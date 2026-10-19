@@ -1,0 +1,21 @@
+{
+  "name": "订阅账本",
+  "short_name": "订阅账本",
+  "description": "负 MRR、扣款日历、余额续航、拼车分摊与邮件提醒",
+  "lang": "zh-CN",
+  "start_url": "/#/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f3f6f8",
+  "theme_color": "#f3f6f8",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "扣款日历", "url": "/#/calendar" },
+    { "name": "钱包余额", "url": "/#/wallet" },
+    { "name": "拼车", "url": "/#/carpool" }
+  ]
+}

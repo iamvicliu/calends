@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "calends",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/cal/*"]
+  },
+  "routes": [{ "pattern": "calends.example.com", "custom_domain": true }],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "subscription-db", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  // Cloudflare Email Sending：example.com 已在账户内验证
+  "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["calends@example.com"] }],
+  // 每小时触发：到设置中的提醒时刻才发信；每日刷新汇率
+  "triggers": { "crons": ["5 * * * *"] },
+  "vars": {
+    "SITE_URL": "https://calends.example.com",
+    "MAIL_FROM": "calends@example.com",
+    "MAIL_FROM_NAME": "订阅账本"
+  },
+  // OWNER_PASSCODE 为 secret：wrangler secret put OWNER_PASSCODE
+  "observability": { "enabled": true }
+}
