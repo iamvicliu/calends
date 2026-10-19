@@ -1,4 +1,4 @@
-import { addMonths, chargesBetween, convert, effectiveStatus, myShareFactor, type Charge } from '../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, convert, effectiveStatus, myShareFactor, parseDay, type Charge } from '../shared/billing.ts';
 import type { AppState, MethodKind, Subscription } from '../shared/types.ts';
 
 const PALETTE = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c8)', 'var(--c9)', 'var(--c10)'];
@@ -142,4 +142,31 @@ export function domainOf(url?: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+export type Period = 'day' | 'week' | 'month' | 'year';
+export const PERIOD_LABEL: Record<Period, string> = { day: '今日', week: '本周', month: '本月', year: '今年' };
+export const PERIOD_UNIT: Record<Period, string> = { day: '日', week: '周', month: '月', year: '年' };
+
+/** 当前周期向前/后偏移 offset 个周期的 [from, to]（含两端） */
+export function periodRange(p: Period, today: string, offset = 0): [string, string] {
+  if (p === 'day') {
+    const d = addDays(today, offset);
+    return [d, d];
+  }
+  if (p === 'week') {
+    const dow = (new Date(parseDay(today)).getUTCDay() + 6) % 7;
+    const from = addDays(today, -dow + offset * 7);
+    return [from, addDays(from, 6)];
+  }
+  if (p === 'month') {
+    const from = addMonths(today.slice(0, 8) + '01', offset);
+    return [from, addDays(addMonths(from, 1), -1)];
+  }
+  const y = Number(today.slice(0, 4)) + offset;
+  return [`${y}-01-01`, `${y}-12-31`];
+}
+
+export function sumBase(state: AppState, charges: Charge[]): number {
+  return charges.reduce((a, c) => a + toBase(state, c.amount, c.currency), 0);
 }

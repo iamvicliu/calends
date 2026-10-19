@@ -3,7 +3,7 @@ import { cycleShort } from '../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../shared/csv.ts';
 import { CURRENCIES } from '../../shared/format.ts';
 import type { AppState, PaymentMethod, Subscription } from '../../shared/types.ts';
-import { Icon, SectionHead, Sheet, Toggle } from '../components/ui.tsx';
+import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, toast } from '../store.ts';
 
 interface Preview {
@@ -29,13 +29,13 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
   return (
     <Sheet narrow title="订阅到日历" onClose={onClose}>
       <div class="stack">
-        <p class="muted" style={{ margin: 0, fontSize: 14 }}>
+        <p class="muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>
           把扣款日同步到 Apple 日历 / Google 日历 / Outlook，每 6 小时自动刷新，并按提醒设置在扣款前弹出通知。
         </p>
         {url ? (
           <>
             <div class="codebox">{url}</div>
-            <div class="hstack">
+            <div class="row" style={{ flexWrap: 'wrap' }}>
               <a class="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
                 <Icon name="cal" /> 一键订阅
               </a>
@@ -100,188 +100,121 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
     download(`subscriptions-${today}.csv`, toCsv([head, ...rows]), 'text/csv');
   };
 
+  const hour = (h: number) => `${String(h).padStart(2, '0')}:05`;
+  const sel = (e: Event) => (e.target as HTMLSelectElement).value;
   return (
-    <div class="wrap fade-in" style={{ maxWidth: 760 }}>
-      <SectionHead no="■" label="Settings" title="设置" />
-
-      <div class="stack" style={{ gap: 22 }}>
-        <div class="card card-pad">
-          <div class="eyebrow" style={{ marginBottom: 6 }}>
-            邮件提醒
-          </div>
-          <div class="switch">
-            <div style={{ flex: 1 }}>
-              <div class="t">通知邮箱</div>
-              <div class="d">每天在设定时刻检查，扣款、试用到期、余额不足、拼车待收会合并为一封邮件。</div>
-            </div>
-          </div>
-          <div class="inline" style={{ margin: '4px 0 6px' }}>
-            <input class="input" type="email" value={email} onInput={(e) => setEmail((e.target as HTMLInputElement).value)} />
-            <button class="btn" style={{ flex: '0 0 auto' }} disabled={email === s.notifyEmail} onClick={() => run(() => saveSettings({ notifyEmail: email.trim() }), '已保存')}>
-              保存
-            </button>
-          </div>
-          <div class="form" style={{ marginTop: 10 }}>
-            <label class="field">
-              <span>默认提前天数</span>
-              <select class="input" value={s.remindDays} onChange={(e) => run(() => saveSettings({ remindDays: Number((e.target as HTMLSelectElement).value) }))}>
-                {[0, 1, 2, 3, 5, 7, 14].map((n) => (
-                  <option key={n} value={n}>
-                    {n === 0 ? '当天' : `提前 ${n} 天`}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label class="field">
-              <span>发送时刻（{s.timezone}）</span>
-              <select class="input" value={s.notifyHour} onChange={(e) => run(() => saveSettings({ notifyHour: Number((e.target as HTMLSelectElement).value) }))}>
-                {Array.from({ length: 24 }, (_, h) => (
-                  <option key={h} value={h}>
-                    {String(h).padStart(2, '0')}:05
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div class="switch">
-            <div>
-              <div class="t">每月 1 日账单预告</div>
-              <div class="d">列出当月所有预计扣款与合计</div>
-            </div>
+    <>
+      <Toolbar title="设置" />
+      <div class="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
+        <Group title="邮件提醒" foot="每天到点检查一次：即将扣款、试用到期、余额不足、拼车待收、到期不续，合并成一封邮件。">
+          <Cell label="通知邮箱">
+            <input type="email" value={email} onInput={(e) => setEmail((e.target as HTMLInputElement).value)} />
+            {email !== s.notifyEmail && (
+              <button class="btn primary" onClick={() => run(() => saveSettings({ notifyEmail: email.trim() }), '已保存')}>
+                保存
+              </button>
+            )}
+          </Cell>
+          <Cell label="默认提前">
+            <select value={s.remindDays} onChange={(e) => run(() => saveSettings({ remindDays: Number(sel(e)) }))}>
+              {[0, 1, 2, 3, 5, 7, 14].map((n) => (
+                <option key={n} value={n}>
+                  {n === 0 ? '到期当天' : `${n} 天`}
+                </option>
+              ))}
+            </select>
+          </Cell>
+          <Cell label="发送时间">
+            <select value={s.notifyHour} onChange={(e) => run(() => saveSettings({ notifyHour: Number(sel(e)) }))}>
+              {Array.from({ length: 24 }, (_, h) => (
+                <option key={h} value={h}>
+                  {hour(h)}
+                </option>
+              ))}
+            </select>
+          </Cell>
+          <Cell label="每月 1 日账单预告" sub="列出当月所有预计扣款">
             <Toggle checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
-          </div>
-          <div class="hstack" style={{ marginTop: 14 }}>
-            <button
-              class="btn primary"
-              onClick={() =>
-                run(async () => {
-                  const r = await api<{ sent: boolean; reason?: string }>('/api/notify/test', { method: 'POST' });
-                  if (!r.sent) throw new Error(r.reason ?? '发送失败');
-                  loadPreview();
-                }, `测试邮件已发往 ${s.notifyEmail}`)
-              }
-            >
-              <Icon name="mail" /> 发送测试邮件
-            </button>
-            <a class="btn" href="/api/notify/preview?html=1" target="_blank" rel="noreferrer">
-              预览今日邮件
-            </a>
-          </div>
-          {preview && (
-            <div style={{ marginTop: 18 }}>
-              <div class="eyebrow" style={{ marginBottom: 6 }}>
-                今日（{preview.day}）待发
-              </div>
-              {preview.digests.length === 0 ? (
-                <div class="soft" style={{ fontSize: 13 }}>今天没有需要提醒的事项。</div>
-              ) : (
-                preview.digests.map((d) => (
-                  <div key={d.key} class="log-row">
-                    <span>{d.subject}</span>
-                    <span class="soft">{d.sections.reduce((a, x) => a + x.rows.length, 0)} 项</span>
-                  </div>
-                ))
-              )}
-              {preview.log.length > 0 && (
-                <>
-                  <div class="eyebrow" style={{ margin: '16px 0 6px' }}>
-                    发送记录
-                  </div>
-                  {preview.log.slice(0, 8).map((l) => (
-                    <div key={l.dedupe_key} class="log-row">
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.subject}</span>
-                      <span class={`num ${l.status === 'sent' ? 'soft' : 'warn'}`} style={{ flexShrink: 0 }}>
-                        {l.sent_at.slice(5, 16)}
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-          )}
-        </div>
+          </Cell>
+          <Cell
+            label={<span style={{ color: 'var(--accent)' }}>发送测试邮件</span>}
+            onClick={() =>
+              run(async () => {
+                const r = await api<{ sent: boolean; reason?: string }>('/api/notify/test', { method: 'POST' });
+                if (!r.sent) throw new Error(r.reason ?? '发送失败');
+                loadPreview();
+              }, `测试邮件已发往 ${s.notifyEmail}`)
+            }
+          />
+          <Cell label={<span style={{ color: 'var(--accent)' }}>预览今天的提醒邮件</span>} onClick={() => window.open('/api/notify/preview?html=1', '_blank')} />
+        </Group>
 
-        <div class="card card-pad">
-          <div class="eyebrow" style={{ marginBottom: 6 }}>
-            日历与显示
-          </div>
-          <div class="switch">
-            <div>
-              <div class="t">日历订阅（ICS）</div>
-              <div class="d">{s.icsToken ? '已开启，可在 Apple 日历中查看扣款日' : '把扣款日同步到系统日历'}</div>
-            </div>
-            <button class="btn sm" onClick={() => setIcs(true)}>
-              管理
-            </button>
-          </div>
-          <div class="form" style={{ marginTop: 12 }}>
-            <label class="field">
-              <span>本位币</span>
-              <select class="input" value={s.baseCurrency} onChange={(e) => run(() => saveSettings({ baseCurrency: (e.target as HTMLSelectElement).value }))}>
-                {CURRENCIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
-            <label class="field">
-              <span>时区</span>
-              <select class="input" value={s.timezone} onChange={(e) => run(() => saveSettings({ timezone: (e.target as HTMLSelectElement).value }))}>
-                {['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => (
-                  <option key={z}>{z}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div class="switch" style={{ marginTop: 6 }}>
-            <div>
-              <div class="t">汇率</div>
-              <div class="d">
-                更新于 {state.fx.fetchedAt.slice(0, 16).replace('T', ' ')} · 1 USD = {state.fx.rates.CNY?.toFixed(3)} CNY · {state.fx.rates.TRY?.toFixed(2)} TRY · {state.fx.rates.NGN?.toFixed(0)} NGN ·{' '}
-                {state.fx.rates.PHP?.toFixed(2)} PHP
-              </div>
-            </div>
-            <button class="btn sm" onClick={() => run(refreshFx, '汇率已更新')}>
-              刷新
-            </button>
-          </div>
-          <div class="switch">
-            <div>
-              <div class="t">公开只读视图</div>
-              <div class="d">开启后未登录访客可查看脱敏后的账本（隐藏备注、联系人、卡号尾号）</div>
-            </div>
+        {preview && (
+          <Group title={`今天（${preview.day}）`} foot={preview.log.length ? undefined : '还没有发送记录'}>
+            {preview.digests.length === 0 ? (
+              <div class="cell muted">今天没有需要提醒的事项</div>
+            ) : (
+              preview.digests.map((d) => (
+                <Cell key={d.key} label={d.subject}>
+                  {d.sections.reduce((a, x) => a + x.rows.length, 0)} 项
+                </Cell>
+              ))
+            )}
+            {preview.log.slice(0, 6).map((l) => (
+              <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
+                <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{l.sent_at.slice(5, 16)}</span>
+              </Cell>
+            ))}
+          </Group>
+        )}
+
+        <Group title="日历" foot="订阅后扣款日会出现在 Apple 日历 / Google 日历中，并按提醒设置提前弹出通知。">
+          <Cell label="订阅到系统日历" onClick={() => setIcs(true)}>
+            {s.icsToken ? '已开启' : '未开启'}
+          </Cell>
+        </Group>
+
+        <Group title="显示">
+          <Cell label="本位币">
+            <select value={s.baseCurrency} onChange={(e) => run(() => saveSettings({ baseCurrency: sel(e) }))}>
+              {CURRENCIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </Cell>
+          <Cell label="时区">
+            <select value={s.timezone} onChange={(e) => run(() => saveSettings({ timezone: sel(e) }))}>
+              {['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => (
+                <option key={z}>{z}</option>
+              ))}
+            </select>
+          </Cell>
+          <Cell label="汇率" sub={`更新于 ${state.fx.fetchedAt.slice(0, 16).replace('T', ' ')}`} onClick={() => run(refreshFx, '汇率已更新')}>
+            1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY · {state.fx.rates.TRY?.toFixed(1)} TRY
+          </Cell>
+        </Group>
+
+        <Group title="隐私" foot="开启后未登录的访客能看到脱敏后的账本：隐藏备注、拼车联系人和卡号尾号。">
+          <Cell label="公开只读视图">
             <Toggle checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已设为私密')} />
-          </div>
-        </div>
+          </Cell>
+        </Group>
 
-        <div class="card card-pad">
-          <div class="eyebrow" style={{ marginBottom: 12 }}>
-            数据
-          </div>
-          <div class="hstack">
-            <button class="btn" onClick={() => pickFile('.csv,text/csv', onCsv)}>
-              <Icon name="upload" /> 导入 CSV
-            </button>
-            <button class="btn" onClick={() => pickFile('.json,application/json', onJson)}>
-              <Icon name="upload" /> 恢复备份
-            </button>
-            <button class="btn" onClick={exportCsv}>
-              <Icon name="download" /> 导出 CSV
-            </button>
-            <button class="btn" onClick={() => download(`ledger-backup-${today}.json`, JSON.stringify({ subscriptions: state.subscriptions, methods: state.methods, settings: { ...s, icsToken: undefined } }, null, 2), 'application/json')}>
-              <Icon name="download" /> 备份 JSON
-            </button>
-          </div>
-          <small class="soft" style={{ display: 'block', marginTop: 10 }}>
-            CSV 兼容 Subscriptions App 导出格式：Name, Currency, Price, Category, Cycle, Starts, Ends, Tags, Payment Account, URL, Notes。
-          </small>
-        </div>
+        <Group title="数据" foot="CSV 兼容 Subscriptions App 的导出格式。">
+          <Cell label="导入 CSV" onClick={() => pickFile('.csv,text/csv', onCsv)} />
+          <Cell label="从 JSON 备份恢复" onClick={() => pickFile('.json,application/json', onJson)} />
+          <Cell label="导出 CSV" onClick={exportCsv} />
+          <Cell
+            label="导出 JSON 备份"
+            onClick={() => download(`ledger-backup-${today}.json`, JSON.stringify({ subscriptions: state.subscriptions, methods: state.methods, settings: { ...s, icsToken: undefined } }, null, 2), 'application/json')}
+          />
+        </Group>
 
-        <div class="hstack">
-          <span class="spacer" />
-          <button class="btn danger" onClick={() => logout()}>
+        <Group>
+          <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => logout()}>
             退出登录
           </button>
-        </div>
+        </Group>
       </div>
 
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
@@ -318,17 +251,15 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             </>
           }
         >
-          {importing.methods.length > 0 && <p class="muted" style={{ marginTop: 0 }}>将新建支付方式：{importing.methods.map((m) => m.name).join('、')}</p>}
-          {importing.subs.map((x) => (
-            <div key={x.id} class="log-row">
-              <span>{x.name}</span>
-              <span class="num soft">
+          <Group title={importing.methods.length ? `将新建支付方式：${importing.methods.map((m) => m.name).join('、')}` : undefined}>
+            {importing.subs.map((x) => (
+              <Cell key={x.id} label={x.name}>
                 {x.currency} {x.price} / {cycleShort(x.cycle)}
-              </span>
-            </div>
-          ))}
+              </Cell>
+            ))}
+          </Group>
         </Sheet>
       )}
-    </div>
+    </>
   );
 }

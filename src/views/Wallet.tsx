@@ -2,69 +2,71 @@ import { useState } from 'preact/hooks';
 import { cycleLabel, diffDays, effectiveStatus, monthlyGross, runwayFor, uid, type Runway } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, CURRENCIES, money, relDays } from '../../shared/format.ts';
 import { BALANCE_KINDS, type AppState, type MethodKind, type PaymentMethod, type Subscription } from '../../shared/types.ts';
-import { Icon, SectionHead, Sheet, SubIcon } from '../components/ui.tsx';
+import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { KIND_BG, KIND_LABEL, liveSubs, toBase } from '../derive.ts';
 import { deleteMethod, run, saveMethod } from '../store.ts';
+import { confirmDelete } from './Editor.tsx';
 
-export function RunwayCard({ r, today, state }: { r: Runway; today: string; state: AppState }) {
+export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
   const m = r.method;
-  const scaleMonths = 12;
-  const months = r.runsOutOn ? diffDays(today, r.runsOutOn) / 30.4375 : r.monthlyDrain > 0 ? Infinity : 0;
-  const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(months, scaleMonths) / scaleMonths) * 100);
-  const low = r.runsOutOn ? diffDays(today, r.runsOutOn) <= (m.lowRunwayDays ?? 30) : false;
+  const daysLeft = r.runsOutOn ? diffDays(today, r.runsOutOn) : Infinity;
+  const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
+  const tone = daysLeft <= 7 ? 'out' : daysLeft <= (m.lowRunwayDays ?? 30) ? 'low' : '';
   const base = state.settings.baseCurrency;
-  return (
-    <div class="card runway">
-      <div class="runway-top">
-        <span class="ico" style={{ background: KIND_BG[m.kind], color: '#fff', border: 0, font: '600 12px/1 var(--mono)' }}>
+  const body = (
+    <div class="runway">
+      <div class="rw-top">
+        <span class="ico mono" style={{ '--s': '36px', background: m.color || KIND_BG[m.kind], fontSize: '12px' } as Record<string, string>}>
           {m.region ?? m.currency.slice(0, 2)}
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div class="row-title">{m.name}</div>
-          <div class="row-sub">
-            {KIND_LABEL[m.kind]} · 每月约扣 {money(r.monthlyDrain, m.currency, { compact: true })}
+          <div style={{ fontWeight: 600 }}>{m.name}</div>
+          <div class="muted" style={{ fontSize: 12.5 }}>
+            每月约扣 {money(r.monthlyDrain, m.currency, { compact: true })}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div class="runway-bal">{money(r.current, m.currency, { compact: true })}</div>
-          {m.currency !== base && <div class="soft num" style={{ fontSize: 11.5, marginTop: 4 }}>≈ {money(toBase(state, r.current, m.currency), base, { compact: true })}</div>}
+          <div class="rw-bal">
+            <Amount value={r.current} ccy={m.currency} />
+          </div>
+          {m.currency !== base && <div class="soft" style={{ fontSize: 11.5 }}>≈ {money(toBase(state, r.current, m.currency), base, { compact: true })}</div>}
         </div>
       </div>
-      <div class={`runway-track ${low ? 'low' : ''}`}>
+      <div class={`rw-track ${tone}`}>
         <span style={{ width: `${pct}%` }} />
       </div>
-      <div class="runway-scale">
+      <div class="rw-scale">
         <span>今天</span>
         <span>3 个月</span>
-        <span>6 个月</span>
+        <span>半年</span>
         <span>9 个月</span>
-        <span>1 年+</span>
+        <span>1 年</span>
       </div>
-      <div class="runway-note">
+      <div class="rw-note">
         {r.monthlyDrain <= 0 ? (
           '没有关联的计费订阅。'
         ) : r.shortfall && r.coveredCharges === 0 ? (
           <>
-            余额不够 <b>{cnDateFull(r.shortfall.date)}</b>（{relDays(diffDays(today, r.shortfall.date))}）{r.shortfall.sub.name} 的 {money(r.shortfall.amount, r.shortfall.currency)}。
-            撑满一年需再充 <b>{money(r.topUp12m, m.currency, { compact: true })}</b>。
+            余额不够 <b>{cnDate(r.shortfall.date)}</b>（{relDays(daysLeft)}）{r.shortfall.sub.name} 的 {money(r.shortfall.amount, r.shortfall.currency)}。撑满一年需再充{' '}
+            <b>{money(r.topUp12m, m.currency, { compact: true })}</b>。
           </>
         ) : r.shortfall ? (
           <>
-            还能完整扣 <b>{r.coveredCharges} 期</b>，在 <b>{cnDateFull(r.shortfall.date)}</b>（{relDays(diffDays(today, r.shortfall.date))}）的 {r.shortfall.sub.name} 前用完。撑满一年需再充{' '}
+            还能扣 <b>{r.coveredCharges} 期</b>，在 <b>{cnDateFull(r.shortfall.date)}</b>（{relDays(daysLeft)}）的 {r.shortfall.sub.name} 前用完。撑满一年需再充{' '}
             <b>{money(r.topUp12m, m.currency, { compact: true })}</b>。
           </>
         ) : (
           <>
-            未来 3 年内都够用，已覆盖 <b>{r.coveredCharges} 期</b>扣款。
+            未来 3 年都够用，覆盖 <b>{r.coveredCharges} 期</b>扣款。
           </>
         )}
-        {m.balanceAsOf && <span class="soft"> 余额校准于 {m.balanceAsOf}。</span>}
       </div>
     </div>
   );
+  return flat ? body : <div class="card">{body}</div>;
 }
 
-const NEEDS_LAST4: MethodKind[] = ['debit', 'credit', 'crypto'];
+const CARD_KINDS: MethodKind[] = ['debit', 'credit', 'crypto'];
 
 export function Wallet({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const [edit, setEdit] = useState<PaymentMethod | null>(null);
@@ -72,35 +74,32 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
   const [open, setOpen] = useState<string | null>(null);
   const ro = !!state.readonly;
   const live = liveSubs(state, today);
+  const base = state.settings.baseCurrency;
   const unassigned = live.filter((s) => !s.methodId || !state.methods.some((m) => m.id === s.methodId));
+  const opened = state.methods.find((m) => m.id === open);
+
   return (
-    <div class="wrap fade-in">
-      <SectionHead
-        no="■"
-        label="Wallet"
-        title="支付方式"
-        meta="银行卡、支付宝、App Store 礼品卡余额、SMART 话费……余额类账户会逐期推演还能扣多久。"
-        right={
-          !ro && (
-            <button class="btn primary" onClick={() => setEdit({ id: uid(), name: '', kind: 'appstore', currency: 'TRY' })}>
-              <Icon name="plus" /> 添加支付方式
-            </button>
-          )
-        }
-      />
-      <div class="grid-2" style={{ marginTop: 8 }}>
-        {state.methods.map((m) => {
-          const subs = state.subscriptions.filter((s) => s.methodId === m.id);
-          const liveHere = subs.filter((s) => live.includes(s));
-          const r = runwayFor(m, state, today);
-          const monthly = liveHere.reduce((a, s) => a + toBase(state, monthlyGross(s, today), s.currency), 0);
-          const isOpen = open === m.id;
-          return (
-            <div key={m.id} class="stack" style={{ gap: 10 }}>
-              <div
+    <>
+      <Toolbar title="钱包" sub={`${state.methods.length} 种支付方式`}>
+        {!ro && (
+          <button class="btn primary" onClick={() => setEdit({ id: uid(), name: '', kind: 'appstore', currency: 'TRY' })}>
+            <Icon name="plus" /> 添加
+          </button>
+        )}
+      </Toolbar>
+      <div class="page fade-in stack">
+        <div class="wallet-grid">
+          {state.methods.map((m) => {
+            const subs = state.subscriptions.filter((s) => s.methodId === m.id);
+            const liveHere = subs.filter((s) => live.includes(s));
+            const r = runwayFor(m, state, today);
+            const monthly = liveHere.reduce((a, s) => a + toBase(state, monthlyGross(s, today), s.currency), 0);
+            return (
+              <button
+                key={m.id}
                 class="paycard"
-                style={{ '--card-bg': m.color || KIND_BG[m.kind] } as never}
-                onClick={() => setOpen(isOpen ? null : m.id)}
+                style={{ '--card-bg': m.color || KIND_BG[m.kind] } as Record<string, string>}
+                onClick={() => setOpen(m.id)}
                 onMouseMove={(e) => {
                   const el = e.currentTarget as HTMLElement;
                   const b = el.getBoundingClientRect();
@@ -108,8 +107,8 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                   el.style.setProperty('--my', `${e.clientY - b.top}px`);
                 }}
               >
-                <div class="hstack" style={{ alignItems: 'flex-start' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                <div class="pc-top">
+                  <div style={{ minWidth: 0 }}>
                     <div class="pc-kind">
                       {KIND_LABEL[m.kind]}
                       {m.region ? ` · ${m.region}` : ''}
@@ -117,130 +116,148 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                     </div>
                     <div class="pc-name">{m.name}</div>
                   </div>
-                  {NEEDS_LAST4.includes(m.kind) ? <div class="pc-chip" /> : <span class="mono" style={{ fontSize: 12, opacity: 0.85 }}>{m.currency}</span>}
+                  {CARD_KINDS.includes(m.kind) ? <div class="pc-chip" /> : <span style={{ fontSize: 13, fontWeight: 600, opacity: 0.85 }}>{m.currency}</span>}
                 </div>
                 <div class="pc-foot">
                   <div>
                     {r ? (
                       <>
-                        <div class="pc-bal">{money(r.current, m.currency, { compact: true })}</div>
-                        <div style={{ marginTop: 6 }}>{r.shortfall ? `可扣 ${r.coveredCharges} 期 · 至 ${r.shortfall.date.slice(0, 7)}` : r.monthlyDrain > 0 ? '3 年内充足' : '暂无扣款'}</div>
+                        <div class="o">余额</div>
+                        <div class="pc-bal">
+                          <Amount value={r.current} ccy={m.currency} />
+                        </div>
                       </>
                     ) : (
                       <>
+                        <div class="o">每月支出</div>
                         <div class="pc-bal">
-                          {money(monthly, state.settings.baseCurrency, { compact: true })}
-                          <span style={{ fontSize: 14, opacity: 0.7, fontFamily: 'var(--mono)' }}> /月</span>
-                        </div>
-                        <div style={{ marginTop: 6 }}>
-                          {liveHere.length} 项计费中{BALANCE_KINDS.includes(m.kind) && !ro ? ' · 点此设置余额' : ''}
+                          <Amount value={monthly} ccy={base} />
                         </div>
                       </>
                     )}
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    {r ? (
-                      <>
-                        <div>{money(monthly, state.settings.baseCurrency, { compact: true })}</div>
-                        <div style={{ opacity: 0.7 }}>/ 月</div>
-                      </>
-                    ) : (
-                      <>
-                        {m.cashback ? <div>返 ≈ {money((monthly * m.cashback) / 100, state.settings.baseCurrency)}/月</div> : null}
-                        {m.last4 && <div style={{ letterSpacing: '0.12em' }}>•••• {m.last4}</div>}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {isOpen && (
-                <div class="card card-pad fade-in" style={{ padding: 16 }}>
-                  {!ro && (
-                    <div class="hstack" style={{ marginBottom: 10 }}>
-                      {r && (
-                        <button class="btn sm primary" onClick={() => setTopup({ m, current: r.current })}>
-                          充值 / 校准余额
-                        </button>
-                      )}
-                      {!r && BALANCE_KINDS.includes(m.kind) && (
-                        <button class="btn sm primary" onClick={() => setTopup({ m, current: 0 })}>
-                          设置余额
-                        </button>
-                      )}
-                      <button class="btn sm" onClick={() => setEdit(m)}>
-                        编辑
-                      </button>
+                    <div class="o">{liveHere.length} 个订阅</div>
+                    <div style={{ fontWeight: 600 }}>
+                      {r ? (r.shortfall ? (r.coveredCharges ? `可扣 ${r.coveredCharges} 期` : '余额不足') : r.monthlyDrain > 0 ? '余额充足' : '—') : m.last4 ? `•••• ${m.last4}` : BALANCE_KINDS.includes(m.kind) ? '未设余额' : ''}
                     </div>
-                  )}
-                  {r && r.upcoming.length > 0 && (
-                    <>
-                      <div class="eyebrow" style={{ margin: '8px 0 6px' }}>
-                        扣款推演
-                      </div>
-                      {r.upcoming.slice(0, 8).map((c) => (
-                        <div key={c.sub.id + c.date} class="log-row">
-                          <span>
-                            {cnDate(c.date)} · {c.sub.name}
-                          </span>
-                          <span class="num">
-                            −{money(c.amountInMethod, m.currency, { compact: true })} → <span class={c.balanceAfter < 0 ? 'warn' : ''}>{money(c.balanceAfter, m.currency, { compact: true })}</span>
-                          </span>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  <div class="eyebrow" style={{ margin: '14px 0 2px' }}>
-                    关联订阅 · {subs.length}
                   </div>
-                  {subs.map((s) => (
-                    <button key={s.id} class="row" style={{ gridTemplateColumns: '26px 1fr auto', padding: '10px 2px' }} onClick={() => onOpen(s)}>
-                      <SubIcon sub={s} size="sm" />
-                      <span class="row-title" style={{ fontSize: 14, opacity: effectiveStatus(s, today) === 'ended' ? 0.5 : 1 }}>
-                        {s.name}
-                      </span>
-                      <span class="num" style={{ fontSize: 13 }}>
-                        {money(s.price, s.currency)} <span class="soft">{cycleLabel(s.cycle)}</span>
-                      </span>
-                    </button>
-                  ))}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {unassigned.length > 0 && (
-        <div class="card card-pad" style={{ marginTop: 24 }}>
-          <div class="eyebrow" style={{ marginBottom: 8 }}>
-            未指定支付方式 · {unassigned.length}
-          </div>
-          <div class="chips">
-            {unassigned.map((s) => (
-              <button key={s.id} class="chip" onClick={() => onOpen(s)}>
-                <SubIcon sub={s} size="xs" /> {s.name}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      )}
 
-      {state.methods.some((m) => runwayFor(m, state, today)) && (
-        <section class="section">
-          <SectionHead no="■" label="Runway" title="余额续航" />
-          <div class="grid-2">
+        {state.methods.some((m) => runwayFor(m, state, today)) && (
+          <Group title="余额续航">
             {state.methods
               .map((m) => runwayFor(m, state, today))
               .filter((r) => r != null)
               .map((r) => (
-                <RunwayCard key={r.method.id} r={r} today={today} state={state} />
+                <div key={r.method.id} class="cell" style={{ display: 'block', padding: '14px 16px' }}>
+                  <RunwayCard r={r} today={today} state={state} flat />
+                </div>
               ))}
-          </div>
-        </section>
-      )}
+          </Group>
+        )}
 
+        <Group>
+          <Cell label={<span class="row"><Icon name="car" />拼车与分摊</span>} onClick={() => (location.hash = '#/carpool')}>
+            {state.subscriptions.filter((s) => s.share).length} 个
+          </Cell>
+        </Group>
+
+        {unassigned.length > 0 && (
+          <Group title={`未指定支付方式 · ${unassigned.length}`}>
+            {unassigned.map((s) => (
+              <Cell key={s.id} label={<span class="row"><SubIcon sub={s} size={28} />{s.name}</span>} onClick={() => onOpen(s)}>
+                {money(s.price, s.currency)}
+              </Cell>
+            ))}
+          </Group>
+        )}
+      </div>
+
+      {opened && (
+        <MethodSheet
+          m={opened}
+          state={state}
+          today={today}
+          onClose={() => setOpen(null)}
+          onEdit={() => setEdit(opened)}
+          onTopup={(current) => setTopup({ m: opened, current })}
+          onOpen={(s) => {
+            setOpen(null);
+            onOpen(s);
+          }}
+        />
+      )}
       {edit && <MethodEditor m={edit} state={state} onClose={() => setEdit(null)} />}
       {topup && <TopupSheet m={topup.m} current={topup.current} today={today} onClose={() => setTopup(null)} />}
-    </div>
+    </>
+  );
+}
+
+function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m: PaymentMethod; state: AppState; today: string; onClose: () => void; onEdit: () => void; onTopup: (current: number) => void; onOpen: (s: Subscription) => void }) {
+  const r = runwayFor(m, state, today);
+  const subs = state.subscriptions.filter((s) => s.methodId === m.id);
+  const ro = !!state.readonly;
+  return (
+    <Sheet narrow title={m.name} onClose={onClose}>
+      <div class="stack" style={{ gap: 18 }}>
+        {!ro && (
+          <div class="row">
+            {(r || BALANCE_KINDS.includes(m.kind)) && (
+              <button class="btn primary" onClick={() => onTopup(r?.current ?? 0)}>
+                {r ? '充值 / 校准余额' : '设置余额'}
+              </button>
+            )}
+            <button class="btn" onClick={onEdit}>
+              <Icon name="edit" /> 编辑
+            </button>
+          </div>
+        )}
+        {r && (
+          <div class="card">
+            <RunwayCard r={r} today={today} state={state} flat />
+          </div>
+        )}
+        {r && r.upcoming.length > 0 && (
+          <Group title="扣款推演">
+            {r.upcoming.slice(0, 10).map((c) => (
+              <Cell key={c.sub.id + c.date} label={c.sub.name} sub={cnDate(c.date)}>
+                <span>−{money(c.amountInMethod, m.currency, { compact: true })}</span>
+                <b style={{ color: c.balanceAfter < 0 ? 'var(--red)' : 'var(--label)', fontWeight: 600, minWidth: 80 }}>{money(c.balanceAfter, m.currency, { compact: true })}</b>
+              </Cell>
+            ))}
+          </Group>
+        )}
+        <Group title={`关联订阅 · ${subs.length}`}>
+          {subs.length === 0 && <div class="cell muted">暂无</div>}
+          {subs.map((s) => (
+            <Cell
+              key={s.id}
+              label={
+                <span class="row" style={{ opacity: effectiveStatus(s, today) === 'ended' ? 0.45 : 1 }}>
+                  <SubIcon sub={s} size={28} />
+                  {s.name}
+                </span>
+              }
+              onClick={() => onOpen(s)}
+            >
+              {money(s.price, s.currency)} · {cycleLabel(s.cycle)}
+            </Cell>
+          ))}
+        </Group>
+        {m.notes && (
+          <Group title="备注">
+            <div class="cell" style={{ fontSize: 14 }}>
+              {m.notes}
+            </div>
+          </Group>
+        )}
+      </div>
+    </Sheet>
   );
 }
 
@@ -276,27 +293,23 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
       }
     >
       <div class="stack">
-        <div class="seg-ctl" style={{ alignSelf: 'flex-start' }}>
-          <button class={mode === 'add' ? 'on' : ''} onClick={() => setMode('add')}>
-            充值
-          </button>
-          <button class={mode === 'set' ? 'on' : ''} onClick={() => setMode('set')}>
-            校准为实际余额
-          </button>
-        </div>
-        <label class="field">
-          <span>{mode === 'add' ? `充值金额（${m.currency}）` : `当前实际余额（${m.currency}）`}</span>
-          <input class="input num" inputMode="decimal" autoFocus value={val} onInput={(e) => setVal((e.target as HTMLInputElement).value)} placeholder="0.00" />
-        </label>
-        <dl class="kv">
-          <dt>系统估算余额</dt>
-          <dd>{money(current, m.currency)}</dd>
-          <dt>保存后</dt>
-          <dd>
-            <b>{money(next, m.currency)}</b>
-          </dd>
-        </dl>
-        <small class="muted">保存时以今天为校准日，之后的扣款会按订阅周期自动从余额中推演扣除。</small>
+        <Seg
+          value={mode}
+          onChange={setMode}
+          options={[
+            ['add', '充值'],
+            ['set', '校准为实际余额'],
+          ]}
+        />
+        <Group foot="以今天为校准日，之后的扣款按订阅周期自动从余额里推算。">
+          <Cell label={mode === 'add' ? '充值金额' : '实际余额'}>
+            <input class="num" inputMode="decimal" autoFocus value={val} onInput={(e) => setVal((e.target as HTMLInputElement).value)} placeholder={`${m.currency} 0.00`} />
+          </Cell>
+          <Cell label="当前估算">{money(current, m.currency)}</Cell>
+          <Cell label="保存后">
+            <b style={{ color: 'var(--label)' }}>{money(next, m.currency)}</b>
+          </Cell>
+        </Group>
       </div>
     </Sheet>
   );
@@ -307,8 +320,10 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
   const isNew = !state.methods.some((x) => x.id === m.id);
   const up = (p: Partial<PaymentMethod>) => setF({ ...f, ...p });
   const balanceKind = BALANCE_KINDS.includes(f.kind);
+  const val = (e: Event) => (e.target as HTMLInputElement).value;
   return (
     <Sheet
+      narrow
       title={isNew ? '添加支付方式' : '编辑支付方式'}
       onClose={onClose}
       foot={
@@ -341,82 +356,90 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
               }, '已保存')
             }
           >
-            保存
+            完成
           </button>
         </>
       }
     >
-      <div class="form">
-        <label class="field full">
-          <span>名称</span>
-          <input class="input" value={f.name} placeholder="如：招商银行、App Store 土耳其区、SMART 手机卡" onInput={(e) => up({ name: (e.target as HTMLInputElement).value })} />
-        </label>
-        <label class="field">
-          <span>类型</span>
-          <select class="input" value={f.kind} onChange={(e) => up({ kind: (e.target as HTMLSelectElement).value as MethodKind })}>
-            {(Object.keys(KIND_LABEL) as MethodKind[]).map((k) => (
-              <option key={k} value={k}>
-                {KIND_LABEL[k]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label class="field">
-          <span>账户币种</span>
-          <select class="input" value={f.currency} onChange={(e) => up({ currency: (e.target as HTMLSelectElement).value })}>
-            {CURRENCIES.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
-        {NEEDS_LAST4.includes(f.kind) && (
-          <label class="field">
-            <span>卡号尾号</span>
-            <input class="input num" maxLength={4} value={f.last4 ?? ''} onInput={(e) => up({ last4: (e.target as HTMLInputElement).value.replace(/\D/g, '') || undefined })} />
-          </label>
-        )}
-        <label class="field">
-          <span>地区</span>
-          <input class="input" value={f.region ?? ''} placeholder="TR / NG / PH" onInput={(e) => up({ region: (e.target as HTMLInputElement).value.toUpperCase() || undefined })} />
-        </label>
+      <div class="stack">
+        <div class="paycard" style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
+          <div class="pc-top">
+            <div>
+              <div class="pc-kind">{KIND_LABEL[f.kind]}</div>
+              <div class="pc-name">{f.name || '新的支付方式'}</div>
+            </div>
+            {CARD_KINDS.includes(f.kind) ? <div class="pc-chip" /> : <span style={{ fontWeight: 600 }}>{f.currency}</span>}
+          </div>
+          <div class="pc-foot">
+            <span>{f.last4 ? `•••• ${f.last4}` : ''}</span>
+            <span>{f.region ?? ''}</span>
+          </div>
+        </div>
+        <Group>
+          <Cell label="名称">
+            <input value={f.name} placeholder="招商银行、App Store 土耳其区…" onInput={(e) => up({ name: val(e) })} />
+          </Cell>
+          <Cell label="类型">
+            <select value={f.kind} onChange={(e) => up({ kind: val(e) as MethodKind })}>
+              {(Object.keys(KIND_LABEL) as MethodKind[]).map((k) => (
+                <option key={k} value={k}>
+                  {KIND_LABEL[k]}
+                </option>
+              ))}
+            </select>
+          </Cell>
+          <Cell label="币种">
+            <select value={f.currency} onChange={(e) => up({ currency: val(e) })}>
+              {CURRENCIES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </Cell>
+          {CARD_KINDS.includes(f.kind) && (
+            <Cell label="卡号尾号">
+              <input class="num" maxLength={4} value={f.last4 ?? ''} onInput={(e) => up({ last4: val(e).replace(/\D/g, '') || undefined })} />
+            </Cell>
+          )}
+          <Cell label="地区">
+            <input value={f.region ?? ''} placeholder="TR / NG / PH" onInput={(e) => up({ region: val(e).toUpperCase() || undefined })} />
+          </Cell>
+          <Cell label="返现 / 积分">
+            <input class="num" inputMode="decimal" value={f.cashback ?? ''} placeholder="% 可选" onInput={(e) => up({ cashback: Number(val(e)) || undefined })} />
+          </Cell>
+        </Group>
         {balanceKind && (
-          <>
-            <label class="field">
-              <span>当前余额</span>
+          <Group title="余额" foot="留空则不推算续航。">
+            <Cell label="当前余额">
               <input
-                class="input num"
+                class="num"
                 inputMode="decimal"
                 value={f.balance ?? ''}
-                placeholder="留空则不推演"
-                onInput={(e) => {
-                  const v = (e.target as HTMLInputElement).value;
-                  up({ balance: v === '' ? undefined : Number(v), balanceAsOf: f.balanceAsOf ?? new Date().toISOString().slice(0, 10) });
-                }}
+                placeholder="可选"
+                onInput={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? new Date().toISOString().slice(0, 10) })}
               />
-            </label>
-            <label class="field">
-              <span>余额校准日</span>
-              <input class="input" type="date" value={f.balanceAsOf ?? ''} onInput={(e) => up({ balanceAsOf: (e.target as HTMLInputElement).value || undefined })} />
-            </label>
-            <label class="field">
-              <span>不足预警（天）</span>
-              <input class="input num" inputMode="numeric" value={f.lowRunwayDays ?? 30} onInput={(e) => up({ lowRunwayDays: Number((e.target as HTMLInputElement).value) || 30 })} />
-            </label>
-          </>
+            </Cell>
+            <Cell label="校准日">
+              <input type="date" value={f.balanceAsOf ?? ''} onInput={(e) => up({ balanceAsOf: val(e) || undefined })} />
+            </Cell>
+            <Cell label="不足提醒">
+              <select value={f.lowRunwayDays ?? 30} onChange={(e) => up({ lowRunwayDays: Number(val(e)) })}>
+                {[7, 14, 30, 60].map((d) => (
+                  <option key={d} value={d}>
+                    提前 {d} 天
+                  </option>
+                ))}
+              </select>
+            </Cell>
+          </Group>
         )}
-        <label class="field">
-          <span>返现 / 积分（%）</span>
-          <input class="input num" inputMode="decimal" value={f.cashback ?? ''} placeholder="如 1.5" onInput={(e) => up({ cashback: Number((e.target as HTMLInputElement).value) || undefined })} />
-        </label>
-        <label class="field full">
-          <span>备注</span>
-          <textarea class="input" value={f.notes ?? ''} onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })} />
-        </label>
+        <Group title="备注">
+          <div class="cell">
+            <span class="cell-r">
+              <textarea value={f.notes ?? ''} onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })} />
+            </span>
+          </div>
+        </Group>
       </div>
     </Sheet>
   );
-}
-
-export function confirmDelete(msg: string): boolean {
-  return window.confirm(msg);
 }

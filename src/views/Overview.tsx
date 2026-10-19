@@ -1,276 +1,280 @@
-import { useMemo } from 'preact/hooks';
-import { addDays, addMonths, cycleLabel, diffDays, effectiveStatus, nextCharge, parseDay, runwayFor, totals } from '../../shared/billing.ts';
-import { cnDate, money, relDays, symbol } from '../../shared/format.ts';
+import { Fragment } from 'preact';
+import { useMemo, useState } from 'preact/hooks';
+import { addDays, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, parseDay, priceAt, runwayFor, totals } from '../../shared/billing.ts';
+import { cnDate, money, relDays } from '../../shared/format.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../shared/types.ts';
-import { SectionHead, SubIcon, tipProps } from '../components/ui.tsx';
-import { allCharges, breakdown, catColor, earliest, lifetimeByYear, liveSubs, monthSeries, spentSince, toBase } from '../derive.ts';
+import { Amount, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
+import { allCharges, breakdown, catColor, liveSubs, PERIOD_LABEL, PERIOD_UNIT, periodRange, sumBase, toBase, type Period } from '../derive.ts';
 import { RunwayCard } from './Wallet.tsx';
 
-function Big({ value, ccy }: { value: number; ccy: string }) {
-  const s = Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
-  return (
-    <span class="hero-num">
-      <span class="minus">−</span>
-      <span class="cur">{symbol(ccy).trim()}</span>
-      {s}
-    </span>
-  );
+const PERIODS: Array<[Period, string]> = [
+  ['day', '日'],
+  ['week', '周'],
+  ['month', '月'],
+  ['year', '年'],
+];
+
+function loadPeriod(): Period {
+  try {
+    return (localStorage.getItem('ledger:period') as Period) || 'month';
+  } catch {
+    return 'month';
+  }
 }
 
-export function Overview({ state, today, onOpen, onReceipt }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onReceipt: () => void }) {
+const PER: Record<string, string> = { day: '天', week: '周', month: '月', year: '年' };
+export function perLabel(s: Subscription): string {
+  if (s.cycle.unit === 'lifetime') return '买断';
+  return s.cycle.every === 1 ? PER[s.cycle.unit] : cycleLabel(s.cycle).replace('每', '');
+}
+
+export function Overview({ state, today, onOpen, onReceipt, onAdd }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onReceipt: () => void; onAdd: () => void }) {
+  const [period, setPeriodRaw] = useState<Period>(loadPeriod);
+  const setPeriod = (p: Period) => {
+    setPeriodRaw(p);
+    try {
+      localStorage.setItem('ledger:period', p);
+    } catch {
+      /* ignore */
+    }
+  };
   const base = state.settings.baseCurrency;
   const t = totals(state, today);
-  const first = earliest(state) ?? today;
-  const year = today.slice(0, 4);
-  const life = useMemo(() => spentSince(state, first, today), [state, today]);
-  const ytd = useMemo(() => spentSince(state, `${year}-01-01`, today), [state, today]);
-  const series = useMemo(() => monthSeries(state, today), [state, today]);
-  const live = liveSubs(state, today);
-  const firstSub = state.subscriptions.find((s) => s.start === first);
-  const cats = breakdown(state, today, (s) => s.category);
-  const methods = breakdown(state, today, (s) => state.methods.find((m) => m.id === s.methodId)?.name ?? '未指定');
-  const years = lifetimeByYear(state, today);
+  const [from, to] = periodRange(period, today);
+  const charges = useMemo(() => allCharges(state, from, to, today), [state, from, to]);
+  const due = sumBase(state, charges);
+  const paid = sumBase(
+    state,
+    charges.filter((c) => !c.projected),
+  );
+  // 过去 12 个完整周期的平均
+  const avg = useMemo(() => {
+    let s = 0;
+    for (let i = 1; i <= 12; i++) {
+      const [a, b] = periodRange(period, today, -i);
+      s += sumBase(state, allCharges(state, a, b, today));
+    }
+    return s / 12;
+  }, [state, period, today]);
+  const live = liveSubs(state, today).sort((a, b) => (nextCharge(a, today) ?? '9').localeCompare(nextCharge(b, today) ?? '9'));
   const runways = state.methods.map((m) => runwayFor(m, state, today)).filter((r) => r != null);
-  const catKeys = cats.map((c) => c.key);
-  const unsetBalance = state.methods.filter((m) => BALANCE_KINDS.includes(m.kind) && m.balance == null && state.subscriptions.some((s) => s.methodId === m.id && live.includes(s)));
-
-  const upcoming = allCharges(state, today, addDays(today, 30), today);
-  const upcomingSum = upcoming.reduce((a, c) => a + toBase(state, c.amount, c.currency), 0);
-  const nextYear = allCharges(state, addDays(today, 1), addMonths(today, 12), today).reduce((a, c) => a + toBase(state, c.amount, c.currency), 0);
-
-  const max = Math.max(1, ...series.map((m) => m.total));
-  const ended = state.subscriptions.filter((s) => effectiveStatus(s, today) === 'ended').length;
-  const lifetimeBuys = state.subscriptions.filter((s) => s.cycle.unit === 'lifetime').length;
-  const [fy, fm] = first.split('-');
+  const unset = state.methods.filter((m) => BALANCE_KINDS.includes(m.kind) && m.balance == null && live.some((s) => s.methodId === m.id));
+  const unit = PERIOD_UNIT[period];
+  const [y, mo] = today.split('-').map(Number);
 
   return (
-    <div class="wrap fade-in">
-      <div class="eyebrow">Subscription Ledger · {fy}—{year}</div>
-      <h1 class="h1">
-        每个月，订阅从我这里<em>拿走</em>
-      </h1>
-      <div class="hero-figure">
-        <Big value={t.mrr} ccy={base} />
-        <div class="hero-unit">
-          负 MRR / 月<b>{t.activeCount} 项正在计费</b>
-        </div>
-      </div>
-      <p class="lede">
-        第一笔是 {firstSub?.name ?? '—'}，{fy} 年 {Number(fm)} 月。记录了 {state.subscriptions.length} 项服务，{live.length} 项仍在扣款
-        {ended ? `，${ended} 项已经停掉` : ''}
-        {lifetimeBuys ? `，另有 ${lifetimeBuys} 个买断` : ''}。
-        {t.recoverMrr > 1 ? ` 拼车每月回血 ${money(t.recoverMrr, base, { compact: true })}。` : ''}
-      </p>
-
-      <div class="kpis">
-        <div class="kpi hl">
-          <div class="kpi-label">负 ARR · 年化</div>
-          <div class="kpi-value">
-            <small>−{symbol(base)}</small>
-            {Math.round(t.mrr * 12).toLocaleString()}
-          </div>
-          <div class="kpi-sub">每天 {money(t.mrr / 30.4375, base)}</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">{year} 已付</div>
-          <div class="kpi-value">
-            <small>{symbol(base)}</small>
-            {Math.round(ytd.total).toLocaleString()}
-          </div>
-          <div class="kpi-sub">{ytd.count} 笔扣款</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi-label">累计已付</div>
-          <div class="kpi-value">
-            <small>{symbol(base)}</small>
-            {Math.round(life.total).toLocaleString()}
-          </div>
-          <div class="kpi-sub">{life.count} 笔 · 自 {fy}</div>
-        </div>
-        <div class={`kpi ${t.recoverMrr > 1 ? 'good' : ''}`}>
-          <div class="kpi-label">未来 12 个月</div>
-          <div class="kpi-value">
-            <small>{symbol(base)}</small>
-            {Math.round(nextYear).toLocaleString()}
-          </div>
-          <div class="kpi-sub">{t.recoverMrr > 1 ? `拼车回血 ${money(t.recoverMrr * 12, base, { compact: true })}/年` : '按当前订阅预测'}</div>
-        </div>
-      </div>
-      <div class="ccy-line">
-        {Object.entries(life.byCcy)
-          .filter(([, v]) => v > 0)
-          .sort((a, b) => toBase(state, b[1], b[0]) - toBase(state, a[1], a[0]))
-          .map(([c, v], i) => (
-            <span key={c}>
-              {i > 0 && ' · '}
-              <b>{c}</b> {money(v, c)}
-            </span>
-          ))}
-      </div>
-
-      <div class="strip">
-        <div class="strip-head">
-          <span>扣款 · 过去 24 个月 + 未来 12 个月</span>
-          <button class="btn sm ghost" style={{ height: 'auto', padding: 0, font: 'inherit', letterSpacing: 'inherit', color: 'var(--muted)' }} onClick={onReceipt}>
-            生成账单小票 →
+    <>
+      <Toolbar title="仪表板" sub={`${y}年${mo}月${Number(today.slice(8))}日 · ${t.activeCount} 个订阅计费中`}>
+        <Seg value={period} options={PERIODS} onChange={setPeriod} />
+        <button class="icon-btn" onClick={onReceipt} title="生成账单小票" aria-label="账单小票">
+          <Icon name="receipt" />
+        </button>
+        {!state.readonly && (
+          <button class="icon-btn accent d-only" onClick={onAdd} title="添加订阅（N）" aria-label="添加订阅">
+            <Icon name="plus" />
           </button>
-        </div>
-        <div class="strip-bars">
-          {series.map((m) => (
-            <div
-              key={m.key}
-              class={`strip-col ${m.projected ? 'future' : ''} ${m.key === today.slice(0, 7) ? 'now' : ''}`}
-              {...tipProps(() => (
-                <>
-                  <b>{m.key.replace('-', ' 年 ')} 月</b> · {m.count} 笔
-                  <br />
-                  {money(m.total, base, { compact: true })}
-                  {m.projected ? ' · 预测' : ''}
-                </>
-              ))}
-            >
-              {catKeys
-                .concat(Object.keys(m.byCat).filter((k) => !catKeys.includes(k)))
-                .filter((k) => m.byCat[k])
-                .map((k) => (
-                  <div key={k} class="seg" style={{ height: `${(m.byCat[k] / max) * 100}%`, background: catColor(k) }} />
-                ))}
+        )}
+      </Toolbar>
+      <div class="page fade-in stack">
+        <div class="grid g-4">
+          <div class="card stat hero">
+            <div class="stat-label">每月订阅支出 · 负 MRR</div>
+            <div class="stat-value">
+              <Amount value={-t.mrr} ccy={base} />
             </div>
-          ))}
+            <div class="stat-sub">
+              年化 {money(-t.mrr * 12, base, { compact: true })} · 每天 {money(t.mrr / 30.4375, base)}
+            </div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">
+              <Icon name="cal" />
+              {PERIOD_LABEL[period]}应付
+            </div>
+            <div class="stat-value">
+              <Amount value={due} ccy={base} />
+            </div>
+            <div class="stat-sub">
+              已付 {money(paid, base, { compact: true })} · 待付 {money(due - paid, base, { compact: true })}
+            </div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">
+              <Icon name="chart" />
+              每{unit}平均
+            </div>
+            <div class="stat-value">
+              <Amount value={avg} ccy={base} />
+            </div>
+            <div class="stat-sub">按过去 12 {unit === '月' ? '个月' : unit}计算</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">
+              <Icon name="list" />
+              {t.activeCount} 个订阅
+            </div>
+            <div class="stat-value">
+              <span class="amt">
+                {charges.length}
+                <small> 笔费用</small>
+              </span>
+            </div>
+            <div class="stat-sub">{t.recoverMrr > 1 ? `拼车每月回血 ${money(t.recoverMrr, base, { compact: true })}` : `${PERIOD_LABEL[period]}扣款笔数`}</div>
+          </div>
         </div>
-        <div class="strip-axis">
-          {series.map((m, i) => (
-            <span key={m.key}>{m.key.endsWith('-01') || i === 0 ? (m.key.endsWith('-01') ? m.key.slice(0, 4) : '') : m.key === today.slice(0, 7) ? '▲' : ''}</span>
-          ))}
-        </div>
-      </div>
 
-      {/* 01 即将扣款 */}
-      <section class="section">
-        <SectionHead no="01" label="Upcoming" title="接下来 30 天" meta={`${upcoming.length} 笔 · 约 ${money(upcomingSum, base, { compact: true })}`} />
-        <DueTimeline state={state} today={today} />
-        <div class="ledger">
-          {upcoming.length === 0 && <div class="empty">未来 30 天没有扣款，享受这份安静。</div>}
-          {upcoming.map((c) => {
-            const d = diffDays(today, c.date);
-            const m = state.methods.find((x) => x.id === c.sub.methodId);
+        <div class="tiles">
+          {live.map((s) => {
+            const n = nextCharge(s, today);
+            const d = n ? diffDays(today, n) : undefined;
+            const m = state.methods.find((x) => x.id === s.methodId);
+            const price = n ? priceAt(s, n) : s.price;
             return (
-              <button key={c.sub.id + c.date} class="row has-when" onClick={() => onOpen(c.sub)}>
-                <SubIcon sub={c.sub} />
-                <div class="row-main" style={{ minWidth: 0 }}>
-                  <div class="row-title">
-                    {c.sub.name}
-                    {c.sub.share?.role === 'owner' && c.sub.share.members.length > 0 && <span class="badge accent">拼车</span>}
+              <button key={s.id} class="tile" onClick={() => onOpen(s)}>
+                <SubIcon sub={s} size={42} />
+                <div style={{ minWidth: 0 }}>
+                  <div class="tile-name">
+                    <span>{s.name}</span>
+                    {s.intro && s.intro.until > today && <Icon name="leaf" />}
                   </div>
-                  <div class="row-sub">
-                    {m?.name ?? '未指定支付'} · {cycleLabel(c.sub.cycle)}
+                  <div class="tile-price">
+                    <Amount value={price} ccy={s.currency} />
+                    <span class="per">/{perLabel(s)}</span>
                   </div>
                 </div>
-                <div class="leader" />
-                <div class="row-amt">
-                  <div class="a">{money(c.amount, c.currency)}</div>
-                  {c.currency !== base && <div class="b">≈ {money(toBase(state, c.amount, c.currency), base)}</div>}
-                </div>
-                <div class={`row-when ${d <= 3 ? 'soon' : ''}`}>
-                  <div class="a">{relDays(d)}</div>
-                  <div class="b">{cnDate(c.date)}</div>
+                <div class="tile-foot">
+                  <PayBadge m={m} />
+                  {n && <span class={`due ${d! <= 3 ? 'soon' : ''}`}>{d! <= 14 ? relDays(d!) : cnDate(n)}</span>}
                 </div>
               </button>
             );
           })}
         </div>
-      </section>
 
-      {/* 02 余额续航 */}
-      {unsetBalance.length > 0 && !state.readonly && (
-        <a class="card card-pad hstack" href="#/wallet" style={{ marginTop: 40, textDecoration: 'none', gap: 14 }}>
-          <span class="ico" style={{ background: 'var(--accent-soft)', color: 'var(--accent)', border: 0 }}>
-            ¤
-          </span>
-          <span style={{ flex: 1, minWidth: 0 }}>
-            <span class="row-title" style={{ display: 'block' }}>
-              {unsetBalance.map((m) => m.name).join('、')} 尚未设置余额
+        <div class="card">
+          <DueAxis state={state} today={today} period={period} />
+        </div>
+
+        {unset.length > 0 && !state.readonly && (
+          <a class="card row" href="#/wallet" style={{ gap: 14 }}>
+            <span class="ico mono" style={{ '--tint': 'var(--c5)', '--s': '40px' } as Record<string, string>}>
+              ¤
             </span>
-            <span class="row-sub" style={{ display: 'block' }}>
-              填入礼品卡 / 话费余额后，就能推演每期扣多少、还能撑多久，并在不足前邮件提醒。
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <b style={{ fontWeight: 600 }}>{unset.map((m) => m.name).join('、')} 还没有余额</b>
+              <div class="muted" style={{ fontSize: 13 }}>
+                填入礼品卡或话费余额，就能推算每期扣多少、还能撑多久，余额不够时邮件提醒。
+              </div>
             </span>
-          </span>
-          <span class="btn sm">去设置 →</span>
-        </a>
-      )}
-      {runways.length > 0 && (
-        <section class="section">
-          <SectionHead no="02" label="Runway" title="余额还能扣多久" meta="App Store 礼品卡、手机话费等预充值账户，按订阅扣款逐期推演" />
-          <div class="grid-2">
-            {runways.map((r) => (
-              <RunwayCard key={r.method.id} r={r} today={today} state={state} />
-            ))}
-          </div>
-        </section>
-      )}
+            <span class="btn tinted">去设置</span>
+          </a>
+        )}
 
-      {/* 03 分类 */}
-      <section class="section">
-        <SectionHead no="03" label="By category" title="钱花在哪儿" meta="按月折算，扣除拼车分摊后的个人成本" />
-        <ShareList rows={cats} total={t.mrr} base={base} color={catColor} />
-      </section>
+        <div class="grid g-2">
+          <Breakdown title="分类明细" rows={breakdown(state, today, (s) => s.category)} total={t.mrr} base={base} color={catColor} />
+          <Breakdown
+            title="支付方式明细"
+            rows={breakdown(state, today, (s) => state.methods.find((m) => m.id === s.methodId)?.name ?? '未指定')}
+            total={t.mrr}
+            base={base}
+            color={(_, i) => `var(--c${((i + 2) % 10) + 1})`}
+          />
+        </div>
 
-      {/* 04 支付方式 */}
-      <section class="section">
-        <SectionHead no="04" label="By payment" title="从哪儿付出去" meta="银行卡、支付宝、App Store 余额、话费，各自承担的月成本" />
-        <ShareList rows={methods} total={t.mrr} base={base} color={(_, i) => `var(--c${(i % 10) + 1})`} />
-      </section>
-
-      {/* 05 时间线 */}
-      <section class="section">
-        <SectionHead no="05" label="Timeline" title="时间线" meta="实心为仍在计费，浅色为已结束，◆ 为买断" />
-        <Gantt state={state} today={today} onOpen={onOpen} />
-      </section>
-
-      {/* 06 按年 */}
-      <section class="section">
-        <SectionHead
-          no="06"
-          label="By year"
-          title="按年"
-          meta={years.length > 1 ? `${year} 年已付 ${money(years[years.length - 1].paid, base, { compact: true })}，年底前还会扣 ${money(years[years.length - 1].projected, base, { compact: true })}` : undefined}
-        />
-        <YearBars rows={years} base={base} year={year} />
-      </section>
-
-      <div class="footnote">
-        <span>非 {base} 金额按当前汇率折算 · 汇率更新于 {state.fx.fetchedAt.slice(0, 10)}</span>
-        <span>负 MRR = 每月为订阅付出的钱</span>
+        <div class="grid g-2">
+          <YearWidget state={state} today={today} />
+          {runways.length > 0 ? (
+            <div class="card">
+              <div class="card-h">
+                <h3>余额续航</h3>
+                <a class="btn plain" href="#/wallet">
+                  钱包
+                </a>
+              </div>
+              <div class="stack">
+                {runways.map((r) => (
+                  <RunwayCard key={r.method.id} r={r} today={today} state={state} flat />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Spent state={state} today={today} />
+          )}
+        </div>
+        <Lifetime state={state} today={today} onOpen={onOpen} />
       </div>
-    </div>
+    </>
   );
 }
 
-function ShareList({ rows, total, base, color }: { rows: { key: string; mrr: number; count: number }[]; total: number; base: string; color: (k: string, i: number) => string }) {
-  if (!rows.length) return <div class="empty">暂无数据</div>;
+/** 到期时间轴：按所选周期铺开刻度，图标落在扣款日 */
+function DueAxis({ state, today, period }: { state: AppState; today: string; period: Period }) {
+  // 「日」周期太短，时间轴改为展示未来 7 天
+  const [from, to] = period === 'day' ? [today, addDays(today, 6)] : periodRange(period, today);
+  const charges = allCharges(state, from, to, today);
+  const span = diffDays(from, to) + 1;
+  const pos = (d: string) => `${((diffDays(from, d) + 0.5) / span) * 100}%`;
+  const byKey = new Map<string, typeof charges>();
+  for (const c of charges) {
+    const k = period === 'year' ? c.date.slice(0, 7) + '-15' : c.date;
+    byKey.set(k, [...(byKey.get(k) ?? []), c]);
+  }
+  const ticks: Array<{ d: string; label: string; today: boolean }> = [];
+  if (period === 'year') {
+    for (let m = 1; m <= 12; m++) {
+      const d = `${from.slice(0, 4)}-${String(m).padStart(2, '0')}-15`;
+      ticks.push({ d, label: `${m}月`, today: today.slice(5, 7) === d.slice(5, 7) });
+    }
+  } else {
+    for (let i = 0; i < span; i++) {
+      const d = addDays(from, i);
+      const day = Number(d.slice(8));
+      const show = span <= 7 || day === 1 || day % 5 === 0 || d === today;
+      if (show) ticks.push({ d, label: span <= 7 ? `周${'一二三四五六日'[(new Date(parseDay(d)).getUTCDay() + 6) % 7]}` : String(day), today: d === today });
+    }
+  }
+  const [fy, fm] = from.split('-').map(Number);
+  const [ty, tm] = to.split('-').map(Number);
   return (
     <>
-      <div class="sharebar">
-        {rows.map((r, i) => (
-          <span key={r.key} style={{ flex: Math.max(r.mrr, total * 0.004), background: color(r.key, i) }} />
-        ))}
+      <div class="due-head">
+        <span>{period === 'year' ? `${fy}年` : `${fm}月${Number(from.slice(8))}日`}</span>
+        <span>
+          {charges.length} 笔 · {money(sumBase(state, charges), state.settings.baseCurrency, { compact: true })}
+        </span>
+        <span>{period === 'year' ? '12月' : `${ty !== fy ? ty + '年' : ''}${tm}月${Number(to.slice(8))}日`}</span>
       </div>
-      <div class="ledger" style={{ borderTop: 0 }}>
-        {rows.map((r, i) => (
-          <div key={r.key} class="row" style={{ gridTemplateColumns: '14px minmax(0,auto) 1fr auto auto' }}>
-            <span style={{ display: 'block', width: 10, height: 10, borderRadius: 3, background: color(r.key, i) }} />
-            <div style={{ minWidth: 0 }}>
-              <div class="row-title">{r.key}</div>
-              <div class="row-sub">{r.count} 项</div>
-            </div>
-            <div class="leader" />
-            <div class="row-amt">
-              <div class="a">{money(r.mrr, base, { compact: true })}</div>
-              <div class="b">/ 月</div>
-            </div>
-            <div class="pct" style={{ color: color(r.key, i) }}>
-              {total > 0 ? ((r.mrr / total) * 100).toFixed(1) : '0'}%
-            </div>
+      <div class="due-axis">
+        <div class="line" />
+        {ticks.map((t) => (
+          <Fragment key={t.d}>
+            <i class="tick" style={{ left: pos(t.d) }} />
+            <span class={`lab ${t.today ? 'today' : ''}`} style={{ left: pos(t.d) }}>
+              {t.label}
+            </span>
+          </Fragment>
+        ))}
+        {today >= from && today <= to && <i class="now" style={{ left: pos(today) }} />}
+        {[...byKey.entries()].map(([d, list]) => (
+          <div
+            key={d}
+            class="pin"
+            style={{ left: pos(d) }}
+            {...tipProps(() => (
+              <>
+                <b>{period === 'year' ? `${Number(d.slice(5, 7))}月` : cnDate(d, true)}</b>
+                {list.slice(0, 8).map((c) => (
+                  <div key={c.sub.id + c.date}>
+                    {c.sub.name} · {money(c.amount, c.currency)}
+                  </div>
+                ))}
+                {list.length > 8 && <div>…共 {list.length} 笔</div>}
+              </>
+            ))}
+          >
+            {list.slice(0, period === 'year' ? 3 : 2).map((c) => (
+              <SubIcon key={c.sub.id + c.date} sub={c.sub} size={period === 'month' ? 22 : 26} />
+            ))}
           </div>
         ))}
       </div>
@@ -278,140 +282,223 @@ function ShareList({ rows, total, base, color }: { rows: { key: string; mrr: num
   );
 }
 
-function DueTimeline({ state, today }: { state: AppState; today: string }) {
-  const days = 30;
-  const charges = allCharges(state, today, addDays(today, days), today);
-  const byDay = new Map<string, typeof charges>();
-  for (const c of charges) byDay.set(c.date, [...(byDay.get(c.date) ?? []), c]);
-  const pos = (d: string) => `calc(18px + (100% - 36px) * ${diffDays(today, d) / days})`;
+function Breakdown({ title, rows, total, base, color }: { title: string; rows: { key: string; mrr: number; count: number }[]; total: number; base: string; color: (k: string, i: number) => string }) {
+  const [mode, setMode] = useState<'bar' | 'pie'>('bar');
+  const max = Math.max(1, ...rows.map((r) => r.mrr));
+  let acc = 0;
   return (
-    <div class="due">
-      <div class="due-track" />
-      {Array.from({ length: days + 1 }, (_, i) => {
-        const d = addDays(today, i);
-        const wk = new Date(parseDay(d)).getUTCDay() === 1;
-        return (
-          <span key={d}>
-            <i class={`due-tick ${wk ? 'wk' : ''}`} style={{ left: pos(d) }} />
-            {(wk || (i === days && new Date(parseDay(d)).getUTCDay() > 3)) && i > 1 && (
-              <span class="due-lab" style={{ left: pos(d) }}>
-                {Number(d.slice(5, 7))}/{Number(d.slice(8))}
-              </span>
-            )}
-          </span>
-        );
-      })}
-      <div class="due-today" style={{ left: '18px' }} />
-      {[...byDay.entries()].map(([d, list]) => (
-        <div
-          key={d}
-          class="due-dot"
-          style={{ left: pos(d) }}
-          {...tipProps(() => (
-            <>
-              <b>{cnDate(d, true)}</b>
-              {list.map((c) => (
-                <div key={c.sub.id}>
-                  {c.sub.name} · {money(c.amount, c.currency)}
+    <div class="card">
+      <div class="card-h">
+        <h3>{title}</h3>
+        <Seg
+          small
+          value={mode}
+          onChange={setMode}
+          options={[
+            ['bar', '条形'],
+            ['pie', '饼图'],
+          ]}
+        />
+      </div>
+      {rows.length === 0 && <div class="empty">暂无数据</div>}
+      {mode === 'bar' ? (
+        <div class="hbars">
+          {rows.map((r, i) => (
+            <Fragment key={r.key}>
+              <div class="hb-l">
+                {r.key}
+                <small>{money(r.mrr, base, { compact: true })}/月</small>
+              </div>
+              <div class="hb-track">
+                <div class="hb-fill" style={{ width: `${Math.max(8, (r.mrr / max) * 100)}%`, background: color(r.key, i) }}>
+                  {total > 0 ? Math.round((r.mrr / total) * 100) : 0}%
                 </div>
-              ))}
-            </>
-          ))}
-        >
-          {list.slice(0, 3).map((c) => (
-            <SubIcon key={c.sub.id} sub={c.sub} size="sm" />
+              </div>
+            </Fragment>
           ))}
         </div>
-      ))}
+      ) : (
+        <div class="donut-wrap">
+          <svg viewBox="0 0 42 42" width="150" height="150" style={{ transform: 'rotate(-90deg)' }}>
+            {rows.map((r, i) => {
+              const pct = total > 0 ? (r.mrr / total) * 100 : 0;
+              const len = Math.max(0, pct - 0.8);
+              const el = <circle key={r.key} cx="21" cy="21" r="15.915" fill="none" stroke={color(r.key, i)} stroke-width="6" stroke-linecap="round" stroke-dasharray={`${len} ${100 - len}`} stroke-dashoffset={-acc} />;
+              acc += pct;
+              return el;
+            })}
+          </svg>
+          <div class="legend">
+            {rows.map((r, i) => (
+              <div key={r.key}>
+                <i style={{ background: color(r.key, i) }} />
+                {r.key}
+                <b>{total > 0 ? ((r.mrr / total) * 100).toFixed(1) : 0}%</b>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function Gantt({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
-  const subs = [...state.subscriptions].sort((a, b) => a.start.localeCompare(b.start));
-  if (!subs.length) return <div class="empty">还没有订阅</div>;
-  const from = subs[0].start.slice(0, 4) + '-01-01';
-  const to = addMonths(today, 4);
-  const span = diffDays(from, to);
-  const x = (d: string) => `${(Math.max(0, Math.min(span, diffDays(from, d))) / span) * 100}%`;
-  const years: string[] = [];
-  for (let y = Number(from.slice(0, 4)); `${y}-01-01` <= to; y++) years.push(`${y}-01-01`);
+/** 年度小组件：大数字 + 12 个月柱 */
+function YearWidget({ state, today }: { state: AppState; today: string }) {
+  const base = state.settings.baseCurrency;
+  const y = today.slice(0, 4);
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const m = `${y}-${String(i + 1).padStart(2, '0')}`;
+    const [a, b] = periodRange('month', `${m}-15`);
+    const cs = allCharges(state, a, b, today);
+    return { m, sum: sumBase(state, cs), n: cs.length };
+  });
+  const total = months.reduce((a, b) => a + b.sum, 0);
+  const paidCs = allCharges(state, `${y}-01-01`, today, today);
+  const paid = sumBase(state, paidCs);
+  const max = Math.max(1, ...months.map((m) => m.sum));
+  const cur = today.slice(0, 7);
   return (
-    <div class="card gantt">
-      <div class="g-axis">
+    <div class="card">
+      <div class="card-h">
+        <h3>{y} 年</h3>
+        <span class="meta">每月支出</span>
+      </div>
+      <div class="row" style={{ alignItems: 'flex-end', gap: 22, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 34, lineHeight: 1.1 }}>
+            <Amount value={total} ccy={base} />
+          </div>
+          <div class="muted" style={{ fontSize: 13, marginTop: 4 }}>
+            全年 {months.reduce((a, b) => a + b.n, 0)} 笔
+          </div>
+          <div class="muted" style={{ fontSize: 13, marginTop: 12, lineHeight: 1.6 }}>
+            已付 {money(paid, base, { compact: true })} · {paidCs.length} 笔
+            <br />
+            占全年 {total > 0 ? Math.round((paid / total) * 100) : 0}%
+          </div>
+        </div>
+        <div class="minibars" style={{ flex: 1, minWidth: 220 }}>
+          {months.map((m, i) => (
+            <div key={m.m} class={`mb ${m.m === cur ? 'cur' : m.m > cur ? 'future' : ''}`} {...tipProps(() => `${i + 1}月 · ${money(m.sum, base, { compact: true })} · ${m.n} 笔`)}>
+              <i style={{ height: `${Math.max(3, (m.sum / max) * 76)}px` }} />
+              <span>{i + 1}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 历年累计 */
+function Spent({ state, today }: { state: AppState; today: string }) {
+  const base = state.settings.baseCurrency;
+  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const rows: Array<{ y: string; v: number; n: number }> = [];
+  for (let y = Number(first.slice(0, 4)); y <= Number(today.slice(0, 4)); y++) {
+    const cs = allCharges(state, `${y}-01-01`, `${y}-12-31` < today ? `${y}-12-31` : today, today);
+    rows.push({ y: String(y), v: sumBase(state, cs), n: cs.length });
+  }
+  const total = rows.reduce((a, r) => a + r.v, 0);
+  const max = Math.max(1, ...rows.map((r) => r.v));
+  return (
+    <div class="card">
+      <div class="card-h">
+        <h3>累计已付</h3>
+        <span class="meta">自 {first.slice(0, 4)} 年</span>
+      </div>
+      <div style={{ fontSize: 34, lineHeight: 1.1, marginBottom: 14 }}>
+        <Amount value={total} ccy={base} />
+      </div>
+      <div class="hbars">
+        {rows.map((r) => (
+          <Fragment key={r.y}>
+            <div class="hb-l">
+              {r.y}
+              <small>{r.n} 笔</small>
+            </div>
+            <div class="hb-track">
+              <div class="hb-fill" style={{ width: `${Math.max(12, (r.v / max) * 100)}%`, background: r.y === today.slice(0, 4) ? 'var(--accent)' : 'color-mix(in srgb, var(--accent) 45%, var(--card))' }}>
+                {money(r.v, base, { compact: true })}
+              </div>
+            </div>
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 订阅生命线：每个订阅从开始到结束（或至今）的区间 */
+function Lifetime({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+  const subs = [...state.subscriptions].sort((a, b) => a.start.localeCompare(b.start));
+  if (!subs.length) return null;
+  const from = subs[0].start.slice(0, 4) + '-01-01';
+  const to = `${Number(today.slice(0, 4)) + 1}-01-01`;
+  const span = diffDays(from, to);
+  const x = (d: string) => (Math.max(0, Math.min(span, diffDays(from, d))) / span) * 100;
+  const years: number[] = [];
+  for (let yy = Number(from.slice(0, 4)); yy <= Number(today.slice(0, 4)); yy++) years.push(yy);
+  const base = state.settings.baseCurrency;
+  return (
+    <div class="card">
+      <div class="card-h">
+        <h3>订阅时间线</h3>
+        <span class="meta">
+          {subs.length} 个订阅 · 自 {from.slice(0, 4)} 年
+        </span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(104px, 180px) minmax(0, 1fr)', rowGap: 2, alignItems: 'center' }}>
         <div />
-        <div class="lane">
-          {years.map((y) => (
-            <span key={y} class="yr" style={{ left: x(y) }}>
-              {y.slice(0, 4)}
+        <div style={{ position: 'relative', height: 20 }}>
+          {years.map((yy) => (
+            <span key={yy} class="soft" style={{ position: 'absolute', left: `${x(`${yy}-01-01`)}%`, fontSize: 11, fontWeight: 600, paddingLeft: 3 }}>
+              {yy}
             </span>
           ))}
         </div>
-      </div>
-      <div class="gantt-grid">
-        <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: 'var(--gl, 150px) 1fr', pointerEvents: 'none' }} class="g-overlay">
-          <div />
-          <div style={{ position: 'relative' }}>
-            {years.map((y) => (
-              <i key={y} class="g-vline" style={{ left: x(y) }} />
-            ))}
-            <i class="g-now" style={{ left: x(today) }} />
-          </div>
-        </div>
         {subs.map((s) => {
           const st = effectiveStatus(s, today);
-          const tint = catColor(s.category);
-          const end = s.end && s.end < today ? s.end : today;
           const live = st === 'active' || st === 'trial' || st === 'ending';
-          const n = nextCharge(s, today);
+          const end = live ? today : s.end && s.end < today ? s.end : today;
+          const mo = toBase(state, monthlyGross(s, today), s.currency) * myShareFactor(s);
           return (
-            <div key={s.id} class="g-row" style={{ cursor: 'pointer' }} onClick={() => onOpen(s)}>
-              <div class="g-name">
-                <SubIcon sub={s} size="xs" />
-                <span>{s.name}</span>
-              </div>
-              <div class="g-lane" style={{ '--tint': tint } as never}>
-                {s.cycle.unit === 'lifetime' ? (
-                  <i class="g-life" style={{ left: x(s.start) }} {...tipProps(() => `${s.name} · 买断 ${money(s.price, s.currency)} · ${s.start}`)} />
+            <Fragment key={s.id}>
+              <button class="side-item" style={{ padding: '3px 6px', fontSize: 12.5 }} onClick={() => onOpen(s)}>
+                <SubIcon sub={s} size={20} />
+                <span style={{ color: live || st === 'lifetime' ? 'var(--label)' : 'var(--label-3)' }}>{s.name}</span>
+              </button>
+              <div style={{ position: 'relative', height: 24 }}>
+                {years.map((yy) => (
+                  <i key={yy} style={{ position: 'absolute', top: 0, bottom: 0, left: `${x(`${yy}-01-01`)}%`, width: 1, background: 'var(--sep)' }} />
+                ))}
+                <i style={{ position: 'absolute', top: 0, bottom: 0, left: `${x(today)}%`, width: 1.5, background: 'var(--accent)', opacity: 0.5 }} />
+                {st === 'lifetime' ? (
+                  <i
+                    style={{ position: 'absolute', top: 7, left: `calc(${x(s.start)}% - 5px)`, width: 10, height: 10, borderRadius: 3, transform: 'rotate(45deg)', background: catColor(s.category) }}
+                    {...tipProps(() => `${s.name} · 买断 ${money(s.price, s.currency)} · ${s.start}`)}
+                  />
                 ) : (
                   <i
-                    class={`g-bar ${live ? (st === 'ending' ? '' : 'fade') : st === 'paused' ? 'paused' : 'ended'}`}
-                    style={{ left: x(s.start), width: `calc(${x(live ? (s.end ?? to) : end)} - ${x(s.start)})` }}
-                    {...tipProps(() => (
-                      <>
-                        <b>{s.name}</b> · {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                        <br />
-                        {s.start} → {live ? (s.end ?? (n ? `下次 ${n}` : '')) : end}
-                      </>
-                    ))}
+                    style={{
+                      position: 'absolute',
+                      top: 7,
+                      height: 10,
+                      borderRadius: 5,
+                      left: `${x(s.start)}%`,
+                      width: `max(8px, ${x(end) - x(s.start)}%)`,
+                      background: catColor(s.category),
+                      opacity: live ? 1 : 0.28,
+                    }}
+                    {...tipProps(() => `${s.name} · ${s.start} → ${live ? '至今' : end}${live ? ` · ${money(mo, base, { compact: true })}/月` : ''}`)}
                   />
                 )}
               </div>
-            </div>
+            </Fragment>
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function YearBars({ rows, base, year }: { rows: ReturnType<typeof lifetimeByYear>; base: string; year: string }) {
-  const max = Math.max(1, ...rows.map((r) => r.paid + r.projected));
-  return (
-    <div class="ledger">
-      {rows.map((r) => (
-        <div key={r.year} class={`yrow ${r.year === year ? 'cur' : ''}`}>
-          <span class="num muted">{r.year}</span>
-          <div class="ybar" style={{ display: 'flex' }}>
-            <span style={{ width: `${(r.paid / max) * 100}%` }} />
-            {r.projected > 0 && <span class="proj" style={{ width: `${(r.projected / max) * 100}%`, borderRadius: 0 }} />}
-          </div>
-          <div class="row-amt">
-            <div class="a">{money(r.paid, base, { compact: true })}</div>
-            <div class="b">{r.year === year && r.projected > 0 ? `+ ${money(r.projected, base, { compact: true })} 待扣` : `${r.count} 笔`}</div>
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
