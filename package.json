@@ -13,7 +13,8 @@
     "test": "node --experimental-strip-types --test shared/*.test.ts",
     "seed": "node scripts/seed.ts",
     "deploy": "npm run build && wrangler deploy",
-    "sync:domains": "node scripts/sync-domains.mjs"
+    "sync:domains": "node scripts/sync-domains.mjs",
+    "db:push": "node scripts/push.mjs"
   },
   "dependencies": {
     "preact": "^10.29.8"
