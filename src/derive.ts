@@ -1,8 +1,9 @@
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, myShareFactor, parseDay, type Charge } from '../shared/billing.ts';
+import { chargeValue } from '../shared/fx.ts';
 import type { AppState, MethodKind, Subscription } from '../shared/types.ts';
 
 const PALETTE = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c8)', 'var(--c9)', 'var(--c10)'];
-const FIXED: Record<string, number> = { 工具: 0, 影音: 1, 效率: 2, 音乐: 3, 日用: 4, 教育: 5, 购物: 6, AI: 7, 游戏: 8, 云服务: 9 };
+const FIXED: Record<string, number> = { 工具: 0, 影音: 1, 效率: 2, 音乐: 3, 日用: 4, 教育: 5, 购物: 6, AI: 7, 游戏: 8, 域名: 9 };
 
 export function catColor(cat: string): string {
   if (cat in FIXED) return PALETTE[FIXED[cat]];
@@ -72,7 +73,7 @@ export function monthSeries(state: AppState, today: string, back = 23, fwd = 12)
   for (const c of allCharges(state, first, last, today)) {
     const b = map.get(c.date.slice(0, 7));
     if (!b) continue;
-    const v = toBase(state, c.amount, c.currency);
+    const v = chargeValue(state, c);
     b.total += v;
     b.count++;
     b.byCat[c.sub.category] = (b.byCat[c.sub.category] ?? 0) + v;
@@ -92,7 +93,7 @@ export function lifetimeByYear(state: AppState, today: string) {
   for (const c of allCharges(state, start, yearEnd, today)) {
     const y = c.date.slice(0, 4);
     const r = rows.get(y) ?? { year: y, paid: 0, projected: 0, count: 0 };
-    const v = toBase(state, c.amount, c.currency);
+    const v = chargeValue(state, c);
     if (c.projected) r.projected += v;
     else {
       r.paid += v;
@@ -108,7 +109,7 @@ export function spentSince(state: AppState, from: string, today: string) {
   let count = 0;
   const byCcy: Record<string, number> = {};
   for (const c of allCharges(state, from, today, today)) {
-    total += toBase(state, c.amount, c.currency);
+    total += chargeValue(state, c);
     byCcy[c.currency] = (byCcy[c.currency] ?? 0) + c.amount;
     count++;
   }
@@ -168,5 +169,5 @@ export function periodRange(p: Period, today: string, offset = 0): [string, stri
 }
 
 export function sumBase(state: AppState, charges: Charge[]): number {
-  return charges.reduce((a, c) => a + toBase(state, c.amount, c.currency), 0);
+  return charges.reduce((a, c) => a + chargeValue(state, c), 0);
 }

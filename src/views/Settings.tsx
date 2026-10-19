@@ -4,7 +4,7 @@ import { importSubscriptionsCsv, toCsv } from '../../shared/csv.ts';
 import { CURRENCIES } from '../../shared/format.ts';
 import type { AppState, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
-import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, toast } from '../store.ts';
+import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, syncFx, toast } from '../store.ts';
 
 interface Preview {
   day: string;
@@ -66,8 +66,11 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[] } | null>(null);
 
   const loadPreview = () => api<Preview>('/api/notify/preview').then(setPreview).catch(() => {});
+  const [fxs, setFxs] = useState<{ needed: number; covered: number; sources: Record<string, number>; first?: string } | null>(null);
+  const loadFx = () => api<typeof fxs>('/api/fx/status').then(setFxs).catch(() => {});
   useEffect(() => {
     loadPreview();
+    loadFx();
   }, []);
 
   const pickFile = (accept: string, cb: (text: string) => void) => {
@@ -194,10 +197,25 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Cell>
         </Group>
 
-        <Group title="隐私" foot="开启后未登录的访客能看到脱敏后的账本：隐藏备注、拼车联系人和卡号尾号。">
-          <Cell label="公开只读视图">
-            <Toggle checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已设为私密')} />
+        <Group title="历史汇率" foot="每笔已发生的扣款按扣款当天的汇率折算成人民币和美元；未来的预测按当前汇率。2024 年 3 月起用 currency-api（含奈拉等全部币种），更早的用欧洲央行数据，个别币种缺数据时取最近一天。">
+          <Cell label="已覆盖扣款日" sub={fxs?.first ? `最早 ${fxs.first}` : undefined}>
+            {fxs ? `${fxs.covered} / ${fxs.needed}` : '…'}
           </Cell>
+          {fxs && Object.keys(fxs.sources).length > 0 && (
+            <Cell label="数据来源">
+              {Object.entries(fxs.sources)
+                .map(([k, v]) => `${{ 'currency-api': 'currency-api', ecb: '欧洲央行', 'er-api': '实时汇率' }[k] ?? k} ${v}`)
+                .join(' · ')}
+            </Cell>
+          )}
+          <Cell label={<span style={{ color: 'var(--accent)' }}>补齐缺失的汇率</span>} onClick={() => run(async () => { await syncFx(); await loadFx(); }, '历史汇率已更新')} />
+        </Group>
+
+        <Group title="公开页" foot="公开页只展示脱敏后的数据：域名打码，银行卡只显示类型，不含余额、卡号、备注和拼车成员。">
+          <Cell label="允许访客查看" sub={`${location.origin}/`}>
+            <Toggle checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已关闭公开页')} />
+          </Cell>
+          <Cell label={<span style={{ color: 'var(--accent)' }}>预览公开页</span>} onClick={() => window.open('/', '_blank')} />
         </Group>
 
         <Group title="数据" foot="CSV 兼容 Subscriptions App 的导出格式。">

@@ -1,6 +1,7 @@
 import { FALLBACK_FX } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
+import { keepSet, loadFxHistory } from './fx.ts';
 
 async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
   const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?1').bind(key).first<{ value: string }>();
@@ -30,30 +31,14 @@ export async function loadState(env: Env): Promise<AppState> {
     getSettings(env),
     getFx(env),
   ]);
-  return {
+  const state: AppState = {
     subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
     methods: methods.results.map((r) => JSON.parse(r.data) as PaymentMethod),
     settings,
     fx,
   };
-}
-
-/** 匿名公开视图：去掉备注、联系人、卡号尾号、通知邮箱与日历令牌 */
-export function sanitize(state: AppState): AppState {
-  return {
-    readonly: true,
-    fx: state.fx,
-    settings: { ...state.settings, notifyEmail: '', icsToken: undefined },
-    methods: state.methods.map(({ notes: _n, last4: _l, ...m }) => m),
-    subscriptions: state.subscriptions.map(({ notes: _n, ...s }) => ({
-      ...s,
-      share: s.share && {
-        ...s.share,
-        ownerName: s.share.ownerName ? '车主' : undefined,
-        members: s.share.members.map((m, i) => ({ id: m.id, name: `成员 ${i + 1}`, share: m.share, paidUntil: m.paidUntil })),
-      },
-    })),
-  };
+  state.fxHistory = await loadFxHistory(env, keepSet(state));
+  return state;
 }
 
 export async function upsert(env: Env, table: 'subscriptions' | 'methods', id: string, data: unknown): Promise<void> {

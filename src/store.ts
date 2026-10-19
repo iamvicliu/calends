@@ -72,6 +72,7 @@ export async function boot(): Promise<void> {
     const state = await api<AppState>('/api/state');
     cache(state);
     set({ phase: 'ready', state });
+    if (!state.readonly) void syncFx();
   } catch (e) {
     if (store.phase === 'login') {
       // 401 时丢弃旧缓存，避免他人设备残留数据
@@ -86,6 +87,32 @@ export async function boot(): Promise<void> {
     if (store.state) set({ phase: 'offline' });
     else set({ phase: 'offline', error: e instanceof Error ? e.message : String(e) });
   }
+}
+
+let syncing: Promise<void> | undefined;
+
+/** 补齐扣款日的历史汇率：后台分批，补到新数据后刷新一次 */
+export function syncFx(): Promise<void> {
+  if (syncing) return syncing;
+  syncing = (async () => {
+    let filled = 0;
+    for (let i = 0; i < 30; i++) {
+      const r = await api<{ filled: number; remaining: number }>('/api/fx/backfill', { method: 'POST' }).catch(() => undefined);
+      if (!r) break;
+      filled += r.filled;
+      if (r.remaining <= 0 || r.filled === 0) break;
+    }
+    if (filled > 0) {
+      const state = await api<AppState>('/api/state').catch(() => undefined);
+      if (state) {
+        cache(state);
+        set({ state });
+      }
+    }
+  })().finally(() => {
+    syncing = undefined;
+  });
+  return syncing;
 }
 
 export async function login(passcode: string): Promise<void> {
@@ -124,6 +151,8 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
 }
 
 export function saveSub(sub: Subscription) {
+  // 改了开始日期或周期后，新的扣款日需要补汇率
+  setTimeout(() => void syncFx(), 500);
   return optimistic(
     (s) => ({ ...s, subscriptions: s.subscriptions.some((x) => x.id === sub.id) ? s.subscriptions.map((x) => (x.id === sub.id ? sub : x)) : [...s.subscriptions, sub] }),
     () => api(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),

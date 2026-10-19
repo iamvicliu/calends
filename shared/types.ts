@@ -34,6 +34,23 @@ export interface Share {
   ownerName?: string;
 }
 
+/** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
+export interface Phase {
+  start: string;
+  /** 缺省：下一阶段开始日；最后一个阶段取订阅的 end */
+  end?: string;
+  price: number;
+  currency: string;
+  cycle: Cycle;
+  methodId?: string;
+  region?: string;
+  priceHistory?: PricePoint[];
+  intro?: { price: number; until: string };
+  payments?: Array<{ date: string; amount: number; note?: string }>;
+  nextDue?: string;
+  note?: string;
+}
+
 export interface Subscription {
   id: string;
   name: string;
@@ -57,6 +74,17 @@ export interface Subscription {
   /** 提前几天提醒；空则用全局设置，-1 关闭 */
   remindDays?: number;
   priceHistory?: PricePoint[];
+  /**
+   * 历程：换区、换套餐、断更后续订。存在时按阶段计费，顶层的价格/币种/周期/支付方式镜像最后一个阶段。
+   * 阶段之间有空档即为断更。
+   */
+  phases?: Phase[];
+  /** 域名类订阅：已上线的项目可在公开页显示真实域名，默认打码 */
+  showOnPublic?: boolean;
+  /** 实际扣款记录：有则以此为准（一次付多年、提前续费、促销价都能准确记录） */
+  payments?: Array<{ date: string; amount: number; note?: string }>;
+  /** 下次扣款日：之后的扣款从这一天按周期推算 */
+  nextDue?: string;
   /** 首期优惠：until 之前的扣款按优惠价，例如首年 5 折 */
   intro?: { price: number; until: string };
   notes?: string;
@@ -92,6 +120,8 @@ export interface PaymentMethod {
   lowRunwayDays?: number;
   /** 返现 / 积分比例（%） */
   cashback?: number;
+  /** 卡面品牌：决定 logo 与卡面样式（cmb / plasma / appstore / smart） */
+  brand?: string;
 }
 
 export interface Settings {
@@ -112,11 +142,16 @@ export interface FxTable {
   fetchedAt: string;
 }
 
+/** 历史汇率：date → { CCY: 1 USD 可换多少 } */
+export type FxHistory = Record<string, Record<string, number>>;
+
 export interface AppState {
   subscriptions: Subscription[];
   methods: PaymentMethod[];
   settings: Settings;
   fx: FxTable;
+  /** 扣款日的历史汇率；缺失的日期用相邻日期或当前汇率兜底 */
+  fxHistory?: FxHistory;
   /** 匿名公开视图时为 true（已脱敏、只读） */
   readonly?: boolean;
 }
@@ -129,7 +164,7 @@ export const DEFAULT_SETTINGS: Settings = {
   remindDays: 3,
   notifyHour: 9,
   timezone: 'Asia/Shanghai',
-  publicView: false,
+  publicView: true,
   monthlyDigest: true,
   displayName: 'Ethan',
 };

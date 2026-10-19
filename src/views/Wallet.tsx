@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import { cycleLabel, diffDays, effectiveStatus, monthlyGross, runwayFor, uid, type Runway } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, CURRENCIES, money, relDays } from '../../shared/format.ts';
 import { BALANCE_KINDS, type AppState, type MethodKind, type PaymentMethod, type Subscription } from '../../shared/types.ts';
+import { DatePicker } from '../components/DatePicker.tsx';
 import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { KIND_BG, KIND_LABEL, liveSubs, toBase } from '../derive.ts';
 import { deleteMethod, run, saveMethod } from '../store.ts';
@@ -68,6 +69,88 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
 
 const CARD_KINDS: MethodKind[] = ['debit', 'credit', 'crypto'];
 
+const BRAND_LOGO: Record<string, string> = { cmb: '/brands/cmb.svg', plasma: '/brands/plasma.svg', appstore: '/brands/appstore.svg' };
+
+export function brandOf(m: PaymentMethod): string | undefined {
+  if (m.brand) return m.brand;
+  if (m.kind === 'appstore') return 'appstore';
+  if (m.kind === 'phone') return 'smart';
+  if (/招商/.test(m.name)) return 'cmb';
+  if (/plasma/i.test(m.name)) return 'plasma';
+  return undefined;
+}
+
+export const isSim = (m: PaymentMethod) => brandOf(m) === 'smart' || m.kind === 'phone';
+
+/** 卡面：品牌标旋转放大做水印并渐隐，角上放清晰的小 logo；手机话费做成 SIM 卡 */
+function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; label: string; value: preact.ComponentChildren; right: string; rightSub: string }) {
+  const brand = brandOf(m);
+  if (isSim(m)) {
+    return (
+      <>
+        <div class="sim-top">
+          <img class="sim-logo" src="/brands/smart.png" alt="SMART" />
+          <span class="sim-tag">SIM · {m.region ?? 'PH'}</span>
+        </div>
+        <div class="sim-mid">
+          <div class="sim-chip" aria-hidden="true">
+            {Array.from({ length: 6 }, (_, i) => (
+              <i key={i} />
+            ))}
+          </div>
+          <div class="sim-name">
+            {m.name}
+            <small>
+              {KIND_LABEL[m.kind]} · {m.currency}
+            </small>
+          </div>
+        </div>
+        <div class="pc-foot">
+          <div>
+            {label && <div class="o">{label}</div>}
+            <div class="pc-bal">{value}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div class="o">{right}</div>
+            <div style={{ fontWeight: 600 }}>{rightSub}</div>
+          </div>
+        </div>
+      </>
+    );
+  }
+  const logo = brand ? BRAND_LOGO[brand] : undefined;
+  return (
+    <>
+      {logo && <img class={`pc-mark ${brand}`} src={logo} alt="" aria-hidden="true" />}
+      <div class="pc-top">
+        <div class="pc-id">
+          {logo && <img class={`pc-logo ${brand}`} src={logo} alt="" />}
+          <div style={{ minWidth: 0 }}>
+            <div class="pc-name">{m.name}</div>
+            <div class="pc-kind">
+              {KIND_LABEL[m.kind]}
+              {m.region ? ` · ${m.region}` : ''}
+              {m.cashback ? ` · 返 ${m.cashback}%` : ''}
+            </div>
+          </div>
+        </div>
+        <span class="pc-ccy">{m.currency}</span>
+      </div>
+      {CARD_KINDS.includes(m.kind) && <div class="pc-chip" />}
+      <div class="pc-foot">
+        <div>
+          {label && <div class="o">{label}</div>}
+          <div class="pc-bal">{value}</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div class="o">{right}</div>
+          <div style={{ fontWeight: 600 }}>{rightSub}</div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function Wallet({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const [edit, setEdit] = useState<PaymentMethod | null>(null);
   const [topup, setTopup] = useState<{ m: PaymentMethod; current: number } | null>(null);
@@ -97,7 +180,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
             return (
               <button
                 key={m.id}
-                class="paycard"
+                class={`paycard ${isSim(m) ? 'sim' : ''}`}
                 style={{ '--card-bg': m.color || KIND_BG[m.kind] } as Record<string, string>}
                 onClick={() => setOpen(m.id)}
                 onMouseMove={(e) => {
@@ -107,42 +190,13 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                   el.style.setProperty('--my', `${e.clientY - b.top}px`);
                 }}
               >
-                <div class="pc-top">
-                  <div style={{ minWidth: 0 }}>
-                    <div class="pc-kind">
-                      {KIND_LABEL[m.kind]}
-                      {m.region ? ` · ${m.region}` : ''}
-                      {m.cashback ? ` · 返 ${m.cashback}%` : ''}
-                    </div>
-                    <div class="pc-name">{m.name}</div>
-                  </div>
-                  {CARD_KINDS.includes(m.kind) ? <div class="pc-chip" /> : <span style={{ fontSize: 13, fontWeight: 600, opacity: 0.85 }}>{m.currency}</span>}
-                </div>
-                <div class="pc-foot">
-                  <div>
-                    {r ? (
-                      <>
-                        <div class="o">余额</div>
-                        <div class="pc-bal">
-                          <Amount value={r.current} ccy={m.currency} />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div class="o">每月支出</div>
-                        <div class="pc-bal">
-                          <Amount value={monthly} ccy={base} />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div class="o">{liveHere.length} 个订阅</div>
-                    <div style={{ fontWeight: 600 }}>
-                      {r ? (r.shortfall ? (r.coveredCharges ? `可扣 ${r.coveredCharges} 期` : '余额不足') : r.monthlyDrain > 0 ? '余额充足' : '—') : m.last4 ? `•••• ${m.last4}` : BALANCE_KINDS.includes(m.kind) ? '未设余额' : ''}
-                    </div>
-                  </div>
-                </div>
+                <CardFace
+                  m={m}
+                  label={r ? '余额' : '每月支出'}
+                  value={r ? <Amount value={r.current} ccy={m.currency} /> : <Amount value={monthly} ccy={base} />}
+                  right={`${liveHere.length} 个订阅`}
+                  rightSub={r ? (r.shortfall ? (r.coveredCharges ? `可扣 ${r.coveredCharges} 期` : '余额不足') : r.monthlyDrain > 0 ? '余额充足' : '—') : m.last4 ? `•••• ${m.last4}` : BALANCE_KINDS.includes(m.kind) ? '未设余额' : ''}
+                />
               </button>
             );
           })}
@@ -362,18 +416,8 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
       }
     >
       <div class="stack">
-        <div class="paycard" style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
-          <div class="pc-top">
-            <div>
-              <div class="pc-kind">{KIND_LABEL[f.kind]}</div>
-              <div class="pc-name">{f.name || '新的支付方式'}</div>
-            </div>
-            {CARD_KINDS.includes(f.kind) ? <div class="pc-chip" /> : <span style={{ fontWeight: 600 }}>{f.currency}</span>}
-          </div>
-          <div class="pc-foot">
-            <span>{f.last4 ? `•••• ${f.last4}` : ''}</span>
-            <span>{f.region ?? ''}</span>
-          </div>
+        <div class={`paycard ${isSim(f) ? 'sim' : ''}`} style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
+          <CardFace m={{ ...f, name: f.name || '新的支付方式' }} label="" value="" right={f.region ?? ''} rightSub={f.last4 ? `•••• ${f.last4}` : ''} />
         </div>
         <Group>
           <Cell label="名称">
@@ -419,7 +463,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
               />
             </Cell>
             <Cell label="校准日">
-              <input type="date" value={f.balanceAsOf ?? ''} onInput={(e) => up({ balanceAsOf: val(e) || undefined })} />
+              <DatePicker value={f.balanceAsOf} onChange={(v) => up({ balanceAsOf: v })} />
             </Cell>
             <Cell label="不足提醒">
               <select value={f.lowRunwayDays ?? 30} onChange={(e) => up({ lowRunwayDays: Number(val(e)) })}>

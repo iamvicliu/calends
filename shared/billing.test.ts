@@ -49,3 +49,13 @@ test('拼车', () => {
   const t = totals({ ...state, settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' } }, '2026-10-19');
   assert.equal(Math.round(t.mrr), 40);
 });
+
+test('实际扣款记录 + 下次扣款日', () => {
+  // 一次付两年：2026-08-19 付 20.92，下一笔 2028-07-20
+  const s = base({ price: 10.46, cycle: { unit: 'year', every: 1 }, start: '2026-08-19', payments: [{ date: '2026-08-19', amount: 20.92 }], nextDue: '2028-07-20' });
+  const cs = chargesBetween(s, '2026-01-01', '2029-12-31', '2026-10-19');
+  assert.deepEqual(cs.map((c) => [c.date, c.amount]), [['2026-08-19', 20.92], ['2028-07-20', 10.46], ['2029-07-20', 10.46]]);
+  // 提前续费：最后一笔之后才开始推算
+  const f = base({ price: 10.46, cycle: { unit: 'year', every: 1 }, start: '2025-11-07', payments: [{ date: '2025-11-07', amount: 10.46 }, { date: '2026-10-08', amount: 10.46 }], nextDue: '2027-10-08' });
+  assert.equal(nextCharge(f, '2026-10-19'), '2027-10-08');
+});

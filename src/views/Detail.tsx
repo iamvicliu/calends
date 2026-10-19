@@ -1,6 +1,8 @@
 import { chargesBetween, convert, cycleLabel, diffDays, effectiveStatus, memberDues, monthlyGross, nextCharge, priceAt } from '../../shared/billing.ts';
 import { cnDateFull, money, relDays } from '../../shared/format.ts';
+import { chargeValue, rateOn } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
+import { History } from '../components/History.tsx';
 import { Amount, Cell, Group, Icon, PayBadge, SubIcon } from '../components/ui.tsx';
 import { catColor, domainOf } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
@@ -20,10 +22,12 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const next = nextCharge(sub, today);
   const method = state.methods.find((m) => m.id === sub.methodId);
   const history = chargesBetween(sub, sub.start, today, today);
-  const total = history.reduce((a, c) => a + (convert(c.amount, c.currency, base, state.fx) || 0), 0);
+  const total = history.reduce((a, c) => a + chargeValue(state, c), 0);
+  const totalCny = history.reduce((a, c) => a + chargeValue(state, c, 'CNY'), 0);
+  const totalUsd = history.reduce((a, c) => a + chargeValue(state, c, 'USD'), 0);
   const monthly = monthlyGross(sub, today);
   const remind = sub.remindDays ?? state.settings.remindDays;
-  const icon = sub.icon?.startsWith('http') ? sub.icon : domainOf(sub.url) ? `https://www.google.com/s2/favicons?domain=${domainOf(sub.url)}&sz=128` : undefined;
+  const icon = sub.category === '域名' ? undefined : sub.icon?.startsWith('http') ? sub.icon : domainOf(sub.url) ? `https://www.google.com/s2/favicons?domain=${domainOf(sub.url)}&sz=128` : undefined;
   const [label, tone] = STATUS[st];
   const ro = !!state.readonly;
   const dues = memberDues(sub, today);
@@ -90,10 +94,16 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           {sub.end && <Cell label={st === 'ended' ? '结束于' : '到期不续'}>{cnDateFull(sub.end)}</Cell>}
           {sub.trialEnd && <Cell label="试用截止">{cnDateFull(sub.trialEnd)}</Cell>}
           {sub.region && <Cell label="地区">{sub.region}</Cell>}
-          <Cell label="累计支付">
-            {money(total, base)} · {history.length} 笔
+          <Cell label="累计支付" sub={sub.currency !== base ? '按每笔扣款当天的汇率' : undefined}>
+            {base === 'CNY' || base === 'USD' ? `${money(totalCny, 'CNY')} · ${money(totalUsd, 'USD')}` : money(total, base)} · {history.length} 笔
           </Cell>
         </Group>
+
+        {(sub.phases?.length || (sub.priceHistory?.length ?? 0) > 1) && (
+          <Group title="历程" foot="换区、换套餐、调价与断更都会记录在这里；每段按当时的价格和汇率计费。">
+            <History sub={sub} state={state} today={today} />
+          </Group>
+        )}
 
         {sub.intro && (
           <Group title="首期优惠">
@@ -127,26 +137,32 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           </Group>
         )}
 
-        {(sub.priceHistory?.length ?? 0) > 1 && (
-          <Group title="价格历史">
-            {sub.priceHistory!.map((p) => (
-              <Cell key={p.from} label={`${p.from} 起`}>
-                {money(p.amount, sub.currency)}
-              </Cell>
-            ))}
-          </Group>
-        )}
 
         {history.length > 0 && (
-          <Group title={`扣款记录 · ${history.length} 笔`} foot={history.length > 8 ? '仅显示最近 8 笔' : undefined}>
+          <Group title={`扣款记录 · ${history.length} 笔`} foot={`人民币、美元金额按每笔扣款当天的汇率折算${history.length > 12 ? '，仅显示最近 12 笔' : ''}。`}>
             {history
-              .slice(-8)
+              .slice(-12)
               .reverse()
-              .map((c) => (
-                <Cell key={c.date} label={cnDateFull(c.date)}>
-                  {money(c.amount, c.currency)}
-                </Cell>
-              ))}
+              .map((c) => {
+                const r = rateOn(state.fxHistory, c.currency, c.date);
+                const cny = rateOn(state.fxHistory, 'CNY', c.date);
+                return (
+                  <div key={c.date} class="charge-row">
+                    <span class="cr-date">{c.date}</span>
+                    <b>{money(c.amount, c.currency)}</b>
+                    <span class="cr-conv">
+                      {c.currency !== 'CNY' && money(chargeValue(state, c, 'CNY'), 'CNY')}
+                      {c.currency !== 'CNY' && c.currency !== 'USD' && ' · '}
+                      {c.currency !== 'USD' && money(chargeValue(state, c, 'USD'), 'USD')}
+                      {c.currency !== 'USD' && r && cny && (
+                        <small>
+                          1 {c.currency} = {((1 / r.rate) * cny.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} CNY{r.date !== c.date ? ` · ${r.date}` : ''}
+                        </small>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
           </Group>
         )}
 

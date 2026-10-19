@@ -1,6 +1,6 @@
 import { render } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { effectiveStatus, nextCharge, totals } from '../shared/billing.ts';
+import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
@@ -12,17 +12,20 @@ import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
 import { List } from './views/List.tsx';
 import { Overview } from './views/Overview.tsx';
-import { Receipt } from './views/Receipt.tsx';
+import { Report } from './views/Report.tsx';
+import { PublicPage } from './views/Public.tsx';
+import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
 
 const NAV = [
-  { path: '', label: '仪表板', icon: 'chart' },
+  { path: '', label: '概览', icon: 'home' },
+  { path: 'list', label: '订阅', icon: 'list' },
   { path: 'calendar', label: '日历', icon: 'cal' },
-  { path: 'list', label: '全部订阅', short: '订阅', icon: 'list' },
+  { path: 'report', label: '报告', icon: 'chart' },
   { path: 'wallet', label: '钱包', icon: 'wallet' },
   { path: 'carpool', label: '拼车', icon: 'car' },
-] as const;
+];
 
 function useRoute() {
   const get = () => decodeURIComponent(location.hash.replace(/^#\/?/, ''));
@@ -88,101 +91,178 @@ function Login({ error }: { error?: string }) {
   );
 }
 
-function Sidebar({ state, route, d, theme, toggleTheme, onOpen }: { state: AppState; route: string; d: string; theme: string; toggleTheme: () => void; onOpen: (s: Subscription) => void }) {
-  const live = state.subscriptions.filter((s) => ['active', 'trial', 'ending', 'paused'].includes(effectiveStatus(s, d)));
-  const owned = state.subscriptions.filter((s) => s.share && ['active', 'trial', 'ending', 'paused'].includes(effectiveStatus(s, d)));
-  const counts: Record<string, number> = { list: live.length, wallet: state.methods.length, carpool: owned.length };
-  const cats = new Map<string, Subscription[]>();
-  for (const s of [...state.subscriptions].sort((a, b) => a.name.localeCompare(b.name, 'zh'))) cats.set(s.category, [...(cats.get(s.category) ?? []), s]);
-  const catList = [...cats.entries()].sort((a, b) => b[1].length - a[1].length);
+function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch, onCollapse }: { state: AppState; route: string; d: string; theme: string; toggleTheme: () => void; onOpen: (s: Subscription) => void; onAdd: () => void; onSearch: () => void; onCollapse: () => void }) {
+  // 即将扣款：像聊天记录一样列在导航下方
+  const upcoming = state.subscriptions
+    .map((s) => ({ s, n: nextCharge(s, d) }))
+    .filter((x) => x.n && x.n <= addDays(d, 45))
+    .sort((a, b) => a.n!.localeCompare(b.n!))
+    .slice(0, 12);
   return (
     <aside class="sidebar">
-      <div class="side-brand">
-        <img src="/icons/icon-192.png" alt="" />
-        <div>
-          <b>订阅账本</b>
-          <span>{state.settings.displayName}</span>
-        </div>
+      <div class="sb-top">
+        <a class="sb-mark" href="#/">
+          <img src="/icons/icon-192.png" alt="" />
+          订阅账本
+        </a>
+        <button class="sb-btn" onClick={onCollapse} title="收起侧边栏" aria-label="收起侧边栏">
+          <Icon name="sidebar" />
+        </button>
       </div>
-      <div class="side-scroll">
-        {NAV.map((n) => (
-          <a key={n.path} class={`side-item ${route === n.path ? 'active' : ''}`} href={`#/${n.path}`}>
-            <Icon name={n.icon} />
-            <span>{n.label}</span>
-            {counts[n.path] != null && <span class="n">{counts[n.path]}</span>}
-          </a>
-        ))}
-        <div class="side-label">分类</div>
-        {catList.map(([cat, subs]) => {
-          const active = route === `cat/${cat}`;
-          const nLive = subs.filter((s) => live.includes(s)).length;
+      {!state.readonly && (
+        <button class="side-item" onClick={onAdd}>
+          <Icon name="compose" />
+          <span>新建订阅</span>
+          <kbd>N</kbd>
+        </button>
+      )}
+      <button class="side-item" onClick={onSearch}>
+        <Icon name="search" />
+        <span>搜索</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <div class="side-gap" />
+      {NAV.map((n) => (
+        <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) ? 'active' : ''}`} href={`#/${n.path}`}>
+          <Icon name={n.icon} />
+          <span>{n.label}</span>
+        </a>
+      ))}
+      <div class="side-scroll side-recent">
+        {upcoming.length > 0 && <div class="side-label">即将扣款</div>}
+        {upcoming.map(({ s, n }) => {
+          const days = diffDays(d, n!);
           return (
-            <details key={cat} class="side-group" open={active || undefined}>
-              <summary class={`side-item ${active ? 'active' : ''}`} onClick={() => (location.hash = `#/cat/${encodeURIComponent(cat)}`)}>
-                <Icon name="down" />
-                <Icon name="tag" />
-                <span>{cat}</span>
-                <span class="n">{nLive}</span>
-              </summary>
-              <div class="side-sub">
-                {subs.map((s) => {
-                  const st = effectiveStatus(s, d);
-                  return (
-                    <button key={s.id} class={`side-item ${st === 'ended' ? 'ended' : ''}`} onClick={() => onOpen(s)}>
-                      <SubIcon sub={s} size={18} />
-                      <span>{s.name}</span>
-                      {s.intro && s.intro.until > d && <Icon name="leaf" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </details>
+            <button key={s.id} class={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
+              <SubIcon sub={s} size={18} />
+              <span>{s.name}</span>
+              <small>{days === 0 ? '今天' : days === 1 ? '明天' : days < 7 ? `${days} 天后` : cnDate(n!)}</small>
+            </button>
           );
         })}
       </div>
       <div class="side-foot">
-        {!state.readonly && (
-          <a class={`side-item ${route === 'settings' ? 'active' : ''}`} href="#/settings">
-            <Icon name="gear" />
-            <span>设置</span>
-          </a>
-        )}
         <button class="side-item" onClick={toggleTheme}>
           <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
-          <span>{theme === 'dark' ? '浅色模式' : '深色模式'}</span>
+          <span>{theme === 'dark' ? '浅色' : '深色'}外观</span>
         </button>
+        {!state.readonly && (
+          <a class="me" href="#/settings">
+            <span class="avatar">{[...state.settings.displayName][0]?.toUpperCase()}</span>
+            <span class="who">
+              <b>{state.settings.displayName}</b>
+              <small>设置与提醒</small>
+            </span>
+          </a>
+        )}
       </div>
     </aside>
   );
 }
 
-function StatusBar({ state, d }: { state: AppState; d: string }) {
-  const t = totals(state, d);
-  const base = state.settings.baseCurrency;
-  let next: { s: Subscription; n: string } | undefined;
-  for (const s of state.subscriptions) {
-    const n = nextCharge(s, d);
-    if (n && (!next || n < next.n)) next = { s, n };
-  }
+/** ⌘K 搜索：订阅、页面、操作 */
+function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: string; onClose: () => void; onOpen: (s: Subscription) => void; onAdd: () => void }) {
+  const [q, setQ] = useState('');
+  const [i, setI] = useState(0);
+  const lower = q.trim().toLowerCase();
+  const subs = state.subscriptions
+    .filter((s) => !lower || `${s.name} ${s.category} ${s.tags.join(' ')}`.toLowerCase().includes(lower))
+    .sort((a, b) => (effectiveStatus(a, d) === 'ended' ? 1 : 0) - (effectiveStatus(b, d) === 'ended' ? 1 : 0))
+    .slice(0, 8);
+  const pages = [...NAV, { path: 'settings', label: '设置', icon: 'gear' }].filter((n) => !lower || n.label.includes(lower));
+  const items: Array<{ key: string; run: () => void; el: preact.JSX.Element }> = [
+    ...subs.map((s) => ({
+      key: s.id,
+      run: () => onOpen(s),
+      el: (
+        <>
+          <SubIcon sub={s} size={24} />
+          {s.name}
+          <small>{money(s.price, s.currency)}</small>
+        </>
+      ),
+    })),
+    ...pages.map((n) => ({
+      key: n.path,
+      run: () => (location.hash = `#/${n.path}`),
+      el: (
+        <>
+          <Icon name={n.icon} />
+          {n.label}
+          <small>页面</small>
+        </>
+      ),
+    })),
+    ...(!state.readonly && (!lower || '新建添加'.includes(lower))
+      ? [
+          {
+            key: 'add',
+            run: onAdd,
+            el: (
+              <>
+                <Icon name="compose" />
+                新建订阅
+                <small>N</small>
+              </>
+            ),
+          },
+        ]
+      : []),
+  ];
+  const go = (k: number) => {
+    items[k]?.run();
+    onClose();
+  };
   return (
-    <footer class="statusbar">
-      <span>
-        订阅 <b>{t.activeCount}</b>
-      </span>
-      <span>
-        每月合计 <b>{money(t.mrr, base)}</b>
-      </span>
-      <span>
-        每年 <b>{money(t.mrr * 12, base, { compact: true })}</b>
-      </span>
-      {next && (
-        <span>
-          下次扣款 <b>{next.s.name}</b> · {cnDate(next.n)}
-        </span>
-      )}
-      <span style={{ marginLeft: 'auto' }}>汇率 {state.fx.fetchedAt.slice(0, 10)}</span>
-    </footer>
+    <div class="scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div class="palette" role="dialog" aria-modal="true">
+        <input
+          autoFocus
+          placeholder="搜索订阅或页面…"
+          value={q}
+          onInput={(e) => {
+            setQ((e.target as HTMLInputElement).value);
+            setI(0);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowDown') (e.preventDefault(), setI(Math.min(items.length - 1, i + 1)));
+            if (e.key === 'ArrowUp') (e.preventDefault(), setI(Math.max(0, i - 1)));
+            if (e.key === 'Enter') go(i);
+            if (e.key === 'Escape') onClose();
+          }}
+        />
+        <div class="palette-list">
+          {items.length === 0 && <div class="pal-group">没有结果</div>}
+          {items.map((it, k) => (
+            <button key={it.key} class={`pal-item ${k === i ? 'on' : ''}`} onMouseEnter={() => setI(k)} onClick={() => go(k)}>
+              {it.el}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
+}
+
+function useLocalFlag(key: string): [boolean, (v: boolean) => void] {
+  const [v, setV] = useState(() => {
+    try {
+      return localStorage.getItem(key) === '1';
+    } catch {
+      return false;
+    }
+  });
+  return [
+    v,
+    (nv: boolean) => {
+      setV(nv);
+      try {
+        localStorage.setItem(key, nv ? '1' : '0');
+      } catch {
+        /* ignore */
+      }
+    },
+  ];
 }
 
 function App() {
@@ -191,32 +271,60 @@ function App() {
   const [theme, toggleTheme] = useTheme();
   const [editing, setEditing] = useState<Subscription | null>(null);
   const [viewId, setViewId] = useState<string | null>(null);
-  const [receipt, setReceipt] = useState(false);
+  const [review, setReview] = useState(false);
   const [ics, setIcs] = useState(false);
+  const [palette, setPalette] = useState(false);
+  const [collapsed, setCollapsed] = useLocalFlag('ledger:sidebar-collapsed');
+  const [drawer, setDrawer] = useState(false);
 
+  useEffect(() => setDrawer(false), [route]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPalette(true);
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+        e.preventDefault();
+        setCollapsed(!collapsed);
+        return;
+      }
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.metaKey || e.ctrlKey) return;
       if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today()));
       const idx = Number(e.key);
       if (idx >= 1 && idx <= NAV.length) location.hash = '#/' + NAV[idx - 1].path;
     };
+    const onDrawer = () => (matchMedia('(max-width: 860px)').matches ? setDrawer(true) : setCollapsed(false));
+    const onAdd = () => state && !state.readonly && setEditing(newSub(today()));
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [state]);
+    window.addEventListener('ledger:drawer', onDrawer);
+    window.addEventListener('ledger:add', onAdd);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('ledger:drawer', onDrawer);
+      window.removeEventListener('ledger:add', onAdd);
+    };
+  }, [state, collapsed]);
 
   if (phase === 'loading') return <div class="login" />;
   if (phase === 'login' || !state) return <Login error={phase === 'offline' ? `无法连接：${error ?? ''}` : undefined} />;
 
   const d = today();
   const ro = !!state.readonly;
-  const open = (s: Subscription) => setViewId(s.id);
+  const open = (s: Subscription) => {
+    setDrawer(false);
+    setViewId(s.id);
+  };
   const edit = (s: Subscription) => {
     setViewId(null);
     setEditing(s);
   };
-  const add = () => setEditing(newSub(d));
+  const add = () => {
+    setDrawer(false);
+    setEditing(newSub(d));
+  };
   const viewing = state.subscriptions.find((s) => s.id === viewId);
 
   let view;
@@ -235,40 +343,46 @@ function App() {
       case 'carpool':
         view = <Carpool state={state} today={d} onOpen={open} onEdit={edit} />;
         break;
+      case 'report':
+        view = <Report state={state} today={d} onOpen={open} onReview={() => setReview(true)} />;
+        break;
       case 'settings':
         view = ro ? null : <Settings state={state} today={d} />;
         break;
       default:
-        view = <Overview state={state} today={d} onOpen={open} onReceipt={() => setReceipt(true)} onAdd={add} />;
+        view = <Overview state={state} today={d} onOpen={open} onAdd={add} />;
     }
 
-  const tabs = [...NAV.slice(0, 4), { path: 'settings', label: '设置', icon: 'gear' }].filter((t) => !(ro && t.path === 'settings'));
   return (
-    <>
-      <Sidebar state={state} route={route} d={d} theme={theme} toggleTheme={toggleTheme} onOpen={open} />
+    <div class={`app ${collapsed ? 'collapsed' : ''} ${drawer ? 'drawer' : ''}`}>
+      <Sidebar
+        state={state}
+        route={route}
+        d={d}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onOpen={open}
+        onAdd={add}
+        onSearch={() => {
+          setDrawer(false);
+          setPalette(true);
+        }}
+        onCollapse={() => (drawer ? setDrawer(false) : setCollapsed(true))}
+      />
+      <div class="drawer-scrim" onClick={() => setDrawer(false)} />
       <div class="main">
         {phase === 'offline' && (
           <div class="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
             离线
           </div>
         )}
+        {collapsed && (
+          <button class="sb-btn reopen" onClick={() => setCollapsed(false)} title="展开侧边栏" aria-label="展开侧边栏">
+            <Icon name="sidebar" />
+          </button>
+        )}
         {view}
-        <StatusBar state={state} d={d} />
       </div>
-
-      <nav class="tabbar">
-        {tabs.map((r) => (
-          <a key={r.path} class={`tab ${route === r.path || (r.path === 'list' && route.startsWith('cat/')) ? 'active' : ''}`} href={`#/${r.path}`}>
-            <Icon name={r.icon} />
-            {'short' in r ? r.short : r.label}
-          </a>
-        ))}
-      </nav>
-      {!ro && (
-        <button class="fab" onClick={add} aria-label="添加订阅">
-          <Icon name="plus" />
-        </button>
-      )}
 
       {viewing && (
         <Sheet bare onClose={() => setViewId(null)}>
@@ -276,16 +390,23 @@ function App() {
         </Sheet>
       )}
       {editing && <Editor key={editing.id} sub={editing} state={state} today={d} onClose={() => setEditing(null)} />}
-      {receipt && <Receipt state={state} today={d} onClose={() => setReceipt(false)} />}
+      {review && <Review state={state} today={d} onClose={() => setReview(false)} />}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
+      {palette && <Palette state={state} d={d} onClose={() => setPalette(false)} onOpen={open} onAdd={add} />}
       <Toasts />
       <TipLayer />
-    </>
+    </div>
   );
 }
 
-render(<App />, document.getElementById('app')!);
-boot();
+// 根路径是对外公开的只读页（不出现任何登录入口）；/admin 才是需要登录的后台
+if (location.pathname.startsWith('/admin')) {
+  render(<App />, document.getElementById('app')!);
+  boot();
+} else {
+  if (location.pathname !== '/') history.replaceState(null, '', '/');
+  render(<PublicPage />, document.getElementById('app')!);
+}
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});

@@ -137,7 +137,7 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
 }
 
 export function renderEmail(d: Digest, siteUrl: string): { html: string; text: string } {
-  const text = [d.intro, '', ...d.sections.flatMap((s) => [`【${s.heading}】`, ...s.rows.map((r) => `· ${r.title}  ${r.amount ?? ''}  ${r.sub ?? ''}`), '']), siteUrl].join('\n');
+  const text = [d.intro, '', ...d.sections.flatMap((s) => [`【${s.heading}】`, ...s.rows.map((r) => `· ${r.title}  ${r.amount ?? ''}  ${r.sub ?? ''}`), '']), `${siteUrl}/admin`].join('\n');
   const toneColor = { warn: '#c2593b', ok: '#3c8a52', muted: '#7b858b' } as const;
   const rows = (s: Section) =>
     s.rows
@@ -167,7 +167,7 @@ ${d.sections
   )
   .join('')}
 <tr><td style="padding:24px 28px 28px">
-<a href="${esc(siteUrl)}" style="display:inline-block;background:#1d2328;color:#fff;text-decoration:none;font:600 14px/1 -apple-system,'PingFang SC',sans-serif;padding:12px 18px;border-radius:999px">打开订阅账本</a>
+<a href="${esc(siteUrl)}/admin" style="display:inline-block;background:#1d2328;color:#fff;text-decoration:none;font:600 14px/1 -apple-system,'PingFang SC',sans-serif;padding:12px 18px;border-radius:999px">打开订阅账本</a>
 <p style="font:12px/1.6 -apple-system,'PingFang SC',sans-serif;color:#93a0a6;margin:16px 0 0">提醒时间与提前天数可在「设置」中调整。</p>
 </td></tr></table></body></html>`;
   return { html, text };

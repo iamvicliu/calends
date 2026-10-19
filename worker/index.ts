@@ -1,10 +1,12 @@
 import { todayIn } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
 import { isAuthed, login, logout, randomToken, sameOrigin } from './auth.ts';
+import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
+import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type Digest } from './notify.ts';
-import { getFx, getSettings, loadState, putKv, remove, replaceAll, sanitize, upsert } from './store.ts';
+import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from './store.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
@@ -15,6 +17,7 @@ async function refreshFx(env: Env): Promise<FxTable> {
   if (body.result !== 'success' || !body.rates) throw new Error('汇率接口异常');
   const fx: FxTable = { base: 'USD', rates: body.rates, fetchedAt: new Date().toISOString() };
   await putKv(env, 'fx', fx);
+  await recordToday(env, fx, (await getSettings(env)).timezone);
   return fx;
 }
 
@@ -27,20 +30,34 @@ function validSub(s: Subscription): string | undefined {
   return undefined;
 }
 
+/**
+ * 本地开发免登录：DEV_BYPASS_AUTH 只写在 .dev.vars（不随部署上传）。
+ * wrangler dev 会把请求 URL 改写成线上路由域名，所以这里无法按 localhost 判断。
+ */
+function devBypass(_req: Request, env: Env): boolean {
+  return env.DEV_BYPASS_AUTH === '1';
+}
+
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
   if (path === '/api/login' && method === 'POST') return login(req, env);
   if (path === '/api/logout' && method === 'POST') return logout(req, env);
 
-  const authed = await isAuthed(req, env);
+  const dev = devBypass(req, env);
+  const authed = dev || (await isAuthed(req, env));
+  if (path === '/api/public' && method === 'GET') {
+    const state = await loadState(env);
+    if (!state.settings.publicView && !dev) return bad('这个账本没有公开', 404);
+    return json(maskForPublic(state));
+  }
   if (path === '/api/state' && method === 'GET') {
     const state = await loadState(env);
     if (authed) return json(state);
-    if (state.settings.publicView) return json(sanitize(state));
+    if (state.settings.publicView) return json(maskForPublic(state));
     return bad('unauthorized', 401);
   }
   if (!authed) return bad('unauthorized', 401);
-  if (method !== 'GET' && !sameOrigin(req)) return bad('forbidden', 403);
+  if (method !== 'GET' && !dev && !sameOrigin(req)) return bad('forbidden', 403);
 
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
@@ -97,6 +114,13 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       await putKv(env, 'settings', { ...cur, ...body.settings, icsToken: cur.icsToken });
     }
     return json(await loadState(env));
+  }
+  if (path === '/api/fx/status' && method === 'GET') {
+    const st = await fxStatus(env, await loadState(env));
+    return json({ ...st, missing: st.missing.slice(0, 50) });
+  }
+  if (path === '/api/fx/backfill' && method === 'POST') {
+    return json(await backfill(env, await loadState(env)));
   }
   if (path === '/api/fx/refresh' && method === 'POST') {
     try {

@@ -3,7 +3,8 @@ import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../share
 import { cnDate, money, relDays } from '../../shared/format.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Amount, Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
-import { allCharges, toBase } from '../derive.ts';
+import { chargeValue } from '../../shared/fx.ts';
+import { allCharges } from '../derive.ts';
 
 const DOW = ['一', '二', '三', '四', '五', '六', '日'];
 
@@ -30,7 +31,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
     for (const c of charges) m.set(c.date, [...(m.get(c.date) ?? []), c]);
     return m;
   }, [charges]);
-  const sumOf = (list: Charge[] = []) => list.reduce((a, c) => a + toBase(state, c.amount, c.currency), 0);
+  const sumOf = (list: Charge[] = []) => list.reduce((a, c) => a + chargeValue(state, c), 0);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
   const shift = (n: number) => setMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));
@@ -129,7 +130,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       <Amount value={c.amount} ccy={c.currency} />
                       <div class="muted" style={{ fontSize: 12 }}>
                         {c.projected ? '预计' : '已扣'}
-                        {c.currency !== base ? ` · ≈${money(toBase(state, c.amount, c.currency), base, { compact: true })}` : ''}
+                        {c.currency !== base ? ` · ≈${money(chargeValue(state, c), base, { compact: true })}` : ''}
                       </div>
                     </span>
                   </button>
@@ -153,33 +154,52 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
 }
 
 function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; byDay: Map<string, Charge[]>; today: string; sumOf: (l?: Charge[]) => number; base: string; onPick: (m: string) => void }) {
-  const max = Math.max(1, ...[...byDay.entries()].filter(([d]) => d.startsWith(year)).map(([, l]) => sumOf(l)));
   return (
     <div class="heat">
       {Array.from({ length: 12 }, (_, i) => {
         const m = `${year}-${String(i + 1).padStart(2, '0')}`;
-        const grid = monthGrid(m);
-        const total = grid.filter((d) => d.startsWith(m)).reduce((a, d) => a + sumOf(byDay.get(d)), 0);
+        // 固定 6 行，让 12 张月卡等高对齐
+        const grid = Array.from({ length: 42 }, (_, k) => addDays(monthGrid(m)[0], k));
+        const days = grid.filter((d) => d.startsWith(m));
+        const total = days.reduce((a, d) => a + sumOf(byDay.get(d)), 0);
+        const count = days.reduce((a, d) => a + (byDay.get(d)?.length ?? 0), 0);
         return (
-          <button key={m} class={`heat-m ${today.startsWith(m) ? 'cur' : ''}`} onClick={() => onPick(m)}>
+          <button key={m} class={`heat-m ${today.startsWith(m) ? 'cur' : ''} ${m < today.slice(0, 7) ? 'past' : ''}`} onClick={() => onPick(m)}>
             <div class="heat-h">
-              {i + 1}月<span>{money(total, base, { compact: true })}</span>
+              {i + 1}月
+              <span>
+                {count ? `${count} 笔 · ` : ''}
+                {money(total, base, { compact: true })}
+              </span>
             </div>
             <div class="heat-g">
+              {DOW.map((w) => (
+                <em key={w}>{w}</em>
+              ))}
               {grid.map((d) => {
-                const list = d.startsWith(m) ? byDay.get(d) : undefined;
-                const v = sumOf(list);
-                const a = v ? 0.3 + 0.7 * Math.sqrt(v / max) : 0;
+                if (!d.startsWith(m)) return <i key={d} class="hd out" />;
+                const list = (byDay.get(d) ?? []).slice().sort((x, y) => y.amount - x.amount);
+                const cls = `hd ${d === today ? 'today' : ''} ${list.length ? 'has' : ''} ${d < today ? 'gone' : ''}`;
+                if (!list.length)
+                  return (
+                    <i key={d} class={cls}>
+                      {Number(d.slice(8))}
+                    </i>
+                  );
                 return (
-                  <i
-                    key={d}
-                    style={{
-                      visibility: d.startsWith(m) ? 'visible' : 'hidden',
-                      background: v ? `color-mix(in srgb, var(--accent) ${Math.round(a * 100)}%, transparent)` : undefined,
-                      boxShadow: d === today ? 'inset 0 0 0 1.5px var(--red)' : undefined,
-                    }}
-                    {...(list ? tipProps(() => `${cnDate(d)} · ${list.map((c) => c.sub.name).join('、')} · ${money(v, base, { compact: true })}`) : {})}
-                  />
+                  <i key={d} class={cls} {...tipProps(() => (
+                    <>
+                      <b>{cnDate(d, true)}</b>
+                      {list.map((c) => (
+                        <div key={c.sub.id}>
+                          {c.sub.name} · {money(c.amount, c.currency)}
+                        </div>
+                      ))}
+                    </>
+                  ))}>
+                    <SubIcon sub={list[0].sub} size={20} />
+                    {list.length > 1 && <b class="hd-n">{list.length}</b>}
+                  </i>
                 );
               })}
             </div>

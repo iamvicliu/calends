@@ -1,0 +1,463 @@
+// 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
+// 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
+import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
+import { chargeValue, toBaseAt } from './fx.ts';
+import type { AppState, PaymentMethod, Subscription } from './types.ts';
+
+const MONTH = 30.4375;
+
+/** 不带日期 = 当前汇率（固定汇率口径）；带日期 = 当天汇率 */
+function toBase(state: AppState, amount: number, ccy: string, date?: string): number {
+  return toBaseAt(state, amount, ccy, date);
+}
+
+/** 我承担的比例：车主扣除成员份额 */
+function shareFactor(s: Subscription): number {
+  const sh = s.share;
+  if (!sh || sh.role !== 'owner' || s.price <= 0) return 1;
+  return Math.max(0, (s.price - sh.members.reduce((t, m) => t + (m.share || 0), 0)) / s.price);
+}
+
+/** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
+export function contributionOn(state: AppState, s: Subscription, day: string, fxDate?: string): number {
+  if (s.phases?.length) {
+    const v = phaseAt(s, day);
+    return v ? contributionOn(state, v, day, fxDate) : 0;
+  }
+  if (s.cycle.unit === 'lifetime') return 0;
+  if (s.start > day) return 0;
+  if (s.end && s.end <= day) return 0;
+  if (s.status === 'cancelled' && !s.end) return 0;
+  if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
+  if (s.status === 'trial' && s.trialEnd && s.trialEnd > day) return 0;
+  return toBase(state, (priceAt(s, day) * MONTH) / cycleDays(s.cycle), s.currency, fxDate) * shareFactor(s);
+}
+
+/** fxDate 缺省为当前汇率；传入则按该日汇率 */
+export function mrrOn(state: AppState, day: string, fxDate?: string): number {
+  return state.subscriptions.reduce((a, s) => a + contributionOn(state, s, day, fxDate), 0);
+}
+
+export function monthEnd(month: string): string {
+  return addDays(addMonths(month + '-01', 1), -1);
+}
+
+export interface MrrPoint {
+  month: string; // YYYY-MM
+  mrr: number;
+}
+
+/** 每月月末（当月为今天）的 MRR；historical 为 true 时按当月汇率，否则按当前汇率 */
+export function mrrSeries(state: AppState, today: string, months: number, historical = false): MrrPoint[] {
+  const out: MrrPoint[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const m = addMonths(today.slice(0, 8) + '01', -i).slice(0, 7);
+    const day = i === 0 ? today : monthEnd(m);
+    out.push({ month: m, mrr: mrrOn(state, day, historical && i > 0 ? day : undefined) });
+  }
+  return out;
+}
+
+export interface Movement {
+  /** 期初 MRR（期初汇率） */
+  from: number;
+  /** 汇率变化带来的增减：期初的订阅组合按期末汇率重估 */
+  fx: number;
+  to: number;
+  added: number;
+  expansion: number;
+  contraction: number;
+  churned: number;
+  items: Array<{ sub: Subscription; kind: 'added' | 'expansion' | 'contraction' | 'churned'; delta: number }>;
+}
+
+/**
+ * 区间 (start, end] 内的 MRR 变动。
+ * 期初按期初汇率；先把期初组合按期末汇率重估得到「汇率影响」，
+ * 再在期末汇率下拆出新增、涨价、降价、退订，保证各项相加正好等于期末。
+ * endFx 缺省（期末是今天）时用当前汇率。
+ */
+export function movement(state: AppState, start: string, end: string, endFx?: string): Movement {
+  const r: Movement = { from: 0, fx: 0, to: 0, added: 0, expansion: 0, contraction: 0, churned: 0, items: [] };
+  for (const s of state.subscriptions) {
+    const a0 = contributionOn(state, s, start, start);
+    const a = contributionOn(state, s, start, endFx);
+    const b = contributionOn(state, s, end, endFx);
+    r.from += a0;
+    r.fx += a - a0;
+    r.to += b;
+    const d = b - a;
+    if (Math.abs(d) < 0.005) continue;
+    const kind = a === 0 ? 'added' : b === 0 ? 'churned' : d > 0 ? 'expansion' : 'contraction';
+    r[kind] += Math.abs(d);
+    r.items.push({ sub: s, kind, delta: d });
+  }
+  r.items.sort((x, y) => Math.abs(y.delta) - Math.abs(x.delta));
+  return r;
+}
+
+export type EventKind = 'start' | 'end' | 'price' | 'intro-end' | 'buy' | 'pause' | 'switch' | 'resume';
+
+export interface LedgerEvent {
+  date: string;
+  sub: Subscription;
+  kind: EventKind;
+  /** 对 MRR 的影响（本位币/月），买断为一次性金额 */
+  delta: number;
+  note?: string;
+}
+
+/** 单个阶段的事件 */
+function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[] {
+  const out: LedgerEvent[] = [];
+  if (s.cycle.unit === 'lifetime') {
+    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBase(state, s.price, s.currency) });
+    return out;
+  }
+  const after = (d: string) => contributionOn(state, s, d);
+  if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'start', delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s) });
+  const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
+  for (let i = 1; i < hist.length; i++) {
+    if (hist[i].from > today) continue;
+    const prev = hist[i - 1].amount;
+    const cur = hist[i].amount;
+    if (prev === cur) continue;
+    out.push({ date: hist[i].from, sub: s, kind: 'price', delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s), note: `${prev} → ${cur} ${s.currency}` });
+  }
+  if (s.intro && s.intro.until <= today && s.intro.until > s.start) {
+    out.push({ date: s.intro.until, sub: s, kind: 'intro-end', delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s) });
+  }
+  if (s.end && s.end <= today) out.push({ date: s.end, sub: s, kind: 'end', delta: -contributionOn(state, s, addDays(s.end, -1)) });
+  if (s.status === 'paused' && s.pausedAt && s.pausedAt <= today) out.push({ date: s.pausedAt, sub: s, kind: 'pause', delta: -contributionOn(state, { ...s, status: 'active' }, s.pausedAt) });
+  return out;
+}
+
+const label = (v: Subscription) => `${v.region ? v.region + ' ' : ''}${v.price} ${v.currency}/${v.cycle.unit === 'year' ? '年' : v.cycle.unit === 'month' ? (v.cycle.every === 1 ? '月' : `${v.cycle.every}月`) : v.cycle.unit}`;
+
+/** 变更日志：像 git log 一样记录每一次花钱决策；多阶段订阅会合并成「换区/换套餐」「断更」「续订」 */
+export function events(state: AppState, today: string): LedgerEvent[] {
+  const out: LedgerEvent[] = [];
+  for (const s of state.subscriptions) {
+    const vs = phaseSubs(s);
+    if (vs.length === 1 && !s.phases?.length) {
+      out.push(...eventsOf(state, s, today));
+      continue;
+    }
+    vs.forEach((v, i) => {
+      const evs = eventsOf(state, v, today);
+      const prev = vs[i - 1];
+      const next = vs[i + 1];
+      const contiguous = (a: Subscription, b: Subscription) => !!a.end && a.end >= b.start;
+      for (const e of evs) {
+        if (e.kind === 'start' && prev) {
+          if (contiguous(prev, v)) {
+            const before = contributionOn(state, prev, addDays(v.start, -1));
+            out.push({ ...e, kind: 'switch', delta: e.delta - before, note: `${label(prev)} → ${label(v)}` });
+          } else out.push({ ...e, kind: 'resume', note: label(v) });
+          continue;
+        }
+        if (e.kind === 'end' && next && contiguous(v, next)) continue; // 并入下一阶段的 switch
+        out.push(e);
+      }
+    });
+  }
+  return out.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** 一笔扣款覆盖的服务期 [date, 下一笔扣款日)；没有下一笔时按一个周期（到期日更早则截到到期日） */
+function coverage(c: Charge): [string, string] {
+  const s = c.sub;
+  if (s.cycle.unit === 'lifetime') return [c.date, addDays(c.date, 1)];
+  const horizon = addDays(c.date, Math.round(cycleDays(s.cycle) * 3) + 31);
+  const next = chargesBetween({ ...s, end: undefined, status: s.status === 'paused' ? 'active' : s.status }, addDays(c.date, 1), horizon, '9999-12-31')[0]?.date;
+  let end = next ?? nthCharge(c.date, s.cycle, 1);
+  if (s.end && s.end > c.date && s.end < end) end = s.end;
+  return [c.date, end];
+}
+
+export interface CashAccrual {
+  month: string;
+  cash: number;
+  accrual: number;
+  projected: boolean;
+}
+
+/**
+ * 现金 vs 权责：现金按扣款日入账（年付会形成尖峰），
+ * 权责把每笔扣款平摊到它覆盖的天数上，反映真实的每月成本。买断不计入权责。
+ */
+export function cashVsAccrual(state: AppState, today: string, back: number, fwd: number): CashAccrual[] {
+  const first = addMonths(today.slice(0, 8) + '01', -back);
+  const last = monthEnd(addMonths(today.slice(0, 8) + '01', fwd).slice(0, 7));
+  const rows = new Map<string, CashAccrual>();
+  for (let i = 0; i <= back + fwd; i++) {
+    const m = addMonths(first, i).slice(0, 7);
+    rows.set(m, { month: m, cash: 0, accrual: 0, projected: m > today.slice(0, 7) });
+  }
+  // 往前多取一年，保证年付在窗口开头的摊销完整
+  const charges = state.subscriptions.flatMap((s) => chargesBetween(s, addMonths(first, -24), last, today));
+  for (const c of charges) {
+    const v = chargeValue(state, c) * shareFactor(c.sub);
+    const r = rows.get(c.date.slice(0, 7));
+    if (r) r.cash += v;
+    if (c.sub.cycle.unit === 'lifetime') continue;
+    const [a, b] = coverage(c);
+    const days = Math.max(1, diffDays(a, b));
+    const perDay = v / days;
+    // 按月切分覆盖期
+    let cur = a;
+    while (cur < b) {
+      const mEnd = addDays(monthEnd(cur.slice(0, 7)), 1);
+      const segEnd = mEnd < b ? mEnd : b;
+      const row = rows.get(cur.slice(0, 7));
+      if (row) row.accrual += perDay * diffDays(cur, segEnd);
+      cur = segEnd;
+    }
+  }
+  return [...rows.values()];
+}
+
+/** 预付余值：已经付了钱、但服务期还没用完的部分 */
+export function prepaidValue(state: AppState, today: string): { total: number; items: Array<{ sub: Subscription; value: number; until: string }> } {
+  const items: Array<{ sub: Subscription; value: number; until: string }> = [];
+  for (const s of state.subscriptions) {
+    if (s.cycle.unit === 'lifetime') continue;
+    const past = chargesBetween(s, addMonths(today, -12 * Math.max(1, s.cycle.unit === 'year' ? s.cycle.every : 1) - 1), today, today);
+    const last = past[past.length - 1];
+    if (!last) continue;
+    const [a, b] = coverage(last);
+    const end = s.end && s.end < b ? s.end : b;
+    if (end <= today) continue;
+    const v = chargeValue(state, last) * shareFactor(s) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
+    if (v > 0.01) items.push({ sub: s, value: v, until: end });
+  }
+  items.sort((x, y) => y.value - x.value);
+  return { total: items.reduce((t, i) => t + i.value, 0), items };
+}
+
+/** 退订省下的钱：如果没退，从退订到今天还要付多少 */
+export function cancelSavings(state: AppState, today: string): { total: number; items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> } {
+  const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> = [];
+  for (const s of state.subscriptions) {
+    if (s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
+    const monthly = toBase(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s);
+    const saved = (monthly * diffDays(s.end, today)) / MONTH;
+    items.push({ sub: s, saved, since: s.end, monthly });
+  }
+  items.sort((x, y) => y.saved - x.saved);
+  return { total: items.reduce((t, i) => t + i.saved, 0), items };
+}
+
+// ---------- 礼品卡充值计划 ----------
+
+const DENOMS: Record<string, number[]> = {
+  TRY: [100, 250, 500, 1000],
+  NGN: [5000, 10000, 25000, 50000],
+  PHP: [100, 300, 500, 1000],
+  USD: [10, 25, 50, 100],
+  CNY: [50, 100, 200, 500],
+  INR: [500, 1000, 2000],
+  PKR: [1000, 2500, 5000],
+  EGP: [100, 250, 500],
+};
+
+/** 用尽量少的卡凑够金额（贪心，最后一张向上取整） */
+function pickCards(need: number, denoms: number[]): number[] {
+  const ds = [...denoms].sort((a, b) => b - a);
+  const cards: number[] = [];
+  let left = need;
+  for (const d of ds) {
+    while (left >= d) {
+      cards.push(d);
+      left -= d;
+    }
+  }
+  if (left > 0) cards.push(ds.slice().reverse().find((d) => d >= left) ?? ds[ds.length - 1]);
+  return cards;
+}
+
+export interface TopUp {
+  method: PaymentMethod;
+  current: number;
+  /** 撑满 horizon 所需充值（账户币种） */
+  need: number;
+  /** 最晚充值日：余额首次不够的那天 */
+  deadline?: string;
+  cards: number[];
+  monthly: number;
+}
+
+export function topUpPlan(state: AppState, today: string, months = 6): TopUp[] {
+  const out: TopUp[] = [];
+  for (const m of state.methods) {
+    const r = runwayFor(m, state, today);
+    if (!r || r.monthlyDrain <= 0) continue;
+    const horizon = addMonths(today, months);
+    const due = r.upcoming.filter((c) => c.date <= horizon).reduce((a, c) => a + c.amountInMethod, 0);
+    const need = Math.max(0, due - r.current);
+    const denoms = DENOMS[m.currency] ?? [Math.pow(10, Math.max(1, Math.round(Math.log10(Math.max(10, need)))))];
+    out.push({ method: m, current: r.current, need, deadline: r.shortfall?.date, cards: need > 0 ? pickCards(need, denoms) : [], monthly: r.monthlyDrain });
+  }
+  return out.sort((a, b) => (a.deadline ?? '9').localeCompare(b.deadline ?? '9'));
+}
+
+// ---------- 体检 ----------
+
+export interface Insight {
+  id: string;
+  tone: 'warn' | 'info' | 'good';
+  title: string;
+  body: string;
+  subs?: Subscription[];
+  href?: string;
+}
+
+/** 去掉地区、平台、序号等修饰，用来识别重复订阅 */
+function baseName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')
+    .replace(/[（(].*?[）)]/g, '')
+    .replace(/\b(mac|ios|ipad|pro|plus|premium|main|主号|小号)\b/g, '')
+    .replace(/主号|小号|\d+(\.\d+)?/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function insights(state: AppState, today: string): Insight[] {
+  const out: Insight[] = [];
+  const base = state.settings.baseCurrency;
+  const live = state.subscriptions.filter((s) => ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)));
+  const fmt = (v: number) => `${Math.round(v).toLocaleString()} ${base}`;
+
+  // 1. 年付续费窗口：60 天内要自动续费的长周期订阅
+  const yearly = live
+    .filter((s) => cycleDays(s.cycle) >= 180 && effectiveStatus(s, today) === 'active')
+    .map((s) => ({ s, n: nextCharge(s, today) }))
+    .filter((x) => x.n && diffDays(today, x.n) <= 60)
+    .sort((a, b) => a.n!.localeCompare(b.n!));
+  if (yearly.length) {
+    const sum = yearly.reduce((a, x) => a + toBase(state, priceAt(x.s, x.n!), x.s.currency), 0);
+    out.push({
+      id: 'yearly-window',
+      tone: 'warn',
+      title: `${yearly.length} 个长周期订阅 60 天内续费`,
+      body: `合计约 ${fmt(sum)}。年付一旦扣款就很难退，现在是决定留不留的时候。`,
+      subs: yearly.map((x) => x.s),
+    });
+  }
+
+  // 2. 疑似重复
+  const groups = new Map<string, Subscription[]>();
+  for (const s of live) {
+    const k = baseName(s.name);
+    if (k.length < 2) continue;
+    groups.set(k, [...(groups.get(k) ?? []), s]);
+  }
+  for (const [, g] of groups) {
+    if (g.length < 2) continue;
+    const sum = g.reduce((a, s) => a + contributionOn(state, s, today), 0);
+    out.push({ id: `dup-${g[0].id}`, tone: 'info', title: `${g.map((s) => s.name).join('、')} 可能重复`, body: `这 ${g.length} 个订阅每月合计约 ${fmt(sum)}，确认是否都还需要。`, subs: g });
+  }
+
+  // 3. 过去一年涨过价
+  const yearAgo = addMonths(today, -12);
+  const hikes = live.filter((s) => {
+    const h = (s.priceHistory ?? []).filter((p) => p.from > yearAgo && p.from <= today);
+    return h.length && (s.priceHistory ?? []).length > 1 && priceAt(s, today) > priceAt(s, addDays(h[0].from, -1));
+  });
+  if (hikes.length) out.push({ id: 'hikes', tone: 'warn', title: `${hikes.length} 个订阅过去一年涨了价`, body: hikes.map((s) => s.name).join('、'), subs: hikes });
+
+  // 4. 首期优惠即将结束
+  const introEnding = live.filter((s) => s.intro && s.intro.until > today && diffDays(today, s.intro.until) <= 30);
+  for (const s of introEnding) {
+    out.push({ id: `intro-${s.id}`, tone: 'warn', title: `${s.name} 的优惠 ${diffDays(today, s.intro!.until)} 天后结束`, body: `之后从 ${s.intro!.price} 恢复到 ${s.price} ${s.currency}。`, subs: [s] });
+  }
+
+  // 5. 余额 30 天内不够
+  for (const m of state.methods) {
+    const r = runwayFor(m, state, today);
+    if (r?.shortfall && diffDays(today, r.shortfall.date) <= (m.lowRunwayDays ?? 30)) {
+      out.push({ id: `bal-${m.id}`, tone: 'warn', title: `${m.name} 余额撑不到 ${r.shortfall.date.slice(5)}`, body: `${r.shortfall.sub.name} 需要 ${r.shortfall.amount} ${r.shortfall.currency}，当前约 ${Math.round(r.current)} ${m.currency}。`, href: '#/wallet' });
+    }
+  }
+
+  // 6. 汇率敞口
+  const byCcy = new Map<string, number>();
+  let total = 0;
+  for (const s of live) {
+    const v = contributionOn(state, s, today);
+    total += v;
+    byCcy.set(s.currency, (byCcy.get(s.currency) ?? 0) + v);
+  }
+  const foreign = [...byCcy.entries()].filter(([c]) => c !== base).sort((a, b) => b[1] - a[1]);
+  if (total > 0 && foreign.length) {
+    const share = foreign.reduce((a, [, v]) => a + v, 0) / total;
+    out.push({
+      id: 'fx',
+      tone: 'info',
+      title: `${Math.round(share * 100)}% 的支出以外币计价`,
+      body: `最大的是 ${foreign[0][0]}（${Math.round((foreign[0][1] / total) * 100)}%）。${foreign[0][0]} 贬值时这部分会变便宜，反之变贵。`,
+    });
+  }
+
+  // 7. 未指定支付方式
+  const noMethod = live.filter((s) => !s.methodId);
+  if (noMethod.length) out.push({ id: 'nomethod', tone: 'info', title: `${noMethod.length} 个订阅没有指定支付方式`, body: '补上之后，余额推算和按支付方式的统计才完整。', subs: noMethod });
+
+  // 8. 最贵的一天
+  const perDay = live.map((s) => ({ s, v: contributionOn(state, s, today) / MONTH })).sort((a, b) => b.v - a.v)[0];
+  if (perDay && perDay.v > 0) {
+    out.push({ id: 'top', tone: 'good', title: `${perDay.s.name} 是最贵的订阅`, body: `每天约 ${perDay.v.toFixed(2)} ${base}，占月支出 ${total > 0 ? Math.round(((perDay.v * MONTH) / total) * 100) : 0}%。`, subs: [perDay.s] });
+  }
+  return out;
+}
+
+// ---------- 年度回顾 ----------
+
+export interface YearReview {
+  year: string;
+  total: number;
+  charges: number;
+  top: Array<{ sub: Subscription; sum: number }>;
+  longest?: { sub: Subscription; days: number };
+  newSubs: Subscription[];
+  ended: Subscription[];
+  currencies: number;
+  busiestMonth?: { month: string; sum: number };
+  perDay: number;
+}
+
+export function yearReview(state: AppState, today: string, year = today.slice(0, 4)): YearReview {
+  const from = `${year}-01-01`;
+  const to = `${year}-12-31` < today ? `${year}-12-31` : today;
+  const cs = state.subscriptions.flatMap((s) => chargesBetween(s, from, to, today));
+  const bySub = new Map<string, { sub: Subscription; sum: number }>();
+  const byMonth = new Map<string, number>();
+  const ccys = new Set<string>();
+  let total = 0;
+  for (const c of cs) {
+    const v = chargeValue(state, c);
+    total += v;
+    ccys.add(c.currency);
+    const r = bySub.get(c.sub.id) ?? { sub: c.sub, sum: 0 };
+    r.sum += v;
+    bySub.set(c.sub.id, r);
+    byMonth.set(c.date.slice(0, 7), (byMonth.get(c.date.slice(0, 7)) ?? 0) + v);
+  }
+  const live = state.subscriptions.filter((s) => s.cycle.unit !== 'lifetime' && ['active', 'ending', 'paused'].includes(effectiveStatus(s, today)));
+  const longest = live.map((s) => ({ sub: s, days: diffDays(s.start, today) })).sort((a, b) => b.days - a.days)[0];
+  const busiest = [...byMonth.entries()].sort((a, b) => b[1] - a[1])[0];
+  return {
+    year,
+    total,
+    charges: cs.length,
+    top: [...bySub.values()].sort((a, b) => b.sum - a.sum).slice(0, 5),
+    longest,
+    newSubs: state.subscriptions.filter((s) => s.start.startsWith(year)),
+    ended: state.subscriptions.filter((s) => s.end?.startsWith(year) && s.end <= today),
+    currencies: ccys.size,
+    busiestMonth: busiest && { month: busiest[0], sum: busiest[1] },
+    perDay: total / Math.max(1, diffDays(from, to) + 1),
+  };
+}

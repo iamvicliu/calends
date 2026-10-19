@@ -3,14 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "worker:dev": "wrangler dev",
-    "deploy": "npm run build && wrangler deploy",
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite",
+    "dev:worker": "wrangler dev --port 8787 --local",
+    "db:pull": "node scripts/pull.mjs",
     "db:migrate:local": "wrangler d1 migrations apply subscription-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply subscription-db --remote",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --experimental-strip-types --test shared/*.test.ts",
     "seed": "node scripts/seed.ts",
-    "test": "node --experimental-strip-types --test shared/*.test.ts"
+    "deploy": "npm run build && wrangler deploy",
+    "sync:domains": "node scripts/sync-domains.mjs"
   },
   "dependencies": {
     "preact": "^10.29.8"

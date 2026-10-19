@@ -86,6 +86,48 @@ export function cycleShort(c: Cycle): string {
   return c.every === 1 ? u : `${c.every}${u}`;
 }
 
+// ---------- 阶段（换区 / 换套餐 / 断更续订） ----------
+
+/** 把多阶段订阅展开成若干个单阶段的「虚拟订阅」，id 不变；无阶段时返回自身 */
+export function phaseSubs(s: Subscription): Subscription[] {
+  if (!s.phases?.length) return [s];
+  const ps = s.phases.slice().sort((a, b) => a.start.localeCompare(b.start));
+  return ps.map((p, i) => {
+    const last = i === ps.length - 1;
+    return {
+      ...s,
+      phases: undefined,
+      start: p.start,
+      end: p.end ?? (last ? s.end : ps[i + 1].start),
+      price: p.price,
+      currency: p.currency,
+      cycle: p.cycle,
+      methodId: p.methodId,
+      region: p.region,
+      priceHistory: p.priceHistory,
+      intro: p.intro,
+      payments: p.payments,
+      nextDue: p.nextDue,
+      trialEnd: i === 0 ? s.trialEnd : undefined,
+      status: last ? s.status : 'active',
+      pausedAt: last ? s.pausedAt : undefined,
+    };
+  });
+}
+
+/** day 当天所处的阶段；处在断更空档或尚未开始时返回 undefined（无阶段的订阅总是返回自身） */
+export function phaseAt(s: Subscription, day: string): Subscription | undefined {
+  const vs = phaseSubs(s);
+  if (vs.length === 1 && !s.phases?.length) return vs[0];
+  return vs.find((v) => v.start <= day && (!v.end || v.end > day));
+}
+
+/** 当前生效的阶段；没有生效的取最近的一个 */
+export function currentPhase(s: Subscription, day: string): Subscription {
+  const vs = phaseSubs(s);
+  return phaseAt(s, day) ?? vs.filter((v) => v.start <= day).pop() ?? vs[0];
+}
+
 // ---------- 订阅状态 ----------
 
 /** 订阅在 day 当天是否仍处于计费关系中（不考虑暂停） */
@@ -96,6 +138,19 @@ export function isLive(s: Subscription, day: string): boolean {
 }
 
 export function effectiveStatus(s: Subscription, today: string): 'active' | 'trial' | 'paused' | 'ending' | 'ended' | 'lifetime' {
+  if (s.phases?.length) {
+    const v = phaseAt(s, today);
+    if (v) {
+      const st = effectiveStatus(v, today);
+      // 当前阶段结束当天就有下一阶段接上（换区 / 换套餐），不算到期不续
+      const vs = phaseSubs(s);
+      const next = vs[vs.indexOf(vs.find((x) => x.start === v.start)!) + 1];
+      return st === 'ending' && next && v.end && next.start <= v.end ? 'active' : st;
+    }
+    const vs = phaseSubs(s);
+    if (vs.some((x) => x.start > today)) return vs[0].start > today ? 'active' : 'paused'; // 断更中，已安排续订
+    return effectiveStatus(vs[vs.length - 1], today);
+  }
   if (s.cycle.unit === 'lifetime') return 'lifetime';
   if (s.status === 'paused') return 'paused';
   if (!isLive(s, today)) return 'ended';
@@ -105,6 +160,7 @@ export function effectiveStatus(s: Subscription, today: string): 'active' | 'tri
 }
 
 export function priceAt(s: Subscription, day: string): number {
+  if (s.phases?.length) return priceAt(currentPhase(s, day), day);
   if (s.intro && day < s.intro.until) return s.intro.price;
   let p = s.price;
   const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
@@ -124,27 +180,51 @@ export interface Charge {
   projected: boolean;
 }
 
-/** [from, to] 区间内的扣款（含两端）。暂停中的订阅不产生未来扣款；试用期内的不计费。 */
-export function chargesBetween(s: Subscription, from: string, to: string, today: string): Charge[] {
+/** 按周期从 anchor 推算 [from, to] 内、晚于 after 的扣款 */
+function schedule(s: Subscription, anchor: string, from: string, to: string, today: string, after = ''): Charge[] {
   const out: Charge[] = [];
-  const firstPaid = s.status === 'trial' && s.trialEnd ? s.trialEnd : s.start;
-  if (s.cycle.unit === 'lifetime') {
-    if (s.start >= from && s.start <= to) out.push({ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today });
-    return out;
-  }
+  const firstPaid = s.status === 'trial' && s.trialEnd ? s.trialEnd : '';
   const stopAt = s.end && s.end < to ? s.end : to;
   const pausedFrom = s.status === 'paused' ? (s.pausedAt ?? today) : undefined;
-  // 估算起点 k，避免从 2015 年逐期迭代
-  let k = Math.max(0, Math.floor(diffDays(s.start, from) / cycleDays(s.cycle)) - 2);
+  // 估算起点 k，避免逐期迭代
+  let k = Math.max(0, Math.floor(diffDays(anchor, from) / cycleDays(s.cycle)) - 2);
   for (let guard = 0; guard < 5000; guard++, k++) {
-    const d = nthCharge(s.start, s.cycle, k);
+    const d = nthCharge(anchor, s.cycle, k);
     if (d > stopAt) break;
-    if (d < from || d < firstPaid) continue;
+    if (d < from || d < firstPaid || d <= after) continue;
     if (s.end && d >= s.end && d !== s.start) break; // 到期当天不再扣
     if (pausedFrom && d >= pausedFrom) break;
     out.push({ sub: s, date: d, amount: priceAt(s, d), currency: s.currency, projected: d > today });
   }
   return out;
+}
+
+/**
+ * [from, to] 区间内的扣款（含两端）。暂停中的订阅不产生未来扣款；试用期内的不计费。
+ * 有实际扣款记录（payments）时以记录为准，之后从 nextDue（缺省为最后一笔 + 一个周期）开始推算；
+ * 只有 nextDue 时，此前按开始日推算，此后从 nextDue 推算（用于扣款日漂移、提前续费等）。
+ */
+export function chargesBetween(s: Subscription, from: string, to: string, today: string): Charge[] {
+  if (s.phases?.length) {
+    return phaseSubs(s)
+      .flatMap((v) => chargesBetween(v, from, to, today))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+  const pays = (s.payments ?? []).slice().sort((a, b) => a.date.localeCompare(b.date));
+  if (pays.length) {
+    const out: Charge[] = pays.filter((p) => p.date >= from && p.date <= to).map((p) => ({ sub: s, date: p.date, amount: p.amount, currency: s.currency, projected: p.date > today }));
+    if (s.cycle.unit === 'lifetime') return out;
+    const last = pays[pays.length - 1].date;
+    return out.concat(schedule(s, s.nextDue ?? nthCharge(last, s.cycle, 1), from, to, today, last));
+  }
+  if (s.cycle.unit === 'lifetime') {
+    return s.start >= from && s.start <= to ? [{ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today }] : [];
+  }
+  if (s.nextDue) {
+    const before = schedule(s, s.start, from, to < s.nextDue ? to : addDays(s.nextDue, -1), today).filter((c) => diffDays(c.date, s.nextDue!) > cycleDays(s.cycle) / 2);
+    return before.concat(schedule(s, s.nextDue, from, to, today));
+  }
+  return schedule(s, s.start, from, to, today);
 }
 
 export function nextCharge(s: Subscription, today: string): string | undefined {
@@ -183,6 +263,7 @@ export function myShareFactor(s: Subscription): number {
 
 /** 每月折算（原币，全额） */
 export function monthlyGross(s: Subscription, day?: string): number {
+  if (s.phases?.length) return monthlyGross(day ? currentPhase(s, day) : phaseSubs(s).pop()!, day);
   if (s.cycle.unit === 'lifetime') return 0;
   const p = day ? priceAt(s, day) : s.price;
   return (p * 30.4375) / cycleDays(s.cycle);
@@ -208,7 +289,8 @@ export function totals(state: AppState, today: string): Totals {
       continue;
     }
     count++;
-    const m = convert(monthlyGross(s, today), s.currency, base, state.fx);
+    const v = currentPhase(s, today);
+    const m = convert(monthlyGross(v, today), v.currency, base, state.fx);
     if (!Number.isFinite(m)) continue;
     gross += m;
     mrr += m * myShareFactor(s);
@@ -235,7 +317,8 @@ export interface Runway {
 
 export function runwayFor(method: PaymentMethod, state: AppState, today: string, horizonMonths = 36): Runway | undefined {
   if (method.balance == null) return undefined;
-  const subs = state.subscriptions.filter((s) => s.methodId === method.id);
+  // 按阶段展开：换区前后可能用不同的支付方式
+  const subs = state.subscriptions.flatMap(phaseSubs).filter((s) => s.methodId === method.id);
   const asOf = method.balanceAsOf ?? today;
   const horizon = addMonths(today, horizonMonths);
   const charges = subs

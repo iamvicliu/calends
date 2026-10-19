@@ -16,4 +16,6 @@ export interface Env {
   MAIL_FROM: string;
   MAIL_FROM_NAME: string;
   OWNER_PASSCODE?: string;
+  /** 仅本地：.dev.vars 设为 1 且访问来自 localhost 时跳过登录 */
+  DEV_BYPASS_AUTH?: string;
 }

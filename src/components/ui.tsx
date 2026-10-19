@@ -46,6 +46,9 @@ const P: Record<string, JSX.Element> = {
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,
+  menu: <path d="M4 7h16M4 12h10M4 17h16" />,
+  compose: <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M18.4 3.6a2 2 0 0 1 2.8 2.8L12 15.6l-3.6.8.8-3.6z" />,
+  home: <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" />,
   x: <path d="M6 6l12 12M18 6 6 18" />,
   search: (
     <>
@@ -110,6 +113,18 @@ export function SubIcon({ sub, size = 40 }: { sub: Pick<Subscription, 'name' | '
   const [, force] = useState(0);
   const tint = catColor(sub.category);
   const style = { '--s': `${size}px`, '--tint': tint } as Record<string, string>;
+  // 域名统一使用一个图标，不用各自的站点图标
+  if (sub.category === '域名') {
+    return (
+      <span class="ico domain" style={style}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.2" />
+          <ellipse cx="12" cy="12" rx="3.6" ry="8.2" />
+          <path d="M4.2 9.2h15.6M4.2 14.8h15.6" />
+        </svg>
+      </span>
+    );
+  }
   const icon = sub.icon?.trim();
   if (icon && !/^https?:/.test(icon)) {
     return (
@@ -196,10 +211,16 @@ export function Seg<T extends string>({ value, options, onChange, small }: { val
 export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (
     <header class="toolbar">
+      <button class="sb-btn tb-lead" aria-label="打开侧边栏" onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
+        <Icon name="menu" />
+      </button>
       <div class="tb-title">
         <h1>{title}</h1>
         {sub && <div class="tb-sub">{sub}</div>}
       </div>
+      <button class="sb-btn tb-trail" aria-label="添加订阅" onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
+        <Icon name="compose" />
+      </button>
       <div class="tb-actions">{children}</div>
     </header>
   );

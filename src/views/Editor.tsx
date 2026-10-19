@@ -2,7 +2,10 @@ import { useMemo, useState } from 'preact/hooks';
 import { nthCharge, uid } from '../../shared/billing.ts';
 import { CURRENCIES, money } from '../../shared/format.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../shared/types.ts';
+import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { changePrice, syncLastPhase } from '../../shared/phases.ts';
+import { ChangePanel } from '../components/ChangePanel.tsx';
 import { api, deleteSub, run, saveSub } from '../store.ts';
 
 const CYCLES: Array<[string, string, Cycle]> = [
@@ -31,20 +34,23 @@ export function confirmDelete(msg: string): boolean {
 
 export function Editor({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
   const isNew = !state.subscriptions.some((s) => s.id === sub.id);
-  const [f, setF] = useState<Subscription>(structuredClone(sub));
-  const up = (p: Partial<Subscription>) => setF((x) => ({ ...x, ...p }));
+  const [f, setFRaw] = useState<Subscription>(structuredClone(sub));
+  // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
+  const [basePrice, setBasePrice] = useState(sub.price);
+  const setF = (next: Subscription) => {
+    setFRaw(next);
+    setBasePrice(next.price);
+  };
+  const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
   const cats = useMemo(() => [...new Set(state.subscriptions.map((s) => s.category))], [state]);
 
   const save = () =>
     run(
       async () => {
-        const out: Subscription = { ...f, name: f.name.trim() };
-        // 改价时自动记录价格历史，保证过往账单不被新价格覆盖
-        if (!isNew && sub.price !== out.price) {
-          const hist = out.priceHistory?.length ? [...out.priceHistory] : [{ from: sub.start, amount: sub.price }];
-          hist.push({ from: today, amount: out.price });
-          out.priceHistory = hist;
-        }
+        let out: Subscription = { ...f, name: f.name.trim() };
+        // 直接改了价格框：视为今天起调价，过往账单保持原价
+        if (!isNew && basePrice !== out.price) out = changePrice(syncLastPhase({ ...out, price: basePrice }), today, out.price);
+        else out = syncLastPhase(out);
         if (out.status === 'cancelled' && !out.end) out.end = today;
         if (out.status === 'paused' && !out.pausedAt) out.pausedAt = today;
         if (out.status !== 'paused') delete out.pausedAt;
@@ -85,6 +91,11 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       }
     >
       <Form f={f} up={up} state={state} cats={cats} today={today} />
+      {!isNew && (
+        <div style={{ marginTop: 18 }}>
+          <ChangePanel f={f} setF={setF} state={state} today={today} />
+        </div>
+      )}
     </Sheet>
   );
 }
@@ -129,6 +140,11 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
             <Cell label="地区">
               <input value={f.region ?? ''} placeholder="如 TR" onInput={(e) => up({ region: val(e).toUpperCase() || undefined })} />
             </Cell>
+            {f.category === '域名' && (
+              <Cell label="公开页显示域名" sub={f.showOnPublic ? '访客能看到完整域名' : '公开页打码显示'}>
+                <Toggle checked={!!f.showOnPublic} onChange={(v) => up({ showOnPublic: v || undefined })} />
+              </Cell>
+            )}
           </Group>
 
           <Group title="首期优惠" foot={f.intro ? '截止日前按优惠价计费，之后恢复原价；提醒邮件会注明恢复原价。' : '如首年半价、首月 ¥1 等'}>
@@ -141,7 +157,7 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
                   <input class="num" inputMode="decimal" value={f.intro.price} onInput={(e) => up({ intro: { ...f.intro!, price: Number(val(e)) || 0 } })} />
                 </Cell>
                 <Cell label="优惠截止">
-                  <input type="date" value={f.intro.until} onInput={(e) => up({ intro: { ...f.intro!, until: val(e) || today } })} />
+                  <DatePicker value={f.intro.until} onChange={(v) => up({ intro: { ...f.intro!, until: v ?? today } })} />
                 </Cell>
               </>
             )}
@@ -207,7 +223,7 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
               </Cell>
             )}
             <Cell label={f.cycle.unit === 'lifetime' ? '购买日期' : '开始日期'}>
-              <input type="date" value={f.start} onInput={(e) => up({ start: val(e) || today })} />
+              <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
             </Cell>
           </Group>
 
@@ -217,11 +233,11 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
             </div>
             {f.status === 'trial' && (
               <Cell label="试用截止">
-                <input type="date" value={f.trialEnd ?? ''} onInput={(e) => up({ trialEnd: val(e) || undefined })} />
+                <DatePicker value={f.trialEnd} clearable onChange={(v) => up({ trialEnd: v })} />
               </Cell>
             )}
             <Cell label="到期不续" sub="之后不再扣款">
-              <input type="date" value={f.end ?? ''} onInput={(e) => up({ end: val(e) || undefined })} />
+              <DatePicker value={f.end} clearable placeholder="不设置" onChange={(v) => up({ end: v })} />
             </Cell>
           </Group>
 
@@ -266,7 +282,9 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
                   <div key={m.id} class="member-edit">
                     <input value={m.name} placeholder={`成员 ${i + 1}`} onInput={(e) => setMember(i, { name: val(e) })} />
                     <input class="num" inputMode="decimal" value={m.share} title="每期份额" onInput={(e) => setMember(i, { share: Number(val(e)) || 0 })} />
-                    <input class="wide" type="date" value={m.paidUntil ?? ''} title="已付至" onInput={(e) => setMember(i, { paidUntil: val(e) || undefined })} />
+                    <span class="wide">
+                      <DatePicker value={m.paidUntil} clearable placeholder="已付至" onChange={(v) => setMember(i, { paidUntil: v })} />
+                    </span>
                     <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label="移除" onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}>
                       <Icon name="x" />
                     </button>

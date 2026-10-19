@@ -1,0 +1,181 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { FALLBACK_FX } from './billing.ts';
+import { cancelSavings, cashVsAccrual, events, movement, mrrOn, prepaidValue, topUpPlan } from './metrics.ts';
+import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
+
+const sub = (o: Partial<Subscription>): Subscription => ({
+  id: Math.random().toString(36).slice(2),
+  name: 'X',
+  category: '工具',
+  tags: [],
+  price: 120,
+  currency: 'USD',
+  cycle: { unit: 'year', every: 1 },
+  start: '2026-01-01',
+  status: 'active',
+  ...o,
+});
+const state = (subs: Subscription[], extra: Partial<AppState> = {}): AppState => ({
+  subscriptions: subs,
+  methods: [],
+  settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' },
+  fx: FALLBACK_FX,
+  ...extra,
+});
+
+test('年付的现金是尖峰，权责是平的', () => {
+  const st = state([sub({})]);
+  const rows = cashVsAccrual(st, '2026-06-15', 5, 0);
+  const jan = rows.find((r) => r.month === '2026-01')!;
+  const mar = rows.find((r) => r.month === '2026-03')!;
+  assert.equal(jan.cash, 120);
+  assert.equal(mar.cash, 0);
+  assert.ok(Math.abs(mar.accrual - (120 * 31) / 365) < 0.01);
+});
+
+test('MRR 变动：新增与退订', () => {
+  const a = sub({ price: 10, cycle: { unit: 'month', every: 1 }, start: '2026-03-10' });
+  const b = sub({ price: 20, cycle: { unit: 'month', every: 1 }, start: '2025-01-01', end: '2026-03-20' });
+  const st = state([a, b]);
+  const mv = movement(st, '2026-02-28', '2026-03-31');
+  assert.ok(Math.abs(mv.added - 10) < 1e-6);
+  assert.ok(Math.abs(mv.churned - 20) < 1e-6);
+  assert.ok(Math.abs(mrrOn(st, '2026-03-31') - 10) < 1e-6);
+});
+
+test('涨价进入变更日志', () => {
+  const s = sub({ price: 15, cycle: { unit: 'month', every: 1 }, priceHistory: [{ from: '2026-01-01', amount: 10 }, { from: '2026-05-01', amount: 15 }] });
+  const ev = events(state([s]), '2026-06-01');
+  const p = ev.find((e) => e.kind === 'price')!;
+  assert.ok(Math.abs(p.delta - 5) < 1e-6);
+});
+
+test('预付余值与退订省钱', () => {
+  const y = sub({});
+  const c = sub({ price: 10, cycle: { unit: 'month', every: 1 }, start: '2025-01-01', end: '2026-01-01' });
+  const st = state([y, c]);
+  const pv = prepaidValue(st, '2026-07-02');
+  assert.ok(Math.abs(pv.total - (120 * 182) / 365) < 0.5);
+  const sv = cancelSavings(st, '2026-07-01');
+  assert.ok(Math.abs(sv.total - (10 * 181) / 30.4375) < 0.01);
+});
+
+test('充值计划凑面额', () => {
+  const s = sub({ price: 100, currency: 'TRY', cycle: { unit: 'month', every: 1 }, start: '2026-01-05', methodId: 'tr' });
+  const st = state([s], { methods: [{ id: 'tr', name: 'TR', kind: 'appstore', currency: 'TRY', balance: 120, balanceAsOf: '2026-06-01' }] });
+  const [p] = topUpPlan(st, '2026-06-01', 6);
+  assert.equal(p.need, 480);
+  assert.deepEqual(p.cards, [250, 100, 100, 100]);
+});
+
+test('历史扣款按当天汇率，预测按当前汇率，缺失币种取最近日期', async () => {
+  const { chargeValue } = await import('./fx.ts');
+  const st = state([], {
+    settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+    fx: { base: 'USD', fetchedAt: '2026-10-19', rates: { USD: 1, CNY: 7, TRY: 40 } },
+    fxHistory: { '2021-07-26': { USD: 1, CNY: 6.48, TRY: 8.57 }, '2024-03-06': { USD: 1, CNY: 7.2, TRY: 31.7 } },
+  });
+  const past = chargeValue(st, { amount: 85.7, currency: 'TRY', date: '2021-07-26', projected: false });
+  assert.ok(Math.abs(past - 64.8) < 0.01); // 85.7 / 8.57 * 6.48
+  const between = chargeValue(st, { amount: 31.7, currency: 'TRY', date: '2025-01-01', projected: false });
+  assert.ok(Math.abs(between - 7.2) < 1e-9); // 取 2024-03-06
+  const future = chargeValue(st, { amount: 40, currency: 'TRY', date: '2027-01-01', projected: true });
+  assert.ok(Math.abs(future - 7) < 1e-9);
+});
+
+test('汇率影响单独成一项，各项加总等于期末', () => {
+  const s = sub({ price: 400, currency: 'TRY', cycle: { unit: 'month', every: 1 }, start: '2025-01-01' });
+  const st = state([s], {
+    settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' },
+    fx: { base: 'USD', fetchedAt: '', rates: { USD: 1, TRY: 40 } },
+    fxHistory: { '2026-02-28': { USD: 1, TRY: 40 }, '2026-03-31': { USD: 1, TRY: 50 } },
+  });
+  const mv = movement(st, '2026-02-28', '2026-03-31', '2026-03-31');
+  assert.ok(Math.abs(mv.from - 10) < 1e-9);
+  assert.ok(Math.abs(mv.fx + 2) < 1e-9);
+  assert.ok(Math.abs(mv.from + mv.fx + mv.added + mv.expansion - mv.contraction - mv.churned - mv.to) < 1e-9);
+});
+
+test('换区：两个阶段分别计费，变更日志合并为一次换区', async () => {
+  const { chargesBetween, effectiveStatus } = await import('./billing.ts');
+  const s = sub({
+    name: 'iCloud+',
+    price: 2.99,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2021-08-06',
+    phases: [
+      { start: '2021-08-06', price: 249, currency: 'TRY', cycle: { unit: 'month', every: 1 }, region: 'TR', priceHistory: [{ from: '2021-08-06', amount: 39.99 }, { from: '2024-03-01', amount: 249 }] },
+      { start: '2026-10-25', price: 2.99, currency: 'USD', cycle: { unit: 'month', every: 1 }, region: 'US' },
+    ],
+  });
+  const st = state([s], { fx: { base: 'USD', fetchedAt: '', rates: { USD: 1, TRY: 40 } } });
+  const cs = chargesBetween(s, '2026-09-01', '2026-12-31', '2026-10-19');
+  assert.deepEqual(cs.map((c) => [c.date, c.amount, c.currency]), [['2026-09-06', 249, 'TRY'], ['2026-10-06', 249, 'TRY'], ['2026-10-25', 2.99, 'USD'], ['2026-11-25', 2.99, 'USD'], ['2026-12-25', 2.99, 'USD']]);
+  const ev = events(st, '2026-11-01');
+  const sw = ev.find((e) => e.kind === 'switch')!;
+  assert.equal(sw.date, '2026-10-25');
+  assert.ok(Math.abs(sw.delta - (2.99 - 249 / 40)) < 1e-6);
+  assert.equal(ev.filter((e) => e.kind === 'price').length, 1);
+  assert.equal(effectiveStatus(s, '2026-11-01'), 'active');
+});
+
+test('断更后续订', async () => {
+  const { effectiveStatus } = await import('./billing.ts');
+  const s = sub({
+    price: 10, cycle: { unit: 'month', every: 1 }, start: '2024-01-01',
+    phases: [
+      { start: '2024-01-01', end: '2024-06-01', price: 10, currency: 'USD', cycle: { unit: 'month', every: 1 } },
+      { start: '2025-03-01', price: 12, currency: 'USD', cycle: { unit: 'month', every: 1 } },
+    ],
+  });
+  const st = state([s]);
+  assert.equal(effectiveStatus(s, '2024-10-01'), 'paused'); // 断更中，之后有续订
+  assert.equal(mrrOn(st, '2024-10-01'), 0);
+  assert.ok(Math.abs(mrrOn(st, '2025-04-01') - 12) < 1e-9);
+  const kinds = events(st, '2026-01-01').map((e) => e.kind);
+  assert.deepEqual(kinds.sort(), ['end', 'resume', 'start']);
+});
+
+test('历程操作：调价 → 换区 → 撤回', async () => {
+  const { changePrice, switchPlan, removePhase } = await import('./phases.ts');
+  const { chargesBetween } = await import('./billing.ts');
+  let s = sub({ price: 39.99, currency: 'TRY', cycle: { unit: 'month', every: 1 }, start: '2021-08-06', region: 'TR' });
+  s = changePrice(s, '2024-03-06', 249);
+  assert.equal(s.price, 249);
+  assert.equal(chargesBetween(s, '2024-02-01', '2024-03-31', '2026-10-19').map((c) => c.amount).join(), '39.99,249');
+  s = switchPlan(s, '2026-10-25', { price: 2.99, currency: 'USD', cycle: { unit: 'month', every: 1 }, region: 'US' });
+  assert.equal(s.currency, 'USD');
+  assert.equal(s.phases!.length, 2);
+  assert.equal(s.phases![0].priceHistory!.length, 2);
+  const back = removePhase(s, 1);
+  assert.equal(back.phases, undefined);
+  assert.equal(back.currency, 'TRY');
+  assert.equal(back.end, undefined);
+});
+
+test('公开数据不包含任何真实域名', async () => {
+  const { maskForPublic } = await import('./mask.ts');
+  const s = sub({ id: 'cf-example-com', name: 'example.com', category: '域名', url: 'https://example.com', icon: 'https://x/example.com.png', notes: '到期 2027' });
+  const out = JSON.stringify(maskForPublic(state([s])));
+  assert.ok(!out.includes('example'), out);
+});
+
+test('换区前的阶段不显示为到期不续', async () => {
+  const { effectiveStatus } = await import('./billing.ts');
+  const s = sub({ price: 9.99, cycle: { unit: 'month', every: 1 }, start: '2021-08-06', phases: [
+    { start: '2021-08-06', price: 249, currency: 'TRY', cycle: { unit: 'month', every: 1 } },
+    { start: '2026-10-26', price: 9.99, currency: 'USD', cycle: { unit: 'month', every: 1 } },
+  ] });
+  assert.equal(effectiveStatus(s, '2026-10-19'), 'active');
+});
+
+test('已上线的域名可在公开页显示，未上线的打码', async () => {
+  const { maskForPublic } = await import('./mask.ts');
+  const live = sub({ id: 'cf-doc2md-org', name: 'doc2md.org', category: '域名', url: 'https://doc2md.org', showOnPublic: true });
+  const hidden = sub({ id: 'cf-larkcli-app', name: 'larkcli.app', category: '域名', url: 'https://larkcli.app' });
+  const out = maskForPublic(state([live, hidden]));
+  assert.equal(out.subscriptions[0].name, 'doc2md.org');
+  assert.ok(!JSON.stringify(out.subscriptions[1]).includes('larkcli'));
+});
