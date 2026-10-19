@@ -902,33 +902,68 @@ select.btn { appearance: none; -webkit-appearance: none; padding-right: 28px; ba
 @media (max-width: 860px) { .reopen { display: none; } .app.collapsed .toolbar { padding-left: 12px; } .app.collapsed { --side-w: 0px; } }
 
 /* ================================================================
-   公开页
+   公开页：单栏、留白、排版即设计（参考 paco.me / emilkowal.ski 的克制）
    ================================================================ */
-.pub { max-width: 920px; margin: 0 auto; padding: calc(20px + var(--safe-t)) 24px 60px; }
-.pub-top { display: flex; justify-content: space-between; align-items: center; padding: 6px 0 40px; }
-.pub-hero .hero-num { font-size: 72px; margin: 12px 0 14px; }
-.pub-lede { font-size: 16px; line-height: 1.7; color: var(--label-2); max-width: 620px; margin: 0; }
-.pub-lede b { color: var(--label); font-weight: 600; }
-.pub-sec { margin-top: 48px; }
-.pub-sec h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 14px; }
-.pub-list { border-top: 1px solid var(--line); }
-.pub-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 2px; border-bottom: 1px solid var(--line); }
-.pub-name b { display: block; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pub-name .pn-sub { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--label-2); margin-top: 2px; white-space: nowrap; overflow: hidden; }
-.pub-name i { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.pub-price { text-align: right; }
-.pub-price b { font-size: 15px; }
-.pub-price small { font-size: 12px; color: var(--label-2); font-weight: 500; }
-.pub-price .pp-sub { display: block; font-size: 12px; color: var(--label-3); margin-top: 2px; white-space: nowrap; }
-.pub-year { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 6px 0; font-size: 13px; }
-.pub-year b { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 70px; text-align: right; }
-.pub-year .hb-track { height: 12px; }
-.pub-mini { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 14px; }
-.pub-mini .pm-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pub-mini small { font-size: 12.5px; color: var(--label-2); }
-.pub-foot { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--label-3); }
-.pub-foot span { display: inline-flex; align-items: center; gap: 6px; }
-@media (max-width: 680px) { .pub { padding: 14px 16px 40px; } .pub-hero .hero-num { font-size: 52px; } .pub-top { padding-bottom: 24px; } }
+.pp { max-width: 640px; margin: 0 auto; padding: calc(96px + var(--safe-t)) 24px 80px; font-size: 15px; line-height: 1.7; color: var(--label); }
+.pp-muted { color: var(--label-2); }
+.pp-head { display: flex; align-items: center; gap: 12px; margin-bottom: 72px; }
+.pp-head img { width: 36px; height: 36px; border-radius: 50%; }
+.pp-head b { display: block; font-weight: 500; line-height: 1.3; }
+.pp-head span { display: block; color: var(--label-2); font-size: 14px; line-height: 1.3; }
+.pp-label { font-size: 14px; color: var(--label-2); }
+.pp-big { font-family: var(--font-num); font-size: 56px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.1; margin: 6px 0 22px; font-variant-numeric: tabular-nums; }
+.pp-lede { margin: 0; color: var(--label-2); }
+.pp-lede b { color: var(--label); font-weight: 500; font-variant-numeric: tabular-nums; }
+.pp-sec { margin-top: 72px; }
+.pp-sec h2 { font-size: 15px; font-weight: 500; margin: 0 0 18px; }
+.pp-note { margin: 12px 0 0; font-size: 13px; color: var(--label-3); }
+
+.pp-bar { display: flex; gap: 2px; height: 10px; border-radius: 5px; overflow: hidden; }
+.pp-bar i { display: block; min-width: 3px; }
+.pp-legend { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 32px; }
+.pp-legend li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.pp-legend i { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.pp-legend span { flex: 1; }
+.pp-legend em { font-style: normal; font-variant-numeric: tabular-nums; }
+.pp-legend small { width: 36px; text-align: right; color: var(--label-3); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+.pp-cols { display: flex; gap: 6px; height: 120px; align-items: flex-end; }
+.pp-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; }
+.pp-col i { width: 100%; max-width: 18px; border-radius: 3px; background: color-mix(in srgb, var(--label) 22%, var(--bg)); }
+.pp-col.cur i { background: var(--label); }
+.pp-col.next i { background: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--label) 22%, var(--bg)); }
+.pp-col span { font-size: 11px; color: var(--label-3); font-variant-numeric: tabular-nums; line-height: 1; }
+.pp-col.cur span { color: var(--label); }
+
+.pp-group + .pp-group { margin-top: 28px; }
+.pp-group h3 { font-size: 13px; font-weight: 400; color: var(--label-3); margin: 0 0 6px; }
+.pp-row { display: flex; align-items: center; gap: 12px; padding: 7px 0; font-size: 15px; }
+.pp-row .ico { box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1); }
+.pp-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-name small { margin-left: 8px; font-size: 11.5px; color: var(--label-3); letter-spacing: 0.04em; }
+.pp-mid { color: var(--label-3); font-size: 13.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pp-right { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 120px; }
+.pp-conv { width: 104px; text-align: right; color: var(--label-3); font-size: 13.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pp-mid { width: 96px; text-align: right; }
+.pp-right small { color: var(--label-3); font-size: 13px; margin-left: 1px; }
+.pp-right em { display: block; font-style: normal; font-size: 12.5px; color: var(--label-3); line-height: 1.3; }
+.pp-right.up { color: var(--red); }
+.pp-right.down { color: var(--green); }
+.pp-fx .pp-name { flex: 0 0 48px; }
+.pp-fx .pp-mid { flex: 1; }
+.pp-foot { margin-top: 96px; display: flex; justify-content: space-between; gap: 24px; font-size: 13px; color: var(--label-3); }
+.pp-foot a { color: var(--label-2); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; flex-shrink: 0; }
+@media (max-width: 560px) {
+  .pp { padding: calc(56px + var(--safe-t)) 20px 56px; }
+  .pp-head { margin-bottom: 48px; }
+  .pp-big { font-size: 44px; }
+  .pp-sec { margin-top: 56px; }
+  .pp-legend { grid-template-columns: 1fr; }
+  .pp-mid, .pp-conv { display: none; }
+  .pp-fx .pp-mid { display: inline; font-size: 12.5px; }
+  .pp-right { min-width: 0; }
+  .pp-foot { flex-direction: column; gap: 8px; }
+}
 
 /* ================================================================
    概览 v5：一张主图 + 即将扣款 + 钱包 + 三条洞察
