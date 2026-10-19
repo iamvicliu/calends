@@ -52,8 +52,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   if (path === '/api/state' && method === 'GET') {
     const state = await loadState(env);
+    // 后台数据只给登录用户；访客的公开数据走 /api/public
     if (authed) return json(state);
-    if (state.settings.publicView) return json(maskForPublic(state));
     return bad('unauthorized', 401);
   }
   if (!authed) return bad('unauthorized', 401);
