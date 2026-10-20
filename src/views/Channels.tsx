@@ -16,24 +16,25 @@ interface Field {
 }
 
 /** 每种渠道要填什么；logo 是白色标志，放在品牌色底上（mark 是品牌字标，不翻译）。文案在渲染时取 */
-export const KINDS = (): Record<ChannelKind, { name: string; color: string; logo?: string; mark?: string; fields: Field[]; help?: string }> => ({
+export const KINDS = (): Record<ChannelKind, { name: string; color: string; logo?: string; mark?: string; tile?: boolean; fields: Field[]; help?: string }> => ({
   email: { name: t('settings.channels.kind.email.name'), color: '#ea4335', logo: '/channels/gmail.svg', fields: [{ key: 'to', label: t('settings.channels.field.to'), placeholder: 'you@example.com' }], help: t('settings.channels.kind.email.help') },
   telegram: { name: 'Telegram', color: '#26a5e4', logo: '/channels/telegram.svg', fields: [{ key: 'token', label: 'Bot Token', placeholder: '123456:ABC…', secret: true }, { key: 'chatId', label: 'Chat ID', placeholder: t('settings.channels.kind.telegram.chatIdPlaceholder') }], help: t('settings.channels.kind.telegram.help') },
-  lark: { name: t('settings.channels.kind.lark.name'), color: '#3370ff', mark: '飞', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://open.feishu.cn/open-apis/bot/v2/hook/…' }, { key: 'secret', label: t('settings.channels.kind.lark.secret'), placeholder: t('settings.channels.kind.lark.secretPlaceholder'), secret: true, optional: true }], help: t('settings.channels.kind.lark.help') },
-  dingtalk: { name: t('settings.channels.kind.dingtalk.name'), color: '#1677ff', mark: '钉', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://oapi.dingtalk.com/robot/send?access_token=…' }, { key: 'secret', label: t('settings.channels.kind.dingtalk.secret'), placeholder: t('settings.channels.kind.dingtalk.secretPlaceholder'), secret: true, optional: true }], help: t('settings.channels.kind.dingtalk.help') },
+  lark: { name: t('settings.channels.kind.lark.name'), color: '#3370ff', logo: '/channels/lark.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://open.feishu.cn/open-apis/bot/v2/hook/…' }, { key: 'secret', label: t('settings.channels.kind.lark.secret'), placeholder: t('settings.channels.kind.lark.secretPlaceholder'), secret: true, optional: true }], help: t('settings.channels.kind.lark.help') },
+  dingtalk: { name: t('settings.channels.kind.dingtalk.name'), color: '#1677ff', logo: '/channels/dingtalk.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://oapi.dingtalk.com/robot/send?access_token=…' }, { key: 'secret', label: t('settings.channels.kind.dingtalk.secret'), placeholder: t('settings.channels.kind.dingtalk.secretPlaceholder'), secret: true, optional: true }], help: t('settings.channels.kind.dingtalk.help') },
   wecom: { name: t('settings.channels.kind.wecom.name'), color: '#07c160', logo: '/channels/wechat.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=…' }], help: t('settings.channels.kind.wecom.help') },
-  bark: { name: 'Bark', color: '#f04d4d', mark: 'B', fields: [{ key: 'key', label: 'Device Key', placeholder: t('settings.channels.kind.bark.keyPlaceholder'), secret: true }, { key: 'server', label: t('settings.channels.field.server'), placeholder: 'https://api.day.app', optional: true }], help: t('settings.channels.kind.bark.help') },
+  bark: { name: 'Bark', color: '#f04d4d', logo: '/channels/bark.png', tile: true, fields: [{ key: 'key', label: 'Device Key', placeholder: t('settings.channels.kind.bark.keyPlaceholder'), secret: true }, { key: 'server', label: t('settings.channels.field.server'), placeholder: 'https://api.day.app', optional: true }], help: t('settings.channels.kind.bark.help') },
   ntfy: { name: 'ntfy', color: '#317f6f', logo: '/channels/ntfy.svg', fields: [{ key: 'topic', label: 'Topic', placeholder: t('settings.channels.kind.ntfy.topicPlaceholder') }, { key: 'server', label: t('settings.channels.field.server'), placeholder: 'https://ntfy.sh', optional: true }, { key: 'token', label: t('settings.channels.field.token'), secret: true, optional: true }], help: t('settings.channels.kind.ntfy.help') },
-  serverchan: { name: t('settings.channels.kind.serverchan.name'), color: '#4e5bf2', mark: '酱', fields: [{ key: 'key', label: 'SendKey', placeholder: t('settings.channels.kind.serverchan.keyPlaceholder'), secret: true }], help: t('settings.channels.kind.serverchan.help') },
+  serverchan: { name: t('settings.channels.kind.serverchan.name'), color: '#1f4e79', logo: '/channels/serverchan.png', tile: true, fields: [{ key: 'key', label: 'SendKey', placeholder: t('settings.channels.kind.serverchan.keyPlaceholder'), secret: true }], help: t('settings.channels.kind.serverchan.help') },
   discord: { name: 'Discord', color: '#5865f2', logo: '/channels/discord.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://discord.com/api/webhooks/…' }], help: t('settings.channels.kind.discord.help') },
   slack: { name: 'Slack', color: '#4a154b', logo: '/channels/slack.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://hooks.slack.com/services/…' }], help: 'Slack App → Incoming Webhooks' },
-  webhook: { name: t('settings.channels.kind.webhook.name'), color: '#3a3f47', mark: '{}', fields: [{ key: 'url', label: 'URL', placeholder: 'https://…' }, { key: 'header', label: t('settings.channels.kind.webhook.header'), placeholder: 'Authorization: Bearer …', secret: true, optional: true }], help: t('settings.channels.kind.webhook.help') },
+  webhook: { name: t('settings.channels.kind.webhook.name'), color: '#3a3f47', logo: '/channels/webhook.svg', fields: [{ key: 'url', label: 'URL', placeholder: 'https://…' }, { key: 'header', label: t('settings.channels.kind.webhook.header'), placeholder: 'Authorization: Bearer …', secret: true, optional: true }], help: t('settings.channels.kind.webhook.help') },
 });
 
 export function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: number }) {
   const k = KINDS()[kind];
   return (
-    <span class="ch-mark" style={{ background: k.color, width: size, height: size }}>
+    // tile：官方 App 图标本身就是完整的方块，铺满不留底色
+    <span class={`ch-mark ${k.tile ? 'tile' : ''}`} style={{ background: k.color, width: size, height: size }}>
       {k.logo ? <img src={k.logo} alt="" /> : <b>{k.mark}</b>}
     </span>
   );

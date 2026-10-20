@@ -1709,6 +1709,8 @@ button.seat:disabled { cursor: default; }
 .ch-mark { display: inline-grid; place-items: center; flex-shrink: 0; border-radius: 28%; color: #fff; }
 .ch-mark img { width: 58%; height: 58%; }
 .ch-mark b { font-size: 12px; font-weight: 700; }
+.ch-mark.tile { overflow: hidden; }
+.ch-mark.tile img { width: 100%; height: 100%; object-fit: cover; }
 .ch-row { gap: 10px; }
 .ch-main { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ch-main .cell-l { max-width: none; }
