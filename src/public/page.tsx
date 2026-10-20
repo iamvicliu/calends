@@ -1,0 +1,601 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, MotionConfig } from 'motion/react';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
+import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../shared/billing.ts';
+import { cnDate, money, symbol } from '../../shared/format.ts';
+import { chargeValue, toBaseAt } from '../../shared/fx.ts';
+import { cancelSavings, contributionOn, mrrSeries } from '../../shared/metrics.ts';
+import type { AppState, Subscription } from '../../shared/types.ts';
+import { allCharges, periodRange } from '../derive.ts';
+import { THEME_LABEL, ThemeIcon, useThemeMode } from '../theme.tsx';
+import { AppIcon } from '@/public/components/app-icon';
+import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
+import { Num } from '@/public/components/number';
+import { Badge } from '@/public/components/ui/badge';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/public/components/ui/card';
+import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/public/components/ui/chart';
+import { Separator } from '@/public/components/ui/separator';
+import { Skeleton } from '@/public/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/public/components/ui/tabs';
+import { TooltipProvider } from '@/public/components/ui/tooltip';
+import { cn } from '@/public/lib/utils';
+
+type Ccy = 'CNY' | 'USD';
+
+const pref = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+const save = (key: string, v: string) => {
+  try {
+    localStorage.setItem(key, v);
+  } catch {
+    /* 隐私模式下忽略 */
+  }
+};
+
+/** 公开页去掉名字里的国旗 emoji，地区另有标签 */
+const clean = (name: string) => name.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, ' ').replace(/\s+/g, ' ').trim();
+
+/** 标题随浏览器语言：中文「小哲的订阅」，其他语言用英文 */
+const TITLE = /^zh\b/i.test(navigator.language) ? '小哲的订阅' : "Ethan's Subscriptions";
+document.title = TITLE;
+
+/** 卡片留白：手机 16px，桌面 24px */
+const roomy = 'sm:[--card-spacing:--spacing(6)]';
+
+/** 对外公开的只读账本：数据已在服务端脱敏 */
+export function PublicPage() {
+  const [state, setState] = useState<AppState | null>(null);
+  const [err, setErr] = useState<string>();
+  useEffect(() => {
+    fetch('/api/public')
+      .then(async (r) => {
+        const body = (await r.json()) as AppState & { error?: string };
+        if (!r.ok) throw new Error(body.error ?? '加载失败');
+        setState(body);
+      })
+      .catch((e: Error) => setErr(e.message));
+  }, []);
+  return (
+    <TooltipProvider delayDuration={80}>
+      <MotionConfig reducedMotion="user" transition={{ type: 'spring', bounce: 0, duration: 0.5 }}>
+        {err ? (
+          <Shell>
+            <p className="py-24 text-center text-sm text-muted-foreground">{err}</p>
+          </Shell>
+        ) : state ? (
+          <Ledger state={state} />
+        ) : (
+          <Shell>
+            <Skeleton className="h-[560px] rounded-xl" />
+          </Shell>
+        )}
+      </MotionConfig>
+    </TooltipProvider>
+  );
+}
+
+function Shell({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-12 sm:px-6 sm:pt-10">
+      <header className="mb-5 flex items-center gap-3 sm:mb-6">
+        <img src="/icons/avatar.png" alt="" className="size-9 rounded-full ring-1 ring-foreground/10" />
+        <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{TITLE}</h1>
+        {right}
+      </header>
+      {children}
+    </div>
+  );
+}
+
+/** 卡片依次浮现 */
+const Reveal = ({ i, className, children }: { i: number; className?: string; children: React.ReactNode }) => (
+  <motion.div className={cn('min-w-0', className)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
+    {children}
+  </motion.div>
+);
+
+function ThemeButton() {
+  const [mode, cycle] = useThemeMode();
+  return (
+    <button
+      type="button"
+      title={`主题：${THEME_LABEL[mode]}（点击切换）`}
+      aria-label={`主题：${THEME_LABEL[mode]}，点击切换`}
+      onClick={cycle}
+      className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
+    >
+      <ThemeIcon mode={mode} size={16} />
+    </button>
+  );
+}
+
+function Ledger({ state }: { state: AppState }) {
+  const [ccy, setCcy] = useState<Ccy>(() => (pref('ledger:public-ccy') === 'USD' ? 'USD' : 'CNY'));
+  const today = todayIn(state.settings.timezone);
+  const base = state.settings.baseCurrency;
+  const d = useMemo(() => derive(state, today), [state, today]);
+
+  // 当前值按今天汇率换算；历史扣款按扣款当天汇率单独累计
+  const k = (ccy as string) === base ? 1 : toBaseAt(state, 1, base, undefined, ccy);
+  const sym = symbol(ccy);
+  // 折算金额取整；不足 10 的保留分，免得出现 ¥0
+  const fmt = (v: number) => money(v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 });
+  const diff = (d.mrr - d.yearAgoMrr) * k;
+  // 时间线按需加载：拖到哪段算哪段，按日分组
+  const loadTimeline = useCallback(
+    (from: string, to: string) => {
+      const map = new Map<string, TimelineGroup>();
+      for (const c of allCharges(state, from, to, today)) {
+        const g = map.get(c.date) ?? { date: c.date, items: [] };
+        const v = chargeValue(state, c) * k;
+        g.items.push({ key: `${c.sub.id}-${c.date}`, icon: <AppIcon sub={c.sub} className="rounded-[8px] bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${money(c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${fmt(v)}` : ''}` });
+        map.set(c.date, g);
+      }
+      return [...map.values()];
+    },
+    [state, today, ccy, k],
+  );
+
+  return (
+    <Shell
+      right={
+        <div className="flex items-center gap-1.5">
+          <Tabs
+            value={ccy}
+            onValueChange={(v: string) => {
+              setCcy(v as Ccy);
+              save('ledger:public-ccy', v);
+            }}
+          >
+            <TabsList aria-label="显示币种">
+              <TabsTrigger value="CNY" className="px-2.5 text-xs">
+                ¥ CNY
+              </TabsTrigger>
+              <TabsTrigger value="USD" className="px-2.5 text-xs">
+                $ USD
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <ThemeButton />
+        </div>
+      }
+    >
+      <div className="grid grid-cols-1 gap-4">
+        {/* 主卡：月支出、未来 30 天、每月扣款 */}
+        <Reveal i={0}>
+          <Card className={cn(roomy, 'h-full')}>
+            <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <div className="text-sm text-muted-foreground">每月订阅支出</div>
+                <Num value={d.mrr * k} prefix={sym} className="mt-1 text-5xl font-semibold tracking-tight tnum sm:text-6xl" />
+                <div className="mt-2 text-[13px] text-muted-foreground tnum">
+                  {Math.abs(diff) < 1 ? '与去年同月持平' : `比去年同月${diff > 0 ? '多' : '少'} ${fmt(Math.abs(diff))}`}
+                </div>
+              </div>
+              <dl className="grid grid-cols-3 gap-6 sm:gap-10">
+                <Stat label="一年约" value={<Num value={d.mrr * 12 * k} prefix={sym} />} />
+                <Stat label="在付订阅" value={<Num value={d.live.length} />} />
+                <Stat label={`累计已付 · ${d.first.slice(0, 4)} 起`} value={<Num value={ccy === 'USD' ? d.paidUsd : d.paidBase} prefix={sym} />} />
+              </dl>
+            </CardContent>
+
+            <Separator />
+
+            <CardContent>
+              <div className="mb-2 flex items-baseline justify-between gap-3 pr-16">
+                <h2 className="font-medium">时间线</h2>
+                <span className="text-[13px] text-muted-foreground tnum">
+                  接下来 30 天 {d.upcoming.length} 笔 · <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} prefix={sym} className="text-foreground" />
+                </span>
+              </div>
+              <Timeline today={today} load={loadTimeline} />
+            </CardContent>
+
+            <Separator />
+
+            <Tabs defaultValue="paid" className="gap-0">
+              <CardHeader>
+                <CardTitle className="text-sm">每月扣款</CardTitle>
+                <CardDescription className="text-[13px]">过去 12 个月与之后 3 个月，虚线为预计</CardDescription>
+                <CardAction>
+                  <TabsList>
+                    <TabsTrigger value="paid" className="px-2.5 text-xs">
+                      实付
+                    </TabsTrigger>
+                    <TabsTrigger value="mrr" className="px-2.5 text-xs">
+                      月成本
+                    </TabsTrigger>
+                  </TabsList>
+                </CardAction>
+              </CardHeader>
+              <TabsContent value="paid" className="mt-4 px-2 sm:px-4">
+                <PaidChart months={ccy === 'USD' ? d.monthsUsd : d.monthsBase} cur={today.slice(0, 7)} sym={sym} fmt={fmt} />
+              </TabsContent>
+              <TabsContent value="mrr" className="mt-4 px-2 sm:px-4">
+                <MrrChart data={d.mrrTrend.map((p) => ({ ...p, mrr: p.mrr * k }))} sym={sym} fmt={fmt} />
+              </TabsContent>
+            </Tabs>
+          </Card>
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Reveal i={1} className="h-full">
+            <Composition cats={d.cats} total={d.mrr} k={k} fmt={fmt} />
+          </Reveal>
+          <Reveal i={2} className="h-full">
+            <Currencies d={d} ccy={ccy} fmt={fmt} />
+          </Reveal>
+        </div>
+
+        <Reveal i={3}>
+          <SubList d={d} today={today} ccy={ccy} k={k} fmt={fmt} />
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {d.ended.length > 0 && (
+            <Reveal i={4} className="h-full">
+              <Card className={cn(roomy, 'h-full')}>
+                <CardHeader>
+                  <CardTitle>已退订</CardTitle>
+                  <CardDescription>
+                    退订至今少花 <span className="font-medium text-foreground tnum">{fmt(d.saved * k)}</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="-my-1.5">
+                    {d.ended.map((x) => (
+                      <li key={x.sub.id} className="flex items-center gap-3 py-1.5">
+                        <AppIcon sub={x.sub} className="size-7 rounded-[8px] opacity-50 grayscale" />
+                        <span className="min-w-0 flex-1 truncate text-muted-foreground">{clean(x.sub.name)}</span>
+                        <span className="text-right tnum">
+                          <span className="text-[13px] text-muted-foreground line-through decoration-muted-foreground/50">{fmt(x.monthly * k)}/月</span>
+                          <span className="ml-3">省 {fmt(x.saved * k)}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </Reveal>
+          )}
+          {d.lifetime.length > 0 && (
+            <Reveal i={5} className="h-full">
+              <Card className={cn(roomy, 'h-full')}>
+                <CardHeader>
+                  <CardTitle>买断</CardTitle>
+                  <CardDescription>一次付清，不再扣款</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="-my-1.5">
+                    {d.lifetime.map((s) => (
+                      <li key={s.id} className="flex items-center gap-3 py-1.5">
+                        <AppIcon sub={s} className="size-7 rounded-[8px]" />
+                        <span className="min-w-0 flex-1 truncate">{clean(s.name)}</span>
+                        <span className="text-[13px] text-muted-foreground tnum">{s.start.slice(0, 4)}</span>
+                        <span className="w-20 text-right tnum">{money(s.price, s.currency)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </Reveal>
+          )}
+        </div>
+      </div>
+
+      <footer className="mt-10 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:justify-between">
+        <span>过去的扣款按当天汇率，未来按今天汇率换算。未上线项目的域名与支付信息已隐藏。</span>
+        <a href="https://example.com" className="underline decoration-border underline-offset-4 hover:text-foreground">
+          example.com
+        </a>
+      </footer>
+    </Shell>
+  );
+}
+
+// ---------- 数据 ----------
+
+type Derived = ReturnType<typeof derive>;
+
+function derive(state: AppState, today: string) {
+  const base = state.settings.baseCurrency;
+  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const past = allCharges(state, first, today, today);
+  const yearAgo = `${Number(today.slice(0, 4)) - 1}${today.slice(4)}`;
+
+  const live = state.subscriptions
+    .map((s) => ({ s, v: contributionOn(state, s, today) }))
+    .filter((x) => ['active', 'ending', 'trial', 'paused'].includes(effectiveStatus(x.s, today)))
+    .sort((a, b) => b.v - a.v);
+  const mrr = live.reduce((a, x) => a + x.v, 0);
+  const trend = mrrSeries(state, today, 25);
+
+  const cats = new Map<string, { v: number; n: number }>();
+  for (const x of live) {
+    const c = cats.get(x.s.category) ?? { v: 0, n: 0 };
+    c.v += x.v;
+    c.n++;
+    cats.set(x.s.category, c);
+  }
+
+  // 过去 12 个月 + 之后 3 个月的实际扣款
+  const months = Array.from({ length: 15 }, (_, i) => {
+    const m = addMonths(today.slice(0, 8) + '01', i - 11).slice(0, 7);
+    const [a, b] = periodRange('month', `${m}-15`);
+    const cs = allCharges(state, a, b, today);
+    return { m, base: cs.reduce((x, c) => x + chargeValue(state, c), 0), usd: cs.reduce((x, c) => x + chargeValue(state, c, 'USD'), 0) };
+  });
+
+
+  const upcoming = allCharges(state, today, addDays(today, 29), today)
+    .filter((c) => c.projected || c.date === today)
+    .map((c) => ({ ...c, value: chargeValue(state, c) }));
+
+  const byCcy = new Map<string, { v: number }>();
+  for (const x of live) {
+    const c = currentPhase(x.s, today).currency;
+    const e = byCcy.get(c) ?? { v: 0 };
+    e.v += x.v;
+    byCcy.set(c, e);
+  }
+  // 相对显示币种：外币一年涨跌，以及按一年前汇率每月要付多少（v 为本位币，先还原成原币）
+  const fxFor = (to: string) => {
+    const rows = [...byCcy.entries()]
+      .filter(([c]) => c !== to)
+      .sort((a, b) => b[1].v - a[1].v)
+      .map(([c, e]) => {
+        const now = toBaseAt(state, 1, c, undefined, to);
+        const then = toBaseAt(state, 1, c, yearAgo, to);
+        const native = e.v / (toBaseAt(state, 1, c, undefined, base) || 1);
+        return { c, now, share: e.v / (mrr || 1), chg: then ? (now - then) / then : 0, effect: native * (now - then) };
+      });
+    return { rows, effect: rows.reduce((a, r) => a + r.effect, 0) };
+  };
+
+  const savings = cancelSavings(state, today);
+  return {
+    first,
+    paidBase: past.reduce((a, c) => a + chargeValue(state, c), 0),
+    paidUsd: past.reduce((a, c) => a + chargeValue(state, c, 'USD'), 0),
+    live,
+    mrr,
+    yearAgoMrr: trend[trend.length - 13]?.mrr ?? mrr,
+    mrrTrend: trend.map((p) => ({ month: p.month, mrr: p.mrr })),
+    cats: [...cats.entries()].sort((a, b) => b[1].v - a[1].v),
+    monthsBase: months.map((x) => ({ m: x.m, v: x.base })),
+    monthsUsd: months.map((x) => ({ m: x.m, v: x.usd })),
+    upcoming,
+    fx: { CNY: fxFor('CNY'), USD: fxFor('USD') } as Record<Ccy, ReturnType<typeof fxFor>>,
+    ended: savings.items,
+    saved: savings.total,
+    lifetime: state.subscriptions.filter((s) => s.cycle.unit === 'lifetime'),
+  };
+}
+
+const monthTick = (m: string, cur: string) => (m === cur ? '本月' : `${Number(m.slice(5))}月`);
+const monthFull = (m: string) => `${m.slice(0, 4)}年${Number(m.slice(5))}月`;
+const short = (v: number, sym: string) => (v >= 1000 ? `${sym}${+(v / 1000).toFixed(1)}k` : `${sym}${Math.round(v)}`);
+
+// ---------- 组件 ----------
+
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="truncate text-[13px] text-muted-foreground">{label}</dt>
+      <dd className="mt-1 text-lg font-semibold tracking-tight tnum">{value}</dd>
+    </div>
+  );
+}
+
+const paidConfig = { v: { label: '扣款', color: 'var(--foreground)' } } satisfies ChartConfig;
+
+function PaidChart({ months, cur, sym, fmt }: { months: Array<{ m: string; v: number }>; cur: string; sym: string; fmt: (v: number) => string }) {
+  return (
+    <ChartContainer config={paidConfig} className="aspect-auto h-52 w-full">
+      <BarChart data={months} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+        <CartesianGrid vertical={false} strokeDasharray="2 4" />
+        <XAxis dataKey="m" tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" minTickGap={6} tickFormatter={(m: string) => monthTick(m, cur)} />
+        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => short(v, sym)} />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent hideIndicator labelFormatter={(m) => `${monthFull(String(m))}${String(m) > cur ? ' · 预计' : ''}`} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />}
+        />
+        <Bar dataKey="v" radius={4} maxBarSize={26}>
+          {months.map((x) => (
+            <Cell
+              key={x.m}
+              fill={x.m === cur ? 'var(--foreground)' : x.m > cur ? 'transparent' : 'color-mix(in oklab, var(--foreground) 16%, transparent)'}
+              stroke={x.m > cur ? 'color-mix(in oklab, var(--foreground) 35%, transparent)' : undefined}
+              strokeDasharray={x.m > cur ? '3 3' : undefined}
+            />
+          ))}
+        </Bar>
+      </BarChart>
+    </ChartContainer>
+  );
+}
+
+const mrrConfig = { mrr: { label: '月成本', color: 'var(--foreground)' } } satisfies ChartConfig;
+
+function MrrChart({ data, sym, fmt }: { data: Array<{ month: string; mrr: number }>; sym: string; fmt: (v: number) => string }) {
+  return (
+    <ChartContainer config={mrrConfig} className="aspect-auto h-52 w-full">
+      <AreaChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
+        <defs>
+          <linearGradient id="mrr-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-mrr)" stopOpacity={0.14} />
+            <stop offset="100%" stopColor="var(--color-mrr)" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid vertical={false} strokeDasharray="2 4" />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} minTickGap={28} tickFormatter={(m: string) => `${m.slice(2, 4)}/${Number(m.slice(5))}`} />
+        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => short(v, sym)} />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent hideIndicator labelFormatter={(m) => monthFull(String(m))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />} />
+        <Area dataKey="mrr" type="stepAfter" stroke="var(--color-mrr)" strokeWidth={1.5} fill="url(#mrr-fill)" />
+      </AreaChart>
+    </ChartContainer>
+  );
+}
+
+/** 构成：一条分段比例条 + 图例 */
+function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: number; k: number; fmt: (v: number) => string }) {
+  const top = cats.slice(0, 4).map(([name, c]) => ({ name, v: c.v, n: c.n }));
+  const rest = cats.slice(4);
+  if (rest.length) top.push({ name: '其他', v: rest.reduce((a, [, c]) => a + c.v, 0), n: rest.reduce((a, [, c]) => a + c.n, 0) });
+  const shade = (i: number) => `color-mix(in oklab, var(--foreground) ${[100, 62, 38, 22, 12][i] ?? 10}%, transparent)`;
+  return (
+    <Card className={cn(roomy, 'h-full')}>
+      <CardHeader>
+        <CardTitle>构成</CardTitle>
+        <CardDescription>每月成本按分类</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex h-2 gap-0.5 overflow-hidden rounded-full">
+          {top.map((x, i) => (
+            <motion.i
+              key={x.name}
+              className="block h-full min-w-1"
+              style={{ background: shade(i), flexGrow: x.v, originX: 0 }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.3 + i * 0.05 }}
+            />
+          ))}
+        </div>
+        <ul className="mt-5 space-y-2.5">
+          {top.map((x, i) => (
+            <li key={x.name} className="flex items-center gap-2.5">
+              <i className="size-2.5 rounded-[3px]" style={{ background: shade(i) }} />
+              <span className="flex-1">
+                {x.name} <span className="text-[13px] text-muted-foreground">{x.n} 个</span>
+              </span>
+              <span className="tnum">{fmt(x.v * k)}</span>
+              <span className="w-10 text-right text-[13px] text-muted-foreground tnum">{Math.round((x.v / (total || 1)) * 100)}%</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+/** 汇率：外币占比与一年变化 */
+function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) => string }) {
+  const { rows, effect: eff } = d.fx[ccy];
+  return (
+    <Card className={cn(roomy, 'h-full')}>
+      <CardHeader>
+        <CardTitle>汇率</CardTitle>
+        <CardDescription>
+          {Math.abs(eff) < 1 ? (
+            '与一年前相比，汇率几乎没有影响'
+          ) : (
+            <>
+              和一年前的汇率相比，每月{eff < 0 ? '少花' : '多花'} <span className="font-medium text-foreground tnum">{fmt(Math.abs(eff))}</span>
+            </>
+          )}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2.5">
+          {rows.map(({ now, ...f }) => {
+            return (
+              <li key={f.c} className="flex items-center gap-2.5">
+                <Badge variant="outline" className="w-12 justify-center font-mono text-[11px]">
+                  {f.c}
+                </Badge>
+                <span className="flex-1 text-[13px] text-muted-foreground tnum">
+                  1 {f.c} = {now < 0.1 ? now.toFixed(4) : now.toFixed(3)} {ccy}
+                </span>
+                <span className="text-[13px] text-muted-foreground tnum">占 {Math.round(f.share * 100)}%</span>
+                <span className={cn('w-14 text-right tnum', Math.abs(f.chg) < 0.005 ? 'text-muted-foreground' : f.chg > 0 ? 'text-up' : 'text-down')}>
+                  {f.chg > 0 ? '+' : f.chg < 0 ? '−' : ''}
+                  {Math.abs(f.chg * 100).toFixed(1)}%
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Ccy; k: number; fmt: (v: number) => string }) {
+  const [tab, setTab] = useState('全部');
+  const rows = tab === '全部' ? d.live : d.live.filter((x) => x.s.category === tab);
+  const tabs = [['全部', d.live.length] as const, ...d.cats.map(([c, x]) => [c, x.n] as const)];
+  return (
+    <Card className={cn(roomy, 'h-full')}>
+      <CardHeader>
+        <CardTitle>正在订阅</CardTitle>
+        <CardDescription className="tnum">
+          {rows.length} 个 · 每月 {fmt(rows.reduce((a, x) => a + x.v, 0) * k)}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="-mx-1 mb-2 overflow-x-auto px-1 py-0.5 [scrollbar-width:none]">
+          <div className="flex w-max gap-1.5">
+            {tabs.map(([c, n]) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setTab(c)}
+                className={cn('relative h-7 rounded-full px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground ring-1 ring-border hover:text-foreground')}
+              >
+                {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-full bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
+                <span className="relative">
+                  {c} <span className="opacity-60 tnum">{n}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <ul className="grid gap-x-10 md:grid-cols-2">
+          <AnimatePresence initial={false} mode="popLayout">
+            {rows.map(({ s, v }) => (
+              <motion.li key={s.id} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="border-b border-border/60">
+                <Row s={s} v={v} today={today} ccy={ccy} k={k} fmt={fmt} />
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: string; ccy: Ccy; k: number; fmt: (v: number) => string }) {
+  const ph = currentPhase(s, today);
+  const n = nextCharge(s, today);
+  const soon = n !== undefined && diffDays(today, n) <= 7;
+  const monthly = ph.currency === ccy && ph.cycle.unit === 'month' && ph.cycle.every === 1;
+  return (
+    <div className="flex items-center gap-3 py-3">
+      <AppIcon sub={s} className="size-9 rounded-[10px]" />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="truncate font-medium">{clean(s.name)}</span>
+          {ph.region && (
+            <Badge variant="secondary" className="h-4 px-1.5 font-mono text-[10px] font-normal text-muted-foreground">
+              {ph.region}
+            </Badge>
+          )}
+        </div>
+        <div className="truncate text-[13px] text-muted-foreground tnum">
+          {cycleLabel(ph.cycle)} {money(ph.price, ph.currency)}
+          {n && <span className={cn(soon && 'text-foreground')}> · {cnDate(n)}续费</span>}
+        </div>
+      </div>
+      <div className="text-right tnum">
+        <div className="font-medium">{fmt(v * k)}</div>
+        <div className="text-[13px] text-muted-foreground">{monthly ? '每月' : '折合每月'}</div>
+      </div>
+    </div>
+  );
+}
