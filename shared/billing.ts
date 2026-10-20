@@ -292,12 +292,14 @@ export function convert(amount: number, from: string, to: string, fx: FxTable): 
 }
 
 /** 我实际承担的比例（合租发起人扣除他人份额；加入的成员 price 本就是自己那份） */
-export function myShareFactor(s: Subscription): number {
+export function myShareFactor(s: Subscription, day?: string): number {
   // 代付：全额由对方承担
   if (s.proxy) return 0;
   const sh = s.share;
   if (!sh || sh.role !== 'owner' || s.price <= 0) return 1;
-  const others = sh.members.reduce((t, m) => t + (m.exempt || m.left ? 0 : m.share || 0), 0);
+  // 给了日期就按那天在不在车上算（历史统计用）；不给日期按现在的成员算
+  const aboard = (m: (typeof sh.members)[number]) => (day ? (!m.left || m.left > day) && (!m.joined || m.joined <= day) : !m.left);
+  const others = sh.members.reduce((t, m) => t + (m.exempt || !aboard(m) ? 0 : m.share || 0), 0);
   return Math.max(0, (s.price - others) / s.price);
 }
 

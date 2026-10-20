@@ -1,6 +1,6 @@
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
 // 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
-import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
+import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
@@ -10,14 +10,6 @@ const MONTH = 30.4375;
 /** 不带日期 = 当前汇率（固定汇率口径）；带日期 = 当天汇率 */
 function toBase(state: AppState, amount: number, ccy: string, date?: string): number {
   return toBaseAt(state, amount, ccy, date);
-}
-
-/** 我承担的比例：发起人扣除成员份额 */
-function shareFactor(s: Subscription): number {
-  if (s.proxy) return 0;
-  const sh = s.share;
-  if (!sh || sh.role !== 'owner' || s.price <= 0) return 1;
-  return Math.max(0, (s.price - sh.members.reduce((t, m) => t + (m.exempt ? 0 : m.share || 0), 0)) / s.price);
 }
 
 /** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
@@ -32,7 +24,7 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   if (s.status === 'cancelled' && !s.end) return 0;
   if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
   if (s.status === 'trial' && s.trialEnd && s.trialEnd > day) return 0;
-  return toBase(state, (priceAt(s, day) * MONTH) / cycleDays(s.cycle), s.currency, fxDate) * shareFactor(s);
+  return toBase(state, (priceAt(s, day) * MONTH) / cycleDays(s.cycle), s.currency, fxDate) * myShareFactor(s, day);
 }
 
 /** fxDate 缺省为当前汇率；传入则按该日汇率 */
@@ -117,17 +109,17 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
     return out;
   }
   const after = (d: string) => contributionOn(state, s, d);
-  if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'start', delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s) });
+  if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'start', delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start) });
   const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
   for (let i = 1; i < hist.length; i++) {
     if (hist[i].from > today) continue;
     const prev = hist[i - 1].amount;
     const cur = hist[i].amount;
     if (prev === cur) continue;
-    out.push({ date: hist[i].from, sub: s, kind: 'price', delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s), note: `${prev} → ${cur} ${s.currency}` });
+    out.push({ date: hist[i].from, sub: s, kind: 'price', delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from), note: `${prev} → ${cur} ${s.currency}` });
   }
   if (s.intro && s.intro.until <= today && s.intro.until > s.start) {
-    out.push({ date: s.intro.until, sub: s, kind: 'intro-end', delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s) });
+    out.push({ date: s.intro.until, sub: s, kind: 'intro-end', delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until) });
   }
   if (s.end && s.end <= today) out.push({ date: s.end, sub: s, kind: 'end', delta: -contributionOn(state, s, addDays(s.end, -1)) });
   if (s.status === 'paused' && s.pausedAt && s.pausedAt <= today) out.push({ date: s.pausedAt, sub: s, kind: 'pause', delta: -contributionOn(state, { ...s, status: 'active' }, s.pausedAt) });
@@ -200,7 +192,7 @@ export function cashVsAccrual(state: AppState, today: string, back: number, fwd:
   // 往前多取一年，保证年付在窗口开头的摊销完整
   const charges = state.subscriptions.filter((s) => !s.proxy).flatMap((s) => chargesBetween(s, addMonths(first, -24), last, today));
   for (const c of charges) {
-    const v = chargeValue(state, c) * shareFactor(c.sub);
+    const v = chargeValue(state, c) * myShareFactor(c.sub, c.date);
     const r = rows.get(c.date.slice(0, 7));
     if (r) r.cash += v;
     if (c.sub.cycle.unit === 'lifetime') continue;
@@ -231,7 +223,7 @@ export function prepaidValue(state: AppState, today: string): { total: number; i
     const [a, b] = coverage(last);
     const end = s.end && s.end < b ? s.end : b;
     if (end <= today) continue;
-    const v = chargeValue(state, last) * shareFactor(s) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
+    const v = chargeValue(state, last) * myShareFactor(s, today) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
     if (v > 0.01) items.push({ sub: s, value: v, until: end });
   }
   items.sort((x, y) => y.value - x.value);
@@ -243,7 +235,7 @@ export function cancelSavings(state: AppState, today: string): { total: number; 
   const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> = [];
   for (const s of state.subscriptions) {
     if (s.proxy || s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
-    const monthly = toBase(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * shareFactor(s);
+    const monthly = toBase(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
     const saved = (monthly * diffDays(s.end, today)) / MONTH;
     items.push({ sub: s, saved, since: s.end, monthly });
   }
