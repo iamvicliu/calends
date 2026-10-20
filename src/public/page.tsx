@@ -6,7 +6,7 @@ import { cnDate, money, symbol } from '../../shared/format.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { allCharges, periodRange } from '../derive.ts';
+import { allCharges, periodRange, sumBase } from '../derive.ts';
 import { THEME_LABEL, ThemeIcon, useThemeMode } from '../theme.tsx';
 import { AppIcon } from '@/public/components/app-icon';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
@@ -328,7 +328,7 @@ function derive(state: AppState, today: string) {
     const m = addMonths(today.slice(0, 8) + '01', i - 11).slice(0, 7);
     const [a, b] = periodRange('month', `${m}-15`);
     const cs = allCharges(state, a, b, today);
-    return { m, base: cs.reduce((x, c) => x + chargeValue(state, c), 0), usd: cs.reduce((x, c) => x + chargeValue(state, c, 'USD'), 0) };
+    return { m, base: sumBase(state, cs), usd: sumBase(state, cs, 'USD') };
   });
 
 
@@ -360,8 +360,8 @@ function derive(state: AppState, today: string) {
   const savings = cancelSavings(state, today);
   return {
     first,
-    paidBase: past.reduce((a, c) => a + chargeValue(state, c), 0),
-    paidUsd: past.reduce((a, c) => a + chargeValue(state, c, 'USD'), 0),
+    paidBase: sumBase(state, past),
+    paidUsd: sumBase(state, past, 'USD'),
     live,
     mrr,
     yearAgoMrr: trend[trend.length - 13]?.mrr ?? mrr,

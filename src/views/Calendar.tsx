@@ -4,7 +4,7 @@ import { cnDate, money, relDays } from '../../shared/format.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Amount, Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
 import { chargeValue } from '../../shared/fx.ts';
-import { allCharges } from '../derive.ts';
+import { allCharges, sumBase } from '../derive.ts';
 
 const DOW_MON = ['一', '二', '三', '四', '五', '六', '日'];
 const DOW_SUN = ['日', '一', '二', '三', '四', '五', '六'];
@@ -36,7 +36,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
     for (const c of charges) m.set(c.date, [...(m.get(c.date) ?? []), c]);
     return m;
   }, [charges]);
-  const sumOf = (list: Charge[] = []) => list.reduce((a, c) => a + chargeValue(state, c), 0);
+  const sumOf = (list: Charge[] = []) => sumBase(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
   const shift = (n: number) => setMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));

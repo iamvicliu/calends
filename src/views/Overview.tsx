@@ -7,7 +7,7 @@ import { BALANCE_KINDS, type AppState, type Subscription } from '../../shared/ty
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { Amount, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
-import { allCharges, catColor } from '../derive.ts';
+import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 
 type Scale = 'month' | 'year';
@@ -128,8 +128,8 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
 
   const sel = selKey && buckets.some((b) => b.key === selKey) ? selKey : curKey;
   const selData = data.find((d) => d.r.key === sel);
-  const selTotal = selData ? selData.cs.reduce((a, c) => a + chargeValue(state, c), 0) : 0;
-  const selPaid = selData ? selData.cs.filter((c) => !c.projected).reduce((a, c) => a + chargeValue(state, c), 0) : 0;
+  const selTotal = selData ? sumBase(state, selData.cs) : 0;
+  const selPaid = selData ? sumBase(state, selData.cs.filter((c) => !c.projected)) : 0;
   const bySub = new Map<string, { sub: Subscription; v: number; n: number; proj: boolean }>();
   for (const c of selData?.cs ?? []) {
     const e = bySub.get(c.sub.id) ?? { sub: c.sub, v: 0, n: 0, proj: true };
@@ -227,7 +227,7 @@ function allRanges(state: AppState, ranges: Array<{ from: string; to: string }>,
 function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const cs = allCharges(state, today, addDays(today, 30), today);
-  const total = cs.reduce((a, c) => a + chargeValue(state, c), 0);
+  const total = sumBase(state, cs);
   const groups: Array<[string, Charge[]]> = [
     ['这周', cs.filter((c) => diffDays(today, c.date) <= 6)],
     ['之后', cs.filter((c) => diffDays(today, c.date) > 6)],
@@ -365,7 +365,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const prev = series[series.length - 2]?.mrr ?? 0;
   const delta = t.mrr - prev;
-  const ytd = useMemo(() => allCharges(state, `${today.slice(0, 4)}-01-01`, today, today).reduce((a, c) => a + chargeValue(state, c), 0), [state, today]);
+  const ytd = useMemo(() => sumBase(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
   const live = useMemo(
     () =>
       state.subscriptions

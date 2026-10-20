@@ -180,6 +180,7 @@ export function periodRange(p: Period, today: string, offset = 0): [string, stri
   return [`${y}-01-01`, `${y}-12-31`];
 }
 
-export function sumBase(state: AppState, charges: Charge[]): number {
-  return charges.reduce((a, c) => a + chargeValue(state, c), 0);
+/** 一组扣款折算后的合计；to 缺省为本位币 */
+export function sumBase(state: AppState, charges: Charge[], to?: string): number {
+  return charges.reduce((a, c) => a + chargeValue(state, c, to), 0);
 }
