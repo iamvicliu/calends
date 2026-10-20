@@ -303,7 +303,7 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
           <b>{fmt(book.yearIncome)}</b>
         </div>
         <div>
-          <small>利润 / 年{profit < 0 ? ' · 没赚钱' : ''}</small>
+          <small>{profit < 0 ? '没赚钱 / 年' : '利润 / 年'}</small>
           <b class={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
         </div>
       </div>
