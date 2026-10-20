@@ -285,6 +285,8 @@ export interface Settings {
   notifyHour: number;
   timezone: string;
   publicView: boolean;
+  /** 公开页不展示的订阅 id；缺省全部展示，新加的订阅默认也展示 */
+  publicHidden?: string[];
   monthlyDigest: boolean;
   icsToken?: string;
   displayName: string;

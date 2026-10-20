@@ -174,3 +174,15 @@ test('公开页不下发名册，也不带成员的 personId', () => {
   const json = JSON.stringify(pub);
   assert.ok(!json.includes('Alice') && !json.includes('alice') && !json.includes('personId'));
 });
+
+test('公开页不下发设置里取消展示的订阅', () => {
+  const state = st([sub({ id: 'a', name: 'A' }), sub({ id: 'b', name: 'B' })]);
+  state.settings.publicHidden = ['b'];
+  const pub = maskForPublic(state);
+  assert.deepEqual(
+    pub.subscriptions.map((s) => s.name),
+    ['A'],
+  );
+  // 隐藏列表本身不公开
+  assert.equal(pub.settings.publicHidden, undefined);
+});

@@ -66,6 +66,15 @@
     "historyUpdated": "歷史匯率已更新"
   },
   "open": {
+    "publicSubs": "展示的訂閱",
+    "publicSubsHint": "公開頁只展示下面這些訂閱。代付的訂閱從不公開；新加的訂閱預設展示。",
+    "publicShown": "展示中 · {count}",
+    "publicOff2": "未展示 · {count}",
+    "publicShowAll": "全部展示",
+    "publicHideAll": "全部隱藏",
+    "publicHideOne": "不展示 {name}",
+    "publicShowOne": "展示 {name}",
+    "publicNone": "一個都沒展示，公開頁會是空的",
     "title": "開放",
     "ics": "訂閱到系統行事曆",
     "on": "已開啟",

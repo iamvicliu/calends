@@ -66,6 +66,15 @@
     "historyUpdated": "Historical rates updated"
   },
   "open": {
+    "publicSubs": "Shown subscriptions",
+    "publicSubsHint": "Only these subscriptions appear on the public page. Paid-on-behalf ones are never public; new subscriptions are shown by default.",
+    "publicShown": "Shown · {count}",
+    "publicOff2": "Hidden · {count}",
+    "publicShowAll": "Show all",
+    "publicHideAll": "Hide all",
+    "publicHideOne": "Hide {name}",
+    "publicShowOne": "Show {name}",
+    "publicNone": "Nothing is shown — the public page will be empty",
     "title": "Sharing & access",
     "ics": "Subscribe in system calendar",
     "on": "On",

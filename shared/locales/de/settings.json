@@ -81,6 +81,15 @@
     "historyUpdated": "Historische Kurse aktualisiert"
   },
   "open": {
+    "publicSubs": "Angezeigte Abos",
+    "publicSubsHint": "Nur diese Abos erscheinen auf der öffentlichen Seite. Für andere bezahlte Abos sind nie öffentlich; neue Abos werden standardmäßig angezeigt.",
+    "publicShown": "Angezeigt · {count}",
+    "publicOff2": "Ausgeblendet · {count}",
+    "publicShowAll": "Alle anzeigen",
+    "publicHideAll": "Alle ausblenden",
+    "publicHideOne": "{name} ausblenden",
+    "publicShowOne": "{name} anzeigen",
+    "publicNone": "Nichts ausgewählt – die öffentliche Seite bleibt leer",
     "title": "Teilen & Zugriff",
     "ics": "Im Systemkalender abonnieren",
     "on": "Ein",

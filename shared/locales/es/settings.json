@@ -69,6 +69,15 @@
     "historyUpdated": "Tipos históricos actualizados"
   },
   "open": {
+    "publicSubs": "Suscripciones visibles",
+    "publicSubsHint": "Solo estas suscripciones aparecen en la página pública. Las pagadas por otros nunca son públicas; las nuevas se muestran por defecto.",
+    "publicShown": "Visibles · {count}",
+    "publicOff2": "Ocultas · {count}",
+    "publicShowAll": "Mostrar todas",
+    "publicHideAll": "Ocultar todas",
+    "publicHideOne": "Ocultar {name}",
+    "publicShowOne": "Mostrar {name}",
+    "publicNone": "No se muestra nada: la página pública estará vacía",
     "title": "Compartir y acceso",
     "ics": "Suscribirse en el calendario del sistema",
     "on": "Activado",

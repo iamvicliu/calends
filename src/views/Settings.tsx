@@ -8,6 +8,7 @@ import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
 import { CategoriesGroup } from './Categories.tsx';
+import { PublicSubsSheet, publicCandidates } from './PublicSubs.tsx';
 import { go } from '../router.ts';
 import { LOCALES, isLocale, t } from '../../shared/i18n.ts';
 import { preferredLocale } from '../i18n.ts';
@@ -108,6 +109,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [name, setName] = useState(s.displayName);
   const [ics, setIcs] = useState(false);
+  const [pubSubs, setPubSubs] = useState(false);
   const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[]; created: PaymentMethod[] } | null>(null);
 
   const loadPreview = () =>
@@ -400,6 +402,15 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             />
           </Cell>
           {s.publicView && (
+            <Cell label={t('settings.open.publicSubs')} onClick={() => setPubSubs(true)}>
+              {(() => {
+                const all = publicCandidates(state, today);
+                const hidden = new Set(s.publicHidden ?? []);
+                return `${all.filter((x) => !hidden.has(x.id)).length} / ${all.length}`;
+              })()}
+            </Cell>
+          )}
+          {s.publicView && (
             <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />
           )}
           <Cell label={t('settings.open.ai')}>
@@ -467,6 +478,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
         </Sheet>
       )}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
+      {pubSubs && <PublicSubsSheet state={state} today={today} onClose={() => setPubSubs(false)} />}
       {importing && (
         <Sheet
           title={t('settings.import.title', { count: importing.subs.length })}

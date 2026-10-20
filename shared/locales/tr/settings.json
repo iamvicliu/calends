@@ -66,6 +66,15 @@
     "historyUpdated": "Geçmiş kurlar güncellendi"
   },
   "open": {
+    "publicSubs": "Gösterilen abonelikler",
+    "publicSubsHint": "Herkese açık sayfada yalnızca bu abonelikler görünür. Başkası adına ödenenler asla gösterilmez; yeni abonelikler varsayılan olarak gösterilir.",
+    "publicShown": "Gösterilen · {count}",
+    "publicOff2": "Gizli · {count}",
+    "publicShowAll": "Tümünü göster",
+    "publicHideAll": "Tümünü gizle",
+    "publicHideOne": "{name} gizle",
+    "publicShowOne": "{name} göster",
+    "publicNone": "Hiçbiri gösterilmiyor, herkese açık sayfa boş kalacak",
     "title": "Paylaşım ve erişim",
     "ics": "Sistem takvimine abone ol",
     "on": "Açık",

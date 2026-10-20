@@ -66,6 +66,15 @@
     "historyUpdated": "Đã cập nhật tỷ giá lịch sử"
   },
   "open": {
+    "publicSubs": "Gói hiển thị",
+    "publicSubsHint": "Trang công khai chỉ hiện các gói dưới đây. Gói trả hộ không bao giờ công khai; gói mới mặc định được hiển thị.",
+    "publicShown": "Đang hiện · {count}",
+    "publicOff2": "Đã ẩn · {count}",
+    "publicShowAll": "Hiện tất cả",
+    "publicHideAll": "Ẩn tất cả",
+    "publicHideOne": "Ẩn {name}",
+    "publicShowOne": "Hiện {name}",
+    "publicNone": "Chưa hiện gói nào, trang công khai sẽ trống",
     "title": "Chia sẻ & truy cập",
     "ics": "Đăng ký trên lịch hệ thống",
     "on": "Bật",

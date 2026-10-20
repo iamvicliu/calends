@@ -81,6 +81,15 @@
     "historyUpdated": "Taux historiques mis à jour"
   },
   "open": {
+    "publicSubs": "Abonnements affichés",
+    "publicSubsHint": "Seuls ces abonnements apparaissent sur la page publique. Ceux payés pour d’autres ne sont jamais publics ; les nouveaux sont affichés par défaut.",
+    "publicShown": "Affichés · {count}",
+    "publicOff2": "Masqués · {count}",
+    "publicShowAll": "Tout afficher",
+    "publicHideAll": "Tout masquer",
+    "publicHideOne": "Masquer {name}",
+    "publicShowOne": "Afficher {name}",
+    "publicNone": "Rien n’est affiché : la page publique sera vide",
     "title": "Partage et accès",
     "ics": "S’abonner dans le calendrier du système",
     "on": "Activé",

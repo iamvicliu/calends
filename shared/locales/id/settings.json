@@ -66,6 +66,15 @@
     "historyUpdated": "Kurs historis diperbarui"
   },
   "open": {
+    "publicSubs": "Langganan yang ditampilkan",
+    "publicSubsHint": "Hanya langganan ini yang muncul di halaman publik. Langganan yang dibayarkan untuk orang lain tidak pernah publik; langganan baru ditampilkan secara bawaan.",
+    "publicShown": "Ditampilkan · {count}",
+    "publicOff2": "Disembunyikan · {count}",
+    "publicShowAll": "Tampilkan semua",
+    "publicHideAll": "Sembunyikan semua",
+    "publicHideOne": "Sembunyikan {name}",
+    "publicShowOne": "Tampilkan {name}",
+    "publicNone": "Tidak ada yang ditampilkan, halaman publik akan kosong",
     "title": "Berbagi & akses",
     "ics": "Langganan di kalender sistem",
     "on": "Aktif",

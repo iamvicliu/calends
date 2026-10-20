@@ -1,0 +1,135 @@
+/* 设置 · 公开页展示的订阅：胶囊多选 */
+.ps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+.ps-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--label-2);
+}
+.ps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-2);
+}
+.ps-acts {
+  display: flex;
+  gap: 8px;
+}
+.ps-acts .btn {
+  height: 32px;
+  font-size: 13px;
+}
+.ps-acts .btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.ps-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ps-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  max-width: 100%;
+  padding: 0 4px 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--label);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.ps-chip .ico {
+  --s: 20px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.ps-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ps-x {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fill-2);
+  color: var(--label-2);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ps-x:hover {
+  background: var(--fill);
+  color: var(--label);
+}
+.ps-chip.off {
+  padding: 0 14px 0 10px;
+  background: none;
+  color: var(--label-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  border: 1px dashed transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+.ps-chip.off:hover {
+  background: var(--fill-2);
+  color: var(--label);
+}
+.ps-chip.off:active {
+  transform: scale(0.97);
+}
+.ps-chip.off .ico {
+  opacity: 0.55;
+}
+.ps-empty {
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--fill-2);
+  color: var(--label-2);
+  font-size: 13px;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .ps-chips {
+    gap: 6px;
+  }
+  .ps-chip {
+    gap: 6px;
+    height: 34px;
+    padding-left: 7px;
+    font-size: 13px;
+  }
+  .ps-chip .ico {
+    --s: 18px;
+  }
+  .ps-x {
+    width: 26px;
+    height: 26px;
+  }
+  .ps-chip.off {
+    padding: 0 12px 0 8px;
+  }
+}

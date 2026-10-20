@@ -69,6 +69,15 @@
     "historyUpdated": "Cotações históricas atualizadas"
   },
   "open": {
+    "publicSubs": "Assinaturas exibidas",
+    "publicSubsHint": "Só estas assinaturas aparecem na página pública. As pagas por outros nunca são públicas; novas assinaturas são exibidas por padrão.",
+    "publicShown": "Exibidas · {count}",
+    "publicOff2": "Ocultas · {count}",
+    "publicShowAll": "Exibir todas",
+    "publicHideAll": "Ocultar todas",
+    "publicHideOne": "Ocultar {name}",
+    "publicShowOne": "Exibir {name}",
+    "publicNone": "Nada exibido: a página pública ficará vazia",
     "title": "Compartilhamento e acesso",
     "ics": "Assinar no calendário do sistema",
     "on": "Ativado",

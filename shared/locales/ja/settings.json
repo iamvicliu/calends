@@ -76,6 +76,15 @@
     "historyUpdated": "過去のレートを更新しました"
   },
   "open": {
+    "publicSubs": "公開するサブスク",
+    "publicSubsHint": "公開ページには以下のサブスクだけが表示されます。立替分は公開されず、新しいサブスクは既定で表示されます。",
+    "publicShown": "表示中 · {count}",
+    "publicOff2": "非表示 · {count}",
+    "publicShowAll": "すべて表示",
+    "publicHideAll": "すべて非表示",
+    "publicHideOne": "{name} を非表示",
+    "publicShowOne": "{name} を表示",
+    "publicNone": "何も表示されていません。公開ページは空になります",
     "title": "共有とアクセス",
     "ics": "システムのカレンダーで購読",
     "on": "オン",

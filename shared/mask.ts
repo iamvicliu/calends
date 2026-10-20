@@ -87,8 +87,9 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
 
 export function maskForPublic(state: AppState): AppState {
   const cats = categoryList(state.settings, state.subscriptions);
-  // 代付涉及他人，公开页完全不出现
-  const subs = state.subscriptions.filter((s) => !s.proxy);
+  // 代付涉及他人，公开页完全不出现；设置里取消展示的也不下发
+  const hidden = new Set(state.settings.publicHidden ?? []);
+  const subs = state.subscriptions.filter((s) => !s.proxy && !hidden.has(s.id));
   const used = new Set(subs.map((s) => s.category));
   return {
     readonly: true,

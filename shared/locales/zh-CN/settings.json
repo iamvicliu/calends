@@ -66,6 +66,15 @@
     "historyUpdated": "历史汇率已更新"
   },
   "open": {
+    "publicSubs": "展示的订阅",
+    "publicSubsHint": "公开页只展示下面这些订阅。代付的订阅从不公开；新加的订阅默认展示。",
+    "publicShown": "展示中 · {count}",
+    "publicOff2": "未展示 · {count}",
+    "publicShowAll": "全部展示",
+    "publicHideAll": "全部隐藏",
+    "publicHideOne": "不展示 {name}",
+    "publicShowOne": "展示 {name}",
+    "publicNone": "一个都没展示，公开页会是空的",
     "title": "开放",
     "ics": "订阅到系统日历",
     "on": "已开启",

@@ -76,6 +76,15 @@
     "historyUpdated": "과거 환율을 업데이트했습니다"
   },
   "open": {
+    "publicSubs": "공개할 구독",
+    "publicSubsHint": "공개 페이지에는 아래 구독만 표시됩니다. 대리 결제는 공개되지 않으며, 새 구독은 기본으로 표시됩니다.",
+    "publicShown": "표시 중 · {count}",
+    "publicOff2": "숨김 · {count}",
+    "publicShowAll": "모두 표시",
+    "publicHideAll": "모두 숨기기",
+    "publicHideOne": "{name} 숨기기",
+    "publicShowOne": "{name} 표시",
+    "publicNone": "표시할 구독이 없어 공개 페이지가 비어 있어요",
     "title": "공유 및 접근",
     "ics": "시스템 캘린더에서 구독",
     "on": "켬",
