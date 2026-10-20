@@ -141,24 +141,25 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             <div className="stack">
               <Group title={`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}>
                 {selList.length === 0 && <div className="cell muted">{t('calendar.noneDay')}</div>}
-                {selList.map((c) => (
-                  <button key={c.sub.id} className="cell tap" onClick={() => onOpen(c.sub)}>
-                    <SubIcon sub={c.sub} size={34} />
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600 }}>{c.sub.name}</div>
-                      <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
-                    </span>
-                    <span style={{ textAlign: 'right' }}>
-                      {pair(c.amount, c.currency, { value: chargeValue(state, c) }).main}
-                      <div className="muted" style={{ fontSize: 12 }}>
-                        {c.projected ? t('calendar.projected') : t('calendar.charged')}
-                        {pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt
-                          ? ` · ${pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt}`
-                          : ''}
-                      </div>
-                    </span>
-                  </button>
-                ))}
+                {selList.map((c) => {
+                  const amt = pair(c.amount, c.currency, { value: chargeValue(state, c) });
+                  return (
+                    <button key={c.sub.id} className="cell tap" onClick={() => onOpen(c.sub)}>
+                      <SubIcon sub={c.sub} size={34} />
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600 }}>{c.sub.name}</div>
+                        <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                      </span>
+                      <span style={{ textAlign: 'right' }}>
+                        {amt.main}
+                        <div className="muted" style={{ fontSize: 12 }}>
+                          {c.projected ? t('calendar.projected') : t('calendar.charged')}
+                          {amt.alt ? ` · ${amt.alt}` : ''}
+                        </div>
+                      </span>
+                    </button>
+                  );
+                })}
               </Group>
               <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}

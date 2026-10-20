@@ -282,6 +282,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
               {list.slice(0, g === 'thisWeek' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
                 const m = state.methods.find((x) => x.id === c.sub.methodId);
+                const amt = pair(c.amount, c.currency, { value: chargeValue(state, c) });
                 return (
                   <button key={c.sub.id + c.date + i} className="due-row" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={36} />
@@ -292,10 +293,8 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
                       </small>
                     </span>
                     <span className="am">
-                      <b>{pair(c.amount, c.currency, { value: chargeValue(state, c) }).main}</b>
-                      {pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt && (
-                        <small>{pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt}</small>
-                      )}
+                      <b>{amt.main}</b>
+                      {amt.alt && <small>{amt.alt}</small>}
                     </span>
                     <span className={`pill ${d <= 3 ? 'hot' : ''}`}>{d <= 13 ? relDays(d) : cnDate(c.date)}</span>
                   </button>

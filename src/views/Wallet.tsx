@@ -24,6 +24,7 @@ function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state
   const daysLeft = r.runsOutOn ? diffDays(today, r.runsOutOn) : Infinity;
   const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
   const tone = daysLeft <= 7 ? 'out' : daysLeft <= (m.lowRunwayDays ?? 30) ? 'low' : '';
+  const bal = pair(r.current, m.currency);
   const body = (
     <div className="runway">
       <div className="rw-top">
@@ -35,10 +36,10 @@ function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div className="rw-bal">{pair(r.current, m.currency).main}</div>
-          {pair(r.current, m.currency).alt && (
+          <div className="rw-bal">{bal.main}</div>
+          {bal.alt && (
             <div className="soft" style={{ fontSize: 11.5 }}>
-              {pair(r.current, m.currency).alt}
+              {bal.alt}
             </div>
           )}
         </div>
@@ -226,6 +227,17 @@ function projFoot(r: Runway, m: PaymentMethod): string | undefined {
   return t('wallet.runway.projFoot', { amount: money(r.topUp12m, m.currency, { compact: true }) });
 }
 
+/** 卡面右下角的小字：设了余额的说还够扣几期，没设的显示卡号尾号 */
+function cardHint(m: PaymentMethod, r: Runway | undefined): string {
+  if (r) {
+    if (r.monthlyDrain <= 0) return t('wallet.card.noCharges');
+    if (!r.shortfall) return t('wallet.card.enough');
+    return r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low');
+  }
+  if (m.last4) return `•••• ${m.last4}`;
+  return BALANCE_KINDS.includes(m.kind) ? t('wallet.card.noBalance') : '';
+}
+
 /** 可拖动排序的卡片：拖起时放大、加深阴影，其余卡片让位 */
 function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () => void; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: m.id });
@@ -326,21 +338,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                           ? t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) })
                           : t('wallet.card.subs', { count: liveHere.length })
                       }
-                      rightSub={
-                        r
-                          ? r.monthlyDrain <= 0
-                            ? t('wallet.card.noCharges')
-                            : r.shortfall
-                              ? r.coveredCharges
-                                ? t('wallet.card.periodsLeft', { count: r.coveredCharges })
-                                : t('wallet.card.low')
-                              : t('wallet.card.enough')
-                          : m.last4
-                            ? `•••• ${m.last4}`
-                            : BALANCE_KINDS.includes(m.kind)
-                              ? t('wallet.card.noBalance')
-                              : ''
-                      }
+                      rightSub={cardHint(m, r)}
                     />
                   </SortableCard>
                 );
@@ -880,22 +878,16 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
     img.src = URL.createObjectURL(fl);
   };
   const favicon = domainOf(f.url);
+  let source = t('wallet.logo.none');
+  if (f.logo) source = f.logo.startsWith('data:') ? t('wallet.logo.uploaded') : t('wallet.logo.link');
+  else if (favicon) source = t('wallet.logo.favicon');
+  else if (bankOf(f)) source = t('wallet.logo.bank');
   return (
     <>
       <div className="cell logo-field">
         <span className="cell-l">
           Logo
-          <small>
-            {f.logo
-              ? f.logo.startsWith('data:')
-                ? t('wallet.logo.uploaded')
-                : t('wallet.logo.link')
-              : favicon
-                ? t('wallet.logo.favicon')
-                : bankOf(f)
-                  ? t('wallet.logo.bank')
-                  : t('wallet.logo.none')}
-          </small>
+          <small>{source}</small>
         </span>
         <span className="cell-r">
           <MethodMark m={f} size={32} />

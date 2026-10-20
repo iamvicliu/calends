@@ -256,7 +256,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     <b>{money(r.entry!.received!, r.entry!.receivedCurrency ?? base)}</b>
                   )}
                 </span>
-                <span className={d == null ? 'muted' : Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
+                <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
                   {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : `${d > 0 ? '+' : '−'}${money(Math.abs(d), base)}`}
                 </span>
               </button>

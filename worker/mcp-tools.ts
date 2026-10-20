@@ -26,7 +26,7 @@ import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, pr
 import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
 import { matchEntries } from '../shared/proxy.ts';
 import { normName, peopleLedger, type PersonLedger } from '../shared/people.ts';
-import type { AppState, Payment, Person, Subscription } from '../shared/types.ts';
+import type { AppState, Payment, PaymentMethod, Person, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { loadState, upsert } from './store.ts';
 import { t } from '../shared/i18n.ts';
@@ -237,6 +237,28 @@ function chargesIn(st: AppState, from: string, to: string, today: string, scope:
     .filter((s) => (scope === 'proxy' ? !!s.proxy : scope === 'all' || scope === 'gross' ? true : !s.proxy))
     .flatMap((s) => chargesBetween(s, from, to, today))
     .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** 花费汇总的分组：返回 [分组键, 显示名] */
+function groupOf(by: string, c: Charge, sub: Subscription, m: PaymentMethod | undefined): [string, string] {
+  switch (by) {
+    case 'month':
+      return [c.date.slice(0, 7), c.date.slice(0, 7)];
+    case 'year':
+      return [c.date.slice(0, 4), c.date.slice(0, 4)];
+    case 'category':
+      return [sub.category, sub.category];
+    case 'method':
+      return [m?.id ?? 'none', m?.name ?? t('mcp.label.unassigned')];
+    case 'currency':
+      return [c.currency, c.currency];
+    case 'region':
+      return [c.sub.region ?? '—', c.sub.region ?? t('mcp.label.anyRegion')];
+    case 'subscription':
+      return [sub.id, sub.name];
+    default:
+      return ['all', t('mcp.label.total')];
+  }
 }
 
 const outCcy = (st: AppState, a: Record<string, unknown>) => {
@@ -528,22 +550,7 @@ export const TOOLS: Tool[] = [
         const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
         const v = chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(sub) : 1);
         const m = st.methods.find((x) => x.id === c.sub.methodId);
-        const [key, label] =
-          by === 'month'
-            ? [c.date.slice(0, 7), c.date.slice(0, 7)]
-            : by === 'year'
-              ? [c.date.slice(0, 4), c.date.slice(0, 4)]
-              : by === 'category'
-                ? [sub.category, sub.category]
-                : by === 'method'
-                  ? [m?.id ?? 'none', m?.name ?? t('mcp.label.unassigned')]
-                  : by === 'currency'
-                    ? [c.currency, c.currency]
-                    : by === 'region'
-                      ? [c.sub.region ?? '—', c.sub.region ?? t('mcp.label.anyRegion')]
-                      : by === 'subscription'
-                        ? [sub.id, sub.name]
-                        : ['all', t('mcp.label.total')];
+        const [key, label] = groupOf(by, c, sub, m);
         const g = groups.get(key) ?? { key, label, total: 0, count: 0 };
         g.total += v;
         g.count++;
