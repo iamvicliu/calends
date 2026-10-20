@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { diffDays } from '../../shared/billing.ts';
+import { addDays, addMonths, diffDays } from '../../shared/billing.ts';
 import './timeline.css';
 
 export interface TimelineItem {
@@ -27,7 +27,6 @@ const AFTER = 240;
 const STEP = 180;
 const EDGE = 900;
 
-const addDay = (d: string, n: number) => new Date(Date.parse(d) + n * 86400000).toISOString().slice(0, 10);
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
 
 /**
@@ -38,7 +37,7 @@ const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
 export function Timeline({ load, today }: { load: (from: string, to: string) => TimelineGroup[]; today: string }) {
   const scroller = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
-  const [range, setRange] = useState(() => ({ from: addDay(today, -BEFORE), to: addDay(today, AFTER) }));
+  const [range, setRange] = useState(() => ({ from: addDays(today, -BEFORE), to: addDays(today, AFTER) }));
   const prevFrom = useRef(range.from);
   const busy = useRef(false); // 一次只加载一段
   const drag = useRef<{ x: number; left: number; moved: boolean; v: number; t: number; id: number } | null>(null);
@@ -65,7 +64,7 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
     }
     // 日、周刻度用背景画，只有月份刻度是元素
     const months: Array<{ x: number; label: string }> = [];
-    for (let d = `${from.slice(0, 8)}01`; d <= to; d = `${addDay(d, 32).slice(0, 8)}01`) {
+    for (let d = `${from.slice(0, 8)}01`; d <= to; d = addMonths(d, 1)) {
       if (d >= from) months.push({ x: xOf(d), label: d.slice(5, 7) === '01' ? `${d.slice(0, 4)} 年` : `${Number(d.slice(5, 7))} 月` });
     }
     const monday = (8 - new Date(from).getUTCDay()) % 7;
@@ -110,10 +109,10 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
     if (busy.current) return;
     if (el.scrollLeft < EDGE) {
       busy.current = true;
-      setRange((r) => ({ ...r, from: addDay(r.from, -STEP) }));
+      setRange((r) => ({ ...r, from: addDays(r.from, -STEP) }));
     } else if (el.scrollWidth - el.scrollLeft - el.clientWidth < EDGE) {
       busy.current = true;
-      setRange((r) => ({ ...r, to: addDay(r.to, STEP) }));
+      setRange((r) => ({ ...r, to: addDays(r.to, STEP) }));
     }
   };
 
