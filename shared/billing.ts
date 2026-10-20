@@ -87,6 +87,15 @@ export function cycleShort(c: Cycle): string {
   return c.every === 1 ? u : `${c.every}${u}`;
 }
 
+/** 订阅基本字段的校验：有问题时返回错误文案（后台接口与 MCP 共用） */
+export function subError(s: Subscription): string | undefined {
+  if (!s.name?.trim()) return '名称不能为空';
+  if (!Number.isFinite(s.price) || s.price < 0) return '价格无效';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) return '开始日期无效';
+  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !(s.cycle.every >= 1)) return '周期无效';
+  return undefined;
+}
+
 // ---------- 阶段（换区 / 换套餐 / 断更续订） ----------
 
 /** 把多阶段订阅展开成若干个单阶段的「虚拟订阅」，id 不变；无阶段时返回自身 */
@@ -151,15 +160,14 @@ export function upcomingPhase(s: Subscription, today: string): Subscription | un
 
 export function effectiveStatus(s: Subscription, today: string): 'upcoming' | 'active' | 'trial' | 'paused' | 'ending' | 'ended' | 'lifetime' {
   if (s.phases?.length) {
+    const vs = phaseSubs(s);
     const v = phaseAt(s, today);
     if (v) {
       const st = effectiveStatus(v, today);
       // 已经排好下一阶段（换区 / 换套餐 / 换支付方式，中间空几天也算），不算到期不续
-      const vs = phaseSubs(s);
-      const next = vs[vs.indexOf(vs.find((x) => x.start === v.start)!) + 1];
+      const next = vs[vs.findIndex((x) => x.start === v.start) + 1];
       return st === 'ending' && next ? 'active' : st;
     }
-    const vs = phaseSubs(s);
     if (vs.some((x) => x.start > today)) return vs[0].start > today ? 'upcoming' : 'paused'; // 尚未开始，或断更中已安排续订
     return effectiveStatus(vs[vs.length - 1], today);
   }
@@ -321,11 +329,9 @@ export function totals(state: AppState, today: string): Totals {
     if (s.proxy) continue;
     const st = effectiveStatus(s, today);
     if (st !== 'active' && st !== 'ending' && st !== 'trial') continue;
-    if (st === 'trial') {
-      count++;
-      continue;
-    }
     count++;
+    // 试用期计入数量，不计入金额
+    if (st === 'trial') continue;
     const v = currentPhase(s, today);
     const m = convert(monthlyGross(v, today), v.currency, base, state.fx);
     if (!Number.isFinite(m)) continue;

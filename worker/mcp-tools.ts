@@ -1,5 +1,5 @@
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
-import { addDays, addMonths, chargesBetween, currentPhase, cycleLabel, effectiveStatus, lastCharge, memberDues, monthlyGross, myShareFactor, nextCharge, phaseSubs, priceAt, runwayFor, todayIn, totals, uid, type Charge } from '../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, currentPhase, cycleLabel, effectiveStatus, lastCharge, memberDues, monthlyGross, myShareFactor, nextCharge, phaseSubs, priceAt, runwayFor, subError, todayIn, totals, uid, type Charge } from '../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../shared/metrics.ts';
 import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncLastPhase } from '../shared/phases.ts';
@@ -166,21 +166,13 @@ const obj = (properties: Record<string, unknown>, required: string[] = []) => ({
 
 /** 写入：dry_run 只返回预览；否则保存并返回最新一行 + 接下来几笔扣款 */
 async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscription, dry: unknown, changed: string[]) {
-  const errs = validate(after);
+  const errs = subError(after);
   if (errs) throw new Error(errs);
   const preview = { subscription: row(st, after, today), changed, next_charges: chargesBetween(after, today, addMonths(today, 13), today).slice(0, 3).map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })) };
   if (dry) return { dry_run: true, ...preview };
   const saved = { ...after, updatedAt: new Date().toISOString() };
   await upsert(ctx.env, 'subscriptions', saved.id, saved);
   return { ok: true, ...preview };
-}
-
-function validate(s: Subscription): string | undefined {
-  if (!s.name?.trim()) return '名称不能为空';
-  if (!Number.isFinite(s.price) || s.price < 0) return '价格无效';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) return '开始日期无效';
-  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !(s.cycle.every >= 1)) return '周期无效';
-  return undefined;
 }
 
 const str = (v: unknown) => (v == null || v === '' ? undefined : String(v));

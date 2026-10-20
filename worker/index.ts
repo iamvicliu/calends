@@ -1,4 +1,4 @@
-import { todayIn } from '../shared/billing.ts';
+import { addDays, subError, todayIn } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type Channel, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
 import { DEFAULT_MAX_SESSIONS, authStatus, changePassword, deletePasskey, isAuthed, listPasskeys, listSessions, login, logout, logoutOthers, passkeyLoginOptions, passkeyLoginVerify, passkeyRegisterOptions, passkeyRegisterVerify, pruneSessions, randomToken, revokeSession, sameOrigin, setup } from './auth.ts';
 import { maskForPublic } from '../shared/mask.ts';
@@ -26,19 +26,16 @@ async function refreshFx(env: Env): Promise<FxTable> {
 
 function validSub(s: Subscription): string | undefined {
   if (!s || typeof s.id !== 'string' || !s.id) return '缺少 id';
-  if (!s.name?.trim()) return '名称不能为空';
-  if (!Number.isFinite(s.price) || s.price < 0) return '价格无效';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) return '开始日期无效';
-  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !(s.cycle.every >= 1)) return '周期无效';
-  return undefined;
+  return subError(s);
 }
 
-/**
- * 本地开发免登录：DEV_BYPASS_AUTH 只写在 .dev.vars（不随部署上传）。
- * wrangler dev 会把请求 URL 改写成线上路由域名，所以这里无法按 localhost 判断。
- */
-function devBypass(_req: Request, env: Env): boolean {
-  return env.DEV_BYPASS_AUTH === '1';
+/** 批量导入时第一条不合格的订阅 */
+function invalidIn(subs: Subscription[]): string | undefined {
+  for (const s of subs) {
+    const err = validSub(s);
+    if (err) return `${s?.name ?? '?'}：${err}`;
+  }
+  return undefined;
 }
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
@@ -47,7 +44,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/logout' && method === 'POST') return logout(req, env);
   // 登录前可用：状态、首次设置、Passkey 登录
   if (path === '/api/auth/status' && method === 'GET') return authStatus(env);
-  const dev = devBypass(req, env);
+  // 本地开发免登录：DEV_BYPASS_AUTH 只写在 .dev.vars（不随部署上传）。
+  // wrangler dev 会把请求 URL 改写成线上路由域名，所以这里无法按 localhost 判断。
+  const dev = env.DEV_BYPASS_AUTH === '1';
   if (method === 'POST' && path.startsWith('/api/auth/') && !dev && !sameOrigin(req)) return bad('forbidden', 403);
   if (path === '/api/auth/setup' && method === 'POST') return setup(req, env);
   if (path === '/api/auth/passkey/login/options' && method === 'POST') return passkeyLoginOptions(req, env);
@@ -162,19 +161,15 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     } catch (e) {
       return bad(e instanceof Error ? e.message : '备份文件无效');
     }
-    for (const s of b.subscriptions) {
-      const err = validSub(s);
-      if (err) return bad(`${s?.name ?? '?'}：${err}`);
-    }
+    const err = invalidIn(b.subscriptions);
+    if (err) return bad(err);
     return json({ restored: await restoreAll(env, b), state: await loadState(env) });
   }
   if (path === '/api/import' && method === 'POST') {
     const body = (await req.json()) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; settings?: Partial<Settings>; mode?: 'merge' | 'replace' };
     const subs = body.subscriptions ?? [];
-    for (const s of subs) {
-      const err = validSub(s);
-      if (err) return bad(`${s?.name ?? '?'}：${err}`);
-    }
+    const err = invalidIn(subs);
+    if (err) return bad(err);
     await replaceAll(env, subs, body.methods ?? [], body.mode === 'replace' ? 'replace' : 'merge');
     if (body.settings) {
       const cur = await getSettings(env);
@@ -235,8 +230,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     // 测试信：取未来 30 天内第一个会触发的日报；都没有就发一封样例
     let d: Digest | undefined;
     for (let i = 0; i < 30 && !d; i++) {
-      const day = new Date(Date.parse(today) + i * 86_400_000).toISOString().slice(0, 10);
-      d = buildDaily(state, day);
+      d = buildDaily(state, addDays(today, i));
     }
     const digest: Digest = d
       ? { ...d, key: `test:${today}`, kind: 'test', subject: `【测试】${d.subject}` }

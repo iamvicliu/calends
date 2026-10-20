@@ -19,6 +19,6 @@ export interface Env {
   OWNER_PASSCODE?: string;
   /** 首次设置密码时需要提供的一次性令牌（wrangler secret put SETUP_TOKEN） */
   SETUP_TOKEN?: string;
-  /** 仅本地：.dev.vars 设为 1 且访问来自 localhost 时跳过登录 */
+  /** 仅本地：.dev.vars 设为 1 时跳过登录（不要在线上配置） */
   DEV_BYPASS_AUTH?: string;
 }
