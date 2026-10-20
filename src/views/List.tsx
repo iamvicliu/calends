@@ -3,12 +3,12 @@ import { currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, price
 import { cnDate, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Amount, catIcon, CatChip, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
 import { t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { cancelSavings } from '../../shared/metrics.ts';
-import { subImage, toBase } from '../derive.ts';
+import { categories, subImage, toBase } from '../derive.ts';
 import { useOrig } from '../display.ts';
 import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
@@ -92,7 +92,10 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
   const statusN = facet('status', (s) => statusOf(effectiveStatus(s, today)));
   const catN = facet('cat', (s) => s.category);
   const payN = facet('pay', payOf);
-  const cats = [...new Set(mine.map((s) => s.category))].sort((x, y) => (catN.get(y) ?? 0) - (catN.get(x) ?? 0));
+  // 按分类表的顺序（设置里可拖动调整）
+  const cats = categories()
+    .map((c) => c.name)
+    .filter((c) => mine.some((s) => s.category === c));
   const dirty = filter !== 'live' || cat !== (category ?? 'all') || pay !== 'all';
   const mo = (s: Subscription) => monthlyMine(state, s, today);
   const rows = mine.filter(match).sort((a, b) => {
@@ -139,7 +142,7 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
             </button>
           )}
           <FacetRow label={t('list.facet.status')} value={filter} onChange={(v) => setFilter(v as Filter)} options={FILTERS().map(([k, l]) => ({ key: k, label: l, n: statusN.get(k) ?? 0 }))} />
-          <FacetRow label={t('list.facet.category')} value={cat} onChange={setCat} options={[{ key: 'all', label: t('list.all'), n: catN.get('all') ?? 0 }, ...cats.map((c) => ({ key: c, label: c, icon: <Icon name={catIcon(c)} size={13} />, n: catN.get(c) ?? 0 }))]} />
+          <FacetRow label={t('list.facet.category')} value={cat} onChange={setCat} options={[{ key: 'all', label: t('list.all'), n: catN.get('all') ?? 0 }, ...cats.map((c) => ({ key: c, label: c, icon: <CatIcon cat={c} size={13} />, n: catN.get(c) ?? 0 }))]} />
           <FacetRow
             label={t('list.facet.pay')}
             value={pay}

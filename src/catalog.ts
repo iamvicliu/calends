@@ -1,6 +1,7 @@
 // 常用服务目录：新建订阅时按名称联想，选中后带出 logo、分类和官网。
 // AI 产品的图标来自 lobe-icons（MIT），放在 public/ai；不带价格，价格变得太快，留给用户自己填。
 import { t } from '../shared/i18n.ts';
+import { presetCat } from './derive.ts';
 
 export interface CatalogItem {
   name: string;
@@ -21,7 +22,7 @@ const ai = (name: string, file: string, url: string, aka: string[] = [], cat: Ca
 /** 选中目录项时才取文案：分类会写进订阅，所以按当前语言给默认值 */
 function resolve(e: Entry): CatalogItem {
   const name = LOCALIZED.has(e.file) ? t(`catalog.name.${e.file}`) : e.name;
-  return { name, aka: name === e.name ? e.aka : [e.name, ...e.aka], icon: `/ai/${e.file}.svg`, category: t(`catalog.category.${e.cat}`), url: e.url };
+  return { name, aka: name === e.name ? e.aka : [e.name, ...e.aka], icon: `/ai/${e.file}.svg`, category: presetCat(e.cat), url: e.url };
 }
 
 const CATALOG: Entry[] = [

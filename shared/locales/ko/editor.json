@@ -42,18 +42,7 @@
   },
   "category": {
     "choose": "카테고리 선택",
-    "new": "새 카테고리…",
-    "newPrompt": "카테고리 이름",
-    "tools": "도구",
-    "media": "동영상",
-    "music": "음악",
-    "daily": "라이프스타일",
-    "productivity": "생산성",
-    "shopping": "쇼핑",
-    "education": "교육",
-    "games": "게임",
-    "domains": "도메인",
-    "social": "소셜"
+    "new": "새 카테고리…"
   },
   "group": {
     "billing": "결제",

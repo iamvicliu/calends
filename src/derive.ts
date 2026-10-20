@@ -3,25 +3,30 @@ import { chargeValue } from '../shared/fx.ts';
 import { flag } from '../shared/format.ts';
 import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../shared/types.ts';
 import { BANKS } from './banks.ts';
-import { t } from '../shared/i18n.ts';
+import { locale, t } from '../shared/i18n.ts';
+import { categoryColor, categoryList, findCategory, isDomainCategory, presetCategory, type Category } from '../shared/categories.ts';
 
-const PALETTE = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c8)', 'var(--c9)', 'var(--c10)'];
-/** 内置分类的代码 → 中文原名；用其他语言新建的分类（Tools 等）靠它对回同一个图标、颜色 */
-const CAT_CODE: Record<string, string> = { tools: '工具', media: '影音', music: '音乐', daily: '日用', productivity: '效率', shopping: '购物', education: '教育', games: '游戏', domains: '域名', social: '社交' };
-/** 分类名归一成中文原名（内置分类），自定义分类原样返回 */
-export function canonicalCat(cat: string): string {
-  for (const [code, zh] of Object.entries(CAT_CODE)) if (t(`editor.category.${code}`) === cat) return zh;
-  return cat;
+/** 当前生效的分类表（名称、图标、颜色、顺序）：后台和公开页每次渲染前用最新数据同步，各处按分类名查 */
+let REG: Category[] = [];
+let regKey: unknown[] = [];
+export function syncCategories(state: Pick<AppState, 'settings' | 'subscriptions'>): Category[] {
+  // 语言变了也要重算：没存过分类表时，内置分类按当前语言命名
+  const key = [state.settings.categories, state.subscriptions, locale()];
+  if (key.some((k, i) => k !== regKey[i])) {
+    REG = categoryList(state.settings, state.subscriptions);
+    regKey = key;
+  }
+  return REG;
 }
-const FIXED: Record<string, number> = { 工具: 0, 影音: 1, 效率: 2, 音乐: 3, 日用: 4, 教育: 5, 购物: 6, AI: 7, 游戏: 8, 域名: 9 };
-
-export function catColor(cat: string): string {
-  const c = canonicalCat(cat);
-  if (c in FIXED) return PALETTE[FIXED[c]];
-  let h = 0;
-  for (const ch of cat) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return PALETTE[h % PALETTE.length];
-}
+export const categories = (): Category[] => REG;
+export const catOf = (name: string): Category | undefined => findCategory(REG, name);
+/** 分类图标：Lucide 图标名或 emoji */
+export const catIcon = (name: string): string => catOf(name)?.icon ?? 'tag';
+export const catColor = (name: string): string => categoryColor(catOf(name), name);
+/** 「域名」分类：域名用注册商图标、可在公开页打码；改过名也认得 */
+export const isDomainCat = (name: string): boolean => isDomainCategory(REG, name);
+/** 某个内置分类现在的名称（用户可能改过名），新建订阅的默认分类、App Store 类别映射用它 */
+export const presetCat = (code: string): string => presetCategory(REG, code);
 
 /** 支付方式类型名；用 getter 在读取时才取文案（模块加载时语言包还没就绪） */
 export const KIND_LABEL: Record<MethodKind, string> = {
@@ -181,7 +186,7 @@ export function faviconOf(url?: string): string | undefined {
 
 /** 订阅的图片图标，用作卡片和详情的背景光晕：图片链接 > 官网图标；域名类不用 */
 export function subImage(s: Pick<Subscription, 'category' | 'icon' | 'url'>): string | undefined {
-  if (canonicalCat(s.category) === '域名') return undefined;
+  if (isDomainCat(s.category)) return undefined;
   if (s.icon?.startsWith('http')) return s.icon;
   return faviconOf(s.url);
 }

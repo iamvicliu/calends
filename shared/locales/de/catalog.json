@@ -1,9 +1,4 @@
 {
-  "category": {
-    "ai": "KI",
-    "tools": "Tools",
-    "productivity": "Produktivität"
-  },
   "name": {
     "qwen": "Qwen",
     "doubao": "Doubao",

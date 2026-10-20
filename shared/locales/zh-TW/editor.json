@@ -9,18 +9,7 @@
   "status": { "active": "計費中", "trial": "試用中", "paused": "已暫停", "cancelled": "已退訂" },
   "category": {
     "choose": "選擇分類",
-    "new": "新增分類…",
-    "newPrompt": "新分類名稱",
-    "tools": "工具",
-    "media": "影音",
-    "music": "音樂",
-    "daily": "日用",
-    "productivity": "效率",
-    "shopping": "購物",
-    "education": "教育",
-    "games": "遊戲",
-    "domains": "網域",
-    "social": "社交"
+    "new": "新增分類…"
   },
   "group": { "billing": "計費", "status": "狀態", "who": "誰在用", "links": "連結與外觀", "tags": "標籤與備註" },
   "field": {

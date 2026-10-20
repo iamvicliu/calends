@@ -218,5 +218,60 @@
     "newPassword": "Mật khẩu mới",
     "minLength": "Ít nhất 8 ký tự",
     "confirmPassword": "Xác nhận mật khẩu mới"
+  },
+  "cat": {
+    "title": "Danh mục",
+    "manage": "Quản lý danh mục",
+    "count": {
+      "other": "{count} danh mục"
+    },
+    "subs": {
+      "other": "{count} gói đăng ký"
+    },
+    "unused": "Chưa dùng",
+    "foot": "Kéo để sắp xếp. Đổi tên danh mục sẽ cập nhật mọi gói đăng ký trong đó.",
+    "add": "Danh mục mới",
+    "edit": "Sửa danh mục",
+    "name": "Tên",
+    "namePlaceholder": "Tên danh mục",
+    "color": "Màu",
+    "icon": "Biểu tượng",
+    "tabIcons": "Biểu tượng",
+    "tabEmoji": "Emoji",
+    "search": "Tìm biểu tượng",
+    "noMatch": "Không có biểu tượng phù hợp",
+    "emojiPlaceholder": "Nhập hoặc dán emoji bất kỳ",
+    "emojiCommon": "Gợi ý",
+    "delete": "Xóa danh mục",
+    "moveTo": {
+      "other": "Chuyển {count} gói đăng ký của nó sang"
+    },
+    "confirmDelete": "Xóa “{name}”?",
+    "dragHandle": "Kéo để sắp xếp",
+    "toast": {
+      "created": "Đã thêm danh mục",
+      "saved": "Đã lưu danh mục",
+      "renamed": {
+        "other": "Đã lưu danh mục · cập nhật {count} gói đăng ký"
+      },
+      "deleted": "Đã xóa danh mục",
+      "order": "Đã lưu thứ tự"
+    },
+    "error": {
+      "empty": "Nhập tên",
+      "duplicate": "Đã có danh mục tên “{name}”"
+    },
+    "group": {
+      "common": "Thường dùng",
+      "tech": "Công nghệ",
+      "media": "Giải trí",
+      "work": "Công việc",
+      "money": "Mua sắm & tiền",
+      "life": "Nhà & đời sống",
+      "food": "Ăn uống",
+      "health": "Sức khỏe & thể thao",
+      "travel": "Đi lại",
+      "people": "Con người & học tập"
+    }
   }
 }

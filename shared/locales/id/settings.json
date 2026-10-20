@@ -218,5 +218,60 @@
     "newPassword": "Kata sandi baru",
     "minLength": "Minimal 8 karakter",
     "confirmPassword": "Konfirmasi kata sandi baru"
+  },
+  "cat": {
+    "title": "Kategori",
+    "manage": "Kelola kategori",
+    "count": {
+      "other": "{count} kategori"
+    },
+    "subs": {
+      "other": "{count} langganan"
+    },
+    "unused": "Tidak dipakai",
+    "foot": "Seret untuk mengurutkan. Mengganti nama kategori akan memperbarui semua langganan di dalamnya.",
+    "add": "Kategori baru",
+    "edit": "Edit kategori",
+    "name": "Nama",
+    "namePlaceholder": "Nama kategori",
+    "color": "Warna",
+    "icon": "Ikon",
+    "tabIcons": "Ikon",
+    "tabEmoji": "Emoji",
+    "search": "Cari ikon",
+    "noMatch": "Tidak ada ikon yang cocok",
+    "emojiPlaceholder": "Ketik atau tempel emoji apa saja",
+    "emojiCommon": "Saran",
+    "delete": "Hapus kategori",
+    "moveTo": {
+      "other": "Pindahkan {count} langganannya ke"
+    },
+    "confirmDelete": "Hapus “{name}”?",
+    "dragHandle": "Seret untuk mengurutkan",
+    "toast": {
+      "created": "Kategori ditambahkan",
+      "saved": "Kategori disimpan",
+      "renamed": {
+        "other": "Kategori disimpan · {count} langganan diperbarui"
+      },
+      "deleted": "Kategori dihapus",
+      "order": "Urutan disimpan"
+    },
+    "error": {
+      "empty": "Masukkan nama",
+      "duplicate": "Kategori bernama “{name}” sudah ada"
+    },
+    "group": {
+      "common": "Umum",
+      "tech": "Teknologi",
+      "media": "Hiburan",
+      "work": "Kerja",
+      "money": "Belanja & uang",
+      "life": "Rumah & hidup",
+      "food": "Makan & minum",
+      "health": "Kesehatan & olahraga",
+      "travel": "Perjalanan",
+      "people": "Orang & belajar"
+    }
   }
 }

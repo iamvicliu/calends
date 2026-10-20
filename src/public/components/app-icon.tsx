@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Subscription } from '../../../shared/types.ts';
-import { faviconOf } from '../../derive.ts';
+import { faviconOf, isDomainCat } from '../../derive.ts';
 import { cn } from '@/public/lib/utils';
 
 const failed = new Set<string>();
@@ -10,7 +10,7 @@ export function AppIcon({ sub, className, size }: { sub: Pick<Subscription, 'nam
   const [, force] = useState(0);
   const box = cn('flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[9px] ring-1 ring-foreground/10', className);
   const style = size ? { width: size, height: size, fontSize: size * 0.55 } : undefined;
-  if (sub.category === '域名') {
+  if (isDomainCat(sub.category)) {
     return (
       <span style={style} className={cn(box, 'bg-white')}>
         <img src={sub.icon?.startsWith('http') ? sub.icon : '/brands/cloudflare.svg'} alt="" className="size-[70%] object-contain" />

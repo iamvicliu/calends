@@ -218,5 +218,64 @@
     "newPassword": "Nova senha",
     "minLength": "Mínimo de 8 caracteres",
     "confirmPassword": "Confirmar nova senha"
+  },
+  "cat": {
+    "title": "Categorias",
+    "manage": "Gerenciar categorias",
+    "count": {
+      "one": "{count} categoria",
+      "other": "{count} categorias"
+    },
+    "subs": {
+      "one": "{count} assinatura",
+      "other": "{count} assinaturas"
+    },
+    "unused": "Sem uso",
+    "foot": "Arraste para reordenar. Renomear uma categoria atualiza todas as assinaturas dela.",
+    "add": "Nova categoria",
+    "edit": "Editar categoria",
+    "name": "Nome",
+    "namePlaceholder": "Nome da categoria",
+    "color": "Cor",
+    "icon": "Ícone",
+    "tabIcons": "Ícones",
+    "tabEmoji": "Emoji",
+    "search": "Buscar ícones",
+    "noMatch": "Nenhum ícone encontrado",
+    "emojiPlaceholder": "Digite ou cole qualquer emoji",
+    "emojiCommon": "Sugestões",
+    "delete": "Excluir categoria",
+    "moveTo": {
+      "one": "Mover a {count} assinatura dela para",
+      "other": "Mover as {count} assinaturas dela para"
+    },
+    "confirmDelete": "Excluir “{name}”?",
+    "dragHandle": "Arraste para reordenar",
+    "toast": {
+      "created": "Categoria adicionada",
+      "saved": "Categoria salva",
+      "renamed": {
+        "one": "Categoria salva · {count} assinatura atualizada",
+        "other": "Categoria salva · {count} assinaturas atualizadas"
+      },
+      "deleted": "Categoria excluída",
+      "order": "Ordem salva"
+    },
+    "error": {
+      "empty": "Digite um nome",
+      "duplicate": "Já existe uma categoria chamada “{name}”"
+    },
+    "group": {
+      "common": "Comuns",
+      "tech": "Tecnologia",
+      "media": "Entretenimento",
+      "work": "Trabalho",
+      "money": "Compras e dinheiro",
+      "life": "Casa e vida",
+      "food": "Comida e bebida",
+      "health": "Saúde e esporte",
+      "travel": "Viagem",
+      "people": "Pessoas e estudo"
+    }
   }
 }

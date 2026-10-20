@@ -246,5 +246,60 @@
     "newPassword": "新しいパスワード",
     "minLength": "8文字以上",
     "confirmPassword": "新しいパスワードを確認"
+  },
+  "cat": {
+    "title": "カテゴリ",
+    "manage": "カテゴリを管理",
+    "count": {
+      "other": "{count} 個のカテゴリ"
+    },
+    "subs": {
+      "other": "{count} 件のサブスク"
+    },
+    "unused": "未使用",
+    "foot": "ドラッグで並べ替えできます。名前を変えると、そのカテゴリのサブスクすべてに反映されます。",
+    "add": "新しいカテゴリ",
+    "edit": "カテゴリを編集",
+    "name": "名前",
+    "namePlaceholder": "カテゴリ名",
+    "color": "カラー",
+    "icon": "アイコン",
+    "tabIcons": "アイコン",
+    "tabEmoji": "絵文字",
+    "search": "アイコンを検索",
+    "noMatch": "一致するアイコンがありません",
+    "emojiPlaceholder": "好きな絵文字を入力または貼り付け",
+    "emojiCommon": "おすすめ",
+    "delete": "カテゴリを削除",
+    "moveTo": {
+      "other": "含まれる {count} 件のサブスクの移動先"
+    },
+    "confirmDelete": "「{name}」を削除しますか？",
+    "dragHandle": "ドラッグで並べ替え",
+    "toast": {
+      "created": "カテゴリを追加しました",
+      "saved": "カテゴリを保存しました",
+      "renamed": {
+        "other": "カテゴリを保存し、{count} 件のサブスクを更新しました"
+      },
+      "deleted": "カテゴリを削除しました",
+      "order": "並び順を保存しました"
+    },
+    "error": {
+      "empty": "名前を入力してください",
+      "duplicate": "「{name}」という名前のカテゴリはすでにあります"
+    },
+    "group": {
+      "common": "よく使う",
+      "tech": "テクノロジー",
+      "media": "エンタメ",
+      "work": "仕事",
+      "money": "買い物・お金",
+      "life": "暮らし",
+      "food": "食べ物",
+      "health": "健康・スポーツ",
+      "travel": "移動・旅行",
+      "people": "人・学び"
+    }
   }
 }

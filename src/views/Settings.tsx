@@ -7,6 +7,7 @@ import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveS
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
+import { CategoriesGroup } from './Categories.tsx';
 import { go } from '../router.ts';
 import { LOCALES, isLocale, t } from '../../shared/i18n.ts';
 import { preferredLocale } from '../i18n.ts';
@@ -243,6 +244,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <CurrencySelect value={s.collectCurrency ?? s.baseCurrency} onChange={(c) => run(() => saveSettings({ collectCurrency: c }))} ariaLabel={t('settings.books.collectCurrency')} />
           </Cell>
         </Group>
+
+        <CategoriesGroup state={state} />
 
         <Group title={t('settings.fx.title')}>
           <Cell label={t('settings.fx.current')} sub={t('settings.fx.updatedAt', { time: localTime(state.fx.fetchedAt, state.settings.timezone) })} onClick={() => run(refreshFx, t('settings.fx.updated'))}>

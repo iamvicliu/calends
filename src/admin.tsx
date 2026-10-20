@@ -6,6 +6,7 @@ import type { AppState, Subscription } from '../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
+import { syncCategories } from './derive.ts';
 import { CurrencyPicker } from './components/CurrencyPicker.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode, type ThemeMode } from './theme.tsx';
 import './styles.css';
@@ -372,6 +373,8 @@ function App() {
 
   if (phase === 'loading') return <div class="login" />;
   if (phase === 'login' || !state) return <Login error={phase === 'offline' ? t('app.offlineError', { error: error ?? '' }) : undefined} />;
+  // 分类表（图标、颜色、顺序）先于各页面同步，页面里按分类名直接查
+  syncCategories(state);
 
   const d = today();
   const ro = !!state.readonly;

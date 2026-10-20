@@ -7,7 +7,8 @@ import { t, type Params } from '../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { allCharges, periodRange, sumBase } from '../derive.ts';
+import { allCharges, catIcon, periodRange, sumBase, syncCategories } from '../derive.ts';
+import { CatGlyph } from '../components/CatGlyph.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode } from '../theme.tsx';
 import { AppIcon } from '@/public/components/app-icon';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
@@ -318,6 +319,7 @@ function Ledger({ state }: { state: AppState }) {
 type Derived = ReturnType<typeof derive>;
 
 function derive(state: AppState, today: string) {
+  syncCategories(state);
   const base = state.settings.baseCurrency;
   const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
   const past = allCharges(state, first, today, today);
@@ -330,7 +332,9 @@ function derive(state: AppState, today: string) {
   const mrr = live.reduce((a, x) => a + x.v, 0);
   const trend = mrrSeries(state, today, 25);
 
+  // 先按分类表的顺序放好：筛选标签沿用这个顺序，构成图按金额排
   const cats = new Map<string, { v: number; n: number }>();
+  for (const c of syncCategories(state)) if (live.some((x) => x.s.category === c.name)) cats.set(c.name, { v: 0, n: 0 });
   for (const x of live) {
     const c = cats.get(x.s.category) ?? { v: 0, n: 0 };
     c.v += x.v;
@@ -382,6 +386,8 @@ function derive(state: AppState, today: string) {
     yearAgoMrr: trend[trend.length - 13]?.mrr ?? mrr,
     mrrTrend: trend.map((p) => ({ month: p.month, mrr: p.mrr })),
     cats: [...cats.entries()].sort((a, b) => b[1].v - a[1].v),
+    /** 筛选标签按分类表的顺序 */
+    catTabs: [...cats.entries()],
     monthsBase: months.map((x) => ({ m: x.m, v: x.base })),
     monthsUsd: months.map((x) => ({ m: x.m, v: x.usd })),
     upcoming,
@@ -459,9 +465,9 @@ function MrrChart({ data, sym, fmt }: { data: Array<{ month: string; mrr: number
 
 /** 构成：一条分段比例条 + 图例 */
 function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: number; k: number; fmt: (v: number) => string }) {
-  const top = cats.slice(0, 4).map(([name, c]) => ({ name, v: c.v, n: c.n }));
+  const top: Array<{ name: string; v: number; n: number; other?: boolean }> = cats.slice(0, 4).map(([name, c]) => ({ name, v: c.v, n: c.n }));
   const rest = cats.slice(4);
-  if (rest.length) top.push({ name: t('public.composition.other'), v: rest.reduce((a, [, c]) => a + c.v, 0), n: rest.reduce((a, [, c]) => a + c.n, 0) });
+  if (rest.length) top.push({ name: t('public.composition.other'), v: rest.reduce((a, [, c]) => a + c.v, 0), n: rest.reduce((a, [, c]) => a + c.n, 0), other: true });
   const shade = (i: number) => `color-mix(in oklab, var(--foreground) ${[100, 62, 38, 22, 12][i] ?? 10}%, transparent)`;
   return (
     <Card className={cn(roomy, 'h-full')}>
@@ -486,7 +492,8 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
           {top.map((x, i) => (
             <li key={x.name} className="flex items-center gap-2.5">
               <i className="size-2.5 rounded-[3px]" style={{ background: shade(i) }} />
-              <span className="flex-1">
+              <span className="flex flex-1 items-center gap-1.5">
+                {!x.other && <CatGlyph icon={catIcon(x.name)} size={14} class="size-3.5 text-muted-foreground" />}
                 {x.name} <span className="text-[13px] text-muted-foreground">{t('public.count', { count: x.n })}</span>
               </span>
               <span className="tnum">{fmt(x.v * k)}</span>
@@ -543,7 +550,7 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
   // 空字符串代表「全部」，避免和名为「全部」的分类撞车
   const [tab, setTab] = useState('');
   const rows = tab === '' ? d.live : d.live.filter((x) => x.s.category === tab);
-  const tabs = [['', d.live.length] as const, ...d.cats.map(([c, x]) => [c, x.n] as const)];
+  const tabs = [['', d.live.length] as const, ...d.catTabs.map(([c, x]) => [c, x.n] as const)];
   return (
     <Card className={cn(roomy, 'h-full')}>
       <CardHeader>
@@ -563,7 +570,8 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
                 className={cn('relative h-7 rounded-full px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground ring-1 ring-border hover:text-foreground')}
               >
                 {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-full bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
-                <span className="relative">
+                <span className="relative flex items-center gap-1">
+                  {c && <CatGlyph icon={catIcon(c)} size={13} class="size-[13px]" />}
                   {c || t('public.list.all')} <span className="opacity-60 tnum">{n}</span>
                 </span>
               </button>

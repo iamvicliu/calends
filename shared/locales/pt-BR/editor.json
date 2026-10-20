@@ -16,18 +16,7 @@
   "status": { "active": "Ativa", "trial": "Teste", "paused": "Pausada", "cancelled": "Cancelada" },
   "category": {
     "choose": "Escolher categoria",
-    "new": "Nova categoria…",
-    "newPrompt": "Nome da categoria",
-    "tools": "Ferramentas",
-    "media": "Vídeo",
-    "music": "Música",
-    "daily": "Estilo de vida",
-    "productivity": "Produtividade",
-    "shopping": "Compras",
-    "education": "Educação",
-    "games": "Jogos",
-    "domains": "Domínios",
-    "social": "Redes sociais"
+    "new": "Nova categoria…"
   },
   "group": { "billing": "Cobrança", "status": "Status", "who": "Quem usa", "links": "Links e aparência", "tags": "Tags e notas" },
   "field": {

@@ -246,5 +246,60 @@
     "newPassword": "새 비밀번호",
     "minLength": "8자 이상",
     "confirmPassword": "새 비밀번호 확인"
+  },
+  "cat": {
+    "title": "카테고리",
+    "manage": "카테고리 관리",
+    "count": {
+      "other": "카테고리 {count}개"
+    },
+    "subs": {
+      "other": "구독 {count}개"
+    },
+    "unused": "사용 안 함",
+    "foot": "드래그해서 순서를 바꿀 수 있습니다. 이름을 바꾸면 해당 카테고리의 모든 구독에 반영됩니다.",
+    "add": "새 카테고리",
+    "edit": "카테고리 편집",
+    "name": "이름",
+    "namePlaceholder": "카테고리 이름",
+    "color": "색상",
+    "icon": "아이콘",
+    "tabIcons": "아이콘",
+    "tabEmoji": "이모지",
+    "search": "아이콘 검색",
+    "noMatch": "일치하는 아이콘이 없습니다",
+    "emojiPlaceholder": "이모지를 입력하거나 붙여넣으세요",
+    "emojiCommon": "추천",
+    "delete": "카테고리 삭제",
+    "moveTo": {
+      "other": "포함된 구독 {count}개를 옮길 곳"
+    },
+    "confirmDelete": "“{name}” 카테고리를 삭제할까요?",
+    "dragHandle": "드래그해서 순서 변경",
+    "toast": {
+      "created": "카테고리를 추가했습니다",
+      "saved": "카테고리를 저장했습니다",
+      "renamed": {
+        "other": "카테고리를 저장하고 구독 {count}개를 업데이트했습니다"
+      },
+      "deleted": "카테고리를 삭제했습니다",
+      "order": "순서를 저장했습니다"
+    },
+    "error": {
+      "empty": "이름을 입력하세요",
+      "duplicate": "“{name}” 카테고리가 이미 있습니다"
+    },
+    "group": {
+      "common": "자주 쓰는",
+      "tech": "기술",
+      "media": "엔터테인먼트",
+      "work": "업무",
+      "money": "쇼핑·금융",
+      "life": "생활",
+      "food": "음식",
+      "health": "건강·운동",
+      "travel": "이동·여행",
+      "people": "사람·학습"
+    }
   }
 }

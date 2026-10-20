@@ -218,5 +218,64 @@
     "newPassword": "New password",
     "minLength": "At least 8 characters",
     "confirmPassword": "Confirm new password"
+  },
+  "cat": {
+    "title": "Categories",
+    "manage": "Manage categories",
+    "count": {
+      "one": "{count} category",
+      "other": "{count} categories"
+    },
+    "subs": {
+      "one": "{count} subscription",
+      "other": "{count} subscriptions"
+    },
+    "unused": "Not used",
+    "foot": "Drag to reorder. Renaming a category updates every subscription in it.",
+    "add": "New category",
+    "edit": "Edit category",
+    "name": "Name",
+    "namePlaceholder": "Category name",
+    "color": "Color",
+    "icon": "Icon",
+    "tabIcons": "Icons",
+    "tabEmoji": "Emoji",
+    "search": "Search icons",
+    "noMatch": "No matching icons",
+    "emojiPlaceholder": "Type or paste any emoji",
+    "emojiCommon": "Suggestions",
+    "delete": "Delete category",
+    "moveTo": {
+      "one": "Move its {count} subscription to",
+      "other": "Move its {count} subscriptions to"
+    },
+    "confirmDelete": "Delete “{name}”?",
+    "dragHandle": "Drag to reorder",
+    "toast": {
+      "created": "Category added",
+      "saved": "Category saved",
+      "renamed": {
+        "one": "Category saved · {count} subscription updated",
+        "other": "Category saved · {count} subscriptions updated"
+      },
+      "deleted": "Category deleted",
+      "order": "Order saved"
+    },
+    "error": {
+      "empty": "Enter a name",
+      "duplicate": "A category named “{name}” already exists"
+    },
+    "group": {
+      "common": "Common",
+      "tech": "Tech",
+      "media": "Entertainment",
+      "work": "Work",
+      "money": "Shopping & money",
+      "life": "Home & life",
+      "food": "Food & drink",
+      "health": "Health & sport",
+      "travel": "Travel",
+      "people": "People & learning"
+    }
   }
 }

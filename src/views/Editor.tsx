@@ -1,10 +1,12 @@
-import { useMemo, useRef, useState } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../shared/billing.ts';
 import { cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { catIcon, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { CatIcon, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { categories, isDomainCat, presetCat } from '../derive.ts';
+import { CategorySheet } from './Categories.tsx';
 import { changePrice, syncPhase, toEditForm } from '../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
@@ -17,11 +19,8 @@ const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetim
 
 const STATUS: SubStatus[] = ['active', 'trial', 'paused', 'cancelled'];
 
-/** 「域名」分类显示公开页开关；旧数据里存的是中文分类名 */
-const isDomainCat = (c: string) => c === '域名' || c === t('editor.category.domains');
-
 export function newSub(today: string, methodId?: string): Subscription {
-  return { id: uid(), name: '', category: t('editor.category.tools'), tags: [], price: 0, currency: 'CNY', cycle: { unit: 'month', every: 1 }, start: today, status: 'active', methodId };
+  return { id: uid(), name: '', category: presetCat('tools'), tags: [], price: 0, currency: 'CNY', cycle: { unit: 'month', every: 1 }, start: today, status: 'active', methodId };
 }
 
 export function confirmDelete(msg: string): boolean {
@@ -40,7 +39,6 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     setBasePrice(form.price);
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
-  const cats = useMemo(() => [...new Set(state.subscriptions.map((s) => s.category))], [state]);
   // 有未保存的修改时，关闭前确认一下
   const [initial] = useState(() => JSON.stringify(f));
   const close = () => (JSON.stringify(f) === initial || confirmDelete(t('editor.confirmDiscard'))) && onClose();
@@ -100,7 +98,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         </>
       }
     >
-      <Form f={f} up={up} state={state} cats={cats} today={today} />
+      <Form f={f} up={up} state={state} today={today} />
       {!isNew && (
         <div style={{ marginTop: 18 }}>
           <ChangePanel f={f} setF={setF} state={state} today={today} />
@@ -110,7 +108,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   );
 }
 
-function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<Subscription>) => void; state: AppState; cats: string[]; today: string }) {
+function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscription>) => void; state: AppState; today: string }) {
   const cycleKey = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'custom';
   const share = f.share;
   const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) => up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
@@ -125,7 +123,9 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
     Boolean,
   ) as string[];
   const [more, setMore] = useState(extras.length > 0);
-  const catOptions = [...new Set([...cats, f.category].filter(Boolean))];
+  // 分类表的顺序；表单里的分类万一不在表里（刚被删掉），也留着它
+  const catOptions = [...new Set([...categories().map((c) => c.name), f.category].filter(Boolean))];
+  const [newCat, setNewCat] = useState(false);
 
   return (
     <div class="ed">
@@ -146,7 +146,7 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
                 // 只有粘贴的链接里带了地区才填，按名称搜时不猜
                 ...(h.fromLink && !f.region && h.country !== 'cn' ? { region: h.country!.toUpperCase() } : {}),
                 // 分类按 App Store 的类别给个默认值，已经选过的不动
-                ...(!f.name.trim() || f.category === t('editor.category.tools') ? { category: GENRE_CAT[h.genre] ? t(`editor.category.${GENRE_CAT[h.genre]}`) : f.category } : {}),
+                ...(!f.name.trim() || f.category === presetCat('tools') ? { category: GENRE_CAT[h.genre] ? presetCat(GENRE_CAT[h.genre]) : f.category } : {}),
               })
             }
             onPickCatalog={(c) => up({ name: c.name, icon: c.icon, url: f.url || c.url, category: c.category })}
@@ -154,15 +154,15 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
           <div class="ed-id-sub">
             <Picker
               value={f.category}
-              onChange={(c) => (c === '__new' ? up({ category: window.prompt(t('editor.category.newPrompt'))?.trim() || f.category }) : up({ category: c }))}
+              onChange={(c) => (c === '__new' ? setNewCat(true) : up({ category: c }))}
               options={[
-                ...catOptions.map((c) => ({ value: c, label: c, icon: <Icon name={catIcon(c)} size={14} /> })),
+                ...catOptions.map((c) => ({ value: c, label: c, icon: <CatIcon cat={c} size={14} /> })),
                 { value: '__new', label: t('editor.category.new'), icon: <Icon name="plus" size={14} /> },
               ]}
               ariaLabel={t('editor.field.category')}
               display={
                 <>
-                  <Icon name={catIcon(f.category)} size={13} />
+                  <CatIcon cat={f.category} size={13} />
                   <span>{f.category || t('editor.category.choose')}</span>
                 </>
               }
@@ -444,6 +444,7 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
           </Group>
         </>
       )}
+      {newCat && <CategorySheet state={state} onClose={() => setNewCat(false)} onSaved={(name) => up({ category: name })} />}
     </div>
   );
 }
@@ -460,24 +461,27 @@ interface AppHit {
   fromLink?: boolean;
 }
 
-/** App Store 类别 → 账本分类 */
+/** App Store 类别 → 账本分类（内置分类代码） */
 const GENRE_CAT: Record<string, string> = {
   Music: 'music',
   Entertainment: 'media',
   'Photo & Video': 'media',
   Productivity: 'productivity',
   Utilities: 'tools',
-  'Developer Tools': 'tools',
+  'Developer Tools': 'developer',
+  'Graphics & Design': 'design',
   Business: 'productivity',
   'Social Networking': 'social',
   Games: 'games',
   Education: 'education',
   Shopping: 'shopping',
   Lifestyle: 'daily',
-  Finance: 'daily',
-  'Health & Fitness': 'daily',
-  Books: 'education',
-  News: 'media',
+  Finance: 'finance',
+  'Health & Fitness': 'health',
+  Medical: 'health',
+  Books: 'news',
+  'Magazines & Newspapers': 'news',
+  News: 'news',
   Reference: 'education',
 };
 

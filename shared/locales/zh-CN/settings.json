@@ -218,5 +218,60 @@
     "newPassword": "新密码",
     "minLength": "至少 8 位",
     "confirmPassword": "确认新密码"
+  },
+  "cat": {
+    "title": "分类",
+    "manage": "管理分类",
+    "count": {
+      "other": "{count} 个分类"
+    },
+    "subs": {
+      "other": "{count} 个订阅"
+    },
+    "unused": "未使用",
+    "foot": "拖动调整顺序；改名会同步到该分类下的所有订阅。",
+    "add": "新建分类",
+    "edit": "编辑分类",
+    "name": "名称",
+    "namePlaceholder": "分类名称",
+    "color": "颜色",
+    "icon": "图标",
+    "tabIcons": "图标",
+    "tabEmoji": "Emoji",
+    "search": "搜索图标",
+    "noMatch": "没有匹配的图标",
+    "emojiPlaceholder": "输入或粘贴任意 emoji",
+    "emojiCommon": "推荐",
+    "delete": "删除分类",
+    "moveTo": {
+      "other": "其中 {count} 个订阅移到"
+    },
+    "confirmDelete": "删除分类「{name}」？",
+    "dragHandle": "拖动排序",
+    "toast": {
+      "created": "已新建分类",
+      "saved": "已保存分类",
+      "renamed": {
+        "other": "已保存分类，更新了 {count} 个订阅"
+      },
+      "deleted": "已删除分类",
+      "order": "已保存顺序"
+    },
+    "error": {
+      "empty": "请填写名称",
+      "duplicate": "已有名为「{name}」的分类"
+    },
+    "group": {
+      "common": "常用",
+      "tech": "科技",
+      "media": "影音娱乐",
+      "work": "办公",
+      "money": "购物理财",
+      "life": "居家生活",
+      "food": "美食",
+      "health": "健康运动",
+      "travel": "出行",
+      "people": "社交学习"
+    }
   }
 }

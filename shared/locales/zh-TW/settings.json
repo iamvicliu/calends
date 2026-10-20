@@ -218,5 +218,60 @@
     "newPassword": "新密碼",
     "minLength": "至少 8 個字元",
     "confirmPassword": "確認新密碼"
+  },
+  "cat": {
+    "title": "分類",
+    "manage": "管理分類",
+    "count": {
+      "other": "{count} 個分類"
+    },
+    "subs": {
+      "other": "{count} 個訂閱"
+    },
+    "unused": "未使用",
+    "foot": "拖曳調整順序；改名會同步到該分類下的所有訂閱。",
+    "add": "新增分類",
+    "edit": "編輯分類",
+    "name": "名稱",
+    "namePlaceholder": "分類名稱",
+    "color": "顏色",
+    "icon": "圖示",
+    "tabIcons": "圖示",
+    "tabEmoji": "Emoji",
+    "search": "搜尋圖示",
+    "noMatch": "沒有符合的圖示",
+    "emojiPlaceholder": "輸入或貼上任意 emoji",
+    "emojiCommon": "推薦",
+    "delete": "刪除分類",
+    "moveTo": {
+      "other": "其中 {count} 個訂閱移到"
+    },
+    "confirmDelete": "刪除分類「{name}」？",
+    "dragHandle": "拖曳排序",
+    "toast": {
+      "created": "已新增分類",
+      "saved": "已儲存分類",
+      "renamed": {
+        "other": "已儲存分類，更新了 {count} 個訂閱"
+      },
+      "deleted": "已刪除分類",
+      "order": "已儲存順序"
+    },
+    "error": {
+      "empty": "請填寫名稱",
+      "duplicate": "已有名為「{name}」的分類"
+    },
+    "group": {
+      "common": "常用",
+      "tech": "科技",
+      "media": "影音娛樂",
+      "work": "辦公",
+      "money": "購物理財",
+      "life": "居家生活",
+      "food": "美食",
+      "health": "健康運動",
+      "travel": "出行",
+      "people": "社交學習"
+    }
   }
 }

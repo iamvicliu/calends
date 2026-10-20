@@ -218,5 +218,64 @@
     "newPassword": "Yeni parola",
     "minLength": "En az 8 karakter",
     "confirmPassword": "Yeni parolayı onaylayın"
+  },
+  "cat": {
+    "title": "Kategoriler",
+    "manage": "Kategorileri yönet",
+    "count": {
+      "one": "{count} kategori",
+      "other": "{count} kategori"
+    },
+    "subs": {
+      "one": "{count} abonelik",
+      "other": "{count} abonelik"
+    },
+    "unused": "Kullanılmıyor",
+    "foot": "Sıralamak için sürükleyin. Kategoriyi yeniden adlandırmak içindeki tüm abonelikleri günceller.",
+    "add": "Yeni kategori",
+    "edit": "Kategoriyi düzenle",
+    "name": "Ad",
+    "namePlaceholder": "Kategori adı",
+    "color": "Renk",
+    "icon": "Simge",
+    "tabIcons": "Simgeler",
+    "tabEmoji": "Emoji",
+    "search": "Simge ara",
+    "noMatch": "Eşleşen simge yok",
+    "emojiPlaceholder": "Herhangi bir emoji yazın veya yapıştırın",
+    "emojiCommon": "Öneriler",
+    "delete": "Kategoriyi sil",
+    "moveTo": {
+      "one": "İçindeki {count} aboneliği taşı:",
+      "other": "İçindeki {count} aboneliği taşı:"
+    },
+    "confirmDelete": "“{name}” silinsin mi?",
+    "dragHandle": "Sıralamak için sürükleyin",
+    "toast": {
+      "created": "Kategori eklendi",
+      "saved": "Kategori kaydedildi",
+      "renamed": {
+        "one": "Kategori kaydedildi · {count} abonelik güncellendi",
+        "other": "Kategori kaydedildi · {count} abonelik güncellendi"
+      },
+      "deleted": "Kategori silindi",
+      "order": "Sıralama kaydedildi"
+    },
+    "error": {
+      "empty": "Bir ad girin",
+      "duplicate": "“{name}” adlı bir kategori zaten var"
+    },
+    "group": {
+      "common": "Sık kullanılan",
+      "tech": "Teknoloji",
+      "media": "Eğlence",
+      "work": "İş",
+      "money": "Alışveriş ve para",
+      "life": "Ev ve yaşam",
+      "food": "Yeme içme",
+      "health": "Sağlık ve spor",
+      "travel": "Seyahat",
+      "people": "İnsanlar ve eğitim"
+    }
   }
 }

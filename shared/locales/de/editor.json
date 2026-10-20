@@ -46,18 +46,7 @@
   },
   "category": {
     "choose": "Kategorie wählen",
-    "new": "Neue Kategorie …",
-    "newPrompt": "Name der Kategorie",
-    "tools": "Tools",
-    "media": "Video",
-    "music": "Musik",
-    "daily": "Alltag",
-    "productivity": "Produktivität",
-    "shopping": "Shopping",
-    "education": "Bildung",
-    "games": "Spiele",
-    "domains": "Domains",
-    "social": "Social Media"
+    "new": "Neue Kategorie …"
   },
   "group": {
     "billing": "Abrechnung",
