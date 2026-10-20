@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>订阅账本 · Ethan</title>
+    <title>小哲的订阅</title>
     <meta name="description" content="个人订阅账本：负 MRR、扣款日历、余额续航、拼车分摊与邮件提醒。" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
@@ -22,10 +22,12 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
     />
     <script>
+      // 首屏前定好主题，避免闪烁：存了亮色/暗色就用它，否则跟随系统
+      var t;
       try {
-        var t = localStorage.getItem('ledger:theme');
-        if (t) document.documentElement.dataset.theme = t;
+        t = localStorage.getItem('ledger:theme');
       } catch (e) {}
+      document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     </script>
   </head>
   <body>

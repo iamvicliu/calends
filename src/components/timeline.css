@@ -1,0 +1,40 @@
+/* 扣款时间线：后台与公开页共用，颜色同时兼容两套设计变量 */
+.tl { --tl-fg: var(--label, var(--foreground)); --tl-mute: var(--label-3, var(--muted-foreground)); --tl-line: var(--line, var(--border)); --tl-card: var(--card); --tl-fill: var(--fill-2, var(--muted)); position: relative; }
+.tl-scroll { overflow-x: auto; overflow-y: hidden; cursor: grab; scrollbar-width: none; overscroll-behavior-x: contain; }
+/* 两端渐隐：用盖在上面的渐变，而不是给滚动层加 mask（mask 每帧都要重绘整层） */
+.tl::before, .tl::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40px; z-index: 3; pointer-events: none; }
+.tl::before { left: 0; background: linear-gradient(90deg, var(--tl-card), transparent); }
+.tl::after { right: 0; background: linear-gradient(270deg, var(--tl-card), transparent); }
+/* 拖动中：图标不响应悬停，提示不出现，光标保持抓手 */
+.tl.dragging .tl-scroll { cursor: grabbing; }
+.tl.dragging .tl-icon { pointer-events: none; }
+.tl img { -webkit-user-drag: none; user-select: none; }
+.tl-scroll::-webkit-scrollbar { display: none; }
+.tl-scroll:active { cursor: grabbing; }
+.tl-track { position: relative; height: 176px; user-select: none; -webkit-user-select: none; contain: layout paint;
+  /* 轴线 + 日刻度 + 周刻度（周一），都画在背景里 */
+  background:
+    linear-gradient(var(--tl-line), var(--tl-line)) 0 140px / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--tl-mute) 70%, transparent) 0 1px, transparent 1px calc(var(--day) * 7)) var(--mon) 140px / 100% 7px no-repeat,
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--tl-mute) 35%, transparent) 0 1px, transparent 1px var(--day)) 0 140px / 100% 4px no-repeat;
+}
+.tl-month { position: absolute; top: 140px; width: 1px; height: 12px; background: var(--tl-fg); opacity: 0.9; }
+.tl-month span { position: absolute; top: 15px; left: 0; transform: translateX(-50%); font-size: 11px; font-weight: 600; font-style: normal; color: var(--tl-fg); opacity: 0.75; white-space: nowrap; }
+
+.tl-today { position: absolute; top: 4px; height: 137px; width: 0; border-left: 1.5px solid var(--tl-fg); opacity: 0.85; }
+.tl-today span { position: absolute; top: 152px; left: 0; transform: translateX(-50%); padding: 1px 7px; border-radius: 999px; background: var(--tl-fg); color: var(--tl-card); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.tl-icon { position: absolute; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; background: none; border-radius: 9px; cursor: pointer; transition: transform 0.15s; z-index: 1; }
+/* 细线把图标连到它那一天 */
+.tl-icon::before { content: ''; position: absolute; top: 100%; left: 50%; width: 1px; height: var(--stem); background: var(--tl-mute); opacity: 0.35; z-index: -1; }
+.tl-icon:hover { transform: translateY(-2px); z-index: 3; }
+.tl-icon.past { opacity: 0.5; }
+.tl-icon.past:hover { opacity: 1; }
+.tl-icon > * { width: 30px !important; height: 30px !important; }
+/* 悬停提示 */
+.tl-icon::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; line-height: 1.3; padding: 5px 8px; border-radius: 8px; background: var(--tl-fg); color: var(--tl-card); opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
+.tl-icon:hover::after { opacity: 1; }
+.tl-more { position: absolute; transform: translateX(-50%); font-size: 11px; font-weight: 600; color: var(--tl-mute); background: var(--tl-fill); border-radius: 999px; padding: 1px 6px; }
+.tl-dot { position: absolute; top: 137px; width: 7px; height: 7px; margin-left: -3px; border-radius: 50%; background: var(--tl-card); box-shadow: inset 0 0 0 1.5px var(--tl-fg); z-index: 2; }
+.tl-dot.past { box-shadow: inset 0 0 0 1.5px var(--tl-mute); }
+.tl-home { position: absolute; top: 0; right: 0; z-index: 4; height: 24px; padding: 0 9px; border: 0; border-radius: 999px; background: var(--tl-fill); color: var(--tl-mute); font-size: 12px; cursor: pointer; }
+.tl-home:hover { color: var(--tl-fg); }

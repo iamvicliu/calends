@@ -4,19 +4,23 @@ import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billin
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
-import { boot, login, today, useStore } from './store.ts';
+import { boot, login, run, saveSettings, today, useStore } from './store.ts';
+import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
+import { CurrencyPicker } from './components/CurrencyPicker.tsx';
+import { THEME_LABEL, ThemeIcon, useThemeMode, type ThemeMode } from './theme.tsx';
 import './styles.css';
 import { Calendar } from './views/Calendar.tsx';
 import { Carpool } from './views/Carpool.tsx';
+import { ProxyPage } from './views/Proxy.tsx';
 import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
 import { List } from './views/List.tsx';
 import { Overview } from './views/Overview.tsx';
 import { Report } from './views/Report.tsx';
-import { PublicPage } from './views/Public.tsx';
 import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
+import { currentRoute, go as navigate, href, initRouter, onRoute } from './router.ts';
 
 const NAV = [
   { path: '', label: '概览', icon: 'home' },
@@ -24,39 +28,21 @@ const NAV = [
   { path: 'calendar', label: '日历', icon: 'cal' },
   { path: 'report', label: '报告', icon: 'chart' },
   { path: 'wallet', label: '钱包', icon: 'wallet' },
-  { path: 'carpool', label: '拼车', icon: 'car' },
+  { path: 'family', label: '合租', icon: 'users' },
+  { path: 'behalf', label: '代付', icon: 'swap' },
 ];
 
 function useRoute() {
-  const get = () => decodeURIComponent(location.hash.replace(/^#\/?/, ''));
-  const [r, setR] = useState(get());
-  useEffect(() => {
-    const on = () => {
-      setR(get());
-      window.scrollTo({ top: 0 });
-    };
-    window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
-  }, []);
+  const [r, setR] = useState(currentRoute());
+  useEffect(
+    () =>
+      onRoute(() => {
+        setR(currentRoute());
+        window.scrollTo({ top: 0 });
+      }),
+    [],
+  );
   return r;
-}
-
-function useTheme(): [string, () => void] {
-  const sys = () => (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  const [t, setT] = useState(document.documentElement.dataset.theme ?? sys());
-  return [
-    t,
-    () => {
-      const next = t === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = next;
-      try {
-        localStorage.setItem('ledger:theme', next);
-      } catch {
-        /* ignore */
-      }
-      setT(next);
-    },
-  ];
 }
 
 function Login({ error }: { error?: string }) {
@@ -91,9 +77,10 @@ function Login({ error }: { error?: string }) {
   );
 }
 
-function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch, onCollapse }: { state: AppState; route: string; d: string; theme: string; toggleTheme: () => void; onOpen: (s: Subscription) => void; onAdd: () => void; onSearch: () => void; onCollapse: () => void }) {
+function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch, onCollapse }: { state: AppState; route: string; d: string; theme: ThemeMode; toggleTheme: () => void; onOpen: (s: Subscription) => void; onAdd: () => void; onSearch: () => void; onCollapse: () => void }) {
   // 即将扣款：像聊天记录一样列在导航下方
   const upcoming = state.subscriptions
+    .filter((s) => !s.proxy) // 代付在「代付」页单独管
     .map((s) => ({ s, n: nextCharge(s, d) }))
     .filter((x) => x.n && x.n <= addDays(d, 45))
     .sort((a, b) => a.n!.localeCompare(b.n!))
@@ -101,7 +88,7 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
   return (
     <aside class="sidebar">
       <div class="sb-top">
-        <a class="sb-mark" href="#/">
+        <a class="sb-mark" href={href('')}>
           <img src="/icons/icon-192.png" alt="" />
           订阅账本
         </a>
@@ -112,7 +99,7 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
       {!state.readonly && (
         <button class="side-item" onClick={onAdd}>
           <Icon name="compose" />
-          <span>新建订阅</span>
+          <span>新建</span>
           <kbd>N</kbd>
         </button>
       )}
@@ -123,7 +110,7 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
       </button>
       <div class="side-gap" />
       {NAV.map((n) => (
-        <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) ? 'active' : ''}`} href={`#/${n.path}`}>
+        <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) ? 'active' : ''}`} href={href(n.path)}>
           <Icon name={n.icon} />
           <span>{n.label}</span>
         </a>
@@ -142,22 +129,44 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
         })}
       </div>
       <div class="side-foot">
-        <button class="side-item" onClick={toggleTheme}>
-          <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
-          <span>{theme === 'dark' ? '浅色' : '深色'}外观</span>
+        <CurrencyItem state={state} />
+        <button class="side-item theme-item" onClick={toggleTheme} title="点击切换：亮色 → 暗色 → 跟随系统">
+          <ThemeIcon mode={theme} size={17} />
+          <span>主题</span>
+          <small>{THEME_LABEL[theme]}</small>
         </button>
         {!state.readonly && (
-          <a class="me" href="#/settings">
-            <span class="avatar">{[...state.settings.displayName][0]?.toUpperCase()}</span>
-            <span class="who">
-              <b>{state.settings.displayName}</b>
-              <small>设置与提醒</small>
-            </span>
+          <a class={`side-item ${route === 'settings' ? 'active' : ''}`} href={href('settings')}>
+            <Icon name="gear" />
+            <span>设置</span>
           </a>
         )}
       </div>
     </aside>
   );
+}
+
+/**
+ * 侧边栏「货币」：点开直接是下拉。原币 = 列表按各自币种显示；选一种货币 = 全站统计按它折算，列表也换成它。
+ * 原币只影响显示，统计仍沿用上次选的货币。
+ */
+function CurrencyItem({ state }: { state: AppState }) {
+  const orig = useOrig();
+  const base = state.settings.baseCurrency;
+  const value = orig ? 'orig' : base;
+  // 常用：美元、人民币，再加订阅里实际用到的币种（含各个分段），按出现次数排；其余按代码排序，汇率接口支持的全部列出
+  const count = new Map<string, number>();
+  for (const s of state.subscriptions) for (const c of new Set([s.currency, ...(s.phases ?? []).map((p) => p.currency)])) count.set(c, (count.get(c) ?? 0) + 1);
+  const used = [...new Set(['USD', 'CNY', ...[...count].sort((a, b) => b[1] - a[1]).map(([c]) => c)])].filter((c) => state.fx.rates[c]);
+  const rest = Object.keys(state.fx.rates)
+    .filter((c) => !used.includes(c) && !HIDDEN_CCY.has(c))
+    .sort();
+  const pick = (v: string) => {
+    if (v === 'orig') return setOrig(true);
+    setOrig(false);
+    if (v !== base && !state.readonly) run(() => saveSettings({ baseCurrency: v }));
+  };
+  return <CurrencyPicker value={value} used={used} all={rest} onChange={pick} />;
 }
 
 /** ⌘K 搜索：订阅、页面、操作 */
@@ -166,7 +175,13 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
   const [i, setI] = useState(0);
   const lower = q.trim().toLowerCase();
   const subs = state.subscriptions
-    .filter((s) => !lower || `${s.name} ${s.category} ${s.tags.join(' ')}`.toLowerCase().includes(lower))
+    .filter((s) => {
+      if (!lower) return true;
+      // 名称、分类、标签、支付方式、地区、备注、代付对象都能搜；多个词需同时命中
+      const m = state.methods.find((x) => x.id === s.methodId)?.name ?? '';
+      const hay = `${s.name} ${s.category} ${s.tags.join(' ')} ${m} ${s.region ?? ''} ${s.notes ?? ''} ${s.proxy?.forName ?? ''}`.toLowerCase();
+      return lower.split(/\s+/).every((w) => hay.includes(w));
+    })
     .sort((a, b) => (effectiveStatus(a, d) === 'ended' ? 1 : 0) - (effectiveStatus(b, d) === 'ended' ? 1 : 0))
     .slice(0, 8);
   const pages = [...NAV, { path: 'settings', label: '设置', icon: 'gear' }].filter((n) => !lower || n.label.includes(lower));
@@ -184,7 +199,7 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
     })),
     ...pages.map((n) => ({
       key: n.path,
-      run: () => (location.hash = `#/${n.path}`),
+      run: () => navigate(n.path),
       el: (
         <>
           <Icon name={n.icon} />
@@ -268,7 +283,7 @@ function useLocalFlag(key: string): [boolean, (v: boolean) => void] {
 function App() {
   const { phase, state, error } = useStore();
   const route = useRoute();
-  const [theme, toggleTheme] = useTheme();
+  const [theme, toggleTheme] = useThemeMode();
   const [editing, setEditing] = useState<Subscription | null>(null);
   const [viewId, setViewId] = useState<string | null>(null);
   const [review, setReview] = useState(false);
@@ -292,12 +307,12 @@ function App() {
       }
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.metaKey || e.ctrlKey) return;
-      if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today()));
+      if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today(), state?.settings.defaultMethodId));
       const idx = Number(e.key);
-      if (idx >= 1 && idx <= NAV.length) location.hash = '#/' + NAV[idx - 1].path;
+      if (idx >= 1 && idx <= NAV.length) navigate(NAV[idx - 1].path);
     };
     const onDrawer = () => (matchMedia('(max-width: 860px)').matches ? setDrawer(true) : setCollapsed(false));
-    const onAdd = () => state && !state.readonly && setEditing(newSub(today()));
+    const onAdd = () => state && !state.readonly && setEditing(newSub(today(), state?.settings.defaultMethodId));
     document.addEventListener('keydown', onKey);
     window.addEventListener('ledger:drawer', onDrawer);
     window.addEventListener('ledger:add', onAdd);
@@ -323,7 +338,7 @@ function App() {
   };
   const add = () => {
     setDrawer(false);
-    setEditing(newSub(d));
+    setEditing(newSub(d, state?.settings.defaultMethodId));
   };
   const viewing = state.subscriptions.find((s) => s.id === viewId);
 
@@ -340,8 +355,11 @@ function App() {
       case 'wallet':
         view = <Wallet state={state} today={d} onOpen={open} />;
         break;
-      case 'carpool':
+      case 'family':
         view = <Carpool state={state} today={d} onOpen={open} onEdit={edit} />;
+        break;
+      case 'behalf':
+        view = <ProxyPage state={state} today={d} onOpen={open} />;
         break;
       case 'report':
         view = <Report state={state} today={d} onOpen={open} onReview={() => setReview(true)} />;
@@ -399,15 +417,7 @@ function App() {
   );
 }
 
-// 根路径是对外公开的只读页（不出现任何登录入口）；/admin 才是需要登录的后台
-if (location.pathname.startsWith('/admin')) {
-  render(<App />, document.getElementById('app')!);
-  boot();
-} else {
-  if (location.pathname !== '/') history.replaceState(null, '', '/');
-  render(<PublicPage />, document.getElementById('app')!);
-}
-
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-}
+document.title = '订阅账本';
+initRouter();
+render(<App />, document.getElementById('app')!);
+boot();

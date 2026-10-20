@@ -1,8 +1,8 @@
 import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { symbol } from '../../shared/format.ts';
-import type { PaymentMethod, Subscription } from '../../shared/types.ts';
-import { catColor, domainOf, KIND_BG } from '../derive.ts';
+import { flag, symbol } from '../../shared/format.ts';
+import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
+import { bankOf, BRANDS, brandOf, catColor, domainOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { useToasts } from '../store.ts';
 
 // ---------- SF Symbols 风格线性图标 ----------
@@ -56,6 +56,57 @@ const P: Record<string, JSX.Element> = {
       <path d="m20 20-3.5-3.5" />
     </>
   ),
+  // 分类图标（Lucide 路径）
+  bot: (
+    <>
+      <rect x="4" y="8" width="16" height="12" rx="3" />
+      <path d="M12 8V4.5M10 4.5h4M2 13.5v2M22 13.5v2M9.5 13v1.5M14.5 13v1.5" />
+    </>
+  ),
+  sparkle: <path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3Z" />,
+  wrench: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9l-3.8 3.8Z" />,
+  film: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="m10 8 6 4-6 4Z" />
+    </>
+  ),
+  music: (
+    <>
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </>
+  ),
+  zap: <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />,
+  server: (
+    <>
+      <rect x="2" y="3" width="20" height="8" rx="2" />
+      <rect x="2" y="13" width="20" height="8" rx="2" />
+      <path d="M6 7h.01M6 17h.01" />
+    </>
+  ),
+  bag: (
+    <>
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+      <path d="M3 6h18M16 10a4 4 0 0 1-8 0" />
+    </>
+  ),
+  book: <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />,
+  gamepad: (
+    <>
+      <rect x="2" y="6" width="20" height="12" rx="2" />
+      <path d="M6 12h4M8 10v4M15 13h.01M18 11h.01" />
+    </>
+  ),
+  users: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </>
+  ),
+  // 代付：一来一回
+  swap: <path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />,
   moon: <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />,
   sun: (
     <>
@@ -89,6 +140,18 @@ const P: Record<string, JSX.Element> = {
       <path d="M9 4v16" />
     </>
   ),
+  coins: (
+    <>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82" />
+    </>
+  ),
+  copy: (
+    <>
+      <rect x="8" y="8" width="12" height="12" rx="2.5" />
+      <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+    </>
+  ),
   share: <path d="M12 3v12M8 7l4-4 4 4M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />,
   globe: (
     <>
@@ -109,24 +172,22 @@ export function Icon({ name, size }: { name: keyof typeof P | string; size?: num
 // ---------- 订阅图标：emoji > 图片 URL > 站点图标 > 渐变首字母 ----------
 const failed = new Set<string>();
 
-export function SubIcon({ sub, size = 40 }: { sub: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'>; size?: number }) {
+/** proxied：经 /api/img 同源中转，导出图片时画布不会被跨域图片污染 */
+export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'>; size?: number; proxied?: boolean }) {
   const [, force] = useState(0);
   const tint = catColor(sub.category);
   const style = { '--s': `${size}px`, '--tint': tint } as Record<string, string>;
-  // 域名统一使用一个图标，不用各自的站点图标
+  // 域名用注册商的图标，不用各自的站点图标：默认 Cloudflare，其他注册商在 icon 里填它的图标
   if (sub.category === '域名') {
     return (
       <span class="ico domain" style={style}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="8.2" />
-          <ellipse cx="12" cy="12" rx="3.6" ry="8.2" />
-          <path d="M4.2 9.2h15.6M4.2 14.8h15.6" />
-        </svg>
+        <img src={sub.icon?.startsWith('http') ? (proxied ? `/api/img?u=${encodeURIComponent(sub.icon)}` : sub.icon) : '/brands/cloudflare.svg'} alt="" />
       </span>
     );
   }
   const icon = sub.icon?.trim();
-  if (icon && !/^https?:/.test(icon)) {
+  // 不是链接也不是站内图片路径（/ai/claude.svg）的，当 emoji 显示
+  if (icon && !/^(https?:|\/)/.test(icon)) {
     return (
       <span class="ico emoji" style={style}>
         {icon}
@@ -134,10 +195,12 @@ export function SubIcon({ sub, size = 40 }: { sub: Pick<Subscription, 'name' | '
     );
   }
   const domain = domainOf(sub.url);
-  const src = icon || (domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : undefined);
+  const raw = icon || (domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : undefined);
+  const src = raw && proxied && /^https?:/.test(raw) ? `/api/img?u=${encodeURIComponent(raw)}` : raw;
   if (src && !failed.has(src)) {
     return (
-      <span class={`ico ${icon ? 'app' : 'fav'}`} style={style}>
+      // 目录里的 AI 标是透明底的矢量图，按站点图标那样放在白底上
+      <span class={`ico ${icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
         <img
           src={src}
           alt=""
@@ -167,15 +230,55 @@ export function SubIcon({ sub, size = 40 }: { sub: Pick<Subscription, 'name' | '
   );
 }
 
-/** 支付方式小徽标：色块 + 名称 */
+/** 支付方式胶囊：logo 标记 + 名称；全站凡是显示支付方式的地方都用它 */
 export function PayBadge({ m }: { m?: PaymentMethod }) {
   if (!m) return <span class="pay none">未指定</span>;
   return (
-    <span class="pay">
-      <i style={{ background: m.color || KIND_BG[m.kind] }} />
-      {m.name}
+    <span class="pay" title={m.name}>
+      <MethodMark m={m} size={16} />
+      <span class="pay-name">{m.name}</span>
     </span>
   );
+}
+
+export const CAT_ICON: Record<string, string> = { AI: 'bot', 工具: 'wrench', 影音: 'film', 音乐: 'music', 日用: 'home', 效率: 'zap', 购物: 'bag', 教育: 'book', 游戏: 'gamepad', 域名: 'globe', 服务器: 'server', 社交: 'users' };
+
+/** 分类胶囊：分类色 + 图标 + 名称 */
+export function CatChip({ cat }: { cat: string }) {
+  return (
+    <span class="cat-chip" style={{ '--tint': catColor(cat) } as Record<string, string>}>
+      <Icon name={CAT_ICON[cat] ?? 'tag'} size={12} />
+      {cat}
+    </span>
+  );
+}
+
+/**
+ * 支付方式标记：统一显示支付产品自己的 logo —— 银行卡用银行图标集，
+ * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有 logo 的用卡面色 + 名称首字。
+ */
+export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }) {
+  const brand = brandOf(m);
+  const bank = bankOf(m);
+  const f = flag(methodRegion(m));
+  // 小圆标优先用银行图标集（专为小尺寸设计）；其余用自定义 / 平台 / 官网 logo
+  const logo = bank ? undefined : methodLogo(m);
+  const onColor = BRANDS.find((b) => b.key === brand)?.onColor;
+  // 白色 logo 放在卡面色上，彩色 logo 放在白底上
+  const bg = bank || brand === 'appstore' ? undefined : onColor ? KIND_BG[m.kind] : logo ? (m.color && m.logo ? m.color : '#fff') : m.color || KIND_BG[m.kind];
+  const style = { '--s': `${size}px`, background: bg } as Record<string, string>;
+  return (
+    <span class={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
+      {bank ? <img src={`/banks/${bank}-rect.svg`} alt="" /> : brand === 'appstore' ? <i class="mm-glyph" /> : logo ? <img src={logo} alt="" /> : <b>{[...m.name][0]}</b>}
+      {f && <em class="mm-flag">{f}</em>}
+    </span>
+  );
+}
+
+/** 卡组织标：Visa、Mastercard、银联… */
+export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; height?: number }) {
+  if (!network) return null;
+  return <img class="net-mark" src={`/networks/${network}.svg`} alt={NETWORKS[network]} title={NETWORKS[network]} style={{ height }} />;
 }
 
 /** 小组件式金额：小数位缩小 */

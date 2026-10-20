@@ -33,7 +33,12 @@ export async function loadState(env: Env): Promise<AppState> {
   ]);
   const state: AppState = {
     subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
-    methods: methods.results.map((r) => JSON.parse(r.data) as PaymentMethod),
+    // 按用户在钱包里拖出来的顺序；没排过的保持原有先后
+    methods: methods.results
+      .map((r) => JSON.parse(r.data) as PaymentMethod)
+      .map((m, i) => ({ m, i }))
+      .sort((a, b) => (a.m.order ?? 1e9) - (b.m.order ?? 1e9) || a.i - b.i)
+      .map((x) => x.m),
     settings,
     fx,
   };

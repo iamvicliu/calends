@@ -1,4 +1,4 @@
-import type { AppState, Cycle, FxTable, PaymentMethod, Subscription } from './types.ts';
+import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment } from './types.ts';
 
 // ---------- 日期：全部按 UTC 日计算 ----------
 
@@ -77,6 +77,7 @@ export function cycleLabel(c: Cycle): string {
   if (c.every === 1) return { day: '每天', week: '每周', month: '每月', year: '每年' }[c.unit];
   if (c.unit === 'month' && c.every === 3) return '每季度';
   if (c.unit === 'month' && c.every === 6) return '每半年';
+  if (c.unit === 'year' && c.every === 2) return '每两年';
   return `每 ${c.every} ${unit === '月' ? '个月' : unit}`;
 }
 
@@ -106,8 +107,10 @@ export function phaseSubs(s: Subscription): Subscription[] {
       region: p.region,
       priceHistory: p.priceHistory,
       intro: p.intro,
+      bonus: p.bonus,
       payments: p.payments,
       nextDue: p.nextDue,
+      planned: p.planned,
       trialEnd: i === 0 ? s.trialEnd : undefined,
       status: last ? s.status : 'active',
       pausedAt: last ? s.pausedAt : undefined,
@@ -137,20 +140,30 @@ export function isLive(s: Subscription, day: string): boolean {
   return true;
 }
 
-export function effectiveStatus(s: Subscription, today: string): 'active' | 'trial' | 'paused' | 'ending' | 'ended' | 'lifetime' {
+/**
+ * 待生效的变更：今天之后才开始的第一个阶段（换区、换支付方式、断更后约好的续订）；
+ * 没有阶段的订阅若开始日在未来，返回自身（未来某天才开始订阅、前面有免费期等）
+ */
+export function upcomingPhase(s: Subscription, today: string): Subscription | undefined {
+  if (!s.phases?.length) return s.start > today ? s : undefined;
+  return phaseSubs(s).find((v) => v.start > today);
+}
+
+export function effectiveStatus(s: Subscription, today: string): 'upcoming' | 'active' | 'trial' | 'paused' | 'ending' | 'ended' | 'lifetime' {
   if (s.phases?.length) {
     const v = phaseAt(s, today);
     if (v) {
       const st = effectiveStatus(v, today);
-      // 当前阶段结束当天就有下一阶段接上（换区 / 换套餐），不算到期不续
+      // 已经排好下一阶段（换区 / 换套餐 / 换支付方式，中间空几天也算），不算到期不续
       const vs = phaseSubs(s);
       const next = vs[vs.indexOf(vs.find((x) => x.start === v.start)!) + 1];
-      return st === 'ending' && next && v.end && next.start <= v.end ? 'active' : st;
+      return st === 'ending' && next ? 'active' : st;
     }
     const vs = phaseSubs(s);
-    if (vs.some((x) => x.start > today)) return vs[0].start > today ? 'active' : 'paused'; // 断更中，已安排续订
+    if (vs.some((x) => x.start > today)) return vs[0].start > today ? 'upcoming' : 'paused'; // 尚未开始，或断更中已安排续订
     return effectiveStatus(vs[vs.length - 1], today);
   }
+  if (s.start > today) return 'upcoming';
   if (s.cycle.unit === 'lifetime') return 'lifetime';
   if (s.status === 'paused') return 'paused';
   if (!isLive(s, today)) return 'ended';
@@ -178,6 +191,10 @@ export interface Charge {
   currency: string;
   /** 预测的未来扣款 */
   projected: boolean;
+  kind?: Payment['kind'];
+  /** 卡上实际扣的币种与金额 */
+  settled?: Payment['settled'];
+  note?: string;
 }
 
 /** 按周期从 anchor 推算 [from, to] 内、晚于 after 的扣款 */
@@ -210,9 +227,22 @@ export function chargesBetween(s: Subscription, from: string, to: string, today:
       .flatMap((v) => chargesBetween(v, from, to, today))
       .sort((a, b) => a.date.localeCompare(b.date));
   }
+  const raw = rawCharges(s, from, to, today);
+  const b = s.bonus;
+  if (!b || s.cycle.unit === 'lifetime') return raw;
+  // 赠送期：期间的预测扣款去掉，之后从赠送结束日重新按周期起算；实际扣款记录照旧保留
+  const paid = new Set((s.payments ?? []).map((p) => p.date));
+  const lastPaid = (s.payments ?? []).reduce((m, p) => (p.date > m ? p.date : m), '');
+  const keep = raw.filter((c) => paid.has(c.date) || c.date < b.from);
+  const after = schedule(s, b.until, from, to, today, lastPaid > b.until ? lastPaid : addDays(b.until, -1));
+  return keep.concat(after.filter((c) => !paid.has(c.date))).sort((x, y) => x.date.localeCompare(y.date));
+}
+
+function rawCharges(s: Subscription, from: string, to: string, today: string): Charge[] {
   const pays = (s.payments ?? []).slice().sort((a, b) => a.date.localeCompare(b.date));
   if (pays.length) {
-    const out: Charge[] = pays.filter((p) => p.date >= from && p.date <= to).map((p) => ({ sub: s, date: p.date, amount: p.amount, currency: s.currency, projected: p.date > today }));
+    // 扣款失败的记一笔 0，不计入支出，但留在记录里
+    const out: Charge[] = pays.filter((p) => p.date >= from && p.date <= to).map((p) => ({ sub: s, date: p.date, amount: p.kind === 'failed' ? 0 : p.amount, currency: s.currency, projected: p.date > today, kind: p.kind, settled: p.settled, note: p.note }));
     if (s.cycle.unit === 'lifetime') return out;
     const last = pays[pays.length - 1].date;
     return out.concat(schedule(s, s.nextDue ?? nthCharge(last, s.cycle, 1), from, to, today, last));
@@ -253,11 +283,13 @@ export function convert(amount: number, from: string, to: string, fx: FxTable): 
   return (amount / a) * b;
 }
 
-/** 我实际承担的比例（拼车车主扣除他人份额；上车成员 price 本就是自己那份） */
+/** 我实际承担的比例（合租发起人扣除他人份额；加入的成员 price 本就是自己那份） */
 export function myShareFactor(s: Subscription): number {
+  // 代付：全额由对方承担
+  if (s.proxy) return 0;
   const sh = s.share;
   if (!sh || sh.role !== 'owner' || s.price <= 0) return 1;
-  const others = sh.members.reduce((t, m) => t + (m.share || 0), 0);
+  const others = sh.members.reduce((t, m) => t + (m.exempt || m.left ? 0 : m.share || 0), 0);
   return Math.max(0, (s.price - others) / s.price);
 }
 
@@ -266,13 +298,16 @@ export function monthlyGross(s: Subscription, day?: string): number {
   if (s.phases?.length) return monthlyGross(day ? currentPhase(s, day) : phaseSubs(s).pop()!, day);
   if (s.cycle.unit === 'lifetime') return 0;
   const p = day ? priceAt(s, day) : s.price;
-  return (p * 30.4375) / cycleDays(s.cycle);
+  // 有赠送时长：这一期的钱摊到「周期 + 赠送」上，赠送结束后恢复正常
+  const b = s.bonus;
+  const days = cycleDays(s.cycle) + (b && (!day || day < b.until) ? Math.max(0, diffDays(b.from, b.until)) : 0);
+  return (p * 30.4375) / days;
 }
 
 export interface Totals {
   mrr: number; // 我承担的部分，正数，展示时加负号
   grossMrr: number;
-  recoverMrr: number; // 拼车每月回血
+  recoverMrr: number; // 合租每月回血
   activeCount: number;
 }
 
@@ -282,6 +317,8 @@ export function totals(state: AppState, today: string): Totals {
   let gross = 0;
   let count = 0;
   for (const s of state.subscriptions) {
+    // 代付是替别人付的钱，不算我的订阅，也不计入数量与总额
+    if (s.proxy) continue;
     const st = effectiveStatus(s, today);
     if (st !== 'active' && st !== 'ending' && st !== 'trial') continue;
     if (st === 'trial') {
@@ -352,7 +389,7 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   return { method, current, monthlyDrain, shortfall, coveredCharges: covered, runsOutOn: shortfall?.date, topUp12m: Math.max(0, need12 - current), upcoming };
 }
 
-// ---------- 拼车 ----------
+// ---------- 合租 ----------
 
 export interface MemberDue {
   sub: Subscription;
@@ -367,15 +404,22 @@ export function memberDues(s: Subscription, today: string): MemberDue[] {
   if (!s.share || s.share.role !== 'owner') return [];
   const next = nextCharge(s, today);
   if (!next) return [];
-  // 下一期账单周期结束日 = next 之后一个周期的前一天
-  const coverUntil = addDays(nthCharge(next, s.cycle, 1), -1);
+  const cycleMonths = cycleDays(s.cycle) / 30.4375;
   return s.share.members.map((m) => {
+    if (m.exempt) return { sub: s, member: m, dueFor: next, owed: 0, periodsOwed: 0 };
+    // 按成员自己的收费周期数欠了几期：从已付至的次日（没收过就从加入那天）起，每个周期开始时就该交；退出后不再计
+    const every = m.billEvery ?? Math.max(1, Math.round(cycleMonths));
+    const until = m.left && m.left <= today ? addDays(m.left, -1) : today;
     let periods = 0;
-    if (!m.paidUntil) periods = 1;
-    else if (m.paidUntil < coverUntil) {
-      periods = Math.max(1, Math.ceil(diffDays(m.paidUntil, coverUntil) / cycleDays(s.cycle)));
+    if (!m.paidUntil || m.paidUntil < until) {
+      const from = m.paidUntil ? addDays(m.paidUntil, 1) : (m.joined ?? s.share!.since ?? today);
+      if (from <= until) {
+        periods = 1;
+        for (let d = addMonths(from, every); d <= until && periods < 120; d = addMonths(d, every)) periods++;
+      }
     }
-    return { sub: s, member: m, dueFor: next, owed: periods * (m.share || 0), periodsOwed: periods };
+    const perCollect = ((m.share || 0) * every) / cycleMonths;
+    return { sub: s, member: m, dueFor: next, owed: periods * perCollect, periodsOwed: periods };
   });
 }
 

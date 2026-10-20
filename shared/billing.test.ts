@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addMonths, chargesBetween, nextCharge, runwayFor, memberDues, advancePaid, totals, FALLBACK_FX } from './billing.ts';
+import { addMonths, chargesBetween, monthlyGross, nextCharge, runwayFor, memberDues, advancePaid, totals, FALLBACK_FX } from './billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const base = (o: Partial<Subscription>): Subscription => ({
@@ -39,11 +39,17 @@ test('余额续航', () => {
   assert.equal(r.runsOutOn, '2027-01-05');
 });
 
-test('拼车', () => {
+test('合租', () => {
   const s = base({ price: 60, start: '2026-01-10', share: { role: 'owner', seats: 6, members: [{ id: 'a', name: 'A', share: 10, paidUntil: '2026-11-09' }, { id: 'b', name: 'B', share: 10 }] } });
   const d = memberDues(s, '2026-10-19');
-  assert.equal(d[0].periodsOwed, 1);
+  // 已付至 11 月 9 日：还没到期，不欠
+  assert.equal(d[0].periodsOwed, 0);
   assert.equal(d[1].owed, 10);
+  // 按半年收、已付至 7 月 16 日：10 月 20 日欠一期（7 月 17 日那期），金额 = 每期份额 × 6
+  const half = base({ price: 60, start: '2021-04-14', share: { role: 'owner', seats: 6, members: [{ id: 'c', name: 'C', share: 10, billEvery: 6, paidUntil: '2026-07-16' }] } });
+  const h = memberDues(half, '2026-10-20');
+  assert.equal(h[0].periodsOwed, 1);
+  assert.equal(Math.round(h[0].owed), 60);
   assert.equal(advancePaid(s, '2026-11-09', '2026-10-19'), '2026-12-09');
   const state: AppState = { subscriptions: [s], methods: [], settings: DEFAULT_SETTINGS, fx: FALLBACK_FX };
   const t = totals({ ...state, settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' } }, '2026-10-19');
@@ -58,4 +64,28 @@ test('实际扣款记录 + 下次扣款日', () => {
   // 提前续费：最后一笔之后才开始推算
   const f = base({ price: 10.46, cycle: { unit: 'year', every: 1 }, start: '2025-11-07', payments: [{ date: '2025-11-07', amount: 10.46 }, { date: '2026-10-08', amount: 10.46 }], nextDue: '2027-10-08' });
   assert.equal(nextCharge(f, '2026-10-19'), '2027-10-08');
+});
+
+test('赠送时长：买一年送一年', () => {
+  const s = base({ price: 120, cycle: { unit: 'year', every: 1 }, start: '2026-01-01', bonus: { from: '2027-01-01', until: '2028-01-01' } });
+  const cs = chargesBetween(s, '2025-01-01', '2029-06-30', '2026-10-19');
+  assert.deepEqual(cs.map((c) => c.date), ['2026-01-01', '2028-01-01', '2029-01-01']);
+  assert.equal(Math.round(monthlyGross(s, '2026-10-19') * 100) / 100, 5); // 120 摊到 24 个月
+  assert.equal(Math.round(monthlyGross(s, '2028-03-01')), 10); // 赠送结束后恢复
+  // 不整周期的赠送：送 45 天，下一笔顺延到赠送结束那天
+  const m = base({ price: 10, start: '2026-01-10', bonus: { from: '2026-03-10', until: '2026-04-24' } });
+  assert.deepEqual(chargesBetween(m, '2026-01-01', '2026-06-30', '2026-01-01').map((c) => c.date), ['2026-01-10', '2026-02-10', '2026-04-24', '2026-05-24', '2026-06-24']);
+});
+
+test('手动记一笔：推算的历史先固化，未来照旧', async () => {
+  const { savePayment, deletePayment } = await import('./phases.ts');
+  const s = base({ price: 10, start: '2026-01-10' });
+  const r = savePayment(s, '2026-04-01', { date: '2026-03-15', amount: -4, kind: 'refund' });
+  const cs = chargesBetween(r, '2026-01-01', '2026-06-30', '2026-04-01');
+  assert.deepEqual(cs.map((c) => [c.date, c.amount]), [['2026-01-10', 10], ['2026-02-10', 10], ['2026-03-10', 10], ['2026-03-15', -4], ['2026-04-10', 10], ['2026-05-10', 10], ['2026-06-10', 10]]);
+  // 改成「扣款失败」：不计金额
+  const f = savePayment(r, '2026-04-01', { date: '2026-03-10', amount: 10, kind: 'failed' }, { date: '2026-03-10', index: 0 });
+  assert.equal(chargesBetween(f, '2026-03-10', '2026-03-10', '2026-04-01')[0].amount, 0);
+  const d = deletePayment(f, '2026-04-01', '2026-03-15', 0);
+  assert.equal(chargesBetween(d, '2026-03-11', '2026-03-31', '2026-04-01').length, 0);
 });

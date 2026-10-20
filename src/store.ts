@@ -89,6 +89,40 @@ export async function boot(): Promise<void> {
   }
 }
 
+/**
+ * 只把这次表单里真正改动的字段合并到最新数据上：
+ * 打开表单期间别处（另一个标签页、同步脚本）改过的其他字段不会被旧数据覆盖。
+ */
+export function mergeEdits<T extends { id: string }>(original: T, edited: T, latest: T | undefined): T {
+  if (!latest) return edited;
+  const out: Record<string, unknown> = { ...latest };
+  const keys = new Set([...Object.keys(original), ...Object.keys(edited)]);
+  for (const k of keys) {
+    const a = (original as Record<string, unknown>)[k];
+    const b = (edited as Record<string, unknown>)[k];
+    if (JSON.stringify(a) !== JSON.stringify(b)) out[k] = b;
+  }
+  return out as T;
+}
+
+/** 回到页面时拉一次最新数据，避免长时间开着的标签页拿旧数据保存 */
+let lastRefresh = 0;
+export async function refresh(): Promise<void> {
+  if (store.phase !== 'ready' || Date.now() - lastRefresh < 5000) return;
+  lastRefresh = Date.now();
+  try {
+    const state = await api<AppState>('/api/state');
+    cache(state);
+    set({ state });
+  } catch {
+    /* 离线时保留当前数据 */
+  }
+}
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && void refresh());
+  window.addEventListener('focus', () => void refresh());
+}
+
 let syncing: Promise<void> | undefined;
 
 /** 补齐扣款日的历史汇率：后台分批，补到新数据后刷新一次 */
@@ -161,6 +195,18 @@ export function saveSub(sub: Subscription) {
 
 export function deleteSub(id: string) {
   return optimistic((s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id) }), () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }));
+}
+
+/** 钱包卡片换顺序：按新顺序重写每张卡的 order */
+export function reorderMethods(ids: string[]) {
+  const prev = store.state!.methods;
+  const next = ids.map((id, i) => ({ ...prev.find((m) => m.id === id)!, order: i }));
+  // 全部重写，避免本地数据过期时出现重复的序号
+  const changed = next;
+  return optimistic(
+    (s) => ({ ...s, methods: next }),
+    () => Promise.all(changed.map((m) => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }))),
+  );
 }
 
 export function saveMethod(m: PaymentMethod) {

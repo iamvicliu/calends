@@ -1,6 +1,8 @@
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, myShareFactor, parseDay, type Charge } from '../shared/billing.ts';
 import { chargeValue } from '../shared/fx.ts';
-import type { AppState, MethodKind, Subscription } from '../shared/types.ts';
+import { flag } from '../shared/format.ts';
+import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../shared/types.ts';
+import { BANKS } from './banks.ts';
 
 const PALETTE = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c8)', 'var(--c9)', 'var(--c10)'];
 const FIXED: Record<string, number> = { 工具: 0, 影音: 1, 效率: 2, 音乐: 3, 日用: 4, 教育: 5, 购物: 6, AI: 7, 游戏: 8, 域名: 9 };
@@ -19,24 +21,102 @@ export const KIND_LABEL: Record<MethodKind, string> = {
   wechat: '微信支付',
   paypal: 'PayPal',
   appstore: 'App Store 余额',
+  googleplay: 'Google Play 余额',
   giftcard: '礼品卡',
+  prepaid: '商家余额',
   phone: '手机话费',
   crypto: '加密卡',
   other: '其他',
 };
 
+// 卡面底色：中性石墨或品牌纯色，不用蓝紫渐变；App Store 卡另有钛金属卡面
 export const KIND_BG: Record<MethodKind, string> = {
-  debit: 'linear-gradient(135deg,#2d4f7c,#16263d)',
-  credit: 'linear-gradient(135deg,#4a3b6b,#1e1730)',
-  alipay: 'linear-gradient(135deg,#1677ff,#0b4fc0)',
-  wechat: 'linear-gradient(135deg,#1aad5f,#0d7a40)',
-  paypal: 'linear-gradient(135deg,#1b5fb5,#0b2f66)',
-  appstore: 'linear-gradient(135deg,#3a8dfd,#7b5cf0 60%,#e2468f)',
-  giftcard: 'linear-gradient(135deg,#f08a4b,#c94677)',
+  debit: 'linear-gradient(135deg,#3a3f47,#1c1f24)',
+  credit: 'linear-gradient(135deg,#2c2c30,#111113)',
+  alipay: '#1677ff',
+  wechat: '#07c160',
+  paypal: '#003087',
+  appstore: 'linear-gradient(135deg,#fbfbfd,#e4e4e8)',
+  googleplay: '#ffffff',
+  giftcard: 'linear-gradient(135deg,#f08a4b,#d4532b)',
+  prepaid: 'linear-gradient(135deg,#3a3f47,#1c1f24)',
   phone: 'linear-gradient(135deg,#2fbf71,#0f7d55)',
   crypto: 'linear-gradient(135deg,#1f2933,#4a3b10)',
   other: 'linear-gradient(135deg,#55626c,#262e34)',
 };
+
+/**
+ * 平台品牌：这几类支付方式本身就是一个平台，选了类型就自动用它的 logo。
+ * 其余的（银行卡从银行列表选；加密卡、商家余额、运营商等）由用户自己设 logo，不在代码里写死某一家。
+ */
+export interface Brand {
+  key: string;
+  name: string;
+  logo: string;
+  kinds: MethodKind[];
+  /** logo 是白色的，放在品牌色底上 */
+  onColor?: boolean;
+}
+export const BRANDS: Brand[] = [
+  { key: 'appstore', name: 'App Store', logo: '/brands/appstore.svg', kinds: ['appstore'] },
+  { key: 'googleplay', name: 'Google Play', logo: '/brands/googleplay.svg', kinds: ['googleplay'] },
+  { key: 'paypal', name: 'PayPal', logo: '/brands/paypal.svg', kinds: ['paypal'], onColor: true },
+  { key: 'alipay', name: '支付宝', logo: '/brands/alipay.svg', kinds: ['alipay'], onColor: true },
+  { key: 'wechat', name: '微信支付', logo: '/brands/wechat.svg', kinds: ['wechat'], onColor: true },
+];
+
+/** 卡面品牌 logo */
+export const BRAND_LOGO: Record<string, string> = Object.fromEntries(BRANDS.map((b) => [b.key, b.logo]));
+
+/** 平台品牌（只按类型认） */
+export function brandOf(m: Pick<PaymentMethod, 'kind'>): string | undefined {
+  return BRANDS.find((b) => b.kinds.includes(m.kind))?.key;
+}
+
+/** 支付方式的 logo：自定义 > 平台品牌 > 官网图标；银行卡没设自定义时用银行图标集（见 bankOf） */
+export function methodLogo(m: Pick<PaymentMethod, 'logo' | 'kind' | 'url' | 'bank' | 'name'>): string | undefined {
+  if (m.logo) return m.logo;
+  const b = brandOf(m);
+  if (b) return BRAND_LOGO[b];
+  if (bankOf(m)) return undefined;
+  const d = domainOf(m.url);
+  return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : undefined;
+}
+
+/** 只用一种货币的国家：没填地区时，App Store、礼品卡、话费按币种推断国旗 */
+const CCY_REGION: Record<string, string> = { CNY: 'CN', TRY: 'TR', NGN: 'NG', PHP: 'PH', JPY: 'JP', HKD: 'HK', TWD: 'TW', KRW: 'KR', INR: 'IN', PKR: 'PK', EGP: 'EG', BRL: 'BR', ARS: 'AR', GBP: 'GB', MYR: 'MY', THB: 'TH', VND: 'VN', IDR: 'ID', SGD: 'SG', CAD: 'CA', AUD: 'AU', RUB: 'RU', UAH: 'UA', KZT: 'KZ', CHF: 'CH', MXN: 'MX' };
+
+/** 支付方式所属的地区：填了就用填的；按地区区分的账户（App Store、礼品卡、话费）没填时看币种 */
+export function methodRegion(m: Pick<PaymentMethod, 'region' | 'kind' | 'currency'>): string | undefined {
+  if (m.region) return m.region;
+  if (['appstore', 'googleplay', 'giftcard', 'phone'].includes(m.kind)) return CCY_REGION[m.currency];
+  return undefined;
+}
+
+/** 卡组织名称；图标在 public/networks（datatrans/payment-logos，CC BY-SA 4.0） */
+export const NETWORKS: Record<CardNetwork, string> = {
+  visa: 'Visa',
+  mastercard: 'Mastercard',
+  unionpay: '银联',
+  jcb: 'JCB',
+  'american-express': 'American Express',
+  discover: 'Discover',
+  diners: 'Diners Club',
+  maestro: 'Maestro',
+};
+
+/** 银行卡对应的银行图标：手动指定优先，否则按名称里的银行名识别（招商银行 → cmbchina） */
+export function bankOf(m: Pick<PaymentMethod, 'name' | 'kind' | 'bank'>): string | undefined {
+  if (m.bank) return m.bank;
+  if (m.kind !== 'debit' && m.kind !== 'credit') return undefined;
+  return BANKS.find(([name]) => m.name.includes(name))?.[1];
+}
+
+/** 支付方式显示名：有地区的前面加国旗，一眼分清土耳其区、尼日利亚区 */
+export function methodName(m: Pick<PaymentMethod, 'name' | 'region' | 'kind' | 'currency'>): string {
+  const f = flag(methodRegion(m));
+  return f ? `${f} ${m.name}` : m.name;
+}
 
 export function liveSubs(state: AppState, today: string): Subscription[] {
   return state.subscriptions.filter((s) => {
@@ -58,8 +138,12 @@ export interface MonthBucket {
   count: number;
 }
 
-export function allCharges(state: AppState, from: string, to: string, today: string): Charge[] {
-  return state.subscriptions.flatMap((s) => chargesBetween(s, from, to, today)).sort((a, b) => a.date.localeCompare(b.date));
+/** 区间内的扣款。默认不含代付（那是替别人付的，不算我的支出）；日历等需要看卡上实际扣款时传 withProxy */
+export function allCharges(state: AppState, from: string, to: string, today: string, withProxy = false): Charge[] {
+  return state.subscriptions
+    .filter((s) => withProxy || !s.proxy)
+    .flatMap((s) => chargesBetween(s, from, to, today))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function monthSeries(state: AppState, today: string, back = 23, fwd = 12): MonthBucket[] {

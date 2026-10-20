@@ -179,3 +179,14 @@ test('已上线的域名可在公开页显示，未上线的打码', async () =>
   assert.equal(out.subscriptions[0].name, 'doc2md.org');
   assert.ok(!JSON.stringify(out.subscriptions[1]).includes('larkcli'));
 });
+
+test('代付不计入我的月成本，公开页也不出现', async () => {
+  const { maskForPublic } = await import('./mask.ts');
+  const mine = sub({ price: 10, cycle: { unit: 'month', every: 1 } });
+  const proxy = sub({ id: 'proxy-x', price: 200, cycle: { unit: 'month', every: 1 }, proxy: { forName: '朋友', entries: [] } });
+  const st = state([mine, proxy]);
+  assert.ok(Math.abs(mrrOn(st, '2026-06-15') - (10 * 365.25) / 12 / 30.4375) < 0.5);
+  const out = maskForPublic(st);
+  assert.equal(out.subscriptions.length, 1);
+  assert.ok(!JSON.stringify(out).includes('朋友'));
+});

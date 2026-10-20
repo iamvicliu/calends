@@ -5,7 +5,7 @@ import { cnDate, money } from '../../shared/format.ts';
 import { cancelSavings, cashVsAccrual, contributionOn, events, insights, monthEnd, movement, mrrSeries, prepaidValue, topUpPlan, type EventKind } from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { Amount, Icon, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
+import { Amount, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, sumBase, toBase } from '../derive.ts';
 
 const PER: Record<string, string> = { day: '天', week: '周', month: '月', year: '年' };
@@ -23,7 +23,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
     <>
       <Toolbar title="报告">
         <button class="btn" onClick={onReview}>
-          <Icon name="receipt" /> {y} 年度回顾
+          <Icon name="share" /> 分享 {y} 年度回顾
         </button>
       </Toolbar>
       <div class="page fade-in stack">
@@ -89,7 +89,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           {t.recoverMrr > 1 && (
             <div>
               <b>{money(t.recoverMrr, base, { compact: true })}</b>
-              <span>拼车回血/月</span>
+              <span>合租回血/月</span>
             </div>
           )}
         </div>
@@ -203,7 +203,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
         {mv.items.slice(0, 4).map((it) => (
           <button key={it.sub.id} class="wf-item" onClick={() => onOpen(it.sub)}>
             <SubIcon sub={it.sub} size={24} />
-            <span>{it.sub.name}</span>
+            <span class="wf-name">{it.sub.name}</span>
             <em class={it.delta > 0 ? 'up' : 'down'}>{kindLabel[it.kind]}</em>
             <b class="num">
               {it.delta > 0 ? '+' : '−'}
@@ -323,7 +323,6 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           </div>
         </div>
       </div>
-      <p class="card-note">年付会让扣款集中在个别月份；橙线把每笔扣款平摊到它覆盖的天数上，是每个月真正花掉的钱。</p>
     </div>
   );
 }
@@ -419,7 +418,6 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           );
         })}
       </div>
-      <p class="card-note">面积是每月成本（扣除拼车分摊）。点一块看里面的订阅。</p>
     </div>
   );
 }
@@ -428,6 +426,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
 function TopUps({ state, today }: { state: AppState; today: string }) {
   const [months, setMonths] = useState<'3' | '6' | '12'>('6');
   const plan = useMemo(() => topUpPlan(state, today, Number(months)), [state, today, months]);
+  const span = months === '12' ? '未来一年' : months === '6' ? '未来半年' : '未来三个月';
   const base = state.settings.baseCurrency;
   return (
     <div class="card">
@@ -448,29 +447,44 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
         <div class="empty">
           还没有设置余额的账户。
           <br />
-          <a class="btn plain" href="#/wallet">
+          <a class="btn plain" href="/admin/wallet">
             去钱包填写 App Store / 话费余额
           </a>
         </div>
       )}
       {plan.map((p) => (
         <div key={p.method.id} class="topup">
-          <span class="ico mono" style={{ '--s': '36px', background: p.method.color || KIND_BG[p.method.kind], fontSize: '12px' } as Record<string, string>}>
-            {p.method.region ?? p.method.currency.slice(0, 2)}
-          </span>
+          <MethodMark m={p.method} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600 }}>{p.method.name}</div>
             <div class="muted" style={{ fontSize: 12.5 }}>
               余额 {money(p.current, p.method.currency, { compact: true })} · 每月约 {money(p.monthly, p.method.currency, { compact: true })}
             </div>
             {p.need > 0 ? (
-              <div class="cards-row">
-                {p.cards.map((c, i) => (
-                  <span key={i} class="gift">
-                    {money(c, p.method.currency, { compact: true })}
-                  </span>
-                ))}
-              </div>
+              <>
+                <div class="topup-why">
+                  {span}要扣 {money(p.due, p.method.currency, { compact: true })}，余额 {money(p.current, p.method.currency, { compact: true })}，还差 {money(p.need, p.method.currency, { compact: true })}
+                  {p.deadline && p.minNeed > 0 && p.minNeed < p.need - 0.01 && (
+                    <>
+                      ；最急的是 {cnDate(p.deadline)} 前至少补 <b>{money(p.minNeed, p.method.currency, { compact: true })}</b>
+                    </>
+                  )}
+                </div>
+                {p.cards.length > 0 ? (
+                  <div class="cards-row">
+                    <small>礼品卡面额参考</small>
+                    {/* 同面额合并成「×N」，不再一张张平铺 */}
+                    {[...p.cards.reduce((m2, c) => m2.set(c, (m2.get(c) ?? 0) + 1), new Map<number, number>())].sort((x, y) => y[0] - x[0]).map(([c, n]) => (
+                      <span key={c} class="gift">
+                        {money(c, p.method.currency, { compact: true })}
+                        {n > 1 && <em>×{n}</em>}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div class="topup-why soft">按需充值即可，不用凑面额</div>
+                )}
+              </>
             ) : (
               <div class="green" style={{ fontSize: 13, marginTop: 6 }}>
                 余额足够，{months === '12' ? '一年' : months === '6' ? '半年' : '三个月'}内不用充值

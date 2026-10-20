@@ -201,9 +201,10 @@ export interface Bubble {
 export function packCircles(values: number[], aspect = 1.6): Bubble[] {
   const order = values.map((v, i) => ({ v, i })).filter((x) => x.v > 0).sort((a, b) => b.v - a.v);
   const placed: Bubble[] = [];
-  const top = Math.sqrt(order[0]?.v ?? 1);
-  // 面积 ∝ 数值，但给小圆一个下限，保证图标看得清；大小顺序不变
-  const radius = (v: number) => Math.max(Math.sqrt(v), top * 0.2);
+  const max = order[0]?.v ?? 1;
+  const top = Math.sqrt(max);
+  // 半径按金额的 0.45 次方：比开平方更贴近真实差距，又不至于让小订阅缩成一个点；最小保留 14%
+  const radius = (v: number) => top * (0.14 + 0.86 * Math.pow(v / max, 0.45));
   const gap = top * 0.04;
   for (const { v, i } of order) {
     const r = radius(v);

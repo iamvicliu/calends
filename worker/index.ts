@@ -59,6 +59,17 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (!authed) return bad('unauthorized', 401);
   if (method !== 'GET' && !dev && !sameOrigin(req)) return bad('forbidden', 403);
 
+  // 图片中转：分享图要把订阅图标画进 canvas，跨域图片会污染画布，所以经同源转一道。只转 https 的图片，限 1MB
+  if (path === '/api/img' && method === 'GET') {
+    const u = new URL(req.url).searchParams.get('u') ?? '';
+    if (!/^https:\/\//.test(u)) return bad('bad url', 400);
+    const res = await fetch(u, { cf: { cacheTtl: 86400, cacheEverything: true } });
+    const type = res.headers.get('content-type') ?? '';
+    if (!res.ok || !type.startsWith('image/')) return bad('not an image', 502);
+    const body = await res.arrayBuffer();
+    if (body.byteLength > 1_000_000) return bad('too large', 413);
+    return new Response(body, { headers: { 'content-type': type, 'cache-control': 'private, max-age=86400' } });
+  }
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {

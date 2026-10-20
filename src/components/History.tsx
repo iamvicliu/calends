@@ -1,13 +1,14 @@
 import { cycleLabel, diffDays, phaseSubs } from '../../shared/billing.ts';
 import { money } from '../../shared/format.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
+import { PayBadge } from './ui.tsx';
 
 /** 订阅历程：阶段（地区/币种/价格/支付方式）、阶段内调价、断更空档 */
 export function History({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
   const vs = phaseSubs(sub);
   const hasStory = vs.length > 1 || (vs[0].priceHistory?.length ?? 0) > 1;
   if (!hasStory) return null;
-  const method = (id?: string) => state.methods.find((m) => m.id === id)?.name;
+  const method = (id?: string) => state.methods.find((m) => m.id === id);
   const items: preact.JSX.Element[] = [];
   vs.forEach((v, i) => {
     const prev = vs[i - 1];
@@ -29,7 +30,7 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
         <div class="h-plan">
           {v.region && <span class="badge">{v.region}</span>}
           <b>{money(v.price, v.currency)}</b> {cycleLabel(v.cycle)}
-          {method(v.methodId) && <span class="muted"> · {method(v.methodId)}</span>}
+          {method(v.methodId) && <PayBadge m={method(v.methodId)} />}
         </div>
         {hist.length > 1 && (
           <ul class="h-prices">

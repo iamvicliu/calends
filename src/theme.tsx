@@ -1,0 +1,76 @@
+// 主题：亮色 → 暗色 → 跟随系统 三者轮换，后台与公开页共用
+import { useEffect, useState } from 'preact/hooks';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+const KEY = 'ledger:theme';
+const NEXT: Record<ThemeMode, ThemeMode> = { light: 'dark', dark: 'system', system: 'light' };
+export const THEME_LABEL: Record<ThemeMode, string> = { light: '亮色', dark: '暗色', system: '跟随系统' };
+
+const mq = () => matchMedia('(prefers-color-scheme: dark)');
+
+function readMode(): ThemeMode {
+  try {
+    const v = localStorage.getItem(KEY);
+    return v === 'light' || v === 'dark' ? v : 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+/** 始终写入 data-theme，跟随系统时按系统当前外观取值 */
+function apply(m: ThemeMode) {
+  document.documentElement.dataset.theme = m === 'system' ? (mq().matches ? 'dark' : 'light') : m;
+}
+
+export function useThemeMode(): [ThemeMode, () => void] {
+  const [mode, setMode] = useState(readMode);
+  useEffect(() => {
+    apply(mode);
+    if (mode !== 'system') return;
+    const m = mq();
+    const on = () => apply('system');
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, [mode]);
+  const cycle = () => {
+    const n = NEXT[mode];
+    try {
+      if (n === 'system') localStorage.removeItem(KEY);
+      else localStorage.setItem(KEY, n);
+    } catch {
+      /* 隐私模式下只在本次生效 */
+    }
+    setMode(n);
+  };
+  return [mode, cycle];
+}
+
+/**
+ * 三个图标叠在一起，当前的转正放大显示，其余旋转缩小淡出；
+ * 切换时新图标带一点回弹转进来，旧图标反向转出。
+ */
+export function ThemeIcon({ mode, size = 18 }: { mode: ThemeMode; size?: number }) {
+  const layer = (m: ThemeMode, turn: number) => ({
+    transformBox: 'fill-box',
+    transformOrigin: 'center',
+    transform: mode === m ? 'rotate(0deg) scale(1)' : `rotate(${turn}deg) scale(0.3)`,
+    opacity: mode === m ? 1 : 0,
+    transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
+  });
+  return (
+    <svg class="i" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <g style={layer('light', -90)}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </g>
+      <g style={layer('dark', 90)}>
+        <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z" />
+      </g>
+      <g style={layer('system', 180)}>
+        <rect x="2.5" y="4" width="19" height="13" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </g>
+    </svg>
+  );
+}

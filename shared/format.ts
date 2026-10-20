@@ -1,5 +1,5 @@
 const SYMBOL: Record<string, string> = {
-  CNY: '¥', USD: '$', EUR: '€', GBP: '£', JPY: '¥', HKD: 'HK$', TWD: 'NT$', TRY: '₺', NGN: '₦', PHP: '₱', INR: '₹', KRW: '₩',
+  CNY: '¥', USD: '$', EUR: '€', GBP: '£', JPY: 'JP¥', HKD: 'HK$', TWD: 'NT$', TRY: '₺', NGN: '₦', PHP: '₱', INR: '₹', KRW: '₩',
   SGD: 'S$', AUD: 'A$', CAD: 'C$', THB: '฿', VND: '₫', RUB: '₽', UAH: '₴', BRL: 'R$', EGP: 'E£', PKR: '₨', KZT: '₸', IDR: 'Rp', MYR: 'RM',
 };
 
@@ -43,4 +43,11 @@ export function relDays(n: number): string {
 
 export function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+}
+
+/** 国家/地区代码转国旗 emoji：TR → 🇹🇷；不是两位字母则返回空串 */
+export function flag(region?: string): string {
+  const r = region?.trim().toUpperCase();
+  if (!r || !/^[A-Z]{2}$/.test(r)) return '';
+  return String.fromCodePoint(...[...r].map((c) => 0x1f1a5 + c.charCodeAt(0)));
 }

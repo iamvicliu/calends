@@ -1,7 +1,9 @@
-import { addMonths, chargesBetween, convert, diffDays, effectiveStatus, memberDues, nextCharge, priceAt, runwayFor, todayIn, totals } from '../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, convert, cycleDays, diffDays, effectiveStatus, nextCharge, priceAt, runwayFor, todayIn, totals } from '../shared/billing.ts';
+import { toBaseAt } from '../shared/fx.ts';
 import { cnDate, esc, money, relDays } from '../shared/format.ts';
 import type { AppState } from '../shared/types.ts';
 import type { Env } from './env.ts';
+import { matchEntries } from '../shared/proxy.ts';
 
 export interface Row {
   title: string;
@@ -32,6 +34,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
   const trials: Row[] = [];
   const ending: Row[] = [];
   const carpool: Row[] = [];
+  const proxy: Row[] = [];
   const balance: Row[] = [];
   const headline: string[] = [];
 
@@ -57,9 +60,6 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
           const introEnds = s.intro && s.intro.until > n ? '' : s.intro && diffDays(s.intro.until, n) < 40 ? ' · 优惠结束，恢复原价' : '';
           renew.push({ title: s.name, sub: `${relDays(d)} · ${cnDate(n, true)}${method ? ` · ${method.name}` : ''}${introEnds}`, amount: money(price, s.currency), amountSub: conv });
           headline.push(`${s.name} ${relDays(d)}扣款 ${money(price, s.currency)}`);
-          for (const due of memberDues(s, today)) {
-            if (due.periodsOwed > 0) carpool.push({ title: `${due.member.name} · ${s.name}`, sub: `应付 ${due.periodsOwed} 期${due.member.contact ? ` · ${due.member.contact}` : ''}`, amount: money(due.owed, s.currency), tone: 'warn' });
-          }
         }
       }
     }
@@ -69,6 +69,57 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
         ending.push({ title: s.name, sub: `${relDays(d)}到期，不会自动续费`, amount: cnDate(s.end), tone: 'muted' });
         headline.push(`${s.name} ${relDays(d)}到期`);
       }
+    }
+  }
+
+  // 合租：成员的「已付至」快到或已过，提醒去收下一期；到期前 7 天、3 天、当天，逾期后再提醒几次
+  const collect = settings.collectCurrency ?? base;
+  for (const s of state.subscriptions) {
+    if (s.share?.role !== 'owner' || !['active', 'ending'].includes(effectiveStatus(s, today))) continue;
+    const months = cycleDays(s.cycle) / 30.4375;
+    for (const m of s.share.members) {
+      if (m.exempt) continue;
+      const due = m.paidUntil ? addDays(m.paidUntil, 1) : s.share.since;
+      if (!due) continue;
+      const d = diffDays(today, due);
+      // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
+      if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
+      const every = m.billEvery ?? 1;
+      const fee = m.fee != null ? money(m.fee, m.feeCurrency ?? collect) : money(toBaseAt(state, ((m.share || 0) * every) / months, s.currency, undefined, collect), collect);
+      const who = [m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : m.contact ?? m.tg].filter(Boolean).join('');
+      carpool.push({
+        title: `${m.name} · ${s.name}`,
+        sub: `${d > 0 ? `${relDays(d)}（${cnDate(due)}）到期` : d === 0 ? '今天到期' : `已逾期 ${-d} 天`}，下一期${(({ 1: '按月', 3: '按季', 6: '按半年', 12: '按年' }) as Record<number, string>)[every] ?? `按 ${every} 个月`}${who ? ` · ${who}` : ''}`,
+        amount: fee,
+        tone: d < 0 ? 'warn' : undefined,
+      });
+      if (d <= 0) headline.push(`${m.name} 的 ${s.name} 该收钱了`);
+    }
+  }
+
+  // 代付：替人扣款当天提醒去收；扣了还没收回的，第 3、7、14、30 天各提醒一次
+  for (const s of state.subscriptions) {
+    if (!s.proxy) continue;
+    const name = s.proxy.forName || '对方';
+    const contact = s.proxy.contact ? ` · ${s.proxy.contactVia ? `${s.proxy.contactVia} ` : ''}${s.proxy.contact}` : '';
+    // 与代付页同样的对账规则（扣款日前后 15 天内的收款也算），改过开始日期也不会重复提醒
+    const charges = chargesBetween(s, s.start, today, today);
+    const matched = matchEntries(s.proxy.entries, charges.map((c) => c.date));
+    for (const c of charges.filter((x) => x.date >= addDays(today, -45))) {
+      const entry = matched.get(c.date);
+      if (entry?.received != null) continue;
+      const d = diffDays(c.date, today);
+      if (![0, 3, 7, 14, 30].includes(d)) continue;
+      const charged = entry?.charged ?? c.amount;
+      const ccy = entry?.chargedCurrency ?? c.currency;
+      proxy.push({
+        title: `${name} · ${s.name}`,
+        sub: `${d === 0 ? '今天替 TA 扣了款' : `${cnDate(c.date)} 扣的款已过 ${d} 天`}，还没收回${contact}`,
+        amount: money(charged, ccy),
+        amountSub: `≈ ${money(toBaseAt(state, charged, ccy, c.date, collect), collect)}`,
+        tone: d > 0 ? 'warn' : undefined,
+      });
+      headline.push(d === 0 ? `替 ${name} 扣了 ${s.name}` : `${name} 的 ${s.name} 还没收回`);
     }
   }
 
@@ -92,7 +143,8 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     { heading: '即将扣款', rows: renew },
     { heading: '试用到期', rows: trials },
     { heading: '余额预警', rows: balance },
-    { heading: '拼车待收', rows: carpool },
+    { heading: '合租收款', rows: carpool },
+    { heading: '代付待收', rows: proxy },
     { heading: '即将到期', rows: ending },
   ].filter((x) => x.rows.length);
   if (!sections.length) return undefined;
@@ -111,7 +163,9 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
   if (!state.settings.monthlyDigest || !today.endsWith('-01')) return undefined;
   const base = state.settings.baseCurrency;
   const end = addMonths(today, 1);
+  // 月度账单只列我自己的订阅；代付在「代付待收」里单独提醒
   const charges = state.subscriptions
+    .filter((s) => !s.proxy)
     .flatMap((s) => chargesBetween(s, today, end, today).filter((c) => c.date < end))
     .sort((a, b) => a.date.localeCompare(b.date));
   const sum = charges.reduce((t, c) => t + (convert(c.amount, c.currency, base, state.fx) || 0), 0);

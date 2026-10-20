@@ -3,11 +3,11 @@ import type { AppState, MethodKind, PaymentMethod, Subscription } from './types.
 
 const DOMAIN = /\b((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+)([a-z]{2,})\b/gi;
 
-/** framingflow.com → f•••••••w.com；保留首尾字母和顶级域 */
+/** framingflow.com → f••••••••.com；只保留首字母和顶级域 */
 export function maskDomain(text: string): string {
   return text.replace(DOMAIN, (_m, labels: string, tld: string) => {
     const parts = labels.slice(0, -1).split('.');
-    const masked = parts.map((p) => (p.length <= 2 ? '•'.repeat(p.length) : p[0] + '•'.repeat(Math.min(p.length - 2, 8)) + p[p.length - 1]));
+    const masked = parts.map((p) => (p.length <= 1 ? '•' : p[0] + '•'.repeat(Math.min(p.length - 1, 8))));
     return `${masked.join('.')}.${tld}`;
   });
 }
@@ -24,7 +24,9 @@ const KIND_PUBLIC: Record<MethodKind, string> = {
   wechat: '微信支付',
   paypal: 'PayPal',
   appstore: 'App Store',
+  googleplay: 'Google Play',
   giftcard: '礼品卡',
+  prepaid: '商家余额',
   phone: '手机话费',
   crypto: '加密卡',
   other: '其他',
@@ -90,6 +92,7 @@ export function maskForPublic(state: AppState): AppState {
       monthlyDigest: false,
     },
     methods: state.methods.map(publicMethod),
-    subscriptions: state.subscriptions.map(publicSub),
+    // 代付涉及他人，公开页完全不出现
+    subscriptions: state.subscriptions.filter((s) => !s.proxy).map(publicSub),
   };
 }

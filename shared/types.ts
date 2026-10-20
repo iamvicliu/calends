@@ -9,6 +9,16 @@ export interface Cycle {
 
 export type SubStatus = 'active' | 'trial' | 'paused' | 'cancelled';
 
+/** 一笔实际发生的钱。amount 是订阅币种的金额（退款为负）；settled 是卡上实际扣的币种和金额（不同时才填） */
+export interface Payment {
+  date: string;
+  amount: number;
+  note?: string;
+  /** 缺省为正常扣款；refund 退款、adjust 补差（升级补差价等）、failed 扣款失败（不计入支出） */
+  kind?: 'refund' | 'adjust' | 'failed';
+  settled?: { amount: number; currency: string };
+}
+
 export interface PricePoint {
   /** 自该日起生效 */
   from: string;
@@ -22,16 +32,80 @@ export interface ShareMember {
   share: number;
   /** 已付至（含）该日；为空表示从未收款 */
   paidUntil?: string;
+  /** 联系方式：渠道（Telegram、微信、邮箱…）+ 账号 / ID */
+  contactVia?: string;
   contact?: string;
+  /** 旧字段：早期单独记的 Telegram，读取时当作 contactVia = Telegram */
+  tg?: string;
+  /** 来源：从哪个群 / 渠道来的 */
+  source?: string;
+  /** 受邀账号：被邀请进家庭组的邮箱（多数服务用邮箱邀请） */
+  account?: string;
+  /** 不分摊：占一个位置但不交钱（比如自己的另一个账号、家人） */
+  exempt?: boolean;
+  /** 每次收多少（按收费周期），币种默认人民币；每期份额 share 由它按汇率换算得出 */
+  fee?: number;
+  feeCurrency?: string;
+  /** 收费周期（月）：1 按月、3 按季、12 按年；缺省按月 */
+  billEvery?: number;
+  /** 收款记录 */
+  payments?: MemberPayment[];
+  note?: string;
+  /** 加入日；缺省为开始合租那天 */
+  joined?: string;
+  /** 退出日：之后不再占座、不再计应收，历史收款保留 */
+  left?: string;
+}
+
+/** 合租成员的一笔收款：收了多少、覆盖到哪天 */
+export interface MemberPayment {
+  date: string;
+  amount: number;
+  currency: string;
+  /** 这笔钱覆盖的起始日 */
+  from?: string;
+  /** 这笔钱付到（含）哪一天 */
+  until: string;
+  note?: string;
 }
 
 export interface Share {
-  /** owner = 我是车主，代付全款向他人收钱；member = 我上车，price 记录的是我的那份 */
+  /** owner = 我发起合租，代付全款向他人收钱；member = 我加入合租，price 记录的是我的那份 */
   role: 'owner' | 'member';
   seats: number;
   members: ShareMember[];
   /** member 时：付给谁 */
   ownerName?: string;
+  /** 开始合租的日期：从这天起统计我付了多少、收回多少 */
+  since?: string;
+}
+
+/** 代付的一期：卡上实扣多少（订阅币种），对方还了多少（币种可以不同，比如扣日元、收人民币） */
+export interface ProxyEntry {
+  /** 对应哪一期扣款（扣款日） */
+  charge: string;
+  /** 卡上实际扣款金额，缺省按订阅价格 */
+  charged?: number;
+  /** 实扣币种：卡按自己的币种结算时与订阅币种不同（订阅 JPY、Bybit 卡扣 USD）；缺省同订阅 */
+  chargedCurrency?: string;
+  /** 收回的金额；为空表示还没收 */
+  received?: number;
+  receivedCurrency?: string;
+  /** 实际收到的日期，用于按当天汇率折算 */
+  receivedOn?: string;
+  note?: string;
+}
+
+/** 代付：替别人付的订阅。钱从我的卡上扣，但不算我的支出，每期向对方收回 */
+export interface Proxy {
+  /** 替谁付 */
+  forName: string;
+  /** 对方的联系方式：渠道 + 账号，与合租成员一致 */
+  contactVia?: string;
+  contact?: string;
+  /** 一句话备注，如「同事，月底转账」 */
+  note?: string;
+  entries: ProxyEntry[];
 }
 
 /** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
@@ -46,9 +120,13 @@ export interface Phase {
   region?: string;
   priceHistory?: PricePoint[];
   intro?: { price: number; until: string };
-  payments?: Array<{ date: string; amount: number; note?: string }>;
+  /** 赠送时长（如买一年送一年）：[from, until) 期间不扣款，之后从 until 起重新按周期扣 */
+  bonus?: { from: string; until: string };
+  payments?: Payment[];
   nextDue?: string;
   note?: string;
+  /** 只是打算（比如到期后可能改年付），还没确定；照常计入预测，界面上标「计划」，可一键确认或取消 */
+  planned?: boolean;
 }
 
 export interface Subscription {
@@ -56,6 +134,8 @@ export interface Subscription {
   name: string;
   icon?: string; // emoji 或图片 URL
   url?: string;
+  /** 管理页：家庭组成员、账单、续费设置所在的页面（如 Spotify Family、1Password People） */
+  manageUrl?: string;
   category: string;
   tags: string[];
   price: number;
@@ -71,8 +151,14 @@ export interface Subscription {
   /** App Store 区域等，例如 TR、NG */
   region?: string;
   share?: Share;
+  /** 代付：有则不计入我的支出，单独记账 */
+  proxy?: Proxy;
   /** 提前几天提醒；空则用全局设置，-1 关闭 */
   remindDays?: number;
+  /** 服务到期日（如域名）；与扣款日不同，自动续费可能提前若干天扣款 */
+  expires?: string;
+  /** 由阶段展开时带上：这一段只是计划 */
+  planned?: boolean;
   priceHistory?: PricePoint[];
   /**
    * 历程：换区、换套餐、断更后续订。存在时按阶段计费，顶层的价格/币种/周期/支付方式镜像最后一个阶段。
@@ -82,11 +168,13 @@ export interface Subscription {
   /** 域名类订阅：已上线的项目可在公开页显示真实域名，默认打码 */
   showOnPublic?: boolean;
   /** 实际扣款记录：有则以此为准（一次付多年、提前续费、促销价都能准确记录） */
-  payments?: Array<{ date: string; amount: number; note?: string }>;
+  payments?: Payment[];
   /** 下次扣款日：之后的扣款从这一天按周期推算 */
   nextDue?: string;
   /** 首期优惠：until 之前的扣款按优惠价，例如首年 5 折 */
   intro?: { price: number; until: string };
+  /** 赠送时长（如买一年送一年）：[from, until) 期间不扣款，之后从 until 起重新按周期扣 */
+  bonus?: { from: string; until: string };
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -99,10 +187,14 @@ export type MethodKind =
   | 'wechat'
   | 'paypal'
   | 'appstore' // App Store 余额 / 礼品卡
+  | 'googleplay' // Google Play 余额
   | 'giftcard'
+  | 'prepaid' // 商家账户余额：先充值，扣费从余额里走（如 Uzuma）
   | 'phone' // 手机话费余额，如 SMART Load
   | 'crypto'
   | 'other';
+
+export type CardNetwork = 'visa' | 'mastercard' | 'unionpay' | 'jcb' | 'american-express' | 'discover' | 'diners' | 'maestro';
 
 export interface PaymentMethod {
   id: string;
@@ -120,12 +212,40 @@ export interface PaymentMethod {
   lowRunwayDays?: number;
   /** 返现 / 积分比例（%） */
   cashback?: number;
-  /** 卡面品牌：决定 logo 与卡面样式（cmb / plasma / appstore / smart） */
+  /** 旧字段：早期写死的品牌标识，现只认 App Store、PayPal、支付宝、微信支付这类平台 */
   brand?: string;
+  /** 自定义 logo：图片链接，或上传后的 data URL；优先于银行图标 */
+  logo?: string;
+  /** logo 是横向字标（如 BYBIT、SMART），卡面上按宽版显示 */
+  logoWide?: boolean;
+  /** 钱包里的排列顺序，越小越靠前；缺省排在最后 */
+  order?: number;
+  /** 银行图标（public/banks 下的文件名）；缺省时按名称自动识别 */
+  bank?: string;
+  /** 卡组织：Visa、Mastercard、银联等 */
+  network?: CardNetwork;
+  /** 手机号（手机话费类）：只在后台显示，公开页不下发 */
+  phone?: string;
+  /** 官网或充值页（如商家余额的充值入口） */
+  url?: string;
+  /** 充值记录：充进多少（账户币种），以及实际花了多少（如买礼品卡的人民币成本） */
+  topUps?: TopUp[];
+}
+
+export interface TopUp {
+  date: string;
+  amount: number;
+  cost?: number;
+  costCurrency?: string;
+  note?: string;
 }
 
 export interface Settings {
   baseCurrency: string;
+  /** 合租向成员收款的默认币种；缺省同本位币 */
+  collectCurrency?: string;
+  /** 新建订阅默认的支付方式 */
+  defaultMethodId?: string;
   notifyEmail: string;
   remindDays: number;
   notifyHour: number;
@@ -156,7 +276,7 @@ export interface AppState {
   readonly?: boolean;
 }
 
-export const BALANCE_KINDS: MethodKind[] = ['appstore', 'giftcard', 'phone', 'paypal', 'alipay', 'wechat', 'crypto'];
+export const BALANCE_KINDS: MethodKind[] = ['appstore', 'googleplay', 'giftcard', 'prepaid', 'phone', 'paypal', 'alipay', 'wechat', 'crypto'];
 
 export const DEFAULT_SETTINGS: Settings = {
   baseCurrency: 'CNY',

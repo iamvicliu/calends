@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../shared/billing.ts';
 import { cnDate, money, relDays } from '../../shared/format.ts';
 import { chargeValue } from '../../shared/fx.ts';
 import { contributionOn, insights, mrrSeries } from '../../shared/metrics.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
-import { Amount, Icon, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
-import { allCharges, catColor, KIND_BG } from '../derive.ts';
+import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
+import { Amount, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { allCharges, catColor } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 
 type Scale = 'month' | 'year';
@@ -26,6 +27,7 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
       </Toolbar>
       <div class="page fade-in stack" style={{ gap: 20 }}>
         <Statement state={state} today={today} onOpen={onOpen} />
+        <ChargeTimeline state={state} today={today} onOpen={onOpen} />
         <Spending state={state} today={today} onOpen={onOpen} />
         <div class="grid g-2">
           <DueSoon state={state} today={today} onOpen={onOpen} />
@@ -33,13 +35,53 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
         </div>
         <Tips state={state} today={today} onOpen={onOpen} />
         <p class="card-note" style={{ textAlign: 'center' }}>
-          {t.activeCount} 个订阅计费中 · 每月 {money(t.mrr, base)} · 过去的扣款按当天汇率折算，未来按今天汇率 ·{' '}
-          <a href="#/report" style={{ textDecoration: 'underline' }}>
+          {t.activeCount} 个订阅计费中 · 每月 {money(t.mrr, base)} ·{' '}
+          <a href="/admin/report" style={{ textDecoration: 'underline' }}>
             看完整报告
           </a>
         </p>
       </div>
     </>
+  );
+}
+
+/** 扣款时间线：今天居中，左右滑动看前后的扣款 */
+function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+  const base = state.settings.baseCurrency;
+  const { past30, next30 } = useMemo(() => {
+    let past30 = 0;
+    let next30 = 0;
+    for (const c of allCharges(state, addDays(today, -30), addDays(today, 30), today)) {
+      const v = chargeValue(state, c);
+      if (c.date < today) past30 += v;
+      else next30 += v;
+    }
+    return { past30, next30 };
+  }, [state, today]);
+  // 时间线按需加载：拖到哪段算哪段
+  const load = useCallback(
+    (from: string, to: string) => {
+      const map = new Map<string, TimelineGroup>();
+      for (const c of allCharges(state, from, to, today)) {
+        const g = map.get(c.date) ?? { date: c.date, items: [] };
+        const real = state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
+        g.items.push({ key: `${c.sub.id}-${c.date}`, icon: <SubIcon sub={c.sub} size={30} />, tip: `${c.sub.name} · ${money(c.amount, c.currency)}`, onClick: () => onOpen(real) });
+        map.set(c.date, g);
+      }
+      return [...map.values()];
+    },
+    [state, today],
+  );
+  return (
+    <section class="card">
+      <div class="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
+        <h3 class="sec-title">时间线</h3>
+        <span class="sec-sub" style={{ marginTop: 0 }}>
+          过去 30 天扣了 {money(past30, base, { compact: true })} · 接下来 30 天要扣 {money(next30, base, { compact: true })}
+        </span>
+      </div>
+      <Timeline load={load} today={today} />
+    </section>
   );
 }
 
@@ -110,7 +152,7 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
       <div class="ov-head">
         <div>
           <h3 class="sec-title">每月花了多少</h3>
-          <div class="sec-sub">按分类堆叠 · 过去的扣款按当天汇率 · 浅色为预计</div>
+          <div class="sec-sub">浅色为预计</div>
         </div>
         <Seg
           value={scale}
@@ -244,7 +286,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
     <div class="card">
       <div class="card-h">
         <h3>钱包</h3>
-        <a class="btn plain" href="#/wallet">
+        <a class="btn plain" href="/admin/wallet">
           管理
         </a>
       </div>
@@ -252,10 +294,8 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
         const days = r?.runsOutOn ? diffDays(today, r.runsOutOn) : undefined;
         const pct = r ? (r.monthlyDrain <= 0 ? 100 : Math.min(100, ((days ?? 365) / 365) * 100)) : 0;
         return (
-          <a key={m.id} class="wal-row" href="#/wallet">
-            <span class="wal-chip" style={{ background: m.color || KIND_BG[m.kind] }}>
-              {m.region ?? m.currency.slice(0, 2)}
-            </span>
+          <a key={m.id} class="wal-row" href="/admin/wallet">
+            <MethodMark m={m} size={28} />
             <span class="nm">
               <b>{m.name}</b>
               {r ? (
@@ -400,7 +440,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
               <b>{hv.s.name}</b> · {money(hv.v, base, { compact: true })}/月 · 占 {Math.round((hv.v / t.mrr) * 100)}%
             </>
           ) : (
-            <>订阅星图 · 圆越大，每月花得越多</>
+            <>订阅星图 · 圆的大小按每月金额比例</>
           )}
         </div>
         <div class="stars" ref={box} style={{ aspectRatio: `${1 / h}` }}>
