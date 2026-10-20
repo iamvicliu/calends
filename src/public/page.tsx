@@ -485,7 +485,6 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
   const top: Array<{ name: string; v: number; n: number; other?: boolean }> = cats.slice(0, 4).map(([name, c]) => ({ name, v: c.v, n: c.n }));
   const rest = cats.slice(4);
   if (rest.length) top.push({ name: t('public.composition.other'), v: rest.reduce((a, [, c]) => a + c.v, 0), n: rest.reduce((a, [, c]) => a + c.n, 0), other: true });
-  const shade = (i: number) => `color-mix(in oklab, var(--foreground) ${[100, 62, 38, 22, 12][i] ?? 10}%, transparent)`;
   return (
     <Card className={cn(roomy, 'h-full')}>
       <CardHeader>
@@ -524,6 +523,9 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
 }
 
 /** 汇率：外币占比与一年变化 */
+/** 占比条的灰阶：第一名最深，依次变浅（构成与汇率两张卡共用） */
+const shade = (i: number) => `color-mix(in oklab, var(--foreground) ${[100, 62, 38, 22, 12][i] ?? 10}%, transparent)`;
+
 function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) => string }) {
   const { rows, effect: eff } = d.fx[ccy];
   return (
@@ -539,10 +541,24 @@ function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) =>
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-2.5">
-          {rows.map(({ now, ...f }) => {
+        {/* 和「构成」卡一样，顶部一条按各币种花费占比分段的条 */}
+        <div className="flex h-2 gap-0.5 overflow-hidden rounded-full">
+          {rows.map((f, i) => (
+            <motion.i
+              key={f.c}
+              className="block h-full min-w-1"
+              style={{ background: shade(i), flexGrow: f.share, originX: 0 }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.3 + i * 0.05 }}
+            />
+          ))}
+        </div>
+        <ul className="mt-5 space-y-2.5">
+          {rows.map(({ now, ...f }, i) => {
             return (
               <li key={f.c} className="flex items-center gap-2.5">
+                <i className="size-2.5 shrink-0 rounded-[3px]" style={{ background: shade(i) }} />
                 <Badge variant="outline" className="w-12 justify-center font-mono text-[11px]">
                   {f.c}
                 </Badge>
