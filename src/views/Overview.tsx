@@ -247,11 +247,11 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
           .map(([g, list]) => (
             <>
               <div class="due-g">{g}</div>
-              {list.slice(0, g === '这周' ? 10 : 6).map((c) => {
+              {list.slice(0, g === '这周' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
                 const m = state.methods.find((x) => x.id === c.sub.methodId);
                 return (
-                  <button key={c.sub.id + c.date} class="due-row" onClick={() => onOpen(c.sub)}>
+                  <button key={c.sub.id + c.date + i} class="due-row" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={36} />
                     <span class="nm">
                       <b>{c.sub.name}</b>

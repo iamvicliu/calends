@@ -35,7 +35,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//example.com//Subscription Ledger//ZH',
+    'PRODID:-//Subscription Ledger//ZH',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-WR-CALNAME:订阅扣款',
@@ -45,12 +45,16 @@ export function buildIcs(state: AppState, siteUrl: string): string {
   ];
   for (const s of state.subscriptions) {
     const remind = s.remindDays ?? state.settings.remindDays;
+    const seen = new Map<string, number>();
     for (const c of chargesBetween(s, from, to, today)) {
       const d = c.date.replace(/-/g, '');
-      const method = state.methods.find((m) => m.id === s.methodId);
+      // 同一天可能有两笔（如补扣），UID 要各不相同
+      const n = (seen.get(d) ?? 0) + 1;
+      seen.set(d, n);
+      const method = state.methods.find((m) => m.id === c.sub.methodId);
       lines.push(
         'BEGIN:VEVENT',
-        `UID:${s.id}-${d}@calends.example.com`,
+        `UID:${s.id}-${d}${n > 1 ? `-${n}` : ''}@${new URL(siteUrl).host}`,
         `DTSTAMP:${stamp}`,
         `DTSTART;VALUE=DATE:${d}`,
         `DTEND;VALUE=DATE:${addDays(c.date, 1).replace(/-/g, '')}`,

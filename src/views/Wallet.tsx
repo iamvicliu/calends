@@ -380,9 +380,9 @@ function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m:
         )}
         {r && r.upcoming.length > 0 && (
           <Group title="扣款推演" foot={projFoot(r, m)}>
-            {projRows(r).map((c) => (
+            {projRows(r).map((c, i) => (
               <Cell
-                key={c.sub.id + c.date}
+                key={c.sub.id + c.date + i}
                 label={
                   <span class="row">
                     <SubIcon sub={c.sub} size={28} />
@@ -745,7 +745,7 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
       )}
       {(f.logo || favicon) && (
         <Cell label="横向字标">
-          <Toggle checked={!!f.logoWide} onChange={(v) => up({ logoWide: v || undefined })} />
+          <Toggle label="横向字标" checked={!!f.logoWide} onChange={(v) => up({ logoWide: v || undefined })} />
         </Cell>
       )}
     </>
