@@ -38,7 +38,6 @@
     "title": { "one": "Charges · {count}", "other": "Charges · {count}" },
     "kind": { "refund": "Refund", "adjust": "Adjustment", "failed": "Failed" },
     "add": "Add a record (refund, adjustment, failed charge, card amount…)",
-    "recent": "Show last 12 only",
     "all": "Show all {count}"
   },
   "stats": {

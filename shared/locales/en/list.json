@@ -98,22 +98,13 @@
     "byRegion": "By region",
     "gapTitle": "Lapsed {span}: {from} – {to}",
     "gapShort": "Lapsed {span}",
-    "gapDays": {
-      "one": "Lapsed {count} day",
-      "other": "Lapsed {count} days"
-    },
     "lifetimeSuffix": " lifetime",
-    "lifetime": "Lifetime {amount}",
     "present": "now",
     "plannedSuffix": " · planned",
     "introPrefix": "Intro offer · ",
     "introShort": "Intro ",
     "planned": "Planned",
     "gap": "Lapsed",
-    "range": {
-      "one": "Since {date} · {count} phase",
-      "other": "Since {date} · {count} phases"
-    },
     "zoomYear": "This year",
     "earlier": "Earlier",
     "later": "Later",

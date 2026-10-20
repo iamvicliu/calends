@@ -43,7 +43,6 @@
     "title": { "one": "Cobros · {count}", "other": "Cobros · {count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Fallido" },
     "add": "Añadir un registro (reembolso, ajuste, cobro fallido, importe en tarjeta…)",
-    "recent": "Mostrar solo los últimos 12",
     "all": "Mostrar los {count}"
   },
   "stats": {

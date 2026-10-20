@@ -43,7 +43,6 @@
     "title": { "other": "결제 · {count}" },
     "kind": { "refund": "환불", "adjust": "조정", "failed": "실패" },
     "add": "기록 추가(환불, 조정, 결제 실패, 카드 금액 등)",
-    "recent": "최근 12건만 보기",
     "all": "{count}건 모두 보기"
   },
   "stats": {

@@ -43,7 +43,6 @@
     "title": { "one": "Abbuchung · {count}", "other": "Abbuchungen · {count}" },
     "kind": { "refund": "Erstattung", "adjust": "Korrektur", "failed": "Fehlgeschlagen" },
     "add": "Eintrag hinzufügen (Erstattung, Korrektur, fehlgeschlagene Abbuchung, Kartenbetrag …)",
-    "recent": "Nur die letzten 12 zeigen",
     "all": "Alle {count} zeigen"
   },
   "stats": {

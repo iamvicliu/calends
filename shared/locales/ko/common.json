@@ -2,21 +2,11 @@
   "save": "저장",
   "cancel": "취소",
   "delete": "삭제",
-  "edit": "편집",
   "done": "완료",
-  "close": "닫기",
   "add": "추가",
   "apply": "적용",
-  "back": "뒤로",
-  "copy": "복사",
-  "copied": "복사됨",
   "clear": "지우기",
   "today": "오늘",
-  "yesterday": "어제",
-  "tomorrow": "내일",
-  "none": "없음",
-  "all": "전체",
   "other": "기타",
-  "search": "검색",
-  "loading": "불러오는 중…"
+  "search": "검색"
 }

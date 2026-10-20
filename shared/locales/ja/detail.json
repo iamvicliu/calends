@@ -43,7 +43,6 @@
     "title": { "other": "請求 · {count}" },
     "kind": { "refund": "返金", "adjust": "調整", "failed": "失敗" },
     "add": "記録を追加（返金、調整、請求失敗、カード上の金額など）",
-    "recent": "最新12件のみ表示",
     "all": "すべて表示（{count}件）"
   },
   "stats": {

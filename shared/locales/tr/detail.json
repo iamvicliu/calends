@@ -48,7 +48,6 @@
     "title": { "one": "Ödemeler · {count}", "other": "Ödemeler · {count}" },
     "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" },
     "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)",
-    "recent": "Yalnızca son 12'yi göster",
     "all": "Tümünü göster ({count})"
   },
   "stats": {

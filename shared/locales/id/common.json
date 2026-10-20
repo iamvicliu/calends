@@ -2,21 +2,11 @@
   "save": "Simpan",
   "cancel": "Batal",
   "delete": "Hapus",
-  "edit": "Edit",
   "done": "Selesai",
-  "close": "Tutup",
   "add": "Tambah",
   "apply": "Terapkan",
-  "back": "Kembali",
-  "copy": "Salin",
-  "copied": "Disalin",
   "clear": "Hapus",
   "today": "Hari ini",
-  "yesterday": "Kemarin",
-  "tomorrow": "Besok",
-  "none": "Tidak ada",
-  "all": "Semua",
   "other": "Lainnya",
-  "search": "Cari",
-  "loading": "Memuat…"
+  "search": "Cari"
 }

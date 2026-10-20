@@ -93,20 +93,13 @@
     "byRegion": "지역별",
     "gapTitle": "{span} 중단: {from} – {to}",
     "gapShort": "{span} 중단",
-    "gapDays": {
-      "other": "{count}일 중단"
-    },
     "lifetimeSuffix": " 평생 이용",
-    "lifetime": "평생 이용 {amount}",
     "present": "현재",
     "plannedSuffix": " · 예정",
     "introPrefix": "프로모션 · ",
     "introShort": "프로모션 ",
     "planned": "예정",
     "gap": "중단",
-    "range": {
-      "other": "{date}부터 · {count}개 구간"
-    },
     "zoomYear": "올해",
     "earlier": "이전",
     "later": "다음",

@@ -93,20 +93,13 @@
     "byRegion": "地域別",
     "gapTitle": "{span}中断：{from} – {to}",
     "gapShort": "{span}中断",
-    "gapDays": {
-      "other": "{count}日中断"
-    },
     "lifetimeSuffix": " 買い切り",
-    "lifetime": "買い切り {amount}",
     "present": "現在",
     "plannedSuffix": " · 予定",
     "introPrefix": "初回特典 · ",
     "introShort": "特典 ",
     "planned": "予定",
     "gap": "中断",
-    "range": {
-      "other": "{date}から · {count}期間"
-    },
     "zoomYear": "今年",
     "earlier": "前へ",
     "later": "次へ",

@@ -98,22 +98,13 @@
     "byRegion": "Bölgeye göre",
     "gapTitle": "{span} ara: {from} – {to}",
     "gapShort": "{span} ara",
-    "gapDays": {
-      "one": "{count} gün ara",
-      "other": "{count} gün ara"
-    },
     "lifetimeSuffix": " ömür boyu",
-    "lifetime": "Ömür boyu {amount}",
     "present": "şimdi",
     "plannedSuffix": " · planlandı",
     "introPrefix": "Tanıtım teklifi · ",
     "introShort": "Tanıtım ",
     "planned": "Planlandı",
     "gap": "Ara",
-    "range": {
-      "one": "{date} itibarıyla · {count} dönem",
-      "other": "{date} itibarıyla · {count} dönem"
-    },
     "zoomYear": "Bu yıl",
     "earlier": "Önceki",
     "later": "Sonraki",

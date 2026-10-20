@@ -98,22 +98,13 @@
     "byRegion": "Por región",
     "gapTitle": "Interrumpida {span}: {from} – {to}",
     "gapShort": "Interrumpida {span}",
-    "gapDays": {
-      "one": "Interrumpida {count} día",
-      "other": "Interrumpida {count} días"
-    },
     "lifetimeSuffix": " de por vida",
-    "lifetime": "De por vida {amount}",
     "present": "ahora",
     "plannedSuffix": " · previsto",
     "introPrefix": "Oferta inicial · ",
     "introShort": "Inicial ",
     "planned": "Previsto",
     "gap": "Interrupción",
-    "range": {
-      "one": "Desde {date} · {count} fase",
-      "other": "Desde {date} · {count} fases"
-    },
     "zoomYear": "Este año",
     "earlier": "Antes",
     "later": "Después",

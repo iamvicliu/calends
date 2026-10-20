@@ -93,20 +93,13 @@
     "byRegion": "Theo khu vực",
     "gapTitle": "Gián đoạn {span}: {from} – {to}",
     "gapShort": "Gián đoạn {span}",
-    "gapDays": {
-      "other": "Gián đoạn {count} ngày"
-    },
     "lifetimeSuffix": " trọn đời",
-    "lifetime": "Trọn đời {amount}",
     "present": "nay",
     "plannedSuffix": " · dự định",
     "introPrefix": "Ưu đãi mở đầu · ",
     "introShort": "Ưu đãi ",
     "planned": "Dự định",
     "gap": "Gián đoạn",
-    "range": {
-      "other": "Từ {date} · {count} giai đoạn"
-    },
     "zoomYear": "Năm nay",
     "earlier": "Trước",
     "later": "Sau",

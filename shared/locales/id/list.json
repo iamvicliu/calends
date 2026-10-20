@@ -93,20 +93,13 @@
     "byRegion": "Per wilayah",
     "gapTitle": "Terputus {span}: {from} – {to}",
     "gapShort": "Terputus {span}",
-    "gapDays": {
-      "other": "Terputus {count} hari"
-    },
     "lifetimeSuffix": " seumur hidup",
-    "lifetime": "Seumur hidup {amount}",
     "present": "sekarang",
     "plannedSuffix": " · rencana",
     "introPrefix": "Promo awal · ",
     "introShort": "Promo ",
     "planned": "Rencana",
     "gap": "Terputus",
-    "range": {
-      "other": "Sejak {date} · {count} fase"
-    },
     "zoomYear": "Tahun ini",
     "earlier": "Sebelumnya",
     "later": "Berikutnya",

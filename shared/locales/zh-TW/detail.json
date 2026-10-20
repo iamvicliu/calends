@@ -38,7 +38,6 @@
     "title": "扣款記錄 · {count} 筆",
     "kind": { "refund": "退款", "adjust": "補差", "failed": "失敗" },
     "add": "記一筆（退款、補差、扣款失敗、卡上實扣…）",
-    "recent": "只顯示最近 12 筆",
     "all": "顯示全部 {count} 筆"
   },
   "stats": {

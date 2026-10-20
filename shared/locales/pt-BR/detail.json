@@ -38,7 +38,6 @@
     "title": { "one": "Cobranças · {count}", "other": "Cobranças · {count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Falhou" },
     "add": "Adicionar registro (reembolso, ajuste, cobrança com falha, valor no cartão…)",
-    "recent": "Mostrar só as últimas 12",
     "all": "Mostrar todas as {count}"
   },
   "stats": {

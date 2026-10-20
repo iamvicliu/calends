@@ -98,22 +98,13 @@
     "byRegion": "Por região",
     "gapTitle": "Interrompida por {span}: {from} – {to}",
     "gapShort": "Interrompida por {span}",
-    "gapDays": {
-      "one": "Interrompida por {count} dia",
-      "other": "Interrompida por {count} dias"
-    },
     "lifetimeSuffix": " vitalícia",
-    "lifetime": "Vitalícia {amount}",
     "present": "agora",
     "plannedSuffix": " · planejada",
     "introPrefix": "Oferta inicial · ",
     "introShort": "Promo ",
     "planned": "Planejada",
     "gap": "Interrupção",
-    "range": {
-      "one": "Desde {date} · {count} fase",
-      "other": "Desde {date} · {count} fases"
-    },
     "zoomYear": "Este ano",
     "earlier": "Anterior",
     "later": "Próximo",

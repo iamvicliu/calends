@@ -43,7 +43,6 @@
     "title": { "other": "Tagihan · {count}" },
     "kind": { "refund": "Refund", "adjust": "Penyesuaian", "failed": "Gagal" },
     "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)",
-    "recent": "Tampilkan 12 terakhir saja",
     "all": "Tampilkan semua {count}"
   },
   "stats": {

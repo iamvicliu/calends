@@ -2,21 +2,11 @@
   "save": "保存",
   "cancel": "キャンセル",
   "delete": "削除",
-  "edit": "編集",
   "done": "完了",
-  "close": "閉じる",
   "add": "追加",
   "apply": "適用",
-  "back": "戻る",
-  "copy": "コピー",
-  "copied": "コピーしました",
   "clear": "クリア",
   "today": "今日",
-  "yesterday": "昨日",
-  "tomorrow": "明日",
-  "none": "なし",
-  "all": "すべて",
   "other": "その他",
-  "search": "検索",
-  "loading": "読み込み中…"
+  "search": "検索"
 }

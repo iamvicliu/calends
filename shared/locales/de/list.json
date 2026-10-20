@@ -98,22 +98,13 @@
     "byRegion": "Nach Region",
     "gapTitle": "{span} unterbrochen: {from} – {to}",
     "gapShort": "{span} unterbrochen",
-    "gapDays": {
-      "one": "{count} Tag unterbrochen",
-      "other": "{count} Tage unterbrochen"
-    },
     "lifetimeSuffix": " lebenslang",
-    "lifetime": "Lebenslang {amount}",
     "present": "heute",
     "plannedSuffix": " · geplant",
     "introPrefix": "Einführungsangebot · ",
     "introShort": "Angebot ",
     "planned": "Geplant",
     "gap": "Unterbrochen",
-    "range": {
-      "one": "Seit {date} · {count} Phase",
-      "other": "Seit {date} · {count} Phasen"
-    },
     "zoomYear": "Dieses Jahr",
     "earlier": "Früher",
     "later": "Später",

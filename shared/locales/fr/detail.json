@@ -43,7 +43,6 @@
     "title": { "one": "Prélèvements · {count}", "other": "Prélèvements · {count}" },
     "kind": { "refund": "Remboursement", "adjust": "Ajustement", "failed": "Échec" },
     "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)",
-    "recent": "Afficher les 12 derniers",
     "all": "Tout afficher ({count})"
   },
   "stats": {

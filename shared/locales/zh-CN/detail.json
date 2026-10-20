@@ -38,7 +38,6 @@
     "title": "扣款记录 · {count} 笔",
     "kind": { "refund": "退款", "adjust": "补差", "failed": "失败" },
     "add": "记一笔（退款、补差、扣款失败、卡上实扣…）",
-    "recent": "只看最近 12 笔",
     "all": "显示全部 {count} 笔"
   },
   "stats": {

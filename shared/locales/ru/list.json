@@ -108,26 +108,13 @@
     "byRegion": "По региону",
     "gapTitle": "Перерыв {span}: {from} – {to}",
     "gapShort": "Перерыв {span}",
-    "gapDays": {
-      "one": "Перерыв {count} день",
-      "few": "Перерыв {count} дня",
-      "many": "Перерыв {count} дней",
-      "other": "Перерыв {count} дня"
-    },
     "lifetimeSuffix": " навсегда",
-    "lifetime": "Навсегда {amount}",
     "present": "сейчас",
     "plannedSuffix": " · в планах",
     "introPrefix": "Вводное предложение · ",
     "introShort": "Вводная ",
     "planned": "В планах",
     "gap": "Перерыв",
-    "range": {
-      "one": "С {date} · {count} этап",
-      "few": "С {date} · {count} этапа",
-      "many": "С {date} · {count} этапов",
-      "other": "С {date} · {count} этапа"
-    },
     "zoomYear": "Этот год",
     "earlier": "Раньше",
     "later": "Позже",
