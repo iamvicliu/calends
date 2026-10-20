@@ -43,6 +43,16 @@ function shortHash(text: string): string {
   return (h >>> 0).toString(36);
 }
 
+/** 只保留网址的协议与域名；写得不像网址的不下发（避免整个公开页报错） */
+function originOf(url?: string): string | undefined {
+  if (!url) return undefined;
+  try {
+    return new URL(url.startsWith('http') ? url : `https://${url}`).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 function publicSub(s: Subscription): Subscription {
   const domain = isDomainSub(s);
   // 未上线项目的域名打码；已上线的（showOnPublic）原样展示
@@ -52,7 +62,7 @@ function publicSub(s: Subscription): Subscription {
     name: hide ? maskDomain(s.name) : s.name,
     // 域名统一用域名图标；隐藏的域名连网址也不下发，避免暴露真实域名
     icon: domain ? undefined : s.icon,
-    url: hide || !s.url ? undefined : new URL(s.url.startsWith('http') ? s.url : `https://${s.url}`).origin,
+    url: hide ? undefined : originOf(s.url),
     category: s.category,
     tags: [],
     price: s.price,

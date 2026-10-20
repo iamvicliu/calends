@@ -244,7 +244,12 @@ export async function revokeSession(req: Request, env: Env, id: string): Promise
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get('origin');
   if (!origin) return true;
-  return new URL(origin).host === new URL(req.url).host;
+  // 「Origin: null」等无法解析的来源一律视为跨站
+  try {
+    return new URL(origin).host === new URL(req.url).host;
+  } catch {
+    return false;
+  }
 }
 
 // ---------- Passkey ----------
