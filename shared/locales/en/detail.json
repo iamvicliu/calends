@@ -46,6 +46,8 @@
     "settled": "Settled"
   },
   "charges": {
+    "recentN": { "one": "Latest {count} only", "other": "Latest {count} only" },
+    "addShort": "Add",
     "title": { "one": "Charges · {count}", "other": "Charges · {count}" },
     "kind": { "refund": "Refund", "adjust": "Adjustment", "failed": "Failed" },
     "onCard": "On card {amount} · ",
@@ -72,5 +74,46 @@
     "unchanged": "No change",
     "times": { "one": "{count} time", "other": "{count} times" },
     "changeHint": "Region, plan or payment changes"
-  }
+  },
+  "tab": { "charges": "Charges · {count}", "details": "Details" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "At each charge’s day rate",
+    "noGaps": "No lapses",
+    "now": "now",
+    "endedOn": "Ended {date}",
+    "nextOn": "Next charge {date} · {rel}",
+    "perCharge": "Per charge {from} → {to}",
+    "changes": { "one": "{count} change in {months} mo", "other": "{count} changes in {months} mo" }
+  },
+  "chart": {
+    "title": "Per charge · {ccy}",
+    "orig": "Original",
+    "all": "All",
+    "y1": "1Y",
+    "m6": "6M",
+    "latest": "Latest {date} · first {first}",
+    "perCharge": "Per charge",
+    "list": "List price at first rate",
+    "listOrig": "List price",
+    "insight": "Price {price} · FX {fx}",
+    "origAmount": "Original amount",
+    "few": "Need at least two charges to draw a trend"
+  },
+  "ev": {
+    "gap": "Lapsed",
+    "start": "Subscribed",
+    "switch": "Plan switched",
+    "price": "Price change",
+    "introEnd": "Back to regular price",
+    "paused": "Paused",
+    "last": "Latest charge",
+    "nth": "#{count}",
+    "next": "Next charge",
+    "ended": "Ended",
+    "ending": "Ends",
+    "phases": { "one": "{count} phase", "other": "{count} phases" },
+    "more": { "one": "Show {count} earlier", "other": "Show {count} earlier" }
+  },
+  "table": { "date": "Date", "orig": "Original" }
 }

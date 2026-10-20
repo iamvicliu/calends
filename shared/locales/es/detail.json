@@ -51,6 +51,8 @@
     "settled": "Al día"
   },
   "charges": {
+    "recentN": { "one": "Solo el último", "other": "Solo los últimos {count}" },
+    "addShort": "Añadir",
     "title": { "one": "Cobros · {count}", "other": "Cobros · {count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Fallido" },
     "onCard": "En la tarjeta {amount} · ",
@@ -77,5 +79,46 @@
     "unchanged": "Sin cambios",
     "times": { "one": "{count} vez", "other": "{count} veces" },
     "changeHint": "Cambios de región, plan o pago"
-  }
+  },
+  "tab": { "charges": "Cargos · {count}", "details": "Detalles" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "Al tipo de cambio de cada cargo",
+    "noGaps": "Sin interrupciones",
+    "now": "hoy",
+    "endedOn": "Terminó el {date}",
+    "nextOn": "Próximo cargo {date} · {rel}",
+    "perCharge": "Por cargo {from} → {to}",
+    "changes": { "one": "{count} cambio en {months} meses", "other": "{count} cambios en {months} meses" }
+  },
+  "chart": {
+    "title": "Por cargo · {ccy}",
+    "orig": "Original",
+    "all": "Todo",
+    "y1": "1 año",
+    "m6": "6 meses",
+    "latest": "Último {date} · primero {first}",
+    "perCharge": "Por cargo",
+    "list": "Precio de lista al primer tipo",
+    "listOrig": "Precio de lista",
+    "insight": "Precio {price} · cambio {fx}",
+    "origAmount": "Importe original",
+    "few": "Se necesitan al menos dos cargos para ver la tendencia"
+  },
+  "ev": {
+    "gap": "Interrupción",
+    "start": "Suscripción",
+    "switch": "Cambio de plan",
+    "price": "Cambio de precio",
+    "introEnd": "Vuelve al precio normal",
+    "paused": "En pausa",
+    "last": "Último cargo",
+    "nth": "n.º {count}",
+    "next": "Próximo cargo",
+    "ended": "Terminada",
+    "ending": "Termina",
+    "phases": { "one": "{count} fase", "other": "{count} fases" },
+    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" }
+  },
+  "table": { "date": "Fecha", "orig": "Original" }
 }

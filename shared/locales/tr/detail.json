@@ -56,6 +56,8 @@
     "settled": "Ödeşildi"
   },
   "charges": {
+    "recentN": "Yalnızca son {count}",
+    "addShort": "Ekle",
     "title": { "one": "Ödemeler · {count}", "other": "Ödemeler · {count}" },
     "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" },
     "onCard": "Kartta {amount} · ",
@@ -82,5 +84,46 @@
     "unchanged": "Değişiklik yok",
     "times": { "one": "{count} kez", "other": "{count} kez" },
     "changeHint": "Bölge, plan veya ödeme değişiklikleri"
-  }
+  },
+  "tab": { "charges": "Ödemeler · {count}", "details": "Ayrıntılar" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "Her ödemenin günlük kuruyla",
+    "noGaps": "Kesinti yok",
+    "now": "bugün",
+    "endedOn": "{date} tarihinde bitti",
+    "nextOn": "Sonraki ödeme {date} · {rel}",
+    "perCharge": "Ödeme başına {from} → {to}",
+    "changes": "{months} ayda {count} değişiklik"
+  },
+  "chart": {
+    "title": "Ödeme başına · {ccy}",
+    "orig": "Orijinal",
+    "all": "Tümü",
+    "y1": "1 yıl",
+    "m6": "6 ay",
+    "latest": "Son {date} · ilk {first}",
+    "perCharge": "Ödeme başına",
+    "list": "İlk kurla liste fiyatı",
+    "listOrig": "Liste fiyatı",
+    "insight": "Fiyat {price} · kur {fx}",
+    "origAmount": "Orijinal tutar",
+    "few": "Eğilim için en az iki ödeme gerekir"
+  },
+  "ev": {
+    "gap": "Kesinti",
+    "start": "Abone olundu",
+    "switch": "Plan değişti",
+    "price": "Fiyat değişikliği",
+    "introEnd": "Normal fiyata dönüş",
+    "paused": "Duraklatıldı",
+    "last": "Son ödeme",
+    "nth": "{count}. ödeme",
+    "next": "Sonraki ödeme",
+    "ended": "Bitti",
+    "ending": "Bitiyor",
+    "phases": "{count} dönem",
+    "more": "Önceki {count} kaydı göster"
+  },
+  "table": { "date": "Tarih", "orig": "Orijinal" }
 }

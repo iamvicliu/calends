@@ -1,368 +1,229 @@
 import { createPortal } from 'react-dom';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
+import type { ReactNode } from 'react';
+import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
 import {
   activePhases,
+  addMonths,
   chargesBetween,
+  coveredUntil,
   currentPhase,
-  phaseSubs,
   cycleLabel,
   diffDays,
   effectiveStatus,
+  isGap,
   memberDues,
-  monthlyGross,
   nextCharge,
+  phaseLanes,
+  phaseSubs,
   priceAt,
   servedTime,
   upcomingPhase,
+  type Charge,
 } from '../../shared/billing.ts';
-import { cnDateAuto, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
-import { chargeValue, rateOn } from '../../shared/fx.ts';
+import { cnDateFull, money, relDays, weekdayOf } from '../../shared/format.ts';
+import { chargeValue, convertOn, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { History } from '../components/History.tsx';
-import { CatChip, Cell, Group, Icon, PayBadge, SubIcon } from '../components/ui.tsx';
-import { catColor, subImage, sumBase } from '../derive.ts';
+import { CatIcon, PayBadge, Seg, SubIcon } from '../components/ui.tsx';
+import { catColor } from '../derive.ts';
+import { FLAGS } from '../display.ts';
 import { run, saveSub } from '../store.ts';
-import { ChangeNote, ParallelNote } from './List.tsx';
-import { MiniGantt } from './Gantt.tsx';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan } from '../../shared/phases.ts';
 import { t } from '../../shared/i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
+import { ChargeChart, type ChartLane } from './DetailChart.tsx';
+import './detail.css';
 
 /** 状态角标的色调；文案见 list.status.* */
 const TONE: Record<string, string> = {
-  upcoming: 'blue',
-  active: 'green',
-  trial: 'green',
+  upcoming: 'acc',
+  active: 'ok',
+  trial: 'ok',
   paused: '',
-  ending: 'orange',
+  ending: 'warn',
   ended: '',
-  lifetime: 'blue',
+  lifetime: 'acc',
 };
+const LANE_COLORS = ['var(--c1)', 'var(--c6)', 'var(--c5)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
 
-export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state: AppState; today: string; onEdit: () => void }) {
-  // 大字 / 小字金额跟随显示货币设置
+/** 涨跌角标：花费类数字，降了是好事（绿），涨了是坏事（红） */
+function Trend({ pct, plain }: { pct: number | undefined; plain?: boolean }) {
+  if (pct == null || !Number.isFinite(pct)) return null;
+  const flat = Math.abs(pct) < 0.005;
+  const cls = flat || plain ? '' : pct < 0 ? 'ok' : 'bad';
+  return (
+    <span className={`dt-badge ${cls}`}>
+      {flat ? <ArrowRight size={12} /> : pct < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
+      {flat ? '0%' : `${pct > 0 ? '+' : '−'}${(Math.abs(pct) * 100).toFixed(Math.abs(pct) < 0.1 ? 1 : 0)}%`}
+    </span>
+  );
+}
+
+/** 地区：国旗小图 + 代码（emoji 国旗在部分系统上显示成字母） */
+function Region({ cc }: { cc: string }) {
+  const k = cc.toLowerCase();
+  return (
+    <span className="dt-region">
+      {FLAGS.has(k) && <img src={`/flags/${k}.png`} alt="" />}
+      {cc.toUpperCase()}
+    </span>
+  );
+}
+
+/**
+ * 详情顶部的操作按钮。宽屏：常用的带文字（胶囊），次要的只有图标（正圆）；
+ * 窄屏：一排等宽的大圆按钮，图标下面写名称，方便手指点
+ */
+function Act({ icon, label, onClick, href, round }: { icon: ReactNode; label: string; onClick?: () => void; href?: string; round?: boolean }) {
+  const inner = (
+    <>
+      <i className="dt-act-i">{icon}</i>
+      <span className="dt-act-l">{label}</span>
+    </>
+  );
+  const cls = `dt-act ${round ? 'round' : ''}`;
+  return href ? (
+    <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
+      {inner}
+    </a>
+  ) : (
+    <button className={cls} onClick={onClick} title={label} aria-label={label}>
+      {inner}
+    </button>
+  );
+}
+
+function Panel({ title, aside, children, className = '' }: { title?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <section className={`dt-panel ${className}`}>
+      {title && (
+        <div className="dt-ph">
+          <h3>{title}</h3>
+          {aside && <div className="dt-aside">{aside}</div>}
+        </div>
+      )}
+      {children}
+    </section>
+  );
+}
+
+export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscription; state: AppState; today: string; onEdit: () => void; onClose: () => void }) {
   const pair = useMoneyPair(state);
-  const base = state.settings.baseCurrency;
   const st = effectiveStatus(sub, today);
   const next = nextCharge(sub, today);
   // 显示今天生效的那一段（换区前仍是旧区的价格与支付方式），未来的变更单独列出
   const cur = currentPhase(sub, today);
-  const up = upcomingPhase(sub, today);
-  const method = state.methods.find((m) => m.id === cur.methodId);
-  const upMethod = up && state.methods.find((m) => m.id === up.methodId);
   const history = chargesBetween(sub, sub.start, today, today);
-  const total = sumBase(state, history);
-  const totalUsd = sumBase(state, history, 'USD');
-  // 换区后旧的那段还没到期：两段同时在付钱，每月成本按两段之和
-  const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
-  const monthly = monthlyGross(sub, today, state.fx);
-  const remind = sub.remindDays ?? state.settings.remindDays;
-  const icon = subImage(sub);
-  const label = t(`list.status.${st}`);
-  const tone = TONE[st];
   const ro = !!state.readonly;
-  const dues = memberDues(sub, today);
-  const [allCharges, setAllCharges] = useState(false);
   const [pay, setPay] = useState<{ pay?: Payment; index?: number; phase?: string } | null>(null);
   const [share, setShare] = useState(false);
+  const [tab, setTab] = useState<'charges' | 'details'>('charges');
 
+  const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
+  const big = pair(nowPrice, cur.currency, { compact: false });
+
+  const editPay = (c: Charge) => {
+    if (ro) return;
+    // 同一天可能有多笔（如重复扣款），用当天在同一段里的序号定位；并行的两段各算各的
+    const index = history.filter((x) => x.date === c.date && x.sub.start === c.sub.start).indexOf(c);
+    setPay({
+      pay: { date: c.date, amount: c.kind === 'failed' ? c.sub.price : c.amount, kind: c.kind, settled: c.settled, note: c.note },
+      index,
+      phase: sub.phases?.length ? c.sub.start : undefined,
+    });
+  };
+
+  const paused = sub.status === 'paused';
   const actions = (
     <>
-      {!ro && (
-        <button className="btn" onClick={onEdit}>
-          <Icon name="edit" /> {t('detail.action.edit')}
-        </button>
-      )}
+      {!ro && <Act icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
       {!ro && sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
-        <button
-          className="btn"
+        <Act
+          icon={paused ? <Play size={15} /> : <Pause size={15} />}
+          label={paused ? t('detail.action.resume') : t('detail.action.pause')}
           onClick={() =>
             run(
-              () => saveSub(sub.status === 'paused' ? { ...sub, status: 'active', pausedAt: undefined } : { ...sub, status: 'paused', pausedAt: today }),
-              sub.status === 'paused' ? t('detail.toast.resumed') : t('detail.toast.paused'),
+              () => saveSub(paused ? { ...sub, status: 'active', pausedAt: undefined } : { ...sub, status: 'paused', pausedAt: today }),
+              paused ? t('detail.toast.resumed') : t('detail.toast.paused'),
             )
           }
-        >
-          <Icon name={sub.status === 'paused' ? 'play' : 'pause'} /> {sub.status === 'paused' ? t('detail.action.resume') : t('detail.action.pause')}
-        </button>
+        />
       )}
-      {sub.manageUrl && (
-        <a className="btn" href={sub.manageUrl} target="_blank" rel="noreferrer">
-          <Icon name="gear" /> {t('detail.action.manage')}
-        </a>
-      )}
-      {sub.url && (
-        <a className="btn" href={sub.url} target="_blank" rel="noreferrer">
-          <Icon name="link" /> {t('detail.action.website')}
-        </a>
-      )}
-      <button className="btn" onClick={() => setShare(true)}>
-        <Icon name="share" /> {t('detail.action.share')}
-      </button>
+      {sub.manageUrl && <Act icon={<Settings2 size={15} />} label={t('detail.action.manage')} href={sub.manageUrl} />}
+      {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
+      <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
     </>
   );
-  const story = !!(sub.phases?.length || (sub.priceHistory?.length ?? 0) > 1);
+
+  const details = <Details sub={sub} state={state} today={today} />;
+  const charges = <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />;
 
   return (
-    <div className="detail">
-      {/* 宽屏：操作按钮放在右上角 */}
-      <div className="d-top">{actions}</div>
-      <div className="d-side">
-        <div className="d-hero">
-          {icon ? (
-            <div className="d-hero-bg" style={{ backgroundImage: `url("${icon}")` }} />
-          ) : (
-            <div className="d-hero-bg tint" style={{ '--tint': catColor(sub.category) } as Record<string, string>} />
-          )}
-          <SubIcon sub={sub} size={72} />
+    <div className="dt">
+      <header className="dt-head">
+        <SubIcon sub={sub} size={48} />
+        <div className="dt-id">
           <h2>
-            {sub.name}
-            <span className={`badge ${tone} d-status`}>{label}</span>
+            <span className="dt-name">{sub.name}</span>
+            <span className={`dt-badge dot ${TONE[st]}`}>
+              <i />
+              {t(`list.status.${st}`)}
+            </span>
           </h2>
-          <div className="price">
-            {pair(next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price, cur.currency, { compact: false }).main}
-            {cycleLabel(cur.cycle)}
-            {pair(cur.price, cur.currency, { compact: false }).alt && ` · ${pair(cur.price, cur.currency, { compact: false }).alt}`}
-          </div>
-          {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
-          <ParallelNote sub={sub} cur={cur} today={today} />
-          <div className="d-actions">{actions}</div>
-        </div>
-        <Stats
-          sub={sub}
-          state={state}
-          today={today}
-          total={total}
-          count={history.length}
-          alt={base !== 'USD' ? money(totalUsd, 'USD', { compact: true }) : undefined}
-        />
-        {story && (
-          <div className="d-mini">
-            <div className="d-mini-h">{t('detail.history')}</div>
-            <MiniGantt sub={sub} state={state} today={today} />
-          </div>
-        )}
-      </div>
-      <div className="d-body">
-        <Group title={t('detail.summary')}>
-          <Cell label={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Cell>
-          <Cell label={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Cell>
-          {cur.cycle.unit !== 'lifetime' && (
-            <Cell
-              label={t('detail.field.monthlyYearly')}
-              sub={parallel.length ? t('detail.overlap.monthlyHint', { count: parallel.length + 1 }) : undefined}
-            >{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>
-          )}
-          <Cell label={t('detail.field.category')}>
-            <CatChip cat={sub.category} />
-          </Cell>
-          <Cell label={t('detail.field.method')}>
-            <PayBadge m={method} />
-          </Cell>
-          <Cell label={t('detail.field.start')}>{cnDateFull(sub.start)}</Cell>
-          {next && (
-            <Cell label={t('detail.field.next')}>
-              {cnDateFull(next)} · {relDays(diffDays(today, next))}
-            </Cell>
-          )}
-          {sub.expires && !sub.end && (
-            <Cell label={t('detail.field.expires')} sub={next && next < sub.expires ? t('detail.field.expiresHint') : undefined}>
-              {cnDateFull(sub.expires)} · {relDays(diffDays(today, sub.expires))}
-            </Cell>
-          )}
-          {sub.end && <Cell label={st === 'ended' ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Cell>}
-          {sub.trialEnd && <Cell label={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Cell>}
-          {cur.region && <Cell label={t('detail.field.region')}>{`${flag(cur.region)} ${cur.region}`.trim()}</Cell>}
-        </Group>
-
-        {parallel.length > 0 && (
-          <Group title={t('detail.overlap.title')}>
-            {parallel.map((v) => (
-              <Cell
-                key={v.start}
-                label={
-                  <span className="row" style={{ gap: 6 }}>
-                    {v.region ? `${flag(v.region)} ${v.region}` : t('detail.overlap.previous')}
-                    <PayBadge m={state.methods.find((m) => m.id === v.methodId)} />
-                  </span>
-                }
-                sub={t('detail.overlap.until', { date: cnDateFull(v.end!), rel: relDays(diffDays(today, v.end!)) })}
-              >
-                {money(v.price, v.currency)} · {cycleLabel(v.cycle)}
-              </Cell>
-            ))}
-          </Group>
-        )}
-
-        {up && (
-          <Group title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}>
-            <Cell label={t('detail.up.effective')}>
-              {cnDateFull(up.start)} · {relDays(diffDays(today, up.start))}
-            </Cell>
-            {up.region !== cur.region && up.region && (
-              <Cell
-                label={t('detail.field.region')}
-              >{`${cur.region && st !== 'upcoming' ? `${flag(cur.region)} ${cur.region} → ` : ''}${flag(up.region)} ${up.region}`}</Cell>
-            )}
-            <Cell label={t('detail.field.amount')}>
-              {st !== 'upcoming' && (up.price !== cur.price || up.currency !== cur.currency) ? `${money(cur.price, cur.currency)} → ` : ''}
-              {money(up.price, up.currency)} · {cycleLabel(up.cycle)}
-            </Cell>
-            <Cell label={t('detail.field.method')}>
-              <PayBadge m={upMethod} />
-            </Cell>
-            {up.planned && !ro && (
-              <div className="cell plan-actions">
-                <button
-                  className="btn"
-                  onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}
-                >
-                  {t('detail.plan.drop')}
-                </button>
-                <button className="btn primary" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
-                  <Icon name="check" /> {t('detail.plan.confirm')}
-                </button>
-              </div>
-            )}
-          </Group>
-        )}
-
-        {(sub.phases?.length || (sub.priceHistory?.length ?? 0) > 1) && (
-          <Group title={t('detail.history')}>
-            <History sub={sub} state={state} today={today} />
-          </Group>
-        )}
-
-        {sub.intro && (
-          <Group title={t('detail.intro.title')}>
-            <Cell
-              label={
-                <span className="row" style={{ gap: 6, color: 'var(--green)' }}>
-                  <Icon name="leaf" /> {t('detail.intro.price')}
-                </span>
-              }
-            >
-              {money(sub.intro.price, sub.currency)}
-            </Cell>
-            <Cell label={t('detail.intro.until')}>{cnDateFull(sub.intro.until)}</Cell>
-            <Cell label={t('detail.intro.then')}>{money(sub.price, sub.currency)}</Cell>
-          </Group>
-        )}
-
-        {sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
-          <Group title={t('detail.remind.title')}>
-            <Cell
-              label={
-                <span className="row" style={{ gap: 8 }}>
-                  <Icon name="bell" /> {t('detail.remind.email')}
-                </span>
-              }
-            >
-              {remind < 0
-                ? t('detail.remind.off')
-                : t(remind === 0 ? 'detail.remind.onDay' : 'detail.remind.before', {
-                    count: remind,
-                    time: `${String(state.settings.notifyHour).padStart(2, '0')}:05`,
-                  })}
-            </Cell>
-          </Group>
-        )}
-
-        {sub.share && (
-          <Group
-            title={
-              sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')
-            }
-          >
-            {sub.share.role === 'member' && <Cell label={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Cell>}
-            {sub.share.role === 'owner' && (
+          <div className="dt-meta">
+            <b>
+              {big.main} {cycleLabel(cur.cycle)}
+            </b>
+            {big.alt && (
               <>
-                <Cell label={t('detail.share.myShare')}>{money(sub.price - sub.share.members.reduce((a, m) => a + m.share, 0), sub.currency)}</Cell>
-                {dues.map((d) => (
-                  <Cell
-                    key={d.member.id}
-                    label={d.member.name || t('detail.share.unnamed')}
-                    sub={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}
-                  >
-                    {d.periodsOwed > 0 ? (
-                      <span style={{ color: 'var(--orange)', fontWeight: 600 }}>{t('detail.share.owed', { amount: money(d.owed, sub.currency) })}</span>
-                    ) : (
-                      <span style={{ color: 'var(--green)' }}>{t('detail.share.settled')}</span>
-                    )}
-                  </Cell>
-                ))}
+                <s>·</s>
+                {big.alt}
               </>
             )}
-          </Group>
-        )}
-
-        {history.length > 0 && (
-          <Group title={t('detail.charges.title', { count: history.length })}>
-            {history
-              .slice(allCharges ? 0 : -12)
-              .reverse()
-              .map((c, i) => {
-                const r = rateOn(state.fxHistory, c.currency, c.date);
-                const baseRate = rateOn(state.fxHistory, base, c.date);
-                // 同一天可能有多笔（如重复扣款），用当天在同一段里的序号定位；并行的两段各算各的
-                const index = history.filter((x) => x.date === c.date && x.sub.start === c.sub.start).indexOf(c);
-                return (
-                  <div
-                    key={`${c.date}-${i}`}
-                    className={`charge-row ${ro ? '' : 'editable'} ${c.kind ?? ''}`}
-                    onClick={() =>
-                      !ro &&
-                      setPay({
-                        pay: { date: c.date, amount: c.kind === 'failed' ? c.sub.price : c.amount, kind: c.kind, settled: c.settled, note: c.note },
-                        index,
-                        phase: sub.phases?.length ? c.sub.start : undefined,
-                      })
-                    }
-                  >
-                    <span className="cr-date">
-                      {c.date}
-                      {c.kind && <em className={`cr-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
-                    </span>
-                    <b>{money(c.amount, c.currency)}</b>
-                    <span className="cr-conv">
-                      {c.settled && <span className="cr-settled">{t('detail.charges.onCard', { amount: money(c.settled.amount, c.settled.currency) })}</span>}
-                      {c.currency !== base && money(chargeValue(state, c, base), base)}
-                      {c.currency !== base && base !== 'USD' && c.currency !== 'USD' && ' · '}
-                      {base !== 'USD' && c.currency !== 'USD' && money(chargeValue(state, c, 'USD'), 'USD')}
-                      {c.currency !== base && r && baseRate && (
-                        <small>
-                          1 {c.currency} = {((1 / r.rate) * baseRate.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} {base}
-                          {r.date !== c.date ? ` · ${r.date}` : ''}
-                        </small>
-                      )}
-                    </span>
-                  </div>
-                );
-              })}
-            {!ro && (
-              <button className="cell more-row" onClick={() => setPay({})}>
-                <Icon name="plus" size={14} /> {t('detail.charges.add')}
-              </button>
+            {cur.region && (
+              <>
+                <s>·</s>
+                <Region cc={cur.region} />
+              </>
             )}
-            {history.length > 12 && (
-              <button className="cell more-row" onClick={() => setAllCharges(!allCharges)}>
-                {allCharges ? t('detail.charges.recent') : t('detail.charges.all', { count: history.length })}
-              </button>
-            )}
-          </Group>
-        )}
+            <s>·</s>
+            <span className="dt-cat" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
+              <CatIcon cat={sub.category} size={12} />
+              {sub.category}
+            </span>
+          </div>
+        </div>
+        <div className="dt-actions">{actions}</div>
+        <button className="dt-btn icon dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')}>
+          <X size={17} />
+        </button>
+      </header>
 
-        {sub.notes && (
-          <Group title={t('detail.notes')}>
-            <div className="cell" style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6 }}>
-              {sub.notes}
-            </div>
-          </Group>
-        )}
+      <div className="dt-grid">
+        <div className="dt-col">
+          <Kpis sub={sub} state={state} today={today} history={history} />
+          <Trendline sub={sub} state={state} today={today} history={history} />
+          <Events sub={sub} state={state} today={today} />
+        </div>
+        <div className="dt-col dt-right">
+          <div className="dt-tabs">
+            <Seg
+              value={tab}
+              onChange={setTab}
+              options={[
+                ['charges', t('detail.tab.charges', { count: history.length })],
+                ['details', t('detail.tab.details')],
+              ]}
+            />
+          </div>
+          <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>{details}</div>
+          <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>{charges}</div>
+        </div>
       </div>
-      {/* 挂到 body：详情本身可能在弹层里，嵌套的弹层放在里面会被裁切 */}
+
+      {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
       {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
       {pay &&
         createPortal(
@@ -378,71 +239,548 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   );
 }
 
+/** 正常扣款（不含退款、补差、失败）：走势和「每笔」都只看这些 */
+const regular = (h: Charge[]) => h.filter((c) => !c.kind);
+
 /**
- * 指标卡：累计花了多少、订了多久（扣掉断档）、按实际算每月多少、价格变化。
+ * 指标卡：累计花了多少、订了多久（扣掉断档）、按实际算每月多少。
  * 累计按每笔扣款当天的汇率；合租发起人这里是付出去的全额，成员分摊在「合租」页看。
  */
-function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; state: AppState; today: string; total: number; count: number; alt?: string }) {
+function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
   const base = state.settings.baseCurrency;
-  const vs = phaseSubs(sub);
+  const vals = history.map((c) => chargeValue(state, c, base));
+  const total = vals.reduce((a, v) => a + (Number.isFinite(v) ? v : 0), 0);
+  const per = regular(history)
+    .map((c) => chargeValue(state, c, base))
+    .filter(Number.isFinite);
   // 实际在订的天数：各段到今天（或结束日）为止，不算断档，并行的不重复计
   const served = servedTime(sub, today);
   const active = served.days;
   const gaps = served.gaps.length;
   const years = Math.floor(active / 365);
   const months = Math.floor((active % 365) / 30.44);
-  const lifetime = sub.cycle.unit === 'lifetime' && vs.length === 1;
+  const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   const perMonth = active > 0 ? total / Math.max(1, active / 30.44) : 0;
-  // 价格变化：同币种比第一次和现在；币种变过就说换过几次
-  const first = vs[0];
-  const cur = currentPhase(sub, today);
-  const p0 = priceAt(first, first.start);
-  const p1 = priceAt(cur, today < cur.start ? cur.start : today);
-  const same = first.currency === cur.currency && first.cycle.unit === cur.cycle.unit && first.cycle.every === cur.cycle.every && p0 > 0;
-  const change = same ? p1 / p0 - 1 : undefined;
+  const perTrend = per.length > 1 && per[0] > 0 ? per[per.length - 1] / per[0] - 1 : undefined;
+  const duration = years
+    ? months
+      ? t('detail.stats.yearsMonths', { years, months })
+      : t('detail.stats.years', { count: years })
+    : months
+      ? t('detail.stats.months', { count: months })
+      : t('detail.stats.days', { count: active });
+
   return (
-    <div className="d-stats">
-      <div>
-        <small>{t('detail.stats.spent')}</small>
-        <b>{money(total, base, { compact: true })}</b>
-        <span>
-          {t('detail.stats.count', { count })}
-          {alt ? ` · ${alt}` : ''}
-        </span>
+    <div className={`dt-kpis ${lifetime ? 'two' : ''}`}>
+      <div className="dt-panel dt-kpi">
+        <div className="dt-kpi-top">
+          <small>{t('detail.stats.spent')}</small>
+          <span className="dt-badge">{t('detail.stats.count', { count: history.length })}</span>
+        </div>
+        <div className="dt-kpi-val">
+          <b>{money(total, base, { compact: true })}</b>
+        </div>
       </div>
-      <div>
-        <small>{lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}</small>
-        <b>
-          {years
-            ? months
-              ? t('detail.stats.yearsMonths', { years, months })
-              : t('detail.stats.years', { count: years })
-            : months
-              ? t('detail.stats.months', { count: months })
-              : t('detail.stats.days', { count: active })}
-        </b>
-        <span>{gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.stats.since', { date: cnDateAuto(sub.start, today) })}</span>
+      <div className="dt-panel dt-kpi">
+        <div className="dt-kpi-top">
+          <small>{lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}</small>
+          {gaps > 0 && <span className="dt-badge warn">{t('detail.stats.gaps', { count: gaps })}</span>}
+        </div>
+        <div className="dt-kpi-val">
+          <b>{duration}</b>
+        </div>
       </div>
       {!lifetime && (
-        <div>
-          <small>{t('detail.stats.perMonth')}</small>
-          <b>{money(perMonth, base, { compact: true })}</b>
-          <span>{t('detail.stats.perMonthHint')}</span>
+        <div className="dt-panel dt-kpi">
+          <div className="dt-kpi-top">
+            <small>{t('detail.stats.perMonth')}</small>
+            <Trend pct={perTrend} />
+          </div>
+          <div className="dt-kpi-val">
+            <b>{money(perMonth, base, { compact: true })}</b>
+          </div>
         </div>
       )}
-      <div>
-        <small>{change != null ? t('detail.stats.priceChange') : t('detail.stats.changed')}</small>
-        <b className={change != null ? (change > 0.005 ? 'up' : change < -0.005 ? 'down' : '') : ''}>
-          {change != null
-            ? Math.abs(change) < 0.005
-              ? t('detail.stats.unchanged')
-              : `${change > 0 ? '+' : '−'}${Math.round(Math.abs(change) * 100)}%`
-            : t('detail.stats.times', { count: vs.length - 1 })}
-        </b>
-        <span>
-          {change != null ? `${money(p0, first.currency, { compact: true })} → ${money(p1, cur.currency, { compact: true })}` : t('detail.stats.changeHint')}
-        </span>
-      </div>
     </div>
+  );
+}
+
+type Unit = 'base' | 'usd' | 'orig';
+type Range = 'all' | '1y' | '6m';
+
+/** 每笔扣款折算后的走势，和标价（按首笔汇率）对比，看出是涨价还是汇率在动 */
+function Trendline({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
+  const base = state.settings.baseCurrency;
+  const [unit, setUnit] = useState<Unit>('base');
+  const [range, setRange] = useState<Range>('all');
+  const reg = regular(history);
+  const ccys = [...new Set(reg.map((c) => c.currency))];
+  const single = ccys.length === 1;
+  const u: Unit = unit === 'orig' && !single ? 'base' : unit;
+  const ccy = u === 'base' ? base : u === 'usd' ? 'USD' : ccys[0];
+  const lastDay = reg[reg.length - 1]?.date ?? today;
+  const since = range === 'all' ? '' : addMonths(lastDay, range === '1y' ? -12 : -6);
+  // 每段首笔的日期：标价按那天的汇率折算
+  const firstOf = new Map<string, string>();
+  for (const c of reg) if (!firstOf.has(c.sub.start)) firstOf.set(c.sub.start, c.date);
+  const rows = reg
+    .filter((c) => c.date >= since)
+    .map((c) => {
+      const v = u === 'orig' ? (c.settled ? NaN : c.amount) : chargeValue(state, c, ccy);
+      const price = priceAt(c.sub, c.date);
+      const list = u === 'orig' ? price : convertOn(price, c.currency, ccy, firstOf.get(c.sub.start)!, state.fxHistory, state.fx);
+      return { c, date: c.date, v: Number.isFinite(v) ? v : c.amount, list: Number.isFinite(list) ? list : undefined };
+    });
+  if (reg.length < 2) return null;
+
+  const fmt = (v: number) => money(v, ccy, { compact: true });
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  const vsFirst = rows.length > 1 && first.v > 0 ? last.v / first.v - 1 : undefined;
+  const lanesSrc = phaseSubs(sub);
+  const laneIdx = phaseLanes(lanesSrc);
+  const methodIds = [...new Set(lanesSrc.map((v) => v.methodId ?? ''))];
+  const lanes: ChartLane[] = lanesSrc.map((v, i) => {
+    const m = state.methods.find((x) => x.id === v.methodId);
+    return {
+      key: v.start,
+      from: v.start,
+      to: v.end && v.end < today ? v.end : today,
+      lane: laneIdx[i],
+      color: LANE_COLORS[methodIds.indexOf(v.methodId ?? '') % LANE_COLORS.length],
+      label: (
+        <>
+          {v.region && <Region cc={v.region} />}
+          {money(v.price, v.currency)} {cycleLabel(v.cycle)}
+        </>
+      ),
+      aside: m?.name,
+    };
+  });
+  const unitOpts: Array<[Unit, string]> = [
+    ['base', base],
+    ...(single && ccys[0] !== base && ccys[0] !== 'USD' ? [['orig', t('detail.chart.orig')] as [Unit, string]] : []),
+  ];
+  const spanDays = diffDays(reg[0].date, lastDay);
+
+  return (
+    <Panel
+      className="dt-chart"
+      title={t('detail.chart.title', { ccy: u === 'orig' ? t('detail.chart.orig') : ccy })}
+      aside={
+        <>
+          {unitOpts.length > 1 && <Seg small value={u} onChange={setUnit} options={unitOpts} />}
+          {spanDays > 240 && (
+            <Seg
+              small
+              value={range}
+              onChange={setRange}
+              options={[
+                ['all', t('detail.chart.all')],
+                ['1y', t('detail.chart.y1')],
+                ...(spanDays > 400 ? [['6m', t('detail.chart.m6')] as [Range, string]] : []),
+              ]}
+            />
+          )}
+        </>
+      }
+    >
+      <div className="dt-headline">
+        <b>{money(last.v, ccy)}</b>
+        <Trend pct={vsFirst} />
+      </div>
+      {rows.length > 1 ? (
+        <ChargeChart
+          points={rows}
+          fmt={fmt}
+          lanes={lanes}
+          tip={(i) => {
+            const r = rows[i];
+            const c = r.c;
+            const m = state.methods.find((x) => x.id === c.sub.methodId);
+            const rate = rateOn(state.fxHistory, c.currency, c.date);
+            const rb = rateOn(state.fxHistory, base, c.date);
+            return (
+              <>
+                <div className="cc-tip-h">
+                  <b>{cnDateFull(c.date)}</b>
+                  <span>{weekdayOf(c.date)}</span>
+                </div>
+                <div className="cc-tip-r">
+                  <i className="k-v" />
+                  <span>{t('detail.chart.perCharge')}</span>
+                  <b>{money(r.v, ccy)}</b>
+                </div>
+                {r.list != null && (
+                  <div className="cc-tip-r">
+                    <i className="k-l" />
+                    <span>{u === 'orig' ? t('detail.chart.listOrig') : t('detail.chart.list')}</span>
+                    <b className="m">{money(r.list, ccy)}</b>
+                  </div>
+                )}
+                {c.currency !== ccy && (
+                  <div className="cc-tip-r">
+                    <i />
+                    <span>{t('detail.chart.origAmount')}</span>
+                    <b className="m">{money(c.amount, c.currency)}</b>
+                  </div>
+                )}
+                <div className="cc-tip-f">
+                  {m?.name ?? t('ui.method.none')}
+                  {c.currency !== base && rate && rb && ` · 1 ${c.currency} = ${((1 / rate.rate) * rb.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} ${base}`}
+                </div>
+              </>
+            );
+          }}
+        />
+      ) : (
+        <div className="dt-empty">{t('detail.chart.few')}</div>
+      )}
+    </Panel>
+  );
+}
+
+interface Ev {
+  date: string;
+  title: string;
+  sub?: ReactNode;
+  tone?: 'acc' | 'ok' | 'warn' | 'bad' | 'ink';
+  future?: boolean;
+}
+
+/** 历程：开始、换方案、调价、断档、暂停、结束，以及计划中的变更 */
+function Events({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+  const [all, setAll] = useState(false);
+  const vs = phaseSubs(sub);
+  const plan = (v: Subscription) => {
+    const m = state.methods.find((x) => x.id === v.methodId);
+    return (
+      <span className="dt-inline">
+        {v.region && <Region cc={v.region} />}
+        {[`${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`, m?.name].filter(Boolean).join(' · ')}
+      </span>
+    );
+  };
+  const evs: Ev[] = [];
+  vs.forEach((v, i) => {
+    const until = coveredUntil(vs, i);
+    if (i > 0 && isGap(until, v.start)) {
+      const days = diffDays(until!, v.start);
+      const months = Math.round(days / 30.4375);
+      evs.push({
+        date: until!,
+        title: t('detail.ev.gap'),
+        sub: months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: days }),
+        tone: 'warn',
+      });
+    }
+    if (v.start <= today || !v.planned)
+      evs.push({
+        date: v.start,
+        title: i === 0 ? t('detail.ev.start') : t('detail.ev.switch'),
+        sub: plan(v),
+        tone: 'acc',
+        future: v.start > today,
+      });
+    const hist = (v.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
+    hist.forEach((p, k) => {
+      if (!k || p.from === v.start) return;
+      const prev = hist[k - 1].amount;
+      evs.push({
+        date: p.from,
+        title: t('detail.ev.price'),
+        sub: `${money(prev, v.currency)} → ${money(p.amount, v.currency)}${prev > 0 ? ` (${p.amount > prev ? '+' : '−'}${Math.round(Math.abs(p.amount / prev - 1) * 100)}%)` : ''}`,
+        tone: p.amount > prev ? 'bad' : 'ok',
+        future: p.from > today,
+      });
+    });
+  });
+  if (sub.intro && sub.intro.until <= today) evs.push({ date: sub.intro.until, title: t('detail.intro.title'), sub: t('detail.ev.introEnd') });
+  if (sub.trialEnd) evs.push({ date: sub.trialEnd, title: t('detail.field.trialEnd'), future: sub.trialEnd > today });
+  if (sub.pausedAt && sub.status === 'paused') evs.push({ date: sub.pausedAt, title: t('detail.ev.paused'), tone: 'warn' });
+  const up = upcomingPhase(sub, today);
+  if (up?.planned) evs.push({ date: up.start, title: t('detail.up.planned'), sub: plan(up), future: true });
+  if (sub.end) evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
+  evs.sort((a, b) => a.date.localeCompare(b.date));
+
+  // 只有「开始订阅」一条时，没什么可看的
+  if (evs.length < 2) return null;
+  const shown = all || evs.length <= 6 ? evs : evs.slice(-6);
+  const gaps = servedTime(sub, today).gaps.length;
+  return (
+    <Panel
+      className="dt-events"
+      title={t('detail.history')}
+      aside={`${t('detail.ev.phases', { count: vs.length })} · ${gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.kpi.noGaps')}`}
+    >
+      <ol className="dt-evs" style={{ '--rows': Math.ceil(shown.length / 2) } as Record<string, number>}>
+        {shown.map((e, i) => (
+          <li key={`${e.date}-${i}`} className={`dt-ev ${e.future ? 'fut' : ''} ${e.tone ?? ''}`}>
+            <i />
+            <div>
+              <b>{e.title}</b>
+              {e.sub && <small>{e.sub}</small>}
+            </div>
+            <time>{e.date}</time>
+          </li>
+        ))}
+      </ol>
+      {evs.length > shown.length && (
+        <button className="dt-link" onClick={() => setAll(true)}>
+          {t('detail.ev.more', { count: evs.length - shown.length })}
+        </button>
+      )}
+    </Panel>
+  );
+}
+
+function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?: ReactNode }) {
+  return (
+    <div className="dt-prop">
+      <dt>{k}</dt>
+      <dd>
+        {children}
+        {hint && <small>{hint}</small>}
+      </dd>
+    </div>
+  );
+}
+
+/** 详情：金额、周期、分类、支付方式、日期等，以及并行、计划变更、优惠、合租、提醒和备注 */
+function Details({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+  const st = effectiveStatus(sub, today);
+  const cur = currentPhase(sub, today);
+  const up = upcomingPhase(sub, today);
+  const ro = !!state.readonly;
+  const next = nextCharge(sub, today);
+  const method = state.methods.find((m) => m.id === cur.methodId);
+  const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
+  const dues = memberDues(sub, today);
+  return (
+    <>
+      <Panel title={t('detail.summary')}>
+        <dl className="dt-props">
+          <Prop k={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Prop>
+          <Prop k={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Prop>
+          <Prop k={t('detail.field.category')}>
+            <span className="dt-cat" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
+              <CatIcon cat={sub.category} size={12} />
+              {sub.category}
+            </span>
+          </Prop>
+          <Prop k={t('detail.field.method')}>
+            <PayBadge m={method} />
+          </Prop>
+          {cur.region && (
+            <Prop k={t('detail.field.region')}>
+              <Region cc={cur.region} />
+            </Prop>
+          )}
+          <Prop k={t('detail.field.start')}>{cnDateFull(sub.start)}</Prop>
+          {next && (
+            <Prop k={t('detail.field.next')} hint={relDays(diffDays(today, next))}>
+              {cnDateFull(next)}
+            </Prop>
+          )}
+          {sub.expires && !sub.end && (
+            <Prop k={t('detail.field.expires')} hint={next && next < sub.expires ? t('detail.field.expiresHint') : relDays(diffDays(today, sub.expires))}>
+              {cnDateFull(sub.expires)}
+            </Prop>
+          )}
+          {sub.end && <Prop k={st === 'ended' ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Prop>}
+          {sub.trialEnd && <Prop k={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Prop>}
+        </dl>
+        {sub.notes && (
+          <div className="dt-note">
+            <StickyNote size={14} />
+            <p>{sub.notes}</p>
+          </div>
+        )}
+      </Panel>
+
+      {parallel.length > 0 && (
+        <Panel title={t('detail.overlap.title')}>
+          <dl className="dt-props one">
+            {parallel.map((v) => (
+              <Prop
+                key={v.start}
+                k={
+                  <span className="dt-inline">
+                    {v.region ? <Region cc={v.region} /> : t('detail.overlap.previous')}
+                    <PayBadge m={state.methods.find((m) => m.id === v.methodId)} />
+                  </span>
+                }
+                hint={t('detail.overlap.until', { date: cnDateFull(v.end!), rel: relDays(diffDays(today, v.end!)) })}
+              >
+                {money(v.price, v.currency)} · {cycleLabel(v.cycle)}
+              </Prop>
+            ))}
+          </dl>
+        </Panel>
+      )}
+
+      {up && (
+        <Panel title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}>
+          <dl className="dt-props one">
+            <Prop k={t('detail.up.effective')} hint={relDays(diffDays(today, up.start))}>
+              {cnDateFull(up.start)}
+            </Prop>
+            {up.region !== cur.region && up.region && (
+              <Prop k={t('detail.field.region')}>
+                <span className="dt-inline">
+                  {cur.region && st !== 'upcoming' && (
+                    <>
+                      <Region cc={cur.region} /> →
+                    </>
+                  )}
+                  <Region cc={up.region} />
+                </span>
+              </Prop>
+            )}
+            <Prop k={t('detail.field.amount')}>
+              {st !== 'upcoming' && (up.price !== cur.price || up.currency !== cur.currency) ? `${money(cur.price, cur.currency)} → ` : ''}
+              {money(up.price, up.currency)} · {cycleLabel(up.cycle)}
+            </Prop>
+            <Prop k={t('detail.field.method')}>
+              <PayBadge m={state.methods.find((m) => m.id === up.methodId)} />
+            </Prop>
+          </dl>
+          {up.planned && !ro && (
+            <div className="dt-plan">
+              <button
+                className="dt-btn"
+                onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}
+              >
+                {t('detail.plan.drop')}
+              </button>
+              <button className="dt-btn dark" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
+                {t('detail.plan.confirm')}
+              </button>
+            </div>
+          )}
+        </Panel>
+      )}
+
+      {sub.intro && (
+        <Panel title={t('detail.intro.title')}>
+          <dl className="dt-props one">
+            <Prop k={t('detail.intro.price')}>{money(sub.intro.price, sub.currency)}</Prop>
+            <Prop k={t('detail.intro.until')}>{cnDateFull(sub.intro.until)}</Prop>
+            <Prop k={t('detail.intro.then')}>{money(sub.price, sub.currency)}</Prop>
+          </dl>
+        </Panel>
+      )}
+
+      {sub.share && (
+        <Panel
+          title={
+            sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')
+          }
+        >
+          <dl className="dt-props one">
+            {sub.share.role === 'member' && <Prop k={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Prop>}
+            {sub.share.role === 'owner' && (
+              <>
+                <Prop k={t('detail.share.myShare')}>{money(sub.price - sub.share.members.reduce((a, m) => a + m.share, 0), sub.currency)}</Prop>
+                {dues.map((d) => (
+                  <Prop
+                    key={d.member.id}
+                    k={d.member.name || t('detail.share.unnamed')}
+                    hint={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}
+                  >
+                    {d.periodsOwed > 0 ? (
+                      <span className="dt-owed">{t('detail.share.owed', { amount: money(d.owed, sub.currency) })}</span>
+                    ) : (
+                      <span className="dt-settled">{t('detail.share.settled')}</span>
+                    )}
+                  </Prop>
+                ))}
+              </>
+            )}
+          </dl>
+        </Panel>
+      )}
+    </>
+  );
+}
+
+/** 扣款记录：按年分组（组头带合计），日期 · 原币 · 折合本位币；点一行改这笔 */
+function Charges({
+  sub,
+  state,
+  history,
+  onRow,
+  onAdd,
+}: {
+  sub: Subscription;
+  state: AppState;
+  history: Charge[];
+  onRow: (c: Charge) => void;
+  onAdd?: () => void;
+}) {
+  const base = state.settings.baseCurrency;
+  const [all, setAll] = useState(false);
+  const multi = phaseSubs(sub).length > 1;
+  const rows = history.map((c) => ({ c, b: chargeValue(state, c, base) })).reverse();
+  const shown = all ? rows : rows.slice(0, 24);
+  const years = [...new Set(shown.map((r) => r.c.date.slice(0, 4)))];
+  return (
+    <Panel className="dt-charges" title={t('detail.charges.title', { count: history.length })}>
+      {history.length > 0 && (
+        <div className="dt-tbl">
+          {years.map((y) => {
+            const ys = rows.filter((r) => r.c.date.startsWith(y));
+            return (
+              <Fragment key={y}>
+                <div className="dt-grp">
+                  <span>
+                    <b>{y}</b>
+                    {t('detail.stats.count', { count: ys.length })}
+                  </span>
+                  <span>
+                    {money(
+                      ys.reduce((a, r) => a + (r.b || 0), 0),
+                      base,
+                    )}
+                  </span>
+                </div>
+                {shown
+                  .filter((r) => r.c.date.startsWith(y))
+                  .map(({ c, b }, i) => (
+                    <div
+                      key={`${c.date}-${c.sub.start}-${i}`}
+                      className={`dt-tr dt-row ${onAdd ? 'edit' : ''} ${c.kind ?? ''}`}
+                      onClick={() => onAdd && onRow(c)}
+                      title={c.note}
+                    >
+                      <span className="d">{c.date.slice(5)}</span>
+                      <span className="o">
+                        {c.currency !== base || c.settled ? money(c.amount, c.currency) : ''}
+                        {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
+                        {multi && c.sub.region && !c.kind && <em className="dt-kind">{c.sub.region}</em>}
+                      </span>
+                      <span className="c">{Number.isFinite(b) ? money(b, base) : '—'}</span>
+                    </div>
+                  ))}
+              </Fragment>
+            );
+          })}
+        </div>
+      )}
+      <div className="dt-tfoot">
+        {rows.length > 24 ? (
+          <button className="dt-link" onClick={() => setAll(!all)}>
+            {all ? t('detail.charges.recentN', { count: 24 }) : t('detail.charges.all', { count: history.length })}
+          </button>
+        ) : (
+          <span />
+        )}
+        {onAdd && (
+          <button className="dt-btn sm" onClick={onAdd} title={t('detail.charges.add')}>
+            <Plus size={14} /> {t('detail.charges.addShort')}
+          </button>
+        )}
+      </div>
+    </Panel>
   );
 }

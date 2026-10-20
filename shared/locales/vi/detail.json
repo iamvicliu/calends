@@ -51,6 +51,8 @@
     "settled": "Đã thanh toán đủ"
   },
   "charges": {
+    "recentN": "Chỉ {count} lần gần nhất",
+    "addShort": "Ghi",
     "title": { "other": "Khoản phí · {count}" },
     "kind": { "refund": "Hoàn tiền", "adjust": "Điều chỉnh", "failed": "Thất bại" },
     "onCard": "Trên thẻ {amount} · ",
@@ -77,5 +79,46 @@
     "unchanged": "Không đổi",
     "times": { "other": "{count} lần" },
     "changeHint": "Đổi khu vực, gói hoặc phương thức thanh toán"
-  }
+  },
+  "tab": { "charges": "Lần trừ tiền · {count}", "details": "Chi tiết" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "Theo tỷ giá ngày trừ tiền",
+    "noGaps": "Không gián đoạn",
+    "now": "nay",
+    "endedOn": "Kết thúc {date}",
+    "nextOn": "Lần trừ tiếp {date} · {rel}",
+    "perCharge": "Mỗi lần {from} → {to}",
+    "changes": "{count} lần đổi trong {months} tháng"
+  },
+  "chart": {
+    "title": "Mỗi lần trừ · {ccy}",
+    "orig": "Gốc",
+    "all": "Tất cả",
+    "y1": "1 năm",
+    "m6": "6 tháng",
+    "latest": "Gần nhất {date} · lần đầu {first}",
+    "perCharge": "Mỗi lần",
+    "list": "Giá niêm yết theo tỷ giá đầu",
+    "listOrig": "Giá niêm yết",
+    "insight": "Giá {price} · tỷ giá {fx}",
+    "origAmount": "Số tiền gốc",
+    "few": "Cần ít nhất hai lần trừ tiền để vẽ xu hướng"
+  },
+  "ev": {
+    "gap": "Gián đoạn",
+    "start": "Bắt đầu đăng ký",
+    "switch": "Đổi gói",
+    "price": "Đổi giá",
+    "introEnd": "Về giá thường",
+    "paused": "Tạm dừng",
+    "last": "Lần trừ gần nhất",
+    "nth": "Lần thứ {count}",
+    "next": "Lần trừ tiếp theo",
+    "ended": "Đã kết thúc",
+    "ending": "Sắp kết thúc",
+    "phases": "{count} giai đoạn",
+    "more": "Xem {count} mục trước"
+  },
+  "table": { "date": "Ngày", "orig": "Gốc" }
 }

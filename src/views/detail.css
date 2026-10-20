@@ -1,0 +1,1070 @@
+/* ---------------- 订阅详情（B2）：宽屏左右两栏，左边指标、走势、历程，右边详情与扣款记录；窄屏单列 ---------------- */
+.dt {
+  --dt-bg: #f6f6f7;
+  --dt-panel: var(--card);
+  --dt-ok: #1f9a5a;
+  --dt-ok-soft: rgba(31, 154, 90, 0.1);
+  --dt-bad: #d93f3f;
+  --dt-bad-soft: rgba(217, 63, 63, 0.09);
+  --dt-warn: #b5620a;
+  --dt-warn-soft: rgba(226, 133, 27, 0.1);
+  --dt-line: color-mix(in srgb, var(--label) 9%, transparent);
+  --dt-line-2: color-mix(in srgb, var(--label) 14%, transparent);
+  background: var(--dt-bg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 13px;
+  line-height: 20px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .dt {
+    --dt-bg: #1b1b1b;
+    --dt-ok: #3dd68c;
+    --dt-ok-soft: rgba(61, 214, 140, 0.12);
+    --dt-bad: #ff6369;
+    --dt-bad-soft: rgba(255, 99, 105, 0.12);
+    --dt-warn: #ffa057;
+    --dt-warn-soft: rgba(255, 160, 87, 0.12);
+  }
+}
+:root[data-theme='dark'] .dt {
+  --dt-bg: #1b1b1b;
+  --dt-ok: #3dd68c;
+  --dt-ok-soft: rgba(61, 214, 140, 0.12);
+  --dt-bad: #ff6369;
+  --dt-bad-soft: rgba(255, 99, 105, 0.12);
+  --dt-warn: #ffa057;
+  --dt-warn-soft: rgba(255, 160, 87, 0.12);
+}
+.sheet.bare:has(.dt) {
+  background: var(--dt-bg, #f6f6f7);
+}
+/* 关闭按钮放进详情自己的按钮行，和其他按钮对齐 */
+.sheet.bare:has(.dt) .sheet-close {
+  display: none;
+}
+.dt h2,
+.dt h3,
+.dt p,
+.dt dl,
+.dt dd,
+.dt ol {
+  margin: 0;
+}
+
+/* 角标与按钮 */
+.dt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  background: var(--fill-2);
+  color: var(--label-2);
+  box-shadow: inset 0 0 0 1px var(--dt-line);
+  font-variant-numeric: tabular-nums;
+}
+.dt-badge.dot i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.dt-badge.ok {
+  background: var(--dt-ok-soft);
+  color: var(--dt-ok);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-ok) 25%, transparent);
+}
+.dt-badge.bad {
+  background: var(--dt-bad-soft);
+  color: var(--dt-bad);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-bad) 25%, transparent);
+}
+.dt-badge.warn {
+  background: var(--dt-warn-soft);
+  color: var(--dt-warn);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-warn) 25%, transparent);
+}
+.dt-badge.acc {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.dt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dt-panel);
+  color: var(--label);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px var(--dt-line-2),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+.dt-btn:hover {
+  background: color-mix(in srgb, var(--dt-panel) 92%, var(--label));
+}
+.dt-btn:active {
+  transform: scale(0.97);
+}
+.dt-btn.icon {
+  width: 34px;
+  padding: 0;
+}
+.dt-close {
+  flex-shrink: 0;
+  margin-left: 4px;
+  background: var(--fill);
+  box-shadow: none;
+}
+/* 顶部操作：宽屏为胶囊（带文字）与正圆（只有图标），34px 高，与关闭按钮对齐 */
+.dt-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dt-panel);
+  color: var(--label);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px var(--dt-line-2),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+.dt-act:hover {
+  background: color-mix(in srgb, var(--dt-panel) 92%, var(--label));
+}
+.dt-act:active {
+  transform: scale(0.96);
+}
+.dt-act-i {
+  display: grid;
+  place-items: center;
+  font-style: normal;
+}
+.dt-act.round {
+  width: 34px;
+  padding: 0;
+}
+.dt-act.round .dt-act-l {
+  display: none;
+}
+.dt-btn.sm {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}
+.dt-btn.dark {
+  background: var(--ink);
+  color: var(--on-ink);
+  box-shadow: none;
+}
+.dt-btn svg {
+  flex: none;
+}
+.dt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+/* 头部：图标、名称、状态，一行价格与支付信息，右侧操作 */
+.dt-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 48px;
+}
+.dt-head > .ico {
+  border-radius: 12px;
+}
+.dt-id {
+  min-width: 0;
+  flex: 1;
+}
+.dt-id h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  min-width: 0;
+}
+.dt-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dt-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  margin-top: 2px;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+.dt-meta b {
+  font-weight: 550;
+  color: var(--label);
+}
+.dt-meta s {
+  text-decoration: none;
+  color: var(--label-3);
+}
+.dt-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--label);
+}
+.dt-cat .i,
+.dt-cat .cat-emo,
+.dt-cat svg {
+  color: var(--tint);
+}
+.dt-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 两栏 */
+.dt-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+.dt-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.dt-panel {
+  background: var(--dt-panel);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 1px var(--dt-line),
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 16px 20px 20px;
+  min-width: 0;
+}
+.dt-ph {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  flex-wrap: wrap;
+}
+.dt-ph h3 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.dt-aside {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+.dt-aside .seg {
+  margin: 0;
+}
+
+/* 指标卡 */
+.dt-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.dt-kpi {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--dt-panel)), var(--dt-panel) 60%);
+}
+.dt-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 22px;
+}
+.dt-kpi-top small {
+  font-size: 12px;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dt-kpi-val {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+.dt-kpi-val b {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.dt-kpi-val b.up {
+  color: var(--dt-bad);
+}
+.dt-kpi-val b.down {
+  color: var(--dt-ok);
+}
+.dt-kpi-val .spark {
+  flex: none;
+  overflow: visible;
+}
+
+/* 走势 */
+.dt-chart {
+  padding-bottom: 16px;
+}
+.dt-headline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 4px;
+}
+.dt-headline b {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.dt-headline > span:last-child {
+  font-size: 12px;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.dt-empty {
+  padding: 24px 0 8px;
+  color: var(--label-3);
+  font-size: 12.5px;
+}
+.cc {
+  position: relative;
+  margin-top: 12px;
+  touch-action: pan-y;
+  user-select: none;
+}
+.cc-plot {
+  display: block;
+  overflow: visible;
+}
+.cc-grid {
+  stroke: var(--sep);
+  stroke-width: 1;
+}
+.cc-tk {
+  fill: var(--label-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.cc-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.cc-list {
+  fill: none;
+  stroke: var(--label-3);
+  stroke-width: 1.4;
+  stroke-dasharray: 4 4;
+}
+.cc-pt {
+  fill: var(--dt-panel);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+.cc-cross {
+  stroke: var(--label-3);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.cc-hl {
+  fill: var(--accent);
+  stroke: var(--dt-panel);
+  stroke-width: 2.5;
+}
+.cc-hl.list {
+  fill: var(--label-3);
+  stroke-width: 2;
+}
+
+.cc-lanes {
+  position: relative;
+}
+.cc-lane {
+  position: absolute;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 11.5px;
+  background: color-mix(in srgb, var(--tint) 12%, var(--dt-panel));
+  box-shadow: inset 3px 0 0 var(--tint);
+}
+.cc-lane b {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--tint) 80%, var(--label));
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-lane span {
+  color: var(--label-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-cross-l {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--label-3);
+  pointer-events: none;
+}
+.cc-xt {
+  position: relative;
+  height: 22px;
+  margin-top: 4px;
+}
+.cc-xt span {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--label-3);
+  white-space: nowrap;
+}
+.cc-tip {
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  width: 220px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dt-panel) 94%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 0 0 1px var(--dt-line-2),
+    0 12px 32px -8px rgba(0, 0, 0, 0.22),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 16px;
+}
+.cc-tip-h {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--sep);
+  color: var(--label-2);
+}
+.cc-tip-h b {
+  color: var(--label);
+  font-weight: 600;
+}
+.cc-tip-r {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+}
+.cc-tip-r i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.cc-tip-r i.k-v {
+  background: var(--accent);
+}
+.cc-tip-r i.k-l {
+  border-radius: 0;
+  height: 0;
+  border-top: 1.5px dashed var(--label-3);
+}
+.cc-tip-r span {
+  flex: 1;
+  color: var(--label-2);
+}
+.cc-tip-r b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cc-tip-r b.m {
+  font-weight: 500;
+}
+.cc-tip-f {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--sep);
+  color: var(--label-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 历程 */
+.dt-evs {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px !important;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px 24px;
+}
+.dt-ev {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  column-gap: 8px;
+  padding: 6px 0;
+}
+.dt-ev > i {
+  width: 9px;
+  height: 9px;
+  margin: 5px 0 0 3px;
+  border-radius: 50%;
+  background: var(--label-3);
+  box-shadow:
+    0 0 0 3px var(--dt-panel),
+    0 0 0 4px var(--dt-line-2);
+}
+.dt-ev.acc > i {
+  background: var(--accent);
+}
+.dt-ev.ok > i {
+  background: var(--dt-ok);
+}
+.dt-ev.bad > i {
+  background: var(--dt-bad);
+}
+.dt-ev.warn > i {
+  background: var(--orange);
+}
+.dt-ev.ink > i {
+  background: var(--label);
+}
+.dt-ev.fut > i {
+  background: var(--dt-panel);
+  box-shadow:
+    0 0 0 3px var(--dt-panel),
+    inset 0 0 0 1.5px var(--label-3);
+}
+.dt-ev b {
+  display: block;
+  font-weight: 500;
+}
+.dt-ev small {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+.dt-ev time {
+  padding-top: 1px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--label-3);
+}
+.dt-events .dt-link {
+  margin-top: 8px;
+}
+
+/* 详情属性 */
+.dt-props {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 24px;
+  margin-top: 4px !important;
+}
+.dt-prop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 38px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--sep);
+}
+.dt-prop dt {
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.dt-prop dd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+}
+.dt-prop dd small {
+  font-size: 11.5px;
+  line-height: 15px;
+  font-weight: 400;
+  color: var(--label-3);
+}
+.dt-prop .pay {
+  font-weight: 500;
+}
+.dt-region {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.dt-region img {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.15);
+}
+.dt-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dt-note {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 20px;
+  color: var(--label-2);
+}
+.dt-note svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--label-3);
+}
+.dt-note p {
+  white-space: pre-wrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dt-plan {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.dt-owed {
+  color: var(--orange);
+  font-weight: 600;
+}
+.dt-settled {
+  color: var(--dt-ok);
+}
+
+/* 扣款表 */
+.dt-charges {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dt-charges .dt-ph {
+  padding: 14px 20px 10px;
+}
+.dt-tbl {
+  --cols: 52px minmax(0, 1fr) auto;
+}
+.dt-tr {
+  display: grid;
+  grid-template-columns: var(--cols);
+  align-items: center;
+  column-gap: 8px;
+  min-height: 34px;
+  padding: 0 20px;
+  font-variant-numeric: tabular-nums;
+}
+.dt-tr > :nth-child(n + 3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dt-grp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-variant-numeric: tabular-nums;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 30px;
+  background: color-mix(in srgb, var(--label) 2.5%, var(--dt-panel));
+  box-shadow: inset 0 -1px 0 var(--sep);
+  font-size: 12px;
+  color: var(--label-2);
+}
+.dt-grp b {
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--label);
+}
+.dt-row {
+  border-bottom: 1px solid var(--sep);
+}
+.dt-row.edit {
+  cursor: pointer;
+}
+.dt-row.edit:hover {
+  background: var(--fill-2);
+}
+.dt-row .d {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.dt-row .o {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  min-width: 0;
+  white-space: nowrap;
+}
+.dt-row .c {
+  font-weight: 500;
+}
+.dt-row .u {
+  color: var(--label-3);
+}
+.dt-row.refund .o,
+.dt-row.refund .c {
+  color: var(--dt-ok);
+}
+.dt-row.failed .o,
+.dt-row.failed .c {
+  color: var(--label-3);
+  text-decoration: line-through;
+}
+.dt-kind {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: none;
+}
+.dt-kind.refund {
+  background: var(--dt-ok-soft);
+  color: var(--dt-ok);
+}
+.dt-kind.failed {
+  background: var(--dt-bad-soft);
+  color: var(--dt-bad);
+}
+.dt-kind.adjust {
+  background: var(--dt-warn-soft);
+  color: var(--dt-warn);
+}
+.dt-kind.card {
+  background: var(--fill);
+  color: var(--label-2);
+}
+.dt-tfoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 0 12px 0 20px;
+  border-top: 1px solid var(--dt-line);
+  flex: none;
+}
+.dt-tabs {
+  display: flex;
+}
+.dt-tabs .seg {
+  flex: 1;
+  margin: 0;
+}
+.dt-tabs .seg button {
+  flex: 1;
+}
+.dt-pane {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+.dt-pane.on {
+  display: flex;
+}
+
+/* 窄屏：按钮只留图标，表格去掉星期 */
+@media (max-width: 640px) {
+  .dt {
+    padding: 24px 12px 24px;
+  }
+  /* 第一行：图标 · 名称 · 关闭；第二行：一排等宽的圆形操作按钮 */
+  .dt-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'ico id close' 'act act act';
+    align-items: start;
+    gap: 12px;
+  }
+  .dt-head > .ico {
+    grid-area: ico;
+  }
+  .dt-id {
+    grid-area: id;
+  }
+  .dt-id h2 {
+    flex-wrap: wrap;
+    row-gap: 2px;
+    font-size: 19px;
+    line-height: 26px;
+  }
+  .dt-name {
+    white-space: normal;
+  }
+  .dt-close {
+    grid-area: close;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+  }
+  .dt-actions {
+    grid-area: act;
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .dt-act,
+  .dt-act.round {
+    flex-direction: column;
+    gap: 6px;
+    width: auto;
+    height: auto;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--label-2);
+  }
+  .dt-act:hover {
+    background: none;
+  }
+  .dt-act-i {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--dt-panel);
+    color: var(--label);
+    box-shadow:
+      0 0 0 1px var(--dt-line-2),
+      0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .dt-act-i svg {
+    width: 20px;
+    height: 20px;
+  }
+  .dt-act.round .dt-act-l {
+    display: block;
+  }
+  .dt-act-l {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dt-panel {
+    padding: 14px 14px 16px;
+  }
+  /* 三张指标卡并排，角标换到数字下面 */
+  .dt-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .dt-kpis.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dt-kpi {
+    padding: 10px 12px 12px;
+  }
+  .dt-kpi-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dt-kpi-top .dt-badge {
+    order: 2;
+    margin-top: 6px;
+  }
+  .dt-kpi {
+    display: grid;
+    grid-template-areas: 'label' 'val' 'badge';
+    align-content: start;
+  }
+  .dt-kpi-top {
+    display: contents;
+  }
+  .dt-kpi-top small {
+    grid-area: label;
+  }
+  .dt-kpi-top .dt-badge {
+    grid-area: badge;
+    justify-self: start;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+  .dt-kpi-val {
+    grid-area: val;
+    margin-top: 2px;
+  }
+  .dt-kpi-val b {
+    font-size: 18px;
+    line-height: 24px;
+  }
+  .dt-tr {
+    padding: 0 14px;
+  }
+  .dt-charges .dt-ph {
+    padding: 12px 14px 8px;
+  }
+}
+
+/* 宽屏：弹层撑大，两栏各自滚动 */
+@media (min-width: 1000px) {
+  .sheet.bare:has(.dt) {
+    width: min(1080px, calc(100vw - 48px));
+    overflow: hidden;
+  }
+  .sheet.bare:has(.dt) .sheet-body {
+    height: min(92vh, 940px);
+    overflow: hidden;
+  }
+  .dt {
+    height: 100%;
+    padding: 24px;
+    gap: 20px;
+  }
+  .dt-grid {
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 20px;
+  }
+  .dt-col {
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    margin: -2px;
+    padding: 2px 2px 8px;
+  }
+  .dt-col::-webkit-scrollbar {
+    display: none;
+  }
+  .dt-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .dt-kpis.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dt-evs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(var(--rows), auto);
+    grid-auto-flow: column;
+  }
+  /* 宽屏两块都显示，不用切换 */
+  .dt-tabs {
+    display: none;
+  }
+  .dt-pane {
+    display: flex;
+  }
+  .dt-right {
+    gap: 16px;
+  }
+}
+@media (min-width: 641px) and (max-width: 999px) {
+  .sheet.bare:has(.dt) {
+    width: min(760px, calc(100vw - 32px));
+  }
+}

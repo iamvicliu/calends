@@ -73,6 +73,8 @@
     "settled": "정산 완료"
   },
   "charges": {
+    "recentN": "최근 {count}건만",
+    "addShort": "기록",
     "title": {
       "other": "결제 · {count}"
     },
@@ -117,5 +119,46 @@
       "other": "{count}회"
     },
     "changeHint": "지역, 플랜 또는 결제 수단 변경"
-  }
+  },
+  "tab": { "charges": "결제 내역 · {count}", "details": "상세" },
+  "kpi": {
+    "approx": "약 {amount}",
+    "dayRate": "결제일 환율 기준",
+    "noGaps": "중단 없음",
+    "now": "현재",
+    "endedOn": "{date} 종료",
+    "nextOn": "다음 결제 {date} · {rel}",
+    "perCharge": "회당 {from} → {to}",
+    "changes": "{months}개월 동안 {count}회 변경"
+  },
+  "chart": {
+    "title": "회당 결제 · {ccy}",
+    "orig": "원래 통화",
+    "all": "전체",
+    "y1": "1년",
+    "m6": "6개월",
+    "latest": "최근 {date} · 첫 결제 {first}",
+    "perCharge": "회당 환산",
+    "list": "정가(첫 결제 환율)",
+    "listOrig": "정가",
+    "insight": "가격 {price} · 환율 {fx}",
+    "origAmount": "원래 통화 금액",
+    "few": "결제가 2회 이상이어야 추이를 볼 수 있어요"
+  },
+  "ev": {
+    "gap": "중단",
+    "start": "구독 시작",
+    "switch": "요금제 변경",
+    "price": "가격 변경",
+    "introEnd": "정상가로 복귀",
+    "paused": "일시 중지",
+    "last": "최근 결제",
+    "nth": "{count}번째",
+    "next": "다음 결제",
+    "ended": "종료됨",
+    "ending": "종료 예정",
+    "phases": "{count}개 구간",
+    "more": "이전 {count}건 보기"
+  },
+  "table": { "date": "날짜", "orig": "원래 통화" }
 }

@@ -73,6 +73,8 @@
     "settled": "精算済み"
   },
   "charges": {
+    "recentN": "最新 {count} 件のみ",
+    "addShort": "記録",
     "title": {
       "other": "請求 · {count}"
     },
@@ -117,5 +119,46 @@
       "other": "{count}回"
     },
     "changeHint": "地域・プラン・支払い方法の変更"
-  }
+  },
+  "tab": { "charges": "請求履歴 · {count}", "details": "詳細" },
+  "kpi": {
+    "approx": "約 {amount}",
+    "dayRate": "各請求日のレートで換算",
+    "noGaps": "中断なし",
+    "now": "現在",
+    "endedOn": "{date} に終了",
+    "nextOn": "次回請求 {date} · {rel}",
+    "perCharge": "1 回あたり {from} → {to}",
+    "changes": "{months} か月で {count} 回変更"
+  },
+  "chart": {
+    "title": "1 回の請求 · {ccy}",
+    "orig": "原通貨",
+    "all": "すべて",
+    "y1": "1 年",
+    "m6": "6 か月",
+    "latest": "最新 {date} · 初回 {first}",
+    "perCharge": "1 回あたり",
+    "list": "定価（初回レート）",
+    "listOrig": "定価",
+    "insight": "価格 {price} · 為替 {fx}",
+    "origAmount": "原通貨の金額",
+    "few": "請求が 2 回以上になると推移を表示します"
+  },
+  "ev": {
+    "gap": "中断",
+    "start": "登録",
+    "switch": "プラン変更",
+    "price": "価格改定",
+    "introEnd": "通常価格に戻る",
+    "paused": "一時停止",
+    "last": "最新の請求",
+    "nth": "{count} 回目",
+    "next": "次回請求",
+    "ended": "終了",
+    "ending": "終了予定",
+    "phases": "{count} 期間",
+    "more": "以前の {count} 件を表示"
+  },
+  "table": { "date": "日付", "orig": "原通貨" }
 }

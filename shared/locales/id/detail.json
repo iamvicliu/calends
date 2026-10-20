@@ -51,6 +51,8 @@
     "settled": "Lunas"
   },
   "charges": {
+    "recentN": "Hanya {count} terakhir",
+    "addShort": "Catat",
     "title": { "other": "Tagihan · {count}" },
     "kind": { "refund": "Refund", "adjust": "Penyesuaian", "failed": "Gagal" },
     "onCard": "Di kartu {amount} · ",
@@ -77,5 +79,46 @@
     "unchanged": "Tidak berubah",
     "times": { "other": "{count} kali" },
     "changeHint": "Perubahan wilayah, paket, atau pembayaran"
-  }
+  },
+  "tab": { "charges": "Tagihan · {count}", "details": "Detail" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "Kurs hari tiap tagihan",
+    "noGaps": "Tanpa jeda",
+    "now": "sekarang",
+    "endedOn": "Berakhir {date}",
+    "nextOn": "Tagihan berikutnya {date} · {rel}",
+    "perCharge": "Per tagihan {from} → {to}",
+    "changes": "{count} perubahan dalam {months} bulan"
+  },
+  "chart": {
+    "title": "Per tagihan · {ccy}",
+    "orig": "Asli",
+    "all": "Semua",
+    "y1": "1 thn",
+    "m6": "6 bln",
+    "latest": "Terakhir {date} · pertama {first}",
+    "perCharge": "Per tagihan",
+    "list": "Harga daftar pada kurs pertama",
+    "listOrig": "Harga daftar",
+    "insight": "Harga {price} · kurs {fx}",
+    "origAmount": "Jumlah asli",
+    "few": "Perlu minimal dua tagihan untuk melihat tren"
+  },
+  "ev": {
+    "gap": "Jeda",
+    "start": "Mulai berlangganan",
+    "switch": "Ganti paket",
+    "price": "Perubahan harga",
+    "introEnd": "Kembali ke harga normal",
+    "paused": "Dijeda",
+    "last": "Tagihan terakhir",
+    "nth": "Ke-{count}",
+    "next": "Tagihan berikutnya",
+    "ended": "Berakhir",
+    "ending": "Akan berakhir",
+    "phases": "{count} fase",
+    "more": "Tampilkan {count} sebelumnya"
+  },
+  "table": { "date": "Tanggal", "orig": "Asli" }
 }

@@ -74,6 +74,8 @@
     "settled": "Réglé"
   },
   "charges": {
+    "recentN": { "one": "Seulement le dernier", "other": "Seulement les {count} derniers" },
+    "addShort": "Ajouter",
     "title": {
       "one": "Prélèvements · {count}",
       "other": "Prélèvements · {count}"
@@ -125,5 +127,46 @@
       "other": "{count} fois"
     },
     "changeHint": "Changements de région, de formule ou de paiement"
-  }
+  },
+  "tab": { "charges": "Prélèvements · {count}", "details": "Détails" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "Au taux du jour de chaque prélèvement",
+    "noGaps": "Sans interruption",
+    "now": "aujourd’hui",
+    "endedOn": "Terminé le {date}",
+    "nextOn": "Prochain prélèvement {date} · {rel}",
+    "perCharge": "Par prélèvement {from} → {to}",
+    "changes": { "one": "{count} changement en {months} mois", "other": "{count} changements en {months} mois" }
+  },
+  "chart": {
+    "title": "Par prélèvement · {ccy}",
+    "orig": "Devise d’origine",
+    "all": "Tout",
+    "y1": "1 an",
+    "m6": "6 mois",
+    "latest": "Dernier {date} · premier {first}",
+    "perCharge": "Par prélèvement",
+    "list": "Prix catalogue au premier taux",
+    "listOrig": "Prix catalogue",
+    "insight": "Prix {price} · change {fx}",
+    "origAmount": "Montant d’origine",
+    "few": "Il faut au moins deux prélèvements pour tracer une tendance"
+  },
+  "ev": {
+    "gap": "Interruption",
+    "start": "Abonnement",
+    "switch": "Changement d’offre",
+    "price": "Changement de prix",
+    "introEnd": "Retour au prix normal",
+    "paused": "En pause",
+    "last": "Dernier prélèvement",
+    "nth": "n° {count}",
+    "next": "Prochain prélèvement",
+    "ended": "Terminé",
+    "ending": "Se termine",
+    "phases": { "one": "{count} phase", "other": "{count} phases" },
+    "more": { "one": "Afficher {count} plus ancien", "other": "Afficher {count} plus anciens" }
+  },
+  "table": { "date": "Date", "orig": "Origine" }
 }

@@ -556,7 +556,7 @@ function App() {
 
       {viewing && (
         <Sheet bare onClose={() => setViewId(null)}>
-          <Detail sub={viewing} state={state} today={d} onEdit={() => edit(viewing)} />
+          <Detail sub={viewing} state={state} today={d} onEdit={() => edit(viewing)} onClose={() => setViewId(null)} />
         </Sheet>
       )}
       {editing && <Editor key={editing.id} sub={editing} state={state} today={d} onClose={() => setEditing(null)} />}

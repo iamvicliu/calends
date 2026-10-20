@@ -40,6 +40,8 @@
     "settled": "已结清"
   },
   "charges": {
+    "recentN": "只看最近 {count} 笔",
+    "addShort": "记一笔",
     "title": "扣款记录 · {count} 笔",
     "kind": { "refund": "退款", "adjust": "补差", "failed": "失败" },
     "onCard": "卡上 {amount} · ",
@@ -66,5 +68,46 @@
     "unchanged": "没变",
     "times": "{count} 次",
     "changeHint": "换区、换套餐或换支付方式"
-  }
+  },
+  "tab": { "charges": "扣款记录 · {count}", "details": "详情" },
+  "kpi": {
+    "approx": "折合 {amount}",
+    "dayRate": "按每笔当天汇率",
+    "noGaps": "无断档",
+    "now": "至今",
+    "endedOn": "已于 {date} 结束",
+    "nextOn": "下次扣款 {date} · {rel}",
+    "perCharge": "每笔从 {from} 到 {to}",
+    "changes": "{months} 个月内调整 {count} 次"
+  },
+  "chart": {
+    "title": "每笔扣款 · {ccy}",
+    "orig": "原币",
+    "all": "全部",
+    "y1": "1 年",
+    "m6": "6 个月",
+    "latest": "最近一笔 {date} · 首笔 {first}",
+    "perCharge": "每笔折合",
+    "list": "标价（按首笔汇率）",
+    "listOrig": "标价",
+    "insight": "标价 {price} · 汇率 {fx}",
+    "origAmount": "原币金额",
+    "few": "扣款少于两笔，还画不出走势"
+  },
+  "ev": {
+    "gap": "断更",
+    "start": "开始订阅",
+    "switch": "切换方案",
+    "price": "调价",
+    "introEnd": "恢复原价",
+    "paused": "暂停",
+    "last": "最近一笔",
+    "nth": "第 {count} 笔",
+    "next": "下次扣款",
+    "ended": "已结束",
+    "ending": "将结束",
+    "phases": "{count} 段",
+    "more": "显示更早的 {count} 条"
+  },
+  "table": { "date": "日期", "orig": "原币" }
 }

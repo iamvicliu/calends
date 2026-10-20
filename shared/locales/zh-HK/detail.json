@@ -40,6 +40,8 @@
     "settled": "已結清"
   },
   "charges": {
+    "recentN": "只看最近 {count} 筆",
+    "addShort": "記一筆",
     "title": "扣款記錄 · {count} 筆",
     "kind": { "refund": "退款", "adjust": "補差", "failed": "失敗" },
     "onCard": "卡上 {amount} · ",
@@ -66,5 +68,46 @@
     "unchanged": "沒變",
     "times": "{count} 次",
     "changeHint": "換區、換套餐或換付款方式"
-  }
+  },
+  "tab": { "charges": "扣款紀錄 · {count}", "details": "詳情" },
+  "kpi": {
+    "approx": "約合 {amount}",
+    "dayRate": "按每筆當天匯率",
+    "noGaps": "無中斷",
+    "now": "至今",
+    "endedOn": "已於 {date} 結束",
+    "nextOn": "下次扣款 {date} · {rel}",
+    "perCharge": "每筆由 {from} 到 {to}",
+    "changes": "{months} 個月內調整 {count} 次"
+  },
+  "chart": {
+    "title": "每筆扣款 · {ccy}",
+    "orig": "原幣",
+    "all": "全部",
+    "y1": "1 年",
+    "m6": "6 個月",
+    "latest": "最近一筆 {date} · 首筆 {first}",
+    "perCharge": "每筆約合",
+    "list": "標價（按首筆匯率）",
+    "listOrig": "標價",
+    "insight": "標價 {price} · 匯率 {fx}",
+    "origAmount": "原幣金額",
+    "few": "扣款少於兩筆，未能畫出走勢"
+  },
+  "ev": {
+    "gap": "中斷",
+    "start": "開始訂閱",
+    "switch": "切換方案",
+    "price": "調價",
+    "introEnd": "恢復原價",
+    "paused": "暫停",
+    "last": "最近一筆",
+    "nth": "第 {count} 筆",
+    "next": "下次扣款",
+    "ended": "已結束",
+    "ending": "將結束",
+    "phases": "{count} 段",
+    "more": "顯示更早的 {count} 項"
+  },
+  "table": { "date": "日期", "orig": "原幣" }
 }

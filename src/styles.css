@@ -471,7 +471,7 @@ a {
   border: 0;
   background: none;
   padding: 4px 14px;
-  border-radius: 7px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
   color: var(--label);
@@ -729,92 +729,6 @@ a {
   width: 15px;
   height: 15px;
   color: var(--label-2);
-}
-/* ---------------- 详情 ---------------- */
-.detail {
-  background: var(--card);
-  border-radius: var(--r);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.d-hero {
-  position: relative;
-  padding: 36px 20px 18px;
-  text-align: center;
-  overflow: hidden;
-  isolation: isolate;
-}
-.d-hero-bg {
-  position: absolute;
-  inset: -60px;
-  z-index: -1;
-  background-size: cover;
-  background-position: center;
-  filter: blur(42px) saturate(1.8);
-  opacity: 0.5;
-}
-.d-hero-bg.tint {
-  background: radial-gradient(circle at 50% 35%, var(--label-3), transparent 65%);
-  opacity: 0.18;
-  filter: blur(16px);
-}
-.d-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(180deg, transparent 35%, var(--card));
-}
-.d-hero h2 {
-  margin: 12px 0 2px;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-}
-.d-hero .d-status {
-  margin-left: 8px;
-  vertical-align: 4px;
-  font-size: 11.5px;
-  letter-spacing: 0;
-}
-.d-hero .change-note {
-  display: inline-flex;
-  margin-top: 8px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--orange, #f59e0b) 14%, transparent);
-  color: var(--label);
-}
-.d-hero .price {
-  font-size: 14px;
-  color: var(--label-2);
-}
-.d-hero .price .amt {
-  color: var(--label);
-  font-size: 22px;
-  margin-right: 4px;
-}
-.d-actions {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-.d-actions .btn {
-  background: color-mix(in srgb, var(--card) 75%, transparent);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 0 0.5px var(--sep);
-}
-.d-body {
-  padding: 4px 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-.d-body .group-body {
-  background: var(--card-2);
-  box-shadow: none;
 }
 
 /* ---------------- iOS 分组列表 ---------------- */
@@ -1394,10 +1308,7 @@ a {
 .sheet.bare .sheet-body {
   padding: 0;
 }
-.sheet.bare .detail {
-  box-shadow: none;
-  border-radius: 0;
-}
+
 .sheet-close {
   position: absolute;
   top: 12px;
@@ -1732,12 +1643,6 @@ select.btn {
   background-position: right 11px center;
 }
 
-.d-hero .ico {
-  margin: 0 auto;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.18),
-    inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
-}
 @media (max-width: 860px) {
   .tb-title {
     flex-basis: 100%;
@@ -2745,7 +2650,7 @@ select.btn {
 }
 .seg {
   background: var(--fill);
-  border-radius: 10px;
+  border-radius: 999px;
 }
 .seg button {
   color: var(--label-2);
@@ -2777,7 +2682,6 @@ select.btn {
 /* 卡片：细线，无阴影 */
 .card,
 .heat-m,
-.detail,
 .group-body {
   box-shadow: 0 0 0 1px var(--line);
 }
@@ -2795,9 +2699,7 @@ select.btn {
   font-size: 12.5px;
   color: var(--label-3);
 }
-.d-body .group-body {
-  background: var(--card);
-}
+
 .toggle input:checked + i {
   background: var(--ink);
 }
@@ -5316,17 +5218,6 @@ a.car-toggle {
   height: 12px;
 }
 
-/* 详情页：左侧字段名浅一点，右侧数值深一点，一眼看出哪边是数据 */
-.d-body .cell-l {
-  color: var(--label-2);
-}
-.d-body .cell-r {
-  color: var(--label);
-}
-.d-body .cell-l small {
-  color: var(--label-3);
-}
-
 /* 订阅列表的多维筛选：每行一个维度，选项一行排开、放不下横向滑动 */
 .facets {
   position: relative;
@@ -6881,154 +6772,6 @@ button.seat:disabled {
   }
 }
 
-/* 详情：指标卡 */
-.d-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-.d-stats > div {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.d-stats small {
-  font-size: 12px;
-  color: var(--label-2);
-}
-.d-stats b {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.d-stats b.up {
-  color: var(--red);
-}
-.d-stats b.down {
-  color: var(--green);
-}
-.d-stats span {
-  font-size: 11.5px;
-  color: var(--label-3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 详情：迷你时间轴 */
-.mg-track {
-  position: relative;
-  height: calc(var(--lanes) * 22px + 26px);
-  margin: 4px 0 2px;
-}
-.mg-seg {
-  position: absolute;
-  height: 16px;
-  border-radius: 999px;
-  background: var(--c);
-}
-.mg-seg.future {
-  opacity: 0.45;
-}
-.mg-seg.cut {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  box-shadow: inset -1.5px 0 0 var(--card);
-}
-.mg-seg.cont {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.mg-seg.open {
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 16px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 16px), transparent);
-}
-.mg-seg.planned {
-  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 55%, transparent) 0 4px, color-mix(in srgb, var(--c) 20%, transparent) 4px 8px);
-  box-shadow: inset 0 0 0 1px var(--c);
-}
-.mg-gap {
-  position: absolute;
-  height: 0;
-  border-top: 1.5px dashed var(--label-3);
-}
-.mg-dot {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  margin-left: -6px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--card);
-}
-.mg-year {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--sep);
-}
-.mg-year span {
-  position: absolute;
-  bottom: -2px;
-  left: 3px;
-  font-size: 10.5px;
-  font-style: normal;
-  color: var(--label-3);
-}
-.mg-today {
-  position: absolute;
-  top: -2px;
-  bottom: 12px;
-  width: 1.5px;
-  margin-left: -0.75px;
-  background: var(--red);
-  opacity: 0.7;
-}
-.mg-charge {
-  position: absolute;
-  bottom: 12px;
-  width: 1.5px;
-  height: 4px;
-  background: var(--label-2);
-}
-.mg-charge.future {
-  opacity: 0.4;
-}
-.mg-charge.refund {
-  background: var(--green);
-}
-.mg-legend {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 12px;
-  font-size: 11.5px;
-  color: var(--label-2);
-}
-.mg-legend span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.mg-legend i {
-  width: 12px;
-  height: 7px;
-  border-radius: 999px;
-}
-.mg-legend .mg-range {
-  margin-left: auto;
-  color: var(--label-3);
-}
-
 /* ---------------- 单个订阅的分享图 ---------------- */
 .rc-row .rc-d {
   width: 78px;
@@ -7348,76 +7091,6 @@ button.seat:disabled {
   margin-top: 14px;
   font-size: 10.5px;
   color: #8e8e93;
-}
-
-/* ---------------- 订阅详情：窄屏单列；宽屏左右两栏，左栏是这个订阅本身，右栏滚动看明细 ---------------- */
-.d-top {
-  display: none;
-}
-.d-side > .d-stats {
-  padding: 0 16px;
-  margin-top: 4px;
-}
-.d-mini {
-  margin: 14px 16px 0;
-  padding: 12px 14px 10px;
-  border-radius: 14px;
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.d-mini-h {
-  margin-bottom: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--label-2);
-}
-@media (min-width: 1000px) {
-  .sheet.bare:has(.detail) {
-    width: min(1000px, calc(100vw - 48px));
-    overflow: hidden;
-  }
-  .detail {
-    display: grid;
-    grid-template-columns: 380px minmax(0, 1fr);
-    height: min(90vh, 920px);
-    border-radius: 0;
-  }
-  .d-side {
-    overflow: auto;
-    overscroll-behavior: contain;
-    padding-bottom: 20px;
-    border-right: 0.5px solid var(--sep);
-    background: color-mix(in srgb, var(--fill-2) 40%, var(--card));
-  }
-  .d-side .d-hero {
-    padding-top: 40px;
-  }
-  .d-side .d-hero::after {
-    background: linear-gradient(180deg, transparent 35%, color-mix(in srgb, var(--fill-2) 40%, var(--card)));
-  }
-  .d-hero .d-actions {
-    display: none;
-  }
-  .d-body {
-    overflow: auto;
-    overscroll-behavior: contain;
-    padding-top: 60px !important;
-  }
-  /* 右上角的操作条，紧挨关闭按钮 */
-  .d-top {
-    display: flex;
-    gap: 8px;
-    position: absolute;
-    top: 12px;
-    right: 58px;
-    z-index: 6;
-  }
-  .d-top .btn {
-    height: 32px;
-    background: color-mix(in srgb, var(--card) 80%, transparent);
-    backdrop-filter: blur(10px);
-    box-shadow: inset 0 0 0 1px var(--line);
-  }
 }
 
 /* SIM 卡面：卡托右侧按真实比例的 Mini SIM 压痕，垂直居中 */

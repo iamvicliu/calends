@@ -46,6 +46,8 @@
     "settled": "Quitado"
   },
   "charges": {
+    "recentN": { "one": "Só a última", "other": "Só as últimas {count}" },
+    "addShort": "Registrar",
     "title": { "one": "Cobranças · {count}", "other": "Cobranças · {count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Falhou" },
     "onCard": "No cartão {amount} · ",
@@ -72,5 +74,46 @@
     "unchanged": "Sem mudança",
     "times": { "one": "{count} vez", "other": "{count} vezes" },
     "changeHint": "Mudanças de região, plano ou pagamento"
-  }
+  },
+  "tab": { "charges": "Cobranças · {count}", "details": "Detalhes" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "Pelo câmbio do dia de cada cobrança",
+    "noGaps": "Sem interrupções",
+    "now": "hoje",
+    "endedOn": "Encerrada em {date}",
+    "nextOn": "Próxima cobrança {date} · {rel}",
+    "perCharge": "Por cobrança {from} → {to}",
+    "changes": { "one": "{count} mudança em {months} meses", "other": "{count} mudanças em {months} meses" }
+  },
+  "chart": {
+    "title": "Por cobrança · {ccy}",
+    "orig": "Original",
+    "all": "Tudo",
+    "y1": "1 ano",
+    "m6": "6 meses",
+    "latest": "Última {date} · primeira {first}",
+    "perCharge": "Por cobrança",
+    "list": "Preço de tabela no primeiro câmbio",
+    "listOrig": "Preço de tabela",
+    "insight": "Preço {price} · câmbio {fx}",
+    "origAmount": "Valor original",
+    "few": "São necessárias ao menos duas cobranças para ver a tendência"
+  },
+  "ev": {
+    "gap": "Interrupção",
+    "start": "Assinatura",
+    "switch": "Troca de plano",
+    "price": "Mudança de preço",
+    "introEnd": "Volta ao preço normal",
+    "paused": "Pausada",
+    "last": "Última cobrança",
+    "nth": "nº {count}",
+    "next": "Próxima cobrança",
+    "ended": "Encerrada",
+    "ending": "Termina",
+    "phases": { "one": "{count} fase", "other": "{count} fases" },
+    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" }
+  },
+  "table": { "date": "Data", "orig": "Original" }
 }

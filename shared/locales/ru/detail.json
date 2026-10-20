@@ -61,6 +61,8 @@
     "settled": "Рассчитались"
   },
   "charges": {
+    "recentN": "Только последние {count}",
+    "addShort": "Добавить",
     "title": { "one": "Списания · {count}", "few": "Списания · {count}", "many": "Списания · {count}", "other": "Списания · {count}" },
     "kind": { "refund": "Возврат", "adjust": "Корректировка", "failed": "Не прошло" },
     "onCard": "По карте {amount} · ",
@@ -87,5 +89,46 @@
     "unchanged": "Без изменений",
     "times": { "one": "{count} раз", "few": "{count} раза", "many": "{count} раз", "other": "{count} раза" },
     "changeHint": "Смена региона, тарифа или оплаты"
-  }
+  },
+  "tab": { "charges": "Списания · {count}", "details": "Подробности" },
+  "kpi": {
+    "approx": "≈ {amount}",
+    "dayRate": "По курсу на день списания",
+    "noGaps": "Без перерывов",
+    "now": "сейчас",
+    "endedOn": "Завершена {date}",
+    "nextOn": "Следующее списание {date} · {rel}",
+    "perCharge": "За списание {from} → {to}",
+    "changes": "Изменений за {months} мес.: {count}"
+  },
+  "chart": {
+    "title": "За списание · {ccy}",
+    "orig": "Исходная",
+    "all": "Всё",
+    "y1": "1 год",
+    "m6": "6 мес.",
+    "latest": "Последнее {date} · первое {first}",
+    "perCharge": "За списание",
+    "list": "Цена по первому курсу",
+    "listOrig": "Цена",
+    "insight": "Цена {price} · курс {fx}",
+    "origAmount": "Исходная сумма",
+    "few": "Для графика нужно хотя бы два списания"
+  },
+  "ev": {
+    "gap": "Перерыв",
+    "start": "Подписка оформлена",
+    "switch": "Смена тарифа",
+    "price": "Изменение цены",
+    "introEnd": "Обычная цена",
+    "paused": "Пауза",
+    "last": "Последнее списание",
+    "nth": "№ {count}",
+    "next": "Следующее списание",
+    "ended": "Завершена",
+    "ending": "Завершится",
+    "phases": "Этапов: {count}",
+    "more": "Показать ранние ({count})"
+  },
+  "table": { "date": "Дата", "orig": "Исходная" }
 }

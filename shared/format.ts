@@ -84,6 +84,11 @@ export function cnDate(d: string, withWeek = false): string {
   return withWeek ? `${s} · ${fmtDate(d, { weekday: 'short' })}` : s;
 }
 
+/** 星期几的简写：「周一」「Mon」 */
+export function weekdayOf(d: string): string {
+  return fmtDate(d, { weekday: 'short' });
+}
+
 /** 今年的日期省略年份，往年的带上年份，避免「1月17日」到底是哪一年的歧义 */
 export function cnDateAuto(d: string, today: string): string {
   return d.slice(0, 4) === today.slice(0, 4) ? cnDate(d) : cnDateFull(d);
