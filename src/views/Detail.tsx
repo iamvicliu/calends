@@ -49,10 +49,10 @@ const TONE: Record<string, string> = {
 const LANE_COLORS = ['var(--c1)', 'var(--c6)', 'var(--c5)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
 
 /** 涨跌角标：花费类数字，降了是好事（绿），涨了是坏事（红） */
-function Trend({ pct, plain }: { pct: number | undefined; plain?: boolean }) {
+function Trend({ pct }: { pct: number | undefined }) {
   if (pct == null || !Number.isFinite(pct)) return null;
   const flat = Math.abs(pct) < 0.005;
-  const cls = flat || plain ? '' : pct < 0 ? 'ok' : 'bad';
+  const cls = flat ? '' : pct < 0 ? 'ok' : 'bad';
   return (
     <span className={`dt-badge ${cls}`}>
       {flat ? <ArrowRight size={12} /> : pct < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
@@ -71,6 +71,18 @@ function Region({ cc }: { cc: string }) {
     </span>
   );
 }
+
+/** 分类：分类色 + 图标 + 名称 */
+function CatTag({ cat }: { cat: string }) {
+  return (
+    <span className="dt-cat" style={{ '--tint': catColor(cat) } as Record<string, string>}>
+      <CatIcon cat={cat} size={12} />
+      {cat}
+    </span>
+  );
+}
+
+const methodOf = (state: AppState, id?: string) => state.methods.find((m) => m.id === id);
 
 /**
  * 详情顶部的操作按钮。宽屏：常用的带文字（胶囊），次要的只有图标（正圆）；
@@ -157,9 +169,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
     </>
   );
 
-  const details = <Details sub={sub} state={state} today={today} />;
-  const charges = <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />;
-
   return (
     <div className="dt">
       <header className="dt-head">
@@ -189,10 +198,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               </>
             )}
             <s>·</s>
-            <span className="dt-cat" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
-              <CatIcon cat={sub.category} size={12} />
-              {sub.category}
-            </span>
+            <CatTag cat={sub.category} />
           </div>
         </div>
         <div className="dt-actions">{actions}</div>
@@ -218,8 +224,12 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               ]}
             />
           </div>
-          <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>{details}</div>
-          <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>{charges}</div>
+          <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>
+            <Details sub={sub} state={state} today={today} />
+          </div>
+          <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>
+            <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
+          </div>
         </div>
       </div>
 
@@ -341,7 +351,7 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
   const laneIdx = phaseLanes(lanesSrc);
   const methodIds = [...new Set(lanesSrc.map((v) => v.methodId ?? ''))];
   const lanes: ChartLane[] = lanesSrc.map((v, i) => {
-    const m = state.methods.find((x) => x.id === v.methodId);
+    const m = methodOf(state, v.methodId);
     return {
       key: v.start,
       from: v.start,
@@ -397,7 +407,7 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
           tip={(i) => {
             const r = rows[i];
             const c = r.c;
-            const m = state.methods.find((x) => x.id === c.sub.methodId);
+            const m = methodOf(state, c.sub.methodId);
             const rate = rateOn(state.fxHistory, c.currency, c.date);
             const rb = rateOn(state.fxHistory, base, c.date);
             return (
@@ -453,7 +463,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
   const [all, setAll] = useState(false);
   const vs = phaseSubs(sub);
   const plan = (v: Subscription) => {
-    const m = state.methods.find((x) => x.id === v.methodId);
+    const m = methodOf(state, v.methodId);
     return (
       <span className="dt-inline">
         {v.region && <Region cc={v.region} />}
@@ -553,7 +563,7 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
   const up = upcomingPhase(sub, today);
   const ro = !!state.readonly;
   const next = nextCharge(sub, today);
-  const method = state.methods.find((m) => m.id === cur.methodId);
+  const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
   const dues = memberDues(sub, today);
   return (
@@ -563,10 +573,7 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
           <Prop k={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Prop>
           <Prop k={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Prop>
           <Prop k={t('detail.field.category')}>
-            <span className="dt-cat" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
-              <CatIcon cat={sub.category} size={12} />
-              {sub.category}
-            </span>
+            <CatTag cat={sub.category} />
           </Prop>
           <Prop k={t('detail.field.method')}>
             <PayBadge m={method} />
@@ -607,7 +614,7 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
                 k={
                   <span className="dt-inline">
                     {v.region ? <Region cc={v.region} /> : t('detail.overlap.previous')}
-                    <PayBadge m={state.methods.find((m) => m.id === v.methodId)} />
+                    <PayBadge m={methodOf(state, v.methodId)} />
                   </span>
                 }
                 hint={t('detail.overlap.until', { date: cnDateFull(v.end!), rel: relDays(diffDays(today, v.end!)) })}
@@ -642,7 +649,7 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
               {money(up.price, up.currency)} · {cycleLabel(up.cycle)}
             </Prop>
             <Prop k={t('detail.field.method')}>
-              <PayBadge m={state.methods.find((m) => m.id === up.methodId)} />
+              <PayBadge m={methodOf(state, up.methodId)} />
             </Prop>
           </dl>
           {up.planned && !ro && (

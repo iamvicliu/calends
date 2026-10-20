@@ -207,17 +207,14 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             bottom = run;
             h = -s.v;
           }
+          const sign = s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−';
           return (
-            <div
-              key={s.k}
-              className={`wf-col ${s.kind}`}
-              {...tipProps(() => `${s.k} ${perMonth(`${s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−'}${money(Math.abs(s.v), base)}`)}`)}
-            >
+            <div key={s.k} className={`wf-col ${s.kind}`} {...tipProps(() => `${s.k} ${perMonth(`${sign}${money(Math.abs(s.v), base)}`)}`)}>
               <div className="wf-track">
                 <i style={{ bottom: `${(bottom / max) * 100}%`, height: `max(${h > 0 ? 3 : 1}px, ${(h / max) * 100}%)` }} />
               </div>
               <b className="num">
-                {s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−'}
+                {sign}
                 {Math.abs(s.v) >= 1000 ? `${(Math.abs(s.v) / 1000).toFixed(1)}k` : Math.round(Math.abs(s.v))}
               </b>
               <span>{s.k}</span>
@@ -397,20 +394,18 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   const H = W < 560 ? 320 : 400;
   const live = state.subscriptions.map((s) => ({ s, v: contributionOn(state, s, today) })).filter((x) => x.v > 0);
   const total = live.reduce((a, x) => a + x.v, 0);
-  const keyOf = (s: Subscription) =>
-    dim === 'cat'
-      ? s.category
-      : dim === 'pay'
-        ? (state.methods.find((m) => m.id === s.methodId)?.name ?? t('report.comp.unassigned'))
-        : dim === 'ccy'
-          ? s.currency
-          : cycleDays(s.cycle) >= 300
-            ? t('report.comp.yearly')
-            : cycleDays(s.cycle) >= 80
-              ? t('report.comp.quarterly')
-              : t('report.comp.monthly');
+  const keyOf = (s: Subscription) => {
+    if (dim === 'cat') return s.category;
+    if (dim === 'pay') return state.methods.find((m) => m.id === s.methodId)?.name ?? t('report.comp.unassigned');
+    if (dim === 'ccy') return s.currency;
+    const days = cycleDays(s.cycle);
+    return days >= 300 ? t('report.comp.yearly') : days >= 80 ? t('report.comp.quarterly') : t('report.comp.monthly');
+  };
   const groups = new Map<string, typeof live>();
-  for (const x of live) groups.set(keyOf(x.s), [...(groups.get(keyOf(x.s)) ?? []), x]);
+  for (const x of live) {
+    const k = keyOf(x.s);
+    groups.set(k, [...(groups.get(k) ?? []), x]);
+  }
   const entries = [...groups.entries()]
     .map(([k, xs]) => ({ k, xs: xs.sort((a, b) => b.v - a.v), v: xs.reduce((a, x) => a + x.v, 0) }))
     .sort((a, b) => b.v - a.v);
