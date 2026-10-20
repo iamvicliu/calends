@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { todayIn } from '../shared/billing.ts';
-import type { AppState, PaymentMethod, Settings, Subscription } from '../shared/types.ts';
+import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../shared/types.ts';
+import { mergePeople, syncPerson } from '../shared/people.ts';
 import { locale, t } from '../shared/i18n.ts';
 
 const CACHE_KEY = 'ledger:state:v1';
@@ -252,6 +253,36 @@ export async function deleteMethod(id: string) {
   await optimistic((s) => ({ ...s, methods: s.methods.filter((x) => x.id !== id) }), () => api(`/api/methods/${id}`, { method: 'DELETE' }));
   for (const s of linked)
     await saveSub({ ...s, methodId: s.methodId === id ? undefined : s.methodId, phases: s.phases?.map((p) => (p.methodId === id ? { ...p, methodId: undefined } : p)) });
+}
+
+/** 换上服务端改过的订阅（同步人的资料、合并时一次改好几条） */
+const withSubs = (s: AppState, subs: Subscription[]): AppState => ({ ...s, subscriptions: s.subscriptions.map((x) => subs.find((y) => y.id === x.id) ?? x) });
+
+/** 保存一个人：称呼、联系方式同步到所有引用他的成员、代付上（本地先同步，服务端再同步一遍并返回结果） */
+export async function savePerson(p: Person) {
+  const r = await optimistic(
+    (s) => withSubs({ ...s, people: upsertById(s.people ?? [], p) }, syncPerson(s.subscriptions, p)),
+    () => api<{ person: Person; subscriptions: Subscription[] }>(`/api/people/${p.id}`, { method: 'PUT', body: JSON.stringify(p) }),
+  );
+  patchState((s) => withSubs({ ...s, people: upsertById(s.people ?? [], r.person) }, r.subscriptions));
+  return r.person;
+}
+
+/** 删除一个人：只能删没有被任何合租、代付引用的（服务端会再检查一次） */
+export function deletePerson(id: string) {
+  return optimistic((s) => ({ ...s, people: (s.people ?? []).filter((x) => x.id !== id) }), () => api(`/api/people/${id}`, { method: 'DELETE' }));
+}
+
+/** 把 from 合并到 into：引用全部改指向 into，from 从名册里去掉 */
+export async function mergePerson(from: string, into: string) {
+  const r = await optimistic(
+    (s) => {
+      const m = mergePeople(s.people ?? [], s.subscriptions, from, into);
+      return withSubs({ ...s, people: m.people }, m.subs);
+    },
+    () => api<{ people: Person[]; subscriptions: Subscription[] }>(`/api/people/${from}/merge`, { method: 'POST', body: JSON.stringify({ into }) }),
+  );
+  patchState((s) => withSubs({ ...s, people: r.people }, r.subscriptions));
 }
 
 export function saveSettings(patch: Partial<Settings>) {

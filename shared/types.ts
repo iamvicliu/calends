@@ -28,6 +28,8 @@ export interface PricePoint {
 
 export interface ShareMember {
   id: string;
+  /** 关联的人（people 名册）；有则以那个人的称呼、联系方式为准，下面的 name、contact 是镜像副本，老数据只有副本 */
+  personId?: string;
   name: string;
   /** 每期应付金额，币种同订阅 */
   share: number;
@@ -99,6 +101,8 @@ export interface ProxyEntry {
 
 /** 代付：替别人付的订阅。钱从我的卡上扣，但不算我的支出，每期向对方收回 */
 export interface Proxy {
+  /** 关联的人（people 名册）；forName、contact 是镜像副本，老数据只有副本 */
+  personId?: string;
   /** 替谁付 */
   forName: string;
   /** 对方的联系方式：渠道 + 账号，与合租成员一致 */
@@ -107,6 +111,21 @@ export interface Proxy {
   /** 一句话备注，如「同事，月底转账」 */
   note?: string;
   entries: ProxyEntry[];
+}
+
+/** 头像底色：只存色名，显示时按主题取色 */
+export const PERSON_COLORS = ['blue', 'green', 'orange', 'pink', 'purple', 'teal', 'indigo', 'red'] as const;
+export type PersonColor = (typeof PERSON_COLORS)[number];
+
+/** 名册里的一个人：同一位朋友在多个合租、代付里只记一次，改联系方式处处生效 */
+export interface Person {
+  id: string;
+  name: string;
+  contactVia?: string;
+  contact?: string;
+  note?: string;
+  color?: PersonColor;
+  createdAt?: string;
 }
 
 /** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
@@ -299,6 +318,8 @@ export type FxHistory = Record<string, Record<string, number>>;
 export interface AppState {
   subscriptions: Subscription[];
   methods: PaymentMethod[];
+  /** 人：合租成员、代付对象的名册（公开页不下发） */
+  people?: Person[];
   settings: Settings;
   fx: FxTable;
   /** 扣款日的历史汇率；缺失的日期用相邻日期或当前汇率兜底 */
