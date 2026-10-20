@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { uid } from '../../shared/billing.ts';
-import type { AppState, Channel, ChannelKind } from '../../shared/types.ts';
+import { channelsOf, type AppState, type Channel, type ChannelKind } from '../../shared/types.ts';
 import { Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, run, saveSettings, toast } from '../store.ts';
@@ -36,12 +36,6 @@ export function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: num
       {k.logo ? <img src={k.logo} alt="" /> : <b>{k.mark}</b>}
     </span>
   );
-}
-
-/** 没配过渠道时，把旧的「通知邮箱」当成第一个渠道显示 */
-export function channelsOf(s: AppState['settings']): Channel[] {
-  if (s.channels) return s.channels;
-  return s.notifyEmail ? [{ id: 'email', kind: 'email', name: '邮件', enabled: true, config: { to: s.notifyEmail } }] : [];
 }
 
 const test = (channel: Channel | string) =>

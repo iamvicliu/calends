@@ -1,7 +1,7 @@
 import { addDays, addMonths, chargesBetween, convert, cycleDays, diffDays, effectiveStatus, nextCharge, priceAt, runwayFor, todayIn, totals } from '../shared/billing.ts';
 import { toBaseAt } from '../shared/fx.ts';
 import { billLabel, cnDate, esc, money, relDays } from '../shared/format.ts';
-import type { AppState, Channel } from '../shared/types.ts';
+import { channelsOf, type AppState } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { matchEntries } from '../shared/proxy.ts';
 import { sendTo } from './channels.ts';
@@ -228,19 +228,12 @@ ${d.sections
   return { html, text };
 }
 
-/** 实际生效的渠道：没配过渠道时，把旧的「通知邮箱」当成一个邮件渠道 */
-export function channelsOf(state: AppState): Channel[] {
-  if (state.settings.channels) return state.settings.channels;
-  const to = state.settings.notifyEmail;
-  return to ? [{ id: 'email', kind: 'email', name: '邮件', enabled: true, config: { to } }] : [];
-}
-
 /**
  * 把一份提醒发到所有开着的渠道（或只发 only 指定的那一个）。
  * 任一渠道成功就算发出；全部失败则撤掉占位，下一小时重试。
  */
 export async function sendDigest(env: Env, state: AppState, d: Digest, opts: { force?: boolean; only?: string } = {}): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
-  const targets = channelsOf(state).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
+  const targets = channelsOf(state.settings).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
   if (!targets.length) return { sent: false, reason: opts.only ? '没有这个渠道' : '还没有开启任何通知渠道' };
   if (!opts.force) {
     // 先占位后发送：重叠触发时只有一个能占到

@@ -314,3 +314,9 @@ export const DEFAULT_SETTINGS: Settings = {
   monthlyDigest: true,
   displayName: 'Ethan',
 };
+
+/** 实际生效的通知渠道：没配过渠道时，把旧的「通知邮箱」当成一个邮件渠道 */
+export function channelsOf(s: Settings): Channel[] {
+  if (s.channels) return s.channels;
+  return s.notifyEmail ? [{ id: 'email', kind: 'email', name: '邮件', enabled: true, config: { to: s.notifyEmail } }] : [];
+}
