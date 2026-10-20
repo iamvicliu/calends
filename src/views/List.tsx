@@ -14,7 +14,7 @@ import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
 import { Picker } from '../components/Picker.tsx';
 
-type Filter = 'live' | 'upcoming' | 'trial' | 'ended' | 'lifetime' | 'all';
+type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
 type Dir = 'asc' | 'desc';
 /** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、最新开始在前 */
@@ -39,11 +39,13 @@ const FILTERS = (): Array<[Filter, string]> => [
   ['live', t('list.status.active')],
   ['upcoming', t('list.status.upcoming')],
   ['trial', t('list.status.trialShort')],
+  ['paused', t('list.status.paused')],
   ['lifetime', t('list.status.lifetime')],
   ['ended', t('list.status.ended')],
 ];
 
-const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' || st === 'paused' ? 'live' : (st as Filter));
+/** 「订阅中」只算正在计费的（含到期不续）；试用、暂停各自单独一类，和概览、公开页的计数一致 */
+const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' ? 'live' : (st as Filter));
 
 export function List({
   state,

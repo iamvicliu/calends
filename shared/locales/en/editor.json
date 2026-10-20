@@ -5,14 +5,21 @@
     "keepUntil": "Old one runs until",
     "endAuto": "When next starts",
     "planned": "Planned",
-    "parallel": { "one": "Overlaps {count} day", "other": "Overlaps {count} days" },
+    "parallel": {
+      "one": "Overlaps {count} day",
+      "other": "Overlaps {count} days"
+    },
     "payPhase": "Belongs to"
   },
   "addTitle": "Add subscription",
   "editTitle": "Edit “{name}”",
   "confirmDiscard": "Discard unsaved changes?",
   "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, mark it as Cancelled instead.",
-  "toast": { "added": "Added", "saved": "Saved", "deleted": "Deleted" },
+  "toast": {
+    "added": "Added",
+    "saved": "Saved",
+    "deleted": "Deleted"
+  },
   "cycle": {
     "w1": "Weekly",
     "m1": "Monthly",
@@ -26,17 +33,40 @@
   "unit": {
     "label": "Unit",
     "every": "Every",
-    "day": { "one": "day", "other": "days" },
-    "week": { "one": "week", "other": "weeks" },
-    "month": { "one": "month", "other": "months" },
-    "year": { "one": "year", "other": "years" }
+    "day": {
+      "one": "day",
+      "other": "days"
+    },
+    "week": {
+      "one": "week",
+      "other": "weeks"
+    },
+    "month": {
+      "one": "month",
+      "other": "months"
+    },
+    "year": {
+      "one": "year",
+      "other": "years"
+    }
   },
-  "status": { "active": "Active", "trial": "Trial", "paused": "Paused", "cancelled": "Cancelled" },
+  "status": {
+    "active": "Active",
+    "trial": "Trial",
+    "paused": "Paused",
+    "cancelled": "Cancelled"
+  },
   "category": {
     "choose": "Choose category",
     "new": "New category…"
   },
-  "group": { "billing": "Billing", "status": "Status", "who": "Who uses it", "links": "Links & appearance", "tags": "Tags & notes" },
+  "group": {
+    "billing": "Billing",
+    "status": "Status",
+    "who": "Who uses it",
+    "links": "Links & appearance",
+    "tags": "Tags & notes"
+  },
   "field": {
     "category": "Category",
     "amount": "Amount",
@@ -77,7 +107,12 @@
     "remove": "Remove",
     "addMember": "Add member"
   },
-  "proxy": { "for": "Paying for", "forPlaceholder": "Their name", "contact": "Contact", "notePlaceholder": "e.g. Coworker, pays at month end" },
+  "proxy": {
+    "for": "Paying for",
+    "forPlaceholder": "Their name",
+    "contact": "Contact",
+    "notePlaceholder": "e.g. Coworker, pays at month end"
+  },
   "more": {
     "title": "More options",
     "intro": "Intro offer",
@@ -89,26 +124,49 @@
     "summary": "Intro offer, free time, reminder, links, tags, notes",
     "summaryLt": "Links, tags, notes"
   },
-  "intro": { "has": "Intro offer", "price": "Intro price", "until": "Offer ends" },
+  "intro": {
+    "has": "Intro offer",
+    "price": "Intro price",
+    "until": "Offer ends"
+  },
   "bonus": {
     "has": "Free time",
     "from": "Free from",
     "until": "Free until",
     "resume": "Billing resumes {date}",
-    "quick": { "d7": "+7 days", "m1": "+1 month", "m3": "+3 months", "m6": "+6 months", "y1": "+1 year" }
+    "quick": {
+      "d7": "+7 days",
+      "m1": "+1 month",
+      "m3": "+3 months",
+      "m6": "+6 months",
+      "y1": "+1 year"
+    }
   },
   "remind": {
     "days": "Remind me",
-    "default": { "one": "Default ({count} day before)", "other": "Default ({count} days before)" },
+    "default": {
+      "one": "Default ({count} day before)",
+      "other": "Default ({count} days before)"
+    },
     "sameDay": "On the due date",
-    "before": { "one": "{count} day before", "other": "{count} days before" },
+    "before": {
+      "one": "{count} day before",
+      "other": "{count} days before"
+    },
     "never": "Never"
   },
-  "name": { "placeholder": "Name, or paste an App Store link", "catalog": "Popular services · fills in logo, category and website" },
+  "name": {
+    "placeholder": "Name, or paste an App Store link",
+    "catalog": "Popular services · fills in logo, category and website"
+  },
   "change": {
     "title": "History & changes",
     "needPrice": "Enter a price",
-    "toast": { "price": "Price change recorded. Save to apply.", "switch": "New phase added. Save to apply.", "resume": "Resubscribed. Save to apply." },
+    "toast": {
+      "price": "Price change recorded. Tap “{done}” to apply.",
+      "switch": "New phase added. Tap “{done}” to apply.",
+      "resume": "Resubscribed. Tap “{done}” to apply."
+    },
     "price": "Record price change",
     "switch": "Change region, plan or payment method",
     "resume": "Resubscribe",
@@ -122,8 +180,14 @@
     "plannedHint": "Still counted in forecasts and marked “Planned” in details. Confirm or cancel it with one tap later."
   },
   "history": {
-    "gapMonths": { "one": "Lapsed {count} month", "other": "Lapsed {count} months" },
-    "gapDays": { "one": "Lapsed {count} day", "other": "Lapsed {count} days" },
+    "gapMonths": {
+      "one": "Lapsed {count} month",
+      "other": "Lapsed {count} months"
+    },
+    "gapDays": {
+      "one": "Lapsed {count} day",
+      "other": "Lapsed {count} days"
+    },
     "plannedRange": "{start} → {end} (planned)",
     "plannedFrom": "From {start} (planned)",
     "range": "{start} → {end}",
@@ -134,9 +198,19 @@
   "payment": {
     "addTitle": "Add payment",
     "editTitle": "Edit payment",
-    "toast": { "added": "Payment added", "edited": "Payment updated", "deleted": "Payment deleted" },
+    "toast": {
+      "added": "Payment added",
+      "edited": "Payment updated",
+      "deleted": "Payment deleted"
+    },
     "date": "Date",
-    "kind": { "label": "Type", "charge": "Charge", "refund": "Refund", "adjust": "Adjustment", "failed": "Failed charge" },
+    "kind": {
+      "label": "Type",
+      "charge": "Charge",
+      "refund": "Refund",
+      "adjust": "Adjustment",
+      "failed": "Failed charge"
+    },
     "amount": "Amount ({currency})",
     "refundHint": "Enter the amount refunded; it’s saved as negative",
     "settled": "Charged to card (optional)",
@@ -145,5 +219,7 @@
     "blank": "Leave blank",
     "freezeHint": "Charges in this phase are currently estimated from the billing cycle. Saving will first turn the estimated {amount} charges up to today into records; from then on, records are the source of truth. Future charges are unchanged."
   },
-  "timeline": { "home": "Back to today (or double-click the timeline)" }
+  "timeline": {
+    "home": "Back to today (or double-click the timeline)"
+  }
 }

@@ -32,9 +32,9 @@ const CLIENTS = (): Array<[Client, string]> => [
 /** 各家客户端的接入写法；token 为空时用占位符 */
 function snippet(client: Client, url: string, token?: string): string {
   const tk = token ?? t('ai.tokenPlaceholder');
-  if (client === 'codex') return `export SUBSCRIPTION_MCP_TOKEN=${tk}\ncodex mcp add subscription --url ${url} --bearer-token-env-var SUBSCRIPTION_MCP_TOKEN`;
-  if (client === 'claude') return `claude mcp add --transport http subscription ${url} --header "Authorization: Bearer ${tk}"`;
-  if (client === 'cursor') return JSON.stringify({ mcpServers: { subscription: { url, headers: { Authorization: `Bearer ${tk}` } } } }, null, 2);
+  if (client === 'codex') return `export CALENDS_TOKEN=${tk}\ncodex mcp add calends --url ${url} --bearer-token-env-var CALENDS_TOKEN`;
+  if (client === 'claude') return `claude mcp add --transport http calends ${url} --header "Authorization: Bearer ${tk}"`;
+  if (client === 'cursor') return JSON.stringify({ mcpServers: { calends: { url, headers: { Authorization: `Bearer ${tk}` } } } }, null, 2);
   return `POST ${url}\nAuthorization: Bearer ${tk}\nContent-Type: application/json\n\n{"jsonrpc":"2.0","id":1,"method":"tools/list"}`;
 }
 

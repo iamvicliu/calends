@@ -509,6 +509,8 @@ function App() {
         view = ro ? null : <Settings state={state} today={d} />;
         break;
       default:
+        // 不认识的地址回到概览，地址栏也一并改正
+        if (route) queueMicrotask(() => replaceRoute(''));
         view = <Overview state={state} today={d} onOpen={open} onAdd={add} />;
     }
 

@@ -1,7 +1,7 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
 import { DEFAULT_SETTINGS, type AppState, type PaymentMethod, type Subscription } from './types.ts';
 import { t } from './i18n.ts';
-import { categoryList, isDomainCategory, type Category } from './categories.ts';
+import { categoryList, isDomainCategory, presetOf, type Category } from './categories.ts';
 
 const DOMAIN = /\b((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+)([a-z]{2,})\b/gi;
 
@@ -16,7 +16,8 @@ export function maskDomain(text: string): string {
 
 /** 域名类订阅：「域名」分类（改过名也认得，需传入分类表）、标签或备注提到域名、名称像域名 */
 export function isDomainSub(s: Pick<Subscription, 'name' | 'category' | 'tags' | 'notes'>, cats: Category[] = []): boolean {
-  if (s.category === '域名' || isDomainCategory(cats, s.category)) return true;
+  // 内置「域名」分类在任何语言下的名字都认（访客的语言可能和建分类时不同）
+  if (s.category === '域名' || isDomainCategory(cats, s.category) || presetOf(s.category)?.code === 'domains') return true;
   return /域名|domain/i.test(`${s.category} ${s.tags.join(' ')} ${s.notes ?? ''}`) || new RegExp(DOMAIN.source, 'i').test(s.name);
 }
 

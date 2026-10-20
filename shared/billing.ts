@@ -467,7 +467,8 @@ export function totals(state: AppState, today: string): Totals {
     if (s.proxy) continue;
     const st = effectiveStatus(s, today);
     if (st !== 'active' && st !== 'ending' && st !== 'trial') continue;
-    count++;
+    // 数量只算正在计费的；试用期不计入数量与金额（和列表的「订阅中」一致）
+    if (st !== 'trial') count++;
     // 试用期计入数量，不计入金额
     if (st === 'trial') continue;
     // 换区后新旧两段并行时两边都在付钱，都计入

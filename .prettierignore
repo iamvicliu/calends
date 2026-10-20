@@ -8,3 +8,4 @@ shared/locales/server.gen.ts
 public
 worker/migrations.gen.ts
 src/components/cat-icons.gen.ts
+shared/locales/categories.gen.ts

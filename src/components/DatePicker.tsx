@@ -2,16 +2,17 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { addDays, addMonths, parseDay } from '../../shared/billing.ts';
 import { cnDateFull, monthLabel, weekdayShort } from '../../shared/format.ts';
 import { intlLocale, t } from '../../shared/i18n.ts';
-import { today as todayOf } from '../store.ts';
+import { getState, today as todayOf } from '../store.ts';
 import { Icon } from './ui.tsx';
 
-/** 周一在前；weekdayShort 的 0 是周日 */
-const DOW = [1, 2, 3, 4, 5, 6, 0];
+/** 每周起始日跟随设置（1 周一、0 周日）；weekdayShort 的 0 是周日 */
+const weekStart = () => getState()?.settings.weekStart ?? 1;
+const dows = () => Array.from({ length: 7 }, (_, i) => (i + weekStart()) % 7);
 const yearLabel = (y: number) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, 0, 1)));
 
 function grid(month: string): string[] {
   const first = month + '-01';
-  const dow = (new Date(parseDay(first)).getUTCDay() + 6) % 7;
+  const dow = (new Date(parseDay(first)).getUTCDay() - weekStart() + 7) % 7;
   const start = addDays(first, -dow);
   return Array.from({ length: 42 }, (_, i) => addDays(start, i));
 }
@@ -160,7 +161,7 @@ export function DatePicker({
             </div>
             {mode === 'day' ? (
               <div class="dp-grid">
-                {DOW.map((d) => (
+                {dows().map((d) => (
                   <span key={d} class="dp-dow">
                     {weekdayShort(d, true)}
                   </span>

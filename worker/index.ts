@@ -263,7 +263,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return new Response(JSON.stringify(b, null, 1), {
       headers: {
         'content-type': 'application/json; charset=utf-8',
-        'content-disposition': `attachment; filename="ledger-backup-${b.exportedAt.slice(0, 10)}.json"`,
+        'content-disposition': `attachment; filename="calends-backup-${b.exportedAt.slice(0, 10)}.json"`,
         'cache-control': 'no-store',
       },
     });

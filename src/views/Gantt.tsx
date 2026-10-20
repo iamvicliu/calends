@@ -190,11 +190,14 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
 
   // 刻度：年份始终标；1 年视图再标每个月
   const ticks: Array<{ d: string; label: string; major: boolean }> = [];
+  // 相邻刻度至少隔 40px：窄屏隔月、隔季度甚至只标年份，免得月份文字挤在一起
+  const monthPx = k * 30.4;
+  const every = [1, 2, 3, 6, 12].find((n) => n >= (zoom === '3y' ? 3 : 1) && monthPx * n >= 40) ?? 12;
   for (let d = `${start.slice(0, 7)}-01`; d <= end; d = addMonths(d, 1)) {
     if (d < start) continue;
     const jan = d.slice(5, 7) === '01';
-    if (zoom === 'year' || zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7))))
-      ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
+    const m = Number(d.slice(5, 7)) - 1;
+    if (jan || (zoom !== 'all' && m % every === 0)) ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
   }
 
   return (

@@ -5,14 +5,21 @@
     "keepUntil": "El anterior sigue hasta",
     "endAuto": "Al empezar la siguiente",
     "planned": "Planificado",
-    "parallel": { "one": "Se solapa {count} día", "other": "Se solapa {count} días" },
+    "parallel": {
+      "one": "Se solapa {count} día",
+      "other": "Se solapa {count} días"
+    },
     "payPhase": "Corresponde a"
   },
   "addTitle": "Añadir suscripción",
   "editTitle": "Editar «{name}»",
   "confirmDiscard": "¿Descartar los cambios sin guardar?",
   "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, márcala como Cancelada.",
-  "toast": { "added": "Añadida", "saved": "Guardado", "deleted": "Eliminada" },
+  "toast": {
+    "added": "Añadida",
+    "saved": "Guardado",
+    "deleted": "Eliminada"
+  },
   "cycle": {
     "w1": "Semanal",
     "m1": "Mensual",
@@ -26,17 +33,40 @@
   "unit": {
     "label": "Unidad",
     "every": "Cada",
-    "day": { "one": "día", "other": "días" },
-    "week": { "one": "semana", "other": "semanas" },
-    "month": { "one": "mes", "other": "meses" },
-    "year": { "one": "año", "other": "años" }
+    "day": {
+      "one": "día",
+      "other": "días"
+    },
+    "week": {
+      "one": "semana",
+      "other": "semanas"
+    },
+    "month": {
+      "one": "mes",
+      "other": "meses"
+    },
+    "year": {
+      "one": "año",
+      "other": "años"
+    }
   },
-  "status": { "active": "Activa", "trial": "Prueba", "paused": "En pausa", "cancelled": "Cancelada" },
+  "status": {
+    "active": "Activa",
+    "trial": "Prueba",
+    "paused": "En pausa",
+    "cancelled": "Cancelada"
+  },
   "category": {
     "choose": "Elegir categoría",
     "new": "Nueva categoría…"
   },
-  "group": { "billing": "Facturación", "status": "Estado", "who": "Quién la usa", "links": "Enlaces y apariencia", "tags": "Etiquetas y notas" },
+  "group": {
+    "billing": "Facturación",
+    "status": "Estado",
+    "who": "Quién la usa",
+    "links": "Enlaces y apariencia",
+    "tags": "Etiquetas y notas"
+  },
   "field": {
     "category": "Categoría",
     "amount": "Importe",
@@ -77,7 +107,12 @@
     "remove": "Quitar",
     "addMember": "Añadir miembro"
   },
-  "proxy": { "for": "Pago por", "forPlaceholder": "Su nombre", "contact": "Contacto", "notePlaceholder": "p. ej. compañero de trabajo, paga a fin de mes" },
+  "proxy": {
+    "for": "Pago por",
+    "forPlaceholder": "Su nombre",
+    "contact": "Contacto",
+    "notePlaceholder": "p. ej. compañero de trabajo, paga a fin de mes"
+  },
   "more": {
     "title": "Más opciones",
     "intro": "Oferta inicial",
@@ -89,29 +124,48 @@
     "summary": "Oferta inicial, tiempo gratis, recordatorio, enlaces, etiquetas, notas",
     "summaryLt": "Enlaces, etiquetas, notas"
   },
-  "intro": { "has": "Oferta inicial", "price": "Precio inicial", "until": "Fin de la oferta" },
+  "intro": {
+    "has": "Oferta inicial",
+    "price": "Precio inicial",
+    "until": "Fin de la oferta"
+  },
   "bonus": {
     "has": "Tiempo gratis",
     "from": "Gratis desde",
     "until": "Gratis hasta",
     "resume": "La facturación se reanuda: {date}",
-    "quick": { "d7": "+7 días", "m1": "+1 mes", "m3": "+3 meses", "m6": "+6 meses", "y1": "+1 año" }
+    "quick": {
+      "d7": "+7 días",
+      "m1": "+1 mes",
+      "m3": "+3 meses",
+      "m6": "+6 meses",
+      "y1": "+1 año"
+    }
   },
   "remind": {
     "days": "Recordarme",
-    "default": { "one": "Predeterminado ({count} día antes)", "other": "Predeterminado ({count} días antes)" },
+    "default": {
+      "one": "Predeterminado ({count} día antes)",
+      "other": "Predeterminado ({count} días antes)"
+    },
     "sameDay": "El día del cobro",
-    "before": { "one": "{count} día antes", "other": "{count} días antes" },
+    "before": {
+      "one": "{count} día antes",
+      "other": "{count} días antes"
+    },
     "never": "Nunca"
   },
-  "name": { "placeholder": "Nombre, o pega un enlace de App Store", "catalog": "Servicios populares · completa logo, categoría y sitio web" },
+  "name": {
+    "placeholder": "Nombre, o pega un enlace de App Store",
+    "catalog": "Servicios populares · completa logo, categoría y sitio web"
+  },
   "change": {
     "title": "Historial y cambios",
     "needPrice": "Introduce un precio",
     "toast": {
-      "price": "Cambio de precio registrado. Guarda para aplicarlo.",
-      "switch": "Nueva fase añadida. Guarda para aplicarla.",
-      "resume": "Suscripción reactivada. Guarda para aplicarla."
+      "price": "Cambio de precio registrado. Toca «{done}» para aplicarlo.",
+      "switch": "Nueva fase añadida. Toca «{done}» para aplicarlo.",
+      "resume": "Suscripción reactivada. Toca «{done}» para aplicarlo."
     },
     "price": "Registrar cambio de precio",
     "switch": "Cambiar región, plan o método de pago",
@@ -126,8 +180,14 @@
     "plannedHint": "Se sigue contando en las previsiones y aparece como «Previsto» en los detalles. Podrás confirmarlo o cancelarlo con un toque más adelante."
   },
   "history": {
-    "gapMonths": { "one": "Interrumpida {count} mes", "other": "Interrumpida {count} meses" },
-    "gapDays": { "one": "Interrumpida {count} día", "other": "Interrumpida {count} días" },
+    "gapMonths": {
+      "one": "Interrumpida {count} mes",
+      "other": "Interrumpida {count} meses"
+    },
+    "gapDays": {
+      "one": "Interrumpida {count} día",
+      "other": "Interrumpida {count} días"
+    },
     "plannedRange": "{start} → {end} (previsto)",
     "plannedFrom": "Desde {start} (previsto)",
     "range": "{start} → {end}",
@@ -138,9 +198,19 @@
   "payment": {
     "addTitle": "Añadir pago",
     "editTitle": "Editar pago",
-    "toast": { "added": "Pago añadido", "edited": "Pago actualizado", "deleted": "Pago eliminado" },
+    "toast": {
+      "added": "Pago añadido",
+      "edited": "Pago actualizado",
+      "deleted": "Pago eliminado"
+    },
     "date": "Fecha",
-    "kind": { "label": "Tipo", "charge": "Cobro", "refund": "Reembolso", "adjust": "Ajuste", "failed": "Cobro fallido" },
+    "kind": {
+      "label": "Tipo",
+      "charge": "Cobro",
+      "refund": "Reembolso",
+      "adjust": "Ajuste",
+      "failed": "Cobro fallido"
+    },
     "amount": "Importe ({currency})",
     "refundHint": "Introduce el importe reembolsado; se guarda en negativo",
     "settled": "Cargado en la tarjeta (opcional)",
@@ -149,5 +219,7 @@
     "blank": "Dejar en blanco",
     "freezeHint": "Los cobros de esta fase se estiman ahora a partir del ciclo de facturación. Al guardar, los {amount} cobros estimados hasta hoy se convertirán en registros; a partir de entonces, los registros serán la referencia. Los cobros futuros no cambian."
   },
-  "timeline": { "home": "Volver a hoy (o haz doble clic en la línea de tiempo)" }
+  "timeline": {
+    "home": "Volver a hoy (o haz doble clic en la línea de tiempo)"
+  }
 }

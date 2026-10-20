@@ -130,3 +130,13 @@ test('公开页：只下发公开订阅用到的分类；改了名的域名分�
   assert.equal(domain.url, undefined);
   assert.ok(domain.id.startsWith('d-'));
 });
+
+test('内置分类在任何语言下的名字都认回同一个预设，公开页的域名打码不依赖访客语言', async () => {
+  const { presetOf } = await import('./categories.ts');
+  const { isDomainSub } = await import('./mask.ts');
+  for (const name of ['域名', 'Domains', 'Dominios', 'ドメイン', 'Домены', '網域']) {
+    assert.equal(presetOf(name)?.code, 'domains', name);
+    assert.ok(isDomainSub({ name: 'my site', category: name, tags: [] }), name);
+  }
+  assert.equal(presetOf('Spiele')?.code, 'games');
+});

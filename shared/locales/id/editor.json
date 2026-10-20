@@ -5,14 +5,20 @@
     "keepUntil": "Yang lama berjalan sampai",
     "endAuto": "Saat fase berikutnya mulai",
     "planned": "Rencana",
-    "parallel": { "other": "Tumpang tindih {count} hari" },
+    "parallel": {
+      "other": "Tumpang tindih {count} hari"
+    },
     "payPhase": "Masuk ke fase"
   },
   "addTitle": "Tambah langganan",
   "editTitle": "Edit “{name}”",
   "confirmDiscard": "Buang perubahan yang belum disimpan?",
   "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, tandai sebagai Dibatalkan saja.",
-  "toast": { "added": "Ditambahkan", "saved": "Disimpan", "deleted": "Dihapus" },
+  "toast": {
+    "added": "Ditambahkan",
+    "saved": "Disimpan",
+    "deleted": "Dihapus"
+  },
   "cycle": {
     "w1": "Mingguan",
     "m1": "Bulanan",
@@ -26,17 +32,36 @@
   "unit": {
     "label": "Satuan",
     "every": "Setiap",
-    "day": { "other": "hari" },
-    "week": { "other": "minggu" },
-    "month": { "other": "bulan" },
-    "year": { "other": "tahun" }
+    "day": {
+      "other": "hari"
+    },
+    "week": {
+      "other": "minggu"
+    },
+    "month": {
+      "other": "bulan"
+    },
+    "year": {
+      "other": "tahun"
+    }
   },
-  "status": { "active": "Aktif", "trial": "Uji coba", "paused": "Dijeda", "cancelled": "Dibatalkan" },
+  "status": {
+    "active": "Aktif",
+    "trial": "Uji coba",
+    "paused": "Dijeda",
+    "cancelled": "Dibatalkan"
+  },
   "category": {
     "choose": "Pilih kategori",
     "new": "Kategori baru…"
   },
-  "group": { "billing": "Tagihan", "status": "Status", "who": "Siapa yang memakai", "links": "Tautan & tampilan", "tags": "Tag & catatan" },
+  "group": {
+    "billing": "Tagihan",
+    "status": "Status",
+    "who": "Siapa yang memakai",
+    "links": "Tautan & tampilan",
+    "tags": "Tag & catatan"
+  },
   "field": {
     "category": "Kategori",
     "amount": "Jumlah",
@@ -77,7 +102,12 @@
     "remove": "Hapus",
     "addMember": "Tambah anggota"
   },
-  "proxy": { "for": "Ditalangi untuk", "forPlaceholder": "Nama mereka", "contact": "Kontak", "notePlaceholder": "mis. Rekan kerja, bayar di akhir bulan" },
+  "proxy": {
+    "for": "Ditalangi untuk",
+    "forPlaceholder": "Nama mereka",
+    "contact": "Kontak",
+    "notePlaceholder": "mis. Rekan kerja, bayar di akhir bulan"
+  },
   "more": {
     "title": "Opsi lainnya",
     "intro": "Promo awal",
@@ -89,29 +119,46 @@
     "summary": "Promo awal, waktu gratis, pengingat, tautan, tag, catatan",
     "summaryLt": "Tautan, tag, catatan"
   },
-  "intro": { "has": "Promo awal", "price": "Harga promo", "until": "Promo berakhir" },
+  "intro": {
+    "has": "Promo awal",
+    "price": "Harga promo",
+    "until": "Promo berakhir"
+  },
   "bonus": {
     "has": "Waktu gratis",
     "from": "Gratis mulai",
     "until": "Gratis hingga",
     "resume": "Tagihan berlanjut {date}",
-    "quick": { "d7": "+7 hari", "m1": "+1 bulan", "m3": "+3 bulan", "m6": "+6 bulan", "y1": "+1 tahun" }
+    "quick": {
+      "d7": "+7 hari",
+      "m1": "+1 bulan",
+      "m3": "+3 bulan",
+      "m6": "+6 bulan",
+      "y1": "+1 tahun"
+    }
   },
   "remind": {
     "days": "Ingatkan saya",
-    "default": { "other": "Default ({count} hari sebelumnya)" },
+    "default": {
+      "other": "Default ({count} hari sebelumnya)"
+    },
     "sameDay": "Pada hari jatuh tempo",
-    "before": { "other": "{count} hari sebelumnya" },
+    "before": {
+      "other": "{count} hari sebelumnya"
+    },
     "never": "Tidak pernah"
   },
-  "name": { "placeholder": "Nama, atau tempel tautan App Store", "catalog": "Layanan populer · mengisi logo, kategori, dan situs web" },
+  "name": {
+    "placeholder": "Nama, atau tempel tautan App Store",
+    "catalog": "Layanan populer · mengisi logo, kategori, dan situs web"
+  },
   "change": {
     "title": "Riwayat & perubahan",
     "needPrice": "Masukkan harga",
     "toast": {
-      "price": "Perubahan harga dicatat. Simpan untuk menerapkan.",
-      "switch": "Fase baru ditambahkan. Simpan untuk menerapkan.",
-      "resume": "Berlangganan lagi. Simpan untuk menerapkan."
+      "price": "Perubahan harga dicatat. Ketuk “{done}” untuk menerapkan.",
+      "switch": "Fase baru ditambahkan. Ketuk “{done}” untuk menerapkan.",
+      "resume": "Berlangganan lagi. Ketuk “{done}” untuk menerapkan."
     },
     "price": "Catat perubahan harga",
     "switch": "Ubah wilayah, paket, atau metode pembayaran",
@@ -126,8 +173,12 @@
     "plannedHint": "Tetap dihitung dalam perkiraan dan ditandai “Rencana” di detail. Nanti cukup satu ketukan untuk mengonfirmasi atau membatalkan."
   },
   "history": {
-    "gapMonths": { "other": "Terputus {count} bulan" },
-    "gapDays": { "other": "Terputus {count} hari" },
+    "gapMonths": {
+      "other": "Terputus {count} bulan"
+    },
+    "gapDays": {
+      "other": "Terputus {count} hari"
+    },
     "plannedRange": "{start} → {end} (rencana)",
     "plannedFrom": "Mulai {start} (rencana)",
     "range": "{start} → {end}",
@@ -138,9 +189,19 @@
   "payment": {
     "addTitle": "Tambah pembayaran",
     "editTitle": "Edit pembayaran",
-    "toast": { "added": "Pembayaran ditambahkan", "edited": "Pembayaran diperbarui", "deleted": "Pembayaran dihapus" },
+    "toast": {
+      "added": "Pembayaran ditambahkan",
+      "edited": "Pembayaran diperbarui",
+      "deleted": "Pembayaran dihapus"
+    },
     "date": "Tanggal",
-    "kind": { "label": "Jenis", "charge": "Tagihan", "refund": "Refund", "adjust": "Penyesuaian", "failed": "Tagihan gagal" },
+    "kind": {
+      "label": "Jenis",
+      "charge": "Tagihan",
+      "refund": "Refund",
+      "adjust": "Penyesuaian",
+      "failed": "Tagihan gagal"
+    },
     "amount": "Jumlah ({currency})",
     "refundHint": "Masukkan jumlah yang di-refund; akan disimpan sebagai nilai negatif",
     "settled": "Ditagihkan ke kartu (opsional)",
@@ -149,5 +210,7 @@
     "blank": "Kosongkan",
     "freezeHint": "Tagihan di fase ini saat ini diperkirakan dari siklus tagihan. Saat disimpan, {amount} tagihan perkiraan hingga hari ini akan diubah menjadi catatan; sejak itu, catatanlah yang menjadi acuan. Tagihan mendatang tidak berubah."
   },
-  "timeline": { "home": "Kembali ke hari ini (atau klik dua kali linimasa)" }
+  "timeline": {
+    "home": "Kembali ke hari ini (atau klik dua kali linimasa)"
+  }
 }

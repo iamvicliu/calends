@@ -96,9 +96,13 @@ export function findPerson(st: AppState, ref: unknown): Person {
   throw new Error(t('mcp.error.personAmbiguous', { q, count: fuzzy.length, list: candidates(fuzzy) }));
 }
 
-/** 联系方式的一行文字（MCP 用，不翻译渠道名） */
-const contactLine = (p: Pick<Person, 'contactVia' | 'contact'>) =>
-  p.contact ? `${p.contactVia && p.contactVia !== '其他' ? `${p.contactVia} ` : ''}${p.contact}` : null;
+/** 联系渠道在数据里存的是中文代码，给 AI 的输出统一换成英文名 */
+const VIA_EN: Record<string, string> = { 微信: 'WeChat', 邮箱: 'Email', 手机: 'Phone', 其他: '' };
+const contactLine = (p: Pick<Person, 'contactVia' | 'contact'>) => {
+  if (!p.contact) return null;
+  const via = p.contactVia ? (VIA_EN[p.contactVia] ?? p.contactVia) : '';
+  return via ? `${via} ${p.contact}` : p.contact;
+};
 
 /** 一个人的应收：在哪些合租 / 代付里、欠多少、收回多少 */
 function personRow(st: AppState, l: PersonLedger, out: string, today: string) {

@@ -344,13 +344,13 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
         </div>
         <Group title={t('settings.cat.color')}>
           <div class="cat-swatches" role="radiogroup" aria-label={t('settings.cat.color')}>
-            {CAT_COLORS.map((c) => (
+            {CAT_COLORS.map((c, i) => (
               <button
                 key={c}
                 type="button"
                 role="radio"
                 aria-checked={color === c}
-                aria-label={c}
+                aria-label={`${t('settings.cat.color')} ${i + 1}`}
                 class={`cat-swatch ${color === c ? 'on' : ''}`}
                 style={{ '--tint': `var(--${c})` } as Record<string, string>}
                 onClick={() => setColor(c)}

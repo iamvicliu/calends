@@ -1,5 +1,5 @@
 import { addDays, coveredUntil, cycleLabel, diffDays, isGap, phaseLanes, phaseSubs } from '../../shared/billing.ts';
-import { money } from '../../shared/format.ts';
+import { cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
@@ -49,7 +49,7 @@ export function History({
       <li key={`p${i}`} class={`h-phase ${live && v.start <= today ? 'now' : ''} ${lanes[i] > 0 ? 'lane' : ''} ${editable ? 'edit' : ''}`}>
         {editable ? (
           <div class="h-range h-edit">
-            <span>{v.start} →</span>
+            <span>{cnDateFull(v.start)} →</span>
             <DatePicker
               value={raw?.end}
               clearable
@@ -63,9 +63,9 @@ export function History({
           <div class="h-range">
             {v.start > today
               ? v.end
-                ? t('editor.history.plannedRange', { start: v.start, end: v.end })
-                : t('editor.history.plannedFrom', { start: v.start })
-              : t('editor.history.range', { start: v.start, end: v.end ?? t('editor.history.now') })}
+                ? t('editor.history.plannedRange', { start: cnDateFull(v.start), end: cnDateFull(v.end) })
+                : t('editor.history.plannedFrom', { start: cnDateFull(v.start) })
+              : t('editor.history.range', { start: cnDateFull(v.start), end: v.end ? cnDateFull(v.end) : t('editor.history.now') })}
           </div>
         )}
         <div class="h-plan">

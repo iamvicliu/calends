@@ -6,7 +6,7 @@ import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/type
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { CatGlyph } from './CatGlyph.tsx';
 import { useToasts } from '../store.ts';
-import { t } from '../../shared/i18n.ts';
+import { intlLocale, t } from '../../shared/i18n.ts';
 
 // ---------- SF Symbols 风格线性图标 ----------
 const P: Record<string, JSX.Element> = {
@@ -294,13 +294,25 @@ export function Amount({ value, ccy, sign, compact }: { value: number; ccy: stri
   const neg = value < 0;
   const abs = Math.abs(value);
   const noDec = compact && abs >= 1000;
-  const [int, dec] = abs.toFixed(noDec ? 0 : 2).split('.');
+  // 整数分组和小数点都跟随当前语言（德语 1.234,56、法语 1 234,56），小数部分缩小显示
+  const parts = new Intl.NumberFormat(intlLocale(), { minimumFractionDigits: noDec ? 0 : 2, maximumFractionDigits: noDec ? 0 : 2 }).formatToParts(abs);
+  const int = parts
+    .filter((p) => p.type !== 'decimal' && p.type !== 'fraction')
+    .map((p) => p.value)
+    .join('');
+  const point = parts.find((p) => p.type === 'decimal')?.value;
+  const dec = parts.find((p) => p.type === 'fraction')?.value;
   return (
     <span class="amt">
       {neg ? '−' : sign ? '+' : ''}
       <span class="cur">{symbol(ccy).trim()}</span>
-      {Number(int).toLocaleString('en-US')}
-      {dec && <small>.{dec}</small>}
+      {int}
+      {dec && (
+        <small>
+          {point}
+          {dec}
+        </small>
+      )}
     </span>
   );
 }

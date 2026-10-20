@@ -202,7 +202,7 @@ function Ledger({ state }: { state: AppState }) {
               </div>
               <dl className="grid grid-cols-3 gap-6 sm:gap-10">
                 <Stat label={t('public.hero.yearly')} value={<Num value={d.mrr * 12 * k} prefix={sym} />} />
-                <Stat label={t('public.hero.live')} value={<Num value={d.live.length} />} />
+                <Stat label={t('public.hero.live')} value={<Num value={d.live.filter((x) => ['active', 'ending'].includes(effectiveStatus(x.s, today))).length} />} />
                 <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === base ? d.paidBase : d.paidUsd} prefix={sym} />} />
               </dl>
             </CardContent>

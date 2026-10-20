@@ -5,7 +5,10 @@
     "keepUntil": "Altes läuft bis",
     "endAuto": "Mit Beginn der nächsten",
     "planned": "Geplant",
-    "parallel": { "one": "Überschneidet sich {count} Tag", "other": "Überschneidet sich {count} Tage" },
+    "parallel": {
+      "one": "Überschneidet sich {count} Tag",
+      "other": "Überschneidet sich {count} Tage"
+    },
     "payPhase": "Gehört zu"
   },
   "addTitle": "Abo hinzufügen",
@@ -160,9 +163,9 @@
     "title": "Verlauf & Änderungen",
     "needPrice": "Gib einen Preis ein",
     "toast": {
-      "price": "Preisänderung erfasst. Sichern zum Übernehmen.",
-      "switch": "Neue Phase hinzugefügt. Sichern zum Übernehmen.",
-      "resume": "Neu abonniert. Sichern zum Übernehmen."
+      "price": "Preisänderung erfasst. Tippe auf „{done}“, um sie zu übernehmen.",
+      "switch": "Neue Phase hinzugefügt. Tippe auf „{done}“, um sie zu übernehmen.",
+      "resume": "Neu abonniert. Tippe auf „{done}“, um sie zu übernehmen."
     },
     "price": "Preisänderung erfassen",
     "switch": "Region, Tarif oder Zahlungsmethode ändern",

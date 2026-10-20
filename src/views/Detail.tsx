@@ -16,7 +16,7 @@ import {
   servedTime,
   upcomingPhase,
 } from '../../shared/billing.ts';
-import { cnDate, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
+import { cnDateAuto, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
 import { chargeValue, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
 import { PaymentSheet } from './PaymentSheet.tsx';
@@ -416,7 +416,7 @@ function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; st
               ? t('detail.stats.months', { count: months })
               : t('detail.stats.days', { count: active })}
         </b>
-        <span>{gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.stats.since', { date: cnDate(sub.start) })}</span>
+        <span>{gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.stats.since', { date: cnDateAuto(sub.start, today) })}</span>
       </div>
       {!lifetime && (
         <div>

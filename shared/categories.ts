@@ -4,6 +4,7 @@
 // - 内置分类带 preset 代码：改了名也认得出「域名」等有特殊行为的分类。
 import { t } from './i18n.ts';
 import type { Settings, Subscription } from './types.ts';
+import { CATEGORY_ALIASES } from './locales/categories.gen.ts';
 
 export interface Category {
   name: string;
@@ -59,7 +60,7 @@ export const presetName: PresetName = (code) => t(`core.category.${code}`);
 
 /** 分类名对应哪个内置预设：当前语言的名称或早期中文原名 */
 export function presetOf(name: string, nameOf: PresetName = presetName): Preset | undefined {
-  return PRESETS.find((p) => nameOf(p.code) === name || p.legacy?.includes(name));
+  return PRESETS.find((p) => nameOf(p.code) === name || p.legacy?.includes(name) || CATEGORY_ALIASES[p.code]?.includes(name));
 }
 
 function fromPreset(name: string, p: Preset | undefined): Category {
@@ -108,7 +109,7 @@ export function presetCategory(list: Category[], code: string, nameOf: PresetNam
 /** 是否「域名」分类：认 preset，也认旧数据里的中文原名 */
 export function isDomainCategory(list: Category[], name: string): boolean {
   const c = findCategory(list, name);
-  return c ? c.preset === 'domains' : name === '域名';
+  return c ? c.preset === 'domains' : presetOf(name)?.code === 'domains';
 }
 
 /** 图标值是 Lucide 图标名还是 emoji */

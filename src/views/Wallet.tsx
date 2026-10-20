@@ -66,7 +66,7 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
               topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b>,
             })}
           </>
-        ) : r.shortfall ? (
+        ) : r.shortfall && r.topUp12m > 0 ? (
           <>
             {tx('wallet.runway.shortLater', {
               periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b>,

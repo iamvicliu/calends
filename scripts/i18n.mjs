@@ -28,6 +28,19 @@ for (const loc of locales) {
 lines.push('', 'export const SERVER_MESSAGES: Record<string, Record<string, MessageTree>> = {', ...table, '};', '');
 writeFileSync(join(ROOT, 'server.gen.ts'), lines.join('\n'));
 
+// 内置分类在各语言里的名字：不同语言下建的分类（如「游戏」「Games」「Spiele」）都能认回同一个预设
+const aliases = {};
+for (const loc of locales) {
+  const file = join(ROOT, loc, 'core.json');
+  if (!existsSync(file)) continue;
+  for (const [code, name] of Object.entries(JSON.parse(readFileSync(file, 'utf8')).category ?? {})) {
+    if (typeof name !== 'string') continue;
+    (aliases[code] ??= new Set()).add(name);
+  }
+}
+const aliasObj = Object.fromEntries(Object.entries(aliases).map(([k, v]) => [k, [...v].sort()]));
+writeFileSync(join(ROOT, 'categories.gen.ts'), `// 由 scripts/i18n.mjs 生成，请勿手改\nexport const CATEGORY_ALIASES: Record<string, string[]> = ${JSON.stringify(aliasObj)};\n`);
+
 if (process.argv.includes('--check')) {
   const keys = (tree, prefix = '', out = new Set()) => {
     for (const [k, v] of Object.entries(tree)) {

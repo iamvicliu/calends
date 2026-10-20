@@ -84,7 +84,11 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
         mode === 'price' ? changePrice(f, date, n) : mode === 'switch' ? switchPlan(f, date, plan, keep ? keepUntil : undefined) : resume(f, date, plan);
       setF(next);
       setMode(null);
-      toast(t(mode === 'price' ? 'editor.change.toast.price' : mode === 'switch' ? 'editor.change.toast.switch' : 'editor.change.toast.resume'));
+      toast(
+        t(mode === 'price' ? 'editor.change.toast.price' : mode === 'switch' ? 'editor.change.toast.switch' : 'editor.change.toast.resume', {
+          done: t('common.done'),
+        }),
+      );
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e), true);
     }
@@ -180,13 +184,13 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
                 </div>
               )}
               {mode === 'switch' && (
-                <label class="change-plan">
+                <div class="change-plan">
                   <span>
                     {t('editor.change.planned')}
                     <small>{t('editor.change.plannedHint')}</small>
                   </span>
-                  <Toggle checked={planned} onChange={setPlanned} />
-                </label>
+                  <Toggle checked={planned} onChange={setPlanned} label={t('editor.change.planned')} />
+                </div>
               )}
             </>
           )}

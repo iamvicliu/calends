@@ -5,7 +5,10 @@
     "keepUntil": "L’ancien continue jusqu’au",
     "endAuto": "Au début de la suivante",
     "planned": "Prévu",
-    "parallel": { "one": "Chevauche {count} jour", "other": "Chevauche {count} jours" },
+    "parallel": {
+      "one": "Chevauche {count} jour",
+      "other": "Chevauche {count} jours"
+    },
     "payPhase": "Rattaché à"
   },
   "addTitle": "Ajouter un abonnement",
@@ -160,9 +163,9 @@
     "title": "Historique et changements",
     "needPrice": "Saisissez un prix",
     "toast": {
-      "price": "Changement de prix noté. Enregistrez pour l’appliquer.",
-      "switch": "Nouvelle phase ajoutée. Enregistrez pour l’appliquer.",
-      "resume": "Réabonné. Enregistrez pour l’appliquer."
+      "price": "Changement de prix noté. Touchez « {done} » pour l’appliquer.",
+      "switch": "Nouvelle phase ajoutée. Touchez « {done} » pour l’appliquer.",
+      "resume": "Réabonné. Touchez « {done} » pour l’appliquer."
     },
     "price": "Noter un changement de prix",
     "switch": "Changer de région, de formule ou de moyen de paiement",

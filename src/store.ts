@@ -115,13 +115,26 @@ export function mergeEdits<T extends { id: string }>(original: T, edited: T, lat
   return out as T;
 }
 
+/**
+ * 写操作计数：读取整份状态的请求如果发出时或返回前有写操作在进行，返回的就是旧数据，不能拿来覆盖本地。
+ * 典型场景：点「暂停」的同一次点击让窗口获得焦点触发刷新，GET 先于 PUT 返回。
+ */
+let writes = 0;
+let writeSeq = 0;
+async function freshState(): Promise<AppState | undefined> {
+  const seq = writeSeq;
+  const state = await api<AppState>('/api/state');
+  return writes > 0 || seq !== writeSeq ? undefined : state;
+}
+
 /** 回到页面时拉一次最新数据，避免长时间开着的标签页拿旧数据保存 */
 let lastRefresh = 0;
 export async function refresh(): Promise<void> {
   if (store.phase !== 'ready' || Date.now() - lastRefresh < 5000) return;
   lastRefresh = Date.now();
   try {
-    replaceState(await api<AppState>('/api/state'));
+    const state = await freshState();
+    if (state) replaceState(state);
   } catch {
     /* 离线时保留当前数据 */
   }
@@ -145,7 +158,7 @@ export function syncFx(): Promise<void> {
       if (r.remaining <= 0 || r.filled === 0) break;
     }
     if (filled > 0) {
-      const state = await api<AppState>('/api/state').catch(() => undefined);
+      const state = await freshState().catch(() => undefined);
       if (state) replaceState(state);
     }
   })().finally(() => {
@@ -271,11 +284,16 @@ function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
 async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T>): Promise<T> {
   const prev = store.state!;
   patchState(fn);
+  writes++;
+  writeSeq++;
   try {
     return await req();
   } catch (e) {
     patchState(() => prev);
     throw e;
+  } finally {
+    writes--;
+    writeSeq++;
   }
 }
 

@@ -5,14 +5,20 @@
     "keepUntil": "Gói cũ dùng đến",
     "endAuto": "Khi giai đoạn sau bắt đầu",
     "planned": "Dự kiến",
-    "parallel": { "other": "Chồng lấn {count} ngày" },
+    "parallel": {
+      "other": "Chồng lấn {count} ngày"
+    },
     "payPhase": "Thuộc giai đoạn"
   },
   "addTitle": "Thêm gói đăng ký",
   "editTitle": "Sửa “{name}”",
   "confirmDiscard": "Bỏ các thay đổi chưa lưu?",
   "confirmDelete": "Xóa “{name}”? Lịch sử của gói cũng sẽ bị xóa. Nếu bạn chỉ ngừng gia hạn, hãy đánh dấu là Đã hủy.",
-  "toast": { "added": "Đã thêm", "saved": "Đã lưu", "deleted": "Đã xóa" },
+  "toast": {
+    "added": "Đã thêm",
+    "saved": "Đã lưu",
+    "deleted": "Đã xóa"
+  },
   "cycle": {
     "w1": "Hằng tuần",
     "m1": "Hằng tháng",
@@ -26,17 +32,36 @@
   "unit": {
     "label": "Đơn vị",
     "every": "Mỗi",
-    "day": { "other": "ngày" },
-    "week": { "other": "tuần" },
-    "month": { "other": "tháng" },
-    "year": { "other": "năm" }
+    "day": {
+      "other": "ngày"
+    },
+    "week": {
+      "other": "tuần"
+    },
+    "month": {
+      "other": "tháng"
+    },
+    "year": {
+      "other": "năm"
+    }
   },
-  "status": { "active": "Đang hoạt động", "trial": "Dùng thử", "paused": "Tạm dừng", "cancelled": "Đã hủy" },
+  "status": {
+    "active": "Đang hoạt động",
+    "trial": "Dùng thử",
+    "paused": "Tạm dừng",
+    "cancelled": "Đã hủy"
+  },
   "category": {
     "choose": "Chọn danh mục",
     "new": "Danh mục mới…"
   },
-  "group": { "billing": "Thanh toán", "status": "Trạng thái", "who": "Ai sử dụng", "links": "Liên kết & hiển thị", "tags": "Thẻ & ghi chú" },
+  "group": {
+    "billing": "Thanh toán",
+    "status": "Trạng thái",
+    "who": "Ai sử dụng",
+    "links": "Liên kết & hiển thị",
+    "tags": "Thẻ & ghi chú"
+  },
   "field": {
     "category": "Danh mục",
     "amount": "Số tiền",
@@ -77,7 +102,12 @@
     "remove": "Xóa",
     "addMember": "Thêm thành viên"
   },
-  "proxy": { "for": "Trả hộ cho", "forPlaceholder": "Tên người đó", "contact": "Liên hệ", "notePlaceholder": "VD: Đồng nghiệp, trả vào cuối tháng" },
+  "proxy": {
+    "for": "Trả hộ cho",
+    "forPlaceholder": "Tên người đó",
+    "contact": "Liên hệ",
+    "notePlaceholder": "VD: Đồng nghiệp, trả vào cuối tháng"
+  },
   "more": {
     "title": "Tùy chọn khác",
     "intro": "Ưu đãi mở đầu",
@@ -89,29 +119,46 @@
     "summary": "Ưu đãi mở đầu, thời gian miễn phí, nhắc nhở, liên kết, thẻ, ghi chú",
     "summaryLt": "Liên kết, thẻ, ghi chú"
   },
-  "intro": { "has": "Ưu đãi mở đầu", "price": "Giá ưu đãi", "until": "Ưu đãi kết thúc" },
+  "intro": {
+    "has": "Ưu đãi mở đầu",
+    "price": "Giá ưu đãi",
+    "until": "Ưu đãi kết thúc"
+  },
   "bonus": {
     "has": "Thời gian miễn phí",
     "from": "Miễn phí từ",
     "until": "Miễn phí đến",
     "resume": "Tiếp tục thanh toán từ {date}",
-    "quick": { "d7": "+7 ngày", "m1": "+1 tháng", "m3": "+3 tháng", "m6": "+6 tháng", "y1": "+1 năm" }
+    "quick": {
+      "d7": "+7 ngày",
+      "m1": "+1 tháng",
+      "m3": "+3 tháng",
+      "m6": "+6 tháng",
+      "y1": "+1 năm"
+    }
   },
   "remind": {
     "days": "Nhắc tôi",
-    "default": { "other": "Mặc định (trước {count} ngày)" },
+    "default": {
+      "other": "Mặc định (trước {count} ngày)"
+    },
     "sameDay": "Vào ngày đến hạn",
-    "before": { "other": "Trước {count} ngày" },
+    "before": {
+      "other": "Trước {count} ngày"
+    },
     "never": "Không bao giờ"
   },
-  "name": { "placeholder": "Tên, hoặc dán liên kết App Store", "catalog": "Dịch vụ phổ biến · tự điền logo, danh mục và trang web" },
+  "name": {
+    "placeholder": "Tên, hoặc dán liên kết App Store",
+    "catalog": "Dịch vụ phổ biến · tự điền logo, danh mục và trang web"
+  },
   "change": {
     "title": "Lịch sử & thay đổi",
     "needPrice": "Nhập giá",
     "toast": {
-      "price": "Đã ghi nhận đổi giá. Lưu để áp dụng.",
-      "switch": "Đã thêm giai đoạn mới. Lưu để áp dụng.",
-      "resume": "Đã đăng ký lại. Lưu để áp dụng."
+      "price": "Đã ghi nhận đổi giá. Nhấn “{done}” để áp dụng.",
+      "switch": "Đã thêm giai đoạn mới. Nhấn “{done}” để áp dụng.",
+      "resume": "Đã đăng ký lại. Nhấn “{done}” để áp dụng."
     },
     "price": "Ghi nhận đổi giá",
     "switch": "Đổi khu vực, gói hoặc phương thức thanh toán",
@@ -126,8 +173,12 @@
     "plannedHint": "Vẫn được tính vào dự báo và đánh dấu “Dự định” trong chi tiết. Sau này chỉ cần một chạm để xác nhận hoặc hủy."
   },
   "history": {
-    "gapMonths": { "other": "Gián đoạn {count} tháng" },
-    "gapDays": { "other": "Gián đoạn {count} ngày" },
+    "gapMonths": {
+      "other": "Gián đoạn {count} tháng"
+    },
+    "gapDays": {
+      "other": "Gián đoạn {count} ngày"
+    },
     "plannedRange": "{start} → {end} (dự định)",
     "plannedFrom": "Từ {start} (dự định)",
     "range": "{start} → {end}",
@@ -138,9 +189,19 @@
   "payment": {
     "addTitle": "Thêm khoản thanh toán",
     "editTitle": "Sửa khoản thanh toán",
-    "toast": { "added": "Đã thêm khoản thanh toán", "edited": "Đã cập nhật khoản thanh toán", "deleted": "Đã xóa khoản thanh toán" },
+    "toast": {
+      "added": "Đã thêm khoản thanh toán",
+      "edited": "Đã cập nhật khoản thanh toán",
+      "deleted": "Đã xóa khoản thanh toán"
+    },
     "date": "Ngày",
-    "kind": { "label": "Loại", "charge": "Trừ tiền", "refund": "Hoàn tiền", "adjust": "Điều chỉnh", "failed": "Trừ tiền thất bại" },
+    "kind": {
+      "label": "Loại",
+      "charge": "Trừ tiền",
+      "refund": "Hoàn tiền",
+      "adjust": "Điều chỉnh",
+      "failed": "Trừ tiền thất bại"
+    },
     "amount": "Số tiền ({currency})",
     "refundHint": "Nhập số tiền được hoàn; sẽ được lưu dưới dạng số âm",
     "settled": "Số tiền trừ trên thẻ (tùy chọn)",
@@ -149,5 +210,7 @@
     "blank": "Để trống",
     "freezeHint": "Các khoản phí trong giai đoạn này hiện được ước tính theo chu kỳ thanh toán. Khi lưu, {amount} khoản phí ước tính tính đến hôm nay sẽ được chuyển thành bản ghi; từ đó trở đi, bản ghi là căn cứ chính. Các khoản phí sắp tới không thay đổi."
   },
-  "timeline": { "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)" }
+  "timeline": {
+    "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)"
+  }
 }

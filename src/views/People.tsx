@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { uid } from '../../shared/billing.ts';
-import { cnDate, money } from '../../shared/format.ts';
+import { cnDateAuto, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } from '../../shared/people.ts';
 import { proxyRows } from '../../shared/proxy.ts';
@@ -98,7 +98,7 @@ function itemLine(i: PersonItem, today: string): string {
   if (!i.active && i.kind === 'proxy') return `${kind} · ${t('people.item.ended')}`;
   if (i.member?.exempt) return `${kind} · ${t('family.pool.exempt')}`;
   if (i.periodsOwed > 0) return `${kind} · ${t('people.item.owedPeriods', { count: i.periodsOwed })}`;
-  if (i.kind === 'share') return `${kind} · ${i.paidUntil ? t('people.item.paidUntil', { date: cnDate(i.paidUntil) }) : t('people.item.noPay')}`;
+  if (i.kind === 'share') return `${kind} · ${i.paidUntil ? t('people.item.paidUntil', { date: cnDateAuto(i.paidUntil, today) }) : t('people.item.noPay')}`;
   return `${kind} · ${t('family.pool.settled')}`;
 }
 
@@ -205,7 +205,7 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
         </div>
         <div>
           <small>{t('people.sheet.last')}</small>
-          <b class={l.lastPaid ? '' : 'muted'}>{l.lastPaid ? cnDate(l.lastPaid) : '—'}</b>
+          <b class={l.lastPaid ? '' : 'muted'}>{l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}</b>
         </div>
       </div>
       {live.length !== l.items.length && live.length > 0 && <div class="muted pp-foot">{t('people.card.past', { count: l.items.length - live.length })}</div>}
@@ -324,7 +324,7 @@ function PersonSheet({
           </div>
           <div>
             <small>{t('people.sheet.last')}</small>
-            <b>{l.lastPaid ? cnDate(l.lastPaid) : '—'}</b>
+            <b>{l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}</b>
           </div>
         </div>
 
@@ -375,13 +375,13 @@ function PersonSheet({
             </Cell>
             <Cell label={t('people.sheet.color')}>
               <span class="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
-                {PERSON_COLORS.map((c) => (
+                {PERSON_COLORS.map((c, i) => (
                   <button
                     key={c}
                     type="button"
                     role="radio"
                     aria-checked={(f.color ?? colorFor(f.id)) === c}
-                    aria-label={c}
+                    aria-label={`${t('people.sheet.color')} ${i + 1}`}
                     class={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`}
                     onClick={() => up({ color: c })}
                   />
