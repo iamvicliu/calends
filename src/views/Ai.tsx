@@ -3,6 +3,7 @@ import type { AppState } from '../../shared/types.ts';
 import { Cell, Group, Icon, Seg, Sheet, Toolbar } from '../components/ui.tsx';
 import { api, run, toast } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
+import { localTime } from '../../shared/format.ts';
 
 interface Token {
   id: string;
@@ -59,7 +60,7 @@ export function Ai({ state }: { state: AppState }) {
     load();
     api<ToolMeta[]>('/api/mcp/tools').then(setTools, () => setTools([]));
   }, []);
-  const when = (iso?: string) => (iso ? iso.slice(0, 16).replace('T', ' ') : '从未使用');
+  const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : '从未使用');
 
   return (
     <>

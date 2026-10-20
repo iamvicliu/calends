@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { AppState } from '../../shared/types.ts';
+import { localTime } from '../../shared/format.ts';
 import { Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, registerPasskey, run, saveSettings } from '../store.ts';
@@ -55,7 +56,7 @@ function ago(iso: string | null): string {
   return iso.slice(0, 10);
 }
 
-function DeviceCell({ d, onRevoke }: { d: Device; onRevoke: () => void }) {
+function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () => void }) {
   const { browser, os } = describeUA(d.userAgent);
   const where = [d.location, d.ip].filter(Boolean).join(' · ');
   return (
@@ -66,7 +67,7 @@ function DeviceCell({ d, onRevoke }: { d: Device; onRevoke: () => void }) {
           {d.current && <span class="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>本机</span>}
         </span>
       }
-      sub={[where, [`${d.method === 'passkey' ? 'Passkey ' : '密码'}登录于 ${d.createdAt.slice(0, 10)}`, d.current ? '' : ago(d.lastSeenAt)].filter(Boolean).join(' · ')].filter(Boolean).join('\n')}
+      sub={[where, [`${d.method === 'passkey' ? 'Passkey ' : '密码'}登录于 ${localTime(d.createdAt, tz, true)}`, d.current ? '' : ago(d.lastSeenAt)].filter(Boolean).join(' · ')].filter(Boolean).join('\n')}
     >
       {!d.current && (
         <button type="button" class="chip-btn" onClick={onRevoke}>
@@ -96,11 +97,12 @@ export function SecurityGroup({ state }: { state: AppState }) {
   useEffect(() => void load(), []);
   const supported = typeof window.PublicKeyCredential === 'function';
   const max = state.settings.maxSessions ?? DEFAULT_MAX;
+  const tz = state.settings.timezone;
   return (
     <>
       <Group title="安全" foot={supported ? '绑定 Passkey 后可以用面容、指纹或设备密码登录，无需输入密码。' : '当前浏览器不支持 Passkey。'}>
         {sec?.passkeys.map((p) => (
-          <Cell key={p.id} label={p.name} sub={p.lastUsedAt ? `上次使用 ${p.lastUsedAt.slice(0, 10)}` : `添加于 ${p.createdAt.slice(0, 10)}`}>
+          <Cell key={p.id} label={p.name} sub={p.lastUsedAt ? `上次使用 ${localTime(p.lastUsedAt, tz, true)}` : `添加于 ${localTime(p.createdAt, tz, true)}`}>
             <button
               type="button"
               class="chip-btn"
@@ -143,7 +145,7 @@ export function SecurityGroup({ state }: { state: AppState }) {
           />
         </Cell>
         {sec?.sessions.slice().sort((a, b) => Number(b.current) - Number(a.current)).map((d) => (
-          <DeviceCell key={d.id} d={d} onRevoke={() => run(() => api(`/api/auth/sessions/${d.id}`, { method: 'DELETE' }).then(load), '已移出')} />
+          <DeviceCell key={d.id} d={d} tz={tz} onRevoke={() => run(() => api(`/api/auth/sessions/${d.id}`, { method: 'DELETE' }).then(load), '已移出')} />
         ))}
         {sec && sec.sessions.length > 1 && (
           <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => confirmDelete('退出除本机外的所有设备？') && run(() => api('/api/auth/logout-others', { method: 'POST' }).then(load), '其他设备已退出')}>

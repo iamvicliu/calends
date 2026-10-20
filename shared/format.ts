@@ -57,3 +57,12 @@ export function flag(region?: string): string {
   if (!r || !/^[A-Z]{2}$/.test(r)) return '';
   return String.fromCodePoint(...[...r].map((c) => 0x1f1a5 + c.charCodeAt(0)));
 }
+
+/** 把服务端的 UTC 时间（ISO 或 SQLite 的「YYYY-MM-DD HH:MM:SS」）按设置的时区显示成「2026-10-20 19:03」；dateOnly 只要日期 */
+export function localTime(raw: string, timeZone: string, dateOnly = false): string {
+  const iso = /[TZ]/.test(raw) ? raw : raw.replace(' ', 'T') + 'Z';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return raw;
+  const s = d.toLocaleString('sv-SE', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+  return dateOnly ? s.slice(0, 10) : s.slice(0, 16);
+}

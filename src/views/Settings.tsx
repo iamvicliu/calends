@@ -26,6 +26,7 @@ const SIDE_MODULES: Array<[string, string]> = [
   ['ai', 'AI 接入'],
 ];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
+import { localTime } from '../../shared/format.ts';
 
 interface Preview {
   day: string;
@@ -153,7 +154,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <Group title="侧边栏">
           <Cell label="即将扣款">
-            <Toggle checked={s.sidebarUpcoming !== false} onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))} />
+            <Toggle label="即将扣款" checked={s.sidebarUpcoming !== false} onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))} />
           </Cell>
           {s.sidebarUpcoming !== false && (
             <Cell label="往后看">
@@ -175,7 +176,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <Picker value={s.notifyHour} onChange={(h) => run(() => saveSettings({ notifyHour: h }))} options={Array.from({ length: 24 }, (_, h) => ({ value: h, label: hour(h) }))} ariaLabel="发送时间" search={false} />
           </Cell>
           <Cell label="每月 1 日账单预告">
-            <Toggle checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
+            <Toggle label="每月 1 日账单预告" checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
           </Cell>
           <Cell
             label={<span style={{ color: 'var(--accent)' }}>发一条测试提醒到所有渠道</span>}
@@ -231,7 +232,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
         </Group>
 
         <Group title="汇率">
-          <Cell label="当前汇率" sub={`更新于 ${state.fx.fetchedAt.slice(0, 16).replace('T', ' ')}`} onClick={() => run(refreshFx, '汇率已更新')}>
+          <Cell label="当前汇率" sub={`更新于 ${localTime(state.fx.fetchedAt, state.settings.timezone)}`} onClick={() => run(refreshFx, '汇率已更新')}>
             1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY
           </Cell>
           <Cell label="历史汇率覆盖" sub={fxs?.first ? `最早 ${fxs.first}` : undefined}>
@@ -245,11 +246,11 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             {s.icsToken ? '已开启' : '未开启'}
           </Cell>
           <Cell label="公开页" sub={s.publicView ? `${location.origin}/` : undefined}>
-            <Toggle checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已关闭公开页')} />
+            <Toggle label="公开页" checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已关闭公开页')} />
           </Cell>
           {s.publicView && <Cell label={<span style={{ color: 'var(--accent)' }}>预览公开页</span>} onClick={() => window.open('/', '_blank')} />}
           <Cell label="AI 接入（MCP）">
-            <Toggle checked={s.aiEnabled !== false} onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? '已开启 AI 接入' : '已关闭，AI 助手将无法访问')} />
+            <Toggle label="AI 接入（MCP）" checked={s.aiEnabled !== false} onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? '已开启 AI 接入' : '已关闭，AI 助手将无法访问')} />
           </Cell>
           {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>管理令牌与接入方式</span>} onClick={() => go('ai')} />}
         </Group>
@@ -300,7 +301,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           <Group foot="当前账本会被备份里的内容整体替换，无法撤销；建议先导出一份当前备份。">
             <Cell label="订阅">{restoring.subs} 个</Cell>
             <Cell label="支付方式">{restoring.methods} 个</Cell>
-            {restoring.exportedAt && <Cell label="备份时间">{restoring.exportedAt.slice(0, 16).replace('T', ' ')}</Cell>}
+            {restoring.exportedAt && <Cell label="备份时间">{localTime(restoring.exportedAt, state.settings.timezone)}</Cell>}
             {restoring.version < 2 && <Cell label="格式">旧版备份：只含订阅与支付方式</Cell>}
           </Group>
         </Sheet>
