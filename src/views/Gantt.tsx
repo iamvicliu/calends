@@ -3,7 +3,7 @@ import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveSt
 import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Icon, Seg, SubIcon } from '../components/ui.tsx';
+import { Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
 
 type Zoom = 'year' | '1y' | '3y' | 'all';
@@ -50,14 +50,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     setDrag(0);
   };
   const [colorBy, setColorBy] = useState<ColorBy>('method');
-  const box = useRef<HTMLDivElement>(null);
-  const [w, setW] = useState(0);
-  useLayoutEffect(() => {
-    const el = box.current!;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const [box, w] = useWidth();
 
   // 排序、筛选变化时的过渡（FLIP）：记下每行上一次的位置，重排后从旧位置平滑滑到新位置；新出现的行淡入
   const body = useRef<HTMLDivElement>(null);

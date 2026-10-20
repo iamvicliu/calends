@@ -73,10 +73,13 @@ export function Picker<T extends string | number>({
     list.current?.querySelector<HTMLElement>(`[data-i="${hi}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [hi, open]);
 
-  const pick = (v: T) => {
-    onChange(v);
+  const close = () => {
     setOpen(false);
     setQ('');
+  };
+  const pick = (v: T) => {
+    onChange(v);
+    close();
   };
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') setHi((i) => Math.min(shown.length - 1, i + 1));
@@ -107,22 +110,12 @@ export function Picker<T extends string | number>({
         <Icon name="down" />
       </button>
       {open && (
-        <Pop
-          triggerRef={btn}
-          open
-          onClose={() => {
-            setOpen(false);
-            setQ('');
-          }}
-          label={ariaLabel ?? t('picker.choose')}
-          className="cp-pop pk-pop"
-          style={{ height: H }}
-        >
+        <Pop triggerRef={btn} onClose={close} label={ariaLabel ?? t('picker.choose')} className="cp-pop pk-pop" style={{ height: H }}>
           <div className="pk-in" onKeyDown={onKey}>
             {searchable && (
               <label className="cp-search">
                 <Icon name="search" />
-                <input ref={input} value={q} placeholder={t('common.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
+                <input ref={input} value={q} placeholder={t('common.search')} onChange={(e) => setQ(e.target.value)} />
               </label>
             )}
             <div className="cp-list" ref={list} role="listbox" aria-label={ariaLabel} tabIndex={searchable ? undefined : -1}>
@@ -155,7 +148,7 @@ export function Picker<T extends string | number>({
 }
 
 /** 国旗小图；没有对应国旗时用货币代码 */
-export function CcyFlag({ code }: { code: string }) {
+function CcyFlag({ code }: { code: string }) {
   const src = ccyFlag(code);
   return <span className="cp-flag">{src ? <img src={src} alt="" loading="lazy" /> : <b>{code.slice(0, 2)}</b>}</span>;
 }
@@ -229,6 +222,7 @@ export function RegionSelect({
   const top = [...new Set(['us', 'cn', ...common.map((c) => c.toLowerCase())])].filter((c) => REGIONS.includes(c));
   const rest = REGIONS.filter((c) => !top.includes(c)).sort((a, b) => name(a).localeCompare(name(b), locale()));
   const v = value?.toLowerCase() ?? '';
+  const opt = (group: string) => (c: string) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group });
   return (
     <Picker
       value={v}
@@ -248,11 +242,7 @@ export function RegionSelect({
           <span>{t('picker.region.any')}</span>
         )
       }
-      options={[
-        { value: '', label: t('picker.region.none') },
-        ...top.map((c) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group: t('picker.common') })),
-        ...rest.map((c) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group: t('picker.region.all') })),
-      ]}
+      options={[{ value: '', label: t('picker.region.none') }, ...top.map(opt(t('picker.common'))), ...rest.map(opt(t('picker.region.all')))]}
     />
   );
 }

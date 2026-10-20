@@ -27,7 +27,7 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
         <Icon name="down" />
       </button>
       {open && (
-        <Pop triggerRef={btn} open onClose={() => setOpen(false)} label={t('picker.method.label')} className="mp-pop">
+        <Pop triggerRef={btn} onClose={() => setOpen(false)} label={t('picker.method.label')} className="mp-pop">
           <div role="listbox" aria-label={t('picker.method.label')}>
             <button type="button" role="option" aria-selected={!cur} className={`mp-opt ${cur ? '' : 'sel'}`} onClick={() => pick(undefined)}>
               <span className="mp-none" />

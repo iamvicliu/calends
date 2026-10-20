@@ -1,5 +1,4 @@
-import { Fragment } from 'react';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -20,7 +19,7 @@ import {
 } from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { Amount, CatIcon, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
+import { Amount, CatIcon, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, sumBase, toBase } from '../derive.ts';
 
 export function perLabel(s: Subscription): string {
@@ -394,15 +393,8 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   const base = state.settings.baseCurrency;
   const [dim, setDim] = useState<Dim>('cat');
   const [focus, setFocus] = useState<string | null>(null);
-  const box = useRef<HTMLDivElement>(null);
-  const [W, setW] = useState(0);
+  const [box, W] = useWidth();
   const H = W < 560 ? 320 : 400;
-  useLayoutEffect(() => {
-    const el = box.current!;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
   const live = state.subscriptions.map((s) => ({ s, v: contributionOn(state, s, today) })).filter((x) => x.v > 0);
   const total = live.reduce((a, x) => a + x.v, 0);
   const keyOf = (s: Subscription) =>

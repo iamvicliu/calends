@@ -98,90 +98,91 @@ export function DatePicker({
         <span>{value ? cnDateFull(value) : placeholder}</span>
       </button>
       {open && (
-        <Pop triggerRef={btn} open onClose={() => setOpen(false)} label={t('picker.date.placeholder')}>
-          <>
-            <div className="dp-head">
-              <button type="button" className="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
-                {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
-                <Icon name="down" />
-              </button>
-              <button
-                type="button"
-                className="dp-nav"
-                aria-label={t('picker.date.prev')}
-                onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}
-              >
-                <Icon name="left" />
-              </button>
-              <button
-                type="button"
-                className="dp-nav"
-                aria-label={t('picker.date.next')}
-                onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}
-              >
-                <Icon name="right" />
-              </button>
+        <Pop triggerRef={btn} onClose={() => setOpen(false)} label={t('picker.date.placeholder')}>
+          <div className="dp-head">
+            <button type="button" className="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
+              {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
+              <Icon name="down" />
+            </button>
+            <button
+              type="button"
+              className="dp-nav"
+              aria-label={t('picker.date.prev')}
+              onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}
+            >
+              <Icon name="left" />
+            </button>
+            <button
+              type="button"
+              className="dp-nav"
+              aria-label={t('picker.date.next')}
+              onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}
+            >
+              <Icon name="right" />
+            </button>
+          </div>
+          {mode === 'day' ? (
+            <div className="dp-grid">
+              {dows().map((d) => (
+                <span key={d} className="dp-dow">
+                  {weekdayShort(d, true)}
+                </span>
+              ))}
+              {grid(month).map((d) => (
+                <button
+                  type="button"
+                  key={d}
+                  className={[
+                    'dp-day',
+                    d.startsWith(month) ? '' : 'out',
+                    d === today ? 'today' : '',
+                    d === value ? 'sel' : '',
+                    d === cursor ? 'cursor' : '',
+                  ].join(' ')}
+                  disabled={!!disabled(d)}
+                  onClick={() => pick(d)}
+                >
+                  {Number(d.slice(8))}
+                </button>
+              ))}
             </div>
-            {mode === 'day' ? (
-              <div className="dp-grid">
-                {dows().map((d) => (
-                  <span key={d} className="dp-dow">
-                    {weekdayShort(d, true)}
-                  </span>
-                ))}
-                {grid(month).map((d) => (
-                  <button
-                    type="button"
-                    key={d}
-                    className={[
-                      'dp-day',
-                      d.startsWith(month) ? '' : 'out',
-                      d === today ? 'today' : '',
-                      d === value ? 'sel' : '',
-                      d === cursor ? 'cursor' : '',
-                    ].join(' ')}
-                    disabled={!!disabled(d)}
-                    onClick={() => pick(d)}
-                  >
-                    {Number(d.slice(8))}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="dp-months">
-                {Array.from({ length: 12 }, (_, i) => (
+          ) : (
+            <div className="dp-months">
+              {Array.from({ length: 12 }, (_, i) => {
+                const ym = `${y}-${String(i + 1).padStart(2, '0')}`;
+                return (
                   <button
                     type="button"
                     key={i}
                     className={`dp-month ${i + 1 === m ? 'sel' : ''}`}
                     onClick={() => {
-                      setMonth(`${y}-${String(i + 1).padStart(2, '0')}`);
+                      setMonth(ym);
                       setMode('day');
                     }}
                   >
-                    {monthLabel(`${y}-${String(i + 1).padStart(2, '0')}`, { year: false })}
+                    {monthLabel(ym, { year: false })}
                   </button>
-                ))}
-              </div>
-            )}
-            <div className="dp-foot">
-              <button type="button" className="btn plain" onClick={() => pick(today)}>
-                {t('common.today')}
-              </button>
-              {clearable && value && (
-                <button
-                  type="button"
-                  className="btn plain"
-                  onClick={() => {
-                    onChange(undefined);
-                    setOpen(false);
-                  }}
-                >
-                  {t('common.clear')}
-                </button>
-              )}
+                );
+              })}
             </div>
-          </>
+          )}
+          <div className="dp-foot">
+            <button type="button" className="btn plain" onClick={() => pick(today)}>
+              {t('common.today')}
+            </button>
+            {clearable && value && (
+              <button
+                type="button"
+                className="btn plain"
+                onClick={() => {
+                  onChange(undefined);
+                  setOpen(false);
+                }}
+              >
+                {t('common.clear')}
+              </button>
+            )}
+          </div>
         </Pop>
       )}
     </>

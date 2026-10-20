@@ -8,11 +8,10 @@ const MOBILE = 560;
 /**
  * 选择器共用的弹出层（react-aria）：宽屏是挂在按钮旁的 Popover，自动翻转、跟随滚动；窄屏是贴底的面板，带遮罩。
  * 点外面、按 Esc 关闭，焦点留在弹层里、关闭后回到按钮；放在弹窗（Sheet）里也能正确叠放。
- * className 给到盒子本身（.dp-pop 系列样式）；style 只用于宽屏（窄屏高度交给样式表）。
+ * 由调用方按需挂载（挂上即打开）。className 给到盒子本身（.dp-pop 系列样式）；style 只用于宽屏（窄屏高度交给样式表）。
  */
 export function Pop({
   triggerRef,
-  open,
   onClose,
   label,
   className = '',
@@ -21,7 +20,6 @@ export function Pop({
   children,
 }: {
   triggerRef: RefObject<HTMLElement | null>;
-  open: boolean;
   onClose: () => void;
   label: string;
   className?: string;
@@ -34,7 +32,7 @@ export function Pop({
   const change = (o: boolean) => !o && onClose();
   if (mobile)
     return (
-      <ModalOverlay className="dp-scrim" isOpen={open} onOpenChange={change} isDismissable>
+      <ModalOverlay className="dp-scrim" isOpen onOpenChange={change} isDismissable>
         <Modal className="pop-shell">
           <Dialog aria-label={label} className={`dp-pop mobile ${className}`}>
             {children}
@@ -43,7 +41,7 @@ export function Pop({
       </ModalOverlay>
     );
   return (
-    <Popover className="pop-shell" triggerRef={triggerRef} isOpen={open} onOpenChange={change} placement={placement} offset={6} containerPadding={8}>
+    <Popover className="pop-shell" triggerRef={triggerRef} isOpen onOpenChange={change} placement={placement} offset={6} containerPadding={8}>
       <Dialog aria-label={label} className={`dp-pop ${className}`} style={style}>
         {children}
       </Dialog>

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { addMonths, diffDays } from '../../shared/billing.ts';
 import { monthLabel } from '../../shared/format.ts';
+import { useWidth } from '../components/ui.tsx';
 
 export interface ChartPoint {
   date: string;
@@ -23,6 +24,9 @@ export interface ChartLane {
 const PAD_L = 44;
 const PAD_R = 14;
 const LANE = 24;
+/** 曲线区高度与顶部留白 */
+const H = 200;
+const T = 10;
 
 /** 刻度取 1、2、2.5、5 × 10ⁿ，让 4 格左右正好盖住最大值 */
 function niceStep(max: number) {
@@ -36,7 +40,11 @@ function smooth(pts: Array<[number, number]>) {
   if (pts.length < 3) return pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x},${y}`).join('');
   const n = pts.length;
   const d = pts.slice(1).map(([x, y], i) => (y - pts[i][1]) / (x - pts[i][0] || 1));
-  const m = pts.map((_, i) => (i === 0 ? d[0] : i === n - 1 ? d[n - 2] : d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2));
+  const m = pts.map((_, i) => {
+    if (i === 0) return d[0];
+    if (i === n - 1) return d[n - 2];
+    return d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+  });
   for (let i = 0; i < n - 1; i++) {
     if (d[i] === 0) {
       m[i] = m[i + 1] = 0;
@@ -70,23 +78,14 @@ export function ChargeChart({
   fmt,
   lanes,
   tip,
-  height = 200,
 }: {
   points: ChartPoint[];
   fmt: (v: number) => string;
   lanes: ChartLane[];
   tip: (i: number) => ReactNode;
-  height?: number;
 }) {
-  const box = useRef<HTMLDivElement>(null);
-  const [w, setW] = useState(0);
+  const [box, w] = useWidth();
   const [hover, setHover] = useState<number | null>(null);
-  useLayoutEffect(() => {
-    const el = box.current!;
-    const ro = new ResizeObserver(() => setW(el.clientWidth));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const from = points[0].date;
   const to = points[points.length - 1].date;
@@ -96,8 +95,6 @@ export function ChargeChart({
   const max = Math.max(...points.map((p) => Math.max(p.v, p.list ?? 0))) || 1;
   const step = niceStep(max * 1.08);
   const top = Math.ceil((max * 1.08) / step) * step;
-  const T = 10;
-  const H = height;
   const y = (v: number) => T + (1 - v / top) * (H - T - 6);
   const ticks = Array.from({ length: Math.round(top / step) + 1 }, (_, i) => i * step);
 
@@ -169,7 +166,7 @@ export function ChargeChart({
           {nLanes > 0 && (
             <div className="cc-lanes" style={{ height: nLanes * LANE + 4, marginLeft: PAD_L, marginRight: PAD_R }}>
               {lanes.map((l) => {
-                const a = Math.max(PAD_L, x(l.from < from ? from : l.from));
+                const a = Math.max(PAD_L, x(l.from));
                 const b = Math.min(w - PAD_R, x(l.to > to ? to : l.to));
                 return (
                   <div

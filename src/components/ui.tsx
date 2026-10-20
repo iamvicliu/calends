@@ -1,6 +1,6 @@
 import type { ReactNode as ComponentChildren, JSX } from 'react';
 import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
@@ -48,12 +48,6 @@ const P: Record<string, JSX.Element> = {
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </>
   ),
-  tag: (
-    <>
-      <path d="M3 12V4.5A1.5 1.5 0 0 1 4.5 3H12l9 9-9 9z" />
-      <circle cx="7.5" cy="7.5" r="1.3" />
-    </>
-  ),
   plus: <path d="M12 5v14M5 12h14" />,
   menu: <path d="M4 7h16M4 12h10M4 17h16" />,
   compose: <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M18.4 3.6a2 2 0 0 1 2.8 2.8L12 15.6l-3.6.8.8-3.6z" />,
@@ -91,35 +85,18 @@ const P: Record<string, JSX.Element> = {
   ),
   // 代付：一来一回
   swap: <path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7" />,
-  moon: <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />,
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-    </>
-  ),
   left: <path d="m15 18-6-6 6-6" />,
   'sort-asc': <path d="m3 8 4-4 4 4M7 4v16M11 12h4M11 16h7M11 20h10" />,
   'sort-desc': <path d="m3 16 4 4 4-4M7 20V4M11 4h10M11 8h7M11 12h4" />,
   right: <path d="m9 18 6-6-6-6" />,
   down: <path d="m6 9 6 6 6-6" />,
   receipt: <path d="M6 2.5h12v19l-3-2-3 2-3-2-3 2zM9 7.5h6M9 11.5h6M9 15.5h3" />,
-  mail: (
-    <>
-      <rect x="3" y="5" width="18" height="14" rx="2.5" />
-      <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
-    </>
-  ),
   link: <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   download: <path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 20h16" />,
-  upload: <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 20h16" />,
   edit: <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16zM13.5 6.5l4 4" />,
-  pause: <path d="M8.5 5v14M15.5 5v14" />,
-  play: <path d="M7 4.5v15l12-7.5z" />,
   bell: <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0" />,
   leaf: <path d="M5 19c0-8 5-13 15-14-1 10-6 15-14 15M5 19l7-7" />,
-  archive: <path d="M3.5 4.5h17v4h-17zM5 8.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5M10 12.5h4" />,
   sidebar: (
     <>
       <rect x="3" y="4" width="18" height="16" rx="3" />
@@ -139,12 +116,6 @@ const P: Record<string, JSX.Element> = {
     </>
   ),
   share: <path d="M12 3v12M8 7l4-4 4 4M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />,
-  globe: (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3z" />
-    </>
-  ),
 };
 
 export function Icon({ name, size }: { name: keyof typeof P | string; size?: number }) {
@@ -194,6 +165,10 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   const raw = icon || faviconOf(sub.url);
   const src = raw && proxied && /^https?:/.test(raw) ? `/api/img?u=${encodeURIComponent(raw)}` : raw;
   if (src && !failed.has(src)) {
+    const fail = () => {
+      failed.add(src);
+      force((n) => n + 1);
+    };
     return (
       // 目录里的 AI 标是透明底的矢量图，按站点图标那样放在白底上
       <span className={`ico ${icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
@@ -204,16 +179,9 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
           referrerPolicy="no-referrer"
           onLoad={(e) => {
             // Google 对未知域名返回 16px 的地球占位图
-            const img = e.currentTarget as HTMLImageElement;
-            if (!icon && img.naturalWidth <= 16) {
-              failed.add(src);
-              force((n) => n + 1);
-            }
+            if (!icon && e.currentTarget.naturalWidth <= 16) fail();
           }}
-          onError={() => {
-            failed.add(src);
-            force((n) => n + 1);
-          }}
+          onError={fail}
         />
       </span>
     );
@@ -262,9 +230,7 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
   const f = flag(methodRegion(m));
   // 小圆标优先用银行图标集（专为小尺寸设计）；其余用自定义 / 平台 / 官网 logo
   const logo = bank ? undefined : methodLogo(m);
-  const onColor = BRANDS.find((b) => b.key === brand)?.onColor;
-  // 白色 logo 放在卡面色上，彩色 logo 放在白底上
-  const bg = bank || brand === 'appstore' ? undefined : onColor ? KIND_BG[m.kind] : logo ? (m.color && m.logo ? m.color : '#fff') : m.color || KIND_BG[m.kind];
+  const bg = bank || brand === 'appstore' ? undefined : markBg(m, logo, BRANDS.find((b) => b.key === brand)?.onColor);
   const style = { '--s': `${size}px`, background: bg } as Record<string, string>;
   return (
     <span className={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
@@ -280,6 +246,13 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
       {f && <em className="mm-flag">{f}</em>}
     </span>
   );
+}
+
+/** 标记底色：白色 logo 放在卡面色上，彩色 logo 放在白底上 */
+function markBg(m: PaymentMethod, logo: string | undefined, onColor: boolean | undefined): string {
+  if (onColor) return KIND_BG[m.kind];
+  if (logo) return m.color && m.logo ? m.color : '#fff';
+  return m.color || KIND_BG[m.kind];
 }
 
 /** 卡组织标：Visa、Mastercard、银联… */
@@ -369,14 +342,14 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
 }
 
 // ---------- 弹层 ----------
+/** 打开中的弹窗，后开的在上面 */
+const openSheets: object[] = [];
+
 /**
  * 弹窗（react-aria Modal）：宽屏居中，窄屏贴底。点遮罩、按 Esc 关闭，多层叠放时只关最上面那层；
  * 打开期间焦点留在弹窗里、背景不滚动，关闭后焦点回到打开它的按钮。
  * 没有标题（bare）时用 label 作为读屏名称。
  */
-/** 打开中的弹窗，后开的在上面 */
-const openSheets: object[] = [];
-
 export function Sheet(props: {
   title?: ComponentChildren;
   label?: string;
@@ -445,6 +418,19 @@ export function Toasts() {
       toastOptions={{ className: 'ledger-toast' }}
     />
   );
+}
+
+/** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
+export function useWidth<T extends HTMLElement = HTMLDivElement>() {
+  const ref = useRef<T>(null);
+  const [w, setW] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current!;
+    const ro = new ResizeObserver(() => setW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w] as const;
 }
 
 // ---------- 悬浮提示 ----------

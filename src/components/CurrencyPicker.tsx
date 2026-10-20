@@ -38,10 +38,13 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
     list.current?.querySelector<HTMLElement>(`[data-i="${hi}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [hi, open]);
 
-  const pick = (v: string) => {
-    onChange(v);
+  const close = () => {
     setOpen(false);
     setQ('');
+  };
+  const pick = (v: string) => {
+    onChange(v);
+    close();
   };
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') setHi((i) => Math.min(flat.length - 1, i + 1));
@@ -66,24 +69,14 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
       >
         <Icon name="coins" />
         <span>{t('picker.ccy.label')}</span>
-        <small>{orig ? t('picker.ccy.orig') : `${ccyName(value)}`}</small>
+        <small>{orig ? t('picker.ccy.orig') : ccyName(value)}</small>
       </button>
       {open && (
-        <Pop
-          triggerRef={btn}
-          open
-          onClose={() => {
-            setOpen(false);
-            setQ('');
-          }}
-          label={t('picker.ccy.label')}
-          className="cp-pop"
-          placement="right bottom"
-        >
+        <Pop triggerRef={btn} onClose={close} label={t('picker.ccy.label')} className="cp-pop" placement="right bottom">
           <div className="pk-in" onKeyDown={onKey}>
             <label className="cp-search">
               <Icon name="search" />
-              <input autoFocus value={q} placeholder={t('picker.ccy.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
+              <input autoFocus value={q} placeholder={t('picker.ccy.search')} onChange={(e) => setQ(e.target.value)} />
             </label>
             <div className="cp-list" ref={list} role="listbox" aria-label={t('picker.ccy.label')}>
               {sections.map((s) => (
