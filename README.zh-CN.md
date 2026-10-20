@@ -17,6 +17,13 @@
   <a href="README.md">English</a>
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/overview.zh-CN.png" alt="Calends 概览" width="880" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/timeline.zh-CN.png" alt="时间轴视图" width="880" />
+</p>
+
 ---
 
 > Calends 是罗马历每个月的第一天，那天结清账目、收回欠款；英文的 calendar（日历）就由它而来。

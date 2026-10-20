@@ -17,6 +17,13 @@
   <a href="README.zh-CN.md">简体中文</a>
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/overview.png" alt="Calends overview" width="880" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/timeline.png" alt="Timeline view" width="880" />
+</p>
+
 ---
 
 > _Calends_ were the first day of every Roman month — the day accounts were settled and debts called in. It's also where the word _calendar_ comes from.
