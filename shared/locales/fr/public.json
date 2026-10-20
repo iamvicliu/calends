@@ -69,5 +69,10 @@
     "perMonthEq": "Par mois"
   },
   "titleAnon": "Abonnements",
-  "poweredBy": "Fait avec {app}"
+  "poweredBy": "Fait avec {app}",
+  "pile": {
+    "label": "Tes abonnements en pile — plus l’icône est grande, plus il coûte",
+    "hint": "Touche une icône pour la faire disparaître · recharge pour les retrouver",
+    "empty": "Tout est dégagé ! Recharge la page pour les retrouver."
+  }
 }

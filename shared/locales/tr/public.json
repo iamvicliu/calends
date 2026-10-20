@@ -69,5 +69,10 @@
     "perMonthEq": "Aylık karşılığı"
   },
   "titleAnon": "Abonelikler",
-  "poweredBy": "{app} ile yapıldı"
+  "poweredBy": "{app} ile yapıldı",
+  "pile": {
+    "label": "Abonelik yığını: simge büyüdükçe aylık maliyet artar",
+    "hint": "Bir simgeye dokunun, kaybolsun · geri getirmek için sayfayı yenileyin",
+    "empty": "Hepsi temizlendi! Geri getirmek için sayfayı yenileyin."
+  }
 }

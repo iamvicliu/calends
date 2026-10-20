@@ -69,5 +69,10 @@
     "perMonthEq": "Pro Monat"
   },
   "titleAnon": "Abos",
-  "poweredBy": "Erstellt mit {app}"
+  "poweredBy": "Erstellt mit {app}",
+  "pile": {
+    "label": "Deine Abos als Stapel – je größer, desto teurer",
+    "hint": "Tippe auf ein Symbol, um es verschwinden zu lassen · neu laden bringt alle zurück",
+    "empty": "Alles weg! Neu laden bringt sie zurück."
+  }
 }

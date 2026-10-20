@@ -69,5 +69,10 @@
     "perMonthEq": "Al mes"
   },
   "titleAnon": "Suscripciones",
-  "poweredBy": "Hecho con {app}"
+  "poweredBy": "Hecho con {app}",
+  "pile": {
+    "label": "Tus suscripciones apiladas: cuanto más grande, más cuesta",
+    "hint": "Toca un icono para hacerlo desaparecer · recarga para recuperarlos",
+    "empty": "¡Todo despejado! Recarga para recuperarlos."
+  }
 }

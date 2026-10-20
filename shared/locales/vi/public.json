@@ -67,5 +67,10 @@
     "perMonthEq": "Mỗi tháng"
   },
   "titleAnon": "Gói đăng ký",
-  "poweredBy": "Tạo bằng {app}"
+  "poweredBy": "Tạo bằng {app}",
+  "pile": {
+    "label": "Đống gói đăng ký: biểu tượng càng lớn, mỗi tháng càng tốn",
+    "hint": "Chạm vào biểu tượng để làm nó biến mất · tải lại trang để đưa chúng trở lại",
+    "empty": "Đã dọn sạch! Tải lại trang để đưa chúng trở lại."
+  }
 }

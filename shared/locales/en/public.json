@@ -69,5 +69,10 @@
     "perMonthEq": "Per month"
   },
   "titleAnon": "Subscriptions",
-  "poweredBy": "Made with {app}"
+  "poweredBy": "Made with {app}",
+  "pile": {
+    "label": "Your subscriptions, piled up — bigger icons cost more",
+    "hint": "Tap an icon to pop it · refresh to bring them back",
+    "empty": "All cleared! Refresh to bring them back."
+  }
 }

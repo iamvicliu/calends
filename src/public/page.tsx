@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/public/components/ui
 import { TooltipProvider } from '@/public/components/ui/tooltip';
 import { cn } from '@/public/lib/utils';
 import { PROJECT_NAME, PROJECT_URL } from '../../shared/brand.ts';
+import { IconPile } from './components/icon-pile.tsx';
 
 /** 公开页可切换的币种：本位币，和（本位币不是美元时）美元 */
 type Ccy = string;
@@ -310,7 +311,12 @@ function Ledger({ state }: { state: AppState }) {
         </div>
       </div>
 
-      <footer className="mt-10 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:justify-between">
+      {/* 底部的订阅堆：每个正在付费的订阅一个图标，越贵越大 */}
+      <div className="mt-12">
+        <IconPile items={d.live.filter((x) => x.v > 0)} />
+      </div>
+
+      <footer className="mt-8 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:justify-between">
         <span>{t('public.footer')}</span>
         <a href={PROJECT_URL} className="underline decoration-border underline-offset-4 hover:text-foreground">
           {t('public.poweredBy', { app: PROJECT_NAME })}

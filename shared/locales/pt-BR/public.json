@@ -69,5 +69,10 @@
     "perMonthEq": "Por mês"
   },
   "titleAnon": "Assinaturas",
-  "poweredBy": "Feito com {app}"
+  "poweredBy": "Feito com {app}",
+  "pile": {
+    "label": "Suas assinaturas empilhadas — quanto maior, mais custa",
+    "hint": "Toque em um ícone para sumir com ele · recarregue para trazê-los de volta",
+    "empty": "Tudo limpo! Recarregue para trazê-los de volta."
+  }
 }

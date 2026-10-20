@@ -63,5 +63,10 @@
     "perMonthEq": "折合每月"
   },
   "titleAnon": "订阅一览",
-  "poweredBy": "由 {app} 驱动"
+  "poweredBy": "由 {app} 驱动",
+  "pile": {
+    "label": "订阅堆：图标越大，每月花得越多",
+    "hint": "点一下图标让它消失 · 刷新页面就会回来",
+    "empty": "全都清空了！刷新页面它们会回来。"
+  }
 }
