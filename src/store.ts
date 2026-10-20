@@ -245,9 +245,11 @@ export function saveMethod(m: PaymentMethod) {
 }
 
 export async function deleteMethod(id: string) {
-  const linked = store.state!.subscriptions.filter((s) => s.methodId === id);
+  // 订阅本身和它的各个阶段都可能引用这张卡，一并清掉
+  const linked = store.state!.subscriptions.filter((s) => s.methodId === id || s.phases?.some((p) => p.methodId === id));
   await optimistic((s) => ({ ...s, methods: s.methods.filter((x) => x.id !== id) }), () => api(`/api/methods/${id}`, { method: 'DELETE' }));
-  for (const s of linked) await saveSub({ ...s, methodId: undefined });
+  for (const s of linked)
+    await saveSub({ ...s, methodId: s.methodId === id ? undefined : s.methodId, phases: s.phases?.map((p) => (p.methodId === id ? { ...p, methodId: undefined } : p)) });
 }
 
 export function saveSettings(patch: Partial<Settings>) {
