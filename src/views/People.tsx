@@ -119,7 +119,7 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   const current = open ? book.find((l) => (l.person.id || l.person.name) === open) : undefined;
   return (
     <>
-      <Toolbar title={t('people.title')}>
+      <Toolbar title={t('family.pool.title')}>
         <FamilyTabs tab="people" />
       </Toolbar>
       <div className="page fade-in stack">
