@@ -63,6 +63,7 @@ export function List({
   const [filter, setFilter] = useState<Filter>(category ? 'all' : 'live');
   const [cat, setCat] = useState<string>(category ?? 'all');
   const [pay, setPay] = useState<string>('all');
+  const [q, setQ] = useState('');
   useEffect(() => setCat(category ?? 'all'), [category]);
   // 排序与方向记在本机；切换到另一种排序时用它的默认方向，再点同一种则反转
   const [sort, setSortRaw] = useState<Sort>(() => {
@@ -126,7 +127,13 @@ export function List({
   // 代付是替别人付的，不进「全部订阅」，在「代付」页单独管
   const mine = state.subscriptions.filter((s) => !s.proxy);
   const payOf = (s: Subscription) => currentPhase(s, today).methodId ?? 'none';
+  // 搜索也是一个筛选条件：名称、分类、标签、备注、地区、支付方式、网址都能搜，各维度的计数随之变化
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const methodName = new Map(state.methods.map((m) => [m.id, m.name]));
+  const haystack = (s: Subscription) =>
+    [s.name, s.category, ...s.tags, s.notes, s.region, s.url, methodName.get(payOf(s))].filter(Boolean).join(' ').toLowerCase();
   const hit = (s: Subscription, skip?: 'status' | 'cat' | 'pay') => {
+    if (words.length && !words.every((w) => haystack(s).includes(w))) return false;
     if (skip !== 'status' && filter !== 'all' && statusOf(effectiveStatus(s, today)) !== filter) return false;
     if (skip !== 'cat' && cat !== 'all' && s.category !== cat) return false;
     if (skip !== 'pay' && pay !== 'all' && payOf(s) !== pay) return false;
@@ -151,7 +158,7 @@ export function List({
   const cats = categories()
     .map((c) => c.name)
     .filter((c) => mine.some((s) => s.category === c));
-  const dirty = filter !== 'live' || cat !== (category ?? 'all') || pay !== 'all';
+  const dirty = filter !== 'live' || cat !== (category ?? 'all') || pay !== 'all' || !!q;
   const mo = (s: Subscription) => monthlyMine(state, s, today);
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
@@ -177,6 +184,22 @@ export function List({
         title={category ?? t('list.title')}
         sub={t('list.summary', { count: rows.length, monthly: money(sum, base, { compact: true }), yearly: money(sum * 12, base, { compact: true }) })}
       >
+        <label className="tb-search">
+          <Icon name="search" />
+          <input
+            type="search"
+            value={q}
+            placeholder={t('list.search')}
+            aria-label={t('list.search')}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === 'Escape' && q && (e.stopPropagation(), setQ(''))}
+          />
+          {q && (
+            <button type="button" className="tb-search-x" onClick={() => setQ('')} aria-label={t('common.clear')}>
+              <Icon name="x" size={14} />
+            </button>
+          )}
+        </label>
         <Seg
           small
           value={view}
@@ -225,6 +248,7 @@ export function List({
                 setFilter('live');
                 setCat(category ?? 'all');
                 setPay('all');
+                setQ('');
               }}
             >
               {t('list.clear')}

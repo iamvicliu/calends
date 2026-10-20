@@ -281,7 +281,8 @@ a {
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 8px 16px;
   min-height: 56px;
   padding: 10px 28px;
   background: var(--glass);
@@ -289,8 +290,9 @@ a {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 0.5px solid var(--sep);
 }
+/* 标题至少留出一段宽度；放不下时操作按钮整体换到下一行，而不是把标题挤成竖排 */
 .tb-title {
-  min-width: 0;
+  min-width: min(220px, 100%);
   flex: 1;
 }
 .tb-title h1 {
@@ -307,12 +309,63 @@ a {
   color: var(--label-2);
   margin-top: 1px;
 }
+/* 工具栏里的搜索框：胶囊形，高度与分段控件一致 */
+.tb-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 200px;
+  min-width: 120px;
+  height: 34px;
+  padding: 0 6px 0 12px;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--label-3);
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+.tb-search:focus-within {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.tb-search .i {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.tb-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--label);
+  font: inherit;
+  font-size: 13.5px;
+}
+.tb-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.tb-search-x {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-2);
+  cursor: pointer;
+}
 .tb-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
   flex-wrap: wrap;
+  margin-left: auto;
 }
 .page {
   padding: 24px 28px 48px;
@@ -2753,6 +2806,11 @@ select.btn {
   }
   .tb-actions:empty {
     display: none;
+  }
+  .tb-search {
+    order: -1;
+    flex-basis: 100%;
+    height: 38px;
   }
   .tb-actions .seg {
     flex: 1;

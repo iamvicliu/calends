@@ -2,6 +2,7 @@
   "overlap": {
     "note": "{what} 并行至 {date}"
   },
+  "search": "搜索订阅",
   "title": "全部订阅",
   "all": "全部",
   "summary": "{count} 项 · 每月 {monthly} · 每年 {yearly}",
