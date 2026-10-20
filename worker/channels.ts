@@ -1,8 +1,9 @@
 // 通知渠道：同一份提醒，按各家机器人 / 推送服务的格式发出去。
 // 邮件依赖 Cloudflare Email Sending；没有的话，Telegram、飞书、钉钉、企业微信、Bark、ntfy、Server酱、Discord、Slack、通用 Webhook 任选。
+import { esc } from '../shared/format.ts';
 import type { Channel } from '../shared/types.ts';
 import type { Env } from './env.ts';
-import type { Digest } from './notify.ts';
+import { renderEmail, type Digest } from './notify.ts';
 
 /** 纯文本：Telegram（HTML 前的回退）、Bark、ntfy 等用 */
 export function toText(d: Digest, siteUrl: string): string {
@@ -17,8 +18,8 @@ export function toText(d: Digest, siteUrl: string): string {
 }
 
 /** Markdown：飞书卡片、钉钉、企业微信、Discord、Server酱 */
-export function toMarkdown(d: Digest, siteUrl: string, opts: { bold?: string } = {}): string {
-  const b = (s: string) => (opts.bold === '' ? s : `**${s}**`);
+export function toMarkdown(d: Digest, siteUrl: string): string {
+  const b = (s: string) => `**${s}**`;
   const out = [d.intro, ''];
   for (const s of d.sections) {
     out.push(b(s.heading));
@@ -28,8 +29,6 @@ export function toMarkdown(d: Digest, siteUrl: string, opts: { bold?: string } =
   out.push(`[打开订阅账本](${siteUrl}/admin)`);
   return out.join('\n').trim();
 }
-
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** Telegram 的 HTML 子集 */
 function toTelegram(d: Digest, siteUrl: string): string {
@@ -73,7 +72,6 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
   switch (c.kind) {
     case 'email': {
       const to = need(c, 'to', '收件邮箱');
-      const { renderEmail } = await import('./notify.ts');
       const { html, text } = renderEmail(d, site);
       await env.EMAIL.send({ from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME }, to, subject: d.subject, text, html });
       return;
