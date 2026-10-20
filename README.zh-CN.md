@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://calends.dev">在线演示</a> ·
+  <a href="https://calends.date">在线演示</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#ai-与-mcp">AI 与 MCP</a> ·
   <a href="README.md">English</a>
