@@ -65,7 +65,7 @@ interface Ctx {
 }
 
 const STATUS_TEXT: Record<string, string> = { active: '订阅中', ending: '到期不续', trial: '试用中', paused: '已暂停', ended: '已退订', lifetime: '已买断', upcoming: '即将开始' };
-const changeText = (st: Story, m: Ctx['m']) =>
+const changeText = (st: Story) =>
   st.change == null ? `换过 ${st.vs.length - 1} 次` : Math.abs(st.change) < 0.005 ? '价格没变过' : `${st.change > 0 ? '涨了' : '降了'} ${Math.round(Math.abs(st.change) * 100)}%`;
 
 /** 单个订阅的分享图 */
@@ -116,7 +116,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         </div>
         <div>
           <small>价格</small>
-          <b>{changeText(st, m)}</b>
+          <b>{changeText(st)}</b>
         </div>
         <div>
           <small>{hide ? '阶段' : '扣款'}</small>
@@ -185,7 +185,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
       </div>
       <div class="rc-kv">
         <span>价格</span>
-        <span>{changeText(st, m)}</span>
+        <span>{changeText(st)}</span>
       </div>
       <div class="rc-cut" />
       <div class="rc-bars">
@@ -258,13 +258,13 @@ function SPoster({ sub, st, hide, m }: Ctx) {
       <div class="sp-k">陪伴了</div>
       <div class="sp-big">{st.duration}</div>
       <div class="sp-line">
-        {hide ? `${st.charges.length} 次扣款 · ${changeText(st, m)}` : `一共 ${m(st.total)} · 平均每天 ${m(st.perDay)}`}
+        {hide ? `${st.charges.length} 次扣款 · ${changeText(st)}` : `一共 ${m(st.total)} · 平均每天 ${m(st.perDay)}`}
       </div>
       <div class="sp-chips">
         <span>{STATUS_TEXT[st.status]}</span>
         {st.gaps.length > 0 && <span>断过 {st.gaps.length} 次</span>}
         {st.vs.length > 1 && <span>换过 {st.vs.length - 1} 次</span>}
-        {st.change != null && <span>{changeText(st, m)}</span>}
+        {st.change != null && <span>{changeText(st)}</span>}
       </div>
       <div class="sp-foot">calends.example.com</div>
     </div>
@@ -294,7 +294,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
         ))}
       </div>
       <div class="sy-foot">
-        <span>{st.charges.length} 次扣款 · {changeText(st, m)}</span>
+        <span>{st.charges.length} 次扣款 · {changeText(st)}</span>
         <span>calends.example.com</span>
       </div>
     </div>

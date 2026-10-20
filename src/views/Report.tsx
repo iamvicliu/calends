@@ -169,7 +169,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
         </div>
       </div>
       <div class="wf">
-        {steps.map((s, i) => {
+        {steps.map((s) => {
           let bottom = 0;
           let h = 0;
           if (s.kind === 'total') {

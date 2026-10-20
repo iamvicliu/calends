@@ -33,7 +33,7 @@ function iconUrl(s: Subscription): string | undefined {
   return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : undefined;
 }
 
-export function List({ state, today, onOpen, onEdit, onAdd, category }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onEdit: (s: Subscription) => void; onAdd: () => void; category?: string }) {
+export function List({ state, today, onOpen, onAdd, category }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onAdd: () => void; category?: string }) {
   const [filter, setFilter] = useState<Filter>(category ? 'all' : 'live');
   const [cat, setCat] = useState<string>(category ?? 'all');
   const [pay, setPay] = useState<string>('all');

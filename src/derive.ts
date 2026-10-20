@@ -1,4 +1,4 @@
-import { addDays, addMonths, chargesBetween, convert, effectiveStatus, myShareFactor, parseDay, type Charge } from '../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, convert, effectiveStatus, parseDay, type Charge } from '../shared/billing.ts';
 import { chargeValue } from '../shared/fx.ts';
 import { flag } from '../shared/format.ts';
 import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../shared/types.ts';
@@ -49,7 +49,7 @@ export const KIND_BG: Record<MethodKind, string> = {
  * 平台品牌：这几类支付方式本身就是一个平台，选了类型就自动用它的 logo。
  * 其余的（银行卡从银行列表选；加密卡、商家余额、运营商等）由用户自己设 logo，不在代码里写死某一家。
  */
-export interface Brand {
+interface Brand {
   key: string;
   name: string;
   logo: string;
@@ -66,7 +66,7 @@ export const BRANDS: Brand[] = [
 ];
 
 /** 卡面品牌 logo */
-export const BRAND_LOGO: Record<string, string> = Object.fromEntries(BRANDS.map((b) => [b.key, b.logo]));
+const BRAND_LOGO: Record<string, string> = Object.fromEntries(BRANDS.map((b) => [b.key, b.logo]));
 
 /** 平台品牌（只按类型认） */
 export function brandOf(m: Pick<PaymentMethod, 'kind'>): string | undefined {
@@ -130,94 +130,12 @@ export function toBase(state: AppState, amount: number, ccy: string): number {
   return Number.isFinite(v) ? v : 0;
 }
 
-export interface MonthBucket {
-  key: string; // YYYY-MM
-  total: number;
-  byCat: Record<string, number>;
-  projected: boolean;
-  count: number;
-}
-
 /** 区间内的扣款。默认不含代付（那是替别人付的，不算我的支出）；日历等需要看卡上实际扣款时传 withProxy */
 export function allCharges(state: AppState, from: string, to: string, today: string, withProxy = false): Charge[] {
   return state.subscriptions
     .filter((s) => withProxy || !s.proxy)
     .flatMap((s) => chargesBetween(s, from, to, today))
     .sort((a, b) => a.date.localeCompare(b.date));
-}
-
-export function monthSeries(state: AppState, today: string, back = 23, fwd = 12): MonthBucket[] {
-  const first = addMonths(today.slice(0, 8) + '01', -back);
-  const last = addMonths(today.slice(0, 8) + '01', fwd + 1);
-  const map = new Map<string, MonthBucket>();
-  for (let i = 0; i <= back + fwd; i++) {
-    const k = addMonths(first, i).slice(0, 7);
-    map.set(k, { key: k, total: 0, byCat: {}, projected: k > today.slice(0, 7), count: 0 });
-  }
-  for (const c of allCharges(state, first, last, today)) {
-    const b = map.get(c.date.slice(0, 7));
-    if (!b) continue;
-    const v = chargeValue(state, c);
-    b.total += v;
-    b.count++;
-    b.byCat[c.sub.category] = (b.byCat[c.sub.category] ?? 0) + v;
-  }
-  return [...map.values()];
-}
-
-export function earliest(state: AppState): string | undefined {
-  return state.subscriptions.reduce<string | undefined>((m, s) => (!m || s.start < m ? s.start : m), undefined);
-}
-
-export function lifetimeByYear(state: AppState, today: string) {
-  const start = earliest(state);
-  if (!start) return [];
-  const yearEnd = today.slice(0, 4) + '-12-31';
-  const rows = new Map<string, { year: string; paid: number; projected: number; count: number }>();
-  for (const c of allCharges(state, start, yearEnd, today)) {
-    const y = c.date.slice(0, 4);
-    const r = rows.get(y) ?? { year: y, paid: 0, projected: 0, count: 0 };
-    const v = chargeValue(state, c);
-    if (c.projected) r.projected += v;
-    else {
-      r.paid += v;
-      r.count++;
-    }
-    rows.set(y, r);
-  }
-  return [...rows.values()].sort((a, b) => a.year.localeCompare(b.year));
-}
-
-export function spentSince(state: AppState, from: string, today: string) {
-  let total = 0;
-  let count = 0;
-  const byCcy: Record<string, number> = {};
-  for (const c of allCharges(state, from, today, today)) {
-    total += chargeValue(state, c);
-    byCcy[c.currency] = (byCcy[c.currency] ?? 0) + c.amount;
-    count++;
-  }
-  return { total, count, byCcy };
-}
-
-/** 按分组聚合每月成本（我承担的部分） */
-export function breakdown(state: AppState, today: string, key: (s: Subscription) => string) {
-  const map = new Map<string, { key: string; mrr: number; count: number }>();
-  for (const s of liveSubs(state, today)) {
-    if (effectiveStatus(s, today) === 'trial') continue;
-    const k = key(s);
-    const r = map.get(k) ?? { key: k, mrr: 0, count: 0 };
-    r.mrr += toBase(state, (s.price * 30.4375) / cycleDaysSafe(s), s.currency) * myShareFactor(s);
-    r.count++;
-    map.set(k, r);
-  }
-  return [...map.values()].sort((a, b) => b.mrr - a.mrr);
-}
-
-function cycleDaysSafe(s: Subscription): number {
-  const c = s.cycle;
-  if (c.unit === 'lifetime') return Infinity;
-  return { day: 1, week: 7, month: 30.4375, year: 365.25 }[c.unit] * c.every;
 }
 
 export function domainOf(url?: string): string | undefined {
@@ -230,8 +148,6 @@ export function domainOf(url?: string): string | undefined {
 }
 
 export type Period = 'day' | 'week' | 'month' | 'year';
-export const PERIOD_LABEL: Record<Period, string> = { day: '今日', week: '本周', month: '本月', year: '今年' };
-export const PERIOD_UNIT: Record<Period, string> = { day: '日', week: '周', month: '月', year: '年' };
 
 /** 当前周期向前/后偏移 offset 个周期的 [from, to]（含两端） */
 export function periodRange(p: Period, today: string, offset = 0): [string, string] {

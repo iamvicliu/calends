@@ -8,7 +8,7 @@ import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../comp
 import { toBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
 
-export function Carpool({ state, today, onOpen, onEdit }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onEdit: (s: Subscription) => void }) {
+export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused'].includes(effectiveStatus(s, today));
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));

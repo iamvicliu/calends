@@ -379,20 +379,20 @@ function App() {
   const viewing = state.subscriptions.find((s) => s.id === viewId);
 
   let view;
-  if (route.startsWith('cat/')) view = <List key={route} state={state} today={d} onOpen={open} onEdit={edit} onAdd={add} category={route.slice(4)} />;
+  if (route.startsWith('cat/')) view = <List key={route} state={state} today={d} onOpen={open} onAdd={add} category={route.slice(4)} />;
   else
     switch (route) {
       case 'calendar':
         view = <Calendar state={state} today={d} onOpen={open} onIcs={() => setIcs(true)} />;
         break;
       case 'list':
-        view = <List key="all" state={state} today={d} onOpen={open} onEdit={edit} onAdd={add} />;
+        view = <List key="all" state={state} today={d} onOpen={open} onAdd={add} />;
         break;
       case 'wallet':
         view = <Wallet state={state} today={d} onOpen={open} />;
         break;
       case 'family':
-        view = <Carpool state={state} today={d} onOpen={open} onEdit={edit} />;
+        view = <Carpool state={state} today={d} onOpen={open} />;
         break;
       case 'behalf':
         view = <ProxyPage state={state} today={d} onOpen={open} />;
