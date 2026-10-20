@@ -10,6 +10,7 @@ import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { TOOLS } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
+import { requestLocale, settingsLocale, useLocale } from './i18n.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
@@ -252,6 +253,11 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     try {
+      // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
+      if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
+        const s = await getSettings(env);
+        useLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+      }
       if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
       if (url.pathname === '/mcp') return await mcp(req, env);
       const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
@@ -274,7 +280,9 @@ export default {
     if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
       ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
     }
-    const log = await runScheduled(env, await loadState(env));
+    const state = await loadState(env);
+    useLocale(settingsLocale(state.settings));
+    const log = await runScheduled(env, state);
     if (log.length) console.log('[notify]', log.join('; '));
   },
 } satisfies ExportedHandler<Env>;

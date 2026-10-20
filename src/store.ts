@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { todayIn } from '../shared/billing.ts';
 import type { AppState, PaymentMethod, Settings, Subscription } from '../shared/types.ts';
+import { locale } from '../shared/i18n.ts';
 
 const CACHE_KEY = 'ledger:state:v1';
 
@@ -56,7 +57,8 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(path, {
     ...init,
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json', ...(init.headers ?? {}) },
+    // 服务端按当前界面语言返回错误等文案
+    headers: { 'content-type': 'application/json', 'x-locale': locale(), ...(init.headers ?? {}) },
   });
   if (res.status === 401 && path !== '/api/login' && !path.startsWith('/api/auth/')) {
     set({ phase: 'login' });

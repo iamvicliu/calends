@@ -8,6 +8,8 @@ import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
 import { go } from '../router.ts';
+import { LOCALES, isLocale } from '../../shared/i18n.ts';
+import { preferredLocale } from '../i18n.ts';
 
 /** 可设为启动页的页面 */
 const START_PAGES: Array<[string, string]> = [
@@ -135,6 +137,17 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       <Toolbar title="设置" />
       <div class="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
         <Group title="通用">
+          <Cell label="语言">
+            <Picker
+              value={isLocale(s.language) ? s.language : ''}
+              onChange={(v) => run(() => saveSettings({ language: v || undefined }))}
+              options={[
+                { value: '', label: '跟随系统', hint: LOCALES.find((l) => l.code === preferredLocale())?.name },
+                ...LOCALES.map((l) => ({ value: l.code as string, label: l.name, icon: <span class="cp-flag"><img src={`/flags/${l.flag}.png`} alt="" /></span> })),
+              ]}
+              ariaLabel="语言"
+            />
+          </Cell>
           <Cell label="名字">
             <input value={name} placeholder="分享图、公开页上显示" onInput={(e) => setName((e.target as HTMLInputElement).value)} onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), '已保存')} />
           </Cell>

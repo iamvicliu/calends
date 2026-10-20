@@ -1,3 +1,5 @@
+import { intlLocale, t } from './i18n.ts';
+
 const SYMBOL: Record<string, string> = {
   CNY: '¥', USD: '$', EUR: '€', GBP: '£', JPY: 'JP¥', HKD: 'HK$', TWD: 'NT$', TRY: '₺', NGN: '₦', PHP: '₱', INR: '₹', KRW: '₩',
   SGD: 'S$', AUD: 'A$', CAD: 'C$', THB: '฿', VND: '₫', RUB: '₽', UAH: '₴', BRL: 'R$', EGP: 'E£', PKR: '₨', KZT: '₸', IDR: 'Rp', MYR: 'RM',
@@ -9,42 +11,54 @@ export function symbol(ccy: string): string {
   return SYMBOL[ccy] ?? ccy + ' ';
 }
 
-/** 带币种符号的金额；compact 去掉多余小数 */
+/** 带币种符号的金额；compact 去掉多余小数。数字分组跟随当前语言 */
 export function money(n: number, ccy: string, opts: { compact?: boolean; sign?: boolean; decimals?: number } = {}): string {
   if (!Number.isFinite(n)) return '—';
   const big = Math.abs(n) >= 1000;
   const decimals = opts.decimals ?? (opts.compact ? (big || Number.isInteger(n) ? 0 : 2) : ['JPY', 'KRW', 'VND', 'IDR'].includes(ccy) ? 0 : 2);
-  const s = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  const s = Math.abs(n).toLocaleString(intlLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
   const sign = n < 0 ? '−' : opts.sign && n > 0 ? '+' : '';
   return `${sign}${symbol(ccy)}${s}`;
 }
 
-const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
-
-export function cnDate(d: string, withWeek = false): string {
+/** 日期字符串（YYYY-MM-DD）按当前语言格式化；按 UTC 解析，避免时区把日期挪一天 */
+function fmtDate(d: string, o: Intl.DateTimeFormatOptions): string {
   const [y, m, day] = d.split('-').map(Number);
-  const w = new Date(Date.UTC(y, m - 1, day)).getUTCDay();
-  return `${m}月${day}日${withWeek ? ` · 周${WEEK[w]}` : ''}`;
+  return new Intl.DateTimeFormat(intlLocale(), { ...o, timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, day)));
 }
 
+/** 「10月20日」「Oct 20」；withWeek 附带星期 */
+export function cnDate(d: string, withWeek = false): string {
+  const s = fmtDate(d, { month: 'short', day: 'numeric' });
+  return withWeek ? `${s} · ${fmtDate(d, { weekday: 'short' })}` : s;
+}
+
+/** 「2026年10月20日」「Oct 20, 2026」 */
 export function cnDateFull(d: string): string {
-  const [y] = d.split('-');
-  return `${y}年${cnDate(d)}`;
+  return fmtDate(d, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+/** 「2026年10月」「Oct 2026」；month 为 YYYY-MM */
+export function monthLabel(month: string, opts: { year?: boolean; long?: boolean } = {}): string {
+  return fmtDate(`${month}-01`, { month: opts.long ? 'long' : 'short', ...(opts.year === false ? {} : { year: 'numeric' }) });
+}
+
+/** 星期几的简称，0 = 周日 */
+export function weekdayShort(i: number, narrow = false): string {
+  // 2023-01-01 是周日
+  return fmtDate(`2023-01-0${i + 1}`, { weekday: narrow ? 'narrow' : 'short' });
+}
+
+/** 今天、明天、3 天后、2 个月后 */
 export function relDays(n: number): string {
-  if (n === 0) return '今天';
-  if (n === 1) return '明天';
-  if (n === 2) return '后天';
-  if (n < 0) return `${-n} 天前`;
-  if (n < 60) return `${n} 天后`;
-  return `${Math.round(n / 30)} 个月后`;
+  const rtf = new Intl.RelativeTimeFormat(intlLocale(), { numeric: 'auto' });
+  return Math.abs(n) < 60 ? rtf.format(n, 'day') : rtf.format(Math.round(n / 30), 'month');
 }
 
-const BILL_LABEL: Record<number, string> = { 1: '按月', 3: '按季', 6: '按半年', 12: '按年' };
-/** 合租收费周期的文字；不在常用选项里的写成「按 N 个月」 */
+/** 合租收费周期的文字：按月、按季……不在常用选项里的写成「按 N 个月」 */
 export function billLabel(months?: number): string {
-  return BILL_LABEL[months ?? 1] ?? `按 ${months} 个月`;
+  const m = months ?? 1;
+  return [1, 3, 6, 12].includes(m) ? t(`core.bill.m${m}`) : t('core.bill.custom', { count: m });
 }
 
 export function esc(s: string): string {

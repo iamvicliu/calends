@@ -280,6 +280,10 @@ export interface Settings {
   aiEnabled?: boolean;
   /** 最多同时登录的设备数；超出时最久未活动的设备被挤下线；缺省 10 */
   maxSessions?: number;
+  /** 界面、提醒邮件、MCP 的语言；缺省跟随浏览器 */
+  language?: string;
+  /** 跟随浏览器时，后台最近一次实际使用的语言（提醒邮件、MCP 用它） */
+  languageSeen?: string;
 }
 
 export interface FxTable {

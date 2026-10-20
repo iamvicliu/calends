@@ -22,6 +22,8 @@ import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
 import { currentRoute, go as navigate, href, initRouter, onRoute, replaceRoute } from './router.ts';
+import { locale, t } from '../shared/i18n.ts';
+import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 
 const NAV = [
   { path: '', label: '概览', icon: 'home' },
@@ -464,7 +466,22 @@ function App() {
   );
 }
 
-document.title = '订阅账本';
+/** 语言跟着设置走：设置变了就加载新语言包，并整棵树重新挂载 */
+function Root() {
+  const { state } = useStore();
+  const [loc, setLoc] = useState(locale());
+  const want = state ? preferredLocale(state.settings.language) : loc;
+  useEffect(() => {
+    if (want !== loc) void loadLocale(want).then(() => setLoc(want));
+    document.title = t('app.name');
+    // 跟随浏览器时，把实际用的语言记到设置里，提醒邮件和 MCP 用同一种
+    if (state && !state.readonly && !state.settings.language && state.settings.languageSeen !== want) void saveSettings({ languageSeen: want }).catch(() => {});
+  }, [want, loc]);
+  return <App key={loc} />;
+}
+
 initRouter();
-render(<App />, document.getElementById('app')!);
-boot();
+void loadLocale(initialLocale()).then(() => {
+  render(<Root />, document.getElementById('app')!);
+  boot();
+});

@@ -35,7 +35,8 @@
       "react-dom/*": [
         "./node_modules/preact/compat/*"
       ]
-    }
+    },
+    "resolveJsonModule": true
   },
   "include": [
     "src",

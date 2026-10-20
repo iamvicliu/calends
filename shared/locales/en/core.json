@@ -1,0 +1,3 @@
+{
+  "bill": { "m1": "Monthly", "m3": "Quarterly", "m6": "Every 6 months", "m12": "Yearly", "custom": { "one": "Every {count} month", "other": "Every {count} months" } }
+}
