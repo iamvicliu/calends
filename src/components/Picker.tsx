@@ -1,10 +1,10 @@
 import type { ReactNode as ComponentChildren } from 'react';
-import { createPortal } from 'react-dom';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CURRENCIES } from '../../shared/format.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import { ccyFlag, ccyName, FLAGS } from '../display.ts';
 import { Icon } from './ui.tsx';
+import { Pop } from './Pop.tsx';
 
 export interface PickOption<T> {
   value: T;
@@ -43,37 +43,12 @@ export function Picker<T extends string | number>({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [hi, setHi] = useState(0);
-  const [pos, setPos] = useState<{ top: number; left: number; mobile: boolean; h: number } | null>(null);
   const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const searchable = search ?? options.length > 12;
   const cur = options.find((o) => o.value === value);
-
-  useLayoutEffect(() => {
-    if (!open) return;
-    const r = btn.current!.getBoundingClientRect();
-    const W = 260;
-    const H = Math.min(400, (searchable ? 48 : 8) + options.length * 36 + new Set(options.map((o) => o.group).filter(Boolean)).size * 26);
-    const below = r.bottom + 6 + H < window.innerHeight;
-    setPos({
-      mobile: window.innerWidth < 560,
-      h: H,
-      top: below ? r.bottom + 6 : Math.max(8, r.top - H - 6),
-      left: Math.min(Math.max(8, r.right - W), window.innerWidth - W - 8),
-    });
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (!pop.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
-    };
-    document.addEventListener('pointerdown', onDown, true);
-    return () => document.removeEventListener('pointerdown', onDown, true);
-  }, [open]);
+  const H = Math.min(400, (searchable ? 48 : 8) + options.length * 36 + new Set(options.map((o) => o.group).filter(Boolean)).size * 26);
 
   const shown = useMemo(() => {
     const k = q.trim().toLowerCase();
@@ -88,9 +63,9 @@ export function Picker<T extends string | number>({
         shown.findIndex((o) => o.value === value),
       ),
     );
-    // 弹层挂在 body 上、首帧还没定位，autoFocus 不可靠：定位后再把焦点给搜索框（没有搜索框就给列表，方便上下键）
+    // 弹层打开后把焦点给搜索框（没有搜索框就给列表，方便上下键）
     requestAnimationFrame(() => (input.current ?? list.current)?.focus({ preventScroll: true }));
-  }, [open, pos]);
+  }, [open]);
   useEffect(() => {
     if (q) setHi(0);
   }, [q]);
@@ -102,17 +77,12 @@ export function Picker<T extends string | number>({
     onChange(v);
     setOpen(false);
     setQ('');
-    btn.current?.focus();
   };
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') setHi((i) => Math.min(shown.length - 1, i + 1));
     else if (e.key === 'ArrowUp') setHi((i) => Math.max(0, i - 1));
     else if (e.key === 'Enter' && shown[hi]) pick(shown[hi].value);
-    else if (e.key === 'Escape') {
-      e.stopPropagation();
-      setOpen(false);
-      btn.current?.focus();
-    } else return;
+    else return;
     e.preventDefault();
   };
 
@@ -136,49 +106,50 @@ export function Picker<T extends string | number>({
         )}
         <Icon name="down" />
       </button>
-      {open &&
-        pos &&
-        createPortal(
-          <>
-            {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
-            <div
-              ref={pop}
-              className={`dp-pop cp-pop pk-pop ${pos.mobile ? 'mobile' : ''}`}
-              style={pos.mobile ? undefined : { top: pos.top, left: pos.left, height: pos.h }}
-              onKeyDown={onKey}
-            >
-              {searchable && (
-                <label className="cp-search">
-                  <Icon name="search" />
-                  <input ref={input} value={q} placeholder={t('common.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
-                </label>
-              )}
-              <div className="cp-list" ref={list} role="listbox" aria-label={ariaLabel} tabIndex={searchable ? undefined : -1} autoFocus={!searchable}>
-                {shown.map((o, i) => (
-                  <div key={String(o.value)}>
-                    {o.group && o.group !== shown[i - 1]?.group && <div className="cp-head">{o.group}</div>}
-                    <button
-                      type="button"
-                      data-i={i}
-                      role="option"
-                      aria-selected={o.value === value}
-                      className={`cp-opt ${o.value === value ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
-                      onMouseMove={() => setHi(i)}
-                      onClick={() => pick(o.value)}
-                    >
-                      {o.icon !== undefined && <span className="pk-ico">{o.icon}</span>}
-                      <span className="cp-name">{o.label}</span>
-                      {o.hint && <span className="cp-code">{o.hint}</span>}
-                      {o.value === value && <Icon name="check" />}
-                    </button>
-                  </div>
-                ))}
-                {!shown.length && <div className="cp-empty">{t('picker.noMatch')}</div>}
-              </div>
+      {open && (
+        <Pop
+          triggerRef={btn}
+          open
+          onClose={() => {
+            setOpen(false);
+            setQ('');
+          }}
+          label={ariaLabel ?? t('picker.choose')}
+          className="cp-pop pk-pop"
+          style={{ height: H }}
+        >
+          <div className="pk-in" onKeyDown={onKey}>
+            {searchable && (
+              <label className="cp-search">
+                <Icon name="search" />
+                <input ref={input} value={q} placeholder={t('common.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
+              </label>
+            )}
+            <div className="cp-list" ref={list} role="listbox" aria-label={ariaLabel} tabIndex={searchable ? undefined : -1}>
+              {shown.map((o, i) => (
+                <div key={String(o.value)}>
+                  {o.group && o.group !== shown[i - 1]?.group && <div className="cp-head">{o.group}</div>}
+                  <button
+                    type="button"
+                    data-i={i}
+                    role="option"
+                    aria-selected={o.value === value}
+                    className={`cp-opt ${o.value === value ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
+                    onMouseMove={() => setHi(i)}
+                    onClick={() => pick(o.value)}
+                  >
+                    {o.icon !== undefined && <span className="pk-ico">{o.icon}</span>}
+                    <span className="cp-name">{o.label}</span>
+                    {o.hint && <span className="cp-code">{o.hint}</span>}
+                    {o.value === value && <Icon name="check" />}
+                  </button>
+                </div>
+              ))}
+              {!shown.length && <div className="cp-empty">{t('picker.noMatch')}</div>}
             </div>
-          </>,
-          document.body,
-        )}
+          </div>
+        </Pop>
+      )}
     </>
   );
 }

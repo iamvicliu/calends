@@ -1,9 +1,9 @@
-import { createPortal } from 'react-dom';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { symbol } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { ccyFlag, ccyName } from '../display.ts';
 import { Icon } from './ui.tsx';
+import { Pop } from './Pop.tsx';
 
 /**
  * 侧边栏的货币切换：点开在右侧弹出，可搜索。最上面是「原币」，然后是常用币种，再往下是汇率接口支持的全部货币。
@@ -13,37 +13,8 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [hi, setHi] = useState(0);
-  const [pos, setPos] = useState<{
-    top: number;
-    left: number;
-    mobile: boolean;
-  } | null>(null);
   const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
-
-  const H = 440;
-  useLayoutEffect(() => {
-    if (!open) return;
-    const r = btn.current!.getBoundingClientRect();
-    const W = 300;
-    const mobile = window.innerWidth < 560;
-    setPos({
-      mobile,
-      top: Math.max(8, Math.min(r.bottom - H, window.innerHeight - H - 8)),
-      left: Math.min(r.right + 8, window.innerWidth - W - 8),
-    });
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (!pop.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
-    };
-    document.addEventListener('pointerdown', onDown, true);
-    return () => document.removeEventListener('pointerdown', onDown, true);
-  }, [open]);
 
   // 搜索：代码、中文名、符号都能搜
   const sections = useMemo(() => {
@@ -76,11 +47,7 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
     if (e.key === 'ArrowDown') setHi((i) => Math.min(flat.length - 1, i + 1));
     else if (e.key === 'ArrowUp') setHi((i) => Math.max(0, i - 1));
     else if (e.key === 'Enter' && flat[hi]) pick(flat[hi]);
-    else if (e.key === 'Escape') {
-      e.stopPropagation();
-      setOpen(false);
-      btn.current?.focus();
-    } else return;
+    else return;
     e.preventDefault();
   };
 
@@ -101,57 +68,57 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
         <span>{t('picker.ccy.label')}</span>
         <small>{orig ? t('picker.ccy.orig') : `${ccyName(value)}`}</small>
       </button>
-      {open &&
-        pos &&
-        // 挂到 body 上：侧边栏自成层叠上下文，弹层放在里面会被主内容盖住
-        createPortal(
-          <>
-            {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
-            <div
-              ref={pop}
-              className={`dp-pop cp-pop ${pos.mobile ? 'mobile' : ''}`}
-              style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
-              onKeyDown={onKey}
-            >
-              <label className="cp-search">
-                <Icon name="search" />
-                <input autoFocus value={q} placeholder={t('picker.ccy.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
-              </label>
-              <div className="cp-list" ref={list} role="listbox" aria-label={t('picker.ccy.label')}>
-                {sections.map((s) => (
-                  <div key={s.title ?? 'orig'}>
-                    {s.title && <div className="cp-head">{s.title}</div>}
-                    {s.items.map((c) => {
-                      const i = n++;
-                      const sel = c === value;
-                      return (
-                        <button
-                          type="button"
-                          key={c}
-                          data-i={i}
-                          role="option"
-                          aria-selected={sel}
-                          className={`cp-opt ${sel ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
-                          onMouseMove={() => setHi(i)}
-                          onClick={() => pick(c)}
-                        >
-                          <span className="cp-flag">
-                            {c === 'orig' ? <Icon name="swap" /> : ccyFlag(c) ? <img src={ccyFlag(c)} alt="" loading="lazy" /> : <b>{symbol(c).trim() || c}</b>}
-                          </span>
-                          <span className="cp-name">{c === 'orig' ? t('picker.ccy.orig') : ccyName(c)}</span>
-                          <span className="cp-code">{c === 'orig' ? t('picker.ccy.origHint') : c}</span>
-                          {sel && <Icon name="check" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-                {!flat.length && <div className="cp-empty">{t('picker.ccy.noMatch')}</div>}
-              </div>
+      {open && (
+        <Pop
+          triggerRef={btn}
+          open
+          onClose={() => {
+            setOpen(false);
+            setQ('');
+          }}
+          label={t('picker.ccy.label')}
+          className="cp-pop"
+          placement="right bottom"
+        >
+          <div className="pk-in" onKeyDown={onKey}>
+            <label className="cp-search">
+              <Icon name="search" />
+              <input autoFocus value={q} placeholder={t('picker.ccy.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
+            </label>
+            <div className="cp-list" ref={list} role="listbox" aria-label={t('picker.ccy.label')}>
+              {sections.map((s) => (
+                <div key={s.title ?? 'orig'}>
+                  {s.title && <div className="cp-head">{s.title}</div>}
+                  {s.items.map((c) => {
+                    const i = n++;
+                    const sel = c === value;
+                    return (
+                      <button
+                        type="button"
+                        key={c}
+                        data-i={i}
+                        role="option"
+                        aria-selected={sel}
+                        className={`cp-opt ${sel ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
+                        onMouseMove={() => setHi(i)}
+                        onClick={() => pick(c)}
+                      >
+                        <span className="cp-flag">
+                          {c === 'orig' ? <Icon name="swap" /> : ccyFlag(c) ? <img src={ccyFlag(c)} alt="" loading="lazy" /> : <b>{symbol(c).trim() || c}</b>}
+                        </span>
+                        <span className="cp-name">{c === 'orig' ? t('picker.ccy.orig') : ccyName(c)}</span>
+                        <span className="cp-code">{c === 'orig' ? t('picker.ccy.origHint') : c}</span>
+                        {sel && <Icon name="check" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+              {!flat.length && <div className="cp-empty">{t('picker.ccy.noMatch')}</div>}
             </div>
-          </>,
-          document.body,
-        )}
+          </div>
+        </Pop>
+      )}
     </>
   );
 }

@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { addDays, addMonths, parseDay } from '../../shared/billing.ts';
 import { cnDateFull, monthLabel, weekdayShort } from '../../shared/format.ts';
 import { intlLocale, t } from '../../shared/i18n.ts';
 import { getState, today as todayOf } from '../store.ts';
 import { Icon } from './ui.tsx';
+import { Pop } from './Pop.tsx';
 
 /** 每周起始日跟随设置（1 周一、0 周日）；weekdayShort 的 0 是周日 */
 const weekStart = () => getState()?.settings.weekStart ?? 1;
@@ -19,7 +20,7 @@ function grid(month: string): string[] {
 
 /**
  * 日期选择器：按钮显示「2026年10月19日」，点开是月历。
- * 弹层用 fixed 定位，避免被弹窗的滚动容器裁掉；窄屏时贴底显示。
+ * 弹层用共用的 Pop（react-aria），不会被弹窗的滚动容器裁掉；窄屏时贴底显示。
  */
 export function DatePicker({
   value,
@@ -41,37 +42,10 @@ export function DatePicker({
   const [month, setMonth] = useState((value ?? today).slice(0, 7));
   const [mode, setMode] = useState<'day' | 'month'>('day');
   const [cursor, setCursor] = useState(value ?? today);
-  const [pos, setPos] = useState<{ top: number; left: number; mobile: boolean } | null>(null);
   const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
-
-  const place = () => {
-    const r = btn.current!.getBoundingClientRect();
-    const mobile = window.innerWidth < 560;
-    const W = 296;
-    const H = 360;
-    const below = r.bottom + 6 + H < window.innerHeight;
-    setPos({ mobile, top: below ? r.bottom + 6 : Math.max(8, r.top - H - 6), left: Math.min(Math.max(8, r.right - W), window.innerWidth - W - 8) });
-  };
-
-  useLayoutEffect(() => {
-    if (!open) return;
-    place();
-    const onScroll = () => place();
-    window.addEventListener('resize', onScroll);
-    document.addEventListener('scroll', onScroll, true);
-    return () => {
-      window.removeEventListener('resize', onScroll);
-      document.removeEventListener('scroll', onScroll, true);
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (!pop.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
-    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
@@ -90,12 +64,8 @@ export function DatePicker({
         pick(cursor);
       }
     };
-    document.addEventListener('pointerdown', onDown, true);
     document.addEventListener('keydown', onKey, true);
-    return () => {
-      document.removeEventListener('pointerdown', onDown, true);
-      document.removeEventListener('keydown', onKey, true);
-    };
+    return () => document.removeEventListener('keydown', onKey, true);
   }, [open, cursor, mode]);
 
   const toggle = () => {
@@ -127,16 +97,9 @@ export function DatePicker({
         <Icon name="cal" />
         <span>{value ? cnDateFull(value) : placeholder}</span>
       </button>
-      {open && pos && (
-        <>
-          {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
-          <div
-            ref={pop}
-            className={`dp-pop ${pos.mobile ? 'mobile' : ''}`}
-            style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
-            role="dialog"
-            aria-label={t('picker.date.placeholder')}
-          >
+      {open && (
+        <Pop triggerRef={btn} open onClose={() => setOpen(false)} label={t('picker.date.placeholder')}>
+          <>
             <div className="dp-head">
               <button type="button" className="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
                 {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
@@ -218,8 +181,8 @@ export function DatePicker({
                 </button>
               )}
             </div>
-          </div>
-        </>
+          </>
+        </Pop>
       )}
     </>
   );

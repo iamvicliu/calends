@@ -1,61 +1,18 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { PaymentMethod } from '../../shared/types.ts';
 import { KIND_LABEL } from '../derive.ts';
 import { t } from '../../shared/i18n.ts';
 import { Icon, MethodMark } from './ui.tsx';
+import { Pop } from './Pop.tsx';
 
 /**
  * 支付方式选择器：系统下拉框放不了图片，这里自己画一个，每项带产品 logo 与国旗角标。
- * 弹层用 fixed 定位，窄屏时贴底显示，与日期选择器一致。
+ * 弹层用共用的 Pop，窄屏时贴底显示，与日期选择器一致。
  */
 export function MethodPicker({ methods, value, onChange }: { methods: PaymentMethod[]; value?: string; onChange: (id: string | undefined) => void }) {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top: number; left: number; mobile: boolean } | null>(null);
   const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
   const cur = methods.find((m) => m.id === value);
-
-  useLayoutEffect(() => {
-    if (!open) return;
-    const place = () => {
-      const r = btn.current!.getBoundingClientRect();
-      const W = 280;
-      const H = Math.min(420, 52 + methods.length * 48);
-      const below = r.bottom + 6 + H < window.innerHeight;
-      setPos({
-        mobile: window.innerWidth < 560,
-        top: below ? r.bottom + 6 : Math.max(8, r.top - H - 6),
-        left: Math.min(Math.max(8, r.right - W), window.innerWidth - W - 8),
-      });
-    };
-    place();
-    window.addEventListener('resize', place);
-    document.addEventListener('scroll', place, true);
-    return () => {
-      window.removeEventListener('resize', place);
-      document.removeEventListener('scroll', place, true);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (!pop.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      e.stopPropagation();
-      setOpen(false);
-      btn.current?.focus();
-    };
-    document.addEventListener('pointerdown', onDown, true);
-    document.addEventListener('keydown', onKey, true);
-    return () => {
-      document.removeEventListener('pointerdown', onDown, true);
-      document.removeEventListener('keydown', onKey, true);
-    };
-  }, [open]);
 
   const pick = (id: string | undefined) => {
     onChange(id);
@@ -69,16 +26,9 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
         <span>{cur ? cur.name : t('picker.method.none')}</span>
         <Icon name="down" />
       </button>
-      {open && pos && (
-        <>
-          {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
-          <div
-            ref={pop}
-            className={`dp-pop mp-pop ${pos.mobile ? 'mobile' : ''}`}
-            style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
-            role="listbox"
-            aria-label={t('picker.method.label')}
-          >
+      {open && (
+        <Pop triggerRef={btn} open onClose={() => setOpen(false)} label={t('picker.method.label')} className="mp-pop">
+          <div role="listbox" aria-label={t('picker.method.label')}>
             <button type="button" role="option" aria-selected={!cur} className={`mp-opt ${cur ? '' : 'sel'}`} onClick={() => pick(undefined)}>
               <span className="mp-none" />
               <span className="mp-name">{t('picker.method.none')}</span>
@@ -104,7 +54,7 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
               </button>
             ))}
           </div>
-        </>
+        </Pop>
       )}
     </>
   );

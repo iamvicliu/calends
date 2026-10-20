@@ -1,5 +1,5 @@
 import type { ReactNode as ComponentChildren, JSX } from 'react';
-import { createPortal } from 'react-dom';
+import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
 import { useEffect, useEffectEvent, useState } from 'react';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
@@ -317,6 +317,7 @@ export function Amount({ value, ccy, sign, compact }: { value: number; ccy: stri
   );
 }
 
+/** 分段控件：单选、不能取消；左右方向键切换（react-aria 的 ToggleButtonGroup） */
 export function Seg<T extends string>({
   value,
   options,
@@ -329,13 +330,22 @@ export function Seg<T extends string>({
   small?: boolean;
 }) {
   return (
-    <div className={`seg ${small ? 'sm' : ''}`} role="tablist">
+    <ToggleButtonGroup
+      className={`seg ${small ? 'sm' : ''}`}
+      selectionMode="single"
+      disallowEmptySelection
+      selectedKeys={[value]}
+      onSelectionChange={(keys) => {
+        const k = [...keys][0];
+        if (k != null && k !== value) onChange(k as T);
+      }}
+    >
       {options.map(([k, l]) => (
-        <button key={k} role="tab" aria-selected={value === k} className={value === k ? 'on' : ''} onClick={() => onChange(k)}>
+        <ToggleButton key={k} id={k} className={({ isSelected }) => (isSelected ? 'on' : '')}>
           {l}
-        </button>
+        </ToggleButton>
       ))}
-    </div>
+    </ToggleButtonGroup>
   );
 }
 
@@ -359,54 +369,59 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
 }
 
 // ---------- 弹层 ----------
-/** 打开中的弹层，后开的在上面：Esc 只关最上面那一层（如订阅表单里再开的新建分类） */
+/**
+ * 弹窗（react-aria Modal）：宽屏居中，窄屏贴底。点遮罩、按 Esc 关闭，多层叠放时只关最上面那层；
+ * 打开期间焦点留在弹窗里、背景不滚动，关闭后焦点回到打开它的按钮。
+ * 没有标题（bare）时用 label 作为读屏名称。
+ */
+/** 打开中的弹窗，后开的在上面 */
 const openSheets: object[] = [];
 
 export function Sheet(props: {
   title?: ComponentChildren;
+  label?: string;
   onClose: () => void;
   children: ComponentChildren;
   foot?: ComponentChildren;
   narrow?: boolean;
   bare?: boolean;
 }) {
-  // Esc 时调用最新的 onClose（它可能依赖表单状态，比如未保存确认）
+  // 兜底：焦点不在弹窗里（如落在 body 上）时 react-aria 收不到 Esc，这里替最上面那层关掉
   const close = useEffectEvent(() => props.onClose());
   useEffect(() => {
     const me = {};
     openSheets.push(me);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && openSheets[openSheets.length - 1] === me && close();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && e.target === document.body && openSheets[openSheets.length - 1] === me && close();
     document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     return () => {
       openSheets.splice(openSheets.indexOf(me), 1);
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
     };
   }, []);
-  // 挂到 body 上：放在带动画（transform）的页面里时，fixed 定位不会被困在页面范围内
-  return createPortal(
-    <div className="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`} role="dialog" aria-modal="true">
-        <div className="grabber" />
-        {props.bare ? (
-          <button className="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
-            <Icon name="x" />
-          </button>
-        ) : (
-          <div className="sheet-head">
-            <h3>{props.title}</h3>
-            <button className="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
+  return (
+    <ModalOverlay className="scrim" isOpen isDismissable onOpenChange={(o) => !o && props.onClose()}>
+      <Modal className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`}>
+        <Dialog className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
+          <div className="grabber" />
+          {props.bare ? (
+            <button className="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
               <Icon name="x" />
             </button>
-          </div>
-        )}
-        <div className="sheet-body">{props.children}</div>
-        {props.foot && <div className="sheet-foot">{props.foot}</div>}
-      </div>
-    </div>,
-    document.body,
+          ) : (
+            <div className="sheet-head">
+              <Heading slot="title" level={3}>
+                {props.title}
+              </Heading>
+              <button className="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
+                <Icon name="x" />
+              </button>
+            </div>
+          )}
+          <div className="sheet-body">{props.children}</div>
+          {props.foot && <div className="sheet-foot">{props.foot}</div>}
+        </Dialog>
+      </Modal>
+    </ModalOverlay>
   );
 }
 
@@ -459,18 +474,9 @@ export function tipProps(html: () => ComponentChildren) {
 
 export function Toggle({ checked, onChange, disabled, label }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string }) {
   return (
-    <label className="toggle">
-      <input
-        type="checkbox"
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
-        checked={checked}
-        disabled={disabled}
-        onChange={(e) => onChange((e.target as HTMLInputElement).checked)}
-      />
+    <AriaSwitch className="toggle" isSelected={checked} onChange={onChange} isDisabled={disabled} aria-label={label}>
       <i />
-    </label>
+    </AriaSwitch>
   );
 }
 
