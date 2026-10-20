@@ -18,7 +18,9 @@
   "phase": {
     "switchTooEarly": "The effective date must be after the current phase starts",
     "resumeTooEarly": "The resume date can't be earlier than the last end date",
-    "priceOutOfRange": "The price change date isn't within any phase"
+    "priceOutOfRange": "The price change date isn't within any phase",
+    "keepTooEarly": "The keep-until date must be after the switch date",
+    "endTooEarly": "The end date must be after this phase's start date"
   },
   "event": {
     "label": "{region}{price}/{per}",

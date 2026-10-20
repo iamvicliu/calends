@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Manter o anterior por um tempo",
+    "keepHint": "Já foi pago antecipadamente e ainda não venceu: os dois rodam juntos e são cobrados normalmente",
+    "keepUntil": "O anterior vai até",
+    "endAuto": "Ao começar a próxima",
+    "planned": "Planejado",
+    "parallel": { "one": "Sobrepõe {count} dia", "other": "Sobrepõe {count} dias" },
+    "payPhase": "Pertence a"
+  },
   "addTitle": "Adicionar assinatura",
   "editTitle": "Editar “{name}”",
   "confirmDiscard": "Descartar alterações não salvas?",

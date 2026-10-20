@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} {date} tarihine kadar birlikte devam ediyor"
+  },
   "title": "Tüm abonelikler",
   "all": "Tümü",
   "summary": { "one": "{count} öğe · {monthly}/ay · {yearly}/yıl", "other": "{count} öğe · {monthly}/ay · {yearly}/yıl" },

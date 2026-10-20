@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} действует параллельно до {date}"
+  },
   "title": "Все подписки",
   "all": "Все",
   "summary": { "one": "{count} подписка · {monthly}/мес. · {yearly}/год", "few": "{count} подписки · {monthly}/мес. · {yearly}/год", "many": "{count} подписок · {monthly}/мес. · {yearly}/год", "other": "{count} подписки · {monthly}/мес. · {yearly}/год" },

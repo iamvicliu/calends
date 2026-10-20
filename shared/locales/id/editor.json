@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Tetap pakai yang lama sementara",
+    "keepHint": "Sudah dibayar di muka dan belum habis: keduanya berjalan bersamaan dan ditagih seperti biasa",
+    "keepUntil": "Yang lama berjalan sampai",
+    "endAuto": "Saat fase berikutnya mulai",
+    "planned": "Rencana",
+    "parallel": { "other": "Tumpang tindih {count} hari" },
+    "payPhase": "Masuk ke fase"
+  },
   "addTitle": "Tambah langganan",
   "editTitle": "Edit “{name}”",
   "confirmDiscard": "Buang perubahan yang belum disimpan?",

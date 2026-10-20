@@ -18,7 +18,9 @@
   "phase": {
     "switchTooEarly": "La fecha de entrada en vigor debe ser posterior al inicio de la fase actual",
     "resumeTooEarly": "La fecha de reanudación no puede ser anterior a la última fecha de fin",
-    "priceOutOfRange": "La fecha del cambio de precio no está dentro de ninguna fase"
+    "priceOutOfRange": "La fecha del cambio de precio no está dentro de ninguna fase",
+    "keepTooEarly": "La fecha hasta la que se mantiene debe ser posterior a la del cambio",
+    "endTooEarly": "La fecha de fin debe ser posterior al inicio de esta fase"
   },
   "event": {
     "label": "{region}{price}/{per}",

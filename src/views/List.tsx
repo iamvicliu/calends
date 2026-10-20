@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
+import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
 import { cnDate, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
@@ -195,6 +195,7 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                     <span class="sc-per">/{perLabel(cur)}</span>
                   </div>
                   {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
+                  <ParallelNote sub={s} cur={cur} today={today} />
                   <div class="sc-foot">
                     <span>{shown(s, n).sub ?? '\u00a0'}</span>
                     <span class={d != null && d <= 3 ? 'soon' : ''}>
@@ -259,6 +260,7 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                         {s.proxy && <span class="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>{t('list.badge.proxy')}</span>}
                       </span>
                       {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
+                      <ParallelNote sub={s} cur={cur} today={today} />
                     </span>
                   </span>
                   <span class="lt-cat">
@@ -319,6 +321,19 @@ export function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; u
         {t(st === 'upcoming' ? 'list.change.starts' : 'list.change.from', { when })}
         {parts.length ? ` · ${parts.join(' · ')}` : ''}
       </span>
+    </div>
+  );
+}
+
+/** 换区后旧的那段还没到期、两边都在付钱：标出它是哪一段、用到哪天 */
+export function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subscription; today: string }) {
+  if (!sub.phases?.length) return null;
+  const vs = activePhases(sub, today).filter((v) => v.start !== cur.start);
+  if (!vs.length) return null;
+  return (
+    <div class="change-note parallel">
+      <Icon name="copy" size={12} />
+      <span>{vs.map((v) => t('list.overlap.note', { what: v.region && v.region !== cur.region ? `${flag(v.region)} ${v.region}` : `${money(v.price, v.currency)}/${perLabel(v)}`, date: cnDate(v.end!) })).join(' · ')}</span>
     </div>
   );
 }

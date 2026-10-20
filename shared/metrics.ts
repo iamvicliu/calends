@@ -1,6 +1,6 @@
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
 // 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
-import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, isGap, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
+import { activePhases, addDays, addMonths, chargesBetween, coveredUntil, cycleDays, phaseSubs, diffDays, effectiveStatus, isGap, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
@@ -15,10 +15,8 @@ function toBase(state: AppState, amount: number, ccy: string, date?: string): nu
 
 /** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
 export function contributionOn(state: AppState, s: Subscription, day: string, fxDate?: string): number {
-  if (s.phases?.length) {
-    const v = phaseAt(s, day);
-    return v ? contributionOn(state, v, day, fxDate) : 0;
-  }
+  // 多阶段：当天在跑的各段相加（换区后新旧两段并行时两边都在付钱）
+  if (s.phases?.length) return activePhases(s, day).reduce((a, v) => a + contributionOn(state, v, day, fxDate), 0);
   if (s.cycle.unit === 'lifetime') return 0;
   if (s.start > day) return 0;
   if (s.end && s.end <= day) return 0;
@@ -153,8 +151,16 @@ export function events(state: AppState, today: string): LedgerEvent[] {
       const evs = eventsOf(state, v, today);
       const prev = vs[i - 1];
       const next = vs[i + 1];
-      const contiguous = (a: Subscription, b: Subscription) => !!a.end && !isGap(a.end, b.start);
+      const contiguous = (a: Subscription, b: Subscription) => !!a.end && a.end <= b.start && !isGap(a.end, b.start);
+      // 前面还有没到期的段：新旧并行，旧段照常付到到期
+      const until = coveredUntil(vs, i);
+      const parallel = i > 0 && (!until || until > v.start);
       for (const e of evs) {
+        if (e.kind === 'start' && prev && parallel) {
+          // 新段整份计入；旧段到期时另记一笔结束
+          out.push({ ...e, kind: 'switch', note: `${label(prev)} → ${label(v)}` });
+          continue;
+        }
         if (e.kind === 'start' && prev) {
           if (contiguous(prev, v)) {
             const before = contributionOn(state, prev, addDays(v.start, -1));
@@ -227,15 +233,21 @@ export function cashVsAccrual(state: AppState, today: string, back: number, fwd:
 export function prepaidValue(state: AppState, today: string): { total: number; items: Array<{ sub: Subscription; value: number; until: string }> } {
   const items: Array<{ sub: Subscription; value: number; until: string }> = [];
   for (const s of state.subscriptions) {
-    if (s.cycle.unit === 'lifetime') continue;
-    const past = chargesBetween(s, addMonths(today, -12 * Math.max(1, s.cycle.unit === 'year' ? s.cycle.every : 1) - 1), today, today);
-    const last = past[past.length - 1];
-    if (!last) continue;
-    const [a, b] = coverage(last);
-    const end = s.end && s.end < b ? s.end : b;
-    if (end <= today) continue;
-    const v = chargeValue(state, last) * myShareFactor(s, today) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
-    if (v > 0.01) items.push({ sub: s, value: v, until: end });
+    // 按阶段各算各的：换区后旧区域预付的时长和新区域的一样都是余值
+    let value = 0;
+    let until = '';
+    for (const p of phaseSubs(s)) {
+      if (p.cycle.unit === 'lifetime' || p.start > today) continue;
+      const past = chargesBetween(p, addMonths(today, -12 * Math.max(1, p.cycle.unit === 'year' ? p.cycle.every : 1) - 1), today, today);
+      const last = past[past.length - 1];
+      if (!last) continue;
+      const [a, b] = coverage(last);
+      const end = p.end && p.end < b ? p.end : b;
+      if (end <= today) continue;
+      value += chargeValue(state, last) * myShareFactor(p, today) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
+      if (end > until) until = end;
+    }
+    if (value > 0.01) items.push({ sub: s, value, until });
   }
   items.sort((x, y) => y.value - x.value);
   return { total: items.reduce((t, i) => t + i.value, 0), items };

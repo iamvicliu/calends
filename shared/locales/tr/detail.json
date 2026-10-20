@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "Birlikte devam eden",
+    "previous": "Önceki plan",
+    "until": "{date} tarihine kadar · {rel}",
+    "monthlyHint": { "one": "{count} plan aynı anda, toplam", "other": "{count} plan aynı anda, toplam" }
+  },
   "action": { "edit": "Düzenle", "pause": "Duraklat", "resume": "Devam ettir", "manage": "Yönet", "website": "Web sitesi", "share": "Paylaş" },
   "toast": { "resumed": "Ödemeler devam ediyor", "paused": "Duraklatıldı. Gelecek ödemeler tahmin edilmeyecek" },
   "history": "Geçmiş",

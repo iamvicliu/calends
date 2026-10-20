@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Altes noch weiterlaufen lassen",
+    "keepHint": "Bereits vorausbezahlt und noch nicht abgelaufen: Beide laufen parallel und werden normal abgerechnet",
+    "keepUntil": "Altes läuft bis",
+    "endAuto": "Mit Beginn der nächsten",
+    "planned": "Geplant",
+    "parallel": { "one": "Überschneidet sich {count} Tag", "other": "Überschneidet sich {count} Tage" },
+    "payPhase": "Gehört zu"
+  },
   "addTitle": "Abo hinzufügen",
   "editTitle": "„{name}“ bearbeiten",
   "confirmDiscard": "Ungesicherte Änderungen verwerfen?",

@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "Läuft parallel",
+    "previous": "Vorheriger Tarif",
+    "until": "Bis {date} · {rel}",
+    "monthlyHint": { "one": "{count} Tarif parallel, summiert", "other": "{count} Tarife parallel, summiert" }
+  },
   "action": {
     "edit": "Bearbeiten",
     "pause": "Pausieren",

@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
-import { addDays, nextCharge, phaseSubs } from '../../shared/billing.ts';
-import { changePrice, removePhase, resume, switchPlan } from '../../shared/phases.ts';
+import { addDays, addMonths, nextCharge, phaseSubs } from '../../shared/billing.ts';
+import { changePrice, removePhase, resume, setPhaseEnd, switchPlan } from '../../shared/phases.ts';
 import type { AppState, Cycle, Subscription } from '../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { History } from './History.tsx';
@@ -34,6 +34,9 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   const [methodId, setMethodId] = useState(f.methodId ?? '');
   const [region, setRegion] = useState(f.region ?? '');
   const [planned, setPlanned] = useState(false);
+  // 换区时旧的继续用到某天（已预付、还没到期），两段并行
+  const [keep, setKeep] = useState(false);
+  const [keepUntil, setKeepUntil] = useState(today);
   const ended = !!f.end || f.status === 'cancelled';
   const phases = phaseSubs(f).length;
 
@@ -47,13 +50,30 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
     setMethodId(f.methodId ?? '');
     setRegion(f.region ?? '');
     setPlanned(false);
+    setKeep(false);
+  };
+  /** 旧的默认用到哪天：切换日之后它的下一次扣款日（已付到那天），没有就一个月后 */
+  const paidThrough = (at: string) => {
+    const last = phaseSubs(f).pop()!;
+    return nextCharge(last, addDays(at, 1)) ?? addMonths(at, 1);
+  };
+  const toggleKeep = (on: boolean) => {
+    setKeep(on);
+    if (on) setKeepUntil(paidThrough(date));
+  };
+  const setEnd = (start: string, end: string | undefined) => {
+    try {
+      setF(setPhaseEnd(f, start, end));
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e), true);
+    }
   };
   const apply = () => {
     const n = Number(price);
     if (!(n >= 0) || price === '') return toast(t('editor.change.needPrice'), true);
     try {
       const plan = { price: n, currency, cycle: CYCLES.find(([k]) => k === cycle)![1], methodId: methodId || undefined, region: region.trim().toUpperCase() || undefined, planned: mode === 'switch' && planned ? true : undefined };
-      const next = mode === 'price' ? changePrice(f, date, n) : mode === 'switch' ? switchPlan(f, date, plan) : resume(f, date, plan);
+      const next = mode === 'price' ? changePrice(f, date, n) : mode === 'switch' ? switchPlan(f, date, plan, keep ? keepUntil : undefined) : resume(f, date, plan);
       setF(next);
       setMode(null);
       toast(t(mode === 'price' ? 'editor.change.toast.price' : mode === 'switch' ? 'editor.change.toast.switch' : 'editor.change.toast.resume'));
@@ -64,7 +84,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
 
   return (
     <Group title={t('editor.change.title')}>
-      <History sub={f} state={state} today={today} />
+      <History sub={f} state={state} today={today} onEnd={setEnd} />
       <div class="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
         <button class={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
           {t('editor.change.price')}
@@ -87,7 +107,14 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
         <div class="change-form">
           <label>
             {t(mode === 'price' ? 'editor.change.priceDate' : mode === 'switch' ? 'editor.change.switchDate' : 'editor.change.resumeDate')}
-            <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
+            <DatePicker
+              value={date}
+              onChange={(v) => {
+                const d = v ?? today;
+                setDate(d);
+                if (keep && keepUntil <= d) setKeepUntil(paidThrough(d));
+              }}
+            />
           </label>
           <label>
             {mode === 'price' ? t('editor.change.newPrice', { currency: f.currency }) : t('editor.change.priceLabel')}
@@ -111,6 +138,23 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
                 {t('editor.field.region')}
                 <RegionSelect value={region || undefined} onChange={(r) => setRegion(r ?? '')} common={[...new Set([...state.subscriptions.flatMap((x) => [x.region, ...(x.phases ?? []).map((ph) => ph.region)]), ...state.methods.map((m) => m.region)].filter(Boolean) as string[])]} />
               </label>
+              {mode === 'switch' && (
+                <div class="change-keep">
+                  <div class="change-keep-row">
+                    <span>
+                      {t('editor.overlap.keep')}
+                      <small>{t('editor.overlap.keepHint')}</small>
+                    </span>
+                    <Toggle checked={keep} onChange={toggleKeep} label={t('editor.overlap.keep')} />
+                  </div>
+                  {keep && (
+                    <label class="change-keep-date">
+                      {t('editor.overlap.keepUntil')}
+                      <DatePicker value={keepUntil} min={addDays(date, 1)} onChange={(v) => v && setKeepUntil(v)} />
+                    </label>
+                  )}
+                </div>
+              )}
               {mode === 'switch' && (
                 <label class="change-plan">
                   <span>

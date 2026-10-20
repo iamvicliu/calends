@@ -839,6 +839,15 @@ select.btn { appearance: none; -webkit-appearance: none; padding-right: 28px; ba
 .h-prices em { font-style: normal; font-weight: 600; margin-left: 6px; }
 .h-prices em.up { color: var(--red); }
 .h-prices em.down { color: var(--green); }
+/* 并行的阶段：第二条轨道，圆点落在右边那条线上 */
+.history.laned { padding-left: 48px; }
+.history.laned .h-phase::before { left: -31.5px; }
+.history.laned .h-phase.lane::before { left: -17.5px; }
+.history.laned .h-phase.lane::after { content: ''; position: absolute; left: -13.75px; top: 0; bottom: 0; width: 1.5px; background: color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: 1px; }
+.h-par { font-weight: 500; }
+.h-edit { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.h-edit .dp-btn { height: 28px; padding: 0 9px; font-size: 12.5px; }
+.h-phase.edit::before { top: 19px; }
 .h-gap { padding: 6px 0 !important; }
 .h-gap span { font-size: 12px; color: var(--label-3); border: 1px dashed var(--line); padding: 2px 8px; border-radius: 6px; }
 .change-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; padding: 10px 16px 14px; }
@@ -1420,6 +1429,13 @@ button.seat:disabled { cursor: default; }
 .change-plan { display: flex !important; flex-direction: row !important; align-items: center; justify-content: space-between; gap: 12px; }
 .change-plan > span { display: flex; flex-direction: column; }
 .change-plan small { font-size: 12px; color: var(--label-3); font-weight: 400; }
+/* 换区时旧的继续用到某天：开关一整行，打开后下面出日期 */
+.change-keep { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; padding: 2px 0; }
+.change-keep-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--label-2); }
+.change-keep-row > span { display: flex; flex-direction: column; gap: 1px; }
+.change-form .change-plan { grid-column: 1 / -1; }
+.change-keep small { font-size: 12px; color: var(--label-3); font-weight: 400; }
+.change-keep-date { max-width: 240px; }
 .plan-actions { justify-content: flex-end; gap: 8px; }
 
 /* ---------------- 时间轴（甘特图） ---------------- */
@@ -1436,7 +1452,7 @@ button.seat:disabled { cursor: default; }
 .gt-grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--sep); }
 .gt-grid i.major { background: var(--line); }
 .gt-today { position: absolute; top: 0; bottom: 0; width: 1.5px; margin-left: -0.75px; background: var(--red); opacity: 0.7; z-index: 3; }
-.gt-row { position: relative; height: var(--rh); align-items: center; cursor: pointer; }
+.gt-row { position: relative; height: calc(var(--rh) + (var(--lanes, 1) - 1) * 21px); align-items: center; cursor: pointer; }
 .gt-row:hover { background: var(--fill-2); }
 .gt-label { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 12px 0 16px; font-size: 13px; }
 .gt-label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1453,7 +1469,7 @@ button.seat:disabled { cursor: default; }
 .gt-lifetime { position: absolute; top: 10px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; z-index: 1; box-shadow: 0 0 0 2px var(--card); }
 .gt-gap { position: absolute; top: 16px; height: 0; border-top: 1.5px dashed var(--label-3); }
 .gt-gap em { position: absolute; left: 50%; top: -15px; transform: translateX(-50%); font-size: 10.5px; font-style: normal; color: var(--label-3); white-space: nowrap; background: var(--card); padding: 0 3px; }
-.gt-charge { position: absolute; top: 27px; width: 1.5px; height: 4px; margin-left: -0.75px; background: var(--label-2); z-index: 2; }
+.gt-charge { position: absolute; top: calc(27px + (var(--lanes, 1) - 1) * 21px); width: 1.5px; height: 4px; margin-left: -0.75px; background: var(--label-2); z-index: 2; }
 .gt-charge.future { opacity: 0.4; }
 .gt-charge.refund { background: var(--red); top: 4px; }
 .gt-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--label-2); }

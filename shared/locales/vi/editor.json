@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Vẫn dùng gói cũ thêm một thời gian",
+    "keepHint": "Đã trả trước và chưa hết hạn: hai giai đoạn chạy song song, mỗi bên tính phí như thường",
+    "keepUntil": "Gói cũ dùng đến",
+    "endAuto": "Khi giai đoạn sau bắt đầu",
+    "planned": "Dự kiến",
+    "parallel": { "other": "Chồng lấn {count} ngày" },
+    "payPhase": "Thuộc giai đoạn"
+  },
   "addTitle": "Thêm gói đăng ký",
   "editTitle": "Sửa “{name}”",
   "confirmDiscard": "Bỏ các thay đổi chưa lưu?",

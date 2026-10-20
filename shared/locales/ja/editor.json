@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "以前のものをしばらく継続",
+    "keepHint": "前払い済みでまだ期限前：2 つを並行し、それぞれ通常どおり課金します",
+    "keepUntil": "以前のものの利用終了日",
+    "endAuto": "次の期間の開始まで",
+    "planned": "予定",
+    "parallel": { "other": "{count} 日間並行" },
+    "payPhase": "記録する期間"
+  },
   "addTitle": "サブスクを追加",
   "editTitle": "「{name}」を編集",
   "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「解約済み」にしてください。",

@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} も {date} まで並行"
+  },
   "title": "すべてのサブスク",
   "all": "すべて",
   "summary": {

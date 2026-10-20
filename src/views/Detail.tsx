@@ -1,6 +1,6 @@
 import { createPortal } from 'preact/compat';
 import { useState } from 'preact/hooks';
-import { chargesBetween, convert, currentPhase, phaseSubs, cycleLabel, diffDays, effectiveStatus, memberDues, monthlyGross, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
+import { activePhases, chargesBetween, convert, currentPhase, phaseSubs, cycleLabel, diffDays, effectiveStatus, memberDues, monthlyGross, nextCharge, priceAt, servedTime, upcomingPhase } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
 import { chargeValue, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
@@ -9,7 +9,7 @@ import { History } from '../components/History.tsx';
 import { Amount, CatChip, Cell, Group, Icon, PayBadge, SubIcon } from '../components/ui.tsx';
 import { catColor, subImage, sumBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
-import { ChangeNote } from './List.tsx';
+import { ChangeNote, ParallelNote } from './List.tsx';
 import { MiniGantt } from './Gantt.tsx';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan } from '../../shared/phases.ts';
@@ -39,7 +39,9 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const total = sumBase(state, history);
   const totalCny = sumBase(state, history, 'CNY');
   const totalUsd = sumBase(state, history, 'USD');
-  const monthly = monthlyGross(sub, today);
+  // 换区后旧的那段还没到期：两段同时在付钱，每月成本按两段之和
+  const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
+  const monthly = monthlyGross(sub, today, state.fx);
   const remind = sub.remindDays ?? state.settings.remindDays;
   const icon = subImage(sub);
   const label = t(`list.status.${st}`);
@@ -47,7 +49,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const ro = !!state.readonly;
   const dues = memberDues(sub, today);
   const [allCharges, setAllCharges] = useState(false);
-  const [pay, setPay] = useState<{ pay?: Payment; index?: number } | null>(null);
+  const [pay, setPay] = useState<{ pay?: Payment; index?: number; phase?: string } | null>(null);
   const [share, setShare] = useState(false);
 
   const actions = (
@@ -105,6 +107,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           {cur.currency !== base && ` · ≈ ${money(convert(cur.price, cur.currency, base, state.fx), base)}`}
         </div>
         {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
+        <ParallelNote sub={sub} cur={cur} today={today} />
         <div class="d-actions">{actions}</div>
       </div>
       <Stats sub={sub} state={state} today={today} total={total} count={history.length} alt={base === 'CNY' ? money(totalUsd, 'USD', { compact: true }) : base === 'USD' ? money(totalCny, 'CNY', { compact: true }) : undefined} />
@@ -119,7 +122,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
         <Group title={t('detail.summary')}>
           <Cell label={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Cell>
           <Cell label={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Cell>
-          {cur.cycle.unit !== 'lifetime' && <Cell label={t('detail.field.monthlyYearly')}>{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>}
+          {cur.cycle.unit !== 'lifetime' && <Cell label={t('detail.field.monthlyYearly')} sub={parallel.length ? t('detail.overlap.monthlyHint', { count: parallel.length + 1 }) : undefined}>{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>}
           <Cell label={t('detail.field.category')}>
             <CatChip cat={sub.category} />
           </Cell>
@@ -142,6 +145,25 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           {cur.region && <Cell label={t('detail.field.region')}>{`${flag(cur.region)} ${cur.region}`.trim()}</Cell>}
         </Group>
 
+
+        {parallel.length > 0 && (
+          <Group title={t('detail.overlap.title')}>
+            {parallel.map((v) => (
+              <Cell
+                key={v.start}
+                label={
+                  <span class="row" style={{ gap: 6 }}>
+                    {v.region ? `${flag(v.region)} ${v.region}` : t('detail.overlap.previous')}
+                    <PayBadge m={state.methods.find((m) => m.id === v.methodId)} />
+                  </span>
+                }
+                sub={t('detail.overlap.until', { date: cnDateFull(v.end!), rel: relDays(diffDays(today, v.end!)) })}
+              >
+                {money(v.price, v.currency)} · {cycleLabel(v.cycle)}
+              </Cell>
+            ))}
+          </Group>
+        )}
 
         {up && (
           <Group
@@ -218,13 +240,13 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
               .map((c, i) => {
                 const r = rateOn(state.fxHistory, c.currency, c.date);
                 const cny = rateOn(state.fxHistory, 'CNY', c.date);
-                // 同一天可能有多笔（如重复扣款），用当天的序号定位
-                const index = history.filter((x) => x.date === c.date).indexOf(c);
+                // 同一天可能有多笔（如重复扣款），用当天在同一段里的序号定位；并行的两段各算各的
+                const index = history.filter((x) => x.date === c.date && x.sub.start === c.sub.start).indexOf(c);
                 return (
                   <div
                     key={`${c.date}-${i}`}
                     class={`charge-row ${ro ? '' : 'editable'} ${c.kind ?? ''}`}
-                    onClick={() => !ro && setPay({ pay: { date: c.date, amount: c.kind === 'failed' ? currentPhase(sub, c.date).price : c.amount, kind: c.kind, settled: c.settled, note: c.note }, index })}
+                    onClick={() => !ro && setPay({ pay: { date: c.date, amount: c.kind === 'failed' ? c.sub.price : c.amount, kind: c.kind, settled: c.settled, note: c.note }, index, phase: sub.phases?.length ? c.sub.start : undefined })}
                   >
                     <span class="cr-date">
                       {c.date}
@@ -268,7 +290,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
       </div>
       {/* 挂到 body：详情本身可能在弹层里，嵌套的弹层放在里面会被裁切 */}
       {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
-      {pay && createPortal(<PaymentSheet sub={sub} today={today} edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0 } : undefined} onClose={() => setPay(null)} />, document.body)}
+      {pay && createPortal(<PaymentSheet sub={sub} today={today} edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined} onClose={() => setPay(null)} />, document.body)}
     </div>
   );
 }
@@ -280,13 +302,10 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
 function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; state: AppState; today: string; total: number; count: number; alt?: string }) {
   const base = state.settings.baseCurrency;
   const vs = phaseSubs(sub);
-  // 实际在订的天数：各段到今天（或结束日）为止，不算断档
-  const active = vs.reduce((a, v) => {
-    if (v.start > today) return a;
-    const end = v.end && v.end < today ? v.end : today;
-    return a + Math.max(0, diffDays(v.start, end));
-  }, 0);
-  const gaps = vs.slice(1).filter((v, i) => vs[i].end && vs[i].end! < v.start).length;
+  // 实际在订的天数：各段到今天（或结束日）为止，不算断档，并行的不重复计
+  const served = servedTime(sub, today);
+  const active = served.days;
+  const gaps = served.gaps.length;
   const years = Math.floor(active / 365);
   const months = Math.floor((active % 365) / 30.44);
   const lifetime = sub.cycle.unit === 'lifetime' && vs.length === 1;

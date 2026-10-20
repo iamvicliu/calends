@@ -1,5 +1,5 @@
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
-import { addDays, addMonths, chargesBetween, currentPhase, cycleLabel, effectiveStatus, lastCharge, memberDues, monthlyGross, myShareFactor, nextCharge, phaseSubs, priceAt, runwayFor, subError, todayIn, totals, uid, type Charge } from '../shared/billing.ts';
+import { activePhases, addDays, addMonths, chargesBetween, currentPhase, cycleLabel, effectiveStatus, lastCharge, memberDues, monthlyGross, myShareFactor, nextCharge, phaseSubs, priceAt, runwayFor, subError, todayIn, totals, uid, type Charge } from '../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../shared/metrics.ts';
 import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
@@ -103,7 +103,9 @@ const kindOf = (s: Subscription): Scope => (s.proxy ? 'proxy' : s.share?.role ==
 function row(st: AppState, s: Subscription, today: string, out?: string) {
   const cur = currentPhase(s, today);
   const next = nextCharge(s, today);
-  const monthly = monthlyGross(cur, today);
+  // 换区后旧阶段还在跑：每月成本按并行各段之和，另列出同时进行的旧阶段
+  const monthly = monthlyGross(s, today, st.fx);
+  const parallel = s.phases?.length ? activePhases(s, today).filter((v) => v.start !== cur.start) : [];
   return {
     id: s.id,
     name: s.name,
@@ -123,6 +125,7 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
     start: s.start,
     end: s.end ?? null,
     has_planned_change: !!s.phases?.some((p) => p.planned),
+    ...(parallel.length ? { also_running: parallel.map((v) => ({ start: v.start, until: v.end ?? null, price: money(st, v.price, v.currency, undefined, out), cycle: cycleLabel(v.cycle), region: v.region ?? null, method: st.methods.find((m) => m.id === v.methodId)?.name ?? null })) } : {}),
   };
 }
 
@@ -426,7 +429,7 @@ export const TOOLS: Tool[] = [
             region: m.region ?? null,
             balance: r ? round(r.current) : (m.balance ?? null),
             balance_as_of: m.balanceAsOf ?? null,
-            subscriptions: st.subscriptions.filter((s) => currentPhase(s, today).methodId === m.id && ['active', 'trial', 'ending'].includes(effectiveStatus(s, today))).map((s) => s.name),
+            subscriptions: st.subscriptions.filter((s) => [currentPhase(s, today), ...activePhases(s, today)].some((v) => v.methodId === m.id) && ['active', 'trial', 'ending'].includes(effectiveStatus(s, today))).map((s) => s.name),
             runway: r ? { monthly_drain: round(r.monthlyDrain), covered_charges: r.coveredCharges, runs_out_on: r.runsOutOn ?? null, shortfall: r.shortfall ? { date: r.shortfall.date, name: r.shortfall.sub.name, amount: round(r.shortfall.amount) } : null } : null,
             topup: p && p.need > 0 ? { need: round(p.need), min_need: round(p.minNeed), deadline: p.deadline ?? null } : null,
           };
@@ -633,7 +636,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'change_plan',
     description:
-      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap (action=resume), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch.',
+      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap (action=resume), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
@@ -641,6 +644,7 @@ export const TOOLS: Tool[] = [
         action: { type: 'string', enum: ['switch', 'resume', 'confirm', 'drop'] },
         at: DATE,
         plan: obj({ price: { type: 'number' }, currency: { type: 'string' }, cycle: CYCLE, method: { type: 'string' }, region: { type: 'string' }, note: { type: 'string' }, planned: { type: 'boolean' } }, ['price', 'currency', 'cycle']),
+        keep_previous_until: { ...DATE, description: 'action=switch only: the previous phase keeps running until this date (after `at`), overlapping the new one.' },
         dry_run: DRY,
       },
       ['subscription', 'action', 'at'],
@@ -657,7 +661,8 @@ export const TOOLS: Tool[] = [
       const cyc = p.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       const plan = { price: num(p.price, 'plan.price'), currency: String(p.currency).toUpperCase(), cycle: { unit: cyc.unit, every: Math.max(1, Number(cyc.every ?? 1)) }, methodId: methodRef(st, p.method) ?? currentPhase(s, today).methodId, region: str(p.region)?.toUpperCase(), note: str(p.note), planned: p.planned ? true : undefined };
       if (!st.fx.rates[plan.currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: plan.currency }));
-      return commit(ctx, st, today, act === 'resume' ? resume(s, at, plan) : switchPlan(s, at, plan), a.dry_run, [act]);
+      const keep = act === 'switch' && a.keep_previous_until != null ? date(a.keep_previous_until, 'keep_previous_until') : undefined;
+      return commit(ctx, st, today, act === 'resume' ? resume(s, at, plan) : switchPlan(s, at, plan, keep), a.dry_run, keep ? [act, 'keep_previous_until'] : [act]);
     },
   },
   {
@@ -695,6 +700,7 @@ export const TOOLS: Tool[] = [
         settled: obj({ amount: { type: 'number' }, currency: { type: 'string' } }, ['amount', 'currency']),
         note: { type: 'string' },
         allow_duplicate: { type: 'boolean', default: false },
+        phase: { ...DATE, description: 'Start date of the phase this payment belongs to; only needed when two phases overlap on that date (defaults to the latest-started one).' },
         dry_run: DRY,
       },
       ['subscription', 'amount'],
@@ -711,7 +717,7 @@ export const TOOLS: Tool[] = [
       if (isRecorded && existing.length && !a.allow_duplicate) throw new Error(t('mcp.error.duplicatePayment', { date: d, amount }));
       const st2 = a.settled as { amount: unknown; currency: unknown } | undefined;
       const pay: Payment = { date: d, amount, kind: kind === 'charge' ? undefined : (kind as Payment['kind']), settled: st2 ? { amount: sign * Math.abs(num(st2.amount, 'settled.amount')), currency: String(st2.currency).toUpperCase() } : undefined, note: str(a.note) };
-      return commit(ctx, st, today, savePayment(s, today, pay), a.dry_run, ['payment']);
+      return commit(ctx, st, today, savePayment(s, today, pay, undefined, a.phase != null ? date(a.phase, 'phase') : undefined), a.dry_run, ['payment']);
     },
   },
   {
@@ -719,11 +725,11 @@ export const TOOLS: Tool[] = [
     description: 'Delete one recorded payment of a subscription by date (index picks among several on the same day, 0-based).',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF, date: DATE, index: { type: 'integer', default: 0 }, dry_run: DRY }, ['subscription', 'date']),
+    inputSchema: obj({ subscription: SUBREF, date: DATE, index: { type: 'integer', default: 0 }, phase: { ...DATE, description: 'Start date of the phase holding the payment, when two phases overlap.' }, dry_run: DRY }, ['subscription', 'date']),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
-      return commit(ctx, st, today, deletePayment(s, today, date(a.date, 'date'), Number(a.index ?? 0)), a.dry_run, ['delete_payment']);
+      return commit(ctx, st, today, deletePayment(s, today, date(a.date, 'date'), Number(a.index ?? 0), a.phase != null ? date(a.phase, 'phase') : undefined), a.dry_run, ['delete_payment']);
     },
   },
   {

@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "Aussi en cours",
+    "previous": "Ancienne formule",
+    "until": "Jusqu’au {date} · {rel}",
+    "monthlyHint": { "one": "{count} formule en parallèle, additionnée", "other": "{count} formules en parallèle, additionnées" }
+  },
   "action": {
     "edit": "Modifier",
     "pause": "Suspendre",

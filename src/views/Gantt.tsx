@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { addMonths, chargesBetween, diffDays, effectiveStatus, phaseSubs, priceAt } from '../../shared/billing.ts';
+import { addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
 import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
@@ -20,10 +20,15 @@ interface Seg_ {
 interface Row {
   s: Subscription;
   segs: Seg_[];
+  /** 每段所在的轨道：换区后新旧两段并行时，后开始的那段画在下面一条 */
+  lanes: number[];
   gaps: Array<{ from: string; to: string }>;
   first: string;
   last: string;
 }
+
+/** 并行的段往下错开的距离（条高 18） */
+const LANE = 21;
 
 const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.round(d / 30.4) }) : t('list.gantt.days', { count: d }));
 
@@ -71,8 +76,13 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         const end = v.end ?? (st === 'ended' ? today : undefined);
         return { v, from: v.start, to: end ?? addMonths(today, 6), open: !end };
       });
-      const gaps = segs.slice(1).flatMap((g, i) => (segs[i].to < g.from ? [{ from: segs[i].to, to: g.from }] : []));
-      return { s, segs, gaps, first: segs[0].from, last: segs[segs.length - 1].to };
+      const spans = segs.map((g) => ({ start: g.from, end: g.open ? undefined : g.to }));
+      // 断订：前面所有段都已结束、下一段还没开始的空档（并行的旧段还在跑就不算）
+      const gaps = segs.slice(1).flatMap((g, i) => {
+        const until = coveredUntil(spans, i + 1);
+        return until && until < g.from ? [{ from: until, to: g.from }] : [];
+      });
+      return { s, segs, lanes: phaseLanes(spans), gaps, first: segs[0].from, last: segs.reduce((m, g) => (g.to > m ? g.to : m), segs[0].to) };
     });
     // 每个订阅各占一行、互相独立；顺序跟随页面顶部的排序与筛选
     return out;
@@ -129,7 +139,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           {rows.map((r) => {
             const charges = w ? chargesBetween(r.s, start, end, today) : [];
             return (
-              <div key={r.s.id} data-id={r.s.id} class="gt-row" onClick={() => onOpen(r.s)}>
+              <div key={r.s.id} data-id={r.s.id} class="gt-row" style={{ '--lanes': Math.max(...r.lanes) + 1 } as Record<string, number>} onClick={() => onOpen(r.s)}>
                 <div class="gt-label" title={r.s.name}>
                   <SubIcon sub={r.s} size={20} />
                   <span>{r.s.name}</span>
@@ -140,13 +150,14 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       {x(g.to) - x(g.from) > 56 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
                     </span>
                   ))}
-                  {r.segs.map((g) => {
+                  {r.segs.map((g, gi) => {
                     const left = x(g.from);
+                    const top = 8 + r.lanes[gi] * LANE;
 
                     if (g.to < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
-                    if (lifetime) return <span key={g.from} class="gt-lifetime" style={{ left, background: color(g.v) }} title={tip} />;
+                    if (lifetime) return <span key={g.from} class="gt-lifetime" style={{ left, top: top + 2, background: color(g.v) }} title={tip} />;
                     // 段内按调价、首期优惠切成几截，每截标自己的价格
                     const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])]
                       .filter((d) => d >= g.from && d <= g.to)
@@ -164,7 +175,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                         <span
                           key={a}
                           class={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 ? 'cont' : ''} ${!last ? 'cut' : ''} ${intro ? 'intro' : ''}`}
-                          style={{ left: pl, width: pw, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
+                          style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                           title={ptip || tip}
                         >
                           {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && <i class="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />}

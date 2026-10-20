@@ -13,7 +13,9 @@
   "phase": {
     "switchTooEarly": "生效日期要晚于当前阶段的开始日期",
     "resumeTooEarly": "续订日期不能早于上次结束的日期",
-    "priceOutOfRange": "调价日期不在任何阶段内"
+    "priceOutOfRange": "调价日期不在任何阶段内",
+    "keepTooEarly": "继续使用的截止日期要晚于生效日期",
+    "endTooEarly": "结束日期要晚于这一阶段的开始日期"
   },
   "event": {
     "label": "{region}{price}/{per}",

@@ -1,4 +1,4 @@
-import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt } from '../../shared/billing.ts';
+import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, flag, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 
@@ -26,8 +26,8 @@ function story(state: AppState, sub: Subscription, today: string) {
   const values = charges.map((c) => chargeValue(state, c));
   const total = values.reduce((a, v) => a + v, 0);
   const vs = phaseSubs(sub);
-  const active = vs.reduce((a, v) => (v.start > today ? a : a + Math.max(0, diffDays(v.start, v.end && v.end < today ? v.end : today))), 0);
-  const gaps = vs.slice(1).flatMap((v, i) => (vs[i].end && vs[i].end! < v.start ? [{ from: vs[i].end!, to: v.start, days: diffDays(vs[i].end!, v.start) }] : []));
+  // 并行的阶段不重复计天数；断档只算前面各段都已结束的空档
+  const { days: active, gaps } = servedTime(sub, today);
   const years = new Map<string, number>();
   charges.forEach((c, i) => years.set(c.date.slice(0, 4), (years.get(c.date.slice(0, 4)) ?? 0) + values[i]));
   const first = vs[0];

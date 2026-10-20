@@ -1,38 +1,58 @@
-import { cycleLabel, diffDays, isGap, phaseSubs } from '../../shared/billing.ts';
+import { addDays, coveredUntil, cycleLabel, diffDays, isGap, phaseLanes, phaseSubs } from '../../shared/billing.ts';
 import { money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
+import { DatePicker } from './DatePicker.tsx';
 import { PayBadge } from './ui.tsx';
 
-/** 订阅历程：阶段（地区/币种/价格/支付方式）、阶段内调价、断更空档 */
-export function History({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+/**
+ * 订阅历程：阶段（地区/币种/价格/支付方式）、阶段内调价、断更空档。
+ * 时间上重叠的阶段（换区后旧区域还没到期）画在第二条轨道上，并标出并行了多少天；
+ * 给了 onEnd 时（编辑页）每段的结束日可以直接改
+ */
+export function History({ sub, state, today, onEnd }: { sub: Subscription; state: AppState; today: string; onEnd?: (start: string, end: string | undefined) => void }) {
   const vs = phaseSubs(sub);
   const hasStory = vs.length > 1 || (vs[0].priceHistory?.length ?? 0) > 1;
   if (!hasStory) return null;
   const method = (id?: string) => state.methods.find((m) => m.id === id);
+  const lanes = phaseLanes(vs);
+  const laned = lanes.some((l) => l > 0);
+  const editable = !!onEnd && !!sub.phases?.length;
   const items: preact.JSX.Element[] = [];
   vs.forEach((v, i) => {
-    const prev = vs[i - 1];
-    if (isGap(prev?.end, v.start)) {
-      const end = prev.end!;
-      const months = Math.round(diffDays(end, v.start) / 30.4375);
+    // 断更看前面各段最晚跑到哪天：并行的旧段还没到期就不算断
+    const until = coveredUntil(vs, i);
+    if (i > 0 && isGap(until, v.start)) {
+      const months = Math.round(diffDays(until!, v.start) / 30.4375);
       items.push(
         <li key={`gap${i}`} class="h-gap">
-          <span>{months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: diffDays(end, v.start) })}</span>
+          <span>{months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: diffDays(until!, v.start) })}</span>
         </li>,
       );
     }
+    const parallel = i > 0 && until && until > v.start ? diffDays(v.start, v.end && v.end < until ? v.end : until) : 0;
     const live = !v.end || v.end > today;
     const hist = (v.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
+    const raw = sub.phases?.find((p) => p.start === v.start);
+    const isLast = i === vs.length - 1;
     items.push(
-      <li key={`p${i}`} class={`h-phase ${live && v.start <= today ? 'now' : ''}`}>
-        <div class="h-range">
-          {v.start > today ? (v.end ? t('editor.history.plannedRange', { start: v.start, end: v.end }) : t('editor.history.plannedFrom', { start: v.start })) : t('editor.history.range', { start: v.start, end: v.end ?? t('editor.history.now') })}
-        </div>
+      <li key={`p${i}`} class={`h-phase ${live && v.start <= today ? 'now' : ''} ${lanes[i] > 0 ? 'lane' : ''} ${editable ? 'edit' : ''}`}>
+        {editable ? (
+          <div class="h-range h-edit">
+            <span>{v.start} →</span>
+            <DatePicker value={raw?.end} clearable min={addDays(v.start, 1)} placeholder={isLast ? t('editor.history.now') : t('editor.overlap.endAuto')} onChange={(d) => onEnd!(v.start, d)} />
+            {v.planned && <span class="badge">{t('editor.overlap.planned')}</span>}
+          </div>
+        ) : (
+          <div class="h-range">
+            {v.start > today ? (v.end ? t('editor.history.plannedRange', { start: v.start, end: v.end }) : t('editor.history.plannedFrom', { start: v.start })) : t('editor.history.range', { start: v.start, end: v.end ?? t('editor.history.now') })}
+          </div>
+        )}
         <div class="h-plan">
           {v.region && <span class="badge">{v.region}</span>}
           <b>{money(v.price, v.currency)}</b> {cycleLabel(v.cycle)}
           {method(v.methodId) && <PayBadge m={method(v.methodId)} />}
+          {parallel > 0 && <span class="badge blue h-par">{t('editor.overlap.parallel', { count: parallel })}</span>}
         </div>
         {hist.length > 1 && (
           <ul class="h-prices">
@@ -47,5 +67,5 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
       </li>,
     );
   });
-  return <ol class="history">{items.reverse()}</ol>;
+  return <ol class={`history ${laned ? 'laned' : ''}`}>{items.reverse()}</ol>;
 }
