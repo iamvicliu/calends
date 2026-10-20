@@ -1,0 +1,74 @@
+// 完整备份与恢复：导出的文件导入到一个全新的部署后，账本与原来完全一致。
+// 包含：订阅、支付方式、全部设置（含通知渠道、日历订阅令牌）、当前汇率、历史汇率。
+// 不包含：登录会话、AI 接入令牌（属于凭据，新部署应重新生成）、提醒发送记录。
+import type { FxTable, PaymentMethod, Settings, Subscription } from '../shared/types.ts';
+import type { Env } from './env.ts';
+import { getFx, getSettings, putKv, replaceAll } from './store.ts';
+
+export const BACKUP_FORMAT = 'subscription-ledger-backup';
+export const BACKUP_VERSION = 2;
+
+export interface Backup {
+  format: typeof BACKUP_FORMAT;
+  version: number;
+  exportedAt: string;
+  subscriptions: Subscription[];
+  methods: PaymentMethod[];
+  settings: Settings;
+  fx: FxTable;
+  fxDaily: Array<{ date: string; rates: Record<string, number>; source: string }>;
+}
+
+export async function exportAll(env: Env): Promise<Backup> {
+  const [subs, methods, fxDaily] = await Promise.all([
+    env.DB.prepare('SELECT data FROM subscriptions ORDER BY id').all<{ data: string }>(),
+    env.DB.prepare('SELECT data FROM methods ORDER BY id').all<{ data: string }>(),
+    env.DB.prepare('SELECT date, rates, source FROM fx_daily ORDER BY date').all<{ date: string; rates: string; source: string }>(),
+  ]);
+  return {
+    format: BACKUP_FORMAT,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
+    methods: methods.results.map((r) => JSON.parse(r.data) as PaymentMethod),
+    settings: await getSettings(env),
+    fx: await getFx(env),
+    fxDaily: fxDaily.results.map((r) => ({ date: r.date, rates: JSON.parse(r.rates) as Record<string, number>, source: r.source })),
+  };
+}
+
+/** 读取任意版本的备份：v2 是完整格式；早期导出只有 subscriptions / methods / settings */
+export function parseBackup(raw: unknown): Backup {
+  const b = raw as Partial<Backup>;
+  if (!b || !Array.isArray(b.subscriptions)) throw new Error('不是有效的备份文件');
+  if (b.format && b.format !== BACKUP_FORMAT) throw new Error(`不认识的备份格式：${b.format}`);
+  if ((b.version ?? 1) > BACKUP_VERSION) throw new Error(`备份来自更新的版本（v${b.version}），请先升级本站`);
+  return {
+    format: BACKUP_FORMAT,
+    version: b.version ?? 1,
+    exportedAt: b.exportedAt ?? '',
+    subscriptions: b.subscriptions,
+    methods: b.methods ?? [],
+    settings: (b.settings ?? {}) as Settings,
+    fx: b.fx as FxTable,
+    fxDaily: b.fxDaily ?? [],
+  };
+}
+
+/** 整体替换为备份里的内容；历史汇率按日期合并（同一天以备份为准） */
+export async function restoreAll(env: Env, b: Backup): Promise<{ subscriptions: number; methods: number; fxDays: number }> {
+  await replaceAll(env, b.subscriptions, b.methods, 'replace');
+  if (b.settings && Object.keys(b.settings).length) await putKv(env, 'settings', { ...(await getSettings(env)), ...b.settings });
+  if (b.fx?.rates) await putKv(env, 'fx', b.fx);
+  // D1 一次 batch 的语句数有限，分批写
+  for (let i = 0; i < b.fxDaily.length; i += 50) {
+    await env.DB.batch(
+      b.fxDaily
+        .slice(i, i + 50)
+        .map((d) =>
+          env.DB.prepare('INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO UPDATE SET rates = excluded.rates, source = excluded.source').bind(d.date, JSON.stringify(d.rates), d.source),
+        ),
+    );
+  }
+  return { subscriptions: b.subscriptions.length, methods: b.methods.length, fxDays: b.fxDaily.length };
+}

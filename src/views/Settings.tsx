@@ -108,11 +108,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
     if (!r.subscriptions.length) return toast('CSV 中没有可导入的订阅', true);
     setImporting({ subs: r.subscriptions, methods: r.methods });
   };
+  // 备份恢复：整份交给服务端，订阅、支付方式、设置、汇率一起原样还原
+  const [restoring, setRestoring] = useState<{ raw: unknown; subs: number; methods: number; exportedAt?: string; version: number } | null>(null);
   const onJson = (text: string) => {
     try {
-      const j = JSON.parse(text) as Partial<AppState>;
+      const j = JSON.parse(text) as { subscriptions?: unknown[]; methods?: unknown[]; exportedAt?: string; version?: number };
       if (!Array.isArray(j.subscriptions)) throw new Error();
-      setImporting({ subs: j.subscriptions, methods: j.methods ?? [] });
+      setRestoring({ raw: j, subs: j.subscriptions.length, methods: j.methods?.length ?? 0, exportedAt: j.exportedAt, version: j.version ?? 1 });
     } catch {
       toast('不是有效的备份文件', true);
     }
@@ -253,12 +255,9 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <Group title="数据">
           <Cell label="导入 CSV" onClick={() => pickFile('.csv,text/csv', onCsv)} />
-          <Cell label="从 JSON 备份恢复" onClick={() => pickFile('.json,application/json', onJson)} />
+          <Cell label="从备份恢复" onClick={() => pickFile('.json,application/json', onJson)} />
           <Cell label="导出 CSV" onClick={exportCsv} />
-          <Cell
-            label="导出 JSON 备份"
-            onClick={() => download(`ledger-backup-${today}.json`, JSON.stringify({ subscriptions: state.subscriptions, methods: state.methods, settings: { ...s, icsToken: undefined } }, null, 2), 'application/json')}
-          />
+          <Cell label="导出完整备份" onClick={() => (location.href = '/api/backup')} />
         </Group>
 
         <Group>
@@ -268,6 +267,41 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
         </Group>
       </div>
 
+      {restoring && (
+        <Sheet
+          narrow
+          title="从备份恢复"
+          onClose={() => setRestoring(null)}
+          foot={
+            <>
+              <span class="grow" />
+              <button class="btn" onClick={() => setRestoring(null)}>
+                取消
+              </button>
+              <button
+                class="btn primary"
+                onClick={() =>
+                  run(async () => {
+                    const r = await api<{ restored: { subscriptions: number; methods: number; fxDays: number }; state: AppState }>('/api/backup', { method: 'POST', body: JSON.stringify(restoring.raw) });
+                    setRestoring(null);
+                    location.reload();
+                    return r;
+                  }, '已恢复')
+                }
+              >
+                替换当前账本
+              </button>
+            </>
+          }
+        >
+          <Group foot="当前账本会被备份里的内容整体替换，无法撤销；建议先导出一份当前备份。">
+            <Cell label="订阅">{restoring.subs} 个</Cell>
+            <Cell label="支付方式">{restoring.methods} 个</Cell>
+            {restoring.exportedAt && <Cell label="备份时间">{restoring.exportedAt.slice(0, 16).replace('T', ' ')}</Cell>}
+            {restoring.version < 2 && <Cell label="格式">旧版备份：只含订阅与支付方式</Cell>}
+          </Group>
+        </Sheet>
+      )}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {importing && (
         <Sheet

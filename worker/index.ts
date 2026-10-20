@@ -9,6 +9,7 @@ import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type D
 import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from './store.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { TOOLS } from './mcp-tools.ts';
+import { exportAll, parseBackup, restoreAll } from './backup.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
@@ -127,6 +128,24 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const next = { ...cur, icsToken: randomToken(16) };
     await putKv(env, 'settings', next);
     return json(next);
+  }
+  // 完整备份：导出文件可在全新部署上原样恢复
+  if (path === '/api/backup' && method === 'GET') {
+    const b = await exportAll(env);
+    return new Response(JSON.stringify(b, null, 1), { headers: { 'content-type': 'application/json; charset=utf-8', 'content-disposition': `attachment; filename="ledger-backup-${b.exportedAt.slice(0, 10)}.json"`, 'cache-control': 'no-store' } });
+  }
+  if (path === '/api/backup' && method === 'POST') {
+    let b;
+    try {
+      b = parseBackup(await req.json());
+    } catch (e) {
+      return bad(e instanceof Error ? e.message : '备份文件无效');
+    }
+    for (const s of b.subscriptions) {
+      const err = validSub(s);
+      if (err) return bad(`${s?.name ?? '?'}：${err}`);
+    }
+    return json({ restored: await restoreAll(env, b), state: await loadState(env) });
   }
   if (path === '/api/import' && method === 'POST') {
     const body = (await req.json()) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; settings?: Partial<Settings>; mode?: 'merge' | 'replace' };
