@@ -5,7 +5,7 @@
     "m6": "Halbjährlich",
     "m12": "Jährlich",
     "custom": {
-      "one": "Jeden {count}. Monat",
+      "one": "Jeden Monat",
       "other": "Alle {count} Monate"
     }
   },
@@ -23,19 +23,19 @@
     "biennial": "Alle 2 Jahre",
     "everyN": {
       "day": {
-        "one": "Jeden {count}. Tag",
+        "one": "Jeden Tag",
         "other": "Alle {count} Tage"
       },
       "week": {
-        "one": "Jede {count}. Woche",
+        "one": "Jede Woche",
         "other": "Alle {count} Wochen"
       },
       "month": {
-        "one": "Jeden {count}. Monat",
+        "one": "Jeden Monat",
         "other": "Alle {count} Monate"
       },
       "year": {
-        "one": "Jedes {count}. Jahr",
+        "one": "Jedes Jahr",
         "other": "Alle {count} Jahre"
       }
     }

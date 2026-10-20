@@ -56,7 +56,7 @@
       "m6": "Pro Halbjahr",
       "m12": "Pro Jahr",
       "custom": {
-        "one": "Jeden {count}. Monat",
+        "one": "Jeden Monat",
         "other": "Alle {count} Monate"
       }
     },
