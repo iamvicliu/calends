@@ -4,7 +4,8 @@ import { chargeValue, toBaseAt } from '../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../shared/metrics.ts';
 import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
 import { matchEntries } from '../shared/proxy.ts';
-import type { AppState, Payment, Subscription } from '../shared/types.ts';
+import { normName, peopleLedger, type PersonLedger } from '../shared/people.ts';
+import type { AppState, Payment, Person, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { loadState, upsert } from './store.ts';
 import { t } from '../shared/i18n.ts';
@@ -56,6 +57,52 @@ export function findSub(st: AppState, ref: unknown): Subscription {
   if (fuzzy.length === 1) return fuzzy[0];
   if (!fuzzy.length) throw new Error(t('mcp.error.subNotFound', { q }));
   throw new Error(t('mcp.error.subAmbiguous', { q, count: fuzzy.length, list: candidates(fuzzy) }));
+}
+
+/** 按 id 或称呼找人；称呼模糊匹配到多个时报错并列出候选 */
+export function findPerson(st: AppState, ref: unknown): Person {
+  const q = String(ref ?? '').trim();
+  const people = st.people ?? [];
+  const byId = people.find((p) => p.id === q);
+  if (byId) return byId;
+  const k = normName(q);
+  const exact = people.filter((p) => normName(p.name) === k);
+  if (exact.length === 1) return exact[0];
+  const fuzzy = exact.length ? exact : k ? people.filter((p) => normName(p.name).includes(k)) : [];
+  if (fuzzy.length === 1) return fuzzy[0];
+  if (!fuzzy.length) throw new Error(t('mcp.error.personNotFound', { q }));
+  throw new Error(t('mcp.error.personAmbiguous', { q, count: fuzzy.length, list: candidates(fuzzy) }));
+}
+
+/** 联系方式的一行文字（MCP 用，不翻译渠道名） */
+const contactLine = (p: Pick<Person, 'contactVia' | 'contact'>) => (p.contact ? `${p.contactVia && p.contactVia !== '其他' ? `${p.contactVia} ` : ''}${p.contact}` : null);
+
+/** 一个人的应收：在哪些合租 / 代付里、欠多少、收回多少 */
+function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
+  const conv = (v: number) => round(toBaseAt(st, v, st.settings.baseCurrency, undefined, out));
+  return {
+    person_id: l.person.id || null,
+    name: l.person.name,
+    contact: contactLine(l.person),
+    note: l.person.note ?? null,
+    owed: conv(l.owed),
+    periods_owed: l.periodsOwed,
+    received: conv(l.received),
+    last_paid: l.lastPaid ?? null,
+    in: l.items.map((i) => ({
+      subscription_id: i.sub.id,
+      name: i.sub.name,
+      kind: i.kind,
+      member_id: i.member?.id ?? null,
+      active: i.active,
+      left: i.member?.left && i.member.left <= today ? i.member.left : null,
+      owed: conv(i.owed),
+      periods_owed: i.periodsOwed,
+      received: conv(i.received),
+      last_paid: i.lastPaid ?? null,
+      paid_until: i.paidUntil ?? null,
+    })),
+  };
 }
 
 /** 时间范围：today / next_3_days / next_7_days / next_30_days / this_month / next_month / last_30_days / this_year / custom */
@@ -435,8 +482,21 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'list_people',
+    description: 'People in the ledger (shared-plan members and people I pay on behalf of, each listed once): contact, which shared plans / proxy payments they are in, how much they owe me now, how much they have paid so far and when they last paid. Use query to find someone by name.',
+    inputSchema: obj({ query: { type: 'string', description: 'Fuzzy name filter.' }, owing_only: { type: 'boolean', default: false }, currency_out: CURRENCY_OUT }),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const out = outCcy(st, a) ?? st.settings.baseCurrency;
+      const q = normName(str(a.query));
+      const list = peopleLedger(st, today).filter((l) => (!q || normName(l.person.name).includes(q)) && (!a.owing_only || l.periodsOwed > 0));
+      const rows = list.map((l) => personRow(st, l, out, today));
+      return { currency: out, count: rows.length, total_owed: round(rows.reduce((x, r) => x + r.owed, 0)), people: rows };
+    },
+  },
+  {
     name: 'get_receivables',
-    description: 'Money others owe me: shared-plan members whose payment is due/overdue, and proxy charges (paid on behalf of someone) not yet repaid.',
+    description: 'Money others owe me: by_person totals each person across all their shared plans and proxy payments; share lists shared-plan members whose payment is due/overdue; proxy lists charges paid on behalf of someone not yet repaid.',
     inputSchema: obj({ kind: { type: 'string', enum: ['share', 'proxy', 'all'], default: 'all' }, currency_out: CURRENCY_OUT }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
@@ -448,7 +508,7 @@ export const TOOLS: Tool[] = [
           : st.subscriptions.flatMap((s) =>
               memberDues(s, today)
                 .filter((d) => d.periodsOwed > 0)
-                .map((d) => ({ subscription_id: s.id, name: s.name, member: d.member.name, contact: d.member.contact ?? null, periods_owed: d.periodsOwed, paid_until: d.member.paidUntil ?? null, owed: money(st, d.owed, s.currency, undefined, out) })),
+                .map((d) => ({ subscription_id: s.id, name: s.name, person_id: d.member.personId ?? null, member: d.member.name, contact: d.member.contact ?? null, periods_owed: d.periodsOwed, paid_until: d.member.paidUntil ?? null, owed: money(st, d.owed, s.currency, undefined, out) })),
             );
       const proxy =
         kind === 'share'
@@ -464,11 +524,18 @@ export const TOOLS: Tool[] = [
                     const e = m.get(c.date);
                     const charged = e?.charged ?? c.amount;
                     const ccy = e?.chargedCurrency ?? c.currency;
-                    return { subscription_id: s.id, name: s.name, for: s.proxy!.forName, charge: c.date, charged: money(st, charged, ccy, c.date, out) };
+                    return { subscription_id: s.id, name: s.name, person_id: s.proxy!.personId ?? null, for: s.proxy!.forName, charge: c.date, charged: money(st, charged, ccy, c.date, out) };
                   });
               });
       const total = share.reduce((t, x) => t + x.owed.converted, 0) + proxy.reduce((t, x) => t + x.charged.converted, 0);
-      return { currency: out, total_outstanding: round(total), share, proxy };
+      // 按人汇总：只列现在欠钱的人，金额与下面的明细同源（memberDues / 代付逐期对账）
+      const by_person = peopleLedger(st, today)
+        .map((l) => ({ ...l, items: l.items.filter((i) => i.periodsOwed > 0 && (kind === 'all' || i.kind === kind)) }))
+        .filter((l) => l.items.length)
+        .map((l) => ({ ...l, owed: l.items.reduce((a, i) => a + i.owed, 0), periodsOwed: l.items.reduce((a, i) => a + i.periodsOwed, 0) }))
+        .map((l) => personRow(st, l, out, today))
+        .sort((a, b) => b.owed - a.owed);
+      return { currency: out, total_outstanding: round(total), by_person, share, proxy };
     },
   },
   {
@@ -729,12 +796,13 @@ export const TOOLS: Tool[] = [
   {
     name: 'record_receivable',
     description:
-      'Mark money received from others: a shared-plan member paid their share (kind=share; advances their paid-until date by their billing cycle unless until is given), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid).',
+      'Mark money received from others: a shared-plan member paid their share (kind=share; advances their paid-until date by their billing cycle unless until is given), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
     write: true,
     inputSchema: obj(
       {
-        subscription: SUBREF,
-        kind: { type: 'string', enum: ['share', 'proxy'] },
+        subscription: { ...SUBREF, description: 'Subscription id or name. Optional when person is given and only one of their plans / proxy payments matches.' },
+        person: { type: 'string', description: 'Person id or name (see list_people). Picks the matching member or proxy payment automatically.' },
+        kind: { type: 'string', enum: ['share', 'proxy'], description: 'Inferred when person is given.' },
         member: { type: 'string', description: 'share: member id or name.' },
         charge: { ...DATE, description: 'proxy: which charge date is being repaid (defaults to the oldest unpaid).' },
         amount: { type: 'number', minimum: 0 },
@@ -744,10 +812,13 @@ export const TOOLS: Tool[] = [
         note: { type: 'string' },
         dry_run: DRY,
       },
-      ['subscription', 'kind', 'amount'],
+      ['amount'],
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
+      if (a.person != null && String(a.person).trim()) a = { ...a, ...personTarget(st, a, today) };
+      if (!a.subscription) throw new Error(t('mcp.error.needSubOrPerson'));
+      if (a.kind !== 'share' && a.kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
       const s = findSub(st, a.subscription);
       const on = date(a.date, 'date', today);
       const ccy = (str(a.currency) ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
@@ -823,6 +894,20 @@ export const TOOLS: Tool[] = [
     },
   },
 ];
+
+/** record_receivable 按人记账：在这个人的合租、代付里找出要记的那一笔（优先现在欠钱的） */
+function personTarget(st: AppState, a: Record<string, unknown>, today: string): { subscription: string; kind: 'share' | 'proxy'; member?: string } {
+  const p = findPerson(st, a.person);
+  const sub = a.subscription ? findSub(st, a.subscription) : undefined;
+  const items = (peopleLedger(st, today).find((l) => l.person.id === p.id)?.items ?? []).filter((i) => (!sub || i.sub.id === sub.id) && (!a.kind || i.kind === a.kind));
+  const open = items.filter((i) => i.periodsOwed > 0);
+  const live = items.filter((i) => i.active);
+  const pick = open.length ? open : live.length === 1 ? live : items;
+  if (!pick.length) throw new Error(t('mcp.error.personNoItems', { name: p.name }));
+  if (pick.length > 1) throw new Error(t('mcp.error.personItemsAmbiguous', { name: p.name, list: candidates(pick.map((i) => ({ name: i.sub.name, id: i.sub.id }))) }));
+  const i = pick[0];
+  return { subscription: i.sub.id, kind: i.kind, member: i.member?.id };
+}
 
 function roundAll<T extends object>(o: T): T {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined).map(([k, v]) => [k, typeof v === 'number' ? round(v) : v])) as T;
