@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { currentPhase, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
+import { currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
 import { cnDate, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
@@ -92,7 +92,7 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
   const payN = facet('pay', payOf);
   const cats = [...new Set(mine.map((s) => s.category))].sort((x, y) => (catN.get(y) ?? 0) - (catN.get(x) ?? 0));
   const dirty = filter !== 'live' || cat !== (category ?? 'all') || pay !== 'all';
-  const mo = (s: Subscription) => toBase(state, monthlyGross(s, today), s.currency) * myShareFactor(s);
+  const mo = (s: Subscription) => monthlyMine(state, s, today);
   const rows = mine.filter(match).sort((a, b) => {
     if (sort === 'name') return a.name.localeCompare(b.name, 'zh');
     if (sort === 'cost') return mo(b) - mo(a) || toBase(state, b.price, b.currency) - toBase(state, a.price, a.currency);

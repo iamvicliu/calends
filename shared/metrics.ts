@@ -36,6 +36,11 @@ export function monthEnd(month: string): string {
   return addDays(addMonths(month + '-01', 1), -1);
 }
 
+/** 和上月末相比每月成本变了多少；两头都按当前汇率，只反映订阅本身的变化 */
+export function mrrChangeSinceLastMonth(state: AppState, today: string): number {
+  return mrrOn(state, today) - mrrOn(state, monthEnd(addMonths(today.slice(0, 8) + '01', -1).slice(0, 7)));
+}
+
 export interface MrrPoint {
   month: string; // YYYY-MM
   mrr: number;

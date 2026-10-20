@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../shared/billing.ts';
 import { cnDate, money, relDays } from '../../shared/format.ts';
 import { chargeValue } from '../../shared/fx.ts';
-import { contributionOn, insights, mrrSeries } from '../../shared/metrics.ts';
+import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries } from '../../shared/metrics.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
@@ -363,8 +363,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
   const base = state.settings.baseCurrency;
   const t = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
-  const prev = series[series.length - 2]?.mrr ?? 0;
-  const delta = t.mrr - prev;
+  const delta = mrrChangeSinceLastMonth(state, today);
   const ytd = useMemo(() => sumBase(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
   const live = useMemo(
     () =>

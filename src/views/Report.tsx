@@ -2,7 +2,7 @@ import { Fragment } from 'preact';
 import { useMemo, useState } from 'preact/hooks';
 import { addDays, addMonths, cycleDays, cycleLabel, diffDays, totals } from '../../shared/billing.ts';
 import { cnDate, money } from '../../shared/format.ts';
-import { cancelSavings, cashVsAccrual, contributionOn, events, insights, monthEnd, movement, mrrSeries, prepaidValue, topUpPlan, type EventKind } from '../../shared/metrics.ts';
+import { cancelSavings, cashVsAccrual, contributionOn, events, insights, monthEnd, movement, mrrChangeSinceLastMonth, mrrSeries, prepaidValue, topUpPlan, type EventKind } from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { Amount, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
@@ -54,9 +54,8 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
   const t = totals(state, today);
   const now = series[series.length - 1].mrr;
-  const lastMonth = mrrOnMonthEnd(state, today, -1);
   const yearAgo = series.length > 12 ? series[series.length - 13].mrr : undefined;
-  const delta = now - lastMonth;
+  const delta = mrrChangeSinceLastMonth(state, today);
   const evDates = new Set(events(state, today).filter((e) => e.kind !== 'buy').map((e) => e.date.slice(0, 7)));
   const markers = series.map((p, i) => (evDates.has(p.month) ? i : -1)).filter((i) => i >= 0);
   return (
@@ -129,11 +128,6 @@ function Hero({ state, today }: { state: AppState; today: string }) {
       </div>
     </div>
   );
-}
-
-function mrrOnMonthEnd(state: AppState, today: string, offset: number): number {
-  const m = addMonths(today.slice(0, 8) + '01', offset).slice(0, 7);
-  return state.subscriptions.reduce((a, s) => a + contributionOn(state, s, monthEnd(m)), 0);
 }
 
 /** 月度变动瀑布：上月末 → 新增 → 涨价 → 降价 → 退订 → 本月 */
