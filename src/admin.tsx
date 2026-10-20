@@ -256,11 +256,17 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
     items[k]?.run();
     onClose();
   };
+  // autoFocus 只在首次挂载可靠，第二次打开时手动聚焦
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => input.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, []);
   return (
-    <div class="scrim" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div class="scrim" onClick={(e) => e.target === e.currentTarget && onClose()} onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div class="palette" role="dialog" aria-modal="true">
         <input
-          autoFocus
+          ref={input}
           placeholder="搜索订阅或页面…"
           value={q}
           onInput={(e) => {
@@ -341,8 +347,10 @@ function App() {
         setCollapsed(!collapsed);
         return;
       }
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.metaKey || e.ctrlKey) return;
+      const el = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || e.metaKey || e.ctrlKey || e.altKey) return;
+      // 有弹层（编辑器、详情、搜索等）打开时，单键快捷键不生效
+      if (editing || viewId || review || ics || palette || document.querySelector('[aria-modal="true"]')) return;
       if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today(), state?.settings.defaultMethodId));
       const idx = Number(e.key);
       if (state && idx >= 1 && idx <= navOf(state.settings).length) navigate(navOf(state.settings)[idx - 1].path);
@@ -357,7 +365,7 @@ function App() {
       window.removeEventListener('ledger:drawer', onDrawer);
       window.removeEventListener('ledger:add', onAdd);
     };
-  }, [state, collapsed]);
+  }, [state, collapsed, editing, viewId, review, ics, palette]);
 
   if (phase === 'loading') return <div class="login" />;
   if (phase === 'login' || !state) return <Login error={phase === 'offline' ? `无法连接：${error ?? ''}` : undefined} />;
