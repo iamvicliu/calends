@@ -167,6 +167,24 @@ export async function setupPassword(setupToken: string, password: string): Promi
   await api('/api/auth/setup', { method: 'POST', body: JSON.stringify({ setupToken, password }) });
   set({ phase: 'loading' });
   await boot();
+  // 新部署：按浏览器的时区和地区猜好本位币，之后可在设置里改
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const ccy = guessCurrency();
+  if (store.state) await saveSettings({ ...(tz ? { timezone: tz } : {}), ...(ccy ? { baseCurrency: ccy } : {}) }).catch(() => {});
+}
+
+/** 按浏览器语言里的地区猜本位币，例如 zh-CN → CNY、en-GB → GBP；猜不出时返回 undefined */
+function guessCurrency(): string | undefined {
+  const MAP: Record<string, string> = { CN: 'CNY', US: 'USD', GB: 'GBP', HK: 'HKD', TW: 'TWD', JP: 'JPY', KR: 'KRW', SG: 'SGD', AU: 'AUD', CA: 'CAD', IN: 'INR', TR: 'TRY', RU: 'RUB', BR: 'BRL', ID: 'IDR', VN: 'VND', PH: 'PHP', TH: 'THB', MY: 'MYR', NG: 'NGN', CH: 'CHF', UA: 'UAH', KZ: 'KZT', PK: 'PKR', EG: 'EGP', AR: 'ARS', DE: 'EUR', FR: 'EUR', ES: 'EUR', IT: 'EUR', NL: 'EUR', PT: 'EUR', AT: 'EUR', BE: 'EUR', IE: 'EUR', FI: 'EUR', GR: 'EUR' };
+  for (const l of navigator.languages ?? [navigator.language]) {
+    try {
+      const region = new Intl.Locale(l).maximize().region;
+      if (region && MAP[region]) return MAP[region];
+    } catch {
+      /* 非法的语言标签 */
+    }
+  }
+  return undefined;
 }
 
 export async function loginPasskey(): Promise<void> {

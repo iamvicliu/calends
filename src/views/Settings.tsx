@@ -83,6 +83,19 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
   );
 }
 
+/** 全部 IANA 时区，右侧标出当前偏移（GMT+8）；当前值不在列表里时也保留 */
+function timeZones(current: string) {
+  const all = typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('timeZone') : [];
+  const offset = (z: string) => {
+    try {
+      return new Intl.DateTimeFormat('en-US', { timeZone: z, timeZoneName: 'shortOffset' }).formatToParts().find((p) => p.type === 'timeZoneName')?.value ?? '';
+    } catch {
+      return '';
+    }
+  };
+  return [...new Set(['UTC', ...all, current])].map((z) => ({ value: z, label: z.replace(/_/g, ' '), hint: offset(z) }));
+}
+
 export function Settings({ state, today }: { state: AppState; today: string }) {
   const s = state.settings;
   // 只补没有分段、也不是代付的订阅：分段的每段各有支付方式，代付用的是别人的钱
@@ -159,7 +172,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <CurrencySelect value={s.baseCurrency} onChange={(c) => run(() => saveSettings({ baseCurrency: c }))} ariaLabel={t('settings.general.baseCurrency')} />
           </Cell>
           <Cell label={t('settings.general.timezone')}>
-            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => ({ value: z, label: z }))} ariaLabel={t('settings.general.timezone')} />
+            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={timeZones(s.timezone)} search ariaLabel={t('settings.general.timezone')} />
           </Cell>
           <Cell label={t('settings.general.weekStart')}>
             <Picker value={String(s.weekStart ?? 1)} onChange={(v) => run(() => saveSettings({ weekStart: v === '0' ? 0 : 1 }))} options={[{ value: '1', label: t('settings.general.monday') }, { value: '0', label: t('settings.general.sunday') }]} ariaLabel={t('settings.general.weekStartAria')} />
