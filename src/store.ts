@@ -46,6 +46,12 @@ function cache(state: AppState) {
   }
 }
 
+/** 换上服务端返回的最新数据，并写入本地缓存 */
+function replaceState(state: AppState) {
+  cache(state);
+  set({ state });
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(path, {
     ...init,
@@ -111,9 +117,7 @@ export async function refresh(): Promise<void> {
   if (store.phase !== 'ready' || Date.now() - lastRefresh < 5000) return;
   lastRefresh = Date.now();
   try {
-    const state = await api<AppState>('/api/state');
-    cache(state);
-    set({ state });
+    replaceState(await api<AppState>('/api/state'));
   } catch {
     /* 离线时保留当前数据 */
   }
@@ -138,10 +142,7 @@ export function syncFx(): Promise<void> {
     }
     if (filled > 0) {
       const state = await api<AppState>('/api/state').catch(() => undefined);
-      if (state) {
-        cache(state);
-        set({ state });
-      }
+      if (state) replaceState(state);
     }
   })().finally(() => {
     syncing = undefined;
@@ -192,9 +193,12 @@ export async function logout(): Promise<void> {
 }
 
 function patchState(fn: (s: AppState) => AppState) {
-  const next = fn(store.state!);
-  cache(next);
-  set({ state: next });
+  replaceState(fn(store.state!));
+}
+
+/** 按 id 替换列表里的一项，没有就追加 */
+function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
+  return list.some((x) => x.id === item.id) ? list.map((x) => (x.id === item.id ? item : x)) : [...list, item];
 }
 
 /** 乐观更新：先改本地，失败回滚 */
@@ -213,7 +217,7 @@ export function saveSub(sub: Subscription) {
   // 改了开始日期或周期后，新的扣款日需要补汇率
   setTimeout(() => void syncFx(), 500);
   return optimistic(
-    (s) => ({ ...s, subscriptions: s.subscriptions.some((x) => x.id === sub.id) ? s.subscriptions.map((x) => (x.id === sub.id ? sub : x)) : [...s.subscriptions, sub] }),
+    (s) => ({ ...s, subscriptions: upsertById(s.subscriptions, sub) }),
     () => api(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
   );
 }
@@ -227,16 +231,15 @@ export function reorderMethods(ids: string[]) {
   const prev = store.state!.methods;
   const next = ids.map((id, i) => ({ ...prev.find((m) => m.id === id)!, order: i }));
   // 全部重写，避免本地数据过期时出现重复的序号
-  const changed = next;
   return optimistic(
     (s) => ({ ...s, methods: next }),
-    () => Promise.all(changed.map((m) => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }))),
+    () => Promise.all(next.map((m) => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }))),
   );
 }
 
 export function saveMethod(m: PaymentMethod) {
   return optimistic(
-    (s) => ({ ...s, methods: s.methods.some((x) => x.id === m.id) ? s.methods.map((x) => (x.id === m.id ? m : x)) : [...s.methods, m] }),
+    (s) => ({ ...s, methods: upsertById(s.methods, m) }),
     () => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }),
   );
 }
@@ -264,9 +267,7 @@ export async function rotateIcs() {
 }
 
 export async function importData(body: { subscriptions: Subscription[]; methods: PaymentMethod[]; mode: 'merge' | 'replace' }) {
-  const state = await api<AppState>('/api/import', { method: 'POST', body: JSON.stringify(body) });
-  cache(state);
-  set({ state });
+  replaceState(await api<AppState>('/api/import', { method: 'POST', body: JSON.stringify(body) }));
 }
 
 export async function refreshFx() {
