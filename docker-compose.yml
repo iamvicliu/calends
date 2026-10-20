@@ -1,0 +1,20 @@
+# docker compose up -d，然后打开 http://localhost:8787/admin
+# 首次设置密码需要的初始化令牌：docker compose logs calends
+services:
+  calends:
+    image: ghcr.io/imetn/calends:latest
+    # 或者从源码构建：build: .
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    volumes:
+      - calends-data:/data
+    environment:
+      # 对外访问地址（提醒、日历订阅里的链接），可选
+      # SITE_URL: https://calends.example.com
+      # 在 Caddy / Nginx / Traefik 等反向代理后面时设为 1，限速才能拿到真实访客 IP
+      # TRUST_PROXY: "1"
+      TZ: UTC
+
+volumes:
+  calends-data:
