@@ -49,7 +49,9 @@
   "phase": {
     "switchTooEarly": "Das Gültigkeitsdatum muss nach dem Beginn der aktuellen Phase liegen",
     "resumeTooEarly": "Das Fortsetzungsdatum darf nicht vor dem letzten Enddatum liegen",
-    "priceOutOfRange": "Das Datum der Preisänderung liegt in keiner Phase"
+    "priceOutOfRange": "Das Datum der Preisänderung liegt in keiner Phase",
+    "keepTooEarly": "Das Weiterlaufen-bis-Datum muss nach dem Wechseldatum liegen",
+    "endTooEarly": "Das Enddatum muss nach dem Beginn dieser Phase liegen"
   },
   "event": {
     "label": "{region}{price}/{per}",

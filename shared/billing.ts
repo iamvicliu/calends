@@ -98,17 +98,25 @@ export function subError(s: Subscription): string | undefined {
 
 // ---------- 阶段（换区 / 换套餐 / 断更续订） ----------
 
-/** 把多阶段订阅展开成若干个单阶段的「虚拟订阅」，id 不变；无阶段时返回自身 */
+/**
+ * 把多阶段订阅展开成若干个单阶段的「虚拟订阅」，id 不变；无阶段时返回自身。
+ * 阶段缺省在下一阶段开始日结束；显式的 end 可以晚于下一阶段的开始日（换区后旧区域预付到期前仍在跑），两段在时间上并行。
+ */
 export function phaseSubs(s: Subscription): Subscription[] {
   if (!s.phases?.length) return [s];
   const sorted = s.phases.slice().sort((a, b) => a.start.localeCompare(b.start));
-  // 订阅整体的结束日、暂停日对所有阶段生效：之后才开始的计划阶段作废，跨过它的阶段在那天截止
+  // 订阅整体的结束日、暂停日对所有阶段生效：之后才开始的计划阶段作废，跨过它的阶段（包括并行中的旧阶段）在那天截止
   const pausedAt = s.status === 'paused' ? s.pausedAt : undefined;
   const stop = [s.end, pausedAt].filter(Boolean).sort()[0];
   const kept = stop ? sorted.filter((p, i) => i === 0 || p.start < stop) : sorted;
+  const lastStart = kept[kept.length - 1].start;
   return kept.map((p, i) => {
     const last = i === kept.length - 1;
     const natural = p.end ?? (last ? undefined : kept[i + 1].start);
+    // 并行中的旧阶段跑过了暂停日：同样在暂停日停下
+    const paused = !last && s.status === 'paused' && !!natural && natural > lastStart && (!s.pausedAt || natural > s.pausedAt);
+    // 已退订但没写结束日：与最后一段并行的旧阶段也一并视为退订
+    const cancelled = !last && s.status === 'cancelled' && !s.end && !!natural && natural > lastStart;
     return {
       ...s,
       phases: undefined,
@@ -126,8 +134,8 @@ export function phaseSubs(s: Subscription): Subscription[] {
       nextDue: p.nextDue,
       planned: p.planned,
       trialEnd: i === 0 ? s.trialEnd : undefined,
-      status: last ? s.status : 'active',
-      pausedAt: last ? s.pausedAt : undefined,
+      status: last ? s.status : paused ? 'paused' : cancelled ? 'cancelled' : 'active',
+      pausedAt: last || paused ? s.pausedAt : undefined,
     };
   });
 }
@@ -137,14 +145,64 @@ export function isGap(prevEnd: string | undefined, nextStart: string): boolean {
   return !!prevEnd && diffDays(prevEnd, nextStart) > 3;
 }
 
-/** day 当天所处的阶段；处在断更空档或尚未开始时返回 undefined（无阶段的订阅总是返回自身） */
-export function phaseAt(s: Subscription, day: string): Subscription | undefined {
-  const vs = phaseSubs(s);
-  if (vs.length === 1 && !s.phases?.length) return vs[0];
-  return vs.find((v) => v.start <= day && (!v.end || v.end > day));
+/** 两段在时间上并行（没有结束日的视为一直延续） */
+export function overlaps(a: { start: string; end?: string }, b: { start: string; end?: string }): boolean {
+  return a.start <= b.start ? !a.end || a.end > b.start : !b.end || b.end > a.start;
 }
 
-/** 当前生效的阶段；没有生效的取最近的一个 */
+/** 把阶段排进并行轨道：与前面仍在跑的段重叠时放到下一条轨道，返回每段的轨道号（0 起）；没有结束日的段视为一直延续 */
+export function phaseLanes(vs: Array<{ start: string; end?: string }>): number[] {
+  const laneEnd: string[] = [];
+  return vs.map((v) => {
+    let l = laneEnd.findIndex((e) => e <= v.start);
+    if (l < 0) l = laneEnd.length;
+    laneEnd[l] = v.end ?? '9999-12-31';
+    return l;
+  });
+}
+
+/** 第 i 段开始前，前面各段最晚跑到哪天；有一直延续的段时返回 undefined。断更看它：并行的旧段还没到期就不算断 */
+export function coveredUntil(vs: Array<{ start: string; end?: string }>, i: number): string | undefined {
+  let m = '';
+  for (const v of vs.slice(0, i)) {
+    if (!v.end) return undefined;
+    if (v.end > m) m = v.end;
+  }
+  return m || undefined;
+}
+
+/** 实际在订的天数（并行的阶段不重复计，截到 today），以及中间没有任何阶段在跑的断更空档 */
+export function servedTime(s: Subscription, today: string): { days: number; gaps: Array<{ from: string; to: string; days: number }> } {
+  const vs = phaseSubs(s);
+  let days = 0;
+  let cursor = '';
+  const gaps: Array<{ from: string; to: string; days: number }> = [];
+  vs.forEach((v, i) => {
+    const until = i > 0 ? coveredUntil(vs, i) : undefined;
+    if (until && until < v.start) gaps.push({ from: until, to: v.start, days: diffDays(until, v.start) });
+    if (v.start > today) return;
+    const a = cursor > v.start ? cursor : v.start;
+    const b = v.end && v.end < today ? v.end : today;
+    if (b > a) {
+      days += diffDays(a, b);
+      cursor = b;
+    }
+  });
+  return { days, gaps };
+}
+
+/** day 当天同时在跑的所有阶段，按开始日排列（换区后旧区域还没到期时会有多个）；无阶段的订阅总是返回自身 */
+export function activePhases(s: Subscription, day: string): Subscription[] {
+  if (!s.phases?.length) return [s];
+  return phaseSubs(s).filter((v) => v.start <= day && (!v.end || v.end > day));
+}
+
+/** day 当天所处的阶段：并行时取最晚开始的那段；处在断更空档或尚未开始时返回 undefined（无阶段的订阅总是返回自身） */
+export function phaseAt(s: Subscription, day: string): Subscription | undefined {
+  return activePhases(s, day).pop();
+}
+
+/** 当前生效的阶段（并行时取最晚开始的那段）；没有生效的取最近的一个 */
 export function currentPhase(s: Subscription, day: string): Subscription {
   const vs = phaseSubs(s);
   return phaseAt(s, day) ?? vs.filter((v) => v.start <= day).pop() ?? vs[0];
@@ -313,9 +371,17 @@ export function myShareFactor(s: Subscription, day?: string): number {
   return Math.max(0, (s.price - others) / s.price);
 }
 
-/** 每月折算（原币，全额） */
-export function monthlyGross(s: Subscription, day?: string): number {
-  if (s.phases?.length) return monthlyGross(day ? currentPhase(s, day) : phaseSubs(s).pop()!, day);
+/**
+ * 每月折算（原币，全额）。多阶段订阅按 day 当天的阶段算，币种为 currentPhase 的币种；
+ * 换区后新旧两段并行时两边都在真实付钱，按两段之和计（另一段按 fx 折成当前段的币种，缺省用内置汇率）
+ */
+export function monthlyGross(s: Subscription, day?: string, fx: FxTable = FALLBACK_FX): number {
+  if (s.phases?.length) {
+    if (!day) return monthlyGross(phaseSubs(s).pop()!);
+    const cur = currentPhase(s, day);
+    const others = activePhases(s, day).filter((v) => v.start !== cur.start);
+    return others.reduce((a, v) => a + (convert(monthlyGross(v, day), v.currency, cur.currency, fx) || 0), monthlyGross(cur, day));
+  }
   if (s.cycle.unit === 'lifetime') return 0;
   const p = day ? priceAt(s, day) : s.price;
   // 有赠送时长：这一期的钱摊到「周期 + 赠送」上，赠送结束后恢复正常
@@ -324,11 +390,23 @@ export function monthlyGross(s: Subscription, day?: string): number {
   return (p * 30.4375) / days;
 }
 
-/** 每月折算到本位币、我承担的部分；多阶段订阅按 day 所在阶段的价格和币种算 */
-export function monthlyMine(state: AppState, s: Subscription, day: string): number {
-  const v = currentPhase(s, day);
-  const m = convert(monthlyGross(v, day), v.currency, state.settings.baseCurrency, state.fx);
-  return Number.isFinite(m) ? m * myShareFactor(v) : 0;
+/** 计入每月成本的阶段：day 当天在跑的各段（并行时都算），都不在跑时取最近的一段 */
+function billedPhases(s: Subscription, day: string): Subscription[] {
+  const vs = activePhases(s, day);
+  return vs.length ? vs : [currentPhase(s, day)];
+}
+
+/**
+ * 每月折算到本位币、我承担的部分；多阶段订阅按 day 所在阶段的价格和币种算，并行的几段相加。
+ * 给了 methodId 时只算用这个支付方式付的那几段（钱包按卡统计）
+ */
+export function monthlyMine(state: AppState, s: Subscription, day: string, methodId?: string): number {
+  return billedPhases(s, day)
+    .filter((v) => methodId === undefined || v.methodId === methodId)
+    .reduce((a, v) => {
+      const m = convert(monthlyGross(v, day), v.currency, state.settings.baseCurrency, state.fx);
+      return Number.isFinite(m) ? a + m * myShareFactor(v) : a;
+    }, 0);
 }
 
 export interface Totals {
@@ -351,11 +429,13 @@ export function totals(state: AppState, today: string): Totals {
     count++;
     // 试用期计入数量，不计入金额
     if (st === 'trial') continue;
-    const v = currentPhase(s, today);
-    const m = convert(monthlyGross(v, today), v.currency, base, state.fx);
-    if (!Number.isFinite(m)) continue;
-    gross += m;
-    mrr += m * myShareFactor(s);
+    // 换区后新旧两段并行时两边都在付钱，都计入
+    for (const v of billedPhases(s, today)) {
+      const m = convert(monthlyGross(v, today), v.currency, base, state.fx);
+      if (!Number.isFinite(m)) continue;
+      gross += m;
+      mrr += m * myShareFactor(s);
+    }
   }
   return { mrr, grossMrr: gross, recoverMrr: gross - mrr, activeCount: count };
 }

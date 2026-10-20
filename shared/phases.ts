@@ -53,16 +53,27 @@ function mirror(s: Subscription, phases: Phase[]): Subscription {
     bonus: last.bonus,
     payments: undefined,
     nextDue: undefined,
-    end: last.end,
+    end: endOf(phases),
   };
 }
 
-/** 从 at 起换区或换套餐：上一阶段在 at 结束，新阶段无缝衔接 */
-export function switchPlan(s: Subscription, at: string, next: PlanChange): Subscription {
+/** 整个订阅的结束日：最后一段一直延续时没有；否则取各段里最晚的结束日（并行的旧段可能比最后一段跑得更久） */
+function endOf(phases: Phase[]): string | undefined {
+  const last = phases[phases.length - 1];
+  if (!last.end) return undefined;
+  return phases.reduce((m, p) => (p.end && p.end > m ? p.end : m), last.end);
+}
+
+/**
+ * 从 at 起换区或换套餐：上一阶段默认在 at 结束，新阶段无缝衔接；
+ * 给了 keepUntil 时上一阶段继续跑到那天（比如旧区域已预付到月底），两段并行、两边都照常计费
+ */
+export function switchPlan(s: Subscription, at: string, next: PlanChange, keepUntil?: string): Subscription {
   const phases = phasesOf(s);
   const last = phases[phases.length - 1];
   if (at <= last.start) throw new Error(t('core.phase.switchTooEarly'));
-  last.end = at;
+  if (keepUntil && keepUntil <= at) throw new Error(t('core.phase.keepTooEarly'));
+  last.end = keepUntil ?? at;
   phases.push({ start: at, ...next });
   return { ...mirror(s, phases), status: 'active', pausedAt: undefined };
 }
@@ -72,11 +83,11 @@ export function confirmPlan(s: Subscription, start: string): Subscription {
   return mirror(s, phasesOf(s).map((p) => (p.start === start ? { ...p, planned: undefined } : p)));
 }
 
-/** 不切换了：删掉这个计划阶段，上一阶段就在原定的切换日结束（到期不续） */
+/** 不切换了：删掉这个计划阶段，上一阶段就在原定的切换日结束（到期不续）；原本就打算并行跑得更久的，保留它自己的结束日 */
 export function dropPlan(s: Subscription, start: string): Subscription {
   const phases = phasesOf(s).filter((p) => p.start !== start);
   const last = phases[phases.length - 1];
-  last.end = start;
+  if (!last.end || last.end <= start) last.end = start;
   if (phases.length === 1) {
     const p = phases[0];
     return { ...s, phases: undefined, start: p.start, end: p.end, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, priceHistory: p.priceHistory, intro: p.intro, payments: p.payments, nextDue: p.nextDue };
@@ -112,9 +123,16 @@ export function changePrice(s: Subscription, from: string, amount: number): Subs
   return mirror(s, phases);
 }
 
-/** 编辑表单对应的阶段：今天所在的阶段（还没开始的计划阶段不算），都没开始时取第一个 */
+/** 阶段 i 实际跑到哪天（不含）：显式结束日，缺省为下一段开始日 */
+const endAt = (phases: Phase[], i: number) => phases[i].end ?? phases[i + 1]?.start ?? '9999-12-31';
+
+/**
+ * 编辑表单对应的阶段：今天所在的阶段（还没开始的计划阶段不算；并行时取最晚开始的，与 currentPhase 一致），
+ * 今天不在任何阶段里时取最近开始的，都没开始时取第一个
+ */
 function editIndex(phases: Phase[], today: string): number {
-  return Math.max(0, phases.findLastIndex((p) => p.start <= today));
+  const live = phases.findLastIndex((p, i) => p.start <= today && today < endAt(phases, i));
+  return live >= 0 ? live : Math.max(0, phases.findLastIndex((p) => p.start <= today));
 }
 
 /** 打开编辑表单时，顶层字段换成当前阶段的，避免把未生效的计划阶段当成现在的样子 */
@@ -125,13 +143,30 @@ export function toEditForm(s: Subscription, today: string): Subscription {
   return { ...s, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, intro: p.intro, bonus: p.bonus };
 }
 
-/** 编辑表单改了顶层字段后，同步回当前阶段；结束日属于整个订阅，写到最后一个阶段 */
+/**
+ * 编辑表单改了顶层字段后，同步回当前阶段；结束日属于整个订阅，改了才写到最后一个阶段
+ * （并行的旧段各有自己的结束日，没改结束日时不动它们；订阅的结束日对所有阶段封顶）
+ */
 export function syncPhase(s: Subscription, today: string): Subscription {
   if (!s.phases?.length) return s;
   const phases = phasesOf(s);
   Object.assign(phases[editIndex(phases, today)], { price: s.price, currency: s.currency, cycle: s.cycle, methodId: s.methodId, region: s.region, intro: s.intro, bonus: s.bonus });
-  phases[phases.length - 1].end = s.end;
+  if (s.end !== endOf(phases)) phases[phases.length - 1].end = s.end;
   return { ...mirror(s, phases), end: s.end };
+}
+
+/**
+ * 改某一段的结束日（按开始日定位）：留空回到缺省（下一段开始日；最后一段为一直延续）。
+ * 晚于下一段的开始日即为并行，早于则中间是断更；最后一段的结束日就是整个订阅的结束日
+ */
+export function setPhaseEnd(s: Subscription, start: string, end: string | undefined): Subscription {
+  if (end && end <= start) throw new Error(t('core.phase.endTooEarly'));
+  if (!s.phases?.length) return { ...s, end };
+  const phases = phasesOf(s);
+  const p = phases.find((x) => x.start === start);
+  if (!p) throw new Error(t('core.phase.priceOutOfRange'));
+  p.end = end;
+  return mirror(s, phases);
 }
 
 /** 删除一个阶段（误操作撤回）；只剩一个阶段时退回普通订阅 */
@@ -139,8 +174,9 @@ export function removePhase(s: Subscription, index: number): Subscription {
   const phases = phasesOf(s);
   if (phases.length <= 1) return s;
   const [removed] = phases.splice(index, 1);
-  // 撤回最后一次换区：上一阶段只是因为换区才结束的，恢复为进行中
-  if (index === phases.length && phases[phases.length - 1].end === removed.start) phases[phases.length - 1].end = undefined;
+  // 撤回最后一次换区：上一阶段只是因为换区才结束（或换区时选了继续跑到某天）的，恢复为进行中
+  const prev = phases[phases.length - 1];
+  if (index === phases.length && prev.end && prev.end >= removed.start) prev.end = undefined;
   if (phases.length === 1) {
     const p = phases[0];
     return { ...s, phases: undefined, start: p.start, end: p.end, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, priceHistory: p.priceHistory, intro: p.intro, payments: p.payments, nextDue: p.nextDue };
@@ -150,10 +186,19 @@ export function removePhase(s: Subscription, index: number): Subscription {
 
 // ---------- 扣款记录（手动编辑） ----------
 
-/** date 落在哪一段：开始日 ≤ date < 结束日；都不在时取它之前最近的一段 */
-function phaseIndexAt(phases: Phase[], date: string): number {
-  const i = phases.findIndex((p, k) => p.start <= date && date < (p.end ?? phases[k + 1]?.start ?? '9999-12-31'));
-  if (i >= 0) return i;
+/**
+ * date 落在哪一段：开始日 ≤ date < 结束日；都不在时取它之前最近的一段。
+ * 给了 phase（阶段开始日）就用那段；两段并行时，找已有记录（existing）优先取那天确实有扣款的一段，否则取最晚开始的一段
+ */
+function phaseIndexAt(phases: Phase[], date: string, sub?: Subscription, phase?: string, existing = false): number {
+  const pick = phase ? phases.findIndex((p) => p.start === phase) : -1;
+  if (pick >= 0) return pick;
+  const live = phases.flatMap((p, k) => (p.start <= date && date < endAt(phases, k) ? [k] : []));
+  if (existing && sub && live.length > 1) {
+    const has = live.find((k) => (phases[k].payments ?? []).some((x) => x.date === date)) ?? live.find((k) => !phases[k].payments?.length && chargesBetween({ ...sub, phases: undefined, ...phases[k], end: endAt(phases, k) }, date, date, date).length);
+    if (has != null) return has;
+  }
+  if (live.length) return live[live.length - 1];
   const before = phases.map((p, k) => [p.start, k] as const).filter(([d]) => d <= date);
   return before.length ? before[before.length - 1][1] : 0;
 }
@@ -167,29 +212,32 @@ function materialize(p: Phase, sub: Subscription, today: string): Phase {
   const v: Subscription = { ...sub, phases: undefined, ...p, end: p.end };
   const past = chargesBetween(v, p.start, today, today);
   const next = chargesBetween(v, addDays(today, 1), addDays(today, 800), today)[0]?.date;
-  return { ...p, payments: past.map((c) => ({ date: c.date, amount: c.amount })), nextDue: p.nextDue ?? next };
+  // 到期前不会再扣（比如并行中快到期的旧段）：下次扣款记为结束日，删掉最后一笔也不会被重新推算出来
+  return { ...p, payments: past.map((c) => ({ date: c.date, amount: c.amount })), nextDue: p.nextDue ?? next ?? p.end };
 }
 
 /** 新增或修改一笔扣款记录；old 为原记录的日期与序号（修改时） */
-export function savePayment(s: Subscription, today: string, pay: Payment, old?: { date: string; index: number }): Subscription {
+export function savePayment(s: Subscription, today: string, pay: Payment, old?: { date: string; index: number }, phase?: string): Subscription {
   const phases = phasesOf(s);
   if (old) {
-    const oi = phaseIndexAt(phases, old.date);
+    const oi = phaseIndexAt(phases, old.date, s, phase, true);
     phases[oi] = materialize(phases[oi], s, today);
     const list = (phases[oi].payments ?? []).filter((x) => x.date === old.date);
     const target = list[old.index] ?? list[0];
     phases[oi] = { ...phases[oi], payments: (phases[oi].payments ?? []).filter((x) => x !== target) };
   }
-  const i = phaseIndexAt(phases, pay.date);
+  // 指定了阶段（并行时选的那一段，或原记录所在的段）且日期仍在那段里：记在那段；否则按日期归段
+  const keep = phase ? phases.findIndex((p, k) => p.start === phase && p.start <= pay.date && pay.date < endAt(phases, k)) : -1;
+  const i = keep >= 0 ? keep : phaseIndexAt(phases, pay.date);
   phases[i] = materialize(phases[i], s, today);
   phases[i] = { ...phases[i], payments: [...(phases[i].payments ?? []), pay].sort((a, b) => a.date.localeCompare(b.date)) };
   return fromPhases(s, phases);
 }
 
 /** 删除一笔扣款记录 */
-export function deletePayment(s: Subscription, today: string, date: string, index: number): Subscription {
+export function deletePayment(s: Subscription, today: string, date: string, index: number, phase?: string): Subscription {
   const phases = phasesOf(s);
-  const i = phaseIndexAt(phases, date);
+  const i = phaseIndexAt(phases, date, s, phase, true);
   phases[i] = materialize(phases[i], s, today);
   const list = (phases[i].payments ?? []).filter((x) => x.date === date);
   const target = list[index] ?? list[0];

@@ -18,7 +18,9 @@
   "phase": {
     "switchTooEarly": "Tanggal berlaku harus setelah fase saat ini dimulai",
     "resumeTooEarly": "Tanggal lanjut tidak boleh sebelum tanggal berakhir terakhir",
-    "priceOutOfRange": "Tanggal perubahan harga tidak berada di fase mana pun"
+    "priceOutOfRange": "Tanggal perubahan harga tidak berada di fase mana pun",
+    "keepTooEarly": "Tanggal tetap berjalan harus setelah tanggal peralihan",
+    "endTooEarly": "Tanggal berakhir harus setelah awal fase ini"
   },
   "event": {
     "label": "{region}{price}/{per}",

@@ -18,7 +18,9 @@
   "phase": {
     "switchTooEarly": "Geçerlilik tarihi mevcut dönemin başlangıcından sonra olmalı",
     "resumeTooEarly": "Devam tarihi son bitiş tarihinden önce olamaz",
-    "priceOutOfRange": "Fiyat değişikliği tarihi hiçbir dönemin içinde değil"
+    "priceOutOfRange": "Fiyat değişikliği tarihi hiçbir dönemin içinde değil",
+    "keepTooEarly": "Devam etme tarihi geçiş tarihinden sonra olmalı",
+    "endTooEarly": "Bitiş tarihi bu dönemin başlangıcından sonra olmalı"
   },
   "event": {
     "label": "{region}{price}/{per}",

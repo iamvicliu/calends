@@ -44,7 +44,9 @@
   "phase": {
     "switchTooEarly": "적용일은 현재 구간의 시작일 이후여야 합니다",
     "resumeTooEarly": "재개일은 마지막 종료일보다 빠를 수 없습니다",
-    "priceOutOfRange": "가격 변경일이 어떤 구간에도 속하지 않습니다"
+    "priceOutOfRange": "가격 변경일이 어떤 구간에도 속하지 않습니다",
+    "keepTooEarly": "계속 사용할 종료일은 전환일 이후여야 합니다",
+    "endTooEarly": "종료일은 이 구간의 시작일 이후여야 합니다"
   },
   "event": {
     "label": "{region}{price}/{per}",
