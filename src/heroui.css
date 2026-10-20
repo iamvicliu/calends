@@ -8,7 +8,7 @@
 @import 'tailwindcss/utilities.css' layer(utilities);
 @import 'tw-animate-css';
 @import '@heroui/styles/base' layer(base);
-@import '@heroui/styles/components/index.css' layer(components);
+@import './heroui-components.css' layer(components);
 @import '@heroui/styles/themes/default' layer(theme);
 @import '@heroui/styles/utilities';
 @import '@heroui/styles/variants';
