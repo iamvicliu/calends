@@ -364,17 +364,6 @@
   min-width: 0;
 }
 
-.dt-kpi-val b.up {
-  color: var(--dt-bad);
-}
-.dt-kpi-val b.down {
-  color: var(--dt-ok);
-}
-.dt-kpi-val .spark {
-  flex: none;
-  overflow: visible;
-}
-
 /* 走势 */
 .dt-chart {
   padding-bottom: 16px;
@@ -805,9 +794,6 @@
 .dt-row .c {
   font-weight: 500;
 }
-.dt-row .u {
-  color: var(--label-3);
-}
 .dt-row.refund .o,
 .dt-row.refund .c {
   color: var(--dt-ok);
@@ -841,10 +827,6 @@
 .dt-kind.adjust {
   background: var(--dt-warn-soft);
   color: var(--dt-warn);
-}
-.dt-kind.card {
-  background: var(--fill);
-  color: var(--label-2);
 }
 .dt-tfoot {
   display: flex;

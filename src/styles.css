@@ -350,26 +350,6 @@ a {
   .page {
     padding: 12px 16px calc(110px + var(--safe-b));
   }
-  .tab {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    font-size: 10.5px;
-    font-weight: 500;
-    color: var(--label-2);
-    border-radius: 24px;
-    margin: 6px 0;
-  }
-  .tab .i {
-    width: 23px;
-    height: 23px;
-  }
-  .tab.active {
-    color: var(--accent);
-    background: var(--fill-2);
-  }
 }
 
 /* ---------------- 按钮 ---------------- */
@@ -487,13 +467,6 @@ a {
     0 1px 3px rgba(0, 0, 0, 0.12),
     0 0 0 0.5px rgba(0, 0, 0, 0.04);
   font-weight: 600;
-}
-.seg.wide {
-  display: flex;
-}
-.seg.wide button {
-  flex: 1;
-  padding: 6px 0;
 }
 .seg.sm button {
   padding: 3px 10px;
@@ -704,36 +677,6 @@ a {
   background: var(--accent-soft);
   color: var(--accent);
 }
-.badge.red {
-  background: rgba(255, 59, 48, 0.12);
-  color: var(--red);
-}
-
-/* ---------------- 列表 + 详情（全部订阅） ---------------- */
-.search {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 11px;
-  border-radius: 10px;
-  background: var(--fill);
-  flex: 1;
-  min-width: 160px;
-}
-.search input {
-  border: 0;
-  outline: 0;
-  background: none;
-  flex: 1;
-  min-width: 0;
-  font-size: 15px;
-}
-.search .i {
-  width: 15px;
-  height: 15px;
-  color: var(--label-2);
-}
 
 /* ---------------- iOS 分组列表 ---------------- */
 .group {
@@ -842,14 +785,6 @@ a {
 .cell-r input[type='date'] {
   width: auto;
   color: var(--accent);
-}
-.cell.col {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-}
-.cell.col .cell-r {
-  justify-content: flex-start;
 }
 .cell textarea {
   text-align: left !important;
@@ -1481,8 +1416,6 @@ a {
 }
 
 /* ---------------- 提示 ---------------- */
-@media (max-width: 860px) {
-}
 .tip {
   position: fixed;
   z-index: 80;
@@ -1496,58 +1429,6 @@ a {
   box-shadow: var(--shadow-lg);
   white-space: nowrap;
   transform: translate(-50%, calc(-100% - 10px));
-}
-
-/* ---------------- 小票 ---------------- */
-.receipt {
-  font: 12.5px/1.7 var(--mono);
-  color: #1d1d1f;
-  background: #fff;
-  padding: 26px 22px 40px;
-  position: relative;
-  border-radius: 4px 4px 0 0;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.1));
-  -webkit-mask:
-    linear-gradient(#000 0 0) top / 100% calc(100% - 12px) no-repeat,
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 16px 12px repeat-x;
-  mask:
-    linear-gradient(#000 0 0) top / 100% calc(100% - 12px) no-repeat,
-    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 16px 12px repeat-x;
-}
-.receipt h4 {
-  font: 700 16px/1.2 var(--mono);
-  text-align: center;
-  margin: 0;
-  letter-spacing: 0.16em;
-}
-.receipt .c {
-  text-align: center;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-}
-.receipt .hr {
-  border-top: 1.5px dashed #1d1d1f;
-  margin: 12px 0;
-  opacity: 0.85;
-}
-.receipt .l {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.receipt .l .dots {
-  flex: 1;
-  border-bottom: 1.5px dotted #9a9a9a;
-  transform: translateY(-3px);
-  min-width: 10px;
-}
-.receipt .l .ico {
-  --s: 15px !important;
-  border-radius: 4px;
-}
-.receipt .b {
-  font-weight: 700;
 }
 
 /* ---------------- 其他 ---------------- */
@@ -2086,11 +1967,6 @@ select.btn {
   line-height: 1.5;
 }
 
-/* 接下来 30 天 */
-.week + .week {
-  margin-top: 10px;
-}
-
 /* 树状图 */
 .treemap {
   position: relative;
@@ -2409,42 +2285,6 @@ select.btn {
   margin-top: 14px;
   letter-spacing: 0.04em;
 }
-.charge-row {
-  display: grid;
-  grid-template-columns: 96px auto 1fr;
-  gap: 12px;
-  align-items: baseline;
-  padding: 9px 16px;
-  position: relative;
-  font-variant-numeric: tabular-nums;
-}
-.charge-row + .charge-row::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 16px;
-  right: 0;
-  height: 0.5px;
-  background: var(--sep);
-}
-.cr-date {
-  font-size: 13px;
-  color: var(--label-2);
-}
-.charge-row b {
-  font-size: 14px;
-  font-weight: 600;
-}
-.cr-conv {
-  text-align: right;
-  font-size: 13px;
-  color: var(--label-2);
-}
-.cr-conv small {
-  display: block;
-  font-size: 11px;
-  color: var(--label-3);
-}
 
 /* ================================================================
    外壳 v4：克制的侧边栏 + 白色画布（覆盖上方旧规则）
@@ -2682,11 +2522,6 @@ select.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-.search {
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
-  border-radius: 12px;
 }
 
 /* 卡片：细线，无阴影 */
@@ -5673,16 +5508,6 @@ button.seat:disabled {
   }
 }
 
-.more-row {
-  width: 100%;
-  justify-content: center;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font-size: 14px;
-  cursor: pointer;
-}
-
 /* 货币切换弹层 */
 .cp-pop {
   width: 300px;
@@ -6216,10 +6041,6 @@ button.seat:disabled {
 .change-keep-date {
   max-width: 240px;
 }
-.plan-actions {
-  justify-content: flex-end;
-  gap: 8px;
-}
 
 /* ---------------- 时间轴（甘特图） ---------------- */
 .gantt {
@@ -6568,49 +6389,6 @@ button.seat:disabled {
 .chip-btn.on {
   background: var(--ink);
   color: var(--on-ink);
-}
-
-/* 扣款记录：可点开修改；退款、补差、失败各有标记 */
-.charge-row.editable {
-  cursor: pointer;
-}
-.charge-row.editable:hover {
-  background: var(--fill-2);
-}
-.charge-row.failed b {
-  color: var(--label-3);
-  text-decoration: line-through;
-}
-.charge-row.refund b {
-  color: var(--green);
-}
-.cr-kind {
-  margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-style: normal;
-  font-weight: 600;
-  background: var(--fill);
-  color: var(--label-2);
-}
-.cr-kind.refund {
-  background: color-mix(in srgb, var(--green) 14%, transparent);
-  color: var(--green);
-}
-.cr-kind.failed {
-  background: color-mix(in srgb, var(--red) 12%, transparent);
-  color: var(--red);
-}
-.cr-kind.adjust {
-  background: color-mix(in srgb, var(--orange) 14%, transparent);
-  color: var(--orange);
-}
-.cr-settled {
-  color: var(--label);
-}
-.more-row .i {
-  margin-right: 4px;
 }
 
 .topup-rate {
