@@ -7,6 +7,8 @@ import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type Digest } from './notify.ts';
 import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from './store.ts';
+import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
+import { TOOLS } from './mcp-tools.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
@@ -69,6 +71,20 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const body = await res.arrayBuffer();
     if (body.byteLength > 1_000_000) return bad('too large', 413);
     return new Response(body, { headers: { 'content-type': type, 'cache-control': 'private, max-age=86400' } });
+  }
+  // MCP 令牌管理（后台「AI」页）：明文只在新建时返回一次
+  if (path === '/api/mcp/tools' && method === 'GET') return json(TOOLS.map((t) => ({ name: t.name, title: t.title, description: t.description, write: !!t.write })));
+  if (path === '/api/mcp/tokens' && method === 'GET') return json((await listTokens(env)).map(({ hash: _h, ...t }) => t));
+  if (path === '/api/mcp/tokens' && method === 'POST') {
+    const b = (await req.json()) as { name?: string; scope?: string };
+    const { token, item } = await createToken(env, b.name ?? '', b.scope === 'read' ? 'read' : 'write');
+    const { hash: _h, ...rest } = item;
+    return json({ token, item: rest });
+  }
+  const tm = path.match(/^\/api\/mcp\/tokens\/([\w-]+)$/);
+  if (tm && method === 'DELETE') {
+    await revokeToken(env, tm[1]);
+    return json({ ok: true });
   }
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
@@ -195,6 +211,7 @@ export default {
     const url = new URL(req.url);
     try {
       if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
+      if (url.pathname === '/mcp') return await mcp(req, env);
       const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
       if (cal) {
         const state = await loadState(env);

@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: {
     // 本地开发：wrangler dev 跑在 8787
-    proxy: { '/api': 'http://127.0.0.1:8787', '/cal': 'http://127.0.0.1:8787' },
+    proxy: { '/api': 'http://127.0.0.1:8787', '/cal': 'http://127.0.0.1:8787', '/mcp': 'http://127.0.0.1:8787' },
   },
   build: { target: 'es2022', assetsInlineLimit: 0 },
 });

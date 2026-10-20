@@ -12,6 +12,7 @@ import './styles.css';
 import { Calendar } from './views/Calendar.tsx';
 import { Carpool } from './views/Carpool.tsx';
 import { ProxyPage } from './views/Proxy.tsx';
+import { Ai } from './views/Ai.tsx';
 import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
 import { List } from './views/List.tsx';
@@ -30,6 +31,7 @@ const NAV = [
   { path: 'wallet', label: '钱包', icon: 'wallet' },
   { path: 'family', label: '合租', icon: 'users' },
   { path: 'behalf', label: '代付', icon: 'swap' },
+  { path: 'ai', label: 'AI 接入', icon: 'bot' },
 ];
 
 function useRoute() {
@@ -360,6 +362,9 @@ function App() {
         break;
       case 'behalf':
         view = <ProxyPage state={state} today={d} onOpen={open} />;
+        break;
+      case 'ai':
+        view = <Ai state={state} />;
         break;
       case 'report':
         view = <Report state={state} today={d} onOpen={open} onReview={() => setReview(true)} />;

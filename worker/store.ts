@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type
 import type { Env } from './env.ts';
 import { keepSet, loadFxHistory } from './fx.ts';
 
-async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
+export async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
   const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?1').bind(key).first<{ value: string }>();
   return row ? (JSON.parse(row.value) as T) : undefined;
 }

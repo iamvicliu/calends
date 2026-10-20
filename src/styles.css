@@ -1871,3 +1871,12 @@ button.seat:disabled { cursor: default; }
 /* 合租卡片：座位不压缩，放不下时操作按钮换到下一行 */
 .seats-row { flex-wrap: wrap; row-gap: 8px; }
 .seats-row .seats { flex-shrink: 0; }
+
+/* AI 接入页 */
+.ai-page { display: flex; flex-direction: column; gap: 18px; max-width: 760px; }
+.ai-url { font-size: 13.5px; word-break: break-all; }
+.ai-token code, .ai-tool code { font-size: 12.5px; }
+.ai-snippet { align-items: flex-start; gap: 10px; }
+.ai-snippet pre { flex: 1; min-width: 0; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--fill-2); font: 12.5px/1.55 ui-monospace, 'SF Mono', Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
+.ai-token .btn { margin-left: auto; }
+.ai-token .cell-l, .ai-tool .cell-l { max-width: none; }
