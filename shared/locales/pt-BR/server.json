@@ -31,5 +31,8 @@
     "calName": "Cobranças de assinaturas",
     "method": "Pagamento: {name}",
     "alarm": "{name} renova em breve"
-  }
+  },
+  "invalidPerson": "O nome é obrigatório",
+  "personNotFound": "Pessoa não encontrada",
+  "personInUse": { "one": "Ainda vinculada a {count} plano ou pagamento. Mescle com outra pessoa antes.", "other": "Ainda vinculada a {count} planos ou pagamentos. Mescle com outra pessoa antes." }
 }

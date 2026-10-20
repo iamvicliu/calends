@@ -35,7 +35,13 @@
     "noMember": "Không có thành viên này. Các thành viên: {list}",
     "notProxy": "“{name}” không phải khoản trả hộ",
     "noPendingProxy": "Không có khoản trả hộ nào chưa được trả lại",
-    "nothingToChange": "Không có gì để thay đổi: hãy truyền balance, top_up, name hoặc region"
+    "nothingToChange": "Không có gì để thay đổi: hãy truyền balance, top_up, name hoặc region",
+    "personNotFound": "Không có ai khớp “{q}”. Hãy thử list_people trước.",
+    "personAmbiguous": "“{q}” khớp {count} người. Hãy chỉ định bằng id: {list}",
+    "personNoItems": "{name} không có gói hay khoản trả hộ nào để ghi",
+    "personItemsAmbiguous": "{name} có ở nhiều nơi — hãy chỉ định subscription: {list}",
+    "needSubOrPerson": "Cần subscription hoặc person",
+    "needKind": "Cần kind (share hoặc proxy)"
   },
   "tool": {
     "get_overview": "Tổng quan sổ",
@@ -56,6 +62,7 @@
     "record_payment": "Ghi nhận khoản phí",
     "delete_payment": "Xóa bản ghi khoản phí",
     "record_receivable": "Ghi nhận tiền đã nhận",
-    "update_payment_method": "Cập nhật số dư phương thức thanh toán"
+    "update_payment_method": "Cập nhật số dư phương thức thanh toán",
+    "list_people": "Người & khoản phải thu"
   }
 }

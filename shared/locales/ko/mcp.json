@@ -35,7 +35,13 @@
     "noMember": "해당 멤버가 없습니다. 멤버: {list}",
     "notProxy": "‘{name}’은(는) 대신 결제가 아닙니다",
     "noPendingProxy": "미수 대신 결제가 없습니다",
-    "nothingToChange": "변경할 내용이 없습니다: balance, top_up, name 또는 region을 전달하세요"
+    "nothingToChange": "변경할 내용이 없습니다: balance, top_up, name 또는 region을 전달하세요",
+    "personNotFound": "'{q}'와(과) 일치하는 사람이 없어요. 먼저 list_people로 확인하세요",
+    "personAmbiguous": "'{q}'에 {count}명이 일치해요. id로 지정하세요: {list}",
+    "personNoItems": "{name}에게 기록할 공유·대신 결제가 없어요",
+    "personItemsAmbiguous": "{name}은(는) 여러 곳에 있어요. subscription으로 지정하세요: {list}",
+    "needSubOrPerson": "subscription 또는 person이 필요해요",
+    "needKind": "kind(share 또는 proxy)가 필요해요"
   },
   "tool": {
     "get_overview": "장부 개요",
@@ -56,6 +62,7 @@
     "record_payment": "결제 기록",
     "delete_payment": "결제 기록 삭제",
     "record_receivable": "받은 돈 기록",
-    "update_payment_method": "결제 수단 잔액 업데이트"
+    "update_payment_method": "결제 수단 잔액 업데이트",
+    "list_people": "사람과 받을 돈"
   }
 }

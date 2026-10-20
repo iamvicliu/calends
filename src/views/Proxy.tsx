@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { chargesBetween, cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../shared/billing.ts';
+import { cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../shared/types.ts';
@@ -8,51 +8,14 @@ import { Amount, Cell, Group, Icon, PayBadge, Sheet, SubIcon, Toolbar } from '..
 import { contactText } from './Members.tsx';
 import { run, saveSub } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { matchEntries } from '../../shared/proxy.ts';
+import { proxyRows, type ProxyRow } from '../../shared/proxy.ts';
 import { t } from '../../shared/i18n.ts';
 
 /** 代付的状态文案：进行中、到期停付、已停止是代付自己的说法，其余沿用订阅状态 */
 const statusLabel = (st: string): string => (['active', 'ending', 'ended'].includes(st) ? t(`proxy.status.${st}`) : t(`list.status.${st}`));
 
-interface Row {
-  date: string;
-  entry?: ProxyEntry;
-  /** 订阅原价（订阅币种） */
-  list: number;
-  listCurrency: string;
-  /** 卡上实扣 */
-  charged: number;
-  currency: string;
-  /** 扣款当天汇率折成本位币 */
-  chargedBase: number;
-  /** 收款当天汇率折成本位币；未收为空 */
-  receivedBase?: number;
-}
-
-/** 每一期：卡上实扣多少、折合多少，对方还了多少、折合多少 */
-function rows(state: AppState, s: Subscription, today: string): Row[] {
-  const entries = s.proxy?.entries ?? [];
-  const charges = chargesBetween(s, s.start, today, today);
-  const matched = matchEntries(entries, charges.map((c) => c.date));
-  return charges
-    .map((c) => {
-      const entry = matched.get(c.date);
-      const charged = entry?.charged ?? c.amount;
-      const currency = entry?.chargedCurrency ?? c.currency;
-      const received = entry?.received;
-      return {
-        date: c.date,
-        entry,
-        list: c.amount,
-        listCurrency: c.currency,
-        charged,
-        currency,
-        chargedBase: toBaseAt(state, charged, currency, c.date),
-        receivedBase: received == null ? undefined : toBaseAt(state, received, entry!.receivedCurrency ?? state.settings.baseCurrency, entry!.receivedOn ?? c.date),
-      };
-    })
-    .reverse();
-}
+export type Row = ProxyRow;
+const rows = proxyRows;
 
 /** 某个代付订阅还有几期没收回 */
 export function proxyOwed(state: AppState, s: Subscription, today: string): number {
@@ -171,7 +134,7 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
 }
 
 /** 代付详情：上面是订阅与对象的基本信息和汇总，下面是每一期的扣款与收款列表；点一行记收款或修改 */
-function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s: Subscription; onClose: () => void; onOpen: (s: Subscription) => void }) {
+export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s: Subscription; onClose: () => void; onOpen: (s: Subscription) => void }) {
   const today = todayIn(state.settings.timezone);
   const base = state.settings.baseCurrency;
   const live = state.subscriptions.find((x) => x.id === s.id) ?? s;
@@ -282,7 +245,7 @@ function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s: Subscr
   );
 }
 
-function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Subscription; row: Row; onClose: () => void }) {
+export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Subscription; row: Row; onClose: () => void }) {
   const base = state.settings.baseCurrency;
   const e = row.entry;
   const [charged, setCharged] = useState(e?.charged != null ? String(e.charged) : '');

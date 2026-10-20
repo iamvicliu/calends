@@ -31,5 +31,8 @@
     "calName": "Subscription charges",
     "method": "Payment: {name}",
     "alarm": "{name} renews soon"
-  }
+  },
+  "invalidPerson": "Name is required",
+  "personNotFound": "Person not found",
+  "personInUse": { "one": "Still linked to {count} shared plan or proxy payment. Merge them into someone else first.", "other": "Still linked to {count} shared plans or proxy payments. Merge them into someone else first." }
 }

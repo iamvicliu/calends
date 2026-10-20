@@ -9,6 +9,7 @@ import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Membe
 import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
+import { FamilyTabs } from './People.tsx';
 
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
@@ -47,7 +48,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
 
   return (
     <>
-      <Toolbar title={t('family.pool.title')} />
+      <Toolbar title={t('family.pool.title')}>
+        {!ro && <FamilyTabs tab="plans" />}
+      </Toolbar>
       <div class="page fade-in stack">
         <div class="grid g-3">
           <div class="card stat">

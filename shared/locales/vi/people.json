@@ -1,0 +1,62 @@
+{
+  "title": "Người",
+  "tab": {
+    "plans": "Gói",
+    "people": "Người"
+  },
+  "stat": {
+    "owed": "Cần thu",
+    "owedSub": "{count} người còn nợ",
+    "allSettled": "Đã thu đủ",
+    "received": "Đã thu đến nay",
+    "receivedSub": "Gói chia sẻ và trả hộ",
+    "count": "Số người",
+    "countSub": "Gói chia sẻ: {share} · Trả hộ: {proxy}"
+  },
+  "empty": {
+    "title": "Chưa có ai",
+    "body": "Thêm thành viên vào gói chia sẻ hoặc chọn người được trả hộ — tại đây sẽ thấy mỗi người còn nợ bao nhiêu."
+  },
+  "card": {
+    "noContact": "Chưa có liên hệ",
+    "nothing": "Không tham gia gói nào",
+    "past": "Thêm {count} mục đã kết thúc"
+  },
+  "kind": {
+    "share": "Gói chia sẻ",
+    "proxy": "Trả hộ"
+  },
+  "item": {
+    "paidUntil": "Đã trả đến {date}",
+    "noPay": "Chưa thu lần nào",
+    "owedPeriods": "Nợ {count} kỳ",
+    "left": "Đã rời",
+    "ended": "Đã dừng",
+    "received": "Đã thu {amount}"
+  },
+  "sheet": {
+    "owed": "Còn nợ",
+    "received": "Đã trả đến nay",
+    "last": "Lần trả gần nhất",
+    "in": "Tham gia {count} gói",
+    "inEmpty": "Không có trong gói chia sẻ hay khoản trả hộ nào. Có thể xoá.",
+    "profile": "Hồ sơ",
+    "notePh": "vd: đồng nghiệp, chuyển cuối tháng",
+    "color": "Màu",
+    "syncFoot": "Đổi tên hoặc liên hệ sẽ áp dụng cho cả {count} chỗ.",
+    "merge": "Gộp vào",
+    "mergePick": "Chọn…",
+    "mergeFoot": "Một người bị ghi thành hai? Gộp lại để dồn gói và khoản thu về một chỗ.",
+    "mergeConfirm": "Gộp “{from}” vào “{into}”? Mọi gói và khoản thu của {from} chuyển sang {into}, giữ tên và liên hệ của {into}.",
+    "merged": "Đã gộp vào {name}",
+    "confirmDelete": "Xoá “{name}”?"
+  },
+  "pick": {
+    "new": "Người mới",
+    "aria": "Chọn người"
+  },
+  "field": {
+    "person": "Người",
+    "syncFoot": "Người này còn ở {count} chỗ khác — đổi tên hoặc liên hệ sẽ áp dụng luôn."
+  }
+}

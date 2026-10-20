@@ -35,7 +35,13 @@
     "noMember": "Böyle bir üye yok. Üyeler: {list}",
     "notProxy": "“{name}” başkası için yapılan bir ödeme değil",
     "noPendingProxy": "Geri ödenmemiş başkası için ödeme yok",
-    "nothingToChange": "Değiştirilecek bir şey yok: balance, top_up, name veya region gönderin"
+    "nothingToChange": "Değiştirilecek bir şey yok: balance, top_up, name veya region gönderin",
+    "personNotFound": "“{q}” ile eşleşen kişi yok. Önce list_people deneyin.",
+    "personAmbiguous": "“{q}” {count} kişiyle eşleşiyor. id ile belirtin: {list}",
+    "personNoItems": "{name} için kayıt yapılacak plan veya ödeme yok",
+    "personItemsAmbiguous": "{name} birden fazla yerde; subscription belirtin: {list}",
+    "needSubOrPerson": "subscription veya person gerekli",
+    "needKind": "kind gerekli (share veya proxy)"
   },
   "tool": {
     "get_overview": "Defter özeti",
@@ -56,6 +62,7 @@
     "record_payment": "Ödeme kaydet",
     "delete_payment": "Ödeme kaydını sil",
     "record_receivable": "Alınan parayı kaydet",
-    "update_payment_method": "Ödeme yöntemi bakiyesini güncelle"
+    "update_payment_method": "Ödeme yöntemi bakiyesini güncelle",
+    "list_people": "Kişiler ve alacaklar"
   }
 }

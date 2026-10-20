@@ -31,5 +31,8 @@
     "calName": "訂閱扣款",
     "method": "付款：{name}",
     "alarm": "{name} 即將扣款"
-  }
+  },
+  "invalidPerson": "稱呼不能留空",
+  "personNotFound": "搵唔到呢個人",
+  "personInUse": "仲有 {count} 處共享或代付關聯呢個人，請先合併到其他人名下"
 }

@@ -1,12 +1,13 @@
 import { addDays, subError, todayIn } from '../shared/billing.ts';
-import { DEFAULT_SETTINGS, type Channel, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
+import { DEFAULT_SETTINGS, PERSON_COLORS, type Channel, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
+import { mergePeople, refsFor, syncPerson } from '../shared/people.ts';
 import { DEFAULT_MAX_SESSIONS, authStatus, changePassword, deletePasskey, isAuthed, listPasskeys, listSessions, login, logout, logoutOthers, passkeyLoginOptions, passkeyLoginVerify, passkeyRegisterOptions, passkeyRegisterVerify, pruneSessions, randomToken, revokeSession, sameOrigin, setup } from './auth.ts';
 import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
 import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type Digest } from './notify.ts';
-import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from './store.ts';
+import { getFx, getPeople, getSettings, loadState, putKv, remove, replaceAll, upsert, writePeople } from './store.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
@@ -40,6 +41,17 @@ function invalidIn(subs: Subscription[]): string | undefined {
   }
   return undefined;
 }
+
+/** 名册里的一个人：只收认识的字段，去掉多余空白 */
+function cleanPerson(raw: Partial<Person>, id: string): Person | undefined {
+  const name = typeof raw?.name === 'string' ? raw.name.trim() : '';
+  if (!name) return undefined;
+  const s = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+  const contact = s(raw.contact);
+  return { id, name, contactVia: contact ? s(raw.contactVia) : undefined, contact, note: s(raw.note), color: PERSON_COLORS.includes(raw.color as never) ? raw.color : undefined, createdAt: s(raw.createdAt) ?? new Date().toISOString() };
+}
+
+const subsOf = async (env: Env) => (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
@@ -121,6 +133,37 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     }
     if (method === 'DELETE') {
       await remove(env, 'subscriptions', m[1]);
+      return json({ ok: true });
+    }
+  }
+  // 人：保存时把称呼、联系方式同步到所有引用他的成员、代付上，返回改动过的订阅
+  m = path.match(/^\/api\/people\/([\w-]+)(\/merge)?$/);
+  if (m) {
+    const people = await getPeople(env);
+    const id = m[1];
+    if (m[2] && method === 'POST') {
+      const into = String(((await req.json()) as { into?: string }).into ?? '');
+      if (!people.some((p) => p.id === id) || !people.some((p) => p.id === into) || into === id) return bad(t('server.personNotFound'), 404);
+      const r = mergePeople(people, await subsOf(env), id, into);
+      const subscriptions = r.subs.map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
+      await writePeople(env, r.people, subscriptions);
+      return json({ people: r.people, subscriptions });
+    }
+    if (!m[2] && method === 'PUT') {
+      const p = cleanPerson((await req.json()) as Partial<Person>, id);
+      if (!p) return bad(t('server.invalidPerson'));
+      const old = people.find((x) => x.id === id);
+      if (old?.createdAt) p.createdAt = old.createdAt;
+      const next = old ? people.map((x) => (x.id === id ? p : x)) : [...people, p];
+      const subscriptions = syncPerson(await subsOf(env), p).map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
+      await writePeople(env, next, subscriptions);
+      return json({ person: p, subscriptions });
+    }
+    if (!m[2] && method === 'DELETE') {
+      // 还有合租、代付指向他时不删：先合并到别人名下或从那些订阅里移除，账不会悬空
+      const n = refsFor(await subsOf(env), id).length;
+      if (n) return bad(t('server.personInUse', { count: n }), 409);
+      await putKv(env, 'people', people.filter((x) => x.id !== id));
       return json({ ok: true });
     }
   }

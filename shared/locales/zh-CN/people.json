@@ -1,0 +1,62 @@
+{
+  "title": "人",
+  "tab": {
+    "plans": "合租",
+    "people": "人"
+  },
+  "stat": {
+    "owed": "待收",
+    "owedSub": "{count} 人欠款",
+    "allSettled": "都已结清",
+    "received": "至今收回",
+    "receivedSub": "合租与代付合计",
+    "count": "人数",
+    "countSub": "合租 {share} · 代付 {proxy}"
+  },
+  "empty": {
+    "title": "还没有人",
+    "body": "在合租里添加成员，或给代付填上对象，这里会按人汇总谁欠你多少。"
+  },
+  "card": {
+    "noContact": "未填联系方式",
+    "nothing": "没有参与合租或代付",
+    "past": "另有 {count} 项已结束"
+  },
+  "kind": {
+    "share": "合租",
+    "proxy": "代付"
+  },
+  "item": {
+    "paidUntil": "已付至 {date}",
+    "noPay": "还没收过款",
+    "owedPeriods": "欠 {count} 期",
+    "left": "已退出",
+    "ended": "已停止",
+    "received": "已收 {amount}"
+  },
+  "sheet": {
+    "owed": "待收",
+    "received": "至今收回",
+    "last": "最近收款",
+    "in": "参与 {count} 项",
+    "inEmpty": "不在任何合租或代付里，可以删除。",
+    "profile": "资料",
+    "notePh": "比如：同事，月底转账",
+    "color": "颜色",
+    "syncFoot": "改称呼或联系方式会同步到 {count} 处合租和代付。",
+    "merge": "合并到",
+    "mergePick": "选择…",
+    "mergeFoot": "同一个人被记成了两个？合并后账目归到一起。",
+    "mergeConfirm": "把「{from}」合并到「{into}」？{from} 的合租和代付都会转到 {into} 名下，称呼和联系方式以 {into} 为准。",
+    "merged": "已合并到 {name}",
+    "confirmDelete": "删除「{name}」？"
+  },
+  "pick": {
+    "new": "新的人",
+    "aria": "选择人"
+  },
+  "field": {
+    "person": "人",
+    "syncFoot": "这个人还在另外 {count} 处出现，改称呼或联系方式会一起改。"
+  }
+}

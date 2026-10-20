@@ -35,7 +35,13 @@
     "noMember": "Mitglied nicht gefunden. Mitglieder: {list}",
     "notProxy": "„{name}“ ist keine Zahlung für andere",
     "noPendingProxy": "Keine offenen Abbuchungen für andere",
-    "nothingToChange": "Nichts zu ändern: übergib balance, top_up, name oder region"
+    "nothingToChange": "Nichts zu ändern: übergib balance, top_up, name oder region",
+    "personNotFound": "Keine Person passt zu „{q}“. Probiere zuerst list_people.",
+    "personAmbiguous": "„{q}“ passt zu {count} Personen. Gib eine per id an: {list}",
+    "personNoItems": "Für {name} gibt es kein Abo und keine Auslage zum Erfassen",
+    "personItemsAmbiguous": "{name} ist in mehreren – gib subscription an: {list}",
+    "needSubOrPerson": "subscription oder person ist erforderlich",
+    "needKind": "kind ist erforderlich (share oder proxy)"
   },
   "tool": {
     "get_overview": "Kontoübersicht",
@@ -56,6 +62,7 @@
     "record_payment": "Abbuchung erfassen",
     "delete_payment": "Abbuchung löschen",
     "record_receivable": "Zahlungseingang erfassen",
-    "update_payment_method": "Guthaben der Zahlungsmethode aktualisieren"
+    "update_payment_method": "Guthaben der Zahlungsmethode aktualisieren",
+    "list_people": "Personen & Forderungen"
   }
 }

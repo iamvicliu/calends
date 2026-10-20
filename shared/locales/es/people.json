@@ -1,0 +1,62 @@
+{
+  "title": "Personas",
+  "tab": {
+    "plans": "Planes",
+    "people": "Personas"
+  },
+  "stat": {
+    "owed": "Te deben",
+    "owedSub": { "one": "{count} persona debe", "other": "{count} personas deben" },
+    "allSettled": "Todos al día",
+    "received": "Cobrado hasta hoy",
+    "receivedSub": "Planes compartidos y pagos por otros",
+    "count": "Personas",
+    "countSub": "Planes: {share} · Pagos por otros: {proxy}"
+  },
+  "empty": {
+    "title": "Aún no hay personas",
+    "body": "Añade miembros a un plan compartido o indica para quién pagas: aquí verás cuánto te debe cada persona."
+  },
+  "card": {
+    "noContact": "Sin contacto",
+    "nothing": "No está en ningún plan",
+    "past": { "one": "Y {count} ya terminado", "other": "Y {count} ya terminados" }
+  },
+  "kind": {
+    "share": "Plan compartido",
+    "proxy": "Pago por otro"
+  },
+  "item": {
+    "paidUntil": "Pagado hasta {date}",
+    "noPay": "Sin pagos aún",
+    "owedPeriods": { "one": "Debe {count} periodo", "other": "Debe {count} periodos" },
+    "left": "Salió",
+    "ended": "Detenido",
+    "received": "Pagado {amount}"
+  },
+  "sheet": {
+    "owed": "Pendiente",
+    "received": "Pagado hasta hoy",
+    "last": "Último pago",
+    "in": { "one": "En {count} plan", "other": "En {count} planes" },
+    "inEmpty": "No está en ningún plan ni pago por otros. Puedes eliminarla.",
+    "profile": "Perfil",
+    "notePh": "p. ej., compañero, paga a fin de mes",
+    "color": "Color",
+    "syncFoot": { "one": "Los cambios de nombre y contacto se aplican en {count} lugar.", "other": "Los cambios de nombre y contacto se aplican en los {count} lugares." },
+    "merge": "Combinar con",
+    "mergePick": "Elegir…",
+    "mergeFoot": "¿La misma persona aparece dos veces? Combínalas para unir sus planes y pagos.",
+    "mergeConfirm": "¿Combinar «{from}» con «{into}»? Todos los planes y pagos de {from} pasan a {into}, y se conservan el nombre y contacto de {into}.",
+    "merged": "Combinado con {name}",
+    "confirmDelete": "¿Eliminar a «{name}»?"
+  },
+  "pick": {
+    "new": "Persona nueva",
+    "aria": "Elegir persona"
+  },
+  "field": {
+    "person": "Persona",
+    "syncFoot": { "one": "También aparece en {count} lugar más: los cambios de nombre y contacto se aplican ahí también.", "other": "También aparece en {count} lugares más: los cambios de nombre y contacto se aplican ahí también." }
+  }
+}

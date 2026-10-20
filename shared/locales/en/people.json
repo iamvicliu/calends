@@ -1,0 +1,62 @@
+{
+  "title": "People",
+  "tab": {
+    "plans": "Plans",
+    "people": "People"
+  },
+  "stat": {
+    "owed": "Owed to me",
+    "owedSub": { "one": "{count} person owes", "other": "{count} people owe" },
+    "allSettled": "Everyone's settled",
+    "received": "Collected so far",
+    "receivedSub": "Shared plans and paid-for, combined",
+    "count": "People",
+    "countSub": "Shared plans: {share} · Paid for: {proxy}"
+  },
+  "empty": {
+    "title": "No people yet",
+    "body": "Add members to a shared plan or set who a proxy payment is for — everyone shows up here with what they owe you."
+  },
+  "card": {
+    "noContact": "No contact",
+    "nothing": "Not in any plan",
+    "past": { "one": "Plus {count} that has ended", "other": "Plus {count} that have ended" }
+  },
+  "kind": {
+    "share": "Shared plan",
+    "proxy": "Paid for"
+  },
+  "item": {
+    "paidUntil": "Paid through {date}",
+    "noPay": "No payments yet",
+    "owedPeriods": { "one": "{count} period owed", "other": "{count} periods owed" },
+    "left": "Left",
+    "ended": "Stopped",
+    "received": "Paid {amount}"
+  },
+  "sheet": {
+    "owed": "Owed",
+    "received": "Paid so far",
+    "last": "Last payment",
+    "in": { "one": "In {count} plan", "other": "In {count} plans" },
+    "inEmpty": "Not in any shared plan or proxy payment. You can delete this person.",
+    "profile": "Profile",
+    "notePh": "e.g. coworker, pays at month end",
+    "color": "Color",
+    "syncFoot": { "one": "Name and contact changes apply everywhere this person appears ({count} place).", "other": "Name and contact changes apply everywhere this person appears ({count} places)." },
+    "merge": "Merge into",
+    "mergePick": "Choose…",
+    "mergeFoot": "Recorded the same person twice? Merge them to combine their plans and payments.",
+    "mergeConfirm": "Merge “{from}” into “{into}”? All of {from}'s plans and payments move to {into}, keeping {into}'s name and contact.",
+    "merged": "Merged into {name}",
+    "confirmDelete": "Delete “{name}”?"
+  },
+  "pick": {
+    "new": "New person",
+    "aria": "Choose a person"
+  },
+  "field": {
+    "person": "Person",
+    "syncFoot": { "one": "Also in {count} other place — name and contact changes apply there too.", "other": "Also in {count} other places — name and contact changes apply there too." }
+  }
+}

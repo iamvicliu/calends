@@ -1,0 +1,62 @@
+{
+  "title": "Personen",
+  "tab": {
+    "plans": "Abos",
+    "people": "Personen"
+  },
+  "stat": {
+    "owed": "Ausstehend",
+    "owedSub": { "one": "{count} Person schuldet", "other": "{count} Personen schulden" },
+    "allSettled": "Alle beglichen",
+    "received": "Bisher erhalten",
+    "receivedSub": "Geteilte Abos und Auslagen zusammen",
+    "count": "Personen",
+    "countSub": "Geteilt: {share} · Ausgelegt: {proxy}"
+  },
+  "empty": {
+    "title": "Noch keine Personen",
+    "body": "Füge Mitglieder zu einem geteilten Abo hinzu oder gib an, für wen du zahlst – hier siehst du dann, wer dir wie viel schuldet."
+  },
+  "card": {
+    "noContact": "Kein Kontakt",
+    "nothing": "In keinem Abo",
+    "past": { "one": "Dazu {count} beendet", "other": "Dazu {count} beendet" }
+  },
+  "kind": {
+    "share": "Geteilt",
+    "proxy": "Ausgelegt"
+  },
+  "item": {
+    "paidUntil": "Bezahlt bis {date}",
+    "noPay": "Noch keine Zahlung",
+    "owedPeriods": { "one": "{count} Zeitraum offen", "other": "{count} Zeiträume offen" },
+    "left": "Ausgestiegen",
+    "ended": "Beendet",
+    "received": "Erhalten {amount}"
+  },
+  "sheet": {
+    "owed": "Offen",
+    "received": "Bisher bezahlt",
+    "last": "Letzte Zahlung",
+    "in": { "one": "In {count} Abo", "other": "In {count} Abos" },
+    "inEmpty": "In keinem geteilten Abo und keiner Auslage. Du kannst die Person löschen.",
+    "profile": "Profil",
+    "notePh": "z. B. Kollege, zahlt zum Monatsende",
+    "color": "Farbe",
+    "syncFoot": { "one": "Änderungen an Name und Kontakt gelten an {count} Stelle.", "other": "Änderungen an Name und Kontakt gelten an allen {count} Stellen." },
+    "merge": "Zusammenführen mit",
+    "mergePick": "Auswählen…",
+    "mergeFoot": "Dieselbe Person doppelt angelegt? Zusammenführen bündelt Abos und Zahlungen.",
+    "mergeConfirm": "„{from}“ mit „{into}“ zusammenführen? Alle Abos und Zahlungen von {from} gehen auf {into} über; Name und Kontakt von {into} bleiben.",
+    "merged": "Mit {name} zusammengeführt",
+    "confirmDelete": "„{name}“ löschen?"
+  },
+  "pick": {
+    "new": "Neue Person",
+    "aria": "Person wählen"
+  },
+  "field": {
+    "person": "Person",
+    "syncFoot": { "one": "Auch an {count} weiteren Stelle – Änderungen an Name und Kontakt gelten dort mit.", "other": "Auch an {count} weiteren Stellen – Änderungen an Name und Kontakt gelten dort mit." }
+  }
+}

@@ -35,7 +35,13 @@
     "noMember": "Anggota tidak ditemukan. Anggota: {list}",
     "notProxy": "“{name}” bukan talangan",
     "noPendingProxy": "Tidak ada talangan yang belum dibayar",
-    "nothingToChange": "Tidak ada yang diubah: kirim balance, top_up, name, atau region"
+    "nothingToChange": "Tidak ada yang diubah: kirim balance, top_up, name, atau region",
+    "personNotFound": "Tidak ada orang yang cocok dengan “{q}”. Coba list_people dulu.",
+    "personAmbiguous": "“{q}” cocok dengan {count} orang. Tentukan dengan id: {list}",
+    "personNoItems": "{name} tidak punya paket atau talangan untuk dicatat",
+    "personItemsAmbiguous": "{name} ada di beberapa; tentukan subscription: {list}",
+    "needSubOrPerson": "subscription atau person wajib diisi",
+    "needKind": "kind wajib diisi (share atau proxy)"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
@@ -56,6 +62,7 @@
     "record_payment": "Catat tagihan",
     "delete_payment": "Hapus catatan tagihan",
     "record_receivable": "Catat uang diterima",
-    "update_payment_method": "Perbarui saldo metode pembayaran"
+    "update_payment_method": "Perbarui saldo metode pembayaran",
+    "list_people": "Orang & piutang"
   }
 }

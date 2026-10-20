@@ -6,7 +6,9 @@ import type { AppState, MemberPayment, ShareMember, Subscription } from '../../s
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
 import { confirmDelete } from './Editor.tsx';
-import { run, saveSub } from '../store.ts';
+import { getState, run, savePerson, saveSub } from '../store.ts';
+import { linkPerson, PersonPicker } from './People.tsx';
+import { refsFor } from '../../shared/people.ts';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { t, type Params } from '../../shared/i18n.ts';
 
@@ -196,6 +198,8 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
     }, t('family.member.copied', { count: targets.length }));
   };
 
+  // 同一个人还出现在别的合租、代付里：改称呼或联系方式会一起改
+  const linkedElsewhere = f.personId ? refsFor(state.subscriptions, f.personId).filter((r) => !(r.kind === 'member' && r.sub.id === s.id && r.member.id === f.id)).length : 0;
   const payments = (f.payments ?? []).slice().reverse();
   const received = (f.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date, base), 0);
 
@@ -228,10 +232,17 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
           <button
             class="btn primary"
             disabled={!f.name.trim()}
-            onClick={async () => {
-              await save({ ...f, name: f.name.trim() }, isNew ? t('family.member.added') : t('family.member.saved'));
-              onClose();
-            }}
+            onClick={() =>
+              run(async () => {
+                // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
+                const link = await linkPerson(state, f.personId, f.name, f.contact ? via : undefined, f.contact);
+                const next = { ...f, name: f.name.trim(), personId: link.id };
+                const sh = getState().subscriptions.find((x) => x.id === s.id)?.share ?? s.share!;
+                await saveSub({ ...s, share: { ...sh, members: sh.members.some((x) => x.id === next.id) ? sh.members.map((x) => (x.id === next.id ? next : x)) : [...sh.members, next] } });
+                if (link.after) await savePerson(link.after);
+                onClose();
+              }, isNew ? t('family.member.added') : t('family.member.saved'))
+            }
           >
             {isNew ? t('family.member.add') : t('family.member.save')}
           </button>
@@ -239,7 +250,16 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
       }
     >
       <div class="stack">
-        <Group title={t('family.member.group')}>
+        <Group title={t('family.member.group')} foot={linkedElsewhere > 0 ? t('people.field.syncFoot', { count: linkedElsewhere }) : undefined}>
+          {(state.people?.length ?? 0) > 0 && (
+            <Cell label={t('people.field.person')}>
+              <PersonPicker
+                state={state}
+                value={f.personId}
+                onPick={(p) => (p ? up({ personId: p.id, name: p.name, contactVia: p.contactVia, contact: p.contact, tg: undefined }) : f.personId && up({ personId: undefined, name: '', contact: undefined, tg: undefined }))}
+              />
+            </Cell>
+          )}
           <Cell label={t('family.member.name')}>
             <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onInput={(e) => up({ name: val(e) })} />
           </Cell>
