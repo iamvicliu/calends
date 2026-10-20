@@ -16,7 +16,7 @@ const STATUS: Record<string, [string, string]> = {
   trial: ['试用中', 'blue'],
   paused: ['已暂停', ''],
   ending: ['到期停付', ''],
-  ended: ['已结束', ''],
+  ended: ['已停止', ''],
   lifetime: ['买断', ''],
 };
 

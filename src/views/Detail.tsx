@@ -20,7 +20,7 @@ const STATUS: Record<string, [string, string]> = {
   trial: ['试用中', 'green'],
   paused: ['已暂停', ''],
   ending: ['到期不续', 'orange'],
-  ended: ['已归档', ''],
+  ended: ['已退订', ''],
   lifetime: ['买断', 'blue'],
 };
 

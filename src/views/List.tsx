@@ -21,7 +21,7 @@ const FILTERS: Array<[Filter, string]> = [
   ['upcoming', '未开始'],
   ['trial', '试用'],
   ['lifetime', '买断'],
-  ['ended', '已归档'],
+  ['ended', '已退订'],
 ];
 
 const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' || st === 'paused' ? 'live' : (st as Filter));
