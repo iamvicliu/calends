@@ -440,12 +440,12 @@ function App() {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || e.metaKey || e.ctrlKey || e.altKey) return;
       // 有弹层（编辑器、详情、搜索等）打开时，单键快捷键不生效
       if (editing || viewId || review || ics || palette || document.querySelector('[aria-modal="true"]')) return;
-      if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today(), state?.settings.defaultMethodId));
+      if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
       const idx = Number(e.key);
       if (state && idx >= 1 && idx <= navOf(state.settings).length) navigate(navOf(state.settings)[idx - 1].path);
     };
     const onDrawer = () => (matchMedia('(max-width: 860px)').matches ? setDrawer(true) : setCollapsed(false));
-    const onAdd = () => state && !state.readonly && setEditing(newSub(today(), state?.settings.defaultMethodId));
+    const onAdd = () => state && !state.readonly && setEditing(newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
     document.addEventListener('keydown', onKey);
     window.addEventListener('ledger:drawer', onDrawer);
     window.addEventListener('ledger:add', onAdd);
@@ -473,7 +473,7 @@ function App() {
   };
   const add = () => {
     setDrawer(false);
-    setEditing(newSub(d, state?.settings.defaultMethodId));
+    setEditing(newSub(d, state?.settings.defaultMethodId, state?.settings.baseCurrency));
   };
   const viewing = state.subscriptions.find((s) => s.id === viewId);
 

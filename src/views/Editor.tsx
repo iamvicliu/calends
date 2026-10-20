@@ -20,14 +20,14 @@ const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetim
 
 const STATUS: SubStatus[] = ['active', 'trial', 'paused', 'cancelled'];
 
-export function newSub(today: string, methodId?: string): Subscription {
+export function newSub(today: string, methodId?: string, currency = 'USD'): Subscription {
   return {
     id: uid(),
     name: '',
     category: presetCat('tools'),
     tags: [],
     price: 0,
-    currency: 'CNY',
+    currency,
     cycle: { unit: 'month', every: 1 },
     start: today,
     status: 'active',

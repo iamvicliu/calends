@@ -23,7 +23,8 @@ import { TooltipProvider } from '@/public/components/ui/tooltip';
 import { cn } from '@/public/lib/utils';
 import { PROJECT_NAME, PROJECT_URL } from '../../shared/brand.ts';
 
-type Ccy = 'CNY' | 'USD';
+/** 公开页可切换的币种：本位币，和（本位币不是美元时）美元 */
+type Ccy = string;
 
 const pref = (key: string): string | null => {
   try {
@@ -135,9 +136,9 @@ function ThemeButton() {
 }
 
 function Ledger({ state }: { state: AppState }) {
-  const [ccy, setCcy] = useState<Ccy>(() => (pref('ledger:public-ccy') === 'USD' ? 'USD' : 'CNY'));
-  const today = todayIn(state.settings.timezone);
   const base = state.settings.baseCurrency;
+  const [ccy, setCcy] = useState<Ccy>(() => (base !== 'USD' && pref('ledger:public-ccy') === 'USD' ? 'USD' : base));
+  const today = todayIn(state.settings.timezone);
   const d = useMemo(() => derive(state, today), [state, today]);
 
   // 当前值按今天汇率换算；历史扣款按扣款当天汇率单独累计
@@ -165,22 +166,23 @@ function Ledger({ state }: { state: AppState }) {
     <Shell
       right={
         <div className="flex items-center gap-1.5">
-          <Tabs
-            value={ccy}
-            onValueChange={(v: string) => {
-              setCcy(v as Ccy);
-              save('ledger:public-ccy', v);
-            }}
-          >
-            <TabsList aria-label={t('public.currency')}>
-              <TabsTrigger value="CNY" className="px-2.5 text-xs">
-                ¥ CNY
-              </TabsTrigger>
-              <TabsTrigger value="USD" className="px-2.5 text-xs">
-                $ USD
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {base !== 'USD' && (
+            <Tabs
+              value={ccy}
+              onValueChange={(v: string) => {
+                setCcy(v);
+                save('ledger:public-ccy', v);
+              }}
+            >
+              <TabsList aria-label={t('public.currency')}>
+                {[base, 'USD'].map((c) => (
+                  <TabsTrigger key={c} value={c} className="px-2.5 text-xs">
+                    {symbol(c).trim()} {c}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          )}
           <ThemeButton />
         </div>
       }
@@ -200,7 +202,7 @@ function Ledger({ state }: { state: AppState }) {
               <dl className="grid grid-cols-3 gap-6 sm:gap-10">
                 <Stat label={t('public.hero.yearly')} value={<Num value={d.mrr * 12 * k} prefix={sym} />} />
                 <Stat label={t('public.hero.live')} value={<Num value={d.live.length} />} />
-                <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === 'USD' ? d.paidUsd : d.paidBase} prefix={sym} />} />
+                <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === base ? d.paidBase : d.paidUsd} prefix={sym} />} />
               </dl>
             </CardContent>
 
@@ -234,7 +236,7 @@ function Ledger({ state }: { state: AppState }) {
                 </CardAction>
               </CardHeader>
               <TabsContent value="paid" className="mt-4 px-2 sm:px-4">
-                <PaidChart months={ccy === 'USD' ? d.monthsUsd : d.monthsBase} cur={today.slice(0, 7)} sym={sym} fmt={fmt} />
+                <PaidChart months={ccy === base ? d.monthsBase : d.monthsUsd} cur={today.slice(0, 7)} sym={sym} fmt={fmt} />
               </TabsContent>
               <TabsContent value="mrr" className="mt-4 px-2 sm:px-4">
                 <MrrChart data={d.mrrTrend.map((p) => ({ ...p, mrr: p.mrr * k }))} sym={sym} fmt={fmt} />
@@ -395,7 +397,7 @@ function derive(state: AppState, today: string) {
     monthsBase: months.map((x) => ({ m: x.m, v: x.base })),
     monthsUsd: months.map((x) => ({ m: x.m, v: x.usd })),
     upcoming,
-    fx: { CNY: fxFor('CNY'), USD: fxFor('USD') } as Record<Ccy, ReturnType<typeof fxFor>>,
+    fx: { [base]: fxFor(base), USD: fxFor('USD') } as Record<Ccy, ReturnType<typeof fxFor>>,
     ended: savings.items,
     saved: savings.total,
     lifetime: state.subscriptions.filter((s) => s.cycle.unit === 'lifetime'),

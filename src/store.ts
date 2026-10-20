@@ -38,7 +38,7 @@ export function getState(): AppState {
 }
 
 export function today(): string {
-  return todayIn(store.state?.settings.timezone ?? 'Asia/Shanghai');
+  return todayIn(store.state?.settings.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
 }
 
 function cache(state: AppState) {

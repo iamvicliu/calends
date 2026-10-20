@@ -52,7 +52,6 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const upMethod = up && state.methods.find((m) => m.id === up.methodId);
   const history = chargesBetween(sub, sub.start, today, today);
   const total = sumBase(state, history);
-  const totalCny = sumBase(state, history, 'CNY');
   const totalUsd = sumBase(state, history, 'USD');
   // 换区后旧的那段还没到期：两段同时在付钱，每月成本按两段之和
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
@@ -135,7 +134,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           today={today}
           total={total}
           count={history.length}
-          alt={base === 'CNY' ? money(totalUsd, 'USD', { compact: true }) : base === 'USD' ? money(totalCny, 'CNY', { compact: true }) : undefined}
+          alt={base !== 'USD' ? money(totalUsd, 'USD', { compact: true }) : undefined}
         />
         {story && (
           <div class="d-mini">
@@ -301,7 +300,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
               .reverse()
               .map((c, i) => {
                 const r = rateOn(state.fxHistory, c.currency, c.date);
-                const cny = rateOn(state.fxHistory, 'CNY', c.date);
+                const baseRate = rateOn(state.fxHistory, base, c.date);
                 // 同一天可能有多笔（如重复扣款），用当天在同一段里的序号定位；并行的两段各算各的
                 const index = history.filter((x) => x.date === c.date && x.sub.start === c.sub.start).indexOf(c);
                 return (
@@ -324,12 +323,13 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
                     <b>{money(c.amount, c.currency)}</b>
                     <span class="cr-conv">
                       {c.settled && <span class="cr-settled">{t('detail.charges.onCard', { amount: money(c.settled.amount, c.settled.currency) })}</span>}
-                      {c.currency !== 'CNY' && money(chargeValue(state, c, 'CNY'), 'CNY')}
-                      {c.currency !== 'CNY' && c.currency !== 'USD' && ' · '}
-                      {c.currency !== 'USD' && money(chargeValue(state, c, 'USD'), 'USD')}
-                      {c.currency !== 'USD' && r && cny && (
+                      {c.currency !== base && money(chargeValue(state, c, base), base)}
+                      {c.currency !== base && base !== 'USD' && c.currency !== 'USD' && ' · '}
+                      {base !== 'USD' && c.currency !== 'USD' && money(chargeValue(state, c, 'USD'), 'USD')}
+                      {c.currency !== base && r && baseRate && (
                         <small>
-                          1 {c.currency} = {((1 / r.rate) * cny.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} CNY{r.date !== c.date ? ` · ${r.date}` : ''}
+                          1 {c.currency} = {((1 / r.rate) * baseRate.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} {base}
+                          {r.date !== c.date ? ` · ${r.date}` : ''}
                         </small>
                       )}
                     </span>

@@ -338,11 +338,11 @@ export interface AppState {
 export const BALANCE_KINDS: MethodKind[] = ['appstore', 'googleplay', 'giftcard', 'prepaid', 'phone', 'paypal', 'alipay', 'wechat', 'crypto'];
 
 export const DEFAULT_SETTINGS: Settings = {
-  baseCurrency: 'CNY',
+  baseCurrency: 'USD',
   notifyEmail: '',
   remindDays: 3,
   notifyHour: 9,
-  timezone: 'Asia/Shanghai',
+  timezone: 'UTC',
   // 新部署默认不公开，需要时到设置里打开
   publicView: false,
   monthlyDigest: true,
