@@ -17,10 +17,16 @@
     "alreadySetup": "Ya se ha establecido una contraseña",
     "noSetupToken": "SETUP_TOKEN no se configuró al desplegar, así que no se puede continuar. Configura primero este secreto (wrangler secret put SETUP_TOKEN).",
     "badSetupToken": "Token de configuración incorrecto",
-    "passwordTooShort": { "one": "La contraseña debe tener al menos {min} carácter", "other": "La contraseña debe tener al menos {min} caracteres" },
+    "passwordTooShort": {
+      "one": "La contraseña debe tener al menos {min} carácter",
+      "other": "La contraseña debe tener al menos {min} caracteres"
+    },
     "wrongPassword": "Contraseña incorrecta",
     "wrongCurrentPassword": "La contraseña actual es incorrecta",
-    "newPasswordTooShort": { "one": "La nueva contraseña debe tener al menos {min} carácter", "other": "La nueva contraseña debe tener al menos {min} caracteres" },
+    "newPasswordTooShort": {
+      "one": "La nueva contraseña debe tener al menos {min} carácter",
+      "other": "La nueva contraseña debe tener al menos {min} caracteres"
+    },
     "invalidDevice": "Dispositivo no válido",
     "cannotRemoveCurrent": "No puedes quitar este dispositivo. Usa Cerrar sesión.",
     "expired": "La solicitud caducó. Inténtalo de nuevo.",
@@ -34,5 +40,12 @@
   },
   "invalidPerson": "El nombre es obligatorio",
   "personNotFound": "Persona no encontrada",
-  "personInUse": { "one": "Aún vinculada a {count} plan o pago. Combínala antes con otra persona.", "other": "Aún vinculada a {count} planes o pagos. Combínala antes con otra persona." }
+  "personInUse": {
+    "one": "Aún vinculada a {count} plan o pago. Combínala antes con otra persona.",
+    "other": "Aún vinculada a {count} planes o pagos. Combínala antes con otra persona."
+  },
+  "category": {
+    "invalid": "Lista de categorías no válida",
+    "duplicate": "Categoría duplicada: {name}"
+  }
 }

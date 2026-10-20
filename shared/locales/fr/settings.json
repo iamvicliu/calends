@@ -260,5 +260,64 @@
     "newPassword": "Nouveau mot de passe",
     "minLength": "8 caractères minimum",
     "confirmPassword": "Confirmer le nouveau mot de passe"
+  },
+  "cat": {
+    "title": "Catégories",
+    "manage": "Gérer les catégories",
+    "count": {
+      "one": "{count} catégorie",
+      "other": "{count} catégories"
+    },
+    "subs": {
+      "one": "{count} abonnement",
+      "other": "{count} abonnements"
+    },
+    "unused": "Inutilisée",
+    "foot": "Faites glisser pour réordonner. Renommer une catégorie met à jour tous ses abonnements.",
+    "add": "Nouvelle catégorie",
+    "edit": "Modifier la catégorie",
+    "name": "Nom",
+    "namePlaceholder": "Nom de la catégorie",
+    "color": "Couleur",
+    "icon": "Icône",
+    "tabIcons": "Icônes",
+    "tabEmoji": "Emoji",
+    "search": "Rechercher une icône",
+    "noMatch": "Aucune icône correspondante",
+    "emojiPlaceholder": "Saisissez ou collez un emoji",
+    "emojiCommon": "Suggestions",
+    "delete": "Supprimer la catégorie",
+    "moveTo": {
+      "one": "Déplacer son abonnement vers",
+      "other": "Déplacer ses {count} abonnements vers"
+    },
+    "confirmDelete": "Supprimer « {name} » ?",
+    "dragHandle": "Faire glisser pour réordonner",
+    "toast": {
+      "created": "Catégorie ajoutée",
+      "saved": "Catégorie enregistrée",
+      "renamed": {
+        "one": "Catégorie enregistrée · {count} abonnement mis à jour",
+        "other": "Catégorie enregistrée · {count} abonnements mis à jour"
+      },
+      "deleted": "Catégorie supprimée",
+      "order": "Ordre enregistré"
+    },
+    "error": {
+      "empty": "Saisissez un nom",
+      "duplicate": "Une catégorie nommée « {name} » existe déjà"
+    },
+    "group": {
+      "common": "Courantes",
+      "tech": "Tech",
+      "media": "Divertissement",
+      "work": "Travail",
+      "money": "Achats et argent",
+      "life": "Maison et vie",
+      "food": "Cuisine et boissons",
+      "health": "Santé et sport",
+      "travel": "Voyage",
+      "people": "Personnes et études"
+    }
   }
 }

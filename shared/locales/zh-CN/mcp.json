@@ -2,7 +2,6 @@
   "serverTitle": "订阅账本",
   "instructions": "这是用户的个人订阅账本。金额同时给出原币和折算后的本位币；「我的支出」不含代付（替别人付的），合租只算我自己承担的部分。查询前不确定订阅叫什么时先用 list_subscriptions 搜索；写操作都支持 dry_run，先预览再执行。",
   "defaultTokenName": "AI 助手",
-  "defaultCategory": "工具",
   "item": "{name}（{id}）",
   "sep": "、",
   "label": {
@@ -45,6 +44,7 @@
   },
   "tool": {
     "get_overview": "账本概况",
+    "list_categories": "分类列表",
     "list_subscriptions": "列出订阅",
     "get_subscription": "订阅详情",
     "list_charges": "扣款明细",

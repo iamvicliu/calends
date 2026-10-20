@@ -124,5 +124,27 @@
   "csv": {
     "appStoreBalance": "App Store {region} 잔액",
     "otherCategory": "기타"
+  },
+  "category": {
+    "ai": "AI",
+    "tools": "도구",
+    "productivity": "생산성",
+    "media": "동영상",
+    "music": "음악",
+    "games": "게임",
+    "cloud": "클라우드",
+    "storage": "저장공간",
+    "domains": "도메인",
+    "vpn": "VPN·네트워크",
+    "developer": "개발",
+    "design": "디자인",
+    "education": "교육",
+    "news": "뉴스·읽기",
+    "social": "소셜",
+    "shopping": "쇼핑",
+    "finance": "금융",
+    "health": "건강·피트니스",
+    "phone": "통신",
+    "daily": "라이프스타일"
   }
 }

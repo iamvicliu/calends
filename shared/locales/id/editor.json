@@ -25,18 +25,7 @@
   "status": { "active": "Aktif", "trial": "Uji coba", "paused": "Dijeda", "cancelled": "Dibatalkan" },
   "category": {
     "choose": "Pilih kategori",
-    "new": "Kategori baru…",
-    "newPrompt": "Nama kategori",
-    "tools": "Alat",
-    "media": "Video",
-    "music": "Musik",
-    "daily": "Gaya hidup",
-    "productivity": "Produktivitas",
-    "shopping": "Belanja",
-    "education": "Pendidikan",
-    "games": "Game",
-    "domains": "Domain",
-    "social": "Sosial"
+    "new": "Kategori baru…"
   },
   "group": { "billing": "Tagihan", "status": "Status", "who": "Siapa yang memakai", "links": "Tautan & tampilan", "tags": "Tag & catatan" },
   "field": {

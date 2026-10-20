@@ -34,5 +34,9 @@
   },
   "invalidPerson": "称呼不能为空",
   "personNotFound": "找不到这个人",
-  "personInUse": "还有 {count} 处合租或代付关联这个人，请先合并到别人名下"
+  "personInUse": "还有 {count} 处合租或代付关联这个人，请先合并到别人名下",
+  "category": {
+    "invalid": "分类列表无效",
+    "duplicate": "分类重名：{name}"
+  }
 }

@@ -17,10 +17,16 @@
     "alreadySetup": "Parola zaten belirlenmiş",
     "noSetupToken": "SETUP_TOKEN dağıtım sırasında yapılandırılmadığı için kuruluma devam edilemiyor. Önce bu gizli anahtarı ayarlayın (wrangler secret put SETUP_TOKEN).",
     "badSetupToken": "Kurulum token'ı yanlış",
-    "passwordTooShort": { "one": "Parola en az {min} karakter olmalı", "other": "Parola en az {min} karakter olmalı" },
+    "passwordTooShort": {
+      "one": "Parola en az {min} karakter olmalı",
+      "other": "Parola en az {min} karakter olmalı"
+    },
     "wrongPassword": "Parola yanlış",
     "wrongCurrentPassword": "Mevcut parola yanlış",
-    "newPasswordTooShort": { "one": "Yeni parola en az {min} karakter olmalı", "other": "Yeni parola en az {min} karakter olmalı" },
+    "newPasswordTooShort": {
+      "one": "Yeni parola en az {min} karakter olmalı",
+      "other": "Yeni parola en az {min} karakter olmalı"
+    },
     "invalidDevice": "Geçersiz cihaz",
     "cannotRemoveCurrent": "Bu cihazı kaldıramazsınız. Bunun yerine Çıkış Yap'ı kullanın.",
     "expired": "İsteğin süresi doldu. Lütfen tekrar deneyin.",
@@ -34,5 +40,12 @@
   },
   "invalidPerson": "Ad gerekli",
   "personNotFound": "Kişi bulunamadı",
-  "personInUse": { "one": "Hâlâ {count} plana veya ödemeye bağlı. Önce başka biriyle birleştirin.", "other": "Hâlâ {count} plana veya ödemeye bağlı. Önce başka biriyle birleştirin." }
+  "personInUse": {
+    "one": "Hâlâ {count} plana veya ödemeye bağlı. Önce başka biriyle birleştirin.",
+    "other": "Hâlâ {count} plana veya ödemeye bağlı. Önce başka biriyle birleştirin."
+  },
+  "category": {
+    "invalid": "Geçersiz kategori listesi",
+    "duplicate": "Yinelenen kategori: {name}"
+  }
 }

@@ -17,10 +17,16 @@
     "alreadySetup": "A password has already been set",
     "noSetupToken": "SETUP_TOKEN wasn't configured at deploy time, so setup can't continue. Set this secret first (wrangler secret put SETUP_TOKEN).",
     "badSetupToken": "Incorrect setup token",
-    "passwordTooShort": { "one": "Password must be at least {min} character", "other": "Password must be at least {min} characters" },
+    "passwordTooShort": {
+      "one": "Password must be at least {min} character",
+      "other": "Password must be at least {min} characters"
+    },
     "wrongPassword": "Incorrect password",
     "wrongCurrentPassword": "Current password is incorrect",
-    "newPasswordTooShort": { "one": "New password must be at least {min} character", "other": "New password must be at least {min} characters" },
+    "newPasswordTooShort": {
+      "one": "New password must be at least {min} character",
+      "other": "New password must be at least {min} characters"
+    },
     "invalidDevice": "Invalid device",
     "cannotRemoveCurrent": "You can't remove this device. Use Log Out instead.",
     "expired": "The request expired. Please try again.",
@@ -34,5 +40,12 @@
   },
   "invalidPerson": "Name is required",
   "personNotFound": "Person not found",
-  "personInUse": { "one": "Still linked to {count} shared plan or proxy payment. Merge them into someone else first.", "other": "Still linked to {count} shared plans or proxy payments. Merge them into someone else first." }
+  "personInUse": {
+    "one": "Still linked to {count} shared plan or proxy payment. Merge them into someone else first.",
+    "other": "Still linked to {count} shared plans or proxy payments. Merge them into someone else first."
+  },
+  "category": {
+    "invalid": "Invalid category list",
+    "duplicate": "Duplicate category: {name}"
+  }
 }

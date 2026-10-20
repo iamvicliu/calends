@@ -25,18 +25,7 @@
   "status": { "active": "Đang hoạt động", "trial": "Dùng thử", "paused": "Tạm dừng", "cancelled": "Đã hủy" },
   "category": {
     "choose": "Chọn danh mục",
-    "new": "Danh mục mới…",
-    "newPrompt": "Tên danh mục",
-    "tools": "Công cụ",
-    "media": "Video",
-    "music": "Âm nhạc",
-    "daily": "Đời sống",
-    "productivity": "Năng suất",
-    "shopping": "Mua sắm",
-    "education": "Giáo dục",
-    "games": "Trò chơi",
-    "domains": "Tên miền",
-    "social": "Mạng xã hội"
+    "new": "Danh mục mới…"
   },
   "group": { "billing": "Thanh toán", "status": "Trạng thái", "who": "Ai sử dụng", "links": "Liên kết & hiển thị", "tags": "Thẻ & ghi chú" },
   "field": {

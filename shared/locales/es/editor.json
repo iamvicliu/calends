@@ -25,18 +25,7 @@
   "status": { "active": "Activa", "trial": "Prueba", "paused": "En pausa", "cancelled": "Cancelada" },
   "category": {
     "choose": "Elegir categoría",
-    "new": "Nueva categoría…",
-    "newPrompt": "Nombre de la categoría",
-    "tools": "Herramientas",
-    "media": "Vídeo",
-    "music": "Música",
-    "daily": "Estilo de vida",
-    "productivity": "Productividad",
-    "shopping": "Compras",
-    "education": "Educación",
-    "games": "Juegos",
-    "domains": "Dominios",
-    "social": "Redes sociales"
+    "new": "Nueva categoría…"
   },
   "group": { "billing": "Facturación", "status": "Estado", "who": "Quién la usa", "links": "Enlaces y apariencia", "tags": "Etiquetas y notas" },
   "field": {

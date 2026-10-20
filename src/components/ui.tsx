@@ -1,8 +1,10 @@
 import type { ComponentChildren, JSX } from 'preact';
+import { createPortal } from 'preact/compat';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
-import { bankOf, BRANDS, brandOf, canonicalCat, catColor, faviconOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
+import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
+import { CatGlyph } from './CatGlyph.tsx';
 import { useToasts } from '../store.ts';
 import { t } from '../../shared/i18n.ts';
 
@@ -63,47 +65,22 @@ const P: Record<string, JSX.Element> = {
       <path d="m20 20-3.5-3.5" />
     </>
   ),
-  // 分类图标（Lucide 路径）
+  // 拖动排序的把手
+  grip: (
+    <>
+      <circle cx="9" cy="6" r="1" />
+      <circle cx="9" cy="12" r="1" />
+      <circle cx="9" cy="18" r="1" />
+      <circle cx="15" cy="6" r="1" />
+      <circle cx="15" cy="12" r="1" />
+      <circle cx="15" cy="18" r="1" />
+    </>
+  ),
+  // 侧边栏「AI」
   bot: (
     <>
       <rect x="4" y="8" width="16" height="12" rx="3" />
       <path d="M12 8V4.5M10 4.5h4M2 13.5v2M22 13.5v2M9.5 13v1.5M14.5 13v1.5" />
-    </>
-  ),
-  sparkle: <path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3Z" />,
-  wrench: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9l-3.8 3.8Z" />,
-  film: (
-    <>
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <path d="m10 8 6 4-6 4Z" />
-    </>
-  ),
-  music: (
-    <>
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
-    </>
-  ),
-  zap: <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />,
-  server: (
-    <>
-      <rect x="2" y="3" width="20" height="8" rx="2" />
-      <rect x="2" y="13" width="20" height="8" rx="2" />
-      <path d="M6 7h.01M6 17h.01" />
-    </>
-  ),
-  bag: (
-    <>
-      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-      <path d="M3 6h18M16 10a4 4 0 0 1-8 0" />
-    </>
-  ),
-  book: <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />,
-  gamepad: (
-    <>
-      <rect x="2" y="6" width="20" height="12" rx="2" />
-      <path d="M6 12h4M8 10v4M15 13h.01M18 11h.01" />
     </>
   ),
   users: (
@@ -185,7 +162,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   const tint = catColor(sub.category);
   const style = { '--s': `${size}px`, '--tint': tint } as Record<string, string>;
   // 域名用注册商的图标，不用各自的站点图标：默认 Cloudflare，其他注册商在 icon 里填它的图标
-  if (canonicalCat(sub.category) === '域名') {
+  if (isDomainCat(sub.category)) {
     return (
       <span class="ico domain" style={style}>
         <img src={sub.icon?.startsWith('http') ? (proxied ? `/api/img?u=${encodeURIComponent(sub.icon)}` : sub.icon) : '/brands/cloudflare.svg'} alt="" />
@@ -247,14 +224,16 @@ export function PayBadge({ m }: { m?: PaymentMethod }) {
   );
 }
 
-export const CAT_ICON: Record<string, string> = { AI: 'bot', 工具: 'wrench', 影音: 'film', 音乐: 'music', 日用: 'home', 效率: 'zap', 购物: 'bag', 教育: 'book', 游戏: 'gamepad', 域名: 'globe', 服务器: 'server', 社交: 'users' };
-export const catIcon = (cat: string): string => CAT_ICON[canonicalCat(cat)] ?? 'tag';
+/** 分类图标（按分类表里设的图标或 emoji） */
+export function CatIcon({ cat, size = 14 }: { cat: string; size?: number }) {
+  return <CatGlyph icon={catIcon(cat)} size={size} />;
+}
 
 /** 分类胶囊：分类色 + 图标 + 名称 */
 export function CatChip({ cat }: { cat: string }) {
   return (
     <span class="cat-chip" style={{ '--tint': catColor(cat) } as Record<string, string>}>
-      <Icon name={catIcon(cat)} size={12} />
+      <CatIcon cat={cat} size={12} />
       {cat}
     </span>
   );
@@ -337,21 +316,28 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
 }
 
 // ---------- 弹层 ----------
+/** 打开中的弹层，后开的在上面：Esc 只关最上面那一层（如订阅表单里再开的新建分类） */
+const openSheets: object[] = [];
+
 export function Sheet(props: { title?: ComponentChildren; onClose: () => void; children: ComponentChildren; foot?: ComponentChildren; narrow?: boolean; bare?: boolean }) {
   // Esc 时调用最新的 onClose（它可能依赖表单状态，比如未保存确认）
   const close = useRef(props.onClose);
   close.current = props.onClose;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
+    const me = {};
+    openSheets.push(me);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && openSheets[openSheets.length - 1] === me && close.current();
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
+      openSheets.splice(openSheets.indexOf(me), 1);
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
     };
   }, []);
-  return (
+  // 挂到 body 上：放在带动画（transform）的页面里时，fixed 定位不会被困在页面范围内
+  return createPortal(
     <div class="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
       <div class={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`} role="dialog" aria-modal="true">
         <div class="grabber" />
@@ -370,7 +356,8 @@ export function Sheet(props: { title?: ComponentChildren; onClose: () => void; c
         <div class="sheet-body">{props.children}</div>
         {props.foot && <div class="sheet-foot">{props.foot}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

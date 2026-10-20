@@ -17,10 +17,14 @@
     "alreadySetup": "Kata sandi sudah diatur",
     "noSetupToken": "SETUP_TOKEN tidak dikonfigurasi saat deploy, jadi penyiapan tidak bisa dilanjutkan. Atur secret ini terlebih dahulu (wrangler secret put SETUP_TOKEN).",
     "badSetupToken": "Token penyiapan salah",
-    "passwordTooShort": { "other": "Kata sandi minimal {min} karakter" },
+    "passwordTooShort": {
+      "other": "Kata sandi minimal {min} karakter"
+    },
     "wrongPassword": "Kata sandi salah",
     "wrongCurrentPassword": "Kata sandi saat ini salah",
-    "newPasswordTooShort": { "other": "Kata sandi baru minimal {min} karakter" },
+    "newPasswordTooShort": {
+      "other": "Kata sandi baru minimal {min} karakter"
+    },
     "invalidDevice": "Perangkat tidak valid",
     "cannotRemoveCurrent": "Perangkat ini tidak bisa dihapus. Gunakan Keluar.",
     "expired": "Permintaan kedaluwarsa. Silakan coba lagi.",
@@ -34,5 +38,9 @@
   },
   "invalidPerson": "Nama wajib diisi",
   "personNotFound": "Orang tidak ditemukan",
-  "personInUse": "Masih terkait dengan {count} paket atau talangan. Gabungkan dulu ke orang lain."
+  "personInUse": "Masih terkait dengan {count} paket atau talangan. Gabungkan dulu ke orang lain.",
+  "category": {
+    "invalid": "Daftar kategori tidak valid",
+    "duplicate": "Kategori ganda: {name}"
+  }
 }

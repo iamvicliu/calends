@@ -7,7 +7,8 @@ import type { Env } from './env.ts';
 import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type Digest } from './notify.ts';
-import { getFx, getPeople, getSettings, loadState, putKv, remove, replaceAll, upsert, writePeople } from './store.ts';
+import { getFx, getPeople, getSettings, loadState, loadSubs, putKv, remove, replaceAll, saveSettingsWithSubs, upsert, writePeople } from './store.ts';
+import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
@@ -190,6 +191,19 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     await putKv(env, 'settings', next);
     if (next.maxSessions !== cur.maxSessions) await pruneSessions(req, env, next.maxSessions ?? DEFAULT_MAX_SESSIONS);
     return json(next);
+  }
+  // 分类表：整表保存；renames（旧名 → 新名）把相关订阅一起改掉，改名、删除时移走订阅都靠它
+  if (path === '/api/categories' && method === 'PUT') {
+    const b = (await req.json()) as { categories?: unknown; renames?: Record<string, unknown> };
+    const r = cleanCategories(b.categories);
+    if ('error' in r) return bad(r.error);
+    const renames: Record<string, string> = {};
+    for (const [from, to] of Object.entries(b.renames ?? {})) if (typeof to === 'string' && to.trim()) renames[from] = to.trim();
+    const now = new Date().toISOString();
+    const changed = renameInSubs(await loadSubs(env), renames).map((s) => ({ ...s, updatedAt: now }));
+    const settings = { ...(await getSettings(env)), categories: r.list };
+    await saveSettingsWithSubs(env, settings, changed);
+    return json({ settings, subscriptions: changed });
   }
   if (path === '/api/ics/rotate' && method === 'POST') {
     const cur = await getSettings(env);

@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "Đây là sổ theo dõi gói đăng ký cá nhân của người dùng. Số tiền được cung cấp theo cả tiền tệ gốc và quy đổi sang tiền tệ cơ sở. \"Chi tiêu của tôi\" không bao gồm các khoản trả hộ (trả thay cho người khác), và với gói chia sẻ chỉ tính phần của riêng tôi. Nếu không chắc tên của một gói đăng ký, hãy tìm bằng list_subscriptions trước. Mọi công cụ ghi đều hỗ trợ dry_run — hãy xem trước rồi mới áp dụng.",
   "defaultTokenName": "Trợ lý AI",
-  "defaultCategory": "Công cụ",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -45,6 +44,7 @@
   },
   "tool": {
     "get_overview": "Tổng quan sổ",
+    "list_categories": "Danh mục",
     "list_subscriptions": "Danh sách gói đăng ký",
     "get_subscription": "Chi tiết gói đăng ký",
     "list_charges": "Khoản phí",

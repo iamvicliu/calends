@@ -2,7 +2,6 @@
   "serverTitle": "サブスク台帳",
   "instructions": "これはユーザー個人のサブスク台帳です。金額は元の通貨と基準通貨換算の両方で示されます。「自分の支出」には立て替え（他人のための支払い）は含まれず、共有プランは自分の負担分のみを計上します。サブスクの名前がわからない場合は、まず list_subscriptions で検索してください。すべての書き込みツールは dry_run に対応しています。まずプレビューしてから適用してください。",
   "defaultTokenName": "AI アシスタント",
-  "defaultCategory": "ツール",
   "item": "{name}（{id}）",
   "sep": "、",
   "label": {
@@ -45,6 +44,7 @@
   },
   "tool": {
     "get_overview": "台帳の概要",
+    "list_categories": "カテゴリ一覧",
     "list_subscriptions": "サブスク一覧",
     "get_subscription": "サブスクの詳細",
     "list_charges": "請求履歴",

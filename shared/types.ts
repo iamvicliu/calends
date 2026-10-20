@@ -1,5 +1,6 @@
 // 前端与 Worker 共用的数据模型。日期一律用 'YYYY-MM-DD' 字符串，按「日」计算，避免时区漂移。
 import { t } from './i18n.ts';
+import type { Category } from './categories.ts';
 
 export type CycleUnit = 'day' | 'week' | 'month' | 'year';
 
@@ -300,6 +301,8 @@ export interface Settings {
   aiEnabled?: boolean;
   /** 最多同时登录的设备数；超出时最久未活动的设备被挤下线；缺省 10 */
   maxSessions?: number;
+  /** 分类注册表（名称、图标、颜色），顺序即显示顺序；缺省按内置预设和已用分类推导，见 shared/categories.ts */
+  categories?: Category[];
   /** 界面、提醒邮件、MCP 的语言；缺省跟随浏览器 */
   language?: string;
   /** 跟随浏览器时，后台最近一次实际使用的语言（提醒邮件、MCP 用它） */

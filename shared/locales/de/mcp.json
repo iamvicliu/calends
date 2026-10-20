@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "Dies ist das persönliche Abo-Konto des Nutzers. Beträge werden in der Originalwährung und umgerechnet in die Basiswährung angegeben. „Meine Ausgaben“ schließen Zahlungen für andere aus und zählen bei geteilten Abos nur meinen eigenen Anteil. Wenn du nicht sicher bist, wie ein Abo heißt, suche zuerst mit list_subscriptions. Jedes Schreib-Tool unterstützt dry_run – erst Vorschau, dann anwenden.",
   "defaultTokenName": "KI-Assistent",
-  "defaultCategory": "Tools",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -45,6 +44,7 @@
   },
   "tool": {
     "get_overview": "Kontoübersicht",
+    "list_categories": "Kategorien",
     "list_subscriptions": "Abos auflisten",
     "get_subscription": "Abo-Details",
     "list_charges": "Abbuchungen",

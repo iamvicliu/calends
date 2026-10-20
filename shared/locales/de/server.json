@@ -43,5 +43,9 @@
   "personInUse": {
     "one": "Noch mit {count} Abo oder Auslage verknüpft. Führe sie zuerst mit einer anderen Person zusammen.",
     "other": "Noch mit {count} Abos oder Auslagen verknüpft. Führe sie zuerst mit einer anderen Person zusammen."
+  },
+  "category": {
+    "invalid": "Ungültige Kategorienliste",
+    "duplicate": "Doppelte Kategorie: {name}"
   }
 }

@@ -134,5 +134,27 @@
   "csv": {
     "appStoreBalance": "App Store-Guthaben {region}",
     "otherCategory": "Sonstiges"
+  },
+  "category": {
+    "ai": "KI",
+    "tools": "Tools",
+    "productivity": "Produktivität",
+    "media": "Video",
+    "music": "Musik",
+    "games": "Spiele",
+    "cloud": "Cloud & Server",
+    "storage": "Speicher",
+    "domains": "Domains",
+    "vpn": "VPN & Netzwerk",
+    "developer": "Entwicklung",
+    "design": "Design",
+    "education": "Bildung",
+    "news": "News & Lesen",
+    "social": "Social Media",
+    "shopping": "Shopping",
+    "finance": "Finanzen",
+    "health": "Gesundheit & Fitness",
+    "phone": "Mobilfunk",
+    "daily": "Alltag"
   }
 }

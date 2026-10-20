@@ -1,6 +1,7 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
 import { DEFAULT_SETTINGS, type AppState, type PaymentMethod, type Subscription } from './types.ts';
 import { t } from './i18n.ts';
+import { categoryList, isDomainCategory, type Category } from './categories.ts';
 
 const DOMAIN = /\b((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+)([a-z]{2,})\b/gi;
 
@@ -13,8 +14,9 @@ export function maskDomain(text: string): string {
   });
 }
 
-export function isDomainSub(s: Pick<Subscription, 'name' | 'category' | 'tags' | 'notes'>): boolean {
-  if (s.category === '域名') return true;
+/** 域名类订阅：「域名」分类（改过名也认得，需传入分类表）、标签或备注提到域名、名称像域名 */
+export function isDomainSub(s: Pick<Subscription, 'name' | 'category' | 'tags' | 'notes'>, cats: Category[] = []): boolean {
+  if (s.category === '域名' || isDomainCategory(cats, s.category)) return true;
   return /域名|domain/i.test(`${s.category} ${s.tags.join(' ')} ${s.notes ?? ''}`) || new RegExp(DOMAIN.source, 'i').test(s.name);
 }
 
@@ -39,8 +41,8 @@ function originOf(url?: string): string | undefined {
   }
 }
 
-function publicSub(s: Subscription): Subscription {
-  const domain = isDomainSub(s);
+function publicSub(s: Subscription, cats: Category[]): Subscription {
+  const domain = isDomainSub(s, cats);
   // 未上线项目的域名打码；已上线的（showOnPublic）原样展示
   const hide = domain && !s.showOnPublic;
   return {
@@ -76,6 +78,10 @@ function publicSub(s: Subscription): Subscription {
 }
 
 export function maskForPublic(state: AppState): AppState {
+  const cats = categoryList(state.settings, state.subscriptions);
+  // 代付涉及他人，公开页完全不出现
+  const subs = state.subscriptions.filter((s) => !s.proxy);
+  const used = new Set(subs.map((s) => s.category));
   return {
     readonly: true,
     fx: state.fx,
@@ -91,9 +97,10 @@ export function maskForPublic(state: AppState): AppState {
       publicView: true,
       remindDays: 0,
       monthlyDigest: false,
+      // 分类只下发公开订阅用到的：名称、图标、颜色，以及「域名」标记（公开页据此用注册商图标）
+      categories: cats.filter((c) => used.has(c.name)).map((c) => ({ name: c.name, icon: c.icon, color: c.color, preset: c.preset === 'domains' ? c.preset : undefined })),
     },
     methods: state.methods.map(publicMethod),
-    // 代付涉及他人，公开页完全不出现
-    subscriptions: state.subscriptions.filter((s) => !s.proxy).map(publicSub),
+    subscriptions: subs.map((s) => publicSub(s, cats)),
   };
 }

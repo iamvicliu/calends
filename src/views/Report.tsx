@@ -7,7 +7,7 @@ import { tx } from '../i18n.ts';
 import { cancelSavings, cashVsAccrual, contributionOn, events, insights, monthEnd, movement, mrrChangeSinceLastMonth, mrrSeries, prepaidValue, topUpPlan, type EventKind } from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { Amount, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
+import { Amount, CatIcon, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, sumBase, toBase } from '../derive.ts';
 
 export function perLabel(s: Subscription): string {
@@ -402,7 +402,12 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           const e = entries[r.i];
           return (
             <button key={e.k} class="tm-cell" style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: color(e.k, r.i) }} onClick={() => setFocus(e.k)} {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}>
-              {r.w * r.h > 160 && <b>{e.k}</b>}
+              {r.w * r.h > 160 && (
+                <b>
+                  {dim === 'cat' && <CatIcon cat={e.k} size={12} />}
+                  {e.k}
+                </b>
+              )}
               {r.w * r.h > 260 && (
                 <span>
                   {Math.round((e.v / total) * 100)}% · {money(e.v, base, { compact: true })}

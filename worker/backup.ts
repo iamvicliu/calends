@@ -1,5 +1,5 @@
 // 完整备份与恢复：导出的文件导入到一个全新的部署后，账本与原来完全一致。
-// 包含：订阅、支付方式、人的名册、全部设置（含通知渠道、日历订阅令牌）、当前汇率、历史汇率。
+// 包含：订阅、支付方式、人的名册、全部设置（含通知渠道、日历订阅令牌、分类表）、当前汇率、历史汇率。
 // 不包含：登录会话、AI 接入令牌（属于凭据，新部署应重新生成）、提醒发送记录。
 import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';

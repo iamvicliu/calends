@@ -51,18 +51,7 @@
   },
   "category": {
     "choose": "カテゴリを選択",
-    "new": "新しいカテゴリ…",
-    "newPrompt": "カテゴリ名",
-    "tools": "ツール",
-    "media": "動画",
-    "music": "音楽",
-    "daily": "ライフスタイル",
-    "productivity": "効率化",
-    "shopping": "ショッピング",
-    "education": "教育",
-    "games": "ゲーム",
-    "domains": "ドメイン",
-    "social": "SNS"
+    "new": "新しいカテゴリ…"
   },
   "group": {
     "billing": "請求",

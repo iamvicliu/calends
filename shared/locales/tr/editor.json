@@ -25,18 +25,7 @@
   "status": { "active": "Etkin", "trial": "Deneme", "paused": "Duraklatıldı", "cancelled": "İptal edildi" },
   "category": {
     "choose": "Kategori seçin",
-    "new": "Yeni kategori…",
-    "newPrompt": "Kategori adı",
-    "tools": "Araçlar",
-    "media": "Video",
-    "music": "Müzik",
-    "daily": "Yaşam",
-    "productivity": "Verimlilik",
-    "shopping": "Alışveriş",
-    "education": "Eğitim",
-    "games": "Oyunlar",
-    "domains": "Alan adları",
-    "social": "Sosyal"
+    "new": "Yeni kategori…"
   },
   "group": { "billing": "Ödeme", "status": "Durum", "who": "Kim kullanıyor", "links": "Bağlantılar ve görünüm", "tags": "Etiketler ve notlar" },
   "field": {

@@ -9,12 +9,14 @@ export async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
   return row ? (JSON.parse(row.value) as T) : undefined;
 }
 
-export async function putKv(env: Env, key: string, value: unknown): Promise<void> {
-  await env.DB.prepare(
+function putKvStmt(env: Env, key: string, value: unknown): D1PreparedStatement {
+  return env.DB.prepare(
     "INSERT INTO kv (key, value, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
-  )
-    .bind(key, JSON.stringify(value))
-    .run();
+  ).bind(key, JSON.stringify(value));
+}
+
+export async function putKv(env: Env, key: string, value: unknown): Promise<void> {
+  await putKvStmt(env, key, value).run();
 }
 
 export async function getSettings(env: Env): Promise<Settings> {
@@ -100,4 +102,13 @@ export async function replaceAll(env: Env, subs: Subscription[], methods: Paymen
   for (const m of methods) stmts.push(upsertStmt(env, 'methods', m.id, m));
   for (const s of subs) stmts.push(upsertStmt(env, 'subscriptions', s.id, s));
   await env.DB.batch(stmts);
+}
+
+export async function loadSubs(env: Env): Promise<Subscription[]> {
+  return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
+}
+
+/** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */
+export async function saveSettingsWithSubs(env: Env, settings: Settings, subs: Subscription[]): Promise<void> {
+  await env.DB.batch([putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))]);
 }

@@ -43,5 +43,9 @@
   "personInUse": {
     "one": "Encore liée à {count} abonnement ou paiement. Fusionnez-la d’abord avec quelqu’un d’autre.",
     "other": "Encore liée à {count} abonnements ou paiements. Fusionnez-la d’abord avec quelqu’un d’autre."
+  },
+  "category": {
+    "invalid": "Liste de catégories invalide",
+    "duplicate": "Catégorie en double : {name}"
   }
 }

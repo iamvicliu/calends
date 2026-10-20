@@ -56,5 +56,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Email" },
-  "csv": { "appStoreBalance": "App Store {region} balance", "otherCategory": "Other" }
+  "csv": { "appStoreBalance": "App Store {region} balance", "otherCategory": "Other" },
+  "category": {
+    "ai": "AI",
+    "tools": "Tools",
+    "productivity": "Productivity",
+    "media": "Video",
+    "music": "Music",
+    "games": "Games",
+    "cloud": "Cloud & Servers",
+    "storage": "Storage",
+    "domains": "Domains",
+    "vpn": "VPN & Network",
+    "developer": "Developer",
+    "design": "Design",
+    "education": "Education",
+    "news": "News & Reading",
+    "social": "Social",
+    "shopping": "Shopping",
+    "finance": "Finance",
+    "health": "Health & Fitness",
+    "phone": "Phone & Mobile",
+    "daily": "Lifestyle"
+  }
 }

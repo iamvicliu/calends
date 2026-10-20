@@ -17,10 +17,16 @@
     "alreadySetup": "Uma senha já foi definida",
     "noSetupToken": "O SETUP_TOKEN não foi configurado na implantação, então não é possível continuar. Defina esse segredo primeiro (wrangler secret put SETUP_TOKEN).",
     "badSetupToken": "Token de configuração incorreto",
-    "passwordTooShort": { "one": "A senha deve ter pelo menos {min} caractere", "other": "A senha deve ter pelo menos {min} caracteres" },
+    "passwordTooShort": {
+      "one": "A senha deve ter pelo menos {min} caractere",
+      "other": "A senha deve ter pelo menos {min} caracteres"
+    },
     "wrongPassword": "Senha incorreta",
     "wrongCurrentPassword": "A senha atual está incorreta",
-    "newPasswordTooShort": { "one": "A nova senha deve ter pelo menos {min} caractere", "other": "A nova senha deve ter pelo menos {min} caracteres" },
+    "newPasswordTooShort": {
+      "one": "A nova senha deve ter pelo menos {min} caractere",
+      "other": "A nova senha deve ter pelo menos {min} caracteres"
+    },
     "invalidDevice": "Dispositivo inválido",
     "cannotRemoveCurrent": "Não é possível remover este dispositivo. Use Sair.",
     "expired": "A solicitação expirou. Tente de novo.",
@@ -34,5 +40,12 @@
   },
   "invalidPerson": "O nome é obrigatório",
   "personNotFound": "Pessoa não encontrada",
-  "personInUse": { "one": "Ainda vinculada a {count} plano ou pagamento. Mescle com outra pessoa antes.", "other": "Ainda vinculada a {count} planos ou pagamentos. Mescle com outra pessoa antes." }
+  "personInUse": {
+    "one": "Ainda vinculada a {count} plano ou pagamento. Mescle com outra pessoa antes.",
+    "other": "Ainda vinculada a {count} planos ou pagamentos. Mescle com outra pessoa antes."
+  },
+  "category": {
+    "invalid": "Lista de categorias inválida",
+    "duplicate": "Categoria duplicada: {name}"
+  }
 }

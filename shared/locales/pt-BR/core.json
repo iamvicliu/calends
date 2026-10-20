@@ -56,5 +56,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "E-mail" },
-  "csv": { "appStoreBalance": "Saldo da App Store {region}", "otherCategory": "Outros" }
+  "csv": { "appStoreBalance": "Saldo da App Store {region}", "otherCategory": "Outros" },
+  "category": {
+    "ai": "IA",
+    "tools": "Ferramentas",
+    "productivity": "Produtividade",
+    "media": "Vídeo",
+    "music": "Música",
+    "games": "Jogos",
+    "cloud": "Nuvem e servidores",
+    "storage": "Armazenamento",
+    "domains": "Domínios",
+    "vpn": "VPN e rede",
+    "developer": "Desenvolvimento",
+    "design": "Design",
+    "education": "Educação",
+    "news": "Notícias e leitura",
+    "social": "Redes sociais",
+    "shopping": "Compras",
+    "finance": "Finanças",
+    "health": "Saúde e fitness",
+    "phone": "Telefonia",
+    "daily": "Estilo de vida"
+  }
 }

@@ -18,18 +18,7 @@
   "status": { "active": "计费中", "trial": "试用中", "paused": "已暂停", "cancelled": "已退订" },
   "category": {
     "choose": "选择分类",
-    "new": "新建分类…",
-    "newPrompt": "新分类名称",
-    "tools": "工具",
-    "media": "影音",
-    "music": "音乐",
-    "daily": "日用",
-    "productivity": "效率",
-    "shopping": "购物",
-    "education": "教育",
-    "games": "游戏",
-    "domains": "域名",
-    "social": "社交"
+    "new": "新建分类…"
   },
   "group": { "billing": "计费", "status": "状态", "who": "谁在用", "links": "链接与外观", "tags": "标签与备注" },
   "field": {

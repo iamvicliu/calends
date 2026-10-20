@@ -55,18 +55,7 @@
   },
   "category": {
     "choose": "Choisir une catégorie",
-    "new": "Nouvelle catégorie…",
-    "newPrompt": "Nom de la catégorie",
-    "tools": "Outils",
-    "media": "Vidéo",
-    "music": "Musique",
-    "daily": "Vie quotidienne",
-    "productivity": "Productivité",
-    "shopping": "Shopping",
-    "education": "Éducation",
-    "games": "Jeux",
-    "domains": "Domaines",
-    "social": "Réseaux sociaux"
+    "new": "Nouvelle catégorie…"
   },
   "group": {
     "billing": "Facturation",

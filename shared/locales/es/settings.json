@@ -218,5 +218,64 @@
     "newPassword": "Nueva contraseña",
     "minLength": "Mínimo 8 caracteres",
     "confirmPassword": "Confirmar nueva contraseña"
+  },
+  "cat": {
+    "title": "Categorías",
+    "manage": "Gestionar categorías",
+    "count": {
+      "one": "{count} categoría",
+      "other": "{count} categorías"
+    },
+    "subs": {
+      "one": "{count} suscripción",
+      "other": "{count} suscripciones"
+    },
+    "unused": "Sin uso",
+    "foot": "Arrastra para reordenar. Al cambiar el nombre se actualizan todas las suscripciones de la categoría.",
+    "add": "Nueva categoría",
+    "edit": "Editar categoría",
+    "name": "Nombre",
+    "namePlaceholder": "Nombre de la categoría",
+    "color": "Color",
+    "icon": "Icono",
+    "tabIcons": "Iconos",
+    "tabEmoji": "Emoji",
+    "search": "Buscar iconos",
+    "noMatch": "Ningún icono coincide",
+    "emojiPlaceholder": "Escribe o pega cualquier emoji",
+    "emojiCommon": "Sugerencias",
+    "delete": "Eliminar categoría",
+    "moveTo": {
+      "one": "Mover su {count} suscripción a",
+      "other": "Mover sus {count} suscripciones a"
+    },
+    "confirmDelete": "¿Eliminar «{name}»?",
+    "dragHandle": "Arrastra para reordenar",
+    "toast": {
+      "created": "Categoría añadida",
+      "saved": "Categoría guardada",
+      "renamed": {
+        "one": "Categoría guardada · {count} suscripción actualizada",
+        "other": "Categoría guardada · {count} suscripciones actualizadas"
+      },
+      "deleted": "Categoría eliminada",
+      "order": "Orden guardado"
+    },
+    "error": {
+      "empty": "Escribe un nombre",
+      "duplicate": "Ya existe una categoría llamada «{name}»"
+    },
+    "group": {
+      "common": "Frecuentes",
+      "tech": "Tecnología",
+      "media": "Entretenimiento",
+      "work": "Trabajo",
+      "money": "Compras y dinero",
+      "life": "Hogar y vida",
+      "food": "Comida y bebida",
+      "health": "Salud y deporte",
+      "travel": "Viajes",
+      "people": "Personas y estudio"
+    }
   }
 }

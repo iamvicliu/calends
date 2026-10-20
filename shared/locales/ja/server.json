@@ -38,5 +38,9 @@
   },
   "invalidPerson": "呼び名を入力してください",
   "personNotFound": "相手が見つかりません",
-  "personInUse": "まだ {count} 件の共有・立て替えに紐づいています。先に別の相手へ統合してください"
+  "personInUse": "まだ {count} 件の共有・立て替えに紐づいています。先に別の相手へ統合してください",
+  "category": {
+    "invalid": "カテゴリの一覧が正しくありません",
+    "duplicate": "カテゴリ名が重複しています：{name}"
+  }
 }

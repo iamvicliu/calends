@@ -260,5 +260,64 @@
     "newPassword": "Neues Passwort",
     "minLength": "Mindestens 8 Zeichen",
     "confirmPassword": "Neues Passwort bestätigen"
+  },
+  "cat": {
+    "title": "Kategorien",
+    "manage": "Kategorien verwalten",
+    "count": {
+      "one": "{count} Kategorie",
+      "other": "{count} Kategorien"
+    },
+    "subs": {
+      "one": "{count} Abo",
+      "other": "{count} Abos"
+    },
+    "unused": "Nicht verwendet",
+    "foot": "Zum Sortieren ziehen. Beim Umbenennen werden alle Abos der Kategorie aktualisiert.",
+    "add": "Neue Kategorie",
+    "edit": "Kategorie bearbeiten",
+    "name": "Name",
+    "namePlaceholder": "Name der Kategorie",
+    "color": "Farbe",
+    "icon": "Symbol",
+    "tabIcons": "Symbole",
+    "tabEmoji": "Emoji",
+    "search": "Symbole suchen",
+    "noMatch": "Keine passenden Symbole",
+    "emojiPlaceholder": "Beliebiges Emoji eingeben oder einfügen",
+    "emojiCommon": "Vorschläge",
+    "delete": "Kategorie löschen",
+    "moveTo": {
+      "one": "Ihr {count} Abo verschieben nach",
+      "other": "Ihre {count} Abos verschieben nach"
+    },
+    "confirmDelete": "„{name}“ löschen?",
+    "dragHandle": "Zum Sortieren ziehen",
+    "toast": {
+      "created": "Kategorie hinzugefügt",
+      "saved": "Kategorie gespeichert",
+      "renamed": {
+        "one": "Kategorie gespeichert · {count} Abo aktualisiert",
+        "other": "Kategorie gespeichert · {count} Abos aktualisiert"
+      },
+      "deleted": "Kategorie gelöscht",
+      "order": "Reihenfolge gespeichert"
+    },
+    "error": {
+      "empty": "Bitte einen Namen eingeben",
+      "duplicate": "Eine Kategorie „{name}“ gibt es schon"
+    },
+    "group": {
+      "common": "Häufig",
+      "tech": "Technik",
+      "media": "Unterhaltung",
+      "work": "Arbeit",
+      "money": "Einkauf & Geld",
+      "life": "Zuhause & Alltag",
+      "food": "Essen & Trinken",
+      "health": "Gesundheit & Sport",
+      "travel": "Reisen",
+      "people": "Menschen & Lernen"
+    }
   }
 }

@@ -56,5 +56,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Email" },
-  "csv": { "appStoreBalance": "Saldo App Store {region}", "otherCategory": "Lainnya" }
+  "csv": { "appStoreBalance": "Saldo App Store {region}", "otherCategory": "Lainnya" },
+  "category": {
+    "ai": "AI",
+    "tools": "Alat",
+    "productivity": "Produktivitas",
+    "media": "Video",
+    "music": "Musik",
+    "games": "Game",
+    "cloud": "Cloud & server",
+    "storage": "Penyimpanan",
+    "domains": "Domain",
+    "vpn": "VPN & jaringan",
+    "developer": "Pengembangan",
+    "design": "Desain",
+    "education": "Pendidikan",
+    "news": "Berita & bacaan",
+    "social": "Sosial",
+    "shopping": "Belanja",
+    "finance": "Keuangan",
+    "health": "Kesehatan & kebugaran",
+    "phone": "Telepon & seluler",
+    "daily": "Gaya hidup"
+  }
 }

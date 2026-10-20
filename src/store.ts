@@ -3,6 +3,7 @@ import { todayIn } from '../shared/billing.ts';
 import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../shared/types.ts';
 import { mergePeople, syncPerson } from '../shared/people.ts';
 import { locale, t } from '../shared/i18n.ts';
+import { renameInSubs, type Category } from '../shared/categories.ts';
 
 const CACHE_KEY = 'ledger:state:v1';
 
@@ -294,6 +295,25 @@ export function saveSettings(patch: Partial<Settings>) {
       const settings = await api<Settings>('/api/settings', { method: 'PUT', body });
       patchState((s) => ({ ...s, settings }));
       return settings;
+    },
+  );
+}
+
+/**
+ * 保存分类表（顺序即显示顺序）。renames 是旧名 → 新名：改名、删除分类时把订阅移过去，服务端一次改写所有相关订阅。
+ * 返回改动了几个订阅。
+ */
+export function saveCategories(categories: Category[], renames: Record<string, string> = {}) {
+  const swap = (subs: Subscription[], changed: Subscription[]) => {
+    const by = new Map(changed.map((x) => [x.id, x]));
+    return subs.map((x) => by.get(x.id) ?? x);
+  };
+  return optimistic(
+    (s) => ({ ...s, settings: { ...s.settings, categories }, subscriptions: swap(s.subscriptions, renameInSubs(s.subscriptions, renames)) }),
+    async () => {
+      const r = await api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', { method: 'PUT', body: JSON.stringify({ categories, renames }) });
+      patchState((s) => ({ ...s, settings: r.settings, subscriptions: swap(s.subscriptions, r.subscriptions) }));
+      return r.subscriptions.length;
     },
   );
 }

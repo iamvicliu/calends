@@ -17,10 +17,14 @@
     "alreadySetup": "Mật khẩu đã được đặt",
     "noSetupToken": "SETUP_TOKEN chưa được cấu hình khi triển khai nên không thể tiếp tục thiết lập. Hãy đặt secret này trước (wrangler secret put SETUP_TOKEN).",
     "badSetupToken": "Token thiết lập không đúng",
-    "passwordTooShort": { "other": "Mật khẩu phải có ít nhất {min} ký tự" },
+    "passwordTooShort": {
+      "other": "Mật khẩu phải có ít nhất {min} ký tự"
+    },
     "wrongPassword": "Mật khẩu không đúng",
     "wrongCurrentPassword": "Mật khẩu hiện tại không đúng",
-    "newPasswordTooShort": { "other": "Mật khẩu mới phải có ít nhất {min} ký tự" },
+    "newPasswordTooShort": {
+      "other": "Mật khẩu mới phải có ít nhất {min} ký tự"
+    },
     "invalidDevice": "Thiết bị không hợp lệ",
     "cannotRemoveCurrent": "Không thể xóa thiết bị này. Hãy dùng Đăng xuất.",
     "expired": "Yêu cầu đã hết hạn. Vui lòng thử lại.",
@@ -34,5 +38,9 @@
   },
   "invalidPerson": "Cần nhập tên",
   "personNotFound": "Không tìm thấy người này",
-  "personInUse": "Vẫn gắn với {count} gói hoặc khoản trả hộ. Hãy gộp vào người khác trước."
+  "personInUse": "Vẫn gắn với {count} gói hoặc khoản trả hộ. Hãy gộp vào người khác trước.",
+  "category": {
+    "invalid": "Danh sách danh mục không hợp lệ",
+    "duplicate": "Danh mục bị trùng: {name}"
+  }
 }

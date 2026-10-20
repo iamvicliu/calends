@@ -25,18 +25,7 @@
   "status": { "active": "Active", "trial": "Trial", "paused": "Paused", "cancelled": "Cancelled" },
   "category": {
     "choose": "Choose category",
-    "new": "New category…",
-    "newPrompt": "Category name",
-    "tools": "Tools",
-    "media": "Video",
-    "music": "Music",
-    "daily": "Lifestyle",
-    "productivity": "Productivity",
-    "shopping": "Shopping",
-    "education": "Education",
-    "games": "Games",
-    "domains": "Domains",
-    "social": "Social"
+    "new": "New category…"
   },
   "group": { "billing": "Billing", "status": "Status", "who": "Who uses it", "links": "Links & appearance", "tags": "Tags & notes" },
   "field": {
