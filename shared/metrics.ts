@@ -1,6 +1,23 @@
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
 // 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
-import { activePhases, addDays, addMonths, chargesBetween, coveredUntil, cycleDays, phaseSubs, diffDays, effectiveStatus, isGap, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
+import {
+  activePhases,
+  addDays,
+  addMonths,
+  chargesBetween,
+  coveredUntil,
+  cycleDays,
+  phaseSubs,
+  diffDays,
+  effectiveStatus,
+  isGap,
+  myShareFactor,
+  nextCharge,
+  nthCharge,
+  priceAt,
+  runwayFor,
+  type Charge,
+} from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
@@ -113,20 +130,38 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
     return out;
   }
   const after = (d: string) => contributionOn(state, s, d);
-  if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'start', delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start) });
+  if (s.start <= today)
+    out.push({
+      date: s.start,
+      sub: s,
+      kind: 'start',
+      delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
+    });
   const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
   for (let i = 1; i < hist.length; i++) {
     if (hist[i].from > today) continue;
     const prev = hist[i - 1].amount;
     const cur = hist[i].amount;
     if (prev === cur) continue;
-    out.push({ date: hist[i].from, sub: s, kind: 'price', delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from), note: `${prev} → ${cur} ${s.currency}` });
+    out.push({
+      date: hist[i].from,
+      sub: s,
+      kind: 'price',
+      delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
+      note: `${prev} → ${cur} ${s.currency}`,
+    });
   }
   if (s.intro && s.intro.until <= today && s.intro.until > s.start) {
-    out.push({ date: s.intro.until, sub: s, kind: 'intro-end', delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until) });
+    out.push({
+      date: s.intro.until,
+      sub: s,
+      kind: 'intro-end',
+      delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
+    });
   }
   if (s.end && s.end <= today) out.push({ date: s.end, sub: s, kind: 'end', delta: -contributionOn(state, s, addDays(s.end, -1)) });
-  if (s.status === 'paused' && s.pausedAt && s.pausedAt <= today) out.push({ date: s.pausedAt, sub: s, kind: 'pause', delta: -contributionOn(state, { ...s, status: 'active' }, s.pausedAt) });
+  if (s.status === 'paused' && s.pausedAt && s.pausedAt <= today)
+    out.push({ date: s.pausedAt, sub: s, kind: 'pause', delta: -contributionOn(state, { ...s, status: 'active' }, s.pausedAt) });
   return out;
 }
 
@@ -134,7 +169,14 @@ const label = (v: Subscription) =>
   t('core.event.label', {
     region: v.region ? t('core.event.region', { region: v.region }) : '',
     price: money(v.price, v.currency),
-    per: v.cycle.unit === 'year' ? t('core.event.per.year') : v.cycle.unit === 'month' ? (v.cycle.every === 1 ? t('core.event.per.month') : t('core.event.per.months', { count: v.cycle.every })) : t(`core.event.per.${v.cycle.unit}`),
+    per:
+      v.cycle.unit === 'year'
+        ? t('core.event.per.year')
+        : v.cycle.unit === 'month'
+          ? v.cycle.every === 1
+            ? t('core.event.per.month')
+            : t('core.event.per.months', { count: v.cycle.every })
+          : t(`core.event.per.${v.cycle.unit}`),
   });
 
 /** 变更日志：像 git log 一样记录每一次花钱决策；多阶段订阅会合并成「换区/换套餐」「断更」「续订」 */
@@ -181,7 +223,8 @@ function coverage(c: Charge): [string, string] {
   const s = c.sub;
   if (s.cycle.unit === 'lifetime') return [c.date, addDays(c.date, 1)];
   const horizon = addDays(c.date, Math.round(cycleDays(s.cycle) * 3) + 31);
-  const next = chargesBetween({ ...s, end: undefined, status: s.status === 'paused' ? 'active' : s.status }, addDays(c.date, 1), horizon, '9999-12-31')[0]?.date;
+  const next = chargesBetween({ ...s, end: undefined, status: s.status === 'paused' ? 'active' : s.status }, addDays(c.date, 1), horizon, '9999-12-31')[0]
+    ?.date;
   let end = next ?? nthCharge(c.date, s.cycle, 1);
   if (s.end && s.end > c.date && s.end < end) end = s.end;
   return [c.date, end];
@@ -254,7 +297,10 @@ export function prepaidValue(state: AppState, today: string): { total: number; i
 }
 
 /** 退订省下的钱：如果没退，从退订到今天还要付多少 */
-export function cancelSavings(state: AppState, today: string): { total: number; items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> } {
+export function cancelSavings(
+  state: AppState,
+  today: string,
+): { total: number; items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> } {
   const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> = [];
   for (const s of state.subscriptions) {
     if (s.proxy || s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
@@ -290,7 +336,13 @@ function pickCards(need: number, denoms: number[]): number[] {
       left -= d;
     }
   }
-  if (left > 0) cards.push(ds.slice().reverse().find((d) => d >= left) ?? ds[ds.length - 1]);
+  if (left > 0)
+    cards.push(
+      ds
+        .slice()
+        .reverse()
+        .find((d) => d >= left) ?? ds[ds.length - 1],
+    );
   return cards;
 }
 
@@ -330,7 +382,16 @@ export function topUpPlan(state: AppState, today: string, months = 6): TopUp[] {
     }
     const byCard = ['appstore', 'googleplay', 'giftcard', 'phone'].includes(m.kind);
     const denoms = DENOMS[m.currency] ?? [Math.pow(10, Math.max(1, Math.round(Math.log10(Math.max(10, need)))))];
-    out.push({ method: m, current: r.current, need, due, minNeed, deadline: r.shortfall?.date, cards: byCard && need > 0 ? pickCards(need, denoms) : [], monthly: r.monthlyDrain });
+    out.push({
+      method: m,
+      current: r.current,
+      need,
+      due,
+      minNeed,
+      deadline: r.shortfall?.date,
+      cards: byCard && need > 0 ? pickCards(need, denoms) : [],
+      monthly: r.monthlyDrain,
+    });
   }
   return out.sort((a, b) => (a.deadline ?? '9').localeCompare(b.deadline ?? '9'));
 }
@@ -403,7 +464,13 @@ export function insights(state: AppState, today: string): Insight[] {
   for (const [, g] of groups) {
     if (g.length < 2) continue;
     const sum = g.reduce((a, s) => a + contributionOn(state, s, today), 0);
-    out.push({ id: `dup-${g[0].id}`, tone: 'info', title: t('core.insight.dup.title', { names: names(g) }), body: t('core.insight.dup.body', { count: g.length, sum: fmt(sum) }), subs: g });
+    out.push({
+      id: `dup-${g[0].id}`,
+      tone: 'info',
+      title: t('core.insight.dup.title', { names: names(g) }),
+      body: t('core.insight.dup.body', { count: g.length, sum: fmt(sum) }),
+      subs: g,
+    });
   }
 
   // 3. 过去一年涨过价
@@ -417,14 +484,30 @@ export function insights(state: AppState, today: string): Insight[] {
   // 4. 首期优惠即将结束
   const introEnding = live.filter((s) => s.intro && s.intro.until > today && diffDays(today, s.intro.until) <= 30);
   for (const s of introEnding) {
-    out.push({ id: `intro-${s.id}`, tone: 'warn', title: t('core.insight.intro.title', { name: s.name, count: diffDays(today, s.intro!.until) }), body: t('core.insight.intro.body', { from: money(s.intro!.price, s.currency), to: money(s.price, s.currency) }), subs: [s] });
+    out.push({
+      id: `intro-${s.id}`,
+      tone: 'warn',
+      title: t('core.insight.intro.title', { name: s.name, count: diffDays(today, s.intro!.until) }),
+      body: t('core.insight.intro.body', { from: money(s.intro!.price, s.currency), to: money(s.price, s.currency) }),
+      subs: [s],
+    });
   }
 
   // 5. 余额 30 天内不够
   for (const m of state.methods) {
     const r = runwayFor(m, state, today);
     if (r?.shortfall && diffDays(today, r.shortfall.date) <= (m.lowRunwayDays ?? 30)) {
-      out.push({ id: `bal-${m.id}`, tone: 'warn', title: t('core.insight.balance.title', { name: m.name, date: cnDate(r.shortfall.date) }), body: t('core.insight.balance.body', { sub: r.shortfall.sub.name, need: money(r.shortfall.amount, r.shortfall.currency), current: money(r.current, m.currency) }), href: '/admin/wallet' });
+      out.push({
+        id: `bal-${m.id}`,
+        tone: 'warn',
+        title: t('core.insight.balance.title', { name: m.name, date: cnDate(r.shortfall.date) }),
+        body: t('core.insight.balance.body', {
+          sub: r.shortfall.sub.name,
+          need: money(r.shortfall.amount, r.shortfall.currency),
+          current: money(r.current, m.currency),
+        }),
+        href: '/admin/wallet',
+      });
     }
   }
 
@@ -449,12 +532,25 @@ export function insights(state: AppState, today: string): Insight[] {
 
   // 7. 未指定支付方式
   const noMethod = live.filter((s) => !s.methodId);
-  if (noMethod.length) out.push({ id: 'nomethod', tone: 'info', title: t('core.insight.noMethod.title', { count: noMethod.length }), body: t('core.insight.noMethod.body'), subs: noMethod });
+  if (noMethod.length)
+    out.push({
+      id: 'nomethod',
+      tone: 'info',
+      title: t('core.insight.noMethod.title', { count: noMethod.length }),
+      body: t('core.insight.noMethod.body'),
+      subs: noMethod,
+    });
 
   // 8. 最贵的一天
   const perDay = live.map((s) => ({ s, v: contributionOn(state, s, today) / MONTH })).sort((a, b) => b.v - a.v)[0];
   if (perDay && perDay.v > 0) {
-    out.push({ id: 'top', tone: 'good', title: t('core.insight.top.title', { name: perDay.s.name }), body: t('core.insight.top.body', { perDay: money(perDay.v, base), pct: total > 0 ? Math.round(((perDay.v * MONTH) / total) * 100) : 0 }), subs: [perDay.s] });
+    out.push({
+      id: 'top',
+      tone: 'good',
+      title: t('core.insight.top.title', { name: perDay.s.name }),
+      body: t('core.insight.top.body', { perDay: money(perDay.v, base), pct: total > 0 ? Math.round(((perDay.v * MONTH) / total) * 100) : 0 }),
+      subs: [perDay.s],
+    });
   }
   return out;
 }

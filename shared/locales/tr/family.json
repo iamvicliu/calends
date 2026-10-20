@@ -55,12 +55,24 @@
     "currency": "Para birimi",
     "coverFrom": "Dönem başı",
     "coverTo": "Dönem sonu",
-    "coverAuto": { "m1": "Ödeme dönemine göre ayarlanır; düzenlenebilir", "m3": "Ödeme dönemine göre ayarlanır; düzenlenebilir", "m6": "Ödeme dönemine göre ayarlanır; düzenlenebilir", "m12": "Ödeme dönemine göre ayarlanır; düzenlenebilir", "custom": "Ödeme dönemine göre ayarlanır; düzenlenebilir" },
+    "coverAuto": {
+      "m1": "Ödeme dönemine göre ayarlanır; düzenlenebilir",
+      "m3": "Ödeme dönemine göre ayarlanır; düzenlenebilir",
+      "m6": "Ödeme dönemine göre ayarlanır; düzenlenebilir",
+      "m12": "Ödeme dönemine göre ayarlanır; düzenlenebilir",
+      "custom": "Ödeme dönemine göre ayarlanır; düzenlenebilir"
+    },
     "receivedOn": "Alınma tarihi",
     "note": "Not",
     "notePh": "İsteğe bağlı, ör. USDT transferi",
     "record": "Kaydet",
-    "recordBtn": { "m1": "Ödemeyi kaydet ({fee}/ay)", "m3": "Ödemeyi kaydet ({fee}/çeyrek)", "m6": "Ödemeyi kaydet (6 ayda bir {fee})", "m12": "Ödemeyi kaydet ({fee}/yıl)", "custom": { "one": "Ödemeyi kaydet ({count} ayda bir {fee})", "other": "Ödemeyi kaydet ({count} ayda bir {fee})" } }
+    "recordBtn": {
+      "m1": "Ödemeyi kaydet ({fee}/ay)",
+      "m3": "Ödemeyi kaydet ({fee}/çeyrek)",
+      "m6": "Ödemeyi kaydet (6 ayda bir {fee})",
+      "m12": "Ödemeyi kaydet ({fee}/yıl)",
+      "custom": { "one": "Ödemeyi kaydet ({count} ayda bir {fee})", "other": "Ödemeyi kaydet ({count} ayda bir {fee})" }
+    }
   },
   "pool": {
     "title": "Ortak planlar",
@@ -94,7 +106,13 @@
     "from": "kaynak: {source}",
     "exempt": "Ödemiyor",
     "owedAmount": "{amount} borç",
-    "perFee": { "m1": "{fee}/ay", "m3": "{fee}/çeyrek", "m6": "6 ayda bir {fee}", "m12": "{fee}/yıl", "custom": { "one": "{count} ayda bir {fee}", "other": "{count} ayda bir {fee}" } },
+    "perFee": {
+      "m1": "{fee}/ay",
+      "m3": "{fee}/çeyrek",
+      "m6": "6 ayda bir {fee}",
+      "m12": "{fee}/yıl",
+      "custom": { "one": "{count} ayda bir {fee}", "other": "{count} ayda bir {fee}" }
+    },
     "collect": "Tahsil et",
     "joinedGroup": "Katıldığım planlar",
     "payTo": "Ödenen: {name} · {amount}",

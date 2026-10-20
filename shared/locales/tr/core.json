@@ -35,7 +35,10 @@
     },
     "dup": {
       "title": "{names} birbirinin tekrarı olabilir",
-      "body": { "one": "Bu abonelik ayda yaklaşık {sum} tutuyor. Hâlâ gerekip gerekmediğine bakın.", "other": "Bu {count} abonelik birlikte ayda yaklaşık {sum} tutuyor. Hepsine hâlâ ihtiyacınız olup olmadığına bakın." }
+      "body": {
+        "one": "Bu abonelik ayda yaklaşık {sum} tutuyor. Hâlâ gerekip gerekmediğine bakın.",
+        "other": "Bu {count} abonelik birlikte ayda yaklaşık {sum} tutuyor. Hepsine hâlâ ihtiyacınız olup olmadığına bakın."
+      }
     },
     "hikes": { "title": { "one": "{count} abonelik son bir yılda zam yaptı", "other": "{count} abonelik son bir yılda zam yaptı" } },
     "intro": {
@@ -43,7 +46,10 @@
       "body": "Ardından fiyat {from} tutarından {to} tutarına döner."
     },
     "balance": { "title": "{name} bakiyesi {date} tarihine kadar yetmeyecek", "body": "{sub} için {need} gerekiyor; bakiye yaklaşık {current}." },
-    "fx": { "title": "Harcamaların %{pct} kadarı yabancı para birimlerinde", "body": "En büyüğü {ccy} (%{share}). {ccy} değer kaybettikçe bu kısım ucuzlar, değer kazandıkça pahalanır." },
+    "fx": {
+      "title": "Harcamaların %{pct} kadarı yabancı para birimlerinde",
+      "body": "En büyüğü {ccy} (%{share}). {ccy} değer kaybettikçe bu kısım ucuzlar, değer kazandıkça pahalanır."
+    },
     "noMethod": {
       "title": { "one": "{count} aboneliğin ödeme yöntemi yok", "other": "{count} aboneliğin ödeme yöntemi yok" },
       "body": "Bakiye tahminleri ve ödeme yöntemi istatistikleri eksiksiz olsun diye bir yöntem ekleyin."
@@ -51,8 +57,18 @@
     "top": { "title": "En pahalı aboneliğiniz: {name}", "body": "Günde yaklaşık {perDay}, aylık harcamanın %{pct} kadarı." }
   },
   "methodKind": {
-    "debit": "Banka kartı", "credit": "Kredi kartı", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
-    "giftcard": "Hediye kartı", "prepaid": "Mağaza bakiyesi", "phone": "Hat bakiyesi", "crypto": "Kripto kart", "other": "Diğer"
+    "debit": "Banka kartı",
+    "credit": "Kredi kartı",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Hediye kartı",
+    "prepaid": "Mağaza bakiyesi",
+    "phone": "Hat bakiyesi",
+    "crypto": "Kripto kart",
+    "other": "Diğer"
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "E-posta" },

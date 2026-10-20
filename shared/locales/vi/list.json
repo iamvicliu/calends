@@ -5,7 +5,17 @@
   "title": "Tất cả gói đăng ký",
   "all": "Tất cả",
   "summary": { "other": "{count} mục · {monthly}/tháng · {yearly}/năm" },
-  "status": { "upcoming": "Chưa bắt đầu", "active": "Đang hoạt động", "trial": "Đang dùng thử", "trialShort": "Dùng thử", "paused": "Tạm dừng", "pausedShort": "Tạm dừng", "ending": "Không gia hạn", "ended": "Đã hủy", "lifetime": "Trọn đời" },
+  "status": {
+    "upcoming": "Chưa bắt đầu",
+    "active": "Đang hoạt động",
+    "trial": "Đang dùng thử",
+    "trialShort": "Dùng thử",
+    "paused": "Tạm dừng",
+    "pausedShort": "Tạm dừng",
+    "ending": "Không gia hạn",
+    "ended": "Đã hủy",
+    "lifetime": "Trọn đời"
+  },
   "proxyExcluded": "Trả hộ · không tính",
   "perMonthApprox": "≈ {amount}/tháng",
   "originalPrice": "Giá gốc {amount}",
@@ -18,7 +28,15 @@
   "empty": "Không có gói đăng ký phù hợp",
   "badge": { "share": "Chia sẻ", "joined": "Tham gia", "proxy": "Trả hộ", "proxyFor": "Trả hộ {name}", "someone": "ai đó" },
   "saved": "Tiết kiệm {amount}",
-  "col": { "name": "Gói đăng ký", "category": "Danh mục", "method": "Phương thức thanh toán", "amount": "Số tiền", "monthly": "Hằng tháng", "start": "Bắt đầu", "next": "Lần trừ tiền tới" },
+  "col": {
+    "name": "Gói đăng ký",
+    "category": "Danh mục",
+    "method": "Phương thức thanh toán",
+    "amount": "Số tiền",
+    "monthly": "Hằng tháng",
+    "start": "Bắt đầu",
+    "next": "Lần trừ tiền tới"
+  },
   "notCounted": "Không tính",
   "endedOn": "Kết thúc {date}",
   "change": { "noMethod": "Chưa chọn phương thức thanh toán", "planned": "Dự định · ", "starts": "Bắt đầu {when}", "from": "Thay đổi {when}" },
@@ -49,6 +67,19 @@
     "gap": "Gián đoạn",
     "range": { "other": "Từ {date} · {count} giai đoạn" }
   },
-  "kind": { "debit": "Thẻ ngân hàng", "credit": "Thẻ tín dụng", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "Số dư App Store", "googleplay": "Số dư Google Play", "giftcard": "Thẻ quà tặng", "prepaid": "Số dư cửa hàng", "phone": "Tài khoản di động", "crypto": "Thẻ tiền mã hóa", "other": "Khác" },
+  "kind": {
+    "debit": "Thẻ ngân hàng",
+    "credit": "Thẻ tín dụng",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "Số dư App Store",
+    "googleplay": "Số dư Google Play",
+    "giftcard": "Thẻ quà tặng",
+    "prepaid": "Số dư cửa hàng",
+    "phone": "Tài khoản di động",
+    "crypto": "Thẻ tiền mã hóa",
+    "other": "Khác"
+  },
   "network": { "unionpay": "UnionPay" }
 }

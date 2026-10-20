@@ -69,12 +69,16 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     const top = r.items[0];
     if (top) out.push(t('review.tip.top', { name: top.sub.name, pct: pct(top.sum) }));
     if (r.longest) out.push(t('review.tip.longest', { name: r.longest.sub.name, count: Math.max(1, Math.floor(r.longest.days / 365)) }));
-    if (r.busiestMonth) out.push(t('review.tip.busiest', { n: Number(r.busiestMonth.month.slice(5)), month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }) }));
+    if (r.busiestMonth)
+      out.push(
+        t('review.tip.busiest', { n: Number(r.busiestMonth.month.slice(5)), month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }) }),
+      );
     if (r.newSubs.length || r.ended.length) out.push(t('review.tip.newEnded', { added: r.newSubs.length, ended: r.ended.length }));
     if (r.currencies > 1) out.push(t('review.tip.currencies', { count: r.currencies }));
     const soon = allCharges(state, today, addDays(today, 30), today).length;
     if (soon) out.push(t('review.tip.soon', { count: soon }));
-    if (!hide && base === 'CNY' && r.perDay >= 1) out.push(t('review.tip.milkTea', { amount: money(r.perDay, base), count: Math.max(1, Math.round(r.perDay / 15)) }));
+    if (!hide && base === 'CNY' && r.perDay >= 1)
+      out.push(t('review.tip.milkTea', { amount: money(r.perDay, base), count: Math.max(1, Math.round(r.perDay / 15)) }));
     if (!hide && saved > 1) out.push(t('review.tip.saved', { amount: money(saved, base, { compact: true }) }));
     return out.length ? out[Math.floor(seed * out.length)] : t('review.tip.fallback');
   };
@@ -89,8 +93,30 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
       onClose={onClose}
       render={(style, { hide, m }) => {
         const dn = state.settings.displayName;
-        const ctx: Ctx = { r, year, name: dn || t('review.me'), whose: dn ? t('review.whose', { name: dn }) : t('review.whoseSelf'), ongoing: year === today.slice(0, 4), m, hide, pct, mrr: tot.mrr, saved, byMethod, tip: tipsFor(hide), today };
-        return style === 'receipt' ? <Receipt {...ctx} /> : style === 'poster' ? <Poster {...ctx} /> : style === 'card' ? <Card {...ctx} /> : <Stars {...ctx} />;
+        const ctx: Ctx = {
+          r,
+          year,
+          name: dn || t('review.me'),
+          whose: dn ? t('review.whose', { name: dn }) : t('review.whoseSelf'),
+          ongoing: year === today.slice(0, 4),
+          m,
+          hide,
+          pct,
+          mrr: tot.mrr,
+          saved,
+          byMethod,
+          tip: tipsFor(hide),
+          today,
+        };
+        return style === 'receipt' ? (
+          <Receipt {...ctx} />
+        ) : style === 'poster' ? (
+          <Poster {...ctx} />
+        ) : style === 'card' ? (
+          <Card {...ctx} />
+        ) : (
+          <Stars {...ctx} />
+        );
       }}
     />
   );
@@ -119,24 +145,24 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
       <div class="rp-c rp-shop">{t('review.receipt.shop', { whose }).trim()}</div>
       <div class="rp-c">SUBSCRIPTION STORE</div>
       <div class="rp-c rp-small">{ongoing ? t('review.receipt.asOf', { date: today }) : t('review.receipt.fullYear', { year })}</div>
-      <div class="rp-rule">{"=".repeat(60)}</div>
+      <div class="rp-rule">{'='.repeat(60)}</div>
       <Line l={t('review.receipt.no', { no })} r={t('review.receipt.register')} />
       <Line l={t('review.receipt.cashier', { name })} r={ongoing ? today : `${year}-12-31`} />
-      <div class="rp-rule">{"-".repeat(60)}</div>
+      <div class="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.item')} r={hide ? t('review.receipt.share') : t('review.receipt.amount')} />
-      <div class="rp-rule">{"-".repeat(60)}</div>
+      <div class="rp-rule">{'-'.repeat(60)}</div>
       {items.map((x) => (
         <Line key={x.sub.id} l={x.sub.name} r={amt(x.sum)} />
       ))}
       {rest.length > 0 && <Line l={t('review.receipt.rest', { count: rest.length })} r={amt(restSum)} />}
-      <div class="rp-rule">{"-".repeat(60)}</div>
+      <div class="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.count', { items: r.items.length, charges: r.charges })} r="" />
       {!hide && <Line l={t('review.receipt.total')} r={m(r.total)} b />}
-      <div class="rp-rule">{"-".repeat(60)}</div>
+      <div class="rp-rule">{'-'.repeat(60)}</div>
       {byMethod.slice(0, 5).map((x) => (
         <Line key={x.name} l={x.name} r={amt(x.sum)} />
       ))}
-      <div class="rp-rule">{"=".repeat(60)}</div>
+      <div class="rp-rule">{'='.repeat(60)}</div>
       <div class="rp-bars">
         {bars.map((w, i) => (
           <i key={i} style={{ width: w, marginRight: i % 3 === 0 ? 2 : 1 }} />
@@ -160,7 +186,11 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
       <div class="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
       <div class="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</div>
       <div class="ps-line">
-        {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, { charges: t('review.n.charges', { count: r.charges }), currencies: t('review.n.currencies', { count: r.currencies }), subs: t('review.n.subs', { count: r.items.length }) })}
+        {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, {
+          charges: t('review.n.charges', { count: r.charges }),
+          currencies: t('review.n.currencies', { count: r.currencies }),
+          subs: t('review.n.subs', { count: r.items.length }),
+        })}
       </div>
       <div class="ps-wall">
         {r.items.map((x, i) => (
@@ -172,10 +202,18 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
       <div class="ps-top">
         <small>{t('review.topSpend')}</small>
         <b>{r.items[0]?.sub.name ?? '—'}</b>
-        <span>{r.items[0] ? (hide ? t('review.ofYear', { pct: pct(r.items[0].sum) }) : `${m(r.items[0].sum)} · ${t('review.ofYear', { pct: pct(r.items[0].sum) })}`) : ''}</span>
+        <span>
+          {r.items[0]
+            ? hide
+              ? t('review.ofYear', { pct: pct(r.items[0].sum) })
+              : `${m(r.items[0].sum)} · ${t('review.ofYear', { pct: pct(r.items[0].sum) })}`
+            : ''}
+        </span>
       </div>
       <div class="ps-foot">
-        <span>{hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(r.perDay) })}</span>
+        <span>
+          {hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(r.perDay) })}
+        </span>
         <span>{location.host}</span>
       </div>
     </div>
@@ -194,7 +232,11 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
       <div class="rv-big">
         <small>{t(`review.card.intro.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`)}</small>
         <span class="rv-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</span>
-        <span>{hide ? `${t('review.n.charges', { count: r.charges })} · ${t('review.n.currencyKinds', { count: r.currencies })}` : `${t('review.n.charges', { count: r.charges })} · ${t('review.card.perDay', { amount: m(r.perDay) })}`}</span>
+        <span>
+          {hide
+            ? `${t('review.n.charges', { count: r.charges })} · ${t('review.n.currencyKinds', { count: r.currencies })}`
+            : `${t('review.n.charges', { count: r.charges })} · ${t('review.card.perDay', { amount: m(r.perDay) })}`}
+        </span>
       </div>
       <div class="rv-sec">
         <div class="rv-label">{t('review.topSpend')}</div>
@@ -225,7 +267,12 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
         {r.busiestMonth && (
           <div>
             <small>{t('review.card.busiest')}</small>
-            <b>{t('review.card.month', { n: Number(r.busiestMonth.month.slice(5)), month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }) })}</b>
+            <b>
+              {t('review.card.month', {
+                n: Number(r.busiestMonth.month.slice(5)),
+                month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }),
+              })}
+            </b>
             <span>{hide ? t('review.ofYear', { pct: pct(r.busiestMonth.sum) }) : m(r.busiestMonth.sum)}</span>
           </div>
         )}
@@ -234,7 +281,13 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
           <b>
             {r.newSubs.length} / {r.ended.length}
           </b>
-          <span>{saved && !hide ? t('review.card.saved', { amount: m(saved) }) : r.ended.length ? t('review.card.ended', { count: r.ended.length }) : t('review.card.noneEnded')}</span>
+          <span>
+            {saved && !hide
+              ? t('review.card.saved', { amount: m(saved) })
+              : r.ended.length
+                ? t('review.card.ended', { count: r.ended.length })
+                : t('review.card.noneEnded')}
+          </span>
         </div>
         <div>
           <small>{t('review.card.currencies')}</small>

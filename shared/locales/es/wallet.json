@@ -1,7 +1,10 @@
 {
   "title": "Cartera",
   "sub": { "one": "{count} método de pago", "other": "{count} métodos de pago" },
-  "subDrag": { "one": "{count} método de pago · Arrastra las tarjetas para reordenarlas", "other": "{count} métodos de pago · Arrastra las tarjetas para reordenarlas" },
+  "subDrag": {
+    "one": "{count} método de pago · Arrastra las tarjetas para reordenarlas",
+    "other": "{count} métodos de pago · Arrastra las tarjetas para reordenarlas"
+  },
   "add": "Añadir",
   "orderSaved": "Orden guardado",
   "runwayGroup": "Duración del saldo",

@@ -4,8 +4,23 @@
   },
   "title": "Все подписки",
   "all": "Все",
-  "summary": { "one": "{count} подписка · {monthly}/мес. · {yearly}/год", "few": "{count} подписки · {monthly}/мес. · {yearly}/год", "many": "{count} подписок · {monthly}/мес. · {yearly}/год", "other": "{count} подписки · {monthly}/мес. · {yearly}/год" },
-  "status": { "upcoming": "Не началась", "active": "Активна", "trial": "Пробный период", "trialShort": "Пробная", "paused": "Приостановлена", "pausedShort": "Пауза", "ending": "Не продлевается", "ended": "Отменена", "lifetime": "Навсегда" },
+  "summary": {
+    "one": "{count} подписка · {monthly}/мес. · {yearly}/год",
+    "few": "{count} подписки · {monthly}/мес. · {yearly}/год",
+    "many": "{count} подписок · {monthly}/мес. · {yearly}/год",
+    "other": "{count} подписки · {monthly}/мес. · {yearly}/год"
+  },
+  "status": {
+    "upcoming": "Не началась",
+    "active": "Активна",
+    "trial": "Пробный период",
+    "trialShort": "Пробная",
+    "paused": "Приостановлена",
+    "pausedShort": "Пауза",
+    "ending": "Не продлевается",
+    "ended": "Отменена",
+    "lifetime": "Навсегда"
+  },
   "proxyExcluded": "Оплата за других · не учитывается",
   "perMonthApprox": "≈ {amount}/мес.",
   "originalPrice": "Было {amount}",
@@ -18,13 +33,31 @@
   "empty": "Подходящих подписок нет",
   "badge": { "share": "Совместная", "joined": "Участвую", "proxy": "Оплата за других", "proxyFor": "Оплата за {name}", "someone": "кого-то" },
   "saved": "Сэкономлено {amount}",
-  "col": { "name": "Подписка", "category": "Категория", "method": "Способ оплаты", "amount": "Сумма", "monthly": "В месяц", "start": "Начало", "next": "Следующее списание" },
+  "col": {
+    "name": "Подписка",
+    "category": "Категория",
+    "method": "Способ оплаты",
+    "amount": "Сумма",
+    "monthly": "В месяц",
+    "start": "Начало",
+    "next": "Следующее списание"
+  },
   "notCounted": "Не учитывается",
   "endedOn": "Завершена {date}",
   "change": { "noMethod": "Способ оплаты не выбран", "planned": "В планах · ", "starts": "Начнётся {when}", "from": "Изменится {when}" },
   "proxyBadge": {
-    "owed": { "one": "Оплата за других · к оплате {count}", "few": "Оплата за других · к оплате {count}", "many": "Оплата за других · к оплате {count}", "other": "Оплата за других · к оплате {count}" },
-    "owedFor": { "one": "Оплата за {name} · к оплате {count}", "few": "Оплата за {name} · к оплате {count}", "many": "Оплата за {name} · к оплате {count}", "other": "Оплата за {name} · к оплате {count}" },
+    "owed": {
+      "one": "Оплата за других · к оплате {count}",
+      "few": "Оплата за других · к оплате {count}",
+      "many": "Оплата за других · к оплате {count}",
+      "other": "Оплата за других · к оплате {count}"
+    },
+    "owedFor": {
+      "one": "Оплата за {name} · к оплате {count}",
+      "few": "Оплата за {name} · к оплате {count}",
+      "many": "Оплата за {name} · к оплате {count}",
+      "other": "Оплата за {name} · к оплате {count}"
+    },
     "settled": "Оплата за других · рассчитались",
     "settledFor": "Оплата за {name} · рассчитались"
   },
@@ -49,6 +82,19 @@
     "gap": "Перерыв",
     "range": { "one": "С {date} · {count} этап", "few": "С {date} · {count} этапа", "many": "С {date} · {count} этапов", "other": "С {date} · {count} этапа" }
   },
-  "kind": { "debit": "Банковская карта", "credit": "Кредитная карта", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "Баланс App Store", "googleplay": "Баланс Google Play", "giftcard": "Подарочная карта", "prepaid": "Баланс магазина", "phone": "Баланс телефона", "crypto": "Криптокарта", "other": "Другое" },
+  "kind": {
+    "debit": "Банковская карта",
+    "credit": "Кредитная карта",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "Баланс App Store",
+    "googleplay": "Баланс Google Play",
+    "giftcard": "Подарочная карта",
+    "prepaid": "Баланс магазина",
+    "phone": "Баланс телефона",
+    "crypto": "Криптокарта",
+    "other": "Другое"
+  },
   "network": { "unionpay": "UnionPay" }
 }

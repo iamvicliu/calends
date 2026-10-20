@@ -48,7 +48,8 @@ export async function exportAll(env: Env): Promise<Backup> {
 export function parseBackup(raw: unknown): Backup {
   const b = raw as Partial<Backup>;
   if (!b || !Array.isArray(b.subscriptions)) throw new Error(t('server.backup.notBackup'));
-  if (b.format && b.format !== BACKUP_FORMAT && !LEGACY_FORMATS.includes(b.format)) throw new Error(t('server.backup.unknownFormat', { format: String(b.format) }));
+  if (b.format && b.format !== BACKUP_FORMAT && !LEGACY_FORMATS.includes(b.format))
+    throw new Error(t('server.backup.unknownFormat', { format: String(b.format) }));
   if ((b.version ?? 1) > BACKUP_VERSION) throw new Error(t('server.backup.newerVersion', { version: b.version }));
   return {
     format: BACKUP_FORMAT,

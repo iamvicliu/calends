@@ -50,7 +50,10 @@
     "title": "Contabilidade",
     "defaultMethod": "Forma de pagamento padrão",
     "unassigned": { "one": "{count} assinatura está sem forma de pagamento", "other": "{count} assinaturas estão sem forma de pagamento" },
-    "assignAllDone": { "one": "{count} assinatura definida com a forma de pagamento padrão", "other": "{count} assinaturas definidas com a forma de pagamento padrão" },
+    "assignAllDone": {
+      "one": "{count} assinatura definida com a forma de pagamento padrão",
+      "other": "{count} assinaturas definidas com a forma de pagamento padrão"
+    },
     "assignAll": "Usar padrão em todas",
     "collectCurrency": "Moeda dos planos compartilhados"
   },

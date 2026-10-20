@@ -96,13 +96,13 @@ codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALE
 
 ## 配置
 
-| 变量 | 位置 | 作用 |
-|---|---|---|
-| `SETUP_TOKEN` | secret / 环境变量 | 新部署首次设置密码时需要。 |
-| `SITE_URL` | 变量 / 环境变量 | 提醒和日历里使用的站点地址；不设时自动识别。 |
-| `EMAIL` 绑定 + `MAIL_FROM`、`MAIL_FROM_NAME` | wrangler | 可选：通过 [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/) 发邮件提醒；其他渠道无需服务端配置。 |
-| `TRUST_PROXY` | 环境变量 | 在反向代理后面时设为 `1`，登录限速才能拿到真实访客 IP。 |
-| `DATA_DIR`、`PORT` | Docker 环境变量 | 数据目录（默认 `/data`）和端口（默认 `8787`）。 |
+| 变量                                         | 位置              | 作用                                                                                                                                                          |
+| -------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SETUP_TOKEN`                                | secret / 环境变量 | 新部署首次设置密码时需要。                                                                                                                                    |
+| `SITE_URL`                                   | 变量 / 环境变量   | 提醒和日历里使用的站点地址；不设时自动识别。                                                                                                                  |
+| `EMAIL` 绑定 + `MAIL_FROM`、`MAIL_FROM_NAME` | wrangler          | 可选：通过 [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/) 发邮件提醒；其他渠道无需服务端配置。 |
+| `TRUST_PROXY`                                | 环境变量          | 在反向代理后面时设为 `1`，登录限速才能拿到真实访客 IP。                                                                                                       |
+| `DATA_DIR`、`PORT`                           | Docker 环境变量   | 数据目录（默认 `/data`）和端口（默认 `8787`）。                                                                                                               |
 
 个人部署的配置（自己的域名、数据库 ID、发件地址、头像等）可以放在被 git 忽略的 `local/` 目录：npm 脚本会自动使用 `local/wrangler.jsonc`，构建时 `local/public/` 里的文件会覆盖 `public/` 里的同名文件。
 

@@ -4,7 +4,20 @@ import { addDays, addMonths, cycleDays, diffDays, totals } from '../../shared/bi
 import { cnDate, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
-import { cancelSavings, cashVsAccrual, contributionOn, events, insights, monthEnd, movement, mrrChangeSinceLastMonth, mrrSeries, prepaidValue, topUpPlan, type EventKind } from '../../shared/metrics.ts';
+import {
+  cancelSavings,
+  cashVsAccrual,
+  contributionOn,
+  events,
+  insights,
+  monthEnd,
+  movement,
+  mrrChangeSinceLastMonth,
+  mrrSeries,
+  prepaidValue,
+  topUpPlan,
+  type EventKind,
+} from '../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { Amount, CatIcon, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
@@ -63,7 +76,11 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const now = series[series.length - 1].mrr;
   const yearAgo = series.length > 12 ? series[series.length - 13].mrr : undefined;
   const delta = mrrChangeSinceLastMonth(state, today);
-  const evDates = new Set(events(state, today).filter((e) => e.kind !== 'buy').map((e) => e.date.slice(0, 7)));
+  const evDates = new Set(
+    events(state, today)
+      .filter((e) => e.kind !== 'buy')
+      .map((e) => e.date.slice(0, 7)),
+  );
   const markers = series.map((p, i) => (evDates.has(p.month) ? i : -1)).filter((i) => i >= 0);
   return (
     <div class="card hero-card">
@@ -164,7 +181,13 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           <button class="icon-btn" aria-label={t('report.wf.prev')} onClick={() => setOffset(offset - 1)}>
             <Icon name="left" />
           </button>
-          <button class="icon-btn" aria-label={t('report.wf.next')} disabled={offset >= 0} style={{ opacity: offset >= 0 ? 0.35 : 1 }} onClick={() => setOffset(Math.min(0, offset + 1))}>
+          <button
+            class="icon-btn"
+            aria-label={t('report.wf.next')}
+            disabled={offset >= 0}
+            style={{ opacity: offset >= 0 ? 0.35 : 1 }}
+            onClick={() => setOffset(Math.min(0, offset + 1))}
+          >
             <Icon name="right" />
           </button>
         </div>
@@ -186,7 +209,11 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             h = -s.v;
           }
           return (
-            <div key={s.k} class={`wf-col ${s.kind}`} {...tipProps(() => `${s.k} ${perMonth(`${s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−'}${money(Math.abs(s.v), base)}`)}`)}>
+            <div
+              key={s.k}
+              class={`wf-col ${s.kind}`}
+              {...tipProps(() => `${s.k} ${perMonth(`${s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−'}${money(Math.abs(s.v), base)}`)}`)}
+            >
               <div class="wf-track">
                 <i style={{ bottom: `${(bottom / max) * 100}%`, height: `max(${h > 0 ? 3 : 1}px, ${(h / max) * 100}%)` }} />
               </div>
@@ -200,7 +227,13 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
         })}
       </div>
       <div class="wf-items">
-        {mv.items.length === 0 && <div class="muted" style={{ fontSize: 13, padding: '8px 0' }}>{Math.abs(mv.fx) >= 0.5 ? t('report.wf.emptyFx', { amount: `${mv.fx > 0 ? '+' : '−'}${money(Math.abs(mv.fx), base, { compact: true })}` }) : t('report.wf.empty')}</div>}
+        {mv.items.length === 0 && (
+          <div class="muted" style={{ fontSize: 13, padding: '8px 0' }}>
+            {Math.abs(mv.fx) >= 0.5
+              ? t('report.wf.emptyFx', { amount: `${mv.fx > 0 ? '+' : '−'}${money(Math.abs(mv.fx), base, { compact: true })}` })
+              : t('report.wf.empty')}
+          </div>
+        )}
         {mv.items.slice(0, 4).map((it) => (
           <button key={it.sub.id} class="wf-item" onClick={() => onOpen(it.sub)}>
             <SubIcon sub={it.sub} size={24} />
@@ -301,14 +334,32 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           )}
         />
         <div class="cash-facts">
-          <div {...tipProps(() => pv.items.slice(0, 6).map((x) => <div key={x.sub.id}>{t('report.cash.prepaidItem', { name: x.sub.name, amount: money(x.value, base, { compact: true }), until: x.until })}</div>))}>
+          <div
+            {...tipProps(() =>
+              pv.items
+                .slice(0, 6)
+                .map((x) => (
+                  <div key={x.sub.id}>
+                    {t('report.cash.prepaidItem', { name: x.sub.name, amount: money(x.value, base, { compact: true }), until: x.until })}
+                  </div>
+                )),
+            )}
+          >
             <span>{t('report.cash.prepaid')}</span>
             <b>
               <Amount value={pv.total} ccy={base} compact />
             </b>
             <small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>
           </div>
-          <div {...tipProps(() => sv.items.slice(0, 6).map((x) => <div key={x.sub.id}>{t('report.cash.savedItem', { name: x.sub.name, amount: money(x.saved, base, { compact: true }), since: x.since })}</div>))}>
+          <div
+            {...tipProps(() =>
+              sv.items
+                .slice(0, 6)
+                .map((x) => (
+                  <div key={x.sub.id}>{t('report.cash.savedItem', { name: x.sub.name, amount: money(x.saved, base, { compact: true }), since: x.since })}</div>
+                )),
+            )}
+          >
             <span>{t('report.cash.saved')}</span>
             <b style={{ color: 'var(--green)' }}>
               <Amount value={sv.total} ccy={base} compact />
@@ -320,7 +371,15 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             <b>
               <Amount value={next90} ccy={base} compact />
             </b>
-            <small>{peak ? t('report.cash.peak', { n: Number(peak.month.slice(5)), month: monthLabel(peak.month.slice(0, 7), { year: false }), amount: money(peak.cash, base, { compact: true }) }) : ''}</small>
+            <small>
+              {peak
+                ? t('report.cash.peak', {
+                    n: Number(peak.month.slice(5)),
+                    month: monthLabel(peak.month.slice(0, 7), { year: false }),
+                    amount: money(peak.cash, base, { compact: true }),
+                  })
+                : ''}
+            </small>
           </div>
         </div>
       </div>
@@ -351,7 +410,9 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
               : t('report.comp.monthly');
   const groups = new Map<string, typeof live>();
   for (const x of live) groups.set(keyOf(x.s), [...(groups.get(keyOf(x.s)) ?? []), x]);
-  const entries = [...groups.entries()].map(([k, xs]) => ({ k, xs: xs.sort((a, b) => b.v - a.v), v: xs.reduce((a, x) => a + x.v, 0) })).sort((a, b) => b.v - a.v);
+  const entries = [...groups.entries()]
+    .map(([k, xs]) => ({ k, xs: xs.sort((a, b) => b.v - a.v), v: xs.reduce((a, x) => a + x.v, 0) }))
+    .sort((a, b) => b.v - a.v);
   const color = (k: string, i: number) => {
     if (dim === 'cat') return catColor(k);
     if (dim === 'pay') {
@@ -392,7 +453,13 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           if (sel) {
             const x = sel.xs[r.i];
             return (
-              <button key={x.s.id} class="tm-cell" style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: catColor(x.s.category) }} onClick={() => onOpen(x.s)} {...tipProps(() => `${x.s.name} · ${perMonth(money(x.v, base))}`)}>
+              <button
+                key={x.s.id}
+                class="tm-cell"
+                style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: catColor(x.s.category) }}
+                onClick={() => onOpen(x.s)}
+                {...tipProps(() => `${x.s.name} · ${perMonth(money(x.v, base))}`)}
+              >
                 {r.w * r.h > 300 && <SubIcon sub={x.s} size={24} />}
                 {r.w * r.h > 180 && <b>{x.s.name}</b>}
                 {r.w * r.h > 300 && <span>{money(x.v, base, { compact: true })}</span>}
@@ -401,7 +468,13 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           }
           const e = entries[r.i];
           return (
-            <button key={e.k} class="tm-cell" style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: color(e.k, r.i) }} onClick={() => setFocus(e.k)} {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}>
+            <button
+              key={e.k}
+              class="tm-cell"
+              style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: color(e.k, r.i) }}
+              onClick={() => setFocus(e.k)}
+              {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}
+            >
               {r.w * r.h > 160 && (
                 <b>
                   {dim === 'cat' && <CatIcon cat={e.k} size={12} />}
@@ -464,26 +537,36 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600 }}>{p.method.name}</div>
             <div class="muted" style={{ fontSize: 12.5 }}>
-              {t('report.topup.summary', { balance: money(p.current, p.method.currency, { compact: true }), monthly: money(p.monthly, p.method.currency, { compact: true }) })}
+              {t('report.topup.summary', {
+                balance: money(p.current, p.method.currency, { compact: true }),
+                monthly: money(p.monthly, p.method.currency, { compact: true }),
+              })}
             </div>
             {p.need > 0 ? (
               <>
                 <div class="topup-why">
-                  {t('report.topup.why', { span, due: money(p.due, p.method.currency, { compact: true }), balance: money(p.current, p.method.currency, { compact: true }), need: money(p.need, p.method.currency, { compact: true }) })}
+                  {t('report.topup.why', {
+                    span,
+                    due: money(p.due, p.method.currency, { compact: true }),
+                    balance: money(p.current, p.method.currency, { compact: true }),
+                    need: money(p.need, p.method.currency, { compact: true }),
+                  })}
                   {p.deadline && p.minNeed > 0 && p.minNeed < p.need - 0.01 && (
-<>{tx('report.topup.urgent', { date: cnDate(p.deadline), min: <b>{money(p.minNeed, p.method.currency, { compact: true })}</b> })}</>
+                    <>{tx('report.topup.urgent', { date: cnDate(p.deadline), min: <b>{money(p.minNeed, p.method.currency, { compact: true })}</b> })}</>
                   )}
                 </div>
                 {p.cards.length > 0 ? (
                   <div class="cards-row">
                     <small>{t('report.topup.cards')}</small>
                     {/* 同面额合并成「×N」，不再一张张平铺 */}
-                    {[...p.cards.reduce((m2, c) => m2.set(c, (m2.get(c) ?? 0) + 1), new Map<number, number>())].sort((x, y) => y[0] - x[0]).map(([c, n]) => (
-                      <span key={c} class="gift">
-                        {money(c, p.method.currency, { compact: true })}
-                        {n > 1 && <em>×{n}</em>}
-                      </span>
-                    ))}
+                    {[...p.cards.reduce((m2, c) => m2.set(c, (m2.get(c) ?? 0) + 1), new Map<number, number>())]
+                      .sort((x, y) => y[0] - x[0])
+                      .map(([c, n]) => (
+                        <span key={c} class="gift">
+                          {money(c, p.method.currency, { compact: true })}
+                          {n > 1 && <em>×{n}</em>}
+                        </span>
+                      ))}
                   </div>
                 ) : (
                   <div class="topup-why soft">{t('report.topup.anyAmount')}</div>
@@ -500,8 +583,14 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
               <div style={{ fontWeight: 700 }}>
                 <Amount value={p.need} ccy={p.method.currency} compact />
               </div>
-              <div class="muted" style={{ fontSize: 12 }}>≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}</div>
-              {p.deadline && <div class={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 12, fontWeight: 600 }}>{t('report.topup.by', { date: cnDate(p.deadline) })}</div>}
+              <div class="muted" style={{ fontSize: 12 }}>
+                ≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}
+              </div>
+              {p.deadline && (
+                <div class={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 12, fontWeight: 600 }}>
+                  {t('report.topup.by', { date: cnDate(p.deadline) })}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -556,7 +645,9 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
                   </small>
                 </span>
                 <b class={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
-                  {tone === 'buy' ? money(e.delta, base, { compact: true }) : perMonth(`${e.delta >= 0 ? '+' : '−'}${money(Math.abs(e.delta), base, { compact: true })}`)}
+                  {tone === 'buy'
+                    ? money(e.delta, base, { compact: true })
+                    : perMonth(`${e.delta >= 0 ? '+' : '−'}${money(Math.abs(e.delta), base, { compact: true })}`)}
                 </b>
               </button>
             </Fragment>
@@ -571,4 +662,3 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
     </div>
   );
 }
-

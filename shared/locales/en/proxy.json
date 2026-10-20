@@ -21,7 +21,15 @@
   "nextCharge": "Next charge",
   "note": "Note",
   "diffLabel": "Paid back − charged",
-  "table": { "date": "Charge date", "charged": "Charged", "received": "Paid back", "diff": "Difference", "record": "Record", "even": "Even", "none": "No charges yet." },
+  "table": {
+    "date": "Charge date",
+    "charged": "Charged",
+    "received": "Paid back",
+    "diff": "Difference",
+    "record": "Record",
+    "even": "Even",
+    "none": "No charges yet."
+  },
   "entry": {
     "markedDue": "Marked as due",
     "saved": "Saved",

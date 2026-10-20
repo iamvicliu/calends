@@ -9,13 +9,55 @@
   "toast": { "resumed": "Facturación reanudada", "paused": "En pausa. No se prevén cobros futuros" },
   "history": "Historial",
   "summary": "Resumen",
-  "field": { "amount": "Importe", "cycle": "Ciclo de facturación", "monthlyYearly": "Mensual / anual", "category": "Categoría", "method": "Método de pago", "start": "Fecha de inicio", "next": "Próximo cobro", "expires": "Fin del servicio", "expiresHint": "La renovación automática cobra antes de esta fecha", "endedOn": "Finalizó el", "trialEnd": "Fin de la prueba", "region": "Región" },
+  "field": {
+    "amount": "Importe",
+    "cycle": "Ciclo de facturación",
+    "monthlyYearly": "Mensual / anual",
+    "category": "Categoría",
+    "method": "Método de pago",
+    "start": "Fecha de inicio",
+    "next": "Próximo cobro",
+    "expires": "Fin del servicio",
+    "expiresHint": "La renovación automática cobra antes de esta fecha",
+    "endedOn": "Finalizó el",
+    "trialEnd": "Fin de la prueba",
+    "region": "Región"
+  },
   "up": { "planned": "Cambio previsto · sin confirmar", "starting": "Empieza pronto", "changing": "Próximo cambio", "effective": "Fecha de entrada en vigor" },
-  "plan": { "drop": "No cambiar", "droppedToast": "No se cambiará. Termina después del {date}", "confirm": "Confirmar cambio", "confirmedToast": "Cambio confirmado" },
+  "plan": {
+    "drop": "No cambiar",
+    "droppedToast": "No se cambiará. Termina después del {date}",
+    "confirm": "Confirmar cambio",
+    "confirmedToast": "Cambio confirmado"
+  },
   "intro": { "title": "Oferta inicial", "price": "Precio inicial", "until": "Fin de la oferta", "then": "Después" },
-  "remind": { "title": "Recordatorios", "email": "Recordatorio por correo", "off": "Desactivado", "onDay": "El día del cobro a las {time}", "before": { "one": "{count} día antes a las {time}", "other": "{count} días antes a las {time}" } },
-  "share": { "owner": "Compartido · lo organizo yo ({count}/{seats})", "member": "Compartido · me uní", "payTo": "Pagar a", "host": "Organizador", "myShare": "Mi parte", "unnamed": "Sin nombre", "paidUntil": "Pagado hasta el {date}", "unpaid": "Aún sin pagar", "owed": "{amount} pendiente", "settled": "Al día" },
-  "charges": { "title": { "one": "Cobros · {count}", "other": "Cobros · {count}" }, "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Fallido" }, "onCard": "En la tarjeta {amount} · ", "add": "Añadir un registro (reembolso, ajuste, cobro fallido, importe en tarjeta…)", "recent": "Mostrar solo los últimos 12", "all": "Mostrar los {count}" },
+  "remind": {
+    "title": "Recordatorios",
+    "email": "Recordatorio por correo",
+    "off": "Desactivado",
+    "onDay": "El día del cobro a las {time}",
+    "before": { "one": "{count} día antes a las {time}", "other": "{count} días antes a las {time}" }
+  },
+  "share": {
+    "owner": "Compartido · lo organizo yo ({count}/{seats})",
+    "member": "Compartido · me uní",
+    "payTo": "Pagar a",
+    "host": "Organizador",
+    "myShare": "Mi parte",
+    "unnamed": "Sin nombre",
+    "paidUntil": "Pagado hasta el {date}",
+    "unpaid": "Aún sin pagar",
+    "owed": "{amount} pendiente",
+    "settled": "Al día"
+  },
+  "charges": {
+    "title": { "one": "Cobros · {count}", "other": "Cobros · {count}" },
+    "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Fallido" },
+    "onCard": "En la tarjeta {amount} · ",
+    "add": "Añadir un registro (reembolso, ajuste, cobro fallido, importe en tarjeta…)",
+    "recent": "Mostrar solo los últimos 12",
+    "all": "Mostrar los {count}"
+  },
   "notes": "Notas",
   "stats": {
     "spent": "Gasto total",

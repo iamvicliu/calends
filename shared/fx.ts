@@ -83,7 +83,6 @@ export function parseFrankfurter(body: unknown, keep: Set<string>): Record<strin
   return out;
 }
 
-
 /** 换算到本位币：date 在未来或缺省时用当前汇率 */
 export function toBaseAt(state: AppState, amount: number, ccy: string, date?: string, to = state.settings.baseCurrency): number {
   const v = date ? convertOn(amount, ccy, to, date, state.fxHistory, state.fx) : convertOn(amount, ccy, to, '9999-12-31', undefined, state.fx);
@@ -91,7 +90,11 @@ export function toBaseAt(state: AppState, amount: number, ccy: string, date?: st
 }
 
 /** 一笔扣款的本位币金额：已发生的按扣款当天汇率，预测的按当前汇率 */
-export function chargeValue(state: AppState, c: { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } }, to = state.settings.baseCurrency): number {
+export function chargeValue(
+  state: AppState,
+  c: { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } },
+  to = state.settings.baseCurrency,
+): number {
   // 记了卡上实际扣款时按它算：汇差、手续费都算进真实成本
   if (c.settled && !c.projected) return toBaseAt(state, c.settled.amount, c.settled.currency, c.date, to);
   return toBaseAt(state, c.amount, c.currency, c.projected ? undefined : c.date, to);

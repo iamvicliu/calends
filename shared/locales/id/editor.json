@@ -13,7 +13,16 @@
   "confirmDiscard": "Buang perubahan yang belum disimpan?",
   "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, tandai sebagai Dibatalkan saja.",
   "toast": { "added": "Ditambahkan", "saved": "Disimpan", "deleted": "Dihapus" },
-  "cycle": { "w1": "Mingguan", "m1": "Bulanan", "m3": "Triwulanan", "m6": "Per 6 bulan", "y1": "Tahunan", "y2": "Per 2 tahun", "lt": "Seumur hidup", "custom": "Kustom…" },
+  "cycle": {
+    "w1": "Mingguan",
+    "m1": "Bulanan",
+    "m3": "Triwulanan",
+    "m6": "Per 6 bulan",
+    "y1": "Tahunan",
+    "y2": "Per 2 tahun",
+    "lt": "Seumur hidup",
+    "custom": "Kustom…"
+  },
   "unit": {
     "label": "Satuan",
     "every": "Setiap",
@@ -99,7 +108,11 @@
   "change": {
     "title": "Riwayat & perubahan",
     "needPrice": "Masukkan harga",
-    "toast": { "price": "Perubahan harga dicatat. Simpan untuk menerapkan.", "switch": "Fase baru ditambahkan. Simpan untuk menerapkan.", "resume": "Berlangganan lagi. Simpan untuk menerapkan." },
+    "toast": {
+      "price": "Perubahan harga dicatat. Simpan untuk menerapkan.",
+      "switch": "Fase baru ditambahkan. Simpan untuk menerapkan.",
+      "resume": "Berlangganan lagi. Simpan untuk menerapkan."
+    },
     "price": "Catat perubahan harga",
     "switch": "Ubah wilayah, paket, atau metode pembayaran",
     "resume": "Berlangganan lagi",

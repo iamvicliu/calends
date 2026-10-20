@@ -31,7 +31,16 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
 
   const year = month.slice(0, 4);
   const grid = monthGrid(month);
-  const charges = useMemo(() => allCharges(state, grid[0] < `${year}-01-01` ? grid[0] : `${year}-01-01`, grid[grid.length - 1] > `${year}-12-31` ? grid[grid.length - 1] : `${year}-12-31`, today), [state, year, month, today]);
+  const charges = useMemo(
+    () =>
+      allCharges(
+        state,
+        grid[0] < `${year}-01-01` ? grid[0] : `${year}-01-01`,
+        grid[grid.length - 1] > `${year}-12-31` ? grid[grid.length - 1] : `${year}-12-31`,
+        today,
+      ),
+    [state, year, month, today],
+  );
   const byDay = useMemo(() => {
     const m = new Map<string, Charge[]>();
     for (const c of charges) m.set(c.date, [...(m.get(c.date) ?? []), c]);
@@ -104,7 +113,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                 {grid.map((d) => {
                   const items = byDay.get(d) ?? [];
                   return (
-                    <button key={d} class={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`} onClick={() => setSel(d)}>
+                    <button
+                      key={d}
+                      class={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`}
+                      onClick={() => setSel(d)}
+                    >
                       <div class="cal-day">
                         <b>{Number(d.slice(8))}</b>
                         {items.length > 0 && <span class="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
@@ -145,8 +158,19 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
                 {monthCharges.length === 0 && <div class="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
-                  <Cell key={c.sub.id + c.date + i} label={<span class="row cal-name"><SubIcon sub={c.sub} size={24} /><span>{c.sub.name}</span></span>} onClick={() => onOpen(c.sub)}>
-                    <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>{t('calendar.day', { day: Number(c.date.slice(8)) })}</span>
+                  <Cell
+                    key={c.sub.id + c.date + i}
+                    label={
+                      <span class="row cal-name">
+                        <SubIcon sub={c.sub} size={24} />
+                        <span>{c.sub.name}</span>
+                      </span>
+                    }
+                    onClick={() => onOpen(c.sub)}
+                  >
+                    <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>
+                      {t('calendar.day', { day: Number(c.date.slice(8)) })}
+                    </span>
                     <b style={{ color: 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>{money(c.amount, c.currency, { compact: true })}</b>
                   </Cell>
                 ))}
@@ -159,7 +183,21 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   );
 }
 
-function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; byDay: Map<string, Charge[]>; today: string; sumOf: (l?: Charge[]) => number; base: string; onPick: (m: string) => void }) {
+function YearHeat({
+  year,
+  byDay,
+  today,
+  sumOf,
+  base,
+  onPick,
+}: {
+  year: string;
+  byDay: Map<string, Charge[]>;
+  today: string;
+  sumOf: (l?: Charge[]) => number;
+  base: string;
+  onPick: (m: string) => void;
+}) {
   const DOW = dows();
   return (
     <div class="heat">
@@ -194,16 +232,20 @@ function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; b
                     </i>
                   );
                 return (
-                  <i key={d} class={cls} {...tipProps(() => (
-                    <>
-                      <b>{cnDate(d, true)}</b>
-                      {list.map((c) => (
-                        <div key={c.sub.id}>
-                          {c.sub.name} · {money(c.amount, c.currency)}
-                        </div>
-                      ))}
-                    </>
-                  ))}>
+                  <i
+                    key={d}
+                    class={cls}
+                    {...tipProps(() => (
+                      <>
+                        <b>{cnDate(d, true)}</b>
+                        {list.map((c) => (
+                          <div key={c.sub.id}>
+                            {c.sub.name} · {money(c.amount, c.currency)}
+                          </div>
+                        ))}
+                      </>
+                    ))}
+                  >
                     {/* 同一天多笔：只画第一个图标，右上角标出总笔数（格子太小，叠起来只剩一道边） */}
                     <span class="hd-stack">
                       <SubIcon sub={list[0].sub} size={20} />

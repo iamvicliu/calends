@@ -21,7 +21,15 @@
   "nextCharge": "Tagihan berikutnya",
   "note": "Catatan",
   "diffLabel": "Diganti − ditagih",
-  "table": { "date": "Tanggal tagihan", "charged": "Ditagih", "received": "Diganti", "diff": "Selisih", "record": "Catat", "even": "Impas", "none": "Belum ada tagihan." },
+  "table": {
+    "date": "Tanggal tagihan",
+    "charged": "Ditagih",
+    "received": "Diganti",
+    "diff": "Selisih",
+    "record": "Catat",
+    "even": "Impas",
+    "none": "Belum ada tagihan."
+  },
   "entry": {
     "markedDue": "Ditandai tertunggak",
     "saved": "Disimpan",

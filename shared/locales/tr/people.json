@@ -43,7 +43,10 @@
     "profile": "Profil",
     "notePh": "ör. iş arkadaşı, ay sonu öder",
     "color": "Renk",
-    "syncFoot": { "one": "Ad ve iletişim değişiklikleri {count} yerin tümüne uygulanır.", "other": "Ad ve iletişim değişiklikleri {count} yerin tümüne uygulanır." },
+    "syncFoot": {
+      "one": "Ad ve iletişim değişiklikleri {count} yerin tümüne uygulanır.",
+      "other": "Ad ve iletişim değişiklikleri {count} yerin tümüne uygulanır."
+    },
     "merge": "Birleştir",
     "mergePick": "Seç…",
     "mergeFoot": "Aynı kişi iki kez mi kaydedildi? Birleştirince planlar ve ödemeler bir araya gelir.",
@@ -57,6 +60,9 @@
   },
   "field": {
     "person": "Kişi",
-    "syncFoot": { "one": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır.", "other": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır." }
+    "syncFoot": {
+      "one": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır.",
+      "other": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır."
+    }
   }
 }

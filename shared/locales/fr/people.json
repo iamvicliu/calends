@@ -43,7 +43,10 @@
     "profile": "Profil",
     "notePh": "ex. collègue, paie en fin de mois",
     "color": "Couleur",
-    "syncFoot": { "one": "Les changements de nom et de contact s’appliquent à {count} endroit.", "other": "Les changements de nom et de contact s’appliquent aux {count} endroits." },
+    "syncFoot": {
+      "one": "Les changements de nom et de contact s’appliquent à {count} endroit.",
+      "other": "Les changements de nom et de contact s’appliquent aux {count} endroits."
+    },
     "merge": "Fusionner avec",
     "mergePick": "Choisir…",
     "mergeFoot": "La même personne apparaît deux fois ? Fusionnez pour regrouper ses abonnements et paiements.",
@@ -57,6 +60,9 @@
   },
   "field": {
     "person": "Personne",
-    "syncFoot": { "one": "Apparaît aussi à {count} autre endroit : les changements de nom et de contact s’y appliquent aussi.", "other": "Apparaît aussi à {count} autres endroits : les changements de nom et de contact s’y appliquent aussi." }
+    "syncFoot": {
+      "one": "Apparaît aussi à {count} autre endroit : les changements de nom et de contact s’y appliquent aussi.",
+      "other": "Apparaît aussi à {count} autres endroits : les changements de nom et de contact s’y appliquent aussi."
+    }
   }
 }

@@ -97,13 +97,13 @@ Tools include `get_overview`, `list_subscriptions`, `spending_stats`, `get_trend
 
 ## Configuration
 
-| Variable | Where | Purpose |
-|---|---|---|
-| `SETUP_TOKEN` | secret / env | Required once to set the owner password on a fresh install. |
-| `SITE_URL` | var / env | Public URL used in reminders and calendar links. Auto-detected if unset. |
-| `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
-| `TRUST_PROXY` | env | Set to `1` behind a reverse proxy so login rate limiting sees the real client IP. |
-| `DATA_DIR`, `PORT` | Docker env | Data directory (default `/data`) and port (default `8787`). |
+| Variable                                        | Where        | Purpose                                                                                                                                                                            |
+| ----------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SETUP_TOKEN`                                   | secret / env | Required once to set the owner password on a fresh install.                                                                                                                        |
+| `SITE_URL`                                      | var / env    | Public URL used in reminders and calendar links. Auto-detected if unset.                                                                                                           |
+| `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler     | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
+| `TRUST_PROXY`                                   | env          | Set to `1` behind a reverse proxy so login rate limiting sees the real client IP.                                                                                                  |
+| `DATA_DIR`, `PORT`                              | Docker env   | Data directory (default `/data`) and port (default `8787`).                                                                                                                        |
 
 Personal deployment settings (your domain, database id, sender address, your own icons) can live in a git-ignored `local/` folder: `local/wrangler.jsonc` is picked up automatically by the npm scripts and files in `local/public/` override `public/` at build time.
 
@@ -116,12 +116,12 @@ echo "DEV_BYPASS_AUTH=1" > .dev.vars   # local only: skip login
 npm run dev                            # Vite on :5173 + Worker on :8787
 ```
 
-| Command | |
-|---|---|
-| `npm test` | Unit tests (billing, phases, metrics, masking) |
-| `npm run typecheck` / `npm run lint` / `npm run format` | TypeScript, oxlint, Prettier |
-| `npm run i18n:check` | Every locale has every key |
-| `npm run build` | Production build |
+| Command                                                 |                                                |
+| ------------------------------------------------------- | ---------------------------------------------- |
+| `npm test`                                              | Unit tests (billing, phases, metrics, masking) |
+| `npm run typecheck` / `npm run lint` / `npm run format` | TypeScript, oxlint, Prettier                   |
+| `npm run i18n:check`                                    | Every locale has every key                     |
+| `npm run build`                                         | Production build                               |
 
 Stack: Preact + Vite (admin), preact/compat + shadcn/ui (public page), Cloudflare Workers + D1 (SQLite), shared TypeScript domain logic in `shared/`.
 

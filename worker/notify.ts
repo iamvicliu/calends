@@ -1,4 +1,17 @@
-import { addDays, addMonths, chargesBetween, convert, cycleDays, diffDays, effectiveStatus, nextCharge, priceAt, runwayFor, todayIn, totals } from '../shared/billing.ts';
+import {
+  addDays,
+  addMonths,
+  chargesBetween,
+  convert,
+  cycleDays,
+  diffDays,
+  effectiveStatus,
+  nextCharge,
+  priceAt,
+  runwayFor,
+  todayIn,
+  totals,
+} from '../shared/billing.ts';
 import { toBaseAt } from '../shared/fx.ts';
 import { billLabel, cnDate, esc, money, monthLabel, relDays } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
@@ -49,7 +62,12 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     if (st === 'trial' && s.trialEnd) {
       const d = diffDays(today, s.trialEnd);
       if (d === remind || d === 1 || d === 0) {
-        trials.push({ title: s.name, sub: t('notify.trial.sub', { when: relDays(d), date: cnDate(s.trialEnd), price: money(s.price, s.currency) }), amount: money(s.price, s.currency), tone: 'warn' });
+        trials.push({
+          title: s.name,
+          sub: t('notify.trial.sub', { when: relDays(d), date: cnDate(s.trialEnd), price: money(s.price, s.currency) }),
+          amount: money(s.price, s.currency),
+          tone: 'warn',
+        });
         headline.push(t('notify.trial.headline', { name: s.name, when: relDays(d) }));
       }
     }
@@ -62,7 +80,12 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
           const price = priceAt(s, n);
           const conv = s.currency !== base ? `≈ ${money(convert(price, s.currency, base, fx), base)}` : undefined;
           const introEnds = !(s.intro && s.intro.until > n) && !!s.intro && diffDays(s.intro.until, n) < 40;
-          renew.push({ title: s.name, sub: [relDays(d), cnDate(n, true), method?.name, introEnds ? t('notify.renew.introEnds') : ''].filter(Boolean).join(' · '), amount: money(price, s.currency), amountSub: conv });
+          renew.push({
+            title: s.name,
+            sub: [relDays(d), cnDate(n, true), method?.name, introEnds ? t('notify.renew.introEnds') : ''].filter(Boolean).join(' · '),
+            amount: money(price, s.currency),
+            amountSub: conv,
+          });
           headline.push(t('notify.renew.headline', { name: s.name, when: relDays(d), price: money(price, s.currency) }));
         }
       }
@@ -89,7 +112,10 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
       const every = m.billEvery ?? 1;
-      const fee = m.fee != null ? money(m.fee, m.feeCurrency ?? collect) : money(toBaseAt(state, ((m.share || 0) * every) / months, s.currency, undefined, collect), collect);
+      const fee =
+        m.fee != null
+          ? money(m.fee, m.feeCurrency ?? collect)
+          : money(toBaseAt(state, ((m.share || 0) * every) / months, s.currency, undefined, collect), collect);
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
       carpool.push({
         title: `${m.name} · ${s.name}`,
@@ -108,7 +134,10 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     const contact = s.proxy.contact ? ` · ${s.proxy.contactVia ? `${s.proxy.contactVia} ` : ''}${s.proxy.contact}` : '';
     // 与代付页同样的对账规则（扣款日前后 15 天内的收款也算），改过开始日期也不会重复提醒
     const charges = chargesBetween(s, s.start, today, today);
-    const matched = matchEntries(s.proxy.entries, charges.map((c) => c.date));
+    const matched = matchEntries(
+      s.proxy.entries,
+      charges.map((c) => c.date),
+    );
     for (const c of charges.filter((x) => x.date >= addDays(today, -45))) {
       const entry = matched.get(c.date);
       if (entry?.received != null) continue;
@@ -135,7 +164,12 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     if (d === lead || d === 14 || d === 7 || d === 3 || d === 1 || d === 0) {
       balance.push({
         title: m.name,
-        sub: t('notify.balance.sub', { balance: money(r.current, m.currency), date: cnDate(r.shortfall.date), sub: r.shortfall.sub.name, amount: money(r.shortfall.amount, r.shortfall.currency) }),
+        sub: t('notify.balance.sub', {
+          balance: money(r.current, m.currency),
+          date: cnDate(r.shortfall.date),
+          sub: r.shortfall.sub.name,
+          amount: money(r.shortfall.amount, r.shortfall.currency),
+        }),
         amount: relDays(d),
         tone: 'warn',
       });
@@ -152,7 +186,10 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     { heading: t('notify.section.ending'), rows: ending },
   ].filter((x) => x.rows.length);
   if (!sections.length) return undefined;
-  const title = headline.length === 1 ? t('notify.daily.title', { headline: headline[0] }) : t('notify.daily.titleMore', { headline: headline[0], count: headline.length, more: headline.length - 1 });
+  const title =
+    headline.length === 1
+      ? t('notify.daily.title', { headline: headline[0] })
+      : t('notify.daily.titleMore', { headline: headline[0], count: headline.length, more: headline.length - 1 });
   const tot = totals(state, today);
   return {
     key: `daily:${today}`,
@@ -177,7 +214,16 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
   const tot = totals(state, today);
   const [y, m] = today.split('-').map(Number);
   const ym = today.slice(0, 7);
-  const p = { y, m, month: monthLabel(ym, { year: false, long: true }), monthYear: monthLabel(ym, { long: true }), count: charges.length, sum: money(sum, base, { compact: true }), mrr: money(-tot.mrr, base, { compact: true }), arr: money(-tot.mrr * 12, base, { compact: true }) };
+  const p = {
+    y,
+    m,
+    month: monthLabel(ym, { year: false, long: true }),
+    monthYear: monthLabel(ym, { long: true }),
+    count: charges.length,
+    sum: money(sum, base, { compact: true }),
+    mrr: money(-tot.mrr, base, { compact: true }),
+    arr: money(-tot.mrr * 12, base, { compact: true }),
+  };
   return {
     key: `monthly:${today.slice(0, 7)}`,
     kind: 'monthly',
@@ -198,7 +244,16 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
 }
 
 export function renderEmail(d: Digest, siteUrl: string): { html: string; text: string } {
-  const text = [d.intro, '', ...d.sections.flatMap((s) => [t('notify.text.heading', { heading: s.heading }), ...s.rows.map((r) => `· ${r.title}  ${r.amount ?? ''}  ${r.sub ?? ''}`), '']), `${siteUrl}/admin`].join('\n');
+  const text = [
+    d.intro,
+    '',
+    ...d.sections.flatMap((s) => [
+      t('notify.text.heading', { heading: s.heading }),
+      ...s.rows.map((r) => `· ${r.title}  ${r.amount ?? ''}  ${r.sub ?? ''}`),
+      '',
+    ]),
+    `${siteUrl}/admin`,
+  ].join('\n');
   const toneColor = { warn: '#c2593b', ok: '#3c8a52', muted: '#7b858b' } as const;
   const rows = (s: Section) =>
     s.rows
@@ -238,12 +293,19 @@ ${d.sections
  * 把一份提醒发到所有开着的渠道（或只发 only 指定的那一个）。
  * 任一渠道成功就算发出；全部失败则撤掉占位，下一小时重试。
  */
-export async function sendDigest(env: Env, state: AppState, d: Digest, opts: { force?: boolean; only?: string } = {}): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
+export async function sendDigest(
+  env: Env,
+  state: AppState,
+  d: Digest,
+  opts: { force?: boolean; only?: string } = {},
+): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
   const targets = channelsOf(state.settings).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
   if (!targets.length) return { sent: false, reason: opts.only ? t('notify.send.noChannel') : t('notify.send.noneEnabled') };
   if (!opts.force) {
     // 先占位后发送：重叠触发时只有一个能占到
-    const claim = await env.DB.prepare("INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, 'sending') ON CONFLICT(dedupe_key) DO NOTHING")
+    const claim = await env.DB.prepare(
+      "INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, 'sending') ON CONFLICT(dedupe_key) DO NOTHING",
+    )
       .bind(d.key, d.kind, d.subject)
       .run();
     if (!claim.meta.changes) return { sent: false, reason: t('notify.send.alreadySent') };
@@ -264,7 +326,11 @@ export async function sendDigest(env: Env, state: AppState, d: Digest, opts: { f
   const status = okCount === results.length ? 'sent' : okCount ? `partial ${okCount}/${results.length}` : 'failed';
   if (!okCount) {
     if (!opts.force) await env.DB.prepare('DELETE FROM notify_log WHERE dedupe_key = ?1').bind(d.key).run();
-    return { sent: false, reason: results.map((r) => t('notify.send.failure', { channel: r.channel, error: r.error })).join(t('notify.send.failureSep')), results };
+    return {
+      sent: false,
+      reason: results.map((r) => t('notify.send.failure', { channel: r.channel, error: r.error })).join(t('notify.send.failureSep')),
+      results,
+    };
   }
   await env.DB.prepare(
     "INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(dedupe_key) DO UPDATE SET status = excluded.status, sent_at = datetime('now')",

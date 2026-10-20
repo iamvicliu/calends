@@ -30,12 +30,18 @@
   "listSep": ", ",
   "insight": {
     "yearly": {
-      "title": { "one": "{count} assinatura de longo prazo renova nos próximos 60 dias", "other": "{count} assinaturas de longo prazo renovam nos próximos 60 dias" },
+      "title": {
+        "one": "{count} assinatura de longo prazo renova nos próximos 60 dias",
+        "other": "{count} assinaturas de longo prazo renovam nos próximos 60 dias"
+      },
       "body": "Cerca de {sum} no total. Cobranças anuais são difíceis de reembolsar, então é hora de decidir o que fica."
     },
     "dup": {
       "title": "{names} podem estar duplicadas",
-      "body": { "one": "Esta assinatura custa cerca de {sum} por mês. Veja se ainda precisa dela.", "other": "Estas {count} assinaturas custam juntas cerca de {sum} por mês. Veja se ainda precisa de todas." }
+      "body": {
+        "one": "Esta assinatura custa cerca de {sum} por mês. Veja se ainda precisa dela.",
+        "other": "Estas {count} assinaturas custam juntas cerca de {sum} por mês. Veja se ainda precisa de todas."
+      }
     },
     "hikes": { "title": { "one": "{count} assinatura aumentou o preço no último ano", "other": "{count} assinaturas aumentaram o preço no último ano" } },
     "intro": {
@@ -43,7 +49,10 @@
       "body": "Depois disso, o preço volta de {from} para {to}."
     },
     "balance": { "title": "{name} não vai durar até {date}", "body": "{sub} precisa de {need}; o saldo é de cerca de {current}." },
-    "fx": { "title": "{pct}% dos gastos são em moedas estrangeiras", "body": "A maior é {ccy} ({share}%). Essa parte fica mais barata quando o {ccy} se desvaloriza e mais cara quando se valoriza." },
+    "fx": {
+      "title": "{pct}% dos gastos são em moedas estrangeiras",
+      "body": "A maior é {ccy} ({share}%). Essa parte fica mais barata quando o {ccy} se desvaloriza e mais cara quando se valoriza."
+    },
     "noMethod": {
       "title": { "one": "{count} assinatura está sem forma de pagamento", "other": "{count} assinaturas estão sem forma de pagamento" },
       "body": "Adicione uma para que as previsões de saldo e as estatísticas por forma de pagamento fiquem completas."
@@ -51,8 +60,18 @@
     "top": { "title": "{name} é sua assinatura mais cara", "body": "Cerca de {perDay} por dia, {pct}% dos gastos mensais." }
   },
   "methodKind": {
-    "debit": "Cartão de débito", "credit": "Cartão de crédito", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
-    "giftcard": "Cartão-presente", "prepaid": "Saldo na loja", "phone": "Crédito de celular", "crypto": "Cartão cripto", "other": "Outro"
+    "debit": "Cartão de débito",
+    "credit": "Cartão de crédito",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Cartão-presente",
+    "prepaid": "Saldo na loja",
+    "phone": "Crédito de celular",
+    "crypto": "Cartão cripto",
+    "other": "Outro"
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "E-mail" },

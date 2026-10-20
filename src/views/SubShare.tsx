@@ -47,7 +47,13 @@ function story(state: AppState, sub: Subscription, today: string) {
     active,
     gaps,
     years: [...years].sort((a, b) => a[0].localeCompare(b[0])),
-    duration: y ? (mo ? t('share.dur.ym', { y, m: mo }) : t('share.dur.y', { count: y })) : mo ? t('share.dur.m', { count: mo }) : t('share.dur.d', { count: active }),
+    duration: y
+      ? mo
+        ? t('share.dur.ym', { y, m: mo })
+        : t('share.dur.y', { count: y })
+      : mo
+        ? t('share.dur.m', { count: mo })
+        : t('share.dur.d', { count: active }),
     perMonth: active > 0 ? total / Math.max(1, active / 30.44) : 0,
     perDay: active > 0 ? total / active : 0,
     change: same ? p1 / p0 - 1 : undefined,
@@ -67,7 +73,11 @@ interface Ctx {
 
 const statusText = (st: Story) => t(`share.status.${st.status}`);
 const changeText = (st: Story) =>
-  st.change == null ? t('share.switched', { count: st.vs.length - 1 }) : Math.abs(st.change) < 0.005 ? t('share.priceSame') : t(st.change > 0 ? 'share.priceUp' : 'share.priceDown', { pct: Math.round(Math.abs(st.change) * 100) });
+  st.change == null
+    ? t('share.switched', { count: st.vs.length - 1 })
+    : Math.abs(st.change) < 0.005
+      ? t('share.priceSame')
+      : t(st.change > 0 ? 'share.priceUp' : 'share.priceDown', { pct: Math.round(Math.abs(st.change) * 100) });
 
 /** 单个订阅的分享图 */
 export function SubShare({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
@@ -82,7 +92,17 @@ export function SubShare({ sub, state, today, onClose }: { sub: Subscription; st
       onClose={onClose}
       render={(style, { hide, m }) => {
         const ctx: Ctx = { sub, st, hide, m, today };
-        return style === 'card' ? <SCard {...ctx} /> : style === 'receipt' ? <SReceipt {...ctx} /> : style === 'timeline' ? <STimeline {...ctx} /> : style === 'poster' ? <SPoster {...ctx} /> : <SYears {...ctx} />;
+        return style === 'card' ? (
+          <SCard {...ctx} />
+        ) : style === 'receipt' ? (
+          <SReceipt {...ctx} />
+        ) : style === 'timeline' ? (
+          <STimeline {...ctx} />
+        ) : style === 'poster' ? (
+          <SPoster {...ctx} />
+        ) : (
+          <SYears {...ctx} />
+        );
       }}
     />
   );
@@ -128,13 +148,20 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         {st.vs.map((v, i) => {
           const end = v.end && v.end < today ? v.end : today;
           if (v.start > today) return null;
-          return <i key={v.start} style={{ left: `${(diffDays(start, v.start) / span) * 100}%`, width: `${Math.max(1, (diffDays(v.start, end) / span) * 100)}%`, background: colors[i % colors.length] }} />;
+          return (
+            <i
+              key={v.start}
+              style={{
+                left: `${(diffDays(start, v.start) / span) * 100}%`,
+                width: `${Math.max(1, (diffDays(v.start, end) / span) * 100)}%`,
+                background: colors[i % colors.length],
+              }}
+            />
+          );
         })}
       </div>
       <div class="sc-foot">
-        <span>
-          {t('share.untilToday', { date: when(start, today) })}
-        </span>
+        <span>{t('share.untilToday', { date: when(start, today) })}</span>
         <span>{location.host}</span>
       </div>
     </div>
@@ -230,13 +257,18 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
               <i />
               <div>
                 <small>
-                  {when(it.from, today)} — {it.to ? (it.to > today ? t('share.planned', { date: when(it.to, today) }) : when(it.to, today)) : t('share.present')}
+                  {when(it.from, today)} —{' '}
+                  {it.to ? (it.to > today ? t('share.planned', { date: when(it.to, today) }) : when(it.to, today)) : t('share.present')}
                 </small>
                 <b>
                   {it.v!.region ? `${flag(it.v!.region)} ${it.v!.region} · ` : ''}
                   {hide ? cycleLabel(it.v!.cycle) : `${money(it.v!.price, it.v!.currency, { compact: true })} ${cycleLabel(it.v!.cycle)}`}
                 </b>
-                {(it.v!.priceHistory?.length ?? 0) > 1 && !hide && <span>{t('share.priceChanges', { list: it.v!.priceHistory!.map((p) => money(p.amount, it.v!.currency, { compact: true })).join(' → ') })}</span>}
+                {(it.v!.priceHistory?.length ?? 0) > 1 && !hide && (
+                  <span>
+                    {t('share.priceChanges', { list: it.v!.priceHistory!.map((p) => money(p.amount, it.v!.currency, { compact: true })).join(' → ') })}
+                  </span>
+                )}
                 {sub.phases?.find((ph) => ph.start === it.v!.start)?.note && <span>{sub.phases!.find((ph) => ph.start === it.v!.start)!.note}</span>}
               </div>
             </div>
@@ -259,7 +291,9 @@ function SPoster({ sub, st, hide, m }: Ctx) {
       <div class="sp-k">{t('share.withYou')}</div>
       <div class="sp-big">{st.duration}</div>
       <div class="sp-line">
-        {hide ? `${t('share.n.charges', { count: st.charges.length })} · ${changeText(st)}` : t('share.totalPerDay', { total: m(st.total), perDay: m(st.perDay) })}
+        {hide
+          ? `${t('share.n.charges', { count: st.charges.length })} · ${changeText(st)}`
+          : t('share.totalPerDay', { total: m(st.total), perDay: m(st.perDay) })}
       </div>
       <div class="sp-chips">
         <span>{statusText(st)}</span>
@@ -295,7 +329,9 @@ function SYears({ sub, st, hide, m }: Ctx) {
         ))}
       </div>
       <div class="sy-foot">
-        <span>{t('share.n.charges', { count: st.charges.length })} · {changeText(st)}</span>
+        <span>
+          {t('share.n.charges', { count: st.charges.length })} · {changeText(st)}
+        </span>
         <span>{location.host}</span>
       </div>
     </div>

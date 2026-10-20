@@ -5,7 +5,17 @@
   "title": "Todas las suscripciones",
   "all": "Todas",
   "summary": { "one": "{count} elemento · {monthly}/mes · {yearly}/año", "other": "{count} elementos · {monthly}/mes · {yearly}/año" },
-  "status": { "upcoming": "Sin empezar", "active": "Activa", "trial": "En prueba", "trialShort": "Prueba", "paused": "En pausa", "pausedShort": "Pausa", "ending": "No se renueva", "ended": "Cancelada", "lifetime": "De por vida" },
+  "status": {
+    "upcoming": "Sin empezar",
+    "active": "Activa",
+    "trial": "En prueba",
+    "trialShort": "Prueba",
+    "paused": "En pausa",
+    "pausedShort": "Pausa",
+    "ending": "No se renueva",
+    "ended": "Cancelada",
+    "lifetime": "De por vida"
+  },
   "proxyExcluded": "Pago por otros · no se cuenta",
   "perMonthApprox": "≈ {amount}/mes",
   "originalPrice": "Original {amount}",
@@ -18,7 +28,15 @@
   "empty": "No hay suscripciones que coincidan",
   "badge": { "share": "Compartida", "joined": "Unida", "proxy": "Pago por otros", "proxyFor": "Pago por {name}", "someone": "alguien" },
   "saved": "Ahorrado {amount}",
-  "col": { "name": "Suscripción", "category": "Categoría", "method": "Método de pago", "amount": "Importe", "monthly": "Mensual", "start": "Inicio", "next": "Próximo cobro" },
+  "col": {
+    "name": "Suscripción",
+    "category": "Categoría",
+    "method": "Método de pago",
+    "amount": "Importe",
+    "monthly": "Mensual",
+    "start": "Inicio",
+    "next": "Próximo cobro"
+  },
   "notCounted": "No se cuenta",
   "endedOn": "Finalizó {date}",
   "change": { "noMethod": "Método de pago por definir", "planned": "Previsto · ", "starts": "Empieza {when}", "from": "Cambia {when}" },
@@ -49,6 +67,19 @@
     "gap": "Interrupción",
     "range": { "one": "Desde {date} · {count} fase", "other": "Desde {date} · {count} fases" }
   },
-  "kind": { "debit": "Tarjeta bancaria", "credit": "Tarjeta de crédito", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "Saldo de App Store", "googleplay": "Saldo de Google Play", "giftcard": "Tarjeta regalo", "prepaid": "Saldo de tienda", "phone": "Saldo móvil", "crypto": "Tarjeta cripto", "other": "Otro" },
+  "kind": {
+    "debit": "Tarjeta bancaria",
+    "credit": "Tarjeta de crédito",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "Saldo de App Store",
+    "googleplay": "Saldo de Google Play",
+    "giftcard": "Tarjeta regalo",
+    "prepaid": "Saldo de tienda",
+    "phone": "Saldo móvil",
+    "crypto": "Tarjeta cripto",
+    "other": "Otro"
+  },
   "network": { "unionpay": "UnionPay" }
 }

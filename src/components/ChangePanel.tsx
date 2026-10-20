@@ -72,8 +72,16 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
     const n = Number(price);
     if (!(n >= 0) || price === '') return toast(t('editor.change.needPrice'), true);
     try {
-      const plan = { price: n, currency, cycle: CYCLES.find(([k]) => k === cycle)![1], methodId: methodId || undefined, region: region.trim().toUpperCase() || undefined, planned: mode === 'switch' && planned ? true : undefined };
-      const next = mode === 'price' ? changePrice(f, date, n) : mode === 'switch' ? switchPlan(f, date, plan, keep ? keepUntil : undefined) : resume(f, date, plan);
+      const plan = {
+        price: n,
+        currency,
+        cycle: CYCLES.find(([k]) => k === cycle)![1],
+        methodId: methodId || undefined,
+        region: region.trim().toUpperCase() || undefined,
+        planned: mode === 'switch' && planned ? true : undefined,
+      };
+      const next =
+        mode === 'price' ? changePrice(f, date, n) : mode === 'switch' ? switchPlan(f, date, plan, keep ? keepUntil : undefined) : resume(f, date, plan);
       setF(next);
       setMode(null);
       toast(t(mode === 'price' ? 'editor.change.toast.price' : mode === 'switch' ? 'editor.change.toast.switch' : 'editor.change.toast.resume'));
@@ -128,7 +136,12 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
               </label>
               <label>
                 {t('editor.field.cycle')}
-                <Picker value={cycle} onChange={setCycle} options={CYCLES.map(([k]) => ({ value: k, label: cycleName(k) }))} ariaLabel={t('editor.field.cycle')} />
+                <Picker
+                  value={cycle}
+                  onChange={setCycle}
+                  options={CYCLES.map(([k]) => ({ value: k, label: cycleName(k) }))}
+                  ariaLabel={t('editor.field.cycle')}
+                />
               </label>
               <label>
                 {t('editor.field.method')}
@@ -136,7 +149,18 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
               </label>
               <label>
                 {t('editor.field.region')}
-                <RegionSelect value={region || undefined} onChange={(r) => setRegion(r ?? '')} common={[...new Set([...state.subscriptions.flatMap((x) => [x.region, ...(x.phases ?? []).map((ph) => ph.region)]), ...state.methods.map((m) => m.region)].filter(Boolean) as string[])]} />
+                <RegionSelect
+                  value={region || undefined}
+                  onChange={(r) => setRegion(r ?? '')}
+                  common={[
+                    ...new Set(
+                      [
+                        ...state.subscriptions.flatMap((x) => [x.region, ...(x.phases ?? []).map((ph) => ph.region)]),
+                        ...state.methods.map((m) => m.region),
+                      ].filter(Boolean) as string[],
+                    ),
+                  ]}
+                />
               </label>
               {mode === 'switch' && (
                 <div class="change-keep">

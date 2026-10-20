@@ -1,7 +1,36 @@
 import { addDays, subError, todayIn } from '../shared/billing.ts';
-import { DEFAULT_SETTINGS, PERSON_COLORS, type Channel, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
+import {
+  DEFAULT_SETTINGS,
+  PERSON_COLORS,
+  type Channel,
+  type FxTable,
+  type PaymentMethod,
+  type Person,
+  type Settings,
+  type Subscription,
+} from '../shared/types.ts';
 import { mergePeople, refsFor, syncPerson } from '../shared/people.ts';
-import { DEFAULT_MAX_SESSIONS, authStatus, changePassword, deletePasskey, isAuthed, listPasskeys, listSessions, login, logout, logoutOthers, passkeyLoginOptions, passkeyLoginVerify, passkeyRegisterOptions, passkeyRegisterVerify, pruneSessions, randomToken, revokeSession, sameOrigin, setup } from './auth.ts';
+import {
+  DEFAULT_MAX_SESSIONS,
+  authStatus,
+  changePassword,
+  deletePasskey,
+  isAuthed,
+  listPasskeys,
+  listSessions,
+  login,
+  logout,
+  logoutOthers,
+  passkeyLoginOptions,
+  passkeyLoginVerify,
+  passkeyRegisterOptions,
+  passkeyRegisterVerify,
+  pruneSessions,
+  randomToken,
+  revokeSession,
+  sameOrigin,
+  setup,
+} from './auth.ts';
 import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
 import { backfill, fxStatus, recordToday } from './fx.ts';
@@ -49,10 +78,19 @@ function cleanPerson(raw: Partial<Person>, id: string): Person | undefined {
   if (!name) return undefined;
   const s = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
   const contact = s(raw.contact);
-  return { id, name, contactVia: contact ? s(raw.contactVia) : undefined, contact, note: s(raw.note), color: PERSON_COLORS.includes(raw.color as never) ? raw.color : undefined, createdAt: s(raw.createdAt) ?? new Date().toISOString() };
+  return {
+    id,
+    name,
+    contactVia: contact ? s(raw.contactVia) : undefined,
+    contact,
+    note: s(raw.note),
+    color: PERSON_COLORS.includes(raw.color as never) ? raw.color : undefined,
+    createdAt: s(raw.createdAt) ?? new Date().toISOString(),
+  };
 }
 
-const subsOf = async (env: Env) => (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
+const subsOf = async (env: Env) =>
+  (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
@@ -89,7 +127,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   // 图片中转：分享图要把订阅图标画进 canvas，跨域图片会污染画布，所以经同源转一道。只转 https 的图片，限 1MB
   if (path === '/api/img' && method === 'GET') {
     const u = new URL(req.url).searchParams.get('u') ?? '';
-    if (!/^https:\/\//.test(u)) return bad('bad url', 400);
+    if (!u.startsWith('https://')) return bad('bad url', 400);
     const res = await fetch(u, { cf: { cacheTtl: 86400, cacheEverything: true } });
     const type = res.headers.get('content-type') ?? '';
     if (!res.ok || !type.startsWith('image/')) return bad('not an image', 502);
@@ -111,7 +149,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json({ ok: true });
   }
   // MCP 令牌管理（后台「AI」页）：明文只在新建时返回一次
-  if (path === '/api/mcp/tools' && method === 'GET') return json(TOOLS.map((x) => ({ name: x.name, title: toolTitle(x.name), description: x.description, write: !!x.write })));
+  if (path === '/api/mcp/tools' && method === 'GET')
+    return json(TOOLS.map((x) => ({ name: x.name, title: toolTitle(x.name), description: x.description, write: !!x.write })));
   if (path === '/api/mcp/tokens' && method === 'GET') return json((await listTokens(env)).map(({ hash: _h, ...rest }) => rest));
   if (path === '/api/mcp/tokens' && method === 'POST') {
     const b = (await req.json()) as { name?: string; scope?: string };
@@ -167,7 +206,11 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       // 还有合租、代付指向他时不删：先合并到别人名下或从那些订阅里移除，账不会悬空
       const n = refsFor(await subsOf(env), id).length;
       if (n) return bad(t('server.personInUse', { count: n }), 409);
-      await putKv(env, 'people', people.filter((x) => x.id !== id));
+      await putKv(
+        env,
+        'people',
+        people.filter((x) => x.id !== id),
+      );
       return json({ ok: true });
     }
   }
@@ -217,7 +260,13 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   // 完整备份：导出文件可在全新部署上原样恢复
   if (path === '/api/backup' && method === 'GET') {
     const b = await exportAll(env);
-    return new Response(JSON.stringify(b, null, 1), { headers: { 'content-type': 'application/json; charset=utf-8', 'content-disposition': `attachment; filename="ledger-backup-${b.exportedAt.slice(0, 10)}.json"`, 'cache-control': 'no-store' } });
+    return new Response(JSON.stringify(b, null, 1), {
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'content-disposition': `attachment; filename="ledger-backup-${b.exportedAt.slice(0, 10)}.json"`,
+        'cache-control': 'no-store',
+      },
+    });
   }
   if (path === '/api/backup' && method === 'POST') {
     let b;
@@ -259,7 +308,11 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/appstore/search' && method === 'GET') {
     const url = new URL(req.url);
     const term = (url.searchParams.get('q') ?? '').trim().slice(0, 80);
-    const country = (url.searchParams.get('country') ?? 'us').toLowerCase().replace(/[^a-z]/g, '').slice(0, 2) || 'us';
+    const country =
+      (url.searchParams.get('country') ?? 'us')
+        .toLowerCase()
+        .replace(/[^a-z]/g, '')
+        .slice(0, 2) || 'us';
     if (!term) return json({ results: [] });
     // 粘贴 App Store 链接时按 id 精确查找
     const id = term.match(/id(\d{6,})/)?.[1];

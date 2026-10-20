@@ -1,11 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "unicorn",
-    "react",
-    "import"
-  ],
+  "plugins": ["typescript", "unicorn", "react", "import"],
   "categories": {
     "correctness": "error",
     "suspicious": "warn"
@@ -35,13 +30,13 @@
     "react/globals": "off",
     "react/memo-dependencies": "off",
     "unicorn/prefer-add-event-listener": "off",
-    "eslint/preserve-caught-error": "off"
+    "eslint/preserve-caught-error": "off",
+    "react/no-unstable-nested-components": [
+      "warn",
+      {
+        "allowAsProps": true
+      }
+    ]
   },
-  "ignorePatterns": [
-    "dist",
-    "node_modules",
-    "shared/locales/server.gen.ts",
-    "src/public/components/ui",
-    "local"
-  ]
+  "ignorePatterns": ["dist", "node_modules", "shared/locales/server.gen.ts", "src/public/components/ui", "local"]
 }

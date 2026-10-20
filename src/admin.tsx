@@ -42,7 +42,10 @@ const NAV = [
 
 /** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
 export function navOf(st: AppState['settings']) {
-  return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false)).map((n) => ({ ...n, label: t(`app.nav.${n.label}`) }));
+  return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false)).map((n) => ({
+    ...n,
+    label: t(`app.nav.${n.label}`),
+  }));
 }
 
 function useRoute() {
@@ -93,10 +96,37 @@ function Login({ error }: { error?: string }) {
         <img src="/icons/icon-192.png" alt="" />
         <h1>{t('app.name')}</h1>
         <p>{setupMode ? t('app.login.setupHint') : t('app.login.tagline')}</p>
-        {setupMode && <input type="password" autoComplete="off" placeholder={t('app.login.setupToken')} value={token} onInput={(e) => setToken((e.target as HTMLInputElement).value)} />}
-        <input type="password" autoFocus autoComplete={setupMode ? 'new-password' : 'current-password'} placeholder={setupMode ? t('app.login.newPassword') : t('app.login.password')} value={pw} onInput={(e) => setPw((e.target as HTMLInputElement).value)} />
-        {setupMode && <input type="password" autoComplete="new-password" placeholder={t('app.login.again')} value={pw2} onInput={(e) => setPw2((e.target as HTMLInputElement).value)} />}
-        {(err || mismatch) && <div class="red" style={{ fontSize: 13 }}>{mismatch ? t('app.login.mismatch') : err}</div>}
+        {setupMode && (
+          <input
+            type="password"
+            autoComplete="off"
+            placeholder={t('app.login.setupToken')}
+            value={token}
+            onInput={(e) => setToken((e.target as HTMLInputElement).value)}
+          />
+        )}
+        <input
+          type="password"
+          autoFocus
+          autoComplete={setupMode ? 'new-password' : 'current-password'}
+          placeholder={setupMode ? t('app.login.newPassword') : t('app.login.password')}
+          value={pw}
+          onInput={(e) => setPw((e.target as HTMLInputElement).value)}
+        />
+        {setupMode && (
+          <input
+            type="password"
+            autoComplete="new-password"
+            placeholder={t('app.login.again')}
+            value={pw2}
+            onInput={(e) => setPw2((e.target as HTMLInputElement).value)}
+          />
+        )}
+        {(err || mismatch) && (
+          <div class="red" style={{ fontSize: 13 }}>
+            {mismatch ? t('app.login.mismatch') : err}
+          </div>
+        )}
         <button class="btn primary lg" disabled={!status || !pw || busy || (setupMode && (!token || pw.length < 8 || pw !== pw2))}>
           {busy ? t('app.login.verifying') : setupMode ? t('app.login.setupEnter') : t('app.login.enter')}
         </button>
@@ -110,7 +140,27 @@ function Login({ error }: { error?: string }) {
   );
 }
 
-function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch, onCollapse }: { state: AppState; route: string; d: string; theme: ThemeMode; toggleTheme: () => void; onOpen: (s: Subscription) => void; onAdd: () => void; onSearch: () => void; onCollapse: () => void }) {
+function Sidebar({
+  state,
+  route,
+  d,
+  theme,
+  toggleTheme,
+  onOpen,
+  onAdd,
+  onSearch,
+  onCollapse,
+}: {
+  state: AppState;
+  route: string;
+  d: string;
+  theme: ThemeMode;
+  toggleTheme: () => void;
+  onOpen: (s: Subscription) => void;
+  onAdd: () => void;
+  onSearch: () => void;
+  onCollapse: () => void;
+}) {
   // 即将扣款：像聊天记录一样列在导航下方
   const upcoming = state.subscriptions
     .filter((s) => !s.proxy) // 代付在「代付」页单独管
@@ -144,23 +194,36 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
       </button>
       <div class="side-gap" />
       {navOf(state.settings).map((n) => (
-        <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) || (n.path === 'family' && route === 'family/people') ? 'active' : ''}`} href={href(n.path)}>
+        <a
+          key={n.path}
+          class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) || (n.path === 'family' && route === 'family/people') ? 'active' : ''}`}
+          href={href(n.path)}
+        >
           <Icon name={n.icon} />
           <span>{n.label}</span>
         </a>
       ))}
       <div class="side-scroll side-recent">
         {showUpcoming && upcoming.length > 0 && <div class="side-label">{t('app.sidebar.upcoming')}</div>}
-        {showUpcoming && upcoming.map(({ s, n }) => {
-          const days = diffDays(d, n!);
-          return (
-            <button key={s.id} class={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
-              <SubIcon sub={s} size={18} />
-              <span>{s.name}</span>
-              <small>{days === 0 ? t('app.sidebar.today') : days === 1 ? t('app.sidebar.tomorrow') : days < 7 ? t('app.sidebar.inDays', { count: days }) : cnDate(n!)}</small>
-            </button>
-          );
-        })}
+        {showUpcoming &&
+          upcoming.map(({ s, n }) => {
+            const days = diffDays(d, n!);
+            return (
+              <button key={s.id} class={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
+                <SubIcon sub={s} size={18} />
+                <span>{s.name}</span>
+                <small>
+                  {days === 0
+                    ? t('app.sidebar.today')
+                    : days === 1
+                      ? t('app.sidebar.tomorrow')
+                      : days < 7
+                        ? t('app.sidebar.inDays', { count: days })
+                        : cnDate(n!)}
+                </small>
+              </button>
+            );
+          })}
       </div>
       <div class="side-foot">
         <CurrencyItem state={state} />
@@ -204,7 +267,19 @@ function CurrencyItem({ state }: { state: AppState }) {
 }
 
 /** ⌘K 搜索：订阅、页面、操作 */
-function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: string; onClose: () => void; onOpen: (s: Subscription) => void; onAdd: () => void }) {
+function Palette({
+  state,
+  d,
+  onClose,
+  onOpen,
+  onAdd,
+}: {
+  state: AppState;
+  d: string;
+  onClose: () => void;
+  onOpen: (s: Subscription) => void;
+  onAdd: () => void;
+}) {
   const [q, setQ] = useState('');
   const [i, setI] = useState(0);
   const lower = q.trim().toLowerCase();
@@ -218,7 +293,9 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
     })
     .sort((a, b) => (effectiveStatus(a, d) === 'ended' ? 1 : 0) - (effectiveStatus(b, d) === 'ended' ? 1 : 0))
     .slice(0, 8);
-  const pages = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }].filter((n) => !lower || n.label.toLowerCase().includes(lower));
+  const pages = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }].filter(
+    (n) => !lower || n.label.toLowerCase().includes(lower),
+  );
   const items: Array<{ key: string; run: () => void; el: preact.JSX.Element }> = [
     ...subs.map((s) => ({
       key: s.id,
@@ -280,8 +357,14 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
             setI(0);
           }}
           onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') (e.preventDefault(), setI(Math.min(items.length - 1, i + 1)));
-            if (e.key === 'ArrowUp') (e.preventDefault(), setI(Math.max(0, i - 1)));
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setI(Math.min(items.length - 1, i + 1));
+            }
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setI(Math.max(0, i - 1));
+            }
             if (e.key === 'Enter') go(i);
             if (e.key === 'Escape') onClose();
           }}
@@ -494,7 +577,8 @@ function Root() {
     // 跟随浏览器时，把实际用的语言记到设置里，提醒邮件和 MCP 用同一种
     if (state && !state.readonly && !state.settings.language && state.settings.languageSeen !== want) void saveSettings({ languageSeen: want }).catch(() => {});
     // 记下站点地址，定时提醒里的链接要用（本地开发不记）
-    if (state && !state.readonly && state.settings.siteUrl !== location.origin && !/^http:\/\/(localhost|127\.)/.test(location.origin)) void saveSettings({ siteUrl: location.origin }).catch(() => {});
+    if (state && !state.readonly && state.settings.siteUrl !== location.origin && !/^http:\/\/(localhost|127\.)/.test(location.origin))
+      void saveSettings({ siteUrl: location.origin }).catch(() => {});
   }, [want, loc]);
   return <App key={loc} />;
 }

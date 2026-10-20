@@ -67,7 +67,7 @@ function mdy(s: string): string | undefined {
 }
 
 function amount(s: string): number {
-  const n = Number(s.replace(/[^\d.\-]/g, ''));
+  const n = Number(s.replace(/[^\d.-]/g, ''));
   return Number.isFinite(n) ? n : 0;
 }
 
@@ -134,31 +134,35 @@ export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], 
     return m.id;
   };
   // 没有名称的行（空行、合计行等）直接跳过，不让整批导入失败
-  const subscriptions: Subscription[] = rows.filter((r) => col(r, 'name')).map((r) => {
-    const ccy = col(r, 'currency').toUpperCase() || 'CNY';
-    const start = mdy(col(r, 'starts', 'start')) ?? today;
-    const end = mdy(col(r, 'ends', 'end'));
-    const cycle = parseCycle(col(r, 'cycle'));
-    const tags = col(r, 'tags').split(/[\s,，]+/).filter(Boolean);
-    const sub: Subscription = {
-      id: uid(),
-      name: col(r, 'name'),
-      category: col(r, 'category') || t('core.csv.otherCategory'),
-      tags,
-      price: amount(col(r, 'price')),
-      currency: ccy,
-      cycle,
-      start,
-      end,
-      status: end && end < today ? 'cancelled' : 'active',
-      methodId: methodFor(col(r, 'payment account', 'payment method'), ccy),
-      url: col(r, 'url') || undefined,
-      notes: col(r, 'notes') || undefined,
-      region: REGION_BY_CCY[ccy] !== 'CN' && REGION_BY_CCY[ccy] !== 'US' ? REGION_BY_CCY[ccy] : undefined,
-      createdAt: today,
-    };
-    return sub;
-  });
+  const subscriptions: Subscription[] = rows
+    .filter((r) => col(r, 'name'))
+    .map((r) => {
+      const ccy = col(r, 'currency').toUpperCase() || 'CNY';
+      const start = mdy(col(r, 'starts', 'start')) ?? today;
+      const end = mdy(col(r, 'ends', 'end'));
+      const cycle = parseCycle(col(r, 'cycle'));
+      const tags = col(r, 'tags')
+        .split(/[\s,，]+/)
+        .filter(Boolean);
+      const sub: Subscription = {
+        id: uid(),
+        name: col(r, 'name'),
+        category: col(r, 'category') || t('core.csv.otherCategory'),
+        tags,
+        price: amount(col(r, 'price')),
+        currency: ccy,
+        cycle,
+        start,
+        end,
+        status: end && end < today ? 'cancelled' : 'active',
+        methodId: methodFor(col(r, 'payment account', 'payment method'), ccy),
+        url: col(r, 'url') || undefined,
+        notes: col(r, 'notes') || undefined,
+        region: REGION_BY_CCY[ccy] !== 'CN' && REGION_BY_CCY[ccy] !== 'US' ? REGION_BY_CCY[ccy] : undefined,
+        createdAt: today,
+      };
+      return sub;
+    });
   // 除新建的，也带上被引用到的已有支付方式：「替换全部」会清空支付方式，不带上引用就悬空了
   const used = new Set(subscriptions.map((x) => x.methodId));
   return { subscriptions, methods: methods.filter((m) => created.includes(m) || used.has(m.id)), created };

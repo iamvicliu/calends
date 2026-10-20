@@ -100,8 +100,24 @@ export const BRANDS: Brand[] = [
   { key: 'appstore', name: 'App Store', logo: '/brands/appstore.svg', kinds: ['appstore'] },
   { key: 'googleplay', name: 'Google Play', logo: '/brands/googleplay.svg', kinds: ['googleplay'] },
   { key: 'paypal', name: 'PayPal', logo: '/brands/paypal.svg', kinds: ['paypal'], onColor: true },
-  { key: 'alipay', get name() { return t('list.kind.alipay'); }, logo: '/brands/alipay.svg', kinds: ['alipay'], onColor: true },
-  { key: 'wechat', get name() { return t('list.kind.wechat'); }, logo: '/brands/wechat.svg', kinds: ['wechat'], onColor: true },
+  {
+    key: 'alipay',
+    get name() {
+      return t('list.kind.alipay');
+    },
+    logo: '/brands/alipay.svg',
+    kinds: ['alipay'],
+    onColor: true,
+  },
+  {
+    key: 'wechat',
+    get name() {
+      return t('list.kind.wechat');
+    },
+    logo: '/brands/wechat.svg',
+    kinds: ['wechat'],
+    onColor: true,
+  },
 ];
 
 /** 卡面品牌 logo */
@@ -122,7 +138,34 @@ export function methodLogo(m: Pick<PaymentMethod, 'logo' | 'kind' | 'url' | 'ban
 }
 
 /** 只用一种货币的国家：没填地区时，App Store、礼品卡、话费按币种推断国旗 */
-const CCY_REGION: Record<string, string> = { CNY: 'CN', TRY: 'TR', NGN: 'NG', PHP: 'PH', JPY: 'JP', HKD: 'HK', TWD: 'TW', KRW: 'KR', INR: 'IN', PKR: 'PK', EGP: 'EG', BRL: 'BR', ARS: 'AR', GBP: 'GB', MYR: 'MY', THB: 'TH', VND: 'VN', IDR: 'ID', SGD: 'SG', CAD: 'CA', AUD: 'AU', RUB: 'RU', UAH: 'UA', KZT: 'KZ', CHF: 'CH', MXN: 'MX' };
+const CCY_REGION: Record<string, string> = {
+  CNY: 'CN',
+  TRY: 'TR',
+  NGN: 'NG',
+  PHP: 'PH',
+  JPY: 'JP',
+  HKD: 'HK',
+  TWD: 'TW',
+  KRW: 'KR',
+  INR: 'IN',
+  PKR: 'PK',
+  EGP: 'EG',
+  BRL: 'BR',
+  ARS: 'AR',
+  GBP: 'GB',
+  MYR: 'MY',
+  THB: 'TH',
+  VND: 'VN',
+  IDR: 'ID',
+  SGD: 'SG',
+  CAD: 'CA',
+  AUD: 'AU',
+  RUB: 'RU',
+  UAH: 'UA',
+  KZT: 'KZ',
+  CHF: 'CH',
+  MXN: 'MX',
+};
 
 /** 支付方式所属的地区：填了就用填的；按地区区分的账户（App Store、礼品卡、话费）没填时看币种 */
 export function methodRegion(m: Pick<PaymentMethod, 'region' | 'kind' | 'currency'>): string | undefined {

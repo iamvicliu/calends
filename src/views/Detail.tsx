@@ -1,6 +1,21 @@
 import { createPortal } from 'preact/compat';
 import { useState } from 'preact/hooks';
-import { activePhases, chargesBetween, convert, currentPhase, phaseSubs, cycleLabel, diffDays, effectiveStatus, memberDues, monthlyGross, nextCharge, priceAt, servedTime, upcomingPhase } from '../../shared/billing.ts';
+import {
+  activePhases,
+  chargesBetween,
+  convert,
+  currentPhase,
+  phaseSubs,
+  cycleLabel,
+  diffDays,
+  effectiveStatus,
+  memberDues,
+  monthlyGross,
+  nextCharge,
+  priceAt,
+  servedTime,
+  upcomingPhase,
+} from '../../shared/billing.ts';
 import { cnDate, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
 import { chargeValue, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
@@ -54,34 +69,34 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
 
   const actions = (
     <>
-          {!ro && (
-            <button class="btn" onClick={onEdit}>
-              <Icon name="edit" /> {t('detail.action.edit')}
-            </button>
-          )}
-          {!ro && sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
-            <button
-              class="btn"
-              onClick={() =>
-                run(
-                  () => saveSub(sub.status === 'paused' ? { ...sub, status: 'active', pausedAt: undefined } : { ...sub, status: 'paused', pausedAt: today }),
-                  sub.status === 'paused' ? t('detail.toast.resumed') : t('detail.toast.paused'),
-                )
-              }
-            >
-              <Icon name={sub.status === 'paused' ? 'play' : 'pause'} /> {sub.status === 'paused' ? t('detail.action.resume') : t('detail.action.pause')}
-            </button>
-          )}
-          {sub.manageUrl && (
-            <a class="btn" href={sub.manageUrl} target="_blank" rel="noreferrer">
-              <Icon name="gear" /> {t('detail.action.manage')}
-            </a>
-          )}
-          {sub.url && (
-            <a class="btn" href={sub.url} target="_blank" rel="noreferrer">
-              <Icon name="link" /> {t('detail.action.website')}
-            </a>
-          )}
+      {!ro && (
+        <button class="btn" onClick={onEdit}>
+          <Icon name="edit" /> {t('detail.action.edit')}
+        </button>
+      )}
+      {!ro && sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
+        <button
+          class="btn"
+          onClick={() =>
+            run(
+              () => saveSub(sub.status === 'paused' ? { ...sub, status: 'active', pausedAt: undefined } : { ...sub, status: 'paused', pausedAt: today }),
+              sub.status === 'paused' ? t('detail.toast.resumed') : t('detail.toast.paused'),
+            )
+          }
+        >
+          <Icon name={sub.status === 'paused' ? 'play' : 'pause'} /> {sub.status === 'paused' ? t('detail.action.resume') : t('detail.action.pause')}
+        </button>
+      )}
+      {sub.manageUrl && (
+        <a class="btn" href={sub.manageUrl} target="_blank" rel="noreferrer">
+          <Icon name="gear" /> {t('detail.action.manage')}
+        </a>
+      )}
+      {sub.url && (
+        <a class="btn" href={sub.url} target="_blank" rel="noreferrer">
+          <Icon name="link" /> {t('detail.action.website')}
+        </a>
+      )}
       <button class="btn" onClick={() => setShare(true)}>
         <Icon name="share" /> {t('detail.action.share')}
       </button>
@@ -94,35 +109,51 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
       {/* 宽屏：操作按钮放在右上角 */}
       <div class="d-top">{actions}</div>
       <div class="d-side">
-      <div class="d-hero">
-        {icon ? <div class="d-hero-bg" style={{ backgroundImage: `url("${icon}")` }} /> : <div class="d-hero-bg tint" style={{ '--tint': catColor(sub.category) } as Record<string, string>} />}
-        <SubIcon sub={sub} size={72} />
-        <h2>
-          {sub.name}
-          <span class={`badge ${tone} d-status`}>{label}</span>
-        </h2>
-        <div class="price">
-          <Amount value={next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price} ccy={cur.currency} />
-          {cycleLabel(cur.cycle)}
-          {cur.currency !== base && ` · ≈ ${money(convert(cur.price, cur.currency, base, state.fx), base)}`}
+        <div class="d-hero">
+          {icon ? (
+            <div class="d-hero-bg" style={{ backgroundImage: `url("${icon}")` }} />
+          ) : (
+            <div class="d-hero-bg tint" style={{ '--tint': catColor(sub.category) } as Record<string, string>} />
+          )}
+          <SubIcon sub={sub} size={72} />
+          <h2>
+            {sub.name}
+            <span class={`badge ${tone} d-status`}>{label}</span>
+          </h2>
+          <div class="price">
+            <Amount value={next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price} ccy={cur.currency} />
+            {cycleLabel(cur.cycle)}
+            {cur.currency !== base && ` · ≈ ${money(convert(cur.price, cur.currency, base, state.fx), base)}`}
+          </div>
+          {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
+          <ParallelNote sub={sub} cur={cur} today={today} />
+          <div class="d-actions">{actions}</div>
         </div>
-        {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
-        <ParallelNote sub={sub} cur={cur} today={today} />
-        <div class="d-actions">{actions}</div>
-      </div>
-      <Stats sub={sub} state={state} today={today} total={total} count={history.length} alt={base === 'CNY' ? money(totalUsd, 'USD', { compact: true }) : base === 'USD' ? money(totalCny, 'CNY', { compact: true }) : undefined} />
-      {story && (
-        <div class="d-mini">
-          <div class="d-mini-h">{t('detail.history')}</div>
-          <MiniGantt sub={sub} state={state} today={today} />
-        </div>
-      )}
+        <Stats
+          sub={sub}
+          state={state}
+          today={today}
+          total={total}
+          count={history.length}
+          alt={base === 'CNY' ? money(totalUsd, 'USD', { compact: true }) : base === 'USD' ? money(totalCny, 'CNY', { compact: true }) : undefined}
+        />
+        {story && (
+          <div class="d-mini">
+            <div class="d-mini-h">{t('detail.history')}</div>
+            <MiniGantt sub={sub} state={state} today={today} />
+          </div>
+        )}
       </div>
       <div class="d-body">
         <Group title={t('detail.summary')}>
           <Cell label={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Cell>
           <Cell label={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Cell>
-          {cur.cycle.unit !== 'lifetime' && <Cell label={t('detail.field.monthlyYearly')} sub={parallel.length ? t('detail.overlap.monthlyHint', { count: parallel.length + 1 }) : undefined}>{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>}
+          {cur.cycle.unit !== 'lifetime' && (
+            <Cell
+              label={t('detail.field.monthlyYearly')}
+              sub={parallel.length ? t('detail.overlap.monthlyHint', { count: parallel.length + 1 }) : undefined}
+            >{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>
+          )}
           <Cell label={t('detail.field.category')}>
             <CatChip cat={sub.category} />
           </Cell>
@@ -145,7 +176,6 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           {cur.region && <Cell label={t('detail.field.region')}>{`${flag(cur.region)} ${cur.region}`.trim()}</Cell>}
         </Group>
 
-
         {parallel.length > 0 && (
           <Group title={t('detail.overlap.title')}>
             {parallel.map((v) => (
@@ -166,13 +196,15 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
         )}
 
         {up && (
-          <Group
-            title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}
-          >
+          <Group title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}>
             <Cell label={t('detail.up.effective')}>
               {cnDateFull(up.start)} · {relDays(diffDays(today, up.start))}
             </Cell>
-            {up.region !== cur.region && up.region && <Cell label={t('detail.field.region')}>{`${cur.region && st !== 'upcoming' ? `${flag(cur.region)} ${cur.region} → ` : ''}${flag(up.region)} ${up.region}`}</Cell>}
+            {up.region !== cur.region && up.region && (
+              <Cell
+                label={t('detail.field.region')}
+              >{`${cur.region && st !== 'upcoming' ? `${flag(cur.region)} ${cur.region} → ` : ''}${flag(up.region)} ${up.region}`}</Cell>
+            )}
             <Cell label={t('detail.field.amount')}>
               {st !== 'upcoming' && (up.price !== cur.price || up.currency !== cur.currency) ? `${money(cur.price, cur.currency)} → ` : ''}
               {money(up.price, up.currency)} · {cycleLabel(up.cycle)}
@@ -201,7 +233,15 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
 
         {sub.intro && (
           <Group title={t('detail.intro.title')}>
-            <Cell label={<span class="row" style={{ gap: 6, color: 'var(--green)' }}><Icon name="leaf" /> {t('detail.intro.price')}</span>}>{money(sub.intro.price, sub.currency)}</Cell>
+            <Cell
+              label={
+                <span class="row" style={{ gap: 6, color: 'var(--green)' }}>
+                  <Icon name="leaf" /> {t('detail.intro.price')}
+                </span>
+              }
+            >
+              {money(sub.intro.price, sub.currency)}
+            </Cell>
             <Cell label={t('detail.intro.until')}>{cnDateFull(sub.intro.until)}</Cell>
             <Cell label={t('detail.intro.then')}>{money(sub.price, sub.currency)}</Cell>
           </Group>
@@ -209,28 +249,50 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
 
         {sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
           <Group title={t('detail.remind.title')}>
-            <Cell label={<span class="row" style={{ gap: 8 }}><Icon name="bell" /> {t('detail.remind.email')}</span>}>
-              {remind < 0 ? t('detail.remind.off') : t(remind === 0 ? 'detail.remind.onDay' : 'detail.remind.before', { count: remind, time: `${String(state.settings.notifyHour).padStart(2, '0')}:05` })}
+            <Cell
+              label={
+                <span class="row" style={{ gap: 8 }}>
+                  <Icon name="bell" /> {t('detail.remind.email')}
+                </span>
+              }
+            >
+              {remind < 0
+                ? t('detail.remind.off')
+                : t(remind === 0 ? 'detail.remind.onDay' : 'detail.remind.before', {
+                    count: remind,
+                    time: `${String(state.settings.notifyHour).padStart(2, '0')}:05`,
+                  })}
             </Cell>
           </Group>
         )}
 
         {sub.share && (
-          <Group title={sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')}>
+          <Group
+            title={
+              sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')
+            }
+          >
             {sub.share.role === 'member' && <Cell label={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Cell>}
             {sub.share.role === 'owner' && (
               <>
                 <Cell label={t('detail.share.myShare')}>{money(sub.price - sub.share.members.reduce((a, m) => a + m.share, 0), sub.currency)}</Cell>
                 {dues.map((d) => (
-                  <Cell key={d.member.id} label={d.member.name || t('detail.share.unnamed')} sub={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}>
-                    {d.periodsOwed > 0 ? <span style={{ color: 'var(--orange)', fontWeight: 600 }}>{t('detail.share.owed', { amount: money(d.owed, sub.currency) })}</span> : <span style={{ color: 'var(--green)' }}>{t('detail.share.settled')}</span>}
+                  <Cell
+                    key={d.member.id}
+                    label={d.member.name || t('detail.share.unnamed')}
+                    sub={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}
+                  >
+                    {d.periodsOwed > 0 ? (
+                      <span style={{ color: 'var(--orange)', fontWeight: 600 }}>{t('detail.share.owed', { amount: money(d.owed, sub.currency) })}</span>
+                    ) : (
+                      <span style={{ color: 'var(--green)' }}>{t('detail.share.settled')}</span>
+                    )}
                   </Cell>
                 ))}
               </>
             )}
           </Group>
         )}
-
 
         {history.length > 0 && (
           <Group title={t('detail.charges.title', { count: history.length })}>
@@ -246,7 +308,14 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
                   <div
                     key={`${c.date}-${i}`}
                     class={`charge-row ${ro ? '' : 'editable'} ${c.kind ?? ''}`}
-                    onClick={() => !ro && setPay({ pay: { date: c.date, amount: c.kind === 'failed' ? c.sub.price : c.amount, kind: c.kind, settled: c.settled, note: c.note }, index, phase: sub.phases?.length ? c.sub.start : undefined })}
+                    onClick={() =>
+                      !ro &&
+                      setPay({
+                        pay: { date: c.date, amount: c.kind === 'failed' ? c.sub.price : c.amount, kind: c.kind, settled: c.settled, note: c.note },
+                        index,
+                        phase: sub.phases?.length ? c.sub.start : undefined,
+                      })
+                    }
                   >
                     <span class="cr-date">
                       {c.date}
@@ -290,7 +359,16 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
       </div>
       {/* 挂到 body：详情本身可能在弹层里，嵌套的弹层放在里面会被裁切 */}
       {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
-      {pay && createPortal(<PaymentSheet sub={sub} today={today} edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined} onClose={() => setPay(null)} />, document.body)}
+      {pay &&
+        createPortal(
+          <PaymentSheet
+            sub={sub}
+            today={today}
+            edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined}
+            onClose={() => setPay(null)}
+          />,
+          document.body,
+        )}
     </div>
   );
 }
@@ -329,7 +407,15 @@ function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; st
       </div>
       <div>
         <small>{lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}</small>
-        <b>{years ? (months ? t('detail.stats.yearsMonths', { years, months }) : t('detail.stats.years', { count: years })) : months ? t('detail.stats.months', { count: months }) : t('detail.stats.days', { count: active })}</b>
+        <b>
+          {years
+            ? months
+              ? t('detail.stats.yearsMonths', { years, months })
+              : t('detail.stats.years', { count: years })
+            : months
+              ? t('detail.stats.months', { count: months })
+              : t('detail.stats.days', { count: active })}
+        </b>
         <span>{gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.stats.since', { date: cnDate(sub.start) })}</span>
       </div>
       {!lifetime && (
@@ -342,9 +428,15 @@ function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; st
       <div>
         <small>{change != null ? t('detail.stats.priceChange') : t('detail.stats.changed')}</small>
         <b class={change != null ? (change > 0.005 ? 'up' : change < -0.005 ? 'down' : '') : ''}>
-          {change != null ? (Math.abs(change) < 0.005 ? t('detail.stats.unchanged') : `${change > 0 ? '+' : '−'}${Math.round(Math.abs(change) * 100)}%`) : t('detail.stats.times', { count: vs.length - 1 })}
+          {change != null
+            ? Math.abs(change) < 0.005
+              ? t('detail.stats.unchanged')
+              : `${change > 0 ? '+' : '−'}${Math.round(Math.abs(change) * 100)}%`
+            : t('detail.stats.times', { count: vs.length - 1 })}
         </b>
-        <span>{change != null ? `${money(p0, first.currency, { compact: true })} → ${money(p1, cur.currency, { compact: true })}` : t('detail.stats.changeHint')}</span>
+        <span>
+          {change != null ? `${money(p0, first.currency, { compact: true })} → ${money(p1, cur.currency, { compact: true })}` : t('detail.stats.changeHint')}
+        </span>
       </div>
     </div>
   );

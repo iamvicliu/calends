@@ -5,7 +5,17 @@
   "title": "All subscriptions",
   "all": "All",
   "summary": { "one": "{count} item · {monthly}/mo · {yearly}/yr", "other": "{count} items · {monthly}/mo · {yearly}/yr" },
-  "status": { "upcoming": "Not started", "active": "Active", "trial": "On trial", "trialShort": "Trial", "paused": "Paused", "pausedShort": "Paused", "ending": "Not renewing", "ended": "Canceled", "lifetime": "Lifetime" },
+  "status": {
+    "upcoming": "Not started",
+    "active": "Active",
+    "trial": "On trial",
+    "trialShort": "Trial",
+    "paused": "Paused",
+    "pausedShort": "Paused",
+    "ending": "Not renewing",
+    "ended": "Canceled",
+    "lifetime": "Lifetime"
+  },
   "proxyExcluded": "Paid for others · not counted",
   "perMonthApprox": "≈ {amount}/mo",
   "originalPrice": "Original {amount}",
@@ -18,7 +28,15 @@
   "empty": "No matching subscriptions",
   "badge": { "share": "Shared", "joined": "Joined", "proxy": "Paid for others", "proxyFor": "Paid for {name}", "someone": "someone" },
   "saved": "Saved {amount}",
-  "col": { "name": "Subscription", "category": "Category", "method": "Payment method", "amount": "Amount", "monthly": "Monthly", "start": "Start", "next": "Next charge" },
+  "col": {
+    "name": "Subscription",
+    "category": "Category",
+    "method": "Payment method",
+    "amount": "Amount",
+    "monthly": "Monthly",
+    "start": "Start",
+    "next": "Next charge"
+  },
   "notCounted": "Not counted",
   "endedOn": "Ended {date}",
   "change": { "noMethod": "Payment method TBD", "planned": "Planned · ", "starts": "Starts {when}", "from": "Changes {when}" },
@@ -49,6 +67,19 @@
     "gap": "Lapsed",
     "range": { "one": "Since {date} · {count} phase", "other": "Since {date} · {count} phases" }
   },
-  "kind": { "debit": "Bank card", "credit": "Credit card", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store balance", "googleplay": "Google Play balance", "giftcard": "Gift card", "prepaid": "Store balance", "phone": "Phone credit", "crypto": "Crypto card", "other": "Other" },
+  "kind": {
+    "debit": "Bank card",
+    "credit": "Credit card",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store balance",
+    "googleplay": "Google Play balance",
+    "giftcard": "Gift card",
+    "prepaid": "Store balance",
+    "phone": "Phone credit",
+    "crypto": "Crypto card",
+    "other": "Other"
+  },
   "network": { "unionpay": "UnionPay" }
 }

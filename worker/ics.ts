@@ -60,13 +60,21 @@ export function buildIcs(state: AppState, siteUrl: string): string {
         `DTSTART;VALUE=DATE:${d}`,
         `DTEND;VALUE=DATE:${addDays(c.date, 1).replace(/-/g, '')}`,
         fold(`SUMMARY:${icsText(`${s.icon && !s.icon.startsWith('http') ? s.icon + ' ' : ''}${s.name} ${money(c.amount, c.currency)}`)}`),
-        fold(`DESCRIPTION:${icsText([method ? t('server.ics.method', { name: method.name }) : '', s.category, `${siteUrl}/admin`].filter(Boolean).join('\n'))}`),
+        fold(
+          `DESCRIPTION:${icsText([method ? t('server.ics.method', { name: method.name }) : '', s.category, `${siteUrl}/admin`].filter(Boolean).join('\n'))}`,
+        ),
         'TRANSP:TRANSPARENT',
       );
       if (remind >= 0 && c.projected) {
         // 全天事件从当天 0 点算起：提前 N 天的上午 9 点
         const trigger = remind === 0 ? 'PT9H' : `-P${remind - 1}DT15H`;
-        lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', fold(`DESCRIPTION:${icsText(t('server.ics.alarm', { name: s.name }))}`), `TRIGGER:${trigger}`, 'END:VALARM');
+        lines.push(
+          'BEGIN:VALARM',
+          'ACTION:DISPLAY',
+          fold(`DESCRIPTION:${icsText(t('server.ics.alarm', { name: s.name }))}`),
+          `TRIGGER:${trigger}`,
+          'END:VALARM',
+        );
       }
       lines.push('END:VEVENT');
     }

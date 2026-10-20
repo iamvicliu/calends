@@ -22,7 +22,11 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
       const W = 280;
       const H = Math.min(420, 52 + methods.length * 48);
       const below = r.bottom + 6 + H < window.innerHeight;
-      setPos({ mobile: window.innerWidth < 560, top: below ? r.bottom + 6 : Math.max(8, r.top - H - 6), left: Math.min(Math.max(8, r.right - W), window.innerWidth - W - 8) });
+      setPos({
+        mobile: window.innerWidth < 560,
+        top: below ? r.bottom + 6 : Math.max(8, r.top - H - 6),
+        left: Math.min(Math.max(8, r.right - W), window.innerWidth - W - 8),
+      });
     };
     place();
     window.addEventListener('resize', place);
@@ -68,14 +72,27 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
       {open && pos && (
         <>
           {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
-          <div ref={pop} class={`dp-pop mp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} role="listbox" aria-label={t('picker.method.label')}>
+          <div
+            ref={pop}
+            class={`dp-pop mp-pop ${pos.mobile ? 'mobile' : ''}`}
+            style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
+            role="listbox"
+            aria-label={t('picker.method.label')}
+          >
             <button type="button" role="option" aria-selected={!cur} class={`mp-opt ${cur ? '' : 'sel'}`} onClick={() => pick(undefined)}>
               <span class="mp-none" />
               <span class="mp-name">{t('picker.method.none')}</span>
               {!cur && <Icon name="check" />}
             </button>
             {methods.map((m) => (
-              <button type="button" role="option" key={m.id} aria-selected={m.id === value} class={`mp-opt ${m.id === value ? 'sel' : ''}`} onClick={() => pick(m.id)}>
+              <button
+                type="button"
+                role="option"
+                key={m.id}
+                aria-selected={m.id === value}
+                class={`mp-opt ${m.id === value ? 'sel' : ''}`}
+                onClick={() => pick(m.id)}
+              >
                 <MethodMark m={m} size={28} />
                 <span class="mp-name">
                   {m.name}

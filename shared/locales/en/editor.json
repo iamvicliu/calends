@@ -13,7 +13,16 @@
   "confirmDiscard": "Discard unsaved changes?",
   "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, mark it as Cancelled instead.",
   "toast": { "added": "Added", "saved": "Saved", "deleted": "Deleted" },
-  "cycle": { "w1": "Weekly", "m1": "Monthly", "m3": "Quarterly", "m6": "Every 6 months", "y1": "Yearly", "y2": "Every 2 years", "lt": "Lifetime", "custom": "Custom…" },
+  "cycle": {
+    "w1": "Weekly",
+    "m1": "Monthly",
+    "m3": "Quarterly",
+    "m6": "Every 6 months",
+    "y1": "Yearly",
+    "y2": "Every 2 years",
+    "lt": "Lifetime",
+    "custom": "Custom…"
+  },
   "unit": {
     "label": "Unit",
     "every": "Every",

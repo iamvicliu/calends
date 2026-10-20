@@ -5,7 +5,17 @@
   "title": "Tüm abonelikler",
   "all": "Tümü",
   "summary": { "one": "{count} öğe · {monthly}/ay · {yearly}/yıl", "other": "{count} öğe · {monthly}/ay · {yearly}/yıl" },
-  "status": { "upcoming": "Başlamadı", "active": "Etkin", "trial": "Denemede", "trialShort": "Deneme", "paused": "Duraklatıldı", "pausedShort": "Duraklatıldı", "ending": "Yenilenmeyecek", "ended": "İptal edildi", "lifetime": "Ömür boyu" },
+  "status": {
+    "upcoming": "Başlamadı",
+    "active": "Etkin",
+    "trial": "Denemede",
+    "trialShort": "Deneme",
+    "paused": "Duraklatıldı",
+    "pausedShort": "Duraklatıldı",
+    "ending": "Yenilenmeyecek",
+    "ended": "İptal edildi",
+    "lifetime": "Ömür boyu"
+  },
   "proxyExcluded": "Başkası için ödendi · sayılmaz",
   "perMonthApprox": "≈ {amount}/ay",
   "originalPrice": "Normal fiyat {amount}",
@@ -18,7 +28,15 @@
   "empty": "Eşleşen abonelik yok",
   "badge": { "share": "Ortak", "joined": "Katıldım", "proxy": "Başkası için", "proxyFor": "{name} için ödendi", "someone": "birisi" },
   "saved": "{amount} tasarruf",
-  "col": { "name": "Abonelik", "category": "Kategori", "method": "Ödeme yöntemi", "amount": "Tutar", "monthly": "Aylık", "start": "Başlangıç", "next": "Sonraki ödeme" },
+  "col": {
+    "name": "Abonelik",
+    "category": "Kategori",
+    "method": "Ödeme yöntemi",
+    "amount": "Tutar",
+    "monthly": "Aylık",
+    "start": "Başlangıç",
+    "next": "Sonraki ödeme"
+  },
   "notCounted": "Sayılmaz",
   "endedOn": "{date} sona erdi",
   "change": { "noMethod": "Ödeme yöntemi belirsiz", "planned": "Planlandı · ", "starts": "Başlangıç: {when}", "from": "Değişiklik: {when}" },
@@ -49,6 +67,19 @@
     "gap": "Ara",
     "range": { "one": "{date} itibarıyla · {count} dönem", "other": "{date} itibarıyla · {count} dönem" }
   },
-  "kind": { "debit": "Banka kartı", "credit": "Kredi kartı", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store bakiyesi", "googleplay": "Google Play bakiyesi", "giftcard": "Hediye kartı", "prepaid": "Mağaza bakiyesi", "phone": "Hat bakiyesi", "crypto": "Kripto kart", "other": "Diğer" },
+  "kind": {
+    "debit": "Banka kartı",
+    "credit": "Kredi kartı",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store bakiyesi",
+    "googleplay": "Google Play bakiyesi",
+    "giftcard": "Hediye kartı",
+    "prepaid": "Mağaza bakiyesi",
+    "phone": "Hat bakiyesi",
+    "crypto": "Kripto kart",
+    "other": "Diğer"
+  },
   "network": { "unionpay": "UnionPay" }
 }

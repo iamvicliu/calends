@@ -21,7 +21,15 @@
   "nextCharge": "Próxima cobrança",
   "note": "Nota",
   "diffLabel": "Reembolsado − cobrado",
-  "table": { "date": "Data da cobrança", "charged": "Cobrado", "received": "Reembolsado", "diff": "Diferença", "record": "Registrar", "even": "Zerado", "none": "Nenhuma cobrança ainda." },
+  "table": {
+    "date": "Data da cobrança",
+    "charged": "Cobrado",
+    "received": "Reembolsado",
+    "diff": "Diferença",
+    "record": "Registrar",
+    "even": "Zerado",
+    "none": "Nenhuma cobrança ainda."
+  },
   "entry": {
     "markedDue": "Marcado como pendente",
     "saved": "Salvo",

@@ -21,7 +21,15 @@
   "nextCharge": "Sonraki ödeme",
   "note": "Not",
   "diffLabel": "Geri ödenen − ödenen",
-  "table": { "date": "Ödeme tarihi", "charged": "Ödenen", "received": "Geri ödenen", "diff": "Fark", "record": "Kayıt", "even": "Eşit", "none": "Henüz ödeme yok." },
+  "table": {
+    "date": "Ödeme tarihi",
+    "charged": "Ödenen",
+    "received": "Geri ödenen",
+    "diff": "Fark",
+    "record": "Kayıt",
+    "even": "Eşit",
+    "none": "Henüz ödeme yok."
+  },
   "entry": {
     "markedDue": "Borç olarak işaretlendi",
     "saved": "Kaydedildi",

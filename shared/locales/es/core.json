@@ -14,7 +14,12 @@
       "year": { "one": "Cada {count} año", "other": "Cada {count} años" }
     }
   },
-  "subError": { "name": "El nombre es obligatorio", "price": "Precio no válido", "start": "Fecha de inicio no válida", "cycle": "Ciclo de facturación no válido" },
+  "subError": {
+    "name": "El nombre es obligatorio",
+    "price": "Precio no válido",
+    "start": "Fecha de inicio no válida",
+    "cycle": "Ciclo de facturación no válido"
+  },
   "phase": {
     "switchTooEarly": "La fecha de entrada en vigor debe ser posterior al inicio de la fase actual",
     "resumeTooEarly": "La fecha de reanudación no puede ser anterior a la última fecha de fin",
@@ -30,12 +35,18 @@
   "listSep": ", ",
   "insight": {
     "yearly": {
-      "title": { "one": "{count} suscripción de largo plazo se renueva en los próximos 60 días", "other": "{count} suscripciones de largo plazo se renuevan en los próximos 60 días" },
+      "title": {
+        "one": "{count} suscripción de largo plazo se renueva en los próximos 60 días",
+        "other": "{count} suscripciones de largo plazo se renuevan en los próximos 60 días"
+      },
       "body": "Unos {sum} en total. Los cobros anuales son difíciles de reembolsar, así que es buen momento para decidir cuáles conservar."
     },
     "dup": {
       "title": "{names} podrían estar duplicadas",
-      "body": { "one": "Esta suscripción cuesta unos {sum} al mes. Comprueba si todavía la necesitas.", "other": "Estas {count} suscripciones cuestan unos {sum} al mes en total. Comprueba si todavía las necesitas todas." }
+      "body": {
+        "one": "Esta suscripción cuesta unos {sum} al mes. Comprueba si todavía la necesitas.",
+        "other": "Estas {count} suscripciones cuestan unos {sum} al mes en total. Comprueba si todavía las necesitas todas."
+      }
     },
     "hikes": { "title": { "one": "{count} suscripción subió de precio el último año", "other": "{count} suscripciones subieron de precio el último año" } },
     "intro": {
@@ -43,7 +54,10 @@
       "body": "Después, el precio pasará de {from} a {to}."
     },
     "balance": { "title": "{name} no alcanzará hasta el {date}", "body": "{sub} necesita {need}; el saldo es de unos {current}." },
-    "fx": { "title": "El {pct}% del gasto es en monedas extranjeras", "body": "La principal es {ccy} ({share}%). Esta parte se abarata cuando {ccy} se debilita y se encarece cuando se fortalece." },
+    "fx": {
+      "title": "El {pct}% del gasto es en monedas extranjeras",
+      "body": "La principal es {ccy} ({share}%). Esta parte se abarata cuando {ccy} se debilita y se encarece cuando se fortalece."
+    },
     "noMethod": {
       "title": { "one": "{count} suscripción no tiene método de pago", "other": "{count} suscripciones no tienen método de pago" },
       "body": "Añade uno para que las previsiones de saldo y las estadísticas por método estén completas."
@@ -51,8 +65,18 @@
     "top": { "title": "{name} es tu suscripción más cara", "body": "Unos {perDay} al día, el {pct}% del gasto mensual." }
   },
   "methodKind": {
-    "debit": "Tarjeta bancaria", "credit": "Tarjeta de crédito", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
-    "giftcard": "Tarjeta regalo", "prepaid": "Saldo de tienda", "phone": "Saldo móvil", "crypto": "Tarjeta cripto", "other": "Otro"
+    "debit": "Tarjeta bancaria",
+    "credit": "Tarjeta de crédito",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Tarjeta regalo",
+    "prepaid": "Saldo de tienda",
+    "phone": "Saldo móvil",
+    "crypto": "Tarjeta cripto",
+    "other": "Otro"
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Correo electrónico" },

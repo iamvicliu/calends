@@ -50,7 +50,10 @@
     "title": "Contabilidad",
     "defaultMethod": "Método de pago predeterminado",
     "unassigned": { "one": "{count} suscripción no tiene método de pago", "other": "{count} suscripciones no tienen método de pago" },
-    "assignAllDone": { "one": "Se asignó el método de pago predeterminado a {count} suscripción", "other": "Se asignó el método de pago predeterminado a {count} suscripciones" },
+    "assignAllDone": {
+      "one": "Se asignó el método de pago predeterminado a {count} suscripción",
+      "other": "Se asignó el método de pago predeterminado a {count} suscripciones"
+    },
     "assignAll": "Usar el predeterminado en todas",
     "collectCurrency": "Moneda de los planes compartidos"
   },

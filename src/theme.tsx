@@ -71,7 +71,18 @@ export function ThemeIcon({ mode, size = 18 }: { mode: ThemeMode; size?: number 
     transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
   });
   return (
-    <svg class="i" viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <svg
+      class="i"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
       <g style={layer('light', -90)}>
         <circle cx="12" cy="12" r="4" />
         <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />

@@ -5,7 +5,17 @@
   "title": "Semua langganan",
   "all": "Semua",
   "summary": { "other": "{count} item · {monthly}/bln · {yearly}/thn" },
-  "status": { "upcoming": "Belum dimulai", "active": "Aktif", "trial": "Masa uji coba", "trialShort": "Uji coba", "paused": "Dijeda", "pausedShort": "Dijeda", "ending": "Tidak diperpanjang", "ended": "Dibatalkan", "lifetime": "Seumur hidup" },
+  "status": {
+    "upcoming": "Belum dimulai",
+    "active": "Aktif",
+    "trial": "Masa uji coba",
+    "trialShort": "Uji coba",
+    "paused": "Dijeda",
+    "pausedShort": "Dijeda",
+    "ending": "Tidak diperpanjang",
+    "ended": "Dibatalkan",
+    "lifetime": "Seumur hidup"
+  },
   "proxyExcluded": "Talangan · tidak dihitung",
   "perMonthApprox": "≈ {amount}/bln",
   "originalPrice": "Harga asli {amount}",
@@ -18,7 +28,15 @@
   "empty": "Tidak ada langganan yang cocok",
   "badge": { "share": "Bersama", "joined": "Diikuti", "proxy": "Talangan", "proxyFor": "Ditalangi untuk {name}", "someone": "seseorang" },
   "saved": "Hemat {amount}",
-  "col": { "name": "Langganan", "category": "Kategori", "method": "Metode pembayaran", "amount": "Jumlah", "monthly": "Bulanan", "start": "Mulai", "next": "Tagihan berikutnya" },
+  "col": {
+    "name": "Langganan",
+    "category": "Kategori",
+    "method": "Metode pembayaran",
+    "amount": "Jumlah",
+    "monthly": "Bulanan",
+    "start": "Mulai",
+    "next": "Tagihan berikutnya"
+  },
   "notCounted": "Tidak dihitung",
   "endedOn": "Berakhir {date}",
   "change": { "noMethod": "Metode pembayaran belum ditentukan", "planned": "Rencana · ", "starts": "Mulai {when}", "from": "Berubah {when}" },
@@ -49,6 +67,19 @@
     "gap": "Terputus",
     "range": { "other": "Sejak {date} · {count} fase" }
   },
-  "kind": { "debit": "Kartu debit", "credit": "Kartu kredit", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "Saldo App Store", "googleplay": "Saldo Google Play", "giftcard": "Kartu hadiah", "prepaid": "Saldo toko", "phone": "Pulsa", "crypto": "Kartu kripto", "other": "Lainnya" },
+  "kind": {
+    "debit": "Kartu debit",
+    "credit": "Kartu kredit",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "Saldo App Store",
+    "googleplay": "Saldo Google Play",
+    "giftcard": "Kartu hadiah",
+    "prepaid": "Saldo toko",
+    "phone": "Pulsa",
+    "crypto": "Kartu kripto",
+    "other": "Lainnya"
+  },
   "network": { "unionpay": "UnionPay" }
 }

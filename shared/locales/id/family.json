@@ -55,12 +55,24 @@
     "currency": "Mata uang",
     "coverFrom": "Berlaku dari",
     "coverTo": "Berlaku hingga",
-    "coverAuto": { "m1": "Diatur dari periode tagihan; bisa diubah", "m3": "Diatur dari periode tagihan; bisa diubah", "m6": "Diatur dari periode tagihan; bisa diubah", "m12": "Diatur dari periode tagihan; bisa diubah", "custom": "Diatur dari periode tagihan; bisa diubah" },
+    "coverAuto": {
+      "m1": "Diatur dari periode tagihan; bisa diubah",
+      "m3": "Diatur dari periode tagihan; bisa diubah",
+      "m6": "Diatur dari periode tagihan; bisa diubah",
+      "m12": "Diatur dari periode tagihan; bisa diubah",
+      "custom": "Diatur dari periode tagihan; bisa diubah"
+    },
     "receivedOn": "Diterima pada",
     "note": "Catatan",
     "notePh": "Opsional, mis. transfer USDT",
     "record": "Catat",
-    "recordBtn": { "m1": "Catat pembayaran ({fee}/bln)", "m3": "Catat pembayaran ({fee}/triwulan)", "m6": "Catat pembayaran ({fee} per 6 bulan)", "m12": "Catat pembayaran ({fee}/thn)", "custom": { "other": "Catat pembayaran ({fee} per {count} bulan)" } }
+    "recordBtn": {
+      "m1": "Catat pembayaran ({fee}/bln)",
+      "m3": "Catat pembayaran ({fee}/triwulan)",
+      "m6": "Catat pembayaran ({fee} per 6 bulan)",
+      "m12": "Catat pembayaran ({fee}/thn)",
+      "custom": { "other": "Catat pembayaran ({fee} per {count} bulan)" }
+    }
   },
   "pool": {
     "title": "Paket bersama",

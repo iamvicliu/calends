@@ -88,7 +88,15 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
   let n = 0;
   return (
     <>
-      <button type="button" ref={btn} class={`side-item theme-item ${open ? 'open' : ''}`} onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open} title={t('picker.ccy.switch')}>
+      <button
+        type="button"
+        ref={btn}
+        class={`side-item theme-item ${open ? 'open' : ''}`}
+        onClick={() => setOpen(!open)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        title={t('picker.ccy.switch')}
+      >
         <Icon name="coins" />
         <span>{t('picker.ccy.label')}</span>
         <small>{orig ? t('picker.ccy.orig') : `${ccyName(value)}`}</small>
@@ -99,7 +107,12 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
         createPortal(
           <>
             {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
-            <div ref={pop} class={`dp-pop cp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} onKeyDown={onKey}>
+            <div
+              ref={pop}
+              class={`dp-pop cp-pop ${pos.mobile ? 'mobile' : ''}`}
+              style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
+              onKeyDown={onKey}
+            >
               <label class="cp-search">
                 <Icon name="search" />
                 <input autoFocus value={q} placeholder={t('picker.ccy.search')} onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
@@ -122,7 +135,9 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
                           onMouseMove={() => setHi(i)}
                           onClick={() => pick(c)}
                         >
-                          <span class="cp-flag">{c === 'orig' ? <Icon name="swap" /> : ccyFlag(c) ? <img src={ccyFlag(c)} alt="" loading="lazy" /> : <b>{symbol(c).trim() || c}</b>}</span>
+                          <span class="cp-flag">
+                            {c === 'orig' ? <Icon name="swap" /> : ccyFlag(c) ? <img src={ccyFlag(c)} alt="" loading="lazy" /> : <b>{symbol(c).trim() || c}</b>}
+                          </span>
                           <span class="cp-name">{c === 'orig' ? t('picker.ccy.orig') : ccyName(c)}</span>
                           <span class="cp-code">{c === 'orig' ? t('picker.ccy.origHint') : c}</span>
                           {sel && <Icon name="check" />}

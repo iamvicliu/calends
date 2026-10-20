@@ -36,7 +36,11 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
           <div class="rw-bal">
             <Amount value={r.current} ccy={m.currency} />
           </div>
-          {m.currency !== base && <div class="soft" style={{ fontSize: 11.5 }}>≈ {money(toBase(state, r.current, m.currency), base, { compact: true })}</div>}
+          {m.currency !== base && (
+            <div class="soft" style={{ fontSize: 11.5 }}>
+              ≈ {money(toBase(state, r.current, m.currency), base, { compact: true })}
+            </div>
+          )}
         </div>
       </div>
       <div class={`rw-track ${tone}`}>
@@ -54,16 +58,26 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
           t('wallet.runway.noSubs')
         ) : r.shortfall && r.coveredCharges === 0 ? (
           <>
-            {tx('wallet.runway.shortNow', { date: <b>{cnDate(r.shortfall.date)}</b>, rel: relDays(daysLeft), name: r.shortfall.sub.name, amount: money(r.shortfall.amount, r.shortfall.currency), topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b> })}
+            {tx('wallet.runway.shortNow', {
+              date: <b>{cnDate(r.shortfall.date)}</b>,
+              rel: relDays(daysLeft),
+              name: r.shortfall.sub.name,
+              amount: money(r.shortfall.amount, r.shortfall.currency),
+              topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b>,
+            })}
           </>
         ) : r.shortfall ? (
           <>
-            {tx('wallet.runway.shortLater', { periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b>, date: <b>{cnDateFull(r.shortfall.date)}</b>, rel: relDays(daysLeft), name: r.shortfall.sub.name, topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b> })}
+            {tx('wallet.runway.shortLater', {
+              periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b>,
+              date: <b>{cnDateFull(r.shortfall.date)}</b>,
+              rel: relDays(daysLeft),
+              name: r.shortfall.sub.name,
+              topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b>,
+            })}
           </>
         ) : (
-          <>
-            {tx('wallet.runway.ok', { periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b> })}
-          </>
+          <>{tx('wallet.runway.ok', { periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b> })}</>
         )}
       </div>
     </div>
@@ -104,11 +118,20 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
             </linearGradient>
           </defs>
           <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="rgba(120,90,20,0.45)" stroke-width="0.12" />
-          <path d="M10.6 4.6V10.6M6.6 6.6H9.4M6.6 8.6H9.4M11.8 6.6H14.6M11.8 8.6H14.6M9.4 5.6V9.6M11.8 5.6V9.6" fill="none" stroke="rgba(120,90,20,0.45)" stroke-width="0.12" />
+          <path
+            d="M10.6 4.6V10.6M6.6 6.6H9.4M6.6 8.6H9.4M11.8 6.6H14.6M11.8 8.6H14.6M9.4 5.6V9.6M11.8 5.6V9.6"
+            fill="none"
+            stroke="rgba(120,90,20,0.45)"
+            stroke-width="0.12"
+          />
         </svg>
         <div class="sim-top">
           {/* 只有认出是哪家运营商（如 SMART）才放它的 logo，否则写名字，不默认套某一家 */}
-          {methodLogo(m) ? <img class={`sim-logo ${m.logoWide ? 'wide' : ''}`} src={methodLogo(m)} alt="" /> : <b class="sim-carrier">{m.name.split(/\s/)[0]}</b>}
+          {methodLogo(m) ? (
+            <img class={`sim-logo ${m.logoWide ? 'wide' : ''}`} src={methodLogo(m)} alt="" />
+          ) : (
+            <b class="sim-carrier">{m.name.split(/\s/)[0]}</b>
+          )}
         </div>
         <div class="sim-name">
           {m.name}
@@ -209,7 +232,13 @@ function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () =>
       {...(listeners as Record<string, unknown>)}
       class={`paycard ${faceClass(m)} ${isDragging ? 'lifted' : ''}`}
       // 拖动排序用独立的 translate 属性，不占用 transform / transition：悬停的浮起和倾斜才能平滑过渡
-      style={{ '--card-bg': m.color || KIND_BG[m.kind], translate: transform ? `${transform.x}px ${transform.y}px` : undefined, '--sort-t': transition ? transition.replace('transform', 'translate') : 'translate 0s' } as Record<string, string>}
+      style={
+        {
+          '--card-bg': m.color || KIND_BG[m.kind],
+          translate: transform ? `${transform.x}px ${transform.y}px` : undefined,
+          '--sort-t': transition ? transition.replace('transform', 'translate') : 'translate 0s',
+        } as Record<string, string>
+      }
       onClick={onOpen}
       onMouseMove={(e) => {
         // 光泽跟着鼠标走，卡片朝鼠标方向轻微倾斜（最多 4°），像拿在手里转一下
@@ -288,8 +317,26 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                       // 设了余额的账户主数字是余额，右下是每月扣多少、还能扣几期；没有余额的卡主数字是每月支出
                       label={r ? t('wallet.card.balance') : t('wallet.card.monthlySpend')}
                       value={r ? <Amount value={r.current} ccy={m.currency} /> : <Amount value={monthly} ccy={base} />}
-                      right={r && r.monthlyDrain > 0 ? t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) }) : t('wallet.card.subs', { count: liveHere.length })}
-                      rightSub={r ? (r.monthlyDrain <= 0 ? t('wallet.card.noCharges') : r.shortfall ? (r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low')) : t('wallet.card.enough')) : m.last4 ? `•••• ${m.last4}` : BALANCE_KINDS.includes(m.kind) ? t('wallet.card.noBalance') : ''}
+                      right={
+                        r && r.monthlyDrain > 0
+                          ? t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) })
+                          : t('wallet.card.subs', { count: liveHere.length })
+                      }
+                      rightSub={
+                        r
+                          ? r.monthlyDrain <= 0
+                            ? t('wallet.card.noCharges')
+                            : r.shortfall
+                              ? r.coveredCharges
+                                ? t('wallet.card.periodsLeft', { count: r.coveredCharges })
+                                : t('wallet.card.low')
+                              : t('wallet.card.enough')
+                          : m.last4
+                            ? `•••• ${m.last4}`
+                            : BALANCE_KINDS.includes(m.kind)
+                              ? t('wallet.card.noBalance')
+                              : ''
+                      }
                     />
                   </SortableCard>
                 );
@@ -313,7 +360,15 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
         )}
 
         <Group>
-          <Cell label={<span class="row"><Icon name="car" />{t('wallet.family')}</span>} onClick={() => go('family')}>
+          <Cell
+            label={
+              <span class="row">
+                <Icon name="car" />
+                {t('wallet.family')}
+              </span>
+            }
+            onClick={() => go('family')}
+          >
             {t('wallet.familyCount', { count: state.subscriptions.filter((s) => s.share).length })}
           </Cell>
         </Group>
@@ -321,7 +376,16 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
         {unassigned.length > 0 && (
           <Group title={t('wallet.unassigned', { count: unassigned.length })}>
             {unassigned.map((s) => (
-              <Cell key={s.id} label={<span class="row"><SubIcon sub={s} size={28} />{s.name}</span>} onClick={() => onOpen(s)}>
+              <Cell
+                key={s.id}
+                label={
+                  <span class="row">
+                    <SubIcon sub={s} size={28} />
+                    {s.name}
+                  </span>
+                }
+                onClick={() => onOpen(s)}
+              >
                 {money(s.price, s.currency)}
               </Cell>
             ))}
@@ -349,7 +413,23 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
   );
 }
 
-function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m: PaymentMethod; state: AppState; today: string; onClose: () => void; onEdit: () => void; onTopup: (current: number) => void; onOpen: (s: Subscription) => void }) {
+function MethodSheet({
+  m,
+  state,
+  today,
+  onClose,
+  onEdit,
+  onTopup,
+  onOpen,
+}: {
+  m: PaymentMethod;
+  state: AppState;
+  today: string;
+  onClose: () => void;
+  onEdit: () => void;
+  onTopup: (current: number) => void;
+  onOpen: (s: Subscription) => void;
+}) {
   const r = runwayFor(m, state, today);
   const subs = state.subscriptions.filter((s) => s.methodId === m.id);
   const ro = !!state.readonly;
@@ -395,7 +475,9 @@ function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m:
                 onClick={() => onOpen(state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub)}
               >
                 <span>−{money(c.amountInMethod, m.currency, { compact: true })}</span>
-                <b style={{ color: c.balanceAfter < 0 ? 'var(--red)' : 'var(--label)', fontWeight: 600, minWidth: 80 }}>{money(c.balanceAfter, m.currency, { compact: true })}</b>
+                <b style={{ color: c.balanceAfter < 0 ? 'var(--red)' : 'var(--label)', fontWeight: 600, minWidth: 80 }}>
+                  {money(c.balanceAfter, m.currency, { compact: true })}
+                </b>
               </Cell>
             ))}
           </Group>
@@ -448,13 +530,18 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
   const rateOf = (tp: TopUp) => (tp.cost != null && tp.amount ? tp.cost / tp.amount : undefined);
   const market = (tp: TopUp) => toBaseAt(state, 1, m.currency, tp.date, tp.costCurrency ?? state.settings.baseCurrency);
   const save = () =>
-    run(async () => {
-      const top: TopUp | undefined = mode === 'add' && n > 0 ? { date, amount: n, cost: cost === '' ? undefined : Number(cost), costCurrency: cost === '' ? undefined : costCcy, note: note.trim() || undefined } : undefined;
-      await saveMethod({ ...m, balance: Math.round(next * 100) / 100, balanceAsOf: today, topUps: top ? [...(m.topUps ?? []), top] : m.topUps });
-      onClose();
-    }, mode === 'add' ? t('wallet.topup.toastAdd') : t('wallet.topup.toastSet'));
-  const removeTop = (tp: TopUp) =>
-    run(() => saveMethod({ ...m, topUps: (m.topUps ?? []).filter((x) => x !== tp) }), t('wallet.topup.removed'));
+    run(
+      async () => {
+        const top: TopUp | undefined =
+          mode === 'add' && n > 0
+            ? { date, amount: n, cost: cost === '' ? undefined : Number(cost), costCurrency: cost === '' ? undefined : costCcy, note: note.trim() || undefined }
+            : undefined;
+        await saveMethod({ ...m, balance: Math.round(next * 100) / 100, balanceAsOf: today, topUps: top ? [...(m.topUps ?? []), top] : m.topUps });
+        onClose();
+      },
+      mode === 'add' ? t('wallet.topup.toastAdd') : t('wallet.topup.toastSet'),
+    );
+  const removeTop = (tp: TopUp) => run(() => saveMethod({ ...m, topUps: (m.topUps ?? []).filter((x) => x !== tp) }), t('wallet.topup.removed'));
   return (
     <Sheet
       narrow
@@ -483,7 +570,14 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
         />
         <Group>
           <Cell label={mode === 'add' ? t('wallet.topup.amount', { ccy: m.currency }) : t('wallet.topup.actual')}>
-            <input class="num" inputMode="decimal" autoFocus value={val} onInput={(e) => setVal((e.target as HTMLInputElement).value)} placeholder={`${m.currency} 0.00`} />
+            <input
+              class="num"
+              inputMode="decimal"
+              autoFocus
+              value={val}
+              onInput={(e) => setVal((e.target as HTMLInputElement).value)}
+              placeholder={`${m.currency} 0.00`}
+            />
           </Cell>
           <Cell label={t('wallet.topup.estimate')}>{money(current, m.currency)}</Cell>
           <Cell label={t('wallet.topup.after')}>
@@ -499,7 +593,13 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
               <CurrencySelect value={costCcy} onChange={setCostCcy} />
             </Cell>
             <Cell label={t('wallet.topup.cost')}>
-              <input class="num" inputMode="decimal" value={cost} placeholder={t('wallet.topup.costPh')} onInput={(e) => setCost((e.target as HTMLInputElement).value)} />
+              <input
+                class="num"
+                inputMode="decimal"
+                value={cost}
+                placeholder={t('wallet.topup.costPh')}
+                onInput={(e) => setCost((e.target as HTMLInputElement).value)}
+              />
             </Cell>
             <Cell label={t('wallet.topup.note')}>
               <input value={note} placeholder={t('wallet.topup.notePh')} onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
@@ -526,7 +626,13 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
                     {r != null && (
                       <span class="topup-rate">
                         1 {m.currency} = {r.toFixed(r < 0.1 ? 4 : 3)} {tp.costCurrency}
-                        {premium != null && Math.abs(premium) >= 0.005 && <em class={premium > 0 ? 'up' : 'down'}>{premium > 0 ? t('wallet.topup.premium', { pct: Math.round(premium * 100) }) : t('wallet.topup.below', { pct: Math.round(-premium * 100) })}</em>}
+                        {premium != null && Math.abs(premium) >= 0.005 && (
+                          <em class={premium > 0 ? 'up' : 'down'}>
+                            {premium > 0
+                              ? t('wallet.topup.premium', { pct: Math.round(premium * 100) })
+                              : t('wallet.topup.below', { pct: Math.round(-premium * 100) })}
+                          </em>
+                        )}
                       </span>
                     )}
                     <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
@@ -580,7 +686,15 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
             onClick={() =>
               run(async () => {
                 const edited = { ...f, name: f.name.trim() };
-                await saveMethod(isNew ? edited : mergeEdits(m, edited, getState().methods.find((x) => x.id === m.id)));
+                await saveMethod(
+                  isNew
+                    ? edited
+                    : mergeEdits(
+                        m,
+                        edited,
+                        getState().methods.find((x) => x.id === m.id),
+                      ),
+                );
                 onClose();
               }, t('wallet.editor.saved'))
             }
@@ -592,7 +706,13 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
     >
       <div class="stack">
         <div class={`paycard ${faceClass(f)}`} style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
-          <CardFace m={{ ...f, name: f.name || t('wallet.editor.newName') }} label="" value="" right={f.region ?? ''} rightSub={f.last4 ? `•••• ${f.last4}` : ''} />
+          <CardFace
+            m={{ ...f, name: f.name || t('wallet.editor.newName') }}
+            label=""
+            value=""
+            right={f.region ?? ''}
+            rightSub={f.last4 ? `•••• ${f.last4}` : ''}
+          />
         </div>
         <Group>
           <Cell label={t('wallet.editor.name')}>
@@ -602,7 +722,12 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
             <input value={f.url ?? ''} placeholder={t('wallet.editor.urlPh')} onInput={(e) => up({ url: val(e).trim() || undefined })} />
           </Cell>
           <Cell label={t('wallet.editor.kind')}>
-            <Picker value={f.kind} onChange={(k) => up({ kind: k })} options={(Object.keys(KIND_LABEL) as MethodKind[]).map((k) => ({ value: k, label: KIND_LABEL[k] }))} ariaLabel={t('wallet.editor.kind')} />
+            <Picker
+              value={f.kind}
+              onChange={(k) => up({ kind: k })}
+              options={(Object.keys(KIND_LABEL) as MethodKind[]).map((k) => ({ value: k, label: KIND_LABEL[k] }))}
+              ariaLabel={t('wallet.editor.kind')}
+            />
           </Cell>
           {(f.kind === 'debit' || f.kind === 'credit') && (
             <Cell label={t('wallet.editor.bank')} sub={f.bank ? undefined : bankOf({ ...f, bank: undefined }) ? t('wallet.editor.bankDetected') : undefined}>
@@ -610,7 +735,12 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
                 value={f.bank ?? ''}
                 onChange={(v) => up({ bank: v || undefined })}
                 search
-                options={[{ value: '', label: t('wallet.editor.bankAuto') }, ...[...BANKS].sort((x, y) => x[0].localeCompare(y[0], 'zh')).map(([name, code]) => ({ value: code, label: name, icon: <img class="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> }))]}
+                options={[
+                  { value: '', label: t('wallet.editor.bankAuto') },
+                  ...[...BANKS]
+                    .sort((x, y) => x[0].localeCompare(y[0], 'zh'))
+                    .map(([name, code]) => ({ value: code, label: name, icon: <img class="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> })),
+                ]}
                 ariaLabel={t('wallet.editor.bank')}
               />
             </Cell>
@@ -629,7 +759,19 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
             <Cell label={t('wallet.editor.network')}>
               <span class="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
                 <NetworkMark network={f.network} height={20} />
-                <Picker value={f.network ?? ''} onChange={(n) => up({ network: (n || undefined) as CardNetwork | undefined })} options={[{ value: '', label: t('wallet.editor.networkNone') }, ...(Object.keys(NETWORKS) as CardNetwork[]).map((n) => ({ value: n, label: NETWORKS[n], icon: <img class="pk-net" src={`/networks/${n}.svg`} alt="" /> }))]} ariaLabel={t('wallet.editor.network')} />
+                <Picker
+                  value={f.network ?? ''}
+                  onChange={(n) => up({ network: (n || undefined) as CardNetwork | undefined })}
+                  options={[
+                    { value: '', label: t('wallet.editor.networkNone') },
+                    ...(Object.keys(NETWORKS) as CardNetwork[]).map((n) => ({
+                      value: n,
+                      label: NETWORKS[n],
+                      icon: <img class="pk-net" src={`/networks/${n}.svg`} alt="" />,
+                    })),
+                  ]}
+                  ariaLabel={t('wallet.editor.network')}
+                />
               </span>
             </Cell>
           )}
@@ -647,7 +789,15 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
             </Cell>
           )}
           <Cell label={t('wallet.editor.region')}>
-            <RegionSelect value={f.region} onChange={(r) => up({ region: r })} common={getState().methods.map((m) => m.region).filter(Boolean) as string[]} />
+            <RegionSelect
+              value={f.region}
+              onChange={(r) => up({ region: r })}
+              common={
+                getState()
+                  .methods.map((m) => m.region)
+                  .filter(Boolean) as string[]
+              }
+            />
           </Cell>
           {f.kind === 'phone' && (
             <Cell label={t('wallet.editor.phone')}>
@@ -655,7 +805,13 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
             </Cell>
           )}
           <Cell label={t('wallet.editor.cashback')}>
-            <input class="num" inputMode="decimal" value={f.cashback ?? ''} placeholder={t('wallet.editor.cashbackPh')} onInput={(e) => up({ cashback: Number(val(e)) || undefined })} />
+            <input
+              class="num"
+              inputMode="decimal"
+              value={f.cashback ?? ''}
+              placeholder={t('wallet.editor.cashbackPh')}
+              onInput={(e) => up({ cashback: Number(val(e)) || undefined })}
+            />
           </Cell>
         </Group>
         {balanceKind && (
@@ -673,7 +829,12 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
               <DatePicker value={f.balanceAsOf} onChange={(v) => up({ balanceAsOf: v })} />
             </Cell>
             <Cell label={t('wallet.editor.lowAlert')}>
-              <Picker value={f.lowRunwayDays ?? 30} onChange={(d) => up({ lowRunwayDays: d })} options={[7, 14, 30, 60].map((d) => ({ value: d, label: t('wallet.editor.lowAlertOpt', { count: d }) }))} ariaLabel={t('wallet.editor.lowAlertAria')} />
+              <Picker
+                value={f.lowRunwayDays ?? 30}
+                onChange={(d) => up({ lowRunwayDays: d })}
+                options={[7, 14, 30, 60].map((d) => ({ value: d, label: t('wallet.editor.lowAlertOpt', { count: d }) }))}
+                ariaLabel={t('wallet.editor.lowAlertAria')}
+              />
             </Cell>
           </Group>
         )}
@@ -720,7 +881,17 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
       <div class="cell logo-field">
         <span class="cell-l">
           Logo
-          <small>{f.logo ? (f.logo.startsWith('data:') ? t('wallet.logo.uploaded') : t('wallet.logo.link')) : favicon ? t('wallet.logo.favicon') : bankOf(f) ? t('wallet.logo.bank') : t('wallet.logo.none')}</small>
+          <small>
+            {f.logo
+              ? f.logo.startsWith('data:')
+                ? t('wallet.logo.uploaded')
+                : t('wallet.logo.link')
+              : favicon
+                ? t('wallet.logo.favicon')
+                : bankOf(f)
+                  ? t('wallet.logo.bank')
+                  : t('wallet.logo.none')}
+          </small>
         </span>
         <span class="cell-r">
           <MethodMark m={f} size={32} />
@@ -740,7 +911,11 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
       </div>
       {link && (
         <Cell label={t('wallet.logo.link')}>
-          <input value={f.logo?.startsWith('data:') ? '' : (f.logo ?? '')} placeholder="https://…/logo.png" onInput={(e) => up({ logo: (e.target as HTMLInputElement).value.trim() || undefined })} />
+          <input
+            value={f.logo?.startsWith('data:') ? '' : (f.logo ?? '')}
+            placeholder="https://…/logo.png"
+            onInput={(e) => up({ logo: (e.target as HTMLInputElement).value.trim() || undefined })}
+          />
         </Cell>
       )}
       {(f.logo || favicon) && (

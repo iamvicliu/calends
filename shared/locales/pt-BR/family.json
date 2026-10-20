@@ -33,7 +33,13 @@
     "leftPh": "Ainda no plano",
     "feeGroup": "Cobrança",
     "seg": { "m1": "Mensal", "m3": "Trimestral", "m6": "Semestral", "m12": "Anual" },
-    "feeLabel": { "m1": "Por mês", "m3": "Por trimestre", "m6": "Por semestre", "m12": "Por ano", "custom": { "one": "A cada {count} mês", "other": "A cada {count} meses" } },
+    "feeLabel": {
+      "m1": "Por mês",
+      "m3": "Por trimestre",
+      "m6": "Por semestre",
+      "m12": "Por ano",
+      "custom": { "one": "A cada {count} mês", "other": "A cada {count} meses" }
+    },
     "feeCcyAria": "Moeda",
     "exempt": "Não paga",
     "other": "Outro",
@@ -55,12 +61,24 @@
     "currency": "Moeda",
     "coverFrom": "Cobre a partir de",
     "coverTo": "Cobre até",
-    "coverAuto": { "m1": "Definido pelo período de cobrança; editável", "m3": "Definido pelo período de cobrança; editável", "m6": "Definido pelo período de cobrança; editável", "m12": "Definido pelo período de cobrança; editável", "custom": "Definido pelo período de cobrança; editável" },
+    "coverAuto": {
+      "m1": "Definido pelo período de cobrança; editável",
+      "m3": "Definido pelo período de cobrança; editável",
+      "m6": "Definido pelo período de cobrança; editável",
+      "m12": "Definido pelo período de cobrança; editável",
+      "custom": "Definido pelo período de cobrança; editável"
+    },
     "receivedOn": "Recebido em",
     "note": "Nota",
     "notePh": "Opcional, ex.: transferência em USDT",
     "record": "Registrar",
-    "recordBtn": { "m1": "Registrar pagamento ({fee}/mês)", "m3": "Registrar pagamento ({fee}/trimestre)", "m6": "Registrar pagamento ({fee}/semestre)", "m12": "Registrar pagamento ({fee}/ano)", "custom": { "one": "Registrar pagamento ({fee} a cada {count} mês)", "other": "Registrar pagamento ({fee} a cada {count} meses)" } }
+    "recordBtn": {
+      "m1": "Registrar pagamento ({fee}/mês)",
+      "m3": "Registrar pagamento ({fee}/trimestre)",
+      "m6": "Registrar pagamento ({fee}/semestre)",
+      "m12": "Registrar pagamento ({fee}/ano)",
+      "custom": { "one": "Registrar pagamento ({fee} a cada {count} mês)", "other": "Registrar pagamento ({fee} a cada {count} meses)" }
+    }
   },
   "pool": {
     "title": "Planos compartilhados",
@@ -94,7 +112,13 @@
     "from": "via {source}",
     "exempt": "Não paga",
     "owedAmount": "{amount} pendente",
-    "perFee": { "m1": "{fee}/mês", "m3": "{fee}/trimestre", "m6": "{fee}/semestre", "m12": "{fee}/ano", "custom": { "one": "{fee} a cada {count} mês", "other": "{fee} a cada {count} meses" } },
+    "perFee": {
+      "m1": "{fee}/mês",
+      "m3": "{fee}/trimestre",
+      "m6": "{fee}/semestre",
+      "m12": "{fee}/ano",
+      "custom": { "one": "{fee} a cada {count} mês", "other": "{fee} a cada {count} meses" }
+    },
     "collect": "Cobrar",
     "joinedGroup": "Planos de que participo",
     "payTo": "Pago a {name} · {amount}",

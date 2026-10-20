@@ -10,7 +10,17 @@ import { PayBadge } from './ui.tsx';
  * 时间上重叠的阶段（换区后旧区域还没到期）画在第二条轨道上，并标出并行了多少天；
  * 给了 onEnd 时（编辑页）每段的结束日可以直接改
  */
-export function History({ sub, state, today, onEnd }: { sub: Subscription; state: AppState; today: string; onEnd?: (start: string, end: string | undefined) => void }) {
+export function History({
+  sub,
+  state,
+  today,
+  onEnd,
+}: {
+  sub: Subscription;
+  state: AppState;
+  today: string;
+  onEnd?: (start: string, end: string | undefined) => void;
+}) {
   const vs = phaseSubs(sub);
   const hasStory = vs.length > 1 || (vs[0].priceHistory?.length ?? 0) > 1;
   if (!hasStory) return null;
@@ -40,12 +50,22 @@ export function History({ sub, state, today, onEnd }: { sub: Subscription; state
         {editable ? (
           <div class="h-range h-edit">
             <span>{v.start} →</span>
-            <DatePicker value={raw?.end} clearable min={addDays(v.start, 1)} placeholder={isLast ? t('editor.history.now') : t('editor.overlap.endAuto')} onChange={(d) => onEnd!(v.start, d)} />
+            <DatePicker
+              value={raw?.end}
+              clearable
+              min={addDays(v.start, 1)}
+              placeholder={isLast ? t('editor.history.now') : t('editor.overlap.endAuto')}
+              onChange={(d) => onEnd!(v.start, d)}
+            />
             {v.planned && <span class="badge">{t('editor.overlap.planned')}</span>}
           </div>
         ) : (
           <div class="h-range">
-            {v.start > today ? (v.end ? t('editor.history.plannedRange', { start: v.start, end: v.end }) : t('editor.history.plannedFrom', { start: v.start })) : t('editor.history.range', { start: v.start, end: v.end ?? t('editor.history.now') })}
+            {v.start > today
+              ? v.end
+                ? t('editor.history.plannedRange', { start: v.start, end: v.end })
+                : t('editor.history.plannedFrom', { start: v.start })
+              : t('editor.history.range', { start: v.start, end: v.end ?? t('editor.history.now') })}
           </div>
         )}
         <div class="h-plan">
@@ -59,7 +79,12 @@ export function History({ sub, state, today, onEnd }: { sub: Subscription; state
             {hist.map((p, k) => (
               <li key={p.from}>
                 {k === 0 ? t('editor.history.initial') : t('editor.history.priceChange', { date: p.from })} · {money(p.amount, v.currency)}
-                {k > 0 && hist[k - 1].amount > 0 && <em class={p.amount > hist[k - 1].amount ? 'up' : 'down'}>{p.amount > hist[k - 1].amount ? '+' : ''}{Math.round(((p.amount - hist[k - 1].amount) / hist[k - 1].amount) * 100)}%</em>}
+                {k > 0 && hist[k - 1].amount > 0 && (
+                  <em class={p.amount > hist[k - 1].amount ? 'up' : 'down'}>
+                    {p.amount > hist[k - 1].amount ? '+' : ''}
+                    {Math.round(((p.amount - hist[k - 1].amount) / hist[k - 1].amount) * 100)}%
+                  </em>
+                )}
               </li>
             ))}
           </ul>

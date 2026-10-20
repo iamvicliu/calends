@@ -21,7 +21,14 @@ export function isDomainSub(s: Pick<Subscription, 'name' | 'category' | 'tags' |
 }
 
 function publicMethod(m: PaymentMethod): PaymentMethod {
-  return { id: m.id, kind: m.kind, currency: m.currency, region: m.region, color: m.color, name: m.region ? t('core.publicMethod', { kind: t(`core.methodKind.${m.kind}`), region: m.region }) : t(`core.methodKind.${m.kind}`) };
+  return {
+    id: m.id,
+    kind: m.kind,
+    currency: m.currency,
+    region: m.region,
+    color: m.color,
+    name: m.region ? t('core.publicMethod', { kind: t(`core.methodKind.${m.kind}`), region: m.region }) : t(`core.methodKind.${m.kind}`),
+  };
 }
 
 /** FNV-1a 短哈希：公开数据里不暴露可能含域名的 id */
@@ -98,7 +105,9 @@ export function maskForPublic(state: AppState): AppState {
       remindDays: 0,
       monthlyDigest: false,
       // 分类只下发公开订阅用到的：名称、图标、颜色，以及「域名」标记（公开页据此用注册商图标）
-      categories: cats.filter((c) => used.has(c.name)).map((c) => ({ name: c.name, icon: c.icon, color: c.color, preset: c.preset === 'domains' ? c.preset : undefined })),
+      categories: cats
+        .filter((c) => used.has(c.name))
+        .map((c) => ({ name: c.name, icon: c.icon, color: c.color, preset: c.preset === 'domains' ? c.preset : undefined })),
     },
     methods: state.methods.map(publicMethod),
     subscriptions: subs.map((s) => publicSub(s, cats)),

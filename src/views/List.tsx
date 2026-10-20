@@ -28,8 +28,19 @@ const FILTERS = (): Array<[Filter, string]> => [
 
 const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' || st === 'paused' ? 'live' : (st as Filter));
 
-
-export function List({ state, today, onOpen, onAdd, category }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onAdd: () => void; category?: string }) {
+export function List({
+  state,
+  today,
+  onOpen,
+  onAdd,
+  category,
+}: {
+  state: AppState;
+  today: string;
+  onOpen: (s: Subscription) => void;
+  onAdd: () => void;
+  category?: string;
+}) {
   const [filter, setFilter] = useState<Filter>(category ? 'all' : 'live');
   const [cat, setCat] = useState<string>(category ?? 'all');
   const [pay, setPay] = useState<string>('all');
@@ -53,7 +64,15 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
     const price = n ? priceAt(s, n) : s.price;
     const live = !['lifetime', 'ended'].includes(effectiveStatus(s, today));
     if (money2 === 'orig' || s.currency === money2) {
-      return { value: price, ccy: s.currency, sub: s.proxy ? t('list.proxyExcluded') : live && (s.currency !== base || s.cycle.unit !== 'month' || s.cycle.every !== 1) ? t('list.perMonthApprox', { amount: money(mo(s), base, { compact: true }) }) : undefined }; // 外币或不是按月付的，都折成每月多少
+      return {
+        value: price,
+        ccy: s.currency,
+        sub: s.proxy
+          ? t('list.proxyExcluded')
+          : live && (s.currency !== base || s.cycle.unit !== 'month' || s.cycle.every !== 1)
+            ? t('list.perMonthApprox', { amount: money(mo(s), base, { compact: true }) })
+            : undefined,
+      }; // 外币或不是按月付的，都折成每月多少
     }
     return { value: toBaseAt(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
   };
@@ -109,7 +128,10 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
 
   return (
     <>
-      <Toolbar title={category ?? t('list.title')} sub={t('list.summary', { count: rows.length, monthly: money(sum, base, { compact: true }), yearly: money(sum * 12, base, { compact: true }) })}>
+      <Toolbar
+        title={category ?? t('list.title')}
+        sub={t('list.summary', { count: rows.length, monthly: money(sum, base, { compact: true }), yearly: money(sum * 12, base, { compact: true }) })}
+      >
         <Seg
           small
           value={view}
@@ -120,7 +142,20 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
             ['gantt', t('list.view.gantt')],
           ]}
         />
-        <Picker variant="btn" value={sort} onChange={setSort} ariaLabel={t('list.sort.label')} options={[{ value: 'next', label: t('list.sort.next') }, { value: 'cost', label: t('list.sort.cost') }, { value: 'name', label: t('list.sort.name') }, { value: 'start', label: t('list.sort.start') }] as Array<{ value: Sort; label: string }>} />
+        <Picker
+          variant="btn"
+          value={sort}
+          onChange={setSort}
+          ariaLabel={t('list.sort.label')}
+          options={
+            [
+              { value: 'next', label: t('list.sort.next') },
+              { value: 'cost', label: t('list.sort.cost') },
+              { value: 'name', label: t('list.sort.name') },
+              { value: 'start', label: t('list.sort.start') },
+            ] as Array<{ value: Sort; label: string }>
+          }
+        />
         {!state.readonly && (
           <button class="icon-btn accent d-only" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
@@ -141,8 +176,21 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
               {t('list.clear')}
             </button>
           )}
-          <FacetRow label={t('list.facet.status')} value={filter} onChange={(v) => setFilter(v as Filter)} options={FILTERS().map(([k, l]) => ({ key: k, label: l, n: statusN.get(k) ?? 0 }))} />
-          <FacetRow label={t('list.facet.category')} value={cat} onChange={setCat} options={[{ key: 'all', label: t('list.all'), n: catN.get('all') ?? 0 }, ...cats.map((c) => ({ key: c, label: c, icon: <CatIcon cat={c} size={13} />, n: catN.get(c) ?? 0 }))]} />
+          <FacetRow
+            label={t('list.facet.status')}
+            value={filter}
+            onChange={(v) => setFilter(v as Filter)}
+            options={FILTERS().map(([k, l]) => ({ key: k, label: l, n: statusN.get(k) ?? 0 }))}
+          />
+          <FacetRow
+            label={t('list.facet.category')}
+            value={cat}
+            onChange={setCat}
+            options={[
+              { key: 'all', label: t('list.all'), n: catN.get('all') ?? 0 },
+              ...cats.map((c) => ({ key: c, label: c, icon: <CatIcon cat={c} size={13} />, n: catN.get(c) ?? 0 })),
+            ]}
+          />
           <FacetRow
             label={t('list.facet.pay')}
             value={pay}
@@ -202,7 +250,23 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                   <div class="sc-foot">
                     <span>{shown(s, n).sub ?? '\u00a0'}</span>
                     <span class={d != null && d <= 3 ? 'soon' : ''}>
-                      {st === 'lifetime' ? s.start.slice(0, 7) : st === 'ended' ? (saved.get(s.id) ? <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span> : (s.end ?? '')) : n ? (d! <= 14 ? relDays(d!) : cnDate(n)) : ''}
+                      {st === 'lifetime' ? (
+                        s.start.slice(0, 7)
+                      ) : st === 'ended' ? (
+                        saved.get(s.id) ? (
+                          <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
+                        ) : (
+                          (s.end ?? '')
+                        )
+                      ) : n ? (
+                        d! <= 14 ? (
+                          relDays(d!)
+                        ) : (
+                          cnDate(n)
+                        )
+                      ) : (
+                        ''
+                      )}
                     </span>
                   </div>
                 </button>
@@ -211,94 +275,105 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
           </div>
         ) : (
           <div class="ltable-wrap">
-          <div class="ltable" role="table">
-            <div class="lt-row lt-head" role="row">
-              {(
-                [
-                  ['name', t('list.col.name')],
-                  [null, t('list.col.category')],
-                  [null, t('list.col.method')],
-                  [null, t('list.col.amount')],
-                  ['cost', t('list.col.monthly')],
-                  ['start', t('list.col.start')],
-                  ['next', t('list.col.next')],
-                ] as Array<[Sort | null, string]>
-              ).map(([k, l]) =>
-                k ? (
-                  <button key={l} class={`lt-sort ${sort === k ? 'on' : ''}`} onClick={() => setSort(k)}>
-                    {l}
-                    {sort === k && <Icon name="down" size={11} />}
-                  </button>
-                ) : (
-                  <span key={l}>{l}</span>
-                ),
-              )}
-            </div>
-            {rows.map((s) => {
-              const st = effectiveStatus(s, today);
-              const n = nextCharge(s, today);
-              const d = n ? diffDays(today, n) : undefined;
-              const cur = currentPhase(s, today);
-              const up = upcomingPhase(s, today);
-              const m = state.methods.find((x) => x.id === cur.methodId);
-              const v = shown(s, n);
-              const live = !['lifetime', 'ended'].includes(st);
-              return (
-                <button key={s.id} class={`lt-row st-${st}`} role="row" onClick={() => onOpen(s)}>
-                  <span class="lt-name">
-                    <SubIcon sub={s} size={32} />
-                    <span class="lt-title">
-                      <span class="nm">
-                        <b>{s.name}</b>
-                        {s.intro && s.intro.until > today && <Icon name="leaf" size={13} />}
-                        {cur.region && <span class="badge">{cur.region}</span>}
-                        {st === 'upcoming' && <span class="badge blue">{t('list.status.upcoming')}</span>}
-                        {st === 'trial' && <span class="badge green">{t('list.status.trialShort')}</span>}
-                        {st === 'ending' && <span class="badge orange">{t('list.status.ending')}</span>}
-                        {st === 'paused' && <span class="badge">{t('list.status.pausedShort')}</span>}
-                        {st === 'ended' && <span class="badge">{t('list.status.ended')}</span>}
-                        {st === 'lifetime' && <span class="badge">{t('list.status.lifetime')}</span>}
-                        {s.share?.role === 'owner' && s.share.members.length > 0 && <span class="badge blue">{t('list.badge.share')}</span>}
-                        {s.share?.role === 'member' && <span class="badge blue">{t('list.badge.joined')}</span>}
-                        {s.proxy && <span class="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>{t('list.badge.proxy')}</span>}
+            <div class="ltable" role="table">
+              <div class="lt-row lt-head" role="row">
+                {(
+                  [
+                    ['name', t('list.col.name')],
+                    [null, t('list.col.category')],
+                    [null, t('list.col.method')],
+                    [null, t('list.col.amount')],
+                    ['cost', t('list.col.monthly')],
+                    ['start', t('list.col.start')],
+                    ['next', t('list.col.next')],
+                  ] as Array<[Sort | null, string]>
+                ).map(([k, l]) =>
+                  k ? (
+                    <button key={l} class={`lt-sort ${sort === k ? 'on' : ''}`} onClick={() => setSort(k)}>
+                      {l}
+                      {sort === k && <Icon name="down" size={11} />}
+                    </button>
+                  ) : (
+                    <span key={l}>{l}</span>
+                  ),
+                )}
+              </div>
+              {rows.map((s) => {
+                const st = effectiveStatus(s, today);
+                const n = nextCharge(s, today);
+                const d = n ? diffDays(today, n) : undefined;
+                const cur = currentPhase(s, today);
+                const up = upcomingPhase(s, today);
+                const m = state.methods.find((x) => x.id === cur.methodId);
+                const v = shown(s, n);
+                const live = !['lifetime', 'ended'].includes(st);
+                return (
+                  <button key={s.id} class={`lt-row st-${st}`} role="row" onClick={() => onOpen(s)}>
+                    <span class="lt-name">
+                      <SubIcon sub={s} size={32} />
+                      <span class="lt-title">
+                        <span class="nm">
+                          <b>{s.name}</b>
+                          {s.intro && s.intro.until > today && <Icon name="leaf" size={13} />}
+                          {cur.region && <span class="badge">{cur.region}</span>}
+                          {st === 'upcoming' && <span class="badge blue">{t('list.status.upcoming')}</span>}
+                          {st === 'trial' && <span class="badge green">{t('list.status.trialShort')}</span>}
+                          {st === 'ending' && <span class="badge orange">{t('list.status.ending')}</span>}
+                          {st === 'paused' && <span class="badge">{t('list.status.pausedShort')}</span>}
+                          {st === 'ended' && <span class="badge">{t('list.status.ended')}</span>}
+                          {st === 'lifetime' && <span class="badge">{t('list.status.lifetime')}</span>}
+                          {s.share?.role === 'owner' && s.share.members.length > 0 && <span class="badge blue">{t('list.badge.share')}</span>}
+                          {s.share?.role === 'member' && <span class="badge blue">{t('list.badge.joined')}</span>}
+                          {s.proxy && (
+                            <span class="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>
+                              {t('list.badge.proxy')}
+                            </span>
+                          )}
+                        </span>
+                        {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
+                        <ParallelNote sub={s} cur={cur} today={today} />
                       </span>
-                      {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
-                      <ParallelNote sub={s} cur={cur} today={today} />
                     </span>
-                  </span>
-                  <span class="lt-cat">
-                    <CatChip cat={s.category} />
-                  </span>
-                  <span class="lt-pay">
-                    <PayBadge m={m} />
-                  </span>
-                  <span class="lt-amt">
-                    <span>
-                      <Amount value={v.value} ccy={v.ccy} />
-                      <small>/{perLabel(cur)}</small>
+                    <span class="lt-cat">
+                      <CatChip cat={s.category} />
                     </span>
-                    {money2 !== 'orig' && s.currency !== money2 && <small>{v.sub}</small>}
-                  </span>
-                  <span class="lt-mo">{s.proxy ? <small>{t('list.notCounted')}</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
-                  <span class="lt-start">{cnDate(s.start)}<small>{s.start.slice(0, 4)}</small></span>
-                  <span class={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
-                    {st === 'lifetime' ? (
-                      t('list.status.lifetime')
-                    ) : st === 'ended' ? (
-                      saved.get(s.id) ? <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span> : <>{tx('list.endedOn', { date: <small>{s.end ?? '—'}</small> })}</>
-                    ) : n ? (
-                      <>
-                        {cnDate(n)}
-                        <small>{relDays(d!)}</small>
-                      </>
-                    ) : (
-                      '—'
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                    <span class="lt-pay">
+                      <PayBadge m={m} />
+                    </span>
+                    <span class="lt-amt">
+                      <span>
+                        <Amount value={v.value} ccy={v.ccy} />
+                        <small>/{perLabel(cur)}</small>
+                      </span>
+                      {money2 !== 'orig' && s.currency !== money2 && <small>{v.sub}</small>}
+                    </span>
+                    <span class="lt-mo">{s.proxy ? <small>{t('list.notCounted')}</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
+                    <span class="lt-start">
+                      {cnDate(s.start)}
+                      <small>{s.start.slice(0, 4)}</small>
+                    </span>
+                    <span class={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
+                      {st === 'lifetime' ? (
+                        t('list.status.lifetime')
+                      ) : st === 'ended' ? (
+                        saved.get(s.id) ? (
+                          <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
+                        ) : (
+                          <>{tx('list.endedOn', { date: <small>{s.end ?? '—'}</small> })}</>
+                        )
+                      ) : n ? (
+                        <>
+                          {cnDate(n)}
+                          <small>{relDays(d!)}</small>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -336,7 +411,16 @@ export function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subs
   return (
     <div class="change-note parallel">
       <Icon name="copy" size={12} />
-      <span>{vs.map((v) => t('list.overlap.note', { what: v.region && v.region !== cur.region ? `${flag(v.region)} ${v.region}` : `${money(v.price, v.currency)}/${perLabel(v)}`, date: cnDate(v.end!) })).join(' · ')}</span>
+      <span>
+        {vs
+          .map((v) =>
+            t('list.overlap.note', {
+              what: v.region && v.region !== cur.region ? `${flag(v.region)} ${v.region}` : `${money(v.price, v.currency)}/${perLabel(v)}`,
+              date: cnDate(v.end!),
+            }),
+          )
+          .join(' · ')}
+      </span>
     </div>
   );
 }
@@ -346,11 +430,25 @@ function ProxyBadge({ state, s, today }: { state: AppState; s: Subscription; tod
   const n = proxyOwed(state, s, today);
   const name = s.proxy?.forName;
   const key = `list.proxyBadge.${n ? 'owed' : 'settled'}${name ? 'For' : ''}`;
-  return <span class={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>{t(key, { count: n, name })}</span>;
+  return (
+    <span class={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>
+      {t(key, { count: n, name })}
+    </span>
+  );
 }
 
 /** 一行筛选：左边维度名，右边「全部」+ 各选项胶囊（数量在胶囊内；没有匹配的隐藏，已选中的保留）；再点已选中的回到「全部」，一行放不下时横向滑动 */
-function FacetRow({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: Array<{ key: string; label: string; n: number; icon?: preact.ComponentChildren }> }) {
+function FacetRow({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<{ key: string; label: string; n: number; icon?: preact.ComponentChildren }>;
+}) {
   return (
     <div class="facet-row">
       <span class="facet-label">{label}</span>

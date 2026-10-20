@@ -45,7 +45,14 @@ test('MRR 变动：新增与退订', () => {
 });
 
 test('涨价进入变更日志', () => {
-  const s = sub({ price: 15, cycle: { unit: 'month', every: 1 }, priceHistory: [{ from: '2026-01-01', amount: 10 }, { from: '2026-05-01', amount: 15 }] });
+  const s = sub({
+    price: 15,
+    cycle: { unit: 'month', every: 1 },
+    priceHistory: [
+      { from: '2026-01-01', amount: 10 },
+      { from: '2026-05-01', amount: 15 },
+    ],
+  });
   const ev = events(state([s]), '2026-06-01');
   const p = ev.find((e) => e.kind === 'price')!;
   assert.ok(Math.abs(p.delta - 5) < 1e-6);
@@ -106,13 +113,32 @@ test('换区：两个阶段分别计费，变更日志合并为一次换区', as
     cycle: { unit: 'month', every: 1 },
     start: '2021-08-06',
     phases: [
-      { start: '2021-08-06', price: 249, currency: 'TRY', cycle: { unit: 'month', every: 1 }, region: 'TR', priceHistory: [{ from: '2021-08-06', amount: 39.99 }, { from: '2024-03-01', amount: 249 }] },
+      {
+        start: '2021-08-06',
+        price: 249,
+        currency: 'TRY',
+        cycle: { unit: 'month', every: 1 },
+        region: 'TR',
+        priceHistory: [
+          { from: '2021-08-06', amount: 39.99 },
+          { from: '2024-03-01', amount: 249 },
+        ],
+      },
       { start: '2026-10-25', price: 2.99, currency: 'USD', cycle: { unit: 'month', every: 1 }, region: 'US' },
     ],
   });
   const st = state([s], { fx: { base: 'USD', fetchedAt: '', rates: { USD: 1, TRY: 40 } } });
   const cs = chargesBetween(s, '2026-09-01', '2026-12-31', '2026-10-19');
-  assert.deepEqual(cs.map((c) => [c.date, c.amount, c.currency]), [['2026-09-06', 249, 'TRY'], ['2026-10-06', 249, 'TRY'], ['2026-10-25', 2.99, 'USD'], ['2026-11-25', 2.99, 'USD'], ['2026-12-25', 2.99, 'USD']]);
+  assert.deepEqual(
+    cs.map((c) => [c.date, c.amount, c.currency]),
+    [
+      ['2026-09-06', 249, 'TRY'],
+      ['2026-10-06', 249, 'TRY'],
+      ['2026-10-25', 2.99, 'USD'],
+      ['2026-11-25', 2.99, 'USD'],
+      ['2026-12-25', 2.99, 'USD'],
+    ],
+  );
   const ev = events(st, '2026-11-01');
   const sw = ev.find((e) => e.kind === 'switch')!;
   assert.equal(sw.date, '2026-10-25');
@@ -124,7 +150,9 @@ test('换区：两个阶段分别计费，变更日志合并为一次换区', as
 test('断更后续订', async () => {
   const { effectiveStatus } = await import('./billing.ts');
   const s = sub({
-    price: 10, cycle: { unit: 'month', every: 1 }, start: '2024-01-01',
+    price: 10,
+    cycle: { unit: 'month', every: 1 },
+    start: '2024-01-01',
     phases: [
       { start: '2024-01-01', end: '2024-06-01', price: 10, currency: 'USD', cycle: { unit: 'month', every: 1 } },
       { start: '2025-03-01', price: 12, currency: 'USD', cycle: { unit: 'month', every: 1 } },
@@ -144,7 +172,12 @@ test('历程操作：调价 → 换区 → 撤回', async () => {
   let s = sub({ price: 39.99, currency: 'TRY', cycle: { unit: 'month', every: 1 }, start: '2021-08-06', region: 'TR' });
   s = changePrice(s, '2024-03-06', 249);
   assert.equal(s.price, 249);
-  assert.equal(chargesBetween(s, '2024-02-01', '2024-03-31', '2026-10-19').map((c) => c.amount).join(), '39.99,249');
+  assert.equal(
+    chargesBetween(s, '2024-02-01', '2024-03-31', '2026-10-19')
+      .map((c) => c.amount)
+      .join(),
+    '39.99,249',
+  );
   s = switchPlan(s, '2026-10-25', { price: 2.99, currency: 'USD', cycle: { unit: 'month', every: 1 }, region: 'US' });
   assert.equal(s.currency, 'USD');
   assert.equal(s.phases!.length, 2);
@@ -157,17 +190,29 @@ test('历程操作：调价 → 换区 → 撤回', async () => {
 
 test('公开数据不包含任何真实域名', async () => {
   const { maskForPublic } = await import('./mask.ts');
-  const s = sub({ id: 'cf-example-org', name: 'example-domain.org', category: '域名', url: 'https://example-domain.org', icon: 'https://x/example-domain.org.png', notes: '到期 2027' });
+  const s = sub({
+    id: 'cf-example-org',
+    name: 'example-domain.org',
+    category: '域名',
+    url: 'https://example-domain.org',
+    icon: 'https://x/example-domain.org.png',
+    notes: '到期 2027',
+  });
   const out = JSON.stringify(maskForPublic(state([s])));
   assert.ok(!out.includes('example-domain'), out);
 });
 
 test('换区前的阶段不显示为到期不续', async () => {
   const { effectiveStatus } = await import('./billing.ts');
-  const s = sub({ price: 9.99, cycle: { unit: 'month', every: 1 }, start: '2021-08-06', phases: [
-    { start: '2021-08-06', price: 249, currency: 'TRY', cycle: { unit: 'month', every: 1 } },
-    { start: '2026-10-26', price: 9.99, currency: 'USD', cycle: { unit: 'month', every: 1 } },
-  ] });
+  const s = sub({
+    price: 9.99,
+    cycle: { unit: 'month', every: 1 },
+    start: '2021-08-06',
+    phases: [
+      { start: '2021-08-06', price: 249, currency: 'TRY', cycle: { unit: 'month', every: 1 } },
+      { start: '2026-10-26', price: 9.99, currency: 'USD', cycle: { unit: 'month', every: 1 } },
+    ],
+  });
   assert.equal(effectiveStatus(s, '2026-10-19'), 'active');
 });
 

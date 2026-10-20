@@ -16,7 +16,17 @@ const KINDS: Kind[] = ['charge', 'refund', 'adjust', 'failed'];
  * 记一笔 / 修改一笔扣款。金额按这一段订阅的币种填；卡上实际扣的是别的币种（如日元订阅从美元卡扣）时，
  * 另填「卡上实扣」，统计就按实扣算，汇差和手续费都算进真实成本。
  */
-export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription; today: string; edit?: { pay: Payment; index: number; phase?: string }; onClose: () => void }) {
+export function PaymentSheet({
+  sub,
+  today,
+  edit,
+  onClose,
+}: {
+  sub: Subscription;
+  today: string;
+  edit?: { pay: Payment; index: number; phase?: string };
+  onClose: () => void;
+}) {
   const [date, setDate] = useState(edit?.pay.date ?? today);
   const [kind, setKind] = useState<Kind>(edit?.pay.kind ?? 'charge');
   // 换区后新旧两段并行的日子：要选这笔记在哪一段（缺省为最晚开始的那段，修改时为原记录所在的段）
@@ -41,10 +51,13 @@ export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription;
       settled: settled !== '' && Number(settled) >= 0 ? { amount: sign * Number(settled), currency: settledCcy } : undefined,
       note: note.trim() || undefined,
     };
-    run(async () => {
-      await saveSub(savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick));
-      onClose();
-    }, t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'));
+    run(
+      async () => {
+        await saveSub(savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick));
+        onClose();
+      },
+      t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'),
+    );
   };
   const remove = () =>
     run(async () => {
@@ -87,13 +100,21 @@ export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription;
                   const p = lanes.find((x) => x.start === v);
                   if (!edit && p) setAmount(String(p.price));
                 }}
-                options={lanes.map((v) => ({ value: v.start, label: `${v.region ? `${flag(v.region)} ${v.region} · ` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}` }))}
+                options={lanes.map((v) => ({
+                  value: v.start,
+                  label: `${v.region ? `${flag(v.region)} ${v.region} · ` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`,
+                }))}
                 ariaLabel={t('editor.overlap.payPhase')}
               />
             </Cell>
           )}
           <Cell label={t('editor.payment.kind.label')}>
-            <Picker value={kind} onChange={setKind} options={KINDS.map((k) => ({ value: k, label: t(`editor.payment.kind.${k}`) }))} ariaLabel={t('editor.payment.kind.label')} />
+            <Picker
+              value={kind}
+              onChange={setKind}
+              options={KINDS.map((k) => ({ value: k, label: t(`editor.payment.kind.${k}`) }))}
+              ariaLabel={t('editor.payment.kind.label')}
+            />
           </Cell>
           <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('editor.payment.refundHint') : undefined}>
             <input class="num" inputMode="decimal" value={amount} onInput={(e) => setAmount((e.target as HTMLInputElement).value)} />
@@ -104,7 +125,13 @@ export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription;
             <CurrencySelect value={settledCcy} onChange={setSettledCcy} />
           </Cell>
           <Cell label={t('editor.payment.settledAmount')}>
-            <input class="num" inputMode="decimal" placeholder={t('editor.payment.blank')} value={settled} onInput={(e) => setSettled((e.target as HTMLInputElement).value)} />
+            <input
+              class="num"
+              inputMode="decimal"
+              placeholder={t('editor.payment.blank')}
+              value={settled}
+              onInput={(e) => setSettled((e.target as HTMLInputElement).value)}
+            />
           </Cell>
         </Group>
         <Group>

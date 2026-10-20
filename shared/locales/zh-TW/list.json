@@ -5,7 +5,17 @@
   "title": "全部訂閱",
   "all": "全部",
   "summary": "{count} 項 · 每月 {monthly} · 每年 {yearly}",
-  "status": { "upcoming": "未開始", "active": "計費中", "trial": "試用中", "trialShort": "試用", "paused": "已暫停", "pausedShort": "暫停", "ending": "到期不續", "ended": "已退訂", "lifetime": "買斷" },
+  "status": {
+    "upcoming": "未開始",
+    "active": "計費中",
+    "trial": "試用中",
+    "trialShort": "試用",
+    "paused": "已暫停",
+    "pausedShort": "暫停",
+    "ending": "到期不續",
+    "ended": "已退訂",
+    "lifetime": "買斷"
+  },
   "proxyExcluded": "代付 · 不計入支出",
   "perMonthApprox": "≈ {amount}/月",
   "originalPrice": "原價 {amount}",
@@ -22,7 +32,12 @@
   "notCounted": "不計入",
   "endedOn": "結束 {date}",
   "change": { "noMethod": "付款方式未定", "planned": "計畫 · ", "starts": "{when}開始", "from": "{when}起" },
-  "proxyBadge": { "owed": "代付 · 待收 {count} 期", "owedFor": "替{name}代付 · 待收 {count} 期", "settled": "代付 · 已結清", "settledFor": "替{name}代付 · 已結清" },
+  "proxyBadge": {
+    "owed": "代付 · 待收 {count} 期",
+    "owedFor": "替{name}代付 · 待收 {count} 期",
+    "settled": "代付 · 已結清",
+    "settledFor": "替{name}代付 · 已結清"
+  },
   "gantt": {
     "months": "{count} 個月",
     "days": "{count} 天",
@@ -44,6 +59,19 @@
     "gap": "中斷",
     "range": "{date} 起 · {count} 段"
   },
-  "kind": { "debit": "金融卡", "credit": "信用卡", "alipay": "支付寶", "wechat": "微信支付", "paypal": "PayPal", "appstore": "App Store 餘額", "googleplay": "Google Play 餘額", "giftcard": "禮品卡", "prepaid": "商家餘額", "phone": "電信帳單", "crypto": "加密卡", "other": "其他" },
+  "kind": {
+    "debit": "金融卡",
+    "credit": "信用卡",
+    "alipay": "支付寶",
+    "wechat": "微信支付",
+    "paypal": "PayPal",
+    "appstore": "App Store 餘額",
+    "googleplay": "Google Play 餘額",
+    "giftcard": "禮品卡",
+    "prepaid": "商家餘額",
+    "phone": "電信帳單",
+    "crypto": "加密卡",
+    "other": "其他"
+  },
   "network": { "unionpay": "銀聯" }
 }

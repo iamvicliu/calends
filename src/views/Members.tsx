@@ -18,10 +18,12 @@ const VIA_KEY: Record<string, string> = { 微信: 'wechat', 邮箱: 'email', 手
 /** 渠道的显示名：Telegram 等专名原样，微信、邮箱等按当前语言 */
 export const viaLabel = (via: string): string => (VIA_KEY[via] ? t(`family.contact.via.${VIA_KEY[via]}`) : via);
 const CONTACT_HINT: Record<string, string> = { Telegram: '@username', WhatsApp: '+63 …', 邮箱: 'name@example.com', 手机: '+86 …', X: '@handle' };
-export const contactHint = (via: string): string | undefined => (via === '微信' ? t('family.contact.hint.wechat') : via === 'Discord' ? t('family.contact.hint.discord') : CONTACT_HINT[via]);
+export const contactHint = (via: string): string | undefined =>
+  via === '微信' ? t('family.contact.hint.wechat') : via === 'Discord' ? t('family.contact.hint.discord') : CONTACT_HINT[via];
 
 /** 按收费周期选文案：常用周期各有一条，其余走 custom（带 count） */
-export const perBill = (key: string, months = 1, params: Params = {}): string => t(`${key}.${[1, 3, 6, 12].includes(months) ? `m${months}` : 'custom'}`, { count: months, ...params });
+export const perBill = (key: string, months = 1, params: Params = {}): string =>
+  t(`${key}.${[1, 3, 6, 12].includes(months) ? `m${months}` : 'custom'}`, { count: months, ...params });
 
 /** 用户名前面带 @ 的渠道：输入框里固定显示 @，存的时候去掉 */
 const AT_VIA = new Set(['Telegram', 'X']);
@@ -55,7 +57,14 @@ export function ContactField({ via, value, onVia, onChange }: { via: string; val
         }}
       />
       {url && (
-        <a class="icon-btn contact-go" href={url} target="_blank" rel="noreferrer" aria-label={t('family.contact.open', { via: viaLabel(via) })} title={t('family.contact.open', { via: viaLabel(via) })}>
+        <a
+          class="icon-btn contact-go"
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t('family.contact.open', { via: viaLabel(via) })}
+          title={t('family.contact.open', { via: viaLabel(via) })}
+        >
           <Icon name="link" />
         </a>
       )}
@@ -99,7 +108,7 @@ function cycleMonths(s: Subscription): number {
 
 /** 按收费周期应收的金额：每期份额 × 周期月数 ÷ 订阅一期的月数 */
 export function billAmount(s: Subscription, m: ShareMember): number {
-  return Math.round(((m.share || 0) * (m.billEvery ?? 1)) / cycleMonths(s) * 100) / 100;
+  return Math.round((((m.share || 0) * (m.billEvery ?? 1)) / cycleMonths(s)) * 100) / 100;
 }
 
 /** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算成本位币 */
@@ -120,14 +129,29 @@ const coverEnd = (from: string, months: number) => addDays(addMonths(from, month
 const nextFrom = (m: ShareMember, today: string) => (m.paidUntil ? addDays(m.paidUntil, 1) : today);
 
 /** 成员资料与收款记录：TG、联系方式、来源、服务账号、收费周期，以及每一笔收款 */
-export function MemberSheet({ state, s, member, collect, onClose }: { state: AppState; s: Subscription; member?: ShareMember; collect?: boolean; onClose: () => void }) {
+export function MemberSheet({
+  state,
+  s,
+  member,
+  collect,
+  onClose,
+}: {
+  state: AppState;
+  s: Subscription;
+  member?: ShareMember;
+  collect?: boolean;
+  onClose: () => void;
+}) {
   const today = todayIn(state.settings.timezone);
   const isNew = !member;
   // 早期单独记的 Telegram 并入通用的联系方式
   // 收款默认币种：设置里的「合租收款币种」，缺省同本位币
   const base = state.settings.collectCurrency ?? state.settings.baseCurrency;
   const [f, setF] = useState<ShareMember>(() => {
-    const init = member?.tg && !member.contact ? { ...member, contactVia: 'Telegram', contact: member.tg, tg: undefined } : (member ?? { id: uid(), name: '', share: Math.round((s.price / Math.max(1, s.share?.seats ?? 1)) * 100) / 100, billEvery: 1 });
+    const init =
+      member?.tg && !member.contact
+        ? { ...member, contactVia: 'Telegram', contact: member.tg, tg: undefined }
+        : (member ?? { id: uid(), name: '', share: Math.round((s.price / Math.max(1, s.share?.seats ?? 1)) * 100) / 100, billEvery: 1 });
     // 老数据只有每期份额：换算成「每次收多少人民币」
     const fee = memberFee(state, s, init);
     return { ...init, fee: fee.amount, feeCurrency: fee.currency };
@@ -136,7 +160,13 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
   const via = f.contactVia ?? 'Telegram';
   const setVia = (v: string) => up({ contactVia: v, ...(v === '邮箱' && f.contact && !f.account ? { account: f.contact } : {}) });
   // 联系方式选的是邮箱且还没填受邀邮箱时，顺手填上
-  const setContact = (c: string) => up({ contactVia: via, contact: c || undefined, tg: undefined, ...(via === '邮箱' && (!f.account || f.account === f.contact) ? { account: c || undefined } : {}) });
+  const setContact = (c: string) =>
+    up({
+      contactVia: via,
+      contact: c || undefined,
+      tg: undefined,
+      ...(via === '邮箱' && (!f.account || f.account === f.contact) ? { account: c || undefined } : {}),
+    });
   const val = (e: Event) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
   const months = f.billEvery ?? 1;
@@ -192,14 +222,19 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
       const payments = [...(m.payments ?? []), { ...p }].sort((a, b) => a.date.localeCompare(b.date));
       return { ...m, payments, paidUntil: !m.paidUntil || p.until > m.paidUntil ? p.until : m.paidUntil };
     });
-    run(async () => {
-      await saveSub({ ...s, share: { ...sh, members } });
-      setCopying(null);
-    }, t('family.member.copied', { count: targets.length }));
+    run(
+      async () => {
+        await saveSub({ ...s, share: { ...sh, members } });
+        setCopying(null);
+      },
+      t('family.member.copied', { count: targets.length }),
+    );
   };
 
   // 同一个人还出现在别的合租、代付里：改称呼或联系方式会一起改
-  const linkedElsewhere = f.personId ? refsFor(state.subscriptions, f.personId).filter((r) => !(r.kind === 'member' && r.sub.id === s.id && r.member.id === f.id)).length : 0;
+  const linkedElsewhere = f.personId
+    ? refsFor(state.subscriptions, f.personId).filter((r) => !(r.kind === 'member' && r.sub.id === s.id && r.member.id === f.id)).length
+    : 0;
   const payments = (f.payments ?? []).slice().reverse();
   const received = (f.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date, base), 0);
 
@@ -233,15 +268,24 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
             class="btn primary"
             disabled={!f.name.trim()}
             onClick={() =>
-              run(async () => {
-                // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
-                const link = await linkPerson(state, f.personId, f.name, f.contact ? via : undefined, f.contact);
-                const next = { ...f, name: f.name.trim(), personId: link.id };
-                const sh = getState().subscriptions.find((x) => x.id === s.id)?.share ?? s.share!;
-                await saveSub({ ...s, share: { ...sh, members: sh.members.some((x) => x.id === next.id) ? sh.members.map((x) => (x.id === next.id ? next : x)) : [...sh.members, next] } });
-                if (link.after) await savePerson(link.after);
-                onClose();
-              }, isNew ? t('family.member.added') : t('family.member.saved'))
+              run(
+                async () => {
+                  // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
+                  const link = await linkPerson(state, f.personId, f.name, f.contact ? via : undefined, f.contact);
+                  const next = { ...f, name: f.name.trim(), personId: link.id };
+                  const sh = getState().subscriptions.find((x) => x.id === s.id)?.share ?? s.share!;
+                  await saveSub({
+                    ...s,
+                    share: {
+                      ...sh,
+                      members: sh.members.some((x) => x.id === next.id) ? sh.members.map((x) => (x.id === next.id ? next : x)) : [...sh.members, next],
+                    },
+                  });
+                  if (link.after) await savePerson(link.after);
+                  onClose();
+                },
+                isNew ? t('family.member.added') : t('family.member.saved'),
+              )
             }
           >
             {isNew ? t('family.member.add') : t('family.member.save')}
@@ -256,7 +300,11 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
               <PersonPicker
                 state={state}
                 value={f.personId}
-                onPick={(p) => (p ? up({ personId: p.id, name: p.name, contactVia: p.contactVia, contact: p.contact, tg: undefined }) : f.personId && up({ personId: undefined, name: '', contact: undefined, tg: undefined }))}
+                onPick={(p) =>
+                  p
+                    ? up({ personId: p.id, name: p.name, contactVia: p.contactVia, contact: p.contact, tg: undefined })
+                    : f.personId && up({ personId: undefined, name: '', contact: undefined, tg: undefined })
+                }
               />
             </Cell>
           )}
@@ -267,10 +315,21 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
             <ContactField via={via} value={f.contact} onVia={setVia} onChange={setContact} />
           </Cell>
           <Cell label={t('family.member.account')}>
-            <input inputMode="email" autoCapitalize="off" value={f.account ?? ''} placeholder={t('family.member.accountPh', { name: s.name })} onInput={(e) => up({ account: val(e).trim() || undefined })} />
+            <input
+              inputMode="email"
+              autoCapitalize="off"
+              value={f.account ?? ''}
+              placeholder={t('family.member.accountPh', { name: s.name })}
+              onInput={(e) => up({ account: val(e).trim() || undefined })}
+            />
           </Cell>
           <Cell label={t('family.member.joined')}>
-            <DatePicker value={f.joined} clearable placeholder={s.share?.since ? t('family.member.joinedPh', { date: s.share.since }) : t('family.member.notSet')} onChange={(v) => up({ joined: v })} />
+            <DatePicker
+              value={f.joined}
+              clearable
+              placeholder={s.share?.since ? t('family.member.joinedPh', { date: s.share.since }) : t('family.member.notSet')}
+              onChange={(v) => up({ joined: v })}
+            />
           </Cell>
           <Cell label={t('family.member.left')}>
             <DatePicker value={f.left} clearable placeholder={t('family.member.leftPh')} onChange={(v) => up({ left: v })} />
@@ -307,7 +366,10 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
           </Cell>
         </Group>
 
-        <Group title={t('family.member.payments', { count: (f.payments ?? []).length })} foot={received ? t('family.member.receivedTotal', { amount: money(received, base) }) : undefined}>
+        <Group
+          title={t('family.member.payments', { count: (f.payments ?? []).length })}
+          foot={received ? t('family.member.receivedTotal', { amount: money(received, base) }) : undefined}
+        >
           <Cell label={t('family.member.paidUntil')}>
             <DatePicker value={f.paidUntil} clearable placeholder={t('family.member.paidUntilPh')} onChange={(v) => up({ paidUntil: v })} />
           </Cell>
@@ -318,13 +380,21 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
                 <span class="cell-l">
                   {money(p.amount, p.currency)}
                   <small>
-                    {p.from ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) }) : t('family.member.payCoverTo', { date: cnDateFull(p.date), until: cnDate(p.until) })}
+                    {p.from
+                      ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) })
+                      : t('family.member.payCoverTo', { date: cnDateFull(p.date), until: cnDate(p.until) })}
                     {p.note ? ` · ${p.note}` : ''}
                   </small>
                 </span>
                 <span class="cell-r">
                   {others.length > 0 && (
-                    <button class={`icon-btn ${copying === i ? 'on' : ''}`} style={{ width: 26, height: 26 }} aria-label={t('family.member.copyAria')} title={t('family.member.copyAria')} onClick={() => (copying === i ? setCopying(null) : startCopy(i))}>
+                    <button
+                      class={`icon-btn ${copying === i ? 'on' : ''}`}
+                      style={{ width: 26, height: 26 }}
+                      aria-label={t('family.member.copyAria')}
+                      title={t('family.member.copyAria')}
+                      onClick={() => (copying === i ? setCopying(null) : startCopy(i))}
+                    >
                       <Icon name="copy" />
                     </button>
                   )}
@@ -345,7 +415,13 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
                             onChange={(e) => setTargets((e.target as HTMLInputElement).checked ? [...targets, o.id] : targets.filter((x) => x !== o.id))}
                           />
                           <span>{o.name || t('family.member.unnamed')}</span>
-                          <small>{dup ? t('family.member.dup') : o.paidUntil ? t('family.member.paidUntilDate', { date: cnDate(o.paidUntil) }) : t('family.member.noPay')}</small>
+                          <small>
+                            {dup
+                              ? t('family.member.dup')
+                              : o.paidUntil
+                                ? t('family.member.paidUntilDate', { date: cnDate(o.paidUntil) })
+                                : t('family.member.noPay')}
+                          </small>
                         </label>
                       );
                     })}
@@ -373,7 +449,16 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
               <Cell label={t('family.member.coverFrom')}>
                 <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v, until: coverEnd(v, months) })} />
               </Cell>
-              <Cell label={<span>{t('family.member.coverTo')}<small class="muted" style={{ display: 'block', fontSize: 12 }}>{perBill('family.member.coverAuto', months)}</small></span>}>
+              <Cell
+                label={
+                  <span>
+                    {t('family.member.coverTo')}
+                    <small class="muted" style={{ display: 'block', fontSize: 12 }}>
+                      {perBill('family.member.coverAuto', months)}
+                    </small>
+                  </span>
+                }
+              >
                 <DatePicker value={pay.until} onChange={(v) => setPay({ ...pay, until: v ?? pay.until })} />
               </Cell>
               <Cell label={t('family.member.receivedOn')}>

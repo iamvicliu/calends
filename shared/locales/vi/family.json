@@ -55,12 +55,24 @@
     "currency": "Tiền tệ",
     "coverFrom": "Áp dụng từ",
     "coverTo": "Áp dụng đến",
-    "coverAuto": { "m1": "Đặt theo kỳ thanh toán; có thể sửa", "m3": "Đặt theo kỳ thanh toán; có thể sửa", "m6": "Đặt theo kỳ thanh toán; có thể sửa", "m12": "Đặt theo kỳ thanh toán; có thể sửa", "custom": "Đặt theo kỳ thanh toán; có thể sửa" },
+    "coverAuto": {
+      "m1": "Đặt theo kỳ thanh toán; có thể sửa",
+      "m3": "Đặt theo kỳ thanh toán; có thể sửa",
+      "m6": "Đặt theo kỳ thanh toán; có thể sửa",
+      "m12": "Đặt theo kỳ thanh toán; có thể sửa",
+      "custom": "Đặt theo kỳ thanh toán; có thể sửa"
+    },
     "receivedOn": "Ngày nhận",
     "note": "Ghi chú",
     "notePh": "Tùy chọn, VD: chuyển USDT",
     "record": "Ghi nhận",
-    "recordBtn": { "m1": "Ghi nhận thanh toán ({fee}/tháng)", "m3": "Ghi nhận thanh toán ({fee}/quý)", "m6": "Ghi nhận thanh toán ({fee} mỗi 6 tháng)", "m12": "Ghi nhận thanh toán ({fee}/năm)", "custom": { "other": "Ghi nhận thanh toán ({fee} mỗi {count} tháng)" } }
+    "recordBtn": {
+      "m1": "Ghi nhận thanh toán ({fee}/tháng)",
+      "m3": "Ghi nhận thanh toán ({fee}/quý)",
+      "m6": "Ghi nhận thanh toán ({fee} mỗi 6 tháng)",
+      "m12": "Ghi nhận thanh toán ({fee}/năm)",
+      "custom": { "other": "Ghi nhận thanh toán ({fee} mỗi {count} tháng)" }
+    }
   },
   "pool": {
     "title": "Gói chia sẻ",

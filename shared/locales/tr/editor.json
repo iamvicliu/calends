@@ -13,7 +13,16 @@
   "confirmDiscard": "Kaydedilmemiş değişiklikler atılsın mı?",
   "confirmDelete": "“{name}” silinsin mi? Geçmişi de silinir. Yalnızca yenilemeyi bıraktıysanız bunun yerine İptal edildi olarak işaretleyin.",
   "toast": { "added": "Eklendi", "saved": "Kaydedildi", "deleted": "Silindi" },
-  "cycle": { "w1": "Haftalık", "m1": "Aylık", "m3": "Üç aylık", "m6": "Altı aylık", "y1": "Yıllık", "y2": "İki yılda bir", "lt": "Ömür boyu", "custom": "Özel…" },
+  "cycle": {
+    "w1": "Haftalık",
+    "m1": "Aylık",
+    "m3": "Üç aylık",
+    "m6": "Altı aylık",
+    "y1": "Yıllık",
+    "y2": "İki yılda bir",
+    "lt": "Ömür boyu",
+    "custom": "Özel…"
+  },
   "unit": {
     "label": "Birim",
     "every": "Her",
@@ -99,7 +108,11 @@
   "change": {
     "title": "Geçmiş ve değişiklikler",
     "needPrice": "Bir fiyat girin",
-    "toast": { "price": "Fiyat değişikliği kaydedildi. Uygulamak için kaydedin.", "switch": "Yeni dönem eklendi. Uygulamak için kaydedin.", "resume": "Yeniden abone olundu. Uygulamak için kaydedin." },
+    "toast": {
+      "price": "Fiyat değişikliği kaydedildi. Uygulamak için kaydedin.",
+      "switch": "Yeni dönem eklendi. Uygulamak için kaydedin.",
+      "resume": "Yeniden abone olundu. Uygulamak için kaydedin."
+    },
     "price": "Fiyat değişikliğini kaydet",
     "switch": "Bölge, plan veya ödeme yöntemini değiştir",
     "resume": "Yeniden abone ol",

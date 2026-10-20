@@ -318,7 +318,18 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
   const pays = (s.payments ?? []).slice().sort((a, b) => a.date.localeCompare(b.date));
   if (pays.length) {
     // 扣款失败的记一笔 0，不计入支出，但留在记录里
-    const out: Charge[] = pays.filter((p) => p.date >= from && p.date <= to).map((p) => ({ sub: s, date: p.date, amount: p.kind === 'failed' ? 0 : p.amount, currency: s.currency, projected: p.date > today, kind: p.kind, settled: p.settled, note: p.note }));
+    const out: Charge[] = pays
+      .filter((p) => p.date >= from && p.date <= to)
+      .map((p) => ({
+        sub: s,
+        date: p.date,
+        amount: p.kind === 'failed' ? 0 : p.amount,
+        currency: s.currency,
+        projected: p.date > today,
+        kind: p.kind,
+        settled: p.settled,
+        note: p.note,
+      }));
     if (s.cycle.unit === 'lifetime') return out;
     const last = pays[pays.length - 1].date;
     return out.concat(schedule(s, s.nextDue ?? nthCharge(last, s.cycle, 1), from, to, today, last));
@@ -327,7 +338,9 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
     return s.start >= from && s.start <= to ? [{ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today }] : [];
   }
   if (s.nextDue) {
-    const before = schedule(s, s.start, from, to < s.nextDue ? to : addDays(s.nextDue, -1), today).filter((c) => diffDays(c.date, s.nextDue!) > cycleDays(s.cycle) / 2);
+    const before = schedule(s, s.start, from, to < s.nextDue ? to : addDays(s.nextDue, -1), today).filter(
+      (c) => diffDays(c.date, s.nextDue!) > cycleDays(s.cycle) / 2,
+    );
     return before.concat(schedule(s, s.nextDue, from, to, today));
   }
   return schedule(s, s.start, from, to, today);
@@ -348,7 +361,35 @@ export function lastCharge(s: Subscription, today: string): string | undefined {
 export const FALLBACK_FX: FxTable = {
   base: 'USD',
   fetchedAt: '2026-10-19',
-  rates: { USD: 1, CNY: 7.12, HKD: 7.78, TWD: 32.1, JPY: 151.5, EUR: 0.92, GBP: 0.77, TRY: 41.9, NGN: 1530, PHP: 58.4, INR: 88.6, KRW: 1390, SGD: 1.3, MYR: 4.25, THB: 34.2, VND: 26300, IDR: 16400, AUD: 1.52, CAD: 1.39, BRL: 5.4, ARS: 1400, EGP: 48.5, PKR: 281, RUB: 81, UAH: 41.5, KZT: 535, CHF: 0.8 },
+  rates: {
+    USD: 1,
+    CNY: 7.12,
+    HKD: 7.78,
+    TWD: 32.1,
+    JPY: 151.5,
+    EUR: 0.92,
+    GBP: 0.77,
+    TRY: 41.9,
+    NGN: 1530,
+    PHP: 58.4,
+    INR: 88.6,
+    KRW: 1390,
+    SGD: 1.3,
+    MYR: 4.25,
+    THB: 34.2,
+    VND: 26300,
+    IDR: 16400,
+    AUD: 1.52,
+    CAD: 1.39,
+    BRL: 5.4,
+    ARS: 1400,
+    EGP: 48.5,
+    PKR: 281,
+    RUB: 81,
+    UAH: 41.5,
+    KZT: 535,
+    CHF: 0.8,
+  },
 };
 
 export function convert(amount: number, from: string, to: string, fx: FxTable): number {
@@ -463,9 +504,7 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   const subs = state.subscriptions.flatMap(phaseSubs).filter((s) => s.methodId === method.id);
   const asOf = method.balanceAsOf ?? today;
   const horizon = addMonths(today, horizonMonths);
-  const charges = subs
-    .flatMap((s) => chargesBetween(s, addDays(asOf, 1), horizon, today))
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const charges = subs.flatMap((s) => chargesBetween(s, addDays(asOf, 1), horizon, today)).sort((a, b) => a.date.localeCompare(b.date));
   let bal = method.balance;
   const upcoming: Runway['upcoming'] = [];
   let shortfall: Charge | undefined;

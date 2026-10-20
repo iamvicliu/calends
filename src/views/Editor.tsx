@@ -21,7 +21,18 @@ const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetim
 const STATUS: SubStatus[] = ['active', 'trial', 'paused', 'cancelled'];
 
 export function newSub(today: string, methodId?: string): Subscription {
-  return { id: uid(), name: '', category: presetCat('tools'), tags: [], price: 0, currency: 'CNY', cycle: { unit: 'month', every: 1 }, start: today, status: 'active', methodId };
+  return {
+    id: uid(),
+    name: '',
+    category: presetCat('tools'),
+    tags: [],
+    price: 0,
+    currency: 'CNY',
+    cycle: { unit: 'month', every: 1 },
+    start: today,
+    status: 'active',
+    methodId,
+  };
 }
 
 export function confirmDelete(msg: string): boolean {
@@ -56,7 +67,9 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         if (out.status !== 'paused') delete out.pausedAt;
         // 代付对象：新的人先建档，已有的人改了资料等订阅保存后再同步
         const px = out.proxy;
-        const link: Awaited<ReturnType<typeof linkPerson>> = px ? await linkPerson(state, px.personId, px.forName, px.contact ? (px.contactVia ?? 'Telegram') : undefined, px.contact) : {};
+        const link: Awaited<ReturnType<typeof linkPerson>> = px
+          ? await linkPerson(state, px.personId, px.forName, px.contact ? (px.contactVia ?? 'Telegram') : undefined, px.contact)
+          : {};
         if (px) out = { ...out, proxy: { ...px, forName: px.forName.trim(), personId: link.id } };
         await saveSub(
           isNew
@@ -117,7 +130,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
 function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscription>) => void; state: AppState; today: string }) {
   const cycleKey = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'custom';
   const share = f.share;
-  const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) => up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
+  const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) =>
+    up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
   const setMember = (i: number, p: Partial<ShareMember>) => setShare({ members: share!.members.map((m, j) => (j === i ? { ...m, ...p } : m)) });
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
   const val = (e: Event) => (e.target as HTMLInputElement).value;
@@ -125,9 +139,14 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
   // 买断是一次性的：没有续费、状态、到期、提醒、优惠期这些概念，表单里不显示
   const lt = f.cycle.unit === 'lifetime';
-  const extras = [f.intro && t('editor.more.intro'), f.bonus && t('editor.more.bonus'), f.remindDays != null && t('editor.more.remind'), (f.url || f.manageUrl) && t('editor.more.links'), f.tags.length > 0 && t('editor.more.tags'), f.notes && t('editor.more.notes')].filter(
-    Boolean,
-  ) as string[];
+  const extras = [
+    f.intro && t('editor.more.intro'),
+    f.bonus && t('editor.more.bonus'),
+    f.remindDays != null && t('editor.more.remind'),
+    (f.url || f.manageUrl) && t('editor.more.links'),
+    f.tags.length > 0 && t('editor.more.tags'),
+    f.notes && t('editor.more.notes'),
+  ].filter(Boolean) as string[];
   const [more, setMore] = useState(extras.length > 0);
   // 分类表的顺序；表单里的分类万一不在表里（刚被删掉），也留着它
   const catOptions = [...new Set([...categories().map((c) => c.name), f.category].filter(Boolean))];
@@ -223,7 +242,12 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
           <MethodPicker
             methods={state.methods}
             value={f.methodId}
-            onChange={(id) => up({ methodId: id, ...(!f.region && state.methods.find((m) => m.id === id)?.region ? { region: state.methods.find((m) => m.id === id)!.region } : {}) })}
+            onChange={(id) =>
+              up({
+                methodId: id,
+                ...(!f.region && state.methods.find((m) => m.id === id)?.region ? { region: state.methods.find((m) => m.id === id)!.region } : {}),
+              })
+            }
           />
         </Cell>
         <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
@@ -233,7 +257,13 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
           <RegionSelect
             value={f.region}
             onChange={(r) => up({ region: r })}
-            common={[...new Set([...state.subscriptions.flatMap((x) => [x.region, ...(x.phases ?? []).map((ph) => ph.region)]), ...state.methods.map((m) => m.region)].filter(Boolean) as string[])]}
+            common={[
+              ...new Set(
+                [...state.subscriptions.flatMap((x) => [x.region, ...(x.phases ?? []).map((ph) => ph.region)]), ...state.methods.map((m) => m.region)].filter(
+                  Boolean,
+                ) as string[],
+              ),
+            ]}
           />
         </Cell>
       </Group>
@@ -256,7 +286,18 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
       )}
 
       {/* 四、谁在用 */}
-      <Group title={t('editor.group.who')} foot={f.proxy ? undefined : share?.role === 'member' ? t('editor.share.memberHint') : share?.role === 'owner' ? t('editor.share.perHead', { amount: money(perHead, f.currency) }) : undefined}>
+      <Group
+        title={t('editor.group.who')}
+        foot={
+          f.proxy
+            ? undefined
+            : share?.role === 'member'
+              ? t('editor.share.memberHint')
+              : share?.role === 'owner'
+                ? t('editor.share.perHead', { amount: money(perHead, f.currency) })
+                : undefined
+        }
+      >
         <div class="cell">
           <Seg
             value={f.proxy ? 'proxy' : share ? share.role : 'none'}
@@ -280,7 +321,11 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                 <PersonPicker
                   state={state}
                   value={f.proxy.personId}
-                  onPick={(p) => (p ? up({ proxy: { ...f.proxy!, personId: p.id, forName: p.name, contactVia: p.contactVia, contact: p.contact } }) : f.proxy!.personId && up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contact: undefined } }))}
+                  onPick={(p) =>
+                    p
+                      ? up({ proxy: { ...f.proxy!, personId: p.id, forName: p.name, contactVia: p.contactVia, contact: p.contact } })
+                      : f.proxy!.personId && up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contact: undefined } })
+                  }
                 />
               </Cell>
             )}
@@ -296,13 +341,21 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               />
             </Cell>
             <Cell label={t('editor.field.notes')}>
-              <input value={f.proxy.note ?? ''} placeholder={t('editor.proxy.notePlaceholder')} onInput={(e) => up({ proxy: { ...f.proxy!, note: val(e) || undefined } })} />
+              <input
+                value={f.proxy.note ?? ''}
+                placeholder={t('editor.proxy.notePlaceholder')}
+                onInput={(e) => up({ proxy: { ...f.proxy!, note: val(e) || undefined } })}
+              />
             </Cell>
           </>
         )}
         {share?.role === 'member' && (
           <Cell label={t('editor.share.ownerName')}>
-            <input value={share.ownerName ?? ''} placeholder={t('editor.share.ownerPlaceholder')} onInput={(e) => setShare({ ownerName: val(e) || undefined })} />
+            <input
+              value={share.ownerName ?? ''}
+              placeholder={t('editor.share.ownerPlaceholder')}
+              onInput={(e) => setShare({ ownerName: val(e) || undefined })}
+            />
           </Cell>
         )}
         {share?.role === 'owner' && (
@@ -313,17 +366,32 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
             {share.members.map((m, i) => (
               <div key={m.id} class="member-edit">
                 <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onInput={(e) => setMember(i, { name: val(e) })} />
-                <input class="num" inputMode="decimal" value={m.share} title={t('editor.share.perPeriod')} onInput={(e) => setMember(i, { share: Number(val(e)) || 0 })} />
+                <input
+                  class="num"
+                  inputMode="decimal"
+                  value={m.share}
+                  title={t('editor.share.perPeriod')}
+                  onInput={(e) => setMember(i, { share: Number(val(e)) || 0 })}
+                />
                 <span class="wide">
                   <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
                 </span>
-                <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('editor.share.remove')} onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}>
+                <button
+                  class="icon-btn"
+                  style={{ width: 26, height: 26 }}
+                  aria-label={t('editor.share.remove')}
+                  onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}
+                >
                   <Icon name="x" />
                 </button>
               </div>
             ))}
             {share.members.length < share.seats - 1 && (
-              <button class="cell tap" style={{ color: 'var(--accent)' }} onClick={() => setShare({ members: [...share.members, { id: uid(), name: '', share: perHead }] })}>
+              <button
+                class="cell tap"
+                style={{ color: 'var(--accent)' }}
+                onClick={() => setShare({ members: [...share.members, { id: uid(), name: '', share: perHead }] })}
+              >
                 <Icon name="plus" /> {t('editor.share.addMember')}
               </button>
             )}
@@ -351,13 +419,24 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                 >
                   <Toggle
                     checked={!!f.intro}
-                    onChange={(v) => up({ intro: v ? { price: f.price, until: nthCharge(f.start, f.cycle.unit === 'lifetime' ? { unit: 'year', every: 1 } : f.cycle, 1) } : undefined })}
+                    onChange={(v) =>
+                      up({
+                        intro: v
+                          ? { price: f.price, until: nthCharge(f.start, f.cycle.unit === 'lifetime' ? { unit: 'year', every: 1 } : f.cycle, 1) }
+                          : undefined,
+                      })
+                    }
                   />
                 </Cell>
                 {f.intro && (
                   <>
                     <Cell label={t('editor.intro.price')}>
-                      <input class="num" inputMode="decimal" value={f.intro.price} onInput={(e) => up({ intro: { ...f.intro!, price: Number(val(e)) || 0 } })} />
+                      <input
+                        class="num"
+                        inputMode="decimal"
+                        value={f.intro.price}
+                        onInput={(e) => up({ intro: { ...f.intro!, price: Number(val(e)) || 0 } })}
+                      />
                     </Cell>
                     <Cell label={t('editor.intro.until')}>
                       <DatePicker value={f.intro.until} onChange={(v) => up({ intro: { ...f.intro!, until: v ?? today } })} />
@@ -400,7 +479,12 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                           ['y1', (d: string) => addMonths(d, 12)],
                         ] as Array<[string, (d: string) => string]>
                       ).map(([l, fn]) => (
-                        <button key={l} type="button" class={`chip-btn ${f.bonus!.until === fn(f.bonus!.from) ? 'on' : ''}`} onClick={() => up({ bonus: { ...f.bonus!, until: fn(f.bonus!.from) } })}>
+                        <button
+                          key={l}
+                          type="button"
+                          class={`chip-btn ${f.bonus!.until === fn(f.bonus!.from) ? 'on' : ''}`}
+                          onClick={() => up({ bonus: { ...f.bonus!, until: fn(f.bonus!.from) } })}
+                        >
                           {t(`editor.bonus.quick.${l}`)}
                         </button>
                       ))}
@@ -449,11 +533,19 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
           </Group>
           <Group title={t('editor.group.tags')}>
             <Cell label={t('editor.more.tags')}>
-              <input value={f.tags.join(' ')} placeholder={t('editor.field.tagsPlaceholder')} onInput={(e) => up({ tags: val(e).split(/\s+/).filter(Boolean) })} />
+              <input
+                value={f.tags.join(' ')}
+                placeholder={t('editor.field.tagsPlaceholder')}
+                onInput={(e) => up({ tags: val(e).split(/\s+/).filter(Boolean) })}
+              />
             </Cell>
             <div class="cell">
               <span class="cell-r">
-                <textarea value={f.notes ?? ''} placeholder={t('editor.field.notesPlaceholder')} onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })} />
+                <textarea
+                  value={f.notes ?? ''}
+                  placeholder={t('editor.field.notesPlaceholder')}
+                  onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })}
+                />
               </span>
             </div>
           </Group>
@@ -584,7 +676,13 @@ function NameField({
                   App Store · <img class="pk-flag" src={`/flags/${x.h.country}.png`} alt="" />
                 </div>
               )}
-              <button type="button" class={`hit ${i === hi ? 'hi' : ''}`} onMouseDown={(e) => e.preventDefault()} onMouseMove={() => setHi(i)} onClick={() => pick(x)}>
+              <button
+                type="button"
+                class={`hit ${i === hi ? 'hi' : ''}`}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseMove={() => setHi(i)}
+                onClick={() => pick(x)}
+              >
                 {x.c ? (
                   <span class="ed-cat-ico">
                     <img src={x.c.icon} alt="" />

@@ -120,7 +120,60 @@ export function CategoriesSheet({ state, onClose }: { state: AppState; onClose: 
 }
 
 /** 常用 emoji；也可以在输入框里填任意 emoji */
-const EMOJIS = ['🤖', '🧠', '💡', '🛠️', '⚙️', '💻', '📱', '☁️', '🌐', '🔒', '🛡️', '🎬', '📺', '🎵', '🎧', '🎮', '🕹️', '📚', '📰', '✏️', '🎨', '📷', '🛒', '🛍️', '💳', '💰', '🏦', '📈', '🏠', '🛋️', '🍔', '☕', '🍿', '🏋️', '🚴', '💊', '❤️', '✈️', '🚗', '🚆', '🗺️', '👪', '👶', '🐶', '🐱', '🌱', '⭐', '🎁', '🔥', '⚡', '📦', '🎓'];
+const EMOJIS = [
+  '🤖',
+  '🧠',
+  '💡',
+  '🛠️',
+  '⚙️',
+  '💻',
+  '📱',
+  '☁️',
+  '🌐',
+  '🔒',
+  '🛡️',
+  '🎬',
+  '📺',
+  '🎵',
+  '🎧',
+  '🎮',
+  '🕹️',
+  '📚',
+  '📰',
+  '✏️',
+  '🎨',
+  '📷',
+  '🛒',
+  '🛍️',
+  '💳',
+  '💰',
+  '🏦',
+  '📈',
+  '🏠',
+  '🛋️',
+  '🍔',
+  '☕',
+  '🍿',
+  '🏋️',
+  '🚴',
+  '💊',
+  '❤️',
+  '✈️',
+  '🚗',
+  '🚆',
+  '🗺️',
+  '👪',
+  '👶',
+  '🐶',
+  '🐱',
+  '🌱',
+  '⭐',
+  '🎁',
+  '🔥',
+  '⚡',
+  '📦',
+  '🎓',
+];
 
 /** 输入框里的最后一个 emoji（字素簇）；不是 emoji 的字符忽略 */
 function lastEmoji(text: string): string | undefined {
@@ -163,7 +216,15 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
                 <div class="cp-head">{x.label}</div>
                 <div class="cat-grid">
                   {x.names.map((n) => (
-                    <button key={n} type="button" class={`cat-pick ${value === n ? 'on' : ''}`} aria-pressed={value === n} aria-label={n} title={n} onClick={() => onChange(n)}>
+                    <button
+                      key={n}
+                      type="button"
+                      class={`cat-pick ${value === n ? 'on' : ''}`}
+                      aria-pressed={value === n}
+                      aria-label={n}
+                      title={n}
+                      onClick={() => onChange(n)}
+                    >
                       <CatGlyph icon={n} size={20} />
                     </button>
                   ))}
@@ -190,7 +251,13 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
           <div class="cp-head">{t('settings.cat.emojiCommon')}</div>
           <div class="cat-grid">
             {EMOJIS.map((e) => (
-              <button key={e} type="button" class={`cat-pick emo ${value === e ? 'on' : ''}`} aria-pressed={value === e} onClick={() => (setEmoji(e), onChange(e))}>
+              <button
+                key={e}
+                type="button"
+                class={`cat-pick emo ${value === e ? 'on' : ''}`}
+                aria-pressed={value === e}
+                onClick={() => (setEmoji(e), onChange(e))}
+              >
                 {e}
               </button>
             ))}
@@ -278,7 +345,16 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
         <Group title={t('settings.cat.color')}>
           <div class="cat-swatches" role="radiogroup" aria-label={t('settings.cat.color')}>
             {CAT_COLORS.map((c) => (
-              <button key={c} type="button" role="radio" aria-checked={color === c} aria-label={c} class={`cat-swatch ${color === c ? 'on' : ''}`} style={{ '--tint': `var(--${c})` } as Record<string, string>} onClick={() => setColor(c)} />
+              <button
+                key={c}
+                type="button"
+                role="radio"
+                aria-checked={color === c}
+                aria-label={c}
+                class={`cat-swatch ${color === c ? 'on' : ''}`}
+                style={{ '--tint': `var(--${c})` } as Record<string, string>}
+                onClick={() => setColor(c)}
+              />
             ))}
           </div>
         </Group>
@@ -289,7 +365,12 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
           <Group>
             {deleting && n > 0 && (
               <Cell label={t('settings.cat.moveTo', { count: n })}>
-                <Picker value={target} onChange={setTarget} options={others.map((c) => ({ value: c.name, label: c.name, icon: <CatGlyph icon={c.icon} size={14} /> }))} ariaLabel={t('settings.cat.moveTo', { count: n })} />
+                <Picker
+                  value={target}
+                  onChange={setTarget}
+                  options={others.map((c) => ({ value: c.name, label: c.name, icon: <CatGlyph icon={c.icon} size={14} /> }))}
+                  ariaLabel={t('settings.cat.moveTo', { count: n })}
+                />
               </Cell>
             )}
             <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => (n && !deleting ? setDeleting(true) : remove())}>

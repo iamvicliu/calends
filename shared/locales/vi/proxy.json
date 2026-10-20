@@ -21,7 +21,15 @@
   "nextCharge": "Lần trừ tiền tới",
   "note": "Ghi chú",
   "diffLabel": "Đã trả lại − đã trừ",
-  "table": { "date": "Ngày trừ tiền", "charged": "Đã trừ", "received": "Đã trả lại", "diff": "Chênh lệch", "record": "Ghi nhận", "even": "Hòa", "none": "Chưa có khoản phí nào." },
+  "table": {
+    "date": "Ngày trừ tiền",
+    "charged": "Đã trừ",
+    "received": "Đã trả lại",
+    "diff": "Chênh lệch",
+    "record": "Ghi nhận",
+    "even": "Hòa",
+    "none": "Chưa có khoản phí nào."
+  },
   "entry": {
     "markedDue": "Đã đánh dấu chưa trả lại",
     "saved": "Đã lưu",

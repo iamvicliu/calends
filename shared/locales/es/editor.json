@@ -13,7 +13,16 @@
   "confirmDiscard": "¿Descartar los cambios sin guardar?",
   "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, márcala como Cancelada.",
   "toast": { "added": "Añadida", "saved": "Guardado", "deleted": "Eliminada" },
-  "cycle": { "w1": "Semanal", "m1": "Mensual", "m3": "Trimestral", "m6": "Semestral", "y1": "Anual", "y2": "Cada 2 años", "lt": "De por vida", "custom": "Personalizado…" },
+  "cycle": {
+    "w1": "Semanal",
+    "m1": "Mensual",
+    "m3": "Trimestral",
+    "m6": "Semestral",
+    "y1": "Anual",
+    "y2": "Cada 2 años",
+    "lt": "De por vida",
+    "custom": "Personalizado…"
+  },
   "unit": {
     "label": "Unidad",
     "every": "Cada",
@@ -99,7 +108,11 @@
   "change": {
     "title": "Historial y cambios",
     "needPrice": "Introduce un precio",
-    "toast": { "price": "Cambio de precio registrado. Guarda para aplicarlo.", "switch": "Nueva fase añadida. Guarda para aplicarla.", "resume": "Suscripción reactivada. Guarda para aplicarla." },
+    "toast": {
+      "price": "Cambio de precio registrado. Guarda para aplicarlo.",
+      "switch": "Nueva fase añadida. Guarda para aplicarla.",
+      "resume": "Suscripción reactivada. Guarda para aplicarla."
+    },
     "price": "Registrar cambio de precio",
     "switch": "Cambiar región, plan o método de pago",
     "resume": "Volver a suscribirse",

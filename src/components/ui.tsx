@@ -147,7 +147,18 @@ const P: Record<string, JSX.Element> = {
 
 export function Icon({ name, size }: { name: keyof typeof P | string; size?: number }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width={size} height={size} aria-hidden="true" class="i">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      width={size}
+      height={size}
+      aria-hidden="true"
+      class="i"
+    >
       {P[name]}
     </svg>
   );
@@ -255,7 +266,15 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
   const style = { '--s': `${size}px`, background: bg } as Record<string, string>;
   return (
     <span class={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
-      {bank ? <img src={`/banks/${bank}-rect.svg`} alt="" /> : brand === 'appstore' ? <i class="mm-glyph" /> : logo ? <img src={logo} alt="" /> : <b>{[...m.name][0]}</b>}
+      {bank ? (
+        <img src={`/banks/${bank}-rect.svg`} alt="" />
+      ) : brand === 'appstore' ? (
+        <i class="mm-glyph" />
+      ) : logo ? (
+        <img src={logo} alt="" />
+      ) : (
+        <b>{[...m.name][0]}</b>
+      )}
       {f && <em class="mm-flag">{f}</em>}
     </span>
   );
@@ -284,7 +303,17 @@ export function Amount({ value, ccy, sign, compact }: { value: number; ccy: stri
   );
 }
 
-export function Seg<T extends string>({ value, options, onChange, small }: { value: T; options: Array<[T, string]>; onChange: (v: T) => void; small?: boolean }) {
+export function Seg<T extends string>({
+  value,
+  options,
+  onChange,
+  small,
+}: {
+  value: T;
+  options: Array<[T, string]>;
+  onChange: (v: T) => void;
+  small?: boolean;
+}) {
   return (
     <div class={`seg ${small ? 'sm' : ''}`} role="tablist">
       {options.map(([k, l]) => (
@@ -319,7 +348,14 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
 /** 打开中的弹层，后开的在上面：Esc 只关最上面那一层（如订阅表单里再开的新建分类） */
 const openSheets: object[] = [];
 
-export function Sheet(props: { title?: ComponentChildren; onClose: () => void; children: ComponentChildren; foot?: ComponentChildren; narrow?: boolean; bare?: boolean }) {
+export function Sheet(props: {
+  title?: ComponentChildren;
+  onClose: () => void;
+  children: ComponentChildren;
+  foot?: ComponentChildren;
+  narrow?: boolean;
+  bare?: boolean;
+}) {
   // Esc 时调用最新的 onClose（它可能依赖表单状态，比如未保存确认）
   const close = useRef(props.onClose);
   close.current = props.onClose;
@@ -402,7 +438,15 @@ export function tipProps(html: () => ComponentChildren) {
 export function Toggle({ checked, onChange, disabled, label }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string }) {
   return (
     <label class="toggle">
-      <input type="checkbox" role="switch" aria-checked={checked} aria-label={label} checked={checked} disabled={disabled} onChange={(e) => onChange((e.target as HTMLInputElement).checked)} />
+      <input
+        type="checkbox"
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange((e.target as HTMLInputElement).checked)}
+      />
       <i />
     </label>
   );
@@ -419,7 +463,17 @@ export function Group({ title, foot, children }: { title?: ComponentChildren; fo
   );
 }
 
-export function Cell({ label, children, onClick, sub }: { label: ComponentChildren; children?: ComponentChildren; onClick?: () => void; sub?: ComponentChildren }) {
+export function Cell({
+  label,
+  children,
+  onClick,
+  sub,
+}: {
+  label: ComponentChildren;
+  children?: ComponentChildren;
+  onClick?: () => void;
+  sub?: ComponentChildren;
+}) {
   const inner = (
     <>
       <span class="cell-l">

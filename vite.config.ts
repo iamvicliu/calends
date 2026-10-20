@@ -6,7 +6,13 @@ import preact from '@preact/preset-vite';
 import tailwindcss from '@tailwindcss/vite';
 
 const LOCAL_PUBLIC = fileURLToPath(new URL('./local/public', import.meta.url));
-const TYPES: Record<string, string> = { '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
+const TYPES: Record<string, string> = {
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.webmanifest': 'application/manifest+json',
+  '.json': 'application/json',
+};
 
 /** 个人部署的素材（local/public）覆盖 public 里的同名文件：开发时优先提供，构建后复制进 dist */
 function localPublic(): Plugin {

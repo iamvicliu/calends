@@ -29,18 +29,32 @@ export async function listTokens(env: Env): Promise<McpToken[]> {
 /** 新建令牌：明文只在这一次返回 */
 export async function createToken(env: Env, name: string, scope: 'read' | 'write'): Promise<{ token: string; item: McpToken }> {
   const token = `sub_${randomToken(24)}`;
-  const item: McpToken = { id: randomToken(6), name: name.trim().slice(0, 40) || t('mcp.defaultTokenName'), hash: await sha256(token), prefix: token.slice(0, 12), scope, createdAt: new Date().toISOString() };
+  const item: McpToken = {
+    id: randomToken(6),
+    name: name.trim().slice(0, 40) || t('mcp.defaultTokenName'),
+    hash: await sha256(token),
+    prefix: token.slice(0, 12),
+    scope,
+    createdAt: new Date().toISOString(),
+  };
   await putKv(env, KEY, [...(await listTokens(env)), item]);
   return { token, item };
 }
 
 export async function revokeToken(env: Env, id: string): Promise<void> {
-  await putKv(env, KEY, (await listTokens(env)).filter((x) => x.id !== id));
+  await putKv(
+    env,
+    KEY,
+    (await listTokens(env)).filter((x) => x.id !== id),
+  );
 }
 
 /** 校验请求里的令牌；通过时顺手记下最后使用时间（同一小时内不重复写） */
 async function authenticate(req: Request, env: Env): Promise<McpToken | undefined> {
-  const raw = req.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+  const raw = req.headers
+    .get('authorization')
+    ?.match(/^Bearer\s+(.+)$/i)?.[1]
+    ?.trim();
   if (!raw) return undefined;
   const hash = await sha256(raw);
   const tokens = await listTokens(env);
@@ -103,7 +117,11 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
 }
 
 export async function mcp(req: Request, env: Env): Promise<Response> {
-  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'authorization, content-type, mcp-protocol-version, mcp-session-id', 'access-control-allow-methods': 'POST, GET, OPTIONS' };
+  const cors = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': 'authorization, content-type, mcp-protocol-version, mcp-session-id',
+    'access-control-allow-methods': 'POST, GET, OPTIONS',
+  };
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   // 无状态服务器不提供服务端推送流
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { ...cors, allow: 'POST' } });

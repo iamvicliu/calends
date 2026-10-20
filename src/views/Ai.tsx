@@ -151,7 +151,16 @@ export function Ai({ state }: { state: AppState }) {
         />
       )}
       {fresh && (
-        <Sheet narrow title={t('ai.created.title')} onClose={() => setFresh(null)} foot={<button class="btn primary" onClick={() => setFresh(null)}>{t('ai.created.saved')}</button>}>
+        <Sheet
+          narrow
+          title={t('ai.created.title')}
+          onClose={() => setFresh(null)}
+          foot={
+            <button class="btn primary" onClick={() => setFresh(null)}>
+              {t('ai.created.saved')}
+            </button>
+          }
+        >
           <div class="stack">
             <Group title={`${fresh.item.name} · ${fresh.item.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}`} foot={t('ai.created.foot')}>
               <div class="cell ai-snippet">

@@ -43,7 +43,10 @@
     "profile": "Profil",
     "notePh": "z. B. Kollege, zahlt zum Monatsende",
     "color": "Farbe",
-    "syncFoot": { "one": "Änderungen an Name und Kontakt gelten an {count} Stelle.", "other": "Änderungen an Name und Kontakt gelten an allen {count} Stellen." },
+    "syncFoot": {
+      "one": "Änderungen an Name und Kontakt gelten an {count} Stelle.",
+      "other": "Änderungen an Name und Kontakt gelten an allen {count} Stellen."
+    },
     "merge": "Zusammenführen mit",
     "mergePick": "Auswählen…",
     "mergeFoot": "Dieselbe Person doppelt angelegt? Zusammenführen bündelt Abos und Zahlungen.",
@@ -57,6 +60,9 @@
   },
   "field": {
     "person": "Person",
-    "syncFoot": { "one": "Auch an {count} weiteren Stelle – Änderungen an Name und Kontakt gelten dort mit.", "other": "Auch an {count} weiteren Stellen – Änderungen an Name und Kontakt gelten dort mit." }
+    "syncFoot": {
+      "one": "Auch an {count} weiteren Stelle – Änderungen an Name und Kontakt gelten dort mit.",
+      "other": "Auch an {count} weiteren Stellen – Änderungen an Name und Kontakt gelten dort mit."
+    }
   }
 }

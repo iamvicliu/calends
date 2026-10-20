@@ -8,7 +8,10 @@ const ROOT = new URL('../shared/locales/', import.meta.url).pathname;
 // Worker 端会用到的命名空间：共享逻辑、服务端接口、提醒邮件、MCP
 const SERVER_NS = ['common', 'core', 'server', 'notify', 'mcp'];
 
-const locales = readdirSync(ROOT, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+const locales = readdirSync(ROOT, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => d.name)
+  .sort();
 const lines = ['// 由 scripts/i18n.mjs 生成，请勿手改', "import type { MessageTree } from '../i18n.ts';"];
 const table = [];
 let i = 0;
@@ -36,7 +39,8 @@ if (process.argv.includes('--check')) {
   };
   const load = (loc) => {
     const all = new Set();
-    for (const f of readdirSync(join(ROOT, loc)).filter((f) => f.endsWith('.json'))) for (const k of keys(JSON.parse(readFileSync(join(ROOT, loc, f), 'utf8')), f.slice(0, -5))) all.add(k);
+    for (const f of readdirSync(join(ROOT, loc)).filter((f) => f.endsWith('.json')))
+      for (const k of keys(JSON.parse(readFileSync(join(ROOT, loc, f), 'utf8')), f.slice(0, -5))) all.add(k);
     return all;
   };
   const en = load('en');
@@ -46,7 +50,9 @@ if (process.argv.includes('--check')) {
     const missing = [...en].filter((k) => !have.has(k));
     const extra = [...have].filter((k) => !en.has(k));
     if (missing.length || extra.length) bad++;
-    console.log(`${loc.padEnd(6)} ${have.size} keys · missing ${missing.length} · extra ${extra.length}${missing.length ? '\n  - ' + missing.slice(0, 10).join('\n  - ') : ''}${extra.length ? '\n  + ' + extra.slice(0, 10).join('\n  + ') : ''}`);
+    console.log(
+      `${loc.padEnd(6)} ${have.size} keys · missing ${missing.length} · extra ${extra.length}${missing.length ? '\n  - ' + missing.slice(0, 10).join('\n  - ') : ''}${extra.length ? '\n  + ' + extra.slice(0, 10).join('\n  + ') : ''}`,
+    );
   }
   process.exitCode = bad ? 1 : 0;
 }

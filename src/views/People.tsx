@@ -31,7 +31,10 @@ export function PersonPicker({ state, value, onPick }: { state: AppState; value?
       search={people.length > 6}
       ariaLabel={t('people.pick.aria')}
       onChange={(v) => onPick(people.find((p) => p.id === v))}
-      options={[{ value: '', label: t('people.pick.new'), icon: <Icon name="plus" size={14} /> }, ...people.map((p) => ({ value: p.id, label: p.name, hint: contactText(p) || undefined, icon: <PersonAvatar p={p} size={20} /> }))]}
+      options={[
+        { value: '', label: t('people.pick.new'), icon: <Icon name="plus" size={14} /> },
+        ...people.map((p) => ({ value: p.id, label: p.name, hint: contactText(p) || undefined, icon: <PersonAvatar p={p} size={20} /> })),
+      ]}
     />
   );
 }
@@ -40,7 +43,13 @@ export function PersonPicker({ state, value, onPick }: { state: AppState; value?
  * 保存成员 / 代付之前调用：还没建档的人先建档，返回 personId；
  * 已有的人改了称呼或联系方式时返回 after，等订阅保存后再 savePerson，把改动同步到其他地方。
  */
-export async function linkPerson(state: AppState, personId: string | undefined, name: string, contactVia: string | undefined, contact: string | undefined): Promise<{ id?: string; after?: Person }> {
+export async function linkPerson(
+  state: AppState,
+  personId: string | undefined,
+  name: string,
+  contactVia: string | undefined,
+  contact: string | undefined,
+): Promise<{ id?: string; after?: Person }> {
   const n = name.trim();
   if (!n) return { id: personId };
   const c = contact?.trim() || undefined;
@@ -156,7 +165,13 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
   const contact = contactText(p);
   const live = l.items.filter((i) => i.active);
   return (
-    <div class="card pp-card" role="button" tabIndex={0} onClick={onClick} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}>
+    <div
+      class="card pp-card"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}
+    >
       <div class="pp-top">
         <PersonAvatar p={p} size={44} />
         <div class="pp-id">
@@ -166,7 +181,11 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
         <ContactLink p={p} />
       </div>
       <div class="ph-chips">
-        {l.items.length === 0 && <span class="muted" style={{ fontSize: 13 }}>{t('people.card.nothing')}</span>}
+        {l.items.length === 0 && (
+          <span class="muted" style={{ fontSize: 13 }}>
+            {t('people.card.nothing')}
+          </span>
+        )}
         {l.items.map((i) => (
           <span key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} class={`pp-chip ${i.active ? '' : 'off'}`} title={itemLine(i, today)}>
             <SubIcon sub={i.sub} size={16} />
@@ -195,13 +214,28 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
 }
 
 /** 一个人的详情：资料（改了处处生效）、每个合租 / 代付的明细与快捷记收款、合并与删除 */
-function PersonSheet({ state, today, l, onOpen, onClose }: { state: AppState; today: string; l: PersonLedger; onOpen: (s: Subscription) => void; onClose: () => void }) {
+function PersonSheet({
+  state,
+  today,
+  l,
+  onOpen,
+  onClose,
+}: {
+  state: AppState;
+  today: string;
+  l: PersonLedger;
+  onOpen: (s: Subscription) => void;
+  onClose: () => void;
+}) {
   const base = state.settings.baseCurrency;
   const stored = l.person.id ? state.people?.find((p) => p.id === l.person.id) : undefined;
   const [f, setF] = useState<Person>(() => ({ ...l.person }));
   const up = (p: Partial<Person>) => setF({ ...f, ...p });
   const via = f.contactVia ?? 'Telegram';
-  const dirty = !!stored && JSON.stringify({ ...stored, contactVia: stored.contact ? stored.contactVia : undefined }) !== JSON.stringify({ ...f, contactVia: f.contact ? f.contactVia : undefined });
+  const dirty =
+    !!stored &&
+    JSON.stringify({ ...stored, contactVia: stored.contact ? stored.contactVia : undefined }) !==
+      JSON.stringify({ ...f, contactVia: f.contact ? f.contactVia : undefined });
   const refs = l.person.id ? refsFor(state.subscriptions, l.person.id).length : l.items.length;
   const others = (state.people ?? []).filter((p) => p.id !== l.person.id).sort((a, b) => a.name.localeCompare(b.name));
   const [member, setMember] = useState<{ s: Subscription; m: ShareMember; collect?: boolean } | null>(null);
@@ -306,7 +340,11 @@ function PersonSheet({ state, today, l, onOpen, onClose }: { state: AppState; to
               </button>
               <span class="cell-r">
                 <span class="pp-amt">
-                  {i.owed > 0.005 ? <b style={{ color: 'var(--orange)' }}>{money(i.owed, base)}</b> : <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>}
+                  {i.owed > 0.005 ? (
+                    <b style={{ color: 'var(--orange)' }}>{money(i.owed, base)}</b>
+                  ) : (
+                    <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
+                  )}
                   <small>{t('people.item.received', { amount: money(i.received, base, { compact: true }) })}</small>
                 </span>
                 {!ro && !i.member?.exempt && (i.active || i.periodsOwed > 0) && (
@@ -325,7 +363,12 @@ function PersonSheet({ state, today, l, onOpen, onClose }: { state: AppState; to
               <input value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onInput={(e) => up({ name: val(e) })} />
             </Cell>
             <Cell label={t('family.member.contact')}>
-              <ContactField via={via} value={f.contact} onVia={(v) => up({ contactVia: v })} onChange={(c) => up({ contactVia: via, contact: c || undefined })} />
+              <ContactField
+                via={via}
+                value={f.contact}
+                onVia={(v) => up({ contactVia: v })}
+                onChange={(c) => up({ contactVia: via, contact: c || undefined })}
+              />
             </Cell>
             <Cell label={t('family.member.note')}>
               <input value={f.note ?? ''} disabled={ro} placeholder={t('people.sheet.notePh')} onInput={(e) => up({ note: val(e) || undefined })} />
@@ -333,7 +376,15 @@ function PersonSheet({ state, today, l, onOpen, onClose }: { state: AppState; to
             <Cell label={t('people.sheet.color')}>
               <span class="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
                 {PERSON_COLORS.map((c) => (
-                  <button key={c} type="button" role="radio" aria-checked={(f.color ?? colorFor(f.id)) === c} aria-label={c} class={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`} onClick={() => up({ color: c })} />
+                  <button
+                    key={c}
+                    type="button"
+                    role="radio"
+                    aria-checked={(f.color ?? colorFor(f.id)) === c}
+                    aria-label={c}
+                    class={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`}
+                    onClick={() => up({ color: c })}
+                  />
                 ))}
               </span>
             </Cell>
@@ -351,10 +402,13 @@ function PersonSheet({ state, today, l, onOpen, onClose }: { state: AppState; to
                 onChange={(into) => {
                   const target = others.find((p) => p.id === into);
                   if (!target || !confirmDelete(t('people.sheet.mergeConfirm', { from: stored.name, into: target.name }))) return;
-                  run(async () => {
-                    await mergePerson(stored.id, target.id);
-                    onClose();
-                  }, t('people.sheet.merged', { name: target.name }));
+                  run(
+                    async () => {
+                      await mergePerson(stored.id, target.id);
+                      onClose();
+                    },
+                    t('people.sheet.merged', { name: target.name }),
+                  );
                 }}
                 options={others.map((p) => ({ value: p.id, label: p.name, hint: contactText(p) || undefined, icon: <PersonAvatar p={p} size={20} /> }))}
               />
@@ -362,7 +416,15 @@ function PersonSheet({ state, today, l, onOpen, onClose }: { state: AppState; to
           </Group>
         )}
       </div>
-      {member && <MemberSheet state={state} s={live(member.s)} member={live(member.s).share?.members.find((x) => x.id === member.m.id) ?? member.m} collect={member.collect} onClose={() => setMember(null)} />}
+      {member && (
+        <MemberSheet
+          state={state}
+          s={live(member.s)}
+          member={live(member.s).share?.members.find((x) => x.id === member.m.id) ?? member.m}
+          collect={member.collect}
+          onClose={() => setMember(null)}
+        />
+      )}
       {ledger && <LedgerSheet state={state} s={live(ledger)} onOpen={onOpen} onClose={() => setLedger(null)} />}
       {entry && <EntrySheet state={state} s={live(entry.s)} row={entry.row} onClose={() => setEntry(null)} />}
     </Sheet>

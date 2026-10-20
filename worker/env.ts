@@ -1,11 +1,5 @@
 export interface EmailBinding {
-  send(msg: {
-    from: { email: string; name?: string } | string;
-    to: string | string[];
-    subject: string;
-    text: string;
-    html: string;
-  }): Promise<unknown>;
+  send(msg: { from: { email: string; name?: string } | string; to: string | string[]; subject: string; text: string; html: string }): Promise<unknown>;
 }
 
 export interface Env {

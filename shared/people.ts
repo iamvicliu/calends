@@ -21,7 +21,8 @@ export function normContact(via?: string, contact?: string, tg?: string): string
 }
 
 /** 一个人的身份键：称呼 + 联系方式 */
-export const personKey = (name: string | undefined, via?: string, contact?: string, tg?: string): string => `${normName(name)}|${normContact(via, contact, tg)}`;
+export const personKey = (name: string | undefined, via?: string, contact?: string, tg?: string): string =>
+  `${normName(name)}|${normContact(via, contact, tg)}`;
 
 /** FNV-1a 短哈希：自动建档的人用它当 id，同样的数据算出同样的 id，并发迁移也不会重复建档 */
 function hash(text: string): number {
@@ -48,7 +49,8 @@ export function refsOf(subs: Subscription[]): PersonRef[] {
 
 /** 引用上的镜像副本：称呼与联系方式（早期的 tg 字段视为 Telegram） */
 export function refInfo(r: PersonRef): { personId?: string; name: string; contactVia?: string; contact?: string } {
-  if (r.kind === 'proxy') return { personId: r.sub.proxy!.personId, name: r.sub.proxy!.forName ?? '', contactVia: r.sub.proxy!.contactVia, contact: r.sub.proxy!.contact };
+  if (r.kind === 'proxy')
+    return { personId: r.sub.proxy!.personId, name: r.sub.proxy!.forName ?? '', contactVia: r.sub.proxy!.contactVia, contact: r.sub.proxy!.contact };
   const m = r.member;
   return { personId: m.personId, name: m.name ?? '', contactVia: m.contactVia ?? (m.tg && !m.contact ? 'Telegram' : undefined), contact: m.contact ?? m.tg };
 }
@@ -107,7 +109,13 @@ export function linkPeople(people: Person[], subs: Subscription[]): { people: Pe
     const id = `p${hash(k).toString(36)}`;
     if (!ids.has(id)) {
       ids.add(id);
-      created.push({ id, name: info.name.trim(), contactVia: info.contact ? info.contactVia : undefined, contact: info.contact || undefined, color: colorFor(k) });
+      created.push({
+        id,
+        name: info.name.trim(),
+        contactVia: info.contact ? info.contactVia : undefined,
+        contact: info.contact || undefined,
+        color: colorFor(k),
+      });
     }
     byKey.set(k, id);
     addName(normName(info.name), id);
@@ -145,7 +153,9 @@ export function syncPerson(subs: Subscription[], p: Person): Subscription[] {
   return rewrite(subs, (r) => {
     if (refInfo(r).personId !== p.id) return undefined;
     // 镜像副本整体换成名册里的：清掉旧的 tg，联系方式跟着人走
-    return r.kind === 'member' ? { name: p.name, contactVia: p.contact ? p.contactVia : undefined, contact: p.contact || undefined, tg: undefined } : { name: p.name, contactVia: p.contact ? p.contactVia : undefined, contact: p.contact || undefined };
+    return r.kind === 'member'
+      ? { name: p.name, contactVia: p.contact ? p.contactVia : undefined, contact: p.contact || undefined, tg: undefined }
+      : { name: p.name, contactVia: p.contact ? p.contactVia : undefined, contact: p.contact || undefined };
   });
 }
 
@@ -255,5 +265,7 @@ export function peopleLedger(state: AppState, today: string): PersonLedger[] {
     if (item.lastPaid && (!l.lastPaid || item.lastPaid > l.lastPaid)) l.lastPaid = item.lastPaid;
   }
   for (const l of book.values()) l.items.sort((a, b) => Number(b.active) - Number(a.active) || b.owed - a.owed || a.sub.name.localeCompare(b.sub.name));
-  return [...book.values()].sort((a, b) => (b.owed > 0.005 ? 1 : 0) - (a.owed > 0.005 ? 1 : 0) || b.owed - a.owed || a.person.name.localeCompare(b.person.name));
+  return [...book.values()].sort(
+    (a, b) => (b.owed > 0.005 ? 1 : 0) - (a.owed > 0.005 ? 1 : 0) || b.owed - a.owed || a.person.name.localeCompare(b.person.name),
+  );
 }

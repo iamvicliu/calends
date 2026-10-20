@@ -13,7 +13,16 @@
   "confirmDiscard": "Descartar alterações não salvas?",
   "confirmDelete": "Apagar “{name}”? O histórico também será apagado. Se você só parou de renovar, marque como Cancelada.",
   "toast": { "added": "Adicionada", "saved": "Salvo", "deleted": "Apagada" },
-  "cycle": { "w1": "Semanal", "m1": "Mensal", "m3": "Trimestral", "m6": "Semestral", "y1": "Anual", "y2": "A cada 2 anos", "lt": "Vitalício", "custom": "Personalizado…" },
+  "cycle": {
+    "w1": "Semanal",
+    "m1": "Mensal",
+    "m3": "Trimestral",
+    "m6": "Semestral",
+    "y1": "Anual",
+    "y2": "A cada 2 anos",
+    "lt": "Vitalício",
+    "custom": "Personalizado…"
+  },
   "unit": {
     "label": "Unidade",
     "every": "A cada",
@@ -99,7 +108,11 @@
   "change": {
     "title": "Histórico e mudanças",
     "needPrice": "Informe um preço",
-    "toast": { "price": "Mudança de preço registrada. Salve para aplicar.", "switch": "Nova fase adicionada. Salve para aplicar.", "resume": "Assinatura retomada. Salve para aplicar." },
+    "toast": {
+      "price": "Mudança de preço registrada. Salve para aplicar.",
+      "switch": "Nova fase adicionada. Salve para aplicar.",
+      "resume": "Assinatura retomada. Salve para aplicar."
+    },
     "price": "Registrar mudança de preço",
     "switch": "Mudar região, plano ou forma de pagamento",
     "resume": "Assinar de novo",

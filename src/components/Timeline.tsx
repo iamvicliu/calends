@@ -198,7 +198,9 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
               key={it.key}
               type="button"
               class={`tl-icon ${date < today ? 'past' : ''}`}
-              style={{ left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<string, string | number>}
+              style={
+                { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<string, string | number>
+              }
               data-tip={`${md(date)} · ${it.tip}`}
               onClick={() => it.onClick?.()}
             >

@@ -3,7 +3,14 @@
 // - 兼容旧部署：配置了 OWNER_PASSCODE 密钥的，第一次用它登录成功后自动转存为哈希。
 // - Passkey：WebAuthn（SimpleWebAuthn），登录后在设置里绑定，之后可免密码登录。
 // - 会话：随机令牌放 HttpOnly + SameSite=Lax Cookie（https 下再加 Secure），库里只存 SHA-256；登录失败按 IP 限速。
-import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse, type AuthenticationResponseJSON, type RegistrationResponseJSON } from '@simplewebauthn/server';
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
+  type AuthenticationResponseJSON,
+  type RegistrationResponseJSON,
+} from '@simplewebauthn/server';
 import type { Env } from './env.ts';
 import { t } from '../shared/i18n.ts';
 import { getKv, getSettings, putKv } from './store.ts';
@@ -85,10 +92,13 @@ export async function isAuthed(req: Request, env: Env): Promise<boolean> {
   const token = readCookie(req, COOKIE);
   if (!token) return false;
   const hash = await sha256(token);
-  const row = await env.DB.prepare('SELECT expires_at, last_seen_at FROM sessions WHERE token_hash = ?1').bind(hash).first<{ expires_at: number; last_seen_at: number | null }>();
+  const row = await env.DB.prepare('SELECT expires_at, last_seen_at FROM sessions WHERE token_hash = ?1')
+    .bind(hash)
+    .first<{ expires_at: number; last_seen_at: number | null }>();
   const now = Date.now();
   if (!row || row.expires_at <= now) return false;
-  if (!row.last_seen_at || now - row.last_seen_at > TOUCH_MS) await env.DB.prepare('UPDATE sessions SET last_seen_at = ?1, ip = ?2 WHERE token_hash = ?3').bind(now, clientIp(req, env), hash).run();
+  if (!row.last_seen_at || now - row.last_seen_at > TOUCH_MS)
+    await env.DB.prepare('UPDATE sessions SET last_seen_at = ?1, ip = ?2 WHERE token_hash = ?3').bind(now, clientIp(req, env), hash).run();
   return true;
 }
 
@@ -99,7 +109,8 @@ async function sessionHash(req: Request): Promise<string> {
 }
 
 /** 访客 IP：Cloudflare 上取 cf-connecting-ip；自托管在反向代理后面时，设 TRUST_PROXY=1 才信任 X-Forwarded-For（否则可被伪造来绕过限速） */
-const clientIp = (req: Request, env: Env) => req.headers.get('cf-connecting-ip') ?? (env.TRUST_PROXY === '1' ? req.headers.get('x-forwarded-for')?.split(',')[0].trim() : undefined) ?? '';
+const clientIp = (req: Request, env: Env) =>
+  req.headers.get('cf-connecting-ip') ?? (env.TRUST_PROXY === '1' ? req.headers.get('x-forwarded-for')?.split(',')[0].trim() : undefined) ?? '';
 
 /** 只有 https 访问时才给 Cookie 加 Secure，否则局域网里用 http 自托管时浏览器存不下登录状态 */
 const secure = (req: Request) => (new URL(req.url).protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https' ? '; Secure' : '');
@@ -128,7 +139,10 @@ async function startSession(req: Request, env: Env, method: 'password' | 'passke
     ),
     env.DB.prepare('DELETE FROM sessions WHERE token_hash NOT IN (SELECT token_hash FROM sessions ORDER BY COALESCE(last_seen_at, 0) DESC LIMIT ?1)').bind(max),
   ]);
-  return Response.json({ ok: true }, { headers: { 'set-cookie': `${COOKIE}=${token}; Path=/; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}` } });
+  return Response.json(
+    { ok: true },
+    { headers: { 'set-cookie': `${COOKIE}=${token}; Path=/; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}` } },
+  );
 }
 
 /** 按 IP 限速：15 分钟内失败 6 次就先锁住 */
@@ -195,13 +209,18 @@ export async function changePassword(req: Request, env: Env): Promise<Response> 
 }
 
 async function removeOtherSessions(req: Request, env: Env): Promise<number> {
-  const r = await env.DB.prepare('DELETE FROM sessions WHERE token_hash != ?1').bind(await sessionHash(req)).run();
+  const r = await env.DB.prepare('DELETE FROM sessions WHERE token_hash != ?1')
+    .bind(await sessionHash(req))
+    .run();
   return r.meta.changes;
 }
 
 export async function logout(req: Request, env: Env): Promise<Response> {
   const token = readCookie(req, COOKIE);
-  if (token) await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?1').bind(await sha256(token)).run();
+  if (token)
+    await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?1')
+      .bind(await sha256(token))
+      .run();
   return Response.json({ ok: true }, { headers: { 'set-cookie': `${COOKIE}=; Path=/; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=0` } });
 }
 
@@ -213,9 +232,19 @@ export async function logoutOthers(req: Request, env: Env): Promise<Response> {
 /** 登录设备列表；id 取令牌哈希的前 16 位，不暴露完整哈希 */
 export async function listSessions(req: Request, env: Env) {
   const mineHash = await sessionHash(req);
-  const rows = await env.DB.prepare('SELECT token_hash, created_at, user_agent, ip, location, method, last_seen_at FROM sessions WHERE expires_at > ?1 ORDER BY COALESCE(last_seen_at, 0) DESC')
+  const rows = await env.DB.prepare(
+    'SELECT token_hash, created_at, user_agent, ip, location, method, last_seen_at FROM sessions WHERE expires_at > ?1 ORDER BY COALESCE(last_seen_at, 0) DESC',
+  )
     .bind(Date.now())
-    .all<{ token_hash: string; created_at: string; user_agent: string | null; ip: string | null; location: string | null; method: string | null; last_seen_at: number | null }>();
+    .all<{
+      token_hash: string;
+      created_at: string;
+      user_agent: string | null;
+      ip: string | null;
+      location: string | null;
+      method: string | null;
+      last_seen_at: number | null;
+    }>();
   return rows.results.map((r) => ({
     id: r.token_hash.slice(0, 16),
     current: r.token_hash === mineHash,
@@ -230,7 +259,9 @@ export async function listSessions(req: Request, env: Env) {
 
 /** 调低设备上限后立即生效：保留当前设备和最近活跃的几台 */
 export async function pruneSessions(req: Request, env: Env, max: number): Promise<void> {
-  await env.DB.prepare('DELETE FROM sessions WHERE token_hash NOT IN (SELECT token_hash FROM sessions ORDER BY token_hash = ?1 DESC, COALESCE(last_seen_at, 0) DESC LIMIT ?2)')
+  await env.DB.prepare(
+    'DELETE FROM sessions WHERE token_hash NOT IN (SELECT token_hash FROM sessions ORDER BY token_hash = ?1 DESC, COALESCE(last_seen_at, 0) DESC LIMIT ?2)',
+  )
     .bind(await sessionHash(req), Math.max(1, max))
     .run();
 }
@@ -277,7 +308,9 @@ async function saveChallenge(env: Env, kind: string, challenge: string): Promise
 
 /** 取出并作废一次性挑战 */
 async function takeChallenge(env: Env, id: string, kind: string): Promise<string | undefined> {
-  const row = await env.DB.prepare('SELECT challenge, kind, expires_at FROM auth_challenges WHERE id = ?1').bind(id).first<{ challenge: string; kind: string; expires_at: number }>();
+  const row = await env.DB.prepare('SELECT challenge, kind, expires_at FROM auth_challenges WHERE id = ?1')
+    .bind(id)
+    .first<{ challenge: string; kind: string; expires_at: number }>();
   await env.DB.prepare('DELETE FROM auth_challenges WHERE id = ?1').bind(id).run();
   return row && row.kind === kind && row.expires_at > Date.now() ? row.challenge : undefined;
 }
@@ -292,11 +325,17 @@ interface PasskeyRow {
   last_used_at: string | null;
 }
 
-const b64url = (b: Uint8Array) => btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const b64url = (b: Uint8Array) =>
+  btoa(String.fromCharCode(...b))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 const unb64url = (s: string) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
 
 export async function listPasskeys(env: Env) {
-  const rows = await env.DB.prepare('SELECT id, name, created_at, last_used_at FROM passkeys ORDER BY created_at').all<Pick<PasskeyRow, 'id' | 'name' | 'created_at' | 'last_used_at'>>();
+  const rows = await env.DB.prepare('SELECT id, name, created_at, last_used_at FROM passkeys ORDER BY created_at').all<
+    Pick<PasskeyRow, 'id' | 'name' | 'created_at' | 'last_used_at'>
+  >();
   return rows.results.map((r) => ({ id: r.id, name: r.name, createdAt: r.created_at, lastUsedAt: r.last_used_at }));
 }
 
@@ -325,11 +364,23 @@ export async function passkeyRegisterVerify(req: Request, env: Env): Promise<Res
   const expected = await takeChallenge(env, body.challengeId, 'register');
   if (!expected) return err(t('server.auth.expired'));
   const { rpID, origin } = rp(req, env);
-  const v = await verifyRegistrationResponse({ response: body.response, expectedChallenge: expected, expectedOrigin: origin, expectedRPID: rpID, requireUserVerification: false }).catch(() => undefined);
+  const v = await verifyRegistrationResponse({
+    response: body.response,
+    expectedChallenge: expected,
+    expectedOrigin: origin,
+    expectedRPID: rpID,
+    requireUserVerification: false,
+  }).catch(() => undefined);
   if (!v?.verified || !v.registrationInfo) return err(t('server.auth.passkeyFailed'));
   const c = v.registrationInfo.credential;
   await env.DB.prepare('INSERT INTO passkeys (id, public_key, counter, transports, name) VALUES (?1, ?2, ?3, ?4, ?5)')
-    .bind(c.id, b64url(c.publicKey), c.counter, JSON.stringify(c.transports ?? body.response.response.transports ?? []), (body.name ?? '').trim().slice(0, 40) || 'Passkey')
+    .bind(
+      c.id,
+      b64url(c.publicKey),
+      c.counter,
+      JSON.stringify(c.transports ?? body.response.response.transports ?? []),
+      (body.name ?? '').trim().slice(0, 40) || 'Passkey',
+    )
     .run();
   return Response.json({ ok: true });
 }

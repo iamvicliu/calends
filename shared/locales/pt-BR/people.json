@@ -57,6 +57,9 @@
   },
   "field": {
     "person": "Pessoa",
-    "syncFoot": { "one": "Também aparece em mais {count} lugar — mudanças de nome e contato valem lá também.", "other": "Também aparece em mais {count} lugares — mudanças de nome e contato valem lá também." }
+    "syncFoot": {
+      "one": "Também aparece em mais {count} lugar — mudanças de nome e contato valem lá também.",
+      "other": "Também aparece em mais {count} lugares — mudanças de nome e contato valem lá também."
+    }
   }
 }

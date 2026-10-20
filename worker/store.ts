@@ -20,7 +20,7 @@ export async function putKv(env: Env, key: string, value: unknown): Promise<void
 }
 
 export async function getSettings(env: Env): Promise<Settings> {
-  return { ...DEFAULT_SETTINGS, ...((await getKv<Settings>(env, 'settings')) ?? {}) };
+  return { ...DEFAULT_SETTINGS, ...(await getKv<Settings>(env, 'settings')) };
 }
 
 export async function getFx(env: Env): Promise<FxTable> {
@@ -33,7 +33,9 @@ export async function getPeople(env: Env): Promise<Person[]> {
 }
 
 export const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
-  env.DB.prepare("INSERT INTO kv (key, value, updated_at) VALUES ('people', ?1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at").bind(JSON.stringify(people));
+  env.DB.prepare(
+    "INSERT INTO kv (key, value, updated_at) VALUES ('people', ?1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+  ).bind(JSON.stringify(people));
 
 /** 把名册和改动过的订阅一起写入（分批，D1 一次 batch 的语句数有限） */
 export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<void> {

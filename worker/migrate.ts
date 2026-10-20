@@ -13,7 +13,9 @@ export function ensureMigrated(env: Env): Promise<void> {
 }
 
 async function run(env: Env): Promise<void> {
-  await env.DB.prepare('CREATE TABLE IF NOT EXISTS d1_migrations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)').run();
+  await env.DB.prepare(
+    'CREATE TABLE IF NOT EXISTS d1_migrations (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL)',
+  ).run();
   const applied = new Set((await env.DB.prepare('SELECT name FROM d1_migrations').all<{ name: string }>()).results.map((r) => r.name));
   for (const m of MIGRATIONS) {
     if (applied.has(m.name)) continue;

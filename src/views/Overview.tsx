@@ -66,7 +66,12 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const real = state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <SubIcon sub={c.sub} size={30} />, tip: `${c.sub.name} · ${money(c.amount, c.currency)}`, onClick: () => onOpen(real) });
+        g.items.push({
+          key: `${c.sub.id}-${c.date}-${g.items.length}`,
+          icon: <SubIcon sub={c.sub} size={30} />,
+          tip: `${c.sub.name} · ${money(c.amount, c.currency)}`,
+          onClick: () => onOpen(real),
+        });
         map.set(c.date, g);
       }
       return [...map.values()];
@@ -99,10 +104,19 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
     if (scale === 'month') {
       for (let i = -11; i <= 6; i++) {
         const m = addMonths(today.slice(0, 8) + '01', i);
-        out.push({ key: m.slice(0, 7), label: i === 0 || m.endsWith('-01-01') ? t('overview.axis.yearMonth', { yy: m.slice(2, 4), m: Number(m.slice(5, 7)), mon: monthLabel(m.slice(0, 7), { year: false }) }) : monthLabel(m.slice(0, 7), { year: false }), from: m, to: addDays(addMonths(m, 1), -1) });
+        out.push({
+          key: m.slice(0, 7),
+          label:
+            i === 0 || m.endsWith('-01-01')
+              ? t('overview.axis.yearMonth', { yy: m.slice(2, 4), m: Number(m.slice(5, 7)), mon: monthLabel(m.slice(0, 7), { year: false }) })
+              : monthLabel(m.slice(0, 7), { year: false }),
+          from: m,
+          to: addDays(addMonths(m, 1), -1),
+        });
       }
     } else {
-      for (let yy = Number(first.slice(0, 4)); yy <= Number(today.slice(0, 4)) + 1; yy++) out.push({ key: String(yy), label: String(yy), from: `${yy}-01-01`, to: `${yy}-12-31` });
+      for (let yy = Number(first.slice(0, 4)); yy <= Number(today.slice(0, 4)) + 1; yy++)
+        out.push({ key: String(yy), label: String(yy), from: `${yy}-01-01`, to: `${yy}-12-31` });
     }
     return out;
   }, [scale, today, first]);
@@ -130,7 +144,12 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
   const sel = selKey && buckets.some((b) => b.key === selKey) ? selKey : curKey;
   const selData = data.find((d) => d.r.key === sel);
   const selTotal = selData ? sumBase(state, selData.cs) : 0;
-  const selPaid = selData ? sumBase(state, selData.cs.filter((c) => !c.projected)) : 0;
+  const selPaid = selData
+    ? sumBase(
+        state,
+        selData.cs.filter((c) => !c.projected),
+      )
+    : 0;
   const bySub = new Map<string, { sub: Subscription; v: number; n: number; proj: boolean }>();
   for (const c of selData?.cs ?? []) {
     const e = bySub.get(c.sub.id) ?? { sub: c.sub, v: 0, n: 0, proj: true };
@@ -143,7 +162,8 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
 
   // 图例：所选区间（全部柱子）里各分类的合计
   const catTotals = new Map<string, number>();
-  for (const { cs } of allRanges(state, ranges, today)) for (const c of cs) catTotals.set(c.sub.category, (catTotals.get(c.sub.category) ?? 0) + chargeValue(state, c));
+  for (const { cs } of allRanges(state, ranges, today))
+    for (const c of cs) catTotals.set(c.sub.category, (catTotals.get(c.sub.category) ?? 0) + chargeValue(state, c));
   const cats = [...catTotals.entries()].sort((a, b) => b[1] - a[1]);
   const selLabel = scale === 'month' ? monthLabel(sel) : t('overview.spending.year', { year: sel });
   const isFuture = sel > curKey;
@@ -179,7 +199,11 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
 
       <div class="legend-chips">
         {cats.map(([k, v]) => (
-          <button key={k} class={`lc ${hidden.includes(k) ? 'off' : ''}`} onClick={() => setHidden(hidden.includes(k) ? hidden.filter((x) => x !== k) : [...hidden, k])}>
+          <button
+            key={k}
+            class={`lc ${hidden.includes(k) ? 'off' : ''}`}
+            onClick={() => setHidden(hidden.includes(k) ? hidden.filter((x) => x !== k) : [...hidden, k])}
+          >
             <i style={{ background: catColor(k) }} />
             {k}
             <b>{money(v, base, { compact: true })}</b>
@@ -202,7 +226,11 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
           </div>
         </div>
         <div class="sel-items">
-          {items.length === 0 && <span class="muted" style={{ fontSize: 13 }}>{t('overview.spending.empty')}</span>}
+          {items.length === 0 && (
+            <span class="muted" style={{ fontSize: 13 }}>
+              {t('overview.spending.empty')}
+            </span>
+          )}
           {items.slice(0, 12).map((e) => (
             <button key={e.sub.id} class="sel-item" onClick={() => onOpen(e.sub)}>
               <SubIcon sub={e.sub} size={22} />
@@ -304,7 +332,11 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
                   <small>
                     {t('overview.wallet.balance', {
                       amount: money(r.current, m.currency, { compact: true }),
-                      status: r.shortfall ? (r.coveredCharges ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) }) : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })) : t('overview.wallet.enough'),
+                      status: r.shortfall
+                        ? r.coveredCharges
+                          ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) })
+                          : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })
+                        : t('overview.wallet.enough'),
                     })}
                   </small>
                   <div class="wal-bar">
@@ -454,7 +486,16 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
                 <button
                   key={s.id}
                   class={`star ${hover === b.i ? 'on' : ''}`}
-                  style={{ left: `${(b.x - b.r) * 100}%`, top: `${((b.y - b.r) / h) * 100}%`, width: d, height: d, '--tint': catColor(s.category), animationDelay: `${k * 35}ms` } as Record<string, string | number>}
+                  style={
+                    {
+                      left: `${(b.x - b.r) * 100}%`,
+                      top: `${((b.y - b.r) / h) * 100}%`,
+                      width: d,
+                      height: d,
+                      '--tint': catColor(s.category),
+                      animationDelay: `${k * 35}ms`,
+                    } as Record<string, string | number>
+                  }
                   onMouseEnter={() => setHover(b.i)}
                   onMouseLeave={() => setHover(null)}
                   onClick={() => onOpen(s)}

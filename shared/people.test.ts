@@ -7,20 +7,58 @@ import { proxyRows } from './proxy.ts';
 import { DEFAULT_SETTINGS, type AppState, type Person, type Subscription } from './types.ts';
 
 const sub = (o: Partial<Subscription>): Subscription => ({
-  id: 'x', name: 'X', category: '工具', tags: [], price: 60, currency: 'USD',
-  cycle: { unit: 'month', every: 1 }, start: '2026-01-10', status: 'active', ...o,
+  id: 'x',
+  name: 'X',
+  category: '工具',
+  tags: [],
+  price: 60,
+  currency: 'USD',
+  cycle: { unit: 'month', every: 1 },
+  start: '2026-01-10',
+  status: 'active',
+  ...o,
 });
-const st = (subscriptions: Subscription[], people: Person[] = []): AppState => ({ subscriptions, methods: [], people, settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' }, fx: FALLBACK_FX });
+const st = (subscriptions: Subscription[], people: Person[] = []): AppState => ({
+  subscriptions,
+  methods: [],
+  people,
+  settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' },
+  fx: FALLBACK_FX,
+});
 
-const spotify = sub({ id: 'sp', name: 'Spotify', share: { role: 'owner', seats: 6, since: '2026-01-10', members: [
-  { id: 'a', name: 'Alice', share: 10, contactVia: 'Telegram', contact: '@alice' },
-  { id: 'b', name: 'Bob', share: 10, tg: 'bob' },
-] } });
-const yt = sub({ id: 'yt', name: 'YouTube', share: { role: 'owner', seats: 6, since: '2026-01-10', members: [
-  { id: 'a2', name: ' alice ', share: 10, contactVia: 'Telegram', contact: 'Alice', paidUntil: '2026-12-09' },
-  { id: 'c', name: 'Carol', share: 10 },
-] } });
-const proxy = sub({ id: 'gpt', name: 'ChatGPT', price: 20, start: '2026-08-01', proxy: { forName: 'Bob', entries: [{ charge: '2026-08-01', received: 20, receivedCurrency: 'USD', receivedOn: '2026-08-03' }] } });
+const spotify = sub({
+  id: 'sp',
+  name: 'Spotify',
+  share: {
+    role: 'owner',
+    seats: 6,
+    since: '2026-01-10',
+    members: [
+      { id: 'a', name: 'Alice', share: 10, contactVia: 'Telegram', contact: '@alice' },
+      { id: 'b', name: 'Bob', share: 10, tg: 'bob' },
+    ],
+  },
+});
+const yt = sub({
+  id: 'yt',
+  name: 'YouTube',
+  share: {
+    role: 'owner',
+    seats: 6,
+    since: '2026-01-10',
+    members: [
+      { id: 'a2', name: ' alice ', share: 10, contactVia: 'Telegram', contact: 'Alice', paidUntil: '2026-12-09' },
+      { id: 'c', name: 'Carol', share: 10 },
+    ],
+  },
+});
+const proxy = sub({
+  id: 'gpt',
+  name: 'ChatGPT',
+  price: 20,
+  start: '2026-08-01',
+  proxy: { forName: 'Bob', entries: [{ charge: '2026-08-01', received: 20, receivedCurrency: 'USD', receivedOn: '2026-08-03' }] },
+});
 
 test('联系方式归一化', () => {
   assert.equal(normContact('Telegram', '@Alice'), 'Telegram:alice');
@@ -49,16 +87,26 @@ test('自动建档：同名同联系方式合为一人，只有称呼的归到�
   assert.equal(again.created.length, 0);
   assert.equal(again.subs.length, 0);
   // 同样的数据（并发迁移）得到同样的 id
-  assert.deepEqual(linkPeople([], [spotify, yt, proxy]).created.map((p) => p.id), r.created.map((p) => p.id));
+  assert.deepEqual(
+    linkPeople([], [spotify, yt, proxy]).created.map((p) => p.id),
+    r.created.map((p) => p.id),
+  );
 });
 
 test('同名但联系方式不同不合并；同名有多个时只有称呼的单独建档', () => {
-  const s = sub({ id: 's', share: { role: 'owner', seats: 6, members: [
-    { id: '1', name: 'Mom', share: 1, contactVia: '微信', contact: 'mom1' },
-    { id: '2', name: 'Mom', share: 1, contactVia: '微信', contact: 'mom2' },
-    { id: '3', name: 'Mom', share: 1 },
-    { id: '4', name: '', share: 1 },
-  ] } });
+  const s = sub({
+    id: 's',
+    share: {
+      role: 'owner',
+      seats: 6,
+      members: [
+        { id: '1', name: 'Mom', share: 1, contactVia: '微信', contact: 'mom1' },
+        { id: '2', name: 'Mom', share: 1, contactVia: '微信', contact: 'mom2' },
+        { id: '3', name: 'Mom', share: 1 },
+        { id: '4', name: '', share: 1 },
+      ],
+    },
+  });
   const r = linkPeople([], [s]);
   assert.equal(r.created.length, 3);
   const ms = r.subs[0].share!.members;
@@ -68,7 +116,10 @@ test('同名但联系方式不同不合并；同名有多个时只有称呼的�
 
 test('关联到已有的人；指向不存在的人时重新关联', () => {
   const alice: Person = { id: 'alice', name: 'Alice', contactVia: 'Telegram', contact: 'alice' };
-  const s = sub({ id: 's', share: { role: 'owner', seats: 6, members: [{ id: '1', name: 'alice', share: 1, contactVia: 'Telegram', contact: '@ALICE', personId: 'ghost' }] } });
+  const s = sub({
+    id: 's',
+    share: { role: 'owner', seats: 6, members: [{ id: '1', name: 'alice', share: 1, contactVia: 'Telegram', contact: '@ALICE', personId: 'ghost' }] },
+  });
   const r = linkPeople([alice], [s]);
   assert.equal(r.created.length, 0);
   assert.equal(r.subs[0].share!.members[0].personId, 'alice');
@@ -95,12 +146,17 @@ test('改人的联系方式处处生效；合并两个人', () => {
 
 test('按人汇总应收：与 memberDues、proxyRows 的结果一致', () => {
   const linked = linkPeople([], [spotify, yt, proxy]);
-  const state = st([spotify, yt, proxy].map((s) => linked.subs.find((x) => x.id === s.id) ?? s), linked.people);
+  const state = st(
+    [spotify, yt, proxy].map((s) => linked.subs.find((x) => x.id === s.id) ?? s),
+    linked.people,
+  );
   const today = '2026-10-19';
   const book = peopleLedger(state, today);
   const bob = book.find((l) => l.person.name === 'Bob')!;
   const shareOwed = memberDues(state.subscriptions[0], today).find((d) => d.member.id === 'b')!.owed;
-  const proxyOwed = proxyRows(state, state.subscriptions[2], today).filter((r) => r.receivedBase == null).reduce((a, r) => a + r.chargedBase, 0);
+  const proxyOwed = proxyRows(state, state.subscriptions[2], today)
+    .filter((r) => r.receivedBase == null)
+    .reduce((a, r) => a + r.chargedBase, 0);
   assert.equal(bob.items.length, 2);
   assert.equal(Math.round(bob.owed * 100), Math.round((shareOwed + proxyOwed) * 100));
   assert.equal(bob.received, 20);

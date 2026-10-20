@@ -58,7 +58,8 @@ async function post(url: string, body: unknown, headers: Record<string, string> 
 /** 不少机器人接口出错也返回 200，要看返回体里的错误码 */
 async function expectOk(res: Response, field: string, okValues: unknown[]): Promise<void> {
   const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!okValues.includes(body[field])) throw new Error(`${field}=${String(body[field])} ${String(body.msg ?? body.errmsg ?? body.message ?? body.description ?? '')}`.trim());
+  if (!okValues.includes(body[field]))
+    throw new Error(`${field}=${String(body[field])} ${String(body.msg ?? body.errmsg ?? body.message ?? body.description ?? '')}`.trim());
 }
 
 /** field 是 notify.channel.field 下的键 */
@@ -81,7 +82,12 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
     }
     case 'telegram': {
       const token = need(c, 'token', 'botToken');
-      const res = await post(`https://api.telegram.org/bot${token}/sendMessage`, { chat_id: need(c, 'chatId', 'chatId'), text: toTelegram(d, site), parse_mode: 'HTML', disable_web_page_preview: true });
+      const res = await post(`https://api.telegram.org/bot${token}/sendMessage`, {
+        chat_id: need(c, 'chatId', 'chatId'),
+        text: toTelegram(d, site),
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      });
       return expectOk(res, 'ok', [true]);
     }
     case 'lark': {
@@ -93,7 +99,11 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
       const res = await post(url, {
         ...sign,
         msg_type: 'interactive',
-        card: { config: { wide_screen_mode: true }, header: { template: 'blue', title: { tag: 'plain_text', content: d.subject } }, elements: [{ tag: 'markdown', content: toMarkdown(d, site) }] },
+        card: {
+          config: { wide_screen_mode: true },
+          header: { template: 'blue', title: { tag: 'plain_text', content: d.subject } },
+          elements: [{ tag: 'markdown', content: toMarkdown(d, site) }],
+        },
       });
       return expectOk(res, 'code', [0, undefined]);
     }
@@ -109,12 +119,21 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
       return expectOk(res, 'errcode', [0]);
     }
     case 'wecom': {
-      const res = await post(need(c, 'webhook', 'webhook'), { msgtype: 'markdown', markdown: { content: `**${d.subject}**\n${toMarkdown(d, site)}`.slice(0, 4000) } });
+      const res = await post(need(c, 'webhook', 'webhook'), {
+        msgtype: 'markdown',
+        markdown: { content: `**${d.subject}**\n${toMarkdown(d, site)}`.slice(0, 4000) },
+      });
       return expectOk(res, 'errcode', [0]);
     }
     case 'bark': {
       const server = (c.config.server?.trim() || 'https://api.day.app').replace(/\/$/, '');
-      await post(`${server}/push`, { device_key: need(c, 'key', 'deviceKey'), title: d.subject, body: toText(d, site), url: `${site}/admin`, group: t('notify.appName') });
+      await post(`${server}/push`, {
+        device_key: need(c, 'key', 'deviceKey'),
+        title: d.subject,
+        body: toText(d, site),
+        url: `${site}/admin`,
+        group: t('notify.appName'),
+      });
       return;
     }
     case 'ntfy': {
@@ -132,11 +151,16 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
       return expectOk(res, 'code', [0]);
     }
     case 'discord': {
-      await post(need(c, 'webhook', 'webhook'), { username: t('notify.appName'), embeds: [{ title: d.subject, description: toMarkdown(d, site).slice(0, 4000), url: `${site}/admin`, color: 0x1d2328 }] });
+      await post(need(c, 'webhook', 'webhook'), {
+        username: t('notify.appName'),
+        embeds: [{ title: d.subject, description: toMarkdown(d, site).slice(0, 4000), url: `${site}/admin`, color: 0x1d2328 }],
+      });
       return;
     }
     case 'slack': {
-      const md = toMarkdown(d, site).replace(/\*\*(.+?)\*\*/g, '*$1*').replace(/\[(.+?)\]\((.+?)\)/g, '<$2|$1>');
+      const md = toMarkdown(d, site)
+        .replace(/\*\*(.+?)\*\*/g, '*$1*')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<$2|$1>');
       await post(need(c, 'webhook', 'webhook'), { text: `*${d.subject}*\n${md}` });
       return;
     }
@@ -146,7 +170,11 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
         const [k, ...v] = c.config.header.split(':');
         headers[k.trim()] = v.join(':').trim();
       }
-      await post(need(c, 'url', 'url'), { subject: d.subject, intro: d.intro, kind: d.kind, sections: d.sections, text: toText(d, site), markdown: toMarkdown(d, site), url: `${site}/admin` }, headers);
+      await post(
+        need(c, 'url', 'url'),
+        { subject: d.subject, intro: d.intro, kind: d.kind, sections: d.sections, text: toText(d, site), markdown: toMarkdown(d, site), url: `${site}/admin` },
+        headers,
+      );
       return;
     }
   }

@@ -9,13 +9,60 @@
   "toast": { "resumed": "Ödemeler devam ediyor", "paused": "Duraklatıldı. Gelecek ödemeler tahmin edilmeyecek" },
   "history": "Geçmiş",
   "summary": "Özet",
-  "field": { "amount": "Tutar", "cycle": "Ödeme dönemi", "monthlyYearly": "Aylık / yıllık", "category": "Kategori", "method": "Ödeme yöntemi", "start": "Başlangıç tarihi", "next": "Sonraki ödeme", "expires": "Hizmet bitişi", "expiresHint": "Otomatik yenileme bu tarihten önce ücretlendirir", "endedOn": "Bitiş tarihi", "trialEnd": "Deneme bitişi", "region": "Bölge" },
-  "up": { "planned": "Planlanan değişiklik · onaylanmadı", "starting": "Yakında başlıyor", "changing": "Yaklaşan değişiklik", "effective": "Geçerlilik tarihi" },
-  "plan": { "drop": "Geçiş yapma", "droppedToast": "Geçiş yapılmayacak. {date} sonrasında sona erecek", "confirm": "Geçişi onayla", "confirmedToast": "Geçiş onaylandı" },
+  "field": {
+    "amount": "Tutar",
+    "cycle": "Ödeme dönemi",
+    "monthlyYearly": "Aylık / yıllık",
+    "category": "Kategori",
+    "method": "Ödeme yöntemi",
+    "start": "Başlangıç tarihi",
+    "next": "Sonraki ödeme",
+    "expires": "Hizmet bitişi",
+    "expiresHint": "Otomatik yenileme bu tarihten önce ücretlendirir",
+    "endedOn": "Bitiş tarihi",
+    "trialEnd": "Deneme bitişi",
+    "region": "Bölge"
+  },
+  "up": {
+    "planned": "Planlanan değişiklik · onaylanmadı",
+    "starting": "Yakında başlıyor",
+    "changing": "Yaklaşan değişiklik",
+    "effective": "Geçerlilik tarihi"
+  },
+  "plan": {
+    "drop": "Geçiş yapma",
+    "droppedToast": "Geçiş yapılmayacak. {date} sonrasında sona erecek",
+    "confirm": "Geçişi onayla",
+    "confirmedToast": "Geçiş onaylandı"
+  },
   "intro": { "title": "Tanıtım teklifi", "price": "Tanıtım fiyatı", "until": "Teklif bitişi", "then": "Sonra" },
-  "remind": { "title": "Hatırlatmalar", "email": "E-posta hatırlatması", "off": "Kapalı", "onDay": "Ödeme günü saat {time}", "before": { "one": "{count} gün önce saat {time}", "other": "{count} gün önce saat {time}" } },
-  "share": { "owner": "Ortak · yönetici benim ({count}/{seats})", "member": "Ortak · katıldım", "payTo": "Ödenecek kişi", "host": "Yönetici", "myShare": "Payım", "unnamed": "Adsız", "paidUntil": "{date} tarihine kadar ödendi", "unpaid": "Henüz ödenmedi", "owed": "{amount} borç", "settled": "Ödeşildi" },
-  "charges": { "title": { "one": "Ödemeler · {count}", "other": "Ödemeler · {count}" }, "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" }, "onCard": "Kartta {amount} · ", "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)", "recent": "Yalnızca son 12'yi göster", "all": "Tümünü göster ({count})" },
+  "remind": {
+    "title": "Hatırlatmalar",
+    "email": "E-posta hatırlatması",
+    "off": "Kapalı",
+    "onDay": "Ödeme günü saat {time}",
+    "before": { "one": "{count} gün önce saat {time}", "other": "{count} gün önce saat {time}" }
+  },
+  "share": {
+    "owner": "Ortak · yönetici benim ({count}/{seats})",
+    "member": "Ortak · katıldım",
+    "payTo": "Ödenecek kişi",
+    "host": "Yönetici",
+    "myShare": "Payım",
+    "unnamed": "Adsız",
+    "paidUntil": "{date} tarihine kadar ödendi",
+    "unpaid": "Henüz ödenmedi",
+    "owed": "{amount} borç",
+    "settled": "Ödeşildi"
+  },
+  "charges": {
+    "title": { "one": "Ödemeler · {count}", "other": "Ödemeler · {count}" },
+    "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" },
+    "onCard": "Kartta {amount} · ",
+    "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)",
+    "recent": "Yalnızca son 12'yi göster",
+    "all": "Tümünü göster ({count})"
+  },
   "notes": "Notlar",
   "stats": {
     "spent": "Toplam harcama",

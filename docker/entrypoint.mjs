@@ -26,7 +26,19 @@ if (!setupToken) {
 // 3. 透传给 Worker 的变量
 const vars = { SETUP_TOKEN: setupToken };
 for (const k of ['SITE_URL', 'OWNER_PASSCODE', 'TRUST_PROXY']) if (process.env[k]) vars[k] = process.env[k];
-const args = ['dev', '--local', '--ip', '0.0.0.0', '--port', PORT, '--persist-to', DATA, '--show-interactive-dev-session=false', '--log-level', process.env.LOG_LEVEL || 'warn'];
+const args = [
+  'dev',
+  '--local',
+  '--ip',
+  '0.0.0.0',
+  '--port',
+  PORT,
+  '--persist-to',
+  DATA,
+  '--show-interactive-dev-session=false',
+  '--log-level',
+  process.env.LOG_LEVEL || 'warn',
+];
 for (const [k, v] of Object.entries(vars)) args.push('--var', `${k}:${v}`);
 
 const worker = spawn(wrangler, args, { stdio: 'inherit' });
@@ -39,7 +51,7 @@ async function ready() {
   for (let i = 0; i < 120; i++) {
     try {
       const r = await fetch(`${base}/api/auth/status`);
-      if (r.ok) return (await r.json());
+      if (r.ok) return await r.json();
     } catch {}
     await new Promise((r) => setTimeout(r, 1000));
   }

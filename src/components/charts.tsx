@@ -2,7 +2,19 @@ import type { ComponentChildren } from 'preact';
 import { tipProps } from './ui.tsx';
 
 /** 面积折线图：SVG 只画形状，文字用 HTML 叠加，避免被拉伸 */
-export function AreaChart({ values, labels, height = 160, tip, markers }: { values: number[]; labels: string[]; height?: number; tip: (i: number) => ComponentChildren; markers?: number[] }) {
+export function AreaChart({
+  values,
+  labels,
+  height = 160,
+  tip,
+  markers,
+}: {
+  values: number[];
+  labels: string[];
+  height?: number;
+  tip: (i: number) => ComponentChildren;
+  markers?: number[];
+}) {
   const W = 1000;
   const max = Math.max(1, ...values) * 1.12;
   const n = values.length;
@@ -21,7 +33,17 @@ export function AreaChart({ values, labels, height = 160, tip, markers }: { valu
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((f) => (
-          <line key={f} x1="0" x2={W} y1={height * f} y2={height * f} stroke="var(--sep)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="3 4" />
+          <line
+            key={f}
+            x1="0"
+            x2={W}
+            y1={height * f}
+            y2={height * f}
+            stroke="var(--sep)"
+            stroke-width="1"
+            vector-effect="non-scaling-stroke"
+            stroke-dasharray="3 4"
+          />
         ))}
         <path d={area} fill="url(#area-fill)" />
         <path d={line} fill="none" stroke="var(--accent)" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round" />
@@ -49,7 +71,21 @@ export function AreaChart({ values, labels, height = 160, tip, markers }: { valu
 }
 
 /** 柱 + 线：柱为现金，线为权责 */
-export function BarLine({ bars, line, labels, future, height = 150, tip }: { bars: number[]; line: number[]; labels: string[]; future: boolean[]; height?: number; tip: (i: number) => ComponentChildren }) {
+export function BarLine({
+  bars,
+  line,
+  labels,
+  future,
+  height = 150,
+  tip,
+}: {
+  bars: number[];
+  line: number[];
+  labels: string[];
+  future: boolean[];
+  height?: number;
+  tip: (i: number) => ComponentChildren;
+}) {
   const max = Math.max(1, ...bars, ...line) * 1.08;
   const n = bars.length;
   const W = 1000;
@@ -66,7 +102,15 @@ export function BarLine({ bars, line, labels, future, height = 150, tip }: { bar
         ))}
       </div>
       <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }} class="bl-line">
-        <path d={path} fill="none" stroke="var(--orange)" stroke-width="2.4" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round" />
+        <path
+          d={path}
+          fill="none"
+          stroke="var(--orange)"
+          stroke-width="2.4"
+          vector-effect="non-scaling-stroke"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
       </svg>
       <div class="area-x">
         {labels.map((l, i) =>
@@ -93,7 +137,10 @@ export interface Rect {
 export function squarify(values: number[], x = 0, y = 0, w = 100, h = 100): Rect[] {
   const total = values.reduce((a, b) => a + b, 0);
   if (total <= 0) return [];
-  const items = values.map((v, i) => ({ v: (v / total) * w * h, i })).filter((t) => t.v > 0).sort((a, b) => b.v - a.v);
+  const items = values
+    .map((v, i) => ({ v: (v / total) * w * h, i }))
+    .filter((t) => t.v > 0)
+    .sort((a, b) => b.v - a.v);
   const out: Rect[] = [];
   const worst = (row: number[], side: number) => {
     const s = row.reduce((a, b) => a + b, 0);
@@ -127,7 +174,15 @@ export function squarify(values: number[], x = 0, y = 0, w = 100, h = 100): Rect
   };
   for (const t of items) {
     const side = Math.min(rect.w, rect.h);
-    if (!row.length || worst([...row.map((r) => r.v), t.v], side) <= worst(row.map((r) => r.v), side)) row.push(t);
+    if (
+      !row.length ||
+      worst([...row.map((r) => r.v), t.v], side) <=
+        worst(
+          row.map((r) => r.v),
+          side,
+        )
+    )
+      row.push(t);
     else {
       layout(row);
       row = [t];
@@ -159,7 +214,23 @@ export interface Bucket {
 }
 
 /** 堆叠柱状图：有刻度、可选中，未来为斜纹 */
-export function Activity({ buckets, color, selected, current, onSelect, height = 220, fmt }: { buckets: Bucket[]; color: (k: string) => string; selected?: string; current?: string; onSelect: (k: string) => void; height?: number; fmt: (v: number) => string }) {
+export function Activity({
+  buckets,
+  color,
+  selected,
+  current,
+  onSelect,
+  height = 220,
+  fmt,
+}: {
+  buckets: Bucket[];
+  color: (k: string) => string;
+  selected?: string;
+  current?: string;
+  onSelect: (k: string) => void;
+  height?: number;
+  fmt: (v: number) => string;
+}) {
   const ticks = niceTicks(Math.max(1, ...buckets.map((b) => b.total)));
   const top = ticks[ticks.length - 1];
   return (
@@ -173,7 +244,12 @@ export function Activity({ buckets, color, selected, current, onSelect, height =
       </div>
       <div class="act-bars">
         {buckets.map((b, i) => (
-          <button key={b.key} class={`act-col ${(buckets.length - 1 - i) % 2 ? 'odd' : ''} ${b.future ? 'future' : ''} ${b.current ? 'current' : ''} ${(selected ?? current) === b.key ? 'sel' : ''} ${selected && selected !== b.key ? 'dim' : ''}`} onClick={() => onSelect(b.key)} aria-label={`${b.label} ${fmt(b.total)}`}>
+          <button
+            key={b.key}
+            class={`act-col ${(buckets.length - 1 - i) % 2 ? 'odd' : ''} ${b.future ? 'future' : ''} ${b.current ? 'current' : ''} ${(selected ?? current) === b.key ? 'sel' : ''} ${selected && selected !== b.key ? 'dim' : ''}`}
+            onClick={() => onSelect(b.key)}
+            aria-label={`${b.label} ${fmt(b.total)}`}
+          >
             <div class="act-stack" style={{ height: `${(b.total / top) * 100}%` }}>
               {b.parts.map((p) => (
                 <i key={p.k} style={{ flexGrow: p.v, background: color(p.k) }} />
@@ -199,7 +275,10 @@ export interface Bubble {
  * 返回的坐标已归一化到 [0, 1] 的正方形里。
  */
 export function packCircles(values: number[], aspect = 1.6): Bubble[] {
-  const order = values.map((v, i) => ({ v, i })).filter((x) => x.v > 0).sort((a, b) => b.v - a.v);
+  const order = values
+    .map((v, i) => ({ v, i }))
+    .filter((x) => x.v > 0)
+    .sort((a, b) => b.v - a.v);
   const placed: Bubble[] = [];
   const max = order[0]?.v ?? 1;
   const top = Math.sqrt(max);
@@ -238,5 +317,5 @@ export function packCircles(values: number[], aspect = 1.6): Bubble[] {
   const maxY = Math.max(...placed.map((p) => p.y + p.r));
   const w = maxX - minX;
   const h = maxY - minY;
-  return placed.map((p) => ({ i: p.i, r: p.r / w, x: (p.x - minX) / w, y: (p.y - minY) / w, h: h / w } as Bubble & { h: number }));
+  return placed.map((p) => ({ i: p.i, r: p.r / w, x: (p.x - minX) / w, y: (p.y - minY) / w, h: h / w }) as Bubble & { h: number });
 }

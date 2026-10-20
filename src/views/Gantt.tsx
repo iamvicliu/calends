@@ -62,8 +62,16 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
       next.set(id, top);
       if (reduce || !prevTops.current.size) return;
       const before = prevTops.current.get(id);
-      if (before == null) row.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
-      else if (before !== top) row.animate([{ transform: `translateY(${before - top}px)` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      if (before == null)
+        row.animate(
+          [
+            { opacity: 0, transform: 'translateY(6px)' },
+            { opacity: 1, transform: 'none' },
+          ],
+          { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        );
+      else if (before !== top)
+        row.animate([{ transform: `translateY(${before - top}px)` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
     });
     prevTops.current = next;
   });
@@ -99,21 +107,44 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   const keyOf = (v: Subscription) => (colorBy === 'method' ? (v.methodId ?? 'none') : (v.region ?? '—'));
   const keys = useMemo(() => [...new Set(rows.flatMap((r) => r.segs.map((g) => keyOf(g.v))))], [rows, colorBy]);
   const color = (v: Subscription) => PALETTE[keys.indexOf(keyOf(v)) % PALETTE.length];
-  const labelOf = (key: string) => (colorBy === 'method' ? (state.methods.find((m) => m.id === key)?.name ?? t('list.unassigned')) : key === '—' ? t('list.gantt.noRegion') : `${flag(key)} ${key}`);
+  const labelOf = (key: string) =>
+    colorBy === 'method'
+      ? (state.methods.find((m) => m.id === key)?.name ?? t('list.unassigned'))
+      : key === '—'
+        ? t('list.gantt.noRegion')
+        : `${flag(key)} ${key}`;
 
   // 刻度：年份始终标；1 年视图再标每个月
   const ticks: Array<{ d: string; label: string; major: boolean }> = [];
   for (let d = `${start.slice(0, 7)}-01`; d <= end; d = addMonths(d, 1)) {
     if (d < start) continue;
     const jan = d.slice(5, 7) === '01';
-    if (zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7)))) ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
+    if (zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7))))
+      ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
   }
 
   return (
     <div class="gantt">
       <div class="gt-bar">
-        <Seg small value={zoom} onChange={setZoom} options={[['1y', t('list.gantt.zoom1y')], ['3y', t('list.gantt.zoom3y')], ['all', t('list.all')]]} />
-        <Seg small value={colorBy} onChange={setColorBy} options={[['method', t('list.gantt.byMethod')], ['region', t('list.gantt.byRegion')]]} />
+        <Seg
+          small
+          value={zoom}
+          onChange={setZoom}
+          options={[
+            ['1y', t('list.gantt.zoom1y')],
+            ['3y', t('list.gantt.zoom3y')],
+            ['all', t('list.all')],
+          ]}
+        />
+        <Seg
+          small
+          value={colorBy}
+          onChange={setColorBy}
+          options={[
+            ['method', t('list.gantt.byMethod')],
+            ['region', t('list.gantt.byRegion')],
+          ]}
+        />
       </div>
       <div class="gt">
         <div class="gt-head">
@@ -139,14 +170,25 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           {rows.map((r) => {
             const charges = w ? chargesBetween(r.s, start, end, today) : [];
             return (
-              <div key={r.s.id} data-id={r.s.id} class="gt-row" style={{ '--lanes': Math.max(...r.lanes) + 1 } as Record<string, number>} onClick={() => onOpen(r.s)}>
+              <div
+                key={r.s.id}
+                data-id={r.s.id}
+                class="gt-row"
+                style={{ '--lanes': Math.max(...r.lanes) + 1 } as Record<string, number>}
+                onClick={() => onOpen(r.s)}
+              >
                 <div class="gt-label" title={r.s.name}>
                   <SubIcon sub={r.s} size={20} />
                   <span>{r.s.name}</span>
                 </div>
                 <div class="gt-track">
                   {r.gaps.map((g) => (
-                    <span key={g.from} class="gt-gap" style={{ left: x(g.from), width: Math.max(0, x(g.to) - x(g.from)) }} title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}>
+                    <span
+                      key={g.from}
+                      class="gt-gap"
+                      style={{ left: x(g.from), width: Math.max(0, x(g.to) - x(g.from)) }}
+                      title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
+                    >
                       {x(g.to) - x(g.from) > 56 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
                     </span>
                   ))}
@@ -260,23 +302,44 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
           </i>
         ))}
         <b class="mg-today" style={{ left: x(today) }} />
-        {segs.slice(1).map((g, i) => (segs[i].to < g.from && lanes[i] === lanes[i + 1] ? <span key={`gap-${g.from}`} class="mg-gap" style={{ left: x(segs[i].to), width: w(segs[i].to, g.from), top: `${lanes[i] * 22 + 9}px` }} title={t('list.gantt.gapDays', { count: diffDays(segs[i].to, g.from) })} /> : null))}
+        {segs
+          .slice(1)
+          .map((g, i) =>
+            segs[i].to < g.from && lanes[i] === lanes[i + 1] ? (
+              <span
+                key={`gap-${g.from}`}
+                class="mg-gap"
+                style={{ left: x(segs[i].to), width: w(segs[i].to, g.from), top: `${lanes[i] * 22 + 9}px` }}
+                title={t('list.gantt.gapDays', { count: diffDays(segs[i].to, g.from) })}
+              />
+            ) : null,
+          )}
         {segs.map((g, k) => {
-            if (g.v.cycle.unit === 'lifetime') return <span key={g.from} class="mg-dot" style={{ left: x(g.from), top: `${lanes[k] * 22 + 3}px`, background: color(g.v) }} title={t('list.gantt.lifetime', { amount: money(g.v.price, g.v.currency) })} />;
-            const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])].filter((d) => d >= g.from && d <= g.to).sort();
-            return cuts.slice(0, -1).map((a, n) => {
-              const b = cuts[n + 1];
-              const lastCut = n === cuts.length - 2;
-              const price = priceAt(g.v, a);
-              return (
-                <span
-                  key={`${g.from}-${a}`}
-                  class={`mg-seg ${n > 0 ? 'cont' : ''} ${!lastCut ? 'cut' : ''} ${lastCut && g.open ? 'open' : ''} ${g.v.planned ? 'planned' : ''} ${a > today ? 'future' : ''}`}
-                  style={{ left: x(a), width: w(a, b), top: `${lanes[k] * 22}px`, '--c': color(g.v) } as Record<string, string>}
-                  title={`${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${lastCut && g.open ? t('list.gantt.present') : cnDate(b)}`}
-                />
-              );
-            });
+          if (g.v.cycle.unit === 'lifetime')
+            return (
+              <span
+                key={g.from}
+                class="mg-dot"
+                style={{ left: x(g.from), top: `${lanes[k] * 22 + 3}px`, background: color(g.v) }}
+                title={t('list.gantt.lifetime', { amount: money(g.v.price, g.v.currency) })}
+              />
+            );
+          const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])]
+            .filter((d) => d >= g.from && d <= g.to)
+            .sort();
+          return cuts.slice(0, -1).map((a, n) => {
+            const b = cuts[n + 1];
+            const lastCut = n === cuts.length - 2;
+            const price = priceAt(g.v, a);
+            return (
+              <span
+                key={`${g.from}-${a}`}
+                class={`mg-seg ${n > 0 ? 'cont' : ''} ${!lastCut ? 'cut' : ''} ${lastCut && g.open ? 'open' : ''} ${g.v.planned ? 'planned' : ''} ${a > today ? 'future' : ''}`}
+                style={{ left: x(a), width: w(a, b), top: `${lanes[k] * 22}px`, '--c': color(g.v) } as Record<string, string>}
+                title={`${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${lastCut && g.open ? t('list.gantt.present') : cnDate(b)}`}
+              />
+            );
+          });
         })}
         {charges.map((c, i) => (
           <i key={i} class={`mg-charge ${c.amount < 0 ? 'refund' : ''} ${c.projected ? 'future' : ''}`} style={{ left: x(c.date) }} />
@@ -289,9 +352,7 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
             {state.methods.find((m) => m.id === id)?.name ?? t('list.unassigned')}
           </span>
         ))}
-        <span class="mg-range">
-          {t('list.gantt.range', { date: cnDate(start), count: segs.length })}
-        </span>
+        <span class="mg-range">{t('list.gantt.range', { date: cnDate(start), count: segs.length })}</span>
       </div>
     </div>
   );

@@ -33,7 +33,12 @@ import { localTime } from '../../shared/format.ts';
 
 interface Preview {
   day: string;
-  digests: Array<{ key: string; subject: string; intro: string; sections: Array<{ heading: string; rows: Array<{ title: string; sub?: string; amount?: string }> }> }>;
+  digests: Array<{
+    key: string;
+    subject: string;
+    intro: string;
+    sections: Array<{ heading: string; rows: Array<{ title: string; sub?: string; amount?: string }> }>;
+  }>;
   log: Array<{ dedupe_key: string; subject: string; status: string; sent_at: string }>;
 }
 
@@ -105,9 +110,15 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [ics, setIcs] = useState(false);
   const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[]; created: PaymentMethod[] } | null>(null);
 
-  const loadPreview = () => api<Preview>('/api/notify/preview').then(setPreview).catch(() => {});
+  const loadPreview = () =>
+    api<Preview>('/api/notify/preview')
+      .then(setPreview)
+      .catch(() => {});
   const [fxs, setFxs] = useState<{ needed: number; covered: number; sources: Record<string, number>; first?: string } | null>(null);
-  const loadFx = () => api<typeof fxs>('/api/fx/status').then(setFxs).catch(() => {});
+  const loadFx = () =>
+    api<typeof fxs>('/api/fx/status')
+      .then(setFxs)
+      .catch(() => {});
   useEffect(() => {
     loadPreview();
     loadFx();
@@ -140,8 +151,25 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
   const exportCsv = () => {
     const head = ['Name', 'Currency', 'Price', 'Category', 'Cycle', 'Starts', 'Ends', 'Tags', 'Payment Account', 'URL', 'Notes'];
-    const cyc = (x: Subscription) => (x.cycle.unit === 'lifetime' ? 'Lifetime' : x.cycle.every === 1 ? { day: 'Daily', week: 'Weekly', month: 'Monthly', year: 'Yearly' }[x.cycle.unit] : `Every ${x.cycle.every} ${x.cycle.unit}s`);
-    const rows = state.subscriptions.map((x) => [x.name, x.currency, x.price, x.category, cyc(x), x.start, x.end ?? '', x.tags.join(' '), state.methods.find((m) => m.id === x.methodId)?.name ?? '', x.url ?? '', x.notes ?? '']);
+    const cyc = (x: Subscription) =>
+      x.cycle.unit === 'lifetime'
+        ? 'Lifetime'
+        : x.cycle.every === 1
+          ? { day: 'Daily', week: 'Weekly', month: 'Monthly', year: 'Yearly' }[x.cycle.unit]
+          : `Every ${x.cycle.every} ${x.cycle.unit}s`;
+    const rows = state.subscriptions.map((x) => [
+      x.name,
+      x.currency,
+      x.price,
+      x.category,
+      cyc(x),
+      x.start,
+      x.end ?? '',
+      x.tags.join(' '),
+      state.methods.find((m) => m.id === x.methodId)?.name ?? '',
+      x.url ?? '',
+      x.notes ?? '',
+    ]);
     download(`subscriptions-${today}.csv`, toCsv([head, ...rows]), 'text/csv');
   };
 
@@ -157,50 +185,110 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               onChange={(v) => run(() => saveSettings({ language: v || undefined }))}
               options={[
                 { value: '', label: t('settings.general.followSystem'), hint: LOCALES.find((l) => l.code === preferredLocale())?.name },
-                ...LOCALES.map((l) => ({ value: l.code as string, label: l.name, icon: <span class="cp-flag"><img src={`/flags/${l.flag}.png`} alt="" /></span> })),
+                ...LOCALES.map((l) => ({
+                  value: l.code as string,
+                  label: l.name,
+                  icon: (
+                    <span class="cp-flag">
+                      <img src={`/flags/${l.flag}.png`} alt="" />
+                    </span>
+                  ),
+                })),
               ]}
               ariaLabel={t('settings.general.language')}
             />
           </Cell>
           <Cell label={t('settings.general.name')}>
-            <input value={name} placeholder={t('settings.general.namePlaceholder')} onInput={(e) => setName((e.target as HTMLInputElement).value)} onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), t('settings.toast.saved'))} />
+            <input
+              value={name}
+              placeholder={t('settings.general.namePlaceholder')}
+              onInput={(e) => setName((e.target as HTMLInputElement).value)}
+              onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), t('settings.toast.saved'))}
+            />
           </Cell>
           <Cell label={t('settings.general.startPage')}>
-            <Picker value={s.startPage ?? ''} onChange={(v) => run(() => saveSettings({ startPage: v || undefined }))} options={[{ value: '', label: t('app.nav.overview') }, ...START_PAGES.map(([k, l]) => ({ value: k, label: t(`app.nav.${l}`) }))]} ariaLabel={t('settings.general.startPageAria')} />
+            <Picker
+              value={s.startPage ?? ''}
+              onChange={(v) => run(() => saveSettings({ startPage: v || undefined }))}
+              options={[{ value: '', label: t('app.nav.overview') }, ...START_PAGES.map(([k, l]) => ({ value: k, label: t(`app.nav.${l}`) }))]}
+              ariaLabel={t('settings.general.startPageAria')}
+            />
           </Cell>
           <Cell label={t('settings.general.baseCurrency')}>
-            <CurrencySelect value={s.baseCurrency} onChange={(c) => run(() => saveSettings({ baseCurrency: c }))} ariaLabel={t('settings.general.baseCurrency')} />
+            <CurrencySelect
+              value={s.baseCurrency}
+              onChange={(c) => run(() => saveSettings({ baseCurrency: c }))}
+              ariaLabel={t('settings.general.baseCurrency')}
+            />
           </Cell>
           <Cell label={t('settings.general.timezone')}>
-            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={timeZones(s.timezone)} search ariaLabel={t('settings.general.timezone')} />
+            <Picker
+              value={s.timezone}
+              onChange={(z) => run(() => saveSettings({ timezone: z }))}
+              options={timeZones(s.timezone)}
+              search
+              ariaLabel={t('settings.general.timezone')}
+            />
           </Cell>
           <Cell label={t('settings.general.weekStart')}>
-            <Picker value={String(s.weekStart ?? 1)} onChange={(v) => run(() => saveSettings({ weekStart: v === '0' ? 0 : 1 }))} options={[{ value: '1', label: t('settings.general.monday') }, { value: '0', label: t('settings.general.sunday') }]} ariaLabel={t('settings.general.weekStartAria')} />
+            <Picker
+              value={String(s.weekStart ?? 1)}
+              onChange={(v) => run(() => saveSettings({ weekStart: v === '0' ? 0 : 1 }))}
+              options={[
+                { value: '1', label: t('settings.general.monday') },
+                { value: '0', label: t('settings.general.sunday') },
+              ]}
+              ariaLabel={t('settings.general.weekStartAria')}
+            />
           </Cell>
         </Group>
 
         <Group title={t('settings.sidebar.title')}>
           <Cell label={t('settings.sidebar.upcoming')}>
-            <Toggle label={t('settings.sidebar.upcoming')} checked={s.sidebarUpcoming !== false} onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))} />
+            <Toggle
+              label={t('settings.sidebar.upcoming')}
+              checked={s.sidebarUpcoming !== false}
+              onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))}
+            />
           </Cell>
           {s.sidebarUpcoming !== false && (
             <Cell label={t('settings.sidebar.lookAhead')}>
-              <Picker value={s.upcomingDays ?? 45} onChange={(n) => run(() => saveSettings({ upcomingDays: n }))} options={[7, 14, 30, 45, 60, 90].map((n) => ({ value: n, label: t('settings.days', { count: n }) }))} ariaLabel={t('settings.sidebar.lookAheadAria')} search={false} />
+              <Picker
+                value={s.upcomingDays ?? 45}
+                onChange={(n) => run(() => saveSettings({ upcomingDays: n }))}
+                options={[7, 14, 30, 45, 60, 90].map((n) => ({ value: n, label: t('settings.days', { count: n }) }))}
+                ariaLabel={t('settings.sidebar.lookAheadAria')}
+                search={false}
+              />
             </Cell>
           )}
           {SIDE_MODULES.map(([k, l]) => (
             <Cell key={k} label={t(`app.nav.${l}`)}>
-              <Toggle checked={!(s.hiddenNav ?? []).includes(k)} onChange={(v) => run(() => saveSettings({ hiddenNav: v ? (s.hiddenNav ?? []).filter((x) => x !== k) : [...(s.hiddenNav ?? []), k] }))} />
+              <Toggle
+                checked={!(s.hiddenNav ?? []).includes(k)}
+                onChange={(v) => run(() => saveSettings({ hiddenNav: v ? (s.hiddenNav ?? []).filter((x) => x !== k) : [...(s.hiddenNav ?? []), k] }))}
+              />
             </Cell>
           ))}
         </Group>
 
         <Group title={t('settings.remind.title')}>
           <Cell label={t('settings.remind.lead')}>
-            <Picker value={s.remindDays} onChange={(n) => run(() => saveSettings({ remindDays: n }))} options={[0, 1, 2, 3, 5, 7, 14].map((n) => ({ value: n, label: n === 0 ? t('settings.remind.sameDay') : t('settings.days', { count: n }) }))} ariaLabel={t('settings.remind.lead')} />
+            <Picker
+              value={s.remindDays}
+              onChange={(n) => run(() => saveSettings({ remindDays: n }))}
+              options={[0, 1, 2, 3, 5, 7, 14].map((n) => ({ value: n, label: n === 0 ? t('settings.remind.sameDay') : t('settings.days', { count: n }) }))}
+              ariaLabel={t('settings.remind.lead')}
+            />
           </Cell>
           <Cell label={t('settings.remind.hour')}>
-            <Picker value={s.notifyHour} onChange={(h) => run(() => saveSettings({ notifyHour: h }))} options={Array.from({ length: 24 }, (_, h) => ({ value: h, label: hour(h) }))} ariaLabel={t('settings.remind.hour')} search={false} />
+            <Picker
+              value={s.notifyHour}
+              onChange={(h) => run(() => saveSettings({ notifyHour: h }))}
+              options={Array.from({ length: 24 }, (_, h) => ({ value: h, label: hour(h) }))}
+              ariaLabel={t('settings.remind.hour')}
+              search={false}
+            />
           </Cell>
           <Cell label={t('settings.remind.monthly')}>
             <Toggle label={t('settings.remind.monthly')} checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
@@ -209,15 +297,24 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.test')}</span>}
             onClick={() =>
               run(async () => {
-                const r = await api<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }>('/api/notify/test', { method: 'POST', body: '{}' });
+                const r = await api<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }>('/api/notify/test', {
+                  method: 'POST',
+                  body: '{}',
+                });
                 if (!r.sent) throw new Error(r.reason ?? t('settings.remind.testFailed'));
                 const bad = r.results?.filter((x) => !x.ok) ?? [];
-                if (bad.length) throw new Error(bad.map((x) => t('settings.remind.channelError', { channel: x.channel, error: x.error })).join(t('settings.remind.errorSep')));
+                if (bad.length)
+                  throw new Error(
+                    bad.map((x) => t('settings.remind.channelError', { channel: x.channel, error: x.error })).join(t('settings.remind.errorSep')),
+                  );
                 loadPreview();
               }, t('settings.remind.testSent'))
             }
           />
-          <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.preview')}</span>} onClick={() => window.open('/api/notify/preview?html=1', '_blank')} />
+          <Cell
+            label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.preview')}</span>}
+            onClick={() => window.open('/api/notify/preview?html=1', '_blank')}
+          />
         </Group>
 
         <ChannelsGroup state={state} />
@@ -245,29 +342,50 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <Cell
               label={t('settings.books.unassigned', { count: unassigned.length })}
               onClick={() =>
-                run(async () => {
-                  for (const x of unassigned) await saveSub({ ...x, methodId: s.defaultMethodId });
-                }, t('settings.books.assignAllDone', { count: unassigned.length }))
+                run(
+                  async () => {
+                    for (const x of unassigned) await saveSub({ ...x, methodId: s.defaultMethodId });
+                  },
+                  t('settings.books.assignAllDone', { count: unassigned.length }),
+                )
               }
             >
               <span style={{ color: 'var(--accent)' }}>{t('settings.books.assignAll')}</span>
             </Cell>
           )}
           <Cell label={t('settings.books.collectCurrency')}>
-            <CurrencySelect value={s.collectCurrency ?? s.baseCurrency} onChange={(c) => run(() => saveSettings({ collectCurrency: c }))} ariaLabel={t('settings.books.collectCurrency')} />
+            <CurrencySelect
+              value={s.collectCurrency ?? s.baseCurrency}
+              onChange={(c) => run(() => saveSettings({ collectCurrency: c }))}
+              ariaLabel={t('settings.books.collectCurrency')}
+            />
           </Cell>
         </Group>
 
         <CategoriesGroup state={state} />
 
         <Group title={t('settings.fx.title')}>
-          <Cell label={t('settings.fx.current')} sub={t('settings.fx.updatedAt', { time: localTime(state.fx.fetchedAt, state.settings.timezone) })} onClick={() => run(refreshFx, t('settings.fx.updated'))}>
+          <Cell
+            label={t('settings.fx.current')}
+            sub={t('settings.fx.updatedAt', { time: localTime(state.fx.fetchedAt, state.settings.timezone) })}
+            onClick={() => run(refreshFx, t('settings.fx.updated'))}
+          >
             1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY
           </Cell>
           <Cell label={t('settings.fx.history')} sub={fxs?.first ? t('settings.fx.earliest', { date: fxs.first }) : undefined}>
             {fxs ? t('settings.fx.coverage', { covered: fxs.covered, count: fxs.needed }) : '…'}
           </Cell>
-          {fxs && fxs.covered < fxs.needed && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.fx.fill')}</span>} onClick={() => run(async () => { await syncFx(); await loadFx(); }, t('settings.fx.historyUpdated'))} />}
+          {fxs && fxs.covered < fxs.needed && (
+            <Cell
+              label={<span style={{ color: 'var(--accent)' }}>{t('settings.fx.fill')}</span>}
+              onClick={() =>
+                run(async () => {
+                  await syncFx();
+                  await loadFx();
+                }, t('settings.fx.historyUpdated'))
+              }
+            />
+          )}
         </Group>
 
         <Group title={t('settings.open.title')}>
@@ -275,11 +393,21 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             {s.icsToken ? t('settings.open.on') : t('settings.open.off')}
           </Cell>
           <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}/` : undefined}>
-            <Toggle label={t('settings.open.public')} checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? t('settings.open.publicOn') : t('settings.open.publicOff'))} />
+            <Toggle
+              label={t('settings.open.public')}
+              checked={s.publicView}
+              onChange={(v) => run(() => saveSettings({ publicView: v }), v ? t('settings.open.publicOn') : t('settings.open.publicOff'))}
+            />
           </Cell>
-          {s.publicView && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />}
+          {s.publicView && (
+            <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />
+          )}
           <Cell label={t('settings.open.ai')}>
-            <Toggle label={t('settings.open.ai')} checked={s.aiEnabled !== false} onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))} />
+            <Toggle
+              label={t('settings.open.ai')}
+              checked={s.aiEnabled !== false}
+              onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))}
+            />
           </Cell>
           {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('ai')} />}
         </Group>
@@ -315,7 +443,10 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                 class="btn primary"
                 onClick={() =>
                   run(async () => {
-                    const r = await api<{ restored: { subscriptions: number; methods: number; fxDays: number }; state: AppState }>('/api/backup', { method: 'POST', body: JSON.stringify(restoring.raw) });
+                    const r = await api<{ restored: { subscriptions: number; methods: number; fxDays: number }; state: AppState }>('/api/backup', {
+                      method: 'POST',
+                      body: JSON.stringify(restoring.raw),
+                    });
                     setRestoring(null);
                     location.reload();
                     return r;
@@ -369,7 +500,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             </>
           }
         >
-          <Group title={importing.created.length ? t('settings.import.newMethods', { names: importing.created.map((m) => m.name).join(t('settings.import.sep')) }) : undefined}>
+          <Group
+            title={
+              importing.created.length
+                ? t('settings.import.newMethods', { names: importing.created.map((m) => m.name).join(t('settings.import.sep')) })
+                : undefined
+            }
+          >
             {importing.subs.map((x) => (
               <Cell key={x.id} label={x.name}>
                 {x.currency} {x.price} / {cycleShort(x.cycle)}

@@ -60,7 +60,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     ...init,
     credentials: 'same-origin',
     // 服务端按当前界面语言返回错误等文案
-    headers: { 'content-type': 'application/json', 'x-locale': locale(), ...(init.headers ?? {}) },
+    headers: { 'content-type': 'application/json', 'x-locale': locale(), ...init.headers },
   });
   if (res.status === 401 && path !== '/api/login' && !path.startsWith('/api/auth/')) {
     set({ phase: 'login' });
@@ -175,7 +175,45 @@ export async function setupPassword(setupToken: string, password: string): Promi
 
 /** 按浏览器语言里的地区猜本位币，例如 zh-CN → CNY、en-GB → GBP；猜不出时返回 undefined */
 function guessCurrency(): string | undefined {
-  const MAP: Record<string, string> = { CN: 'CNY', US: 'USD', GB: 'GBP', HK: 'HKD', TW: 'TWD', JP: 'JPY', KR: 'KRW', SG: 'SGD', AU: 'AUD', CA: 'CAD', IN: 'INR', TR: 'TRY', RU: 'RUB', BR: 'BRL', ID: 'IDR', VN: 'VND', PH: 'PHP', TH: 'THB', MY: 'MYR', NG: 'NGN', CH: 'CHF', UA: 'UAH', KZ: 'KZT', PK: 'PKR', EG: 'EGP', AR: 'ARS', DE: 'EUR', FR: 'EUR', ES: 'EUR', IT: 'EUR', NL: 'EUR', PT: 'EUR', AT: 'EUR', BE: 'EUR', IE: 'EUR', FI: 'EUR', GR: 'EUR' };
+  const MAP: Record<string, string> = {
+    CN: 'CNY',
+    US: 'USD',
+    GB: 'GBP',
+    HK: 'HKD',
+    TW: 'TWD',
+    JP: 'JPY',
+    KR: 'KRW',
+    SG: 'SGD',
+    AU: 'AUD',
+    CA: 'CAD',
+    IN: 'INR',
+    TR: 'TRY',
+    RU: 'RUB',
+    BR: 'BRL',
+    ID: 'IDR',
+    VN: 'VND',
+    PH: 'PHP',
+    TH: 'THB',
+    MY: 'MYR',
+    NG: 'NGN',
+    CH: 'CHF',
+    UA: 'UAH',
+    KZ: 'KZT',
+    PK: 'PKR',
+    EG: 'EGP',
+    AR: 'ARS',
+    DE: 'EUR',
+    FR: 'EUR',
+    ES: 'EUR',
+    IT: 'EUR',
+    NL: 'EUR',
+    PT: 'EUR',
+    AT: 'EUR',
+    BE: 'EUR',
+    IE: 'EUR',
+    FI: 'EUR',
+    GR: 'EUR',
+  };
   for (const l of navigator.languages ?? [navigator.language]) {
     try {
       const region = new Intl.Locale(l).maximize().region;
@@ -189,7 +227,10 @@ function guessCurrency(): string | undefined {
 
 export async function loginPasskey(): Promise<void> {
   const { startAuthentication } = await import('@simplewebauthn/browser');
-  const { options, challengeId } = await api<{ options: Parameters<typeof startAuthentication>[0]['optionsJSON']; challengeId: string }>('/api/auth/passkey/login/options', { method: 'POST' });
+  const { options, challengeId } = await api<{ options: Parameters<typeof startAuthentication>[0]['optionsJSON']; challengeId: string }>(
+    '/api/auth/passkey/login/options',
+    { method: 'POST' },
+  );
   const response = await startAuthentication({ optionsJSON: options });
   await api('/api/auth/passkey/login', { method: 'POST', body: JSON.stringify({ challengeId, response }) });
   set({ phase: 'loading' });
@@ -198,7 +239,10 @@ export async function loginPasskey(): Promise<void> {
 
 export async function registerPasskey(name: string): Promise<void> {
   const { startRegistration } = await import('@simplewebauthn/browser');
-  const { options, challengeId } = await api<{ options: Parameters<typeof startRegistration>[0]['optionsJSON']; challengeId: string }>('/api/auth/passkey/register/options', { method: 'POST' });
+  const { options, challengeId } = await api<{ options: Parameters<typeof startRegistration>[0]['optionsJSON']; challengeId: string }>(
+    '/api/auth/passkey/register/options',
+    { method: 'POST' },
+  );
   const response = await startRegistration({ optionsJSON: options });
   await api('/api/auth/passkey/register', { method: 'POST', body: JSON.stringify({ challengeId, response, name }) });
 }
@@ -245,7 +289,10 @@ export function saveSub(sub: Subscription) {
 }
 
 export function deleteSub(id: string) {
-  return optimistic((s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id) }), () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }));
+  return optimistic(
+    (s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id) }),
+    () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }),
+  );
 }
 
 /** 钱包卡片换顺序：按新顺序重写每张卡的 order */
@@ -269,9 +316,16 @@ export function saveMethod(m: PaymentMethod) {
 export async function deleteMethod(id: string) {
   // 订阅本身和它的各个阶段都可能引用这张卡，一并清掉
   const linked = store.state!.subscriptions.filter((s) => s.methodId === id || s.phases?.some((p) => p.methodId === id));
-  await optimistic((s) => ({ ...s, methods: s.methods.filter((x) => x.id !== id) }), () => api(`/api/methods/${id}`, { method: 'DELETE' }));
+  await optimistic(
+    (s) => ({ ...s, methods: s.methods.filter((x) => x.id !== id) }),
+    () => api(`/api/methods/${id}`, { method: 'DELETE' }),
+  );
   for (const s of linked)
-    await saveSub({ ...s, methodId: s.methodId === id ? undefined : s.methodId, phases: s.phases?.map((p) => (p.methodId === id ? { ...p, methodId: undefined } : p)) });
+    await saveSub({
+      ...s,
+      methodId: s.methodId === id ? undefined : s.methodId,
+      phases: s.phases?.map((p) => (p.methodId === id ? { ...p, methodId: undefined } : p)),
+    });
 }
 
 /** 换上服务端改过的订阅（同步人的资料、合并时一次改好几条） */
@@ -289,7 +343,10 @@ export async function savePerson(p: Person) {
 
 /** 删除一个人：只能删没有被任何合租、代付引用的（服务端会再检查一次） */
 export function deletePerson(id: string) {
-  return optimistic((s) => ({ ...s, people: (s.people ?? []).filter((x) => x.id !== id) }), () => api(`/api/people/${id}`, { method: 'DELETE' }));
+  return optimistic(
+    (s) => ({ ...s, people: (s.people ?? []).filter((x) => x.id !== id) }),
+    () => api(`/api/people/${id}`, { method: 'DELETE' }),
+  );
 }
 
 /** 把 from 合并到 into：引用全部改指向 into，from 从名册里去掉 */
@@ -329,7 +386,10 @@ export function saveCategories(categories: Category[], renames: Record<string, s
   return optimistic(
     (s) => ({ ...s, settings: { ...s.settings, categories }, subscriptions: swap(s.subscriptions, renameInSubs(s.subscriptions, renames)) }),
     async () => {
-      const r = await api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', { method: 'PUT', body: JSON.stringify({ categories, renames }) });
+      const r = await api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', {
+        method: 'PUT',
+        body: JSON.stringify({ categories, renames }),
+      });
       patchState((s) => ({ ...s, settings: r.settings, subscriptions: swap(s.subscriptions, r.subscriptions) }));
       return r.subscriptions.length;
     },

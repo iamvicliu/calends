@@ -21,7 +21,15 @@
   "nextCharge": "Próximo cobro",
   "note": "Nota",
   "diffLabel": "Devuelto − cobrado",
-  "table": { "date": "Fecha de cobro", "charged": "Cobrado", "received": "Devuelto", "diff": "Diferencia", "record": "Registrar", "even": "Igual", "none": "Aún no hay cobros." },
+  "table": {
+    "date": "Fecha de cobro",
+    "charged": "Cobrado",
+    "received": "Devuelto",
+    "diff": "Diferencia",
+    "record": "Registrar",
+    "even": "Igual",
+    "none": "Aún no hay cobros."
+  },
   "entry": {
     "markedDue": "Marcado como pendiente",
     "saved": "Guardado",

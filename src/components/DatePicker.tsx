@@ -20,7 +20,21 @@ function grid(month: string): string[] {
  * 日期选择器：按钮显示「2026年10月19日」，点开是月历。
  * 弹层用 fixed 定位，避免被弹窗的滚动容器裁掉；窄屏时贴底显示。
  */
-export function DatePicker({ value, onChange, placeholder = t('picker.date.placeholder'), clearable, min, max }: { value?: string; onChange: (v: string | undefined) => void; placeholder?: string; clearable?: boolean; min?: string; max?: string }) {
+export function DatePicker({
+  value,
+  onChange,
+  placeholder = t('picker.date.placeholder'),
+  clearable,
+  min,
+  max,
+}: {
+  value?: string;
+  onChange: (v: string | undefined) => void;
+  placeholder?: string;
+  clearable?: boolean;
+  min?: string;
+  max?: string;
+}) {
   const today = todayOf();
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState((value ?? today).slice(0, 7));
@@ -101,23 +115,46 @@ export function DatePicker({ value, onChange, placeholder = t('picker.date.place
 
   return (
     <>
-      <button type="button" ref={btn} class={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`} onClick={toggle} aria-haspopup="dialog" aria-expanded={open}>
+      <button
+        type="button"
+        ref={btn}
+        class={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`}
+        onClick={toggle}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
         <Icon name="cal" />
         <span>{value ? cnDateFull(value) : placeholder}</span>
       </button>
       {open && pos && (
         <>
           {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
-          <div ref={pop} class={`dp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} role="dialog" aria-label={t('picker.date.placeholder')}>
+          <div
+            ref={pop}
+            class={`dp-pop ${pos.mobile ? 'mobile' : ''}`}
+            style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
+            role="dialog"
+            aria-label={t('picker.date.placeholder')}
+          >
             <div class="dp-head">
               <button type="button" class="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
                 {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
                 <Icon name="down" />
               </button>
-              <button type="button" class="dp-nav" aria-label={t('picker.date.prev')} onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}>
+              <button
+                type="button"
+                class="dp-nav"
+                aria-label={t('picker.date.prev')}
+                onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}
+              >
                 <Icon name="left" />
               </button>
-              <button type="button" class="dp-nav" aria-label={t('picker.date.next')} onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}>
+              <button
+                type="button"
+                class="dp-nav"
+                aria-label={t('picker.date.next')}
+                onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}
+              >
                 <Icon name="right" />
               </button>
             </div>
@@ -132,7 +169,13 @@ export function DatePicker({ value, onChange, placeholder = t('picker.date.place
                   <button
                     type="button"
                     key={d}
-                    class={['dp-day', d.startsWith(month) ? '' : 'out', d === today ? 'today' : '', d === value ? 'sel' : '', d === cursor ? 'cursor' : ''].join(' ')}
+                    class={[
+                      'dp-day',
+                      d.startsWith(month) ? '' : 'out',
+                      d === today ? 'today' : '',
+                      d === value ? 'sel' : '',
+                      d === cursor ? 'cursor' : '',
+                    ].join(' ')}
                     disabled={!!disabled(d)}
                     onClick={() => pick(d)}
                   >

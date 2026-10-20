@@ -80,7 +80,10 @@ export function switchPlan(s: Subscription, at: string, next: PlanChange, keepUn
 
 /** 计划成真：去掉「计划」标记 */
 export function confirmPlan(s: Subscription, start: string): Subscription {
-  return mirror(s, phasesOf(s).map((p) => (p.start === start ? { ...p, planned: undefined } : p)));
+  return mirror(
+    s,
+    phasesOf(s).map((p) => (p.start === start ? { ...p, planned: undefined } : p)),
+  );
 }
 
 /** 不切换了：删掉这个计划阶段，上一阶段就在原定的切换日结束（到期不续）；原本就打算并行跑得更久的，保留它自己的结束日 */
@@ -90,7 +93,21 @@ export function dropPlan(s: Subscription, start: string): Subscription {
   if (!last.end || last.end <= start) last.end = start;
   if (phases.length === 1) {
     const p = phases[0];
-    return { ...s, phases: undefined, start: p.start, end: p.end, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, priceHistory: p.priceHistory, intro: p.intro, payments: p.payments, nextDue: p.nextDue };
+    return {
+      ...s,
+      phases: undefined,
+      start: p.start,
+      end: p.end,
+      price: p.price,
+      currency: p.currency,
+      cycle: p.cycle,
+      methodId: p.methodId,
+      region: p.region,
+      priceHistory: p.priceHistory,
+      intro: p.intro,
+      payments: p.payments,
+      nextDue: p.nextDue,
+    };
   }
   return mirror({ ...s, start: phases[0].start }, phases);
 }
@@ -109,7 +126,10 @@ export function resume(s: Subscription, at: string, next: PlanChange): Subscript
 export function changePrice(s: Subscription, from: string, amount: number): Subscription {
   if (!s.phases?.length) {
     const hist = s.priceHistory?.length ? [...s.priceHistory] : [{ from: s.start, amount: priceAt(s, addDays(from, -1)) }];
-    const merged = hist.filter((p) => p.from !== from).concat({ from, amount }).sort((a, b) => a.from.localeCompare(b.from));
+    const merged = hist
+      .filter((p) => p.from !== from)
+      .concat({ from, amount })
+      .sort((a, b) => a.from.localeCompare(b.from));
     return { ...s, priceHistory: merged, price: merged[merged.length - 1].amount };
   }
   const phases = phasesOf(s);
@@ -118,7 +138,10 @@ export function changePrice(s: Subscription, from: string, amount: number): Subs
   const p = phases[idx];
   const old = phaseSubs({ ...s, phases })[idx];
   const hist = p.priceHistory?.length ? [...p.priceHistory] : [{ from: p.start, amount: priceAt(old, addDays(from, -1)) }];
-  p.priceHistory = hist.filter((x) => x.from !== from).concat({ from, amount }).sort((a, b) => a.from.localeCompare(b.from));
+  p.priceHistory = hist
+    .filter((x) => x.from !== from)
+    .concat({ from, amount })
+    .sort((a, b) => a.from.localeCompare(b.from));
   p.price = p.priceHistory[p.priceHistory.length - 1].amount;
   return mirror(s, phases);
 }
@@ -132,7 +155,12 @@ const endAt = (phases: Phase[], i: number) => phases[i].end ?? phases[i + 1]?.st
  */
 function editIndex(phases: Phase[], today: string): number {
   const live = phases.findLastIndex((p, i) => p.start <= today && today < endAt(phases, i));
-  return live >= 0 ? live : Math.max(0, phases.findLastIndex((p) => p.start <= today));
+  return live >= 0
+    ? live
+    : Math.max(
+        0,
+        phases.findLastIndex((p) => p.start <= today),
+      );
 }
 
 /** 打开编辑表单时，顶层字段换成当前阶段的，避免把未生效的计划阶段当成现在的样子 */
@@ -150,7 +178,15 @@ export function toEditForm(s: Subscription, today: string): Subscription {
 export function syncPhase(s: Subscription, today: string): Subscription {
   if (!s.phases?.length) return s;
   const phases = phasesOf(s);
-  Object.assign(phases[editIndex(phases, today)], { price: s.price, currency: s.currency, cycle: s.cycle, methodId: s.methodId, region: s.region, intro: s.intro, bonus: s.bonus });
+  Object.assign(phases[editIndex(phases, today)], {
+    price: s.price,
+    currency: s.currency,
+    cycle: s.cycle,
+    methodId: s.methodId,
+    region: s.region,
+    intro: s.intro,
+    bonus: s.bonus,
+  });
   if (s.end !== endOf(phases)) phases[phases.length - 1].end = s.end;
   return { ...mirror(s, phases), end: s.end };
 }
@@ -179,7 +215,21 @@ export function removePhase(s: Subscription, index: number): Subscription {
   if (index === phases.length && prev.end && prev.end >= removed.start) prev.end = undefined;
   if (phases.length === 1) {
     const p = phases[0];
-    return { ...s, phases: undefined, start: p.start, end: p.end, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, priceHistory: p.priceHistory, intro: p.intro, payments: p.payments, nextDue: p.nextDue };
+    return {
+      ...s,
+      phases: undefined,
+      start: p.start,
+      end: p.end,
+      price: p.price,
+      currency: p.currency,
+      cycle: p.cycle,
+      methodId: p.methodId,
+      region: p.region,
+      priceHistory: p.priceHistory,
+      intro: p.intro,
+      payments: p.payments,
+      nextDue: p.nextDue,
+    };
   }
   return mirror({ ...s, start: phases[0].start }, phases);
 }
@@ -195,7 +245,11 @@ function phaseIndexAt(phases: Phase[], date: string, sub?: Subscription, phase?:
   if (pick >= 0) return pick;
   const live = phases.flatMap((p, k) => (p.start <= date && date < endAt(phases, k) ? [k] : []));
   if (existing && sub && live.length > 1) {
-    const has = live.find((k) => (phases[k].payments ?? []).some((x) => x.date === date)) ?? live.find((k) => !phases[k].payments?.length && chargesBetween({ ...sub, phases: undefined, ...phases[k], end: endAt(phases, k) }, date, date, date).length);
+    const has =
+      live.find((k) => (phases[k].payments ?? []).some((x) => x.date === date)) ??
+      live.find(
+        (k) => !phases[k].payments?.length && chargesBetween({ ...sub, phases: undefined, ...phases[k], end: endAt(phases, k) }, date, date, date).length,
+      );
     if (has != null) return has;
   }
   if (live.length) return live[live.length - 1];

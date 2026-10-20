@@ -48,9 +48,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
 
   return (
     <>
-      <Toolbar title={t('family.pool.title')}>
-        {!ro && <FamilyTabs tab="plans" />}
-      </Toolbar>
+      <Toolbar title={t('family.pool.title')}>{!ro && <FamilyTabs tab="plans" />}</Toolbar>
       <div class="page fade-in stack">
         <div class="grid g-3">
           <div class="card stat">
@@ -90,108 +88,164 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         {/* 两列各自独立：展开一张卡只撑高它所在的那一列，不影响同一行的另一张 */}
         <div class="car-cols">
           {[0, 1].map((col) => (
-          <div class="car-col" key={col}>
-          {owned.map((s, idx) => {
-            if (idx % 2 !== col) return null;
-            const sh = s.share!;
-            const dues = memberDues(s, today);
-            // 已退出的成员不占座，只在展开的明细里保留
-            const onboard = sh.members.filter((m) => !m.left || m.left > today);
-            const next = nextCharge(s, today);
-            return (
-              <div key={s.id} class="card stack" style={{ gap: 14, order: idx }}>
-                <button class="row" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(s)}>
-                  <SubIcon sub={s} size={46} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 16 }}>{s.name}</div>
-                    <div class="muted" style={{ fontSize: 13 }}>
-                      {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                      {next ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
-                    </div>
-                  </div>
-                </button>
-                <div class="seats-row">
-                <div class="seats">
-                  <span class="seat me" title={t('family.pool.me')}><img src="/icons/avatar.png" alt={t('family.pool.me')} /></span>
-                  {onboard.map((m) => {
-                    const owe = dues.find((d) => d.member.id === m.id)?.periodsOwed;
-                    return (
-                      <button key={m.id} type="button" disabled={ro} onClick={() => setMember({ s, m })} class={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`} title={m.exempt ? t('family.pool.exemptTitle', { name: m.name }) : m.name}>
-                        {[...(m.name || '?')][0]}
-                      </button>
-                    );
-                  })}
-                  {Array.from({ length: Math.max(0, sh.seats - 1 - onboard.length) }, (_, i) => (
-                    <button key={i} type="button" class="seat add" disabled={ro} onClick={() => setMember({ s })} aria-label={t('family.pool.addMember')} title={t('family.pool.addMember')}>
-                      +
-                    </button>
-                  ))}
-                </div>
-                {s.manageUrl && (
-                  <a class="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
-                    <Icon name="gear" size={14} /> {t('family.pool.manage')}
-                  </a>
-                )}
-                <button class={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
-                  {(() => {
-                    const n = dues.filter((d) => d.periodsOwed > 0).length;
-                    return n ? <span class="owe">{t('family.pool.owedN', { count: n })}</span> : sh.members.length ? t('family.pool.settled') : t('family.pool.noMembers');
-                  })()}
-                  <Icon name="down" size={14} />
-                </button>
-                </div>
-                <CarFacts book={books.get(s.id)!} base={base} />
-                {expanded.has(s.id) && (
-                <>
-                {!ro && onboard.length < sh.seats - 1 && (
-                  <button class="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
-                    <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: sh.seats - 1 - onboard.length })}
-                  </button>
-                )}
-                <div>
-                  {dues.map((d) => (
-                    <div key={d.member.id} class="member">
-                      <button class="member-info" disabled={ro} onClick={() => setMember({ s, m: d.member })}>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>
-                          {d.member.name || t('family.pool.unnamed')}
-                          {d.member.left && d.member.left <= today && <span class="badge" style={{ marginLeft: 6 }}>{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
-                          {contactText(d.member) && <span class="muted" style={{ fontWeight: 400 }}> · {contactText(d.member)}</span>}
+            <div class="car-col" key={col}>
+              {owned.map((s, idx) => {
+                if (idx % 2 !== col) return null;
+                const sh = s.share!;
+                const dues = memberDues(s, today);
+                // 已退出的成员不占座，只在展开的明细里保留
+                const onboard = sh.members.filter((m) => !m.left || m.left > today);
+                const next = nextCharge(s, today);
+                return (
+                  <div key={s.id} class="card stack" style={{ gap: 14, order: idx }}>
+                    <button class="row" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(s)}>
+                      <SubIcon sub={s} size={46} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: 16 }}>{s.name}</div>
+                        <div class="muted" style={{ fontSize: 13 }}>
+                          {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                          {next ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
                         </div>
-                        <div class="muted" style={{ fontSize: 12 }}>
-                          {d.member.exempt ? (d.member.note ?? t('family.pool.exemptNote')) : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: d.member.paidUntil }) : t('family.pool.noPay')}`}
-                          {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
-                          {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
-                        </div>
-                      </button>
-                      <div style={{ textAlign: 'right', fontSize: 13.5 }}>
-                        {d.member.exempt ? <span class="muted" style={{ fontWeight: 600 }}>{t('family.pool.exempt')}</span> : d.periodsOwed > 0 ? <b style={{ color: 'var(--orange)' }}>{t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect) })}</b> : <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>}
-                        {!d.member.exempt && (
-                          <div class="muted" style={{ fontSize: 12 }}>
-                            {perBill('family.pool.perFee', d.member.billEvery ?? 1, { fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency) })}
-                          </div>
-                        )}
                       </div>
-                      {!ro && !d.member.exempt && (
-                        <button class={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
-                          <Icon name="check" /> {t('family.pool.collect')}
-                        </button>
+                    </button>
+                    <div class="seats-row">
+                      <div class="seats">
+                        <span class="seat me" title={t('family.pool.me')}>
+                          <img src="/icons/avatar.png" alt={t('family.pool.me')} />
+                        </span>
+                        {onboard.map((m) => {
+                          const owe = dues.find((d) => d.member.id === m.id)?.periodsOwed;
+                          return (
+                            <button
+                              key={m.id}
+                              type="button"
+                              disabled={ro}
+                              onClick={() => setMember({ s, m })}
+                              class={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`}
+                              title={m.exempt ? t('family.pool.exemptTitle', { name: m.name }) : m.name}
+                            >
+                              {[...(m.name || '?')][0]}
+                            </button>
+                          );
+                        })}
+                        {Array.from({ length: Math.max(0, sh.seats - 1 - onboard.length) }, (_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            class="seat add"
+                            disabled={ro}
+                            onClick={() => setMember({ s })}
+                            aria-label={t('family.pool.addMember')}
+                            title={t('family.pool.addMember')}
+                          >
+                            +
+                          </button>
+                        ))}
+                      </div>
+                      {s.manageUrl && (
+                        <a class="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
+                          <Icon name="gear" size={14} /> {t('family.pool.manage')}
+                        </a>
                       )}
+                      <button class={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
+                        {(() => {
+                          const n = dues.filter((d) => d.periodsOwed > 0).length;
+                          return n ? (
+                            <span class="owe">{t('family.pool.owedN', { count: n })}</span>
+                          ) : sh.members.length ? (
+                            t('family.pool.settled')
+                          ) : (
+                            t('family.pool.noMembers')
+                          );
+                        })()}
+                        <Icon name="down" size={14} />
+                      </button>
                     </div>
-                  ))}
-                </div>
-                </>
-                )}
-              </div>
-            );
-          })}
-          </div>
+                    <CarFacts book={books.get(s.id)!} base={base} />
+                    {expanded.has(s.id) && (
+                      <>
+                        {!ro && onboard.length < sh.seats - 1 && (
+                          <button class="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
+                            <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: sh.seats - 1 - onboard.length })}
+                          </button>
+                        )}
+                        <div>
+                          {dues.map((d) => (
+                            <div key={d.member.id} class="member">
+                              <button class="member-info" disabled={ro} onClick={() => setMember({ s, m: d.member })}>
+                                <div style={{ fontWeight: 600, fontSize: 14 }}>
+                                  {d.member.name || t('family.pool.unnamed')}
+                                  {d.member.left && d.member.left <= today && (
+                                    <span class="badge" style={{ marginLeft: 6 }}>
+                                      {t('family.pool.leftOn', { date: cnDate(d.member.left) })}
+                                    </span>
+                                  )}
+                                  {contactText(d.member) && (
+                                    <span class="muted" style={{ fontWeight: 400 }}>
+                                      {' '}
+                                      · {contactText(d.member)}
+                                    </span>
+                                  )}
+                                </div>
+                                <div class="muted" style={{ fontSize: 12 }}>
+                                  {d.member.exempt
+                                    ? (d.member.note ?? t('family.pool.exemptNote'))
+                                    : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: d.member.paidUntil }) : t('family.pool.noPay')}`}
+                                  {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
+                                  {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
+                                </div>
+                              </button>
+                              <div style={{ textAlign: 'right', fontSize: 13.5 }}>
+                                {d.member.exempt ? (
+                                  <span class="muted" style={{ fontWeight: 600 }}>
+                                    {t('family.pool.exempt')}
+                                  </span>
+                                ) : d.periodsOwed > 0 ? (
+                                  <b style={{ color: 'var(--orange)' }}>
+                                    {t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect) })}
+                                  </b>
+                                ) : (
+                                  <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
+                                )}
+                                {!d.member.exempt && (
+                                  <div class="muted" style={{ fontSize: 12 }}>
+                                    {perBill('family.pool.perFee', d.member.billEvery ?? 1, {
+                                      fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                              {!ro && !d.member.exempt && (
+                                <button class={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
+                                  <Icon name="check" /> {t('family.pool.collect')}
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ))}
         </div>
 
         {joined.length > 0 && (
           <Group title={t('family.pool.joinedGroup')}>
             {joined.map((s) => (
-              <Cell key={s.id} label={<span class="row"><SubIcon sub={s} size={30} />{s.name}</span>} sub={undefined} onClick={() => onOpen(s)}>
+              <Cell
+                key={s.id}
+                label={
+                  <span class="row">
+                    <SubIcon sub={s} size={30} />
+                    {s.name}
+                  </span>
+                }
+                sub={undefined}
+                onClick={() => onOpen(s)}
+              >
                 {t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: money(s.price, s.currency) })}
               </Cell>
             ))}
@@ -219,7 +273,15 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           </Group>
         )}
         {convert && <ConvertSheet s={convert} today={today} onClose={() => setConvert(null)} />}
-        {member && <MemberSheet state={state} s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s} member={member.m} collect={member.collect} onClose={() => setMember(null)} />}
+        {member && (
+          <MemberSheet
+            state={state}
+            s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
+            member={member.m}
+            collect={member.collect}
+            onClose={() => setMember(null)}
+          />
+        )}
       </div>
     </>
   );
@@ -252,10 +314,19 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
           <button
             class="btn primary"
             onClick={() =>
-              run(async () => {
-                await saveSub({ ...s, share: role === 'owner' ? { role, seats, members: [], since: today } : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today } });
-                onClose();
-              }, role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'))
+              run(
+                async () => {
+                  await saveSub({
+                    ...s,
+                    share:
+                      role === 'owner'
+                        ? { role, seats, members: [], since: today }
+                        : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today },
+                  });
+                  onClose();
+                },
+                role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'),
+              )
             }
           >
             {t('family.convert.submit')}
@@ -318,7 +389,15 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
           <>
             <span>{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
             <span>
-              {tx('family.facts.actual', { paid: fmt(book.paid), received: fmt(book.received), result: <b class={actual >= 0 ? 'gain' : 'loss'}>{actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}</b> })}
+              {tx('family.facts.actual', {
+                paid: fmt(book.paid),
+                received: fmt(book.received),
+                result: (
+                  <b class={actual >= 0 ? 'gain' : 'loss'}>
+                    {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
+                  </b>
+                ),
+              })}
             </span>
           </>
         ) : (

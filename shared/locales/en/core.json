@@ -1,5 +1,11 @@
 {
-  "bill": { "m1": "Monthly", "m3": "Quarterly", "m6": "Every 6 months", "m12": "Yearly", "custom": { "one": "Every {count} month", "other": "Every {count} months" } },
+  "bill": {
+    "m1": "Monthly",
+    "m3": "Quarterly",
+    "m6": "Every 6 months",
+    "m12": "Yearly",
+    "custom": { "one": "Every {count} month", "other": "Every {count} months" }
+  },
   "cycle": {
     "lifetime": "Lifetime",
     "once": "once",
@@ -35,15 +41,23 @@
     },
     "dup": {
       "title": "{names} may be duplicates",
-      "body": { "one": "This subscription costs about {sum} a month. Check whether you still need it.", "other": "These {count} subscriptions cost about {sum} a month together. Check whether you still need all of them." }
+      "body": {
+        "one": "This subscription costs about {sum} a month. Check whether you still need it.",
+        "other": "These {count} subscriptions cost about {sum} a month together. Check whether you still need all of them."
+      }
     },
-    "hikes": { "title": { "one": "{count} subscription raised its price in the past year", "other": "{count} subscriptions raised their prices in the past year" } },
+    "hikes": {
+      "title": { "one": "{count} subscription raised its price in the past year", "other": "{count} subscriptions raised their prices in the past year" }
+    },
     "intro": {
       "title": { "one": "{name}'s promo ends in {count} day", "other": "{name}'s promo ends in {count} days" },
       "body": "After that, the price goes from {from} back to {to}."
     },
     "balance": { "title": "{name} won't last until {date}", "body": "{sub} needs {need}; the balance is about {current}." },
-    "fx": { "title": "{pct}% of spending is in foreign currencies", "body": "The largest is {ccy} ({share}%). This part gets cheaper when {ccy} weakens, and pricier when it strengthens." },
+    "fx": {
+      "title": "{pct}% of spending is in foreign currencies",
+      "body": "The largest is {ccy} ({share}%). This part gets cheaper when {ccy} weakens, and pricier when it strengthens."
+    },
     "noMethod": {
       "title": { "one": "{count} subscription has no payment method", "other": "{count} subscriptions have no payment method" },
       "body": "Add one so balance forecasts and per-method stats are complete."
@@ -51,8 +65,18 @@
     "top": { "title": "{name} is your most expensive subscription", "body": "About {perDay} a day, {pct}% of monthly spending." }
   },
   "methodKind": {
-    "debit": "Bank card", "credit": "Credit card", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
-    "giftcard": "Gift card", "prepaid": "Store balance", "phone": "Mobile credit", "crypto": "Crypto card", "other": "Other"
+    "debit": "Bank card",
+    "credit": "Credit card",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Gift card",
+    "prepaid": "Store balance",
+    "phone": "Mobile credit",
+    "crypto": "Crypto card",
+    "other": "Other"
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Email" },

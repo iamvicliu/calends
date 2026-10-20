@@ -33,7 +33,13 @@
     "leftPh": "Still on the plan",
     "feeGroup": "Billing",
     "seg": { "m1": "Monthly", "m3": "Quarterly", "m6": "6 months", "m12": "Yearly" },
-    "feeLabel": { "m1": "Per month", "m3": "Per quarter", "m6": "Per 6 months", "m12": "Per year", "custom": { "one": "Every {count} month", "other": "Every {count} months" } },
+    "feeLabel": {
+      "m1": "Per month",
+      "m3": "Per quarter",
+      "m6": "Per 6 months",
+      "m12": "Per year",
+      "custom": { "one": "Every {count} month", "other": "Every {count} months" }
+    },
     "feeCcyAria": "Currency",
     "exempt": "Doesn't pay",
     "other": "Other",
@@ -55,12 +61,24 @@
     "currency": "Currency",
     "coverFrom": "Covers from",
     "coverTo": "Covers until",
-    "coverAuto": { "m1": "Set from the billing period; editable", "m3": "Set from the billing period; editable", "m6": "Set from the billing period; editable", "m12": "Set from the billing period; editable", "custom": "Set from the billing period; editable" },
+    "coverAuto": {
+      "m1": "Set from the billing period; editable",
+      "m3": "Set from the billing period; editable",
+      "m6": "Set from the billing period; editable",
+      "m12": "Set from the billing period; editable",
+      "custom": "Set from the billing period; editable"
+    },
     "receivedOn": "Received on",
     "note": "Note",
     "notePh": "Optional, e.g. USDT transfer",
     "record": "Record",
-    "recordBtn": { "m1": "Record payment ({fee}/mo)", "m3": "Record payment ({fee}/quarter)", "m6": "Record payment ({fee} every 6 months)", "m12": "Record payment ({fee}/yr)", "custom": { "one": "Record payment ({fee} every {count} month)", "other": "Record payment ({fee} every {count} months)" } }
+    "recordBtn": {
+      "m1": "Record payment ({fee}/mo)",
+      "m3": "Record payment ({fee}/quarter)",
+      "m6": "Record payment ({fee} every 6 months)",
+      "m12": "Record payment ({fee}/yr)",
+      "custom": { "one": "Record payment ({fee} every {count} month)", "other": "Record payment ({fee} every {count} months)" }
+    }
   },
   "pool": {
     "title": "Shared plans",
@@ -94,7 +112,13 @@
     "from": "via {source}",
     "exempt": "Doesn't pay",
     "owedAmount": "{amount} due",
-    "perFee": { "m1": "{fee}/mo", "m3": "{fee}/quarter", "m6": "{fee} every 6 months", "m12": "{fee}/yr", "custom": { "one": "{fee} every {count} month", "other": "{fee} every {count} months" } },
+    "perFee": {
+      "m1": "{fee}/mo",
+      "m3": "{fee}/quarter",
+      "m6": "{fee} every 6 months",
+      "m12": "{fee}/yr",
+      "custom": { "one": "{fee} every {count} month", "other": "{fee} every {count} months" }
+    },
     "collect": "Collect",
     "joinedGroup": "Plans I've joined",
     "payTo": "Paid to {name} · {amount}",

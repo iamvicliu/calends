@@ -43,7 +43,10 @@ export interface ProxyRow {
 export function proxyRows(state: AppState, s: Subscription, today: string): ProxyRow[] {
   const entries = s.proxy?.entries ?? [];
   const charges = chargesBetween(s, s.start, today, today);
-  const matched = matchEntries(entries, charges.map((c) => c.date));
+  const matched = matchEntries(
+    entries,
+    charges.map((c) => c.date),
+  );
   return charges
     .map((c) => {
       const entry = matched.get(c.date);
@@ -58,7 +61,8 @@ export function proxyRows(state: AppState, s: Subscription, today: string): Prox
         charged,
         currency,
         chargedBase: toBaseAt(state, charged, currency, c.date),
-        receivedBase: received == null ? undefined : toBaseAt(state, received, entry!.receivedCurrency ?? state.settings.baseCurrency, entry!.receivedOn ?? c.date),
+        receivedBase:
+          received == null ? undefined : toBaseAt(state, received, entry!.receivedCurrency ?? state.settings.baseCurrency, entry!.receivedOn ?? c.date),
       };
     })
     .reverse();

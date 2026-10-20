@@ -63,72 +63,79 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
 
   return (
     <>
-    {/* 整张卡片点开代付详情 */}
-    <div
-      class={`card proxy-card ${stopped ? 'stopped' : ''}`}
-      role="button"
-      tabIndex={0}
-      onClick={() => setLedger(true)}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setLedger(true))}
-    >
-      {stopped && (
-        <span class="stop-stamp" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M5.6 5.6l12.8 12.8" />
-          </svg>
-        </span>
-      )}
-      <div class="proxy-top">
-        <button
-          class="proxy-head"
-          title={t('proxy.viewSub')}
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpen(s);
-          }}
-        >
-          <SubIcon sub={s} size={46} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div class="ph-name">{s.name}</div>
-            <div class="muted ph-meta">
-              {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-              {stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : ''}
+      {/* 整张卡片点开代付详情 */}
+      <div
+        class={`card proxy-card ${stopped ? 'stopped' : ''}`}
+        role="button"
+        tabIndex={0}
+        onClick={() => setLedger(true)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setLedger(true))}
+      >
+        {stopped && (
+          <span class="stop-stamp" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M5.6 5.6l12.8 12.8" />
+            </svg>
+          </span>
+        )}
+        <div class="proxy-top">
+          <button
+            class="proxy-head"
+            title={t('proxy.viewSub')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen(s);
+            }}
+          >
+            <SubIcon sub={s} size={46} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div class="ph-name">{s.name}</div>
+              <div class="muted ph-meta">
+                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                {stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : ''}
+              </div>
             </div>
+          </button>
+          <span class={`ph-status ${tone}`}>
+            <i />
+            {label}
+          </span>
+        </div>
+        <div class="ph-chips">
+          <span class="who-chip" title={s.proxy!.note}>
+            <Icon name="users" size={12} />
+            {t('proxy.payFor', { name: s.proxy!.forName || t('proxy.unset') })}
+            {contactText(s.proxy!) && <em>{contactText(s.proxy!)}</em>}
+          </span>
+          <PayBadge m={method} />
+        </div>
+
+        <div class="proxy-facts">
+          <div>
+            <small>{t('proxy.paidPeriods', { count: list.length })}</small>
+            <b>{money(charged, base, { compact: true })}</b>
           </div>
-        </button>
-        <span class={`ph-status ${tone}`}>
-          <i />
-          {label}
-        </span>
-      </div>
-      <div class="ph-chips">
-        <span class="who-chip" title={s.proxy!.note}>
-          <Icon name="users" size={12} />{t('proxy.payFor', { name: s.proxy!.forName || t('proxy.unset') })}
-          {contactText(s.proxy!) && <em>{contactText(s.proxy!)}</em>}
-        </span>
-        <PayBadge m={method} />
-      </div>
-
-      <div class="proxy-facts">
-        <div>
-          <small>{t('proxy.paidPeriods', { count: list.length })}</small>
-          <b>{money(charged, base, { compact: true })}</b>
-        </div>
-        <div>
-          <small>{t('proxy.received')}</small>
-          <b>{money(received, base, { compact: true })}</b>
-        </div>
-        <div>
-          <small>{open.length ? t('proxy.owedPeriods', { count: open.length }) : t('proxy.owed')}</small>
-          <b class={open.length ? 'warn' : 'done'}>{open.length ? `≈ ${money(open.reduce((a, r) => a + r.chargedBase, 0), base, { compact: true })}` : t('proxy.settled')}</b>
+          <div>
+            <small>{t('proxy.received')}</small>
+            <b>{money(received, base, { compact: true })}</b>
+          </div>
+          <div>
+            <small>{open.length ? t('proxy.owedPeriods', { count: open.length }) : t('proxy.owed')}</small>
+            <b class={open.length ? 'warn' : 'done'}>
+              {open.length
+                ? `≈ ${money(
+                    open.reduce((a, r) => a + r.chargedBase, 0),
+                    base,
+                    { compact: true },
+                  )}`
+                : t('proxy.settled')}
+            </b>
+          </div>
         </div>
       </div>
-
-
-    </div>
-    {/* 弹窗放在卡片外面：卡片的定位与裁切不会影响弹层，也不会把同一行的卡片撑高 */}
-    {ledger && <LedgerSheet state={state} s={s} onClose={() => setLedger(false)} onOpen={onOpen} />}
+      {/* 弹窗放在卡片外面：卡片的定位与裁切不会影响弹层，也不会把同一行的卡片撑高 */}
+      {ledger && <LedgerSheet state={state} s={s} onClose={() => setLedger(false)} onOpen={onOpen} />}
     </>
   );
 }
@@ -190,7 +197,9 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           >
             {t('proxy.viewDetail')}
           </Cell>
-          <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>{stopped ? (live.end ? cnDateFull(live.end) : '—') : next ? cnDateFull(next) : '—'}</Cell>
+          <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
+            {stopped ? (live.end ? cnDateFull(live.end) : '—') : next ? cnDateFull(next) : '—'}
+          </Cell>
           {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
         </Group>
 
@@ -205,7 +214,15 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           </div>
           <div>
             <small>{t('proxy.owed')}</small>
-            <b class={open.length ? 'warn' : 'done'}>{open.length ? `≈ ${money(open.reduce((a, r) => a + r.chargedBase, 0), base, { compact: true })}` : t('proxy.settled')}</b>
+            <b class={open.length ? 'warn' : 'done'}>
+              {open.length
+                ? `≈ ${money(
+                    open.reduce((a, r) => a + r.chargedBase, 0),
+                    base,
+                    { compact: true },
+                  )}`
+                : t('proxy.settled')}
+            </b>
           </div>
           <div>
             <small>{t('proxy.diffLabel')}</small>
@@ -232,12 +249,24 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                   <b>{money(r.charged, r.currency)}</b>
                   <small>≈ {money(r.chargedBase, base)}</small>
                 </span>
-                <span>{r.receivedBase == null ? <em class="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em> : <b>{money(r.entry!.received!, r.entry!.receivedCurrency ?? base)}</b>}</span>
-                <span class={d == null ? 'muted' : Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>{d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : `${d > 0 ? '+' : '−'}${money(Math.abs(d), base)}`}</span>
+                <span>
+                  {r.receivedBase == null ? (
+                    <em class="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
+                  ) : (
+                    <b>{money(r.entry!.received!, r.entry!.receivedCurrency ?? base)}</b>
+                  )}
+                </span>
+                <span class={d == null ? 'muted' : Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
+                  {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : `${d > 0 ? '+' : '−'}${money(Math.abs(d), base)}`}
+                </span>
               </button>
             );
           })}
-          {list.length === 0 && <div class="muted" style={{ fontSize: 13, padding: '12px 0' }}>{t('proxy.table.none')}</div>}
+          {list.length === 0 && (
+            <div class="muted" style={{ fontSize: 13, padding: '12px 0' }}>
+              {t('proxy.table.none')}
+            </div>
+          )}
         </div>
       </div>
       {edit && <EntrySheet state={state} s={live} row={edit} onClose={() => setEdit(null)} />}
@@ -275,10 +304,13 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
     // 去掉这一期原来那条（可能是按相近日期对上的旧记录），换成新的
     const others = (s.proxy?.entries ?? []).filter((x) => x.charge !== row.date && x.charge !== row.entry?.charge);
     const keep = next.charged != null || next.received != null || next.note;
-    run(async () => {
-      await saveSub({ ...s, proxy: { ...s.proxy!, entries: keep ? [...others, next].sort((a, b) => a.charge.localeCompare(b.charge)) : others } });
-      onClose();
-    }, clearReceipt ? t('proxy.entry.markedDue') : t('proxy.entry.saved'));
+    run(
+      async () => {
+        await saveSub({ ...s, proxy: { ...s.proxy!, entries: keep ? [...others, next].sort((a, b) => a.charge.localeCompare(b.charge)) : others } });
+        onClose();
+      },
+      clearReceipt ? t('proxy.entry.markedDue') : t('proxy.entry.saved'),
+    );
   };
 
   return (
@@ -297,14 +329,21 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           <button class="btn" onClick={onClose}>
             {t('proxy.entry.cancel')}
           </button>
-          <button class="btn primary" disabled={(charged !== '' && !Number.isFinite(Number(charged))) || (recvN != null && !Number.isFinite(recvN))} onClick={() => save()}>
+          <button
+            class="btn primary"
+            disabled={(charged !== '' && !Number.isFinite(Number(charged))) || (recvN != null && !Number.isFinite(recvN))}
+            onClick={() => save()}
+          >
             {t('proxy.entry.save')}
           </button>
         </>
       }
     >
       <div class="stack">
-        <Group title={t('proxy.table.charged')} foot={t('proxy.entry.chargedFoot', { amount: money(chargedBase, base), list: money(row.list, row.listCurrency) })}>
+        <Group
+          title={t('proxy.table.charged')}
+          foot={t('proxy.entry.chargedFoot', { amount: money(chargedBase, base), list: money(row.list, row.listCurrency) })}
+        >
           <Cell label={t('proxy.entry.amount')}>
             <input class="num" inputMode="decimal" value={charged} placeholder={String(row.list)} onInput={(ev) => setCharged(val(ev))} />
           </Cell>
@@ -312,9 +351,26 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
           </Cell>
         </Group>
-        <Group title={s.proxy!.forName ? t('proxy.entry.paidBack', { name: s.proxy!.forName }) : t('proxy.entry.paidBackAnon')} foot={diff == null ? t('proxy.entry.receivedEmpty') : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', { amount: money(recvBase!, base), diff: money(Math.abs(diff), base) })}>
+        <Group
+          title={s.proxy!.forName ? t('proxy.entry.paidBack', { name: s.proxy!.forName }) : t('proxy.entry.paidBackAnon')}
+          foot={
+            diff == null
+              ? t('proxy.entry.receivedEmpty')
+              : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
+                  amount: money(recvBase!, base),
+                  diff: money(Math.abs(diff), base),
+                })
+          }
+        >
           <Cell label={t('proxy.entry.amount')}>
-            <input class="num" inputMode="decimal" autoFocus value={received} placeholder={t('proxy.entry.notReceived')} onInput={(ev) => setReceived(val(ev))} />
+            <input
+              class="num"
+              inputMode="decimal"
+              autoFocus
+              value={received}
+              placeholder={t('proxy.entry.notReceived')}
+              onInput={(ev) => setReceived(val(ev))}
+            />
           </Cell>
           <Cell label={t('proxy.entry.currency')}>
             <CurrencySelect value={ccy} onChange={setCcy} />

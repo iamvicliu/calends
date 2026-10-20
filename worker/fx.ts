@@ -6,7 +6,14 @@ import type { Env } from './env.ts';
 
 /** 需要保存的币种：常用列表 + 订阅和账户实际用到的 */
 export function keepSet(state: Pick<AppState, 'subscriptions' | 'methods' | 'settings'>): Set<string> {
-  return new Set([...CURRENCIES, 'USD', 'CNY', state.settings.baseCurrency, ...state.subscriptions.map((s) => s.currency), ...state.methods.map((m) => m.currency)]);
+  return new Set([
+    ...CURRENCIES,
+    'USD',
+    'CNY',
+    state.settings.baseCurrency,
+    ...state.subscriptions.map((s) => s.currency),
+    ...state.methods.map((m) => m.currency),
+  ]);
 }
 
 /** 需要历史汇率的日期：所有已发生的扣款日、每个月末（MRR 走势）、余额校准日 */
@@ -40,7 +47,9 @@ export async function loadFxHistory(env: Env, keep: Set<string>): Promise<FxHist
 
 /** 写入某一天的历史汇率；同一天已有时覆盖 */
 export function putFxDayStmt(env: Env, date: string, rates: Record<string, number>, source: string): D1PreparedStatement {
-  return env.DB.prepare('INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO UPDATE SET rates = excluded.rates, source = excluded.source').bind(date, JSON.stringify(rates), source);
+  return env.DB.prepare(
+    'INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO UPDATE SET rates = excluded.rates, source = excluded.source',
+  ).bind(date, JSON.stringify(rates), source);
 }
 
 async function getJson(url: string): Promise<unknown> {

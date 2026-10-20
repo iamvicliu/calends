@@ -1,19 +1,49 @@
 // 阶段并行：换区后旧区域预付到期前仍在跑，两边都在付钱
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { activePhases, chargesBetween, convert, currentPhase, effectiveStatus, FALLBACK_FX, monthlyGross, monthlyMine, nextCharge, phaseAt, phaseLanes, phaseSubs, servedTime, totals } from './billing.ts';
+import {
+  activePhases,
+  chargesBetween,
+  convert,
+  currentPhase,
+  effectiveStatus,
+  FALLBACK_FX,
+  monthlyGross,
+  monthlyMine,
+  nextCharge,
+  phaseAt,
+  phaseLanes,
+  phaseSubs,
+  servedTime,
+  totals,
+} from './billing.ts';
 import { contributionOn, events, prepaidValue } from './metrics.ts';
 import { deletePayment, dropPlan, removePhase, savePayment, setPhaseEnd, switchPlan, syncPhase, toEditForm } from './phases.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const base = (o: Partial<Subscription> = {}): Subscription => ({
-  id: 'x', name: 'X', category: '工具', tags: [], price: 10, currency: 'USD',
-  cycle: { unit: 'month', every: 1 }, start: '2026-01-15', status: 'active', region: 'US', methodId: 'us', ...o,
+  id: 'x',
+  name: 'X',
+  category: '工具',
+  tags: [],
+  price: 10,
+  currency: 'USD',
+  cycle: { unit: 'month', every: 1 },
+  start: '2026-01-15',
+  status: 'active',
+  region: 'US',
+  methodId: 'us',
+  ...o,
 });
 const TR = { price: 100, currency: 'TRY', cycle: { unit: 'month' as const, every: 1 }, region: 'TR', methodId: 'tr' };
 /** 美区月付 $10，6/1 起换土区 ₺100，美区继续跑到 8/15 */
 const overlap = () => switchPlan(base(), '2026-06-01', TR, '2026-08-15');
-const stateOf = (subs: Subscription[]): AppState => ({ subscriptions: subs, methods: [], settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' }, fx: FALLBACK_FX });
+const stateOf = (subs: Subscription[]): AppState => ({
+  subscriptions: subs,
+  methods: [],
+  settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+  fx: FALLBACK_FX,
+});
 const dates = (s: Subscription, from: string, to: string) => chargesBetween(s, from, to, '2026-07-01').map((c) => `${c.date} ${c.currency}`);
 const near = (a: number, b: number) => assert.ok(Math.abs(a - b) < 0.01, `${a} ≈ ${b}`);
 
@@ -30,17 +60,34 @@ test('换区时选择继续跑：旧阶段的结束日晚于新阶段开始日�
 });
 
 test('并行期间两边的扣款都在，旧阶段到期当天不再扣', () => {
-  assert.deepEqual(dates(overlap(), '2026-05-01', '2026-09-30'), ['2026-05-15 USD', '2026-06-01 TRY', '2026-06-15 USD', '2026-07-01 TRY', '2026-07-15 USD', '2026-08-01 TRY', '2026-09-01 TRY']);
+  assert.deepEqual(dates(overlap(), '2026-05-01', '2026-09-30'), [
+    '2026-05-15 USD',
+    '2026-06-01 TRY',
+    '2026-06-15 USD',
+    '2026-07-01 TRY',
+    '2026-07-15 USD',
+    '2026-08-01 TRY',
+    '2026-09-01 TRY',
+  ]);
   assert.equal(nextCharge(overlap(), '2026-07-02'), '2026-07-15');
 });
 
 test('并行期间：当前阶段取最晚开始的那段，activePhases 列出两段', () => {
   const s = overlap();
-  assert.deepEqual(activePhases(s, '2026-07-01').map((v) => v.region), ['US', 'TR']);
+  assert.deepEqual(
+    activePhases(s, '2026-07-01').map((v) => v.region),
+    ['US', 'TR'],
+  );
   assert.equal(phaseAt(s, '2026-07-01')!.region, 'TR');
   assert.equal(currentPhase(s, '2026-07-01').region, 'TR');
-  assert.deepEqual(activePhases(s, '2026-08-15').map((v) => v.region), ['TR']);
-  assert.deepEqual(activePhases(s, '2026-05-01').map((v) => v.region), ['US']);
+  assert.deepEqual(
+    activePhases(s, '2026-08-15').map((v) => v.region),
+    ['TR'],
+  );
+  assert.deepEqual(
+    activePhases(s, '2026-05-01').map((v) => v.region),
+    ['US'],
+  );
   assert.equal(effectiveStatus(s, '2026-07-01'), 'active');
   assert.equal(effectiveStatus(s, '2026-09-01'), 'active');
   assert.deepEqual(phaseLanes(phaseSubs(s)), [0, 1]);
@@ -79,7 +126,10 @@ test('退订对并行的两段都生效', () => {
   assert.equal(cancelled.end, '2026-07-10');
   assert.equal(cancelled.phases![0].end, '2026-08-15'); // 旧段自己的到期日保留，由订阅结束日封顶
   assert.deepEqual(dates(cancelled, '2026-07-02', '2026-12-31'), []);
-  assert.deepEqual(phaseSubs(cancelled).map((v) => v.end), ['2026-07-10', '2026-07-10']);
+  assert.deepEqual(
+    phaseSubs(cancelled).map((v) => v.end),
+    ['2026-07-10', '2026-07-10'],
+  );
   assert.equal(effectiveStatus(cancelled, '2026-07-05'), 'ending');
   assert.equal(effectiveStatus(cancelled, '2026-07-20'), 'ended');
   assert.equal(totals(stateOf([cancelled]), '2026-07-20').mrr, 0);
@@ -156,7 +206,10 @@ test('并行期间实际在订的天数不重复计，没有断档', () => {
   assert.equal(r.days, 181); // 1/15 → 7/15
   assert.equal(r.gaps.length, 0);
   const gap = setPhaseEnd(switchPlan(base(), '2026-06-01', TR), '2026-01-15', '2026-04-15');
-  assert.deepEqual(servedTime(gap, '2026-07-15').gaps.map((g) => g.days), [47]);
+  assert.deepEqual(
+    servedTime(gap, '2026-07-15').gaps.map((g) => g.days),
+    [47],
+  );
 });
 
 test('预付余值：并行中旧区域没用完的部分也算', () => {
@@ -181,5 +234,8 @@ test('并行期间记一笔扣款：可指定阶段，缺省记到最晚开始�
   assert.deepEqual(dates(del, '2026-07-01', '2026-07-31'), ['2026-07-01 TRY']);
   // 修改美区那笔的金额：留在美区
   const edited = savePayment(s, '2026-07-20', { date: '2026-07-15', amount: 12 }, { date: '2026-07-15', index: 0 }, '2026-01-15');
-  assert.deepEqual(chargesBetween(edited, '2026-07-15', '2026-07-15', '2026-07-20').map((c) => `${c.amount} ${c.currency}`), ['12 USD']);
+  assert.deepEqual(
+    chargesBetween(edited, '2026-07-15', '2026-07-15', '2026-07-20').map((c) => `${c.amount} ${c.currency}`),
+    ['12 USD'],
+  );
 });

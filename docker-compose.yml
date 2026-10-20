@@ -6,7 +6,7 @@ services:
     # 或者从源码构建：build: .
     restart: unless-stopped
     ports:
-      - "8787:8787"
+      - '8787:8787'
     volumes:
       - calends-data:/data
     environment:

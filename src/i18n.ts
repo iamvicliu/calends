@@ -7,7 +7,15 @@ const KEY = 'ledger:locale';
 async function pack(loc: Locale): Promise<Messages> {
   const mod = await PACKS[`./locales/${loc}.ts`]?.();
   const out: Messages = {};
-  for (const [path, file] of Object.entries(mod?.default ?? {})) flatten(path.split('/').pop()!.replace(/\.json$/, ''), file.default, out);
+  for (const [path, file] of Object.entries(mod?.default ?? {}))
+    flatten(
+      path
+        .split('/')
+        .pop()!
+        .replace(/\.json$/, ''),
+      file.default,
+      out,
+    );
   return out;
 }
 

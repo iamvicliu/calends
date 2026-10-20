@@ -43,7 +43,10 @@
       "body": "Setelah itu, harga kembali dari {from} ke {to}."
     },
     "balance": { "title": "{name} tidak akan cukup sampai {date}", "body": "{sub} butuh {need}; saldo sekitar {current}." },
-    "fx": { "title": "{pct}% pengeluaran dalam mata uang asing", "body": "Terbesar adalah {ccy} ({share}%). Bagian ini jadi lebih murah saat {ccy} melemah, dan lebih mahal saat menguat." },
+    "fx": {
+      "title": "{pct}% pengeluaran dalam mata uang asing",
+      "body": "Terbesar adalah {ccy} ({share}%). Bagian ini jadi lebih murah saat {ccy} melemah, dan lebih mahal saat menguat."
+    },
     "noMethod": {
       "title": { "other": "{count} langganan belum punya metode pembayaran" },
       "body": "Tambahkan agar perkiraan saldo dan statistik per metode lengkap."
@@ -51,8 +54,18 @@
     "top": { "title": "{name} adalah langganan termahal Anda", "body": "Sekitar {perDay} per hari, {pct}% dari pengeluaran bulanan." }
   },
   "methodKind": {
-    "debit": "Kartu debit", "credit": "Kartu kredit", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
-    "giftcard": "Kartu hadiah", "prepaid": "Saldo toko", "phone": "Pulsa", "crypto": "Kartu kripto", "other": "Lainnya"
+    "debit": "Kartu debit",
+    "credit": "Kartu kredit",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Kartu hadiah",
+    "prepaid": "Saldo toko",
+    "phone": "Pulsa",
+    "crypto": "Kartu kripto",
+    "other": "Lainnya"
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Email" },

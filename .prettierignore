@@ -6,3 +6,5 @@ seed
 package-lock.json
 shared/locales/server.gen.ts
 public
+worker/migrations.gen.ts
+src/components/cat-icons.gen.ts

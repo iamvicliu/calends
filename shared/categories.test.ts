@@ -79,7 +79,10 @@ test('改名表只改相关订阅、不连锁', () => {
 });
 
 test('保存前校验：去空白、拒绝空名与重名、丢掉非法字段', () => {
-  const ok = cleanCategories([{ name: ' AI ', icon: 'bot', color: 'c8', preset: 'ai', extra: 1 }, { name: '影音', color: 'red' }]);
+  const ok = cleanCategories([
+    { name: ' AI ', icon: 'bot', color: 'c8', preset: 'ai', extra: 1 },
+    { name: '影音', color: 'red' },
+  ]);
   assert.ok('list' in ok);
   assert.deepEqual(ok.list, [{ name: 'AI', icon: 'bot', color: 'c8', preset: 'ai' }, { name: '影音' }]);
   assert.ok('error' in cleanCategories([{ name: 'A' }, { name: 'A ' }]));
@@ -88,11 +91,34 @@ test('保存前校验：去空白、拒绝空名与重名、丢掉非法字段',
 });
 
 test('公开页：只下发公开订阅用到的分类；改了名的域名分类照样打码', () => {
-  const sub = (o: Partial<Subscription>): Subscription => ({ id: Math.random().toString(36).slice(2), name: 'X', category: '工具', tags: [], price: 1, currency: 'USD', cycle: { unit: 'month', every: 1 }, start: '2026-01-01', status: 'active', ...o });
+  const sub = (o: Partial<Subscription>): Subscription => ({
+    id: Math.random().toString(36).slice(2),
+    name: 'X',
+    category: '工具',
+    tags: [],
+    price: 1,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    status: 'active',
+    ...o,
+  });
   const state: AppState = {
-    subscriptions: [sub({ name: 'secret-project', category: '网址', url: 'https://secret.dev' }), sub({ category: '影音' }), sub({ category: '代付专用', proxy: { forName: '小王', entries: [] } })],
+    subscriptions: [
+      sub({ name: 'secret-project', category: '网址', url: 'https://secret.dev' }),
+      sub({ category: '影音' }),
+      sub({ category: '代付专用', proxy: { forName: '小王', entries: [] } }),
+    ],
     methods: [],
-    settings: { ...DEFAULT_SETTINGS, categories: [{ name: '网址', icon: 'globe', preset: 'domains' }, { name: '影音', icon: '🎬', color: 'c2', preset: 'media' }, { name: '没用到', icon: 'bot' }, { name: '代付专用' }] },
+    settings: {
+      ...DEFAULT_SETTINGS,
+      categories: [
+        { name: '网址', icon: 'globe', preset: 'domains' },
+        { name: '影音', icon: '🎬', color: 'c2', preset: 'media' },
+        { name: '没用到', icon: 'bot' },
+        { name: '代付专用' },
+      ],
+    },
     fx: FALLBACK_FX,
   };
   const pub = maskForPublic(state);

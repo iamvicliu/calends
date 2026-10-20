@@ -1,7 +1,10 @@
 {
   "title": "Carteira",
   "sub": { "one": "{count} forma de pagamento", "other": "{count} formas de pagamento" },
-  "subDrag": { "one": "{count} forma de pagamento · Arraste os cartões para reordenar", "other": "{count} formas de pagamento · Arraste os cartões para reordenar" },
+  "subDrag": {
+    "one": "{count} forma de pagamento · Arraste os cartões para reordenar",
+    "other": "{count} formas de pagamento · Arraste os cartões para reordenar"
+  },
   "add": "Adicionar",
   "orderSaved": "Ordem salva",
   "runwayGroup": "Duração do saldo",

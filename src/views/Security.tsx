@@ -65,10 +65,24 @@ function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () =
       label={
         <span>
           {[browser, os].filter(Boolean).join(' · ')}
-          {d.current && <span class="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>{t('settings.security.thisDevice')}</span>}
+          {d.current && (
+            <span class="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>
+              {t('settings.security.thisDevice')}
+            </span>
+          )}
         </span>
       }
-      sub={[where, [t(d.method === 'passkey' ? 'settings.security.signedInPasskey' : 'settings.security.signedInPassword', { time: localTime(d.createdAt, tz, true) }), d.current ? '' : ago(d.lastSeenAt)].filter(Boolean).join(' · ')].filter(Boolean).join('\n')}
+      sub={[
+        where,
+        [
+          t(d.method === 'passkey' ? 'settings.security.signedInPasskey' : 'settings.security.signedInPassword', { time: localTime(d.createdAt, tz, true) }),
+          d.current ? '' : ago(d.lastSeenAt),
+        ]
+          .filter(Boolean)
+          .join(' · '),
+      ]
+        .filter(Boolean)
+        .join('\n')}
     >
       {!d.current && (
         <button type="button" class="chip-btn" onClick={onRevoke}>
@@ -103,11 +117,22 @@ export function SecurityGroup({ state }: { state: AppState }) {
     <>
       <Group title={t('settings.security.title')} foot={supported ? t('settings.security.passkeyFoot') : t('settings.security.passkeyUnsupported')}>
         {sec?.passkeys.map((p) => (
-          <Cell key={p.id} label={p.name} sub={p.lastUsedAt ? t('settings.security.lastUsed', { time: localTime(p.lastUsedAt, tz, true) }) : t('settings.security.addedAt', { time: localTime(p.createdAt, tz, true) })}>
+          <Cell
+            key={p.id}
+            label={p.name}
+            sub={
+              p.lastUsedAt
+                ? t('settings.security.lastUsed', { time: localTime(p.lastUsedAt, tz, true) })
+                : t('settings.security.addedAt', { time: localTime(p.createdAt, tz, true) })
+            }
+          >
             <button
               type="button"
               class="chip-btn"
-              onClick={() => confirmDelete(t('settings.security.confirmRemovePasskey', { name: p.name })) && run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))}
+              onClick={() =>
+                confirmDelete(t('settings.security.confirmRemovePasskey', { name: p.name })) &&
+                run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))
+              }
             >
               {t('settings.security.remove')}
             </button>
@@ -136,7 +161,10 @@ export function SecurityGroup({ state }: { state: AppState }) {
         )}
         <Cell label={t('settings.security.changePassword')} onClick={() => setPwSheet(true)} />
       </Group>
-      <Group title={sec ? t('settings.security.devicesCount', { count: sec.sessions.length }) : t('settings.security.devices')} foot={t('settings.security.devicesFoot')}>
+      <Group
+        title={sec ? t('settings.security.devicesCount', { count: sec.sessions.length }) : t('settings.security.devices')}
+        foot={t('settings.security.devicesFoot')}
+      >
         <Cell label={t('settings.security.maxSessions')}>
           <Picker
             value={max}
@@ -145,11 +173,26 @@ export function SecurityGroup({ state }: { state: AppState }) {
             ariaLabel={t('settings.security.maxSessions')}
           />
         </Cell>
-        {sec?.sessions.slice().sort((a, b) => Number(b.current) - Number(a.current)).map((d) => (
-          <DeviceCell key={d.id} d={d} tz={tz} onRevoke={() => run(() => api(`/api/auth/sessions/${d.id}`, { method: 'DELETE' }).then(load), t('settings.security.revoked'))} />
-        ))}
+        {sec?.sessions
+          .slice()
+          .sort((a, b) => Number(b.current) - Number(a.current))
+          .map((d) => (
+            <DeviceCell
+              key={d.id}
+              d={d}
+              tz={tz}
+              onRevoke={() => run(() => api(`/api/auth/sessions/${d.id}`, { method: 'DELETE' }).then(load), t('settings.security.revoked'))}
+            />
+          ))}
         {sec && sec.sessions.length > 1 && (
-          <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => confirmDelete(t('settings.security.confirmLogoutOthers')) && run(() => api('/api/auth/logout-others', { method: 'POST' }).then(load), t('settings.security.loggedOutOthers'))}>
+          <button
+            class="cell tap"
+            style={{ justifyContent: 'center', color: 'var(--red)' }}
+            onClick={() =>
+              confirmDelete(t('settings.security.confirmLogoutOthers')) &&
+              run(() => api('/api/auth/logout-others', { method: 'POST' }).then(load), t('settings.security.loggedOutOthers'))
+            }
+          >
             {t('settings.security.logoutOthers')}
           </button>
         )}

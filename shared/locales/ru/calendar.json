@@ -1,6 +1,11 @@
 {
   "yearTitle": "{year}",
-  "summary": { "one": "{count} списание · {amount}", "few": "{count} списания · {amount}", "many": "{count} списаний · {amount}", "other": "{count} списания · {amount}" },
+  "summary": {
+    "one": "{count} списание · {amount}",
+    "few": "{count} списания · {amount}",
+    "many": "{count} списаний · {amount}",
+    "other": "{count} списания · {amount}"
+  },
   "mode": { "month": "Месяц", "year": "Год" },
   "prev": "Назад",
   "next": "Вперёд",

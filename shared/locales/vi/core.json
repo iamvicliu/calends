@@ -43,7 +43,10 @@
       "body": "Sau đó, giá sẽ từ {from} trở lại {to}."
     },
     "balance": { "title": "{name} sẽ không đủ đến {date}", "body": "{sub} cần {need}; số dư hiện khoảng {current}." },
-    "fx": { "title": "{pct}% chi tiêu bằng ngoại tệ", "body": "Lớn nhất là {ccy} ({share}%). Phần này rẻ hơn khi {ccy} yếu đi, và đắt hơn khi {ccy} mạnh lên." },
+    "fx": {
+      "title": "{pct}% chi tiêu bằng ngoại tệ",
+      "body": "Lớn nhất là {ccy} ({share}%). Phần này rẻ hơn khi {ccy} yếu đi, và đắt hơn khi {ccy} mạnh lên."
+    },
     "noMethod": {
       "title": { "other": "{count} gói đăng ký chưa có phương thức thanh toán" },
       "body": "Hãy thêm để dự báo số dư và thống kê theo phương thức được đầy đủ."
@@ -51,8 +54,18 @@
     "top": { "title": "{name} là gói đăng ký đắt nhất của bạn", "body": "Khoảng {perDay} mỗi ngày, chiếm {pct}% chi tiêu hằng tháng." }
   },
   "methodKind": {
-    "debit": "Thẻ ngân hàng", "credit": "Thẻ tín dụng", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
-    "giftcard": "Thẻ quà tặng", "prepaid": "Số dư cửa hàng", "phone": "Tài khoản di động", "crypto": "Thẻ tiền mã hóa", "other": "Khác"
+    "debit": "Thẻ ngân hàng",
+    "credit": "Thẻ tín dụng",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Thẻ quà tặng",
+    "prepaid": "Số dư cửa hàng",
+    "phone": "Tài khoản di động",
+    "crypto": "Thẻ tiền mã hóa",
+    "other": "Khác"
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Email" },
