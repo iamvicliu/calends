@@ -10,7 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://calends.date">在线演示</a> ·
+  <a href="https://calends.date">官网</a> ·
+  <a href="https://demo.calends.date">在线演示</a> ·
   <a href="#快速开始">快速开始</a> ·
   <a href="#ai-与-mcp">AI 与 MCP</a> ·
   <a href="README.md">English</a>
@@ -27,7 +28,7 @@
 ## 功能
 
 - **各种周期**：月付、年付、每 N 天/周/月、买断；试用、首期优惠、赠送时长、暂停、到期不续。
-- **完整历程**：调价、换套餐、换区、断更与续订；提前开通新区、旧区尚未到期时，两段可以重叠。
+- **完整历程**：调价、换套餐、换区、断更与续订；提前开通新区、旧区尚未到期时，两段可以重叠。每个订阅都有自己的详情页：累计花了多少、实际每月多少、每笔扣款与标价的走势，以及按年分组的扣款记录。
 - **多币种**：过去的扣款按当天汇率折算，未来按今天汇率；可随时切换本位币或显示原币。
 - **钱包与余额续航**：银行卡、App Store / Google Play 余额、礼品卡、手机卡；看余额还能扣几期、撑满一年还要充多少。
 - **合租与代付**：车主记录成员付到哪天、一键收款；也能记替朋友付的钱。「人」是独立的数据，一眼看清每个人欠你多少。
@@ -35,7 +36,7 @@
 - **日历**：月视图、年视图，以及可订阅到苹果 / 谷歌日历的私密 ICS 链接。
 - **多渠道提醒**：邮件、Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Server酱、自定义 Webhook。
 - **原生 AI**：内置 [MCP](https://modelcontextprotocol.io) 服务器，20 多个工具，Claude、ChatGPT、Codex、Cursor 都能回答「下周有什么要续费」，或者执行「Netflix 从今天起涨到 17.99 美元」。
-- **默认私密**：单用户；密码加 Passkey，登录设备可远程下线；可选的只读公开页，敏感信息在服务端脱敏。
+- **默认私密**：单用户；密码加 Passkey，登录设备可远程下线。只读公开页可选开启，敏感信息在服务端脱敏，展示哪些订阅由你挑选。
 - **14 种语言**：English、简体中文、繁體中文（台灣／香港）、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский、Türkçe、Bahasa Indonesia、Tiếng Việt。
 - **数据归你**：完整 JSON 备份与恢复、CSV 导入导出。Cloudflare 免费额度就够用，也能用 Docker 跑在任何机器上。
 
@@ -78,12 +79,12 @@ docker logs calends   # 首次启动会打印一次性的初始化令牌
    如果我要自定义域名，部署前在 wrangler.jsonc 的 routes 里以 custom_domain 加上。
 3. Docker：运行官方镜像 ghcr.io/imetn/calends，给 /data 挂一个命名卷，开放 8787 端口，
    再从容器日志里读出初始化令牌；顺便问我要不要用 Caddy 配 HTTPS。
-4. 最后把 /admin 地址和初始化令牌告诉我，并提醒我绑定 Passkey，以及在「设置 → AI 接入」里连接我的 AI 助手。
+4. 最后把 /admin 地址和初始化令牌告诉我，并提醒我绑定 Passkey，以及在后台「连接」页接入我的 AI 助手。
 ```
 
 ## AI 与 MCP
 
-Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口（Streamable HTTP）。在后台「AI 接入」页生成令牌（只读或读写），然后：
+Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口（Streamable HTTP）。在后台「连接」页生成令牌（只读或读写），然后：
 
 ```bash
 # Claude Code
@@ -92,7 +93,7 @@ claude mcp add --transport http calends https://你的域名/mcp --header "Autho
 codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALENDS_TOKEN
 ```
 
-工具包括 `get_overview`、`list_subscriptions`、`spending_stats`、`get_trends`、`get_receivables`、`get_insights`、`create_subscription`、`change_price`、`change_plan`、`set_status`、`record_payment` 等。所有写操作都支持 `dry_run` 预览，也可以在设置里一键关闭 AI 接入。
+工具包括 `get_overview`、`list_subscriptions`、`spending_stats`、`get_trends`、`get_receivables`、`get_insights`、`create_subscription`、`change_price`、`change_plan`、`set_status`、`record_payment` 等。所有写操作都支持 `dry_run` 预览，也可以在设置里一键关闭 AI 连接。
 
 ## 配置
 
@@ -114,6 +115,8 @@ npm run db:migrate:local
 echo "DEV_BYPASS_AUTH=1" > .dev.vars   # 仅本地：跳过登录
 npm run dev                            # Vite :5173 + Worker :8787
 ```
+
+技术栈：后台用 React 19（开启 React Compiler）+ Vite，弹窗、下拉、开关等交互组件基于 react-aria-components；公开页用 shadcn/ui；服务端是 Cloudflare Workers + D1（SQLite）；计费、汇率、脱敏等领域逻辑放在 `shared/`，浏览器和 Worker 共用。
 
 `npm test` 单元测试，`npm run typecheck` / `lint` / `format` 类型检查、代码检查与格式化，`npm run i18n:check` 检查各语言文案是否齐全。贡献指南见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 

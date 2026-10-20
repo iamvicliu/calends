@@ -10,7 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://calends.date">Live demo</a> ·
+  <a href="https://calends.date">Website</a> ·
+  <a href="https://demo.calends.date">Live demo</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#ai--mcp">AI &amp; MCP</a> ·
   <a href="README.zh-CN.md">简体中文</a>
@@ -27,7 +28,7 @@ Most subscription trackers assume one currency, one card and one person. Real li
 ## Features
 
 - **Every subscription, every cycle** — monthly, yearly, every _n_ days/weeks/months, lifetime; trials, intro prices, bonus periods, pauses, "won't renew".
-- **Full history** — price changes, plan and region switches, gaps and resumptions; overlapping plans when you start a new one before the old one expires.
+- **Full history** — price changes, plan and region switches, gaps and resumptions; overlapping plans when you start a new one before the old one expires. Each subscription has its own page with total spent, real monthly cost, a per-charge trend against the list price, and every charge grouped by year.
 - **Multi-currency done right** — past charges use that day's exchange rate, future ones use today's; switch the whole UI to any base currency or show originals.
 - **Wallet & runway** — cards, App Store / Google Play balances, gift cards, prepaid SIMs; see how many charges a balance still covers and how much to top up for a full year.
 - **Shared plans & paying for others** — organize family plans, track who paid until when, collect payments; track things you pay on behalf of friends. People are first-class: one place to see what everyone owes you.
@@ -35,7 +36,7 @@ Most subscription trackers assume one currency, one card and one person. Real li
 - **Calendar** — month and year views, plus a private ICS feed for Apple/Google Calendar.
 - **Reminders everywhere** — email, Telegram, Lark/Feishu, DingTalk, WeCom, Slack, Discord, Bark, ntfy, ServerChan or any webhook.
 - **AI-native** — a built-in [MCP](https://modelcontextprotocol.io) server with 20+ tools so Claude, ChatGPT, Codex or Cursor can answer "what renews next week?" or "Netflix went up to $17.99 from today".
-- **Private by default** — single-owner app, password + passkeys, device list with remote sign-out, optional read-only public page with sensitive data masked server-side.
+- **Private by default** — single-owner app, password + passkeys, device list with remote sign-out. The optional read-only public page masks sensitive data on the server, and you choose which subscriptions appear on it.
 - **14 languages** — English, 简体中文, 繁體中文（台灣／香港）, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil), Русский, Türkçe, Bahasa Indonesia, Tiếng Việt.
 - **Yours to keep** — full JSON backup/restore, CSV import/export. Runs on Cloudflare's free tier or any machine with Docker.
 
@@ -79,7 +80,7 @@ Deploy Calends (https://github.com/imetn/calends), a self-hosted subscription le
 3. Docker: run the official image ghcr.io/imetn/calends with a named volume for /data and port 8787,
    then read the setup token from the container logs. Offer to put it behind HTTPS with Caddy.
 4. Finally give me the /admin URL and the setup token, and remind me to add a passkey and connect my AI assistant
-   via Settings → AI access (MCP).
+   on the AI access page (MCP).
 ```
 
 ## AI & MCP
@@ -123,7 +124,7 @@ npm run dev                            # Vite on :5173 + Worker on :8787
 | `npm run i18n:check`                                    | Every locale has every key                     |
 | `npm run build`                                         | Production build                               |
 
-Stack: Preact + Vite (admin), preact/compat + shadcn/ui (public page), Cloudflare Workers + D1 (SQLite), shared TypeScript domain logic in `shared/`.
+Stack: React 19 with the React Compiler, Vite, react-aria-components for dialogs, menus and controls (admin), shadcn/ui (public page), Cloudflare Workers + D1 (SQLite), and shared TypeScript domain logic in `shared/`.
 
 ```
 src/        admin app and public page
