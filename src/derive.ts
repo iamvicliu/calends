@@ -79,8 +79,7 @@ export function methodLogo(m: Pick<PaymentMethod, 'logo' | 'kind' | 'url' | 'ban
   const b = brandOf(m);
   if (b) return BRAND_LOGO[b];
   if (bankOf(m)) return undefined;
-  const d = domainOf(m.url);
-  return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : undefined;
+  return faviconOf(m.url);
 }
 
 /** 只用一种货币的国家：没填地区时，App Store、礼品卡、话费按币种推断国旗 */
@@ -136,6 +135,19 @@ export function allCharges(state: AppState, from: string, to: string, today: str
     .filter((s) => withProxy || !s.proxy)
     .flatMap((s) => chargesBetween(s, from, to, today))
     .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** 官网图标（Google favicon 服务） */
+export function faviconOf(url?: string): string | undefined {
+  const d = domainOf(url);
+  return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : undefined;
+}
+
+/** 订阅的图片图标，用作卡片和详情的背景光晕：图片链接 > 官网图标；域名类不用 */
+export function subImage(s: Pick<Subscription, 'category' | 'icon' | 'url'>): string | undefined {
+  if (s.category === '域名') return undefined;
+  if (s.icon?.startsWith('http')) return s.icon;
+  return faviconOf(s.url);
 }
 
 export function domainOf(url?: string): string | undefined {

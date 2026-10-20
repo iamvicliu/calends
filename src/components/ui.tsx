@@ -2,7 +2,7 @@ import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
-import { bankOf, BRANDS, brandOf, catColor, domainOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
+import { bankOf, BRANDS, brandOf, catColor, faviconOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { useToasts } from '../store.ts';
 
 // ---------- SF Symbols 风格线性图标 ----------
@@ -200,8 +200,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
       </span>
     );
   }
-  const domain = domainOf(sub.url);
-  const raw = icon || (domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : undefined);
+  const raw = icon || faviconOf(sub.url);
   const src = raw && proxied && /^https?:/.test(raw) ? `/api/img?u=${encodeURIComponent(raw)}` : raw;
   if (src && !failed.has(src)) {
     return (

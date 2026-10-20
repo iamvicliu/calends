@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Subscription } from '../../../shared/types.ts';
-import { domainOf } from '../../derive.ts';
+import { faviconOf } from '../../derive.ts';
 import { cn } from '@/public/lib/utils';
 
 const failed = new Set<string>();
@@ -19,8 +19,7 @@ export function AppIcon({ sub, className, size }: { sub: Pick<Subscription, 'nam
   }
   const icon = sub.icon?.trim();
   if (icon && !/^https?:/.test(icon)) return <span style={style} className={cn(box, 'bg-muted text-[1.05em]')}>{icon}</span>;
-  const domain = domainOf(sub.url);
-  const src = icon || (domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : undefined);
+  const src = icon || faviconOf(sub.url);
   if (src && !failed.has(src)) {
     return (
       <span style={style} className={cn(box, icon ? 'bg-muted' : 'bg-white p-[5px]')}>

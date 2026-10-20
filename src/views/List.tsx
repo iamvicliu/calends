@@ -6,7 +6,7 @@ import type { AppState, Subscription } from '../../shared/types.ts';
 import { Amount, CAT_ICON, CatChip, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
 import { cancelSavings } from '../../shared/metrics.ts';
-import { domainOf, toBase } from '../derive.ts';
+import { subImage, toBase } from '../derive.ts';
 import { useOrig } from '../display.ts';
 import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
@@ -26,12 +26,6 @@ const FILTERS: Array<[Filter, string]> = [
 
 const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' || st === 'paused' ? 'live' : (st as Filter));
 
-function iconUrl(s: Subscription): string | undefined {
-  if (s.category === '域名') return undefined;
-  if (s.icon?.startsWith('http')) return s.icon;
-  const d = domainOf(s.url);
-  return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : undefined;
-}
 
 export function List({ state, today, onOpen, onAdd, category }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onAdd: () => void; category?: string }) {
   const [filter, setFilter] = useState<Filter>(category ? 'all' : 'live');
@@ -167,7 +161,7 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
               const cur = currentPhase(s, today);
               const up = upcomingPhase(s, today);
               const m = state.methods.find((x) => x.id === cur.methodId);
-              const icon = iconUrl(s);
+              const icon = subImage(s);
               return (
                 <button key={s.id} class={`scard st-${st}`} onClick={() => onOpen(s)}>
                   <div class="sc-glow" style={icon ? { backgroundImage: `url("${icon}")` } : { background: 'var(--fill-2)' }} />

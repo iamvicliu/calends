@@ -7,7 +7,7 @@ import type { AppState, Payment, Subscription } from '../../shared/types.ts';
 import { PaymentSheet } from './PaymentSheet.tsx';
 import { History } from '../components/History.tsx';
 import { Amount, CatChip, Cell, Group, Icon, PayBadge, SubIcon } from '../components/ui.tsx';
-import { catColor, domainOf } from '../derive.ts';
+import { catColor, subImage } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
 import { ChangeNote } from './List.tsx';
 import { MiniGantt } from './Gantt.tsx';
@@ -39,7 +39,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const totalUsd = history.reduce((a, c) => a + chargeValue(state, c, 'USD'), 0);
   const monthly = monthlyGross(sub, today);
   const remind = sub.remindDays ?? state.settings.remindDays;
-  const icon = sub.category === '域名' ? undefined : sub.icon?.startsWith('http') ? sub.icon : domainOf(sub.url) ? `https://www.google.com/s2/favicons?domain=${domainOf(sub.url)}&sz=128` : undefined;
+  const icon = subImage(sub);
   const [label, tone] = STATUS[st];
   const ro = !!state.readonly;
   const dues = memberDues(sub, today);
