@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} 並行至 {date}"
+  },
   "title": "全部訂閱",
   "all": "全部",
   "summary": "{count} 項 · 每月 {monthly} · 每年 {yearly}",

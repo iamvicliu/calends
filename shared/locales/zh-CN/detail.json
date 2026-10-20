@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "同时进行中",
+    "previous": "原来的方案",
+    "until": "用到 {date} · {rel}",
+    "monthlyHint": { "other": "{count} 段并行，按合计" }
+  },
   "action": { "edit": "编辑", "pause": "暂停", "resume": "恢复", "manage": "管理", "website": "官网", "share": "分享" },
   "toast": { "resumed": "已恢复计费", "paused": "已暂停，不再推算后续扣款" },
   "history": "历程",

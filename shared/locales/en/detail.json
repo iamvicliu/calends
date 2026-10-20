@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "Also running",
+    "previous": "Previous plan",
+    "until": "Runs until {date} · {rel}",
+    "monthlyHint": { "one": "{count} plan running at once, summed", "other": "{count} plans running at once, summed" }
+  },
   "action": { "edit": "Edit", "pause": "Pause", "resume": "Resume", "manage": "Manage", "website": "Website", "share": "Share" },
   "toast": { "resumed": "Billing resumed", "paused": "Paused. Future charges won't be projected" },
   "history": "History",

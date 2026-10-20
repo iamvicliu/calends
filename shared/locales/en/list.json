@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} also running until {date}"
+  },
   "title": "All subscriptions",
   "all": "All",
   "summary": { "one": "{count} item · {monthly}/mo · {yearly}/yr", "other": "{count} items · {monthly}/mo · {yearly}/yr" },

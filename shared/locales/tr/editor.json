@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Eskisini bir süre daha kullan",
+    "keepHint": "Önceden ödendi ve süresi henüz dolmadı: ikisi birlikte çalışır, her biri normal şekilde ücretlendirilir",
+    "keepUntil": "Eskisi şu tarihe kadar",
+    "endAuto": "Sonraki başlayınca",
+    "planned": "Plan",
+    "parallel": { "one": "{count} gün çakışıyor", "other": "{count} gün çakışıyor" },
+    "payPhase": "Ait olduğu dönem"
+  },
   "addTitle": "Abonelik ekle",
   "editTitle": "“{name}” aboneliğini düzenle",
   "confirmDiscard": "Kaydedilmemiş değişiklikler atılsın mı?",

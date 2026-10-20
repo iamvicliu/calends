@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "Juga berjalan",
+    "previous": "Paket sebelumnya",
+    "until": "Sampai {date} · {rel}",
+    "monthlyHint": { "other": "{count} paket berjalan bersamaan, dijumlahkan" }
+  },
   "action": { "edit": "Edit", "pause": "Jeda", "resume": "Lanjutkan", "manage": "Kelola", "website": "Situs web", "share": "Bagikan" },
   "toast": { "resumed": "Tagihan dilanjutkan", "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan" },
   "history": "Riwayat",

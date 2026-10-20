@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "旧的继续用一段时间",
+    "keepHint": "旧的已经预付、还没到期：两段并行，各自照常计费",
+    "keepUntil": "旧的用到",
+    "endAuto": "随下一段开始",
+    "planned": "计划",
+    "parallel": { "other": "并行 {count} 天" },
+    "payPhase": "记在哪一段"
+  },
   "addTitle": "添加订阅",
   "editTitle": "编辑「{name}」",
   "confirmDiscard": "放弃未保存的修改？",

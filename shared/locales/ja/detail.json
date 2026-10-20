@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "並行中",
+    "previous": "以前のプラン",
+    "until": "{date}まで · {rel}",
+    "monthlyHint": { "other": "{count} つが並行中、合計で計算" }
+  },
   "action": {
     "edit": "編集",
     "pause": "一時停止",

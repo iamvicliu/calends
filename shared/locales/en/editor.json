@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Keep the old one running",
+    "keepHint": "Already prepaid and not expired yet: both run side by side and are billed as usual",
+    "keepUntil": "Old one runs until",
+    "endAuto": "When next starts",
+    "planned": "Planned",
+    "parallel": { "one": "Overlaps {count} day", "other": "Overlaps {count} days" },
+    "payPhase": "Belongs to"
+  },
   "addTitle": "Add subscription",
   "editTitle": "Edit “{name}”",
   "confirmDiscard": "Discard unsaved changes?",

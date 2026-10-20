@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} sigue activo hasta el {date}"
+  },
   "title": "Todas las suscripciones",
   "all": "Todas",
   "summary": { "one": "{count} elemento · {monthly}/mes · {yearly}/año", "other": "{count} elementos · {monthly}/mes · {yearly}/año" },

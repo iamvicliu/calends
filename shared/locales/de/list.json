@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} läuft parallel bis {date}"
+  },
   "title": "Alle Abos",
   "all": "Alle",
   "summary": {

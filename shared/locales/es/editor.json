@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Mantener el anterior un tiempo",
+    "keepHint": "Ya está prepagado y aún no vence: ambos funcionan a la vez y se cobran como siempre",
+    "keepUntil": "El anterior sigue hasta",
+    "endAuto": "Al empezar la siguiente",
+    "planned": "Planificado",
+    "parallel": { "one": "Se solapa {count} día", "other": "Se solapa {count} días" },
+    "payPhase": "Corresponde a"
+  },
   "addTitle": "Añadir suscripción",
   "editTitle": "Editar «{name}»",
   "confirmDiscard": "¿Descartar los cambios sin guardar?",

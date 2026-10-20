@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} {date}까지 함께 진행"
+  },
   "title": "모든 구독",
   "all": "전체",
   "summary": {

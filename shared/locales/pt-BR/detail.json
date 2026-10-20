@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "Também ativo",
+    "previous": "Plano anterior",
+    "until": "Até {date} · {rel}",
+    "monthlyHint": { "one": "{count} plano ao mesmo tempo, somado", "other": "{count} planos ao mesmo tempo, somados" }
+  },
   "action": { "edit": "Editar", "pause": "Pausar", "resume": "Retomar", "manage": "Gerenciar", "website": "Site", "share": "Compartilhar" },
   "toast": { "resumed": "Cobrança retomada", "paused": "Pausada. Cobranças futuras não serão previstas" },
   "history": "Histórico",

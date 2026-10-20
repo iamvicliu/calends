@@ -1,4 +1,13 @@
 {
+  "overlap": {
+    "keep": "Garder l’ancien encore un temps",
+    "keepHint": "Déjà prépayé et pas encore expiré : les deux tournent en parallèle et sont facturés normalement",
+    "keepUntil": "L’ancien continue jusqu’au",
+    "endAuto": "Au début de la suivante",
+    "planned": "Prévu",
+    "parallel": { "one": "Chevauche {count} jour", "other": "Chevauche {count} jours" },
+    "payPhase": "Rattaché à"
+  },
   "addTitle": "Ajouter un abonnement",
   "editTitle": "Modifier « {name} »",
   "confirmDiscard": "Abandonner les modifications non enregistrées ?",

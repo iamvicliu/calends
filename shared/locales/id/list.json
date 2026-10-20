@@ -1,4 +1,7 @@
 {
+  "overlap": {
+    "note": "{what} juga berjalan sampai {date}"
+  },
   "title": "Semua langganan",
   "all": "Semua",
   "summary": { "other": "{count} item · {monthly}/bln · {yearly}/thn" },

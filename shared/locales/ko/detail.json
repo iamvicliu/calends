@@ -1,4 +1,10 @@
 {
+  "overlap": {
+    "title": "함께 진행 중",
+    "previous": "기존 플랜",
+    "until": "{date}까지 · {rel}",
+    "monthlyHint": { "other": "{count}개 구간이 함께 진행, 합계 기준" }
+  },
   "action": {
     "edit": "편집",
     "pause": "일시 정지",
