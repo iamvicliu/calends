@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { phaseSubs } from '../../shared/billing.ts';
+import { addDays, nextCharge, phaseSubs } from '../../shared/billing.ts';
 import { changePrice, removePhase, resume, switchPlan } from '../../shared/phases.ts';
 import type { AppState, Cycle, Subscription } from '../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
@@ -36,7 +36,9 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
 
   const open = (m: Mode) => {
     setMode(m);
-    setDate(today);
+    // 生效日要晚于当前阶段的开始日：今天就开始的新订阅，默认放到下次续费（或第二天）
+    const lastStart = phaseSubs(f).pop()!.start;
+    setDate(today > lastStart ? today : (nextCharge(f, addDays(lastStart, 1)) ?? addDays(lastStart, 1)));
     setPrice(m === 'price' ? '' : String(f.price));
     setCurrency(f.currency);
     setMethodId(f.methodId ?? '');

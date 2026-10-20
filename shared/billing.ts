@@ -132,6 +132,11 @@ export function phaseSubs(s: Subscription): Subscription[] {
   });
 }
 
+/** 两段之间空了几天以内不算断更（续费晚一两天、时区差之类） */
+export function isGap(prevEnd: string | undefined, nextStart: string): boolean {
+  return !!prevEnd && diffDays(prevEnd, nextStart) > 3;
+}
+
 /** day 当天所处的阶段；处在断更空档或尚未开始时返回 undefined（无阶段的订阅总是返回自身） */
 export function phaseAt(s: Subscription, day: string): Subscription | undefined {
   const vs = phaseSubs(s);

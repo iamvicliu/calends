@@ -1,6 +1,6 @@
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
 // 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
-import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
+import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, isGap, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
@@ -147,7 +147,7 @@ export function events(state: AppState, today: string): LedgerEvent[] {
       const evs = eventsOf(state, v, today);
       const prev = vs[i - 1];
       const next = vs[i + 1];
-      const contiguous = (a: Subscription, b: Subscription) => !!a.end && a.end >= b.start;
+      const contiguous = (a: Subscription, b: Subscription) => !!a.end && !isGap(a.end, b.start);
       for (const e of evs) {
         if (e.kind === 'start' && prev) {
           if (contiguous(prev, v)) {

@@ -1,4 +1,4 @@
-import { cycleLabel, diffDays, phaseSubs } from '../../shared/billing.ts';
+import { cycleLabel, diffDays, isGap, phaseSubs } from '../../shared/billing.ts';
 import { money } from '../../shared/format.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { PayBadge } from './ui.tsx';
@@ -12,11 +12,12 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
   const items: preact.JSX.Element[] = [];
   vs.forEach((v, i) => {
     const prev = vs[i - 1];
-    if (prev?.end && prev.end < v.start) {
-      const months = Math.round(diffDays(prev.end, v.start) / 30.4375);
+    if (isGap(prev?.end, v.start)) {
+      const end = prev.end!;
+      const months = Math.round(diffDays(end, v.start) / 30.4375);
       items.push(
         <li key={`gap${i}`} class="h-gap">
-          <span>断更 {months >= 1 ? `${months} 个月` : `${diffDays(prev.end, v.start)} 天`}</span>
+          <span>断更 {months >= 1 ? `${months} 个月` : `${diffDays(end, v.start)} 天`}</span>
         </li>,
       );
     }
@@ -25,7 +26,7 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
     items.push(
       <li key={`p${i}`} class={`h-phase ${live && v.start <= today ? 'now' : ''}`}>
         <div class="h-range">
-          {v.start} → {v.end ? v.end : '至今'}
+          {v.start > today ? `${v.start}${v.end ? ` → ${v.end}` : ' 起'}（计划）` : `${v.start} → ${v.end ?? '至今'}`}
         </div>
         <div class="h-plan">
           {v.region && <span class="badge">{v.region}</span>}
