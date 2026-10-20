@@ -9,7 +9,8 @@ import { MethodPicker } from './MethodPicker.tsx';
 import { toast } from '../store.ts';
 import { CurrencySelect, Picker, RegionSelect } from './Picker.tsx';
 
-const CYCLES: Array<[string, string, Cycle]> = [
+/** 常用的续费周期（不含买断） */
+export const CYCLES: Array<[string, string, Cycle]> = [
   ['w1', '每周', { unit: 'week', every: 1 }],
   ['m1', '每月', { unit: 'month', every: 1 }],
   ['m3', '每季度', { unit: 'month', every: 3 }],

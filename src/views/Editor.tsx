@@ -5,22 +5,14 @@ import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../.
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CAT_ICON, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { changePrice, syncLastPhase } from '../../shared/phases.ts';
-import { ChangePanel } from '../components/ChangePanel.tsx';
+import { ChangePanel, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ContactField } from './Members.tsx';
 import { api, deleteSub, getState, mergeEdits, run, saveSub } from '../store.ts';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { searchCatalog, type CatalogItem } from '../catalog.ts';
 
-const CYCLES: Array<[string, string, Cycle]> = [
-  ['w1', '每周', { unit: 'week', every: 1 }],
-  ['m1', '每月', { unit: 'month', every: 1 }],
-  ['m3', '每季度', { unit: 'month', every: 3 }],
-  ['m6', '每半年', { unit: 'month', every: 6 }],
-  ['y1', '每年', { unit: 'year', every: 1 }],
-  ['y2', '每两年', { unit: 'year', every: 2 }],
-  ['lt', '买断', { unit: 'lifetime', every: 1 }],
-];
+const CYCLES: Array<[string, string, Cycle]> = [...RENEW_CYCLES, ['lt', '买断', { unit: 'lifetime', every: 1 }]];
 
 const STATUS: Array<[SubStatus, string]> = [
   ['active', '计费中'],
