@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "react",
+    "import"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": {
+    "browser": true,
+    "worker": true,
+    "es2024": true
+  },
+  "settings": {
+    "react": {
+      "version": "18.3"
+    }
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/no-unknown-property": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "off",
+    "no-unused-vars": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-array-reverse": "off",
+    "eslint/no-shadow": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "import/no-unassigned-import": "off",
+    "react/immutability": "off",
+    "react/globals": "off",
+    "react/memo-dependencies": "off",
+    "unicorn/prefer-add-event-listener": "off",
+    "eslint/preserve-caught-error": "off"
+  },
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "shared/locales/server.gen.ts",
+    "src/public/components/ui",
+    "local"
+  ]
+}

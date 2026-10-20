@@ -8,6 +8,10 @@
     "dev:worker": "node scripts/wrangler.mjs dev --port 8787 --local",
     "build": "tsc --noEmit && vite build",
     "test": "node --experimental-strip-types --test shared/*.test.ts",
+    "lint": "oxlint --deny-warnings src shared worker scripts docker",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
     "i18n": "node scripts/i18n.mjs",
     "i18n:check": "node scripts/i18n.mjs --check",
     "db:migrate:local": "node scripts/wrangler.mjs d1 migrations apply DB --local",
@@ -41,6 +45,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261019.1",
     "@preact/preset-vite": "^2.10.6",
+    "oxlint": "^1.89.0",
+    "prettier": "^3.9.10",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "wrangler": "^4.151.2"

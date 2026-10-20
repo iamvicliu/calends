@@ -1,0 +1,8 @@
+dist
+node_modules
+local
+seed
+.wrangler
+package-lock.json
+shared/locales/server.gen.ts
+public
