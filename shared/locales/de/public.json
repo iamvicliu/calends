@@ -1,5 +1,5 @@
 {
-  "title": "Ethans Abos",
+  "title": "{name}s Abos",
   "loadFailed": "Laden fehlgeschlagen",
   "theme": {
     "title": "Design: {mode} (klicken zum Wechseln)",
@@ -67,5 +67,7 @@
     "renews": " · Verlängert sich am {date}",
     "monthly": "Monatlich",
     "perMonthEq": "Pro Monat"
-  }
+  },
+  "titleAnon": "Abos",
+  "poweredBy": "Erstellt mit {app}"
 }

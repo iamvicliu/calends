@@ -144,7 +144,7 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
       </div>
       <div class="rp-c rp-small">{no}</div>
       <div class="rp-tip">* {tip} *</div>
-      <div class="rp-c rp-small">calends.example.com</div>
+      <div class="rp-c rp-small">{location.host}</div>
     </div>
   );
 }
@@ -176,7 +176,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
       </div>
       <div class="ps-foot">
         <span>{hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(r.perDay) })}</span>
-        <span>calends.example.com</span>
+        <span>{location.host}</span>
       </div>
     </div>
   );
@@ -242,7 +242,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
           <span>{hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(mrr) })}</span>
         </div>
       </div>
-      <div class="rv-foot">calends.example.com</div>
+      <div class="rv-foot">{location.host}</div>
     </div>
   );
 }
@@ -276,7 +276,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
       </div>
       <div class="st-foot">
         <span>{t('review.stars.foot')}</span>
-        <span>calends.example.com</span>
+        <span>{location.host}</span>
       </div>
     </div>
   );

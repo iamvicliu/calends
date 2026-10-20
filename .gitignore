@@ -4,3 +4,7 @@ dist
 .dev.vars
 *.local
 seed/
+# 个人部署配置、脚本与素材（见 local/README.md）
+local/
+.DS_Store
+.claude/

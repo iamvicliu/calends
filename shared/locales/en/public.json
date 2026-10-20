@@ -1,7 +1,10 @@
 {
-  "title": "Ethan's Subscriptions",
+  "title": "{name}'s subscriptions",
   "loadFailed": "Couldn't load",
-  "theme": { "title": "Theme: {mode} (click to switch)", "aria": "Theme: {mode}, click to switch" },
+  "theme": {
+    "title": "Theme: {mode} (click to switch)",
+    "aria": "Theme: {mode}, click to switch"
+  },
   "currency": "Display currency",
   "hero": {
     "monthly": "Monthly subscription spending",
@@ -12,7 +15,13 @@
     "live": "Active",
     "paid": "Paid since {year}"
   },
-  "timeline": { "title": "Timeline", "upcoming": { "one": "{count} charge in the next 30 days · {amount}", "other": "{count} charges in the next 30 days · {amount}" } },
+  "timeline": {
+    "title": "Timeline",
+    "upcoming": {
+      "one": "{count} charge in the next 30 days · {amount}",
+      "other": "{count} charges in the next 30 days · {amount}"
+    }
+  },
   "chart": {
     "title": "Monthly charges",
     "desc": "Past 12 months and next 3; dashed bars are projected",
@@ -22,11 +31,22 @@
     "thisMonth": "This month",
     "projected": "{month} · Projected"
   },
-  "ended": { "title": "Cancelled", "saved": "{amount} saved since cancelling", "item": "Saved {amount}" },
+  "ended": {
+    "title": "Cancelled",
+    "saved": "{amount} saved since cancelling",
+    "item": "Saved {amount}"
+  },
   "perMonth": "{amount}/mo",
-  "lifetime": { "title": "Lifetime", "desc": "Paid once, no more charges" },
+  "lifetime": {
+    "title": "Lifetime",
+    "desc": "Paid once, no more charges"
+  },
   "footer": "Past charges use the exchange rate of that day; future ones use today's rate. Unreleased domains and payment details are hidden.",
-  "composition": { "title": "Breakdown", "desc": "Monthly cost by category", "other": "Other" },
+  "composition": {
+    "title": "Breakdown",
+    "desc": "Monthly cost by category",
+    "other": "Other"
+  },
   "count": "{count}",
   "fx": {
     "title": "Exchange rates",
@@ -35,6 +55,19 @@
     "more": "At today's rates you pay {amount} more a month than a year ago",
     "share": "{pct}%"
   },
-  "list": { "title": "Subscriptions", "summary": { "one": "{count} · {amount}/mo", "other": "{count} · {amount}/mo" }, "all": "All" },
-  "row": { "renews": " · Renews {date}", "monthly": "Monthly", "perMonthEq": "Per month" }
+  "list": {
+    "title": "Subscriptions",
+    "summary": {
+      "one": "{count} · {amount}/mo",
+      "other": "{count} · {amount}/mo"
+    },
+    "all": "All"
+  },
+  "row": {
+    "renews": " · Renews {date}",
+    "monthly": "Monthly",
+    "perMonthEq": "Per month"
+  },
+  "titleAnon": "Subscriptions",
+  "poweredBy": "Made with {app}"
 }

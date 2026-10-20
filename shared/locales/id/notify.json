@@ -88,6 +88,8 @@
       "topic": "topik",
       "sendKey": "SendKey",
       "url": "URL"
-    }
-  }
+    },
+    "emailNotConfigured": "Email belum diatur di server ini (perlu binding EMAIL dan MAIL_FROM). Gunakan kanal lain atau lihat README."
+  },
+  "sender": "Calends"
 }

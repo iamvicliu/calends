@@ -1,7 +1,10 @@
 {
-  "title": "Các gói đăng ký của Ethan",
+  "title": "Gói đăng ký của {name}",
   "loadFailed": "Không tải được",
-  "theme": { "title": "Giao diện: {mode} (nhấn để chuyển)", "aria": "Giao diện: {mode}, nhấn để chuyển" },
+  "theme": {
+    "title": "Giao diện: {mode} (nhấn để chuyển)",
+    "aria": "Giao diện: {mode}, nhấn để chuyển"
+  },
   "currency": "Tiền tệ hiển thị",
   "hero": {
     "monthly": "Chi tiêu gói đăng ký hằng tháng",
@@ -12,7 +15,12 @@
     "live": "Đang hoạt động",
     "paid": "Đã trả từ {year}"
   },
-  "timeline": { "title": "Dòng thời gian", "upcoming": { "other": "{count} khoản phí trong 30 ngày tới · {amount}" } },
+  "timeline": {
+    "title": "Dòng thời gian",
+    "upcoming": {
+      "other": "{count} khoản phí trong 30 ngày tới · {amount}"
+    }
+  },
   "chart": {
     "title": "Khoản phí hằng tháng",
     "desc": "12 tháng qua và 3 tháng tới; cột nét đứt là dự kiến",
@@ -22,11 +30,22 @@
     "thisMonth": "Tháng này",
     "projected": "{month} · Dự kiến"
   },
-  "ended": { "title": "Đã hủy", "saved": "Đã tiết kiệm {amount} kể từ khi hủy", "item": "Tiết kiệm {amount}" },
+  "ended": {
+    "title": "Đã hủy",
+    "saved": "Đã tiết kiệm {amount} kể từ khi hủy",
+    "item": "Tiết kiệm {amount}"
+  },
   "perMonth": "{amount}/tháng",
-  "lifetime": { "title": "Trọn đời", "desc": "Trả một lần, không còn bị trừ tiền" },
+  "lifetime": {
+    "title": "Trọn đời",
+    "desc": "Trả một lần, không còn bị trừ tiền"
+  },
   "footer": "Khoản phí đã qua dùng tỷ giá của ngày đó; khoản phí sắp tới dùng tỷ giá hôm nay. Tên miền chưa công bố và chi tiết thanh toán được ẩn.",
-  "composition": { "title": "Cơ cấu", "desc": "Chi phí hằng tháng theo danh mục", "other": "Khác" },
+  "composition": {
+    "title": "Cơ cấu",
+    "desc": "Chi phí hằng tháng theo danh mục",
+    "other": "Khác"
+  },
   "count": "{count}",
   "fx": {
     "title": "Tỷ giá",
@@ -35,6 +54,18 @@
     "more": "Theo tỷ giá hôm nay, bạn trả nhiều hơn {amount} mỗi tháng so với một năm trước",
     "share": "{pct}%"
   },
-  "list": { "title": "Gói đăng ký", "summary": { "other": "{count} · {amount}/tháng" }, "all": "Tất cả" },
-  "row": { "renews": " · Gia hạn {date}", "monthly": "Hằng tháng", "perMonthEq": "Mỗi tháng" }
+  "list": {
+    "title": "Gói đăng ký",
+    "summary": {
+      "other": "{count} · {amount}/tháng"
+    },
+    "all": "Tất cả"
+  },
+  "row": {
+    "renews": " · Gia hạn {date}",
+    "monthly": "Hằng tháng",
+    "perMonthEq": "Mỗi tháng"
+  },
+  "titleAnon": "Gói đăng ký",
+  "poweredBy": "Tạo bằng {app}"
 }

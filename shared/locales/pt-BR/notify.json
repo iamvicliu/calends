@@ -92,6 +92,8 @@
       "topic": "um tópico",
       "sendKey": "uma SendKey",
       "url": "uma URL"
-    }
-  }
+    },
+    "emailNotConfigured": "O e-mail não está configurado neste servidor (requer o binding EMAIL e MAIL_FROM). Use outro canal ou consulte o README."
+  },
+  "sender": "Calends"
 }

@@ -88,6 +88,8 @@
       "topic": "토픽",
       "sendKey": "SendKey",
       "url": "URL"
-    }
-  }
+    },
+    "emailNotConfigured": "이 서버에는 이메일 발송이 설정되어 있지 않습니다(EMAIL 바인딩과 MAIL_FROM 필요). 다른 채널을 사용하거나 README를 참고하세요."
+  },
+  "sender": "Calends"
 }

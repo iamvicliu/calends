@@ -991,9 +991,9 @@ select.btn { appearance: none; -webkit-appearance: none; padding-right: 28px; ba
 .sec-title { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.015em; }
 .sec-sub { font-size: 12.5px; color: var(--label-3); margin-top: 3px; }
 
-/* 品牌头像：沿用 example.com 的头像 */
-.sb-mark img { border-radius: 50%; box-shadow: none; }
-.login-card img { border-radius: 50%; }
+/* 品牌图标自带圆角，这里只做轻微裁切；个人部署可在 local/public/icons 换成自己的头像 */
+.sb-mark img { border-radius: 22%; box-shadow: none; }
+.login-card img { border-radius: 22%; }
 
 /* 年视图：有扣款的日子显示订阅图标，多笔时角标计数 */
 .heat-m { padding: 14px 14px 12px; }

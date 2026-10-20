@@ -1,5 +1,5 @@
 {
-  "title": "Les abonnements d’Ethan",
+  "title": "Abonnements de {name}",
   "loadFailed": "Chargement impossible",
   "theme": {
     "title": "Thème : {mode} (cliquez pour changer)",
@@ -67,5 +67,7 @@
     "renews": " · Renouvellement le {date}",
     "monthly": "Mensuel",
     "perMonthEq": "Par mois"
-  }
+  },
+  "titleAnon": "Abonnements",
+  "poweredBy": "Fait avec {app}"
 }

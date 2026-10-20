@@ -80,6 +80,8 @@
       "topic": " Topic",
       "sendKey": " SendKey",
       "url": " URL"
-    }
-  }
+    },
+    "emailNotConfigured": "这台服务器没有配置邮件发送（需要 EMAIL 绑定和 MAIL_FROM），请改用其他渠道，或参照 README 配置。"
+  },
+  "sender": "订阅账本"
 }

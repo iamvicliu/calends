@@ -224,7 +224,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const digests = [buildMonthly(state, day), buildDaily(state, day)].filter(Boolean) as Digest[];
     const log = await env.DB.prepare('SELECT dedupe_key, kind, subject, status, sent_at FROM notify_log ORDER BY sent_at DESC LIMIT 20').all();
     if (url.searchParams.get('html') === '1' && digests[0]) {
-      return new Response(renderEmail(digests[0], env.SITE_URL).html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
+      return new Response(renderEmail(digests[0], env.SITE_URL ?? '').html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
     }
     return json({ day, digests, log: log.results });
   }
@@ -253,6 +253,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
+    // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
+    if (!env.SITE_URL) env = { ...env, SITE_URL: url.origin };
     try {
       // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
@@ -265,7 +267,7 @@ export default {
       if (cal) {
         const state = await loadState(env);
         if (!state.settings.icsToken || state.settings.icsToken !== cal[1]) return new Response('not found', { status: 404 });
-        return new Response(buildIcs(state, env.SITE_URL), {
+        return new Response(buildIcs(state, env.SITE_URL ?? ''), {
           headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
         });
       }
@@ -283,6 +285,8 @@ export default {
     }
     const state = await loadState(env);
     useLocale(settingsLocale(state.settings));
+    // 定时任务没有请求地址：用后台最近一次访问时记下的地址
+    if (!env.SITE_URL) env = { ...env, SITE_URL: state.settings.siteUrl };
     const log = await runScheduled(env, state);
     if (log.length) console.log('[notify]', log.join('; '));
   },

@@ -80,6 +80,8 @@
       "topic": " Topic",
       "sendKey": " SendKey",
       "url": " URL"
-    }
-  }
+    },
+    "emailNotConfigured": "這部伺服器未設定電郵發送（需要 EMAIL 綁定和 MAIL_FROM），請改用其他渠道，或參照 README 設定。"
+  },
+  "sender": "訂閱帳本"
 }

@@ -1,5 +1,5 @@
 {
-  "title": "Ethan のサブスク",
+  "title": "{name}のサブスク",
   "loadFailed": "読み込めませんでした",
   "theme": {
     "title": "テーマ：{mode}（クリックで切り替え）",
@@ -65,5 +65,7 @@
     "renews": " · {date}に更新",
     "monthly": "月額",
     "perMonthEq": "月あたり"
-  }
+  },
+  "titleAnon": "サブスク一覧",
+  "poweredBy": "{app} で作成"
 }

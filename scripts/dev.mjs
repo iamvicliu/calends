@@ -28,5 +28,5 @@ if (!existsSync('dist/index.html')) {
   const b = spawn('npx', ['vite', 'build'], { stdio: 'inherit' });
   await new Promise((r) => b.on('exit', r));
 }
-run('worker', '35', 'npx', ['wrangler', 'dev', '--port', '8787', '--local']);
+run('worker', '35', 'node', ['scripts/wrangler.mjs', 'dev', '--port', '8787', '--local']);
 run('vite', '36', 'npx', ['vite', '--host', '127.0.0.1', '--port', '5173', '--strictPort']);

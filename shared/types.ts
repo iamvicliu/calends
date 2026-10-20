@@ -285,6 +285,8 @@ export interface Settings {
   language?: string;
   /** 跟随浏览器时，后台最近一次实际使用的语言（提醒邮件、MCP 用它） */
   languageSeen?: string;
+  /** 站点地址：没配置 SITE_URL 时，后台访问时记下，供定时提醒里的链接使用 */
+  siteUrl?: string;
 }
 
 export interface FxTable {

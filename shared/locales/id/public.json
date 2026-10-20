@@ -1,7 +1,10 @@
 {
-  "title": "Langganan Ethan",
+  "title": "Langganan {name}",
   "loadFailed": "Gagal memuat",
-  "theme": { "title": "Tema: {mode} (klik untuk beralih)", "aria": "Tema: {mode}, klik untuk beralih" },
+  "theme": {
+    "title": "Tema: {mode} (klik untuk beralih)",
+    "aria": "Tema: {mode}, klik untuk beralih"
+  },
   "currency": "Mata uang tampilan",
   "hero": {
     "monthly": "Pengeluaran langganan bulanan",
@@ -12,7 +15,12 @@
     "live": "Aktif",
     "paid": "Dibayar sejak {year}"
   },
-  "timeline": { "title": "Linimasa", "upcoming": { "other": "{count} tagihan dalam 30 hari ke depan · {amount}" } },
+  "timeline": {
+    "title": "Linimasa",
+    "upcoming": {
+      "other": "{count} tagihan dalam 30 hari ke depan · {amount}"
+    }
+  },
   "chart": {
     "title": "Tagihan bulanan",
     "desc": "12 bulan terakhir dan 3 bulan ke depan; batang putus-putus adalah perkiraan",
@@ -22,11 +30,22 @@
     "thisMonth": "Bulan ini",
     "projected": "{month} · Perkiraan"
   },
-  "ended": { "title": "Dibatalkan", "saved": "Hemat {amount} sejak dibatalkan", "item": "Hemat {amount}" },
+  "ended": {
+    "title": "Dibatalkan",
+    "saved": "Hemat {amount} sejak dibatalkan",
+    "item": "Hemat {amount}"
+  },
   "perMonth": "{amount}/bln",
-  "lifetime": { "title": "Seumur hidup", "desc": "Bayar sekali, tanpa tagihan lagi" },
+  "lifetime": {
+    "title": "Seumur hidup",
+    "desc": "Bayar sekali, tanpa tagihan lagi"
+  },
   "footer": "Tagihan lalu memakai kurs pada hari itu; tagihan mendatang memakai kurs hari ini. Domain yang belum dirilis dan detail pembayaran disembunyikan.",
-  "composition": { "title": "Rincian", "desc": "Biaya bulanan per kategori", "other": "Lainnya" },
+  "composition": {
+    "title": "Rincian",
+    "desc": "Biaya bulanan per kategori",
+    "other": "Lainnya"
+  },
   "count": "{count}",
   "fx": {
     "title": "Kurs",
@@ -35,6 +54,18 @@
     "more": "Dengan kurs hari ini, Anda membayar {amount} lebih banyak per bulan dibanding setahun lalu",
     "share": "{pct}%"
   },
-  "list": { "title": "Langganan", "summary": { "other": "{count} · {amount}/bln" }, "all": "Semua" },
-  "row": { "renews": " · Diperpanjang {date}", "monthly": "Bulanan", "perMonthEq": "Per bulan" }
+  "list": {
+    "title": "Langganan",
+    "summary": {
+      "other": "{count} · {amount}/bln"
+    },
+    "all": "Semua"
+  },
+  "row": {
+    "renews": " · Diperpanjang {date}",
+    "monthly": "Bulanan",
+    "perMonthEq": "Per bulan"
+  },
+  "titleAnon": "Langganan",
+  "poweredBy": "Dibuat dengan {app}"
 }

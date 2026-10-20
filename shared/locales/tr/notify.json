@@ -92,6 +92,8 @@
       "topic": "konu",
       "sendKey": "SendKey",
       "url": "URL"
-    }
-  }
+    },
+    "emailNotConfigured": "Bu sunucuda e-posta gönderimi ayarlı değil (EMAIL bağlaması ve MAIL_FROM gerekli). Başka bir kanal kullanın veya README'ye bakın."
+  },
+  "sender": "Calends"
 }

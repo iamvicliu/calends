@@ -477,6 +477,8 @@ function Root() {
     document.title = t('app.name');
     // 跟随浏览器时，把实际用的语言记到设置里，提醒邮件和 MCP 用同一种
     if (state && !state.readonly && !state.settings.language && state.settings.languageSeen !== want) void saveSettings({ languageSeen: want }).catch(() => {});
+    // 记下站点地址，定时提醒里的链接要用（本地开发不记）
+    if (state && !state.readonly && state.settings.siteUrl !== location.origin && !/^http:\/\/(localhost|127\.)/.test(location.origin)) void saveSettings({ siteUrl: location.origin }).catch(() => {});
   }, [want, loc]);
   return <App key={loc} />;
 }

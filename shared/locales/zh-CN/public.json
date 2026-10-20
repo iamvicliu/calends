@@ -1,7 +1,10 @@
 {
-  "title": "小哲的订阅",
+  "title": "{name}的订阅",
   "loadFailed": "加载失败",
-  "theme": { "title": "主题：{mode}（点击切换）", "aria": "主题：{mode}，点击切换" },
+  "theme": {
+    "title": "主题：{mode}（点击切换）",
+    "aria": "主题：{mode}，点击切换"
+  },
   "currency": "显示币种",
   "hero": {
     "monthly": "每月订阅支出",
@@ -12,7 +15,10 @@
     "live": "在付订阅",
     "paid": "累计已付 · {year} 起"
   },
-  "timeline": { "title": "时间线", "upcoming": "接下来 30 天 {count} 笔 · {amount}" },
+  "timeline": {
+    "title": "时间线",
+    "upcoming": "接下来 30 天 {count} 笔 · {amount}"
+  },
   "chart": {
     "title": "每月扣款",
     "desc": "过去 12 个月与之后 3 个月，虚线为预计",
@@ -22,11 +28,22 @@
     "thisMonth": "本月",
     "projected": "{month} · 预计"
   },
-  "ended": { "title": "已退订", "saved": "退订至今少花 {amount}", "item": "省 {amount}" },
+  "ended": {
+    "title": "已退订",
+    "saved": "退订至今少花 {amount}",
+    "item": "省 {amount}"
+  },
   "perMonth": "{amount}/月",
-  "lifetime": { "title": "买断", "desc": "一次付清，不再扣款" },
+  "lifetime": {
+    "title": "买断",
+    "desc": "一次付清，不再扣款"
+  },
   "footer": "过去的扣款按当天汇率，未来按今天汇率换算。未上线项目的域名与支付信息已隐藏。",
-  "composition": { "title": "构成", "desc": "每月成本按分类", "other": "其他" },
+  "composition": {
+    "title": "构成",
+    "desc": "每月成本按分类",
+    "other": "其他"
+  },
   "count": "{count} 个",
   "fx": {
     "title": "汇率",
@@ -35,6 +52,16 @@
     "more": "和一年前的汇率相比，每月多花 {amount}",
     "share": "占 {pct}%"
   },
-  "list": { "title": "正在订阅", "summary": "{count} 个 · 每月 {amount}", "all": "全部" },
-  "row": { "renews": " · {date}续费", "monthly": "每月", "perMonthEq": "折合每月" }
+  "list": {
+    "title": "正在订阅",
+    "summary": "{count} 个 · 每月 {amount}",
+    "all": "全部"
+  },
+  "row": {
+    "renews": " · {date}续费",
+    "monthly": "每月",
+    "perMonthEq": "折合每月"
+  },
+  "titleAnon": "订阅一览",
+  "poweredBy": "由 {app} 驱动"
 }

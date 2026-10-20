@@ -11,10 +11,12 @@ export interface EmailBinding {
 export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
-  EMAIL: EmailBinding;
-  SITE_URL: string;
-  MAIL_FROM: string;
-  MAIL_FROM_NAME: string;
+  /** Cloudflare Email Sending；不配置时邮件渠道不可用，其他渠道照常 */
+  EMAIL?: EmailBinding;
+  /** 站点地址（提醒里的链接）；不配置时用访问后台时记下的地址 */
+  SITE_URL?: string;
+  MAIL_FROM?: string;
+  MAIL_FROM_NAME?: string;
   /** 旧版：口令直接放在密钥里；第一次登录成功后会转存为哈希，之后可以删除 */
   OWNER_PASSCODE?: string;
   /** 首次设置密码时需要提供的一次性令牌（wrangler secret put SETUP_TOKEN） */

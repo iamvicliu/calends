@@ -70,12 +70,13 @@ const need = (c: Channel, k: string, field: string) => {
 
 /** 发一份提醒到一个渠道；失败时抛错，由调用方记录 */
 export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
-  const site = env.SITE_URL;
+  const site = env.SITE_URL ?? '';
   switch (c.kind) {
     case 'email': {
       const to = need(c, 'to', 'to');
+      if (!env.EMAIL || !env.MAIL_FROM) throw new Error(t('notify.channel.emailNotConfigured'));
       const { html, text } = renderEmail(d, site);
-      await env.EMAIL.send({ from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME }, to, subject: d.subject, text, html });
+      await env.EMAIL.send({ from: { email: env.MAIL_FROM, name: env.MAIL_FROM_NAME || t('notify.sender') }, to, subject: d.subject, text, html });
       return;
     }
     case 'telegram': {

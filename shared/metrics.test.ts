@@ -157,9 +157,9 @@ test('历程操作：调价 → 换区 → 撤回', async () => {
 
 test('公开数据不包含任何真实域名', async () => {
   const { maskForPublic } = await import('./mask.ts');
-  const s = sub({ id: 'cf-example-com', name: 'example.com', category: '域名', url: 'https://example.com', icon: 'https://x/example.com.png', notes: '到期 2027' });
+  const s = sub({ id: 'cf-example-org', name: 'example-domain.org', category: '域名', url: 'https://example-domain.org', icon: 'https://x/example-domain.org.png', notes: '到期 2027' });
   const out = JSON.stringify(maskForPublic(state([s])));
-  assert.ok(!out.includes('example'), out);
+  assert.ok(!out.includes('example-domain'), out);
 });
 
 test('换区前的阶段不显示为到期不续', async () => {

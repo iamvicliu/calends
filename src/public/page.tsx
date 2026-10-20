@@ -20,6 +20,7 @@ import { Skeleton } from '@/public/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/public/components/ui/tabs';
 import { TooltipProvider } from '@/public/components/ui/tooltip';
 import { cn } from '@/public/lib/utils';
+import { PROJECT_NAME, PROJECT_URL } from '../../shared/brand.ts';
 
 type Ccy = 'CNY' | 'USD';
 
@@ -41,8 +42,9 @@ const save = (key: string, v: string) => {
 /** 公开页去掉名字里的国旗 emoji，地区另有标签 */
 const clean = (name: string) => name.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, ' ').replace(/\s+/g, ' ').trim();
 
-/** 标题随浏览器语言：中文「小哲的订阅」，其他语言用英文 */
-const title = () => t('public.title');
+/** 标题：「某某的订阅」；没设名字时用通用标题 */
+let owner = '';
+const title = () => (owner.trim() ? t('public.title', { name: owner.trim() }) : t('public.titleAnon'));
 
 /** 文案里嵌元素：先按 params 填文字（含复数），再把 {name} 换成 parts 里的节点 */
 function rich(key: string, params: Params, parts: Record<string, React.ReactNode>): React.ReactNode[] {
@@ -71,6 +73,8 @@ export function PublicPage() {
       .then(async (r) => {
         const body = (await r.json()) as AppState & { error?: string };
         if (!r.ok) throw new Error(body.error ?? t('public.loadFailed'));
+        owner = body.settings.displayName ?? '';
+        document.title = title();
         setState(body);
       })
       .catch((e: Error) => setErr(e.message));
@@ -98,7 +102,7 @@ function Shell({ children, right }: { children: React.ReactNode; right?: React.R
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-12 sm:px-6 sm:pt-10">
       <header className="mb-5 flex items-center gap-3 sm:mb-6">
-        <img src="/icons/avatar.png" alt="" className="size-9 rounded-full ring-1 ring-foreground/10" />
+        <img src="/icons/avatar.png" alt="" className="size-9 rounded-[22%]" />
         <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title()}</h1>
         {right}
       </header>
@@ -305,8 +309,8 @@ function Ledger({ state }: { state: AppState }) {
 
       <footer className="mt-10 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:justify-between">
         <span>{t('public.footer')}</span>
-        <a href="https://example.com" className="underline decoration-border underline-offset-4 hover:text-foreground">
-          example.com
+        <a href={PROJECT_URL} className="underline decoration-border underline-offset-4 hover:text-foreground">
+          {t('public.poweredBy', { app: PROJECT_NAME })}
         </a>
       </footer>
     </Shell>

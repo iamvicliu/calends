@@ -100,6 +100,8 @@
       "topic": "тема",
       "sendKey": "SendKey",
       "url": "URL"
-    }
-  }
+    },
+    "emailNotConfigured": "На этом сервере не настроена отправка почты (нужны привязка EMAIL и MAIL_FROM). Используйте другой канал или см. README."
+  },
+  "sender": "Calends"
 }

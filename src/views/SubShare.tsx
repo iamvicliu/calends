@@ -135,7 +135,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         <span>
           {t('share.untilToday', { date: when(start, today) })}
         </span>
-        <span>calends.example.com</span>
+        <span>{location.host}</span>
       </div>
     </div>
   );
@@ -195,7 +195,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
         ))}
       </div>
       <div class="rc-thanks">{t('share.thanks')}</div>
-      <div class="rc-site">calends.example.com</div>
+      <div class="rc-site">{location.host}</div>
     </div>
   );
 }
@@ -243,7 +243,7 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
           ),
         )}
       </div>
-      <div class="tlc-foot">calends.example.com</div>
+      <div class="tlc-foot">{location.host}</div>
     </div>
   );
 }
@@ -267,7 +267,7 @@ function SPoster({ sub, st, hide, m }: Ctx) {
         {st.vs.length > 1 && <span>{t('share.switched', { count: st.vs.length - 1 })}</span>}
         {st.change != null && <span>{changeText(st)}</span>}
       </div>
-      <div class="sp-foot">calends.example.com</div>
+      <div class="sp-foot">{location.host}</div>
     </div>
   );
 }
@@ -296,7 +296,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
       </div>
       <div class="sy-foot">
         <span>{t('share.n.charges', { count: st.charges.length })} · {changeText(st)}</span>
-        <span>calends.example.com</span>
+        <span>{location.host}</span>
       </div>
     </div>
   );

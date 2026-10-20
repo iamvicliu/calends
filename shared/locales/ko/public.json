@@ -1,5 +1,5 @@
 {
-  "title": "Ethan의 구독",
+  "title": "{name}의 구독",
   "loadFailed": "불러오지 못했습니다",
   "theme": {
     "title": "테마: {mode}(클릭하여 전환)",
@@ -65,5 +65,7 @@
     "renews": " · {date} 갱신",
     "monthly": "월",
     "perMonthEq": "월 환산"
-  }
+  },
+  "titleAnon": "구독 목록",
+  "poweredBy": "{app}로 만듦"
 }

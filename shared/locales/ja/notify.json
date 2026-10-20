@@ -88,6 +88,8 @@
       "topic": "トピック",
       "sendKey": "SendKey",
       "url": "URL"
-    }
-  }
+    },
+    "emailNotConfigured": "このサーバーではメール送信が設定されていません（EMAIL バインディングと MAIL_FROM が必要）。別のチャネルを使うか、README を参照してください。"
+  },
+  "sender": "Calends"
 }

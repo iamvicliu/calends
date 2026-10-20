@@ -88,6 +88,8 @@
       "topic": "chủ đề",
       "sendKey": "SendKey",
       "url": "URL"
-    }
-  }
+    },
+    "emailNotConfigured": "Máy chủ này chưa cấu hình gửi email (cần binding EMAIL và MAIL_FROM). Hãy dùng kênh khác hoặc xem README."
+  },
+  "sender": "Calends"
 }

@@ -1,3 +1,7 @@
+// Calends 的 Cloudflare 部署配置。
+// - 首次部署：npm run deploy 会自动创建 D1 数据库（无需填写 database_id）。
+// - 个人配置（自定义域名、发信地址等）写在 local/wrangler.jsonc，存在时 npm 脚本会优先使用它。
+// - 密钥：wrangler secret put SETUP_TOKEN（首次设置密码用）。
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "calends",
@@ -10,19 +14,11 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*", "/cal/*", "/mcp"]
   },
-  "routes": [{ "pattern": "calends.example.com", "custom_domain": true }],
-  "d1_databases": [
-    { "binding": "DB", "database_name": "subscription-db", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
-  ],
-  // Cloudflare Email Sending：example.com 已在账户内验证
-  "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["calends@example.com"] }],
-  // 每小时触发：到设置中的提醒时刻才发信；每日刷新汇率
+  "d1_databases": [{ "binding": "DB", "database_name": "calends", "migrations_dir": "migrations" }],
+  // 每小时触发：到设置中的提醒时刻才发送；每日刷新汇率
   "triggers": { "crons": ["5 * * * *"] },
-  "vars": {
-    "SITE_URL": "https://calends.example.com",
-    "MAIL_FROM": "calends@example.com",
-    "MAIL_FROM_NAME": "订阅账本"
-  },
-  // OWNER_PASSCODE 为 secret：wrangler secret put OWNER_PASSCODE
+  // 可选：邮件提醒需要 Cloudflare Email Sending，取消注释并换成你在 Cloudflare 验证过的域名
+  // "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["calends@example.com"] }],
+  // "vars": { "SITE_URL": "https://calends.example.com", "MAIL_FROM": "calends@example.com", "MAIL_FROM_NAME": "Calends" },
   "observability": { "enabled": true }
 }
