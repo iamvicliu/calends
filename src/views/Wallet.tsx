@@ -7,7 +7,7 @@ import { toBaseAt } from '../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Amount, Cell, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
-import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS, toBase } from '../derive.ts';
+import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
 import { go } from '../router.ts';
@@ -15,13 +15,15 @@ import { BANKS } from '../banks.ts';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
+import { useMoneyPair } from '../components/MoneyPair.tsx';
 
 export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
+  // 大字 / 小字金额跟随显示货币设置
+  const pair = useMoneyPair(state);
   const m = r.method;
   const daysLeft = r.runsOutOn ? diffDays(today, r.runsOutOn) : Infinity;
   const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
   const tone = daysLeft <= 7 ? 'out' : daysLeft <= (m.lowRunwayDays ?? 30) ? 'low' : '';
-  const base = state.settings.baseCurrency;
   const body = (
     <div class="runway">
       <div class="rw-top">
@@ -33,12 +35,10 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div class="rw-bal">
-            <Amount value={r.current} ccy={m.currency} />
-          </div>
-          {m.currency !== base && (
+          <div class="rw-bal">{pair(r.current, m.currency).main}</div>
+          {pair(r.current, m.currency).alt && (
             <div class="soft" style={{ fontSize: 11.5 }}>
-              ≈ {money(toBase(state, r.current, m.currency), base, { compact: true })}
+              {pair(r.current, m.currency).alt}
             </div>
           )}
         </div>

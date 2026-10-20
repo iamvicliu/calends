@@ -10,6 +10,7 @@ import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { Amount, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
+import { useMoneyPair } from '../components/MoneyPair.tsx';
 
 type Scale = 'month' | 'year';
 const PROJ = '__proj';
@@ -254,6 +255,8 @@ function allRanges(state: AppState, ranges: Array<{ from: string; to: string }>,
 
 /** 接下来 30 天 */
 function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+  // 大字 / 小字金额跟随显示货币设置
+  const pair = useMoneyPair(state);
   const base = state.settings.baseCurrency;
   const cs = allCharges(state, today, addDays(today, 30), today);
   const total = sumBase(state, cs);
@@ -289,10 +292,10 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
                       </small>
                     </span>
                     <span class="am">
-                      <b>
-                        <Amount value={c.amount} ccy={c.currency} />
-                      </b>
-                      {c.currency !== base && <small>≈ {money(chargeValue(state, c), base, { compact: true })}</small>}
+                      <b>{pair(c.amount, c.currency, { value: chargeValue(state, c) }).main}</b>
+                      {pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt && (
+                        <small>{pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt}</small>
+                      )}
                     </span>
                     <span class={`pill ${d <= 3 ? 'hot' : ''}`}>{d <= 13 ? relDays(d) : cnDate(c.date)}</span>
                   </button>

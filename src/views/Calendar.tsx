@@ -3,9 +3,10 @@ import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../share
 import { cnDate, money, monthLabel, relDays, weekdayShort } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Amount, Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
+import { Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
 import { chargeValue } from '../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
+import { useMoneyPair } from '../components/MoneyPair.tsx';
 
 /** 表头的星期简称，按周起始日排好 */
 const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
@@ -22,6 +23,8 @@ function monthGrid(month: string) {
 }
 
 export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onIcs: () => void }) {
+  // 大字 / 小字金额跟随显示货币设置
+  const pair = useMoneyPair(state);
   weekStart = state.settings.weekStart ?? 1;
   const DOW = dows();
   const [month, setMonth] = useState(today.slice(0, 7));
@@ -146,10 +149,12 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
                     </span>
                     <span style={{ textAlign: 'right' }}>
-                      <Amount value={c.amount} ccy={c.currency} />
+                      {pair(c.amount, c.currency, { value: chargeValue(state, c) }).main}
                       <div class="muted" style={{ fontSize: 12 }}>
                         {c.projected ? t('calendar.projected') : t('calendar.charged')}
-                        {c.currency !== base ? ` · ≈${money(chargeValue(state, c), base, { compact: true })}` : ''}
+                        {pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt
+                          ? ` · ${pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt}`
+                          : ''}
                       </div>
                     </span>
                   </button>

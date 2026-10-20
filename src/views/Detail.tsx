@@ -3,7 +3,6 @@ import { useState } from 'preact/hooks';
 import {
   activePhases,
   chargesBetween,
-  convert,
   currentPhase,
   phaseSubs,
   cycleLabel,
@@ -21,7 +20,7 @@ import { chargeValue, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
 import { PaymentSheet } from './PaymentSheet.tsx';
 import { History } from '../components/History.tsx';
-import { Amount, CatChip, Cell, Group, Icon, PayBadge, SubIcon } from '../components/ui.tsx';
+import { CatChip, Cell, Group, Icon, PayBadge, SubIcon } from '../components/ui.tsx';
 import { catColor, subImage, sumBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
 import { ChangeNote, ParallelNote } from './List.tsx';
@@ -29,6 +28,7 @@ import { MiniGantt } from './Gantt.tsx';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan } from '../../shared/phases.ts';
 import { t } from '../../shared/i18n.ts';
+import { useMoneyPair } from '../components/MoneyPair.tsx';
 
 /** 状态角标的色调；文案见 list.status.* */
 const TONE: Record<string, string> = {
@@ -42,6 +42,8 @@ const TONE: Record<string, string> = {
 };
 
 export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state: AppState; today: string; onEdit: () => void }) {
+  // 大字 / 小字金额跟随显示货币设置
+  const pair = useMoneyPair(state);
   const base = state.settings.baseCurrency;
   const st = effectiveStatus(sub, today);
   const next = nextCharge(sub, today);
@@ -120,9 +122,9 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
             <span class={`badge ${tone} d-status`}>{label}</span>
           </h2>
           <div class="price">
-            <Amount value={next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price} ccy={cur.currency} />
+            {pair(next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price, cur.currency, { compact: false }).main}
             {cycleLabel(cur.cycle)}
-            {cur.currency !== base && ` · ≈ ${money(convert(cur.price, cur.currency, base, state.fx), base)}`}
+            {pair(cur.price, cur.currency, { compact: false }).alt && ` · ${pair(cur.price, cur.currency, { compact: false }).alt}`}
           </div>
           {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
           <ParallelNote sub={sub} cur={cur} today={today} />
