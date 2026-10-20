@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "Also running",
-    "previous": "Previous plan",
-    "until": "Runs until {date} · {rel}",
-    "monthlyHint": { "one": "{count} plan running at once, summed", "other": "{count} plans running at once, summed" }
-  },
+  "overlap": { "title": "Also running", "previous": "Previous plan", "until": "Runs until {date} · {rel}" },
   "action": { "edit": "Edit", "pause": "Pause", "resume": "Resume", "manage": "Manage", "website": "Website", "share": "Share" },
   "toast": { "resumed": "Billing resumed", "paused": "Paused. Future charges won't be projected" },
   "history": "History",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "Amount",
     "cycle": "Billing cycle",
-    "monthlyYearly": "Monthly / yearly",
     "category": "Category",
     "method": "Payment method",
     "start": "Start date",
@@ -26,13 +20,6 @@
   "up": { "planned": "Planned change · not confirmed", "starting": "Starting soon", "changing": "Upcoming change", "effective": "Effective date" },
   "plan": { "drop": "Don't switch", "droppedToast": "Won't switch. Ends after {date}", "confirm": "Confirm switch", "confirmedToast": "Switch confirmed" },
   "intro": { "title": "Intro offer", "price": "Intro price", "until": "Offer ends", "then": "Then" },
-  "remind": {
-    "title": "Reminders",
-    "email": "Email reminder",
-    "off": "Off",
-    "onDay": "On the due date at {time}",
-    "before": { "one": "{count} day before at {time}", "other": "{count} days before at {time}" }
-  },
   "share": {
     "owner": "Shared · I host ({count}/{seats})",
     "member": "Shared · I joined",
@@ -50,12 +37,10 @@
     "addShort": "Add",
     "title": { "one": "Charges · {count}", "other": "Charges · {count}" },
     "kind": { "refund": "Refund", "adjust": "Adjustment", "failed": "Failed" },
-    "onCard": "On card {amount} · ",
     "add": "Add a record (refund, adjustment, failed charge, card amount…)",
     "recent": "Show last 12 only",
     "all": "Show all {count}"
   },
-  "notes": "Notes",
   "stats": {
     "spent": "Total spent",
     "count": { "one": "{count} charge", "other": "{count} charges" },
@@ -66,37 +51,19 @@
     "months": { "one": "{count} month", "other": "{count} months" },
     "days": { "one": "{count} day", "other": "{count} days" },
     "gaps": { "one": "Lapsed once", "other": "Lapsed {count} times" },
-    "since": "Since {date}",
-    "perMonth": "Actual monthly",
-    "perMonthHint": "Total ÷ months subscribed",
-    "priceChange": "Price change",
-    "changed": "Changes",
-    "unchanged": "No change",
-    "times": { "one": "{count} time", "other": "{count} times" },
-    "changeHint": "Region, plan or payment changes"
+    "perMonth": "Actual monthly"
   },
   "tab": { "charges": "Charges · {count}", "details": "Details" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "At each charge’s day rate",
-    "noGaps": "No lapses",
-    "now": "now",
-    "endedOn": "Ended {date}",
-    "nextOn": "Next charge {date} · {rel}",
-    "perCharge": "Per charge {from} → {to}",
-    "changes": { "one": "{count} change in {months} mo", "other": "{count} changes in {months} mo" }
-  },
+  "kpi": { "noGaps": "No lapses" },
   "chart": {
     "title": "Per charge · {ccy}",
     "orig": "Original",
     "all": "All",
     "y1": "1Y",
     "m6": "6M",
-    "latest": "Latest {date} · first {first}",
     "perCharge": "Per charge",
     "list": "List price at first rate",
     "listOrig": "List price",
-    "insight": "Price {price} · FX {fx}",
     "origAmount": "Original amount",
     "few": "Need at least two charges to draw a trend"
   },
@@ -107,13 +74,9 @@
     "price": "Price change",
     "introEnd": "Back to regular price",
     "paused": "Paused",
-    "last": "Latest charge",
-    "nth": "#{count}",
-    "next": "Next charge",
     "ended": "Ended",
     "ending": "Ends",
     "phases": { "one": "{count} phase", "other": "{count} phases" },
     "more": { "one": "Show {count} earlier", "other": "Show {count} earlier" }
-  },
-  "table": { "date": "Date", "orig": "Original" }
+  }
 }

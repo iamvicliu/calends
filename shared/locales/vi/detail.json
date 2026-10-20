@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "Đang chạy song song",
-    "previous": "Gói trước",
-    "until": "Đến {date} · {rel}",
-    "monthlyHint": { "other": "{count} gói chạy song song, tính tổng" }
-  },
+  "overlap": { "title": "Đang chạy song song", "previous": "Gói trước", "until": "Đến {date} · {rel}" },
   "action": { "edit": "Sửa", "pause": "Tạm dừng", "resume": "Tiếp tục", "manage": "Quản lý", "website": "Trang web", "share": "Chia sẻ" },
   "toast": { "resumed": "Đã tiếp tục thanh toán", "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến" },
   "history": "Lịch sử",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "Số tiền",
     "cycle": "Chu kỳ thanh toán",
-    "monthlyYearly": "Theo tháng / năm",
     "category": "Danh mục",
     "method": "Phương thức thanh toán",
     "start": "Ngày bắt đầu",
@@ -31,13 +25,6 @@
     "confirmedToast": "Đã xác nhận chuyển"
   },
   "intro": { "title": "Ưu đãi mở đầu", "price": "Giá ưu đãi", "until": "Ưu đãi kết thúc", "then": "Sau đó" },
-  "remind": {
-    "title": "Nhắc nhở",
-    "email": "Nhắc qua email",
-    "off": "Tắt",
-    "onDay": "Vào ngày đến hạn lúc {time}",
-    "before": { "other": "Trước {count} ngày lúc {time}" }
-  },
   "share": {
     "owner": "Chia sẻ · tôi làm chủ nhóm ({count}/{seats})",
     "member": "Chia sẻ · tôi tham gia",
@@ -55,12 +42,10 @@
     "addShort": "Ghi",
     "title": { "other": "Khoản phí · {count}" },
     "kind": { "refund": "Hoàn tiền", "adjust": "Điều chỉnh", "failed": "Thất bại" },
-    "onCard": "Trên thẻ {amount} · ",
     "add": "Thêm bản ghi (hoàn tiền, điều chỉnh, trừ tiền thất bại, số tiền trên thẻ…)",
     "recent": "Chỉ hiện 12 mục gần nhất",
     "all": "Hiện tất cả {count}"
   },
-  "notes": "Ghi chú",
   "stats": {
     "spent": "Tổng chi",
     "count": { "other": "{count} khoản phí" },
@@ -71,37 +56,19 @@
     "months": { "other": "{count} tháng" },
     "days": { "other": "{count} ngày" },
     "gaps": { "other": "Gián đoạn {count} lần" },
-    "since": "Từ {date}",
-    "perMonth": "Thực chi mỗi tháng",
-    "perMonthHint": "Tổng ÷ số tháng đã đăng ký",
-    "priceChange": "Thay đổi giá",
-    "changed": "Thay đổi",
-    "unchanged": "Không đổi",
-    "times": { "other": "{count} lần" },
-    "changeHint": "Đổi khu vực, gói hoặc phương thức thanh toán"
+    "perMonth": "Thực chi mỗi tháng"
   },
   "tab": { "charges": "Lần trừ tiền · {count}", "details": "Chi tiết" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Theo tỷ giá ngày trừ tiền",
-    "noGaps": "Không gián đoạn",
-    "now": "nay",
-    "endedOn": "Kết thúc {date}",
-    "nextOn": "Lần trừ tiếp {date} · {rel}",
-    "perCharge": "Mỗi lần {from} → {to}",
-    "changes": "{count} lần đổi trong {months} tháng"
-  },
+  "kpi": { "noGaps": "Không gián đoạn" },
   "chart": {
     "title": "Mỗi lần trừ · {ccy}",
     "orig": "Gốc",
     "all": "Tất cả",
     "y1": "1 năm",
     "m6": "6 tháng",
-    "latest": "Gần nhất {date} · lần đầu {first}",
     "perCharge": "Mỗi lần",
     "list": "Giá niêm yết theo tỷ giá đầu",
     "listOrig": "Giá niêm yết",
-    "insight": "Giá {price} · tỷ giá {fx}",
     "origAmount": "Số tiền gốc",
     "few": "Cần ít nhất hai lần trừ tiền để vẽ xu hướng"
   },
@@ -112,13 +79,9 @@
     "price": "Đổi giá",
     "introEnd": "Về giá thường",
     "paused": "Tạm dừng",
-    "last": "Lần trừ gần nhất",
-    "nth": "Lần thứ {count}",
-    "next": "Lần trừ tiếp theo",
     "ended": "Đã kết thúc",
     "ending": "Sắp kết thúc",
     "phases": "{count} giai đoạn",
     "more": "Xem {count} mục trước"
-  },
-  "table": { "date": "Ngày", "orig": "Gốc" }
+  }
 }

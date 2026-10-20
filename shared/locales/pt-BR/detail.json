@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "Também ativo",
-    "previous": "Plano anterior",
-    "until": "Até {date} · {rel}",
-    "monthlyHint": { "one": "{count} plano ao mesmo tempo, somado", "other": "{count} planos ao mesmo tempo, somados" }
-  },
+  "overlap": { "title": "Também ativo", "previous": "Plano anterior", "until": "Até {date} · {rel}" },
   "action": { "edit": "Editar", "pause": "Pausar", "resume": "Retomar", "manage": "Gerenciar", "website": "Site", "share": "Compartilhar" },
   "toast": { "resumed": "Cobrança retomada", "paused": "Pausada. Cobranças futuras não serão previstas" },
   "history": "Histórico",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "Valor",
     "cycle": "Ciclo de cobrança",
-    "monthlyYearly": "Mensal / anual",
     "category": "Categoria",
     "method": "Forma de pagamento",
     "start": "Data de início",
@@ -26,13 +20,6 @@
   "up": { "planned": "Mudança planejada · não confirmada", "starting": "Começa em breve", "changing": "Mudança próxima", "effective": "Data de vigência" },
   "plan": { "drop": "Não trocar", "droppedToast": "Sem troca. Termina após {date}", "confirm": "Confirmar troca", "confirmedToast": "Troca confirmada" },
   "intro": { "title": "Oferta inicial", "price": "Preço promocional", "until": "Fim da oferta", "then": "Depois" },
-  "remind": {
-    "title": "Lembretes",
-    "email": "Lembrete por e-mail",
-    "off": "Desativado",
-    "onDay": "No dia da cobrança às {time}",
-    "before": { "one": "{count} dia antes às {time}", "other": "{count} dias antes às {time}" }
-  },
   "share": {
     "owner": "Compartilhado · Eu organizo ({count}/{seats})",
     "member": "Compartilhado · Participo",
@@ -50,12 +37,10 @@
     "addShort": "Registrar",
     "title": { "one": "Cobranças · {count}", "other": "Cobranças · {count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Falhou" },
-    "onCard": "No cartão {amount} · ",
     "add": "Adicionar registro (reembolso, ajuste, cobrança com falha, valor no cartão…)",
     "recent": "Mostrar só as últimas 12",
     "all": "Mostrar todas as {count}"
   },
-  "notes": "Notas",
   "stats": {
     "spent": "Total gasto",
     "count": { "one": "{count} cobrança", "other": "{count} cobranças" },
@@ -66,37 +51,19 @@
     "months": { "one": "{count} mês", "other": "{count} meses" },
     "days": { "one": "{count} dia", "other": "{count} dias" },
     "gaps": { "one": "Interrompida uma vez", "other": "Interrompida {count} vezes" },
-    "since": "Desde {date}",
-    "perMonth": "Custo mensal real",
-    "perMonthHint": "Total ÷ meses de assinatura",
-    "priceChange": "Mudança de preço",
-    "changed": "Mudanças",
-    "unchanged": "Sem mudança",
-    "times": { "one": "{count} vez", "other": "{count} vezes" },
-    "changeHint": "Mudanças de região, plano ou pagamento"
+    "perMonth": "Custo mensal real"
   },
   "tab": { "charges": "Cobranças · {count}", "details": "Detalhes" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Pelo câmbio do dia de cada cobrança",
-    "noGaps": "Sem interrupções",
-    "now": "hoje",
-    "endedOn": "Encerrada em {date}",
-    "nextOn": "Próxima cobrança {date} · {rel}",
-    "perCharge": "Por cobrança {from} → {to}",
-    "changes": { "one": "{count} mudança em {months} meses", "other": "{count} mudanças em {months} meses" }
-  },
+  "kpi": { "noGaps": "Sem interrupções" },
   "chart": {
     "title": "Por cobrança · {ccy}",
     "orig": "Original",
     "all": "Tudo",
     "y1": "1 ano",
     "m6": "6 meses",
-    "latest": "Última {date} · primeira {first}",
     "perCharge": "Por cobrança",
     "list": "Preço de tabela no primeiro câmbio",
     "listOrig": "Preço de tabela",
-    "insight": "Preço {price} · câmbio {fx}",
     "origAmount": "Valor original",
     "few": "São necessárias ao menos duas cobranças para ver a tendência"
   },
@@ -107,13 +74,9 @@
     "price": "Mudança de preço",
     "introEnd": "Volta ao preço normal",
     "paused": "Pausada",
-    "last": "Última cobrança",
-    "nth": "nº {count}",
-    "next": "Próxima cobrança",
     "ended": "Encerrada",
     "ending": "Termina",
     "phases": { "one": "{count} fase", "other": "{count} fases" },
     "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" }
-  },
-  "table": { "date": "Data", "orig": "Original" }
+  }
 }

@@ -1,28 +1,12 @@
 {
-  "overlap": {
-    "title": "함께 진행 중",
-    "previous": "기존 플랜",
-    "until": "{date}까지 · {rel}",
-    "monthlyHint": { "other": "{count}개 구간이 함께 진행, 합계 기준" }
-  },
-  "action": {
-    "edit": "편집",
-    "pause": "일시 정지",
-    "resume": "재개",
-    "manage": "관리",
-    "website": "웹사이트",
-    "share": "공유"
-  },
-  "toast": {
-    "resumed": "결제를 재개했습니다",
-    "paused": "일시 정지했습니다. 앞으로의 결제는 예측에 포함되지 않습니다"
-  },
+  "overlap": { "title": "함께 진행 중", "previous": "기존 플랜", "until": "{date}까지 · {rel}" },
+  "action": { "edit": "편집", "pause": "일시 정지", "resume": "재개", "manage": "관리", "website": "웹사이트", "share": "공유" },
+  "toast": { "resumed": "결제를 재개했습니다", "paused": "일시 정지했습니다. 앞으로의 결제는 예측에 포함되지 않습니다" },
   "history": "기록",
   "summary": "요약",
   "field": {
     "amount": "금액",
     "cycle": "결제 주기",
-    "monthlyYearly": "월 / 연",
     "category": "카테고리",
     "method": "결제 수단",
     "start": "시작일",
@@ -33,33 +17,14 @@
     "trialEnd": "체험 종료",
     "region": "지역"
   },
-  "up": {
-    "planned": "변경 예정 · 미확정",
-    "starting": "곧 시작",
-    "changing": "예정된 변경",
-    "effective": "적용일"
-  },
+  "up": { "planned": "변경 예정 · 미확정", "starting": "곧 시작", "changing": "예정된 변경", "effective": "적용일" },
   "plan": {
     "drop": "전환하지 않음",
     "droppedToast": "전환하지 않습니다. {date} 이후 종료됩니다",
     "confirm": "전환 확정",
     "confirmedToast": "전환을 확정했습니다"
   },
-  "intro": {
-    "title": "프로모션",
-    "price": "프로모션 가격",
-    "until": "프로모션 종료",
-    "then": "이후"
-  },
-  "remind": {
-    "title": "알림",
-    "email": "이메일 알림",
-    "off": "끔",
-    "onDay": "결제일 {time}",
-    "before": {
-      "other": "{count}일 전 {time}"
-    }
-  },
+  "intro": { "title": "프로모션", "price": "프로모션 가격", "until": "프로모션 종료", "then": "이후" },
   "share": {
     "owner": "공유 · 내가 주최({count}/{seats})",
     "member": "공유 · 참여 중",
@@ -75,73 +40,35 @@
   "charges": {
     "recentN": "최근 {count}건만",
     "addShort": "기록",
-    "title": {
-      "other": "결제 · {count}"
-    },
-    "kind": {
-      "refund": "환불",
-      "adjust": "조정",
-      "failed": "실패"
-    },
-    "onCard": "카드 금액 {amount} · ",
+    "title": { "other": "결제 · {count}" },
+    "kind": { "refund": "환불", "adjust": "조정", "failed": "실패" },
     "add": "기록 추가(환불, 조정, 결제 실패, 카드 금액 등)",
     "recent": "최근 12건만 보기",
     "all": "{count}건 모두 보기"
   },
-  "notes": "메모",
   "stats": {
     "spent": "총 지출",
-    "count": {
-      "other": "결제 {count}건"
-    },
+    "count": { "other": "결제 {count}건" },
     "owned": "보유 기간",
     "subscribed": "구독 기간",
     "yearsMonths": "{years}년 {months}개월",
-    "years": {
-      "other": "{count}년"
-    },
-    "months": {
-      "other": "{count}개월"
-    },
-    "days": {
-      "other": "{count}일"
-    },
-    "gaps": {
-      "other": "{count}회 중단"
-    },
-    "since": "{date}부터",
-    "perMonth": "실제 월평균",
-    "perMonthHint": "총액 ÷ 구독한 개월 수",
-    "priceChange": "가격 변동",
-    "changed": "변동 있음",
-    "unchanged": "변동 없음",
-    "times": {
-      "other": "{count}회"
-    },
-    "changeHint": "지역, 플랜 또는 결제 수단 변경"
+    "years": { "other": "{count}년" },
+    "months": { "other": "{count}개월" },
+    "days": { "other": "{count}일" },
+    "gaps": { "other": "{count}회 중단" },
+    "perMonth": "실제 월평균"
   },
   "tab": { "charges": "결제 내역 · {count}", "details": "상세" },
-  "kpi": {
-    "approx": "약 {amount}",
-    "dayRate": "결제일 환율 기준",
-    "noGaps": "중단 없음",
-    "now": "현재",
-    "endedOn": "{date} 종료",
-    "nextOn": "다음 결제 {date} · {rel}",
-    "perCharge": "회당 {from} → {to}",
-    "changes": "{months}개월 동안 {count}회 변경"
-  },
+  "kpi": { "noGaps": "중단 없음" },
   "chart": {
     "title": "회당 결제 · {ccy}",
     "orig": "원래 통화",
     "all": "전체",
     "y1": "1년",
     "m6": "6개월",
-    "latest": "최근 {date} · 첫 결제 {first}",
     "perCharge": "회당 환산",
     "list": "정가(첫 결제 환율)",
     "listOrig": "정가",
-    "insight": "가격 {price} · 환율 {fx}",
     "origAmount": "원래 통화 금액",
     "few": "결제가 2회 이상이어야 추이를 볼 수 있어요"
   },
@@ -152,13 +79,9 @@
     "price": "가격 변경",
     "introEnd": "정상가로 복귀",
     "paused": "일시 중지",
-    "last": "최근 결제",
-    "nth": "{count}번째",
-    "next": "다음 결제",
     "ended": "종료됨",
     "ending": "종료 예정",
     "phases": "{count}개 구간",
     "more": "이전 {count}건 보기"
-  },
-  "table": { "date": "날짜", "orig": "원래 통화" }
+  }
 }

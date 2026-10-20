@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "同时进行中",
-    "previous": "原来的方案",
-    "until": "用到 {date} · {rel}",
-    "monthlyHint": { "other": "{count} 段并行，按合计" }
-  },
+  "overlap": { "title": "同时进行中", "previous": "原来的方案", "until": "用到 {date} · {rel}" },
   "action": { "edit": "编辑", "pause": "暂停", "resume": "恢复", "manage": "管理", "website": "官网", "share": "分享" },
   "toast": { "resumed": "已恢复计费", "paused": "已暂停，不再推算后续扣款" },
   "history": "历程",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "金额",
     "cycle": "计费周期",
-    "monthlyYearly": "月均 / 年均",
     "category": "分类",
     "method": "支付方式",
     "start": "开始日期",
@@ -26,7 +20,6 @@
   "up": { "planned": "计划变更 · 还没确定", "starting": "即将开始", "changing": "即将变更", "effective": "生效日期" },
   "plan": { "drop": "不切换了", "droppedToast": "不切换了，{date} 到期后不再续", "confirm": "确认切换", "confirmedToast": "已确认切换" },
   "intro": { "title": "首期优惠", "price": "优惠价", "until": "优惠截止", "then": "之后恢复" },
-  "remind": { "title": "提醒", "email": "邮件提醒", "off": "已关闭", "onDay": "到期当天 {time}", "before": "提前 {count} 天 {time}" },
   "share": {
     "owner": "合租 · 我发起（{count}/{seats}）",
     "member": "合租 · 我加入",
@@ -44,12 +37,10 @@
     "addShort": "记一笔",
     "title": "扣款记录 · {count} 笔",
     "kind": { "refund": "退款", "adjust": "补差", "failed": "失败" },
-    "onCard": "卡上 {amount} · ",
     "add": "记一笔（退款、补差、扣款失败、卡上实扣…）",
     "recent": "只看最近 12 笔",
     "all": "显示全部 {count} 笔"
   },
-  "notes": "备注",
   "stats": {
     "spent": "累计花了",
     "count": "{count} 笔",
@@ -60,37 +51,19 @@
     "months": "{count} 个月",
     "days": "{count} 天",
     "gaps": "中间断过 {count} 次",
-    "since": "{date} 起",
-    "perMonth": "实际每月",
-    "perMonthHint": "累计 ÷ 在订的月数",
-    "priceChange": "价格变化",
-    "changed": "变过",
-    "unchanged": "没变",
-    "times": "{count} 次",
-    "changeHint": "换区、换套餐或换支付方式"
+    "perMonth": "实际每月"
   },
   "tab": { "charges": "扣款记录 · {count}", "details": "详情" },
-  "kpi": {
-    "approx": "折合 {amount}",
-    "dayRate": "按每笔当天汇率",
-    "noGaps": "无断档",
-    "now": "至今",
-    "endedOn": "已于 {date} 结束",
-    "nextOn": "下次扣款 {date} · {rel}",
-    "perCharge": "每笔从 {from} 到 {to}",
-    "changes": "{months} 个月内调整 {count} 次"
-  },
+  "kpi": { "noGaps": "无断档" },
   "chart": {
     "title": "每笔扣款 · {ccy}",
     "orig": "原币",
     "all": "全部",
     "y1": "1 年",
     "m6": "6 个月",
-    "latest": "最近一笔 {date} · 首笔 {first}",
     "perCharge": "每笔折合",
     "list": "标价（按首笔汇率）",
     "listOrig": "标价",
-    "insight": "标价 {price} · 汇率 {fx}",
     "origAmount": "原币金额",
     "few": "扣款少于两笔，还画不出走势"
   },
@@ -101,13 +74,9 @@
     "price": "调价",
     "introEnd": "恢复原价",
     "paused": "暂停",
-    "last": "最近一笔",
-    "nth": "第 {count} 笔",
-    "next": "下次扣款",
     "ended": "已结束",
     "ending": "将结束",
     "phases": "{count} 段",
     "more": "显示更早的 {count} 条"
-  },
-  "table": { "date": "日期", "orig": "原币" }
+  }
 }

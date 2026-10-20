@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "Birlikte devam eden",
-    "previous": "Önceki plan",
-    "until": "{date} tarihine kadar · {rel}",
-    "monthlyHint": { "one": "{count} plan aynı anda, toplam", "other": "{count} plan aynı anda, toplam" }
-  },
+  "overlap": { "title": "Birlikte devam eden", "previous": "Önceki plan", "until": "{date} tarihine kadar · {rel}" },
   "action": { "edit": "Düzenle", "pause": "Duraklat", "resume": "Devam ettir", "manage": "Yönet", "website": "Web sitesi", "share": "Paylaş" },
   "toast": { "resumed": "Ödemeler devam ediyor", "paused": "Duraklatıldı. Gelecek ödemeler tahmin edilmeyecek" },
   "history": "Geçmiş",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "Tutar",
     "cycle": "Ödeme dönemi",
-    "monthlyYearly": "Aylık / yıllık",
     "category": "Kategori",
     "method": "Ödeme yöntemi",
     "start": "Başlangıç tarihi",
@@ -36,13 +30,6 @@
     "confirmedToast": "Geçiş onaylandı"
   },
   "intro": { "title": "Tanıtım teklifi", "price": "Tanıtım fiyatı", "until": "Teklif bitişi", "then": "Sonra" },
-  "remind": {
-    "title": "Hatırlatmalar",
-    "email": "E-posta hatırlatması",
-    "off": "Kapalı",
-    "onDay": "Ödeme günü saat {time}",
-    "before": { "one": "{count} gün önce saat {time}", "other": "{count} gün önce saat {time}" }
-  },
   "share": {
     "owner": "Ortak · yönetici benim ({count}/{seats})",
     "member": "Ortak · katıldım",
@@ -60,12 +47,10 @@
     "addShort": "Ekle",
     "title": { "one": "Ödemeler · {count}", "other": "Ödemeler · {count}" },
     "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" },
-    "onCard": "Kartta {amount} · ",
     "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)",
     "recent": "Yalnızca son 12'yi göster",
     "all": "Tümünü göster ({count})"
   },
-  "notes": "Notlar",
   "stats": {
     "spent": "Toplam harcama",
     "count": { "one": "{count} ödeme", "other": "{count} ödeme" },
@@ -76,37 +61,19 @@
     "months": { "one": "{count} ay", "other": "{count} ay" },
     "days": { "one": "{count} gün", "other": "{count} gün" },
     "gaps": { "one": "Bir kez ara verildi", "other": "{count} kez ara verildi" },
-    "since": "{date} tarihinden beri",
-    "perMonth": "Gerçek aylık",
-    "perMonthHint": "Toplam ÷ abone olunan ay",
-    "priceChange": "Fiyat değişikliği",
-    "changed": "Değişiklik",
-    "unchanged": "Değişiklik yok",
-    "times": { "one": "{count} kez", "other": "{count} kez" },
-    "changeHint": "Bölge, plan veya ödeme değişiklikleri"
+    "perMonth": "Gerçek aylık"
   },
   "tab": { "charges": "Ödemeler · {count}", "details": "Ayrıntılar" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Her ödemenin günlük kuruyla",
-    "noGaps": "Kesinti yok",
-    "now": "bugün",
-    "endedOn": "{date} tarihinde bitti",
-    "nextOn": "Sonraki ödeme {date} · {rel}",
-    "perCharge": "Ödeme başına {from} → {to}",
-    "changes": "{months} ayda {count} değişiklik"
-  },
+  "kpi": { "noGaps": "Kesinti yok" },
   "chart": {
     "title": "Ödeme başına · {ccy}",
     "orig": "Orijinal",
     "all": "Tümü",
     "y1": "1 yıl",
     "m6": "6 ay",
-    "latest": "Son {date} · ilk {first}",
     "perCharge": "Ödeme başına",
     "list": "İlk kurla liste fiyatı",
     "listOrig": "Liste fiyatı",
-    "insight": "Fiyat {price} · kur {fx}",
     "origAmount": "Orijinal tutar",
     "few": "Eğilim için en az iki ödeme gerekir"
   },
@@ -117,13 +84,9 @@
     "price": "Fiyat değişikliği",
     "introEnd": "Normal fiyata dönüş",
     "paused": "Duraklatıldı",
-    "last": "Son ödeme",
-    "nth": "{count}. ödeme",
-    "next": "Sonraki ödeme",
     "ended": "Bitti",
     "ending": "Bitiyor",
     "phases": "{count} dönem",
     "more": "Önceki {count} kaydı göster"
-  },
-  "table": { "date": "Tarih", "orig": "Orijinal" }
+  }
 }

@@ -1,28 +1,12 @@
 {
-  "overlap": {
-    "title": "Aussi en cours",
-    "previous": "Ancienne formule",
-    "until": "Jusqu’au {date} · {rel}",
-    "monthlyHint": { "one": "{count} formule en parallèle, additionnée", "other": "{count} formules en parallèle, additionnées" }
-  },
-  "action": {
-    "edit": "Modifier",
-    "pause": "Suspendre",
-    "resume": "Reprendre",
-    "manage": "Gérer",
-    "website": "Site web",
-    "share": "Partager"
-  },
-  "toast": {
-    "resumed": "Facturation reprise",
-    "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus"
-  },
+  "overlap": { "title": "Aussi en cours", "previous": "Ancienne formule", "until": "Jusqu’au {date} · {rel}" },
+  "action": { "edit": "Modifier", "pause": "Suspendre", "resume": "Reprendre", "manage": "Gérer", "website": "Site web", "share": "Partager" },
+  "toast": { "resumed": "Facturation reprise", "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus" },
   "history": "Historique",
   "summary": "Résumé",
   "field": {
     "amount": "Montant",
     "cycle": "Cycle de facturation",
-    "monthlyYearly": "Mensuel / annuel",
     "category": "Catégorie",
     "method": "Moyen de paiement",
     "start": "Date de début",
@@ -33,34 +17,14 @@
     "trialEnd": "Fin de l’essai",
     "region": "Région"
   },
-  "up": {
-    "planned": "Changement prévu · non confirmé",
-    "starting": "Commence bientôt",
-    "changing": "Changement à venir",
-    "effective": "Date d’effet"
-  },
+  "up": { "planned": "Changement prévu · non confirmé", "starting": "Commence bientôt", "changing": "Changement à venir", "effective": "Date d’effet" },
   "plan": {
     "drop": "Ne pas changer",
     "droppedToast": "Pas de changement. Se termine après le {date}",
     "confirm": "Confirmer le changement",
     "confirmedToast": "Changement confirmé"
   },
-  "intro": {
-    "title": "Offre de lancement",
-    "price": "Prix de lancement",
-    "until": "Fin de l’offre",
-    "then": "Ensuite"
-  },
-  "remind": {
-    "title": "Rappels",
-    "email": "Rappel par e-mail",
-    "off": "Désactivé",
-    "onDay": "Le jour de l’échéance à {time}",
-    "before": {
-      "one": "{count} jour avant à {time}",
-      "other": "{count} jours avant à {time}"
-    }
-  },
+  "intro": { "title": "Offre de lancement", "price": "Prix de lancement", "until": "Fin de l’offre", "then": "Ensuite" },
   "share": {
     "owner": "Partagé · j’organise ({count}/{seats})",
     "member": "Partagé · j’ai rejoint",
@@ -76,80 +40,35 @@
   "charges": {
     "recentN": { "one": "Seulement le dernier", "other": "Seulement les {count} derniers" },
     "addShort": "Ajouter",
-    "title": {
-      "one": "Prélèvements · {count}",
-      "other": "Prélèvements · {count}"
-    },
-    "kind": {
-      "refund": "Remboursement",
-      "adjust": "Ajustement",
-      "failed": "Échec"
-    },
-    "onCard": "Sur la carte {amount} · ",
+    "title": { "one": "Prélèvements · {count}", "other": "Prélèvements · {count}" },
+    "kind": { "refund": "Remboursement", "adjust": "Ajustement", "failed": "Échec" },
     "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)",
     "recent": "Afficher les 12 derniers",
     "all": "Tout afficher ({count})"
   },
-  "notes": "Notes",
   "stats": {
     "spent": "Total dépensé",
-    "count": {
-      "one": "{count} prélèvement",
-      "other": "{count} prélèvements"
-    },
+    "count": { "one": "{count} prélèvement", "other": "{count} prélèvements" },
     "owned": "Possédé depuis",
     "subscribed": "Abonné depuis",
     "yearsMonths": "{years} an(s) {months} mois",
-    "years": {
-      "one": "{count} an",
-      "other": "{count} ans"
-    },
-    "months": {
-      "one": "{count} mois",
-      "other": "{count} mois"
-    },
-    "days": {
-      "one": "{count} jour",
-      "other": "{count} jours"
-    },
-    "gaps": {
-      "one": "Interrompu une fois",
-      "other": "Interrompu {count} fois"
-    },
-    "since": "Depuis le {date}",
-    "perMonth": "Coût mensuel réel",
-    "perMonthHint": "Total ÷ mois d’abonnement",
-    "priceChange": "Changement de prix",
-    "changed": "Changements",
-    "unchanged": "Aucun changement",
-    "times": {
-      "one": "{count} fois",
-      "other": "{count} fois"
-    },
-    "changeHint": "Changements de région, de formule ou de paiement"
+    "years": { "one": "{count} an", "other": "{count} ans" },
+    "months": { "one": "{count} mois", "other": "{count} mois" },
+    "days": { "one": "{count} jour", "other": "{count} jours" },
+    "gaps": { "one": "Interrompu une fois", "other": "Interrompu {count} fois" },
+    "perMonth": "Coût mensuel réel"
   },
   "tab": { "charges": "Prélèvements · {count}", "details": "Détails" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Au taux du jour de chaque prélèvement",
-    "noGaps": "Sans interruption",
-    "now": "aujourd’hui",
-    "endedOn": "Terminé le {date}",
-    "nextOn": "Prochain prélèvement {date} · {rel}",
-    "perCharge": "Par prélèvement {from} → {to}",
-    "changes": { "one": "{count} changement en {months} mois", "other": "{count} changements en {months} mois" }
-  },
+  "kpi": { "noGaps": "Sans interruption" },
   "chart": {
     "title": "Par prélèvement · {ccy}",
     "orig": "Devise d’origine",
     "all": "Tout",
     "y1": "1 an",
     "m6": "6 mois",
-    "latest": "Dernier {date} · premier {first}",
     "perCharge": "Par prélèvement",
     "list": "Prix catalogue au premier taux",
     "listOrig": "Prix catalogue",
-    "insight": "Prix {price} · change {fx}",
     "origAmount": "Montant d’origine",
     "few": "Il faut au moins deux prélèvements pour tracer une tendance"
   },
@@ -160,13 +79,9 @@
     "price": "Changement de prix",
     "introEnd": "Retour au prix normal",
     "paused": "En pause",
-    "last": "Dernier prélèvement",
-    "nth": "n° {count}",
-    "next": "Prochain prélèvement",
     "ended": "Terminé",
     "ending": "Se termine",
     "phases": { "one": "{count} phase", "other": "{count} phases" },
     "more": { "one": "Afficher {count} plus ancien", "other": "Afficher {count} plus anciens" }
-  },
-  "table": { "date": "Date", "orig": "Origine" }
+  }
 }

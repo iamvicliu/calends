@@ -1,28 +1,12 @@
 {
-  "overlap": {
-    "title": "Läuft parallel",
-    "previous": "Vorheriger Tarif",
-    "until": "Bis {date} · {rel}",
-    "monthlyHint": { "one": "{count} Tarif parallel, summiert", "other": "{count} Tarife parallel, summiert" }
-  },
-  "action": {
-    "edit": "Bearbeiten",
-    "pause": "Pausieren",
-    "resume": "Fortsetzen",
-    "manage": "Verwalten",
-    "website": "Website",
-    "share": "Teilen"
-  },
-  "toast": {
-    "resumed": "Abrechnung fortgesetzt",
-    "paused": "Pausiert. Künftige Abbuchungen werden nicht mehr prognostiziert"
-  },
+  "overlap": { "title": "Läuft parallel", "previous": "Vorheriger Tarif", "until": "Bis {date} · {rel}" },
+  "action": { "edit": "Bearbeiten", "pause": "Pausieren", "resume": "Fortsetzen", "manage": "Verwalten", "website": "Website", "share": "Teilen" },
+  "toast": { "resumed": "Abrechnung fortgesetzt", "paused": "Pausiert. Künftige Abbuchungen werden nicht mehr prognostiziert" },
   "history": "Verlauf",
   "summary": "Übersicht",
   "field": {
     "amount": "Betrag",
     "cycle": "Abrechnungszeitraum",
-    "monthlyYearly": "Monatlich / jährlich",
     "category": "Kategorie",
     "method": "Zahlungsmethode",
     "start": "Startdatum",
@@ -33,34 +17,14 @@
     "trialEnd": "Testphase endet",
     "region": "Region"
   },
-  "up": {
-    "planned": "Geplante Änderung · nicht bestätigt",
-    "starting": "Beginnt bald",
-    "changing": "Anstehende Änderung",
-    "effective": "Gültig ab"
-  },
+  "up": { "planned": "Geplante Änderung · nicht bestätigt", "starting": "Beginnt bald", "changing": "Anstehende Änderung", "effective": "Gültig ab" },
   "plan": {
     "drop": "Nicht wechseln",
     "droppedToast": "Kein Wechsel. Endet nach dem {date}",
     "confirm": "Wechsel bestätigen",
     "confirmedToast": "Wechsel bestätigt"
   },
-  "intro": {
-    "title": "Einführungsangebot",
-    "price": "Einführungspreis",
-    "until": "Angebot endet",
-    "then": "Danach"
-  },
-  "remind": {
-    "title": "Erinnerungen",
-    "email": "E-Mail-Erinnerung",
-    "off": "Aus",
-    "onDay": "Am Fälligkeitstag um {time}",
-    "before": {
-      "one": "{count} Tag vorher um {time}",
-      "other": "{count} Tage vorher um {time}"
-    }
-  },
+  "intro": { "title": "Einführungsangebot", "price": "Einführungspreis", "until": "Angebot endet", "then": "Danach" },
   "share": {
     "owner": "Geteilt · ich organisiere ({count}/{seats})",
     "member": "Geteilt · ich bin dabei",
@@ -76,80 +40,35 @@
   "charges": {
     "recentN": { "one": "Nur die letzten {count}", "other": "Nur die letzten {count}" },
     "addShort": "Erfassen",
-    "title": {
-      "one": "Abbuchung · {count}",
-      "other": "Abbuchungen · {count}"
-    },
-    "kind": {
-      "refund": "Erstattung",
-      "adjust": "Korrektur",
-      "failed": "Fehlgeschlagen"
-    },
-    "onCard": "Auf der Karte {amount} · ",
+    "title": { "one": "Abbuchung · {count}", "other": "Abbuchungen · {count}" },
+    "kind": { "refund": "Erstattung", "adjust": "Korrektur", "failed": "Fehlgeschlagen" },
     "add": "Eintrag hinzufügen (Erstattung, Korrektur, fehlgeschlagene Abbuchung, Kartenbetrag …)",
     "recent": "Nur die letzten 12 zeigen",
     "all": "Alle {count} zeigen"
   },
-  "notes": "Notizen",
   "stats": {
     "spent": "Gesamtausgaben",
-    "count": {
-      "one": "{count} Abbuchung",
-      "other": "{count} Abbuchungen"
-    },
+    "count": { "one": "{count} Abbuchung", "other": "{count} Abbuchungen" },
     "owned": "Im Besitz seit",
     "subscribed": "Abonniert seit",
     "yearsMonths": "{years} J. {months} Mon.",
-    "years": {
-      "one": "{count} Jahr",
-      "other": "{count} Jahre"
-    },
-    "months": {
-      "one": "{count} Monat",
-      "other": "{count} Monate"
-    },
-    "days": {
-      "one": "{count} Tag",
-      "other": "{count} Tage"
-    },
-    "gaps": {
-      "one": "Einmal unterbrochen",
-      "other": "{count}-mal unterbrochen"
-    },
-    "since": "Seit {date}",
-    "perMonth": "Tatsächlich pro Monat",
-    "perMonthHint": "Gesamt ÷ abonnierte Monate",
-    "priceChange": "Preisänderung",
-    "changed": "Änderungen",
-    "unchanged": "Unverändert",
-    "times": {
-      "one": "{count}-mal",
-      "other": "{count}-mal"
-    },
-    "changeHint": "Änderungen bei Region, Tarif oder Zahlung"
+    "years": { "one": "{count} Jahr", "other": "{count} Jahre" },
+    "months": { "one": "{count} Monat", "other": "{count} Monate" },
+    "days": { "one": "{count} Tag", "other": "{count} Tage" },
+    "gaps": { "one": "Einmal unterbrochen", "other": "{count}-mal unterbrochen" },
+    "perMonth": "Tatsächlich pro Monat"
   },
   "tab": { "charges": "Abbuchungen · {count}", "details": "Details" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Zum Tageskurs jeder Abbuchung",
-    "noGaps": "Keine Unterbrechung",
-    "now": "heute",
-    "endedOn": "Beendet am {date}",
-    "nextOn": "Nächste Abbuchung {date} · {rel}",
-    "perCharge": "Pro Abbuchung {from} → {to}",
-    "changes": { "one": "{count} Änderung in {months} Mon.", "other": "{count} Änderungen in {months} Mon." }
-  },
+  "kpi": { "noGaps": "Keine Unterbrechung" },
   "chart": {
     "title": "Pro Abbuchung · {ccy}",
     "orig": "Original",
     "all": "Alle",
     "y1": "1 J.",
     "m6": "6 M.",
-    "latest": "Zuletzt {date} · erste {first}",
     "perCharge": "Pro Abbuchung",
     "list": "Listenpreis zum ersten Kurs",
     "listOrig": "Listenpreis",
-    "insight": "Preis {price} · Kurs {fx}",
     "origAmount": "Originalbetrag",
     "few": "Für einen Verlauf braucht es mindestens zwei Abbuchungen"
   },
@@ -160,13 +79,9 @@
     "price": "Preisänderung",
     "introEnd": "Wieder regulärer Preis",
     "paused": "Pausiert",
-    "last": "Letzte Abbuchung",
-    "nth": "Nr. {count}",
-    "next": "Nächste Abbuchung",
     "ended": "Beendet",
     "ending": "Endet",
     "phases": { "one": "{count} Phase", "other": "{count} Phasen" },
     "more": { "one": "{count} frühere anzeigen", "other": "{count} frühere anzeigen" }
-  },
-  "table": { "date": "Datum", "orig": "Original" }
+  }
 }

@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "Juga berjalan",
-    "previous": "Paket sebelumnya",
-    "until": "Sampai {date} · {rel}",
-    "monthlyHint": { "other": "{count} paket berjalan bersamaan, dijumlahkan" }
-  },
+  "overlap": { "title": "Juga berjalan", "previous": "Paket sebelumnya", "until": "Sampai {date} · {rel}" },
   "action": { "edit": "Edit", "pause": "Jeda", "resume": "Lanjutkan", "manage": "Kelola", "website": "Situs web", "share": "Bagikan" },
   "toast": { "resumed": "Tagihan dilanjutkan", "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan" },
   "history": "Riwayat",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "Jumlah",
     "cycle": "Siklus tagihan",
-    "monthlyYearly": "Bulanan / tahunan",
     "category": "Kategori",
     "method": "Metode pembayaran",
     "start": "Tanggal mulai",
@@ -31,13 +25,6 @@
     "confirmedToast": "Peralihan dikonfirmasi"
   },
   "intro": { "title": "Promo awal", "price": "Harga promo", "until": "Promo berakhir", "then": "Setelahnya" },
-  "remind": {
-    "title": "Pengingat",
-    "email": "Pengingat email",
-    "off": "Mati",
-    "onDay": "Pada hari jatuh tempo pukul {time}",
-    "before": { "other": "{count} hari sebelumnya pukul {time}" }
-  },
   "share": {
     "owner": "Bersama · saya pengelola ({count}/{seats})",
     "member": "Bersama · saya bergabung",
@@ -55,12 +42,10 @@
     "addShort": "Catat",
     "title": { "other": "Tagihan · {count}" },
     "kind": { "refund": "Refund", "adjust": "Penyesuaian", "failed": "Gagal" },
-    "onCard": "Di kartu {amount} · ",
     "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)",
     "recent": "Tampilkan 12 terakhir saja",
     "all": "Tampilkan semua {count}"
   },
-  "notes": "Catatan",
   "stats": {
     "spent": "Total pengeluaran",
     "count": { "other": "{count} tagihan" },
@@ -71,37 +56,19 @@
     "months": { "other": "{count} bulan" },
     "days": { "other": "{count} hari" },
     "gaps": { "other": "Terputus {count} kali" },
-    "since": "Sejak {date}",
-    "perMonth": "Biaya bulanan riil",
-    "perMonthHint": "Total ÷ bulan berlangganan",
-    "priceChange": "Perubahan harga",
-    "changed": "Perubahan",
-    "unchanged": "Tidak berubah",
-    "times": { "other": "{count} kali" },
-    "changeHint": "Perubahan wilayah, paket, atau pembayaran"
+    "perMonth": "Biaya bulanan riil"
   },
   "tab": { "charges": "Tagihan · {count}", "details": "Detail" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Kurs hari tiap tagihan",
-    "noGaps": "Tanpa jeda",
-    "now": "sekarang",
-    "endedOn": "Berakhir {date}",
-    "nextOn": "Tagihan berikutnya {date} · {rel}",
-    "perCharge": "Per tagihan {from} → {to}",
-    "changes": "{count} perubahan dalam {months} bulan"
-  },
+  "kpi": { "noGaps": "Tanpa jeda" },
   "chart": {
     "title": "Per tagihan · {ccy}",
     "orig": "Asli",
     "all": "Semua",
     "y1": "1 thn",
     "m6": "6 bln",
-    "latest": "Terakhir {date} · pertama {first}",
     "perCharge": "Per tagihan",
     "list": "Harga daftar pada kurs pertama",
     "listOrig": "Harga daftar",
-    "insight": "Harga {price} · kurs {fx}",
     "origAmount": "Jumlah asli",
     "few": "Perlu minimal dua tagihan untuk melihat tren"
   },
@@ -112,13 +79,9 @@
     "price": "Perubahan harga",
     "introEnd": "Kembali ke harga normal",
     "paused": "Dijeda",
-    "last": "Tagihan terakhir",
-    "nth": "Ke-{count}",
-    "next": "Tagihan berikutnya",
     "ended": "Berakhir",
     "ending": "Akan berakhir",
     "phases": "{count} fase",
     "more": "Tampilkan {count} sebelumnya"
-  },
-  "table": { "date": "Tanggal", "orig": "Asli" }
+  }
 }

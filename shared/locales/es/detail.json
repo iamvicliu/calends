@@ -1,10 +1,5 @@
 {
-  "overlap": {
-    "title": "También activo",
-    "previous": "Plan anterior",
-    "until": "Hasta el {date} · {rel}",
-    "monthlyHint": { "one": "{count} plan a la vez, sumado", "other": "{count} planes a la vez, sumados" }
-  },
+  "overlap": { "title": "También activo", "previous": "Plan anterior", "until": "Hasta el {date} · {rel}" },
   "action": { "edit": "Editar", "pause": "Pausar", "resume": "Reanudar", "manage": "Gestionar", "website": "Sitio web", "share": "Compartir" },
   "toast": { "resumed": "Facturación reanudada", "paused": "En pausa. No se prevén cobros futuros" },
   "history": "Historial",
@@ -12,7 +7,6 @@
   "field": {
     "amount": "Importe",
     "cycle": "Ciclo de facturación",
-    "monthlyYearly": "Mensual / anual",
     "category": "Categoría",
     "method": "Método de pago",
     "start": "Fecha de inicio",
@@ -31,13 +25,6 @@
     "confirmedToast": "Cambio confirmado"
   },
   "intro": { "title": "Oferta inicial", "price": "Precio inicial", "until": "Fin de la oferta", "then": "Después" },
-  "remind": {
-    "title": "Recordatorios",
-    "email": "Recordatorio por correo",
-    "off": "Desactivado",
-    "onDay": "El día del cobro a las {time}",
-    "before": { "one": "{count} día antes a las {time}", "other": "{count} días antes a las {time}" }
-  },
   "share": {
     "owner": "Compartido · lo organizo yo ({count}/{seats})",
     "member": "Compartido · me uní",
@@ -55,12 +42,10 @@
     "addShort": "Añadir",
     "title": { "one": "Cobros · {count}", "other": "Cobros · {count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Fallido" },
-    "onCard": "En la tarjeta {amount} · ",
     "add": "Añadir un registro (reembolso, ajuste, cobro fallido, importe en tarjeta…)",
     "recent": "Mostrar solo los últimos 12",
     "all": "Mostrar los {count}"
   },
-  "notes": "Notas",
   "stats": {
     "spent": "Gasto total",
     "count": { "one": "{count} cobro", "other": "{count} cobros" },
@@ -71,37 +56,19 @@
     "months": { "one": "{count} mes", "other": "{count} meses" },
     "days": { "one": "{count} día", "other": "{count} días" },
     "gaps": { "one": "Interrumpida una vez", "other": "Interrumpida {count} veces" },
-    "since": "Desde el {date}",
-    "perMonth": "Coste mensual real",
-    "perMonthHint": "Total ÷ meses suscrito",
-    "priceChange": "Cambio de precio",
-    "changed": "Cambios",
-    "unchanged": "Sin cambios",
-    "times": { "one": "{count} vez", "other": "{count} veces" },
-    "changeHint": "Cambios de región, plan o pago"
+    "perMonth": "Coste mensual real"
   },
   "tab": { "charges": "Cargos · {count}", "details": "Detalles" },
-  "kpi": {
-    "approx": "≈ {amount}",
-    "dayRate": "Al tipo de cambio de cada cargo",
-    "noGaps": "Sin interrupciones",
-    "now": "hoy",
-    "endedOn": "Terminó el {date}",
-    "nextOn": "Próximo cargo {date} · {rel}",
-    "perCharge": "Por cargo {from} → {to}",
-    "changes": { "one": "{count} cambio en {months} meses", "other": "{count} cambios en {months} meses" }
-  },
+  "kpi": { "noGaps": "Sin interrupciones" },
   "chart": {
     "title": "Por cargo · {ccy}",
     "orig": "Original",
     "all": "Todo",
     "y1": "1 año",
     "m6": "6 meses",
-    "latest": "Último {date} · primero {first}",
     "perCharge": "Por cargo",
     "list": "Precio de lista al primer tipo",
     "listOrig": "Precio de lista",
-    "insight": "Precio {price} · cambio {fx}",
     "origAmount": "Importe original",
     "few": "Se necesitan al menos dos cargos para ver la tendencia"
   },
@@ -112,13 +79,9 @@
     "price": "Cambio de precio",
     "introEnd": "Vuelve al precio normal",
     "paused": "En pausa",
-    "last": "Último cargo",
-    "nth": "n.º {count}",
-    "next": "Próximo cargo",
     "ended": "Terminada",
     "ending": "Termina",
     "phases": { "one": "{count} fase", "other": "{count} fases" },
     "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" }
-  },
-  "table": { "date": "Fecha", "orig": "Original" }
+  }
 }
