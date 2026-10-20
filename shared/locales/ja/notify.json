@@ -55,9 +55,7 @@
     "subject": {
       "other": "{month}の請求：約{sum}、{count}件"
     },
-    "intro": {
-      "other": "{monthYear}は{count}件の請求が予定されており、合計約{sum}です。月額 {mrr}、年額 {arr}。"
-    }
+    "intro": "今のサブスクのままだと、年間約 {arr} です。"
   },
   "email": {
     "open": "Calendsを開く",

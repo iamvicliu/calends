@@ -58,10 +58,7 @@
       "one": "Factura de {month}: unos {sum}, {count} cobro",
       "other": "Factura de {month}: unos {sum}, {count} cobros"
     },
-    "intro": {
-      "one": "{count} cobro previsto en {monthYear}, unos {sum} en total. MRR {mrr}, {arr} al año.",
-      "other": "{count} cobros previstos en {monthYear}, unos {sum} en total. MRR {mrr}, {arr} al año."
-    }
+    "intro": "Con tus suscripciones actuales, son unos {arr} al año."
   },
   "email": {
     "open": "Abrir Calends",

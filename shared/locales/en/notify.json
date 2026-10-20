@@ -58,10 +58,7 @@
       "one": "{month} bill: about {sum}, {count} charge",
       "other": "{month} bill: about {sum}, {count} charges"
     },
-    "intro": {
-      "one": "{count} charge expected in {monthYear}, about {sum} in total. MRR {mrr}, {arr} a year.",
-      "other": "{count} charges expected in {monthYear}, about {sum} in total. MRR {mrr}, {arr} a year."
-    }
+    "intro": "At your current subscriptions, that is about {arr} a year."
   },
   "email": {
     "open": "Open Calends",

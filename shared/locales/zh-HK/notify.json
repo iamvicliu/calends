@@ -49,7 +49,7 @@
   "monthly": {
     "title": "{m} 月預計扣款 {sum}",
     "subject": "{m} 月訂閱帳單｜預計 {sum}，共 {count} 筆",
-    "intro": "{y} 年 {m} 月預計扣款 {count} 筆，合計約 {sum}。負 MRR {mrr}，年化 {arr}。"
+    "intro": "按目前的訂閱，一年約花 {arr}。"
   },
   "email": {
     "open": "開啟訂閱帳本",

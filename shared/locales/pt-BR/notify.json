@@ -58,10 +58,7 @@
       "one": "Fatura de {month}: cerca de {sum}, {count} cobrança",
       "other": "Fatura de {month}: cerca de {sum}, {count} cobranças"
     },
-    "intro": {
-      "one": "{count} cobrança prevista em {monthYear}, cerca de {sum} no total. MRR {mrr}, {arr} por ano.",
-      "other": "{count} cobranças previstas em {monthYear}, cerca de {sum} no total. MRR {mrr}, {arr} por ano."
-    }
+    "intro": "Com suas assinaturas atuais, são cerca de {arr} por ano."
   },
   "email": {
     "open": "Abrir o Calends",

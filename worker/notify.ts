@@ -233,7 +233,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     kind: 'daily',
     subject: t('notify.daily.subject', { title }),
     title,
-    intro: t('notify.daily.intro', { mrr: money(-tot.mrr, base, { compact: true }), count: tot.activeCount }),
+    intro: t('notify.daily.intro', { mrr: money(tot.mrr, base, { compact: true }), count: tot.activeCount }),
     sections,
     date: today,
     // 标题只放得下第一项，其余几项放进预览行
@@ -261,8 +261,8 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
     monthYear: monthLabel(ym, { long: true }),
     count: charges.length,
     sum: money(sum, base, { compact: true }),
-    mrr: money(-tot.mrr, base, { compact: true }),
-    arr: money(-tot.mrr * 12, base, { compact: true }),
+    mrr: money(tot.mrr, base, { compact: true }),
+    arr: money(tot.mrr * 12, base, { compact: true }),
   };
   return {
     key: `monthly:${today.slice(0, 7)}`,

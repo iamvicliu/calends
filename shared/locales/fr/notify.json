@@ -58,10 +58,7 @@
       "one": "Relevé de {month} : environ {sum}, {count} prélèvement",
       "other": "Relevé de {month} : environ {sum}, {count} prélèvements"
     },
-    "intro": {
-      "one": "{count} prélèvement prévu en {monthYear}, environ {sum} au total. MRR {mrr}, {arr} par an.",
-      "other": "{count} prélèvements prévus en {monthYear}, environ {sum} au total. MRR {mrr}, {arr} par an."
-    }
+    "intro": "Avec vos abonnements actuels, cela représente environ {arr} par an."
   },
   "email": {
     "open": "Ouvrir Calends",

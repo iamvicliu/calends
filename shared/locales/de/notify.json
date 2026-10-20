@@ -58,10 +58,7 @@
       "one": "Abrechnung {month}: etwa {sum}, {count} Abbuchung",
       "other": "Abrechnung {month}: etwa {sum}, {count} Abbuchungen"
     },
-    "intro": {
-      "one": "{count} Abbuchung erwartet im {monthYear}, insgesamt etwa {sum}. MRR {mrr}, {arr} pro Jahr.",
-      "other": "{count} Abbuchungen erwartet im {monthYear}, insgesamt etwa {sum}. MRR {mrr}, {arr} pro Jahr."
-    }
+    "intro": "Bei deinen aktuellen Abos sind das rund {arr} im Jahr."
   },
   "email": {
     "open": "Calends öffnen",

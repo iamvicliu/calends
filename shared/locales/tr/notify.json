@@ -58,10 +58,7 @@
       "one": "{month} faturası: yaklaşık {sum}, {count} ödeme",
       "other": "{month} faturası: yaklaşık {sum}, {count} ödeme"
     },
-    "intro": {
-      "one": "{monthYear} için {count} ödeme bekleniyor, toplam yaklaşık {sum}. MRR {mrr}, yılda {arr}.",
-      "other": "{monthYear} için {count} ödeme bekleniyor, toplam yaklaşık {sum}. MRR {mrr}, yılda {arr}."
-    }
+    "intro": "Mevcut aboneliklerinle yılda yaklaşık {arr}."
   },
   "email": {
     "open": "Calends'ni aç",

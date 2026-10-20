@@ -64,12 +64,7 @@
       "many": "Счёт за {month}: около {sum}, {count} списаний",
       "other": "Счёт за {month}: около {sum}, {count} списания"
     },
-    "intro": {
-      "one": "{monthYear}: ожидается {count} списание, всего около {sum}. MRR {mrr}, {arr} в год.",
-      "few": "{monthYear}: ожидается {count} списания, всего около {sum}. MRR {mrr}, {arr} в год.",
-      "many": "{monthYear}: ожидается {count} списаний, всего около {sum}. MRR {mrr}, {arr} в год.",
-      "other": "{monthYear}: ожидается {count} списания, всего около {sum}. MRR {mrr}, {arr} в год."
-    }
+    "intro": "При текущих подписках это около {arr} в год."
   },
   "email": {
     "open": "Открыть Calends",

@@ -55,9 +55,7 @@
     "subject": {
       "other": "Tagihan {month}: sekitar {sum}, {count} tagihan"
     },
-    "intro": {
-      "other": "{count} tagihan diperkirakan pada {monthYear}, total sekitar {sum}. MRR {mrr}, {arr} per tahun."
-    }
+    "intro": "Dengan langganan saat ini, sekitar {arr} per tahun."
   },
   "email": {
     "open": "Buka Calends",

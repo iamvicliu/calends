@@ -49,7 +49,7 @@
   "monthly": {
     "title": "{m} 月预计扣款 {sum}",
     "subject": "{m} 月订阅账单｜预计 {sum}，共 {count} 笔",
-    "intro": "{y} 年 {m} 月预计扣款 {count} 笔，合计约 {sum}。负 MRR {mrr}，年化 {arr}。"
+    "intro": "照现在的订阅，一年约花 {arr}。"
   },
   "email": {
     "open": "打开订阅账本",

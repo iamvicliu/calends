@@ -55,9 +55,7 @@
     "subject": {
       "other": "Hóa đơn {month}: khoảng {sum}, {count} khoản phí"
     },
-    "intro": {
-      "other": "Dự kiến {count} khoản phí trong {monthYear}, tổng cộng khoảng {sum}. MRR {mrr}, {arr} mỗi năm."
-    }
+    "intro": "Với các gói hiện tại, mỗi năm khoảng {arr}."
   },
   "email": {
     "open": "Mở Calends",

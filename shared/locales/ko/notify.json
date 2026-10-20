@@ -55,9 +55,7 @@
     "subject": {
       "other": "{month} 청구: 약 {sum}, 결제 {count}건"
     },
-    "intro": {
-      "other": "{monthYear}에 결제 {count}건이 예정되어 있으며, 합계 약 {sum}입니다. MRR {mrr}, 연 {arr}."
-    }
+    "intro": "지금 구독대로라면 1년에 약 {arr}입니다."
   },
   "email": {
     "open": "Calends 열기",
