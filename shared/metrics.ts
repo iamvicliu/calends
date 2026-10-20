@@ -408,7 +408,7 @@ export interface Insight {
 }
 
 /** 去掉地区、平台、序号等修饰，用来识别重复订阅 */
-export function baseName(name: string): string {
+function baseName(name: string): string {
   return name
     .toLowerCase()
     .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')

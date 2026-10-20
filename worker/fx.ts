@@ -17,7 +17,7 @@ export function keepSet(state: Pick<AppState, 'subscriptions' | 'methods' | 'set
 }
 
 /** 需要历史汇率的日期：所有已发生的扣款日、每个月末（MRR 走势）、余额校准日 */
-export function neededDates(state: AppState): string[] {
+function neededDates(state: AppState): string[] {
   const today = todayIn(state.settings.timezone);
   const set = new Set<string>();
   let first = today;

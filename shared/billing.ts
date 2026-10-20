@@ -10,7 +10,7 @@ export function parseDay(s: string): number {
   return Date.UTC(y, m - 1, d);
 }
 
-export function fmtDay(t: number): string {
+function fmtDay(t: number): string {
   return new Date(t).toISOString().slice(0, 10);
 }
 
@@ -145,11 +145,6 @@ export function isGap(prevEnd: string | undefined, nextStart: string): boolean {
   return !!prevEnd && diffDays(prevEnd, nextStart) > 3;
 }
 
-/** 两段在时间上并行（没有结束日的视为一直延续） */
-export function overlaps(a: { start: string; end?: string }, b: { start: string; end?: string }): boolean {
-  return a.start <= b.start ? !a.end || a.end > b.start : !b.end || b.end > a.start;
-}
-
 /** 把阶段排进并行轨道：与前面仍在跑的段重叠时放到下一条轨道，返回每段的轨道号（0 起）；没有结束日的段视为一直延续 */
 export function phaseLanes(vs: Array<{ start: string; end?: string }>): number[] {
   const laneEnd: string[] = [];
@@ -211,7 +206,7 @@ export function currentPhase(s: Subscription, day: string): Subscription {
 // ---------- 订阅状态 ----------
 
 /** 订阅在 day 当天是否仍处于计费关系中（不考虑暂停） */
-export function isLive(s: Subscription, day: string): boolean {
+function isLive(s: Subscription, day: string): boolean {
   if (s.status === 'cancelled' && !s.end) return false;
   if (s.end && s.end < day) return false;
   return true;

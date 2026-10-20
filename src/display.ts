@@ -41,7 +41,7 @@ export function ccyName(code: string): string {
   }
 }
 
-export function getOrig(): boolean {
+function getOrig(): boolean {
   try {
     return localStorage.getItem(KEY) !== 'base';
   } catch {

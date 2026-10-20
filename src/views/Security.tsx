@@ -26,7 +26,7 @@ interface Security {
 const DEFAULT_MAX = 10;
 
 /** 从 UA 认出浏览器和系统，例如「Chrome 141 · macOS」 */
-export function describeUA(ua: string): { browser: string; os: string } {
+function describeUA(ua: string): { browser: string; os: string } {
   const v = (re: RegExp) => ua.match(re)?.[1]?.split('.')[0];
   let browser = t('settings.security.unknownBrowser');
   if (/Edg\//.test(ua)) browser = `Edge ${v(/Edg\/([\d.]+)/) ?? ''}`;

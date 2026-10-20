@@ -51,7 +51,7 @@ function download(name: string, text: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-export function icsUrl(state: AppState) {
+function icsUrl(state: AppState) {
   return state.settings.icsToken ? `${location.origin}/cal/${state.settings.icsToken}.ics` : '';
 }
 

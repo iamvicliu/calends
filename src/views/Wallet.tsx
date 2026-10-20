@@ -17,7 +17,7 @@ import { t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 
-export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
+function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
   // 大字 / 小字金额跟随显示货币设置
   const pair = useMoneyPair(state);
   const m = r.method;
@@ -94,7 +94,7 @@ function fmtPhone(p: string): string {
   return m ? `+${m[1]} ${m[2]} ${m[3]} ${m[4]}` : p;
 }
 
-export const isSim = (m: PaymentMethod) => m.kind === 'phone';
+const isSim = (m: PaymentMethod) => m.kind === 'phone';
 
 /** 卡面样式：手机话费做成 SIM 卡，App Store 余额做成钛金属卡（参照 Apple Card） */
 const faceClass = (m: PaymentMethod) => (isSim(m) ? 'sim' : brandOf(m) === 'appstore' ? 'apple' : '');
@@ -653,7 +653,7 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
   );
 }
 
-export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState; onClose: () => void }) {
+function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState; onClose: () => void }) {
   const [f, setF] = useState<PaymentMethod>(m);
   const isNew = !state.methods.some((x) => x.id === m.id);
   const up = (p: Partial<PaymentMethod>) => setF({ ...f, ...p });

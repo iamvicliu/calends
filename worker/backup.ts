@@ -7,11 +7,11 @@ import { t } from '../shared/i18n.ts';
 import { putFxDayStmt } from './fx.ts';
 import { getFx, getPeople, getSettings, putKv, replaceAll } from './store.ts';
 
-export const BACKUP_FORMAT = 'calends-backup';
+const BACKUP_FORMAT = 'calends-backup';
 /** 改名前的备份格式名，照样能导入 */
 const LEGACY_FORMATS = ['subscription-ledger-backup'];
 // v3 起带上人的名册（people）
-export const BACKUP_VERSION = 3;
+const BACKUP_VERSION = 3;
 
 export interface Backup {
   format: typeof BACKUP_FORMAT;

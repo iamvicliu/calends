@@ -13,12 +13,12 @@ import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { t, type Params } from '../../shared/i18n.ts';
 
 // 渠道值存进数据里（微信、邮箱等保持中文代码），显示时再翻译
-export const CONTACT_VIA = ['Telegram', '微信', 'WhatsApp', '邮箱', '手机', 'X', 'Discord', '其他'];
+const CONTACT_VIA = ['Telegram', '微信', 'WhatsApp', '邮箱', '手机', 'X', 'Discord', '其他'];
 const VIA_KEY: Record<string, string> = { 微信: 'wechat', 邮箱: 'email', 手机: 'phone', 其他: 'other' };
 /** 渠道的显示名：Telegram 等专名原样，微信、邮箱等按当前语言 */
 export const viaLabel = (via: string): string => (VIA_KEY[via] ? t(`family.contact.via.${VIA_KEY[via]}`) : via);
 const CONTACT_HINT: Record<string, string> = { Telegram: '@username', WhatsApp: '+63 …', 邮箱: 'name@example.com', 手机: '+86 …', X: '@handle' };
-export const contactHint = (via: string): string | undefined =>
+const contactHint = (via: string): string | undefined =>
   via === '微信' ? t('family.contact.hint.wechat') : via === 'Discord' ? t('family.contact.hint.discord') : CONTACT_HINT[via];
 
 /** 按收费周期选文案：常用周期各有一条，其余走 custom（带 count） */
@@ -107,7 +107,7 @@ function cycleMonths(s: Subscription): number {
 }
 
 /** 按收费周期应收的金额：每期份额 × 周期月数 ÷ 订阅一期的月数 */
-export function billAmount(s: Subscription, m: ShareMember): number {
+function billAmount(s: Subscription, m: ShareMember): number {
   return Math.round((((m.share || 0) * (m.billEvery ?? 1)) / cycleMonths(s)) * 100) / 100;
 }
 

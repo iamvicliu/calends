@@ -132,7 +132,7 @@ export const KINDS = (): Record<
   },
 });
 
-export function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: number }) {
+function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: number }) {
   const k = KINDS()[kind];
   return (
     // tile：官方 App 图标本身就是完整的方块，铺满不留底色

@@ -7,7 +7,7 @@ import type { Env } from './env.ts';
 import { renderEmail, type Digest } from './notify.ts';
 
 /** 纯文本：Telegram（HTML 前的回退）、Bark、ntfy 等用 */
-export function toText(d: Digest, siteUrl: string): string {
+function toText(d: Digest, siteUrl: string): string {
   const lines = [d.intro, ''];
   for (const s of d.sections) {
     lines.push(t('notify.text.heading', { heading: s.heading }));
@@ -19,7 +19,7 @@ export function toText(d: Digest, siteUrl: string): string {
 }
 
 /** Markdown：飞书卡片、钉钉、企业微信、Discord、Server酱 */
-export function toMarkdown(d: Digest, siteUrl: string): string {
+function toMarkdown(d: Digest, siteUrl: string): string {
   const b = (s: string) => `**${s}**`;
   const out = [d.intro, ''];
   for (const s of d.sections) {

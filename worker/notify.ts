@@ -340,7 +340,7 @@ export async function sendDigest(
   return { sent: true, results };
 }
 
-export function localHour(tz: string): number {
+function localHour(tz: string): number {
   try {
     return Number(new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
   } catch {

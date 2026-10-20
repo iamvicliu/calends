@@ -42,7 +42,7 @@ const NAV = [
 ];
 
 /** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
-export function navOf(st: AppState['settings']) {
+function navOf(st: AppState['settings']) {
   return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false)).map((n) => ({
     ...n,
     label: t(`app.nav.${n.label}`),

@@ -93,7 +93,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
 }
 
 /** 主图：每月 / 每年花了多少，按分类堆叠 */
-export function Spending({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+function Spending({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const [scale, setScale] = useState<Scale>('month');
   const [hidden, setHidden] = useState<string[]>([]);
@@ -397,7 +397,7 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
 export { perLabel };
 
 /** 账单头：深色底，左边负 MRR，右边订阅星图（圆的面积 = 每月成本） */
-export function Statement({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+function Statement({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const tot = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);

@@ -67,7 +67,7 @@ export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
 const candidates = (xs: Array<{ name: string; id: string }>) => xs.map((x) => t('mcp.item', { name: x.name, id: x.id })).join(t('mcp.sep'));
 
 /** 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选 */
-export function findSub(st: AppState, ref: unknown): Subscription {
+function findSub(st: AppState, ref: unknown): Subscription {
   const q = String(ref ?? '').trim();
   if (!q) throw new Error(t('mcp.error.needSub'));
   const byId = st.subscriptions.find((s) => s.id === q);
@@ -82,7 +82,7 @@ export function findSub(st: AppState, ref: unknown): Subscription {
 }
 
 /** 按 id 或称呼找人；称呼模糊匹配到多个时报错并列出候选 */
-export function findPerson(st: AppState, ref: unknown): Person {
+function findPerson(st: AppState, ref: unknown): Person {
   const q = String(ref ?? '').trim();
   const people = st.people ?? [];
   const byId = people.find((p) => p.id === q);
@@ -133,7 +133,7 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
 }
 
 /** 时间范围：today / next_3_days / next_7_days / next_30_days / this_month / next_month / last_30_days / this_year / custom */
-export function rangeOf(period: unknown, today: string, from?: unknown, to?: unknown): [string, string] {
+function rangeOf(period: unknown, today: string, from?: unknown, to?: unknown): [string, string] {
   const p = String(period ?? 'next_30_days');
   const ym = today.slice(0, 7);
   switch (p) {
@@ -165,7 +165,7 @@ export function rangeOf(period: unknown, today: string, from?: unknown, to?: unk
   }
 }
 
-export const PERIODS = ['today', 'next_3_days', 'next_7_days', 'next_30_days', 'this_month', 'next_month', 'last_30_days', 'this_year', 'custom'];
+const PERIODS = ['today', 'next_3_days', 'next_7_days', 'next_30_days', 'this_month', 'next_month', 'last_30_days', 'this_year', 'custom'];
 
 // ---------- 订阅的统一表示 ----------
 

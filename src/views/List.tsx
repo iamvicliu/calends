@@ -441,7 +441,7 @@ export function List({
 }
 
 /** 待生效变更的一行提示：「10月27日起 🇺🇸 $9.99/月 · 支付方式」，未来才开始的订阅写「10月27日开始」 */
-export function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; up: Subscription; st: string; today: string; state: AppState }) {
+function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; up: Subscription; st: string; today: string; state: AppState }) {
   const d = diffDays(today, up.start);
   const when = d <= 14 ? relDays(d) : cnDate(up.start);
   const m = state.methods.find((x) => x.id === up.methodId);
@@ -463,7 +463,7 @@ export function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; u
 }
 
 /** 换区后旧的那段还没到期、两边都在付钱：标出它是哪一段、用到哪天 */
-export function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subscription; today: string }) {
+function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subscription; today: string }) {
   if (!sub.phases?.length) return null;
   const vs = activePhases(sub, today).filter((v) => v.start !== cur.start);
   if (!vs.length) return null;

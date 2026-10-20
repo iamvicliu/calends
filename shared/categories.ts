@@ -56,7 +56,7 @@ export const PRESETS: Preset[] = [
 
 export type PresetName = (code: string) => string;
 /** 内置分类在当前语言下的名称；只在调用时取文案（模块加载时语言包还没就绪） */
-export const presetName: PresetName = (code) => t(`core.category.${code}`);
+const presetName: PresetName = (code) => t(`core.category.${code}`);
 
 /** 分类名对应哪个内置预设：当前语言的名称或早期中文原名 */
 export function presetOf(name: string, nameOf: PresetName = presetName): Preset | undefined {

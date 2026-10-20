@@ -185,7 +185,7 @@ export function squarify(values: number[], x = 0, y = 0, w = 100, h = 100): Rect
 }
 
 /** 取整齐的刻度：1 / 2 / 2.5 / 5 × 10^n */
-export function niceTicks(max: number, count = 4): number[] {
+function niceTicks(max: number, count = 4): number[] {
   if (max <= 0) return [0];
   const raw = max / count;
   const mag = Math.pow(10, Math.floor(Math.log10(raw)));

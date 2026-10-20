@@ -38,7 +38,7 @@ export const colorFor = (seed: string): PersonColor => PERSON_COLORS[hash(seed) 
 /** 一处引用：某个合租的某位成员，或某个代付的对象 */
 export type PersonRef = { kind: 'member'; sub: Subscription; member: ShareMember } | { kind: 'proxy'; sub: Subscription };
 
-export function refsOf(subs: Subscription[]): PersonRef[] {
+function refsOf(subs: Subscription[]): PersonRef[] {
   const out: PersonRef[] = [];
   for (const s of subs) {
     for (const m of s.share?.members ?? []) out.push({ kind: 'member', sub: s, member: m });
@@ -48,7 +48,7 @@ export function refsOf(subs: Subscription[]): PersonRef[] {
 }
 
 /** 引用上的镜像副本：称呼与联系方式（早期的 tg 字段视为 Telegram） */
-export function refInfo(r: PersonRef): { personId?: string; name: string; contactVia?: string; contact?: string } {
+function refInfo(r: PersonRef): { personId?: string; name: string; contactVia?: string; contact?: string } {
   if (r.kind === 'proxy')
     return { personId: r.sub.proxy!.personId, name: r.sub.proxy!.forName ?? '', contactVia: r.sub.proxy!.contactVia, contact: r.sub.proxy!.contact };
   const m = r.member;
@@ -171,7 +171,7 @@ export function mergePeople(people: Person[], subs: Subscription[], fromId: stri
 }
 
 /** 显示用：引用对应的人；没关联（或名册里找不到）时用副本拼一个 */
-export function personOf(state: Pick<AppState, 'people'>, r: PersonRef): Person {
+function personOf(state: Pick<AppState, 'people'>, r: PersonRef): Person {
   const i = refInfo(r);
   return state.people?.find((p) => p.id === i.personId) ?? { id: '', name: i.name, contactVia: i.contactVia, contact: i.contact };
 }

@@ -14,7 +14,7 @@ import { ContactField, contactText, contactUrl, MemberSheet, viaLabel } from './
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 
 /** 头像：称呼的第一个字 + 这个人的颜色 */
-export function PersonAvatar({ p, size = 36 }: { p: Pick<Person, 'name' | 'color' | 'id'>; size?: number }) {
+function PersonAvatar({ p, size = 36 }: { p: Pick<Person, 'name' | 'color' | 'id'>; size?: number }) {
   return (
     <span
       className={`pp-ava c-${p.color ?? colorFor(p.id || p.name)}`}

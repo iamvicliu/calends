@@ -23,7 +23,7 @@ export function proxyOwed(state: AppState, s: Subscription, today: string): numb
 }
 
 /** 代付总账：待收多少、收回的钱和实扣相比赚了还是亏了 */
-export function proxySummary(state: AppState, today: string) {
+function proxySummary(state: AppState, today: string) {
   // 进行中的在前，已停止的排到最后
   const subs = state.subscriptions
     .filter((s) => s.proxy)
@@ -45,7 +45,7 @@ export function proxySummary(state: AppState, today: string) {
  * 代付卡片：头部（图标、名称）点开是订阅详情；底部「N 期明细」点开是逐期的扣款与收款。
  * 卡片本身只放摘要，高度统一；停止的盖一枚模糊的 🚫 水印。
  */
-export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onOpen: (s: Subscription) => void }) {
+function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onOpen: (s: Subscription) => void }) {
   const today = todayIn(state.settings.timezone);
   const base = state.settings.baseCurrency;
   const list = rows(state, s, today);

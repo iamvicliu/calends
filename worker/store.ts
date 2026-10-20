@@ -32,7 +32,7 @@ export async function getPeople(env: Env): Promise<Person[]> {
   return (await getKv<Person[]>(env, 'people')) ?? [];
 }
 
-export const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
+const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
   env.DB.prepare(
     "INSERT INTO kv (key, value, updated_at) VALUES ('people', ?1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
   ).bind(JSON.stringify(people));

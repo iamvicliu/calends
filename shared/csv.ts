@@ -2,7 +2,7 @@ import type { Cycle, MethodKind, PaymentMethod, Subscription } from './types.ts'
 import { uid } from './billing.ts';
 import { t } from './i18n.ts';
 
-export function parseCsv(text: string): string[][] {
+function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = '';
@@ -42,7 +42,7 @@ export function toCsv(rows: unknown[][]): string {
   return '﻿' + rows.map((r) => r.map(toCsvCell).join(',')).join('\n');
 }
 
-export function parseCycle(s: string): Cycle {
+function parseCycle(s: string): Cycle {
   const t = s.trim().toLowerCase();
   if (t === 'lifetime' || t === 'one time' || t === 'once') return { unit: 'lifetime', every: 1 };
   const map: Record<string, Cycle> = {
@@ -72,7 +72,7 @@ function amount(s: string): number {
 }
 
 /** 依据账户名称推断类型 */
-export function guessKind(name: string): MethodKind {
+function guessKind(name: string): MethodKind {
   if (/支付宝|alipay/i.test(name)) return 'alipay';
   if (/微信|wechat/i.test(name)) return 'wechat';
   if (/paypal/i.test(name)) return 'paypal';

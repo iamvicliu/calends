@@ -21,7 +21,7 @@ export const LOCALES = [
 ] as const;
 
 export type Locale = (typeof LOCALES)[number]['code'];
-export const DEFAULT_LOCALE: Locale = 'en';
+const DEFAULT_LOCALE: Locale = 'en';
 
 /** 一个命名空间的文案：值是字符串、复数对象，或者再嵌套一层 */
 export type MessageTree = { [key: string]: string | MessageTree };

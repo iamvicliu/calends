@@ -19,7 +19,7 @@ export function syncCategories(state: Pick<AppState, 'settings' | 'subscriptions
   return REG;
 }
 export const categories = (): Category[] => REG;
-export const catOf = (name: string): Category | undefined => findCategory(REG, name);
+const catOf = (name: string): Category | undefined => findCategory(REG, name);
 /** 分类图标：Lucide 图标名或 emoji */
 export const catIcon = (name: string): string => catOf(name)?.icon ?? 'tag';
 export const catColor = (name: string): string => categoryColor(catOf(name), name);

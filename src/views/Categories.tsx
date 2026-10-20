@@ -13,7 +13,7 @@ import { categories } from '../derive.ts';
 import { run, saveCategories, toast } from '../store.ts';
 
 /** 分类色块：分类色的浅底 + 同色图标 */
-export function CatTile({ cat, size = 30 }: { cat: Pick<Category, 'name' | 'icon' | 'color'>; size?: number }) {
+function CatTile({ cat, size = 30 }: { cat: Pick<Category, 'name' | 'icon' | 'color'>; size?: number }) {
   return (
     <span className="cat-tile" style={{ '--tint': categoryColor(cat, cat.name), '--s': `${size}px` } as Record<string, string>}>
       <CatGlyph icon={cat.icon} size={Math.round(size * 0.56)} />
@@ -70,7 +70,7 @@ function SortableRow({ cat, n, onOpen }: { cat: Category; n: number; onOpen: () 
 }
 
 /** 分类列表：拖动把手排序，点一行编辑 */
-export function CategoriesSheet({ state, onClose }: { state: AppState; onClose: () => void }) {
+function CategoriesSheet({ state, onClose }: { state: AppState; onClose: () => void }) {
   const list = categories();
   const counts = useMemo(() => categoryCounts(state.subscriptions), [state.subscriptions]);
   const [editing, setEditing] = useState<Category | 'new' | null>(null);
