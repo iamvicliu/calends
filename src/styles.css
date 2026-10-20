@@ -2713,6 +2713,15 @@ select.btn {
 .toggle[data-selected] i {
   background: var(--ink);
 }
+/* 暗色下 --ink 是浅灰，白色圆钮在上面看不出开关状态，改用绿色轨道 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .toggle[data-selected] i {
+    background: var(--green);
+  }
+}
+:root[data-theme='dark'] .toggle[data-selected] i {
+  background: var(--green);
+}
 .toggle i::after {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
