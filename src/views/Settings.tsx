@@ -66,7 +66,7 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
         {url ? (
           <>
             <div className="codebox">{url}</div>
-            <div className="row" style={{ flexWrap: 'wrap' }}>
+            <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <a className="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
                 <Icon name="cal" /> {t('app.ics.subscribe')}
               </a>

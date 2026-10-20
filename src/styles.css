@@ -1358,6 +1358,8 @@ a {
   display: flex;
   gap: 10px;
   align-items: center;
+  /* 按钮统一靠右；「删除」之类放在 .grow 左边 */
+  justify-content: flex-end;
   padding: 12px 18px calc(12px + var(--safe-b));
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(18px);
@@ -2794,6 +2796,14 @@ select.btn {
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   animation: pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.05);
+}
+/* 窄屏：搜索面板仍是悬浮的完整弹窗，左右留出间距（贴底弹出的面板才贴边） */
+@media (max-width: 680px) {
+  .palette {
+    width: calc(100% - 24px);
+    margin: calc(12px + var(--safe-t)) 12px 0;
+    max-height: calc(100% - 96px);
+  }
 }
 .palette input {
   width: 100%;
@@ -7430,6 +7440,17 @@ button.seat:disabled {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
   gap: 8px;
+}
+/* 窄屏两列，不然八个客户端排成长长一列 */
+@media (max-width: 640px) {
+  .ai-clients {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ai-client {
+    padding: 9px 10px;
+    gap: 8px;
+    font-size: 13px;
+  }
 }
 .ai-client {
   display: flex;
