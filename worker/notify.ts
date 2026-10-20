@@ -1,6 +1,6 @@
 import { addDays, addMonths, chargesBetween, convert, cycleDays, diffDays, effectiveStatus, nextCharge, priceAt, runwayFor, todayIn, totals } from '../shared/billing.ts';
 import { toBaseAt } from '../shared/fx.ts';
-import { cnDate, esc, money, relDays } from '../shared/format.ts';
+import { billLabel, cnDate, esc, money, relDays } from '../shared/format.ts';
 import type { AppState, Channel } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { matchEntries } from '../shared/proxy.ts';
@@ -87,10 +87,10 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
       const every = m.billEvery ?? 1;
       const fee = m.fee != null ? money(m.fee, m.feeCurrency ?? collect) : money(toBaseAt(state, ((m.share || 0) * every) / months, s.currency, undefined, collect), collect);
-      const who = [m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : m.contact ?? m.tg].filter(Boolean).join('');
+      const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
       carpool.push({
         title: `${m.name} · ${s.name}`,
-        sub: `${d > 0 ? `${relDays(d)}（${cnDate(due)}）到期` : d === 0 ? '今天到期' : `已逾期 ${-d} 天`}，下一期${(({ 1: '按月', 3: '按季', 6: '按半年', 12: '按年' }) as Record<number, string>)[every] ?? `按 ${every} 个月`}${who ? ` · ${who}` : ''}`,
+        sub: `${d > 0 ? `${relDays(d)}（${cnDate(due)}）到期` : d === 0 ? '今天到期' : `已逾期 ${-d} 天`}，下一期${billLabel(every)}${who ? ` · ${who}` : ''}`,
         amount: fee,
         tone: d < 0 ? 'warn' : undefined,
       });

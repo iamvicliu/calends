@@ -41,6 +41,12 @@ export function relDays(n: number): string {
   return `${Math.round(n / 30)} 个月后`;
 }
 
+const BILL_LABEL: Record<number, string> = { 1: '按月', 3: '按季', 6: '按半年', 12: '按年' };
+/** 合租收费周期的文字；不在常用选项里的写成「按 N 个月」 */
+export function billLabel(months?: number): string {
+  return BILL_LABEL[months ?? 1] ?? `按 ${months} 个月`;
+}
+
 export function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }

@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import { addDays, addMonths, chargesBetween, currentPhase, cycleDays, monthlyGross, todayIn, uid } from '../../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
-import { cnDate, cnDateFull, money } from '../../shared/format.ts';
+import { billLabel, cnDate, cnDateFull, money } from '../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
@@ -80,10 +80,6 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   const received = members.flatMap((m) => m.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0);
   return { yearCost, yearIncome, yearNet: yearCost - yearIncome, since, paid, received, net: paid - received };
 }
-
-export const BILL_LABEL: Record<number, string> = { 1: '按月', 3: '按季', 6: '按半年', 12: '按年' };
-/** 收费周期的文字；不在常用选项里的写成「按 N 个月」 */
-export const billLabel = (months?: number) => BILL_LABEL[months ?? 1] ?? `按 ${months} 个月`;
 
 /** 订阅一期大约几个月，用来把「每期份额」换算成按月 / 季 / 年收的金额 */
 function cycleMonths(s: Subscription): number {

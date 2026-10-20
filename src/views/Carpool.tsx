@@ -1,9 +1,9 @@
 import { cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
 import { useState } from 'preact/hooks';
-import { cnDate, money } from '../../shared/format.ts';
+import { billLabel, cnDate, money } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../shared/types.ts';
-import { billLabel, carLedger, contactText, MemberSheet, memberFee } from './Members.tsx';
+import { carLedger, contactText, MemberSheet, memberFee } from './Members.tsx';
 import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
