@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { uid } from '../../shared/billing.ts';
 import { channelsOf, type AppState, type Channel, type ChannelKind } from '../../shared/types.ts';
 import { Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
@@ -136,7 +136,7 @@ export function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: num
   const k = KINDS()[kind];
   return (
     // tile：官方 App 图标本身就是完整的方块，铺满不留底色
-    <span class={`ch-mark ${k.tile ? 'tile' : ''}`} style={{ background: k.color, width: size, height: size }}>
+    <span className={`ch-mark ${k.tile ? 'tile' : ''}`} style={{ background: k.color, width: size, height: size }}>
       {k.logo ? <img src={k.logo} alt="" /> : <b>{k.mark}</b>}
     </span>
   );
@@ -157,23 +157,23 @@ export function ChannelsGroup({ state }: { state: AppState }) {
   return (
     <>
       <Group title={t('settings.channels.title', { count: list.filter((c) => c.enabled).length })}>
-        {list.length === 0 && <div class="cell muted">{t('settings.channels.empty')}</div>}
+        {list.length === 0 && <div className="cell muted">{t('settings.channels.empty')}</div>}
         {list.map((c) => (
-          <div key={c.id} class="cell ch-row">
-            <button type="button" class="ch-main" onClick={() => setEdit(c)}>
+          <div key={c.id} className="cell ch-row">
+            <button type="button" className="ch-main" onClick={() => setEdit(c)}>
               <ChannelMark kind={c.kind} />
-              <span class="cell-l">
+              <span className="cell-l">
                 {c.name}
                 <small>{c.kind === 'email' && c.config.to ? c.config.to : kinds[c.kind].name}</small>
               </span>
             </button>
-            <button type="button" class="chip-btn" onClick={() => test(c.id)}>
+            <button type="button" className="chip-btn" onClick={() => test(c.id)}>
               {t('settings.channels.test')}
             </button>
             <Toggle checked={c.enabled} onChange={(v) => run(() => save(list.map((x) => (x.id === c.id ? { ...x, enabled: v } : x))))} />
           </div>
         ))}
-        <div class="cell">
+        <div className="cell">
           <Picker
             value=""
             onChange={(k) => k && setEdit({ id: uid(), kind: k as ChannelKind, name: kinds[k as ChannelKind].name, enabled: true, config: {} })}
@@ -235,28 +235,28 @@ function ChannelSheet({
       foot={
         <>
           {!isNew && (
-            <button class="btn danger" onClick={onDelete}>
+            <button className="btn danger" onClick={onDelete}>
               {t('settings.channels.delete')}
             </button>
           )}
-          <span class="grow" />
+          <span className="grow" />
           <button
-            class="btn"
+            className="btn"
             disabled={missing.length > 0}
             onClick={() => (missing.length ? toast(t('settings.channels.fillField', { field: missing[0].label }), true) : test(f))}
           >
             {t('settings.channels.test')}
           </button>
-          <button class="btn primary" disabled={missing.length > 0} onClick={() => onSave(f)}>
+          <button className="btn primary" disabled={missing.length > 0} onClick={() => onSave(f)}>
             {t('settings.channels.save')}
           </button>
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Group foot={k.help}>
           <Cell label={t('settings.channels.name')}>
-            <input value={f.name} onInput={(e) => setF({ ...f, name: (e.target as HTMLInputElement).value })} />
+            <input value={f.name} onChange={(e) => setF({ ...f, name: (e.target as HTMLInputElement).value })} />
           </Cell>
           {k.fields.map((x) => (
             <Cell key={x.key} label={x.label}>
@@ -266,7 +266,7 @@ function ChannelSheet({
                 autoCapitalize="off"
                 value={f.config[x.key] ?? ''}
                 placeholder={x.placeholder ?? (x.optional ? t('settings.channels.optional') : '')}
-                onInput={(e) => setF({ ...f, config: { ...f.config, [x.key]: (e.target as HTMLInputElement).value.trim() } })}
+                onChange={(e) => setF({ ...f, config: { ...f.config, [x.key]: (e.target as HTMLInputElement).value.trim() } })}
               />
             </Cell>
           ))}

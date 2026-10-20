@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import type { AppState } from '../../shared/types.ts';
 import { Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, run, saveSettings, toast } from '../store.ts';
@@ -118,7 +118,7 @@ const copy = (text: string, what = t('ai.copied')) =>
 
 function ClientLogo({ c, size = 28 }: { c: Client; size?: number }) {
   return (
-    <span class="ai-logo" style={{ width: size, height: size }}>
+    <span className="ai-logo" style={{ width: size, height: size }}>
       {c.logo ? <img src={c.logo} alt="" /> : <Icon name="link" size={size * 0.55} />}
     </span>
   );
@@ -127,10 +127,10 @@ function ClientLogo({ c, size = 28 }: { c: Client; size?: number }) {
 /** 一段可复制的代码：右上角是复制按钮，左上角是语言角标 */
 function CodeBlock({ code, lang, onCopy }: { code: string; lang: string; onCopy: () => void }) {
   return (
-    <div class="ai-code">
-      <div class="ai-code-bar">
+    <div className="ai-code">
+      <div className="ai-code-bar">
         <span>{lang}</span>
-        <button type="button" class="ai-copy" onClick={onCopy}>
+        <button type="button" className="ai-copy" onClick={onCopy}>
           <Icon name="copy" size={14} /> {t('ai.copy')}
         </button>
       </div>
@@ -162,15 +162,15 @@ function Connect({
   // 直接发给 AI 助手的一段话：说明要做什么、放在哪、具体配置，最后让它自己验证
   const prompt = t('ai.agentPrompt', { name, where: c.where(), code, verify: 'get_overview' });
   return (
-    <div class="ai-connect">
-      <div class="ai-clients" role="radiogroup" aria-label={t('ai.pickClient')}>
+    <div className="ai-connect">
+      <div className="ai-clients" role="radiogroup" aria-label={t('ai.pickClient')}>
         {CLIENTS.map((x) => (
           <button
             key={x.id}
             type="button"
             role="radio"
             aria-checked={x.id === c.id}
-            class={`ai-client ${x.id === c.id ? 'on' : ''}`}
+            className={`ai-client ${x.id === c.id ? 'on' : ''}`}
             onClick={() => setClient(x.id)}
           >
             <ClientLogo c={x} />
@@ -178,35 +178,35 @@ function Connect({
           </button>
         ))}
       </div>
-      <ol class="ai-steps">
+      <ol className="ai-steps">
         <li>
           <b>{t('ai.step.token')}</b>
           {token ? (
-            <span class="ai-step-ok">
+            <span className="ai-step-ok">
               <Icon name="check" size={14} /> {t('ai.step.tokenReady', { name: token.item.name })}
             </span>
           ) : onCreate ? (
             <span>
               {t('ai.step.tokenNeeded')}{' '}
-              <button type="button" class="btn plain" onClick={() => onCreate(name)}>
+              <button type="button" className="btn plain" onClick={() => onCreate(name)}>
                 {t('ai.step.createFor', { name })}
               </button>
             </span>
           ) : null}
         </li>
-        <li class="ai-step-code">
+        <li className="ai-step-code">
           <b>
             {t('ai.step.send', { name })}
-            {c.experimental && <span class="badge">{t('ai.experimental')}</span>}
+            {c.experimental && <span className="badge">{t('ai.experimental')}</span>}
           </b>
           <CodeBlock code={prompt} lang={t('ai.promptLabel')} onCopy={() => copy(prompt, token ? t('ai.copiedWithToken') : t('ai.copied'))} />
-          <span class="ai-step-actions">
+          <span className="ai-step-actions">
             {token && c.install && (
-              <a class="btn primary ai-install" href={c.install(url, token.token)}>
+              <a className="btn primary ai-install" href={c.install(url, token.token)}>
                 <ClientLogo c={c} size={18} /> {t('ai.installIn', { name })}
               </a>
             )}
-            <button type="button" class="btn plain" onClick={() => copy(code, t('ai.configCopied'))}>
+            <button type="button" className="btn plain" onClick={() => copy(code, t('ai.configCopied'))}>
               <Icon name="copy" size={14} /> {t('ai.copyConfigOnly')}
             </button>
           </span>
@@ -247,16 +247,16 @@ export function Ai({ state }: { state: AppState }) {
     <>
       <Toolbar title={t('ai.title')}>
         {!ro && (
-          <button class="btn primary" onClick={() => setCreating(CLIENTS.find((x) => x.id === client)?.name || 'AI')}>
+          <button className="btn primary" onClick={() => setCreating(CLIENTS.find((x) => x.id === client)?.name || 'AI')}>
             <Icon name="plus" /> {t('ai.newToken')}
           </button>
         )}
       </Toolbar>
-      <div class="page fade-in ai-page">
+      <div className="page fade-in ai-page">
         {/* 状态与地址 */}
-        <div class={`ai-status ${enabled ? 'on' : ''}`}>
-          <div class="ai-status-l">
-            <span class="ai-dot" />
+        <div className={`ai-status ${enabled ? 'on' : ''}`}>
+          <div className="ai-status-l">
+            <span className="ai-dot" />
             <div>
               <b>{enabled ? t('ai.status.on') : t('ai.status.off')}</b>
               <small>{enabled ? t('ai.status.onHint') : t('ai.status.offHint')}</small>
@@ -264,13 +264,13 @@ export function Ai({ state }: { state: AppState }) {
           </div>
           {!ro && <Toggle checked={enabled} label={t('ai.title')} onChange={(v) => run(() => saveSettings({ aiEnabled: v }))} />}
         </div>
-        <button type="button" class="ai-endpoint" onClick={() => copy(url, t('ai.urlCopied'))} title={t('ai.copy')}>
+        <button type="button" className="ai-endpoint" onClick={() => copy(url, t('ai.urlCopied'))} title={t('ai.copy')}>
           <span>{t('ai.mcpUrl')}</span>
           <code>{url}</code>
           <Icon name="copy" size={15} />
         </button>
 
-        <section class="ai-card">
+        <section className="ai-card">
           <header>
             <h2>{t('ai.setup')}</h2>
             <p>{t('ai.setupHint')}</p>
@@ -278,22 +278,22 @@ export function Ai({ state }: { state: AppState }) {
           <Connect url={url} token={fresh ?? undefined} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
         </section>
 
-        <section class="ai-card">
+        <section className="ai-card">
           <header>
             <h2>{t('ai.tokens', { count: tokens?.length ?? 0 })}</h2>
             <p>{t('ai.tokensHint')}</p>
           </header>
-          {tokens?.length === 0 && <div class="ai-empty">{t('ai.noTokens')}</div>}
+          {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
           {!!tokens?.length && (
-            <div class="ai-tokens" role="table">
+            <div className="ai-tokens" role="table">
               {tokens.map((tk) => (
-                <div key={tk.id} class="ai-token" role="row">
-                  <span class="ai-token-name">
+                <div key={tk.id} className="ai-token" role="row">
+                  <span className="ai-token-name">
                     <b>{tk.name}</b>
-                    <span class={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
+                    <span className={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
                   </span>
-                  <code class="ai-token-prefix">{tk.prefix}…</code>
-                  <span class="ai-token-meta">
+                  <code className="ai-token-prefix">{tk.prefix}…</code>
+                  <span className="ai-token-meta">
                     {t('ai.createdAt', { time: localTime(tk.createdAt, state.settings.timezone, true) })}
                     <br />
                     {t('ai.lastUsed', { time: when(tk.lastUsedAt) })}
@@ -301,7 +301,7 @@ export function Ai({ state }: { state: AppState }) {
                   {!ro && (
                     <button
                       type="button"
-                      class="icon-btn ai-revoke"
+                      className="icon-btn ai-revoke"
                       aria-label={t('ai.revoke')}
                       title={t('ai.revoke')}
                       onClick={() =>
@@ -322,8 +322,8 @@ export function Ai({ state }: { state: AppState }) {
           )}
         </section>
 
-        <section class="ai-card">
-          <button type="button" class="ai-tools-toggle" onClick={() => setShowTools(!showTools)} aria-expanded={showTools}>
+        <section className="ai-card">
+          <button type="button" className="ai-tools-toggle" onClick={() => setShowTools(!showTools)} aria-expanded={showTools}>
             <span>
               <h2>{t('ai.tools', { count: tools.length })}</h2>
               <p>{t('ai.toolsHint')}</p>
@@ -331,12 +331,12 @@ export function Ai({ state }: { state: AppState }) {
             <Icon name="down" size={16} />
           </button>
           {showTools && (
-            <div class="ai-tools">
+            <div className="ai-tools">
               {groups.map(([title, list]) => (
                 <div key={title}>
                   <h3>{title}</h3>
                   {list.map((tool) => (
-                    <div key={tool.name} class="ai-tool">
+                    <div key={tool.name} className="ai-tool">
                       <b>{tool.title ?? tool.name}</b>
                       <code>{tool.name}</code>
                     </div>
@@ -366,21 +366,21 @@ export function Ai({ state }: { state: AppState }) {
           onClose={() => setShowFresh(false)}
           foot={
             <>
-              <span class="grow" />
-              <button class="btn primary" onClick={() => setShowFresh(false)}>
+              <span className="grow" />
+              <button className="btn primary" onClick={() => setShowFresh(false)}>
                 {t('ai.created.saved')}
               </button>
             </>
           }
         >
-          <div class="stack">
-            <div class="ai-fresh">
-              <div class="ai-fresh-head">
+          <div className="stack">
+            <div className="ai-fresh">
+              <div className="ai-fresh-head">
                 <b>{fresh.item.name}</b>
-                <span class={`ai-scope ${fresh.item.scope}`}>{fresh.item.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
+                <span className={`ai-scope ${fresh.item.scope}`}>{fresh.item.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
               </div>
               <CodeBlock code={fresh.token} lang="token" onCopy={() => copy(fresh.token, t('ai.created.tokenCopied'))} />
-              <p class="ai-warn">
+              <p className="ai-warn">
                 <Icon name="key" size={14} /> {t('ai.created.foot')}
               </p>
             </div>
@@ -406,37 +406,37 @@ function NewToken({ initialName, onClose, onCreated }: { initialName: string; on
       onClose={onClose}
       foot={
         <>
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('ai.cancel')}
           </button>
-          <button class="btn primary" disabled={!name.trim()} onClick={create}>
+          <button className="btn primary" disabled={!name.trim()} onClick={create}>
             {t('ai.generate')}
           </button>
         </>
       }
     >
-      <div class="stack">
-        <label class="ai-field">
+      <div className="stack">
+        <label className="ai-field">
           <span>{t('ai.name')}</span>
           <input
             value={name}
             placeholder={t('ai.namePlaceholder')}
-            onInput={(e) => setName((e.target as HTMLInputElement).value)}
+            onChange={(e) => setName((e.target as HTMLInputElement).value)}
             onKeyDown={(e) => e.key === 'Enter' && name.trim() && create()}
           />
         </label>
-        <div class="ai-scopes" role="radiogroup" aria-label={t('ai.scope.label')}>
+        <div className="ai-scopes" role="radiogroup" aria-label={t('ai.scope.label')}>
           {(['write', 'read'] as const).map((s) => (
             <button
               key={s}
               type="button"
               role="radio"
               aria-checked={scope === s}
-              class={`ai-scope-card ${scope === s ? 'on' : ''}`}
+              className={`ai-scope-card ${scope === s ? 'on' : ''}`}
               onClick={() => setScope(s)}
             >
-              <span class="ai-radio" />
+              <span className="ai-radio" />
               <span>
                 <b>{s === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</b>
                 <small>{s === 'write' ? t('ai.scope.writeDesc') : t('ai.scope.readDesc')}</small>

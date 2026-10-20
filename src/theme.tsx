@@ -1,5 +1,5 @@
 // 主题：亮色 → 暗色 → 跟随系统 三者轮换，后台与公开页共用
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { t } from '../shared/i18n.ts';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -63,24 +63,25 @@ export function useThemeMode(): [ThemeMode, () => void] {
  * 切换时新图标带一点回弹转进来，旧图标反向转出。
  */
 export function ThemeIcon({ mode, size = 18 }: { mode: ThemeMode; size?: number }) {
-  const layer = (m: ThemeMode, turn: number) => ({
-    transformBox: 'fill-box',
-    transformOrigin: 'center',
-    transform: mode === m ? 'rotate(0deg) scale(1)' : `rotate(${turn}deg) scale(0.3)`,
-    opacity: mode === m ? 1 : 0,
-    transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
-  });
+  const layer = (m: ThemeMode, turn: number) =>
+    ({
+      transformBox: 'fill-box',
+      transformOrigin: 'center',
+      transform: mode === m ? 'rotate(0deg) scale(1)' : `rotate(${turn}deg) scale(0.3)`,
+      opacity: mode === m ? 1 : 0,
+      transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
+    }) as React.CSSProperties;
   return (
     <svg
-      class="i"
+      className="i"
       viewBox="0 0 24 24"
       width={size}
       height={size}
       fill="none"
       stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
       <g style={layer('light', -90)}>

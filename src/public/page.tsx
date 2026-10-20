@@ -60,7 +60,7 @@ function rich(key: string, params: Params, parts: Record<string, React.ReactNode
     last = m.index! + m[0].length;
   }
   out.push(s.slice(last));
-  return out;
+  return out.map((node, i) => <Fragment key={i}>{node}</Fragment>);
 }
 
 /** 卡片留白：手机 16px，桌面 24px */
@@ -509,7 +509,7 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
             <li key={x.name} className="flex items-center gap-2.5">
               <i className="size-2.5 rounded-[3px]" style={{ background: shade(i) }} />
               <span className="flex flex-1 items-center gap-1.5">
-                {!x.other && <CatGlyph icon={catIcon(x.name)} size={14} class="size-3.5 text-muted-foreground" />}
+                {!x.other && <CatGlyph icon={catIcon(x.name)} size={14} className="size-3.5 text-muted-foreground" />}
                 {x.name} <span className="text-[13px] text-muted-foreground">{t('public.count', { count: x.n })}</span>
               </span>
               <span className="tnum">{fmt(x.v * k)}</span>
@@ -604,7 +604,7 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
               >
                 {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-full bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
                 <span className="relative flex items-center gap-1">
-                  {c && <CatGlyph icon={catIcon(c)} size={13} class="size-[13px]" />}
+                  {c && <CatGlyph icon={catIcon(c)} size={13} className="size-[13px]" />}
                   {c || t('public.list.all')} <span className="opacity-60 tnum">{n}</span>
                 </span>
               </button>

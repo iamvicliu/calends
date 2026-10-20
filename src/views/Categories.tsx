@@ -1,7 +1,7 @@
 // 分类管理：设置里的「分类」列表（拖动排序、改名、换图标和颜色、删除并移走订阅），以及新建 / 编辑分类的弹层（订阅表单里「新建分类…」也用它）
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useMemo, useState } from 'preact/hooks';
+import { useMemo, useState } from 'react';
 import { CAT_COLORS, categoryColor, categoryCounts, isIconName, type Category } from '../../shared/categories.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState } from '../../shared/types.ts';
@@ -15,7 +15,7 @@ import { run, saveCategories, toast } from '../store.ts';
 /** 分类色块：分类色的浅底 + 同色图标 */
 export function CatTile({ cat, size = 30 }: { cat: Pick<Category, 'name' | 'icon' | 'color'>; size?: number }) {
   return (
-    <span class="cat-tile" style={{ '--tint': categoryColor(cat, cat.name), '--s': `${size}px` } as Record<string, string>}>
+    <span className="cat-tile" style={{ '--tint': categoryColor(cat, cat.name), '--s': `${size}px` } as Record<string, string>}>
       <CatGlyph icon={cat.icon} size={Math.round(size * 0.56)} />
     </span>
   );
@@ -29,7 +29,7 @@ export function CategoriesGroup({ state }: { state: AppState }) {
     <>
       <Group title={t('settings.cat.title')}>
         <Cell label={t('settings.cat.manage')} sub={t('settings.cat.count', { count: list.length })} onClick={() => setOpen(true)}>
-          <span class="cat-peek">
+          <span className="cat-peek">
             {list.slice(0, 5).map((c) => (
               <CatTile key={c.name} cat={c} size={22} />
             ))}
@@ -46,23 +46,23 @@ function SortableRow({ cat, n, onOpen }: { cat: Category; n: number; onOpen: () 
   return (
     <div
       ref={setNodeRef as (el: HTMLDivElement | null) => void}
-      class={`cell cat-row ${isDragging ? 'lifted' : ''}`}
+      className={`cell cat-row ${isDragging ? 'lifted' : ''}`}
       style={{ transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined, transition } as Record<string, string | undefined>}
     >
       <button
         type="button"
         ref={setActivatorNodeRef as (el: HTMLButtonElement | null) => void}
-        class="cat-grip"
+        className="cat-grip"
         aria-label={t('settings.cat.dragHandle')}
         {...(attributes as unknown as Record<string, unknown>)}
         {...(listeners as Record<string, unknown>)}
       >
         <Icon name="grip" />
       </button>
-      <button type="button" class="cat-row-main" onClick={onOpen}>
+      <button type="button" className="cat-row-main" onClick={onOpen}>
         <CatTile cat={cat} />
-        <span class="cat-row-name">{cat.name}</span>
-        <span class="cat-row-n">{n ? t('settings.cat.subs', { count: n }) : t('settings.cat.unused')}</span>
+        <span className="cat-row-name">{cat.name}</span>
+        <span className="cat-row-n">{n ? t('settings.cat.subs', { count: n }) : t('settings.cat.unused')}</span>
         <Icon name="right" />
       </button>
     </div>
@@ -88,8 +88,8 @@ export function CategoriesSheet({ state, onClose }: { state: AppState; onClose: 
       foot={
         !ro && (
           <>
-            <span class="grow" />
-            <button class="btn primary" onClick={() => setEditing('new')}>
+            <span className="grow" />
+            <button className="btn primary" onClick={() => setEditing('new')}>
               <Icon name="plus" /> {t('settings.cat.add')}
             </button>
           </>
@@ -195,7 +195,7 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
     })
     .filter((x) => x.names.length);
   return (
-    <div class="cat-picker" style={{ '--tint': tint } as Record<string, string>}>
+    <div className="cat-picker" style={{ '--tint': tint } as Record<string, string>}>
       <Seg
         value={tab}
         onChange={setTab}
@@ -206,20 +206,20 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
       />
       {tab === 'icons' ? (
         <>
-          <label class="cp-search">
+          <label className="cp-search">
             <Icon name="search" />
-            <input value={q} placeholder={t('settings.cat.search')} onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
+            <input value={q} placeholder={t('settings.cat.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
           </label>
-          <div class="cat-icon-scroll">
+          <div className="cat-icon-scroll">
             {groups.map((x) => (
               <section key={x.g}>
-                <div class="cp-head">{x.label}</div>
-                <div class="cat-grid">
+                <div className="cp-head">{x.label}</div>
+                <div className="cat-grid">
                   {x.names.map((n) => (
                     <button
                       key={n}
                       type="button"
-                      class={`cat-pick ${value === n ? 'on' : ''}`}
+                      className={`cat-pick ${value === n ? 'on' : ''}`}
                       aria-pressed={value === n}
                       aria-label={n}
                       title={n}
@@ -231,16 +231,16 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
                 </div>
               </section>
             ))}
-            {!groups.length && <div class="cp-empty">{t('settings.cat.noMatch')}</div>}
+            {!groups.length && <div className="cp-empty">{t('settings.cat.noMatch')}</div>}
           </div>
         </>
       ) : (
         <>
-          <label class="cp-search">
+          <label className="cp-search">
             <input
               value={emoji}
               placeholder={t('settings.cat.emojiPlaceholder')}
-              onInput={(e) => {
+              onChange={(e) => {
                 const v = (e.target as HTMLInputElement).value;
                 setEmoji(v);
                 const g = lastEmoji(v);
@@ -248,13 +248,13 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
               }}
             />
           </label>
-          <div class="cp-head">{t('settings.cat.emojiCommon')}</div>
-          <div class="cat-grid">
+          <div className="cp-head">{t('settings.cat.emojiCommon')}</div>
+          <div className="cat-grid">
             {EMOJIS.map((e) => (
               <button
                 key={e}
                 type="button"
-                class={`cat-pick emo ${value === e ? 'on' : ''}`}
+                className={`cat-pick emo ${value === e ? 'on' : ''}`}
                 aria-pressed={value === e}
                 onClick={() => (setEmoji(e), onChange(e))}
               >
@@ -318,32 +318,32 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
       onClose={onClose}
       foot={
         <>
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button class="btn primary" onClick={save}>
+          <button className="btn primary" onClick={save}>
             {t('common.save')}
           </button>
         </>
       }
     >
-      <div class="stack">
-        <div class="cat-hero">
+      <div className="stack">
+        <div className="cat-hero">
           <CatTile cat={{ name: name || '?', icon, color }} size={56} />
           <input
-            class="cat-name"
+            className="cat-name"
             value={name}
             maxLength={40}
             placeholder={t('settings.cat.namePlaceholder')}
             aria-label={t('settings.cat.name')}
             autoFocus={!cat}
-            onInput={(e) => setName((e.target as HTMLInputElement).value)}
+            onChange={(e) => setName((e.target as HTMLInputElement).value)}
             onKeyDown={(e) => e.key === 'Enter' && save()}
           />
         </div>
         <Group title={t('settings.cat.color')}>
-          <div class="cat-swatches" role="radiogroup" aria-label={t('settings.cat.color')}>
+          <div className="cat-swatches" role="radiogroup" aria-label={t('settings.cat.color')}>
             {CAT_COLORS.map((c, i) => (
               <button
                 key={c}
@@ -351,7 +351,7 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
                 role="radio"
                 aria-checked={color === c}
                 aria-label={`${t('settings.cat.color')} ${i + 1}`}
-                class={`cat-swatch ${color === c ? 'on' : ''}`}
+                className={`cat-swatch ${color === c ? 'on' : ''}`}
                 style={{ '--tint': `var(--${c})` } as Record<string, string>}
                 onClick={() => setColor(c)}
               />
@@ -373,7 +373,11 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
                 />
               </Cell>
             )}
-            <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => (n && !deleting ? setDeleting(true) : remove())}>
+            <button
+              className="cell tap"
+              style={{ justifyContent: 'center', color: 'var(--red)' }}
+              onClick={() => (n && !deleting ? setDeleting(true) : remove())}
+            >
               {deleting && n > 0 ? t('common.delete') : t('settings.cat.delete')}
             </button>
           </Group>

@@ -18,13 +18,13 @@ export function Num({ value, prefix, suffix, digits = 0, className }: { value: n
     el.numberSuffix = suffix;
     el.update(value);
   }, [value, prefix, suffix, digits]);
-  return <number-flow ref={ref} class={className} />;
+  return <number-flow ref={ref} className={className} />;
 }
 
-declare module 'preact' {
+declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'number-flow': HTMLAttributes<NumberFlowElement>;
+      'number-flow': React.DetailedHTMLProps<React.HTMLAttributes<NumberFlowElement>, NumberFlowElement>;
     }
   }
 }

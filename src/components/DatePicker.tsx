@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addDays, addMonths, parseDay } from '../../shared/billing.ts';
 import { cnDateFull, monthLabel, weekdayShort } from '../../shared/format.ts';
 import { intlLocale, t } from '../../shared/i18n.ts';
@@ -119,7 +119,7 @@ export function DatePicker({
       <button
         type="button"
         ref={btn}
-        class={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`}
+        className={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`}
         onClick={toggle}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -129,22 +129,22 @@ export function DatePicker({
       </button>
       {open && pos && (
         <>
-          {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
+          {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
           <div
             ref={pop}
-            class={`dp-pop ${pos.mobile ? 'mobile' : ''}`}
+            className={`dp-pop ${pos.mobile ? 'mobile' : ''}`}
             style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
             role="dialog"
             aria-label={t('picker.date.placeholder')}
           >
-            <div class="dp-head">
-              <button type="button" class="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
+            <div className="dp-head">
+              <button type="button" className="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
                 {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
                 <Icon name="down" />
               </button>
               <button
                 type="button"
-                class="dp-nav"
+                className="dp-nav"
                 aria-label={t('picker.date.prev')}
                 onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}
               >
@@ -152,7 +152,7 @@ export function DatePicker({
               </button>
               <button
                 type="button"
-                class="dp-nav"
+                className="dp-nav"
                 aria-label={t('picker.date.next')}
                 onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}
               >
@@ -160,9 +160,9 @@ export function DatePicker({
               </button>
             </div>
             {mode === 'day' ? (
-              <div class="dp-grid">
+              <div className="dp-grid">
                 {dows().map((d) => (
-                  <span key={d} class="dp-dow">
+                  <span key={d} className="dp-dow">
                     {weekdayShort(d, true)}
                   </span>
                 ))}
@@ -170,7 +170,7 @@ export function DatePicker({
                   <button
                     type="button"
                     key={d}
-                    class={[
+                    className={[
                       'dp-day',
                       d.startsWith(month) ? '' : 'out',
                       d === today ? 'today' : '',
@@ -185,12 +185,12 @@ export function DatePicker({
                 ))}
               </div>
             ) : (
-              <div class="dp-months">
+              <div className="dp-months">
                 {Array.from({ length: 12 }, (_, i) => (
                   <button
                     type="button"
                     key={i}
-                    class={`dp-month ${i + 1 === m ? 'sel' : ''}`}
+                    className={`dp-month ${i + 1 === m ? 'sel' : ''}`}
                     onClick={() => {
                       setMonth(`${y}-${String(i + 1).padStart(2, '0')}`);
                       setMode('day');
@@ -201,14 +201,14 @@ export function DatePicker({
                 ))}
               </div>
             )}
-            <div class="dp-foot">
-              <button type="button" class="btn plain" onClick={() => pick(today)}>
+            <div className="dp-foot">
+              <button type="button" className="btn plain" onClick={() => pick(today)}>
                 {t('common.today')}
               </button>
               {clearable && value && (
                 <button
                   type="button"
-                  class="btn plain"
+                  className="btn plain"
                   onClick={() => {
                     onChange(undefined);
                     setOpen(false);

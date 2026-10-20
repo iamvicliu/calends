@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { addDays, addMonths, nextCharge, phaseSubs } from '../../shared/billing.ts';
 import { changePrice, removePhase, resume, setPhaseEnd, switchPlan } from '../../shared/phases.ts';
 import type { AppState, Cycle, Subscription } from '../../shared/types.ts';
@@ -97,26 +97,26 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   return (
     <Group title={t('editor.change.title')}>
       <History sub={f} state={state} today={today} onEnd={setEnd} />
-      <div class="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <button class={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
+      <div className="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
+        <button className={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
           {t('editor.change.price')}
         </button>
-        <button class={`btn ${mode === 'switch' ? 'primary' : ''}`} onClick={() => open('switch')}>
+        <button className={`btn ${mode === 'switch' ? 'primary' : ''}`} onClick={() => open('switch')}>
           {t('editor.change.switch')}
         </button>
         {ended && (
-          <button class={`btn ${mode === 'resume' ? 'primary' : ''}`} onClick={() => open('resume')}>
+          <button className={`btn ${mode === 'resume' ? 'primary' : ''}`} onClick={() => open('resume')}>
             {t('editor.change.resume')}
           </button>
         )}
         {phases > 1 && (
-          <button class="btn danger" onClick={() => setF(removePhase(f, phases - 1))}>
+          <button className="btn danger" onClick={() => setF(removePhase(f, phases - 1))}>
             {t('editor.change.undo')}
           </button>
         )}
       </div>
       {mode && (
-        <div class="change-form">
+        <div className="change-form">
           <label>
             {t(mode === 'price' ? 'editor.change.priceDate' : mode === 'switch' ? 'editor.change.switchDate' : 'editor.change.resumeDate')}
             <DatePicker
@@ -130,7 +130,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
           </label>
           <label>
             {mode === 'price' ? t('editor.change.newPrice', { currency: f.currency }) : t('editor.change.priceLabel')}
-            <input inputMode="decimal" value={price} autoFocus placeholder="0.00" onInput={(e) => setPrice((e.target as HTMLInputElement).value)} />
+            <input inputMode="decimal" value={price} autoFocus placeholder="0.00" onChange={(e) => setPrice((e.target as HTMLInputElement).value)} />
           </label>
           {mode !== 'price' && (
             <>
@@ -167,8 +167,8 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
                 />
               </label>
               {mode === 'switch' && (
-                <div class="change-keep">
-                  <div class="change-keep-row">
+                <div className="change-keep">
+                  <div className="change-keep-row">
                     <span>
                       {t('editor.overlap.keep')}
                       <small>{t('editor.overlap.keepHint')}</small>
@@ -176,7 +176,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
                     <Toggle checked={keep} onChange={toggleKeep} label={t('editor.overlap.keep')} />
                   </div>
                   {keep && (
-                    <label class="change-keep-date">
+                    <label className="change-keep-date">
                       {t('editor.overlap.keepUntil')}
                       <DatePicker value={keepUntil} min={addDays(date, 1)} onChange={(v) => v && setKeepUntil(v)} />
                     </label>
@@ -184,7 +184,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
                 </div>
               )}
               {mode === 'switch' && (
-                <div class="change-plan">
+                <div className="change-plan">
                   <span>
                     {t('editor.change.planned')}
                     <small>{t('editor.change.plannedHint')}</small>
@@ -194,11 +194,11 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
               )}
             </>
           )}
-          <div class="change-actions">
-            <button class="btn" onClick={() => setMode(null)}>
+          <div className="change-actions">
+            <button className="btn" onClick={() => setMode(null)}>
               {t('common.cancel')}
             </button>
-            <button class="btn primary" onClick={apply}>
+            <button className="btn primary" onClick={apply}>
               <Icon name="check" /> {t('common.apply')}
             </button>
           </div>

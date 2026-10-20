@@ -1,4 +1,4 @@
-import { useRef, useState } from 'preact/hooks';
+import { useRef, useState } from 'react';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../shared/billing.ts';
 import { cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -95,7 +95,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         <>
           {!isNew && (
             <button
-              class="btn danger"
+              className="btn danger"
               onClick={() =>
                 confirmDelete(t('editor.confirmDelete', { name: sub.name })) &&
                 run(
@@ -111,11 +111,11 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
               {t('common.delete')}
             </button>
           )}
-          <span class="grow" />
-          <button class="btn" onClick={close}>
+          <span className="grow" />
+          <button className="btn" onClick={close}>
             {t('common.cancel')}
           </button>
-          <button class="btn primary" disabled={!f.name.trim()} onClick={save}>
+          <button className="btn primary" disabled={!f.name.trim()} onClick={save}>
             {isNew ? t('common.add') : t('common.done')}
           </button>
         </>
@@ -138,7 +138,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
   const setMember = (i: number, p: Partial<ShareMember>) => setShare({ members: share!.members.map((m, j) => (j === i ? { ...m, ...p } : m)) });
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
-  const val = (e: Event) => (e.target as HTMLInputElement).value;
+  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const method = state.methods.find((m) => m.id === f.methodId);
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
   // 买断是一次性的：没有续费、状态、到期、提醒、优惠期这些概念，表单里不显示
@@ -157,15 +157,15 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
   const [newCat, setNewCat] = useState(false);
 
   return (
-    <div class="ed">
+    <div className="ed">
       {/* 一、是什么：图标 + 名称（输入时联想 App Store）+ 分类 */}
-      <div class="ed-id">
+      <div className="ed-id">
         <SubIcon sub={{ ...f, name: f.name || '?' }} size={64} />
-        <div class="ed-id-main">
+        <div className="ed-id-main">
           <NameField
             value={f.name}
             region={(f.region || method?.region || 'us').toLowerCase()}
-            onInput={(name) => up({ name })}
+            onChange={(name) => up({ name })}
             onPick={(h) =>
               up({
                 // 「Spotify: Music and Podcasts」只取冒号、破折号前的产品名
@@ -180,7 +180,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
             }
             onPickCatalog={(c) => up({ name: c.name, icon: c.icon, url: f.url || c.url, category: c.category })}
           />
-          <div class="ed-id-sub">
+          <div className="ed-id-sub">
             <Picker
               value={f.category}
               onChange={(c) => (c === '__new' ? setNewCat(true) : up({ category: c }))}
@@ -203,8 +203,8 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
       {/* 二、怎么付钱 */}
       <Group title={t('editor.group.billing')}>
         <Cell label={t('editor.field.amount')}>
-          <span class="ed-amount">
-            <input class="num" inputMode="decimal" value={f.price || ''} placeholder="0.00" onInput={(e) => up({ price: Number(val(e)) || 0 })} />
+          <span className="ed-amount">
+            <input className="num" inputMode="decimal" value={f.price || ''} placeholder="0.00" onChange={(e) => up({ price: Number(val(e)) || 0 })} />
             <CurrencySelect value={f.currency} onChange={(c) => up({ currency: c })} />
           </span>
         </Cell>
@@ -223,11 +223,11 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
         {cycleKey === 'custom' && (
           <Cell label={t('editor.unit.every')}>
             <input
-              class="num"
+              className="num"
               style={{ width: 60 }}
               inputMode="numeric"
               value={f.cycle.every}
-              onInput={(e) => up({ cycle: { unit: f.cycle.unit === 'lifetime' ? 'month' : f.cycle.unit, every: Math.max(1, Number(val(e)) || 1) } })}
+              onChange={(e) => up({ cycle: { unit: f.cycle.unit === 'lifetime' ? 'month' : f.cycle.unit, every: Math.max(1, Number(val(e)) || 1) } })}
             />
             <Picker
               value={f.cycle.unit}
@@ -275,7 +275,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
       {/* 三、现在的状态 */}
       {!lt && (
         <Group title={t('editor.group.status')}>
-          <div class="cell">
+          <div className="cell">
             <Seg value={f.status} onChange={(v) => up({ status: v })} options={STATUS.map((s) => [s, t(`editor.status.${s}`)] as [SubStatus, string])} />
           </div>
           {f.status === 'trial' && (
@@ -302,7 +302,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                 : undefined
         }
       >
-        <div class="cell">
+        <div className="cell">
           <Seg
             value={f.proxy ? 'proxy' : share ? share.role : 'none'}
             onChange={(v) =>
@@ -334,7 +334,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               </Cell>
             )}
             <Cell label={t('editor.proxy.for')}>
-              <input value={f.proxy.forName} placeholder={t('editor.proxy.forPlaceholder')} onInput={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })} />
+              <input value={f.proxy.forName} placeholder={t('editor.proxy.forPlaceholder')} onChange={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })} />
             </Cell>
             <Cell label={t('editor.proxy.contact')}>
               <ContactField
@@ -348,7 +348,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               <input
                 value={f.proxy.note ?? ''}
                 placeholder={t('editor.proxy.notePlaceholder')}
-                onInput={(e) => up({ proxy: { ...f.proxy!, note: val(e) || undefined } })}
+                onChange={(e) => up({ proxy: { ...f.proxy!, note: val(e) || undefined } })}
               />
             </Cell>
           </>
@@ -358,30 +358,30 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
             <input
               value={share.ownerName ?? ''}
               placeholder={t('editor.share.ownerPlaceholder')}
-              onInput={(e) => setShare({ ownerName: val(e) || undefined })}
+              onChange={(e) => setShare({ ownerName: val(e) || undefined })}
             />
           </Cell>
         )}
         {share?.role === 'owner' && (
           <>
             <Cell label={t('editor.share.seats')}>
-              <input class="num" inputMode="numeric" value={share.seats} onInput={(e) => setShare({ seats: Math.max(1, Number(val(e)) || 1) })} />
+              <input className="num" inputMode="numeric" value={share.seats} onChange={(e) => setShare({ seats: Math.max(1, Number(val(e)) || 1) })} />
             </Cell>
             {share.members.map((m, i) => (
-              <div key={m.id} class="member-edit">
-                <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onInput={(e) => setMember(i, { name: val(e) })} />
+              <div key={m.id} className="member-edit">
+                <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
                 <input
-                  class="num"
+                  className="num"
                   inputMode="decimal"
                   value={m.share}
                   title={t('editor.share.perPeriod')}
-                  onInput={(e) => setMember(i, { share: Number(val(e)) || 0 })}
+                  onChange={(e) => setMember(i, { share: Number(val(e)) || 0 })}
                 />
-                <span class="wide">
+                <span className="wide">
                   <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
                 </span>
                 <button
-                  class="icon-btn"
+                  className="icon-btn"
                   style={{ width: 26, height: 26 }}
                   aria-label={t('editor.share.remove')}
                   onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}
@@ -392,7 +392,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
             ))}
             {share.members.length < share.seats - 1 && (
               <button
-                class="cell tap"
+                className="cell tap"
                 style={{ color: 'var(--accent)' }}
                 onClick={() => setShare({ members: [...share.members, { id: uid(), name: '', share: perHead }] })}
               >
@@ -404,7 +404,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
       </Group>
 
       {/* 五、不常用的：折叠起来，标题上列出已设置的项 */}
-      <button type="button" class={`ed-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more}>
+      <button type="button" className={`ed-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more}>
         <span>{t('editor.more.title')}</span>
         <small>{extras.length ? extras.join(' · ') : t(lt ? 'editor.more.summaryLt' : 'editor.more.summary')}</small>
         <Icon name="down" size={14} />
@@ -416,7 +416,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               <Group title={t('editor.more.intro')}>
                 <Cell
                   label={
-                    <span class="row" style={{ gap: 6 }}>
+                    <span className="row" style={{ gap: 6 }}>
                       <Icon name="leaf" /> {t('editor.intro.has')}
                     </span>
                   }
@@ -436,10 +436,10 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                   <>
                     <Cell label={t('editor.intro.price')}>
                       <input
-                        class="num"
+                        className="num"
                         inputMode="decimal"
                         value={f.intro.price}
-                        onInput={(e) => up({ intro: { ...f.intro!, price: Number(val(e)) || 0 } })}
+                        onChange={(e) => up({ intro: { ...f.intro!, price: Number(val(e)) || 0 } })}
                       />
                     </Cell>
                     <Cell label={t('editor.intro.until')}>
@@ -451,7 +451,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               <Group title={t('editor.more.bonus')} foot={f.bonus ? t('editor.bonus.resume', { date: cnDateFull(f.bonus.until) }) : undefined}>
                 <Cell
                   label={
-                    <span class="row" style={{ gap: 6 }}>
+                    <span className="row" style={{ gap: 6 }}>
                       <Icon name="receipt" /> {t('editor.bonus.has')}
                     </span>
                   }
@@ -473,7 +473,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                     <Cell label={t('editor.bonus.until')}>
                       <DatePicker value={f.bonus.until} onChange={(v) => up({ bonus: { ...f.bonus!, until: v ?? today } })} />
                     </Cell>
-                    <div class="cell bonus-quick">
+                    <div className="cell bonus-quick">
                       {(
                         [
                           ['d7', (d: string) => addDays(d, 7)],
@@ -486,7 +486,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                         <button
                           key={l}
                           type="button"
-                          class={`chip-btn ${f.bonus!.until === fn(f.bonus!.from) ? 'on' : ''}`}
+                          className={`chip-btn ${f.bonus!.until === fn(f.bonus!.from) ? 'on' : ''}`}
                           onClick={() => up({ bonus: { ...f.bonus!, until: fn(f.bonus!.from) } })}
                         >
                           {t(`editor.bonus.quick.${l}`)}
@@ -499,7 +499,7 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               <Group title={t('editor.more.remind')}>
                 <Cell
                   label={
-                    <span class="row" style={{ gap: 6 }}>
+                    <span className="row" style={{ gap: 6 }}>
                       <Icon name="bell" /> {t('editor.remind.days')}
                     </span>
                   }
@@ -521,13 +521,13 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
           )}
           <Group title={t('editor.group.links')}>
             <Cell label={t('editor.field.url')}>
-              <input value={f.url ?? ''} placeholder="https://" onInput={(e) => up({ url: val(e) || undefined })} />
+              <input value={f.url ?? ''} placeholder="https://" onChange={(e) => up({ url: val(e) || undefined })} />
             </Cell>
             <Cell label={t('editor.field.manageUrl')}>
-              <input value={f.manageUrl ?? ''} placeholder={t('editor.field.optional')} onInput={(e) => up({ manageUrl: val(e) || undefined })} />
+              <input value={f.manageUrl ?? ''} placeholder={t('editor.field.optional')} onChange={(e) => up({ manageUrl: val(e) || undefined })} />
             </Cell>
             <Cell label={t('editor.field.icon')}>
-              <input value={f.icon ?? ''} placeholder={t('editor.field.auto')} onInput={(e) => up({ icon: val(e) || undefined })} />
+              <input value={f.icon ?? ''} placeholder={t('editor.field.auto')} onChange={(e) => up({ icon: val(e) || undefined })} />
             </Cell>
             {isDomainCat(f.category) && (
               <Cell label={t('editor.field.showDomain')} sub={t(f.showOnPublic ? 'editor.field.showDomainOn' : 'editor.field.showDomainOff')}>
@@ -540,15 +540,15 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
               <input
                 value={f.tags.join(' ')}
                 placeholder={t('editor.field.tagsPlaceholder')}
-                onInput={(e) => up({ tags: val(e).split(/\s+/).filter(Boolean) })}
+                onChange={(e) => up({ tags: val(e).split(/\s+/).filter(Boolean) })}
               />
             </Cell>
-            <div class="cell">
-              <span class="cell-r">
+            <div className="cell">
+              <span className="cell-r">
                 <textarea
                   value={f.notes ?? ''}
                   placeholder={t('editor.field.notesPlaceholder')}
-                  onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })}
+                  onChange={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })}
                 />
               </span>
             </div>
@@ -603,13 +603,13 @@ const GENRE_CAT: Record<string, string> = {
 function NameField({
   value,
   region,
-  onInput,
+  onChange: onInput,
   onPick,
   onPickCatalog,
 }: {
   value: string;
   region: string;
-  onInput: (v: string) => void;
+  onChange: (v: string) => void;
   onPick: (h: AppHit) => void;
   onPickCatalog: (c: CatalogItem) => void;
 }) {
@@ -646,12 +646,12 @@ function NameField({
     setHits([]);
   };
   return (
-    <div class="ed-name">
+    <div className="ed-name">
       <input
         value={value}
         autoFocus={!value}
         placeholder={t('editor.name.placeholder')}
-        onInput={(e) => {
+        onChange={(e) => {
           const v = (e.target as HTMLInputElement).value;
           onInput(v);
           search(v);
@@ -671,24 +671,24 @@ function NameField({
         }}
       />
       {open && all.length > 0 && (
-        <div class="ed-suggest" role="listbox">
+        <div className="ed-suggest" role="listbox">
           {all.map((x, i) => (
             <div key={x.c ? `c-${x.c.name}` : `h-${x.h!.url}`}>
-              {i === 0 && x.c && <div class="ed-suggest-h">{t('editor.name.catalog')}</div>}
+              {i === 0 && x.c && <div className="ed-suggest-h">{t('editor.name.catalog')}</div>}
               {x.h && (i === 0 || all[i - 1].c) && (
-                <div class="ed-suggest-h">
-                  App Store · <img class="pk-flag" src={`/flags/${x.h.country}.png`} alt="" />
+                <div className="ed-suggest-h">
+                  App Store · <img className="pk-flag" src={`/flags/${x.h.country}.png`} alt="" />
                 </div>
               )}
               <button
                 type="button"
-                class={`hit ${i === hi ? 'hi' : ''}`}
+                className={`hit ${i === hi ? 'hi' : ''}`}
                 onMouseDown={(e) => e.preventDefault()}
                 onMouseMove={() => setHi(i)}
                 onClick={() => pick(x)}
               >
                 {x.c ? (
-                  <span class="ed-cat-ico">
+                  <span className="ed-cat-ico">
                     <img src={x.c.icon} alt="" />
                   </span>
                 ) : (

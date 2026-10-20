@@ -1,6 +1,6 @@
-import type { ComponentChildren } from 'preact';
-import { createPortal } from 'preact/compat';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import type { ReactNode as ComponentChildren } from 'react';
+import { createPortal } from 'react-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { CURRENCIES } from '../../shared/format.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import { ccyFlag, ccyName, FLAGS } from '../display.ts';
@@ -104,7 +104,7 @@ export function Picker<T extends string | number>({
     setQ('');
     btn.current?.focus();
   };
-  const onKey = (e: KeyboardEvent) => {
+  const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') setHi((i) => Math.min(shown.length - 1, i + 1));
     else if (e.key === 'ArrowUp') setHi((i) => Math.max(0, i - 1));
     else if (e.key === 'Enter' && shown[hi]) pick(shown[hi].value);
@@ -121,7 +121,7 @@ export function Picker<T extends string | number>({
       <button
         type="button"
         ref={btn}
-        class={`pk-btn ${variant} ${open ? 'open' : ''}`}
+        className={`pk-btn ${variant} ${open ? 'open' : ''}`}
         onClick={() => setOpen(!open)}
         onKeyDown={(e) => !open && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setOpen(true))}
         aria-haspopup="listbox"
@@ -130,7 +130,7 @@ export function Picker<T extends string | number>({
       >
         {display ?? (
           <>
-            {cur?.icon && <span class="pk-ico">{cur.icon}</span>}
+            {cur?.icon && <span className="pk-ico">{cur.icon}</span>}
             <span>{cur?.label ?? t('picker.choose')}</span>
           </>
         )}
@@ -140,40 +140,40 @@ export function Picker<T extends string | number>({
         pos &&
         createPortal(
           <>
-            {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
+            {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
             <div
               ref={pop}
-              class={`dp-pop cp-pop pk-pop ${pos.mobile ? 'mobile' : ''}`}
+              className={`dp-pop cp-pop pk-pop ${pos.mobile ? 'mobile' : ''}`}
               style={pos.mobile ? undefined : { top: pos.top, left: pos.left, height: pos.h }}
               onKeyDown={onKey}
             >
               {searchable && (
-                <label class="cp-search">
+                <label className="cp-search">
                   <Icon name="search" />
-                  <input ref={input} value={q} placeholder={t('common.search')} onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
+                  <input ref={input} value={q} placeholder={t('common.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
                 </label>
               )}
-              <div class="cp-list" ref={list} role="listbox" aria-label={ariaLabel} tabIndex={searchable ? undefined : -1} autoFocus={!searchable}>
+              <div className="cp-list" ref={list} role="listbox" aria-label={ariaLabel} tabIndex={searchable ? undefined : -1} autoFocus={!searchable}>
                 {shown.map((o, i) => (
                   <div key={String(o.value)}>
-                    {o.group && o.group !== shown[i - 1]?.group && <div class="cp-head">{o.group}</div>}
+                    {o.group && o.group !== shown[i - 1]?.group && <div className="cp-head">{o.group}</div>}
                     <button
                       type="button"
                       data-i={i}
                       role="option"
                       aria-selected={o.value === value}
-                      class={`cp-opt ${o.value === value ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
+                      className={`cp-opt ${o.value === value ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
                       onMouseMove={() => setHi(i)}
                       onClick={() => pick(o.value)}
                     >
-                      {o.icon !== undefined && <span class="pk-ico">{o.icon}</span>}
-                      <span class="cp-name">{o.label}</span>
-                      {o.hint && <span class="cp-code">{o.hint}</span>}
+                      {o.icon !== undefined && <span className="pk-ico">{o.icon}</span>}
+                      <span className="cp-name">{o.label}</span>
+                      {o.hint && <span className="cp-code">{o.hint}</span>}
                       {o.value === value && <Icon name="check" />}
                     </button>
                   </div>
                 ))}
-                {!shown.length && <div class="cp-empty">{t('picker.noMatch')}</div>}
+                {!shown.length && <div className="cp-empty">{t('picker.noMatch')}</div>}
               </div>
             </div>
           </>,
@@ -186,7 +186,7 @@ export function Picker<T extends string | number>({
 /** 国旗小图；没有对应国旗时用货币代码 */
 export function CcyFlag({ code }: { code: string }) {
   const src = ccyFlag(code);
-  return <span class="cp-flag">{src ? <img src={src} alt="" loading="lazy" /> : <b>{code.slice(0, 2)}</b>}</span>;
+  return <span className="cp-flag">{src ? <img src={src} alt="" loading="lazy" /> : <b>{code.slice(0, 2)}</b>}</span>;
 }
 
 /** 货币选择：国旗 + 中文名 + 代码，人民币、美元置顶 */
@@ -268,7 +268,7 @@ export function RegionSelect({
       display={
         v ? (
           <>
-            <span class="cp-flag">
+            <span className="cp-flag">
               <img src={`/flags/${v}.png`} alt="" />
             </span>
             <span>{name(v)}</span>
@@ -288,7 +288,7 @@ export function RegionSelect({
 
 function CcyFlagImg({ cc }: { cc: string }) {
   return (
-    <span class="cp-flag">
+    <span className="cp-flag">
       <img src={`/flags/${cc}.png`} alt="" loading="lazy" />
     </span>
   );

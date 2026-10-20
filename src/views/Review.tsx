@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useMemo, useState } from 'react';
 import { addDays, totals } from '../../shared/billing.ts';
 import { money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -125,7 +125,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
 /** 两端对齐的一行：左边名称、右边金额，中间用空格撑开（小票打印机的排法） */
 function Line({ l, r, b }: { l: string; r: string; b?: boolean }) {
   return (
-    <div class={`rp-line ${b ? 'b' : ''}`}>
+    <div className={`rp-line ${b ? 'b' : ''}`}>
       <span>{l}</span>
       <span>{r}</span>
     </div>
@@ -141,36 +141,36 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
   const amt = (v: number) => (hide ? pct(v) : m(v));
   const no = `${year}${String(r.charges).padStart(4, '0')}`;
   return (
-    <div class="rp">
-      <div class="rp-c rp-shop">{t('review.receipt.shop', { whose }).trim()}</div>
-      <div class="rp-c">SUBSCRIPTION STORE</div>
-      <div class="rp-c rp-small">{ongoing ? t('review.receipt.asOf', { date: today }) : t('review.receipt.fullYear', { year })}</div>
-      <div class="rp-rule">{'='.repeat(60)}</div>
+    <div className="rp">
+      <div className="rp-c rp-shop">{t('review.receipt.shop', { whose }).trim()}</div>
+      <div className="rp-c">SUBSCRIPTION STORE</div>
+      <div className="rp-c rp-small">{ongoing ? t('review.receipt.asOf', { date: today }) : t('review.receipt.fullYear', { year })}</div>
+      <div className="rp-rule">{'='.repeat(60)}</div>
       <Line l={t('review.receipt.no', { no })} r={t('review.receipt.register')} />
       <Line l={t('review.receipt.cashier', { name })} r={ongoing ? today : `${year}-12-31`} />
-      <div class="rp-rule">{'-'.repeat(60)}</div>
+      <div className="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.item')} r={hide ? t('review.receipt.share') : t('review.receipt.amount')} />
-      <div class="rp-rule">{'-'.repeat(60)}</div>
+      <div className="rp-rule">{'-'.repeat(60)}</div>
       {items.map((x) => (
         <Line key={x.sub.id} l={x.sub.name} r={amt(x.sum)} />
       ))}
       {rest.length > 0 && <Line l={t('review.receipt.rest', { count: rest.length })} r={amt(restSum)} />}
-      <div class="rp-rule">{'-'.repeat(60)}</div>
+      <div className="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.count', { items: r.items.length, charges: r.charges })} r="" />
       {!hide && <Line l={t('review.receipt.total')} r={m(r.total)} b />}
-      <div class="rp-rule">{'-'.repeat(60)}</div>
+      <div className="rp-rule">{'-'.repeat(60)}</div>
       {byMethod.slice(0, 5).map((x) => (
         <Line key={x.name} l={x.name} r={amt(x.sum)} />
       ))}
-      <div class="rp-rule">{'='.repeat(60)}</div>
-      <div class="rp-bars">
+      <div className="rp-rule">{'='.repeat(60)}</div>
+      <div className="rp-bars">
         {bars.map((w, i) => (
           <i key={i} style={{ width: w, marginRight: i % 3 === 0 ? 2 : 1 }} />
         ))}
       </div>
-      <div class="rp-c rp-small">{no}</div>
-      <div class="rp-tip">* {tip} *</div>
-      <div class="rp-c rp-small">{location.host}</div>
+      <div className="rp-c rp-small">{no}</div>
+      <div className="rp-tip">* {tip} *</div>
+      <div className="rp-c rp-small">{location.host}</div>
     </div>
   );
 }
@@ -181,25 +181,25 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
   // 第一名占 3×3，接下来四个占 2×2，其余 1×1；dense 排布让格子自动补齐
   const span = (i: number) => (i === 0 ? 3 : i < 5 ? 2 : 1);
   return (
-    <div class="ps" style={{ '--g1': glow[0] ?? '#6366f1', '--g2': glow[1] ?? '#ec4899', '--g3': glow[2] ?? '#f59e0b' } as Record<string, string>}>
-      <div class="ps-year">{year}</div>
-      <div class="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
-      <div class="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</div>
-      <div class="ps-line">
+    <div className="ps" style={{ '--g1': glow[0] ?? '#6366f1', '--g2': glow[1] ?? '#ec4899', '--g3': glow[2] ?? '#f59e0b' } as Record<string, string>}>
+      <div className="ps-year">{year}</div>
+      <div className="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
+      <div className="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</div>
+      <div className="ps-line">
         {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, {
           charges: t('review.n.charges', { count: r.charges }),
           currencies: t('review.n.currencies', { count: r.currencies }),
           subs: t('review.n.subs', { count: r.items.length }),
         })}
       </div>
-      <div class="ps-wall">
+      <div className="ps-wall">
         {r.items.map((x, i) => (
-          <span key={x.sub.id} class={`s${span(i)}`} title={x.sub.name}>
+          <span key={x.sub.id} className={`s${span(i)}`} title={x.sub.name}>
             <SubIcon sub={x.sub} size={span(i) === 3 ? 96 : span(i) === 2 ? 60 : 30} proxied />
           </span>
         ))}
       </div>
-      <div class="ps-top">
+      <div className="ps-top">
         <small>{t('review.topSpend')}</small>
         <b>{r.items[0]?.sub.name ?? '—'}</b>
         <span>
@@ -210,7 +210,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
             : ''}
         </span>
       </div>
-      <div class="ps-foot">
+      <div className="ps-foot">
         <span>
           {hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(r.perDay) })}
         </span>
@@ -224,39 +224,39 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
 function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
   const top = r.top[0]?.sum ?? 1;
   return (
-    <div class="review">
-      <div class="rv-head">
+    <div className="review">
+      <div className="rv-head">
         <span>{year}</span>
         <span>{t('review.card.head', { whose }).trim()}</span>
       </div>
-      <div class="rv-big">
+      <div className="rv-big">
         <small>{t(`review.card.intro.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`)}</small>
-        <span class="rv-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</span>
+        <span className="rv-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</span>
         <span>
           {hide
             ? `${t('review.n.charges', { count: r.charges })} · ${t('review.n.currencyKinds', { count: r.currencies })}`
             : `${t('review.n.charges', { count: r.charges })} · ${t('review.card.perDay', { amount: m(r.perDay) })}`}
         </span>
       </div>
-      <div class="rv-sec">
-        <div class="rv-label">{t('review.topSpend')}</div>
+      <div className="rv-sec">
+        <div className="rv-label">{t('review.topSpend')}</div>
         {r.top.map((x, i) => (
-          <div key={x.sub.id} class="rv-bar">
-            <span class="rv-rank">{i + 1}</span>
+          <div key={x.sub.id} className="rv-bar">
+            <span className="rv-rank">{i + 1}</span>
             <SubIcon sub={x.sub} size={26} proxied />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div class="rv-name">
+              <div className="rv-name">
                 <span>{x.sub.name}</span>
                 <b>{hide ? pct(x.sum) : m(x.sum)}</b>
               </div>
-              <div class="rv-track">
+              <div className="rv-track">
                 <i style={{ width: `${(x.sum / top) * 100}%` }} />
               </div>
             </div>
           </div>
         ))}
       </div>
-      <div class="rv-grid">
+      <div className="rv-grid">
         {r.longest && (
           <div>
             <small>{t('review.card.longest')}</small>
@@ -295,7 +295,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
           <span>{hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(mrr) })}</span>
         </div>
       </div>
-      <div class="rv-foot">{location.host}</div>
+      <div className="rv-foot">{location.host}</div>
     </div>
   );
 }
@@ -310,24 +310,24 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
   ) as Array<{ x: number; y: number; r: number; i: number; h: number }>;
   const W = 312;
   return (
-    <div class="st">
-      <div class="st-head">
+    <div className="st">
+      <div className="st-head">
         <span>{t('review.stars.head', { year, whose }).trim()}</span>
         <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</b>
       </div>
-      <div class="st-map" style={{ height: (bubbles[0]?.h ?? 1) * W }}>
+      <div className="st-map" style={{ height: (bubbles[0]?.h ?? 1) * W }}>
         {bubbles.map((b) => {
           const x = items[b.i];
           const d = b.r * 2 * W;
           return (
-            <span key={x.sub.id} class="st-b" style={{ left: (b.x - b.r) * W, top: (b.y - b.r) * W, width: d, height: d }}>
+            <span key={x.sub.id} className="st-b" style={{ left: (b.x - b.r) * W, top: (b.y - b.r) * W, width: d, height: d }}>
               <SubIcon sub={x.sub} size={Math.max(12, Math.round(d * 0.48))} proxied />
               {d > 70 && <small>{hide ? pct(x.sum) : m(x.sum)}</small>}
             </span>
           );
         })}
       </div>
-      <div class="st-foot">
+      <div className="st-foot">
         <span>{t('review.stars.foot')}</span>
         <span>{location.host}</span>
       </div>

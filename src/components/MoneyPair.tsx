@@ -2,7 +2,7 @@
 // - 选了本位币：大字是折算后的本位币，小字是原币（准确数，作参考）
 // - 选了原币：大字是原币，小字是折算成本位币的约数
 // - 原币就是本位币：只显示一个数
-import type { ComponentChildren } from 'preact';
+import type { ReactNode as ComponentChildren } from 'react';
 import { money } from '../../shared/format.ts';
 import { convert } from '../../shared/billing.ts';
 import { toBaseAt } from '../../shared/fx.ts';

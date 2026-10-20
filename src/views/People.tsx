@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { uid } from '../../shared/billing.ts';
 import { cnDateAuto, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -16,7 +16,11 @@ import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 /** 头像：称呼的第一个字 + 这个人的颜色 */
 export function PersonAvatar({ p, size = 36 }: { p: Pick<Person, 'name' | 'color' | 'id'>; size?: number }) {
   return (
-    <span class={`pp-ava c-${p.color ?? colorFor(p.id || p.name)}`} style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }} aria-hidden="true">
+    <span
+      className={`pp-ava c-${p.color ?? colorFor(p.id || p.name)}`}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }}
+      aria-hidden="true"
+    >
       {[...(p.name.trim() || '?')][0].toUpperCase()}
     </span>
   );
@@ -85,7 +89,7 @@ function ContactLink({ p }: { p: Person }) {
   if (!url) return null;
   const label = t('family.contact.open', { via: viaLabel(p.contactVia ?? '') });
   return (
-    <a class="icon-btn" href={url} target="_blank" rel="noreferrer" aria-label={label} title={label} onClick={(e) => e.stopPropagation()}>
+    <a className="icon-btn" href={url} target="_blank" rel="noreferrer" aria-label={label} title={label} onClick={(e) => e.stopPropagation()}>
       <Icon name="link" />
     </a>
   );
@@ -118,37 +122,37 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
       <Toolbar title={t('people.title')}>
         <FamilyTabs tab="people" />
       </Toolbar>
-      <div class="page fade-in stack">
-        <div class="grid g-3">
-          <div class="card stat">
-            <div class="stat-label">{t('people.stat.owed')}</div>
-            <div class="stat-value" style={{ color: owed > 0 ? 'var(--orange)' : undefined }}>
+      <div className="page fade-in stack">
+        <div className="grid g-3">
+          <div className="card stat">
+            <div className="stat-label">{t('people.stat.owed')}</div>
+            <div className="stat-value" style={{ color: owed > 0 ? 'var(--orange)' : undefined }}>
               <Amount value={owed} ccy={base} />
             </div>
-            <div class="stat-sub">{owing.length ? t('people.stat.owedSub', { count: owing.length }) : t('people.stat.allSettled')}</div>
+            <div className="stat-sub">{owing.length ? t('people.stat.owedSub', { count: owing.length }) : t('people.stat.allSettled')}</div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">{t('people.stat.received')}</div>
-            <div class="stat-value">
+          <div className="card stat">
+            <div className="stat-label">{t('people.stat.received')}</div>
+            <div className="stat-value">
               <Amount value={received} ccy={base} />
             </div>
-            <div class="stat-sub">{t('people.stat.receivedSub')}</div>
+            <div className="stat-sub">{t('people.stat.receivedSub')}</div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">{t('people.stat.count')}</div>
-            <div class="stat-value">
-              <span class="amt">{book.length}</span>
+          <div className="card stat">
+            <div className="stat-label">{t('people.stat.count')}</div>
+            <div className="stat-value">
+              <span className="amt">{book.length}</span>
             </div>
-            <div class="stat-sub">{t('people.stat.countSub', { share: inShare, proxy: inProxy })}</div>
+            <div className="stat-sub">{t('people.stat.countSub', { share: inShare, proxy: inProxy })}</div>
           </div>
         </div>
         {book.length === 0 ? (
-          <div class="card empty">
+          <div className="card empty">
             <b>{t('people.empty.title')}</b>
             {t('people.empty.body')}
           </div>
         ) : (
-          <div class="grid g-2">
+          <div className="grid g-2">
             {book.map((l) => (
               <PersonCard key={l.person.id || l.person.name} l={l} base={base} today={today} onClick={() => setOpen(l.person.id || l.person.name)} />
             ))}
@@ -166,38 +170,38 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
   const live = l.items.filter((i) => i.active);
   return (
     <div
-      class="card pp-card"
+      className="card pp-card"
       role="button"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}
     >
-      <div class="pp-top">
+      <div className="pp-top">
         <PersonAvatar p={p} size={44} />
-        <div class="pp-id">
-          <div class="ph-name">{p.name}</div>
-          <div class="muted ph-meta">{contact || p.note || t('people.card.noContact')}</div>
+        <div className="pp-id">
+          <div className="ph-name">{p.name}</div>
+          <div className="muted ph-meta">{contact || p.note || t('people.card.noContact')}</div>
         </div>
         <ContactLink p={p} />
       </div>
-      <div class="ph-chips">
+      <div className="ph-chips">
         {l.items.length === 0 && (
-          <span class="muted" style={{ fontSize: 13 }}>
+          <span className="muted" style={{ fontSize: 13 }}>
             {t('people.card.nothing')}
           </span>
         )}
         {l.items.map((i) => (
-          <span key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} class={`pp-chip ${i.active ? '' : 'off'}`} title={itemLine(i, today)}>
+          <span key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} className={`pp-chip ${i.active ? '' : 'off'}`} title={itemLine(i, today)}>
             <SubIcon sub={i.sub} size={16} />
             {i.sub.name}
-            {i.periodsOwed > 0 && <i class="dot" />}
+            {i.periodsOwed > 0 && <i className="dot" />}
           </span>
         ))}
       </div>
-      <div class="proxy-facts">
+      <div className="proxy-facts">
         <div>
           <small>{l.periodsOwed ? t('people.item.owedPeriods', { count: l.periodsOwed }) : t('people.sheet.owed')}</small>
-          <b class={l.owed > 0.005 ? 'warn' : 'done'}>{l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}</b>
+          <b className={l.owed > 0.005 ? 'warn' : 'done'}>{l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}</b>
         </div>
         <div>
           <small>{t('people.sheet.received')}</small>
@@ -205,10 +209,12 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
         </div>
         <div>
           <small>{t('people.sheet.last')}</small>
-          <b class={l.lastPaid ? '' : 'muted'}>{l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}</b>
+          <b className={l.lastPaid ? '' : 'muted'}>{l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}</b>
         </div>
       </div>
-      {live.length !== l.items.length && live.length > 0 && <div class="muted pp-foot">{t('people.card.past', { count: l.items.length - live.length })}</div>}
+      {live.length !== l.items.length && live.length > 0 && (
+        <div className="muted pp-foot">{t('people.card.past', { count: l.items.length - live.length })}</div>
+      )}
     </div>
   );
 }
@@ -242,7 +248,7 @@ function PersonSheet({
   const [ledger, setLedger] = useState<Subscription | null>(null);
   const [entry, setEntry] = useState<{ s: Subscription; row: ReturnType<typeof proxyRows>[number] } | null>(null);
   const ro = !!state.readonly;
-  const val = (e: Event) => (e.target as HTMLInputElement).value;
+  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const live = (s: Subscription) => state.subscriptions.find((x) => x.id === s.id) ?? s;
 
   const save = () =>
@@ -279,7 +285,7 @@ function PersonSheet({
           <>
             {refs === 0 && (
               <button
-                class="btn plain"
+                className="btn plain"
                 style={{ color: 'var(--red)' }}
                 onClick={() =>
                   confirmDelete(t('people.sheet.confirmDelete', { name: stored.name })) &&
@@ -292,31 +298,31 @@ function PersonSheet({
                 {t('family.member.delete')}
               </button>
             )}
-            <span class="grow" />
-            <button class="btn" onClick={onClose}>
+            <span className="grow" />
+            <button className="btn" onClick={onClose}>
               {t('family.member.cancel')}
             </button>
-            <button class="btn primary" disabled={!dirty || !f.name.trim()} onClick={save}>
+            <button className="btn primary" disabled={!dirty || !f.name.trim()} onClick={save}>
               {t('family.member.save')}
             </button>
           </>
         ) : undefined
       }
     >
-      <div class="stack">
-        <div class="ld-head">
+      <div className="stack">
+        <div className="ld-head">
           <PersonAvatar p={f} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div class="ph-name">{f.name || l.person.name}</div>
-            <div class="muted ph-meta">{contactText(f) || t('people.card.noContact')}</div>
+            <div className="ph-name">{f.name || l.person.name}</div>
+            <div className="muted ph-meta">{contactText(f) || t('people.card.noContact')}</div>
           </div>
           <ContactLink p={f} />
         </div>
 
-        <div class="proxy-facts">
+        <div className="proxy-facts">
           <div>
             <small>{t('people.sheet.owed')}</small>
-            <b class={l.owed > 0.005 ? 'warn' : 'done'}>{l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}</b>
+            <b className={l.owed > 0.005 ? 'warn' : 'done'}>{l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}</b>
           </div>
           <div>
             <small>{t('people.sheet.received')}</small>
@@ -330,16 +336,16 @@ function PersonSheet({
 
         <Group title={t('people.sheet.in', { count: l.items.length })} foot={l.items.length ? undefined : t('people.sheet.inEmpty')}>
           {l.items.map((i) => (
-            <div key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} class={`cell pp-item ${i.active ? '' : 'off'}`}>
-              <button class="pp-item-l" disabled={ro} onClick={() => tap(i)}>
+            <div key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} className={`cell pp-item ${i.active ? '' : 'off'}`}>
+              <button className="pp-item-l" disabled={ro} onClick={() => tap(i)}>
                 <SubIcon sub={i.sub} size={30} />
                 <span>
                   {i.sub.name}
                   <small>{itemLine(i, today)}</small>
                 </span>
               </button>
-              <span class="cell-r">
-                <span class="pp-amt">
+              <span className="cell-r">
+                <span className="pp-amt">
                   {i.owed > 0.005 ? (
                     <b style={{ color: 'var(--orange)' }}>{money(i.owed, base)}</b>
                   ) : (
@@ -348,7 +354,7 @@ function PersonSheet({
                   <small>{t('people.item.received', { amount: money(i.received, base, { compact: true }) })}</small>
                 </span>
                 {!ro && !i.member?.exempt && (i.active || i.periodsOwed > 0) && (
-                  <button class={`btn ${i.periodsOwed > 0 ? 'tinted' : ''} pp-collect`} onClick={() => record(i)}>
+                  <button className={`btn ${i.periodsOwed > 0 ? 'tinted' : ''} pp-collect`} onClick={() => record(i)}>
                     <Icon name="check" /> {t('family.pool.collect')}
                   </button>
                 )}
@@ -360,7 +366,7 @@ function PersonSheet({
         {stored && (
           <Group title={t('people.sheet.profile')} foot={refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : undefined}>
             <Cell label={t('family.member.name')}>
-              <input value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onInput={(e) => up({ name: val(e) })} />
+              <input value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
             </Cell>
             <Cell label={t('family.member.contact')}>
               <ContactField
@@ -371,10 +377,10 @@ function PersonSheet({
               />
             </Cell>
             <Cell label={t('family.member.note')}>
-              <input value={f.note ?? ''} disabled={ro} placeholder={t('people.sheet.notePh')} onInput={(e) => up({ note: val(e) || undefined })} />
+              <input value={f.note ?? ''} disabled={ro} placeholder={t('people.sheet.notePh')} onChange={(e) => up({ note: val(e) || undefined })} />
             </Cell>
             <Cell label={t('people.sheet.color')}>
-              <span class="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
+              <span className="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
                 {PERSON_COLORS.map((c, i) => (
                   <button
                     key={c}
@@ -382,7 +388,7 @@ function PersonSheet({
                     role="radio"
                     aria-checked={(f.color ?? colorFor(f.id)) === c}
                     aria-label={`${t('people.sheet.color')} ${i + 1}`}
-                    class={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`}
+                    className={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`}
                     onClick={() => up({ color: c })}
                   />
                 ))}

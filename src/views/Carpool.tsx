@@ -1,5 +1,5 @@
 import { cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { billLabel, cnDate, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
@@ -49,46 +49,46 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   return (
     <>
       <Toolbar title={t('family.pool.title')}>{!ro && <FamilyTabs tab="plans" />}</Toolbar>
-      <div class="page fade-in stack">
-        <div class="grid g-3">
-          <div class="card stat">
-            <div class="stat-label">{yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}</div>
-            <div class="stat-value" style={{ color: yearNet < 0 ? 'var(--green)' : undefined }}>
+      <div className="page fade-in stack">
+        <div className="grid g-3">
+          <div className="card stat">
+            <div className="stat-label">{yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}</div>
+            <div className="stat-value" style={{ color: yearNet < 0 ? 'var(--green)' : undefined }}>
               <Amount value={Math.abs(yearNet)} ccy={base} />
             </div>
-            <div class="stat-sub">{t('family.pool.yearIncome', { amount: money(yearIncome, base, { compact: true }) })}</div>
+            <div className="stat-sub">{t('family.pool.yearIncome', { amount: money(yearIncome, base, { compact: true }) })}</div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">{t('family.pool.owed')}</div>
-            <div class="stat-value" style={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}>
+          <div className="card stat">
+            <div className="stat-label">{t('family.pool.owed')}</div>
+            <div className="stat-value" style={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}>
               <Amount value={owedSum} ccy={base} />
             </div>
-            <div class="stat-sub">{t('family.pool.owedSub', { count: owedAll.length })}</div>
+            <div className="stat-sub">{t('family.pool.owedSub', { count: owedAll.length })}</div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">{t('family.pool.count')}</div>
-            <div class="stat-value">
-              <span class="amt">
+          <div className="card stat">
+            <div className="stat-label">{t('family.pool.count')}</div>
+            <div className="stat-value">
+              <span className="amt">
                 {owned.length}
                 <small>{t('family.pool.countStarted')}</small>
                 {joined.length}
                 <small>{t('family.pool.countJoined')}</small>
               </span>
             </div>
-            <div class="stat-sub">{t('family.pool.countSub')}</div>
+            <div className="stat-sub">{t('family.pool.countSub')}</div>
           </div>
         </div>
 
         {owned.length === 0 && (
-          <div class="card empty">
+          <div className="card empty">
             <b>{t('family.pool.emptyTitle')}</b>
             {t('family.pool.emptyBody')}
           </div>
         )}
         {/* 两列各自独立：展开一张卡只撑高它所在的那一列，不影响同一行的另一张 */}
-        <div class="car-cols">
+        <div className="car-cols">
           {[0, 1].map((col) => (
-            <div class="car-col" key={col}>
+            <div className="car-col" key={col}>
               {owned.map((s, idx) => {
                 if (idx % 2 !== col) return null;
                 const sh = s.share!;
@@ -97,20 +97,20 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 const onboard = sh.members.filter((m) => !m.left || m.left > today);
                 const next = nextCharge(s, today);
                 return (
-                  <div key={s.id} class="card stack" style={{ gap: 14, order: idx }}>
-                    <button class="row" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(s)}>
+                  <div key={s.id} className="card stack" style={{ gap: 14, order: idx }}>
+                    <button className="row" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(s)}>
                       <SubIcon sub={s} size={46} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 700, fontSize: 16 }}>{s.name}</div>
-                        <div class="muted" style={{ fontSize: 13 }}>
+                        <div className="muted" style={{ fontSize: 13 }}>
                           {money(s.price, s.currency)} {cycleLabel(s.cycle)}
                           {next ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
                         </div>
                       </div>
                     </button>
-                    <div class="seats-row">
-                      <div class="seats">
-                        <span class="seat me" title={t('family.pool.me')}>
+                    <div className="seats-row">
+                      <div className="seats">
+                        <span className="seat me" title={t('family.pool.me')}>
                           <img src="/icons/avatar.png" alt={t('family.pool.me')} />
                         </span>
                         {onboard.map((m) => {
@@ -121,7 +121,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                               type="button"
                               disabled={ro}
                               onClick={() => setMember({ s, m })}
-                              class={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`}
+                              className={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`}
                               title={m.exempt ? t('family.pool.exemptTitle', { name: m.name }) : m.name}
                             >
                               {[...(m.name || '?')][0]}
@@ -132,7 +132,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                           <button
                             key={i}
                             type="button"
-                            class="seat add"
+                            className="seat add"
                             disabled={ro}
                             onClick={() => setMember({ s })}
                             aria-label={t('family.pool.addMember')}
@@ -143,15 +143,15 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         ))}
                       </div>
                       {s.manageUrl && (
-                        <a class="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
+                        <a className="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
                           <Icon name="gear" size={14} /> {t('family.pool.manage')}
                         </a>
                       )}
-                      <button class={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
+                      <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
                         {(() => {
                           const n = dues.filter((d) => d.periodsOwed > 0).length;
                           return n ? (
-                            <span class="owe">{t('family.pool.owedN', { count: n })}</span>
+                            <span className="owe">{t('family.pool.owedN', { count: n })}</span>
                           ) : sh.members.length ? (
                             t('family.pool.settled')
                           ) : (
@@ -165,29 +165,29 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     {expanded.has(s.id) && (
                       <>
                         {!ro && onboard.length < sh.seats - 1 && (
-                          <button class="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
+                          <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
                             <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: sh.seats - 1 - onboard.length })}
                           </button>
                         )}
                         <div>
                           {dues.map((d) => (
-                            <div key={d.member.id} class="member">
-                              <button class="member-info" disabled={ro} onClick={() => setMember({ s, m: d.member })}>
+                            <div key={d.member.id} className="member">
+                              <button className="member-info" disabled={ro} onClick={() => setMember({ s, m: d.member })}>
                                 <div style={{ fontWeight: 600, fontSize: 14 }}>
                                   {d.member.name || t('family.pool.unnamed')}
                                   {d.member.left && d.member.left <= today && (
-                                    <span class="badge" style={{ marginLeft: 6 }}>
+                                    <span className="badge" style={{ marginLeft: 6 }}>
                                       {t('family.pool.leftOn', { date: cnDate(d.member.left) })}
                                     </span>
                                   )}
                                   {contactText(d.member) && (
-                                    <span class="muted" style={{ fontWeight: 400 }}>
+                                    <span className="muted" style={{ fontWeight: 400 }}>
                                       {' '}
                                       · {contactText(d.member)}
                                     </span>
                                   )}
                                 </div>
-                                <div class="muted" style={{ fontSize: 12 }}>
+                                <div className="muted" style={{ fontSize: 12 }}>
                                   {d.member.exempt
                                     ? (d.member.note ?? t('family.pool.exemptNote'))
                                     : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: d.member.paidUntil }) : t('family.pool.noPay')}`}
@@ -197,7 +197,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                               </button>
                               <div style={{ textAlign: 'right', fontSize: 13.5 }}>
                                 {d.member.exempt ? (
-                                  <span class="muted" style={{ fontWeight: 600 }}>
+                                  <span className="muted" style={{ fontWeight: 600 }}>
                                     {t('family.pool.exempt')}
                                   </span>
                                 ) : d.periodsOwed > 0 ? (
@@ -208,7 +208,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                                   <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
                                 )}
                                 {!d.member.exempt && (
-                                  <div class="muted" style={{ fontSize: 12 }}>
+                                  <div className="muted" style={{ fontSize: 12 }}>
                                     {perBill('family.pool.perFee', d.member.billEvery ?? 1, {
                                       fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
                                     })}
@@ -216,7 +216,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                                 )}
                               </div>
                               {!ro && !d.member.exempt && (
-                                <button class={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
+                                <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
                                   <Icon name="check" /> {t('family.pool.collect')}
                                 </button>
                               )}
@@ -238,7 +238,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               <Cell
                 key={s.id}
                 label={
-                  <span class="row">
+                  <span className="row">
                     <SubIcon sub={s} size={30} />
                     {s.name}
                   </span>
@@ -255,16 +255,16 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         {candidates.length > 0 && !ro && (
           <Group title={t('family.pool.maybeGroup')}>
             {candidates.map((s) => (
-              <div key={s.id} class="cell">
-                <span class="cell-l">
-                  <span class="row">
+              <div key={s.id} className="cell">
+                <span className="cell-l">
+                  <span className="row">
                     <SubIcon sub={s} size={30} />
                     {s.name}
                   </span>
                 </span>
-                <span class="cell-r">
+                <span className="cell-r">
                   {money(s.price, s.currency)}
-                  <button class="btn tinted" onClick={() => setConvert(s)}>
+                  <button className="btn tinted" onClick={() => setConvert(s)}>
                     {t('family.pool.convert')}
                   </button>
                 </span>
@@ -307,12 +307,12 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
       onClose={onClose}
       foot={
         <>
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('family.convert.cancel')}
           </button>
           <button
-            class="btn primary"
+            className="btn primary"
             onClick={() =>
               run(
                 async () => {
@@ -334,7 +334,7 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Seg
           value={role}
           onChange={setRole}
@@ -345,11 +345,16 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
         />
         <Group foot={role === 'owner' ? t('family.convert.footOwner', { count: seats, amount: money(perHead, s.currency) }) : t('family.convert.footMember')}>
           <Cell label={t('family.convert.seats')}>
-            <input class="num" inputMode="numeric" value={seats} onInput={(e) => setSeats(Math.max(1, Number((e.target as HTMLInputElement).value) || 1))} />
+            <input
+              className="num"
+              inputMode="numeric"
+              value={seats}
+              onChange={(e) => setSeats(Math.max(1, Number((e.target as HTMLInputElement).value) || 1))}
+            />
           </Cell>
           {role === 'member' && (
             <Cell label={t('family.convert.owner')}>
-              <input value={ownerName} placeholder={t('family.convert.ownerPh')} onInput={(e) => setOwnerName((e.target as HTMLInputElement).value)} />
+              <input value={ownerName} placeholder={t('family.convert.ownerPh')} onChange={(e) => setOwnerName((e.target as HTMLInputElement).value)} />
             </Cell>
           )}
         </Group>
@@ -368,8 +373,8 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
   const actual = -book.net;
   const signed = (v: number) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v))}`;
   return (
-    <div class="car-book">
-      <div class="proxy-facts">
+    <div className="car-book">
+      <div className="proxy-facts">
         <div>
           <small>{t('family.facts.cost')}</small>
           <b>{fmt(book.yearCost)}</b>
@@ -380,11 +385,11 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
         </div>
         <div>
           <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
-          <b class={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
+          <b className={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
         </div>
       </div>
       {/* 实际收支这一行始终占位，卡片高度才一致 */}
-      <div class="car-actual">
+      <div className="car-actual">
         {book.since ? (
           <>
             <span>{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
@@ -393,7 +398,7 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
                 paid: fmt(book.paid),
                 received: fmt(book.received),
                 result: (
-                  <b class={actual >= 0 ? 'gain' : 'loss'}>
+                  <b className={actual >= 0 ? 'gain' : 'loss'}>
                     {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
                   </b>
                 ),

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import type { AppState } from '../../shared/types.ts';
 import { localTime } from '../../shared/format.ts';
 import { Cell, Group, Icon, Sheet } from '../components/ui.tsx';
@@ -66,7 +66,7 @@ function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () =
         <span>
           {[browser, os].filter(Boolean).join(' · ')}
           {d.current && (
-            <span class="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>
+            <span className="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>
               {t('settings.security.thisDevice')}
             </span>
           )}
@@ -85,7 +85,7 @@ function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () =
         .join('\n')}
     >
       {!d.current && (
-        <button type="button" class="chip-btn" onClick={onRevoke}>
+        <button type="button" className="chip-btn" onClick={onRevoke}>
           {t('settings.security.revoke')}
         </button>
       )}
@@ -128,7 +128,7 @@ export function SecurityGroup({ state }: { state: AppState }) {
           >
             <button
               type="button"
-              class="chip-btn"
+              className="chip-btn"
               onClick={() =>
                 confirmDelete(t('settings.security.confirmRemovePasskey', { name: p.name })) &&
                 run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))
@@ -186,7 +186,7 @@ export function SecurityGroup({ state }: { state: AppState }) {
           ))}
         {sec && sec.sessions.length > 1 && (
           <button
-            class="cell tap"
+            className="cell tap"
             style={{ justifyContent: 'center', color: 'var(--red)' }}
             onClick={() =>
               confirmDelete(t('settings.security.confirmLogoutOthers')) &&
@@ -208,7 +208,7 @@ function PasswordSheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
   const [again, setAgain] = useState('');
   const ok = cur && next.length >= 8 && next === again;
   const input = (value: string, set: (v: string) => void, placeholder: string, auto: string) => (
-    <input type="password" autoComplete={auto} value={value} placeholder={placeholder} onInput={(e) => set((e.target as HTMLInputElement).value)} />
+    <input type="password" autoComplete={auto} value={value} placeholder={placeholder} onChange={(e) => set((e.target as HTMLInputElement).value)} />
   );
   return (
     <Sheet
@@ -217,9 +217,9 @@ function PasswordSheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
       onClose={onClose}
       foot={
         <>
-          <span class="grow" />
+          <span className="grow" />
           <button
-            class="btn primary"
+            className="btn primary"
             disabled={!ok}
             onClick={() =>
               run(async () => {
@@ -234,7 +234,7 @@ function PasswordSheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Group foot={next && again && next !== again ? t('settings.security.mismatch') : t('settings.security.passwordFoot')}>
           <Cell label={t('settings.security.currentPassword')}>{input(cur, setCur, '', 'current-password')}</Cell>
           <Cell label={t('settings.security.newPassword')}>{input(next, setNext, t('settings.security.minLength'), 'new-password')}</Cell>

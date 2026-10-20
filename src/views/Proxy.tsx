@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
@@ -65,23 +65,23 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
     <>
       {/* 整张卡片点开代付详情 */}
       <div
-        class={`card proxy-card ${stopped ? 'stopped' : ''}`}
+        className={`card proxy-card ${stopped ? 'stopped' : ''}`}
         role="button"
         tabIndex={0}
         onClick={() => setLedger(true)}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setLedger(true))}
       >
         {stopped && (
-          <span class="stop-stamp" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <span className="stop-stamp" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <circle cx="12" cy="12" r="9" />
               <path d="M5.6 5.6l12.8 12.8" />
             </svg>
           </span>
         )}
-        <div class="proxy-top">
+        <div className="proxy-top">
           <button
-            class="proxy-head"
+            className="proxy-head"
             title={t('proxy.viewSub')}
             onClick={(e) => {
               e.stopPropagation();
@@ -90,20 +90,20 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
           >
             <SubIcon sub={s} size={46} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div class="ph-name">{s.name}</div>
-              <div class="muted ph-meta">
+              <div className="ph-name">{s.name}</div>
+              <div className="muted ph-meta">
                 {money(s.price, s.currency)} {cycleLabel(s.cycle)}
                 {stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : ''}
               </div>
             </div>
           </button>
-          <span class={`ph-status ${tone}`}>
+          <span className={`ph-status ${tone}`}>
             <i />
             {label}
           </span>
         </div>
-        <div class="ph-chips">
-          <span class="who-chip" title={s.proxy!.note}>
+        <div className="ph-chips">
+          <span className="who-chip" title={s.proxy!.note}>
             <Icon name="users" size={12} />
             {t('proxy.payFor', { name: s.proxy!.forName || t('proxy.unset') })}
             {contactText(s.proxy!) && <em>{contactText(s.proxy!)}</em>}
@@ -111,7 +111,7 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
           <PayBadge m={method} />
         </div>
 
-        <div class="proxy-facts">
+        <div className="proxy-facts">
           <div>
             <small>{t('proxy.paidPeriods', { count: list.length })}</small>
             <b>{money(charged, base, { compact: true })}</b>
@@ -122,7 +122,7 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
           </div>
           <div>
             <small>{open.length ? t('proxy.owedPeriods', { count: open.length }) : t('proxy.owed')}</small>
-            <b class={open.length ? 'warn' : 'done'}>
+            <b className={open.length ? 'warn' : 'done'}>
               {open.length
                 ? `≈ ${money(
                     open.reduce((a, r) => a + r.chargedBase, 0),
@@ -162,17 +162,17 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
 
   return (
     <Sheet narrow title={t('proxy.detailTitle')} onClose={onClose}>
-      <div class="stack">
-        <div class="ld-head">
+      <div className="stack">
+        <div className="ld-head">
           <SubIcon sub={live} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div class="ph-name">{live.name}</div>
-            <div class="muted ph-meta">
+            <div className="ph-name">{live.name}</div>
+            <div className="muted ph-meta">
               {money(live.price, live.currency)} {cycleLabel(live.cycle)}
               {cardCcy ? t('proxy.cardCcy', { ccy: cardCcy }) : ''}
             </div>
           </div>
-          <span class={`ph-status ${stopped ? 'stop' : open.length ? 'owe' : 'ok'}`}>
+          <span className={`ph-status ${stopped ? 'stop' : open.length ? 'owe' : 'ok'}`}>
             <i />
             {stopped ? t('proxy.status.ended') : open.length ? t('proxy.owedPeriods', { count: open.length }) : statusLabel(st)}
           </span>
@@ -180,7 +180,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
 
         <Group>
           <Cell label={t('proxy.forWhom')}>
-            <span class="ld-who">
+            <span className="ld-who">
               {px.forName || t('proxy.unset')}
               {contactText(px) && <small>{contactText(px)}</small>}
             </span>
@@ -203,7 +203,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
         </Group>
 
-        <div class="proxy-facts four">
+        <div className="proxy-facts four">
           <div>
             <small>{t('proxy.paidPeriods', { count: list.length })}</small>
             <b>{money(charged, base, { compact: true })}</b>
@@ -214,7 +214,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           </div>
           <div>
             <small>{t('proxy.owed')}</small>
-            <b class={open.length ? 'warn' : 'done'}>
+            <b className={open.length ? 'warn' : 'done'}>
               {open.length
                 ? `≈ ${money(
                     open.reduce((a, r) => a + r.chargedBase, 0),
@@ -226,15 +226,15 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           </div>
           <div>
             <small>{t('proxy.diffLabel')}</small>
-            <b class={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>
+            <b className={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>
               {diff > 0.5 ? '+' : ''}
               {money(diff, base, { compact: true })}
             </b>
           </div>
         </div>
 
-        <div class="ld-table">
-          <div class="ld-row ld-th">
+        <div className="ld-table">
+          <div className="ld-row ld-th">
             <span>{t('proxy.table.date')}</span>
             <span>{t('proxy.table.charged')}</span>
             <span>{t('proxy.table.received')}</span>
@@ -243,27 +243,27 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           {list.map((r) => {
             const d = r.receivedBase == null ? undefined : r.receivedBase - r.chargedBase;
             return (
-              <button key={r.date} class="ld-row" disabled={ro} onClick={() => setEdit(r)}>
-                <span class="ld-date">{cnDate(r.date)}</span>
+              <button key={r.date} className="ld-row" disabled={ro} onClick={() => setEdit(r)}>
+                <span className="ld-date">{cnDate(r.date)}</span>
                 <span>
                   <b>{money(r.charged, r.currency)}</b>
                   <small>≈ {money(r.chargedBase, base)}</small>
                 </span>
                 <span>
                   {r.receivedBase == null ? (
-                    <em class="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
+                    <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
                   ) : (
                     <b>{money(r.entry!.received!, r.entry!.receivedCurrency ?? base)}</b>
                   )}
                 </span>
-                <span class={d == null ? 'muted' : Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
+                <span className={d == null ? 'muted' : Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
                   {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : `${d > 0 ? '+' : '−'}${money(Math.abs(d), base)}`}
                 </span>
               </button>
             );
           })}
           {list.length === 0 && (
-            <div class="muted" style={{ fontSize: 13, padding: '12px 0' }}>
+            <div className="muted" style={{ fontSize: 13, padding: '12px 0' }}>
               {t('proxy.table.none')}
             </div>
           )}
@@ -283,7 +283,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const [ccy, setCcy] = useState(e?.receivedCurrency ?? base);
   const [on, setOn] = useState<string | undefined>(e?.receivedOn ?? todayIn(state.settings.timezone));
   const [note, setNote] = useState(e?.note ?? '');
-  const val = (ev: Event) => (ev.target as HTMLInputElement).value;
+  const val = (ev: { target: EventTarget | null }) => (ev.target as HTMLInputElement).value;
 
   const chargedN = charged === '' ? row.list : Number(charged);
   const chargedBase = toBaseAt(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
@@ -321,16 +321,16 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       foot={
         <>
           {e?.received != null && (
-            <button class="btn plain" style={{ color: 'var(--red)' }} onClick={() => save(true)}>
+            <button className="btn plain" style={{ color: 'var(--red)' }} onClick={() => save(true)}>
               {t('proxy.entry.markDue')}
             </button>
           )}
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('proxy.entry.cancel')}
           </button>
           <button
-            class="btn primary"
+            className="btn primary"
             disabled={(charged !== '' && !Number.isFinite(Number(charged))) || (recvN != null && !Number.isFinite(recvN))}
             onClick={() => save()}
           >
@@ -339,13 +339,13 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Group
           title={t('proxy.table.charged')}
           foot={t('proxy.entry.chargedFoot', { amount: money(chargedBase, base), list: money(row.list, row.listCurrency) })}
         >
           <Cell label={t('proxy.entry.amount')}>
-            <input class="num" inputMode="decimal" value={charged} placeholder={String(row.list)} onInput={(ev) => setCharged(val(ev))} />
+            <input className="num" inputMode="decimal" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
           </Cell>
           <Cell label={t('proxy.entry.currency')}>
             <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
@@ -364,12 +364,12 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
         >
           <Cell label={t('proxy.entry.amount')}>
             <input
-              class="num"
+              className="num"
               inputMode="decimal"
               autoFocus
               value={received}
               placeholder={t('proxy.entry.notReceived')}
-              onInput={(ev) => setReceived(val(ev))}
+              onChange={(ev) => setReceived(val(ev))}
             />
           </Cell>
           <Cell label={t('proxy.entry.currency')}>
@@ -379,7 +379,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             <DatePicker value={on} onChange={setOn} />
           </Cell>
           <Cell label={t('proxy.note')}>
-            <input value={note} placeholder={t('proxy.entry.notePlaceholder')} onInput={(ev) => setNote(val(ev))} />
+            <input value={note} placeholder={t('proxy.entry.notePlaceholder')} onChange={(ev) => setNote(val(ev))} />
           </Cell>
         </Group>
       </div>
@@ -394,37 +394,37 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
   return (
     <>
       <Toolbar title={t('proxy.title')} />
-      <div class="page fade-in stack">
-        <div class="grid g-3">
-          <div class="card stat">
-            <div class="stat-label">{t('proxy.owed')}</div>
-            <div class="stat-value" style={{ color: sum.owedCount ? 'var(--orange)' : undefined }}>
+      <div className="page fade-in stack">
+        <div className="grid g-3">
+          <div className="card stat">
+            <div className="stat-label">{t('proxy.owed')}</div>
+            <div className="stat-value" style={{ color: sum.owedCount ? 'var(--orange)' : undefined }}>
               <Amount value={sum.owed} ccy={base} />
             </div>
-            <div class="stat-sub">{sum.owedCount ? t('proxy.page.owedSub', { count: sum.owedCount }) : t('proxy.page.allBack')}</div>
+            <div className="stat-sub">{sum.owedCount ? t('proxy.page.owedSub', { count: sum.owedCount }) : t('proxy.page.allBack')}</div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">{t('proxy.page.total')}</div>
-            <div class="stat-value">
+          <div className="card stat">
+            <div className="stat-label">{t('proxy.page.total')}</div>
+            <div className="stat-value">
               <Amount value={sum.charged} ccy={base} />
             </div>
-            <div class="stat-sub">{t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) })}</div>
+            <div className="stat-sub">{t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) })}</div>
           </div>
-          <div class="card stat">
-            <div class="stat-label">{t('proxy.diffLabel')}</div>
-            <div class="stat-value" style={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}>
+          <div className="card stat">
+            <div className="stat-label">{t('proxy.diffLabel')}</div>
+            <div className="stat-value" style={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}>
               <Amount value={sum.diff} ccy={base} />
             </div>
-            <div class="stat-sub">{t('proxy.page.diffSub')}</div>
+            <div className="stat-sub">{t('proxy.page.diffSub')}</div>
           </div>
         </div>
         {sum.subs.length === 0 ? (
-          <div class="card empty">
+          <div className="card empty">
             <b>{t('proxy.page.emptyTitle')}</b>
             {t('proxy.page.emptyBody')}
           </div>
         ) : (
-          <div class="grid g-2">
+          <div className="grid g-2">
             {sum.subs.map((s) => (
               <ProxyCard key={s.id} state={state} s={s} onOpen={onOpen} />
             ))}

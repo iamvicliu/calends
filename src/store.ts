@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { todayIn } from '../shared/billing.ts';
 import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../shared/types.ts';
 import { mergePeople, syncPerson } from '../shared/people.ts';
@@ -29,7 +29,9 @@ export function useStore(): Store {
   useEffect(() => {
     const l = () => force((n) => n + 1);
     listeners.add(l);
-    return () => listeners.delete(l);
+    return () => {
+      listeners.delete(l);
+    };
   }, []);
   return store;
 }

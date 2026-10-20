@@ -1,5 +1,5 @@
-import { createPortal } from 'preact/compat';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { createPortal } from 'react-dom';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { symbol } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { ccyFlag, ccyName } from '../display.ts';
@@ -72,7 +72,7 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
     setOpen(false);
     setQ('');
   };
-  const onKey = (e: KeyboardEvent) => {
+  const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') setHi((i) => Math.min(flat.length - 1, i + 1));
     else if (e.key === 'ArrowUp') setHi((i) => Math.max(0, i - 1));
     else if (e.key === 'Enter' && flat[hi]) pick(flat[hi]);
@@ -91,7 +91,7 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
       <button
         type="button"
         ref={btn}
-        class={`side-item theme-item ${open ? 'open' : ''}`}
+        className={`side-item theme-item ${open ? 'open' : ''}`}
         onClick={() => setOpen(!open)}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -106,21 +106,21 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
         // 挂到 body 上：侧边栏自成层叠上下文，弹层放在里面会被主内容盖住
         createPortal(
           <>
-            {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
+            {pos.mobile && <div className="dp-scrim" onClick={() => setOpen(false)} />}
             <div
               ref={pop}
-              class={`dp-pop cp-pop ${pos.mobile ? 'mobile' : ''}`}
+              className={`dp-pop cp-pop ${pos.mobile ? 'mobile' : ''}`}
               style={pos.mobile ? undefined : { top: pos.top, left: pos.left }}
               onKeyDown={onKey}
             >
-              <label class="cp-search">
+              <label className="cp-search">
                 <Icon name="search" />
-                <input autoFocus value={q} placeholder={t('picker.ccy.search')} onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
+                <input autoFocus value={q} placeholder={t('picker.ccy.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
               </label>
-              <div class="cp-list" ref={list} role="listbox" aria-label={t('picker.ccy.label')}>
+              <div className="cp-list" ref={list} role="listbox" aria-label={t('picker.ccy.label')}>
                 {sections.map((s) => (
                   <div key={s.title ?? 'orig'}>
-                    {s.title && <div class="cp-head">{s.title}</div>}
+                    {s.title && <div className="cp-head">{s.title}</div>}
                     {s.items.map((c) => {
                       const i = n++;
                       const sel = c === value;
@@ -131,22 +131,22 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
                           data-i={i}
                           role="option"
                           aria-selected={sel}
-                          class={`cp-opt ${sel ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
+                          className={`cp-opt ${sel ? 'sel' : ''} ${i === hi ? 'hi' : ''}`}
                           onMouseMove={() => setHi(i)}
                           onClick={() => pick(c)}
                         >
-                          <span class="cp-flag">
+                          <span className="cp-flag">
                             {c === 'orig' ? <Icon name="swap" /> : ccyFlag(c) ? <img src={ccyFlag(c)} alt="" loading="lazy" /> : <b>{symbol(c).trim() || c}</b>}
                           </span>
-                          <span class="cp-name">{c === 'orig' ? t('picker.ccy.orig') : ccyName(c)}</span>
-                          <span class="cp-code">{c === 'orig' ? t('picker.ccy.origHint') : c}</span>
+                          <span className="cp-name">{c === 'orig' ? t('picker.ccy.orig') : ccyName(c)}</span>
+                          <span className="cp-code">{c === 'orig' ? t('picker.ccy.origHint') : c}</span>
                           {sel && <Icon name="check" />}
                         </button>
                       );
                     })}
                   </div>
                 ))}
-                {!flat.length && <div class="cp-empty">{t('picker.ccy.noMatch')}</div>}
+                {!flat.length && <div className="cp-empty">{t('picker.ccy.noMatch')}</div>}
               </div>
             </div>
           </>,

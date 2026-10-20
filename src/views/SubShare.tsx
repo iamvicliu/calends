@@ -114,8 +114,8 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
   const span = Math.max(1, diffDays(start, today));
   const colors = ['#7c9bf5', '#3dd68c', '#ff8b3e', '#bf7af0', '#2dd4bf', '#f472b6'];
   return (
-    <div class="sc">
-      <div class="sc-head">
+    <div className="sc">
+      <div className="sc-head">
         <SubIcon sub={sub} size={44} proxied />
         <div>
           <b>{sub.name}</b>
@@ -124,9 +124,9 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
           </span>
         </div>
       </div>
-      <small class="sc-k">{hide ? t('share.together') : t('share.totalSpent')}</small>
-      <div class="sc-big">{hide ? st.duration : m(st.total)}</div>
-      <div class="sc-grid">
+      <small className="sc-k">{hide ? t('share.together') : t('share.totalSpent')}</small>
+      <div className="sc-big">{hide ? st.duration : m(st.total)}</div>
+      <div className="sc-grid">
         <div>
           <small>{hide ? t('share.charges') : t('share.subscribed')}</small>
           <b>{hide ? t('share.times', { count: st.charges.length }) : st.duration}</b>
@@ -144,7 +144,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
           <b>{hide ? t('share.phaseCount', { count: st.vs.length }) : t('share.times', { count: st.charges.length })}</b>
         </div>
       </div>
-      <div class="sc-bar">
+      <div className="sc-bar">
         {st.vs.map((v, i) => {
           const end = v.end && v.end < today ? v.end : today;
           if (v.start > today) return null;
@@ -160,7 +160,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
           );
         })}
       </div>
-      <div class="sc-foot">
+      <div className="sc-foot">
         <span>{t('share.untilToday', { date: when(start, today) })}</span>
         <span>{location.host}</span>
       </div>
@@ -175,54 +175,58 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
   const rest = rows.slice(14);
   const bars = Array.from({ length: 46 }, (_, i) => 1 + ((Math.round(st.total) * 7 + st.charges.length * 13 + i * 31) % 4));
   return (
-    <div class="rc">
-      <div class="rc-shop">{sub.name}</div>
-      <div class="rc-sub">SUBSCRIPTION RECEIPT</div>
-      <div class="rc-meta">
+    <div className="rc">
+      <div className="rc-shop">{sub.name}</div>
+      <div className="rc-sub">SUBSCRIPTION RECEIPT</div>
+      <div className="rc-meta">
         <span>{t('share.since', { date: when(st.vs[0].start, today) })}</span>
         <span>{statusText(st)}</span>
       </div>
-      <div class="rc-cut" />
+      <div className="rc-cut" />
       {shown.map(({ c, v }, i) => (
-        <div key={i} class="rc-row">
-          <span class="rc-d">{c.date}</span>
-          <span class="rc-n">{c.kind === 'refund' ? t('share.refund') : c.sub.region ? `${flag(c.sub.region)} ${c.sub.region}` : cycleLabel(c.sub.cycle)}</span>
-          <span class="rc-v">{hide ? (c.kind === 'refund' ? t('share.refundShort') : t('share.nth', { n: rows.length - i })) : m(c.amount, c.currency)}</span>
-          {!hide && c.currency !== st.base && <span class="rc-x">≈{m(v)}</span>}
+        <div key={i} className="rc-row">
+          <span className="rc-d">{c.date}</span>
+          <span className="rc-n">
+            {c.kind === 'refund' ? t('share.refund') : c.sub.region ? `${flag(c.sub.region)} ${c.sub.region}` : cycleLabel(c.sub.cycle)}
+          </span>
+          <span className="rc-v">
+            {hide ? (c.kind === 'refund' ? t('share.refundShort') : t('share.nth', { n: rows.length - i })) : m(c.amount, c.currency)}
+          </span>
+          {!hide && c.currency !== st.base && <span className="rc-x">≈{m(v)}</span>}
         </div>
       ))}
       {rest.length > 0 && (
-        <div class="rc-row">
-          <span class="rc-d">··</span>
-          <span class="rc-n">{t('share.earlier', { count: rest.length })}</span>
-          <span class="rc-v">{hide ? '' : m(rest.reduce((a, x) => a + x.v, 0))}</span>
+        <div className="rc-row">
+          <span className="rc-d">··</span>
+          <span className="rc-n">{t('share.earlier', { count: rest.length })}</span>
+          <span className="rc-v">{hide ? '' : m(rest.reduce((a, x) => a + x.v, 0))}</span>
         </div>
       )}
-      <div class="rc-cut" />
-      <div class="rc-sum">
+      <div className="rc-cut" />
+      <div className="rc-sum">
         <span>{hide ? t('share.time') : t('share.total')}</span>
         <b>{hide ? st.duration : m(st.total)}</b>
       </div>
-      <div class="rc-kv">
+      <div className="rc-kv">
         <span>{t('share.chargeCount')}</span>
         <span>{t('share.count', { count: st.charges.length })}</span>
       </div>
-      <div class="rc-kv">
+      <div className="rc-kv">
         <span>{hide ? t('share.switches') : t('share.realMonthly')}</span>
         <span>{hide ? t('share.times', { count: st.vs.length - 1 }) : m(st.perMonth)}</span>
       </div>
-      <div class="rc-kv">
+      <div className="rc-kv">
         <span>{t('share.price')}</span>
         <span>{changeText(st)}</span>
       </div>
-      <div class="rc-cut" />
-      <div class="rc-bars">
+      <div className="rc-cut" />
+      <div className="rc-bars">
         {bars.map((w, i) => (
           <i key={i} style={{ width: w, marginRight: i % 3 === 0 ? 2 : 1 }} />
         ))}
       </div>
-      <div class="rc-thanks">{t('share.thanks')}</div>
-      <div class="rc-site">{location.host}</div>
+      <div className="rc-thanks">{t('share.thanks')}</div>
+      <div className="rc-site">{location.host}</div>
     </div>
   );
 }
@@ -236,8 +240,8 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
     items.push({ key: v.start, v, from: v.start, to: v.end });
   });
   return (
-    <div class="tlc" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
-      <div class="tlc-head">
+    <div className="tlc" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
+      <div className="tlc-head">
         <SubIcon sub={sub} size={48} proxied />
         <div>
           <b>{sub.name}</b>
@@ -246,14 +250,14 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
           </span>
         </div>
       </div>
-      <div class="tlc-list">
+      <div className="tlc-list">
         {items.map((it) =>
           it.gap ? (
-            <div key={it.key} class="tlc-gap">
+            <div key={it.key} className="tlc-gap">
               {t('share.gap', { dur: it.gap >= 60 ? t('share.dur.m', { count: Math.round(it.gap / 30.4) }) : t('share.dur.d', { count: it.gap }) })}
             </div>
           ) : (
-            <div key={it.key} class={`tlc-item ${it.v!.planned ? 'planned' : ''}`}>
+            <div key={it.key} className={`tlc-item ${it.v!.planned ? 'planned' : ''}`}>
               <i />
               <div>
                 <small>
@@ -275,7 +279,7 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
           ),
         )}
       </div>
-      <div class="tlc-foot">{location.host}</div>
+      <div className="tlc-foot">{location.host}</div>
     </div>
   );
 }
@@ -283,25 +287,25 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
 /** 海报：大图标 + 「陪伴了多久」 + 总额 */
 function SPoster({ sub, st, hide, m }: Ctx) {
   return (
-    <div class="sp" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
-      <div class="sp-icon">
+    <div className="sp" style={{ '--tint': catColor(sub.category) } as Record<string, string>}>
+      <div className="sp-icon">
         <SubIcon sub={sub} size={112} proxied />
       </div>
-      <div class="sp-name">{sub.name}</div>
-      <div class="sp-k">{t('share.withYou')}</div>
-      <div class="sp-big">{st.duration}</div>
-      <div class="sp-line">
+      <div className="sp-name">{sub.name}</div>
+      <div className="sp-k">{t('share.withYou')}</div>
+      <div className="sp-big">{st.duration}</div>
+      <div className="sp-line">
         {hide
           ? `${t('share.n.charges', { count: st.charges.length })} · ${changeText(st)}`
           : t('share.totalPerDay', { total: m(st.total), perDay: m(st.perDay) })}
       </div>
-      <div class="sp-chips">
+      <div className="sp-chips">
         <span>{statusText(st)}</span>
         {st.gaps.length > 0 && <span>{t('share.lapsed', { count: st.gaps.length })}</span>}
         {st.vs.length > 1 && <span>{t('share.switched', { count: st.vs.length - 1 })}</span>}
         {st.change != null && <span>{changeText(st)}</span>}
       </div>
-      <div class="sp-foot">{location.host}</div>
+      <div className="sp-foot">{location.host}</div>
     </div>
   );
 }
@@ -310,25 +314,25 @@ function SPoster({ sub, st, hide, m }: Ctx) {
 function SYears({ sub, st, hide, m }: Ctx) {
   const max = Math.max(1, ...st.years.map(([, v]) => v));
   return (
-    <div class="sy">
-      <div class="sy-head">
+    <div className="sy">
+      <div className="sy-head">
         <SubIcon sub={sub} size={36} proxied />
         <div>
           <b>{sub.name}</b>
           <span>{t('share.byYear')}</span>
         </div>
       </div>
-      <div class="sy-big">{hide ? st.duration : m(st.total)}</div>
-      <div class="sy-bars">
+      <div className="sy-big">{hide ? st.duration : m(st.total)}</div>
+      <div className="sy-bars">
         {st.years.map(([y, v]) => (
-          <div key={y} class="sy-col">
-            <span class="sy-v">{hide ? `${st.total > 0 ? Math.round((v / st.total) * 100) : 0}%` : m(v)}</span>
+          <div key={y} className="sy-col">
+            <span className="sy-v">{hide ? `${st.total > 0 ? Math.round((v / st.total) * 100) : 0}%` : m(v)}</span>
             <i style={{ height: `${Math.max(4, (v / max) * 100)}%` }} />
-            <span class="sy-y">{y}</span>
+            <span className="sy-y">{y}</span>
           </div>
         ))}
       </div>
-      <div class="sy-foot">
+      <div className="sy-foot">
         <span>
           {t('share.n.charges', { count: st.charges.length })} · {changeText(st)}
         </span>

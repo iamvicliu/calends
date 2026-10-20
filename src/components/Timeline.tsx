@@ -1,5 +1,5 @@
-import type { ComponentChildren } from 'preact';
-import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import type { ReactNode as ComponentChildren } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, diffDays } from '../../shared/billing.ts';
 import { monthLabel } from '../../shared/format.ts';
 import { intlLocale, t } from '../../shared/i18n.ts';
@@ -121,12 +121,12 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
 
   // 鼠标按住拖动：按在空白或图标上都拖整条时间线；松手后带惯性滑一段。拖过之后不触发点击
   const glide = useRef(0);
-  const onDown = (e: PointerEvent) => {
+  const onDown = (e: React.PointerEvent) => {
     if (e.pointerType !== 'mouse' || e.button !== 0) return;
     cancelAnimationFrame(glide.current);
     drag.current = { x: e.clientX, left: scroller.current!.scrollLeft, moved: false, v: 0, t: e.timeStamp, id: e.pointerId };
   };
-  const onMove = (e: PointerEvent) => {
+  const onMove = (e: React.PointerEvent) => {
     const d = drag.current;
     if (!d) return;
     const dx = e.clientX - d.x;
@@ -143,7 +143,7 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
     d.t = e.timeStamp;
     el.scrollLeft = next;
   };
-  const onUp = (e: PointerEvent) => {
+  const onUp = (e: React.PointerEvent) => {
     const d = drag.current;
     if (!d) return;
     box.current!.classList.remove('dragging');
@@ -166,9 +166,9 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
 
   const { xOf, placed, overflow, months, dots, width, monday } = layout;
   return (
-    <div class="tl" ref={box}>
+    <div className="tl" ref={box}>
       <div
-        class="tl-scroll"
+        className="tl-scroll"
         ref={scroller}
         onScroll={onScroll}
         onPointerDown={onDown}
@@ -177,27 +177,27 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
         onPointerCancel={onUp}
         onDragStart={(e) => e.preventDefault()}
         // 在空白处双击回到今天（双击图标不算，那是打开详情）
-        onDblClick={(e) => {
+        onDoubleClick={(e) => {
           if (!(e.target as Element).closest('.tl-icon')) center(true);
         }}
         onClickCapture={(e) => {
           if (drag.current?.moved) e.stopPropagation();
         }}
       >
-        <div class="tl-track" style={{ width, '--day': `${DAY}px`, '--mon': `${monday * DAY}px` } as Record<string, string | number>}>
+        <div className="tl-track" style={{ width, '--day': `${DAY}px`, '--mon': `${monday * DAY}px` } as Record<string, string | number>}>
           {months.map((m) => (
-            <i key={m.x} class="tl-month" style={{ left: m.x }}>
+            <i key={m.x} className="tl-month" style={{ left: m.x }}>
               <span>{m.label}</span>
             </i>
           ))}
-          <div class="tl-today" style={{ left: xOf(today) }}>
+          <div className="tl-today" style={{ left: xOf(today) }}>
             <span>{t('common.today')}</span>
           </div>
           {placed.map(({ it, date, x, level }) => (
             <button
               key={it.key}
               type="button"
-              class={`tl-icon ${date < today ? 'past' : ''}`}
+              className={`tl-icon ${date < today ? 'past' : ''}`}
               style={
                 { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<string, string | number>
               }
@@ -208,16 +208,16 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
             </button>
           ))}
           {[...overflow].map(([d, n]) => (
-            <span key={`more-${d}`} class="tl-more" style={{ left: xOf(d), top: AXIS - 14 - LEVELS * (ICON + 4) - 4 }}>
+            <span key={`more-${d}`} className="tl-more" style={{ left: xOf(d), top: AXIS - 14 - LEVELS * (ICON + 4) - 4 }}>
               +{n}
             </span>
           ))}
           {dots.map((d) => (
-            <i key={`dot-${d}`} class={`tl-dot ${d < today ? 'past' : ''}`} style={{ left: xOf(d) }} />
+            <i key={`dot-${d}`} className={`tl-dot ${d < today ? 'past' : ''}`} style={{ left: xOf(d) }} />
           ))}
         </div>
       </div>
-      <button type="button" class="tl-home" onClick={() => center(true)} title={t('editor.timeline.home')}>
+      <button type="button" className="tl-home" onClick={() => center(true)} title={t('editor.timeline.home')}>
         {t('common.today')}
       </button>
     </div>

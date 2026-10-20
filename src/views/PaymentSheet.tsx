@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { activePhases, currentPhase, cycleLabel } from '../../shared/billing.ts';
 import { flag, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -73,20 +73,20 @@ export function PaymentSheet({
       foot={
         <>
           {edit && (
-            <button class="btn danger" style={{ marginRight: 'auto' }} onClick={remove}>
+            <button className="btn danger" style={{ marginRight: 'auto' }} onClick={remove}>
               {t('common.delete')}
             </button>
           )}
-          <button class="btn" onClick={onClose}>
+          <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button class="btn primary" onClick={save}>
+          <button className="btn primary" onClick={save}>
             {t('common.save')}
           </button>
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Group>
           <Cell label={t('editor.payment.date')}>
             <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
@@ -117,7 +117,7 @@ export function PaymentSheet({
             />
           </Cell>
           <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('editor.payment.refundHint') : undefined}>
-            <input class="num" inputMode="decimal" value={amount} onInput={(e) => setAmount((e.target as HTMLInputElement).value)} />
+            <input className="num" inputMode="decimal" value={amount} onChange={(e) => setAmount((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
         <Group title={t('editor.payment.settled')}>
@@ -126,21 +126,21 @@ export function PaymentSheet({
           </Cell>
           <Cell label={t('editor.payment.settledAmount')}>
             <input
-              class="num"
+              className="num"
               inputMode="decimal"
               placeholder={t('editor.payment.blank')}
               value={settled}
-              onInput={(e) => setSettled((e.target as HTMLInputElement).value)}
+              onChange={(e) => setSettled((e.target as HTMLInputElement).value)}
             />
           </Cell>
         </Group>
         <Group>
           <Cell label={t('editor.field.notes')}>
-            <input value={note} placeholder={t('editor.field.optional')} onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
+            <input value={note} placeholder={t('editor.field.optional')} onChange={(e) => setNote((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
         {phase.payments?.length || sub.payments?.length ? null : (
-          <small class="muted" style={{ padding: '0 4px' }}>
+          <small className="muted" style={{ padding: '0 4px' }}>
             {t('editor.payment.freezeHint', { amount: money(phase.price, ccy) })}
           </small>
         )}

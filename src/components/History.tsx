@@ -28,14 +28,14 @@ export function History({
   const lanes = phaseLanes(vs);
   const laned = lanes.some((l) => l > 0);
   const editable = !!onEnd && !!sub.phases?.length;
-  const items: preact.JSX.Element[] = [];
+  const items: React.JSX.Element[] = [];
   vs.forEach((v, i) => {
     // 断更看前面各段最晚跑到哪天：并行的旧段还没到期就不算断
     const until = coveredUntil(vs, i);
     if (i > 0 && isGap(until, v.start)) {
       const months = Math.round(diffDays(until!, v.start) / 30.4375);
       items.push(
-        <li key={`gap${i}`} class="h-gap">
+        <li key={`gap${i}`} className="h-gap">
           <span>{months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: diffDays(until!, v.start) })}</span>
         </li>,
       );
@@ -46,9 +46,9 @@ export function History({
     const raw = sub.phases?.find((p) => p.start === v.start);
     const isLast = i === vs.length - 1;
     items.push(
-      <li key={`p${i}`} class={`h-phase ${live && v.start <= today ? 'now' : ''} ${lanes[i] > 0 ? 'lane' : ''} ${editable ? 'edit' : ''}`}>
+      <li key={`p${i}`} className={`h-phase ${live && v.start <= today ? 'now' : ''} ${lanes[i] > 0 ? 'lane' : ''} ${editable ? 'edit' : ''}`}>
         {editable ? (
-          <div class="h-range h-edit">
+          <div className="h-range h-edit">
             <span>{cnDateFull(v.start)} →</span>
             <DatePicker
               value={raw?.end}
@@ -57,10 +57,10 @@ export function History({
               placeholder={isLast ? t('editor.history.now') : t('editor.overlap.endAuto')}
               onChange={(d) => onEnd!(v.start, d)}
             />
-            {v.planned && <span class="badge">{t('editor.overlap.planned')}</span>}
+            {v.planned && <span className="badge">{t('editor.overlap.planned')}</span>}
           </div>
         ) : (
-          <div class="h-range">
+          <div className="h-range">
             {v.start > today
               ? v.end
                 ? t('editor.history.plannedRange', { start: cnDateFull(v.start), end: cnDateFull(v.end) })
@@ -68,19 +68,19 @@ export function History({
               : t('editor.history.range', { start: cnDateFull(v.start), end: v.end ? cnDateFull(v.end) : t('editor.history.now') })}
           </div>
         )}
-        <div class="h-plan">
-          {v.region && <span class="badge">{v.region}</span>}
+        <div className="h-plan">
+          {v.region && <span className="badge">{v.region}</span>}
           <b>{money(v.price, v.currency)}</b> {cycleLabel(v.cycle)}
           {method(v.methodId) && <PayBadge m={method(v.methodId)} />}
-          {parallel > 0 && <span class="badge blue h-par">{t('editor.overlap.parallel', { count: parallel })}</span>}
+          {parallel > 0 && <span className="badge blue h-par">{t('editor.overlap.parallel', { count: parallel })}</span>}
         </div>
         {hist.length > 1 && (
-          <ul class="h-prices">
+          <ul className="h-prices">
             {hist.map((p, k) => (
               <li key={p.from}>
                 {k === 0 ? t('editor.history.initial') : t('editor.history.priceChange', { date: p.from })} · {money(p.amount, v.currency)}
                 {k > 0 && hist[k - 1].amount > 0 && (
-                  <em class={p.amount > hist[k - 1].amount ? 'up' : 'down'}>
+                  <em className={p.amount > hist[k - 1].amount ? 'up' : 'down'}>
                     {p.amount > hist[k - 1].amount ? '+' : ''}
                     {Math.round(((p.amount - hist[k - 1].amount) / hist[k - 1].amount) * 100)}%
                   </em>
@@ -92,5 +92,5 @@ export function History({
       </li>,
     );
   });
-  return <ol class={`history ${laned ? 'laned' : ''}`}>{items.reverse()}</ol>;
+  return <ol className={`history ${laned ? 'laned' : ''}`}>{items.reverse()}</ol>;
 }

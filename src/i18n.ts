@@ -1,4 +1,5 @@
 // 浏览器端加载语言包：每种语言打成一个独立的 chunk，用到才下载
+import { createElement, Fragment } from 'react';
 import { fallbackChain, flatten, isLocale, matchLocale, setLocale, t, type Locale, type MessageTree, type Messages } from '../shared/i18n.ts';
 
 const PACKS = import.meta.glob<{ default: Record<string, { default: MessageTree }> }>('./locales/*.ts');
@@ -49,9 +50,9 @@ export const preferredLocale = (setting?: string): Locale => (isLocale(setting) 
  * 文案里要嵌元素时用：tx('wallet.runout', { date: <b>{d}</b> }) 把 {date} 换成 JSX 节点；
  * 只是文字的参数直接写在 params 里也行。
  */
-export function tx(key: string, parts: Record<string, preact.ComponentChildren>): preact.ComponentChildren[] {
+export function tx(key: string, parts: Record<string, React.ReactNode>): React.ReactNode[] {
   const s = t(key);
-  const out: preact.ComponentChildren[] = [];
+  const out: React.ReactNode[] = [];
   let last = 0;
   for (const m of s.matchAll(/\{(\w+)\}/g)) {
     out.push(s.slice(last, m.index));
@@ -59,5 +60,6 @@ export function tx(key: string, parts: Record<string, preact.ComponentChildren>)
     last = m.index! + m[0].length;
   }
   out.push(s.slice(last));
-  return out;
+  // React 要求数组里的每个子节点都有 key
+  return out.map((node, i) => createElement(Fragment, { key: i }, node));
 }

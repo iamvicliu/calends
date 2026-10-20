@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { addDays, addMonths, chargesBetween, currentPhase, cycleDays, monthlyGross, todayIn, uid } from '../../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cnDate, cnDateFull, money } from '../../shared/format.ts';
@@ -43,22 +43,22 @@ export function ContactField({ via, value, onVia, onChange }: { via: string; val
   const at = AT_VIA.has(via);
   const url = contactUrl(via, value);
   return (
-    <span class="contact-field">
+    <span className="contact-field">
       <Picker value={via} onChange={onVia} options={CONTACT_VIA.map((c) => ({ value: c, label: viaLabel(c) }))} ariaLabel={t('family.contact.viaAria')} />
-      {at && <span class="contact-at">@</span>}
+      {at && <span className="contact-at">@</span>}
       <input
         value={at ? bare(value ?? '') : (value ?? '')}
         autoCapitalize="off"
         inputMode={via === '邮箱' ? 'email' : via === '手机' ? 'tel' : 'text'}
         placeholder={at ? bare(contactHint(via) ?? '') : (contactHint(via) ?? t('family.contact.hint.generic'))}
-        onInput={(e) => {
+        onChange={(e) => {
           const v = (e.target as HTMLInputElement).value.trim();
           onChange(at ? bare(v) : v);
         }}
       />
       {url && (
         <a
-          class="icon-btn contact-go"
+          className="icon-btn contact-go"
           href={url}
           target="_blank"
           rel="noreferrer"
@@ -167,7 +167,7 @@ export function MemberSheet({
       tg: undefined,
       ...(via === '邮箱' && (!f.account || f.account === f.contact) ? { account: c || undefined } : {}),
     });
-  const val = (e: Event) => (e.target as HTMLInputElement).value;
+  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
   const months = f.billEvery ?? 1;
   const freshPay = (m: ShareMember): MemberPayment => {
@@ -247,7 +247,7 @@ export function MemberSheet({
         <>
           {!isNew && (
             <button
-              class="btn plain"
+              className="btn plain"
               style={{ color: 'var(--red)' }}
               onClick={() =>
                 confirmDelete(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') })) &&
@@ -260,12 +260,12 @@ export function MemberSheet({
               {t('family.member.delete')}
             </button>
           )}
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('family.member.cancel')}
           </button>
           <button
-            class="btn primary"
+            className="btn primary"
             disabled={!f.name.trim()}
             onClick={() =>
               run(
@@ -293,7 +293,7 @@ export function MemberSheet({
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Group title={t('family.member.group')} foot={linkedElsewhere > 0 ? t('people.field.syncFoot', { count: linkedElsewhere }) : undefined}>
           {(state.people?.length ?? 0) > 0 && (
             <Cell label={t('people.field.person')}>
@@ -309,7 +309,7 @@ export function MemberSheet({
             </Cell>
           )}
           <Cell label={t('family.member.name')}>
-            <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onInput={(e) => up({ name: val(e) })} />
+            <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
           </Cell>
           <Cell label={t('family.member.contact')}>
             <ContactField via={via} value={f.contact} onVia={setVia} onChange={setContact} />
@@ -320,7 +320,7 @@ export function MemberSheet({
               autoCapitalize="off"
               value={f.account ?? ''}
               placeholder={t('family.member.accountPh', { name: s.name })}
-              onInput={(e) => up({ account: val(e).trim() || undefined })}
+              onChange={(e) => up({ account: val(e).trim() || undefined })}
             />
           </Cell>
           <Cell label={t('family.member.joined')}>
@@ -337,7 +337,7 @@ export function MemberSheet({
         </Group>
 
         <Group title={t('family.member.feeGroup')}>
-          <div class="cell">
+          <div className="cell">
             <Seg
               value={String(months)}
               onChange={(v) => setFee({ billEvery: Number(v) })}
@@ -350,9 +350,9 @@ export function MemberSheet({
             />
           </div>
           <Cell label={perBill('family.member.feeLabel', months)}>
-            <span class="contact-field">
+            <span className="contact-field">
               <CurrencySelect value={f.feeCurrency ?? base} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
-              <input class="num" inputMode="decimal" value={f.fee ?? ''} placeholder="0" onInput={(e) => setFee({ fee: Number(val(e)) || 0 })} />
+              <input className="num" inputMode="decimal" value={f.fee ?? ''} placeholder="0" onChange={(e) => setFee({ fee: Number(val(e)) || 0 })} />
             </span>
           </Cell>
           <Cell label={<span>{t('family.member.exempt')}</span>}>
@@ -362,7 +362,7 @@ export function MemberSheet({
 
         <Group title={t('family.member.other')}>
           <Cell label={t('family.member.source')}>
-            <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onInput={(e) => up({ source: val(e) || undefined })} />
+            <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onChange={(e) => up({ source: val(e) || undefined })} />
           </Cell>
         </Group>
 
@@ -376,8 +376,8 @@ export function MemberSheet({
           {payments.map((p) => {
             const i = (f.payments ?? []).indexOf(p);
             return (
-              <div key={`${p.date}-${i}`} class="cell member-pay">
-                <span class="cell-l">
+              <div key={`${p.date}-${i}`} className="cell member-pay">
+                <span className="cell-l">
                   {money(p.amount, p.currency)}
                   <small>
                     {p.from
@@ -386,10 +386,10 @@ export function MemberSheet({
                     {p.note ? ` · ${p.note}` : ''}
                   </small>
                 </span>
-                <span class="cell-r">
+                <span className="cell-r">
                   {others.length > 0 && (
                     <button
-                      class={`icon-btn ${copying === i ? 'on' : ''}`}
+                      className={`icon-btn ${copying === i ? 'on' : ''}`}
                       style={{ width: 26, height: 26 }}
                       aria-label={t('family.member.copyAria')}
                       title={t('family.member.copyAria')}
@@ -398,16 +398,16 @@ export function MemberSheet({
                       <Icon name="copy" />
                     </button>
                   )}
-                  <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
+                  <button className="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
                     <Icon name="x" />
                   </button>
                 </span>
                 {copying === i && (
-                  <div class="copy-pay">
+                  <div className="copy-pay">
                     {others.map((o) => {
                       const dup = o.payments?.some((x) => x.date === p.date && x.until === p.until && x.amount === p.amount);
                       return (
-                        <label key={o.id} class={`copy-target ${dup ? 'dup' : ''}`}>
+                        <label key={o.id} className={`copy-target ${dup ? 'dup' : ''}`}>
                           <input
                             type="checkbox"
                             disabled={dup}
@@ -425,11 +425,11 @@ export function MemberSheet({
                         </label>
                       );
                     })}
-                    <div class="copy-actions">
-                      <button class="btn" onClick={() => setCopying(null)}>
+                    <div className="copy-actions">
+                      <button className="btn" onClick={() => setCopying(null)}>
                         {t('family.member.cancel')}
                       </button>
-                      <button class="btn primary" disabled={!targets.length} onClick={() => copyTo(p)}>
+                      <button className="btn primary" disabled={!targets.length} onClick={() => copyTo(p)}>
                         {t('family.member.copyN', { count: targets.length })}
                       </button>
                     </div>
@@ -441,7 +441,7 @@ export function MemberSheet({
           {adding ? (
             <>
               <Cell label={t('family.member.amount')}>
-                <input class="num" inputMode="decimal" value={pay.amount} onInput={(e) => setPay({ ...pay, amount: Number(val(e)) || 0 })} />
+                <input className="num" inputMode="decimal" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: Number(val(e)) || 0 })} />
               </Cell>
               <Cell label={t('family.member.currency')}>
                 <CurrencySelect value={pay.currency} onChange={(c) => setPay({ ...pay, currency: c })} />
@@ -453,7 +453,7 @@ export function MemberSheet({
                 label={
                   <span>
                     {t('family.member.coverTo')}
-                    <small class="muted" style={{ display: 'block', fontSize: 12 }}>
+                    <small className="muted" style={{ display: 'block', fontSize: 12 }}>
                       {perBill('family.member.coverAuto', months)}
                     </small>
                   </span>
@@ -465,20 +465,20 @@ export function MemberSheet({
                 <DatePicker value={pay.date} onChange={(v) => setPay({ ...pay, date: v ?? today })} />
               </Cell>
               <Cell label={t('family.member.note')}>
-                <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onInput={(e) => setPay({ ...pay, note: val(e) || undefined })} />
+                <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onChange={(e) => setPay({ ...pay, note: val(e) || undefined })} />
               </Cell>
-              <div class="cell" style={{ justifyContent: 'flex-end', gap: 8 }}>
-                <button class="btn" onClick={() => setAdding(false)}>
+              <div className="cell" style={{ justifyContent: 'flex-end', gap: 8 }}>
+                <button className="btn" onClick={() => setAdding(false)}>
                   {t('family.member.cancel')}
                 </button>
-                <button class="btn primary" disabled={!pay.amount} onClick={addPayment}>
+                <button className="btn primary" disabled={!pay.amount} onClick={addPayment}>
                   {t('family.member.record')}
                 </button>
               </div>
             </>
           ) : (
             <button
-              class="cell tap"
+              className="cell tap"
               style={{ color: 'var(--accent)' }}
               onClick={() => {
                 setPay(freshPay(f));

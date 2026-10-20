@@ -1,4 +1,4 @@
-import type { ComponentChildren } from 'preact';
+import type { ReactNode as ComponentChildren } from 'react';
 import { tipProps } from './ui.tsx';
 
 /** 面积折线图：SVG 只画形状，文字用 HTML 叠加，避免被拉伸 */
@@ -24,12 +24,12 @@ export function AreaChart({
   const area = `${line}L${W},${height}L0,${height}Z`;
   const step = Math.max(1, Math.ceil(n / 8));
   return (
-    <div class="area" style={{ height: height + 22 }}>
+    <div className="area" style={{ height: height + 22 }}>
       <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }}>
         <defs>
           <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="var(--accent)" stop-opacity="0.28" />
-            <stop offset="1" stop-color="var(--accent)" stop-opacity="0" />
+            <stop offset="0" stopColor="var(--accent)" stopOpacity="0.28" />
+            <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((f) => (
@@ -40,24 +40,24 @@ export function AreaChart({
             y1={height * f}
             y2={height * f}
             stroke="var(--sep)"
-            stroke-width="1"
-            vector-effect="non-scaling-stroke"
-            stroke-dasharray="3 4"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+            strokeDasharray="3 4"
           />
         ))}
         <path d={area} fill="url(#area-fill)" />
-        <path d={line} fill="none" stroke="var(--accent)" stroke-width="2.2" vector-effect="non-scaling-stroke" stroke-linejoin="round" />
+        <path d={line} fill="none" stroke="var(--accent)" strokeWidth="2.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       </svg>
       {markers?.map((i) => (
-        <i key={i} class="area-mark" style={{ left: `${(x(i) / W) * 100}%`, top: y(values[i]) }} />
+        <i key={i} className="area-mark" style={{ left: `${(x(i) / W) * 100}%`, top: y(values[i]) }} />
       ))}
-      <i class="area-end" style={{ left: '100%', top: y(values[n - 1]) }} />
-      <div class="area-hit">
+      <i className="area-end" style={{ left: '100%', top: y(values[n - 1]) }} />
+      <div className="area-hit">
         {values.map((_, i) => (
           <span key={i} {...tipProps(() => tip(i))} />
         ))}
       </div>
-      <div class="area-x">
+      <div className="area-x">
         {labels.map((l, i) =>
           i % step === 0 || i === n - 1 ? (
             <span key={i} style={{ left: `${(x(i) / W) * 100}%` }}>
@@ -93,26 +93,18 @@ export function BarLine({
   const path = line.map((v, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${(height - (v / max) * height).toFixed(1)}`).join('');
   const step = Math.max(1, Math.ceil(n / 12));
   return (
-    <div class="barline" style={{ height: height + 22 }}>
-      <div class="bl-bars" style={{ height }}>
+    <div className="barline" style={{ height: height + 22 }}>
+      <div className="bl-bars" style={{ height }}>
         {bars.map((v, i) => (
-          <div key={i} class={`bl-col ${future[i] ? 'future' : ''}`} {...tipProps(() => tip(i))}>
+          <div key={i} className={`bl-col ${future[i] ? 'future' : ''}`} {...tipProps(() => tip(i))}>
             <i style={{ height: `${(v / max) * 100}%` }} />
           </div>
         ))}
       </div>
-      <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }} class="bl-line">
-        <path
-          d={path}
-          fill="none"
-          stroke="var(--orange)"
-          stroke-width="2.4"
-          vector-effect="non-scaling-stroke"
-          stroke-linejoin="round"
-          stroke-linecap="round"
-        />
+      <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }} className="bl-line">
+        <path d={path} fill="none" stroke="var(--orange)" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
-      <div class="area-x">
+      <div className="area-x">
         {labels.map((l, i) =>
           i % step === 0 ? (
             <span key={i} style={{ left: `${(cx(i) / W) * 100}%` }}>
@@ -234,28 +226,28 @@ export function Activity({
   const ticks = niceTicks(Math.max(1, ...buckets.map((b) => b.total)));
   const top = ticks[ticks.length - 1];
   return (
-    <div class="act" style={{ '--h': `${height}px` } as Record<string, string>}>
-      <div class="act-grid">
+    <div className="act" style={{ '--h': `${height}px` } as Record<string, string>}>
+      <div className="act-grid">
         {ticks.map((t) => (
-          <div key={t} class="act-tick" style={{ bottom: `${(t / top) * 100}%` }}>
+          <div key={t} className="act-tick" style={{ bottom: `${(t / top) * 100}%` }}>
             <span>{fmt(t)}</span>
           </div>
         ))}
       </div>
-      <div class="act-bars">
+      <div className="act-bars">
         {buckets.map((b, i) => (
           <button
             key={b.key}
-            class={`act-col ${(buckets.length - 1 - i) % 2 ? 'odd' : ''} ${b.future ? 'future' : ''} ${b.current ? 'current' : ''} ${(selected ?? current) === b.key ? 'sel' : ''} ${selected && selected !== b.key ? 'dim' : ''}`}
+            className={`act-col ${(buckets.length - 1 - i) % 2 ? 'odd' : ''} ${b.future ? 'future' : ''} ${b.current ? 'current' : ''} ${(selected ?? current) === b.key ? 'sel' : ''} ${selected && selected !== b.key ? 'dim' : ''}`}
             onClick={() => onSelect(b.key)}
             aria-label={`${b.label} ${fmt(b.total)}`}
           >
-            <div class="act-stack" style={{ height: `${(b.total / top) * 100}%` }}>
+            <div className="act-stack" style={{ height: `${(b.total / top) * 100}%` }}>
               {b.parts.map((p) => (
                 <i key={p.k} style={{ flexGrow: p.v, background: color(p.k) }} />
               ))}
             </div>
-            <span class="act-label">{b.label}</span>
+            <span className="act-label">{b.label}</span>
           </button>
         ))}
       </div>

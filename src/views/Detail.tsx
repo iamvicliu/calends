@@ -1,5 +1,5 @@
-import { createPortal } from 'preact/compat';
-import { useState } from 'preact/hooks';
+import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import {
   activePhases,
   chargesBetween,
@@ -71,13 +71,13 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const actions = (
     <>
       {!ro && (
-        <button class="btn" onClick={onEdit}>
+        <button className="btn" onClick={onEdit}>
           <Icon name="edit" /> {t('detail.action.edit')}
         </button>
       )}
       {!ro && sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
         <button
-          class="btn"
+          className="btn"
           onClick={() =>
             run(
               () => saveSub(sub.status === 'paused' ? { ...sub, status: 'active', pausedAt: undefined } : { ...sub, status: 'paused', pausedAt: today }),
@@ -89,16 +89,16 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
         </button>
       )}
       {sub.manageUrl && (
-        <a class="btn" href={sub.manageUrl} target="_blank" rel="noreferrer">
+        <a className="btn" href={sub.manageUrl} target="_blank" rel="noreferrer">
           <Icon name="gear" /> {t('detail.action.manage')}
         </a>
       )}
       {sub.url && (
-        <a class="btn" href={sub.url} target="_blank" rel="noreferrer">
+        <a className="btn" href={sub.url} target="_blank" rel="noreferrer">
           <Icon name="link" /> {t('detail.action.website')}
         </a>
       )}
-      <button class="btn" onClick={() => setShare(true)}>
+      <button className="btn" onClick={() => setShare(true)}>
         <Icon name="share" /> {t('detail.action.share')}
       </button>
     </>
@@ -106,29 +106,29 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const story = !!(sub.phases?.length || (sub.priceHistory?.length ?? 0) > 1);
 
   return (
-    <div class="detail">
+    <div className="detail">
       {/* 宽屏：操作按钮放在右上角 */}
-      <div class="d-top">{actions}</div>
-      <div class="d-side">
-        <div class="d-hero">
+      <div className="d-top">{actions}</div>
+      <div className="d-side">
+        <div className="d-hero">
           {icon ? (
-            <div class="d-hero-bg" style={{ backgroundImage: `url("${icon}")` }} />
+            <div className="d-hero-bg" style={{ backgroundImage: `url("${icon}")` }} />
           ) : (
-            <div class="d-hero-bg tint" style={{ '--tint': catColor(sub.category) } as Record<string, string>} />
+            <div className="d-hero-bg tint" style={{ '--tint': catColor(sub.category) } as Record<string, string>} />
           )}
           <SubIcon sub={sub} size={72} />
           <h2>
             {sub.name}
-            <span class={`badge ${tone} d-status`}>{label}</span>
+            <span className={`badge ${tone} d-status`}>{label}</span>
           </h2>
-          <div class="price">
+          <div className="price">
             {pair(next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price, cur.currency, { compact: false }).main}
             {cycleLabel(cur.cycle)}
             {pair(cur.price, cur.currency, { compact: false }).alt && ` · ${pair(cur.price, cur.currency, { compact: false }).alt}`}
           </div>
           {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
           <ParallelNote sub={sub} cur={cur} today={today} />
-          <div class="d-actions">{actions}</div>
+          <div className="d-actions">{actions}</div>
         </div>
         <Stats
           sub={sub}
@@ -139,13 +139,13 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           alt={base !== 'USD' ? money(totalUsd, 'USD', { compact: true }) : undefined}
         />
         {story && (
-          <div class="d-mini">
-            <div class="d-mini-h">{t('detail.history')}</div>
+          <div className="d-mini">
+            <div className="d-mini-h">{t('detail.history')}</div>
             <MiniGantt sub={sub} state={state} today={today} />
           </div>
         )}
       </div>
-      <div class="d-body">
+      <div className="d-body">
         <Group title={t('detail.summary')}>
           <Cell label={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Cell>
           <Cell label={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Cell>
@@ -183,7 +183,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
               <Cell
                 key={v.start}
                 label={
-                  <span class="row" style={{ gap: 6 }}>
+                  <span className="row" style={{ gap: 6 }}>
                     {v.region ? `${flag(v.region)} ${v.region}` : t('detail.overlap.previous')}
                     <PayBadge m={state.methods.find((m) => m.id === v.methodId)} />
                   </span>
@@ -214,11 +214,14 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
               <PayBadge m={upMethod} />
             </Cell>
             {up.planned && !ro && (
-              <div class="cell plan-actions">
-                <button class="btn" onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}>
+              <div className="cell plan-actions">
+                <button
+                  className="btn"
+                  onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}
+                >
                   {t('detail.plan.drop')}
                 </button>
-                <button class="btn primary" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
+                <button className="btn primary" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
                   <Icon name="check" /> {t('detail.plan.confirm')}
                 </button>
               </div>
@@ -236,7 +239,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           <Group title={t('detail.intro.title')}>
             <Cell
               label={
-                <span class="row" style={{ gap: 6, color: 'var(--green)' }}>
+                <span className="row" style={{ gap: 6, color: 'var(--green)' }}>
                   <Icon name="leaf" /> {t('detail.intro.price')}
                 </span>
               }
@@ -252,7 +255,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
           <Group title={t('detail.remind.title')}>
             <Cell
               label={
-                <span class="row" style={{ gap: 8 }}>
+                <span className="row" style={{ gap: 8 }}>
                   <Icon name="bell" /> {t('detail.remind.email')}
                 </span>
               }
@@ -308,7 +311,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
                 return (
                   <div
                     key={`${c.date}-${i}`}
-                    class={`charge-row ${ro ? '' : 'editable'} ${c.kind ?? ''}`}
+                    className={`charge-row ${ro ? '' : 'editable'} ${c.kind ?? ''}`}
                     onClick={() =>
                       !ro &&
                       setPay({
@@ -318,13 +321,13 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
                       })
                     }
                   >
-                    <span class="cr-date">
+                    <span className="cr-date">
                       {c.date}
-                      {c.kind && <em class={`cr-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
+                      {c.kind && <em className={`cr-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
                     </span>
                     <b>{money(c.amount, c.currency)}</b>
-                    <span class="cr-conv">
-                      {c.settled && <span class="cr-settled">{t('detail.charges.onCard', { amount: money(c.settled.amount, c.settled.currency) })}</span>}
+                    <span className="cr-conv">
+                      {c.settled && <span className="cr-settled">{t('detail.charges.onCard', { amount: money(c.settled.amount, c.settled.currency) })}</span>}
                       {c.currency !== base && money(chargeValue(state, c, base), base)}
                       {c.currency !== base && base !== 'USD' && c.currency !== 'USD' && ' · '}
                       {base !== 'USD' && c.currency !== 'USD' && money(chargeValue(state, c, 'USD'), 'USD')}
@@ -339,12 +342,12 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
                 );
               })}
             {!ro && (
-              <button class="cell more-row" onClick={() => setPay({})}>
+              <button className="cell more-row" onClick={() => setPay({})}>
                 <Icon name="plus" size={14} /> {t('detail.charges.add')}
               </button>
             )}
             {history.length > 12 && (
-              <button class="cell more-row" onClick={() => setAllCharges(!allCharges)}>
+              <button className="cell more-row" onClick={() => setAllCharges(!allCharges)}>
                 {allCharges ? t('detail.charges.recent') : t('detail.charges.all', { count: history.length })}
               </button>
             )}
@@ -353,7 +356,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
 
         {sub.notes && (
           <Group title={t('detail.notes')}>
-            <div class="cell" style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6 }}>
+            <div className="cell" style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6 }}>
               {sub.notes}
             </div>
           </Group>
@@ -398,7 +401,7 @@ function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; st
   const same = first.currency === cur.currency && first.cycle.unit === cur.cycle.unit && first.cycle.every === cur.cycle.every && p0 > 0;
   const change = same ? p1 / p0 - 1 : undefined;
   return (
-    <div class="d-stats">
+    <div className="d-stats">
       <div>
         <small>{t('detail.stats.spent')}</small>
         <b>{money(total, base, { compact: true })}</b>
@@ -429,7 +432,7 @@ function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; st
       )}
       <div>
         <small>{change != null ? t('detail.stats.priceChange') : t('detail.stats.changed')}</small>
-        <b class={change != null ? (change > 0.005 ? 'up' : change < -0.005 ? 'down' : '') : ''}>
+        <b className={change != null ? (change > 0.005 ? 'up' : change < -0.005 ? 'down' : '') : ''}>
           {change != null
             ? Math.abs(change) < 0.005
               ? t('detail.stats.unchanged')

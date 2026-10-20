@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { cycleShort } from '../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../shared/csv.ts';
 import type { AppState, PaymentMethod, Subscription } from '../../shared/types.ts';
@@ -58,31 +58,31 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
   const url = icsUrl(state);
   return (
     <Sheet narrow title={t('app.ics.title')} onClose={onClose}>
-      <div class="stack">
-        <p class="muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>
+      <div className="stack">
+        <p className="muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>
           {t('app.ics.intro')}
         </p>
         {url ? (
           <>
-            <div class="codebox">{url}</div>
-            <div class="row" style={{ flexWrap: 'wrap' }}>
-              <a class="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
+            <div className="codebox">{url}</div>
+            <div className="row" style={{ flexWrap: 'wrap' }}>
+              <a className="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
                 <Icon name="cal" /> {t('app.ics.subscribe')}
               </a>
-              <button class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast(t('app.ics.copied')))}>
+              <button className="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast(t('app.ics.copied')))}>
                 {t('app.ics.copy')}
               </button>
-              <button class="btn ghost" onClick={() => run(rotateIcs, t('app.ics.resetDone'))}>
+              <button className="btn ghost" onClick={() => run(rotateIcs, t('app.ics.resetDone'))}>
                 {t('app.ics.reset')}
               </button>
             </div>
           </>
         ) : (
-          <button class="btn primary" onClick={() => run(rotateIcs, t('app.ics.generated'))}>
+          <button className="btn primary" onClick={() => run(rotateIcs, t('app.ics.generated'))}>
             {t('app.ics.generate')}
           </button>
         )}
-        <small class="soft">{t('app.ics.note')}</small>
+        <small className="soft">{t('app.ics.note')}</small>
       </div>
     </Sheet>
   );
@@ -177,7 +177,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   return (
     <>
       <Toolbar title={t('settings.title')} />
-      <div class="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
+      <div className="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
         <Group title={t('settings.general.title')}>
           <Cell label={t('settings.general.language')}>
             <Picker
@@ -189,7 +189,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                   value: l.code as string,
                   label: l.name,
                   icon: (
-                    <span class="cp-flag">
+                    <span className="cp-flag">
                       <img src={`/flags/${l.flag}.png`} alt="" />
                     </span>
                   ),
@@ -202,7 +202,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <input
               value={name}
               placeholder={t('settings.general.namePlaceholder')}
-              onInput={(e) => setName((e.target as HTMLInputElement).value)}
+              onChange={(e) => setName((e.target as HTMLInputElement).value)}
               onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), t('settings.toast.saved'))}
             />
           </Cell>
@@ -422,7 +422,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
         </Group>
 
         <Group>
-          <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => logout()}>
+          <button className="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => logout()}>
             {t('settings.logout')}
           </button>
         </Group>
@@ -435,12 +435,12 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           onClose={() => setRestoring(null)}
           foot={
             <>
-              <span class="grow" />
-              <button class="btn" onClick={() => setRestoring(null)}>
+              <span className="grow" />
+              <button className="btn" onClick={() => setRestoring(null)}>
                 {t('settings.restore.cancel')}
               </button>
               <button
-                class="btn primary"
+                className="btn primary"
                 onClick={() =>
                   run(async () => {
                     const r = await api<{ restored: { subscriptions: number; methods: number; fxDays: number }; state: AppState }>('/api/backup', {
@@ -474,7 +474,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           foot={
             <>
               <button
-                class="btn danger"
+                className="btn danger"
                 onClick={() =>
                   window.confirm(t('settings.import.confirmReplace')) &&
                   run(async () => {
@@ -485,9 +485,9 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               >
                 {t('settings.import.replaceAll')}
               </button>
-              <span class="grow" />
+              <span className="grow" />
               <button
-                class="btn primary"
+                className="btn primary"
                 onClick={() =>
                   run(async () => {
                     await importData({ subscriptions: importing.subs, methods: importing.methods, mode: 'merge' });

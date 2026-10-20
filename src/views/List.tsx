@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
 import { cnDate, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
@@ -203,7 +203,7 @@ export function List({
         />
         <button
           type="button"
-          class="icon-btn"
+          className="icon-btn"
           onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')}
           aria-label={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
           title={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
@@ -211,16 +211,16 @@ export function List({
           <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
         </button>
         {!state.readonly && (
-          <button class="icon-btn accent d-only" onClick={onAdd} aria-label={t('list.add')}>
+          <button className="icon-btn accent d-only" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
           </button>
         )}
       </Toolbar>
-      <div class="page fade-in">
-        <div class="facets">
+      <div className="page fade-in">
+        <div className="facets">
           {dirty && (
             <button
-              class="facet-clear"
+              className="facet-clear"
               onClick={() => {
                 setFilter('live');
                 setCat(category ?? 'all');
@@ -256,11 +256,11 @@ export function List({
             ]}
           />
         </div>
-        {rows.length === 0 && <div class="empty">{t('list.empty')}</div>}
+        {rows.length === 0 && <div className="empty">{t('list.empty')}</div>}
         {view === 'gantt' ? (
           rows.length > 0 && <Gantt rows={rows} state={state} today={today} onOpen={onOpen} />
         ) : view === 'grid' ? (
-          <div class="sgrid">
+          <div className="sgrid">
             {rows.map((s) => {
               const st = effectiveStatus(s, today);
               const n = nextCharge(s, today);
@@ -270,45 +270,45 @@ export function List({
               const m = state.methods.find((x) => x.id === cur.methodId);
               const icon = subImage(s);
               return (
-                <button key={s.id} class={`scard st-${st}`} onClick={() => onOpen(s)}>
-                  <div class="sc-glow" style={icon ? { backgroundImage: `url("${icon}")` } : { background: 'var(--fill-2)' }} />
-                  <div class="sc-top">
+                <button key={s.id} className={`scard st-${st}`} onClick={() => onOpen(s)}>
+                  <div className="sc-glow" style={icon ? { backgroundImage: `url("${icon}")` } : { background: 'var(--fill-2)' }} />
+                  <div className="sc-top">
                     <SubIcon sub={s} size={48} />
-                    <span class="sc-flags">
-                      {cur.region && <span class="badge">{cur.region}</span>}
-                      {st === 'upcoming' && <span class="badge blue">{t('list.status.upcoming')}</span>}
-                      {st === 'trial' && <span class="badge green">{t('list.status.trialShort')}</span>}
-                      {st === 'ending' && <span class="badge orange">{t('list.status.ending')}</span>}
-                      {st === 'paused' && <span class="badge">{t('list.status.pausedShort')}</span>}
-                      {st === 'ended' && <span class="badge">{t('list.status.ended')}</span>}
-                      {st === 'lifetime' && <span class="badge">{t('list.status.lifetime')}</span>}
-                      {s.share?.role === 'owner' && <span class="badge blue">{t('list.badge.share')}</span>}
-                      {s.share?.role === 'member' && <span class="badge blue">{t('list.badge.joined')}</span>}
+                    <span className="sc-flags">
+                      {cur.region && <span className="badge">{cur.region}</span>}
+                      {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
+                      {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
+                      {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
+                      {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
+                      {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
+                      {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
+                      {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
+                      {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                       {s.proxy && <ProxyBadge state={state} s={s} today={today} />}
                     </span>
                   </div>
-                  <div class="sc-name">
+                  <div className="sc-name">
                     <span>{s.name}</span>
                     {s.intro && s.intro.until > today && <Icon name="leaf" size={13} />}
                   </div>
-                  <div class="sc-meta">
+                  <div className="sc-meta">
                     <CatChip cat={s.category} />
                     <PayBadge m={m} />
                   </div>
-                  <div class="sc-price">
+                  <div className="sc-price">
                     <Amount value={shown(s, n).value} ccy={shown(s, n).ccy} />
-                    <span class="sc-per">/{perLabel(cur)}</span>
+                    <span className="sc-per">/{perLabel(cur)}</span>
                   </div>
                   {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
                   <ParallelNote sub={s} cur={cur} today={today} />
-                  <div class="sc-foot">
+                  <div className="sc-foot">
                     <span>{shown(s, n).sub ?? '\u00a0'}</span>
-                    <span class={d != null && d <= 3 ? 'soon' : ''}>
+                    <span className={d != null && d <= 3 ? 'soon' : ''}>
                       {st === 'lifetime' ? (
                         s.start.slice(0, 7)
                       ) : st === 'ended' ? (
                         saved.get(s.id) ? (
-                          <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
+                          <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (
                           (s.end ?? '')
                         )
@@ -328,9 +328,9 @@ export function List({
             })}
           </div>
         ) : (
-          <div class="ltable-wrap">
-            <div class="ltable" role="table">
-              <div class="lt-row lt-head" role="row">
+          <div className="ltable-wrap">
+            <div className="ltable" role="table">
+              <div className="lt-row lt-head" role="row">
                 {(
                   [
                     ['name', t('list.col.name')],
@@ -345,7 +345,7 @@ export function List({
                   k ? (
                     <button
                       key={l}
-                      class={`lt-sort ${sort === k ? 'on' : ''}`}
+                      className={`lt-sort ${sort === k ? 'on' : ''}`}
                       onClick={() => toggleSort(k)}
                       aria-sort={sort === k ? (dir === 'asc' ? 'ascending' : 'descending') : undefined}
                     >
@@ -367,24 +367,24 @@ export function List({
                 const v = shown(s, n);
                 const live = !['lifetime', 'ended'].includes(st);
                 return (
-                  <button key={s.id} class={`lt-row st-${st}`} role="row" onClick={() => onOpen(s)}>
-                    <span class="lt-name">
+                  <button key={s.id} className={`lt-row st-${st}`} role="row" onClick={() => onOpen(s)}>
+                    <span className="lt-name">
                       <SubIcon sub={s} size={32} />
-                      <span class="lt-title">
-                        <span class="nm">
+                      <span className="lt-title">
+                        <span className="nm">
                           <b>{s.name}</b>
                           {s.intro && s.intro.until > today && <Icon name="leaf" size={13} />}
-                          {cur.region && <span class="badge">{cur.region}</span>}
-                          {st === 'upcoming' && <span class="badge blue">{t('list.status.upcoming')}</span>}
-                          {st === 'trial' && <span class="badge green">{t('list.status.trialShort')}</span>}
-                          {st === 'ending' && <span class="badge orange">{t('list.status.ending')}</span>}
-                          {st === 'paused' && <span class="badge">{t('list.status.pausedShort')}</span>}
-                          {st === 'ended' && <span class="badge">{t('list.status.ended')}</span>}
-                          {st === 'lifetime' && <span class="badge">{t('list.status.lifetime')}</span>}
-                          {s.share?.role === 'owner' && s.share.members.length > 0 && <span class="badge blue">{t('list.badge.share')}</span>}
-                          {s.share?.role === 'member' && <span class="badge blue">{t('list.badge.joined')}</span>}
+                          {cur.region && <span className="badge">{cur.region}</span>}
+                          {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
+                          {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
+                          {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
+                          {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
+                          {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
+                          {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
+                          {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
+                          {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                           {s.proxy && (
-                            <span class="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>
+                            <span className="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>
                               {t('list.badge.proxy')}
                             </span>
                           )}
@@ -393,30 +393,30 @@ export function List({
                         <ParallelNote sub={s} cur={cur} today={today} />
                       </span>
                     </span>
-                    <span class="lt-cat">
+                    <span className="lt-cat">
                       <CatChip cat={s.category} />
                     </span>
-                    <span class="lt-pay">
+                    <span className="lt-pay">
                       <PayBadge m={m} />
                     </span>
-                    <span class="lt-amt">
+                    <span className="lt-amt">
                       <span>
                         <Amount value={v.value} ccy={v.ccy} />
                         <small>/{perLabel(cur)}</small>
                       </span>
                       {money2 !== 'orig' && s.currency !== money2 && <small>{v.sub}</small>}
                     </span>
-                    <span class="lt-mo">{s.proxy ? <small>{t('list.notCounted')}</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
-                    <span class="lt-start">
+                    <span className="lt-mo">{s.proxy ? <small>{t('list.notCounted')}</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
+                    <span className="lt-start">
                       {cnDate(s.start)}
                       <small>{s.start.slice(0, 4)}</small>
                     </span>
-                    <span class={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
+                    <span className={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
                       {st === 'lifetime' ? (
                         t('list.status.lifetime')
                       ) : st === 'ended' ? (
                         saved.get(s.id) ? (
-                          <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
+                          <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (
                           <>{tx('list.endedOn', { date: <small>{s.end ?? '—'}</small> })}</>
                         )
@@ -451,7 +451,7 @@ export function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; u
     up.methodId !== cur.methodId || st === 'upcoming' ? (m ? m.name : t('list.change.noMethod')) : '',
   ].filter(Boolean);
   return (
-    <div class="change-note">
+    <div className="change-note">
       <Icon name="right" size={12} />
       <span>
         {up.planned ? t('list.change.planned') : ''}
@@ -468,7 +468,7 @@ export function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subs
   const vs = activePhases(sub, today).filter((v) => v.start !== cur.start);
   if (!vs.length) return null;
   return (
-    <div class="change-note parallel">
+    <div className="change-note parallel">
       <Icon name="copy" size={12} />
       <span>
         {vs
@@ -490,7 +490,7 @@ function ProxyBadge({ state, s, today }: { state: AppState; s: Subscription; tod
   const name = s.proxy?.forName;
   const key = `list.proxyBadge.${n ? 'owed' : 'settled'}${name ? 'For' : ''}`;
   return (
-    <span class={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>
+    <span className={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>
       {t(key, { count: n, name })}
     </span>
   );
@@ -506,24 +506,24 @@ function FacetRow({
   label: string;
   value: string;
   onChange: (v: string) => void;
-  options: Array<{ key: string; label: string; n: number; icon?: preact.ComponentChildren }>;
+  options: Array<{ key: string; label: string; n: number; icon?: React.ReactNode }>;
 }) {
   return (
-    <div class="facet-row">
-      <span class="facet-label">{label}</span>
-      <div class="facet-opts">
+    <div className="facet-row">
+      <span className="facet-label">{label}</span>
+      <div className="facet-opts">
         {options
           .filter((o) => o.key === 'all' || o.n > 0 || o.key === value)
           .map((o) => (
             <button
               key={o.key}
-              class={`facet ${value === o.key ? 'on' : ''} ${o.icon ? 'has-icon' : ''}`}
+              className={`facet ${value === o.key ? 'on' : ''} ${o.icon ? 'has-icon' : ''}`}
               aria-pressed={value === o.key}
               onClick={() => onChange(value === o.key && o.key !== 'all' ? 'all' : o.key)}
             >
               {o.icon}
               {o.label}
-              <span class="n">×{o.n}</span>
+              <span className="n">×{o.n}</span>
             </button>
           ))}
       </div>

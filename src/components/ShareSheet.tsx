@@ -1,6 +1,6 @@
 import { toBlob } from 'html-to-image';
-import type { ComponentChildren } from 'preact';
-import { useRef, useState } from 'preact/hooks';
+import type { ReactNode as ComponentChildren } from 'react';
+import { useRef, useState } from 'react';
 import { money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { toast } from '../store.ts';
@@ -88,27 +88,27 @@ export function ShareSheet<S extends string>({
       onClose={onClose}
       foot={
         <>
-          <button class="btn" disabled={busy} onClick={download}>
+          <button className="btn" disabled={busy} onClick={download}>
             <Icon name="download" /> {t('share.sheet.download')}
           </button>
-          <button class="btn primary" disabled={busy} onClick={copy}>
+          <button className="btn primary" disabled={busy} onClick={copy}>
             <Icon name="copy" /> {busy ? t('share.sheet.generating') : t('share.sheet.copy')}
           </button>
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         {top}
         <Seg value={style} onChange={pick} options={styles} />
-        <div class="share-stage">
-          <div ref={node} class={`share share-${style}`}>
+        <div className="share-stage">
+          <div ref={node} className={`share share-${style}`}>
             {render(style, { hide: !amounts, m })}
           </div>
         </div>
-        <div class="group-body">
-          <div class="cell">
-            <span class="cell-l">{t('share.sheet.showAmounts')}</span>
-            <span class="cell-r">
+        <div className="group-body">
+          <div className="cell">
+            <span className="cell-l">{t('share.sheet.showAmounts')}</span>
+            <span className="cell-r">
               <Toggle checked={amounts} onChange={setAmounts} />
             </span>
           </div>

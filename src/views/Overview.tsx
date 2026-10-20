@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel, relDays } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -22,21 +22,21 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
     <>
       <Toolbar title={t('overview.title')}>
         {!state.readonly && (
-          <button class="btn primary d-only" onClick={onAdd}>
+          <button className="btn primary d-only" onClick={onAdd}>
             <Icon name="plus" /> {t('overview.add')}
           </button>
         )}
       </Toolbar>
-      <div class="page fade-in stack" style={{ gap: 20 }}>
+      <div className="page fade-in stack" style={{ gap: 20 }}>
         <Statement state={state} today={today} onOpen={onOpen} />
         <ChargeTimeline state={state} today={today} onOpen={onOpen} />
         <Spending state={state} today={today} onOpen={onOpen} />
-        <div class="grid g-2">
+        <div className="grid g-2">
           <DueSoon state={state} today={today} onOpen={onOpen} />
           <WalletBrief state={state} today={today} />
         </div>
         <Tips state={state} today={today} onOpen={onOpen} />
-        <p class="card-note" style={{ textAlign: 'center' }}>
+        <p className="card-note" style={{ textAlign: 'center' }}>
           {t('overview.footer', { count: tot.activeCount, amount: money(tot.mrr, base) })}{' '}
           <a href="/admin/report" style={{ textDecoration: 'underline' }}>
             {t('overview.fullReport')}
@@ -80,10 +80,10 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
     [state, today],
   );
   return (
-    <section class="card">
-      <div class="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
-        <h3 class="sec-title">{t('overview.timeline.title')}</h3>
-        <span class="sec-sub" style={{ marginTop: 0 }}>
+    <section className="card">
+      <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
+        <h3 className="sec-title">{t('overview.timeline.title')}</h3>
+        <span className="sec-sub" style={{ marginTop: 0 }}>
           {t('overview.timeline.sub', { past: money(past30, base, { compact: true }), next: money(next30, base, { compact: true }) })}
         </span>
       </div>
@@ -170,11 +170,11 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
   const isFuture = sel > curKey;
 
   return (
-    <div class="card" style={{ padding: '22px 24px 20px' }}>
-      <div class="ov-head">
+    <div className="card" style={{ padding: '22px 24px 20px' }}>
+      <div className="ov-head">
         <div>
-          <h3 class="sec-title">{t('overview.spending.title')}</h3>
-          <div class="sec-sub">{t('overview.spending.sub')}</div>
+          <h3 className="sec-title">{t('overview.spending.title')}</h3>
+          <div className="sec-sub">{t('overview.spending.sub')}</div>
         </div>
         <Seg
           value={scale}
@@ -198,11 +198,11 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
         fmt={(v) => (v >= 10000 ? `${(v / 1000).toFixed(0)}k` : v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(Math.round(v)))}
       />
 
-      <div class="legend-chips">
+      <div className="legend-chips">
         {cats.map(([k, v]) => (
           <button
             key={k}
-            class={`lc ${hidden.includes(k) ? 'off' : ''}`}
+            className={`lc ${hidden.includes(k) ? 'off' : ''}`}
             onClick={() => setHidden(hidden.includes(k) ? hidden.filter((x) => x !== k) : [...hidden, k])}
           >
             <i style={{ background: catColor(k) }} />
@@ -212,30 +212,30 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
         ))}
       </div>
 
-      <div class="sel-box">
+      <div className="sel-box">
         <div>
           <h4>
             {selLabel}
             {isFuture ? t('overview.spending.projected') : sel === curKey ? t('overview.spending.inProgress') : ''}
           </h4>
-          <div class="big">
+          <div className="big">
             <Amount value={selTotal} ccy={base} />
           </div>
-          <div class="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+          <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
             {t('overview.n.subs', { count: items.length })} · {t('overview.n.charges', { count: selData?.cs.length ?? 0 })}
             {sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: money(selPaid, base, { compact: true }) }) : ''}
           </div>
         </div>
-        <div class="sel-items">
+        <div className="sel-items">
           {items.length === 0 && (
-            <span class="muted" style={{ fontSize: 13 }}>
+            <span className="muted" style={{ fontSize: 13 }}>
               {t('overview.spending.empty')}
             </span>
           )}
           {items.slice(0, 12).map((e) => (
-            <button key={e.sub.id} class="sel-item" onClick={() => onOpen(e.sub)}>
+            <button key={e.sub.id} className="sel-item" onClick={() => onOpen(e.sub)}>
               <SubIcon sub={e.sub} size={22} />
-              <span class="si-name" style={{ opacity: e.proj && !isFuture ? 0.6 : 1 }}>
+              <span className="si-name" style={{ opacity: e.proj && !isFuture ? 0.6 : 1 }}>
                 {e.sub.name}
                 {e.n > 1 ? ` ×${e.n}` : ''}
               </span>
@@ -265,43 +265,43 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
     ['later', cs.filter((c) => diffDays(today, c.date) > 6)],
   ];
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('overview.due.title')}</h3>
-        <span class="meta">
+        <span className="meta">
           {t('overview.n.charges', { count: cs.length })} · {money(total, base, { compact: true })}
         </span>
       </div>
-      {cs.length === 0 && <div class="empty">{t('overview.due.empty')}</div>}
-      <div class="due-list">
+      {cs.length === 0 && <div className="empty">{t('overview.due.empty')}</div>}
+      <div className="due-list">
         {groups
           .filter(([, l]) => l.length)
           .map(([g, list]) => (
-            <>
-              <div class="due-g">{t(`overview.due.${g}`)}</div>
+            <Fragment key={g}>
+              <div className="due-g">{t(`overview.due.${g}`)}</div>
               {list.slice(0, g === 'thisWeek' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
                 const m = state.methods.find((x) => x.id === c.sub.methodId);
                 return (
-                  <button key={c.sub.id + c.date + i} class="due-row" onClick={() => onOpen(c.sub)}>
+                  <button key={c.sub.id + c.date + i} className="due-row" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={36} />
-                    <span class="nm">
+                    <span className="nm">
                       <b>{c.sub.name}</b>
                       <small>
                         {m?.name ?? t('overview.due.noMethod')} · {cycleLabel(c.sub.cycle)}
                       </small>
                     </span>
-                    <span class="am">
+                    <span className="am">
                       <b>{pair(c.amount, c.currency, { value: chargeValue(state, c) }).main}</b>
                       {pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt && (
                         <small>{pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt}</small>
                       )}
                     </span>
-                    <span class={`pill ${d <= 3 ? 'hot' : ''}`}>{d <= 13 ? relDays(d) : cnDate(c.date)}</span>
+                    <span className={`pill ${d <= 3 ? 'hot' : ''}`}>{d <= 13 ? relDays(d) : cnDate(c.date)}</span>
                   </button>
                 );
               })}
-            </>
+            </Fragment>
           ))}
       </div>
     </div>
@@ -315,10 +315,10 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
     .map((m) => ({ m, r: runwayFor(m, state, today) }));
   const cards = state.methods.filter((m) => !BALANCE_KINDS.includes(m.kind));
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('overview.wallet.title')}</h3>
-        <a class="btn plain" href="/admin/wallet">
+        <a className="btn plain" href="/admin/wallet">
           {t('overview.wallet.manage')}
         </a>
       </div>
@@ -326,9 +326,9 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
         const days = r?.runsOutOn ? diffDays(today, r.runsOutOn) : undefined;
         const pct = r ? (r.monthlyDrain <= 0 ? 100 : Math.min(100, ((days ?? 365) / 365) * 100)) : 0;
         return (
-          <a key={m.id} class="wal-row" href="/admin/wallet">
+          <a key={m.id} className="wal-row" href="/admin/wallet">
             <MethodMark m={m} size={28} />
-            <span class="nm">
+            <span className="nm">
               <b>{m.name}</b>
               {r ? (
                 <>
@@ -342,8 +342,8 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
                         : t('overview.wallet.enough'),
                     })}
                   </small>
-                  <div class="wal-bar">
-                    <i class={days != null && days <= 7 ? 'out' : days != null && days <= 30 ? 'low' : ''} style={{ width: `${Math.max(3, pct)}%` }} />
+                  <div className="wal-bar">
+                    <i className={days != null && days <= 7 ? 'out' : days != null && days <= 30 ? 'low' : ''} style={{ width: `${Math.max(3, pct)}%` }} />
                   </div>
                 </>
               ) : (
@@ -354,7 +354,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
         );
       })}
       {cards.length > 0 && (
-        <div class="muted" style={{ fontSize: 12.5, marginTop: rows.length ? 12 : 0 }}>
+        <div className="muted" style={{ fontSize: 12.5, marginTop: rows.length ? 12 : 0 }}>
           {t('overview.wallet.others', { list: cards.map((m) => m.name).join(t('overview.listSep')) })}
         </div>
       )}
@@ -370,17 +370,17 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
   if (!top.length) return null;
   const label = { warn: t('overview.tips.warn'), info: t('overview.tips.info'), good: t('overview.tips.good') };
   return (
-    <div class="tips">
+    <div className="tips">
       {top.map((i) => (
-        <div key={i.id} class={`tip-card ${i.tone}`}>
-          <span class="k">
+        <div key={i.id} className={`tip-card ${i.tone}`}>
+          <span className="k">
             <i />
             {label[i.tone]}
           </span>
           <b>{i.title}</b>
           <p>{i.body}</p>
           {i.subs && i.subs.length > 0 && (
-            <div class="ins-subs">
+            <div className="ins-subs">
               {i.subs.slice(0, 7).map((s) => (
                 <button key={s.id} onClick={() => onOpen(s)} title={s.name}>
                   <SubIcon sub={s} size={22} />
@@ -429,29 +429,29 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
   const hv = hover != null ? live[hover] : undefined;
 
   return (
-    <section class="stmt">
-      <div class="stmt-l">
-        <div class="stmt-kicker">{t('overview.stmt.kicker')}</div>
-        <div class="stmt-num">
+    <section className="stmt">
+      <div className="stmt-l">
+        <div className="stmt-kicker">{t('overview.stmt.kicker')}</div>
+        <div className="stmt-num">
           <Amount value={-tot.mrr} ccy={base} />
         </div>
-        <div class="stmt-delta">
-          <span class={delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}>
+        <div className="stmt-delta">
+          <span className={delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}>
             {delta > 0.5 ? '↑' : delta < -0.5 ? '↓' : '·'} {money(Math.abs(delta), base, { compact: true })}
           </span>
           {t('overview.stmt.vsLastMonth')}
         </div>
-        <svg class="stmt-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
+        <svg className="stmt-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
           <path d={`${path}L100,32L0,32Z`} fill="url(#stmt-g)" />
-          <path d={path} fill="none" stroke="currentColor" stroke-width="1.4" vector-effect="non-scaling-stroke" />
+          <path d={path} fill="none" stroke="currentColor" strokeWidth="1.4" vector-effect="non-scaling-stroke" />
           <defs>
             <linearGradient id="stmt-g" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0" stop-color="currentColor" stop-opacity="0.25" />
-              <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+              <stop offset="0" stopColor="currentColor" stopOpacity="0.25" />
+              <stop offset="1" stopColor="currentColor" stopOpacity="0" />
             </linearGradient>
           </defs>
         </svg>
-        <div class="stmt-facts">
+        <div className="stmt-facts">
           <div>
             <b>{money(tot.mrr * 12, base, { compact: true })}</b>
             <span>{t('overview.stmt.annual')}</span>
@@ -470,8 +470,8 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
           </div>
         </div>
       </div>
-      <div class="stmt-r">
-        <div class="stmt-cap">
+      <div className="stmt-r">
+        <div className="stmt-cap">
           {hv ? (
             <>
               <b>{hv.s.name}</b> · {t('overview.stmt.share', { amount: money(hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) })}
@@ -480,7 +480,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
             <>{t('overview.stmt.caption')}</>
           )}
         </div>
-        <div class="stars" ref={box} style={{ aspectRatio: `${1 / h}` }}>
+        <div className="stars" ref={box} style={{ aspectRatio: `${1 / h}` }}>
           {w > 0 &&
             bubbles.map((b, k) => {
               const { s, v } = live[b.i];
@@ -488,7 +488,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
               return (
                 <button
                   key={s.id}
-                  class={`star ${hover === b.i ? 'on' : ''}`}
+                  className={`star ${hover === b.i ? 'on' : ''}`}
                   style={
                     {
                       left: `${(b.x - b.r) * 100}%`,
@@ -505,7 +505,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
                   aria-label={t('overview.stmt.aria', { name: s.name, amount: money(v, base) })}
                 >
                   <SubIcon sub={s} size={Math.max(12, Math.round(d * 0.5))} />
-                  {d > 86 && <span class="star-amt">{money(v, base, { compact: true })}</span>}
+                  {d > 86 && <span className="star-amt">{money(v, base, { compact: true })}</span>}
                 </button>
               );
             })}

@@ -1,6 +1,6 @@
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
-import { useRef, useState } from 'preact/hooks';
+import { useRef, useState } from 'react';
 import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
@@ -25,35 +25,35 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
   const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
   const tone = daysLeft <= 7 ? 'out' : daysLeft <= (m.lowRunwayDays ?? 30) ? 'low' : '';
   const body = (
-    <div class="runway">
-      <div class="rw-top">
+    <div className="runway">
+      <div className="rw-top">
         <MethodMark m={m} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600 }}>{m.name}</div>
-          <div class="muted" style={{ fontSize: 12.5 }}>
+          <div className="muted" style={{ fontSize: 12.5 }}>
             {t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) })}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div class="rw-bal">{pair(r.current, m.currency).main}</div>
+          <div className="rw-bal">{pair(r.current, m.currency).main}</div>
           {pair(r.current, m.currency).alt && (
-            <div class="soft" style={{ fontSize: 11.5 }}>
+            <div className="soft" style={{ fontSize: 11.5 }}>
               {pair(r.current, m.currency).alt}
             </div>
           )}
         </div>
       </div>
-      <div class={`rw-track ${tone}`}>
+      <div className={`rw-track ${tone}`}>
         <span style={{ width: `${pct}%` }} />
       </div>
-      <div class="rw-scale">
+      <div className="rw-scale">
         <span>{t('wallet.runway.scale.today')}</span>
         <span>{t('wallet.runway.scale.m3')}</span>
         <span>{t('wallet.runway.scale.m6')}</span>
         <span>{t('wallet.runway.scale.m9')}</span>
         <span>{t('wallet.runway.scale.y1')}</span>
       </div>
-      <div class="rw-note">
+      <div className="rw-note">
         {r.monthlyDrain <= 0 ? (
           t('wallet.runway.noSubs')
         ) : r.shortfall && r.coveredCharges === 0 ? (
@@ -82,7 +82,7 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
       </div>
     </div>
   );
-  return flat ? body : <div class="card">{body}</div>;
+  return flat ? body : <div className="card">{body}</div>;
 }
 
 const CARD_KINDS: MethodKind[] = ['debit', 'credit', 'crypto'];
@@ -100,52 +100,52 @@ export const isSim = (m: PaymentMethod) => m.kind === 'phone';
 const faceClass = (m: PaymentMethod) => (isSim(m) ? 'sim' : brandOf(m) === 'appstore' ? 'apple' : '');
 
 /** 卡面：品牌标旋转放大做水印并渐隐，角上放清晰的小 logo；手机话费做成 SIM 卡 */
-function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; label: string; value: preact.ComponentChildren; right: string; rightSub: string }) {
+function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; label: string; value: React.ReactNode; right: string; rightSub: string }) {
   const brand = brandOf(m);
   if (isSim(m)) {
     // 标准 SIM 卡托：银行卡大小的卡片，右半边是可以掰下来的 SIM 卡压痕（缺角、内圈 Micro 压痕、金色触点）
     return (
       <>
         {/* 标准 Mini SIM（25 × 15 mm）按真实比例画：外圈带缺角，里面依次是 Micro、Nano 的压痕，触点在正中 */}
-        <svg class="sim-punch" viewBox="0 0 25 15" aria-hidden="true">
-          <path class="groove" d="M1 0.15H22.2L24.85 2.8V14A0.85 0.85 0 0 1 24 14.85H1A0.85 0.85 0 0 1 0.15 14V1A0.85 0.85 0 0 1 1 0.15Z" />
-          <path class="groove inner" d="M3.5 1.5H16.4L18 3.1V13.5H3.5Z" />
-          <path class="groove inner" d="M4.6 3.1H15.4L16.65 4.35V11.9H4.6Z" />
+        <svg className="sim-punch" viewBox="0 0 25 15" aria-hidden="true">
+          <path className="groove" d="M1 0.15H22.2L24.85 2.8V14A0.85 0.85 0 0 1 24 14.85H1A0.85 0.85 0 0 1 0.15 14V1A0.85 0.85 0 0 1 1 0.15Z" />
+          <path className="groove inner" d="M3.5 1.5H16.4L18 3.1V13.5H3.5Z" />
+          <path className="groove inner" d="M4.6 3.1H15.4L16.65 4.35V11.9H4.6Z" />
           <defs>
             <linearGradient id="simgold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#fbefc4" />
-              <stop offset="1" stop-color="#d6b46a" />
+              <stop offset="0" stopColor="#fbefc4" />
+              <stop offset="1" stopColor="#d6b46a" />
             </linearGradient>
           </defs>
-          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="rgba(120,90,20,0.45)" stroke-width="0.12" />
+          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="rgba(120,90,20,0.45)" strokeWidth="0.12" />
           <path
             d="M10.6 4.6V10.6M6.6 6.6H9.4M6.6 8.6H9.4M11.8 6.6H14.6M11.8 8.6H14.6M9.4 5.6V9.6M11.8 5.6V9.6"
             fill="none"
             stroke="rgba(120,90,20,0.45)"
-            stroke-width="0.12"
+            strokeWidth="0.12"
           />
         </svg>
-        <div class="sim-top">
+        <div className="sim-top">
           {/* 只有认出是哪家运营商（如 SMART）才放它的 logo，否则写名字，不默认套某一家 */}
           {methodLogo(m) ? (
-            <img class={`sim-logo ${m.logoWide ? 'wide' : ''}`} src={methodLogo(m)} alt="" />
+            <img className={`sim-logo ${m.logoWide ? 'wide' : ''}`} src={methodLogo(m)} alt="" />
           ) : (
-            <b class="sim-carrier">{m.name.split(/\s/)[0]}</b>
+            <b className="sim-carrier">{m.name.split(/\s/)[0]}</b>
           )}
         </div>
-        <div class="sim-name">
+        <div className="sim-name">
           {m.name}
           <small>
             {flag(methodRegion(m))} {m.phone ? fmtPhone(m.phone) : `${KIND_LABEL[m.kind]} · ${m.currency}`}
           </small>
         </div>
-        <div class="pc-foot">
+        <div className="pc-foot">
           <div>
-            {label && <div class="o">{label}</div>}
-            <div class="pc-bal">{value}</div>
+            {label && <div className="o">{label}</div>}
+            <div className="pc-bal">{value}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div class="o">{right}</div>
+            <div className="o">{right}</div>
             <div style={{ fontWeight: 600 }}>{rightSub}</div>
           </div>
         </div>
@@ -156,20 +156,20 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
     // 白色钛金属卡面：左上激光蚀刻的 App Store 标与地区名，右上国旗；余额与其他卡一样放左下
     return (
       <>
-        <div class="pc-top">
-          <div class="pc-id">
-            <span class="ac-logo" aria-hidden="true" />
-            <div class="ac-name">{m.name}</div>
+        <div className="pc-top">
+          <div className="pc-id">
+            <span className="ac-logo" aria-hidden="true" />
+            <div className="ac-name">{m.name}</div>
           </div>
-          <span class="ac-flag">{flag(methodRegion(m))}</span>
+          <span className="ac-flag">{flag(methodRegion(m))}</span>
         </div>
-        <div class="pc-foot">
+        <div className="pc-foot">
           <div>
-            {label && <div class="ac-o">{label}</div>}
-            <div class="pc-bal">{value}</div>
+            {label && <div className="ac-o">{label}</div>}
+            <div className="pc-bal">{value}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div class="ac-o">{right}</div>
+            <div className="ac-o">{right}</div>
             <div style={{ fontWeight: 600 }}>{rightSub}</div>
           </div>
         </div>
@@ -182,29 +182,33 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
   const cls = m.logoWide ? 'wide' : (brand ?? '');
   return (
     <>
-      {logo && <img class={`pc-mark ${cls}`} src={logo} alt="" aria-hidden="true" />}
-      <div class="pc-top">
-        <div class="pc-id">
-          {logo ? <img class={`pc-logo ${cls}`} src={logo} alt="" /> : bank ? <img class="pc-logo bank" src={`/banks/${bank}-rect.svg`} alt="" /> : null}
+      {logo && <img className={`pc-mark ${cls}`} src={logo} alt="" aria-hidden="true" />}
+      <div className="pc-top">
+        <div className="pc-id">
+          {logo ? (
+            <img className={`pc-logo ${cls}`} src={logo} alt="" />
+          ) : bank ? (
+            <img className="pc-logo bank" src={`/banks/${bank}-rect.svg`} alt="" />
+          ) : null}
           <div style={{ minWidth: 0 }}>
-            <div class="pc-name">{m.name}</div>
-            <div class="pc-kind">
+            <div className="pc-name">{m.name}</div>
+            <div className="pc-kind">
               {KIND_LABEL[m.kind]} · {m.currency}
               {m.region ? ` · ${m.region}` : ''}
               {m.cashback ? ` · ${t('wallet.card.cashback', { pct: m.cashback })}` : ''}
             </div>
           </div>
         </div>
-        {m.network ? <NetworkMark network={m.network} height={26} /> : <span class="pc-ccy">{m.currency}</span>}
+        {m.network ? <NetworkMark network={m.network} height={26} /> : <span className="pc-ccy">{m.currency}</span>}
       </div>
-      {CARD_KINDS.includes(m.kind) && <div class="pc-chip" />}
-      <div class="pc-foot">
+      {CARD_KINDS.includes(m.kind) && <div className="pc-chip" />}
+      <div className="pc-foot">
         <div>
-          {label && <div class="o">{label}</div>}
-          <div class="pc-bal">{value}</div>
+          {label && <div className="o">{label}</div>}
+          <div className="pc-bal">{value}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div class="o">{right}</div>
+          <div className="o">{right}</div>
           <div style={{ fontWeight: 600 }}>{rightSub}</div>
         </div>
       </div>
@@ -223,14 +227,14 @@ function projFoot(r: Runway, m: PaymentMethod): string | undefined {
 }
 
 /** 可拖动排序的卡片：拖起时放大、加深阴影，其余卡片让位 */
-function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () => void; children: preact.ComponentChildren }) {
+function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () => void; children: React.ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: m.id });
   return (
     <button
       ref={setNodeRef as (el: HTMLButtonElement | null) => void}
       {...(attributes as unknown as Record<string, unknown>)}
       {...(listeners as Record<string, unknown>)}
-      class={`paycard ${faceClass(m)} ${isDragging ? 'lifted' : ''}`}
+      className={`paycard ${faceClass(m)} ${isDragging ? 'lifted' : ''}`}
       // 拖动排序用独立的 translate 属性，不占用 transform / transition：悬停的浮起和倾斜才能平滑过渡
       style={
         {
@@ -283,12 +287,12 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
     <>
       <Toolbar title={t('wallet.title')} sub={t(ro ? 'wallet.sub' : 'wallet.subDrag', { count: state.methods.length })}>
         {!ro && (
-          <button class="btn primary" onClick={() => setEdit({ id: uid(), name: '', kind: 'appstore', currency: 'TRY' })}>
+          <button className="btn primary" onClick={() => setEdit({ id: uid(), name: '', kind: 'appstore', currency: 'TRY' })}>
             <Icon name="plus" /> {t('wallet.add')}
           </button>
         )}
       </Toolbar>
-      <div class="page fade-in stack">
+      <div className="page fade-in stack">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -304,7 +308,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
           }}
         >
           <SortableContext items={state.methods.map((m) => m.id)} strategy={rectSortingStrategy} disabled={ro}>
-            <div class={`wallet-grid ${dragging ? 'dragging' : ''}`}>
+            <div className={`wallet-grid ${dragging ? 'dragging' : ''}`}>
               {state.methods.map((m) => {
                 // 按当前阶段归属支付方式（换区后新旧两段并行时，两张卡各算各的）；代付的钱不算我的支出
                 const liveHere = live.filter((s) => !s.proxy && [currentPhase(s, today), ...activePhases(s, today)].some((v) => v.methodId === m.id));
@@ -352,7 +356,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
               .map((m) => runwayFor(m, state, today))
               .filter((r): r is NonNullable<typeof r> => r != null && r.monthlyDrain > 0)
               .map((r) => (
-                <div key={r.method.id} class="cell" style={{ display: 'block', padding: '14px 16px' }}>
+                <div key={r.method.id} className="cell" style={{ display: 'block', padding: '14px 16px' }}>
                   <RunwayCard r={r} today={today} state={state} flat />
                 </div>
               ))}
@@ -362,7 +366,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
         <Group>
           <Cell
             label={
-              <span class="row">
+              <span className="row">
                 <Icon name="car" />
                 {t('wallet.family')}
               </span>
@@ -379,7 +383,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
               <Cell
                 key={s.id}
                 label={
-                  <span class="row">
+                  <span className="row">
                     <SubIcon sub={s} size={28} />
                     {s.name}
                   </span>
@@ -435,26 +439,26 @@ function MethodSheet({
   const ro = !!state.readonly;
   return (
     <Sheet narrow title={methodName(m)} onClose={onClose}>
-      <div class="stack" style={{ gap: 18 }}>
+      <div className="stack" style={{ gap: 18 }}>
         {!ro && (
-          <div class="row">
+          <div className="row">
             {(r || BALANCE_KINDS.includes(m.kind)) && (
-              <button class="btn primary" onClick={() => onTopup(r?.current ?? 0)}>
+              <button className="btn primary" onClick={() => onTopup(r?.current ?? 0)}>
                 {r ? t('wallet.sheet.topup') : t('wallet.sheet.setBalance')}
               </button>
             )}
-            <button class="btn" onClick={onEdit}>
+            <button className="btn" onClick={onEdit}>
               <Icon name="edit" /> {t('wallet.sheet.edit')}
             </button>
             {m.url && (
-              <a class="btn" href={m.url} target="_blank" rel="noreferrer">
+              <a className="btn" href={m.url} target="_blank" rel="noreferrer">
                 <Icon name="link" /> {BALANCE_KINDS.includes(m.kind) ? t('wallet.sheet.goTopup') : t('wallet.sheet.site')}
               </a>
             )}
           </div>
         )}
         {r && (
-          <div class="card">
+          <div className="card">
             <RunwayCard r={r} today={today} state={state} flat />
           </div>
         )}
@@ -464,9 +468,9 @@ function MethodSheet({
               <Cell
                 key={c.sub.id + c.date + i}
                 label={
-                  <span class="row">
+                  <span className="row">
                     <SubIcon sub={c.sub} size={28} />
-                    <span class="proj-name">
+                    <span className="proj-name">
                       {c.sub.name}
                       <small>{cnDate(c.date)}</small>
                     </span>
@@ -483,12 +487,12 @@ function MethodSheet({
           </Group>
         )}
         <Group title={t('wallet.sheet.linked', { count: subs.length })}>
-          {subs.length === 0 && <div class="cell muted">{t('wallet.sheet.none')}</div>}
+          {subs.length === 0 && <div className="cell muted">{t('wallet.sheet.none')}</div>}
           {subs.map((s) => (
             <Cell
               key={s.id}
               label={
-                <span class="row" style={{ opacity: effectiveStatus(s, today) === 'ended' ? 0.45 : 1 }}>
+                <span className="row" style={{ opacity: effectiveStatus(s, today) === 'ended' ? 0.45 : 1 }}>
                   <SubIcon sub={s} size={28} />
                   {s.name}
                 </span>
@@ -501,7 +505,7 @@ function MethodSheet({
         </Group>
         {m.notes && (
           <Group title={t('wallet.sheet.notes')}>
-            <div class="cell" style={{ fontSize: 14 }}>
+            <div className="cell" style={{ fontSize: 14 }}>
               {m.notes}
             </div>
           </Group>
@@ -549,17 +553,17 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
       onClose={onClose}
       foot={
         <>
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('wallet.topup.cancel')}
           </button>
-          <button class="btn primary" disabled={!val || !Number.isFinite(n)} onClick={save}>
+          <button className="btn primary" disabled={!val || !Number.isFinite(n)} onClick={save}>
             {t('wallet.topup.save')}
           </button>
         </>
       }
     >
-      <div class="stack">
+      <div className="stack">
         <Seg
           value={mode}
           onChange={setMode}
@@ -571,11 +575,11 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
         <Group>
           <Cell label={mode === 'add' ? t('wallet.topup.amount', { ccy: m.currency }) : t('wallet.topup.actual')}>
             <input
-              class="num"
+              className="num"
               inputMode="decimal"
               autoFocus
               value={val}
-              onInput={(e) => setVal((e.target as HTMLInputElement).value)}
+              onChange={(e) => setVal((e.target as HTMLInputElement).value)}
               placeholder={`${m.currency} 0.00`}
             />
           </Cell>
@@ -594,15 +598,15 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
             </Cell>
             <Cell label={t('wallet.topup.cost')}>
               <input
-                class="num"
+                className="num"
                 inputMode="decimal"
                 value={cost}
                 placeholder={t('wallet.topup.costPh')}
-                onInput={(e) => setCost((e.target as HTMLInputElement).value)}
+                onChange={(e) => setCost((e.target as HTMLInputElement).value)}
               />
             </Cell>
             <Cell label={t('wallet.topup.note')}>
-              <input value={note} placeholder={t('wallet.topup.notePh')} onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
+              <input value={note} placeholder={t('wallet.topup.notePh')} onChange={(e) => setNote((e.target as HTMLInputElement).value)} />
             </Cell>
           </Group>
         )}
@@ -613,8 +617,8 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
               const mk = market(tp);
               const premium = r && mk ? r / mk - 1 : undefined;
               return (
-                <div key={i} class="cell topup-row">
-                  <span class="cell-l">
+                <div key={i} className="cell topup-row">
+                  <span className="cell-l">
                     {money(tp.amount, m.currency)}
                     <small>
                       {tp.date}
@@ -622,12 +626,12 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
                       {tp.note ? ` · ${tp.note}` : ''}
                     </small>
                   </span>
-                  <span class="cell-r">
+                  <span className="cell-r">
                     {r != null && (
-                      <span class="topup-rate">
+                      <span className="topup-rate">
                         1 {m.currency} = {r.toFixed(r < 0.1 ? 4 : 3)} {tp.costCurrency}
                         {premium != null && Math.abs(premium) >= 0.005 && (
-                          <em class={premium > 0 ? 'up' : 'down'}>
+                          <em className={premium > 0 ? 'up' : 'down'}>
                             {premium > 0
                               ? t('wallet.topup.premium', { pct: Math.round(premium * 100) })
                               : t('wallet.topup.below', { pct: Math.round(-premium * 100) })}
@@ -635,7 +639,7 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
                         )}
                       </span>
                     )}
-                    <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
+                    <button className="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
                       <Icon name="x" />
                     </button>
                   </span>
@@ -654,7 +658,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
   const isNew = !state.methods.some((x) => x.id === m.id);
   const up = (p: Partial<PaymentMethod>) => setF({ ...f, ...p });
   const balanceKind = BALANCE_KINDS.includes(f.kind);
-  const val = (e: Event) => (e.target as HTMLInputElement).value;
+  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   return (
     <Sheet
       narrow
@@ -664,7 +668,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
         <>
           {!isNew && (
             <button
-              class="btn danger"
+              className="btn danger"
               onClick={() =>
                 confirmDelete(t('wallet.editor.confirmDelete', { name: m.name })) &&
                 run(async () => {
@@ -676,12 +680,12 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
               {t('wallet.editor.delete')}
             </button>
           )}
-          <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
             {t('wallet.editor.cancel')}
           </button>
           <button
-            class="btn primary"
+            className="btn primary"
             disabled={!f.name.trim()}
             onClick={() =>
               run(async () => {
@@ -704,8 +708,8 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
         </>
       }
     >
-      <div class="stack">
-        <div class={`paycard ${faceClass(f)}`} style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
+      <div className="stack">
+        <div className={`paycard ${faceClass(f)}`} style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
           <CardFace
             m={{ ...f, name: f.name || t('wallet.editor.newName') }}
             label=""
@@ -716,10 +720,10 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
         </div>
         <Group>
           <Cell label={t('wallet.editor.name')}>
-            <input value={f.name} placeholder={t('wallet.editor.namePh')} onInput={(e) => up({ name: val(e) })} />
+            <input value={f.name} placeholder={t('wallet.editor.namePh')} onChange={(e) => up({ name: val(e) })} />
           </Cell>
           <Cell label={t('wallet.editor.url')}>
-            <input value={f.url ?? ''} placeholder={t('wallet.editor.urlPh')} onInput={(e) => up({ url: val(e).trim() || undefined })} />
+            <input value={f.url ?? ''} placeholder={t('wallet.editor.urlPh')} onChange={(e) => up({ url: val(e).trim() || undefined })} />
           </Cell>
           <Cell label={t('wallet.editor.kind')}>
             <Picker
@@ -739,7 +743,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
                   { value: '', label: t('wallet.editor.bankAuto') },
                   ...[...BANKS]
                     .sort((x, y) => x[0].localeCompare(y[0], 'zh'))
-                    .map(([name, code]) => ({ value: code, label: name, icon: <img class="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> })),
+                    .map(([name, code]) => ({ value: code, label: name, icon: <img className="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> })),
                 ]}
                 ariaLabel={t('wallet.editor.bank')}
               />
@@ -757,7 +761,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
           </Cell>
           {CARD_KINDS.includes(f.kind) && (
             <Cell label={t('wallet.editor.network')}>
-              <span class="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
+              <span className="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
                 <NetworkMark network={f.network} height={20} />
                 <Picker
                   value={f.network ?? ''}
@@ -767,7 +771,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
                     ...(Object.keys(NETWORKS) as CardNetwork[]).map((n) => ({
                       value: n,
                       label: NETWORKS[n],
-                      icon: <img class="pk-net" src={`/networks/${n}.svg`} alt="" />,
+                      icon: <img className="pk-net" src={`/networks/${n}.svg`} alt="" />,
                     })),
                   ]}
                   ariaLabel={t('wallet.editor.network')}
@@ -777,15 +781,15 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
           )}
           {(f.kind === 'debit' || f.kind === 'credit') && (
             <Cell label={t('wallet.editor.bankIcon')}>
-              <span class="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
+              <span className="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
                 {bankOf(f) ? <MethodMark m={f} size={22} /> : null}
-                <span class="muted">{bankOf(f) ? (f.bank ? t('wallet.editor.bankSet') : t('wallet.editor.bankAuto')) : t('wallet.editor.bankHint')}</span>
+                <span className="muted">{bankOf(f) ? (f.bank ? t('wallet.editor.bankSet') : t('wallet.editor.bankAuto')) : t('wallet.editor.bankHint')}</span>
               </span>
             </Cell>
           )}
           {CARD_KINDS.includes(f.kind) && (
             <Cell label={t('wallet.editor.last4')}>
-              <input class="num" maxLength={4} value={f.last4 ?? ''} onInput={(e) => up({ last4: val(e).replace(/\D/g, '') || undefined })} />
+              <input className="num" maxLength={4} value={f.last4 ?? ''} onChange={(e) => up({ last4: val(e).replace(/\D/g, '') || undefined })} />
             </Cell>
           )}
           <Cell label={t('wallet.editor.region')}>
@@ -801,16 +805,16 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
           </Cell>
           {f.kind === 'phone' && (
             <Cell label={t('wallet.editor.phone')}>
-              <input inputMode="tel" value={f.phone ?? ''} placeholder="+63 9xx xxx xxxx" onInput={(e) => up({ phone: val(e).trim() || undefined })} />
+              <input inputMode="tel" value={f.phone ?? ''} placeholder="+63 9xx xxx xxxx" onChange={(e) => up({ phone: val(e).trim() || undefined })} />
             </Cell>
           )}
           <Cell label={t('wallet.editor.cashback')}>
             <input
-              class="num"
+              className="num"
               inputMode="decimal"
               value={f.cashback ?? ''}
               placeholder={t('wallet.editor.cashbackPh')}
-              onInput={(e) => up({ cashback: Number(val(e)) || undefined })}
+              onChange={(e) => up({ cashback: Number(val(e)) || undefined })}
             />
           </Cell>
         </Group>
@@ -818,11 +822,11 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
           <Group title={t('wallet.editor.balanceGroup')}>
             <Cell label={t('wallet.editor.balance')}>
               <input
-                class="num"
+                className="num"
                 inputMode="decimal"
                 value={f.balance ?? ''}
                 placeholder={t('wallet.editor.optional')}
-                onInput={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? today() })}
+                onChange={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? today() })}
               />
             </Cell>
             <Cell label={t('wallet.editor.asOf')}>
@@ -839,9 +843,9 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
           </Group>
         )}
         <Group title={t('wallet.editor.notes')}>
-          <div class="cell">
-            <span class="cell-r">
-              <textarea value={f.notes ?? ''} onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })} />
+          <div className="cell">
+            <span className="cell-r">
+              <textarea value={f.notes ?? ''} onChange={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })} />
             </span>
           </div>
         </Group>
@@ -857,7 +861,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
 function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>) => void }) {
   const [link, setLink] = useState(false);
   const file = useRef<HTMLInputElement>(null);
-  const onFile = (e: Event) => {
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target as HTMLInputElement;
     const fl = input.files?.[0];
     input.value = '';
@@ -878,8 +882,8 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
   const favicon = domainOf(f.url);
   return (
     <>
-      <div class="cell logo-field">
-        <span class="cell-l">
+      <div className="cell logo-field">
+        <span className="cell-l">
           Logo
           <small>
             {f.logo
@@ -893,16 +897,16 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
                   : t('wallet.logo.none')}
           </small>
         </span>
-        <span class="cell-r">
+        <span className="cell-r">
           <MethodMark m={f} size={32} />
-          <button type="button" class="chip-btn" onClick={() => file.current?.click()}>
+          <button type="button" className="chip-btn" onClick={() => file.current?.click()}>
             {t('wallet.logo.upload')}
           </button>
-          <button type="button" class={`chip-btn ${link ? 'on' : ''}`} onClick={() => setLink(!link)}>
+          <button type="button" className={`chip-btn ${link ? 'on' : ''}`} onClick={() => setLink(!link)}>
             {t('wallet.logo.linkBtn')}
           </button>
           {f.logo && (
-            <button type="button" class="chip-btn" onClick={() => up({ logo: undefined })}>
+            <button type="button" className="chip-btn" onClick={() => up({ logo: undefined })}>
               {t('wallet.logo.clear')}
             </button>
           )}
@@ -914,7 +918,7 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
           <input
             value={f.logo?.startsWith('data:') ? '' : (f.logo ?? '')}
             placeholder="https://…/logo.png"
-            onInput={(e) => up({ logo: (e.target as HTMLInputElement).value.trim() || undefined })}
+            onChange={(e) => up({ logo: (e.target as HTMLInputElement).value.trim() || undefined })}
           />
         </Cell>
       )}

@@ -1,6 +1,6 @@
-import type { ComponentChildren, JSX } from 'preact';
-import { createPortal } from 'preact/compat';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import type { ReactNode as ComponentChildren, JSX } from 'react';
+import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
@@ -153,13 +153,13 @@ export function Icon({ name, size }: { name: keyof typeof P | string; size?: num
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       width={size}
       height={size}
       aria-hidden="true"
-      class="i"
+      className="i"
     >
       {P[name]}
     </svg>
@@ -177,7 +177,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   // 域名用注册商的图标，不用各自的站点图标：默认 Cloudflare，其他注册商在 icon 里填它的图标
   if (isDomainCat(sub.category)) {
     return (
-      <span class="ico domain" style={style}>
+      <span className="ico domain" style={style}>
         <img src={sub.icon?.startsWith('http') ? (proxied ? `/api/img?u=${encodeURIComponent(sub.icon)}` : sub.icon) : '/brands/cloudflare.svg'} alt="" />
       </span>
     );
@@ -186,7 +186,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   // 不是链接也不是站内图片路径（/ai/claude.svg）的，当 emoji 显示
   if (icon && !/^(https?:|\/)/.test(icon)) {
     return (
-      <span class="ico emoji" style={style}>
+      <span className="ico emoji" style={style}>
         {icon}
       </span>
     );
@@ -196,12 +196,12 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   if (src && !failed.has(src)) {
     return (
       // 目录里的 AI 标是透明底的矢量图，按站点图标那样放在白底上
-      <span class={`ico ${icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
+      <span className={`ico ${icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
         <img
           src={src}
           alt=""
           loading="lazy"
-          referrerpolicy="no-referrer"
+          referrerPolicy="no-referrer"
           onLoad={(e) => {
             // Google 对未知域名返回 16px 的地球占位图
             const img = e.currentTarget as HTMLImageElement;
@@ -220,7 +220,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   }
   const letter = [...sub.name.replace(/^(域名|VPS)\s*/, '')][0]?.toUpperCase() ?? '?';
   return (
-    <span class="ico mono" style={style}>
+    <span className="ico mono" style={style}>
       {letter}
     </span>
   );
@@ -228,11 +228,11 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
 
 /** 支付方式胶囊：logo 标记 + 名称；全站凡是显示支付方式的地方都用它 */
 export function PayBadge({ m }: { m?: PaymentMethod }) {
-  if (!m) return <span class="pay none">{t('ui.method.none')}</span>;
+  if (!m) return <span className="pay none">{t('ui.method.none')}</span>;
   return (
-    <span class="pay" title={m.name}>
+    <span className="pay" title={m.name}>
       <MethodMark m={m} size={16} />
-      <span class="pay-name">{m.name}</span>
+      <span className="pay-name">{m.name}</span>
     </span>
   );
 }
@@ -245,7 +245,7 @@ export function CatIcon({ cat, size = 14 }: { cat: string; size?: number }) {
 /** 分类胶囊：分类色 + 图标 + 名称 */
 export function CatChip({ cat }: { cat: string }) {
   return (
-    <span class="cat-chip" style={{ '--tint': catColor(cat) } as Record<string, string>}>
+    <span className="cat-chip" style={{ '--tint': catColor(cat) } as Record<string, string>}>
       <CatIcon cat={cat} size={12} />
       {cat}
     </span>
@@ -267,17 +267,17 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
   const bg = bank || brand === 'appstore' ? undefined : onColor ? KIND_BG[m.kind] : logo ? (m.color && m.logo ? m.color : '#fff') : m.color || KIND_BG[m.kind];
   const style = { '--s': `${size}px`, background: bg } as Record<string, string>;
   return (
-    <span class={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
+    <span className={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
       {bank ? (
         <img src={`/banks/${bank}-rect.svg`} alt="" />
       ) : brand === 'appstore' ? (
-        <i class="mm-glyph" />
+        <i className="mm-glyph" />
       ) : logo ? (
         <img src={logo} alt="" />
       ) : (
         <b>{[...m.name][0]}</b>
       )}
-      {f && <em class="mm-flag">{f}</em>}
+      {f && <em className="mm-flag">{f}</em>}
     </span>
   );
 }
@@ -285,12 +285,12 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
 /** 卡组织标：Visa、Mastercard、银联… */
 export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; height?: number }) {
   if (!network) return null;
-  return <img class="net-mark" src={`/networks/${network}.svg`} alt={NETWORKS[network]} title={NETWORKS[network]} style={{ height }} />;
+  return <img className="net-mark" src={`/networks/${network}.svg`} alt={NETWORKS[network]} title={NETWORKS[network]} style={{ height }} />;
 }
 
 /** 小组件式金额：小数位缩小 */
 export function Amount({ value, ccy, sign, compact }: { value: number; ccy: string; sign?: boolean; compact?: boolean }) {
-  if (!Number.isFinite(value)) return <span class="amt">—</span>;
+  if (!Number.isFinite(value)) return <span className="amt">—</span>;
   const neg = value < 0;
   const abs = Math.abs(value);
   const noDec = compact && abs >= 1000;
@@ -303,9 +303,9 @@ export function Amount({ value, ccy, sign, compact }: { value: number; ccy: stri
   const point = parts.find((p) => p.type === 'decimal')?.value;
   const dec = parts.find((p) => p.type === 'fraction')?.value;
   return (
-    <span class="amt">
+    <span className="amt">
       {neg ? '−' : sign ? '+' : ''}
-      <span class="cur">{symbol(ccy).trim()}</span>
+      <span className="cur">{symbol(ccy).trim()}</span>
       {int}
       {dec && (
         <small>
@@ -329,9 +329,9 @@ export function Seg<T extends string>({
   small?: boolean;
 }) {
   return (
-    <div class={`seg ${small ? 'sm' : ''}`} role="tablist">
+    <div className={`seg ${small ? 'sm' : ''}`} role="tablist">
       {options.map(([k, l]) => (
-        <button key={k} role="tab" aria-selected={value === k} class={value === k ? 'on' : ''} onClick={() => onChange(k)}>
+        <button key={k} role="tab" aria-selected={value === k} className={value === k ? 'on' : ''} onClick={() => onChange(k)}>
           {l}
         </button>
       ))}
@@ -342,18 +342,18 @@ export function Seg<T extends string>({
 /** 页面工具栏：桌面端为半透明窗口工具栏，手机端为大标题 */
 export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (
-    <header class="toolbar">
-      <button class="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
+    <header className="toolbar">
+      <button className="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
         <Icon name="menu" />
       </button>
-      <div class="tb-title">
+      <div className="tb-title">
         <h1>{title}</h1>
-        {sub && <div class="tb-sub">{sub}</div>}
+        {sub && <div className="tb-sub">{sub}</div>}
       </div>
-      <button class="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
+      <button className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
         <Icon name="compose" />
       </button>
-      <div class="tb-actions">{children}</div>
+      <div className="tb-actions">{children}</div>
     </header>
   );
 }
@@ -388,23 +388,23 @@ export function Sheet(props: {
   }, []);
   // 挂到 body 上：放在带动画（transform）的页面里时，fixed 定位不会被困在页面范围内
   return createPortal(
-    <div class="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
-      <div class={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`} role="dialog" aria-modal="true">
-        <div class="grabber" />
+    <div className="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
+      <div className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`} role="dialog" aria-modal="true">
+        <div className="grabber" />
         {props.bare ? (
-          <button class="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
+          <button className="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
             <Icon name="x" />
           </button>
         ) : (
-          <div class="sheet-head">
+          <div className="sheet-head">
             <h3>{props.title}</h3>
-            <button class="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
+            <button className="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
               <Icon name="x" />
             </button>
           </div>
         )}
-        <div class="sheet-body">{props.children}</div>
-        {props.foot && <div class="sheet-foot">{props.foot}</div>}
+        <div className="sheet-body">{props.children}</div>
+        {props.foot && <div className="sheet-foot">{props.foot}</div>}
       </div>
     </div>,
     document.body,
@@ -442,7 +442,7 @@ export function TipLayer() {
   if (!tip) return null;
   const x = Math.min(Math.max(tip.x, 90), window.innerWidth - 90);
   return (
-    <div class="tip" style={{ left: x, top: tip.y }}>
+    <div className="tip" style={{ left: x, top: tip.y }}>
       {tip.html}
     </div>
   );
@@ -450,7 +450,7 @@ export function TipLayer() {
 
 export function tipProps(html: () => ComponentChildren) {
   return {
-    onMouseEnter: (e: MouseEvent) => {
+    onMouseEnter: (e: React.MouseEvent) => {
       const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
       tipSet?.({ x: r.left + r.width / 2, y: r.top, html: html() });
     },
@@ -460,7 +460,7 @@ export function tipProps(html: () => ComponentChildren) {
 
 export function Toggle({ checked, onChange, disabled, label }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string }) {
   return (
-    <label class="toggle">
+    <label className="toggle">
       <input
         type="checkbox"
         role="switch"
@@ -478,10 +478,10 @@ export function Toggle({ checked, onChange, disabled, label }: { checked: boolea
 /** iOS 分组列表 */
 export function Group({ title, foot, children }: { title?: ComponentChildren; foot?: ComponentChildren; children: ComponentChildren }) {
   return (
-    <section class="group">
-      {title && <div class="group-title">{title}</div>}
-      <div class="group-body">{children}</div>
-      {foot && <div class="group-foot">{foot}</div>}
+    <section className="group">
+      {title && <div className="group-title">{title}</div>}
+      <div className="group-body">{children}</div>
+      {foot && <div className="group-foot">{foot}</div>}
     </section>
   );
 }
@@ -499,19 +499,19 @@ export function Cell({
 }) {
   const inner = (
     <>
-      <span class="cell-l">
+      <span className="cell-l">
         {label}
         {sub && <small>{sub}</small>}
       </span>
-      <span class="cell-r">{children}</span>
+      <span className="cell-r">{children}</span>
     </>
   );
   return onClick ? (
-    <button class="cell tap" onClick={onClick}>
+    <button className="cell tap" onClick={onClick}>
       {inner}
       <Icon name="right" />
     </button>
   ) : (
-    <div class="cell">{inner}</div>
+    <div className="cell">{inner}</div>
   );
 }

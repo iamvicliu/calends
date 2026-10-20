@@ -1,5 +1,5 @@
-import { Fragment } from 'preact';
-import { useMemo, useState } from 'preact/hooks';
+import { Fragment } from 'react';
+import { useMemo, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -42,19 +42,19 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
   return (
     <>
       <Toolbar title={t('report.title')}>
-        <button class="btn" onClick={onReview}>
+        <button className="btn" onClick={onReview}>
           <Icon name="share" /> {t('report.shareReview', { year: y })}
         </button>
       </Toolbar>
-      <div class="page fade-in stack">
+      <div className="page fade-in stack">
         <Hero state={state} today={today} />
-        <div class="grid g-2">
+        <div className="grid g-2">
           <Waterfall state={state} today={today} onOpen={onOpen} />
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
         <CashCard state={state} today={today} />
         <Composition state={state} today={today} onOpen={onOpen} />
-        <div class="grid g-2">
+        <div className="grid g-2">
           <TopUps state={state} today={today} />
           <Changelog state={state} today={today} onOpen={onOpen} base={base} />
         </div>
@@ -83,20 +83,20 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   );
   const markers = series.map((p, i) => (evDates.has(p.month) ? i : -1)).filter((i) => i >= 0);
   return (
-    <div class="card hero-card">
-      <div class="hero-l">
-        <div class="stat-label">{t('report.hero.label')}</div>
-        <div class="hero-num">
+    <div className="card hero-card">
+      <div className="hero-l">
+        <div className="stat-label">{t('report.hero.label')}</div>
+        <div className="hero-num">
           <Amount value={-now} ccy={base} />
         </div>
-        <div class="hero-delta">
-          <span class={`chip-d ${delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}`}>
+        <div className="hero-delta">
+          <span className={`chip-d ${delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}`}>
             {delta > 0.5 ? '▲' : delta < -0.5 ? '▼' : '—'} {money(Math.abs(delta), base, { compact: true })}
           </span>
-          <span class="muted">{t('report.hero.vsLastMonth')}</span>
-          {yearAgo != null && yearAgo > 0 && <span class="muted">{t('report.hero.yearAgo', { amount: money(yearAgo, base, { compact: true }) })}</span>}
+          <span className="muted">{t('report.hero.vsLastMonth')}</span>
+          {yearAgo != null && yearAgo > 0 && <span className="muted">{t('report.hero.yearAgo', { amount: money(yearAgo, base, { compact: true }) })}</span>}
         </div>
-        <div class="hero-facts">
+        <div className="hero-facts">
           <div>
             <b>{money(now * 12, base, { compact: true })}</b>
             <span>{t('report.hero.annual')}</span>
@@ -117,8 +117,8 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           )}
         </div>
       </div>
-      <div class="hero-r">
-        <div class="row" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+      <div className="hero-r">
+        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
           <Seg
             small
             value={hist ? 'h' : 'c'}
@@ -174,15 +174,15 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
   let run = 0;
   const kindLabel = (k: 'added' | 'expansion' | 'contraction' | 'churned') => t(`report.wf.${k}`);
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('report.wf.title', { n: Number(month.slice(5)), month: monthLabel(month, { year: false, long: true }) })}</h3>
-        <div class="row" style={{ gap: 4 }}>
-          <button class="icon-btn" aria-label={t('report.wf.prev')} onClick={() => setOffset(offset - 1)}>
+        <div className="row" style={{ gap: 4 }}>
+          <button className="icon-btn" aria-label={t('report.wf.prev')} onClick={() => setOffset(offset - 1)}>
             <Icon name="left" />
           </button>
           <button
-            class="icon-btn"
+            className="icon-btn"
             aria-label={t('report.wf.next')}
             disabled={offset >= 0}
             style={{ opacity: offset >= 0 ? 0.35 : 1 }}
@@ -192,7 +192,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           </button>
         </div>
       </div>
-      <div class="wf">
+      <div className="wf">
         {steps.map((s) => {
           let bottom = 0;
           let h = 0;
@@ -211,13 +211,13 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           return (
             <div
               key={s.k}
-              class={`wf-col ${s.kind}`}
+              className={`wf-col ${s.kind}`}
               {...tipProps(() => `${s.k} ${perMonth(`${s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−'}${money(Math.abs(s.v), base)}`)}`)}
             >
-              <div class="wf-track">
+              <div className="wf-track">
                 <i style={{ bottom: `${(bottom / max) * 100}%`, height: `max(${h > 0 ? 3 : 1}px, ${(h / max) * 100}%)` }} />
               </div>
-              <b class="num">
+              <b className="num">
                 {s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−'}
                 {Math.abs(s.v) >= 1000 ? `${(Math.abs(s.v) / 1000).toFixed(1)}k` : Math.round(Math.abs(s.v))}
               </b>
@@ -226,20 +226,20 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           );
         })}
       </div>
-      <div class="wf-items">
+      <div className="wf-items">
         {mv.items.length === 0 && (
-          <div class="muted" style={{ fontSize: 13, padding: '8px 0' }}>
+          <div className="muted" style={{ fontSize: 13, padding: '8px 0' }}>
             {Math.abs(mv.fx) >= 0.5
               ? t('report.wf.emptyFx', { amount: `${mv.fx > 0 ? '+' : '−'}${money(Math.abs(mv.fx), base, { compact: true })}` })
               : t('report.wf.empty')}
           </div>
         )}
         {mv.items.slice(0, 4).map((it) => (
-          <button key={it.sub.id} class="wf-item" onClick={() => onOpen(it.sub)}>
+          <button key={it.sub.id} className="wf-item" onClick={() => onOpen(it.sub)}>
             <SubIcon sub={it.sub} size={24} />
-            <span class="wf-name">{it.sub.name}</span>
-            <em class={it.delta > 0 ? 'up' : 'down'}>{kindLabel(it.kind)}</em>
-            <b class="num">
+            <span className="wf-name">{it.sub.name}</span>
+            <em className={it.delta > 0 ? 'up' : 'down'}>{kindLabel(it.kind)}</em>
+            <b className="num">
               {it.delta > 0 ? '+' : '−'}
               {money(Math.abs(it.delta), base, { compact: true })}
             </b>
@@ -256,20 +256,20 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
   const [all, setAll] = useState(false);
   const shown = all ? list : list.slice(0, 5);
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('report.checkup.title')}</h3>
-        <span class="meta">{t('report.checkup.warn', { count: list.filter((i) => i.tone === 'warn').length })}</span>
+        <span className="meta">{t('report.checkup.warn', { count: list.filter((i) => i.tone === 'warn').length })}</span>
       </div>
-      <div class="insights">
+      <div className="insights">
         {shown.map((i) => (
-          <div key={i.id} class={`insight ${i.tone}`}>
-            <i class="dot" />
+          <div key={i.id} className={`insight ${i.tone}`}>
+            <i className="dot" />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div class="ins-t">{i.title}</div>
-              <div class="ins-b">{i.body}</div>
+              <div className="ins-t">{i.title}</div>
+              <div className="ins-b">{i.body}</div>
               {i.subs && i.subs.length > 0 && (
-                <div class="ins-subs">
+                <div className="ins-subs">
                   {i.subs.slice(0, 6).map((s) => (
                     <button key={s.id} onClick={() => onOpen(s)} title={s.name}>
                       <SubIcon sub={s} size={22} />
@@ -279,7 +279,7 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
               )}
             </div>
             {i.href && (
-              <a class="btn plain" href={i.href}>
+              <a className="btn plain" href={i.href}>
                 {t('report.checkup.fix')}
               </a>
             )}
@@ -287,7 +287,7 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
         ))}
       </div>
       {list.length > 5 && (
-        <button class="btn plain" style={{ marginTop: 6 }} onClick={() => setAll(!all)}>
+        <button className="btn plain" style={{ marginTop: 6 }} onClick={() => setAll(!all)}>
           {all ? t('report.checkup.less') : t('report.checkup.more', { count: list.length - 5 })}
         </button>
       )}
@@ -304,10 +304,10 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   const next90 = sumBase(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('report.cash.title')}</h3>
-        <div class="legend-inline">
+        <div className="legend-inline">
           <span>
             <i style={{ background: 'var(--accent)' }} />
             {t('report.cash.legendCash')}
@@ -318,7 +318,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           </span>
         </div>
       </div>
-      <div class="cash-grid">
+      <div className="cash-grid">
         <BarLine
           bars={rows.map((r) => r.cash)}
           line={rows.map((r) => r.accrual)}
@@ -333,7 +333,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             </>
           )}
         />
-        <div class="cash-facts">
+        <div className="cash-facts">
           <div
             {...tipProps(() =>
               pv.items
@@ -424,11 +424,11 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   const sel = focus ? entries.find((e) => e.k === focus) : undefined;
   const rects = sel ? squarify(sel.xs.map((x) => x.v)) : squarify(entries.map((e) => e.v));
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{sel ? `${sel.k} · ${perMonth(money(sel.v, base, { compact: true }))}` : t('report.comp.title')}</h3>
         {sel ? (
-          <button class="btn plain" onClick={() => setFocus(null)}>
+          <button className="btn plain" onClick={() => setFocus(null)}>
             {t('report.comp.back')}
           </button>
         ) : (
@@ -448,14 +448,14 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           />
         )}
       </div>
-      <div class="treemap">
+      <div className="treemap">
         {rects.map((r) => {
           if (sel) {
             const x = sel.xs[r.i];
             return (
               <button
                 key={x.s.id}
-                class="tm-cell"
+                className="tm-cell"
                 style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: catColor(x.s.category) }}
                 onClick={() => onOpen(x.s)}
                 {...tipProps(() => `${x.s.name} · ${perMonth(money(x.v, base))}`)}
@@ -470,7 +470,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           return (
             <button
               key={e.k}
-              class="tm-cell"
+              className="tm-cell"
               style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: color(e.k, r.i) }}
               onClick={() => setFocus(e.k)}
               {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}
@@ -487,7 +487,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                 </span>
               )}
               {r.w * r.h > 900 && (
-                <span class="tm-icons">
+                <span className="tm-icons">
                   {e.xs.slice(0, 5).map((x) => (
                     <SubIcon key={x.s.id} sub={x.s} size={20} />
                   ))}
@@ -508,8 +508,8 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
   const span = t(`report.topup.span${months}`);
   const base = state.settings.baseCurrency;
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('report.topup.title')}</h3>
         <Seg
           small
@@ -523,20 +523,20 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
         />
       </div>
       {plan.length === 0 && (
-        <div class="empty">
+        <div className="empty">
           {t('report.topup.empty')}
           <br />
-          <a class="btn plain" href="/admin/wallet">
+          <a className="btn plain" href="/admin/wallet">
             {t('report.topup.emptyCta')}
           </a>
         </div>
       )}
       {plan.map((p) => (
-        <div key={p.method.id} class="topup">
+        <div key={p.method.id} className="topup">
           <MethodMark m={p.method} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600 }}>{p.method.name}</div>
-            <div class="muted" style={{ fontSize: 12.5 }}>
+            <div className="muted" style={{ fontSize: 12.5 }}>
               {t('report.topup.summary', {
                 balance: money(p.current, p.method.currency, { compact: true }),
                 monthly: money(p.monthly, p.method.currency, { compact: true }),
@@ -544,7 +544,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
             </div>
             {p.need > 0 ? (
               <>
-                <div class="topup-why">
+                <div className="topup-why">
                   {t('report.topup.why', {
                     span,
                     due: money(p.due, p.method.currency, { compact: true }),
@@ -556,24 +556,24 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                   )}
                 </div>
                 {p.cards.length > 0 ? (
-                  <div class="cards-row">
+                  <div className="cards-row">
                     <small>{t('report.topup.cards')}</small>
                     {/* 同面额合并成「×N」，不再一张张平铺 */}
                     {[...p.cards.reduce((m2, c) => m2.set(c, (m2.get(c) ?? 0) + 1), new Map<number, number>())]
                       .sort((x, y) => y[0] - x[0])
                       .map(([c, n]) => (
-                        <span key={c} class="gift">
+                        <span key={c} className="gift">
                           {money(c, p.method.currency, { compact: true })}
                           {n > 1 && <em>×{n}</em>}
                         </span>
                       ))}
                   </div>
                 ) : (
-                  <div class="topup-why soft">{t('report.topup.anyAmount')}</div>
+                  <div className="topup-why soft">{t('report.topup.anyAmount')}</div>
                 )}
               </>
             ) : (
-              <div class="green" style={{ fontSize: 13, marginTop: 6 }}>
+              <div className="green" style={{ fontSize: 13, marginTop: 6 }}>
                 {t(`report.topup.enough${months}`)}
               </div>
             )}
@@ -583,11 +583,11 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
               <div style={{ fontWeight: 700 }}>
                 <Amount value={p.need} ccy={p.method.currency} compact />
               </div>
-              <div class="muted" style={{ fontSize: 12 }}>
+              <div className="muted" style={{ fontSize: 12 }}>
                 ≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}
               </div>
               {p.deadline && (
-                <div class={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 12, fontWeight: 600 }}>
+                <div className={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 12, fontWeight: 600 }}>
                   {t('report.topup.by', { date: cnDate(p.deadline) })}
                 </div>
               )}
@@ -617,12 +617,12 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
   const [n, setN] = useState(8);
   let lastYear = '';
   return (
-    <div class="card">
-      <div class="card-h">
+    <div className="card">
+      <div className="card-h">
         <h3>{t('report.log.title')}</h3>
-        <span class="meta">{t('report.log.decisions', { count: list.length })}</span>
+        <span className="meta">{t('report.log.decisions', { count: list.length })}</span>
       </div>
-      <div class="log">
+      <div className="log">
         {list.slice(0, n).map((e, i) => {
           const yr = e.date.slice(0, 4);
           const showYear = yr !== lastYear;
@@ -632,19 +632,19 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
           const up = e.kind === 'price' || e.kind === 'intro-end' || e.kind === 'switch' ? e.delta > 0 : tone === 'up';
           return (
             <Fragment key={e.sub.id + e.kind + e.date + i}>
-              {showYear && <div class="log-year">{yr}</div>}
-              <button class="log-item" onClick={() => onOpen(e.sub)}>
-                <span class="log-date num">{e.date.slice(5).replace('-', '/')}</span>
-                <i class={`log-dot ${tone}`} />
+              {showYear && <div className="log-year">{yr}</div>}
+              <button className="log-item" onClick={() => onOpen(e.sub)}>
+                <span className="log-date num">{e.date.slice(5).replace('-', '/')}</span>
+                <i className={`log-dot ${tone}`} />
                 <SubIcon sub={e.sub} size={24} />
-                <span class="log-name">
+                <span className="log-name">
                   {e.sub.name}
                   <small>
                     {label}
                     {e.note ? ` ${e.note}` : ''}
                   </small>
                 </span>
-                <b class={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
+                <b className={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
                   {tone === 'buy'
                     ? money(e.delta, base, { compact: true })
                     : perMonth(`${e.delta >= 0 ? '+' : '−'}${money(Math.abs(e.delta), base, { compact: true })}`)}
@@ -655,7 +655,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
         })}
       </div>
       {list.length > n && (
-        <button class="btn plain" style={{ marginTop: 6 }} onClick={() => setN(n + 12)}>
+        <button className="btn plain" style={{ marginTop: 6 }} onClick={() => setN(n + 12)}>
           {t('report.log.more')}
         </button>
       )}

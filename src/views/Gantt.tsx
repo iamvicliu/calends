@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
 import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -139,7 +139,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   };
 
   // 触控板横向滑动：直接平移，停下 150ms 后对齐到月初
-  const wheelIdle = useRef<number>();
+  const wheelIdle = useRef<number | undefined>(undefined);
   const onWheel = (e: WheelEvent) => {
     if (!pannable || !k || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     e.preventDefault();
@@ -147,15 +147,26 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     clearTimeout(wheelIdle.current);
     wheelIdle.current = window.setTimeout(() => setPan((p) => snap(p)), 150);
   };
+  // React 的 wheel 监听是被动的，拦不住页面滚动；横向滑动改用原生监听（非被动），并始终调用最新的处理函数
+  const gtEl = useRef<HTMLDivElement>(null);
+  const wheelRef = useRef(onWheel);
+  wheelRef.current = onWheel;
+  useEffect(() => {
+    const el = gtEl.current;
+    if (!el) return;
+    const h = (e: WheelEvent) => wheelRef.current(e);
+    el.addEventListener('wheel', h, { passive: false });
+    return () => el.removeEventListener('wheel', h);
+  }, []);
   // 按住拖动：超过 6px 才算拖动，拖动后吞掉这次点击，避免误开详情
   const dragFrom = useRef<number | null>(null);
   const dragged = useRef(false);
-  const onPointerDown = (e: PointerEvent) => {
+  const onPointerDown = (e: React.PointerEvent) => {
     if (!pannable || e.button !== 0) return;
     dragFrom.current = e.clientX;
     dragged.current = false;
   };
-  const onPointerMove = (e: PointerEvent) => {
+  const onPointerMove = (e: React.PointerEvent) => {
     if (dragFrom.current == null || !k) return;
     const dx = e.clientX - dragFrom.current;
     if (!dragged.current && Math.abs(dx) < 6) return;
@@ -201,8 +212,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   }
 
   return (
-    <div class="gantt">
-      <div class="gt-bar">
+    <div className="gantt">
+      <div className="gt-bar">
         <Seg
           small
           value={zoom}
@@ -215,14 +226,14 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           ]}
         />
         {pannable && (
-          <div class="gt-nav">
-            <button type="button" class="icon-btn" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
+          <div className="gt-nav">
+            <button type="button" className="icon-btn" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
               <Icon name="left" />
             </button>
-            <button type="button" class={`gt-range ${offset === 0 ? '' : 'moved'}`} onClick={() => setPan(0)} title={t('list.gantt.backToNow')}>
+            <button type="button" className={`gt-range ${offset === 0 ? '' : 'moved'}`} onClick={() => setPan(0)} title={t('list.gantt.backToNow')}>
               {rangeLabel}
             </button>
-            <button type="button" class="icon-btn" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
+            <button type="button" className="icon-btn" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
               <Icon name="right" />
             </button>
           </div>
@@ -238,31 +249,31 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         />
       </div>
       <div
-        class={`gt ${pannable ? 'pannable' : ''} ${drag ? 'dragging' : ''}`}
-        onWheel={onWheel}
+        ref={gtEl}
+        className={`gt ${pannable ? 'pannable' : ''} ${drag ? 'dragging' : ''}`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <div class="gt-head">
-          <div class="gt-label" />
-          <div class="gt-track" ref={box}>
+        <div className="gt-head">
+          <div className="gt-label" />
+          <div className="gt-track" ref={box}>
             {ticks.map((t) => (
-              <span key={t.d} class={`gt-tick ${t.major ? 'major' : ''}`} style={{ left: x(t.d) }}>
+              <span key={t.d} className={`gt-tick ${t.major ? 'major' : ''}`} style={{ left: x(t.d) }}>
                 {t.label}
               </span>
             ))}
           </div>
         </div>
-        <div class="gt-body" ref={body}>
-          <div class="gt-grid">
-            <div class="gt-label" />
-            <div class="gt-track">
+        <div className="gt-body" ref={body}>
+          <div className="gt-grid">
+            <div className="gt-label" />
+            <div className="gt-track">
               {ticks.map((t) => (
-                <i key={t.d} class={t.major ? 'major' : ''} style={{ left: x(t.d) }} />
+                <i key={t.d} className={t.major ? 'major' : ''} style={{ left: x(t.d) }} />
               ))}
-              <b class="gt-today" style={{ left: x(today) }} />
+              <b className="gt-today" style={{ left: x(today) }} />
             </div>
           </div>
           {rows.map((r) => {
@@ -271,19 +282,19 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
               <div
                 key={r.s.id}
                 data-id={r.s.id}
-                class="gt-row"
+                className="gt-row"
                 style={{ '--lanes': Math.max(...r.lanes) + 1 } as Record<string, number>}
                 onClick={() => !dragged.current && onOpen(r.s)}
               >
-                <div class="gt-label" title={r.s.name}>
+                <div className="gt-label" title={r.s.name}>
                   <SubIcon sub={r.s} size={20} />
                   <span>{r.s.name}</span>
                 </div>
-                <div class="gt-track">
+                <div className="gt-track">
                   {r.gaps.map((g) => (
                     <span
                       key={g.from}
-                      class="gt-gap"
+                      className="gt-gap"
                       style={{ left: x(g.from), width: Math.max(0, x(g.to) - x(g.from)) }}
                       title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
                     >
@@ -297,7 +308,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     if (g.to < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
-                    if (lifetime) return <span key={g.from} class="gt-lifetime" style={{ left, top: top + 2, background: color(g.v) }} title={tip} />;
+                    if (lifetime) return <span key={g.from} className="gt-lifetime" style={{ left, top: top + 2, background: color(g.v) }} title={tip} />;
                     // 段内按调价、首期优惠切成几截，每截标自己的价格
                     const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])]
                       .filter((d) => d >= g.from && d <= g.to)
@@ -314,11 +325,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       return (
                         <span
                           key={a}
-                          class={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 ? 'cont' : ''} ${!last ? 'cut' : ''} ${intro ? 'intro' : ''}`}
+                          className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 ? 'cont' : ''} ${!last ? 'cut' : ''} ${intro ? 'intro' : ''}`}
                           style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                           title={ptip || tip}
                         >
-                          {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && <i class="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />}
+                          {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />}
                           {pw > 70 && (
                             <em>
                               {n === 0 && g.v.region ? `${flag(g.v.region)} ` : ''}
@@ -331,7 +342,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     });
                   })}
                   {charges.map((c, k2) => (
-                    <i key={k2} class={`gt-charge ${c.amount < 0 ? 'refund' : ''} ${c.date > today ? 'future' : ''}`} style={{ left: x(c.date) }} />
+                    <i key={k2} className={`gt-charge ${c.amount < 0 ? 'refund' : ''} ${c.date > today ? 'future' : ''}`} style={{ left: x(c.date) }} />
                   ))}
                 </div>
               </div>
@@ -339,7 +350,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           })}
         </div>
       </div>
-      <div class="gt-legend">
+      <div className="gt-legend">
         {keys.map((key, i) => (
           <span key={key}>
             <i style={{ background: PALETTE[i % PALETTE.length] }} />
@@ -347,11 +358,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           </span>
         ))}
         <span>
-          <i class="lg-planned" />
+          <i className="lg-planned" />
           {t('list.gantt.planned')}
         </span>
         <span>
-          <i class="lg-gap" />
+          <i className="lg-gap" />
           {t('list.gantt.gap')}
         </span>
       </div>
@@ -392,21 +403,21 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
   const years: string[] = [];
   for (let y = Number(from.slice(0, 4)) + 1; `${y}-01-01` <= to; y++) years.push(`${y}-01-01`);
   return (
-    <div class="mg" style={{ '--lanes': laneEnd.length } as Record<string, number>}>
-      <div class="mg-track">
+    <div className="mg" style={{ '--lanes': laneEnd.length } as Record<string, number>}>
+      <div className="mg-track">
         {years.map((y) => (
-          <i key={y} class="mg-year" style={{ left: x(y) }}>
+          <i key={y} className="mg-year" style={{ left: x(y) }}>
             <span>{y.slice(0, 4)}</span>
           </i>
         ))}
-        <b class="mg-today" style={{ left: x(today) }} />
+        <b className="mg-today" style={{ left: x(today) }} />
         {segs
           .slice(1)
           .map((g, i) =>
             segs[i].to < g.from && lanes[i] === lanes[i + 1] ? (
               <span
                 key={`gap-${g.from}`}
-                class="mg-gap"
+                className="mg-gap"
                 style={{ left: x(segs[i].to), width: w(segs[i].to, g.from), top: `${lanes[i] * 22 + 9}px` }}
                 title={t('list.gantt.gapDays', { count: diffDays(segs[i].to, g.from) })}
               />
@@ -417,7 +428,7 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
             return (
               <span
                 key={g.from}
-                class="mg-dot"
+                className="mg-dot"
                 style={{ left: x(g.from), top: `${lanes[k] * 22 + 3}px`, background: color(g.v) }}
                 title={t('list.gantt.lifetime', { amount: money(g.v.price, g.v.currency) })}
               />
@@ -432,7 +443,7 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
             return (
               <span
                 key={`${g.from}-${a}`}
-                class={`mg-seg ${n > 0 ? 'cont' : ''} ${!lastCut ? 'cut' : ''} ${lastCut && g.open ? 'open' : ''} ${g.v.planned ? 'planned' : ''} ${a > today ? 'future' : ''}`}
+                className={`mg-seg ${n > 0 ? 'cont' : ''} ${!lastCut ? 'cut' : ''} ${lastCut && g.open ? 'open' : ''} ${g.v.planned ? 'planned' : ''} ${a > today ? 'future' : ''}`}
                 style={{ left: x(a), width: w(a, b), top: `${lanes[k] * 22}px`, '--c': color(g.v) } as Record<string, string>}
                 title={`${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${lastCut && g.open ? t('list.gantt.present') : cnDate(b)}`}
               />
@@ -440,17 +451,17 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
           });
         })}
         {charges.map((c, i) => (
-          <i key={i} class={`mg-charge ${c.amount < 0 ? 'refund' : ''} ${c.projected ? 'future' : ''}`} style={{ left: x(c.date) }} />
+          <i key={i} className={`mg-charge ${c.amount < 0 ? 'refund' : ''} ${c.projected ? 'future' : ''}`} style={{ left: x(c.date) }} />
         ))}
       </div>
-      <div class="mg-legend">
+      <div className="mg-legend">
         {methodIds.map((id) => (
           <span key={id}>
             <i style={{ background: PALETTE[methodIds.indexOf(id) % PALETTE.length] }} />
             {state.methods.find((m) => m.id === id)?.name ?? t('list.unassigned')}
           </span>
         ))}
-        <span class="mg-range">{t('list.gantt.range', { date: cnDate(start), count: segs.length })}</span>
+        <span className="mg-range">{t('list.gantt.range', { date: cnDate(start), count: segs.length })}</span>
       </div>
     </div>
   );

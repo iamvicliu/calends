@@ -1,5 +1,5 @@
-import { render } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { createRoot } from 'react-dom/client';
+import { useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
@@ -85,14 +85,14 @@ function Login({ error }: { error?: string }) {
   };
   const setupMode = status?.needsSetup;
   const mismatch = setupMode && pw2 !== '' && pw !== pw2;
-  const submit = (e: Event) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
     void go(() => (setupMode ? setupPassword(token.trim(), pw) : login(pw)));
   };
   const canPasskey = !setupMode && !!status?.passkeys && typeof window.PublicKeyCredential === 'function';
   return (
-    <div class="login">
-      <form class="login-card fade-in" onSubmit={submit}>
+    <div className="login">
+      <form className="login-card fade-in" onSubmit={submit}>
         <img src="/icons/icon-192.png" alt="" />
         <h1>{t('app.name')}</h1>
         <p>{setupMode ? t('app.login.setupHint') : t('app.login.tagline')}</p>
@@ -102,7 +102,7 @@ function Login({ error }: { error?: string }) {
             autoComplete="off"
             placeholder={t('app.login.setupToken')}
             value={token}
-            onInput={(e) => setToken((e.target as HTMLInputElement).value)}
+            onChange={(e) => setToken((e.target as HTMLInputElement).value)}
           />
         )}
         <input
@@ -111,7 +111,7 @@ function Login({ error }: { error?: string }) {
           autoComplete={setupMode ? 'new-password' : 'current-password'}
           placeholder={setupMode ? t('app.login.newPassword') : t('app.login.password')}
           value={pw}
-          onInput={(e) => setPw((e.target as HTMLInputElement).value)}
+          onChange={(e) => setPw((e.target as HTMLInputElement).value)}
         />
         {setupMode && (
           <input
@@ -119,19 +119,19 @@ function Login({ error }: { error?: string }) {
             autoComplete="new-password"
             placeholder={t('app.login.again')}
             value={pw2}
-            onInput={(e) => setPw2((e.target as HTMLInputElement).value)}
+            onChange={(e) => setPw2((e.target as HTMLInputElement).value)}
           />
         )}
         {(err || mismatch) && (
-          <div class="red" style={{ fontSize: 13 }}>
+          <div className="red" style={{ fontSize: 13 }}>
             {mismatch ? t('app.login.mismatch') : err}
           </div>
         )}
-        <button class="btn primary lg" disabled={!status || !pw || busy || (setupMode && (!token || pw.length < 8 || pw !== pw2))}>
+        <button className="btn primary lg" disabled={!status || !pw || busy || (setupMode && (!token || pw.length < 8 || pw !== pw2))}>
           {busy ? t('app.login.verifying') : setupMode ? t('app.login.setupEnter') : t('app.login.enter')}
         </button>
         {canPasskey && (
-          <button type="button" class="btn lg" disabled={busy} onClick={() => go(loginPasskey)}>
+          <button type="button" className="btn lg" disabled={busy} onClick={() => go(loginPasskey)}>
             <Icon name="key" /> {t('app.login.passkey')}
           </button>
         )}
@@ -170,46 +170,46 @@ function Sidebar({
     .slice(0, 12);
   const showUpcoming = state.settings.sidebarUpcoming !== false;
   return (
-    <aside class="sidebar">
-      <div class="sb-top">
-        <a class="sb-mark" href={href('')}>
+    <aside className="sidebar">
+      <div className="sb-top">
+        <a className="sb-mark" href={href('')}>
           <img src="/icons/icon-192.png" alt="" />
           {t('app.name')}
         </a>
-        <button class="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
+        <button className="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
           <Icon name="sidebar" />
         </button>
       </div>
       {!state.readonly && (
-        <button class="side-item" onClick={onAdd}>
+        <button className="side-item" onClick={onAdd}>
           <Icon name="compose" />
           <span>{t('app.sidebar.new')}</span>
           <kbd>N</kbd>
         </button>
       )}
-      <button class="side-item" onClick={onSearch}>
+      <button className="side-item" onClick={onSearch}>
         <Icon name="search" />
         <span>{t('app.sidebar.search')}</span>
         <kbd>⌘K</kbd>
       </button>
-      <div class="side-gap" />
+      <div className="side-gap" />
       {navOf(state.settings).map((n) => (
         <a
           key={n.path}
-          class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) || (n.path === 'family' && route === 'family/people') ? 'active' : ''}`}
+          className={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) || (n.path === 'family' && route === 'family/people') ? 'active' : ''}`}
           href={href(n.path)}
         >
           <Icon name={n.icon} />
           <span>{n.label}</span>
         </a>
       ))}
-      <div class="side-scroll side-recent">
-        {showUpcoming && upcoming.length > 0 && <div class="side-label">{t('app.sidebar.upcoming')}</div>}
+      <div className="side-scroll side-recent">
+        {showUpcoming && upcoming.length > 0 && <div className="side-label">{t('app.sidebar.upcoming')}</div>}
         {showUpcoming &&
           upcoming.map(({ s, n }) => {
             const days = diffDays(d, n!);
             return (
-              <button key={s.id} class={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
+              <button key={s.id} className={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
                 <SubIcon sub={s} size={18} />
                 <span>{s.name}</span>
                 <small>
@@ -225,15 +225,15 @@ function Sidebar({
             );
           })}
       </div>
-      <div class="side-foot">
+      <div className="side-foot">
         <CurrencyItem state={state} />
-        <button class="side-item theme-item" onClick={toggleTheme} title={t('app.sidebar.themeHint')}>
+        <button className="side-item theme-item" onClick={toggleTheme} title={t('app.sidebar.themeHint')}>
           <ThemeIcon mode={theme} size={17} />
           <span>{t('app.sidebar.theme')}</span>
           <small>{THEME_LABEL[theme]}</small>
         </button>
         {!state.readonly && (
-          <a class={`side-item ${route === 'settings' ? 'active' : ''}`} href={href('settings')}>
+          <a className={`side-item ${route === 'settings' ? 'active' : ''}`} href={href('settings')}>
             <Icon name="gear" />
             <span>{t('app.nav.settings')}</span>
           </a>
@@ -296,7 +296,7 @@ function Palette({
   const pages = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }].filter(
     (n) => !lower || n.label.toLowerCase().includes(lower),
   );
-  const items: Array<{ key: string; run: () => void; el: preact.JSX.Element }> = [
+  const items: Array<{ key: string; run: () => void; el: React.JSX.Element }> = [
     ...subs.map((s) => ({
       key: s.id,
       run: () => onOpen(s),
@@ -346,13 +346,13 @@ function Palette({
     return () => cancelAnimationFrame(id);
   }, []);
   return (
-    <div class="scrim" onClick={(e) => e.target === e.currentTarget && onClose()} onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div class="palette" role="dialog" aria-modal="true">
+    <div className="scrim" onClick={(e) => e.target === e.currentTarget && onClose()} onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+      <div className="palette" role="dialog" aria-modal="true">
         <input
           ref={input}
           placeholder={t('app.palette.placeholder')}
           value={q}
-          onInput={(e) => {
+          onChange={(e) => {
             setQ((e.target as HTMLInputElement).value);
             setI(0);
           }}
@@ -369,10 +369,10 @@ function Palette({
             if (e.key === 'Escape') onClose();
           }}
         />
-        <div class="palette-list">
-          {items.length === 0 && <div class="pal-group">{t('app.palette.empty')}</div>}
+        <div className="palette-list">
+          {items.length === 0 && <div className="pal-group">{t('app.palette.empty')}</div>}
           {items.map((it, k) => (
-            <button key={it.key} class={`pal-item ${k === i ? 'on' : ''}`} onMouseEnter={() => setI(k)} onClick={() => go(k)}>
+            <button key={it.key} className={`pal-item ${k === i ? 'on' : ''}`} onMouseEnter={() => setI(k)} onClick={() => go(k)}>
               {it.el}
             </button>
           ))}
@@ -456,7 +456,7 @@ function App() {
     };
   }, [state, collapsed, editing, viewId, review, ics, palette]);
 
-  if (phase === 'loading') return <div class="login" />;
+  if (phase === 'loading') return <div className="login" />;
   if (phase === 'login' || !state) return <Login error={phase === 'offline' ? t('app.offlineError', { error: error ?? '' }) : undefined} />;
   // 分类表（图标、颜色、顺序）先于各页面同步，页面里按分类名直接查
   syncCategories(state);
@@ -515,7 +515,7 @@ function App() {
     }
 
   return (
-    <div class={`app ${collapsed ? 'collapsed' : ''} ${drawer ? 'drawer' : ''}`}>
+    <div className={`app ${collapsed ? 'collapsed' : ''} ${drawer ? 'drawer' : ''}`}>
       <Sidebar
         state={state}
         route={route}
@@ -530,10 +530,10 @@ function App() {
         }}
         onCollapse={() => (drawer ? setDrawer(false) : setCollapsed(true))}
       />
-      <div class="drawer-scrim" onClick={() => setDrawer(false)} />
-      <div class="main">
+      <div className="drawer-scrim" onClick={() => setDrawer(false)} />
+      <div className="main">
         {state.demo && (
-          <div class="demo-bar">
+          <div className="demo-bar">
             <span>{t('app.demo.banner')}</span>
             <a href={PROJECT_URL} target="_blank" rel="noopener">
               {t('app.demo.cta')} →
@@ -541,12 +541,12 @@ function App() {
           </div>
         )}
         {phase === 'offline' && (
-          <div class="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
+          <div className="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
             {t('app.offline')}
           </div>
         )}
         {collapsed && (
-          <button class="sb-btn reopen" onClick={() => setCollapsed(false)} title={t('app.sidebar.expand')} aria-label={t('app.sidebar.expand')}>
+          <button className="sb-btn reopen" onClick={() => setCollapsed(false)} title={t('app.sidebar.expand')} aria-label={t('app.sidebar.expand')}>
             <Icon name="sidebar" />
           </button>
         )}
@@ -587,6 +587,6 @@ function Root() {
 
 initRouter();
 void loadLocale(initialLocale()).then(() => {
-  render(<Root />, document.getElementById('app')!);
+  createRoot(document.getElementById('app')!).render(<Root />);
   boot();
 });

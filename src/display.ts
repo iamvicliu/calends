@@ -1,5 +1,5 @@
 // 金额显示偏好：列表里显示原币，还是折算成本位币。只存在本机，侧边栏与列表共用
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 import { intlLocale, t } from '../shared/i18n.ts';
 
 const KEY = 'ledger:list-ccy';

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useMemo, useState } from 'react';
 import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel, relDays, weekdayShort } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -70,11 +70,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             ['year', t('calendar.mode.year')],
           ]}
         />
-        <button class="icon-btn" aria-label={t('calendar.prev')} onClick={() => shift(-1)}>
+        <button className="icon-btn" aria-label={t('calendar.prev')} onClick={() => shift(-1)}>
           <Icon name="left" />
         </button>
         <button
-          class="btn"
+          className="btn"
           onClick={() => {
             setMonth(today.slice(0, 7));
             setSel(today);
@@ -82,16 +82,16 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         >
           {t('calendar.today')}
         </button>
-        <button class="icon-btn" aria-label={t('calendar.next')} onClick={() => shift(1)}>
+        <button className="icon-btn" aria-label={t('calendar.next')} onClick={() => shift(1)}>
           <Icon name="right" />
         </button>
         {!state.readonly && (
-          <button class="icon-btn" onClick={onIcs} title={t('calendar.ics')} aria-label={t('calendar.ics')}>
+          <button className="icon-btn" onClick={onIcs} title={t('calendar.ics')} aria-label={t('calendar.ics')}>
             <Icon name="share" />
           </button>
         )}
       </Toolbar>
-      <div class="page fade-in">
+      <div className="page fade-in">
         {mode === 'year' ? (
           <YearHeat
             year={year}
@@ -105,11 +105,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             }}
           />
         ) : (
-          <div class="cal-wrap">
-            <div class="card cal">
-              <div class="cal-grid">
+          <div className="cal-wrap">
+            <div className="card cal">
+              <div className="cal-grid">
                 {DOW.map((d, i) => (
-                  <div key={i} class="cal-dow">
+                  <div key={i} className="cal-dow">
                     {d}
                   </div>
                 ))}
@@ -118,31 +118,31 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   return (
                     <button
                       key={d}
-                      class={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`}
+                      className={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`}
                       onClick={() => setSel(d)}
                     >
-                      <div class="cal-day">
+                      <div className="cal-day">
                         <b>{Number(d.slice(8))}</b>
-                        {items.length > 0 && <span class="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
+                        {items.length > 0 && <span className="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
                       </div>
-                      <div class="cal-icons">
+                      <div className="cal-icons">
                         {items.slice(0, 4).map((c) => (
                           <span key={c.sub.id} {...tipProps(() => `${c.sub.name} · ${money(c.amount, c.currency)}`)}>
                             <SubIcon sub={c.sub} size={24} />
                           </span>
                         ))}
-                        {items.length > 4 && <span class="cal-more">+{items.length - 4}</span>}
+                        {items.length > 4 && <span className="cal-more">+{items.length - 4}</span>}
                       </div>
                     </button>
                   );
                 })}
               </div>
             </div>
-            <div class="stack">
+            <div className="stack">
               <Group title={`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}>
-                {selList.length === 0 && <div class="cell muted">{t('calendar.noneDay')}</div>}
+                {selList.length === 0 && <div className="cell muted">{t('calendar.noneDay')}</div>}
                 {selList.map((c) => (
-                  <button key={c.sub.id} class="cell tap" onClick={() => onOpen(c.sub)}>
+                  <button key={c.sub.id} className="cell tap" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={34} />
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600 }}>{c.sub.name}</div>
@@ -150,7 +150,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                     </span>
                     <span style={{ textAlign: 'right' }}>
                       {pair(c.amount, c.currency, { value: chargeValue(state, c) }).main}
-                      <div class="muted" style={{ fontSize: 12 }}>
+                      <div className="muted" style={{ fontSize: 12 }}>
                         {c.projected ? t('calendar.projected') : t('calendar.charged')}
                         {pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt
                           ? ` · ${pair(c.amount, c.currency, { value: chargeValue(state, c) }).alt}`
@@ -161,12 +161,12 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                 ))}
               </Group>
               <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
-                {monthCharges.length === 0 && <div class="cell muted">{t('calendar.noneMonth')}</div>}
+                {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
                   <Cell
                     key={c.sub.id + c.date + i}
                     label={
-                      <span class="row cal-name">
+                      <span className="row cal-name">
                         <SubIcon sub={c.sub} size={24} />
                         <span>{c.sub.name}</span>
                       </span>
@@ -205,7 +205,7 @@ function YearHeat({
 }) {
   const DOW = dows();
   return (
-    <div class="heat">
+    <div className="heat">
       {Array.from({ length: 12 }, (_, i) => {
         const m = `${year}-${String(i + 1).padStart(2, '0')}`;
         // 固定 6 行，让 12 张月卡等高对齐
@@ -214,32 +214,32 @@ function YearHeat({
         const total = days.reduce((a, d) => a + sumOf(byDay.get(d)), 0);
         const count = days.reduce((a, d) => a + (byDay.get(d)?.length ?? 0), 0);
         return (
-          <button key={m} class={`heat-m ${today.startsWith(m) ? 'cur' : ''} ${m < today.slice(0, 7) ? 'past' : ''}`} onClick={() => onPick(m)}>
-            <div class="heat-h">
+          <button key={m} className={`heat-m ${today.startsWith(m) ? 'cur' : ''} ${m < today.slice(0, 7) ? 'past' : ''}`} onClick={() => onPick(m)}>
+            <div className="heat-h">
               {monthLabel(m, { year: false })}
               <span>
                 {count ? t('calendar.heatCount', { count }) : ''}
                 {money(total, base, { compact: true })}
               </span>
             </div>
-            <div class="heat-g">
+            <div className="heat-g">
               {DOW.map((w, k) => (
                 <em key={k}>{w}</em>
               ))}
               {grid.map((d) => {
-                if (!d.startsWith(m)) return <i key={d} class="hd out" />;
+                if (!d.startsWith(m)) return <i key={d} className="hd out" />;
                 const list = (byDay.get(d) ?? []).slice().sort((x, y) => y.amount - x.amount);
                 const cls = `hd ${d === today ? 'today' : ''} ${list.length ? 'has' : ''} ${d < today ? 'gone' : ''}`;
                 if (!list.length)
                   return (
-                    <i key={d} class={cls}>
+                    <i key={d} className={cls}>
                       {Number(d.slice(8))}
                     </i>
                   );
                 return (
                   <i
                     key={d}
-                    class={cls}
+                    className={cls}
                     {...tipProps(() => (
                       <>
                         <b>{cnDate(d, true)}</b>
@@ -252,9 +252,9 @@ function YearHeat({
                     ))}
                   >
                     {/* 同一天多笔：只画第一个图标，右上角标出总笔数（格子太小，叠起来只剩一道边） */}
-                    <span class="hd-stack">
+                    <span className="hd-stack">
                       <SubIcon sub={list[0].sub} size={20} />
-                      {list.length > 1 && <b class="hd-more">{list.length}</b>}
+                      {list.length > 1 && <b className="hd-more">{list.length}</b>}
                     </span>
                   </i>
                 );
