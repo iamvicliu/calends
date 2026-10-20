@@ -88,6 +88,7 @@ export function maskForPublic(state: AppState): AppState {
       ...state.settings,
       notifyEmail: '',
       icsToken: undefined,
+      channels: undefined,
       remindDays: 0,
       monthlyDigest: false,
     },

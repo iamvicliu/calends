@@ -240,8 +240,21 @@ export interface TopUp {
   note?: string;
 }
 
+export type ChannelKind = 'email' | 'telegram' | 'lark' | 'dingtalk' | 'wecom' | 'bark' | 'ntfy' | 'serverchan' | 'discord' | 'slack' | 'webhook';
+
+/** 一个通知渠道：同一份提醒会发到所有开着的渠道。config 里是该渠道的地址、令牌等（只存在后台，公开页不下发） */
+export interface Channel {
+  id: string;
+  kind: ChannelKind;
+  name: string;
+  enabled: boolean;
+  config: Record<string, string>;
+}
+
 export interface Settings {
   baseCurrency: string;
+  /** 通知渠道；为空时沿用 notifyEmail 作为唯一的邮件渠道 */
+  channels?: Channel[];
   /** 合租向成员收款的默认币种；缺省同本位币 */
   collectCurrency?: string;
   /** 新建订阅默认的支付方式 */

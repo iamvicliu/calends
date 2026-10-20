@@ -5,6 +5,7 @@ import type { AppState, PaymentMethod, Subscription } from '../../shared/types.t
 import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
+import { ChannelsGroup } from './Channels.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 
 interface Preview {
@@ -65,7 +66,6 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const unassigned = state.subscriptions.filter((x) => !x.methodId && !x.phases?.length && !x.proxy);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [ics, setIcs] = useState(false);
-  const [email, setEmail] = useState(s.notifyEmail);
   const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[] } | null>(null);
 
   const loadPreview = () => api<Preview>('/api/notify/preview').then(setPreview).catch(() => {});
@@ -111,15 +111,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
     <>
       <Toolbar title="设置" />
       <div class="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
-        <Group title="邮件提醒">
-          <Cell label="通知邮箱">
-            <input type="email" value={email} onInput={(e) => setEmail((e.target as HTMLInputElement).value)} />
-            {email !== s.notifyEmail && (
-              <button class="btn primary" onClick={() => run(() => saveSettings({ notifyEmail: email.trim() }), '已保存')}>
-                保存
-              </button>
-            )}
-          </Cell>
+        <Group title="提醒">
           <Cell label="默认提前">
             <Picker value={s.remindDays} onChange={(n) => run(() => saveSettings({ remindDays: n }))} options={[0, 1, 2, 3, 5, 7, 14].map((n) => ({ value: n, label: n === 0 ? '到期当天' : `${n} 天` }))} ariaLabel="默认提前" />
           </Cell>
@@ -130,17 +122,21 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <Toggle checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
           </Cell>
           <Cell
-            label={<span style={{ color: 'var(--accent)' }}>发送测试邮件</span>}
+            label={<span style={{ color: 'var(--accent)' }}>发一条测试提醒到所有渠道</span>}
             onClick={() =>
               run(async () => {
-                const r = await api<{ sent: boolean; reason?: string }>('/api/notify/test', { method: 'POST' });
+                const r = await api<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }>('/api/notify/test', { method: 'POST', body: '{}' });
                 if (!r.sent) throw new Error(r.reason ?? '发送失败');
+                const bad = r.results?.filter((x) => !x.ok) ?? [];
+                if (bad.length) throw new Error(bad.map((x) => `${x.channel}：${x.error}`).join('；'));
                 loadPreview();
-              }, `测试邮件已发往 ${s.notifyEmail}`)
+              }, '测试提醒已发出')
             }
           />
-          <Cell label={<span style={{ color: 'var(--accent)' }}>预览今天的提醒邮件</span>} onClick={() => window.open('/api/notify/preview?html=1', '_blank')} />
+          <Cell label={<span style={{ color: 'var(--accent)' }}>预览今天的提醒</span>} onClick={() => window.open('/api/notify/preview?html=1', '_blank')} />
         </Group>
+
+        <ChannelsGroup state={state} />
 
         {preview && (
           <Group title={`今天（${preview.day}）`} foot={preview.log.length ? undefined : '还没有发送记录'}>

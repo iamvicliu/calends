@@ -1,5 +1,5 @@
 import { todayIn } from '../shared/billing.ts';
-import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
+import { DEFAULT_SETTINGS, type Channel, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
 import { isAuthed, login, logout, randomToken, sameOrigin } from './auth.ts';
 import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
@@ -200,8 +200,14 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     }
     const digest: Digest = d
       ? { ...d, key: `test:${today}`, kind: 'test', subject: `【测试】${d.subject}` }
-      : { key: `test:${today}`, kind: 'test', subject: '【测试】订阅提醒已就绪', intro: '邮件通道工作正常。', sections: [] };
-    return json(await sendDigest(env, state, digest, { force: true }));
+      : { key: `test:${today}`, kind: 'test', subject: '【测试】订阅提醒已就绪', intro: '通知渠道工作正常。', sections: [] };
+    // 可以只测某一个渠道；传入 channel 对象时测试还没保存的配置
+    const body = (await req.json().catch(() => ({}))) as { channel?: Channel | string };
+    if (body.channel && typeof body.channel === 'object') {
+      const c = body.channel;
+      return json(await sendDigest(env, { ...state, settings: { ...state.settings, channels: [c] } }, digest, { force: true, only: c.id }));
+    }
+    return json(await sendDigest(env, state, digest, { force: true, only: typeof body.channel === 'string' ? body.channel : undefined }));
   }
   return bad('not found', 404);
 }
