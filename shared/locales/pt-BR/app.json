@@ -59,5 +59,9 @@
     "generate": "Criar link privado do calendário",
     "generated": "Link do calendário criado",
     "note": "O link contém um token privado — quem tiver o link pode ver suas datas de cobrança. Se ele vazar, toque em Redefinir link para revogá-lo."
+  },
+  "demo": {
+    "banner": "Demonstração somente leitura com dados de exemplo",
+    "cta": "Implante a sua"
   }
 }

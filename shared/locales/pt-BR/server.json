@@ -47,5 +47,6 @@
   "category": {
     "invalid": "Lista de categorias inválida",
     "duplicate": "Categoria duplicada: {name}"
-  }
+  },
+  "demoReadonly": "Esta é uma demonstração somente leitura — as alterações não são salvas."
 }

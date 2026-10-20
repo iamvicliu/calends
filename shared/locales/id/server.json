@@ -42,5 +42,6 @@
   "category": {
     "invalid": "Daftar kategori tidak valid",
     "duplicate": "Kategori ganda: {name}"
-  }
+  },
+  "demoReadonly": "Ini demo hanya-baca — perubahan tidak dapat disimpan."
 }

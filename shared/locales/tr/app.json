@@ -59,5 +59,9 @@
     "generate": "Özel takvim bağlantısı oluştur",
     "generated": "Takvim bağlantısı oluşturuldu",
     "note": "Bağlantı özel bir token içerir; ona sahip olan herkes ödeme takviminizi görebilir. Sızarsa iptal etmek için Bağlantıyı sıfırla'ya dokunun."
+  },
+  "demo": {
+    "banner": "Örnek verilerle salt okunur demo",
+    "cta": "Kendinizinkini kurun"
   }
 }

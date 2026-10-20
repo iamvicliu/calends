@@ -38,5 +38,6 @@
   "category": {
     "invalid": "分类列表无效",
     "duplicate": "分类重名：{name}"
-  }
+  },
+  "demoReadonly": "这是只读演示，无法保存修改。"
 }

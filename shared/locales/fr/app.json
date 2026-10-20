@@ -59,5 +59,9 @@
     "generate": "Créer un lien de calendrier privé",
     "generated": "Lien de calendrier créé",
     "note": "Le lien contient un jeton privé : toute personne qui l’a peut voir vos échéances. En cas de fuite, touchez Réinitialiser le lien pour le révoquer."
+  },
+  "demo": {
+    "banner": "Démo en lecture seule avec données d’exemple",
+    "cta": "Déployer la vôtre"
   }
 }

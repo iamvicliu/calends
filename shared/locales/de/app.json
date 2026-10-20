@@ -59,5 +59,9 @@
     "generate": "Privaten Kalenderlink erstellen",
     "generated": "Kalenderlink erstellt",
     "note": "Der Link enthält ein privates Token – wer ihn hat, sieht deine Abbuchungstermine. Falls er bekannt wird, tippe auf „Link zurücksetzen“, um ihn ungültig zu machen."
+  },
+  "demo": {
+    "banner": "Schreibgeschützte Demo mit Beispieldaten",
+    "cta": "Eigene Instanz deployen"
   }
 }

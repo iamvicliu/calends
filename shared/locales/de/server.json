@@ -47,5 +47,6 @@
   "category": {
     "invalid": "Ungültige Kategorienliste",
     "duplicate": "Doppelte Kategorie: {name}"
-  }
+  },
+  "demoReadonly": "Das ist eine schreibgeschützte Demo – Änderungen werden nicht gespeichert."
 }

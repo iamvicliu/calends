@@ -59,5 +59,9 @@
     "generate": "Crear enlace de calendario privado",
     "generated": "Enlace de calendario creado",
     "note": "El enlace contiene un token privado: cualquiera que lo tenga puede ver tus fechas de cobro. Si se filtra, toca Restablecer enlace para revocarlo."
+  },
+  "demo": {
+    "banner": "Demo de solo lectura con datos de ejemplo",
+    "cta": "Despliega la tuya"
   }
 }

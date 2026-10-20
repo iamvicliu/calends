@@ -47,5 +47,6 @@
   "category": {
     "invalid": "Invalid category list",
     "duplicate": "Duplicate category: {name}"
-  }
+  },
+  "demoReadonly": "This is a read-only demo — changes can't be saved."
 }

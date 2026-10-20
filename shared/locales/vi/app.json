@@ -58,5 +58,9 @@
     "generate": "Tạo liên kết lịch riêng tư",
     "generated": "Đã tạo liên kết lịch",
     "note": "Liên kết chứa token riêng tư — ai có nó đều xem được lịch thanh toán của bạn. Nếu bị lộ, hãy nhấn Đặt lại liên kết để thu hồi."
+  },
+  "demo": {
+    "banner": "Bản demo chỉ xem với dữ liệu mẫu",
+    "cta": "Tự triển khai"
   }
 }

@@ -47,5 +47,6 @@
   "category": {
     "invalid": "Geçersiz kategori listesi",
     "duplicate": "Yinelenen kategori: {name}"
-  }
+  },
+  "demoReadonly": "Bu salt okunur bir demo; değişiklikler kaydedilmez."
 }

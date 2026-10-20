@@ -38,5 +38,6 @@
   "category": {
     "invalid": "分類列表無效",
     "duplicate": "分類重名：{name}"
-  }
+  },
+  "demoReadonly": "這是唯讀示範，無法儲存變更。"
 }

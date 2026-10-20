@@ -331,6 +331,8 @@ export interface AppState {
   fxHistory?: FxHistory;
   /** 匿名公开视图时为 true（已脱敏、只读） */
   readonly?: boolean;
+  /** 演示站的只读数据 */
+  demo?: boolean;
 }
 
 export const BALANCE_KINDS: MethodKind[] = ['appstore', 'googleplay', 'giftcard', 'prepaid', 'phone', 'paypal', 'alipay', 'wechat', 'crypto'];

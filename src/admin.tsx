@@ -26,6 +26,7 @@ import { Wallet } from './views/Wallet.tsx';
 import { currentRoute, go as navigate, href, initRouter, onRoute, replaceRoute } from './router.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
+import { PROJECT_URL } from '../shared/brand.ts';
 
 /** label 是 app.nav.* 的键，取用时再翻译 */
 const NAV = [
@@ -446,6 +447,14 @@ function App() {
       />
       <div class="drawer-scrim" onClick={() => setDrawer(false)} />
       <div class="main">
+        {state.demo && (
+          <div class="demo-bar">
+            <span>{t('app.demo.banner')}</span>
+            <a href={PROJECT_URL} target="_blank" rel="noopener">
+              {t('app.demo.cta')} →
+            </a>
+          </div>
+        )}
         {phase === 'offline' && (
           <div class="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
             {t('app.offline')}

@@ -23,6 +23,8 @@ export interface Env {
   SETUP_TOKEN?: string;
   /** 自托管在反向代理后面时设为 1，才信任 X-Forwarded-For 作为访客 IP */
   TRUST_PROXY?: string;
+  /** 演示站：未登录访客可只读浏览后台 */
+  DEMO_MODE?: string;
   /** 仅本地：.dev.vars 设为 1 时跳过登录（不要在线上配置） */
   DEV_BYPASS_AUTH?: string;
 }

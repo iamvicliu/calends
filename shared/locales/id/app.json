@@ -58,5 +58,9 @@
     "generate": "Buat tautan kalender pribadi",
     "generated": "Tautan kalender dibuat",
     "note": "Tautan ini berisi token pribadi — siapa pun yang memilikinya bisa melihat jadwal tagihan Anda. Jika bocor, ketuk Atur ulang tautan untuk mencabutnya."
+  },
+  "demo": {
+    "banner": "Demo hanya-baca dengan data contoh",
+    "cta": "Pasang milikmu"
   }
 }

@@ -1813,3 +1813,7 @@ button.seat:disabled { cursor: default; }
   .pp-item .cell-r { width: 100%; justify-content: space-between; }
   .pp-amt { align-items: flex-start; }
 }
+
+/* 演示站顶部的提示条 */
+.demo-bar { position: sticky; top: 0; z-index: 30; display: flex; justify-content: center; align-items: center; gap: 12px; padding: 7px 16px; background: var(--ink); color: var(--on-ink); font-size: 13px; }
+.demo-bar a { color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }

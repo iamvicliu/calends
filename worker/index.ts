@@ -78,8 +78,11 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const state = await loadState(env);
     // 后台数据只给登录用户；访客的公开数据走 /api/public
     if (authed) return json(state);
+    // 演示站：不登录也能以只读方式看完整后台（演示数据是虚构的），渠道配置和令牌不下发
+    if (env.DEMO_MODE === '1') return json({ ...state, readonly: true, demo: true, settings: { ...state.settings, channels: undefined, icsToken: undefined } });
     return bad('unauthorized', 401);
   }
+  if (!authed && env.DEMO_MODE === '1') return bad(t('server.demoReadonly'), 403);
   if (!authed) return bad('unauthorized', 401);
   if (method !== 'GET' && !dev && !sameOrigin(req)) return bad('forbidden', 403);
 

@@ -42,5 +42,6 @@
   "category": {
     "invalid": "카테고리 목록이 올바르지 않습니다",
     "duplicate": "카테고리 이름이 중복됩니다: {name}"
-  }
+  },
+  "demoReadonly": "읽기 전용 데모라 변경 내용을 저장할 수 없습니다."
 }

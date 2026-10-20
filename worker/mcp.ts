@@ -108,6 +108,7 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
   // 无状态服务器不提供服务端推送流
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { ...cors, allow: 'POST' } });
   if ((await getSettings(env)).aiEnabled === false) return Response.json(fail(null, -32002, t('mcp.error.aiDisabled')), { status: 403, headers: cors });
+  if (env.DEMO_MODE === '1') return Response.json(fail(null, -32002, t('server.demoReadonly')), { status: 403, headers: cors });
   const token = await authenticate(req, env);
   if (!token) return Response.json(fail(null, -32001, t('mcp.error.badToken')), { status: 401, headers: { ...cors, 'www-authenticate': 'Bearer' } });
   let body: Rpc | Rpc[];

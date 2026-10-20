@@ -17,7 +17,8 @@
     "db:migrate:local": "node scripts/wrangler.mjs d1 migrations apply DB --local",
     "db:migrate:remote": "node scripts/wrangler.mjs d1 migrations apply DB --remote",
     "deploy": "npm run build && node scripts/wrangler.mjs deploy && node scripts/wrangler.mjs d1 migrations apply DB --remote",
-    "seed": "node --experimental-strip-types scripts/seed.ts"
+    "seed": "node --experimental-strip-types scripts/seed.ts",
+    "demo": "node --experimental-strip-types scripts/demo.ts --sql > .wrangler/demo.sql && node scripts/wrangler.mjs d1 execute DB --local --file .wrangler/demo.sql"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
