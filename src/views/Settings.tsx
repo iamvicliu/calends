@@ -8,24 +8,24 @@ import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
 import { go } from '../router.ts';
-import { LOCALES, isLocale } from '../../shared/i18n.ts';
+import { LOCALES, isLocale, t } from '../../shared/i18n.ts';
 import { preferredLocale } from '../i18n.ts';
 
-/** 可设为启动页的页面 */
+/** 可设为启动页的页面（标签取 app.nav.*） */
 const START_PAGES: Array<[string, string]> = [
-  ['list', '订阅'],
-  ['calendar', '日历'],
-  ['report', '报告'],
-  ['wallet', '钱包'],
+  ['list', 'list'],
+  ['calendar', 'calendar'],
+  ['report', 'report'],
+  ['wallet', 'wallet'],
 ];
 /** 侧边栏里可以隐藏的模块；概览、订阅始终显示 */
 const SIDE_MODULES: Array<[string, string]> = [
-  ['calendar', '日历'],
-  ['report', '报告'],
-  ['wallet', '钱包'],
-  ['family', '合租'],
-  ['behalf', '代付'],
-  ['ai', 'AI 接入'],
+  ['calendar', 'calendar'],
+  ['report', 'report'],
+  ['wallet', 'wallet'],
+  ['family', 'family'],
+  ['behalf', 'behalf'],
+  ['ai', 'ai'],
 ];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { localTime } from '../../shared/format.ts';
@@ -51,32 +51,32 @@ export function icsUrl(state: AppState) {
 export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => void }) {
   const url = icsUrl(state);
   return (
-    <Sheet narrow title="订阅到日历" onClose={onClose}>
+    <Sheet narrow title={t('app.ics.title')} onClose={onClose}>
       <div class="stack">
         <p class="muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>
-          把扣款日同步到 Apple 日历 / Google 日历 / Outlook，每 6 小时自动刷新，并按提醒设置在扣款前弹出通知。
+          {t('app.ics.intro')}
         </p>
         {url ? (
           <>
             <div class="codebox">{url}</div>
             <div class="row" style={{ flexWrap: 'wrap' }}>
               <a class="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
-                <Icon name="cal" /> 一键订阅
+                <Icon name="cal" /> {t('app.ics.subscribe')}
               </a>
-              <button class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast('已复制'))}>
-                复制链接
+              <button class="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast(t('app.ics.copied')))}>
+                {t('app.ics.copy')}
               </button>
-              <button class="btn ghost" onClick={() => run(rotateIcs, '已重置，旧链接失效')}>
-                重置链接
+              <button class="btn ghost" onClick={() => run(rotateIcs, t('app.ics.resetDone'))}>
+                {t('app.ics.reset')}
               </button>
             </div>
           </>
         ) : (
-          <button class="btn primary" onClick={() => run(rotateIcs, '已生成日历链接')}>
-            生成私密日历链接
+          <button class="btn primary" onClick={() => run(rotateIcs, t('app.ics.generated'))}>
+            {t('app.ics.generate')}
           </button>
         )}
-        <small class="soft">链接含私密令牌，持有者可看到扣款日程；泄露后点「重置链接」即可作废。</small>
+        <small class="soft">{t('app.ics.note')}</small>
       </div>
     </Sheet>
   );
@@ -109,7 +109,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
   const onCsv = (text: string) => {
     const r = importSubscriptionsCsv(text, state.methods, today);
-    if (!r.subscriptions.length) return toast('CSV 中没有可导入的订阅', true);
+    if (!r.subscriptions.length) return toast(t('settings.toast.csvEmpty'), true);
     setImporting({ subs: r.subscriptions, methods: r.methods, created: r.created });
   };
   // 备份恢复：整份交给服务端，订阅、支付方式、设置、汇率一起原样还原
@@ -120,7 +120,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       if (!Array.isArray(j.subscriptions)) throw new Error();
       setRestoring({ raw: j, subs: j.subscriptions.length, methods: j.methods?.length ?? 0, exportedAt: j.exportedAt, version: j.version ?? 1 });
     } catch {
-      toast('不是有效的备份文件', true);
+      toast(t('settings.toast.badBackup'), true);
     }
   };
 
@@ -134,85 +134,85 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const hour = (h: number) => `${String(h).padStart(2, '0')}:05`;
   return (
     <>
-      <Toolbar title="设置" />
+      <Toolbar title={t('settings.title')} />
       <div class="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
-        <Group title="通用">
-          <Cell label="语言">
+        <Group title={t('settings.general.title')}>
+          <Cell label={t('settings.general.language')}>
             <Picker
               value={isLocale(s.language) ? s.language : ''}
               onChange={(v) => run(() => saveSettings({ language: v || undefined }))}
               options={[
-                { value: '', label: '跟随系统', hint: LOCALES.find((l) => l.code === preferredLocale())?.name },
+                { value: '', label: t('settings.general.followSystem'), hint: LOCALES.find((l) => l.code === preferredLocale())?.name },
                 ...LOCALES.map((l) => ({ value: l.code as string, label: l.name, icon: <span class="cp-flag"><img src={`/flags/${l.flag}.png`} alt="" /></span> })),
               ]}
-              ariaLabel="语言"
+              ariaLabel={t('settings.general.language')}
             />
           </Cell>
-          <Cell label="名字">
-            <input value={name} placeholder="分享图、公开页上显示" onInput={(e) => setName((e.target as HTMLInputElement).value)} onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), '已保存')} />
+          <Cell label={t('settings.general.name')}>
+            <input value={name} placeholder={t('settings.general.namePlaceholder')} onInput={(e) => setName((e.target as HTMLInputElement).value)} onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), t('settings.toast.saved'))} />
           </Cell>
-          <Cell label="打开后先看">
-            <Picker value={s.startPage ?? ''} onChange={(v) => run(() => saveSettings({ startPage: v || undefined }))} options={[{ value: '', label: '概览' }, ...START_PAGES.map(([k, l]) => ({ value: k, label: l }))]} ariaLabel="启动页" />
+          <Cell label={t('settings.general.startPage')}>
+            <Picker value={s.startPage ?? ''} onChange={(v) => run(() => saveSettings({ startPage: v || undefined }))} options={[{ value: '', label: t('app.nav.overview') }, ...START_PAGES.map(([k, l]) => ({ value: k, label: t(`app.nav.${l}`) }))]} ariaLabel={t('settings.general.startPageAria')} />
           </Cell>
-          <Cell label="本位币">
-            <CurrencySelect value={s.baseCurrency} onChange={(c) => run(() => saveSettings({ baseCurrency: c }))} ariaLabel="本位币" />
+          <Cell label={t('settings.general.baseCurrency')}>
+            <CurrencySelect value={s.baseCurrency} onChange={(c) => run(() => saveSettings({ baseCurrency: c }))} ariaLabel={t('settings.general.baseCurrency')} />
           </Cell>
-          <Cell label="时区">
-            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => ({ value: z, label: z }))} ariaLabel="时区" />
+          <Cell label={t('settings.general.timezone')}>
+            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => ({ value: z, label: z }))} ariaLabel={t('settings.general.timezone')} />
           </Cell>
-          <Cell label="每周从">
-            <Picker value={String(s.weekStart ?? 1)} onChange={(v) => run(() => saveSettings({ weekStart: v === '0' ? 0 : 1 }))} options={[{ value: '1', label: '周一开始' }, { value: '0', label: '周日开始' }]} ariaLabel="每周起始日" />
+          <Cell label={t('settings.general.weekStart')}>
+            <Picker value={String(s.weekStart ?? 1)} onChange={(v) => run(() => saveSettings({ weekStart: v === '0' ? 0 : 1 }))} options={[{ value: '1', label: t('settings.general.monday') }, { value: '0', label: t('settings.general.sunday') }]} ariaLabel={t('settings.general.weekStartAria')} />
           </Cell>
         </Group>
 
-        <Group title="侧边栏">
-          <Cell label="即将扣款">
-            <Toggle label="即将扣款" checked={s.sidebarUpcoming !== false} onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))} />
+        <Group title={t('settings.sidebar.title')}>
+          <Cell label={t('settings.sidebar.upcoming')}>
+            <Toggle label={t('settings.sidebar.upcoming')} checked={s.sidebarUpcoming !== false} onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))} />
           </Cell>
           {s.sidebarUpcoming !== false && (
-            <Cell label="往后看">
-              <Picker value={s.upcomingDays ?? 45} onChange={(n) => run(() => saveSettings({ upcomingDays: n }))} options={[7, 14, 30, 45, 60, 90].map((n) => ({ value: n, label: `${n} 天` }))} ariaLabel="即将扣款天数" search={false} />
+            <Cell label={t('settings.sidebar.lookAhead')}>
+              <Picker value={s.upcomingDays ?? 45} onChange={(n) => run(() => saveSettings({ upcomingDays: n }))} options={[7, 14, 30, 45, 60, 90].map((n) => ({ value: n, label: t('settings.days', { count: n }) }))} ariaLabel={t('settings.sidebar.lookAheadAria')} search={false} />
             </Cell>
           )}
           {SIDE_MODULES.map(([k, l]) => (
-            <Cell key={k} label={l}>
+            <Cell key={k} label={t(`app.nav.${l}`)}>
               <Toggle checked={!(s.hiddenNav ?? []).includes(k)} onChange={(v) => run(() => saveSettings({ hiddenNav: v ? (s.hiddenNav ?? []).filter((x) => x !== k) : [...(s.hiddenNav ?? []), k] }))} />
             </Cell>
           ))}
         </Group>
 
-        <Group title="提醒">
-          <Cell label="默认提前">
-            <Picker value={s.remindDays} onChange={(n) => run(() => saveSettings({ remindDays: n }))} options={[0, 1, 2, 3, 5, 7, 14].map((n) => ({ value: n, label: n === 0 ? '到期当天' : `${n} 天` }))} ariaLabel="默认提前" />
+        <Group title={t('settings.remind.title')}>
+          <Cell label={t('settings.remind.lead')}>
+            <Picker value={s.remindDays} onChange={(n) => run(() => saveSettings({ remindDays: n }))} options={[0, 1, 2, 3, 5, 7, 14].map((n) => ({ value: n, label: n === 0 ? t('settings.remind.sameDay') : t('settings.days', { count: n }) }))} ariaLabel={t('settings.remind.lead')} />
           </Cell>
-          <Cell label="发送时间">
-            <Picker value={s.notifyHour} onChange={(h) => run(() => saveSettings({ notifyHour: h }))} options={Array.from({ length: 24 }, (_, h) => ({ value: h, label: hour(h) }))} ariaLabel="发送时间" search={false} />
+          <Cell label={t('settings.remind.hour')}>
+            <Picker value={s.notifyHour} onChange={(h) => run(() => saveSettings({ notifyHour: h }))} options={Array.from({ length: 24 }, (_, h) => ({ value: h, label: hour(h) }))} ariaLabel={t('settings.remind.hour')} search={false} />
           </Cell>
-          <Cell label="每月 1 日账单预告">
-            <Toggle label="每月 1 日账单预告" checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
+          <Cell label={t('settings.remind.monthly')}>
+            <Toggle label={t('settings.remind.monthly')} checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
           </Cell>
           <Cell
-            label={<span style={{ color: 'var(--accent)' }}>发一条测试提醒到所有渠道</span>}
+            label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.test')}</span>}
             onClick={() =>
               run(async () => {
                 const r = await api<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }>('/api/notify/test', { method: 'POST', body: '{}' });
-                if (!r.sent) throw new Error(r.reason ?? '发送失败');
+                if (!r.sent) throw new Error(r.reason ?? t('settings.remind.testFailed'));
                 const bad = r.results?.filter((x) => !x.ok) ?? [];
-                if (bad.length) throw new Error(bad.map((x) => `${x.channel}：${x.error}`).join('；'));
+                if (bad.length) throw new Error(bad.map((x) => t('settings.remind.channelError', { channel: x.channel, error: x.error })).join(t('settings.remind.errorSep')));
                 loadPreview();
-              }, '测试提醒已发出')
+              }, t('settings.remind.testSent'))
             }
           />
-          <Cell label={<span style={{ color: 'var(--accent)' }}>预览今天的提醒</span>} onClick={() => window.open('/api/notify/preview?html=1', '_blank')} />
+          <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.preview')}</span>} onClick={() => window.open('/api/notify/preview?html=1', '_blank')} />
         </Group>
 
         <ChannelsGroup state={state} />
 
         {preview && (preview.digests.length > 0 || preview.log.length > 0) && (
-          <Group title={`今天（${preview.day}）`}>
+          <Group title={t('settings.today.title', { day: preview.day })}>
             {preview.digests.map((d) => (
               <Cell key={d.key} label={d.subject}>
-                {d.sections.reduce((a, x) => a + x.rows.length, 0)} 项
+                {t('settings.today.items', { count: d.sections.reduce((a, x) => a + x.rows.length, 0) })}
               </Cell>
             ))}
             {preview.log.slice(0, 6).map((l) => (
@@ -223,63 +223,63 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Group>
         )}
 
-        <Group title="记账">
-          <Cell label="默认支付方式">
+        <Group title={t('settings.books.title')}>
+          <Cell label={t('settings.books.defaultMethod')}>
             <MethodPicker methods={state.methods} value={s.defaultMethodId} onChange={(id) => run(() => saveSettings({ defaultMethodId: id }))} />
           </Cell>
           {s.defaultMethodId && unassigned.length > 0 && (
             <Cell
-              label={`${unassigned.length} 个订阅未指定支付方式`}
+              label={t('settings.books.unassigned', { count: unassigned.length })}
               onClick={() =>
                 run(async () => {
                   for (const x of unassigned) await saveSub({ ...x, methodId: s.defaultMethodId });
-                }, `已把 ${unassigned.length} 个订阅设为默认支付方式`)
+                }, t('settings.books.assignAllDone', { count: unassigned.length }))
               }
             >
-              <span style={{ color: 'var(--accent)' }}>全部设为默认</span>
+              <span style={{ color: 'var(--accent)' }}>{t('settings.books.assignAll')}</span>
             </Cell>
           )}
-          <Cell label="合租收款币种">
-            <CurrencySelect value={s.collectCurrency ?? s.baseCurrency} onChange={(c) => run(() => saveSettings({ collectCurrency: c }))} ariaLabel="合租收款币种" />
+          <Cell label={t('settings.books.collectCurrency')}>
+            <CurrencySelect value={s.collectCurrency ?? s.baseCurrency} onChange={(c) => run(() => saveSettings({ collectCurrency: c }))} ariaLabel={t('settings.books.collectCurrency')} />
           </Cell>
         </Group>
 
-        <Group title="汇率">
-          <Cell label="当前汇率" sub={`更新于 ${localTime(state.fx.fetchedAt, state.settings.timezone)}`} onClick={() => run(refreshFx, '汇率已更新')}>
+        <Group title={t('settings.fx.title')}>
+          <Cell label={t('settings.fx.current')} sub={t('settings.fx.updatedAt', { time: localTime(state.fx.fetchedAt, state.settings.timezone) })} onClick={() => run(refreshFx, t('settings.fx.updated'))}>
             1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY
           </Cell>
-          <Cell label="历史汇率覆盖" sub={fxs?.first ? `最早 ${fxs.first}` : undefined}>
-            {fxs ? `${fxs.covered} / ${fxs.needed} 天` : '…'}
+          <Cell label={t('settings.fx.history')} sub={fxs?.first ? t('settings.fx.earliest', { date: fxs.first }) : undefined}>
+            {fxs ? t('settings.fx.coverage', { covered: fxs.covered, count: fxs.needed }) : '…'}
           </Cell>
-          {fxs && fxs.covered < fxs.needed && <Cell label={<span style={{ color: 'var(--accent)' }}>补齐缺失的汇率</span>} onClick={() => run(async () => { await syncFx(); await loadFx(); }, '历史汇率已更新')} />}
+          {fxs && fxs.covered < fxs.needed && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.fx.fill')}</span>} onClick={() => run(async () => { await syncFx(); await loadFx(); }, t('settings.fx.historyUpdated'))} />}
         </Group>
 
-        <Group title="开放">
-          <Cell label="订阅到系统日历" onClick={() => setIcs(true)}>
-            {s.icsToken ? '已开启' : '未开启'}
+        <Group title={t('settings.open.title')}>
+          <Cell label={t('settings.open.ics')} onClick={() => setIcs(true)}>
+            {s.icsToken ? t('settings.open.on') : t('settings.open.off')}
           </Cell>
-          <Cell label="公开页" sub={s.publicView ? `${location.origin}/` : undefined}>
-            <Toggle label="公开页" checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已关闭公开页')} />
+          <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}/` : undefined}>
+            <Toggle label={t('settings.open.public')} checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? t('settings.open.publicOn') : t('settings.open.publicOff'))} />
           </Cell>
-          {s.publicView && <Cell label={<span style={{ color: 'var(--accent)' }}>预览公开页</span>} onClick={() => window.open('/', '_blank')} />}
-          <Cell label="AI 接入（MCP）">
-            <Toggle label="AI 接入（MCP）" checked={s.aiEnabled !== false} onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? '已开启 AI 接入' : '已关闭，AI 助手将无法访问')} />
+          {s.publicView && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />}
+          <Cell label={t('settings.open.ai')}>
+            <Toggle label={t('settings.open.ai')} checked={s.aiEnabled !== false} onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))} />
           </Cell>
-          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>管理令牌与接入方式</span>} onClick={() => go('ai')} />}
+          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('ai')} />}
         </Group>
 
         {!state.readonly && <SecurityGroup state={state} />}
 
-        <Group title="数据">
-          <Cell label="导入 CSV" onClick={() => pickFile('.csv,text/csv', onCsv)} />
-          <Cell label="从备份恢复" onClick={() => pickFile('.json,application/json', onJson)} />
-          <Cell label="导出 CSV" onClick={exportCsv} />
-          <Cell label="导出完整备份" onClick={() => (location.href = '/api/backup')} />
+        <Group title={t('settings.data.title')}>
+          <Cell label={t('settings.data.importCsv')} onClick={() => pickFile('.csv,text/csv', onCsv)} />
+          <Cell label={t('settings.data.restore')} onClick={() => pickFile('.json,application/json', onJson)} />
+          <Cell label={t('settings.data.exportCsv')} onClick={exportCsv} />
+          <Cell label={t('settings.data.backup')} onClick={() => (location.href = '/api/backup')} />
         </Group>
 
         <Group>
           <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => logout()}>
-            退出登录
+            {t('settings.logout')}
           </button>
         </Group>
       </div>
@@ -287,13 +287,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       {restoring && (
         <Sheet
           narrow
-          title="从备份恢复"
+          title={t('settings.data.restore')}
           onClose={() => setRestoring(null)}
           foot={
             <>
               <span class="grow" />
               <button class="btn" onClick={() => setRestoring(null)}>
-                取消
+                {t('settings.restore.cancel')}
               </button>
               <button
                 class="btn primary"
@@ -303,40 +303,40 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                     setRestoring(null);
                     location.reload();
                     return r;
-                  }, '已恢复')
+                  }, t('settings.restore.done'))
                 }
               >
-                替换当前账本
+                {t('settings.restore.replace')}
               </button>
             </>
           }
         >
-          <Group foot="当前账本会被备份里的内容整体替换，无法撤销；建议先导出一份当前备份。">
-            <Cell label="订阅">{restoring.subs} 个</Cell>
-            <Cell label="支付方式">{restoring.methods} 个</Cell>
-            {restoring.exportedAt && <Cell label="备份时间">{localTime(restoring.exportedAt, state.settings.timezone)}</Cell>}
-            {restoring.version < 2 && <Cell label="格式">旧版备份：只含订阅与支付方式</Cell>}
+          <Group foot={t('settings.restore.warning')}>
+            <Cell label={t('settings.restore.subs')}>{t('settings.restore.count', { count: restoring.subs })}</Cell>
+            <Cell label={t('settings.restore.methods')}>{t('settings.restore.count', { count: restoring.methods })}</Cell>
+            {restoring.exportedAt && <Cell label={t('settings.restore.time')}>{localTime(restoring.exportedAt, state.settings.timezone)}</Cell>}
+            {restoring.version < 2 && <Cell label={t('settings.restore.format')}>{t('settings.restore.legacy')}</Cell>}
           </Group>
         </Sheet>
       )}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {importing && (
         <Sheet
-          title={`导入 ${importing.subs.length} 项订阅`}
+          title={t('settings.import.title', { count: importing.subs.length })}
           onClose={() => setImporting(null)}
           foot={
             <>
               <button
                 class="btn danger"
                 onClick={() =>
-                  window.confirm('替换会清空现有订阅与支付方式，确定？') &&
+                  window.confirm(t('settings.import.confirmReplace')) &&
                   run(async () => {
                     await importData({ subscriptions: importing.subs, methods: importing.methods, mode: 'replace' });
                     setImporting(null);
-                  }, '已替换导入')
+                  }, t('settings.import.replaceDone'))
                 }
               >
-                替换全部
+                {t('settings.import.replaceAll')}
               </button>
               <span class="grow" />
               <button
@@ -345,15 +345,15 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                   run(async () => {
                     await importData({ subscriptions: importing.subs, methods: importing.methods, mode: 'merge' });
                     setImporting(null);
-                  }, '已合并导入')
+                  }, t('settings.import.mergeDone'))
                 }
               >
-                追加导入
+                {t('settings.import.merge')}
               </button>
             </>
           }
         >
-          <Group title={importing.created.length ? `将新建支付方式：${importing.created.map((m) => m.name).join('、')}` : undefined}>
+          <Group title={importing.created.length ? t('settings.import.newMethods', { names: importing.created.map((m) => m.name).join(t('settings.import.sep')) }) : undefined}>
             {importing.subs.map((x) => (
               <Cell key={x.id} label={x.name}>
                 {x.currency} {x.price} / {cycleShort(x.cycle)}

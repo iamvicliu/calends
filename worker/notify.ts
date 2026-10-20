@@ -1,6 +1,7 @@
 import { addDays, addMonths, chargesBetween, convert, cycleDays, diffDays, effectiveStatus, nextCharge, priceAt, runwayFor, todayIn, totals } from '../shared/billing.ts';
 import { toBaseAt } from '../shared/fx.ts';
-import { billLabel, cnDate, esc, money, relDays } from '../shared/format.ts';
+import { billLabel, cnDate, esc, money, monthLabel, relDays } from '../shared/format.ts';
+import { t } from '../shared/i18n.ts';
 import { channelsOf, type AppState } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { matchEntries } from '../shared/proxy.ts';
@@ -23,6 +24,8 @@ export interface Digest {
   key: string;
   kind: 'daily' | 'monthly' | 'test';
   subject: string;
+  /** 邮件大标题；不填时用 subject */
+  title?: string;
   intro: string;
   sections: Section[];
 }
@@ -46,8 +49,8 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     if (st === 'trial' && s.trialEnd) {
       const d = diffDays(today, s.trialEnd);
       if (d === remind || d === 1 || d === 0) {
-        trials.push({ title: s.name, sub: `试用 ${relDays(d)}结束（${cnDate(s.trialEnd)}），之后按 ${money(s.price, s.currency)} 扣费`, amount: money(s.price, s.currency), tone: 'warn' });
-        headline.push(`${s.name} 试用${relDays(d)}结束`);
+        trials.push({ title: s.name, sub: t('notify.trial.sub', { when: relDays(d), date: cnDate(s.trialEnd), price: money(s.price, s.currency) }), amount: money(s.price, s.currency), tone: 'warn' });
+        headline.push(t('notify.trial.headline', { name: s.name, when: relDays(d) }));
       }
     }
     if (st === 'active' || st === 'ending') {
@@ -58,17 +61,17 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
           const method = state.methods.find((m) => m.id === s.methodId);
           const price = priceAt(s, n);
           const conv = s.currency !== base ? `≈ ${money(convert(price, s.currency, base, fx), base)}` : undefined;
-          const introEnds = s.intro && s.intro.until > n ? '' : s.intro && diffDays(s.intro.until, n) < 40 ? ' · 优惠结束，恢复原价' : '';
-          renew.push({ title: s.name, sub: `${relDays(d)} · ${cnDate(n, true)}${method ? ` · ${method.name}` : ''}${introEnds}`, amount: money(price, s.currency), amountSub: conv });
-          headline.push(`${s.name} ${relDays(d)}扣款 ${money(price, s.currency)}`);
+          const introEnds = !(s.intro && s.intro.until > n) && !!s.intro && diffDays(s.intro.until, n) < 40;
+          renew.push({ title: s.name, sub: [relDays(d), cnDate(n, true), method?.name, introEnds ? t('notify.renew.introEnds') : ''].filter(Boolean).join(' · '), amount: money(price, s.currency), amountSub: conv });
+          headline.push(t('notify.renew.headline', { name: s.name, when: relDays(d), price: money(price, s.currency) }));
         }
       }
     }
     if (s.end && st === 'ending') {
       const d = diffDays(today, s.end);
       if (d === 7 || d === 1) {
-        ending.push({ title: s.name, sub: `${relDays(d)}到期，不会自动续费`, amount: cnDate(s.end), tone: 'muted' });
-        headline.push(`${s.name} ${relDays(d)}到期`);
+        ending.push({ title: s.name, sub: t('notify.ending.sub', { when: relDays(d) }), amount: cnDate(s.end), tone: 'muted' });
+        headline.push(t('notify.ending.headline', { name: s.name, when: relDays(d) }));
       }
     }
   }
@@ -90,18 +93,18 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
       carpool.push({
         title: `${m.name} · ${s.name}`,
-        sub: `${d > 0 ? `${relDays(d)}（${cnDate(due)}）到期` : d === 0 ? '今天到期' : `已逾期 ${-d} 天`}，下一期${billLabel(every)}${who ? ` · ${who}` : ''}`,
+        sub: `${t('notify.carpool.sub', { status: d > 0 ? t('notify.carpool.dueIn', { when: relDays(d), date: cnDate(due) }) : d === 0 ? t('notify.carpool.dueToday') : t('notify.carpool.overdue', { count: -d }), bill: billLabel(every) })}${who ? ` · ${who}` : ''}`,
         amount: fee,
         tone: d < 0 ? 'warn' : undefined,
       });
-      if (d <= 0) headline.push(`${m.name} 的 ${s.name} 该收钱了`);
+      if (d <= 0) headline.push(t('notify.carpool.headline', { member: m.name, name: s.name }));
     }
   }
 
   // 代付：替人扣款当天提醒去收；扣了还没收回的，第 3、7、14、30 天各提醒一次
   for (const s of state.subscriptions) {
     if (!s.proxy) continue;
-    const name = s.proxy.forName || '对方';
+    const name = s.proxy.forName || t('notify.proxy.someone');
     const contact = s.proxy.contact ? ` · ${s.proxy.contactVia ? `${s.proxy.contactVia} ` : ''}${s.proxy.contact}` : '';
     // 与代付页同样的对账规则（扣款日前后 15 天内的收款也算），改过开始日期也不会重复提醒
     const charges = chargesBetween(s, s.start, today, today);
@@ -115,12 +118,12 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       const ccy = entry?.chargedCurrency ?? c.currency;
       proxy.push({
         title: `${name} · ${s.name}`,
-        sub: `${d === 0 ? '今天替 TA 扣了款' : `${cnDate(c.date)} 扣的款已过 ${d} 天`}，还没收回${contact}`,
+        sub: `${t('notify.proxy.sub', { status: d === 0 ? t('notify.proxy.chargedToday') : t('notify.proxy.chargedAgo', { date: cnDate(c.date), count: d }) })}${contact}`,
         amount: money(charged, ccy),
         amountSub: `≈ ${money(toBaseAt(state, charged, ccy, c.date, collect), collect)}`,
         tone: d > 0 ? 'warn' : undefined,
       });
-      headline.push(d === 0 ? `替 ${name} 扣了 ${s.name}` : `${name} 的 ${s.name} 还没收回`);
+      headline.push(t(d === 0 ? 'notify.proxy.headlineToday' : 'notify.proxy.headlineUnpaid', { name, sub: s.name }));
     }
   }
 
@@ -132,30 +135,31 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     if (d === lead || d === 14 || d === 7 || d === 3 || d === 1 || d === 0) {
       balance.push({
         title: m.name,
-        sub: `余额 ${money(r.current, m.currency)}，不足以支付 ${cnDate(r.shortfall.date)} 的 ${r.shortfall.sub.name}（${money(r.shortfall.amount, r.shortfall.currency)}）`,
+        sub: t('notify.balance.sub', { balance: money(r.current, m.currency), date: cnDate(r.shortfall.date), sub: r.shortfall.sub.name, amount: money(r.shortfall.amount, r.shortfall.currency) }),
         amount: relDays(d),
         tone: 'warn',
       });
-      headline.push(`${m.name} 余额将不足`);
+      headline.push(t('notify.balance.headline', { name: m.name }));
     }
   }
 
   const sections: Section[] = [
-    { heading: '即将扣款', rows: renew },
-    { heading: '试用到期', rows: trials },
-    { heading: '余额预警', rows: balance },
-    { heading: '合租收款', rows: carpool },
-    { heading: '代付待收', rows: proxy },
-    { heading: '即将到期', rows: ending },
+    { heading: t('notify.section.renew'), rows: renew },
+    { heading: t('notify.section.trials'), rows: trials },
+    { heading: t('notify.section.balance'), rows: balance },
+    { heading: t('notify.section.carpool'), rows: carpool },
+    { heading: t('notify.section.proxy'), rows: proxy },
+    { heading: t('notify.section.ending'), rows: ending },
   ].filter((x) => x.rows.length);
   if (!sections.length) return undefined;
-  const subject = headline.length === 1 ? `订阅提醒｜${headline[0]}` : `订阅提醒｜${headline[0]} 等 ${headline.length} 项`;
-  const t = totals(state, today);
+  const title = headline.length === 1 ? t('notify.daily.title', { headline: headline[0] }) : t('notify.daily.titleMore', { headline: headline[0], count: headline.length, more: headline.length - 1 });
+  const tot = totals(state, today);
   return {
     key: `daily:${today}`,
     kind: 'daily',
-    subject,
-    intro: `当前每月订阅支出 ${money(-t.mrr, base, { compact: true })}，${t.activeCount} 项正在计费。`,
+    subject: t('notify.daily.subject', { title }),
+    title,
+    intro: t('notify.daily.intro', { mrr: money(-tot.mrr, base, { compact: true }), count: tot.activeCount }),
     sections,
   };
 }
@@ -169,17 +173,19 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
     .filter((s) => !s.proxy)
     .flatMap((s) => chargesBetween(s, today, end, today).filter((c) => c.date < end))
     .sort((a, b) => a.date.localeCompare(b.date));
-  const sum = charges.reduce((t, c) => t + (convert(c.amount, c.currency, base, state.fx) || 0), 0);
-  const t = totals(state, today);
+  const sum = charges.reduce((acc, c) => acc + (convert(c.amount, c.currency, base, state.fx) || 0), 0);
+  const tot = totals(state, today);
   const [y, m] = today.split('-').map(Number);
+  const ym = today.slice(0, 7);
+  const p = { y, m, month: monthLabel(ym, { year: false, long: true }), monthYear: monthLabel(ym, { long: true }), count: charges.length, sum: money(sum, base, { compact: true }), mrr: money(-tot.mrr, base, { compact: true }), arr: money(-tot.mrr * 12, base, { compact: true }) };
   return {
     key: `monthly:${today.slice(0, 7)}`,
     kind: 'monthly',
-    subject: `${m} 月订阅账单｜预计 ${money(sum, base, { compact: true })}，共 ${charges.length} 笔`,
-    intro: `${y} 年 ${m} 月预计扣款 ${charges.length} 笔，合计约 ${money(sum, base, { compact: true })}。负 MRR ${money(-t.mrr, base, { compact: true })}，年化 ${money(-t.mrr * 12, base, { compact: true })}。`,
+    subject: t('notify.monthly.subject', p),
+    intro: t('notify.monthly.intro', p),
     sections: [
       {
-        heading: '本月扣款',
+        heading: t('notify.section.month'),
         rows: charges.map((c) => ({
           title: c.sub.name,
           sub: cnDate(c.date, true),
@@ -192,7 +198,7 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
 }
 
 export function renderEmail(d: Digest, siteUrl: string): { html: string; text: string } {
-  const text = [d.intro, '', ...d.sections.flatMap((s) => [`【${s.heading}】`, ...s.rows.map((r) => `· ${r.title}  ${r.amount ?? ''}  ${r.sub ?? ''}`), '']), `${siteUrl}/admin`].join('\n');
+  const text = [d.intro, '', ...d.sections.flatMap((s) => [t('notify.text.heading', { heading: s.heading }), ...s.rows.map((r) => `· ${r.title}  ${r.amount ?? ''}  ${r.sub ?? ''}`), '']), `${siteUrl}/admin`].join('\n');
   const toneColor = { warn: '#c2593b', ok: '#3c8a52', muted: '#7b858b' } as const;
   const rows = (s: Section) =>
     s.rows
@@ -211,7 +217,7 @@ ${r.amountSub ? `<div style="font:12px/1.5 'SF Mono',Menlo,monospace;color:#93a0
   const html = `<!doctype html><html><body style="margin:0;background:#f3f6f8;padding:32px 12px">
 <table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#fbfcfd;border:1px solid #e3e9ed;border-radius:16px" cellpadding="0" cellspacing="0"><tr><td style="padding:28px 28px 8px">
 <div style="font:500 11px/1 'SF Mono',Menlo,monospace;letter-spacing:.14em;color:#7b858b;text-transform:uppercase">■ Subscription Ledger</div>
-<h1 style="font:600 26px/1.25 Georgia,'Songti SC',serif;color:#1d2328;margin:14px 0 8px">${esc(d.subject.replace(/^订阅提醒｜/, ''))}</h1>
+<h1 style="font:600 26px/1.25 Georgia,'Songti SC',serif;color:#1d2328;margin:14px 0 8px">${esc(d.title ?? d.subject)}</h1>
 <p style="font:14px/1.7 -apple-system,'PingFang SC',sans-serif;color:#4c5a61;margin:0 0 8px">${esc(d.intro)}</p>
 </td></tr>
 ${d.sections
@@ -222,8 +228,8 @@ ${d.sections
   )
   .join('')}
 <tr><td style="padding:24px 28px 28px">
-<a href="${esc(siteUrl)}/admin" style="display:inline-block;background:#1d2328;color:#fff;text-decoration:none;font:600 14px/1 -apple-system,'PingFang SC',sans-serif;padding:12px 18px;border-radius:999px">打开订阅账本</a>
-<p style="font:12px/1.6 -apple-system,'PingFang SC',sans-serif;color:#93a0a6;margin:16px 0 0">提醒时间与提前天数可在「设置」中调整。</p>
+<a href="${esc(siteUrl)}/admin" style="display:inline-block;background:#1d2328;color:#fff;text-decoration:none;font:600 14px/1 -apple-system,'PingFang SC',sans-serif;padding:12px 18px;border-radius:999px">${esc(t('notify.email.open'))}</a>
+<p style="font:12px/1.6 -apple-system,'PingFang SC',sans-serif;color:#93a0a6;margin:16px 0 0">${esc(t('notify.email.footer'))}</p>
 </td></tr></table></body></html>`;
   return { html, text };
 }
@@ -234,13 +240,13 @@ ${d.sections
  */
 export async function sendDigest(env: Env, state: AppState, d: Digest, opts: { force?: boolean; only?: string } = {}): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
   const targets = channelsOf(state.settings).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
-  if (!targets.length) return { sent: false, reason: opts.only ? '没有这个渠道' : '还没有开启任何通知渠道' };
+  if (!targets.length) return { sent: false, reason: opts.only ? t('notify.send.noChannel') : t('notify.send.noneEnabled') };
   if (!opts.force) {
     // 先占位后发送：重叠触发时只有一个能占到
     const claim = await env.DB.prepare("INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, 'sending') ON CONFLICT(dedupe_key) DO NOTHING")
       .bind(d.key, d.kind, d.subject)
       .run();
-    if (!claim.meta.changes) return { sent: false, reason: '今日已发送' };
+    if (!claim.meta.changes) return { sent: false, reason: t('notify.send.alreadySent') };
   }
   const results = await Promise.all(
     targets.map(async (c) => {
@@ -258,7 +264,7 @@ export async function sendDigest(env: Env, state: AppState, d: Digest, opts: { f
   const status = okCount === results.length ? 'sent' : okCount ? `partial ${okCount}/${results.length}` : 'failed';
   if (!okCount) {
     if (!opts.force) await env.DB.prepare('DELETE FROM notify_log WHERE dedupe_key = ?1').bind(d.key).run();
-    return { sent: false, reason: results.map((r) => `${r.channel}：${r.error}`).join('；'), results };
+    return { sent: false, reason: results.map((r) => t('notify.send.failure', { channel: r.channel, error: r.error })).join(t('notify.send.failureSep')), results };
   }
   await env.DB.prepare(
     "INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(dedupe_key) DO UPDATE SET status = excluded.status, sent_at = datetime('now')",

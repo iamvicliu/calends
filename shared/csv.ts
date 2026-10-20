@@ -1,5 +1,6 @@
 import type { Cycle, MethodKind, PaymentMethod, Subscription } from './types.ts';
 import { uid } from './billing.ts';
+import { t } from './i18n.ts';
 
 export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -115,7 +116,7 @@ export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], 
       // 空账户的外币订阅，多为对应区 App Store 余额（礼品卡）支付
       const region = REGION_BY_CCY[ccy];
       if (!region || region === 'CN' || region === 'US') return undefined;
-      label = `App Store ${region} 余额`;
+      label = t('core.csv.appStoreBalance', { region });
     }
     let m = methods.find((x) => x.name === label);
     if (!m) {
@@ -142,7 +143,7 @@ export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], 
     const sub: Subscription = {
       id: uid(),
       name: col(r, 'name'),
-      category: col(r, 'category') || '其他',
+      category: col(r, 'category') || t('core.csv.otherCategory'),
       tags,
       price: amount(col(r, 'price')),
       currency: ccy,

@@ -1,11 +1,23 @@
 // 主题：亮色 → 暗色 → 跟随系统 三者轮换，后台与公开页共用
 import { useEffect, useState } from 'preact/hooks';
+import { t } from '../shared/i18n.ts';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 const KEY = 'ledger:theme';
 const NEXT: Record<ThemeMode, ThemeMode> = { light: 'dark', dark: 'system', system: 'light' };
-export const THEME_LABEL: Record<ThemeMode, string> = { light: '亮色', dark: '暗色', system: '跟随系统' };
+/** 主题名称：用 getter 在读取时翻译，THEME_LABEL[mode] 的写法不变 */
+export const THEME_LABEL: Record<ThemeMode, string> = {
+  get light() {
+    return t('ui.theme.light');
+  },
+  get dark() {
+    return t('ui.theme.dark');
+  },
+  get system() {
+    return t('ui.theme.system');
+  },
+};
 
 const mq = () => matchMedia('(prefers-color-scheme: dark)');
 

@@ -1,4 +1,5 @@
 // 前端与 Worker 共用的数据模型。日期一律用 'YYYY-MM-DD' 字符串，按「日」计算，避免时区漂移。
+import { t } from './i18n.ts';
 
 export type CycleUnit = 'day' | 'week' | 'month' | 'year';
 
@@ -323,5 +324,5 @@ export const DEFAULT_SETTINGS: Settings = {
 /** 实际生效的通知渠道：没配过渠道时，把旧的「通知邮箱」当成一个邮件渠道 */
 export function channelsOf(s: Settings): Channel[] {
   if (s.channels) return s.channels;
-  return s.notifyEmail ? [{ id: 'email', kind: 'email', name: '邮件', enabled: true, config: { to: s.notifyEmail } }] : [];
+  return s.notifyEmail ? [{ id: 'email', kind: 'email', name: t('core.channel.email'), enabled: true, config: { to: s.notifyEmail } }] : [];
 }

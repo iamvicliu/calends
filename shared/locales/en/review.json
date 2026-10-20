@@ -1,0 +1,105 @@
+{
+  "title": "Share your year in review",
+  "fileName": "subscriptions-{year}-in-review-{style}.png",
+  "style": {
+    "poster": "Poster",
+    "receipt": "Receipt",
+    "card": "Card",
+    "stars": "Star map"
+  },
+  "unassigned": "Unassigned",
+  "me": "Me",
+  "whose": "{name}'s",
+  "whoseSelf": "My",
+  "topSpend": "Top spend",
+  "ofYear": "{pct} of the year",
+  "n": {
+    "subs": {
+      "one": "{count} subscription",
+      "other": "{count} subscriptions"
+    },
+    "charges": {
+      "one": "{count} charge",
+      "other": "{count} charges"
+    },
+    "currencies": {
+      "one": "{count} currency",
+      "other": "{count} currencies"
+    },
+    "currencyKinds": {
+      "one": "{count} currency",
+      "other": "{count} currencies"
+    }
+  },
+  "tip": {
+    "top": "{name} alone ate {pct} of the year",
+    "longest": {
+      "one": "{name} has stuck with you for over a year",
+      "other": "{name} has stuck with you for {count}+ years"
+    },
+    "busiest": "{month} hit your wallet hardest",
+    "newEnded": "This year: {added} in, {ended} out",
+    "currencies": {
+      "one": "Paid in {count} currency this year",
+      "other": "Paid in {count} currencies this year — very well traveled"
+    },
+    "soon": {
+      "one": "{count} charge lands in the next 30 days — still want it?",
+      "other": "{count} charges land in the next 30 days — still want them all?"
+    },
+    "milkTea": {
+      "one": "{amount} a day — about one bubble tea",
+      "other": "{amount} a day — about {count} bubble teas"
+    },
+    "saved": "Cancelling has already saved you {amount} this year",
+    "fallback": "Knowing what you pay for is the first step to paying less"
+  },
+  "receipt": {
+    "shop": "{whose} Subscription Store",
+    "asOf": "Annual statement · as of {date}",
+    "fullYear": "Annual statement · {year}",
+    "no": "No. {no}",
+    "register": "REG 01",
+    "cashier": "Cashier: {name}",
+    "item": "Item",
+    "share": "Share",
+    "amount": "Amount",
+    "rest": "{count} more",
+    "count": "Items {items} / Charges {charges}",
+    "total": "TOTAL"
+  },
+  "poster": {
+    "kicker": "{whose} year in subscriptions",
+    "ongoing": "So far this year, across {subs} · {charges}",
+    "ongoingHidden": "So far this year: {charges} · {currencies}",
+    "year": "Spent across {subs} · {charges}",
+    "yearHidden": "This year: {charges} · {currencies}",
+    "newEnded": "{added} new · {ended} cancelled",
+    "perDay": "{amount}/day on average"
+  },
+  "card": {
+    "head": "{whose} subscriptions",
+    "intro": {
+      "ongoing": "So far this year, subscriptions cost",
+      "ongoingHidden": "So far this year, you subscribed to",
+      "year": "This year, subscriptions cost",
+      "yearHidden": "This year, you subscribed to"
+    },
+    "perDay": "{amount}/day on average",
+    "longest": "Longest-running",
+    "duration": "{y} yr {m} mo",
+    "busiest": "Priciest month",
+    "month": "{month}",
+    "newEnded": "New / cancelled",
+    "saved": "Saved {amount}",
+    "ended": "{count} cancelled",
+    "noneEnded": "Nothing cancelled",
+    "currencies": "Currencies",
+    "currencyCount": "{count}",
+    "nowMonthly": "{amount}/mo now"
+  },
+  "stars": {
+    "head": "{year} · {whose} subscription stars",
+    "foot": "Bigger bubble, bigger spend"
+  }
+}

@@ -2,6 +2,7 @@ import { toBlob } from 'html-to-image';
 import type { ComponentChildren } from 'preact';
 import { useRef, useState } from 'preact/hooks';
 import { money } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import { toast } from '../store.ts';
 import { Icon, Seg, Sheet, Toggle } from './ui.tsx';
 
@@ -58,9 +59,9 @@ export function ShareSheet<S extends string>({
     try {
       // Safari 要求在点击的同一个调用里拿到 ClipboardItem，所以传 Promise 进去
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': render3x().then((b) => b!) })]);
-      toast('图片已复制，可以直接粘贴');
+      toast(t('share.sheet.copied'));
     } catch {
-      toast('复制失败，试试下载图片');
+      toast(t('share.sheet.copyFailed'));
     } finally {
       setBusy(false);
     }
@@ -75,7 +76,7 @@ export function ShareSheet<S extends string>({
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     } catch {
-      toast('生成图片失败');
+      toast(t('share.sheet.renderFailed'));
     } finally {
       setBusy(false);
     }
@@ -88,10 +89,10 @@ export function ShareSheet<S extends string>({
       foot={
         <>
           <button class="btn" disabled={busy} onClick={download}>
-            <Icon name="download" /> 下载图片
+            <Icon name="download" /> {t('share.sheet.download')}
           </button>
           <button class="btn primary" disabled={busy} onClick={copy}>
-            <Icon name="copy" /> {busy ? '生成中…' : '复制图片'}
+            <Icon name="copy" /> {busy ? t('share.sheet.generating') : t('share.sheet.copy')}
           </button>
         </>
       }
@@ -106,7 +107,7 @@ export function ShareSheet<S extends string>({
         </div>
         <div class="group-body">
           <div class="cell">
-            <span class="cell-l">显示金额</span>
+            <span class="cell-l">{t('share.sheet.showAmounts')}</span>
             <span class="cell-r">
               <Toggle checked={amounts} onChange={setAmounts} />
             </span>

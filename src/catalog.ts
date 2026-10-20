@@ -1,5 +1,6 @@
 // 常用服务目录：新建订阅时按名称联想，选中后带出 logo、分类和官网。
 // AI 产品的图标来自 lobe-icons（MIT），放在 public/ai；不带价格，价格变得太快，留给用户自己填。
+import { t } from '../shared/i18n.ts';
 
 export interface CatalogItem {
   name: string;
@@ -10,9 +11,20 @@ export interface CatalogItem {
   url: string;
 }
 
-const ai = (name: string, file: string, url: string, aka: string[] = [], category = 'AI'): CatalogItem => ({ name, aka, icon: `/ai/${file}.svg`, category, url });
+type Cat = 'ai' | 'tools' | 'productivity';
+/** 目录里只存分类代码；名称在 catalog.name.<file> 里有译名时按当前语言显示，原名仍参与搜索 */
+type Entry = { name: string; file: string; aka: string[]; cat: Cat; url: string };
+const LOCALIZED = new Set(['qwen', 'doubao', 'yuanbao', 'zhipu', 'coze', 'kling', 'hailuo', 'hunyuan']);
 
-export const CATALOG: CatalogItem[] = [
+const ai = (name: string, file: string, url: string, aka: string[] = [], cat: Cat = 'ai'): Entry => ({ name, file, aka, cat, url });
+
+/** 选中目录项时才取文案：分类会写进订阅，所以按当前语言给默认值 */
+function resolve(e: Entry): CatalogItem {
+  const name = LOCALIZED.has(e.file) ? t(`catalog.name.${e.file}`) : e.name;
+  return { name, aka: name === e.name ? e.aka : [e.name, ...e.aka], icon: `/ai/${e.file}.svg`, category: t(`catalog.category.${e.cat}`), url: e.url };
+}
+
+const CATALOG: Entry[] = [
   ai('ChatGPT', 'openai', 'https://chatgpt.com', ['openai', 'gpt', 'chatgpt plus', 'chatgpt pro']),
   ai('Claude', 'claude', 'https://claude.ai', ['anthropic', 'claude pro', 'claude max']),
   ai('Gemini', 'gemini', 'https://gemini.google.com', ['google ai pro', 'google one ai', 'bard']),
@@ -31,16 +43,16 @@ export const CATALOG: CatalogItem[] = [
   ai('Manus', 'manus', 'https://manus.im'),
   ai('OpenRouter', 'openrouter', 'https://openrouter.ai'),
   ai('Microsoft Copilot', 'copilot', 'https://copilot.microsoft.com', ['copilot pro', 'microsoft 365 copilot']),
-  ai('GitHub Copilot', 'githubcopilot', 'https://github.com/features/copilot', ['copilot'], '工具'),
-  ai('Cursor', 'cursor', 'https://cursor.com', ['cursor pro'], '工具'),
-  ai('Windsurf', 'windsurf', 'https://windsurf.com', ['codeium'], '工具'),
-  ai('Trae', 'trae', 'https://www.trae.ai', [], '工具'),
-  ai('Cline', 'cline', 'https://cline.bot', [], '工具'),
-  ai('Devin', 'devin', 'https://devin.ai', ['cognition'], '工具'),
-  ai('v0', 'v0', 'https://v0.dev', ['vercel'], '工具'),
-  ai('Lovable', 'lovable', 'https://lovable.dev', [], '工具'),
-  ai('Replit', 'replit', 'https://replit.com', [], '工具'),
-  ai('Hugging Face', 'huggingface', 'https://huggingface.co', ['hf'], '工具'),
+  ai('GitHub Copilot', 'githubcopilot', 'https://github.com/features/copilot', ['copilot'], 'tools'),
+  ai('Cursor', 'cursor', 'https://cursor.com', ['cursor pro'], 'tools'),
+  ai('Windsurf', 'windsurf', 'https://windsurf.com', ['codeium'], 'tools'),
+  ai('Trae', 'trae', 'https://www.trae.ai', [], 'tools'),
+  ai('Cline', 'cline', 'https://cline.bot', [], 'tools'),
+  ai('Devin', 'devin', 'https://devin.ai', ['cognition'], 'tools'),
+  ai('v0', 'v0', 'https://v0.dev', ['vercel'], 'tools'),
+  ai('Lovable', 'lovable', 'https://lovable.dev', [], 'tools'),
+  ai('Replit', 'replit', 'https://replit.com', [], 'tools'),
+  ai('Hugging Face', 'huggingface', 'https://huggingface.co', ['hf'], 'tools'),
   ai('扣子', 'coze', 'https://www.coze.cn', ['coze']),
   ai('Midjourney', 'midjourney', 'https://www.midjourney.com', ['mj']),
   ai('Ideogram', 'ideogram', 'https://ideogram.ai'),
@@ -53,15 +65,15 @@ export const CATALOG: CatalogItem[] = [
   ai('Udio', 'udio', 'https://www.udio.com'),
   ai('ElevenLabs', 'elevenlabs', 'https://elevenlabs.io', ['11labs']),
   ai('腾讯混元', 'hunyuan', 'https://hunyuan.tencent.com', ['hunyuan']),
-  ai('Notion', 'notion', 'https://www.notion.so', ['notion ai'], '效率'),
-  ai('Figma', 'figma', 'https://www.figma.com', [], '工具'),
+  ai('Notion', 'notion', 'https://www.notion.so', ['notion ai'], 'productivity'),
+  ai('Figma', 'figma', 'https://www.figma.com', [], 'tools'),
 ];
 
 /** 名称联想：前缀命中排前面，其次是包含 */
 export function searchCatalog(q: string, limit = 4): CatalogItem[] {
   const k = q.trim().toLowerCase();
   if (k.length < 1) return [];
-  const score = (c: CatalogItem) => {
+  const score = (c: Entry) => {
     const names = [c.name, ...c.aka].map((x) => x.toLowerCase());
     if (names.some((n) => n === k)) return 3;
     if (names.some((n) => n.startsWith(k))) return 2;
@@ -72,5 +84,5 @@ export function searchCatalog(q: string, limit = 4): CatalogItem[] {
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)
     .slice(0, limit)
-    .map((x) => x.c);
+    .map((x) => resolve(x.c));
 }

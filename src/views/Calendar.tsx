@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'preact/hooks';
 import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../shared/billing.ts';
-import { cnDate, money, relDays } from '../../shared/format.ts';
+import { cnDate, money, monthLabel, relDays, weekdayShort } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Amount, Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
 import { chargeValue } from '../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 
-const DOW_MON = ['一', '二', '三', '四', '五', '六', '日'];
-const DOW_SUN = ['日', '一', '二', '三', '四', '五', '六'];
+/** 表头的星期简称，按周起始日排好 */
+const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
 /** 周起始日：设置里选的，缺省周一 */
 let weekStart: 0 | 1 = 1;
 
@@ -22,7 +23,7 @@ function monthGrid(month: string) {
 
 export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onIcs: () => void }) {
   weekStart = state.settings.weekStart ?? 1;
-  const DOW = weekStart === 0 ? DOW_SUN : DOW_MON;
+  const DOW = dows();
   const [month, setMonth] = useState(today.slice(0, 7));
   const [mode, setMode] = useState<'month' | 'year'>('month');
   const [sel, setSel] = useState<string>(today);
@@ -46,18 +47,18 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   return (
     <>
       <Toolbar
-        title={mode === 'month' ? `${year}年${Number(month.slice(5))}月` : `${year}年`}
-        sub={`${list.length} 笔 · ${money(sumOf(list), base, { compact: true })}`}
+        title={mode === 'month' ? monthLabel(month, { long: true }) : t('calendar.yearTitle', { year })}
+        sub={t('calendar.summary', { count: list.length, amount: money(sumOf(list), base, { compact: true }) })}
       >
         <Seg
           value={mode}
           onChange={setMode}
           options={[
-            ['month', '月'],
-            ['year', '年'],
+            ['month', t('calendar.mode.month')],
+            ['year', t('calendar.mode.year')],
           ]}
         />
-        <button class="icon-btn" aria-label="上一页" onClick={() => shift(-1)}>
+        <button class="icon-btn" aria-label={t('calendar.prev')} onClick={() => shift(-1)}>
           <Icon name="left" />
         </button>
         <button
@@ -67,13 +68,13 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             setSel(today);
           }}
         >
-          今天
+          {t('calendar.today')}
         </button>
-        <button class="icon-btn" aria-label="下一页" onClick={() => shift(1)}>
+        <button class="icon-btn" aria-label={t('calendar.next')} onClick={() => shift(1)}>
           <Icon name="right" />
         </button>
         {!state.readonly && (
-          <button class="icon-btn" onClick={onIcs} title="订阅到系统日历" aria-label="订阅到系统日历">
+          <button class="icon-btn" onClick={onIcs} title={t('calendar.ics')} aria-label={t('calendar.ics')}>
             <Icon name="share" />
           </button>
         )}
@@ -95,8 +96,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
           <div class="cal-wrap">
             <div class="card cal">
               <div class="cal-grid">
-                {DOW.map((d) => (
-                  <div key={d} class="cal-dow">
+                {DOW.map((d, i) => (
+                  <div key={i} class="cal-dow">
                     {d}
                   </div>
                 ))}
@@ -123,7 +124,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             </div>
             <div class="stack">
               <Group title={`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}>
-                {selList.length === 0 && <div class="cell muted">这一天没有扣款</div>}
+                {selList.length === 0 && <div class="cell muted">{t('calendar.noneDay')}</div>}
                 {selList.map((c) => (
                   <button key={c.sub.id} class="cell tap" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={34} />
@@ -134,18 +135,18 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                     <span style={{ textAlign: 'right' }}>
                       <Amount value={c.amount} ccy={c.currency} />
                       <div class="muted" style={{ fontSize: 12 }}>
-                        {c.projected ? '预计' : '已扣'}
+                        {c.projected ? t('calendar.projected') : t('calendar.charged')}
                         {c.currency !== base ? ` · ≈${money(chargeValue(state, c), base, { compact: true })}` : ''}
                       </div>
                     </span>
                   </button>
                 ))}
               </Group>
-              <Group title={`${Number(month.slice(5))}月全部扣款`}>
-                {monthCharges.length === 0 && <div class="cell muted">本月没有扣款</div>}
+              <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
+                {monthCharges.length === 0 && <div class="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
                   <Cell key={c.sub.id + c.date + i} label={<span class="row cal-name"><SubIcon sub={c.sub} size={24} /><span>{c.sub.name}</span></span>} onClick={() => onOpen(c.sub)}>
-                    <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>{Number(c.date.slice(8))}日</span>
+                    <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>{t('calendar.day', { day: Number(c.date.slice(8)) })}</span>
                     <b style={{ color: 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>{money(c.amount, c.currency, { compact: true })}</b>
                   </Cell>
                 ))}
@@ -159,7 +160,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
 }
 
 function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; byDay: Map<string, Charge[]>; today: string; sumOf: (l?: Charge[]) => number; base: string; onPick: (m: string) => void }) {
-  const DOW = weekStart === 0 ? DOW_SUN : DOW_MON;
+  const DOW = dows();
   return (
     <div class="heat">
       {Array.from({ length: 12 }, (_, i) => {
@@ -172,15 +173,15 @@ function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; b
         return (
           <button key={m} class={`heat-m ${today.startsWith(m) ? 'cur' : ''} ${m < today.slice(0, 7) ? 'past' : ''}`} onClick={() => onPick(m)}>
             <div class="heat-h">
-              {i + 1}月
+              {monthLabel(m, { year: false })}
               <span>
-                {count ? `${count} 笔 · ` : ''}
+                {count ? t('calendar.heatCount', { count }) : ''}
                 {money(total, base, { compact: true })}
               </span>
             </div>
             <div class="heat-g">
-              {DOW.map((w) => (
-                <em key={w}>{w}</em>
+              {DOW.map((w, k) => (
+                <em key={k}>{w}</em>
               ))}
               {grid.map((d) => {
                 if (!d.startsWith(m)) return <i key={d} class="hd out" />;

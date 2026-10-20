@@ -3,6 +3,7 @@
 import { addDays, addMonths, chargesBetween, cycleDays, phaseAt, phaseSubs, diffDays, effectiveStatus, isGap, myShareFactor, nextCharge, nthCharge, priceAt, runwayFor, type Charge } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
+import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
 
 const MONTH = 30.4375;
@@ -131,7 +132,12 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
   return out;
 }
 
-const label = (v: Subscription) => `${v.region ? v.region + ' ' : ''}${money(v.price, v.currency)}/${v.cycle.unit === 'year' ? '年' : v.cycle.unit === 'month' ? (v.cycle.every === 1 ? '月' : `${v.cycle.every}月`) : v.cycle.unit}`;
+const label = (v: Subscription) =>
+  t('core.event.label', {
+    region: v.region ? t('core.event.region', { region: v.region }) : '',
+    price: money(v.price, v.currency),
+    per: v.cycle.unit === 'year' ? t('core.event.per.year') : v.cycle.unit === 'month' ? (v.cycle.every === 1 ? t('core.event.per.month') : t('core.event.per.months', { count: v.cycle.every })) : t(`core.event.per.${v.cycle.unit}`),
+  });
 
 /** 变更日志：像 git log 一样记录每一次花钱决策；多阶段订阅会合并成「换区/换套餐」「断更」「续订」 */
 export function events(state: AppState, today: string): LedgerEvent[] {
@@ -343,7 +349,7 @@ export function baseName(name: string): string {
 /** 货币中文名，取不到时用代码 */
 function ccyLabel(c: string): string {
   try {
-    return new Intl.DisplayNames(['zh-CN'], { type: 'currency' }).of(c) ?? c;
+    return new Intl.DisplayNames([intlLocale()], { type: 'currency' }).of(c) ?? c;
   } catch {
     return c;
   }
@@ -355,6 +361,7 @@ export function insights(state: AppState, today: string): Insight[] {
   // 代付是别人的订阅，不参与体检
   const live = state.subscriptions.filter((s) => !s.proxy && ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)));
   const fmt = (v: number) => money(v, base, { compact: true });
+  const names = (ss: Subscription[]) => ss.map((s) => s.name).join(t('core.listSep'));
 
   // 1. 年付续费窗口：60 天内要自动续费的长周期订阅
   const yearly = live
@@ -367,8 +374,8 @@ export function insights(state: AppState, today: string): Insight[] {
     out.push({
       id: 'yearly-window',
       tone: 'warn',
-      title: `${yearly.length} 个长周期订阅 60 天内续费`,
-      body: `合计约 ${fmt(sum)}。年付一旦扣款就很难退，现在是决定留不留的时候。`,
+      title: t('core.insight.yearly.title', { count: yearly.length }),
+      body: t('core.insight.yearly.body', { sum: fmt(sum) }),
       subs: yearly.map((x) => x.s),
     });
   }
@@ -384,7 +391,7 @@ export function insights(state: AppState, today: string): Insight[] {
   for (const [, g] of groups) {
     if (g.length < 2) continue;
     const sum = g.reduce((a, s) => a + contributionOn(state, s, today), 0);
-    out.push({ id: `dup-${g[0].id}`, tone: 'info', title: `${g.map((s) => s.name).join('、')} 可能重复`, body: `这 ${g.length} 个订阅每月合计约 ${fmt(sum)}，确认是否都还需要。`, subs: g });
+    out.push({ id: `dup-${g[0].id}`, tone: 'info', title: t('core.insight.dup.title', { names: names(g) }), body: t('core.insight.dup.body', { count: g.length, sum: fmt(sum) }), subs: g });
   }
 
   // 3. 过去一年涨过价
@@ -393,19 +400,19 @@ export function insights(state: AppState, today: string): Insight[] {
     const h = (s.priceHistory ?? []).filter((p) => p.from > yearAgo && p.from <= today);
     return h.length && (s.priceHistory ?? []).length > 1 && priceAt(s, today) > priceAt(s, addDays(h[0].from, -1));
   });
-  if (hikes.length) out.push({ id: 'hikes', tone: 'warn', title: `${hikes.length} 个订阅过去一年涨了价`, body: hikes.map((s) => s.name).join('、'), subs: hikes });
+  if (hikes.length) out.push({ id: 'hikes', tone: 'warn', title: t('core.insight.hikes.title', { count: hikes.length }), body: names(hikes), subs: hikes });
 
   // 4. 首期优惠即将结束
   const introEnding = live.filter((s) => s.intro && s.intro.until > today && diffDays(today, s.intro.until) <= 30);
   for (const s of introEnding) {
-    out.push({ id: `intro-${s.id}`, tone: 'warn', title: `${s.name} 的优惠 ${diffDays(today, s.intro!.until)} 天后结束`, body: `之后从 ${money(s.intro!.price, s.currency)} 恢复到 ${money(s.price, s.currency)}。`, subs: [s] });
+    out.push({ id: `intro-${s.id}`, tone: 'warn', title: t('core.insight.intro.title', { name: s.name, count: diffDays(today, s.intro!.until) }), body: t('core.insight.intro.body', { from: money(s.intro!.price, s.currency), to: money(s.price, s.currency) }), subs: [s] });
   }
 
   // 5. 余额 30 天内不够
   for (const m of state.methods) {
     const r = runwayFor(m, state, today);
     if (r?.shortfall && diffDays(today, r.shortfall.date) <= (m.lowRunwayDays ?? 30)) {
-      out.push({ id: `bal-${m.id}`, tone: 'warn', title: `${m.name} 余额撑不到 ${cnDate(r.shortfall.date)}`, body: `${r.shortfall.sub.name} 需要 ${money(r.shortfall.amount, r.shortfall.currency)}，当前约 ${money(r.current, m.currency)}。`, href: '/admin/wallet' });
+      out.push({ id: `bal-${m.id}`, tone: 'warn', title: t('core.insight.balance.title', { name: m.name, date: cnDate(r.shortfall.date) }), body: t('core.insight.balance.body', { sub: r.shortfall.sub.name, need: money(r.shortfall.amount, r.shortfall.currency), current: money(r.current, m.currency) }), href: '/admin/wallet' });
     }
   }
 
@@ -423,19 +430,19 @@ export function insights(state: AppState, today: string): Insight[] {
     out.push({
       id: 'fx',
       tone: 'info',
-      title: `${Math.round(share * 100)}% 的支出以外币计价`,
-      body: `最大的是${ccyLabel(foreign[0][0])}（${Math.round((foreign[0][1] / total) * 100)}%）。${ccyLabel(foreign[0][0])}贬值时这部分会变便宜，反之变贵。`,
+      title: t('core.insight.fx.title', { pct: Math.round(share * 100) }),
+      body: t('core.insight.fx.body', { ccy: ccyLabel(foreign[0][0]), share: Math.round((foreign[0][1] / total) * 100) }),
     });
   }
 
   // 7. 未指定支付方式
   const noMethod = live.filter((s) => !s.methodId);
-  if (noMethod.length) out.push({ id: 'nomethod', tone: 'info', title: `${noMethod.length} 个订阅没有指定支付方式`, body: '补上之后，余额推算和按支付方式的统计才完整。', subs: noMethod });
+  if (noMethod.length) out.push({ id: 'nomethod', tone: 'info', title: t('core.insight.noMethod.title', { count: noMethod.length }), body: t('core.insight.noMethod.body'), subs: noMethod });
 
   // 8. 最贵的一天
   const perDay = live.map((s) => ({ s, v: contributionOn(state, s, today) / MONTH })).sort((a, b) => b.v - a.v)[0];
   if (perDay && perDay.v > 0) {
-    out.push({ id: 'top', tone: 'good', title: `${perDay.s.name} 是最贵的订阅`, body: `每天约 ${money(perDay.v, base)}，占月支出 ${total > 0 ? Math.round(((perDay.v * MONTH) / total) * 100) : 0}%。`, subs: [perDay.s] });
+    out.push({ id: 'top', tone: 'good', title: t('core.insight.top.title', { name: perDay.s.name }), body: t('core.insight.top.body', { perDay: money(perDay.v, base), pct: total > 0 ? Math.round(((perDay.v * MONTH) / total) * 100) : 0 }), subs: [perDay.s] });
   }
   return out;
 }

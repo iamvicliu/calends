@@ -7,6 +7,7 @@ import { matchEntries } from '../shared/proxy.ts';
 import type { AppState, Payment, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { loadState, upsert } from './store.ts';
+import { t } from '../shared/i18n.ts';
 
 export interface ToolCtx {
   env: Env;
@@ -14,7 +15,6 @@ export interface ToolCtx {
 
 export interface Tool {
   name: string;
-  title: string;
   description: string;
   inputSchema: Record<string, unknown>;
   write?: boolean;
@@ -37,10 +37,16 @@ export function money(st: AppState, amount: number, currency: string, date?: str
 }
 export const round = (n: number) => Math.round(n * 100) / 100;
 
+/** 工具的显示名（随语言变化，所以不写在 TOOLS 里） */
+export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
+
+/** 候选列表：「名称（id）、名称（id）」 */
+const candidates = (xs: Array<{ name: string; id: string }>) => xs.map((x) => t('mcp.item', { name: x.name, id: x.id })).join(t('mcp.sep'));
+
 /** 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选 */
 export function findSub(st: AppState, ref: unknown): Subscription {
   const q = String(ref ?? '').trim();
-  if (!q) throw new Error('需要 subscription（订阅 id 或名称）');
+  if (!q) throw new Error(t('mcp.error.needSub'));
   const byId = st.subscriptions.find((s) => s.id === q);
   if (byId) return byId;
   const k = q.toLowerCase();
@@ -48,8 +54,8 @@ export function findSub(st: AppState, ref: unknown): Subscription {
   if (exact.length === 1) return exact[0];
   const fuzzy = (exact.length ? exact : st.subscriptions.filter((s) => s.name.toLowerCase().includes(k)));
   if (fuzzy.length === 1) return fuzzy[0];
-  if (!fuzzy.length) throw new Error(`没有找到「${q}」。可以先用 list_subscriptions 搜索。`);
-  throw new Error(`「${q}」匹配到 ${fuzzy.length} 个订阅，请用 id 指定：${fuzzy.map((s) => `${s.name}（${s.id}）`).join('、')}`);
+  if (!fuzzy.length) throw new Error(t('mcp.error.subNotFound', { q }));
+  throw new Error(t('mcp.error.subAmbiguous', { q, count: fuzzy.length, list: candidates(fuzzy) }));
 }
 
 /** 时间范围：today / next_3_days / next_7_days / next_30_days / this_month / next_month / last_30_days / this_year / custom */
@@ -77,11 +83,11 @@ export function rangeOf(period: unknown, today: string, from?: unknown, to?: unk
       return [`${today.slice(0, 4)}-01-01`, `${today.slice(0, 4)}-12-31`];
     case 'custom': {
       const re = /^\d{4}-\d{2}-\d{2}$/;
-      if (!re.test(String(from)) || !re.test(String(to))) throw new Error('period=custom 时需要 from、to（YYYY-MM-DD）');
+      if (!re.test(String(from)) || !re.test(String(to))) throw new Error(t('mcp.error.customRange'));
       return [String(from), String(to)];
     }
     default:
-      throw new Error(`不认识的 period：${p}`);
+      throw new Error(t('mcp.error.unknownPeriod', { period: p }));
   }
 }
 
@@ -147,7 +153,7 @@ function chargesIn(st: AppState, from: string, to: string, today: string, scope:
 
 const outCcy = (st: AppState, a: Record<string, unknown>) => {
   const c = a.currency_out ? String(a.currency_out).toUpperCase() : undefined;
-  if (c && !st.fx.rates[c]) throw new Error(`不支持的币种：${c}`);
+  if (c && !st.fx.rates[c]) throw new Error(t('mcp.error.unsupportedCurrency', { code: c }));
   return c;
 };
 
@@ -159,7 +165,7 @@ const CYCLE = {
   type: 'object',
   properties: { unit: { type: 'string', enum: ['day', 'week', 'month', 'year', 'lifetime'] }, every: { type: 'integer', minimum: 1, default: 1 } },
   required: ['unit'],
-  description: 'Billing cycle, e.g. {"unit":"month","every":1}; lifetime = one-time purchase (买断).',
+  description: 'Billing cycle, e.g. {"unit":"month","every":1}; lifetime = one-time purchase.',
 };
 const DRY = { type: 'boolean', default: false, description: 'Preview the result without saving.' };
 const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required, additionalProperties: false });
@@ -178,19 +184,19 @@ async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscrip
 const str = (v: unknown) => (v == null || v === '' ? undefined : String(v));
 const num = (v: unknown, what: string) => {
   const n = Number(v);
-  if (!Number.isFinite(n)) throw new Error(`${what} 需要是数字`);
+  if (!Number.isFinite(n)) throw new Error(t('mcp.error.notNumber', { what }));
   return n;
 };
 const date = (v: unknown, what: string, fallback?: string) => {
   const d = v == null ? fallback : String(v);
-  if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) throw new Error(`${what} 需要是 YYYY-MM-DD`);
+  if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) throw new Error(t('mcp.error.notDate', { what }));
   return d;
 };
 const methodRef = (st: AppState, v: unknown) => {
   const q = str(v);
   if (!q) return undefined;
   const m = st.methods.find((x) => x.id === q) ?? st.methods.find((x) => x.name === q) ?? st.methods.filter((x) => x.name.toLowerCase().includes(q.toLowerCase()))[0];
-  if (!m) throw new Error(`没有这个支付方式：${q}。可选：${st.methods.map((x) => `${x.name}（${x.id}）`).join('、')}`);
+  if (!m) throw new Error(t('mcp.error.noMethod', { q, list: candidates(st.methods) }));
   return m.id;
 };
 
@@ -199,9 +205,8 @@ const methodRef = (st: AppState, v: unknown) => {
 export const TOOLS: Tool[] = [
   {
     name: 'get_overview',
-    title: '账本概况',
     description:
-      'Snapshot of the subscription ledger (订阅账本): today, base currency, my monthly recurring spend (MRR — excludes 代付/paying for others, counts only my share of 合租/shared plans), active count, payment methods (ids), categories and regions in use, top insights. Call this first to learn ids and categories.',
+      'Snapshot of the subscription ledger: today, base currency, my monthly recurring spend (MRR — excludes proxy payments made on behalf of others, counts only my share of shared plans), active count, payment methods (ids), categories and regions in use, top insights. Call this first to learn ids and categories.',
     inputSchema: obj({ currency_out: CURRENCY_OUT }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
@@ -227,9 +232,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'list_subscriptions',
-    title: '列出订阅',
     description:
-      'List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner 合租发起 / share_member 合租加入 / proxy 代付), category, method or region. Use query to find a subscription id.',
+      'List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner = shared plan I organize / share_member = shared plan I joined / proxy = paid on behalf of someone), category, method or region. Use query to find a subscription id.',
     inputSchema: obj({
       query: { type: 'string', description: 'Fuzzy match on name, tags, notes, category.' },
       status: { type: 'string', enum: ['active', 'trial', 'paused', 'ending', 'ended', 'upcoming', 'lifetime', 'live', 'all'], default: 'live', description: 'live = active+trial+ending+paused.' },
@@ -263,9 +267,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_subscription',
-    title: '订阅详情',
     description:
-      'Full detail of one subscription: every phase (换区/换套餐 region or plan switches, gaps = lapses), price history, intro/bonus periods, recent and upcoming charges, 合租 member dues, 代付 repayments, and totals spent so far.',
+      'Full detail of one subscription: every phase (region or plan switches, gaps = lapses), price history, intro/bonus periods, recent and upcoming charges, shared-plan member dues, proxy repayments, and totals spent so far.',
     inputSchema: obj({ subscription: SUBREF, months_back: { type: 'integer', default: 12 }, months_forward: { type: 'integer', default: 6 }, currency_out: CURRENCY_OUT }, ['subscription']),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
@@ -303,9 +306,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'list_charges',
-    title: '扣款明细',
     description:
-      'Charges (actual and projected) in a period: today, next 3 days, next 7/30 days, this or next month, last 30 days, this year, or custom from/to. scope=mine excludes 代付 and reports my_amount as my share for 合租; gross = full card charges incl. 代付; proxy = only 代付.',
+      'Charges (actual and projected) in a period: today, next 3 days, next 7/30 days, this or next month, last 30 days, this year, or custom from/to. scope=mine excludes proxy payments and reports my_amount as my share for shared plans; gross = full card charges incl. proxy payments; proxy = only proxy payments.',
     inputSchema: obj({
       period: { ...PERIOD, default: 'next_30_days' },
       from: DATE,
@@ -333,9 +335,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'spending_stats',
-    title: '花费统计',
     description:
-      'Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes 代付 and counts my share of 合租.',
+      'Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans.',
     inputSchema: obj({
       period: { ...PERIOD, default: 'this_year' },
       from: DATE,
@@ -363,11 +364,11 @@ export const TOOLS: Tool[] = [
           by === 'month' ? [c.date.slice(0, 7), c.date.slice(0, 7)]
           : by === 'year' ? [c.date.slice(0, 4), c.date.slice(0, 4)]
           : by === 'category' ? [sub.category, sub.category]
-          : by === 'method' ? [m?.id ?? 'none', m?.name ?? '未指定']
+          : by === 'method' ? [m?.id ?? 'none', m?.name ?? t('mcp.label.unassigned')]
           : by === 'currency' ? [c.currency, c.currency]
-          : by === 'region' ? [c.sub.region ?? '—', c.sub.region ?? '不区分地区']
+          : by === 'region' ? [c.sub.region ?? '—', c.sub.region ?? t('mcp.label.anyRegion')]
           : by === 'subscription' ? [sub.id, sub.name]
-          : ['all', '合计'];
+          : ['all', t('mcp.label.total')];
         const g = groups.get(key) ?? { key, label, total: 0, count: 0 };
         g.total += v;
         g.count++;
@@ -387,7 +388,6 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_trends',
-    title: '趋势',
     description:
       'Time series: monthly MRR history, cash-vs-accrual by month (cash = what was charged; accrual = cost spread over the period it covers), or MRR movement between two dates (added / expansion / contraction / churn / FX effect).',
     inputSchema: obj({
@@ -408,7 +408,6 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'list_payment_methods',
-    title: '支付方式与余额',
     description:
       'Payment methods (bank cards, App Store region balances, crypto cards, prepaid balances…) with current estimated balance, monthly drain, runway (how long the balance lasts, first shortfall) and a top-up suggestion.',
     inputSchema: obj({ topup_months: { type: 'integer', default: 6 } }),
@@ -437,8 +436,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_receivables',
-    title: '待收款',
-    description: 'Money others owe me: 合租 (shared plan) members whose payment is due/overdue, and 代付 (paid on behalf of someone) charges not yet repaid.',
+    description: 'Money others owe me: shared-plan members whose payment is due/overdue, and proxy charges (paid on behalf of someone) not yet repaid.',
     inputSchema: obj({ kind: { type: 'string', enum: ['share', 'proxy', 'all'], default: 'all' }, currency_out: CURRENCY_OUT }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
@@ -475,7 +473,6 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'get_insights',
-    title: '体检与年度回顾',
     description: 'Health check and reports: insights (renewals coming up, price hikes, low balances, possible duplicates), year_review (total, top subscriptions, busiest month), prepaid (paid-but-unused value) or cancel_savings (money saved by cancelling).',
     inputSchema: obj({ section: { type: 'string', enum: ['insights', 'year_review', 'prepaid', 'cancel_savings'], default: 'insights' }, year: { type: 'string', description: 'year_review only, e.g. 2025.' } }),
     async run(a, ctx) {
@@ -497,7 +494,6 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'list_events',
-    title: '变更日志',
     description: 'Changelog of spending decisions: subscriptions started, ended, paused, resumed, price changes and plan/region switches, each with its effect on monthly spend (base currency).',
     inputSchema: obj({ since: DATE, until: DATE, subscription: SUBREF, limit: { type: 'integer', default: 50 } }),
     async run(a, ctx) {
@@ -514,7 +510,6 @@ export const TOOLS: Tool[] = [
   // ---------- 写入 ----------
   {
     name: 'create_subscription',
-    title: '新增订阅',
     description:
       'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. category: reuse one from get_overview when possible.',
     write: true,
@@ -525,7 +520,7 @@ export const TOOLS: Tool[] = [
         currency: { type: 'string', description: 'ISO code, e.g. USD, CNY, TRY.' },
         cycle: CYCLE,
         start: { ...DATE, description: 'First charge / purchase date. Defaults to today.' },
-        category: { type: 'string', default: '工具' },
+        category: { type: 'string', description: 'Defaults to the Tools category.' },
         tags: { type: 'array', items: { type: 'string' } },
         method: { type: 'string', description: 'Payment method id or name.' },
         region: { type: 'string', description: 'ISO country code for region-priced stores (App Store TR, NG…).' },
@@ -533,8 +528,8 @@ export const TOOLS: Tool[] = [
         notes: { type: 'string' },
         status: { type: 'string', enum: ['active', 'trial'], default: 'active' },
         trial_end: DATE,
-        end: { ...DATE, description: 'Will not renew after this date (到期不续).' },
-        intro: { type: 'object', properties: { price: { type: 'number' }, until: DATE }, required: ['price', 'until'], description: 'Intro price (首期优惠) until a date.' },
+        end: { ...DATE, description: 'Will not renew after this date.' },
+        intro: { type: 'object', properties: { price: { type: 'number' }, until: DATE }, required: ['price', 'until'], description: 'Intro price until a date.' },
         force: { type: 'boolean', default: false },
         dry_run: DRY,
       },
@@ -545,13 +540,13 @@ export const TOOLS: Tool[] = [
       const name = String(a.name ?? '').trim();
       const start = date(a.start, 'start', today);
       const currency = String(a.currency ?? '').toUpperCase();
-      if (!st.fx.rates[currency]) throw new Error(`不支持的币种：${currency}`);
-      if (!a.force && st.subscriptions.some((s) => s.name.toLowerCase() === name.toLowerCase() && s.start === start)) throw new Error(`已经有同名、同开始日的「${name}」；确认要重复建就传 force=true`);
+      if (!st.fx.rates[currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: currency }));
+      if (!a.force && st.subscriptions.some((s) => s.name.toLowerCase() === name.toLowerCase() && s.start === start)) throw new Error(t('mcp.error.duplicateSub', { name }));
       const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       const sub: Subscription = {
         id: uid(),
         name,
-        category: str(a.category) ?? '工具',
+        category: str(a.category) ?? t('mcp.defaultCategory'),
         tags: Array.isArray(a.tags) ? a.tags.map(String) : [],
         price: num(a.price, 'price'),
         currency,
@@ -572,9 +567,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'update_subscription',
-    title: '修改订阅信息',
     description:
-      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, payment method, region, reminder days, end date / 到期不续, next due date, trial end). Only provided keys change. For price changes use change_price; for plan/region switches use change_plan.',
+      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, payment method, region, reminder days, end date (no renewal after it), next due date, trial end). Only provided keys change. For price changes use change_price; for plan/region switches use change_plan.',
     write: true,
     inputSchema: obj(
       {
@@ -621,13 +615,12 @@ export const TOOLS: Tool[] = [
       for (const [k, f] of [['end', 'end'], ['next_due', 'nextDue'], ['trial_end', 'trialEnd'], ['expires', 'expires']] as const) {
         if (k in set) put(f, set[k] == null ? undefined : date(set[k], k), k);
       }
-      if (!changed.length) throw new Error('set 里没有可改的字段');
+      if (!changed.length) throw new Error(t('mcp.error.noFields'));
       return commit(ctx, st, today, syncPhase(next, today), a.dry_run, changed);
     },
   },
   {
     name: 'change_price',
-    title: '记录调价',
     description: 'Record a price change for the current plan, effective from a date (vendor raised/lowered the price). Past charges keep the old price.',
     write: true,
     inputSchema: obj({ subscription: SUBREF, amount: { type: 'number', minimum: 0 }, from: { ...DATE, description: 'Effective date; defaults to today.' }, dry_run: DRY }, ['subscription', 'amount']),
@@ -639,9 +632,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'change_plan',
-    title: '换区 / 换套餐 / 续订',
     description:
-      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch, 换区/换套餐), resubscribe after a gap (action=resume, 断订后续订), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch.',
+      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap (action=resume), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch.',
     write: true,
     inputSchema: obj(
       {
@@ -661,16 +653,15 @@ export const TOOLS: Tool[] = [
       if (act === 'confirm') return commit(ctx, st, today, confirmPlan(s, at), a.dry_run, ['confirm_plan']);
       if (act === 'drop') return commit(ctx, st, today, dropPlan(s, at), a.dry_run, ['drop_plan']);
       const p = a.plan as Record<string, unknown> | undefined;
-      if (!p) throw new Error('switch / resume 需要 plan');
+      if (!p) throw new Error(t('mcp.error.needPlan'));
       const cyc = p.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       const plan = { price: num(p.price, 'plan.price'), currency: String(p.currency).toUpperCase(), cycle: { unit: cyc.unit, every: Math.max(1, Number(cyc.every ?? 1)) }, methodId: methodRef(st, p.method) ?? currentPhase(s, today).methodId, region: str(p.region)?.toUpperCase(), note: str(p.note), planned: p.planned ? true : undefined };
-      if (!st.fx.rates[plan.currency]) throw new Error(`不支持的币种：${plan.currency}`);
+      if (!st.fx.rates[plan.currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: plan.currency }));
       return commit(ctx, st, today, act === 'resume' ? resume(s, at, plan) : switchPlan(s, at, plan), a.dry_run, [act]);
     },
   },
   {
     name: 'set_status',
-    title: '暂停 / 退订 / 恢复',
     description: 'Pause a subscription (stop projecting charges), cancel it (no renewal after a date), or reactivate it (clear pause / end date).',
     write: true,
     inputSchema: obj({ subscription: SUBREF, action: { type: 'string', enum: ['pause', 'cancel', 'reactivate'] }, at: { ...DATE, description: 'Defaults to today. For cancel: last day of service / no renewal from this date.' }, dry_run: DRY }, ['subscription', 'action']),
@@ -692,9 +683,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'record_payment',
-    title: '记一笔扣款',
     description:
-      'Record an actual charge, refund (退款, positive amount — stored negative), adjustment (补差) or failed charge for a subscription, in the subscription’s currency. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). Rejects same-day same-amount duplicates unless allow_duplicate.',
+      'Record an actual charge, refund (positive amount — stored negative), adjustment or failed charge for a subscription, in the subscription’s currency. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). Rejects same-day same-amount duplicates unless allow_duplicate.',
     write: true,
     inputSchema: obj(
       {
@@ -718,7 +708,7 @@ export const TOOLS: Tool[] = [
       const amount = sign * Math.abs(num(a.amount, 'amount'));
       const existing = chargesBetween(s, d, d, today).filter((c) => !c.projected && Math.abs(c.amount - amount) < 0.005);
       const isRecorded = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some((p) => p.date === d && Math.abs(p.amount - amount) < 0.005);
-      if (isRecorded && existing.length && !a.allow_duplicate) throw new Error(`${d} 已经记过一笔 ${amount}；确认是重复扣款就传 allow_duplicate=true`);
+      if (isRecorded && existing.length && !a.allow_duplicate) throw new Error(t('mcp.error.duplicatePayment', { date: d, amount }));
       const st2 = a.settled as { amount: unknown; currency: unknown } | undefined;
       const pay: Payment = { date: d, amount, kind: kind === 'charge' ? undefined : (kind as Payment['kind']), settled: st2 ? { amount: sign * Math.abs(num(st2.amount, 'settled.amount')), currency: String(st2.currency).toUpperCase() } : undefined, note: str(a.note) };
       return commit(ctx, st, today, savePayment(s, today, pay), a.dry_run, ['payment']);
@@ -726,7 +716,6 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'delete_payment',
-    title: '删除一笔扣款记录',
     description: 'Delete one recorded payment of a subscription by date (index picks among several on the same day, 0-based).',
     write: true,
     destructive: true,
@@ -739,9 +728,8 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'record_receivable',
-    title: '记一笔收款',
     description:
-      'Mark money received from others: a 合租 member paid their share (kind=share; advances their paid-until date by their billing cycle unless until is given), or a 代付 charge was repaid (kind=proxy; charge = the charge date being repaid).',
+      'Mark money received from others: a shared-plan member paid their share (kind=share; advances their paid-until date by their billing cycle unless until is given), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid).',
     write: true,
     inputSchema: obj(
       {
@@ -765,10 +753,10 @@ export const TOOLS: Tool[] = [
       const ccy = (str(a.currency) ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
       const amount = num(a.amount, 'amount');
       if (a.kind === 'share') {
-        if (!s.share || s.share.role !== 'owner') throw new Error(`「${s.name}」不是我发起的合租`);
+        if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
         const q = String(a.member ?? '').trim().toLowerCase();
         const ms = s.share.members.filter((m) => m.id === q || m.name.toLowerCase() === q || (q && m.name.toLowerCase().includes(q)));
-        if (ms.length !== 1) throw new Error(ms.length ? `「${a.member}」匹配到多个成员：${ms.map((m) => `${m.name}（${m.id}）`).join('、')}` : `没有这个成员。成员：${s.share.members.map((m) => `${m.name}（${m.id}）`).join('、')}`);
+        if (ms.length !== 1) throw new Error(ms.length ? t('mcp.error.memberAmbiguous', { q: String(a.member), list: candidates(ms) }) : t('mcp.error.noMember', { list: candidates(s.share.members) }));
         const m = ms[0];
         const months = m.billEvery ?? 1;
         const from = m.paidUntil ? addDays(m.paidUntil, 1) : (m.joined ?? s.share.since ?? on);
@@ -776,11 +764,11 @@ export const TOOLS: Tool[] = [
         const members = s.share.members.map((x) => (x.id === m.id ? { ...x, paidUntil: until, payments: [...(x.payments ?? []), { date: on, amount, currency: ccy, from, until, note: str(a.note) }] } : x));
         return commit(ctx, st, today, { ...s, share: { ...s.share, members } }, a.dry_run, [`share_payment:${m.name}`]);
       }
-      if (!s.proxy) throw new Error(`「${s.name}」不是代付`);
+      if (!s.proxy) throw new Error(t('mcp.error.notProxy', { name: s.name }));
       const cs = chargesBetween(s, s.start, today, today);
       const matched = matchEntries(s.proxy.entries, cs.map((c) => c.date));
       const charge = a.charge ? date(a.charge, 'charge') : cs.find((c) => matched.get(c.date)?.received == null)?.date;
-      if (!charge) throw new Error('没有待收的代付期');
+      if (!charge) throw new Error(t('mcp.error.noPendingProxy'));
       const old = matched.get(charge);
       const entry = { ...(old ?? { charge }), charge, received: amount, receivedCurrency: ccy, receivedOn: on, note: str(a.note) ?? old?.note };
       const entries = [...s.proxy.entries.filter((e) => e !== old), entry].sort((x, y) => x.charge.localeCompare(y.charge));
@@ -789,8 +777,7 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'update_payment_method',
-    title: '更新支付方式余额',
-    description: 'Update a payment method: set its current balance (校准余额), record a top-up (充值, optionally with what it actually cost in another currency, e.g. a gift card bought with CNY), or edit name/region.',
+    description: 'Update a payment method: set its current balance (recalibrate), record a top-up (optionally with what it actually cost in another currency, e.g. a gift card bought with CNY), or edit name/region.',
     write: true,
     inputSchema: obj(
       {
@@ -827,7 +814,7 @@ export const TOOLS: Tool[] = [
       }
       if (a.name) (next.name = String(a.name)), changed.push('name');
       if (a.region !== undefined) (next.region = str(a.region)?.toUpperCase()), changed.push('region');
-      if (!changed.length) throw new Error('没有要改的内容：传 balance、top_up、name 或 region');
+      if (!changed.length) throw new Error(t('mcp.error.nothingToChange'));
       const after = { id: next.id, name: next.name, currency: next.currency, balance: next.balance ?? null, balance_as_of: next.balanceAsOf ?? null, top_ups: next.topUps?.length ?? 0 };
       if (a.dry_run) return { dry_run: true, changed, method: after };
       await upsert(ctx.env, 'methods', next.id, next);

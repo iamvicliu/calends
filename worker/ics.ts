@@ -1,5 +1,6 @@
 import { addDays, addMonths, chargesBetween, todayIn } from '../shared/billing.ts';
 import { money } from '../shared/format.ts';
+import { t } from '../shared/i18n.ts';
 import type { AppState } from '../shared/types.ts';
 
 function icsText(s: string): string {
@@ -38,7 +39,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
     'PRODID:-//Subscription Ledger//ZH',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:订阅扣款',
+    fold(`X-WR-CALNAME:${icsText(t('server.ics.calName'))}`),
     'X-WR-TIMEZONE:' + state.settings.timezone,
     'REFRESH-INTERVAL;VALUE=DURATION:PT6H',
     'X-PUBLISHED-TTL:PT6H',
@@ -59,13 +60,13 @@ export function buildIcs(state: AppState, siteUrl: string): string {
         `DTSTART;VALUE=DATE:${d}`,
         `DTEND;VALUE=DATE:${addDays(c.date, 1).replace(/-/g, '')}`,
         fold(`SUMMARY:${icsText(`${s.icon && !s.icon.startsWith('http') ? s.icon + ' ' : ''}${s.name} ${money(c.amount, c.currency)}`)}`),
-        fold(`DESCRIPTION:${icsText([method ? `支付：${method.name}` : '', s.category, `${siteUrl}/admin`].filter(Boolean).join('\n'))}`),
+        fold(`DESCRIPTION:${icsText([method ? t('server.ics.method', { name: method.name }) : '', s.category, `${siteUrl}/admin`].filter(Boolean).join('\n'))}`),
         'TRANSP:TRANSPARENT',
       );
       if (remind >= 0 && c.projected) {
         // 全天事件从当天 0 点算起：提前 N 天的上午 9 点
         const trigger = remind === 0 ? 'PT9H' : `-P${remind - 1}DT15H`;
-        lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', fold(`DESCRIPTION:${icsText(`${s.name} 即将扣款`)}`), `TRIGGER:${trigger}`, 'END:VALARM');
+        lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', fold(`DESCRIPTION:${icsText(t('server.ics.alarm', { name: s.name }))}`), `TRIGGER:${trigger}`, 'END:VALARM');
       }
       lines.push('END:VEVENT');
     }

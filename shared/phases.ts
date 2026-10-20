@@ -1,6 +1,7 @@
 // 订阅历程的编辑操作：调价、换区/换套餐、断更、续订。全部为纯函数，返回新的订阅对象。
 import { addDays, chargesBetween, phaseSubs, priceAt } from './billing.ts';
 import type { Cycle, Payment, Phase, Subscription } from './types.ts';
+import { t } from './i18n.ts';
 
 export interface PlanChange {
   price: number;
@@ -60,7 +61,7 @@ function mirror(s: Subscription, phases: Phase[]): Subscription {
 export function switchPlan(s: Subscription, at: string, next: PlanChange): Subscription {
   const phases = phasesOf(s);
   const last = phases[phases.length - 1];
-  if (at <= last.start) throw new Error('生效日期要晚于当前阶段的开始日期');
+  if (at <= last.start) throw new Error(t('core.phase.switchTooEarly'));
   last.end = at;
   phases.push({ start: at, ...next });
   return { ...mirror(s, phases), status: 'active', pausedAt: undefined };
@@ -88,7 +89,7 @@ export function resume(s: Subscription, at: string, next: PlanChange): Subscript
   const phases = phasesOf(s);
   const last = phases[phases.length - 1];
   if (!last.end) last.end = s.pausedAt && s.pausedAt < at ? s.pausedAt : at;
-  if (at < last.end) throw new Error('续订日期不能早于上次结束的日期');
+  if (at < last.end) throw new Error(t('core.phase.resumeTooEarly'));
   phases.push({ start: at, ...next });
   return { ...mirror(s, phases), status: 'active', pausedAt: undefined };
 }
@@ -102,7 +103,7 @@ export function changePrice(s: Subscription, from: string, amount: number): Subs
   }
   const phases = phasesOf(s);
   const idx = phases.findIndex((p, i) => p.start <= from && (!phases[i + 1] || phases[i + 1].start > from));
-  if (idx < 0) throw new Error('调价日期不在任何阶段内');
+  if (idx < 0) throw new Error(t('core.phase.priceOutOfRange'));
   const p = phases[idx];
   const old = phaseSubs({ ...s, phases })[idx];
   const hist = p.priceHistory?.length ? [...p.priceHistory] : [{ from: p.start, amount: priceAt(old, addDays(from, -1)) }];

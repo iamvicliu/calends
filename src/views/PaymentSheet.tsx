@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import { currentPhase } from '../../shared/billing.ts';
 import { money } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import { deletePayment, savePayment } from '../../shared/phases.ts';
 import type { Payment, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -9,12 +10,7 @@ import { Cell, Group, Sheet } from '../components/ui.tsx';
 import { run, saveSub } from '../store.ts';
 
 type Kind = 'charge' | NonNullable<Payment['kind']>;
-const KINDS: Array<{ value: Kind; label: string }> = [
-  { value: 'charge', label: '扣款' },
-  { value: 'refund', label: '退款' },
-  { value: 'adjust', label: '补差' },
-  { value: 'failed', label: '扣款失败' },
-];
+const KINDS: Kind[] = ['charge', 'refund', 'adjust', 'failed'];
 
 /**
  * 记一笔 / 修改一笔扣款。金额按这一段订阅的币种填；卡上实际扣的是别的币种（如日元订阅从美元卡扣）时，
@@ -44,63 +40,63 @@ export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription;
     run(async () => {
       await saveSub(savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }));
       onClose();
-    }, edit ? '已修改这笔记录' : '已记下这笔');
+    }, t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'));
   };
   const remove = () =>
     run(async () => {
       await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index));
       onClose();
-    }, '已删除这笔记录');
+    }, t('editor.payment.toast.deleted'));
 
   return (
     <Sheet
       narrow
-      title={edit ? '修改扣款记录' : '记一笔'}
+      title={t(edit ? 'editor.payment.editTitle' : 'editor.payment.addTitle')}
       onClose={onClose}
       foot={
         <>
           {edit && (
             <button class="btn danger" style={{ marginRight: 'auto' }} onClick={remove}>
-              删除
+              {t('common.delete')}
             </button>
           )}
           <button class="btn" onClick={onClose}>
-            取消
+            {t('common.cancel')}
           </button>
           <button class="btn primary" onClick={save}>
-            保存
+            {t('common.save')}
           </button>
         </>
       }
     >
       <div class="stack">
         <Group>
-          <Cell label="日期">
+          <Cell label={t('editor.payment.date')}>
             <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
           </Cell>
-          <Cell label="类型">
-            <Picker value={kind} onChange={setKind} options={KINDS.map((k) => ({ value: k.value, label: k.label }))} ariaLabel="类型" />
+          <Cell label={t('editor.payment.kind.label')}>
+            <Picker value={kind} onChange={setKind} options={KINDS.map((k) => ({ value: k, label: t(`editor.payment.kind.${k}`) }))} ariaLabel={t('editor.payment.kind.label')} />
           </Cell>
-          <Cell label={`金额（${ccy}）`} sub={kind === 'refund' ? '填退回多少，保存为负数' : undefined}>
+          <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('editor.payment.refundHint') : undefined}>
             <input class="num" inputMode="decimal" value={amount} onInput={(e) => setAmount((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
-        <Group title="卡上实扣（可选）">
-          <Cell label="实扣币种">
+        <Group title={t('editor.payment.settled')}>
+          <Cell label={t('editor.payment.settledCcy')}>
             <CurrencySelect value={settledCcy} onChange={setSettledCcy} />
           </Cell>
-          <Cell label="实扣金额">
-            <input class="num" inputMode="decimal" placeholder="不填" value={settled} onInput={(e) => setSettled((e.target as HTMLInputElement).value)} />
+          <Cell label={t('editor.payment.settledAmount')}>
+            <input class="num" inputMode="decimal" placeholder={t('editor.payment.blank')} value={settled} onInput={(e) => setSettled((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
         <Group>
-          <Cell label="备注">
-            <input value={note} placeholder="可选" onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
+          <Cell label={t('editor.field.notes')}>
+            <input value={note} placeholder={t('editor.field.optional')} onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
         {phase.payments?.length || sub.payments?.length ? null : (
           <small class="muted" style={{ padding: '0 4px' }}>
-            这一段目前按周期推算扣款；保存后会先把到今天为止推算出的 {money(phase.price, ccy)} 各期固化成记录，以后完全以记录为准，未来的扣款照旧。
+            {t('editor.payment.freezeHint', { amount: money(phase.price, ccy) })}
           </small>
         )}
       </div>

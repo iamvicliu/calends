@@ -1,5 +1,6 @@
 import { cycleLabel, diffDays, isGap, phaseSubs } from '../../shared/billing.ts';
 import { money } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { PayBadge } from './ui.tsx';
 
@@ -17,7 +18,7 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
       const months = Math.round(diffDays(end, v.start) / 30.4375);
       items.push(
         <li key={`gap${i}`} class="h-gap">
-          <span>断更 {months >= 1 ? `${months} 个月` : `${diffDays(end, v.start)} 天`}</span>
+          <span>{months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: diffDays(end, v.start) })}</span>
         </li>,
       );
     }
@@ -26,7 +27,7 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
     items.push(
       <li key={`p${i}`} class={`h-phase ${live && v.start <= today ? 'now' : ''}`}>
         <div class="h-range">
-          {v.start > today ? `${v.start}${v.end ? ` → ${v.end}` : ' 起'}（计划）` : `${v.start} → ${v.end ?? '至今'}`}
+          {v.start > today ? (v.end ? t('editor.history.plannedRange', { start: v.start, end: v.end }) : t('editor.history.plannedFrom', { start: v.start })) : t('editor.history.range', { start: v.start, end: v.end ?? t('editor.history.now') })}
         </div>
         <div class="h-plan">
           {v.region && <span class="badge">{v.region}</span>}
@@ -37,7 +38,7 @@ export function History({ sub, state, today }: { sub: Subscription; state: AppSt
           <ul class="h-prices">
             {hist.map((p, k) => (
               <li key={p.from}>
-                {k === 0 ? '起始' : `${p.from} 调价`} · {money(p.amount, v.currency)}
+                {k === 0 ? t('editor.history.initial') : t('editor.history.priceChange', { date: p.from })} · {money(p.amount, v.currency)}
                 {k > 0 && hist[k - 1].amount > 0 && <em class={p.amount > hist[k - 1].amount ? 'up' : 'down'}>{p.amount > hist[k - 1].amount ? '+' : ''}{Math.round(((p.amount - hist[k - 1].amount) / hist[k - 1].amount) * 100)}%</em>}
               </li>
             ))}

@@ -1,8 +1,9 @@
 import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt } from '../../shared/billing.ts';
-import { cnDate, flag, money } from '../../shared/format.ts';
+import { cnDate, cnDateFull, flag, money } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 
 /** 不是今年的日期带上年份 */
-const when = (d: string, today: string) => (d.slice(0, 4) === today.slice(0, 4) ? cnDate(d) : `${d.slice(0, 4)}年${cnDate(d)}`);
+const when = (d: string, today: string) => (d.slice(0, 4) === today.slice(0, 4) ? cnDate(d) : cnDateFull(d));
 import { chargeValue } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { ShareSheet } from '../components/ShareSheet.tsx';
@@ -10,12 +11,12 @@ import { SubIcon } from '../components/ui.tsx';
 import { catColor } from '../derive.ts';
 
 type Style = 'card' | 'receipt' | 'timeline' | 'poster' | 'years';
-const STYLES: Array<[Style, string]> = [
-  ['card', '卡片'],
-  ['receipt', '小票'],
-  ['timeline', '历程'],
-  ['poster', '海报'],
-  ['years', '逐年'],
+const STYLES = (): Array<[Style, string]> => [
+  ['card', t('share.style.card')],
+  ['receipt', t('share.style.receipt')],
+  ['timeline', t('share.style.timeline')],
+  ['poster', t('share.style.poster')],
+  ['years', t('share.style.years')],
 ];
 
 /** 一个订阅的完整故事：花了多少、订了多久、换过几次、每年多少 */
@@ -46,7 +47,7 @@ function story(state: AppState, sub: Subscription, today: string) {
     active,
     gaps,
     years: [...years].sort((a, b) => a[0].localeCompare(b[0])),
-    duration: y ? `${y} 年${mo ? ` ${mo} 个月` : ''}` : mo ? `${mo} 个月` : `${active} 天`,
+    duration: y ? (mo ? t('share.dur.ym', { y, m: mo }) : t('share.dur.y', { count: y })) : mo ? t('share.dur.m', { count: mo }) : t('share.dur.d', { count: active }),
     perMonth: active > 0 ? total / Math.max(1, active / 30.44) : 0,
     perDay: active > 0 ? total / active : 0,
     change: same ? p1 / p0 - 1 : undefined,
@@ -64,17 +65,17 @@ interface Ctx {
   today: string;
 }
 
-const STATUS_TEXT: Record<string, string> = { active: '订阅中', ending: '到期不续', trial: '试用中', paused: '已暂停', ended: '已退订', lifetime: '已买断', upcoming: '即将开始' };
+const statusText = (st: Story) => t(`share.status.${st.status}`);
 const changeText = (st: Story) =>
-  st.change == null ? `换过 ${st.vs.length - 1} 次` : Math.abs(st.change) < 0.005 ? '价格没变过' : `${st.change > 0 ? '涨了' : '降了'} ${Math.round(Math.abs(st.change) * 100)}%`;
+  st.change == null ? t('share.switched', { count: st.vs.length - 1 }) : Math.abs(st.change) < 0.005 ? t('share.priceSame') : t(st.change > 0 ? 'share.priceUp' : 'share.priceDown', { pct: Math.round(Math.abs(st.change) * 100) });
 
 /** 单个订阅的分享图 */
 export function SubShare({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
   const st = story(state, sub, today);
   return (
     <ShareSheet
-      title={`分享「${sub.name}」`}
-      styles={STYLES}
+      title={t('share.title', { name: sub.name })}
+      styles={STYLES()}
       storageKey="ledger:sub-share-style"
       base={st.base}
       fileName={(l) => `${sub.name}-${l}.png`}
@@ -99,28 +100,28 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         <div>
           <b>{sub.name}</b>
           <span>
-            {STATUS_TEXT[st.status]} · {when(start, today)} 起
+            {statusText(st)} · {t('share.since', { date: when(start, today) })}
           </span>
         </div>
       </div>
-      <small class="sc-k">{hide ? '一起走过' : '一共花了'}</small>
+      <small class="sc-k">{hide ? t('share.together') : t('share.totalSpent')}</small>
       <div class="sc-big">{hide ? st.duration : m(st.total)}</div>
       <div class="sc-grid">
         <div>
-          <small>{hide ? '扣款' : '订了'}</small>
-          <b>{hide ? `${st.charges.length} 次` : st.duration}</b>
+          <small>{hide ? t('share.charges') : t('share.subscribed')}</small>
+          <b>{hide ? t('share.times', { count: st.charges.length }) : st.duration}</b>
         </div>
         <div>
-          <small>{hide ? '断过' : '实际每月'}</small>
-          <b>{hide ? `${st.gaps.length} 次` : m(st.perMonth)}</b>
+          <small>{hide ? t('share.gaps') : t('share.realMonthly')}</small>
+          <b>{hide ? t('share.times', { count: st.gaps.length }) : m(st.perMonth)}</b>
         </div>
         <div>
-          <small>价格</small>
+          <small>{t('share.price')}</small>
           <b>{changeText(st)}</b>
         </div>
         <div>
-          <small>{hide ? '阶段' : '扣款'}</small>
-          <b>{hide ? `${st.vs.length} 段` : `${st.charges.length} 次`}</b>
+          <small>{hide ? t('share.phases') : t('share.charges')}</small>
+          <b>{hide ? t('share.phaseCount', { count: st.vs.length }) : t('share.times', { count: st.charges.length })}</b>
         </div>
       </div>
       <div class="sc-bar">
@@ -132,7 +133,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
       </div>
       <div class="sc-foot">
         <span>
-          {when(start, today)} — 今天
+          {t('share.untilToday', { date: when(start, today) })}
         </span>
         <span>calends.example.com</span>
       </div>
@@ -151,40 +152,40 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
       <div class="rc-shop">{sub.name}</div>
       <div class="rc-sub">SUBSCRIPTION RECEIPT</div>
       <div class="rc-meta">
-        <span>{when(st.vs[0].start, today)} 起</span>
-        <span>{STATUS_TEXT[st.status]}</span>
+        <span>{t('share.since', { date: when(st.vs[0].start, today) })}</span>
+        <span>{statusText(st)}</span>
       </div>
       <div class="rc-cut" />
       {shown.map(({ c, v }, i) => (
         <div key={i} class="rc-row">
           <span class="rc-d">{c.date}</span>
-          <span class="rc-n">{c.kind === 'refund' ? '退款' : c.sub.region ? `${flag(c.sub.region)} ${c.sub.region}` : cycleLabel(c.sub.cycle)}</span>
-          <span class="rc-v">{hide ? (c.kind === 'refund' ? '退' : `第 ${rows.length - i} 期`) : m(c.amount, c.currency)}</span>
+          <span class="rc-n">{c.kind === 'refund' ? t('share.refund') : c.sub.region ? `${flag(c.sub.region)} ${c.sub.region}` : cycleLabel(c.sub.cycle)}</span>
+          <span class="rc-v">{hide ? (c.kind === 'refund' ? t('share.refundShort') : t('share.nth', { n: rows.length - i })) : m(c.amount, c.currency)}</span>
           {!hide && c.currency !== st.base && <span class="rc-x">≈{m(v)}</span>}
         </div>
       ))}
       {rest.length > 0 && (
         <div class="rc-row">
           <span class="rc-d">··</span>
-          <span class="rc-n">更早 {rest.length} 笔</span>
+          <span class="rc-n">{t('share.earlier', { count: rest.length })}</span>
           <span class="rc-v">{hide ? '' : m(rest.reduce((a, x) => a + x.v, 0))}</span>
         </div>
       )}
       <div class="rc-cut" />
       <div class="rc-sum">
-        <span>{hide ? '时长 TIME' : '合计 TOTAL'}</span>
+        <span>{hide ? t('share.time') : t('share.total')}</span>
         <b>{hide ? st.duration : m(st.total)}</b>
       </div>
       <div class="rc-kv">
-        <span>扣款笔数</span>
-        <span>{st.charges.length} 笔</span>
+        <span>{t('share.chargeCount')}</span>
+        <span>{t('share.count', { count: st.charges.length })}</span>
       </div>
       <div class="rc-kv">
-        <span>{hide ? '换区 / 换套餐' : '实际每月'}</span>
-        <span>{hide ? `${st.vs.length - 1} 次` : m(st.perMonth)}</span>
+        <span>{hide ? t('share.switches') : t('share.realMonthly')}</span>
+        <span>{hide ? t('share.times', { count: st.vs.length - 1 }) : m(st.perMonth)}</span>
       </div>
       <div class="rc-kv">
-        <span>价格</span>
+        <span>{t('share.price')}</span>
         <span>{changeText(st)}</span>
       </div>
       <div class="rc-cut" />
@@ -193,7 +194,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
           <i key={i} style={{ width: w, marginRight: i % 3 === 0 ? 2 : 1 }} />
         ))}
       </div>
-      <div class="rc-thanks">谢谢惠顾 · 下期见</div>
+      <div class="rc-thanks">{t('share.thanks')}</div>
       <div class="rc-site">calends.example.com</div>
     </div>
   );
@@ -214,7 +215,7 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
         <div>
           <b>{sub.name}</b>
           <span>
-            {st.duration} · {hide ? `${st.charges.length} 次扣款` : `共 ${m(st.total)}`}
+            {st.duration} · {hide ? t('share.n.charges', { count: st.charges.length }) : t('share.sum', { amount: m(st.total) })}
           </span>
         </div>
       </div>
@@ -222,20 +223,20 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
         {items.map((it) =>
           it.gap ? (
             <div key={it.key} class="tlc-gap">
-              断了 {it.gap >= 60 ? `${Math.round(it.gap / 30.4)} 个月` : `${it.gap} 天`}
+              {t('share.gap', { dur: it.gap >= 60 ? t('share.dur.m', { count: Math.round(it.gap / 30.4) }) : t('share.dur.d', { count: it.gap }) })}
             </div>
           ) : (
             <div key={it.key} class={`tlc-item ${it.v!.planned ? 'planned' : ''}`}>
               <i />
               <div>
                 <small>
-                  {when(it.from, today)} — {it.to ? (it.to > today ? `${when(it.to, today)}（计划）` : when(it.to, today)) : '至今'}
+                  {when(it.from, today)} — {it.to ? (it.to > today ? t('share.planned', { date: when(it.to, today) }) : when(it.to, today)) : t('share.present')}
                 </small>
                 <b>
                   {it.v!.region ? `${flag(it.v!.region)} ${it.v!.region} · ` : ''}
                   {hide ? cycleLabel(it.v!.cycle) : `${money(it.v!.price, it.v!.currency, { compact: true })} ${cycleLabel(it.v!.cycle)}`}
                 </b>
-                {(it.v!.priceHistory?.length ?? 0) > 1 && !hide && <span>期间调价 {it.v!.priceHistory!.map((p) => money(p.amount, it.v!.currency, { compact: true })).join(' → ')}</span>}
+                {(it.v!.priceHistory?.length ?? 0) > 1 && !hide && <span>{t('share.priceChanges', { list: it.v!.priceHistory!.map((p) => money(p.amount, it.v!.currency, { compact: true })).join(' → ') })}</span>}
                 {sub.phases?.find((ph) => ph.start === it.v!.start)?.note && <span>{sub.phases!.find((ph) => ph.start === it.v!.start)!.note}</span>}
               </div>
             </div>
@@ -255,15 +256,15 @@ function SPoster({ sub, st, hide, m }: Ctx) {
         <SubIcon sub={sub} size={112} proxied />
       </div>
       <div class="sp-name">{sub.name}</div>
-      <div class="sp-k">陪伴了</div>
+      <div class="sp-k">{t('share.withYou')}</div>
       <div class="sp-big">{st.duration}</div>
       <div class="sp-line">
-        {hide ? `${st.charges.length} 次扣款 · ${changeText(st)}` : `一共 ${m(st.total)} · 平均每天 ${m(st.perDay)}`}
+        {hide ? `${t('share.n.charges', { count: st.charges.length })} · ${changeText(st)}` : t('share.totalPerDay', { total: m(st.total), perDay: m(st.perDay) })}
       </div>
       <div class="sp-chips">
-        <span>{STATUS_TEXT[st.status]}</span>
-        {st.gaps.length > 0 && <span>断过 {st.gaps.length} 次</span>}
-        {st.vs.length > 1 && <span>换过 {st.vs.length - 1} 次</span>}
+        <span>{statusText(st)}</span>
+        {st.gaps.length > 0 && <span>{t('share.lapsed', { count: st.gaps.length })}</span>}
+        {st.vs.length > 1 && <span>{t('share.switched', { count: st.vs.length - 1 })}</span>}
         {st.change != null && <span>{changeText(st)}</span>}
       </div>
       <div class="sp-foot">calends.example.com</div>
@@ -280,7 +281,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
         <SubIcon sub={sub} size={36} proxied />
         <div>
           <b>{sub.name}</b>
-          <span>每年花了多少</span>
+          <span>{t('share.byYear')}</span>
         </div>
       </div>
       <div class="sy-big">{hide ? st.duration : m(st.total)}</div>
@@ -294,7 +295,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
         ))}
       </div>
       <div class="sy-foot">
-        <span>{st.charges.length} 次扣款 · {changeText(st)}</span>
+        <span>{t('share.n.charges', { count: st.charges.length })} · {changeText(st)}</span>
         <span>calends.example.com</span>
       </div>
     </div>

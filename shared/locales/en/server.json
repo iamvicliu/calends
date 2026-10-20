@@ -1,0 +1,35 @@
+{
+  "fxApiError": "The exchange rate service returned an error",
+  "missingId": "Missing id",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "This ledger isn't public",
+  "idMismatch": "ID mismatch",
+  "invalidMethod": "Invalid payment method",
+  "invalidBackup": "Invalid backup file",
+  "refreshFailed": "Refresh failed",
+  "backup": {
+    "notBackup": "This isn't a valid backup file",
+    "unknownFormat": "Unrecognized backup format: {format}",
+    "newerVersion": "This backup is from a newer version (v{version}). Update this site first."
+  },
+  "auth": {
+    "tooMany": "Too many attempts. Try again in 15 minutes.",
+    "alreadySetup": "A password has already been set",
+    "noSetupToken": "SETUP_TOKEN wasn't configured at deploy time, so setup can't continue. Set this secret first (wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "Incorrect setup token",
+    "passwordTooShort": { "one": "Password must be at least {min} character", "other": "Password must be at least {min} characters" },
+    "wrongPassword": "Incorrect password",
+    "wrongCurrentPassword": "Current password is incorrect",
+    "newPasswordTooShort": { "one": "New password must be at least {min} character", "other": "New password must be at least {min} characters" },
+    "invalidDevice": "Invalid device",
+    "cannotRemoveCurrent": "You can't remove this device. Use Log Out instead.",
+    "expired": "The request expired. Please try again.",
+    "passkeyFailed": "Passkey verification failed",
+    "passkeyNotBound": "This passkey isn't registered with this site"
+  },
+  "ics": {
+    "calName": "Subscription charges",
+    "method": "Payment: {name}",
+    "alarm": "{name} renews soon"
+  }
+}

@@ -1,6 +1,7 @@
 import { createPortal } from 'preact/compat';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { symbol } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import { ccyFlag, ccyName } from '../display.ts';
 import { Icon } from './ui.tsx';
 
@@ -49,11 +50,11 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
     const k = q.trim().toLowerCase();
     const hit = (c: string) => !k || c.toLowerCase().includes(k) || ccyName(c).toLowerCase().includes(k) || symbol(c).toLowerCase().includes(k);
     const out: Array<{ title?: string; items: string[] }> = [];
-    if (!k || '原币 original'.includes(k)) out.push({ items: ['orig'] });
+    if (!k || `${t('picker.ccy.orig')} 原币 original`.toLowerCase().includes(k)) out.push({ items: ['orig'] });
     const u = used.filter(hit);
-    if (u.length) out.push({ title: '常用', items: u });
+    if (u.length) out.push({ title: t('picker.common'), items: u });
     const r = all.filter((c) => !used.includes(c) && hit(c));
-    if (r.length) out.push({ title: k ? '其他' : '全部货币', items: r });
+    if (r.length) out.push({ title: k ? t('common.other') : t('picker.ccy.all'), items: r });
     return out;
   }, [q, used, all]);
   const flat = sections.flatMap((s) => s.items);
@@ -87,10 +88,10 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
   let n = 0;
   return (
     <>
-      <button type="button" ref={btn} class={`side-item theme-item ${open ? 'open' : ''}`} onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open} title="切换金额显示的货币">
+      <button type="button" ref={btn} class={`side-item theme-item ${open ? 'open' : ''}`} onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open} title={t('picker.ccy.switch')}>
         <Icon name="coins" />
-        <span>货币</span>
-        <small>{orig ? '原币' : `${ccyName(value)}`}</small>
+        <span>{t('picker.ccy.label')}</span>
+        <small>{orig ? t('picker.ccy.orig') : `${ccyName(value)}`}</small>
       </button>
       {open &&
         pos &&
@@ -101,9 +102,9 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
             <div ref={pop} class={`dp-pop cp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} onKeyDown={onKey}>
               <label class="cp-search">
                 <Icon name="search" />
-                <input autoFocus value={q} placeholder="搜索货币、代码或符号" onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
+                <input autoFocus value={q} placeholder={t('picker.ccy.search')} onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
               </label>
-              <div class="cp-list" ref={list} role="listbox" aria-label="货币">
+              <div class="cp-list" ref={list} role="listbox" aria-label={t('picker.ccy.label')}>
                 {sections.map((s) => (
                   <div key={s.title ?? 'orig'}>
                     {s.title && <div class="cp-head">{s.title}</div>}
@@ -122,15 +123,15 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
                           onClick={() => pick(c)}
                         >
                           <span class="cp-flag">{c === 'orig' ? <Icon name="swap" /> : ccyFlag(c) ? <img src={ccyFlag(c)} alt="" loading="lazy" /> : <b>{symbol(c).trim() || c}</b>}</span>
-                          <span class="cp-name">{c === 'orig' ? '原币' : ccyName(c)}</span>
-                          <span class="cp-code">{c === 'orig' ? '各自币种' : c}</span>
+                          <span class="cp-name">{c === 'orig' ? t('picker.ccy.orig') : ccyName(c)}</span>
+                          <span class="cp-code">{c === 'orig' ? t('picker.ccy.origHint') : c}</span>
                           {sel && <Icon name="check" />}
                         </button>
                       );
                     })}
                   </div>
                 ))}
-                {!flat.length && <div class="cp-empty">没有匹配的货币</div>}
+                {!flat.length && <div class="cp-empty">{t('picker.ccy.noMatch')}</div>}
               </div>
             </div>
           </>,

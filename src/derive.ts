@@ -3,30 +3,64 @@ import { chargeValue } from '../shared/fx.ts';
 import { flag } from '../shared/format.ts';
 import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../shared/types.ts';
 import { BANKS } from './banks.ts';
+import { t } from '../shared/i18n.ts';
 
 const PALETTE = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c8)', 'var(--c9)', 'var(--c10)'];
+/** 内置分类的代码 → 中文原名；用其他语言新建的分类（Tools 等）靠它对回同一个图标、颜色 */
+const CAT_CODE: Record<string, string> = { tools: '工具', media: '影音', music: '音乐', daily: '日用', productivity: '效率', shopping: '购物', education: '教育', games: '游戏', domains: '域名', social: '社交' };
+/** 分类名归一成中文原名（内置分类），自定义分类原样返回 */
+export function canonicalCat(cat: string): string {
+  for (const [code, zh] of Object.entries(CAT_CODE)) if (t(`editor.category.${code}`) === cat) return zh;
+  return cat;
+}
 const FIXED: Record<string, number> = { 工具: 0, 影音: 1, 效率: 2, 音乐: 3, 日用: 4, 教育: 5, 购物: 6, AI: 7, 游戏: 8, 域名: 9 };
 
 export function catColor(cat: string): string {
-  if (cat in FIXED) return PALETTE[FIXED[cat]];
+  const c = canonicalCat(cat);
+  if (c in FIXED) return PALETTE[FIXED[c]];
   let h = 0;
   for (const ch of cat) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return PALETTE[h % PALETTE.length];
 }
 
+/** 支付方式类型名；用 getter 在读取时才取文案（模块加载时语言包还没就绪） */
 export const KIND_LABEL: Record<MethodKind, string> = {
-  debit: '银行卡',
-  credit: '信用卡',
-  alipay: '支付宝',
-  wechat: '微信支付',
-  paypal: 'PayPal',
-  appstore: 'App Store 余额',
-  googleplay: 'Google Play 余额',
-  giftcard: '礼品卡',
-  prepaid: '商家余额',
-  phone: '手机话费',
-  crypto: '加密卡',
-  other: '其他',
+  get debit() {
+    return t('list.kind.debit');
+  },
+  get credit() {
+    return t('list.kind.credit');
+  },
+  get alipay() {
+    return t('list.kind.alipay');
+  },
+  get wechat() {
+    return t('list.kind.wechat');
+  },
+  get paypal() {
+    return t('list.kind.paypal');
+  },
+  get appstore() {
+    return t('list.kind.appstore');
+  },
+  get googleplay() {
+    return t('list.kind.googleplay');
+  },
+  get giftcard() {
+    return t('list.kind.giftcard');
+  },
+  get prepaid() {
+    return t('list.kind.prepaid');
+  },
+  get phone() {
+    return t('list.kind.phone');
+  },
+  get crypto() {
+    return t('list.kind.crypto');
+  },
+  get other() {
+    return t('list.kind.other');
+  },
 };
 
 // 卡面底色：中性石墨或品牌纯色，不用蓝紫渐变；App Store 卡另有钛金属卡面
@@ -61,8 +95,8 @@ export const BRANDS: Brand[] = [
   { key: 'appstore', name: 'App Store', logo: '/brands/appstore.svg', kinds: ['appstore'] },
   { key: 'googleplay', name: 'Google Play', logo: '/brands/googleplay.svg', kinds: ['googleplay'] },
   { key: 'paypal', name: 'PayPal', logo: '/brands/paypal.svg', kinds: ['paypal'], onColor: true },
-  { key: 'alipay', name: '支付宝', logo: '/brands/alipay.svg', kinds: ['alipay'], onColor: true },
-  { key: 'wechat', name: '微信支付', logo: '/brands/wechat.svg', kinds: ['wechat'], onColor: true },
+  { key: 'alipay', get name() { return t('list.kind.alipay'); }, logo: '/brands/alipay.svg', kinds: ['alipay'], onColor: true },
+  { key: 'wechat', get name() { return t('list.kind.wechat'); }, logo: '/brands/wechat.svg', kinds: ['wechat'], onColor: true },
 ];
 
 /** 卡面品牌 logo */
@@ -96,7 +130,9 @@ export function methodRegion(m: Pick<PaymentMethod, 'region' | 'kind' | 'currenc
 export const NETWORKS: Record<CardNetwork, string> = {
   visa: 'Visa',
   mastercard: 'Mastercard',
-  unionpay: '银联',
+  get unionpay() {
+    return t('list.network.unionpay');
+  },
   jcb: 'JCB',
   'american-express': 'American Express',
   discover: 'Discover',
@@ -145,7 +181,7 @@ export function faviconOf(url?: string): string | undefined {
 
 /** 订阅的图片图标，用作卡片和详情的背景光晕：图片链接 > 官网图标；域名类不用 */
 export function subImage(s: Pick<Subscription, 'category' | 'icon' | 'url'>): string | undefined {
-  if (s.category === '域名') return undefined;
+  if (canonicalCat(s.category) === '域名') return undefined;
   if (s.icon?.startsWith('http')) return s.icon;
   return faviconOf(s.url);
 }

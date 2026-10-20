@@ -8,9 +8,10 @@ import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type Digest } from './notify.ts';
 import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from './store.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
-import { TOOLS } from './mcp-tools.ts';
+import { TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
 import { requestLocale, settingsLocale, useLocale } from './i18n.ts';
+import { t } from '../shared/i18n.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
@@ -18,7 +19,7 @@ const bad = (msg: string, status = 400) => json({ error: msg }, status);
 async function refreshFx(env: Env): Promise<FxTable> {
   const res = await fetch('https://open.er-api.com/v6/latest/USD', { cf: { cacheTtl: 3600 } });
   const body = (await res.json()) as { result?: string; rates?: Record<string, number> };
-  if (body.result !== 'success' || !body.rates) throw new Error('汇率接口异常');
+  if (body.result !== 'success' || !body.rates) throw new Error(t('server.fxApiError'));
   const fx: FxTable = { base: 'USD', rates: body.rates, fetchedAt: new Date().toISOString() };
   await putKv(env, 'fx', fx);
   await recordToday(env, fx, (await getSettings(env)).timezone);
@@ -26,7 +27,7 @@ async function refreshFx(env: Env): Promise<FxTable> {
 }
 
 function validSub(s: Subscription): string | undefined {
-  if (!s || typeof s.id !== 'string' || !s.id) return '缺少 id';
+  if (!s || typeof s.id !== 'string' || !s.id) return t('server.missingId');
   return subError(s);
 }
 
@@ -34,7 +35,7 @@ function validSub(s: Subscription): string | undefined {
 function invalidIn(subs: Subscription[]): string | undefined {
   for (const s of subs) {
     const err = validSub(s);
-    if (err) return `${s?.name ?? '?'}：${err}`;
+    if (err) return t('server.invalidItem', { name: s?.name ?? '?', error: err });
   }
   return undefined;
 }
@@ -56,7 +57,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   const authed = dev || (await isAuthed(req, env));
   if (path === '/api/public' && method === 'GET') {
     const state = await loadState(env);
-    if (!state.settings.publicView && !dev) return bad('这个账本没有公开', 404);
+    if (!state.settings.publicView && !dev) return bad(t('server.notPublic'), 404);
     return json(maskForPublic(state));
   }
   if (path === '/api/state' && method === 'GET') {
@@ -93,8 +94,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json({ ok: true });
   }
   // MCP 令牌管理（后台「AI」页）：明文只在新建时返回一次
-  if (path === '/api/mcp/tools' && method === 'GET') return json(TOOLS.map((t) => ({ name: t.name, title: t.title, description: t.description, write: !!t.write })));
-  if (path === '/api/mcp/tokens' && method === 'GET') return json((await listTokens(env)).map(({ hash: _h, ...t }) => t));
+  if (path === '/api/mcp/tools' && method === 'GET') return json(TOOLS.map((x) => ({ name: x.name, title: toolTitle(x.name), description: x.description, write: !!x.write })));
+  if (path === '/api/mcp/tokens' && method === 'GET') return json((await listTokens(env)).map(({ hash: _h, ...rest }) => rest));
   if (path === '/api/mcp/tokens' && method === 'POST') {
     const b = (await req.json()) as { name?: string; scope?: string };
     const { token, item } = await createToken(env, b.name ?? '', b.scope === 'read' ? 'read' : 'write');
@@ -110,7 +111,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (m) {
     if (method === 'PUT') {
       const sub = (await req.json()) as Subscription;
-      if (sub.id !== m[1]) return bad('id 不一致');
+      if (sub.id !== m[1]) return bad(t('server.idMismatch'));
       const err = validSub(sub);
       if (err) return bad(err);
       sub.updatedAt = new Date().toISOString();
@@ -126,7 +127,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (m) {
     if (method === 'PUT') {
       const pm = (await req.json()) as PaymentMethod;
-      if (pm.id !== m[1] || !pm.name?.trim()) return bad('支付方式无效');
+      if (pm.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
       await upsert(env, 'methods', pm.id, pm);
       return json(pm);
     }
@@ -162,7 +163,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     try {
       b = parseBackup(await req.json());
     } catch (e) {
-      return bad(e instanceof Error ? e.message : '备份文件无效');
+      return bad(e instanceof Error ? e.message : t('server.invalidBackup'));
     }
     const err = invalidIn(b.subscriptions);
     if (err) return bad(err);
@@ -191,7 +192,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     try {
       return json(await refreshFx(env));
     } catch (e) {
-      return bad(e instanceof Error ? e.message : '刷新失败', 502);
+      return bad(e instanceof Error ? e.message : t('server.refreshFailed'), 502);
     }
   }
   if (path === '/api/appstore/search' && method === 'GET') {
@@ -236,8 +237,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       d = buildDaily(state, addDays(today, i));
     }
     const digest: Digest = d
-      ? { ...d, key: `test:${today}`, kind: 'test', subject: `【测试】${d.subject}` }
-      : { key: `test:${today}`, kind: 'test', subject: '【测试】订阅提醒已就绪', intro: '通知渠道工作正常。', sections: [] };
+      ? { ...d, key: `test:${today}`, kind: 'test', subject: t('notify.test.subject', { subject: d.subject }), title: undefined }
+      : { key: `test:${today}`, kind: 'test', subject: t('notify.test.sampleSubject'), intro: t('notify.test.sampleIntro'), sections: [] };
     // 可以只测某一个渠道；传入 channel 对象时测试还没保存的配置
     const body = (await req.json().catch(() => ({}))) as { channel?: Channel | string };
     if (body.channel && typeof body.channel === 'object') {

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { addMonths, chargesBetween, diffDays, effectiveStatus, phaseSubs, priceAt } from '../../shared/billing.ts';
-import { cnDate, flag, money } from '../../shared/format.ts';
+import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Seg, SubIcon } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
@@ -24,7 +25,7 @@ interface Row {
   last: string;
 }
 
-const span = (d: number) => (d >= 60 ? `${Math.round(d / 30.4)} 个月` : `${d} 天`);
+const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.round(d / 30.4) }) : t('list.gantt.days', { count: d }));
 
 /**
  * 时间轴（甘特图）：一行一个订阅，一段一根条。
@@ -88,21 +89,21 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   const keyOf = (v: Subscription) => (colorBy === 'method' ? (v.methodId ?? 'none') : (v.region ?? '—'));
   const keys = useMemo(() => [...new Set(rows.flatMap((r) => r.segs.map((g) => keyOf(g.v))))], [rows, colorBy]);
   const color = (v: Subscription) => PALETTE[keys.indexOf(keyOf(v)) % PALETTE.length];
-  const labelOf = (key: string) => (colorBy === 'method' ? (state.methods.find((m) => m.id === key)?.name ?? '未指定') : key === '—' ? '未标地区' : `${flag(key)} ${key}`);
+  const labelOf = (key: string) => (colorBy === 'method' ? (state.methods.find((m) => m.id === key)?.name ?? t('list.unassigned')) : key === '—' ? t('list.gantt.noRegion') : `${flag(key)} ${key}`);
 
   // 刻度：年份始终标；1 年视图再标每个月
   const ticks: Array<{ d: string; label: string; major: boolean }> = [];
   for (let d = `${start.slice(0, 7)}-01`; d <= end; d = addMonths(d, 1)) {
     if (d < start) continue;
     const jan = d.slice(5, 7) === '01';
-    if (zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7)))) ticks.push({ d, label: jan ? d.slice(0, 4) : `${Number(d.slice(5, 7))}月`, major: jan });
+    if (zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7)))) ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
   }
 
   return (
     <div class="gantt">
       <div class="gt-bar">
-        <Seg small value={zoom} onChange={setZoom} options={[['1y', '1 年'], ['3y', '3 年'], ['all', '全部']]} />
-        <Seg small value={colorBy} onChange={setColorBy} options={[['method', '按支付'], ['region', '按地区']]} />
+        <Seg small value={zoom} onChange={setZoom} options={[['1y', t('list.gantt.zoom1y')], ['3y', t('list.gantt.zoom3y')], ['all', t('list.all')]]} />
+        <Seg small value={colorBy} onChange={setColorBy} options={[['method', t('list.gantt.byMethod')], ['region', t('list.gantt.byRegion')]]} />
       </div>
       <div class="gt">
         <div class="gt-head">
@@ -135,8 +136,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                 </div>
                 <div class="gt-track">
                   {r.gaps.map((g) => (
-                    <span key={g.from} class="gt-gap" style={{ left: x(g.from), width: Math.max(0, x(g.to) - x(g.from)) }} title={`断订 ${span(diffDays(g.from, g.to))}：${cnDate(g.from)} – ${cnDate(g.to)}`}>
-                      {x(g.to) - x(g.from) > 56 && <em>断 {span(diffDays(g.from, g.to))}</em>}
+                    <span key={g.from} class="gt-gap" style={{ left: x(g.from), width: Math.max(0, x(g.to) - x(g.from)) }} title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}>
+                      {x(g.to) - x(g.from) > 56 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
                     </span>
                   ))}
                   {r.segs.map((g) => {
@@ -144,7 +145,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
 
                     if (g.to < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
-                    const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? ' 买断' : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? '至今' : cnDate(g.to)}${g.v.planned ? ' · 计划中' : ''}`;
+                    const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                     if (lifetime) return <span key={g.from} class="gt-lifetime" style={{ left, background: color(g.v) }} title={tip} />;
                     // 段内按调价、首期优惠切成几截，每截标自己的价格
                     const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])]
@@ -158,7 +159,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       const price = priceAt(g.v, a);
                       const last = n === cuts.length - 2;
                       const pnow = Math.min(pw, Math.max(0, x(today) - pl));
-                      const ptip = `${intro ? '首期优惠 · ' : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? '至今' : cnDate(b)}${g.v.region ? ` · ${flag(g.v.region)} ${g.v.region}` : ''}${g.v.planned ? ' · 计划中' : ''}`;
+                      const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${flag(g.v.region)} ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                       return (
                         <span
                           key={a}
@@ -170,7 +171,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           {pw > 70 && (
                             <em>
                               {n === 0 && g.v.region ? `${flag(g.v.region)} ` : ''}
-                              {intro ? '首期 ' : ''}
+                              {intro ? t('list.gantt.introShort') : ''}
                               {money(price, g.v.currency, { compact: true })}/{perLabel(g.v)}
                             </em>
                           )}
@@ -196,11 +197,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         ))}
         <span>
           <i class="lg-planned" />
-          计划中
+          {t('list.gantt.planned')}
         </span>
         <span>
           <i class="lg-gap" />
-          断订
+          {t('list.gantt.gap')}
         </span>
       </div>
     </div>
@@ -248,9 +249,9 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
           </i>
         ))}
         <b class="mg-today" style={{ left: x(today) }} />
-        {segs.slice(1).map((g, i) => (segs[i].to < g.from && lanes[i] === lanes[i + 1] ? <span key={`gap-${g.from}`} class="mg-gap" style={{ left: x(segs[i].to), width: w(segs[i].to, g.from), top: `${lanes[i] * 22 + 9}px` }} title={`断订 ${diffDays(segs[i].to, g.from)} 天`} /> : null))}
+        {segs.slice(1).map((g, i) => (segs[i].to < g.from && lanes[i] === lanes[i + 1] ? <span key={`gap-${g.from}`} class="mg-gap" style={{ left: x(segs[i].to), width: w(segs[i].to, g.from), top: `${lanes[i] * 22 + 9}px` }} title={t('list.gantt.gapDays', { count: diffDays(segs[i].to, g.from) })} /> : null))}
         {segs.map((g, k) => {
-            if (g.v.cycle.unit === 'lifetime') return <span key={g.from} class="mg-dot" style={{ left: x(g.from), top: `${lanes[k] * 22 + 3}px`, background: color(g.v) }} title={`买断 ${money(g.v.price, g.v.currency)}`} />;
+            if (g.v.cycle.unit === 'lifetime') return <span key={g.from} class="mg-dot" style={{ left: x(g.from), top: `${lanes[k] * 22 + 3}px`, background: color(g.v) }} title={t('list.gantt.lifetime', { amount: money(g.v.price, g.v.currency) })} />;
             const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])].filter((d) => d >= g.from && d <= g.to).sort();
             return cuts.slice(0, -1).map((a, n) => {
               const b = cuts[n + 1];
@@ -261,7 +262,7 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
                   key={`${g.from}-${a}`}
                   class={`mg-seg ${n > 0 ? 'cont' : ''} ${!lastCut ? 'cut' : ''} ${lastCut && g.open ? 'open' : ''} ${g.v.planned ? 'planned' : ''} ${a > today ? 'future' : ''}`}
                   style={{ left: x(a), width: w(a, b), top: `${lanes[k] * 22}px`, '--c': color(g.v) } as Record<string, string>}
-                  title={`${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${lastCut && g.open ? '至今' : cnDate(b)}`}
+                  title={`${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${lastCut && g.open ? t('list.gantt.present') : cnDate(b)}`}
                 />
               );
             });
@@ -274,11 +275,11 @@ export function MiniGantt({ sub, state, today }: { sub: Subscription; state: App
         {methodIds.map((id) => (
           <span key={id}>
             <i style={{ background: PALETTE[methodIds.indexOf(id) % PALETTE.length] }} />
-            {state.methods.find((m) => m.id === id)?.name ?? '未指定'}
+            {state.methods.find((m) => m.id === id)?.name ?? t('list.unassigned')}
           </span>
         ))}
         <span class="mg-range">
-          {cnDate(start)} 起 · {segs.length} 段
+          {t('list.gantt.range', { date: cnDate(start), count: segs.length })}
         </span>
       </div>
     </div>

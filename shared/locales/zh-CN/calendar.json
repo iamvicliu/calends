@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}年",
+  "summary": "{count} 笔 · {amount}",
+  "mode": { "month": "月", "year": "年" },
+  "prev": "上一页",
+  "next": "下一页",
+  "today": "今天",
+  "ics": "订阅到系统日历",
+  "noneDay": "这一天没有扣款",
+  "projected": "预计",
+  "charged": "已扣",
+  "monthAll": "{month}全部扣款",
+  "noneMonth": "本月没有扣款",
+  "day": "{day}日",
+  "heatCount": "{count} 笔 · "
+}

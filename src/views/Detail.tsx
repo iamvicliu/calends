@@ -13,15 +13,17 @@ import { ChangeNote } from './List.tsx';
 import { MiniGantt } from './Gantt.tsx';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan } from '../../shared/phases.ts';
+import { t } from '../../shared/i18n.ts';
 
-const STATUS: Record<string, [string, string]> = {
-  upcoming: ['未开始', 'blue'],
-  active: ['计费中', 'green'],
-  trial: ['试用中', 'green'],
-  paused: ['已暂停', ''],
-  ending: ['到期不续', 'orange'],
-  ended: ['已退订', ''],
-  lifetime: ['买断', 'blue'],
+/** 状态角标的色调；文案见 list.status.* */
+const TONE: Record<string, string> = {
+  upcoming: 'blue',
+  active: 'green',
+  trial: 'green',
+  paused: '',
+  ending: 'orange',
+  ended: '',
+  lifetime: 'blue',
 };
 
 export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state: AppState; today: string; onEdit: () => void }) {
@@ -40,7 +42,8 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
   const monthly = monthlyGross(sub, today);
   const remind = sub.remindDays ?? state.settings.remindDays;
   const icon = subImage(sub);
-  const [label, tone] = STATUS[st];
+  const label = t(`list.status.${st}`);
+  const tone = TONE[st];
   const ro = !!state.readonly;
   const dues = memberDues(sub, today);
   const [allCharges, setAllCharges] = useState(false);
@@ -51,7 +54,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
     <>
           {!ro && (
             <button class="btn" onClick={onEdit}>
-              <Icon name="edit" /> 编辑
+              <Icon name="edit" /> {t('detail.action.edit')}
             </button>
           )}
           {!ro && sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
@@ -60,25 +63,25 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
               onClick={() =>
                 run(
                   () => saveSub(sub.status === 'paused' ? { ...sub, status: 'active', pausedAt: undefined } : { ...sub, status: 'paused', pausedAt: today }),
-                  sub.status === 'paused' ? '已恢复计费' : '已暂停，不再推算后续扣款',
+                  sub.status === 'paused' ? t('detail.toast.resumed') : t('detail.toast.paused'),
                 )
               }
             >
-              <Icon name={sub.status === 'paused' ? 'play' : 'pause'} /> {sub.status === 'paused' ? '恢复' : '暂停'}
+              <Icon name={sub.status === 'paused' ? 'play' : 'pause'} /> {sub.status === 'paused' ? t('detail.action.resume') : t('detail.action.pause')}
             </button>
           )}
           {sub.manageUrl && (
             <a class="btn" href={sub.manageUrl} target="_blank" rel="noreferrer">
-              <Icon name="gear" /> 管理
+              <Icon name="gear" /> {t('detail.action.manage')}
             </a>
           )}
           {sub.url && (
             <a class="btn" href={sub.url} target="_blank" rel="noreferrer">
-              <Icon name="link" /> 官网
+              <Icon name="link" /> {t('detail.action.website')}
             </a>
           )}
       <button class="btn" onClick={() => setShare(true)}>
-        <Icon name="share" /> 分享
+        <Icon name="share" /> {t('detail.action.share')}
       </button>
     </>
   );
@@ -107,61 +110,61 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
       <Stats sub={sub} state={state} today={today} total={total} count={history.length} alt={base === 'CNY' ? money(totalUsd, 'USD', { compact: true }) : base === 'USD' ? money(totalCny, 'CNY', { compact: true }) : undefined} />
       {story && (
         <div class="d-mini">
-          <div class="d-mini-h">历程</div>
+          <div class="d-mini-h">{t('detail.history')}</div>
           <MiniGantt sub={sub} state={state} today={today} />
         </div>
       )}
       </div>
       <div class="d-body">
-        <Group title="摘要">
-          <Cell label="金额">{money(cur.price, cur.currency)}</Cell>
-          <Cell label="计费周期">{cycleLabel(cur.cycle)}</Cell>
-          {cur.cycle.unit !== 'lifetime' && <Cell label="月均 / 年均">{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>}
-          <Cell label="分类">
+        <Group title={t('detail.summary')}>
+          <Cell label={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Cell>
+          <Cell label={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Cell>
+          {cur.cycle.unit !== 'lifetime' && <Cell label={t('detail.field.monthlyYearly')}>{`${money(monthly, cur.currency)} / ${money(monthly * 12, cur.currency, { compact: true })}`}</Cell>}
+          <Cell label={t('detail.field.category')}>
             <CatChip cat={sub.category} />
           </Cell>
-          <Cell label="支付方式">
+          <Cell label={t('detail.field.method')}>
             <PayBadge m={method} />
           </Cell>
-          <Cell label="开始日期">{cnDateFull(sub.start)}</Cell>
+          <Cell label={t('detail.field.start')}>{cnDateFull(sub.start)}</Cell>
           {next && (
-            <Cell label="下次到期">
+            <Cell label={t('detail.field.next')}>
               {cnDateFull(next)} · {relDays(diffDays(today, next))}
             </Cell>
           )}
           {sub.expires && !sub.end && (
-            <Cell label="服务到期" sub={next && next < sub.expires ? '自动续费会在到期前扣款' : undefined}>
+            <Cell label={t('detail.field.expires')} sub={next && next < sub.expires ? t('detail.field.expiresHint') : undefined}>
               {cnDateFull(sub.expires)} · {relDays(diffDays(today, sub.expires))}
             </Cell>
           )}
-          {sub.end && <Cell label={st === 'ended' ? '结束于' : '到期不续'}>{cnDateFull(sub.end)}</Cell>}
-          {sub.trialEnd && <Cell label="试用截止">{cnDateFull(sub.trialEnd)}</Cell>}
-          {cur.region && <Cell label="地区">{`${flag(cur.region)} ${cur.region}`.trim()}</Cell>}
+          {sub.end && <Cell label={st === 'ended' ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Cell>}
+          {sub.trialEnd && <Cell label={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Cell>}
+          {cur.region && <Cell label={t('detail.field.region')}>{`${flag(cur.region)} ${cur.region}`.trim()}</Cell>}
         </Group>
 
 
         {up && (
           <Group
-            title={up.planned ? '计划变更 · 还没确定' : st === 'upcoming' ? '即将开始' : '即将变更'}
+            title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}
           >
-            <Cell label="生效日期">
+            <Cell label={t('detail.up.effective')}>
               {cnDateFull(up.start)} · {relDays(diffDays(today, up.start))}
             </Cell>
-            {up.region !== cur.region && up.region && <Cell label="地区">{`${cur.region && st !== 'upcoming' ? `${flag(cur.region)} ${cur.region} → ` : ''}${flag(up.region)} ${up.region}`}</Cell>}
-            <Cell label="金额">
+            {up.region !== cur.region && up.region && <Cell label={t('detail.field.region')}>{`${cur.region && st !== 'upcoming' ? `${flag(cur.region)} ${cur.region} → ` : ''}${flag(up.region)} ${up.region}`}</Cell>}
+            <Cell label={t('detail.field.amount')}>
               {st !== 'upcoming' && (up.price !== cur.price || up.currency !== cur.currency) ? `${money(cur.price, cur.currency)} → ` : ''}
               {money(up.price, up.currency)} · {cycleLabel(up.cycle)}
             </Cell>
-            <Cell label="支付方式">
+            <Cell label={t('detail.field.method')}>
               <PayBadge m={upMethod} />
             </Cell>
             {up.planned && !ro && (
               <div class="cell plan-actions">
-                <button class="btn" onClick={() => run(() => saveSub(dropPlan(sub, up.start)), `不切换了，${cnDateFull(up.start)} 到期后不再续`)}>
-                  不切换了
+                <button class="btn" onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}>
+                  {t('detail.plan.drop')}
                 </button>
-                <button class="btn primary" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), '已确认切换')}>
-                  <Icon name="check" /> 确认切换
+                <button class="btn primary" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
+                  <Icon name="check" /> {t('detail.plan.confirm')}
                 </button>
               </div>
             )}
@@ -169,36 +172,36 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
         )}
 
         {(sub.phases?.length || (sub.priceHistory?.length ?? 0) > 1) && (
-          <Group title="历程">
+          <Group title={t('detail.history')}>
             <History sub={sub} state={state} today={today} />
           </Group>
         )}
 
         {sub.intro && (
-          <Group title="首期优惠">
-            <Cell label={<span class="row" style={{ gap: 6, color: 'var(--green)' }}><Icon name="leaf" /> 优惠价</span>}>{money(sub.intro.price, sub.currency)}</Cell>
-            <Cell label="优惠截止">{cnDateFull(sub.intro.until)}</Cell>
-            <Cell label="之后恢复">{money(sub.price, sub.currency)}</Cell>
+          <Group title={t('detail.intro.title')}>
+            <Cell label={<span class="row" style={{ gap: 6, color: 'var(--green)' }}><Icon name="leaf" /> {t('detail.intro.price')}</span>}>{money(sub.intro.price, sub.currency)}</Cell>
+            <Cell label={t('detail.intro.until')}>{cnDateFull(sub.intro.until)}</Cell>
+            <Cell label={t('detail.intro.then')}>{money(sub.price, sub.currency)}</Cell>
           </Group>
         )}
 
         {sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
-          <Group title="提醒">
-            <Cell label={<span class="row" style={{ gap: 8 }}><Icon name="bell" /> 邮件提醒</span>}>
-              {remind < 0 ? '已关闭' : remind === 0 ? `到期当天 ${String(state.settings.notifyHour).padStart(2, '0')}:05` : `提前 ${remind} 天 ${String(state.settings.notifyHour).padStart(2, '0')}:05`}
+          <Group title={t('detail.remind.title')}>
+            <Cell label={<span class="row" style={{ gap: 8 }}><Icon name="bell" /> {t('detail.remind.email')}</span>}>
+              {remind < 0 ? t('detail.remind.off') : t(remind === 0 ? 'detail.remind.onDay' : 'detail.remind.before', { count: remind, time: `${String(state.settings.notifyHour).padStart(2, '0')}:05` })}
             </Cell>
           </Group>
         )}
 
         {sub.share && (
-          <Group title={sub.share.role === 'owner' ? `合租 · 我发起（${sub.share.members.length + 1}/${sub.share.seats}）` : '合租 · 我加入'}>
-            {sub.share.role === 'member' && <Cell label="付给">{sub.share.ownerName ?? '发起人'}</Cell>}
+          <Group title={sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')}>
+            {sub.share.role === 'member' && <Cell label={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Cell>}
             {sub.share.role === 'owner' && (
               <>
-                <Cell label="我的份额">{money(sub.price - sub.share.members.reduce((a, m) => a + m.share, 0), sub.currency)}</Cell>
+                <Cell label={t('detail.share.myShare')}>{money(sub.price - sub.share.members.reduce((a, m) => a + m.share, 0), sub.currency)}</Cell>
                 {dues.map((d) => (
-                  <Cell key={d.member.id} label={d.member.name || '未命名'} sub={d.member.paidUntil ? `已付至 ${d.member.paidUntil}` : '尚未收款'}>
-                    {d.periodsOwed > 0 ? <span style={{ color: 'var(--orange)', fontWeight: 600 }}>待收 {money(d.owed, sub.currency)}</span> : <span style={{ color: 'var(--green)' }}>已结清</span>}
+                  <Cell key={d.member.id} label={d.member.name || t('detail.share.unnamed')} sub={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}>
+                    {d.periodsOwed > 0 ? <span style={{ color: 'var(--orange)', fontWeight: 600 }}>{t('detail.share.owed', { amount: money(d.owed, sub.currency) })}</span> : <span style={{ color: 'var(--green)' }}>{t('detail.share.settled')}</span>}
                   </Cell>
                 ))}
               </>
@@ -208,7 +211,7 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
 
 
         {history.length > 0 && (
-          <Group title={`扣款记录 · ${history.length} 笔`}>
+          <Group title={t('detail.charges.title', { count: history.length })}>
             {history
               .slice(allCharges ? 0 : -12)
               .reverse()
@@ -225,11 +228,11 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
                   >
                     <span class="cr-date">
                       {c.date}
-                      {c.kind && <em class={`cr-kind ${c.kind}`}>{{ refund: '退款', adjust: '补差', failed: '失败' }[c.kind]}</em>}
+                      {c.kind && <em class={`cr-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
                     </span>
                     <b>{money(c.amount, c.currency)}</b>
                     <span class="cr-conv">
-                      {c.settled && <span class="cr-settled">卡上 {money(c.settled.amount, c.settled.currency)} · </span>}
+                      {c.settled && <span class="cr-settled">{t('detail.charges.onCard', { amount: money(c.settled.amount, c.settled.currency) })}</span>}
                       {c.currency !== 'CNY' && money(chargeValue(state, c, 'CNY'), 'CNY')}
                       {c.currency !== 'CNY' && c.currency !== 'USD' && ' · '}
                       {c.currency !== 'USD' && money(chargeValue(state, c, 'USD'), 'USD')}
@@ -244,19 +247,19 @@ export function Detail({ sub, state, today, onEdit }: { sub: Subscription; state
               })}
             {!ro && (
               <button class="cell more-row" onClick={() => setPay({})}>
-                <Icon name="plus" size={14} /> 记一笔（退款、补差、扣款失败、卡上实扣…）
+                <Icon name="plus" size={14} /> {t('detail.charges.add')}
               </button>
             )}
             {history.length > 12 && (
               <button class="cell more-row" onClick={() => setAllCharges(!allCharges)}>
-                {allCharges ? '只看最近 12 笔' : `显示全部 ${history.length} 笔`}
+                {allCharges ? t('detail.charges.recent') : t('detail.charges.all', { count: history.length })}
               </button>
             )}
           </Group>
         )}
 
         {sub.notes && (
-          <Group title="备注">
+          <Group title={t('detail.notes')}>
             <div class="cell" style={{ whiteSpace: 'pre-wrap', fontSize: 14, lineHeight: 1.6 }}>
               {sub.notes}
             </div>
@@ -298,30 +301,31 @@ function Stats({ sub, state, today, total, count, alt }: { sub: Subscription; st
   return (
     <div class="d-stats">
       <div>
-        <small>累计花了</small>
+        <small>{t('detail.stats.spent')}</small>
         <b>{money(total, base, { compact: true })}</b>
         <span>
-          {count} 笔{alt ? ` · ${alt}` : ''}
+          {t('detail.stats.count', { count })}
+          {alt ? ` · ${alt}` : ''}
         </span>
       </div>
       <div>
-        <small>{lifetime ? '买了' : '订了'}</small>
-        <b>{years ? `${years} 年${months ? ` ${months} 个月` : ''}` : months ? `${months} 个月` : `${active} 天`}</b>
-        <span>{gaps ? `中间断过 ${gaps} 次` : `${cnDate(sub.start)} 起`}</span>
+        <small>{lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}</small>
+        <b>{years ? (months ? t('detail.stats.yearsMonths', { years, months }) : t('detail.stats.years', { count: years })) : months ? t('detail.stats.months', { count: months }) : t('detail.stats.days', { count: active })}</b>
+        <span>{gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.stats.since', { date: cnDate(sub.start) })}</span>
       </div>
       {!lifetime && (
         <div>
-          <small>实际每月</small>
+          <small>{t('detail.stats.perMonth')}</small>
           <b>{money(perMonth, base, { compact: true })}</b>
-          <span>累计 ÷ 在订的月数</span>
+          <span>{t('detail.stats.perMonthHint')}</span>
         </div>
       )}
       <div>
-        <small>{change != null ? '价格变化' : '变过'}</small>
+        <small>{change != null ? t('detail.stats.priceChange') : t('detail.stats.changed')}</small>
         <b class={change != null ? (change > 0.005 ? 'up' : change < -0.005 ? 'down' : '') : ''}>
-          {change != null ? (Math.abs(change) < 0.005 ? '没变' : `${change > 0 ? '+' : '−'}${Math.round(Math.abs(change) * 100)}%`) : `${vs.length - 1} 次`}
+          {change != null ? (Math.abs(change) < 0.005 ? t('detail.stats.unchanged') : `${change > 0 ? '+' : '−'}${Math.round(Math.abs(change) * 100)}%`) : t('detail.stats.times', { count: vs.length - 1 })}
         </b>
-        <span>{change != null ? `${money(p0, first.currency, { compact: true })} → ${money(p1, cur.currency, { compact: true })}` : '换区、换套餐或换支付方式'}</span>
+        <span>{change != null ? `${money(p0, first.currency, { compact: true })} → ${money(p1, cur.currency, { compact: true })}` : t('detail.stats.changeHint')}</span>
       </div>
     </div>
   );

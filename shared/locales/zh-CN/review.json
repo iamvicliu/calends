@@ -1,0 +1,81 @@
+{
+  "title": "分享年度回顾",
+  "fileName": "订阅年度回顾-{year}-{style}.png",
+  "style": {
+    "poster": "海报",
+    "receipt": "小票",
+    "card": "卡片",
+    "stars": "星图"
+  },
+  "unassigned": "未指定",
+  "me": "我",
+  "whose": "{name}",
+  "whoseSelf": "我",
+  "topSpend": "花得最多",
+  "ofYear": "占全年 {pct}",
+  "n": {
+    "subs": "{count} 个订阅",
+    "charges": "{count} 次扣款",
+    "currencies": "{count} 种货币",
+    "currencyKinds": "{count} 种币种"
+  },
+  "tip": {
+    "top": "{name} 一个就占了全年的 {pct}",
+    "longest": "{name} 已经陪了你 {count} 年多",
+    "busiest": "{n} 月是花得最多的一个月",
+    "newEnded": "这一年新开 {added} 个、退订 {ended} 个",
+    "currencies": "这一年用 {count} 种货币付过订阅",
+    "soon": "接下来 30 天还有 {count} 笔扣款，记得看看还要不要",
+    "milkTea": "平均每天 {amount}，差不多 {count} 杯奶茶",
+    "saved": "今年的退订已经帮你省下 {amount}",
+    "fallback": "订阅这件事，记清楚就是省钱"
+  },
+  "receipt": {
+    "shop": "{whose} 订阅商店",
+    "asOf": "年度结算单 · 截至 {date}",
+    "fullYear": "年度结算单 · {year} 全年",
+    "no": "单号 {no}",
+    "register": "机号 01",
+    "cashier": "收银 {name}",
+    "item": "品名",
+    "share": "占比",
+    "amount": "金额",
+    "rest": "其余 {count} 项",
+    "count": "共 {items} 项 / {charges} 笔",
+    "total": "合计"
+  },
+  "poster": {
+    "kicker": "{whose}的订阅年度报告",
+    "ongoing": "今年到目前为止花在 {subs}上 · {charges}",
+    "ongoingHidden": "今年到目前为止一共 {charges} · {currencies}",
+    "year": "这一年花在 {subs}上 · {charges}",
+    "yearHidden": "这一年一共 {charges} · {currencies}",
+    "newEnded": "新开 {added} · 退订 {ended}",
+    "perDay": "日均 {amount}"
+  },
+  "card": {
+    "head": "{whose} 的订阅",
+    "intro": {
+      "ongoing": "今年到目前为止，订阅一共花了",
+      "ongoingHidden": "今年到目前为止，一共订了",
+      "year": "这一年，订阅一共花了",
+      "yearHidden": "这一年，一共订了"
+    },
+    "perDay": "平均每天 {amount}",
+    "longest": "陪伴最久",
+    "duration": "{y} 年 {m} 个月",
+    "busiest": "最贵的月份",
+    "month": "{n} 月",
+    "newEnded": "新开 / 退订",
+    "saved": "退订已省 {amount}",
+    "ended": "退订了 {count} 个",
+    "noneEnded": "没有退订",
+    "currencies": "用到的币种",
+    "currencyCount": "{count} 种",
+    "nowMonthly": "现在每月 {amount}"
+  },
+  "stars": {
+    "head": "{year} · {whose}的订阅星图",
+    "foot": "圆越大，这一年花得越多"
+  }
+}

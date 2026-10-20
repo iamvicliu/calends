@@ -1,9 +1,11 @@
 import { cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
 import { useState } from 'preact/hooks';
-import { billLabel, cnDate, money } from '../../shared/format.ts';
+import { billLabel, cnDate, money, monthLabel } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
+import { tx } from '../i18n.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../shared/types.ts';
-import { carLedger, contactText, MemberSheet, memberFee } from './Members.tsx';
+import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
 import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
@@ -41,45 +43,45 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
       /* ignore */
     }
   };
-  const candidates = state.subscriptions.filter((s) => !s.share && !s.proxy && live(s) && s.tags.some((t) => /合租|拼车|家庭|family/i.test(t)));
+  const candidates = state.subscriptions.filter((s) => !s.share && !s.proxy && live(s) && s.tags.some((tag) => /合租|拼车|家庭|family|shared/i.test(tag)));
 
   return (
     <>
-      <Toolbar title="合租" />
+      <Toolbar title={t('family.pool.title')} />
       <div class="page fade-in stack">
         <div class="grid g-3">
           <div class="card stat">
-            <div class="stat-label">{yearNet < 0 ? '合租每年净赚' : '合租每年净成本'}</div>
+            <div class="stat-label">{yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}</div>
             <div class="stat-value" style={{ color: yearNet < 0 ? 'var(--green)' : undefined }}>
               <Amount value={Math.abs(yearNet)} ccy={base} />
             </div>
-            <div class="stat-sub">成员每年应交 {money(yearIncome, base, { compact: true })}</div>
+            <div class="stat-sub">{t('family.pool.yearIncome', { amount: money(yearIncome, base, { compact: true }) })}</div>
           </div>
           <div class="card stat">
-            <div class="stat-label">待收</div>
+            <div class="stat-label">{t('family.pool.owed')}</div>
             <div class="stat-value" style={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}>
               <Amount value={owedSum} ccy={base} />
             </div>
-            <div class="stat-sub">{owedAll.length} 位成员未结清</div>
+            <div class="stat-sub">{t('family.pool.owedSub', { count: owedAll.length })}</div>
           </div>
           <div class="card stat">
-            <div class="stat-label">合租数</div>
+            <div class="stat-label">{t('family.pool.count')}</div>
             <div class="stat-value">
               <span class="amt">
                 {owned.length}
-                <small> 发起 · </small>
+                <small>{t('family.pool.countStarted')}</small>
                 {joined.length}
-                <small> 加入</small>
+                <small>{t('family.pool.countJoined')}</small>
               </span>
             </div>
-            <div class="stat-sub">我发起的 · 我加入的</div>
+            <div class="stat-sub">{t('family.pool.countSub')}</div>
           </div>
         </div>
 
         {owned.length === 0 && (
           <div class="card empty">
-            <b>还没有发起合租</b>
-            在订阅编辑页把「谁在用」设为「我发起」，添加成员与每期份额。
+            <b>{t('family.pool.emptyTitle')}</b>
+            {t('family.pool.emptyBody')}
           </div>
         )}
         {/* 两列各自独立：展开一张卡只撑高它所在的那一列，不影响同一行的另一张 */}
@@ -101,36 +103,36 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     <div style={{ fontWeight: 700, fontSize: 16 }}>{s.name}</div>
                     <div class="muted" style={{ fontSize: 13 }}>
                       {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                      {next ? ` · 下次 ${cnDate(next)}` : ''}
+                      {next ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
                     </div>
                   </div>
                 </button>
                 <div class="seats-row">
                 <div class="seats">
-                  <span class="seat me" title="我"><img src="/icons/avatar.png" alt="我" /></span>
+                  <span class="seat me" title={t('family.pool.me')}><img src="/icons/avatar.png" alt={t('family.pool.me')} /></span>
                   {onboard.map((m) => {
                     const owe = dues.find((d) => d.member.id === m.id)?.periodsOwed;
                     return (
-                      <button key={m.id} type="button" disabled={ro} onClick={() => setMember({ s, m })} class={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`} title={m.exempt ? `${m.name}（不分摊）` : m.name}>
+                      <button key={m.id} type="button" disabled={ro} onClick={() => setMember({ s, m })} class={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`} title={m.exempt ? t('family.pool.exemptTitle', { name: m.name }) : m.name}>
                         {[...(m.name || '?')][0]}
                       </button>
                     );
                   })}
                   {Array.from({ length: Math.max(0, sh.seats - 1 - onboard.length) }, (_, i) => (
-                    <button key={i} type="button" class="seat add" disabled={ro} onClick={() => setMember({ s })} aria-label="添加成员" title="添加成员">
+                    <button key={i} type="button" class="seat add" disabled={ro} onClick={() => setMember({ s })} aria-label={t('family.pool.addMember')} title={t('family.pool.addMember')}>
                       +
                     </button>
                   ))}
                 </div>
                 {s.manageUrl && (
-                  <a class="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title="打开家庭组管理页">
-                    <Icon name="gear" size={14} /> 管理
+                  <a class="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
+                    <Icon name="gear" size={14} /> {t('family.pool.manage')}
                   </a>
                 )}
                 <button class={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
                   {(() => {
                     const n = dues.filter((d) => d.periodsOwed > 0).length;
-                    return n ? <span class="owe">{n} 人待收</span> : sh.members.length ? '已结清' : '还没有成员';
+                    return n ? <span class="owe">{t('family.pool.owedN', { count: n })}</span> : sh.members.length ? t('family.pool.settled') : t('family.pool.noMembers');
                   })()}
                   <Icon name="down" size={14} />
                 </button>
@@ -140,7 +142,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 <>
                 {!ro && onboard.length < sh.seats - 1 && (
                   <button class="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
-                    <Icon name="plus" /> 添加成员（{sh.seats - 1 - onboard.length} 个空位）
+                    <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: sh.seats - 1 - onboard.length })}
                   </button>
                 )}
                 <div>
@@ -148,27 +150,27 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     <div key={d.member.id} class="member">
                       <button class="member-info" disabled={ro} onClick={() => setMember({ s, m: d.member })}>
                         <div style={{ fontWeight: 600, fontSize: 14 }}>
-                          {d.member.name || '未命名'}
-                          {d.member.left && d.member.left <= today && <span class="badge" style={{ marginLeft: 6 }}>{cnDate(d.member.left)} 已退出</span>}
+                          {d.member.name || t('family.pool.unnamed')}
+                          {d.member.left && d.member.left <= today && <span class="badge" style={{ marginLeft: 6 }}>{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
                           {contactText(d.member) && <span class="muted" style={{ fontWeight: 400 }}> · {contactText(d.member)}</span>}
                         </div>
                         <div class="muted" style={{ fontSize: 12 }}>
-                          {d.member.exempt ? (d.member.note ?? '占位不交钱') : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? `已付至 ${d.member.paidUntil}` : '尚未收款'}`}
-                          {d.member.payments?.length ? ` · ${d.member.payments.length} 笔收款` : ''}
-                          {d.member.source ? ` · 来自 ${d.member.source}` : ''}
+                          {d.member.exempt ? (d.member.note ?? t('family.pool.exemptNote')) : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: d.member.paidUntil }) : t('family.pool.noPay')}`}
+                          {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
+                          {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
                         </div>
                       </button>
                       <div style={{ textAlign: 'right', fontSize: 13.5 }}>
-                        {d.member.exempt ? <span class="muted" style={{ fontWeight: 600 }}>不分摊</span> : d.periodsOwed > 0 ? <b style={{ color: 'var(--orange)' }}>待收 {money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect)}</b> : <span style={{ color: 'var(--green)', fontWeight: 600 }}>已结清</span>}
+                        {d.member.exempt ? <span class="muted" style={{ fontWeight: 600 }}>{t('family.pool.exempt')}</span> : d.periodsOwed > 0 ? <b style={{ color: 'var(--orange)' }}>{t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect) })}</b> : <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>}
                         {!d.member.exempt && (
                           <div class="muted" style={{ fontSize: 12 }}>
-                            每{billLabel(d.member.billEvery).slice(1)}收 {money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency)}
+                            {perBill('family.pool.perFee', d.member.billEvery ?? 1, { fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency) })}
                           </div>
                         )}
                       </div>
                       {!ro && !d.member.exempt && (
                         <button class={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
-                          <Icon name="check" /> 收款
+                          <Icon name="check" /> {t('family.pool.collect')}
                         </button>
                       )}
                     </div>
@@ -184,17 +186,17 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         </div>
 
         {joined.length > 0 && (
-          <Group title="我加入的合租">
+          <Group title={t('family.pool.joinedGroup')}>
             {joined.map((s) => (
               <Cell key={s.id} label={<span class="row"><SubIcon sub={s} size={30} />{s.name}</span>} sub={undefined} onClick={() => onOpen(s)}>
-                付给 {s.share?.ownerName ?? '发起人'} · {money(s.price, s.currency)}
+                {t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: money(s.price, s.currency) })}
               </Cell>
             ))}
           </Group>
         )}
 
         {candidates.length > 0 && !ro && (
-          <Group title="可能在合租">
+          <Group title={t('family.pool.maybeGroup')}>
             {candidates.map((s) => (
               <div key={s.id} class="cell">
                 <span class="cell-l">
@@ -206,7 +208,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 <span class="cell-r">
                   {money(s.price, s.currency)}
                   <button class="btn tinted" onClick={() => setConvert(s)}>
-                    转为合租
+                    {t('family.pool.convert')}
                   </button>
                 </span>
               </div>
@@ -236,13 +238,13 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
   return (
     <Sheet
       narrow
-      title={`「${s.name}」转为合租`}
+      title={t('family.convert.title', { name: s.name })}
       onClose={onClose}
       foot={
         <>
           <span class="grow" />
           <button class="btn" onClick={onClose}>
-            取消
+            {t('family.convert.cancel')}
           </button>
           <button
             class="btn primary"
@@ -250,10 +252,10 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
               run(async () => {
                 await saveSub({ ...s, share: role === 'owner' ? { role, seats, members: [], since: today } : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today } });
                 onClose();
-              }, role === 'owner' ? '已转为合租，接着添加成员吧' : '已记为加入合租')
+              }, role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'))
             }
           >
-            转为合租
+            {t('family.convert.submit')}
           </button>
         </>
       }
@@ -263,17 +265,17 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
           value={role}
           onChange={setRole}
           options={[
-            ['owner', '我发起'],
-            ['member', '我加入'],
+            ['owner', t('family.convert.roleOwner')],
+            ['member', t('family.convert.roleMember')],
           ]}
         />
-        <Group foot={role === 'owner' ? `按 ${seats} 人均摊，每人每期约 ${money(perHead, s.currency)}；加了成员后，我的份额自动扣掉成员那份。` : '加入后，订阅金额记你每期付给发起人的那一份。'}>
-          <Cell label="总席位（含自己）">
+        <Group foot={role === 'owner' ? t('family.convert.footOwner', { count: seats, amount: money(perHead, s.currency) }) : t('family.convert.footMember')}>
+          <Cell label={t('family.convert.seats')}>
             <input class="num" inputMode="numeric" value={seats} onInput={(e) => setSeats(Math.max(1, Number((e.target as HTMLInputElement).value) || 1))} />
           </Cell>
           {role === 'member' && (
-            <Cell label="发起人">
-              <input value={ownerName} placeholder="付给谁" onInput={(e) => setOwnerName((e.target as HTMLInputElement).value)} />
+            <Cell label={t('family.convert.owner')}>
+              <input value={ownerName} placeholder={t('family.convert.ownerPh')} onInput={(e) => setOwnerName((e.target as HTMLInputElement).value)} />
             </Cell>
           )}
         </Group>
@@ -295,15 +297,15 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
     <div class="car-book">
       <div class="proxy-facts">
         <div>
-          <small>成本 / 年</small>
+          <small>{t('family.facts.cost')}</small>
           <b>{fmt(book.yearCost)}</b>
         </div>
         <div>
-          <small>收入 / 年</small>
+          <small>{t('family.facts.income')}</small>
           <b>{fmt(book.yearIncome)}</b>
         </div>
         <div>
-          <small>{profit < 0 ? '没赚钱 / 年' : '利润 / 年'}</small>
+          <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
           <b class={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
         </div>
       </div>
@@ -311,15 +313,15 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
       <div class="car-actual">
         {book.since ? (
           <>
-            <span>{book.since.slice(0, 4)}年{Number(book.since.slice(5, 7))}月发起至今</span>
+            <span>{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
             <span>
-              付出 {fmt(book.paid)} · 收回 {fmt(book.received)} · <b class={actual >= 0 ? 'gain' : 'loss'}>{actual >= 0 ? `赚 ${fmt(actual)}` : `亏 ${fmt(-actual)}`}</b>
+              {tx('family.facts.actual', { paid: fmt(book.paid), received: fmt(book.received), result: <b class={actual >= 0 ? 'gain' : 'loss'}>{actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}</b> })}
             </span>
           </>
         ) : (
           <>
-            <span>发起至今</span>
-            <span>还没有收款记录</span>
+            <span>{t('family.facts.sinceNone')}</span>
+            <span>{t('family.facts.noRecords')}</span>
           </>
         )}
       </div>

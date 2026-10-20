@@ -25,20 +25,21 @@ import { currentRoute, go as navigate, href, initRouter, onRoute, replaceRoute }
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 
+/** label 是 app.nav.* 的键，取用时再翻译 */
 const NAV = [
-  { path: '', label: '概览', icon: 'home' },
-  { path: 'list', label: '订阅', icon: 'list' },
-  { path: 'calendar', label: '日历', icon: 'cal' },
-  { path: 'report', label: '报告', icon: 'chart' },
-  { path: 'wallet', label: '钱包', icon: 'wallet' },
-  { path: 'family', label: '合租', icon: 'users' },
-  { path: 'behalf', label: '代付', icon: 'swap' },
-  { path: 'ai', label: 'AI 接入', icon: 'bot' },
+  { path: '', label: 'overview', icon: 'home' },
+  { path: 'list', label: 'list', icon: 'list' },
+  { path: 'calendar', label: 'calendar', icon: 'cal' },
+  { path: 'report', label: 'report', icon: 'chart' },
+  { path: 'wallet', label: 'wallet', icon: 'wallet' },
+  { path: 'family', label: 'family', icon: 'users' },
+  { path: 'behalf', label: 'behalf', icon: 'swap' },
+  { path: 'ai', label: 'ai', icon: 'bot' },
 ];
 
 /** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
 export function navOf(st: AppState['settings']) {
-  return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false));
+  return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false)).map((n) => ({ ...n, label: t(`app.nav.${n.label}`) }));
 }
 
 function useRoute() {
@@ -87,18 +88,18 @@ function Login({ error }: { error?: string }) {
     <div class="login">
       <form class="login-card fade-in" onSubmit={submit}>
         <img src="/icons/icon-192.png" alt="" />
-        <h1>订阅账本</h1>
-        <p>{setupMode ? '首次使用，请设置登录密码。' : '每一笔订阅、每一张卡、每一辆车。'}</p>
-        {setupMode && <input type="password" autoComplete="off" placeholder="初始化令牌（SETUP_TOKEN）" value={token} onInput={(e) => setToken((e.target as HTMLInputElement).value)} />}
-        <input type="password" autoFocus autoComplete={setupMode ? 'new-password' : 'current-password'} placeholder={setupMode ? '新密码（至少 8 位）' : '密码'} value={pw} onInput={(e) => setPw((e.target as HTMLInputElement).value)} />
-        {setupMode && <input type="password" autoComplete="new-password" placeholder="再输一次" value={pw2} onInput={(e) => setPw2((e.target as HTMLInputElement).value)} />}
-        {(err || mismatch) && <div class="red" style={{ fontSize: 13 }}>{mismatch ? '两次输入不一致' : err}</div>}
+        <h1>{t('app.name')}</h1>
+        <p>{setupMode ? t('app.login.setupHint') : t('app.login.tagline')}</p>
+        {setupMode && <input type="password" autoComplete="off" placeholder={t('app.login.setupToken')} value={token} onInput={(e) => setToken((e.target as HTMLInputElement).value)} />}
+        <input type="password" autoFocus autoComplete={setupMode ? 'new-password' : 'current-password'} placeholder={setupMode ? t('app.login.newPassword') : t('app.login.password')} value={pw} onInput={(e) => setPw((e.target as HTMLInputElement).value)} />
+        {setupMode && <input type="password" autoComplete="new-password" placeholder={t('app.login.again')} value={pw2} onInput={(e) => setPw2((e.target as HTMLInputElement).value)} />}
+        {(err || mismatch) && <div class="red" style={{ fontSize: 13 }}>{mismatch ? t('app.login.mismatch') : err}</div>}
         <button class="btn primary lg" disabled={!status || !pw || busy || (setupMode && (!token || pw.length < 8 || pw !== pw2))}>
-          {busy ? '验证中…' : setupMode ? '设置并进入' : '进入'}
+          {busy ? t('app.login.verifying') : setupMode ? t('app.login.setupEnter') : t('app.login.enter')}
         </button>
         {canPasskey && (
           <button type="button" class="btn lg" disabled={busy} onClick={() => go(loginPasskey)}>
-            <Icon name="key" /> 用 Passkey 登录
+            <Icon name="key" /> {t('app.login.passkey')}
           </button>
         )}
       </form>
@@ -120,22 +121,22 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
       <div class="sb-top">
         <a class="sb-mark" href={href('')}>
           <img src="/icons/icon-192.png" alt="" />
-          订阅账本
+          {t('app.name')}
         </a>
-        <button class="sb-btn" onClick={onCollapse} title="收起侧边栏" aria-label="收起侧边栏">
+        <button class="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
           <Icon name="sidebar" />
         </button>
       </div>
       {!state.readonly && (
         <button class="side-item" onClick={onAdd}>
           <Icon name="compose" />
-          <span>新建</span>
+          <span>{t('app.sidebar.new')}</span>
           <kbd>N</kbd>
         </button>
       )}
       <button class="side-item" onClick={onSearch}>
         <Icon name="search" />
-        <span>搜索</span>
+        <span>{t('app.sidebar.search')}</span>
         <kbd>⌘K</kbd>
       </button>
       <div class="side-gap" />
@@ -146,29 +147,29 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
         </a>
       ))}
       <div class="side-scroll side-recent">
-        {showUpcoming && upcoming.length > 0 && <div class="side-label">即将扣款</div>}
+        {showUpcoming && upcoming.length > 0 && <div class="side-label">{t('app.sidebar.upcoming')}</div>}
         {showUpcoming && upcoming.map(({ s, n }) => {
           const days = diffDays(d, n!);
           return (
             <button key={s.id} class={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
               <SubIcon sub={s} size={18} />
               <span>{s.name}</span>
-              <small>{days === 0 ? '今天' : days === 1 ? '明天' : days < 7 ? `${days} 天后` : cnDate(n!)}</small>
+              <small>{days === 0 ? t('app.sidebar.today') : days === 1 ? t('app.sidebar.tomorrow') : days < 7 ? t('app.sidebar.inDays', { count: days }) : cnDate(n!)}</small>
             </button>
           );
         })}
       </div>
       <div class="side-foot">
         <CurrencyItem state={state} />
-        <button class="side-item theme-item" onClick={toggleTheme} title="点击切换：亮色 → 暗色 → 跟随系统">
+        <button class="side-item theme-item" onClick={toggleTheme} title={t('app.sidebar.themeHint')}>
           <ThemeIcon mode={theme} size={17} />
-          <span>主题</span>
+          <span>{t('app.sidebar.theme')}</span>
           <small>{THEME_LABEL[theme]}</small>
         </button>
         {!state.readonly && (
           <a class={`side-item ${route === 'settings' ? 'active' : ''}`} href={href('settings')}>
             <Icon name="gear" />
-            <span>设置</span>
+            <span>{t('app.nav.settings')}</span>
           </a>
         )}
       </div>
@@ -214,7 +215,7 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
     })
     .sort((a, b) => (effectiveStatus(a, d) === 'ended' ? 1 : 0) - (effectiveStatus(b, d) === 'ended' ? 1 : 0))
     .slice(0, 8);
-  const pages = [...navOf(state.settings), { path: 'settings', label: '设置', icon: 'gear' }].filter((n) => !lower || n.label.includes(lower));
+  const pages = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }].filter((n) => !lower || n.label.toLowerCase().includes(lower));
   const items: Array<{ key: string; run: () => void; el: preact.JSX.Element }> = [
     ...subs.map((s) => ({
       key: s.id,
@@ -234,11 +235,11 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
         <>
           <Icon name={n.icon} />
           {n.label}
-          <small>页面</small>
+          <small>{t('app.palette.page')}</small>
         </>
       ),
     })),
-    ...(!state.readonly && (!lower || '新建添加'.includes(lower))
+    ...(!state.readonly && (!lower || t('app.palette.addKeywords').toLowerCase().includes(lower))
       ? [
           {
             key: 'add',
@@ -246,7 +247,7 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
             el: (
               <>
                 <Icon name="compose" />
-                新建订阅
+                {t('app.palette.add')}
                 <small>N</small>
               </>
             ),
@@ -269,7 +270,7 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
       <div class="palette" role="dialog" aria-modal="true">
         <input
           ref={input}
-          placeholder="搜索订阅或页面…"
+          placeholder={t('app.palette.placeholder')}
           value={q}
           onInput={(e) => {
             setQ((e.target as HTMLInputElement).value);
@@ -283,7 +284,7 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
           }}
         />
         <div class="palette-list">
-          {items.length === 0 && <div class="pal-group">没有结果</div>}
+          {items.length === 0 && <div class="pal-group">{t('app.palette.empty')}</div>}
           {items.map((it, k) => (
             <button key={it.key} class={`pal-item ${k === i ? 'on' : ''}`} onMouseEnter={() => setI(k)} onClick={() => go(k)}>
               {it.el}
@@ -370,7 +371,7 @@ function App() {
   }, [state, collapsed, editing, viewId, review, ics, palette]);
 
   if (phase === 'loading') return <div class="login" />;
-  if (phase === 'login' || !state) return <Login error={phase === 'offline' ? `无法连接：${error ?? ''}` : undefined} />;
+  if (phase === 'login' || !state) return <Login error={phase === 'offline' ? t('app.offlineError', { error: error ?? '' }) : undefined} />;
 
   const d = today();
   const ro = !!state.readonly;
@@ -440,11 +441,11 @@ function App() {
       <div class="main">
         {phase === 'offline' && (
           <div class="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
-            离线
+            {t('app.offline')}
           </div>
         )}
         {collapsed && (
-          <button class="sb-btn reopen" onClick={() => setCollapsed(false)} title="展开侧边栏" aria-label="展开侧边栏">
+          <button class="sb-btn reopen" onClick={() => setCollapsed(false)} title={t('app.sidebar.expand')} aria-label={t('app.sidebar.expand')}>
             <Icon name="sidebar" />
           </button>
         )}

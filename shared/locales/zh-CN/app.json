@@ -1,3 +1,60 @@
 {
-  "name": "订阅账本"
+  "name": "订阅账本",
+  "offline": "离线",
+  "offlineError": "无法连接：{error}",
+  "nav": {
+    "overview": "概览",
+    "list": "订阅",
+    "calendar": "日历",
+    "report": "报告",
+    "wallet": "钱包",
+    "family": "合租",
+    "behalf": "代付",
+    "ai": "AI 接入",
+    "settings": "设置"
+  },
+  "login": {
+    "setupHint": "首次使用，请设置登录密码。",
+    "tagline": "每一笔订阅、每一张卡、每一辆车。",
+    "setupToken": "初始化令牌（SETUP_TOKEN）",
+    "newPassword": "新密码（至少 8 位）",
+    "password": "密码",
+    "again": "再输一次",
+    "mismatch": "两次输入不一致",
+    "verifying": "验证中…",
+    "setupEnter": "设置并进入",
+    "enter": "进入",
+    "passkey": "用 Passkey 登录"
+  },
+  "sidebar": {
+    "collapse": "收起侧边栏",
+    "expand": "展开侧边栏",
+    "new": "新建",
+    "search": "搜索",
+    "upcoming": "即将扣款",
+    "today": "今天",
+    "tomorrow": "明天",
+    "inDays": { "other": "{count} 天后" },
+    "theme": "主题",
+    "themeHint": "点击切换：亮色 → 暗色 → 跟随系统"
+  },
+  "palette": {
+    "placeholder": "搜索订阅或页面…",
+    "empty": "没有结果",
+    "page": "页面",
+    "add": "新建订阅",
+    "addKeywords": "新建添加"
+  },
+  "ics": {
+    "title": "订阅到日历",
+    "intro": "把扣款日同步到 Apple 日历 / Google 日历 / Outlook，每 6 小时自动刷新，并按提醒设置在扣款前弹出通知。",
+    "subscribe": "一键订阅",
+    "copy": "复制链接",
+    "copied": "已复制",
+    "reset": "重置链接",
+    "resetDone": "已重置，旧链接失效",
+    "generate": "生成私密日历链接",
+    "generated": "已生成日历链接",
+    "note": "链接含私密令牌，持有者可看到扣款日程；泄露后点「重置链接」即可作废。"
+  }
 }

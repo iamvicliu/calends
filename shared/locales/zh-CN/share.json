@@ -1,0 +1,72 @@
+{
+  "title": "分享「{name}」",
+  "style": {
+    "card": "卡片",
+    "receipt": "小票",
+    "timeline": "历程",
+    "poster": "海报",
+    "years": "逐年"
+  },
+  "dur": {
+    "ym": "{y} 年 {m} 个月",
+    "y": "{count} 年",
+    "m": "{count} 个月",
+    "d": "{count} 天"
+  },
+  "status": {
+    "active": "订阅中",
+    "ending": "到期不续",
+    "trial": "试用中",
+    "paused": "已暂停",
+    "ended": "已退订",
+    "lifetime": "已买断",
+    "upcoming": "即将开始"
+  },
+  "switched": "换过 {count} 次",
+  "priceSame": "价格没变过",
+  "priceUp": "涨了 {pct}%",
+  "priceDown": "降了 {pct}%",
+  "since": "{date} 起",
+  "together": "一起走过",
+  "totalSpent": "一共花了",
+  "charges": "扣款",
+  "subscribed": "订了",
+  "times": "{count} 次",
+  "gaps": "断过",
+  "realMonthly": "实际每月",
+  "price": "价格",
+  "phases": "阶段",
+  "phaseCount": "{count} 段",
+  "untilToday": "{date} — 今天",
+  "refund": "退款",
+  "refundShort": "退",
+  "nth": "第 {n} 期",
+  "earlier": "更早 {count} 笔",
+  "time": "时长 TIME",
+  "total": "合计 TOTAL",
+  "chargeCount": "扣款笔数",
+  "count": "{count} 笔",
+  "switches": "换区 / 换套餐",
+  "thanks": "谢谢惠顾 · 下期见",
+  "n": {
+    "charges": "{count} 次扣款"
+  },
+  "sum": "共 {amount}",
+  "gap": "断了 {dur}",
+  "planned": "{date}（计划）",
+  "present": "至今",
+  "priceChanges": "期间调价 {list}",
+  "withYou": "陪伴了",
+  "totalPerDay": "一共 {total} · 平均每天 {perDay}",
+  "lapsed": "断过 {count} 次",
+  "byYear": "每年花了多少",
+  "sheet": {
+    "copied": "图片已复制，可以直接粘贴",
+    "copyFailed": "复制失败，试试下载图片",
+    "renderFailed": "生成图片失败",
+    "download": "下载图片",
+    "generating": "生成中…",
+    "copy": "复制图片",
+    "showAmounts": "显示金额"
+  }
+}

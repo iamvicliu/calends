@@ -4,7 +4,8 @@
 import { randomToken, sha256 } from './auth.ts';
 import type { Env } from './env.ts';
 import { getKv, getSettings, putKv } from './store.ts';
-import { TOOLS, type ToolCtx } from './mcp-tools.ts';
+import { TOOLS, toolTitle, type ToolCtx } from './mcp-tools.ts';
+import { t } from '../shared/i18n.ts';
 
 export interface McpToken {
   id: string;
@@ -28,13 +29,13 @@ export async function listTokens(env: Env): Promise<McpToken[]> {
 /** 新建令牌：明文只在这一次返回 */
 export async function createToken(env: Env, name: string, scope: 'read' | 'write'): Promise<{ token: string; item: McpToken }> {
   const token = `sub_${randomToken(24)}`;
-  const item: McpToken = { id: randomToken(6), name: name.trim().slice(0, 40) || 'AI 助手', hash: await sha256(token), prefix: token.slice(0, 12), scope, createdAt: new Date().toISOString() };
+  const item: McpToken = { id: randomToken(6), name: name.trim().slice(0, 40) || t('mcp.defaultTokenName'), hash: await sha256(token), prefix: token.slice(0, 12), scope, createdAt: new Date().toISOString() };
   await putKv(env, KEY, [...(await listTokens(env)), item]);
   return { token, item };
 }
 
 export async function revokeToken(env: Env, id: string): Promise<void> {
-  await putKv(env, KEY, (await listTokens(env)).filter((t) => t.id !== id));
+  await putKv(env, KEY, (await listTokens(env)).filter((x) => x.id !== id));
 }
 
 /** 校验请求里的令牌；通过时顺手记下最后使用时间（同一小时内不重复写） */
@@ -43,14 +44,14 @@ async function authenticate(req: Request, env: Env): Promise<McpToken | undefine
   if (!raw) return undefined;
   const hash = await sha256(raw);
   const tokens = await listTokens(env);
-  const t = tokens.find((x) => x.hash === hash);
-  if (!t) return undefined;
+  const tk = tokens.find((x) => x.hash === hash);
+  if (!tk) return undefined;
   const now = new Date().toISOString();
-  if (!t.lastUsedAt || now.slice(0, 13) !== t.lastUsedAt.slice(0, 13)) {
-    t.lastUsedAt = now;
+  if (!tk.lastUsedAt || now.slice(0, 13) !== tk.lastUsedAt.slice(0, 13)) {
+    tk.lastUsedAt = now;
     await putKv(env, KEY, tokens);
   }
-  return t;
+  return tk;
 }
 
 type Rpc = { jsonrpc: '2.0'; id?: string | number | null; method: string; params?: Record<string, unknown> };
@@ -66,28 +67,27 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
       return ok(msg.id, {
         protocolVersion: SUPPORTED.includes(asked) ? asked : PROTOCOL,
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: 'subscription-ledger', title: '订阅账本', version: '1.0.0' },
-        instructions:
-          '这是用户的个人订阅账本。金额同时给出原币和折算后的本位币；「我的支出」不含代付（替别人付的），合租只算我自己承担的部分。查询前不确定订阅叫什么时先用 list_subscriptions 搜索；写操作都支持 dry_run，先预览再执行。',
+        serverInfo: { name: 'subscription-ledger', title: t('mcp.serverTitle'), version: '1.0.0' },
+        instructions: t('mcp.instructions'),
       });
     }
     case 'ping':
       return ok(msg.id, {});
     case 'tools/list':
       return ok(msg.id, {
-        tools: TOOLS.filter((t) => token.scope === 'write' || !t.write).map((t) => ({
-          name: t.name,
-          title: t.title,
-          description: t.description,
-          inputSchema: t.inputSchema,
-          annotations: { readOnlyHint: !t.write, destructiveHint: !!t.destructive, idempotentHint: !t.write || !!t.idempotent, openWorldHint: false },
+        tools: TOOLS.filter((x) => token.scope === 'write' || !x.write).map((x) => ({
+          name: x.name,
+          title: toolTitle(x.name),
+          description: x.description,
+          inputSchema: x.inputSchema,
+          annotations: { readOnlyHint: !x.write, destructiveHint: !!x.destructive, idempotentHint: !x.write || !!x.idempotent, openWorldHint: false },
         })),
       });
     case 'tools/call': {
       const name = String(msg.params?.name ?? '');
-      const tool = TOOLS.find((t) => t.name === name);
-      if (!tool) return fail(msg.id, -32602, `没有这个工具：${name}`);
-      if (tool.write && token.scope !== 'write') return ok(msg.id, { isError: true, content: [{ type: 'text', text: '这个令牌是只读的，不能修改账本。请在后台「AI」页换一个读写令牌。' }] });
+      const tool = TOOLS.find((x) => x.name === name);
+      if (!tool) return fail(msg.id, -32602, t('mcp.error.noTool', { name }));
+      if (tool.write && token.scope !== 'write') return ok(msg.id, { isError: true, content: [{ type: 'text', text: t('mcp.error.readOnly') }] });
       const ctx: ToolCtx = { env };
       try {
         const out = await tool.run((msg.params?.arguments ?? {}) as Record<string, unknown>, ctx);
@@ -98,7 +98,7 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
       }
     }
     default:
-      return fail(msg.id, -32601, `不支持的方法：${msg.method}`);
+      return fail(msg.id, -32601, t('mcp.error.unsupportedMethod', { method: msg.method }));
   }
 }
 
@@ -107,14 +107,14 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   // 无状态服务器不提供服务端推送流
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { ...cors, allow: 'POST' } });
-  if ((await getSettings(env)).aiEnabled === false) return Response.json(fail(null, -32002, 'AI 接入已在订阅账本的设置里关闭'), { status: 403, headers: cors });
+  if ((await getSettings(env)).aiEnabled === false) return Response.json(fail(null, -32002, t('mcp.error.aiDisabled')), { status: 403, headers: cors });
   const token = await authenticate(req, env);
-  if (!token) return Response.json(fail(null, -32001, '缺少或无效的令牌：请在订阅账本后台「AI」页生成，并以 Authorization: Bearer <令牌> 传入'), { status: 401, headers: { ...cors, 'www-authenticate': 'Bearer' } });
+  if (!token) return Response.json(fail(null, -32001, t('mcp.error.badToken')), { status: 401, headers: { ...cors, 'www-authenticate': 'Bearer' } });
   let body: Rpc | Rpc[];
   try {
     body = (await req.json()) as Rpc | Rpc[];
   } catch {
-    return Response.json(fail(null, -32700, 'JSON 解析失败'), { status: 400, headers: cors });
+    return Response.json(fail(null, -32700, t('mcp.error.parse')), { status: 400, headers: cors });
   }
   const list = Array.isArray(body) ? body : [body];
   const out = (await Promise.all(list.map((m) => handle(m, env, token)))).filter((x) => x !== undefined);

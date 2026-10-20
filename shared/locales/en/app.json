@@ -1,3 +1,60 @@
 {
-  "name": "Subscription Ledger"
+  "name": "Subscription Ledger",
+  "offline": "Offline",
+  "offlineError": "Can't connect: {error}",
+  "nav": {
+    "overview": "Overview",
+    "list": "Subscriptions",
+    "calendar": "Calendar",
+    "report": "Reports",
+    "wallet": "Wallet",
+    "family": "Shared plans",
+    "behalf": "Paid for others",
+    "ai": "AI access",
+    "settings": "Settings"
+  },
+  "login": {
+    "setupHint": "First time here? Set a password to sign in.",
+    "tagline": "Every subscription, every card, every shared plan.",
+    "setupToken": "Setup token (SETUP_TOKEN)",
+    "newPassword": "New password (at least 8 characters)",
+    "password": "Password",
+    "again": "Confirm password",
+    "mismatch": "Passwords don't match",
+    "verifying": "Verifying…",
+    "setupEnter": "Set password and continue",
+    "enter": "Sign in",
+    "passkey": "Sign in with passkey"
+  },
+  "sidebar": {
+    "collapse": "Hide sidebar",
+    "expand": "Show sidebar",
+    "new": "New",
+    "search": "Search",
+    "upcoming": "Upcoming",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays": { "one": "In {count} day", "other": "In {count} days" },
+    "theme": "Theme",
+    "themeHint": "Click to switch: Light → Dark → System"
+  },
+  "palette": {
+    "placeholder": "Search subscriptions or pages…",
+    "empty": "No results",
+    "page": "Page",
+    "add": "New subscription",
+    "addKeywords": "new add create"
+  },
+  "ics": {
+    "title": "Subscribe in calendar",
+    "intro": "Sync billing dates to Apple Calendar, Google Calendar or Outlook. Refreshes every 6 hours and alerts you before each charge based on your reminder settings.",
+    "subscribe": "Subscribe",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "reset": "Reset link",
+    "resetDone": "Link reset. The old link no longer works.",
+    "generate": "Create private calendar link",
+    "generated": "Calendar link created",
+    "note": "The link contains a private token — anyone with it can see your billing schedule. If it leaks, tap Reset link to revoke it."
+  }
 }

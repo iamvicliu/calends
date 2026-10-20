@@ -1,0 +1,132 @@
+{
+  "title": "Report",
+  "shareReview": "Share {year} in review",
+  "perMonth": "{amount}/mo",
+  "per": {
+    "day": "day",
+    "week": "wk",
+    "month": "mo",
+    "year": "yr",
+    "lifetime": "one-time",
+    "quarter": "qtr",
+    "halfYear": "6 mo",
+    "twoYears": "2 yr",
+    "n": {
+      "day": "{count} days",
+      "week": "{count} wk",
+      "month": "{count} mo",
+      "year": "{count} yr"
+    }
+  },
+  "axis": {
+    "year": "{year}"
+  },
+  "hero": {
+    "label": "Monthly subscription spend · negative MRR",
+    "vsLastMonth": "vs. end of last month",
+    "yearAgo": "· {amount} a year ago",
+    "annual": "Per year",
+    "perDay": "Per day",
+    "active": "Active",
+    "recover": "Recovered from sharing/mo",
+    "fxHist": "Rates then",
+    "fxNow": "Today's rates",
+    "range1": "1Y",
+    "range3": "3Y",
+    "rangeAll": "All"
+  },
+  "wf": {
+    "title": "Changes in {month}",
+    "prev": "Previous month",
+    "next": "Next month",
+    "from": "Last month",
+    "fx": "FX",
+    "added": "New",
+    "expansion": "Price up",
+    "contraction": "Price down",
+    "churned": "Cancelled",
+    "now": "Now",
+    "monthEnd": "Month end",
+    "empty": "No new, cancelled, or repriced subscriptions this month.",
+    "emptyFx": "No new, cancelled, or repriced subscriptions this month — the whole change came from exchange rates ({amount})."
+  },
+  "checkup": {
+    "title": "Checkup",
+    "warn": {
+      "one": "{count} item needs attention",
+      "other": "{count} items need attention"
+    },
+    "fix": "Fix",
+    "less": "Show less",
+    "more": "Show {count} more"
+  },
+  "cash": {
+    "title": "Cash vs. true cost",
+    "legendCash": "Charged that month",
+    "legendAccrual": "Cost spread per month",
+    "forecast": " · Forecast",
+    "tip": "Charged {cash} · Cost {cost}",
+    "prepaidItem": "{name} · {amount} · until {until}",
+    "prepaid": "Prepaid value",
+    "prepaidSub": "{count} paid, not used up",
+    "savedItem": "{name} · {amount} · since {since}",
+    "saved": "Saved by cancelling",
+    "savedSub": "{count} cancelled",
+    "next90": "Due in the next 90 days",
+    "peak": "Peak in {month} · {amount}"
+  },
+  "comp": {
+    "title": "Where the money goes",
+    "back": "Back",
+    "cat": "Category",
+    "pay": "Payment",
+    "ccy": "Currency",
+    "cycle": "Cycle",
+    "unassigned": "Unassigned",
+    "yearly": "Yearly",
+    "quarterly": "Quarterly / semiannual",
+    "monthly": "Monthly",
+    "groupTip": {
+      "one": "{name} · {count} item · {amount}/mo",
+      "other": "{name} · {count} items · {amount}/mo"
+    }
+  },
+  "topup": {
+    "title": "Top-up plan",
+    "range3": "3 mo",
+    "range6": "6 mo",
+    "range12": "1 yr",
+    "span3": "Next 3 months",
+    "span6": "Next 6 months",
+    "span12": "Next year",
+    "empty": "No accounts with a balance yet.",
+    "emptyCta": "Add App Store or carrier balances in Wallet",
+    "summary": "Balance {balance} · about {monthly}/mo",
+    "why": "{span}: {due} due, {balance} on hand, {need} short",
+    "urgent": "; most urgent: add at least {min} by {date}",
+    "cards": "Suggested gift cards",
+    "anyAmount": "Top up any amount — no need to match card values",
+    "enough3": "Balance covers the next 3 months",
+    "enough6": "Balance covers the next 6 months",
+    "enough12": "Balance covers the next year",
+    "by": "By {date}"
+  },
+  "ev": {
+    "start": "Started",
+    "end": "Cancelled",
+    "price": "Price change",
+    "introEnd": "Intro offer ended",
+    "buy": "Bought outright",
+    "pause": "Paused",
+    "switch": "Switched region / plan",
+    "resume": "Resumed"
+  },
+  "log": {
+    "title": "Changelog",
+    "decisions": {
+      "one": "{count} decision",
+      "other": "{count} decisions"
+    },
+    "more": "Earlier entries"
+  }
+}

@@ -4,6 +4,7 @@ import { Cell, Group, Icon, Seg, Sheet, Toolbar } from '../components/ui.tsx';
 import { api, run, toast } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
 import { localTime } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 
 interface Token {
   id: string;
@@ -21,26 +22,26 @@ interface ToolMeta {
 }
 
 type Client = 'codex' | 'claude' | 'cursor' | 'http';
-const CLIENTS: Array<[Client, string]> = [
+const CLIENTS = (): Array<[Client, string]> => [
   ['codex', 'Codex'],
   ['claude', 'Claude Code'],
   ['cursor', 'Cursor'],
-  ['http', '其他'],
+  ['http', t('ai.clientOther')],
 ];
 
 /** 各家客户端的接入写法；token 为空时用占位符 */
 function snippet(client: Client, url: string, token?: string): string {
-  const t = token ?? '<你的令牌>';
-  if (client === 'codex') return `export SUBSCRIPTION_MCP_TOKEN=${t}\ncodex mcp add subscription --url ${url} --bearer-token-env-var SUBSCRIPTION_MCP_TOKEN`;
-  if (client === 'claude') return `claude mcp add --transport http subscription ${url} --header "Authorization: Bearer ${t}"`;
-  if (client === 'cursor') return JSON.stringify({ mcpServers: { subscription: { url, headers: { Authorization: `Bearer ${t}` } } } }, null, 2);
-  return `POST ${url}\nAuthorization: Bearer ${t}\nContent-Type: application/json\n\n{"jsonrpc":"2.0","id":1,"method":"tools/list"}`;
+  const tk = token ?? t('ai.tokenPlaceholder');
+  if (client === 'codex') return `export SUBSCRIPTION_MCP_TOKEN=${tk}\ncodex mcp add subscription --url ${url} --bearer-token-env-var SUBSCRIPTION_MCP_TOKEN`;
+  if (client === 'claude') return `claude mcp add --transport http subscription ${url} --header "Authorization: Bearer ${tk}"`;
+  if (client === 'cursor') return JSON.stringify({ mcpServers: { subscription: { url, headers: { Authorization: `Bearer ${tk}` } } } }, null, 2);
+  return `POST ${url}\nAuthorization: Bearer ${tk}\nContent-Type: application/json\n\n{"jsonrpc":"2.0","id":1,"method":"tools/list"}`;
 }
 
-const copy = (text: string, what = '已复制') =>
+const copy = (text: string, what = t('ai.copied')) =>
   navigator.clipboard.writeText(text).then(
     () => toast(what),
-    () => toast('复制失败', true),
+    () => toast(t('ai.copyFailed'), true),
   );
 
 /**
@@ -55,82 +56,83 @@ export function Ai({ state }: { state: AppState }) {
   const [creating, setCreating] = useState(false);
   const [fresh, setFresh] = useState<{ token: string; item: Token } | null>(null);
   const ro = !!state.readonly;
+  const clients = CLIENTS();
   const load = () => api<Token[]>('/api/mcp/tokens').then(setTokens, () => setTokens([]));
   useEffect(() => {
     load();
     api<ToolMeta[]>('/api/mcp/tools').then(setTools, () => setTools([]));
   }, []);
-  const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : '从未使用');
+  const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : t('ai.neverUsed'));
 
   return (
     <>
-      <Toolbar title="AI 接入">
+      <Toolbar title={t('ai.title')}>
         {!ro && (
           <button class="btn primary" onClick={() => setCreating(true)}>
-            <Icon name="plus" /> 新建令牌
+            <Icon name="plus" /> {t('ai.newToken')}
           </button>
         )}
       </Toolbar>
       <div class="page fade-in ai-page">
-        <Group title="MCP 地址">
-          <Cell label={<code class="ai-url">{url}</code>} onClick={() => copy(url, '地址已复制')}>
+        <Group title={t('ai.mcpUrl')}>
+          <Cell label={<code class="ai-url">{url}</code>} onClick={() => copy(url, t('ai.urlCopied'))}>
             <Icon name="copy" />
           </Cell>
         </Group>
 
-        <Group title={`令牌 · ${tokens?.length ?? 0} 个`}>
-          {tokens?.length === 0 && <div class="cell muted">还没有令牌。新建一个，交给要接入的 AI 助手。</div>}
-          {tokens?.map((t) => (
-            <div key={t.id} class="cell ai-token">
+        <Group title={t('ai.tokens', { count: tokens?.length ?? 0 })}>
+          {tokens?.length === 0 && <div class="cell muted">{t('ai.noTokens')}</div>}
+          {tokens?.map((tk) => (
+            <div key={tk.id} class="cell ai-token">
               <span class="cell-l">
                 <span class="row" style={{ gap: 6 }}>
-                  {t.name}
-                  <span class={`badge ${t.scope === 'write' ? 'orange' : ''}`}>{t.scope === 'write' ? '读写' : '只读'}</span>
+                  {tk.name}
+                  <span class={`badge ${tk.scope === 'write' ? 'orange' : ''}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
                 </span>
                 <small>
-                  <code>{t.prefix}…</code> · 最近使用 {when(t.lastUsedAt)}
+                  <code>{tk.prefix}…</code> · {t('ai.lastUsed', { time: when(tk.lastUsedAt) })}
                 </small>
               </span>
               {!ro && (
                 <button
                   class="btn danger"
                   onClick={() =>
-                    confirmDelete(`吊销「${t.name}」？用它接入的 AI 助手会立刻失去访问权限。`) &&
+                    confirmDelete(t('ai.confirmRevoke', { name: tk.name })) &&
                     run(async () => {
-                      await api(`/api/mcp/tokens/${t.id}`, { method: 'DELETE' });
+                      await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
                       await load();
-                    }, '已吊销')
+                    }, t('ai.revoked'))
                   }
                 >
-                  吊销
+                  {t('ai.revoke')}
                 </button>
               )}
             </div>
           ))}
         </Group>
 
-        <Group title="接入方式">
+        <Group title={t('ai.setup')}>
           <div class="cell">
-            <Seg value={client} onChange={setClient} options={CLIENTS} />
+            <Seg value={client} onChange={setClient} options={clients} />
           </div>
           <div class="cell ai-snippet">
             <pre>{snippet(client, url, fresh?.token)}</pre>
-            <button class="icon-btn" aria-label="复制" onClick={() => copy(snippet(client, url, fresh?.token))}>
+            <button class="icon-btn" aria-label={t('ai.copy')} onClick={() => copy(snippet(client, url, fresh?.token))}>
               <Icon name="copy" />
             </button>
           </div>
         </Group>
 
-        <Group title={`可用工具 · ${tools.length} 个`}>
-          {tools.map((t) => (
-            <div key={t.name} class="cell ai-tool">
+        <Group title={t('ai.tools', { count: tools.length })}>
+          {tools.map((tool) => (
+            <div key={tool.name} class="cell ai-tool">
               <span class="cell-l">
                 <span class="row" style={{ gap: 6 }}>
-                  {t.title ?? t.name}
-                  {t.write && <span class="badge orange">写入</span>}
+                  {tool.title ?? tool.name}
+                  {tool.write && <span class="badge orange">{t('ai.writeBadge')}</span>}
                 </span>
                 <small>
-                  <code>{t.name}</code>
+                  <code>{tool.name}</code>
                 </small>
               </span>
             </div>
@@ -149,23 +151,23 @@ export function Ai({ state }: { state: AppState }) {
         />
       )}
       {fresh && (
-        <Sheet narrow title="令牌已生成" onClose={() => setFresh(null)} foot={<button class="btn primary" onClick={() => setFresh(null)}>我已保存</button>}>
+        <Sheet narrow title={t('ai.created.title')} onClose={() => setFresh(null)} foot={<button class="btn primary" onClick={() => setFresh(null)}>{t('ai.created.saved')}</button>}>
           <div class="stack">
-            <Group title={`${fresh.item.name} · ${fresh.item.scope === 'write' ? '读写' : '只读'}`} foot="令牌只显示这一次，关掉后无法再查看；丢了就吊销重建。">
+            <Group title={`${fresh.item.name} · ${fresh.item.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}`} foot={t('ai.created.foot')}>
               <div class="cell ai-snippet">
                 <pre>{fresh.token}</pre>
-                <button class="icon-btn" aria-label="复制令牌" onClick={() => copy(fresh.token, '令牌已复制')}>
+                <button class="icon-btn" aria-label={t('ai.created.copyToken')} onClick={() => copy(fresh.token, t('ai.created.tokenCopied'))}>
                   <Icon name="copy" />
                 </button>
               </div>
             </Group>
-            <Group title="接入命令">
+            <Group title={t('ai.created.command')}>
               <div class="cell">
-                <Seg value={client} onChange={setClient} options={CLIENTS} />
+                <Seg value={client} onChange={setClient} options={clients} />
               </div>
               <div class="cell ai-snippet">
                 <pre>{snippet(client, url, fresh.token)}</pre>
-                <button class="icon-btn" aria-label="复制" onClick={() => copy(snippet(client, url, fresh.token))}>
+                <button class="icon-btn" aria-label={t('ai.copy')} onClick={() => copy(snippet(client, url, fresh.token))}>
                   <Icon name="copy" />
                 </button>
               </div>
@@ -183,13 +185,13 @@ function NewToken({ onClose, onCreated }: { onClose: () => void; onCreated: (r: 
   return (
     <Sheet
       narrow
-      title="新建令牌"
+      title={t('ai.newToken')}
       onClose={onClose}
       foot={
         <>
           <span class="grow" />
           <button class="btn" onClick={onClose}>
-            取消
+            {t('ai.cancel')}
           </button>
           <button
             class="btn primary"
@@ -199,23 +201,23 @@ function NewToken({ onClose, onCreated }: { onClose: () => void; onCreated: (r: 
               })
             }
           >
-            生成
+            {t('ai.generate')}
           </button>
         </>
       }
     >
       <div class="stack">
         <Group>
-          <Cell label="名称">
-            <input value={name} placeholder="给哪个 AI 用" onInput={(e) => setName((e.target as HTMLInputElement).value)} />
+          <Cell label={t('ai.name')}>
+            <input value={name} placeholder={t('ai.namePlaceholder')} onInput={(e) => setName((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
         <Seg
           value={scope}
           onChange={setScope}
           options={[
-            ['write', '读写：可查询、新增、修改'],
-            ['read', '只读：只能查询'],
+            ['write', t('ai.scope.writeLong')],
+            ['read', t('ai.scope.readLong')],
           ]}
         />
       </div>

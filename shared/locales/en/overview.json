@@ -1,0 +1,74 @@
+{
+  "title": "Overview",
+  "add": "New subscription",
+  "footer": {
+    "one": "{count} active subscription · {amount}/mo ·",
+    "other": "{count} active subscriptions · {amount}/mo ·"
+  },
+  "fullReport": "See full report",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "one": "{count} subscription",
+      "other": "{count} subscriptions"
+    },
+    "charges": {
+      "one": "{count} charge",
+      "other": "{count} charges"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} '{yy}"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "sub": "{past} charged in the last 30 days · {next} due in the next 30"
+  },
+  "spending": {
+    "title": "Monthly spending",
+    "sub": "Lighter bars are projected",
+    "month": "Monthly",
+    "yearly": "Yearly",
+    "year": "{year}",
+    "projected": " · Projected",
+    "inProgress": " · In progress",
+    "paid": " · {amount} paid",
+    "empty": "No charges in this period"
+  },
+  "due": {
+    "title": "Next 30 days",
+    "empty": "Nothing due in the next 30 days",
+    "thisWeek": "This week",
+    "later": "Later",
+    "noMethod": "No payment method"
+  },
+  "wallet": {
+    "title": "Wallet",
+    "manage": "Manage",
+    "balance": "Balance {amount} · {status}",
+    "covered": {
+      "one": "covers {count} more charge, top up by {date}",
+      "other": "covers {count} more charges, top up by {date}"
+    },
+    "mustTopUp": "top up by {date}",
+    "enough": "enough for 3+ years",
+    "noBalance": "Add a balance to see how long it will last",
+    "others": "Also: {list}"
+  },
+  "tips": {
+    "warn": "Heads up",
+    "info": "Tip",
+    "good": "Fun fact"
+  },
+  "stmt": {
+    "kicker": "Monthly subscription spend",
+    "vsLastMonth": "vs. end of last month",
+    "annual": "Per year",
+    "ytd": "Paid in {year}",
+    "perDay": "Per day",
+    "active": "Active",
+    "share": "{amount}/mo · {pct}%",
+    "caption": "Subscription stars · bubble size shows monthly cost",
+    "aria": "{name}, {amount} per month"
+  }
+}

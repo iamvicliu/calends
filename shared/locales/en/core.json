@@ -1,3 +1,58 @@
 {
-  "bill": { "m1": "Monthly", "m3": "Quarterly", "m6": "Every 6 months", "m12": "Yearly", "custom": { "one": "Every {count} month", "other": "Every {count} months" } }
+  "bill": { "m1": "Monthly", "m3": "Quarterly", "m6": "Every 6 months", "m12": "Yearly", "custom": { "one": "Every {count} month", "other": "Every {count} months" } },
+  "cycle": {
+    "lifetime": "Lifetime",
+    "once": "once",
+    "every": { "day": "Daily", "week": "Weekly", "month": "Monthly", "year": "Yearly" },
+    "quarterly": "Quarterly",
+    "halfYearly": "Every 6 months",
+    "biennial": "Every 2 years",
+    "everyN": {
+      "day": { "one": "Every {count} day", "other": "Every {count} days" },
+      "week": { "one": "Every {count} week", "other": "Every {count} weeks" },
+      "month": { "one": "Every {count} month", "other": "Every {count} months" },
+      "year": { "one": "Every {count} year", "other": "Every {count} years" }
+    }
+  },
+  "subError": { "name": "Name is required", "price": "Invalid price", "start": "Invalid start date", "cycle": "Invalid billing cycle" },
+  "phase": {
+    "switchTooEarly": "The effective date must be after the current phase starts",
+    "resumeTooEarly": "The resume date can't be earlier than the last end date",
+    "priceOutOfRange": "The price change date isn't within any phase"
+  },
+  "event": {
+    "label": "{region}{price}/{per}",
+    "region": "{region} ",
+    "per": { "year": "yr", "month": "mo", "months": "{count} mo", "week": "wk", "day": "day" }
+  },
+  "listSep": ", ",
+  "insight": {
+    "yearly": {
+      "title": { "one": "{count} long-term subscription renews within 60 days", "other": "{count} long-term subscriptions renew within 60 days" },
+      "body": "About {sum} in total. Annual charges are hard to refund, so now is the time to decide what stays."
+    },
+    "dup": {
+      "title": "{names} may be duplicates",
+      "body": { "one": "This subscription costs about {sum} a month. Check whether you still need it.", "other": "These {count} subscriptions cost about {sum} a month together. Check whether you still need all of them." }
+    },
+    "hikes": { "title": { "one": "{count} subscription raised its price in the past year", "other": "{count} subscriptions raised their prices in the past year" } },
+    "intro": {
+      "title": { "one": "{name}'s promo ends in {count} day", "other": "{name}'s promo ends in {count} days" },
+      "body": "After that, the price goes from {from} back to {to}."
+    },
+    "balance": { "title": "{name} won't last until {date}", "body": "{sub} needs {need}; the balance is about {current}." },
+    "fx": { "title": "{pct}% of spending is in foreign currencies", "body": "The largest is {ccy} ({share}%). This part gets cheaper when {ccy} weakens, and pricier when it strengthens." },
+    "noMethod": {
+      "title": { "one": "{count} subscription has no payment method", "other": "{count} subscriptions have no payment method" },
+      "body": "Add one so balance forecasts and per-method stats are complete."
+    },
+    "top": { "title": "{name} is your most expensive subscription", "body": "About {perDay} a day, {pct}% of monthly spending." }
+  },
+  "methodKind": {
+    "debit": "Bank card", "credit": "Credit card", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
+    "giftcard": "Gift card", "prepaid": "Store balance", "phone": "Mobile credit", "crypto": "Crypto card", "other": "Other"
+  },
+  "publicMethod": "{kind} · {region}",
+  "channel": { "email": "Email" },
+  "csv": { "appStoreBalance": "App Store {region} balance", "otherCategory": "Other" }
 }

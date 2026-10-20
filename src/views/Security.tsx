@@ -5,6 +5,7 @@ import { Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, registerPasskey, run, saveSettings } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
+import { t } from '../../shared/i18n.ts';
 
 interface Device {
   id: string;
@@ -27,7 +28,7 @@ const DEFAULT_MAX = 10;
 /** 从 UA 认出浏览器和系统，例如「Chrome 141 · macOS」 */
 export function describeUA(ua: string): { browser: string; os: string } {
   const v = (re: RegExp) => ua.match(re)?.[1]?.split('.')[0];
-  let browser = '未知浏览器';
+  let browser = t('settings.security.unknownBrowser');
   if (/Edg\//.test(ua)) browser = `Edge ${v(/Edg\/([\d.]+)/) ?? ''}`;
   else if (/OPR\//.test(ua)) browser = `Opera ${v(/OPR\/([\d.]+)/) ?? ''}`;
   else if (/Firefox\//.test(ua)) browser = `Firefox ${v(/Firefox\/([\d.]+)/) ?? ''}`;
@@ -49,10 +50,10 @@ export function describeUA(ua: string): { browser: string; os: string } {
 function ago(iso: string | null): string {
   if (!iso) return '';
   const m = Math.round((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (m < 15) return '刚刚活跃';
-  if (m < 60) return `${m} 分钟前`;
-  if (m < 1440) return `${Math.round(m / 60)} 小时前`;
-  if (m < 43200) return `${Math.round(m / 1440)} 天前`;
+  if (m < 15) return t('settings.security.ago.justNow');
+  if (m < 60) return t('settings.security.ago.minutes', { count: m });
+  if (m < 1440) return t('settings.security.ago.hours', { count: Math.round(m / 60) });
+  if (m < 43200) return t('settings.security.ago.days', { count: Math.round(m / 1440) });
   return iso.slice(0, 10);
 }
 
@@ -64,14 +65,14 @@ function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () =
       label={
         <span>
           {[browser, os].filter(Boolean).join(' · ')}
-          {d.current && <span class="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>本机</span>}
+          {d.current && <span class="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>{t('settings.security.thisDevice')}</span>}
         </span>
       }
-      sub={[where, [`${d.method === 'passkey' ? 'Passkey ' : '密码'}登录于 ${localTime(d.createdAt, tz, true)}`, d.current ? '' : ago(d.lastSeenAt)].filter(Boolean).join(' · ')].filter(Boolean).join('\n')}
+      sub={[where, [t(d.method === 'passkey' ? 'settings.security.signedInPasskey' : 'settings.security.signedInPassword', { time: localTime(d.createdAt, tz, true) }), d.current ? '' : ago(d.lastSeenAt)].filter(Boolean).join(' · ')].filter(Boolean).join('\n')}
     >
       {!d.current && (
         <button type="button" class="chip-btn" onClick={onRevoke}>
-          移出
+          {t('settings.security.revoke')}
         </button>
       )}
     </Cell>
@@ -100,15 +101,15 @@ export function SecurityGroup({ state }: { state: AppState }) {
   const tz = state.settings.timezone;
   return (
     <>
-      <Group title="安全" foot={supported ? '绑定 Passkey 后可以用面容、指纹或设备密码登录，无需输入密码。' : '当前浏览器不支持 Passkey。'}>
+      <Group title={t('settings.security.title')} foot={supported ? t('settings.security.passkeyFoot') : t('settings.security.passkeyUnsupported')}>
         {sec?.passkeys.map((p) => (
-          <Cell key={p.id} label={p.name} sub={p.lastUsedAt ? `上次使用 ${localTime(p.lastUsedAt, tz, true)}` : `添加于 ${localTime(p.createdAt, tz, true)}`}>
+          <Cell key={p.id} label={p.name} sub={p.lastUsedAt ? t('settings.security.lastUsed', { time: localTime(p.lastUsedAt, tz, true) }) : t('settings.security.addedAt', { time: localTime(p.createdAt, tz, true) })}>
             <button
               type="button"
               class="chip-btn"
-              onClick={() => confirmDelete(`移除 Passkey「${p.name}」？`) && run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), '已移除')}
+              onClick={() => confirmDelete(t('settings.security.confirmRemovePasskey', { name: p.name })) && run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))}
             >
-              移除
+              {t('settings.security.remove')}
             </button>
           </Cell>
         ))}
@@ -116,7 +117,7 @@ export function SecurityGroup({ state }: { state: AppState }) {
           <Cell
             label={
               <span style={{ color: 'var(--accent)' }}>
-                <Icon name="key" /> 添加 Passkey
+                <Icon name="key" /> {t('settings.security.addPasskey')}
               </span>
             }
             onClick={() =>
@@ -125,7 +126,7 @@ export function SecurityGroup({ state }: { state: AppState }) {
                   await registerPasskey(deviceName());
                 } catch (e) {
                   if (e instanceof Error && e.name === 'NotAllowedError') return;
-                  if (e instanceof Error && e.name === 'InvalidStateError') throw new Error('这台设备已经绑定过了');
+                  if (e instanceof Error && e.name === 'InvalidStateError') throw new Error(t('settings.security.alreadyBound'));
                   throw e;
                 }
                 await load();
@@ -133,23 +134,23 @@ export function SecurityGroup({ state }: { state: AppState }) {
             }
           />
         )}
-        <Cell label="修改密码" onClick={() => setPwSheet(true)} />
+        <Cell label={t('settings.security.changePassword')} onClick={() => setPwSheet(true)} />
       </Group>
-      <Group title={sec ? `登录设备 · ${sec.sessions.length}` : '登录设备'} foot="超过上限时，最久没有活动的设备会被自动退出。位置按 IP 估算，仅供参考。">
-        <Cell label="最多同时登录">
+      <Group title={sec ? t('settings.security.devicesCount', { count: sec.sessions.length }) : t('settings.security.devices')} foot={t('settings.security.devicesFoot')}>
+        <Cell label={t('settings.security.maxSessions')}>
           <Picker
             value={max}
-            onChange={(n) => run(() => saveSettings({ maxSessions: n }).then(load), `最多 ${n} 台设备`)}
-            options={[1, 2, 3, 5, 10, 20].map((n) => ({ value: n, label: `${n} 台` }))}
-            ariaLabel="最多同时登录"
+            onChange={(n) => run(() => saveSettings({ maxSessions: n }).then(load), t('settings.security.maxSessionsSaved', { count: n }))}
+            options={[1, 2, 3, 5, 10, 20].map((n) => ({ value: n, label: t('settings.security.deviceCount', { count: n }) }))}
+            ariaLabel={t('settings.security.maxSessions')}
           />
         </Cell>
         {sec?.sessions.slice().sort((a, b) => Number(b.current) - Number(a.current)).map((d) => (
-          <DeviceCell key={d.id} d={d} tz={tz} onRevoke={() => run(() => api(`/api/auth/sessions/${d.id}`, { method: 'DELETE' }).then(load), '已移出')} />
+          <DeviceCell key={d.id} d={d} tz={tz} onRevoke={() => run(() => api(`/api/auth/sessions/${d.id}`, { method: 'DELETE' }).then(load), t('settings.security.revoked'))} />
         ))}
         {sec && sec.sessions.length > 1 && (
-          <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => confirmDelete('退出除本机外的所有设备？') && run(() => api('/api/auth/logout-others', { method: 'POST' }).then(load), '其他设备已退出')}>
-            退出其他所有设备
+          <button class="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => confirmDelete(t('settings.security.confirmLogoutOthers')) && run(() => api('/api/auth/logout-others', { method: 'POST' }).then(load), t('settings.security.loggedOutOthers'))}>
+            {t('settings.security.logoutOthers')}
           </button>
         )}
       </Group>
@@ -169,7 +170,7 @@ function PasswordSheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
   return (
     <Sheet
       narrow
-      title="修改密码"
+      title={t('settings.security.changePassword')}
       onClose={onClose}
       foot={
         <>
@@ -182,19 +183,19 @@ function PasswordSheet({ onClose, onDone }: { onClose: () => void; onDone: () =>
                 await api('/api/auth/password', { method: 'POST', body: JSON.stringify({ current: cur, next }) });
                 onDone();
                 onClose();
-              }, '密码已修改，其他设备已退出')
+              }, t('settings.security.passwordChanged'))
             }
           >
-            保存
+            {t('settings.security.save')}
           </button>
         </>
       }
     >
       <div class="stack">
-        <Group foot={next && again && next !== again ? '两次输入不一致' : '至少 8 位。修改后，除当前设备外的登录都会失效。'}>
-          <Cell label="当前密码">{input(cur, setCur, '', 'current-password')}</Cell>
-          <Cell label="新密码">{input(next, setNext, '至少 8 位', 'new-password')}</Cell>
-          <Cell label="确认新密码">{input(again, setAgain, '', 'new-password')}</Cell>
+        <Group foot={next && again && next !== again ? t('settings.security.mismatch') : t('settings.security.passwordFoot')}>
+          <Cell label={t('settings.security.currentPassword')}>{input(cur, setCur, '', 'current-password')}</Cell>
+          <Cell label={t('settings.security.newPassword')}>{input(next, setNext, t('settings.security.minLength'), 'new-password')}</Cell>
+          <Cell label={t('settings.security.confirmPassword')}>{input(again, setAgain, '', 'new-password')}</Cell>
         </Group>
       </div>
     </Sheet>

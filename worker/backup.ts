@@ -3,6 +3,7 @@
 // 不包含：登录会话、AI 接入令牌（属于凭据，新部署应重新生成）、提醒发送记录。
 import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
+import { t } from '../shared/i18n.ts';
 import { putFxDayStmt } from './fx.ts';
 import { getFx, getSettings, putKv, replaceAll } from './store.ts';
 
@@ -41,9 +42,9 @@ export async function exportAll(env: Env): Promise<Backup> {
 /** 读取任意版本的备份：v2 是完整格式；早期导出只有 subscriptions / methods / settings */
 export function parseBackup(raw: unknown): Backup {
   const b = raw as Partial<Backup>;
-  if (!b || !Array.isArray(b.subscriptions)) throw new Error('不是有效的备份文件');
-  if (b.format && b.format !== BACKUP_FORMAT) throw new Error(`不认识的备份格式：${b.format}`);
-  if ((b.version ?? 1) > BACKUP_VERSION) throw new Error(`备份来自更新的版本（v${b.version}），请先升级本站`);
+  if (!b || !Array.isArray(b.subscriptions)) throw new Error(t('server.backup.notBackup'));
+  if (b.format && b.format !== BACKUP_FORMAT) throw new Error(t('server.backup.unknownFormat', { format: String(b.format) }));
+  if ((b.version ?? 1) > BACKUP_VERSION) throw new Error(t('server.backup.newerVersion', { version: b.version }));
   return {
     format: BACKUP_FORMAT,
     version: b.version ?? 1,

@@ -1,6 +1,8 @@
 import type { ComponentChildren } from 'preact';
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { addDays, addMonths, diffDays } from '../../shared/billing.ts';
+import { monthLabel } from '../../shared/format.ts';
+import { intlLocale, t } from '../../shared/i18n.ts';
 import './timeline.css';
 
 export interface TimelineItem {
@@ -27,6 +29,7 @@ const AFTER = 240;
 const STEP = 180;
 const EDGE = 900;
 
+const yearLabel = (d: string) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
 
 /**
@@ -65,7 +68,7 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
     // 日、周刻度用背景画，只有月份刻度是元素
     const months: Array<{ x: number; label: string }> = [];
     for (let d = `${from.slice(0, 8)}01`; d <= to; d = addMonths(d, 1)) {
-      if (d >= from) months.push({ x: xOf(d), label: d.slice(5, 7) === '01' ? `${d.slice(0, 4)} 年` : `${Number(d.slice(5, 7))} 月` });
+      if (d >= from) months.push({ x: xOf(d), label: d.slice(5, 7) === '01' ? yearLabel(d) : monthLabel(d.slice(0, 7), { year: false }) });
     }
     const monday = (8 - new Date(from).getUTCDay()) % 7;
     return { xOf, placed, overflow, months, dots: [...new Set(placed.map((p) => p.date))], width: xOf(to), monday };
@@ -188,7 +191,7 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
             </i>
           ))}
           <div class="tl-today" style={{ left: xOf(today) }}>
-            <span>今天</span>
+            <span>{t('common.today')}</span>
           </div>
           {placed.map(({ it, date, x, level }) => (
             <button
@@ -212,8 +215,8 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
           ))}
         </div>
       </div>
-      <button type="button" class="tl-home" onClick={() => center(true)} title="回到今天（也可以在时间线上双击）">
-        今天
+      <button type="button" class="tl-home" onClick={() => center(true)} title={t('editor.timeline.home')}>
+        {t('common.today')}
       </button>
     </div>
   );

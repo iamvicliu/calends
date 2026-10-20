@@ -1,0 +1,23 @@
+{
+  "close": "关闭",
+  "error": {
+    "loginRequired": "请先登录",
+    "requestFailed": "请求失败 {status}"
+  },
+  "theme": {
+    "light": "亮色",
+    "dark": "暗色",
+    "system": "跟随系统"
+  },
+  "currency": {
+    "XCG": "加勒比盾",
+    "ZWG": "津巴布韦金元"
+  },
+  "method": {
+    "none": "未指定"
+  },
+  "toolbar": {
+    "openSidebar": "打开侧边栏",
+    "add": "添加订阅"
+  }
+}

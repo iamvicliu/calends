@@ -1,0 +1,35 @@
+{
+  "fxApiError": "汇率接口异常",
+  "missingId": "缺少 id",
+  "invalidItem": "{name}：{error}",
+  "notPublic": "这个账本没有公开",
+  "idMismatch": "id 不一致",
+  "invalidMethod": "支付方式无效",
+  "invalidBackup": "备份文件无效",
+  "refreshFailed": "刷新失败",
+  "backup": {
+    "notBackup": "不是有效的备份文件",
+    "unknownFormat": "不认识的备份格式：{format}",
+    "newerVersion": "备份来自更新的版本（v{version}），请先升级本站"
+  },
+  "auth": {
+    "tooMany": "尝试过多，请 15 分钟后再试",
+    "alreadySetup": "已经设置过密码",
+    "noSetupToken": "部署时没有配置 SETUP_TOKEN，无法初始化。请先设置这个密钥（wrangler secret put SETUP_TOKEN）。",
+    "badSetupToken": "初始化令牌不正确",
+    "passwordTooShort": "密码至少 {min} 位",
+    "wrongPassword": "密码不正确",
+    "wrongCurrentPassword": "当前密码不正确",
+    "newPasswordTooShort": "新密码至少 {min} 位",
+    "invalidDevice": "无效的设备",
+    "cannotRemoveCurrent": "不能移出当前设备，请用「退出登录」",
+    "expired": "请求已过期，请重试",
+    "passkeyFailed": "Passkey 校验失败",
+    "passkeyNotBound": "这个 Passkey 没有绑定到本站"
+  },
+  "ics": {
+    "calName": "订阅扣款",
+    "method": "支付：{name}",
+    "alarm": "{name} 即将扣款"
+  }
+}

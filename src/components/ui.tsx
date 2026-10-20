@@ -2,8 +2,9 @@ import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
-import { bankOf, BRANDS, brandOf, catColor, faviconOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
+import { bankOf, BRANDS, brandOf, canonicalCat, catColor, faviconOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { useToasts } from '../store.ts';
+import { t } from '../../shared/i18n.ts';
 
 // ---------- SF Symbols 风格线性图标 ----------
 const P: Record<string, JSX.Element> = {
@@ -184,7 +185,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   const tint = catColor(sub.category);
   const style = { '--s': `${size}px`, '--tint': tint } as Record<string, string>;
   // 域名用注册商的图标，不用各自的站点图标：默认 Cloudflare，其他注册商在 icon 里填它的图标
-  if (sub.category === '域名') {
+  if (canonicalCat(sub.category) === '域名') {
     return (
       <span class="ico domain" style={style}>
         <img src={sub.icon?.startsWith('http') ? (proxied ? `/api/img?u=${encodeURIComponent(sub.icon)}` : sub.icon) : '/brands/cloudflare.svg'} alt="" />
@@ -237,7 +238,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
 
 /** 支付方式胶囊：logo 标记 + 名称；全站凡是显示支付方式的地方都用它 */
 export function PayBadge({ m }: { m?: PaymentMethod }) {
-  if (!m) return <span class="pay none">未指定</span>;
+  if (!m) return <span class="pay none">{t('ui.method.none')}</span>;
   return (
     <span class="pay" title={m.name}>
       <MethodMark m={m} size={16} />
@@ -247,12 +248,13 @@ export function PayBadge({ m }: { m?: PaymentMethod }) {
 }
 
 export const CAT_ICON: Record<string, string> = { AI: 'bot', 工具: 'wrench', 影音: 'film', 音乐: 'music', 日用: 'home', 效率: 'zap', 购物: 'bag', 教育: 'book', 游戏: 'gamepad', 域名: 'globe', 服务器: 'server', 社交: 'users' };
+export const catIcon = (cat: string): string => CAT_ICON[canonicalCat(cat)] ?? 'tag';
 
 /** 分类胶囊：分类色 + 图标 + 名称 */
 export function CatChip({ cat }: { cat: string }) {
   return (
     <span class="cat-chip" style={{ '--tint': catColor(cat) } as Record<string, string>}>
-      <Icon name={CAT_ICON[cat] ?? 'tag'} size={12} />
+      <Icon name={catIcon(cat)} size={12} />
       {cat}
     </span>
   );
@@ -319,14 +321,14 @@ export function Seg<T extends string>({ value, options, onChange, small }: { val
 export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (
     <header class="toolbar">
-      <button class="sb-btn tb-lead" aria-label="打开侧边栏" onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
+      <button class="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
         <Icon name="menu" />
       </button>
       <div class="tb-title">
         <h1>{title}</h1>
         {sub && <div class="tb-sub">{sub}</div>}
       </div>
-      <button class="sb-btn tb-trail" aria-label="添加订阅" onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
+      <button class="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
         <Icon name="compose" />
       </button>
       <div class="tb-actions">{children}</div>
@@ -354,13 +356,13 @@ export function Sheet(props: { title?: ComponentChildren; onClose: () => void; c
       <div class={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`} role="dialog" aria-modal="true">
         <div class="grabber" />
         {props.bare ? (
-          <button class="icon-btn sheet-close" onClick={props.onClose} aria-label="关闭">
+          <button class="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
             <Icon name="x" />
           </button>
         ) : (
           <div class="sheet-head">
             <h3>{props.title}</h3>
-            <button class="icon-btn" onClick={props.onClose} aria-label="关闭">
+            <button class="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
               <Icon name="x" />
             </button>
           </div>

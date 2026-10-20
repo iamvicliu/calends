@@ -1,10 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { addDays, addMonths, parseDay } from '../../shared/billing.ts';
-import { cnDateFull } from '../../shared/format.ts';
+import { cnDateFull, monthLabel, weekdayShort } from '../../shared/format.ts';
+import { intlLocale, t } from '../../shared/i18n.ts';
 import { today as todayOf } from '../store.ts';
 import { Icon } from './ui.tsx';
 
-const DOW = ['一', '二', '三', '四', '五', '六', '日'];
+/** 周一在前；weekdayShort 的 0 是周日 */
+const DOW = [1, 2, 3, 4, 5, 6, 0];
+const yearLabel = (y: number) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, 0, 1)));
 
 function grid(month: string): string[] {
   const first = month + '-01';
@@ -17,7 +20,7 @@ function grid(month: string): string[] {
  * 日期选择器：按钮显示「2026年10月19日」，点开是月历。
  * 弹层用 fixed 定位，避免被弹窗的滚动容器裁掉；窄屏时贴底显示。
  */
-export function DatePicker({ value, onChange, placeholder = '选择日期', clearable, min, max }: { value?: string; onChange: (v: string | undefined) => void; placeholder?: string; clearable?: boolean; min?: string; max?: string }) {
+export function DatePicker({ value, onChange, placeholder = t('picker.date.placeholder'), clearable, min, max }: { value?: string; onChange: (v: string | undefined) => void; placeholder?: string; clearable?: boolean; min?: string; max?: string }) {
   const today = todayOf();
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState((value ?? today).slice(0, 7));
@@ -105,16 +108,16 @@ export function DatePicker({ value, onChange, placeholder = '选择日期', clea
       {open && pos && (
         <>
           {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
-          <div ref={pop} class={`dp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} role="dialog" aria-label="选择日期">
+          <div ref={pop} class={`dp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} role="dialog" aria-label={t('picker.date.placeholder')}>
             <div class="dp-head">
               <button type="button" class="dp-title" onClick={() => setMode(mode === 'day' ? 'month' : 'day')}>
-                {mode === 'day' ? `${y}年${m}月` : `${y}年`}
+                {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
                 <Icon name="down" />
               </button>
-              <button type="button" class="dp-nav" aria-label="上一页" onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}>
+              <button type="button" class="dp-nav" aria-label={t('picker.date.prev')} onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}>
                 <Icon name="left" />
               </button>
-              <button type="button" class="dp-nav" aria-label="下一页" onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}>
+              <button type="button" class="dp-nav" aria-label={t('picker.date.next')} onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}>
                 <Icon name="right" />
               </button>
             </div>
@@ -122,7 +125,7 @@ export function DatePicker({ value, onChange, placeholder = '选择日期', clea
               <div class="dp-grid">
                 {DOW.map((d) => (
                   <span key={d} class="dp-dow">
-                    {d}
+                    {weekdayShort(d, true)}
                   </span>
                 ))}
                 {grid(month).map((d) => (
@@ -149,14 +152,14 @@ export function DatePicker({ value, onChange, placeholder = '选择日期', clea
                       setMode('day');
                     }}
                   >
-                    {i + 1}月
+                    {monthLabel(`${y}-${String(i + 1).padStart(2, '0')}`, { year: false })}
                   </button>
                 ))}
               </div>
             )}
             <div class="dp-foot">
               <button type="button" class="btn plain" onClick={() => pick(today)}>
-                今天
+                {t('common.today')}
               </button>
               {clearable && value && (
                 <button
@@ -167,7 +170,7 @@ export function DatePicker({ value, onChange, placeholder = '选择日期', clea
                     setOpen(false);
                   }}
                 >
-                  清除
+                  {t('common.clear')}
                 </button>
               )}
             </div>

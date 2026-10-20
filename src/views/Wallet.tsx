@@ -13,6 +13,8 @@ import { confirmDelete } from './Editor.tsx';
 import { go } from '../router.ts';
 import { BANKS } from '../banks.ts';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
+import { t } from '../../shared/i18n.ts';
+import { tx } from '../i18n.ts';
 
 export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
   const m = r.method;
@@ -27,7 +29,7 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600 }}>{m.name}</div>
           <div class="muted" style={{ fontSize: 12.5 }}>
-            每月约扣 {money(r.monthlyDrain, m.currency, { compact: true })}
+            {t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) })}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -41,28 +43,26 @@ export function RunwayCard({ r, today, state, flat }: { r: Runway; today: string
         <span style={{ width: `${pct}%` }} />
       </div>
       <div class="rw-scale">
-        <span>今天</span>
-        <span>3 个月</span>
-        <span>半年</span>
-        <span>9 个月</span>
-        <span>1 年</span>
+        <span>{t('wallet.runway.scale.today')}</span>
+        <span>{t('wallet.runway.scale.m3')}</span>
+        <span>{t('wallet.runway.scale.m6')}</span>
+        <span>{t('wallet.runway.scale.m9')}</span>
+        <span>{t('wallet.runway.scale.y1')}</span>
       </div>
       <div class="rw-note">
         {r.monthlyDrain <= 0 ? (
-          '没有关联的计费订阅。'
+          t('wallet.runway.noSubs')
         ) : r.shortfall && r.coveredCharges === 0 ? (
           <>
-            余额不够 <b>{cnDate(r.shortfall.date)}</b>（{relDays(daysLeft)}）{r.shortfall.sub.name} 的 {money(r.shortfall.amount, r.shortfall.currency)}。撑满一年需再充{' '}
-            <b>{money(r.topUp12m, m.currency, { compact: true })}</b>。
+            {tx('wallet.runway.shortNow', { date: <b>{cnDate(r.shortfall.date)}</b>, rel: relDays(daysLeft), name: r.shortfall.sub.name, amount: money(r.shortfall.amount, r.shortfall.currency), topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b> })}
           </>
         ) : r.shortfall ? (
           <>
-            还能扣 <b>{r.coveredCharges} 期</b>，在 <b>{cnDateFull(r.shortfall.date)}</b>（{relDays(daysLeft)}）的 {r.shortfall.sub.name} 前用完。撑满一年需再充{' '}
-            <b>{money(r.topUp12m, m.currency, { compact: true })}</b>。
+            {tx('wallet.runway.shortLater', { periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b>, date: <b>{cnDateFull(r.shortfall.date)}</b>, rel: relDays(daysLeft), name: r.shortfall.sub.name, topup: <b>{money(r.topUp12m, m.currency, { compact: true })}</b> })}
           </>
         ) : (
           <>
-            未来 3 年都够用，覆盖 <b>{r.coveredCharges} 期</b>扣款。
+            {tx('wallet.runway.ok', { periods: <b>{t('wallet.runway.periods', { count: r.coveredCharges })}</b> })}
           </>
         )}
       </div>
@@ -168,7 +168,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
             <div class="pc-kind">
               {KIND_LABEL[m.kind]} · {m.currency}
               {m.region ? ` · ${m.region}` : ''}
-              {m.cashback ? ` · 返 ${m.cashback}%` : ''}
+              {m.cashback ? ` · ${t('wallet.card.cashback', { pct: m.cashback })}` : ''}
             </div>
           </div>
         </div>
@@ -196,7 +196,7 @@ function projRows(r: Runway) {
 }
 function projFoot(r: Runway, m: PaymentMethod): string | undefined {
   if (!r.shortfall) return undefined;
-  return `之后的扣款都不够扣，撑满一年需再充 ${money(r.topUp12m, m.currency, { compact: true })}。`;
+  return t('wallet.runway.projFoot', { amount: money(r.topUp12m, m.currency, { compact: true }) });
 }
 
 /** 可拖动排序的卡片：拖起时放大、加深阴影，其余卡片让位 */
@@ -252,10 +252,10 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
 
   return (
     <>
-      <Toolbar title="钱包" sub={`${state.methods.length} 种支付方式${ro ? '' : ' · 拖动卡片调整顺序'}`}>
+      <Toolbar title={t('wallet.title')} sub={t(ro ? 'wallet.sub' : 'wallet.subDrag', { count: state.methods.length })}>
         {!ro && (
           <button class="btn primary" onClick={() => setEdit({ id: uid(), name: '', kind: 'appstore', currency: 'TRY' })}>
-            <Icon name="plus" /> 添加
+            <Icon name="plus" /> {t('wallet.add')}
           </button>
         )}
       </Toolbar>
@@ -271,7 +271,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
             const from = ids.indexOf(String(e.active.id));
             const to = e.over ? ids.indexOf(String(e.over.id)) : -1;
             if (from < 0 || to < 0 || from === to) return;
-            run(() => reorderMethods(arrayMove(ids, from, to)), '顺序已保存');
+            run(() => reorderMethods(arrayMove(ids, from, to)), t('wallet.orderSaved'));
           }}
         >
           <SortableContext items={state.methods.map((m) => m.id)} strategy={rectSortingStrategy} disabled={ro}>
@@ -286,10 +286,10 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                     <CardFace
                       m={m}
                       // 设了余额的账户主数字是余额，右下是每月扣多少、还能扣几期；没有余额的卡主数字是每月支出
-                      label={r ? '余额' : '每月支出'}
+                      label={r ? t('wallet.card.balance') : t('wallet.card.monthlySpend')}
                       value={r ? <Amount value={r.current} ccy={m.currency} /> : <Amount value={monthly} ccy={base} />}
-                      right={r ? (r.monthlyDrain > 0 ? `每月约扣 ${money(r.monthlyDrain, m.currency, { compact: true })}` : `${liveHere.length} 个订阅`) : `${liveHere.length} 个订阅`}
-                      rightSub={r ? (r.monthlyDrain <= 0 ? '暂无扣款' : r.shortfall ? (r.coveredCharges ? `还能扣 ${r.coveredCharges} 期` : '余额不足') : '余额充足') : m.last4 ? `•••• ${m.last4}` : BALANCE_KINDS.includes(m.kind) ? '未设余额' : ''}
+                      right={r && r.monthlyDrain > 0 ? t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) }) : t('wallet.card.subs', { count: liveHere.length })}
+                      rightSub={r ? (r.monthlyDrain <= 0 ? t('wallet.card.noCharges') : r.shortfall ? (r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low')) : t('wallet.card.enough')) : m.last4 ? `•••• ${m.last4}` : BALANCE_KINDS.includes(m.kind) ? t('wallet.card.noBalance') : ''}
                     />
                   </SortableCard>
                 );
@@ -300,7 +300,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
 
         {/* 只列有关联计费订阅的余额；空着的账户（比如还没用上的美国区）不占位置 */}
         {state.methods.some((m) => (runwayFor(m, state, today)?.monthlyDrain ?? 0) > 0) && (
-          <Group title="余额续航">
+          <Group title={t('wallet.runwayGroup')}>
             {state.methods
               .map((m) => runwayFor(m, state, today))
               .filter((r): r is NonNullable<typeof r> => r != null && r.monthlyDrain > 0)
@@ -313,13 +313,13 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
         )}
 
         <Group>
-          <Cell label={<span class="row"><Icon name="car" />合租与分摊</span>} onClick={() => go('family')}>
-            {state.subscriptions.filter((s) => s.share).length} 个
+          <Cell label={<span class="row"><Icon name="car" />{t('wallet.family')}</span>} onClick={() => go('family')}>
+            {t('wallet.familyCount', { count: state.subscriptions.filter((s) => s.share).length })}
           </Cell>
         </Group>
 
         {unassigned.length > 0 && (
-          <Group title={`未指定支付方式 · ${unassigned.length}`}>
+          <Group title={t('wallet.unassigned', { count: unassigned.length })}>
             {unassigned.map((s) => (
               <Cell key={s.id} label={<span class="row"><SubIcon sub={s} size={28} />{s.name}</span>} onClick={() => onOpen(s)}>
                 {money(s.price, s.currency)}
@@ -360,15 +360,15 @@ function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m:
           <div class="row">
             {(r || BALANCE_KINDS.includes(m.kind)) && (
               <button class="btn primary" onClick={() => onTopup(r?.current ?? 0)}>
-                {r ? '充值 / 校准余额' : '设置余额'}
+                {r ? t('wallet.sheet.topup') : t('wallet.sheet.setBalance')}
               </button>
             )}
             <button class="btn" onClick={onEdit}>
-              <Icon name="edit" /> 编辑
+              <Icon name="edit" /> {t('wallet.sheet.edit')}
             </button>
             {m.url && (
               <a class="btn" href={m.url} target="_blank" rel="noreferrer">
-                <Icon name="link" /> {BALANCE_KINDS.includes(m.kind) ? '去充值' : '官网'}
+                <Icon name="link" /> {BALANCE_KINDS.includes(m.kind) ? t('wallet.sheet.goTopup') : t('wallet.sheet.site')}
               </a>
             )}
           </div>
@@ -379,7 +379,7 @@ function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m:
           </div>
         )}
         {r && r.upcoming.length > 0 && (
-          <Group title="扣款推演" foot={projFoot(r, m)}>
+          <Group title={t('wallet.sheet.projection')} foot={projFoot(r, m)}>
             {projRows(r).map((c, i) => (
               <Cell
                 key={c.sub.id + c.date + i}
@@ -400,8 +400,8 @@ function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m:
             ))}
           </Group>
         )}
-        <Group title={`关联订阅 · ${subs.length}`}>
-          {subs.length === 0 && <div class="cell muted">暂无</div>}
+        <Group title={t('wallet.sheet.linked', { count: subs.length })}>
+          {subs.length === 0 && <div class="cell muted">{t('wallet.sheet.none')}</div>}
           {subs.map((s) => (
             <Cell
               key={s.id}
@@ -418,7 +418,7 @@ function MethodSheet({ m, state, today, onClose, onEdit, onTopup, onOpen }: { m:
           ))}
         </Group>
         {m.notes && (
-          <Group title="备注">
+          <Group title={t('wallet.sheet.notes')}>
             <div class="cell" style={{ fontSize: 14 }}>
               {m.notes}
             </div>
@@ -445,16 +445,16 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
   const next = mode === 'add' ? current + (n || 0) : n || 0;
   const tops = (m.topUps ?? []).slice().sort((a, b) => b.date.localeCompare(a.date));
   // 实际成本折算：每 1 单位账户币种花了多少（成本币种），对比当天市价
-  const rateOf = (t: TopUp) => (t.cost != null && t.amount ? t.cost / t.amount : undefined);
-  const market = (t: TopUp) => toBaseAt(state, 1, m.currency, t.date, t.costCurrency ?? state.settings.baseCurrency);
+  const rateOf = (tp: TopUp) => (tp.cost != null && tp.amount ? tp.cost / tp.amount : undefined);
+  const market = (tp: TopUp) => toBaseAt(state, 1, m.currency, tp.date, tp.costCurrency ?? state.settings.baseCurrency);
   const save = () =>
     run(async () => {
       const top: TopUp | undefined = mode === 'add' && n > 0 ? { date, amount: n, cost: cost === '' ? undefined : Number(cost), costCurrency: cost === '' ? undefined : costCcy, note: note.trim() || undefined } : undefined;
       await saveMethod({ ...m, balance: Math.round(next * 100) / 100, balanceAsOf: today, topUps: top ? [...(m.topUps ?? []), top] : m.topUps });
       onClose();
-    }, mode === 'add' ? '已记下这次充值' : '余额已更新');
-  const removeTop = (t: TopUp) =>
-    run(() => saveMethod({ ...m, topUps: (m.topUps ?? []).filter((x) => x !== t) }), '已删除这条充值记录（余额不变）');
+    }, mode === 'add' ? t('wallet.topup.toastAdd') : t('wallet.topup.toastSet'));
+  const removeTop = (tp: TopUp) =>
+    run(() => saveMethod({ ...m, topUps: (m.topUps ?? []).filter((x) => x !== tp) }), t('wallet.topup.removed'));
   return (
     <Sheet
       narrow
@@ -464,10 +464,10 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
         <>
           <span class="grow" />
           <button class="btn" onClick={onClose}>
-            取消
+            {t('wallet.topup.cancel')}
           </button>
           <button class="btn primary" disabled={!val || !Number.isFinite(n)} onClick={save}>
-            保存
+            {t('wallet.topup.save')}
           </button>
         </>
       }
@@ -477,59 +477,59 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
           value={mode}
           onChange={setMode}
           options={[
-            ['add', '充值'],
-            ['set', '校准为实际余额'],
+            ['add', t('wallet.topup.modeAdd')],
+            ['set', t('wallet.topup.modeSet')],
           ]}
         />
         <Group>
-          <Cell label={mode === 'add' ? `充值金额（${m.currency}）` : '实际余额'}>
+          <Cell label={mode === 'add' ? t('wallet.topup.amount', { ccy: m.currency }) : t('wallet.topup.actual')}>
             <input class="num" inputMode="decimal" autoFocus value={val} onInput={(e) => setVal((e.target as HTMLInputElement).value)} placeholder={`${m.currency} 0.00`} />
           </Cell>
-          <Cell label="当前估算">{money(current, m.currency)}</Cell>
-          <Cell label="保存后">
+          <Cell label={t('wallet.topup.estimate')}>{money(current, m.currency)}</Cell>
+          <Cell label={t('wallet.topup.after')}>
             <b style={{ color: 'var(--label)' }}>{money(next, m.currency)}</b>
           </Cell>
         </Group>
         {mode === 'add' && (
-          <Group title="这次充值（可选）">
-            <Cell label="充值日期">
+          <Group title={t('wallet.topup.optional')}>
+            <Cell label={t('wallet.topup.date')}>
               <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
             </Cell>
-            <Cell label="实际花费币种">
+            <Cell label={t('wallet.topup.costCcy')}>
               <CurrencySelect value={costCcy} onChange={setCostCcy} />
             </Cell>
-            <Cell label="实际花费">
-              <input class="num" inputMode="decimal" value={cost} placeholder="不填" onInput={(e) => setCost((e.target as HTMLInputElement).value)} />
+            <Cell label={t('wallet.topup.cost')}>
+              <input class="num" inputMode="decimal" value={cost} placeholder={t('wallet.topup.costPh')} onInput={(e) => setCost((e.target as HTMLInputElement).value)} />
             </Cell>
-            <Cell label="备注">
-              <input value={note} placeholder="如 Razer Gold、某宝店铺" onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
+            <Cell label={t('wallet.topup.note')}>
+              <input value={note} placeholder={t('wallet.topup.notePh')} onInput={(e) => setNote((e.target as HTMLInputElement).value)} />
             </Cell>
           </Group>
         )}
         {tops.length > 0 && (
-          <Group title={`充值记录 · ${tops.length} 次`}>
-            {tops.map((t, i) => {
-              const r = rateOf(t);
-              const mk = market(t);
+          <Group title={t('wallet.topup.history', { count: tops.length })}>
+            {tops.map((tp, i) => {
+              const r = rateOf(tp);
+              const mk = market(tp);
               const premium = r && mk ? r / mk - 1 : undefined;
               return (
                 <div key={i} class="cell topup-row">
                   <span class="cell-l">
-                    {money(t.amount, m.currency)}
+                    {money(tp.amount, m.currency)}
                     <small>
-                      {t.date}
-                      {t.cost != null ? ` · 花了 ${money(t.cost, t.costCurrency ?? state.settings.baseCurrency)}` : ''}
-                      {t.note ? ` · ${t.note}` : ''}
+                      {tp.date}
+                      {tp.cost != null ? ` · ${t('wallet.topup.spent', { amount: money(tp.cost, tp.costCurrency ?? state.settings.baseCurrency) })}` : ''}
+                      {tp.note ? ` · ${tp.note}` : ''}
                     </small>
                   </span>
                   <span class="cell-r">
                     {r != null && (
                       <span class="topup-rate">
-                        1 {m.currency} = {r.toFixed(r < 0.1 ? 4 : 3)} {t.costCurrency}
-                        {premium != null && Math.abs(premium) >= 0.005 && <em class={premium > 0 ? 'up' : 'down'}>{premium > 0 ? `溢价 ${Math.round(premium * 100)}%` : `比市价低 ${Math.round(-premium * 100)}%`}</em>}
+                        1 {m.currency} = {r.toFixed(r < 0.1 ? 4 : 3)} {tp.costCurrency}
+                        {premium != null && Math.abs(premium) >= 0.005 && <em class={premium > 0 ? 'up' : 'down'}>{premium > 0 ? t('wallet.topup.premium', { pct: Math.round(premium * 100) }) : t('wallet.topup.below', { pct: Math.round(-premium * 100) })}</em>}
                       </span>
                     )}
-                    <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label="删除这条充值记录" onClick={() => removeTop(t)}>
+                    <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
                       <Icon name="x" />
                     </button>
                   </span>
@@ -552,7 +552,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
   return (
     <Sheet
       narrow
-      title={isNew ? '添加支付方式' : '编辑支付方式'}
+      title={isNew ? t('wallet.editor.titleNew') : t('wallet.editor.titleEdit')}
       onClose={onClose}
       foot={
         <>
@@ -560,19 +560,19 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
             <button
               class="btn danger"
               onClick={() =>
-                confirmDelete(`删除「${m.name}」？关联订阅会变为未指定。`) &&
+                confirmDelete(t('wallet.editor.confirmDelete', { name: m.name })) &&
                 run(async () => {
                   await deleteMethod(m.id);
                   onClose();
-                }, '已删除')
+                }, t('wallet.editor.deleted'))
               }
             >
-              删除
+              {t('wallet.editor.delete')}
             </button>
           )}
           <span class="grow" />
           <button class="btn" onClick={onClose}>
-            取消
+            {t('wallet.editor.cancel')}
           </button>
           <button
             class="btn primary"
@@ -582,102 +582,102 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
                 const edited = { ...f, name: f.name.trim() };
                 await saveMethod(isNew ? edited : mergeEdits(m, edited, getState().methods.find((x) => x.id === m.id)));
                 onClose();
-              }, '已保存')
+              }, t('wallet.editor.saved'))
             }
           >
-            完成
+            {t('wallet.editor.done')}
           </button>
         </>
       }
     >
       <div class="stack">
         <div class={`paycard ${faceClass(f)}`} style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
-          <CardFace m={{ ...f, name: f.name || '新的支付方式' }} label="" value="" right={f.region ?? ''} rightSub={f.last4 ? `•••• ${f.last4}` : ''} />
+          <CardFace m={{ ...f, name: f.name || t('wallet.editor.newName') }} label="" value="" right={f.region ?? ''} rightSub={f.last4 ? `•••• ${f.last4}` : ''} />
         </div>
         <Group>
-          <Cell label="名称">
-            <input value={f.name} placeholder="招商银行、App Store 土耳其区…" onInput={(e) => up({ name: val(e) })} />
+          <Cell label={t('wallet.editor.name')}>
+            <input value={f.name} placeholder={t('wallet.editor.namePh')} onInput={(e) => up({ name: val(e) })} />
           </Cell>
-          <Cell label="官网 / 充值页">
-            <input value={f.url ?? ''} placeholder="https://，可选" onInput={(e) => up({ url: val(e).trim() || undefined })} />
+          <Cell label={t('wallet.editor.url')}>
+            <input value={f.url ?? ''} placeholder={t('wallet.editor.urlPh')} onInput={(e) => up({ url: val(e).trim() || undefined })} />
           </Cell>
-          <Cell label="类型">
-            <Picker value={f.kind} onChange={(k) => up({ kind: k })} options={(Object.keys(KIND_LABEL) as MethodKind[]).map((k) => ({ value: k, label: KIND_LABEL[k] }))} ariaLabel="类型" />
+          <Cell label={t('wallet.editor.kind')}>
+            <Picker value={f.kind} onChange={(k) => up({ kind: k })} options={(Object.keys(KIND_LABEL) as MethodKind[]).map((k) => ({ value: k, label: KIND_LABEL[k] }))} ariaLabel={t('wallet.editor.kind')} />
           </Cell>
           {(f.kind === 'debit' || f.kind === 'credit') && (
-            <Cell label="银行" sub={f.bank ? undefined : bankOf({ ...f, bank: undefined }) ? '已按名称自动识别' : undefined}>
+            <Cell label={t('wallet.editor.bank')} sub={f.bank ? undefined : bankOf({ ...f, bank: undefined }) ? t('wallet.editor.bankDetected') : undefined}>
               <Picker
                 value={f.bank ?? ''}
                 onChange={(v) => up({ bank: v || undefined })}
                 search
-                options={[{ value: '', label: '按名称自动识别' }, ...[...BANKS].sort((x, y) => x[0].localeCompare(y[0], 'zh')).map(([name, code]) => ({ value: code, label: name, icon: <img class="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> }))]}
-                ariaLabel="银行"
+                options={[{ value: '', label: t('wallet.editor.bankAuto') }, ...[...BANKS].sort((x, y) => x[0].localeCompare(y[0], 'zh')).map(([name, code]) => ({ value: code, label: name, icon: <img class="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> }))]}
+                ariaLabel={t('wallet.editor.bank')}
               />
             </Cell>
           )}
           {brandOf(f) ? (
-            <Cell label="Logo" sub={`${KIND_LABEL[f.kind]} 自带官方标`}>
+            <Cell label="Logo" sub={t('wallet.editor.logoBuiltIn', { kind: KIND_LABEL[f.kind] })}>
               <MethodMark m={f} size={28} />
             </Cell>
           ) : (
             <LogoField f={f} up={up} />
           )}
-          <Cell label="币种">
+          <Cell label={t('wallet.editor.currency')}>
             <CurrencySelect value={f.currency} onChange={(c) => up({ currency: c })} />
           </Cell>
           {CARD_KINDS.includes(f.kind) && (
-            <Cell label="卡组织">
+            <Cell label={t('wallet.editor.network')}>
               <span class="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
                 <NetworkMark network={f.network} height={20} />
-                <Picker value={f.network ?? ''} onChange={(n) => up({ network: (n || undefined) as CardNetwork | undefined })} options={[{ value: '', label: '不显示' }, ...(Object.keys(NETWORKS) as CardNetwork[]).map((n) => ({ value: n, label: NETWORKS[n], icon: <img class="pk-net" src={`/networks/${n}.svg`} alt="" /> }))]} ariaLabel="卡组织" />
+                <Picker value={f.network ?? ''} onChange={(n) => up({ network: (n || undefined) as CardNetwork | undefined })} options={[{ value: '', label: t('wallet.editor.networkNone') }, ...(Object.keys(NETWORKS) as CardNetwork[]).map((n) => ({ value: n, label: NETWORKS[n], icon: <img class="pk-net" src={`/networks/${n}.svg`} alt="" /> }))]} ariaLabel={t('wallet.editor.network')} />
               </span>
             </Cell>
           )}
           {(f.kind === 'debit' || f.kind === 'credit') && (
-            <Cell label="银行图标" >
+            <Cell label={t('wallet.editor.bankIcon')}>
               <span class="row" style={{ gap: 8, justifyContent: 'flex-end' }}>
                 {bankOf(f) ? <MethodMark m={f} size={22} /> : null}
-                <span class="muted">{bankOf(f) ? (f.bank ? '已指定' : '按名称自动识别') : '名称里写上银行名即可识别'}</span>
+                <span class="muted">{bankOf(f) ? (f.bank ? t('wallet.editor.bankSet') : t('wallet.editor.bankAuto')) : t('wallet.editor.bankHint')}</span>
               </span>
             </Cell>
           )}
           {CARD_KINDS.includes(f.kind) && (
-            <Cell label="卡号尾号">
+            <Cell label={t('wallet.editor.last4')}>
               <input class="num" maxLength={4} value={f.last4 ?? ''} onInput={(e) => up({ last4: val(e).replace(/\D/g, '') || undefined })} />
             </Cell>
           )}
-          <Cell label="地区">
+          <Cell label={t('wallet.editor.region')}>
             <RegionSelect value={f.region} onChange={(r) => up({ region: r })} common={getState().methods.map((m) => m.region).filter(Boolean) as string[]} />
           </Cell>
           {f.kind === 'phone' && (
-            <Cell label="手机号">
+            <Cell label={t('wallet.editor.phone')}>
               <input inputMode="tel" value={f.phone ?? ''} placeholder="+63 9xx xxx xxxx" onInput={(e) => up({ phone: val(e).trim() || undefined })} />
             </Cell>
           )}
-          <Cell label="返现 / 积分">
-            <input class="num" inputMode="decimal" value={f.cashback ?? ''} placeholder="% 可选" onInput={(e) => up({ cashback: Number(val(e)) || undefined })} />
+          <Cell label={t('wallet.editor.cashback')}>
+            <input class="num" inputMode="decimal" value={f.cashback ?? ''} placeholder={t('wallet.editor.cashbackPh')} onInput={(e) => up({ cashback: Number(val(e)) || undefined })} />
           </Cell>
         </Group>
         {balanceKind && (
-          <Group title="余额">
-            <Cell label="当前余额">
+          <Group title={t('wallet.editor.balanceGroup')}>
+            <Cell label={t('wallet.editor.balance')}>
               <input
                 class="num"
                 inputMode="decimal"
                 value={f.balance ?? ''}
-                placeholder="可选"
+                placeholder={t('wallet.editor.optional')}
                 onInput={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? today() })}
               />
             </Cell>
-            <Cell label="校准日">
+            <Cell label={t('wallet.editor.asOf')}>
               <DatePicker value={f.balanceAsOf} onChange={(v) => up({ balanceAsOf: v })} />
             </Cell>
-            <Cell label="不足提醒">
-              <Picker value={f.lowRunwayDays ?? 30} onChange={(d) => up({ lowRunwayDays: d })} options={[7, 14, 30, 60].map((d) => ({ value: d, label: `提前 ${d} 天` }))} ariaLabel="余额提醒" />
+            <Cell label={t('wallet.editor.lowAlert')}>
+              <Picker value={f.lowRunwayDays ?? 30} onChange={(d) => up({ lowRunwayDays: d })} options={[7, 14, 30, 60].map((d) => ({ value: d, label: t('wallet.editor.lowAlertOpt', { count: d }) }))} ariaLabel={t('wallet.editor.lowAlertAria')} />
             </Cell>
           </Group>
         )}
-        <Group title="备注">
+        <Group title={t('wallet.editor.notes')}>
           <div class="cell">
             <span class="cell-r">
               <textarea value={f.notes ?? ''} onInput={(e) => up({ notes: (e.target as HTMLTextAreaElement).value || undefined })} />
@@ -720,32 +720,32 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
       <div class="cell logo-field">
         <span class="cell-l">
           Logo
-          <small>{f.logo ? (f.logo.startsWith('data:') ? '已上传' : '图片链接') : favicon ? '用官网图标' : bankOf(f) ? '用银行图标' : '未设置，显示名称首字'}</small>
+          <small>{f.logo ? (f.logo.startsWith('data:') ? t('wallet.logo.uploaded') : t('wallet.logo.link')) : favicon ? t('wallet.logo.favicon') : bankOf(f) ? t('wallet.logo.bank') : t('wallet.logo.none')}</small>
         </span>
         <span class="cell-r">
           <MethodMark m={f} size={32} />
           <button type="button" class="chip-btn" onClick={() => file.current?.click()}>
-            上传
+            {t('wallet.logo.upload')}
           </button>
           <button type="button" class={`chip-btn ${link ? 'on' : ''}`} onClick={() => setLink(!link)}>
-            链接
+            {t('wallet.logo.linkBtn')}
           </button>
           {f.logo && (
             <button type="button" class="chip-btn" onClick={() => up({ logo: undefined })}>
-              清除
+              {t('wallet.logo.clear')}
             </button>
           )}
           <input ref={file} type="file" accept="image/*" hidden onChange={onFile} />
         </span>
       </div>
       {link && (
-        <Cell label="图片链接">
+        <Cell label={t('wallet.logo.link')}>
           <input value={f.logo?.startsWith('data:') ? '' : (f.logo ?? '')} placeholder="https://…/logo.png" onInput={(e) => up({ logo: (e.target as HTMLInputElement).value.trim() || undefined })} />
         </Cell>
       )}
       {(f.logo || favicon) && (
-        <Cell label="横向字标">
-          <Toggle label="横向字标" checked={!!f.logoWide} onChange={(v) => up({ logoWide: v || undefined })} />
+        <Cell label={t('wallet.logo.wide')}>
+          <Toggle label={t('wallet.logo.wide')} checked={!!f.logoWide} onChange={(v) => up({ logoWide: v || undefined })} />
         </Cell>
       )}
     </>

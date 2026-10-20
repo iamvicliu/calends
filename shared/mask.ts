@@ -1,5 +1,6 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
-import { DEFAULT_SETTINGS, type AppState, type MethodKind, type PaymentMethod, type Subscription } from './types.ts';
+import { DEFAULT_SETTINGS, type AppState, type PaymentMethod, type Subscription } from './types.ts';
+import { t } from './i18n.ts';
 
 const DOMAIN = /\b((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+)([a-z]{2,})\b/gi;
 
@@ -17,23 +18,8 @@ export function isDomainSub(s: Pick<Subscription, 'name' | 'category' | 'tags' |
   return /域名|domain/i.test(`${s.category} ${s.tags.join(' ')} ${s.notes ?? ''}`) || new RegExp(DOMAIN.source, 'i').test(s.name);
 }
 
-const KIND_PUBLIC: Record<MethodKind, string> = {
-  debit: '银行卡',
-  credit: '信用卡',
-  alipay: '支付宝',
-  wechat: '微信支付',
-  paypal: 'PayPal',
-  appstore: 'App Store',
-  googleplay: 'Google Play',
-  giftcard: '礼品卡',
-  prepaid: '商家余额',
-  phone: '手机话费',
-  crypto: '加密卡',
-  other: '其他',
-};
-
 function publicMethod(m: PaymentMethod): PaymentMethod {
-  return { id: m.id, kind: m.kind, currency: m.currency, region: m.region, color: m.color, name: `${KIND_PUBLIC[m.kind]}${m.region ? ` · ${m.region}` : ''}` };
+  return { id: m.id, kind: m.kind, currency: m.currency, region: m.region, color: m.color, name: m.region ? t('core.publicMethod', { kind: t(`core.methodKind.${m.kind}`), region: m.region }) : t(`core.methodKind.${m.kind}`) };
 }
 
 /** FNV-1a 短哈希：公开数据里不暴露可能含域名的 id */

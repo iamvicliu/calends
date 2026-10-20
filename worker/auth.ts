@@ -5,6 +5,7 @@
 // - 会话：随机令牌放 HttpOnly + Secure + SameSite=Lax Cookie，库里只存 SHA-256；登录失败按 IP 限速。
 import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse, type AuthenticationResponseJSON, type RegistrationResponseJSON } from '@simplewebauthn/server';
 import type { Env } from './env.ts';
+import { t } from '../shared/i18n.ts';
 import { getKv, getSettings, putKv } from './store.ts';
 
 const COOKIE = 'sid';
@@ -143,7 +144,6 @@ async function throttle(req: Request, env: Env) {
 }
 
 const err = (error: string, status = 400) => Response.json({ error }, { status });
-const TOO_MANY = '尝试过多，请 15 分钟后再试';
 
 export async function authStatus(env: Env): Promise<Response> {
   const passkeys = await env.DB.prepare('SELECT COUNT(*) AS n FROM passkeys').first<{ n: number }>();
@@ -152,38 +152,38 @@ export async function authStatus(env: Env): Promise<Response> {
 
 /** 首次设置密码：必须带上部署时配置的 SETUP_TOKEN */
 export async function setup(req: Request, env: Env): Promise<Response> {
-  if (!(await needsSetup(env))) return err('已经设置过密码', 409);
-  const t = await throttle(req, env);
-  if (t.blocked) return err(TOO_MANY, 429);
-  if (!env.SETUP_TOKEN) return err('部署时没有配置 SETUP_TOKEN，无法初始化。请先设置这个密钥（wrangler secret put SETUP_TOKEN）。', 403);
+  if (!(await needsSetup(env))) return err(t('server.auth.alreadySetup'), 409);
+  const th = await throttle(req, env);
+  if (th.blocked) return err(t('server.auth.tooMany'), 429);
+  if (!env.SETUP_TOKEN) return err(t('server.auth.noSetupToken'), 403);
   const body = (await req.json().catch(() => ({}))) as { setupToken?: string; password?: string };
   if (!body.setupToken || !constantEqual(await sha256(body.setupToken), await sha256(env.SETUP_TOKEN))) {
-    await t.fail();
-    return err('初始化令牌不正确', 401);
+    await th.fail();
+    return err(t('server.auth.badSetupToken'), 401);
   }
-  if (!body.password || body.password.length < MIN_PASSWORD) return err(`密码至少 ${MIN_PASSWORD} 位`);
+  if (!body.password || body.password.length < MIN_PASSWORD) return err(t('server.auth.passwordTooShort', { min: MIN_PASSWORD, count: MIN_PASSWORD }));
   await putKv(env, 'auth', await hashPassword(body.password));
-  await t.clear();
+  await th.clear();
   return startSession(req, env, 'password');
 }
 
 export async function login(req: Request, env: Env): Promise<Response> {
-  const t = await throttle(req, env);
-  if (t.blocked) return err(TOO_MANY, 429);
+  const th = await throttle(req, env);
+  if (th.blocked) return err(t('server.auth.tooMany'), 429);
   const body = (await req.json().catch(() => ({}))) as { passcode?: string; password?: string };
   const pw = body.password ?? body.passcode ?? '';
   if (!pw || !(await checkPassword(env, pw))) {
-    await t.fail();
-    return err('密码不正确', 401);
+    await th.fail();
+    return err(t('server.auth.wrongPassword'), 401);
   }
-  await t.clear();
+  await th.clear();
   return startSession(req, env, 'password');
 }
 
 export async function changePassword(req: Request, env: Env): Promise<Response> {
   const body = (await req.json().catch(() => ({}))) as { current?: string; next?: string };
-  if (!body.current || !(await checkPassword(env, body.current))) return err('当前密码不正确', 401);
-  if (!body.next || body.next.length < MIN_PASSWORD) return err(`新密码至少 ${MIN_PASSWORD} 位`);
+  if (!body.current || !(await checkPassword(env, body.current))) return err(t('server.auth.wrongCurrentPassword'), 401);
+  if (!body.next || body.next.length < MIN_PASSWORD) return err(t('server.auth.newPasswordTooShort', { min: MIN_PASSWORD, count: MIN_PASSWORD }));
   await putKv(env, 'auth', await hashPassword(body.next));
   // 改密码后其他设备全部下线，只留当前会话
   await removeOtherSessions(req, env);
@@ -233,9 +233,9 @@ export async function pruneSessions(req: Request, env: Env, max: number): Promis
 
 /** 移出某一台设备（不能移出当前这台，当前用「退出登录」） */
 export async function revokeSession(req: Request, env: Env, id: string): Promise<Response> {
-  if (!/^[0-9a-f]{16}$/.test(id)) return err('无效的设备');
+  if (!/^[0-9a-f]{16}$/.test(id)) return err(t('server.auth.invalidDevice'));
   const mine = await sessionHash(req);
-  if (mine && mine.startsWith(id)) return err('不能移出当前设备，请用「退出登录」');
+  if (mine && mine.startsWith(id)) return err(t('server.auth.cannotRemoveCurrent'));
   await env.DB.prepare('DELETE FROM sessions WHERE substr(token_hash, 1, 16) = ?1').bind(id).run();
   return Response.json({ ok: true });
 }
@@ -319,10 +319,10 @@ export async function passkeyRegisterOptions(req: Request, env: Env): Promise<Re
 export async function passkeyRegisterVerify(req: Request, env: Env): Promise<Response> {
   const body = (await req.json()) as { challengeId: string; response: RegistrationResponseJSON; name?: string };
   const expected = await takeChallenge(env, body.challengeId, 'register');
-  if (!expected) return err('请求已过期，请重试');
+  if (!expected) return err(t('server.auth.expired'));
   const { rpID, origin } = rp(req, env);
   const v = await verifyRegistrationResponse({ response: body.response, expectedChallenge: expected, expectedOrigin: origin, expectedRPID: rpID, requireUserVerification: false }).catch(() => undefined);
-  if (!v?.verified || !v.registrationInfo) return err('Passkey 校验失败');
+  if (!v?.verified || !v.registrationInfo) return err(t('server.auth.passkeyFailed'));
   const c = v.registrationInfo.credential;
   await env.DB.prepare('INSERT INTO passkeys (id, public_key, counter, transports, name) VALUES (?1, ?2, ?3, ?4, ?5)')
     .bind(c.id, b64url(c.publicKey), c.counter, JSON.stringify(c.transports ?? body.response.response.transports ?? []), (body.name ?? '').trim().slice(0, 40) || 'Passkey')
@@ -338,15 +338,15 @@ export async function passkeyLoginOptions(req: Request, env: Env): Promise<Respo
 
 /** 第二步：校验签名，成功后建会话 */
 export async function passkeyLoginVerify(req: Request, env: Env): Promise<Response> {
-  const t = await throttle(req, env);
-  if (t.blocked) return err(TOO_MANY, 429);
+  const th = await throttle(req, env);
+  if (th.blocked) return err(t('server.auth.tooMany'), 429);
   const body = (await req.json()) as { challengeId: string; response: AuthenticationResponseJSON };
   const expected = await takeChallenge(env, body.challengeId, 'login');
-  if (!expected) return err('请求已过期，请重试');
+  if (!expected) return err(t('server.auth.expired'));
   const row = await env.DB.prepare('SELECT * FROM passkeys WHERE id = ?1').bind(body.response.id).first<PasskeyRow>();
   if (!row) {
-    await t.fail();
-    return err('这个 Passkey 没有绑定到本站', 401);
+    await th.fail();
+    return err(t('server.auth.passkeyNotBound'), 401);
   }
   const { rpID, origin } = rp(req, env);
   const v = await verifyAuthenticationResponse({
@@ -359,10 +359,10 @@ export async function passkeyLoginVerify(req: Request, env: Env): Promise<Respon
   }).catch(() => undefined);
   // 签名不对、计数器回退（疑似克隆）等都会在这里被拒绝
   if (!v?.verified) {
-    await t.fail();
-    return err('Passkey 校验失败', 401);
+    await th.fail();
+    return err(t('server.auth.passkeyFailed'), 401);
   }
   await env.DB.prepare("UPDATE passkeys SET counter = ?1, last_used_at = datetime('now') WHERE id = ?2").bind(v.authenticationInfo.newCounter, row.id).run();
-  await t.clear();
+  await th.clear();
   return startSession(req, env, 'passkey');
 }

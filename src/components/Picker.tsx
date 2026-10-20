@@ -2,6 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { createPortal } from 'preact/compat';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { CURRENCIES } from '../../shared/format.ts';
+import { locale, t } from '../../shared/i18n.ts';
 import { ccyFlag, ccyName, FLAGS } from '../display.ts';
 import { Icon } from './ui.tsx';
 
@@ -120,7 +121,7 @@ export function Picker<T extends string | number>({
         {display ?? (
           <>
             {cur?.icon && <span class="pk-ico">{cur.icon}</span>}
-            <span>{cur?.label ?? '请选择'}</span>
+            <span>{cur?.label ?? t('picker.choose')}</span>
           </>
         )}
         <Icon name="down" />
@@ -134,7 +135,7 @@ export function Picker<T extends string | number>({
               {searchable && (
                 <label class="cp-search">
                   <Icon name="search" />
-                  <input ref={input} value={q} placeholder="搜索" onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
+                  <input ref={input} value={q} placeholder={t('common.search')} onInput={(e) => setQ((e.target as HTMLInputElement).value)} />
                 </label>
               )}
               <div class="cp-list" ref={list} role="listbox" aria-label={ariaLabel} tabIndex={searchable ? undefined : -1} autoFocus={!searchable}>
@@ -157,7 +158,7 @@ export function Picker<T extends string | number>({
                     </button>
                   </div>
                 ))}
-                {!shown.length && <div class="cp-empty">没有匹配的选项</div>}
+                {!shown.length && <div class="cp-empty">{t('picker.noMatch')}</div>}
               </div>
             </div>
           </>,
@@ -174,7 +175,7 @@ export function CcyFlag({ code }: { code: string }) {
 }
 
 /** 货币选择：国旗 + 中文名 + 代码，人民币、美元置顶 */
-export function CurrencySelect({ value, onChange, variant, ariaLabel = '币种' }: { value: string; onChange: (v: string) => void; variant?: 'btn' | 'inline'; ariaLabel?: string }) {
+export function CurrencySelect({ value, onChange, variant, ariaLabel = t('picker.currency') }: { value: string; onChange: (v: string) => void; variant?: 'btn' | 'inline'; ariaLabel?: string }) {
   const list = [...new Set(['CNY', 'USD', ...CURRENCIES, value])];
   return (
     <Picker
@@ -194,13 +195,19 @@ export function CurrencySelect({ value, onChange, variant, ariaLabel = '币种' 
   );
 }
 
-const regionNames = (() => {
-  try {
-    return new Intl.DisplayNames(['zh-CN'], { type: 'region' });
-  } catch {
-    return undefined;
+/** 地区名跟随当前语言，按语言缓存 */
+const regionCache = new Map<string, Intl.DisplayNames | undefined>();
+function regionNames(): Intl.DisplayNames | undefined {
+  const loc = locale();
+  if (!regionCache.has(loc)) {
+    try {
+      regionCache.set(loc, new Intl.DisplayNames([loc], { type: 'region' }));
+    } catch {
+      regionCache.set(loc, undefined);
+    }
   }
-})();
+  return regionCache.get(loc);
+}
 /** 有国旗图片的地区（两位国家码），与 public/flags 一致 */
 const REGIONS = [...FLAGS].filter((c) => c !== 'eu');
 
@@ -208,13 +215,13 @@ const REGIONS = [...FLAGS].filter((c) => c !== 'eu');
 export function RegionSelect({ value, onChange, common = [], variant }: { value?: string; onChange: (v: string | undefined) => void; common?: string[]; variant?: 'btn' | 'inline' }) {
   const name = (cc: string) => {
     try {
-      return regionNames?.of(cc.toUpperCase()) ?? cc.toUpperCase();
+      return regionNames()?.of(cc.toUpperCase()) ?? cc.toUpperCase();
     } catch {
       return cc.toUpperCase();
     }
   };
   const top = [...new Set(['us', 'cn', ...common.map((c) => c.toLowerCase())])].filter((c) => REGIONS.includes(c));
-  const rest = REGIONS.filter((c) => !top.includes(c)).sort((a, b) => name(a).localeCompare(name(b), 'zh'));
+  const rest = REGIONS.filter((c) => !top.includes(c)).sort((a, b) => name(a).localeCompare(name(b), locale()));
   const v = value?.toLowerCase() ?? '';
   return (
     <Picker
@@ -222,7 +229,7 @@ export function RegionSelect({ value, onChange, common = [], variant }: { value?
       onChange={(c) => onChange(c ? c.toUpperCase() : undefined)}
       variant={variant}
       search
-      ariaLabel="地区"
+      ariaLabel={t('picker.region.label')}
       display={
         v ? (
           <>
@@ -232,13 +239,13 @@ export function RegionSelect({ value, onChange, common = [], variant }: { value?
             <span>{name(v)}</span>
           </>
         ) : (
-          <span>不区分</span>
+          <span>{t('picker.region.any')}</span>
         )
       }
       options={[
-        { value: '', label: '不区分地区' },
-        ...top.map((c) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group: '常用' })),
-        ...rest.map((c) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group: '全部地区' })),
+        { value: '', label: t('picker.region.none') },
+        ...top.map((c) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group: t('picker.common') })),
+        ...rest.map((c) => ({ value: c, label: name(c), hint: c.toUpperCase(), icon: <CcyFlagImg cc={c} />, group: t('picker.region.all') })),
       ]}
     />
   );

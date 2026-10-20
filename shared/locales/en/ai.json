@@ -1,0 +1,39 @@
+{
+  "title": "AI access",
+  "newToken": "New token",
+  "mcpUrl": "MCP URL",
+  "urlCopied": "URL copied",
+  "copy": "Copy",
+  "copied": "Copied",
+  "copyFailed": "Couldn't copy",
+  "neverUsed": "Never used",
+  "tokenPlaceholder": "<your-token>",
+  "tokens": { "one": "Tokens · {count}", "other": "Tokens · {count}" },
+  "noTokens": "No tokens yet. Create one and give it to the AI assistant you want to connect.",
+  "lastUsed": "Last used {time}",
+  "confirmRevoke": "Revoke “{name}”? Any AI assistant using it will lose access immediately.",
+  "revoke": "Revoke",
+  "revoked": "Revoked",
+  "setup": "Setup",
+  "tools": { "one": "Available tools · {count}", "other": "Available tools · {count}" },
+  "writeBadge": "Write",
+  "clientOther": "Other",
+  "scope": {
+    "write": "Read & write",
+    "read": "Read-only",
+    "writeLong": "Read & write: query, add and edit",
+    "readLong": "Read-only: query only"
+  },
+  "created": {
+    "title": "Token created",
+    "saved": "I've saved it",
+    "foot": "This token is shown only once and can't be viewed again after you close this. If you lose it, revoke it and create a new one.",
+    "copyToken": "Copy token",
+    "tokenCopied": "Token copied",
+    "command": "Setup command"
+  },
+  "cancel": "Cancel",
+  "generate": "Create",
+  "name": "Name",
+  "namePlaceholder": "Which AI is this for?"
+}

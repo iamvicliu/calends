@@ -3,8 +3,10 @@ import { currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, price
 import { cnDate, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Amount, CAT_ICON, CatChip, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, catIcon, CatChip, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
+import { t } from '../../shared/i18n.ts';
+import { tx } from '../i18n.ts';
 import { cancelSavings } from '../../shared/metrics.ts';
 import { subImage, toBase } from '../derive.ts';
 import { useOrig } from '../display.ts';
@@ -15,13 +17,13 @@ import { Picker } from '../components/Picker.tsx';
 type Filter = 'live' | 'upcoming' | 'trial' | 'ended' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
 
-const FILTERS: Array<[Filter, string]> = [
-  ['all', '全部'],
-  ['live', '计费中'],
-  ['upcoming', '未开始'],
-  ['trial', '试用'],
-  ['lifetime', '买断'],
-  ['ended', '已退订'],
+const FILTERS = (): Array<[Filter, string]> => [
+  ['all', t('list.all')],
+  ['live', t('list.status.active')],
+  ['upcoming', t('list.status.upcoming')],
+  ['trial', t('list.status.trialShort')],
+  ['lifetime', t('list.status.lifetime')],
+  ['ended', t('list.status.ended')],
 ];
 
 const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' || st === 'paused' ? 'live' : (st as Filter));
@@ -51,9 +53,9 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
     const price = n ? priceAt(s, n) : s.price;
     const live = !['lifetime', 'ended'].includes(effectiveStatus(s, today));
     if (money2 === 'orig' || s.currency === money2) {
-      return { value: price, ccy: s.currency, sub: s.proxy ? '代付 · 不计入支出' : live && (s.currency !== base || s.cycle.unit !== 'month' || s.cycle.every !== 1) ? `≈ ${money(mo(s), base, { compact: true })}/月` : undefined }; // 外币或不是按月付的，都折成每月多少
+      return { value: price, ccy: s.currency, sub: s.proxy ? t('list.proxyExcluded') : live && (s.currency !== base || s.cycle.unit !== 'month' || s.cycle.every !== 1) ? t('list.perMonthApprox', { amount: money(mo(s), base, { compact: true }) }) : undefined }; // 外币或不是按月付的，都折成每月多少
     }
-    return { value: toBaseAt(state, price, s.currency, undefined, money2), ccy: money2, sub: `原价 ${money(price, s.currency)}` };
+    return { value: toBaseAt(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
   };
   const setView = (v: 'grid' | 'list' | 'gantt') => {
     setViewRaw(v);
@@ -104,20 +106,20 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
 
   return (
     <>
-      <Toolbar title={category ?? '全部订阅'} sub={`${rows.length} 项 · 每月 ${money(sum, base, { compact: true })} · 每年 ${money(sum * 12, base, { compact: true })}`}>
+      <Toolbar title={category ?? t('list.title')} sub={t('list.summary', { count: rows.length, monthly: money(sum, base, { compact: true }), yearly: money(sum * 12, base, { compact: true }) })}>
         <Seg
           small
           value={view}
           onChange={setView}
           options={[
-            ['grid', '卡片'],
-            ['list', '列表'],
-            ['gantt', '时间轴'],
+            ['grid', t('list.view.grid')],
+            ['list', t('list.view.list')],
+            ['gantt', t('list.view.gantt')],
           ]}
         />
-        <Picker variant="btn" value={sort} onChange={setSort} ariaLabel="排序" options={[{ value: 'next', label: '按下次扣款' }, { value: 'cost', label: '按月成本' }, { value: 'name', label: '按名称' }, { value: 'start', label: '按开始时间' }] as Array<{ value: Sort; label: string }>} />
+        <Picker variant="btn" value={sort} onChange={setSort} ariaLabel={t('list.sort.label')} options={[{ value: 'next', label: t('list.sort.next') }, { value: 'cost', label: t('list.sort.cost') }, { value: 'name', label: t('list.sort.name') }, { value: 'start', label: t('list.sort.start') }] as Array<{ value: Sort; label: string }>} />
         {!state.readonly && (
-          <button class="icon-btn accent d-only" onClick={onAdd} aria-label="添加订阅">
+          <button class="icon-btn accent d-only" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
           </button>
         )}
@@ -133,23 +135,23 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                 setPay('all');
               }}
             >
-              清除
+              {t('list.clear')}
             </button>
           )}
-          <FacetRow label="状态" value={filter} onChange={(v) => setFilter(v as Filter)} options={FILTERS.map(([k, l]) => ({ key: k, label: l, n: statusN.get(k) ?? 0 }))} />
-          <FacetRow label="分类" value={cat} onChange={setCat} options={[{ key: 'all', label: '全部', n: catN.get('all') ?? 0 }, ...cats.map((c) => ({ key: c, label: c, icon: <Icon name={CAT_ICON[c] ?? 'tag'} size={13} />, n: catN.get(c) ?? 0 }))]} />
+          <FacetRow label={t('list.facet.status')} value={filter} onChange={(v) => setFilter(v as Filter)} options={FILTERS().map(([k, l]) => ({ key: k, label: l, n: statusN.get(k) ?? 0 }))} />
+          <FacetRow label={t('list.facet.category')} value={cat} onChange={setCat} options={[{ key: 'all', label: t('list.all'), n: catN.get('all') ?? 0 }, ...cats.map((c) => ({ key: c, label: c, icon: <Icon name={catIcon(c)} size={13} />, n: catN.get(c) ?? 0 }))]} />
           <FacetRow
-            label="支付"
+            label={t('list.facet.pay')}
             value={pay}
             onChange={setPay}
             options={[
-              { key: 'all', label: '全部', n: payN.get('all') ?? 0 },
+              { key: 'all', label: t('list.all'), n: payN.get('all') ?? 0 },
               ...state.methods.map((m) => ({ key: m.id, label: m.name, icon: <MethodMark m={m} size={16} />, n: payN.get(m.id) ?? 0 })),
-              { key: 'none', label: '未指定', n: payN.get('none') ?? 0 },
+              { key: 'none', label: t('list.unassigned'), n: payN.get('none') ?? 0 },
             ]}
           />
         </div>
-        {rows.length === 0 && <div class="empty">没有匹配的订阅</div>}
+        {rows.length === 0 && <div class="empty">{t('list.empty')}</div>}
         {view === 'gantt' ? (
           rows.length > 0 && <Gantt rows={rows} state={state} today={today} onOpen={onOpen} />
         ) : view === 'grid' ? (
@@ -169,14 +171,14 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                     <SubIcon sub={s} size={48} />
                     <span class="sc-flags">
                       {cur.region && <span class="badge">{cur.region}</span>}
-                      {st === 'upcoming' && <span class="badge blue">未开始</span>}
-                      {st === 'trial' && <span class="badge green">试用</span>}
-                      {st === 'ending' && <span class="badge orange">到期不续</span>}
-                      {st === 'paused' && <span class="badge">暂停</span>}
-                      {st === 'ended' && <span class="badge">已退订</span>}
-                      {st === 'lifetime' && <span class="badge">买断</span>}
-                      {s.share?.role === 'owner' && <span class="badge blue">合租</span>}
-                      {s.share?.role === 'member' && <span class="badge blue">加入合租</span>}
+                      {st === 'upcoming' && <span class="badge blue">{t('list.status.upcoming')}</span>}
+                      {st === 'trial' && <span class="badge green">{t('list.status.trialShort')}</span>}
+                      {st === 'ending' && <span class="badge orange">{t('list.status.ending')}</span>}
+                      {st === 'paused' && <span class="badge">{t('list.status.pausedShort')}</span>}
+                      {st === 'ended' && <span class="badge">{t('list.status.ended')}</span>}
+                      {st === 'lifetime' && <span class="badge">{t('list.status.lifetime')}</span>}
+                      {s.share?.role === 'owner' && <span class="badge blue">{t('list.badge.share')}</span>}
+                      {s.share?.role === 'member' && <span class="badge blue">{t('list.badge.joined')}</span>}
                       {s.proxy && <ProxyBadge state={state} s={s} today={today} />}
                     </span>
                   </div>
@@ -196,7 +198,7 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                   <div class="sc-foot">
                     <span>{shown(s, n).sub ?? '\u00a0'}</span>
                     <span class={d != null && d <= 3 ? 'soon' : ''}>
-                      {st === 'lifetime' ? s.start.slice(0, 7) : st === 'ended' ? (saved.get(s.id) ? <span class="green">省 {money(saved.get(s.id)!, base, { compact: true })}</span> : (s.end ?? '')) : n ? (d! <= 14 ? relDays(d!) : cnDate(n)) : ''}
+                      {st === 'lifetime' ? s.start.slice(0, 7) : st === 'ended' ? (saved.get(s.id) ? <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span> : (s.end ?? '')) : n ? (d! <= 14 ? relDays(d!) : cnDate(n)) : ''}
                     </span>
                   </div>
                 </button>
@@ -209,13 +211,13 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
             <div class="lt-row lt-head" role="row">
               {(
                 [
-                  ['name', '订阅'],
-                  [null, '分类'],
-                  [null, '支付方式'],
-                  [null, '金额'],
-                  ['cost', '月均'],
-                  ['start', '开始'],
-                  ['next', '下次扣款'],
+                  ['name', t('list.col.name')],
+                  [null, t('list.col.category')],
+                  [null, t('list.col.method')],
+                  [null, t('list.col.amount')],
+                  ['cost', t('list.col.monthly')],
+                  ['start', t('list.col.start')],
+                  ['next', t('list.col.next')],
                 ] as Array<[Sort | null, string]>
               ).map(([k, l]) =>
                 k ? (
@@ -246,15 +248,15 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                         <b>{s.name}</b>
                         {s.intro && s.intro.until > today && <Icon name="leaf" size={13} />}
                         {cur.region && <span class="badge">{cur.region}</span>}
-                        {st === 'upcoming' && <span class="badge blue">未开始</span>}
-                        {st === 'trial' && <span class="badge green">试用</span>}
-                        {st === 'ending' && <span class="badge orange">到期不续</span>}
-                        {st === 'paused' && <span class="badge">暂停</span>}
-                        {st === 'ended' && <span class="badge">已退订</span>}
-                        {st === 'lifetime' && <span class="badge">买断</span>}
-                        {s.share?.role === 'owner' && s.share.members.length > 0 && <span class="badge blue">合租</span>}
-                        {s.share?.role === 'member' && <span class="badge blue">加入合租</span>}
-                        {s.proxy && <span class="badge" title={`替${s.proxy.forName || '他人'}代付`}>代付</span>}
+                        {st === 'upcoming' && <span class="badge blue">{t('list.status.upcoming')}</span>}
+                        {st === 'trial' && <span class="badge green">{t('list.status.trialShort')}</span>}
+                        {st === 'ending' && <span class="badge orange">{t('list.status.ending')}</span>}
+                        {st === 'paused' && <span class="badge">{t('list.status.pausedShort')}</span>}
+                        {st === 'ended' && <span class="badge">{t('list.status.ended')}</span>}
+                        {st === 'lifetime' && <span class="badge">{t('list.status.lifetime')}</span>}
+                        {s.share?.role === 'owner' && s.share.members.length > 0 && <span class="badge blue">{t('list.badge.share')}</span>}
+                        {s.share?.role === 'member' && <span class="badge blue">{t('list.badge.joined')}</span>}
+                        {s.proxy && <span class="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>{t('list.badge.proxy')}</span>}
                       </span>
                       {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
                     </span>
@@ -272,13 +274,13 @@ export function List({ state, today, onOpen, onAdd, category }: { state: AppStat
                     </span>
                     {money2 !== 'orig' && s.currency !== money2 && <small>{v.sub}</small>}
                   </span>
-                  <span class="lt-mo">{s.proxy ? <small>不计入</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
+                  <span class="lt-mo">{s.proxy ? <small>{t('list.notCounted')}</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
                   <span class="lt-start">{cnDate(s.start)}<small>{s.start.slice(0, 4)}</small></span>
                   <span class={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
                     {st === 'lifetime' ? (
-                      '买断'
+                      t('list.status.lifetime')
                     ) : st === 'ended' ? (
-                      saved.get(s.id) ? <span class="green">省 {money(saved.get(s.id)!, base, { compact: true })}</span> : <>结束 <small>{s.end ?? '—'}</small></>
+                      saved.get(s.id) ? <span class="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span> : <>{tx('list.endedOn', { date: <small>{s.end ?? '—'}</small> })}</>
                     ) : n ? (
                       <>
                         {cnDate(n)}
@@ -307,15 +309,14 @@ export function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; u
   const parts = [
     up.region && up.region !== cur.region ? `${flag(up.region)} ${up.region}` : '',
     st === 'upcoming' || up.price !== cur.price || up.currency !== cur.currency ? `${money(up.price, up.currency)}/${perLabel(up)}` : '',
-    up.methodId !== cur.methodId || st === 'upcoming' ? (m ? m.name : '支付方式未定') : '',
+    up.methodId !== cur.methodId || st === 'upcoming' ? (m ? m.name : t('list.change.noMethod')) : '',
   ].filter(Boolean);
   return (
     <div class="change-note">
       <Icon name="right" size={12} />
       <span>
-        {up.planned ? '计划 · ' : ''}
-        {when}
-        {st === 'upcoming' ? '开始' : '起'}
+        {up.planned ? t('list.change.planned') : ''}
+        {t(st === 'upcoming' ? 'list.change.starts' : 'list.change.from', { when })}
         {parts.length ? ` · ${parts.join(' · ')}` : ''}
       </span>
     </div>
@@ -325,8 +326,9 @@ export function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; u
 /** 代付状态角标：有待收显示「代付 · 待收 N 期」，否则「代付 · 已结清」 */
 function ProxyBadge({ state, s, today }: { state: AppState; s: Subscription; today: string }) {
   const n = proxyOwed(state, s, today);
-  const who = s.proxy?.forName ? `替${s.proxy.forName}` : '';
-  return <span class={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>{n ? `${who}代付 · 待收 ${n} 期` : `${who}代付 · 已结清`}</span>;
+  const name = s.proxy?.forName;
+  const key = `list.proxyBadge.${n ? 'owed' : 'settled'}${name ? 'For' : ''}`;
+  return <span class={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>{t(key, { count: n, name })}</span>;
 }
 
 /** 一行筛选：左边维度名，右边「全部」+ 各选项胶囊（数量在胶囊内；没有匹配的隐藏，已选中的保留）；再点已选中的回到「全部」，一行放不下时横向滑动 */

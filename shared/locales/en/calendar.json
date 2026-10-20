@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}",
+  "summary": { "one": "{count} charge · {amount}", "other": "{count} charges · {amount}" },
+  "mode": { "month": "Month", "year": "Year" },
+  "prev": "Previous",
+  "next": "Next",
+  "today": "Today",
+  "ics": "Subscribe in Calendar",
+  "noneDay": "No charges on this day",
+  "projected": "Expected",
+  "charged": "Charged",
+  "monthAll": "All charges in {month}",
+  "noneMonth": "No charges this month",
+  "day": "{day}",
+  "heatCount": { "one": "{count} charge · ", "other": "{count} charges · " }
+}

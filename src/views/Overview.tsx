@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../shared/billing.ts';
-import { cnDate, money, relDays } from '../../shared/format.ts';
+import { cnDate, money, monthLabel, relDays } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
 import { chargeValue } from '../../shared/fx.ts';
 import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries } from '../../shared/metrics.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../shared/types.ts';
@@ -15,13 +16,13 @@ const PROJ = '__proj';
 
 export function Overview({ state, today, onOpen, onAdd }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onAdd: () => void }) {
   const base = state.settings.baseCurrency;
-  const t = totals(state, today);
+  const tot = totals(state, today);
   return (
     <>
-      <Toolbar title="概览">
+      <Toolbar title={t('overview.title')}>
         {!state.readonly && (
           <button class="btn primary d-only" onClick={onAdd}>
-            <Icon name="plus" /> 新建订阅
+            <Icon name="plus" /> {t('overview.add')}
           </button>
         )}
       </Toolbar>
@@ -35,9 +36,9 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
         </div>
         <Tips state={state} today={today} onOpen={onOpen} />
         <p class="card-note" style={{ textAlign: 'center' }}>
-          {t.activeCount} 个订阅计费中 · 每月 {money(t.mrr, base)} ·{' '}
+          {t('overview.footer', { count: tot.activeCount, amount: money(tot.mrr, base) })}{' '}
           <a href="/admin/report" style={{ textDecoration: 'underline' }}>
-            看完整报告
+            {t('overview.fullReport')}
           </a>
         </p>
       </div>
@@ -65,7 +66,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const real = state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-        g.items.push({ key: `${c.sub.id}-${c.date}`, icon: <SubIcon sub={c.sub} size={30} />, tip: `${c.sub.name} · ${money(c.amount, c.currency)}`, onClick: () => onOpen(real) });
+        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <SubIcon sub={c.sub} size={30} />, tip: `${c.sub.name} · ${money(c.amount, c.currency)}`, onClick: () => onOpen(real) });
         map.set(c.date, g);
       }
       return [...map.values()];
@@ -75,9 +76,9 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
   return (
     <section class="card">
       <div class="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
-        <h3 class="sec-title">时间线</h3>
+        <h3 class="sec-title">{t('overview.timeline.title')}</h3>
         <span class="sec-sub" style={{ marginTop: 0 }}>
-          过去 30 天扣了 {money(past30, base, { compact: true })} · 接下来 30 天要扣 {money(next30, base, { compact: true })}
+          {t('overview.timeline.sub', { past: money(past30, base, { compact: true }), next: money(next30, base, { compact: true }) })}
         </span>
       </div>
       <Timeline load={load} today={today} />
@@ -98,7 +99,7 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
     if (scale === 'month') {
       for (let i = -11; i <= 6; i++) {
         const m = addMonths(today.slice(0, 8) + '01', i);
-        out.push({ key: m.slice(0, 7), label: i === 0 || m.endsWith('-01-01') ? `${m.slice(2, 4)}/${Number(m.slice(5, 7))}` : `${Number(m.slice(5, 7))}月`, from: m, to: addDays(addMonths(m, 1), -1) });
+        out.push({ key: m.slice(0, 7), label: i === 0 || m.endsWith('-01-01') ? t('overview.axis.yearMonth', { yy: m.slice(2, 4), m: Number(m.slice(5, 7)), mon: monthLabel(m.slice(0, 7), { year: false }) }) : monthLabel(m.slice(0, 7), { year: false }), from: m, to: addDays(addMonths(m, 1), -1) });
       }
     } else {
       for (let yy = Number(first.slice(0, 4)); yy <= Number(today.slice(0, 4)) + 1; yy++) out.push({ key: String(yy), label: String(yy), from: `${yy}-01-01`, to: `${yy}-12-31` });
@@ -144,15 +145,15 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
   const catTotals = new Map<string, number>();
   for (const { cs } of allRanges(state, ranges, today)) for (const c of cs) catTotals.set(c.sub.category, (catTotals.get(c.sub.category) ?? 0) + chargeValue(state, c));
   const cats = [...catTotals.entries()].sort((a, b) => b[1] - a[1]);
-  const selLabel = scale === 'month' ? `${sel.slice(0, 4)}年${Number(sel.slice(5))}月` : `${sel}年`;
+  const selLabel = scale === 'month' ? monthLabel(sel) : t('overview.spending.year', { year: sel });
   const isFuture = sel > curKey;
 
   return (
     <div class="card" style={{ padding: '22px 24px 20px' }}>
       <div class="ov-head">
         <div>
-          <h3 class="sec-title">每月花了多少</h3>
-          <div class="sec-sub">浅色为预计</div>
+          <h3 class="sec-title">{t('overview.spending.title')}</h3>
+          <div class="sec-sub">{t('overview.spending.sub')}</div>
         </div>
         <Seg
           value={scale}
@@ -161,8 +162,8 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
             setSelKey(undefined);
           }}
           options={[
-            ['month', '按月'],
-            ['year', '按年'],
+            ['month', t('overview.spending.month')],
+            ['year', t('overview.spending.yearly')],
           ]}
         />
       </div>
@@ -190,18 +191,18 @@ export function Spending({ state, today, onOpen }: { state: AppState; today: str
         <div>
           <h4>
             {selLabel}
-            {isFuture ? ' · 预计' : sel === curKey ? ' · 进行中' : ''}
+            {isFuture ? t('overview.spending.projected') : sel === curKey ? t('overview.spending.inProgress') : ''}
           </h4>
           <div class="big">
             <Amount value={selTotal} ccy={base} />
           </div>
           <div class="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
-            {items.length} 个订阅 · {selData?.cs.length ?? 0} 笔
-            {sel === curKey && selTotal > selPaid ? ` · 已付 ${money(selPaid, base, { compact: true })}` : ''}
+            {t('overview.n.subs', { count: items.length })} · {t('overview.n.charges', { count: selData?.cs.length ?? 0 })}
+            {sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: money(selPaid, base, { compact: true }) }) : ''}
           </div>
         </div>
         <div class="sel-items">
-          {items.length === 0 && <span class="muted" style={{ fontSize: 13 }}>这段时间没有扣款</span>}
+          {items.length === 0 && <span class="muted" style={{ fontSize: 13 }}>{t('overview.spending.empty')}</span>}
           {items.slice(0, 12).map((e) => (
             <button key={e.sub.id} class="sel-item" onClick={() => onOpen(e.sub)}>
               <SubIcon sub={e.sub} size={22} />
@@ -228,26 +229,26 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
   const base = state.settings.baseCurrency;
   const cs = allCharges(state, today, addDays(today, 30), today);
   const total = sumBase(state, cs);
-  const groups: Array<[string, Charge[]]> = [
-    ['这周', cs.filter((c) => diffDays(today, c.date) <= 6)],
-    ['之后', cs.filter((c) => diffDays(today, c.date) > 6)],
+  const groups: Array<['thisWeek' | 'later', Charge[]]> = [
+    ['thisWeek', cs.filter((c) => diffDays(today, c.date) <= 6)],
+    ['later', cs.filter((c) => diffDays(today, c.date) > 6)],
   ];
   return (
     <div class="card">
       <div class="card-h">
-        <h3>接下来 30 天</h3>
+        <h3>{t('overview.due.title')}</h3>
         <span class="meta">
-          {cs.length} 笔 · {money(total, base, { compact: true })}
+          {t('overview.n.charges', { count: cs.length })} · {money(total, base, { compact: true })}
         </span>
       </div>
-      {cs.length === 0 && <div class="empty">30 天内没有扣款</div>}
+      {cs.length === 0 && <div class="empty">{t('overview.due.empty')}</div>}
       <div class="due-list">
         {groups
           .filter(([, l]) => l.length)
           .map(([g, list]) => (
             <>
-              <div class="due-g">{g}</div>
-              {list.slice(0, g === '这周' ? 10 : 6).map((c, i) => {
+              <div class="due-g">{t(`overview.due.${g}`)}</div>
+              {list.slice(0, g === 'thisWeek' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
                 const m = state.methods.find((x) => x.id === c.sub.methodId);
                 return (
@@ -256,7 +257,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
                     <span class="nm">
                       <b>{c.sub.name}</b>
                       <small>
-                        {m?.name ?? '未指定支付'} · {cycleLabel(c.sub.cycle)}
+                        {m?.name ?? t('overview.due.noMethod')} · {cycleLabel(c.sub.cycle)}
                       </small>
                     </span>
                     <span class="am">
@@ -285,9 +286,9 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
   return (
     <div class="card">
       <div class="card-h">
-        <h3>钱包</h3>
+        <h3>{t('overview.wallet.title')}</h3>
         <a class="btn plain" href="/admin/wallet">
-          管理
+          {t('overview.wallet.manage')}
         </a>
       </div>
       {rows.map(({ m, r }) => {
@@ -301,15 +302,17 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
               {r ? (
                 <>
                   <small>
-                    余额 {money(r.current, m.currency, { compact: true })} ·{' '}
-                    {r.shortfall ? (r.coveredCharges ? `还能扣 ${r.coveredCharges} 期，${cnDate(r.shortfall.date)} 前要充值` : `${cnDate(r.shortfall.date)} 前必须充值`) : '3 年内够用'}
+                    {t('overview.wallet.balance', {
+                      amount: money(r.current, m.currency, { compact: true }),
+                      status: r.shortfall ? (r.coveredCharges ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) }) : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })) : t('overview.wallet.enough'),
+                    })}
                   </small>
                   <div class="wal-bar">
                     <i class={days != null && days <= 7 ? 'out' : days != null && days <= 30 ? 'low' : ''} style={{ width: `${Math.max(3, pct)}%` }} />
                   </div>
                 </>
               ) : (
-                <small style={{ color: 'var(--orange)' }}>还没填余额，填了才能算出还能撑多久</small>
+                <small style={{ color: 'var(--orange)' }}>{t('overview.wallet.noBalance')}</small>
               )}
             </span>
           </a>
@@ -317,7 +320,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
       })}
       {cards.length > 0 && (
         <div class="muted" style={{ fontSize: 12.5, marginTop: rows.length ? 12 : 0 }}>
-          另有 {cards.map((m) => m.name).join('、')}
+          {t('overview.wallet.others', { list: cards.map((m) => m.name).join(t('overview.listSep')) })}
         </div>
       )}
     </div>
@@ -330,7 +333,7 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
   const order = { warn: 0, info: 1, good: 2 } as const;
   const top = [...list].sort((a, b) => order[a.tone] - order[b.tone]).slice(0, 3);
   if (!top.length) return null;
-  const label = { warn: '需要留意', info: '提示', good: '一个事实' } as const;
+  const label = { warn: t('overview.tips.warn'), info: t('overview.tips.info'), good: t('overview.tips.good') };
   return (
     <div class="tips">
       {top.map((i) => (
@@ -361,7 +364,7 @@ export { perLabel };
 /** 账单头：深色底，左边负 MRR，右边订阅星图（圆的面积 = 每月成本） */
 export function Statement({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
-  const t = totals(state, today);
+  const tot = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const delta = mrrChangeSinceLastMonth(state, today);
   const ytd = useMemo(() => sumBase(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
@@ -393,15 +396,15 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
   return (
     <section class="stmt">
       <div class="stmt-l">
-        <div class="stmt-kicker">每月订阅支出</div>
+        <div class="stmt-kicker">{t('overview.stmt.kicker')}</div>
         <div class="stmt-num">
-          <Amount value={-t.mrr} ccy={base} />
+          <Amount value={-tot.mrr} ccy={base} />
         </div>
         <div class="stmt-delta">
           <span class={delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}>
             {delta > 0.5 ? '↑' : delta < -0.5 ? '↓' : '·'} {money(Math.abs(delta), base, { compact: true })}
           </span>
-          较上月末
+          {t('overview.stmt.vsLastMonth')}
         </div>
         <svg class="stmt-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
           <path d={`${path}L100,32L0,32Z`} fill="url(#stmt-g)" />
@@ -415,20 +418,20 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
         </svg>
         <div class="stmt-facts">
           <div>
-            <b>{money(t.mrr * 12, base, { compact: true })}</b>
-            <span>年化</span>
+            <b>{money(tot.mrr * 12, base, { compact: true })}</b>
+            <span>{t('overview.stmt.annual')}</span>
           </div>
           <div>
             <b>{money(ytd, base, { compact: true })}</b>
-            <span>{today.slice(0, 4)} 已付</span>
+            <span>{t('overview.stmt.ytd', { year: today.slice(0, 4) })}</span>
           </div>
           <div>
-            <b>{money(t.mrr / 30.4375, base)}</b>
-            <span>每天</span>
+            <b>{money(tot.mrr / 30.4375, base)}</b>
+            <span>{t('overview.stmt.perDay')}</span>
           </div>
           <div>
-            <b>{t.activeCount}</b>
-            <span>计费中</span>
+            <b>{tot.activeCount}</b>
+            <span>{t('overview.stmt.active')}</span>
           </div>
         </div>
       </div>
@@ -436,10 +439,10 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
         <div class="stmt-cap">
           {hv ? (
             <>
-              <b>{hv.s.name}</b> · {money(hv.v, base, { compact: true })}/月 · 占 {Math.round((hv.v / t.mrr) * 100)}%
+              <b>{hv.s.name}</b> · {t('overview.stmt.share', { amount: money(hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) })}
             </>
           ) : (
-            <>订阅星图 · 圆的大小按每月金额比例</>
+            <>{t('overview.stmt.caption')}</>
           )}
         </div>
         <div class="stars" ref={box} style={{ aspectRatio: `${1 / h}` }}>
@@ -455,7 +458,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
                   onMouseEnter={() => setHover(b.i)}
                   onMouseLeave={() => setHover(null)}
                   onClick={() => onOpen(s)}
-                  aria-label={`${s.name} 每月 ${money(v, base)}`}
+                  aria-label={t('overview.stmt.aria', { name: s.name, amount: money(v, base) })}
                 >
                   <SubIcon sub={s} size={Math.max(12, Math.round(d * 0.5))} />
                   {d > 86 && <span class="star-amt">{money(v, base, { compact: true })}</span>}

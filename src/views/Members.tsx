@@ -1,16 +1,25 @@
 import { useState } from 'preact/hooks';
 import { addDays, addMonths, chargesBetween, currentPhase, cycleDays, monthlyGross, todayIn, uid } from '../../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
-import { billLabel, cnDate, cnDateFull, money } from '../../shared/format.ts';
+import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
 import { confirmDelete } from './Editor.tsx';
 import { run, saveSub } from '../store.ts';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
+import { t, type Params } from '../../shared/i18n.ts';
 
+// 渠道值存进数据里（微信、邮箱等保持中文代码），显示时再翻译
 export const CONTACT_VIA = ['Telegram', '微信', 'WhatsApp', '邮箱', '手机', 'X', 'Discord', '其他'];
-export const CONTACT_HINT: Record<string, string> = { Telegram: '@username', 微信: '微信号', WhatsApp: '+63 …', 邮箱: 'name@example.com', 手机: '+86 …', X: '@handle', Discord: '用户名' };
+const VIA_KEY: Record<string, string> = { 微信: 'wechat', 邮箱: 'email', 手机: 'phone', 其他: 'other' };
+/** 渠道的显示名：Telegram 等专名原样，微信、邮箱等按当前语言 */
+export const viaLabel = (via: string): string => (VIA_KEY[via] ? t(`family.contact.via.${VIA_KEY[via]}`) : via);
+const CONTACT_HINT: Record<string, string> = { Telegram: '@username', WhatsApp: '+63 …', 邮箱: 'name@example.com', 手机: '+86 …', X: '@handle' };
+export const contactHint = (via: string): string | undefined => (via === '微信' ? t('family.contact.hint.wechat') : via === 'Discord' ? t('family.contact.hint.discord') : CONTACT_HINT[via]);
+
+/** 按收费周期选文案：常用周期各有一条，其余走 custom（带 count） */
+export const perBill = (key: string, months = 1, params: Params = {}): string => t(`${key}.${[1, 3, 6, 12].includes(months) ? `m${months}` : 'custom'}`, { count: months, ...params });
 
 /** 用户名前面带 @ 的渠道：输入框里固定显示 @，存的时候去掉 */
 const AT_VIA = new Set(['Telegram', 'X']);
@@ -22,7 +31,7 @@ export function contactText(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'
   const id = m.contact ?? m.tg;
   if (!id) return '';
   const shown = AT_VIA.has(via) ? `@${bare(id)}` : id;
-  return via && via !== '其他' ? `${via} ${shown}` : shown;
+  return via && via !== '其他' ? `${viaLabel(via)} ${shown}` : shown;
 }
 
 /** 联系方式输入：渠道选择 + 账号；Telegram、X 固定显示 @，能直接打开的渠道后面带一个跳转按钮 */
@@ -31,20 +40,20 @@ export function ContactField({ via, value, onVia, onChange }: { via: string; val
   const url = contactUrl(via, value);
   return (
     <span class="contact-field">
-      <Picker value={via} onChange={onVia} options={CONTACT_VIA.map((c) => ({ value: c, label: c }))} ariaLabel="联系渠道" />
+      <Picker value={via} onChange={onVia} options={CONTACT_VIA.map((c) => ({ value: c, label: viaLabel(c) }))} ariaLabel={t('family.contact.viaAria')} />
       {at && <span class="contact-at">@</span>}
       <input
         value={at ? bare(value ?? '') : (value ?? '')}
         autoCapitalize="off"
         inputMode={via === '邮箱' ? 'email' : via === '手机' ? 'tel' : 'text'}
-        placeholder={at ? bare(CONTACT_HINT[via]) : (CONTACT_HINT[via] ?? '账号 / ID')}
+        placeholder={at ? bare(contactHint(via) ?? '') : (contactHint(via) ?? t('family.contact.hint.generic'))}
         onInput={(e) => {
           const v = (e.target as HTMLInputElement).value.trim();
           onChange(at ? bare(v) : v);
         }}
       />
       {url && (
-        <a class="icon-btn contact-go" href={url} target="_blank" rel="noreferrer" aria-label={`打开 ${via}`} title={`打开 ${via}`}>
+        <a class="icon-btn contact-go" href={url} target="_blank" rel="noreferrer" aria-label={t('family.contact.open', { via: viaLabel(via) })} title={t('family.contact.open', { via: viaLabel(via) })}>
           <Icon name="link" />
         </a>
       )}
@@ -155,13 +164,13 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
     const next = { ...f, payments, paidUntil };
     setF(next);
     setAdding(false);
-    if (!isNew) save(next, `已记 ${f.name || '成员'} 收款 ${money(pay.amount, pay.currency)}`);
+    if (!isNew) save(next, t('family.member.toastPaid', { name: f.name || t('family.member.defaultName'), amount: money(pay.amount, pay.currency) }));
   };
   const removePayment = (i: number) => {
     const payments = (f.payments ?? []).filter((_, k) => k !== i);
     const next = { ...f, payments, paidUntil: payments.length ? payments.reduce((a, p) => (p.until > a ? p.until : a), payments[0].until) : f.paidUntil };
     setF(next);
-    if (!isNew) save(next, '已删除这笔收款');
+    if (!isNew) save(next, t('family.member.paymentRemoved'));
   };
 
   // 同一笔收款复制给其他成员：大家每期交的一样，不用一个个重填
@@ -184,17 +193,16 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
     run(async () => {
       await saveSub({ ...s, share: { ...sh, members } });
       setCopying(null);
-    }, `已复制给 ${targets.length} 位成员`);
+    }, t('family.member.copied', { count: targets.length }));
   };
 
   const payments = (f.payments ?? []).slice().reverse();
   const received = (f.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date, base), 0);
-  const unit = billLabel(months).slice(1);
 
   return (
     <Sheet
       narrow
-      title={isNew ? `添加成员 · ${s.name}` : f.name || '成员'}
+      title={isNew ? t('family.member.titleNew', { name: s.name }) : f.name || t('family.member.group')}
       onClose={onClose}
       foot={
         <>
@@ -203,85 +211,85 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
               class="btn plain"
               style={{ color: 'var(--red)' }}
               onClick={() =>
-                confirmDelete(`彻底删除成员「${f.name || '未命名'}」？收款记录也会一起删除，账本里的收入会变少。\n只是不再合租的话，填「退出日」就好。`) &&
+                confirmDelete(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') })) &&
                 run(async () => {
                   await saveSub({ ...s, share: { ...s.share!, members: s.share!.members.filter((x) => x.id !== f.id) } });
                   onClose();
-                }, '已删除')
+                }, t('family.member.deleted'))
               }
             >
-              删除
+              {t('family.member.delete')}
             </button>
           )}
           <span class="grow" />
           <button class="btn" onClick={onClose}>
-            取消
+            {t('family.member.cancel')}
           </button>
           <button
             class="btn primary"
             disabled={!f.name.trim()}
             onClick={async () => {
-              await save({ ...f, name: f.name.trim() }, isNew ? '已添加成员' : '已保存');
+              await save({ ...f, name: f.name.trim() }, isNew ? t('family.member.added') : t('family.member.saved'));
               onClose();
             }}
           >
-            {isNew ? '添加' : '保存'}
+            {isNew ? t('family.member.add') : t('family.member.save')}
           </button>
         </>
       }
     >
       <div class="stack">
-        <Group title="成员">
-          <Cell label="称呼">
-            <input value={f.name} autoFocus={isNew} placeholder="怎么称呼" onInput={(e) => up({ name: val(e) })} />
+        <Group title={t('family.member.group')}>
+          <Cell label={t('family.member.name')}>
+            <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onInput={(e) => up({ name: val(e) })} />
           </Cell>
-          <Cell label="联系方式">
+          <Cell label={t('family.member.contact')}>
             <ContactField via={via} value={f.contact} onVia={setVia} onChange={setContact} />
           </Cell>
-          <Cell label="受邀账号">
-            <input inputMode="email" autoCapitalize="off" value={f.account ?? ''} placeholder={`拉进 ${s.name} 家庭组的邮箱或用户名`} onInput={(e) => up({ account: val(e).trim() || undefined })} />
+          <Cell label={t('family.member.account')}>
+            <input inputMode="email" autoCapitalize="off" value={f.account ?? ''} placeholder={t('family.member.accountPh', { name: s.name })} onInput={(e) => up({ account: val(e).trim() || undefined })} />
           </Cell>
-          <Cell label="加入日">
-            <DatePicker value={f.joined} clearable placeholder={s.share?.since ? `同发起日 ${s.share.since}` : '不设置'} onChange={(v) => up({ joined: v })} />
+          <Cell label={t('family.member.joined')}>
+            <DatePicker value={f.joined} clearable placeholder={s.share?.since ? t('family.member.joinedPh', { date: s.share.since }) : t('family.member.notSet')} onChange={(v) => up({ joined: v })} />
           </Cell>
-          <Cell label="退出日">
-            <DatePicker value={f.left} clearable placeholder="还在合租" onChange={(v) => up({ left: v })} />
+          <Cell label={t('family.member.left')}>
+            <DatePicker value={f.left} clearable placeholder={t('family.member.leftPh')} onChange={(v) => up({ left: v })} />
           </Cell>
         </Group>
 
-        <Group title="收费标准">
+        <Group title={t('family.member.feeGroup')}>
           <div class="cell">
             <Seg
               value={String(months)}
               onChange={(v) => setFee({ billEvery: Number(v) })}
               options={[
-                ['1', '按月'],
-                ['3', '按季'],
-                ['6', '半年'],
-                ['12', '按年'],
+                ['1', t('family.member.seg.m1')],
+                ['3', t('family.member.seg.m3')],
+                ['6', t('family.member.seg.m6')],
+                ['12', t('family.member.seg.m12')],
               ]}
             />
           </div>
-          <Cell label={`每${unit}收`}>
+          <Cell label={perBill('family.member.feeLabel', months)}>
             <span class="contact-field">
-              <CurrencySelect value={f.feeCurrency ?? base} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel="收款币种" />
+              <CurrencySelect value={f.feeCurrency ?? base} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
               <input class="num" inputMode="decimal" value={f.fee ?? ''} placeholder="0" onInput={(e) => setFee({ fee: Number(val(e)) || 0 })} />
             </span>
           </Cell>
-          <Cell label={<span>不分摊</span>}>
+          <Cell label={<span>{t('family.member.exempt')}</span>}>
             <Toggle checked={!!f.exempt} onChange={(v) => up({ exempt: v || undefined })} />
           </Cell>
         </Group>
 
-        <Group title="其他">
-          <Cell label="来源">
-            <input value={f.source ?? ''} placeholder="哪个群 / 谁介绍的" onInput={(e) => up({ source: val(e) || undefined })} />
+        <Group title={t('family.member.other')}>
+          <Cell label={t('family.member.source')}>
+            <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onInput={(e) => up({ source: val(e) || undefined })} />
           </Cell>
         </Group>
 
-        <Group title={`收款记录 · ${(f.payments ?? []).length} 笔`} foot={received ? `累计收到约 ${money(received, base)}` : undefined}>
-          <Cell label="已付至">
-            <DatePicker value={f.paidUntil} clearable placeholder="还没收过" onChange={(v) => up({ paidUntil: v })} />
+        <Group title={t('family.member.payments', { count: (f.payments ?? []).length })} foot={received ? t('family.member.receivedTotal', { amount: money(received, base) }) : undefined}>
+          <Cell label={t('family.member.paidUntil')}>
+            <DatePicker value={f.paidUntil} clearable placeholder={t('family.member.paidUntilPh')} onChange={(v) => up({ paidUntil: v })} />
           </Cell>
           {payments.map((p) => {
             const i = (f.payments ?? []).indexOf(p);
@@ -290,18 +298,17 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
                 <span class="cell-l">
                   {money(p.amount, p.currency)}
                   <small>
-                    {cnDateFull(p.date)} 收 · 覆盖 {p.from ? `${cnDate(p.from)}–` : '至 '}
-                    {cnDate(p.until)}
+                    {p.from ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) }) : t('family.member.payCoverTo', { date: cnDateFull(p.date), until: cnDate(p.until) })}
                     {p.note ? ` · ${p.note}` : ''}
                   </small>
                 </span>
                 <span class="cell-r">
                   {others.length > 0 && (
-                    <button class={`icon-btn ${copying === i ? 'on' : ''}`} style={{ width: 26, height: 26 }} aria-label="复制给其他成员" title="复制给其他成员" onClick={() => (copying === i ? setCopying(null) : startCopy(i))}>
+                    <button class={`icon-btn ${copying === i ? 'on' : ''}`} style={{ width: 26, height: 26 }} aria-label={t('family.member.copyAria')} title={t('family.member.copyAria')} onClick={() => (copying === i ? setCopying(null) : startCopy(i))}>
                       <Icon name="copy" />
                     </button>
                   )}
-                  <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label="删除这笔收款" onClick={() => removePayment(i)}>
+                  <button class="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
                     <Icon name="x" />
                   </button>
                 </span>
@@ -317,17 +324,17 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
                             checked={!dup && targets.includes(o.id)}
                             onChange={(e) => setTargets((e.target as HTMLInputElement).checked ? [...targets, o.id] : targets.filter((x) => x !== o.id))}
                           />
-                          <span>{o.name || '未命名'}</span>
-                          <small>{dup ? '已有这笔' : o.paidUntil ? `已付至 ${cnDate(o.paidUntil)}` : '尚未收款'}</small>
+                          <span>{o.name || t('family.member.unnamed')}</span>
+                          <small>{dup ? t('family.member.dup') : o.paidUntil ? t('family.member.paidUntilDate', { date: cnDate(o.paidUntil) }) : t('family.member.noPay')}</small>
                         </label>
                       );
                     })}
                     <div class="copy-actions">
                       <button class="btn" onClick={() => setCopying(null)}>
-                        取消
+                        {t('family.member.cancel')}
                       </button>
                       <button class="btn primary" disabled={!targets.length} onClick={() => copyTo(p)}>
-                        复制给 {targets.length} 人
+                        {t('family.member.copyN', { count: targets.length })}
                       </button>
                     </div>
                   </div>
@@ -337,30 +344,30 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
           })}
           {adding ? (
             <>
-              <Cell label="金额">
+              <Cell label={t('family.member.amount')}>
                 <input class="num" inputMode="decimal" value={pay.amount} onInput={(e) => setPay({ ...pay, amount: Number(val(e)) || 0 })} />
               </Cell>
-              <Cell label="币种">
+              <Cell label={t('family.member.currency')}>
                 <CurrencySelect value={pay.currency} onChange={(c) => setPay({ ...pay, currency: c })} />
               </Cell>
-              <Cell label="覆盖开始">
+              <Cell label={t('family.member.coverFrom')}>
                 <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v, until: coverEnd(v, months) })} />
               </Cell>
-              <Cell label={<span>覆盖结束<small class="muted" style={{ display: 'block', fontSize: 12 }}>按{billLabel(months).slice(1)}自动算出，可改</small></span>}>
+              <Cell label={<span>{t('family.member.coverTo')}<small class="muted" style={{ display: 'block', fontSize: 12 }}>{perBill('family.member.coverAuto', months)}</small></span>}>
                 <DatePicker value={pay.until} onChange={(v) => setPay({ ...pay, until: v ?? pay.until })} />
               </Cell>
-              <Cell label="收到日期">
+              <Cell label={t('family.member.receivedOn')}>
                 <DatePicker value={pay.date} onChange={(v) => setPay({ ...pay, date: v ?? today })} />
               </Cell>
-              <Cell label="备注">
-                <input value={pay.note ?? ''} placeholder="可选，如 USDT 转账" onInput={(e) => setPay({ ...pay, note: val(e) || undefined })} />
+              <Cell label={t('family.member.note')}>
+                <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onInput={(e) => setPay({ ...pay, note: val(e) || undefined })} />
               </Cell>
               <div class="cell" style={{ justifyContent: 'flex-end', gap: 8 }}>
                 <button class="btn" onClick={() => setAdding(false)}>
-                  取消
+                  {t('family.member.cancel')}
                 </button>
                 <button class="btn primary" disabled={!pay.amount} onClick={addPayment}>
-                  记下这笔
+                  {t('family.member.record')}
                 </button>
               </div>
             </>
@@ -373,7 +380,7 @@ export function MemberSheet({ state, s, member, collect, onClose }: { state: App
                 setAdding(true);
               }}
             >
-              <Icon name="plus" /> 记一笔收款（每{unit} {money(f.fee ?? 0, f.feeCurrency ?? base)}）
+              <Icon name="plus" /> {perBill('family.member.recordBtn', months, { fee: money(f.fee ?? 0, f.feeCurrency ?? base) })}
             </button>
           )}
         </Group>

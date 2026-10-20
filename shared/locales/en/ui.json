@@ -1,0 +1,23 @@
+{
+  "close": "Close",
+  "error": {
+    "loginRequired": "Please sign in first",
+    "requestFailed": "Request failed ({status})"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "currency": {
+    "XCG": "Caribbean guilder",
+    "ZWG": "Zimbabwe Gold"
+  },
+  "method": {
+    "none": "Not set"
+  },
+  "toolbar": {
+    "openSidebar": "Open sidebar",
+    "add": "Add subscription"
+  }
+}

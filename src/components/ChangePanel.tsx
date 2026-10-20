@@ -8,16 +8,19 @@ import { Group, Icon, Toggle } from './ui.tsx';
 import { MethodPicker } from './MethodPicker.tsx';
 import { toast } from '../store.ts';
 import { CurrencySelect, Picker, RegionSelect } from './Picker.tsx';
+import { t } from '../../shared/i18n.ts';
 
 /** 常用的续费周期（不含买断） */
-export const CYCLES: Array<[string, string, Cycle]> = [
-  ['w1', '每周', { unit: 'week', every: 1 }],
-  ['m1', '每月', { unit: 'month', every: 1 }],
-  ['m3', '每季度', { unit: 'month', every: 3 }],
-  ['m6', '每半年', { unit: 'month', every: 6 }],
-  ['y1', '每年', { unit: 'year', every: 1 }],
-  ['y2', '每两年', { unit: 'year', every: 2 }],
+export const CYCLES: Array<[string, Cycle]> = [
+  ['w1', { unit: 'week', every: 1 }],
+  ['m1', { unit: 'month', every: 1 }],
+  ['m3', { unit: 'month', every: 3 }],
+  ['m6', { unit: 'month', every: 6 }],
+  ['y1', { unit: 'year', every: 1 }],
+  ['y2', { unit: 'year', every: 2 }],
 ];
+/** 周期选项的文字（w1、m1……lt） */
+export const cycleName = (k: string) => t(`editor.cycle.${k}`);
 
 type Mode = 'price' | 'switch' | 'resume';
 
@@ -27,7 +30,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   const [date, setDate] = useState(today);
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState(f.currency);
-  const [cycle, setCycle] = useState(CYCLES.find(([, , c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'm1');
+  const [cycle, setCycle] = useState(CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'm1');
   const [methodId, setMethodId] = useState(f.methodId ?? '');
   const [region, setRegion] = useState(f.region ?? '');
   const [planned, setPlanned] = useState(false);
@@ -47,72 +50,72 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   };
   const apply = () => {
     const n = Number(price);
-    if (!(n >= 0) || price === '') return toast('请填写价格', true);
+    if (!(n >= 0) || price === '') return toast(t('editor.change.needPrice'), true);
     try {
-      const plan = { price: n, currency, cycle: CYCLES.find(([k]) => k === cycle)![2], methodId: methodId || undefined, region: region.trim().toUpperCase() || undefined, planned: mode === 'switch' && planned ? true : undefined };
+      const plan = { price: n, currency, cycle: CYCLES.find(([k]) => k === cycle)![1], methodId: methodId || undefined, region: region.trim().toUpperCase() || undefined, planned: mode === 'switch' && planned ? true : undefined };
       const next = mode === 'price' ? changePrice(f, date, n) : mode === 'switch' ? switchPlan(f, date, plan) : resume(f, date, plan);
       setF(next);
       setMode(null);
-      toast(mode === 'price' ? '已记录调价，保存后生效' : mode === 'switch' ? '已添加新阶段，保存后生效' : '已续订，保存后生效');
+      toast(t(mode === 'price' ? 'editor.change.toast.price' : mode === 'switch' ? 'editor.change.toast.switch' : 'editor.change.toast.resume'));
     } catch (e) {
       toast(e instanceof Error ? e.message : String(e), true);
     }
   };
 
   return (
-    <Group title="历程与变更">
+    <Group title={t('editor.change.title')}>
       <History sub={f} state={state} today={today} />
       <div class="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
         <button class={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
-          记录调价
+          {t('editor.change.price')}
         </button>
         <button class={`btn ${mode === 'switch' ? 'primary' : ''}`} onClick={() => open('switch')}>
-          换区 / 换套餐 / 换支付方式
+          {t('editor.change.switch')}
         </button>
         {ended && (
           <button class={`btn ${mode === 'resume' ? 'primary' : ''}`} onClick={() => open('resume')}>
-            续订
+            {t('editor.change.resume')}
           </button>
         )}
         {phases > 1 && (
           <button class="btn danger" onClick={() => setF(removePhase(f, phases - 1))}>
-            撤回最近一个阶段
+            {t('editor.change.undo')}
           </button>
         )}
       </div>
       {mode && (
         <div class="change-form">
           <label>
-            {mode === 'price' ? '新价格生效日' : mode === 'switch' ? '切换生效日' : '续订日期'}
+            {t(mode === 'price' ? 'editor.change.priceDate' : mode === 'switch' ? 'editor.change.switchDate' : 'editor.change.resumeDate')}
             <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
           </label>
           <label>
-            {mode === 'price' ? `新价格（${f.currency}）` : '价格'}
+            {mode === 'price' ? t('editor.change.newPrice', { currency: f.currency }) : t('editor.change.priceLabel')}
             <input inputMode="decimal" value={price} autoFocus placeholder="0.00" onInput={(e) => setPrice((e.target as HTMLInputElement).value)} />
           </label>
           {mode !== 'price' && (
             <>
               <label>
-                币种
+                {t('editor.field.currency')}
                 <CurrencySelect value={currency} onChange={setCurrency} />
               </label>
               <label>
-                周期
-                <Picker value={cycle} onChange={setCycle} options={CYCLES.map(([k, l]) => ({ value: k, label: l }))} ariaLabel="周期" />
+                {t('editor.field.cycle')}
+                <Picker value={cycle} onChange={setCycle} options={CYCLES.map(([k]) => ({ value: k, label: cycleName(k) }))} ariaLabel={t('editor.field.cycle')} />
               </label>
               <label>
-                支付方式
+                {t('editor.field.method')}
                 <MethodPicker methods={state.methods} value={methodId || undefined} onChange={(id) => setMethodId(id ?? '')} />
               </label>
               <label>
-                地区
+                {t('editor.field.region')}
                 <RegionSelect value={region || undefined} onChange={(r) => setRegion(r ?? '')} common={[...new Set([...state.subscriptions.flatMap((x) => [x.region, ...(x.phases ?? []).map((ph) => ph.region)]), ...state.methods.map((m) => m.region)].filter(Boolean) as string[])]} />
               </label>
               {mode === 'switch' && (
                 <label class="change-plan">
                   <span>
-                    还没确定，只是计划
-                    <small>照常算进预测，详情里会标「计划」，到时一键确认或取消</small>
+                    {t('editor.change.planned')}
+                    <small>{t('editor.change.plannedHint')}</small>
                   </span>
                   <Toggle checked={planned} onChange={setPlanned} />
                 </label>
@@ -121,10 +124,10 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
           )}
           <div class="change-actions">
             <button class="btn" onClick={() => setMode(null)}>
-              取消
+              {t('common.cancel')}
             </button>
             <button class="btn primary" onClick={apply}>
-              <Icon name="check" /> 应用
+              <Icon name="check" /> {t('common.apply')}
             </button>
           </div>
         </div>

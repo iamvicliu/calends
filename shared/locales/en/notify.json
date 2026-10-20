@@ -1,0 +1,97 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "Trial ends {when} ({date}), then {price}",
+    "headline": "{name} trial ends {when}"
+  },
+  "renew": {
+    "introEnds": "Intro price ends, back to regular price",
+    "headline": "{name} renews {when} for {price}"
+  },
+  "ending": {
+    "sub": "Ends {when}, won't renew",
+    "headline": "{name} ends {when}"
+  },
+  "carpool": {
+    "dueIn": "Due {when} ({date})",
+    "dueToday": "Due today",
+    "overdue": {
+      "one": "{count} day overdue",
+      "other": "{count} days overdue"
+    },
+    "sub": "{status} · next period: {bill}",
+    "headline": "Time to collect from {member} for {name}"
+  },
+  "proxy": {
+    "someone": "Someone",
+    "chargedToday": "Charged on their behalf today",
+    "chargedAgo": {
+      "one": "Charged {date}, {count} day ago",
+      "other": "Charged {date}, {count} days ago"
+    },
+    "sub": "{status}, not repaid yet",
+    "headlineToday": "Paid {sub} for {name}",
+    "headlineUnpaid": "{name} hasn't repaid {sub}"
+  },
+  "balance": {
+    "sub": "Balance {balance} won't cover {sub} ({amount}) on {date}",
+    "headline": "{name} balance running low"
+  },
+  "section": {
+    "renew": "Upcoming charges",
+    "trials": "Trials ending",
+    "balance": "Low balance",
+    "carpool": "Shared plan payments",
+    "proxy": "Owed for paying on behalf",
+    "ending": "Ending soon",
+    "month": "This month's charges"
+  },
+  "daily": {
+    "subject": "Subscription reminder: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} + {more} more",
+    "intro": "You're spending {mrr} a month on subscriptions, with {count} active."
+  },
+  "monthly": {
+    "subject": {
+      "one": "{month} bill: about {sum}, {count} charge",
+      "other": "{month} bill: about {sum}, {count} charges"
+    },
+    "intro": {
+      "one": "{count} charge expected in {monthYear}, about {sum} in total. MRR {mrr}, {arr} a year.",
+      "other": "{count} charges expected in {monthYear}, about {sum} in total. MRR {mrr}, {arr} a year."
+    }
+  },
+  "email": {
+    "open": "Open Subscription Ledger",
+    "footer": "You can change the reminder time and lead days in Settings."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Channel not found",
+    "noneEnabled": "No notification channels are turned on",
+    "alreadySent": "Already sent today",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Test] {subject}",
+    "sampleSubject": "[Test] Subscription reminders are ready",
+    "sampleIntro": "Your notification channel is working."
+  },
+  "channel": {
+    "missing": "“{channel}” is missing {field}",
+    "field": {
+      "to": "a recipient email",
+      "botToken": "a bot token",
+      "chatId": "a chat ID",
+      "webhook": "a webhook URL",
+      "deviceKey": "a device key",
+      "topic": "a topic",
+      "sendKey": "a SendKey",
+      "url": "a URL"
+    }
+  }
+}

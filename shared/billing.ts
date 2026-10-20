@@ -1,4 +1,5 @@
 import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment } from './types.ts';
+import { t } from './i18n.ts';
 
 // ---------- 日期：全部按 UTC 日计算 ----------
 
@@ -72,27 +73,26 @@ export function cycleDays(c: Cycle): number {
 }
 
 export function cycleLabel(c: Cycle): string {
-  if (c.unit === 'lifetime') return '买断';
-  const unit = { day: '天', week: '周', month: '月', year: '年' }[c.unit];
-  if (c.every === 1) return { day: '每天', week: '每周', month: '每月', year: '每年' }[c.unit];
-  if (c.unit === 'month' && c.every === 3) return '每季度';
-  if (c.unit === 'month' && c.every === 6) return '每半年';
-  if (c.unit === 'year' && c.every === 2) return '每两年';
-  return `每 ${c.every} ${unit === '月' ? '个月' : unit}`;
+  if (c.unit === 'lifetime') return t('core.cycle.lifetime');
+  if (c.every === 1) return t(`core.cycle.every.${c.unit}`);
+  if (c.unit === 'month' && c.every === 3) return t('core.cycle.quarterly');
+  if (c.unit === 'month' && c.every === 6) return t('core.cycle.halfYearly');
+  if (c.unit === 'year' && c.every === 2) return t('core.cycle.biennial');
+  return t(`core.cycle.everyN.${c.unit}`, { count: c.every });
 }
 
 export function cycleShort(c: Cycle): string {
-  if (c.unit === 'lifetime') return '一次';
+  if (c.unit === 'lifetime') return t('core.cycle.once');
   const u = { day: 'd', week: 'w', month: 'mo', year: 'yr' }[c.unit];
   return c.every === 1 ? u : `${c.every}${u}`;
 }
 
 /** 订阅基本字段的校验：有问题时返回错误文案（后台接口与 MCP 共用） */
 export function subError(s: Subscription): string | undefined {
-  if (!s.name?.trim()) return '名称不能为空';
-  if (!Number.isFinite(s.price) || s.price < 0) return '价格无效';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) return '开始日期无效';
-  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !(s.cycle.every >= 1)) return '周期无效';
+  if (!s.name?.trim()) return t('core.subError.name');
+  if (!Number.isFinite(s.price) || s.price < 0) return t('core.subError.price');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) return t('core.subError.start');
+  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !(s.cycle.every >= 1)) return t('core.subError.cycle');
   return undefined;
 }
 

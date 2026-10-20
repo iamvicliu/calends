@@ -1,0 +1,222 @@
+{
+  "title": "Settings",
+  "days": { "one": "{count} day", "other": "{count} days" },
+  "logout": "Sign out",
+  "toast": {
+    "saved": "Saved",
+    "deleted": "Deleted",
+    "csvEmpty": "No subscriptions to import in this CSV",
+    "badBackup": "Not a valid backup file"
+  },
+  "general": {
+    "title": "General",
+    "language": "Language",
+    "followSystem": "System default",
+    "name": "Name",
+    "namePlaceholder": "Shown on share images and the public page",
+    "startPage": "Open to",
+    "startPageAria": "Start page",
+    "baseCurrency": "Base currency",
+    "timezone": "Time zone",
+    "weekStart": "Week starts on",
+    "weekStartAria": "First day of week",
+    "monday": "Monday",
+    "sunday": "Sunday"
+  },
+  "sidebar": {
+    "title": "Sidebar",
+    "upcoming": "Upcoming charges",
+    "lookAhead": "Look ahead",
+    "lookAheadAria": "Upcoming charges window"
+  },
+  "remind": {
+    "title": "Reminders",
+    "lead": "Remind me",
+    "sameDay": "On the day",
+    "hour": "Send at",
+    "monthly": "Monthly preview on the 1st",
+    "test": "Send a test reminder to all channels",
+    "testFailed": "Couldn't send",
+    "channelError": "{channel}: {error}",
+    "errorSep": "; ",
+    "testSent": "Test reminder sent",
+    "preview": "Preview today's reminders"
+  },
+  "today": {
+    "title": "Today ({day})",
+    "items": { "one": "{count} item", "other": "{count} items" }
+  },
+  "books": {
+    "title": "Bookkeeping",
+    "defaultMethod": "Default payment method",
+    "unassigned": { "one": "{count} subscription has no payment method", "other": "{count} subscriptions have no payment method" },
+    "assignAllDone": { "one": "Set {count} subscription to the default payment method", "other": "Set {count} subscriptions to the default payment method" },
+    "assignAll": "Use default for all",
+    "collectCurrency": "Shared plan currency"
+  },
+  "fx": {
+    "title": "Exchange rates",
+    "current": "Current rate",
+    "updatedAt": "Updated {time}",
+    "updated": "Exchange rates updated",
+    "history": "Historical rates",
+    "earliest": "From {date}",
+    "coverage": { "one": "{covered} / {count} day", "other": "{covered} / {count} days" },
+    "fill": "Fill in missing rates",
+    "historyUpdated": "Historical rates updated"
+  },
+  "open": {
+    "title": "Sharing & access",
+    "ics": "Subscribe in system calendar",
+    "on": "On",
+    "off": "Off",
+    "public": "Public page",
+    "publicOn": "Public page is on",
+    "publicOff": "Public page is off",
+    "previewPublic": "Preview public page",
+    "ai": "AI access (MCP)",
+    "aiOn": "AI access is on",
+    "aiOff": "AI access is off. AI assistants can no longer connect.",
+    "manageAi": "Manage tokens and setup"
+  },
+  "data": {
+    "title": "Data",
+    "importCsv": "Import CSV",
+    "restore": "Restore from backup",
+    "exportCsv": "Export CSV",
+    "backup": "Export full backup"
+  },
+  "restore": {
+    "cancel": "Cancel",
+    "replace": "Replace current ledger",
+    "done": "Restored",
+    "warning": "Your current ledger will be completely replaced by the backup. This can't be undone — consider exporting a backup first.",
+    "subs": "Subscriptions",
+    "methods": "Payment methods",
+    "count": { "one": "{count}", "other": "{count}" },
+    "time": "Backed up",
+    "format": "Format",
+    "legacy": "Legacy backup: subscriptions and payment methods only"
+  },
+  "import": {
+    "title": { "one": "Import {count} subscription", "other": "Import {count} subscriptions" },
+    "confirmReplace": "Replacing will erase all existing subscriptions and payment methods. Continue?",
+    "replaceDone": "Imported (replaced)",
+    "replaceAll": "Replace all",
+    "mergeDone": "Imported (merged)",
+    "merge": "Add to existing",
+    "newMethods": "New payment methods will be created: {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": { "one": "Notification channels · {count} on", "other": "Notification channels · {count} on" },
+    "empty": "No channels yet — reminders won't be sent.",
+    "test": "Test",
+    "testFailed": "Couldn't send",
+    "testSent": "Test message sent",
+    "add": "Add channel",
+    "addKind": "Add {name}",
+    "confirmDelete": "Delete channel “{name}”?",
+    "delete": "Delete",
+    "save": "Save",
+    "fillField": "Please enter {field}",
+    "name": "Name",
+    "optional": "Optional",
+    "enabled": "Enabled",
+    "field": {
+      "to": "Email address",
+      "webhook": "Webhook URL",
+      "server": "Server",
+      "token": "Access token"
+    },
+    "kind": {
+      "email": {
+        "name": "Email",
+        "help": "Sent via Cloudflare Email Sending; your domain must be verified on Cloudflare"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "Your user ID or group ID",
+        "help": "Create a bot with @BotFather to get a token. Send your bot a message first, then use @userinfobot to find your ID"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Signing secret",
+        "secretPlaceholder": "Required if signature verification is on",
+        "help": "Group settings → Bots → Add custom bot"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Signing secret",
+        "secretPlaceholder": "SEC…, required if signing is on",
+        "help": "Group settings → Bots → Custom bot"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Group chat → Add group bot"
+      },
+      "bark": {
+        "keyPlaceholder": "Key copied from the app",
+        "help": "iPhone push notifications — search Bark on the App Store"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Pick a name that's hard to guess",
+        "help": "Install the ntfy app on your phone and subscribe to the same topic"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… or sctp…",
+        "help": "Push to WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Channel settings → Integrations → Webhooks"
+      },
+      "webhook": {
+        "name": "Custom webhook",
+        "header": "Extra header",
+        "help": "POST JSON: subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Security",
+    "unknownBrowser": "Unknown browser",
+    "ago": {
+      "justNow": "Active just now",
+      "minutes": { "one": "{count} minute ago", "other": "{count} minutes ago" },
+      "hours": { "one": "{count} hour ago", "other": "{count} hours ago" },
+      "days": { "one": "{count} day ago", "other": "{count} days ago" }
+    },
+    "thisDevice": "This device",
+    "signedInPasskey": "Signed in with passkey on {time}",
+    "signedInPassword": "Signed in with password on {time}",
+    "revoke": "Sign out",
+    "revoked": "Signed out",
+    "passkeyFoot": "With a passkey you can sign in using Face ID, Touch ID or your device passcode — no password needed.",
+    "passkeyUnsupported": "This browser doesn't support passkeys.",
+    "lastUsed": "Last used {time}",
+    "addedAt": "Added {time}",
+    "confirmRemovePasskey": "Remove passkey “{name}”?",
+    "remove": "Remove",
+    "removed": "Removed",
+    "addPasskey": "Add passkey",
+    "alreadyBound": "This device already has a passkey",
+    "changePassword": "Change password",
+    "devices": "Signed-in devices",
+    "devicesCount": { "one": "Signed-in devices · {count}", "other": "Signed-in devices · {count}" },
+    "devicesFoot": "When the limit is reached, the device inactive the longest is signed out automatically. Locations are estimated from IP and may be inaccurate.",
+    "maxSessions": "Max signed-in devices",
+    "maxSessionsSaved": { "one": "Up to {count} device", "other": "Up to {count} devices" },
+    "deviceCount": { "one": "{count} device", "other": "{count} devices" },
+    "confirmLogoutOthers": "Sign out all other devices?",
+    "loggedOutOthers": "Other devices signed out",
+    "logoutOthers": "Sign out all other devices",
+    "passwordChanged": "Password changed. Other devices have been signed out.",
+    "save": "Save",
+    "mismatch": "Passwords don't match",
+    "passwordFoot": "At least 8 characters. Changing it signs out all devices except this one.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "minLength": "At least 8 characters",
+    "confirmPassword": "Confirm new password"
+  }
+}

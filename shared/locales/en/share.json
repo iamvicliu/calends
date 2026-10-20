@@ -1,0 +1,91 @@
+{
+  "title": "Share “{name}”",
+  "style": {
+    "card": "Card",
+    "receipt": "Receipt",
+    "timeline": "Timeline",
+    "poster": "Poster",
+    "years": "By year"
+  },
+  "dur": {
+    "ym": "{y} yr {m} mo",
+    "y": {
+      "one": "{count} year",
+      "other": "{count} years"
+    },
+    "m": {
+      "one": "{count} month",
+      "other": "{count} months"
+    },
+    "d": {
+      "one": "{count} day",
+      "other": "{count} days"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "ending": "Ending",
+    "trial": "On trial",
+    "paused": "Paused",
+    "ended": "Cancelled",
+    "lifetime": "Owned for life",
+    "upcoming": "Starting soon"
+  },
+  "switched": {
+    "zero": "Never switched",
+    "one": "Switched once",
+    "other": "Switched {count} times"
+  },
+  "priceSame": "Unchanged",
+  "priceUp": "Up {pct}%",
+  "priceDown": "Down {pct}%",
+  "since": "Since {date}",
+  "together": "Together for",
+  "totalSpent": "Total spent",
+  "charges": "Charges",
+  "subscribed": "Subscribed",
+  "times": "{count}",
+  "gaps": "Lapses",
+  "realMonthly": "Real monthly cost",
+  "price": "Price",
+  "phases": "Phases",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — today",
+  "refund": "Refund",
+  "refundShort": "Refund",
+  "nth": "#{n}",
+  "earlier": "{count} earlier",
+  "time": "TIME",
+  "total": "TOTAL",
+  "chargeCount": "Charges",
+  "count": "{count}",
+  "switches": "Region / plan changes",
+  "thanks": "Thank you · See you next cycle",
+  "n": {
+    "charges": {
+      "one": "{count} charge",
+      "other": "{count} charges"
+    }
+  },
+  "sum": "{amount} total",
+  "gap": "{dur} off",
+  "planned": "{date} (planned)",
+  "present": "now",
+  "priceChanges": "Price changes: {list}",
+  "withYou": "With you for",
+  "totalPerDay": "{total} total · {perDay}/day on average",
+  "lapsed": {
+    "one": "Lapsed once",
+    "other": "Lapsed {count} times"
+  },
+  "byYear": "Spending by year",
+  "sheet": {
+    "copied": "Image copied — ready to paste",
+    "copyFailed": "Couldn't copy. Try downloading instead.",
+    "renderFailed": "Couldn't create the image",
+    "download": "Download image",
+    "generating": "Generating…",
+    "copy": "Copy image",
+    "showAmounts": "Show amounts"
+  }
+}

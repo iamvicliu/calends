@@ -5,6 +5,7 @@ import { Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, run, saveSettings, toast } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
+import { t } from '../../shared/i18n.ts';
 
 interface Field {
   key: string;
@@ -14,23 +15,23 @@ interface Field {
   optional?: boolean;
 }
 
-/** 每种渠道要填什么；logo 是白色标志，放在品牌色底上 */
-export const KINDS: Record<ChannelKind, { name: string; color: string; logo?: string; mark?: string; fields: Field[]; help?: string }> = {
-  email: { name: '邮件', color: '#ea4335', logo: '/channels/gmail.svg', fields: [{ key: 'to', label: '收件邮箱', placeholder: 'you@example.com' }], help: '经 Cloudflare Email Sending 发出，需要域名已在 Cloudflare 验证' },
-  telegram: { name: 'Telegram', color: '#26a5e4', logo: '/channels/telegram.svg', fields: [{ key: 'token', label: 'Bot Token', placeholder: '123456:ABC…', secret: true }, { key: 'chatId', label: 'Chat ID', placeholder: '你的用户 ID 或群 ID' }], help: '找 @BotFather 建机器人拿 Token；先给机器人发一条消息，再用 @userinfobot 查自己的 ID' },
-  lark: { name: '飞书 / Lark', color: '#3370ff', mark: '飞', fields: [{ key: 'webhook', label: 'Webhook 地址', placeholder: 'https://open.feishu.cn/open-apis/bot/v2/hook/…' }, { key: 'secret', label: '签名密钥', placeholder: '开启「签名校验」时填', secret: true, optional: true }], help: '群设置 → 群机器人 → 添加自定义机器人' },
-  dingtalk: { name: '钉钉', color: '#1677ff', mark: '钉', fields: [{ key: 'webhook', label: 'Webhook 地址', placeholder: 'https://oapi.dingtalk.com/robot/send?access_token=…' }, { key: 'secret', label: '加签密钥', placeholder: 'SEC…，开启「加签」时填', secret: true, optional: true }], help: '群设置 → 机器人 → 自定义机器人' },
-  wecom: { name: '企业微信', color: '#07c160', logo: '/channels/wechat.svg', fields: [{ key: 'webhook', label: 'Webhook 地址', placeholder: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=…' }], help: '群聊 → 添加群机器人' },
-  bark: { name: 'Bark', color: '#f04d4d', mark: 'B', fields: [{ key: 'key', label: 'Device Key', placeholder: 'App 里复制的 Key', secret: true }, { key: 'server', label: '服务器', placeholder: 'https://api.day.app', optional: true }], help: 'iPhone 推送，App Store 搜 Bark' },
-  ntfy: { name: 'ntfy', color: '#317f6f', logo: '/channels/ntfy.svg', fields: [{ key: 'topic', label: 'Topic', placeholder: '随便起一个不易猜到的名字' }, { key: 'server', label: '服务器', placeholder: 'https://ntfy.sh', optional: true }, { key: 'token', label: '访问令牌', secret: true, optional: true }], help: '手机装 ntfy App 订阅同一个 Topic' },
-  serverchan: { name: 'Server酱', color: '#4e5bf2', mark: '酱', fields: [{ key: 'key', label: 'SendKey', placeholder: 'SCT… 或 sctp…', secret: true }], help: '推送到微信（Server酱 Turbo / ³）' },
-  discord: { name: 'Discord', color: '#5865f2', logo: '/channels/discord.svg', fields: [{ key: 'webhook', label: 'Webhook 地址', placeholder: 'https://discord.com/api/webhooks/…' }], help: '频道设置 → 整合 → Webhook' },
-  slack: { name: 'Slack', color: '#4a154b', logo: '/channels/slack.svg', fields: [{ key: 'webhook', label: 'Webhook 地址', placeholder: 'https://hooks.slack.com/services/…' }], help: 'Slack App → Incoming Webhooks' },
-  webhook: { name: '自定义 Webhook', color: '#3a3f47', mark: '{}', fields: [{ key: 'url', label: 'URL', placeholder: 'https://…' }, { key: 'header', label: '附加请求头', placeholder: 'Authorization: Bearer …', secret: true, optional: true }], help: 'POST JSON：subject、intro、sections、text、markdown、url' },
-};
+/** 每种渠道要填什么；logo 是白色标志，放在品牌色底上（mark 是品牌字标，不翻译）。文案在渲染时取 */
+export const KINDS = (): Record<ChannelKind, { name: string; color: string; logo?: string; mark?: string; fields: Field[]; help?: string }> => ({
+  email: { name: t('settings.channels.kind.email.name'), color: '#ea4335', logo: '/channels/gmail.svg', fields: [{ key: 'to', label: t('settings.channels.field.to'), placeholder: 'you@example.com' }], help: t('settings.channels.kind.email.help') },
+  telegram: { name: 'Telegram', color: '#26a5e4', logo: '/channels/telegram.svg', fields: [{ key: 'token', label: 'Bot Token', placeholder: '123456:ABC…', secret: true }, { key: 'chatId', label: 'Chat ID', placeholder: t('settings.channels.kind.telegram.chatIdPlaceholder') }], help: t('settings.channels.kind.telegram.help') },
+  lark: { name: t('settings.channels.kind.lark.name'), color: '#3370ff', mark: '飞', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://open.feishu.cn/open-apis/bot/v2/hook/…' }, { key: 'secret', label: t('settings.channels.kind.lark.secret'), placeholder: t('settings.channels.kind.lark.secretPlaceholder'), secret: true, optional: true }], help: t('settings.channels.kind.lark.help') },
+  dingtalk: { name: t('settings.channels.kind.dingtalk.name'), color: '#1677ff', mark: '钉', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://oapi.dingtalk.com/robot/send?access_token=…' }, { key: 'secret', label: t('settings.channels.kind.dingtalk.secret'), placeholder: t('settings.channels.kind.dingtalk.secretPlaceholder'), secret: true, optional: true }], help: t('settings.channels.kind.dingtalk.help') },
+  wecom: { name: t('settings.channels.kind.wecom.name'), color: '#07c160', logo: '/channels/wechat.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=…' }], help: t('settings.channels.kind.wecom.help') },
+  bark: { name: 'Bark', color: '#f04d4d', mark: 'B', fields: [{ key: 'key', label: 'Device Key', placeholder: t('settings.channels.kind.bark.keyPlaceholder'), secret: true }, { key: 'server', label: t('settings.channels.field.server'), placeholder: 'https://api.day.app', optional: true }], help: t('settings.channels.kind.bark.help') },
+  ntfy: { name: 'ntfy', color: '#317f6f', logo: '/channels/ntfy.svg', fields: [{ key: 'topic', label: 'Topic', placeholder: t('settings.channels.kind.ntfy.topicPlaceholder') }, { key: 'server', label: t('settings.channels.field.server'), placeholder: 'https://ntfy.sh', optional: true }, { key: 'token', label: t('settings.channels.field.token'), secret: true, optional: true }], help: t('settings.channels.kind.ntfy.help') },
+  serverchan: { name: t('settings.channels.kind.serverchan.name'), color: '#4e5bf2', mark: '酱', fields: [{ key: 'key', label: 'SendKey', placeholder: t('settings.channels.kind.serverchan.keyPlaceholder'), secret: true }], help: t('settings.channels.kind.serverchan.help') },
+  discord: { name: 'Discord', color: '#5865f2', logo: '/channels/discord.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://discord.com/api/webhooks/…' }], help: t('settings.channels.kind.discord.help') },
+  slack: { name: 'Slack', color: '#4a154b', logo: '/channels/slack.svg', fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://hooks.slack.com/services/…' }], help: 'Slack App → Incoming Webhooks' },
+  webhook: { name: t('settings.channels.kind.webhook.name'), color: '#3a3f47', mark: '{}', fields: [{ key: 'url', label: 'URL', placeholder: 'https://…' }, { key: 'header', label: t('settings.channels.kind.webhook.header'), placeholder: 'Authorization: Bearer …', secret: true, optional: true }], help: t('settings.channels.kind.webhook.help') },
+});
 
 export function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: number }) {
-  const k = KINDS[kind];
+  const k = KINDS()[kind];
   return (
     <span class="ch-mark" style={{ background: k.color, width: size, height: size }}>
       {k.logo ? <img src={k.logo} alt="" /> : <b>{k.mark}</b>}
@@ -41,29 +42,30 @@ export function ChannelMark({ kind, size = 28 }: { kind: ChannelKind; size?: num
 const test = (channel: Channel | string) =>
   run(async () => {
     const r = await api<{ sent: boolean; reason?: string }>('/api/notify/test', { method: 'POST', body: JSON.stringify({ channel }) });
-    if (!r.sent) throw new Error(r.reason ?? '发送失败');
-  }, '测试消息已发出');
+    if (!r.sent) throw new Error(r.reason ?? t('settings.channels.testFailed'));
+  }, t('settings.channels.testSent'));
 
 /** 设置页的「通知渠道」：列表、开关、测试、编辑、添加 */
 export function ChannelsGroup({ state }: { state: AppState }) {
   const list = channelsOf(state.settings);
   const [edit, setEdit] = useState<Channel | null>(null);
   const save = (next: Channel[]) => saveSettings({ channels: next });
+  const kinds = KINDS();
   return (
     <>
-      <Group title={`通知渠道 · ${list.filter((c) => c.enabled).length} 个开启`}>
-        {list.length === 0 && <div class="cell muted">还没有渠道，提醒不会发出。</div>}
+      <Group title={t('settings.channels.title', { count: list.filter((c) => c.enabled).length })}>
+        {list.length === 0 && <div class="cell muted">{t('settings.channels.empty')}</div>}
         {list.map((c) => (
           <div key={c.id} class="cell ch-row">
             <button type="button" class="ch-main" onClick={() => setEdit(c)}>
               <ChannelMark kind={c.kind} />
               <span class="cell-l">
                 {c.name}
-                <small>{c.kind === 'email' && c.config.to ? c.config.to : KINDS[c.kind].name}</small>
+                <small>{c.kind === 'email' && c.config.to ? c.config.to : kinds[c.kind].name}</small>
               </span>
             </button>
             <button type="button" class="chip-btn" onClick={() => test(c.id)}>
-              测试
+              {t('settings.channels.test')}
             </button>
             <Toggle checked={c.enabled} onChange={(v) => run(() => save(list.map((x) => (x.id === c.id ? { ...x, enabled: v } : x))))} />
           </div>
@@ -71,14 +73,14 @@ export function ChannelsGroup({ state }: { state: AppState }) {
         <div class="cell">
           <Picker
             value=""
-            onChange={(k) => k && setEdit({ id: uid(), kind: k as ChannelKind, name: KINDS[k as ChannelKind].name, enabled: true, config: {} })}
-            options={(Object.keys(KINDS) as ChannelKind[]).map((k) => ({ value: k, label: KINDS[k].name, icon: <ChannelMark kind={k} size={20} /> }))}
+            onChange={(k) => k && setEdit({ id: uid(), kind: k as ChannelKind, name: kinds[k as ChannelKind].name, enabled: true, config: {} })}
+            options={(Object.keys(kinds) as ChannelKind[]).map((k) => ({ value: k, label: kinds[k].name, icon: <ChannelMark kind={k} size={20} /> }))}
             display={
               <>
-                <Icon name="plus" /> 添加渠道
+                <Icon name="plus" /> {t('settings.channels.add')}
               </>
             }
-            ariaLabel="添加渠道"
+            ariaLabel={t('settings.channels.add')}
           />
         </div>
       </Group>
@@ -91,14 +93,14 @@ export function ChannelsGroup({ state }: { state: AppState }) {
             run(async () => {
               await save(list.some((x) => x.id === c.id) ? list.map((x) => (x.id === c.id ? c : x)) : [...list, c]);
               setEdit(null);
-            }, '已保存')
+            }, t('settings.toast.saved'))
           }
           onDelete={() =>
-            confirmDelete(`删除渠道「${edit.name}」？`) &&
+            confirmDelete(t('settings.channels.confirmDelete', { name: edit.name })) &&
             run(async () => {
               await save(list.filter((x) => x.id !== edit.id));
               setEdit(null);
-            }, '已删除')
+            }, t('settings.toast.deleted'))
           }
         />
       )}
@@ -108,33 +110,33 @@ export function ChannelsGroup({ state }: { state: AppState }) {
 
 function ChannelSheet({ c, isNew, onClose, onSave, onDelete }: { c: Channel; isNew: boolean; onClose: () => void; onSave: (c: Channel) => void; onDelete: () => void }) {
   const [f, setF] = useState<Channel>(c);
-  const k = KINDS[f.kind];
+  const k = KINDS()[f.kind];
   const missing = k.fields.filter((x) => !x.optional && !f.config[x.key]?.trim());
   return (
     <Sheet
       narrow
-      title={isNew ? `添加 ${k.name}` : f.name}
+      title={isNew ? t('settings.channels.addKind', { name: k.name }) : f.name}
       onClose={onClose}
       foot={
         <>
           {!isNew && (
             <button class="btn danger" onClick={onDelete}>
-              删除
+              {t('settings.channels.delete')}
             </button>
           )}
           <span class="grow" />
-          <button class="btn" disabled={missing.length > 0} onClick={() => (missing.length ? toast(`请填写${missing[0].label}`, true) : test(f))}>
-            测试
+          <button class="btn" disabled={missing.length > 0} onClick={() => (missing.length ? toast(t('settings.channels.fillField', { field: missing[0].label }), true) : test(f))}>
+            {t('settings.channels.test')}
           </button>
           <button class="btn primary" disabled={missing.length > 0} onClick={() => onSave(f)}>
-            保存
+            {t('settings.channels.save')}
           </button>
         </>
       }
     >
       <div class="stack">
         <Group foot={k.help}>
-          <Cell label="名称">
+          <Cell label={t('settings.channels.name')}>
             <input value={f.name} onInput={(e) => setF({ ...f, name: (e.target as HTMLInputElement).value })} />
           </Cell>
           {k.fields.map((x) => (
@@ -144,13 +146,13 @@ function ChannelSheet({ c, isNew, onClose, onSave, onDelete }: { c: Channel; isN
                 autoComplete="off"
                 autoCapitalize="off"
                 value={f.config[x.key] ?? ''}
-                placeholder={x.placeholder ?? (x.optional ? '可选' : '')}
+                placeholder={x.placeholder ?? (x.optional ? t('settings.channels.optional') : '')}
                 onInput={(e) => setF({ ...f, config: { ...f.config, [x.key]: (e.target as HTMLInputElement).value.trim() } })}
               />
             </Cell>
           ))}
-          <Cell label="启用">
-            <Toggle label="启用" checked={f.enabled} onChange={(v) => setF({ ...f, enabled: v })} />
+          <Cell label={t('settings.channels.enabled')}>
+            <Toggle label={t('settings.channels.enabled')} checked={f.enabled} onChange={(v) => setF({ ...f, enabled: v })} />
           </Cell>
         </Group>
       </div>

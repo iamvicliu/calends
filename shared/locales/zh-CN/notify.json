@@ -1,0 +1,85 @@
+{
+  "appName": "订阅账本",
+  "trial": {
+    "sub": "试用 {when}结束（{date}），之后按 {price} 扣费",
+    "headline": "{name} 试用{when}结束"
+  },
+  "renew": {
+    "introEnds": "优惠结束，恢复原价",
+    "headline": "{name} {when}扣款 {price}"
+  },
+  "ending": {
+    "sub": "{when}到期，不会自动续费",
+    "headline": "{name} {when}到期"
+  },
+  "carpool": {
+    "dueIn": "{when}（{date}）到期",
+    "dueToday": "今天到期",
+    "overdue": "已逾期 {count} 天",
+    "sub": "{status}，下一期{bill}",
+    "headline": "{member} 的 {name} 该收钱了"
+  },
+  "proxy": {
+    "someone": "对方",
+    "chargedToday": "今天替 TA 扣了款",
+    "chargedAgo": "{date} 扣的款已过 {count} 天",
+    "sub": "{status}，还没收回",
+    "headlineToday": "替 {name} 扣了 {sub}",
+    "headlineUnpaid": "{name} 的 {sub} 还没收回"
+  },
+  "balance": {
+    "sub": "余额 {balance}，不足以支付 {date} 的 {sub}（{amount}）",
+    "headline": "{name} 余额将不足"
+  },
+  "section": {
+    "renew": "即将扣款",
+    "trials": "试用到期",
+    "balance": "余额预警",
+    "carpool": "合租收款",
+    "proxy": "代付待收",
+    "ending": "即将到期",
+    "month": "本月扣款"
+  },
+  "daily": {
+    "subject": "订阅提醒｜{title}",
+    "title": "{headline}",
+    "titleMore": "{headline} 等 {count} 项",
+    "intro": "当前每月订阅支出 {mrr}，{count} 项正在计费。"
+  },
+  "monthly": {
+    "subject": "{m} 月订阅账单｜预计 {sum}，共 {count} 笔",
+    "intro": "{y} 年 {m} 月预计扣款 {count} 笔，合计约 {sum}。负 MRR {mrr}，年化 {arr}。"
+  },
+  "email": {
+    "open": "打开订阅账本",
+    "footer": "提醒时间与提前天数可在「设置」中调整。"
+  },
+  "text": {
+    "heading": "【{heading}】"
+  },
+  "send": {
+    "noChannel": "没有这个渠道",
+    "noneEnabled": "还没有开启任何通知渠道",
+    "alreadySent": "今日已发送",
+    "failure": "{channel}：{error}",
+    "failureSep": "；"
+  },
+  "test": {
+    "subject": "【测试】{subject}",
+    "sampleSubject": "【测试】订阅提醒已就绪",
+    "sampleIntro": "通知渠道工作正常。"
+  },
+  "channel": {
+    "missing": "「{channel}」缺少{field}",
+    "field": {
+      "to": "收件邮箱",
+      "botToken": " Bot Token",
+      "chatId": " Chat ID",
+      "webhook": " Webhook 地址",
+      "deviceKey": " Device Key",
+      "topic": " Topic",
+      "sendKey": " SendKey",
+      "url": " URL"
+    }
+  }
+}

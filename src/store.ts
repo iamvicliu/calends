@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { todayIn } from '../shared/billing.ts';
 import type { AppState, PaymentMethod, Settings, Subscription } from '../shared/types.ts';
-import { locale } from '../shared/i18n.ts';
+import { locale, t } from '../shared/i18n.ts';
 
 const CACHE_KEY = 'ledger:state:v1';
 
@@ -62,10 +62,10 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
   if (res.status === 401 && path !== '/api/login' && !path.startsWith('/api/auth/')) {
     set({ phase: 'login' });
-    throw new Error('请先登录');
+    throw new Error(t('ui.error.loginRequired'));
   }
   const body = (await res.json().catch(() => ({}))) as T & { error?: string };
-  if (!res.ok) throw new Error(body.error ?? `请求失败 ${res.status}`);
+  if (!res.ok) throw new Error(body.error ?? t('ui.error.requestFailed', { status: res.status }));
   return body;
 }
 
@@ -291,11 +291,11 @@ export interface Toast {
 let toasts: Toast[] = [];
 const toastListeners = new Set<() => void>();
 export function toast(text: string, err = false) {
-  const t = { id: Date.now() + Math.random(), text, err };
-  toasts = [...toasts, t];
+  const item = { id: Date.now() + Math.random(), text, err };
+  toasts = [...toasts, item];
   toastListeners.forEach((l) => l());
   setTimeout(() => {
-    toasts = toasts.filter((x) => x !== t);
+    toasts = toasts.filter((x) => x !== item);
     toastListeners.forEach((l) => l());
   }, 2600);
 }

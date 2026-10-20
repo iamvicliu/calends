@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { PaymentMethod } from '../../shared/types.ts';
 import { KIND_LABEL } from '../derive.ts';
+import { t } from '../../shared/i18n.ts';
 import { Icon, MethodMark } from './ui.tsx';
 
 /**
@@ -61,16 +62,16 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
     <>
       <button type="button" ref={btn} class={`mp-btn ${cur ? '' : 'empty'}`} onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open}>
         {cur && <MethodMark m={cur} size={20} />}
-        <span>{cur ? cur.name : '未指定'}</span>
+        <span>{cur ? cur.name : t('picker.method.none')}</span>
         <Icon name="down" />
       </button>
       {open && pos && (
         <>
           {pos.mobile && <div class="dp-scrim" onClick={() => setOpen(false)} />}
-          <div ref={pop} class={`dp-pop mp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} role="listbox" aria-label="支付方式">
+          <div ref={pop} class={`dp-pop mp-pop ${pos.mobile ? 'mobile' : ''}`} style={pos.mobile ? undefined : { top: pos.top, left: pos.left }} role="listbox" aria-label={t('picker.method.label')}>
             <button type="button" role="option" aria-selected={!cur} class={`mp-opt ${cur ? '' : 'sel'}`} onClick={() => pick(undefined)}>
               <span class="mp-none" />
-              <span class="mp-name">未指定</span>
+              <span class="mp-name">{t('picker.method.none')}</span>
               {!cur && <Icon name="check" />}
             </button>
             {methods.map((m) => (

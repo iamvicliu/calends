@@ -1,0 +1,222 @@
+{
+  "title": "设置",
+  "days": { "other": "{count} 天" },
+  "logout": "退出登录",
+  "toast": {
+    "saved": "已保存",
+    "deleted": "已删除",
+    "csvEmpty": "CSV 中没有可导入的订阅",
+    "badBackup": "不是有效的备份文件"
+  },
+  "general": {
+    "title": "通用",
+    "language": "语言",
+    "followSystem": "跟随系统",
+    "name": "名字",
+    "namePlaceholder": "分享图、公开页上显示",
+    "startPage": "打开后先看",
+    "startPageAria": "启动页",
+    "baseCurrency": "本位币",
+    "timezone": "时区",
+    "weekStart": "每周从",
+    "weekStartAria": "每周起始日",
+    "monday": "周一开始",
+    "sunday": "周日开始"
+  },
+  "sidebar": {
+    "title": "侧边栏",
+    "upcoming": "即将扣款",
+    "lookAhead": "往后看",
+    "lookAheadAria": "即将扣款天数"
+  },
+  "remind": {
+    "title": "提醒",
+    "lead": "默认提前",
+    "sameDay": "到期当天",
+    "hour": "发送时间",
+    "monthly": "每月 1 日账单预告",
+    "test": "发一条测试提醒到所有渠道",
+    "testFailed": "发送失败",
+    "channelError": "{channel}：{error}",
+    "errorSep": "；",
+    "testSent": "测试提醒已发出",
+    "preview": "预览今天的提醒"
+  },
+  "today": {
+    "title": "今天（{day}）",
+    "items": { "other": "{count} 项" }
+  },
+  "books": {
+    "title": "记账",
+    "defaultMethod": "默认支付方式",
+    "unassigned": { "other": "{count} 个订阅未指定支付方式" },
+    "assignAllDone": { "other": "已把 {count} 个订阅设为默认支付方式" },
+    "assignAll": "全部设为默认",
+    "collectCurrency": "合租收款币种"
+  },
+  "fx": {
+    "title": "汇率",
+    "current": "当前汇率",
+    "updatedAt": "更新于 {time}",
+    "updated": "汇率已更新",
+    "history": "历史汇率覆盖",
+    "earliest": "最早 {date}",
+    "coverage": { "other": "{covered} / {count} 天" },
+    "fill": "补齐缺失的汇率",
+    "historyUpdated": "历史汇率已更新"
+  },
+  "open": {
+    "title": "开放",
+    "ics": "订阅到系统日历",
+    "on": "已开启",
+    "off": "未开启",
+    "public": "公开页",
+    "publicOn": "已公开",
+    "publicOff": "已关闭公开页",
+    "previewPublic": "预览公开页",
+    "ai": "AI 接入（MCP）",
+    "aiOn": "已开启 AI 接入",
+    "aiOff": "已关闭，AI 助手将无法访问",
+    "manageAi": "管理令牌与接入方式"
+  },
+  "data": {
+    "title": "数据",
+    "importCsv": "导入 CSV",
+    "restore": "从备份恢复",
+    "exportCsv": "导出 CSV",
+    "backup": "导出完整备份"
+  },
+  "restore": {
+    "cancel": "取消",
+    "replace": "替换当前账本",
+    "done": "已恢复",
+    "warning": "当前账本会被备份里的内容整体替换，无法撤销；建议先导出一份当前备份。",
+    "subs": "订阅",
+    "methods": "支付方式",
+    "count": { "other": "{count} 个" },
+    "time": "备份时间",
+    "format": "格式",
+    "legacy": "旧版备份：只含订阅与支付方式"
+  },
+  "import": {
+    "title": { "other": "导入 {count} 项订阅" },
+    "confirmReplace": "替换会清空现有订阅与支付方式，确定？",
+    "replaceDone": "已替换导入",
+    "replaceAll": "替换全部",
+    "mergeDone": "已合并导入",
+    "merge": "追加导入",
+    "newMethods": "将新建支付方式：{names}",
+    "sep": "、"
+  },
+  "channels": {
+    "title": { "other": "通知渠道 · {count} 个开启" },
+    "empty": "还没有渠道，提醒不会发出。",
+    "test": "测试",
+    "testFailed": "发送失败",
+    "testSent": "测试消息已发出",
+    "add": "添加渠道",
+    "addKind": "添加 {name}",
+    "confirmDelete": "删除渠道「{name}」？",
+    "delete": "删除",
+    "save": "保存",
+    "fillField": "请填写{field}",
+    "name": "名称",
+    "optional": "可选",
+    "enabled": "启用",
+    "field": {
+      "to": "收件邮箱",
+      "webhook": "Webhook 地址",
+      "server": "服务器",
+      "token": "访问令牌"
+    },
+    "kind": {
+      "email": {
+        "name": "邮件",
+        "help": "经 Cloudflare Email Sending 发出，需要域名已在 Cloudflare 验证"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "你的用户 ID 或群 ID",
+        "help": "找 @BotFather 建机器人拿 Token；先给机器人发一条消息，再用 @userinfobot 查自己的 ID"
+      },
+      "lark": {
+        "name": "飞书 / Lark",
+        "secret": "签名密钥",
+        "secretPlaceholder": "开启「签名校验」时填",
+        "help": "群设置 → 群机器人 → 添加自定义机器人"
+      },
+      "dingtalk": {
+        "name": "钉钉",
+        "secret": "加签密钥",
+        "secretPlaceholder": "SEC…，开启「加签」时填",
+        "help": "群设置 → 机器人 → 自定义机器人"
+      },
+      "wecom": {
+        "name": "企业微信",
+        "help": "群聊 → 添加群机器人"
+      },
+      "bark": {
+        "keyPlaceholder": "App 里复制的 Key",
+        "help": "iPhone 推送，App Store 搜 Bark"
+      },
+      "ntfy": {
+        "topicPlaceholder": "随便起一个不易猜到的名字",
+        "help": "手机装 ntfy App 订阅同一个 Topic"
+      },
+      "serverchan": {
+        "name": "Server酱",
+        "keyPlaceholder": "SCT… 或 sctp…",
+        "help": "推送到微信（Server酱 Turbo / ³）"
+      },
+      "discord": {
+        "help": "频道设置 → 整合 → Webhook"
+      },
+      "webhook": {
+        "name": "自定义 Webhook",
+        "header": "附加请求头",
+        "help": "POST JSON：subject、intro、sections、text、markdown、url"
+      }
+    }
+  },
+  "security": {
+    "title": "安全",
+    "unknownBrowser": "未知浏览器",
+    "ago": {
+      "justNow": "刚刚活跃",
+      "minutes": { "other": "{count} 分钟前" },
+      "hours": { "other": "{count} 小时前" },
+      "days": { "other": "{count} 天前" }
+    },
+    "thisDevice": "本机",
+    "signedInPasskey": "Passkey 登录于 {time}",
+    "signedInPassword": "密码登录于 {time}",
+    "revoke": "移出",
+    "revoked": "已移出",
+    "passkeyFoot": "绑定 Passkey 后可以用面容、指纹或设备密码登录，无需输入密码。",
+    "passkeyUnsupported": "当前浏览器不支持 Passkey。",
+    "lastUsed": "上次使用 {time}",
+    "addedAt": "添加于 {time}",
+    "confirmRemovePasskey": "移除 Passkey「{name}」？",
+    "remove": "移除",
+    "removed": "已移除",
+    "addPasskey": "添加 Passkey",
+    "alreadyBound": "这台设备已经绑定过了",
+    "changePassword": "修改密码",
+    "devices": "登录设备",
+    "devicesCount": { "other": "登录设备 · {count}" },
+    "devicesFoot": "超过上限时，最久没有活动的设备会被自动退出。位置按 IP 估算，仅供参考。",
+    "maxSessions": "最多同时登录",
+    "maxSessionsSaved": { "other": "最多 {count} 台设备" },
+    "deviceCount": { "other": "{count} 台" },
+    "confirmLogoutOthers": "退出除本机外的所有设备？",
+    "loggedOutOthers": "其他设备已退出",
+    "logoutOthers": "退出其他所有设备",
+    "passwordChanged": "密码已修改，其他设备已退出",
+    "save": "保存",
+    "mismatch": "两次输入不一致",
+    "passwordFoot": "至少 8 位。修改后，除当前设备外的登录都会失效。",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "minLength": "至少 8 位",
+    "confirmPassword": "确认新密码"
+  }
+}
