@@ -137,6 +137,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/settings' && method === 'PUT') {
     const cur = await getSettings(env);
     const next = { ...DEFAULT_SETTINGS, ...cur, ...((await req.json()) as Partial<Settings>), icsToken: cur.icsToken };
+    // null 表示清空这个设置
+    for (const k of Object.keys(next) as Array<keyof Settings>) if (next[k] === null) delete next[k];
     next.notifyHour = Math.min(23, Math.max(0, Math.round(next.notifyHour)));
     if (next.maxSessions !== undefined) next.maxSessions = Math.min(50, Math.max(1, Math.round(next.maxSessions)));
     await putKv(env, 'settings', next);

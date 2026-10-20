@@ -256,7 +256,9 @@ export function saveSettings(patch: Partial<Settings>) {
   return optimistic(
     (s) => ({ ...s, settings: { ...s.settings, ...patch } }),
     async () => {
-      const settings = await api<Settings>('/api/settings', { method: 'PUT', body: JSON.stringify({ ...store.state!.settings, ...patch }) });
+      // 清空的字段（undefined）以 null 传给服务端，否则 JSON 会丢掉这个键，旧值留在库里
+      const body = JSON.stringify(Object.fromEntries(Object.entries({ ...store.state!.settings, ...patch }).map(([k, v]) => [k, v === undefined ? null : v])));
+      const settings = await api<Settings>('/api/settings', { method: 'PUT', body });
       patchState((s) => ({ ...s, settings }));
       return settings;
     },
