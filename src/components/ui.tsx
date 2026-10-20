@@ -1,5 +1,5 @@
 import type { ComponentChildren, JSX } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, faviconOf, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
@@ -336,8 +336,11 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
 
 // ---------- 弹层 ----------
 export function Sheet(props: { title?: ComponentChildren; onClose: () => void; children: ComponentChildren; foot?: ComponentChildren; narrow?: boolean; bare?: boolean }) {
+  // Esc 时调用最新的 onClose（它可能依赖表单状态，比如未保存确认）
+  const close = useRef(props.onClose);
+  close.current = props.onClose;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && props.onClose();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';

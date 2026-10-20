@@ -18,7 +18,7 @@ const STATUS: Array<[SubStatus, string]> = [
   ['active', '计费中'],
   ['trial', '试用中'],
   ['paused', '已暂停'],
-  ['cancelled', '已取消'],
+  ['cancelled', '已退订'],
 ];
 
 export function newSub(today: string, methodId?: string): Subscription {
@@ -42,6 +42,9 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
   const cats = useMemo(() => [...new Set(state.subscriptions.map((s) => s.category))], [state]);
+  // 有未保存的修改时，关闭前确认一下
+  const [initial] = useState(() => JSON.stringify(f));
+  const close = () => (JSON.stringify(f) === initial || confirmDelete('放弃未保存的修改？')) && onClose();
 
   const save = () =>
     run(
@@ -71,14 +74,14 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     <Sheet
       narrow
       title={isNew ? '添加订阅' : `编辑「${sub.name}」`}
-      onClose={onClose}
+      onClose={close}
       foot={
         <>
           {!isNew && (
             <button
               class="btn danger"
               onClick={() =>
-                confirmDelete(`删除「${sub.name}」？历史记录会一并清除；只是不再续费的话，建议改为「已取消」。`) &&
+                confirmDelete(`删除「${sub.name}」？历史记录会一并清除；只是不再续费的话，建议改为「已退订」。`) &&
                 run(async () => {
                   await deleteSub(sub.id);
                   onClose();
@@ -89,7 +92,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
             </button>
           )}
           <span class="grow" />
-          <button class="btn" onClick={onClose}>
+          <button class="btn" onClick={close}>
             取消
           </button>
           <button class="btn primary" disabled={!f.name.trim()} onClick={save}>
@@ -548,7 +551,9 @@ function NameField({
           else if (e.key === 'Enter') pick(all[hi]);
           else if (e.key === 'Escape') setOpen(false);
           else return;
+          // 只关联想框，不让 Esc 冒泡去关整个编辑器
           e.preventDefault();
+          e.stopPropagation();
         }}
       />
       {open && all.length > 0 && (
