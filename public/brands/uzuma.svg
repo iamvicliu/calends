@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="uGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="256" height="256" rx="64" fill="url(#bg)" />
+  
+  <!-- Server grid background -->
+  <g stroke="#1e293b" stroke-width="4">
+    <path d="M 0 64 H 256 M 0 128 H 256 M 0 192 H 256" />
+    <path d="M 64 0 V 256 M 128 0 V 256 M 192 0 V 256" />
+  </g>
+  
+  <!-- Outer U Shape, looks like a server frame -->
+  <path d="M 64 64 V 144 A 64 64 0 0 0 192 144 V 64" fill="none" stroke="url(#uGrad)" stroke-width="32" stroke-linecap="round" />
+  
+  <!-- Server Nodes / Indicators inside U ends -->
+  <circle cx="64" cy="64" r="16" fill="#0f172a" />
+  <circle cx="64" cy="64" r="8" fill="#10b981" />
+  
+  <circle cx="192" cy="64" r="16" fill="#0f172a" />
+  <circle cx="192" cy="64" r="8" fill="#10b981" />
+
+  <!-- Center Indicator -->
+  <rect x="108" y="184" width="40" height="12" rx="6" fill="#0ea5e9" opacity="0.8" />
+</svg>

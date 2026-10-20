@@ -3,7 +3,7 @@
   "short_name": "订阅账本",
   "description": "负 MRR、扣款日历、余额续航、拼车分摊与邮件提醒",
   "lang": "zh-CN",
-  "start_url": "/admin#/",
+  "start_url": "/admin",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f3f6f8",
