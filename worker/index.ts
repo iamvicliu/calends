@@ -12,6 +12,7 @@ import { TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
 import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
+import { ensureMigrated } from './migrate.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
@@ -256,6 +257,7 @@ export default {
     // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
     if (!env.SITE_URL) env = { ...env, SITE_URL: url.origin };
     try {
+      if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
       // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
         const s = await getSettings(env);
@@ -283,6 +285,7 @@ export default {
     if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
       ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
     }
+    await ensureMigrated(env);
     const state = await loadState(env);
     applyLocale(settingsLocale(state.settings));
     // 定时任务没有请求地址：用后台最近一次访问时记下的地址

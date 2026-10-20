@@ -6,7 +6,7 @@
     "dev": "node scripts/dev.mjs",
     "dev:web": "vite",
     "dev:worker": "node scripts/wrangler.mjs dev --port 8787 --local",
-    "build": "tsc --noEmit && vite build",
+    "build": "node scripts/migrations.mjs && node scripts/i18n.mjs && tsc --noEmit && vite build",
     "test": "node --experimental-strip-types --test shared/*.test.ts",
     "lint": "oxlint --deny-warnings src shared worker scripts docker",
     "format": "prettier --write .",
