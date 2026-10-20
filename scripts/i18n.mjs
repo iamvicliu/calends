@@ -39,7 +39,10 @@ for (const loc of locales) {
   }
 }
 const aliasObj = Object.fromEntries(Object.entries(aliases).map(([k, v]) => [k, [...v].sort()]));
-writeFileSync(join(ROOT, 'categories.gen.ts'), `// 由 scripts/i18n.mjs 生成，请勿手改\nexport const CATEGORY_ALIASES: Record<string, string[]> = ${JSON.stringify(aliasObj)};\n`);
+writeFileSync(
+  join(ROOT, 'categories.gen.ts'),
+  `// 由 scripts/i18n.mjs 生成，请勿手改\nexport const CATEGORY_ALIASES: Record<string, string[]> = ${JSON.stringify(aliasObj)};\n`,
+);
 
 if (process.argv.includes('--check')) {
   const keys = (tree, prefix = '', out = new Set()) => {

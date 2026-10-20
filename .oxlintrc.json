@@ -1,11 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "unicorn",
-    "react",
-    "import"
-  ],
+  "plugins": ["typescript", "unicorn", "react", "import"],
   "categories": {
     "correctness": "error",
     "suspicious": "warn"
@@ -45,17 +40,9 @@
     "eslint/no-underscore-dangle": [
       "warn",
       {
-        "allow": [
-          "__APP_VERSION__"
-        ]
+        "allow": ["__APP_VERSION__"]
       }
     ]
   },
-  "ignorePatterns": [
-    "dist",
-    "node_modules",
-    "shared/locales/server.gen.ts",
-    "src/public/components/ui",
-    "local"
-  ]
+  "ignorePatterns": ["dist", "node_modules", "shared/locales/server.gen.ts", "src/public/components/ui", "local"]
 }
