@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "사이드바 열기",
     "add": "구독 추가"
-  }
+  },
+  "working": "처리 중…",
+  "undo": "실행 취소",
+  "restored": "복원했습니다"
 }

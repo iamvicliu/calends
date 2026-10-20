@@ -5,8 +5,8 @@ import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { CatGlyph } from './CatGlyph.tsx';
-import { useToasts } from '../store.ts';
 import { intlLocale, t } from '../../shared/i18n.ts';
+import { Toaster } from 'sonner';
 
 // ---------- SF Symbols 风格线性图标 ----------
 const P: Record<string, JSX.Element> = {
@@ -411,16 +411,25 @@ export function Sheet(props: {
   );
 }
 
+/** 全局提示（Sonner）：跟随亮色/暗色主题；手机上避开底部的安全区 */
 export function Toasts() {
-  const list = useToasts();
+  const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'));
+  useEffect(() => {
+    const el = document.documentElement;
+    const mo = new MutationObserver(() => setTheme(el.dataset.theme === 'dark' ? 'dark' : 'light'));
+    mo.observe(el, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => mo.disconnect();
+  }, []);
   return (
-    <div class="toasts" aria-live="polite">
-      {list.map((t) => (
-        <div key={t.id} class={`toast ${t.err ? 'err' : ''}`}>
-          {t.text}
-        </div>
-      ))}
-    </div>
+    <Toaster
+      theme={theme as 'light' | 'dark'}
+      position="bottom-center"
+      offset={24}
+      mobileOffset={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
+      gap={8}
+      visibleToasts={4}
+      toastOptions={{ className: 'ledger-toast' }}
+    />
   );
 }
 

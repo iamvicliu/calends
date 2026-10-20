@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Abrir barra lateral",
     "add": "Adicionar assinatura"
-  }
+  },
+  "working": "Processando…",
+  "undo": "Desfazer",
+  "restored": "Restaurado"
 }

@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Seitenleiste öffnen",
     "add": "Abo hinzufügen"
-  }
+  },
+  "working": "Wird ausgeführt…",
+  "undo": "Rückgängig",
+  "restored": "Wiederhergestellt"
 }

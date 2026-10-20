@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Open sidebar",
     "add": "Add subscription"
-  }
+  },
+  "working": "Working…",
+  "undo": "Undo",
+  "restored": "Restored"
 }

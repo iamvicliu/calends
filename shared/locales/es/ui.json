@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Abrir barra lateral",
     "add": "Añadir suscripción"
-  }
+  },
+  "working": "Procesando…",
+  "undo": "Deshacer",
+  "restored": "Restaurado"
 }

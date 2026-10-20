@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Buka bilah samping",
     "add": "Tambah langganan"
-  }
+  },
+  "working": "Memproses…",
+  "undo": "Urungkan",
+  "restored": "Dipulihkan"
 }

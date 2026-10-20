@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Mở thanh bên",
     "add": "Thêm gói đăng ký"
-  }
+  },
+  "working": "Đang xử lý…",
+  "undo": "Hoàn tác",
+  "restored": "Đã khôi phục"
 }

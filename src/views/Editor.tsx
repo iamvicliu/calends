@@ -98,10 +98,14 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
               class="btn danger"
               onClick={() =>
                 confirmDelete(t('editor.confirmDelete', { name: sub.name })) &&
-                run(async () => {
-                  await deleteSub(sub.id);
-                  onClose();
-                }, t('editor.toast.deleted'))
+                run(
+                  async () => {
+                    await deleteSub(sub.id);
+                    onClose();
+                  },
+                  // 删了还能撤销：把删掉的订阅原样存回去
+                  { text: t('editor.toast.deleted'), action: { label: t('ui.undo'), onClick: () => void run(() => saveSub(sub), t('ui.restored')) } },
+                )
               }
             >
               {t('common.delete')}

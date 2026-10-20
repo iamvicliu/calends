@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Ouvrir la barre latérale",
     "add": "Ajouter un abonnement"
-  }
+  },
+  "working": "En cours…",
+  "undo": "Annuler",
+  "restored": "Restauré"
 }

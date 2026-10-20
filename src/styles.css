@@ -1560,36 +1560,7 @@ a {
 }
 
 /* ---------------- 提示 ---------------- */
-.toasts {
-  position: fixed;
-  z-index: 90;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(28px + var(--safe-b));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-}
 @media (max-width: 860px) {
-  .toasts {
-    bottom: calc(90px + var(--safe-b));
-  }
-}
-.toast {
-  background: color-mix(in srgb, var(--label) 88%, transparent);
-  color: var(--card);
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: var(--shadow-lg);
-  animation: rise 0.25s ease;
-  backdrop-filter: blur(12px);
-}
-.toast.err {
-  background: var(--red);
-  color: #fff;
 }
 .tip {
   position: fixed;
@@ -1747,9 +1718,6 @@ a {
 @media print {
   .sidebar,
   .toolbar,
-  .toasts {
-    display: none !important;
-  }
   .main {
     margin: 0;
   }
@@ -7980,4 +7948,34 @@ button.seat:disabled {
 .gt.dragging .gt-body {
   cursor: grabbing;
   user-select: none;
+}
+
+/* 全局提示（Sonner）：圆角、柔和阴影，与 Apple 风格一致 */
+[data-sonner-toaster] .ledger-toast {
+  border-radius: 14px;
+  border: 0.5px solid var(--line);
+  box-shadow:
+    0 10px 30px -8px rgba(0, 0, 0, 0.22),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 14px;
+}
+[data-sonner-toaster] .ledger-toast [data-button] {
+  border-radius: 8px;
+  font-weight: 600;
+}
+/* 各状态只给图标上色，底色保持中性 */
+[data-sonner-toaster] [data-type='success'] [data-icon] {
+  color: var(--green);
+}
+[data-sonner-toaster] [data-type='error'] [data-icon] {
+  color: var(--red);
+}
+[data-sonner-toaster] [data-type='info'] [data-icon] {
+  color: var(--accent);
+}
+[data-sonner-toaster] [data-type='warning'] [data-icon] {
+  color: var(--orange);
 }

@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "打开侧边栏",
     "add": "添加订阅"
-  }
+  },
+  "working": "处理中…",
+  "undo": "撤销",
+  "restored": "已恢复"
 }

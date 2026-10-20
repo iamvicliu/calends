@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "サイドバーを開く",
     "add": "サブスクを追加"
-  }
+  },
+  "working": "処理中…",
+  "undo": "取り消す",
+  "restored": "元に戻しました"
 }

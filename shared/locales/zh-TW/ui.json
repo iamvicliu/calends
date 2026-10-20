@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "開啟側邊欄",
     "add": "新增訂閱"
-  }
+  },
+  "working": "處理中…",
+  "undo": "復原",
+  "restored": "已還原"
 }

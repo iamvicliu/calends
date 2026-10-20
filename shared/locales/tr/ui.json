@@ -19,5 +19,8 @@
   "toolbar": {
     "openSidebar": "Kenar çubuğunu aç",
     "add": "Abonelik ekle"
-  }
+  },
+  "working": "İşleniyor…",
+  "undo": "Geri al",
+  "restored": "Geri yüklendi"
 }

@@ -4,6 +4,7 @@ import type { AppState, PaymentMethod, Person, Settings, Subscription } from '..
 import { mergePeople, syncPerson } from '../shared/people.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { renameInSubs, type Category } from '../shared/categories.ts';
+import { toast as sonner } from 'sonner';
 
 const CACHE_KEY = 'ledger:state:v1';
 
@@ -429,38 +430,40 @@ export async function refreshFx() {
 }
 
 // ---------- toast ----------
+// 统一走 Sonner：成功、失败、提示、警告、进行中五种状态，可叠放、滑动关闭，可带「撤销」等操作按钮
 
-export interface Toast {
-  id: number;
-  text: string;
-  err?: boolean;
-}
-let toasts: Toast[] = [];
-const toastListeners = new Set<() => void>();
-export function toast(text: string, err = false) {
-  const item = { id: Date.now() + Math.random(), text, err };
-  toasts = [...toasts, item];
-  toastListeners.forEach((l) => l());
-  setTimeout(() => {
-    toasts = toasts.filter((x) => x !== item);
-    toastListeners.forEach((l) => l());
-  }, 2600);
-}
-export function useToasts(): Toast[] {
-  const [, force] = useState(0);
-  useEffect(() => {
-    const l = () => force((n) => n + 1);
-    toastListeners.add(l);
-    return () => toastListeners.delete(l);
-  }, []);
-  return toasts;
+export type ToastKind = 'success' | 'error' | 'info' | 'warning';
+export interface ToastOptions {
+  kind?: ToastKind;
+  /** 第二行的补充说明 */
+  description?: string;
+  /** 例如「撤销」 */
+  action?: { label: string; onClick: () => void };
+  /** 替换已有的那条（例如把「进行中」换成结果） */
+  id?: string | number;
 }
 
-export async function run(fn: () => Promise<unknown>, ok?: string) {
+export function toast(text: string, err = false, opts: ToastOptions = {}): string | number {
+  const kind = err ? 'error' : (opts.kind ?? 'success');
+  return sonner[kind](text, { id: opts.id, description: opts.description, action: opts.action, duration: kind === 'error' ? 5000 : 2800 });
+}
+
+/**
+ * 执行一个操作并给出反馈：超过 400ms 还没完成就先显示「处理中」，完成后原地换成成功或失败。
+ * ok 也可以是 ToastOptions（带撤销按钮等）。
+ */
+export async function run(fn: () => Promise<unknown>, ok?: string | (ToastOptions & { text: string })) {
+  let pending: string | number | undefined;
+  const timer = setTimeout(() => (pending = sonner.loading(t('ui.working'))), 400);
   try {
     await fn();
-    if (ok) toast(ok);
+    clearTimeout(timer);
+    if (ok) {
+      const o = typeof ok === 'string' ? { text: ok } : ok;
+      toast(o.text, false, { ...o, id: pending });
+    } else if (pending !== undefined) sonner.dismiss(pending);
   } catch (e) {
-    toast(e instanceof Error ? e.message : String(e), true);
+    clearTimeout(timer);
+    toast(e instanceof Error ? e.message : String(e), true, { id: pending });
   }
 }
