@@ -1,7 +1,7 @@
 // 完整备份与恢复：导出的文件导入到一个全新的部署后，账本与原来完全一致。
 // 包含：订阅、支付方式、全部设置（含通知渠道、日历订阅令牌）、当前汇率、历史汇率。
 // 不包含：登录会话、AI 接入令牌（属于凭据，新部署应重新生成）、提醒发送记录。
-import type { FxTable, PaymentMethod, Settings, Subscription } from '../shared/types.ts';
+import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { putFxDayStmt } from './fx.ts';
 import { getFx, getSettings, putKv, replaceAll } from './store.ts';
@@ -59,7 +59,8 @@ export function parseBackup(raw: unknown): Backup {
 /** 整体替换为备份里的内容；历史汇率按日期合并（同一天以备份为准） */
 export async function restoreAll(env: Env, b: Backup): Promise<{ subscriptions: number; methods: number; fxDays: number }> {
   await replaceAll(env, b.subscriptions, b.methods, 'replace');
-  if (b.settings && Object.keys(b.settings).length) await putKv(env, 'settings', { ...(await getSettings(env)), ...b.settings });
+  // 设置整体替换（备份里没有的项回到默认值），不和当前设置混在一起
+  if (b.settings && Object.keys(b.settings).length) await putKv(env, 'settings', { ...DEFAULT_SETTINGS, ...b.settings });
   if (b.fx?.rates) await putKv(env, 'fx', b.fx);
   // D1 一次 batch 的语句数有限，分批写
   for (let i = 0; i < b.fxDaily.length; i += 50) {

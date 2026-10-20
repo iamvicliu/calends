@@ -86,7 +86,10 @@ const REGION_BY_CCY: Record<string, string> = { TRY: 'TR', NGN: 'NG', PHP: 'PH',
 
 export interface ImportResult {
   subscriptions: Subscription[];
+  /** 要写入的支付方式：新建的加上被引用到的已有的 */
   methods: PaymentMethod[];
+  /** 其中新建的 */
+  created: PaymentMethod[];
 }
 
 /**
@@ -129,7 +132,8 @@ export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], 
     }
     return m.id;
   };
-  const subscriptions: Subscription[] = rows.map((r) => {
+  // 没有名称的行（空行、合计行等）直接跳过，不让整批导入失败
+  const subscriptions: Subscription[] = rows.filter((r) => col(r, 'name')).map((r) => {
     const ccy = col(r, 'currency').toUpperCase() || 'CNY';
     const start = mdy(col(r, 'starts', 'start')) ?? today;
     const end = mdy(col(r, 'ends', 'end'));
@@ -154,5 +158,7 @@ export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], 
     };
     return sub;
   });
-  return { subscriptions, methods: created };
+  // 除新建的，也带上被引用到的已有支付方式：「替换全部」会清空支付方式，不带上引用就悬空了
+  const used = new Set(subscriptions.map((x) => x.methodId));
+  return { subscriptions, methods: methods.filter((m) => created.includes(m) || used.has(m.id)), created };
 }

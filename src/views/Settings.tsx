@@ -86,7 +86,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [name, setName] = useState(s.displayName);
   const [ics, setIcs] = useState(false);
-  const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[] } | null>(null);
+  const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[]; created: PaymentMethod[] } | null>(null);
 
   const loadPreview = () => api<Preview>('/api/notify/preview').then(setPreview).catch(() => {});
   const [fxs, setFxs] = useState<{ needed: number; covered: number; sources: Record<string, number>; first?: string } | null>(null);
@@ -107,7 +107,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const onCsv = (text: string) => {
     const r = importSubscriptionsCsv(text, state.methods, today);
     if (!r.subscriptions.length) return toast('CSV 中没有可导入的订阅', true);
-    setImporting({ subs: r.subscriptions, methods: r.methods });
+    setImporting({ subs: r.subscriptions, methods: r.methods, created: r.created });
   };
   // 备份恢复：整份交给服务端，订阅、支付方式、设置、汇率一起原样还原
   const [restoring, setRestoring] = useState<{ raw: unknown; subs: number; methods: number; exportedAt?: string; version: number } | null>(null);
@@ -339,7 +339,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             </>
           }
         >
-          <Group title={importing.methods.length ? `将新建支付方式：${importing.methods.map((m) => m.name).join('、')}` : undefined}>
+          <Group title={importing.created.length ? `将新建支付方式：${importing.created.map((m) => m.name).join('、')}` : undefined}>
             {importing.subs.map((x) => (
               <Cell key={x.id} label={x.name}>
                 {x.currency} {x.price} / {cycleShort(x.cycle)}
