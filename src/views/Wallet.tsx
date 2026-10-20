@@ -8,7 +8,7 @@ import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type P
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Amount, Cell, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS, toBase } from '../derive.ts';
-import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod } from '../store.ts';
+import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
 import { go } from '../router.ts';
 import { BANKS } from '../banks.ts';
@@ -666,7 +666,7 @@ export function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: A
                 inputMode="decimal"
                 value={f.balance ?? ''}
                 placeholder="可选"
-                onInput={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? new Date().toISOString().slice(0, 10) })}
+                onInput={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? today() })}
               />
             </Cell>
             <Cell label="校准日">

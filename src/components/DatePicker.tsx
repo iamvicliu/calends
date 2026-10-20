@@ -1,13 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { addDays, addMonths, parseDay, todayIn } from '../../shared/billing.ts';
+import { addDays, addMonths, parseDay } from '../../shared/billing.ts';
+import { cnDateFull } from '../../shared/format.ts';
+import { today as todayOf } from '../store.ts';
 import { Icon } from './ui.tsx';
 
 const DOW = ['一', '二', '三', '四', '五', '六', '日'];
-
-export function fmtCn(d: string): string {
-  const [y, m, day] = d.split('-').map(Number);
-  return `${y}年${m}月${day}日`;
-}
 
 function grid(month: string): string[] {
   const first = month + '-01';
@@ -21,7 +18,7 @@ function grid(month: string): string[] {
  * 弹层用 fixed 定位，避免被弹窗的滚动容器裁掉；窄屏时贴底显示。
  */
 export function DatePicker({ value, onChange, placeholder = '选择日期', clearable, min, max }: { value?: string; onChange: (v: string | undefined) => void; placeholder?: string; clearable?: boolean; min?: string; max?: string }) {
-  const today = todayIn('Asia/Shanghai');
+  const today = todayOf();
   const [open, setOpen] = useState(false);
   const [month, setMonth] = useState((value ?? today).slice(0, 7));
   const [mode, setMode] = useState<'day' | 'month'>('day');
@@ -103,7 +100,7 @@ export function DatePicker({ value, onChange, placeholder = '选择日期', clea
     <>
       <button type="button" ref={btn} class={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`} onClick={toggle} aria-haspopup="dialog" aria-expanded={open}>
         <Icon name="cal" />
-        <span>{value ? fmtCn(value) : placeholder}</span>
+        <span>{value ? cnDateFull(value) : placeholder}</span>
       </button>
       {open && pos && (
         <>
