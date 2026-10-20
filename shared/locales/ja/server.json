@@ -35,5 +35,9 @@
     "calName": "サブスクの請求",
     "method": "支払い方法：{name}",
     "alarm": "{name}がまもなく更新されます"
+  },
+  "category": {
+    "invalid": "カテゴリの一覧が正しくありません",
+    "duplicate": "カテゴリ名が重複しています：{name}"
   }
 }

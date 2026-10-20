@@ -31,5 +31,9 @@
     "calName": "订阅扣款",
     "method": "支付：{name}",
     "alarm": "{name} 即将扣款"
+  },
+  "category": {
+    "invalid": "分类列表无效",
+    "duplicate": "分类重名：{name}"
   }
 }

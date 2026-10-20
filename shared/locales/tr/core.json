@@ -54,5 +54,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "E-posta" },
-  "csv": { "appStoreBalance": "App Store {region} bakiyesi", "otherCategory": "Diğer" }
+  "csv": { "appStoreBalance": "App Store {region} bakiyesi", "otherCategory": "Diğer" },
+  "category": {
+    "ai": "Yapay zekâ",
+    "tools": "Araçlar",
+    "productivity": "Verimlilik",
+    "media": "Video",
+    "music": "Müzik",
+    "games": "Oyunlar",
+    "cloud": "Bulut ve sunucular",
+    "storage": "Depolama",
+    "domains": "Alan adları",
+    "vpn": "VPN ve ağ",
+    "developer": "Geliştirme",
+    "design": "Tasarım",
+    "education": "Eğitim",
+    "news": "Haber ve okuma",
+    "social": "Sosyal",
+    "shopping": "Alışveriş",
+    "finance": "Finans",
+    "health": "Sağlık ve fitness",
+    "phone": "Telefon ve hat",
+    "daily": "Yaşam"
+  }
 }

@@ -132,5 +132,27 @@
   "csv": {
     "appStoreBalance": "Solde App Store {region}",
     "otherCategory": "Autre"
+  },
+  "category": {
+    "ai": "IA",
+    "tools": "Outils",
+    "productivity": "Productivité",
+    "media": "Vidéo",
+    "music": "Musique",
+    "games": "Jeux",
+    "cloud": "Cloud et serveurs",
+    "storage": "Stockage",
+    "domains": "Domaines",
+    "vpn": "VPN et réseau",
+    "developer": "Développement",
+    "design": "Design",
+    "education": "Éducation",
+    "news": "Actualités et lecture",
+    "social": "Réseaux sociaux",
+    "shopping": "Shopping",
+    "finance": "Finances",
+    "health": "Santé et forme",
+    "phone": "Téléphonie",
+    "daily": "Vie quotidienne"
   }
 }

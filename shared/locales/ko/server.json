@@ -35,5 +35,9 @@
     "calName": "구독 결제",
     "method": "결제 수단: {name}",
     "alarm": "{name} 곧 갱신"
+  },
+  "category": {
+    "invalid": "카테고리 목록이 올바르지 않습니다",
+    "duplicate": "카테고리 이름이 중복됩니다: {name}"
   }
 }

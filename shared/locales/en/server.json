@@ -31,5 +31,9 @@
     "calName": "Subscription charges",
     "method": "Payment: {name}",
     "alarm": "{name} renews soon"
+  },
+  "category": {
+    "invalid": "Invalid category list",
+    "duplicate": "Duplicate category: {name}"
   }
 }

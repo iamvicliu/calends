@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "This is the user's personal subscription ledger. Amounts are given both in the original currency and converted to the base currency. \"My spending\" excludes proxy payments (paid on behalf of others), and for shared plans counts only my own share. If you're unsure what a subscription is called, search with list_subscriptions first. Every write tool supports dry_run — preview first, then apply.",
   "defaultTokenName": "AI assistant",
-  "defaultCategory": "Tools",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "Ledger overview",
+    "list_categories": "Categories",
     "list_subscriptions": "List subscriptions",
     "get_subscription": "Subscription details",
     "list_charges": "Charges",

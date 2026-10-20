@@ -31,5 +31,9 @@
     "calName": "Tagihan langganan",
     "method": "Pembayaran: {name}",
     "alarm": "{name} segera diperpanjang"
+  },
+  "category": {
+    "invalid": "Daftar kategori tidak valid",
+    "duplicate": "Kategori ganda: {name}"
   }
 }

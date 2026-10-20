@@ -31,5 +31,9 @@
     "calName": "Khoản phí gói đăng ký",
     "method": "Thanh toán: {name}",
     "alarm": "{name} sắp gia hạn"
+  },
+  "category": {
+    "invalid": "Danh sách danh mục không hợp lệ",
+    "duplicate": "Danh mục bị trùng: {name}"
   }
 }

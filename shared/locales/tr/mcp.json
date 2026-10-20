@@ -2,7 +2,6 @@
   "serverTitle": "Abonelik Defteri",
   "instructions": "Bu, kullanıcının kişisel abonelik defteridir. Tutarlar hem orijinal para biriminde hem de ana para birimine çevrilmiş olarak verilir. “Harcamalarım” başkaları için yapılan ödemeleri içermez; ortak planlarda yalnızca benim payımı sayar. Bir aboneliğin adından emin değilseniz önce list_subscriptions ile arayın. Tüm yazma araçları dry_run destekler; önce önizleyin, sonra uygulayın.",
   "defaultTokenName": "Yapay zekâ asistanı",
-  "defaultCategory": "Araçlar",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "Defter özeti",
+    "list_categories": "Kategoriler",
     "list_subscriptions": "Abonelikleri listele",
     "get_subscription": "Abonelik ayrıntıları",
     "list_charges": "Ödemeler",

@@ -31,5 +31,9 @@
     "calName": "訂閱扣款",
     "method": "付款：{name}",
     "alarm": "{name} 即將扣款"
+  },
+  "category": {
+    "invalid": "分類列表無效",
+    "duplicate": "分類重名：{name}"
   }
 }

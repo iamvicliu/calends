@@ -54,5 +54,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Email" },
-  "csv": { "appStoreBalance": "Số dư App Store {region}", "otherCategory": "Khác" }
+  "csv": { "appStoreBalance": "Số dư App Store {region}", "otherCategory": "Khác" },
+  "category": {
+    "ai": "AI",
+    "tools": "Công cụ",
+    "productivity": "Năng suất",
+    "media": "Video",
+    "music": "Âm nhạc",
+    "games": "Trò chơi",
+    "cloud": "Đám mây & máy chủ",
+    "storage": "Lưu trữ",
+    "domains": "Tên miền",
+    "vpn": "VPN & mạng",
+    "developer": "Lập trình",
+    "design": "Thiết kế",
+    "education": "Giáo dục",
+    "news": "Tin tức & đọc",
+    "social": "Mạng xã hội",
+    "shopping": "Mua sắm",
+    "finance": "Tài chính",
+    "health": "Sức khỏe & thể hình",
+    "phone": "Viễn thông",
+    "daily": "Đời sống"
+  }
 }

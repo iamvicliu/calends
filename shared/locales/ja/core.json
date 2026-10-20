@@ -122,5 +122,27 @@
   "csv": {
     "appStoreBalance": "App Store {region} 残高",
     "otherCategory": "その他"
+  },
+  "category": {
+    "ai": "AI",
+    "tools": "ツール",
+    "productivity": "効率化",
+    "media": "動画",
+    "music": "音楽",
+    "games": "ゲーム",
+    "cloud": "クラウド",
+    "storage": "ストレージ",
+    "domains": "ドメイン",
+    "vpn": "VPN・ネットワーク",
+    "developer": "開発",
+    "design": "デザイン",
+    "education": "教育",
+    "news": "ニュース・読書",
+    "social": "SNS",
+    "shopping": "ショッピング",
+    "finance": "金融",
+    "health": "健康・フィットネス",
+    "phone": "通信",
+    "daily": "ライフスタイル"
   }
 }

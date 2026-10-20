@@ -37,5 +37,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "邮件" },
-  "csv": { "appStoreBalance": "App Store {region} 余额", "otherCategory": "其他" }
+  "csv": { "appStoreBalance": "App Store {region} 余额", "otherCategory": "其他" },
+  "category": {
+    "ai": "AI",
+    "tools": "工具",
+    "productivity": "效率",
+    "media": "影音",
+    "music": "音乐",
+    "games": "游戏",
+    "cloud": "服务器",
+    "storage": "存储",
+    "domains": "域名",
+    "vpn": "网络",
+    "developer": "开发",
+    "design": "设计",
+    "education": "教育",
+    "news": "阅读",
+    "social": "社交",
+    "shopping": "购物",
+    "finance": "金融",
+    "health": "健康",
+    "phone": "通信",
+    "daily": "日用"
+  }
 }

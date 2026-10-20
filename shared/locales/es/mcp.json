@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "Este es el registro personal de suscripciones del usuario. Los importes se dan en la moneda original y convertidos a la moneda base. «Mi gasto» excluye los pagos por otros (pagados en nombre de otras personas) y, en los planes compartidos, solo cuenta mi parte. Si no sabes con certeza cómo se llama una suscripción, búscala primero con list_subscriptions. Todas las herramientas de escritura admiten dry_run: primero previsualiza y después aplica.",
   "defaultTokenName": "Asistente de IA",
-  "defaultCategory": "Herramientas",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "Resumen del registro",
+    "list_categories": "Categorías",
     "list_subscriptions": "Listar suscripciones",
     "get_subscription": "Detalles de la suscripción",
     "list_charges": "Cobros",

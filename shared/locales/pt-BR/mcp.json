@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "Este é o controle pessoal de assinaturas do usuário. Os valores aparecem na moeda original e convertidos para a moeda base. \"Meus gastos\" exclui pagamentos feitos para outras pessoas e, nos planos compartilhados, conta só a minha parte. Se não tiver certeza do nome de uma assinatura, busque primeiro com list_subscriptions. Todas as ferramentas de escrita aceitam dry_run — visualize antes e depois aplique.",
   "defaultTokenName": "Assistente de IA",
-  "defaultCategory": "Ferramentas",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "Visão geral",
+    "list_categories": "Categorias",
     "list_subscriptions": "Listar assinaturas",
     "get_subscription": "Detalhes da assinatura",
     "list_charges": "Cobranças",

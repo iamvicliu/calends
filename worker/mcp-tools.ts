@@ -8,6 +8,7 @@ import type { AppState, Payment, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { loadState, upsert } from './store.ts';
 import { t } from '../shared/i18n.ts';
+import { categoryCounts, categoryList, presetCategory } from '../shared/categories.ts';
 
 export interface ToolCtx {
   env: Env;
@@ -224,9 +225,24 @@ export const TOOLS: Tool[] = [
         active_count: t.activeCount,
         subscription_count: st.subscriptions.length,
         methods: st.methods.map((m) => ({ id: m.id, name: m.name, kind: m.kind, currency: m.currency, region: m.region ?? null, balance: m.balance ?? null })),
-        categories: [...new Set(st.subscriptions.map((s) => s.category))],
+        // 分类按用户排的顺序，只列用到的；图标颜色等见 list_categories
+        categories: categoryList(st.settings, st.subscriptions).map((c) => c.name).filter((n) => st.subscriptions.some((s) => s.category === n)),
         regions: [...new Set(st.subscriptions.flatMap((s) => phaseSubs(s).map((v) => v.region)).filter(Boolean))],
         insights: insights(st, today).slice(0, 5).map((i) => ({ tone: i.tone, title: i.title, body: i.body })),
+      };
+    },
+  },
+  {
+    name: 'list_categories',
+    description:
+      'List the user’s categories in display order: name, icon (a Lucide icon name or an emoji), color, built-in code if any, and how many subscriptions use it (total / live). Use these exact names for the category field of create_subscription and update_subscription; a new name creates a new category.',
+    inputSchema: obj({}),
+    async run(_a, ctx) {
+      const { st, today } = await state(ctx);
+      const all = categoryCounts(st.subscriptions);
+      const live = categoryCounts(st.subscriptions.filter((s) => ['active', 'trial', 'ending', 'paused'].includes(effectiveStatus(s, today))));
+      return {
+        items: categoryList(st.settings, st.subscriptions).map((c) => ({ name: c.name, icon: c.icon ?? null, color: c.color ?? null, builtin: c.preset ?? null, subscriptions: all.get(c.name) ?? 0, live: live.get(c.name) ?? 0 })),
       };
     },
   },
@@ -511,7 +527,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'create_subscription',
     description:
-      'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. category: reuse one from get_overview when possible.',
+      'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. category: reuse a name from list_categories when possible.',
     write: true,
     inputSchema: obj(
       {
@@ -546,7 +562,7 @@ export const TOOLS: Tool[] = [
       const sub: Subscription = {
         id: uid(),
         name,
-        category: str(a.category) ?? t('mcp.defaultCategory'),
+        category: str(a.category) ?? presetCategory(categoryList(st.settings, st.subscriptions), 'tools'),
         tags: Array.isArray(a.tags) ? a.tags.map(String) : [],
         price: num(a.price, 'price'),
         currency,

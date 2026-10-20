@@ -31,5 +31,9 @@
     "calName": "Cobros de suscripciones",
     "method": "Pago: {name}",
     "alarm": "{name} se renueva pronto"
+  },
+  "category": {
+    "invalid": "Lista de categorías no válida",
+    "duplicate": "Categoría duplicada: {name}"
   }
 }

@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "Ceci est le registre personnel d’abonnements de l’utilisateur. Les montants sont donnés dans la devise d’origine et convertis dans la devise de référence. « Mes dépenses » exclut les paiements pour d’autres et, pour les abonnements partagés, ne compte que ma propre part. Si vous n’êtes pas sûr du nom d’un abonnement, cherchez d’abord avec list_subscriptions. Chaque outil d’écriture prend en charge dry_run : prévisualisez d’abord, puis appliquez.",
   "defaultTokenName": "Assistant IA",
-  "defaultCategory": "Outils",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "Aperçu du registre",
+    "list_categories": "Catégories",
     "list_subscriptions": "Liste des abonnements",
     "get_subscription": "Détails d’un abonnement",
     "list_charges": "Prélèvements",

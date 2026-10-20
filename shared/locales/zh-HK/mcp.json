@@ -2,7 +2,6 @@
   "serverTitle": "訂閱帳本",
   "instructions": "這是用戶的個人訂閱帳本。金額會同時提供原幣與換算後的基準貨幣；「我的支出」不含代付（替別人付的），共享方案只計算我自己負擔的部分。不確定訂閱名稱時，先用 list_subscriptions 搜尋；寫入操作都支援 dry_run，可先預覽再執行。",
   "defaultTokenName": "AI 助理",
-  "defaultCategory": "工具",
   "item": "{name}（{id}）",
   "sep": "、",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "帳本概況",
+    "list_categories": "分類列表",
     "list_subscriptions": "列出訂閱",
     "get_subscription": "訂閱詳情",
     "list_charges": "扣款明細",

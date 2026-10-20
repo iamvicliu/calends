@@ -31,5 +31,9 @@
     "calName": "Cobranças de assinaturas",
     "method": "Pagamento: {name}",
     "alarm": "{name} renova em breve"
+  },
+  "category": {
+    "invalid": "Lista de categorias inválida",
+    "duplicate": "Categoria duplicada: {name}"
   }
 }

@@ -2,7 +2,6 @@
   "serverTitle": "구독 장부",
   "instructions": "사용자의 개인 구독 장부입니다. 금액은 원래 통화와 기준 통화 환산액으로 함께 제공됩니다. ‘내 지출’에는 대신 결제(다른 사람을 위해 결제한 금액)가 포함되지 않으며, 공유 플랜은 내 분담금만 계산합니다. 구독 이름이 확실하지 않다면 먼저 list_subscriptions로 검색하세요. 모든 쓰기 도구는 dry_run을 지원하므로 먼저 미리 보고 적용하세요.",
   "defaultTokenName": "AI 어시스턴트",
-  "defaultCategory": "도구",
   "item": "{name}({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "장부 개요",
+    "list_categories": "카테고리 목록",
     "list_subscriptions": "구독 목록",
     "get_subscription": "구독 상세",
     "list_charges": "결제 내역",

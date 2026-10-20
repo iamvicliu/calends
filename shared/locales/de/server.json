@@ -37,5 +37,9 @@
     "calName": "Abo-Abbuchungen",
     "method": "Zahlung: {name}",
     "alarm": "{name} verlängert sich bald"
+  },
+  "category": {
+    "invalid": "Ungültige Kategorienliste",
+    "duplicate": "Doppelte Kategorie: {name}"
   }
 }

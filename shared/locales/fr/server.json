@@ -37,5 +37,9 @@
     "calName": "Prélèvements d’abonnements",
     "method": "Paiement : {name}",
     "alarm": "{name} se renouvelle bientôt"
+  },
+  "category": {
+    "invalid": "Liste de catégories invalide",
+    "duplicate": "Catégorie en double : {name}"
   }
 }

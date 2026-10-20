@@ -31,5 +31,9 @@
     "calName": "Abonelik ödemeleri",
     "method": "Ödeme: {name}",
     "alarm": "{name} yakında yenileniyor"
+  },
+  "category": {
+    "invalid": "Geçersiz kategori listesi",
+    "duplicate": "Yinelenen kategori: {name}"
   }
 }

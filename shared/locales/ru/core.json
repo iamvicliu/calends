@@ -54,5 +54,27 @@
   },
   "publicMethod": "{kind} · {region}",
   "channel": { "email": "Эл. почта" },
-  "csv": { "appStoreBalance": "Баланс App Store ({region})", "otherCategory": "Другое" }
+  "csv": { "appStoreBalance": "Баланс App Store ({region})", "otherCategory": "Другое" },
+  "category": {
+    "ai": "ИИ",
+    "tools": "Инструменты",
+    "productivity": "Продуктивность",
+    "media": "Видео",
+    "music": "Музыка",
+    "games": "Игры",
+    "cloud": "Облако и серверы",
+    "storage": "Хранилище",
+    "domains": "Домены",
+    "vpn": "VPN и сеть",
+    "developer": "Разработка",
+    "design": "Дизайн",
+    "education": "Обучение",
+    "news": "Новости и чтение",
+    "social": "Соцсети",
+    "shopping": "Покупки",
+    "finance": "Финансы",
+    "health": "Здоровье и фитнес",
+    "phone": "Связь",
+    "daily": "Повседневное"
+  }
 }

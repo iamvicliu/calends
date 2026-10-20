@@ -2,7 +2,6 @@
   "serverTitle": "Subscription Ledger",
   "instructions": "Ini adalah buku catatan langganan pribadi milik pengguna. Jumlah diberikan dalam mata uang asli sekaligus dikonversi ke mata uang dasar. \"Pengeluaran saya\" tidak termasuk talangan (dibayarkan untuk orang lain), dan untuk paket bersama hanya menghitung bagian saya sendiri. Jika tidak yakin nama sebuah langganan, cari dulu dengan list_subscriptions. Setiap alat tulis mendukung dry_run — pratinjau dulu, lalu terapkan.",
   "defaultTokenName": "Asisten AI",
-  "defaultCategory": "Alat",
   "item": "{name} ({id})",
   "sep": ", ",
   "label": {
@@ -39,6 +38,7 @@
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
+    "list_categories": "Kategori",
     "list_subscriptions": "Daftar langganan",
     "get_subscription": "Detail langganan",
     "list_charges": "Tagihan",
