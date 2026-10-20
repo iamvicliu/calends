@@ -577,8 +577,14 @@ a {
     font-size: 21px;
     margin-top: 6px;
   }
-  .stat-sub {
-    font-size: 11px;
+  /* 窄屏空间有限：说明、提示类的小字只在宽屏显示（.m-hide 可用在任何这类文字上） */
+  .stat-sub,
+  .cash-facts small {
+    display: none;
+  }
+  /* 工具类：要压过各组件里写了 display 的选择器 */
+  .m-hide {
+    display: none !important;
   }
 }
 

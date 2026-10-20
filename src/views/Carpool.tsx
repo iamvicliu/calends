@@ -191,8 +191,10 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                                   {d.member.exempt
                                     ? (d.member.note ?? t('family.pool.exemptNote'))
                                     : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
-                                  {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
-                                  {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
+                                  <span className="m-hide">
+                                    {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
+                                    {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
+                                  </span>
                                 </div>
                               </button>
                               <div style={{ textAlign: 'right', fontSize: 13.5 }}>
@@ -208,7 +210,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                                   <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
                                 )}
                                 {!d.member.exempt && (
-                                  <div className="muted" style={{ fontSize: 12 }}>
+                                  <div className="muted m-hide" style={{ fontSize: 12 }}>
                                     {perBill('family.pool.perFee', d.member.billEvery ?? 1, {
                                       fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
                                     })}
@@ -392,7 +394,7 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
       <div className="car-actual">
         {book.since ? (
           <>
-            <span>{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
+            <span className="m-hide">{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
             <span>
               {tx('family.facts.actual', {
                 paid: fmt(book.paid),
@@ -407,7 +409,7 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
           </>
         ) : (
           <>
-            <span>{t('family.facts.sinceNone')}</span>
+            <span className="m-hide">{t('family.facts.sinceNone')}</span>
             <span>{t('family.facts.noRecords')}</span>
           </>
         )}

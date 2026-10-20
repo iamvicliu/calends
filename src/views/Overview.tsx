@@ -470,7 +470,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
         </div>
       </div>
       <div className="stmt-r">
-        <div className="stmt-cap">
+        <div className="stmt-cap m-hide">
           {hv ? (
             <>
               <b>{hv.s.name}</b> · {t('overview.stmt.share', { amount: money(hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) })}

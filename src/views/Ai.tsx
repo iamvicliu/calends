@@ -259,7 +259,7 @@ export function Ai({ state }: { state: AppState }) {
             <span className="ai-dot" />
             <div>
               <b>{enabled ? t('ai.status.on') : t('ai.status.off')}</b>
-              <small>{enabled ? t('ai.status.onHint') : t('ai.status.offHint')}</small>
+              <small className="m-hide">{enabled ? t('ai.status.onHint') : t('ai.status.offHint')}</small>
             </div>
           </div>
           {!ro && <Toggle checked={enabled} label={t('ai.title')} onChange={(v) => run(() => saveSettings({ aiEnabled: v }))} />}
@@ -273,7 +273,7 @@ export function Ai({ state }: { state: AppState }) {
         <section className="ai-card">
           <header>
             <h2>{t('ai.setup')}</h2>
-            <p>{t('ai.setupHint')}</p>
+            <p className="m-hide">{t('ai.setupHint')}</p>
           </header>
           <Connect url={url} token={fresh ?? undefined} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
         </section>
@@ -281,7 +281,7 @@ export function Ai({ state }: { state: AppState }) {
         <section className="ai-card">
           <header>
             <h2>{t('ai.tokens', { count: tokens?.length ?? 0 })}</h2>
-            <p>{t('ai.tokensHint')}</p>
+            <p className="m-hide">{t('ai.tokensHint')}</p>
           </header>
           {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
           {!!tokens?.length && (
@@ -326,7 +326,7 @@ export function Ai({ state }: { state: AppState }) {
           <button type="button" className="ai-tools-toggle" onClick={() => setShowTools(!showTools)} aria-expanded={showTools}>
             <span>
               <h2>{t('ai.tools', { count: tools.length })}</h2>
-              <p>{t('ai.toolsHint')}</p>
+              <p className="m-hide">{t('ai.toolsHint')}</p>
             </span>
             <Icon name="down" size={16} />
           </button>
