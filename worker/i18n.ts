@@ -14,7 +14,7 @@ function pack(loc: Locale): Messages {
   return m;
 }
 
-export function useLocale(loc: Locale): void {
+export function applyLocale(loc: Locale): void {
   setLocale(loc, fallbackChain(loc).map(pack));
 }
 

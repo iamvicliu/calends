@@ -10,7 +10,7 @@ import { getFx, getSettings, loadState, putKv, remove, replaceAll, upsert } from
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
-import { requestLocale, settingsLocale, useLocale } from './i18n.ts';
+import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
@@ -259,7 +259,7 @@ export default {
       // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
         const s = await getSettings(env);
-        useLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+        applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
       }
       if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
       if (url.pathname === '/mcp') return await mcp(req, env);
@@ -284,7 +284,7 @@ export default {
       ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
     }
     const state = await loadState(env);
-    useLocale(settingsLocale(state.settings));
+    applyLocale(settingsLocale(state.settings));
     // 定时任务没有请求地址：用后台最近一次访问时记下的地址
     if (!env.SITE_URL) env = { ...env, SITE_URL: state.settings.siteUrl };
     const log = await runScheduled(env, state);
