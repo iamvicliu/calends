@@ -6,11 +6,14 @@ import { Amount, Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } 
 import { chargeValue } from '../../shared/fx.ts';
 import { allCharges } from '../derive.ts';
 
-const DOW = ['一', '二', '三', '四', '五', '六', '日'];
+const DOW_MON = ['一', '二', '三', '四', '五', '六', '日'];
+const DOW_SUN = ['日', '一', '二', '三', '四', '五', '六'];
+/** 周起始日：设置里选的，缺省周一 */
+let weekStart: 0 | 1 = 1;
 
 function monthGrid(month: string) {
   const first = month + '-01';
-  const dow = (new Date(parseDay(first)).getUTCDay() + 6) % 7; // 周一开头
+  const dow = (new Date(parseDay(first)).getUTCDay() + 7 - weekStart) % 7;
   const start = addDays(first, -dow);
   const last = addDays(addMonths(first, 1), -1);
   const cells = Math.ceil((dow + Number(last.slice(8))) / 7) * 7;
@@ -18,6 +21,8 @@ function monthGrid(month: string) {
 }
 
 export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onIcs: () => void }) {
+  weekStart = state.settings.weekStart ?? 1;
+  const DOW = weekStart === 0 ? DOW_SUN : DOW_MON;
   const [month, setMonth] = useState(today.slice(0, 7));
   const [mode, setMode] = useState<'month' | 'year'>('month');
   const [sel, setSel] = useState<string>(today);
@@ -154,6 +159,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
 }
 
 function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; byDay: Map<string, Charge[]>; today: string; sumOf: (l?: Charge[]) => number; base: string; onPick: (m: string) => void }) {
+  const DOW = weekStart === 0 ? DOW_SUN : DOW_MON;
   return (
     <div class="heat">
       {Array.from({ length: 12 }, (_, i) => {

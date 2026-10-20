@@ -267,6 +267,17 @@ export interface Settings {
   monthlyDigest: boolean;
   icsToken?: string;
   displayName: string;
+  /** 侧边栏显示「即将扣款」，以及往后看多少天；缺省显示、45 天 */
+  sidebarUpcoming?: boolean;
+  upcomingDays?: number;
+  /** 侧边栏里隐藏的模块（路由名） */
+  hiddenNav?: string[];
+  /** 打开后台时进入的页面（路由名，空为概览） */
+  startPage?: string;
+  /** 每周从哪天开始：1 周一（缺省）、0 周日 */
+  weekStart?: 0 | 1;
+  /** AI 接入（MCP）总开关；关闭后 /mcp 拒绝所有请求；缺省开启 */
+  aiEnabled?: boolean;
 }
 
 export interface FxTable {

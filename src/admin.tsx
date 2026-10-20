@@ -1,5 +1,5 @@
 import { render } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
@@ -21,7 +21,7 @@ import { Report } from './views/Report.tsx';
 import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
-import { currentRoute, go as navigate, href, initRouter, onRoute } from './router.ts';
+import { currentRoute, go as navigate, href, initRouter, onRoute, replaceRoute } from './router.ts';
 
 const NAV = [
   { path: '', label: '概览', icon: 'home' },
@@ -33,6 +33,11 @@ const NAV = [
   { path: 'behalf', label: '代付', icon: 'swap' },
   { path: 'ai', label: 'AI 接入', icon: 'bot' },
 ];
+
+/** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
+export function navOf(st: AppState['settings']) {
+  return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false));
+}
 
 function useRoute() {
   const [r, setR] = useState(currentRoute());
@@ -84,9 +89,10 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
   const upcoming = state.subscriptions
     .filter((s) => !s.proxy) // 代付在「代付」页单独管
     .map((s) => ({ s, n: nextCharge(s, d) }))
-    .filter((x) => x.n && x.n <= addDays(d, 45))
+    .filter((x) => x.n && x.n <= addDays(d, state.settings.upcomingDays ?? 45))
     .sort((a, b) => a.n!.localeCompare(b.n!))
     .slice(0, 12);
+  const showUpcoming = state.settings.sidebarUpcoming !== false;
   return (
     <aside class="sidebar">
       <div class="sb-top">
@@ -111,15 +117,15 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
         <kbd>⌘K</kbd>
       </button>
       <div class="side-gap" />
-      {NAV.map((n) => (
+      {navOf(state.settings).map((n) => (
         <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) ? 'active' : ''}`} href={href(n.path)}>
           <Icon name={n.icon} />
           <span>{n.label}</span>
         </a>
       ))}
       <div class="side-scroll side-recent">
-        {upcoming.length > 0 && <div class="side-label">即将扣款</div>}
-        {upcoming.map(({ s, n }) => {
+        {showUpcoming && upcoming.length > 0 && <div class="side-label">即将扣款</div>}
+        {showUpcoming && upcoming.map(({ s, n }) => {
           const days = diffDays(d, n!);
           return (
             <button key={s.id} class={`side-item ${days <= 3 ? 'soon' : ''}`} onClick={() => onOpen(s)}>
@@ -186,7 +192,7 @@ function Palette({ state, d, onClose, onOpen, onAdd }: { state: AppState; d: str
     })
     .sort((a, b) => (effectiveStatus(a, d) === 'ended' ? 1 : 0) - (effectiveStatus(b, d) === 'ended' ? 1 : 0))
     .slice(0, 8);
-  const pages = [...NAV, { path: 'settings', label: '设置', icon: 'gear' }].filter((n) => !lower || n.label.includes(lower));
+  const pages = [...navOf(state.settings), { path: 'settings', label: '设置', icon: 'gear' }].filter((n) => !lower || n.label.includes(lower));
   const items: Array<{ key: string; run: () => void; el: preact.JSX.Element }> = [
     ...subs.map((s) => ({
       key: s.id,
@@ -295,6 +301,14 @@ function App() {
   const [drawer, setDrawer] = useState(false);
 
   useEffect(() => setDrawer(false), [route]);
+  // 启动页：打开 /admin 时按设置跳到指定页面（只在首次加载时）
+  const started = useRef(false);
+  useEffect(() => {
+    if (!state || started.current) return;
+    started.current = true;
+    const sp = state.settings.startPage;
+    if (sp && currentRoute() === '' && navOf(state.settings).some((n) => n.path === sp)) replaceRoute(sp);
+  }, [state]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -311,7 +325,7 @@ function App() {
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.metaKey || e.ctrlKey) return;
       if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today(), state?.settings.defaultMethodId));
       const idx = Number(e.key);
-      if (idx >= 1 && idx <= NAV.length) navigate(NAV[idx - 1].path);
+      if (state && idx >= 1 && idx <= navOf(state.settings).length) navigate(navOf(state.settings)[idx - 1].path);
     };
     const onDrawer = () => (matchMedia('(max-width: 860px)').matches ? setDrawer(true) : setCollapsed(false));
     const onAdd = () => state && !state.readonly && setEditing(newSub(today(), state?.settings.defaultMethodId));

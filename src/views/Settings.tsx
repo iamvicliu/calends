@@ -6,6 +6,24 @@ import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx'
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
+import { go } from '../router.ts';
+
+/** 可设为启动页的页面 */
+const START_PAGES: Array<[string, string]> = [
+  ['list', '订阅'],
+  ['calendar', '日历'],
+  ['report', '报告'],
+  ['wallet', '钱包'],
+];
+/** 侧边栏里可以隐藏的模块；概览、订阅始终显示 */
+const SIDE_MODULES: Array<[string, string]> = [
+  ['calendar', '日历'],
+  ['report', '报告'],
+  ['wallet', '钱包'],
+  ['family', '合租'],
+  ['behalf', '代付'],
+  ['ai', 'AI 接入'],
+];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 
 interface Preview {
@@ -65,6 +83,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   // 只补没有分段、也不是代付的订阅：分段的每段各有支付方式，代付用的是别人的钱
   const unassigned = state.subscriptions.filter((x) => !x.methodId && !x.phases?.length && !x.proxy);
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [name, setName] = useState(s.displayName);
   const [ics, setIcs] = useState(false);
   const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[] } | null>(null);
 
@@ -111,6 +130,40 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
     <>
       <Toolbar title="设置" />
       <div class="page fade-in stack" style={{ maxWidth: 720, gap: 26, margin: '0 auto' }}>
+        <Group title="通用">
+          <Cell label="名字">
+            <input value={name} placeholder="分享图、公开页上显示" onInput={(e) => setName((e.target as HTMLInputElement).value)} onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), '已保存')} />
+          </Cell>
+          <Cell label="打开后先看">
+            <Picker value={s.startPage ?? ''} onChange={(v) => run(() => saveSettings({ startPage: v || undefined }))} options={[{ value: '', label: '概览' }, ...START_PAGES.map(([k, l]) => ({ value: k, label: l }))]} ariaLabel="启动页" />
+          </Cell>
+          <Cell label="本位币">
+            <CurrencySelect value={s.baseCurrency} onChange={(c) => run(() => saveSettings({ baseCurrency: c }))} ariaLabel="本位币" />
+          </Cell>
+          <Cell label="时区">
+            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => ({ value: z, label: z }))} ariaLabel="时区" />
+          </Cell>
+          <Cell label="每周从">
+            <Picker value={String(s.weekStart ?? 1)} onChange={(v) => run(() => saveSettings({ weekStart: v === '0' ? 0 : 1 }))} options={[{ value: '1', label: '周一开始' }, { value: '0', label: '周日开始' }]} ariaLabel="每周起始日" />
+          </Cell>
+        </Group>
+
+        <Group title="侧边栏">
+          <Cell label="即将扣款">
+            <Toggle checked={s.sidebarUpcoming !== false} onChange={(v) => run(() => saveSettings({ sidebarUpcoming: v }))} />
+          </Cell>
+          {s.sidebarUpcoming !== false && (
+            <Cell label="往后看">
+              <Picker value={s.upcomingDays ?? 45} onChange={(n) => run(() => saveSettings({ upcomingDays: n }))} options={[7, 14, 30, 45, 60, 90].map((n) => ({ value: n, label: `${n} 天` }))} ariaLabel="即将扣款天数" search={false} />
+            </Cell>
+          )}
+          {SIDE_MODULES.map(([k, l]) => (
+            <Cell key={k} label={l}>
+              <Toggle checked={!(s.hiddenNav ?? []).includes(k)} onChange={(v) => run(() => saveSettings({ hiddenNav: v ? (s.hiddenNav ?? []).filter((x) => x !== k) : [...(s.hiddenNav ?? []), k] }))} />
+            </Cell>
+          ))}
+        </Group>
+
         <Group title="提醒">
           <Cell label="默认提前">
             <Picker value={s.remindDays} onChange={(n) => run(() => saveSettings({ remindDays: n }))} options={[0, 1, 2, 3, 5, 7, 14].map((n) => ({ value: n, label: n === 0 ? '到期当天' : `${n} 天` }))} ariaLabel="默认提前" />
@@ -138,17 +191,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <ChannelsGroup state={state} />
 
-        {preview && (
-          <Group title={`今天（${preview.day}）`} foot={preview.log.length ? undefined : '还没有发送记录'}>
-            {preview.digests.length === 0 ? (
-              <div class="cell muted">今天没有需要提醒的事项</div>
-            ) : (
-              preview.digests.map((d) => (
-                <Cell key={d.key} label={d.subject}>
-                  {d.sections.reduce((a, x) => a + x.rows.length, 0)} 项
-                </Cell>
-              ))
-            )}
+        {preview && (preview.digests.length > 0 || preview.log.length > 0) && (
+          <Group title={`今天（${preview.day}）`}>
+            {preview.digests.map((d) => (
+              <Cell key={d.key} label={d.subject}>
+                {d.sections.reduce((a, x) => a + x.rows.length, 0)} 项
+              </Cell>
+            ))}
             {preview.log.slice(0, 6).map((l) => (
               <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
                 <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{l.sent_at.slice(5, 16)}</span>
@@ -157,23 +206,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Group>
         )}
 
-        <Group title="日历">
-          <Cell label="订阅到系统日历" onClick={() => setIcs(true)}>
-            {s.icsToken ? '已开启' : '未开启'}
-          </Cell>
-        </Group>
-
-        <Group title="显示">
-          <Cell label="本位币">
-            <CurrencySelect value={s.baseCurrency} onChange={(c) => run(() => saveSettings({ baseCurrency: c }))} ariaLabel="本位币" />
-          </Cell>
+        <Group title="记账">
           <Cell label="默认支付方式">
             <MethodPicker methods={state.methods} value={s.defaultMethodId} onChange={(id) => run(() => saveSettings({ defaultMethodId: id }))} />
           </Cell>
           {s.defaultMethodId && unassigned.length > 0 && (
             <Cell
               label={`${unassigned.length} 个订阅未指定支付方式`}
-              sub="代付与分段订阅不在其内"
               onClick={() =>
                 run(async () => {
                   for (const x of unassigned) await saveSub({ ...x, methodId: s.defaultMethodId });
@@ -186,33 +225,30 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           <Cell label="合租收款币种">
             <CurrencySelect value={s.collectCurrency ?? s.baseCurrency} onChange={(c) => run(() => saveSettings({ collectCurrency: c }))} ariaLabel="合租收款币种" />
           </Cell>
-          <Cell label="时区">
-            <Picker value={s.timezone} onChange={(z) => run(() => saveSettings({ timezone: z }))} options={['Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Tokyo', 'Asia/Manila', 'Asia/Singapore', 'Europe/Istanbul', 'Europe/London', 'America/Los_Angeles', 'America/New_York', 'UTC'].map((z) => ({ value: z, label: z }))} ariaLabel="时区" />
-          </Cell>
-          <Cell label="汇率" sub={`更新于 ${state.fx.fetchedAt.slice(0, 16).replace('T', ' ')}`} onClick={() => run(refreshFx, '汇率已更新')}>
-            1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY · {state.fx.rates.TRY?.toFixed(1)} TRY
-          </Cell>
         </Group>
 
-        <Group title="历史汇率">
-          <Cell label="已覆盖扣款日" sub={fxs?.first ? `最早 ${fxs.first}` : undefined}>
-            {fxs ? `${fxs.covered} / ${fxs.needed}` : '…'}
+        <Group title="汇率">
+          <Cell label="当前汇率" sub={`更新于 ${state.fx.fetchedAt.slice(0, 16).replace('T', ' ')}`} onClick={() => run(refreshFx, '汇率已更新')}>
+            1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY
           </Cell>
-          {fxs && Object.keys(fxs.sources).length > 0 && (
-            <Cell label="数据来源">
-              {Object.entries(fxs.sources)
-                .map(([k, v]) => `${{ 'currency-api': 'currency-api', ecb: '欧洲央行', 'er-api': '实时汇率' }[k] ?? k} ${v}`)
-                .join(' · ')}
-            </Cell>
-          )}
-          <Cell label={<span style={{ color: 'var(--accent)' }}>补齐缺失的汇率</span>} onClick={() => run(async () => { await syncFx(); await loadFx(); }, '历史汇率已更新')} />
+          <Cell label="历史汇率覆盖" sub={fxs?.first ? `最早 ${fxs.first}` : undefined}>
+            {fxs ? `${fxs.covered} / ${fxs.needed} 天` : '…'}
+          </Cell>
+          {fxs && fxs.covered < fxs.needed && <Cell label={<span style={{ color: 'var(--accent)' }}>补齐缺失的汇率</span>} onClick={() => run(async () => { await syncFx(); await loadFx(); }, '历史汇率已更新')} />}
         </Group>
 
-        <Group title="公开页" foot="公开页只展示脱敏后的数据：域名打码，银行卡只显示类型，不含余额、卡号、备注和合租成员。">
-          <Cell label="允许访客查看" sub={`${location.origin}/`}>
+        <Group title="开放">
+          <Cell label="订阅到系统日历" onClick={() => setIcs(true)}>
+            {s.icsToken ? '已开启' : '未开启'}
+          </Cell>
+          <Cell label="公开页" sub={s.publicView ? `${location.origin}/` : undefined}>
             <Toggle checked={s.publicView} onChange={(v) => run(() => saveSettings({ publicView: v }), v ? '已公开' : '已关闭公开页')} />
           </Cell>
-          <Cell label={<span style={{ color: 'var(--accent)' }}>预览公开页</span>} onClick={() => window.open('/', '_blank')} />
+          {s.publicView && <Cell label={<span style={{ color: 'var(--accent)' }}>预览公开页</span>} onClick={() => window.open('/', '_blank')} />}
+          <Cell label="AI 接入（MCP）">
+            <Toggle checked={s.aiEnabled !== false} onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? '已开启 AI 接入' : '已关闭，AI 助手将无法访问')} />
+          </Cell>
+          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>管理令牌与接入方式</span>} onClick={() => go('ai')} />}
         </Group>
 
         <Group title="数据">

@@ -8,6 +8,12 @@ export const currentRoute = () => decodeURIComponent(location.pathname.slice(BAS
 /** 某个路由的完整地址，用于 <a href> */
 export const href = (path: string) => (path ? `${BASE}/${path}` : BASE);
 
+/** 替换当前地址（不留历史记录），用于启动页跳转 */
+export function replaceRoute(path: string) {
+  history.replaceState(null, '', href(path));
+  window.dispatchEvent(new Event(EVENT));
+}
+
 export function go(path: string) {
   const url = href(path);
   if (url !== location.pathname) history.pushState(null, '', url);

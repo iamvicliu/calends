@@ -3,7 +3,7 @@
 // 鉴权：Authorization: Bearer <令牌>；令牌在后台「AI」页生成，库里只存 SHA-256，分只读 / 读写两种权限。
 import { randomToken, sha256 } from './auth.ts';
 import type { Env } from './env.ts';
-import { getKv, putKv } from './store.ts';
+import { getKv, getSettings, putKv } from './store.ts';
 import { TOOLS, type ToolCtx } from './mcp-tools.ts';
 
 export interface McpToken {
@@ -107,6 +107,7 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   // 无状态服务器不提供服务端推送流
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { ...cors, allow: 'POST' } });
+  if ((await getSettings(env)).aiEnabled === false) return Response.json(fail(null, -32002, 'AI 接入已在订阅账本的设置里关闭'), { status: 403, headers: cors });
   const token = await authenticate(req, env);
   if (!token) return Response.json(fail(null, -32001, '缺少或无效的令牌：请在订阅账本后台「AI」页生成，并以 Authorization: Bearer <令牌> 传入'), { status: 401, headers: { ...cors, 'www-authenticate': 'Bearer' } });
   let body: Rpc | Rpc[];
