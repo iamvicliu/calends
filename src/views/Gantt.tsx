@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
 import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -149,12 +149,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   };
   // React 的 wheel 监听是被动的，拦不住页面滚动；横向滑动改用原生监听（非被动），并始终调用最新的处理函数
   const gtEl = useRef<HTMLDivElement>(null);
-  const wheelRef = useRef(onWheel);
-  wheelRef.current = onWheel;
+  const wheel = useEffectEvent((e: WheelEvent) => onWheel(e));
   useEffect(() => {
     const el = gtEl.current;
     if (!el) return;
-    const h = (e: WheelEvent) => wheelRef.current(e);
+    const h = (e: WheelEvent) => wheel(e);
     el.addEventListener('wheel', h, { passive: false });
     return () => el.removeEventListener('wheel', h);
   }, []);

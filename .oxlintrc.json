@@ -42,7 +42,9 @@
       {
         "allow": ["__APP_VERSION__"]
       }
-    ]
+    ],
+    "react/exhaustive-effect-dependencies": "off",
+    "react/set-state-in-effect": "off"
   },
   "ignorePatterns": ["dist", "node_modules", "shared/locales/server.gen.ts", "src/public/components/ui", "local"]
 }

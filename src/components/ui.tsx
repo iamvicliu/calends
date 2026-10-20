@@ -1,6 +1,6 @@
 import type { ReactNode as ComponentChildren, JSX } from 'react';
 import { createPortal } from 'react-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
@@ -371,12 +371,11 @@ export function Sheet(props: {
   bare?: boolean;
 }) {
   // Esc 时调用最新的 onClose（它可能依赖表单状态，比如未保存确认）
-  const close = useRef(props.onClose);
-  close.current = props.onClose;
+  const close = useEffectEvent(() => props.onClose());
   useEffect(() => {
     const me = {};
     openSheets.push(me);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && openSheets[openSheets.length - 1] === me && close.current();
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && openSheets[openSheets.length - 1] === me && close();
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
