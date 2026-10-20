@@ -516,7 +516,9 @@ select.btn { appearance: none; -webkit-appearance: none; padding-right: 28px; ba
 .wf-col b { font-size: 13px; font-weight: 700; }
 .wf-col.up b { color: var(--red); }
 .wf-col.down b { color: #1f9d48; }
-.wf-col span { font-size: 11.5px; color: var(--label-2); white-space: nowrap; }
+.wf-col span { max-width: 100%; font-size: 11.5px; color: var(--label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 窄屏或长语言：柱子下的标签缩小，放不下就省略（悬停可看全称） */
+@media (max-width: 560px) { .wf { gap: 4px; } .wf-col span { font-size: 10px; } .wf-col b { font-size: 11.5px; } }
 .wf-items { margin-top: 12px; border-top: 0.5px solid var(--sep); padding-top: 6px; }
 .wf-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 0; border: 0; background: none; text-align: left; font-size: 13.5px; }
 .wf-item .wf-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1217,9 +1219,10 @@ a.car-toggle { text-decoration: none; }
 .d-body .cell-l small { color: var(--label-3); }
 
 /* 订阅列表的多维筛选：每行一个维度，选项一行排开、放不下横向滑动 */
-.facets { position: relative; display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; padding: 10px 12px; border-radius: 14px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
-.facet-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.facet-label { flex-shrink: 0; width: 34px; font-size: 12.5px; color: var(--label-3); }
+.facets { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 10px; align-items: center; margin-bottom: 16px; padding: 10px 12px; border-radius: 14px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }
+/* 标签一列、选项一列：各语言的标签长短不同也能对齐 */
+.facet-row { display: contents; }
+.facet-label { flex-shrink: 0; min-width: 34px; font-size: 12.5px; color: var(--label-3); white-space: nowrap; }
 .facet-opts { display: flex; gap: 2px; overflow-x: auto; min-width: 0; padding: 1px 24px 1px 1px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
 .facet { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; height: 28px; padding: 0 10px; border: 0; border-radius: 999px; background: none; color: var(--label-2); font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 0.15s, color 0.15s, transform 0.1s; }
 .facet:hover { background: var(--fill-2); color: var(--label); }
@@ -1232,7 +1235,7 @@ a.car-toggle { text-decoration: none; }
 .facet.on { background: var(--ink); color: var(--on-ink); }
 .facet.on .i, .facet.on .n { color: inherit; opacity: 0.7; }
 .facet-clear { position: absolute; top: 8px; right: 10px; z-index: 1; border: 0; background: var(--card); color: var(--accent); font-size: 12.5px; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
-@media (max-width: 860px) { .facets { padding: 8px 10px; } .facet-label { width: 30px; } }
+@media (max-width: 860px) { .facets { padding: 8px 10px; } .facet-label { min-width: 30px; } }
 
 /* 座位可点：成员头像打开资料，空位「+」直接添加成员 */
 button.seat { border: 0; padding: 0; font: inherit; cursor: pointer; transition: transform 0.12s, box-shadow 0.15s; }

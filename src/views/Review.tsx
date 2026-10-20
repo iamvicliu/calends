@@ -116,7 +116,7 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
   const no = `${year}${String(r.charges).padStart(4, '0')}`;
   return (
     <div class="rp">
-      <div class="rp-c rp-shop">{t('review.receipt.shop', { whose })}</div>
+      <div class="rp-c rp-shop">{t('review.receipt.shop', { whose }).trim()}</div>
       <div class="rp-c">SUBSCRIPTION STORE</div>
       <div class="rp-c rp-small">{ongoing ? t('review.receipt.asOf', { date: today }) : t('review.receipt.fullYear', { year })}</div>
       <div class="rp-rule">{"=".repeat(60)}</div>
@@ -157,7 +157,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
   return (
     <div class="ps" style={{ '--g1': glow[0] ?? '#6366f1', '--g2': glow[1] ?? '#ec4899', '--g3': glow[2] ?? '#f59e0b' } as Record<string, string>}>
       <div class="ps-year">{year}</div>
-      <div class="ps-kicker">{t('review.poster.kicker', { whose })}</div>
+      <div class="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
       <div class="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</div>
       <div class="ps-line">
         {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, { charges: t('review.n.charges', { count: r.charges }), currencies: t('review.n.currencies', { count: r.currencies }), subs: t('review.n.subs', { count: r.items.length }) })}
@@ -189,7 +189,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
     <div class="review">
       <div class="rv-head">
         <span>{year}</span>
-        <span>{t('review.card.head', { whose })}</span>
+        <span>{t('review.card.head', { whose }).trim()}</span>
       </div>
       <div class="rv-big">
         <small>{t(`review.card.intro.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`)}</small>
@@ -259,7 +259,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
   return (
     <div class="st">
       <div class="st-head">
-        <span>{t('review.stars.head', { year, whose })}</span>
+        <span>{t('review.stars.head', { year, whose }).trim()}</span>
         <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</b>
       </div>
       <div class="st-map" style={{ height: (bubbles[0]?.h ?? 1) * W }}>

@@ -101,7 +101,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         </div>
       </div>
       <div class="hero-r">
-        <div class="row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
+        <div class="row" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
           <Seg
             small
             value={hist ? 'h' : 'c'}
