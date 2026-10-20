@@ -31,5 +31,8 @@
     "calName": "Abonelik ödemeleri",
     "method": "Ödeme: {name}",
     "alarm": "{name} yakında yenileniyor"
-  }
+  },
+  "invalidPerson": "Ad gerekli",
+  "personNotFound": "Kişi bulunamadı",
+  "personInUse": { "one": "Hâlâ {count} plana veya ödemeye bağlı. Önce başka biriyle birleştirin.", "other": "Hâlâ {count} plana veya ödemeye bağlı. Önce başka biriyle birleştirin." }
 }

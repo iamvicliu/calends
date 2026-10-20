@@ -1,0 +1,62 @@
+{
+  "title": "Personnes",
+  "tab": {
+    "plans": "Abonnements",
+    "people": "Personnes"
+  },
+  "stat": {
+    "owed": "On vous doit",
+    "owedSub": { "one": "{count} personne doit", "other": "{count} personnes doivent" },
+    "allSettled": "Tout est réglé",
+    "received": "Encaissé à ce jour",
+    "receivedSub": "Abonnements partagés et paiements pour d’autres",
+    "count": "Personnes",
+    "countSub": "Partages : {share} · Payé pour : {proxy}"
+  },
+  "empty": {
+    "title": "Personne pour l’instant",
+    "body": "Ajoutez des membres à un abonnement partagé ou indiquez pour qui vous payez : vous verrez ici ce que chacun vous doit."
+  },
+  "card": {
+    "noContact": "Aucun contact",
+    "nothing": "Dans aucun abonnement",
+    "past": { "one": "Et {count} terminé", "other": "Et {count} terminés" }
+  },
+  "kind": {
+    "share": "Partage",
+    "proxy": "Payé pour"
+  },
+  "item": {
+    "paidUntil": "Payé jusqu’au {date}",
+    "noPay": "Aucun paiement",
+    "owedPeriods": { "one": "{count} période due", "other": "{count} périodes dues" },
+    "left": "Parti",
+    "ended": "Arrêté",
+    "received": "Payé {amount}"
+  },
+  "sheet": {
+    "owed": "Dû",
+    "received": "Payé à ce jour",
+    "last": "Dernier paiement",
+    "in": { "one": "Dans {count} abonnement", "other": "Dans {count} abonnements" },
+    "inEmpty": "Dans aucun abonnement partagé ni paiement pour autrui. Vous pouvez la supprimer.",
+    "profile": "Profil",
+    "notePh": "ex. collègue, paie en fin de mois",
+    "color": "Couleur",
+    "syncFoot": { "one": "Les changements de nom et de contact s’appliquent à {count} endroit.", "other": "Les changements de nom et de contact s’appliquent aux {count} endroits." },
+    "merge": "Fusionner avec",
+    "mergePick": "Choisir…",
+    "mergeFoot": "La même personne apparaît deux fois ? Fusionnez pour regrouper ses abonnements et paiements.",
+    "mergeConfirm": "Fusionner « {from} » avec « {into} » ? Les abonnements et paiements de {from} passent à {into}, dont le nom et le contact sont conservés.",
+    "merged": "Fusionné avec {name}",
+    "confirmDelete": "Supprimer « {name} » ?"
+  },
+  "pick": {
+    "new": "Nouvelle personne",
+    "aria": "Choisir une personne"
+  },
+  "field": {
+    "person": "Personne",
+    "syncFoot": { "one": "Apparaît aussi à {count} autre endroit : les changements de nom et de contact s’y appliquent aussi.", "other": "Apparaît aussi à {count} autres endroits : les changements de nom et de contact s’y appliquent aussi." }
+  }
+}

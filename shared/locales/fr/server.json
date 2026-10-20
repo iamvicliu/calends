@@ -37,5 +37,11 @@
     "calName": "Prélèvements d’abonnements",
     "method": "Paiement : {name}",
     "alarm": "{name} se renouvelle bientôt"
+  },
+  "invalidPerson": "Le nom est requis",
+  "personNotFound": "Personne introuvable",
+  "personInUse": {
+    "one": "Encore liée à {count} abonnement ou paiement. Fusionnez-la d’abord avec quelqu’un d’autre.",
+    "other": "Encore liée à {count} abonnements ou paiements. Fusionnez-la d’abord avec quelqu’un d’autre."
   }
 }

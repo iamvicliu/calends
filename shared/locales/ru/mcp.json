@@ -35,7 +35,13 @@
     "noMember": "Нет такого участника. Участники: {list}",
     "notProxy": "«{name}» — не оплата за других",
     "noPendingProxy": "Нет неоплаченных списаний за других",
-    "nothingToChange": "Нечего менять: передайте balance, top_up, name или region"
+    "nothingToChange": "Нечего менять: передайте balance, top_up, name или region",
+    "personNotFound": "Никто не подходит под «{q}». Сначала используйте list_people.",
+    "personAmbiguous": "«{q}» подходит {count} людям. Укажите id: {list}",
+    "personNoItems": "У {name} нет подписок или оплат, куда записать платёж",
+    "personItemsAmbiguous": "{name} есть в нескольких — укажите subscription: {list}",
+    "needSubOrPerson": "Нужен subscription или person",
+    "needKind": "Нужен kind (share или proxy)"
   },
   "tool": {
     "get_overview": "Обзор учёта",
@@ -56,6 +62,7 @@
     "record_payment": "Записать списание",
     "delete_payment": "Удалить запись о списании",
     "record_receivable": "Записать полученные деньги",
-    "update_payment_method": "Обновить баланс способа оплаты"
+    "update_payment_method": "Обновить баланс способа оплаты",
+    "list_people": "Люди и долги"
   }
 }

@@ -31,5 +31,8 @@
     "calName": "订阅扣款",
     "method": "支付：{name}",
     "alarm": "{name} 即将扣款"
-  }
+  },
+  "invalidPerson": "称呼不能为空",
+  "personNotFound": "找不到这个人",
+  "personInUse": "还有 {count} 处合租或代付关联这个人，请先合并到别人名下"
 }

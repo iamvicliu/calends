@@ -31,5 +31,8 @@
     "calName": "Cobros de suscripciones",
     "method": "Pago: {name}",
     "alarm": "{name} se renueva pronto"
-  }
+  },
+  "invalidPerson": "El nombre es obligatorio",
+  "personNotFound": "Persona no encontrada",
+  "personInUse": { "one": "Aún vinculada a {count} plan o pago. Combínala antes con otra persona.", "other": "Aún vinculada a {count} planes o pagos. Combínala antes con otra persona." }
 }

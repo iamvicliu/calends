@@ -35,7 +35,13 @@
     "noMember": "沒有這個成員。成員：{list}",
     "notProxy": "「{name}」不是代付",
     "noPendingProxy": "沒有待收的代付期",
-    "nothingToChange": "沒有要改的內容：傳 balance、top_up、name 或 region"
+    "nothingToChange": "沒有要改的內容：傳 balance、top_up、name 或 region",
+    "personNotFound": "沒有符合「{q}」的人，可先用 list_people 查看",
+    "personAmbiguous": "「{q}」符合 {count} 個人，請用 id 指定：{list}",
+    "personNoItems": "{name} 沒有可記收款的共享或代付",
+    "personItemsAmbiguous": "{name} 在多處，請用 subscription 指定：{list}",
+    "needSubOrPerson": "需要 subscription 或 person",
+    "needKind": "需要 kind（share 或 proxy）"
   },
   "tool": {
     "get_overview": "帳本概況",
@@ -56,6 +62,7 @@
     "record_payment": "記一筆扣款",
     "delete_payment": "刪除一筆扣款記錄",
     "record_receivable": "記一筆收款",
-    "update_payment_method": "更新付款方式餘額"
+    "update_payment_method": "更新付款方式餘額",
+    "list_people": "人與應收"
   }
 }

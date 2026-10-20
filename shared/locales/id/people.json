@@ -1,0 +1,62 @@
+{
+  "title": "Orang",
+  "tab": {
+    "plans": "Paket",
+    "people": "Orang"
+  },
+  "stat": {
+    "owed": "Piutang",
+    "owedSub": "{count} orang berutang",
+    "allSettled": "Semua lunas",
+    "received": "Terkumpul sejauh ini",
+    "receivedSub": "Paket bersama dan talangan",
+    "count": "Orang",
+    "countSub": "Paket bersama: {share} · Talangan: {proxy}"
+  },
+  "empty": {
+    "title": "Belum ada orang",
+    "body": "Tambahkan anggota ke paket bersama atau tentukan untuk siapa Anda menalangi — di sini terlihat berapa utang tiap orang."
+  },
+  "card": {
+    "noContact": "Tanpa kontak",
+    "nothing": "Tidak ada paket",
+    "past": "Ditambah {count} yang sudah berakhir"
+  },
+  "kind": {
+    "share": "Paket bersama",
+    "proxy": "Talangan"
+  },
+  "item": {
+    "paidUntil": "Dibayar s.d. {date}",
+    "noPay": "Belum ada pembayaran",
+    "owedPeriods": "Utang {count} periode",
+    "left": "Keluar",
+    "ended": "Dihentikan",
+    "received": "Diterima {amount}"
+  },
+  "sheet": {
+    "owed": "Piutang",
+    "received": "Sudah dibayar",
+    "last": "Pembayaran terakhir",
+    "in": "Ikut {count} paket",
+    "inEmpty": "Tidak ada di paket bersama atau talangan mana pun. Bisa dihapus.",
+    "profile": "Profil",
+    "notePh": "mis. rekan kerja, bayar akhir bulan",
+    "color": "Warna",
+    "syncFoot": "Perubahan nama dan kontak berlaku di {count} tempat.",
+    "merge": "Gabungkan ke",
+    "mergePick": "Pilih…",
+    "mergeFoot": "Orang yang sama tercatat dua kali? Gabungkan agar paket dan pembayarannya menyatu.",
+    "mergeConfirm": "Gabungkan “{from}” ke “{into}”? Semua paket dan pembayaran {from} pindah ke {into}, nama dan kontak mengikuti {into}.",
+    "merged": "Digabung ke {name}",
+    "confirmDelete": "Hapus “{name}”?"
+  },
+  "pick": {
+    "new": "Orang baru",
+    "aria": "Pilih orang"
+  },
+  "field": {
+    "person": "Orang",
+    "syncFoot": "Juga ada di {count} tempat lain — perubahan nama dan kontak ikut berlaku."
+  }
+}

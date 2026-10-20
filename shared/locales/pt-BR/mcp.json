@@ -35,7 +35,13 @@
     "noMember": "Membro inexistente. Membros: {list}",
     "notProxy": "“{name}” não é um pagamento para outros",
     "noPendingProxy": "Não há cobranças pendentes de pagamentos para outros",
-    "nothingToChange": "Nada a alterar: envie balance, top_up, name ou region"
+    "nothingToChange": "Nada a alterar: envie balance, top_up, name ou region",
+    "personNotFound": "Nenhuma pessoa corresponde a “{q}”. Tente list_people primeiro.",
+    "personAmbiguous": "“{q}” corresponde a {count} pessoas. Indique uma pelo id: {list}",
+    "personNoItems": "{name} não tem planos ou pagamentos para registrar",
+    "personItemsAmbiguous": "{name} está em vários; informe subscription: {list}",
+    "needSubOrPerson": "subscription ou person é obrigatório",
+    "needKind": "kind é obrigatório (share ou proxy)"
   },
   "tool": {
     "get_overview": "Visão geral",
@@ -56,6 +62,7 @@
     "record_payment": "Registrar cobrança",
     "delete_payment": "Apagar registro de cobrança",
     "record_receivable": "Registrar valor recebido",
-    "update_payment_method": "Atualizar saldo da forma de pagamento"
+    "update_payment_method": "Atualizar saldo da forma de pagamento",
+    "list_people": "Pessoas e recebíveis"
   }
 }

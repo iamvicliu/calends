@@ -31,5 +31,8 @@
     "calName": "Tagihan langganan",
     "method": "Pembayaran: {name}",
     "alarm": "{name} segera diperpanjang"
-  }
+  },
+  "invalidPerson": "Nama wajib diisi",
+  "personNotFound": "Orang tidak ditemukan",
+  "personInUse": "Masih terkait dengan {count} paket atau talangan. Gabungkan dulu ke orang lain."
 }

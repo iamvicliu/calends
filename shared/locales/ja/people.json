@@ -1,0 +1,62 @@
+{
+  "title": "相手",
+  "tab": {
+    "plans": "プラン",
+    "people": "相手"
+  },
+  "stat": {
+    "owed": "未回収",
+    "owedSub": "{count} 人が未払い",
+    "allSettled": "全員精算済み",
+    "received": "これまでの回収額",
+    "receivedSub": "共有プランと立て替えの合計",
+    "count": "人数",
+    "countSub": "共有 {share} · 立て替え {proxy}"
+  },
+  "empty": {
+    "title": "まだ誰もいません",
+    "body": "共有プランにメンバーを追加するか、立て替えの相手を設定すると、ここに人ごとの未回収額がまとまります。"
+  },
+  "card": {
+    "noContact": "連絡先なし",
+    "nothing": "共有も立て替えもなし",
+    "past": "ほか {count} 件は終了"
+  },
+  "kind": {
+    "share": "共有",
+    "proxy": "立て替え"
+  },
+  "item": {
+    "paidUntil": "{date} まで支払い済み",
+    "noPay": "未入金",
+    "owedPeriods": "{count} 期分未払い",
+    "left": "退出済み",
+    "ended": "停止済み",
+    "received": "回収 {amount}"
+  },
+  "sheet": {
+    "owed": "未回収",
+    "received": "これまでの入金",
+    "last": "最終入金",
+    "in": "{count} 件に参加",
+    "inEmpty": "共有にも立て替えにも含まれていません。削除できます。",
+    "profile": "プロフィール",
+    "notePh": "例：同僚、月末に振込",
+    "color": "カラー",
+    "syncFoot": "呼び名や連絡先を変えると、{count} か所すべてに反映されます。",
+    "merge": "統合先",
+    "mergePick": "選択…",
+    "mergeFoot": "同じ人が二重に登録されていたら、統合して記録をまとめられます。",
+    "mergeConfirm": "「{from}」を「{into}」に統合しますか？{from} の共有と立て替えはすべて {into} に移り、呼び名と連絡先は {into} のものになります。",
+    "merged": "{name} に統合しました",
+    "confirmDelete": "「{name}」を削除しますか？"
+  },
+  "pick": {
+    "new": "新しい相手",
+    "aria": "相手を選択"
+  },
+  "field": {
+    "person": "相手",
+    "syncFoot": "この人はほかに {count} か所あり、呼び名や連絡先の変更はそちらにも反映されます。"
+  }
+}

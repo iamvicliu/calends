@@ -35,5 +35,8 @@
     "calName": "サブスクの請求",
     "method": "支払い方法：{name}",
     "alarm": "{name}がまもなく更新されます"
-  }
+  },
+  "invalidPerson": "呼び名を入力してください",
+  "personNotFound": "相手が見つかりません",
+  "personInUse": "まだ {count} 件の共有・立て替えに紐づいています。先に別の相手へ統合してください"
 }

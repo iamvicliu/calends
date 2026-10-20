@@ -37,5 +37,11 @@
     "calName": "Abo-Abbuchungen",
     "method": "Zahlung: {name}",
     "alarm": "{name} verlängert sich bald"
+  },
+  "invalidPerson": "Name ist erforderlich",
+  "personNotFound": "Person nicht gefunden",
+  "personInUse": {
+    "one": "Noch mit {count} Abo oder Auslage verknüpft. Führe sie zuerst mit einer anderen Person zusammen.",
+    "other": "Noch mit {count} Abos oder Auslagen verknüpft. Führe sie zuerst mit einer anderen Person zusammen."
   }
 }

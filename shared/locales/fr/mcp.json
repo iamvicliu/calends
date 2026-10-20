@@ -35,7 +35,13 @@
     "noMember": "Membre introuvable. Membres : {list}",
     "notProxy": "« {name} » n’est pas un paiement pour d’autres",
     "noPendingProxy": "Aucun prélèvement pour d’autres en attente de remboursement",
-    "nothingToChange": "Rien à modifier : passez balance, top_up, name ou region"
+    "nothingToChange": "Rien à modifier : passez balance, top_up, name ou region",
+    "personNotFound": "Aucune personne ne correspond à « {q} ». Essayez d’abord list_people.",
+    "personAmbiguous": "« {q} » correspond à {count} personnes. Précisez par id : {list}",
+    "personNoItems": "{name} n’a aucun abonnement ni paiement où l’enregistrer",
+    "personItemsAmbiguous": "{name} figure dans plusieurs ; précisez subscription : {list}",
+    "needSubOrPerson": "subscription ou person est requis",
+    "needKind": "kind est requis (share ou proxy)"
   },
   "tool": {
     "get_overview": "Aperçu du registre",
@@ -56,6 +62,7 @@
     "record_payment": "Enregistrer un prélèvement",
     "delete_payment": "Supprimer un prélèvement",
     "record_receivable": "Enregistrer une somme reçue",
-    "update_payment_method": "Mettre à jour le solde d’un moyen de paiement"
+    "update_payment_method": "Mettre à jour le solde d’un moyen de paiement",
+    "list_people": "Personnes et créances"
   }
 }

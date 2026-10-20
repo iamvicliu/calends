@@ -31,5 +31,8 @@
     "calName": "Khoản phí gói đăng ký",
     "method": "Thanh toán: {name}",
     "alarm": "{name} sắp gia hạn"
-  }
+  },
+  "invalidPerson": "Cần nhập tên",
+  "personNotFound": "Không tìm thấy người này",
+  "personInUse": "Vẫn gắn với {count} gói hoặc khoản trả hộ. Hãy gộp vào người khác trước."
 }

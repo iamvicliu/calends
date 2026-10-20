@@ -35,7 +35,13 @@
     "noMember": "No such member. Members: {list}",
     "notProxy": "“{name}” isn't a proxy payment",
     "noPendingProxy": "No unpaid proxy charges",
-    "nothingToChange": "Nothing to change: pass balance, top_up, name or region"
+    "nothingToChange": "Nothing to change: pass balance, top_up, name or region",
+    "personNotFound": "No person matches “{q}”. Try list_people first.",
+    "personAmbiguous": "“{q}” matches {count} people. Specify one by id: {list}",
+    "personNoItems": "{name} isn't in any shared plan or proxy payment to record against",
+    "personItemsAmbiguous": "{name} is in several — pass subscription to choose: {list}",
+    "needSubOrPerson": "subscription or person is required",
+    "needKind": "kind is required (share or proxy)"
   },
   "tool": {
     "get_overview": "Ledger overview",
@@ -56,6 +62,7 @@
     "record_payment": "Record a charge",
     "delete_payment": "Delete a charge record",
     "record_receivable": "Record money received",
-    "update_payment_method": "Update payment method balance"
+    "update_payment_method": "Update payment method balance",
+    "list_people": "People & receivables"
   }
 }

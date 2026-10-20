@@ -1,0 +1,62 @@
+{
+  "title": "人",
+  "tab": {
+    "plans": "共享",
+    "people": "人"
+  },
+  "stat": {
+    "owed": "待收",
+    "owedSub": "{count} 人欠款",
+    "allSettled": "都已結清",
+    "received": "至今收回",
+    "receivedSub": "共享與代付合計",
+    "count": "人數",
+    "countSub": "共享 {share} · 代付 {proxy}"
+  },
+  "empty": {
+    "title": "還未有人",
+    "body": "在共享裡加入成員，或為代付填上對象，這裡會按人彙總誰欠你多少。"
+  },
+  "card": {
+    "noContact": "未填聯絡方式",
+    "nothing": "沒有參與共享或代付",
+    "past": "另有 {count} 項已結束"
+  },
+  "kind": {
+    "share": "共享",
+    "proxy": "代付"
+  },
+  "item": {
+    "paidUntil": "已付至 {date}",
+    "noPay": "還未收過款",
+    "owedPeriods": "欠 {count} 期",
+    "left": "已退出",
+    "ended": "已停止",
+    "received": "已收 {amount}"
+  },
+  "sheet": {
+    "owed": "待收",
+    "received": "至今收回",
+    "last": "最近收款",
+    "in": "參與 {count} 項",
+    "inEmpty": "不在任何共享或代付裡，可以刪除。",
+    "profile": "資料",
+    "notePh": "例如：同事，月尾過數",
+    "color": "顏色",
+    "syncFoot": "修改稱呼或聯絡方式會同步到 {count} 處共享和代付。",
+    "merge": "合併到",
+    "mergePick": "選擇…",
+    "mergeFoot": "同一個人被記成兩個？合併後帳目會歸埋一齊。",
+    "mergeConfirm": "將「{from}」合併到「{into}」？{from} 的共享和代付都會轉到 {into} 名下，稱呼和聯絡方式以 {into} 為準。",
+    "merged": "已合併到 {name}",
+    "confirmDelete": "刪除「{name}」？"
+  },
+  "pick": {
+    "new": "新嘅人",
+    "aria": "揀人"
+  },
+  "field": {
+    "person": "人",
+    "syncFoot": "呢個人仲出現喺另外 {count} 處，改稱呼或聯絡方式會一齊更新。"
+  }
+}

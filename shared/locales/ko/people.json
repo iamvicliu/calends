@@ -1,0 +1,62 @@
+{
+  "title": "사람",
+  "tab": {
+    "plans": "플랜",
+    "people": "사람"
+  },
+  "stat": {
+    "owed": "받을 돈",
+    "owedSub": "{count}명 미납",
+    "allSettled": "모두 정산 완료",
+    "received": "지금까지 받은 돈",
+    "receivedSub": "공유 플랜과 대신 결제 합계",
+    "count": "인원",
+    "countSub": "공유 {share} · 대신 결제 {proxy}"
+  },
+  "empty": {
+    "title": "아직 사람이 없어요",
+    "body": "공유 플랜에 멤버를 추가하거나 대신 결제할 상대를 지정하면, 여기서 사람별로 받을 돈을 모아 볼 수 있어요."
+  },
+  "card": {
+    "noContact": "연락처 없음",
+    "nothing": "공유·대신 결제 없음",
+    "past": "종료된 항목 {count}개 더 있음"
+  },
+  "kind": {
+    "share": "공유",
+    "proxy": "대신 결제"
+  },
+  "item": {
+    "paidUntil": "{date}까지 납부",
+    "noPay": "아직 받은 적 없음",
+    "owedPeriods": "{count}회분 미납",
+    "left": "나감",
+    "ended": "중단됨",
+    "received": "받음 {amount}"
+  },
+  "sheet": {
+    "owed": "받을 돈",
+    "received": "지금까지 받음",
+    "last": "최근 입금",
+    "in": "참여 {count}건",
+    "inEmpty": "어떤 공유나 대신 결제에도 없어요. 삭제할 수 있어요.",
+    "profile": "프로필",
+    "notePh": "예: 회사 동료, 월말 송금",
+    "color": "색상",
+    "syncFoot": "이름이나 연락처를 바꾸면 {count}곳 모두에 반영돼요.",
+    "merge": "병합 대상",
+    "mergePick": "선택…",
+    "mergeFoot": "같은 사람이 두 번 등록됐나요? 병합하면 내역이 합쳐져요.",
+    "mergeConfirm": "'{from}'을(를) '{into}'에 병합할까요? {from}의 공유와 대신 결제가 모두 {into}(으)로 옮겨지고, 이름과 연락처는 {into} 기준이 돼요.",
+    "merged": "{name}에 병합했어요",
+    "confirmDelete": "'{name}'을(를) 삭제할까요?"
+  },
+  "pick": {
+    "new": "새 사람",
+    "aria": "사람 선택"
+  },
+  "field": {
+    "person": "사람",
+    "syncFoot": "이 사람은 다른 {count}곳에도 있어요. 이름이나 연락처를 바꾸면 함께 바뀌어요."
+  }
+}
