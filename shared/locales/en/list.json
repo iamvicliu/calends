@@ -4,7 +4,10 @@
   },
   "title": "All subscriptions",
   "all": "All",
-  "summary": { "one": "{count} item · {monthly}/mo · {yearly}/yr", "other": "{count} items · {monthly}/mo · {yearly}/yr" },
+  "summary": {
+    "one": "{count} item · {monthly}/mo · {yearly}/yr",
+    "other": "{count} items · {monthly}/mo · {yearly}/yr"
+  },
   "status": {
     "upcoming": "Not started",
     "active": "Active",
@@ -19,14 +22,36 @@
   "proxyExcluded": "Paid for others · not counted",
   "perMonthApprox": "≈ {amount}/mo",
   "originalPrice": "Original {amount}",
-  "view": { "grid": "Cards", "list": "List", "gantt": "Timeline" },
-  "sort": { "label": "Sort", "next": "Next charge", "cost": "Monthly cost", "name": "Name", "start": "Start date" },
+  "view": {
+    "grid": "Cards",
+    "list": "List",
+    "gantt": "Timeline"
+  },
+  "sort": {
+    "label": "Sort",
+    "next": "Next charge",
+    "cost": "Monthly cost",
+    "name": "Name",
+    "start": "Start date",
+    "asc": "Ascending",
+    "desc": "Descending"
+  },
   "add": "Add subscription",
   "clear": "Clear",
-  "facet": { "status": "Status", "category": "Category", "pay": "Payment" },
+  "facet": {
+    "status": "Status",
+    "category": "Category",
+    "pay": "Payment"
+  },
   "unassigned": "Unassigned",
   "empty": "No matching subscriptions",
-  "badge": { "share": "Shared", "joined": "Joined", "proxy": "Paid for others", "proxyFor": "Paid for {name}", "someone": "someone" },
+  "badge": {
+    "share": "Shared",
+    "joined": "Joined",
+    "proxy": "Paid for others",
+    "proxyFor": "Paid for {name}",
+    "someone": "someone"
+  },
   "saved": "Saved {amount}",
   "col": {
     "name": "Subscription",
@@ -39,16 +64,33 @@
   },
   "notCounted": "Not counted",
   "endedOn": "Ended {date}",
-  "change": { "noMethod": "Payment method TBD", "planned": "Planned · ", "starts": "Starts {when}", "from": "Changes {when}" },
+  "change": {
+    "noMethod": "Payment method TBD",
+    "planned": "Planned · ",
+    "starts": "Starts {when}",
+    "from": "Changes {when}"
+  },
   "proxyBadge": {
-    "owed": { "one": "Paid for others · {count} due", "other": "Paid for others · {count} due" },
-    "owedFor": { "one": "Paid for {name} · {count} due", "other": "Paid for {name} · {count} due" },
+    "owed": {
+      "one": "Paid for others · {count} due",
+      "other": "Paid for others · {count} due"
+    },
+    "owedFor": {
+      "one": "Paid for {name} · {count} due",
+      "other": "Paid for {name} · {count} due"
+    },
     "settled": "Paid for others · settled",
     "settledFor": "Paid for {name} · settled"
   },
   "gantt": {
-    "months": { "one": "{count} month", "other": "{count} months" },
-    "days": { "one": "{count} day", "other": "{count} days" },
+    "months": {
+      "one": "{count} month",
+      "other": "{count} months"
+    },
+    "days": {
+      "one": "{count} day",
+      "other": "{count} days"
+    },
     "noRegion": "No region",
     "zoom1y": "1Y",
     "zoom3y": "3Y",
@@ -56,7 +98,10 @@
     "byRegion": "By region",
     "gapTitle": "Lapsed {span}: {from} – {to}",
     "gapShort": "Lapsed {span}",
-    "gapDays": { "one": "Lapsed {count} day", "other": "Lapsed {count} days" },
+    "gapDays": {
+      "one": "Lapsed {count} day",
+      "other": "Lapsed {count} days"
+    },
     "lifetimeSuffix": " lifetime",
     "lifetime": "Lifetime {amount}",
     "present": "now",
@@ -65,7 +110,14 @@
     "introShort": "Intro ",
     "planned": "Planned",
     "gap": "Lapsed",
-    "range": { "one": "Since {date} · {count} phase", "other": "Since {date} · {count} phases" }
+    "range": {
+      "one": "Since {date} · {count} phase",
+      "other": "Since {date} · {count} phases"
+    },
+    "zoomYear": "This year",
+    "earlier": "Earlier",
+    "later": "Later",
+    "backToNow": "Back to now"
   },
   "kind": {
     "debit": "Bank card",
@@ -81,5 +133,7 @@
     "crypto": "Crypto card",
     "other": "Other"
   },
-  "network": { "unionpay": "UnionPay" }
+  "network": {
+    "unionpay": "UnionPay"
+  }
 }

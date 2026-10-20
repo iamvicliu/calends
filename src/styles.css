@@ -6275,6 +6275,7 @@ button.seat:disabled {
   --rh: 34px;
 }
 .gt-bar {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -7938,4 +7939,40 @@ button.seat:disabled {
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* 时间线左右平移：范围标签在中间，点它回到当前；拖动时显示抓手 */
+.gt-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.gt-range {
+  min-width: 96px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--label-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.gt-range.moved {
+  color: var(--accent);
+}
+.gt-nav .icon-btn {
+  width: 28px;
+  height: 28px;
+}
+.gt.pannable .gt-body {
+  cursor: grab;
+  touch-action: pan-y;
+}
+.gt.dragging .gt-body {
+  cursor: grabbing;
+  user-select: none;
 }

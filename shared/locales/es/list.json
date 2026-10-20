@@ -4,7 +4,10 @@
   },
   "title": "Todas las suscripciones",
   "all": "Todas",
-  "summary": { "one": "{count} elemento · {monthly}/mes · {yearly}/año", "other": "{count} elementos · {monthly}/mes · {yearly}/año" },
+  "summary": {
+    "one": "{count} elemento · {monthly}/mes · {yearly}/año",
+    "other": "{count} elementos · {monthly}/mes · {yearly}/año"
+  },
   "status": {
     "upcoming": "Sin empezar",
     "active": "Activa",
@@ -19,14 +22,36 @@
   "proxyExcluded": "Pago por otros · no se cuenta",
   "perMonthApprox": "≈ {amount}/mes",
   "originalPrice": "Original {amount}",
-  "view": { "grid": "Tarjetas", "list": "Lista", "gantt": "Cronología" },
-  "sort": { "label": "Ordenar", "next": "Próximo cobro", "cost": "Coste mensual", "name": "Nombre", "start": "Fecha de inicio" },
+  "view": {
+    "grid": "Tarjetas",
+    "list": "Lista",
+    "gantt": "Cronología"
+  },
+  "sort": {
+    "label": "Ordenar",
+    "next": "Próximo cobro",
+    "cost": "Coste mensual",
+    "name": "Nombre",
+    "start": "Fecha de inicio",
+    "asc": "Ascendente",
+    "desc": "Descendente"
+  },
   "add": "Añadir suscripción",
   "clear": "Borrar",
-  "facet": { "status": "Estado", "category": "Categoría", "pay": "Pago" },
+  "facet": {
+    "status": "Estado",
+    "category": "Categoría",
+    "pay": "Pago"
+  },
   "unassigned": "Sin asignar",
   "empty": "No hay suscripciones que coincidan",
-  "badge": { "share": "Compartida", "joined": "Unida", "proxy": "Pago por otros", "proxyFor": "Pago por {name}", "someone": "alguien" },
+  "badge": {
+    "share": "Compartida",
+    "joined": "Unida",
+    "proxy": "Pago por otros",
+    "proxyFor": "Pago por {name}",
+    "someone": "alguien"
+  },
   "saved": "Ahorrado {amount}",
   "col": {
     "name": "Suscripción",
@@ -39,16 +64,33 @@
   },
   "notCounted": "No se cuenta",
   "endedOn": "Finalizó {date}",
-  "change": { "noMethod": "Método de pago por definir", "planned": "Previsto · ", "starts": "Empieza {when}", "from": "Cambia {when}" },
+  "change": {
+    "noMethod": "Método de pago por definir",
+    "planned": "Previsto · ",
+    "starts": "Empieza {when}",
+    "from": "Cambia {when}"
+  },
   "proxyBadge": {
-    "owed": { "one": "Pago por otros · {count} pendiente", "other": "Pago por otros · {count} pendientes" },
-    "owedFor": { "one": "Pago por {name} · {count} pendiente", "other": "Pago por {name} · {count} pendientes" },
+    "owed": {
+      "one": "Pago por otros · {count} pendiente",
+      "other": "Pago por otros · {count} pendientes"
+    },
+    "owedFor": {
+      "one": "Pago por {name} · {count} pendiente",
+      "other": "Pago por {name} · {count} pendientes"
+    },
     "settled": "Pago por otros · al día",
     "settledFor": "Pago por {name} · al día"
   },
   "gantt": {
-    "months": { "one": "{count} mes", "other": "{count} meses" },
-    "days": { "one": "{count} día", "other": "{count} días" },
+    "months": {
+      "one": "{count} mes",
+      "other": "{count} meses"
+    },
+    "days": {
+      "one": "{count} día",
+      "other": "{count} días"
+    },
     "noRegion": "Sin región",
     "zoom1y": "1 a",
     "zoom3y": "3 a",
@@ -56,7 +98,10 @@
     "byRegion": "Por región",
     "gapTitle": "Interrumpida {span}: {from} – {to}",
     "gapShort": "Interrumpida {span}",
-    "gapDays": { "one": "Interrumpida {count} día", "other": "Interrumpida {count} días" },
+    "gapDays": {
+      "one": "Interrumpida {count} día",
+      "other": "Interrumpida {count} días"
+    },
     "lifetimeSuffix": " de por vida",
     "lifetime": "De por vida {amount}",
     "present": "ahora",
@@ -65,7 +110,14 @@
     "introShort": "Inicial ",
     "planned": "Previsto",
     "gap": "Interrupción",
-    "range": { "one": "Desde {date} · {count} fase", "other": "Desde {date} · {count} fases" }
+    "range": {
+      "one": "Desde {date} · {count} fase",
+      "other": "Desde {date} · {count} fases"
+    },
+    "zoomYear": "Este año",
+    "earlier": "Antes",
+    "later": "Después",
+    "backToNow": "Volver a hoy"
   },
   "kind": {
     "debit": "Tarjeta bancaria",
@@ -81,5 +133,7 @@
     "crypto": "Tarjeta cripto",
     "other": "Otro"
   },
-  "network": { "unionpay": "UnionPay" }
+  "network": {
+    "unionpay": "UnionPay"
+  }
 }

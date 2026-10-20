@@ -99,6 +99,8 @@ const P: Record<string, JSX.Element> = {
     </>
   ),
   left: <path d="m15 18-6-6 6-6" />,
+  'sort-asc': <path d="m3 8 4-4 4 4M7 4v16M11 12h4M11 16h7M11 20h10" />,
+  'sort-desc': <path d="m3 16 4 4 4-4M7 20V4M11 4h10M11 8h7M11 12h4" />,
   right: <path d="m9 18 6-6-6-6" />,
   down: <path d="m6 9 6 6 6-6" />,
   receipt: <path d="M6 2.5h12v19l-3-2-3 2-3-2-3 2zM9 7.5h6M9 11.5h6M9 15.5h3" />,

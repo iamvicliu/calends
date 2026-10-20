@@ -1,12 +1,15 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
 import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Seg, SubIcon } from '../components/ui.tsx';
+import { Icon, Seg, SubIcon } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
 
-type Zoom = '1y' | '3y' | 'all';
+type Zoom = 'year' | '1y' | '3y' | 'all';
+
+/** 每种范围一次翻多少个月 */
+const STEP: Record<Exclude<Zoom, 'all'>, number> = { year: 12, '1y': 12, '3y': 36 };
 type ColorBy = 'method' | 'region';
 
 const PALETTE = ['var(--c1)', 'var(--c4)', 'var(--c5)', 'var(--c3)', 'var(--c6)', 'var(--c7)', 'var(--c2)', 'var(--c8)', 'var(--c10)', 'var(--c9)'];
@@ -37,7 +40,15 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
  * 条按支付方式或地区上色；过去的实心、未来的半透明；计划中的斜线；两段之间空着的是断订；条下的小刻度是每笔扣款。
  */
 export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription[]; state: AppState; today: string; onOpen: (s: Subscription) => void }) {
-  const [zoom, setZoom] = useState<Zoom>('3y');
+  const [zoom, setZoomRaw] = useState<Zoom>('year');
+  // 左右平移：pan 是已确定的偏移（天），drag 是拖动中尚未松手的偏移；松手后对齐到月初
+  const [pan, setPan] = useState(0);
+  const [drag, setDrag] = useState(0);
+  const setZoom = (z: Zoom) => {
+    setZoomRaw(z);
+    setPan(0);
+    setDrag(0);
+  };
   const [colorBy, setColorBy] = useState<ColorBy>('method');
   const box = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(0);
@@ -96,11 +107,74 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     return out;
   }, [subs, today]);
 
-  const end = addMonths(today, zoom === '1y' ? 3 : 6);
   const earliest = rows.reduce((m, r) => (r.first < m ? r.first : m), today);
-  const start = zoom === '1y' ? addMonths(today, -9) : zoom === '3y' ? addMonths(today, -30) : `${earliest.slice(0, 7)}-01`;
+  // 基准窗口：今年 = 1 月 1 日到年底；1 年、3 年以今天为中偏右；全部 = 最早一笔到半年后
+  const baseStart =
+    zoom === 'year'
+      ? `${today.slice(0, 4)}-01-01`
+      : zoom === '1y'
+        ? addMonths(today, -9)
+        : zoom === '3y'
+          ? addMonths(today, -30)
+          : `${earliest.slice(0, 7)}-01`;
+  const baseEnd = zoom === 'year' ? `${Number(today.slice(0, 4)) + 1}-01-01` : addMonths(today, zoom === '1y' ? 3 : 6);
+  const offset = zoom === 'all' ? 0 : Math.round(pan + drag);
+  const start = addDays(baseStart, offset);
+  const end = addDays(baseEnd, offset);
   const days = Math.max(1, diffDays(start, end));
   const k = w / days;
+  const pannable = zoom !== 'all';
+  /** 把窗口起点对齐到最近的月份（与基准窗口同一天），返回对应的偏移 */
+  const snap = (raw: number) => {
+    const d = addDays(baseStart, Math.round(raw));
+    const [y, m] = d.split('-').map(Number);
+    const idx = y * 12 + (m - 1) + (Number(d.slice(8)) > 15 ? 1 : 0);
+    const aligned = idx;
+    const target = `${Math.floor(aligned / 12)}-${String((aligned % 12) + 1).padStart(2, '0')}-${baseStart.slice(8)}`;
+    return diffDays(baseStart, target);
+  };
+  const step = (dir: 1 | -1) => {
+    if (zoom === 'all') return;
+    setPan(diffDays(baseStart, addMonths(start, dir * STEP[zoom])));
+  };
+
+  // 触控板横向滑动：直接平移，停下 150ms 后对齐到月初
+  const wheelIdle = useRef<number>();
+  const onWheel = (e: WheelEvent) => {
+    if (!pannable || !k || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    setPan((p) => p + e.deltaX / k);
+    clearTimeout(wheelIdle.current);
+    wheelIdle.current = window.setTimeout(() => setPan((p) => snap(p)), 150);
+  };
+  // 按住拖动：超过 6px 才算拖动，拖动后吞掉这次点击，避免误开详情
+  const dragFrom = useRef<number | null>(null);
+  const dragged = useRef(false);
+  const onPointerDown = (e: PointerEvent) => {
+    if (!pannable || e.button !== 0) return;
+    dragFrom.current = e.clientX;
+    dragged.current = false;
+  };
+  const onPointerMove = (e: PointerEvent) => {
+    if (dragFrom.current == null || !k) return;
+    const dx = e.clientX - dragFrom.current;
+    if (!dragged.current && Math.abs(dx) < 6) return;
+    if (!dragged.current) (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragged.current = true;
+    setDrag(-dx / k);
+  };
+  const onPointerUp = () => {
+    if (dragFrom.current == null) return;
+    dragFrom.current = null;
+    if (dragged.current) {
+      setPan((p) => snap(p + drag));
+      setDrag(0);
+    }
+  };
+  const rangeLabel =
+    zoom === 'year' && start.slice(5) === '01-01' && end.slice(0, 4) !== start.slice(0, 4) && end.slice(5) === '01-01'
+      ? start.slice(0, 4)
+      : `${monthLabel(start.slice(0, 7))} – ${monthLabel(addDays(end, -1).slice(0, 7))}`;
   const x = (d: string) => Math.min(w, Math.max(0, diffDays(start, d) * k));
 
   // 颜色：按支付方式或地区，固定顺序分配
@@ -119,7 +193,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   for (let d = `${start.slice(0, 7)}-01`; d <= end; d = addMonths(d, 1)) {
     if (d < start) continue;
     const jan = d.slice(5, 7) === '01';
-    if (zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7))))
+    if (zoom === 'year' || zoom === '1y' || jan || (zoom === '3y' && ['04', '07', '10'].includes(d.slice(5, 7))))
       ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
   }
 
@@ -131,11 +205,25 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           value={zoom}
           onChange={setZoom}
           options={[
+            ['year', t('list.gantt.zoomYear')],
             ['1y', t('list.gantt.zoom1y')],
             ['3y', t('list.gantt.zoom3y')],
             ['all', t('list.all')],
           ]}
         />
+        {pannable && (
+          <div class="gt-nav">
+            <button type="button" class="icon-btn" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
+              <Icon name="left" />
+            </button>
+            <button type="button" class={`gt-range ${offset === 0 ? '' : 'moved'}`} onClick={() => setPan(0)} title={t('list.gantt.backToNow')}>
+              {rangeLabel}
+            </button>
+            <button type="button" class="icon-btn" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
+              <Icon name="right" />
+            </button>
+          </div>
+        )}
         <Seg
           small
           value={colorBy}
@@ -146,7 +234,14 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           ]}
         />
       </div>
-      <div class="gt">
+      <div
+        class={`gt ${pannable ? 'pannable' : ''} ${drag ? 'dragging' : ''}`}
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
         <div class="gt-head">
           <div class="gt-label" />
           <div class="gt-track" ref={box}>
@@ -175,7 +270,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                 data-id={r.s.id}
                 class="gt-row"
                 style={{ '--lanes': Math.max(...r.lanes) + 1 } as Record<string, number>}
-                onClick={() => onOpen(r.s)}
+                onClick={() => !dragged.current && onOpen(r.s)}
               >
                 <div class="gt-label" title={r.s.name}>
                   <SubIcon sub={r.s} size={20} />

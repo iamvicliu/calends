@@ -4,7 +4,9 @@
   },
   "title": "Semua langganan",
   "all": "Semua",
-  "summary": { "other": "{count} item · {monthly}/bln · {yearly}/thn" },
+  "summary": {
+    "other": "{count} item · {monthly}/bln · {yearly}/thn"
+  },
   "status": {
     "upcoming": "Belum dimulai",
     "active": "Aktif",
@@ -19,14 +21,36 @@
   "proxyExcluded": "Talangan · tidak dihitung",
   "perMonthApprox": "≈ {amount}/bln",
   "originalPrice": "Harga asli {amount}",
-  "view": { "grid": "Kartu", "list": "Daftar", "gantt": "Linimasa" },
-  "sort": { "label": "Urutkan", "next": "Tagihan berikutnya", "cost": "Biaya bulanan", "name": "Nama", "start": "Tanggal mulai" },
+  "view": {
+    "grid": "Kartu",
+    "list": "Daftar",
+    "gantt": "Linimasa"
+  },
+  "sort": {
+    "label": "Urutkan",
+    "next": "Tagihan berikutnya",
+    "cost": "Biaya bulanan",
+    "name": "Nama",
+    "start": "Tanggal mulai",
+    "asc": "Naik",
+    "desc": "Turun"
+  },
   "add": "Tambah langganan",
   "clear": "Hapus",
-  "facet": { "status": "Status", "category": "Kategori", "pay": "Pembayaran" },
+  "facet": {
+    "status": "Status",
+    "category": "Kategori",
+    "pay": "Pembayaran"
+  },
   "unassigned": "Belum ditentukan",
   "empty": "Tidak ada langganan yang cocok",
-  "badge": { "share": "Bersama", "joined": "Diikuti", "proxy": "Talangan", "proxyFor": "Ditalangi untuk {name}", "someone": "seseorang" },
+  "badge": {
+    "share": "Bersama",
+    "joined": "Diikuti",
+    "proxy": "Talangan",
+    "proxyFor": "Ditalangi untuk {name}",
+    "someone": "seseorang"
+  },
   "saved": "Hemat {amount}",
   "col": {
     "name": "Langganan",
@@ -39,16 +63,29 @@
   },
   "notCounted": "Tidak dihitung",
   "endedOn": "Berakhir {date}",
-  "change": { "noMethod": "Metode pembayaran belum ditentukan", "planned": "Rencana · ", "starts": "Mulai {when}", "from": "Berubah {when}" },
+  "change": {
+    "noMethod": "Metode pembayaran belum ditentukan",
+    "planned": "Rencana · ",
+    "starts": "Mulai {when}",
+    "from": "Berubah {when}"
+  },
   "proxyBadge": {
-    "owed": { "other": "Talangan · {count} tertunggak" },
-    "owedFor": { "other": "Ditalangi untuk {name} · {count} tertunggak" },
+    "owed": {
+      "other": "Talangan · {count} tertunggak"
+    },
+    "owedFor": {
+      "other": "Ditalangi untuk {name} · {count} tertunggak"
+    },
     "settled": "Talangan · lunas",
     "settledFor": "Ditalangi untuk {name} · lunas"
   },
   "gantt": {
-    "months": { "other": "{count} bulan" },
-    "days": { "other": "{count} hari" },
+    "months": {
+      "other": "{count} bulan"
+    },
+    "days": {
+      "other": "{count} hari"
+    },
     "noRegion": "Tanpa wilayah",
     "zoom1y": "1T",
     "zoom3y": "3T",
@@ -56,7 +93,9 @@
     "byRegion": "Per wilayah",
     "gapTitle": "Terputus {span}: {from} – {to}",
     "gapShort": "Terputus {span}",
-    "gapDays": { "other": "Terputus {count} hari" },
+    "gapDays": {
+      "other": "Terputus {count} hari"
+    },
     "lifetimeSuffix": " seumur hidup",
     "lifetime": "Seumur hidup {amount}",
     "present": "sekarang",
@@ -65,7 +104,13 @@
     "introShort": "Promo ",
     "planned": "Rencana",
     "gap": "Terputus",
-    "range": { "other": "Sejak {date} · {count} fase" }
+    "range": {
+      "other": "Sejak {date} · {count} fase"
+    },
+    "zoomYear": "Tahun ini",
+    "earlier": "Sebelumnya",
+    "later": "Berikutnya",
+    "backToNow": "Kembali ke sekarang"
   },
   "kind": {
     "debit": "Kartu debit",
@@ -81,5 +126,7 @@
     "crypto": "Kartu kripto",
     "other": "Lainnya"
   },
-  "network": { "unionpay": "UnionPay" }
+  "network": {
+    "unionpay": "UnionPay"
+  }
 }

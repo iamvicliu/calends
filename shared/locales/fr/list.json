@@ -32,7 +32,9 @@
     "next": "Prochain prélèvement",
     "cost": "Coût mensuel",
     "name": "Nom",
-    "start": "Date de début"
+    "start": "Date de début",
+    "asc": "Croissant",
+    "desc": "Décroissant"
   },
   "add": "Ajouter un abonnement",
   "clear": "Effacer",
@@ -111,7 +113,11 @@
     "range": {
       "one": "Depuis le {date} · {count} phase",
       "other": "Depuis le {date} · {count} phases"
-    }
+    },
+    "zoomYear": "Cette année",
+    "earlier": "Plus tôt",
+    "later": "Plus tard",
+    "backToNow": "Revenir à aujourd’hui"
   },
   "kind": {
     "debit": "Carte bancaire",

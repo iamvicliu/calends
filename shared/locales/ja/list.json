@@ -31,7 +31,9 @@
     "next": "次回請求",
     "cost": "月額",
     "name": "名前",
-    "start": "開始日"
+    "start": "開始日",
+    "asc": "昇順",
+    "desc": "降順"
   },
   "add": "サブスクを追加",
   "clear": "クリア",
@@ -104,7 +106,11 @@
     "gap": "中断",
     "range": {
       "other": "{date}から · {count}期間"
-    }
+    },
+    "zoomYear": "今年",
+    "earlier": "前へ",
+    "later": "次へ",
+    "backToNow": "現在に戻る"
   },
   "kind": {
     "debit": "デビットカード",

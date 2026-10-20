@@ -24,14 +24,36 @@
   "proxyExcluded": "Оплата за других · не учитывается",
   "perMonthApprox": "≈ {amount}/мес.",
   "originalPrice": "Было {amount}",
-  "view": { "grid": "Карточки", "list": "Список", "gantt": "Шкала" },
-  "sort": { "label": "Сортировка", "next": "Следующее списание", "cost": "Стоимость в месяц", "name": "Название", "start": "Дата начала" },
+  "view": {
+    "grid": "Карточки",
+    "list": "Список",
+    "gantt": "Шкала"
+  },
+  "sort": {
+    "label": "Сортировка",
+    "next": "Следующее списание",
+    "cost": "Стоимость в месяц",
+    "name": "Название",
+    "start": "Дата начала",
+    "asc": "По возрастанию",
+    "desc": "По убыванию"
+  },
   "add": "Добавить подписку",
   "clear": "Сбросить",
-  "facet": { "status": "Статус", "category": "Категория", "pay": "Оплата" },
+  "facet": {
+    "status": "Статус",
+    "category": "Категория",
+    "pay": "Оплата"
+  },
   "unassigned": "Не указан",
   "empty": "Подходящих подписок нет",
-  "badge": { "share": "Совместная", "joined": "Участвую", "proxy": "Оплата за других", "proxyFor": "Оплата за {name}", "someone": "кого-то" },
+  "badge": {
+    "share": "Совместная",
+    "joined": "Участвую",
+    "proxy": "Оплата за других",
+    "proxyFor": "Оплата за {name}",
+    "someone": "кого-то"
+  },
   "saved": "Сэкономлено {amount}",
   "col": {
     "name": "Подписка",
@@ -44,7 +66,12 @@
   },
   "notCounted": "Не учитывается",
   "endedOn": "Завершена {date}",
-  "change": { "noMethod": "Способ оплаты не выбран", "planned": "В планах · ", "starts": "Начнётся {when}", "from": "Изменится {when}" },
+  "change": {
+    "noMethod": "Способ оплаты не выбран",
+    "planned": "В планах · ",
+    "starts": "Начнётся {when}",
+    "from": "Изменится {when}"
+  },
   "proxyBadge": {
     "owed": {
       "one": "Оплата за других · к оплате {count}",
@@ -62,8 +89,18 @@
     "settledFor": "Оплата за {name} · рассчитались"
   },
   "gantt": {
-    "months": { "one": "{count} месяц", "few": "{count} месяца", "many": "{count} месяцев", "other": "{count} месяца" },
-    "days": { "one": "{count} день", "few": "{count} дня", "many": "{count} дней", "other": "{count} дня" },
+    "months": {
+      "one": "{count} месяц",
+      "few": "{count} месяца",
+      "many": "{count} месяцев",
+      "other": "{count} месяца"
+    },
+    "days": {
+      "one": "{count} день",
+      "few": "{count} дня",
+      "many": "{count} дней",
+      "other": "{count} дня"
+    },
     "noRegion": "Без региона",
     "zoom1y": "1 г.",
     "zoom3y": "3 г.",
@@ -71,7 +108,12 @@
     "byRegion": "По региону",
     "gapTitle": "Перерыв {span}: {from} – {to}",
     "gapShort": "Перерыв {span}",
-    "gapDays": { "one": "Перерыв {count} день", "few": "Перерыв {count} дня", "many": "Перерыв {count} дней", "other": "Перерыв {count} дня" },
+    "gapDays": {
+      "one": "Перерыв {count} день",
+      "few": "Перерыв {count} дня",
+      "many": "Перерыв {count} дней",
+      "other": "Перерыв {count} дня"
+    },
     "lifetimeSuffix": " навсегда",
     "lifetime": "Навсегда {amount}",
     "present": "сейчас",
@@ -80,7 +122,16 @@
     "introShort": "Вводная ",
     "planned": "В планах",
     "gap": "Перерыв",
-    "range": { "one": "С {date} · {count} этап", "few": "С {date} · {count} этапа", "many": "С {date} · {count} этапов", "other": "С {date} · {count} этапа" }
+    "range": {
+      "one": "С {date} · {count} этап",
+      "few": "С {date} · {count} этапа",
+      "many": "С {date} · {count} этапов",
+      "other": "С {date} · {count} этапа"
+    },
+    "zoomYear": "Этот год",
+    "earlier": "Раньше",
+    "later": "Позже",
+    "backToNow": "Вернуться к сегодня"
   },
   "kind": {
     "debit": "Банковская карта",
@@ -96,5 +147,7 @@
     "crypto": "Криптокарта",
     "other": "Другое"
   },
-  "network": { "unionpay": "UnionPay" }
+  "network": {
+    "unionpay": "UnionPay"
+  }
 }

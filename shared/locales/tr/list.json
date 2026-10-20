@@ -4,7 +4,10 @@
   },
   "title": "Tüm abonelikler",
   "all": "Tümü",
-  "summary": { "one": "{count} öğe · {monthly}/ay · {yearly}/yıl", "other": "{count} öğe · {monthly}/ay · {yearly}/yıl" },
+  "summary": {
+    "one": "{count} öğe · {monthly}/ay · {yearly}/yıl",
+    "other": "{count} öğe · {monthly}/ay · {yearly}/yıl"
+  },
   "status": {
     "upcoming": "Başlamadı",
     "active": "Etkin",
@@ -19,14 +22,36 @@
   "proxyExcluded": "Başkası için ödendi · sayılmaz",
   "perMonthApprox": "≈ {amount}/ay",
   "originalPrice": "Normal fiyat {amount}",
-  "view": { "grid": "Kartlar", "list": "Liste", "gantt": "Zaman çizelgesi" },
-  "sort": { "label": "Sırala", "next": "Sonraki ödeme", "cost": "Aylık maliyet", "name": "Ad", "start": "Başlangıç tarihi" },
+  "view": {
+    "grid": "Kartlar",
+    "list": "Liste",
+    "gantt": "Zaman çizelgesi"
+  },
+  "sort": {
+    "label": "Sırala",
+    "next": "Sonraki ödeme",
+    "cost": "Aylık maliyet",
+    "name": "Ad",
+    "start": "Başlangıç tarihi",
+    "asc": "Artan",
+    "desc": "Azalan"
+  },
   "add": "Abonelik ekle",
   "clear": "Temizle",
-  "facet": { "status": "Durum", "category": "Kategori", "pay": "Ödeme" },
+  "facet": {
+    "status": "Durum",
+    "category": "Kategori",
+    "pay": "Ödeme"
+  },
   "unassigned": "Atanmamış",
   "empty": "Eşleşen abonelik yok",
-  "badge": { "share": "Ortak", "joined": "Katıldım", "proxy": "Başkası için", "proxyFor": "{name} için ödendi", "someone": "birisi" },
+  "badge": {
+    "share": "Ortak",
+    "joined": "Katıldım",
+    "proxy": "Başkası için",
+    "proxyFor": "{name} için ödendi",
+    "someone": "birisi"
+  },
   "saved": "{amount} tasarruf",
   "col": {
     "name": "Abonelik",
@@ -39,16 +64,33 @@
   },
   "notCounted": "Sayılmaz",
   "endedOn": "{date} sona erdi",
-  "change": { "noMethod": "Ödeme yöntemi belirsiz", "planned": "Planlandı · ", "starts": "Başlangıç: {when}", "from": "Değişiklik: {when}" },
+  "change": {
+    "noMethod": "Ödeme yöntemi belirsiz",
+    "planned": "Planlandı · ",
+    "starts": "Başlangıç: {when}",
+    "from": "Değişiklik: {when}"
+  },
   "proxyBadge": {
-    "owed": { "one": "Başkası için · {count} borç", "other": "Başkası için · {count} borç" },
-    "owedFor": { "one": "{name} için · {count} borç", "other": "{name} için · {count} borç" },
+    "owed": {
+      "one": "Başkası için · {count} borç",
+      "other": "Başkası için · {count} borç"
+    },
+    "owedFor": {
+      "one": "{name} için · {count} borç",
+      "other": "{name} için · {count} borç"
+    },
     "settled": "Başkası için · ödeşildi",
     "settledFor": "{name} için · ödeşildi"
   },
   "gantt": {
-    "months": { "one": "{count} ay", "other": "{count} ay" },
-    "days": { "one": "{count} gün", "other": "{count} gün" },
+    "months": {
+      "one": "{count} ay",
+      "other": "{count} ay"
+    },
+    "days": {
+      "one": "{count} gün",
+      "other": "{count} gün"
+    },
     "noRegion": "Bölge yok",
     "zoom1y": "1Y",
     "zoom3y": "3Y",
@@ -56,7 +98,10 @@
     "byRegion": "Bölgeye göre",
     "gapTitle": "{span} ara: {from} – {to}",
     "gapShort": "{span} ara",
-    "gapDays": { "one": "{count} gün ara", "other": "{count} gün ara" },
+    "gapDays": {
+      "one": "{count} gün ara",
+      "other": "{count} gün ara"
+    },
     "lifetimeSuffix": " ömür boyu",
     "lifetime": "Ömür boyu {amount}",
     "present": "şimdi",
@@ -65,7 +110,14 @@
     "introShort": "Tanıtım ",
     "planned": "Planlandı",
     "gap": "Ara",
-    "range": { "one": "{date} itibarıyla · {count} dönem", "other": "{date} itibarıyla · {count} dönem" }
+    "range": {
+      "one": "{date} itibarıyla · {count} dönem",
+      "other": "{date} itibarıyla · {count} dönem"
+    },
+    "zoomYear": "Bu yıl",
+    "earlier": "Önceki",
+    "later": "Sonraki",
+    "backToNow": "Bugüne dön"
   },
   "kind": {
     "debit": "Banka kartı",
@@ -81,5 +133,7 @@
     "crypto": "Kripto kart",
     "other": "Diğer"
   },
-  "network": { "unionpay": "UnionPay" }
+  "network": {
+    "unionpay": "UnionPay"
+  }
 }

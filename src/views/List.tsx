@@ -5,7 +5,7 @@ import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
-import { t } from '../../shared/i18n.ts';
+import { locale, t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { cancelSavings } from '../../shared/metrics.ts';
 import { categories, subImage, toBase } from '../derive.ts';
@@ -16,6 +16,23 @@ import { Picker } from '../components/Picker.tsx';
 
 type Filter = 'live' | 'upcoming' | 'trial' | 'ended' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
+type Dir = 'asc' | 'desc';
+/** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、最新开始在前 */
+const DEFAULT_DIR: Record<Sort, Dir> = { next: 'asc', cost: 'desc', name: 'asc', start: 'desc' };
+const pref = (k: string) => {
+  try {
+    return localStorage.getItem(k);
+  } catch {
+    return null;
+  }
+};
+const keep = (k: string, v: string) => {
+  try {
+    localStorage.setItem(k, v);
+  } catch {
+    /* 隐私模式等 */
+  }
+};
 
 const FILTERS = (): Array<[Filter, string]> => [
   ['all', t('list.all')],
@@ -45,7 +62,24 @@ export function List({
   const [cat, setCat] = useState<string>(category ?? 'all');
   const [pay, setPay] = useState<string>('all');
   useEffect(() => setCat(category ?? 'all'), [category]);
-  const [sort, setSort] = useState<Sort>('next');
+  // 排序与方向记在本机；切换到另一种排序时用它的默认方向，再点同一种则反转
+  const [sort, setSortRaw] = useState<Sort>(() => {
+    const v = pref('ledger:list-sort');
+    return v === 'cost' || v === 'name' || v === 'start' ? v : 'next';
+  });
+  const [dir, setDirRaw] = useState<Dir>(() =>
+    pref('ledger:list-dir') === 'asc' || pref('ledger:list-dir') === 'desc' ? (pref('ledger:list-dir') as Dir) : DEFAULT_DIR[sort],
+  );
+  const setDir = (d: Dir) => {
+    setDirRaw(d);
+    keep('ledger:list-dir', d);
+  };
+  const chooseSort = (k: Sort) => {
+    setSortRaw(k);
+    keep('ledger:list-sort', k);
+    setDir(DEFAULT_DIR[k]);
+  };
+  const toggleSort = (k: Sort) => (k === sort ? setDir(dir === 'asc' ? 'desc' : 'asc') : chooseSort(k));
   const [view, setViewRaw] = useState<'grid' | 'list' | 'gantt'>(() => {
     try {
       return (localStorage.getItem('ledger:list-view') as 'grid' | 'list' | 'gantt') || 'grid';
@@ -117,11 +151,20 @@ export function List({
     .filter((c) => mine.some((s) => s.category === c));
   const dirty = filter !== 'live' || cat !== (category ?? 'all') || pay !== 'all';
   const mo = (s: Subscription) => monthlyMine(state, s, today);
+  // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
+  const asc = (a: Subscription, b: Subscription) => {
+    if (sort === 'name') return a.name.localeCompare(b.name, locale());
+    if (sort === 'cost') return mo(a) - mo(b) || toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
+    if (sort === 'start') return a.start.localeCompare(b.start);
+    return (nextCharge(a, today) ?? '').localeCompare(nextCharge(b, today) ?? '');
+  };
   const rows = mine.filter(match).sort((a, b) => {
-    if (sort === 'name') return a.name.localeCompare(b.name, 'zh');
-    if (sort === 'cost') return mo(b) - mo(a) || toBase(state, b.price, b.currency) - toBase(state, a.price, a.currency);
-    if (sort === 'start') return b.start.localeCompare(a.start);
-    return (nextCharge(a, today) ?? '9999').localeCompare(nextCharge(b, today) ?? '9999');
+    if (sort === 'next') {
+      const na = nextCharge(a, today);
+      const nb = nextCharge(b, today);
+      if (!na || !nb) return na ? -1 : nb ? 1 : 0;
+    }
+    return dir === 'asc' ? asc(a, b) : asc(b, a);
   });
   const sum = rows.reduce((a, s) => a + (effectiveStatus(s, today) === 'ended' ? 0 : mo(s)), 0);
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
@@ -145,7 +188,7 @@ export function List({
         <Picker
           variant="btn"
           value={sort}
-          onChange={setSort}
+          onChange={chooseSort}
           ariaLabel={t('list.sort.label')}
           options={
             [
@@ -156,6 +199,15 @@ export function List({
             ] as Array<{ value: Sort; label: string }>
           }
         />
+        <button
+          type="button"
+          class="icon-btn"
+          onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')}
+          aria-label={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
+          title={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
+        >
+          <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
+        </button>
         {!state.readonly && (
           <button class="icon-btn accent d-only" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
@@ -289,9 +341,14 @@ export function List({
                   ] as Array<[Sort | null, string]>
                 ).map(([k, l]) =>
                   k ? (
-                    <button key={l} class={`lt-sort ${sort === k ? 'on' : ''}`} onClick={() => setSort(k)}>
+                    <button
+                      key={l}
+                      class={`lt-sort ${sort === k ? 'on' : ''}`}
+                      onClick={() => toggleSort(k)}
+                      aria-sort={sort === k ? (dir === 'asc' ? 'ascending' : 'descending') : undefined}
+                    >
                       {l}
-                      {sort === k && <Icon name="down" size={11} />}
+                      {sort === k && <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} size={12} />}
                     </button>
                   ) : (
                     <span key={l}>{l}</span>

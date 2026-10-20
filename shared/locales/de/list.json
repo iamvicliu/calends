@@ -32,7 +32,9 @@
     "next": "Nächste Abbuchung",
     "cost": "Monatliche Kosten",
     "name": "Name",
-    "start": "Startdatum"
+    "start": "Startdatum",
+    "asc": "Aufsteigend",
+    "desc": "Absteigend"
   },
   "add": "Abo hinzufügen",
   "clear": "Zurücksetzen",
@@ -111,7 +113,11 @@
     "range": {
       "one": "Seit {date} · {count} Phase",
       "other": "Seit {date} · {count} Phasen"
-    }
+    },
+    "zoomYear": "Dieses Jahr",
+    "earlier": "Früher",
+    "later": "Später",
+    "backToNow": "Zurück zu heute"
   },
   "kind": {
     "debit": "Bankkarte",
