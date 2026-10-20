@@ -1,4 +1,5 @@
 import type { ComponentChildren, JSX } from 'preact';
+import { createPortal } from 'preact/compat';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { flag, symbol } from '../../shared/format.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
@@ -315,21 +316,28 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
 }
 
 // ---------- 弹层 ----------
+/** 打开中的弹层，后开的在上面：Esc 只关最上面那一层（如订阅表单里再开的新建分类） */
+const openSheets: object[] = [];
+
 export function Sheet(props: { title?: ComponentChildren; onClose: () => void; children: ComponentChildren; foot?: ComponentChildren; narrow?: boolean; bare?: boolean }) {
   // Esc 时调用最新的 onClose（它可能依赖表单状态，比如未保存确认）
   const close = useRef(props.onClose);
   close.current = props.onClose;
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current();
+    const me = {};
+    openSheets.push(me);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && openSheets[openSheets.length - 1] === me && close.current();
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
+      openSheets.splice(openSheets.indexOf(me), 1);
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
     };
   }, []);
-  return (
+  // 挂到 body 上：放在带动画（transform）的页面里时，fixed 定位不会被困在页面范围内
+  return createPortal(
     <div class="scrim" onClick={(e) => e.target === e.currentTarget && props.onClose()}>
       <div class={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`} role="dialog" aria-modal="true">
         <div class="grabber" />
@@ -348,7 +356,8 @@ export function Sheet(props: { title?: ComponentChildren; onClose: () => void; c
         <div class="sheet-body">{props.children}</div>
         {props.foot && <div class="sheet-foot">{props.foot}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
