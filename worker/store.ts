@@ -46,15 +46,19 @@ export async function loadState(env: Env): Promise<AppState> {
   return state;
 }
 
-export async function upsert(env: Env, table: 'subscriptions' | 'methods', id: string, data: unknown): Promise<void> {
-  await env.DB.prepare(
+type Table = 'subscriptions' | 'methods';
+
+function upsertStmt(env: Env, table: Table, id: string, data: unknown): D1PreparedStatement {
+  return env.DB.prepare(
     `INSERT INTO ${table} (id, data, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
-  )
-    .bind(id, JSON.stringify(data))
-    .run();
+  ).bind(id, JSON.stringify(data));
 }
 
-export async function remove(env: Env, table: 'subscriptions' | 'methods', id: string): Promise<void> {
+export async function upsert(env: Env, table: Table, id: string, data: unknown): Promise<void> {
+  await upsertStmt(env, table, id, data).run();
+}
+
+export async function remove(env: Env, table: Table, id: string): Promise<void> {
   await env.DB.prepare(`DELETE FROM ${table} WHERE id = ?1`).bind(id).run();
 }
 
@@ -63,11 +67,7 @@ export async function replaceAll(env: Env, subs: Subscription[], methods: Paymen
   if (mode === 'replace') {
     stmts.push(env.DB.prepare('DELETE FROM subscriptions'), env.DB.prepare('DELETE FROM methods'));
   }
-  const ins = (t: string) =>
-    env.DB.prepare(
-      `INSERT INTO ${t} (id, data, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
-    );
-  for (const m of methods) stmts.push(ins('methods').bind(m.id, JSON.stringify(m)));
-  for (const s of subs) stmts.push(ins('subscriptions').bind(s.id, JSON.stringify(s)));
+  for (const m of methods) stmts.push(upsertStmt(env, 'methods', m.id, m));
+  for (const s of subs) stmts.push(upsertStmt(env, 'subscriptions', s.id, s));
   await env.DB.batch(stmts);
 }

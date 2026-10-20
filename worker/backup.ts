@@ -3,6 +3,7 @@
 // 不包含：登录会话、AI 接入令牌（属于凭据，新部署应重新生成）、提醒发送记录。
 import type { FxTable, PaymentMethod, Settings, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
+import { putFxDayStmt } from './fx.ts';
 import { getFx, getSettings, putKv, replaceAll } from './store.ts';
 
 export const BACKUP_FORMAT = 'subscription-ledger-backup';
@@ -62,13 +63,7 @@ export async function restoreAll(env: Env, b: Backup): Promise<{ subscriptions: 
   if (b.fx?.rates) await putKv(env, 'fx', b.fx);
   // D1 一次 batch 的语句数有限，分批写
   for (let i = 0; i < b.fxDaily.length; i += 50) {
-    await env.DB.batch(
-      b.fxDaily
-        .slice(i, i + 50)
-        .map((d) =>
-          env.DB.prepare('INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO UPDATE SET rates = excluded.rates, source = excluded.source').bind(d.date, JSON.stringify(d.rates), d.source),
-        ),
-    );
+    await env.DB.batch(b.fxDaily.slice(i, i + 50).map((d) => putFxDayStmt(env, d.date, d.rates, d.source)));
   }
   return { subscriptions: b.subscriptions.length, methods: b.methods.length, fxDays: b.fxDaily.length };
 }

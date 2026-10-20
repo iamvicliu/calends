@@ -38,6 +38,11 @@ export async function loadFxHistory(env: Env, keep: Set<string>): Promise<FxHist
   return out;
 }
 
+/** 写入某一天的历史汇率；同一天已有时覆盖 */
+export function putFxDayStmt(env: Env, date: string, rates: Record<string, number>, source: string): D1PreparedStatement {
+  return env.DB.prepare('INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO UPDATE SET rates = excluded.rates, source = excluded.source').bind(date, JSON.stringify(rates), source);
+}
+
 async function getJson(url: string): Promise<unknown> {
   const res = await fetch(url, { cf: { cacheTtl: 86400 * 30, cacheEverything: true } });
   if (!res.ok) throw new Error(`${res.status}`);
@@ -95,7 +100,7 @@ export async function backfill(env: Env, state: AppState, batch = 24) {
         failed.push(d);
         continue;
       }
-      stmts.push(env.DB.prepare('INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO UPDATE SET rates = excluded.rates, source = excluded.source').bind(d, JSON.stringify(r.rates), r.source));
+      stmts.push(putFxDayStmt(env, d, r.rates, r.source));
       filled++;
     }
     if (stmts.length) await env.DB.batch(stmts);
