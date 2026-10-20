@@ -9,7 +9,8 @@ import { changePrice, syncPhase, toEditForm } from '../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ContactField } from './Members.tsx';
-import { api, deleteSub, getState, mergeEdits, run, saveSub } from '../store.ts';
+import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
+import { linkPerson, PersonPicker } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { searchCatalog, type CatalogItem } from '../catalog.ts';
 
@@ -55,6 +56,10 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         if (out.status === 'cancelled' && !out.end) out.end = today;
         if (out.status === 'paused' && !out.pausedAt) out.pausedAt = today;
         if (out.status !== 'paused') delete out.pausedAt;
+        // 代付对象：新的人先建档，已有的人改了资料等订阅保存后再同步
+        const px = out.proxy;
+        const link: Awaited<ReturnType<typeof linkPerson>> = px ? await linkPerson(state, px.personId, px.forName, px.contact ? (px.contactVia ?? 'Telegram') : undefined, px.contact) : {};
+        if (px) out = { ...out, proxy: { ...px, forName: px.forName.trim(), personId: link.id } };
         await saveSub(
           isNew
             ? out
@@ -64,6 +69,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
                 getState().subscriptions.find((x) => x.id === sub.id),
               ),
         );
+        if (link.after) await savePerson(link.after);
         onClose();
       },
       t(isNew ? 'editor.toast.added' : 'editor.toast.saved'),
@@ -269,6 +275,15 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
         </div>
         {f.proxy && (
           <>
+            {(state.people?.length ?? 0) > 0 && (
+              <Cell label={t('people.field.person')}>
+                <PersonPicker
+                  state={state}
+                  value={f.proxy.personId}
+                  onPick={(p) => (p ? up({ proxy: { ...f.proxy!, personId: p.id, forName: p.name, contactVia: p.contactVia, contact: p.contact } }) : f.proxy!.personId && up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contact: undefined } }))}
+                />
+              </Cell>
+            )}
             <Cell label={t('editor.proxy.for')}>
               <input value={f.proxy.forName} placeholder={t('editor.proxy.forPlaceholder')} onInput={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })} />
             </Cell>

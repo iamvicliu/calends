@@ -12,6 +12,7 @@ import './styles.css';
 import { Calendar } from './views/Calendar.tsx';
 import { Carpool } from './views/Carpool.tsx';
 import { ProxyPage } from './views/Proxy.tsx';
+import { PeopleView } from './views/People.tsx';
 import { Ai } from './views/Ai.tsx';
 import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
@@ -141,7 +142,7 @@ function Sidebar({ state, route, d, theme, toggleTheme, onOpen, onAdd, onSearch,
       </button>
       <div class="side-gap" />
       {navOf(state.settings).map((n) => (
-        <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) ? 'active' : ''}`} href={href(n.path)}>
+        <a key={n.path} class={`side-item ${route === n.path || (n.path === 'list' && route.startsWith('cat/')) || (n.path === 'family' && route === 'family/people') ? 'active' : ''}`} href={href(n.path)}>
           <Icon name={n.icon} />
           <span>{n.label}</span>
         </a>
@@ -404,6 +405,9 @@ function App() {
         break;
       case 'family':
         view = <Carpool state={state} today={d} onOpen={open} />;
+        break;
+      case 'family/people':
+        view = ro ? <Carpool state={state} today={d} onOpen={open} /> : <PeopleView state={state} today={d} onOpen={open} />;
         break;
       case 'behalf':
         view = <ProxyPage state={state} today={d} onOpen={open} />;
