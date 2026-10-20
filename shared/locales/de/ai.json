@@ -54,7 +54,6 @@
     "terminal": "Führe das in deinem Terminal aus.",
     "codex": "Führe das in deinem Terminal aus. Füge die export-Zeile deinem Shell-Profil hinzu, damit das Token Neustarts übersteht.",
     "file": "Füge das zu {path} hinzu.",
-    "vscode": "Führe das in deinem Terminal aus oder klicke unten auf die Schaltfläche, um es in VS Code zu installieren.",
     "trae": "Öffne Trae → Einstellungen → MCP → Manuell hinzufügen und füge das ein.",
     "http": "Jeder MCP-Client mit Streamable HTTP. Das ist eine kurze Testanfrage."
   },

@@ -52,7 +52,6 @@
     "terminal": "在终端里运行。",
     "codex": "在终端里运行。把 export 那一行加到 shell 配置文件里，重启后令牌仍然有效。",
     "file": "添加到 {path}。",
-    "vscode": "在终端里运行，或点下面的按钮直接安装到 VS Code。",
     "trae": "打开 Trae → 设置 → MCP → 手动添加，粘贴这段配置。",
     "http": "任何支持 Streamable HTTP 的 MCP 客户端都可以。下面是一条测试请求。"
   },

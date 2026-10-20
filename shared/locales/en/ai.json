@@ -54,7 +54,6 @@
     "terminal": "Run this in your terminal.",
     "codex": "Run this in your terminal. Add the export line to your shell profile so the token survives restarts.",
     "file": "Add this to {path}.",
-    "vscode": "Run this in your terminal, or click the button below to install it in VS Code.",
     "trae": "Open Trae → Settings → MCP → Add manually, then paste this.",
     "http": "Any MCP client that speaks Streamable HTTP. This is a quick test request."
   },

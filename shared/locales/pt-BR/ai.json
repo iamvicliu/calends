@@ -54,7 +54,6 @@
     "terminal": "Execute isto no seu terminal.",
     "codex": "Execute isto no seu terminal. Adicione a linha export ao perfil do seu shell para o token continuar valendo após reiniciar.",
     "file": "Adicione isto a {path}.",
-    "vscode": "Execute isto no seu terminal ou clique no botão abaixo para instalar no VS Code.",
     "trae": "Abra Trae → Configurações → MCP → Adicionar manualmente e cole isto.",
     "http": "Qualquer cliente MCP compatível com Streamable HTTP. Esta é uma requisição de teste rápida."
   },

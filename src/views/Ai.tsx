@@ -67,30 +67,12 @@ const CLIENTS: Client[] = [
       `cursor://anysphere.cursor-deeplink/mcp/install?name=calends&config=${encodeURIComponent(b64(JSON.stringify({ url, headers: { Authorization: `Bearer ${tk}` } })))}`,
   },
   {
-    id: 'vscode',
-    name: 'VS Code',
-    logo: '/ai/githubcopilot.svg',
-    lang: 'shell',
-    where: () => t('ai.where.vscode'),
-    snippet: (url, tk) => `code --add-mcp '${JSON.stringify({ name: 'calends', type: 'http', url, headers: { Authorization: `Bearer ${tk}` } })}'`,
-    install: (url, tk) =>
-      `vscode:mcp/install?${encodeURIComponent(JSON.stringify({ name: 'calends', type: 'http', url, headers: { Authorization: `Bearer ${tk}` } }))}`,
-  },
-  {
     id: 'claude-desktop',
     name: 'Claude Desktop',
     logo: '/ai/claude.svg',
     lang: 'json',
     where: () => t('ai.where.file', { path: 'claude_desktop_config.json' }),
     snippet: (url, tk) => json({ mcpServers: { calends: { command: 'npx', args: ['-y', 'mcp-remote', url, '--header', `Authorization: Bearer ${tk}`] } } }),
-  },
-  {
-    id: 'windsurf',
-    name: 'Windsurf',
-    logo: '/ai/windsurf.svg',
-    lang: 'json',
-    where: () => t('ai.where.file', { path: '~/.codeium/windsurf/mcp_config.json' }),
-    snippet: (url, tk) => json({ mcpServers: { calends: { serverUrl: url, headers: { Authorization: `Bearer ${tk}` } } } }),
   },
   {
     id: 'gemini',
@@ -107,14 +89,6 @@ const CLIENTS: Client[] = [
     lang: 'json',
     where: () => t('ai.where.trae'),
     snippet: (url, tk) => json({ mcpServers: { calends: { url, headers: { Authorization: `Bearer ${tk}` } } } }),
-  },
-  {
-    id: 'cline',
-    name: 'Cline',
-    logo: '/ai/cline.svg',
-    lang: 'json',
-    where: () => t('ai.where.file', { path: 'cline_mcp_settings.json' }),
-    snippet: (url, tk) => json({ mcpServers: { calends: { type: 'streamableHttp', url, headers: { Authorization: `Bearer ${tk}` } } } }),
   },
   {
     id: 'deepseek',

@@ -54,7 +54,6 @@
     "terminal": "Exécutez ceci dans votre terminal.",
     "codex": "Exécutez ceci dans votre terminal. Ajoutez la ligne export à votre profil shell pour que le jeton persiste après un redémarrage.",
     "file": "Ajoutez ceci à {path}.",
-    "vscode": "Exécutez ceci dans votre terminal, ou cliquez sur le bouton ci-dessous pour l’installer dans VS Code.",
     "trae": "Ouvrez Trae → Paramètres → MCP → Ajouter manuellement, puis collez ceci.",
     "http": "Tout client MCP compatible Streamable HTTP. Voici une requête de test rapide."
   },

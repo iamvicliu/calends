@@ -52,7 +52,6 @@
     "terminal": "Jalankan ini di terminal Anda.",
     "codex": "Jalankan ini di terminal Anda. Tambahkan baris export ke profil shell agar token tetap berlaku setelah restart.",
     "file": "Tambahkan ini ke {path}.",
-    "vscode": "Jalankan ini di terminal Anda, atau klik tombol di bawah untuk memasangnya di VS Code.",
     "trae": "Buka Trae → Pengaturan → MCP → Tambah manual, lalu tempel ini.",
     "http": "Klien MCP apa pun yang mendukung Streamable HTTP. Ini permintaan uji singkat."
   },

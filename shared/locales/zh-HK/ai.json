@@ -52,7 +52,6 @@
     "terminal": "在終端機執行。",
     "codex": "在終端機執行。把 export 那一行加到 shell 設定檔，重新啟動後令牌仍然有效。",
     "file": "加入到 {path}。",
-    "vscode": "在終端機執行，或按下面的按鈕直接安裝到 VS Code。",
     "trae": "開啟 Trae → 設定 → MCP → 手動新增，貼上這段設定。",
     "http": "任何支援 Streamable HTTP 的 MCP 用戶端都可以。下面是一個測試請求。"
   },

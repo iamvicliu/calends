@@ -54,7 +54,6 @@
     "terminal": "Bunu terminalinizde çalıştırın.",
     "codex": "Bunu terminalinizde çalıştırın. Token'ın yeniden başlatmalardan sonra da geçerli kalması için export satırını kabuk profilinize ekleyin.",
     "file": "Bunu {path} dosyasına ekleyin.",
-    "vscode": "Bunu terminalinizde çalıştırın veya VS Code'a yüklemek için aşağıdaki düğmeye tıklayın.",
     "trae": "Trae → Ayarlar → MCP → Elle ekle yolunu açın ve bunu yapıştırın.",
     "http": "Streamable HTTP destekleyen her MCP istemcisi. Bu kısa bir test isteğidir."
   },
