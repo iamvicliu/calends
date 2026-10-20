@@ -91,6 +91,12 @@ export async function isAuthed(req: Request, env: Env): Promise<boolean> {
   return true;
 }
 
+/** 当前请求所用会话令牌的哈希；没带 Cookie 时为空串 */
+async function sessionHash(req: Request): Promise<string> {
+  const token = readCookie(req, COOKIE);
+  return token ? sha256(token) : '';
+}
+
 const clientIp = (req: Request) => req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? '';
 
 /** Cloudflare 按 IP 给出的大致位置，如「Tokyo, JP」；自托管时没有 */
@@ -122,7 +128,7 @@ async function startSession(req: Request, env: Env, method: 'password' | 'passke
 
 /** 按 IP 限速：15 分钟内失败 6 次就先锁住 */
 async function throttle(req: Request, env: Env) {
-  const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  const ip = clientIp(req) || 'unknown';
   const now = Date.now();
   const rec = await env.DB.prepare('SELECT fails, window_start FROM login_attempts WHERE ip = ?1').bind(ip).first<{ fails: number; window_start: number }>();
   const fresh = !rec || now - rec.window_start >= WINDOW_MS;
@@ -185,8 +191,7 @@ export async function changePassword(req: Request, env: Env): Promise<Response> 
 }
 
 async function removeOtherSessions(req: Request, env: Env): Promise<number> {
-  const keep = readCookie(req, COOKIE);
-  const r = await env.DB.prepare('DELETE FROM sessions WHERE token_hash != ?1').bind(keep ? await sha256(keep) : '').run();
+  const r = await env.DB.prepare('DELETE FROM sessions WHERE token_hash != ?1').bind(await sessionHash(req)).run();
   return r.meta.changes;
 }
 
@@ -203,8 +208,7 @@ export async function logoutOthers(req: Request, env: Env): Promise<Response> {
 
 /** 登录设备列表；id 取令牌哈希的前 16 位，不暴露完整哈希 */
 export async function listSessions(req: Request, env: Env) {
-  const mine = readCookie(req, COOKIE);
-  const mineHash = mine ? await sha256(mine) : '';
+  const mineHash = await sessionHash(req);
   const rows = await env.DB.prepare('SELECT token_hash, created_at, user_agent, ip, location, method, last_seen_at FROM sessions WHERE expires_at > ?1 ORDER BY COALESCE(last_seen_at, 0) DESC')
     .bind(Date.now())
     .all<{ token_hash: string; created_at: string; user_agent: string | null; ip: string | null; location: string | null; method: string | null; last_seen_at: number | null }>();
@@ -222,17 +226,16 @@ export async function listSessions(req: Request, env: Env) {
 
 /** 调低设备上限后立即生效：保留当前设备和最近活跃的几台 */
 export async function pruneSessions(req: Request, env: Env, max: number): Promise<void> {
-  const mine = readCookie(req, COOKIE);
   await env.DB.prepare('DELETE FROM sessions WHERE token_hash NOT IN (SELECT token_hash FROM sessions ORDER BY token_hash = ?1 DESC, COALESCE(last_seen_at, 0) DESC LIMIT ?2)')
-    .bind(mine ? await sha256(mine) : '', Math.max(1, max))
+    .bind(await sessionHash(req), Math.max(1, max))
     .run();
 }
 
 /** 移出某一台设备（不能移出当前这台，当前用「退出登录」） */
 export async function revokeSession(req: Request, env: Env, id: string): Promise<Response> {
   if (!/^[0-9a-f]{16}$/.test(id)) return err('无效的设备');
-  const mine = readCookie(req, COOKIE);
-  if (mine && (await sha256(mine)).startsWith(id)) return err('不能移出当前设备，请用「退出登录」');
+  const mine = await sessionHash(req);
+  if (mine && mine.startsWith(id)) return err('不能移出当前设备，请用「退出登录」');
   await env.DB.prepare('DELETE FROM sessions WHERE substr(token_hash, 1, 16) = ?1').bind(id).run();
   return Response.json({ ok: true });
 }
