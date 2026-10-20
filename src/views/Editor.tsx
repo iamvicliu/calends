@@ -429,7 +429,7 @@ function Form({ f, up, state, cats, today }: { f: Subscription; up: (p: Partial<
             </Cell>
             {f.category === '域名' && (
               <Cell label="公开页显示域名" sub={f.showOnPublic ? '访客能看到完整域名' : '公开页打码显示'}>
-                <Toggle checked={!!f.showOnPublic} onChange={(v) => up({ showOnPublic: v || undefined })} />
+                <Toggle label="公开页显示域名" checked={!!f.showOnPublic} onChange={(v) => up({ showOnPublic: v || undefined })} />
               </Cell>
             )}
           </Group>

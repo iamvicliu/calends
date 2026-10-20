@@ -150,7 +150,7 @@ function ChannelSheet({ c, isNew, onClose, onSave, onDelete }: { c: Channel; isN
             </Cell>
           ))}
           <Cell label="启用">
-            <Toggle checked={f.enabled} onChange={(v) => setF({ ...f, enabled: v })} />
+            <Toggle label="启用" checked={f.enabled} onChange={(v) => setF({ ...f, enabled: v })} />
           </Cell>
         </Group>
       </div>

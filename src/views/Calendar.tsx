@@ -143,8 +143,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               </Group>
               <Group title={`${Number(month.slice(5))}月全部扣款`}>
                 {monthCharges.length === 0 && <div class="cell muted">本月没有扣款</div>}
-                {monthCharges.map((c) => (
-                  <Cell key={c.sub.id + c.date} label={<span class="row cal-name"><SubIcon sub={c.sub} size={24} /><span>{c.sub.name}</span></span>} onClick={() => onOpen(c.sub)}>
+                {monthCharges.map((c, i) => (
+                  <Cell key={c.sub.id + c.date + i} label={<span class="row cal-name"><SubIcon sub={c.sub} size={24} /><span>{c.sub.name}</span></span>} onClick={() => onOpen(c.sub)}>
                     <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>{Number(c.date.slice(8))}日</span>
                     <b style={{ color: 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>{money(c.amount, c.currency, { compact: true })}</b>
                   </Cell>
@@ -203,13 +203,10 @@ function YearHeat({ year, byDay, today, sumOf, base, onPick }: { year: string; b
                       ))}
                     </>
                   ))}>
-                    {/* 同一天多笔：像一叠卡片，后面的略小、往右上错开；悬停时展开 */}
+                    {/* 同一天多笔：只画第一个图标，右上角标出总笔数（格子太小，叠起来只剩一道边） */}
                     <span class="hd-stack">
-                      {list.slice(0, 3).map((c, k) => (
-                        <span key={c.sub.id} class="hd-card" style={{ '--k': k } as Record<string, number>}>
-                          <SubIcon sub={c.sub} size={20} />
-                        </span>
-                      ))}
+                      <SubIcon sub={list[0].sub} size={20} />
+                      {list.length > 1 && <b class="hd-more">{list.length}</b>}
                     </span>
                   </i>
                 );

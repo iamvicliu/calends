@@ -1006,9 +1006,8 @@ select.btn { appearance: none; -webkit-appearance: none; padding-right: 28px; ba
 .heat-g .hd.has.today::after { content: ''; position: absolute; bottom: -1px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--red); }
 .heat-g .hd.has .ico { --s: 100% !important; width: 100%; height: 100%; border-radius: 26%; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 0 0 0.5px rgba(0, 0, 0, 0.1); }
 .hd-stack { position: relative; width: 70%; aspect-ratio: 1; }
-.hd-card { position: absolute; inset: 0; z-index: calc(3 - var(--k)); transform: translate(calc(var(--k) * 3px), calc(var(--k) * -3px)) scale(calc(1 - var(--k) * 0.1)); transform-origin: 100% 0; transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
-.hd-card .ico { background: var(--card); }
-.heat-g .hd:hover .hd-card { transform: translate(calc(var(--k) * 7px), calc(var(--k) * -6px)) rotate(calc(var(--k) * 8deg)) scale(calc(1 - var(--k) * 0.06)); }
+.hd-stack { display: grid; place-items: center; }
+.hd-more { position: absolute; top: -4px; right: -6px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--label); color: var(--card); font-size: 9px; font-weight: 600; line-height: 14px; text-align: center; box-shadow: 0 0 0 1.5px var(--card); }
 .heat-g .hd.has.gone .hd-stack { opacity: 0.5; } /* 整叠一起变淡，叠在后面的不会透出来 */
 
 /* 域名统一图标：石墨底 + 白色地球线稿 */
@@ -1697,7 +1696,7 @@ button.seat:disabled { cursor: default; }
 .ai-url { font-size: 13.5px; word-break: break-all; }
 .ai-token code, .ai-tool code { font-size: 12.5px; }
 .ai-snippet { align-items: flex-start; gap: 10px; }
-.ai-snippet pre { flex: 1; min-width: 0; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--fill-2); font: 12.5px/1.55 ui-monospace, 'SF Mono', Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
+.ai-snippet pre { flex: 1; min-width: 0; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--fill-2); font: 12.5px/1.55 ui-monospace, 'SF Mono', Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ai-token .btn { margin-left: auto; }
 .ai-token .cell-l, .ai-tool .cell-l { max-width: none; }
 
