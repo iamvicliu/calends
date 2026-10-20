@@ -33,6 +33,8 @@ export function IconPile({ items, height = 280 }: { items: PileItem[]; height?: 
   const [visible, setVisible] = useState(false);
   const [gone, setGone] = useState<Set<string>>(new Set());
   const [ready, setReady] = useState(false);
+  // 物理世界建立时的容器宽度，渲染时据此算图标大小（与物理里的尺寸一致）
+  const [width, setWidth] = useState(0);
   const removeRef = useRef<(i: number) => void>(() => {});
 
   // 进入视野才开始
@@ -137,6 +139,7 @@ export function IconPile({ items, height = 280 }: { items: PileItem[]; height?: 
           last = performance.now();
         },
       };
+      setWidth(W);
       setReady(true);
       cleanup = () => {
         timers.forEach(clearTimeout);
@@ -151,9 +154,11 @@ export function IconPile({ items, height = 280 }: { items: PileItem[]; height?: 
       cleanup();
     };
     // 只在第一次进入视野时建立物理世界
+    // 物理世界只在第一次进入视野时建立一次，之后只暂停/恢复
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies
   }, [visible]);
 
-  const side = box.current ? sizes(items, box.current.clientWidth, height) : items.map(() => MIN);
+  const side = width ? sizes(items, width, height) : items.map(() => MIN);
   // 按下和抬起位置相近才算点击，避免滚动时误触
   const downAt = useRef<{ x: number; y: number } | null>(null);
   const left = items.length - gone.size;
