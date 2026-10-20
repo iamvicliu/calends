@@ -262,7 +262,7 @@ export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; h
 }
 
 /** 小组件式金额：小数位缩小 */
-export function Amount({ value, ccy, sign, compact }: { value: number; ccy: string; sign?: boolean; compact?: boolean }) {
+export function Amount({ value, ccy, compact }: { value: number; ccy: string; compact?: boolean }) {
   if (!Number.isFinite(value)) return <span className="amt">—</span>;
   const neg = value < 0;
   const abs = Math.abs(value);
@@ -277,7 +277,7 @@ export function Amount({ value, ccy, sign, compact }: { value: number; ccy: stri
   const dec = parts.find((p) => p.type === 'fraction')?.value;
   return (
     <span className="amt">
-      {neg ? '−' : sign ? '+' : ''}
+      {neg ? '−' : ''}
       <span className="cur">{symbol(ccy).trim()}</span>
       {int}
       {dec && (
@@ -458,9 +458,9 @@ export function tipProps(html: () => ComponentChildren) {
   };
 }
 
-export function Toggle({ checked, onChange, disabled, label }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string }) {
+export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label?: string }) {
   return (
-    <AriaSwitch className="toggle" isSelected={checked} onChange={onChange} isDisabled={disabled} aria-label={label}>
+    <AriaSwitch className="toggle" isSelected={checked} onChange={onChange} aria-label={label}>
       <i />
     </AriaSwitch>
   );

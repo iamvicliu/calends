@@ -28,14 +28,12 @@ export function DatePicker({
   placeholder = t('picker.date.placeholder'),
   clearable,
   min,
-  max,
 }: {
   value?: string;
   onChange: (v: string | undefined) => void;
   placeholder?: string;
   clearable?: boolean;
   min?: string;
-  max?: string;
 }) {
   const today = todayOf();
   const [open, setOpen] = useState(false);
@@ -76,7 +74,7 @@ export function DatePicker({
     }
     setOpen(!open);
   };
-  const disabled = (d: string) => (min && d < min) || (max && d > max);
+  const disabled = (d: string) => !!min && d < min;
   const pick = (d: string) => {
     if (disabled(d)) return;
     onChange(d);
@@ -139,7 +137,7 @@ export function DatePicker({
                     d === value ? 'sel' : '',
                     d === cursor ? 'cursor' : '',
                   ].join(' ')}
-                  disabled={!!disabled(d)}
+                  disabled={disabled(d)}
                   onClick={() => pick(d)}
                 >
                   {Number(d.slice(8))}

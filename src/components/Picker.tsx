@@ -154,23 +154,12 @@ function CcyFlag({ code }: { code: string }) {
 }
 
 /** 货币选择：国旗 + 中文名 + 代码，人民币、美元置顶 */
-export function CurrencySelect({
-  value,
-  onChange,
-  variant,
-  ariaLabel = t('picker.currency'),
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  variant?: 'btn' | 'inline';
-  ariaLabel?: string;
-}) {
+export function CurrencySelect({ value, onChange, ariaLabel = t('picker.currency') }: { value: string; onChange: (v: string) => void; ariaLabel?: string }) {
   const list = [...new Set(['CNY', 'USD', ...CURRENCIES, value])];
   return (
     <Picker
       value={value}
       onChange={onChange}
-      variant={variant}
       ariaLabel={ariaLabel}
       search
       display={
@@ -201,17 +190,7 @@ function regionNames(): Intl.DisplayNames | undefined {
 const REGIONS = [...FLAGS].filter((c) => c !== 'eu');
 
 /** 地区选择：国旗 + 中文名 + 代码，可搜索。常用的放前面，空值表示不区分地区 */
-export function RegionSelect({
-  value,
-  onChange,
-  common = [],
-  variant,
-}: {
-  value?: string;
-  onChange: (v: string | undefined) => void;
-  common?: string[];
-  variant?: 'btn' | 'inline';
-}) {
+export function RegionSelect({ value, onChange, common = [] }: { value?: string; onChange: (v: string | undefined) => void; common?: string[] }) {
   const name = (cc: string) => {
     try {
       return regionNames()?.of(cc.toUpperCase()) ?? cc.toUpperCase();
@@ -227,7 +206,6 @@ export function RegionSelect({
     <Picker
       value={v}
       onChange={(c) => onChange(c ? c.toUpperCase() : undefined)}
-      variant={variant}
       search
       ariaLabel={t('picker.region.label')}
       display={
