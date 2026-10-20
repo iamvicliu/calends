@@ -159,6 +159,8 @@ function Connect({
   const c = CLIENTS.find((x) => x.id === client) ?? CLIENTS[0];
   const name = c.name || t('ai.clientOther');
   const code = c.snippet(url, token?.token ?? t('ai.tokenPlaceholder'));
+  // 直接发给 AI 助手的一段话：说明要做什么、放在哪、具体配置，最后让它自己验证
+  const prompt = t('ai.agentPrompt', { name, where: c.where(), code, verify: 'get_overview' });
   return (
     <div class="ai-connect">
       <div class="ai-clients" role="radiogroup" aria-label={t('ai.pickClient')}>
@@ -192,21 +194,22 @@ function Connect({
             </span>
           ) : null}
         </li>
-        <li>
-          <b>{t('ai.step.where')}</b>
-          <span>
-            {c.where()}
-            {c.experimental && <span class="badge">{t('ai.experimental')}</span>}
-          </span>
-        </li>
         <li class="ai-step-code">
-          <b>{t('ai.step.paste')}</b>
-          <CodeBlock code={code} lang={c.lang} onCopy={() => copy(code, token ? t('ai.copiedWithToken') : t('ai.copied'))} />
-          {token && c.install && (
-            <a class="btn primary ai-install" href={c.install(url, token.token)}>
-              <ClientLogo c={c} size={18} /> {t('ai.installIn', { name })}
-            </a>
-          )}
+          <b>
+            {t('ai.step.send', { name })}
+            {c.experimental && <span class="badge">{t('ai.experimental')}</span>}
+          </b>
+          <CodeBlock code={prompt} lang={t('ai.promptLabel')} onCopy={() => copy(prompt, token ? t('ai.copiedWithToken') : t('ai.copied'))} />
+          <span class="ai-step-actions">
+            {token && c.install && (
+              <a class="btn primary ai-install" href={c.install(url, token.token)}>
+                <ClientLogo c={c} size={18} /> {t('ai.installIn', { name })}
+              </a>
+            )}
+            <button type="button" class="btn plain" onClick={() => copy(code, t('ai.configCopied'))}>
+              <Icon name="copy" size={14} /> {t('ai.copyConfigOnly')}
+            </button>
+          </span>
         </li>
       </ol>
     </div>

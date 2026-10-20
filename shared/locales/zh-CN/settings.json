@@ -74,8 +74,8 @@
     "publicOn": "已公开",
     "publicOff": "已关闭公开页",
     "previewPublic": "预览公开页",
-    "ai": "AI 接入（MCP）",
-    "aiOn": "已开启 AI 接入",
+    "ai": "AI 连接（MCP）",
+    "aiOn": "已开启 AI 连接",
     "aiOff": "已关闭，AI 助手将无法访问",
     "manageAi": "管理令牌与接入方式"
   },

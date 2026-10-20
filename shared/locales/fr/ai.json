@@ -62,13 +62,16 @@
     "tokenReady": "Utilise « {name} », inclus dans l’extrait ci-dessous",
     "tokenNeeded": "Les jetons ne sont affichés qu’une seule fois.",
     "createFor": "Créer un jeton pour {name}",
-    "where": "Où le placer",
-    "paste": "Copier-coller"
+    "send": "Envoyer à {name}"
   },
   "status": {
     "on": "L’accès IA est activé",
     "off": "L’accès IA est désactivé",
     "onHint": "Les assistants disposant d’un jeton valide peuvent consulter et mettre à jour votre registre.",
     "offHint": "Toutes les requêtes MCP sont refusées jusqu’à sa réactivation."
-  }
+  },
+  "promptLabel": "Prompt",
+  "copyConfigOnly": "Copier seulement la config",
+  "configCopied": "Configuration copiée",
+  "agentPrompt": "Connecte mon registre d’abonnements Calends comme serveur MCP nommé « calends ». {where}\n\n{code}\n\nUne fois configuré, appelle l’outil {verify} pour vérifier que tout marche, puis dis-moi combien d’abonnements actifs j’ai."
 }

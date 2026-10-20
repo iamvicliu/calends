@@ -1,5 +1,5 @@
 {
-  "title": "AI 存取",
+  "title": "連接 AI 助手",
   "newToken": "新增權杖",
   "mcpUrl": "MCP 網址",
   "urlCopied": "網址已複製",
@@ -39,7 +39,7 @@
   "name": "名稱",
   "namePlaceholder": "要給哪個 AI 使用",
   "pickClient": "選擇你的 AI 助理",
-  "setupHint": "選一個你在用的助理，複製一段設定即可。剛建立權杖後，設定裡會自動帶上權杖。",
+  "setupHint": "選一個你在用的 AI 助手，把下面這段話傳給它，它會自己完成設定。剛產生權杖後，這段話裡會自動帶上權杖。",
   "tokensHint": "建議每個助理使用一個獨立的權杖，需要時可以單獨撤銷。",
   "toolsHint": "AI 助理能對帳本做的事。唯讀權杖只能看到讀取類工具。",
   "toolsRead": "讀取",
@@ -60,13 +60,16 @@
     "tokenReady": "使用「{name}」，已寫進下方的設定",
     "tokenNeeded": "權杖只在建立時顯示一次。",
     "createFor": "為 {name} 建立權杖",
-    "where": "放在哪裡",
-    "paste": "複製貼上"
+    "send": "傳給 {name}"
   },
   "status": {
     "on": "AI 存取已開啟",
     "off": "AI 存取已關閉",
     "onHint": "持有有效權杖的 AI 助理可以查詢和修改帳本。",
     "offHint": "重新開啟前，所有 MCP 請求都會被拒絕。"
-  }
+  },
+  "promptLabel": "提示詞",
+  "copyConfigOnly": "只複製設定",
+  "configCopied": "設定已複製",
+  "agentPrompt": "請把我的 Calends 訂閱帳本接入為你的 MCP 伺服器，名稱叫 calends。{where}\n\n{code}\n\n設定好後呼叫 {verify} 工具驗證一下，再告訴我現在有幾個使用中的訂閱。"
 }

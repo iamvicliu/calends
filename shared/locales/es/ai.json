@@ -62,13 +62,16 @@
     "tokenReady": "Usando «{name}», incluido en el fragmento de abajo",
     "tokenNeeded": "Los tokens solo se muestran una vez.",
     "createFor": "Crear un token para {name}",
-    "where": "Dónde va",
-    "paste": "Copiar y pegar"
+    "send": "Enviar a {name}"
   },
   "status": {
     "on": "El acceso de IA está activado",
     "off": "El acceso de IA está desactivado",
     "onHint": "Los asistentes con un token válido pueden consultar y actualizar tu registro.",
     "offHint": "Todas las solicitudes MCP se rechazan hasta que lo vuelvas a activar."
-  }
+  },
+  "promptLabel": "Prompt",
+  "copyConfigOnly": "Copiar solo la configuración",
+  "configCopied": "Configuración copiada",
+  "agentPrompt": "Conecta mi registro de suscripciones Calends como servidor MCP llamado \"calends\". {where}\n\n{code}\n\nCuando esté listo, llama a la herramienta {verify} para comprobar que funciona y dime cuántas suscripciones activas tengo."
 }

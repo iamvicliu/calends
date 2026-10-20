@@ -62,13 +62,16 @@
     "tokenReady": "“{name}” kullanılıyor, aşağıdaki parçaya eklendi",
     "tokenNeeded": "Token'lar yalnızca bir kez gösterilir.",
     "createFor": "{name} için token oluştur",
-    "where": "Nereye eklenir",
-    "paste": "Kopyala ve yapıştır"
+    "send": "{name} uygulamasına gönder"
   },
   "status": {
     "on": "Yapay zekâ erişimi açık",
     "off": "Yapay zekâ erişimi kapalı",
     "onHint": "Geçerli token'a sahip asistanlar kayıt defterinizi sorgulayabilir ve güncelleyebilir.",
     "offHint": "Yeniden açana kadar tüm MCP istekleri reddedilir."
-  }
+  },
+  "promptLabel": "İstem",
+  "copyConfigOnly": "Yalnızca yapılandırmayı kopyala",
+  "configCopied": "Yapılandırma kopyalandı",
+  "agentPrompt": "Calends abonelik defterimi \"calends\" adlı bir MCP sunucusu olarak bağla. {where}\n\n{code}\n\nKurulum bitince çalıştığını doğrulamak için {verify} aracını çağır ve kaç aktif aboneliğim olduğunu söyle."
 }

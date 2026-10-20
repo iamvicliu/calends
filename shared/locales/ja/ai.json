@@ -60,13 +60,16 @@
     "tokenReady": "「{name}」を使用中。下のスニペットに含まれています",
     "tokenNeeded": "トークンは一度しか表示されません。",
     "createFor": "{name} 用のトークンを作成",
-    "where": "設定場所",
-    "paste": "コピーして貼り付け"
+    "send": "{name} に送る"
   },
   "status": {
     "on": "AI 連携はオンです",
     "off": "AI 連携はオフです",
     "onHint": "有効なトークンを持つアシスタントは台帳の照会と更新ができます。",
     "offHint": "再びオンにするまで、すべての MCP リクエストは拒否されます。"
-  }
+  },
+  "promptLabel": "プロンプト",
+  "copyConfigOnly": "設定だけコピー",
+  "configCopied": "設定をコピーしました",
+  "agentPrompt": "私の Calends サブスク台帳を「calends」という名前の MCP サーバーとして接続してください。{where}\n\n{code}\n\n設定できたら {verify} ツールを呼び出して動作を確認し、利用中のサブスクがいくつあるか教えてください。"
 }

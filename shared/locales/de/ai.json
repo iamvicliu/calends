@@ -62,13 +62,16 @@
     "tokenReady": "Verwendet „{name}“, im Snippet unten enthalten",
     "tokenNeeded": "Tokens werden nur einmal angezeigt.",
     "createFor": "Token für {name} erstellen",
-    "where": "Wohin damit",
-    "paste": "Kopieren und einfügen"
+    "send": "An {name} senden"
   },
   "status": {
     "on": "KI-Zugriff ist aktiviert",
     "off": "KI-Zugriff ist deaktiviert",
     "onHint": "Assistenten mit gültigem Token können dein Haushaltsbuch abfragen und aktualisieren.",
     "offHint": "Alle MCP-Anfragen werden abgelehnt, bis du ihn wieder aktivierst."
-  }
+  },
+  "promptLabel": "Prompt",
+  "copyConfigOnly": "Nur Konfiguration kopieren",
+  "configCopied": "Konfiguration kopiert",
+  "agentPrompt": "Verbinde mein Calends-Abo-Konto als MCP-Server namens „calends“. {where}\n\n{code}\n\nWenn alles eingerichtet ist, ruf das Tool {verify} auf, um es zu prüfen, und sag mir, wie viele aktive Abos ich habe."
 }

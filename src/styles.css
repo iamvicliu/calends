@@ -8422,3 +8422,14 @@ button.seat:disabled {
     border-radius: 0;
   }
 }
+.ai-step-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.ai-steps li > b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

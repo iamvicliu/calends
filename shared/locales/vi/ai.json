@@ -60,13 +60,16 @@
     "tokenReady": "Đang dùng “{name}”, đã có trong đoạn bên dưới",
     "tokenNeeded": "Token chỉ hiển thị một lần.",
     "createFor": "Tạo token cho {name}",
-    "where": "Đặt ở đâu",
-    "paste": "Sao chép và dán"
+    "send": "Gửi cho {name}"
   },
   "status": {
     "on": "Đã bật truy cập AI",
     "off": "Đã tắt truy cập AI",
     "onHint": "Trợ lý có token hợp lệ có thể tra cứu và cập nhật sổ của bạn.",
     "offHint": "Mọi yêu cầu MCP đều bị từ chối cho đến khi bạn bật lại."
-  }
+  },
+  "promptLabel": "Prompt",
+  "copyConfigOnly": "Chỉ sao chép cấu hình",
+  "configCopied": "Đã sao chép cấu hình",
+  "agentPrompt": "Hãy kết nối sổ gói đăng ký Calends của tôi làm máy chủ MCP tên là \"calends\". {where}\n\n{code}\n\nKhi xong, hãy gọi công cụ {verify} để kiểm tra, rồi cho tôi biết tôi đang có bao nhiêu gói đăng ký đang dùng."
 }

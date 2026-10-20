@@ -60,13 +60,16 @@
     "tokenReady": "Memakai “{name}”, sudah ada di cuplikan di bawah",
     "tokenNeeded": "Token hanya ditampilkan sekali.",
     "createFor": "Buat token untuk {name}",
-    "where": "Letaknya",
-    "paste": "Salin dan tempel"
+    "send": "Kirim ke {name}"
   },
   "status": {
     "on": "Akses AI aktif",
     "off": "Akses AI nonaktif",
     "onHint": "Asisten dengan token yang valid bisa melihat dan memperbarui catatan Anda.",
     "offHint": "Semua permintaan MCP ditolak hingga Anda mengaktifkannya kembali."
-  }
+  },
+  "promptLabel": "Prompt",
+  "copyConfigOnly": "Salin konfigurasi saja",
+  "configCopied": "Konfigurasi disalin",
+  "agentPrompt": "Hubungkan buku langganan Calends saya sebagai server MCP bernama \"calends\". {where}\n\n{code}\n\nSetelah siap, panggil alat {verify} untuk memastikan berfungsi, lalu beri tahu berapa langganan aktif yang saya punya."
 }
