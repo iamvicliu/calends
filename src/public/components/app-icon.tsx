@@ -6,7 +6,7 @@ import { cn } from '@/public/lib/utils';
 const failed = new Set<string>();
 
 /** 订阅图标：域名用注册商图标（默认 Cloudflare，其他注册商取 icon，与后台一致）；其余 emoji > App 图标 > 站点图标 > 首字母 */
-export function AppIcon({ sub, className, size }: { sub: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'>; className?: string; size?: number }) {
+export function AppIcon({ sub, className, size, eager }: { sub: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'>; className?: string; size?: number; eager?: boolean }) {
   const [, force] = useState(0);
   const box = cn('flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[9px] ring-1 ring-foreground/10', className);
   const style = size ? { width: size, height: size, fontSize: size * 0.55 } : undefined;
@@ -26,7 +26,8 @@ export function AppIcon({ sub, className, size }: { sub: Pick<Subscription, 'nam
         <img
           src={src}
           alt=""
-          loading="lazy"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
           referrerPolicy="no-referrer"
           className="size-full object-cover"
           onLoad={(e) => {

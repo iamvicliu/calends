@@ -5,6 +5,7 @@ import type Matter from 'matter-js';
 import type { Subscription } from '../../../shared/types.ts';
 import { t } from '../../../shared/i18n.ts';
 import { AppIcon } from './app-icon.tsx';
+import { disintegrate } from './dust.ts';
 
 /** 一个订阅：v 是它每月的花费（本位币），决定图标大小 */
 export interface PileItem {
@@ -36,8 +37,28 @@ export function IconPile({ items, height = 300 }: { items: PileItem[]; height?: 
   const [gone, setGone] = useState(0);
   const zone = useRef<HTMLDivElement>(null);
   const [armed, setArmed] = useState(false);
+  // 预热时就量好落地区、算好每个图标的边长并渲染出来（先隐藏），开始落下时只剩物理计算，不再整体重排
+  const [side, setSide] = useState<number[] | null>(null);
 
-  // 落地区大半露出来（也就是已经滚过页脚）才开始
+  // 提前一屏预热：下载物理引擎、预渲染图标并加载图片，真正落下时就不会边加载边卡
+  useEffect(() => {
+    const el = zone.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        void import('matter-js');
+        const r = el.getBoundingClientRect();
+        setSide(sizes(items, r.width, r.height));
+      },
+      { rootMargin: '0px 0px 1000px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [items]);
+
+  // 落地区大半露出来（也就是已经滚过页脚）才开始落
   useEffect(() => {
     const el = zone.current;
     if (!el || armed) return;
@@ -48,7 +69,7 @@ export function IconPile({ items, height = 300 }: { items: PileItem[]; height?: 
 
   return (
     <div ref={zone} className="relative" style={{ height }} aria-label={t('public.pile.label')} role="img">
-      {armed && <PileStage key={epoch} items={items} zone={zone} onGone={setGone} />}
+      {side && <PileStage key={epoch} items={items} side={side} go={armed} zone={zone} onGone={setGone} />}
       {gone > 0 && (
         <button
           type="button"
@@ -68,28 +89,38 @@ export function IconPile({ items, height = 300 }: { items: PileItem[]; height?: 
 }
 
 /** 物理世界用页面坐标：图标层挂在 body 上、铺满整个文档、位于最上层，落地区的底边就是地面 */
-function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current: HTMLDivElement | null }; onGone: (n: number) => void }) {
+function PileStage({
+  items,
+  side,
+  go,
+  zone,
+  onGone,
+}: {
+  items: PileItem[];
+  side: number[];
+  go: boolean;
+  zone: { current: HTMLDivElement | null };
+  onGone: (n: number) => void;
+}) {
   const nodes = useRef<Array<HTMLDivElement | null>>([]);
-  const [side, setSide] = useState<number[]>(() => items.map(() => MIN));
-  const [ready, setReady] = useState(false);
   const [gone, setGone] = useState<Set<string>>(new Set());
   const removeRef = useRef<(i: number) => void>(() => {});
   useEffect(() => onGone(gone.size), [gone, onGone]);
 
   useEffect(() => {
+    if (!go) return;
     let raf = 0;
     let disposed = false;
     let cleanup = () => {};
     void import('matter-js').then((mod) => {
       const el = zone.current;
       if (disposed || !el) return;
-      const { Engine, Bodies, Composite, Body } = ((mod as { default?: typeof Matter }).default ?? mod) as typeof Matter;
+      const { Engine, Bodies, Composite } = ((mod as { default?: typeof Matter }).default ?? mod) as typeof Matter;
       const r = el.getBoundingClientRect();
       const left = r.left + scrollX;
       const W = r.width;
       const floor = r.bottom + scrollY;
-      const sz = sizes(items, W, r.height);
-      setSide(sz);
+      const sz = side;
 
       const engine = Engine.create({ gravity: { x: 0, y: 1.2 } });
       const wall = { isStatic: true, friction: 0.6 };
@@ -120,6 +151,12 @@ function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current
         });
         bodies[i] = b;
         Composite.add(engine.world, b);
+        // 落下的这一刻才显示，图片早已加载好
+        const node = nodes.current[i];
+        if (node) {
+          node.style.transform = `translate(${x - s / 2}px, ${y - s / 2}px)`;
+          node.style.visibility = 'visible';
+        }
       };
       const timers: number[] = [];
       if (reduce) {
@@ -131,25 +168,27 @@ function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current
         const b = bodies[i];
         if (!b) return;
         bodies[i] = null;
-        // 先「啵」地缩小消失，再从物理世界移除，周围的图标随之落下补位
+        // 化为尘埃：图标切成颗粒从左到右飘散，原图标立刻隐藏，物理体移除后周围的图标落下补位
         const node = nodes.current[i];
-        node?.animate(
-          [
-            { transform: node.style.transform, opacity: 1 },
-            { transform: `${node.style.transform} scale(1.15)`, opacity: 0.9, offset: 0.35 },
-            { transform: `${node.style.transform} scale(0)`, opacity: 0 },
-          ],
-          { duration: 260, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' },
-        );
-        Body.setStatic(b, true);
-        window.setTimeout(() => Composite.remove(engine.world, b), 120);
+        if (node) {
+          disintegrate(node, b.angle);
+          node.style.visibility = 'hidden';
+        }
+        Composite.remove(engine.world, b);
       };
 
+      // 固定步长推进物理（1/60 秒一步），帧率波动时也走得匀，不会忽快忽慢
+      const STEP = 1000 / 60;
       let last = performance.now();
+      let acc = 0;
       const tick = (now: number) => {
         if (disposed) return;
-        Engine.update(engine, Math.min(32, now - last));
+        acc = Math.min(acc + (now - last), STEP * 4);
         last = now;
+        while (acc >= STEP) {
+          Engine.update(engine, STEP);
+          acc -= STEP;
+        }
         bodies.forEach((b, i) => {
           const node = nodes.current[i];
           if (!b || !node) return;
@@ -158,7 +197,6 @@ function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current
         raf = requestAnimationFrame(tick);
       };
       raf = requestAnimationFrame(tick);
-      setReady(true);
       cleanup = () => {
         timers.forEach(clearTimeout);
         Composite.clear(engine.world, false);
@@ -172,7 +210,7 @@ function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current
     };
     // 物理世界只在挂载时建立一次；重新落下靠父组件换 key
     // oxlint-disable-next-line react/exhaustive-effect-dependencies
-  }, []);
+  }, [go]);
 
   // 按下和抬起位置相近才算点击，避免滚动时误触
   const downAt = useRef<{ x: number; y: number } | null>(null);
@@ -187,7 +225,7 @@ function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current
             nodes.current[i] = el;
           }}
           className="pointer-events-auto absolute top-0 left-0 cursor-pointer will-change-transform select-none"
-          style={{ width: side[i], height: side[i], transform: 'translate(-9999px, 0)', visibility: ready && !gone.has(x.s.id) ? 'visible' : 'hidden' }}
+          style={{ width: side[i], height: side[i], transform: 'translate(-9999px, 0)', visibility: 'hidden' }}
           title={x.s.name}
           onPointerDown={(e) => (downAt.current = { x: e.clientX, y: e.clientY })}
           onPointerUp={(e) => {
@@ -195,10 +233,10 @@ function PileStage({ items, zone, onGone }: { items: PileItem[]; zone: { current
             downAt.current = null;
             if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
             removeRef.current(i);
-            window.setTimeout(() => setGone((g) => new Set(g).add(x.s.id)), 280);
+            window.setTimeout(() => setGone((g) => new Set(g).add(x.s.id)), 50);
           }}
         >
-          <AppIcon sub={x.s} size={side[i]} className="size-full rounded-[22%] shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)]" />
+          <AppIcon sub={x.s} size={side[i]} eager className="size-full rounded-[22%] shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)]" />
         </div>
       ))}
     </div>,
