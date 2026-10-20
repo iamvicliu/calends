@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "i18n": "node scripts/i18n.mjs",
     "i18n:check": "node scripts/i18n.mjs --check",
+    "email:preview": "node --experimental-strip-types scripts/email-preview.ts",
     "db:migrate:local": "node scripts/wrangler.mjs d1 migrations apply DB --local",
     "db:migrate:remote": "node scripts/wrangler.mjs d1 migrations apply DB --remote",
     "deploy": "npm run build && node scripts/wrangler.mjs deploy && node scripts/wrangler.mjs d1 migrations apply DB --remote",

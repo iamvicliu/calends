@@ -53,6 +53,7 @@
     "intro": "Du gibst {mrr} im Monat für Abos aus, {count} davon aktiv."
   },
   "monthly": {
+    "title": "Rund {sum} an Abbuchungen im {month}",
     "subject": {
       "one": "Abrechnung {month}: etwa {sum}, {count} Abbuchung",
       "other": "Abrechnung {month}: etwa {sum}, {count} Abbuchungen"
@@ -64,7 +65,23 @@
   },
   "email": {
     "open": "Calends öffnen",
-    "footer": "Uhrzeit und Vorlauf der Erinnerungen kannst du in den Einstellungen ändern."
+    "footer": "Uhrzeit und Vorlauf der Erinnerungen kannst du in den Einstellungen ändern.",
+    "why": "Du erhältst diese E-Mail, weil in {app} E-Mail-Erinnerungen aktiviert sind.",
+    "off": "Um sie abzubestellen, deaktiviere den E-Mail-Kanal unter Einstellungen → Benachrichtigungskanäle.",
+    "settings": "Erinnerungseinstellungen",
+    "total": "Summe diesen Monat",
+    "testNote": "Dies ist eine Test-E-Mail, die bestätigt, dass der E-Mail-Kanal funktioniert. Echte Erinnerungen listen hier anstehende Abbuchungen auf.",
+    "noCharges": "Für diesen Monat sind keine Abbuchungen zu erwarten.",
+    "kind": {
+      "daily": "Erinnerung",
+      "monthly": "Monatsabrechnung",
+      "test": "Test"
+    },
+    "stat": {
+      "sum": "Erwartet",
+      "count": "Abbuchungen",
+      "mrr": "Monatliche Kosten"
+    }
   },
   "text": {
     "heading": "[{heading}]"

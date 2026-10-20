@@ -53,6 +53,7 @@
     "intro": "Vous dépensez {mrr} par mois en abonnements, avec {count} actifs."
   },
   "monthly": {
+    "title": "Environ {sum} de prélèvements en {month}",
     "subject": {
       "one": "Relevé de {month} : environ {sum}, {count} prélèvement",
       "other": "Relevé de {month} : environ {sum}, {count} prélèvements"
@@ -64,7 +65,23 @@
   },
   "email": {
     "open": "Ouvrir Calends",
-    "footer": "Vous pouvez modifier l’heure des rappels et le délai d’anticipation dans les Réglages."
+    "footer": "Vous pouvez modifier l’heure des rappels et le délai d’anticipation dans les Réglages.",
+    "why": "Vous recevez cet e-mail car les rappels par e-mail sont activés dans {app}.",
+    "off": "Pour ne plus les recevoir, désactivez le canal e-mail dans Réglages → Canaux de notification.",
+    "settings": "Réglages des rappels",
+    "total": "Total du mois",
+    "testNote": "Ceci est un e-mail de test qui confirme que le canal e-mail fonctionne. Les vrais rappels listeront ici les prochains prélèvements.",
+    "noCharges": "Aucun prélèvement prévu ce mois-ci.",
+    "kind": {
+      "daily": "Rappel",
+      "monthly": "Facture mensuelle",
+      "test": "Test"
+    },
+    "stat": {
+      "sum": "Prévu",
+      "count": "Prélèvements",
+      "mrr": "Dépense mensuelle"
+    }
   },
   "text": {
     "heading": "[{heading}]"

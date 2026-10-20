@@ -35,7 +35,8 @@ import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
 import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
-import { buildDaily, buildMonthly, renderEmail, runScheduled, sendDigest, type Digest } from './notify.ts';
+import { buildDaily, buildMonthly, runScheduled, sendDigest, type Digest } from './notify.ts';
+import { renderEmail } from './email.ts';
 import { getFx, getPeople, getSettings, loadState, loadSubs, putKv, remove, replaceAll, saveSettingsWithSubs, upsert, writePeople } from './store.ts';
 import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
@@ -351,8 +352,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       d = buildDaily(state, addDays(today, i));
     }
     const digest: Digest = d
-      ? { ...d, key: `test:${today}`, kind: 'test', subject: t('notify.test.subject', { subject: d.subject }), title: undefined }
-      : { key: `test:${today}`, kind: 'test', subject: t('notify.test.sampleSubject'), intro: t('notify.test.sampleIntro'), sections: [] };
+      ? { ...d, key: `test:${today}`, kind: 'test', subject: t('notify.test.subject', { subject: d.subject }) }
+      : { key: `test:${today}`, kind: 'test', subject: t('notify.test.sampleSubject'), intro: t('notify.test.sampleIntro'), sections: [], date: today };
     // 可以只测某一个渠道；传入 channel 对象时测试还没保存的配置
     const body = (await req.json().catch(() => ({}))) as { channel?: Channel | string };
     if (body.channel && typeof body.channel === 'object') {

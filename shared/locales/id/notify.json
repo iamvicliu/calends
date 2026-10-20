@@ -51,6 +51,7 @@
     "intro": "Pengeluaran langganan Anda {mrr} per bulan, dengan {count} yang aktif."
   },
   "monthly": {
+    "title": "Sekitar {sum} tagihan di bulan {month}",
     "subject": {
       "other": "Tagihan {month}: sekitar {sum}, {count} tagihan"
     },
@@ -60,7 +61,23 @@
   },
   "email": {
     "open": "Buka Calends",
-    "footer": "Anda bisa mengubah waktu pengingat dan jumlah hari sebelumnya di Pengaturan."
+    "footer": "Anda bisa mengubah waktu pengingat dan jumlah hari sebelumnya di Pengaturan.",
+    "why": "Anda menerima email ini karena pengingat email diaktifkan di {app}.",
+    "off": "Untuk berhenti menerimanya, matikan saluran email di Pengaturan → Saluran notifikasi.",
+    "settings": "Pengaturan pengingat",
+    "total": "Total bulan ini",
+    "testNote": "Ini adalah email uji yang memastikan saluran email berfungsi. Pengingat sungguhan akan menampilkan tagihan mendatang di sini.",
+    "noCharges": "Tidak ada tagihan yang diperkirakan bulan ini.",
+    "kind": {
+      "daily": "Pengingat",
+      "monthly": "Tagihan bulanan",
+      "test": "Uji"
+    },
+    "stat": {
+      "sum": "Perkiraan",
+      "count": "Tagihan",
+      "mrr": "Pengeluaran bulanan"
+    }
   },
   "text": {
     "heading": "[{heading}]"

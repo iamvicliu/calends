@@ -51,6 +51,7 @@
     "intro": "Bạn đang chi {mrr} mỗi tháng cho gói đăng ký, với {count} gói đang hoạt động."
   },
   "monthly": {
+    "title": "Khoảng {sum} cần thanh toán trong {month}",
     "subject": {
       "other": "Hóa đơn {month}: khoảng {sum}, {count} khoản phí"
     },
@@ -60,7 +61,23 @@
   },
   "email": {
     "open": "Mở Calends",
-    "footer": "Bạn có thể đổi giờ nhắc và số ngày nhắc trước trong Cài đặt."
+    "footer": "Bạn có thể đổi giờ nhắc và số ngày nhắc trước trong Cài đặt.",
+    "why": "Bạn nhận được email này vì đã bật nhắc nhở qua email trong {app}.",
+    "off": "Để ngừng nhận, hãy tắt kênh email trong Cài đặt → Kênh thông báo.",
+    "settings": "Cài đặt nhắc nhở",
+    "total": "Tổng tháng này",
+    "testNote": "Đây là email thử để xác nhận kênh email hoạt động. Nhắc nhở thật sẽ liệt kê các khoản sắp thanh toán ở đây.",
+    "noCharges": "Tháng này không có khoản thanh toán dự kiến nào.",
+    "kind": {
+      "daily": "Nhắc nhở",
+      "monthly": "Hóa đơn tháng",
+      "test": "Thử"
+    },
+    "stat": {
+      "sum": "Dự kiến",
+      "count": "Số khoản",
+      "mrr": "Chi mỗi tháng"
+    }
   },
   "text": {
     "heading": "[{heading}]"

@@ -53,6 +53,7 @@
     "intro": "Você gasta {mrr} por mês com assinaturas, com {count} ativas."
   },
   "monthly": {
+    "title": "Cerca de {sum} em cobranças em {month}",
     "subject": {
       "one": "Fatura de {month}: cerca de {sum}, {count} cobrança",
       "other": "Fatura de {month}: cerca de {sum}, {count} cobranças"
@@ -64,7 +65,23 @@
   },
   "email": {
     "open": "Abrir o Calends",
-    "footer": "Você pode mudar o horário do lembrete e a antecedência nos Ajustes."
+    "footer": "Você pode mudar o horário do lembrete e a antecedência nos Ajustes.",
+    "why": "Você está recebendo este e-mail porque ativou os lembretes por e-mail no {app}.",
+    "off": "Para parar de recebê-los, desative o canal de e-mail em Ajustes → Canais de notificação.",
+    "settings": "Ajustes de lembretes",
+    "total": "Total do mês",
+    "testNote": "Este é um e-mail de teste confirmando que o canal de e-mail funciona. Os lembretes reais vão listar aqui as próximas cobranças.",
+    "noCharges": "Nenhuma cobrança prevista para este mês.",
+    "kind": {
+      "daily": "Lembrete",
+      "monthly": "Fatura do mês",
+      "test": "Teste"
+    },
+    "stat": {
+      "sum": "Previsto",
+      "count": "Cobranças",
+      "mrr": "Gasto mensal"
+    }
   },
   "text": {
     "heading": "[{heading}]"

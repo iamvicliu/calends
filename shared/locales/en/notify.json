@@ -53,6 +53,7 @@
     "intro": "You're spending {mrr} a month on subscriptions, with {count} active."
   },
   "monthly": {
+    "title": "About {sum} due in {month}",
     "subject": {
       "one": "{month} bill: about {sum}, {count} charge",
       "other": "{month} bill: about {sum}, {count} charges"
@@ -64,7 +65,23 @@
   },
   "email": {
     "open": "Open Calends",
-    "footer": "You can change the reminder time and lead days in Settings."
+    "footer": "You can change the reminder time and lead days in Settings.",
+    "why": "You're receiving this because email reminders are turned on in {app}.",
+    "off": "To stop them, turn off the email channel in Settings → Notification channels.",
+    "settings": "Reminder settings",
+    "total": "Total this month",
+    "testNote": "This is a test email confirming that the email channel works. Real reminders list upcoming charges here.",
+    "noCharges": "No charges are expected this month.",
+    "kind": {
+      "daily": "Reminder",
+      "monthly": "Monthly bill",
+      "test": "Test"
+    },
+    "stat": {
+      "sum": "Expected",
+      "count": "Charges",
+      "mrr": "Monthly spend"
+    }
   },
   "text": {
     "heading": "[{heading}]"

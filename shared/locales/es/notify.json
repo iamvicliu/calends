@@ -53,6 +53,7 @@
     "intro": "Gastas {mrr} al mes en suscripciones, con {count} activas."
   },
   "monthly": {
+    "title": "Unos {sum} en cargos en {month}",
     "subject": {
       "one": "Factura de {month}: unos {sum}, {count} cobro",
       "other": "Factura de {month}: unos {sum}, {count} cobros"
@@ -64,7 +65,23 @@
   },
   "email": {
     "open": "Abrir Calends",
-    "footer": "Puedes cambiar la hora del recordatorio y los días de antelación en Ajustes."
+    "footer": "Puedes cambiar la hora del recordatorio y los días de antelación en Ajustes.",
+    "why": "Recibes este correo porque activaste los recordatorios por correo en {app}.",
+    "off": "Para dejar de recibirlos, desactiva el canal de correo en Ajustes → Canales de notificación.",
+    "settings": "Ajustes de recordatorios",
+    "total": "Total del mes",
+    "testNote": "Este es un correo de prueba que confirma que el canal de correo funciona. Los recordatorios reales mostrarán aquí los próximos cargos.",
+    "noCharges": "No hay cargos previstos este mes.",
+    "kind": {
+      "daily": "Recordatorio",
+      "monthly": "Factura mensual",
+      "test": "Prueba"
+    },
+    "stat": {
+      "sum": "Previsto",
+      "count": "Cargos",
+      "mrr": "Gasto mensual"
+    }
   },
   "text": {
     "heading": "[{heading}]"

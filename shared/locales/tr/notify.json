@@ -53,6 +53,7 @@
     "intro": "Aboneliklere ayda {mrr} harcıyorsunuz; {count} abonelik etkin."
   },
   "monthly": {
+    "title": "{month} ayında yaklaşık {sum} ödeme",
     "subject": {
       "one": "{month} faturası: yaklaşık {sum}, {count} ödeme",
       "other": "{month} faturası: yaklaşık {sum}, {count} ödeme"
@@ -64,7 +65,23 @@
   },
   "email": {
     "open": "Calends'ni aç",
-    "footer": "Hatırlatma saatini ve kaç gün önceden hatırlatılacağını Ayarlar'dan değiştirebilirsiniz."
+    "footer": "Hatırlatma saatini ve kaç gün önceden hatırlatılacağını Ayarlar'dan değiştirebilirsiniz.",
+    "why": "Bu e-postayı {app} içinde e-posta hatırlatmalarını açtığınız için alıyorsunuz.",
+    "off": "Almak istemiyorsanız Ayarlar → Bildirim kanalları bölümünden e-postayı kapatın.",
+    "settings": "Hatırlatma ayarları",
+    "total": "Bu ay toplam",
+    "testNote": "Bu, e-posta kanalının çalıştığını doğrulayan bir test e-postasıdır. Gerçek hatırlatmalarda yaklaşan ödemeler burada listelenir.",
+    "noCharges": "Bu ay beklenen bir ödeme yok.",
+    "kind": {
+      "daily": "Hatırlatma",
+      "monthly": "Aylık fatura",
+      "test": "Test"
+    },
+    "stat": {
+      "sum": "Beklenen",
+      "count": "Ödeme sayısı",
+      "mrr": "Aylık harcama"
+    }
   },
   "text": {
     "heading": "[{heading}]"

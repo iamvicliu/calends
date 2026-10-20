@@ -1,45 +1,97 @@
 // 通知渠道：同一份提醒，按各家机器人 / 推送服务的格式发出去。
 // 邮件依赖 Cloudflare Email Sending；没有的话，Telegram、飞书、钉钉、企业微信、Bark、ntfy、Server酱、Discord、Slack、通用 Webhook 任选。
-import { esc } from '../shared/format.ts';
+import { esc, relDays } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
 import type { Channel } from '../shared/types.ts';
+import { renderEmail } from './email.ts';
 import type { Env } from './env.ts';
-import { renderEmail, type Digest } from './notify.ts';
+import type { Digest, Row, Section } from './notify.ts';
 
-/** 纯文本：Telegram（HTML 前的回退）、Bark、ntfy 等用 */
+/** 金额：原币，后面带上折合本位币 */
+const amountOf = (r: Row) => [r.amount, r.amountSub ? `(${r.amountSub})` : ''].filter(Boolean).join(' ');
+/** 小节标题带上条数 */
+const headingOf = (s: Section) => `${s.heading} · ${s.rows.length}`;
+/** 说明：没有专门的 detail 时用 sub；有距今天数时补在前面，附加提示放最后 */
+const metaOf = (r: Row) => [r.detail && r.days != null ? relDays(r.days) : '', r.detail ?? r.sub, r.note].filter(Boolean).join(' · ');
+
+/** 纯文本：Bark、ntfy、通用 Webhook 等用 */
 function toText(d: Digest, siteUrl: string): string {
   const lines = [d.intro, ''];
+  if (d.stats?.length) lines.push(d.stats.map((x) => `${x.label} ${x.value}`).join(' · '), '');
   for (const s of d.sections) {
-    lines.push(t('notify.text.heading', { heading: s.heading }));
-    for (const r of s.rows) lines.push(`· ${r.title}${r.amount ? `  ${r.amount}` : ''}${r.sub ? `\n  ${r.sub}` : ''}`);
+    lines.push(t('notify.text.heading', { heading: headingOf(s) }));
+    for (const r of s.rows) {
+      const meta = metaOf(r);
+      lines.push(`· ${r.title}${r.amount ? `  ${amountOf(r)}` : ''}${meta ? `\n  ${meta}` : ''}`);
+    }
+    if (s.total) lines.push(`${s.total.label}  ${s.total.amount}`);
     lines.push('');
   }
   lines.push(`${siteUrl}/admin`);
   return lines.join('\n').trim();
 }
 
-/** Markdown：飞书卡片、钉钉、企业微信、Discord、Server酱 */
-function toMarkdown(d: Digest, siteUrl: string): string {
-  const b = (s: string) => `**${s}**`;
-  const out = [d.intro, ''];
-  for (const s of d.sections) {
-    out.push(b(s.heading));
-    for (const r of s.rows) out.push(`- ${r.title}${r.amount ? ` ${b(r.amount)}` : ''}${r.sub ? `　${r.sub}` : ''}`);
-    out.push('');
+/** 各家 Markdown 方言里的灰色小字；不支持颜色的原样输出 */
+type Grey = (s: string) => string;
+const plain: Grey = (s) => s;
+const GREY = {
+  lark: (s: string) => `<font color='grey'>${s}</font>`,
+  wecom: (s: string) => `<font color="comment">${s}</font>`,
+  dingtalk: (s: string) => `<font color=#8a8a8a>${s}</font>`,
+} satisfies Record<string, Grey>;
+
+/** 一个小节的 Markdown：标题带条数，每条一行（名称、金额、折合，说明用灰色），月度账单附合计 */
+function sectionMarkdown(s: Section, grey: Grey): string {
+  const out = [`**${headingOf(s)}**`];
+  for (const r of s.rows) {
+    const meta = metaOf(r);
+    out.push(`- **${r.title}**${r.amount ? `　${r.amount}` : ''}${r.amountSub ? ` ${grey(r.amountSub)}` : ''}${meta ? `　${grey(meta)}` : ''}`);
   }
-  out.push(`[${t('notify.email.open')}](${siteUrl}/admin)`);
-  return out.join('\n').trim();
+  if (s.total) out.push(`**${s.total.label}　${s.total.amount}**`);
+  return out.join('\n');
+}
+
+/** Markdown：钉钉、企业微信、Discord、Server酱、Slack */
+function toMarkdown(d: Digest, siteUrl: string, grey: Grey = plain): string {
+  const out = [d.intro];
+  if (d.stats?.length) out.push(d.stats.map((x) => `${x.label} **${x.value}**`).join('　'));
+  for (const s of d.sections) out.push(sectionMarkdown(s, grey));
+  out.push(`[${t('notify.email.open')} →](${siteUrl}/admin)`);
+  return out.join('\n\n').trim();
+}
+
+/** 飞书卡片：导语、各小节之间用分隔线，底部一个打开后台的按钮 */
+function toLarkCard(d: Digest, siteUrl: string) {
+  const blocks: unknown[] = [{ tag: 'markdown', content: d.intro }];
+  if (d.stats?.length) blocks.push({ tag: 'markdown', content: d.stats.map((x) => `${x.label} **${x.value}**`).join('　') });
+  for (const s of d.sections) blocks.push({ tag: 'hr' }, { tag: 'markdown', content: sectionMarkdown(s, GREY.lark) });
+  blocks.push({
+    tag: 'action',
+    actions: [{ tag: 'button', text: { tag: 'plain_text', content: t('notify.email.open') }, type: 'primary', url: `${siteUrl}/admin` }],
+  });
+  return {
+    config: { wide_screen_mode: true },
+    header: { template: d.kind === 'test' ? 'grey' : 'blue', title: { tag: 'plain_text', content: d.subject } },
+    elements: blocks,
+  };
 }
 
 /** Telegram 的 HTML 子集 */
 function toTelegram(d: Digest, siteUrl: string): string {
   const out = [`<b>${esc(d.subject)}</b>`, esc(d.intro), ''];
+  if (d.stats?.length) out.push(d.stats.map((x) => `${esc(x.label)} <b>${esc(x.value)}</b>`).join(' · '), '');
   for (const s of d.sections) {
-    out.push(`<b>${esc(s.heading)}</b>`);
-    for (const r of s.rows) out.push(`• ${esc(r.title)}${r.amount ? `  <code>${esc(r.amount)}</code>` : ''}${r.sub ? `\n  <i>${esc(r.sub)}</i>` : ''}`);
+    out.push(`<b>${esc(headingOf(s))}</b>`);
+    for (const r of s.rows) {
+      const meta = metaOf(r);
+      out.push(
+        `• <b>${esc(r.title)}</b>${r.amount ? `  <code>${esc(r.amount)}</code>` : ''}${r.amountSub ? ` ${esc(r.amountSub)}` : ''}${meta ? `\n  <i>${esc(meta)}</i>` : ''}`,
+      );
+    }
+    if (s.total) out.push(`<b>${esc(s.total.label)}  ${esc(s.total.amount)}</b>`);
     out.push('');
   }
-  out.push(`<a href="${siteUrl}/admin">${esc(t('notify.email.open'))}</a>`);
+  out.push(`<a href="${esc(siteUrl)}/admin">${esc(t('notify.email.open'))} →</a>`);
   return out.join('\n').trim().slice(0, 4000);
 }
 
@@ -99,11 +151,7 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
       const res = await post(url, {
         ...sign,
         msg_type: 'interactive',
-        card: {
-          config: { wide_screen_mode: true },
-          header: { template: 'blue', title: { tag: 'plain_text', content: d.subject } },
-          elements: [{ tag: 'markdown', content: toMarkdown(d, site) }],
-        },
+        card: toLarkCard(d, site),
       });
       return expectOk(res, 'code', [0, undefined]);
     }
@@ -115,13 +163,13 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
         const ts = Date.now().toString();
         url += `${url.includes('?') ? '&' : '?'}timestamp=${ts}&sign=${encodeURIComponent(await hmacBase64(secret, `${ts}\n${secret}`))}`;
       }
-      const res = await post(url, { msgtype: 'markdown', markdown: { title: d.subject, text: `### ${d.subject}\n\n${toMarkdown(d, site)}` } });
+      const res = await post(url, { msgtype: 'markdown', markdown: { title: d.subject, text: `### ${d.subject}\n\n${toMarkdown(d, site, GREY.dingtalk)}` } });
       return expectOk(res, 'errcode', [0]);
     }
     case 'wecom': {
       const res = await post(need(c, 'webhook', 'webhook'), {
         msgtype: 'markdown',
-        markdown: { content: `**${d.subject}**\n${toMarkdown(d, site)}`.slice(0, 4000) },
+        markdown: { content: `### ${d.subject}\n${toMarkdown(d, site, GREY.wecom)}`.slice(0, 4000) },
       });
       return expectOk(res, 'errcode', [0]);
     }
@@ -153,7 +201,7 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
     case 'discord': {
       await post(need(c, 'webhook', 'webhook'), {
         username: t('notify.appName'),
-        embeds: [{ title: d.subject, description: toMarkdown(d, site).slice(0, 4000), url: `${site}/admin`, color: 0x1d2328 }],
+        embeds: [{ title: d.subject, description: toMarkdown(d, site).slice(0, 4000), url: `${site}/admin`, color: 0x3e63dd }],
       });
       return;
     }

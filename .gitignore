@@ -8,3 +8,5 @@ seed/
 local/
 .DS_Store
 .claude/
+# 本地预览产物（npm run email:preview）
+.preview/
