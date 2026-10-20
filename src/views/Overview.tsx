@@ -443,7 +443,7 @@ export function Statement({ state, today, onOpen }: { state: AppState; today: st
         </div>
         <svg className="stmt-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
           <path d={`${path}L100,32L0,32Z`} fill="url(#stmt-g)" />
-          <path d={path} fill="none" stroke="currentColor" strokeWidth="1.4" vector-effect="non-scaling-stroke" />
+          <path d={path} fill="none" stroke="currentColor" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
           <defs>
             <linearGradient id="stmt-g" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0" stopColor="currentColor" stopOpacity="0.25" />

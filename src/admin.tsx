@@ -9,6 +9,7 @@ import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
 import { CurrencyPicker } from './components/CurrencyPicker.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode, type ThemeMode } from './theme.tsx';
+import './heroui.css';
 import './styles.css';
 import { Calendar } from './views/Calendar.tsx';
 import { Carpool } from './views/Carpool.tsx';

@@ -1,0 +1,38 @@
+/*
+ * HeroUI v3 接入后台：只引入主题、组件和工具类，不引入 Tailwind 的 preflight，
+ * 免得重置掉现有样式（styles.css 不分层，优先级本来就高于这里的分层样式）。
+ * 下面把 HeroUI 的主题变量映射到我们自己的配色、圆角和字体，亮色暗色都跟着走。
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+@import '@heroui/styles/base' layer(base);
+@import '@heroui/styles/components/index.css' layer(components);
+@import '@heroui/styles/themes/default' layer(theme);
+@import '@heroui/styles/utilities';
+@import '@heroui/styles/variants';
+
+@source '../node_modules/@heroui/react';
+
+:root,
+:root[data-theme='dark'] {
+  --background: var(--bg);
+  --foreground: var(--label);
+  --surface: var(--card);
+  --surface-foreground: var(--label);
+  --overlay: var(--card);
+  --overlay-foreground: var(--label);
+  --muted: var(--label-2);
+  --border: var(--line);
+  --separator: var(--sep);
+  --default: var(--fill);
+  --default-foreground: var(--label);
+  --field-background: var(--card);
+  --field-foreground: var(--label);
+  --danger: var(--red);
+  --success: var(--green);
+  --warning: var(--orange);
+  --radius: 0.75rem;
+  --font-sans: var(--font);
+}
