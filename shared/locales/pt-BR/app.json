@@ -1,5 +1,5 @@
 {
-  "name": "Subscription Ledger",
+  "name": "Calends",
   "offline": "Offline",
   "offlineError": "Sem conexão: {error}",
   "nav": {
@@ -34,7 +34,10 @@
     "upcoming": "Próximas",
     "today": "Hoje",
     "tomorrow": "Amanhã",
-    "inDays": { "one": "Em {count} dia", "other": "Em {count} dias" },
+    "inDays": {
+      "one": "Em {count} dia",
+      "other": "Em {count} dias"
+    },
     "theme": "Tema",
     "themeHint": "Clique para alternar: Claro → Escuro → Sistema"
   },

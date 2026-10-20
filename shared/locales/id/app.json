@@ -1,5 +1,5 @@
 {
-  "name": "Subscription Ledger",
+  "name": "Calends",
   "offline": "Offline",
   "offlineError": "Tidak dapat terhubung: {error}",
   "nav": {
@@ -34,7 +34,9 @@
     "upcoming": "Mendatang",
     "today": "Hari ini",
     "tomorrow": "Besok",
-    "inDays": { "other": "{count} hari lagi" },
+    "inDays": {
+      "other": "{count} hari lagi"
+    },
     "theme": "Tema",
     "themeHint": "Klik untuk beralih: Terang → Gelap → Sistem"
   },

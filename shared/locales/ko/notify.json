@@ -1,5 +1,5 @@
 {
-  "appName": "구독 장부",
+  "appName": "Calends",
   "trial": {
     "sub": "체험이 {when}({date}) 종료되며, 이후 {price}",
     "headline": "{name} 체험이 {when} 종료됩니다"
@@ -59,7 +59,7 @@
     }
   },
   "email": {
-    "open": "구독 장부 열기",
+    "open": "Calends 열기",
     "footer": "알림 시간과 사전 알림 일수는 설정에서 바꿀 수 있습니다."
   },
   "text": {

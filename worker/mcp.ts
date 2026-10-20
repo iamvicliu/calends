@@ -67,7 +67,7 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
       return ok(msg.id, {
         protocolVersion: SUPPORTED.includes(asked) ? asked : PROTOCOL,
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: 'subscription-ledger', title: t('mcp.serverTitle'), version: '1.0.0' },
+        serverInfo: { name: 'calends', title: t('mcp.serverTitle'), version: '1.0.0' },
         instructions: t('mcp.instructions'),
       });
     }

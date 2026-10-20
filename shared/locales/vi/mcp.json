@@ -1,5 +1,5 @@
 {
-  "serverTitle": "Subscription Ledger",
+  "serverTitle": "Calends",
   "instructions": "Đây là sổ theo dõi gói đăng ký cá nhân của người dùng. Số tiền được cung cấp theo cả tiền tệ gốc và quy đổi sang tiền tệ cơ sở. \"Chi tiêu của tôi\" không bao gồm các khoản trả hộ (trả thay cho người khác), và với gói chia sẻ chỉ tính phần của riêng tôi. Nếu không chắc tên của một gói đăng ký, hãy tìm bằng list_subscriptions trước. Mọi công cụ ghi đều hỗ trợ dry_run — hãy xem trước rồi mới áp dụng.",
   "defaultTokenName": "Trợ lý AI",
   "item": "{name} ({id})",
@@ -13,8 +13,8 @@
     "noTool": "Công cụ không xác định: {name}",
     "readOnly": "Token này chỉ đọc và không thể thay đổi sổ. Hãy tạo token đọc-ghi tại trang AI trong trang quản trị.",
     "unsupportedMethod": "Phương thức không được hỗ trợ: {method}",
-    "aiDisabled": "Truy cập AI đang tắt trong cài đặt Subscription Ledger",
-    "badToken": "Thiếu token hoặc token không hợp lệ. Hãy tạo token tại trang AI trong trang quản trị Subscription Ledger và truyền dưới dạng Authorization: Bearer <token>",
+    "aiDisabled": "Truy cập AI đang tắt trong cài đặt Calends",
+    "badToken": "Thiếu token hoặc token không hợp lệ. Hãy tạo token tại trang AI trong trang quản trị Calends và truyền dưới dạng Authorization: Bearer <token>",
     "parse": "Không phân tích được JSON",
     "needSub": "Cần có subscription (id hoặc tên gói đăng ký)",
     "subNotFound": "Không có gói đăng ký nào khớp với “{q}”. Hãy thử tìm bằng list_subscriptions trước.",

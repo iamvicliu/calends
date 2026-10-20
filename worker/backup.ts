@@ -7,7 +7,9 @@ import { t } from '../shared/i18n.ts';
 import { putFxDayStmt } from './fx.ts';
 import { getFx, getPeople, getSettings, putKv, replaceAll } from './store.ts';
 
-export const BACKUP_FORMAT = 'subscription-ledger-backup';
+export const BACKUP_FORMAT = 'calends-backup';
+/** 改名前的备份格式名，照样能导入 */
+const LEGACY_FORMATS = ['subscription-ledger-backup'];
 // v3 起带上人的名册（people）
 export const BACKUP_VERSION = 3;
 
@@ -46,7 +48,7 @@ export async function exportAll(env: Env): Promise<Backup> {
 export function parseBackup(raw: unknown): Backup {
   const b = raw as Partial<Backup>;
   if (!b || !Array.isArray(b.subscriptions)) throw new Error(t('server.backup.notBackup'));
-  if (b.format && b.format !== BACKUP_FORMAT) throw new Error(t('server.backup.unknownFormat', { format: String(b.format) }));
+  if (b.format && b.format !== BACKUP_FORMAT && !LEGACY_FORMATS.includes(b.format)) throw new Error(t('server.backup.unknownFormat', { format: String(b.format) }));
   if ((b.version ?? 1) > BACKUP_VERSION) throw new Error(t('server.backup.newerVersion', { version: b.version }));
   return {
     format: BACKUP_FORMAT,

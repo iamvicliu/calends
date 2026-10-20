@@ -1,5 +1,5 @@
 {
-  "serverTitle": "Subscription Ledger",
+  "serverTitle": "Calends",
   "instructions": "Dies ist das persönliche Abo-Konto des Nutzers. Beträge werden in der Originalwährung und umgerechnet in die Basiswährung angegeben. „Meine Ausgaben“ schließen Zahlungen für andere aus und zählen bei geteilten Abos nur meinen eigenen Anteil. Wenn du nicht sicher bist, wie ein Abo heißt, suche zuerst mit list_subscriptions. Jedes Schreib-Tool unterstützt dry_run – erst Vorschau, dann anwenden.",
   "defaultTokenName": "KI-Assistent",
   "item": "{name} ({id})",
@@ -13,8 +13,8 @@
     "noTool": "Unbekanntes Tool: {name}",
     "readOnly": "Dieses Token ist schreibgeschützt und kann das Konto nicht ändern. Erstelle auf der KI-Seite im Admin ein Token mit Lese- und Schreibrechten.",
     "unsupportedMethod": "Nicht unterstützte Methode: {method}",
-    "aiDisabled": "KI-Zugriff ist in den Einstellungen von Subscription Ledger deaktiviert",
-    "badToken": "Token fehlt oder ist ungültig. Erstelle eins auf der KI-Seite im Admin von Subscription Ledger und übergib es als Authorization: Bearer <token>",
+    "aiDisabled": "KI-Zugriff ist in den Einstellungen von Calends deaktiviert",
+    "badToken": "Token fehlt oder ist ungültig. Erstelle eins auf der KI-Seite im Admin von Calends und übergib es als Authorization: Bearer <token>",
     "parse": "JSON konnte nicht gelesen werden",
     "needSub": "subscription ist erforderlich (Abo-ID oder Name)",
     "subNotFound": "Kein Abo passt zu „{q}“. Suche zuerst mit list_subscriptions.",

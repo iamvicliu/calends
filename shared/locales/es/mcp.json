@@ -1,5 +1,5 @@
 {
-  "serverTitle": "Subscription Ledger",
+  "serverTitle": "Calends",
   "instructions": "Este es el registro personal de suscripciones del usuario. Los importes se dan en la moneda original y convertidos a la moneda base. «Mi gasto» excluye los pagos por otros (pagados en nombre de otras personas) y, en los planes compartidos, solo cuenta mi parte. Si no sabes con certeza cómo se llama una suscripción, búscala primero con list_subscriptions. Todas las herramientas de escritura admiten dry_run: primero previsualiza y después aplica.",
   "defaultTokenName": "Asistente de IA",
   "item": "{name} ({id})",
@@ -13,8 +13,8 @@
     "noTool": "Herramienta desconocida: {name}",
     "readOnly": "Este token es de solo lectura y no puede modificar el registro. Crea un token de lectura y escritura en la página de IA del panel de administración.",
     "unsupportedMethod": "Método no admitido: {method}",
-    "aiDisabled": "El acceso de IA está desactivado en los ajustes de Subscription Ledger",
-    "badToken": "Token ausente o no válido. Crea uno en la página de IA del panel de administración de Subscription Ledger y envíalo como Authorization: Bearer <token>",
+    "aiDisabled": "El acceso de IA está desactivado en los ajustes de Calends",
+    "badToken": "Token ausente o no válido. Crea uno en la página de IA del panel de administración de Calends y envíalo como Authorization: Bearer <token>",
     "parse": "No se pudo analizar el JSON",
     "needSub": "subscription es obligatorio (id o nombre de la suscripción)",
     "subNotFound": "Ninguna suscripción coincide con «{q}». Prueba a buscar primero con list_subscriptions.",

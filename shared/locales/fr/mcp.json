@@ -1,5 +1,5 @@
 {
-  "serverTitle": "Subscription Ledger",
+  "serverTitle": "Calends",
   "instructions": "Ceci est le registre personnel d’abonnements de l’utilisateur. Les montants sont donnés dans la devise d’origine et convertis dans la devise de référence. « Mes dépenses » exclut les paiements pour d’autres et, pour les abonnements partagés, ne compte que ma propre part. Si vous n’êtes pas sûr du nom d’un abonnement, cherchez d’abord avec list_subscriptions. Chaque outil d’écriture prend en charge dry_run : prévisualisez d’abord, puis appliquez.",
   "defaultTokenName": "Assistant IA",
   "item": "{name} ({id})",
@@ -13,8 +13,8 @@
     "noTool": "Outil inconnu : {name}",
     "readOnly": "Ce jeton est en lecture seule et ne peut pas modifier le registre. Créez un jeton en lecture et écriture sur la page IA de l’administration.",
     "unsupportedMethod": "Méthode non prise en charge : {method}",
-    "aiDisabled": "L’accès IA est désactivé dans les réglages de Subscription Ledger",
-    "badToken": "Jeton manquant ou non valide. Créez-en un sur la page IA de l’administration de Subscription Ledger et transmettez-le via Authorization: Bearer <token>",
+    "aiDisabled": "L’accès IA est désactivé dans les réglages de Calends",
+    "badToken": "Jeton manquant ou non valide. Créez-en un sur la page IA de l’administration de Calends et transmettez-le via Authorization: Bearer <token>",
     "parse": "Impossible d’analyser le JSON",
     "needSub": "subscription est obligatoire (id ou nom de l’abonnement)",
     "subNotFound": "Aucun abonnement ne correspond à « {q} ». Essayez d’abord de chercher avec list_subscriptions.",

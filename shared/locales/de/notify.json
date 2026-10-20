@@ -1,5 +1,5 @@
 {
-  "appName": "Subscription Ledger",
+  "appName": "Calends",
   "trial": {
     "sub": "Testphase endet {when} ({date}), danach {price}",
     "headline": "Testphase von {name} endet {when}"
@@ -63,7 +63,7 @@
     }
   },
   "email": {
-    "open": "Subscription Ledger öffnen",
+    "open": "Calends öffnen",
     "footer": "Uhrzeit und Vorlauf der Erinnerungen kannst du in den Einstellungen ändern."
   },
   "text": {

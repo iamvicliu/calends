@@ -36,7 +36,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Subscription Ledger//ZH',
+    'PRODID:-//Calends//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     fold(`X-WR-CALNAME:${icsText(t('server.ics.calName'))}`),

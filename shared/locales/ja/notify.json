@@ -1,5 +1,5 @@
 {
-  "appName": "サブスク台帳",
+  "appName": "Calends",
   "trial": {
     "sub": "トライアルは{when}（{date}）に終了、その後は{price}",
     "headline": "{name}のトライアルが{when}に終了"
@@ -59,7 +59,7 @@
     }
   },
   "email": {
-    "open": "サブスク台帳を開く",
+    "open": "Calendsを開く",
     "footer": "通知時刻や何日前に通知するかは設定で変更できます。"
   },
   "text": {

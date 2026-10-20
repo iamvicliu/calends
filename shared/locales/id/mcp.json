@@ -1,5 +1,5 @@
 {
-  "serverTitle": "Subscription Ledger",
+  "serverTitle": "Calends",
   "instructions": "Ini adalah buku catatan langganan pribadi milik pengguna. Jumlah diberikan dalam mata uang asli sekaligus dikonversi ke mata uang dasar. \"Pengeluaran saya\" tidak termasuk talangan (dibayarkan untuk orang lain), dan untuk paket bersama hanya menghitung bagian saya sendiri. Jika tidak yakin nama sebuah langganan, cari dulu dengan list_subscriptions. Setiap alat tulis mendukung dry_run — pratinjau dulu, lalu terapkan.",
   "defaultTokenName": "Asisten AI",
   "item": "{name} ({id})",
@@ -13,8 +13,8 @@
     "noTool": "Alat tidak dikenal: {name}",
     "readOnly": "Token ini hanya baca dan tidak bisa mengubah buku catatan. Buat token baca-tulis di halaman AI pada admin.",
     "unsupportedMethod": "Metode tidak didukung: {method}",
-    "aiDisabled": "Akses AI dimatikan di pengaturan Subscription Ledger",
-    "badToken": "Token tidak ada atau tidak valid. Buat token di halaman AI pada admin Subscription Ledger dan kirim sebagai Authorization: Bearer <token>",
+    "aiDisabled": "Akses AI dimatikan di pengaturan Calends",
+    "badToken": "Token tidak ada atau tidak valid. Buat token di halaman AI pada admin Calends dan kirim sebagai Authorization: Bearer <token>",
     "parse": "Gagal mengurai JSON",
     "needSub": "subscription wajib diisi (id atau nama langganan)",
     "subNotFound": "Tidak ada langganan yang cocok dengan “{q}”. Coba cari dulu dengan list_subscriptions.",

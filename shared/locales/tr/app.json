@@ -1,5 +1,5 @@
 {
-  "name": "Abonelik Defteri",
+  "name": "Calends",
   "offline": "Çevrimdışı",
   "offlineError": "Bağlanılamıyor: {error}",
   "nav": {
@@ -34,7 +34,10 @@
     "upcoming": "Yaklaşanlar",
     "today": "Bugün",
     "tomorrow": "Yarın",
-    "inDays": { "one": "{count} gün sonra", "other": "{count} gün sonra" },
+    "inDays": {
+      "one": "{count} gün sonra",
+      "other": "{count} gün sonra"
+    },
     "theme": "Tema",
     "themeHint": "Değiştirmek için tıklayın: Açık → Koyu → Sistem"
   },

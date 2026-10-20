@@ -1,5 +1,5 @@
 {
-  "appName": "Abonelik Defteri",
+  "appName": "Calends",
   "trial": {
     "sub": "Deneme {when} bitiyor ({date}), ardından {price}",
     "headline": "{name} denemesi {when} bitiyor"
@@ -63,7 +63,7 @@
     }
   },
   "email": {
-    "open": "Abonelik Defteri'ni aç",
+    "open": "Calends'ni aç",
     "footer": "Hatırlatma saatini ve kaç gün önceden hatırlatılacağını Ayarlar'dan değiştirebilirsiniz."
   },
   "text": {

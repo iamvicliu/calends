@@ -1,5 +1,5 @@
 {
-  "appName": "Subscription Ledger",
+  "appName": "Calends",
   "trial": {
     "sub": "Trial ends {when} ({date}), then {price}",
     "headline": "{name} trial ends {when}"
@@ -63,7 +63,7 @@
     }
   },
   "email": {
-    "open": "Open Subscription Ledger",
+    "open": "Open Calends",
     "footer": "You can change the reminder time and lead days in Settings."
   },
   "text": {

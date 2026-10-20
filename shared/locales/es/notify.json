@@ -1,5 +1,5 @@
 {
-  "appName": "Subscription Ledger",
+  "appName": "Calends",
   "trial": {
     "sub": "La prueba termina {when} ({date}); después, {price}",
     "headline": "La prueba de {name} termina {when}"
@@ -63,7 +63,7 @@
     }
   },
   "email": {
-    "open": "Abrir Subscription Ledger",
+    "open": "Abrir Calends",
     "footer": "Puedes cambiar la hora del recordatorio y los días de antelación en Ajustes."
   },
   "text": {

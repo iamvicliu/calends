@@ -1,5 +1,5 @@
 {
-  "name": "Учёт подписок",
+  "name": "Calends",
   "offline": "Нет сети",
   "offlineError": "Не удаётся подключиться: {error}",
   "nav": {
@@ -34,7 +34,12 @@
     "upcoming": "Скоро",
     "today": "Сегодня",
     "tomorrow": "Завтра",
-    "inDays": { "one": "Через {count} день", "few": "Через {count} дня", "many": "Через {count} дней", "other": "Через {count} дня" },
+    "inDays": {
+      "one": "Через {count} день",
+      "few": "Через {count} дня",
+      "many": "Через {count} дней",
+      "other": "Через {count} дня"
+    },
     "theme": "Тема",
     "themeHint": "Нажмите для смены: Светлая → Тёмная → Системная"
   },

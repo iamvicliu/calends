@@ -1,5 +1,5 @@
 {
-  "appName": "Subscription Ledger",
+  "appName": "Calends",
   "trial": {
     "sub": "Hết dùng thử {when} ({date}), sau đó {price}",
     "headline": "{name} hết dùng thử {when}"
@@ -59,7 +59,7 @@
     }
   },
   "email": {
-    "open": "Mở Subscription Ledger",
+    "open": "Mở Calends",
     "footer": "Bạn có thể đổi giờ nhắc và số ngày nhắc trước trong Cài đặt."
   },
   "text": {

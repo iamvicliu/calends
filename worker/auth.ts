@@ -258,7 +258,7 @@ export function sameOrigin(req: Request): boolean {
 
 // ---------- Passkey ----------
 
-const RP_NAME = 'Subscription Ledger';
+const RP_NAME = 'Calends';
 /** RP 是站点自己的域名；本地开发时 wrangler 会把 URL 改写成线上域名，只好以浏览器的 Origin 为准 */
 const rp = (req: Request, env: Env) => {
   const o = env.DEV_BYPASS_AUTH === '1' ? req.headers.get('origin') : null;

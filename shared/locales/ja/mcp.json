@@ -1,5 +1,5 @@
 {
-  "serverTitle": "サブスク台帳",
+  "serverTitle": "Calends",
   "instructions": "これはユーザー個人のサブスク台帳です。金額は元の通貨と基準通貨換算の両方で示されます。「自分の支出」には立て替え（他人のための支払い）は含まれず、共有プランは自分の負担分のみを計上します。サブスクの名前がわからない場合は、まず list_subscriptions で検索してください。すべての書き込みツールは dry_run に対応しています。まずプレビューしてから適用してください。",
   "defaultTokenName": "AI アシスタント",
   "item": "{name}（{id}）",
@@ -13,8 +13,8 @@
     "noTool": "不明なツール：{name}",
     "readOnly": "このトークンは読み取り専用のため、台帳を変更できません。管理画面の AI ページで読み書き用のトークンを作成してください。",
     "unsupportedMethod": "サポートされていないメソッド：{method}",
-    "aiDisabled": "サブスク台帳の設定で AI 連携がオフになっています",
-    "badToken": "トークンがないか無効です。サブスク台帳の管理画面の AI ページで作成し、Authorization: Bearer <token> として渡してください",
+    "aiDisabled": "Calendsの設定で AI 連携がオフになっています",
+    "badToken": "トークンがないか無効です。Calendsの管理画面の AI ページで作成し、Authorization: Bearer <token> として渡してください",
     "parse": "JSON を解析できませんでした",
     "needSub": "subscription が必要です（サブスクの id または名前）",
     "subNotFound": "「{q}」に一致するサブスクはありません。まず list_subscriptions で検索してください。",

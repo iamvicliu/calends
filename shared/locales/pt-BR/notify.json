@@ -1,5 +1,5 @@
 {
-  "appName": "Subscription Ledger",
+  "appName": "Calends",
   "trial": {
     "sub": "O teste termina {when} ({date}), depois {price}",
     "headline": "O teste de {name} termina {when}"
@@ -63,7 +63,7 @@
     }
   },
   "email": {
-    "open": "Abrir o Subscription Ledger",
+    "open": "Abrir o Calends",
     "footer": "Você pode mudar o horário do lembrete e a antecedência nos Ajustes."
   },
   "text": {

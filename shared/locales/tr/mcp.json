@@ -1,5 +1,5 @@
 {
-  "serverTitle": "Abonelik Defteri",
+  "serverTitle": "Calends",
   "instructions": "Bu, kullanıcının kişisel abonelik defteridir. Tutarlar hem orijinal para biriminde hem de ana para birimine çevrilmiş olarak verilir. “Harcamalarım” başkaları için yapılan ödemeleri içermez; ortak planlarda yalnızca benim payımı sayar. Bir aboneliğin adından emin değilseniz önce list_subscriptions ile arayın. Tüm yazma araçları dry_run destekler; önce önizleyin, sonra uygulayın.",
   "defaultTokenName": "Yapay zekâ asistanı",
   "item": "{name} ({id})",
@@ -13,8 +13,8 @@
     "noTool": "Bilinmeyen araç: {name}",
     "readOnly": "Bu token salt okunurdur ve defteri değiştiremez. Yönetim panelindeki Yapay zekâ erişimi sayfasından okuma-yazma token'ı oluşturun.",
     "unsupportedMethod": "Desteklenmeyen yöntem: {method}",
-    "aiDisabled": "Abonelik Defteri ayarlarında yapay zekâ erişimi kapalı",
-    "badToken": "Token eksik veya geçersiz. Abonelik Defteri yönetim panelindeki Yapay zekâ erişimi sayfasından bir token oluşturun ve Authorization: Bearer <token> olarak gönderin",
+    "aiDisabled": "Calends ayarlarında yapay zekâ erişimi kapalı",
+    "badToken": "Token eksik veya geçersiz. Calends yönetim panelindeki Yapay zekâ erişimi sayfasından bir token oluşturun ve Authorization: Bearer <token> olarak gönderin",
     "parse": "JSON ayrıştırılamadı",
     "needSub": "subscription gerekli (abonelik id'si veya adı)",
     "subNotFound": "“{q}” ile eşleşen abonelik yok. Önce list_subscriptions ile aramayı deneyin.",

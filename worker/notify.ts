@@ -216,7 +216,7 @@ ${r.amountSub ? `<div style="font:12px/1.5 'SF Mono',Menlo,monospace;color:#93a0
       .join('');
   const html = `<!doctype html><html><body style="margin:0;background:#f3f6f8;padding:32px 12px">
 <table role="presentation" width="100%" style="max-width:560px;margin:0 auto;background:#fbfcfd;border:1px solid #e3e9ed;border-radius:16px" cellpadding="0" cellspacing="0"><tr><td style="padding:28px 28px 8px">
-<div style="font:500 11px/1 'SF Mono',Menlo,monospace;letter-spacing:.14em;color:#7b858b;text-transform:uppercase">■ Subscription Ledger</div>
+<div style="font:500 11px/1 'SF Mono',Menlo,monospace;letter-spacing:.14em;color:#7b858b;text-transform:uppercase">■ ${esc(t('notify.appName'))}</div>
 <h1 style="font:600 26px/1.25 Georgia,'Songti SC',serif;color:#1d2328;margin:14px 0 8px">${esc(d.title ?? d.subject)}</h1>
 <p style="font:14px/1.7 -apple-system,'PingFang SC',sans-serif;color:#4c5a61;margin:0 0 8px">${esc(d.intro)}</p>
 </td></tr>

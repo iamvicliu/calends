@@ -1,5 +1,5 @@
 {
-  "appName": "Subscription Ledger",
+  "appName": "Calends",
   "trial": {
     "sub": "Uji coba berakhir {when} ({date}), lalu {price}",
     "headline": "Uji coba {name} berakhir {when}"
@@ -59,7 +59,7 @@
     }
   },
   "email": {
-    "open": "Buka Subscription Ledger",
+    "open": "Buka Calends",
     "footer": "Anda bisa mengubah waktu pengingat dan jumlah hari sebelumnya di Pengaturan."
   },
   "text": {
