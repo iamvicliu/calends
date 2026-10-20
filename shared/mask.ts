@@ -1,5 +1,5 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
-import type { AppState, MethodKind, PaymentMethod, Subscription } from './types.ts';
+import { DEFAULT_SETTINGS, type AppState, type MethodKind, type PaymentMethod, type Subscription } from './types.ts';
 
 const DOMAIN = /\b((?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+)([a-z]{2,})\b/gi;
 
@@ -94,11 +94,15 @@ export function maskForPublic(state: AppState): AppState {
     readonly: true,
     fx: state.fx,
     fxHistory: state.fxHistory,
+    // 设置只挑公开页需要的字段（白名单），以后新增的设置不会被顺带公开
     settings: {
-      ...state.settings,
-      notifyEmail: '',
-      icsToken: undefined,
-      channels: undefined,
+      ...DEFAULT_SETTINGS,
+      baseCurrency: state.settings.baseCurrency,
+      timezone: state.settings.timezone,
+      displayName: state.settings.displayName,
+      weekStart: state.settings.weekStart,
+      collectCurrency: state.settings.collectCurrency,
+      publicView: true,
       remindDays: 0,
       monthlyDigest: false,
     },

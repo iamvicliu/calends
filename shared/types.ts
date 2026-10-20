@@ -306,13 +306,14 @@ export const BALANCE_KINDS: MethodKind[] = ['appstore', 'googleplay', 'giftcard'
 
 export const DEFAULT_SETTINGS: Settings = {
   baseCurrency: 'CNY',
-  notifyEmail: 'you@example.com',
+  notifyEmail: '',
   remindDays: 3,
   notifyHour: 9,
   timezone: 'Asia/Shanghai',
-  publicView: true,
+  // 新部署默认不公开，需要时到设置里打开
+  publicView: false,
   monthlyDigest: true,
-  displayName: 'Ethan',
+  displayName: '',
 };
 
 /** 实际生效的通知渠道：没配过渠道时，把旧的「通知邮箱」当成一个邮件渠道 */
