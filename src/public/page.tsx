@@ -311,17 +311,22 @@ function Ledger({ state }: { state: AppState }) {
         </div>
       </div>
 
-      {/* 底部的订阅堆：每个正在付费的订阅一个图标，越贵越大 */}
-      <div className="mt-12">
-        <IconPile items={d.live.filter((x) => x.v > 0)} />
-      </div>
 
-      <footer className="mt-8 flex flex-col gap-2 text-[13px] text-muted-foreground sm:flex-row sm:justify-between">
-        <span>{t('public.footer')}</span>
-        <a href={PROJECT_URL} className="underline decoration-border underline-offset-4 hover:text-foreground">
-          {t('public.poweredBy', { app: PROJECT_NAME })}
+      <footer className="mt-10 flex items-center justify-between border-t border-border/70 pt-5 text-[13px] text-muted-foreground">
+        <a href={PROJECT_URL} className="flex items-center gap-2 transition hover:text-foreground">
+          <img src="/icons/logo.svg" alt="" className="size-5 rounded-[22%]" />
+          <span className="font-medium text-foreground">{PROJECT_NAME}</span>
+          <span>v{__APP_VERSION__}</span>
+        </a>
+        <a href={PROJECT_URL} className="transition hover:text-foreground" aria-label="GitHub" title="GitHub">
+          <GitHubMark className="size-5" />
         </a>
       </footer>
+      {/* 页脚下面的订阅堆：继续往下滑才会从屏幕顶端落下来；每个正在付费的订阅一个图标，越贵越大 */}
+      {/* 抵消外层的底部留白（pb-12），让图标堆贴着页面最底部 */}
+      <div className="mt-6 -mb-12">
+        <IconPile items={d.live.filter((x) => x.v > 0)} />
+      </div>
     </Shell>
   );
 }
@@ -631,5 +636,14 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
         <div className="text-[13px] text-muted-foreground">{monthly ? t('public.row.monthly') : t('public.row.perMonthEq')}</div>
       </div>
     </div>
+  );
+}
+
+/** GitHub 标志（官方 mark） */
+function GitHubMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
+      <path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .32.21.69.82.57A12 12 0 0 0 12 .3" />
+    </svg>
   );
 }

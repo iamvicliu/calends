@@ -41,7 +41,6 @@
     "title": "Ömür boyu",
     "desc": "Bir kez ödendi, başka ödeme yok"
   },
-  "footer": "Geçmiş ödemeler o günün kuruyla, gelecek ödemeler bugünün kuruyla hesaplanır. Yayınlanmamış alan adları ve ödeme bilgileri gizlenir.",
   "composition": {
     "title": "Dağılım",
     "desc": "Kategoriye göre aylık maliyet",
@@ -69,10 +68,8 @@
     "perMonthEq": "Aylık karşılığı"
   },
   "titleAnon": "Abonelikler",
-  "poweredBy": "{app} ile yapıldı",
   "pile": {
     "label": "Abonelik yığını: simge büyüdükçe aylık maliyet artar",
-    "hint": "Bir simgeye dokunun, kaybolsun · geri getirmek için sayfayı yenileyin",
-    "empty": "Hepsi temizlendi! Geri getirmek için sayfayı yenileyin."
+    "reset": "Yeniden düşür"
   }
 }

@@ -41,7 +41,6 @@
     "title": "De por vida",
     "desc": "Pago único, sin más cobros"
   },
-  "footer": "Los cobros pasados usan el tipo de cambio de ese día; los futuros, el de hoy. Los dominios no publicados y los datos de pago están ocultos.",
   "composition": {
     "title": "Desglose",
     "desc": "Coste mensual por categoría",
@@ -69,10 +68,8 @@
     "perMonthEq": "Al mes"
   },
   "titleAnon": "Suscripciones",
-  "poweredBy": "Hecho con {app}",
   "pile": {
     "label": "Tus suscripciones apiladas: cuanto más grande, más cuesta",
-    "hint": "Toca un icono para hacerlo desaparecer · recarga para recuperarlos",
-    "empty": "¡Todo despejado! Recarga para recuperarlos."
+    "reset": "Volver a soltarlos"
   }
 }

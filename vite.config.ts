@@ -33,7 +33,11 @@ function localPublic(): Plugin {
   };
 }
 
+const VERSION = (JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string }).version;
+
 export default defineConfig({
+  // 页脚等处显示的版本号
+  define: { __APP_VERSION__: JSON.stringify(VERSION) },
   // React 生态组件（shadcn/ui、Radix、Motion、Recharts）统一跑在 preact/compat 上，不引入第二个框架
   plugins: [preact(), tailwindcss(), localPublic()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },

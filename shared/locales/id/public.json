@@ -40,7 +40,6 @@
     "title": "Seumur hidup",
     "desc": "Bayar sekali, tanpa tagihan lagi"
   },
-  "footer": "Tagihan lalu memakai kurs pada hari itu; tagihan mendatang memakai kurs hari ini. Domain yang belum dirilis dan detail pembayaran disembunyikan.",
   "composition": {
     "title": "Rincian",
     "desc": "Biaya bulanan per kategori",
@@ -67,10 +66,8 @@
     "perMonthEq": "Per bulan"
   },
   "titleAnon": "Langganan",
-  "poweredBy": "Dibuat dengan {app}",
   "pile": {
     "label": "Tumpukan langganan: makin besar ikonnya, makin mahal",
-    "hint": "Ketuk ikon untuk menghilangkannya · muat ulang untuk mengembalikannya",
-    "empty": "Semua bersih! Muat ulang untuk mengembalikannya."
+    "reset": "Jatuhkan lagi"
   }
 }

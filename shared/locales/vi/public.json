@@ -40,7 +40,6 @@
     "title": "Trọn đời",
     "desc": "Trả một lần, không còn bị trừ tiền"
   },
-  "footer": "Khoản phí đã qua dùng tỷ giá của ngày đó; khoản phí sắp tới dùng tỷ giá hôm nay. Tên miền chưa công bố và chi tiết thanh toán được ẩn.",
   "composition": {
     "title": "Cơ cấu",
     "desc": "Chi phí hằng tháng theo danh mục",
@@ -67,10 +66,8 @@
     "perMonthEq": "Mỗi tháng"
   },
   "titleAnon": "Gói đăng ký",
-  "poweredBy": "Tạo bằng {app}",
   "pile": {
     "label": "Đống gói đăng ký: biểu tượng càng lớn, mỗi tháng càng tốn",
-    "hint": "Chạm vào biểu tượng để làm nó biến mất · tải lại trang để đưa chúng trở lại",
-    "empty": "Đã dọn sạch! Tải lại trang để đưa chúng trở lại."
+    "reset": "Thả lại"
   }
 }

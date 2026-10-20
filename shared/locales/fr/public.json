@@ -41,7 +41,6 @@
     "title": "À vie",
     "desc": "Payé une fois, plus aucun prélèvement"
   },
-  "footer": "Les prélèvements passés utilisent le taux de change du jour ; les futurs, le taux actuel. Les domaines non publiés et les détails de paiement sont masqués.",
   "composition": {
     "title": "Répartition",
     "desc": "Coût mensuel par catégorie",
@@ -69,10 +68,8 @@
     "perMonthEq": "Par mois"
   },
   "titleAnon": "Abonnements",
-  "poweredBy": "Fait avec {app}",
   "pile": {
     "label": "Tes abonnements en pile — plus l’icône est grande, plus il coûte",
-    "hint": "Touche une icône pour la faire disparaître · recharge pour les retrouver",
-    "empty": "Tout est dégagé ! Recharge la page pour les retrouver."
+    "reset": "Les refaire tomber"
   }
 }
