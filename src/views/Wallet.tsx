@@ -1,7 +1,7 @@
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { useRef, useState } from 'preact/hooks';
-import { currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../shared/billing.ts';
+import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../shared/billing.ts';
 import { cnDate, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../shared/types.ts';
@@ -277,10 +277,10 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
           <SortableContext items={state.methods.map((m) => m.id)} strategy={rectSortingStrategy} disabled={ro}>
             <div class={`wallet-grid ${dragging ? 'dragging' : ''}`}>
               {state.methods.map((m) => {
-                // 按当前阶段归属支付方式；代付的钱不算我的支出
-                const liveHere = live.filter((s) => !s.proxy && currentPhase(s, today).methodId === m.id);
+                // 按当前阶段归属支付方式（换区后新旧两段并行时，两张卡各算各的）；代付的钱不算我的支出
+                const liveHere = live.filter((s) => !s.proxy && [currentPhase(s, today), ...activePhases(s, today)].some((v) => v.methodId === m.id));
                 const r = runwayFor(m, state, today);
-                const monthly = liveHere.reduce((a, s) => a + monthlyMine(state, s, today), 0);
+                const monthly = liveHere.reduce((a, s) => a + monthlyMine(state, s, today, m.id), 0);
                 return (
                   <SortableCard key={m.id} m={m} onOpen={() => setOpen(m.id)}>
                     <CardFace

@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
-import { currentPhase } from '../../shared/billing.ts';
-import { money } from '../../shared/format.ts';
+import { activePhases, currentPhase, cycleLabel } from '../../shared/billing.ts';
+import { flag, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { deletePayment, savePayment } from '../../shared/phases.ts';
 import type { Payment, Subscription } from '../../shared/types.ts';
@@ -16,10 +16,14 @@ const KINDS: Kind[] = ['charge', 'refund', 'adjust', 'failed'];
  * 记一笔 / 修改一笔扣款。金额按这一段订阅的币种填；卡上实际扣的是别的币种（如日元订阅从美元卡扣）时，
  * 另填「卡上实扣」，统计就按实扣算，汇差和手续费都算进真实成本。
  */
-export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription; today: string; edit?: { pay: Payment; index: number }; onClose: () => void }) {
+export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription; today: string; edit?: { pay: Payment; index: number; phase?: string }; onClose: () => void }) {
   const [date, setDate] = useState(edit?.pay.date ?? today);
   const [kind, setKind] = useState<Kind>(edit?.pay.kind ?? 'charge');
-  const phase = currentPhase(sub, date);
+  // 换区后新旧两段并行的日子：要选这笔记在哪一段（缺省为最晚开始的那段，修改时为原记录所在的段）
+  const lanes = sub.phases?.length ? activePhases(sub, date) : [];
+  const [lane, setLane] = useState(edit?.phase);
+  const phase = (lanes.length > 1 && lanes.find((v) => v.start === lane)) || currentPhase(sub, date);
+  const pick = lanes.length > 1 ? phase.start : edit?.phase;
   const ccy = phase.currency;
   const [amount, setAmount] = useState(edit ? String(Math.abs(edit.pay.amount)) : String(phase.price));
   const [settled, setSettled] = useState(edit?.pay.settled ? String(Math.abs(edit.pay.settled.amount)) : '');
@@ -38,13 +42,13 @@ export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription;
       note: note.trim() || undefined,
     };
     run(async () => {
-      await saveSub(savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }));
+      await saveSub(savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick));
       onClose();
     }, t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'));
   };
   const remove = () =>
     run(async () => {
-      await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index));
+      await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index, edit!.phase));
       onClose();
     }, t('editor.payment.toast.deleted'));
 
@@ -74,6 +78,20 @@ export function PaymentSheet({ sub, today, edit, onClose }: { sub: Subscription;
           <Cell label={t('editor.payment.date')}>
             <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
           </Cell>
+          {lanes.length > 1 && (
+            <Cell label={t('editor.overlap.payPhase')}>
+              <Picker
+                value={phase.start}
+                onChange={(v) => {
+                  setLane(v);
+                  const p = lanes.find((x) => x.start === v);
+                  if (!edit && p) setAmount(String(p.price));
+                }}
+                options={lanes.map((v) => ({ value: v.start, label: `${v.region ? `${flag(v.region)} ${v.region} · ` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}` }))}
+                ariaLabel={t('editor.overlap.payPhase')}
+              />
+            </Cell>
+          )}
           <Cell label={t('editor.payment.kind.label')}>
             <Picker value={kind} onChange={setKind} options={KINDS.map((k) => ({ value: k, label: t(`editor.payment.kind.${k}`) }))} ariaLabel={t('editor.payment.kind.label')} />
           </Cell>
