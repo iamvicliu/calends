@@ -8,32 +8,66 @@
   "copyFailed": "複製失敗",
   "neverUsed": "從未使用",
   "tokenPlaceholder": "<你的權杖>",
-  "tokens": { "other": "權杖 · {count} 個" },
+  "tokens": {
+    "other": "權杖 · {count} 個"
+  },
   "noTokens": "還沒有權杖。新增一個，交給要連接的 AI 助理。",
   "lastUsed": "最近使用 {time}",
   "confirmRevoke": "撤銷「{name}」？使用它的 AI 助理會立即失去存取權限。",
   "revoke": "撤銷",
   "revoked": "已撤銷",
   "setup": "連接方式",
-  "tools": { "other": "可用工具 · {count} 個" },
-  "writeBadge": "寫入",
+  "tools": {
+    "other": "可用工具 · {count} 個"
+  },
   "clientOther": "其他",
   "scope": {
     "write": "讀寫",
     "read": "唯讀",
-    "writeLong": "讀寫：可查詢、新增、修改",
-    "readLong": "唯讀：只能查詢"
+    "label": "權限",
+    "writeDesc": "可以查詢，也可以新增和修改訂閱、扣款與收款。",
+    "readDesc": "只能查詢，不能修改任何資料。"
   },
   "created": {
     "title": "權杖已建立",
     "saved": "我已儲存",
     "foot": "權杖只會顯示這一次，關閉後就無法再查看；遺失了就撤銷後重新建立。",
-    "copyToken": "複製權杖",
-    "tokenCopied": "權杖已複製",
-    "command": "連接指令"
+    "tokenCopied": "權杖已複製"
   },
   "cancel": "取消",
   "generate": "建立",
   "name": "名稱",
-  "namePlaceholder": "要給哪個 AI 使用"
+  "namePlaceholder": "要給哪個 AI 使用",
+  "pickClient": "選擇你的 AI 助理",
+  "setupHint": "選一個你在用的助理，複製一段設定即可。剛建立權杖後，設定裡會自動帶上權杖。",
+  "tokensHint": "建議每個助理使用一個獨立的權杖，需要時可以單獨撤銷。",
+  "toolsHint": "AI 助理能對帳本做的事。唯讀權杖只能看到讀取類工具。",
+  "toolsRead": "讀取",
+  "toolsWrite": "修改",
+  "experimental": "實驗性",
+  "copiedWithToken": "已複製，已包含權杖",
+  "installIn": "新增到 {name}",
+  "createdAt": "建立於 {time}",
+  "where": {
+    "terminal": "在終端機中執行。",
+    "codex": "在終端機中執行。把 export 那一行加到 shell 設定檔裡，重新啟動後權杖仍然有效。",
+    "file": "新增到 {path}。",
+    "vscode": "在終端機中執行，或點下方按鈕直接安裝到 VS Code。",
+    "trae": "開啟 Trae → 設定 → MCP → 手動新增，貼上這段設定。",
+    "http": "任何支援 Streamable HTTP 的 MCP 用戶端都可以。下方是一則測試請求。"
+  },
+  "step": {
+    "token": "權杖",
+    "tokenReady": "使用「{name}」，已寫進下方的設定",
+    "tokenNeeded": "權杖只在建立時顯示一次。",
+    "createFor": "為 {name} 建立權杖",
+    "where": "放在哪裡",
+    "paste": "複製貼上"
+  },
+  "status": {
+    "on": "AI 存取已開啟",
+    "off": "AI 存取已關閉",
+    "onHint": "持有有效權杖的 AI 助理可以查詢和修改帳本。",
+    "offHint": "重新開啟前，所有 MCP 請求都會被拒絕。"
+  }
 }

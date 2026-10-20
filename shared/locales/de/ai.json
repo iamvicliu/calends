@@ -22,24 +22,54 @@
     "one": "Verfügbares Tool · {count}",
     "other": "Verfügbare Tools · {count}"
   },
-  "writeBadge": "Schreiben",
   "clientOther": "Andere",
   "scope": {
     "write": "Lesen & Schreiben",
     "read": "Nur lesen",
-    "writeLong": "Lesen & Schreiben: abfragen, hinzufügen und bearbeiten",
-    "readLong": "Nur lesen: nur abfragen"
+    "label": "Berechtigung",
+    "writeDesc": "Abos, Abbuchungen und Rückzahlungen abfragen, hinzufügen und bearbeiten.",
+    "readDesc": "Nur abfragen. Es kann nichts geändert werden."
   },
   "created": {
     "title": "Token erstellt",
     "saved": "Hab ich gespeichert",
     "foot": "Dieses Token wird nur einmal angezeigt und ist nach dem Schließen nicht mehr sichtbar. Falls du es verlierst, widerrufe es und erstelle ein neues.",
-    "copyToken": "Token kopieren",
-    "tokenCopied": "Token kopiert",
-    "command": "Einrichtungsbefehl"
+    "tokenCopied": "Token kopiert"
   },
   "cancel": "Abbrechen",
   "generate": "Erstellen",
   "name": "Name",
-  "namePlaceholder": "Für welche KI ist das?"
+  "namePlaceholder": "Für welche KI ist das?",
+  "pickClient": "Wähle deinen KI-Assistenten",
+  "setupHint": "Wähle deinen Assistenten und füge ein Snippet ein. Dein Token wird direkt nach dem Erstellen automatisch eingefügt.",
+  "tokensHint": "Gib jedem Assistenten ein eigenes Token, damit du es einzeln widerrufen kannst.",
+  "toolsHint": "Was Assistenten mit deinem Haushaltsbuch tun können. Nur-Lese-Tokens sehen nur die Lesewerkzeuge.",
+  "toolsRead": "Lesen",
+  "toolsWrite": "Schreiben",
+  "experimental": "Experimentell",
+  "copiedWithToken": "Kopiert, Token enthalten",
+  "installIn": "Zu {name} hinzufügen",
+  "createdAt": "Erstellt {time}",
+  "where": {
+    "terminal": "Führe das in deinem Terminal aus.",
+    "codex": "Führe das in deinem Terminal aus. Füge die export-Zeile deinem Shell-Profil hinzu, damit das Token Neustarts übersteht.",
+    "file": "Füge das zu {path} hinzu.",
+    "vscode": "Führe das in deinem Terminal aus oder klicke unten auf die Schaltfläche, um es in VS Code zu installieren.",
+    "trae": "Öffne Trae → Einstellungen → MCP → Manuell hinzufügen und füge das ein.",
+    "http": "Jeder MCP-Client mit Streamable HTTP. Das ist eine kurze Testanfrage."
+  },
+  "step": {
+    "token": "Token",
+    "tokenReady": "Verwendet „{name}“, im Snippet unten enthalten",
+    "tokenNeeded": "Tokens werden nur einmal angezeigt.",
+    "createFor": "Token für {name} erstellen",
+    "where": "Wohin damit",
+    "paste": "Kopieren und einfügen"
+  },
+  "status": {
+    "on": "KI-Zugriff ist aktiviert",
+    "off": "KI-Zugriff ist deaktiviert",
+    "onHint": "Assistenten mit gültigem Token können dein Haushaltsbuch abfragen und aktualisieren.",
+    "offHint": "Alle MCP-Anfragen werden abgelehnt, bis du ihn wieder aktivierst."
+  }
 }

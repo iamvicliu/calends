@@ -8,32 +8,68 @@
   "copyFailed": "Kopyalanamadı",
   "neverUsed": "Hiç kullanılmadı",
   "tokenPlaceholder": "<token'ınız>",
-  "tokens": { "one": "Token'lar · {count}", "other": "Token'lar · {count}" },
+  "tokens": {
+    "one": "Token'lar · {count}",
+    "other": "Token'lar · {count}"
+  },
   "noTokens": "Henüz token yok. Bir tane oluşturup bağlamak istediğiniz yapay zekâ asistanına verin.",
   "lastUsed": "Son kullanım: {time}",
   "confirmRevoke": "“{name}” iptal edilsin mi? Bunu kullanan yapay zekâ asistanı erişimini hemen kaybeder.",
   "revoke": "İptal et",
   "revoked": "İptal edildi",
   "setup": "Kurulum",
-  "tools": { "one": "Kullanılabilir araçlar · {count}", "other": "Kullanılabilir araçlar · {count}" },
-  "writeBadge": "Yazma",
+  "tools": {
+    "one": "Kullanılabilir araçlar · {count}",
+    "other": "Kullanılabilir araçlar · {count}"
+  },
   "clientOther": "Diğer",
   "scope": {
     "write": "Okuma ve yazma",
     "read": "Salt okunur",
-    "writeLong": "Okuma ve yazma: sorgulama, ekleme ve düzenleme",
-    "readLong": "Salt okunur: yalnızca sorgulama"
+    "label": "İzin",
+    "writeDesc": "Abonelikleri, ödemeleri ve geri ödemeleri sorgulayın, ekleyin ve düzenleyin.",
+    "readDesc": "Yalnızca sorgulama. Hiçbir şey değiştirilemez."
   },
   "created": {
     "title": "Token oluşturuldu",
     "saved": "Kaydettim",
     "foot": "Bu token yalnızca bir kez gösterilir; bu pencereyi kapattıktan sonra tekrar görüntülenemez. Kaybederseniz iptal edip yenisini oluşturun.",
-    "copyToken": "Token'ı kopyala",
-    "tokenCopied": "Token kopyalandı",
-    "command": "Kurulum komutu"
+    "tokenCopied": "Token kopyalandı"
   },
   "cancel": "Vazgeç",
   "generate": "Oluştur",
   "name": "Ad",
-  "namePlaceholder": "Hangi yapay zekâ için?"
+  "namePlaceholder": "Hangi yapay zekâ için?",
+  "pickClient": "Yapay zekâ asistanınızı seçin",
+  "setupHint": "Kullandığınız asistanı seçin ve tek bir parçayı yapıştırın. Token'ınız oluşturulur oluşturulmaz otomatik olarak eklenir.",
+  "tokensHint": "Her asistana ayrı bir token verin; böylece tek tek iptal edebilirsiniz.",
+  "toolsHint": "Asistanların kayıt defterinizle yapabilecekleri. Salt okunur token'lar yalnızca okuma araçlarını görür.",
+  "toolsRead": "Okuma",
+  "toolsWrite": "Yazma",
+  "experimental": "Deneysel",
+  "copiedWithToken": "Kopyalandı, token dahil",
+  "installIn": "{name} uygulamasına ekle",
+  "createdAt": "{time} oluşturuldu",
+  "where": {
+    "terminal": "Bunu terminalinizde çalıştırın.",
+    "codex": "Bunu terminalinizde çalıştırın. Token'ın yeniden başlatmalardan sonra da geçerli kalması için export satırını kabuk profilinize ekleyin.",
+    "file": "Bunu {path} dosyasına ekleyin.",
+    "vscode": "Bunu terminalinizde çalıştırın veya VS Code'a yüklemek için aşağıdaki düğmeye tıklayın.",
+    "trae": "Trae → Ayarlar → MCP → Elle ekle yolunu açın ve bunu yapıştırın.",
+    "http": "Streamable HTTP destekleyen her MCP istemcisi. Bu kısa bir test isteğidir."
+  },
+  "step": {
+    "token": "Token",
+    "tokenReady": "“{name}” kullanılıyor, aşağıdaki parçaya eklendi",
+    "tokenNeeded": "Token'lar yalnızca bir kez gösterilir.",
+    "createFor": "{name} için token oluştur",
+    "where": "Nereye eklenir",
+    "paste": "Kopyala ve yapıştır"
+  },
+  "status": {
+    "on": "Yapay zekâ erişimi açık",
+    "off": "Yapay zekâ erişimi kapalı",
+    "onHint": "Geçerli token'a sahip asistanlar kayıt defterinizi sorgulayabilir ve güncelleyebilir.",
+    "offHint": "Yeniden açana kadar tüm MCP istekleri reddedilir."
+  }
 }

@@ -22,24 +22,54 @@
     "one": "Outil disponible · {count}",
     "other": "Outils disponibles · {count}"
   },
-  "writeBadge": "Écriture",
   "clientOther": "Autre",
   "scope": {
     "write": "Lecture et écriture",
     "read": "Lecture seule",
-    "writeLong": "Lecture et écriture : consulter, ajouter et modifier",
-    "readLong": "Lecture seule : consulter uniquement"
+    "label": "Autorisation",
+    "writeDesc": "Consulter, ajouter et modifier les abonnements, prélèvements et remboursements.",
+    "readDesc": "Consultation uniquement. Aucune modification possible."
   },
   "created": {
     "title": "Jeton créé",
     "saved": "Je l’ai enregistré",
     "foot": "Ce jeton n’est affiché qu’une seule fois et ne sera plus visible après fermeture. Si vous le perdez, révoquez-le et créez-en un nouveau.",
-    "copyToken": "Copier le jeton",
-    "tokenCopied": "Jeton copié",
-    "command": "Commande de configuration"
+    "tokenCopied": "Jeton copié"
   },
   "cancel": "Annuler",
   "generate": "Créer",
   "name": "Nom",
-  "namePlaceholder": "Pour quelle IA ?"
+  "namePlaceholder": "Pour quelle IA ?",
+  "pickClient": "Choisissez votre assistant IA",
+  "setupHint": "Choisissez l’assistant que vous utilisez, puis collez un extrait. Votre jeton est inséré automatiquement dès sa création.",
+  "tokensHint": "Donnez à chaque assistant son propre jeton pour pouvoir le révoquer séparément.",
+  "toolsHint": "Ce que les assistants peuvent faire avec votre registre. Les jetons en lecture seule ne voient que les outils de lecture.",
+  "toolsRead": "Lecture",
+  "toolsWrite": "Écriture",
+  "experimental": "Expérimental",
+  "copiedWithToken": "Copié, jeton inclus",
+  "installIn": "Ajouter à {name}",
+  "createdAt": "Créé {time}",
+  "where": {
+    "terminal": "Exécutez ceci dans votre terminal.",
+    "codex": "Exécutez ceci dans votre terminal. Ajoutez la ligne export à votre profil shell pour que le jeton persiste après un redémarrage.",
+    "file": "Ajoutez ceci à {path}.",
+    "vscode": "Exécutez ceci dans votre terminal, ou cliquez sur le bouton ci-dessous pour l’installer dans VS Code.",
+    "trae": "Ouvrez Trae → Paramètres → MCP → Ajouter manuellement, puis collez ceci.",
+    "http": "Tout client MCP compatible Streamable HTTP. Voici une requête de test rapide."
+  },
+  "step": {
+    "token": "Jeton",
+    "tokenReady": "Utilise « {name} », inclus dans l’extrait ci-dessous",
+    "tokenNeeded": "Les jetons ne sont affichés qu’une seule fois.",
+    "createFor": "Créer un jeton pour {name}",
+    "where": "Où le placer",
+    "paste": "Copier-coller"
+  },
+  "status": {
+    "on": "L’accès IA est activé",
+    "off": "L’accès IA est désactivé",
+    "onHint": "Les assistants disposant d’un jeton valide peuvent consulter et mettre à jour votre registre.",
+    "offHint": "Toutes les requêtes MCP sont refusées jusqu’à sa réactivation."
+  }
 }

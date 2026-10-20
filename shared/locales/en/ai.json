@@ -8,32 +8,68 @@
   "copyFailed": "Couldn't copy",
   "neverUsed": "Never used",
   "tokenPlaceholder": "<your-token>",
-  "tokens": { "one": "Tokens · {count}", "other": "Tokens · {count}" },
+  "tokens": {
+    "one": "Tokens · {count}",
+    "other": "Tokens · {count}"
+  },
   "noTokens": "No tokens yet. Create one and give it to the AI assistant you want to connect.",
   "lastUsed": "Last used {time}",
   "confirmRevoke": "Revoke “{name}”? Any AI assistant using it will lose access immediately.",
   "revoke": "Revoke",
   "revoked": "Revoked",
   "setup": "Setup",
-  "tools": { "one": "Available tools · {count}", "other": "Available tools · {count}" },
-  "writeBadge": "Write",
+  "tools": {
+    "one": "Available tools · {count}",
+    "other": "Available tools · {count}"
+  },
   "clientOther": "Other",
   "scope": {
     "write": "Read & write",
     "read": "Read-only",
-    "writeLong": "Read & write: query, add and edit",
-    "readLong": "Read-only: query only"
+    "label": "Permission",
+    "writeDesc": "Query, add and edit subscriptions, payments and receivables.",
+    "readDesc": "Query only. Can't change anything."
   },
   "created": {
     "title": "Token created",
     "saved": "I've saved it",
     "foot": "This token is shown only once and can't be viewed again after you close this. If you lose it, revoke it and create a new one.",
-    "copyToken": "Copy token",
-    "tokenCopied": "Token copied",
-    "command": "Setup command"
+    "tokenCopied": "Token copied"
   },
   "cancel": "Cancel",
   "generate": "Create",
   "name": "Name",
-  "namePlaceholder": "Which AI is this for?"
+  "namePlaceholder": "Which AI is this for?",
+  "pickClient": "Choose your AI assistant",
+  "setupHint": "Pick the assistant you use, then paste one snippet. Your token is filled in automatically right after you create it.",
+  "tokensHint": "Each assistant should get its own token, so you can revoke it on its own.",
+  "toolsHint": "What assistants can do with your ledger. Read-only tokens only see the read tools.",
+  "toolsRead": "Read",
+  "toolsWrite": "Write",
+  "experimental": "Experimental",
+  "copiedWithToken": "Copied, token included",
+  "installIn": "Add to {name}",
+  "createdAt": "Created {time}",
+  "where": {
+    "terminal": "Run this in your terminal.",
+    "codex": "Run this in your terminal. Add the export line to your shell profile so the token survives restarts.",
+    "file": "Add this to {path}.",
+    "vscode": "Run this in your terminal, or click the button below to install it in VS Code.",
+    "trae": "Open Trae → Settings → MCP → Add manually, then paste this.",
+    "http": "Any MCP client that speaks Streamable HTTP. This is a quick test request."
+  },
+  "step": {
+    "token": "Token",
+    "tokenReady": "Using “{name}”, included in the snippet below",
+    "tokenNeeded": "Tokens are shown only once.",
+    "createFor": "Create a token for {name}",
+    "where": "Where it goes",
+    "paste": "Copy and paste"
+  },
+  "status": {
+    "on": "AI access is on",
+    "off": "AI access is off",
+    "onHint": "Assistants with a valid token can read and update your ledger.",
+    "offHint": "All MCP requests are rejected until you turn it back on."
+  }
 }

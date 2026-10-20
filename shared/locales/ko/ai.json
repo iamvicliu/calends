@@ -20,24 +20,54 @@
   "tools": {
     "other": "사용 가능한 도구 · {count}"
   },
-  "writeBadge": "쓰기",
   "clientOther": "기타",
   "scope": {
     "write": "읽기 및 쓰기",
     "read": "읽기 전용",
-    "writeLong": "읽기 및 쓰기: 조회, 추가, 편집",
-    "readLong": "읽기 전용: 조회만 가능"
+    "label": "권한",
+    "writeDesc": "구독, 결제, 상환 내역을 조회하고 추가·편집할 수 있습니다.",
+    "readDesc": "조회만 가능하며 데이터를 변경할 수 없습니다."
   },
   "created": {
     "title": "토큰을 만들었습니다",
     "saved": "저장했습니다",
     "foot": "이 토큰은 한 번만 표시되며, 닫으면 다시 볼 수 없습니다. 잃어버렸다면 폐기하고 새로 만드세요.",
-    "copyToken": "토큰 복사",
-    "tokenCopied": "토큰을 복사했습니다",
-    "command": "설정 명령어"
+    "tokenCopied": "토큰을 복사했습니다"
   },
   "cancel": "취소",
   "generate": "만들기",
   "name": "이름",
-  "namePlaceholder": "어떤 AI에서 사용하나요?"
+  "namePlaceholder": "어떤 AI에서 사용하나요?",
+  "pickClient": "AI 어시스턴트 선택",
+  "setupHint": "사용 중인 어시스턴트를 고르고 스니펫 하나만 붙여넣으세요. 토큰을 만들면 바로 자동으로 채워집니다.",
+  "tokensHint": "어시스턴트마다 별도의 토큰을 쓰면 개별적으로 폐기할 수 있습니다.",
+  "toolsHint": "어시스턴트가 장부에서 할 수 있는 작업입니다. 읽기 전용 토큰에는 읽기 도구만 보입니다.",
+  "toolsRead": "읽기",
+  "toolsWrite": "쓰기",
+  "experimental": "실험적",
+  "copiedWithToken": "토큰 포함하여 복사했습니다",
+  "installIn": "{name}에 추가",
+  "createdAt": "{time} 생성",
+  "where": {
+    "terminal": "터미널에서 실행하세요.",
+    "codex": "터미널에서 실행하세요. 재시작 후에도 토큰이 유지되도록 export 줄을 셸 프로필에 추가하세요.",
+    "file": "{path}에 추가하세요.",
+    "vscode": "터미널에서 실행하거나 아래 버튼을 눌러 VS Code에 설치하세요.",
+    "trae": "Trae → 설정 → MCP → 수동 추가를 연 다음 붙여넣으세요.",
+    "http": "Streamable HTTP를 지원하는 모든 MCP 클라이언트에서 사용할 수 있습니다. 아래는 간단한 테스트 요청입니다."
+  },
+  "step": {
+    "token": "토큰",
+    "tokenReady": "“{name}” 사용 중, 아래 스니펫에 포함됨",
+    "tokenNeeded": "토큰은 한 번만 표시됩니다.",
+    "createFor": "{name}용 토큰 만들기",
+    "where": "설정 위치",
+    "paste": "복사해서 붙여넣기"
+  },
+  "status": {
+    "on": "AI 연동이 켜져 있습니다",
+    "off": "AI 연동이 꺼져 있습니다",
+    "onHint": "유효한 토큰을 가진 어시스턴트는 장부를 조회하고 수정할 수 있습니다.",
+    "offHint": "다시 켤 때까지 모든 MCP 요청이 거부됩니다."
+  }
 }

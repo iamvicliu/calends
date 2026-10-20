@@ -2821,10 +2821,13 @@ select.btn {
 }
 .sheet-head {
   background: color-mix(in srgb, var(--bg) 92%, transparent);
+  /* 吸顶/吸底的头尾有自己的合成层，弹出动画时外层圆角裁不到它们，自己也带上圆角 */
+  border-radius: 20px 20px 0 0;
 }
 .sheet-foot {
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   box-shadow: 0 -1px 0 var(--line);
+  border-radius: 0 0 20px 20px;
 }
 .sheet .group-body {
   background: var(--card);
@@ -7585,46 +7588,480 @@ button.seat:disabled {
   flex-shrink: 0;
 }
 
-/* AI 接入页 */
+/* AI 接入页：状态条、地址、接入卡片（客户端网格 + 三步）、令牌表、工具清单 */
 .ai-page {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  max-width: 760px;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
 }
-.ai-url {
-  font-size: 13.5px;
-  word-break: break-all;
+.ai-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
-.ai-token code,
-.ai-tool code {
-  font-size: 12.5px;
+.ai-status-l {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.ai-snippet {
-  align-items: flex-start;
-  gap: 10px;
+.ai-status-l b {
+  display: block;
+  font-size: 15px;
 }
-.ai-snippet pre {
+.ai-status-l small {
+  color: var(--label-2);
+  font-size: 13px;
+}
+.ai-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--label-3);
+  flex-shrink: 0;
+}
+.ai-status.on .ai-dot {
+  background: var(--green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 18%, transparent);
+}
+.ai-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--fill-2);
+  color: var(--label);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ai-endpoint:hover {
+  background: var(--fill);
+}
+.ai-endpoint span {
+  color: var(--label-2);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.ai-endpoint code {
   flex: 1;
   min-width: 0;
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--fill-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font:
-    12.5px/1.55 ui-monospace,
+    500 13.5px/1.4 ui-monospace,
+    'SF Mono',
+    Menlo,
+    monospace;
+}
+.ai-card {
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.ai-card > header,
+.ai-tools-toggle > span {
+  display: block;
+  margin-bottom: 16px;
+}
+.ai-card h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.ai-card p {
+  margin: 4px 0 0;
+  color: var(--label-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.ai-clients {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 8px;
+}
+.ai-client {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--fill-2);
+  color: var(--label);
+  font-size: 13.5px;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+}
+.ai-client span:last-child {
+  min-width: 0;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.ai-client:hover {
+  background: var(--fill);
+}
+.ai-client:active {
+  transform: scale(0.98);
+}
+.ai-client.on {
+  background: var(--card);
+  box-shadow:
+    inset 0 0 0 2px var(--label),
+    0 4px 14px -6px rgba(0, 0, 0, 0.18);
+}
+.ai-logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+  color: var(--label-2);
+}
+.ai-logo img {
+  width: 66%;
+  height: 66%;
+}
+.ai-steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ai-steps li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+.ai-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-2);
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.ai-steps li > span {
+  color: var(--label-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.ai-step-ok {
+  color: var(--green) !important;
+}
+.ai-code {
+  border-radius: 12px;
+  background: #16171a;
+  color: #e9e9ee;
+  overflow: hidden;
+}
+.ai-code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px 6px 14px;
+  background: #1f2024;
+  color: #8a8b93;
+  font:
+    500 11.5px/1 ui-monospace,
+    'SF Mono',
+    Menlo,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ai-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e9e9ee;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.ai-copy:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.ai-code pre {
+  margin: 0;
+  padding: 14px 16px 16px;
+  font:
+    12.5px/1.6 ui-monospace,
     'SF Mono',
     Menlo,
     monospace;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.ai-token .btn {
-  margin-left: auto;
+.ai-install {
+  align-self: flex-start;
+  gap: 8px;
 }
-.ai-token .cell-l,
-.ai-tool .cell-l {
-  max-width: none;
+.ai-install .ai-logo {
+  border-radius: 5px;
+}
+.ai-empty {
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--fill-2);
+  color: var(--label-2);
+  font-size: 14px;
+  text-align: center;
+}
+.ai-tokens {
+  display: flex;
+  flex-direction: column;
+}
+.ai-token {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 0.5px solid var(--sep);
+}
+.ai-token:first-child {
+  border-top: 0;
+}
+.ai-token-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.ai-token-name b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.ai-token-prefix {
+  font:
+    12.5px/1 ui-monospace,
+    'SF Mono',
+    Menlo,
+    monospace;
+  color: var(--label-2);
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--fill-2);
+}
+.ai-token-meta {
+  color: var(--label-3);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.ai-revoke {
+  width: 30px !important;
+  height: 30px !important;
+  color: var(--label-2);
+}
+.ai-revoke:hover {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+}
+.ai-scope {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: var(--fill);
+  color: var(--label-2);
+}
+.ai-scope.write {
+  background: color-mix(in srgb, var(--orange) 14%, transparent);
+  color: var(--orange);
+}
+.ai-tools-toggle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ai-tools-toggle > span {
+  margin-bottom: 0;
+}
+.ai-tools-toggle .i {
+  margin-top: 4px;
+  transition: transform 0.2s;
+}
+.ai-tools-toggle[aria-expanded='true'] .i {
+  transform: rotate(180deg);
+}
+.ai-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+.ai-tools h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--label-3);
+}
+.ai-tool {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 0.5px solid var(--sep);
+  font-size: 14px;
+}
+.ai-tool code {
+  color: var(--label-3);
+  font:
+    12px/1.3 ui-monospace,
+    'SF Mono',
+    Menlo,
+    monospace;
+}
+.ai-fresh {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-fresh-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-warn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--orange);
+  font-size: 13px;
+}
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--label-2);
+}
+.ai-field input {
+  height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--label);
+  font-size: 15px;
+}
+.ai-field input:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.ai-scopes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ai-scope-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--label);
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.ai-scope-card b {
+  display: block;
+  font-size: 15px;
+}
+.ai-scope-card small {
+  display: block;
+  margin-top: 2px;
+  color: var(--label-2);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ai-scope-card.on {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.ai-radio {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--label-3);
+}
+.ai-scope-card.on .ai-radio {
+  box-shadow: inset 0 0 0 5px var(--accent);
+}
+@media (max-width: 680px) {
+  .ai-card {
+    padding: 16px;
+  }
+  .ai-token {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 6px;
+  }
+  .ai-token-meta {
+    grid-column: 1;
+  }
+  .ai-tools {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 通知渠道 */
@@ -7978,4 +8415,10 @@ button.seat:disabled {
 }
 [data-sonner-toaster] [data-type='warning'] [data-icon] {
   color: var(--orange);
+}
+/* 手机上弹层贴底：只有顶部是圆角，底栏不需要 */
+@media (max-width: 680px) {
+  .sheet-foot {
+    border-radius: 0;
+  }
 }

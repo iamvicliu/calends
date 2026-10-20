@@ -8,32 +8,68 @@
   "copyFailed": "No se pudo copiar",
   "neverUsed": "Nunca usado",
   "tokenPlaceholder": "<tu-token>",
-  "tokens": { "one": "Tokens · {count}", "other": "Tokens · {count}" },
+  "tokens": {
+    "one": "Tokens · {count}",
+    "other": "Tokens · {count}"
+  },
   "noTokens": "Aún no hay tokens. Crea uno y dáselo al asistente de IA que quieras conectar.",
   "lastUsed": "Último uso: {time}",
   "confirmRevoke": "¿Revocar «{name}»? Los asistentes de IA que lo usen perderán el acceso de inmediato.",
   "revoke": "Revocar",
   "revoked": "Revocado",
   "setup": "Configuración",
-  "tools": { "one": "Herramientas disponibles · {count}", "other": "Herramientas disponibles · {count}" },
-  "writeBadge": "Escritura",
+  "tools": {
+    "one": "Herramientas disponibles · {count}",
+    "other": "Herramientas disponibles · {count}"
+  },
   "clientOther": "Otro",
   "scope": {
     "write": "Lectura y escritura",
     "read": "Solo lectura",
-    "writeLong": "Lectura y escritura: consultar, añadir y editar",
-    "readLong": "Solo lectura: solo consultar"
+    "label": "Permiso",
+    "writeDesc": "Consultar, añadir y editar suscripciones, cargos y cobros.",
+    "readDesc": "Solo consultar. No puede cambiar nada."
   },
   "created": {
     "title": "Token creado",
     "saved": "Ya lo guardé",
     "foot": "Este token solo se muestra una vez y no podrás volver a verlo al cerrar. Si lo pierdes, revócalo y crea uno nuevo.",
-    "copyToken": "Copiar token",
-    "tokenCopied": "Token copiado",
-    "command": "Comando de configuración"
+    "tokenCopied": "Token copiado"
   },
   "cancel": "Cancelar",
   "generate": "Crear",
   "name": "Nombre",
-  "namePlaceholder": "¿Para qué IA es?"
+  "namePlaceholder": "¿Para qué IA es?",
+  "pickClient": "Elige tu asistente de IA",
+  "setupHint": "Elige el asistente que usas y pega un fragmento. Tu token se rellena automáticamente justo después de crearlo.",
+  "tokensHint": "Conviene darle a cada asistente su propio token para poder revocarlo por separado.",
+  "toolsHint": "Lo que los asistentes pueden hacer con tu registro. Los tokens de solo lectura solo ven las herramientas de lectura.",
+  "toolsRead": "Lectura",
+  "toolsWrite": "Escritura",
+  "experimental": "Experimental",
+  "copiedWithToken": "Copiado, con el token incluido",
+  "installIn": "Añadir a {name}",
+  "createdAt": "Creado {time}",
+  "where": {
+    "terminal": "Ejecuta esto en tu terminal.",
+    "codex": "Ejecuta esto en tu terminal. Añade la línea export al perfil de tu shell para que el token se conserve tras reiniciar.",
+    "file": "Añade esto a {path}.",
+    "vscode": "Ejecuta esto en tu terminal o pulsa el botón de abajo para instalarlo en VS Code.",
+    "trae": "Abre Trae → Configuración → MCP → Añadir manualmente y pega esto.",
+    "http": "Cualquier cliente MCP compatible con Streamable HTTP. Esta es una solicitud de prueba rápida."
+  },
+  "step": {
+    "token": "Token",
+    "tokenReady": "Usando «{name}», incluido en el fragmento de abajo",
+    "tokenNeeded": "Los tokens solo se muestran una vez.",
+    "createFor": "Crear un token para {name}",
+    "where": "Dónde va",
+    "paste": "Copiar y pegar"
+  },
+  "status": {
+    "on": "El acceso de IA está activado",
+    "off": "El acceso de IA está desactivado",
+    "onHint": "Los asistentes con un token válido pueden consultar y actualizar tu registro.",
+    "offHint": "Todas las solicitudes MCP se rechazan hasta que lo vuelvas a activar."
+  }
 }

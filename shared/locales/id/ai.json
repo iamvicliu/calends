@@ -8,32 +8,66 @@
   "copyFailed": "Gagal menyalin",
   "neverUsed": "Belum pernah dipakai",
   "tokenPlaceholder": "<token-anda>",
-  "tokens": { "other": "Token · {count}" },
+  "tokens": {
+    "other": "Token · {count}"
+  },
   "noTokens": "Belum ada token. Buat satu, lalu berikan ke asisten AI yang ingin Anda hubungkan.",
   "lastUsed": "Terakhir dipakai {time}",
   "confirmRevoke": "Cabut “{name}”? Asisten AI yang memakainya akan langsung kehilangan akses.",
   "revoke": "Cabut",
   "revoked": "Dicabut",
   "setup": "Penyiapan",
-  "tools": { "other": "Alat tersedia · {count}" },
-  "writeBadge": "Tulis",
+  "tools": {
+    "other": "Alat tersedia · {count}"
+  },
   "clientOther": "Lainnya",
   "scope": {
     "write": "Baca & tulis",
     "read": "Hanya baca",
-    "writeLong": "Baca & tulis: lihat, tambah, dan ubah",
-    "readLong": "Hanya baca: lihat saja"
+    "label": "Izin",
+    "writeDesc": "Lihat, tambah, dan ubah langganan, tagihan, dan penerimaan.",
+    "readDesc": "Hanya lihat. Tidak bisa mengubah apa pun."
   },
   "created": {
     "title": "Token dibuat",
     "saved": "Sudah saya simpan",
     "foot": "Token ini hanya ditampilkan sekali dan tidak bisa dilihat lagi setelah ditutup. Jika hilang, cabut lalu buat yang baru.",
-    "copyToken": "Salin token",
-    "tokenCopied": "Token disalin",
-    "command": "Perintah penyiapan"
+    "tokenCopied": "Token disalin"
   },
   "cancel": "Batal",
   "generate": "Buat",
   "name": "Nama",
-  "namePlaceholder": "Untuk AI yang mana?"
+  "namePlaceholder": "Untuk AI yang mana?",
+  "pickClient": "Pilih asisten AI Anda",
+  "setupHint": "Pilih asisten yang Anda pakai, lalu tempel satu cuplikan. Token otomatis terisi begitu Anda membuatnya.",
+  "tokensHint": "Sebaiknya tiap asisten punya token sendiri agar bisa dicabut secara terpisah.",
+  "toolsHint": "Hal yang bisa dilakukan asisten pada catatan Anda. Token hanya baca hanya melihat alat baca.",
+  "toolsRead": "Baca",
+  "toolsWrite": "Tulis",
+  "experimental": "Eksperimental",
+  "copiedWithToken": "Disalin, termasuk token",
+  "installIn": "Tambahkan ke {name}",
+  "createdAt": "Dibuat {time}",
+  "where": {
+    "terminal": "Jalankan ini di terminal Anda.",
+    "codex": "Jalankan ini di terminal Anda. Tambahkan baris export ke profil shell agar token tetap berlaku setelah restart.",
+    "file": "Tambahkan ini ke {path}.",
+    "vscode": "Jalankan ini di terminal Anda, atau klik tombol di bawah untuk memasangnya di VS Code.",
+    "trae": "Buka Trae → Pengaturan → MCP → Tambah manual, lalu tempel ini.",
+    "http": "Klien MCP apa pun yang mendukung Streamable HTTP. Ini permintaan uji singkat."
+  },
+  "step": {
+    "token": "Token",
+    "tokenReady": "Memakai “{name}”, sudah ada di cuplikan di bawah",
+    "tokenNeeded": "Token hanya ditampilkan sekali.",
+    "createFor": "Buat token untuk {name}",
+    "where": "Letaknya",
+    "paste": "Salin dan tempel"
+  },
+  "status": {
+    "on": "Akses AI aktif",
+    "off": "Akses AI nonaktif",
+    "onHint": "Asisten dengan token yang valid bisa melihat dan memperbarui catatan Anda.",
+    "offHint": "Semua permintaan MCP ditolak hingga Anda mengaktifkannya kembali."
+  }
 }

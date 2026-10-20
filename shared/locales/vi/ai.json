@@ -8,32 +8,66 @@
   "copyFailed": "Không sao chép được",
   "neverUsed": "Chưa từng dùng",
   "tokenPlaceholder": "<token-của-bạn>",
-  "tokens": { "other": "Token · {count}" },
+  "tokens": {
+    "other": "Token · {count}"
+  },
   "noTokens": "Chưa có token. Hãy tạo một token và đưa cho trợ lý AI bạn muốn kết nối.",
   "lastUsed": "Dùng lần cuối {time}",
   "confirmRevoke": "Thu hồi “{name}”? Trợ lý AI đang dùng token này sẽ mất quyền truy cập ngay lập tức.",
   "revoke": "Thu hồi",
   "revoked": "Đã thu hồi",
   "setup": "Thiết lập",
-  "tools": { "other": "Công cụ khả dụng · {count}" },
-  "writeBadge": "Ghi",
+  "tools": {
+    "other": "Công cụ khả dụng · {count}"
+  },
   "clientOther": "Khác",
   "scope": {
     "write": "Đọc & ghi",
     "read": "Chỉ đọc",
-    "writeLong": "Đọc & ghi: tra cứu, thêm và sửa",
-    "readLong": "Chỉ đọc: chỉ tra cứu"
+    "label": "Quyền",
+    "writeDesc": "Tra cứu, thêm và sửa gói đăng ký, khoản trừ tiền và khoản thu.",
+    "readDesc": "Chỉ tra cứu. Không thể thay đổi gì."
   },
   "created": {
     "title": "Đã tạo token",
     "saved": "Tôi đã lưu",
     "foot": "Token này chỉ hiển thị một lần và không thể xem lại sau khi đóng. Nếu làm mất, hãy thu hồi và tạo token mới.",
-    "copyToken": "Sao chép token",
-    "tokenCopied": "Đã sao chép token",
-    "command": "Lệnh thiết lập"
+    "tokenCopied": "Đã sao chép token"
   },
   "cancel": "Hủy",
   "generate": "Tạo",
   "name": "Tên",
-  "namePlaceholder": "Dành cho AI nào?"
+  "namePlaceholder": "Dành cho AI nào?",
+  "pickClient": "Chọn trợ lý AI của bạn",
+  "setupHint": "Chọn trợ lý bạn đang dùng rồi dán một đoạn cấu hình. Token sẽ tự động được điền ngay sau khi tạo.",
+  "tokensHint": "Nên cấp cho mỗi trợ lý một token riêng để có thể thu hồi riêng lẻ.",
+  "toolsHint": "Những gì trợ lý có thể làm với sổ của bạn. Token chỉ đọc chỉ thấy các công cụ đọc.",
+  "toolsRead": "Đọc",
+  "toolsWrite": "Ghi",
+  "experimental": "Thử nghiệm",
+  "copiedWithToken": "Đã sao chép, kèm token",
+  "installIn": "Thêm vào {name}",
+  "createdAt": "Tạo lúc {time}",
+  "where": {
+    "terminal": "Chạy lệnh này trong terminal.",
+    "codex": "Chạy lệnh này trong terminal. Thêm dòng export vào tệp cấu hình shell để token vẫn còn sau khi khởi động lại.",
+    "file": "Thêm đoạn này vào {path}.",
+    "vscode": "Chạy lệnh này trong terminal, hoặc bấm nút bên dưới để cài vào VS Code.",
+    "trae": "Mở Trae → Cài đặt → MCP → Thêm thủ công, rồi dán đoạn này.",
+    "http": "Mọi MCP client hỗ trợ Streamable HTTP. Đây là một yêu cầu thử nhanh."
+  },
+  "step": {
+    "token": "Token",
+    "tokenReady": "Đang dùng “{name}”, đã có trong đoạn bên dưới",
+    "tokenNeeded": "Token chỉ hiển thị một lần.",
+    "createFor": "Tạo token cho {name}",
+    "where": "Đặt ở đâu",
+    "paste": "Sao chép và dán"
+  },
+  "status": {
+    "on": "Đã bật truy cập AI",
+    "off": "Đã tắt truy cập AI",
+    "onHint": "Trợ lý có token hợp lệ có thể tra cứu và cập nhật sổ của bạn.",
+    "offHint": "Mọi yêu cầu MCP đều bị từ chối cho đến khi bạn bật lại."
+  }
 }
