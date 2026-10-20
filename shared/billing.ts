@@ -101,14 +101,19 @@ export function subError(s: Subscription): string | undefined {
 /** 把多阶段订阅展开成若干个单阶段的「虚拟订阅」，id 不变；无阶段时返回自身 */
 export function phaseSubs(s: Subscription): Subscription[] {
   if (!s.phases?.length) return [s];
-  const ps = s.phases.slice().sort((a, b) => a.start.localeCompare(b.start));
-  return ps.map((p, i) => {
-    const last = i === ps.length - 1;
+  const sorted = s.phases.slice().sort((a, b) => a.start.localeCompare(b.start));
+  // 订阅整体的结束日、暂停日对所有阶段生效：之后才开始的计划阶段作废，跨过它的阶段在那天截止
+  const pausedAt = s.status === 'paused' ? s.pausedAt : undefined;
+  const stop = [s.end, pausedAt].filter(Boolean).sort()[0];
+  const kept = stop ? sorted.filter((p, i) => i === 0 || p.start < stop) : sorted;
+  return kept.map((p, i) => {
+    const last = i === kept.length - 1;
+    const natural = p.end ?? (last ? undefined : kept[i + 1].start);
     return {
       ...s,
       phases: undefined,
       start: p.start,
-      end: p.end ?? (last ? s.end : ps[i + 1].start),
+      end: s.end && (!natural || natural > s.end) ? s.end : natural,
       price: p.price,
       currency: p.currency,
       cycle: p.cycle,
@@ -312,6 +317,13 @@ export function monthlyGross(s: Subscription, day?: string): number {
   const b = s.bonus;
   const days = cycleDays(s.cycle) + (b && (!day || day < b.until) ? Math.max(0, diffDays(b.from, b.until)) : 0);
   return (p * 30.4375) / days;
+}
+
+/** 每月折算到本位币、我承担的部分；多阶段订阅按 day 所在阶段的价格和币种算 */
+export function monthlyMine(state: AppState, s: Subscription, day: string): number {
+  const v = currentPhase(s, day);
+  const m = convert(monthlyGross(v, day), v.currency, state.settings.baseCurrency, state.fx);
+  return Number.isFinite(m) ? m * myShareFactor(v) : 0;
 }
 
 export interface Totals {

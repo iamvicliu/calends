@@ -2,7 +2,7 @@
 import { addDays, addMonths, chargesBetween, currentPhase, cycleLabel, effectiveStatus, lastCharge, memberDues, monthlyGross, myShareFactor, nextCharge, phaseSubs, priceAt, runwayFor, subError, todayIn, totals, uid, type Charge } from '../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../shared/metrics.ts';
-import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncLastPhase } from '../shared/phases.ts';
+import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
 import { matchEntries } from '../shared/proxy.ts';
 import type { AppState, Payment, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
@@ -602,7 +602,8 @@ export const TOOLS: Tool[] = [
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
       const set = (a.set ?? {}) as Record<string, unknown>;
-      const next: Subscription = { ...s };
+      // 多段订阅：顶层字段先换成今天所在的那段，改完再同步回去
+      const next: Subscription = toEditForm({ ...s }, today);
       const changed: string[] = [];
       const put = <K extends keyof Subscription>(k: K, v: Subscription[K], label = String(k)) => {
         next[k] = v;
@@ -621,8 +622,7 @@ export const TOOLS: Tool[] = [
         if (k in set) put(f, set[k] == null ? undefined : date(set[k], k), k);
       }
       if (!changed.length) throw new Error('set 里没有可改的字段');
-      // 支付方式、地区、到期日属于「当前这一段」，多段订阅要同步回最后一段
-      return commit(ctx, st, today, syncLastPhase(next), a.dry_run, changed);
+      return commit(ctx, st, today, syncPhase(next, today), a.dry_run, changed);
     },
   },
   {
@@ -685,8 +685,8 @@ export const TOOLS: Tool[] = [
         // 退订日之后排好的阶段（包括计划中的换套餐）一并取消，再给生效的那段设上结束日
         let c = s;
         for (const ph of (s.phases ?? []).filter((x) => x.start >= at && x.start > s.start).sort((x, y) => y.start.localeCompare(x.start))) c = dropPlan(c, ph.start);
-        next = syncLastPhase({ ...c, status: 'cancelled', end: at });
-      } else next = syncLastPhase({ ...s, status: 'active', pausedAt: undefined, end: undefined });
+        next = syncPhase({ ...toEditForm(c, today), status: 'cancelled', end: at }, today);
+      } else next = syncPhase({ ...toEditForm(s, today), status: 'active', pausedAt: undefined, end: undefined }, today);
       return commit(ctx, st, today, next, a.dry_run, [act]);
     },
   },

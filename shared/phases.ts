@@ -111,15 +111,26 @@ export function changePrice(s: Subscription, from: string, amount: number): Subs
   return mirror(s, phases);
 }
 
-/** 编辑表单改了顶层字段后，同步回最后一个阶段 */
-export function syncLastPhase(s: Subscription): Subscription {
+/** 编辑表单对应的阶段：今天所在的阶段（还没开始的计划阶段不算），都没开始时取第一个 */
+function editIndex(phases: Phase[], today: string): number {
+  return Math.max(0, phases.findLastIndex((p) => p.start <= today));
+}
+
+/** 打开编辑表单时，顶层字段换成当前阶段的，避免把未生效的计划阶段当成现在的样子 */
+export function toEditForm(s: Subscription, today: string): Subscription {
   if (!s.phases?.length) return s;
   const phases = phasesOf(s);
-  const last = phases[phases.length - 1];
-  Object.assign(last, { price: s.price, currency: s.currency, cycle: s.cycle, methodId: s.methodId, region: s.region, end: s.end });
-  last.intro = s.intro;
-  last.bonus = s.bonus;
-  return { ...s, phases };
+  const p = phases[editIndex(phases, today)];
+  return { ...s, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, intro: p.intro, bonus: p.bonus };
+}
+
+/** 编辑表单改了顶层字段后，同步回当前阶段；结束日属于整个订阅，写到最后一个阶段 */
+export function syncPhase(s: Subscription, today: string): Subscription {
+  if (!s.phases?.length) return s;
+  const phases = phasesOf(s);
+  Object.assign(phases[editIndex(phases, today)], { price: s.price, currency: s.currency, cycle: s.cycle, methodId: s.methodId, region: s.region, intro: s.intro, bonus: s.bonus });
+  phases[phases.length - 1].end = s.end;
+  return { ...mirror(s, phases), end: s.end };
 }
 
 /** 删除一个阶段（误操作撤回）；只剩一个阶段时退回普通订阅 */

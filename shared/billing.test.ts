@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addMonths, chargesBetween, monthlyGross, nextCharge, runwayFor, memberDues, advancePaid, totals, FALLBACK_FX } from './billing.ts';
+import { addMonths, chargesBetween, effectiveStatus, monthlyGross, nextCharge, runwayFor, memberDues, advancePaid, totals, FALLBACK_FX } from './billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const base = (o: Partial<Subscription>): Subscription => ({
@@ -88,4 +88,29 @@ test('手动记一笔：推算的历史先固化，未来照旧', async () => {
   assert.equal(chargesBetween(f, '2026-03-10', '2026-03-10', '2026-04-01')[0].amount, 0);
   const d = deletePayment(f, '2026-04-01', '2026-03-15', 0);
   assert.equal(chargesBetween(d, '2026-03-11', '2026-03-31', '2026-04-01').length, 0);
+});
+
+test('有计划阶段时取消、暂停对当前阶段生效', () => {
+  const phases = [
+    { start: '2026-01-10', price: 10, currency: 'USD', cycle: { unit: 'month' as const, every: 1 } },
+    { start: '2026-10-28', price: 100, currency: 'USD', cycle: { unit: 'year' as const, every: 1 } },
+  ];
+  const cancelled = base({ start: '2026-01-10', phases, status: 'cancelled', end: '2026-10-20' });
+  assert.equal(nextCharge(cancelled, '2026-10-21'), undefined);
+  assert.equal(effectiveStatus(cancelled, '2026-10-21'), effectiveStatus(base({ status: 'cancelled', end: '2026-10-20' }), '2026-10-21'));
+  const paused = base({ start: '2026-01-10', phases, status: 'paused', pausedAt: '2026-10-20' });
+  assert.equal(nextCharge(paused, '2026-10-21'), undefined);
+  assert.equal(chargesBetween(paused, '2026-10-21', '2027-12-31', '2026-10-21').length, 0);
+});
+
+test('编辑表单对应当前阶段，保存后计划阶段不变', async () => {
+  const { switchPlan, toEditForm, syncPhase } = await import('./phases.ts');
+  const s = switchPlan(base({ start: '2026-01-10', price: 10, currency: 'TRY' }), '2026-10-28', { price: 100, currency: 'USD', cycle: { unit: 'year', every: 1 }, planned: true });
+  const form = toEditForm(s, '2026-10-20');
+  assert.equal(form.currency, 'TRY');
+  const saved = syncPhase({ ...form, methodId: 'card' }, '2026-10-20');
+  assert.equal(saved.phases![0].methodId, 'card');
+  assert.equal(saved.phases![1].currency, 'USD');
+  assert.equal(saved.phases![1].price, 100);
+  assert.equal(saved.phases![0].end, '2026-10-28');
 });

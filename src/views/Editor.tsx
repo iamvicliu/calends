@@ -4,7 +4,7 @@ import { cnDateFull, money } from '../../shared/format.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CAT_ICON, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
-import { changePrice, syncLastPhase } from '../../shared/phases.ts';
+import { changePrice, syncPhase, toEditForm } from '../../shared/phases.ts';
 import { ChangePanel, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ContactField } from './Members.tsx';
@@ -31,12 +31,14 @@ export function confirmDelete(msg: string): boolean {
 
 export function Editor({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
   const isNew = !state.subscriptions.some((s) => s.id === sub.id);
-  const [f, setFRaw] = useState<Subscription>(structuredClone(sub));
+  // 有多个阶段时，表单显示今天所在的阶段
+  const [f, setFRaw] = useState<Subscription>(() => toEditForm(structuredClone(sub), today));
   // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
-  const [basePrice, setBasePrice] = useState(sub.price);
+  const [basePrice, setBasePrice] = useState(f.price);
   const setF = (next: Subscription) => {
-    setFRaw(next);
-    setBasePrice(next.price);
+    const form = toEditForm(next, today);
+    setFRaw(form);
+    setBasePrice(form.price);
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
   const cats = useMemo(() => [...new Set(state.subscriptions.map((s) => s.category))], [state]);
@@ -46,8 +48,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       async () => {
         let out: Subscription = { ...f, name: f.name.trim() };
         // 直接改了价格框：视为今天起调价，过往账单保持原价
-        if (!isNew && basePrice !== out.price) out = changePrice(syncLastPhase({ ...out, price: basePrice }), today, out.price);
-        else out = syncLastPhase(out);
+        if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
+        else out = syncPhase(out, today);
         if (out.status === 'cancelled' && !out.end) out.end = today;
         if (out.status === 'paused' && !out.pausedAt) out.pausedAt = today;
         if (out.status !== 'paused') delete out.pausedAt;
