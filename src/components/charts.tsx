@@ -1,5 +1,5 @@
 import type { ReactNode as ComponentChildren } from 'react';
-import { tipProps } from './ui.tsx';
+import { tipProps, useWidth } from './ui.tsx';
 
 /** 面积折线图：SVG 只画形状，文字用 HTML 叠加，避免被拉伸 */
 export function AreaChart({
@@ -91,9 +91,11 @@ export function BarLine({
   const W = 1000;
   const cx = (i: number) => ((i + 0.5) / n) * W;
   const path = line.map((v, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${(height - (v / max) * height).toFixed(1)}`).join('');
-  const step = Math.max(1, Math.ceil(n / 12));
+  // 每个月份标签约占 44px，按实际宽度决定隔几根柱子标一次，窄屏不挤
+  const [box, w] = useWidth();
+  const step = Math.max(1, Math.ceil(n / Math.min(12, Math.max(2, Math.floor(w / 44) || 12))));
   return (
-    <div className="barline" style={{ height: height + 22 }}>
+    <div className="barline" ref={box} style={{ height: height + 22 }}>
       <div className="bl-bars" style={{ height }}>
         {bars.map((v, i) => (
           <div key={i} className={`bl-col ${future[i] ? 'future' : ''}`} {...tipProps(() => tip(i))}>

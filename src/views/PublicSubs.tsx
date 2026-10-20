@@ -24,11 +24,11 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
   const save = (ids: string[]) => run(() => saveSettings({ publicHidden: ids.length ? ids : undefined }));
   return (
     <Sheet title={t('settings.open.publicSubs')} onClose={onClose}>
-      <div className="ps">
-        <p className="ps-hint">{t('settings.open.publicSubsHint')}</p>
-        <div className="ps-bar">
+      <div className="pubs">
+        <p className="pubs-hint">{t('settings.open.publicSubsHint')}</p>
+        <div className="pubs-bar">
           <span>{t('settings.open.publicShown', { count: shown.length })}</span>
-          <div className="ps-acts">
+          <div className="pubs-acts">
             <button className="btn" disabled={!off.length} onClick={() => save([])}>
               {t('settings.open.publicShowAll')}
             </button>
@@ -38,13 +38,13 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
           </div>
         </div>
         {shown.length ? (
-          <div className="ps-chips">
+          <div className="pubs-chips">
             {shown.map((s) => (
-              <span key={s.id} className="ps-chip">
+              <span key={s.id} className="pubs-chip">
                 <SubIcon sub={s} size={20} />
-                <span className="ps-name">{s.name}</span>
+                <span className="pubs-name">{s.name}</span>
                 <button
-                  className="ps-x"
+                  className="pubs-x"
                   onClick={() => save([...hidden, s.id])}
                   title={t('settings.open.publicHideOne', { name: s.name })}
                   aria-label={t('settings.open.publicHideOne', { name: s.name })}
@@ -55,24 +55,24 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
             ))}
           </div>
         ) : (
-          <div className="ps-empty">{t('settings.open.publicNone')}</div>
+          <div className="pubs-empty">{t('settings.open.publicNone')}</div>
         )}
         {off.length > 0 && (
           <>
-            <div className="ps-bar">
+            <div className="pubs-bar">
               <span>{t('settings.open.publicOff2', { count: off.length })}</span>
             </div>
-            <div className="ps-chips">
+            <div className="pubs-chips">
               {off.map((s) => (
                 <button
                   key={s.id}
-                  className="ps-chip off"
+                  className="pubs-chip off"
                   onClick={() => save([...hidden].filter((id) => id !== s.id))}
                   title={t('settings.open.publicShowOne', { name: s.name })}
                 >
                   <Plus size={14} strokeWidth={2.2} />
                   <SubIcon sub={s} size={20} />
-                  <span className="ps-name">{s.name}</span>
+                  <span className="pubs-name">{s.name}</span>
                 </button>
               ))}
             </div>

@@ -1,17 +1,17 @@
 /* 设置 · 公开页展示的订阅：胶囊多选 */
-.ps {
+.pubs {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding-bottom: 8px;
 }
-.ps-hint {
+.pubs-hint {
   margin: 0;
   font-size: 13px;
   line-height: 1.5;
   color: var(--label-2);
 }
-.ps-bar {
+.pubs-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -22,24 +22,24 @@
   font-weight: 600;
   color: var(--label-2);
 }
-.ps-acts {
+.pubs-acts {
   display: flex;
   gap: 8px;
 }
-.ps-acts .btn {
+.pubs-acts .btn {
   height: 32px;
   font-size: 13px;
 }
-.ps-acts .btn:disabled {
+.pubs-acts .btn:disabled {
   opacity: 0.4;
   pointer-events: none;
 }
-.ps-chips {
+.pubs-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.ps-chip {
+.pubs-chip {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -55,18 +55,18 @@
   font-weight: 500;
   box-shadow: inset 0 0 0 1px var(--line);
 }
-.ps-chip .ico {
+.pubs-chip .ico {
   --s: 20px;
   border-radius: 6px;
   flex-shrink: 0;
 }
-.ps-name {
+.pubs-name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ps-x {
+.pubs-x {
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -79,11 +79,11 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.ps-x:hover {
+.pubs-x:hover {
   background: var(--fill);
   color: var(--label);
 }
-.ps-chip.off {
+.pubs-chip.off {
   padding: 0 14px 0 10px;
   background: none;
   color: var(--label-2);
@@ -94,17 +94,17 @@
     background 0.15s,
     transform 0.1s;
 }
-.ps-chip.off:hover {
+.pubs-chip.off:hover {
   background: var(--fill-2);
   color: var(--label);
 }
-.ps-chip.off:active {
+.pubs-chip.off:active {
   transform: scale(0.97);
 }
-.ps-chip.off .ico {
+.pubs-chip.off .ico {
   opacity: 0.55;
 }
-.ps-empty {
+.pubs-empty {
   padding: 16px;
   border-radius: 12px;
   background: var(--fill-2);
@@ -113,23 +113,23 @@
   text-align: center;
 }
 @media (max-width: 640px) {
-  .ps-chips {
+  .pubs-chips {
     gap: 6px;
   }
-  .ps-chip {
+  .pubs-chip {
     gap: 6px;
     height: 34px;
     padding-left: 7px;
     font-size: 13px;
   }
-  .ps-chip .ico {
+  .pubs-chip .ico {
     --s: 18px;
   }
-  .ps-x {
+  .pubs-x {
     width: 26px;
     height: 26px;
   }
-  .ps-chip.off {
+  .pubs-chip.off {
     padding: 0 12px 0 8px;
   }
 }
