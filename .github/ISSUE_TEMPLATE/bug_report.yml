@@ -1,0 +1,16 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    attributes: { label: What happened?, description: Steps to reproduce, expected vs. actual. Screenshots help. }
+    validations: { required: true }
+  - type: dropdown
+    attributes:
+      label: Deployment
+      options: [Cloudflare Workers, Docker, Local development]
+    validations: { required: true }
+  - type: input
+    attributes: { label: Version / commit }
+  - type: input
+    attributes: { label: Browser and language }

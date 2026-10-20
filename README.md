@@ -1,61 +1,142 @@
-# calends.example.com
+<p align="center">
+  <img src="public/icons/icon-192.png" width="96" height="96" alt="Calends logo" />
+</p>
 
-个人订阅账本：负 MRR、扣款日历、余额续航、拼车分摊、邮件提醒。单用户、私有，口令登录。
+<h1 align="center">Calends</h1>
 
-- 线上：https://calends.example.com（Cloudflare Worker `calends` + 静态资源 + D1 `subscription-db`）
-- 前端：Vite + Preact 10（注意：Preact 11 不再自动给数字样式补 `px`），PWA（`public/sw.js`、`manifest.webmanifest`）
-- 后端：`worker/`，计费逻辑在 `shared/`，前后端共用
+<p align="center">
+  <b>The settlement day for everything you subscribe to.</b><br />
+  A self-hosted, AI-native subscription ledger — multi-currency, shared plans, prepaid balances, reminders, and a built-in MCP server.
+</p>
 
-## 功能
+<p align="center">
+  <a href="https://calends.dev">Live demo</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#ai--mcp">AI &amp; MCP</a> ·
+  <a href="README.zh-CN.md">简体中文</a>
+</p>
 
-- 总览：负 MRR / ARR、今年与累计已付、24+12 个月扣款条形图、30 天到期时间轴、分类与支付方式占比、订阅时间线、按年统计、账单小票
-- 日历：月视图 + 年度热力图；ICS 私密订阅链接（`/cal/<token>.ics`，含提前提醒）
-- 钱包：银行卡 / 支付宝 / App Store 礼品卡余额 / SMART 话费等；余额类账户按扣款逐期推演，给出可扣期数、用完日期与「撑满一年需充值」
-- 拼车：车主模式记录成员份额与已付至日期，「收 1 期」自动顺延；成员模式记录付给谁
-- 订阅：首期优惠、价格历史（改价自动记录）、试用、暂停、到期不续；App Store 搜索/链接导入图标
-- 提醒：每小时 cron，到设置的本地时刻发一封汇总邮件（扣款、试用到期、余额不足、拼车待收、即将到期）；每月 1 日发当月账单预告；`notify_log` 去重
-- 数据：导入 Subscriptions App 导出的 CSV、JSON 备份/恢复、CSV 导出；可选公开只读视图（脱敏）
+---
 
-## 本地开发
+> _Calends_ were the first day of every Roman month — the day accounts were settled and debts called in. It's also where the word _calendar_ comes from.
 
-```bash
-npm i
-npm run db:migrate:local   # 首次或新增迁移后
-npm run db:pull            # 把线上数据只读复制到本地 D1（口令取自钥匙串）
-npm run dev                # Vite :5173（热更新）+ wrangler :8787（Worker + 本地 D1）
-```
+## Why Calends
 
-- 公开页：http://localhost:5173/ （根路径，对外展示，无登录入口；域名、账户等已在服务端脱敏）
-- 后台：http://localhost:5173/admin （需登录；`.dev.vars` 中 `DEV_BYPASS_AUTH=1` 时本地免登录，该变量不会上传）
-- 历史汇率：打开页面后自动补齐缺失的扣款日汇率；也可在「设置 → 历史汇率」手动触发
-- 测试：`npm test`
+Most subscription trackers assume one currency, one card and one person. Real life is messier: an App Store account in Turkey, a family plan you organize and collect money for, a prepaid card that slowly drains, a server billed yearly in euros, a price hike nobody told you about. Calends keeps the whole story — and lets your AI assistant read and update it.
 
-### 域名同步
+## Features
 
-- `npm run sync:domains`：从 Cloudflare Registrar + 账单历史同步全部域名（默认写本地，`--remote` 写线上，`--dry` 只打印）
-- 自动续费在到期前 30 天扣款，据此把发票匹配到域名；一次注册多年、提前续费、促销价都按实际账单记录
-- 关闭自动续费的域名记为「到期不续」，到期前会邮件提醒
+- **Every subscription, every cycle** — monthly, yearly, every _n_ days/weeks/months, lifetime; trials, intro prices, bonus periods, pauses, "won't renew".
+- **Full history** — price changes, plan and region switches, gaps and resumptions; overlapping plans when you start a new one before the old one expires.
+- **Multi-currency done right** — past charges use that day's exchange rate, future ones use today's; switch the whole UI to any base currency or show originals.
+- **Wallet & runway** — cards, App Store / Google Play balances, gift cards, prepaid SIMs; see how many charges a balance still covers and how much to top up for a full year.
+- **Shared plans & paying for others** — organize family plans, track who paid until when, collect payments; track things you pay on behalf of friends. People are first-class: one place to see what everyone owes you.
+- **Reports** — negative MRR, month-over-month changes, cash vs. accrual, prepaid value, savings from cancelling, a "checkup" with actionable insights, and a shareable year-in-review image.
+- **Calendar** — month and year views, plus a private ICS feed for Apple/Google Calendar.
+- **Reminders everywhere** — email, Telegram, Lark/Feishu, DingTalk, WeCom, Slack, Discord, Bark, ntfy, ServerChan or any webhook.
+- **AI-native** — a built-in [MCP](https://modelcontextprotocol.io) server with 20+ tools so Claude, ChatGPT, Codex or Cursor can answer "what renews next week?" or "Netflix went up to $17.99 from today".
+- **Private by default** — single-owner app, password + passkeys, device list with remote sign-out, optional read-only public page with sensitive data masked server-side.
+- **14 languages** — English, 简体中文, 繁體中文（台灣／香港）, 日本語, 한국어, Español, Français, Deutsch, Português (Brasil), Русский, Türkçe, Bahasa Indonesia, Tiếng Việt.
+- **Yours to keep** — full JSON backup/restore, CSV import/export. Runs on Cloudflare's free tier or any machine with Docker.
 
-### 订阅历程
+## Quick start
 
-- `payments`：实际扣款记录，存在时以记录为准；`nextDue`：之后从这一天按周期推算
-- `phases`：换区、换套餐、断更后续订形成多个阶段，每段有自己的地区/币种/价格/周期/支付方式；阶段内调价用 `priceHistory`
-- 编辑页「历程与变更」可记录调价、换区 / 换套餐、续订，详情页展示时间线
+### Option A — Cloudflare (free tier is plenty)
 
-### 历史汇率
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/imetn/calends)
 
-- 每笔已发生的扣款按扣款当天汇率折算为人民币 / 美元；未来预测按当前汇率
-- 数据源：2024-03-02 起用 fawazahmed0/currency-api（全币种，含 NGN），更早用欧洲央行（Frankfurter，无 NGN）；缺数据的币种取最近一天
-- 存在 D1 `fx_daily`（USD 基准），cron 每天补记当天实时汇率
-
-## 部署
+Or from your machine:
 
 ```bash
-npm run db:migrate:remote
-npm run deploy
+git clone https://github.com/imetn/calends && cd calends
+npm ci
+npx wrangler login
+npx wrangler secret put SETUP_TOKEN   # any long random string; you'll type it once
+npm run deploy                        # builds, creates the D1 database, deploys, migrates
 ```
 
-- 口令为 secret `OWNER_PASSCODE`，本机副本在 macOS 钥匙串：`security find-generic-password -s calends.example.com -a owner -w`
-- 发信走 Cloudflare Email Sending，发件人 `calends@example.com`（example.com 已在账户内验证）
-- 汇率来自 open.er-api.com，cron 每 20 小时刷新一次，也可在设置页手动刷新
-- `seed/` 含真实订阅数据，已在 .gitignore 中
+Open `https://<your-worker>.workers.dev/admin`, enter the setup token and choose your password. Add a passkey in **Settings → Security** afterwards.
+
+### Option B — Docker
+
+```bash
+docker run -d --name calends -p 8787:8787 -v calends-data:/data ghcr.io/imetn/calends:latest
+docker logs calends   # prints the one-time setup token on first run
+```
+
+Open `http://localhost:8787/admin`. Data lives in the `calends-data` volume as SQLite. See [`docker-compose.yml`](docker-compose.yml) for a compose setup; put it behind Caddy/Nginx/Traefik for HTTPS (passkeys require HTTPS) and set `TRUST_PROXY=1`.
+
+### Option C — let your AI agent do it
+
+Copy this into Claude Code, Codex, Cursor or any coding agent with terminal access:
+
+```text
+Deploy Calends (https://github.com/imetn/calends), a self-hosted subscription ledger, for me.
+1. Ask me whether to deploy to Cloudflare Workers (free) or Docker on this machine/server.
+2. Cloudflare: clone the repo, run `npm ci`, make sure `npx wrangler whoami` works (run `npx wrangler login` if not),
+   generate a random SETUP_TOKEN and set it with `npx wrangler secret put SETUP_TOKEN`, then `npm run deploy`.
+   If I want a custom domain, add it under "routes" in wrangler.jsonc as a custom_domain before deploying.
+3. Docker: run the official image ghcr.io/imetn/calends with a named volume for /data and port 8787,
+   then read the setup token from the container logs. Offer to put it behind HTTPS with Caddy.
+4. Finally give me the /admin URL and the setup token, and remind me to add a passkey and connect my AI assistant
+   via Settings → AI access (MCP).
+```
+
+## AI & MCP
+
+Calends exposes a stateless [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` (Streamable HTTP). Create a token in **AI access** — read-only or read/write — then:
+
+```bash
+# Claude Code
+claude mcp add --transport http calends https://your-domain/mcp --header "Authorization: Bearer <token>"
+# Codex
+codex mcp add calends --url https://your-domain/mcp --bearer-token-env-var CALENDS_TOKEN
+```
+
+Tools include `get_overview`, `list_subscriptions`, `spending_stats`, `get_trends`, `get_receivables`, `get_insights`, `create_subscription`, `change_price`, `change_plan`, `set_status`, `record_payment` and more. Every write tool supports `dry_run`, and the server can be switched off entirely in Settings.
+
+## Configuration
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `SETUP_TOKEN` | secret / env | Required once to set the owner password on a fresh install. |
+| `SITE_URL` | var / env | Public URL used in reminders and calendar links. Auto-detected if unset. |
+| `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
+| `TRUST_PROXY` | env | Set to `1` behind a reverse proxy so login rate limiting sees the real client IP. |
+| `DATA_DIR`, `PORT` | Docker env | Data directory (default `/data`) and port (default `8787`). |
+
+Personal deployment settings (your domain, database id, sender address, your own icons) can live in a git-ignored `local/` folder: `local/wrangler.jsonc` is picked up automatically by the npm scripts and files in `local/public/` override `public/` at build time.
+
+## Development
+
+```bash
+npm ci
+npm run db:migrate:local
+echo "DEV_BYPASS_AUTH=1" > .dev.vars   # local only: skip login
+npm run dev                            # Vite on :5173 + Worker on :8787
+```
+
+| Command | |
+|---|---|
+| `npm test` | Unit tests (billing, phases, metrics, masking) |
+| `npm run typecheck` / `npm run lint` / `npm run format` | TypeScript, oxlint, Prettier |
+| `npm run i18n:check` | Every locale has every key |
+| `npm run build` | Production build |
+
+Stack: Preact + Vite (admin), preact/compat + shadcn/ui (public page), Cloudflare Workers + D1 (SQLite), shared TypeScript domain logic in `shared/`.
+
+```
+src/        admin app and public page
+shared/     billing, phases, metrics, fx, masking, i18n — used by both browser and worker
+worker/     API, auth (password + passkeys), MCP, reminders and channels, backup, ICS
+migrations/ D1 / SQLite schema
+docker/     self-hosting image entrypoint
+```
+
+## Translations
+
+Strings live in `shared/locales/<locale>/<namespace>.json`. English and Simplified Chinese are the source languages. To improve or add a language, edit or copy a locale folder and run `npm run i18n:check`. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE)
