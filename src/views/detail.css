@@ -733,7 +733,7 @@
 }
 
 /* 扣款表 */
-.dt-charges {
+.dt-panel.dt-charges {
   padding: 0;
   display: flex;
   flex-direction: column;
