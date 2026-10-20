@@ -8,7 +8,8 @@ import { proxyOwed } from './Proxy.tsx';
 import { locale, t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { cancelSavings } from '../../shared/metrics.ts';
-import { categories, subImage, toBase } from '../derive.ts';
+import { catColor, categories, isDomainCat, subImage, toBase } from '../derive.ts';
+import { useIconTint } from '../iconTint.ts';
 import { useOrig } from '../display.ts';
 import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
@@ -292,10 +293,9 @@ export function List({
               const cur = currentPhase(s, today);
               const up = upcomingPhase(s, today);
               const m = state.methods.find((x) => x.id === cur.methodId);
-              const icon = subImage(s);
               return (
                 <button key={s.id} className={`scard st-${st}`} onClick={() => onOpen(s)}>
-                  <div className="sc-glow" style={icon ? { backgroundImage: `url("${icon}")` } : { background: 'var(--fill-2)' }} />
+                  <CardGlow sub={s} />
                   <div className="sc-top">
                     <SubIcon sub={s} size={48} />
                     <span className="sc-flags">
@@ -553,4 +553,20 @@ function FacetRow({
       </div>
     </div>
   );
+}
+
+/**
+ * 卡片顶部的光晕：用图标的主色（白底图标模糊后只剩一片白，所以不直接铺图片）；
+ * 域名类用注册商图标（默认 Cloudflare）；取不到颜色时用分类色
+ */
+function CardGlow({ sub }: { sub: Subscription }) {
+  const src = isDomainCat(sub.category)
+    ? sub.icon?.startsWith('http')
+      ? sub.icon
+      : '/brands/cloudflare.svg'
+    : sub.icon?.startsWith('/')
+      ? sub.icon
+      : subImage(sub);
+  const tint = useIconTint(src);
+  return <div className="sc-glow" style={{ background: tint ?? catColor(sub.category) }} />;
 }

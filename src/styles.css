@@ -3764,10 +3764,8 @@ select.btn {
   right: -20%;
   top: -60%;
   height: 120%;
-  background-size: cover;
-  background-position: center;
-  filter: blur(38px) saturate(1.6);
-  opacity: 0.22;
+  filter: blur(36px);
+  opacity: 0.3;
   pointer-events: none;
 }
 .sc-glow::after {
