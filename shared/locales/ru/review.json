@@ -1,0 +1,121 @@
+{
+  "title": "Поделиться итогами года",
+  "fileName": "subscriptions-{year}-in-review-{style}.png",
+  "style": {
+    "poster": "Постер",
+    "receipt": "Чек",
+    "card": "Карточка",
+    "stars": "Созвездие"
+  },
+  "unassigned": "Не указано",
+  "me": "Я",
+  "whose": "{name}",
+  "whoseSelf": "Я",
+  "topSpend": "Больше всего трат",
+  "ofYear": "{pct} за год",
+  "n": {
+    "subs": {
+      "one": "{count} подписка",
+      "few": "{count} подписки",
+      "many": "{count} подписок",
+      "other": "{count} подписки"
+    },
+    "charges": {
+      "one": "{count} списание",
+      "few": "{count} списания",
+      "many": "{count} списаний",
+      "other": "{count} списания"
+    },
+    "currencies": {
+      "one": "{count} валюта",
+      "few": "{count} валюты",
+      "many": "{count} валют",
+      "other": "{count} валюты"
+    },
+    "currencyKinds": {
+      "one": "{count} валюта",
+      "few": "{count} валюты",
+      "many": "{count} валют",
+      "other": "{count} валюты"
+    }
+  },
+  "tip": {
+    "top": "На {name} пришлось {pct} годовых расходов",
+    "longest": {
+      "one": "{name} с вами уже больше {count} года",
+      "few": "{name} с вами уже больше {count} лет",
+      "many": "{name} с вами уже больше {count} лет",
+      "other": "{name} с вами уже больше {count} лет"
+    },
+    "busiest": "Сильнее всего по кошельку ударил {month}",
+    "newEnded": "В этом году: {added} новых, {ended} отменено",
+    "currencies": {
+      "one": "В этом году вы платили в {count} валюте",
+      "few": "В этом году вы платили в {count} валютах — настоящий путешественник",
+      "many": "В этом году вы платили в {count} валютах — настоящий путешественник",
+      "other": "В этом году вы платили в {count} валютах — настоящий путешественник"
+    },
+    "soon": {
+      "one": "В ближайшие 30 дней будет {count} списание — оно ещё нужно?",
+      "few": "В ближайшие 30 дней будет {count} списания — все ещё нужны?",
+      "many": "В ближайшие 30 дней будет {count} списаний — все ещё нужны?",
+      "other": "В ближайшие 30 дней будет {count} списания — все ещё нужны?"
+    },
+    "milkTea": {
+      "one": "{amount} в день — примерно {count} стакан бабл-ти",
+      "few": "{amount} в день — примерно {count} стакана бабл-ти",
+      "many": "{amount} в день — примерно {count} стаканов бабл-ти",
+      "other": "{amount} в день — примерно {count} стакана бабл-ти"
+    },
+    "saved": "Отмены уже сэкономили вам {amount} в этом году",
+    "fallback": "Знать, за что платишь, — первый шаг к тому, чтобы платить меньше"
+  },
+  "receipt": {
+    "shop": "Магазин подписок · {whose}",
+    "asOf": "Годовая выписка · на {date}",
+    "fullYear": "Годовая выписка · {year}",
+    "no": "№ {no}",
+    "register": "КАССА 01",
+    "cashier": "Кассир: {name}",
+    "item": "Позиция",
+    "share": "Доля",
+    "amount": "Сумма",
+    "rest": "Ещё {count}",
+    "count": "Позиций {items} / Списаний {charges}",
+    "total": "ИТОГО"
+  },
+  "poster": {
+    "kicker": "{whose} · год в подписках",
+    "ongoing": "С начала года: {subs} · {charges}",
+    "ongoingHidden": "С начала года: {charges} · {currencies}",
+    "year": "Потрачено: {subs} · {charges}",
+    "yearHidden": "За год: {charges} · {currencies}",
+    "newEnded": "{added} новых · {ended} отменено",
+    "perDay": "В среднем {amount} в день"
+  },
+  "card": {
+    "head": "{whose} · подписки",
+    "intro": {
+      "ongoing": "С начала года подписки обошлись в",
+      "ongoingHidden": "С начала года у вас было",
+      "year": "За этот год подписки обошлись в",
+      "yearHidden": "За этот год у вас было"
+    },
+    "perDay": "В среднем {amount} в день",
+    "longest": "Дольше всех",
+    "duration": "{y} г. {m} мес.",
+    "busiest": "Самый дорогой месяц",
+    "month": "{month}",
+    "newEnded": "Новые / отменённые",
+    "saved": "Сэкономлено {amount}",
+    "ended": "Отменено: {count}",
+    "noneEnded": "Ничего не отменено",
+    "currencies": "Валюты",
+    "currencyCount": "{count}",
+    "nowMonthly": "Сейчас {amount}/мес."
+  },
+  "stars": {
+    "head": "{year} · {whose} · созвездие подписок",
+    "foot": "Чем больше пузырь, тем больше трат"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}",
+  "summary": { "other": "{count} khoản phí · {amount}" },
+  "mode": { "month": "Tháng", "year": "Năm" },
+  "prev": "Trước",
+  "next": "Sau",
+  "today": "Hôm nay",
+  "ics": "Đăng ký trên Lịch",
+  "noneDay": "Không có khoản phí nào vào ngày này",
+  "projected": "Dự kiến",
+  "charged": "Đã trừ tiền",
+  "monthAll": "Tất cả khoản phí {month}",
+  "noneMonth": "Không có khoản phí nào trong tháng này",
+  "day": "{day}",
+  "heatCount": { "other": "{count} khoản phí · " }
+}

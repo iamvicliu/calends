@@ -1,0 +1,39 @@
+{
+  "title": "Yapay zekâ erişimi",
+  "newToken": "Yeni token",
+  "mcpUrl": "MCP URL'si",
+  "urlCopied": "URL kopyalandı",
+  "copy": "Kopyala",
+  "copied": "Kopyalandı",
+  "copyFailed": "Kopyalanamadı",
+  "neverUsed": "Hiç kullanılmadı",
+  "tokenPlaceholder": "<token'ınız>",
+  "tokens": { "one": "Token'lar · {count}", "other": "Token'lar · {count}" },
+  "noTokens": "Henüz token yok. Bir tane oluşturup bağlamak istediğiniz yapay zekâ asistanına verin.",
+  "lastUsed": "Son kullanım: {time}",
+  "confirmRevoke": "“{name}” iptal edilsin mi? Bunu kullanan yapay zekâ asistanı erişimini hemen kaybeder.",
+  "revoke": "İptal et",
+  "revoked": "İptal edildi",
+  "setup": "Kurulum",
+  "tools": { "one": "Kullanılabilir araçlar · {count}", "other": "Kullanılabilir araçlar · {count}" },
+  "writeBadge": "Yazma",
+  "clientOther": "Diğer",
+  "scope": {
+    "write": "Okuma ve yazma",
+    "read": "Salt okunur",
+    "writeLong": "Okuma ve yazma: sorgulama, ekleme ve düzenleme",
+    "readLong": "Salt okunur: yalnızca sorgulama"
+  },
+  "created": {
+    "title": "Token oluşturuldu",
+    "saved": "Kaydettim",
+    "foot": "Bu token yalnızca bir kez gösterilir; bu pencereyi kapattıktan sonra tekrar görüntülenemez. Kaybederseniz iptal edip yenisini oluşturun.",
+    "copyToken": "Token'ı kopyala",
+    "tokenCopied": "Token kopyalandı",
+    "command": "Kurulum komutu"
+  },
+  "cancel": "Vazgeç",
+  "generate": "Oluştur",
+  "name": "Ad",
+  "namePlaceholder": "Hangi yapay zekâ için?"
+}

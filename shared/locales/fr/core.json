@@ -1,0 +1,136 @@
+{
+  "bill": {
+    "m1": "Mensuel",
+    "m3": "Trimestriel",
+    "m6": "Semestriel",
+    "m12": "Annuel",
+    "custom": {
+      "one": "Tous les {count} mois",
+      "other": "Tous les {count} mois"
+    }
+  },
+  "cycle": {
+    "lifetime": "À vie",
+    "once": "une fois",
+    "every": {
+      "day": "Quotidien",
+      "week": "Hebdomadaire",
+      "month": "Mensuel",
+      "year": "Annuel"
+    },
+    "quarterly": "Trimestriel",
+    "halfYearly": "Semestriel",
+    "biennial": "Tous les 2 ans",
+    "everyN": {
+      "day": {
+        "one": "Tous les {count} jour",
+        "other": "Tous les {count} jours"
+      },
+      "week": {
+        "one": "Toutes les {count} semaine",
+        "other": "Toutes les {count} semaines"
+      },
+      "month": {
+        "one": "Tous les {count} mois",
+        "other": "Tous les {count} mois"
+      },
+      "year": {
+        "one": "Tous les {count} an",
+        "other": "Tous les {count} ans"
+      }
+    }
+  },
+  "subError": {
+    "name": "Le nom est obligatoire",
+    "price": "Prix non valide",
+    "start": "Date de début non valide",
+    "cycle": "Cycle de facturation non valide"
+  },
+  "phase": {
+    "switchTooEarly": "La date d’effet doit être postérieure au début de la phase actuelle",
+    "resumeTooEarly": "La date de reprise ne peut pas précéder la dernière date de fin",
+    "priceOutOfRange": "La date du changement de prix ne se trouve dans aucune phase"
+  },
+  "event": {
+    "label": "{region}{price}/{per}",
+    "region": "{region} ",
+    "per": {
+      "year": "an",
+      "month": "mois",
+      "months": "{count} mois",
+      "week": "sem.",
+      "day": "jour"
+    }
+  },
+  "listSep": ", ",
+  "insight": {
+    "yearly": {
+      "title": {
+        "one": "{count} abonnement longue durée se renouvelle d’ici 60 jours",
+        "other": "{count} abonnements longue durée se renouvellent d’ici 60 jours"
+      },
+      "body": "Environ {sum} au total. Les prélèvements annuels sont difficiles à rembourser : c’est le moment de décider ce que vous gardez."
+    },
+    "dup": {
+      "title": "{names} font peut-être doublon",
+      "body": {
+        "one": "Cet abonnement coûte environ {sum} par mois. Vérifiez si vous en avez encore besoin.",
+        "other": "Ces {count} abonnements coûtent environ {sum} par mois au total. Vérifiez si vous en avez encore tous besoin."
+      }
+    },
+    "hikes": {
+      "title": {
+        "one": "{count} abonnement a augmenté son prix cette année",
+        "other": "{count} abonnements ont augmenté leur prix cette année"
+      }
+    },
+    "intro": {
+      "title": {
+        "one": "L’offre de {name} se termine dans {count} jour",
+        "other": "L’offre de {name} se termine dans {count} jours"
+      },
+      "body": "Ensuite, le prix repasse de {from} à {to}."
+    },
+    "balance": {
+      "title": "{name} ne tiendra pas jusqu’au {date}",
+      "body": "{sub} nécessite {need} ; le solde est d’environ {current}."
+    },
+    "fx": {
+      "title": "{pct} % des dépenses sont en devises étrangères",
+      "body": "La principale est {ccy} ({share} %). Cette part baisse quand {ccy} s’affaiblit et augmente quand elle se renforce."
+    },
+    "noMethod": {
+      "title": {
+        "one": "{count} abonnement n’a pas de moyen de paiement",
+        "other": "{count} abonnements n’ont pas de moyen de paiement"
+      },
+      "body": "Ajoutez-en un pour des prévisions de solde et des statistiques par moyen de paiement complètes."
+    },
+    "top": {
+      "title": "{name} est votre abonnement le plus cher",
+      "body": "Environ {perDay} par jour, soit {pct} % des dépenses mensuelles."
+    }
+  },
+  "methodKind": {
+    "debit": "Carte bancaire",
+    "credit": "Carte de crédit",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Carte cadeau",
+    "prepaid": "Solde boutique",
+    "phone": "Crédit mobile",
+    "crypto": "Carte crypto",
+    "other": "Autre"
+  },
+  "publicMethod": "{kind} · {region}",
+  "channel": {
+    "email": "E-mail"
+  },
+  "csv": {
+    "appStoreBalance": "Solde App Store {region}",
+    "otherCategory": "Autre"
+  }
+}

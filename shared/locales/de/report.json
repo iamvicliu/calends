@@ -1,0 +1,132 @@
+{
+  "title": "Bericht",
+  "shareReview": "Rückblick {year} teilen",
+  "perMonth": "{amount}/Mon.",
+  "per": {
+    "day": "Tag",
+    "week": "Wo.",
+    "month": "Mon.",
+    "year": "J.",
+    "lifetime": "einmalig",
+    "quarter": "Quartal",
+    "halfYear": "6 Mon.",
+    "twoYears": "2 J.",
+    "n": {
+      "day": "{count} Tage",
+      "week": "{count} Wo.",
+      "month": "{count} Mon.",
+      "year": "{count} J."
+    }
+  },
+  "axis": {
+    "year": "{year}"
+  },
+  "hero": {
+    "label": "Monatliche Abo-Ausgaben · negative MRR",
+    "vsLastMonth": "ggü. Ende letzten Monats",
+    "yearAgo": "· vor einem Jahr {amount}",
+    "annual": "Pro Jahr",
+    "perDay": "Pro Tag",
+    "active": "Aktiv",
+    "recover": "Durch Teilen zurück/Mon.",
+    "fxHist": "Damalige Kurse",
+    "fxNow": "Heutige Kurse",
+    "range1": "1 J.",
+    "range3": "3 J.",
+    "rangeAll": "Alle"
+  },
+  "wf": {
+    "title": "Änderungen im {month}",
+    "prev": "Vorheriger Monat",
+    "next": "Nächster Monat",
+    "from": "Letzter Monat",
+    "fx": "Kurse",
+    "added": "Neu",
+    "expansion": "Teurer",
+    "contraction": "Günstiger",
+    "churned": "Gekündigt",
+    "now": "Jetzt",
+    "monthEnd": "Monatsende",
+    "empty": "Diesen Monat keine neuen, gekündigten oder im Preis geänderten Abos.",
+    "emptyFx": "Diesen Monat keine neuen, gekündigten oder im Preis geänderten Abos – die gesamte Änderung kommt von Wechselkursen ({amount})."
+  },
+  "checkup": {
+    "title": "Check-up",
+    "warn": {
+      "one": "{count} Punkt braucht Aufmerksamkeit",
+      "other": "{count} Punkte brauchen Aufmerksamkeit"
+    },
+    "fix": "Beheben",
+    "less": "Weniger anzeigen",
+    "more": "{count} weitere anzeigen"
+  },
+  "cash": {
+    "title": "Abbuchungen vs. echte Kosten",
+    "legendCash": "Im Monat abgebucht",
+    "legendAccrual": "Kosten pro Monat verteilt",
+    "forecast": " · Prognose",
+    "tip": "Abgebucht {cash} · Kosten {cost}",
+    "prepaidItem": "{name} · {amount} · bis {until}",
+    "prepaid": "Vorausbezahlter Wert",
+    "prepaidSub": "{count} bezahlt, nicht aufgebraucht",
+    "savedItem": "{name} · {amount} · seit {since}",
+    "saved": "Durch Kündigen gespart",
+    "savedSub": "{count} gekündigt",
+    "next90": "Fällig in den nächsten 90 Tagen",
+    "peak": "Höchststand im {month} · {amount}"
+  },
+  "comp": {
+    "title": "Wohin das Geld geht",
+    "back": "Zurück",
+    "cat": "Kategorie",
+    "pay": "Zahlung",
+    "ccy": "Währung",
+    "cycle": "Zeitraum",
+    "unassigned": "Nicht zugeordnet",
+    "yearly": "Jährlich",
+    "quarterly": "Vierteljährlich / halbjährlich",
+    "monthly": "Monatlich",
+    "groupTip": {
+      "one": "{name} · {count} Eintrag · {amount}/Mon.",
+      "other": "{name} · {count} Einträge · {amount}/Mon."
+    }
+  },
+  "topup": {
+    "title": "Aufladeplan",
+    "range3": "3 Mon.",
+    "range6": "6 Mon.",
+    "range12": "1 J.",
+    "span3": "Nächste 3 Monate",
+    "span6": "Nächste 6 Monate",
+    "span12": "Nächstes Jahr",
+    "empty": "Noch keine Konten mit Guthaben.",
+    "emptyCta": "App Store- oder Mobilfunkguthaben im Wallet hinzufügen",
+    "summary": "Guthaben {balance} · etwa {monthly}/Mon.",
+    "why": "{span}: {due} fällig, {balance} vorhanden, {need} fehlen",
+    "urgent": "; am dringendsten: mind. {min} bis {date} aufladen",
+    "cards": "Empfohlene Geschenkkarten",
+    "anyAmount": "Beliebigen Betrag aufladen – Kartenwerte müssen nicht passen",
+    "enough3": "Guthaben reicht für die nächsten 3 Monate",
+    "enough6": "Guthaben reicht für die nächsten 6 Monate",
+    "enough12": "Guthaben reicht für das nächste Jahr",
+    "by": "Bis {date}"
+  },
+  "ev": {
+    "start": "Gestartet",
+    "end": "Gekündigt",
+    "price": "Preisänderung",
+    "introEnd": "Einführungsangebot beendet",
+    "buy": "Dauerhaft gekauft",
+    "pause": "Pausiert",
+    "switch": "Region / Tarif gewechselt",
+    "resume": "Fortgesetzt"
+  },
+  "log": {
+    "title": "Änderungsprotokoll",
+    "decisions": {
+      "one": "{count} Entscheidung",
+      "other": "{count} Entscheidungen"
+    },
+    "more": "Ältere Einträge"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "구독 장부",
+  "offline": "오프라인",
+  "offlineError": "연결할 수 없습니다: {error}",
+  "nav": {
+    "overview": "개요",
+    "list": "구독",
+    "calendar": "캘린더",
+    "report": "리포트",
+    "wallet": "지갑",
+    "family": "공유 플랜",
+    "behalf": "대신 결제",
+    "ai": "AI 연동",
+    "settings": "설정"
+  },
+  "login": {
+    "setupHint": "처음이신가요? 로그인할 비밀번호를 설정하세요.",
+    "tagline": "모든 구독, 모든 카드, 모든 공유 플랜을 한곳에서.",
+    "setupToken": "설정 토큰(SETUP_TOKEN)",
+    "newPassword": "새 비밀번호(8자 이상)",
+    "password": "비밀번호",
+    "again": "비밀번호 확인",
+    "mismatch": "비밀번호가 일치하지 않습니다",
+    "verifying": "확인 중…",
+    "setupEnter": "비밀번호 설정 후 계속",
+    "enter": "로그인",
+    "passkey": "패스키로 로그인"
+  },
+  "sidebar": {
+    "collapse": "사이드바 숨기기",
+    "expand": "사이드바 보기",
+    "new": "새로 만들기",
+    "search": "검색",
+    "upcoming": "예정된 결제",
+    "today": "오늘",
+    "tomorrow": "내일",
+    "inDays": {
+      "other": "{count}일 후"
+    },
+    "theme": "테마",
+    "themeHint": "클릭하여 전환: 라이트 → 다크 → 시스템"
+  },
+  "palette": {
+    "placeholder": "구독 또는 페이지 검색…",
+    "empty": "결과 없음",
+    "page": "페이지",
+    "add": "새 구독",
+    "addKeywords": "새로 추가 생성 new add create"
+  },
+  "ics": {
+    "title": "캘린더에서 구독",
+    "intro": "결제일을 Apple 캘린더, Google 캘린더, Outlook에 동기화합니다. 6시간마다 새로 고쳐지며, 알림 설정에 따라 결제 전에 알려 줍니다.",
+    "subscribe": "구독",
+    "copy": "링크 복사",
+    "copied": "복사됨",
+    "reset": "링크 재설정",
+    "resetDone": "링크를 재설정했습니다. 이전 링크는 더 이상 작동하지 않습니다.",
+    "generate": "비공개 캘린더 링크 만들기",
+    "generated": "캘린더 링크를 만들었습니다",
+    "note": "이 링크에는 비공개 토큰이 포함되어 있어, 링크를 가진 사람은 누구나 결제 일정을 볼 수 있습니다. 유출되었다면 ‘링크 재설정’을 눌러 무효화하세요."
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "save": "Sichern",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "edit": "Bearbeiten",
+  "done": "Fertig",
+  "close": "Schließen",
+  "add": "Hinzufügen",
+  "apply": "Anwenden",
+  "back": "Zurück",
+  "copy": "Kopieren",
+  "copied": "Kopiert",
+  "clear": "Leeren",
+  "today": "Heute",
+  "yesterday": "Gestern",
+  "tomorrow": "Morgen",
+  "none": "Keine",
+  "all": "Alle",
+  "other": "Sonstiges",
+  "search": "Suchen",
+  "loading": "Wird geladen …"
+}

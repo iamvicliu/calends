@@ -1,0 +1,60 @@
+{
+  "name": "Subscription Ledger",
+  "offline": "Ngoại tuyến",
+  "offlineError": "Không thể kết nối: {error}",
+  "nav": {
+    "overview": "Tổng quan",
+    "list": "Gói đăng ký",
+    "calendar": "Lịch",
+    "report": "Báo cáo",
+    "wallet": "Ví",
+    "family": "Gói chia sẻ",
+    "behalf": "Trả hộ",
+    "ai": "Truy cập AI",
+    "settings": "Cài đặt"
+  },
+  "login": {
+    "setupHint": "Lần đầu đến đây? Hãy đặt mật khẩu để đăng nhập.",
+    "tagline": "Mọi gói đăng ký, mọi thẻ, mọi gói chia sẻ.",
+    "setupToken": "Token thiết lập (SETUP_TOKEN)",
+    "newPassword": "Mật khẩu mới (ít nhất 8 ký tự)",
+    "password": "Mật khẩu",
+    "again": "Xác nhận mật khẩu",
+    "mismatch": "Mật khẩu không khớp",
+    "verifying": "Đang xác minh…",
+    "setupEnter": "Đặt mật khẩu và tiếp tục",
+    "enter": "Đăng nhập",
+    "passkey": "Đăng nhập bằng passkey"
+  },
+  "sidebar": {
+    "collapse": "Ẩn thanh bên",
+    "expand": "Hiện thanh bên",
+    "new": "Mới",
+    "search": "Tìm kiếm",
+    "upcoming": "Sắp tới",
+    "today": "Hôm nay",
+    "tomorrow": "Ngày mai",
+    "inDays": { "other": "{count} ngày nữa" },
+    "theme": "Giao diện",
+    "themeHint": "Nhấn để chuyển: Sáng → Tối → Hệ thống"
+  },
+  "palette": {
+    "placeholder": "Tìm gói đăng ký hoặc trang…",
+    "empty": "Không có kết quả",
+    "page": "Trang",
+    "add": "Gói đăng ký mới",
+    "addKeywords": "mới thêm tạo new add create"
+  },
+  "ics": {
+    "title": "Đăng ký trên lịch",
+    "intro": "Đồng bộ ngày thanh toán vào Apple Calendar, Google Calendar hoặc Outlook. Làm mới mỗi 6 giờ và nhắc bạn trước mỗi lần trừ tiền theo cài đặt nhắc nhở.",
+    "subscribe": "Thêm vào lịch",
+    "copy": "Sao chép liên kết",
+    "copied": "Đã sao chép",
+    "reset": "Đặt lại liên kết",
+    "resetDone": "Đã đặt lại liên kết. Liên kết cũ không còn hoạt động.",
+    "generate": "Tạo liên kết lịch riêng tư",
+    "generated": "Đã tạo liên kết lịch",
+    "note": "Liên kết chứa token riêng tư — ai có nó đều xem được lịch thanh toán của bạn. Nếu bị lộ, hãy nhấn Đặt lại liên kết để thu hồi."
+  }
+}

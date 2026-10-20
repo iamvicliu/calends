@@ -1,0 +1,23 @@
+{
+  "close": "Schließen",
+  "error": {
+    "loginRequired": "Bitte melde dich zuerst an",
+    "requestFailed": "Anfrage fehlgeschlagen ({status})"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "currency": {
+    "XCG": "Karibischer Gulden",
+    "ZWG": "Zimbabwe Gold"
+  },
+  "method": {
+    "none": "Nicht festgelegt"
+  },
+  "toolbar": {
+    "openSidebar": "Seitenleiste öffnen",
+    "add": "Abo hinzufügen"
+  }
+}

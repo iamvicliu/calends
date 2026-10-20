@@ -1,0 +1,71 @@
+{
+  "title": "Ethans Abos",
+  "loadFailed": "Laden fehlgeschlagen",
+  "theme": {
+    "title": "Design: {mode} (klicken zum Wechseln)",
+    "aria": "Design: {mode}, klicken zum Wechseln"
+  },
+  "currency": "Anzeigewährung",
+  "hero": {
+    "monthly": "Monatliche Abo-Ausgaben",
+    "flat": "Wie im selben Monat letztes Jahr",
+    "more": "{amount} mehr als im selben Monat letztes Jahr",
+    "less": "{amount} weniger als im selben Monat letztes Jahr",
+    "yearly": "Pro Jahr",
+    "live": "Aktiv",
+    "paid": "Bezahlt seit {year}"
+  },
+  "timeline": {
+    "title": "Zeitleiste",
+    "upcoming": {
+      "one": "{count} Abbuchung in den nächsten 30 Tagen · {amount}",
+      "other": "{count} Abbuchungen in den nächsten 30 Tagen · {amount}"
+    }
+  },
+  "chart": {
+    "title": "Monatliche Abbuchungen",
+    "desc": "Letzte 12 und nächste 3 Monate; gestrichelte Balken sind Prognosen",
+    "paid": "Bezahlt",
+    "mrr": "Monatliche Kosten",
+    "charge": "Abgebucht",
+    "thisMonth": "Dieser Monat",
+    "projected": "{month} · Prognose"
+  },
+  "ended": {
+    "title": "Gekündigt",
+    "saved": "{amount} gespart seit der Kündigung",
+    "item": "{amount} gespart"
+  },
+  "perMonth": "{amount}/Mon.",
+  "lifetime": {
+    "title": "Lebenslang",
+    "desc": "Einmal bezahlt, keine weiteren Abbuchungen"
+  },
+  "footer": "Vergangene Abbuchungen nutzen den Wechselkurs des jeweiligen Tages, künftige den heutigen. Unveröffentlichte Domains und Zahlungsdetails sind ausgeblendet.",
+  "composition": {
+    "title": "Aufteilung",
+    "desc": "Monatliche Kosten nach Kategorie",
+    "other": "Sonstiges"
+  },
+  "count": "{count}",
+  "fx": {
+    "title": "Wechselkurse",
+    "flat": "Wechselkurse haben die Kosten im letzten Jahr kaum verändert",
+    "less": "Zu heutigen Kursen zahlst du {amount} weniger im Monat als vor einem Jahr",
+    "more": "Zu heutigen Kursen zahlst du {amount} mehr im Monat als vor einem Jahr",
+    "share": "{pct} %"
+  },
+  "list": {
+    "title": "Abos",
+    "summary": {
+      "one": "{count} · {amount}/Mon.",
+      "other": "{count} · {amount}/Mon."
+    },
+    "all": "Alle"
+  },
+  "row": {
+    "renews": " · Verlängert sich am {date}",
+    "monthly": "Monatlich",
+    "perMonthEq": "Pro Monat"
+  }
+}

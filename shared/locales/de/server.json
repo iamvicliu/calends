@@ -1,0 +1,41 @@
+{
+  "fxApiError": "Der Wechselkursdienst hat einen Fehler gemeldet",
+  "missingId": "ID fehlt",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "Dieses Konto ist nicht öffentlich",
+  "idMismatch": "ID stimmt nicht überein",
+  "invalidMethod": "Ungültige Zahlungsmethode",
+  "invalidBackup": "Ungültige Backup-Datei",
+  "refreshFailed": "Aktualisierung fehlgeschlagen",
+  "backup": {
+    "notBackup": "Das ist keine gültige Backup-Datei",
+    "unknownFormat": "Unbekanntes Backup-Format: {format}",
+    "newerVersion": "Dieses Backup stammt aus einer neueren Version (v{version}). Aktualisiere zuerst diese Website."
+  },
+  "auth": {
+    "tooMany": "Zu viele Versuche. Versuch es in 15 Minuten erneut.",
+    "alreadySetup": "Ein Passwort wurde bereits festgelegt",
+    "noSetupToken": "SETUP_TOKEN wurde beim Deployment nicht konfiguriert, daher kann die Einrichtung nicht fortgesetzt werden. Lege dieses Secret zuerst fest (wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "Falsches Einrichtungstoken",
+    "passwordTooShort": {
+      "one": "Das Passwort muss mindestens {min} Zeichen lang sein",
+      "other": "Das Passwort muss mindestens {min} Zeichen lang sein"
+    },
+    "wrongPassword": "Falsches Passwort",
+    "wrongCurrentPassword": "Aktuelles Passwort ist falsch",
+    "newPasswordTooShort": {
+      "one": "Das neue Passwort muss mindestens {min} Zeichen lang sein",
+      "other": "Das neue Passwort muss mindestens {min} Zeichen lang sein"
+    },
+    "invalidDevice": "Ungültiges Gerät",
+    "cannotRemoveCurrent": "Dieses Gerät kann nicht entfernt werden. Melde dich stattdessen ab.",
+    "expired": "Die Anfrage ist abgelaufen. Bitte versuch es erneut.",
+    "passkeyFailed": "Passkey-Überprüfung fehlgeschlagen",
+    "passkeyNotBound": "Dieser Passkey ist für diese Website nicht registriert"
+  },
+  "ics": {
+    "calName": "Abo-Abbuchungen",
+    "method": "Zahlung: {name}",
+    "alarm": "{name} verlängert sich bald"
+  }
+}

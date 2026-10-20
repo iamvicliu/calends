@@ -1,0 +1,222 @@
+{
+  "title": "Pengaturan",
+  "days": { "other": "{count} hari" },
+  "logout": "Keluar",
+  "toast": {
+    "saved": "Disimpan",
+    "deleted": "Dihapus",
+    "csvEmpty": "Tidak ada langganan untuk diimpor di CSV ini",
+    "badBackup": "Bukan file cadangan yang valid"
+  },
+  "general": {
+    "title": "Umum",
+    "language": "Bahasa",
+    "followSystem": "Ikuti sistem",
+    "name": "Nama",
+    "namePlaceholder": "Ditampilkan di gambar bagikan dan halaman publik",
+    "startPage": "Buka ke",
+    "startPageAria": "Halaman awal",
+    "baseCurrency": "Mata uang dasar",
+    "timezone": "Zona waktu",
+    "weekStart": "Minggu dimulai pada",
+    "weekStartAria": "Hari pertama dalam minggu",
+    "monday": "Senin",
+    "sunday": "Minggu"
+  },
+  "sidebar": {
+    "title": "Bilah samping",
+    "upcoming": "Tagihan mendatang",
+    "lookAhead": "Rentang ke depan",
+    "lookAheadAria": "Rentang tagihan mendatang"
+  },
+  "remind": {
+    "title": "Pengingat",
+    "lead": "Ingatkan saya",
+    "sameDay": "Pada hari itu",
+    "hour": "Kirim pukul",
+    "monthly": "Pratinjau bulanan tiap tanggal 1",
+    "test": "Kirim pengingat uji ke semua saluran",
+    "testFailed": "Gagal mengirim",
+    "channelError": "{channel}: {error}",
+    "errorSep": "; ",
+    "testSent": "Pengingat uji terkirim",
+    "preview": "Pratinjau pengingat hari ini"
+  },
+  "today": {
+    "title": "Hari ini ({day})",
+    "items": { "other": "{count} item" }
+  },
+  "books": {
+    "title": "Pembukuan",
+    "defaultMethod": "Metode pembayaran default",
+    "unassigned": { "other": "{count} langganan belum punya metode pembayaran" },
+    "assignAllDone": { "other": "{count} langganan diatur ke metode pembayaran default" },
+    "assignAll": "Pakai default untuk semua",
+    "collectCurrency": "Mata uang paket bersama"
+  },
+  "fx": {
+    "title": "Kurs",
+    "current": "Kurs saat ini",
+    "updatedAt": "Diperbarui {time}",
+    "updated": "Kurs diperbarui",
+    "history": "Kurs historis",
+    "earliest": "Sejak {date}",
+    "coverage": { "other": "{covered} / {count} hari" },
+    "fill": "Lengkapi kurs yang kosong",
+    "historyUpdated": "Kurs historis diperbarui"
+  },
+  "open": {
+    "title": "Berbagi & akses",
+    "ics": "Langganan di kalender sistem",
+    "on": "Aktif",
+    "off": "Mati",
+    "public": "Halaman publik",
+    "publicOn": "Halaman publik aktif",
+    "publicOff": "Halaman publik mati",
+    "previewPublic": "Pratinjau halaman publik",
+    "ai": "Akses AI (MCP)",
+    "aiOn": "Akses AI aktif",
+    "aiOff": "Akses AI mati. Asisten AI tidak bisa terhubung lagi.",
+    "manageAi": "Kelola token dan penyiapan"
+  },
+  "data": {
+    "title": "Data",
+    "importCsv": "Impor CSV",
+    "restore": "Pulihkan dari cadangan",
+    "exportCsv": "Ekspor CSV",
+    "backup": "Ekspor cadangan lengkap"
+  },
+  "restore": {
+    "cancel": "Batal",
+    "replace": "Ganti buku catatan saat ini",
+    "done": "Dipulihkan",
+    "warning": "Buku catatan Anda saat ini akan diganti sepenuhnya oleh cadangan. Tindakan ini tidak bisa diurungkan — sebaiknya ekspor cadangan dulu.",
+    "subs": "Langganan",
+    "methods": "Metode pembayaran",
+    "count": { "other": "{count}" },
+    "time": "Dicadangkan",
+    "format": "Format",
+    "legacy": "Cadangan lama: hanya langganan dan metode pembayaran"
+  },
+  "import": {
+    "title": { "other": "Impor {count} langganan" },
+    "confirmReplace": "Mengganti akan menghapus semua langganan dan metode pembayaran yang ada. Lanjutkan?",
+    "replaceDone": "Diimpor (diganti)",
+    "replaceAll": "Ganti semua",
+    "mergeDone": "Diimpor (digabung)",
+    "merge": "Tambahkan ke yang ada",
+    "newMethods": "Metode pembayaran baru akan dibuat: {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": { "other": "Saluran notifikasi · {count} aktif" },
+    "empty": "Belum ada saluran — pengingat tidak akan dikirim.",
+    "test": "Uji",
+    "testFailed": "Gagal mengirim",
+    "testSent": "Pesan uji terkirim",
+    "add": "Tambah saluran",
+    "addKind": "Tambah {name}",
+    "confirmDelete": "Hapus saluran “{name}”?",
+    "delete": "Hapus",
+    "save": "Simpan",
+    "fillField": "Masukkan {field}",
+    "name": "Nama",
+    "optional": "Opsional",
+    "enabled": "Aktif",
+    "field": {
+      "to": "Alamat email",
+      "webhook": "URL webhook",
+      "server": "Server",
+      "token": "Token akses"
+    },
+    "kind": {
+      "email": {
+        "name": "Email",
+        "help": "Dikirim lewat Cloudflare Email Sending; domain Anda harus terverifikasi di Cloudflare"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "ID pengguna atau ID grup Anda",
+        "help": "Buat bot dengan @BotFather untuk mendapatkan token. Kirim pesan ke bot Anda dulu, lalu gunakan @userinfobot untuk mengetahui ID Anda"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Secret penandatanganan",
+        "secretPlaceholder": "Wajib jika verifikasi tanda tangan aktif",
+        "help": "Pengaturan grup → Bot → Tambah bot kustom"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Secret penandatanganan",
+        "secretPlaceholder": "SEC…, wajib jika penandatanganan aktif",
+        "help": "Pengaturan grup → Bot → Bot kustom"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Chat grup → Tambah bot grup"
+      },
+      "bark": {
+        "keyPlaceholder": "Kunci yang disalin dari aplikasi",
+        "help": "Notifikasi push iPhone — cari Bark di App Store"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Pilih nama yang sulit ditebak",
+        "help": "Pasang aplikasi ntfy di ponsel dan langgan topik yang sama"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… atau sctp…",
+        "help": "Push ke WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Pengaturan saluran → Integrasi → Webhook"
+      },
+      "webhook": {
+        "name": "Webhook kustom",
+        "header": "Header tambahan",
+        "help": "POST JSON: subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Keamanan",
+    "unknownBrowser": "Browser tidak dikenal",
+    "ago": {
+      "justNow": "Aktif baru saja",
+      "minutes": { "other": "{count} menit lalu" },
+      "hours": { "other": "{count} jam lalu" },
+      "days": { "other": "{count} hari lalu" }
+    },
+    "thisDevice": "Perangkat ini",
+    "signedInPasskey": "Masuk dengan passkey pada {time}",
+    "signedInPassword": "Masuk dengan kata sandi pada {time}",
+    "revoke": "Keluarkan",
+    "revoked": "Dikeluarkan",
+    "passkeyFoot": "Dengan passkey, Anda bisa masuk memakai Face ID, Touch ID, atau kode sandi perangkat — tanpa kata sandi.",
+    "passkeyUnsupported": "Browser ini tidak mendukung passkey.",
+    "lastUsed": "Terakhir dipakai {time}",
+    "addedAt": "Ditambahkan {time}",
+    "confirmRemovePasskey": "Hapus passkey “{name}”?",
+    "remove": "Hapus",
+    "removed": "Dihapus",
+    "addPasskey": "Tambah passkey",
+    "alreadyBound": "Perangkat ini sudah memiliki passkey",
+    "changePassword": "Ubah kata sandi",
+    "devices": "Perangkat yang masuk",
+    "devicesCount": { "other": "Perangkat yang masuk · {count}" },
+    "devicesFoot": "Saat batas tercapai, perangkat yang paling lama tidak aktif akan dikeluarkan otomatis. Lokasi diperkirakan dari IP dan mungkin tidak akurat.",
+    "maxSessions": "Maks. perangkat yang masuk",
+    "maxSessionsSaved": { "other": "Hingga {count} perangkat" },
+    "deviceCount": { "other": "{count} perangkat" },
+    "confirmLogoutOthers": "Keluarkan semua perangkat lain?",
+    "loggedOutOthers": "Perangkat lain telah dikeluarkan",
+    "logoutOthers": "Keluarkan semua perangkat lain",
+    "passwordChanged": "Kata sandi diubah. Perangkat lain telah dikeluarkan.",
+    "save": "Simpan",
+    "mismatch": "Kata sandi tidak cocok",
+    "passwordFoot": "Minimal 8 karakter. Mengubahnya akan mengeluarkan semua perangkat kecuali yang ini.",
+    "currentPassword": "Kata sandi saat ini",
+    "newPassword": "Kata sandi baru",
+    "minLength": "Minimal 8 karakter",
+    "confirmPassword": "Konfirmasi kata sandi baru"
+  }
+}

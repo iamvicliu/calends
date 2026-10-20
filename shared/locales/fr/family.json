@@ -1,0 +1,193 @@
+{
+  "contact": {
+    "via": {
+      "wechat": "WeChat",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "other": "Autre"
+    },
+    "hint": {
+      "wechat": "ID WeChat",
+      "discord": "Nom d’utilisateur",
+      "generic": "Compte / ID"
+    },
+    "viaAria": "Moyen de contact",
+    "open": "Ouvrir {via}"
+  },
+  "member": {
+    "defaultName": "membre",
+    "unnamed": "Sans nom",
+    "toastPaid": "{amount} de {name} enregistré",
+    "paymentRemoved": "Paiement supprimé",
+    "copied": {
+      "one": "Copié pour {count} membre",
+      "other": "Copié pour {count} membres"
+    },
+    "titleNew": "Ajouter un membre · {name}",
+    "confirmDelete": "Supprimer définitivement « {name} » ? Son historique de paiements sera aussi supprimé, ce qui réduira vos revenus enregistrés.\nS’il a simplement quitté le partage, indiquez plutôt une date de départ.",
+    "deleted": "Supprimé",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "added": "Membre ajouté",
+    "saved": "Enregistré",
+    "add": "Ajouter",
+    "save": "Enregistrer",
+    "group": "Membre",
+    "name": "Nom",
+    "namePh": "Comment l’appeler",
+    "contact": "Contact",
+    "account": "Compte invité",
+    "accountPh": "E-mail ou identifiant invité sur {name}",
+    "joined": "Arrivée",
+    "joinedPh": "Début du partage ({date})",
+    "notSet": "Non défini",
+    "left": "Départ",
+    "leftPh": "Toujours membre",
+    "feeGroup": "Facturation",
+    "seg": {
+      "m1": "Mensuel",
+      "m3": "Trimestriel",
+      "m6": "6 mois",
+      "m12": "Annuel"
+    },
+    "feeLabel": {
+      "m1": "Par mois",
+      "m3": "Par trimestre",
+      "m6": "Par semestre",
+      "m12": "Par an",
+      "custom": {
+        "one": "Tous les {count} mois",
+        "other": "Tous les {count} mois"
+      }
+    },
+    "feeCcyAria": "Devise",
+    "exempt": "Ne paie pas",
+    "other": "Autre",
+    "source": "Provenance",
+    "sourcePh": "Quel groupe / qui l’a recommandé",
+    "payments": "Paiements · {count}",
+    "receivedTotal": "Environ {amount} reçus au total",
+    "paidUntil": "Payé jusqu’au",
+    "paidUntilPh": "Aucun paiement pour l’instant",
+    "payCover": "Reçu le {date} · couvre du {from} au {until}",
+    "payCoverTo": "Reçu le {date} · couvre jusqu’au {until}",
+    "copyAria": "Copier pour les autres membres",
+    "removePayAria": "Supprimer le paiement",
+    "dup": "Déjà enregistré",
+    "paidUntilDate": "Payé jusqu’au {date}",
+    "noPay": "Aucun paiement pour l’instant",
+    "copyN": "Copier pour {count}",
+    "amount": "Montant",
+    "currency": "Devise",
+    "coverFrom": "Couvre à partir du",
+    "coverTo": "Couvre jusqu’au",
+    "coverAuto": {
+      "m1": "Défini selon la période de facturation ; modifiable",
+      "m3": "Défini selon la période de facturation ; modifiable",
+      "m6": "Défini selon la période de facturation ; modifiable",
+      "m12": "Défini selon la période de facturation ; modifiable",
+      "custom": "Défini selon la période de facturation ; modifiable"
+    },
+    "receivedOn": "Reçu le",
+    "note": "Note",
+    "notePh": "Facultatif, ex. virement USDT",
+    "record": "Enregistrer",
+    "recordBtn": {
+      "m1": "Enregistrer un paiement ({fee}/mois)",
+      "m3": "Enregistrer un paiement ({fee}/trimestre)",
+      "m6": "Enregistrer un paiement ({fee} par semestre)",
+      "m12": "Enregistrer un paiement ({fee}/an)",
+      "custom": {
+        "one": "Enregistrer un paiement ({fee} tous les {count} mois)",
+        "other": "Enregistrer un paiement ({fee} tous les {count} mois)"
+      }
+    }
+  },
+  "pool": {
+    "title": "Abonnements partagés",
+    "netGain": "Gain net par an",
+    "netCost": "Coût net par an",
+    "yearIncome": "Les membres paient {amount}/an",
+    "owed": "À encaisser",
+    "owedSub": {
+      "one": "{count} membre n’a pas payé",
+      "other": "{count} membres n’ont pas payé"
+    },
+    "count": "Partages",
+    "countStarted": " organisés · ",
+    "countJoined": " rejoints",
+    "countSub": "Organisés · Rejoints",
+    "emptyTitle": "Aucun abonnement partagé",
+    "emptyBody": "Dans l’éditeur d’un abonnement, réglez « Qui l’utilise » sur « J’organise », puis ajoutez les membres et leurs parts.",
+    "next": "prochain le {date}",
+    "me": "Moi",
+    "exemptTitle": "{name} (ne paie pas)",
+    "addMember": "Ajouter un membre",
+    "manageTitle": "Ouvrir la page de gestion familiale",
+    "manage": "Gérer",
+    "owedN": {
+      "one": "{count} à encaisser",
+      "other": "{count} à encaisser"
+    },
+    "settled": "Réglé",
+    "noMembers": "Aucun membre",
+    "addMemberSeats": {
+      "one": "Ajouter un membre ({count} place libre)",
+      "other": "Ajouter un membre ({count} places libres)"
+    },
+    "unnamed": "Sans nom",
+    "leftOn": "Parti le {date}",
+    "exemptNote": "Occupe une place, ne paie pas",
+    "paidUntil": "Payé jusqu’au {date}",
+    "noPay": "Aucun paiement pour l’instant",
+    "paymentsN": {
+      "one": "{count} paiement",
+      "other": "{count} paiements"
+    },
+    "from": "via {source}",
+    "exempt": "Ne paie pas",
+    "owedAmount": "{amount} dû",
+    "perFee": {
+      "m1": "{fee}/mois",
+      "m3": "{fee}/trimestre",
+      "m6": "{fee} par semestre",
+      "m12": "{fee}/an",
+      "custom": {
+        "one": "{fee} tous les {count} mois",
+        "other": "{fee} tous les {count} mois"
+      }
+    },
+    "collect": "Encaisser",
+    "joinedGroup": "Partages rejoints",
+    "payTo": "Payé à {name} · {amount}",
+    "ownerDefault": "organisateur",
+    "maybeGroup": "Peut-être partagé",
+    "convert": "Rendre partagé"
+  },
+  "convert": {
+    "title": "Partager « {name} »",
+    "cancel": "Annuler",
+    "submit": "Rendre partagé",
+    "toastOwner": "L’abonnement est partagé : ajoutez maintenant des membres",
+    "toastMember": "Marqué comme rejoint",
+    "roleOwner": "J’organise",
+    "roleMember": "J’ai rejoint",
+    "footOwner": "Réparti entre {count} personnes, environ {amount} chacune par période. Ajouter des membres réduit automatiquement votre part.",
+    "footMember": "Une fois rejoint, le prix correspond à ce que vous payez à l’organisateur à chaque période.",
+    "seats": "Places au total (vous compris)",
+    "owner": "Organisateur",
+    "ownerPh": "La personne que vous payez"
+  },
+  "facts": {
+    "cost": "Coût / an",
+    "income": "Revenu / an",
+    "loss": "Perte / an",
+    "profit": "Bénéfice / an",
+    "since": "Depuis {month}",
+    "sinceNone": "Depuis le début",
+    "actual": "Payé {paid} · Reçu {received} · {result}",
+    "gain": "+{amount}",
+    "lost": "−{amount}",
+    "noRecords": "Aucun paiement pour l’instant"
+  }
+}

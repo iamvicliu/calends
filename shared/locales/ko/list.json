@@ -1,0 +1,123 @@
+{
+  "title": "모든 구독",
+  "all": "전체",
+  "summary": {
+    "other": "{count}개 · {monthly}/월 · {yearly}/년"
+  },
+  "status": {
+    "upcoming": "시작 전",
+    "active": "이용 중",
+    "trial": "체험 중",
+    "trialShort": "체험",
+    "paused": "일시 정지됨",
+    "pausedShort": "정지",
+    "ending": "갱신 안 함",
+    "ended": "해지됨",
+    "lifetime": "평생 이용"
+  },
+  "proxyExcluded": "대신 결제 · 집계 제외",
+  "perMonthApprox": "≈ {amount}/월",
+  "originalPrice": "정가 {amount}",
+  "view": {
+    "grid": "카드",
+    "list": "목록",
+    "gantt": "타임라인"
+  },
+  "sort": {
+    "label": "정렬",
+    "next": "다음 결제",
+    "cost": "월 비용",
+    "name": "이름",
+    "start": "시작일"
+  },
+  "add": "구독 추가",
+  "clear": "지우기",
+  "facet": {
+    "status": "상태",
+    "category": "카테고리",
+    "pay": "결제 수단"
+  },
+  "unassigned": "미지정",
+  "empty": "일치하는 구독이 없습니다",
+  "badge": {
+    "share": "공유",
+    "joined": "참여",
+    "proxy": "대신 결제",
+    "proxyFor": "{name} 대신 결제",
+    "someone": "누군가"
+  },
+  "saved": "{amount} 절약",
+  "col": {
+    "name": "구독",
+    "category": "카테고리",
+    "method": "결제 수단",
+    "amount": "금액",
+    "monthly": "월",
+    "start": "시작",
+    "next": "다음 결제"
+  },
+  "notCounted": "집계 제외",
+  "endedOn": "{date} 종료",
+  "change": {
+    "noMethod": "결제 수단 미정",
+    "planned": "예정 · ",
+    "starts": "{when} 시작",
+    "from": "{when} 변경"
+  },
+  "proxyBadge": {
+    "owed": {
+      "other": "대신 결제 · {count}건 미수"
+    },
+    "owedFor": {
+      "other": "{name} 대신 결제 · {count}건 미수"
+    },
+    "settled": "대신 결제 · 정산 완료",
+    "settledFor": "{name} 대신 결제 · 정산 완료"
+  },
+  "gantt": {
+    "months": {
+      "other": "{count}개월"
+    },
+    "days": {
+      "other": "{count}일"
+    },
+    "noRegion": "지역 없음",
+    "zoom1y": "1년",
+    "zoom3y": "3년",
+    "byMethod": "결제 수단별",
+    "byRegion": "지역별",
+    "gapTitle": "{span} 중단: {from} – {to}",
+    "gapShort": "{span} 중단",
+    "gapDays": {
+      "other": "{count}일 중단"
+    },
+    "lifetimeSuffix": " 평생 이용",
+    "lifetime": "평생 이용 {amount}",
+    "present": "현재",
+    "plannedSuffix": " · 예정",
+    "introPrefix": "프로모션 · ",
+    "introShort": "프로모션 ",
+    "planned": "예정",
+    "gap": "중단",
+    "range": {
+      "other": "{date}부터 · {count}개 구간"
+    }
+  },
+  "kind": {
+    "debit": "체크카드",
+    "credit": "신용카드",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store 잔액",
+    "googleplay": "Google Play 잔액",
+    "giftcard": "기프트 카드",
+    "prepaid": "스토어 잔액",
+    "phone": "휴대폰 잔액",
+    "crypto": "암호화폐 카드",
+    "other": "기타"
+  },
+  "network": {
+    "unionpay": "UnionPay"
+  }
+}

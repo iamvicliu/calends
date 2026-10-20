@@ -1,0 +1,77 @@
+{
+  "title": "立て替え",
+  "status": {
+    "active": "継続中",
+    "ending": "終了予定",
+    "ended": "停止"
+  },
+  "owedPeriods": {
+    "other": "未回収 {count}件"
+  },
+  "viewSub": "サブスクを見る",
+  "stoppedOn": " · {date}に停止",
+  "nextOn": " · 次回 {date}",
+  "payFor": "{name}の分",
+  "unset": "未設定",
+  "paidPeriods": {
+    "other": "{count}回立て替え"
+  },
+  "received": "返済済み",
+  "owed": "未回収",
+  "settled": "精算済み",
+  "detailTitle": "立て替え",
+  "cardCcy": " · カードは{ccy}で決済",
+  "forWhom": "立て替え先",
+  "method": "支払い方法",
+  "subscription": "サブスク",
+  "viewDetail": "サブスクの詳細を見る",
+  "stoppedAt": "停止日",
+  "nextCharge": "次回請求",
+  "note": "メモ",
+  "diffLabel": "返済額 − 請求額",
+  "table": {
+    "date": "請求日",
+    "charged": "請求額",
+    "received": "返済額",
+    "diff": "差額",
+    "record": "記録",
+    "even": "差額なし",
+    "none": "まだ請求はありません。"
+  },
+  "entry": {
+    "markedDue": "未回収にしました",
+    "saved": "保存しました",
+    "title": "{date}の請求",
+    "markDue": "未回収にする",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "chargedFoot": "請求日のレートで{amount}。空欄の場合は定価の{list}を使用します。",
+    "amount": "金額",
+    "currency": "通貨",
+    "paidBack": "{name}から返済あり",
+    "paidBackAnon": "返済あり",
+    "receivedEmpty": "まだ受け取っていない場合は空欄にしてください。",
+    "receivedEven": "受領日のレートで{amount}、請求額と同じです。",
+    "receivedMore": "受領日のレートで{amount}、請求額より{diff}多くなっています。",
+    "receivedLess": "受領日のレートで{amount}、請求額より{diff}少なくなっています。",
+    "notReceived": "未受領",
+    "receivedOn": "受領日",
+    "notePlaceholder": "任意（例：銀行振込）"
+  },
+  "page": {
+    "owedSub": {
+      "other": "未回収{count}件（請求日のレート）"
+    },
+    "allBack": "すべて返済済み",
+    "total": "立て替え総額",
+    "totalSub": {
+      "other": "{count}件の請求 · {subs}"
+    },
+    "subs": {
+      "other": "{count}件のサブスク"
+    },
+    "diffSub": "返済済み請求の為替差・手数料による差額",
+    "emptyTitle": "立て替えはまだありません",
+    "emptyBody": "サブスクを作成または編集し、利用者で「立て替え」を選んで相手を入力してください。"
+  }
+}

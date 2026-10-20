@@ -1,0 +1,18 @@
+{
+  "choose": "Pilih",
+  "noMatch": "Tidak ada yang cocok",
+  "common": "Sering dipakai",
+  "currency": "Mata uang",
+  "date": { "placeholder": "Pilih tanggal", "prev": "Sebelumnya", "next": "Berikutnya" },
+  "method": { "label": "Metode pembayaran", "none": "Tidak ada" },
+  "region": { "label": "Wilayah", "any": "Semua", "none": "Semua wilayah", "all": "Semua wilayah" },
+  "ccy": {
+    "label": "Mata uang",
+    "switch": "Ganti mata uang tampilan",
+    "orig": "Asli",
+    "origHint": "Masing-masing dalam mata uangnya",
+    "all": "Semua mata uang",
+    "search": "Cari nama, kode, atau simbol",
+    "noMatch": "Tidak ada mata uang yang cocok"
+  }
+}

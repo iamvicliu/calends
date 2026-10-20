@@ -1,0 +1,132 @@
+{
+  "title": "Relatório",
+  "shareReview": "Compartilhar retrospectiva de {year}",
+  "perMonth": "{amount}/mês",
+  "per": {
+    "day": "dia",
+    "week": "sem",
+    "month": "mês",
+    "year": "ano",
+    "lifetime": "pagamento único",
+    "quarter": "trim",
+    "halfYear": "6 meses",
+    "twoYears": "2 anos",
+    "n": {
+      "day": "{count} dias",
+      "week": "{count} sem",
+      "month": "{count} meses",
+      "year": "{count} anos"
+    }
+  },
+  "axis": {
+    "year": "{year}"
+  },
+  "hero": {
+    "label": "Gasto mensal com assinaturas · MRR negativo",
+    "vsLastMonth": "vs. fim do mês passado",
+    "yearAgo": "· {amount} há um ano",
+    "annual": "Por ano",
+    "perDay": "Por dia",
+    "active": "Ativas",
+    "recover": "Recuperado com compartilhamento/mês",
+    "fxHist": "Câmbio da época",
+    "fxNow": "Câmbio de hoje",
+    "range1": "1A",
+    "range3": "3A",
+    "rangeAll": "Tudo"
+  },
+  "wf": {
+    "title": "Mudanças em {month}",
+    "prev": "Mês anterior",
+    "next": "Próximo mês",
+    "from": "Mês passado",
+    "fx": "Câmbio",
+    "added": "Novas",
+    "expansion": "Aumento",
+    "contraction": "Redução",
+    "churned": "Canceladas",
+    "now": "Agora",
+    "monthEnd": "Fim do mês",
+    "empty": "Nenhuma assinatura nova, cancelada ou com preço alterado neste mês.",
+    "emptyFx": "Nenhuma assinatura nova, cancelada ou com preço alterado neste mês — toda a variação veio do câmbio ({amount})."
+  },
+  "checkup": {
+    "title": "Diagnóstico",
+    "warn": {
+      "one": "{count} item precisa de atenção",
+      "other": "{count} itens precisam de atenção"
+    },
+    "fix": "Corrigir",
+    "less": "Mostrar menos",
+    "more": "Mostrar mais {count}"
+  },
+  "cash": {
+    "title": "Caixa vs. custo real",
+    "legendCash": "Cobrado no mês",
+    "legendAccrual": "Custo distribuído por mês",
+    "forecast": " · Previsão",
+    "tip": "Cobrado {cash} · Custo {cost}",
+    "prepaidItem": "{name} · {amount} · até {until}",
+    "prepaid": "Valor pré-pago",
+    "prepaidSub": "{count} pagas, ainda não consumidas",
+    "savedItem": "{name} · {amount} · desde {since}",
+    "saved": "Economizado com cancelamentos",
+    "savedSub": "{count} canceladas",
+    "next90": "A vencer nos próximos 90 dias",
+    "peak": "Pico em {month} · {amount}"
+  },
+  "comp": {
+    "title": "Para onde vai o dinheiro",
+    "back": "Voltar",
+    "cat": "Categoria",
+    "pay": "Pagamento",
+    "ccy": "Moeda",
+    "cycle": "Ciclo",
+    "unassigned": "Sem atribuição",
+    "yearly": "Anual",
+    "quarterly": "Trimestral / semestral",
+    "monthly": "Mensal",
+    "groupTip": {
+      "one": "{name} · {count} item · {amount}/mês",
+      "other": "{name} · {count} itens · {amount}/mês"
+    }
+  },
+  "topup": {
+    "title": "Plano de recarga",
+    "range3": "3 meses",
+    "range6": "6 meses",
+    "range12": "1 ano",
+    "span3": "Próximos 3 meses",
+    "span6": "Próximos 6 meses",
+    "span12": "Próximo ano",
+    "empty": "Nenhuma conta com saldo ainda.",
+    "emptyCta": "Adicione saldos da App Store ou da operadora na Carteira",
+    "summary": "Saldo {balance} · cerca de {monthly}/mês",
+    "why": "{span}: {due} a vencer, {balance} disponível, faltam {need}",
+    "urgent": "; mais urgente: adicione pelo menos {min} até {date}",
+    "cards": "Cartões-presente sugeridos",
+    "anyAmount": "Recarregue qualquer valor — não precisa ser o valor de um cartão",
+    "enough3": "O saldo cobre os próximos 3 meses",
+    "enough6": "O saldo cobre os próximos 6 meses",
+    "enough12": "O saldo cobre o próximo ano",
+    "by": "Até {date}"
+  },
+  "ev": {
+    "start": "Iniciada",
+    "end": "Cancelada",
+    "price": "Mudança de preço",
+    "introEnd": "Fim da oferta inicial",
+    "buy": "Compra definitiva",
+    "pause": "Pausada",
+    "switch": "Troca de região / plano",
+    "resume": "Retomada"
+  },
+  "log": {
+    "title": "Registro de mudanças",
+    "decisions": {
+      "one": "{count} decisão",
+      "other": "{count} decisões"
+    },
+    "more": "Registros anteriores"
+  }
+}

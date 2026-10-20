@@ -1,0 +1,71 @@
+{
+  "title": "Les abonnements d’Ethan",
+  "loadFailed": "Chargement impossible",
+  "theme": {
+    "title": "Thème : {mode} (cliquez pour changer)",
+    "aria": "Thème : {mode}, cliquez pour changer"
+  },
+  "currency": "Devise d’affichage",
+  "hero": {
+    "monthly": "Dépenses mensuelles en abonnements",
+    "flat": "Identique au même mois l’an dernier",
+    "more": "{amount} de plus qu’au même mois l’an dernier",
+    "less": "{amount} de moins qu’au même mois l’an dernier",
+    "yearly": "Par an",
+    "live": "Actifs",
+    "paid": "Payé depuis {year}"
+  },
+  "timeline": {
+    "title": "Frise",
+    "upcoming": {
+      "one": "{count} prélèvement dans les 30 prochains jours · {amount}",
+      "other": "{count} prélèvements dans les 30 prochains jours · {amount}"
+    }
+  },
+  "chart": {
+    "title": "Prélèvements mensuels",
+    "desc": "12 derniers mois et 3 prochains ; les barres en pointillés sont des prévisions",
+    "paid": "Payé",
+    "mrr": "Coût mensuel",
+    "charge": "Prélevé",
+    "thisMonth": "Ce mois-ci",
+    "projected": "{month} · Prévu"
+  },
+  "ended": {
+    "title": "Résiliés",
+    "saved": "{amount} économisés depuis la résiliation",
+    "item": "{amount} économisés"
+  },
+  "perMonth": "{amount}/mois",
+  "lifetime": {
+    "title": "À vie",
+    "desc": "Payé une fois, plus aucun prélèvement"
+  },
+  "footer": "Les prélèvements passés utilisent le taux de change du jour ; les futurs, le taux actuel. Les domaines non publiés et les détails de paiement sont masqués.",
+  "composition": {
+    "title": "Répartition",
+    "desc": "Coût mensuel par catégorie",
+    "other": "Autre"
+  },
+  "count": "{count}",
+  "fx": {
+    "title": "Taux de change",
+    "flat": "Les taux de change ont à peine modifié les coûts cette année",
+    "less": "Aux taux actuels, vous payez {amount} de moins par mois qu’il y a un an",
+    "more": "Aux taux actuels, vous payez {amount} de plus par mois qu’il y a un an",
+    "share": "{pct} %"
+  },
+  "list": {
+    "title": "Abonnements",
+    "summary": {
+      "one": "{count} · {amount}/mois",
+      "other": "{count} · {amount}/mois"
+    },
+    "all": "Tous"
+  },
+  "row": {
+    "renews": " · Renouvellement le {date}",
+    "monthly": "Mensuel",
+    "perMonthEq": "Par mois"
+  }
+}

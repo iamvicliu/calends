@@ -1,0 +1,39 @@
+{
+  "title": "AI 存取",
+  "newToken": "新增權杖",
+  "mcpUrl": "MCP 網址",
+  "urlCopied": "網址已複製",
+  "copy": "複製",
+  "copied": "已複製",
+  "copyFailed": "複製失敗",
+  "neverUsed": "從未使用",
+  "tokenPlaceholder": "<你的權杖>",
+  "tokens": { "other": "權杖 · {count} 個" },
+  "noTokens": "還沒有權杖。新增一個，交給要連接的 AI 助理。",
+  "lastUsed": "最近使用 {time}",
+  "confirmRevoke": "撤銷「{name}」？使用它的 AI 助理會立即失去存取權限。",
+  "revoke": "撤銷",
+  "revoked": "已撤銷",
+  "setup": "連接方式",
+  "tools": { "other": "可用工具 · {count} 個" },
+  "writeBadge": "寫入",
+  "clientOther": "其他",
+  "scope": {
+    "write": "讀寫",
+    "read": "唯讀",
+    "writeLong": "讀寫：可查詢、新增、修改",
+    "readLong": "唯讀：只能查詢"
+  },
+  "created": {
+    "title": "權杖已建立",
+    "saved": "我已儲存",
+    "foot": "權杖只會顯示這一次，關閉後就無法再查看；遺失了就撤銷後重新建立。",
+    "copyToken": "複製權杖",
+    "tokenCopied": "權杖已複製",
+    "command": "連接指令"
+  },
+  "cancel": "取消",
+  "generate": "建立",
+  "name": "名稱",
+  "namePlaceholder": "要給哪個 AI 使用"
+}

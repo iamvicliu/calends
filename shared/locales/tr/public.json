@@ -1,0 +1,40 @@
+{
+  "title": "Ethan'ın Abonelikleri",
+  "loadFailed": "Yüklenemedi",
+  "theme": { "title": "Tema: {mode} (değiştirmek için tıklayın)", "aria": "Tema: {mode}, değiştirmek için tıklayın" },
+  "currency": "Görüntüleme para birimi",
+  "hero": {
+    "monthly": "Aylık abonelik harcaması",
+    "flat": "Geçen yılın aynı ayıyla aynı",
+    "more": "Geçen yılın aynı ayından {amount} fazla",
+    "less": "Geçen yılın aynı ayından {amount} az",
+    "yearly": "Yıllık",
+    "live": "Etkin",
+    "paid": "{year} yılından beri ödenen"
+  },
+  "timeline": { "title": "Zaman çizelgesi", "upcoming": { "one": "Önümüzdeki 30 günde {count} ödeme · {amount}", "other": "Önümüzdeki 30 günde {count} ödeme · {amount}" } },
+  "chart": {
+    "title": "Aylık ödemeler",
+    "desc": "Son 12 ay ve sonraki 3 ay; kesikli çubuklar tahmindir",
+    "paid": "Ödenen",
+    "mrr": "Aylık maliyet",
+    "charge": "Ödenen tutar",
+    "thisMonth": "Bu ay",
+    "projected": "{month} · Tahmini"
+  },
+  "ended": { "title": "İptal edilenler", "saved": "İptalden bu yana {amount} tasarruf", "item": "{amount} tasarruf" },
+  "perMonth": "{amount}/ay",
+  "lifetime": { "title": "Ömür boyu", "desc": "Bir kez ödendi, başka ödeme yok" },
+  "footer": "Geçmiş ödemeler o günün kuruyla, gelecek ödemeler bugünün kuruyla hesaplanır. Yayınlanmamış alan adları ve ödeme bilgileri gizlenir.",
+  "composition": { "title": "Dağılım", "desc": "Kategoriye göre aylık maliyet", "other": "Diğer" },
+  "count": "{count}",
+  "fx": {
+    "title": "Döviz kurları",
+    "flat": "Kurlar son bir yılda maliyetleri neredeyse hiç değiştirmedi",
+    "less": "Bugünkü kurlarla bir yıl öncesine göre ayda {amount} daha az ödüyorsunuz",
+    "more": "Bugünkü kurlarla bir yıl öncesine göre ayda {amount} daha fazla ödüyorsunuz",
+    "share": "%{pct}"
+  },
+  "list": { "title": "Abonelikler", "summary": { "one": "{count} · {amount}/ay", "other": "{count} · {amount}/ay" }, "all": "Tümü" },
+  "row": { "renews": " · {date} yenilenir", "monthly": "Aylık", "perMonthEq": "Aylık karşılığı" }
+}

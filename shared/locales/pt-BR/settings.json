@@ -1,0 +1,222 @@
+{
+  "title": "Ajustes",
+  "days": { "one": "{count} dia", "other": "{count} dias" },
+  "logout": "Sair",
+  "toast": {
+    "saved": "Salvo",
+    "deleted": "Apagado",
+    "csvEmpty": "Nenhuma assinatura para importar neste CSV",
+    "badBackup": "Arquivo de backup inválido"
+  },
+  "general": {
+    "title": "Geral",
+    "language": "Idioma",
+    "followSystem": "Padrão do sistema",
+    "name": "Nome",
+    "namePlaceholder": "Aparece nas imagens compartilhadas e na página pública",
+    "startPage": "Abrir em",
+    "startPageAria": "Página inicial",
+    "baseCurrency": "Moeda base",
+    "timezone": "Fuso horário",
+    "weekStart": "Semana começa em",
+    "weekStartAria": "Primeiro dia da semana",
+    "monday": "Segunda-feira",
+    "sunday": "Domingo"
+  },
+  "sidebar": {
+    "title": "Barra lateral",
+    "upcoming": "Próximas cobranças",
+    "lookAhead": "Antecedência",
+    "lookAheadAria": "Janela de próximas cobranças"
+  },
+  "remind": {
+    "title": "Lembretes",
+    "lead": "Lembrar",
+    "sameDay": "No dia",
+    "hour": "Enviar às",
+    "monthly": "Prévia mensal no dia 1º",
+    "test": "Enviar lembrete de teste para todos os canais",
+    "testFailed": "Não foi possível enviar",
+    "channelError": "{channel}: {error}",
+    "errorSep": "; ",
+    "testSent": "Lembrete de teste enviado",
+    "preview": "Ver os lembretes de hoje"
+  },
+  "today": {
+    "title": "Hoje ({day})",
+    "items": { "one": "{count} item", "other": "{count} itens" }
+  },
+  "books": {
+    "title": "Contabilidade",
+    "defaultMethod": "Forma de pagamento padrão",
+    "unassigned": { "one": "{count} assinatura está sem forma de pagamento", "other": "{count} assinaturas estão sem forma de pagamento" },
+    "assignAllDone": { "one": "{count} assinatura definida com a forma de pagamento padrão", "other": "{count} assinaturas definidas com a forma de pagamento padrão" },
+    "assignAll": "Usar padrão em todas",
+    "collectCurrency": "Moeda dos planos compartilhados"
+  },
+  "fx": {
+    "title": "Câmbio",
+    "current": "Cotação atual",
+    "updatedAt": "Atualizado {time}",
+    "updated": "Câmbio atualizado",
+    "history": "Cotações históricas",
+    "earliest": "Desde {date}",
+    "coverage": { "one": "{covered} / {count} dia", "other": "{covered} / {count} dias" },
+    "fill": "Completar cotações ausentes",
+    "historyUpdated": "Cotações históricas atualizadas"
+  },
+  "open": {
+    "title": "Compartilhamento e acesso",
+    "ics": "Assinar no calendário do sistema",
+    "on": "Ativado",
+    "off": "Desativado",
+    "public": "Página pública",
+    "publicOn": "Página pública ativada",
+    "publicOff": "Página pública desativada",
+    "previewPublic": "Visualizar página pública",
+    "ai": "Acesso por IA (MCP)",
+    "aiOn": "Acesso por IA ativado",
+    "aiOff": "Acesso por IA desativado. Assistentes de IA não conseguem mais se conectar.",
+    "manageAi": "Gerenciar tokens e configuração"
+  },
+  "data": {
+    "title": "Dados",
+    "importCsv": "Importar CSV",
+    "restore": "Restaurar backup",
+    "exportCsv": "Exportar CSV",
+    "backup": "Exportar backup completo"
+  },
+  "restore": {
+    "cancel": "Cancelar",
+    "replace": "Substituir dados atuais",
+    "done": "Restaurado",
+    "warning": "Seus dados atuais serão totalmente substituídos pelo backup. Não é possível desfazer — considere exportar um backup antes.",
+    "subs": "Assinaturas",
+    "methods": "Formas de pagamento",
+    "count": { "one": "{count}", "other": "{count}" },
+    "time": "Backup feito em",
+    "format": "Formato",
+    "legacy": "Backup antigo: só assinaturas e formas de pagamento"
+  },
+  "import": {
+    "title": { "one": "Importar {count} assinatura", "other": "Importar {count} assinaturas" },
+    "confirmReplace": "Substituir vai apagar todas as assinaturas e formas de pagamento existentes. Continuar?",
+    "replaceDone": "Importado (substituído)",
+    "replaceAll": "Substituir tudo",
+    "mergeDone": "Importado (mesclado)",
+    "merge": "Adicionar aos existentes",
+    "newMethods": "Novas formas de pagamento serão criadas: {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": { "one": "Canais de notificação · {count} ativo", "other": "Canais de notificação · {count} ativos" },
+    "empty": "Nenhum canal ainda — os lembretes não serão enviados.",
+    "test": "Testar",
+    "testFailed": "Não foi possível enviar",
+    "testSent": "Mensagem de teste enviada",
+    "add": "Adicionar canal",
+    "addKind": "Adicionar {name}",
+    "confirmDelete": "Apagar o canal “{name}”?",
+    "delete": "Apagar",
+    "save": "Salvar",
+    "fillField": "Preencha {field}",
+    "name": "Nome",
+    "optional": "Opcional",
+    "enabled": "Ativado",
+    "field": {
+      "to": "Endereço de e-mail",
+      "webhook": "URL do webhook",
+      "server": "Servidor",
+      "token": "Token de acesso"
+    },
+    "kind": {
+      "email": {
+        "name": "E-mail",
+        "help": "Enviado pelo Cloudflare Email Sending; seu domínio precisa estar verificado na Cloudflare"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "Seu ID de usuário ou de grupo",
+        "help": "Crie um bot com o @BotFather para obter o token. Envie uma mensagem ao bot antes e use o @userinfobot para descobrir seu ID"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Segredo de assinatura",
+        "secretPlaceholder": "Obrigatório se a verificação de assinatura estiver ativada",
+        "help": "Ajustes do grupo → Bots → Adicionar bot personalizado"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Segredo de assinatura",
+        "secretPlaceholder": "SEC…, obrigatório se a assinatura estiver ativada",
+        "help": "Ajustes do grupo → Bots → Bot personalizado"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Chat em grupo → Adicionar bot ao grupo"
+      },
+      "bark": {
+        "keyPlaceholder": "Chave copiada do app",
+        "help": "Notificações push no iPhone — procure Bark na App Store"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Escolha um nome difícil de adivinhar",
+        "help": "Instale o app ntfy no celular e assine o mesmo tópico"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… ou sctp…",
+        "help": "Push para o WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Configurações do canal → Integrações → Webhooks"
+      },
+      "webhook": {
+        "name": "Webhook personalizado",
+        "header": "Cabeçalho extra",
+        "help": "POST JSON: subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Segurança",
+    "unknownBrowser": "Navegador desconhecido",
+    "ago": {
+      "justNow": "Ativo agora mesmo",
+      "minutes": { "one": "há {count} minuto", "other": "há {count} minutos" },
+      "hours": { "one": "há {count} hora", "other": "há {count} horas" },
+      "days": { "one": "há {count} dia", "other": "há {count} dias" }
+    },
+    "thisDevice": "Este dispositivo",
+    "signedInPasskey": "Entrou com chave de acesso em {time}",
+    "signedInPassword": "Entrou com senha em {time}",
+    "revoke": "Desconectar",
+    "revoked": "Desconectado",
+    "passkeyFoot": "Com uma chave de acesso, você entra usando Face ID, Touch ID ou o código do dispositivo — sem senha.",
+    "passkeyUnsupported": "Este navegador não suporta chaves de acesso.",
+    "lastUsed": "Último uso {time}",
+    "addedAt": "Adicionada {time}",
+    "confirmRemovePasskey": "Remover a chave de acesso “{name}”?",
+    "remove": "Remover",
+    "removed": "Removida",
+    "addPasskey": "Adicionar chave de acesso",
+    "alreadyBound": "Este dispositivo já tem uma chave de acesso",
+    "changePassword": "Alterar senha",
+    "devices": "Dispositivos conectados",
+    "devicesCount": { "one": "Dispositivos conectados · {count}", "other": "Dispositivos conectados · {count}" },
+    "devicesFoot": "Ao atingir o limite, o dispositivo inativo há mais tempo é desconectado automaticamente. As localizações são estimadas pelo IP e podem não ser precisas.",
+    "maxSessions": "Máximo de dispositivos conectados",
+    "maxSessionsSaved": { "one": "Até {count} dispositivo", "other": "Até {count} dispositivos" },
+    "deviceCount": { "one": "{count} dispositivo", "other": "{count} dispositivos" },
+    "confirmLogoutOthers": "Desconectar todos os outros dispositivos?",
+    "loggedOutOthers": "Outros dispositivos desconectados",
+    "logoutOthers": "Desconectar todos os outros dispositivos",
+    "passwordChanged": "Senha alterada. Os outros dispositivos foram desconectados.",
+    "save": "Salvar",
+    "mismatch": "As senhas não coincidem",
+    "passwordFoot": "Mínimo de 8 caracteres. Ao alterar, todos os dispositivos exceto este serão desconectados.",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "minLength": "Mínimo de 8 caracteres",
+    "confirmPassword": "Confirmar nova senha"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "title": "Langganan Ethan",
+  "loadFailed": "Gagal memuat",
+  "theme": { "title": "Tema: {mode} (klik untuk beralih)", "aria": "Tema: {mode}, klik untuk beralih" },
+  "currency": "Mata uang tampilan",
+  "hero": {
+    "monthly": "Pengeluaran langganan bulanan",
+    "flat": "Sama seperti bulan ini tahun lalu",
+    "more": "{amount} lebih banyak dari bulan ini tahun lalu",
+    "less": "{amount} lebih sedikit dari bulan ini tahun lalu",
+    "yearly": "Per tahun",
+    "live": "Aktif",
+    "paid": "Dibayar sejak {year}"
+  },
+  "timeline": { "title": "Linimasa", "upcoming": { "other": "{count} tagihan dalam 30 hari ke depan · {amount}" } },
+  "chart": {
+    "title": "Tagihan bulanan",
+    "desc": "12 bulan terakhir dan 3 bulan ke depan; batang putus-putus adalah perkiraan",
+    "paid": "Dibayar",
+    "mrr": "Biaya bulanan",
+    "charge": "Ditagih",
+    "thisMonth": "Bulan ini",
+    "projected": "{month} · Perkiraan"
+  },
+  "ended": { "title": "Dibatalkan", "saved": "Hemat {amount} sejak dibatalkan", "item": "Hemat {amount}" },
+  "perMonth": "{amount}/bln",
+  "lifetime": { "title": "Seumur hidup", "desc": "Bayar sekali, tanpa tagihan lagi" },
+  "footer": "Tagihan lalu memakai kurs pada hari itu; tagihan mendatang memakai kurs hari ini. Domain yang belum dirilis dan detail pembayaran disembunyikan.",
+  "composition": { "title": "Rincian", "desc": "Biaya bulanan per kategori", "other": "Lainnya" },
+  "count": "{count}",
+  "fx": {
+    "title": "Kurs",
+    "flat": "Kurs hampir tidak memengaruhi biaya dalam setahun terakhir",
+    "less": "Dengan kurs hari ini, Anda membayar {amount} lebih sedikit per bulan dibanding setahun lalu",
+    "more": "Dengan kurs hari ini, Anda membayar {amount} lebih banyak per bulan dibanding setahun lalu",
+    "share": "{pct}%"
+  },
+  "list": { "title": "Langganan", "summary": { "other": "{count} · {amount}/bln" }, "all": "Semua" },
+  "row": { "renews": " · Diperpanjang {date}", "monthly": "Bulanan", "perMonthEq": "Per bulan" }
+}

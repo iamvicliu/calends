@@ -1,0 +1,85 @@
+{
+  "title": "‘{name}’ 공유",
+  "style": {
+    "card": "카드",
+    "receipt": "영수증",
+    "timeline": "타임라인",
+    "poster": "포스터",
+    "years": "연도별"
+  },
+  "dur": {
+    "ym": "{y}년 {m}개월",
+    "y": {
+      "other": "{count}년"
+    },
+    "m": {
+      "other": "{count}개월"
+    },
+    "d": {
+      "other": "{count}일"
+    }
+  },
+  "status": {
+    "active": "이용 중",
+    "ending": "종료 예정",
+    "trial": "체험 중",
+    "paused": "일시 정지됨",
+    "ended": "해지됨",
+    "lifetime": "평생 소장",
+    "upcoming": "곧 시작"
+  },
+  "switched": {
+    "zero": "변경 없음",
+    "other": "{count}회 변경"
+  },
+  "priceSame": "변동 없음",
+  "priceUp": "{pct}% 인상",
+  "priceDown": "{pct}% 인하",
+  "since": "{date}부터",
+  "together": "함께한 기간",
+  "totalSpent": "총 지출",
+  "charges": "결제",
+  "subscribed": "구독 기간",
+  "times": "{count}회",
+  "gaps": "중단",
+  "realMonthly": "실제 월 비용",
+  "price": "가격",
+  "phases": "구간",
+  "phaseCount": "{count}개",
+  "untilToday": "{date} — 오늘",
+  "refund": "환불",
+  "refundShort": "환불",
+  "nth": "#{n}",
+  "earlier": "이전 {count}건",
+  "time": "TIME",
+  "total": "TOTAL",
+  "chargeCount": "결제 횟수",
+  "count": "{count}",
+  "switches": "지역 / 플랜 변경",
+  "thanks": "감사합니다 · 다음 주기에 또 만나요",
+  "n": {
+    "charges": {
+      "other": "결제 {count}건"
+    }
+  },
+  "sum": "총 {amount}",
+  "gap": "{dur} 중단",
+  "planned": "{date}(예정)",
+  "present": "현재",
+  "priceChanges": "가격 변경: {list}",
+  "withYou": "함께한 기간",
+  "totalPerDay": "총 {total} · 하루 평균 {perDay}",
+  "lapsed": {
+    "other": "{count}회 중단"
+  },
+  "byYear": "연도별 지출",
+  "sheet": {
+    "copied": "이미지를 복사했습니다. 붙여 넣을 수 있습니다",
+    "copyFailed": "복사하지 못했습니다. 대신 다운로드해 보세요.",
+    "renderFailed": "이미지를 만들지 못했습니다",
+    "download": "이미지 다운로드",
+    "generating": "생성 중…",
+    "copy": "이미지 복사",
+    "showAmounts": "금액 표시"
+  }
+}

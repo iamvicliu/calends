@@ -1,0 +1,142 @@
+{
+  "title": "Portefeuille",
+  "sub": {
+    "one": "{count} moyen de paiement",
+    "other": "{count} moyens de paiement"
+  },
+  "subDrag": {
+    "one": "{count} moyen de paiement · Faites glisser les cartes pour les réorganiser",
+    "other": "{count} moyens de paiement · Faites glisser les cartes pour les réorganiser"
+  },
+  "add": "Ajouter",
+  "orderSaved": "Ordre enregistré",
+  "runwayGroup": "Autonomie du solde",
+  "family": "Abonnements partagés",
+  "familyCount": "{count}",
+  "unassigned": "Sans moyen de paiement · {count}",
+  "runway": {
+    "drain": "Environ {amount}/mois",
+    "scale": {
+      "today": "Auj.",
+      "m3": "3 mois",
+      "m6": "6 mois",
+      "m9": "9 mois",
+      "y1": "1 an"
+    },
+    "noSubs": "Aucun abonnement facturé associé.",
+    "shortNow": "Insuffisant pour les {amount} de {name} le {date} ({rel}). Rechargez {topup} pour couvrir une année complète.",
+    "shortLater": "Couvre {periods}, puis s’épuise avant {name} le {date} ({rel}). Rechargez {topup} pour couvrir une année complète.",
+    "ok": "Suffisant pour les 3 prochaines années, soit {periods}.",
+    "periods": {
+      "one": "{count} prélèvement",
+      "other": "{count} prélèvements"
+    },
+    "projFoot": "Les prélèvements suivants ne seront pas couverts. Rechargez {amount} pour couvrir une année complète."
+  },
+  "card": {
+    "cashback": "{pct} % remboursés",
+    "balance": "Solde",
+    "monthlySpend": "Par mois",
+    "subs": {
+      "one": "{count} abonnement",
+      "other": "{count} abonnements"
+    },
+    "noCharges": "Aucun prélèvement",
+    "periodsLeft": {
+      "one": "{count} prélèvement restant",
+      "other": "{count} prélèvements restants"
+    },
+    "low": "Insuffisant",
+    "enough": "Suffisant",
+    "noBalance": "Aucun solde défini"
+  },
+  "sheet": {
+    "topup": "Recharger / ajuster le solde",
+    "setBalance": "Définir le solde",
+    "edit": "Modifier",
+    "goTopup": "Recharger",
+    "site": "Site web",
+    "projection": "Prélèvements à venir",
+    "linked": "Abonnements associés · {count}",
+    "none": "Aucun",
+    "notes": "Notes"
+  },
+  "topup": {
+    "toastAdd": "Recharge enregistrée",
+    "toastSet": "Solde mis à jour",
+    "removed": "Recharge supprimée (solde inchangé)",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "modeAdd": "Recharger",
+    "modeSet": "Définir le solde réel",
+    "amount": "Montant ({ccy})",
+    "actual": "Solde réel",
+    "estimate": "Estimation actuelle",
+    "after": "Après enregistrement",
+    "optional": "Cette recharge (facultatif)",
+    "date": "Date",
+    "costCcy": "Payé en",
+    "cost": "Montant payé",
+    "costPh": "Facultatif",
+    "note": "Note",
+    "notePh": "ex. Razer Gold, un revendeur",
+    "history": "Recharges · {count}",
+    "spent": "payé {amount}",
+    "premium": "{pct} % de surcoût",
+    "below": "{pct} % sous le marché",
+    "removeAria": "Supprimer cette recharge"
+  },
+  "editor": {
+    "titleNew": "Ajouter un moyen de paiement",
+    "titleEdit": "Modifier le moyen de paiement",
+    "confirmDelete": "Supprimer « {name} » ? Les abonnements associés n’auront plus de moyen de paiement.",
+    "deleted": "Supprimé",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "saved": "Enregistré",
+    "done": "OK",
+    "newName": "Nouveau moyen de paiement",
+    "name": "Nom",
+    "namePh": "Boursorama, App Store Türkiye…",
+    "url": "Site web / page de recharge",
+    "urlPh": "https:// (facultatif)",
+    "kind": "Type",
+    "bank": "Banque",
+    "bankDetected": "Détectée d’après le nom",
+    "bankAuto": "Détecter d’après le nom",
+    "logoBuiltIn": "{kind} utilise son logo officiel",
+    "currency": "Devise",
+    "network": "Réseau de carte",
+    "networkNone": "Masqué",
+    "bankIcon": "Icône de la banque",
+    "bankSet": "Choisie manuellement",
+    "bankHint": "Indiquez le nom de la banque pour la détecter",
+    "last4": "4 derniers chiffres",
+    "region": "Région",
+    "phone": "Numéro de téléphone",
+    "cashback": "Cashback / points",
+    "cashbackPh": "% (facultatif)",
+    "balanceGroup": "Solde",
+    "balance": "Solde actuel",
+    "optional": "Facultatif",
+    "asOf": "Au",
+    "lowAlert": "Alerte de solde faible",
+    "lowAlertOpt": {
+      "one": "{count} jour avant",
+      "other": "{count} jours avant"
+    },
+    "lowAlertAria": "Alerte de solde",
+    "notes": "Notes"
+  },
+  "logo": {
+    "uploaded": "Importée",
+    "link": "URL de l’image",
+    "favicon": "Icône du site",
+    "bank": "Icône de la banque",
+    "none": "Non défini, affiche la première lettre",
+    "upload": "Importer",
+    "linkBtn": "URL",
+    "clear": "Effacer",
+    "wide": "Logo horizontal"
+  }
+}

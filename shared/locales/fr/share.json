@@ -1,0 +1,91 @@
+{
+  "title": "Partager « {name} »",
+  "style": {
+    "card": "Carte",
+    "receipt": "Ticket",
+    "timeline": "Frise",
+    "poster": "Affiche",
+    "years": "Par année"
+  },
+  "dur": {
+    "ym": "{y} an(s) {m} mois",
+    "y": {
+      "one": "{count} an",
+      "other": "{count} ans"
+    },
+    "m": {
+      "one": "{count} mois",
+      "other": "{count} mois"
+    },
+    "d": {
+      "one": "{count} jour",
+      "other": "{count} jours"
+    }
+  },
+  "status": {
+    "active": "Actif",
+    "ending": "Se termine",
+    "trial": "En essai",
+    "paused": "Suspendu",
+    "ended": "Résilié",
+    "lifetime": "Acquis à vie",
+    "upcoming": "Commence bientôt"
+  },
+  "switched": {
+    "zero": "Jamais changé",
+    "one": "Changé une fois",
+    "other": "Changé {count} fois"
+  },
+  "priceSame": "Inchangé",
+  "priceUp": "+{pct} %",
+  "priceDown": "−{pct} %",
+  "since": "Depuis le {date}",
+  "together": "Ensemble depuis",
+  "totalSpent": "Total dépensé",
+  "charges": "Prélèvements",
+  "subscribed": "Abonné",
+  "times": "{count}",
+  "gaps": "Interruptions",
+  "realMonthly": "Coût mensuel réel",
+  "price": "Prix",
+  "phases": "Phases",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — aujourd’hui",
+  "refund": "Remboursement",
+  "refundShort": "Remb.",
+  "nth": "n° {n}",
+  "earlier": "{count} plus anciens",
+  "time": "DATE",
+  "total": "TOTAL",
+  "chargeCount": "Prélèvements",
+  "count": "{count}",
+  "switches": "Changements de région / formule",
+  "thanks": "Merci · À la prochaine échéance",
+  "n": {
+    "charges": {
+      "one": "{count} prélèvement",
+      "other": "{count} prélèvements"
+    }
+  },
+  "sum": "{amount} au total",
+  "gap": "{dur} d’interruption",
+  "planned": "{date} (prévu)",
+  "present": "aujourd’hui",
+  "priceChanges": "Changements de prix : {list}",
+  "withYou": "Avec vous depuis",
+  "totalPerDay": "{total} au total · {perDay}/jour en moyenne",
+  "lapsed": {
+    "one": "Interrompu une fois",
+    "other": "Interrompu {count} fois"
+  },
+  "byYear": "Dépenses par année",
+  "sheet": {
+    "copied": "Image copiée, prête à coller",
+    "copyFailed": "Copie impossible. Essayez plutôt de la télécharger.",
+    "renderFailed": "Impossible de créer l’image",
+    "download": "Télécharger l’image",
+    "generating": "Génération…",
+    "copy": "Copier l’image",
+    "showAmounts": "Afficher les montants"
+  }
+}

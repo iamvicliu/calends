@@ -1,0 +1,123 @@
+{
+  "action": {
+    "edit": "Bearbeiten",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "manage": "Verwalten",
+    "website": "Website",
+    "share": "Teilen"
+  },
+  "toast": {
+    "resumed": "Abrechnung fortgesetzt",
+    "paused": "Pausiert. Künftige Abbuchungen werden nicht mehr prognostiziert"
+  },
+  "history": "Verlauf",
+  "summary": "Übersicht",
+  "field": {
+    "amount": "Betrag",
+    "cycle": "Abrechnungszeitraum",
+    "monthlyYearly": "Monatlich / jährlich",
+    "category": "Kategorie",
+    "method": "Zahlungsmethode",
+    "start": "Startdatum",
+    "next": "Nächste Fälligkeit",
+    "expires": "Leistung endet",
+    "expiresHint": "Die automatische Verlängerung bucht vor diesem Datum ab",
+    "endedOn": "Beendet am",
+    "trialEnd": "Testphase endet",
+    "region": "Region"
+  },
+  "up": {
+    "planned": "Geplante Änderung · nicht bestätigt",
+    "starting": "Beginnt bald",
+    "changing": "Anstehende Änderung",
+    "effective": "Gültig ab"
+  },
+  "plan": {
+    "drop": "Nicht wechseln",
+    "droppedToast": "Kein Wechsel. Endet nach dem {date}",
+    "confirm": "Wechsel bestätigen",
+    "confirmedToast": "Wechsel bestätigt"
+  },
+  "intro": {
+    "title": "Einführungsangebot",
+    "price": "Einführungspreis",
+    "until": "Angebot endet",
+    "then": "Danach"
+  },
+  "remind": {
+    "title": "Erinnerungen",
+    "email": "E-Mail-Erinnerung",
+    "off": "Aus",
+    "onDay": "Am Fälligkeitstag um {time}",
+    "before": {
+      "one": "{count} Tag vorher um {time}",
+      "other": "{count} Tage vorher um {time}"
+    }
+  },
+  "share": {
+    "owner": "Geteilt · ich organisiere ({count}/{seats})",
+    "member": "Geteilt · ich bin dabei",
+    "payTo": "Zahlen an",
+    "host": "Organisator",
+    "myShare": "Mein Anteil",
+    "unnamed": "Ohne Namen",
+    "paidUntil": "Bezahlt bis {date}",
+    "unpaid": "Noch nicht bezahlt",
+    "owed": "{amount} offen",
+    "settled": "Beglichen"
+  },
+  "charges": {
+    "title": {
+      "one": "Abbuchung · {count}",
+      "other": "Abbuchungen · {count}"
+    },
+    "kind": {
+      "refund": "Erstattung",
+      "adjust": "Korrektur",
+      "failed": "Fehlgeschlagen"
+    },
+    "onCard": "Auf der Karte {amount} · ",
+    "add": "Eintrag hinzufügen (Erstattung, Korrektur, fehlgeschlagene Abbuchung, Kartenbetrag …)",
+    "recent": "Nur die letzten 12 zeigen",
+    "all": "Alle {count} zeigen"
+  },
+  "notes": "Notizen",
+  "stats": {
+    "spent": "Gesamtausgaben",
+    "count": {
+      "one": "{count} Abbuchung",
+      "other": "{count} Abbuchungen"
+    },
+    "owned": "Im Besitz seit",
+    "subscribed": "Abonniert seit",
+    "yearsMonths": "{years} J. {months} Mon.",
+    "years": {
+      "one": "{count} Jahr",
+      "other": "{count} Jahre"
+    },
+    "months": {
+      "one": "{count} Monat",
+      "other": "{count} Monate"
+    },
+    "days": {
+      "one": "{count} Tag",
+      "other": "{count} Tage"
+    },
+    "gaps": {
+      "one": "Einmal unterbrochen",
+      "other": "{count}-mal unterbrochen"
+    },
+    "since": "Seit {date}",
+    "perMonth": "Tatsächlich pro Monat",
+    "perMonthHint": "Gesamt ÷ abonnierte Monate",
+    "priceChange": "Preisänderung",
+    "changed": "Änderungen",
+    "unchanged": "Unverändert",
+    "times": {
+      "one": "{count}-mal",
+      "other": "{count}-mal"
+    },
+    "changeHint": "Änderungen bei Region, Tarif oder Zahlung"
+  }
+}

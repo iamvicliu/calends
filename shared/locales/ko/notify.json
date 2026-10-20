@@ -1,0 +1,93 @@
+{
+  "appName": "구독 장부",
+  "trial": {
+    "sub": "체험이 {when}({date}) 종료되며, 이후 {price}",
+    "headline": "{name} 체험이 {when} 종료됩니다"
+  },
+  "renew": {
+    "introEnds": "프로모션 가격이 끝나고 정가로 돌아갑니다",
+    "headline": "{name}이(가) {when} {price}에 갱신됩니다"
+  },
+  "ending": {
+    "sub": "{when} 종료, 갱신되지 않음",
+    "headline": "{name}이(가) {when} 종료됩니다"
+  },
+  "carpool": {
+    "dueIn": "기한 {when}({date})",
+    "dueToday": "오늘 기한",
+    "overdue": {
+      "other": "{count}일 연체"
+    },
+    "sub": "{status} · 다음 주기: {bill}",
+    "headline": "{member}에게서 {name} 요금을 받을 때입니다"
+  },
+  "proxy": {
+    "someone": "누군가",
+    "chargedToday": "오늘 대신 결제되었습니다",
+    "chargedAgo": {
+      "other": "{date} 결제, {count}일 전"
+    },
+    "sub": "{status}, 아직 돌려받지 못함",
+    "headlineToday": "{name} 대신 {sub} 결제",
+    "headlineUnpaid": "{name}이(가) {sub}을(를) 아직 갚지 않았습니다"
+  },
+  "balance": {
+    "sub": "잔액 {balance}(으)로는 {date}의 {sub}({amount})을(를) 결제할 수 없습니다",
+    "headline": "{name} 잔액 부족"
+  },
+  "section": {
+    "renew": "예정된 결제",
+    "trials": "종료 예정 체험",
+    "balance": "잔액 부족",
+    "carpool": "공유 플랜 납부",
+    "proxy": "대신 결제 미수금",
+    "ending": "곧 종료",
+    "month": "이번 달 결제"
+  },
+  "daily": {
+    "subject": "구독 알림: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} 외 {more}건",
+    "intro": "현재 구독 {count}개를 이용 중이며, 매달 {mrr}을(를) 지출하고 있습니다."
+  },
+  "monthly": {
+    "subject": {
+      "other": "{month} 청구: 약 {sum}, 결제 {count}건"
+    },
+    "intro": {
+      "other": "{monthYear}에 결제 {count}건이 예정되어 있으며, 합계 약 {sum}입니다. MRR {mrr}, 연 {arr}."
+    }
+  },
+  "email": {
+    "open": "구독 장부 열기",
+    "footer": "알림 시간과 사전 알림 일수는 설정에서 바꿀 수 있습니다."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "채널을 찾을 수 없습니다",
+    "noneEnabled": "켜져 있는 알림 채널이 없습니다",
+    "alreadySent": "오늘 이미 보냈습니다",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[테스트] {subject}",
+    "sampleSubject": "[테스트] 구독 알림이 준비되었습니다",
+    "sampleIntro": "알림 채널이 정상적으로 작동합니다."
+  },
+  "channel": {
+    "missing": "‘{channel}’에 {field}이(가) 없습니다",
+    "field": {
+      "to": "받는 사람 이메일",
+      "botToken": "봇 토큰",
+      "chatId": "채팅 ID",
+      "webhook": "Webhook URL",
+      "deviceKey": "기기 키",
+      "topic": "토픽",
+      "sendKey": "SendKey",
+      "url": "URL"
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "title": "Visão geral",
+  "add": "Nova assinatura",
+  "footer": {
+    "one": "{count} assinatura ativa · {amount}/mês ·",
+    "other": "{count} assinaturas ativas · {amount}/mês ·"
+  },
+  "fullReport": "Ver relatório completo",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "one": "{count} assinatura",
+      "other": "{count} assinaturas"
+    },
+    "charges": {
+      "one": "{count} cobrança",
+      "other": "{count} cobranças"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon}/{yy}"
+  },
+  "timeline": {
+    "title": "Linha do tempo",
+    "sub": "{past} cobrados nos últimos 30 dias · {next} a vencer nos próximos 30"
+  },
+  "spending": {
+    "title": "Gastos mensais",
+    "sub": "Barras mais claras são previsões",
+    "month": "Mensal",
+    "yearly": "Anual",
+    "year": "{year}",
+    "projected": " · Previsto",
+    "inProgress": " · Em andamento",
+    "paid": " · {amount} pagos",
+    "empty": "Nenhuma cobrança neste período"
+  },
+  "due": {
+    "title": "Próximos 30 dias",
+    "empty": "Nada a vencer nos próximos 30 dias",
+    "thisWeek": "Esta semana",
+    "later": "Depois",
+    "noMethod": "Sem forma de pagamento"
+  },
+  "wallet": {
+    "title": "Carteira",
+    "manage": "Gerenciar",
+    "balance": "Saldo {amount} · {status}",
+    "covered": {
+      "one": "cobre mais {count} cobrança, recarregue até {date}",
+      "other": "cobre mais {count} cobranças, recarregue até {date}"
+    },
+    "mustTopUp": "recarregue até {date}",
+    "enough": "suficiente para mais de 3 anos",
+    "noBalance": "Adicione um saldo para ver quanto tempo ele dura",
+    "others": "Também: {list}"
+  },
+  "tips": {
+    "warn": "Atenção",
+    "info": "Dica",
+    "good": "Curiosidade"
+  },
+  "stmt": {
+    "kicker": "Gasto mensal com assinaturas",
+    "vsLastMonth": "vs. fim do mês passado",
+    "annual": "Por ano",
+    "ytd": "Pago em {year}",
+    "perDay": "Por dia",
+    "active": "Ativas",
+    "share": "{amount}/mês · {pct}%",
+    "caption": "Constelação de assinaturas · o tamanho da bolha mostra o custo mensal",
+    "aria": "{name}, {amount} por mês"
+  }
+}

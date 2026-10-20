@@ -1,0 +1,136 @@
+{
+  "bill": {
+    "m1": "Monatlich",
+    "m3": "Vierteljährlich",
+    "m6": "Halbjährlich",
+    "m12": "Jährlich",
+    "custom": {
+      "one": "Jeden {count}. Monat",
+      "other": "Alle {count} Monate"
+    }
+  },
+  "cycle": {
+    "lifetime": "Lebenslang",
+    "once": "einmalig",
+    "every": {
+      "day": "Täglich",
+      "week": "Wöchentlich",
+      "month": "Monatlich",
+      "year": "Jährlich"
+    },
+    "quarterly": "Vierteljährlich",
+    "halfYearly": "Halbjährlich",
+    "biennial": "Alle 2 Jahre",
+    "everyN": {
+      "day": {
+        "one": "Jeden {count}. Tag",
+        "other": "Alle {count} Tage"
+      },
+      "week": {
+        "one": "Jede {count}. Woche",
+        "other": "Alle {count} Wochen"
+      },
+      "month": {
+        "one": "Jeden {count}. Monat",
+        "other": "Alle {count} Monate"
+      },
+      "year": {
+        "one": "Jedes {count}. Jahr",
+        "other": "Alle {count} Jahre"
+      }
+    }
+  },
+  "subError": {
+    "name": "Name ist erforderlich",
+    "price": "Ungültiger Preis",
+    "start": "Ungültiges Startdatum",
+    "cycle": "Ungültiger Abrechnungszeitraum"
+  },
+  "phase": {
+    "switchTooEarly": "Das Gültigkeitsdatum muss nach dem Beginn der aktuellen Phase liegen",
+    "resumeTooEarly": "Das Fortsetzungsdatum darf nicht vor dem letzten Enddatum liegen",
+    "priceOutOfRange": "Das Datum der Preisänderung liegt in keiner Phase"
+  },
+  "event": {
+    "label": "{region}{price}/{per}",
+    "region": "{region} ",
+    "per": {
+      "year": "J.",
+      "month": "Mon.",
+      "months": "{count} Mon.",
+      "week": "Wo.",
+      "day": "Tag"
+    }
+  },
+  "listSep": ", ",
+  "insight": {
+    "yearly": {
+      "title": {
+        "one": "{count} langfristiges Abo verlängert sich in den nächsten 60 Tagen",
+        "other": "{count} langfristige Abos verlängern sich in den nächsten 60 Tagen"
+      },
+      "body": "Insgesamt etwa {sum}. Jahresabbuchungen lassen sich schwer erstatten – jetzt ist der Moment, zu entscheiden, was bleibt."
+    },
+    "dup": {
+      "title": "{names} sind vielleicht doppelt",
+      "body": {
+        "one": "Dieses Abo kostet etwa {sum} im Monat. Prüfe, ob du es noch brauchst.",
+        "other": "Diese {count} Abos kosten zusammen etwa {sum} im Monat. Prüfe, ob du noch alle brauchst."
+      }
+    },
+    "hikes": {
+      "title": {
+        "one": "{count} Abo hat im letzten Jahr den Preis erhöht",
+        "other": "{count} Abos haben im letzten Jahr die Preise erhöht"
+      }
+    },
+    "intro": {
+      "title": {
+        "one": "Das Angebot für {name} endet in {count} Tag",
+        "other": "Das Angebot für {name} endet in {count} Tagen"
+      },
+      "body": "Danach steigt der Preis von {from} wieder auf {to}."
+    },
+    "balance": {
+      "title": "{name} reicht nicht bis {date}",
+      "body": "{sub} braucht {need}; das Guthaben beträgt etwa {current}."
+    },
+    "fx": {
+      "title": "{pct} % der Ausgaben sind in Fremdwährungen",
+      "body": "Am größten ist {ccy} ({share} %). Dieser Teil wird günstiger, wenn {ccy} schwächer wird, und teurer, wenn sie stärker wird."
+    },
+    "noMethod": {
+      "title": {
+        "one": "{count} Abo hat keine Zahlungsmethode",
+        "other": "{count} Abos haben keine Zahlungsmethode"
+      },
+      "body": "Füge eine hinzu, damit Guthabenprognosen und Statistiken pro Zahlungsmethode vollständig sind."
+    },
+    "top": {
+      "title": "{name} ist dein teuerstes Abo",
+      "body": "Etwa {perDay} pro Tag, {pct} % der monatlichen Ausgaben."
+    }
+  },
+  "methodKind": {
+    "debit": "Bankkarte",
+    "credit": "Kreditkarte",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "Geschenkkarte",
+    "prepaid": "Store-Guthaben",
+    "phone": "Mobilfunkguthaben",
+    "crypto": "Kryptokarte",
+    "other": "Sonstiges"
+  },
+  "publicMethod": "{kind} · {region}",
+  "channel": {
+    "email": "E-Mail"
+  },
+  "csv": {
+    "appStoreBalance": "App Store-Guthaben {region}",
+    "otherCategory": "Sonstiges"
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "title": "지갑",
+  "sub": {
+    "other": "결제 수단 {count}개"
+  },
+  "subDrag": {
+    "other": "결제 수단 {count}개 · 카드를 드래그하여 순서 변경"
+  },
+  "add": "추가",
+  "orderSaved": "순서를 저장했습니다",
+  "runwayGroup": "잔액 지속 기간",
+  "family": "공유 플랜",
+  "familyCount": "{count}개",
+  "unassigned": "결제 수단 없음 · {count}",
+  "runway": {
+    "drain": "월 약 {amount}",
+    "scale": {
+      "today": "오늘",
+      "m3": "3개월",
+      "m6": "6개월",
+      "m9": "9개월",
+      "y1": "1년"
+    },
+    "noSubs": "연결된 유료 구독이 없습니다.",
+    "shortNow": "{date}({rel}) {name}의 {amount}을(를) 결제하기에 부족합니다. {topup}을(를) 충전하면 1년간 충분합니다.",
+    "shortLater": "{periods}까지는 가능하지만 {date}({rel}) {name} 전에 부족해집니다. {topup}을(를) 충전하면 1년간 충분합니다.",
+    "ok": "앞으로 3년간 충분하며, {periods}을(를) 감당할 수 있습니다.",
+    "periods": {
+      "other": "결제 {count}건"
+    },
+    "projFoot": "이후 결제는 감당할 수 없습니다. {amount}을(를) 충전하면 1년간 충분합니다."
+  },
+  "card": {
+    "cashback": "{pct}% 적립",
+    "balance": "잔액",
+    "monthlySpend": "월",
+    "subs": {
+      "other": "구독 {count}개"
+    },
+    "noCharges": "결제 없음",
+    "periodsLeft": {
+      "other": "결제 {count}회 남음"
+    },
+    "low": "부족",
+    "enough": "충분",
+    "noBalance": "잔액 미설정"
+  },
+  "sheet": {
+    "topup": "충전 / 잔액 조정",
+    "setBalance": "잔액 설정",
+    "edit": "편집",
+    "goTopup": "충전",
+    "site": "웹사이트",
+    "projection": "예정된 결제",
+    "linked": "연결된 구독 · {count}",
+    "none": "없음",
+    "notes": "메모"
+  },
+  "topup": {
+    "toastAdd": "충전을 기록했습니다",
+    "toastSet": "잔액을 업데이트했습니다",
+    "removed": "충전 기록을 삭제했습니다(잔액은 그대로)",
+    "cancel": "취소",
+    "save": "저장",
+    "modeAdd": "충전",
+    "modeSet": "실제 잔액 설정",
+    "amount": "금액({ccy})",
+    "actual": "실제 잔액",
+    "estimate": "현재 추정치",
+    "after": "저장 후",
+    "optional": "이번 충전(선택 사항)",
+    "date": "날짜",
+    "costCcy": "결제 통화",
+    "cost": "결제 금액",
+    "costPh": "선택 사항",
+    "note": "메모",
+    "notePh": "예: Razer Gold, 대행업체",
+    "history": "충전 기록 · {count}",
+    "spent": "{amount} 결제",
+    "premium": "{pct}% 웃돈",
+    "below": "시세보다 {pct}% 저렴",
+    "removeAria": "이 충전 기록 삭제"
+  },
+  "editor": {
+    "titleNew": "결제 수단 추가",
+    "titleEdit": "결제 수단 편집",
+    "confirmDelete": "‘{name}’을(를) 삭제할까요? 연결된 구독은 결제 수단이 없어집니다.",
+    "deleted": "삭제했습니다",
+    "delete": "삭제",
+    "cancel": "취소",
+    "saved": "저장했습니다",
+    "done": "완료",
+    "newName": "새 결제 수단",
+    "name": "이름",
+    "namePh": "신한카드, App Store 튀르키예…",
+    "url": "웹사이트 / 충전 페이지",
+    "urlPh": "https://(선택 사항)",
+    "kind": "유형",
+    "bank": "은행",
+    "bankDetected": "이름에서 인식함",
+    "bankAuto": "이름에서 인식",
+    "logoBuiltIn": "{kind}은(는) 공식 로고를 사용합니다",
+    "currency": "통화",
+    "network": "카드 브랜드",
+    "networkNone": "숨김",
+    "bankIcon": "은행 아이콘",
+    "bankSet": "직접 선택함",
+    "bankHint": "은행 이름을 포함하면 자동으로 인식합니다",
+    "last4": "끝 4자리",
+    "region": "지역",
+    "phone": "전화번호",
+    "cashback": "캐시백 / 포인트",
+    "cashbackPh": "%(선택 사항)",
+    "balanceGroup": "잔액",
+    "balance": "현재 잔액",
+    "optional": "선택 사항",
+    "asOf": "기준일",
+    "lowAlert": "잔액 부족 알림",
+    "lowAlertOpt": {
+      "other": "{count}일 전"
+    },
+    "lowAlertAria": "잔액 알림",
+    "notes": "메모"
+  },
+  "logo": {
+    "uploaded": "업로드됨",
+    "link": "이미지 URL",
+    "favicon": "웹사이트 아이콘",
+    "bank": "은행 아이콘",
+    "none": "설정 안 함 · 첫 글자 표시",
+    "upload": "업로드",
+    "linkBtn": "URL",
+    "clear": "지우기",
+    "wide": "가로형 워드마크"
+  }
+}

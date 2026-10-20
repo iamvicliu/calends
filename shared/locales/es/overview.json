@@ -1,0 +1,74 @@
+{
+  "title": "Resumen",
+  "add": "Nueva suscripción",
+  "footer": {
+    "one": "{count} suscripción activa · {amount}/mes ·",
+    "other": "{count} suscripciones activas · {amount}/mes ·"
+  },
+  "fullReport": "Ver informe completo",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "one": "{count} suscripción",
+      "other": "{count} suscripciones"
+    },
+    "charges": {
+      "one": "{count} cobro",
+      "other": "{count} cobros"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} '{yy}"
+  },
+  "timeline": {
+    "title": "Cronología",
+    "sub": "{past} cobrados en los últimos 30 días · {next} en los próximos 30"
+  },
+  "spending": {
+    "title": "Gasto mensual",
+    "sub": "Las barras claras son previsiones",
+    "month": "Mensual",
+    "yearly": "Anual",
+    "year": "{year}",
+    "projected": " · Previsto",
+    "inProgress": " · En curso",
+    "paid": " · {amount} pagado",
+    "empty": "No hay cobros en este periodo"
+  },
+  "due": {
+    "title": "Próximos 30 días",
+    "empty": "No hay cobros en los próximos 30 días",
+    "thisWeek": "Esta semana",
+    "later": "Más adelante",
+    "noMethod": "Sin método de pago"
+  },
+  "wallet": {
+    "title": "Cartera",
+    "manage": "Gestionar",
+    "balance": "Saldo {amount} · {status}",
+    "covered": {
+      "one": "cubre {count} cobro más, recarga antes del {date}",
+      "other": "cubre {count} cobros más, recarga antes del {date}"
+    },
+    "mustTopUp": "recarga antes del {date}",
+    "enough": "suficiente para más de 3 años",
+    "noBalance": "Añade un saldo para ver cuánto durará",
+    "others": "También: {list}"
+  },
+  "tips": {
+    "warn": "Atención",
+    "info": "Consejo",
+    "good": "Dato curioso"
+  },
+  "stmt": {
+    "kicker": "Gasto mensual en suscripciones",
+    "vsLastMonth": "vs. final del mes pasado",
+    "annual": "Al año",
+    "ytd": "Pagado en {year}",
+    "perDay": "Al día",
+    "active": "Activas",
+    "share": "{amount}/mes · {pct}%",
+    "caption": "Constelación de suscripciones · el tamaño indica el coste mensual",
+    "aria": "{name}, {amount} al mes"
+  }
+}

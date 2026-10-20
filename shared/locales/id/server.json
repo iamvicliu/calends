@@ -1,0 +1,35 @@
+{
+  "fxApiError": "Layanan kurs mengembalikan galat",
+  "missingId": "id tidak ada",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "Buku catatan ini tidak publik",
+  "idMismatch": "ID tidak cocok",
+  "invalidMethod": "Metode pembayaran tidak valid",
+  "invalidBackup": "File cadangan tidak valid",
+  "refreshFailed": "Gagal memperbarui",
+  "backup": {
+    "notBackup": "Ini bukan file cadangan yang valid",
+    "unknownFormat": "Format cadangan tidak dikenal: {format}",
+    "newerVersion": "Cadangan ini dari versi yang lebih baru (v{version}). Perbarui situs ini terlebih dahulu."
+  },
+  "auth": {
+    "tooMany": "Terlalu banyak percobaan. Coba lagi dalam 15 menit.",
+    "alreadySetup": "Kata sandi sudah diatur",
+    "noSetupToken": "SETUP_TOKEN tidak dikonfigurasi saat deploy, jadi penyiapan tidak bisa dilanjutkan. Atur secret ini terlebih dahulu (wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "Token penyiapan salah",
+    "passwordTooShort": { "other": "Kata sandi minimal {min} karakter" },
+    "wrongPassword": "Kata sandi salah",
+    "wrongCurrentPassword": "Kata sandi saat ini salah",
+    "newPasswordTooShort": { "other": "Kata sandi baru minimal {min} karakter" },
+    "invalidDevice": "Perangkat tidak valid",
+    "cannotRemoveCurrent": "Perangkat ini tidak bisa dihapus. Gunakan Keluar.",
+    "expired": "Permintaan kedaluwarsa. Silakan coba lagi.",
+    "passkeyFailed": "Verifikasi passkey gagal",
+    "passkeyNotBound": "Passkey ini tidak terdaftar di situs ini"
+  },
+  "ics": {
+    "calName": "Tagihan langganan",
+    "method": "Pembayaran: {name}",
+    "alarm": "{name} segera diperpanjang"
+  }
+}

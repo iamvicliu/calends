@@ -1,0 +1,62 @@
+{
+  "title": "概覽",
+  "add": "新增訂閱",
+  "footer": "{count} 個訂閱計費中 · 每月 {amount} ·",
+  "fullReport": "查看完整報告",
+  "listSep": "、",
+  "n": {
+    "subs": "{count} 個訂閱",
+    "charges": "{count} 筆"
+  },
+  "axis": {
+    "yearMonth": "{yy}/{m}"
+  },
+  "timeline": {
+    "title": "時間軸",
+    "sub": "過去 30 天扣了 {past} · 接下來 30 天要扣 {next}"
+  },
+  "spending": {
+    "title": "每月花了多少",
+    "sub": "淺色為預計",
+    "month": "按月",
+    "yearly": "按年",
+    "year": "{year}年",
+    "projected": " · 預計",
+    "inProgress": " · 進行中",
+    "paid": " · 已付 {amount}",
+    "empty": "這段時間沒有扣款"
+  },
+  "due": {
+    "title": "接下來 30 天",
+    "empty": "30 天內沒有扣款",
+    "thisWeek": "這週",
+    "later": "之後",
+    "noMethod": "未指定付款方式"
+  },
+  "wallet": {
+    "title": "錢包",
+    "manage": "管理",
+    "balance": "餘額 {amount} · {status}",
+    "covered": "還能扣 {count} 期，{date} 前要儲值",
+    "mustTopUp": "{date} 前必須儲值",
+    "enough": "3 年內夠用",
+    "noBalance": "還沒填餘額，填了才能算出還能撐多久",
+    "others": "另有 {list}"
+  },
+  "tips": {
+    "warn": "需要留意",
+    "info": "提示",
+    "good": "一個事實"
+  },
+  "stmt": {
+    "kicker": "每月訂閱支出",
+    "vsLastMonth": "較上月末",
+    "annual": "年化",
+    "ytd": "{year} 已付",
+    "perDay": "每天",
+    "active": "計費中",
+    "share": "{amount}/月 · 佔 {pct}%",
+    "caption": "訂閱星圖 · 圓的大小依每月金額比例",
+    "aria": "{name} 每月 {amount}"
+  }
+}

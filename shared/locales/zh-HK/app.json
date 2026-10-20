@@ -1,0 +1,60 @@
+{
+  "name": "訂閱帳本",
+  "offline": "離線",
+  "offlineError": "無法連線：{error}",
+  "nav": {
+    "overview": "概覽",
+    "list": "訂閱",
+    "calendar": "日曆",
+    "report": "報告",
+    "wallet": "錢包",
+    "family": "共享",
+    "behalf": "代付",
+    "ai": "AI 存取",
+    "settings": "設定"
+  },
+  "login": {
+    "setupHint": "首次使用，請設定登入密碼。",
+    "tagline": "每一筆訂閱、每一張卡、每一個共享方案。",
+    "setupToken": "初始化令牌（SETUP_TOKEN）",
+    "newPassword": "新密碼（至少 8 個字元）",
+    "password": "密碼",
+    "again": "再輸入一次",
+    "mismatch": "兩次輸入不一致",
+    "verifying": "驗證中…",
+    "setupEnter": "設定並進入",
+    "enter": "進入",
+    "passkey": "用 Passkey 登入"
+  },
+  "sidebar": {
+    "collapse": "收起側邊欄",
+    "expand": "展開側邊欄",
+    "new": "新增",
+    "search": "搜尋",
+    "upcoming": "即將扣款",
+    "today": "今天",
+    "tomorrow": "明天",
+    "inDays": { "other": "{count} 天後" },
+    "theme": "主題",
+    "themeHint": "點按切換：淺色 → 深色 → 跟隨系統"
+  },
+  "palette": {
+    "placeholder": "搜尋訂閱或頁面…",
+    "empty": "沒有結果",
+    "page": "頁面",
+    "add": "新增訂閱",
+    "addKeywords": "新增 建立 add new"
+  },
+  "ics": {
+    "title": "訂閱到日曆",
+    "intro": "將扣款日同步到 Apple 日曆、Google 日曆或 Outlook，每 6 小時自動更新，並依提醒設定在扣款前跳出通知。",
+    "subscribe": "一鍵訂閱",
+    "copy": "複製連結",
+    "copied": "已複製",
+    "reset": "重設連結",
+    "resetDone": "已重設，舊連結失效",
+    "generate": "建立私密日曆連結",
+    "generated": "已建立日曆連結",
+    "note": "連結含有私密令牌，持有者可看到扣款行程；外洩時點「重設連結」即可作廢。"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "title": "„{name}“ teilen",
+  "style": {
+    "card": "Karte",
+    "receipt": "Kassenbon",
+    "timeline": "Zeitleiste",
+    "poster": "Poster",
+    "years": "Nach Jahr"
+  },
+  "dur": {
+    "ym": "{y} J. {m} Mon.",
+    "y": {
+      "one": "{count} Jahr",
+      "other": "{count} Jahre"
+    },
+    "m": {
+      "one": "{count} Monat",
+      "other": "{count} Monate"
+    },
+    "d": {
+      "one": "{count} Tag",
+      "other": "{count} Tage"
+    }
+  },
+  "status": {
+    "active": "Aktiv",
+    "ending": "Endet",
+    "trial": "In Testphase",
+    "paused": "Pausiert",
+    "ended": "Gekündigt",
+    "lifetime": "Lebenslang gekauft",
+    "upcoming": "Beginnt bald"
+  },
+  "switched": {
+    "zero": "Nie gewechselt",
+    "one": "Einmal gewechselt",
+    "other": "{count}-mal gewechselt"
+  },
+  "priceSame": "Unverändert",
+  "priceUp": "+{pct} %",
+  "priceDown": "−{pct} %",
+  "since": "Seit {date}",
+  "together": "Zusammen seit",
+  "totalSpent": "Gesamtausgaben",
+  "charges": "Abbuchungen",
+  "subscribed": "Abonniert",
+  "times": "{count}",
+  "gaps": "Unterbrechungen",
+  "realMonthly": "Echte Monatskosten",
+  "price": "Preis",
+  "phases": "Phasen",
+  "phaseCount": "{count}",
+  "untilToday": "{date} – heute",
+  "refund": "Erstattung",
+  "refundShort": "Erstattung",
+  "nth": "#{n}",
+  "earlier": "{count} frühere",
+  "time": "ZEIT",
+  "total": "SUMME",
+  "chargeCount": "Abbuchungen",
+  "count": "{count}",
+  "switches": "Region- / Tarifwechsel",
+  "thanks": "Danke · Bis zum nächsten Zeitraum",
+  "n": {
+    "charges": {
+      "one": "{count} Abbuchung",
+      "other": "{count} Abbuchungen"
+    }
+  },
+  "sum": "{amount} gesamt",
+  "gap": "{dur} Pause",
+  "planned": "{date} (geplant)",
+  "present": "heute",
+  "priceChanges": "Preisänderungen: {list}",
+  "withYou": "Dabei seit",
+  "totalPerDay": "{total} gesamt · im Schnitt {perDay}/Tag",
+  "lapsed": {
+    "one": "Einmal unterbrochen",
+    "other": "{count}-mal unterbrochen"
+  },
+  "byYear": "Ausgaben nach Jahr",
+  "sheet": {
+    "copied": "Bild kopiert – bereit zum Einfügen",
+    "copyFailed": "Kopieren fehlgeschlagen. Lade es stattdessen herunter.",
+    "renderFailed": "Bild konnte nicht erstellt werden",
+    "download": "Bild herunterladen",
+    "generating": "Wird erstellt …",
+    "copy": "Bild kopieren",
+    "showAmounts": "Beträge anzeigen"
+  }
+}

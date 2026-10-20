@@ -1,0 +1,63 @@
+{
+  "name": "Subscription Ledger",
+  "offline": "Hors ligne",
+  "offlineError": "Connexion impossible : {error}",
+  "nav": {
+    "overview": "Aperçu",
+    "list": "Abonnements",
+    "calendar": "Calendrier",
+    "report": "Rapports",
+    "wallet": "Portefeuille",
+    "family": "Abonnements partagés",
+    "behalf": "Payé pour d’autres",
+    "ai": "Accès IA",
+    "settings": "Réglages"
+  },
+  "login": {
+    "setupHint": "Première visite ? Définissez un mot de passe pour vous connecter.",
+    "tagline": "Chaque abonnement, chaque carte, chaque partage.",
+    "setupToken": "Jeton de configuration (SETUP_TOKEN)",
+    "newPassword": "Nouveau mot de passe (8 caractères minimum)",
+    "password": "Mot de passe",
+    "again": "Confirmer le mot de passe",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "verifying": "Vérification…",
+    "setupEnter": "Définir le mot de passe et continuer",
+    "enter": "Se connecter",
+    "passkey": "Se connecter avec une clé d’accès"
+  },
+  "sidebar": {
+    "collapse": "Masquer la barre latérale",
+    "expand": "Afficher la barre latérale",
+    "new": "Nouveau",
+    "search": "Rechercher",
+    "upcoming": "À venir",
+    "today": "Aujourd’hui",
+    "tomorrow": "Demain",
+    "inDays": {
+      "one": "Dans {count} jour",
+      "other": "Dans {count} jours"
+    },
+    "theme": "Thème",
+    "themeHint": "Cliquez pour changer : Clair → Sombre → Système"
+  },
+  "palette": {
+    "placeholder": "Rechercher un abonnement ou une page…",
+    "empty": "Aucun résultat",
+    "page": "Page",
+    "add": "Nouvel abonnement",
+    "addKeywords": "nouveau ajouter créer new add create"
+  },
+  "ics": {
+    "title": "S’abonner dans le calendrier",
+    "intro": "Synchronisez les dates de prélèvement avec Apple Calendrier, Google Agenda ou Outlook. Actualisé toutes les 6 heures, avec une alerte avant chaque prélèvement selon vos réglages de rappel.",
+    "subscribe": "S’abonner",
+    "copy": "Copier le lien",
+    "copied": "Copié",
+    "reset": "Réinitialiser le lien",
+    "resetDone": "Lien réinitialisé. L’ancien lien ne fonctionne plus.",
+    "generate": "Créer un lien de calendrier privé",
+    "generated": "Lien de calendrier créé",
+    "note": "Le lien contient un jeton privé : toute personne qui l’a peut voir vos échéances. En cas de fuite, touchez Réinitialiser le lien pour le révoquer."
+  }
+}

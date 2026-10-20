@@ -1,0 +1,18 @@
+{
+  "choose": "Elegir",
+  "noMatch": "Sin coincidencias",
+  "common": "Más usados",
+  "currency": "Moneda",
+  "date": { "placeholder": "Elige una fecha", "prev": "Anterior", "next": "Siguiente" },
+  "method": { "label": "Método de pago", "none": "Ninguno" },
+  "region": { "label": "Región", "any": "Cualquiera", "none": "Cualquier región", "all": "Todas las regiones" },
+  "ccy": {
+    "label": "Moneda",
+    "switch": "Cambiar la moneda de visualización",
+    "orig": "Original",
+    "origHint": "Cada una en la suya",
+    "all": "Todas las monedas",
+    "search": "Buscar nombre, código o símbolo",
+    "noMatch": "No hay monedas que coincidan"
+  }
+}

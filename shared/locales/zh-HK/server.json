@@ -1,0 +1,35 @@
+{
+  "fxApiError": "匯率 API 異常",
+  "missingId": "缺少 id",
+  "invalidItem": "{name}：{error}",
+  "notPublic": "這個帳本沒有公開",
+  "idMismatch": "id 不一致",
+  "invalidMethod": "付款方式無效",
+  "invalidBackup": "備份檔案無效",
+  "refreshFailed": "更新失敗",
+  "backup": {
+    "notBackup": "不是有效的備份檔案",
+    "unknownFormat": "不認識的備份格式：{format}",
+    "newerVersion": "備份來自更新的版本（v{version}），請先升級本站"
+  },
+  "auth": {
+    "tooMany": "嘗試過多，請 15 分鐘後再試",
+    "alreadySetup": "已經設定過密碼",
+    "noSetupToken": "部署時沒有設定 SETUP_TOKEN，無法初始化。請先設定這個密鑰（wrangler secret put SETUP_TOKEN）。",
+    "badSetupToken": "初始化令牌不正確",
+    "passwordTooShort": "密碼至少需要 {min} 個字元",
+    "wrongPassword": "密碼不正確",
+    "wrongCurrentPassword": "目前密碼不正確",
+    "newPasswordTooShort": "新密碼至少需要 {min} 個字元",
+    "invalidDevice": "無效的裝置",
+    "cannotRemoveCurrent": "無法移除目前裝置，請使用「登出」",
+    "expired": "請求已過期，請重試",
+    "passkeyFailed": "Passkey 驗證失敗",
+    "passkeyNotBound": "這個 Passkey 沒有綁定到本站"
+  },
+  "ics": {
+    "calName": "訂閱扣款",
+    "method": "付款：{name}",
+    "alarm": "{name} 即將扣款"
+  }
+}

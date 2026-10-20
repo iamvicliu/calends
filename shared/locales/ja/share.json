@@ -1,0 +1,85 @@
+{
+  "title": "「{name}」を共有",
+  "style": {
+    "card": "カード",
+    "receipt": "レシート",
+    "timeline": "タイムライン",
+    "poster": "ポスター",
+    "years": "年別"
+  },
+  "dur": {
+    "ym": "{y}年{m}か月",
+    "y": {
+      "other": "{count}年"
+    },
+    "m": {
+      "other": "{count}か月"
+    },
+    "d": {
+      "other": "{count}日"
+    }
+  },
+  "status": {
+    "active": "利用中",
+    "ending": "終了予定",
+    "trial": "トライアル中",
+    "paused": "一時停止中",
+    "ended": "解約済み",
+    "lifetime": "買い切り",
+    "upcoming": "まもなく開始"
+  },
+  "switched": {
+    "zero": "切り替えなし",
+    "other": "{count}回切り替え"
+  },
+  "priceSame": "変動なし",
+  "priceUp": "{pct}%値上がり",
+  "priceDown": "{pct}%値下がり",
+  "since": "{date}から",
+  "together": "一緒に過ごした期間",
+  "totalSpent": "累計支出",
+  "charges": "請求",
+  "subscribed": "登録期間",
+  "times": "{count}回",
+  "gaps": "中断",
+  "realMonthly": "実質月額",
+  "price": "価格",
+  "phases": "期間",
+  "phaseCount": "{count}期間",
+  "untilToday": "{date} — 今日",
+  "refund": "返金",
+  "refundShort": "返金",
+  "nth": "#{n}",
+  "earlier": "それ以前 {count}件",
+  "time": "TIME",
+  "total": "TOTAL",
+  "chargeCount": "請求回数",
+  "count": "{count}",
+  "switches": "地域 / プランの変更",
+  "thanks": "ありがとうございました · また次のサイクルで",
+  "n": {
+    "charges": {
+      "other": "{count}回の請求"
+    }
+  },
+  "sum": "合計 {amount}",
+  "gap": "{dur}中断",
+  "planned": "{date}（予定）",
+  "present": "現在",
+  "priceChanges": "価格変更：{list}",
+  "withYou": "一緒に過ごした期間",
+  "totalPerDay": "合計 {total} · 1日平均 {perDay}",
+  "lapsed": {
+    "other": "{count}回中断"
+  },
+  "byYear": "年別の支出",
+  "sheet": {
+    "copied": "画像をコピーしました。貼り付けできます",
+    "copyFailed": "コピーできませんでした。ダウンロードをお試しください。",
+    "renderFailed": "画像を作成できませんでした",
+    "download": "画像をダウンロード",
+    "generating": "作成中…",
+    "copy": "画像をコピー",
+    "showAmounts": "金額を表示"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "done": "OK",
+  "close": "Fermer",
+  "add": "Ajouter",
+  "apply": "Appliquer",
+  "back": "Retour",
+  "copy": "Copier",
+  "copied": "Copié",
+  "clear": "Effacer",
+  "today": "Aujourd’hui",
+  "yesterday": "Hier",
+  "tomorrow": "Demain",
+  "none": "Aucun",
+  "all": "Tous",
+  "other": "Autre",
+  "search": "Rechercher",
+  "loading": "Chargement…"
+}

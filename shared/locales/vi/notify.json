@@ -1,0 +1,93 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "Hết dùng thử {when} ({date}), sau đó {price}",
+    "headline": "{name} hết dùng thử {when}"
+  },
+  "renew": {
+    "introEnds": "Hết giá ưu đãi, trở về giá thường",
+    "headline": "{name} gia hạn {when} với giá {price}"
+  },
+  "ending": {
+    "sub": "Kết thúc {when}, không gia hạn",
+    "headline": "{name} kết thúc {when}"
+  },
+  "carpool": {
+    "dueIn": "Đến hạn {when} ({date})",
+    "dueToday": "Đến hạn hôm nay",
+    "overdue": {
+      "other": "Quá hạn {count} ngày"
+    },
+    "sub": "{status} · kỳ tới: {bill}",
+    "headline": "Đến lúc thu tiền {name} từ {member}"
+  },
+  "proxy": {
+    "someone": "Ai đó",
+    "chargedToday": "Đã trả hộ hôm nay",
+    "chargedAgo": {
+      "other": "Đã trừ tiền {date}, {count} ngày trước"
+    },
+    "sub": "{status}, chưa được trả lại",
+    "headlineToday": "Đã trả hộ {sub} cho {name}",
+    "headlineUnpaid": "{name} chưa trả lại {sub}"
+  },
+  "balance": {
+    "sub": "Số dư {balance} không đủ cho {sub} ({amount}) vào {date}",
+    "headline": "Số dư {name} sắp hết"
+  },
+  "section": {
+    "renew": "Khoản phí sắp tới",
+    "trials": "Sắp hết dùng thử",
+    "balance": "Số dư thấp",
+    "carpool": "Thanh toán gói chia sẻ",
+    "proxy": "Tiền trả hộ cần thu lại",
+    "ending": "Sắp kết thúc",
+    "month": "Khoản phí tháng này"
+  },
+  "daily": {
+    "subject": "Nhắc nhở gói đăng ký: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} và {more} mục khác",
+    "intro": "Bạn đang chi {mrr} mỗi tháng cho gói đăng ký, với {count} gói đang hoạt động."
+  },
+  "monthly": {
+    "subject": {
+      "other": "Hóa đơn {month}: khoảng {sum}, {count} khoản phí"
+    },
+    "intro": {
+      "other": "Dự kiến {count} khoản phí trong {monthYear}, tổng cộng khoảng {sum}. MRR {mrr}, {arr} mỗi năm."
+    }
+  },
+  "email": {
+    "open": "Mở Subscription Ledger",
+    "footer": "Bạn có thể đổi giờ nhắc và số ngày nhắc trước trong Cài đặt."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Không tìm thấy kênh",
+    "noneEnabled": "Chưa bật kênh thông báo nào",
+    "alreadySent": "Hôm nay đã gửi",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Thử] {subject}",
+    "sampleSubject": "[Thử] Nhắc nhở gói đăng ký đã sẵn sàng",
+    "sampleIntro": "Kênh thông báo của bạn đang hoạt động."
+  },
+  "channel": {
+    "missing": "“{channel}” còn thiếu {field}",
+    "field": {
+      "to": "email người nhận",
+      "botToken": "token bot",
+      "chatId": "chat ID",
+      "webhook": "URL webhook",
+      "deviceKey": "khóa thiết bị",
+      "topic": "chủ đề",
+      "sendKey": "SendKey",
+      "url": "URL"
+    }
+  }
+}

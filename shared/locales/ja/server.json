@@ -1,0 +1,39 @@
+{
+  "fxApiError": "為替レートサービスがエラーを返しました",
+  "missingId": "id がありません",
+  "invalidItem": "{name}：{error}",
+  "notPublic": "この台帳は公開されていません",
+  "idMismatch": "ID が一致しません",
+  "invalidMethod": "支払い方法が正しくありません",
+  "invalidBackup": "バックアップファイルが正しくありません",
+  "refreshFailed": "更新に失敗しました",
+  "backup": {
+    "notBackup": "有効なバックアップファイルではありません",
+    "unknownFormat": "認識できないバックアップ形式：{format}",
+    "newerVersion": "このバックアップは新しいバージョン（v{version}）のものです。先にこのサイトを更新してください。"
+  },
+  "auth": {
+    "tooMany": "試行回数が多すぎます。15分後にもう一度お試しください。",
+    "alreadySetup": "パスワードはすでに設定されています",
+    "noSetupToken": "デプロイ時に SETUP_TOKEN が設定されていないため、セットアップを続行できません。先にこのシークレットを設定してください（wrangler secret put SETUP_TOKEN）。",
+    "badSetupToken": "セットアップトークンが正しくありません",
+    "passwordTooShort": {
+      "other": "パスワードは{min}文字以上にしてください"
+    },
+    "wrongPassword": "パスワードが正しくありません",
+    "wrongCurrentPassword": "現在のパスワードが正しくありません",
+    "newPasswordTooShort": {
+      "other": "新しいパスワードは{min}文字以上にしてください"
+    },
+    "invalidDevice": "無効なデバイスです",
+    "cannotRemoveCurrent": "このデバイスは削除できません。ログアウトを使ってください。",
+    "expired": "リクエストの有効期限が切れました。もう一度お試しください。",
+    "passkeyFailed": "パスキーの確認に失敗しました",
+    "passkeyNotBound": "このパスキーはこのサイトに登録されていません"
+  },
+  "ics": {
+    "calName": "サブスクの請求",
+    "method": "支払い方法：{name}",
+    "alarm": "{name}がまもなく更新されます"
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "title": "設定",
+  "days": { "other": "{count} 天" },
+  "logout": "登出",
+  "toast": {
+    "saved": "已儲存",
+    "deleted": "已刪除",
+    "csvEmpty": "CSV 中沒有可匯入的訂閱",
+    "badBackup": "不是有效的備份檔案"
+  },
+  "general": {
+    "title": "一般",
+    "language": "語言",
+    "followSystem": "跟隨系統",
+    "name": "名字",
+    "namePlaceholder": "顯示在分享圖與公開頁上",
+    "startPage": "開啟後先顯示",
+    "startPageAria": "啟動頁",
+    "baseCurrency": "基準貨幣",
+    "timezone": "時區",
+    "weekStart": "每週從",
+    "weekStartAria": "每週起始日",
+    "monday": "週一開始",
+    "sunday": "週日開始"
+  },
+  "sidebar": {
+    "title": "側邊欄",
+    "upcoming": "即將扣款",
+    "lookAhead": "往後看",
+    "lookAheadAria": "即將扣款天數"
+  },
+  "remind": {
+    "title": "提醒",
+    "lead": "預設提前",
+    "sameDay": "到期當天",
+    "hour": "傳送時間",
+    "monthly": "每月 1 日帳單預告",
+    "test": "傳送一則測試提醒到所有管道",
+    "testFailed": "傳送失敗",
+    "channelError": "{channel}：{error}",
+    "errorSep": "；",
+    "testSent": "測試提醒已送出",
+    "preview": "預覽今天的提醒"
+  },
+  "today": {
+    "title": "今天（{day}）",
+    "items": { "other": "{count} 項" }
+  },
+  "books": {
+    "title": "記帳",
+    "defaultMethod": "預設付款方式",
+    "unassigned": { "other": "{count} 個訂閱未指定付款方式" },
+    "assignAllDone": { "other": "已將 {count} 個訂閱設為預設付款方式" },
+    "assignAll": "全部設為預設",
+    "collectCurrency": "共享收款幣別"
+  },
+  "fx": {
+    "title": "匯率",
+    "current": "目前匯率",
+    "updatedAt": "更新於 {time}",
+    "updated": "匯率已更新",
+    "history": "歷史匯率覆蓋",
+    "earliest": "最早 {date}",
+    "coverage": { "other": "{covered} / {count} 天" },
+    "fill": "補齊缺失的匯率",
+    "historyUpdated": "歷史匯率已更新"
+  },
+  "open": {
+    "title": "開放",
+    "ics": "訂閱到系統行事曆",
+    "on": "已開啟",
+    "off": "未開啟",
+    "public": "公開頁",
+    "publicOn": "已公開",
+    "publicOff": "已關閉公開頁",
+    "previewPublic": "預覽公開頁",
+    "ai": "AI 存取（MCP）",
+    "aiOn": "已開啟 AI 存取",
+    "aiOff": "已關閉，AI 助理將無法存取",
+    "manageAi": "管理權杖與連接方式"
+  },
+  "data": {
+    "title": "資料",
+    "importCsv": "匯入 CSV",
+    "restore": "從備份恢復",
+    "exportCsv": "匯出 CSV",
+    "backup": "匯出完整備份"
+  },
+  "restore": {
+    "cancel": "取消",
+    "replace": "取代目前帳本",
+    "done": "已恢復",
+    "warning": "目前帳本會被備份中的內容整體取代，且無法復原；建議先匯出一份目前的備份。",
+    "subs": "訂閱",
+    "methods": "付款方式",
+    "count": { "other": "{count} 個" },
+    "time": "備份時間",
+    "format": "格式",
+    "legacy": "舊版備份：只含訂閱與付款方式"
+  },
+  "import": {
+    "title": { "other": "匯入 {count} 項訂閱" },
+    "confirmReplace": "取代會清除現有的訂閱與付款方式，確定嗎？",
+    "replaceDone": "已取代匯入",
+    "replaceAll": "全部取代",
+    "mergeDone": "已合併匯入",
+    "merge": "追加匯入",
+    "newMethods": "將新增付款方式：{names}",
+    "sep": "、"
+  },
+  "channels": {
+    "title": { "other": "通知管道 · 已開啟 {count} 個" },
+    "empty": "還沒有通知管道，提醒不會送出。",
+    "test": "測試",
+    "testFailed": "傳送失敗",
+    "testSent": "測試訊息已送出",
+    "add": "新增管道",
+    "addKind": "新增 {name}",
+    "confirmDelete": "刪除管道「{name}」？",
+    "delete": "刪除",
+    "save": "儲存",
+    "fillField": "請填寫{field}",
+    "name": "名稱",
+    "optional": "選填",
+    "enabled": "啟用",
+    "field": {
+      "to": "收件信箱",
+      "webhook": "Webhook 網址",
+      "server": "伺服器",
+      "token": "存取權杖"
+    },
+    "kind": {
+      "email": {
+        "name": "電子郵件",
+        "help": "經由 Cloudflare Email Sending 寄出，網域需已在 Cloudflare 驗證"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "你的使用者 ID 或群 ID",
+        "help": "找 @BotFather 建立機器人取得 Token；先傳一則訊息給機器人，再用 @userinfobot 查詢自己的 ID"
+      },
+      "lark": {
+        "name": "飛書 / Lark",
+        "secret": "簽名密鑰",
+        "secretPlaceholder": "開啟「簽名驗證」時填寫",
+        "help": "群組設定 → 群組機器人 → 新增自訂機器人"
+      },
+      "dingtalk": {
+        "name": "釘釘",
+        "secret": "加簽密鑰",
+        "secretPlaceholder": "SEC…，開啟「加簽」時填寫",
+        "help": "群組設定 → 機器人 → 自訂機器人"
+      },
+      "wecom": {
+        "name": "企業微信",
+        "help": "群組 → 新增群組機器人"
+      },
+      "bark": {
+        "keyPlaceholder": "從 App 中複製的 Key",
+        "help": "iPhone 推播，在 App Store 搜尋 Bark"
+      },
+      "ntfy": {
+        "topicPlaceholder": "隨意取一個不易猜到的名稱",
+        "help": "在手機安裝 ntfy App 並訂閱同一個 Topic"
+      },
+      "serverchan": {
+        "name": "Server醬",
+        "keyPlaceholder": "SCT… 或 sctp…",
+        "help": "推播到微信（Server醬 Turbo / ³）"
+      },
+      "discord": {
+        "help": "伺服器設定 → 整合 → Webhook"
+      },
+      "webhook": {
+        "name": "自訂 Webhook",
+        "header": "額外請求標頭",
+        "help": "POST JSON：subject、intro、sections、text、markdown、url"
+      }
+    }
+  },
+  "security": {
+    "title": "安全",
+    "unknownBrowser": "未知瀏覽器",
+    "ago": {
+      "justNow": "剛剛活躍",
+      "minutes": { "other": "{count} 分鐘前" },
+      "hours": { "other": "{count} 小時前" },
+      "days": { "other": "{count} 天前" }
+    },
+    "thisDevice": "本機",
+    "signedInPasskey": "Passkey 登入於 {time}",
+    "signedInPassword": "密碼登入於 {time}",
+    "revoke": "移除",
+    "revoked": "已移除",
+    "passkeyFoot": "綁定 Passkey 後即可用臉孔、指紋或裝置密碼登入，不必輸入密碼。",
+    "passkeyUnsupported": "目前瀏覽器不支援 Passkey。",
+    "lastUsed": "上次使用 {time}",
+    "addedAt": "新增於 {time}",
+    "confirmRemovePasskey": "移除 Passkey「{name}」？",
+    "remove": "移除",
+    "removed": "已移除",
+    "addPasskey": "新增 Passkey",
+    "alreadyBound": "這台裝置已經綁定過了",
+    "changePassword": "修改密碼",
+    "devices": "登入裝置",
+    "devicesCount": { "other": "登入裝置 · {count}" },
+    "devicesFoot": "超過上限時，最久沒有活動的裝置會被自動登出。位置依 IP 估算，僅供參考。",
+    "maxSessions": "最多同時登入",
+    "maxSessionsSaved": { "other": "最多 {count} 台裝置" },
+    "deviceCount": { "other": "{count} 台" },
+    "confirmLogoutOthers": "登出本機以外的所有裝置？",
+    "loggedOutOthers": "其他裝置已登出",
+    "logoutOthers": "登出其他所有裝置",
+    "passwordChanged": "密碼已修改，其他裝置已登出",
+    "save": "儲存",
+    "mismatch": "兩次輸入不一致",
+    "passwordFoot": "至少 8 個字元。修改後，除了目前裝置以外的登入都會失效。",
+    "currentPassword": "目前密碼",
+    "newPassword": "新密碼",
+    "minLength": "至少 8 個字元",
+    "confirmPassword": "確認新密碼"
+  }
+}

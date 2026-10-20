@@ -1,0 +1,70 @@
+{
+  "title": "개요",
+  "add": "새 구독",
+  "footer": {
+    "other": "이용 중인 구독 {count}개 · {amount}/월 ·"
+  },
+  "fullReport": "전체 리포트 보기",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "other": "구독 {count}개"
+    },
+    "charges": {
+      "other": "결제 {count}건"
+    }
+  },
+  "axis": {
+    "yearMonth": "{yy}년 {mon}"
+  },
+  "timeline": {
+    "title": "타임라인",
+    "sub": "지난 30일 결제 {past} · 다음 30일 예정 {next}"
+  },
+  "spending": {
+    "title": "월별 지출",
+    "sub": "옅은 막대는 예측입니다",
+    "month": "월별",
+    "yearly": "연도별",
+    "year": "{year}년",
+    "projected": " · 예측",
+    "inProgress": " · 진행 중",
+    "paid": " · {amount} 결제됨",
+    "empty": "이 기간에는 결제가 없습니다"
+  },
+  "due": {
+    "title": "다음 30일",
+    "empty": "다음 30일 동안 예정된 결제가 없습니다",
+    "thisWeek": "이번 주",
+    "later": "이후",
+    "noMethod": "결제 수단 없음"
+  },
+  "wallet": {
+    "title": "지갑",
+    "manage": "관리",
+    "balance": "잔액 {amount} · {status}",
+    "covered": {
+      "other": "결제 {count}회 더 가능, {date}까지 충전 필요"
+    },
+    "mustTopUp": "{date}까지 충전 필요",
+    "enough": "3년 이상 충분",
+    "noBalance": "잔액을 입력하면 얼마나 버틸지 알 수 있습니다",
+    "others": "그 밖에: {list}"
+  },
+  "tips": {
+    "warn": "주의",
+    "info": "팁",
+    "good": "재미있는 사실"
+  },
+  "stmt": {
+    "kicker": "월 구독 지출",
+    "vsLastMonth": "지난달 말 대비",
+    "annual": "연간",
+    "ytd": "{year}년 결제액",
+    "perDay": "하루",
+    "active": "이용 중",
+    "share": "{amount}/월 · {pct}%",
+    "caption": "구독 별자리 · 거품 크기는 월 비용을 나타냅니다",
+    "aria": "{name}, 월 {amount}"
+  }
+}

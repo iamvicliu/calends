@@ -1,0 +1,23 @@
+{
+  "close": "Đóng",
+  "error": {
+    "loginRequired": "Vui lòng đăng nhập trước",
+    "requestFailed": "Yêu cầu thất bại ({status})"
+  },
+  "theme": {
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống"
+  },
+  "currency": {
+    "XCG": "Guilder Caribe",
+    "ZWG": "Vàng Zimbabwe"
+  },
+  "method": {
+    "none": "Chưa đặt"
+  },
+  "toolbar": {
+    "openSidebar": "Mở thanh bên",
+    "add": "Thêm gói đăng ký"
+  }
+}

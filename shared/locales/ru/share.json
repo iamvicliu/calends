@@ -1,0 +1,103 @@
+{
+  "title": "Поделиться «{name}»",
+  "style": {
+    "card": "Карточка",
+    "receipt": "Чек",
+    "timeline": "Шкала",
+    "poster": "Постер",
+    "years": "По годам"
+  },
+  "dur": {
+    "ym": "{y} г. {m} мес.",
+    "y": {
+      "one": "{count} год",
+      "few": "{count} года",
+      "many": "{count} лет",
+      "other": "{count} года"
+    },
+    "m": {
+      "one": "{count} месяц",
+      "few": "{count} месяца",
+      "many": "{count} месяцев",
+      "other": "{count} месяца"
+    },
+    "d": {
+      "one": "{count} день",
+      "few": "{count} дня",
+      "many": "{count} дней",
+      "other": "{count} дня"
+    }
+  },
+  "status": {
+    "active": "Активна",
+    "ending": "Завершается",
+    "trial": "Пробный период",
+    "paused": "Приостановлена",
+    "ended": "Отменена",
+    "lifetime": "Навсегда",
+    "upcoming": "Скоро начнётся"
+  },
+  "switched": {
+    "zero": "Без смен",
+    "one": "Смен: {count}",
+    "few": "Смен: {count}",
+    "many": "Смен: {count}",
+    "other": "Смен: {count}"
+  },
+  "priceSame": "Без изменений",
+  "priceUp": "Выросла на {pct}%",
+  "priceDown": "Снизилась на {pct}%",
+  "since": "С {date}",
+  "together": "Вместе уже",
+  "totalSpent": "Всего потрачено",
+  "charges": "Списания",
+  "subscribed": "Подписка",
+  "times": "{count}",
+  "gaps": "Перерывы",
+  "realMonthly": "Реально в месяц",
+  "price": "Цена",
+  "phases": "Этапы",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — сегодня",
+  "refund": "Возврат",
+  "refundShort": "Возврат",
+  "nth": "№{n}",
+  "earlier": "Ещё {count} раньше",
+  "time": "ВРЕМЯ",
+  "total": "ИТОГО",
+  "chargeCount": "Списания",
+  "count": "{count}",
+  "switches": "Смены региона / тарифа",
+  "thanks": "Спасибо · До следующего периода",
+  "n": {
+    "charges": {
+      "one": "{count} списание",
+      "few": "{count} списания",
+      "many": "{count} списаний",
+      "other": "{count} списания"
+    }
+  },
+  "sum": "Всего {amount}",
+  "gap": "перерыв {dur}",
+  "planned": "{date} (в планах)",
+  "present": "сейчас",
+  "priceChanges": "Изменения цены: {list}",
+  "withYou": "С вами уже",
+  "totalPerDay": "Всего {total} · в среднем {perDay} в день",
+  "lapsed": {
+    "one": "Перерывов: {count}",
+    "few": "Перерывов: {count}",
+    "many": "Перерывов: {count}",
+    "other": "Перерывов: {count}"
+  },
+  "byYear": "Расходы по годам",
+  "sheet": {
+    "copied": "Изображение скопировано — можно вставлять",
+    "copyFailed": "Не удалось скопировать. Попробуйте скачать.",
+    "renderFailed": "Не удалось создать изображение",
+    "download": "Скачать изображение",
+    "generating": "Создание…",
+    "copy": "Копировать изображение",
+    "showAmounts": "Показывать суммы"
+  }
+}

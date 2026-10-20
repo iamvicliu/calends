@@ -1,0 +1,18 @@
+{
+  "choose": "Chọn",
+  "noMatch": "Không có kết quả phù hợp",
+  "common": "Thường dùng",
+  "currency": "Tiền tệ",
+  "date": { "placeholder": "Chọn ngày", "prev": "Trước", "next": "Sau" },
+  "method": { "label": "Phương thức thanh toán", "none": "Không có" },
+  "region": { "label": "Khu vực", "any": "Bất kỳ", "none": "Mọi khu vực", "all": "Tất cả khu vực" },
+  "ccy": {
+    "label": "Tiền tệ",
+    "switch": "Đổi tiền tệ hiển thị",
+    "orig": "Gốc",
+    "origHint": "Theo tiền tệ riêng của từng mục",
+    "all": "Tất cả tiền tệ",
+    "search": "Tìm theo tên, mã hoặc ký hiệu",
+    "noMatch": "Không có tiền tệ phù hợp"
+  }
+}

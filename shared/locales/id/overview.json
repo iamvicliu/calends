@@ -1,0 +1,70 @@
+{
+  "title": "Ringkasan",
+  "add": "Langganan baru",
+  "footer": {
+    "other": "{count} langganan aktif · {amount}/bln ·"
+  },
+  "fullReport": "Lihat laporan lengkap",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "other": "{count} langganan"
+    },
+    "charges": {
+      "other": "{count} tagihan"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} '{yy}"
+  },
+  "timeline": {
+    "title": "Linimasa",
+    "sub": "{past} ditagih dalam 30 hari terakhir · {next} jatuh tempo dalam 30 hari ke depan"
+  },
+  "spending": {
+    "title": "Pengeluaran bulanan",
+    "sub": "Batang yang lebih terang adalah perkiraan",
+    "month": "Bulanan",
+    "yearly": "Tahunan",
+    "year": "{year}",
+    "projected": " · Perkiraan",
+    "inProgress": " · Berjalan",
+    "paid": " · {amount} dibayar",
+    "empty": "Tidak ada tagihan dalam periode ini"
+  },
+  "due": {
+    "title": "30 hari ke depan",
+    "empty": "Tidak ada tagihan dalam 30 hari ke depan",
+    "thisWeek": "Minggu ini",
+    "later": "Nanti",
+    "noMethod": "Tanpa metode pembayaran"
+  },
+  "wallet": {
+    "title": "Dompet",
+    "manage": "Kelola",
+    "balance": "Saldo {amount} · {status}",
+    "covered": {
+      "other": "cukup untuk {count} tagihan lagi, top up sebelum {date}"
+    },
+    "mustTopUp": "top up sebelum {date}",
+    "enough": "cukup untuk 3+ tahun",
+    "noBalance": "Tambahkan saldo untuk melihat berapa lama akan bertahan",
+    "others": "Juga: {list}"
+  },
+  "tips": {
+    "warn": "Perhatian",
+    "info": "Tips",
+    "good": "Fakta menarik"
+  },
+  "stmt": {
+    "kicker": "Pengeluaran langganan bulanan",
+    "vsLastMonth": "dibanding akhir bulan lalu",
+    "annual": "Per tahun",
+    "ytd": "Dibayar pada {year}",
+    "perDay": "Per hari",
+    "active": "Aktif",
+    "share": "{amount}/bln · {pct}%",
+    "caption": "Bintang langganan · ukuran gelembung menunjukkan biaya bulanan",
+    "aria": "{name}, {amount} per bulan"
+  }
+}

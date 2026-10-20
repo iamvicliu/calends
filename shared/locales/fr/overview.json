@@ -1,0 +1,74 @@
+{
+  "title": "Aperçu",
+  "add": "Nouvel abonnement",
+  "footer": {
+    "one": "{count} abonnement actif · {amount}/mois ·",
+    "other": "{count} abonnements actifs · {amount}/mois ·"
+  },
+  "fullReport": "Voir le rapport complet",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "one": "{count} abonnement",
+      "other": "{count} abonnements"
+    },
+    "charges": {
+      "one": "{count} prélèvement",
+      "other": "{count} prélèvements"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} {yy}"
+  },
+  "timeline": {
+    "title": "Frise",
+    "sub": "{past} prélevés ces 30 derniers jours · {next} à venir dans les 30 prochains"
+  },
+  "spending": {
+    "title": "Dépenses mensuelles",
+    "sub": "Les barres claires sont des prévisions",
+    "month": "Mensuel",
+    "yearly": "Annuel",
+    "year": "{year}",
+    "projected": " · Prévu",
+    "inProgress": " · En cours",
+    "paid": " · {amount} payés",
+    "empty": "Aucun prélèvement sur cette période"
+  },
+  "due": {
+    "title": "30 prochains jours",
+    "empty": "Rien à payer dans les 30 prochains jours",
+    "thisWeek": "Cette semaine",
+    "later": "Plus tard",
+    "noMethod": "Aucun moyen de paiement"
+  },
+  "wallet": {
+    "title": "Portefeuille",
+    "manage": "Gérer",
+    "balance": "Solde {amount} · {status}",
+    "covered": {
+      "one": "couvre encore {count} prélèvement, rechargez avant le {date}",
+      "other": "couvre encore {count} prélèvements, rechargez avant le {date}"
+    },
+    "mustTopUp": "rechargez avant le {date}",
+    "enough": "suffisant pour plus de 3 ans",
+    "noBalance": "Ajoutez un solde pour voir combien de temps il durera",
+    "others": "Aussi : {list}"
+  },
+  "tips": {
+    "warn": "Attention",
+    "info": "Astuce",
+    "good": "Le saviez-vous"
+  },
+  "stmt": {
+    "kicker": "Dépenses mensuelles en abonnements",
+    "vsLastMonth": "par rapport à fin du mois dernier",
+    "annual": "Par an",
+    "ytd": "Payé en {year}",
+    "perDay": "Par jour",
+    "active": "Actifs",
+    "share": "{amount}/mois · {pct} %",
+    "caption": "Constellation d’abonnements · la taille des bulles indique le coût mensuel",
+    "aria": "{name}, {amount} par mois"
+  }
+}

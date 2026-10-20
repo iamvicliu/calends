@@ -1,0 +1,115 @@
+{
+  "action": {
+    "edit": "編集",
+    "pause": "一時停止",
+    "resume": "再開",
+    "manage": "管理",
+    "website": "Web サイト",
+    "share": "共有"
+  },
+  "toast": {
+    "resumed": "請求を再開しました",
+    "paused": "一時停止しました。今後の請求は予測に含まれません"
+  },
+  "history": "履歴",
+  "summary": "概要",
+  "field": {
+    "amount": "金額",
+    "cycle": "請求サイクル",
+    "monthlyYearly": "月額 / 年額",
+    "category": "カテゴリ",
+    "method": "支払い方法",
+    "start": "開始日",
+    "next": "次回請求",
+    "expires": "サービス終了",
+    "expiresHint": "この日より前に自動更新で請求されます",
+    "endedOn": "終了日",
+    "trialEnd": "トライアル終了",
+    "region": "地域"
+  },
+  "up": {
+    "planned": "変更予定 · 未確定",
+    "starting": "まもなく開始",
+    "changing": "今後の変更",
+    "effective": "適用日"
+  },
+  "plan": {
+    "drop": "切り替えない",
+    "droppedToast": "切り替えません。{date}以降に終了します",
+    "confirm": "切り替えを確定",
+    "confirmedToast": "切り替えを確定しました"
+  },
+  "intro": {
+    "title": "初回特典",
+    "price": "特典価格",
+    "until": "特典終了",
+    "then": "その後"
+  },
+  "remind": {
+    "title": "リマインダー",
+    "email": "メールで通知",
+    "off": "オフ",
+    "onDay": "請求日の{time}",
+    "before": {
+      "other": "{count}日前の{time}"
+    }
+  },
+  "share": {
+    "owner": "共有 · 主催（{count}/{seats}）",
+    "member": "共有 · 参加中",
+    "payTo": "支払い先",
+    "host": "主催者",
+    "myShare": "自分の負担分",
+    "unnamed": "名前なし",
+    "paidUntil": "{date}まで支払い済み",
+    "unpaid": "未払い",
+    "owed": "未払い {amount}",
+    "settled": "精算済み"
+  },
+  "charges": {
+    "title": {
+      "other": "請求 · {count}"
+    },
+    "kind": {
+      "refund": "返金",
+      "adjust": "調整",
+      "failed": "失敗"
+    },
+    "onCard": "カード上 {amount} · ",
+    "add": "記録を追加（返金、調整、請求失敗、カード上の金額など）",
+    "recent": "最新12件のみ表示",
+    "all": "すべて表示（{count}件）"
+  },
+  "notes": "メモ",
+  "stats": {
+    "spent": "累計支出",
+    "count": {
+      "other": "{count}件の請求"
+    },
+    "owned": "購入から",
+    "subscribed": "登録期間",
+    "yearsMonths": "{years}年{months}か月",
+    "years": {
+      "other": "{count}年"
+    },
+    "months": {
+      "other": "{count}か月"
+    },
+    "days": {
+      "other": "{count}日"
+    },
+    "gaps": {
+      "other": "{count}回中断"
+    },
+    "since": "{date}から",
+    "perMonth": "実質月額",
+    "perMonthHint": "累計 ÷ 登録月数",
+    "priceChange": "価格変動",
+    "changed": "変動あり",
+    "unchanged": "変動なし",
+    "times": {
+      "other": "{count}回"
+    },
+    "changeHint": "地域・プラン・支払い方法の変更"
+  }
+}

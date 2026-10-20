@@ -1,0 +1,22 @@
+{
+  "save": "Kaydet",
+  "cancel": "Vazgeç",
+  "delete": "Sil",
+  "edit": "Düzenle",
+  "done": "Bitti",
+  "close": "Kapat",
+  "add": "Ekle",
+  "apply": "Uygula",
+  "back": "Geri",
+  "copy": "Kopyala",
+  "copied": "Kopyalandı",
+  "clear": "Temizle",
+  "today": "Bugün",
+  "yesterday": "Dün",
+  "tomorrow": "Yarın",
+  "none": "Yok",
+  "all": "Tümü",
+  "other": "Diğer",
+  "search": "Ara",
+  "loading": "Yükleniyor…"
+}

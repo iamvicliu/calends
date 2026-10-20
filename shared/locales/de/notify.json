@@ -1,0 +1,97 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "Testphase endet {when} ({date}), danach {price}",
+    "headline": "Testphase von {name} endet {when}"
+  },
+  "renew": {
+    "introEnds": "Einführungspreis endet, zurück zum regulären Preis",
+    "headline": "{name} verlängert sich {when} für {price}"
+  },
+  "ending": {
+    "sub": "Endet {when}, keine Verlängerung",
+    "headline": "{name} endet {when}"
+  },
+  "carpool": {
+    "dueIn": "Fällig {when} ({date})",
+    "dueToday": "Heute fällig",
+    "overdue": {
+      "one": "{count} Tag überfällig",
+      "other": "{count} Tage überfällig"
+    },
+    "sub": "{status} · nächster Zeitraum: {bill}",
+    "headline": "Zeit, bei {member} für {name} einzusammeln"
+  },
+  "proxy": {
+    "someone": "Jemand",
+    "chargedToday": "Heute für die Person abgebucht",
+    "chargedAgo": {
+      "one": "Abgebucht am {date}, vor {count} Tag",
+      "other": "Abgebucht am {date}, vor {count} Tagen"
+    },
+    "sub": "{status}, noch nicht zurückgezahlt",
+    "headlineToday": "{sub} für {name} bezahlt",
+    "headlineUnpaid": "{name} hat {sub} noch nicht zurückgezahlt"
+  },
+  "balance": {
+    "sub": "Guthaben {balance} reicht am {date} nicht für {sub} ({amount})",
+    "headline": "Guthaben von {name} wird knapp"
+  },
+  "section": {
+    "renew": "Anstehende Abbuchungen",
+    "trials": "Endende Testphasen",
+    "balance": "Niedriges Guthaben",
+    "carpool": "Zahlungen für geteilte Abos",
+    "proxy": "Offen aus Zahlungen für andere",
+    "ending": "Endet bald",
+    "month": "Abbuchungen diesen Monat"
+  },
+  "daily": {
+    "subject": "Abo-Erinnerung: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} + {more} weitere",
+    "intro": "Du gibst {mrr} im Monat für Abos aus, {count} davon aktiv."
+  },
+  "monthly": {
+    "subject": {
+      "one": "Abrechnung {month}: etwa {sum}, {count} Abbuchung",
+      "other": "Abrechnung {month}: etwa {sum}, {count} Abbuchungen"
+    },
+    "intro": {
+      "one": "{count} Abbuchung erwartet im {monthYear}, insgesamt etwa {sum}. MRR {mrr}, {arr} pro Jahr.",
+      "other": "{count} Abbuchungen erwartet im {monthYear}, insgesamt etwa {sum}. MRR {mrr}, {arr} pro Jahr."
+    }
+  },
+  "email": {
+    "open": "Subscription Ledger öffnen",
+    "footer": "Uhrzeit und Vorlauf der Erinnerungen kannst du in den Einstellungen ändern."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Kanal nicht gefunden",
+    "noneEnabled": "Keine Benachrichtigungskanäle aktiviert",
+    "alreadySent": "Heute bereits gesendet",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Test] {subject}",
+    "sampleSubject": "[Test] Abo-Erinnerungen sind bereit",
+    "sampleIntro": "Dein Benachrichtigungskanal funktioniert."
+  },
+  "channel": {
+    "missing": "Bei „{channel}“ fehlt {field}",
+    "field": {
+      "to": "eine Empfänger-E-Mail",
+      "botToken": "ein Bot-Token",
+      "chatId": "eine Chat-ID",
+      "webhook": "eine Webhook-URL",
+      "deviceKey": "ein Geräteschlüssel",
+      "topic": "ein Topic",
+      "sendKey": "ein SendKey",
+      "url": "eine URL"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "title": "리포트",
+  "shareReview": "{year}년 결산 공유",
+  "perMonth": "{amount}/월",
+  "per": {
+    "day": "일",
+    "week": "주",
+    "month": "월",
+    "year": "년",
+    "lifetime": "1회",
+    "quarter": "분기",
+    "halfYear": "6개월",
+    "twoYears": "2년",
+    "n": {
+      "day": "{count}일",
+      "week": "{count}주",
+      "month": "{count}개월",
+      "year": "{count}년"
+    }
+  },
+  "axis": {
+    "year": "{year}년"
+  },
+  "hero": {
+    "label": "월 구독 지출 · 마이너스 MRR",
+    "vsLastMonth": "지난달 말 대비",
+    "yearAgo": "· 1년 전 {amount}",
+    "annual": "연간",
+    "perDay": "하루",
+    "active": "이용 중",
+    "recover": "공유로 회수/월",
+    "fxHist": "당시 환율",
+    "fxNow": "오늘 환율",
+    "range1": "1년",
+    "range3": "3년",
+    "rangeAll": "전체"
+  },
+  "wf": {
+    "title": "{month} 변동",
+    "prev": "이전 달",
+    "next": "다음 달",
+    "from": "지난달",
+    "fx": "환율",
+    "added": "신규",
+    "expansion": "가격 인상",
+    "contraction": "가격 인하",
+    "churned": "해지",
+    "now": "현재",
+    "monthEnd": "월말",
+    "empty": "이번 달에는 신규, 해지, 가격 변경된 구독이 없습니다.",
+    "emptyFx": "이번 달에는 신규, 해지, 가격 변경된 구독이 없으며, 변동은 모두 환율 때문입니다({amount})."
+  },
+  "checkup": {
+    "title": "점검",
+    "warn": {
+      "other": "확인이 필요한 항목 {count}개"
+    },
+    "fix": "해결",
+    "less": "접기",
+    "more": "{count}개 더 보기"
+  },
+  "cash": {
+    "title": "현금 지출 vs. 실제 비용",
+    "legendCash": "그달 결제 금액",
+    "legendAccrual": "월별로 나눈 비용",
+    "forecast": " · 예측",
+    "tip": "결제 {cash} · 비용 {cost}",
+    "prepaidItem": "{name} · {amount} · {until}까지",
+    "prepaid": "선결제 잔여 가치",
+    "prepaidSub": "{count}개 결제 완료, 아직 사용 중",
+    "savedItem": "{name} · {amount} · {since}부터",
+    "saved": "해지로 절약",
+    "savedSub": "{count}개 해지",
+    "next90": "다음 90일 결제 예정",
+    "peak": "최고점 {month} · {amount}"
+  },
+  "comp": {
+    "title": "돈이 나가는 곳",
+    "back": "뒤로",
+    "cat": "카테고리",
+    "pay": "결제 수단",
+    "ccy": "통화",
+    "cycle": "주기",
+    "unassigned": "미지정",
+    "yearly": "연간",
+    "quarterly": "분기 / 반기",
+    "monthly": "월간",
+    "groupTip": {
+      "other": "{name} · {count}개 · {amount}/월"
+    }
+  },
+  "topup": {
+    "title": "충전 계획",
+    "range3": "3개월",
+    "range6": "6개월",
+    "range12": "1년",
+    "span3": "다음 3개월",
+    "span6": "다음 6개월",
+    "span12": "다음 1년",
+    "empty": "아직 잔액이 있는 계정이 없습니다.",
+    "emptyCta": "지갑에서 App Store 또는 통신사 잔액 추가",
+    "summary": "잔액 {balance} · 월 약 {monthly}",
+    "why": "{span}: 결제 {due}, 보유 {balance}, 부족 {need}",
+    "urgent": "; 가장 급함: {date}까지 최소 {min} 충전",
+    "cards": "추천 기프트 카드",
+    "anyAmount": "원하는 금액만큼 충전 가능, 카드 액면가에 맞출 필요 없음",
+    "enough3": "잔액으로 다음 3개월 충분",
+    "enough6": "잔액으로 다음 6개월 충분",
+    "enough12": "잔액으로 다음 1년 충분",
+    "by": "{date}까지"
+  },
+  "ev": {
+    "start": "시작",
+    "end": "해지",
+    "price": "가격 변경",
+    "introEnd": "프로모션 종료",
+    "buy": "일시불 구매",
+    "pause": "일시 정지",
+    "switch": "지역 / 플랜 변경",
+    "resume": "재개"
+  },
+  "log": {
+    "title": "변경 기록",
+    "decisions": {
+      "other": "결정 {count}건"
+    },
+    "more": "이전 기록"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "appName": "Учёт подписок",
+  "trial": {
+    "sub": "Пробный период закончится {when} ({date}), затем {price}",
+    "headline": "Пробный период {name} закончится {when}"
+  },
+  "renew": {
+    "introEnds": "Вводная цена заканчивается, далее обычная цена",
+    "headline": "{name} продлится {when} за {price}"
+  },
+  "ending": {
+    "sub": "Закончится {when}, без продления",
+    "headline": "{name} закончится {when}"
+  },
+  "carpool": {
+    "dueIn": "Срок оплаты {when} ({date})",
+    "dueToday": "Срок оплаты сегодня",
+    "overdue": {
+      "one": "Просрочено на {count} день",
+      "few": "Просрочено на {count} дня",
+      "many": "Просрочено на {count} дней",
+      "other": "Просрочено на {count} дня"
+    },
+    "sub": "{status} · следующий период: {bill}",
+    "headline": "Пора получить оплату от {member} за {name}"
+  },
+  "proxy": {
+    "someone": "Кто-то",
+    "chargedToday": "Сегодня оплачено за другого",
+    "chargedAgo": {
+      "one": "Списано {date}, {count} день назад",
+      "few": "Списано {date}, {count} дня назад",
+      "many": "Списано {date}, {count} дней назад",
+      "other": "Списано {date}, {count} дня назад"
+    },
+    "sub": "{status}, деньги ещё не вернули",
+    "headlineToday": "Оплачено {sub} за {name}",
+    "headlineUnpaid": "{name} ещё не вернул(а) деньги за {sub}"
+  },
+  "balance": {
+    "sub": "Баланса {balance} не хватит на {sub} ({amount}) {date}",
+    "headline": "У {name} заканчивается баланс"
+  },
+  "section": {
+    "renew": "Ближайшие списания",
+    "trials": "Пробные периоды заканчиваются",
+    "balance": "Низкий баланс",
+    "carpool": "Оплаты по совместным подпискам",
+    "proxy": "Долги за оплату за других",
+    "ending": "Скоро закончатся",
+    "month": "Списания в этом месяце"
+  },
+  "daily": {
+    "subject": "Напоминание о подписках: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} и ещё {more}",
+    "intro": "Вы тратите на подписки {mrr} в месяц, активных: {count}."
+  },
+  "monthly": {
+    "subject": {
+      "one": "Счёт за {month}: около {sum}, {count} списание",
+      "few": "Счёт за {month}: около {sum}, {count} списания",
+      "many": "Счёт за {month}: около {sum}, {count} списаний",
+      "other": "Счёт за {month}: около {sum}, {count} списания"
+    },
+    "intro": {
+      "one": "{monthYear}: ожидается {count} списание, всего около {sum}. MRR {mrr}, {arr} в год.",
+      "few": "{monthYear}: ожидается {count} списания, всего около {sum}. MRR {mrr}, {arr} в год.",
+      "many": "{monthYear}: ожидается {count} списаний, всего около {sum}. MRR {mrr}, {arr} в год.",
+      "other": "{monthYear}: ожидается {count} списания, всего около {sum}. MRR {mrr}, {arr} в год."
+    }
+  },
+  "email": {
+    "open": "Открыть Учёт подписок",
+    "footer": "Время напоминаний и число дней заранее можно изменить в настройках."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Канал не найден",
+    "noneEnabled": "Ни один канал уведомлений не включён",
+    "alreadySent": "Сегодня уже отправлено",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Тест] {subject}",
+    "sampleSubject": "[Тест] Напоминания о подписках настроены",
+    "sampleIntro": "Канал уведомлений работает."
+  },
+  "channel": {
+    "missing": "В канале «{channel}» не указано: {field}",
+    "field": {
+      "to": "адрес получателя",
+      "botToken": "токен бота",
+      "chatId": "ID чата",
+      "webhook": "URL вебхука",
+      "deviceKey": "ключ устройства",
+      "topic": "тема",
+      "sendKey": "SendKey",
+      "url": "URL"
+    }
+  }
+}

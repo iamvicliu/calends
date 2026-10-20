@@ -1,0 +1,33 @@
+{
+  "action": { "edit": "Изменить", "pause": "Приостановить", "resume": "Возобновить", "manage": "Управление", "website": "Сайт", "share": "Поделиться" },
+  "toast": { "resumed": "Оплата возобновлена", "paused": "Приостановлено. Будущие списания не прогнозируются" },
+  "history": "История",
+  "summary": "Сводка",
+  "field": { "amount": "Сумма", "cycle": "Период оплаты", "monthlyYearly": "В месяц / в год", "category": "Категория", "method": "Способ оплаты", "start": "Дата начала", "next": "Следующее списание", "expires": "Доступ до", "expiresHint": "Автопродление спишет оплату до этой даты", "endedOn": "Завершена", "trialEnd": "Пробный период до", "region": "Регион" },
+  "up": { "planned": "Запланированное изменение · не подтверждено", "starting": "Скоро начнётся", "changing": "Предстоящее изменение", "effective": "Вступает в силу" },
+  "plan": { "drop": "Не переходить", "droppedToast": "Переход отменён. Завершится после {date}", "confirm": "Подтвердить переход", "confirmedToast": "Переход подтверждён" },
+  "intro": { "title": "Вводное предложение", "price": "Вводная цена", "until": "Действует до", "then": "Затем" },
+  "remind": { "title": "Напоминания", "email": "Напоминание по почте", "off": "Выкл.", "onDay": "В день списания в {time}", "before": { "one": "За {count} день в {time}", "few": "За {count} дня в {time}", "many": "За {count} дней в {time}", "other": "За {count} дня в {time}" } },
+  "share": { "owner": "Совместная · я организатор ({count}/{seats})", "member": "Совместная · я участник", "payTo": "Кому платить", "host": "Организатор", "myShare": "Моя доля", "unnamed": "Без имени", "paidUntil": "Оплачено до {date}", "unpaid": "Ещё не оплачено", "owed": "К оплате {amount}", "settled": "Рассчитались" },
+  "charges": { "title": { "one": "Списания · {count}", "few": "Списания · {count}", "many": "Списания · {count}", "other": "Списания · {count}" }, "kind": { "refund": "Возврат", "adjust": "Корректировка", "failed": "Не прошло" }, "onCard": "По карте {amount} · ", "add": "Добавить запись (возврат, корректировка, неудачное списание, сумма по карте…)", "recent": "Только последние 12", "all": "Показать все ({count})" },
+  "notes": "Заметки",
+  "stats": {
+    "spent": "Всего потрачено",
+    "count": { "one": "{count} списание", "few": "{count} списания", "many": "{count} списаний", "other": "{count} списания" },
+    "owned": "Во владении",
+    "subscribed": "Подписка",
+    "yearsMonths": "{years} г. {months} мес.",
+    "years": { "one": "{count} год", "few": "{count} года", "many": "{count} лет", "other": "{count} года" },
+    "months": { "one": "{count} месяц", "few": "{count} месяца", "many": "{count} месяцев", "other": "{count} месяца" },
+    "days": { "one": "{count} день", "few": "{count} дня", "many": "{count} дней", "other": "{count} дня" },
+    "gaps": { "one": "Перерывов: {count}", "few": "Перерывов: {count}", "many": "Перерывов: {count}", "other": "Перерывов: {count}" },
+    "since": "С {date}",
+    "perMonth": "Фактически в месяц",
+    "perMonthHint": "Всего ÷ месяцев подписки",
+    "priceChange": "Изменение цены",
+    "changed": "Изменения",
+    "unchanged": "Без изменений",
+    "times": { "one": "{count} раз", "few": "{count} раза", "many": "{count} раз", "other": "{count} раза" },
+    "changeHint": "Смена региона, тарифа или оплаты"
+  }
+}

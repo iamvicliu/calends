@@ -1,0 +1,39 @@
+{
+  "fxApiError": "환율 서비스에서 오류가 발생했습니다",
+  "missingId": "id가 없습니다",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "이 장부는 공개되어 있지 않습니다",
+  "idMismatch": "ID가 일치하지 않습니다",
+  "invalidMethod": "결제 수단이 올바르지 않습니다",
+  "invalidBackup": "백업 파일이 올바르지 않습니다",
+  "refreshFailed": "새로 고침에 실패했습니다",
+  "backup": {
+    "notBackup": "유효한 백업 파일이 아닙니다",
+    "unknownFormat": "인식할 수 없는 백업 형식: {format}",
+    "newerVersion": "이 백업은 더 최신 버전(v{version})에서 만든 것입니다. 먼저 이 사이트를 업데이트하세요."
+  },
+  "auth": {
+    "tooMany": "시도 횟수가 너무 많습니다. 15분 후에 다시 시도하세요.",
+    "alreadySetup": "이미 비밀번호가 설정되어 있습니다",
+    "noSetupToken": "배포 시 SETUP_TOKEN이 설정되지 않아 설정을 계속할 수 없습니다. 먼저 이 시크릿을 설정하세요(wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "설정 토큰이 올바르지 않습니다",
+    "passwordTooShort": {
+      "other": "비밀번호는 {min}자 이상이어야 합니다"
+    },
+    "wrongPassword": "비밀번호가 올바르지 않습니다",
+    "wrongCurrentPassword": "현재 비밀번호가 올바르지 않습니다",
+    "newPasswordTooShort": {
+      "other": "새 비밀번호는 {min}자 이상이어야 합니다"
+    },
+    "invalidDevice": "유효하지 않은 기기입니다",
+    "cannotRemoveCurrent": "이 기기는 삭제할 수 없습니다. 로그아웃을 사용하세요.",
+    "expired": "요청이 만료되었습니다. 다시 시도하세요.",
+    "passkeyFailed": "패스키 인증에 실패했습니다",
+    "passkeyNotBound": "이 패스키는 이 사이트에 등록되어 있지 않습니다"
+  },
+  "ics": {
+    "calName": "구독 결제",
+    "method": "결제 수단: {name}",
+    "alarm": "{name} 곧 갱신"
+  }
+}

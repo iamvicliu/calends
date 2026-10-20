@@ -1,0 +1,23 @@
+{
+  "yearTitle": "{year}年",
+  "summary": {
+    "other": "{count}件の請求 · {amount}"
+  },
+  "mode": {
+    "month": "月",
+    "year": "年"
+  },
+  "prev": "前へ",
+  "next": "次へ",
+  "today": "今日",
+  "ics": "カレンダーで購読",
+  "noneDay": "この日の請求はありません",
+  "projected": "予定",
+  "charged": "請求済み",
+  "monthAll": "{month}のすべての請求",
+  "noneMonth": "今月の請求はありません",
+  "day": "{day}日",
+  "heatCount": {
+    "other": "{count}件 · "
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "yearTitle": "{year}",
+  "summary": {
+    "one": "{count} prélèvement · {amount}",
+    "other": "{count} prélèvements · {amount}"
+  },
+  "mode": {
+    "month": "Mois",
+    "year": "Année"
+  },
+  "prev": "Précédent",
+  "next": "Suivant",
+  "today": "Aujourd’hui",
+  "ics": "S’abonner dans Calendrier",
+  "noneDay": "Aucun prélèvement ce jour-là",
+  "projected": "Prévu",
+  "charged": "Prélevé",
+  "monthAll": "Tous les prélèvements de {month}",
+  "noneMonth": "Aucun prélèvement ce mois-ci",
+  "day": "{day}",
+  "heatCount": {
+    "one": "{count} prélèvement · ",
+    "other": "{count} prélèvements · "
+  }
+}

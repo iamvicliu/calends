@@ -1,0 +1,23 @@
+{
+  "close": "Kapat",
+  "error": {
+    "loginRequired": "Lütfen önce giriş yapın",
+    "requestFailed": "İstek başarısız oldu ({status})"
+  },
+  "theme": {
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem"
+  },
+  "currency": {
+    "XCG": "Karayip guldeni",
+    "ZWG": "Zimbabve altını"
+  },
+  "method": {
+    "none": "Belirtilmedi"
+  },
+  "toolbar": {
+    "openSidebar": "Kenar çubuğunu aç",
+    "add": "Abonelik ekle"
+  }
+}

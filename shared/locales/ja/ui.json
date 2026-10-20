@@ -1,0 +1,23 @@
+{
+  "close": "閉じる",
+  "error": {
+    "loginRequired": "先にログインしてください",
+    "requestFailed": "リクエストに失敗しました（{status}）"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "currency": {
+    "XCG": "カリブ・ギルダー",
+    "ZWG": "ジンバブエ・ゴールド"
+  },
+  "method": {
+    "none": "未設定"
+  },
+  "toolbar": {
+    "openSidebar": "サイドバーを開く",
+    "add": "サブスクを追加"
+  }
+}

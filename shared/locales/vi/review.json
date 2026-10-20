@@ -1,0 +1,97 @@
+{
+  "title": "Chia sẻ tổng kết năm",
+  "fileName": "goi-dang-ky-{year}-tong-ket-{style}.png",
+  "style": {
+    "poster": "Áp phích",
+    "receipt": "Hóa đơn",
+    "card": "Thẻ",
+    "stars": "Bản đồ sao"
+  },
+  "unassigned": "Chưa gán",
+  "me": "Tôi",
+  "whose": "{name}",
+  "whoseSelf": "tôi",
+  "topSpend": "Chi nhiều nhất",
+  "ofYear": "{pct} của cả năm",
+  "n": {
+    "subs": {
+      "other": "{count} gói đăng ký"
+    },
+    "charges": {
+      "other": "{count} khoản phí"
+    },
+    "currencies": {
+      "other": "{count} loại tiền tệ"
+    },
+    "currencyKinds": {
+      "other": "{count} loại tiền tệ"
+    }
+  },
+  "tip": {
+    "top": "Riêng {name} đã chiếm {pct} của cả năm",
+    "longest": {
+      "other": "{name} đã gắn bó với bạn hơn {count} năm"
+    },
+    "busiest": "{month} là tháng ví bạn “đau” nhất",
+    "newEnded": "Năm nay: thêm {added}, bỏ {ended}",
+    "currencies": {
+      "other": "Năm nay đã trả bằng {count} loại tiền tệ — đúng là dân xê dịch"
+    },
+    "soon": {
+      "other": "{count} khoản phí sẽ đến trong 30 ngày tới — vẫn muốn giữ hết chứ?"
+    },
+    "milkTea": {
+      "other": "{amount} mỗi ngày — khoảng {count} ly trà sữa"
+    },
+    "saved": "Năm nay việc hủy gói đã giúp bạn tiết kiệm {amount}",
+    "fallback": "Biết rõ mình trả tiền cho những gì là bước đầu để trả ít hơn"
+  },
+  "receipt": {
+    "shop": "Cửa hàng gói đăng ký của {whose}",
+    "asOf": "Sao kê năm · tính đến {date}",
+    "fullYear": "Sao kê năm · {year}",
+    "no": "Số {no}",
+    "register": "QUẦY 01",
+    "cashier": "Thu ngân: {name}",
+    "item": "Mục",
+    "share": "Phần",
+    "amount": "Số tiền",
+    "rest": "{count} mục khác",
+    "count": "Mục {items} / Khoản phí {charges}",
+    "total": "TỔNG"
+  },
+  "poster": {
+    "kicker": "Năm đăng ký của {whose}",
+    "ongoing": "Từ đầu năm đến nay, qua {subs} · {charges}",
+    "ongoingHidden": "Từ đầu năm đến nay: {charges} · {currencies}",
+    "year": "Đã chi cho {subs} · {charges}",
+    "yearHidden": "Năm nay: {charges} · {currencies}",
+    "newEnded": "{added} mới · {ended} đã hủy",
+    "perDay": "Trung bình {amount}/ngày"
+  },
+  "card": {
+    "head": "Gói đăng ký của {whose}",
+    "intro": {
+      "ongoing": "Từ đầu năm đến nay, gói đăng ký đã tốn",
+      "ongoingHidden": "Từ đầu năm đến nay, bạn đã đăng ký",
+      "year": "Năm nay, gói đăng ký đã tốn",
+      "yearHidden": "Năm nay, bạn đã đăng ký"
+    },
+    "perDay": "Trung bình {amount}/ngày",
+    "longest": "Lâu nhất",
+    "duration": "{y} năm {m} tháng",
+    "busiest": "Tháng tốn nhất",
+    "month": "{month}",
+    "newEnded": "Mới / đã hủy",
+    "saved": "Tiết kiệm {amount}",
+    "ended": "{count} đã hủy",
+    "noneEnded": "Không hủy gói nào",
+    "currencies": "Tiền tệ",
+    "currencyCount": "{count}",
+    "nowMonthly": "Hiện {amount}/tháng"
+  },
+  "stars": {
+    "head": "{year} · Chòm sao gói đăng ký của {whose}",
+    "foot": "Bong bóng càng lớn, chi càng nhiều"
+  }
+}

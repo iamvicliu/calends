@@ -1,0 +1,130 @@
+{
+  "title": "Tous les abonnements",
+  "all": "Tous",
+  "summary": {
+    "one": "{count} élément · {monthly}/mois · {yearly}/an",
+    "other": "{count} éléments · {monthly}/mois · {yearly}/an"
+  },
+  "status": {
+    "upcoming": "Pas commencé",
+    "active": "Actif",
+    "trial": "En essai",
+    "trialShort": "Essai",
+    "paused": "Suspendu",
+    "pausedShort": "Suspendu",
+    "ending": "Sans renouvellement",
+    "ended": "Résilié",
+    "lifetime": "À vie"
+  },
+  "proxyExcluded": "Payé pour d’autres · non compté",
+  "perMonthApprox": "≈ {amount}/mois",
+  "originalPrice": "Prix initial {amount}",
+  "view": {
+    "grid": "Cartes",
+    "list": "Liste",
+    "gantt": "Frise"
+  },
+  "sort": {
+    "label": "Trier",
+    "next": "Prochain prélèvement",
+    "cost": "Coût mensuel",
+    "name": "Nom",
+    "start": "Date de début"
+  },
+  "add": "Ajouter un abonnement",
+  "clear": "Effacer",
+  "facet": {
+    "status": "Statut",
+    "category": "Catégorie",
+    "pay": "Paiement"
+  },
+  "unassigned": "Non attribué",
+  "empty": "Aucun abonnement correspondant",
+  "badge": {
+    "share": "Partagé",
+    "joined": "Rejoint",
+    "proxy": "Payé pour d’autres",
+    "proxyFor": "Payé pour {name}",
+    "someone": "quelqu’un"
+  },
+  "saved": "{amount} économisés",
+  "col": {
+    "name": "Abonnement",
+    "category": "Catégorie",
+    "method": "Moyen de paiement",
+    "amount": "Montant",
+    "monthly": "Mensuel",
+    "start": "Début",
+    "next": "Prochain prélèvement"
+  },
+  "notCounted": "Non compté",
+  "endedOn": "Terminé le {date}",
+  "change": {
+    "noMethod": "Moyen de paiement à définir",
+    "planned": "Prévu · ",
+    "starts": "Commence {when}",
+    "from": "Change {when}"
+  },
+  "proxyBadge": {
+    "owed": {
+      "one": "Payé pour d’autres · {count} dû",
+      "other": "Payé pour d’autres · {count} dus"
+    },
+    "owedFor": {
+      "one": "Payé pour {name} · {count} dû",
+      "other": "Payé pour {name} · {count} dus"
+    },
+    "settled": "Payé pour d’autres · réglé",
+    "settledFor": "Payé pour {name} · réglé"
+  },
+  "gantt": {
+    "months": {
+      "one": "{count} mois",
+      "other": "{count} mois"
+    },
+    "days": {
+      "one": "{count} jour",
+      "other": "{count} jours"
+    },
+    "noRegion": "Sans région",
+    "zoom1y": "1 an",
+    "zoom3y": "3 ans",
+    "byMethod": "Par paiement",
+    "byRegion": "Par région",
+    "gapTitle": "Interrompu {span} : {from} – {to}",
+    "gapShort": "Interrompu {span}",
+    "gapDays": {
+      "one": "Interrompu {count} jour",
+      "other": "Interrompu {count} jours"
+    },
+    "lifetimeSuffix": " à vie",
+    "lifetime": "À vie {amount}",
+    "present": "aujourd’hui",
+    "plannedSuffix": " · prévu",
+    "introPrefix": "Offre de lancement · ",
+    "introShort": "Offre ",
+    "planned": "Prévu",
+    "gap": "Interruption",
+    "range": {
+      "one": "Depuis le {date} · {count} phase",
+      "other": "Depuis le {date} · {count} phases"
+    }
+  },
+  "kind": {
+    "debit": "Carte bancaire",
+    "credit": "Carte de crédit",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "Solde App Store",
+    "googleplay": "Solde Google Play",
+    "giftcard": "Carte cadeau",
+    "prepaid": "Solde boutique",
+    "phone": "Crédit téléphonique",
+    "crypto": "Carte crypto",
+    "other": "Autre"
+  },
+  "network": {
+    "unionpay": "UnionPay"
+  }
+}

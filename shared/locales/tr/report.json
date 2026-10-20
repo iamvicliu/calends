@@ -1,0 +1,132 @@
+{
+  "title": "Rapor",
+  "shareReview": "{year} yıl özetini paylaş",
+  "perMonth": "{amount}/ay",
+  "per": {
+    "day": "gün",
+    "week": "hafta",
+    "month": "ay",
+    "year": "yıl",
+    "lifetime": "tek seferlik",
+    "quarter": "çeyrek",
+    "halfYear": "6 ay",
+    "twoYears": "2 yıl",
+    "n": {
+      "day": "{count} gün",
+      "week": "{count} hafta",
+      "month": "{count} ay",
+      "year": "{count} yıl"
+    }
+  },
+  "axis": {
+    "year": "{year}"
+  },
+  "hero": {
+    "label": "Aylık abonelik harcaması · negatif MRR",
+    "vsLastMonth": "geçen ay sonuna göre",
+    "yearAgo": "· bir yıl önce {amount}",
+    "annual": "Yıllık",
+    "perDay": "Günlük",
+    "active": "Etkin",
+    "recover": "Ortak planlardan geri gelen/ay",
+    "fxHist": "O günkü kurlar",
+    "fxNow": "Bugünkü kurlar",
+    "range1": "1Y",
+    "range3": "3Y",
+    "rangeAll": "Tümü"
+  },
+  "wf": {
+    "title": "{month} değişiklikleri",
+    "prev": "Önceki ay",
+    "next": "Sonraki ay",
+    "from": "Geçen ay",
+    "fx": "Kur",
+    "added": "Yeni",
+    "expansion": "Zam",
+    "contraction": "İndirim",
+    "churned": "İptal",
+    "now": "Şimdi",
+    "monthEnd": "Ay sonu",
+    "empty": "Bu ay yeni, iptal edilen veya fiyatı değişen abonelik yok.",
+    "emptyFx": "Bu ay yeni, iptal edilen veya fiyatı değişen abonelik yok; değişimin tamamı kurlardan kaynaklandı ({amount})."
+  },
+  "checkup": {
+    "title": "Kontrol",
+    "warn": {
+      "one": "{count} öğe ilgi bekliyor",
+      "other": "{count} öğe ilgi bekliyor"
+    },
+    "fix": "Düzelt",
+    "less": "Daha az göster",
+    "more": "{count} tane daha göster"
+  },
+  "cash": {
+    "title": "Nakit ve gerçek maliyet",
+    "legendCash": "O ay ödenen",
+    "legendAccrual": "Aylara yayılan maliyet",
+    "forecast": " · Tahmin",
+    "tip": "Ödenen {cash} · Maliyet {cost}",
+    "prepaidItem": "{name} · {amount} · {until} tarihine kadar",
+    "prepaid": "Ön ödemeli değer",
+    "prepaidSub": "{count} ödendi, henüz tüketilmedi",
+    "savedItem": "{name} · {amount} · {since} tarihinden beri",
+    "saved": "İptalle tasarruf",
+    "savedSub": "{count} iptal edildi",
+    "next90": "Önümüzdeki 90 günde ödenecek",
+    "peak": "Zirve: {month} · {amount}"
+  },
+  "comp": {
+    "title": "Para nereye gidiyor",
+    "back": "Geri",
+    "cat": "Kategori",
+    "pay": "Ödeme",
+    "ccy": "Para birimi",
+    "cycle": "Dönem",
+    "unassigned": "Atanmamış",
+    "yearly": "Yıllık",
+    "quarterly": "Üç / altı aylık",
+    "monthly": "Aylık",
+    "groupTip": {
+      "one": "{name} · {count} öğe · {amount}/ay",
+      "other": "{name} · {count} öğe · {amount}/ay"
+    }
+  },
+  "topup": {
+    "title": "Yükleme planı",
+    "range3": "3 ay",
+    "range6": "6 ay",
+    "range12": "1 yıl",
+    "span3": "Önümüzdeki 3 ay",
+    "span6": "Önümüzdeki 6 ay",
+    "span12": "Önümüzdeki yıl",
+    "empty": "Henüz bakiyeli hesap yok.",
+    "emptyCta": "Cüzdan'a App Store veya operatör bakiyesi ekleyin",
+    "summary": "Bakiye {balance} · ayda yaklaşık {monthly}",
+    "why": "{span}: {due} ödenecek, {balance} mevcut, {need} eksik",
+    "urgent": "; en acil: {date} tarihine kadar en az {min} yükleyin",
+    "cards": "Önerilen hediye kartları",
+    "anyAmount": "İstediğiniz tutarı yükleyin; kart değerlerine uymanız gerekmez",
+    "enough3": "Bakiye önümüzdeki 3 aya yeter",
+    "enough6": "Bakiye önümüzdeki 6 aya yeter",
+    "enough12": "Bakiye önümüzdeki yıla yeter",
+    "by": "Son tarih {date}"
+  },
+  "ev": {
+    "start": "Başladı",
+    "end": "İptal edildi",
+    "price": "Fiyat değişikliği",
+    "introEnd": "Tanıtım teklifi bitti",
+    "buy": "Tamamen satın alındı",
+    "pause": "Duraklatıldı",
+    "switch": "Bölge / plan değişti",
+    "resume": "Devam etti"
+  },
+  "log": {
+    "title": "Değişiklik kaydı",
+    "decisions": {
+      "one": "{count} karar",
+      "other": "{count} karar"
+    },
+    "more": "Daha eski kayıtlar"
+  }
+}

@@ -1,0 +1,222 @@
+{
+  "title": "Ajustes",
+  "days": { "one": "{count} día", "other": "{count} días" },
+  "logout": "Cerrar sesión",
+  "toast": {
+    "saved": "Guardado",
+    "deleted": "Eliminado",
+    "csvEmpty": "Este CSV no tiene suscripciones para importar",
+    "badBackup": "No es un archivo de copia de seguridad válido"
+  },
+  "general": {
+    "title": "General",
+    "language": "Idioma",
+    "followSystem": "Predeterminado del sistema",
+    "name": "Nombre",
+    "namePlaceholder": "Se muestra en las imágenes compartidas y en la página pública",
+    "startPage": "Abrir en",
+    "startPageAria": "Página de inicio",
+    "baseCurrency": "Moneda base",
+    "timezone": "Zona horaria",
+    "weekStart": "La semana empieza el",
+    "weekStartAria": "Primer día de la semana",
+    "monday": "Lunes",
+    "sunday": "Domingo"
+  },
+  "sidebar": {
+    "title": "Barra lateral",
+    "upcoming": "Próximos cobros",
+    "lookAhead": "Anticipación",
+    "lookAheadAria": "Periodo de próximos cobros"
+  },
+  "remind": {
+    "title": "Recordatorios",
+    "lead": "Recordarme",
+    "sameDay": "El mismo día",
+    "hour": "Enviar a las",
+    "monthly": "Avance mensual el día 1",
+    "test": "Enviar un recordatorio de prueba a todos los canales",
+    "testFailed": "No se pudo enviar",
+    "channelError": "{channel}: {error}",
+    "errorSep": "; ",
+    "testSent": "Recordatorio de prueba enviado",
+    "preview": "Vista previa de los recordatorios de hoy"
+  },
+  "today": {
+    "title": "Hoy ({day})",
+    "items": { "one": "{count} elemento", "other": "{count} elementos" }
+  },
+  "books": {
+    "title": "Contabilidad",
+    "defaultMethod": "Método de pago predeterminado",
+    "unassigned": { "one": "{count} suscripción no tiene método de pago", "other": "{count} suscripciones no tienen método de pago" },
+    "assignAllDone": { "one": "Se asignó el método de pago predeterminado a {count} suscripción", "other": "Se asignó el método de pago predeterminado a {count} suscripciones" },
+    "assignAll": "Usar el predeterminado en todas",
+    "collectCurrency": "Moneda de los planes compartidos"
+  },
+  "fx": {
+    "title": "Tipos de cambio",
+    "current": "Tipo actual",
+    "updatedAt": "Actualizado {time}",
+    "updated": "Tipos de cambio actualizados",
+    "history": "Tipos históricos",
+    "earliest": "Desde {date}",
+    "coverage": { "one": "{covered} / {count} día", "other": "{covered} / {count} días" },
+    "fill": "Completar los tipos que faltan",
+    "historyUpdated": "Tipos históricos actualizados"
+  },
+  "open": {
+    "title": "Compartir y acceso",
+    "ics": "Suscribirse en el calendario del sistema",
+    "on": "Activado",
+    "off": "Desactivado",
+    "public": "Página pública",
+    "publicOn": "La página pública está activada",
+    "publicOff": "La página pública está desactivada",
+    "previewPublic": "Vista previa de la página pública",
+    "ai": "Acceso de IA (MCP)",
+    "aiOn": "El acceso de IA está activado",
+    "aiOff": "El acceso de IA está desactivado. Los asistentes de IA ya no pueden conectarse.",
+    "manageAi": "Gestionar tokens y configuración"
+  },
+  "data": {
+    "title": "Datos",
+    "importCsv": "Importar CSV",
+    "restore": "Restaurar desde copia de seguridad",
+    "exportCsv": "Exportar CSV",
+    "backup": "Exportar copia de seguridad completa"
+  },
+  "restore": {
+    "cancel": "Cancelar",
+    "replace": "Reemplazar el registro actual",
+    "done": "Restaurado",
+    "warning": "Tu registro actual se reemplazará por completo con la copia de seguridad. No se puede deshacer; te recomendamos exportar antes una copia.",
+    "subs": "Suscripciones",
+    "methods": "Métodos de pago",
+    "count": { "one": "{count}", "other": "{count}" },
+    "time": "Copia realizada",
+    "format": "Formato",
+    "legacy": "Copia antigua: solo suscripciones y métodos de pago"
+  },
+  "import": {
+    "title": { "one": "Importar {count} suscripción", "other": "Importar {count} suscripciones" },
+    "confirmReplace": "Al reemplazar se borrarán todas las suscripciones y métodos de pago existentes. ¿Continuar?",
+    "replaceDone": "Importado (reemplazado)",
+    "replaceAll": "Reemplazar todo",
+    "mergeDone": "Importado (combinado)",
+    "merge": "Añadir a lo existente",
+    "newMethods": "Se crearán nuevos métodos de pago: {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": { "one": "Canales de notificación · {count} activo", "other": "Canales de notificación · {count} activos" },
+    "empty": "Aún no hay canales: no se enviarán recordatorios.",
+    "test": "Probar",
+    "testFailed": "No se pudo enviar",
+    "testSent": "Mensaje de prueba enviado",
+    "add": "Añadir canal",
+    "addKind": "Añadir {name}",
+    "confirmDelete": "¿Eliminar el canal «{name}»?",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "fillField": "Introduce {field}",
+    "name": "Nombre",
+    "optional": "Opcional",
+    "enabled": "Activado",
+    "field": {
+      "to": "Dirección de correo",
+      "webhook": "URL del webhook",
+      "server": "Servidor",
+      "token": "Token de acceso"
+    },
+    "kind": {
+      "email": {
+        "name": "Correo electrónico",
+        "help": "Se envía con Cloudflare Email Sending; tu dominio debe estar verificado en Cloudflare"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "Tu ID de usuario o de grupo",
+        "help": "Crea un bot con @BotFather para obtener un token. Envía primero un mensaje a tu bot y luego usa @userinfobot para saber tu ID"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Secreto de firma",
+        "secretPlaceholder": "Obligatorio si la verificación de firma está activada",
+        "help": "Ajustes del grupo → Bots → Añadir bot personalizado"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Secreto de firma",
+        "secretPlaceholder": "SEC…, obligatorio si la firma está activada",
+        "help": "Ajustes del grupo → Bots → Bot personalizado"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Chat de grupo → Añadir bot de grupo"
+      },
+      "bark": {
+        "keyPlaceholder": "Clave copiada de la app",
+        "help": "Notificaciones push en iPhone: busca Bark en el App Store"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Elige un nombre difícil de adivinar",
+        "help": "Instala la app ntfy en tu teléfono y suscríbete al mismo tema"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… o sctp…",
+        "help": "Notificaciones en WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Ajustes del canal → Integraciones → Webhooks"
+      },
+      "webhook": {
+        "name": "Webhook personalizado",
+        "header": "Encabezado adicional",
+        "help": "POST JSON: subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Seguridad",
+    "unknownBrowser": "Navegador desconocido",
+    "ago": {
+      "justNow": "Activo ahora mismo",
+      "minutes": { "one": "Hace {count} minuto", "other": "Hace {count} minutos" },
+      "hours": { "one": "Hace {count} hora", "other": "Hace {count} horas" },
+      "days": { "one": "Hace {count} día", "other": "Hace {count} días" }
+    },
+    "thisDevice": "Este dispositivo",
+    "signedInPasskey": "Inició sesión con llave de acceso: {time}",
+    "signedInPassword": "Inició sesión con contraseña: {time}",
+    "revoke": "Cerrar sesión",
+    "revoked": "Sesión cerrada",
+    "passkeyFoot": "Con una llave de acceso puedes iniciar sesión con Face ID, Touch ID o el código de tu dispositivo, sin contraseña.",
+    "passkeyUnsupported": "Este navegador no admite llaves de acceso.",
+    "lastUsed": "Último uso: {time}",
+    "addedAt": "Añadida: {time}",
+    "confirmRemovePasskey": "¿Quitar la llave de acceso «{name}»?",
+    "remove": "Quitar",
+    "removed": "Quitada",
+    "addPasskey": "Añadir llave de acceso",
+    "alreadyBound": "Este dispositivo ya tiene una llave de acceso",
+    "changePassword": "Cambiar contraseña",
+    "devices": "Dispositivos con sesión iniciada",
+    "devicesCount": { "one": "Dispositivos con sesión iniciada · {count}", "other": "Dispositivos con sesión iniciada · {count}" },
+    "devicesFoot": "Al alcanzar el límite, se cierra automáticamente la sesión del dispositivo inactivo durante más tiempo. Las ubicaciones se estiman a partir de la IP y pueden no ser exactas.",
+    "maxSessions": "Máximo de dispositivos con sesión",
+    "maxSessionsSaved": { "one": "Hasta {count} dispositivo", "other": "Hasta {count} dispositivos" },
+    "deviceCount": { "one": "{count} dispositivo", "other": "{count} dispositivos" },
+    "confirmLogoutOthers": "¿Cerrar sesión en todos los demás dispositivos?",
+    "loggedOutOthers": "Sesión cerrada en los demás dispositivos",
+    "logoutOthers": "Cerrar sesión en los demás dispositivos",
+    "passwordChanged": "Contraseña cambiada. Se cerró la sesión en los demás dispositivos.",
+    "save": "Guardar",
+    "mismatch": "Las contraseñas no coinciden",
+    "passwordFoot": "Mínimo 8 caracteres. Al cambiarla se cierra la sesión en todos los dispositivos excepto en este.",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "minLength": "Mínimo 8 caracteres",
+    "confirmPassword": "Confirmar nueva contraseña"
+  }
+}

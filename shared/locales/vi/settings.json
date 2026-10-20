@@ -1,0 +1,222 @@
+{
+  "title": "Cài đặt",
+  "days": { "other": "{count} ngày" },
+  "logout": "Đăng xuất",
+  "toast": {
+    "saved": "Đã lưu",
+    "deleted": "Đã xóa",
+    "csvEmpty": "Không có gói đăng ký nào để nhập trong CSV này",
+    "badBackup": "Không phải tệp sao lưu hợp lệ"
+  },
+  "general": {
+    "title": "Chung",
+    "language": "Ngôn ngữ",
+    "followSystem": "Theo hệ thống",
+    "name": "Tên",
+    "namePlaceholder": "Hiển thị trên ảnh chia sẻ và trang công khai",
+    "startPage": "Mở vào",
+    "startPageAria": "Trang bắt đầu",
+    "baseCurrency": "Tiền tệ cơ sở",
+    "timezone": "Múi giờ",
+    "weekStart": "Tuần bắt đầu vào",
+    "weekStartAria": "Ngày đầu tuần",
+    "monday": "Thứ Hai",
+    "sunday": "Chủ Nhật"
+  },
+  "sidebar": {
+    "title": "Thanh bên",
+    "upcoming": "Khoản phí sắp tới",
+    "lookAhead": "Xem trước",
+    "lookAheadAria": "Khoảng thời gian khoản phí sắp tới"
+  },
+  "remind": {
+    "title": "Nhắc nhở",
+    "lead": "Nhắc tôi",
+    "sameDay": "Trong ngày",
+    "hour": "Gửi lúc",
+    "monthly": "Xem trước hằng tháng vào ngày 1",
+    "test": "Gửi nhắc nhở thử đến tất cả kênh",
+    "testFailed": "Không gửi được",
+    "channelError": "{channel}: {error}",
+    "errorSep": "; ",
+    "testSent": "Đã gửi nhắc nhở thử",
+    "preview": "Xem trước nhắc nhở hôm nay"
+  },
+  "today": {
+    "title": "Hôm nay ({day})",
+    "items": { "other": "{count} mục" }
+  },
+  "books": {
+    "title": "Ghi sổ",
+    "defaultMethod": "Phương thức thanh toán mặc định",
+    "unassigned": { "other": "{count} gói đăng ký chưa có phương thức thanh toán" },
+    "assignAllDone": { "other": "Đã đặt {count} gói đăng ký về phương thức thanh toán mặc định" },
+    "assignAll": "Dùng mặc định cho tất cả",
+    "collectCurrency": "Tiền tệ gói chia sẻ"
+  },
+  "fx": {
+    "title": "Tỷ giá",
+    "current": "Tỷ giá hiện tại",
+    "updatedAt": "Cập nhật {time}",
+    "updated": "Đã cập nhật tỷ giá",
+    "history": "Tỷ giá lịch sử",
+    "earliest": "Từ {date}",
+    "coverage": { "other": "{covered} / {count} ngày" },
+    "fill": "Bổ sung tỷ giá còn thiếu",
+    "historyUpdated": "Đã cập nhật tỷ giá lịch sử"
+  },
+  "open": {
+    "title": "Chia sẻ & truy cập",
+    "ics": "Đăng ký trên lịch hệ thống",
+    "on": "Bật",
+    "off": "Tắt",
+    "public": "Trang công khai",
+    "publicOn": "Trang công khai đang bật",
+    "publicOff": "Trang công khai đang tắt",
+    "previewPublic": "Xem trước trang công khai",
+    "ai": "Truy cập AI (MCP)",
+    "aiOn": "Truy cập AI đang bật",
+    "aiOff": "Truy cập AI đang tắt. Trợ lý AI không thể kết nối nữa.",
+    "manageAi": "Quản lý token và thiết lập"
+  },
+  "data": {
+    "title": "Dữ liệu",
+    "importCsv": "Nhập CSV",
+    "restore": "Khôi phục từ bản sao lưu",
+    "exportCsv": "Xuất CSV",
+    "backup": "Xuất bản sao lưu đầy đủ"
+  },
+  "restore": {
+    "cancel": "Hủy",
+    "replace": "Thay thế sổ hiện tại",
+    "done": "Đã khôi phục",
+    "warning": "Sổ hiện tại sẽ bị thay thế hoàn toàn bằng bản sao lưu. Thao tác này không thể hoàn tác — nên xuất một bản sao lưu trước.",
+    "subs": "Gói đăng ký",
+    "methods": "Phương thức thanh toán",
+    "count": { "other": "{count}" },
+    "time": "Thời điểm sao lưu",
+    "format": "Định dạng",
+    "legacy": "Bản sao lưu cũ: chỉ có gói đăng ký và phương thức thanh toán"
+  },
+  "import": {
+    "title": { "other": "Nhập {count} gói đăng ký" },
+    "confirmReplace": "Thay thế sẽ xóa toàn bộ gói đăng ký và phương thức thanh toán hiện có. Tiếp tục?",
+    "replaceDone": "Đã nhập (thay thế)",
+    "replaceAll": "Thay thế tất cả",
+    "mergeDone": "Đã nhập (gộp)",
+    "merge": "Thêm vào dữ liệu hiện có",
+    "newMethods": "Sẽ tạo phương thức thanh toán mới: {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": { "other": "Kênh thông báo · {count} đang bật" },
+    "empty": "Chưa có kênh nào — nhắc nhở sẽ không được gửi.",
+    "test": "Thử",
+    "testFailed": "Không gửi được",
+    "testSent": "Đã gửi tin nhắn thử",
+    "add": "Thêm kênh",
+    "addKind": "Thêm {name}",
+    "confirmDelete": "Xóa kênh “{name}”?",
+    "delete": "Xóa",
+    "save": "Lưu",
+    "fillField": "Vui lòng nhập {field}",
+    "name": "Tên",
+    "optional": "Tùy chọn",
+    "enabled": "Bật",
+    "field": {
+      "to": "Địa chỉ email",
+      "webhook": "URL webhook",
+      "server": "Máy chủ",
+      "token": "Token truy cập"
+    },
+    "kind": {
+      "email": {
+        "name": "Email",
+        "help": "Gửi qua Cloudflare Email Sending; tên miền của bạn phải được xác minh trên Cloudflare"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "ID người dùng hoặc ID nhóm của bạn",
+        "help": "Tạo bot bằng @BotFather để lấy token. Gửi cho bot một tin nhắn trước, rồi dùng @userinfobot để tìm ID của bạn"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Khóa ký",
+        "secretPlaceholder": "Bắt buộc nếu bật xác minh chữ ký",
+        "help": "Cài đặt nhóm → Bot → Thêm bot tùy chỉnh"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Khóa ký",
+        "secretPlaceholder": "SEC…, bắt buộc nếu bật ký",
+        "help": "Cài đặt nhóm → Bot → Bot tùy chỉnh"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Chat nhóm → Thêm bot nhóm"
+      },
+      "bark": {
+        "keyPlaceholder": "Khóa sao chép từ ứng dụng",
+        "help": "Thông báo đẩy trên iPhone — tìm Bark trên App Store"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Chọn một tên khó đoán",
+        "help": "Cài ứng dụng ntfy trên điện thoại và đăng ký cùng chủ đề"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… hoặc sctp…",
+        "help": "Đẩy đến WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Cài đặt kênh → Tích hợp → Webhook"
+      },
+      "webhook": {
+        "name": "Webhook tùy chỉnh",
+        "header": "Header bổ sung",
+        "help": "POST JSON: subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Bảo mật",
+    "unknownBrowser": "Trình duyệt không xác định",
+    "ago": {
+      "justNow": "Vừa hoạt động",
+      "minutes": { "other": "{count} phút trước" },
+      "hours": { "other": "{count} giờ trước" },
+      "days": { "other": "{count} ngày trước" }
+    },
+    "thisDevice": "Thiết bị này",
+    "signedInPasskey": "Đăng nhập bằng passkey lúc {time}",
+    "signedInPassword": "Đăng nhập bằng mật khẩu lúc {time}",
+    "revoke": "Đăng xuất",
+    "revoked": "Đã đăng xuất",
+    "passkeyFoot": "Với passkey, bạn có thể đăng nhập bằng Face ID, Touch ID hoặc mật mã thiết bị — không cần mật khẩu.",
+    "passkeyUnsupported": "Trình duyệt này không hỗ trợ passkey.",
+    "lastUsed": "Dùng lần cuối {time}",
+    "addedAt": "Đã thêm {time}",
+    "confirmRemovePasskey": "Xóa passkey “{name}”?",
+    "remove": "Xóa",
+    "removed": "Đã xóa",
+    "addPasskey": "Thêm passkey",
+    "alreadyBound": "Thiết bị này đã có passkey",
+    "changePassword": "Đổi mật khẩu",
+    "devices": "Thiết bị đã đăng nhập",
+    "devicesCount": { "other": "Thiết bị đã đăng nhập · {count}" },
+    "devicesFoot": "Khi đạt giới hạn, thiết bị không hoạt động lâu nhất sẽ tự động bị đăng xuất. Vị trí được ước tính từ IP và có thể không chính xác.",
+    "maxSessions": "Số thiết bị đăng nhập tối đa",
+    "maxSessionsSaved": { "other": "Tối đa {count} thiết bị" },
+    "deviceCount": { "other": "{count} thiết bị" },
+    "confirmLogoutOthers": "Đăng xuất tất cả thiết bị khác?",
+    "loggedOutOthers": "Đã đăng xuất các thiết bị khác",
+    "logoutOthers": "Đăng xuất tất cả thiết bị khác",
+    "passwordChanged": "Đã đổi mật khẩu. Các thiết bị khác đã bị đăng xuất.",
+    "save": "Lưu",
+    "mismatch": "Mật khẩu không khớp",
+    "passwordFoot": "Ít nhất 8 ký tự. Đổi mật khẩu sẽ đăng xuất mọi thiết bị trừ thiết bị này.",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "minLength": "Ít nhất 8 ký tự",
+    "confirmPassword": "Xác nhận mật khẩu mới"
+  }
+}

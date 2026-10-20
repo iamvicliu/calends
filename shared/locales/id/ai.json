@@ -1,0 +1,39 @@
+{
+  "title": "Akses AI",
+  "newToken": "Token baru",
+  "mcpUrl": "URL MCP",
+  "urlCopied": "URL disalin",
+  "copy": "Salin",
+  "copied": "Disalin",
+  "copyFailed": "Gagal menyalin",
+  "neverUsed": "Belum pernah dipakai",
+  "tokenPlaceholder": "<token-anda>",
+  "tokens": { "other": "Token · {count}" },
+  "noTokens": "Belum ada token. Buat satu, lalu berikan ke asisten AI yang ingin Anda hubungkan.",
+  "lastUsed": "Terakhir dipakai {time}",
+  "confirmRevoke": "Cabut “{name}”? Asisten AI yang memakainya akan langsung kehilangan akses.",
+  "revoke": "Cabut",
+  "revoked": "Dicabut",
+  "setup": "Penyiapan",
+  "tools": { "other": "Alat tersedia · {count}" },
+  "writeBadge": "Tulis",
+  "clientOther": "Lainnya",
+  "scope": {
+    "write": "Baca & tulis",
+    "read": "Hanya baca",
+    "writeLong": "Baca & tulis: lihat, tambah, dan ubah",
+    "readLong": "Hanya baca: lihat saja"
+  },
+  "created": {
+    "title": "Token dibuat",
+    "saved": "Sudah saya simpan",
+    "foot": "Token ini hanya ditampilkan sekali dan tidak bisa dilihat lagi setelah ditutup. Jika hilang, cabut lalu buat yang baru.",
+    "copyToken": "Salin token",
+    "tokenCopied": "Token disalin",
+    "command": "Perintah penyiapan"
+  },
+  "cancel": "Batal",
+  "generate": "Buat",
+  "name": "Nama",
+  "namePlaceholder": "Untuk AI yang mana?"
+}

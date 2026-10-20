@@ -1,0 +1,77 @@
+{
+  "title": "대신 결제",
+  "status": {
+    "active": "진행 중",
+    "ending": "종료 예정",
+    "ended": "중지됨"
+  },
+  "owedPeriods": {
+    "other": "미수 {count}건"
+  },
+  "viewSub": "구독 보기",
+  "stoppedOn": " · {date} 중지",
+  "nextOn": " · 다음 {date}",
+  "payFor": "{name} 대신",
+  "unset": "설정 안 함",
+  "paidPeriods": {
+    "other": "{count}회 대신 결제"
+  },
+  "received": "돌려받음",
+  "owed": "미수",
+  "settled": "정산 완료",
+  "detailTitle": "대신 결제",
+  "cardCcy": " · 카드는 {ccy}(으)로 결제",
+  "forWhom": "대신 결제 대상",
+  "method": "결제 수단",
+  "subscription": "구독",
+  "viewDetail": "구독 상세 보기",
+  "stoppedAt": "중지일",
+  "nextCharge": "다음 결제",
+  "note": "메모",
+  "diffLabel": "돌려받은 금액 − 결제 금액",
+  "table": {
+    "date": "결제일",
+    "charged": "결제 금액",
+    "received": "돌려받음",
+    "diff": "차액",
+    "record": "기록",
+    "even": "차액 없음",
+    "none": "아직 결제가 없습니다."
+  },
+  "entry": {
+    "markedDue": "미수로 표시했습니다",
+    "saved": "저장했습니다",
+    "title": "{date} 결제",
+    "markDue": "미수로 표시",
+    "cancel": "취소",
+    "save": "저장",
+    "chargedFoot": "결제일 환율 기준 {amount}. 비워 두면 정가 {list}을(를) 사용합니다.",
+    "amount": "금액",
+    "currency": "통화",
+    "paidBack": "{name}에게 돌려받음",
+    "paidBackAnon": "돌려받음",
+    "receivedEmpty": "아직 받지 않았다면 비워 두세요.",
+    "receivedEven": "받은 날 환율 기준 {amount}, 결제 금액과 같습니다.",
+    "receivedMore": "받은 날 환율 기준 {amount}, 결제 금액보다 {diff} 많습니다.",
+    "receivedLess": "받은 날 환율 기준 {amount}, 결제 금액보다 {diff} 적습니다.",
+    "notReceived": "받지 않음",
+    "receivedOn": "받은 날짜",
+    "notePlaceholder": "선택 사항, 예: 계좌 이체"
+  },
+  "page": {
+    "owedSub": {
+      "other": "미수 {count}건, 결제일 환율 기준"
+    },
+    "allBack": "모두 돌려받음",
+    "total": "총 대신 결제액",
+    "totalSub": {
+      "other": "결제 {count}건 · {subs}"
+    },
+    "subs": {
+      "other": "구독 {count}개"
+    },
+    "diffSub": "돌려받은 결제의 환율 및 수수료 차이",
+    "emptyTitle": "아직 대신 결제한 내역이 없습니다",
+    "emptyBody": "구독을 만들거나 편집할 때 사용자에서 ‘대신 결제’를 선택하고 대상을 입력하세요."
+  }
+}

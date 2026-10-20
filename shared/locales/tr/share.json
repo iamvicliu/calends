@@ -1,0 +1,91 @@
+{
+  "title": "“{name}” aboneliğini paylaş",
+  "style": {
+    "card": "Kart",
+    "receipt": "Fiş",
+    "timeline": "Zaman çizelgesi",
+    "poster": "Poster",
+    "years": "Yıllara göre"
+  },
+  "dur": {
+    "ym": "{y} yıl {m} ay",
+    "y": {
+      "one": "{count} yıl",
+      "other": "{count} yıl"
+    },
+    "m": {
+      "one": "{count} ay",
+      "other": "{count} ay"
+    },
+    "d": {
+      "one": "{count} gün",
+      "other": "{count} gün"
+    }
+  },
+  "status": {
+    "active": "Etkin",
+    "ending": "Sona eriyor",
+    "trial": "Denemede",
+    "paused": "Duraklatıldı",
+    "ended": "İptal edildi",
+    "lifetime": "Ömür boyu sahip",
+    "upcoming": "Yakında başlıyor"
+  },
+  "switched": {
+    "zero": "Hiç değiştirilmedi",
+    "one": "Bir kez değiştirildi",
+    "other": "{count} kez değiştirildi"
+  },
+  "priceSame": "Değişmedi",
+  "priceUp": "%{pct} arttı",
+  "priceDown": "%{pct} azaldı",
+  "since": "{date} tarihinden beri",
+  "together": "Birlikte geçen süre",
+  "totalSpent": "Toplam harcama",
+  "charges": "Ödemeler",
+  "subscribed": "Abonelik",
+  "times": "{count}",
+  "gaps": "Aralar",
+  "realMonthly": "Gerçek aylık maliyet",
+  "price": "Fiyat",
+  "phases": "Dönemler",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — bugün",
+  "refund": "İade",
+  "refundShort": "İade",
+  "nth": "#{n}",
+  "earlier": "{count} daha eski",
+  "time": "SÜRE",
+  "total": "TOPLAM",
+  "chargeCount": "Ödemeler",
+  "count": "{count}",
+  "switches": "Bölge / plan değişiklikleri",
+  "thanks": "Teşekkürler · Bir sonraki dönemde görüşmek üzere",
+  "n": {
+    "charges": {
+      "one": "{count} ödeme",
+      "other": "{count} ödeme"
+    }
+  },
+  "sum": "Toplam {amount}",
+  "gap": "{dur} ara",
+  "planned": "{date} (planlandı)",
+  "present": "şimdi",
+  "priceChanges": "Fiyat değişiklikleri: {list}",
+  "withYou": "Sizinle geçen süre",
+  "totalPerDay": "Toplam {total} · günde ortalama {perDay}",
+  "lapsed": {
+    "one": "Bir kez ara verildi",
+    "other": "{count} kez ara verildi"
+  },
+  "byYear": "Yıllara göre harcama",
+  "sheet": {
+    "copied": "Görsel kopyalandı, yapıştırmaya hazır",
+    "copyFailed": "Kopyalanamadı. Bunun yerine indirmeyi deneyin.",
+    "renderFailed": "Görsel oluşturulamadı",
+    "download": "Görseli indir",
+    "generating": "Oluşturuluyor…",
+    "copy": "Görseli kopyala",
+    "showAmounts": "Tutarları göster"
+  }
+}

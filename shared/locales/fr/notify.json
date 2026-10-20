@@ -1,0 +1,97 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "L’essai se termine {when} ({date}), puis {price}",
+    "headline": "L’essai de {name} se termine {when}"
+  },
+  "renew": {
+    "introEnds": "Fin du prix de lancement, retour au prix normal",
+    "headline": "{name} se renouvelle {when} pour {price}"
+  },
+  "ending": {
+    "sub": "Se termine {when}, sans renouvellement",
+    "headline": "{name} se termine {when}"
+  },
+  "carpool": {
+    "dueIn": "Échéance {when} ({date})",
+    "dueToday": "Échéance aujourd’hui",
+    "overdue": {
+      "one": "{count} jour de retard",
+      "other": "{count} jours de retard"
+    },
+    "sub": "{status} · prochaine période : {bill}",
+    "headline": "C’est le moment d’encaisser {member} pour {name}"
+  },
+  "proxy": {
+    "someone": "Quelqu’un",
+    "chargedToday": "Prélevé pour son compte aujourd’hui",
+    "chargedAgo": {
+      "one": "Prélevé le {date}, il y a {count} jour",
+      "other": "Prélevé le {date}, il y a {count} jours"
+    },
+    "sub": "{status}, pas encore remboursé",
+    "headlineToday": "{sub} payé pour {name}",
+    "headlineUnpaid": "{name} n’a pas encore remboursé {sub}"
+  },
+  "balance": {
+    "sub": "Le solde de {balance} ne couvrira pas {sub} ({amount}) le {date}",
+    "headline": "Solde de {name} bientôt insuffisant"
+  },
+  "section": {
+    "renew": "Prélèvements à venir",
+    "trials": "Essais qui se terminent",
+    "balance": "Solde faible",
+    "carpool": "Paiements des abonnements partagés",
+    "proxy": "À rembourser pour des paiements pour d’autres",
+    "ending": "Se termine bientôt",
+    "month": "Prélèvements du mois"
+  },
+  "daily": {
+    "subject": "Rappel d’abonnement : {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} + {more} autres",
+    "intro": "Vous dépensez {mrr} par mois en abonnements, avec {count} actifs."
+  },
+  "monthly": {
+    "subject": {
+      "one": "Relevé de {month} : environ {sum}, {count} prélèvement",
+      "other": "Relevé de {month} : environ {sum}, {count} prélèvements"
+    },
+    "intro": {
+      "one": "{count} prélèvement prévu en {monthYear}, environ {sum} au total. MRR {mrr}, {arr} par an.",
+      "other": "{count} prélèvements prévus en {monthYear}, environ {sum} au total. MRR {mrr}, {arr} par an."
+    }
+  },
+  "email": {
+    "open": "Ouvrir Subscription Ledger",
+    "footer": "Vous pouvez modifier l’heure des rappels et le délai d’anticipation dans les Réglages."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Canal introuvable",
+    "noneEnabled": "Aucun canal de notification n’est activé",
+    "alreadySent": "Déjà envoyé aujourd’hui",
+    "failure": "{channel} : {error}",
+    "failureSep": " ; "
+  },
+  "test": {
+    "subject": "[Test] {subject}",
+    "sampleSubject": "[Test] Les rappels d’abonnement sont prêts",
+    "sampleIntro": "Votre canal de notification fonctionne."
+  },
+  "channel": {
+    "missing": "Il manque {field} à « {channel} »",
+    "field": {
+      "to": "une adresse e-mail de destination",
+      "botToken": "un jeton de bot",
+      "chatId": "un ID de chat",
+      "webhook": "une URL de webhook",
+      "deviceKey": "une clé d’appareil",
+      "topic": "un sujet",
+      "sendKey": "une SendKey",
+      "url": "une URL"
+    }
+  }
+}

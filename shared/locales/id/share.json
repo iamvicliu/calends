@@ -1,0 +1,85 @@
+{
+  "title": "Bagikan “{name}”",
+  "style": {
+    "card": "Kartu",
+    "receipt": "Struk",
+    "timeline": "Linimasa",
+    "poster": "Poster",
+    "years": "Per tahun"
+  },
+  "dur": {
+    "ym": "{y} thn {m} bln",
+    "y": {
+      "other": "{count} tahun"
+    },
+    "m": {
+      "other": "{count} bulan"
+    },
+    "d": {
+      "other": "{count} hari"
+    }
+  },
+  "status": {
+    "active": "Aktif",
+    "ending": "Akan berakhir",
+    "trial": "Masa uji coba",
+    "paused": "Dijeda",
+    "ended": "Dibatalkan",
+    "lifetime": "Dimiliki seumur hidup",
+    "upcoming": "Segera dimulai"
+  },
+  "switched": {
+    "zero": "Tidak pernah berganti",
+    "other": "Berganti {count} kali"
+  },
+  "priceSame": "Tidak berubah",
+  "priceUp": "Naik {pct}%",
+  "priceDown": "Turun {pct}%",
+  "since": "Sejak {date}",
+  "together": "Bersama selama",
+  "totalSpent": "Total pengeluaran",
+  "charges": "Tagihan",
+  "subscribed": "Berlangganan",
+  "times": "{count}",
+  "gaps": "Terputus",
+  "realMonthly": "Biaya bulanan riil",
+  "price": "Harga",
+  "phases": "Fase",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — hari ini",
+  "refund": "Refund",
+  "refundShort": "Refund",
+  "nth": "#{n}",
+  "earlier": "{count} sebelumnya",
+  "time": "WAKTU",
+  "total": "TOTAL",
+  "chargeCount": "Tagihan",
+  "count": "{count}",
+  "switches": "Ganti wilayah / paket",
+  "thanks": "Terima kasih · Sampai jumpa di siklus berikutnya",
+  "n": {
+    "charges": {
+      "other": "{count} tagihan"
+    }
+  },
+  "sum": "Total {amount}",
+  "gap": "Jeda {dur}",
+  "planned": "{date} (rencana)",
+  "present": "sekarang",
+  "priceChanges": "Perubahan harga: {list}",
+  "withYou": "Menemani Anda selama",
+  "totalPerDay": "Total {total} · rata-rata {perDay}/hari",
+  "lapsed": {
+    "other": "Terputus {count} kali"
+  },
+  "byYear": "Pengeluaran per tahun",
+  "sheet": {
+    "copied": "Gambar disalin — siap ditempel",
+    "copyFailed": "Gagal menyalin. Coba unduh saja.",
+    "renderFailed": "Gagal membuat gambar",
+    "download": "Unduh gambar",
+    "generating": "Membuat…",
+    "copy": "Salin gambar",
+    "showAmounts": "Tampilkan jumlah"
+  }
+}

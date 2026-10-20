@@ -1,0 +1,58 @@
+{
+  "bill": { "m1": "Hằng tháng", "m3": "Hằng quý", "m6": "Mỗi 6 tháng", "m12": "Hằng năm", "custom": { "other": "Mỗi {count} tháng" } },
+  "cycle": {
+    "lifetime": "Trọn đời",
+    "once": "một lần",
+    "every": { "day": "Hằng ngày", "week": "Hằng tuần", "month": "Hằng tháng", "year": "Hằng năm" },
+    "quarterly": "Hằng quý",
+    "halfYearly": "Mỗi 6 tháng",
+    "biennial": "Mỗi 2 năm",
+    "everyN": {
+      "day": { "other": "Mỗi {count} ngày" },
+      "week": { "other": "Mỗi {count} tuần" },
+      "month": { "other": "Mỗi {count} tháng" },
+      "year": { "other": "Mỗi {count} năm" }
+    }
+  },
+  "subError": { "name": "Cần nhập tên", "price": "Giá không hợp lệ", "start": "Ngày bắt đầu không hợp lệ", "cycle": "Chu kỳ thanh toán không hợp lệ" },
+  "phase": {
+    "switchTooEarly": "Ngày hiệu lực phải sau ngày bắt đầu giai đoạn hiện tại",
+    "resumeTooEarly": "Ngày tiếp tục không được sớm hơn ngày kết thúc gần nhất",
+    "priceOutOfRange": "Ngày đổi giá không thuộc giai đoạn nào"
+  },
+  "event": {
+    "label": "{region}{price}/{per}",
+    "region": "{region} ",
+    "per": { "year": "năm", "month": "tháng", "months": "{count} tháng", "week": "tuần", "day": "ngày" }
+  },
+  "listSep": ", ",
+  "insight": {
+    "yearly": {
+      "title": { "other": "{count} gói đăng ký dài hạn sẽ gia hạn trong 60 ngày tới" },
+      "body": "Tổng cộng khoảng {sum}. Phí hằng năm khó hoàn tiền, nên đây là lúc quyết định giữ lại gói nào."
+    },
+    "dup": {
+      "title": "{names} có thể bị trùng",
+      "body": { "other": "{count} gói đăng ký này tốn tổng cộng khoảng {sum} mỗi tháng. Hãy kiểm tra xem bạn có còn cần tất cả không." }
+    },
+    "hikes": { "title": { "other": "{count} gói đăng ký đã tăng giá trong năm qua" } },
+    "intro": {
+      "title": { "other": "Ưu đãi của {name} kết thúc sau {count} ngày" },
+      "body": "Sau đó, giá sẽ từ {from} trở lại {to}."
+    },
+    "balance": { "title": "{name} sẽ không đủ đến {date}", "body": "{sub} cần {need}; số dư hiện khoảng {current}." },
+    "fx": { "title": "{pct}% chi tiêu bằng ngoại tệ", "body": "Lớn nhất là {ccy} ({share}%). Phần này rẻ hơn khi {ccy} yếu đi, và đắt hơn khi {ccy} mạnh lên." },
+    "noMethod": {
+      "title": { "other": "{count} gói đăng ký chưa có phương thức thanh toán" },
+      "body": "Hãy thêm để dự báo số dư và thống kê theo phương thức được đầy đủ."
+    },
+    "top": { "title": "{name} là gói đăng ký đắt nhất của bạn", "body": "Khoảng {perDay} mỗi ngày, chiếm {pct}% chi tiêu hằng tháng." }
+  },
+  "methodKind": {
+    "debit": "Thẻ ngân hàng", "credit": "Thẻ tín dụng", "alipay": "Alipay", "wechat": "WeChat Pay", "paypal": "PayPal", "appstore": "App Store", "googleplay": "Google Play",
+    "giftcard": "Thẻ quà tặng", "prepaid": "Số dư cửa hàng", "phone": "Tài khoản di động", "crypto": "Thẻ tiền mã hóa", "other": "Khác"
+  },
+  "publicMethod": "{kind} · {region}",
+  "channel": { "email": "Email" },
+  "csv": { "appStoreBalance": "Số dư App Store {region}", "otherCategory": "Khác" }
+}

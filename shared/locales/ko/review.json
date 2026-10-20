@@ -1,0 +1,97 @@
+{
+  "title": "연간 결산 공유",
+  "fileName": "subscriptions-{year}-in-review-{style}.png",
+  "style": {
+    "poster": "포스터",
+    "receipt": "영수증",
+    "card": "카드",
+    "stars": "별자리"
+  },
+  "unassigned": "미지정",
+  "me": "나",
+  "whose": "{name}의",
+  "whoseSelf": "나의",
+  "topSpend": "최대 지출",
+  "ofYear": "연간의 {pct}",
+  "n": {
+    "subs": {
+      "other": "구독 {count}개"
+    },
+    "charges": {
+      "other": "결제 {count}건"
+    },
+    "currencies": {
+      "other": "통화 {count}종"
+    },
+    "currencyKinds": {
+      "other": "통화 {count}종"
+    }
+  },
+  "tip": {
+    "top": "{name} 하나가 연간 지출의 {pct}를 차지했습니다",
+    "longest": {
+      "other": "{name}와(과) 함께한 지 {count}년이 넘었습니다"
+    },
+    "busiest": "지갑이 가장 아팠던 달은 {month}",
+    "newEnded": "올해 {added}개 추가, {ended}개 해지",
+    "currencies": {
+      "other": "올해 {count}가지 통화로 결제했습니다"
+    },
+    "soon": {
+      "other": "다음 30일 안에 결제 {count}건이 있습니다. 정말 모두 필요한가요?"
+    },
+    "milkTea": {
+      "other": "하루 {amount}, 버블티 약 {count}잔"
+    },
+    "saved": "해지 덕분에 올해 벌써 {amount}을(를) 절약했습니다",
+    "fallback": "무엇에 돈을 내는지 아는 것이 덜 쓰는 첫걸음입니다"
+  },
+  "receipt": {
+    "shop": "{whose} 구독 상점",
+    "asOf": "연간 명세서 · {date} 기준",
+    "fullYear": "연간 명세서 · {year}",
+    "no": "No. {no}",
+    "register": "REG 01",
+    "cashier": "담당: {name}",
+    "item": "항목",
+    "share": "비중",
+    "amount": "금액",
+    "rest": "외 {count}개",
+    "count": "항목 {items} / 결제 {charges}",
+    "total": "합계"
+  },
+  "poster": {
+    "kicker": "{whose} 올해의 구독",
+    "ongoing": "올해 지금까지 {subs} · {charges}",
+    "ongoingHidden": "올해 지금까지: {charges} · {currencies}",
+    "year": "{subs} · {charges}에 지출",
+    "yearHidden": "올해: {charges} · {currencies}",
+    "newEnded": "신규 {added} · 해지 {ended}",
+    "perDay": "하루 평균 {amount}"
+  },
+  "card": {
+    "head": "{whose} 구독",
+    "intro": {
+      "ongoing": "올해 지금까지 구독에 쓴 돈",
+      "ongoingHidden": "올해 지금까지 구독한 서비스",
+      "year": "올해 구독에 쓴 돈",
+      "yearHidden": "올해 구독한 서비스"
+    },
+    "perDay": "하루 평균 {amount}",
+    "longest": "가장 오래된 구독",
+    "duration": "{y}년 {m}개월",
+    "busiest": "가장 비쌌던 달",
+    "month": "{month}",
+    "newEnded": "신규 / 해지",
+    "saved": "{amount} 절약",
+    "ended": "{count}개 해지",
+    "noneEnded": "해지 없음",
+    "currencies": "통화",
+    "currencyCount": "{count}종",
+    "nowMonthly": "현재 {amount}/월"
+  },
+  "stars": {
+    "head": "{year} · {whose} 구독 별자리",
+    "foot": "거품이 클수록 지출도 큽니다"
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "bill": {
+    "m1": "毎月",
+    "m3": "3か月ごと",
+    "m6": "6か月ごと",
+    "m12": "毎年",
+    "custom": {
+      "other": "{count}か月ごと"
+    }
+  },
+  "cycle": {
+    "lifetime": "買い切り",
+    "once": "1回",
+    "every": {
+      "day": "毎日",
+      "week": "毎週",
+      "month": "毎月",
+      "year": "毎年"
+    },
+    "quarterly": "3か月ごと",
+    "halfYearly": "6か月ごと",
+    "biennial": "2年ごと",
+    "everyN": {
+      "day": {
+        "other": "{count}日ごと"
+      },
+      "week": {
+        "other": "{count}週ごと"
+      },
+      "month": {
+        "other": "{count}か月ごと"
+      },
+      "year": {
+        "other": "{count}年ごと"
+      }
+    }
+  },
+  "subError": {
+    "name": "名前を入力してください",
+    "price": "価格が正しくありません",
+    "start": "開始日が正しくありません",
+    "cycle": "請求サイクルが正しくありません"
+  },
+  "phase": {
+    "switchTooEarly": "適用日は現在の期間の開始日より後にしてください",
+    "resumeTooEarly": "再開日は前回の終了日より前にできません",
+    "priceOutOfRange": "価格変更日がどの期間にも含まれていません"
+  },
+  "event": {
+    "label": "{region}{price}/{per}",
+    "region": "{region} ",
+    "per": {
+      "year": "年",
+      "month": "月",
+      "months": "{count}か月",
+      "week": "週",
+      "day": "日"
+    }
+  },
+  "listSep": "、",
+  "insight": {
+    "yearly": {
+      "title": {
+        "other": "長期サブスク{count}件が60日以内に更新されます"
+      },
+      "body": "合計約{sum}。年額の請求は返金が難しいので、続けるものを今のうちに決めましょう。"
+    },
+    "dup": {
+      "title": "{names}は重複しているかもしれません",
+      "body": {
+        "other": "合わせて月約{sum}かかっています（{count}件）。すべて必要か確認しましょう。"
+      }
+    },
+    "hikes": {
+      "title": {
+        "other": "過去1年で{count}件のサブスクが値上げされました"
+      }
+    },
+    "intro": {
+      "title": {
+        "other": "{name}の初回特典はあと{count}日で終了"
+      },
+      "body": "終了後、価格は{from}から{to}に戻ります。"
+    },
+    "balance": {
+      "title": "{name}は{date}まで持ちません",
+      "body": "{sub}に{need}必要ですが、残高は約{current}です。"
+    },
+    "fx": {
+      "title": "支出の{pct}%が外貨建てです",
+      "body": "最も多いのは{ccy}（{share}%）。{ccy}安になればこの分は安く、{ccy}高になれば高くなります。"
+    },
+    "noMethod": {
+      "title": {
+        "other": "{count}件のサブスクに支払い方法が設定されていません"
+      },
+      "body": "設定すると、残高予測と支払い方法別の集計が正確になります。"
+    },
+    "top": {
+      "title": "{name}がいちばん高いサブスクです",
+      "body": "1日あたり約{perDay}、月間支出の{pct}%です。"
+    }
+  },
+  "methodKind": {
+    "debit": "デビットカード",
+    "credit": "クレジットカード",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "ギフトカード",
+    "prepaid": "ストア残高",
+    "phone": "携帯残高",
+    "crypto": "暗号資産カード",
+    "other": "その他"
+  },
+  "publicMethod": "{kind} · {region}",
+  "channel": {
+    "email": "メール"
+  },
+  "csv": {
+    "appStoreBalance": "App Store {region} 残高",
+    "otherCategory": "その他"
+  }
+}

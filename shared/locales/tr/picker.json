@@ -1,0 +1,18 @@
+{
+  "choose": "Seç",
+  "noMatch": "Eşleşme yok",
+  "common": "Sık kullanılanlar",
+  "currency": "Para birimi",
+  "date": { "placeholder": "Tarih seçin", "prev": "Önceki", "next": "Sonraki" },
+  "method": { "label": "Ödeme yöntemi", "none": "Yok" },
+  "region": { "label": "Bölge", "any": "Tümü", "none": "Tüm bölgeler", "all": "Tüm bölgeler" },
+  "ccy": {
+    "label": "Para birimi",
+    "switch": "Görüntüleme para birimini değiştir",
+    "orig": "Orijinal",
+    "origHint": "Her biri kendi para biriminde",
+    "all": "Tüm para birimleri",
+    "search": "Ad, kod veya simge arayın",
+    "noMatch": "Eşleşen para birimi yok"
+  }
+}

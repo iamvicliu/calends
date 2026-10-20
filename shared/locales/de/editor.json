@@ -1,0 +1,224 @@
+{
+  "addTitle": "Abo hinzufügen",
+  "editTitle": "„{name}“ bearbeiten",
+  "confirmDiscard": "Ungesicherte Änderungen verwerfen?",
+  "confirmDelete": "„{name}“ löschen? Der Verlauf wird ebenfalls gelöscht. Wenn du nur nicht mehr verlängerst, markiere es stattdessen als „Gekündigt“.",
+  "toast": {
+    "added": "Hinzugefügt",
+    "saved": "Gesichert",
+    "deleted": "Gelöscht"
+  },
+  "cycle": {
+    "w1": "Wöchentlich",
+    "m1": "Monatlich",
+    "m3": "Vierteljährlich",
+    "m6": "Halbjährlich",
+    "y1": "Jährlich",
+    "y2": "Alle 2 Jahre",
+    "lt": "Lebenslang",
+    "custom": "Eigene …"
+  },
+  "unit": {
+    "label": "Einheit",
+    "every": "Alle",
+    "day": {
+      "one": "Tag",
+      "other": "Tage"
+    },
+    "week": {
+      "one": "Woche",
+      "other": "Wochen"
+    },
+    "month": {
+      "one": "Monat",
+      "other": "Monate"
+    },
+    "year": {
+      "one": "Jahr",
+      "other": "Jahre"
+    }
+  },
+  "status": {
+    "active": "Aktiv",
+    "trial": "Testphase",
+    "paused": "Pausiert",
+    "cancelled": "Gekündigt"
+  },
+  "category": {
+    "choose": "Kategorie wählen",
+    "new": "Neue Kategorie …",
+    "newPrompt": "Name der Kategorie",
+    "tools": "Tools",
+    "media": "Video",
+    "music": "Musik",
+    "daily": "Alltag",
+    "productivity": "Produktivität",
+    "shopping": "Shopping",
+    "education": "Bildung",
+    "games": "Spiele",
+    "domains": "Domains",
+    "social": "Social Media"
+  },
+  "group": {
+    "billing": "Abrechnung",
+    "status": "Status",
+    "who": "Wer es nutzt",
+    "links": "Links & Darstellung",
+    "tags": "Tags & Notizen"
+  },
+  "field": {
+    "category": "Kategorie",
+    "amount": "Betrag",
+    "currency": "Währung",
+    "cycle": "Abrechnungszeitraum",
+    "method": "Zahlungsmethode",
+    "purchased": "Kaufdatum",
+    "start": "Startdatum",
+    "region": "Region",
+    "trialEnd": "Testphase endet",
+    "end": "Endet am",
+    "notSet": "Nicht festgelegt",
+    "notes": "Notizen",
+    "optional": "Optional",
+    "url": "Website",
+    "manageUrl": "Verwaltungsseite",
+    "icon": "Symbol",
+    "auto": "Automatisch",
+    "showDomain": "Domain auf öffentlicher Seite zeigen",
+    "showDomainOn": "Besucher sehen die vollständige Domain",
+    "showDomainOff": "Auf der öffentlichen Seite verborgen",
+    "tagsPlaceholder": "Mit Leerzeichen trennen",
+    "notesPlaceholder": "Notizen (optional)"
+  },
+  "share": {
+    "none": "Nur ich",
+    "owner": "Ich organisiere",
+    "member": "Ich bin dabei",
+    "proxy": "Ich zahle für",
+    "memberHint": "Gib nur deinen Anteil ein",
+    "perHead": "{amount} pro Person",
+    "ownerName": "Organisator",
+    "ownerPlaceholder": "An wen du zahlst",
+    "seats": "Plätze gesamt (inkl. dir)",
+    "memberN": "Mitglied {n}",
+    "perPeriod": "Anteil pro Zeitraum",
+    "paidUntil": "Bezahlt bis",
+    "remove": "Entfernen",
+    "addMember": "Mitglied hinzufügen"
+  },
+  "proxy": {
+    "for": "Ich zahle für",
+    "forPlaceholder": "Name der Person",
+    "contact": "Kontakt",
+    "notePlaceholder": "z. B. Kollege, zahlt am Monatsende"
+  },
+  "more": {
+    "title": "Weitere Optionen",
+    "intro": "Einführungsangebot",
+    "bonus": "Gratiszeit",
+    "remind": "Erinnerung",
+    "links": "Links",
+    "tags": "Tags",
+    "notes": "Notizen",
+    "summary": "Einführungsangebot, Gratiszeit, Erinnerung, Links, Tags, Notizen",
+    "summaryLt": "Links, Tags, Notizen"
+  },
+  "intro": {
+    "has": "Einführungsangebot",
+    "price": "Einführungspreis",
+    "until": "Angebot endet"
+  },
+  "bonus": {
+    "has": "Gratiszeit",
+    "from": "Gratis ab",
+    "until": "Gratis bis",
+    "resume": "Abrechnung ab {date}",
+    "quick": {
+      "d7": "+7 Tage",
+      "m1": "+1 Monat",
+      "m3": "+3 Monate",
+      "m6": "+6 Monate",
+      "y1": "+1 Jahr"
+    }
+  },
+  "remind": {
+    "days": "Erinnern",
+    "default": {
+      "one": "Standard ({count} Tag vorher)",
+      "other": "Standard ({count} Tage vorher)"
+    },
+    "sameDay": "Am Fälligkeitstag",
+    "before": {
+      "one": "{count} Tag vorher",
+      "other": "{count} Tage vorher"
+    },
+    "never": "Nie"
+  },
+  "name": {
+    "placeholder": "Name oder App Store-Link einfügen",
+    "catalog": "Beliebte Dienste · füllt Logo, Kategorie und Website aus"
+  },
+  "change": {
+    "title": "Verlauf & Änderungen",
+    "needPrice": "Gib einen Preis ein",
+    "toast": {
+      "price": "Preisänderung erfasst. Sichern zum Übernehmen.",
+      "switch": "Neue Phase hinzugefügt. Sichern zum Übernehmen.",
+      "resume": "Neu abonniert. Sichern zum Übernehmen."
+    },
+    "price": "Preisänderung erfassen",
+    "switch": "Region, Tarif oder Zahlungsmethode ändern",
+    "resume": "Neu abonnieren",
+    "undo": "Letzte Phase rückgängig machen",
+    "priceDate": "Neuer Preis ab",
+    "switchDate": "Änderung gültig ab",
+    "resumeDate": "Neu abonniert am",
+    "newPrice": "Neuer Preis ({currency})",
+    "priceLabel": "Preis",
+    "planned": "Noch nicht fix, nur geplant",
+    "plannedHint": "Wird weiterhin in Prognosen berücksichtigt und in den Details als „Geplant“ markiert. Später mit einem Tipp bestätigen oder verwerfen."
+  },
+  "history": {
+    "gapMonths": {
+      "one": "{count} Monat unterbrochen",
+      "other": "{count} Monate unterbrochen"
+    },
+    "gapDays": {
+      "one": "{count} Tag unterbrochen",
+      "other": "{count} Tage unterbrochen"
+    },
+    "plannedRange": "{start} → {end} (geplant)",
+    "plannedFrom": "Ab {start} (geplant)",
+    "range": "{start} → {end}",
+    "now": "heute",
+    "initial": "Anfang",
+    "priceChange": "Preisänderung {date}"
+  },
+  "payment": {
+    "addTitle": "Zahlung hinzufügen",
+    "editTitle": "Zahlung bearbeiten",
+    "toast": {
+      "added": "Zahlung hinzugefügt",
+      "edited": "Zahlung aktualisiert",
+      "deleted": "Zahlung gelöscht"
+    },
+    "date": "Datum",
+    "kind": {
+      "label": "Art",
+      "charge": "Abbuchung",
+      "refund": "Erstattung",
+      "adjust": "Korrektur",
+      "failed": "Fehlgeschlagene Abbuchung"
+    },
+    "amount": "Betrag ({currency})",
+    "refundHint": "Gib den erstatteten Betrag ein; er wird negativ gespeichert",
+    "settled": "Von der Karte abgebucht (optional)",
+    "settledCcy": "Kartenwährung",
+    "settledAmount": "Kartenbetrag",
+    "blank": "Leer lassen",
+    "freezeHint": "Abbuchungen in dieser Phase werden derzeit aus dem Abrechnungszeitraum geschätzt. Beim Sichern werden die geschätzten Abbuchungen von {amount} bis heute zuerst in Einträge umgewandelt; danach sind die Einträge maßgeblich. Künftige Abbuchungen bleiben unverändert."
+  },
+  "timeline": {
+    "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"
+  }
+}

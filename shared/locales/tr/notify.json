@@ -1,0 +1,97 @@
+{
+  "appName": "Abonelik Defteri",
+  "trial": {
+    "sub": "Deneme {when} bitiyor ({date}), ardından {price}",
+    "headline": "{name} denemesi {when} bitiyor"
+  },
+  "renew": {
+    "introEnds": "Tanıtım fiyatı bitiyor, normal fiyata dönülüyor",
+    "headline": "{name} {when} {price} karşılığında yenileniyor"
+  },
+  "ending": {
+    "sub": "{when} sona eriyor, yenilenmeyecek",
+    "headline": "{name} {when} sona eriyor"
+  },
+  "carpool": {
+    "dueIn": "Son ödeme {when} ({date})",
+    "dueToday": "Son ödeme bugün",
+    "overdue": {
+      "one": "{count} gün gecikti",
+      "other": "{count} gün gecikti"
+    },
+    "sub": "{status} · sonraki dönem: {bill}",
+    "headline": "{name} için {member} kişisinden tahsilat zamanı"
+  },
+  "proxy": {
+    "someone": "Birisi",
+    "chargedToday": "Bugün onun adına ödendi",
+    "chargedAgo": {
+      "one": "{date} ödendi, {count} gün önce",
+      "other": "{date} ödendi, {count} gün önce"
+    },
+    "sub": "{status}, henüz geri ödenmedi",
+    "headlineToday": "{name} için {sub} ödendi",
+    "headlineUnpaid": "{name}, {sub} ödemesini henüz geri vermedi"
+  },
+  "balance": {
+    "sub": "{balance} bakiye, {date} tarihindeki {sub} ({amount}) ödemesini karşılamayacak",
+    "headline": "{name} bakiyesi azalıyor"
+  },
+  "section": {
+    "renew": "Yaklaşan ödemeler",
+    "trials": "Biten denemeler",
+    "balance": "Düşük bakiye",
+    "carpool": "Ortak plan ödemeleri",
+    "proxy": "Başkaları için ödemelerden alacaklar",
+    "ending": "Yakında sona erenler",
+    "month": "Bu ayın ödemeleri"
+  },
+  "daily": {
+    "subject": "Abonelik hatırlatması: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} + {more} tane daha",
+    "intro": "Aboneliklere ayda {mrr} harcıyorsunuz; {count} abonelik etkin."
+  },
+  "monthly": {
+    "subject": {
+      "one": "{month} faturası: yaklaşık {sum}, {count} ödeme",
+      "other": "{month} faturası: yaklaşık {sum}, {count} ödeme"
+    },
+    "intro": {
+      "one": "{monthYear} için {count} ödeme bekleniyor, toplam yaklaşık {sum}. MRR {mrr}, yılda {arr}.",
+      "other": "{monthYear} için {count} ödeme bekleniyor, toplam yaklaşık {sum}. MRR {mrr}, yılda {arr}."
+    }
+  },
+  "email": {
+    "open": "Abonelik Defteri'ni aç",
+    "footer": "Hatırlatma saatini ve kaç gün önceden hatırlatılacağını Ayarlar'dan değiştirebilirsiniz."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Kanal bulunamadı",
+    "noneEnabled": "Hiçbir bildirim kanalı açık değil",
+    "alreadySent": "Bugün zaten gönderildi",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Test] {subject}",
+    "sampleSubject": "[Test] Abonelik hatırlatmaları hazır",
+    "sampleIntro": "Bildirim kanalınız çalışıyor."
+  },
+  "channel": {
+    "missing": "“{channel}” kanalında eksik: {field}",
+    "field": {
+      "to": "alıcı e-posta adresi",
+      "botToken": "bot token'ı",
+      "chatId": "sohbet ID'si",
+      "webhook": "webhook URL'si",
+      "deviceKey": "cihaz anahtarı",
+      "topic": "konu",
+      "sendKey": "SendKey",
+      "url": "URL"
+    }
+  }
+}

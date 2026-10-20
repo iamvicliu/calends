@@ -1,0 +1,23 @@
+{
+  "close": "Cerrar",
+  "error": {
+    "loginRequired": "Inicia sesión primero",
+    "requestFailed": "La solicitud falló ({status})"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "currency": {
+    "XCG": "Florín caribeño",
+    "ZWG": "Oro de Zimbabue"
+  },
+  "method": {
+    "none": "Sin definir"
+  },
+  "toolbar": {
+    "openSidebar": "Abrir barra lateral",
+    "add": "Añadir suscripción"
+  }
+}

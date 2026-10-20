@@ -1,0 +1,105 @@
+{
+  "title": "Yıl özetinizi paylaşın",
+  "fileName": "subscriptions-{year}-in-review-{style}.png",
+  "style": {
+    "poster": "Poster",
+    "receipt": "Fiş",
+    "card": "Kart",
+    "stars": "Yıldız haritası"
+  },
+  "unassigned": "Atanmamış",
+  "me": "Ben",
+  "whose": "{name}",
+  "whoseSelf": "Ben",
+  "topSpend": "En büyük harcama",
+  "ofYear": "Yılın {pct} kadarı",
+  "n": {
+    "subs": {
+      "one": "{count} abonelik",
+      "other": "{count} abonelik"
+    },
+    "charges": {
+      "one": "{count} ödeme",
+      "other": "{count} ödeme"
+    },
+    "currencies": {
+      "one": "{count} para birimi",
+      "other": "{count} para birimi"
+    },
+    "currencyKinds": {
+      "one": "{count} para birimi",
+      "other": "{count} para birimi"
+    }
+  },
+  "tip": {
+    "top": "Yılın {pct} kadarını tek başına {name} götürdü",
+    "longest": {
+      "one": "{name} bir yıldır sizinle",
+      "other": "{name} {count} yılı aşkın süredir sizinle"
+    },
+    "busiest": "Cüzdanınızı en çok {month} yordu",
+    "newEnded": "Bu yıl: {added} giren, {ended} çıkan",
+    "currencies": {
+      "one": "Bu yıl {count} para biriminde ödeme yaptınız",
+      "other": "Bu yıl {count} farklı para biriminde ödeme yaptınız; tam bir dünya gezgini"
+    },
+    "soon": {
+      "one": "Önümüzdeki 30 günde {count} ödeme var; hâlâ istiyor musunuz?",
+      "other": "Önümüzdeki 30 günde {count} ödeme var; hepsini hâlâ istiyor musunuz?"
+    },
+    "milkTea": {
+      "one": "Günde {amount}; aşağı yukarı bir bubble tea",
+      "other": "Günde {amount}; aşağı yukarı {count} bubble tea"
+    },
+    "saved": "İptaller bu yıl size şimdiden {amount} kazandırdı",
+    "fallback": "Neye ödediğinizi bilmek, daha az ödemenin ilk adımıdır"
+  },
+  "receipt": {
+    "shop": "{whose} · Abonelik Mağazası",
+    "asOf": "Yıllık döküm · {date} itibarıyla",
+    "fullYear": "Yıllık döküm · {year}",
+    "no": "No. {no}",
+    "register": "KASA 01",
+    "cashier": "Kasiyer: {name}",
+    "item": "Ürün",
+    "share": "Pay",
+    "amount": "Tutar",
+    "rest": "{count} tane daha",
+    "count": "Ürün {items} / Ödeme {charges}",
+    "total": "TOPLAM"
+  },
+  "poster": {
+    "kicker": "{whose} · abonelik yılı",
+    "ongoing": "Bu yıl şimdiye kadar, {subs} · {charges}",
+    "ongoingHidden": "Bu yıl şimdiye kadar: {charges} · {currencies}",
+    "year": "{subs} · {charges} için harcandı",
+    "yearHidden": "Bu yıl: {charges} · {currencies}",
+    "newEnded": "{added} yeni · {ended} iptal",
+    "perDay": "Günde ortalama {amount}"
+  },
+  "card": {
+    "head": "{whose} · abonelikler",
+    "intro": {
+      "ongoing": "Bu yıl şimdiye kadar aboneliklerin maliyeti",
+      "ongoingHidden": "Bu yıl şimdiye kadar abone olduklarınız",
+      "year": "Bu yıl aboneliklerin maliyeti",
+      "yearHidden": "Bu yıl abone olduklarınız"
+    },
+    "perDay": "Günde ortalama {amount}",
+    "longest": "En uzun süreli",
+    "duration": "{y} yıl {m} ay",
+    "busiest": "En pahalı ay",
+    "month": "{month}",
+    "newEnded": "Yeni / iptal",
+    "saved": "{amount} tasarruf",
+    "ended": "{count} iptal",
+    "noneEnded": "İptal yok",
+    "currencies": "Para birimleri",
+    "currencyCount": "{count}",
+    "nowMonthly": "Şu an {amount}/ay"
+  },
+  "stars": {
+    "head": "{year} · {whose} · abonelik yıldızları",
+    "foot": "Balon büyüdükçe harcama büyür"
+  }
+}

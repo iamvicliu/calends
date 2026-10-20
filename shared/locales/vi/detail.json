@@ -1,0 +1,33 @@
+{
+  "action": { "edit": "Sửa", "pause": "Tạm dừng", "resume": "Tiếp tục", "manage": "Quản lý", "website": "Trang web", "share": "Chia sẻ" },
+  "toast": { "resumed": "Đã tiếp tục thanh toán", "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến" },
+  "history": "Lịch sử",
+  "summary": "Tóm tắt",
+  "field": { "amount": "Số tiền", "cycle": "Chu kỳ thanh toán", "monthlyYearly": "Theo tháng / năm", "category": "Danh mục", "method": "Phương thức thanh toán", "start": "Ngày bắt đầu", "next": "Kỳ thanh toán tới", "expires": "Dịch vụ kết thúc", "expiresHint": "Tự động gia hạn sẽ trừ tiền trước ngày này", "endedOn": "Kết thúc ngày", "trialEnd": "Hết dùng thử", "region": "Khu vực" },
+  "up": { "planned": "Dự định thay đổi · chưa xác nhận", "starting": "Sắp bắt đầu", "changing": "Thay đổi sắp tới", "effective": "Ngày hiệu lực" },
+  "plan": { "drop": "Không chuyển", "droppedToast": "Sẽ không chuyển. Kết thúc sau {date}", "confirm": "Xác nhận chuyển", "confirmedToast": "Đã xác nhận chuyển" },
+  "intro": { "title": "Ưu đãi mở đầu", "price": "Giá ưu đãi", "until": "Ưu đãi kết thúc", "then": "Sau đó" },
+  "remind": { "title": "Nhắc nhở", "email": "Nhắc qua email", "off": "Tắt", "onDay": "Vào ngày đến hạn lúc {time}", "before": { "other": "Trước {count} ngày lúc {time}" } },
+  "share": { "owner": "Chia sẻ · tôi làm chủ nhóm ({count}/{seats})", "member": "Chia sẻ · tôi tham gia", "payTo": "Trả cho", "host": "Chủ nhóm", "myShare": "Phần của tôi", "unnamed": "Chưa đặt tên", "paidUntil": "Đã trả đến {date}", "unpaid": "Chưa trả", "owed": "Còn nợ {amount}", "settled": "Đã thanh toán đủ" },
+  "charges": { "title": { "other": "Khoản phí · {count}" }, "kind": { "refund": "Hoàn tiền", "adjust": "Điều chỉnh", "failed": "Thất bại" }, "onCard": "Trên thẻ {amount} · ", "add": "Thêm bản ghi (hoàn tiền, điều chỉnh, trừ tiền thất bại, số tiền trên thẻ…)", "recent": "Chỉ hiện 12 mục gần nhất", "all": "Hiện tất cả {count}" },
+  "notes": "Ghi chú",
+  "stats": {
+    "spent": "Tổng chi",
+    "count": { "other": "{count} khoản phí" },
+    "owned": "Đã sở hữu",
+    "subscribed": "Đã đăng ký",
+    "yearsMonths": "{years} năm {months} tháng",
+    "years": { "other": "{count} năm" },
+    "months": { "other": "{count} tháng" },
+    "days": { "other": "{count} ngày" },
+    "gaps": { "other": "Gián đoạn {count} lần" },
+    "since": "Từ {date}",
+    "perMonth": "Thực chi mỗi tháng",
+    "perMonthHint": "Tổng ÷ số tháng đã đăng ký",
+    "priceChange": "Thay đổi giá",
+    "changed": "Thay đổi",
+    "unchanged": "Không đổi",
+    "times": { "other": "{count} lần" },
+    "changeHint": "Đổi khu vực, gói hoặc phương thức thanh toán"
+  }
+}

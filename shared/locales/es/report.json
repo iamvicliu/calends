@@ -1,0 +1,132 @@
+{
+  "title": "Informe",
+  "shareReview": "Compartir el resumen de {year}",
+  "perMonth": "{amount}/mes",
+  "per": {
+    "day": "día",
+    "week": "sem",
+    "month": "mes",
+    "year": "año",
+    "lifetime": "pago único",
+    "quarter": "trim",
+    "halfYear": "6 meses",
+    "twoYears": "2 años",
+    "n": {
+      "day": "{count} días",
+      "week": "{count} sem",
+      "month": "{count} meses",
+      "year": "{count} años"
+    }
+  },
+  "axis": {
+    "year": "{year}"
+  },
+  "hero": {
+    "label": "Gasto mensual en suscripciones · MRR negativo",
+    "vsLastMonth": "vs. final del mes pasado",
+    "yearAgo": "· {amount} hace un año",
+    "annual": "Al año",
+    "perDay": "Al día",
+    "active": "Activas",
+    "recover": "Recuperado al compartir/mes",
+    "fxHist": "Tipos de entonces",
+    "fxNow": "Tipos de hoy",
+    "range1": "1 a",
+    "range3": "3 a",
+    "rangeAll": "Todo"
+  },
+  "wf": {
+    "title": "Cambios en {month}",
+    "prev": "Mes anterior",
+    "next": "Mes siguiente",
+    "from": "Mes pasado",
+    "fx": "Divisas",
+    "added": "Nuevas",
+    "expansion": "Subida",
+    "contraction": "Bajada",
+    "churned": "Canceladas",
+    "now": "Ahora",
+    "monthEnd": "Fin de mes",
+    "empty": "Este mes no hay suscripciones nuevas, canceladas ni con cambio de precio.",
+    "emptyFx": "Este mes no hay suscripciones nuevas, canceladas ni con cambio de precio: todo el cambio se debe a los tipos de cambio ({amount})."
+  },
+  "checkup": {
+    "title": "Revisión",
+    "warn": {
+      "one": "{count} elemento requiere atención",
+      "other": "{count} elementos requieren atención"
+    },
+    "fix": "Corregir",
+    "less": "Mostrar menos",
+    "more": "Mostrar {count} más"
+  },
+  "cash": {
+    "title": "Caja vs. coste real",
+    "legendCash": "Cobrado ese mes",
+    "legendAccrual": "Coste repartido por mes",
+    "forecast": " · Previsión",
+    "tip": "Cobrado {cash} · Coste {cost}",
+    "prepaidItem": "{name} · {amount} · hasta {until}",
+    "prepaid": "Valor prepagado",
+    "prepaidSub": "{count} pagadas, aún sin consumir",
+    "savedItem": "{name} · {amount} · desde {since}",
+    "saved": "Ahorrado al cancelar",
+    "savedSub": "{count} canceladas",
+    "next90": "Vence en los próximos 90 días",
+    "peak": "Pico en {month} · {amount}"
+  },
+  "comp": {
+    "title": "A dónde va el dinero",
+    "back": "Atrás",
+    "cat": "Categoría",
+    "pay": "Pago",
+    "ccy": "Moneda",
+    "cycle": "Ciclo",
+    "unassigned": "Sin asignar",
+    "yearly": "Anual",
+    "quarterly": "Trimestral / semestral",
+    "monthly": "Mensual",
+    "groupTip": {
+      "one": "{name} · {count} elemento · {amount}/mes",
+      "other": "{name} · {count} elementos · {amount}/mes"
+    }
+  },
+  "topup": {
+    "title": "Plan de recargas",
+    "range3": "3 meses",
+    "range6": "6 meses",
+    "range12": "1 año",
+    "span3": "Próximos 3 meses",
+    "span6": "Próximos 6 meses",
+    "span12": "Próximo año",
+    "empty": "Aún no hay cuentas con saldo.",
+    "emptyCta": "Añade saldos de App Store o de tu operador en Cartera",
+    "summary": "Saldo {balance} · unos {monthly}/mes",
+    "why": "{span}: vencen {due}, tienes {balance}, faltan {need}",
+    "urgent": "; lo más urgente: añade al menos {min} antes del {date}",
+    "cards": "Tarjetas regalo sugeridas",
+    "anyAmount": "Recarga cualquier importe, no hace falta que coincida con el valor de las tarjetas",
+    "enough3": "El saldo cubre los próximos 3 meses",
+    "enough6": "El saldo cubre los próximos 6 meses",
+    "enough12": "El saldo cubre el próximo año",
+    "by": "Antes del {date}"
+  },
+  "ev": {
+    "start": "Inicio",
+    "end": "Cancelada",
+    "price": "Cambio de precio",
+    "introEnd": "Fin de la oferta inicial",
+    "buy": "Compra definitiva",
+    "pause": "En pausa",
+    "switch": "Cambio de región / plan",
+    "resume": "Reanudada"
+  },
+  "log": {
+    "title": "Registro de cambios",
+    "decisions": {
+      "one": "{count} decisión",
+      "other": "{count} decisiones"
+    },
+    "more": "Entradas anteriores"
+  }
+}

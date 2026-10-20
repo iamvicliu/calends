@@ -1,0 +1,264 @@
+{
+  "title": "Réglages",
+  "days": {
+    "one": "{count} jour",
+    "other": "{count} jours"
+  },
+  "logout": "Se déconnecter",
+  "toast": {
+    "saved": "Enregistré",
+    "deleted": "Supprimé",
+    "csvEmpty": "Aucun abonnement à importer dans ce CSV",
+    "badBackup": "Fichier de sauvegarde non valide"
+  },
+  "general": {
+    "title": "Général",
+    "language": "Langue",
+    "followSystem": "Langue du système",
+    "name": "Nom",
+    "namePlaceholder": "Affiché sur les images partagées et la page publique",
+    "startPage": "Ouvrir sur",
+    "startPageAria": "Page d’accueil",
+    "baseCurrency": "Devise de référence",
+    "timezone": "Fuseau horaire",
+    "weekStart": "Début de semaine",
+    "weekStartAria": "Premier jour de la semaine",
+    "monday": "Lundi",
+    "sunday": "Dimanche"
+  },
+  "sidebar": {
+    "title": "Barre latérale",
+    "upcoming": "Prélèvements à venir",
+    "lookAhead": "Horizon",
+    "lookAheadAria": "Période des prélèvements à venir"
+  },
+  "remind": {
+    "title": "Rappels",
+    "lead": "Me rappeler",
+    "sameDay": "Le jour même",
+    "hour": "Heure d’envoi",
+    "monthly": "Aperçu mensuel le 1er",
+    "test": "Envoyer un rappel de test à tous les canaux",
+    "testFailed": "Envoi impossible",
+    "channelError": "{channel} : {error}",
+    "errorSep": " ; ",
+    "testSent": "Rappel de test envoyé",
+    "preview": "Aperçu des rappels du jour"
+  },
+  "today": {
+    "title": "Aujourd’hui ({day})",
+    "items": {
+      "one": "{count} élément",
+      "other": "{count} éléments"
+    }
+  },
+  "books": {
+    "title": "Comptabilité",
+    "defaultMethod": "Moyen de paiement par défaut",
+    "unassigned": {
+      "one": "{count} abonnement n’a pas de moyen de paiement",
+      "other": "{count} abonnements n’ont pas de moyen de paiement"
+    },
+    "assignAllDone": {
+      "one": "{count} abonnement associé au moyen de paiement par défaut",
+      "other": "{count} abonnements associés au moyen de paiement par défaut"
+    },
+    "assignAll": "Utiliser le défaut pour tous",
+    "collectCurrency": "Devise des abonnements partagés"
+  },
+  "fx": {
+    "title": "Taux de change",
+    "current": "Taux actuel",
+    "updatedAt": "Mis à jour {time}",
+    "updated": "Taux de change mis à jour",
+    "history": "Taux historiques",
+    "earliest": "Depuis le {date}",
+    "coverage": {
+      "one": "{covered} / {count} jour",
+      "other": "{covered} / {count} jours"
+    },
+    "fill": "Compléter les taux manquants",
+    "historyUpdated": "Taux historiques mis à jour"
+  },
+  "open": {
+    "title": "Partage et accès",
+    "ics": "S’abonner dans le calendrier du système",
+    "on": "Activé",
+    "off": "Désactivé",
+    "public": "Page publique",
+    "publicOn": "La page publique est activée",
+    "publicOff": "La page publique est désactivée",
+    "previewPublic": "Aperçu de la page publique",
+    "ai": "Accès IA (MCP)",
+    "aiOn": "L’accès IA est activé",
+    "aiOff": "L’accès IA est désactivé. Les assistants IA ne peuvent plus se connecter.",
+    "manageAi": "Gérer les jetons et la configuration"
+  },
+  "data": {
+    "title": "Données",
+    "importCsv": "Importer un CSV",
+    "restore": "Restaurer une sauvegarde",
+    "exportCsv": "Exporter en CSV",
+    "backup": "Exporter une sauvegarde complète"
+  },
+  "restore": {
+    "cancel": "Annuler",
+    "replace": "Remplacer le registre actuel",
+    "done": "Restauré",
+    "warning": "Votre registre actuel sera entièrement remplacé par la sauvegarde. Cette action est irréversible : pensez à exporter une sauvegarde avant.",
+    "subs": "Abonnements",
+    "methods": "Moyens de paiement",
+    "count": {
+      "one": "{count}",
+      "other": "{count}"
+    },
+    "time": "Sauvegardé le",
+    "format": "Format",
+    "legacy": "Ancienne sauvegarde : abonnements et moyens de paiement uniquement"
+  },
+  "import": {
+    "title": {
+      "one": "Importer {count} abonnement",
+      "other": "Importer {count} abonnements"
+    },
+    "confirmReplace": "Le remplacement effacera tous les abonnements et moyens de paiement existants. Continuer ?",
+    "replaceDone": "Importé (remplacé)",
+    "replaceAll": "Tout remplacer",
+    "mergeDone": "Importé (fusionné)",
+    "merge": "Ajouter à l’existant",
+    "newMethods": "De nouveaux moyens de paiement seront créés : {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": {
+      "one": "Canaux de notification · {count} activé",
+      "other": "Canaux de notification · {count} activés"
+    },
+    "empty": "Aucun canal : les rappels ne seront pas envoyés.",
+    "test": "Tester",
+    "testFailed": "Envoi impossible",
+    "testSent": "Message de test envoyé",
+    "add": "Ajouter un canal",
+    "addKind": "Ajouter {name}",
+    "confirmDelete": "Supprimer le canal « {name} » ?",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "fillField": "Veuillez saisir {field}",
+    "name": "Nom",
+    "optional": "Facultatif",
+    "enabled": "Activé",
+    "field": {
+      "to": "Adresse e-mail",
+      "webhook": "URL du webhook",
+      "server": "Serveur",
+      "token": "Jeton d’accès"
+    },
+    "kind": {
+      "email": {
+        "name": "E-mail",
+        "help": "Envoyé via Cloudflare Email Sending ; votre domaine doit être vérifié sur Cloudflare"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "Votre ID utilisateur ou de groupe",
+        "help": "Créez un bot avec @BotFather pour obtenir un jeton. Envoyez d’abord un message à votre bot, puis utilisez @userinfobot pour trouver votre ID"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Secret de signature",
+        "secretPlaceholder": "Obligatoire si la vérification de signature est activée",
+        "help": "Réglages du groupe → Bots → Ajouter un bot personnalisé"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Secret de signature",
+        "secretPlaceholder": "SEC…, obligatoire si la signature est activée",
+        "help": "Réglages du groupe → Bots → Bot personnalisé"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Discussion de groupe → Ajouter un bot de groupe"
+      },
+      "bark": {
+        "keyPlaceholder": "Clé copiée depuis l’app",
+        "help": "Notifications push sur iPhone : cherchez Bark sur l’App Store"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Choisissez un nom difficile à deviner",
+        "help": "Installez l’app ntfy sur votre téléphone et abonnez-vous au même sujet"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… ou sctp…",
+        "help": "Push vers WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Paramètres du salon → Intégrations → Webhooks"
+      },
+      "webhook": {
+        "name": "Webhook personnalisé",
+        "header": "En-tête supplémentaire",
+        "help": "POST JSON : subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Sécurité",
+    "unknownBrowser": "Navigateur inconnu",
+    "ago": {
+      "justNow": "Actif à l’instant",
+      "minutes": {
+        "one": "Il y a {count} minute",
+        "other": "Il y a {count} minutes"
+      },
+      "hours": {
+        "one": "Il y a {count} heure",
+        "other": "Il y a {count} heures"
+      },
+      "days": {
+        "one": "Il y a {count} jour",
+        "other": "Il y a {count} jours"
+      }
+    },
+    "thisDevice": "Cet appareil",
+    "signedInPasskey": "Connecté avec une clé d’accès le {time}",
+    "signedInPassword": "Connecté avec un mot de passe le {time}",
+    "revoke": "Déconnecter",
+    "revoked": "Déconnecté",
+    "passkeyFoot": "Avec une clé d’accès, connectez-vous avec Face ID, Touch ID ou le code de votre appareil, sans mot de passe.",
+    "passkeyUnsupported": "Ce navigateur ne prend pas en charge les clés d’accès.",
+    "lastUsed": "Dernière utilisation {time}",
+    "addedAt": "Ajoutée {time}",
+    "confirmRemovePasskey": "Supprimer la clé d’accès « {name} » ?",
+    "remove": "Supprimer",
+    "removed": "Supprimée",
+    "addPasskey": "Ajouter une clé d’accès",
+    "alreadyBound": "Cet appareil a déjà une clé d’accès",
+    "changePassword": "Changer le mot de passe",
+    "devices": "Appareils connectés",
+    "devicesCount": {
+      "one": "Appareil connecté · {count}",
+      "other": "Appareils connectés · {count}"
+    },
+    "devicesFoot": "Une fois la limite atteinte, l’appareil inactif depuis le plus longtemps est déconnecté automatiquement. Les lieux sont estimés à partir de l’IP et peuvent être imprécis.",
+    "maxSessions": "Appareils connectés max.",
+    "maxSessionsSaved": {
+      "one": "Jusqu’à {count} appareil",
+      "other": "Jusqu’à {count} appareils"
+    },
+    "deviceCount": {
+      "one": "{count} appareil",
+      "other": "{count} appareils"
+    },
+    "confirmLogoutOthers": "Déconnecter tous les autres appareils ?",
+    "loggedOutOthers": "Autres appareils déconnectés",
+    "logoutOthers": "Déconnecter tous les autres appareils",
+    "passwordChanged": "Mot de passe modifié. Les autres appareils ont été déconnectés.",
+    "save": "Enregistrer",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "passwordFoot": "8 caractères minimum. Le changer déconnecte tous les appareils sauf celui-ci.",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "minLength": "8 caractères minimum",
+    "confirmPassword": "Confirmer le nouveau mot de passe"
+  }
+}

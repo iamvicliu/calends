@@ -1,0 +1,45 @@
+{
+  "title": "KI-Zugriff",
+  "newToken": "Neues Token",
+  "mcpUrl": "MCP-URL",
+  "urlCopied": "URL kopiert",
+  "copy": "Kopieren",
+  "copied": "Kopiert",
+  "copyFailed": "Kopieren fehlgeschlagen",
+  "neverUsed": "Nie verwendet",
+  "tokenPlaceholder": "<dein-token>",
+  "tokens": {
+    "one": "Token · {count}",
+    "other": "Tokens · {count}"
+  },
+  "noTokens": "Noch keine Tokens. Erstelle eins und gib es dem KI-Assistenten, den du verbinden willst.",
+  "lastUsed": "Zuletzt verwendet {time}",
+  "confirmRevoke": "„{name}“ widerrufen? Jeder KI-Assistent, der es nutzt, verliert sofort den Zugriff.",
+  "revoke": "Widerrufen",
+  "revoked": "Widerrufen",
+  "setup": "Einrichtung",
+  "tools": {
+    "one": "Verfügbares Tool · {count}",
+    "other": "Verfügbare Tools · {count}"
+  },
+  "writeBadge": "Schreiben",
+  "clientOther": "Andere",
+  "scope": {
+    "write": "Lesen & Schreiben",
+    "read": "Nur lesen",
+    "writeLong": "Lesen & Schreiben: abfragen, hinzufügen und bearbeiten",
+    "readLong": "Nur lesen: nur abfragen"
+  },
+  "created": {
+    "title": "Token erstellt",
+    "saved": "Hab ich gespeichert",
+    "foot": "Dieses Token wird nur einmal angezeigt und ist nach dem Schließen nicht mehr sichtbar. Falls du es verlierst, widerrufe es und erstelle ein neues.",
+    "copyToken": "Token kopieren",
+    "tokenCopied": "Token kopiert",
+    "command": "Einrichtungsbefehl"
+  },
+  "cancel": "Abbrechen",
+  "generate": "Erstellen",
+  "name": "Name",
+  "namePlaceholder": "Für welche KI ist das?"
+}

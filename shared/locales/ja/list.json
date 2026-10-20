@@ -1,0 +1,123 @@
+{
+  "title": "すべてのサブスク",
+  "all": "すべて",
+  "summary": {
+    "other": "{count}件 · {monthly}/月 · {yearly}/年"
+  },
+  "status": {
+    "upcoming": "開始前",
+    "active": "利用中",
+    "trial": "トライアル中",
+    "trialShort": "トライアル",
+    "paused": "一時停止中",
+    "pausedShort": "停止中",
+    "ending": "更新なし",
+    "ended": "解約済み",
+    "lifetime": "買い切り"
+  },
+  "proxyExcluded": "立て替え · 集計対象外",
+  "perMonthApprox": "≈ {amount}/月",
+  "originalPrice": "元の価格 {amount}",
+  "view": {
+    "grid": "カード",
+    "list": "リスト",
+    "gantt": "タイムライン"
+  },
+  "sort": {
+    "label": "並べ替え",
+    "next": "次回請求",
+    "cost": "月額",
+    "name": "名前",
+    "start": "開始日"
+  },
+  "add": "サブスクを追加",
+  "clear": "クリア",
+  "facet": {
+    "status": "ステータス",
+    "category": "カテゴリ",
+    "pay": "支払い方法"
+  },
+  "unassigned": "未設定",
+  "empty": "一致するサブスクはありません",
+  "badge": {
+    "share": "共有",
+    "joined": "参加",
+    "proxy": "立て替え",
+    "proxyFor": "{name}の立て替え",
+    "someone": "誰か"
+  },
+  "saved": "{amount}節約",
+  "col": {
+    "name": "サブスク",
+    "category": "カテゴリ",
+    "method": "支払い方法",
+    "amount": "金額",
+    "monthly": "月額",
+    "start": "開始",
+    "next": "次回請求"
+  },
+  "notCounted": "集計対象外",
+  "endedOn": "{date}に終了",
+  "change": {
+    "noMethod": "支払い方法未定",
+    "planned": "予定 · ",
+    "starts": "{when}に開始",
+    "from": "{when}に変更"
+  },
+  "proxyBadge": {
+    "owed": {
+      "other": "立て替え · 未回収 {count}"
+    },
+    "owedFor": {
+      "other": "{name}の立て替え · 未回収 {count}"
+    },
+    "settled": "立て替え · 精算済み",
+    "settledFor": "{name}の立て替え · 精算済み"
+  },
+  "gantt": {
+    "months": {
+      "other": "{count}か月"
+    },
+    "days": {
+      "other": "{count}日"
+    },
+    "noRegion": "地域なし",
+    "zoom1y": "1年",
+    "zoom3y": "3年",
+    "byMethod": "支払い方法別",
+    "byRegion": "地域別",
+    "gapTitle": "{span}中断：{from} – {to}",
+    "gapShort": "{span}中断",
+    "gapDays": {
+      "other": "{count}日中断"
+    },
+    "lifetimeSuffix": " 買い切り",
+    "lifetime": "買い切り {amount}",
+    "present": "現在",
+    "plannedSuffix": " · 予定",
+    "introPrefix": "初回特典 · ",
+    "introShort": "特典 ",
+    "planned": "予定",
+    "gap": "中断",
+    "range": {
+      "other": "{date}から · {count}期間"
+    }
+  },
+  "kind": {
+    "debit": "デビットカード",
+    "credit": "クレジットカード",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store 残高",
+    "googleplay": "Google Play 残高",
+    "giftcard": "ギフトカード",
+    "prepaid": "ストア残高",
+    "phone": "携帯残高",
+    "crypto": "暗号資産カード",
+    "other": "その他"
+  },
+  "network": {
+    "unionpay": "銀聯（UnionPay）"
+  }
+}

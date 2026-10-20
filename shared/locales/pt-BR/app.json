@@ -1,0 +1,60 @@
+{
+  "name": "Subscription Ledger",
+  "offline": "Offline",
+  "offlineError": "Sem conexão: {error}",
+  "nav": {
+    "overview": "Visão geral",
+    "list": "Assinaturas",
+    "calendar": "Calendário",
+    "report": "Relatórios",
+    "wallet": "Carteira",
+    "family": "Planos compartilhados",
+    "behalf": "Pagamentos para outros",
+    "ai": "Acesso por IA",
+    "settings": "Ajustes"
+  },
+  "login": {
+    "setupHint": "Primeira vez aqui? Defina uma senha para entrar.",
+    "tagline": "Todas as assinaturas, todos os cartões, todos os planos compartilhados.",
+    "setupToken": "Token de configuração (SETUP_TOKEN)",
+    "newPassword": "Nova senha (mínimo de 8 caracteres)",
+    "password": "Senha",
+    "again": "Confirmar senha",
+    "mismatch": "As senhas não coincidem",
+    "verifying": "Verificando…",
+    "setupEnter": "Definir senha e continuar",
+    "enter": "Entrar",
+    "passkey": "Entrar com chave de acesso"
+  },
+  "sidebar": {
+    "collapse": "Ocultar barra lateral",
+    "expand": "Mostrar barra lateral",
+    "new": "Nova",
+    "search": "Buscar",
+    "upcoming": "Próximas",
+    "today": "Hoje",
+    "tomorrow": "Amanhã",
+    "inDays": { "one": "Em {count} dia", "other": "Em {count} dias" },
+    "theme": "Tema",
+    "themeHint": "Clique para alternar: Claro → Escuro → Sistema"
+  },
+  "palette": {
+    "placeholder": "Buscar assinaturas ou páginas…",
+    "empty": "Nenhum resultado",
+    "page": "Página",
+    "add": "Nova assinatura",
+    "addKeywords": "nova adicionar criar new add"
+  },
+  "ics": {
+    "title": "Assinar no calendário",
+    "intro": "Sincronize as datas de cobrança com o Calendário da Apple, Google Agenda ou Outlook. Atualiza a cada 6 horas e avisa antes de cada cobrança conforme seus ajustes de lembrete.",
+    "subscribe": "Assinar",
+    "copy": "Copiar link",
+    "copied": "Copiado",
+    "reset": "Redefinir link",
+    "resetDone": "Link redefinido. O link antigo deixou de funcionar.",
+    "generate": "Criar link privado do calendário",
+    "generated": "Link do calendário criado",
+    "note": "O link contém um token privado — quem tiver o link pode ver suas datas de cobrança. Se ele vazar, toque em Redefinir link para revogá-lo."
+  }
+}

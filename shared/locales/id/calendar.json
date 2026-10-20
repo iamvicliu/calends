@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}",
+  "summary": { "other": "{count} tagihan · {amount}" },
+  "mode": { "month": "Bulan", "year": "Tahun" },
+  "prev": "Sebelumnya",
+  "next": "Berikutnya",
+  "today": "Hari ini",
+  "ics": "Langganan di Kalender",
+  "noneDay": "Tidak ada tagihan hari ini",
+  "projected": "Perkiraan",
+  "charged": "Ditagih",
+  "monthAll": "Semua tagihan {month}",
+  "noneMonth": "Tidak ada tagihan bulan ini",
+  "day": "{day}",
+  "heatCount": { "other": "{count} tagihan · " }
+}

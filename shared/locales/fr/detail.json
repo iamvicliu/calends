@@ -1,0 +1,123 @@
+{
+  "action": {
+    "edit": "Modifier",
+    "pause": "Suspendre",
+    "resume": "Reprendre",
+    "manage": "Gérer",
+    "website": "Site web",
+    "share": "Partager"
+  },
+  "toast": {
+    "resumed": "Facturation reprise",
+    "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus"
+  },
+  "history": "Historique",
+  "summary": "Résumé",
+  "field": {
+    "amount": "Montant",
+    "cycle": "Cycle de facturation",
+    "monthlyYearly": "Mensuel / annuel",
+    "category": "Catégorie",
+    "method": "Moyen de paiement",
+    "start": "Date de début",
+    "next": "Prochaine échéance",
+    "expires": "Fin du service",
+    "expiresHint": "Le renouvellement automatique prélève avant cette date",
+    "endedOn": "Terminé le",
+    "trialEnd": "Fin de l’essai",
+    "region": "Région"
+  },
+  "up": {
+    "planned": "Changement prévu · non confirmé",
+    "starting": "Commence bientôt",
+    "changing": "Changement à venir",
+    "effective": "Date d’effet"
+  },
+  "plan": {
+    "drop": "Ne pas changer",
+    "droppedToast": "Pas de changement. Se termine après le {date}",
+    "confirm": "Confirmer le changement",
+    "confirmedToast": "Changement confirmé"
+  },
+  "intro": {
+    "title": "Offre de lancement",
+    "price": "Prix de lancement",
+    "until": "Fin de l’offre",
+    "then": "Ensuite"
+  },
+  "remind": {
+    "title": "Rappels",
+    "email": "Rappel par e-mail",
+    "off": "Désactivé",
+    "onDay": "Le jour de l’échéance à {time}",
+    "before": {
+      "one": "{count} jour avant à {time}",
+      "other": "{count} jours avant à {time}"
+    }
+  },
+  "share": {
+    "owner": "Partagé · j’organise ({count}/{seats})",
+    "member": "Partagé · j’ai rejoint",
+    "payTo": "Payer à",
+    "host": "Organisateur",
+    "myShare": "Ma part",
+    "unnamed": "Sans nom",
+    "paidUntil": "Payé jusqu’au {date}",
+    "unpaid": "Pas encore payé",
+    "owed": "{amount} dû",
+    "settled": "Réglé"
+  },
+  "charges": {
+    "title": {
+      "one": "Prélèvements · {count}",
+      "other": "Prélèvements · {count}"
+    },
+    "kind": {
+      "refund": "Remboursement",
+      "adjust": "Ajustement",
+      "failed": "Échec"
+    },
+    "onCard": "Sur la carte {amount} · ",
+    "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)",
+    "recent": "Afficher les 12 derniers",
+    "all": "Tout afficher ({count})"
+  },
+  "notes": "Notes",
+  "stats": {
+    "spent": "Total dépensé",
+    "count": {
+      "one": "{count} prélèvement",
+      "other": "{count} prélèvements"
+    },
+    "owned": "Possédé depuis",
+    "subscribed": "Abonné depuis",
+    "yearsMonths": "{years} an(s) {months} mois",
+    "years": {
+      "one": "{count} an",
+      "other": "{count} ans"
+    },
+    "months": {
+      "one": "{count} mois",
+      "other": "{count} mois"
+    },
+    "days": {
+      "one": "{count} jour",
+      "other": "{count} jours"
+    },
+    "gaps": {
+      "one": "Interrompu une fois",
+      "other": "Interrompu {count} fois"
+    },
+    "since": "Depuis le {date}",
+    "perMonth": "Coût mensuel réel",
+    "perMonthHint": "Total ÷ mois d’abonnement",
+    "priceChange": "Changement de prix",
+    "changed": "Changements",
+    "unchanged": "Aucun changement",
+    "times": {
+      "one": "{count} fois",
+      "other": "{count} fois"
+    },
+    "changeHint": "Changements de région, de formule ou de paiement"
+  }
+}

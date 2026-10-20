@@ -1,0 +1,40 @@
+{
+  "title": "小哲的訂閱",
+  "loadFailed": "載入失敗",
+  "theme": { "title": "主題：{mode}（點按切換）", "aria": "主題：{mode}，點按切換" },
+  "currency": "顯示貨幣",
+  "hero": {
+    "monthly": "每月訂閱支出",
+    "flat": "與去年同月持平",
+    "more": "比去年同月多 {amount}",
+    "less": "比去年同月少 {amount}",
+    "yearly": "一年約",
+    "live": "在付訂閱",
+    "paid": "累計已付 · {year} 起"
+  },
+  "timeline": { "title": "時間軸", "upcoming": "接下來 30 天 {count} 筆 · {amount}" },
+  "chart": {
+    "title": "每月扣款",
+    "desc": "過去 12 個月與之後 3 個月，虛線為預計",
+    "paid": "實付",
+    "mrr": "月成本",
+    "charge": "扣款",
+    "thisMonth": "本月",
+    "projected": "{month} · 預計"
+  },
+  "ended": { "title": "已退訂", "saved": "退訂至今少花 {amount}", "item": "省 {amount}" },
+  "perMonth": "{amount}/月",
+  "lifetime": { "title": "買斷", "desc": "一次付清，不再扣款" },
+  "footer": "過去的扣款依當天匯率、未來的依今天匯率換算。未上線項目的域名與付款資訊已隱藏。",
+  "composition": { "title": "構成", "desc": "每月成本依分類", "other": "其他" },
+  "count": "{count} 個",
+  "fx": {
+    "title": "匯率",
+    "flat": "與一年前相比，匯率幾乎沒有影響",
+    "less": "和一年前的匯率相比，每月少花 {amount}",
+    "more": "和一年前的匯率相比，每月多花 {amount}",
+    "share": "佔 {pct}%"
+  },
+  "list": { "title": "正在訂閱", "summary": "{count} 個 · 每月 {amount}", "all": "全部" },
+  "row": { "renews": " · {date}續訂", "monthly": "每月", "perMonthEq": "折合每月" }
+}

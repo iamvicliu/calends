@@ -1,0 +1,23 @@
+{
+  "close": "Fechar",
+  "error": {
+    "loginRequired": "Entre primeiro",
+    "requestFailed": "Falha na solicitação ({status})"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "currency": {
+    "XCG": "Florim do Caribe",
+    "ZWG": "Ouro do Zimbábue"
+  },
+  "method": {
+    "none": "Não definido"
+  },
+  "toolbar": {
+    "openSidebar": "Abrir barra lateral",
+    "add": "Adicionar assinatura"
+  }
+}

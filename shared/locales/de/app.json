@@ -1,0 +1,63 @@
+{
+  "name": "Subscription Ledger",
+  "offline": "Offline",
+  "offlineError": "Keine Verbindung: {error}",
+  "nav": {
+    "overview": "Übersicht",
+    "list": "Abos",
+    "calendar": "Kalender",
+    "report": "Berichte",
+    "wallet": "Wallet",
+    "family": "Geteilte Abos",
+    "behalf": "Für andere bezahlt",
+    "ai": "KI-Zugriff",
+    "settings": "Einstellungen"
+  },
+  "login": {
+    "setupHint": "Zum ersten Mal hier? Lege ein Passwort zum Anmelden fest.",
+    "tagline": "Jedes Abo, jede Karte, jedes geteilte Abo.",
+    "setupToken": "Einrichtungstoken (SETUP_TOKEN)",
+    "newPassword": "Neues Passwort (mind. 8 Zeichen)",
+    "password": "Passwort",
+    "again": "Passwort bestätigen",
+    "mismatch": "Passwörter stimmen nicht überein",
+    "verifying": "Wird geprüft …",
+    "setupEnter": "Passwort festlegen und fortfahren",
+    "enter": "Anmelden",
+    "passkey": "Mit Passkey anmelden"
+  },
+  "sidebar": {
+    "collapse": "Seitenleiste ausblenden",
+    "expand": "Seitenleiste einblenden",
+    "new": "Neu",
+    "search": "Suchen",
+    "upcoming": "Demnächst",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "inDays": {
+      "one": "In {count} Tag",
+      "other": "In {count} Tagen"
+    },
+    "theme": "Design",
+    "themeHint": "Klicken zum Wechseln: Hell → Dunkel → System"
+  },
+  "palette": {
+    "placeholder": "Abos oder Seiten suchen …",
+    "empty": "Keine Ergebnisse",
+    "page": "Seite",
+    "add": "Neues Abo",
+    "addKeywords": "neu hinzufügen erstellen new add create"
+  },
+  "ics": {
+    "title": "Im Kalender abonnieren",
+    "intro": "Synchronisiere Abbuchungstermine mit Apple Kalender, Google Kalender oder Outlook. Wird alle 6 Stunden aktualisiert und erinnert dich gemäß deinen Erinnerungseinstellungen vor jeder Abbuchung.",
+    "subscribe": "Abonnieren",
+    "copy": "Link kopieren",
+    "copied": "Kopiert",
+    "reset": "Link zurücksetzen",
+    "resetDone": "Link zurückgesetzt. Der alte Link funktioniert nicht mehr.",
+    "generate": "Privaten Kalenderlink erstellen",
+    "generated": "Kalenderlink erstellt",
+    "note": "Der Link enthält ein privates Token – wer ihn hat, sieht deine Abbuchungstermine. Falls er bekannt wird, tippe auf „Link zurücksetzen“, um ihn ungültig zu machen."
+  }
+}

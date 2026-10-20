@@ -1,0 +1,15 @@
+{
+  "action": { "edit": "編輯", "pause": "暫停", "resume": "恢復", "manage": "管理", "website": "官網", "share": "分享" },
+  "toast": { "resumed": "已恢復計費", "paused": "已暫停，不再推算之後的扣款" },
+  "history": "歷程",
+  "summary": "摘要",
+  "field": { "amount": "金額", "cycle": "計費週期", "monthlyYearly": "月均 / 年均", "category": "分類", "method": "付款方式", "start": "開始日期", "next": "下次到期", "expires": "服務到期", "expiresHint": "自動續訂會在到期前扣款", "endedOn": "結束於", "trialEnd": "試用截止", "region": "地區" },
+  "up": { "planned": "計畫變更 · 尚未確定", "starting": "即將開始", "changing": "即將變更", "effective": "生效日期" },
+  "plan": { "drop": "不切換了", "droppedToast": "不切換了，{date} 到期後不再續", "confirm": "確認切換", "confirmedToast": "已確認切換" },
+  "intro": { "title": "首期優惠", "price": "優惠價", "until": "優惠截止", "then": "之後恢復" },
+  "remind": { "title": "提醒", "email": "電子郵件提醒", "off": "已關閉", "onDay": "到期當天 {time}", "before": "提前 {count} 天 {time}" },
+  "share": { "owner": "共享 · 我發起（{count}/{seats}）", "member": "共享 · 我加入", "payTo": "付給", "host": "發起人", "myShare": "我的份額", "unnamed": "未命名", "paidUntil": "已付至 {date}", "unpaid": "尚未收款", "owed": "待收 {amount}", "settled": "已結清" },
+  "charges": { "title": "扣款記錄 · {count} 筆", "kind": { "refund": "退款", "adjust": "補差", "failed": "失敗" }, "onCard": "卡上 {amount} · ", "add": "記一筆（退款、補差、扣款失敗、卡上實扣…）", "recent": "只顯示最近 12 筆", "all": "顯示全部 {count} 筆" },
+  "notes": "備註",
+  "stats": { "spent": "累計花了", "count": "{count} 筆", "owned": "買了", "subscribed": "訂了", "yearsMonths": "{years} 年 {months} 個月", "years": "{count} 年", "months": "{count} 個月", "days": "{count} 天", "gaps": "中間斷過 {count} 次", "since": "{date} 起", "perMonth": "實際每月", "perMonthHint": "累計 ÷ 訂閱月數", "priceChange": "價格變化", "changed": "變過", "unchanged": "沒變", "times": "{count} 次", "changeHint": "換區、換套餐或換付款方式" }
+}

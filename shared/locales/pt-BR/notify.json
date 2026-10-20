@@ -1,0 +1,97 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "O teste termina {when} ({date}), depois {price}",
+    "headline": "O teste de {name} termina {when}"
+  },
+  "renew": {
+    "introEnds": "Fim do preço promocional, volta ao preço normal",
+    "headline": "{name} renova {when} por {price}"
+  },
+  "ending": {
+    "sub": "Termina {when}, sem renovação",
+    "headline": "{name} termina {when}"
+  },
+  "carpool": {
+    "dueIn": "Vence {when} ({date})",
+    "dueToday": "Vence hoje",
+    "overdue": {
+      "one": "{count} dia de atraso",
+      "other": "{count} dias de atraso"
+    },
+    "sub": "{status} · próximo período: {bill}",
+    "headline": "Hora de cobrar {member} por {name}"
+  },
+  "proxy": {
+    "someone": "Alguém",
+    "chargedToday": "Cobrado hoje em nome da pessoa",
+    "chargedAgo": {
+      "one": "Cobrado em {date}, há {count} dia",
+      "other": "Cobrado em {date}, há {count} dias"
+    },
+    "sub": "{status}, ainda não reembolsado",
+    "headlineToday": "{sub} pago para {name}",
+    "headlineUnpaid": "{name} ainda não reembolsou {sub}"
+  },
+  "balance": {
+    "sub": "O saldo de {balance} não cobre {sub} ({amount}) em {date}",
+    "headline": "Saldo de {name} acabando"
+  },
+  "section": {
+    "renew": "Próximas cobranças",
+    "trials": "Testes terminando",
+    "balance": "Saldo baixo",
+    "carpool": "Pagamentos de planos compartilhados",
+    "proxy": "A receber de pagamentos para outros",
+    "ending": "Terminando em breve",
+    "month": "Cobranças deste mês"
+  },
+  "daily": {
+    "subject": "Lembrete de assinatura: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} + mais {more}",
+    "intro": "Você gasta {mrr} por mês com assinaturas, com {count} ativas."
+  },
+  "monthly": {
+    "subject": {
+      "one": "Fatura de {month}: cerca de {sum}, {count} cobrança",
+      "other": "Fatura de {month}: cerca de {sum}, {count} cobranças"
+    },
+    "intro": {
+      "one": "{count} cobrança prevista em {monthYear}, cerca de {sum} no total. MRR {mrr}, {arr} por ano.",
+      "other": "{count} cobranças previstas em {monthYear}, cerca de {sum} no total. MRR {mrr}, {arr} por ano."
+    }
+  },
+  "email": {
+    "open": "Abrir o Subscription Ledger",
+    "footer": "Você pode mudar o horário do lembrete e a antecedência nos Ajustes."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Canal não encontrado",
+    "noneEnabled": "Nenhum canal de notificação ativado",
+    "alreadySent": "Já enviado hoje",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Teste] {subject}",
+    "sampleSubject": "[Teste] Os lembretes de assinatura estão prontos",
+    "sampleIntro": "Seu canal de notificação está funcionando."
+  },
+  "channel": {
+    "missing": "Falta {field} em “{channel}”",
+    "field": {
+      "to": "um e-mail de destinatário",
+      "botToken": "um token do bot",
+      "chatId": "um ID de chat",
+      "webhook": "uma URL de webhook",
+      "deviceKey": "uma chave do dispositivo",
+      "topic": "um tópico",
+      "sendKey": "uma SendKey",
+      "url": "uma URL"
+    }
+  }
+}

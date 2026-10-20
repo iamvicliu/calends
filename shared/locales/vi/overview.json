@@ -1,0 +1,70 @@
+{
+  "title": "Tổng quan",
+  "add": "Gói đăng ký mới",
+  "footer": {
+    "other": "{count} gói đăng ký đang hoạt động · {amount}/tháng ·"
+  },
+  "fullReport": "Xem báo cáo đầy đủ",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "other": "{count} gói đăng ký"
+    },
+    "charges": {
+      "other": "{count} khoản phí"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} '{yy}"
+  },
+  "timeline": {
+    "title": "Dòng thời gian",
+    "sub": "{past} đã trừ trong 30 ngày qua · {next} đến hạn trong 30 ngày tới"
+  },
+  "spending": {
+    "title": "Chi tiêu hằng tháng",
+    "sub": "Cột nhạt hơn là dự kiến",
+    "month": "Theo tháng",
+    "yearly": "Theo năm",
+    "year": "{year}",
+    "projected": " · Dự kiến",
+    "inProgress": " · Đang diễn ra",
+    "paid": " · đã trả {amount}",
+    "empty": "Không có khoản phí trong kỳ này"
+  },
+  "due": {
+    "title": "30 ngày tới",
+    "empty": "Không có gì đến hạn trong 30 ngày tới",
+    "thisWeek": "Tuần này",
+    "later": "Sau đó",
+    "noMethod": "Chưa có phương thức thanh toán"
+  },
+  "wallet": {
+    "title": "Ví",
+    "manage": "Quản lý",
+    "balance": "Số dư {amount} · {status}",
+    "covered": {
+      "other": "đủ cho {count} khoản phí nữa, nạp tiền trước {date}"
+    },
+    "mustTopUp": "nạp tiền trước {date}",
+    "enough": "đủ dùng hơn 3 năm",
+    "noBalance": "Thêm số dư để xem dùng được bao lâu",
+    "others": "Ngoài ra: {list}"
+  },
+  "tips": {
+    "warn": "Lưu ý",
+    "info": "Mẹo",
+    "good": "Thú vị"
+  },
+  "stmt": {
+    "kicker": "Chi tiêu gói đăng ký hằng tháng",
+    "vsLastMonth": "so với cuối tháng trước",
+    "annual": "Mỗi năm",
+    "ytd": "Đã trả trong {year}",
+    "perDay": "Mỗi ngày",
+    "active": "Đang hoạt động",
+    "share": "{amount}/tháng · {pct}%",
+    "caption": "Chòm sao gói đăng ký · kích thước bong bóng thể hiện chi phí hằng tháng",
+    "aria": "{name}, {amount} mỗi tháng"
+  }
+}

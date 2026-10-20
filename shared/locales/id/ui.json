@@ -1,0 +1,23 @@
+{
+  "close": "Tutup",
+  "error": {
+    "loginRequired": "Silakan masuk terlebih dahulu",
+    "requestFailed": "Permintaan gagal ({status})"
+  },
+  "theme": {
+    "light": "Terang",
+    "dark": "Gelap",
+    "system": "Sistem"
+  },
+  "currency": {
+    "XCG": "Gulden Karibia",
+    "ZWG": "Emas Zimbabwe"
+  },
+  "method": {
+    "none": "Belum diatur"
+  },
+  "toolbar": {
+    "openSidebar": "Buka bilah samping",
+    "add": "Tambah langganan"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "title": "Truy cập AI",
+  "newToken": "Token mới",
+  "mcpUrl": "URL MCP",
+  "urlCopied": "Đã sao chép URL",
+  "copy": "Sao chép",
+  "copied": "Đã sao chép",
+  "copyFailed": "Không sao chép được",
+  "neverUsed": "Chưa từng dùng",
+  "tokenPlaceholder": "<token-của-bạn>",
+  "tokens": { "other": "Token · {count}" },
+  "noTokens": "Chưa có token. Hãy tạo một token và đưa cho trợ lý AI bạn muốn kết nối.",
+  "lastUsed": "Dùng lần cuối {time}",
+  "confirmRevoke": "Thu hồi “{name}”? Trợ lý AI đang dùng token này sẽ mất quyền truy cập ngay lập tức.",
+  "revoke": "Thu hồi",
+  "revoked": "Đã thu hồi",
+  "setup": "Thiết lập",
+  "tools": { "other": "Công cụ khả dụng · {count}" },
+  "writeBadge": "Ghi",
+  "clientOther": "Khác",
+  "scope": {
+    "write": "Đọc & ghi",
+    "read": "Chỉ đọc",
+    "writeLong": "Đọc & ghi: tra cứu, thêm và sửa",
+    "readLong": "Chỉ đọc: chỉ tra cứu"
+  },
+  "created": {
+    "title": "Đã tạo token",
+    "saved": "Tôi đã lưu",
+    "foot": "Token này chỉ hiển thị một lần và không thể xem lại sau khi đóng. Nếu làm mất, hãy thu hồi và tạo token mới.",
+    "copyToken": "Sao chép token",
+    "tokenCopied": "Đã sao chép token",
+    "command": "Lệnh thiết lập"
+  },
+  "cancel": "Hủy",
+  "generate": "Tạo",
+  "name": "Tên",
+  "namePlaceholder": "Dành cho AI nào?"
+}

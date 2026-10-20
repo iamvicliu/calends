@@ -1,0 +1,97 @@
+{
+  "title": "Bagikan kilas balik tahunan",
+  "fileName": "langganan-{year}-kilas-balik-{style}.png",
+  "style": {
+    "poster": "Poster",
+    "receipt": "Struk",
+    "card": "Kartu",
+    "stars": "Peta bintang"
+  },
+  "unassigned": "Belum ditentukan",
+  "me": "Saya",
+  "whose": "{name}",
+  "whoseSelf": "saya",
+  "topSpend": "Pengeluaran teratas",
+  "ofYear": "{pct} dari setahun",
+  "n": {
+    "subs": {
+      "other": "{count} langganan"
+    },
+    "charges": {
+      "other": "{count} tagihan"
+    },
+    "currencies": {
+      "other": "{count} mata uang"
+    },
+    "currencyKinds": {
+      "other": "{count} mata uang"
+    }
+  },
+  "tip": {
+    "top": "{name} sendiri menghabiskan {pct} dari setahun",
+    "longest": {
+      "other": "{name} sudah menemani Anda lebih dari {count} tahun"
+    },
+    "busiest": "{month} paling menguras dompet",
+    "newEnded": "Tahun ini: {added} masuk, {ended} keluar",
+    "currencies": {
+      "other": "Tahun ini membayar dalam {count} mata uang — benar-benar pengelana"
+    },
+    "soon": {
+      "other": "{count} tagihan datang dalam 30 hari ke depan — masih mau semuanya?"
+    },
+    "milkTea": {
+      "other": "{amount} per hari — kira-kira {count} gelas boba"
+    },
+    "saved": "Membatalkan langganan sudah menghemat {amount} tahun ini",
+    "fallback": "Tahu apa yang Anda bayar adalah langkah pertama untuk membayar lebih sedikit"
+  },
+  "receipt": {
+    "shop": "Toko Langganan {whose}",
+    "asOf": "Laporan tahunan · per {date}",
+    "fullYear": "Laporan tahunan · {year}",
+    "no": "No. {no}",
+    "register": "KASIR 01",
+    "cashier": "Kasir: {name}",
+    "item": "Item",
+    "share": "Bagian",
+    "amount": "Jumlah",
+    "rest": "{count} lainnya",
+    "count": "Item {items} / Tagihan {charges}",
+    "total": "TOTAL"
+  },
+  "poster": {
+    "kicker": "Tahun langganan {whose}",
+    "ongoing": "Sejauh ini tahun ini, dari {subs} · {charges}",
+    "ongoingHidden": "Sejauh ini tahun ini: {charges} · {currencies}",
+    "year": "Dibelanjakan untuk {subs} · {charges}",
+    "yearHidden": "Tahun ini: {charges} · {currencies}",
+    "newEnded": "{added} baru · {ended} dibatalkan",
+    "perDay": "Rata-rata {amount}/hari"
+  },
+  "card": {
+    "head": "Langganan {whose}",
+    "intro": {
+      "ongoing": "Sejauh ini tahun ini, biaya langganan",
+      "ongoingHidden": "Sejauh ini tahun ini, Anda berlangganan",
+      "year": "Tahun ini, biaya langganan",
+      "yearHidden": "Tahun ini, Anda berlangganan"
+    },
+    "perDay": "Rata-rata {amount}/hari",
+    "longest": "Paling lama",
+    "duration": "{y} thn {m} bln",
+    "busiest": "Bulan termahal",
+    "month": "{month}",
+    "newEnded": "Baru / dibatalkan",
+    "saved": "Hemat {amount}",
+    "ended": "{count} dibatalkan",
+    "noneEnded": "Tidak ada yang dibatalkan",
+    "currencies": "Mata uang",
+    "currencyCount": "{count}",
+    "nowMonthly": "Kini {amount}/bln"
+  },
+  "stars": {
+    "head": "{year} · Bintang langganan {whose}",
+    "foot": "Gelembung makin besar, pengeluaran makin besar"
+  }
+}

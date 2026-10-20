@@ -1,0 +1,35 @@
+{
+  "fxApiError": "O serviço de câmbio retornou um erro",
+  "missingId": "ID ausente",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "Este controle não é público",
+  "idMismatch": "Os IDs não correspondem",
+  "invalidMethod": "Forma de pagamento inválida",
+  "invalidBackup": "Arquivo de backup inválido",
+  "refreshFailed": "Falha ao atualizar",
+  "backup": {
+    "notBackup": "Este não é um arquivo de backup válido",
+    "unknownFormat": "Formato de backup não reconhecido: {format}",
+    "newerVersion": "Este backup é de uma versão mais nova (v{version}). Atualize este site primeiro."
+  },
+  "auth": {
+    "tooMany": "Muitas tentativas. Tente de novo em 15 minutos.",
+    "alreadySetup": "Uma senha já foi definida",
+    "noSetupToken": "O SETUP_TOKEN não foi configurado na implantação, então não é possível continuar. Defina esse segredo primeiro (wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "Token de configuração incorreto",
+    "passwordTooShort": { "one": "A senha deve ter pelo menos {min} caractere", "other": "A senha deve ter pelo menos {min} caracteres" },
+    "wrongPassword": "Senha incorreta",
+    "wrongCurrentPassword": "A senha atual está incorreta",
+    "newPasswordTooShort": { "one": "A nova senha deve ter pelo menos {min} caractere", "other": "A nova senha deve ter pelo menos {min} caracteres" },
+    "invalidDevice": "Dispositivo inválido",
+    "cannotRemoveCurrent": "Não é possível remover este dispositivo. Use Sair.",
+    "expired": "A solicitação expirou. Tente de novo.",
+    "passkeyFailed": "Falha na verificação da chave de acesso",
+    "passkeyNotBound": "Esta chave de acesso não está registrada neste site"
+  },
+  "ics": {
+    "calName": "Cobranças de assinaturas",
+    "method": "Pagamento: {name}",
+    "alarm": "{name} renova em breve"
+  }
+}

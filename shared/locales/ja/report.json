@@ -1,0 +1,129 @@
+{
+  "title": "レポート",
+  "shareReview": "{year}年のまとめを共有",
+  "perMonth": "{amount}/月",
+  "per": {
+    "day": "日",
+    "week": "週",
+    "month": "月",
+    "year": "年",
+    "lifetime": "1回",
+    "quarter": "3か月",
+    "halfYear": "6か月",
+    "twoYears": "2年",
+    "n": {
+      "day": "{count}日",
+      "week": "{count}週",
+      "month": "{count}か月",
+      "year": "{count}年"
+    }
+  },
+  "axis": {
+    "year": "{year}年"
+  },
+  "hero": {
+    "label": "毎月のサブスク支出 · マイナス MRR",
+    "vsLastMonth": "先月末比",
+    "yearAgo": "· 1年前は{amount}",
+    "annual": "年額",
+    "perDay": "1日あたり",
+    "active": "利用中",
+    "recover": "共有で回収/月",
+    "fxHist": "当時のレート",
+    "fxNow": "今日のレート",
+    "range1": "1年",
+    "range3": "3年",
+    "rangeAll": "全期間"
+  },
+  "wf": {
+    "title": "{month}の変動",
+    "prev": "前月",
+    "next": "翌月",
+    "from": "先月",
+    "fx": "為替",
+    "added": "新規",
+    "expansion": "値上げ",
+    "contraction": "値下げ",
+    "churned": "解約",
+    "now": "現在",
+    "monthEnd": "月末",
+    "empty": "今月は新規・解約・価格変更のあったサブスクはありません。",
+    "emptyFx": "今月は新規・解約・価格変更のあったサブスクはなく、変動はすべて為替によるものです（{amount}）。"
+  },
+  "checkup": {
+    "title": "診断",
+    "warn": {
+      "other": "{count}件の要確認項目"
+    },
+    "fix": "対応",
+    "less": "閉じる",
+    "more": "あと{count}件を表示"
+  },
+  "cash": {
+    "title": "支払額と実質コスト",
+    "legendCash": "その月の請求額",
+    "legendAccrual": "月割りのコスト",
+    "forecast": " · 予測",
+    "tip": "請求 {cash} · コスト {cost}",
+    "prepaidItem": "{name} · {amount} · {until}まで",
+    "prepaid": "前払いの残存価値",
+    "prepaidSub": "{count}件が支払い済み・未消化",
+    "savedItem": "{name} · {amount} · {since}から",
+    "saved": "解約による節約",
+    "savedSub": "{count}件を解約",
+    "next90": "今後90日間の請求",
+    "peak": "ピークは{month} · {amount}"
+  },
+  "comp": {
+    "title": "お金の行き先",
+    "back": "戻る",
+    "cat": "カテゴリ",
+    "pay": "支払い方法",
+    "ccy": "通貨",
+    "cycle": "サイクル",
+    "unassigned": "未設定",
+    "yearly": "年払い",
+    "quarterly": "3か月 / 半年払い",
+    "monthly": "月払い",
+    "groupTip": {
+      "other": "{name} · {count}件 · {amount}/月"
+    }
+  },
+  "topup": {
+    "title": "チャージ計画",
+    "range3": "3か月",
+    "range6": "6か月",
+    "range12": "1年",
+    "span3": "今後3か月",
+    "span6": "今後6か月",
+    "span12": "今後1年",
+    "empty": "残高のあるアカウントはまだありません。",
+    "emptyCta": "ウォレットで App Store や携帯キャリアの残高を追加",
+    "summary": "残高 {balance} · 月約{monthly}",
+    "why": "{span}：請求 {due}、手持ち {balance}、不足 {need}",
+    "urgent": "。最優先：{date}までに{min}以上チャージ",
+    "cards": "おすすめのギフトカード",
+    "anyAmount": "任意の金額をチャージできます。カードの額面に合わせる必要はありません",
+    "enough3": "残高で今後3か月をまかなえます",
+    "enough6": "残高で今後6か月をまかなえます",
+    "enough12": "残高で今後1年をまかなえます",
+    "by": "{date}まで"
+  },
+  "ev": {
+    "start": "開始",
+    "end": "解約",
+    "price": "価格変更",
+    "introEnd": "初回特典終了",
+    "buy": "買い切り購入",
+    "pause": "一時停止",
+    "switch": "地域 / プランを変更",
+    "resume": "再開"
+  },
+  "log": {
+    "title": "変更履歴",
+    "decisions": {
+      "other": "{count}件の判断"
+    },
+    "more": "以前の記録"
+  }
+}

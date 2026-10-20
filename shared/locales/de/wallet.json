@@ -1,0 +1,142 @@
+{
+  "title": "Wallet",
+  "sub": {
+    "one": "{count} Zahlungsmethode",
+    "other": "{count} Zahlungsmethoden"
+  },
+  "subDrag": {
+    "one": "{count} Zahlungsmethode · Karten zum Sortieren ziehen",
+    "other": "{count} Zahlungsmethoden · Karten zum Sortieren ziehen"
+  },
+  "add": "Hinzufügen",
+  "orderSaved": "Reihenfolge gesichert",
+  "runwayGroup": "Reichweite des Guthabens",
+  "family": "Geteilte Abos",
+  "familyCount": "{count}",
+  "unassigned": "Ohne Zahlungsmethode · {count}",
+  "runway": {
+    "drain": "Etwa {amount}/Mon.",
+    "scale": {
+      "today": "Heute",
+      "m3": "3 Mon.",
+      "m6": "6 Mon.",
+      "m9": "9 Mon.",
+      "y1": "1 J."
+    },
+    "noSubs": "Keine abgerechneten Abos verknüpft.",
+    "shortNow": "Reicht nicht für {amount} von {name} am {date} ({rel}). Lade {topup} auf, um ein ganzes Jahr abzudecken.",
+    "shortLater": "Deckt {periods}, reicht dann aber nicht mehr für {name} am {date} ({rel}). Lade {topup} auf, um ein ganzes Jahr abzudecken.",
+    "ok": "Reicht für die nächsten 3 Jahre und deckt {periods}.",
+    "periods": {
+      "one": "{count} Abbuchung",
+      "other": "{count} Abbuchungen"
+    },
+    "projFoot": "Spätere Abbuchungen sind nicht gedeckt. Lade {amount} auf, um ein ganzes Jahr abzudecken."
+  },
+  "card": {
+    "cashback": "{pct} % zurück",
+    "balance": "Guthaben",
+    "monthlySpend": "Pro Monat",
+    "subs": {
+      "one": "{count} Abo",
+      "other": "{count} Abos"
+    },
+    "noCharges": "Keine Abbuchungen",
+    "periodsLeft": {
+      "one": "Noch {count} Abbuchung",
+      "other": "Noch {count} Abbuchungen"
+    },
+    "low": "Reicht nicht",
+    "enough": "Reicht",
+    "noBalance": "Kein Guthaben festgelegt"
+  },
+  "sheet": {
+    "topup": "Aufladen / Guthaben anpassen",
+    "setBalance": "Guthaben festlegen",
+    "edit": "Bearbeiten",
+    "goTopup": "Aufladen",
+    "site": "Website",
+    "projection": "Anstehende Abbuchungen",
+    "linked": "Verknüpfte Abos · {count}",
+    "none": "Keine",
+    "notes": "Notizen"
+  },
+  "topup": {
+    "toastAdd": "Aufladung erfasst",
+    "toastSet": "Guthaben aktualisiert",
+    "removed": "Aufladung gelöscht (Guthaben unverändert)",
+    "cancel": "Abbrechen",
+    "save": "Sichern",
+    "modeAdd": "Aufladen",
+    "modeSet": "Tatsächliches Guthaben festlegen",
+    "amount": "Betrag ({ccy})",
+    "actual": "Tatsächliches Guthaben",
+    "estimate": "Aktuelle Schätzung",
+    "after": "Nach dem Sichern",
+    "optional": "Diese Aufladung (optional)",
+    "date": "Datum",
+    "costCcy": "Bezahlt in",
+    "cost": "Bezahlter Betrag",
+    "costPh": "Optional",
+    "note": "Notiz",
+    "notePh": "z. B. Razer Gold, ein Händler",
+    "history": "Aufladungen · {count}",
+    "spent": "{amount} bezahlt",
+    "premium": "{pct} % Aufpreis",
+    "below": "{pct} % unter Marktpreis",
+    "removeAria": "Diese Aufladung löschen"
+  },
+  "editor": {
+    "titleNew": "Zahlungsmethode hinzufügen",
+    "titleEdit": "Zahlungsmethode bearbeiten",
+    "confirmDelete": "„{name}“ löschen? Verknüpfte Abos haben dann keine Zahlungsmethode mehr.",
+    "deleted": "Gelöscht",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "saved": "Gesichert",
+    "done": "Fertig",
+    "newName": "Neue Zahlungsmethode",
+    "name": "Name",
+    "namePh": "DKB, App Store Türkiye …",
+    "url": "Website / Aufladeseite",
+    "urlPh": "https:// (optional)",
+    "kind": "Art",
+    "bank": "Bank",
+    "bankDetected": "Aus dem Namen erkannt",
+    "bankAuto": "Aus dem Namen erkennen",
+    "logoBuiltIn": "{kind} nutzt sein offizielles Logo",
+    "currency": "Währung",
+    "network": "Kartennetzwerk",
+    "networkNone": "Ausgeblendet",
+    "bankIcon": "Bank-Symbol",
+    "bankSet": "Manuell gewählt",
+    "bankHint": "Nenne den Banknamen, damit er erkannt wird",
+    "last4": "Letzte 4 Ziffern",
+    "region": "Region",
+    "phone": "Telefonnummer",
+    "cashback": "Cashback / Punkte",
+    "cashbackPh": "% (optional)",
+    "balanceGroup": "Guthaben",
+    "balance": "Aktuelles Guthaben",
+    "optional": "Optional",
+    "asOf": "Stand",
+    "lowAlert": "Warnung bei niedrigem Guthaben",
+    "lowAlertOpt": {
+      "one": "{count} Tag vorher",
+      "other": "{count} Tage vorher"
+    },
+    "lowAlertAria": "Guthabenwarnung",
+    "notes": "Notizen"
+  },
+  "logo": {
+    "uploaded": "Hochgeladen",
+    "link": "Bild-URL",
+    "favicon": "Website-Symbol",
+    "bank": "Bank-Symbol",
+    "none": "Nicht festgelegt – zeigt den Anfangsbuchstaben",
+    "upload": "Hochladen",
+    "linkBtn": "URL",
+    "clear": "Entfernen",
+    "wide": "Breites Logo"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "close": "닫기",
+  "error": {
+    "loginRequired": "먼저 로그인하세요",
+    "requestFailed": "요청에 실패했습니다({status})"
+  },
+  "theme": {
+    "light": "라이트",
+    "dark": "다크",
+    "system": "시스템"
+  },
+  "currency": {
+    "XCG": "카리브 길더",
+    "ZWG": "짐바브웨 골드"
+  },
+  "method": {
+    "none": "설정 안 함"
+  },
+  "toolbar": {
+    "openSidebar": "사이드바 열기",
+    "add": "구독 추가"
+  }
+}

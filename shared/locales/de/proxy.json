@@ -1,0 +1,82 @@
+{
+  "title": "Für andere bezahlt",
+  "status": {
+    "active": "Aktiv",
+    "ending": "Endet",
+    "ended": "Beendet"
+  },
+  "owedPeriods": {
+    "one": "{count} Zahlung offen",
+    "other": "{count} Zahlungen offen"
+  },
+  "viewSub": "Abo ansehen",
+  "stoppedOn": " · beendet am {date}",
+  "nextOn": " · nächste am {date}",
+  "payFor": "Für {name}",
+  "unset": "nicht festgelegt",
+  "paidPeriods": {
+    "one": "{count} Abbuchung bezahlt",
+    "other": "{count} Abbuchungen bezahlt"
+  },
+  "received": "Zurückgezahlt",
+  "owed": "Offen",
+  "settled": "Beglichen",
+  "detailTitle": "Für andere bezahlt",
+  "cardCcy": " · Karte rechnet in {ccy} ab",
+  "forWhom": "Bezahlt für",
+  "method": "Zahlungsmethode",
+  "subscription": "Abo",
+  "viewDetail": "Abo-Details ansehen",
+  "stoppedAt": "Beendet am",
+  "nextCharge": "Nächste Abbuchung",
+  "note": "Notiz",
+  "diffLabel": "Zurückgezahlt − abgebucht",
+  "table": {
+    "date": "Abbuchungsdatum",
+    "charged": "Abgebucht",
+    "received": "Zurückgezahlt",
+    "diff": "Differenz",
+    "record": "Erfassen",
+    "even": "Ausgeglichen",
+    "none": "Noch keine Abbuchungen."
+  },
+  "entry": {
+    "markedDue": "Als offen markiert",
+    "saved": "Gesichert",
+    "title": "Abbuchung am {date}",
+    "markDue": "Als offen markieren",
+    "cancel": "Abbrechen",
+    "save": "Sichern",
+    "chargedFoot": "{amount} zum Kurs am Abbuchungstag. Leer lassen, um den Listenpreis von {list} zu verwenden.",
+    "amount": "Betrag",
+    "currency": "Währung",
+    "paidBack": "{name} hat mir zurückgezahlt",
+    "paidBackAnon": "An mich zurückgezahlt",
+    "receivedEmpty": "Leer lassen, wenn noch nichts eingegangen ist.",
+    "receivedEven": "{amount} zum Kurs am Eingangstag, entspricht der Abbuchung.",
+    "receivedMore": "{amount} zum Kurs am Eingangstag, {diff} mehr als abgebucht.",
+    "receivedLess": "{amount} zum Kurs am Eingangstag, {diff} weniger als abgebucht.",
+    "notReceived": "Nicht erhalten",
+    "receivedOn": "Eingangsdatum",
+    "notePlaceholder": "Optional, z. B. Banküberweisung"
+  },
+  "page": {
+    "owedSub": {
+      "one": "{count} offen, zu Kursen am Abbuchungstag",
+      "other": "{count} offen, zu Kursen am Abbuchungstag"
+    },
+    "allBack": "Alles zurückgezahlt",
+    "total": "Gesamt bezahlt",
+    "totalSub": {
+      "one": "{count} Abbuchung · {subs}",
+      "other": "{count} Abbuchungen · {subs}"
+    },
+    "subs": {
+      "one": "{count} Abo",
+      "other": "{count} Abos"
+    },
+    "diffSub": "Differenz durch Wechselkurse und Gebühren bei zurückgezahlten Abbuchungen",
+    "emptyTitle": "Noch nichts für andere bezahlt",
+    "emptyBody": "Lege ein Abo an oder bearbeite eins, wähle beim Teilen „Für andere bezahlt“ und gib an, für wen."
+  }
+}

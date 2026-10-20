@@ -1,0 +1,60 @@
+{
+  "name": "Abonelik Defteri",
+  "offline": "Çevrimdışı",
+  "offlineError": "Bağlanılamıyor: {error}",
+  "nav": {
+    "overview": "Genel Bakış",
+    "list": "Abonelikler",
+    "calendar": "Takvim",
+    "report": "Raporlar",
+    "wallet": "Cüzdan",
+    "family": "Ortak planlar",
+    "behalf": "Başkaları için",
+    "ai": "Yapay zekâ erişimi",
+    "settings": "Ayarlar"
+  },
+  "login": {
+    "setupHint": "İlk kez mi buradasınız? Giriş için bir parola belirleyin.",
+    "tagline": "Tüm abonelikler, tüm kartlar, tüm ortak planlar.",
+    "setupToken": "Kurulum token'ı (SETUP_TOKEN)",
+    "newPassword": "Yeni parola (en az 8 karakter)",
+    "password": "Parola",
+    "again": "Parolayı onaylayın",
+    "mismatch": "Parolalar eşleşmiyor",
+    "verifying": "Doğrulanıyor…",
+    "setupEnter": "Parolayı belirle ve devam et",
+    "enter": "Giriş yap",
+    "passkey": "Geçiş anahtarıyla giriş yap"
+  },
+  "sidebar": {
+    "collapse": "Kenar çubuğunu gizle",
+    "expand": "Kenar çubuğunu göster",
+    "new": "Yeni",
+    "search": "Ara",
+    "upcoming": "Yaklaşanlar",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "inDays": { "one": "{count} gün sonra", "other": "{count} gün sonra" },
+    "theme": "Tema",
+    "themeHint": "Değiştirmek için tıklayın: Açık → Koyu → Sistem"
+  },
+  "palette": {
+    "placeholder": "Abonelik veya sayfa arayın…",
+    "empty": "Sonuç yok",
+    "page": "Sayfa",
+    "add": "Yeni abonelik",
+    "addKeywords": "yeni ekle oluştur new add create"
+  },
+  "ics": {
+    "title": "Takvime abone ol",
+    "intro": "Ödeme tarihlerini Apple Takvim, Google Takvim veya Outlook ile eşzamanlayın. 6 saatte bir yenilenir ve hatırlatma ayarlarınıza göre her ödemeden önce uyarır.",
+    "subscribe": "Abone ol",
+    "copy": "Bağlantıyı kopyala",
+    "copied": "Kopyalandı",
+    "reset": "Bağlantıyı sıfırla",
+    "resetDone": "Bağlantı sıfırlandı. Eski bağlantı artık çalışmıyor.",
+    "generate": "Özel takvim bağlantısı oluştur",
+    "generated": "Takvim bağlantısı oluşturuldu",
+    "note": "Bağlantı özel bir token içerir; ona sahip olan herkes ödeme takviminizi görebilir. Sızarsa iptal etmek için Bağlantıyı sıfırla'ya dokunun."
+  }
+}

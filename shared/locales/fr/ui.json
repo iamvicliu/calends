@@ -1,0 +1,23 @@
+{
+  "close": "Fermer",
+  "error": {
+    "loginRequired": "Veuillez d’abord vous connecter",
+    "requestFailed": "Échec de la requête ({status})"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "currency": {
+    "XCG": "Florin caribéen",
+    "ZWG": "Zimbabwe Gold"
+  },
+  "method": {
+    "none": "Non défini"
+  },
+  "toolbar": {
+    "openSidebar": "Ouvrir la barre latérale",
+    "add": "Ajouter un abonnement"
+  }
+}

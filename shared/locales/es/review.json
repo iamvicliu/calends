@@ -1,0 +1,105 @@
+{
+  "title": "Comparte tu resumen del año",
+  "fileName": "suscripciones-resumen-{year}-{style}.png",
+  "style": {
+    "poster": "Póster",
+    "receipt": "Recibo",
+    "card": "Tarjeta",
+    "stars": "Constelación"
+  },
+  "unassigned": "Sin asignar",
+  "me": "Yo",
+  "whose": "de {name}",
+  "whoseSelf": "personal",
+  "topSpend": "Mayor gasto",
+  "ofYear": "{pct} del año",
+  "n": {
+    "subs": {
+      "one": "{count} suscripción",
+      "other": "{count} suscripciones"
+    },
+    "charges": {
+      "one": "{count} cobro",
+      "other": "{count} cobros"
+    },
+    "currencies": {
+      "one": "{count} moneda",
+      "other": "{count} monedas"
+    },
+    "currencyKinds": {
+      "one": "{count} moneda",
+      "other": "{count} monedas"
+    }
+  },
+  "tip": {
+    "top": "Solo {name} se llevó el {pct} del año",
+    "longest": {
+      "one": "{name} te acompaña desde hace más de un año",
+      "other": "{name} te acompaña desde hace más de {count} años"
+    },
+    "busiest": "{month} fue el mes que más le dolió a tu bolsillo",
+    "newEnded": "Este año: {added} altas, {ended} bajas",
+    "currencies": {
+      "one": "Este año pagaste en {count} moneda",
+      "other": "Este año pagaste en {count} monedas: todo un trotamundos"
+    },
+    "soon": {
+      "one": "{count} cobro llega en los próximos 30 días. ¿Aún lo quieres?",
+      "other": "{count} cobros llegan en los próximos 30 días. ¿Aún los quieres todos?"
+    },
+    "milkTea": {
+      "one": "{amount} al día: más o menos un bubble tea",
+      "other": "{amount} al día: más o menos {count} bubble teas"
+    },
+    "saved": "Cancelar ya te ha ahorrado {amount} este año",
+    "fallback": "Saber lo que pagas es el primer paso para pagar menos"
+  },
+  "receipt": {
+    "shop": "Tienda de suscripciones {whose}",
+    "asOf": "Extracto anual · a {date}",
+    "fullYear": "Extracto anual · {year}",
+    "no": "N.º {no}",
+    "register": "CAJA 01",
+    "cashier": "Cajero: {name}",
+    "item": "Artículo",
+    "share": "Parte",
+    "amount": "Importe",
+    "rest": "{count} más",
+    "count": "Artículos {items} / Cobros {charges}",
+    "total": "TOTAL"
+  },
+  "poster": {
+    "kicker": "Año de suscripciones {whose}",
+    "ongoing": "En lo que va de año, entre {subs} · {charges}",
+    "ongoingHidden": "En lo que va de año: {charges} · {currencies}",
+    "year": "Gastado entre {subs} · {charges}",
+    "yearHidden": "Este año: {charges} · {currencies}",
+    "newEnded": "{added} nuevas · {ended} canceladas",
+    "perDay": "{amount}/día de media"
+  },
+  "card": {
+    "head": "Registro de suscripciones {whose}",
+    "intro": {
+      "ongoing": "En lo que va de año, las suscripciones costaron",
+      "ongoingHidden": "En lo que va de año, te suscribiste a",
+      "year": "Este año, las suscripciones costaron",
+      "yearHidden": "Este año, te suscribiste a"
+    },
+    "perDay": "{amount}/día de media",
+    "longest": "La más duradera",
+    "duration": "{y}a {m}m",
+    "busiest": "Mes más caro",
+    "month": "{month}",
+    "newEnded": "Nuevas / canceladas",
+    "saved": "Ahorrado {amount}",
+    "ended": "{count} canceladas",
+    "noneEnded": "Ninguna cancelada",
+    "currencies": "Monedas",
+    "currencyCount": "{count}",
+    "nowMonthly": "{amount}/mes ahora"
+  },
+  "stars": {
+    "head": "{year} · Constelación de suscripciones {whose}",
+    "foot": "Burbuja más grande, más gasto"
+  }
+}

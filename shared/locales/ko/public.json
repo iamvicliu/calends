@@ -1,0 +1,69 @@
+{
+  "title": "Ethan의 구독",
+  "loadFailed": "불러오지 못했습니다",
+  "theme": {
+    "title": "테마: {mode}(클릭하여 전환)",
+    "aria": "테마: {mode}, 클릭하여 전환"
+  },
+  "currency": "표시 통화",
+  "hero": {
+    "monthly": "월 구독 지출",
+    "flat": "작년 같은 달과 동일",
+    "more": "작년 같은 달보다 {amount} 많음",
+    "less": "작년 같은 달보다 {amount} 적음",
+    "yearly": "연간",
+    "live": "이용 중",
+    "paid": "{year}년부터 결제한 금액"
+  },
+  "timeline": {
+    "title": "타임라인",
+    "upcoming": {
+      "other": "다음 30일 결제 {count}건 · {amount}"
+    }
+  },
+  "chart": {
+    "title": "월별 결제",
+    "desc": "지난 12개월과 다음 3개월, 점선 막대는 예측입니다",
+    "paid": "결제됨",
+    "mrr": "월 비용",
+    "charge": "결제 금액",
+    "thisMonth": "이번 달",
+    "projected": "{month} · 예측"
+  },
+  "ended": {
+    "title": "해지됨",
+    "saved": "해지 후 {amount} 절약",
+    "item": "{amount} 절약"
+  },
+  "perMonth": "{amount}/월",
+  "lifetime": {
+    "title": "평생 이용",
+    "desc": "한 번 결제, 추가 결제 없음"
+  },
+  "footer": "과거 결제는 당일 환율, 앞으로의 결제는 오늘 환율로 환산합니다. 공개되지 않은 도메인과 결제 정보는 숨겨집니다.",
+  "composition": {
+    "title": "구성",
+    "desc": "카테고리별 월 비용",
+    "other": "기타"
+  },
+  "count": "{count}개",
+  "fx": {
+    "title": "환율",
+    "flat": "지난 1년간 환율로 인한 비용 변화는 거의 없습니다",
+    "less": "오늘 환율로는 1년 전보다 매달 {amount} 덜 냅니다",
+    "more": "오늘 환율로는 1년 전보다 매달 {amount} 더 냅니다",
+    "share": "{pct}%"
+  },
+  "list": {
+    "title": "구독",
+    "summary": {
+      "other": "{count}개 · {amount}/월"
+    },
+    "all": "전체"
+  },
+  "row": {
+    "renews": " · {date} 갱신",
+    "monthly": "월",
+    "perMonthEq": "월 환산"
+  }
+}

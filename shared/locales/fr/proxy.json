@@ -1,0 +1,82 @@
+{
+  "title": "Payé pour d’autres",
+  "status": {
+    "active": "Actif",
+    "ending": "Se termine",
+    "ended": "Arrêté"
+  },
+  "owedPeriods": {
+    "one": "{count} paiement dû",
+    "other": "{count} paiements dus"
+  },
+  "viewSub": "Voir l’abonnement",
+  "stoppedOn": " · arrêté le {date}",
+  "nextOn": " · prochain le {date}",
+  "payFor": "Pour {name}",
+  "unset": "non défini",
+  "paidPeriods": {
+    "one": "{count} prélèvement payé",
+    "other": "{count} prélèvements payés"
+  },
+  "received": "Remboursé",
+  "owed": "Dû",
+  "settled": "Réglé",
+  "detailTitle": "Payé pour d’autres",
+  "cardCcy": " · carte débitée en {ccy}",
+  "forWhom": "Payé pour",
+  "method": "Moyen de paiement",
+  "subscription": "Abonnement",
+  "viewDetail": "Voir les détails de l’abonnement",
+  "stoppedAt": "Arrêté le",
+  "nextCharge": "Prochain prélèvement",
+  "note": "Note",
+  "diffLabel": "Remboursé − prélevé",
+  "table": {
+    "date": "Date du prélèvement",
+    "charged": "Prélevé",
+    "received": "Remboursé",
+    "diff": "Écart",
+    "record": "Saisir",
+    "even": "Équilibré",
+    "none": "Aucun prélèvement pour l’instant."
+  },
+  "entry": {
+    "markedDue": "Marqué comme dû",
+    "saved": "Enregistré",
+    "title": "Prélèvement du {date}",
+    "markDue": "Marquer comme dû",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "chargedFoot": "{amount} au taux du jour du prélèvement. Laissez vide pour utiliser le prix catalogue de {list}.",
+    "amount": "Montant",
+    "currency": "Devise",
+    "paidBack": "{name} m’a remboursé",
+    "paidBackAnon": "Remboursé",
+    "receivedEmpty": "Laissez vide si rien n’a encore été reçu.",
+    "receivedEven": "{amount} au taux du jour de réception, égal au prélèvement.",
+    "receivedMore": "{amount} au taux du jour de réception, {diff} de plus que le prélèvement.",
+    "receivedLess": "{amount} au taux du jour de réception, {diff} de moins que le prélèvement.",
+    "notReceived": "Non reçu",
+    "receivedOn": "Date de réception",
+    "notePlaceholder": "Facultatif, ex. virement bancaire"
+  },
+  "page": {
+    "owedSub": {
+      "one": "{count} impayé, aux taux du jour du prélèvement",
+      "other": "{count} impayés, aux taux du jour du prélèvement"
+    },
+    "allBack": "Tout est remboursé",
+    "total": "Total payé",
+    "totalSub": {
+      "one": "{count} prélèvement · {subs}",
+      "other": "{count} prélèvements · {subs}"
+    },
+    "subs": {
+      "one": "{count} abonnement",
+      "other": "{count} abonnements"
+    },
+    "diffSub": "Écart dû aux taux de change et aux frais sur les prélèvements remboursés",
+    "emptyTitle": "Aucun paiement pour d’autres",
+    "emptyBody": "Créez ou modifiez un abonnement, choisissez « Payé pour d’autres » dans le partage et indiquez pour qui."
+  }
+}

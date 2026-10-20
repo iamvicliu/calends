@@ -1,0 +1,91 @@
+{
+  "title": "Compartir «{name}»",
+  "style": {
+    "card": "Tarjeta",
+    "receipt": "Recibo",
+    "timeline": "Cronología",
+    "poster": "Póster",
+    "years": "Por año"
+  },
+  "dur": {
+    "ym": "{y}a {m}m",
+    "y": {
+      "one": "{count} año",
+      "other": "{count} años"
+    },
+    "m": {
+      "one": "{count} mes",
+      "other": "{count} meses"
+    },
+    "d": {
+      "one": "{count} día",
+      "other": "{count} días"
+    }
+  },
+  "status": {
+    "active": "Activa",
+    "ending": "Termina",
+    "trial": "En prueba",
+    "paused": "En pausa",
+    "ended": "Cancelada",
+    "lifetime": "De por vida",
+    "upcoming": "Empieza pronto"
+  },
+  "switched": {
+    "zero": "Sin cambios",
+    "one": "Un cambio",
+    "other": "{count} cambios"
+  },
+  "priceSame": "Sin cambios",
+  "priceUp": "Subió un {pct}%",
+  "priceDown": "Bajó un {pct}%",
+  "since": "Desde {date}",
+  "together": "Juntos desde hace",
+  "totalSpent": "Gasto total",
+  "charges": "Cobros",
+  "subscribed": "Suscrito",
+  "times": "{count}",
+  "gaps": "Interrupciones",
+  "realMonthly": "Coste mensual real",
+  "price": "Precio",
+  "phases": "Fases",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — hoy",
+  "refund": "Reembolso",
+  "refundShort": "Reemb.",
+  "nth": "N.º {n}",
+  "earlier": "{count} anteriores",
+  "time": "FECHA",
+  "total": "TOTAL",
+  "chargeCount": "Cobros",
+  "count": "{count}",
+  "switches": "Cambios de región / plan",
+  "thanks": "Gracias · Hasta el próximo ciclo",
+  "n": {
+    "charges": {
+      "one": "{count} cobro",
+      "other": "{count} cobros"
+    }
+  },
+  "sum": "{amount} en total",
+  "gap": "{dur} sin suscripción",
+  "planned": "{date} (previsto)",
+  "present": "ahora",
+  "priceChanges": "Cambios de precio: {list}",
+  "withYou": "Contigo desde hace",
+  "totalPerDay": "{total} en total · {perDay}/día de media",
+  "lapsed": {
+    "one": "Interrumpida una vez",
+    "other": "Interrumpida {count} veces"
+  },
+  "byYear": "Gasto por año",
+  "sheet": {
+    "copied": "Imagen copiada, lista para pegar",
+    "copyFailed": "No se pudo copiar. Prueba a descargarla.",
+    "renderFailed": "No se pudo crear la imagen",
+    "download": "Descargar imagen",
+    "generating": "Generando…",
+    "copy": "Copiar imagen",
+    "showAmounts": "Mostrar importes"
+  }
+}

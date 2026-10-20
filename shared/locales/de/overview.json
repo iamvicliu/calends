@@ -1,0 +1,74 @@
+{
+  "title": "Übersicht",
+  "add": "Neues Abo",
+  "footer": {
+    "one": "{count} aktives Abo · {amount}/Mon. ·",
+    "other": "{count} aktive Abos · {amount}/Mon. ·"
+  },
+  "fullReport": "Ganzen Bericht ansehen",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "one": "{count} Abo",
+      "other": "{count} Abos"
+    },
+    "charges": {
+      "one": "{count} Abbuchung",
+      "other": "{count} Abbuchungen"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} '{yy}"
+  },
+  "timeline": {
+    "title": "Zeitleiste",
+    "sub": "{past} in den letzten 30 Tagen abgebucht · {next} fällig in den nächsten 30"
+  },
+  "spending": {
+    "title": "Monatliche Ausgaben",
+    "sub": "Hellere Balken sind Prognosen",
+    "month": "Monatlich",
+    "yearly": "Jährlich",
+    "year": "{year}",
+    "projected": " · Prognose",
+    "inProgress": " · Laufend",
+    "paid": " · {amount} bezahlt",
+    "empty": "Keine Abbuchungen in diesem Zeitraum"
+  },
+  "due": {
+    "title": "Nächste 30 Tage",
+    "empty": "In den nächsten 30 Tagen ist nichts fällig",
+    "thisWeek": "Diese Woche",
+    "later": "Später",
+    "noMethod": "Keine Zahlungsmethode"
+  },
+  "wallet": {
+    "title": "Wallet",
+    "manage": "Verwalten",
+    "balance": "Guthaben {amount} · {status}",
+    "covered": {
+      "one": "reicht für {count} weitere Abbuchung, bis {date} aufladen",
+      "other": "reicht für {count} weitere Abbuchungen, bis {date} aufladen"
+    },
+    "mustTopUp": "bis {date} aufladen",
+    "enough": "reicht für über 3 Jahre",
+    "noBalance": "Trag ein Guthaben ein, um zu sehen, wie lange es reicht",
+    "others": "Außerdem: {list}"
+  },
+  "tips": {
+    "warn": "Achtung",
+    "info": "Tipp",
+    "good": "Wusstest du?"
+  },
+  "stmt": {
+    "kicker": "Monatliche Abo-Ausgaben",
+    "vsLastMonth": "ggü. Ende letzten Monats",
+    "annual": "Pro Jahr",
+    "ytd": "Bezahlt {year}",
+    "perDay": "Pro Tag",
+    "active": "Aktiv",
+    "share": "{amount}/Mon. · {pct} %",
+    "caption": "Abo-Sternenhimmel · Blasengröße zeigt monatliche Kosten",
+    "aria": "{name}, {amount} pro Monat"
+  }
+}

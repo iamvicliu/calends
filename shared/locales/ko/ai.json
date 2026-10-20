@@ -1,0 +1,43 @@
+{
+  "title": "AI 연동",
+  "newToken": "새 토큰",
+  "mcpUrl": "MCP URL",
+  "urlCopied": "URL을 복사했습니다",
+  "copy": "복사",
+  "copied": "복사됨",
+  "copyFailed": "복사하지 못했습니다",
+  "neverUsed": "사용 기록 없음",
+  "tokenPlaceholder": "<your-token>",
+  "tokens": {
+    "other": "토큰 · {count}"
+  },
+  "noTokens": "아직 토큰이 없습니다. 토큰을 만들어 연결할 AI 어시스턴트에 전달하세요.",
+  "lastUsed": "마지막 사용 {time}",
+  "confirmRevoke": "‘{name}’을(를) 폐기할까요? 이 토큰을 사용하는 AI 어시스턴트는 즉시 접근할 수 없게 됩니다.",
+  "revoke": "폐기",
+  "revoked": "폐기됨",
+  "setup": "설정 방법",
+  "tools": {
+    "other": "사용 가능한 도구 · {count}"
+  },
+  "writeBadge": "쓰기",
+  "clientOther": "기타",
+  "scope": {
+    "write": "읽기 및 쓰기",
+    "read": "읽기 전용",
+    "writeLong": "읽기 및 쓰기: 조회, 추가, 편집",
+    "readLong": "읽기 전용: 조회만 가능"
+  },
+  "created": {
+    "title": "토큰을 만들었습니다",
+    "saved": "저장했습니다",
+    "foot": "이 토큰은 한 번만 표시되며, 닫으면 다시 볼 수 없습니다. 잃어버렸다면 폐기하고 새로 만드세요.",
+    "copyToken": "토큰 복사",
+    "tokenCopied": "토큰을 복사했습니다",
+    "command": "설정 명령어"
+  },
+  "cancel": "취소",
+  "generate": "만들기",
+  "name": "이름",
+  "namePlaceholder": "어떤 AI에서 사용하나요?"
+}

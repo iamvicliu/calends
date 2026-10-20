@@ -1,0 +1,62 @@
+{
+  "name": "サブスク台帳",
+  "offline": "オフライン",
+  "offlineError": "接続できません：{error}",
+  "nav": {
+    "overview": "概要",
+    "list": "サブスク",
+    "calendar": "カレンダー",
+    "report": "レポート",
+    "wallet": "ウォレット",
+    "family": "共有プラン",
+    "behalf": "立て替え",
+    "ai": "AI 連携",
+    "settings": "設定"
+  },
+  "login": {
+    "setupHint": "初めての方は、ログイン用のパスワードを設定してください。",
+    "tagline": "サブスクも、カードも、共有プランも、ひとつに。",
+    "setupToken": "セットアップトークン（SETUP_TOKEN）",
+    "newPassword": "新しいパスワード（8文字以上）",
+    "password": "パスワード",
+    "again": "パスワードを確認",
+    "mismatch": "パスワードが一致しません",
+    "verifying": "確認中…",
+    "setupEnter": "パスワードを設定して続ける",
+    "enter": "ログイン",
+    "passkey": "パスキーでログイン"
+  },
+  "sidebar": {
+    "collapse": "サイドバーを隠す",
+    "expand": "サイドバーを表示",
+    "new": "新規",
+    "search": "検索",
+    "upcoming": "今後の支払い",
+    "today": "今日",
+    "tomorrow": "明日",
+    "inDays": {
+      "other": "{count}日後"
+    },
+    "theme": "テーマ",
+    "themeHint": "クリックで切り替え：ライト → ダーク → システム"
+  },
+  "palette": {
+    "placeholder": "サブスクやページを検索…",
+    "empty": "結果なし",
+    "page": "ページ",
+    "add": "新規サブスク",
+    "addKeywords": "新規 追加 作成 new add create"
+  },
+  "ics": {
+    "title": "カレンダーで購読",
+    "intro": "請求日を Apple カレンダー、Google カレンダー、Outlook に同期します。6時間ごとに更新され、リマインダー設定に合わせて請求前に通知します。",
+    "subscribe": "購読",
+    "copy": "リンクをコピー",
+    "copied": "コピーしました",
+    "reset": "リンクをリセット",
+    "resetDone": "リンクをリセットしました。古いリンクは使えなくなりました。",
+    "generate": "非公開カレンダーリンクを作成",
+    "generated": "カレンダーリンクを作成しました",
+    "note": "このリンクには非公開トークンが含まれ、知っている人は誰でも請求スケジュールを見られます。漏れた場合は「リンクをリセット」で無効にしてください。"
+  }
+}

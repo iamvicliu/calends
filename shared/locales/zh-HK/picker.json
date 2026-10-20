@@ -1,0 +1,18 @@
+{
+  "choose": "請選擇",
+  "noMatch": "沒有符合的選項",
+  "common": "常用",
+  "currency": "貨幣",
+  "date": { "placeholder": "選擇日期", "prev": "上一頁", "next": "下一頁" },
+  "method": { "label": "付款方式", "none": "未指定" },
+  "region": { "label": "地區", "any": "不區分", "none": "不區分地區", "all": "全部地區" },
+  "ccy": {
+    "label": "貨幣",
+    "switch": "切換金額顯示的貨幣",
+    "orig": "原幣",
+    "origHint": "各自貨幣",
+    "all": "全部貨幣",
+    "search": "搜尋貨幣、代碼或符號",
+    "noMatch": "沒有符合的貨幣"
+  }
+}

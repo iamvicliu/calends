@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}",
+  "summary": { "one": "{count} ödeme · {amount}", "other": "{count} ödeme · {amount}" },
+  "mode": { "month": "Ay", "year": "Yıl" },
+  "prev": "Önceki",
+  "next": "Sonraki",
+  "today": "Bugün",
+  "ics": "Takvime abone ol",
+  "noneDay": "Bu gün ödeme yok",
+  "projected": "Beklenen",
+  "charged": "Ödendi",
+  "monthAll": "Tüm ödemeler · {month}",
+  "noneMonth": "Bu ay ödeme yok",
+  "day": "{day}",
+  "heatCount": { "one": "{count} ödeme · ", "other": "{count} ödeme · " }
+}

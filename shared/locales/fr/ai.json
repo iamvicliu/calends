@@ -1,0 +1,45 @@
+{
+  "title": "Accès IA",
+  "newToken": "Nouveau jeton",
+  "mcpUrl": "URL MCP",
+  "urlCopied": "URL copiée",
+  "copy": "Copier",
+  "copied": "Copié",
+  "copyFailed": "Copie impossible",
+  "neverUsed": "Jamais utilisé",
+  "tokenPlaceholder": "<votre-jeton>",
+  "tokens": {
+    "one": "Jetons · {count}",
+    "other": "Jetons · {count}"
+  },
+  "noTokens": "Aucun jeton pour l’instant. Créez-en un et donnez-le à l’assistant IA que vous voulez connecter.",
+  "lastUsed": "Dernière utilisation {time}",
+  "confirmRevoke": "Révoquer « {name} » ? Tout assistant IA qui l’utilise perdra l’accès immédiatement.",
+  "revoke": "Révoquer",
+  "revoked": "Révoqué",
+  "setup": "Configuration",
+  "tools": {
+    "one": "Outil disponible · {count}",
+    "other": "Outils disponibles · {count}"
+  },
+  "writeBadge": "Écriture",
+  "clientOther": "Autre",
+  "scope": {
+    "write": "Lecture et écriture",
+    "read": "Lecture seule",
+    "writeLong": "Lecture et écriture : consulter, ajouter et modifier",
+    "readLong": "Lecture seule : consulter uniquement"
+  },
+  "created": {
+    "title": "Jeton créé",
+    "saved": "Je l’ai enregistré",
+    "foot": "Ce jeton n’est affiché qu’une seule fois et ne sera plus visible après fermeture. Si vous le perdez, révoquez-le et créez-en un nouveau.",
+    "copyToken": "Copier le jeton",
+    "tokenCopied": "Jeton copié",
+    "command": "Commande de configuration"
+  },
+  "cancel": "Annuler",
+  "generate": "Créer",
+  "name": "Nom",
+  "namePlaceholder": "Pour quelle IA ?"
+}

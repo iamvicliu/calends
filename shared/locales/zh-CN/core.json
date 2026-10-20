@@ -18,7 +18,7 @@
   "event": {
     "label": "{region}{price}/{per}",
     "region": "{region} ",
-    "per": { "year": "年", "month": "月", "months": "{count}月", "week": "week", "day": "day" }
+    "per": { "year": "年", "month": "月", "months": "{count}月", "week": "周", "day": "天" }
   },
   "listSep": "、",
   "insight": {

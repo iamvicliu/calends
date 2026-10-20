@@ -1,0 +1,30 @@
+{
+  "choose": "선택",
+  "noMatch": "일치 항목 없음",
+  "common": "자주 사용",
+  "currency": "통화",
+  "date": {
+    "placeholder": "날짜 선택",
+    "prev": "이전",
+    "next": "다음"
+  },
+  "method": {
+    "label": "결제 수단",
+    "none": "없음"
+  },
+  "region": {
+    "label": "지역",
+    "any": "모두",
+    "none": "모든 지역",
+    "all": "모든 지역"
+  },
+  "ccy": {
+    "label": "통화",
+    "switch": "표시 통화 변경",
+    "orig": "원래 통화",
+    "origHint": "각자의 통화로",
+    "all": "모든 통화",
+    "search": "이름, 코드 또는 기호로 검색",
+    "noMatch": "일치하는 통화가 없습니다"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "title": "Compartilhar “{name}”",
+  "style": {
+    "card": "Cartão",
+    "receipt": "Recibo",
+    "timeline": "Linha do tempo",
+    "poster": "Pôster",
+    "years": "Por ano"
+  },
+  "dur": {
+    "ym": "{y} a {m} m",
+    "y": {
+      "one": "{count} ano",
+      "other": "{count} anos"
+    },
+    "m": {
+      "one": "{count} mês",
+      "other": "{count} meses"
+    },
+    "d": {
+      "one": "{count} dia",
+      "other": "{count} dias"
+    }
+  },
+  "status": {
+    "active": "Ativa",
+    "ending": "Terminando",
+    "trial": "Em teste",
+    "paused": "Pausada",
+    "ended": "Cancelada",
+    "lifetime": "Vitalícia",
+    "upcoming": "Começa em breve"
+  },
+  "switched": {
+    "zero": "Nunca trocou",
+    "one": "Trocou uma vez",
+    "other": "Trocou {count} vezes"
+  },
+  "priceSame": "Sem mudança",
+  "priceUp": "Alta de {pct}%",
+  "priceDown": "Queda de {pct}%",
+  "since": "Desde {date}",
+  "together": "Juntos há",
+  "totalSpent": "Total gasto",
+  "charges": "Cobranças",
+  "subscribed": "Assinante há",
+  "times": "{count}",
+  "gaps": "Interrupções",
+  "realMonthly": "Custo mensal real",
+  "price": "Preço",
+  "phases": "Fases",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — hoje",
+  "refund": "Reembolso",
+  "refundShort": "Reemb.",
+  "nth": "#{n}",
+  "earlier": "{count} anteriores",
+  "time": "DATA",
+  "total": "TOTAL",
+  "chargeCount": "Cobranças",
+  "count": "{count}",
+  "switches": "Trocas de região / plano",
+  "thanks": "Obrigado · Até o próximo ciclo",
+  "n": {
+    "charges": {
+      "one": "{count} cobrança",
+      "other": "{count} cobranças"
+    }
+  },
+  "sum": "{amount} no total",
+  "gap": "{dur} sem assinar",
+  "planned": "{date} (planejado)",
+  "present": "agora",
+  "priceChanges": "Mudanças de preço: {list}",
+  "withYou": "Com você há",
+  "totalPerDay": "{total} no total · {perDay}/dia em média",
+  "lapsed": {
+    "one": "Interrompida uma vez",
+    "other": "Interrompida {count} vezes"
+  },
+  "byYear": "Gastos por ano",
+  "sheet": {
+    "copied": "Imagem copiada — pronta para colar",
+    "copyFailed": "Não foi possível copiar. Tente baixar.",
+    "renderFailed": "Não foi possível criar a imagem",
+    "download": "Baixar imagem",
+    "generating": "Gerando…",
+    "copy": "Copiar imagem",
+    "showAmounts": "Mostrar valores"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "contact": {
+    "via": {
+      "wechat": "WeChat",
+      "email": "メール",
+      "phone": "電話",
+      "other": "その他"
+    },
+    "hint": {
+      "wechat": "WeChat ID",
+      "discord": "ユーザー名",
+      "generic": "アカウント / ID"
+    },
+    "viaAria": "連絡方法",
+    "open": "{via}を開く"
+  },
+  "member": {
+    "defaultName": "メンバー",
+    "unnamed": "名前なし",
+    "toastPaid": "{name}から{amount}の受け取りを記録しました",
+    "paymentRemoved": "支払いを削除しました",
+    "copied": {
+      "other": "{count}人のメンバーにコピーしました"
+    },
+    "titleNew": "メンバーを追加 · {name}",
+    "confirmDelete": "「{name}」を完全に削除しますか？支払い履歴も削除され、記録上の収入が減ります。\nプランを抜けただけなら、脱退日を設定してください。",
+    "deleted": "削除しました",
+    "delete": "削除",
+    "cancel": "キャンセル",
+    "added": "メンバーを追加しました",
+    "saved": "保存しました",
+    "add": "追加",
+    "save": "保存",
+    "group": "メンバー",
+    "name": "名前",
+    "namePh": "呼び名",
+    "contact": "連絡先",
+    "account": "招待したアカウント",
+    "accountPh": "{name}に招待したメールアドレスまたはユーザー名",
+    "joined": "参加日",
+    "joinedPh": "プラン開始日（{date}）",
+    "notSet": "未設定",
+    "left": "脱退日",
+    "leftPh": "参加中",
+    "feeGroup": "料金",
+    "seg": {
+      "m1": "毎月",
+      "m3": "3か月",
+      "m6": "6か月",
+      "m12": "毎年"
+    },
+    "feeLabel": {
+      "m1": "月額",
+      "m3": "3か月あたり",
+      "m6": "6か月あたり",
+      "m12": "年額",
+      "custom": {
+        "other": "{count}か月ごと"
+      }
+    },
+    "feeCcyAria": "通貨",
+    "exempt": "支払いなし",
+    "other": "その他",
+    "source": "経路",
+    "sourcePh": "どのグループ / 誰の紹介か",
+    "payments": "支払い · {count}",
+    "receivedTotal": "累計約{amount}を受け取り済み",
+    "paidUntil": "支払い済み期限",
+    "paidUntilPh": "まだ支払いはありません",
+    "payCover": "{date}受領 · {from}〜{until}分",
+    "payCoverTo": "{date}受領 · {until}まで",
+    "copyAria": "ほかのメンバーにコピー",
+    "removePayAria": "支払いを削除",
+    "dup": "記録済み",
+    "paidUntilDate": "{date}まで支払い済み",
+    "noPay": "まだ支払いはありません",
+    "copyN": "{count}人にコピー",
+    "amount": "金額",
+    "currency": "通貨",
+    "coverFrom": "対象期間の開始",
+    "coverTo": "対象期間の終了",
+    "coverAuto": {
+      "m1": "請求期間から自動設定（編集可）",
+      "m3": "請求期間から自動設定（編集可）",
+      "m6": "請求期間から自動設定（編集可）",
+      "m12": "請求期間から自動設定（編集可）",
+      "custom": "請求期間から自動設定（編集可）"
+    },
+    "receivedOn": "受領日",
+    "note": "メモ",
+    "notePh": "任意（例：USDT 送金）",
+    "record": "記録",
+    "recordBtn": {
+      "m1": "支払いを記録（{fee}/月）",
+      "m3": "支払いを記録（{fee}/3か月）",
+      "m6": "支払いを記録（{fee}/6か月）",
+      "m12": "支払いを記録（{fee}/年）",
+      "custom": {
+        "other": "支払いを記録（{count}か月ごとに{fee}）"
+      }
+    }
+  },
+  "pool": {
+    "title": "共有プラン",
+    "netGain": "年間の純利益",
+    "netCost": "年間の純コスト",
+    "yearIncome": "メンバーの支払い {amount}/年",
+    "owed": "未回収",
+    "owedSub": {
+      "other": "{count}人が未払い"
+    },
+    "count": "プラン数",
+    "countStarted": " 主催 · ",
+    "countJoined": " 参加",
+    "countSub": "主催 · 参加",
+    "emptyTitle": "共有プランはまだありません",
+    "emptyBody": "サブスクの編集画面で利用者を「主催」に設定し、メンバーと負担額を追加してください。",
+    "next": "次回 {date}",
+    "me": "自分",
+    "exemptTitle": "{name}（支払いなし）",
+    "addMember": "メンバーを追加",
+    "manageTitle": "ファミリー管理ページを開く",
+    "manage": "管理",
+    "owedN": {
+      "other": "未回収 {count}"
+    },
+    "settled": "精算済み",
+    "noMembers": "メンバーはまだいません",
+    "addMemberSeats": {
+      "other": "メンバーを追加（空き{count}枠）"
+    },
+    "unnamed": "名前なし",
+    "leftOn": "{date}に脱退",
+    "exemptNote": "枠を使用、支払いなし",
+    "paidUntil": "{date}まで支払い済み",
+    "noPay": "まだ支払いはありません",
+    "paymentsN": {
+      "other": "{count}件の支払い"
+    },
+    "from": "経由：{source}",
+    "exempt": "支払いなし",
+    "owedAmount": "未払い {amount}",
+    "perFee": {
+      "m1": "{fee}/月",
+      "m3": "{fee}/3か月",
+      "m6": "{fee}/6か月",
+      "m12": "{fee}/年",
+      "custom": {
+        "other": "{count}か月ごとに{fee}"
+      }
+    },
+    "collect": "回収",
+    "joinedGroup": "参加中のプラン",
+    "payTo": "{name}に支払い · {amount}",
+    "ownerDefault": "主催者",
+    "maybeGroup": "共有の可能性あり",
+    "convert": "共有にする"
+  },
+  "convert": {
+    "title": "「{name}」を共有にする",
+    "cancel": "キャンセル",
+    "submit": "共有にする",
+    "toastOwner": "共有プランにしました。次にメンバーを追加しましょう",
+    "toastMember": "参加中にしました",
+    "roleOwner": "主催",
+    "roleMember": "参加",
+    "footOwner": "{count}人で割ると、1期間あたり1人約{amount}。メンバーを追加すると自分の負担分が自動で減ります。",
+    "footMember": "参加後の価格は、各期間に主催者へ支払う金額です。",
+    "seats": "総人数（自分を含む）",
+    "owner": "主催者",
+    "ownerPh": "支払う相手"
+  },
+  "facts": {
+    "cost": "コスト / 年",
+    "income": "収入 / 年",
+    "loss": "損失 / 年",
+    "profit": "利益 / 年",
+    "since": "{month}から",
+    "sinceNone": "開始時から",
+    "actual": "支払い {paid} · 受け取り {received} · {result}",
+    "gain": "{amount}のプラス",
+    "lost": "{amount}のマイナス",
+    "noRecords": "まだ支払いはありません"
+  }
+}

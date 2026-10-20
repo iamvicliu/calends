@@ -1,0 +1,30 @@
+{
+  "choose": "Choisir",
+  "noMatch": "Aucun résultat",
+  "common": "Fréquents",
+  "currency": "Devise",
+  "date": {
+    "placeholder": "Choisir une date",
+    "prev": "Précédent",
+    "next": "Suivant"
+  },
+  "method": {
+    "label": "Moyen de paiement",
+    "none": "Aucun"
+  },
+  "region": {
+    "label": "Région",
+    "any": "Toutes",
+    "none": "Toute région",
+    "all": "Toutes les régions"
+  },
+  "ccy": {
+    "label": "Devise",
+    "switch": "Changer la devise d’affichage",
+    "orig": "D’origine",
+    "origHint": "Chacun dans sa devise",
+    "all": "Toutes les devises",
+    "search": "Rechercher un nom, un code ou un symbole",
+    "noMatch": "Aucune devise correspondante"
+  }
+}

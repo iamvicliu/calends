@@ -1,0 +1,126 @@
+{
+  "bill": {
+    "m1": "매월",
+    "m3": "분기마다",
+    "m6": "6개월마다",
+    "m12": "매년",
+    "custom": {
+      "other": "{count}개월마다"
+    }
+  },
+  "cycle": {
+    "lifetime": "평생 이용",
+    "once": "1회",
+    "every": {
+      "day": "매일",
+      "week": "매주",
+      "month": "매월",
+      "year": "매년"
+    },
+    "quarterly": "분기마다",
+    "halfYearly": "6개월마다",
+    "biennial": "2년마다",
+    "everyN": {
+      "day": {
+        "other": "{count}일마다"
+      },
+      "week": {
+        "other": "{count}주마다"
+      },
+      "month": {
+        "other": "{count}개월마다"
+      },
+      "year": {
+        "other": "{count}년마다"
+      }
+    }
+  },
+  "subError": {
+    "name": "이름을 입력하세요",
+    "price": "가격이 올바르지 않습니다",
+    "start": "시작일이 올바르지 않습니다",
+    "cycle": "결제 주기가 올바르지 않습니다"
+  },
+  "phase": {
+    "switchTooEarly": "적용일은 현재 구간의 시작일 이후여야 합니다",
+    "resumeTooEarly": "재개일은 마지막 종료일보다 빠를 수 없습니다",
+    "priceOutOfRange": "가격 변경일이 어떤 구간에도 속하지 않습니다"
+  },
+  "event": {
+    "label": "{region}{price}/{per}",
+    "region": "{region} ",
+    "per": {
+      "year": "년",
+      "month": "월",
+      "months": "{count}개월",
+      "week": "주",
+      "day": "일"
+    }
+  },
+  "listSep": ", ",
+  "insight": {
+    "yearly": {
+      "title": {
+        "other": "장기 구독 {count}개가 60일 안에 갱신됩니다"
+      },
+      "body": "합계 약 {sum}입니다. 연간 결제는 환불이 어려우니 지금 유지할 구독을 정해 두세요."
+    },
+    "dup": {
+      "title": "{names}은(는) 중복일 수 있습니다",
+      "body": {
+        "other": "이 구독 {count}개에 매달 약 {sum}이 나갑니다. 모두 필요한지 확인해 보세요."
+      }
+    },
+    "hikes": {
+      "title": {
+        "other": "지난 1년간 구독 {count}개의 가격이 올랐습니다"
+      }
+    },
+    "intro": {
+      "title": {
+        "other": "{name}의 프로모션이 {count}일 후 종료됩니다"
+      },
+      "body": "종료 후 가격이 {from}에서 {to}(으)로 돌아갑니다."
+    },
+    "balance": {
+      "title": "{name}의 잔액이 {date}까지 버티지 못합니다",
+      "body": "{sub}에 {need}이(가) 필요하지만 잔액은 약 {current}입니다."
+    },
+    "fx": {
+      "title": "지출의 {pct}%가 외화입니다",
+      "body": "가장 큰 비중은 {ccy}({share}%)입니다. {ccy}가 약세면 이 부분이 저렴해지고, 강세면 비싸집니다."
+    },
+    "noMethod": {
+      "title": {
+        "other": "구독 {count}개에 결제 수단이 없습니다"
+      },
+      "body": "결제 수단을 추가하면 잔액 예측과 수단별 통계가 정확해집니다."
+    },
+    "top": {
+      "title": "{name}이(가) 가장 비싼 구독입니다",
+      "body": "하루 약 {perDay}, 월 지출의 {pct}%입니다."
+    }
+  },
+  "methodKind": {
+    "debit": "체크카드",
+    "credit": "신용카드",
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "paypal": "PayPal",
+    "appstore": "App Store",
+    "googleplay": "Google Play",
+    "giftcard": "기프트 카드",
+    "prepaid": "스토어 잔액",
+    "phone": "휴대폰 잔액",
+    "crypto": "암호화폐 카드",
+    "other": "기타"
+  },
+  "publicMethod": "{kind} · {region}",
+  "channel": {
+    "email": "이메일"
+  },
+  "csv": {
+    "appStoreBalance": "App Store {region} 잔액",
+    "otherCategory": "기타"
+  }
+}

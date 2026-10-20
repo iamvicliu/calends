@@ -1,0 +1,85 @@
+{
+  "title": "Chia sẻ “{name}”",
+  "style": {
+    "card": "Thẻ",
+    "receipt": "Hóa đơn",
+    "timeline": "Dòng thời gian",
+    "poster": "Áp phích",
+    "years": "Theo năm"
+  },
+  "dur": {
+    "ym": "{y} năm {m} tháng",
+    "y": {
+      "other": "{count} năm"
+    },
+    "m": {
+      "other": "{count} tháng"
+    },
+    "d": {
+      "other": "{count} ngày"
+    }
+  },
+  "status": {
+    "active": "Đang hoạt động",
+    "ending": "Sắp kết thúc",
+    "trial": "Đang dùng thử",
+    "paused": "Tạm dừng",
+    "ended": "Đã hủy",
+    "lifetime": "Sở hữu trọn đời",
+    "upcoming": "Sắp bắt đầu"
+  },
+  "switched": {
+    "zero": "Chưa từng đổi",
+    "other": "Đã đổi {count} lần"
+  },
+  "priceSame": "Không đổi",
+  "priceUp": "Tăng {pct}%",
+  "priceDown": "Giảm {pct}%",
+  "since": "Từ {date}",
+  "together": "Đồng hành",
+  "totalSpent": "Tổng chi",
+  "charges": "Khoản phí",
+  "subscribed": "Đã đăng ký",
+  "times": "{count}",
+  "gaps": "Gián đoạn",
+  "realMonthly": "Chi phí thực mỗi tháng",
+  "price": "Giá",
+  "phases": "Giai đoạn",
+  "phaseCount": "{count}",
+  "untilToday": "{date} — hôm nay",
+  "refund": "Hoàn tiền",
+  "refundShort": "Hoàn",
+  "nth": "#{n}",
+  "earlier": "{count} mục trước đó",
+  "time": "THỜI GIAN",
+  "total": "TỔNG",
+  "chargeCount": "Khoản phí",
+  "count": "{count}",
+  "switches": "Đổi khu vực / gói",
+  "thanks": "Cảm ơn · Hẹn gặp lại kỳ sau",
+  "n": {
+    "charges": {
+      "other": "{count} khoản phí"
+    }
+  },
+  "sum": "Tổng {amount}",
+  "gap": "Nghỉ {dur}",
+  "planned": "{date} (dự định)",
+  "present": "nay",
+  "priceChanges": "Đổi giá: {list}",
+  "withYou": "Đồng hành cùng bạn",
+  "totalPerDay": "Tổng {total} · trung bình {perDay}/ngày",
+  "lapsed": {
+    "other": "Gián đoạn {count} lần"
+  },
+  "byYear": "Chi tiêu theo năm",
+  "sheet": {
+    "copied": "Đã sao chép ảnh — sẵn sàng để dán",
+    "copyFailed": "Không sao chép được. Hãy thử tải xuống.",
+    "renderFailed": "Không tạo được ảnh",
+    "download": "Tải ảnh xuống",
+    "generating": "Đang tạo…",
+    "copy": "Sao chép ảnh",
+    "showAmounts": "Hiện số tiền"
+  }
+}

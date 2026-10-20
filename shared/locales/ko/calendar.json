@@ -1,0 +1,23 @@
+{
+  "yearTitle": "{year}년",
+  "summary": {
+    "other": "결제 {count}건 · {amount}"
+  },
+  "mode": {
+    "month": "월",
+    "year": "연"
+  },
+  "prev": "이전",
+  "next": "다음",
+  "today": "오늘",
+  "ics": "캘린더에서 구독",
+  "noneDay": "이날은 결제가 없습니다",
+  "projected": "예정",
+  "charged": "결제됨",
+  "monthAll": "{month}의 모든 결제",
+  "noneMonth": "이번 달에는 결제가 없습니다",
+  "day": "{day}일",
+  "heatCount": {
+    "other": "결제 {count}건 · "
+  }
+}

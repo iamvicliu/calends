@@ -1,0 +1,97 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "La prueba termina {when} ({date}); después, {price}",
+    "headline": "La prueba de {name} termina {when}"
+  },
+  "renew": {
+    "introEnds": "Termina el precio inicial y vuelve al precio normal",
+    "headline": "{name} se renueva {when} por {price}"
+  },
+  "ending": {
+    "sub": "Termina {when}, no se renovará",
+    "headline": "{name} termina {when}"
+  },
+  "carpool": {
+    "dueIn": "Vence {when} ({date})",
+    "dueToday": "Vence hoy",
+    "overdue": {
+      "one": "{count} día de retraso",
+      "other": "{count} días de retraso"
+    },
+    "sub": "{status} · próximo periodo: {bill}",
+    "headline": "Toca cobrar a {member} por {name}"
+  },
+  "proxy": {
+    "someone": "Alguien",
+    "chargedToday": "Cobrado hoy en su nombre",
+    "chargedAgo": {
+      "one": "Cobrado el {date}, hace {count} día",
+      "other": "Cobrado el {date}, hace {count} días"
+    },
+    "sub": "{status}, aún sin devolver",
+    "headlineToday": "Pagaste {sub} por {name}",
+    "headlineUnpaid": "{name} aún no te ha devuelto {sub}"
+  },
+  "balance": {
+    "sub": "El saldo de {balance} no cubrirá {sub} ({amount}) el {date}",
+    "headline": "Saldo bajo en {name}"
+  },
+  "section": {
+    "renew": "Próximos cobros",
+    "trials": "Pruebas que terminan",
+    "balance": "Saldo bajo",
+    "carpool": "Cobros de planes compartidos",
+    "proxy": "Pendiente por pagos por otros",
+    "ending": "Terminan pronto",
+    "month": "Cobros de este mes"
+  },
+  "daily": {
+    "subject": "Recordatorio de suscripción: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} y {more} más",
+    "intro": "Gastas {mrr} al mes en suscripciones, con {count} activas."
+  },
+  "monthly": {
+    "subject": {
+      "one": "Factura de {month}: unos {sum}, {count} cobro",
+      "other": "Factura de {month}: unos {sum}, {count} cobros"
+    },
+    "intro": {
+      "one": "{count} cobro previsto en {monthYear}, unos {sum} en total. MRR {mrr}, {arr} al año.",
+      "other": "{count} cobros previstos en {monthYear}, unos {sum} en total. MRR {mrr}, {arr} al año."
+    }
+  },
+  "email": {
+    "open": "Abrir Subscription Ledger",
+    "footer": "Puedes cambiar la hora del recordatorio y los días de antelación en Ajustes."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "No se encontró el canal",
+    "noneEnabled": "No hay canales de notificación activados",
+    "alreadySent": "Ya se envió hoy",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Prueba] {subject}",
+    "sampleSubject": "[Prueba] Los recordatorios de suscripciones están listos",
+    "sampleIntro": "Tu canal de notificación funciona."
+  },
+  "channel": {
+    "missing": "A «{channel}» le falta {field}",
+    "field": {
+      "to": "un correo de destino",
+      "botToken": "un token de bot",
+      "chatId": "un ID de chat",
+      "webhook": "una URL de webhook",
+      "deviceKey": "una clave de dispositivo",
+      "topic": "un tema",
+      "sendKey": "una SendKey",
+      "url": "una URL"
+    }
+  }
+}

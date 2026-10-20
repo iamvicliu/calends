@@ -1,0 +1,250 @@
+{
+  "title": "設定",
+  "days": {
+    "other": "{count}日"
+  },
+  "logout": "ログアウト",
+  "toast": {
+    "saved": "保存しました",
+    "deleted": "削除しました",
+    "csvEmpty": "この CSV にはインポートできるサブスクがありません",
+    "badBackup": "有効なバックアップファイルではありません"
+  },
+  "general": {
+    "title": "一般",
+    "language": "言語",
+    "followSystem": "システムに合わせる",
+    "name": "名前",
+    "namePlaceholder": "共有画像と公開ページに表示されます",
+    "startPage": "起動時に開く",
+    "startPageAria": "開始ページ",
+    "baseCurrency": "基準通貨",
+    "timezone": "タイムゾーン",
+    "weekStart": "週の始まり",
+    "weekStartAria": "週の最初の曜日",
+    "monday": "月曜日",
+    "sunday": "日曜日"
+  },
+  "sidebar": {
+    "title": "サイドバー",
+    "upcoming": "今後の請求",
+    "lookAhead": "表示期間",
+    "lookAheadAria": "今後の請求の表示期間"
+  },
+  "remind": {
+    "title": "リマインダー",
+    "lead": "通知",
+    "sameDay": "当日",
+    "hour": "送信時刻",
+    "monthly": "毎月1日に月間プレビュー",
+    "test": "すべてのチャネルにテスト通知を送信",
+    "testFailed": "送信できませんでした",
+    "channelError": "{channel}：{error}",
+    "errorSep": "；",
+    "testSent": "テスト通知を送信しました",
+    "preview": "今日の通知をプレビュー"
+  },
+  "today": {
+    "title": "今日（{day}）",
+    "items": {
+      "other": "{count}件"
+    }
+  },
+  "books": {
+    "title": "記帳",
+    "defaultMethod": "デフォルトの支払い方法",
+    "unassigned": {
+      "other": "{count}件のサブスクに支払い方法がありません"
+    },
+    "assignAllDone": {
+      "other": "{count}件のサブスクをデフォルトの支払い方法に設定しました"
+    },
+    "assignAll": "すべてにデフォルトを使用",
+    "collectCurrency": "共有プランの通貨"
+  },
+  "fx": {
+    "title": "為替レート",
+    "current": "現在のレート",
+    "updatedAt": "{time}に更新",
+    "updated": "為替レートを更新しました",
+    "history": "過去のレート",
+    "earliest": "{date}から",
+    "coverage": {
+      "other": "{covered} / {count}日"
+    },
+    "fill": "不足しているレートを補完",
+    "historyUpdated": "過去のレートを更新しました"
+  },
+  "open": {
+    "title": "共有とアクセス",
+    "ics": "システムのカレンダーで購読",
+    "on": "オン",
+    "off": "オフ",
+    "public": "公開ページ",
+    "publicOn": "公開ページをオンにしました",
+    "publicOff": "公開ページをオフにしました",
+    "previewPublic": "公開ページをプレビュー",
+    "ai": "AI 連携（MCP）",
+    "aiOn": "AI 連携をオンにしました",
+    "aiOff": "AI 連携をオフにしました。AI アシスタントは接続できなくなります。",
+    "manageAi": "トークンと設定を管理"
+  },
+  "data": {
+    "title": "データ",
+    "importCsv": "CSV をインポート",
+    "restore": "バックアップから復元",
+    "exportCsv": "CSV をエクスポート",
+    "backup": "完全バックアップをエクスポート"
+  },
+  "restore": {
+    "cancel": "キャンセル",
+    "replace": "現在の台帳を置き換える",
+    "done": "復元しました",
+    "warning": "現在の台帳はバックアップで完全に置き換えられます。元に戻せないため、先にバックアップをエクスポートすることをおすすめします。",
+    "subs": "サブスク",
+    "methods": "支払い方法",
+    "count": {
+      "other": "{count}件"
+    },
+    "time": "バックアップ日時",
+    "format": "形式",
+    "legacy": "旧形式のバックアップ：サブスクと支払い方法のみ"
+  },
+  "import": {
+    "title": {
+      "other": "{count}件のサブスクをインポート"
+    },
+    "confirmReplace": "置き換えると、既存のサブスクと支払い方法はすべて消去されます。続けますか？",
+    "replaceDone": "インポートしました（置き換え）",
+    "replaceAll": "すべて置き換える",
+    "mergeDone": "インポートしました（統合）",
+    "merge": "既存に追加",
+    "newMethods": "新しい支払い方法が作成されます：{names}",
+    "sep": "、"
+  },
+  "channels": {
+    "title": {
+      "other": "通知チャネル · {count}件オン"
+    },
+    "empty": "チャネルがありません。通知は送信されません。",
+    "test": "テスト",
+    "testFailed": "送信できませんでした",
+    "testSent": "テストメッセージを送信しました",
+    "add": "チャネルを追加",
+    "addKind": "{name}を追加",
+    "confirmDelete": "チャネル「{name}」を削除しますか？",
+    "delete": "削除",
+    "save": "保存",
+    "fillField": "{field}を入力してください",
+    "name": "名前",
+    "optional": "任意",
+    "enabled": "有効",
+    "field": {
+      "to": "メールアドレス",
+      "webhook": "Webhook URL",
+      "server": "サーバー",
+      "token": "アクセストークン"
+    },
+    "kind": {
+      "email": {
+        "name": "メール",
+        "help": "Cloudflare Email Sending で送信します。ドメインを Cloudflare で認証しておく必要があります"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "ユーザー ID またはグループ ID",
+        "help": "@BotFather でボットを作成してトークンを取得します。先にボットへメッセージを送り、@userinfobot で自分の ID を確認してください"
+      },
+      "lark": {
+        "name": "Lark（Feishu）",
+        "secret": "署名シークレット",
+        "secretPlaceholder": "署名検証がオンの場合は必須",
+        "help": "グループ設定 → ボット → カスタムボットを追加"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "署名シークレット",
+        "secretPlaceholder": "SEC…（署名がオンの場合は必須）",
+        "help": "グループ設定 → ボット → カスタムボット"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "グループチャット → グループボットを追加"
+      },
+      "bark": {
+        "keyPlaceholder": "アプリからコピーしたキー",
+        "help": "iPhone のプッシュ通知。App Store で Bark を検索してください"
+      },
+      "ntfy": {
+        "topicPlaceholder": "推測されにくい名前を付けてください",
+        "help": "スマートフォンに ntfy アプリを入れて、同じトピックを購読してください"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… または sctp…",
+        "help": "WeChat にプッシュ（ServerChan Turbo / ³）"
+      },
+      "discord": {
+        "help": "チャンネル設定 → 連携サービス → ウェブフック"
+      },
+      "webhook": {
+        "name": "カスタム Webhook",
+        "header": "追加ヘッダー",
+        "help": "POST JSON：subject、intro、sections、text、markdown、url"
+      }
+    }
+  },
+  "security": {
+    "title": "セキュリティ",
+    "unknownBrowser": "不明なブラウザ",
+    "ago": {
+      "justNow": "たった今アクティブ",
+      "minutes": {
+        "other": "{count}分前"
+      },
+      "hours": {
+        "other": "{count}時間前"
+      },
+      "days": {
+        "other": "{count}日前"
+      }
+    },
+    "thisDevice": "このデバイス",
+    "signedInPasskey": "{time}にパスキーでログイン",
+    "signedInPassword": "{time}にパスワードでログイン",
+    "revoke": "ログアウト",
+    "revoked": "ログアウトしました",
+    "passkeyFoot": "パスキーを使うと、Face ID、Touch ID、デバイスのパスコードでログインでき、パスワードは不要です。",
+    "passkeyUnsupported": "このブラウザはパスキーに対応していません。",
+    "lastUsed": "最終使用 {time}",
+    "addedAt": "{time}に追加",
+    "confirmRemovePasskey": "パスキー「{name}」を削除しますか？",
+    "remove": "削除",
+    "removed": "削除しました",
+    "addPasskey": "パスキーを追加",
+    "alreadyBound": "このデバイスにはすでにパスキーがあります",
+    "changePassword": "パスワードを変更",
+    "devices": "ログイン中のデバイス",
+    "devicesCount": {
+      "other": "ログイン中のデバイス · {count}"
+    },
+    "devicesFoot": "上限に達すると、最も長く使われていないデバイスが自動的にログアウトされます。所在地は IP から推定しているため、正確でない場合があります。",
+    "maxSessions": "ログインできるデバイスの上限",
+    "maxSessionsSaved": {
+      "other": "最大{count}台"
+    },
+    "deviceCount": {
+      "other": "{count}台"
+    },
+    "confirmLogoutOthers": "ほかのすべてのデバイスからログアウトしますか？",
+    "loggedOutOthers": "ほかのデバイスからログアウトしました",
+    "logoutOthers": "ほかのすべてのデバイスからログアウト",
+    "passwordChanged": "パスワードを変更しました。ほかのデバイスはログアウトされました。",
+    "save": "保存",
+    "mismatch": "パスワードが一致しません",
+    "passwordFoot": "8文字以上。変更すると、このデバイス以外はすべてログアウトされます。",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "minLength": "8文字以上",
+    "confirmPassword": "新しいパスワードを確認"
+  }
+}

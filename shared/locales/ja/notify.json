@@ -1,0 +1,93 @@
+{
+  "appName": "サブスク台帳",
+  "trial": {
+    "sub": "トライアルは{when}（{date}）に終了、その後は{price}",
+    "headline": "{name}のトライアルが{when}に終了"
+  },
+  "renew": {
+    "introEnds": "特典価格が終了し、通常価格に戻ります",
+    "headline": "{name}が{when}に{price}で更新されます"
+  },
+  "ending": {
+    "sub": "{when}に終了、更新はされません",
+    "headline": "{name}が{when}に終了"
+  },
+  "carpool": {
+    "dueIn": "期限 {when}（{date}）",
+    "dueToday": "今日が期限",
+    "overdue": {
+      "other": "{count}日超過"
+    },
+    "sub": "{status} · 次の期間：{bill}",
+    "headline": "{name}の料金を{member}から回収する時期です"
+  },
+  "proxy": {
+    "someone": "誰か",
+    "chargedToday": "今日、立て替えで請求されました",
+    "chargedAgo": {
+      "other": "{date}に請求（{count}日前）"
+    },
+    "sub": "{status}、まだ返済されていません",
+    "headlineToday": "{name}の{sub}を立て替えました",
+    "headlineUnpaid": "{name}が{sub}をまだ返済していません"
+  },
+  "balance": {
+    "sub": "残高{balance}では{date}の{sub}（{amount}）に足りません",
+    "headline": "{name}の残高が少なくなっています"
+  },
+  "section": {
+    "renew": "今後の請求",
+    "trials": "終了間近のトライアル",
+    "balance": "残高不足",
+    "carpool": "共有プランの集金",
+    "proxy": "立て替えの未回収",
+    "ending": "まもなく終了",
+    "month": "今月の請求"
+  },
+  "daily": {
+    "subject": "サブスクのお知らせ：{title}",
+    "title": "{headline}",
+    "titleMore": "{headline} ほか{more}件",
+    "intro": "現在{count}件のサブスクを利用中で、毎月{mrr}を支払っています。"
+  },
+  "monthly": {
+    "subject": {
+      "other": "{month}の請求：約{sum}、{count}件"
+    },
+    "intro": {
+      "other": "{monthYear}は{count}件の請求が予定されており、合計約{sum}です。月額 {mrr}、年額 {arr}。"
+    }
+  },
+  "email": {
+    "open": "サブスク台帳を開く",
+    "footer": "通知時刻や何日前に通知するかは設定で変更できます。"
+  },
+  "text": {
+    "heading": "【{heading}】"
+  },
+  "send": {
+    "noChannel": "チャネルが見つかりません",
+    "noneEnabled": "有効な通知チャネルがありません",
+    "alreadySent": "今日はすでに送信済みです",
+    "failure": "{channel}：{error}",
+    "failureSep": "；"
+  },
+  "test": {
+    "subject": "［テスト］{subject}",
+    "sampleSubject": "［テスト］サブスクの通知が使えるようになりました",
+    "sampleIntro": "通知チャネルは正常に動作しています。"
+  },
+  "channel": {
+    "missing": "「{channel}」に{field}がありません",
+    "field": {
+      "to": "宛先メールアドレス",
+      "botToken": "ボットトークン",
+      "chatId": "チャット ID",
+      "webhook": "Webhook URL",
+      "deviceKey": "デバイスキー",
+      "topic": "トピック",
+      "sendKey": "SendKey",
+      "url": "URL"
+    }
+  }
+}

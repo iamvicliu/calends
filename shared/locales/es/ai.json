@@ -1,0 +1,39 @@
+{
+  "title": "Acceso de IA",
+  "newToken": "Nuevo token",
+  "mcpUrl": "URL de MCP",
+  "urlCopied": "URL copiada",
+  "copy": "Copiar",
+  "copied": "Copiado",
+  "copyFailed": "No se pudo copiar",
+  "neverUsed": "Nunca usado",
+  "tokenPlaceholder": "<tu-token>",
+  "tokens": { "one": "Tokens · {count}", "other": "Tokens · {count}" },
+  "noTokens": "Aún no hay tokens. Crea uno y dáselo al asistente de IA que quieras conectar.",
+  "lastUsed": "Último uso: {time}",
+  "confirmRevoke": "¿Revocar «{name}»? Los asistentes de IA que lo usen perderán el acceso de inmediato.",
+  "revoke": "Revocar",
+  "revoked": "Revocado",
+  "setup": "Configuración",
+  "tools": { "one": "Herramientas disponibles · {count}", "other": "Herramientas disponibles · {count}" },
+  "writeBadge": "Escritura",
+  "clientOther": "Otro",
+  "scope": {
+    "write": "Lectura y escritura",
+    "read": "Solo lectura",
+    "writeLong": "Lectura y escritura: consultar, añadir y editar",
+    "readLong": "Solo lectura: solo consultar"
+  },
+  "created": {
+    "title": "Token creado",
+    "saved": "Ya lo guardé",
+    "foot": "Este token solo se muestra una vez y no podrás volver a verlo al cerrar. Si lo pierdes, revócalo y crea uno nuevo.",
+    "copyToken": "Copiar token",
+    "tokenCopied": "Token copiado",
+    "command": "Comando de configuración"
+  },
+  "cancel": "Cancelar",
+  "generate": "Crear",
+  "name": "Nombre",
+  "namePlaceholder": "¿Para qué IA es?"
+}

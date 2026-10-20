@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}",
+  "summary": { "one": "{count} списание · {amount}", "few": "{count} списания · {amount}", "many": "{count} списаний · {amount}", "other": "{count} списания · {amount}" },
+  "mode": { "month": "Месяц", "year": "Год" },
+  "prev": "Назад",
+  "next": "Вперёд",
+  "today": "Сегодня",
+  "ics": "Подписаться в Календаре",
+  "noneDay": "В этот день списаний нет",
+  "projected": "Ожидается",
+  "charged": "Списано",
+  "monthAll": "Все списания за {month}",
+  "noneMonth": "В этом месяце списаний нет",
+  "day": "{day}",
+  "heatCount": { "one": "{count} списание · ", "few": "{count} списания · ", "many": "{count} списаний · ", "other": "{count} списания · " }
+}

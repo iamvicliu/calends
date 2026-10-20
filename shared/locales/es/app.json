@@ -1,0 +1,60 @@
+{
+  "name": "Subscription Ledger",
+  "offline": "Sin conexión",
+  "offlineError": "No se puede conectar: {error}",
+  "nav": {
+    "overview": "Resumen",
+    "list": "Suscripciones",
+    "calendar": "Calendario",
+    "report": "Informes",
+    "wallet": "Cartera",
+    "family": "Planes compartidos",
+    "behalf": "Pagos por otros",
+    "ai": "Acceso de IA",
+    "settings": "Ajustes"
+  },
+  "login": {
+    "setupHint": "¿Primera vez aquí? Crea una contraseña para iniciar sesión.",
+    "tagline": "Cada suscripción, cada tarjeta, cada plan compartido.",
+    "setupToken": "Token de configuración (SETUP_TOKEN)",
+    "newPassword": "Nueva contraseña (mínimo 8 caracteres)",
+    "password": "Contraseña",
+    "again": "Confirmar contraseña",
+    "mismatch": "Las contraseñas no coinciden",
+    "verifying": "Verificando…",
+    "setupEnter": "Crear contraseña y continuar",
+    "enter": "Iniciar sesión",
+    "passkey": "Iniciar sesión con llave de acceso"
+  },
+  "sidebar": {
+    "collapse": "Ocultar barra lateral",
+    "expand": "Mostrar barra lateral",
+    "new": "Nueva",
+    "search": "Buscar",
+    "upcoming": "Próximos",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "inDays": { "one": "En {count} día", "other": "En {count} días" },
+    "theme": "Tema",
+    "themeHint": "Haz clic para cambiar: Claro → Oscuro → Sistema"
+  },
+  "palette": {
+    "placeholder": "Buscar suscripciones o páginas…",
+    "empty": "Sin resultados",
+    "page": "Página",
+    "add": "Nueva suscripción",
+    "addKeywords": "nueva añadir crear agregar"
+  },
+  "ics": {
+    "title": "Suscribirse en el calendario",
+    "intro": "Sincroniza las fechas de cobro con Apple Calendar, Google Calendar u Outlook. Se actualiza cada 6 horas y te avisa antes de cada cobro según tus ajustes de recordatorio.",
+    "subscribe": "Suscribirse",
+    "copy": "Copiar enlace",
+    "copied": "Copiado",
+    "reset": "Restablecer enlace",
+    "resetDone": "Enlace restablecido. El anterior ya no funciona.",
+    "generate": "Crear enlace de calendario privado",
+    "generated": "Enlace de calendario creado",
+    "note": "El enlace contiene un token privado: cualquiera que lo tenga puede ver tus fechas de cobro. Si se filtra, toca Restablecer enlace para revocarlo."
+  }
+}

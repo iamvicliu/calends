@@ -1,0 +1,216 @@
+{
+  "addTitle": "サブスクを追加",
+  "editTitle": "「{name}」を編集",
+  "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「解約済み」にしてください。",
+  "confirmDiscard": "保存していない変更を破棄しますか？",
+  "toast": {
+    "added": "追加しました",
+    "saved": "保存しました",
+    "deleted": "削除しました"
+  },
+  "cycle": {
+    "w1": "毎週",
+    "m1": "毎月",
+    "m3": "3か月ごと",
+    "m6": "6か月ごと",
+    "y1": "毎年",
+    "y2": "2年ごと",
+    "lt": "買い切り",
+    "custom": "カスタム…"
+  },
+  "unit": {
+    "label": "単位",
+    "every": "毎",
+    "day": {
+      "other": "日"
+    },
+    "week": {
+      "other": "週"
+    },
+    "month": {
+      "other": "か月"
+    },
+    "year": {
+      "other": "年"
+    }
+  },
+  "status": {
+    "active": "利用中",
+    "trial": "トライアル",
+    "paused": "一時停止",
+    "cancelled": "解約済み"
+  },
+  "category": {
+    "choose": "カテゴリを選択",
+    "new": "新しいカテゴリ…",
+    "newPrompt": "カテゴリ名",
+    "tools": "ツール",
+    "media": "動画",
+    "music": "音楽",
+    "daily": "ライフスタイル",
+    "productivity": "効率化",
+    "shopping": "ショッピング",
+    "education": "教育",
+    "games": "ゲーム",
+    "domains": "ドメイン",
+    "social": "SNS"
+  },
+  "group": {
+    "billing": "請求",
+    "status": "ステータス",
+    "who": "利用者",
+    "links": "リンクと外観",
+    "tags": "タグとメモ"
+  },
+  "field": {
+    "category": "カテゴリ",
+    "amount": "金額",
+    "currency": "通貨",
+    "cycle": "請求サイクル",
+    "method": "支払い方法",
+    "purchased": "購入日",
+    "start": "開始日",
+    "region": "地域",
+    "trialEnd": "トライアル終了",
+    "end": "終了日",
+    "notSet": "未設定",
+    "notes": "メモ",
+    "optional": "任意",
+    "url": "Web サイト",
+    "manageUrl": "管理ページ",
+    "icon": "アイコン",
+    "auto": "自動",
+    "showDomain": "公開ページにドメインを表示",
+    "showDomainOn": "訪問者に完全なドメインが表示されます",
+    "showDomainOff": "公開ページでは伏せて表示されます",
+    "tagsPlaceholder": "スペースで区切る",
+    "notesPlaceholder": "メモ（任意）"
+  },
+  "share": {
+    "none": "自分だけ",
+    "owner": "主催",
+    "member": "参加",
+    "proxy": "立て替え",
+    "memberHint": "自分の負担分だけを入力",
+    "perHead": "1人あたり {amount}",
+    "ownerName": "主催者",
+    "ownerPlaceholder": "支払う相手",
+    "seats": "総人数（自分を含む）",
+    "memberN": "メンバー {n}",
+    "perPeriod": "1期間あたりの負担額",
+    "paidUntil": "支払い済み期限",
+    "remove": "削除",
+    "addMember": "メンバーを追加"
+  },
+  "proxy": {
+    "for": "立て替え先",
+    "forPlaceholder": "相手の名前",
+    "contact": "連絡先",
+    "notePlaceholder": "例：同僚、月末に精算"
+  },
+  "more": {
+    "title": "その他のオプション",
+    "intro": "初回特典",
+    "bonus": "無料期間",
+    "remind": "リマインダー",
+    "links": "リンク",
+    "tags": "タグ",
+    "notes": "メモ",
+    "summary": "初回特典、無料期間、リマインダー、リンク、タグ、メモ",
+    "summaryLt": "リンク、タグ、メモ"
+  },
+  "intro": {
+    "has": "初回特典",
+    "price": "特典価格",
+    "until": "特典終了"
+  },
+  "bonus": {
+    "has": "無料期間",
+    "from": "無料開始",
+    "until": "無料終了",
+    "resume": "{date}に請求再開",
+    "quick": {
+      "d7": "+7日",
+      "m1": "+1か月",
+      "m3": "+3か月",
+      "m6": "+6か月",
+      "y1": "+1年"
+    }
+  },
+  "remind": {
+    "days": "通知",
+    "default": {
+      "other": "デフォルト（{count}日前）"
+    },
+    "sameDay": "請求日当日",
+    "before": {
+      "other": "{count}日前"
+    },
+    "never": "しない"
+  },
+  "name": {
+    "placeholder": "名前、または App Store のリンクを貼り付け",
+    "catalog": "人気のサービス · ロゴ・カテゴリ・Web サイトを自動入力"
+  },
+  "change": {
+    "title": "履歴と変更",
+    "needPrice": "価格を入力してください",
+    "toast": {
+      "price": "価格変更を記録しました。保存すると反映されます。",
+      "switch": "新しい期間を追加しました。保存すると反映されます。",
+      "resume": "再登録しました。保存すると反映されます。"
+    },
+    "price": "価格変更を記録",
+    "switch": "地域・プラン・支払い方法を変更",
+    "resume": "再登録",
+    "undo": "最新の期間を取り消す",
+    "priceDate": "新価格の開始日",
+    "switchDate": "変更の適用日",
+    "resumeDate": "再登録日",
+    "newPrice": "新価格（{currency}）",
+    "priceLabel": "価格",
+    "planned": "未確定（予定のみ）",
+    "plannedHint": "予測には含まれ、詳細では「予定」と表示されます。あとでワンタップで確定またはキャンセルできます。"
+  },
+  "history": {
+    "gapMonths": {
+      "other": "{count}か月中断"
+    },
+    "gapDays": {
+      "other": "{count}日中断"
+    },
+    "plannedRange": "{start} → {end}（予定）",
+    "plannedFrom": "{start}から（予定）",
+    "range": "{start} → {end}",
+    "now": "現在",
+    "initial": "初期",
+    "priceChange": "価格変更 {date}"
+  },
+  "payment": {
+    "addTitle": "支払いを追加",
+    "editTitle": "支払いを編集",
+    "toast": {
+      "added": "支払いを追加しました",
+      "edited": "支払いを更新しました",
+      "deleted": "支払いを削除しました"
+    },
+    "date": "日付",
+    "kind": {
+      "label": "種類",
+      "charge": "請求",
+      "refund": "返金",
+      "adjust": "調整",
+      "failed": "請求失敗"
+    },
+    "amount": "金額（{currency}）",
+    "refundHint": "返金額を入力してください。マイナスとして保存されます",
+    "settled": "カードでの請求額（任意）",
+    "settledCcy": "カードの通貨",
+    "settledAmount": "カード上の金額",
+    "blank": "空欄のまま",
+    "freezeHint": "この期間の請求は現在、請求サイクルから推定されています。保存すると、まず今日までの推定請求 {amount} 件が記録に変換され、以後は記録が基準になります。今後の請求は変わりません。"
+  },
+  "timeline": {
+    "home": "今日に戻る（またはタイムラインをダブルクリック）"
+  }
+}

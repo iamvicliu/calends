@@ -1,0 +1,33 @@
+{
+  "action": { "edit": "Edit", "pause": "Jeda", "resume": "Lanjutkan", "manage": "Kelola", "website": "Situs web", "share": "Bagikan" },
+  "toast": { "resumed": "Tagihan dilanjutkan", "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan" },
+  "history": "Riwayat",
+  "summary": "Ringkasan",
+  "field": { "amount": "Jumlah", "cycle": "Siklus tagihan", "monthlyYearly": "Bulanan / tahunan", "category": "Kategori", "method": "Metode pembayaran", "start": "Tanggal mulai", "next": "Jatuh tempo berikutnya", "expires": "Layanan berakhir", "expiresHint": "Perpanjangan otomatis ditagih sebelum tanggal ini", "endedOn": "Berakhir pada", "trialEnd": "Uji coba berakhir", "region": "Wilayah" },
+  "up": { "planned": "Rencana perubahan · belum pasti", "starting": "Segera dimulai", "changing": "Perubahan mendatang", "effective": "Tanggal berlaku" },
+  "plan": { "drop": "Jangan beralih", "droppedToast": "Tidak beralih. Berakhir setelah {date}", "confirm": "Konfirmasi peralihan", "confirmedToast": "Peralihan dikonfirmasi" },
+  "intro": { "title": "Promo awal", "price": "Harga promo", "until": "Promo berakhir", "then": "Setelahnya" },
+  "remind": { "title": "Pengingat", "email": "Pengingat email", "off": "Mati", "onDay": "Pada hari jatuh tempo pukul {time}", "before": { "other": "{count} hari sebelumnya pukul {time}" } },
+  "share": { "owner": "Bersama · saya pengelola ({count}/{seats})", "member": "Bersama · saya bergabung", "payTo": "Bayar ke", "host": "Pengelola", "myShare": "Bagian saya", "unnamed": "Tanpa nama", "paidUntil": "Lunas hingga {date}", "unpaid": "Belum bayar", "owed": "Tertunggak {amount}", "settled": "Lunas" },
+  "charges": { "title": { "other": "Tagihan · {count}" }, "kind": { "refund": "Refund", "adjust": "Penyesuaian", "failed": "Gagal" }, "onCard": "Di kartu {amount} · ", "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)", "recent": "Tampilkan 12 terakhir saja", "all": "Tampilkan semua {count}" },
+  "notes": "Catatan",
+  "stats": {
+    "spent": "Total pengeluaran",
+    "count": { "other": "{count} tagihan" },
+    "owned": "Dimiliki selama",
+    "subscribed": "Berlangganan selama",
+    "yearsMonths": "{years} thn {months} bln",
+    "years": { "other": "{count} tahun" },
+    "months": { "other": "{count} bulan" },
+    "days": { "other": "{count} hari" },
+    "gaps": { "other": "Terputus {count} kali" },
+    "since": "Sejak {date}",
+    "perMonth": "Biaya bulanan riil",
+    "perMonthHint": "Total ÷ bulan berlangganan",
+    "priceChange": "Perubahan harga",
+    "changed": "Perubahan",
+    "unchanged": "Tidak berubah",
+    "times": { "other": "{count} kali" },
+    "changeHint": "Perubahan wilayah, paket, atau pembayaran"
+  }
+}

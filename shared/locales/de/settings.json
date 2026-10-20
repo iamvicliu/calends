@@ -1,0 +1,264 @@
+{
+  "title": "Einstellungen",
+  "days": {
+    "one": "{count} Tag",
+    "other": "{count} Tage"
+  },
+  "logout": "Abmelden",
+  "toast": {
+    "saved": "Gesichert",
+    "deleted": "Gelöscht",
+    "csvEmpty": "Diese CSV enthält keine Abos zum Importieren",
+    "badBackup": "Keine gültige Backup-Datei"
+  },
+  "general": {
+    "title": "Allgemein",
+    "language": "Sprache",
+    "followSystem": "Systemstandard",
+    "name": "Name",
+    "namePlaceholder": "Wird auf geteilten Bildern und der öffentlichen Seite angezeigt",
+    "startPage": "Öffnen mit",
+    "startPageAria": "Startseite",
+    "baseCurrency": "Basiswährung",
+    "timezone": "Zeitzone",
+    "weekStart": "Woche beginnt am",
+    "weekStartAria": "Erster Wochentag",
+    "monday": "Montag",
+    "sunday": "Sonntag"
+  },
+  "sidebar": {
+    "title": "Seitenleiste",
+    "upcoming": "Anstehende Abbuchungen",
+    "lookAhead": "Vorschau",
+    "lookAheadAria": "Zeitraum für anstehende Abbuchungen"
+  },
+  "remind": {
+    "title": "Erinnerungen",
+    "lead": "Erinnern",
+    "sameDay": "Am selben Tag",
+    "hour": "Senden um",
+    "monthly": "Monatsvorschau am 1.",
+    "test": "Test-Erinnerung an alle Kanäle senden",
+    "testFailed": "Senden fehlgeschlagen",
+    "channelError": "{channel}: {error}",
+    "errorSep": "; ",
+    "testSent": "Test-Erinnerung gesendet",
+    "preview": "Heutige Erinnerungen ansehen"
+  },
+  "today": {
+    "title": "Heute ({day})",
+    "items": {
+      "one": "{count} Eintrag",
+      "other": "{count} Einträge"
+    }
+  },
+  "books": {
+    "title": "Buchführung",
+    "defaultMethod": "Standard-Zahlungsmethode",
+    "unassigned": {
+      "one": "{count} Abo hat keine Zahlungsmethode",
+      "other": "{count} Abos haben keine Zahlungsmethode"
+    },
+    "assignAllDone": {
+      "one": "{count} Abo auf Standard-Zahlungsmethode gesetzt",
+      "other": "{count} Abos auf Standard-Zahlungsmethode gesetzt"
+    },
+    "assignAll": "Standard für alle verwenden",
+    "collectCurrency": "Währung für geteilte Abos"
+  },
+  "fx": {
+    "title": "Wechselkurse",
+    "current": "Aktueller Kurs",
+    "updatedAt": "Aktualisiert {time}",
+    "updated": "Wechselkurse aktualisiert",
+    "history": "Historische Kurse",
+    "earliest": "Ab {date}",
+    "coverage": {
+      "one": "{covered} / {count} Tag",
+      "other": "{covered} / {count} Tage"
+    },
+    "fill": "Fehlende Kurse ergänzen",
+    "historyUpdated": "Historische Kurse aktualisiert"
+  },
+  "open": {
+    "title": "Teilen & Zugriff",
+    "ics": "Im Systemkalender abonnieren",
+    "on": "Ein",
+    "off": "Aus",
+    "public": "Öffentliche Seite",
+    "publicOn": "Öffentliche Seite ist an",
+    "publicOff": "Öffentliche Seite ist aus",
+    "previewPublic": "Öffentliche Seite ansehen",
+    "ai": "KI-Zugriff (MCP)",
+    "aiOn": "KI-Zugriff ist an",
+    "aiOff": "KI-Zugriff ist aus. KI-Assistenten können sich nicht mehr verbinden.",
+    "manageAi": "Tokens und Einrichtung verwalten"
+  },
+  "data": {
+    "title": "Daten",
+    "importCsv": "CSV importieren",
+    "restore": "Aus Backup wiederherstellen",
+    "exportCsv": "CSV exportieren",
+    "backup": "Vollständiges Backup exportieren"
+  },
+  "restore": {
+    "cancel": "Abbrechen",
+    "replace": "Aktuelles Konto ersetzen",
+    "done": "Wiederhergestellt",
+    "warning": "Dein aktuelles Konto wird vollständig durch das Backup ersetzt. Das lässt sich nicht rückgängig machen – exportiere am besten vorher ein Backup.",
+    "subs": "Abos",
+    "methods": "Zahlungsmethoden",
+    "count": {
+      "one": "{count}",
+      "other": "{count}"
+    },
+    "time": "Gesichert am",
+    "format": "Format",
+    "legacy": "Altes Backup: nur Abos und Zahlungsmethoden"
+  },
+  "import": {
+    "title": {
+      "one": "{count} Abo importieren",
+      "other": "{count} Abos importieren"
+    },
+    "confirmReplace": "Beim Ersetzen werden alle vorhandenen Abos und Zahlungsmethoden gelöscht. Fortfahren?",
+    "replaceDone": "Importiert (ersetzt)",
+    "replaceAll": "Alles ersetzen",
+    "mergeDone": "Importiert (zusammengeführt)",
+    "merge": "Zu Vorhandenem hinzufügen",
+    "newMethods": "Neue Zahlungsmethoden werden angelegt: {names}",
+    "sep": ", "
+  },
+  "channels": {
+    "title": {
+      "one": "Benachrichtigungskanäle · {count} aktiv",
+      "other": "Benachrichtigungskanäle · {count} aktiv"
+    },
+    "empty": "Noch keine Kanäle – Erinnerungen werden nicht gesendet.",
+    "test": "Testen",
+    "testFailed": "Senden fehlgeschlagen",
+    "testSent": "Testnachricht gesendet",
+    "add": "Kanal hinzufügen",
+    "addKind": "{name} hinzufügen",
+    "confirmDelete": "Kanal „{name}“ löschen?",
+    "delete": "Löschen",
+    "save": "Sichern",
+    "fillField": "Bitte {field} eingeben",
+    "name": "Name",
+    "optional": "Optional",
+    "enabled": "Aktiviert",
+    "field": {
+      "to": "E-Mail-Adresse",
+      "webhook": "Webhook-URL",
+      "server": "Server",
+      "token": "Zugriffstoken"
+    },
+    "kind": {
+      "email": {
+        "name": "E-Mail",
+        "help": "Versand über Cloudflare Email Sending; deine Domain muss bei Cloudflare verifiziert sein"
+      },
+      "telegram": {
+        "chatIdPlaceholder": "Deine Benutzer- oder Gruppen-ID",
+        "help": "Erstelle mit @BotFather einen Bot, um ein Token zu erhalten. Schick deinem Bot zuerst eine Nachricht und finde dann mit @userinfobot deine ID heraus"
+      },
+      "lark": {
+        "name": "Lark (Feishu)",
+        "secret": "Signatur-Secret",
+        "secretPlaceholder": "Erforderlich, wenn die Signaturprüfung aktiv ist",
+        "help": "Gruppeneinstellungen → Bots → Eigenen Bot hinzufügen"
+      },
+      "dingtalk": {
+        "name": "DingTalk",
+        "secret": "Signatur-Secret",
+        "secretPlaceholder": "SEC…, erforderlich, wenn Signieren aktiv ist",
+        "help": "Gruppeneinstellungen → Bots → Eigener Bot"
+      },
+      "wecom": {
+        "name": "WeCom",
+        "help": "Gruppenchat → Gruppen-Bot hinzufügen"
+      },
+      "bark": {
+        "keyPlaceholder": "Aus der App kopierter Schlüssel",
+        "help": "Push-Mitteilungen fürs iPhone – such im App Store nach Bark"
+      },
+      "ntfy": {
+        "topicPlaceholder": "Wähle einen schwer zu erratenden Namen",
+        "help": "Installiere die ntfy-App auf deinem Handy und abonniere dasselbe Topic"
+      },
+      "serverchan": {
+        "name": "ServerChan",
+        "keyPlaceholder": "SCT… oder sctp…",
+        "help": "Push an WeChat (ServerChan Turbo / ³)"
+      },
+      "discord": {
+        "help": "Kanaleinstellungen → Integrationen → Webhooks"
+      },
+      "webhook": {
+        "name": "Eigener Webhook",
+        "header": "Zusätzlicher Header",
+        "help": "POST JSON: subject, intro, sections, text, markdown, url"
+      }
+    }
+  },
+  "security": {
+    "title": "Sicherheit",
+    "unknownBrowser": "Unbekannter Browser",
+    "ago": {
+      "justNow": "Gerade aktiv",
+      "minutes": {
+        "one": "Vor {count} Minute",
+        "other": "Vor {count} Minuten"
+      },
+      "hours": {
+        "one": "Vor {count} Stunde",
+        "other": "Vor {count} Stunden"
+      },
+      "days": {
+        "one": "Vor {count} Tag",
+        "other": "Vor {count} Tagen"
+      }
+    },
+    "thisDevice": "Dieses Gerät",
+    "signedInPasskey": "Mit Passkey angemeldet am {time}",
+    "signedInPassword": "Mit Passwort angemeldet am {time}",
+    "revoke": "Abmelden",
+    "revoked": "Abgemeldet",
+    "passkeyFoot": "Mit einem Passkey meldest du dich per Face ID, Touch ID oder Gerätecode an – ganz ohne Passwort.",
+    "passkeyUnsupported": "Dieser Browser unterstützt keine Passkeys.",
+    "lastUsed": "Zuletzt verwendet {time}",
+    "addedAt": "Hinzugefügt {time}",
+    "confirmRemovePasskey": "Passkey „{name}“ entfernen?",
+    "remove": "Entfernen",
+    "removed": "Entfernt",
+    "addPasskey": "Passkey hinzufügen",
+    "alreadyBound": "Dieses Gerät hat bereits einen Passkey",
+    "changePassword": "Passwort ändern",
+    "devices": "Angemeldete Geräte",
+    "devicesCount": {
+      "one": "Angemeldetes Gerät · {count}",
+      "other": "Angemeldete Geräte · {count}"
+    },
+    "devicesFoot": "Ist das Limit erreicht, wird das am längsten inaktive Gerät automatisch abgemeldet. Standorte werden anhand der IP geschätzt und können ungenau sein.",
+    "maxSessions": "Max. angemeldete Geräte",
+    "maxSessionsSaved": {
+      "one": "Bis zu {count} Gerät",
+      "other": "Bis zu {count} Geräte"
+    },
+    "deviceCount": {
+      "one": "{count} Gerät",
+      "other": "{count} Geräte"
+    },
+    "confirmLogoutOthers": "Alle anderen Geräte abmelden?",
+    "loggedOutOthers": "Andere Geräte abgemeldet",
+    "logoutOthers": "Alle anderen Geräte abmelden",
+    "passwordChanged": "Passwort geändert. Andere Geräte wurden abgemeldet.",
+    "save": "Sichern",
+    "mismatch": "Passwörter stimmen nicht überein",
+    "passwordFoot": "Mindestens 8 Zeichen. Eine Änderung meldet alle Geräte außer diesem ab.",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "minLength": "Mindestens 8 Zeichen",
+    "confirmPassword": "Neues Passwort bestätigen"
+  }
+}

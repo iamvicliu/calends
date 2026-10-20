@@ -1,0 +1,25 @@
+{
+  "yearTitle": "{year}",
+  "summary": {
+    "one": "{count} Abbuchung · {amount}",
+    "other": "{count} Abbuchungen · {amount}"
+  },
+  "mode": {
+    "month": "Monat",
+    "year": "Jahr"
+  },
+  "prev": "Zurück",
+  "next": "Weiter",
+  "today": "Heute",
+  "ics": "Im Kalender abonnieren",
+  "noneDay": "Keine Abbuchungen an diesem Tag",
+  "projected": "Erwartet",
+  "charged": "Abgebucht",
+  "monthAll": "Alle Abbuchungen im {month}",
+  "noneMonth": "Keine Abbuchungen in diesem Monat",
+  "day": "{day}",
+  "heatCount": {
+    "one": "{count} Abbuchung · ",
+    "other": "{count} Abbuchungen · "
+  }
+}

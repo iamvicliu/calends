@@ -1,0 +1,40 @@
+{
+  "title": "Assinaturas de Ethan",
+  "loadFailed": "Não foi possível carregar",
+  "theme": { "title": "Tema: {mode} (clique para alternar)", "aria": "Tema: {mode}, clique para alternar" },
+  "currency": "Moeda de exibição",
+  "hero": {
+    "monthly": "Gasto mensal com assinaturas",
+    "flat": "Igual ao mesmo mês do ano passado",
+    "more": "{amount} a mais que no mesmo mês do ano passado",
+    "less": "{amount} a menos que no mesmo mês do ano passado",
+    "yearly": "Por ano",
+    "live": "Ativas",
+    "paid": "Pago desde {year}"
+  },
+  "timeline": { "title": "Linha do tempo", "upcoming": { "one": "{count} cobrança nos próximos 30 dias · {amount}", "other": "{count} cobranças nos próximos 30 dias · {amount}" } },
+  "chart": {
+    "title": "Cobranças mensais",
+    "desc": "Últimos 12 meses e próximos 3; barras tracejadas são previsões",
+    "paid": "Pago",
+    "mrr": "Custo mensal",
+    "charge": "Cobrado",
+    "thisMonth": "Este mês",
+    "projected": "{month} · Previsto"
+  },
+  "ended": { "title": "Canceladas", "saved": "{amount} economizados desde o cancelamento", "item": "{amount} economizados" },
+  "perMonth": "{amount}/mês",
+  "lifetime": { "title": "Vitalícias", "desc": "Pagas uma vez, sem novas cobranças" },
+  "footer": "Cobranças passadas usam o câmbio do dia; as futuras, o câmbio de hoje. Domínios de projetos não lançados e dados de pagamento ficam ocultos.",
+  "composition": { "title": "Composição", "desc": "Custo mensal por categoria", "other": "Outros" },
+  "count": "{count}",
+  "fx": {
+    "title": "Câmbio",
+    "flat": "O câmbio quase não alterou os custos no último ano",
+    "less": "Pelo câmbio de hoje, você paga {amount} a menos por mês que há um ano",
+    "more": "Pelo câmbio de hoje, você paga {amount} a mais por mês que há um ano",
+    "share": "{pct}%"
+  },
+  "list": { "title": "Assinaturas", "summary": { "one": "{count} · {amount}/mês", "other": "{count} · {amount}/mês" }, "all": "Todas" },
+  "row": { "renews": " · Renova em {date}", "monthly": "Mensal", "perMonthEq": "Por mês" }
+}

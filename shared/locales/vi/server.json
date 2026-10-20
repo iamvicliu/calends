@@ -1,0 +1,35 @@
+{
+  "fxApiError": "Dịch vụ tỷ giá trả về lỗi",
+  "missingId": "Thiếu id",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "Sổ này không công khai",
+  "idMismatch": "ID không khớp",
+  "invalidMethod": "Phương thức thanh toán không hợp lệ",
+  "invalidBackup": "Tệp sao lưu không hợp lệ",
+  "refreshFailed": "Làm mới thất bại",
+  "backup": {
+    "notBackup": "Đây không phải tệp sao lưu hợp lệ",
+    "unknownFormat": "Định dạng sao lưu không xác định: {format}",
+    "newerVersion": "Bản sao lưu này đến từ phiên bản mới hơn (v{version}). Hãy cập nhật trang này trước."
+  },
+  "auth": {
+    "tooMany": "Thử quá nhiều lần. Hãy thử lại sau 15 phút.",
+    "alreadySetup": "Mật khẩu đã được đặt",
+    "noSetupToken": "SETUP_TOKEN chưa được cấu hình khi triển khai nên không thể tiếp tục thiết lập. Hãy đặt secret này trước (wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "Token thiết lập không đúng",
+    "passwordTooShort": { "other": "Mật khẩu phải có ít nhất {min} ký tự" },
+    "wrongPassword": "Mật khẩu không đúng",
+    "wrongCurrentPassword": "Mật khẩu hiện tại không đúng",
+    "newPasswordTooShort": { "other": "Mật khẩu mới phải có ít nhất {min} ký tự" },
+    "invalidDevice": "Thiết bị không hợp lệ",
+    "cannotRemoveCurrent": "Không thể xóa thiết bị này. Hãy dùng Đăng xuất.",
+    "expired": "Yêu cầu đã hết hạn. Vui lòng thử lại.",
+    "passkeyFailed": "Xác minh passkey thất bại",
+    "passkeyNotBound": "Passkey này chưa được đăng ký với trang này"
+  },
+  "ics": {
+    "calName": "Khoản phí gói đăng ký",
+    "method": "Thanh toán: {name}",
+    "alarm": "{name} sắp gia hạn"
+  }
+}

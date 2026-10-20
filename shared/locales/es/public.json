@@ -1,0 +1,40 @@
+{
+  "title": "Suscripciones de Ethan",
+  "loadFailed": "No se pudo cargar",
+  "theme": { "title": "Tema: {mode} (haz clic para cambiar)", "aria": "Tema: {mode}, haz clic para cambiar" },
+  "currency": "Moneda de visualización",
+  "hero": {
+    "monthly": "Gasto mensual en suscripciones",
+    "flat": "Igual que este mes del año pasado",
+    "more": "{amount} más que este mes del año pasado",
+    "less": "{amount} menos que este mes del año pasado",
+    "yearly": "Al año",
+    "live": "Activas",
+    "paid": "Pagado desde {year}"
+  },
+  "timeline": { "title": "Cronología", "upcoming": { "one": "{count} cobro en los próximos 30 días · {amount}", "other": "{count} cobros en los próximos 30 días · {amount}" } },
+  "chart": {
+    "title": "Cobros mensuales",
+    "desc": "Últimos 12 meses y próximos 3; las barras discontinuas son previsiones",
+    "paid": "Pagado",
+    "mrr": "Coste mensual",
+    "charge": "Cobrado",
+    "thisMonth": "Este mes",
+    "projected": "{month} · Previsto"
+  },
+  "ended": { "title": "Canceladas", "saved": "{amount} ahorrados desde la cancelación", "item": "Ahorrado {amount}" },
+  "perMonth": "{amount}/mes",
+  "lifetime": { "title": "De por vida", "desc": "Pago único, sin más cobros" },
+  "footer": "Los cobros pasados usan el tipo de cambio de ese día; los futuros, el de hoy. Los dominios no publicados y los datos de pago están ocultos.",
+  "composition": { "title": "Desglose", "desc": "Coste mensual por categoría", "other": "Otros" },
+  "count": "{count}",
+  "fx": {
+    "title": "Tipos de cambio",
+    "flat": "Los tipos de cambio apenas han variado los costes en el último año",
+    "less": "Con los tipos de hoy pagas {amount} menos al mes que hace un año",
+    "more": "Con los tipos de hoy pagas {amount} más al mes que hace un año",
+    "share": "{pct}%"
+  },
+  "list": { "title": "Suscripciones", "summary": { "one": "{count} · {amount}/mes", "other": "{count} · {amount}/mes" }, "all": "Todas" },
+  "row": { "renews": " · Se renueva {date}", "monthly": "Mensual", "perMonthEq": "Al mes" }
+}

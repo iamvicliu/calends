@@ -1,0 +1,74 @@
+{
+  "title": "Genel Bakış",
+  "add": "Yeni abonelik",
+  "footer": {
+    "one": "{count} etkin abonelik · {amount}/ay ·",
+    "other": "{count} etkin abonelik · {amount}/ay ·"
+  },
+  "fullReport": "Tam raporu gör",
+  "listSep": ", ",
+  "n": {
+    "subs": {
+      "one": "{count} abonelik",
+      "other": "{count} abonelik"
+    },
+    "charges": {
+      "one": "{count} ödeme",
+      "other": "{count} ödeme"
+    }
+  },
+  "axis": {
+    "yearMonth": "{mon} '{yy}"
+  },
+  "timeline": {
+    "title": "Zaman çizelgesi",
+    "sub": "Son 30 günde {past} ödendi · önümüzdeki 30 günde {next} ödenecek"
+  },
+  "spending": {
+    "title": "Aylık harcama",
+    "sub": "Açık renkli çubuklar tahmindir",
+    "month": "Aylık",
+    "yearly": "Yıllık",
+    "year": "{year}",
+    "projected": " · Tahmini",
+    "inProgress": " · Devam ediyor",
+    "paid": " · {amount} ödendi",
+    "empty": "Bu dönemde ödeme yok"
+  },
+  "due": {
+    "title": "Önümüzdeki 30 gün",
+    "empty": "Önümüzdeki 30 günde ödeme yok",
+    "thisWeek": "Bu hafta",
+    "later": "Daha sonra",
+    "noMethod": "Ödeme yöntemi yok"
+  },
+  "wallet": {
+    "title": "Cüzdan",
+    "manage": "Yönet",
+    "balance": "Bakiye {amount} · {status}",
+    "covered": {
+      "one": "{count} ödeme daha karşılar, {date} tarihine kadar yükleme yapın",
+      "other": "{count} ödeme daha karşılar, {date} tarihine kadar yükleme yapın"
+    },
+    "mustTopUp": "{date} tarihine kadar yükleme yapın",
+    "enough": "3 yıldan fazlasına yeter",
+    "noBalance": "Ne kadar yeteceğini görmek için bakiye ekleyin",
+    "others": "Ayrıca: {list}"
+  },
+  "tips": {
+    "warn": "Dikkat",
+    "info": "İpucu",
+    "good": "İlginç bilgi"
+  },
+  "stmt": {
+    "kicker": "Aylık abonelik harcaması",
+    "vsLastMonth": "geçen ay sonuna göre",
+    "annual": "Yıllık",
+    "ytd": "{year} yılında ödenen",
+    "perDay": "Günlük",
+    "active": "Etkin",
+    "share": "{amount}/ay · %{pct}",
+    "caption": "Abonelik yıldızları · balon boyutu aylık maliyeti gösterir",
+    "aria": "{name}, ayda {amount}"
+  }
+}

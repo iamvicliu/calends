@@ -1,0 +1,30 @@
+{
+  "choose": "選択",
+  "noMatch": "一致なし",
+  "common": "よく使う",
+  "currency": "通貨",
+  "date": {
+    "placeholder": "日付を選択",
+    "prev": "前へ",
+    "next": "次へ"
+  },
+  "method": {
+    "label": "支払い方法",
+    "none": "なし"
+  },
+  "region": {
+    "label": "地域",
+    "any": "指定なし",
+    "none": "すべての地域",
+    "all": "すべての地域"
+  },
+  "ccy": {
+    "label": "通貨",
+    "switch": "表示通貨を変更",
+    "orig": "元の通貨",
+    "origHint": "それぞれの通貨で表示",
+    "all": "すべての通貨",
+    "search": "名前・コード・記号で検索",
+    "noMatch": "一致する通貨はありません"
+  }
+}

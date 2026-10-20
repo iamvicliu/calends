@@ -1,0 +1,43 @@
+{
+  "title": "AI 連携",
+  "newToken": "新規トークン",
+  "mcpUrl": "MCP URL",
+  "urlCopied": "URL をコピーしました",
+  "copy": "コピー",
+  "copied": "コピーしました",
+  "copyFailed": "コピーできませんでした",
+  "neverUsed": "未使用",
+  "tokenPlaceholder": "<your-token>",
+  "tokens": {
+    "other": "トークン · {count}"
+  },
+  "noTokens": "トークンはまだありません。作成して、接続したい AI アシスタントに渡してください。",
+  "lastUsed": "最終使用 {time}",
+  "confirmRevoke": "「{name}」を無効にしますか？このトークンを使っている AI アシスタントはすぐにアクセスできなくなります。",
+  "revoke": "無効にする",
+  "revoked": "無効にしました",
+  "setup": "設定方法",
+  "tools": {
+    "other": "利用可能なツール · {count}"
+  },
+  "writeBadge": "書き込み",
+  "clientOther": "その他",
+  "scope": {
+    "write": "読み書き",
+    "read": "読み取り専用",
+    "writeLong": "読み書き：照会・追加・編集",
+    "readLong": "読み取り専用：照会のみ"
+  },
+  "created": {
+    "title": "トークンを作成しました",
+    "saved": "保存しました",
+    "foot": "このトークンは一度しか表示されず、閉じると再表示できません。紛失した場合は無効にして新しく作成してください。",
+    "copyToken": "トークンをコピー",
+    "tokenCopied": "トークンをコピーしました",
+    "command": "設定コマンド"
+  },
+  "cancel": "キャンセル",
+  "generate": "作成",
+  "name": "名前",
+  "namePlaceholder": "どの AI に使いますか？"
+}

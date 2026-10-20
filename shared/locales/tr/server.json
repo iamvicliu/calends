@@ -1,0 +1,35 @@
+{
+  "fxApiError": "Döviz kuru hizmeti hata döndürdü",
+  "missingId": "id eksik",
+  "invalidItem": "{name}: {error}",
+  "notPublic": "Bu defter herkese açık değil",
+  "idMismatch": "ID uyuşmuyor",
+  "invalidMethod": "Geçersiz ödeme yöntemi",
+  "invalidBackup": "Geçersiz yedek dosyası",
+  "refreshFailed": "Yenilenemedi",
+  "backup": {
+    "notBackup": "Bu geçerli bir yedek dosyası değil",
+    "unknownFormat": "Tanınmayan yedek biçimi: {format}",
+    "newerVersion": "Bu yedek daha yeni bir sürümden (v{version}). Önce bu siteyi güncelleyin."
+  },
+  "auth": {
+    "tooMany": "Çok fazla deneme. 15 dakika sonra tekrar deneyin.",
+    "alreadySetup": "Parola zaten belirlenmiş",
+    "noSetupToken": "SETUP_TOKEN dağıtım sırasında yapılandırılmadığı için kuruluma devam edilemiyor. Önce bu gizli anahtarı ayarlayın (wrangler secret put SETUP_TOKEN).",
+    "badSetupToken": "Kurulum token'ı yanlış",
+    "passwordTooShort": { "one": "Parola en az {min} karakter olmalı", "other": "Parola en az {min} karakter olmalı" },
+    "wrongPassword": "Parola yanlış",
+    "wrongCurrentPassword": "Mevcut parola yanlış",
+    "newPasswordTooShort": { "one": "Yeni parola en az {min} karakter olmalı", "other": "Yeni parola en az {min} karakter olmalı" },
+    "invalidDevice": "Geçersiz cihaz",
+    "cannotRemoveCurrent": "Bu cihazı kaldıramazsınız. Bunun yerine Çıkış Yap'ı kullanın.",
+    "expired": "İsteğin süresi doldu. Lütfen tekrar deneyin.",
+    "passkeyFailed": "Geçiş anahtarı doğrulanamadı",
+    "passkeyNotBound": "Bu geçiş anahtarı bu sitede kayıtlı değil"
+  },
+  "ics": {
+    "calName": "Abonelik ödemeleri",
+    "method": "Ödeme: {name}",
+    "alarm": "{name} yakında yenileniyor"
+  }
+}

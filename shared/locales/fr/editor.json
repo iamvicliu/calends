@@ -1,0 +1,224 @@
+{
+  "addTitle": "Ajouter un abonnement",
+  "editTitle": "Modifier « {name} »",
+  "confirmDiscard": "Abandonner les modifications non enregistrées ?",
+  "confirmDelete": "Supprimer « {name} » ? Son historique sera également supprimé. Si vous avez simplement arrêté le renouvellement, marquez-le plutôt comme Résilié.",
+  "toast": {
+    "added": "Ajouté",
+    "saved": "Enregistré",
+    "deleted": "Supprimé"
+  },
+  "cycle": {
+    "w1": "Hebdomadaire",
+    "m1": "Mensuel",
+    "m3": "Trimestriel",
+    "m6": "Semestriel",
+    "y1": "Annuel",
+    "y2": "Tous les 2 ans",
+    "lt": "À vie",
+    "custom": "Personnalisé…"
+  },
+  "unit": {
+    "label": "Unité",
+    "every": "Tous les",
+    "day": {
+      "one": "jour",
+      "other": "jours"
+    },
+    "week": {
+      "one": "semaine",
+      "other": "semaines"
+    },
+    "month": {
+      "one": "mois",
+      "other": "mois"
+    },
+    "year": {
+      "one": "an",
+      "other": "ans"
+    }
+  },
+  "status": {
+    "active": "Actif",
+    "trial": "Essai",
+    "paused": "Suspendu",
+    "cancelled": "Résilié"
+  },
+  "category": {
+    "choose": "Choisir une catégorie",
+    "new": "Nouvelle catégorie…",
+    "newPrompt": "Nom de la catégorie",
+    "tools": "Outils",
+    "media": "Vidéo",
+    "music": "Musique",
+    "daily": "Vie quotidienne",
+    "productivity": "Productivité",
+    "shopping": "Shopping",
+    "education": "Éducation",
+    "games": "Jeux",
+    "domains": "Domaines",
+    "social": "Réseaux sociaux"
+  },
+  "group": {
+    "billing": "Facturation",
+    "status": "Statut",
+    "who": "Qui l’utilise",
+    "links": "Liens et apparence",
+    "tags": "Tags et notes"
+  },
+  "field": {
+    "category": "Catégorie",
+    "amount": "Montant",
+    "currency": "Devise",
+    "cycle": "Cycle de facturation",
+    "method": "Moyen de paiement",
+    "purchased": "Date d’achat",
+    "start": "Date de début",
+    "region": "Région",
+    "trialEnd": "Fin de l’essai",
+    "end": "Se termine le",
+    "notSet": "Non défini",
+    "notes": "Notes",
+    "optional": "Facultatif",
+    "url": "Site web",
+    "manageUrl": "Page de gestion",
+    "icon": "Icône",
+    "auto": "Automatique",
+    "showDomain": "Afficher le domaine sur la page publique",
+    "showDomainOn": "Les visiteurs voient le domaine complet",
+    "showDomainOff": "Masqué sur la page publique",
+    "tagsPlaceholder": "Séparés par des espaces",
+    "notesPlaceholder": "Notes (facultatif)"
+  },
+  "share": {
+    "none": "Moi seul",
+    "owner": "J’organise",
+    "member": "J’ai rejoint",
+    "proxy": "Je paie pour",
+    "memberHint": "Saisissez uniquement votre part",
+    "perHead": "{amount} par personne",
+    "ownerName": "Organisateur",
+    "ownerPlaceholder": "La personne que vous payez",
+    "seats": "Places au total (vous compris)",
+    "memberN": "Membre {n}",
+    "perPeriod": "Part par période",
+    "paidUntil": "Payé jusqu’au",
+    "remove": "Retirer",
+    "addMember": "Ajouter un membre"
+  },
+  "proxy": {
+    "for": "Je paie pour",
+    "forPlaceholder": "Son nom",
+    "contact": "Contact",
+    "notePlaceholder": "ex. Collègue, paie en fin de mois"
+  },
+  "more": {
+    "title": "Plus d’options",
+    "intro": "Offre de lancement",
+    "bonus": "Période gratuite",
+    "remind": "Rappel",
+    "links": "Liens",
+    "tags": "Tags",
+    "notes": "Notes",
+    "summary": "Offre de lancement, période gratuite, rappel, liens, tags, notes",
+    "summaryLt": "Liens, tags, notes"
+  },
+  "intro": {
+    "has": "Offre de lancement",
+    "price": "Prix de lancement",
+    "until": "Fin de l’offre"
+  },
+  "bonus": {
+    "has": "Période gratuite",
+    "from": "Gratuit à partir du",
+    "until": "Gratuit jusqu’au",
+    "resume": "Reprise de la facturation le {date}",
+    "quick": {
+      "d7": "+7 jours",
+      "m1": "+1 mois",
+      "m3": "+3 mois",
+      "m6": "+6 mois",
+      "y1": "+1 an"
+    }
+  },
+  "remind": {
+    "days": "Me rappeler",
+    "default": {
+      "one": "Par défaut ({count} jour avant)",
+      "other": "Par défaut ({count} jours avant)"
+    },
+    "sameDay": "Le jour de l’échéance",
+    "before": {
+      "one": "{count} jour avant",
+      "other": "{count} jours avant"
+    },
+    "never": "Jamais"
+  },
+  "name": {
+    "placeholder": "Nom, ou collez un lien App Store",
+    "catalog": "Services populaires · remplit le logo, la catégorie et le site"
+  },
+  "change": {
+    "title": "Historique et changements",
+    "needPrice": "Saisissez un prix",
+    "toast": {
+      "price": "Changement de prix noté. Enregistrez pour l’appliquer.",
+      "switch": "Nouvelle phase ajoutée. Enregistrez pour l’appliquer.",
+      "resume": "Réabonné. Enregistrez pour l’appliquer."
+    },
+    "price": "Noter un changement de prix",
+    "switch": "Changer de région, de formule ou de moyen de paiement",
+    "resume": "Se réabonner",
+    "undo": "Annuler la dernière phase",
+    "priceDate": "Début du nouveau prix",
+    "switchDate": "Date d’effet du changement",
+    "resumeDate": "Réabonné le",
+    "newPrice": "Nouveau prix ({currency})",
+    "priceLabel": "Prix",
+    "planned": "Pas définitif, simplement prévu",
+    "plannedHint": "Toujours pris en compte dans les prévisions et marqué « Prévu » dans les détails. Confirmez ou annulez-le plus tard en un geste."
+  },
+  "history": {
+    "gapMonths": {
+      "one": "Interrompu {count} mois",
+      "other": "Interrompu {count} mois"
+    },
+    "gapDays": {
+      "one": "Interrompu {count} jour",
+      "other": "Interrompu {count} jours"
+    },
+    "plannedRange": "{start} → {end} (prévu)",
+    "plannedFrom": "À partir du {start} (prévu)",
+    "range": "{start} → {end}",
+    "now": "aujourd’hui",
+    "initial": "Initial",
+    "priceChange": "Changement de prix {date}"
+  },
+  "payment": {
+    "addTitle": "Ajouter un paiement",
+    "editTitle": "Modifier le paiement",
+    "toast": {
+      "added": "Paiement ajouté",
+      "edited": "Paiement mis à jour",
+      "deleted": "Paiement supprimé"
+    },
+    "date": "Date",
+    "kind": {
+      "label": "Type",
+      "charge": "Prélèvement",
+      "refund": "Remboursement",
+      "adjust": "Ajustement",
+      "failed": "Prélèvement échoué"
+    },
+    "amount": "Montant ({currency})",
+    "refundHint": "Saisissez le montant remboursé ; il est enregistré en négatif",
+    "settled": "Débité sur la carte (facultatif)",
+    "settledCcy": "Devise de la carte",
+    "settledAmount": "Montant sur la carte",
+    "blank": "Laisser vide",
+    "freezeHint": "Les prélèvements de cette phase sont actuellement estimés à partir du cycle de facturation. L’enregistrement transformera d’abord les prélèvements estimés de {amount} jusqu’à aujourd’hui en opérations réelles ; ensuite, ce sont les opérations qui font foi. Les prélèvements futurs ne changent pas."
+  },
+  "timeline": {
+    "home": "Revenir à aujourd’hui (ou double-cliquez sur la frise)"
+  }
+}

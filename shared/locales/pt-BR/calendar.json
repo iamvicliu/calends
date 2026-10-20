@@ -1,0 +1,16 @@
+{
+  "yearTitle": "{year}",
+  "summary": { "one": "{count} cobrança · {amount}", "other": "{count} cobranças · {amount}" },
+  "mode": { "month": "Mês", "year": "Ano" },
+  "prev": "Anterior",
+  "next": "Próximo",
+  "today": "Hoje",
+  "ics": "Assinar no Calendário",
+  "noneDay": "Nenhuma cobrança neste dia",
+  "projected": "Prevista",
+  "charged": "Cobrada",
+  "monthAll": "Todas as cobranças de {month}",
+  "noneMonth": "Nenhuma cobrança neste mês",
+  "day": "{day}",
+  "heatCount": { "one": "{count} cobrança · ", "other": "{count} cobranças · " }
+}

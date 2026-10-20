@@ -1,0 +1,93 @@
+{
+  "appName": "Subscription Ledger",
+  "trial": {
+    "sub": "Uji coba berakhir {when} ({date}), lalu {price}",
+    "headline": "Uji coba {name} berakhir {when}"
+  },
+  "renew": {
+    "introEnds": "Harga promo berakhir, kembali ke harga normal",
+    "headline": "{name} diperpanjang {when} seharga {price}"
+  },
+  "ending": {
+    "sub": "Berakhir {when}, tidak diperpanjang",
+    "headline": "{name} berakhir {when}"
+  },
+  "carpool": {
+    "dueIn": "Jatuh tempo {when} ({date})",
+    "dueToday": "Jatuh tempo hari ini",
+    "overdue": {
+      "other": "Terlambat {count} hari"
+    },
+    "sub": "{status} · periode berikutnya: {bill}",
+    "headline": "Saatnya menagih {member} untuk {name}"
+  },
+  "proxy": {
+    "someone": "Seseorang",
+    "chargedToday": "Ditalangi hari ini",
+    "chargedAgo": {
+      "other": "Ditagih {date}, {count} hari lalu"
+    },
+    "sub": "{status}, belum diganti",
+    "headlineToday": "Menalangi {sub} untuk {name}",
+    "headlineUnpaid": "{name} belum mengganti {sub}"
+  },
+  "balance": {
+    "sub": "Saldo {balance} tidak cukup untuk {sub} ({amount}) pada {date}",
+    "headline": "Saldo {name} menipis"
+  },
+  "section": {
+    "renew": "Tagihan mendatang",
+    "trials": "Uji coba berakhir",
+    "balance": "Saldo menipis",
+    "carpool": "Pembayaran paket bersama",
+    "proxy": "Talangan yang belum diganti",
+    "ending": "Segera berakhir",
+    "month": "Tagihan bulan ini"
+  },
+  "daily": {
+    "subject": "Pengingat langganan: {title}",
+    "title": "{headline}",
+    "titleMore": "{headline} + {more} lainnya",
+    "intro": "Pengeluaran langganan Anda {mrr} per bulan, dengan {count} yang aktif."
+  },
+  "monthly": {
+    "subject": {
+      "other": "Tagihan {month}: sekitar {sum}, {count} tagihan"
+    },
+    "intro": {
+      "other": "{count} tagihan diperkirakan pada {monthYear}, total sekitar {sum}. MRR {mrr}, {arr} per tahun."
+    }
+  },
+  "email": {
+    "open": "Buka Subscription Ledger",
+    "footer": "Anda bisa mengubah waktu pengingat dan jumlah hari sebelumnya di Pengaturan."
+  },
+  "text": {
+    "heading": "[{heading}]"
+  },
+  "send": {
+    "noChannel": "Saluran tidak ditemukan",
+    "noneEnabled": "Tidak ada saluran notifikasi yang aktif",
+    "alreadySent": "Sudah dikirim hari ini",
+    "failure": "{channel}: {error}",
+    "failureSep": "; "
+  },
+  "test": {
+    "subject": "[Uji] {subject}",
+    "sampleSubject": "[Uji] Pengingat langganan sudah siap",
+    "sampleIntro": "Saluran notifikasi Anda berfungsi."
+  },
+  "channel": {
+    "missing": "“{channel}” belum memiliki {field}",
+    "field": {
+      "to": "email penerima",
+      "botToken": "token bot",
+      "chatId": "ID chat",
+      "webhook": "URL webhook",
+      "deviceKey": "kunci perangkat",
+      "topic": "topik",
+      "sendKey": "SendKey",
+      "url": "URL"
+    }
+  }
+}
