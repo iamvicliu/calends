@@ -202,9 +202,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       ? `https://itunes.apple.com/lookup?id=${id}&country=${country}`
       : `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=software&limit=8&country=${country}`;
     const res = await fetch(api, { cf: { cacheTtl: 86400 } });
-    const body = (await res.json().catch(() => ({ results: [] }))) as { results: Array<Record<string, unknown>> };
+    const body = (await res.json().catch(() => ({}))) as { results?: Array<Record<string, unknown>> };
     return json({
-      results: body.results.map((r) => ({
+      results: (body.results ?? []).map((r) => ({
         name: r.trackName,
         icon: r.artworkUrl100,
         url: r.trackViewUrl,
