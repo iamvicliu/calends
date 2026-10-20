@@ -2179,60 +2179,101 @@ select.btn {
 /* 树状图 */
 .treemap {
   position: relative;
-  height: 280px;
   border-radius: 12px;
   overflow: hidden;
+}
+/* 分组：底色铺满，标题条在上，订阅小块之间留出细缝 */
+.tm-group {
+  position: absolute;
+  box-shadow: inset 0 0 0 1.5px var(--card);
+  overflow: hidden;
+}
+.tm-head {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  background: rgba(0, 0, 0, 0.14);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  text-align: left;
+}
+.tm-head b {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.tm-head b .i {
+  width: 11px;
+  height: 11px;
+  stroke-width: 2.2;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+.tm-head b .cat-emo {
+  margin-right: 4px;
+}
+.tm-head span {
+  margin-left: auto;
+  opacity: 0.9;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .tm-cell {
   position: absolute;
   border: 0;
-  padding: 8px 9px;
+  padding: 4px;
   color: #fff;
-  text-align: left;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  box-shadow: inset 0 0 0 1.5px var(--card);
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
   transition: filter 0.15s;
 }
+.tm-group > .tm-cell {
+  background: transparent !important;
+}
 .tm-cell:hover {
-  filter: brightness(1.08) saturate(1.1);
+  filter: brightness(1.1) saturate(1.1);
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 .tm-cell b {
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.25;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
-.tm-cell b .i {
-  width: 12px;
-  height: 12px;
-  stroke-width: 2.2;
-  margin-right: 4px;
-  vertical-align: -1px;
-}
-.tm-cell b .cat-emo {
-  margin-right: 4px;
-}
 .tm-cell span {
-  font-size: 11.5px;
-  opacity: 0.92;
+  font-size: 11px;
+  opacity: 0.9;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.tm-icons {
-  display: flex;
-  gap: 3px;
-  margin-top: auto;
+.tm-cell.lg {
+  gap: 6px;
+}
+.tm-cell.lg b {
+  font-size: 15px;
+}
+.tm-cell.lg span {
+  font-size: 12.5px;
 }
 .tm-cell .ico {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 /* 充值计划 */

@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -394,6 +394,15 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   const base = state.settings.baseCurrency;
   const [dim, setDim] = useState<Dim>('cat');
   const [focus, setFocus] = useState<string | null>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(0);
+  const H = W < 560 ? 320 : 400;
+  useLayoutEffect(() => {
+    const el = box.current!;
+    const ro = new ResizeObserver(() => setW(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const live = state.subscriptions.map((s) => ({ s, v: contributionOn(state, s, today) })).filter((x) => x.v > 0);
   const total = live.reduce((a, x) => a + x.v, 0);
   const keyOf = (s: Subscription) =>
@@ -422,7 +431,34 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
     return `var(--c${(i % 10) + 1})`;
   };
   const sel = focus ? entries.find((e) => e.k === focus) : undefined;
-  const rects = sel ? squarify(sel.xs.map((x) => x.v)) : squarify(entries.map((e) => e.v));
+  const rects = squarify(entries.map((e) => e.v));
+  /** 每个订阅一块，图标按块的大小放大，空间够再写名称和金额 */
+  const tiles = (xs: typeof live, b: { x: number; y: number; w: number; h: number }, bg: (cat: string) => string, onPick?: () => void) =>
+    squarify(
+      xs.map((x) => x.v),
+      b.x,
+      b.y,
+      b.w,
+      b.h,
+    ).map((r) => {
+      const x = xs[r.i];
+      const side = Math.min(r.w, r.h);
+      const label = r.w > 76 && r.h > 70;
+      const ico = Math.floor(Math.min(96, side * (label ? 0.4 : 0.6)));
+      return (
+        <button
+          key={x.s.id}
+          className={`tm-cell ${side > 200 ? 'lg' : ''}`}
+          style={{ left: r.x, top: r.y, width: r.w, height: r.h, background: bg(x.s.category) }}
+          onClick={() => (onPick ? onPick() : onOpen(x.s))}
+          {...tipProps(() => `${x.s.name} · ${perMonth(money(x.v, base))}`)}
+        >
+          {ico >= 12 && <SubIcon sub={x.s} size={ico} />}
+          {label && <b>{x.s.name}</b>}
+          {label && r.h > ico + 52 && <span>{money(x.v, base, { compact: true })}</span>}
+        </button>
+      );
+    });
   return (
     <div className="card">
       <div className="card-h">
@@ -448,54 +484,39 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           />
         )}
       </div>
-      <div className="treemap">
-        {rects.map((r) => {
-          if (sel) {
-            const x = sel.xs[r.i];
-            return (
-              <button
-                key={x.s.id}
-                className="tm-cell"
-                style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: catColor(x.s.category) }}
-                onClick={() => onOpen(x.s)}
-                {...tipProps(() => `${x.s.name} · ${perMonth(money(x.v, base))}`)}
-              >
-                {r.w * r.h > 300 && <SubIcon sub={x.s} size={24} />}
-                {r.w * r.h > 180 && <b>{x.s.name}</b>}
-                {r.w * r.h > 300 && <span>{money(x.v, base, { compact: true })}</span>}
-              </button>
-            );
-          }
-          const e = entries[r.i];
-          return (
-            <button
-              key={e.k}
-              className="tm-cell"
-              style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%`, background: color(e.k, r.i) }}
-              onClick={() => setFocus(e.k)}
-              {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}
-            >
-              {r.w * r.h > 160 && (
-                <b>
-                  {dim === 'cat' && <CatIcon cat={e.k} size={12} />}
-                  {e.k}
-                </b>
-              )}
-              {r.w * r.h > 260 && (
-                <span>
-                  {Math.round((e.v / total) * 100)}% · {money(e.v, base, { compact: true })}
-                </span>
-              )}
-              {r.w * r.h > 900 && (
-                <span className="tm-icons">
-                  {e.xs.slice(0, 5).map((x) => (
-                    <SubIcon key={x.s.id} sub={x.s} size={20} />
-                  ))}
-                </span>
-              )}
-            </button>
-          );
-        })}
+      <div className="treemap" ref={box} style={{ height: H }}>
+        {W > 0 &&
+          (sel
+            ? tiles(sel.xs, { x: 0, y: 0, w: W, h: H }, catColor)
+            : rects.map((r) => {
+                const e = entries[r.i];
+                const g = { x: (r.x / 100) * W, y: (r.y / 100) * H, w: (r.w / 100) * W, h: (r.h / 100) * H };
+                // 分组：顶上一条标题，下面按订阅再分小块
+                const head = g.w > 70 && g.h > 64 ? 22 : 0;
+                const bg = color(e.k, r.i);
+                return (
+                  <div key={e.k} className="tm-group" style={{ left: g.x, top: g.y, width: g.w, height: g.h, background: bg }}>
+                    {head > 0 && (
+                      <button
+                        className="tm-head"
+                        onClick={() => setFocus(e.k)}
+                        {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}
+                      >
+                        <b>
+                          {dim === 'cat' && <CatIcon cat={e.k} size={11} />}
+                          {e.k}
+                        </b>
+                        {g.w > 150 && (
+                          <span>
+                            {Math.round((e.v / total) * 100)}% · {money(e.v, base, { compact: true })}
+                          </span>
+                        )}
+                      </button>
+                    )}
+                    {tiles(e.xs, { x: 0, y: head, w: g.w, h: g.h - head }, () => bg, head ? undefined : () => setFocus(e.k))}
+                  </div>
+                );
+              }))}
       </div>
     </div>
   );
