@@ -1,20 +1,75 @@
+// 登录与会话。
+// - 密码：PBKDF2-SHA256 加盐哈希存在 kv 的 auth 键里，从不保存明文；首次设置需要部署时配置的 SETUP_TOKEN，防止陌生人抢先占用新部署。
+// - 兼容旧部署：配置了 OWNER_PASSCODE 密钥的，第一次用它登录成功后自动转存为哈希。
+// - Passkey：WebAuthn（SimpleWebAuthn），登录后在设置里绑定，之后可免密码登录。
+// - 会话：随机令牌放 HttpOnly + Secure + SameSite=Lax Cookie，库里只存 SHA-256；登录失败按 IP 限速。
+import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse, type AuthenticationResponseJSON, type RegistrationResponseJSON } from '@simplewebauthn/server';
 import type { Env } from './env.ts';
+import { getKv, getSettings, putKv } from './store.ts';
 
 const COOKIE = 'sid';
 const SESSION_DAYS = 180;
 const MAX_FAILS = 6;
 const WINDOW_MS = 15 * 60_000;
+/** Workers 的 WebCrypto 允许的 PBKDF2 迭代上限 */
+const PBKDF2_ITERATIONS = 100_000;
+const MIN_PASSWORD = 8;
+export const DEFAULT_MAX_SESSIONS = 10;
+/** 活跃时间每隔这么久才回写一次，避免每个请求都写库 */
+const TOUCH_MS = 10 * 60_000;
+
+interface PasswordRecord {
+  hash: string;
+  salt: string;
+  iterations: number;
+  updatedAt: string;
+}
+
+const hex = (b: Uint8Array) => [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
 
 export async function sha256(s: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hex(new Uint8Array(buf));
 }
 
-function randomToken(bytes = 32): string {
-  return [...crypto.getRandomValues(new Uint8Array(bytes))].map((b) => b.toString(16).padStart(2, '0')).join('');
+export function randomToken(bytes = 32): string {
+  return hex(crypto.getRandomValues(new Uint8Array(bytes)));
 }
 
-export { randomToken };
+async function pbkdf2(password: string, salt: string, iterations: number): Promise<string> {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: new TextEncoder().encode(salt), iterations }, key, 256);
+  return hex(new Uint8Array(bits));
+}
+
+/** 定长比较，避免按字节泄露 */
+function constantEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function hashPassword(password: string): Promise<PasswordRecord> {
+  const salt = randomToken(16);
+  return { hash: await pbkdf2(password, salt, PBKDF2_ITERATIONS), salt, iterations: PBKDF2_ITERATIONS, updatedAt: new Date().toISOString() };
+}
+
+async function checkPassword(env: Env, password: string): Promise<boolean> {
+  const rec = await getKv<PasswordRecord>(env, 'auth');
+  if (rec) return constantEqual(await pbkdf2(password, rec.salt, rec.iterations), rec.hash);
+  // 旧部署：口令放在 OWNER_PASSCODE 密钥里；比对成功就转存成哈希，之后可以删掉这个密钥
+  if (env.OWNER_PASSCODE && constantEqual(await sha256(password), await sha256(env.OWNER_PASSCODE))) {
+    await putKv(env, 'auth', await hashPassword(password));
+    return true;
+  }
+  return false;
+}
+
+/** 还没设过密码（也没有旧口令）时需要先走初始化 */
+export async function needsSetup(env: Env): Promise<boolean> {
+  return !env.OWNER_PASSCODE && !(await getKv<PasswordRecord>(env, 'auth'));
+}
 
 function readCookie(req: Request, name: string): string | undefined {
   const raw = req.headers.get('cookie') ?? '';
@@ -28,52 +83,111 @@ function readCookie(req: Request, name: string): string | undefined {
 export async function isAuthed(req: Request, env: Env): Promise<boolean> {
   const token = readCookie(req, COOKIE);
   if (!token) return false;
-  const row = await env.DB.prepare('SELECT expires_at FROM sessions WHERE token_hash = ?1')
-    .bind(await sha256(token))
-    .first<{ expires_at: number }>();
-  return !!row && row.expires_at > Date.now();
+  const hash = await sha256(token);
+  const row = await env.DB.prepare('SELECT expires_at, last_seen_at FROM sessions WHERE token_hash = ?1').bind(hash).first<{ expires_at: number; last_seen_at: number | null }>();
+  const now = Date.now();
+  if (!row || row.expires_at <= now) return false;
+  if (!row.last_seen_at || now - row.last_seen_at > TOUCH_MS) await env.DB.prepare('UPDATE sessions SET last_seen_at = ?1, ip = ?2 WHERE token_hash = ?3').bind(now, clientIp(req), hash).run();
+  return true;
 }
 
-/** 定长比较，避免按位泄露口令 */
-async function safeEqual(a: string, b: string): Promise<boolean> {
-  const [x, y] = await Promise.all([sha256(a), sha256(b)]);
-  let diff = 0;
-  for (let i = 0; i < x.length; i++) diff |= x.charCodeAt(i) ^ y.charCodeAt(i);
-  return diff === 0;
+const clientIp = (req: Request) => req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? '';
+
+/** Cloudflare 按 IP 给出的大致位置，如「Tokyo, JP」；自托管时没有 */
+function locationOf(req: Request): string {
+  const cf = (req as Request & { cf?: { city?: string; region?: string; country?: string } }).cf;
+  return [cf?.city, cf?.country].filter(Boolean).join(', ');
+}
+
+/** 新建会话并下发 Cookie；超出设备上限时把最久未活动的挤下线 */
+async function startSession(req: Request, env: Env, method: 'password' | 'passkey'): Promise<Response> {
+  const now = Date.now();
+  const token = randomToken();
+  const max = Math.max(1, (await getSettings(env)).maxSessions ?? DEFAULT_MAX_SESSIONS);
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?1').bind(now),
+    env.DB.prepare('INSERT INTO sessions (token_hash, expires_at, user_agent, ip, location, method, last_seen_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)').bind(
+      await sha256(token),
+      now + SESSION_DAYS * 86_400_000,
+      (req.headers.get('user-agent') ?? '').slice(0, 300),
+      clientIp(req),
+      locationOf(req),
+      method,
+      now,
+    ),
+    env.DB.prepare('DELETE FROM sessions WHERE token_hash NOT IN (SELECT token_hash FROM sessions ORDER BY COALESCE(last_seen_at, 0) DESC LIMIT ?1)').bind(max),
+  ]);
+  return Response.json({ ok: true }, { headers: { 'set-cookie': `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}` } });
+}
+
+/** 按 IP 限速：15 分钟内失败 6 次就先锁住 */
+async function throttle(req: Request, env: Env) {
+  const ip = req.headers.get('cf-connecting-ip') ?? req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  const now = Date.now();
+  const rec = await env.DB.prepare('SELECT fails, window_start FROM login_attempts WHERE ip = ?1').bind(ip).first<{ fails: number; window_start: number }>();
+  const fresh = !rec || now - rec.window_start >= WINDOW_MS;
+  return {
+    blocked: !fresh && rec!.fails >= MAX_FAILS,
+    fail: () =>
+      env.DB.prepare('INSERT INTO login_attempts (ip, fails, window_start) VALUES (?1, 1, ?2) ON CONFLICT(ip) DO UPDATE SET fails = ?3, window_start = ?4')
+        .bind(ip, now, fresh ? 1 : rec!.fails + 1, fresh ? now : rec!.window_start)
+        .run(),
+    clear: () => env.DB.prepare('DELETE FROM login_attempts WHERE ip = ?1').bind(ip).run(),
+  };
+}
+
+const err = (error: string, status = 400) => Response.json({ error }, { status });
+const TOO_MANY = '尝试过多，请 15 分钟后再试';
+
+export async function authStatus(env: Env): Promise<Response> {
+  const passkeys = await env.DB.prepare('SELECT COUNT(*) AS n FROM passkeys').first<{ n: number }>();
+  return Response.json({ needsSetup: await needsSetup(env), passkeys: passkeys?.n ?? 0 });
+}
+
+/** 首次设置密码：必须带上部署时配置的 SETUP_TOKEN */
+export async function setup(req: Request, env: Env): Promise<Response> {
+  if (!(await needsSetup(env))) return err('已经设置过密码', 409);
+  const t = await throttle(req, env);
+  if (t.blocked) return err(TOO_MANY, 429);
+  if (!env.SETUP_TOKEN) return err('部署时没有配置 SETUP_TOKEN，无法初始化。请先设置这个密钥（wrangler secret put SETUP_TOKEN）。', 403);
+  const body = (await req.json().catch(() => ({}))) as { setupToken?: string; password?: string };
+  if (!body.setupToken || !constantEqual(await sha256(body.setupToken), await sha256(env.SETUP_TOKEN))) {
+    await t.fail();
+    return err('初始化令牌不正确', 401);
+  }
+  if (!body.password || body.password.length < MIN_PASSWORD) return err(`密码至少 ${MIN_PASSWORD} 位`);
+  await putKv(env, 'auth', await hashPassword(body.password));
+  await t.clear();
+  return startSession(req, env, 'password');
 }
 
 export async function login(req: Request, env: Env): Promise<Response> {
-  const ip = req.headers.get('cf-connecting-ip') ?? 'unknown';
-  const now = Date.now();
-  const rec = await env.DB.prepare('SELECT fails, window_start FROM login_attempts WHERE ip = ?1').bind(ip).first<{ fails: number; window_start: number }>();
-  if (rec && now - rec.window_start < WINDOW_MS && rec.fails >= MAX_FAILS) {
-    return Response.json({ error: '尝试过多，请 15 分钟后再试' }, { status: 429 });
+  const t = await throttle(req, env);
+  if (t.blocked) return err(TOO_MANY, 429);
+  const body = (await req.json().catch(() => ({}))) as { passcode?: string; password?: string };
+  const pw = body.password ?? body.passcode ?? '';
+  if (!pw || !(await checkPassword(env, pw))) {
+    await t.fail();
+    return err('密码不正确', 401);
   }
-  const body = (await req.json().catch(() => ({}))) as { passcode?: string };
-  if (!env.OWNER_PASSCODE || !body.passcode || !(await safeEqual(body.passcode, env.OWNER_PASSCODE))) {
-    const fresh = !rec || now - rec.window_start >= WINDOW_MS;
-    await env.DB.prepare(
-      'INSERT INTO login_attempts (ip, fails, window_start) VALUES (?1, 1, ?2) ON CONFLICT(ip) DO UPDATE SET fails = ?3, window_start = ?4',
-    )
-      .bind(ip, now, fresh ? 1 : rec!.fails + 1, fresh ? now : rec!.window_start)
-      .run();
-    return Response.json({ error: '口令不正确' }, { status: 401 });
-  }
-  await env.DB.prepare('DELETE FROM login_attempts WHERE ip = ?1').bind(ip).run();
-  const token = randomToken();
-  const expires = now + SESSION_DAYS * 86_400_000;
-  await env.DB.batch([
-    env.DB.prepare('DELETE FROM sessions WHERE expires_at < ?1').bind(now),
-    env.DB.prepare('INSERT INTO sessions (token_hash, expires_at, user_agent) VALUES (?1, ?2, ?3)').bind(
-      await sha256(token),
-      expires,
-      (req.headers.get('user-agent') ?? '').slice(0, 200),
-    ),
-  ]);
-  return Response.json(
-    { ok: true },
-    { headers: { 'set-cookie': `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}` } },
-  );
+  await t.clear();
+  return startSession(req, env, 'password');
+}
+
+export async function changePassword(req: Request, env: Env): Promise<Response> {
+  const body = (await req.json().catch(() => ({}))) as { current?: string; next?: string };
+  if (!body.current || !(await checkPassword(env, body.current))) return err('当前密码不正确', 401);
+  if (!body.next || body.next.length < MIN_PASSWORD) return err(`新密码至少 ${MIN_PASSWORD} 位`);
+  await putKv(env, 'auth', await hashPassword(body.next));
+  // 改密码后其他设备全部下线，只留当前会话
+  await removeOtherSessions(req, env);
+  return Response.json({ ok: true });
+}
+
+async function removeOtherSessions(req: Request, env: Env): Promise<number> {
+  const keep = readCookie(req, COOKIE);
+  const r = await env.DB.prepare('DELETE FROM sessions WHERE token_hash != ?1').bind(keep ? await sha256(keep) : '').run();
+  return r.meta.changes;
 }
 
 export async function logout(req: Request, env: Env): Promise<Response> {
@@ -82,9 +196,165 @@ export async function logout(req: Request, env: Env): Promise<Response> {
   return Response.json({ ok: true }, { headers: { 'set-cookie': `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` } });
 }
 
+/** 退出其他所有设备 */
+export async function logoutOthers(req: Request, env: Env): Promise<Response> {
+  return Response.json({ ok: true, removed: await removeOtherSessions(req, env) });
+}
+
+/** 登录设备列表；id 取令牌哈希的前 16 位，不暴露完整哈希 */
+export async function listSessions(req: Request, env: Env) {
+  const mine = readCookie(req, COOKIE);
+  const mineHash = mine ? await sha256(mine) : '';
+  const rows = await env.DB.prepare('SELECT token_hash, created_at, user_agent, ip, location, method, last_seen_at FROM sessions WHERE expires_at > ?1 ORDER BY COALESCE(last_seen_at, 0) DESC')
+    .bind(Date.now())
+    .all<{ token_hash: string; created_at: string; user_agent: string | null; ip: string | null; location: string | null; method: string | null; last_seen_at: number | null }>();
+  return rows.results.map((r) => ({
+    id: r.token_hash.slice(0, 16),
+    current: r.token_hash === mineHash,
+    userAgent: r.user_agent ?? '',
+    ip: r.ip ?? '',
+    location: r.location ?? '',
+    method: r.method ?? 'password',
+    createdAt: r.created_at.replace(' ', 'T') + 'Z',
+    lastSeenAt: r.last_seen_at ? new Date(r.last_seen_at).toISOString() : null,
+  }));
+}
+
+/** 调低设备上限后立即生效：保留当前设备和最近活跃的几台 */
+export async function pruneSessions(req: Request, env: Env, max: number): Promise<void> {
+  const mine = readCookie(req, COOKIE);
+  await env.DB.prepare('DELETE FROM sessions WHERE token_hash NOT IN (SELECT token_hash FROM sessions ORDER BY token_hash = ?1 DESC, COALESCE(last_seen_at, 0) DESC LIMIT ?2)')
+    .bind(mine ? await sha256(mine) : '', Math.max(1, max))
+    .run();
+}
+
+/** 移出某一台设备（不能移出当前这台，当前用「退出登录」） */
+export async function revokeSession(req: Request, env: Env, id: string): Promise<Response> {
+  if (!/^[0-9a-f]{16}$/.test(id)) return err('无效的设备');
+  const mine = readCookie(req, COOKIE);
+  if (mine && (await sha256(mine)).startsWith(id)) return err('不能移出当前设备，请用「退出登录」');
+  await env.DB.prepare('DELETE FROM sessions WHERE substr(token_hash, 1, 16) = ?1').bind(id).run();
+  return Response.json({ ok: true });
+}
+
 /** 写操作必须同源（SameSite=Lax 之外再加一道） */
 export function sameOrigin(req: Request): boolean {
   const origin = req.headers.get('origin');
   if (!origin) return true;
   return new URL(origin).host === new URL(req.url).host;
+}
+
+// ---------- Passkey ----------
+
+const RP_NAME = 'Subscription Ledger';
+/** RP 是站点自己的域名；本地开发时 wrangler 会把 URL 改写成线上域名，只好以浏览器的 Origin 为准 */
+const rp = (req: Request, env: Env) => {
+  const o = env.DEV_BYPASS_AUTH === '1' ? req.headers.get('origin') : null;
+  const u = new URL(o ?? req.url);
+  return { rpID: u.hostname, origin: u.origin };
+};
+
+async function saveChallenge(env: Env, kind: string, challenge: string): Promise<string> {
+  const id = randomToken(12);
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM auth_challenges WHERE expires_at < ?1').bind(Date.now()),
+    env.DB.prepare('INSERT INTO auth_challenges (id, challenge, kind, expires_at) VALUES (?1, ?2, ?3, ?4)').bind(id, challenge, kind, Date.now() + 5 * 60_000),
+  ]);
+  return id;
+}
+
+/** 取出并作废一次性挑战 */
+async function takeChallenge(env: Env, id: string, kind: string): Promise<string | undefined> {
+  const row = await env.DB.prepare('SELECT challenge, kind, expires_at FROM auth_challenges WHERE id = ?1').bind(id).first<{ challenge: string; kind: string; expires_at: number }>();
+  await env.DB.prepare('DELETE FROM auth_challenges WHERE id = ?1').bind(id).run();
+  return row && row.kind === kind && row.expires_at > Date.now() ? row.challenge : undefined;
+}
+
+interface PasskeyRow {
+  id: string;
+  public_key: string;
+  counter: number;
+  transports: string | null;
+  name: string;
+  created_at: string;
+  last_used_at: string | null;
+}
+
+const b64url = (b: Uint8Array) => btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64url = (s: string) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
+
+export async function listPasskeys(env: Env) {
+  const rows = await env.DB.prepare('SELECT id, name, created_at, last_used_at FROM passkeys ORDER BY created_at').all<Pick<PasskeyRow, 'id' | 'name' | 'created_at' | 'last_used_at'>>();
+  return rows.results.map((r) => ({ id: r.id, name: r.name, createdAt: r.created_at, lastUsedAt: r.last_used_at }));
+}
+
+export async function deletePasskey(env: Env, id: string): Promise<void> {
+  await env.DB.prepare('DELETE FROM passkeys WHERE id = ?1').bind(id).run();
+}
+
+/** 已登录时绑定新的 Passkey：第一步，生成注册选项 */
+export async function passkeyRegisterOptions(req: Request, env: Env): Promise<Response> {
+  const existing = await env.DB.prepare('SELECT id, transports FROM passkeys').all<{ id: string; transports: string | null }>();
+  const options = await generateRegistrationOptions({
+    rpName: RP_NAME,
+    rpID: rp(req, env).rpID,
+    userName: 'owner',
+    userDisplayName: 'Owner',
+    attestationType: 'none',
+    excludeCredentials: existing.results.map((c) => ({ id: c.id, transports: c.transports ? JSON.parse(c.transports) : undefined })),
+    authenticatorSelection: { residentKey: 'required', userVerification: 'preferred' },
+  });
+  return Response.json({ options, challengeId: await saveChallenge(env, 'register', options.challenge) });
+}
+
+/** 第二步：校验浏览器返回的凭据并保存 */
+export async function passkeyRegisterVerify(req: Request, env: Env): Promise<Response> {
+  const body = (await req.json()) as { challengeId: string; response: RegistrationResponseJSON; name?: string };
+  const expected = await takeChallenge(env, body.challengeId, 'register');
+  if (!expected) return err('请求已过期，请重试');
+  const { rpID, origin } = rp(req, env);
+  const v = await verifyRegistrationResponse({ response: body.response, expectedChallenge: expected, expectedOrigin: origin, expectedRPID: rpID, requireUserVerification: false }).catch(() => undefined);
+  if (!v?.verified || !v.registrationInfo) return err('Passkey 校验失败');
+  const c = v.registrationInfo.credential;
+  await env.DB.prepare('INSERT INTO passkeys (id, public_key, counter, transports, name) VALUES (?1, ?2, ?3, ?4, ?5)')
+    .bind(c.id, b64url(c.publicKey), c.counter, JSON.stringify(c.transports ?? body.response.response.transports ?? []), (body.name ?? '').trim().slice(0, 40) || 'Passkey')
+    .run();
+  return Response.json({ ok: true });
+}
+
+/** 用 Passkey 登录：第一步，生成挑战（可发现凭据，不需要先输用户名） */
+export async function passkeyLoginOptions(req: Request, env: Env): Promise<Response> {
+  const options = await generateAuthenticationOptions({ rpID: rp(req, env).rpID, userVerification: 'preferred' });
+  return Response.json({ options, challengeId: await saveChallenge(env, 'login', options.challenge) });
+}
+
+/** 第二步：校验签名，成功后建会话 */
+export async function passkeyLoginVerify(req: Request, env: Env): Promise<Response> {
+  const t = await throttle(req, env);
+  if (t.blocked) return err(TOO_MANY, 429);
+  const body = (await req.json()) as { challengeId: string; response: AuthenticationResponseJSON };
+  const expected = await takeChallenge(env, body.challengeId, 'login');
+  if (!expected) return err('请求已过期，请重试');
+  const row = await env.DB.prepare('SELECT * FROM passkeys WHERE id = ?1').bind(body.response.id).first<PasskeyRow>();
+  if (!row) {
+    await t.fail();
+    return err('这个 Passkey 没有绑定到本站', 401);
+  }
+  const { rpID, origin } = rp(req, env);
+  const v = await verifyAuthenticationResponse({
+    response: body.response,
+    expectedChallenge: expected,
+    expectedOrigin: origin,
+    expectedRPID: rpID,
+    requireUserVerification: false,
+    credential: { id: row.id, publicKey: unb64url(row.public_key), counter: row.counter, transports: row.transports ? JSON.parse(row.transports) : undefined },
+  }).catch(() => undefined);
+  // 签名不对、计数器回退（疑似克隆）等都会在这里被拒绝
+  if (!v?.verified) {
+    await t.fail();
+    return err('Passkey 校验失败', 401);
+  }
+  await env.DB.prepare("UPDATE passkeys SET counter = ?1, last_used_at = datetime('now') WHERE id = ?2").bind(v.authenticationInfo.newCounter, row.id).run();
+  await t.clear();
+  return startSession(req, env, 'passkey');
 }

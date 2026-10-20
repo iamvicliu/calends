@@ -52,7 +52,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     credentials: 'same-origin',
     headers: { 'content-type': 'application/json', ...(init.headers ?? {}) },
   });
-  if (res.status === 401 && path !== '/api/login') {
+  if (res.status === 401 && path !== '/api/login' && !path.startsWith('/api/auth/')) {
     set({ phase: 'login' });
     throw new Error('请先登录');
   }
@@ -149,10 +149,35 @@ export function syncFx(): Promise<void> {
   return syncing;
 }
 
-export async function login(passcode: string): Promise<void> {
-  await api('/api/login', { method: 'POST', body: JSON.stringify({ passcode }) });
+export async function login(password: string): Promise<void> {
+  await api('/api/login', { method: 'POST', body: JSON.stringify({ password }) });
   set({ phase: 'loading' });
   await boot();
+}
+
+export const authStatus = () => api<{ needsSetup: boolean; passkeys: number }>('/api/auth/status');
+
+/** 首次设置密码（需要部署时配置的初始化令牌） */
+export async function setupPassword(setupToken: string, password: string): Promise<void> {
+  await api('/api/auth/setup', { method: 'POST', body: JSON.stringify({ setupToken, password }) });
+  set({ phase: 'loading' });
+  await boot();
+}
+
+export async function loginPasskey(): Promise<void> {
+  const { startAuthentication } = await import('@simplewebauthn/browser');
+  const { options, challengeId } = await api<{ options: Parameters<typeof startAuthentication>[0]['optionsJSON']; challengeId: string }>('/api/auth/passkey/login/options', { method: 'POST' });
+  const response = await startAuthentication({ optionsJSON: options });
+  await api('/api/auth/passkey/login', { method: 'POST', body: JSON.stringify({ challengeId, response }) });
+  set({ phase: 'loading' });
+  await boot();
+}
+
+export async function registerPasskey(name: string): Promise<void> {
+  const { startRegistration } = await import('@simplewebauthn/browser');
+  const { options, challengeId } = await api<{ options: Parameters<typeof startRegistration>[0]['optionsJSON']; challengeId: string }>('/api/auth/passkey/register/options', { method: 'POST' });
+  const response = await startRegistration({ optionsJSON: options });
+  await api('/api/auth/passkey/register', { method: 'POST', body: JSON.stringify({ challengeId, response, name }) });
 }
 
 export async function logout(): Promise<void> {

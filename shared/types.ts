@@ -278,6 +278,8 @@ export interface Settings {
   weekStart?: 0 | 1;
   /** AI 接入（MCP）总开关；关闭后 /mcp 拒绝所有请求；缺省开启 */
   aiEnabled?: boolean;
+  /** 最多同时登录的设备数；超出时最久未活动的设备被挤下线；缺省 10 */
+  maxSessions?: number;
 }
 
 export interface FxTable {

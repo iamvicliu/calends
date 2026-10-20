@@ -7,6 +7,12 @@ import { useToasts } from '../store.ts';
 
 // ---------- SF Symbols 风格线性图标 ----------
 const P: Record<string, JSX.Element> = {
+  key: (
+    <>
+      <circle cx="7.5" cy="15.5" r="4.5" />
+      <path d="M10.7 12.3 21 2M17 6l3 3M14 9l2 2" />
+    </>
+  ),
   chart: <path d="M4 20V10M10 20V4M16 20v-7M21 20H3" />,
   cal: (
     <>

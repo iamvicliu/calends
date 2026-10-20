@@ -1,6 +1,6 @@
 import { todayIn } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type Channel, type FxTable, type PaymentMethod, type Settings, type Subscription } from '../shared/types.ts';
-import { isAuthed, login, logout, randomToken, sameOrigin } from './auth.ts';
+import { DEFAULT_MAX_SESSIONS, authStatus, changePassword, deletePasskey, isAuthed, listPasskeys, listSessions, login, logout, logoutOthers, passkeyLoginOptions, passkeyLoginVerify, passkeyRegisterOptions, passkeyRegisterVerify, pruneSessions, randomToken, revokeSession, sameOrigin, setup } from './auth.ts';
 import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
 import { backfill, fxStatus, recordToday } from './fx.ts';
@@ -45,8 +45,14 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
   if (path === '/api/login' && method === 'POST') return login(req, env);
   if (path === '/api/logout' && method === 'POST') return logout(req, env);
-
+  // 登录前可用：状态、首次设置、Passkey 登录
+  if (path === '/api/auth/status' && method === 'GET') return authStatus(env);
   const dev = devBypass(req, env);
+  if (method === 'POST' && path.startsWith('/api/auth/') && !dev && !sameOrigin(req)) return bad('forbidden', 403);
+  if (path === '/api/auth/setup' && method === 'POST') return setup(req, env);
+  if (path === '/api/auth/passkey/login/options' && method === 'POST') return passkeyLoginOptions(req, env);
+  if (path === '/api/auth/passkey/login' && method === 'POST') return passkeyLoginVerify(req, env);
+
   const authed = dev || (await isAuthed(req, env));
   if (path === '/api/public' && method === 'GET') {
     const state = await loadState(env);
@@ -72,6 +78,19 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const body = await res.arrayBuffer();
     if (body.byteLength > 1_000_000) return bad('too large', 413);
     return new Response(body, { headers: { 'content-type': type, 'cache-control': 'private, max-age=86400' } });
+  }
+  // 已登录：账号安全
+  if (path === '/api/auth/security' && method === 'GET') return json({ passkeys: await listPasskeys(env), sessions: await listSessions(req, env) });
+  const sess = path.match(/^\/api\/auth\/sessions\/(\w+)$/);
+  if (sess && method === 'DELETE') return revokeSession(req, env, sess[1]);
+  if (path === '/api/auth/password' && method === 'POST') return changePassword(req, env);
+  if (path === '/api/auth/logout-others' && method === 'POST') return logoutOthers(req, env);
+  if (path === '/api/auth/passkey/register/options' && method === 'POST') return passkeyRegisterOptions(req, env);
+  if (path === '/api/auth/passkey/register' && method === 'POST') return passkeyRegisterVerify(req, env);
+  const pk = path.match(/^\/api\/auth\/passkey\/([\w-]+)$/);
+  if (pk && method === 'DELETE') {
+    await deletePasskey(env, pk[1]);
+    return json({ ok: true });
   }
   // MCP 令牌管理（后台「AI」页）：明文只在新建时返回一次
   if (path === '/api/mcp/tools' && method === 'GET') return json(TOOLS.map((t) => ({ name: t.name, title: t.title, description: t.description, write: !!t.write })));
@@ -120,7 +139,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const cur = await getSettings(env);
     const next = { ...DEFAULT_SETTINGS, ...cur, ...((await req.json()) as Partial<Settings>), icsToken: cur.icsToken };
     next.notifyHour = Math.min(23, Math.max(0, Math.round(next.notifyHour)));
+    if (next.maxSessions !== undefined) next.maxSessions = Math.min(50, Math.max(1, Math.round(next.maxSessions)));
     await putKv(env, 'settings', next);
+    if (next.maxSessions !== cur.maxSessions) await pruneSessions(req, env, next.maxSessions ?? DEFAULT_MAX_SESSIONS);
     return json(next);
   }
   if (path === '/api/ics/rotate' && method === 'POST') {

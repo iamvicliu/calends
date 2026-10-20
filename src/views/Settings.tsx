@@ -6,6 +6,7 @@ import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx'
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
+import { SecurityGroup } from './Security.tsx';
 import { go } from '../router.ts';
 
 /** 可设为启动页的页面 */
@@ -252,6 +253,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Cell>
           {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>管理令牌与接入方式</span>} onClick={() => go('ai')} />}
         </Group>
+
+        {!state.readonly && <SecurityGroup state={state} />}
 
         <Group title="数据">
           <Cell label="导入 CSV" onClick={() => pickFile('.csv,text/csv', onCsv)} />

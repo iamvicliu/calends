@@ -4,7 +4,7 @@ import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billin
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
-import { boot, login, run, saveSettings, today, useStore } from './store.ts';
+import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { CurrencyPicker } from './components/CurrencyPicker.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode, type ThemeMode } from './theme.tsx';
@@ -53,32 +53,52 @@ function useRoute() {
 }
 
 function Login({ error }: { error?: string }) {
-  const [code, setCode] = useState('');
+  const [status, setStatus] = useState<{ needsSetup: boolean; passkeys: number }>();
+  const [pw, setPw] = useState('');
+  const [pw2, setPw2] = useState('');
+  const [token, setToken] = useState('');
   const [err, setErr] = useState(error);
   const [busy, setBusy] = useState(false);
-  const submit = async (e: Event) => {
-    e.preventDefault();
+  useEffect(() => {
+    authStatus().then(setStatus, () => setStatus({ needsSetup: false, passkeys: 0 }));
+  }, []);
+  const go = async (fn: () => Promise<void>) => {
     setBusy(true);
     setErr(undefined);
     try {
-      await login(code);
+      await fn();
     } catch (x) {
-      setErr(x instanceof Error ? x.message : String(x));
+      // 用户在系统弹窗里取消 Passkey 不算错误
+      if (!(x instanceof Error && x.name === 'NotAllowedError')) setErr(x instanceof Error ? x.message : String(x));
     } finally {
       setBusy(false);
     }
   };
+  const setupMode = status?.needsSetup;
+  const mismatch = setupMode && pw2 !== '' && pw !== pw2;
+  const submit = (e: Event) => {
+    e.preventDefault();
+    void go(() => (setupMode ? setupPassword(token.trim(), pw) : login(pw)));
+  };
+  const canPasskey = !setupMode && !!status?.passkeys && typeof window.PublicKeyCredential === 'function';
   return (
     <div class="login">
       <form class="login-card fade-in" onSubmit={submit}>
         <img src="/icons/icon-192.png" alt="" />
         <h1>订阅账本</h1>
-        <p>每一笔订阅、每一张卡、每一辆车。</p>
-        <input type="password" autoFocus autoComplete="current-password" placeholder="口令" value={code} onInput={(e) => setCode((e.target as HTMLInputElement).value)} />
-        {err && <div class="red" style={{ fontSize: 13 }}>{err}</div>}
-        <button class="btn primary lg" disabled={!code || busy}>
-          {busy ? '验证中…' : '进入'}
+        <p>{setupMode ? '首次使用，请设置登录密码。' : '每一笔订阅、每一张卡、每一辆车。'}</p>
+        {setupMode && <input type="password" autoComplete="off" placeholder="初始化令牌（SETUP_TOKEN）" value={token} onInput={(e) => setToken((e.target as HTMLInputElement).value)} />}
+        <input type="password" autoFocus autoComplete={setupMode ? 'new-password' : 'current-password'} placeholder={setupMode ? '新密码（至少 8 位）' : '密码'} value={pw} onInput={(e) => setPw((e.target as HTMLInputElement).value)} />
+        {setupMode && <input type="password" autoComplete="new-password" placeholder="再输一次" value={pw2} onInput={(e) => setPw2((e.target as HTMLInputElement).value)} />}
+        {(err || mismatch) && <div class="red" style={{ fontSize: 13 }}>{mismatch ? '两次输入不一致' : err}</div>}
+        <button class="btn primary lg" disabled={!status || !pw || busy || (setupMode && (!token || pw.length < 8 || pw !== pw2))}>
+          {busy ? '验证中…' : setupMode ? '设置并进入' : '进入'}
         </button>
+        {canPasskey && (
+          <button type="button" class="btn lg" disabled={busy} onClick={() => go(loginPasskey)}>
+            <Icon name="key" /> 用 Passkey 登录
+          </button>
+        )}
       </form>
     </div>
   );
