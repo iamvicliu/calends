@@ -974,8 +974,10 @@ a {
 .cal-cell.out > * {
   opacity: 0.3;
 }
-.cal-cell.sel {
-  background: var(--accent-soft);
+/* 选中要比悬停明显：悬停只是浅灰，选中用强调色的浅底 */
+.cal-cell.sel,
+.cal-cell.sel:hover {
+  background: color-mix(in srgb, var(--accent) 11%, var(--card));
 }
 /* 宽屏：日期在上，当天金额紧跟在下面左对齐，图标沉到格子底部 */
 .cal-day {
@@ -8341,4 +8343,138 @@ button.seat:disabled {
   background: var(--fill-2);
   color: var(--label-2);
   font-size: 12.5px;
+}
+
+/* 日历下方：选中那天的扣款，一张张卡片 */
+.cal-dayhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 4px -4px;
+}
+.cal-dayhead h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-2);
+}
+.cal-dayhead span {
+  font-size: 12.5px;
+  color: var(--label-3);
+  font-variant-numeric: tabular-nums;
+}
+.cal-none {
+  padding: 18px;
+  text-align: center;
+  color: var(--label-3);
+  font-size: 13.5px;
+}
+.cal-daycards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.cal-daycard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.cal-daycard:hover {
+  transform: translateY(-1px);
+}
+.cal-dc-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.cal-dc-main b {
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cal-dc-amt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cal-dc-amt small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--label-3);
+  white-space: nowrap;
+}
+
+/* 日历右栏顶部的本月指标卡 */
+.cal-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+}
+.cal-stat > small,
+.cal-stat-split small {
+  font-size: 12px;
+  color: var(--label-3);
+}
+.cal-stat-big {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.cal-stat-big b {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.cal-stat-big span,
+.cal-stat-split span {
+  font-size: 12px;
+  color: var(--label-3);
+}
+.cal-stat-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+.cal-stat-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--label);
+}
+.cal-stat-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.cal-stat-split > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cal-stat-split b {
+  font-size: 15px;
+  font-weight: 600;
 }

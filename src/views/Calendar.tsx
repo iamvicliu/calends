@@ -53,6 +53,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const inner = gridW / 7 - (narrow ? 6 : 14);
   const MORE_W = 20;
   const iconCap = gridW ? Math.max(2, Math.floor((inner - icon - MORE_W) / step) + 1) : 4;
+  /** 不叠也放得下（间隔 3px）就平铺，放不下才叠 */
+  const fits = (n: number) => icon * n + 3 * (n - 1) <= inner;
   const byDay = useMemo(() => {
     const m = new Map<string, Charge[]>();
     for (const c of charges) m.set(c.date, [...(m.get(c.date) ?? []), c]);
@@ -69,7 +71,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
     <>
       <Toolbar
         title={mode === 'month' ? monthLabel(month, { long: true }) : t('calendar.yearTitle', { year })}
-        sub={t('calendar.summary', { count: list.length, amount: money(sumOf(list), base, { compact: true }) })}
+        // 月视图的笔数与合计放进右侧的指标卡；年视图没有右栏，仍写在标题下
+        sub={mode === 'year' ? t('calendar.summary', { count: list.length, amount: money(sumOf(list), base, { compact: true }) }) : undefined}
       >
         <Seg
           value={mode}
@@ -115,67 +118,78 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
           />
         ) : (
           <div className="cal-wrap">
-            <div className="card cal">
-              <div className="cal-grid" ref={gridRef}>
-                {DOW.map((d, i) => (
-                  <div key={i} className="cal-dow">
-                    {d}
-                  </div>
-                ))}
-                {grid.map((d) => {
-                  const items = byDay.get(d) ?? [];
-                  const shown = items.length > iconCap ? items.slice(0, iconCap) : items;
-                  return (
-                    <button
-                      key={d}
-                      className={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`}
-                      onClick={() => setSel(d)}
-                    >
-                      <div className="cal-day">
-                        <b>{Number(d.slice(8))}</b>
-                        {items.length > 0 && <span className="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
-                      </div>
-                      <div className="cal-icons" style={{ '--m0': `${step - icon}px` } as Record<string, string>}>
-                        {shown.map((c, i) => (
-                          <span
-                            key={c.sub.id}
-                            style={{ '--i': i } as Record<string, number>}
-                            {...tipProps(() => `${c.sub.name} · ${money(c.amount, c.currency)}`)}
-                          >
-                            <SubIcon sub={c.sub} size={24} />
-                          </span>
-                        ))}
-                        {items.length > shown.length && <span className="cal-more">+{items.length - shown.length}</span>}
-                      </div>
-                    </button>
-                  );
-                })}
+            {/* 左：日历，下面紧跟选中那天的明细（卡片）；右：整月列表 */}
+            <div className="stack">
+              <div className="card cal">
+                <div className="cal-grid" ref={gridRef}>
+                  {DOW.map((d, i) => (
+                    <div key={i} className="cal-dow">
+                      {d}
+                    </div>
+                  ))}
+                  {grid.map((d) => {
+                    const items = byDay.get(d) ?? [];
+                    const shown = items.length > iconCap ? items.slice(0, iconCap) : items;
+                    return (
+                      <button
+                        key={d}
+                        className={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`}
+                        onClick={() => setSel(d)}
+                      >
+                        <div className="cal-day">
+                          <b>{Number(d.slice(8))}</b>
+                          {items.length > 0 && <span className="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
+                        </div>
+                        <div className="cal-icons" style={{ '--m0': `${fits(shown.length) ? 3 : step - icon}px` } as Record<string, string>}>
+                          {shown.map((c, i) => (
+                            <span
+                              key={c.sub.id}
+                              style={{ '--i': i } as Record<string, number>}
+                              {...tipProps(() => `${c.sub.name} · ${money(c.amount, c.currency)}`)}
+                            >
+                              <SubIcon sub={c.sub} size={24} />
+                            </span>
+                          ))}
+                          {items.length > shown.length && <span className="cal-more">+{items.length - shown.length}</span>}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
+              <section className="cal-dayhead">
+                <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
+                {selList.length > 0 && <span>{t('calendar.summary', { count: selList.length, amount: money(sumOf(selList), base, { compact: true }) })}</span>}
+              </section>
+              {selList.length === 0 ? (
+                <div className="card cal-none">{t('calendar.noneDay')}</div>
+              ) : (
+                <div className="cal-daycards">
+                  {selList.map((c) => {
+                    const amt = pair(c.amount, c.currency, { value: chargeValue(state, c) });
+                    return (
+                      <button key={c.sub.id} className="card cal-daycard" onClick={() => onOpen(c.sub)}>
+                        <SubIcon sub={c.sub} size={40} />
+                        <span className="cal-dc-main">
+                          <b>{c.sub.name}</b>
+                          <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                        </span>
+                        <span className="cal-dc-amt">
+                          {amt.main}
+                          <small>
+                            {/* 先说原币金额，再说状态；放在一起时「预计 · $45.99」容易读成预计扣 $45.99 */}
+                            {amt.alt ? `${t('list.originalPrice', { amount: amt.alt })} · ` : ''}
+                            {c.projected ? t('calendar.projected') : t('calendar.charged')}
+                          </small>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             <div className="stack">
-              <Group title={`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}>
-                {selList.length === 0 && <div className="cell muted">{t('calendar.noneDay')}</div>}
-                {selList.map((c) => {
-                  const amt = pair(c.amount, c.currency, { value: chargeValue(state, c) });
-                  return (
-                    <button key={c.sub.id} className="cell tap" onClick={() => onOpen(c.sub)}>
-                      <SubIcon sub={c.sub} size={34} />
-                      <span style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600 }}>{c.sub.name}</div>
-                        <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
-                      </span>
-                      <span style={{ textAlign: 'right' }}>
-                        {amt.main}
-                        <div className="muted" style={{ fontSize: 12 }}>
-                          {/* 先说原币金额，再说状态；放在一起时「预计 · $45.99」容易读成预计扣 $45.99 */}
-                          {amt.alt ? `${t('list.originalPrice', { amount: amt.alt })} · ` : ''}
-                          {c.projected ? t('calendar.projected') : t('calendar.charged')}
-                        </div>
-                      </span>
-                    </button>
-                  );
-                })}
-              </Group>
+              <MonthStat charges={monthCharges} month={month} sumOf={sumOf} base={base} />
               <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
@@ -279,6 +293,39 @@ function YearHeat({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/** 右栏顶部：本月合计，拆成已扣与待扣，下面一条进度看已经扣了多少 */
+function MonthStat({ charges, month, sumOf, base }: { charges: Charge[]; month: string; sumOf: (l?: Charge[]) => number; base: string }) {
+  const done = charges.filter((c) => !c.projected);
+  const left = charges.filter((c) => c.projected);
+  const total = sumOf(charges);
+  const paid = sumOf(done);
+  const pct = total > 0 ? Math.min(100, Math.max(0, (paid / total) * 100)) : 0;
+  return (
+    <div className="card cal-stat">
+      <small>{t('calendar.monthTotal', { month: monthLabel(month, { year: false }) })}</small>
+      <div className="cal-stat-big">
+        <b>{money(total, base, { compact: true })}</b>
+        <span>{t('calendar.count', { count: charges.length })}</span>
+      </div>
+      <div className="cal-stat-bar" aria-hidden="true">
+        <i style={{ width: `${pct}%` }} />
+      </div>
+      <div className="cal-stat-split">
+        <div>
+          <small>{t('calendar.charged')}</small>
+          <b>{money(paid, base, { compact: true })}</b>
+          <span>{t('calendar.count', { count: done.length })}</span>
+        </div>
+        <div>
+          <small>{t('calendar.pending')}</small>
+          <b>{money(total - paid, base, { compact: true })}</b>
+          <span>{t('calendar.count', { count: left.length })}</span>
+        </div>
+      </div>
     </div>
   );
 }
