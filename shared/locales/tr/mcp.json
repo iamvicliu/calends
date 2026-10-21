@@ -53,7 +53,8 @@
     "invalidPaidThrough": "Ödenmiş son tarih asıl fatura dönemiyle eşleşmelidir.",
     "invalidStop": "Durdurma son hizmet günüyle eşleşmelidir; yalnızca sağlayıcı kapatması neden içerebilir.",
     "invalidRefund": "İade tutarları geçerli sayılar olmalı ve negatif kaydedilmelidir.",
-    "refundBeforeStop": "İade tarihi durdurma tarihinden önce olamaz."
+    "refundBeforeStop": "İade tarihi durdurma tarihinden önce olamaz.",
+    "paymentOutOfRange": "Ödeme tarihi {date}, başlangıç tarihi ile bugün arasında olmalıdır"
   },
   "tool": {
     "get_overview": "Defter özeti",

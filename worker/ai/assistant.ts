@@ -20,7 +20,7 @@ import {
 } from '../../shared/deepseek.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import type { Env } from '../env.ts';
-import { searchAppStore, TOOLS, type Tool } from './mcp-tools.ts';
+import { decodeEntities, searchAppStore, TOOLS, type Tool } from './mcp-tools.ts';
 import { getKv, loadState, putKv } from '../store.ts';
 
 const KEY = 'assistant';
@@ -101,6 +101,7 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Pick the closest category from the list and the payment method that matches the card, store account or wallet mentioned; omit method if unclear.',
     '- Fill in as much as the input supports: name WITH the plan/tier (e.g. "Spotify Premium Family", "iCloud+ 200GB", "ChatGPT Plus"), price, currency, cycle, start, region, method, category, url, icon, account (the login email, phone number for carriers, or username shown), and notes for useful extras (order number, seats). Never leave out a field you can read or infer.',
     '- Icon and url are required for every app or service: call search_app_store (country = the store region, else us) and pass the matching result’s icon (prefer the 256x256 artwork) and url; for web-only services and ones that are not mainly an app (carriers, utilities, cloud hosting) use the official homepage as url. If nothing matches, still give the official url.',
+    '- Bill tables and statements covering several months (one row per month, one column per service or line): each column/service is ONE subscription — never one per month or per amount. Keep each name exactly as written (fix only obvious typos such as "T-Moblie" → "T-Mobile"); never translate it or swap it for a different provider, and do not search the ledger under other names. start = its first month with an amount (billing day 1 unless a day is shown); months shown as —/blank are before it started or unknown, not charges. price = the latest month’s amount. Usage-based amounts that vary month to month are actual charges, not price changes: pass ALL of them in create_subscription.payments (every month listed, including ones equal to price), and do not call change_price or record_payment for them. Ignore total/sum columns. If no currency is shown, use the currency of the provider’s home market (T-Mobile, AT&T → USD; CUniq → HKD) and say in the reply which currency you assumed.',
     '- Before creating, check list_subscriptions for the same service; if it already exists, propose update_subscription / change_price / record_payment instead of a duplicate.',
     '- If a required field (price, currency or cycle) truly cannot be inferred, ask one short question instead of guessing.',
     '- Distinguish three ways to stop: non-renewal uses set_status cancel (immediate=false) with at as the last service day; voluntary early stopping uses cancel with immediate=true; provider-disabled access uses terminate with an optional reason. Immediate stops may include refund {amount,date?,settled?}; omit refund when none occurred. Terminated subscriptions must resubscribe using change_plan action=resume with a new phase, never reactivate. Refund currency must equal the subscription currency, and total refunds cannot exceed the current period paid amount.',
@@ -127,8 +128,8 @@ const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
  * 名称对得上才采用，补上图标和链接，并告诉模型补了什么
  */
 export async function enrichDraft(args: Record<string, unknown>, cats: string[] = []): Promise<{ args: Record<string, unknown>; filled: string[] }> {
-  const name = String(args.name ?? '').trim();
-  const fixed = { ...args };
+  const name = decodeEntities(String(args.name ?? '').trim());
+  const fixed: Record<string, unknown> = { ...args, ...(args.name != null ? { name } : {}) };
   // 分类：内置分类不管用哪种语言写，都换成账本里当前语言的那个名字；不认识也不在账本里的不新建，交给默认分类
   const fixCat = (v: unknown) => {
     const name = String(v);

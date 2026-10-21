@@ -53,7 +53,8 @@
     "invalidPaidThrough": "La date payée doit correspondre à la période de facturation initiale.",
     "invalidStop": "L’arrêt doit correspondre au dernier jour de service ; seul le fournisseur peut motiver une désactivation.",
     "invalidRefund": "Les montants remboursés doivent être valides et enregistrés en négatif.",
-    "refundBeforeStop": "La date du remboursement ne peut pas précéder l’arrêt."
+    "refundBeforeStop": "La date du remboursement ne peut pas précéder l’arrêt.",
+    "paymentOutOfRange": "La date de paiement {date} doit être comprise entre la date de début et aujourd’hui"
   },
   "tool": {
     "get_overview": "Aperçu du registre",

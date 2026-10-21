@@ -332,6 +332,10 @@ const DRY = { type: 'boolean', default: false, description: 'Preview the result 
 const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required, additionalProperties: false });
 
 /** 写入：dry_run 只返回预览；否则保存并返回最新一行 + 接下来几笔扣款 */
+/** 模型偶尔把名称里的 & 等写成 HTML 实体（AT&amp;T），存之前还原 */
+export const decodeEntities = (s: string) =>
+  s.replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, e: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'" })[e]!);
+
 async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscription, dry: unknown, changed: string[]) {
   const errs = statusChangeError(
     st.subscriptions.find((x) => x.id === after.id),
@@ -927,6 +931,12 @@ export const TOOLS: Tool[] = [
           required: ['price', 'until'],
           description: 'Intro price until a date.',
         },
+        payments: {
+          type: 'array',
+          description:
+            'Actual past charges with their real amounts (e.g. a monthly bill history). When given they become the whole charge history, so include EVERY period, including ones equal to price; future charges continue at price from the last one. Dates on or after start and not after today.',
+          items: obj({ date: DATE, amount: { type: 'number', minimum: 0 }, note: { type: 'string' } }, ['date', 'amount']),
+        },
         force: { type: 'boolean', default: false },
         id: { type: 'string', description: 'Internal: keep this id (used when confirming an earlier draft).' },
         dry_run: DRY,
@@ -935,9 +945,17 @@ export const TOOLS: Tool[] = [
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const name = String(a.name ?? '').trim();
+      const name = decodeEntities(String(a.name ?? '').trim());
       const start = date(a.start, 'start', today);
       const currency = String(a.currency ?? '').toUpperCase();
+      // 历史扣款：按日期排序，必须落在开始日到今天之间
+      const payments = (Array.isArray(a.payments) ? (a.payments as Array<Record<string, unknown>>) : [])
+        .map((p) => {
+          const d = date(p.date, 'payments.date');
+          if (d < start || d > today) throw new Error(t('mcp.error.paymentOutOfRange', { date: d }));
+          return { date: d, amount: Math.abs(num(p.amount, 'payments.amount')), ...(str(p.note) ? { note: str(p.note) } : {}) };
+        })
+        .sort((x, y) => x.date.localeCompare(y.date));
       if (!st.fx.rates[currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: currency }));
       if (!a.force && st.subscriptions.some((s) => s.name.toLowerCase() === name.toLowerCase() && s.start === start))
         throw new Error(t('mcp.error.duplicateSub', { name }));
@@ -964,6 +982,7 @@ export const TOOLS: Tool[] = [
         intro: a.intro
           ? { price: num((a.intro as { price: unknown }).price, 'intro.price'), until: date((a.intro as { until: unknown }).until, 'intro.until') }
           : undefined,
+        ...(payments.length ? { payments } : {}),
         createdAt: today,
       };
       return commit(ctx, st, today, sub, a.dry_run, ['created']);

@@ -53,7 +53,8 @@
     "invalidPaidThrough": "本期付到日必须与原计费周期一致。",
     "invalidStop": "停止信息必须与最后服务日一致，只有服务方停用可填写原因。",
     "invalidRefund": "退款金额须为有效数字，并以负数记录。",
-    "refundBeforeStop": "退款日期不能早于停止日。"
+    "refundBeforeStop": "退款日期不能早于停止日。",
+    "paymentOutOfRange": "扣款日期 {date} 必须在开始日期到今天之间"
   },
   "tool": {
     "get_overview": "账本概况",

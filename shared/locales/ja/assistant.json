@@ -78,7 +78,9 @@
     "pendingCount": {
       "other": "確認待ちの下書きが {count} 件"
     },
-    "applyAll": "すべて確定"
+    "applyAll": "すべて確定",
+    "history": "過去の請求",
+    "historyCount": "{count} 件"
   },
   "error": {
     "auth": "API Key が無効です",

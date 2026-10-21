@@ -53,7 +53,8 @@
     "invalidPaidThrough": "Paid-through date must match the original billing period.",
     "invalidStop": "Stop information must match the last service day; only provider termination may include a reason.",
     "invalidRefund": "Refund amounts must be valid and stored as negative values.",
-    "refundBeforeStop": "Refund date cannot precede the stop date."
+    "refundBeforeStop": "Refund date cannot precede the stop date.",
+    "paymentOutOfRange": "Payment date {date} must be between the start date and today"
   },
   "tool": {
     "get_overview": "Ledger overview",

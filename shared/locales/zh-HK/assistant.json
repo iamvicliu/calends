@@ -78,7 +78,9 @@
     "pendingCount": {
       "other": "還有 {count} 張草稿待確認"
     },
-    "applyAll": "全部確認"
+    "applyAll": "全部確認",
+    "history": "歷史扣款",
+    "historyCount": "{count} 筆"
   },
   "error": {
     "auth": "API Key 無效",

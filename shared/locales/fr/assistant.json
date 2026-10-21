@@ -80,7 +80,9 @@
       "one": "{count} brouillon à confirmer",
       "other": "{count} brouillons à confirmer"
     },
-    "applyAll": "Tout confirmer"
+    "applyAll": "Tout confirmer",
+    "history": "Prélèvements passés",
+    "historyCount": { "one": "{count} prélèvement", "other": "{count} prélèvements" }
   },
   "error": {
     "auth": "Clé API invalide",

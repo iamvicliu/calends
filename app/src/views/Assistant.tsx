@@ -366,6 +366,9 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       ...(a.account ? { account: String(a.account) } : {}),
       ...(a.status === 'trial' ? { status: 'trial' as const } : {}),
       ...(a.trial_end ? { trialEnd: String(a.trial_end) } : {}),
+      ...(Array.isArray(a.payments) && a.payments.length
+        ? { payments: (a.payments as Array<{ date: string; amount: number; note?: string }>).map((x) => ({ date: x.date, amount: x.amount, note: x.note })) }
+        : {}),
     };
     window.dispatchEvent(new CustomEvent('ledger:add', { detail: draft }));
   };
@@ -795,6 +798,7 @@ function Proposal(props: {
     category: String(a.category ?? sub?.category ?? ''),
   };
   const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number } | undefined;
+  const history = create && Array.isArray(a.payments) ? (a.payments as Array<{ amount: number }>) : [];
   const method =
     state.methods.find((m) => m.id === a.method || m.name === a.method) ??
     (create ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
@@ -811,6 +815,14 @@ function Proposal(props: {
         ...(a.region ? [[t('detail.field.region'), String(a.region).toUpperCase()] as [string, ReactNode]] : []),
         ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), cnDateFull(String(a.trial_end))] as [string, ReactNode]] : []),
         [t('detail.field.method'), <PayBadge key="m" m={method} />],
+        ...(history.length
+          ? [
+              [
+                t('assistant.card.history'),
+                `${t('assistant.card.historyCount', { count: history.length })} · ${flow(-history.reduce((x, p) => x + p.amount, 0), String(a.currency))}`,
+              ] as [string, ReactNode],
+            ]
+          : []),
       ]
     : summaryRows(part.tool, a, state, sub?.currency);
   return (

@@ -78,7 +78,9 @@
     "pendingCount": {
       "other": "{count} draf menunggu konfirmasi"
     },
-    "applyAll": "Konfirmasi semua"
+    "applyAll": "Konfirmasi semua",
+    "history": "Riwayat tagihan",
+    "historyCount": "{count} tagihan"
   },
   "error": {
     "auth": "API Key tidak valid",

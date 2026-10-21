@@ -80,7 +80,9 @@
       "one": "{count} draft to confirm",
       "other": "{count} drafts to confirm"
     },
-    "applyAll": "Confirm all"
+    "applyAll": "Confirm all",
+    "history": "Charge history",
+    "historyCount": { "one": "{count} charge", "other": "{count} charges" }
   },
   "error": {
     "auth": "Invalid API key",

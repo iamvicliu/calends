@@ -668,3 +668,36 @@ test('API 编辑器保存复用停止与退款校验、禁止恢复停用订阅�
     setLocale('en', [messages]);
   }
 });
+
+test('MCP 新建订阅可带完整历史扣款：逐期金额即历史，之后按标价推算；越界日期拒绝，名称实体还原', async () => {
+  const f = fixture();
+  try {
+    const today = todayIn('UTC');
+    const start = addDays(today, -70);
+    const payments = [
+      { date: addDays(today, -10), amount: 21.5 },
+      { date: start, amount: 29 },
+      { date: addDays(today, -40), amount: 19 },
+    ];
+    const args = { name: 'AT&amp;T', price: 19, currency: 'USD', cycle: { unit: 'month', every: 1 }, start, payments };
+    const preview = await f.run('create_subscription', { ...args, dry_run: true });
+    assert.equal(preview.dry_run, true);
+    const res = await f.run('create_subscription', args);
+    const created = JSON.parse((f.db.prepare('SELECT data FROM subscriptions WHERE id = ?').get(res.subscription.id) as { data: string }).data) as Subscription;
+    assert.equal(created.name, 'AT&T');
+    assert.deepEqual(
+      created.payments?.map((p) => [p.date, p.amount]),
+      [...payments].sort((a, b) => a.date.localeCompare(b.date)).map((p) => [p.date, p.amount]),
+    );
+    // 历史只取记录的金额，不按标价补出没记录的期
+    assert.deepEqual(
+      chargesBetween(created, start, today, today).map((c) => c.amount),
+      [29, 19, 21.5],
+    );
+    await assert.rejects(() => f.run('create_subscription', { ...args, name: 'Late', payments: [{ date: addDays(today, 1), amount: 5 }], dry_run: true }), {
+      message: t('mcp.error.paymentOutOfRange', { date: addDays(today, 1) }),
+    });
+  } finally {
+    f.db.close();
+  }
+});

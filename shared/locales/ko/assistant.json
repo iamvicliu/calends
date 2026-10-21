@@ -78,7 +78,9 @@
     "pendingCount": {
       "other": "확인할 초안 {count}개"
     },
-    "applyAll": "모두 확인"
+    "applyAll": "모두 확인",
+    "history": "과거 결제",
+    "historyCount": "{count}건"
   },
   "error": {
     "auth": "API Key가 유효하지 않습니다",

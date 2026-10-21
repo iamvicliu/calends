@@ -80,7 +80,9 @@
       "one": "{count} Entwurf offen",
       "other": "{count} Entwürfe offen"
     },
-    "applyAll": "Alle bestätigen"
+    "applyAll": "Alle bestätigen",
+    "history": "Bisherige Abbuchungen",
+    "historyCount": { "one": "{count} Abbuchung", "other": "{count} Abbuchungen" }
   },
   "error": {
     "auth": "Ungültiger API-Key",

@@ -53,7 +53,8 @@
     "invalidPaidThrough": "Tanggal dibayar harus sesuai periode tagihan awal.",
     "invalidStop": "Penghentian harus sesuai hari layanan terakhir; alasan hanya untuk penonaktifan penyedia.",
     "invalidRefund": "Jumlah pengembalian harus valid dan disimpan negatif.",
-    "refundBeforeStop": "Tanggal pengembalian tidak boleh sebelum penghentian."
+    "refundBeforeStop": "Tanggal pengembalian tidak boleh sebelum penghentian.",
+    "paymentOutOfRange": "Tanggal pembayaran {date} harus antara tanggal mulai dan hari ini"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",

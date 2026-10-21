@@ -80,7 +80,9 @@
       "one": "{count} borrador por confirmar",
       "other": "{count} borradores por confirmar"
     },
-    "applyAll": "Confirmar todo"
+    "applyAll": "Confirmar todo",
+    "history": "Cargos anteriores",
+    "historyCount": { "one": "{count} cargo", "other": "{count} cargos" }
   },
   "error": {
     "auth": "API Key no válida",

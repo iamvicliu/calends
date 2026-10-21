@@ -80,7 +80,9 @@
       "one": "{count} rascunho para confirmar",
       "other": "{count} rascunhos para confirmar"
     },
-    "applyAll": "Confirmar tudo"
+    "applyAll": "Confirmar tudo",
+    "history": "Cobranças anteriores",
+    "historyCount": { "one": "{count} cobrança", "other": "{count} cobranças" }
   },
   "error": {
     "auth": "API Key inválida",

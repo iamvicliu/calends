@@ -53,7 +53,8 @@
     "invalidPaidThrough": "Das Bezahlt-bis-Datum muss dem ursprünglichen Abrechnungszeitraum entsprechen.",
     "invalidStop": "Die Beendigung muss dem letzten Nutzungstag entsprechen; nur eine Anbietersperre darf einen Grund enthalten.",
     "invalidRefund": "Erstattungsbeträge müssen gültige Zahlen und negativ gespeichert sein.",
-    "refundBeforeStop": "Das Erstattungsdatum darf nicht vor dem Enddatum liegen."
+    "refundBeforeStop": "Das Erstattungsdatum darf nicht vor dem Enddatum liegen.",
+    "paymentOutOfRange": "Das Zahlungsdatum {date} muss zwischen Startdatum und heute liegen"
   },
   "tool": {
     "get_overview": "Kontoübersicht",

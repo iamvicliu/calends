@@ -74,7 +74,9 @@
     "sep": "、",
     "filled": "图标和链接已从 App Store 补全",
     "pendingCount": "还有 {count} 张草稿待确认",
-    "applyAll": "全部确认"
+    "applyAll": "全部确认",
+    "history": "历史扣款",
+    "historyCount": "{count} 笔"
   },
   "error": {
     "auth": "API Key 无效",

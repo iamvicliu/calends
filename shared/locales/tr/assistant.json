@@ -80,7 +80,9 @@
       "one": "Onay bekleyen {count} taslak",
       "other": "Onay bekleyen {count} taslak"
     },
-    "applyAll": "Tümünü onayla"
+    "applyAll": "Tümünü onayla",
+    "history": "Geçmiş ödemeler",
+    "historyCount": "{count} ödeme"
   },
   "error": {
     "auth": "Geçersiz API Key",

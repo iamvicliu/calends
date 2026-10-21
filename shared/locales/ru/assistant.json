@@ -84,7 +84,9 @@
       "many": "Ждут подтверждения: {count}",
       "other": "Ждут подтверждения: {count}"
     },
-    "applyAll": "Подтвердить все"
+    "applyAll": "Подтвердить все",
+    "history": "История списаний",
+    "historyCount": { "one": "{count} списание", "few": "{count} списания", "many": "{count} списаний", "other": "{count} списания" }
   },
   "error": {
     "auth": "Недействительный API Key",

@@ -78,7 +78,9 @@
     "pendingCount": {
       "other": "Còn {count} bản nháp chờ xác nhận"
     },
-    "applyAll": "Xác nhận tất cả"
+    "applyAll": "Xác nhận tất cả",
+    "history": "Lịch sử thanh toán",
+    "historyCount": "{count} lần"
   },
   "error": {
     "auth": "API Key không hợp lệ",
