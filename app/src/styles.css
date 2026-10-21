@@ -6506,6 +6506,8 @@ button.seat:disabled {
   max-width: 100%;
 }
 .gt {
+  overscroll-behavior-x: contain;
+  touch-action: pan-y pinch-zoom;
   position: relative;
   border-radius: var(--r);
   background: var(--card);
