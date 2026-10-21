@@ -4,6 +4,43 @@
 
 首次部署请先看 [Cloudflare 或 Docker 快速开始](../README.zh-CN.md#快速开始)。本指南说明初始化之后的配置和其他部署选项。
 
+## 使用预构建镜像
+
+无需克隆源码或本地构建，直接拉取并运行：
+
+```bash
+docker pull xizozhe/calends:latest
+docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:latest
+docker logs calends
+```
+
+打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。命名卷 `calends-data` 持久化整个 `/data`，包括 SQLite 数据库状态与自动生成的初始化令牌，无需 Cloudflare 账号。
+
+生产环境建议固定完整版本标签，如 `xizozhe/calends:1.1.0`，升级时再主动修改。`latest` 跟随 main 分支，`1.1` 跟随该次版本系列的发布；这类浮动标签方便更新，但不锁定某次发布。以下命令中的 `xizozhe/calends` 也可替换为 `ghcr.io/imetn/calends`。
+
+使用 `latest` 部署时，先拉取新版镜像，再用同一数据卷重建容器：
+
+```bash
+docker pull xizozhe/calends:latest
+docker stop calends
+docker rm calends
+docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:latest
+docker logs calends
+```
+
+删除容器会保留命名数据卷。重建时复用原数据卷，以及原部署的环境变量、重启策略等参数。使用固定版本时，将 `docker pull` 和 `docker run` 中的标签都改为目标版本。
+
+### 镜像仓库
+
+从 v1.1.0 起，预构建镜像已同时发布到以下两处，均可匿名拉取，无需 `docker login`：
+
+- Docker Hub：`xizozhe/calends`（等同于 `docker.io/xizozhe/calends`）。
+- GitHub Container Registry（GHCR）：`ghcr.io/imetn/calends`。
+
+两处均提供 `linux/amd64` 和 `linux/arm64` 多架构镜像。[镜像工作流](../.github/workflows/docker.yml) 为 main 分支构建发布 `latest`，为版本发布生成版本标签，例如 `v1.1.0` 对应 `1.1.0` 和 `1.1`。
+
+从源码构建不依赖已发布的 Calends 镜像，但仍需下载基础镜像与构建依赖。
+
 ## 从源码部署 Docker
 
 仓库已包含 [Dockerfile](../docker/Dockerfile) 和 [Compose 配置](../docker/docker-compose.yml)。在源码目录中执行：
@@ -15,6 +52,27 @@ docker compose logs calends
 ```
 
 Compose 会构建 `calends:local`，在 8787 端口启动服务，并用命名卷 `calends_calends-data` 持久化 `/data`。打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。取得新版源码后，在 `docker/` 下再运行 `docker compose up -d --build` 即可重建并更新。`docker compose down` 保留数据卷；`docker compose down -v` 会删除账本数据卷。
+
+仓库中的 `docker/docker-compose.yml` 默认从源码构建。如需使用预构建镜像，将整个 `build:` 块及原有的 `image: calends:local` 一行替换为 `image: xizozhe/calends:latest`，保留其他配置。例如：
+
+```yaml
+name: calends
+services:
+  calends:
+    image: xizozhe/calends:latest
+    restart: unless-stopped
+    ports:
+      - '8787:8787'
+    volumes:
+      - calends-data:/data
+    environment:
+      TZ: UTC
+
+volumes:
+  calends-data:
+```
+
+也可改用 `ghcr.io/imetn/calends:latest`，或固定 `1.1.0` 等版本标签。在 `docker/` 下依次运行 `docker compose pull` 和 `docker compose up -d`，即可启动或升级此配置。镜像变化时，Compose 会重建容器并保留 `calends_calends-data` 数据卷。
 
 不使用 Compose 时，也可以在仓库根目录直接构建和运行：
 
@@ -28,14 +86,6 @@ docker logs calends
 一次部署选择一种方式：Compose 使用数据卷 `calends_calends-data`，`docker run` 示例使用 `calends-data`，切换方式时需核对。
 
 镜像先构建前端，再通过 Wrangler 本地 workerd 运行时执行同一套 Worker，以 SQLite 存储数据。入口脚本会执行迁移，并每 15 分钟触发一次定时任务（与 Cloudflare 上的定时一致），无需 Cloudflare 账号。请持久化整个 `/data`，其中包含数据库状态与自动生成的初始化令牌。前端构建不包含 `local/` 中的个人文件。
-
-### 镜像仓库
-
-从 Dockerfile 构建无需把 Calends 镜像上传到任何镜像仓库，但仍需下载基础镜像与构建依赖。Docker Hub 和 GitHub Container Registry（GHCR）是可选的镜像分发服务。
-
-[镜像工作流](../.github/workflows/docker.yml) 配置了 `linux/amd64` 和 `linux/arm64` 构建，在 main 分支推送和版本标签事件中发布到 `ghcr.io/<owner>/<repository>`。Docker Hub 为可选发布目标，需要同时配置仓库 Secret `DOCKERHUB_USERNAME` 和 `DOCKERHUB_TOKEN`，目标为 `<username>/calends`。
-
-存在工作流文件不等于镜像已经上传。把预构建镜像写成可直接使用的入口前，需要核实发布任务成功、仓库中存在对应标签与摘要，并可匿名拉取。上面的源码构建方式不依赖 Calends 镜像已经发布。
 
 ## 配置项
 
@@ -93,8 +143,10 @@ Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Serv
 2. Cloudflare：克隆仓库、执行 npm ci、验证 Wrangler 登录，生成随机 SETUP_TOKEN，
    用 node scripts/wrangler.mjs secret put SETUP_TOKEN 设置，再执行 npm run deploy。
    如果我需要自定义域名，部署前加到实际使用的 Wrangler 配置中。
-3. Docker：在源码的 docker/ 目录中执行 docker compose up -d --build，
-   再用 docker compose logs calends 读取初始化令牌，保留 /data 数据卷。
+3. Docker：优先使用 xizozhe/calends（或 ghcr.io/imetn/calends）的预构建镜像。
+   生产环境固定 1.1.0 等版本标签，拉取后在 8787 端口运行，将 calends-data 挂载到 /data。
+   用 docker logs calends 读取初始化令牌。
+   仅在需要时从源码构建，例如部署到子路径。
    需要公网访问时，用我选择的反向代理配置 HTTPS。
 4. 验证 /admin 地址可访问，把地址和初始化令牌告诉我，
    再说明如何绑定 Passkey，以及在后台「连接」页接入 AI 助手。

@@ -68,7 +68,16 @@ npm run deploy
 
 ### Docker
 
-在源码目录的 `docker/` 下执行，Compose 会使用仓库中的 [Dockerfile](docker/Dockerfile) 构建并启动应用：
+直接运行预构建镜像：
+
+```bash
+docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:latest
+docker logs calends
+```
+
+打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。命名卷 `calends-data` 将 SQLite 数据持久化到 `/data`。也可使用 `ghcr.io/imetn/calends:latest`。生产环境建议固定版本标签，如 `1.1.0`，而不是使用 `latest`。
+
+也可以通过 Compose 从源码构建。在源码目录的 `docker/` 下执行，Compose 会使用仓库中的 [Dockerfile](docker/Dockerfile) 构建并启动应用：
 
 ```bash
 cd docker
@@ -76,7 +85,7 @@ docker compose up -d --build
 docker compose logs calends
 ```
 
-打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。[Compose 配置](docker/docker-compose.yml) 会通过挂载到 `/data` 的命名卷持久化 SQLite 数据。本地构建无需已发布的 Calends 镜像或 Cloudflare 账号。`docker build` / `docker run` 命令及镜像发布说明见 [Docker 部署指南](docs/self-hosting.zh-CN.md#从源码部署-docker)。
+[Compose 配置](docker/docker-compose.yml) 会通过挂载到 `/data` 的命名卷持久化 SQLite 数据。本地构建无需已发布的 Calends 镜像或 Cloudflare 账号。镜像仓库、升级与 Compose 用法见 [Docker 部署指南](docs/self-hosting.zh-CN.md#使用预构建镜像)。
 
 公网访问时，通过反向代理启用 HTTPS，并设置 `TRUST_PROXY=1`。初始化后可在「设置 → 安全」中添加 Passkey。
 

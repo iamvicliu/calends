@@ -68,7 +68,16 @@ Use a long random string for `SETUP_TOKEN`. The deploy command builds the app, p
 
 ### Docker
 
-From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
+Run the prebuilt image directly:
+
+```bash
+docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:latest
+docker logs calends
+```
+
+Open `http://localhost:8787/admin` and use the setup token printed in the logs. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.1.0` instead of `latest`.
+
+Alternatively, build from source with Compose. From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
 
 ```bash
 cd docker
@@ -76,7 +85,7 @@ docker compose up -d --build
 docker compose logs calends
 ```
 
-Open `http://localhost:8787/admin` and use the setup token printed in the logs. The [Compose configuration](docker/docker-compose.yml) persists SQLite data in a named volume mounted at `/data`. Building locally does not require a published Calends image or a Cloudflare account. See the [Docker guide](docs/self-hosting.md#docker-from-source) for `docker build` / `docker run` commands and image publishing details.
+The [Compose configuration](docker/docker-compose.yml) persists SQLite data in a named volume mounted at `/data`. Building locally does not require a published Calends image or a Cloudflare account. See the [Docker guide](docs/self-hosting.md#using-prebuilt-images) for image registries, upgrades and Compose options.
 
 For public access, enable HTTPS through a reverse proxy and set `TRUST_PROXY=1`. Add a passkey after setup in **Settings → Security**.
 

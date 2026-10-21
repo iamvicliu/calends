@@ -4,6 +4,43 @@
 
 Start with the [Cloudflare or Docker quick start](../README.md#quick-start). This guide covers configuration and deployment options beyond the first launch.
 
+## Using prebuilt images
+
+Pull and run the image without a source checkout or local build:
+
+```bash
+docker pull xizozhe/calends:latest
+docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:latest
+docker logs calends
+```
+
+Open `http://localhost:8787/admin` and use the setup token printed in the logs. The named volume `calends-data` persists all of `/data`, including the SQLite database state and generated setup token. No Cloudflare account is required.
+
+For production, pin a full version tag such as `xizozhe/calends:1.1.0` and change it deliberately when upgrading. `latest` follows the main branch; `1.1` follows releases in that minor series. These moving tags are convenient for updates but do not pin a specific release. You can replace `xizozhe/calends` with `ghcr.io/imetn/calends` in these commands.
+
+To upgrade an installation using `latest`, pull the new image, then recreate the container with the same volume:
+
+```bash
+docker pull xizozhe/calends:latest
+docker stop calends
+docker rm calends
+docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:latest
+docker logs calends
+```
+
+Removing the container preserves the named volume. Reuse the same volume and any environment variables, restart policy or other options from your original installation. For a pinned version, use the desired version tag in both `docker pull` and `docker run`.
+
+### Image registries
+
+Since v1.1.0, prebuilt images are published to both registries and can be pulled anonymously, without `docker login`:
+
+- Docker Hub: `xizozhe/calends` (equivalently `docker.io/xizozhe/calends`).
+- GitHub Container Registry (GHCR): `ghcr.io/imetn/calends`.
+
+Both provide multi-architecture images for `linux/amd64` and `linux/arm64`. [The image workflow](../.github/workflows/docker.yml) publishes `latest` for main-branch builds and version tags such as `1.1.0` and `1.1` for a `v1.1.0` release.
+
+Building from source does not depend on a published Calends image; it still downloads base images and build dependencies.
+
 ## Docker from source
 
 The repository includes a [Dockerfile](../docker/Dockerfile) and [Compose configuration](../docker/docker-compose.yml). From a source checkout:
@@ -15,6 +52,27 @@ docker compose logs calends
 ```
 
 Compose builds `calends:local`, starts the service on port 8787 and mounts the named volume `calends_calends-data` at `/data`. Open `http://localhost:8787/admin` and use the setup token from the logs. To update after obtaining newer source, run `docker compose up -d --build` in `docker/` again. `docker compose down` preserves the volume; `docker compose down -v` deletes the ledger volume.
+
+The supplied `docker/docker-compose.yml` builds from source by default. To use a prebuilt image instead, replace the entire `build:` block and the existing `image: calends:local` line with `image: xizozhe/calends:latest`, keeping the remaining settings. For example:
+
+```yaml
+name: calends
+services:
+  calends:
+    image: xizozhe/calends:latest
+    restart: unless-stopped
+    ports:
+      - '8787:8787'
+    volumes:
+      - calends-data:/data
+    environment:
+      TZ: UTC
+
+volumes:
+  calends-data:
+```
+
+Use `ghcr.io/imetn/calends:latest` as an alternative, or pin a version such as `1.1.0`. In `docker/`, run `docker compose pull` followed by `docker compose up -d` to start or upgrade this configuration. Compose recreates the container when the image changes and retains `calends_calends-data`.
 
 To build and run without Compose, from the repository root:
 
@@ -28,14 +86,6 @@ docker logs calends
 Choose one method for an installation: Compose uses the volume `calends_calends-data`, while the `docker run` example uses `calends-data`.
 
 The image builds the frontend, then runs the same Worker through Wrangler's local workerd runtime with SQLite. The entrypoint applies migrations and triggers scheduled work every 15 minutes, matching the Cloudflare cron. No Cloudflare account is required. Persist all of `/data`, which includes the database state and generated setup token. The frontend is built without personal files from `local/`.
-
-### Image registries
-
-Dockerfile builds do not require publishing the Calends image to any registry. They still download base images and build dependencies. Docker Hub and GitHub Container Registry (GHCR) are alternative distribution services, not prerequisites for running the source build.
-
-[The image workflow](../.github/workflows/docker.yml) is configured to build `linux/amd64` and `linux/arm64` and push to `ghcr.io/<owner>/<repository>` on main-branch pushes and version tags. Docker Hub publishing is optional and requires both `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets; its target is `<username>/calends`.
-
-The workflow file alone does not establish that an image has been uploaded. Before documenting a prebuilt image as ready to use, verify a successful publishing run, the registry tag/digest and anonymous pull access. The source-build instructions above work independently of a published Calends image.
 
 ## Configuration
 
@@ -93,8 +143,10 @@ Read the README and docs/self-hosting.md first.
 2. Cloudflare: clone the repo, run npm ci, verify Wrangler login, generate a random SETUP_TOKEN,
    set it with node scripts/wrangler.mjs secret put SETUP_TOKEN, then run npm run deploy.
    Configure my custom domain in the active Wrangler configuration before deploying, if requested.
-3. Docker: from the source checkout's docker/ directory, run docker compose up -d --build,
-   then read the setup token with docker compose logs calends. Keep the /data volume persistent.
+3. Docker: prefer a prebuilt image from xizozhe/calends (or ghcr.io/imetn/calends).
+   Pin a version such as 1.1.0 for production, pull it, then run it on port 8787 with
+   calends-data mounted at /data. Read the setup token with docker logs calends.
+   Build from source only when needed, for example for subpath deployment.
    For public access, configure HTTPS with my chosen proxy.
 4. Verify the /admin URL is reachable. Give me the URL and setup token, then explain how to
    add a passkey and connect an assistant from the AI access page.
