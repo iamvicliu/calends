@@ -168,19 +168,5 @@
     "reactivate": "Reprendre",
     "charge": "Prélèvement",
     "deleteAll": "Supprime l’abonnement et tous ses prélèvements. Action irréversible."
-  },
-  "demo": {
-    "label": "Démo",
-    "downgrade": "Quels comptes Claude pourraient passer à une offre inférieure ?",
-    "receipt": "Reçu fictif\n{name}\n{amount} / mois\nCompte : {account}\nDate : {date}",
-    "thinking": "Je consulte le registre actuel en local. Aucun service IA ne sera contacté.",
-    "duplicate": "Ce reçu existe déjà. Aucun brouillon en double n’a été créé.",
-    "draft": "Aucun compte correspondant. Vérifiez le brouillon puis ajoutez-le au registre de démo.",
-    "month": "Ce mois-ci : {amount} pour {count} débits, hors paiements pour autrui. Le plus élevé : {name}, {largest}.",
-    "hikes": "Hausses du coût mensuel équivalent sur un an (devise d’origine) :",
-    "noHikes": "Aucune hausse de prix trouvée sur un an.",
-    "downgradeReply": "Vérifiez ces comptes Max 20x suspendus ou non renouvelés avant de les réactiver. Le registre ne contient pas de données d’utilisation pour évaluer les comptes actifs.",
-    "freeform": "Cette démo joue des conversations prédéfinies. Choisissez un scénario ci-dessous. Déployez votre Calends et configurez votre clé API pour utiliser une vraie IA.",
-    "disclaimer": "Démo locale scénarisée. Les brouillons confirmés sont enregistrés puis réinitialisés chaque jour."
   }
 }

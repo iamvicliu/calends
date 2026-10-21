@@ -1,5 +1,4 @@
 {
-  "demoUnavailable": "Indisponível no site de demonstração",
   "fxApiError": "O serviço de câmbio retornou um erro",
   "missingId": "ID ausente",
   "invalidItem": "{name}: {error}",
@@ -49,7 +48,9 @@
     "invalid": "Lista de categorias inválida",
     "duplicate": "Categoria duplicada: {name}"
   },
-  "demoReadonly": "Esta é uma demonstração somente leitura — as alterações não são salvas.",
-  "assistant": { "noKey": "Nenhuma chave de API do DeepSeek configurada.", "badTool": "Ação não suportada." },
+  "assistant": {
+    "noKey": "Nenhuma chave de API do DeepSeek configurada.",
+    "badTool": "Ação não suportada."
+  },
   "invalidAvatar": "Imagem inválida"
 }

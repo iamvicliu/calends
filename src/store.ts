@@ -90,7 +90,7 @@ export async function boot(): Promise<void> {
     set({ phase: 'ready', state });
     if (!state.readonly) {
       void syncFx();
-      if (!state.demo) migratePrefs();
+      migratePrefs();
     }
   } catch (e) {
     if (store.phase === 'login') {
@@ -560,8 +560,7 @@ function migratePrefs() {
 export function usePref<T extends string>(key: PrefKey, fallback: T, valid?: (v: string) => v is T): [T, (v: T | null) => void] {
   // 从 useStore 的返回值取，React Compiler 才知道它会变（直接读模块里的 store 会被缓存住）
   const { state } = useStore();
-  // 演示站复原后以服务端空偏好为准，不能从本机副本复活昨天的主题和侧边栏。
-  const raw = state?.prefs?.[key] ?? (state?.demo ? null : localPref(key));
+  const raw = state?.prefs?.[key] ?? localPref(key);
   const value = raw != null && (!valid || valid(raw)) ? (raw as T) : fallback;
   return [value, (v) => writePref(key, v)];
 }

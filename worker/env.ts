@@ -10,7 +10,6 @@ export interface Env {
   /** 站点地址（提醒里的链接）；不配置时用访问后台时记下的地址 */
   SITE_URL?: string;
   BASE_PATH?: string;
-  DEMO_PROFILE?: string;
   MAIL_FROM?: string;
   MAIL_FROM_NAME?: string;
   /** 旧版：口令直接放在密钥里；第一次登录成功后会转存为哈希，之后可以删除 */
@@ -21,8 +20,6 @@ export interface Env {
   TRUST_PROXY?: string;
   /** 换过域名时填旧域名（逗号分隔）：在这些域名上打开页面会 301 到 SITE_URL；接口、MCP、日历订阅照常可用，已有的订阅和客户端不受影响 */
   OLD_HOSTS?: string;
-  /** 演示站：匿名可编辑账本，每天 UTC 零点复原，禁用外部接入与账号安全 */
-  DEMO_MODE?: string;
   /** 仅本地：.dev.vars 设为 1 时跳过登录（不要在线上配置） */
   DEV_BYPASS_AUTH?: string;
 }

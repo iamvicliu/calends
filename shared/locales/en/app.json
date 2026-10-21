@@ -60,10 +60,5 @@
     "generate": "Create private calendar link",
     "generated": "Calendar link created",
     "note": "The link contains a private token — anyone with it can see your billing schedule. If it leaks, tap Reset link to revoke it."
-  },
-  "demo": {
-    "banner": "This is a demo. Data resets every day at 00:00 (GMT).",
-    "cta": "Deploy your own",
-    "unavailable": "Unavailable on the demo site"
   }
 }

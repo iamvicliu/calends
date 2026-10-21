@@ -308,7 +308,6 @@ export async function sendDigest(
   d: Digest,
   opts: { force?: boolean; only?: string } = {},
 ): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
-  if (env.DEMO_MODE === '1') return { sent: false, reason: t('server.demoUnavailable') };
   const targets = channelsOf(state.settings).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
   if (!targets.length) return { sent: false, reason: opts.only ? t('notify.send.noChannel') : t('notify.send.noneEnabled') };
   if (!opts.force) {
@@ -359,7 +358,6 @@ function localHour(tz: string): number {
 }
 
 export async function runScheduled(env: Env, state: AppState): Promise<string[]> {
-  if (env.DEMO_MODE === '1') return [];
   const log: string[] = [];
   const today = todayIn(state.settings.timezone);
   if (localHour(state.settings.timezone) !== state.settings.notifyHour) return log;

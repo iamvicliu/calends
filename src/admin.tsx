@@ -495,7 +495,6 @@ function App() {
         view = <ProxyPage state={state} today={d} onOpen={open} />;
         break;
       case 'mcp':
-        // 演示站也开放连接：令牌与写入都会在每天复原时清空
         view = <Ai state={state} />;
         break;
       case 'assistant':
@@ -535,14 +534,6 @@ function App() {
       />
       <div className="drawer-scrim" onClick={() => setDrawer(false)} />
       <div className="main">
-        {state.demo && (
-          <div className="demo-bar">
-            <span>{t('app.demo.banner')}</span>
-            <a href="https://calends.date/#deploy" target="_blank" rel="noopener">
-              {t('app.demo.cta')} →
-            </a>
-          </div>
-        )}
         {phase === 'offline' && (
           <div className="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
             {t('app.offline')}
@@ -580,8 +571,7 @@ function Root() {
     if (want !== loc) void loadLocale(want).then(() => setLoc(want));
     document.title = t('app.name');
     // 跟随浏览器时，把实际用的语言记到设置里，提醒邮件和 MCP 用同一种
-    if (state && !state.demo && !state.readonly && !state.settings.language && state.settings.languageSeen !== want)
-      void saveSettings({ languageSeen: want }).catch(() => {});
+    if (state && !state.readonly && !state.settings.language && state.settings.languageSeen !== want) void saveSettings({ languageSeen: want }).catch(() => {});
     // 记下站点地址，定时提醒里的链接要用（本地开发不记）
     if (
       state &&

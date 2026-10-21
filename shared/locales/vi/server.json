@@ -1,5 +1,4 @@
 {
-  "demoUnavailable": "Không khả dụng trên trang demo",
   "fxApiError": "Dịch vụ tỷ giá trả về lỗi",
   "missingId": "Thiếu id",
   "invalidItem": "{name}: {error}",
@@ -44,7 +43,9 @@
     "invalid": "Danh sách danh mục không hợp lệ",
     "duplicate": "Danh mục bị trùng: {name}"
   },
-  "demoReadonly": "Đây là bản demo chỉ xem — không thể lưu thay đổi.",
-  "assistant": { "noKey": "Chưa cấu hình khóa API DeepSeek.", "badTool": "Thao tác không được hỗ trợ." },
+  "assistant": {
+    "noKey": "Chưa cấu hình khóa API DeepSeek.",
+    "badTool": "Thao tác không được hỗ trợ."
+  },
   "invalidAvatar": "Ảnh không hợp lệ"
 }

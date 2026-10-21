@@ -166,19 +166,5 @@
     "reactivate": "Lanjutkan",
     "charge": "Tagihan",
     "deleteAll": "Menghapus langganan beserta semua tagihannya. Tidak dapat dibatalkan."
-  },
-  "demo": {
-    "label": "Demo",
-    "downgrade": "Akun Claude mana yang bisa turun paket?",
-    "receipt": "Kuitansi fiktif\n{name}\n{amount} / bulan\nAkun: {account}\nTanggal: {date}",
-    "thinking": "Saya akan memeriksa buku saat ini secara lokal. Tidak ada layanan AI yang dihubungi.",
-    "duplicate": "Kuitansi ini sudah tercatat. Draf duplikat tidak dibuat.",
-    "draft": "Tidak ada akun yang cocok. Periksa draf lalu tambahkan ke buku demo.",
-    "month": "Bulan ini: {amount} dalam {count} tagihan, tanpa pembayaran untuk orang lain. Terbesar: {name}, {largest}.",
-    "hikes": "Kenaikan biaya bulanan ekuivalen setahun terakhir (mata uang asli):",
-    "noHikes": "Tidak ditemukan kenaikan harga dalam setahun terakhir.",
-    "downgradeReply": "Tinjau akun Max 20x yang dijeda atau tidak diperpanjang ini sebelum mengaktifkannya lagi. Tidak ada data pemakaian untuk menilai akun aktif.",
-    "freeform": "Demo ini memutar percakapan terprogram. Pilih skenario di bawah. Pasang Calends sendiri dan atur kunci API Anda untuk memakai AI sungguhan.",
-    "disclaimer": "Demo skrip lokal. Draf yang dikonfirmasi disimpan dan direset setiap hari."
   }
 }

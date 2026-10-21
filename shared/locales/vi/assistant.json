@@ -166,19 +166,5 @@
     "reactivate": "Tiếp tục",
     "charge": "Trừ tiền",
     "deleteAll": "Xóa gói đăng ký và toàn bộ lần trừ tiền. Không thể hoàn tác."
-  },
-  "demo": {
-    "label": "Bản demo",
-    "downgrade": "Tài khoản Claude nào nên hạ gói?",
-    "receipt": "Biên nhận giả định\n{name}\n{amount} / tháng\nTài khoản: {account}\nNgày: {date}",
-    "thinking": "Tôi sẽ kiểm tra sổ hiện tại ngay trên máy. Không liên hệ dịch vụ AI nào.",
-    "duplicate": "Biên nhận này đã có trong sổ. Không tạo bản nháp trùng.",
-    "draft": "Không có tài khoản trùng. Hãy kiểm tra bản nháp rồi thêm vào sổ demo.",
-    "month": "Tháng này: {amount} qua {count} khoản thu, không gồm trả hộ. Lớn nhất: {name}, {largest}.",
-    "hikes": "Các lần tăng chi phí quy đổi theo tháng trong năm qua (tiền tệ gốc):",
-    "noHikes": "Không có tăng giá trong năm qua.",
-    "downgradeReply": "Hãy xem lại các tài khoản Max 20x đang tạm dừng hoặc không gia hạn trước khi kích hoạt lại. Không có dữ liệu sử dụng để đánh giá tài khoản đang hoạt động.",
-    "freeform": "Demo phát hội thoại soạn sẵn. Chọn tình huống bên dưới. Triển khai Calends riêng và cấu hình khóa API của bạn để dùng AI thực.",
-    "disclaimer": "Demo kịch bản chạy cục bộ. Bản nháp được xác nhận sẽ lưu vào sổ và đặt lại hằng ngày."
   }
 }

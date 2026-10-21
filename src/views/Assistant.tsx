@@ -1,4 +1,3 @@
-import { assistantTransport, demoPrompt, demoReply, demoScenarios, type DemoScenario } from '../../shared/assistant-demo.ts';
 import { base, storageKey } from '../base.ts';
 import type { ReactNode } from 'react';
 import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
@@ -35,7 +34,7 @@ import type { AppState, Subscription } from '../../shared/types.ts';
 import { PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
-import { api, refresh, saveSub, toast } from '../store.ts';
+import { api, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
 import './assistant.css';
@@ -230,23 +229,21 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   const composer = useRef<ComposerHandle>(null);
 
   useEffect(() => {
-    if (state.demo) return;
     void api<AssistantConfigView>('/api/assistant/config').then(setCfg, () => setCfg(null));
-  }, [state.demo]);
+  }, []);
   useEffect(() => persist(chat), [chat]);
   useEffect(() => {
-    if (state.demo) return;
     void api<Saved[]>('/api/assistant/chats').then(
       (list) => setPast(list.filter((c) => c.turns?.length)),
       () => {},
     );
-  }, [state.demo]);
+  }, []);
   // 每轮回复结束后存到服务端（流式过程中不存）；其他设备也能看到
   useEffect(() => {
-    if (state.demo || busy || !chat.turns.length) return;
+    if (busy || !chat.turns.length) return;
     const h = setTimeout(() => void api(`/api/assistant/chats/${chat.id}`, { method: 'PUT', body: JSON.stringify(forServer(chat)) }).catch(() => {}), 600);
     return () => clearTimeout(h);
-  }, [chat, busy, state.demo]);
+  }, [chat, busy]);
   const shownPast = past.filter((c) => c.id !== chat.id);
   // 别处（新建订阅表单）带着文字或图片跳过来：放进输入框
   useEffect(() => {
@@ -267,7 +264,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const send = async (text: string, images: string[], history = chat.history, base = chat.turns, scenario?: DemoScenario) => {
+  const send = async (text: string, images: string[], history = chat.history, base = chat.turns) => {
     if (busy || (!text.trim() && !images.length)) return;
     const user: ChatTurn = { id: rid(), role: 'user', text, images, at: history.length };
     let bot: Extract<ChatTurn, { role: 'assistant' }> = { id: rid(), role: 'assistant', parts: [], status: 'streaming' };
@@ -283,56 +280,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
         if (e.type === 'done') added = e.messages;
         setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? bot : x)) }));
       };
-      await assistantTransport(
-        !!state.demo,
-        async () => {
-          const picked = scenario ?? demoScenarios(state).find((key) => demoPrompt(state, today, key) === text);
-          const reply = demoReply(state, today, picked);
-          const pause = (ms: number) =>
-            new Promise<void>((resolve, reject) => {
-              if (ctrl.signal.aborted) return reject(new DOMException('Aborted', 'AbortError'));
-              const stop = () => {
-                clearTimeout(timer);
-                reject(new DOMException('Aborted', 'AbortError'));
-              };
-              const timer = setTimeout(() => {
-                ctrl.signal.removeEventListener('abort', stop);
-                resolve();
-              }, ms);
-              ctrl.signal.addEventListener('abort', stop, { once: true });
-            });
-          const type = async (type: 'reasoning' | 'text', value: string) => {
-            const chars = [...value];
-            for (let i = 0; i < chars.length; i += 3) {
-              await pause(12);
-              on({ type, delta: chars.slice(i, i + 3).join('') });
-            }
-          };
-          await type('reasoning', t('assistant.demo.thinking'));
-          if (reply.tool) {
-            const id = rid();
-            on({ type: 'tool', id, name: reply.tool, args: reply.args, status: 'running' });
-            await pause(500);
-            on({ type: 'tool', id, name: reply.tool, args: reply.args, status: 'done', result: reply.result });
-          }
-          await type('text', reply.text);
-          if (reply.subscription) {
-            const sub = reply.subscription;
-            on({
-              type: 'proposal',
-              id: rid(),
-              tool: 'create_subscription',
-              args: { ...sub, method: sub.methodId },
-              preview: {
-                subscription: { id: sub.id, name: sub.name, price: sub.price, currency: sub.currency },
-                next_charges: [{ date: sub.start, amount: sub.price, currency: sub.currency }],
-              },
-            });
-          }
-          on({ type: 'done', messages: [] });
-        },
-        () => stream({ history, text, images }, ctrl.signal, on),
-      );
+      await stream({ history, text, images }, ctrl.signal, on);
     } catch (err) {
       const aborted = ctrl.signal.aborted;
       bot = aborted
@@ -371,17 +319,10 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   const applyProposal = async (turnId: string, p: Extract<Part, { kind: 'proposal' }>) => {
     setPart(turnId, p.id, { state: 'applying', error: undefined });
     try {
-      let r: { subscription?: { id: string; name: string } };
-      if (state.demo) {
-        if (p.tool !== 'create_subscription') throw new Error(t('app.demo.unavailable'));
-        const draft = p.args as unknown as Subscription;
-        await saveSub(draft);
-        r = { subscription: { id: draft.id, name: draft.name } };
-      } else
-        r = await api<{ subscription?: { id: string; name: string } }>('/api/assistant/apply', {
-          method: 'POST',
-          body: JSON.stringify({ tool: p.tool, args: p.args }),
-        });
+      const r = await api<{ subscription?: { id: string; name: string } }>('/api/assistant/apply', {
+        method: 'POST',
+        body: JSON.stringify({ tool: p.tool, args: p.args }),
+      });
       await refresh();
       setPart(turnId, p.id, { state: 'applied', subId: r.subscription?.id });
       setChat((c) => ({
@@ -438,16 +379,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
 
   const empty = !chat.turns.length;
   const noop = () => {};
-  const ready = !!state.demo || !!cfg?.configured;
-  const demoSuggestions = state.demo ? (
-    <div className="as-suggest">
-      {demoScenarios(state).map((key) => (
-        <button key={key} disabled={busy} onClick={() => void send(demoPrompt(state, today, key), [], chat.history, chat.turns, key)}>
-          {key === 'downgrade' ? t('assistant.demo.downgrade') : t(`assistant.suggest.${key}.title`)}
-        </button>
-      ))}
-    </div>
-  ) : undefined;
+  const ready = !!cfg?.configured;
   return (
     <>
       <Toolbar title={t('assistant.title')}>
@@ -457,11 +389,9 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
               <SquarePen size={16} />
             </button>
           )}
-          {!state.demo && (
-            <button className="icon-btn" onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
-              <Settings2 size={16} />
-            </button>
-          )}
+          <button className="icon-btn" onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
+            <Settings2 size={16} />
+          </button>
         </span>
       </Toolbar>
       <div className="as">
@@ -496,7 +426,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
             ))}
             {shownPast.length > 0 && !empty && <div className="as-past-head">{fmtWhen(chat.createdAt)}</div>}
             {empty ? (
-              <Welcome demo={!!state.demo} ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
+              <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
             ) : (
               chat.turns.map((turn, i) =>
                 turn.role === 'user' ? (
@@ -530,21 +460,17 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
         )}
         <Composer
           ref={composer}
-          above={
-            demoSuggestions ??
-            (empty && ready ? <Suggestions onPick={(x) => (x.send ? void send(x.text, []) : composer.current?.prefill(x.text))} /> : undefined)
-          }
+          above={empty && ready ? <Suggestions onPick={(x) => (x.send ? void send(x.text, []) : composer.current?.prefill(x.text))} /> : undefined}
           busy={busy}
           disabled={!ready}
-          demo={!!state.demo}
-          model={state.demo ? t('assistant.demo.label') : cfg?.model}
+          model={cfg?.model}
           onSend={(text, imgs) => void send(text, imgs)}
           onStop={() => abort.current?.abort()}
           onSettings={() => setSetup(true)}
           onReset={empty ? undefined : reset}
         />
       </div>
-      {!state.demo && setup && (
+      {setup && (
         <SetupSheet
           cfg={cfg}
           onClose={() => setSetup(false)}
@@ -569,12 +495,12 @@ const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
   { key: 'hikes', send: true },
 ];
 
-function Welcome({ demo, ready, cfg, onSetup }: { demo: boolean; ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
+function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
   return (
     <div className="as-welcome">
       <img className="as-orb" src={base('/icons/logo.svg')} alt="" />
       <h2>{t('assistant.welcome.title')}</h2>
-      <p>{t(demo ? 'assistant.demo.disclaimer' : 'assistant.welcome.body')}</p>
+      <p>{t('assistant.welcome.body')}</p>
       {!ready && cfg && (
         <button className="as-setup-cta" onClick={onSetup}>
           <KeyRound size={16} />
@@ -1046,13 +972,11 @@ function Composer({
   onSettings,
   onReset,
   above,
-  demo,
 }: {
   ref: React.Ref<ComposerHandle>;
   busy: boolean;
   disabled: boolean;
   model?: string;
-  demo?: boolean;
   onSend: (text: string, images: string[]) => void;
   onStop: () => void;
   onSettings: () => void;
@@ -1165,13 +1089,9 @@ function Composer({
             <ImagePlus size={17} />
           </button>
           <input ref={file} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files && void addFiles(e.target.files)} />
-          {demo ? (
-            <span className="as-model">{model}</span>
-          ) : (
-            <button className="as-model" onClick={onSettings} title={t('assistant.settings')}>
-              {model === 'deepseek-flash' ? 'DeepSeek V4.1 Flash' : (model ?? 'DeepSeek')}
-            </button>
-          )}
+          <button className="as-model" onClick={onSettings} title={t('assistant.settings')}>
+            {model === 'deepseek-flash' ? 'DeepSeek V4.1 Flash' : (model ?? 'DeepSeek')}
+          </button>
           {onReset && (
             <button className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
@@ -1195,7 +1115,7 @@ function Composer({
           )}
         </div>
       </div>
-      <p className="as-foot">{t(demo ? 'assistant.demo.disclaimer' : 'assistant.disclaimer')}</p>
+      <p className="as-foot">{t('assistant.disclaimer')}</p>
     </div>
   );
 }

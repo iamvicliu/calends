@@ -8164,35 +8164,6 @@ button.seat:disabled {
   }
 }
 
-/* 演示站顶部的提示条 */
-.demo-bar {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px 16px;
-  flex-wrap: wrap;
-  line-height: 1.5;
-  padding: 7px 16px;
-  background: var(--ink);
-  color: var(--on-ink);
-  font-size: 13px;
-}
-.demo-bar a {
-  flex-shrink: 0;
-  margin-left: auto;
-  color: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-@media (min-width: 861px) {
-  .app.collapsed .demo-bar {
-    padding-left: 64px;
-  }
-}
-
 /* 时间线左右平移：范围标签在中间，点它回到当前；拖动时显示抓手 */
 .gt-nav {
   display: flex;
