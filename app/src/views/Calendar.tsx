@@ -64,7 +64,12 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const sumOf = (list: Charge[] = []) => sumBase(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
-  const shift = (n: number) => setMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));
+  // 翻月时选中日跟着走：不在新月份里就落到本月的今天，或那个月的 1 号
+  const goMonth = (m: string) => {
+    setMonth(m);
+    setSel((s) => (s.startsWith(m) ? s : m === today.slice(0, 7) ? today : `${m}-01`));
+  };
+  const shift = (n: number) => goMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));
   // ← → 翻上/下一页（月视图翻月，年视图翻年），T 回到今天；输入框里、弹层打开时不响应
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -73,7 +78,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       if (document.querySelector('.scrim, [aria-modal="true"]')) return;
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault();
-        setMonth(addMonths(month + '-01', (e.key === 'ArrowLeft' ? -1 : 1) * (mode === 'year' ? 12 : 1)).slice(0, 7));
+        goMonth(addMonths(month + '-01', (e.key === 'ArrowLeft' ? -1 : 1) * (mode === 'year' ? 12 : 1)).slice(0, 7));
       } else if (e.key === 't' || e.key === 'T') {
         setMonth(today.slice(0, 7));
         setSel(today);
@@ -131,7 +136,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             sumOf={sumOf}
             base={base}
             onPick={(m) => {
-              setMonth(m);
+              goMonth(m);
               setMode('month');
             }}
           />
