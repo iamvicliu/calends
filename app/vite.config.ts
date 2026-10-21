@@ -84,6 +84,11 @@ export default defineConfig({
   // React 19 + React Compiler（Rust 版，自动做组件记忆化）
   plugins: [react({ compiler: true }), tailwindcss(), baseManifest(), localPublic()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  // 公开页是动态加载的入口：它的依赖若在开发中途才被发现再预构建，会生成第二份 React，打开 /public 报 Invalid hook call。
+  // 首轮就和 React 一起预构建，保证只有一份
+  optimizeDeps: {
+    include: ['radix-ui', 'class-variance-authority', 'clsx', 'tailwind-merge', 'motion/react', 'number-flow', 'recharts', 'matter-js'],
+  },
   server: {
     // 本地开发：wrangler dev 跑在 8787；按前缀匹配，/cal/ 要带斜杠，否则 /calendar 页面也会被转发
     proxy: Object.fromEntries(['/api/', '/cal/', '/mcp'].map((path) => [assetPath(path), 'http://127.0.0.1:8787'])),
