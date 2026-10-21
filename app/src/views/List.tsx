@@ -1,4 +1,4 @@
-import { StopBadge } from '../components/StopPanel.tsx';
+import { StopBadge, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
@@ -279,7 +279,7 @@ export function List({
                       {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
                       {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
                       {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
-                      {st === 'terminated' && <span className="badge">{t('list.status.terminated')}</span>}
+                      {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
                       <StopBadge sub={s} today={today} readonly={state.readonly} />
                       {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
                       {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
@@ -380,8 +380,7 @@ export function List({
                           {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
                           {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
                           {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
-                          {st === 'terminated' && <span className="badge">{t('list.status.terminated')}</span>}
-                          <StopBadge sub={s} today={today} readonly={state.readonly} />
+                          {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
                           {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
                           {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
                           {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
@@ -391,6 +390,12 @@ export function List({
                             </span>
                           )}
                         </span>
+                        {/* 退款情况单独一行，窄屏不挤掉名称 */}
+                        {!state.readonly && stopLabel(cur, today) && (
+                          <small className="lt-stop" title={stopDescription(cur, today)}>
+                            {stopLabel(cur, today)}
+                          </small>
+                        )}
                         {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
                         <ParallelNote sub={s} cur={cur} today={today} />
                       </span>

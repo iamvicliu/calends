@@ -378,7 +378,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           return (
                             <span
                               key={a}
-                              className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${intro ? 'intro' : ''}`}
+                              className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${last && unused ? 'joined' : ''} ${intro ? 'intro' : ''}`}
                               style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                               title={ptip || tip}
                             >
@@ -402,28 +402,19 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             title={stopDescription(g.v, today)}
                           />
                         )}
-                        {stopped &&
-                          stopped.date >= start &&
-                          stopped.date <= end &&
-                          (stopped.kind === 'terminate' ? (
-                            <svg
-                              className="gt-stop"
-                              role="img"
-                              aria-label={t('core.stop.terminate')}
-                              style={{ left: x(stopped.date) - 10, top: top - 1 }}
-                              viewBox="0 0 20 20"
-                            >
-                              <title>{state.readonly ? t('core.stop.terminate') : stopDescription(g.v, today)}</title>
-                              <circle cx="10" cy="10" r="8" />
-                              <path d="M4.4 15.6 15.6 4.4" />
-                            </svg>
-                          ) : (
-                            <span
-                              className="gt-stop-end"
-                              style={{ left: x(stopped.date) - 2, top }}
-                              title={state.readonly ? t('core.stop.cancel') : stopDescription(g.v, today)}
-                            />
-                          ))}
+                        {stopped && stopped.date >= start && stopped.date <= end && stopped.kind === 'terminate' && (
+                          <svg
+                            className="gt-stop"
+                            role="img"
+                            aria-label={t('core.stop.terminate')}
+                            style={{ left: x(stopped.date) - 10, top: top - 1 }}
+                            viewBox="0 0 20 20"
+                          >
+                            <title>{state.readonly ? t('core.stop.terminate') : stopDescription(g.v, today)}</title>
+                            <circle cx="10" cy="10" r="8" />
+                            <path d="M4.4 15.6 15.6 4.4" />
+                          </svg>
+                        )}
                       </Fragment>
                     );
                   })}

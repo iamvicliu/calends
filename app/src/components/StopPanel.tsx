@@ -26,8 +26,9 @@ export function stopDescription(sub: Subscription, today: string): string {
     cnDateFull(summary.date),
     t(summary.kind === 'terminate' ? 'core.stop.terminate' : 'core.stop.cancel'),
     summary.reason ? `(${summary.reason})` : '',
-    stopLabel(sub, today),
-    summary.wastedDays > 0 ? t('core.stop.unused', { days: summary.wastedDays, money: money(summary.unusedValue, sub.currency) }) : '',
+    // 未退款：标签里已有天数，只补金额；有退款：标签写退款额，另起一句写没退回的部分
+    summary.refunded > 0 ? stopLabel(sub, today) : `${stopLabel(sub, today)} (≈ ${money(summary.unusedValue, sub.currency)})`,
+    summary.refunded > 0 && summary.wastedDays > 0 ? t('core.stop.unused', { days: summary.wastedDays, money: money(summary.unusedValue, sub.currency) }) : '',
   ]
     .filter(Boolean)
     .join(' · ');

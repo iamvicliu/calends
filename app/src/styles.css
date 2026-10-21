@@ -737,6 +737,10 @@ a {
   background: rgba(255, 149, 0, 0.14);
   color: #c76a00;
 }
+.badge.red {
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+  color: var(--red);
+}
 .badge.blue {
   background: var(--accent-soft);
   color: var(--accent);
@@ -3937,15 +3941,20 @@ select.btn {
   color: var(--orange);
   font-weight: 600;
 }
-.scard.st-ended {
+.scard.st-ended,
+.scard.st-terminated {
   background: var(--card-2);
 }
 .scard.st-ended .ico,
 .scard.st-ended .sc-name,
-.scard.st-ended .sc-glow {
+.scard.st-ended .sc-glow,
+.scard.st-terminated .ico,
+.scard.st-terminated .sc-name,
+.scard.st-terminated .sc-glow {
   opacity: 0.5;
 }
-.scard.st-ended .sc-price .amt {
+.scard.st-ended .sc-price .amt,
+.scard.st-terminated .sc-price .amt {
   text-decoration: line-through;
   color: var(--label-3);
 }
@@ -5642,6 +5651,13 @@ button.seat:disabled {
 .lt-title .change-note {
   margin-top: 2px;
 }
+.lt-title .lt-stop {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .lt-amt,
 .lt-start,
 .lt-next {
@@ -5670,10 +5686,12 @@ button.seat:disabled {
   font-weight: 600;
 }
 .lt-row.st-ended .lt-name,
+.lt-row.st-terminated .lt-name,
 .lt-row.st-paused .lt-name {
   opacity: 0.55;
 }
-.lt-row.st-ended .amt {
+.lt-row.st-ended .amt,
+.lt-row.st-terminated .amt {
   text-decoration: line-through;
   color: var(--label-3);
 }
@@ -8827,36 +8845,36 @@ img.mm-flag {
   text-align: start;
   overflow-wrap: anywhere;
 }
+.gt-seg.joined {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+/* 已付未用：接在停止日之后，和前面的实线拼成一整根，灰色表示这段钱没用上 */
 .gt-unused,
 .gt-legend .lg-unused {
-  border-radius: 0;
-  background: repeating-linear-gradient(90deg, var(--label-3) 0 7px, transparent 7px 12px);
-  opacity: 0.55;
+  background: color-mix(in srgb, var(--label-3) 38%, transparent);
 }
 .gt-unused {
   position: absolute;
   height: 18px;
   z-index: 1;
+  border-radius: 0 999px 999px 0;
 }
-.gt-stop,
-.gt-stop-end {
+.gt-legend .lg-unused {
+  border-radius: 999px;
+}
+/* 服务方停用：红色禁止标志压在接缝上 */
+.gt-stop {
   position: absolute;
   z-index: 3;
-  color: var(--label);
 }
 .gt-stop,
 .lg-stop {
   width: 20px;
   height: 20px;
   fill: var(--card);
-  stroke: currentColor;
+  stroke: var(--red);
   stroke-width: 2.5;
-}
-.gt-stop-end {
-  width: 4px;
-  height: 18px;
-  border-radius: 2px;
-  background: var(--label-2);
 }
 @media (max-width: 480px) {
   .stop-panel .cell {

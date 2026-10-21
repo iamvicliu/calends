@@ -132,7 +132,7 @@ test('真实停止表单：三种模式、日期默认值、币种锁定、按�
   assert.equal(applied.at(-1)!.end, undefined);
 });
 
-test('真实甘特结构：同高灰色虚线、停用标记、主动结束标记、退款点与公开视图', () => {
+test('真实甘特结构：已付未用接在实线后、红色停用标记、退款点与公开视图', () => {
   const stop = runtime('../app/src/components/StopPanel.tsx', { toast() {} }).exports;
   const r = runtime('../app/src/views/Gantt.tsx', {
     usePref: (_key: string, initial: unknown) => [initial, () => {}],
@@ -160,10 +160,11 @@ test('真实甘特结构：同高灰色虚线、停用标记、主动结束标�
     const nodes = render(stopped);
     assert.equal(withClass(nodes, 'gt-unused').length, amount === 31 ? 0 : 1);
     assert.equal(withClass(nodes, 'gt-stop').length, 1);
-    assert.equal(withClass(nodes, 'gt-stop-end').length, 0);
     if (amount !== 31) {
       const unused = withClass(nodes, 'gt-unused')[0];
       assert.equal(unused.props.style.top, withClass(nodes, 'gt-seg')[0].props.style.top);
+      // 实线最后一截改直角，与已付未用拼成一根
+      assert.equal(withClass(nodes, 'joined').length, 1);
       assert.ok(unused.props.style.width > 0);
       assert.ok(unused.props.title.includes('abuse'));
     }
@@ -171,6 +172,7 @@ test('真实甘特结构：同高灰色虚线、停用标记、主动结束标�
     assert.equal(withClass(render(stopped, true), 'gt-unused').length, 0);
   }
   const cancelled = render(phases.stopSubscription(sub, today, 'cancel'));
-  assert.equal(withClass(cancelled, 'gt-stop-end').length, 1);
+  // 主动退订不加额外标记，只有服务方停用才有禁止标志
   assert.equal(withClass(cancelled, 'gt-stop').length, 0);
+  assert.equal(withClass(cancelled, 'gt-unused').length, 1);
 });
