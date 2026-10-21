@@ -467,7 +467,11 @@ function App() {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || e.metaKey || e.ctrlKey || e.altKey) return;
       // 有弹层（编辑器、详情、搜索等）打开时，单键快捷键不生效
       if (editing || viewId || review || ics || palette || document.querySelector('.scrim, [aria-modal="true"]')) return;
-      if (e.key === 'n' && state && !state.readonly) setEditing(newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
+      if (e.key === 'n' && state && !state.readonly) {
+        // 拦下这次按键，不然它会落进刚打开、自动聚焦的名称输入框
+        e.preventDefault();
+        setEditing(newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
+      }
       const idx = Number(e.key);
       if (state && idx >= 1 && idx <= navOf(state.settings).length) navigate(navOf(state.settings)[idx - 1].path);
     };
