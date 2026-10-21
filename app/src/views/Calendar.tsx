@@ -8,6 +8,8 @@ import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { usePref } from '../store.ts';
+import { monthReport } from '../../../shared/scope-report.ts';
+import { ScopeReport } from '../components/ScopeReport.tsx';
 
 /** 表头的星期简称，按周起始日排好 */
 const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
@@ -30,7 +32,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const DOW = dows();
   const [month, setMonth] = useState(today.slice(0, 7));
   const [mode, setMode] = usePref<'month' | 'year'>('cal-mode', 'month', (v): v is 'month' | 'year' => v === 'month' || v === 'year');
-  const [sel, setSel] = useState<string>(today);
+  const [sel, setSel] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = usePref<'0' | '1'>('cal-report-open', '1', (v): v is '0' | '1' => v === '0' || v === '1');
+  const report = useMemo(() => (mode === 'month' ? monthReport(state, month, today) : null), [state, month, today, mode]);
   const base = state.settings.baseCurrency;
 
   const year = month.slice(0, 4);
@@ -64,10 +68,10 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const sumOf = (list: Charge[] = []) => sumBase(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
-  // 翻月时选中日跟着走：不在新月份里就落到本月的今天，或那个月的 1 号
+  // 翻月或回到今天时清空选择，默认展示整月报告
   const goMonth = (m: string) => {
     setMonth(m);
-    setSel((s) => (s.startsWith(m) ? s : m === today.slice(0, 7) ? today : `${m}-01`));
+    setSel(null);
   };
   const shift = (n: number) => goMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));
   // ← → 翻上/下一页（月视图翻月，年视图翻年），T 回到今天；输入框里、弹层打开时不响应
@@ -80,14 +84,13 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         e.preventDefault();
         goMonth(addMonths(month + '-01', (e.key === 'ArrowLeft' ? -1 : 1) * (mode === 'year' ? 12 : 1)).slice(0, 7));
       } else if (e.key === 't' || e.key === 'T') {
-        setMonth(today.slice(0, 7));
-        setSel(today);
+        goMonth(today.slice(0, 7));
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [month, mode, today]);
-  const selList = byDay.get(sel) ?? [];
+  const selList = (sel && byDay.get(sel)) || [];
   const list = mode === 'month' ? monthCharges : yearCharges;
 
   return (
@@ -112,8 +115,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
           className="btn"
           title={`${t('calendar.today')} T`}
           onClick={() => {
-            setMonth(today.slice(0, 7));
-            setSel(today);
+            goMonth(today.slice(0, 7));
           }}
         >
           {t('calendar.today')}
@@ -142,7 +144,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
           />
         ) : (
           <div className="cal-wrap">
-            {/* 左：日历，下面紧跟选中那天的明细（卡片）；右：整月列表 */}
+            {/* 左：日历与选中日明细或月报告；右：整月列表 */}
             <div className="stack">
               <div className="card cal">
                 <div className="cal-grid" ref={gridRef}>
@@ -158,7 +160,10 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       <button
                         key={d}
                         className={`cal-cell ${d.startsWith(month) ? '' : 'out'} ${d === today ? 'today' : ''} ${d === sel ? 'sel' : ''}`}
-                        onClick={() => setSel(d)}
+                        aria-pressed={d === sel}
+                        aria-current={d === today ? 'date' : undefined}
+                        aria-label={cnDate(d, true)}
+                        onClick={() => setSel((current) => (current === d ? null : d))}
                       >
                         <div className="cal-day">
                           <b>{Number(d.slice(8))}</b>
@@ -181,35 +186,49 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   })}
                 </div>
               </div>
-              <section className="cal-dayhead">
-                <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
-                {selList.length > 0 && <span>{t('calendar.summary', { count: selList.length, amount: flow(-sumOf(selList), base, { compact: true }) })}</span>}
-              </section>
-              {selList.length === 0 ? (
-                <div className="card cal-none">{t('calendar.noneDay')}</div>
+              {sel && selList.length > 0 ? (
+                <>
+                  <section className="cal-dayhead">
+                    <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
+                    <span>{t('calendar.summary', { count: selList.length, amount: flow(-sumOf(selList), base, { compact: true }) })}</span>
+                  </section>
+                  <div className="cal-daycards">
+                    {selList.map((c) => {
+                      const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                      return (
+                        <button key={c.sub.id} className="card cal-daycard" onClick={() => onOpen(c.sub)}>
+                          <SubIcon sub={c.sub} size={40} />
+                          <span className="cal-dc-main">
+                            <b>{c.sub.name}</b>
+                            <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                          </span>
+                          <span className="cal-dc-amt">
+                            {amt.main}
+                            <small>
+                              {/* 先说原币金额，再说状态；放在一起时「预计 · $45.99」容易读成预计扣 $45.99 */}
+                              {amt.alt ? `${t('list.originalPrice', { amount: amt.alt })} · ` : ''}
+                              {c.projected ? t('calendar.projected') : t('calendar.charged')}
+                            </small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
               ) : (
-                <div className="cal-daycards">
-                  {selList.map((c) => {
-                    const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
-                    return (
-                      <button key={c.sub.id} className="card cal-daycard" onClick={() => onOpen(c.sub)}>
-                        <SubIcon sub={c.sub} size={40} />
-                        <span className="cal-dc-main">
-                          <b>{c.sub.name}</b>
-                          <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
-                        </span>
-                        <span className="cal-dc-amt">
-                          {amt.main}
-                          <small>
-                            {/* 先说原币金额，再说状态；放在一起时「预计 · $45.99」容易读成预计扣 $45.99 */}
-                            {amt.alt ? `${t('list.originalPrice', { amount: amt.alt })} · ` : ''}
-                            {c.projected ? t('calendar.projected') : t('calendar.charged')}
-                          </small>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                report && (
+                  <ScopeReport
+                    key={month}
+                    report={report}
+                    state={state}
+                    today={today}
+                    onOpen={onOpen}
+                    title={t('scope.monthTitle', { month: monthLabel(month, { long: true }) })}
+                    animate={true}
+                    open={reportOpen === '1'}
+                    onToggle={() => setReportOpen(reportOpen === '1' ? '0' : '1')}
+                  />
+                )
               )}
             </div>
             <div className="stack">

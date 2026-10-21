@@ -1,4 +1,5 @@
 {
+  "monthTitle": "Informe de {month}",
   "monthly": "Gasto mensual en suscripciones",
   "previousEnd": "Desde el cierre del mes anterior",
   "annual": "Gasto anualizado",

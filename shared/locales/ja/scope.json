@@ -1,4 +1,5 @@
 {
+  "monthTitle": "{month}のレポート",
   "monthly": "月額サブスクリプション支出",
   "previousEnd": "前月末比",
   "annual": "年額換算",
