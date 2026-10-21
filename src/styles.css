@@ -4932,13 +4932,17 @@ select.btn {
   gap: 6px;
   flex-shrink: 0;
   height: 24px;
-  padding: 0 10px;
+  /* 左侧圆点 / 图标和胶囊左端的半圆同心：左内边距 =（高度 − 图标尺寸）÷ 2 */
+  padding: 0 10px 0 8.5px;
   border-radius: 999px;
   background: var(--fill-2);
   color: var(--label-2);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+}
+.ph-status.stop {
+  padding-left: 5.5px;
 }
 .ph-status i {
   width: 7px;
@@ -4958,6 +4962,8 @@ select.btn {
 }
 .ph-status .i {
   flex-shrink: 0;
+  width: 13px;
+  height: 13px;
 }
 /* 已停止：整卡去色变淡，只有右上角的状态胶囊保留颜色 */
 .proxy-card.stopped .proxy-head,
