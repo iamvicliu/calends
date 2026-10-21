@@ -28,7 +28,6 @@ export async function listTokens(env: Env): Promise<McpToken[]> {
 
 /** 新建令牌：明文只在这一次返回 */
 export async function createToken(env: Env, name: string, scope: 'read' | 'write'): Promise<{ token: string; item: McpToken }> {
-  if (env.DEMO_MODE === '1') throw new Error(t('server.demoUnavailable'));
   const token = `sub_${randomToken(24)}`;
   const item: McpToken = {
     id: randomToken(6),
