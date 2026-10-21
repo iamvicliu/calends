@@ -11,6 +11,7 @@ import {
   memberDues,
   monthlyGross,
   myShareFactor,
+  memberAboard,
   nextCharge,
   phaseSubs,
   priceAt,
@@ -224,7 +225,7 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
     price: money(st, next && (!cur.end || next < cur.end) ? priceAt(s, next) : cur.price, cur.currency, undefined, out),
     cycle: cycleLabel(cur.cycle),
     monthly: money(st, monthly, cur.currency, undefined, out),
-    my_share_factor: round(myShareFactor(s)),
+    my_share_factor: round(myShareFactor(cur, today)),
     next_charge: next ?? null,
     last_charge: lastCharge(s, today) ?? null,
     method: st.methods.find((m) => m.id === cur.methodId)?.name ?? null,
@@ -257,7 +258,7 @@ function chargeRow(st: AppState, c: Charge, out?: string) {
     subscription_id: c.sub.id,
     name: sub.name,
     amount: { amount: round(c.amount), currency: c.currency, converted: round(v), convertedCurrency: out ?? st.settings.baseCurrency },
-    my_amount: round(v * myShareFactor(sub)),
+    my_amount: round(v * myShareFactor(c.sub, c.date)),
     projected: c.projected,
     kind: c.kind ?? 'charge',
     method: st.methods.find((m) => m.id === c.sub.methodId)?.name ?? null,
@@ -521,9 +522,9 @@ export const TOOLS: Tool[] = [
                 left: m.left ?? null,
                 exempt: !!m.exempt,
               })),
-              dues: memberDues(s, today)
+              dues: memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency)
                 .filter((d) => d.periodsOwed > 0)
-                .map((d) => ({ member: d.member.name, periods_owed: d.periodsOwed, owed: money(st, d.owed, s.currency, undefined, out) })),
+                .map((d) => ({ member: d.member.name, periods_owed: d.periodsOwed, owed: money(st, d.owed, d.currency, undefined, out) })),
             }
           : null,
         proxy: px
@@ -593,7 +594,7 @@ export const TOOLS: Tool[] = [
       for (const c of chargesIn(st, from, to, today, scope)) {
         if (a.include_projected === false && c.projected) continue;
         const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-        const v = chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(sub) : 1);
+        const v = chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
         const m = st.methods.find((x) => x.id === c.sub.methodId);
         const [key, label] = groupOf(by, c, sub, m);
         const g = groups.get(key) ?? { key, label, total: 0, count: 0 };
@@ -715,7 +716,7 @@ export const TOOLS: Tool[] = [
         kind === 'proxy'
           ? []
           : st.subscriptions.flatMap((s) =>
-              memberDues(s, today)
+              memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({
                   subscription_id: s.id,
@@ -725,7 +726,7 @@ export const TOOLS: Tool[] = [
                   contact: d.member.contact ?? null,
                   periods_owed: d.periodsOwed,
                   paid_until: d.member.paidUntil ?? null,
-                  owed: money(st, d.owed, s.currency, undefined, out),
+                  owed: money(st, d.owed, d.currency, undefined, out),
                 })),
             );
       const proxy =
@@ -1165,8 +1166,8 @@ export const TOOLS: Tool[] = [
           .filter((s) => s.share)
           .map((s) => {
             const sh = s.share!;
-            const live = sh.members.filter((m) => !(m.left && m.left <= today));
-            const dues = new Map(memberDues(s, today).map((d) => [d.member.id, d]));
+            const live = sh.members.filter((m) => memberAboard(m, today));
+            const dues = new Map(memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency).map((d) => [d.member.id, d]));
             const book = carLedger(st, s, today);
             return {
               id: s.id,
@@ -1190,16 +1191,19 @@ export const TOOLS: Tool[] = [
                 i_pay: round(Math.max(0, book.net)),
                 i_earn: round(Math.max(0, -book.net)),
               },
-              members: live.map((m) => {
+              members: sh.members.map((m) => {
                 const fee = memberFee(st, s, m);
                 const d = dues.get(m.id);
                 return {
                   id: m.id,
                   name: m.name,
                   exempt: !!m.exempt,
+                  active: memberAboard(m, today),
+                  joined: m.joined ?? null,
+                  left: m.left ?? null,
                   fee: { amount: fee.amount, currency: fee.currency, every_months: m.billEvery ?? 1 },
                   paid_until: m.paidUntil ?? null,
-                  owed: d && d.periodsOwed > 0 ? money(st, d.owed, s.currency) : null,
+                  owed: d && d.periodsOwed > 0 ? money(st, d.owed, d.currency) : null,
                   payments: (m.payments ?? []).length,
                 };
               }),
@@ -1291,7 +1295,7 @@ export const TOOLS: Tool[] = [
       const q = str(a.member)?.toLowerCase();
       const old = q ? s.share.members.find((m) => m.id === q || m.name.toLowerCase() === q) : undefined;
       if (q && !old) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
-      const live = s.share.members.filter((m) => !(m.left && m.left <= today));
+      const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
       const billEvery = a.bill_every != null ? Number(a.bill_every) : (old?.billEvery ?? 1);

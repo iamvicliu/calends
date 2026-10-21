@@ -32,7 +32,10 @@ test('下次扣款与到期', () => {
 
 test('试用期不计费', () => {
   const s = base({ status: 'trial', start: '2026-10-01', trialEnd: '2026-10-15' });
-  assert.equal(chargesBetween(s, '2026-10-01', '2026-10-31', '2026-10-19').length, 0);
+  assert.deepEqual(
+    chargesBetween(s, '2026-10-01', '2026-10-31', '2026-10-19').map((c) => c.date),
+    ['2026-10-15'],
+  );
 });
 
 test('余额续航', () => {
@@ -64,7 +67,7 @@ test('合租', () => {
   const d = memberDues(s, '2026-10-19');
   // 已付至 11 月 9 日：还没到期，不欠
   assert.equal(d[0].periodsOwed, 0);
-  assert.equal(d[1].owed, 10);
+  assert.equal(d[1].owed, 100);
   // 按半年收、已付至 7 月 16 日：10 月 20 日欠一期（7 月 17 日那期），金额 = 每期份额 × 6
   const half = base({
     price: 60,
@@ -180,5 +183,5 @@ test('编辑表单对应当前阶段，保存后计划阶段不变', async () =>
   assert.equal(saved.phases![0].methodId, 'card');
   assert.equal(saved.phases![1].currency, 'USD');
   assert.equal(saved.phases![1].price, 100);
-  assert.equal(saved.phases![0].end, '2026-10-28');
+  assert.equal(saved.phases![0].end, '2026-10-27');
 });

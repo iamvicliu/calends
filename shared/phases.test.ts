@@ -56,10 +56,10 @@ test('换区时选择继续跑：旧阶段的结束日晚于新阶段开始日�
   assert.equal(s.currency, 'TRY');
   assert.throws(() => switchPlan(base(), '2026-06-01', TR, '2026-06-01'));
   // 默认（不选）仍是无缝切换
-  assert.equal(switchPlan(base(), '2026-06-01', TR).phases![0].end, '2026-06-01');
+  assert.equal(switchPlan(base(), '2026-06-01', TR).phases![0].end, '2026-05-31');
 });
 
-test('并行期间两边的扣款都在，旧阶段到期当天不再扣', () => {
+test('并行期间两边的扣款都在，旧阶段最后服务日仍可扣款', () => {
   assert.deepEqual(dates(overlap(), '2026-05-01', '2026-09-30'), [
     '2026-05-15 USD',
     '2026-06-01 TRY',
@@ -67,6 +67,7 @@ test('并行期间两边的扣款都在，旧阶段到期当天不再扣', () =>
     '2026-07-01 TRY',
     '2026-07-15 USD',
     '2026-08-01 TRY',
+    '2026-08-15 USD',
     '2026-09-01 TRY',
   ]);
   assert.equal(nextCharge(overlap(), '2026-07-02'), '2026-07-15');
@@ -81,7 +82,7 @@ test('并行期间：当前阶段取最晚开始的那段，activePhases 列出�
   assert.equal(phaseAt(s, '2026-07-01')!.region, 'TR');
   assert.equal(currentPhase(s, '2026-07-01').region, 'TR');
   assert.deepEqual(
-    activePhases(s, '2026-08-15').map((v) => v.region),
+    activePhases(s, '2026-08-16').map((v) => v.region),
     ['TR'],
   );
   assert.deepEqual(
@@ -115,7 +116,7 @@ test('变更日志：新段整份计入，旧段到期另记一笔结束', () =>
   assert.equal(sw.date, '2026-06-01');
   near(sw.delta, convert(100, 'TRY', 'CNY', FALLBACK_FX));
   const end = evs.find((e) => e.kind === 'end')!;
-  assert.equal(end.date, '2026-08-15');
+  assert.equal(end.date, '2026-08-16');
   near(end.delta, -convert(10, 'USD', 'CNY', FALLBACK_FX));
 });
 
@@ -146,7 +147,7 @@ test('暂停对并行的两段都生效', () => {
   // 暂停日在旧段到期之后：旧段照常到期，不受影响
   const later = { ...overlap(), status: 'paused' as const, pausedAt: '2026-09-10' };
   assert.equal(phaseSubs(later)[0].status, 'active');
-  assert.deepEqual(dates(later, '2026-08-01', '2026-12-31'), ['2026-08-01 TRY', '2026-09-01 TRY']);
+  assert.deepEqual(dates(later, '2026-08-01', '2026-12-31'), ['2026-08-01 TRY', '2026-08-15 USD', '2026-09-01 TRY']);
 });
 
 test('撤回换区：去掉新阶段，旧阶段恢复为进行中', () => {
@@ -194,7 +195,7 @@ test('改阶段结束日：晚于下一段开始即并行，留空回到缺省',
   assert.equal(activePhases(par, '2026-06-20').length, 2);
   assert.equal(par.end, undefined);
   const cleared = setPhaseEnd(par, '2026-01-15', undefined);
-  assert.equal(phaseSubs(cleared)[0].end, '2026-06-01');
+  assert.equal(phaseSubs(cleared)[0].end, '2026-05-31');
   assert.equal(activePhases(cleared, '2026-06-20').length, 1);
   // 最后一段的结束日就是订阅的结束日
   assert.equal(setPhaseEnd(par, '2026-06-01', '2026-10-01').end, '2026-10-01');
@@ -205,10 +206,11 @@ test('并行期间实际在订的天数不重复计，没有断档', () => {
   const r = servedTime(overlap(), '2026-07-15');
   assert.equal(r.days, 181); // 1/15 → 7/15
   assert.equal(r.gaps.length, 0);
+  assert.equal(servedTime(switchPlan(base(), '2026-06-01', TR), '2026-07-15').gaps.length, 0);
   const gap = setPhaseEnd(switchPlan(base(), '2026-06-01', TR), '2026-01-15', '2026-04-15');
   assert.deepEqual(
     servedTime(gap, '2026-07-15').gaps.map((g) => g.days),
-    [47],
+    [46],
   );
 });
 
@@ -247,7 +249,7 @@ test('补一段更早的买断：插在最前面，开始日前移，之后的�
   assert.deepEqual(
     s.phases!.map((p) => [p.start, p.end, p.cycle.unit]),
     [
-      ['2022-01-01', '2024-07-05', 'lifetime'],
+      ['2022-01-01', '2024-07-04', 'lifetime'],
       ['2024-07-05', undefined, 'year'],
     ],
   );

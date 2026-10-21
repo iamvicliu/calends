@@ -16,6 +16,7 @@ import {
   isGap,
   memberDues,
   monthlyGross,
+  memberAboard,
   nextCharge,
   phaseLanes,
   phaseSubs,
@@ -675,7 +676,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
 
 /** 合租座位：我、在车的成员、空位各一格 */
 function Seats({ share, today }: { share: NonNullable<Subscription['share']>; today: string }) {
-  const live = share.members.filter((m) => !(m.left && m.left <= today));
+  const live = share.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, share.seats - live.length - 1);
   return (
     <div className="dt-seats">
@@ -716,7 +717,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
   const next = nextCharge(sub, today);
   const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
-  const dues = memberDues(sub, today);
+  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
   return (
     <>
       <Panel title={t('detail.summary')}>
@@ -858,7 +859,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
               <>
                 {(() => {
                   // 成员交的比总价还多时，不显示负的份额，直接说多收了多少
-                  const mine = sub.price - sub.share.members.reduce((a, m) => a + m.share, 0);
+                  const mine = sub.price - sub.share.members.reduce((a, m) => a + (m.exempt || !memberAboard(m, today) ? 0 : m.share), 0);
                   return mine >= 0 ? (
                     <Prop k={t('detail.share.myShare')}>{money(mine, sub.currency)}</Prop>
                   ) : (
@@ -874,7 +875,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
                     hint={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}
                   >
                     {d.periodsOwed > 0 ? (
-                      <span className="dt-owed">{t('detail.share.owed', { amount: money(d.owed, sub.currency) })}</span>
+                      <span className="dt-owed">{t('detail.share.owed', { amount: money(d.owed, d.currency) })}</span>
                     ) : (
                       <span className="dt-settled">{t('detail.share.settled')}</span>
                     )}

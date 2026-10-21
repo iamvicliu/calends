@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addDays, addMonths, todayIn, uid } from '../../shared/billing.ts';
+import { addDays, addMonths, todayIn, uid, memberUnpaidFrom } from '../../shared/billing.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../shared/types.ts';
@@ -88,8 +88,6 @@ export function contactUrl(via: string, id?: string): string | undefined {
 
 /** 覆盖期：给定起始日，按收费周期算出结束日（含） */
 const coverEnd = (from: string, months: number) => addDays(addMonths(from, months), -1);
-/** 下一笔默认从已付至的次日起 */
-const nextFrom = (m: ShareMember, today: string) => (m.paidUntil ? addDays(m.paidUntil, 1) : today);
 
 /** 成员资料与收款记录：TG、联系方式、来源、服务账号、收费周期，以及每一笔收款 */
 export function MemberSheet({
@@ -134,7 +132,7 @@ export function MemberSheet({
   const [adding, setAdding] = useState(!!collect);
   const months = f.billEvery ?? 1;
   const freshPay = (m: ShareMember): MemberPayment => {
-    const from = nextFrom(m, today);
+    const from = memberUnpaidFrom(s, m);
     return { date: today, amount: m.fee ?? 0, currency: m.feeCurrency ?? base, from, until: coverEnd(from, m.billEvery ?? 1) };
   };
   const [pay, setPay] = useState<MemberPayment>(() => freshPay(f));

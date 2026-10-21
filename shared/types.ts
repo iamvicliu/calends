@@ -133,7 +133,7 @@ export interface Person {
 /** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
 export interface Phase {
   start: string;
-  /** 缺省：下一阶段开始日；最后一个阶段取订阅的 end */
+  /** 最后服务日（含）；缺省为下一阶段开始前一天，最后一段取订阅的 end */
   end?: string;
   price: number;
   currency: string;
@@ -164,9 +164,10 @@ export interface Subscription {
   currency: string;
   cycle: Cycle;
   start: string;
-  /** 到期/取消日：之后不再扣款 */
+  /** 最后服务日（含当天）：次日结束，不再产生预测扣款 */
   end?: string;
   status: SubStatus;
+  /** 首个付费日；前一天为试用最后一天 */
   trialEnd?: string;
   pausedAt?: string;
   methodId?: string;

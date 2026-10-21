@@ -1,5 +1,5 @@
 import { base as appPath } from '../base.ts';
-import { chargesBetween, cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
+import { chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge } from '../../shared/billing.ts';
 import { Fragment, useState } from 'react';
 import { billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -33,11 +33,11 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   // 筛选记在服务端：切到别的页面再回来、换台设备都还是上次选的
   const [filter, setFilter] = usePref<CarFilter>('car-filter', 'live', (v): v is CarFilter => (CAR_FILTERS as readonly string[]).includes(v));
   const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
-  const owes = (s: Subscription) => memberDues(s, today).some((d) => d.periodsOwed > 0);
+  const owes = (s: Subscription) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).some((d) => d.periodsOwed > 0);
   const groups: Record<CarFilter, Subscription[]> = {
     all: [...owned, ...ended],
     live: owned,
-    owe: owned.filter(owes),
+    owe: [...owned, ...ended].filter(owes),
     settled: owned.filter((s) => !owes(s)),
     ended,
   };
@@ -49,8 +49,10 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const books = new Map([...owned, ...ended].map((s) => [s.id, carLedger(state, s, today)]));
   const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
-  const owedAll = owned.flatMap((s) => memberDues(s, today)).filter((d) => d.periodsOwed > 0);
-  const owedSum = owedAll.reduce((a, d) => a + toBase(state, d.owed, d.sub.currency), 0);
+  const owedAll = [...owned, ...ended]
+    .flatMap((s) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency))
+    .filter((d) => d.periodsOwed > 0);
+  const owedSum = owedAll.reduce((a, d) => a + toBase(state, d.owed, d.currency), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean } | null>(null);
@@ -124,9 +126,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               {shown.map((s, idx) => {
                 if (idx % 2 !== col) return null;
                 const sh = s.share!;
-                const dues = memberDues(s, today);
+                const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
                 // 已退出的成员不占座，只在展开的明细里保留
-                const onboard = sh.members.filter((m) => !m.left || m.left > today);
+                const onboard = sh.members.filter((m) => memberAboard(m, today));
                 const free = Math.max(0, sh.seats - 1 - onboard.length);
                 const next = nextCharge(s, today);
                 return (
@@ -305,7 +307,7 @@ function MemberRows({
   /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
   only?: (m: ShareMember) => boolean;
 }) {
-  const dues = memberDues(s, today).filter((d) => !only || only(d.member));
+  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).filter((d) => !only || only(d.member));
   const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
   return (
     <div>
@@ -343,7 +345,7 @@ function MemberRows({
               </span>
             ) : d.periodsOwed > 0 ? (
               <b style={{ color: 'var(--orange)' }}>
-                {t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect) })}
+                {t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, d.currency, undefined, collect), collect) })}
               </b>
             ) : (
               <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
@@ -396,9 +398,9 @@ export function CarSheet({
   const st = effectiveStatus(s, today);
   const stopped = st === 'ended';
   const next = nextCharge(s, today);
-  const onboard = sh.members.filter((m) => !m.left || m.left > today);
+  const onboard = sh.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, sh.seats - 1 - onboard.length);
-  const owe = memberDues(s, today).filter((d) => d.periodsOwed > 0).length;
+  const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).filter((d) => d.periodsOwed > 0).length;
   const fmt = (v: number) => money(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;

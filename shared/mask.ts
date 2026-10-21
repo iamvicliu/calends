@@ -72,6 +72,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     methodId: s.methodId,
     region: s.region,
     intro: s.intro,
+    bonus: s.bonus,
     priceHistory: s.priceHistory,
     // 计费需要的结构原样保留：阶段、实际扣款、下次扣款日（不含敏感信息）
     phases: s.phases?.map(({ note: _n, ...p }) => ({ ...p, payments: p.payments?.map(({ note: _x, ...pay }) => pay) })),
@@ -80,7 +81,15 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     share: s.share && {
       role: s.share.role,
       seats: s.share.seats,
-      members: s.share.members.map((m, i) => ({ id: `m${i}`, name: '', share: m.share, paidUntil: m.paidUntil })),
+      members: s.share.members.map((m, i) => ({
+        id: `m${i}`,
+        name: '',
+        share: m.share,
+        paidUntil: m.paidUntil,
+        exempt: m.exempt,
+        joined: m.joined,
+        left: m.left,
+      })),
     },
   };
 }

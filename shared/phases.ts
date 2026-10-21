@@ -65,7 +65,7 @@ function endOf(phases: Phase[]): string | undefined {
 }
 
 /**
- * 从 at 起换区或换套餐：上一阶段默认在 at 结束，新阶段无缝衔接；
+ * 从 at 起换区或换套餐：上一阶段默认在 at 前一天结束，新阶段无缝衔接；
  * 给了 keepUntil 时上一阶段继续跑到那天（比如旧区域已预付到月底），两段并行、两边都照常计费
  */
 export function switchPlan(s: Subscription, at: string, next: PlanChange, keepUntil?: string): Subscription {
@@ -73,7 +73,7 @@ export function switchPlan(s: Subscription, at: string, next: PlanChange, keepUn
   const last = phases[phases.length - 1];
   if (at <= last.start) throw new Error(t('core.phase.switchTooEarly'));
   if (keepUntil && keepUntil <= at) throw new Error(t('core.phase.keepTooEarly'));
-  last.end = keepUntil ?? at;
+  last.end = keepUntil ?? addDays(at, -1);
   phases.push({ start: at, ...next });
   return { ...mirror(s, phases), status: 'active', pausedAt: undefined };
 }
@@ -87,7 +87,7 @@ export function prependPlan(s: Subscription, at: string, prev: PlanChange, until
   const first = phases[0];
   if (at >= first.start) throw new Error(t('core.phase.prependTooLate'));
   if (until && (until <= at || until > first.start)) throw new Error(t('core.phase.prependUntil'));
-  phases.unshift({ start: at, end: until ?? first.start, ...prev });
+  phases.unshift({ start: at, end: until ?? addDays(first.start, -1), ...prev });
   return mirror({ ...s, start: at }, phases);
 }
 
@@ -103,7 +103,7 @@ export function confirmPlan(s: Subscription, start: string): Subscription {
 export function dropPlan(s: Subscription, start: string): Subscription {
   const phases = phasesOf(s).filter((p) => p.start !== start);
   const last = phases[phases.length - 1];
-  if (!last.end || last.end <= start) last.end = start;
+  if (!last.end || last.end < start) last.end = addDays(start, -1);
   if (phases.length === 1) {
     const p = phases[0];
     return {
@@ -129,8 +129,8 @@ export function dropPlan(s: Subscription, start: string): Subscription {
 export function resume(s: Subscription, at: string, next: PlanChange): Subscription {
   const phases = phasesOf(s);
   const last = phases[phases.length - 1];
-  if (!last.end) last.end = s.pausedAt && s.pausedAt < at ? s.pausedAt : at;
-  if (at < last.end) throw new Error(t('core.phase.resumeTooEarly'));
+  if (!last.end) last.end = addDays(s.pausedAt && s.pausedAt < at ? s.pausedAt : at, -1);
+  if (at <= last.end) throw new Error(t('core.phase.resumeTooEarly'));
   phases.push({ start: at, ...next });
   return { ...mirror(s, phases), status: 'active', pausedAt: undefined };
 }
@@ -159,15 +159,15 @@ export function changePrice(s: Subscription, from: string, amount: number): Subs
   return mirror(s, phases);
 }
 
-/** 阶段 i 实际跑到哪天（不含）：显式结束日，缺省为下一段开始日 */
-const endAt = (phases: Phase[], i: number) => phases[i].end ?? phases[i + 1]?.start ?? '9999-12-31';
+/** 阶段 i 最后一个服务日（含）；无缝切换在下一段开始前一天结束。 */
+const endAt = (phases: Phase[], i: number) => phases[i].end ?? (phases[i + 1] ? addDays(phases[i + 1].start, -1) : '9999-12-31');
 
 /**
  * 编辑表单对应的阶段：今天所在的阶段（还没开始的计划阶段不算；并行时取最晚开始的，与 currentPhase 一致），
  * 今天不在任何阶段里时取最近开始的，都没开始时取第一个
  */
 function editIndex(phases: Phase[], today: string): number {
-  const live = phases.findLastIndex((p, i) => p.start <= today && today < endAt(phases, i));
+  const live = phases.findLastIndex((p, i) => p.start <= today && today <= endAt(phases, i));
   return live >= 0
     ? live
     : Math.max(
@@ -209,7 +209,7 @@ export function syncPhase(s: Subscription, today: string): Subscription {
  * 晚于下一段的开始日即为并行，早于则中间是断更；最后一段的结束日就是整个订阅的结束日
  */
 export function setPhaseEnd(s: Subscription, start: string, end: string | undefined): Subscription {
-  if (end && end <= start) throw new Error(t('core.phase.endTooEarly'));
+  if (end && end < start) throw new Error(t('core.phase.endTooEarly'));
   if (!s.phases?.length) return { ...s, end };
   const phases = phasesOf(s);
   const p = phases.find((x) => x.start === start);
@@ -225,7 +225,7 @@ export function removePhase(s: Subscription, index: number): Subscription {
   const [removed] = phases.splice(index, 1);
   // 撤回最后一次换区：上一阶段只是因为换区才结束（或换区时选了继续跑到某天）的，恢复为进行中
   const prev = phases[phases.length - 1];
-  if (index === phases.length && prev.end && prev.end >= removed.start) prev.end = undefined;
+  if (index === phases.length && prev.end && prev.end >= addDays(removed.start, -1)) prev.end = undefined;
   if (phases.length === 1) {
     const p = phases[0];
     return {

@@ -12,6 +12,7 @@ import {
   effectiveStatus,
   isGap,
   myShareFactor,
+  monthlyGross,
   nextCharge,
   nthCharge,
   priceAt,
@@ -36,11 +37,11 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   if (s.phases?.length) return activePhases(s, day).reduce((a, v) => a + contributionOn(state, v, day, fxDate), 0);
   if (s.cycle.unit === 'lifetime') return 0;
   if (s.start > day) return 0;
-  if (s.end && s.end <= day) return 0;
+  if (s.end && s.end < day) return 0;
   if (s.status === 'cancelled' && !s.end) return 0;
   if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
   if (s.status === 'trial' && s.trialEnd && s.trialEnd > day) return 0;
-  return toBase(state, (priceAt(s, day) * MONTH) / cycleDays(s.cycle), s.currency, fxDate) * myShareFactor(s, day);
+  return toBase(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
 }
 
 /** fxDate 缺省为当前汇率；传入则按该日汇率 */
@@ -159,7 +160,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
     });
   }
-  if (s.end && s.end <= today) out.push({ date: s.end, sub: s, kind: 'end', delta: -contributionOn(state, s, addDays(s.end, -1)) });
+  if (s.end && s.end < today) out.push({ date: addDays(s.end, 1), sub: s, kind: 'end', delta: -contributionOn(state, s, s.end) });
   if (s.status === 'paused' && s.pausedAt && s.pausedAt <= today)
     out.push({ date: s.pausedAt, sub: s, kind: 'pause', delta: -contributionOn(state, { ...s, status: 'active' }, s.pausedAt) });
   return out;
@@ -226,7 +227,7 @@ function coverage(c: Charge): [string, string] {
   const next = chargesBetween({ ...s, end: undefined, status: s.status === 'paused' ? 'active' : s.status }, addDays(c.date, 1), horizon, '9999-12-31')[0]
     ?.date;
   let end = next ?? nthCharge(c.date, s.cycle, 1);
-  if (s.end && s.end > c.date && s.end < end) end = s.end;
+  if (s.end && addDays(s.end, 1) < end) end = addDays(s.end, 1);
   return [c.date, end];
 }
 
@@ -285,7 +286,7 @@ export function prepaidValue(state: AppState, today: string): { total: number; i
       const last = past[past.length - 1];
       if (!last) continue;
       const [a, b] = coverage(last);
-      const end = p.end && p.end < b ? p.end : b;
+      const end = p.end && addDays(p.end, 1) < b ? addDays(p.end, 1) : b;
       if (end <= today) continue;
       value += chargeValue(state, last) * myShareFactor(p, today) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
       if (end > until) until = end;
@@ -365,15 +366,15 @@ export interface TopUp {
 export function topUpPlan(state: AppState, today: string, months = 6): TopUp[] {
   const out: TopUp[] = [];
   for (const m of state.methods) {
-    const r = runwayFor(m, state, today);
-    if (!r || r.monthlyDrain <= 0) continue;
+    const r = runwayFor(m, state, today, Math.max(12, months));
+    if (!r || !r.forecast.length) continue;
     const horizon = addMonths(today, months);
-    const due = r.upcoming.filter((c) => c.date <= horizon).reduce((a, c) => a + c.amountInMethod, 0);
+    const due = r.forecast.filter((c) => c.date <= horizon).reduce((a, c) => a + c.amountInMethod, 0);
     const need = Math.max(0, due - r.current);
     // 最少补多少：累计到第一笔付不起的扣款为止
     let acc = 0;
     let minNeed = 0;
-    for (const c of r.upcoming) {
+    for (const c of r.forecast) {
       acc += c.amountInMethod;
       if (acc > r.current) {
         minNeed = acc - r.current;
@@ -600,7 +601,7 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
     items: [...bySub.values()].sort((a, b) => b.sum - a.sum),
     longest,
     newSubs: state.subscriptions.filter((s) => s.start.startsWith(year)),
-    ended: state.subscriptions.filter((s) => s.end?.startsWith(year) && s.end <= today),
+    ended: state.subscriptions.filter((s) => s.end?.startsWith(year) && s.end < today),
     currencies: ccys.size,
     busiestMonth: busiest && { month: busiest[0], sum: busiest[1] },
     perDay: total / Math.max(1, diffDays(from, to) + 1),
