@@ -167,8 +167,11 @@ test('真实甘特结构：已付未用接在实线后、红色停用标记、�
     if (amount !== 31) {
       const unused = withClass(nodes, 'gt-unused')[0];
       assert.equal(unused.props.style.top, withClass(nodes, 'gt-seg')[0].props.style.top);
-      // 实线最后一截改直角，与已付未用拼成一根
-      assert.equal(withClass(nodes, 'joined').length, 1);
+      // 被服务方停用：实线末端是与条同高的停用标志（圆形端头），灰段起点藏在标志下半个圆
+      assert.equal(withClass(nodes, 'joined').length, 0);
+      const stop = withClass(nodes, 'gt-stop')[0];
+      assert.equal(stop.props.style.top, unused.props.style.top);
+      assert.equal(unused.props.style.left, stop.props.style.left + 9);
       assert.ok(unused.props.style.width > 0);
       assert.ok(unused.props.title.includes('abuse'));
     }
@@ -179,4 +182,6 @@ test('真实甘特结构：已付未用接在实线后、红色停用标记、�
   // 主动退订不加额外标记，只有服务方停用才有禁止标志
   assert.equal(withClass(cancelled, 'gt-stop').length, 0);
   assert.equal(withClass(cancelled, 'gt-unused').length, 1);
+  // 主动退订：实线最后一截改直角，与已付未用拼成一根
+  assert.equal(withClass(cancelled, 'joined').length, 1);
 });

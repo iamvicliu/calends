@@ -53,6 +53,8 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
  * 时间轴（甘特图）：一行一个订阅，一段一根条。
  * 条按支付方式或地区上色；过去的实心、未来的半透明；计划中的斜线；两段之间空着的是断订；条下的小刻度是每笔扣款。
  */
+/** 停用标志与条同高，作为条的末端 */
+const STOP_CAP = 18;
 const NARROW = '(max-width: 700px)';
 function subscribeNarrow(cb: () => void) {
   const mq = matchMedia(NARROW);
@@ -394,8 +396,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                         {cuts.slice(0, -1).map((a, n) => {
                           const b = cuts[n + 1];
                           if (b < start || a > end) return null;
-                          const pl = x(a);
-                          const pw = Math.max(3, x(b) - pl);
+                          // 被服务方停用：最后一截至少是一个正圆，停用标志正好嵌在末端
+                          const capped = stopped?.kind === 'terminate' && n === cuts.length - 2 && b === stopped.date;
+                          const pl = capped ? Math.min(x(a), x(b) - STOP_CAP) : x(a);
+                          const pw = Math.max(capped ? STOP_CAP : 3, x(b) - pl);
                           const intro = g.v.intro && a < g.v.intro.until;
                           const price = priceAt(g.v, a);
                           const last = n === cuts.length - 2;
@@ -408,7 +412,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           return (
                             <span
                               key={a}
-                              className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${last && unused ? 'joined' : ''} ${intro ? 'intro' : ''}`}
+                              className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${last && unused && !capped ? 'joined' : ''} ${intro ? 'intro' : ''}`}
                               style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                               title={ptip || tip}
                             >
@@ -428,7 +432,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                         {unused && (
                           <span
                             className="gt-unused"
-                            style={{ left: x(stopped!.date), width: Math.max(0, x(wastedUntil) - x(stopped!.date)), top }}
+                            // 被服务方停用时，灰段起点藏到停用标志下半个圆，接缝处只露出完整的圆
+                            style={{
+                              left: x(stopped!.date) - (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
+                              width: Math.max(0, x(wastedUntil) - x(stopped!.date)) + (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
+                              top,
+                            }}
                             title={stopDescription(g.v, today)}
                           />
                         )}
@@ -437,12 +446,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             className="gt-stop"
                             role="img"
                             aria-label={t('core.stop.terminate')}
-                            style={{ left: x(stopped.date) - 10, top: top - 1 }}
+                            style={{ left: x(stopped.date) - STOP_CAP, top }}
                             viewBox="0 0 20 20"
                           >
                             <title>{state.readonly ? t('core.stop.terminate') : stopDescription(g.v, today)}</title>
-                            <circle cx="10" cy="10" r="8" />
-                            <path d="M4.4 15.6 15.6 4.4" />
+                            <circle cx="10" cy="10" r="8.75" />
+                            <path d="M4.7 15.3 15.3 4.7" />
                           </svg>
                         )}
                       </Fragment>
@@ -469,8 +478,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         </span>
         <span>
           <svg className="lg-stop" viewBox="0 0 20 20" aria-hidden="true">
-            <circle cx="10" cy="10" r="8" />
-            <path d="M4.4 15.6 15.6 4.4" />
+            <circle cx="10" cy="10" r="8.75" />
+            <path d="M4.7 15.3 15.3 4.7" />
           </svg>
           {t('core.stop.terminate')}
         </span>

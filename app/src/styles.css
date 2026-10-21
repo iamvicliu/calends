@@ -8946,8 +8946,8 @@ img.mm-flag {
 }
 .gt-stop,
 .lg-stop {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   fill: var(--card);
   stroke: var(--red);
   stroke-width: 2.5;
