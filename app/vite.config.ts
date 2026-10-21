@@ -85,8 +85,8 @@ export default defineConfig({
   plugins: [react({ compiler: true }), tailwindcss(), baseManifest(), localPublic()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: {
-    // 本地开发：wrangler dev 跑在 8787
-    proxy: Object.fromEntries(['/api', '/cal', '/mcp'].map((path) => [assetPath(path), 'http://127.0.0.1:8787'])),
+    // 本地开发：wrangler dev 跑在 8787；按前缀匹配，/cal/ 要带斜杠，否则 /calendar 页面也会被转发
+    proxy: Object.fromEntries(['/api/', '/cal/', '/mcp'].map((path) => [assetPath(path), 'http://127.0.0.1:8787'])),
   },
   build: { outDir: DIST, emptyOutDir: true, target: 'es2022', assetsInlineLimit: 0 },
 });
