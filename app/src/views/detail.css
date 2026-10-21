@@ -1222,3 +1222,20 @@
     text-align: center;
   }
 }
+
+/* 停止与退款复用摘要的属性行，长翻译与停用原因在各自列内换行。 */
+.dt-stops .dt-prop dt {
+  white-space: normal;
+  max-width: 45%;
+}
+.dt-stops .dt-prop dd {
+  overflow-wrap: anywhere;
+}
+.dt-stops .dt-props + .dt-props {
+  margin-top: 16px !important;
+  padding-top: 12px;
+  border-top: 1px solid var(--dt-line);
+}
+.dt-stop-loss {
+  color: var(--dt-bad);
+}

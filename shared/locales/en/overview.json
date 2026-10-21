@@ -70,6 +70,6 @@
     "share": "{amount}/mo · {pct}%",
     "caption": "Subscription stars · bubble size shows monthly cost",
     "aria": "{name}, {amount} per month",
-    "loss": "Lost to cancellations"
+    "loss": "Includes unrefunded loss"
   }
 }

@@ -167,18 +167,24 @@
     "date": "Stop date",
     "paidThrough": "Paid through {date}",
     "refundYes": "Refunded",
-    "refundNo": "No refund",
+    "refundNo": "Unrefunded",
     "refundAmount": "Refund amount",
     "refundDate": "Refund date",
     "reason": "Reason (optional)",
     "currencyHint": "Refunds use {currency}, the subscription currency. Record a different card currency below.",
     "refunded": "Refunded {money}",
     "partial": "Partial refund {money}",
-    "unrefunded": "No refund · {days} unused days",
-    "unused": "{days} unused days, about {money}",
-    "unusedTitle": "Paid but unused",
+    "unrefunded": "No refund · Loss {money}",
+    "unused": "Unrefunded loss: −{money} ({days})",
+    "unusedTitle": "Unrefunded",
     "terminated": "Terminated",
     "restore": "Reactivate",
-    "fxMissing": "Some loss amounts cannot be converted because exchange rates are missing. Original amounts are shown below."
+    "fxMissing": "Some loss amounts cannot be converted because exchange rates are missing. Original amounts are shown below.",
+    "lossTitle": "Unrefunded loss",
+    "lossDays": {
+      "one": "{count} day",
+      "other": "{count} days"
+    },
+    "fullyRefunded": "Fully refunded"
   }
 }

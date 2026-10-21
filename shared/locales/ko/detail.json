@@ -97,5 +97,6 @@
     "total": { "other": "약 {amount} · {count}건" },
     "more": { "other": "{count}건 더" },
     "none": "앞으로 12개월 동안 결제가 없어요"
-  }
+  },
+  "stop": { "title": "종료 및 환불", "type": "종료 유형", "paidThrough": "원래 결제된 이용 종료일", "loss": "−{money} ({days})" }
 }

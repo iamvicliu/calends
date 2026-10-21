@@ -66,6 +66,6 @@
     "share": "{amount}/bln · {pct}%",
     "caption": "Bintang langganan · ukuran gelembung menunjukkan biaya bulanan",
     "aria": "{name}, {amount} per bulan",
-    "loss": "Kerugian pembatalan"
+    "loss": "Termasuk kerugian tanpa pengembalian dana"
   }
 }

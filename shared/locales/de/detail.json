@@ -97,5 +97,6 @@
     "total": { "one": "≈ {amount} · {count} Abbuchung", "other": "≈ {amount} · {count} Abbuchungen" },
     "more": { "one": "{count} weitere", "other": "{count} weitere" },
     "none": "Keine Abbuchungen in den nächsten 12 Monaten"
-  }
+  },
+  "stop": { "title": "Beendigung & Erstattung", "type": "Art der Beendigung", "paidThrough": "Ursprünglich bezahlt bis", "loss": "−{money} ({days})" }
 }

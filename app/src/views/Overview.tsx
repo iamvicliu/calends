@@ -416,7 +416,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const delta = mrrChangeSinceLastMonth(state, today);
   const ytd = useMemo(() => sumBase(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
-  const loss = useMemo(() => (state.readonly ? 0 : stopLosses(state, today).total), [state, today]);
+  const loss = useMemo(() => (state.readonly ? 0 : stopLosses(state, today, { from: `${today.slice(0, 4)}-01-01`, to: today }).total), [state, today]);
   const live = useMemo(
     () =>
       state.subscriptions
@@ -473,6 +473,13 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
           <div>
             <b>{money(ytd, base, { compact: true })}</b>
             <span>{t('overview.stmt.ytd', { year: today.slice(0, 4) })}</span>
+            <div className="stmt-paid-note">
+              {!state.readonly && loss !== 0 && (
+                <button type="button" className="stmt-loss-note" onClick={openLosses} title={!Number.isFinite(loss) ? t('core.stop.fxMissing') : undefined}>
+                  {t('overview.stmt.loss')} <strong>{money(loss, base, { compact: true })}</strong>
+                </button>
+              )}
+            </div>
           </div>
           <div>
             <b>{money(tot.mrr / 30.4375, base)}</b>
@@ -482,14 +489,6 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             <b>{tot.activeCount}</b>
             <span>{t('overview.stmt.active')}</span>
           </div>
-          {/* 退订、停用后没退回的钱：有才显示，点开到报告页的明细 */}
-          {loss > 0.005 && (
-            <button type="button" className="stmt-loss" onClick={openLosses}>
-              <span>{t('overview.stmt.loss')}</span>
-              <b>{money(loss, base, { compact: true })}</b>
-              <Icon name="right" size={14} />
-            </button>
-          )}
         </div>
       </div>
       <div className="stmt-r">

@@ -70,6 +70,6 @@
     "share": "{amount}/mes · {pct}%",
     "caption": "Constelación de suscripciones · el tamaño indica el coste mensual",
     "aria": "{name}, {amount} al mes",
-    "loss": "Pérdidas por cancelaciones"
+    "loss": "Incluye pérdida no reembolsada"
   }
 }

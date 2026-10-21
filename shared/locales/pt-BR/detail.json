@@ -92,5 +92,6 @@
     "total": { "one": "≈ {amount} · {count} cobrança", "other": "≈ {amount} · {count} cobranças" },
     "more": { "one": "mais {count}", "other": "mais {count}" },
     "none": "Nenhuma cobrança nos próximos 12 meses"
-  }
+  },
+  "stop": { "title": "Encerramento e reembolso", "type": "Tipo de encerramento", "paidThrough": "Pago originalmente até", "loss": "−{money} ({days})" }
 }

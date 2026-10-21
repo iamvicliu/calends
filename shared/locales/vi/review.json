@@ -95,5 +95,5 @@
     "foot": "Bong bóng càng lớn, chi càng nhiều"
   },
   "spendBasis": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên",
-  "stopLoss": "Năm này mất {amount} do bị ngừng dịch vụ / hủy sớm"
+  "stopLoss": "Tổn thất chưa hoàn tiền năm nay: {amount}"
 }

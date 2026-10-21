@@ -167,18 +167,24 @@
     "date": "Enddatum",
     "paidThrough": "Bezahlt bis {date}",
     "refundYes": "Erstattet",
-    "refundNo": "Keine Erstattung",
+    "refundNo": "Nicht erstattet",
     "refundAmount": "Erstattungsbetrag",
     "refundDate": "Erstattungsdatum",
     "reason": "Grund (optional)",
     "currencyHint": "Erstattungen erfolgen in der Abowährung {currency}. Eine andere Kartenwährung kann unten erfasst werden.",
     "refunded": "Erstattet {money}",
     "partial": "Teilerstattung {money}",
-    "unrefunded": "Keine Erstattung · {days} ungenutzte Tage",
-    "unused": "{days} bezahlte, ungenutzte Tage, etwa {money}",
-    "unusedTitle": "Bezahlt, ungenutzt",
+    "unrefunded": "Keine Erstattung · Verlust {money}",
+    "unused": "Nicht erstatteter Verlust: −{money} ({days})",
+    "unusedTitle": "Nicht erstattet",
     "terminated": "Gesperrt",
     "restore": "Reaktivieren",
-    "fxMissing": "Einige Verluste können wegen fehlender Wechselkurse nicht umgerechnet werden. Die Originalbeträge bleiben in den Details erhalten."
+    "fxMissing": "Einige Verluste können wegen fehlender Wechselkurse nicht umgerechnet werden. Die Originalbeträge bleiben in den Details erhalten.",
+    "lossTitle": "Nicht erstatteter Verlust",
+    "lossDays": {
+      "one": "{count} Tag",
+      "other": "{count} Tage"
+    },
+    "fullyRefunded": "Vollständig erstattet"
   }
 }

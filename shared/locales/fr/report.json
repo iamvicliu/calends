@@ -135,12 +135,12 @@
   "stops": {
     "title": "Résiliations et suspensions",
     "saved": "Économisé",
-    "loss": "Perdu",
+    "loss": "Perte non remboursée",
     "savedHint": "Renouvellements évités estimés depuis la résiliation, jusqu’à aujourd’hui",
-    "lossHint": "Payé, inutilisé et non remboursé",
-    "basis": "Tout l’historique · Ma part ; économies au taux actuel, pertes au taux du jour de l’arrêt.",
+    "lossHint": "Frais payés pour un service arrêté avant terme et non remboursés",
+    "basis": "Tout l’historique · Ma part ; économies au taux actuel, perte non remboursée au taux du jour de l’arrêt.",
     "details": "Détail des pertes non remboursées",
-    "empty": "Aucune perte liée à un service inutilisé non remboursé.",
-    "cancel": "Résiliation anticipée"
+    "empty": "Aucune perte non remboursée.",
+    "cancel": "Résiliation anticipée volontaire"
   }
 }

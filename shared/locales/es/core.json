@@ -174,11 +174,17 @@
     "currencyHint": "Los reembolsos usan {currency}, la moneda de la suscripción. Puedes indicar otra moneda de tarjeta abajo.",
     "refunded": "Reembolsado {money}",
     "partial": "Reembolso parcial {money}",
-    "unrefunded": "Sin reembolso · {days} días sin usar",
-    "unused": "{days} días pagados sin usar, unos {money}",
-    "unusedTitle": "Pagado sin usar",
+    "unrefunded": "Sin reembolso · Pérdida {money}",
+    "unused": "Pérdida no reembolsada: −{money} ({days})",
+    "unusedTitle": "Sin reembolso",
     "terminated": "Desactivado",
     "restore": "Reactivar",
-    "fxMissing": "Algunas pérdidas no se pueden convertir porque faltan tipos de cambio. Los importes originales se conservan en el detalle."
+    "fxMissing": "Algunas pérdidas no se pueden convertir porque faltan tipos de cambio. Los importes originales se conservan en el detalle.",
+    "lossTitle": "Pérdida no reembolsada",
+    "lossDays": {
+      "one": "{count} día",
+      "other": "{count} días"
+    },
+    "fullyRefunded": "Reembolso completo"
   }
 }

@@ -529,7 +529,7 @@ export function insights(state: AppState, today: string): Insight[] {
     out.push({
       id: 'unused',
       tone: 'warn',
-      title: t('core.stop.unusedTitle'),
+      title: t('core.stop.lossTitle'),
       body: unused.incomplete ? t('core.stop.fxMissing') : money(unused.total, state.settings.baseCurrency),
       subs: [...new Map(unused.items.map((i) => [i.sub.id, i.sub])).values()],
     });

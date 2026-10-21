@@ -97,5 +97,6 @@
     "total": { "other": "≈ {amount} · {count} lần" },
     "more": { "other": "Thêm {count} lần" },
     "none": "Không có khoản trừ nào trong 12 tháng tới"
-  }
+  },
+  "stop": { "title": "Dừng dịch vụ và hoàn tiền", "type": "Loại dừng dịch vụ", "paidThrough": "Ngày cuối đã trả ban đầu", "loss": "−{money} ({days})" }
 }

@@ -135,12 +135,12 @@
   "stops": {
     "title": "Cancellations & terminations",
     "saved": "Saved",
-    "loss": "Lost",
+    "loss": "Unrefunded loss",
     "savedHint": "Estimated renewals avoided since cancellation, through today",
-    "lossHint": "Paid, unused and not refunded",
-    "basis": "All history · My share; savings at current FX, losses at stop-date FX.",
+    "lossHint": "Paid for service that ended early and was not refunded",
+    "basis": "All history · My share; savings at current FX, unrefunded loss at stop-date FX.",
     "details": "Unrefunded loss details",
-    "empty": "No unrefunded losses from unused service.",
-    "cancel": "Cancelled early"
+    "empty": "No unrefunded loss.",
+    "cancel": "Voluntary early cancellation"
   }
 }

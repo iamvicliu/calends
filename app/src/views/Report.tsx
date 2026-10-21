@@ -377,7 +377,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   );
 }
 
-/** 退订后的续费节省与已付未用损失，均截至今天、全部历史 */
+/** 退订后的续费节省与未退款损失，均截至今天、全部历史 */
 function StopsCard({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const saved = useMemo(() => cancelSavings(state, today), [state, today]);
@@ -428,7 +428,10 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
                 <small>{i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: money(i.refunded, i.currency) })}</small>
               </span>
               <span className="stop-amount">
-                <b className="red">{i.fxMissing ? money(i.lossBase, base) : `−${money(i.lossBase, base)}`}</b>
+                <b className="red">
+                  <span className="stop-days">{t('core.stop.lossDays', { count: i.wastedDays })} ·</span>
+                  <span>{i.fxMissing ? money(i.lossBase, base) : `−${money(i.lossBase, base)}`}</span>
+                </b>
                 {i.currency !== base && <small>{money(i.loss, i.currency)}</small>}
               </span>
             </button>

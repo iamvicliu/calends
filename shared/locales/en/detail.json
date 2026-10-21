@@ -92,5 +92,6 @@
     "total": { "one": "≈ {amount} · {count} charge", "other": "≈ {amount} · {count} charges" },
     "more": { "one": "{count} more", "other": "{count} more" },
     "none": "No charges in the next 12 months"
-  }
+  },
+  "stop": { "title": "Stop & refund", "type": "Stop type", "paidThrough": "Originally paid through", "loss": "−{money} ({days})" }
 }

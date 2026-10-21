@@ -66,6 +66,6 @@
     "share": "{amount}/月 · {pct}%",
     "caption": "サブスクの星 · 泡の大きさは月額を表します",
     "aria": "{name}、月額{amount}",
-    "loss": "解約・停止による損失"
+    "loss": "未返金損失を含む"
   }
 }

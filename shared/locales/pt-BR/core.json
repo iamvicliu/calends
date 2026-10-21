@@ -174,11 +174,17 @@
     "currencyHint": "O reembolso usa {currency}, a moeda da assinatura. Outra moeda do cartão pode ser informada abaixo.",
     "refunded": "Reembolsado {money}",
     "partial": "Reembolso parcial {money}",
-    "unrefunded": "Sem reembolso · {days} dias não usados",
-    "unused": "{days} dias pagos não usados, cerca de {money}",
-    "unusedTitle": "Pago e não usado",
+    "unrefunded": "Sem reembolso · Perda {money}",
+    "unused": "Perda não reembolsada: −{money} ({days})",
+    "unusedTitle": "Sem reembolso",
     "terminated": "Desativado",
     "restore": "Reativar",
-    "fxMissing": "Algumas perdas não podem ser convertidas por falta de taxas de câmbio. Os valores originais são mantidos nos detalhes."
+    "fxMissing": "Algumas perdas não podem ser convertidas por falta de taxas de câmbio. Os valores originais são mantidos nos detalhes.",
+    "lossTitle": "Perda não reembolsada",
+    "lossDays": {
+      "one": "{count} dia",
+      "other": "{count} dias"
+    },
+    "fullyRefunded": "Reembolso integral"
   }
 }

@@ -97,5 +97,6 @@
     "total": { "other": "≈ {amount} · {count} tagihan" },
     "more": { "other": "{count} lagi" },
     "none": "Tidak ada tagihan dalam 12 bulan ke depan"
-  }
+  },
+  "stop": { "title": "Penghentian dan pengembalian dana", "type": "Jenis penghentian", "paidThrough": "Awalnya dibayar sampai", "loss": "−{money} ({days})" }
 }

@@ -363,6 +363,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     const stopped = stopSummary(g.v, today);
                     const unused = !state.readonly && !!stopped && stopped.wastedDays > 0;
                     const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
+                    const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
+                    const unusedAmount = unused ? `−${money(stopped!.unusedValue, g.v.currency, { compact: true })}` : '';
+                    // 留出左右内边距；停用标志占据的半圆不计入文字空间。
+                    const showUnusedAmount = unusedWidth >= Math.max(56, [...unusedAmount].length * 7 + 18);
                     if ((unused ? wastedUntil : to) < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
@@ -435,11 +439,14 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             // 被服务方停用时，灰段起点藏到停用标志下半个圆，接缝处只露出完整的圆
                             style={{
                               left: x(stopped!.date) - (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
-                              width: Math.max(0, x(wastedUntil) - x(stopped!.date)) + (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
+                              width: unusedWidth + (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
+                              paddingLeft: stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0,
                               top,
                             }}
                             title={stopDescription(g.v, today)}
-                          />
+                          >
+                            {showUnusedAmount && <em className="gt-unused-amount">{unusedAmount}</em>}
+                          </span>
                         )}
                         {stopped && stopped.date >= start && stopped.date <= end && stopped.kind === 'terminate' && (
                           <svg

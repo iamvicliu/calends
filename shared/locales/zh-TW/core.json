@@ -144,11 +144,16 @@
     "currencyHint": "退款幣別固定為訂閱幣別 {currency}，卡片實退可另填幣別和金額。",
     "refunded": "已退款 {money}",
     "partial": "部分退款 {money}",
-    "unrefunded": "未退款 · 已付未用 {days} 天",
-    "unused": "已付未用 {days} 天，約 {money}",
-    "unusedTitle": "已付未用",
+    "unrefunded": "未退款 · 損失 {money}",
+    "unused": "未退款損失：−{money}（{days}）",
+    "unusedTitle": "未退款",
     "terminated": "已停用",
     "restore": "恢復訂閱",
-    "fxMissing": "部分損失缺少匯率，暫時無法彙總為本位幣；原幣金額保留在明細中。"
+    "fxMissing": "部分損失缺少匯率，暫時無法彙總為本位幣；原幣金額保留在明細中。",
+    "lossTitle": "未退款損失",
+    "lossDays": {
+      "other": "{count} 天"
+    },
+    "fullyRefunded": "已全額退款"
   }
 }

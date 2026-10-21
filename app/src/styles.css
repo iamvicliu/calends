@@ -2112,7 +2112,8 @@ select.btn {
   font-weight: 600;
 }
 .stop-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -2137,9 +2138,24 @@ select.btn {
   font-size: 14px;
 }
 .stop-amount {
+  min-width: 0;
   text-align: right;
-  overflow-wrap: anywhere;
-  max-width: 42%;
+  font-variant-numeric: tabular-nums;
+}
+.stop-amount > b {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0 4px;
+}
+.stop-amount > b > span {
+  white-space: nowrap;
+}
+.stop-amount .stop-days {
+  color: var(--label-2);
+  font-size: 12px;
+  font-weight: 400;
+  align-self: center;
 }
 .stop-amount > b {
   font-size: 14px;
@@ -2159,15 +2175,10 @@ select.btn {
   }
   .stop-row {
     gap: 8px;
-    flex-wrap: wrap;
+    grid-template-columns: 32px minmax(0, 1fr) minmax(0, auto);
   }
-  .stop-info {
-    flex-basis: calc(100% - 40px);
-  }
-  .stop-amount {
-    margin-left: 40px;
-    max-width: calc(100% - 40px);
-    text-align: left;
+  .stop-amount > b {
+    font-size: 13px;
   }
 }
 .barline {
@@ -4194,36 +4205,36 @@ select.btn {
   font-size: 12px;
   color: var(--label-3);
 }
-/* 退订、停用后没退回的钱：横跨两列的一行，红色金额，点开到报告明细 */
-.stmt-facts .stmt-loss {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 8px 10px;
+/* 已付金额下的补充说明预留两行，零损失时其余格子仍保持对齐。 */
+.stmt-paid-note {
+  min-height: 32px;
+  margin-top: 3px;
+}
+.stmt-loss-note {
   border: 0;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--red) 8%, transparent);
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.stmt-facts .stmt-loss:hover {
-  background: color-mix(in srgb, var(--red) 13%, transparent);
-}
-.stmt-facts .stmt-loss span {
-  flex: 1;
-  color: var(--label-2);
-}
-.stmt-facts .stmt-loss b {
-  display: inline;
-  font-size: 15px;
-  color: var(--red);
-}
-.stmt-facts .stmt-loss .i {
+  padding: 0;
+  background: none;
   color: var(--label-3);
+  font: inherit;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: start;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.stmt-loss-note strong {
+  color: var(--red);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.stmt-loss-note:hover {
+  color: var(--label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.stmt-loss-note:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 .stmt-r {
   display: flex;
@@ -7049,7 +7060,7 @@ button.seat:disabled {
   font-weight: 600;
 }
 
-/* 切换范围、平移时，条、刻度、今天线平滑伸缩到新位置；已付未用与停用标志必须同步，否则会和实线分开 */
+/* 切换范围、平移时，条、刻度、今天线平滑伸缩到新位置；未退款段与停用标志必须同步，否则会和实线分开 */
 .gt-seg,
 .gt-gap,
 .gt-unused,
@@ -9050,7 +9061,7 @@ img.mm-flag {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
-/* 已付未用：接在停止日之后，和前面的实线拼成一整根，灰色表示这段钱没用上 */
+/* 未退款段：接在停止日之后，与前面的实线相连。 */
 .gt-unused,
 .gt-legend .lg-unused {
   background: color-mix(in srgb, var(--label-3) 38%, transparent);
@@ -9060,6 +9071,19 @@ img.mm-flag {
   height: 18px;
   z-index: 1;
   border-radius: 0 999px 999px 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.gt-unused-amount {
+  display: block;
+  padding: 0 9px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--red);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .gt-legend .lg-unused {
   border-radius: 999px;

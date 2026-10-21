@@ -70,6 +70,6 @@
     "share": "{amount}/ay · %{pct}",
     "caption": "Abonelik yıldızları · balon boyutu aylık maliyeti gösterir",
     "aria": "{name}, ayda {amount}",
-    "loss": "İptal kayıpları"
+    "loss": "İade edilmeyen kayıp dahil"
   }
 }

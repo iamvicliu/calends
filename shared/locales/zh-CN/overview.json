@@ -58,6 +58,6 @@
     "share": "{amount}/月 · 占 {pct}%",
     "caption": "订阅星图 · 圆的大小按每月金额比例",
     "aria": "{name} 每月 {amount}",
-    "loss": "退订停用损失"
+    "loss": "含未退款损失"
   }
 }

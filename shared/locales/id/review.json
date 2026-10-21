@@ -95,5 +95,5 @@
     "foot": "Gelembung makin besar, pengeluaran makin besar"
   },
   "spendBasis": "Total pembayaran, termasuk talangan untuk anggota",
-  "stopLoss": "Tahun ini rugi {amount} akibat penghentian / pembatalan lebih awal"
+  "stopLoss": "Kerugian tanpa pengembalian dana tahun ini: {amount}"
 }

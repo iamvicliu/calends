@@ -97,5 +97,6 @@
     "total": { "one": "≈ {amount} · {count} prélèvement", "other": "≈ {amount} · {count} prélèvements" },
     "more": { "one": "{count} de plus", "other": "{count} de plus" },
     "none": "Aucun prélèvement dans les 12 prochains mois"
-  }
+  },
+  "stop": { "title": "Arrêt et remboursement", "type": "Type d’arrêt", "paidThrough": "Payé initialement jusqu’au", "loss": "−{money} ({days})" }
 }

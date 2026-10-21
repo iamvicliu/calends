@@ -537,8 +537,14 @@ test('14 种语言都有停止状态、表单文案及全部新增错误，且�
     assert.ok(load(code, 'list').status.terminated);
     for (const [key, text] of Object.entries(enStop)) {
       const translated = load(code, 'core').stop[key];
-      assert.equal(typeof translated, 'string', `${code}: ${key}`);
-      assert.deepEqual(translated.match(/\{\w+\}/g)?.sort(), (text as string).match(/\{\w+\}/g)?.sort());
+      assert.equal(typeof translated, typeof text, `${code}: ${key}`);
+      // 天数有 CLDR 复数形式：各语言类别可以不同，但每个形式都要保留占位符。
+      const original = typeof text === 'string' ? text : (text as Record<string, string>).other;
+      if (typeof translated !== 'string') assert.ok(translated.other, `${code}: ${key}.other`);
+      for (const value of typeof translated === 'string' ? [translated] : Object.values(translated)) {
+        assert.equal(typeof value, 'string', `${code}: ${key}`);
+        assert.deepEqual((value as string).match(/\{\w+\}/g)?.sort(), original.match(/\{\w+\}/g)?.sort(), `${code}: ${key}`);
+      }
     }
     for (const key of [
       'stopBeforeStart',

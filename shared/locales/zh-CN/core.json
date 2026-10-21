@@ -144,11 +144,16 @@
     "currencyHint": "退款币种固定为订阅币种 {currency}，卡上实退可另填币种和金额。",
     "refunded": "已退款 {money}",
     "partial": "部分退款 {money}",
-    "unrefunded": "未退款 · 已付未用 {days} 天",
-    "unused": "已付未用 {days} 天，约 {money}",
-    "unusedTitle": "已付未用",
+    "unrefunded": "未退款 · 损失 {money}",
+    "unused": "未退款损失：−{money}（{days}）",
+    "unusedTitle": "未退款",
     "terminated": "已停用",
     "restore": "恢复订阅",
-    "fxMissing": "部分损失缺少汇率，暂无法汇总为本位币；原币金额保留在明细中。"
+    "fxMissing": "部分损失缺少汇率，暂无法汇总为本位币；原币金额保留在明细中。",
+    "lossTitle": "未退款损失",
+    "lossDays": {
+      "other": "{count} 天"
+    },
+    "fullyRefunded": "已全额退款"
   }
 }

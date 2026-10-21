@@ -70,6 +70,6 @@
     "share": "{amount}/mois · {pct} %",
     "caption": "Constellation d’abonnements · la taille des bulles indique le coût mensuel",
     "aria": "{name}, {amount} par mois",
-    "loss": "Pertes dues aux résiliations"
+    "loss": "Dont perte non remboursée"
   }
 }

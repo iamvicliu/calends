@@ -70,6 +70,6 @@
     "share": "{amount}/mês · {pct}%",
     "caption": "Constelação de assinaturas · o tamanho da bolha mostra o custo mensal",
     "aria": "{name}, {amount} por mês",
-    "loss": "Perdas com cancelamentos"
+    "loss": "Inclui perda não reembolsada"
   }
 }

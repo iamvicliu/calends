@@ -103,5 +103,5 @@
     "foot": "Bolha maior, gasto maior"
   },
   "spendBasis": "Valor total pago, incluindo adiantamentos para membros",
-  "stopLoss": "Neste ano, perda de {amount} por desativações / cancelamentos antecipados"
+  "stopLoss": "Perda não reembolsada neste ano: {amount}"
 }

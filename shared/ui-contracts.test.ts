@@ -254,6 +254,9 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     const terminated = rows.find((e) => text(e).includes('abuse'))!;
     assert.ok(text(terminated).includes(t('core.stop.partial', { money: money(6, 'USD') })));
     assert.ok(text(terminated).includes(money(10, 'USD')));
+    assert.ok(text(terminated).includes(t('core.stop.lossDays', { count: 10 })));
+    assert.ok(text(terminated).includes('−'));
+    assert.ok(text(tree).includes(t('core.stop.lossTitle')));
     assert.ok(text(tree).includes(t('report.stops.cancel')));
     assert.ok(text(tree).includes(t('core.stop.refundNo')));
     terminated.props.onClick();
@@ -289,4 +292,29 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     }
   }
   setLocale('en', []);
+});
+
+test('14 种语言统一未退款损失语义，金额标签取代未用天数，预付余值保持独立', () => {
+  for (const { code } of LOCALES) {
+    const core = locale(code, 'core').stop;
+    const report = locale(code, 'report');
+    const overview = locale(code, 'overview').stmt;
+    const review = locale(code, 'review');
+    const detail = locale(code, 'detail').stop;
+    assert.equal(report.stops.loss, core.lossTitle, code);
+    assert.ok(core.unused.includes(core.lossTitle), code);
+    assert.ok(overview.loss.toLocaleLowerCase(code).includes(core.lossTitle.toLocaleLowerCase(code)), code);
+    assert.ok(review.stopLoss.toLocaleLowerCase(code).includes(core.lossTitle.toLocaleLowerCase(code)), code);
+    assert.ok(core.unrefunded.includes('{money}'), code);
+    assert.ok(!core.unrefunded.includes('{days}'), code);
+    assert.ok(detail.loss.includes('{money}') && detail.loss.includes('{days}'), code);
+    assert.ok(report.stops.lossHint && core.fullyRefunded && detail.title, code);
+    assert.notEqual(core.unusedTitle, core.lossTitle, code); // 图例只写“未退款”。
+    assert.notEqual(report.cash.prepaidSub, report.stops.lossHint, code);
+  }
+  assert.equal(locale('zh-CN', 'report').cash.prepaidSub, '{count} 项已付未用完');
+  assert.equal(locale('zh-CN', 'core').stop.lossTitle, '未退款损失');
+  assert.equal(locale('en', 'core').stop.lossTitle, 'Unrefunded loss');
+  assert.equal(locale('zh-CN', 'report').stops.lossHint, '服务提前终止、没有退回的费用');
+  assert.equal(locale('en', 'report').stops.lossHint, 'Paid for service that ended early and was not refunded');
 });

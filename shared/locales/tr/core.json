@@ -167,18 +167,24 @@
     "date": "Durdurma tarihi",
     "paidThrough": "{date} tarihine kadar ödendi",
     "refundYes": "İade edildi",
-    "refundNo": "İade yok",
+    "refundNo": "İade edilmedi",
     "refundAmount": "İade tutarı",
     "refundDate": "İade tarihi",
     "reason": "Neden (isteğe bağlı)",
     "currencyHint": "İadeler abonelik para birimi {currency} ile kaydedilir. Kart iadesi için aşağıya farklı para birimi girilebilir.",
     "refunded": "İade edildi {money}",
     "partial": "Kısmi iade {money}",
-    "unrefunded": "İade yok · {days} kullanılmayan gün",
-    "unused": "Ödenmiş ama kullanılmamış {days} gün, yaklaşık {money}",
-    "unusedTitle": "Ödenmiş ama kullanılmamış",
+    "unrefunded": "İade yok · Kayıp {money}",
+    "unused": "İade edilmeyen kayıp: −{money} ({days})",
+    "unusedTitle": "İade edilmedi",
     "terminated": "Kapatıldı",
     "restore": "Yeniden etkinleştir",
-    "fxMissing": "Döviz kurları eksik olduğundan bazı kayıplar dönüştürülemiyor. Orijinal tutarlar ayrıntılarda korunur."
+    "fxMissing": "Döviz kurları eksik olduğundan bazı kayıplar dönüştürülemiyor. Orijinal tutarlar ayrıntılarda korunur.",
+    "lossTitle": "İade edilmeyen kayıp",
+    "lossDays": {
+      "one": "{count} gün",
+      "other": "{count} gün"
+    },
+    "fullyRefunded": "Tamamı iade edildi"
   }
 }

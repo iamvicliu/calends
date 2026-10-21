@@ -157,18 +157,23 @@
     "date": "停止日",
     "paidThrough": "支払済み期間：{date} まで",
     "refundYes": "返金あり",
-    "refundNo": "返金なし",
+    "refundNo": "未返金",
     "refundAmount": "返金額",
     "refundDate": "返金日",
     "reason": "理由（任意）",
     "currencyHint": "返金通貨は契約通貨の {currency} です。カードへの返金は別の通貨・金額を入力できます。",
     "refunded": "返金済み {money}",
     "partial": "一部返金 {money}",
-    "unrefunded": "返金なし · 支払済み未利用 {days} 日",
-    "unused": "支払済み未利用 {days} 日、約 {money}",
-    "unusedTitle": "支払済み未利用",
+    "unrefunded": "未返金 · 損失 {money}",
+    "unused": "未返金損失: −{money} ({days})",
+    "unusedTitle": "未返金",
     "terminated": "利用停止",
     "restore": "再開",
-    "fxMissing": "一部の損失は為替レートがないため換算できません。明細に元の通貨の金額を表示します。"
+    "fxMissing": "一部の損失は為替レートがないため換算できません。明細に元の通貨の金額を表示します。",
+    "lossTitle": "未返金損失",
+    "lossDays": {
+      "other": "{count} 日"
+    },
+    "fullyRefunded": "全額返金済み"
   }
 }

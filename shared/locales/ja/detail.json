@@ -97,5 +97,6 @@
     "total": { "other": "約 {amount} · {count} 件" },
     "more": { "other": "ほか {count} 件" },
     "none": "今後 12 か月は請求がありません"
-  }
+  },
+  "stop": { "title": "停止と返金", "type": "停止の種類", "paidThrough": "当初の支払済み期間の終了日", "loss": "−{money} ({days})" }
 }

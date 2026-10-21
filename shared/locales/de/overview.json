@@ -70,6 +70,6 @@
     "share": "{amount}/Mon. · {pct} %",
     "caption": "Abo-Sternenhimmel · Blasengröße zeigt monatliche Kosten",
     "aria": "{name}, {amount} pro Monat",
-    "loss": "Verlust durch Kündigungen"
+    "loss": "Davon nicht erstatteter Verlust"
   }
 }

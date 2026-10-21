@@ -157,18 +157,23 @@
     "date": "중지일",
     "paidThrough": "{date}까지 결제됨",
     "refundYes": "환불됨",
-    "refundNo": "환불 없음",
+    "refundNo": "미환불",
     "refundAmount": "환불 금액",
     "refundDate": "환불일",
     "reason": "사유 (선택)",
     "currencyHint": "환불 통화는 구독 통화인 {currency}로 고정됩니다. 카드 환불은 다른 통화와 금액을 입력할 수 있습니다.",
     "refunded": "환불됨 {money}",
     "partial": "부분 환불 {money}",
-    "unrefunded": "환불 없음 · 결제 후 미사용 {days}일",
-    "unused": "결제 후 미사용 {days}일, 약 {money}",
-    "unusedTitle": "결제 후 미사용",
+    "unrefunded": "미환불 · 손실 {money}",
+    "unused": "미환불 손실: −{money} ({days})",
+    "unusedTitle": "미환불",
     "terminated": "사용 중지됨",
     "restore": "다시 활성화",
-    "fxMissing": "일부 손실은 환율이 없어 환산할 수 없습니다. 내역에 원래 통화 금액을 표시합니다."
+    "fxMissing": "일부 손실은 환율이 없어 환산할 수 없습니다. 내역에 원래 통화 금액을 표시합니다.",
+    "lossTitle": "미환불 손실",
+    "lossDays": {
+      "other": "{count}일"
+    },
+    "fullyRefunded": "전액 환불됨"
   }
 }

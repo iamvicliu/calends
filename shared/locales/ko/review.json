@@ -95,5 +95,5 @@
     "foot": "거품이 클수록 지출도 큽니다"
   },
   "spendBasis": "멤버 대신 낸 금액을 포함한 전체 결제액",
-  "stopLoss": "이 해 서비스 중단 / 조기 해지로 {amount} 손실"
+  "stopLoss": "올해 미환불 손실: {amount}"
 }

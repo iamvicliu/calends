@@ -103,5 +103,5 @@
     "foot": "Bigger bubble, bigger spend"
   },
   "spendBasis": "Full amount paid, including advances for members",
-  "stopLoss": "Lost {amount} to termination / early cancellation this year"
+  "stopLoss": "Unrefunded loss this year: {amount}"
 }

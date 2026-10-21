@@ -135,12 +135,12 @@
   "stops": {
     "title": "Cancelamentos e desativações",
     "saved": "Economizado",
-    "loss": "Perdido",
+    "loss": "Perda não reembolsada",
     "savedHint": "Estimativa de renovações evitadas desde o cancelamento até hoje",
-    "lossHint": "Pago, não utilizado e não reembolsado",
-    "basis": "Todo o histórico · Minha parte; economia no câmbio atual e perdas no câmbio da data de interrupção.",
+    "lossHint": "Valor pago por um serviço encerrado antes do prazo e não reembolsado",
+    "basis": "Todo o histórico · Minha parte; economia pelo câmbio atual e perda não reembolsada pelo câmbio do dia do encerramento.",
     "details": "Detalhes das perdas não reembolsadas",
-    "empty": "Sem perdas por serviços não utilizados e não reembolsados.",
-    "cancel": "Cancelamento antecipado"
+    "empty": "Nenhuma perda não reembolsada.",
+    "cancel": "Cancelamento antecipado voluntário"
   }
 }

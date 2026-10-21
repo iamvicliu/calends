@@ -167,18 +167,24 @@
     "date": "Date d’arrêt",
     "paidThrough": "Payé jusqu’au {date}",
     "refundYes": "Remboursé",
-    "refundNo": "Sans remboursement",
+    "refundNo": "Non remboursé",
     "refundAmount": "Montant remboursé",
     "refundDate": "Date de remboursement",
     "reason": "Motif (facultatif)",
     "currencyHint": "Le remboursement utilise {currency}, la devise de l’abonnement. Une autre devise de carte peut être saisie ci-dessous.",
     "refunded": "Remboursé {money}",
     "partial": "Remboursement partiel {money}",
-    "unrefunded": "Sans remboursement · {days} jours inutilisés",
-    "unused": "{days} jours payés non utilisés, environ {money}",
-    "unusedTitle": "Payé non utilisé",
+    "unrefunded": "Non remboursé · Perte {money}",
+    "unused": "Perte non remboursée: −{money} ({days})",
+    "unusedTitle": "Non remboursé",
     "terminated": "Désactivé",
     "restore": "Réactiver",
-    "fxMissing": "Certaines pertes ne peuvent pas être converties faute de taux de change. Les montants d’origine restent dans le détail."
+    "fxMissing": "Certaines pertes ne peuvent pas être converties faute de taux de change. Les montants d’origine restent dans le détail.",
+    "lossTitle": "Perte non remboursée",
+    "lossDays": {
+      "one": "{count} jour",
+      "other": "{count} jours"
+    },
+    "fullyRefunded": "Intégralement remboursé"
   }
 }

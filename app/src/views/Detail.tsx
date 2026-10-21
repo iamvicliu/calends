@@ -23,6 +23,7 @@ import {
   phaseSubs,
   priceAt,
   servedTime,
+  stopSummary,
   upcomingPhase,
   type Charge,
 } from '../../../shared/billing.ts';
@@ -751,6 +752,38 @@ function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?:
   );
 }
 
+/** 每个停止阶段保留自己的日期、币种与退款记录。 */
+function StopDetails({ sub, today, readonly }: { sub: Subscription; today: string; readonly?: boolean }) {
+  const stopped = phaseSubs(sub).filter((phase) => phase.stop);
+  if (readonly || !stopped.length) return null;
+  return (
+    <Panel title={t('detail.stop.title')} className="dt-stops">
+      {stopped.map((phase) => {
+        const summary = stopSummary(phase, today)!;
+        return (
+          <dl className="dt-props" key={phase.start}>
+            <Prop k={t('detail.stop.type')} hint={summary.kind === 'terminate' ? summary.reason : undefined}>
+              {t(summary.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}
+            </Prop>
+            <Prop k={t('core.stop.date')}>{cnDateFull(summary.date)}</Prop>
+            <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(summary.paidThrough)}</Prop>
+            <Prop k={t('core.stop.refundAmount')} hint={summary.refundStatus === 'full' ? t('core.stop.fullyRefunded') : undefined}>
+              {summary.refunded > 0 ? money(summary.refunded, phase.currency) : t('core.stop.refundNo')}
+            </Prop>
+            {summary.unusedValue > 0 && (
+              <Prop k={t('core.stop.lossTitle')}>
+                <span className="dt-stop-loss">
+                  {t('detail.stop.loss', { money: money(summary.unusedValue, phase.currency), days: t('core.stop.lossDays', { count: summary.wastedDays }) })}
+                </span>
+              </Prop>
+            )}
+          </dl>
+        );
+      })}
+    </Panel>
+  );
+}
+
 /** 详情：金额、周期、分类、支付方式、日期等，以及并行、计划变更、优惠、合租、提醒和备注 */
 function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppState; today: string; onCar: () => void }) {
   const st = effectiveStatus(sub, today);
@@ -812,6 +845,8 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
           </div>
         )}
       </Panel>
+
+      <StopDetails sub={sub} today={today} readonly={ro} />
 
       {parallel.length > 0 && (
         <Panel title={t('detail.overlap.title')}>

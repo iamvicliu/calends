@@ -102,5 +102,6 @@
     "total": { "one": "≈ {amount} · {count} ödeme", "other": "≈ {amount} · {count} ödeme" },
     "more": { "one": "{count} tane daha", "other": "{count} tane daha" },
     "none": "Önümüzdeki 12 ayda ödeme yok"
-  }
+  },
+  "stop": { "title": "Sonlandırma ve iade", "type": "Sonlandırma türü", "paidThrough": "Başlangıçta ödenen son gün", "loss": "−{money} ({days})" }
 }

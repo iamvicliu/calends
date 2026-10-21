@@ -157,18 +157,23 @@
     "date": "Tanggal berhenti",
     "paidThrough": "Dibayar hingga {date}",
     "refundYes": "Dikembalikan",
-    "refundNo": "Tanpa pengembalian",
+    "refundNo": "Tanpa pengembalian dana",
     "refundAmount": "Jumlah pengembalian",
     "refundDate": "Tanggal pengembalian",
     "reason": "Alasan (opsional)",
     "currencyHint": "Pengembalian memakai {currency}, mata uang langganan. Mata uang dan jumlah aktual di kartu dapat diisi di bawah.",
     "refunded": "Dikembalikan {money}",
     "partial": "Pengembalian sebagian {money}",
-    "unrefunded": "Tanpa pengembalian · {days} hari tak terpakai",
-    "unused": "{days} hari dibayar tak terpakai, sekitar {money}",
-    "unusedTitle": "Dibayar tak terpakai",
+    "unrefunded": "Tanpa pengembalian dana · Kerugian {money}",
+    "unused": "Kerugian tanpa pengembalian dana: −{money} ({days})",
+    "unusedTitle": "Tanpa pengembalian dana",
     "terminated": "Dinonaktifkan",
     "restore": "Aktifkan kembali",
-    "fxMissing": "Sebagian kerugian tidak dapat dikonversi karena kurs tidak tersedia. Jumlah dalam mata uang asli tetap ada di rincian."
+    "fxMissing": "Sebagian kerugian tidak dapat dikonversi karena kurs tidak tersedia. Jumlah dalam mata uang asli tetap ada di rincian.",
+    "lossTitle": "Kerugian tanpa pengembalian dana",
+    "lossDays": {
+      "other": "{count} hari"
+    },
+    "fullyRefunded": "Dana dikembalikan penuh"
   }
 }

@@ -135,12 +135,12 @@
   "stops": {
     "title": "İptaller ve sonlandırmalar",
     "saved": "Tasarruf",
-    "loss": "Kayıp",
+    "loss": "İade edilmeyen kayıp",
     "savedHint": "İptalden bugüne kadar önlenen yenileme ücretlerinin tahmini",
-    "lossHint": "Ödenmiş, kullanılmamış ve iade edilmemiş",
-    "basis": "Tüm geçmiş · Benim payım; tasarruf güncel kurla, kayıplar durdurma tarihindeki kurla hesaplanır.",
-    "details": "İade edilmemiş kayıpların ayrıntıları",
-    "empty": "Kullanılmayan hizmetlerden iade edilmemiş kayıp yok.",
-    "cancel": "Erken iptal"
+    "lossHint": "Erken sona eren hizmet için ödenen ve iade edilmeyen tutar",
+    "basis": "Tüm geçmiş · Benim payım; tasarruf güncel kurla, iade edilmeyen kayıp sonlandırma tarihindeki kurla hesaplanır.",
+    "details": "İade edilmeyen kayıp ayrıntıları",
+    "empty": "İade edilmeyen kayıp yok.",
+    "cancel": "İsteğe bağlı erken iptal"
   }
 }

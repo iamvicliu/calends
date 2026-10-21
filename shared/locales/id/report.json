@@ -132,12 +132,12 @@
   "stops": {
     "title": "Pembatalan & penghentian",
     "saved": "Dihemat",
-    "loss": "Kerugian",
+    "loss": "Kerugian tanpa pengembalian dana",
     "savedHint": "Perkiraan biaya perpanjangan yang dihindari sejak pembatalan hingga hari ini",
-    "lossHint": "Sudah dibayar, belum dipakai dan belum dikembalikan",
-    "basis": "Seluruh riwayat · Bagian saya; penghematan memakai kurs saat ini, kerugian memakai kurs tanggal penghentian.",
+    "lossHint": "Biaya yang dibayar untuk layanan yang berakhir lebih awal dan tidak dikembalikan",
+    "basis": "Seluruh riwayat · Bagian saya; penghematan memakai kurs saat ini, kerugian tanpa pengembalian dana memakai kurs tanggal penghentian.",
     "details": "Rincian kerugian tanpa pengembalian dana",
-    "empty": "Tidak ada kerugian dari layanan yang belum dipakai dan belum dikembalikan dananya.",
-    "cancel": "Dibatalkan lebih awal"
+    "empty": "Tidak ada kerugian tanpa pengembalian dana.",
+    "cancel": "Pembatalan dini sukarela"
   }
 }

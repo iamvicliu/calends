@@ -66,6 +66,6 @@
     "share": "{amount}/tháng · {pct}%",
     "caption": "Chòm sao gói đăng ký · kích thước bong bóng thể hiện chi phí hằng tháng",
     "aria": "{name}, {amount} mỗi tháng",
-    "loss": "Tổn thất do hủy/đình chỉ"
+    "loss": "Gồm tổn thất chưa hoàn tiền"
   }
 }

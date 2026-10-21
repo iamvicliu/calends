@@ -97,5 +97,6 @@
     "total": { "one": "≈ {amount} · {count} cargo", "other": "≈ {amount} · {count} cargos" },
     "more": { "one": "{count} más", "other": "{count} más" },
     "none": "Sin cargos en los próximos 12 meses"
-  }
+  },
+  "stop": { "title": "Cese y reembolso", "type": "Tipo de cese", "paidThrough": "Pagado originalmente hasta", "loss": "−{money} ({days})" }
 }
