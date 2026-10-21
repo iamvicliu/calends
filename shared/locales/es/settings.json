@@ -14,6 +14,8 @@
     "followSystem": "Predeterminado del sistema",
     "name": "Nombre",
     "namePlaceholder": "Se muestra en las imágenes compartidas y en la página pública",
+    "avatar": "Avatar",
+    "avatarDefault": "Icono predeterminado",
     "startPage": "Abrir en",
     "startPageAria": "Página de inicio",
     "baseCurrency": "Moneda base",

@@ -6,7 +6,7 @@ import { cnDate, money, monthLabel, symbol } from '../../shared/format.ts';
 import { t, type Params } from '../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../shared/metrics.ts';
-import type { AppState, Subscription } from '../../shared/types.ts';
+import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
 import { allCharges, catIcon, periodRange, sumBase, syncCategories } from '../derive.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode } from '../theme.tsx';
@@ -101,11 +101,11 @@ export function PublicPage() {
   );
 }
 
-function Shell({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
+function Shell({ children, right, avatar }: { children: React.ReactNode; right?: React.ReactNode; avatar?: string }) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-12 sm:px-6 sm:pt-10">
       <header className="mb-5 flex items-center gap-3 sm:mb-6">
-        <img src="/icons/avatar.png" alt="" className="size-9 rounded-[22%]" />
+        <img src={avatarOf({ avatar })} alt="" className="size-9 rounded-[22%] object-cover" />
         <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title()}</h1>
         {right}
       </header>
@@ -165,6 +165,7 @@ function Ledger({ state }: { state: AppState }) {
 
   return (
     <Shell
+      avatar={state.settings.avatar}
       right={
         <div className="flex items-center gap-1.5">
           {base !== 'USD' && (

@@ -17,6 +17,8 @@
     "followSystem": "Langue du système",
     "name": "Nom",
     "namePlaceholder": "Affiché sur les images partagées et la page publique",
+    "avatar": "Avatar",
+    "avatarDefault": "Icône par défaut",
     "startPage": "Ouvrir sur",
     "startPageAria": "Page d’accueil",
     "baseCurrency": "Devise de référence",

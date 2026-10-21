@@ -49,5 +49,6 @@
     "duplicate": "Duplicate category: {name}"
   },
   "demoReadonly": "This is a read-only demo — changes can't be saved.",
-  "assistant": { "noKey": "No DeepSeek API key configured yet.", "badTool": "Unsupported action." }
+  "assistant": { "noKey": "No DeepSeek API key configured yet.", "badTool": "Unsupported action." },
+  "invalidAvatar": "Invalid image"
 }

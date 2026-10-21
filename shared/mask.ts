@@ -101,6 +101,7 @@ export function maskForPublic(state: AppState): AppState {
       baseCurrency: state.settings.baseCurrency,
       timezone: state.settings.timezone,
       displayName: state.settings.displayName,
+      avatar: state.settings.avatar,
       weekStart: state.settings.weekStart,
       collectCurrency: state.settings.collectCurrency,
       publicView: true,

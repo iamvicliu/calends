@@ -14,6 +14,8 @@
     "followSystem": "跟随系统",
     "name": "名字",
     "namePlaceholder": "分享图、公开页上显示",
+    "avatar": "头像",
+    "avatarDefault": "默认图标",
     "startPage": "打开后先看",
     "startPageAria": "启动页",
     "baseCurrency": "本位币",

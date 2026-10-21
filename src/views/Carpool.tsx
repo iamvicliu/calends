@@ -162,7 +162,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     <div className="seats-row">
                       <div className="seats">
                         <span className="seat me" title={t('family.pool.me')}>
-                          <img src="/icons/avatar.png" alt={t('family.pool.me')} />
+                          <img src={state.settings.avatar || '/icons/avatar.png'} alt={t('family.pool.me')} />
                         </span>
                         {onboard.map((m) => {
                           const owe = dues.find((d) => d.member.id === m.id)?.periodsOwed;

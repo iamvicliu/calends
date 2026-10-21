@@ -49,5 +49,6 @@
     "duplicate": "Catégorie en double : {name}"
   },
   "demoReadonly": "Ceci est une démo en lecture seule : les modifications ne sont pas enregistrées.",
-  "assistant": { "noKey": "Aucune clé API DeepSeek configurée.", "badTool": "Action non prise en charge." }
+  "assistant": { "noKey": "Aucune clé API DeepSeek configurée.", "badTool": "Action non prise en charge." },
+  "invalidAvatar": "Image non valide"
 }

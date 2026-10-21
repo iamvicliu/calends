@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
-import type { AppState, Subscription } from '../shared/types.ts';
+import { avatarOf, type AppState, type Subscription } from '../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
@@ -183,7 +183,7 @@ function Sidebar({
     <aside className="sidebar">
       <div className="sb-top">
         <a className="sb-mark" href={href('')}>
-          <img src="/icons/icon-192.png" alt="" />
+          <img src={avatarOf(state.settings)} alt="" />
           {t('app.name')}
         </a>
         <button className="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>

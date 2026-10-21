@@ -293,6 +293,8 @@ export interface Settings {
   monthlyDigest: boolean;
   icsToken?: string;
   displayName: string;
+  /** 侧边栏、公开页与合租里「我」的头像：图片链接或上传后的 data URL；缺省用 Calends 图标 */
+  avatar?: string;
   /** 侧边栏显示「即将扣款」，以及往后看多少天；缺省显示、45 天 */
   sidebarUpcoming?: boolean;
   /** 侧边栏「即将扣款」往后看几天；0 = 看到本月月底 */
@@ -346,6 +348,9 @@ export interface AppState {
 }
 
 export const BALANCE_KINDS: MethodKind[] = ['appstore', 'googleplay', 'giftcard', 'prepaid', 'phone', 'paypal', 'alipay', 'wechat', 'crypto'];
+
+/** 头像地址：没设置时用产品图标 */
+export const avatarOf = (s: Pick<Settings, 'avatar'>) => s.avatar || '/icons/logo.svg';
 
 export const DEFAULT_SETTINGS: Settings = {
   baseCurrency: 'USD',

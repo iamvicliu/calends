@@ -16,6 +16,8 @@
     "followSystem": "システムに合わせる",
     "name": "名前",
     "namePlaceholder": "共有画像と公開ページに表示されます",
+    "avatar": "アイコン",
+    "avatarDefault": "デフォルトのアイコン",
     "startPage": "起動時に開く",
     "startPageAria": "開始ページ",
     "baseCurrency": "基準通貨",

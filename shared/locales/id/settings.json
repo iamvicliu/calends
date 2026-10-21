@@ -14,6 +14,8 @@
     "followSystem": "Ikuti sistem",
     "name": "Nama",
     "namePlaceholder": "Ditampilkan di gambar bagikan dan halaman publik",
+    "avatar": "Avatar",
+    "avatarDefault": "Ikon bawaan",
     "startPage": "Buka ke",
     "startPageAria": "Halaman awal",
     "baseCurrency": "Mata uang dasar",

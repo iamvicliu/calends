@@ -1,9 +1,9 @@
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cycleShort } from '../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../shared/csv.ts';
-import type { AppState, PaymentMethod, Subscription } from '../../shared/types.ts';
+import { avatarOf, type AppState, type PaymentMethod, type Subscription } from '../../shared/types.ts';
 import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
@@ -220,6 +220,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               onBlur={() => name.trim() !== s.displayName && run(() => saveSettings({ displayName: name.trim() }), t('settings.toast.saved'))}
             />
           </Cell>
+          <AvatarField avatar={s.avatar} />
           <Cell label={t('settings.general.startPage')}>
             <Picker
               value={s.startPage ?? ''}
@@ -587,5 +588,69 @@ function NavRow({ id, label, checked, onToggle }: { id: string; label: string; c
       <span className="nav-row-name">{label}</span>
       {checked !== undefined && <Toggle label={label} checked={checked} onChange={onToggle} />}
     </div>
+  );
+}
+
+/** 头像：上传图片（裁成正方形缩到 256px）或填图片链接；侧边栏、公开页和合租里的「我」都用它 */
+function AvatarField({ avatar }: { avatar?: string }) {
+  const [link, setLink] = useState(false);
+  const [url, setUrl] = useState(avatar?.startsWith('data:') ? '' : (avatar ?? ''));
+  const file = useRef<HTMLInputElement>(null);
+  const set = (v: string | null) => run(() => saveSettings({ avatar: v as string | undefined }), t('settings.toast.saved'));
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target as HTMLInputElement;
+    const fl = input.files?.[0];
+    input.value = '';
+    if (!fl) return;
+    const img = new Image();
+    img.onload = () => {
+      const n = 256;
+      const side = Math.min(img.width, img.height);
+      const c = document.createElement('canvas');
+      c.width = c.height = n;
+      c.getContext('2d')!.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, n, n);
+      URL.revokeObjectURL(img.src);
+      setUrl('');
+      setLink(false);
+      void set(c.toDataURL('image/webp', 0.9));
+    };
+    img.src = URL.createObjectURL(fl);
+  };
+  let source = t('settings.general.avatarDefault');
+  if (avatar) source = avatar.startsWith('data:') ? t('wallet.logo.uploaded') : t('wallet.logo.link');
+  return (
+    <>
+      <div className="cell logo-field">
+        <span className="cell-l">
+          {t('settings.general.avatar')}
+          <small>{source}</small>
+        </span>
+        <span className="cell-r">
+          <img className="avatar-preview" src={avatarOf({ avatar })} alt="" />
+          <button type="button" className="chip-btn" onClick={() => file.current?.click()}>
+            {t('wallet.logo.upload')}
+          </button>
+          <button type="button" className={`chip-btn ${link ? 'on' : ''}`} onClick={() => setLink(!link)}>
+            {t('wallet.logo.linkBtn')}
+          </button>
+          {avatar && (
+            <button type="button" className="chip-btn" onClick={() => (setUrl(''), void set(null))}>
+              {t('wallet.logo.clear')}
+            </button>
+          )}
+          <input ref={file} type="file" accept="image/*" hidden onChange={onFile} />
+        </span>
+      </div>
+      {link && (
+        <Cell label={t('wallet.logo.link')}>
+          <input
+            value={url}
+            placeholder="https://…/avatar.png"
+            onChange={(e) => setUrl((e.target as HTMLInputElement).value)}
+            onBlur={() => url.trim() !== (avatar ?? '') && void set(url.trim() || null)}
+          />
+        </Cell>
+      )}
+    </>
   );
 }

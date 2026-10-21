@@ -17,6 +17,8 @@
     "followSystem": "Systemstandard",
     "name": "Name",
     "namePlaceholder": "Wird auf geteilten Bildern und der öffentlichen Seite angezeigt",
+    "avatar": "Avatar",
+    "avatarDefault": "Standard-App-Symbol",
     "startPage": "Öffnen mit",
     "startPageAria": "Startseite",
     "baseCurrency": "Basiswährung",

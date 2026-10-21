@@ -242,6 +242,11 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     // null 表示清空这个设置
     for (const k of Object.keys(next) as Array<keyof Settings>) if (next[k] === null) delete next[k];
     next.notifyHour = Math.min(23, Math.max(0, Math.round(next.notifyHour)));
+    if (
+      (next.avatar && !(/^https?:\/\//.test(next.avatar) || /^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,/.test(next.avatar))) ||
+      (next.avatar?.length ?? 0) > 300_000
+    )
+      return bad(t('server.invalidAvatar'));
     if (next.maxSessions !== undefined) next.maxSessions = Math.min(50, Math.max(1, Math.round(next.maxSessions)));
     await putKv(env, 'settings', next);
     if (next.maxSessions !== cur.maxSessions) await pruneSessions(req, env, next.maxSessions ?? DEFAULT_MAX_SESSIONS);

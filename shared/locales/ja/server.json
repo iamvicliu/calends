@@ -44,5 +44,6 @@
     "duplicate": "カテゴリ名が重複しています：{name}"
   },
   "demoReadonly": "これは閲覧専用のデモのため、変更は保存できません。",
-  "assistant": { "noKey": "DeepSeek の API キーがまだ設定されていません。", "badTool": "サポートされていない操作です。" }
+  "assistant": { "noKey": "DeepSeek の API キーがまだ設定されていません。", "badTool": "サポートされていない操作です。" },
+  "invalidAvatar": "画像が無効です"
 }

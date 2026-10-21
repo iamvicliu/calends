@@ -16,6 +16,8 @@
     "followSystem": "시스템 기본값",
     "name": "이름",
     "namePlaceholder": "공유 이미지와 공개 페이지에 표시됩니다",
+    "avatar": "프로필 이미지",
+    "avatarDefault": "기본 아이콘",
     "startPage": "시작 화면",
     "startPageAria": "시작 페이지",
     "baseCurrency": "기준 통화",

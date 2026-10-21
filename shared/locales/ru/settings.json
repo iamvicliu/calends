@@ -14,6 +14,8 @@
     "followSystem": "Как в системе",
     "name": "Имя",
     "namePlaceholder": "Показывается на картинках и публичной странице",
+    "avatar": "Аватар",
+    "avatarDefault": "Значок по умолчанию",
     "startPage": "Открывать",
     "startPageAria": "Стартовая страница",
     "baseCurrency": "Основная валюта",

@@ -14,6 +14,8 @@
     "followSystem": "Sistem varsayılanı",
     "name": "Ad",
     "namePlaceholder": "Paylaşım görsellerinde ve herkese açık sayfada gösterilir",
+    "avatar": "Avatar",
+    "avatarDefault": "Varsayılan simge",
     "startPage": "Açılış sayfası",
     "startPageAria": "Başlangıç sayfası",
     "baseCurrency": "Ana para birimi",

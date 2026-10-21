@@ -2452,6 +2452,13 @@ select.btn {
   width: 24px;
   height: 24px;
   border-radius: 6px;
+  object-fit: cover;
+}
+.avatar-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 22%;
+  object-fit: cover;
 }
 .sb-btn {
   width: 36px;
