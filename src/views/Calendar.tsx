@@ -153,8 +153,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       <span style={{ textAlign: 'right' }}>
                         {amt.main}
                         <div className="muted" style={{ fontSize: 12 }}>
+                          {/* 先说原币金额，再说状态；放在一起时「预计 · $45.99」容易读成预计扣 $45.99 */}
+                          {amt.alt ? `${t('list.originalPrice', { amount: amt.alt })} · ` : ''}
                           {c.projected ? t('calendar.projected') : t('calendar.charged')}
-                          {amt.alt ? ` · ${amt.alt}` : ''}
                         </div>
                       </span>
                     </button>
