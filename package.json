@@ -7,7 +7,7 @@
     "dev:web": "vite app",
     "dev:worker": "node scripts/wrangler.mjs dev --port 8787 --local",
     "build": "node scripts/migrations.mjs && node scripts/i18n.mjs && tsc --noEmit && vite build app",
-    "test": "node --experimental-strip-types --test shared/*.test.ts",
+    "test": "node --experimental-strip-types --test shared/*.test.ts scripts/*.test.mjs",
     "lint": "oxlint --deny-warnings app shared worker scripts docker",
     "format": "node scripts/format.mjs --write",
     "format:check": "node scripts/format.mjs --check",

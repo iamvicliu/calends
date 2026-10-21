@@ -104,7 +104,7 @@ For Cloudflare, set variables and bindings in your Wrangler configuration and us
 
 ### Personal Cloudflare configuration
 
-Keep deployment-specific settings in the git-ignored `local/` directory:
+By default, deployment-specific settings live in the git-ignored `local/` directory:
 
 - `local/wrangler.jsonc`: your domain, database ID, sender address and other Wrangler settings. The npm scripts select this file automatically when it exists.
 - `local/public/`: your own icons and other static assets. Files here override matching files in `app/public/` at build time.
@@ -114,6 +114,40 @@ When managing secrets for a deployment that uses `local/wrangler.jsonc`, use the
 ```bash
 node scripts/wrangler.mjs secret put SETUP_TOKEN
 ```
+
+Set `CALENDS_LOCAL` to keep these files outside the repository. It accepts an absolute path or a path relative to the repository root; an unset or empty value still uses `local/`. Both Wrangler configuration and the `public/` asset overrides use this directory, including during local development.
+
+For example, with the repository checked out as `calends`:
+
+```text
+workspace/
+├── calends/              # Git checkout
+└── my-deploy/            # Personal files outside Git
+    ├── wrangler.jsonc
+    └── public/
+        └── icons/
+            └── logo.svg
+```
+
+Copy the repository's `wrangler.jsonc` into `my-deploy/`, then adjust its paths. Wrangler resolves relative paths from the configuration file's directory, so update these fields while preserving the other settings and bindings:
+
+```jsonc
+{
+  "$schema": "../calends/node_modules/wrangler/config-schema.json",
+  "main": "../calends/worker/index.ts",
+  "assets": { "directory": "../calends/dist", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "calends", "migrations_dir": "../calends/worker/migrations" }],
+}
+```
+
+Run commands from the repository root, using the same directory for deployment and secrets:
+
+```bash
+CALENDS_LOCAL=../my-deploy npm run deploy
+CALENDS_LOCAL=../my-deploy node scripts/wrangler.mjs secret put SETUP_TOKEN
+```
+
+An explicit `--config`/`-c` takes precedence over automatic configuration selection. If the personal `wrangler.jsonc` does not exist, the wrapper leaves Wrangler's default configuration selection intact. Local Worker and migration commands keep data in `<repo>/.wrangler/state` regardless of the configuration directory; an explicit `--persist-to` still takes precedence.
 
 ### Custom domains and HTTPS
 

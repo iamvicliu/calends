@@ -1,6 +1,6 @@
 // Calends 的 Cloudflare 部署配置。
 // - 首次部署：npm run deploy 会自动创建 D1 数据库（无需填写 database_id）。
-// - 个人配置（自定义域名、发信地址等）写在 local/wrangler.jsonc，存在时 npm 脚本会优先使用它。
+// - 个人配置写在 CALENDS_LOCAL/wrangler.jsonc（默认 local/），存在时 npm 脚本会优先使用它。
 // - 密钥：wrangler secret put SETUP_TOKEN（首次设置密码用）。
 {
   "$schema": "node_modules/wrangler/config-schema.json",

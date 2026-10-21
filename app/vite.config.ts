@@ -3,17 +3,18 @@ import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 import { normalizeBasePath, stripBase, withBase } from '../shared/base.ts';
+import { resolveLocalDir } from '../scripts/local-config.mjs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 const BASE_PATH = normalizeBasePath(process.env.BASE_PATH);
 const assetPath = (path: string) => withBase(path, BASE_PATH);
 
-// 前端工程在 app/，构建产物与个人配置（local/）仍在仓库根目录
+// 前端工程在 app/，构建产物在仓库根目录，个人配置可由 CALENDS_LOCAL 指向仓库外
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const APP = fileURLToPath(new URL('.', import.meta.url));
 const DIST = join(ROOT, 'dist');
-const LOCAL_PUBLIC = join(ROOT, 'local/public');
+const LOCAL_PUBLIC = join(resolveLocalDir(process.env, ROOT), 'public');
 const TYPES: Record<string, string> = {
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
@@ -52,7 +53,7 @@ function baseManifest(): Plugin {
   };
 }
 
-/** 个人部署的素材（local/public）覆盖 app/public 里的同名文件：开发时优先提供，构建后复制进 dist */
+/** 个人配置目录的 public/ 覆盖 app/public 里的同名文件：开发时优先提供，构建后复制进 dist */
 function localPublic(): Plugin {
   return {
     name: 'local-public',

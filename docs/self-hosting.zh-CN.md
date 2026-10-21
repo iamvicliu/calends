@@ -104,7 +104,7 @@ Cloudflare 的变量和绑定写在 Wrangler 配置中，凭据使用 secret。D
 
 ### Cloudflare 个人配置
 
-部署相关的个人配置可放在被 Git 忽略的 `local/` 目录中：
+部署相关的个人配置默认放在被 Git 忽略的 `local/` 目录中：
 
 - `local/wrangler.jsonc`：自己的域名、数据库 ID、发件地址等 Wrangler 配置；文件存在时，npm 脚本会自动使用它。
 - `local/public/`：自己的图标等静态资源；构建时覆盖 `app/public/` 中的同名文件。
@@ -114,6 +114,40 @@ Cloudflare 的变量和绑定写在 Wrangler 配置中，凭据使用 secret。D
 ```bash
 node scripts/wrangler.mjs secret put SETUP_TOKEN
 ```
+
+设置 `CALENDS_LOCAL` 可将这些文件放在仓库外。它接受绝对路径或相对于仓库根目录的路径；未设置或为空时仍使用 `local/`。Wrangler 配置与 `public/` 静态资源覆盖均使用该目录，本地开发时同样生效。
+
+例如，将仓库检出为 `calends`，使用以下目录结构：
+
+```text
+workspace/
+├── calends/              # Git 仓库
+└── my-deploy/            # 仓库外的个人文件
+    ├── wrangler.jsonc
+    └── public/
+        └── icons/
+            └── logo.svg
+```
+
+将仓库的 `wrangler.jsonc` 复制到 `my-deploy/` 后调整路径。Wrangler 中的相对路径以配置文件所在目录为基准，因此需修改以下字段，并保留其他配置与绑定：
+
+```jsonc
+{
+  "$schema": "../calends/node_modules/wrangler/config-schema.json",
+  "main": "../calends/worker/index.ts",
+  "assets": { "directory": "../calends/dist", "binding": "ASSETS", "not_found_handling": "single-page-application", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "calends", "migrations_dir": "../calends/worker/migrations" }],
+}
+```
+
+在仓库根目录执行命令，部署与密钥管理使用同一目录：
+
+```bash
+CALENDS_LOCAL=../my-deploy npm run deploy
+CALENDS_LOCAL=../my-deploy node scripts/wrangler.mjs secret put SETUP_TOKEN
+```
+
+显式传入的 `--config`/`-c` 优先于自动配置选择。个人目录中不存在 `wrangler.jsonc` 时，封装保留 Wrangler 的默认配置选择。本地 Worker 和迁移命令的数据始终保存在 `<repo>/.wrangler/state`，不随配置目录改变；显式指定 `--persist-to` 时仍以用户设置为准。
 
 ### 自定义域名与 HTTPS
 

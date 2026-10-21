@@ -48,7 +48,7 @@ Use the existing commands in [package.json](../package.json). Run checks appropr
 | API, auth, MCP, masking or backup      | Requests through the real Worker path in isolated storage; affected permission, failure and compatibility cases, plus available domain tests.                           |
 | Docker or deployment                   | Configuration validation, then build/start/health/persistence checks when runtime behavior changes. Verify published artifacts separately if publication is authorized. |
 
-Before a code PR is ready, run `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n:check`, `npm test` and `npm run build`, or identify the checks that could not run and why. The current automated suite is Node's test runner over `shared/*.test.ts`; it does not establish browser or Worker integration coverage by itself.
+Before a code PR is ready, run `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run i18n:check`, `npm test` and `npm run build`, or identify the checks that could not run and why. The current automated suite is Node's test runner over `shared/*.test.ts` and `scripts/*.test.mjs`; it does not establish browser or Worker integration coverage by itself.
 
 ## Describe and review a change
 
