@@ -345,7 +345,7 @@ export interface AppState {
   prefs?: Prefs;
   /** 匿名公开视图时为 true（已脱敏、只读） */
   readonly?: boolean;
-  /** 演示站的只读数据 */
+  /** 公开可编辑的演示账本 */
   demo?: boolean;
 }
 

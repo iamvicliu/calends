@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "Недоступно на демосайте",
   "fxApiError": "Сервис курсов валют вернул ошибку",
   "missingId": "Не указан id",
   "invalidItem": "{name}: {error}",

@@ -28,6 +28,7 @@ export async function listTokens(env: Env): Promise<McpToken[]> {
 
 /** 新建令牌：明文只在这一次返回 */
 export async function createToken(env: Env, name: string, scope: 'read' | 'write'): Promise<{ token: string; item: McpToken }> {
+  if (env.DEMO_MODE === '1') throw new Error(t('server.demoUnavailable'));
   const token = `sub_${randomToken(24)}`;
   const item: McpToken = {
     id: randomToken(6),
@@ -122,11 +123,11 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
     'access-control-allow-headers': 'authorization, content-type, mcp-protocol-version, mcp-session-id',
     'access-control-allow-methods': 'POST, GET, OPTIONS',
   };
+  if (env.DEMO_MODE === '1') return Response.json(fail(null, -32002, t('server.demoUnavailable')), { status: 403, headers: cors });
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   // 无状态服务器不提供服务端推送流
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { ...cors, allow: 'POST' } });
   if ((await getSettings(env)).aiEnabled === false) return Response.json(fail(null, -32002, t('mcp.error.aiDisabled')), { status: 403, headers: cors });
-  if (env.DEMO_MODE === '1') return Response.json(fail(null, -32002, t('server.demoReadonly')), { status: 403, headers: cors });
   const token = await authenticate(req, env);
   if (!token) return Response.json(fail(null, -32001, t('mcp.error.badToken')), { status: 401, headers: { ...cors, 'www-authenticate': 'Bearer' } });
   let body: Rpc | Rpc[];

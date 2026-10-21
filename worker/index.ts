@@ -46,6 +46,7 @@ import { exportAll, parseBackup, restoreAll } from './backup.ts';
 import { apply, chat, clearChats, listChats, saveChat, saveConfig, testConfig, viewConfig } from './assistant.ts';
 import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
+import { demoBlocked, ensureDemo } from './demo.ts';
 import { ensureMigrated } from './migrate.ts';
 
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
@@ -97,6 +98,8 @@ const subsOf = async (env: Env) =>
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
+  const demo = env.DEMO_MODE === '1';
+  if (demo && path === '/api/auth/status') return json({ needsSetup: false, passkeys: 0 });
   if (path === '/api/login' && method === 'POST') return login(req, env);
   if (path === '/api/logout' && method === 'POST') return logout(req, env);
   // 登录前可用：状态、首次设置、Passkey 登录
@@ -109,7 +112,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/auth/passkey/login/options' && method === 'POST') return passkeyLoginOptions(req, env);
   if (path === '/api/auth/passkey/login' && method === 'POST') return passkeyLoginVerify(req, env);
 
-  const authed = dev || (await isAuthed(req, env));
+  const authed = demo || dev || (await isAuthed(req, env));
   if (path === '/api/public' && method === 'GET') {
     const state = await loadState(env);
     if (!state.settings.publicView && !dev) return bad(t('server.notPublic'), 404);
@@ -118,12 +121,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/state' && method === 'GET') {
     const state = await loadState(env);
     // 后台数据只给登录用户；访客的公开数据走 /api/public
-    if (authed) return json(state);
-    // 演示站：不登录也能以只读方式看完整后台（演示数据是虚构的），渠道配置和令牌不下发
-    if (env.DEMO_MODE === '1') return json({ ...state, readonly: true, demo: true, settings: { ...state.settings, channels: undefined, icsToken: undefined } });
+    if (authed) return json(demo ? { ...state, demo: true } : state);
     return bad('unauthorized', 401);
   }
-  if (!authed && env.DEMO_MODE === '1') return bad(t('server.demoReadonly'), 403);
   if (!authed) return bad('unauthorized', 401);
   if (method !== 'GET' && !dev && !sameOrigin(req)) return bad('forbidden', 403);
 
@@ -238,7 +238,16 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   if (path === '/api/settings' && method === 'PUT') {
     const cur = await getSettings(env);
-    const next = { ...DEFAULT_SETTINGS, ...cur, ...((await req.json()) as Partial<Settings>), icsToken: cur.icsToken };
+    const patch = (await req.json()) as Partial<Settings>;
+    // 客户端会发完整设置；拒绝受限字段的实际变化，允许原值随表单回传。
+    if (
+      demo &&
+      (['channels', 'notifyEmail', 'publicView', 'icsToken', 'aiEnabled', 'maxSessions'] as const).some(
+        (key) => JSON.stringify(patch[key] ?? null) !== JSON.stringify(cur[key] ?? null) && key in patch,
+      )
+    )
+      return bad(t('server.demoUnavailable'), 403);
+    const next = { ...DEFAULT_SETTINGS, ...cur, ...patch, icsToken: cur.icsToken };
     // null 表示清空这个设置
     for (const k of Object.keys(next) as Array<keyof Settings>) if (next[k] === null) delete next[k];
     next.notifyHour = Math.min(23, Math.max(0, Math.round(next.notifyHour)));
@@ -390,11 +399,17 @@ export default {
     if (!env.SITE_URL) env = { ...env, SITE_URL: url.origin };
     try {
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
+      if (env.DEMO_MODE === '1') {
+        await ensureMigrated(env);
+        await ensureDemo(env);
+        if (url.pathname === '/') return Response.redirect(`${url.origin}/admin`, 302);
+      }
       // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
         const s = await getSettings(env);
-        applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+        applyLocale(url.pathname === '/mcp' && env.DEMO_MODE !== '1' ? settingsLocale(s) : requestLocale(req, s));
       }
+      if (env.DEMO_MODE === '1' && demoBlocked(url.pathname, req.method)) return bad(t('server.demoUnavailable'), 403);
       if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
       if (url.pathname === '/mcp') return await mcp(req, env);
       const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
@@ -412,12 +427,16 @@ export default {
     }
   },
 
-  async scheduled(_: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    await ensureMigrated(env);
+    if (env.DEMO_MODE === '1') {
+      await ensureDemo(env, controller.scheduledTime, true);
+      return;
+    }
     const fx = await getFx(env);
     if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
       ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
     }
-    await ensureMigrated(env);
     const state = await loadState(env);
     applyLocale(settingsLocale(state.settings));
     // 定时任务没有请求地址：用后台最近一次访问时记下的地址

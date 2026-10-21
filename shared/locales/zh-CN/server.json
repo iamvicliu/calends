@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "演示站不可用",
   "fxApiError": "汇率接口异常",
   "missingId": "缺少 id",
   "invalidItem": "{name}：{error}",

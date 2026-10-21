@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "デモサイトでは利用できません",
   "fxApiError": "為替レートサービスがエラーを返しました",
   "missingId": "id がありません",
   "invalidItem": "{name}：{error}",

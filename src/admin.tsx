@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../shared/types.ts';
-import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
+import { Icon, Sheet, SubIcon, TipLayer, Toasts, Toolbar } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -27,7 +27,6 @@ import { Wallet } from './views/Wallet.tsx';
 import { currentRoute, go as navigate, href, initRouter, onRoute, orderKey, replaceRoute, sortNav } from './router.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
-import { PROJECT_URL } from '../shared/brand.ts';
 import { monthEnd } from '../shared/metrics.ts';
 
 // AI 助手页带着 Markdown 渲染器（Streamdown），按需加载，不拖慢其他页面的首屏
@@ -495,10 +494,26 @@ function App() {
         view = <ProxyPage state={state} today={d} onOpen={open} />;
         break;
       case 'mcp':
-        view = <Ai state={state} />;
+        view = state.demo ? (
+          <>
+            <Toolbar title={t('app.nav.ai')} />
+            <div className="page fade-in">
+              <p className="muted">{t('app.demo.unavailable')}</p>
+            </div>
+          </>
+        ) : (
+          <Ai state={state} />
+        );
         break;
       case 'assistant':
-        view = ro ? null : (
+        view = state.demo ? (
+          <>
+            <Toolbar title={t('app.nav.assistant')} />
+            <div className="page fade-in">
+              <p className="muted">{t('app.demo.unavailable')}</p>
+            </div>
+          </>
+        ) : ro ? null : (
           <Suspense fallback={null}>
             <Assistant state={state} today={d} onOpen={open} />
           </Suspense>
@@ -537,7 +552,7 @@ function App() {
         {state.demo && (
           <div className="demo-bar">
             <span>{t('app.demo.banner')}</span>
-            <a href={PROJECT_URL} target="_blank" rel="noopener">
+            <a href="https://calends.date/#deploy" target="_blank" rel="noopener">
               {t('app.demo.cta')} →
             </a>
           </div>
@@ -579,7 +594,8 @@ function Root() {
     if (want !== loc) void loadLocale(want).then(() => setLoc(want));
     document.title = t('app.name');
     // 跟随浏览器时，把实际用的语言记到设置里，提醒邮件和 MCP 用同一种
-    if (state && !state.readonly && !state.settings.language && state.settings.languageSeen !== want) void saveSettings({ languageSeen: want }).catch(() => {});
+    if (state && !state.demo && !state.readonly && !state.settings.language && state.settings.languageSeen !== want)
+      void saveSettings({ languageSeen: want }).catch(() => {});
     // 记下站点地址，定时提醒里的链接要用（本地开发不记）
     if (state && !state.readonly && state.settings.siteUrl !== location.origin && !/^http:\/\/(localhost|127\.)/.test(location.origin))
       void saveSettings({ siteUrl: location.origin }).catch(() => {});

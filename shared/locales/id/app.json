@@ -61,7 +61,8 @@
     "note": "Tautan ini berisi token pribadi — siapa pun yang memilikinya bisa melihat jadwal tagihan Anda. Jika bocor, ketuk Atur ulang tautan untuk mencabutnya."
   },
   "demo": {
-    "banner": "Demo hanya-baca dengan data contoh",
-    "cta": "Pasang milikmu"
+    "banner": "Ini adalah situs demo. Data direset setiap hari pukul 00:00 (GMT).",
+    "cta": "Deploy milik Anda sendiri",
+    "unavailable": "Tidak tersedia di situs demo"
   }
 }

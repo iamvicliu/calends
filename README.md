@@ -107,6 +107,7 @@ Tools include `get_overview`, `list_subscriptions`, `spending_stats`, `get_trend
 
 | Variable                                        | Where        | Purpose                                                                                                                                                                            |
 | ----------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEMO_MODE`                                     | env          | Set to `1` for an anonymous, editable demo that resets daily at 00:00 UTC (Docker triggers around 00:05). See below.                                                               |
 | `SETUP_TOKEN`                                   | secret / env | Required once to set the owner password on a fresh install.                                                                                                                        |
 | `SITE_URL`                                      | var / env    | Public URL used in reminders and calendar links. Auto-detected if unset.                                                                                                           |
 | `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler     | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
@@ -114,6 +115,12 @@ Tools include `get_overview`, `list_subscriptions`, `spending_stats`, `get_trend
 | `DATA_DIR`, `PORT`                              | Docker env   | Data directory (default `/data`) and port (default `8787`).                                                                                                                        |
 
 Personal deployment settings (your domain, database id, sender address, your own icons) can live in a git-ignored `local/` folder: `local/wrangler.jsonc` is picked up automatically by the npm scripts and files in `local/public/` override `public/` at build time.
+
+## Public demo
+
+Run the Docker image with `DEMO_MODE=1` and `SITE_URL=https://demo.calends.date` using a dedicated, initially empty data volume. Set `TRUST_PROXY=1` behind a reverse proxy. No setup token or owner password is required; `/` opens `/admin` directly. All visitors share the same editable ledger and display settings. A fresh empty database is seeded automatically with 41 fictional subscriptions; at the UTC midnight scheduled run it resets subscriptions, wallet, people, settings, preferences, chats and credentials. Exchange rates and migration records are retained.
+
+Password, passkeys, device management, notification channel saving/testing and delivery, MCP, AI assistant, private ICS links and public-page switching are unavailable. The demo also disables backup restore and CSV import entirely to prevent bulk uploads; exports remain available. These restrictions are enforced by the Worker with localized errors as well as explained in the UI. Normal installations without `DEMO_MODE=1` keep their existing behavior.
 
 ## Development
 

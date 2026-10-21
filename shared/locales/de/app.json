@@ -62,7 +62,8 @@
     "note": "Der Link enthält ein privates Token – wer ihn hat, sieht deine Abbuchungstermine. Falls er bekannt wird, tippe auf „Link zurücksetzen“, um ihn ungültig zu machen."
   },
   "demo": {
-    "banner": "Schreibgeschützte Demo mit Beispieldaten",
-    "cta": "Eigene Instanz deployen"
+    "banner": "Dies ist eine Demo. Die Daten werden täglich um 00:00 (GMT) zurückgesetzt.",
+    "cta": "Eigene Instanz bereitstellen",
+    "unavailable": "Auf der Demo-Website nicht verfügbar"
   }
 }

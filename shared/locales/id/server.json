@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "Tidak tersedia di situs demo",
   "fxApiError": "Layanan kurs mengembalikan galat",
   "missingId": "id tidak ada",
   "invalidItem": "{name}: {error}",

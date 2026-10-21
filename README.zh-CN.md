@@ -114,6 +114,12 @@ codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALE
 
 个人部署的配置（自己的域名、数据库 ID、发件地址、头像等）可以放在被 git 忽略的 `local/` 目录：npm 脚本会自动使用 `local/wrangler.jsonc`，构建时 `local/public/` 里的文件会覆盖 `public/` 里的同名文件。
 
+## 公开演示站
+
+Docker 设置 `DEMO_MODE=1`、`SITE_URL=https://demo.calends.date`，使用独立的初始空数据卷；反向代理后设置 `TRUST_PROXY=1`。无需初始化令牌或密码，访问 `/` 直接进入 `/admin`。所有访客共用可编辑账本和显示设置。空库自动生成 41 条虚构订阅；每日 UTC 零点的定时任务复原账本、支付方式、人员、设置、偏好、聊天记录和凭据（Docker 约 00:05 执行），保留汇率与迁移记录。
+
+演示模式禁用密码、Passkey、设备管理、通知渠道保存与测试、提醒实际发送、MCP、AI 助手、ICS 链接和公开页开关。备份恢复与 CSV 导入选择完全禁用，防止批量灌入；仍可导出。界面说明「演示站不可用」，服务端也返回本地化错误。不设置 `DEMO_MODE=1` 的正常自托管行为不变。
+
 ## 本地开发
 
 ```bash

@@ -62,7 +62,8 @@
     "note": "Bağlantı özel bir token içerir; ona sahip olan herkes ödeme takviminizi görebilir. Sızarsa iptal etmek için Bağlantıyı sıfırla'ya dokunun."
   },
   "demo": {
-    "banner": "Örnek verilerle salt okunur demo",
-    "cta": "Kendinizinkini kurun"
+    "banner": "Bu bir demo sitesidir. Veriler her gün 00:00 (GMT) saatinde sıfırlanır.",
+    "cta": "Kendi sunucuna kur",
+    "unavailable": "Demo sitesinde kullanılamaz"
   }
 }

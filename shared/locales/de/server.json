@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "Auf der Demo-Website nicht verfügbar",
   "fxApiError": "Der Wechselkursdienst hat einen Fehler gemeldet",
   "missingId": "ID fehlt",
   "invalidItem": "{name}: {error}",

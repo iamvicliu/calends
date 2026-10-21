@@ -61,7 +61,8 @@
     "note": "Liên kết chứa token riêng tư — ai có nó đều xem được lịch thanh toán của bạn. Nếu bị lộ, hãy nhấn Đặt lại liên kết để thu hồi."
   },
   "demo": {
-    "banner": "Bản demo chỉ xem với dữ liệu mẫu",
-    "cta": "Tự triển khai"
+    "banner": "Đây là trang demo. Dữ liệu được đặt lại mỗi ngày lúc 00:00 (GMT).",
+    "cta": "Triển khai bản của bạn",
+    "unavailable": "Không khả dụng trên trang demo"
   }
 }

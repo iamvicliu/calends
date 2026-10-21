@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "Unavailable on the demo site",
   "fxApiError": "The exchange rate service returned an error",
   "missingId": "Missing id",
   "invalidItem": "{name}: {error}",

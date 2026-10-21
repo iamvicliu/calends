@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "No disponible en el sitio de demostración",
   "fxApiError": "El servicio de tipos de cambio devolvió un error",
   "missingId": "Falta el id",
   "invalidItem": "{name}: {error}",

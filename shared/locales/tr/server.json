@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "Demo sitesinde kullanılamaz",
   "fxApiError": "Döviz kuru hizmeti hata döndürdü",
   "missingId": "id eksik",
   "invalidItem": "{name}: {error}",

@@ -62,7 +62,8 @@
     "note": "O link contém um token privado — quem tiver o link pode ver suas datas de cobrança. Se ele vazar, toque em Redefinir link para revogá-lo."
   },
   "demo": {
-    "banner": "Demonstração somente leitura com dados de exemplo",
-    "cta": "Implante a sua"
+    "banner": "Este é um site de demonstração. Os dados são redefinidos diariamente às 00:00 (GMT).",
+    "cta": "Implante sua própria instância",
+    "unavailable": "Indisponível no site de demonstração"
   }
 }

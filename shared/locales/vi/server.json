@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "Không khả dụng trên trang demo",
   "fxApiError": "Dịch vụ tỷ giá trả về lỗi",
   "missingId": "Thiếu id",
   "invalidItem": "{name}: {error}",

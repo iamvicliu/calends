@@ -1,4 +1,5 @@
 {
+  "demoUnavailable": "示範站無法使用此功能",
   "fxApiError": "匯率 API 異常",
   "missingId": "缺少 id",
   "invalidItem": "{name}：{error}",
