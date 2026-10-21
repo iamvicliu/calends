@@ -6322,17 +6322,25 @@ button.seat:disabled {
   height: 0;
   border-top: 1.5px dashed var(--label-3);
 }
+/* 文字压在虚线正中，底色遮住那一截线 */
 .gt-gap em {
   position: absolute;
   left: 50%;
-  top: -15px;
-  transform: translateX(-50%);
+  top: -0.75px;
+  transform: translate(-50%, -50%);
   font-size: 10.5px;
+  line-height: 14px;
   font-style: normal;
   color: var(--label-3);
   white-space: nowrap;
   background: var(--card);
-  padding: 0 3px;
+  padding: 0 5px;
+}
+.gt-life-tail {
+  position: absolute;
+  height: 2px;
+  border-radius: 1px;
+  opacity: 0.55;
 }
 .gt-charge {
   position: absolute;
@@ -6733,6 +6741,7 @@ button.seat:disabled {
 .gt-seg,
 .gt-gap,
 .gt-lifetime,
+.gt-life-tail,
 .gt-charge,
 .gt-tick,
 .gt-grid i,
@@ -6745,6 +6754,7 @@ button.seat:disabled {
   .gt-seg,
   .gt-gap,
   .gt-lifetime,
+  .gt-life-tail,
   .gt-charge,
   .gt-tick,
   .gt-grid i,

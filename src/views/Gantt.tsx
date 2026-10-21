@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
 import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -35,6 +35,7 @@ const LANE = 21;
 
 /** 一个周期至少这么宽才按续费切开，太窄会密成一串圆点 */
 const CYCLE_MIN_PX = 28;
+const GAP_TUCK = 9;
 const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.round(d / 30.4) }) : t('list.gantt.days', { count: d }));
 
 /**
@@ -289,10 +290,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     <span
                       key={g.from}
                       className="gt-gap"
-                      style={{ left: x(g.from), width: Math.max(0, x(g.to) - x(g.from)) }}
+                      // 两端各伸进相邻段的圆角下面，虚线和前后两段首尾相接
+                      style={{ left: x(g.from) - GAP_TUCK, width: Math.max(0, x(g.to) - x(g.from) + GAP_TUCK * 2) }}
                       title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
                     >
-                      {x(g.to) - x(g.from) > 56 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
+                      {x(g.to) - x(g.from) > 90 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
                     </span>
                   ))}
                   {r.segs.map((g, gi) => {
@@ -302,7 +304,16 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     if (g.to < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
-                    if (lifetime) return <span key={g.from} className="gt-lifetime" style={{ left, top: top + 2, background: color(g.v) }} title={tip} />;
+                    // 买断：一个圆点；有结束日（如含一年更新、之后改订阅）时，再拉一条细线到结束日，和后面的虚线、下一段接上
+                    if (lifetime)
+                      return (
+                        <Fragment key={g.from}>
+                          {!g.open && x(g.to) - left > 8 && (
+                            <span className="gt-life-tail" style={{ left, width: x(g.to) - left, top: top + 8, background: color(g.v) }} />
+                          )}
+                          <span className="gt-lifetime" style={{ left, top: top + 2, background: color(g.v) }} title={tip} />
+                        </Fragment>
+                      );
                     // 段内按调价、首期优惠切成几截，每截标自己的价格；
                     // 周期够宽时再按每次续费切开：每个周期一颗圆角胶囊，连续续订的首尾相接
                     const renewals = chargesBetween(g.v, g.from, g.to, today)
