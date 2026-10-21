@@ -1,20 +1,51 @@
 {
-  "bill": { "m1": "Aylık", "m3": "Üç aylık", "m6": "Altı aylık", "m12": "Yıllık", "custom": { "one": "{count} ayda bir", "other": "{count} ayda bir" } },
+  "bill": {
+    "m1": "Aylık",
+    "m3": "Üç aylık",
+    "m6": "Altı aylık",
+    "m12": "Yıllık",
+    "custom": {
+      "one": "{count} ayda bir",
+      "other": "{count} ayda bir"
+    }
+  },
   "cycle": {
     "lifetime": "Ömür boyu",
     "once": "tek seferlik",
-    "every": { "day": "Günlük", "week": "Haftalık", "month": "Aylık", "year": "Yıllık" },
+    "every": {
+      "day": "Günlük",
+      "week": "Haftalık",
+      "month": "Aylık",
+      "year": "Yıllık"
+    },
     "quarterly": "Üç aylık",
     "halfYearly": "Altı aylık",
     "biennial": "İki yılda bir",
     "everyN": {
-      "day": { "one": "{count} günde bir", "other": "{count} günde bir" },
-      "week": { "one": "{count} haftada bir", "other": "{count} haftada bir" },
-      "month": { "one": "{count} ayda bir", "other": "{count} ayda bir" },
-      "year": { "one": "{count} yılda bir", "other": "{count} yılda bir" }
+      "day": {
+        "one": "{count} günde bir",
+        "other": "{count} günde bir"
+      },
+      "week": {
+        "one": "{count} haftada bir",
+        "other": "{count} haftada bir"
+      },
+      "month": {
+        "one": "{count} ayda bir",
+        "other": "{count} ayda bir"
+      },
+      "year": {
+        "one": "{count} yılda bir",
+        "other": "{count} yılda bir"
+      }
     }
   },
-  "subError": { "name": "Ad gerekli", "price": "Geçersiz fiyat", "start": "Geçersiz başlangıç tarihi", "cycle": "Geçersiz ödeme dönemi" },
+  "subError": {
+    "name": "Ad gerekli",
+    "price": "Geçersiz fiyat",
+    "start": "Geçersiz başlangıç tarihi",
+    "cycle": "Geçersiz ödeme dönemi"
+  },
   "phase": {
     "switchTooEarly": "Geçerlilik tarihi mevcut dönemin başlangıcından sonra olmalı",
     "resumeTooEarly": "Devam tarihi son bitiş tarihinden önce olamaz",
@@ -27,12 +58,21 @@
   "event": {
     "label": "{region}{price}/{per}",
     "region": "{region} ",
-    "per": { "year": "yıl", "month": "ay", "months": "{count} ay", "week": "hafta", "day": "gün" }
+    "per": {
+      "year": "yıl",
+      "month": "ay",
+      "months": "{count} ay",
+      "week": "hafta",
+      "day": "gün"
+    }
   },
   "listSep": ", ",
   "insight": {
     "yearly": {
-      "title": { "one": "{count} uzun vadeli abonelik 60 gün içinde yenileniyor", "other": "{count} uzun vadeli abonelik 60 gün içinde yenileniyor" },
+      "title": {
+        "one": "{count} uzun vadeli abonelik 60 gün içinde yenileniyor",
+        "other": "{count} uzun vadeli abonelik 60 gün içinde yenileniyor"
+      },
       "body": "Toplam yaklaşık {sum}. Yıllık ödemelerin iadesi zordur; neyin kalacağına karar vermenin tam zamanı."
     },
     "dup": {
@@ -42,21 +82,38 @@
         "other": "Bu {count} abonelik birlikte ayda yaklaşık {sum} tutuyor. Hepsine hâlâ ihtiyacınız olup olmadığına bakın."
       }
     },
-    "hikes": { "title": { "one": "{count} abonelik son bir yılda zam yaptı", "other": "{count} abonelik son bir yılda zam yaptı" } },
+    "hikes": {
+      "title": {
+        "one": "{count} abonelik son bir yılda zam yaptı",
+        "other": "{count} abonelik son bir yılda zam yaptı"
+      }
+    },
     "intro": {
-      "title": { "one": "{name} kampanyası {count} gün sonra bitiyor", "other": "{name} kampanyası {count} gün sonra bitiyor" },
+      "title": {
+        "one": "{name} kampanyası {count} gün sonra bitiyor",
+        "other": "{name} kampanyası {count} gün sonra bitiyor"
+      },
       "body": "Ardından fiyat {from} tutarından {to} tutarına döner."
     },
-    "balance": { "title": "{name} bakiyesi {date} tarihine kadar yetmeyecek", "body": "{sub} için {need} gerekiyor; bakiye yaklaşık {current}." },
+    "balance": {
+      "title": "{name} bakiyesi {date} tarihine kadar yetmeyecek",
+      "body": "{sub} için {need} gerekiyor; bakiye yaklaşık {current}."
+    },
     "fx": {
       "title": "Harcamaların %{pct} kadarı yabancı para birimlerinde",
       "body": "En büyüğü {ccy} (%{share}). {ccy} değer kaybettikçe bu kısım ucuzlar, değer kazandıkça pahalanır."
     },
     "noMethod": {
-      "title": { "one": "{count} aboneliğin ödeme yöntemi yok", "other": "{count} aboneliğin ödeme yöntemi yok" },
+      "title": {
+        "one": "{count} aboneliğin ödeme yöntemi yok",
+        "other": "{count} aboneliğin ödeme yöntemi yok"
+      },
       "body": "Bakiye tahminleri ve ödeme yöntemi istatistikleri eksiksiz olsun diye bir yöntem ekleyin."
     },
-    "top": { "title": "En pahalı aboneliğiniz: {name}", "body": "Günde yaklaşık {perDay}, aylık harcamanın %{pct} kadarı." }
+    "top": {
+      "title": "En pahalı aboneliğiniz: {name}",
+      "body": "Günde yaklaşık {perDay}, aylık harcamanın %{pct} kadarı."
+    }
   },
   "methodKind": {
     "debit": "Banka kartı",
@@ -73,8 +130,13 @@
     "other": "Diğer"
   },
   "publicMethod": "{kind} · {region}",
-  "channel": { "email": "E-posta" },
-  "csv": { "appStoreBalance": "App Store {region} bakiyesi", "otherCategory": "Diğer" },
+  "channel": {
+    "email": "E-posta"
+  },
+  "csv": {
+    "appStoreBalance": "App Store {region} bakiyesi",
+    "otherCategory": "Diğer"
+  },
   "category": {
     "ai": "Yapay zekâ",
     "tools": "Araçlar",
@@ -116,6 +178,7 @@
     "unused": "Ödenmiş ama kullanılmamış {days} gün, yaklaşık {money}",
     "unusedTitle": "Ödenmiş ama kullanılmamış",
     "terminated": "Kapatıldı",
-    "restore": "Yeniden etkinleştir"
+    "restore": "Yeniden etkinleştir",
+    "fxMissing": "Döviz kurları eksik olduğundan bazı kayıplar dönüştürülemiyor. Orijinal tutarlar ayrıntılarda korunur."
   }
 }

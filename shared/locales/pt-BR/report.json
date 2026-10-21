@@ -131,5 +131,16 @@
       "other": "{count} decisões"
     },
     "more": "Registros anteriores"
+  },
+  "stops": {
+    "title": "Cancelamentos e desativações",
+    "saved": "Economizado",
+    "loss": "Perdido",
+    "savedHint": "Estimativa de renovações evitadas desde o cancelamento até hoje",
+    "lossHint": "Pago, não utilizado e não reembolsado",
+    "basis": "Todo o histórico · Minha parte; economia no câmbio atual e perdas no câmbio da data de interrupção.",
+    "details": "Detalhes das perdas não reembolsadas",
+    "empty": "Sem perdas por serviços não utilizados e não reembolsados.",
+    "cancel": "Cancelamento antecipado"
   }
 }

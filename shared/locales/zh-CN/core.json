@@ -1,15 +1,36 @@
 {
-  "bill": { "m1": "按月", "m3": "按季", "m6": "按半年", "m12": "按年", "custom": "按 {count} 个月" },
+  "bill": {
+    "m1": "按月",
+    "m3": "按季",
+    "m6": "按半年",
+    "m12": "按年",
+    "custom": "按 {count} 个月"
+  },
   "cycle": {
     "lifetime": "买断",
     "once": "一次",
-    "every": { "day": "每天", "week": "每周", "month": "每月", "year": "每年" },
+    "every": {
+      "day": "每天",
+      "week": "每周",
+      "month": "每月",
+      "year": "每年"
+    },
     "quarterly": "每季度",
     "halfYearly": "每半年",
     "biennial": "每两年",
-    "everyN": { "day": "每 {count} 天", "week": "每 {count} 周", "month": "每 {count} 个月", "year": "每 {count} 年" }
+    "everyN": {
+      "day": "每 {count} 天",
+      "week": "每 {count} 周",
+      "month": "每 {count} 个月",
+      "year": "每 {count} 年"
+    }
   },
-  "subError": { "name": "名称不能为空", "price": "价格无效", "start": "开始日期无效", "cycle": "周期无效" },
+  "subError": {
+    "name": "名称不能为空",
+    "price": "价格无效",
+    "start": "开始日期无效",
+    "cycle": "周期无效"
+  },
   "phase": {
     "switchTooEarly": "生效日期要晚于当前阶段的开始日期",
     "resumeTooEarly": "续订日期不能早于上次结束的日期",
@@ -22,18 +43,47 @@
   "event": {
     "label": "{region}{price}/{per}",
     "region": "{region} ",
-    "per": { "year": "年", "month": "月", "months": "{count}月", "week": "周", "day": "天" }
+    "per": {
+      "year": "年",
+      "month": "月",
+      "months": "{count}月",
+      "week": "周",
+      "day": "天"
+    }
   },
   "listSep": "、",
   "insight": {
-    "yearly": { "title": "{count} 个长周期订阅 60 天内续费", "body": "合计约 {sum}。年付一旦扣款就很难退，现在是决定留不留的时候。" },
-    "dup": { "title": "{names} 可能重复", "body": "这 {count} 个订阅每月合计约 {sum}，确认是否都还需要。" },
-    "hikes": { "title": "{count} 个订阅过去一年涨了价" },
-    "intro": { "title": "{name} 的优惠 {count} 天后结束", "body": "之后从 {from} 恢复到 {to}。" },
-    "balance": { "title": "{name} 余额撑不到 {date}", "body": "{sub} 需要 {need}，当前约 {current}。" },
-    "fx": { "title": "{pct}% 的支出以外币计价", "body": "最大的是{ccy}（{share}%）。{ccy}贬值时这部分会变便宜，反之变贵。" },
-    "noMethod": { "title": "{count} 个订阅没有指定支付方式", "body": "补上之后，余额推算和按支付方式的统计才完整。" },
-    "top": { "title": "{name} 是最贵的订阅", "body": "每天约 {perDay}，占月支出 {pct}%。" }
+    "yearly": {
+      "title": "{count} 个长周期订阅 60 天内续费",
+      "body": "合计约 {sum}。年付一旦扣款就很难退，现在是决定留不留的时候。"
+    },
+    "dup": {
+      "title": "{names} 可能重复",
+      "body": "这 {count} 个订阅每月合计约 {sum}，确认是否都还需要。"
+    },
+    "hikes": {
+      "title": "{count} 个订阅过去一年涨了价"
+    },
+    "intro": {
+      "title": "{name} 的优惠 {count} 天后结束",
+      "body": "之后从 {from} 恢复到 {to}。"
+    },
+    "balance": {
+      "title": "{name} 余额撑不到 {date}",
+      "body": "{sub} 需要 {need}，当前约 {current}。"
+    },
+    "fx": {
+      "title": "{pct}% 的支出以外币计价",
+      "body": "最大的是{ccy}（{share}%）。{ccy}贬值时这部分会变便宜，反之变贵。"
+    },
+    "noMethod": {
+      "title": "{count} 个订阅没有指定支付方式",
+      "body": "补上之后，余额推算和按支付方式的统计才完整。"
+    },
+    "top": {
+      "title": "{name} 是最贵的订阅",
+      "body": "每天约 {perDay}，占月支出 {pct}%。"
+    }
   },
   "methodKind": {
     "debit": "银行卡",
@@ -50,8 +100,13 @@
     "other": "其他"
   },
   "publicMethod": "{kind} · {region}",
-  "channel": { "email": "邮件" },
-  "csv": { "appStoreBalance": "App Store {region} 余额", "otherCategory": "其他" },
+  "channel": {
+    "email": "邮件"
+  },
+  "csv": {
+    "appStoreBalance": "App Store {region} 余额",
+    "otherCategory": "其他"
+  },
   "category": {
     "ai": "AI",
     "tools": "工具",
@@ -93,6 +148,7 @@
     "unused": "已付未用 {days} 天，约 {money}",
     "unusedTitle": "已付未用",
     "terminated": "已停用",
-    "restore": "恢复订阅"
+    "restore": "恢复订阅",
+    "fxMissing": "部分损失缺少汇率，暂无法汇总为本位币；原币金额保留在明细中。"
   }
 }

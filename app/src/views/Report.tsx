@@ -15,6 +15,7 @@ import {
   mrrChangeSinceLastMonth,
   mrrSeries,
   prepaidValue,
+  stopLosses,
   topUpPlan,
   type EventKind,
 } from '../../../shared/metrics.ts';
@@ -53,6 +54,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
         <CashCard state={state} today={today} />
+        <StopsCard state={state} today={today} onOpen={onOpen} />
         <Composition state={state} today={today} onOpen={onOpen} />
         <div className="grid g-2">
           <TopUps state={state} today={today} />
@@ -298,15 +300,11 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
   );
 }
 
-/** 现金 vs 权责 + 预付余值 + 退订省下 */
+/** 现金 vs 权责 + 预付余值 */
 function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const rows = useMemo(() => cashVsAccrual(state, today, 23, 12), [state, today]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
-  const sv = useMemo(() => {
-    const items = cancelSavings(state, today).items.sort((a, b) => b.monthly - a.monthly);
-    return { items, total: items.reduce((n, x) => n + x.monthly, 0) };
-  }, [state, today]);
   const next90 = sumBase(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
@@ -340,12 +338,6 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           )}
         />
         <div className="cash-facts">
-          <div title={pv.unusedItems.map((x) => `${x.sub.name}: ${money(x.value, base)}`).join(' · ')}>
-            <span>{t('core.stop.unusedTitle')}</span>
-            <b>
-              <Amount value={pv.unusedTotal} ccy={base} compact />
-            </b>
-          </div>
           <div
             {...tipProps(() =>
               pv.items
@@ -362,23 +354,6 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
               <Amount value={pv.total} ccy={base} compact />
             </b>
             <small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>
-          </div>
-          <div
-            {...tipProps(() =>
-              sv.items
-                .slice(0, 6)
-                .map((x) => (
-                  <div key={x.sub.id}>
-                    {t('report.cash.savedItem', { name: x.sub.name, amount: money(x.monthly, base, { compact: true }), since: x.since })}
-                  </div>
-                )),
-            )}
-          >
-            <span>{t('report.cash.saved')}</span>
-            <b style={{ color: 'var(--green)' }}>
-              <Amount value={sv.total} ccy={base} compact />
-            </b>
-            <small>{t('report.cash.savedSub', { count: sv.items.length })}</small>
           </div>
           <div>
             <span>{t('report.cash.next90')}</span>
@@ -398,6 +373,68 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** 退订后的续费节省与已付未用损失，均截至今天、全部历史 */
+function StopsCard({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+  const base = state.settings.baseCurrency;
+  const saved = useMemo(() => cancelSavings(state, today), [state, today]);
+  const losses = useMemo(() => stopLosses(state, today), [state, today]);
+  return (
+    <div className="card stop-report">
+      <div className="card-h">
+        <h3>{t('report.stops.title')}</h3>
+      </div>
+      <p className="stop-basis">{t('report.stops.basis')}</p>
+      <div className="stop-totals">
+        <div
+          {...tipProps(() =>
+            saved.items.map((i) => <div key={i.sub.id}>{t('report.cash.savedItem', { name: i.sub.name, amount: money(i.saved, base), since: i.since })}</div>),
+          )}
+        >
+          <span>{t('report.stops.saved')}</span>
+          <b className="green">
+            {saved.total > 0 ? '+' : ''}
+            <Amount value={saved.total} ccy={base} compact />
+          </b>
+          <small>{t('report.stops.savedHint')}</small>
+        </div>
+        <div>
+          <span>{t('report.stops.loss')}</span>
+          <b className="red">
+            {losses.total > 0 ? '−' : ''}
+            <Amount value={losses.total} ccy={base} compact />
+          </b>
+          <small>{t('report.stops.lossHint')}</small>
+        </div>
+      </div>
+      {losses.incomplete && <p className="stop-basis red">{t('core.stop.fxMissing')}</p>}
+      <h4 className="stop-list-title">{t('report.stops.details')}</h4>
+      {losses.items.length === 0 ? (
+        <div className="empty">{t('report.stops.empty')}</div>
+      ) : (
+        <div className="stop-list">
+          {losses.items.map((i) => (
+            <button key={`${i.sub.id}-${i.phaseIndex}`} className="stop-row" onClick={() => onOpen(i.sub)}>
+              <SubIcon sub={i.sub} size={32} />
+              <span className="stop-info">
+                <b>{i.sub.name}</b>
+                <small>
+                  {cnDate(i.date)} · {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
+                  {i.reason ? ` · ${i.reason}` : ''}
+                </small>
+                <small>{i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: money(i.refunded, i.currency) })}</small>
+              </span>
+              <span className="stop-amount">
+                <b className="red">{i.fxMissing ? money(i.lossBase, base) : `−${money(i.lossBase, base)}`}</b>
+                {i.currency !== base && <small>{money(i.loss, i.currency)}</small>}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -131,5 +131,16 @@
       "other": "{count} Entscheidungen"
     },
     "more": "Ältere Einträge"
+  },
+  "stops": {
+    "title": "Kündigungen & Abschaltungen",
+    "saved": "Gespart",
+    "loss": "Verloren",
+    "savedHint": "Geschätzte vermiedene Verlängerungskosten seit der Kündigung bis heute",
+    "lossHint": "Bezahlt, ungenutzt und nicht erstattet",
+    "basis": "Gesamter Verlauf · Mein Anteil; Ersparnis zum heutigen Kurs, Verluste zum Kurs am Stopptag.",
+    "details": "Nicht erstattete Verluste",
+    "empty": "Keine Verluste durch nicht erstattete, ungenutzte Leistungen.",
+    "cancel": "Vorzeitig gekündigt"
   }
 }

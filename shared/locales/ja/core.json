@@ -168,6 +168,7 @@
     "unused": "支払済み未利用 {days} 日、約 {money}",
     "unusedTitle": "支払済み未利用",
     "terminated": "利用停止",
-    "restore": "再開"
+    "restore": "再開",
+    "fxMissing": "一部の損失は為替レートがないため換算できません。明細に元の通貨の金額を表示します。"
   }
 }

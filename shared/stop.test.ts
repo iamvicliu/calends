@@ -18,7 +18,7 @@ import {
   totals,
 } from './billing.ts';
 import { cancelAtEnd, reactivate, resume, savePayment, statusChangeError, stopSubscription, switchPlan } from './phases.ts';
-import { cancelSavings, events, insights, prepaidValue } from './metrics.ts';
+import { cancelSavings, events, insights, prepaidValue, stopLosses, yearReview } from './metrics.ts';
 import { maskForPublic } from './mask.ts';
 import { chargeValue } from './fx.ts';
 import { flatten, LOCALES, setLocale, t } from './i18n.ts';
@@ -95,6 +95,27 @@ for (const [name, amount, value, status, wasted] of [
     const prepaid = prepaidValue(state(stopped), today);
     assert.equal(prepaid.total, 0);
     assert.equal(prepaid.unusedTotal, value);
+    const losses = stopLosses(state(stopped), today);
+    assert.equal(losses.total, value);
+    assert.equal(losses.byKind.terminate, value);
+    assert.equal(losses.byKind.cancel, 0);
+    assert.equal(losses.items.length, value > 0 ? 1 : 0);
+    if (value > 0) {
+      const item = losses.items[0];
+      assert.equal(item.sub, stopped);
+      assert.equal(item.phaseIndex, 0);
+      assert.equal(item.kind, 'terminate');
+      assert.equal(item.reason, 'abuse');
+      assert.equal(item.date, today);
+      assert.equal(item.paid, 31);
+      assert.equal(item.paidBase, 31);
+      assert.equal(item.refunded, amount ?? 0);
+      assert.equal(item.refundedBase, amount ?? 0);
+      assert.equal(item.loss, value);
+      assert.equal(item.lossBase, value);
+      assert.equal(item.refundStatus, status);
+      assert.equal(item.wastedDays, wasted);
+    }
     assert.equal(cancelSavings(state(stopped), '2026-10-30').total, 0);
     assert.ok(cancelSavings(state(stopped), '2026-12-01').total > 0);
     assert.equal(
@@ -102,6 +123,119 @@ for (const [name, amount, value, status, wasted] of [
       value > 0,
     );
   });
+
+test('停用损失按停止日合租份额与历史汇率计算，代付不计', () => {
+  const shared = base({
+    share: {
+      role: 'owner',
+      seats: 3,
+      members: [
+        { id: 'm1', name: 'M1', share: 15.5, joined: '2026-10-05', left: '2026-10-20' },
+        { id: 'm2', name: 'M2', share: 15.5, joined: '2026-10-20' },
+      ],
+    },
+  });
+  const stopped = stopSubscription(shared, today, 'cancel', today, undefined, { amount: 6 });
+  const st = state(stopped);
+  st.settings = { ...st.settings, baseCurrency: 'CNY' };
+  st.fx = { base: 'USD', fetchedAt: '2026-12-01', rates: { USD: 1, CNY: 9 } };
+  st.fxHistory = { '2026-10-05': { CNY: 6 }, '2026-10-19': { CNY: 7 }, '2026-12-01': { CNY: 8 } };
+  st.subscriptions.push({ ...stopped, id: 'proxy', proxy: { forName: 'Friend', entries: [] } });
+  const losses = stopLosses(st, '2026-12-01');
+  assert.equal(losses.items.length, 1);
+  const item = losses.items[0];
+  assert.equal(item.paid, 15.5);
+  assert.equal(item.paidBase, 108.5);
+  assert.equal(item.refunded, 3);
+  assert.equal(item.refundedBase, 21);
+  assert.equal(item.loss, 5);
+  assert.equal(item.lossBase, 35);
+  assert.equal(item.reason, undefined);
+  assert.equal(item.wastedDays, 10);
+  assert.deepEqual(losses.byKind, { cancel: 35, terminate: 0 });
+  assert.equal(prepaidValue(st, '2026-12-01').unusedTotal, losses.total);
+  assert.equal(insights(st, '2026-12-01').find((i) => i.id === 'unused')!.subs![0].id, stopped.id);
+});
+
+test('跨币种损失使用历史阶段币种与停止日汇率，不使用当前套餐或实退卡币种', () => {
+  const original = stopSubscription(base({ currency: 'EUR' }), today, 'terminate', today, 'closed', {
+    amount: 6,
+    settled: { amount: 60, currency: 'CNY' },
+  });
+  const next = resume(original, '2026-11-01', { price: 100, currency: 'USD', cycle: { unit: 'month', every: 1 } });
+  const st = state(next);
+  st.settings = { ...st.settings, baseCurrency: 'CNY' };
+  st.fx = { base: 'USD', fetchedAt: '2026-12-01', rates: { USD: 1, EUR: 4, CNY: 12 } };
+  st.fxHistory = { '2026-10-19': { EUR: 2, CNY: 8 } };
+  const losses = stopLosses(st, '2026-12-01');
+  assert.equal(losses.items[0].phase.currency, 'EUR');
+  assert.equal(losses.items[0].currency, 'EUR');
+  assert.equal(losses.items[0].loss, 10);
+  assert.equal(losses.items[0].lossBase, 40);
+  assert.equal(losses.items[0].refunded, 6);
+  assert.equal(losses.items[0].refundedBase, 24);
+  assert.equal(prepaidValue(st, '2026-12-01').unusedTotal, 40);
+});
+
+test('同一订阅多个停止阶段逐条统计，体检只引用一次订阅', () => {
+  const first = stopSubscription(base(), today, 'terminate', today, 'abuse');
+  const next = resume(first, '2026-11-05', { price: 30, currency: 'USD', cycle: { unit: 'month', every: 1 } });
+  const stopped = stopSubscription(next, '2026-11-19', 'cancel');
+  const st = state(stopped);
+  const losses = stopLosses(st, '2026-12-01');
+  assert.equal(losses.items.length, 2);
+  assert.deepEqual(
+    losses.items.map((i) => [i.phaseIndex, i.kind, i.loss]),
+    [
+      [1, 'cancel', 15],
+      [0, 'terminate', 16],
+    ],
+  );
+  assert.equal(losses.total, 31);
+  assert.deepEqual(losses.byKind, { cancel: 15, terminate: 16 });
+  assert.equal(prepaidValue(st, '2026-12-01').unusedTotal, 31);
+  assert.equal(insights(st, '2026-12-01').find((i) => i.id === 'unused')!.subs!.length, 1);
+});
+
+test('退款按查询日截断，未来停止不计；后续全额退款移除损失', () => {
+  const stopped = stopSubscription(base(), today, 'cancel', today, undefined, { amount: 16, date: '2026-10-21' });
+  const st = state(stopped);
+  assert.equal(stopLosses(st, '2026-10-18').total, 0);
+  assert.equal(stopLosses(st, today).total, 16);
+  assert.equal(stopLosses(st, '2026-10-20').items[0].refunded, 0);
+  assert.equal(stopLosses(st, '2026-10-21').total, 0);
+  assert.equal(stopLosses(st, '2026-10-21').items.length, 0);
+});
+
+test('年度回顾和范围按停止日含两端筛选，排除前年停止与未来停止', () => {
+  const make = (start: string, date: string, kind: 'cancel' | 'terminate') => stopSubscription(base({ id: date, start }), date, kind);
+  const st = state(make('2025-12-05', '2025-12-31', 'terminate'));
+  st.subscriptions.push(make('2025-12-05', '2026-01-01', 'cancel'), make('2026-12-05', '2026-12-31', 'terminate'), make('2026-12-05', '2027-01-01', 'cancel'));
+  const at = '2026-12-31';
+  assert.equal(yearReview(st, at, '2025').stopLoss, 4);
+  assert.equal(yearReview(st, at, '2026').stopLoss, 7);
+  assert.equal(yearReview(st, at, '2027').stopLoss, 0);
+  assert.equal(stopLosses(st, at, { from: '2026-01-01', to: '2026-01-01' }).total, 3);
+  assert.equal(stopLosses(st, at, { from: '2026-12-31', to: '2026-12-31' }).total, 4);
+  assert.equal(stopLosses(st, at, { from: '2027-01-01' }).total, 0);
+  assert.equal(stopLosses(st, at).total, prepaidValue(st, at).unusedTotal);
+  assert.deepEqual(stopLosses({ ...st, subscriptions: [] }, at), { total: 0, byKind: { cancel: 0, terminate: 0 }, items: [], incomplete: false });
+});
+
+test('缺少汇率保留原币损失并标记汇总不可用，不变成零损失或空明细', () => {
+  const stopped = stopSubscription(base({ currency: 'XYZ' }), today, 'terminate');
+  const st = state(stopped);
+  const losses = stopLosses(st, today);
+  assert.equal(losses.items.length, 1);
+  assert.equal(losses.items[0].loss, 16);
+  assert.equal(losses.items[0].fxMissing, true);
+  assert.equal(losses.incomplete, true);
+  assert.ok(Number.isNaN(losses.total));
+  assert.ok(Number.isNaN(prepaidValue(st, today).unusedTotal));
+  assert.equal(prepaidValue(st, today).unusedIncomplete, true);
+  assert.ok(Number.isNaN(yearReview(st, today).stopLoss));
+  assert.ok(insights(st, today).some((i) => i.id === 'unused'));
+});
 
 test('三种停止状态与恢复边界', () => {
   const cancel = stopSubscription(base(), today, 'cancel');
@@ -271,6 +405,66 @@ for (const action of ['cancel', 'terminate'] as const)
       f.db.close();
     }
   });
+
+test('MCP get_insights 返回独立损失明细、分类合计与年度损失，保留省钱 section', async () => {
+  const now = todayIn('UTC');
+  const stopped = stopSubscription(base({ start: addDays(now, -14) }), now, 'terminate', now, 'abuse', { amount: 3 });
+  const f = fixture(stopped);
+  try {
+    const result = await f.run('get_insights', { section: 'stop_losses' });
+    const expected = stopLosses(state(stopped), now);
+    near(result.total, expected.total);
+    assert.equal(result.as_of, now);
+    assert.equal(result.currency, 'USD');
+    near(result.by_type.terminate, expected.total);
+    assert.equal(result.by_type.cancel, 0);
+    assert.equal(result.items[0].subscription_id, stopped.id);
+    assert.equal(result.items[0].phase_index, 0);
+    assert.equal(result.items[0].phase_start, stopped.start);
+    assert.equal(result.items[0].kind, 'terminate');
+    assert.equal(result.items[0].reason, 'abuse');
+    assert.equal(result.items[0].refunded, 3);
+    assert.equal(result.items[0].paid, 31);
+    assert.equal(result.items[0].refund_status, 'partial');
+    near(result.items[0].loss_base, expected.total);
+    const prepaid = await f.run('get_insights', { section: 'prepaid' });
+    assert.equal(prepaid.unused_total, result.total);
+    const review = await f.run('get_insights', { section: 'year_review', year: now.slice(0, 4) });
+    assert.equal(review.stop_loss, result.total);
+    const previous = await f.run('get_insights', { section: 'year_review', year: String(Number(now.slice(0, 4)) - 1) });
+    assert.equal(previous.stop_loss, 0);
+    const saved = await f.run('get_insights', { section: 'cancel_savings' });
+    assert.equal(saved.total, 0);
+    assert.deepEqual(f.saved(), JSON.parse(JSON.stringify(stopped)));
+  } finally {
+    f.db.close();
+  }
+});
+
+test('MCP 缺少汇率时返回 null 与 incomplete 标记，原币损失仍可读取', async () => {
+  const now = todayIn('UTC');
+  const stopped = stopSubscription(base({ start: addDays(now, -14), currency: 'XYZ' }), now, 'cancel');
+  const f = fixture(stopped);
+  try {
+    const result = await f.run('get_insights', { section: 'stop_losses' });
+    assert.equal(result.incomplete, true);
+    assert.equal(result.total, null);
+    assert.equal(result.by_type.cancel, null);
+    assert.equal(result.items[0].fx_missing, true);
+    assert.equal(result.items[0].loss_base, null);
+    assert.ok(result.items[0].loss > 0);
+    assert.equal(result.items[0].currency, 'XYZ');
+    assert.ok(!('reason' in result.items[0]));
+    const prepaid = await f.run('get_insights', { section: 'prepaid' });
+    assert.equal(prepaid.unused_total, null);
+    assert.equal(prepaid.unused_incomplete, true);
+    const review = await f.run('get_insights', { section: 'year_review' });
+    assert.equal(review.stop_loss, null);
+    assert.equal(review.stop_loss_incomplete, true);
+  } finally {
+    f.db.close();
+  }
+});
 
 test('MCP pause / reactivate / 默认到期不续，不生成 stop', async () => {
   const f = fixture();

@@ -94,5 +94,6 @@
     "head": "{year} · Chòm sao gói đăng ký của {whose}",
     "foot": "Bong bóng càng lớn, chi càng nhiều"
   },
-  "spendBasis": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên"
+  "spendBasis": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên",
+  "stopLoss": "Năm này mất {amount} do bị ngừng dịch vụ / hủy sớm"
 }

@@ -1,20 +1,46 @@
 {
-  "bill": { "m1": "Bulanan", "m3": "Triwulanan", "m6": "Per 6 bulan", "m12": "Tahunan", "custom": { "other": "Per {count} bulan" } },
+  "bill": {
+    "m1": "Bulanan",
+    "m3": "Triwulanan",
+    "m6": "Per 6 bulan",
+    "m12": "Tahunan",
+    "custom": {
+      "other": "Per {count} bulan"
+    }
+  },
   "cycle": {
     "lifetime": "Seumur hidup",
     "once": "sekali",
-    "every": { "day": "Harian", "week": "Mingguan", "month": "Bulanan", "year": "Tahunan" },
+    "every": {
+      "day": "Harian",
+      "week": "Mingguan",
+      "month": "Bulanan",
+      "year": "Tahunan"
+    },
     "quarterly": "Triwulanan",
     "halfYearly": "Per 6 bulan",
     "biennial": "Per 2 tahun",
     "everyN": {
-      "day": { "other": "Per {count} hari" },
-      "week": { "other": "Per {count} minggu" },
-      "month": { "other": "Per {count} bulan" },
-      "year": { "other": "Per {count} tahun" }
+      "day": {
+        "other": "Per {count} hari"
+      },
+      "week": {
+        "other": "Per {count} minggu"
+      },
+      "month": {
+        "other": "Per {count} bulan"
+      },
+      "year": {
+        "other": "Per {count} tahun"
+      }
     }
   },
-  "subError": { "name": "Nama wajib diisi", "price": "Harga tidak valid", "start": "Tanggal mulai tidak valid", "cycle": "Siklus tagihan tidak valid" },
+  "subError": {
+    "name": "Nama wajib diisi",
+    "price": "Harga tidak valid",
+    "start": "Tanggal mulai tidak valid",
+    "cycle": "Siklus tagihan tidak valid"
+  },
   "phase": {
     "switchTooEarly": "Tanggal berlaku harus setelah fase saat ini dimulai",
     "resumeTooEarly": "Tanggal lanjut tidak boleh sebelum tanggal berakhir terakhir",
@@ -27,33 +53,57 @@
   "event": {
     "label": "{region}{price}/{per}",
     "region": "{region} ",
-    "per": { "year": "thn", "month": "bln", "months": "{count} bln", "week": "mgg", "day": "hari" }
+    "per": {
+      "year": "thn",
+      "month": "bln",
+      "months": "{count} bln",
+      "week": "mgg",
+      "day": "hari"
+    }
   },
   "listSep": ", ",
   "insight": {
     "yearly": {
-      "title": { "other": "{count} langganan jangka panjang diperpanjang dalam 60 hari" },
+      "title": {
+        "other": "{count} langganan jangka panjang diperpanjang dalam 60 hari"
+      },
       "body": "Totalnya sekitar {sum}. Tagihan tahunan sulit di-refund, jadi sekarang saatnya memutuskan mana yang dipertahankan."
     },
     "dup": {
       "title": "{names} mungkin duplikat",
-      "body": { "other": "{count} langganan ini totalnya sekitar {sum} per bulan. Periksa apakah semuanya masih Anda perlukan." }
+      "body": {
+        "other": "{count} langganan ini totalnya sekitar {sum} per bulan. Periksa apakah semuanya masih Anda perlukan."
+      }
     },
-    "hikes": { "title": { "other": "{count} langganan naik harga dalam setahun terakhir" } },
+    "hikes": {
+      "title": {
+        "other": "{count} langganan naik harga dalam setahun terakhir"
+      }
+    },
     "intro": {
-      "title": { "other": "Promo {name} berakhir dalam {count} hari" },
+      "title": {
+        "other": "Promo {name} berakhir dalam {count} hari"
+      },
       "body": "Setelah itu, harga kembali dari {from} ke {to}."
     },
-    "balance": { "title": "{name} tidak akan cukup sampai {date}", "body": "{sub} butuh {need}; saldo sekitar {current}." },
+    "balance": {
+      "title": "{name} tidak akan cukup sampai {date}",
+      "body": "{sub} butuh {need}; saldo sekitar {current}."
+    },
     "fx": {
       "title": "{pct}% pengeluaran dalam mata uang asing",
       "body": "Terbesar adalah {ccy} ({share}%). Bagian ini jadi lebih murah saat {ccy} melemah, dan lebih mahal saat menguat."
     },
     "noMethod": {
-      "title": { "other": "{count} langganan belum punya metode pembayaran" },
+      "title": {
+        "other": "{count} langganan belum punya metode pembayaran"
+      },
       "body": "Tambahkan agar perkiraan saldo dan statistik per metode lengkap."
     },
-    "top": { "title": "{name} adalah langganan termahal Anda", "body": "Sekitar {perDay} per hari, {pct}% dari pengeluaran bulanan." }
+    "top": {
+      "title": "{name} adalah langganan termahal Anda",
+      "body": "Sekitar {perDay} per hari, {pct}% dari pengeluaran bulanan."
+    }
   },
   "methodKind": {
     "debit": "Kartu debit",
@@ -70,8 +120,13 @@
     "other": "Lainnya"
   },
   "publicMethod": "{kind} · {region}",
-  "channel": { "email": "Email" },
-  "csv": { "appStoreBalance": "Saldo App Store {region}", "otherCategory": "Lainnya" },
+  "channel": {
+    "email": "Email"
+  },
+  "csv": {
+    "appStoreBalance": "Saldo App Store {region}",
+    "otherCategory": "Lainnya"
+  },
   "category": {
     "ai": "AI",
     "tools": "Alat",
@@ -113,6 +168,7 @@
     "unused": "{days} hari dibayar tak terpakai, sekitar {money}",
     "unusedTitle": "Dibayar tak terpakai",
     "terminated": "Dinonaktifkan",
-    "restore": "Aktifkan kembali"
+    "restore": "Aktifkan kembali",
+    "fxMissing": "Sebagian kerugian tidak dapat dikonversi karena kurs tidak tersedia. Jumlah dalam mata uang asli tetap ada di rincian."
   }
 }

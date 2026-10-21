@@ -169,3 +169,124 @@ test('9/17. 所有语言说明全额实付和日历客户端边界；ICS 仍声�
   assert.ok(ics.includes('TRIGGER:-P2DT15H'));
   assert.ok(!ics.includes('TRIGGER;VALUE=DATE-TIME'));
 });
+
+test('报告损失明细可打开原订阅；四种年度分享在非零且未隐藏时展示损失', async () => {
+  const { cancelSavings, stopLosses, yearReview } = await import('./metrics.ts');
+  const { stopSubscription } = await import('./phases.ts');
+  const { cnDate, money } = await import('./format.ts');
+  const { flatten, setLocale, t } = await import('./i18n.ts');
+  type Element = { type: string; props: Record<string, any>; children: unknown[] };
+  const React = {
+    createElement(type: string | ((p: any) => unknown), props: Record<string, any> | null, ...children: unknown[]) {
+      return typeof type === 'function' ? type({ ...props, children }) : { type, props: props ?? {}, children };
+    },
+  };
+  const load = (file: string, names: string[], deps: Record<string, unknown>) => {
+    const source = read(file)
+      .replace(/^import [\s\S]*?;\n/gm, '')
+      .replace(/export function /g, 'function ');
+    const result = transformSync(file, source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+    assert.equal(result.fatal, false);
+    return new Function(...Object.keys(deps), `${result.code}; return { ${names.join(', ')} };`)(...Object.values(deps));
+  };
+  const all = (node: unknown): Element[] => {
+    if (Array.isArray(node)) return node.flatMap(all);
+    if (!node || typeof node !== 'object' || !('type' in node)) return [];
+    const e = node as Element;
+    return [e, ...all(e.children)];
+  };
+  const text = (node: unknown): string => {
+    if (Array.isArray(node)) return node.map(text).join('');
+    if (node == null || typeof node === 'boolean') return '';
+    return typeof node === 'object' ? text((node as Element).children) : String(node);
+  };
+  const deps = {
+    React,
+    t,
+    money,
+    cnDate,
+    useMemo: (f: () => unknown) => f(),
+    cancelSavings,
+    stopLosses,
+    tipProps: () => ({}),
+    SubIcon: 'SubIcon',
+    Amount: 'Amount',
+  };
+  const { StopsCard } = load('../app/src/views/Report.tsx', ['StopsCard'], deps);
+  const { Receipt, Poster, Card, Stars } = load('../app/src/views/Review.tsx', ['Receipt', 'Poster', 'Card', 'Stars'], {
+    React,
+    t,
+    SubIcon: 'SubIcon',
+    catColor: () => '#777',
+    monthLabel: () => 'October',
+    packCircles: () => [],
+    location: { host: 'example.test' },
+  });
+  const today = '2026-10-19';
+  const original = {
+    id: 'fictional',
+    name: 'Fictional Service',
+    category: 'tools',
+    tags: [],
+    price: 31,
+    currency: 'USD',
+    cycle: { unit: 'month' as const, every: 1 },
+    start: '2026-10-05',
+    status: 'active' as const,
+  };
+  const stopped = stopSubscription(original, today, 'terminate', today, 'abuse', { amount: 6 });
+  const cancelled = stopSubscription({ ...original, id: 'cancelled' }, today, 'cancel');
+  const st = { subscriptions: [stopped, cancelled], methods: [], settings: DEFAULT_SETTINGS, fx: FALLBACK_FX };
+  for (const lang of ['en', 'zh-CN']) {
+    const messages = {};
+    for (const ns of ['common', 'core', 'report', 'review']) flatten(ns, locale(lang, ns), messages);
+    setLocale(lang as 'en' | 'zh-CN', [messages]);
+    let opened: unknown;
+    const tree = StopsCard({
+      state: st,
+      today,
+      onOpen: (s: unknown) => {
+        opened = s;
+      },
+    });
+    const rows = all(tree).filter((e) => e.props.className === 'stop-row');
+    assert.equal(rows.length, 2);
+    const terminated = rows.find((e) => text(e).includes('abuse'))!;
+    assert.ok(text(terminated).includes(t('core.stop.partial', { money: money(6, 'USD') })));
+    assert.ok(text(terminated).includes(money(10, 'USD')));
+    assert.ok(text(tree).includes(t('report.stops.cancel')));
+    assert.ok(text(tree).includes(t('core.stop.refundNo')));
+    terminated.props.onClick();
+    assert.equal(opened, stopped);
+    const empty = StopsCard({ state: { ...st, subscriptions: [] }, today, onOpen() {} });
+    assert.ok(text(empty).includes(t('report.stops.empty')));
+    assert.equal(all(empty).filter((e) => e.props.className === 'stop-row').length, 0);
+    const unknown = stopSubscription({ ...original, currency: 'XYZ' }, today, 'terminate');
+    const unknownTree = StopsCard({ state: { ...st, subscriptions: [unknown] }, today, onOpen() {} });
+    assert.ok(text(unknownTree).includes(t('core.stop.fxMissing')));
+    assert.ok(!text(unknownTree).includes(t('report.stops.empty')));
+    const r = yearReview(st, today);
+    const ctx = {
+      r,
+      year: '2026',
+      name: 'Alex',
+      whose: 'Alex',
+      ongoing: true,
+      m: (n: number) => money(n, 'USD'),
+      pct: () => '50%',
+      byMethod: [],
+      tip: 'Tip',
+      today,
+      mrr: 0,
+      saved: 0,
+    };
+    for (const style of [Receipt, Poster, Card, Stars]) {
+      const line = t('review.stopLoss', { amount: money(26, 'USD') });
+      assert.ok(text(style({ ...ctx, hide: false })).includes(line));
+      assert.ok(!text(style({ ...ctx, hide: true })).includes(line));
+      assert.ok(text(style({ ...ctx, r: { ...r, stopLoss: NaN }, hide: false })).includes(t('core.stop.fxMissing')));
+      assert.equal(all(style({ ...ctx, r: { ...r, stopLoss: 0 }, hide: false })).filter((e) => e.props.className === 'review-loss').length, 0);
+    }
+  }
+  setLocale('en', []);
+});

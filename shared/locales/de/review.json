@@ -102,5 +102,6 @@
     "head": "{year} · {whose} Abo-Sternenhimmel",
     "foot": "Größere Blase, höhere Ausgaben"
   },
-  "spendBasis": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder"
+  "spendBasis": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder",
+  "stopLoss": "Dieses Jahr {amount} durch Abschaltung / vorzeitige Kündigung verloren"
 }

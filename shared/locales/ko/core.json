@@ -168,6 +168,7 @@
     "unused": "결제 후 미사용 {days}일, 약 {money}",
     "unusedTitle": "결제 후 미사용",
     "terminated": "사용 중지됨",
-    "restore": "다시 활성화"
+    "restore": "다시 활성화",
+    "fxMissing": "일부 손실은 환율이 없어 환산할 수 없습니다. 내역에 원래 통화 금액을 표시합니다."
   }
 }

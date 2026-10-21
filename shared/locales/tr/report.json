@@ -131,5 +131,16 @@
       "other": "{count} karar"
     },
     "more": "Daha eski kayıtlar"
+  },
+  "stops": {
+    "title": "İptaller ve sonlandırmalar",
+    "saved": "Tasarruf",
+    "loss": "Kayıp",
+    "savedHint": "İptalden bugüne kadar önlenen yenileme ücretlerinin tahmini",
+    "lossHint": "Ödenmiş, kullanılmamış ve iade edilmemiş",
+    "basis": "Tüm geçmiş · Benim payım; tasarruf güncel kurla, kayıplar durdurma tarihindeki kurla hesaplanır.",
+    "details": "İade edilmemiş kayıpların ayrıntıları",
+    "empty": "Kullanılmayan hizmetlerden iade edilmemiş kayıp yok.",
+    "cancel": "Erken iptal"
   }
 }

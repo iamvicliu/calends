@@ -102,5 +102,6 @@
     "head": "{year} · Constelación de suscripciones {whose}",
     "foot": "Burbuja más grande, más gasto"
   },
-  "spendBasis": "Importe total pagado, incluidos los adelantos por los miembros"
+  "spendBasis": "Importe total pagado, incluidos los adelantos por los miembros",
+  "stopLoss": "Este año perdiste {amount} por bajas / cancelaciones anticipadas"
 }

@@ -2033,13 +2033,13 @@ select.btn {
 }
 .cash-facts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 @media (max-width: 900px) {
   .cash-facts {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 }
@@ -2068,6 +2068,106 @@ select.btn {
   }
   .cash-facts > div {
     padding: 8px 9px;
+  }
+}
+/* 退订与停用 */
+.stop-basis {
+  margin: -4px 0 16px;
+  color: var(--label-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.stop-totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.stop-totals > div {
+  min-width: 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--fill-2);
+}
+.stop-totals > div > span,
+.stop-totals > div > small,
+.stop-info small,
+.stop-amount small {
+  display: block;
+  color: var(--label-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.stop-totals > div > b {
+  display: block;
+  font-size: clamp(20px, 3vw, 28px);
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+.stop-totals .amt {
+  white-space: normal;
+}
+.stop-list-title {
+  margin: 20px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.stop-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--sep);
+  background: none;
+  padding: 12px 0;
+  text-align: left;
+}
+.stop-row:last-child {
+  border-bottom: 0;
+}
+.stop-row:hover {
+  background: var(--fill-2);
+}
+.stop-info {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.stop-info > b {
+  font-size: 14px;
+}
+.stop-amount {
+  text-align: right;
+  overflow-wrap: anywhere;
+  max-width: 42%;
+}
+.stop-amount > b {
+  font-size: 14px;
+}
+.review-loss {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 680px) {
+  .stop-totals {
+    gap: 8px;
+  }
+  .stop-totals > div {
+    padding: 10px;
+  }
+  .stop-row {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .stop-info {
+    flex-basis: calc(100% - 40px);
+  }
+  .stop-amount {
+    margin-left: 40px;
+    max-width: calc(100% - 40px);
+    text-align: left;
   }
 }
 .barline {

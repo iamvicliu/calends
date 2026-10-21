@@ -178,6 +178,7 @@
     "unused": "{days} jours payés non utilisés, environ {money}",
     "unusedTitle": "Payé non utilisé",
     "terminated": "Désactivé",
-    "restore": "Réactiver"
+    "restore": "Réactiver",
+    "fxMissing": "Certaines pertes ne peuvent pas être converties faute de taux de change. Les montants d’origine restent dans le détail."
   }
 }

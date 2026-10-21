@@ -401,7 +401,7 @@ export function stopSummary(s: Subscription, asOf = '9999-12-31') {
   const prorated = (period.paid * unusedDays) / period.days;
   const refunded = (s.payments ?? []).filter((p) => p.kind === 'refund' && p.date >= s.stop!.date && p.date <= asOf).reduce((a, p) => a - p.amount, 0);
   // 商家通常按天退剩余部分：退回金额达到按天折算额即视为全额退款
-  const refundStatus = refunded < 0.005 ? 'none' : refunded + 0.005 >= Math.min(prorated, period.paid) ? 'full' : 'partial';
+  const refundStatus: 'none' | 'full' | 'partial' = refunded < 0.005 ? 'none' : refunded + 0.005 >= Math.min(prorated, period.paid) ? 'full' : 'partial';
   const unusedValue = refundStatus === 'full' ? 0 : Math.max(0, prorated - refunded);
   return {
     ...s.stop,

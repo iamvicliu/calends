@@ -23,7 +23,7 @@ import {
   type Charge,
 } from '../../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
-import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../../shared/metrics.ts';
+import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, stopLosses, topUpPlan, yearReview } from '../../shared/metrics.ts';
 import {
   changePrice,
   confirmPlan,
@@ -791,9 +791,9 @@ export const TOOLS: Tool[] = [
   {
     name: 'get_insights',
     description:
-      'Health check and reports: insights (renewals coming up, price hikes, low balances, possible duplicates), year_review (total, top subscriptions, busiest month), prepaid (paid-but-unused value) or cancel_savings (money saved by cancelling).',
+      'Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type). Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.',
     inputSchema: obj({
-      section: { type: 'string', enum: ['insights', 'year_review', 'prepaid', 'cancel_savings'], default: 'insights' },
+      section: { type: 'string', enum: ['insights', 'year_review', 'prepaid', 'cancel_savings', 'stop_losses'], default: 'insights' },
       year: { type: 'string', description: 'year_review only, e.g. 2025.' },
     }),
     async run(a, ctx) {
@@ -807,6 +807,8 @@ export const TOOLS: Tool[] = [
         return {
           currency: base,
           year: r.year,
+          stop_loss: Number.isFinite(r.stopLoss) ? round(r.stopLoss) : null,
+          stop_loss_incomplete: !Number.isFinite(r.stopLoss),
           total: round(r.total),
           charges: r.charges,
           per_day: round(r.perDay),
@@ -823,9 +825,41 @@ export const TOOLS: Tool[] = [
         return {
           currency: base,
           total: round(p.total),
-          unused_total: round(p.unusedTotal),
-          unused_items: p.unusedItems.map((i) => ({ name: i.sub.name, value: round(i.value), until: i.until })),
+          unused_total: Number.isFinite(p.unusedTotal) ? round(p.unusedTotal) : null,
+          unused_incomplete: p.unusedIncomplete,
+          unused_items: p.unusedItems.map((i) => ({ name: i.sub.name, value: Number.isFinite(i.value) ? round(i.value) : null, until: i.until })),
           items: p.items.map((i) => ({ name: i.sub.name, value: round(i.value), until: i.until })),
+        };
+      }
+      if (sec === 'stop_losses') {
+        const losses = stopLosses(st, today);
+        const baseAmount = (n: number) => (Number.isFinite(n) ? round(n) : null);
+        return {
+          currency: base,
+          as_of: today,
+          total: baseAmount(losses.total),
+          incomplete: losses.incomplete,
+          by_type: { cancel: baseAmount(losses.byKind.cancel), terminate: baseAmount(losses.byKind.terminate) },
+          items: losses.items.map((i) => ({
+            subscription_id: i.sub.id,
+            name: i.sub.name,
+            phase_index: i.phaseIndex,
+            phase_start: i.phase.start,
+            kind: i.kind,
+            date: i.date,
+            paid_through: i.paidThrough,
+            ...(i.kind === 'terminate' && i.reason ? { reason: i.reason } : {}),
+            currency: i.currency,
+            paid: round(i.paid),
+            paid_base: baseAmount(i.paidBase),
+            refunded: round(i.refunded),
+            refunded_base: baseAmount(i.refundedBase),
+            loss: round(i.loss),
+            loss_base: baseAmount(i.lossBase),
+            fx_missing: i.fxMissing,
+            refund_status: i.refundStatus,
+            wasted_days: i.wastedDays,
+          })),
         };
       }
       const c = cancelSavings(st, today);

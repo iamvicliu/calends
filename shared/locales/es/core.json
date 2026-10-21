@@ -1,17 +1,43 @@
 {
-  "bill": { "m1": "Mensual", "m3": "Trimestral", "m6": "Semestral", "m12": "Anual", "custom": { "one": "Cada {count} mes", "other": "Cada {count} meses" } },
+  "bill": {
+    "m1": "Mensual",
+    "m3": "Trimestral",
+    "m6": "Semestral",
+    "m12": "Anual",
+    "custom": {
+      "one": "Cada {count} mes",
+      "other": "Cada {count} meses"
+    }
+  },
   "cycle": {
     "lifetime": "De por vida",
     "once": "una vez",
-    "every": { "day": "Diario", "week": "Semanal", "month": "Mensual", "year": "Anual" },
+    "every": {
+      "day": "Diario",
+      "week": "Semanal",
+      "month": "Mensual",
+      "year": "Anual"
+    },
     "quarterly": "Trimestral",
     "halfYearly": "Semestral",
     "biennial": "Cada 2 años",
     "everyN": {
-      "day": { "one": "Cada {count} día", "other": "Cada {count} días" },
-      "week": { "one": "Cada {count} semana", "other": "Cada {count} semanas" },
-      "month": { "one": "Cada {count} mes", "other": "Cada {count} meses" },
-      "year": { "one": "Cada {count} año", "other": "Cada {count} años" }
+      "day": {
+        "one": "Cada {count} día",
+        "other": "Cada {count} días"
+      },
+      "week": {
+        "one": "Cada {count} semana",
+        "other": "Cada {count} semanas"
+      },
+      "month": {
+        "one": "Cada {count} mes",
+        "other": "Cada {count} meses"
+      },
+      "year": {
+        "one": "Cada {count} año",
+        "other": "Cada {count} años"
+      }
     }
   },
   "subError": {
@@ -32,7 +58,13 @@
   "event": {
     "label": "{region}{price}/{per}",
     "region": "{region} ",
-    "per": { "year": "año", "month": "mes", "months": "{count} meses", "week": "sem", "day": "día" }
+    "per": {
+      "year": "año",
+      "month": "mes",
+      "months": "{count} meses",
+      "week": "sem",
+      "day": "día"
+    }
   },
   "listSep": ", ",
   "insight": {
@@ -50,21 +82,38 @@
         "other": "Estas {count} suscripciones cuestan unos {sum} al mes en total. Comprueba si todavía las necesitas todas."
       }
     },
-    "hikes": { "title": { "one": "{count} suscripción subió de precio el último año", "other": "{count} suscripciones subieron de precio el último año" } },
+    "hikes": {
+      "title": {
+        "one": "{count} suscripción subió de precio el último año",
+        "other": "{count} suscripciones subieron de precio el último año"
+      }
+    },
     "intro": {
-      "title": { "one": "La promoción de {name} termina en {count} día", "other": "La promoción de {name} termina en {count} días" },
+      "title": {
+        "one": "La promoción de {name} termina en {count} día",
+        "other": "La promoción de {name} termina en {count} días"
+      },
       "body": "Después, el precio pasará de {from} a {to}."
     },
-    "balance": { "title": "{name} no alcanzará hasta el {date}", "body": "{sub} necesita {need}; el saldo es de unos {current}." },
+    "balance": {
+      "title": "{name} no alcanzará hasta el {date}",
+      "body": "{sub} necesita {need}; el saldo es de unos {current}."
+    },
     "fx": {
       "title": "El {pct}% del gasto es en monedas extranjeras",
       "body": "La principal es {ccy} ({share}%). Esta parte se abarata cuando {ccy} se debilita y se encarece cuando se fortalece."
     },
     "noMethod": {
-      "title": { "one": "{count} suscripción no tiene método de pago", "other": "{count} suscripciones no tienen método de pago" },
+      "title": {
+        "one": "{count} suscripción no tiene método de pago",
+        "other": "{count} suscripciones no tienen método de pago"
+      },
       "body": "Añade uno para que las previsiones de saldo y las estadísticas por método estén completas."
     },
-    "top": { "title": "{name} es tu suscripción más cara", "body": "Unos {perDay} al día, el {pct}% del gasto mensual." }
+    "top": {
+      "title": "{name} es tu suscripción más cara",
+      "body": "Unos {perDay} al día, el {pct}% del gasto mensual."
+    }
   },
   "methodKind": {
     "debit": "Tarjeta bancaria",
@@ -81,8 +130,13 @@
     "other": "Otro"
   },
   "publicMethod": "{kind} · {region}",
-  "channel": { "email": "Correo electrónico" },
-  "csv": { "appStoreBalance": "Saldo de App Store {region}", "otherCategory": "Otros" },
+  "channel": {
+    "email": "Correo electrónico"
+  },
+  "csv": {
+    "appStoreBalance": "Saldo de App Store {region}",
+    "otherCategory": "Otros"
+  },
   "category": {
     "ai": "IA",
     "tools": "Herramientas",
@@ -124,6 +178,7 @@
     "unused": "{days} días pagados sin usar, unos {money}",
     "unusedTitle": "Pagado sin usar",
     "terminated": "Desactivado",
-    "restore": "Reactivar"
+    "restore": "Reactivar",
+    "fxMissing": "Algunas pérdidas no se pueden convertir porque faltan tipos de cambio. Los importes originales se conservan en el detalle."
   }
 }
