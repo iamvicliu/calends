@@ -93,9 +93,9 @@
     "title": "AI 助手設定",
     "intro": "使用你自己的 DeepSeek API Key，費用按 DeepSeek 的價格計入你的帳戶。取得 Key：",
     "keySaved": "已儲存（{hint}），留空則不修改",
-    "baseHint": "官方網址毋須修改；使用代理或兼容服務時才填寫。",
+    "baseHint": "預設是 DeepSeek 官方地址；也可以填任何兼容 OpenAI 介面的服務。",
     "model": "模型",
-    "modelHint": "deepseek-flash 即 V4.1 Flash，支援辨識圖片。",
+    "modelHint": "辨識圖片需要支援視覺的模型。",
     "effort": "思考強度",
     "effort_none": "不思考",
     "effort_noneHint": "最快，適合簡單收據",
@@ -103,16 +103,21 @@
     "effort_lowHint": "推薦：快而準確",
     "effort_high": "深度",
     "effort_highHint": "複雜帳單更穩定，速度較慢",
-    "test": "測試連線",
-    "testOk": {
-      "other": "連線成功，可用 {count} 個模型"
-    },
     "saved": "已儲存",
     "clear": "清除 Key",
     "cleared": "已清除 API Key",
     "cta": "設定 DeepSeek API Key",
     "ctaHint": "只需一次，Key 只保存在你的伺服器上",
-    "privacy": "Key 只保存在你的伺服器上，不會傳送到瀏覽器或寫入備份。辨識時，你傳送的文字和圖片會經你的伺服器轉發給 DeepSeek。"
+    "privacy": "Key 只保存在你的伺服器上，不會傳送到瀏覽器或寫入備份。辨識時，你傳送的文字和圖片會經你的伺服器轉發給 DeepSeek。",
+    "fetching": "正在取得模型列表…",
+    "fetched": "已取得 {count} 個模型。",
+    "fetchHint": "填好 Base URL 和 API Key 後，會自動取得可用的模型。",
+    "noModels": "服務沒有返回模型列表，可以手動填寫。",
+    "refresh": "重新整理",
+    "retry": "重試",
+    "manual": "手動填寫",
+    "pickList": "從列表選擇",
+    "notInList": "不在列表中"
   },
   "f": {
     "member": "成員",

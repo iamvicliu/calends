@@ -910,6 +910,55 @@
   color: var(--label-3);
   font-size: 12px;
 }
+/* 模型：标题右侧是刷新；下方是列表选择或手动输入 */
+.as-model-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.as-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.as-link:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.as-model-pick > * {
+  width: 100%;
+}
+.as-model-pick button {
+  justify-content: space-between;
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+}
+.as-model-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--label-3);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.as-model-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
 .as-effort {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -939,20 +988,6 @@
   color: var(--label-2);
   font-size: 11.5px;
   line-height: 1.4;
-}
-.as-test {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 13px;
-}
-.as-test .ok {
-  color: var(--green);
-}
-.as-test .bad {
-  color: var(--red);
-  overflow-wrap: anywhere;
 }
 
 @media (max-width: 680px) {

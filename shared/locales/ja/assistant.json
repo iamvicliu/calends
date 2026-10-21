@@ -93,9 +93,9 @@
     "title": "AI アシスタントの設定",
     "intro": "ご自身の DeepSeek API Key を使います。料金は DeepSeek の価格でご自身のアカウントに請求されます。Key の取得：",
     "keySaved": "保存済み（{hint}）。空欄のままなら変更しません",
-    "baseHint": "通常は公式 URL のままで大丈夫です。プロキシや互換サービスを使う場合のみ入力してください。",
+    "baseHint": "既定は DeepSeek 公式のアドレスです。OpenAI 互換のサービスも使えます。",
     "model": "モデル",
-    "modelHint": "deepseek-flash は V4.1 Flash で、画像を読み取れます。",
+    "modelHint": "画像の読み取りには画像対応のモデルが必要です。",
     "effort": "思考の深さ",
     "effort_none": "オフ",
     "effort_noneHint": "最速。シンプルなレシート向け",
@@ -103,16 +103,21 @@
     "effort_lowHint": "おすすめ：速くて正確",
     "effort_high": "じっくり",
     "effort_highHint": "複雑な請求書でも安定。やや遅め",
-    "test": "接続をテスト",
-    "testOk": {
-      "other": "接続しました。{count} 個のモデルが利用できます"
-    },
     "saved": "保存しました",
     "clear": "Key を削除",
     "cleared": "API Key を削除しました",
     "cta": "DeepSeek API Key を設定",
     "ctaHint": "設定は一度だけ。Key はご自身のサーバーにのみ保存されます",
-    "privacy": "Key はご自身のサーバーにのみ保存され、ブラウザに送られたりバックアップに含まれたりすることはありません。読み取りの際、送信したテキストや画像はサーバーを経由して DeepSeek に転送されます。"
+    "privacy": "Key はご自身のサーバーにのみ保存され、ブラウザに送られたりバックアップに含まれたりすることはありません。読み取りの際、送信したテキストや画像はサーバーを経由して DeepSeek に転送されます。",
+    "fetching": "モデル一覧を取得しています…",
+    "fetched": "{count} 個のモデルを取得しました。",
+    "fetchHint": "Base URL と API Key を入力すると、使えるモデルを自動で取得します。",
+    "noModels": "モデル一覧が返されませんでした。手入力できます。",
+    "refresh": "更新",
+    "retry": "再試行",
+    "manual": "手入力",
+    "pickList": "一覧から選ぶ",
+    "notInList": "一覧にありません"
   },
   "f": {
     "member": "メンバー",

@@ -93,9 +93,9 @@
     "title": "Pengaturan asisten AI",
     "intro": "Menggunakan DeepSeek API Key milik Anda sendiri; biaya ditagihkan ke akun DeepSeek Anda sesuai harga DeepSeek. Dapatkan Key di",
     "keySaved": "Tersimpan ({hint}), biarkan kosong agar tidak berubah",
-    "baseHint": "Biarkan URL resmi, kecuali Anda memakai proxy atau layanan yang kompatibel.",
+    "baseHint": "Bawaan: alamat resmi DeepSeek. Layanan apa pun yang kompatibel dengan OpenAI juga bisa.",
     "model": "Model",
-    "modelHint": "deepseek-flash adalah V4.1 Flash dan bisa membaca gambar.",
+    "modelHint": "Membaca gambar butuh model yang mendukung visi.",
     "effort": "Tingkat berpikir",
     "effort_none": "Mati",
     "effort_noneHint": "Paling cepat, cukup untuk struk sederhana",
@@ -103,16 +103,21 @@
     "effort_lowHint": "Disarankan: cepat dan akurat",
     "effort_high": "Mendalam",
     "effort_highHint": "Lebih andal untuk tagihan rumit, lebih lambat",
-    "test": "Uji koneksi",
-    "testOk": {
-      "other": "Terhubung, {count} model tersedia"
-    },
     "saved": "Tersimpan",
     "clear": "Hapus Key",
     "cleared": "API Key dihapus",
     "cta": "Atur DeepSeek API Key",
     "ctaHint": "Cukup sekali; Key hanya disimpan di server Anda",
-    "privacy": "Key hanya disimpan di server Anda, tidak pernah dikirim ke browser atau dimasukkan ke cadangan. Teks dan gambar yang Anda kirim diteruskan ke DeepSeek melalui server Anda."
+    "privacy": "Key hanya disimpan di server Anda, tidak pernah dikirim ke browser atau dimasukkan ke cadangan. Teks dan gambar yang Anda kirim diteruskan ke DeepSeek melalui server Anda.",
+    "fetching": "Mengambil daftar model…",
+    "fetched": "{count} model tersedia.",
+    "fetchHint": "Isi Base URL dan API key, model yang tersedia akan dimuat otomatis.",
+    "noModels": "Layanan tidak mengembalikan daftar model. Kamu bisa mengetik namanya.",
+    "refresh": "Muat ulang",
+    "retry": "Coba lagi",
+    "manual": "Ketik manual",
+    "pickList": "Pilih dari daftar",
+    "notInList": "Tidak ada di daftar"
   },
   "f": {
     "member": "Anggota",

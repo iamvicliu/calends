@@ -31,6 +31,7 @@ import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../s
 import { dropOldImages } from '../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
 import { api, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
@@ -1133,21 +1134,47 @@ function SetupSheet({
   const [baseUrl, setBaseUrl] = useState(cfg?.baseUrl ?? 'https://api.deepseek.com');
   const [model, setModel] = useState(cfg?.model ?? 'deepseek-flash');
   const [effort, setEffort] = useState<Effort>(cfg?.effort ?? 'low');
-  const [test, setTest] = useState<{ ok: boolean; message?: string; models?: string[] } | null>(null);
-  const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
+  // 模型列表：填好地址和 Key 后向服务商的 /models 取；取不到（有的服务没有这个接口）时可以手动填
+  const [models, setModels] = useState<string[] | null>(null);
+  const [fetching, setFetching] = useState(false);
+  const [fetchErr, setFetchErr] = useState<string | null>(null);
+  const [manual, setManual] = useState(false);
+  const canFetch = !!baseUrl.trim() && (!!key.trim() || !!cfg?.configured);
 
-  const runTest = async () => {
-    setTesting(true);
-    setTest(null);
+  const fetchModels = async () => {
+    if (!canFetch) return;
+    setFetching(true);
+    setFetchErr(null);
     try {
-      setTest(await api('/api/assistant/test', { method: 'POST', body: JSON.stringify({ apiKey: key || undefined, baseUrl }) }));
+      const r = await api<{ ok: boolean; message?: string; models?: string[] }>('/api/assistant/test', {
+        method: 'POST',
+        body: JSON.stringify({ apiKey: key.trim() || undefined, baseUrl }),
+      });
+      if (!r.ok || !r.models?.length) {
+        setModels(null);
+        setFetchErr(r.ok ? t('assistant.setup.noModels') : (r.message ?? t('assistant.error.network')));
+        return;
+      }
+      const list = [...r.models].sort((a, b) => a.localeCompare(b));
+      setModels(list);
+      setManual(false);
+      // 当前模型不在列表里：优先挑一个 Flash，其次第一个
+      setModel((m) => (list.includes(m) ? m : (list.find((x) => /flash/i.test(x)) ?? list[0])));
     } catch (e) {
-      setTest({ ok: false, message: (e as Error).message });
+      setModels(null);
+      setFetchErr((e as Error).message);
     } finally {
-      setTesting(false);
+      setFetching(false);
     }
   };
+  // 打开时（已保存 Key）以及改了地址或 Key 后，停顿一下自动获取
+  useEffect(() => {
+    if (!canFetch) return;
+    const h = setTimeout(() => void fetchModels(), key || baseUrl !== (cfg?.baseUrl ?? '') ? 700 : 0);
+    return () => clearTimeout(h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, baseUrl]);
   const save = async () => {
     setSaving(true);
     try {
@@ -1182,7 +1209,7 @@ function SetupSheet({
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn primary" onClick={() => void save()} disabled={saving || (!key && !cfg?.configured)}>
+          <button className="btn primary" onClick={() => void save()} disabled={saving || (!key && !cfg?.configured) || !model.trim()}>
             {t('common.save')}
           </button>
         </>
@@ -1218,6 +1245,11 @@ function SetupSheet({
           </a>
         </p>
         <label className="as-field">
+          <span>Base URL</span>
+          <input spellCheck={false} value={baseUrl} placeholder="https://api.deepseek.com" onChange={(e) => setBaseUrl(e.target.value)} />
+          <small>{t('assistant.setup.baseHint')}</small>
+        </label>
+        <label className="as-field">
           <span>API Key</span>
           <input
             type="password"
@@ -1228,21 +1260,68 @@ function SetupSheet({
             onChange={(e) => setKey(e.target.value)}
           />
         </label>
-        <label className="as-field">
-          <span>Base URL</span>
-          <input spellCheck={false} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
-          <small>{t('assistant.setup.baseHint')}</small>
-        </label>
-        <label className="as-field">
-          <span>{t('assistant.setup.model')}</span>
-          <input spellCheck={false} value={model} list="as-models" onChange={(e) => setModel(e.target.value)} />
-          <datalist id="as-models">
-            {(test?.models ?? ['deepseek-flash', 'deepseek-v4-pro']).map((m) => (
-              <option key={m} value={m} />
-            ))}
-          </datalist>
-          <small>{t('assistant.setup.modelHint')}</small>
-        </label>
+        <div className="as-field">
+          <span className="as-model-head">
+            {t('assistant.setup.model')}
+            {models && !manual && (
+              <button type="button" className="as-link" onClick={() => void fetchModels()} disabled={fetching}>
+                {fetching ? <Loader2 size={12} className="spin" /> : <RotateCcw size={12} />} {t('assistant.setup.refresh')}
+              </button>
+            )}
+          </span>
+          {models && !manual ? (
+            <div className="as-model-pick">
+              <Picker
+                variant="btn"
+                value={model}
+                ariaLabel={t('assistant.setup.model')}
+                search
+                options={[
+                  ...(model && !models.includes(model) ? [{ value: model, label: model, hint: t('assistant.setup.notInList') }] : []),
+                  ...models.map((m) => ({
+                    value: m,
+                    label: m.includes('/') ? m.slice(m.indexOf('/') + 1) : m,
+                    group: m.includes('/') ? m.slice(0, m.indexOf('/')) : undefined,
+                  })),
+                ]}
+                onChange={setModel}
+              />
+            </div>
+          ) : manual ? (
+            <input spellCheck={false} value={model} placeholder="deepseek-flash" onChange={(e) => setModel(e.target.value)} />
+          ) : (
+            <div className="as-model-empty">
+              {fetching ? (
+                <>
+                  <Loader2 size={14} className="spin" /> {t('assistant.setup.fetching')}
+                </>
+              ) : (
+                (fetchErr ?? t('assistant.setup.fetchHint'))
+              )}
+            </div>
+          )}
+          <small className="as-model-foot">
+            {models && !manual ? t('assistant.setup.fetched', { count: models.length }) : t('assistant.setup.modelHint')}
+            {!manual ? (
+              <>
+                {fetchErr && !fetching && (
+                  <button type="button" className="as-link" onClick={() => void fetchModels()}>
+                    {t('assistant.setup.retry')}
+                  </button>
+                )}
+                <button type="button" className="as-link" onClick={() => setManual(true)}>
+                  {t('assistant.setup.manual')}
+                </button>
+              </>
+            ) : (
+              models && (
+                <button type="button" className="as-link" onClick={() => setManual(false)}>
+                  {t('assistant.setup.pickList')}
+                </button>
+              )
+            )}
+          </small>
+        </div>
         <div className="as-field">
           <span>{t('assistant.setup.effort')}</span>
           <div className="as-effort">
@@ -1253,16 +1332,6 @@ function SetupSheet({
               </button>
             ))}
           </div>
-        </div>
-        <div className="as-test">
-          <button className="btn" onClick={() => void runTest()} disabled={testing || (!key && !cfg?.configured)}>
-            {testing ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {t('assistant.setup.test')}
-          </button>
-          {test && (
-            <span className={test.ok ? 'ok' : 'bad'}>
-              {test.ok ? t('assistant.setup.testOk', { count: test.models?.length ?? 0 }) : (test.message ?? t('assistant.error.network'))}
-            </span>
-          )}
         </div>
         <p className="as-setup-note">{t('assistant.setup.privacy')}</p>
       </div>

@@ -93,9 +93,9 @@
     "title": "AI 어시스턴트 설정",
     "intro": "내 DeepSeek API Key를 사용하며, 요금은 DeepSeek 가격 기준으로 내 계정에 청구됩니다. Key 발급:",
     "keySaved": "저장됨({hint}). 비워 두면 변경하지 않습니다",
-    "baseHint": "공식 주소는 그대로 두세요. 프록시나 호환 서비스를 쓸 때만 입력합니다.",
+    "baseHint": "기본값은 DeepSeek 공식 주소입니다. OpenAI 호환 서비스도 사용할 수 있습니다.",
     "model": "모델",
-    "modelHint": "deepseek-flash는 V4.1 Flash이며 이미지를 인식할 수 있습니다.",
+    "modelHint": "이미지를 인식하려면 비전 지원 모델이 필요합니다.",
     "effort": "사고 강도",
     "effort_none": "끄기",
     "effort_noneHint": "가장 빠름, 간단한 영수증에 적합",
@@ -103,16 +103,21 @@
     "effort_lowHint": "추천: 빠르고 정확함",
     "effort_high": "깊게",
     "effort_highHint": "복잡한 청구서에 더 안정적, 느림",
-    "test": "연결 테스트",
-    "testOk": {
-      "other": "연결 성공 · 사용 가능한 모델 {count}개"
-    },
     "saved": "저장했습니다",
     "clear": "Key 삭제",
     "cleared": "API Key를 삭제했습니다",
     "cta": "DeepSeek API Key 설정",
     "ctaHint": "한 번만 설정하면 되며, Key는 내 서버에만 저장됩니다",
-    "privacy": "Key는 내 서버에만 저장되며 브라우저로 전송되거나 백업에 포함되지 않습니다. 인식할 때 보낸 텍스트와 이미지는 내 서버를 거쳐 DeepSeek로 전달됩니다."
+    "privacy": "Key는 내 서버에만 저장되며 브라우저로 전송되거나 백업에 포함되지 않습니다. 인식할 때 보낸 텍스트와 이미지는 내 서버를 거쳐 DeepSeek로 전달됩니다.",
+    "fetching": "모델 목록을 가져오는 중…",
+    "fetched": "모델 {count}개를 가져왔습니다.",
+    "fetchHint": "Base URL과 API Key를 입력하면 사용 가능한 모델을 자동으로 가져옵니다.",
+    "noModels": "서비스가 모델 목록을 반환하지 않았습니다. 직접 입력할 수 있습니다.",
+    "refresh": "새로고침",
+    "retry": "다시 시도",
+    "manual": "직접 입력",
+    "pickList": "목록에서 선택",
+    "notInList": "목록에 없음"
   },
   "f": {
     "member": "멤버",
