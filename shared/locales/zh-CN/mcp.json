@@ -10,6 +10,8 @@
     "total": "合计"
   },
   "error": {
+    "shareFull": "「{name}」已经坐满了（{seats} 个位置）",
+    "needMemberName": "成员需要一个称呼",
     "noTool": "没有这个工具：{name}",
     "readOnly": "这个令牌是只读的，不能修改账本。请在后台「AI」页换一个读写令牌。",
     "unsupportedMethod": "不支持的方法：{method}",
@@ -55,6 +57,11 @@
     "get_insights": "体检与年度回顾",
     "list_events": "变更日志",
     "search_app_store": "查找 App",
+    "get_carpool": "合租概况",
+    "delete_subscription": "删除订阅",
+    "set_share": "设置合租",
+    "save_share_member": "添加或修改成员",
+    "remove_share_member": "移除成员",
     "create_subscription": "新增订阅",
     "update_subscription": "修改订阅信息",
     "change_price": "记录调价",

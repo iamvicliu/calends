@@ -10,6 +10,8 @@
     "total": "Total"
   },
   "error": {
+    "shareFull": "“{name}” is full ({seats} seats)",
+    "needMemberName": "The member needs a name",
     "noTool": "Unknown tool: {name}",
     "readOnly": "This token is read-only and can't change the ledger. Create a read-write token on the AI page in the admin.",
     "unsupportedMethod": "Unsupported method: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "Checkup & year in review",
     "list_events": "Change log",
     "search_app_store": "Find app",
+    "get_carpool": "Shared plans",
+    "delete_subscription": "Delete subscription",
+    "set_share": "Set up sharing",
+    "save_share_member": "Add or edit member",
+    "remove_share_member": "Remove member",
     "create_subscription": "Add subscription",
     "update_subscription": "Edit subscription",
     "change_price": "Record price change",

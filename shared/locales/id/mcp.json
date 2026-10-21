@@ -10,6 +10,8 @@
     "total": "Total"
   },
   "error": {
+    "shareFull": "“{name}” sudah penuh ({seats} kursi)",
+    "needMemberName": "Anggota perlu nama",
     "noTool": "Alat tidak dikenal: {name}",
     "readOnly": "Token ini hanya baca dan tidak bisa mengubah buku catatan. Buat token baca-tulis di halaman AI pada admin.",
     "unsupportedMethod": "Metode tidak didukung: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "Pemeriksaan & kilas balik tahunan",
     "list_events": "Log perubahan",
     "search_app_store": "Cari aplikasi",
+    "get_carpool": "Paket patungan",
+    "delete_subscription": "Hapus langganan",
+    "set_share": "Atur patungan",
+    "save_share_member": "Tambah atau ubah anggota",
+    "remove_share_member": "Hapus anggota",
     "create_subscription": "Tambah langganan",
     "update_subscription": "Edit langganan",
     "change_price": "Catat perubahan harga",

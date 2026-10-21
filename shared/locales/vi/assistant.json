@@ -69,7 +69,11 @@
     "view": "Xem",
     "missing": "Không nhận ra {fields}, đã dùng giá trị mặc định, hãy kiểm tra",
     "sep": ", ",
-    "filled": "Biểu tượng và liên kết lấy từ App Store"
+    "filled": "Biểu tượng và liên kết lấy từ App Store",
+    "pendingCount": {
+      "other": "Còn {count} bản nháp chờ xác nhận"
+    },
+    "applyAll": "Xác nhận tất cả"
   },
   "error": {
     "auth": "API Key không hợp lệ",
@@ -104,5 +108,53 @@
     "cta": "Cài đặt DeepSeek API Key",
     "ctaHint": "Chỉ cần một lần, Key chỉ lưu trên máy chủ của bạn",
     "privacy": "Key chỉ được lưu trên máy chủ của bạn, không gửi tới trình duyệt và không có trong bản sao lưu. Khi nhận diện, văn bản và hình ảnh bạn gửi sẽ được máy chủ của bạn chuyển tiếp tới DeepSeek."
+  },
+  "f": {
+    "member": "Thành viên",
+    "amount": "Số tiền",
+    "date": "Ngày",
+    "paidUntil": "Đã trả đến",
+    "fee": "Phí",
+    "joined": "Ngày tham gia",
+    "left": "Ngày rời",
+    "contact": "Liên hệ",
+    "role": "Vai trò",
+    "seats": "Số suất (gồm cả tôi)",
+    "ownerName": "Chủ nhóm",
+    "since": "Chia sẻ từ",
+    "newPrice": "Giá mới",
+    "from": "Ngày hiệu lực",
+    "action": "Thao tác",
+    "kind": "Loại",
+    "effect": "Ảnh hưởng",
+    "name": "Tên",
+    "category": "Danh mục",
+    "tags": "Thẻ",
+    "url": "Trang web",
+    "manage_url": "Liên kết quản lý",
+    "notes": "Ghi chú",
+    "method": "Phương thức thanh toán",
+    "region": "Khu vực",
+    "remind_days": "Nhắc trước (ngày)",
+    "end": "Không gia hạn sau",
+    "next_due": "Lần trừ tiền tới",
+    "trial_end": "Hết dùng thử",
+    "expires": "Dịch vụ kết thúc",
+    "price": "Giá",
+    "currency": "Tiền tệ",
+    "cycle": "Chu kỳ thanh toán",
+    "note": "Ghi chú",
+    "planned": "Dự kiến"
+  },
+  "v": {
+    "exempt": "Không trả tiền",
+    "owner": "Tôi làm chủ nhóm",
+    "member": "Tôi tham gia",
+    "unshare": "Ngừng chia sẻ",
+    "pause": "Tạm dừng",
+    "cancel": "Hủy đăng ký",
+    "reactivate": "Tiếp tục",
+    "charge": "Trừ tiền",
+    "deleteAll": "Xóa gói đăng ký và toàn bộ lần trừ tiền. Không thể hoàn tác."
   }
 }

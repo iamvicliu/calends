@@ -69,7 +69,11 @@
     "view": "Lihat",
     "missing": "{fields} tidak terbaca, nilai bawaan dipakai, mohon periksa",
     "sep": ", ",
-    "filled": "Ikon dan tautan dilengkapi dari App Store"
+    "filled": "Ikon dan tautan dilengkapi dari App Store",
+    "pendingCount": {
+      "other": "{count} draf menunggu konfirmasi"
+    },
+    "applyAll": "Konfirmasi semua"
   },
   "error": {
     "auth": "API Key tidak valid",
@@ -104,5 +108,53 @@
     "cta": "Atur DeepSeek API Key",
     "ctaHint": "Cukup sekali; Key hanya disimpan di server Anda",
     "privacy": "Key hanya disimpan di server Anda, tidak pernah dikirim ke browser atau dimasukkan ke cadangan. Teks dan gambar yang Anda kirim diteruskan ke DeepSeek melalui server Anda."
+  },
+  "f": {
+    "member": "Anggota",
+    "amount": "Jumlah",
+    "date": "Tanggal",
+    "paidUntil": "Lunas hingga",
+    "fee": "Iuran",
+    "joined": "Bergabung",
+    "left": "Keluar",
+    "contact": "Kontak",
+    "role": "Peran",
+    "seats": "Kursi (termasuk saya)",
+    "ownerName": "Pengelola",
+    "since": "Bersama sejak",
+    "newPrice": "Harga baru",
+    "from": "Tanggal berlaku",
+    "action": "Tindakan",
+    "kind": "Jenis",
+    "effect": "Dampak",
+    "name": "Nama",
+    "category": "Kategori",
+    "tags": "Tag",
+    "url": "Situs web",
+    "manage_url": "Tautan kelola",
+    "notes": "Catatan",
+    "method": "Metode pembayaran",
+    "region": "Wilayah",
+    "remind_days": "Ingatkan (hari sebelumnya)",
+    "end": "Tidak diperpanjang setelah",
+    "next_due": "Tagihan berikutnya",
+    "trial_end": "Uji coba berakhir",
+    "expires": "Layanan berakhir",
+    "price": "Harga",
+    "currency": "Mata uang",
+    "cycle": "Siklus tagihan",
+    "note": "Catatan",
+    "planned": "Rencana"
+  },
+  "v": {
+    "exempt": "Tidak membayar",
+    "owner": "Saya pengelola",
+    "member": "Saya bergabung",
+    "unshare": "Berhenti berbagi",
+    "pause": "Jeda",
+    "cancel": "Batalkan langganan",
+    "reactivate": "Lanjutkan",
+    "charge": "Tagihan",
+    "deleteAll": "Menghapus langganan beserta semua tagihannya. Tidak dapat dibatalkan."
   }
 }

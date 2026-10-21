@@ -26,9 +26,10 @@ import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, pr
 import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
 import { matchEntries } from '../shared/proxy.ts';
 import { normName, peopleLedger, type PersonLedger } from '../shared/people.ts';
-import type { AppState, Payment, PaymentMethod, Person, Subscription } from '../shared/types.ts';
+import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
-import { loadState, upsert } from './store.ts';
+import { loadState, remove, upsert } from './store.ts';
+import { carLedger, memberFee, shareFromFee } from '../shared/carpool.ts';
 import { t } from '../shared/i18n.ts';
 import { categoryCounts, categoryList, presetCategory } from '../shared/categories.ts';
 
@@ -58,6 +59,11 @@ export async function searchAppStore(query: string, country = 'us') {
 
 export interface ToolCtx {
   env: Env;
+  /**
+   * 草稿叠加层（AI 助手用）：同一轮里先出的草稿（dry_run）叠在真实数据上，后面的工具能看到它们，
+   * 于是「新建订阅 → 设为合租 → 加成员」可以一口气出完草稿。null 表示这一轮里删除了。
+   */
+  overlay?: Map<string, Subscription | null>;
 }
 
 export interface Tool {
@@ -74,6 +80,10 @@ export interface Tool {
 
 export async function state(ctx: ToolCtx): Promise<{ st: AppState; today: string }> {
   const st = await loadState(ctx.env);
+  if (ctx.overlay?.size) {
+    const subs = st.subscriptions.filter((s) => !ctx.overlay!.has(s.id)).concat([...ctx.overlay.values()].filter((s): s is Subscription => !!s));
+    st.subscriptions = subs;
+  }
   return { st, today: todayIn(st.settings.timezone) };
 }
 
@@ -315,7 +325,10 @@ async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscrip
       .slice(0, 3)
       .map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })),
   };
-  if (dry) return { dry_run: true, ...preview };
+  if (dry) {
+    ctx.overlay?.set(after.id, after);
+    return { dry_run: true, ...preview };
+  }
   const saved = { ...after, updatedAt: new Date().toISOString() };
   await upsert(ctx.env, 'subscriptions', saved.id, saved);
   return { ok: true, ...preview };
@@ -844,6 +857,7 @@ export const TOOLS: Tool[] = [
           description: 'Intro price until a date.',
         },
         force: { type: 'boolean', default: false },
+        id: { type: 'string', description: 'Internal: keep this id (used when confirming an earlier draft).' },
         dry_run: DRY,
       },
       ['name', 'price', 'currency', 'cycle'],
@@ -858,7 +872,8 @@ export const TOOLS: Tool[] = [
         throw new Error(t('mcp.error.duplicateSub', { name }));
       const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       const sub: Subscription = {
-        id: uid(),
+        // 确认草稿时沿用草稿里生成的 id，后续基于它的草稿（合租、成员）才能对上
+        id: str(a.id) && !st.subscriptions.some((s) => s.id === str(a.id)) ? str(a.id)! : uid(),
         name,
         category: str(a.category) ?? presetCategory(categoryList(st.settings, st.subscriptions), 'tools'),
         tags: Array.isArray(a.tags) ? a.tags.map(String) : [],
@@ -1121,6 +1136,190 @@ export const TOOLS: Tool[] = [
     },
   },
   {
+    name: 'get_carpool',
+    description:
+      'Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, members with their fee per billing cycle, paid-until date and amount owed; per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.',
+    inputSchema: obj({ subscription: { ...SUBREF, description: 'Optional: only this plan.' } }),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const subs = a.subscription ? [findSub(st, a.subscription)] : st.subscriptions.filter((s) => s.share);
+      const base = st.settings.baseCurrency;
+      return {
+        currency: base,
+        plans: subs
+          .filter((s) => s.share)
+          .map((s) => {
+            const sh = s.share!;
+            const live = sh.members.filter((m) => !(m.left && m.left <= today));
+            const dues = new Map(memberDues(s, today).map((d) => [d.member.id, d]));
+            const book = carLedger(st, s, today);
+            return {
+              id: s.id,
+              name: s.name,
+              role: sh.role,
+              price: money(st, s.price, s.currency),
+              cycle: cycleLabel(s.cycle),
+              seats: { total: sh.seats, taken: live.length + 1, free: Math.max(0, sh.seats - live.length - 1) },
+              owner: sh.role === 'member' ? (sh.ownerName ?? null) : undefined,
+              since: book.since ?? null,
+              // 方向写清楚：i_pay = 我自己净掏的钱，i_earn = 收的比付的多（赚了）；两者至多一个大于 0
+              year: {
+                cost: round(book.yearCost),
+                expected_income: round(book.yearIncome),
+                i_pay: round(Math.max(0, book.yearNet)),
+                i_earn: round(Math.max(0, -book.yearNet)),
+              },
+              to_date: {
+                paid: round(book.paid),
+                received: round(book.received),
+                i_pay: round(Math.max(0, book.net)),
+                i_earn: round(Math.max(0, -book.net)),
+              },
+              members: live.map((m) => {
+                const fee = memberFee(st, s, m);
+                const d = dues.get(m.id);
+                return {
+                  id: m.id,
+                  name: m.name,
+                  exempt: !!m.exempt,
+                  fee: { amount: fee.amount, currency: fee.currency, every_months: m.billEvery ?? 1 },
+                  paid_until: m.paidUntil ?? null,
+                  owed: d && d.periodsOwed > 0 ? money(st, d.owed, s.currency) : null,
+                  payments: (m.payments ?? []).length,
+                };
+              }),
+            };
+          }),
+      };
+    },
+  },
+  {
+    name: 'delete_subscription',
+    description: 'Delete a subscription and its whole history. Irreversible: always preview with dry_run first; the user confirms.',
+    write: true,
+    destructive: true,
+    inputSchema: obj({ subscription: SUBREF, dry_run: DRY }, ['subscription']),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const s = findSub(st, a.subscription);
+      const preview = { subscription: row(st, s, today), changed: ['deleted'] };
+      if (a.dry_run) {
+        ctx.overlay?.set(s.id, null);
+        return { dry_run: true, ...preview };
+      }
+      await remove(ctx.env, 'subscriptions', s.id);
+      return { ok: true, ...preview };
+    },
+  },
+  {
+    name: 'set_share',
+    description:
+      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. role none stops sharing.',
+    write: true,
+    inputSchema: obj(
+      {
+        subscription: SUBREF,
+        role: { type: 'string', enum: ['owner', 'member', 'none'] },
+        seats: { type: 'integer', minimum: 1, description: 'Total seats including me.' },
+        owner_name: { type: 'string' },
+        since: DATE,
+        dry_run: DRY,
+      },
+      ['subscription', 'role'],
+    ),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const s = findSub(st, a.subscription);
+      if (a.role === 'none') return commit(ctx, st, today, { ...s, share: undefined }, a.dry_run, ['share_removed']);
+      const role = a.role === 'member' ? 'member' : 'owner';
+      const cur = s.share;
+      const share = {
+        role,
+        seats: Math.max(1, Math.round(Number(a.seats ?? cur?.seats ?? 2))),
+        members: cur?.members ?? [],
+        ownerName: role === 'member' ? (str(a.owner_name) ?? cur?.ownerName) : undefined,
+        since: a.since ? date(a.since, 'since') : (cur?.since ?? today),
+      } as NonNullable<Subscription['share']>;
+      return commit(ctx, st, today, { ...s, share }, a.dry_run, [cur ? 'share_updated' : 'share_created']);
+    },
+  },
+  {
+    name: 'save_share_member',
+    description:
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date.',
+    write: true,
+    inputSchema: obj(
+      {
+        subscription: SUBREF,
+        member: { type: 'string', description: 'Existing member id or name to update; omit to add a new member.' },
+        id: { type: 'string', description: 'Internal: id for a new member (used when confirming an earlier draft).' },
+        name: { type: 'string' },
+        fee: { type: 'number', minimum: 0 },
+        fee_currency: { type: 'string' },
+        bill_every: { type: 'integer', enum: [1, 3, 6, 12] },
+        exempt: { type: 'boolean' },
+        paid_until: DATE,
+        joined: DATE,
+        left: { ...DATE, description: 'Left the plan on this date (keeps history).' },
+        contact_via: { type: 'string', description: 'e.g. 微信, Telegram, 邮箱' },
+        contact: { type: 'string' },
+        account: { type: 'string', description: 'Invited account / email.' },
+        note: { type: 'string' },
+        dry_run: DRY,
+      },
+      ['subscription'],
+    ),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const s = findSub(st, a.subscription);
+      if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
+      const q = str(a.member)?.toLowerCase();
+      const old = q ? s.share.members.find((m) => m.id === q || m.name.toLowerCase() === q) : undefined;
+      if (q && !old) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
+      const live = s.share.members.filter((m) => !(m.left && m.left <= today));
+      if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
+      const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
+      const billEvery = a.bill_every != null ? Number(a.bill_every) : (old?.billEvery ?? 1);
+      const m: ShareMember = {
+        ...(old ?? { id: str(a.id) ?? uid(), name: '', share: 0 }),
+        name: str(a.name) ?? old?.name ?? '',
+        ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : {}),
+        billEvery,
+        ...(a.exempt != null ? { exempt: !!a.exempt } : {}),
+        ...(a.paid_until ? { paidUntil: date(a.paid_until, 'paid_until') } : {}),
+        ...(a.joined ? { joined: date(a.joined, 'joined') } : {}),
+        ...(a.left ? { left: date(a.left, 'left') } : {}),
+        ...(a.contact_via ? { contactVia: String(a.contact_via) } : {}),
+        ...(a.contact ? { contact: String(a.contact) } : {}),
+        ...(a.account ? { account: String(a.account) } : {}),
+        ...(a.note ? { note: String(a.note) } : {}),
+      };
+      if (!m.name) throw new Error(t('mcp.error.needMemberName'));
+      // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
+      m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, billEvery) : m.share;
+      const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
+      return commit(ctx, st, today, { ...s, share: { ...s.share, members } }, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`]);
+    },
+  },
+  {
+    name: 'remove_share_member',
+    description: 'Remove a member from a shared plan entirely (their payment history goes too). To keep history, use save_share_member with left instead.',
+    write: true,
+    destructive: true,
+    inputSchema: obj({ subscription: SUBREF, member: { type: 'string' }, dry_run: DRY }, ['subscription', 'member']),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const s = findSub(st, a.subscription);
+      if (!s.share) throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
+      const q = String(a.member).trim().toLowerCase();
+      const m = s.share.members.find((x) => x.id === q || x.name.toLowerCase() === q);
+      if (!m) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
+      return commit(ctx, st, today, { ...s, share: { ...s.share, members: s.share.members.filter((x) => x.id !== m.id) } }, a.dry_run, [
+        `member_removed:${m.name}`,
+      ]);
+    },
+  },
+  {
     name: 'record_receivable',
     description:
       'Mark money received from others: a shared-plan member paid their share (kind=share; advances their paid-until date by their billing cycle unless until is given), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
@@ -1148,6 +1347,8 @@ export const TOOLS: Tool[] = [
       const { st, today } = await state(ctx);
       if (a.person != null && String(a.person).trim()) a = { ...a, ...personTarget(st, a, today) };
       if (!a.subscription) throw new Error(t('mcp.error.needSubOrPerson'));
+      // 没写 kind：给了成员就是合租收款，给了扣款日就是代付还款
+      if (a.kind !== 'share' && a.kind !== 'proxy') a = { ...a, kind: a.member ? 'share' : a.charge ? 'proxy' : a.kind };
       if (a.kind !== 'share' && a.kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
       const s = findSub(st, a.subscription);
       const on = date(a.date, 'date', today);

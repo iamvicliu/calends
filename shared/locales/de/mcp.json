@@ -10,6 +10,8 @@
     "total": "Gesamt"
   },
   "error": {
+    "shareFull": "„{name}“ ist voll ({seats} Plätze)",
+    "needMemberName": "Das Mitglied braucht einen Namen",
     "noTool": "Unbekanntes Tool: {name}",
     "readOnly": "Dieses Token ist schreibgeschützt und kann das Konto nicht ändern. Erstelle auf der KI-Seite im Admin ein Token mit Lese- und Schreibrechten.",
     "unsupportedMethod": "Nicht unterstützte Methode: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "Check-up & Jahresrückblick",
     "list_events": "Änderungsprotokoll",
     "search_app_store": "App suchen",
+    "get_carpool": "Geteilte Abos",
+    "delete_subscription": "Abo löschen",
+    "set_share": "Teilen einrichten",
+    "save_share_member": "Mitglied hinzufügen/bearbeiten",
+    "remove_share_member": "Mitglied entfernen",
     "create_subscription": "Abo hinzufügen",
     "update_subscription": "Abo bearbeiten",
     "change_price": "Preisänderung erfassen",

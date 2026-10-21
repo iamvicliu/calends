@@ -10,6 +10,8 @@
     "total": "合計"
   },
   "error": {
+    "shareFull": "「{name}」已經坐滿了（{seats} 個位置）",
+    "needMemberName": "成員需要一個稱呼",
     "noTool": "沒有這個工具：{name}",
     "readOnly": "這個權杖是唯讀的，無法修改帳本。請到後台「AI」頁換一個讀寫權杖。",
     "unsupportedMethod": "不支援的方法：{method}",
@@ -55,6 +57,11 @@
     "get_insights": "健檢與年度回顧",
     "list_events": "變更日誌",
     "search_app_store": "查找 App",
+    "get_carpool": "合租概況",
+    "delete_subscription": "刪除訂閱",
+    "set_share": "設定合租",
+    "save_share_member": "新增或修改成員",
+    "remove_share_member": "移除成員",
     "create_subscription": "新增訂閱",
     "update_subscription": "修改訂閱資訊",
     "change_price": "記錄調價",

@@ -486,6 +486,10 @@
 .as-card-foot .btn {
   height: 34px;
 }
+.as-card-foot .btn.danger-solid {
+  background: var(--red);
+  color: #fff;
+}
 .as-card-foot .btn:disabled {
   opacity: 0.55;
 }
@@ -519,6 +523,23 @@
   align-items: center;
   gap: 5px;
   color: var(--orange);
+}
+
+/* 一轮里有多张草稿：全部确认 */
+.as-applyall {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 460px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  background: var(--fill-2);
+  font-size: 13.5px;
+  color: var(--label-2);
+}
+.as-applyall .btn {
+  height: 34px;
 }
 
 /* 错误 */

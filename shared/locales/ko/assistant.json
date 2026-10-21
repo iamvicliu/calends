@@ -69,7 +69,11 @@
     "view": "보기",
     "missing": "{fields}을(를) 인식하지 못해 기본값을 썼어요. 확인해 주세요",
     "sep": ", ",
-    "filled": "아이콘과 링크는 App Store에서 채웠어요"
+    "filled": "아이콘과 링크는 App Store에서 채웠어요",
+    "pendingCount": {
+      "other": "확인할 초안 {count}개"
+    },
+    "applyAll": "모두 확인"
   },
   "error": {
     "auth": "API Key가 유효하지 않습니다",
@@ -104,5 +108,53 @@
     "cta": "DeepSeek API Key 설정",
     "ctaHint": "한 번만 설정하면 되며, Key는 내 서버에만 저장됩니다",
     "privacy": "Key는 내 서버에만 저장되며 브라우저로 전송되거나 백업에 포함되지 않습니다. 인식할 때 보낸 텍스트와 이미지는 내 서버를 거쳐 DeepSeek로 전달됩니다."
+  },
+  "f": {
+    "member": "멤버",
+    "amount": "금액",
+    "date": "날짜",
+    "paidUntil": "납부 완료 기한",
+    "fee": "요금",
+    "joined": "참여일",
+    "left": "탈퇴일",
+    "contact": "연락처",
+    "role": "역할",
+    "seats": "총 인원(본인 포함)",
+    "ownerName": "주최자",
+    "since": "공유 시작",
+    "newPrice": "새 가격",
+    "from": "적용일",
+    "action": "작업",
+    "kind": "유형",
+    "effect": "영향",
+    "name": "이름",
+    "category": "카테고리",
+    "tags": "태그",
+    "url": "웹사이트",
+    "manage_url": "관리 링크",
+    "notes": "메모",
+    "method": "결제 수단",
+    "region": "지역",
+    "remind_days": "알림(며칠 전)",
+    "end": "갱신 안 함",
+    "next_due": "다음 결제",
+    "trial_end": "체험 종료",
+    "expires": "서비스 종료",
+    "price": "가격",
+    "currency": "통화",
+    "cycle": "결제 주기",
+    "note": "메모",
+    "planned": "계획"
+  },
+  "v": {
+    "exempt": "납부 면제",
+    "owner": "내가 주최",
+    "member": "참여",
+    "unshare": "공유 해제",
+    "pause": "일시 정지",
+    "cancel": "해지",
+    "reactivate": "재개",
+    "charge": "결제",
+    "deleteAll": "구독과 모든 결제 기록을 삭제합니다. 되돌릴 수 없습니다"
   }
 }

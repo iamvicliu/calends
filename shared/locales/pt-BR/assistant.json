@@ -70,7 +70,12 @@
     "view": "Ver",
     "missing": "Não foi possível identificar {fields}: usamos valores padrão, confira",
     "sep": ", ",
-    "filled": "Ícone e link preenchidos pela App Store"
+    "filled": "Ícone e link preenchidos pela App Store",
+    "pendingCount": {
+      "one": "{count} rascunho para confirmar",
+      "other": "{count} rascunhos para confirmar"
+    },
+    "applyAll": "Confirmar tudo"
   },
   "error": {
     "auth": "API Key inválida",
@@ -106,5 +111,53 @@
     "cta": "Configurar sua API Key do DeepSeek",
     "ctaHint": "Só uma vez; a chave fica no seu próprio servidor",
     "privacy": "A chave fica guardada só no seu servidor — nunca é enviada ao navegador nem incluída em backups. Os textos e imagens que você envia são encaminhados ao DeepSeek pelo seu servidor."
+  },
+  "f": {
+    "member": "Membro",
+    "amount": "Valor",
+    "date": "Data",
+    "paidUntil": "Pago até",
+    "fee": "Mensalidade",
+    "joined": "Entrou em",
+    "left": "Saiu em",
+    "contact": "Contato",
+    "role": "Função",
+    "seats": "Vagas (incluindo eu)",
+    "ownerName": "Organizador",
+    "since": "Compartilhado desde",
+    "newPrice": "Novo preço",
+    "from": "Data de vigência",
+    "action": "Ação",
+    "kind": "Tipo",
+    "effect": "Efeito",
+    "name": "Nome",
+    "category": "Categoria",
+    "tags": "Tags",
+    "url": "Site",
+    "manage_url": "Link de gerenciamento",
+    "notes": "Notas",
+    "method": "Forma de pagamento",
+    "region": "Região",
+    "remind_days": "Lembrar (dias antes)",
+    "end": "Não renova após",
+    "next_due": "Próxima cobrança",
+    "trial_end": "Fim do teste",
+    "expires": "Fim do serviço",
+    "price": "Preço",
+    "currency": "Moeda",
+    "cycle": "Ciclo de cobrança",
+    "note": "Nota",
+    "planned": "Planejado"
+  },
+  "v": {
+    "exempt": "Não paga",
+    "owner": "Eu organizo",
+    "member": "Participo",
+    "unshare": "Deixar de compartilhar",
+    "pause": "Pausar",
+    "cancel": "Cancelar",
+    "reactivate": "Retomar",
+    "charge": "Cobrança",
+    "deleteAll": "Exclui a assinatura e todas as cobranças. Não é possível desfazer."
   }
 }

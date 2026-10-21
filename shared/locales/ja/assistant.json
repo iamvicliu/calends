@@ -69,7 +69,11 @@
     "view": "表示",
     "missing": "{fields}を読み取れなかったため既定値を使いました。確認してください",
     "sep": "、",
-    "filled": "アイコンとリンクは App Store から補完しました"
+    "filled": "アイコンとリンクは App Store から補完しました",
+    "pendingCount": {
+      "other": "確認待ちの下書きが {count} 件"
+    },
+    "applyAll": "すべて確定"
   },
   "error": {
     "auth": "API Key が無効です",
@@ -104,5 +108,53 @@
     "cta": "DeepSeek API Key を設定",
     "ctaHint": "設定は一度だけ。Key はご自身のサーバーにのみ保存されます",
     "privacy": "Key はご自身のサーバーにのみ保存され、ブラウザに送られたりバックアップに含まれたりすることはありません。読み取りの際、送信したテキストや画像はサーバーを経由して DeepSeek に転送されます。"
+  },
+  "f": {
+    "member": "メンバー",
+    "amount": "金額",
+    "date": "日付",
+    "paidUntil": "支払い済み期限",
+    "fee": "料金",
+    "joined": "参加日",
+    "left": "脱退日",
+    "contact": "連絡先",
+    "role": "役割",
+    "seats": "総人数（自分を含む）",
+    "ownerName": "主催者",
+    "since": "共有開始",
+    "newPrice": "新価格",
+    "from": "適用日",
+    "action": "操作",
+    "kind": "種類",
+    "effect": "影響",
+    "name": "名前",
+    "category": "カテゴリ",
+    "tags": "タグ",
+    "url": "Web サイト",
+    "manage_url": "管理リンク",
+    "notes": "メモ",
+    "method": "支払い方法",
+    "region": "地域",
+    "remind_days": "通知（日前）",
+    "end": "更新しない日",
+    "next_due": "次回請求",
+    "trial_end": "トライアル終了",
+    "expires": "サービス終了",
+    "price": "価格",
+    "currency": "通貨",
+    "cycle": "請求サイクル",
+    "note": "メモ",
+    "planned": "予定"
+  },
+  "v": {
+    "exempt": "支払いなし",
+    "owner": "主催",
+    "member": "参加",
+    "unshare": "共有を解除",
+    "pause": "一時停止",
+    "cancel": "解約",
+    "reactivate": "再開",
+    "charge": "請求",
+    "deleteAll": "サブスクリプションとすべての請求記録を削除します。元に戻せません"
   }
 }

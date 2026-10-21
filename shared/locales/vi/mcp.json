@@ -10,6 +10,8 @@
     "total": "Tổng"
   },
   "error": {
+    "shareFull": "“{name}” đã đủ chỗ ({seats} chỗ)",
+    "needMemberName": "Thành viên cần có tên",
     "noTool": "Công cụ không xác định: {name}",
     "readOnly": "Token này chỉ đọc và không thể thay đổi sổ. Hãy tạo token đọc-ghi tại trang AI trong trang quản trị.",
     "unsupportedMethod": "Phương thức không được hỗ trợ: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "Kiểm tra & tổng kết năm",
     "list_events": "Nhật ký thay đổi",
     "search_app_store": "Tìm ứng dụng",
+    "get_carpool": "Gói dùng chung",
+    "delete_subscription": "Xóa gói",
+    "set_share": "Thiết lập dùng chung",
+    "save_share_member": "Thêm hoặc sửa thành viên",
+    "remove_share_member": "Xóa thành viên",
     "create_subscription": "Thêm gói đăng ký",
     "update_subscription": "Sửa gói đăng ký",
     "change_price": "Ghi nhận đổi giá",

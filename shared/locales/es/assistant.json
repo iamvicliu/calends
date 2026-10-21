@@ -70,7 +70,12 @@
     "view": "Ver",
     "missing": "No se encontró {fields}: se usaron valores por defecto, revísalo",
     "sep": ", ",
-    "filled": "Icono y enlace completados desde la App Store"
+    "filled": "Icono y enlace completados desde la App Store",
+    "pendingCount": {
+      "one": "{count} borrador por confirmar",
+      "other": "{count} borradores por confirmar"
+    },
+    "applyAll": "Confirmar todo"
   },
   "error": {
     "auth": "API Key no válida",
@@ -106,5 +111,53 @@
     "cta": "Configurar tu API Key de DeepSeek",
     "ctaHint": "Solo una vez; la clave se queda en tu propio servidor",
     "privacy": "La clave solo se guarda en tu servidor: nunca se envía al navegador ni se incluye en las copias de seguridad. El texto y las imágenes que envíes se reenvían a DeepSeek a través de tu servidor."
+  },
+  "f": {
+    "member": "Miembro",
+    "amount": "Importe",
+    "date": "Fecha",
+    "paidUntil": "Pagado hasta",
+    "fee": "Cuota",
+    "joined": "Se unió",
+    "left": "Salió",
+    "contact": "Contacto",
+    "role": "Rol",
+    "seats": "Plazas (conmigo)",
+    "ownerName": "Organizador",
+    "since": "Compartido desde",
+    "newPrice": "Nuevo precio",
+    "from": "Fecha de entrada en vigor",
+    "action": "Acción",
+    "kind": "Tipo",
+    "effect": "Efecto",
+    "name": "Nombre",
+    "category": "Categoría",
+    "tags": "Etiquetas",
+    "url": "Sitio web",
+    "manage_url": "Enlace de gestión",
+    "notes": "Notas",
+    "method": "Método de pago",
+    "region": "Región",
+    "remind_days": "Recordar (días antes)",
+    "end": "No se renueva después de",
+    "next_due": "Próximo cobro",
+    "trial_end": "Fin de la prueba",
+    "expires": "Fin del servicio",
+    "price": "Precio",
+    "currency": "Moneda",
+    "cycle": "Ciclo de facturación",
+    "note": "Nota",
+    "planned": "Planificado"
+  },
+  "v": {
+    "exempt": "No paga",
+    "owner": "Lo organizo yo",
+    "member": "Me uní",
+    "unshare": "Dejar de compartir",
+    "pause": "Pausar",
+    "cancel": "Cancelar",
+    "reactivate": "Reanudar",
+    "charge": "Cobro",
+    "deleteAll": "Elimina la suscripción y todos sus cobros. No se puede deshacer."
   }
 }

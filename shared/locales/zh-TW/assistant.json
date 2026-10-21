@@ -69,7 +69,11 @@
     "view": "查看",
     "missing": "未辨識到{fields}，已用預設值，請核對",
     "sep": "、",
-    "filled": "圖示和連結已從 App Store 補全"
+    "filled": "圖示和連結已從 App Store 補全",
+    "pendingCount": {
+      "other": "還有 {count} 張草稿待確認"
+    },
+    "applyAll": "全部確認"
   },
   "error": {
     "auth": "API Key 無效",
@@ -104,5 +108,53 @@
     "cta": "設定 DeepSeek API Key",
     "ctaHint": "只需一次，Key 只保存在你的伺服器上",
     "privacy": "Key 只保存在你的伺服器上，不會傳到瀏覽器或寫進備份。辨識時，你傳送的文字和圖片會經你的伺服器轉發給 DeepSeek。"
+  },
+  "f": {
+    "member": "成員",
+    "amount": "金額",
+    "date": "日期",
+    "paidUntil": "已付至",
+    "fee": "收費",
+    "joined": "加入",
+    "left": "退出",
+    "contact": "聯絡方式",
+    "role": "角色",
+    "seats": "席位數（含我）",
+    "ownerName": "發起人",
+    "since": "開始共享",
+    "newPrice": "新價格",
+    "from": "生效日期",
+    "action": "操作",
+    "kind": "類型",
+    "effect": "影響",
+    "name": "名稱",
+    "category": "分類",
+    "tags": "標籤",
+    "url": "網站",
+    "manage_url": "管理連結",
+    "notes": "備註",
+    "method": "付款方式",
+    "region": "地區",
+    "remind_days": "提前提醒（天）",
+    "end": "到期不續",
+    "next_due": "下次扣款",
+    "trial_end": "試用截止",
+    "expires": "服務到期",
+    "price": "價格",
+    "currency": "幣別",
+    "cycle": "週期",
+    "note": "備註",
+    "planned": "計畫中"
+  },
+  "v": {
+    "exempt": "不分攤",
+    "owner": "我發起",
+    "member": "我加入",
+    "unshare": "取消共享",
+    "pause": "暫停",
+    "cancel": "退訂",
+    "reactivate": "恢復",
+    "charge": "扣款",
+    "deleteAll": "刪除訂閱及全部扣款紀錄，無法復原"
   }
 }

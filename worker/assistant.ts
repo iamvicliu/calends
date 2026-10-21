@@ -1,7 +1,7 @@
 // AI 助手：用 DeepSeek 识别用户粘贴的文字、截图，整理成订阅草稿；查询与修改直接复用 MCP 工具。
 // 写操作一律先 dry_run 出草稿，由用户在页面上确认后再经同一个工具真正执行。
 import { todayIn } from '../shared/billing.ts';
-import { categoryList } from '../shared/categories.ts';
+import { categoryList, presetCategory, presetOf } from '../shared/categories.ts';
 import {
   applyLine,
   assistantMessage,
@@ -29,7 +29,19 @@ const MAX_ROUNDS = 8;
 
 /** 给模型用的工具：查询类全部开放；写入类只开放常用的几个，而且只出草稿 */
 const READ = TOOLS.filter((x) => !x.write);
-const WRITE = new Set(['create_subscription', 'update_subscription', 'change_price', 'change_plan', 'set_status', 'record_payment']);
+const WRITE = new Set([
+  'create_subscription',
+  'update_subscription',
+  'delete_subscription',
+  'change_price',
+  'change_plan',
+  'set_status',
+  'record_payment',
+  'set_share',
+  'save_share_member',
+  'remove_share_member',
+  'record_receivable',
+]);
 const ASSISTANT_TOOLS: Tool[] = [...READ, ...TOOLS.filter((x) => WRITE.has(x.name))];
 
 export const getConfig = (env: Env) => getKv<AssistantConfig>(env, KEY);
@@ -88,11 +100,19 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Icon and url are required for every app or service: call search_app_store (country = the store region, else us) and pass the matching result’s icon (prefer the 256x256 artwork) and url; for web-only services use the official homepage as url. If nothing matches, still give the official url.',
     '- Before creating, check list_subscriptions for the same service; if it already exists, propose update_subscription / change_price / record_payment instead of a duplicate.',
     '- If a required field (price, currency or cycle) truly cannot be inferred, ask one short question instead of guessing.',
+    '- Other changes use the matching tool: update_subscription (details), change_price (price change from a date), change_plan (switch plan/region), set_status (pause/cancel/resume), delete_subscription (remove completely), record_payment (a charge happened / refund).',
+    '- Shared plans (合租/拼车): set_share to start or change sharing (seats include me), save_share_member to add or edit a member (fee per billing cycle, bill_every months), remove_share_member, record_receivable when a member paid me. get_carpool answers questions about a carpool: seats free, yearly cost vs. income, profit, who owes what.',
+    '- Drafts in the same turn build on each other: later tools already see earlier drafts (a new subscription’s id from create_subscription, a member just added). So do multi-step requests in ONE turn — e.g. create_subscription, then set_share on the returned id, then save_share_member for each member, then record_receivable. Never stop to ask the user to confirm an earlier card first; the user confirms all cards together, in order.',
     '- After the tool calls, reply with one or two sentences summarizing what you drafted. For questions about spending, use the read tools and answer with concrete numbers.',
   ].join('\n');
 }
 
 type Emit = (event: Record<string, unknown>) => void;
+
+async function categoryNames(env: Env): Promise<string[]> {
+  const st = await loadState(env);
+  return categoryList(st.settings, st.subscriptions).map((c) => c.name);
+}
 
 const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 
@@ -100,8 +120,31 @@ const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
  * 新增订阅的草稿补全：模型没给图标或链接时，按名称（和地区）查 App Store，
  * 名称对得上才采用，补上图标和链接，并告诉模型补了什么
  */
-export async function enrichDraft(args: Record<string, unknown>): Promise<{ args: Record<string, unknown>; filled: string[] }> {
+export async function enrichDraft(args: Record<string, unknown>, cats: string[] = []): Promise<{ args: Record<string, unknown>; filled: string[] }> {
   const name = String(args.name ?? '').trim();
+  const fixed = { ...args };
+  // 分类：内置分类不管用哪种语言写，都换成账本里当前语言的那个名字；不认识也不在账本里的不新建，交给默认分类
+  const fixCat = (v: unknown) => {
+    const name = String(v);
+    const p = presetOf(name);
+    if (p) return presetCategory([], p.code);
+    return cats.includes(name) ? name : undefined;
+  };
+  if (fixed.category != null) {
+    const c = fixCat(fixed.category);
+    if (c) fixed.category = c;
+    else delete fixed.category;
+  }
+  if (fixed.set && typeof fixed.set === 'object' && (fixed.set as Record<string, unknown>).category != null) {
+    const set = { ...(fixed.set as Record<string, unknown>) };
+    const c = fixCat(set.category);
+    if (c) set.category = c;
+    else delete set.category;
+    fixed.set = set;
+  }
+  // App Store 图标给的是 100px，卡片上显得糊：换成 256px
+  if (typeof fixed.icon === 'string') fixed.icon = fixed.icon.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/256x256bb.$1');
+  args = fixed;
   if (!name || (args.icon && args.url)) return { args, filled: [] };
   const country = String(args.region ?? 'us').toLowerCase();
   const hits = await searchAppStore(name, country).catch(() => []);
@@ -183,7 +226,9 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
       const user = userMessage(String(body.text ?? ''), images);
       added.push(user);
       const history = dropOldImages(Array.isArray(body.history) ? body.history : [], 0);
-      const ctx = { env };
+      // 这一问里的草稿叠在一起，后面的工具能看到前面的草稿
+      const ctx = { env, overlay: new Map() };
+      const drafted = new Set<string>();
       for (let round = 0; round < MAX_ROUNDS; round++) {
         const messages: ApiMessage[] = [{ role: 'system', content: await systemPrompt(env) }, ...history, ...added];
         const turn = await complete(cfg, messages, emit, signal);
@@ -195,16 +240,36 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
         for (const call of calls) {
           const tool = ASSISTANT_TOOLS.find((x) => x.name === call.function.name);
           const { args, error: parseError } = parseArgs(call.function.arguments);
+          // 同一问里重复出同一个写操作草稿：不再执行、不显示，直接告诉模型已经有了
+          const sig = `${call.function.name}:${JSON.stringify({ ...args, dry_run: undefined })}`;
+          if (tool?.write && drafted.has(sig)) {
+            added.push({
+              role: 'tool',
+              tool_call_id: call.id,
+              content: JSON.stringify({ duplicate: true, note: 'This exact draft was already shown to the user in this turn. Do not call it again.' }),
+            });
+            continue;
+          }
+          if (tool?.write) drafted.add(sig);
           emit({ type: 'tool', id: call.id, name: call.function.name, args, status: 'running' });
           let content: string;
           try {
             if (!tool) throw new Error(`unknown tool ${call.function.name}`);
             if (parseError) throw new Error(`invalid arguments: ${parseError}`);
             if (tool.write) {
-              const { args: full, filled } = tool.name === 'create_subscription' ? await enrichDraft(args) : { args, filled: [] as string[] };
+              const { args: full, filled } =
+                tool.name === 'create_subscription' || tool.name === 'update_subscription'
+                  ? await enrichDraft(args, await categoryNames(env))
+                  : { args, filled: [] as string[] };
               const draft = { ...full, dry_run: true };
               const preview = await tool.run(draft, ctx);
-              const { dry_run: _d, ...clean } = draft;
+              const { dry_run: _d, ...clean } = draft as Record<string, unknown>;
+              const pv = preview as { subscription?: { id?: string; members?: Array<{ id: string; name: string }> } };
+              if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;
+              if (tool.name === 'save_share_member' && !clean.member) {
+                const added = ctx.overlay.get(String(pv.subscription?.id ?? ''))?.share?.members.find((m: { name: string }) => m.name === clean.name);
+                if (added) clean.id = added.id;
+              }
               emit({ type: 'tool', id: call.id, name: tool.name, args: clean, status: 'done' });
               emit({ type: 'proposal', id: call.id, tool: tool.name, args: clean, preview, filled });
               content = JSON.stringify({
@@ -221,7 +286,11 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
           } catch (e) {
             const message = e instanceof Error ? e.message : String(e);
             emit({ type: 'tool', id: call.id, name: call.function.name, args, status: 'error', error: message });
-            content = JSON.stringify({ error: message });
+            const deletedNow = [...ctx.overlay.values()].some((v) => v === null);
+            content = JSON.stringify({
+              error: message,
+              ...(deletedNow ? { hint: 'Subscriptions you drafted for deletion in this turn are already hidden; that is expected. Do not retry.' } : {}),
+            });
           }
           // 工具结果太长时截断，避免撑爆上下文
           added.push({ role: 'tool', tool_call_id: call.id, content: content.length > 24000 ? `${content.slice(0, 24000)}…` : content });

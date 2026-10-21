@@ -10,6 +10,8 @@
     "total": "합계"
   },
   "error": {
+    "shareFull": "「{name}」은(는) 자리가 다 찼어요({seats}석)",
+    "needMemberName": "멤버 이름이 필요해요",
     "noTool": "알 수 없는 도구: {name}",
     "readOnly": "이 토큰은 읽기 전용이라 장부를 변경할 수 없습니다. 관리 화면의 AI 페이지에서 읽기 및 쓰기 토큰을 만드세요.",
     "unsupportedMethod": "지원하지 않는 메서드: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "점검 및 연간 결산",
     "list_events": "변경 기록",
     "search_app_store": "앱 찾기",
+    "get_carpool": "공유 요약",
+    "delete_subscription": "구독 삭제",
+    "set_share": "공유 설정",
+    "save_share_member": "멤버 추가·수정",
+    "remove_share_member": "멤버 삭제",
     "create_subscription": "구독 추가",
     "update_subscription": "구독 편집",
     "change_price": "가격 변경 기록",

@@ -10,6 +10,8 @@
     "total": "Total"
   },
   "error": {
+    "shareFull": "«{name}» está completo ({seats} plazas)",
+    "needMemberName": "El miembro necesita un nombre",
     "noTool": "Herramienta desconocida: {name}",
     "readOnly": "Este token es de solo lectura y no puede modificar el registro. Crea un token de lectura y escritura en la página de IA del panel de administración.",
     "unsupportedMethod": "Método no admitido: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "Revisión y resumen del año",
     "list_events": "Registro de cambios",
     "search_app_store": "Buscar app",
+    "get_carpool": "Planes compartidos",
+    "delete_subscription": "Eliminar suscripción",
+    "set_share": "Configurar compartir",
+    "save_share_member": "Añadir o editar miembro",
+    "remove_share_member": "Quitar miembro",
     "create_subscription": "Añadir suscripción",
     "update_subscription": "Editar suscripción",
     "change_price": "Registrar cambio de precio",

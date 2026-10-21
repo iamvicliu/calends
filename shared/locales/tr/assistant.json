@@ -70,7 +70,12 @@
     "view": "Görüntüle",
     "missing": "{fields} bulunamadı; varsayılanlar kullanıldı, lütfen kontrol edin",
     "sep": ", ",
-    "filled": "Simge ve bağlantı App Store’dan dolduruldu"
+    "filled": "Simge ve bağlantı App Store’dan dolduruldu",
+    "pendingCount": {
+      "one": "Onay bekleyen {count} taslak",
+      "other": "Onay bekleyen {count} taslak"
+    },
+    "applyAll": "Tümünü onayla"
   },
   "error": {
     "auth": "Geçersiz API Key",
@@ -106,5 +111,53 @@
     "cta": "DeepSeek API Key'inizi ayarlayın",
     "ctaHint": "Yalnızca bir kez; Key kendi sunucunuzda kalır",
     "privacy": "Key yalnızca sunucunuzda saklanır; tarayıcıya gönderilmez ve yedeklere eklenmez. Gönderdiğiniz metin ve görseller sunucunuz üzerinden DeepSeek'e iletilir."
+  },
+  "f": {
+    "member": "Üye",
+    "amount": "Tutar",
+    "date": "Tarih",
+    "paidUntil": "Ödendiği tarih",
+    "fee": "Ücret",
+    "joined": "Katılma",
+    "left": "Ayrılma",
+    "contact": "İletişim",
+    "role": "Rol",
+    "seats": "Kişi sayısı (ben dahil)",
+    "ownerName": "Yönetici",
+    "since": "Ortak başlangıcı",
+    "newPrice": "Yeni fiyat",
+    "from": "Geçerlilik tarihi",
+    "action": "İşlem",
+    "kind": "Tür",
+    "effect": "Etki",
+    "name": "Ad",
+    "category": "Kategori",
+    "tags": "Etiketler",
+    "url": "Web sitesi",
+    "manage_url": "Yönetim bağlantısı",
+    "notes": "Notlar",
+    "method": "Ödeme yöntemi",
+    "region": "Bölge",
+    "remind_days": "Hatırlat (gün önce)",
+    "end": "Şu tarihten sonra yenilenmez",
+    "next_due": "Sonraki ödeme",
+    "trial_end": "Deneme bitişi",
+    "expires": "Hizmet bitişi",
+    "price": "Fiyat",
+    "currency": "Para birimi",
+    "cycle": "Ödeme dönemi",
+    "note": "Not",
+    "planned": "Planlanan"
+  },
+  "v": {
+    "exempt": "Ödemiyor",
+    "owner": "Yönetici benim",
+    "member": "Katıldım",
+    "unshare": "Ortaklığı kaldır",
+    "pause": "Duraklat",
+    "cancel": "İptal et",
+    "reactivate": "Devam ettir",
+    "charge": "Ödeme",
+    "deleteAll": "Abonelik ve tüm ödeme kayıtları silinir. Bu işlem geri alınamaz."
   }
 }

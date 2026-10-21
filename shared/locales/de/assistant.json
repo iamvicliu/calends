@@ -70,7 +70,12 @@
     "view": "Ansehen",
     "missing": "{fields} nicht erkannt – Standardwerte verwendet, bitte prüfen",
     "sep": ", ",
-    "filled": "Symbol und Link aus dem App Store ergänzt"
+    "filled": "Symbol und Link aus dem App Store ergänzt",
+    "pendingCount": {
+      "one": "{count} Entwurf offen",
+      "other": "{count} Entwürfe offen"
+    },
+    "applyAll": "Alle bestätigen"
   },
   "error": {
     "auth": "Ungültiger API-Key",
@@ -106,5 +111,53 @@
     "cta": "DeepSeek-API-Key einrichten",
     "ctaHint": "Nur einmal nötig; der Key bleibt auf deinem eigenen Server",
     "privacy": "Der Key wird nur auf deinem Server gespeichert – nie an den Browser gesendet und nie in Backups aufgenommen. Texte und Bilder, die du sendest, leitet dein Server an DeepSeek weiter."
+  },
+  "f": {
+    "member": "Mitglied",
+    "amount": "Betrag",
+    "date": "Datum",
+    "paidUntil": "Bezahlt bis",
+    "fee": "Beitrag",
+    "joined": "Beigetreten",
+    "left": "Ausgetreten",
+    "contact": "Kontakt",
+    "role": "Rolle",
+    "seats": "Plätze (inkl. mir)",
+    "ownerName": "Organisator",
+    "since": "Geteilt seit",
+    "newPrice": "Neuer Preis",
+    "from": "Gültig ab",
+    "action": "Aktion",
+    "kind": "Art",
+    "effect": "Auswirkung",
+    "name": "Name",
+    "category": "Kategorie",
+    "tags": "Tags",
+    "url": "Website",
+    "manage_url": "Verwaltungslink",
+    "notes": "Notizen",
+    "method": "Zahlungsmethode",
+    "region": "Region",
+    "remind_days": "Erinnern (Tage vorher)",
+    "end": "Keine Verlängerung nach",
+    "next_due": "Nächste Abbuchung",
+    "trial_end": "Testphase endet",
+    "expires": "Leistung endet",
+    "price": "Preis",
+    "currency": "Währung",
+    "cycle": "Abrechnungszeitraum",
+    "note": "Notiz",
+    "planned": "Geplant"
+  },
+  "v": {
+    "exempt": "Zahlt nicht",
+    "owner": "Ich organisiere",
+    "member": "Ich bin dabei",
+    "unshare": "Nicht mehr teilen",
+    "pause": "Pausieren",
+    "cancel": "Kündigen",
+    "reactivate": "Fortsetzen",
+    "charge": "Abbuchung",
+    "deleteAll": "Löscht das Abo und alle Abbuchungen. Dies kann nicht rückgängig gemacht werden."
   }
 }

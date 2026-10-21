@@ -24,8 +24,8 @@ import {
   X,
 } from 'lucide-react';
 import { cycleLabel } from '../../shared/billing.ts';
-import { cnDateFull, money } from '../../shared/format.ts';
-import { t } from '../../shared/i18n.ts';
+import { billLabel, cnDateFull, money } from '../../shared/format.ts';
+import { locale, t } from '../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../shared/deepseek.ts';
 import { dropOldImages } from '../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
@@ -111,10 +111,11 @@ type ServerEvent =
   | { type: 'done'; messages: ApiMessage[]; aborted?: boolean };
 
 async function stream(body: unknown, signal: AbortSignal, on: (e: ServerEvent) => void) {
+  // 带上界面语言：服务端按它给出分类名称和回复语言
   const res = await fetch('/api/assistant/chat', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'x-locale': locale() },
     body: JSON.stringify(body),
     signal,
   });
@@ -288,6 +289,13 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     }
   };
 
+  /** 全部确认：同一轮的草稿按出现顺序逐张执行（后面的可能依赖前面的，例如先建订阅再加成员） */
+  const applyAll = async (turnId: string) => {
+    const turn = chat.turns.find((x) => x.id === turnId);
+    if (turn?.role !== 'assistant') return;
+    for (const p of turn.parts) if (p.kind === 'proposal' && (p.state === 'pending' || p.state === 'error')) await applyProposal(turnId, p);
+  };
+
   /** 编辑后再添加：用草稿填好新建表单 */
   const editProposal = (p: Extract<Part, { kind: 'proposal' }>) => {
     const a = p.args;
@@ -353,6 +361,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
                     onApply={(p) => void applyProposal(turn.id, p)}
                     onEdit={editProposal}
                     onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
+                    onApplyAll={() => void applyAll(turn.id)}
                     onOpen={(id) => {
                       const s = state.subscriptions.find((x) => x.id === id);
                       if (s) onOpen(s);
@@ -452,9 +461,11 @@ function BotMessage(props: {
   onApply: (p: Extract<Part, { kind: 'proposal' }>) => void;
   onEdit: (p: Extract<Part, { kind: 'proposal' }>) => void;
   onDismiss: (p: Extract<Part, { kind: 'proposal' }>) => void;
+  onApplyAll: () => void;
   onOpen: (id: string) => void;
 }) {
   const { turn } = props;
+  const pending = turn.parts.filter((p) => p.kind === 'proposal' && (p.state === 'pending' || p.state === 'error')).length;
   const text = turn.parts.flatMap((p) => (p.kind === 'text' ? [p.text] : [])).join('\n\n');
   const waiting = turn.status === 'streaming' && !turn.parts.length;
   return (
@@ -469,6 +480,7 @@ function BotMessage(props: {
             <Proposal
               key={p.id}
               part={p}
+              siblings={turn.parts.flatMap((x) => (x.kind === 'proposal' ? [{ tool: x.tool, args: x.args }] : []))}
               state={props.state}
               onApply={() => props.onApply(p)}
               onEdit={() => props.onEdit(p)}
@@ -477,6 +489,14 @@ function BotMessage(props: {
             />
           );
         })}
+        {pending > 1 && turn.status !== 'streaming' && (
+          <div className="as-applyall">
+            <span>{t('assistant.card.pendingCount', { count: pending })}</span>
+            <button className="btn primary" onClick={props.onApplyAll}>
+              <Check size={14} /> {t('assistant.card.applyAll')}
+            </button>
+          </div>
+        )}
         {turn.status === 'error' && turn.error && <ErrorCard error={turn.error} onRetry={props.onRetry} onSetup={props.onSetup} />}
         {turn.status === 'stopped' && <div className="as-stopped">{t('assistant.stopped')}</div>}
         {props.last && turn.status !== 'streaming' && turn.status !== 'error' && (
@@ -567,7 +587,88 @@ function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
 }
 
 /** 草稿卡片：新增订阅时显示图标、名称、价格与接下来的扣款；其他写操作显示要改的内容 */
+/** 各写操作的草稿内容：用人话把参数列出来（标签与取值都本地化） */
+function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, subCcy?: string): Array<[string, ReactNode]> {
+  const rows: Array<[string, ReactNode]> = [];
+  const add = (label: string, v: ReactNode | undefined | null | false) => {
+    if (v !== undefined && v !== null && v !== false && v !== '') rows.push([label, v]);
+  };
+  const day = (v: unknown) => (v ? cnDateFull(String(v)) : undefined);
+  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
+  switch (tool) {
+    case 'record_receivable':
+      add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
+      add(t('assistant.f.amount'), a.amount != null ? money(Number(a.amount), String(a.currency ?? collect)) : undefined);
+      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
+      add(t('assistant.f.paidUntil'), day(a.until));
+      break;
+    case 'save_share_member':
+      add(t('assistant.f.member'), String(a.name ?? a.member ?? ''));
+      add(
+        t('assistant.f.fee'),
+        a.exempt
+          ? t('assistant.v.exempt')
+          : a.fee != null
+            ? `${money(Number(a.fee), String(a.fee_currency ?? collect))} · ${billLabel(Number(a.bill_every ?? 1))}`
+            : undefined,
+      );
+      add(t('assistant.f.paidUntil'), day(a.paid_until));
+      add(t('assistant.f.joined'), day(a.joined));
+      add(t('assistant.f.left'), day(a.left));
+      add(t('assistant.f.contact'), [a.contact_via, a.contact].filter(Boolean).join(' ') || undefined);
+      break;
+    case 'remove_share_member':
+      add(t('assistant.f.member'), String(a.member ?? ''));
+      break;
+    case 'set_share':
+      add(t('assistant.f.role'), t(`assistant.v.${a.role === 'member' ? 'member' : a.role === 'none' ? 'unshare' : 'owner'}`));
+      add(t('assistant.f.seats'), a.seats != null ? String(a.seats) : undefined);
+      add(t('assistant.f.ownerName'), a.owner_name ? String(a.owner_name) : undefined);
+      add(t('assistant.f.since'), day(a.since));
+      break;
+    case 'change_price':
+      add(t('assistant.f.newPrice'), a.amount != null ? money(Number(a.amount), subCcy ?? state.settings.baseCurrency) : undefined);
+      add(t('assistant.f.from'), day(a.from) ?? t('assistant.card.today'));
+      break;
+    case 'set_status':
+      add(t('assistant.f.action'), t(`assistant.v.${String(a.action)}`));
+      add(t('assistant.f.date'), day(a.at));
+      break;
+    case 'record_payment':
+      add(t('assistant.f.kind'), a.kind && a.kind !== 'charge' ? t(`detail.charges.kind.${String(a.kind)}`) : t('assistant.v.charge'));
+      add(t('assistant.f.amount'), a.amount != null ? money(Number(a.amount), subCcy ?? state.settings.baseCurrency) : undefined);
+      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
+      break;
+    case 'delete_subscription':
+      add(t('assistant.f.effect'), t('assistant.v.deleteAll'));
+      break;
+    default: {
+      // update_subscription / change_plan 等：逐项列出要改的字段
+      const set = (a.set && typeof a.set === 'object' ? a.set : a.plan && typeof a.plan === 'object' ? a.plan : a) as Record<string, unknown>;
+      for (const [k, v] of Object.entries(set)) {
+        if (['subscription', 'id', 'force', 'dry_run', 'set', 'plan'].includes(k)) continue;
+        const label = t(`assistant.f.${k}`) === `assistant.f.${k}` ? k : t(`assistant.f.${k}`);
+        const val =
+          k === 'method'
+            ? (method(v)?.name ?? String(v))
+            : /date|end|due|until|from|at|expires/.test(k)
+              ? day(v)
+              : Array.isArray(v)
+                ? v.join('、')
+                : typeof v === 'object'
+                  ? JSON.stringify(v)
+                  : String(v);
+        add(label, val);
+      }
+      if (tool === 'change_plan') add(t('assistant.f.from'), day(a.at));
+    }
+  }
+  return rows;
+}
+
 function Proposal(props: {
+  siblings: Array<{ tool: string; args: Record<string, unknown> }>;
   part: Extract<Part, { kind: 'proposal' }>;
   state: AppState;
   onApply: () => void;
@@ -580,10 +681,13 @@ function Proposal(props: {
   const create = part.tool === 'create_subscription';
   const sub = part.preview.subscription;
   const name = String(a.name ?? sub?.name ?? '');
+  const sib = props.siblings.find((x) => x.tool === 'create_subscription' && x.args.id && x.args.id === sub?.id)?.args;
+  const sibling = sib ? { icon: sib.icon ? String(sib.icon) : undefined, url: sib.url ? String(sib.url) : undefined } : undefined;
   const icon: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'> = {
     name,
-    icon: a.icon ? String(a.icon) : state.subscriptions.find((s) => s.id === sub?.id)?.icon,
-    url: a.url ? String(a.url) : state.subscriptions.find((s) => s.id === sub?.id)?.url,
+    // 同一轮先建的订阅还没保存时，从那张新建草稿里取图标和链接
+    icon: a.icon ? String(a.icon) : (state.subscriptions.find((s) => s.id === sub?.id)?.icon ?? sibling?.icon),
+    url: a.url ? String(a.url) : (state.subscriptions.find((s) => s.id === sub?.id)?.url ?? sibling?.url),
     category: String(a.category ?? sub?.category ?? ''),
   };
   const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number } | undefined;
@@ -591,6 +695,7 @@ function Proposal(props: {
     state.methods.find((m) => m.id === a.method || m.name === a.method) ??
     (create ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
   const done = part.state === 'applied';
+  const destructive = part.tool === 'delete_subscription' || part.tool === 'remove_share_member';
   // 没识别出来、用了默认值的字段：提醒用户核对
   const missing = create
     ? [!a.start && t('assistant.card.start'), !a.method && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
@@ -603,9 +708,7 @@ function Proposal(props: {
         ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), cnDateFull(String(a.trial_end))] as [string, ReactNode]] : []),
         [t('detail.field.method'), <PayBadge key="m" m={method} />],
       ]
-    : Object.entries(a)
-        .filter(([k]) => !['id', 'subscription', 'force'].includes(k))
-        .map(([k, v]) => [k, typeof v === 'object' ? JSON.stringify(v) : String(v)]);
+    : summaryRows(part.tool, a, state, sub?.currency);
   return (
     <div className={`as-card ${part.state}`} style={{ '--tint': catColor(icon.category) } as Record<string, string>}>
       <div className="as-card-tag">
@@ -686,7 +789,7 @@ function Proposal(props: {
                 <Pencil size={14} /> {t('assistant.card.edit')}
               </button>
             )}
-            <button className="btn primary" onClick={props.onApply} disabled={part.state === 'applying'}>
+            <button className={`btn ${destructive ? 'danger-solid' : 'primary'}`} onClick={props.onApply} disabled={part.state === 'applying'}>
               {part.state === 'applying' ? <Loader2 size={14} className="spin" /> : <Check size={14} />}
               {create ? t('assistant.card.add') : t('assistant.card.confirm')}
             </button>

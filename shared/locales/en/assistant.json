@@ -70,7 +70,12 @@
     "view": "View",
     "missing": "Couldn’t find {fields} — defaults used, please check",
     "sep": ", ",
-    "filled": "Icon and link filled in from the App Store"
+    "filled": "Icon and link filled in from the App Store",
+    "pendingCount": {
+      "one": "{count} draft to confirm",
+      "other": "{count} drafts to confirm"
+    },
+    "applyAll": "Confirm all"
   },
   "error": {
     "auth": "Invalid API key",
@@ -106,5 +111,53 @@
     "cta": "Set up your DeepSeek API key",
     "ctaHint": "One time only; the key stays on your own server",
     "privacy": "The key is stored only on your server — never sent to the browser or included in backups. Text and images you send are forwarded to DeepSeek through your server."
+  },
+  "f": {
+    "member": "Member",
+    "amount": "Amount",
+    "date": "Date",
+    "paidUntil": "Paid until",
+    "fee": "Fee",
+    "joined": "Joined",
+    "left": "Left",
+    "contact": "Contact",
+    "role": "Role",
+    "seats": "Seats (incl. me)",
+    "ownerName": "Organizer",
+    "since": "Shared since",
+    "newPrice": "New price",
+    "from": "Effective",
+    "action": "Action",
+    "kind": "Type",
+    "effect": "Effect",
+    "name": "Name",
+    "category": "Category",
+    "tags": "Tags",
+    "url": "Website",
+    "manage_url": "Manage link",
+    "notes": "Notes",
+    "method": "Payment method",
+    "region": "Region",
+    "remind_days": "Remind (days before)",
+    "end": "Won’t renew after",
+    "next_due": "Next charge",
+    "trial_end": "Trial ends",
+    "expires": "Service ends",
+    "price": "Price",
+    "currency": "Currency",
+    "cycle": "Cycle",
+    "note": "Note",
+    "planned": "Planned"
+  },
+  "v": {
+    "exempt": "Doesn’t pay",
+    "owner": "I organize",
+    "member": "I joined",
+    "unshare": "Stop sharing",
+    "pause": "Pause",
+    "cancel": "Cancel",
+    "reactivate": "Resume",
+    "charge": "Charge",
+    "deleteAll": "Deletes the subscription and all its charges. This can’t be undone."
   }
 }

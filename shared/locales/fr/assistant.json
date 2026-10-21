@@ -70,7 +70,12 @@
     "view": "Voir",
     "missing": "{fields} introuvable(s) — valeurs par défaut utilisées, à vérifier",
     "sep": ", ",
-    "filled": "Icône et lien complétés depuis l’App Store"
+    "filled": "Icône et lien complétés depuis l’App Store",
+    "pendingCount": {
+      "one": "{count} brouillon à confirmer",
+      "other": "{count} brouillons à confirmer"
+    },
+    "applyAll": "Tout confirmer"
   },
   "error": {
     "auth": "Clé API invalide",
@@ -106,5 +111,53 @@
     "cta": "Configurer votre clé API DeepSeek",
     "ctaHint": "Une seule fois ; la clé reste sur votre propre serveur",
     "privacy": "La clé est stockée uniquement sur votre serveur — jamais envoyée au navigateur ni incluse dans les sauvegardes. Les textes et images que vous envoyez sont transmis à DeepSeek via votre serveur."
+  },
+  "f": {
+    "member": "Membre",
+    "amount": "Montant",
+    "date": "Date",
+    "paidUntil": "Payé jusqu’au",
+    "fee": "Tarif",
+    "joined": "Arrivée",
+    "left": "Départ",
+    "contact": "Contact",
+    "role": "Rôle",
+    "seats": "Places (moi compris)",
+    "ownerName": "Organisateur",
+    "since": "Partagé depuis",
+    "newPrice": "Nouveau prix",
+    "from": "Date d’effet",
+    "action": "Action",
+    "kind": "Type",
+    "effect": "Effet",
+    "name": "Nom",
+    "category": "Catégorie",
+    "tags": "Tags",
+    "url": "Site web",
+    "manage_url": "Lien de gestion",
+    "notes": "Notes",
+    "method": "Moyen de paiement",
+    "region": "Région",
+    "remind_days": "Rappel (jours avant)",
+    "end": "Pas de renouvellement après",
+    "next_due": "Prochain prélèvement",
+    "trial_end": "Fin de l’essai",
+    "expires": "Fin du service",
+    "price": "Prix",
+    "currency": "Devise",
+    "cycle": "Cycle de facturation",
+    "note": "Note",
+    "planned": "Prévu"
+  },
+  "v": {
+    "exempt": "Ne paie pas",
+    "owner": "J’organise",
+    "member": "J’ai rejoint",
+    "unshare": "Ne plus partager",
+    "pause": "Suspendre",
+    "cancel": "Résilier",
+    "reactivate": "Reprendre",
+    "charge": "Prélèvement",
+    "deleteAll": "Supprime l’abonnement et tous ses prélèvements. Action irréversible."
   }
 }

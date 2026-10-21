@@ -10,6 +10,8 @@
     "total": "Toplam"
   },
   "error": {
+    "shareFull": "“{name}” dolu ({seats} koltuk)",
+    "needMemberName": "Üyenin bir adı olmalı",
     "noTool": "Bilinmeyen araç: {name}",
     "readOnly": "Bu token salt okunurdur ve defteri değiştiremez. Yönetim panelindeki Yapay zekâ erişimi sayfasından okuma-yazma token'ı oluşturun.",
     "unsupportedMethod": "Desteklenmeyen yöntem: {method}",
@@ -55,6 +57,11 @@
     "get_insights": "Kontrol ve yıl özeti",
     "list_events": "Değişiklik kaydı",
     "search_app_store": "Uygulama ara",
+    "get_carpool": "Paylaşılan planlar",
+    "delete_subscription": "Aboneliği sil",
+    "set_share": "Paylaşımı ayarla",
+    "save_share_member": "Üye ekle veya düzenle",
+    "remove_share_member": "Üyeyi çıkar",
     "create_subscription": "Abonelik ekle",
     "update_subscription": "Aboneliği düzenle",
     "change_price": "Fiyat değişikliğini kaydet",

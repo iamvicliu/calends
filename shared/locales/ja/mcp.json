@@ -10,6 +10,8 @@
     "total": "合計"
   },
   "error": {
+    "shareFull": "「{name}」は満席です（{seats} 席）",
+    "needMemberName": "メンバーの名前が必要です",
     "noTool": "不明なツール：{name}",
     "readOnly": "このトークンは読み取り専用のため、台帳を変更できません。管理画面の AI ページで読み書き用のトークンを作成してください。",
     "unsupportedMethod": "サポートされていないメソッド：{method}",
@@ -55,6 +57,11 @@
     "get_insights": "診断と年間まとめ",
     "list_events": "変更履歴",
     "search_app_store": "App を検索",
+    "get_carpool": "シェアの概要",
+    "delete_subscription": "サブスクを削除",
+    "set_share": "シェアを設定",
+    "save_share_member": "メンバーを追加・編集",
+    "remove_share_member": "メンバーを削除",
     "create_subscription": "サブスクを追加",
     "update_subscription": "サブスクを編集",
     "change_price": "価格変更を記録",
