@@ -2,15 +2,12 @@
 const BASE = '/admin';
 const EVENT = 'routechange';
 
-/** 连接页的地址从 ai 改成了 mcp：旧设置里隐藏的 ai 按 mcp 算 */
-export const navKey = (k: string) => (k === 'ai' ? 'mcp' : k);
-
 /** 侧边栏模块的排序键：概览的路由是空串，存成 overview */
-export const orderKey = (path: string) => navKey(path) || 'overview';
+export const orderKey = (path: string) => path || 'overview';
 
 /** 按设置里的顺序排侧边栏模块；没出现在设置里的（比如以后新增的模块）按默认位置排在后面 */
 export function sortNav<T>(items: T[], keyOf: (x: T) => string, order: string[] | undefined): T[] {
-  const o = (order ?? []).map(navKey);
+  const o = order ?? [];
   const rank = (x: T, i: number) => {
     const at = o.indexOf(keyOf(x));
     return at < 0 ? 1000 + i : at;
@@ -52,8 +49,6 @@ export function onRoute(fn: () => void) {
 /** 旧链接 /admin#/list 换成 /admin/list；后台内的普通链接点击时不整页刷新 */
 export function initRouter() {
   if (location.hash.startsWith('#/')) history.replaceState(null, '', href(decodeURIComponent(location.hash.slice(2))));
-  // 连接页的地址从 /admin/ai 改成了 /admin/mcp
-  if (currentRoute() === 'ai') history.replaceState(null, '', href('mcp'));
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element).closest?.('a');

@@ -11,7 +11,7 @@ import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
 import { CategoriesGroup } from './Categories.tsx';
 import { PublicSubsSheet, publicCandidates } from './PublicSubs.tsx';
-import { go, navKey, sortNav } from '../router.ts';
+import { go, sortNav } from '../router.ts';
 import { LOCALES, isLocale, t } from '../../shared/i18n.ts';
 import { preferredLocale } from '../i18n.ts';
 
@@ -275,10 +275,9 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                   key={k}
                   id={k}
                   label={t(`app.nav.${l}`)}
-                  checked={hideable ? !(s.hiddenNav ?? []).map(navKey).includes(k) : undefined}
+                  checked={hideable ? !(s.hiddenNav ?? []).includes(k) : undefined}
                   onToggle={(v) => {
-                    // 旧设置里的 ai 和新的 mcp 是同一项：先统一成新写法再增删
-                    const rest = (s.hiddenNav ?? []).map(navKey).filter((x) => x !== k);
+                    const rest = (s.hiddenNav ?? []).filter((x) => x !== k);
                     void run(() => saveSettings({ hiddenNav: v ? rest : [...rest, k] }));
                   }}
                 />

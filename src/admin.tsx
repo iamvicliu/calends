@@ -24,7 +24,7 @@ import { Report } from './views/Report.tsx';
 import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
-import { currentRoute, go as navigate, href, initRouter, navKey, onRoute, orderKey, replaceRoute, sortNav } from './router.ts';
+import { currentRoute, go as navigate, href, initRouter, onRoute, orderKey, replaceRoute, sortNav } from './router.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { PROJECT_URL } from '../shared/brand.ts';
@@ -47,7 +47,7 @@ const NAV = [
 
 /** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
 function navOf(st: AppState['settings']) {
-  const hidden = (st.hiddenNav ?? []).map(navKey);
+  const hidden = st.hiddenNav ?? [];
   const shown = NAV.filter((n) => !hidden.includes(n.path) && (n.path !== 'mcp' || st.aiEnabled !== false));
   return sortNav(shown, (n) => orderKey(n.path), st.navOrder).map((n) => ({
     ...n,
