@@ -182,7 +182,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         <Icon name="down" size={14} />
                       </button>
                     </div>
-                    <CarFacts book={books.get(s.id)!} base={base} detail={expanded.has(s.id)} />
+                    <CarFacts book={books.get(s.id)!} base={base} detail={expanded.has(s.id)} onOpen={() => onOpen(s)} />
                     {expanded.has(s.id) && (
                       <>
                         {!ro && free > 0 && live(s) && (
@@ -238,7 +238,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                                   </div>
                                 )}
                               </div>
-                              {!ro && !d.member.exempt && (
+                              {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
+                              {!ro && !d.member.exempt && d.periodsOwed > 0 && (
                                 <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
                                   <Icon name="check" /> {t('family.pool.collect')}
                                 </button>
@@ -390,14 +391,15 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
  * 合租账本，像一张小利润表：订阅一年花多少（成本）、成员一年交多少（收入）、两者之差（利润）。
  * 利润为负就是我自己用的那部分；下面一行是发起以来实际付出和收回的钱。
  */
-function CarFacts({ book, base, detail }: { book: ReturnType<typeof carLedger>; base: string; detail: boolean }) {
+function CarFacts({ book, base, detail, onOpen }: { book: ReturnType<typeof carLedger>; base: string; detail: boolean; onOpen: () => void }) {
   const fmt = (v: number) => money(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;
   const signed = (v: number) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v))}`;
   return (
     <div className="car-book">
-      <div className="car-facts">
+      {/* 数字区和头部一样，点开订阅详情 */}
+      <button type="button" className="car-facts" onClick={onOpen}>
         <div>
           <small>{t('family.facts.cost')}</small>
           <b>{fmt(book.yearCost)}</b>
@@ -410,7 +412,7 @@ function CarFacts({ book, base, detail }: { book: ReturnType<typeof carLedger>; 
           <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
           <b className={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
         </div>
-      </div>
+      </button>
       {/* 发起至今的实际收支是明细，展开后才看 */}
       {detail && (
         <div className="car-actual">

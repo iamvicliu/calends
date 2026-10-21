@@ -8217,11 +8217,18 @@ button.seat:disabled {
   font-size: 12px;
 }
 .car-facts {
+  width: 100%;
+  border: 0;
+  border-top: 0.5px solid var(--sep);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  padding-top: 12px;
-  border-top: 0.5px solid var(--sep);
+  padding: 12px 0 0;
   font-variant-numeric: tabular-nums;
 }
 .car-facts > div {
