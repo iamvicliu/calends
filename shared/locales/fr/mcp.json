@@ -42,7 +42,18 @@
     "personNoItems": "{name} n’a aucun abonnement ni paiement où l’enregistrer",
     "personItemsAmbiguous": "{name} figure dans plusieurs ; précisez subscription : {list}",
     "needSubOrPerson": "subscription ou person est requis",
-    "needKind": "kind est requis (share ou proxy)"
+    "needKind": "kind est requis (share ou proxy)",
+    "stopBeforeStart": "La date d’arrêt ne peut pas précéder le début.",
+    "stopAfterPaidThrough": "L’arrêt dépasse la période payée. Utilisez le non-renouvellement.",
+    "refundExceedsPaid": "Le total remboursé ne peut pas dépasser le montant payé pour cette période.",
+    "refundCurrency": "La devise du remboursement doit être celle de l’abonnement. Utilisez settled pour la carte.",
+    "subscriptionEnded": "Cet abonnement est déjà terminé. Ajoutez une nouvelle période pour vous réabonner.",
+    "terminatedReactivate": "Un abonnement désactivé par le fournisseur ne peut pas être réactivé. Utilisez change_plan (resume / nouvelle période).",
+    "needStop": "Un abonnement désactivé nécessite les informations d’arrêt.",
+    "invalidPaidThrough": "La date payée doit correspondre à la période de facturation initiale.",
+    "invalidStop": "L’arrêt doit correspondre au dernier jour de service ; seul le fournisseur peut motiver une désactivation.",
+    "invalidRefund": "Les montants remboursés doivent être valides et enregistrés en négatif.",
+    "refundBeforeStop": "La date du remboursement ne peut pas précéder l’arrêt."
   },
   "tool": {
     "get_overview": "Aperçu du registre",

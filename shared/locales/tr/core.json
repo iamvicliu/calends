@@ -96,5 +96,26 @@
     "health": "Sağlık ve fitness",
     "phone": "Telefon ve hat",
     "daily": "Yaşam"
+  },
+  "stop": {
+    "title": "Hizmeti durdur",
+    "nonrenew": "Yenileme",
+    "cancel": "Hemen durdur",
+    "terminate": "Sağlayıcı tarafından kapatıldı",
+    "date": "Durdurma tarihi",
+    "paidThrough": "{date} tarihine kadar ödendi",
+    "refundYes": "İade edildi",
+    "refundNo": "İade yok",
+    "refundAmount": "İade tutarı",
+    "refundDate": "İade tarihi",
+    "reason": "Neden (isteğe bağlı)",
+    "currencyHint": "İadeler abonelik para birimi {currency} ile kaydedilir. Kart iadesi için aşağıya farklı para birimi girilebilir.",
+    "refunded": "İade edildi {money}",
+    "partial": "Kısmi iade {money}",
+    "unrefunded": "İade yok · {days} kullanılmayan gün",
+    "unused": "Ödenmiş ama kullanılmamış {days} gün, yaklaşık {money}",
+    "unusedTitle": "Ödenmiş ama kullanılmamış",
+    "terminated": "Kapatıldı",
+    "restore": "Yeniden etkinleştir"
   }
 }

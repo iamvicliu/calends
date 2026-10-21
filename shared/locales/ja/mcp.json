@@ -42,7 +42,18 @@
     "personNoItems": "{name} には記録できる共有・立て替えがありません",
     "personItemsAmbiguous": "{name} は複数に含まれています。subscription で指定してください：{list}",
     "needSubOrPerson": "subscription か person が必要です",
-    "needKind": "kind（share または proxy）が必要です"
+    "needKind": "kind（share または proxy）が必要です",
+    "stopBeforeStart": "停止日は開始日より前にできません。",
+    "stopAfterPaidThrough": "停止日が支払済み期間を超えています。更新停止を使用してください。",
+    "refundExceedsPaid": "返金総額は当期の支払額を超えられません。",
+    "refundCurrency": "返金通貨は契約通貨と同じにしてください。カード返金は settled を使用します。",
+    "subscriptionEnded": "契約は終了しています。新しい期間で再契約してください。",
+    "terminatedReactivate": "提供元が停止した契約は再開できません。change_plan（resume / 新しい期間）で再契約してください。",
+    "needStop": "利用停止には停止情報が必要です。",
+    "invalidPaidThrough": "支払済み終了日は元の請求期間と一致する必要があります。",
+    "invalidStop": "停止情報は最終利用日と一致させてください。理由は提供元による停止のみ設定できます。",
+    "invalidRefund": "返金額は有効な数値で、負の値として記録してください。",
+    "refundBeforeStop": "返金日は停止日より前にできません。"
   },
   "tool": {
     "get_overview": "台帳の概要",

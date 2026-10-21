@@ -2,6 +2,7 @@
 // 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
 import {
   activePhases,
+  stopSummary,
   addDays,
   addMonths,
   chargesBetween,
@@ -37,6 +38,7 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   if (s.phases?.length) return activePhases(s, day).reduce((a, v) => a + contributionOn(state, v, day, fxDate), 0);
   if (s.cycle.unit === 'lifetime') return 0;
   if (s.start > day) return 0;
+  if (s.stop && s.stop.date <= day) return 0;
   if (s.end && s.end < day) return 0;
   if (s.status === 'cancelled' && !s.end) return 0;
   if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
@@ -112,7 +114,7 @@ export function movement(state: AppState, start: string, end: string, endFx?: st
   return r;
 }
 
-export type EventKind = 'start' | 'end' | 'price' | 'intro-end' | 'buy' | 'pause' | 'switch' | 'resume';
+export type EventKind = 'start' | 'end' | 'price' | 'intro-end' | 'buy' | 'pause' | 'switch' | 'resume' | 'terminate';
 
 export interface LedgerEvent {
   date: string;
@@ -160,7 +162,15 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
     });
   }
-  if (s.end && s.end < today) out.push({ date: addDays(s.end, 1), sub: s, kind: 'end', delta: -contributionOn(state, s, s.end) });
+  if (s.stop && s.stop.date <= today)
+    out.push({
+      date: s.stop.date,
+      sub: s,
+      kind: s.stop.kind === 'terminate' ? 'terminate' : 'end',
+      delta: -contributionOn(state, { ...s, stop: undefined, status: s.trialEnd && s.trialEnd > s.stop.date ? 'trial' : 'active' }, s.stop.date),
+      note: s.stop.reason,
+    });
+  else if (s.end && s.end < today) out.push({ date: addDays(s.end, 1), sub: s, kind: 'end', delta: -contributionOn(state, s, s.end) });
   if (s.status === 'paused' && s.pausedAt && s.pausedAt <= today)
     out.push({ date: s.pausedAt, sub: s, kind: 'pause', delta: -contributionOn(state, { ...s, status: 'active' }, s.pausedAt) });
   return out;
@@ -224,8 +234,12 @@ function coverage(c: Charge): [string, string] {
   const s = c.sub;
   if (s.cycle.unit === 'lifetime') return [c.date, addDays(c.date, 1)];
   const horizon = addDays(c.date, Math.round(cycleDays(s.cycle) * 3) + 31);
-  const next = chargesBetween({ ...s, end: undefined, status: s.status === 'paused' ? 'active' : s.status }, addDays(c.date, 1), horizon, '9999-12-31')[0]
-    ?.date;
+  const next = chargesBetween(
+    { ...s, stop: undefined, end: undefined, status: s.status === 'paused' ? 'active' : s.status },
+    addDays(c.date, 1),
+    horizon,
+    '9999-12-31',
+  ).find((charge) => !charge.kind)?.date;
   let end = next ?? nthCharge(c.date, s.cycle, 1);
   if (s.end && addDays(s.end, 1) < end) end = addDays(s.end, 1);
   return [c.date, end];
@@ -274,15 +288,30 @@ export function cashVsAccrual(state: AppState, today: string, back: number, fwd:
 }
 
 /** 预付余值：已经付了钱、但服务期还没用完的部分 */
-export function prepaidValue(state: AppState, today: string): { total: number; items: Array<{ sub: Subscription; value: number; until: string }> } {
+export function prepaidValue(
+  state: AppState,
+  today: string,
+): {
+  total: number;
+  unusedTotal: number;
+  unusedItems: Array<{ sub: Subscription; value: number; until: string }>;
+  items: Array<{ sub: Subscription; value: number; until: string }>;
+} {
   const items: Array<{ sub: Subscription; value: number; until: string }> = [];
+  const unusedItems: typeof items = [];
   for (const s of state.subscriptions) {
     // 按阶段各算各的：换区后旧区域预付的时长和新区域的一样都是余值
     let value = 0;
     let until = '';
     for (const p of phaseSubs(s)) {
+      const stopped = stopSummary(p, today);
+      if (stopped && stopped.date <= today) {
+        const unused = toBase(state, stopped.unusedValue, p.currency, stopped.date) * myShareFactor(p, stopped.date);
+        if (unused > 0.005 && !s.proxy) unusedItems.push({ sub: s, value: unused, until: stopped.paidThrough });
+        continue;
+      }
       if (p.cycle.unit === 'lifetime' || p.start > today) continue;
-      const past = chargesBetween(p, addMonths(today, -12 * Math.max(1, p.cycle.unit === 'year' ? p.cycle.every : 1) - 1), today, today);
+      const past = chargesBetween(p, addMonths(today, -12 * Math.max(1, p.cycle.unit === 'year' ? p.cycle.every : 1) - 1), today, today).filter((c) => !c.kind);
       const last = past[past.length - 1];
       if (!last) continue;
       const [a, b] = coverage(last);
@@ -294,7 +323,7 @@ export function prepaidValue(state: AppState, today: string): { total: number; i
     if (value > 0.01) items.push({ sub: s, value, until });
   }
   items.sort((x, y) => y.value - x.value);
-  return { total: items.reduce((t, i) => t + i.value, 0), items };
+  return { total: items.reduce((t, i) => t + i.value, 0), items, unusedTotal: unusedItems.reduce((sum, i) => sum + i.value, 0), unusedItems };
 }
 
 /** 退订省下的钱：如果没退，从退订到今天还要付多少 */
@@ -306,8 +335,9 @@ export function cancelSavings(
   for (const s of state.subscriptions) {
     if (s.proxy || s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
     const monthly = toBase(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
-    const saved = (monthly * diffDays(s.end, today)) / MONTH;
-    items.push({ sub: s, saved, since: s.end, monthly });
+    const since = s.stop ? s.stop.paidThrough : s.end;
+    const saved = (monthly * Math.max(0, diffDays(since, today))) / MONTH;
+    if (saved > 0) items.push({ sub: s, saved, since, monthly });
   }
   items.sort((x, y) => y.saved - x.saved);
   return { total: items.reduce((t, i) => t + i.saved, 0), items };
@@ -431,6 +461,15 @@ function ccyLabel(c: string): string {
 
 export function insights(state: AppState, today: string): Insight[] {
   const out: Insight[] = [];
+  const unused = prepaidValue(state, today);
+  if (unused.unusedTotal > 0.005)
+    out.push({
+      id: 'unused',
+      tone: 'warn',
+      title: t('core.stop.unusedTitle'),
+      body: money(unused.unusedTotal, state.settings.baseCurrency),
+      subs: unused.unusedItems.map((i) => i.sub),
+    });
   const base = state.settings.baseCurrency;
   // 代付是别人的订阅，不参与体检
   const live = state.subscriptions.filter((s) => !s.proxy && ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)));

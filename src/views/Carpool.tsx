@@ -396,7 +396,7 @@ export function CarSheet({
   const base = state.settings.baseCurrency;
   const sh = s.share!;
   const st = effectiveStatus(s, today);
-  const stopped = st === 'ended';
+  const stopped = ['ended', 'terminated'].includes(st);
   const next = nextCharge(s, today);
   const onboard = sh.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, sh.seats - 1 - onboard.length);

@@ -18,7 +18,8 @@
     "pausedShort": "Duraklatıldı",
     "ending": "Yenilenmeyecek",
     "ended": "İptal edildi",
-    "lifetime": "Ömür boyu"
+    "lifetime": "Ömür boyu",
+    "terminated": "Kapatıldı"
   },
   "proxyExcluded": "Başkası için ödendi · sayılmaz",
   "perMonthApprox": "≈ {amount}/ay",

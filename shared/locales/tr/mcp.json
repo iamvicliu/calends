@@ -42,7 +42,18 @@
     "personNoItems": "{name} için kayıt yapılacak plan veya ödeme yok",
     "personItemsAmbiguous": "{name} birden fazla yerde; subscription belirtin: {list}",
     "needSubOrPerson": "subscription veya person gerekli",
-    "needKind": "kind gerekli (share veya proxy)"
+    "needKind": "kind gerekli (share veya proxy)",
+    "stopBeforeStart": "Durdurma tarihi başlangıçtan önce olamaz.",
+    "stopAfterPaidThrough": "Durdurma tarihi ödenmiş dönemi aşıyor. Yenilememe seçeneğini kullanın.",
+    "refundExceedsPaid": "Toplam iadeler bu dönem ödenen tutarı aşamaz.",
+    "refundCurrency": "İade para birimi abonelikle aynı olmalıdır. Kart için settled kullanın.",
+    "subscriptionEnded": "Bu abonelik sona erdi. Yeni bir dönemle tekrar abone olun.",
+    "terminatedReactivate": "Sağlayıcı tarafından kapatılan abonelik yeniden etkinleştirilemez. change_plan (resume / yeni dönem) kullanın.",
+    "needStop": "Kapatılan abonelik için durdurma bilgisi gerekir.",
+    "invalidPaidThrough": "Ödenmiş son tarih asıl fatura dönemiyle eşleşmelidir.",
+    "invalidStop": "Durdurma son hizmet günüyle eşleşmelidir; yalnızca sağlayıcı kapatması neden içerebilir.",
+    "invalidRefund": "İade tutarları geçerli sayılar olmalı ve negatif kaydedilmelidir.",
+    "refundBeforeStop": "İade tarihi durdurma tarihinden önce olamaz."
   },
   "tool": {
     "get_overview": "Defter özeti",

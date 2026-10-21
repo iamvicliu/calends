@@ -42,7 +42,18 @@
     "personNoItems": "Für {name} gibt es kein Abo und keine Auslage zum Erfassen",
     "personItemsAmbiguous": "{name} ist in mehreren – gib subscription an: {list}",
     "needSubOrPerson": "subscription oder person ist erforderlich",
-    "needKind": "kind ist erforderlich (share oder proxy)"
+    "needKind": "kind ist erforderlich (share oder proxy)",
+    "stopBeforeStart": "Das Enddatum darf nicht vor dem Start liegen.",
+    "stopAfterPaidThrough": "Das Enddatum liegt nach dem bezahlten Zeitraum. Bitte Nichtverlängerung verwenden.",
+    "refundExceedsPaid": "Erstattungen dürfen die Zahlung für diesen Zeitraum nicht überschreiten.",
+    "refundCurrency": "Die Erstattungswährung muss der Abowährung entsprechen. Für die Karte settled verwenden.",
+    "subscriptionEnded": "Dieses Abo ist bereits beendet. Bitte eine neue Phase anlegen.",
+    "terminatedReactivate": "Ein vom Anbieter gesperrtes Abo kann nicht reaktiviert werden. Bitte mit change_plan (resume / neue Phase) neu abonnieren.",
+    "needStop": "Ein gesperrtes Abo benötigt Angaben zur Beendigung.",
+    "invalidPaidThrough": "Das Bezahlt-bis-Datum muss dem ursprünglichen Abrechnungszeitraum entsprechen.",
+    "invalidStop": "Die Beendigung muss dem letzten Nutzungstag entsprechen; nur eine Anbietersperre darf einen Grund enthalten.",
+    "invalidRefund": "Erstattungsbeträge müssen gültige Zahlen und negativ gespeichert sein.",
+    "refundBeforeStop": "Das Erstattungsdatum darf nicht vor dem Enddatum liegen."
   },
   "tool": {
     "get_overview": "Kontoübersicht",

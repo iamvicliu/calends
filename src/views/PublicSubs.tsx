@@ -8,7 +8,7 @@ import './public-subs.css';
 
 /** 可以公开的订阅：代付涉及他人，从不公开；在订的排前面，其余按名称 */
 export function publicCandidates(state: AppState, today: string): Subscription[] {
-  const live = (s: Subscription) => (effectiveStatus(s, today) === 'ended' ? 1 : 0);
+  const live = (s: Subscription) => (['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 1 : 0);
   return state.subscriptions.filter((s) => !s.proxy).sort((a, b) => live(a) - live(b) || a.name.localeCompare(b.name));
 }
 

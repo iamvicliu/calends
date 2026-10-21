@@ -73,5 +73,26 @@
     "health": "健康",
     "phone": "通訊",
     "daily": "日用"
+  },
+  "stop": {
+    "title": "停止服務",
+    "nonrenew": "到期不續",
+    "cancel": "立即停止",
+    "terminate": "被服務方停用",
+    "date": "停止日",
+    "paidThrough": "本期已付至 {date}",
+    "refundYes": "已退款",
+    "refundNo": "未退款",
+    "refundAmount": "退款金額",
+    "refundDate": "退款日期",
+    "reason": "原因（選填）",
+    "currencyHint": "退款貨幣固定為訂閱貨幣 {currency}，卡上實退可另填貨幣和金額。",
+    "refunded": "已退款 {money}",
+    "partial": "部分退款 {money}",
+    "unrefunded": "未退款 · 已付未用 {days} 天",
+    "unused": "已付未用 {days} 天，約 {money}",
+    "unusedTitle": "已付未用",
+    "terminated": "已停用",
+    "restore": "恢復訂閱"
   }
 }

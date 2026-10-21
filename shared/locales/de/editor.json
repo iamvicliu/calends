@@ -57,7 +57,8 @@
     "active": "Aktiv",
     "trial": "Testphase",
     "paused": "Pausiert",
-    "cancelled": "Gekündigt"
+    "cancelled": "Gekündigt",
+    "terminated": "Gesperrt"
   },
   "category": {
     "choose": "Kategorie wählen",

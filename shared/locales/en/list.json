@@ -18,7 +18,8 @@
     "pausedShort": "Paused",
     "ending": "Not renewing",
     "ended": "Canceled",
-    "lifetime": "Lifetime"
+    "lifetime": "Lifetime",
+    "terminated": "Terminated"
   },
   "proxyExcluded": "Paid for others · not counted",
   "perMonthApprox": "≈ {amount}/mo",

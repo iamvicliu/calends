@@ -1,3 +1,4 @@
+import { statusChangeError } from '../shared/phases.ts';
 import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.ts';
 import { addDays, subError, todayIn } from '../shared/billing.ts';
 import {
@@ -169,7 +170,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     if (method === 'PUT') {
       const sub = (await req.json()) as Subscription;
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
-      const err = validSub(sub);
+      const previous = (await subsOf(env)).find((x) => x.id === sub.id);
+      const err = validSub(sub) ?? statusChangeError(previous, sub, todayIn((await getSettings(env)).timezone));
       if (err) return bad(err);
       sub.updatedAt = new Date().toISOString();
       await upsert(env, 'subscriptions', sub.id, sub);

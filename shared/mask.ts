@@ -67,6 +67,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     start: s.start,
     end: s.end,
     status: s.status,
+    stop: s.stop && { kind: s.stop.kind, date: s.stop.date, paidThrough: s.stop.paidThrough },
     trialEnd: s.trialEnd,
     pausedAt: s.pausedAt,
     methodId: s.methodId,
@@ -75,8 +76,12 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     bonus: s.bonus,
     priceHistory: s.priceHistory,
     // 计费需要的结构原样保留：阶段、实际扣款、下次扣款日（不含敏感信息）
-    phases: s.phases?.map(({ note: _n, ...p }) => ({ ...p, payments: p.payments?.map(({ note: _x, ...pay }) => pay) })),
-    payments: s.payments?.map(({ note: _n, ...p }) => p),
+    phases: s.phases?.map(({ note: _n, stop, ...p }) => ({
+      ...p,
+      stop: stop && { kind: stop.kind, date: stop.date, paidThrough: stop.paidThrough },
+      payments: p.payments?.filter((pay) => pay.kind !== 'refund').map(({ note: _x, ...pay }) => pay),
+    })),
+    payments: s.payments?.filter((pay) => pay.kind !== 'refund').map(({ note: _n, ...p }) => p),
     nextDue: s.nextDue,
     share: s.share && {
       role: s.share.role,

@@ -493,7 +493,7 @@ function MethodSheet({
             <Cell
               key={s.id}
               label={
-                <span className="row" style={{ opacity: effectiveStatus(s, today) === 'ended' ? 0.45 : 1 }}>
+                <span className="row" style={{ opacity: ['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 0.45 : 1 }}>
                   <SubIcon sub={s} size={28} />
                   {s.name}
                 </span>

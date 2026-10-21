@@ -52,7 +52,8 @@
     "active": "Aktif",
     "trial": "Uji coba",
     "paused": "Dijeda",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "terminated": "Dinonaktifkan"
   },
   "category": {
     "choose": "Pilih kategori",

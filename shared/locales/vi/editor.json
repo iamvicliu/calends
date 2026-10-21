@@ -52,7 +52,8 @@
     "active": "Đang hoạt động",
     "trial": "Dùng thử",
     "paused": "Tạm dừng",
-    "cancelled": "Đã hủy"
+    "cancelled": "Đã hủy",
+    "terminated": "Đã vô hiệu hóa"
   },
   "category": {
     "choose": "Chọn danh mục",

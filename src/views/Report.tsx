@@ -340,6 +340,12 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           )}
         />
         <div className="cash-facts">
+          <div title={pv.unusedItems.map((x) => `${x.sub.name}: ${money(x.value, base)}`).join(' · ')}>
+            <span>{t('core.stop.unusedTitle')}</span>
+            <b>
+              <Amount value={pv.unusedTotal} ccy={base} compact />
+            </b>
+          </div>
           <div
             {...tipProps(() =>
               pv.items
@@ -624,6 +630,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
 const EV: Record<EventKind, [string, string]> = {
   start: ['start', 'up'],
   end: ['end', 'down'],
+  terminate: ['terminate', 'down'],
   price: ['price', 'up'],
   'intro-end': ['introEnd', 'up'],
   buy: ['buy', 'buy'],
@@ -649,7 +656,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
           const showYear = yr !== lastYear;
           lastYear = yr;
           const [labelKey, tone] = EV[e.kind];
-          const label = t(`report.ev.${labelKey}`);
+          const label = e.kind === 'terminate' ? t('core.stop.terminate') : t(`report.ev.${labelKey}`);
           const up = e.kind === 'price' || e.kind === 'intro-end' || e.kind === 'switch' ? e.delta > 0 : tone === 'up';
           return (
             <Fragment key={e.sub.id + e.kind + e.date + i}>

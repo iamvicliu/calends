@@ -148,5 +148,26 @@
     "health": "健康・フィットネス",
     "phone": "通信",
     "daily": "ライフスタイル"
+  },
+  "stop": {
+    "title": "サービス停止",
+    "nonrenew": "更新しない",
+    "cancel": "今すぐ停止",
+    "terminate": "提供元による停止",
+    "date": "停止日",
+    "paidThrough": "支払済み期間：{date} まで",
+    "refundYes": "返金あり",
+    "refundNo": "返金なし",
+    "refundAmount": "返金額",
+    "refundDate": "返金日",
+    "reason": "理由（任意）",
+    "currencyHint": "返金通貨は契約通貨の {currency} です。カードへの返金は別の通貨・金額を入力できます。",
+    "refunded": "返金済み {money}",
+    "partial": "一部返金 {money}",
+    "unrefunded": "返金なし · 支払済み未利用 {days} 日",
+    "unused": "支払済み未利用 {days} 日、約 {money}",
+    "unusedTitle": "支払済み未利用",
+    "terminated": "利用停止",
+    "restore": "再開"
   }
 }

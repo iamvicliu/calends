@@ -158,5 +158,26 @@
     "health": "Santé et forme",
     "phone": "Téléphonie",
     "daily": "Vie quotidienne"
+  },
+  "stop": {
+    "title": "Arrêter le service",
+    "nonrenew": "Ne pas renouveler",
+    "cancel": "Arrêter maintenant",
+    "terminate": "Désactivé par le fournisseur",
+    "date": "Date d’arrêt",
+    "paidThrough": "Payé jusqu’au {date}",
+    "refundYes": "Remboursé",
+    "refundNo": "Sans remboursement",
+    "refundAmount": "Montant remboursé",
+    "refundDate": "Date de remboursement",
+    "reason": "Motif (facultatif)",
+    "currencyHint": "Le remboursement utilise {currency}, la devise de l’abonnement. Une autre devise de carte peut être saisie ci-dessous.",
+    "refunded": "Remboursé {money}",
+    "partial": "Remboursement partiel {money}",
+    "unrefunded": "Sans remboursement · {days} jours inutilisés",
+    "unused": "{days} jours payés non utilisés, environ {money}",
+    "unusedTitle": "Payé non utilisé",
+    "terminated": "Désactivé",
+    "restore": "Réactiver"
   }
 }

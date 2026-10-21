@@ -1,3 +1,4 @@
+import { StopBadge } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
@@ -17,7 +18,7 @@ import { perLabel } from './Overview.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { usePref } from '../store.ts';
 
-type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'lifetime' | 'all';
+type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'terminated' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
 type Dir = 'asc' | 'desc';
 /** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、最新开始在前 */
@@ -35,6 +36,7 @@ const FILTERS = (): Array<[Filter, string]> => [
   ['paused', t('list.status.paused')],
   ['lifetime', t('list.status.lifetime')],
   ['ended', t('list.status.ended')],
+  ['terminated', t('list.status.terminated')],
 ];
 
 /** 「订阅中」只算正在计费的（含到期不续）；试用、暂停各自单独一类，和概览、公开页的计数一致 */
@@ -80,7 +82,7 @@ export function List({
     s = cur;
     if (n && cur.end && n >= cur.end) n = undefined;
     const price = n ? priceAt(s, n) : s.price;
-    const live = !['lifetime', 'ended'].includes(effectiveStatus(s, today));
+    const live = !['lifetime', 'ended', 'terminated'].includes(effectiveStatus(s, today));
     if (money2 === 'orig' || s.currency === money2) {
       return {
         value: price,
@@ -148,7 +150,7 @@ export function List({
     }
     return dir === 'asc' ? asc(a, b) : asc(b, a);
   });
-  const sum = rows.reduce((a, s) => a + (effectiveStatus(s, today) === 'ended' ? 0 : mo(s)), 0);
+  const sum = rows.reduce((a, s) => a + (['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
 
   return (
@@ -277,6 +279,8 @@ export function List({
                       {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
                       {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
                       {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
+                      {st === 'terminated' && <span className="badge">{t('list.status.terminated')}</span>}
+                      <StopBadge sub={s} today={today} readonly={state.readonly} />
                       {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
                       {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
                       {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
@@ -302,7 +306,7 @@ export function List({
                     <span className={d != null && d <= 3 ? 'soon' : ''}>
                       {st === 'lifetime' ? (
                         s.start.slice(0, 7)
-                      ) : st === 'ended' ? (
+                      ) : ['ended', 'terminated'].includes(st) ? (
                         saved.get(s.id) ? (
                           <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (
@@ -361,7 +365,7 @@ export function List({
                 const up = upcomingPhase(s, today);
                 const m = state.methods.find((x) => x.id === cur.methodId);
                 const v = shown(s, n);
-                const live = !['lifetime', 'ended'].includes(st);
+                const live = !['lifetime', 'ended', 'terminated'].includes(st);
                 return (
                   <button key={s.id} className={`lt-row st-${st}`} role="row" onClick={() => onOpen(s)}>
                     <span className="lt-name">
@@ -376,6 +380,8 @@ export function List({
                           {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
                           {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
                           {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
+                          {st === 'terminated' && <span className="badge">{t('list.status.terminated')}</span>}
+                          <StopBadge sub={s} today={today} readonly={state.readonly} />
                           {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
                           {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
                           {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
@@ -410,7 +416,7 @@ export function List({
                     <span className={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
                       {st === 'lifetime' ? (
                         t('list.status.lifetime')
-                      ) : st === 'ended' ? (
+                      ) : ['ended', 'terminated'].includes(st) ? (
                         saved.get(s.id) ? (
                           <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (

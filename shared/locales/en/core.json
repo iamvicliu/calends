@@ -104,5 +104,26 @@
     "health": "Health & Fitness",
     "phone": "Phone & Mobile",
     "daily": "Lifestyle"
+  },
+  "stop": {
+    "title": "Stop service",
+    "nonrenew": "Do not renew",
+    "cancel": "Stop immediately",
+    "terminate": "Disabled by provider",
+    "date": "Stop date",
+    "paidThrough": "Paid through {date}",
+    "refundYes": "Refunded",
+    "refundNo": "No refund",
+    "refundAmount": "Refund amount",
+    "refundDate": "Refund date",
+    "reason": "Reason (optional)",
+    "currencyHint": "Refunds use {currency}, the subscription currency. Record a different card currency below.",
+    "refunded": "Refunded {money}",
+    "partial": "Partial refund {money}",
+    "unrefunded": "No refund · {days} unused days",
+    "unused": "{days} unused days, about {money}",
+    "unusedTitle": "Paid but unused",
+    "terminated": "Terminated",
+    "restore": "Reactivate"
   }
 }

@@ -93,5 +93,26 @@
     "health": "Kesehatan & kebugaran",
     "phone": "Telepon & seluler",
     "daily": "Gaya hidup"
+  },
+  "stop": {
+    "title": "Hentikan layanan",
+    "nonrenew": "Jangan perpanjang",
+    "cancel": "Hentikan sekarang",
+    "terminate": "Dinonaktifkan penyedia",
+    "date": "Tanggal berhenti",
+    "paidThrough": "Dibayar hingga {date}",
+    "refundYes": "Dikembalikan",
+    "refundNo": "Tanpa pengembalian",
+    "refundAmount": "Jumlah pengembalian",
+    "refundDate": "Tanggal pengembalian",
+    "reason": "Alasan (opsional)",
+    "currencyHint": "Pengembalian memakai {currency}, mata uang langganan. Mata uang dan jumlah aktual di kartu dapat diisi di bawah.",
+    "refunded": "Dikembalikan {money}",
+    "partial": "Pengembalian sebagian {money}",
+    "unrefunded": "Tanpa pengembalian · {days} hari tak terpakai",
+    "unused": "{days} hari dibayar tak terpakai, sekitar {money}",
+    "unusedTitle": "Dibayar tak terpakai",
+    "terminated": "Dinonaktifkan",
+    "restore": "Aktifkan kembali"
   }
 }

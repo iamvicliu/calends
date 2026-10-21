@@ -1,3 +1,4 @@
+import { StopBadge, StopPanel, stopDescription } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
 import { Fragment, useState } from 'react';
@@ -31,12 +32,12 @@ import type { AppState, Payment, ShareMember, Subscription } from '../../shared/
 import { CarSheet } from './Carpool.tsx';
 import { carLedger, MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { CatIcon, PayBadge, Seg, SubIcon } from '../components/ui.tsx';
+import { CatIcon, PayBadge, Seg, Sheet, SubIcon } from '../components/ui.tsx';
 import { catColor, presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
 import { SubShare } from './SubShare.tsx';
-import { confirmPlan, dropPlan } from '../../shared/phases.ts';
+import { confirmPlan, dropPlan, reactivate } from '../../shared/phases.ts';
 import { t } from '../../shared/i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { ChargeChart, type ChartLane } from './DetailChart.tsx';
@@ -50,6 +51,7 @@ const TONE: Record<string, string> = {
   paused: '',
   ending: 'warn',
   ended: '',
+  terminated: 'bad',
   lifetime: 'acc',
 };
 const LANE_COLORS = ['var(--c1)', 'var(--c6)', 'var(--c5)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
@@ -154,6 +156,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const history = chargesBetween(sub, sub.start, today, today);
   const ro = !!state.readonly;
   const [pay, setPay] = useState<{ pay?: Payment; index?: number; phase?: string } | null>(null);
+  const [stopping, setStopping] = useState(false);
   const [share, setShare] = useState(false);
   // 合租弹窗：从详情的合租区点进去，看收了多少、付了多少；成员资料再叠一层
   const [car, setCar] = useState(false);
@@ -180,7 +183,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const actions = (
     <>
       {!ro && <Act icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
-      {!ro && sub.cycle.unit !== 'lifetime' && st !== 'ended' && (
+      {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
         <Act
           icon={paused ? <Play size={15} /> : <Pause size={15} />}
           label={paused ? t('detail.action.resume') : t('detail.action.pause')}
@@ -192,6 +195,13 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           }
         />
       )}
+      {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
+        <Act icon={<X size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />
+      )}
+      {!ro && sub.stop?.kind === 'cancel' && (
+        <Act icon={<Play size={15} />} label={t('core.stop.restore')} onClick={() => run(() => saveSub(reactivate(sub, today)), t('detail.toast.resumed'))} />
+      )}
+      {!ro && st === 'terminated' && <Act icon={<Plus size={15} />} label={t('editor.change.resume')} onClick={onEdit} />}
       {sub.manageUrl && <Act icon={<Settings2 size={15} />} label={t('detail.action.manage')} href={sub.manageUrl} />}
       {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
       <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
@@ -209,6 +219,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               <i />
               {t(`list.status.${st}`)}
             </span>
+            <StopBadge sub={sub} today={today} readonly={ro} />
           </h2>
           <div className="dt-meta">
             <b>
@@ -272,6 +283,22 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       )}
 
       {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
+      {stopping &&
+        createPortal(
+          <Sheet title={t('core.stop.title')} narrow onClose={() => setStopping(false)}>
+            <StopPanel
+              sub={sub}
+              today={today}
+              onApply={(next) =>
+                run(async () => {
+                  await saveSub(next);
+                  setStopping(false);
+                })
+              }
+            />
+          </Sheet>,
+          document.body,
+        )}
       {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
       {car &&
         sub.share?.role === 'owner' &&
@@ -302,6 +329,8 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
     </div>
   );
 }
+
+const roDescription = (sub: Subscription, state: AppState, today: string) => (state.readonly ? undefined : stopDescription(sub, today));
 
 /** 正常扣款（不含退款、补差、失败）：走势和「每笔」都只看这些 */
 const regular = (h: Charge[]) => h.filter((c) => !c.kind);
@@ -383,7 +412,7 @@ function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; t
   const base = state.settings.baseCurrency;
   const end = addMonths(today, 12);
   const cs = chargesBetween(sub, addDays(today, 1), end, today).filter((c) => !c.kind);
-  if (effectiveStatus(sub, today) === 'ended' || sub.cycle.unit === 'lifetime') return null;
+  if (['ended', 'terminated'].includes(effectiveStatus(sub, today)) || sub.cycle.unit === 'lifetime') return null;
   // 本月剩下的 + 往后 12 个月，共 13 格：年付订阅一年后的那笔也落在格子里
   const labels = Array.from({ length: 13 }, (_, i) => addMonths(`${today.slice(0, 7)}-01`, i).slice(0, 7));
   const vals = cs.map((c) => ({ c, v: chargeValue(state, c, base) }));
@@ -631,7 +660,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       tone: 'ok',
     });
   const nx = nextCharge(sub, today);
-  if (nx && nx > today && effectiveStatus(sub, today) !== 'ended')
+  if (nx && nx > today && !['ended', 'terminated'].includes(effectiveStatus(sub, today)))
     evs.push({
       date: nx,
       title: t('detail.ev.next'),
@@ -640,7 +669,21 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
     });
   const up = upcomingPhase(sub, today);
   if (up?.planned) evs.push({ date: up.start, title: t('detail.up.planned'), sub: plan(up), future: true });
-  if (sub.end) evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
+  for (const v of vs) {
+    if (v.stop)
+      evs.push({
+        date: v.stop.date,
+        title: t(v.stop.kind === 'terminate' ? 'core.stop.terminate' : 'core.stop.cancel'),
+        sub: roDescription(v, state, today),
+        tone: v.stop.kind === 'terminate' ? 'bad' : 'ink',
+      });
+    if (!state.readonly)
+      for (const p of v.payments ?? [])
+        if (p.kind === 'refund')
+          evs.push({ date: p.date, title: t('editor.payment.kind.refund'), sub: money(-p.amount, v.currency), tone: 'ok', future: p.date > today });
+  }
+  if (sub.end && !sub.stop)
+    evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
   evs.sort((a, b) => a.date.localeCompare(b.date));
 
   // 只有「开始订阅」一条时，没什么可看的
@@ -759,7 +802,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
               {cnDateFull(sub.expires)}
             </Prop>
           )}
-          {sub.end && <Prop k={st === 'ended' ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Prop>}
+          {sub.end && <Prop k={['ended', 'terminated'].includes(st) ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Prop>}
           {sub.trialEnd && <Prop k={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Prop>}
         </dl>
         {sub.notes && (

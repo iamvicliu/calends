@@ -93,5 +93,26 @@
     "health": "Sức khỏe & thể hình",
     "phone": "Viễn thông",
     "daily": "Đời sống"
+  },
+  "stop": {
+    "title": "Dừng dịch vụ",
+    "nonrenew": "Không gia hạn",
+    "cancel": "Dừng ngay",
+    "terminate": "Bị nhà cung cấp vô hiệu hóa",
+    "date": "Ngày dừng",
+    "paidThrough": "Đã trả đến {date}",
+    "refundYes": "Đã hoàn tiền",
+    "refundNo": "Không hoàn tiền",
+    "refundAmount": "Số tiền hoàn",
+    "refundDate": "Ngày hoàn tiền",
+    "reason": "Lý do (tùy chọn)",
+    "currencyHint": "Hoàn tiền dùng {currency}, đơn vị tiền của gói. Có thể nhập đơn vị tiền và số tiền thực hoàn về thẻ bên dưới.",
+    "refunded": "Đã hoàn {money}",
+    "partial": "Hoàn một phần {money}",
+    "unrefunded": "Không hoàn · {days} ngày chưa dùng",
+    "unused": "{days} ngày đã trả nhưng chưa dùng, khoảng {money}",
+    "unusedTitle": "Đã trả nhưng chưa dùng",
+    "terminated": "Đã vô hiệu hóa",
+    "restore": "Kích hoạt lại"
   }
 }

@@ -42,7 +42,18 @@
     "personNoItems": "{name} 沒有可記收款的共享或代付",
     "personItemsAmbiguous": "{name} 在多處，請用 subscription 指定：{list}",
     "needSubOrPerson": "需要 subscription 或 person",
-    "needKind": "需要 kind（share 或 proxy）"
+    "needKind": "需要 kind（share 或 proxy）",
+    "stopBeforeStart": "停止日不能早於開始日。",
+    "stopAfterPaidThrough": "停止日晚於本期已付到日，請改用到期不續。",
+    "refundExceedsPaid": "退款合計不能超過當期實付。",
+    "refundCurrency": "退款幣別必須與訂閱幣別一致，卡片實退請使用 settled。",
+    "subscriptionEnded": "訂閱已結束，請透過新階段重新訂閱。",
+    "terminatedReactivate": "已停用訂閱不能恢復，請透過 change_plan（resume / 新階段）重新訂閱。",
+    "needStop": "已停用訂閱必須填寫停止資訊。",
+    "invalidPaidThrough": "本期付到日必須與原計費週期一致。",
+    "invalidStop": "停止資訊必須與最後服務日一致，只有服務方停用可填寫原因。",
+    "invalidRefund": "退款金額須為有效數字，並以負數記錄。",
+    "refundBeforeStop": "退款日期不能早於停止日。"
   },
   "tool": {
     "get_overview": "帳本概況",

@@ -99,5 +99,26 @@
     "health": "Saúde e fitness",
     "phone": "Telefonia",
     "daily": "Estilo de vida"
+  },
+  "stop": {
+    "title": "Interromper serviço",
+    "nonrenew": "Não renovar",
+    "cancel": "Interromper agora",
+    "terminate": "Desativado pelo provedor",
+    "date": "Data de interrupção",
+    "paidThrough": "Pago até {date}",
+    "refundYes": "Reembolsado",
+    "refundNo": "Sem reembolso",
+    "refundAmount": "Valor do reembolso",
+    "refundDate": "Data do reembolso",
+    "reason": "Motivo (opcional)",
+    "currencyHint": "O reembolso usa {currency}, a moeda da assinatura. Outra moeda do cartão pode ser informada abaixo.",
+    "refunded": "Reembolsado {money}",
+    "partial": "Reembolso parcial {money}",
+    "unrefunded": "Sem reembolso · {days} dias não usados",
+    "unused": "{days} dias pagos não usados, cerca de {money}",
+    "unusedTitle": "Pago e não usado",
+    "terminated": "Desativado",
+    "restore": "Reativar"
   }
 }

@@ -52,7 +52,8 @@
     "active": "이용 중",
     "trial": "체험",
     "paused": "일시 정지",
-    "cancelled": "해지됨"
+    "cancelled": "해지됨",
+    "terminated": "사용 중지됨"
   },
   "category": {
     "choose": "카테고리 선택",
