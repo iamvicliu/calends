@@ -14,7 +14,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-Open `http://localhost:8787/admin` and use the setup token printed in the logs. The named volume `calends-data` persists all of `/data`, including the SQLite database state and generated setup token. No Cloudflare account is required.
+Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists all of `/data`, including the SQLite database state and generated setup token. No Cloudflare account is required.
 
 For production, pin a full version tag such as `xizozhe/calends:1.1.0` and change it deliberately when upgrading. `latest` follows the main branch; `1.1` follows releases in that minor series. These moving tags are convenient for updates but do not pin a specific release. You can replace `xizozhe/calends` with `ghcr.io/imetn/calends` in these commands.
 
@@ -51,7 +51,7 @@ docker compose up -d --build
 docker compose logs calends
 ```
 
-Compose builds `calends:local`, starts the service on port 8787 and mounts the named volume `calends_calends-data` at `/data`. Open `http://localhost:8787/admin` and use the setup token from the logs. To update after obtaining newer source, run `docker compose up -d --build` in `docker/` again. `docker compose down` preserves the volume; `docker compose down -v` deletes the ledger volume.
+Compose builds `calends:local`, starts the service on port 8787 and mounts the named volume `calends_calends-data` at `/data`. Open `http://localhost:8787/` and use the setup token from the logs on the login page. To update after obtaining newer source, run `docker compose up -d --build` in `docker/` again. `docker compose down` preserves the volume; `docker compose down -v` deletes the ledger volume.
 
 The supplied `docker/docker-compose.yml` builds from source by default. To use a prebuilt image instead, replace the entire `build:` block and the existing `image: calends:local` line with `image: xizozhe/calends:latest`, keeping the remaining settings. For example:
 
@@ -182,8 +182,8 @@ Read the README and docs/self-hosting.md first.
    calends-data mounted at /data. Read the setup token with docker logs calends.
    Build from source only when needed, for example for subpath deployment.
    For public access, configure HTTPS with my chosen proxy.
-4. Verify the /admin URL is reachable. Give me the URL and setup token, then explain how to
-   add a passkey and connect an assistant from the AI access page.
+4. Verify the app URL at / reaches the login page at /login. Give me the app URL and setup token,
+   then explain how to add a passkey and connect an assistant from the AI access page at /connect.
 ```
 
 ## Subpath deployment
@@ -196,4 +196,4 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data \
   -e BASE_PATH=/calends -e SITE_URL=https://example.com/calends -e TRUST_PROXY=1 calends:local
 ```
 
-Open `https://example.com/calends/admin`. For Cloudflare, set `BASE_PATH` in the environment when running `npm run deploy` and in the Worker's `vars`.
+Open `https://example.com/calends/`; login is at `/calends/login`, AI access at `/calends/connect` and the optional read-only public page at `/calends/public`. MCP clients use `/calends/mcp`. For Cloudflare, set `BASE_PATH` in the environment when running `npm run deploy` and in the Worker's `vars`. See [routes and login redirects](../ARCHITECTURE.md#web-requests-and-state) for access rules.

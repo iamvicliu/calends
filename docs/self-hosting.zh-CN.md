@@ -14,7 +14,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。命名卷 `calends-data` 持久化整个 `/data`，包括 SQLite 数据库状态与自动生成的初始化令牌，无需 Cloudflare 账号。
+打开 `http://localhost:8787/`，在登录页使用日志中的初始化令牌设置密码。命名卷 `calends-data` 持久化整个 `/data`，包括 SQLite 数据库状态与自动生成的初始化令牌，无需 Cloudflare 账号。
 
 生产环境建议固定完整版本标签，如 `xizozhe/calends:1.1.0`，升级时再主动修改。`latest` 跟随 main 分支，`1.1` 跟随该次版本系列的发布；这类浮动标签方便更新，但不锁定某次发布。以下命令中的 `xizozhe/calends` 也可替换为 `ghcr.io/imetn/calends`。
 
@@ -51,7 +51,7 @@ docker compose up -d --build
 docker compose logs calends
 ```
 
-Compose 会构建 `calends:local`，在 8787 端口启动服务，并用命名卷 `calends_calends-data` 持久化 `/data`。打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。取得新版源码后，在 `docker/` 下再运行 `docker compose up -d --build` 即可重建并更新。`docker compose down` 保留数据卷；`docker compose down -v` 会删除账本数据卷。
+Compose 会构建 `calends:local`，在 8787 端口启动服务，并用命名卷 `calends_calends-data` 持久化 `/data`。打开 `http://localhost:8787/`，在登录页使用日志中的初始化令牌设置密码。取得新版源码后，在 `docker/` 下再运行 `docker compose up -d --build` 即可重建并更新。`docker compose down` 保留数据卷；`docker compose down -v` 会删除账本数据卷。
 
 仓库中的 `docker/docker-compose.yml` 默认从源码构建。如需使用预构建镜像，将整个 `build:` 块及原有的 `image: calends:local` 一行替换为 `image: xizozhe/calends:latest`，保留其他配置。例如：
 
@@ -182,8 +182,8 @@ Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Serv
    用 docker logs calends 读取初始化令牌。
    仅在需要时从源码构建，例如部署到子路径。
    需要公网访问时，用我选择的反向代理配置 HTTPS。
-4. 验证 /admin 地址可访问，把地址和初始化令牌告诉我，
-   再说明如何绑定 Passkey，以及在后台「连接」页接入 AI 助手。
+4. 验证应用地址 / 可跳转到登录页 /login，把应用地址和初始化令牌告诉我，
+   再说明如何绑定 Passkey，以及在 Calends 的「连接」页 /connect 接入 AI 助手。
 ```
 
 ## 子路径部署
@@ -196,4 +196,4 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data \
   -e BASE_PATH=/calends -e SITE_URL=https://example.com/calends -e TRUST_PROXY=1 calends:local
 ```
 
-打开 `https://example.com/calends/admin`。Cloudflare 部署时，在运行 `npm run deploy` 的环境变量和 Worker 的 `vars` 中都设置 `BASE_PATH`。
+打开 `https://example.com/calends/`；登录页为 `/calends/login`，「连接」页为 `/calends/connect`，可选的只读公开页为 `/calends/public`。MCP 客户端使用 `/calends/mcp`。Cloudflare 部署时，在运行 `npm run deploy` 的环境变量和 Worker 的 `vars` 中都设置 `BASE_PATH`。访问与登录回跳规则见[架构说明](../ARCHITECTURE.md#web-requests-and-state)。

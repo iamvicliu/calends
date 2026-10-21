@@ -34,7 +34,7 @@
 - **余额与合租分摊**：管理银行卡、预付余额和礼品卡，估算余额还能用多久，记录家庭套餐收款与替朋友代付的费用。
 - **报告与日历**：支出趋势、现金与权责对比、预付价值、退订节省、订阅体检和可分享的年度回顾；支持月历、年历与私密 ICS 订阅。
 - **续费提醒**：邮件、Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Server酱与自定义 Webhook。
-- **AI 接入**：通过支持 MCP 的助手查询和修改账本，令牌可限制权限，写入前可预览。
+- **AI 接入**：通过支持 MCP 助手查询和修改账本，令牌可限制权限，写入前可预览。
 - **数据由你掌握**：密码与 Passkey 登录、设备远程下线、可选的服务端脱敏公开页、JSON 备份恢复和 CSV 导入导出，支持 14 种语言。
 
 <details>
@@ -51,6 +51,8 @@
 
 可以先试用[在线演示](https://demo.calends.date)。演示账本由所有访客共用，每日重置，对外通知等功能不可用。
 
+从 `/` 打开 Calends，在 `/login` 登录。在设置中开启公开页后，访客可通过 `/public` 查看只读账本。路由与登录回跳规则见[架构说明](ARCHITECTURE.md#web-requests-and-state)。
+
 ### Cloudflare Workers
 
 使用 Workers 和 D1，可[一键部署](https://deploy.workers.cloudflare.com/?url=https://github.com/imetn/calends)，也可以从源码部署：
@@ -64,7 +66,7 @@ node scripts/wrangler.mjs secret put SETUP_TOKEN
 npm run deploy
 ```
 
-`SETUP_TOKEN` 请填写一串足够长的随机字符串。部署命令会构建应用、在首次部署时创建 D1 数据库并执行迁移。打开 `https://<你的 worker>.workers.dev/admin`，输入令牌并设置密码。
+`SETUP_TOKEN` 请填写一串足够长的随机字符串。部署命令会构建应用、在首次部署时创建 D1 数据库并执行迁移。打开 `https://<你的 worker>.workers.dev/`，在登录页输入令牌并设置密码。
 
 ### Docker
 
@@ -75,7 +77,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。命名卷 `calends-data` 将 SQLite 数据持久化到 `/data`。也可使用 `ghcr.io/imetn/calends:latest`。生产环境建议固定版本标签，如 `1.1.0`，而不是使用 `latest`。
+打开 `http://localhost:8787/`，在登录页使用日志中的初始化令牌设置密码。命名卷 `calends-data` 将 SQLite 数据持久化到 `/data`。也可使用 `ghcr.io/imetn/calends:latest`。生产环境建议固定版本标签，如 `1.1.0`，而不是使用 `latest`。
 
 也可以通过 Compose 从源码构建。在源码目录的 `docker/` 下执行，Compose 会使用仓库中的 [Dockerfile](docker/Dockerfile) 构建并启动应用：
 
@@ -95,7 +97,7 @@ docker compose logs calends
 
 你可以问「下周有什么要续费」「今年一共花了多少」，也可以说「Netflix 从今天起涨到 17.99 美元」。Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口，使用 Streamable HTTP，内置 20 多个工具。
 
-在后台「连接」页创建只读或读写令牌，再接入客户端：
+在 Calends 的「连接」页（`/connect`）创建只读或读写令牌，再接入客户端。浏览器打开 `/mcp` 会跳转到此页；MCP 客户端使用 `/mcp` 接口：
 
 **Claude Code**
 
@@ -116,7 +118,7 @@ codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALE
 
 欢迎提交问题、改进翻译或发起 Pull Request。本地开发、检查命令与贡献约定见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-修改子系统前，请先阅读[架构说明](ARCHITECTURE.md)和[代码规范](docs/code-standards.md)。AI 编程助手从 [AGENTS.md](AGENTS.md) 读取项目约定，`CLAUDE.md` 引用同一份规则。
+修改子系统前，请先阅读[AGENTS.md](AGENTS.md)、[架构说明](ARCHITECTURE.md)和[代码规范](docs/code-standards.md)。
 
 技术栈为 React 19、Vite、HeroUI / React Aria、shadcn/ui，以及 Cloudflare Workers + D1（SQLite）。计费、汇率等领域逻辑位于 `shared/`，由浏览器和 Worker 共用。
 

@@ -51,6 +51,8 @@ Track what you pay, when it renews, and who owes you. Calends brings subscriptio
 
 [Try the live demo](https://demo.calends.date) to explore before deploying. It is shared by all visitors and resets daily; external notifications are disabled.
 
+Open Calends at `/` and sign in at `/login`. Public sharing is optional: enable it in Settings to make the read-only page available at `/public`. See [routes and login redirects](ARCHITECTURE.md#web-requests-and-state) for details.
+
 ### Cloudflare Workers
 
 Use [one-click deployment](https://deploy.workers.cloudflare.com/?url=https://github.com/imetn/calends) with Workers and D1, or deploy from source:
@@ -64,7 +66,7 @@ node scripts/wrangler.mjs secret put SETUP_TOKEN
 npm run deploy
 ```
 
-Use a long random string for `SETUP_TOKEN`. The deploy command builds the app, provisions D1 on first deployment and applies migrations. Open `https://<your-worker>.workers.dev/admin`, enter the token and set your password.
+Use a long random string for `SETUP_TOKEN`. The deploy command builds the app, provisions D1 on first deployment and applies migrations. Open `https://<your-worker>.workers.dev/`, enter the token on the login page and set your password.
 
 ### Docker
 
@@ -75,7 +77,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-Open `http://localhost:8787/admin` and use the setup token printed in the logs. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.1.0` instead of `latest`.
+Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.1.0` instead of `latest`.
 
 Alternatively, build from source with Compose. From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
 
@@ -95,7 +97,7 @@ See the [self-hosting guide](docs/self-hosting.md) for custom domains, configura
 
 Ask “What renews next week?”, “How much did I spend this year?” or “Netflix went up to $17.99 from today.” Calends provides 20+ tools over a stateless [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` using Streamable HTTP.
 
-In **AI access**, create a read-only or read/write token, then connect your client:
+On the **AI access** page (`/connect`), create a read-only or read/write token, then connect your client. Opening `/mcp` in a browser takes you to this page; MCP clients use the `/mcp` endpoint:
 
 **Claude Code**
 

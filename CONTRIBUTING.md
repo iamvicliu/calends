@@ -11,7 +11,7 @@ Use a current Node.js 22.x release, matching CI and Docker. Add `DEV_BYPASS_AUTH
 ```bash
 npm ci
 npm run db:migrate:local
-npm run dev   # http://127.0.0.1:5173/admin
+npm run dev   # http://127.0.0.1:5173/
 ```
 
 Vite serves the UI on port 5173 and proxies API requests to the Worker on port 8787. Local database state lives in `.wrangler/state`; personal configuration under `local/` is not needed to contribute. Use a fresh checkout or an explicitly isolated Wrangler persistence directory when testing imports or migrations.

@@ -1,6 +1,6 @@
 # Notes for coding agents
 
-Calends is a single-owner subscription ledger. The public page is read-only; maintenance lives under `/admin`. The same billing rules and Worker run on Cloudflare and in Docker.
+Calends is a single-owner subscription ledger. Application pages live at `/` and require login; the optional read-only public page lives at `/public`. See [web requests and state](ARCHITECTURE.md#web-requests-and-state) for routes and login redirects. The same billing rules and Worker run on Cloudflare and in Docker.
 
 ## Before changing a subsystem
 
