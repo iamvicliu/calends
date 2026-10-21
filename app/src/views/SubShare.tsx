@@ -125,7 +125,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         </div>
       </div>
       <small className="sc-k">{hide ? t('share.together') : t('share.totalSpent')}</small>
-      <div className="sc-big">{hide ? st.duration : m(st.total)}</div>
+      <div className="sc-big">{hide ? st.duration : m(-st.total)}</div>
       <div className="sc-grid">
         <div>
           <small>{hide ? t('share.charges') : t('share.subscribed')}</small>
@@ -133,7 +133,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         </div>
         <div>
           <small>{hide ? t('share.gaps') : t('share.realMonthly')}</small>
-          <b>{hide ? t('share.times', { count: st.gaps.length }) : m(st.perMonth)}</b>
+          <b>{hide ? t('share.times', { count: st.gaps.length }) : m(-st.perMonth)}</b>
         </div>
         <div>
           <small>{t('share.price')}</small>
@@ -197,23 +197,23 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
               cycleLabel(c.sub.cycle)
             )}
           </span>
-          <span className="rc-v">
-            {hide ? (c.kind === 'refund' ? t('share.refundShort') : t('share.nth', { n: rows.length - i })) : m(c.amount, c.currency)}
+          <span className={`rc-v ${c.amount < 0 ? 'green' : ''}`}>
+            {hide ? (c.kind === 'refund' ? t('share.refundShort') : t('share.nth', { n: rows.length - i })) : m(-c.amount, c.currency)}
           </span>
-          {!hide && c.currency !== st.base && <span className="rc-x">≈{m(v)}</span>}
+          {!hide && c.currency !== st.base && <span className={`rc-x ${v < 0 ? 'green' : ''}`}>≈{m(-v)}</span>}
         </div>
       ))}
       {rest.length > 0 && (
         <div className="rc-row">
           <span className="rc-d">··</span>
           <span className="rc-n">{t('share.earlier', { count: rest.length })}</span>
-          <span className="rc-v">{hide ? '' : m(rest.reduce((a, x) => a + x.v, 0))}</span>
+          <span className="rc-v">{hide ? '' : m(-rest.reduce((a, x) => a + x.v, 0))}</span>
         </div>
       )}
       <div className="rc-cut" />
       <div className="rc-sum">
         <span>{hide ? t('share.time') : t('share.total')}</span>
-        <b>{hide ? st.duration : m(st.total)}</b>
+        <b>{hide ? st.duration : m(-st.total)}</b>
       </div>
       <div className="rc-kv">
         <span>{t('share.chargeCount')}</span>
@@ -221,7 +221,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
       </div>
       <div className="rc-kv">
         <span>{hide ? t('share.switches') : t('share.realMonthly')}</span>
-        <span>{hide ? t('share.times', { count: st.vs.length - 1 }) : m(st.perMonth)}</span>
+        <span>{hide ? t('share.times', { count: st.vs.length - 1 }) : m(-st.perMonth)}</span>
       </div>
       <div className="rc-kv">
         <span>{t('share.price')}</span>
@@ -254,7 +254,7 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
         <div>
           <b>{sub.name}</b>
           <span>
-            {st.duration} · {hide ? t('share.n.charges', { count: st.charges.length }) : t('share.sum', { amount: m(st.total) })}
+            {st.duration} · {hide ? t('share.n.charges', { count: st.charges.length }) : t('share.sum', { amount: m(-st.total) })}
           </span>
         </div>
       </div>
@@ -309,7 +309,7 @@ function SPoster({ sub, st, hide, m }: Ctx) {
       <div className="sp-line">
         {hide
           ? `${t('share.n.charges', { count: st.charges.length })} · ${changeText(st)}`
-          : t('share.totalPerDay', { total: m(st.total), perDay: m(st.perDay) })}
+          : t('share.totalPerDay', { total: m(-st.total), perDay: m(-st.perDay) })}
       </div>
       <div className="sp-chips">
         <span>{statusText(st)}</span>
@@ -334,11 +334,11 @@ function SYears({ sub, st, hide, m }: Ctx) {
           <span>{t('share.byYear')}</span>
         </div>
       </div>
-      <div className="sy-big">{hide ? st.duration : m(st.total)}</div>
+      <div className="sy-big">{hide ? st.duration : m(-st.total)}</div>
       <div className="sy-bars">
         {st.years.map(([y, v]) => (
           <div key={y} className="sy-col">
-            <span className="sy-v">{hide ? `${st.total > 0 ? Math.round((v / st.total) * 100) : 0}%` : m(v)}</span>
+            <span className="sy-v">{hide ? `${st.total > 0 ? Math.round((v / st.total) * 100) : 0}%` : m(-v)}</span>
             <i style={{ height: `${Math.max(4, (v / max) * 100)}%` }} />
             <span className="sy-y">{y}</span>
           </div>

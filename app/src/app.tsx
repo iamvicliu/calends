@@ -3,7 +3,7 @@ import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/billing.ts';
-import { cnDate, money } from '../../shared/format.ts';
+import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
@@ -607,6 +607,8 @@ function Root() {
   const { state } = useStore();
   const [loc, setLoc] = useState(locale());
   const want = state ? preferredLocale(state.settings.language) : loc;
+  const signed = state?.settings.signedAmounts !== false;
+  setSignedAmounts(signed);
   useEffect(() => {
     if (want !== loc) void loadLocale(want).then(() => setLoc(want));
     document.title = t('app.name');
@@ -621,7 +623,7 @@ function Root() {
     )
       void saveSettings({ siteUrl: `${location.origin}${base('/').replace(/\/$/, '')}` }).catch(() => {});
   }, [want, loc]);
-  return <App key={loc} />;
+  return <App key={`${loc}:${signed}`} />;
 }
 
 initRouter();

@@ -3,7 +3,7 @@ import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, us
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { useRef, useState } from 'react';
 import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../../shared/billing.ts';
-import { cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
+import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -25,7 +25,7 @@ function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state
   const daysLeft = r.runsOutOn ? diffDays(today, r.runsOutOn) : Infinity;
   const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
   const tone = daysLeft <= 7 ? 'out' : daysLeft <= (m.lowRunwayDays ?? 30) ? 'low' : '';
-  const bal = pair(r.current, m.currency);
+  const bal = pair(r.current, m.currency, { plain: true });
   const body = (
     <div className="runway">
       <div className="rw-top">
@@ -33,7 +33,7 @@ function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600 }}>{m.name}</div>
           <div className="muted" style={{ fontSize: 12.5 }}>
-            {t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) })}
+            {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -335,10 +335,10 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                       m={m}
                       // 设了余额的账户主数字是余额，右下是每月扣多少、还能扣几期；没有余额的卡主数字是每月支出
                       label={r ? t('wallet.card.balance') : t('wallet.card.monthlySpend')}
-                      value={r ? <Amount value={r.current} ccy={m.currency} /> : <Amount value={monthly} ccy={base} />}
+                      value={r ? <Amount plain value={r.current} ccy={m.currency} /> : <Amount value={-monthly} ccy={base} />}
                       right={
                         r && r.monthlyDrain > 0
-                          ? t('wallet.runway.drain', { amount: money(r.monthlyDrain, m.currency, { compact: true }) })
+                          ? t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })
                           : t('wallet.card.subs', { count: liveHere.length })
                       }
                       rightSub={cardHint(m, r)}
@@ -479,7 +479,7 @@ function MethodSheet({
                 }
                 onClick={() => onOpen(state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub)}
               >
-                <span>−{money(c.amountInMethod, m.currency, { compact: true })}</span>
+                <span className={c.amountInMethod < 0 ? 'green' : undefined}>{flow(-c.amountInMethod, m.currency, { compact: true })}</span>
                 <b style={{ color: c.balanceAfter < 0 ? 'var(--red)' : 'var(--label)', fontWeight: 600, minWidth: 80 }}>
                   {money(c.balanceAfter, m.currency, { compact: true })}
                 </b>
@@ -620,10 +620,10 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
               return (
                 <div key={i} className="cell topup-row">
                   <span className="cell-l">
-                    {money(tp.amount, m.currency)}
+                    <span className="green">{flow(tp.amount, m.currency)}</span>
                     <small>
                       {tp.date}
-                      {tp.cost != null ? ` · ${t('wallet.topup.spent', { amount: money(tp.cost, tp.costCurrency ?? state.settings.baseCurrency) })}` : ''}
+                      {tp.cost != null ? ` · ${t('wallet.topup.spent', { amount: flow(-tp.cost, tp.costCurrency ?? state.settings.baseCurrency) })}` : ''}
                       {tp.note ? ` · ${tp.note}` : ''}
                     </small>
                   </span>

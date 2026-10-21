@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { addDays, totals } from '../../../shared/billing.ts';
-import { money, monthLabel } from '../../../shared/format.ts';
+import { flow, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
 import { cancelSavings, yearReview, type YearReview } from '../../../shared/metrics.ts';
@@ -31,7 +31,7 @@ interface Ctx {
   /** 占这一年总花费的百分比 */
   pct: (v: number) => string;
   mrr: number;
-  saved: number;
+  saved: string;
   /** 这一年按支付方式分的花费 */
   byMethod: Array<{ name: string; sum: number }>;
   /** 小票底部的一句话：从数据里随机挑 */
@@ -78,7 +78,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     const soon = allCharges(state, today, addDays(today, 30), today).length;
     if (soon) out.push(t('review.tip.soon', { count: soon }));
     if (!hide && base === 'CNY' && r.perDay >= 1)
-      out.push(t('review.tip.milkTea', { amount: money(r.perDay, base), count: Math.max(1, Math.round(r.perDay / 15)) }));
+      out.push(t('review.tip.milkTea', { amount: flow(-r.perDay, base), count: Math.max(1, Math.round(r.perDay / 15)) }));
     if (!hide && saved > 1) out.push(t('review.tip.saved', { amount: money(saved, base, { compact: true }) }));
     return out.length ? out[Math.floor(seed * out.length)] : t('review.tip.fallback');
   };
@@ -103,7 +103,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
           hide,
           pct,
           mrr: tot.mrr,
-          saved,
+          saved: saved ? money(saved, base, { compact: true }) : '',
           byMethod,
           tip: tipsFor(hide),
           today,
@@ -124,7 +124,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
 
 function ReviewLoss({ r, hide, m }: Pick<Ctx, 'r' | 'hide' | 'm'>) {
   return !hide && r.stopLoss !== 0 ? (
-    <div className="review-loss">{Number.isFinite(r.stopLoss) ? t('review.stopLoss', { amount: m(r.stopLoss) }) : t('core.stop.fxMissing')}</div>
+    <div className="review-loss">{Number.isFinite(r.stopLoss) ? t('review.stopLoss', { amount: m(-r.stopLoss) }) : t('core.stop.fxMissing')}</div>
   ) : null;
 }
 
@@ -144,7 +144,7 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
   const rest = r.items.slice(12);
   const restSum = rest.reduce((a, x) => a + x.sum, 0);
   const bars = Array.from({ length: 52 }, (_, i) => 1 + ((Math.round(r.total) * 7 + r.charges * 13 + i * 31) % 4));
-  const amt = (v: number) => (hide ? pct(v) : m(v));
+  const amt = (v: number) => (hide ? pct(v) : m(-v));
   const no = `${year}${String(r.charges).padStart(4, '0')}`;
   return (
     <div className="rp">
@@ -163,7 +163,7 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
       {rest.length > 0 && <Line l={t('review.receipt.rest', { count: rest.length })} r={amt(restSum)} />}
       <div className="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.count', { items: r.items.length, charges: r.charges })} r="" />
-      {!hide && <Line l={t('review.receipt.total')} r={m(r.total)} b />}
+      {!hide && <Line l={t('review.receipt.total')} r={m(-r.total)} b />}
       {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="rp-rule">{'-'.repeat(60)}</div>
@@ -192,7 +192,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
     <div className="ps" style={{ '--g1': glow[0] ?? '#6366f1', '--g2': glow[1] ?? '#ec4899', '--g3': glow[2] ?? '#f59e0b' } as Record<string, string>}>
       <div className="ps-year">{year}</div>
       <div className="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
-      <div className="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</div>
+      <div className="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</div>
       {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="ps-line">
@@ -216,13 +216,13 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
           {r.items[0]
             ? hide
               ? t('review.ofYear', { pct: pct(r.items[0].sum) })
-              : `${m(r.items[0].sum)} · ${t('review.ofYear', { pct: pct(r.items[0].sum) })}`
+              : `${m(-r.items[0].sum)} · ${t('review.ofYear', { pct: pct(r.items[0].sum) })}`
             : ''}
         </span>
       </div>
       <div className="ps-foot">
         <span>
-          {hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(r.perDay) })}
+          {hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(-r.perDay) })}
         </span>
         <span>{location.host}</span>
       </div>
@@ -241,13 +241,13 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
       </div>
       <div className="rv-big">
         <small>{t(`review.card.intro.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`)}</small>
-        <span className="rv-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</span>
+        <span className="rv-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</span>
         {!hide && <small>{t('review.spendBasis')}</small>}
         <ReviewLoss r={r} hide={hide} m={m} />
         <span>
           {hide
             ? `${t('review.n.charges', { count: r.charges })} · ${t('review.n.currencyKinds', { count: r.currencies })}`
-            : `${t('review.n.charges', { count: r.charges })} · ${t('review.card.perDay', { amount: m(r.perDay) })}`}
+            : `${t('review.n.charges', { count: r.charges })} · ${t('review.card.perDay', { amount: m(-r.perDay) })}`}
         </span>
       </div>
       <div className="rv-sec">
@@ -259,7 +259,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="rv-name">
                 <span>{x.sub.name}</span>
-                <b>{hide ? pct(x.sum) : m(x.sum)}</b>
+                <b>{hide ? pct(x.sum) : m(-x.sum)}</b>
               </div>
               <div className="rv-track">
                 <i style={{ width: `${(x.sum / top) * 100}%` }} />
@@ -285,7 +285,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
                 month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }),
               })}
             </b>
-            <span>{hide ? t('review.ofYear', { pct: pct(r.busiestMonth.sum) }) : m(r.busiestMonth.sum)}</span>
+            <span>{hide ? t('review.ofYear', { pct: pct(r.busiestMonth.sum) }) : m(-r.busiestMonth.sum)}</span>
           </div>
         )}
         <div>
@@ -295,7 +295,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
           </b>
           <span>
             {saved && !hide
-              ? t('review.card.saved', { amount: m(saved) })
+              ? t('review.card.saved', { amount: saved })
               : r.ended.length
                 ? t('review.card.ended', { count: r.ended.length })
                 : t('review.card.noneEnded')}
@@ -304,7 +304,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
         <div>
           <small>{t('review.card.currencies')}</small>
           <b>{t('review.card.currencyCount', { count: r.currencies })}</b>
-          <span>{hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(mrr) })}</span>
+          <span>{hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(-mrr) })}</span>
         </div>
       </div>
       <div className="rv-foot">{location.host}</div>
@@ -325,7 +325,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
     <div className="st">
       <div className="st-head">
         <span>{t('review.stars.head', { year, whose }).trim()}</span>
-        <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</b>
+        <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</b>
       </div>
       {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
@@ -336,7 +336,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
           return (
             <span key={x.sub.id} className="st-b" style={{ left: (b.x - b.r) * W, top: (b.y - b.r) * W, width: d, height: d }}>
               <SubIcon sub={x.sub} size={Math.max(12, Math.round(d * 0.48))} proxied />
-              {d > 70 && <small>{hide ? pct(x.sum) : m(x.sum)}</small>}
+              {d > 70 && <small>{hide ? pct(x.sum) : m(-x.sum)}</small>}
             </span>
           );
         })}

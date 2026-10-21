@@ -21,6 +21,8 @@
     "startPage": "起動時に開く",
     "startPageAria": "開始ページ",
     "baseCurrency": "基準通貨",
+    "signedAmounts": "収支の符号",
+    "signedAmountsSub": "支出は −、返金や受け取ったお金は + で表示",
     "timezone": "タイムゾーン",
     "weekStart": "週の始まり",
     "weekStartAria": "週の最初の曜日",

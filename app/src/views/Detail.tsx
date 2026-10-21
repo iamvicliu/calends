@@ -27,7 +27,7 @@ import {
   upcomingPhase,
   type Charge,
 } from '../../../shared/billing.ts';
-import { cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
+import { flow, cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
 import { chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { CarSheet } from './Carpool.tsx';
@@ -191,7 +191,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const root = useRef<HTMLDivElement>(null);
 
   const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
-  const big = pair(nowPrice, cur.currency, { compact: false });
+  const big = pair(nowPrice, cur.currency, { compact: false, plain: true });
 
   const editPay = (c: Charge) => {
     if (ro) return;
@@ -344,7 +344,7 @@ const stopLine = (v: Subscription, state: AppState, today: string) => {
   const sm = state.readonly ? undefined : stopSummary(v, today);
   if (!sm) return undefined;
   return (
-    [sm.kind === 'terminate' ? sm.reason : '', sm.unusedValue > 0 ? `${t('core.stop.lossTitle')} ${money(sm.unusedValue, v.currency)}` : '']
+    [sm.kind === 'terminate' ? sm.reason : '', sm.unusedValue > 0 ? `${t('core.stop.lossTitle')} ${flow(-sm.unusedValue, v.currency)}` : '']
       .filter(Boolean)
       .join(' · ') || undefined
   );
@@ -396,7 +396,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
           <span className="dt-badge">{t('detail.stats.count', { count: history.length })}</span>
         </div>
         <div className="dt-kpi-val">
-          <b>{money(total, base, { compact: true })}</b>
+          <b>{flow(-total, base, { compact: true })}</b>
         </div>
       </div>
       <div className="dt-panel dt-kpi">
@@ -415,7 +415,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
         </div>
         <div className="dt-kpi-val">
           {/* 买断：花的钱摊到拥有的每个月，越用越便宜 */}
-          <b>{money(lifetime ? total / Math.max(1, active / 30.44) : perMonth, base, { compact: true })}</b>
+          <b>{flow(-(lifetime ? total / Math.max(1, active / 30.44) : perMonth), base, { compact: true })}</b>
         </div>
       </div>
     </div>
@@ -442,7 +442,7 @@ function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; t
     <Panel
       className="dt-upcoming"
       title={t('detail.upcoming.title')}
-      aside={cs.length ? t('detail.upcoming.total', { amount: money(total, base), count: cs.length }) : undefined}
+      aside={cs.length ? t('detail.upcoming.total', { amount: flow(-total, base), count: cs.length }) : undefined}
     >
       {cs.length > 0 ? (
         <>
@@ -462,8 +462,8 @@ function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; t
                   <small>{relDays(diffDays(today, c.date))}</small>
                 </span>
                 <span className="a">
-                  <b>{money(-c.amount, c.currency, { sign: true })}</b>
-                  {c.currency !== base && Number.isFinite(v) && <small>≈ {money(-v, base, { sign: true })}</small>}
+                  <b className={c.amount < 0 ? 'dt-in' : undefined}>{flow(-c.amount, c.currency)}</b>
+                  {c.currency !== base && Number.isFinite(v) && <small style={v < 0 ? { color: 'var(--dt-ok)' } : undefined}>≈ {flow(-v, base)}</small>}
                 </span>
               </li>
             ))}
@@ -505,6 +505,7 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
     });
   if (reg.length < 2) return null;
 
+  // 坐标轴是刻度，不是收支，不带正负号
   const fmt = (v: number) => money(v, ccy, { compact: true });
   const first = rows[0];
   const last = rows[rows.length - 1];
@@ -558,7 +559,7 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
       }
     >
       <div className="dt-headline">
-        <b>{money(last.v, ccy)}</b>
+        <b>{flow(-last.v, ccy)}</b>
         <Trend pct={vsFirst} />
       </div>
       {rows.length > 1 ? (
@@ -581,7 +582,7 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
                 <div className="cc-tip-r">
                   <i className="k-v" />
                   <span>{t('detail.chart.perCharge')}</span>
-                  <b>{money(r.v, ccy)}</b>
+                  <b>{flow(-r.v, ccy)}</b>
                 </div>
                 {r.list != null && (
                   <div className="cc-tip-r">
@@ -594,7 +595,7 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
                   <div className="cc-tip-r">
                     <i />
                     <span>{t('detail.chart.origAmount')}</span>
-                    <b className="m">{money(c.amount, c.currency)}</b>
+                    <b className="m">{flow(-c.amount, c.currency)}</b>
                   </div>
                 )}
                 <div className="cc-tip-f">
@@ -682,7 +683,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
     evs.push({
       date: nx,
       title: t('detail.ev.next'),
-      sub: `${money(priceAt(sub, nx), currentPhase(sub, nx).currency)} · ${relDays(diffDays(today, nx))}`,
+      sub: `${flow(-priceAt(sub, nx), currentPhase(sub, nx).currency)} · ${relDays(diffDays(today, nx))}`,
       future: true,
     });
   const up = upcomingPhase(sub, today);
@@ -701,7 +702,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
           evs.push({
             date: p.date,
             title: t('editor.payment.kind.refund'),
-            sub: money(-p.amount, v.currency, { sign: true }),
+            sub: flow(-p.amount, v.currency),
             tone: 'ok',
             future: p.date > today,
           });
@@ -727,7 +728,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
             <i />
             <div>
               <b>{e.title}</b>
-              {e.sub && <small>{e.sub}</small>}
+              {e.sub && <small style={e.tone === 'ok' ? { color: 'var(--dt-ok)' } : undefined}>{e.sub}</small>}
             </div>
             <time>{e.date}</time>
           </li>
@@ -793,12 +794,12 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
             </div>
             {sm.unusedValue > 0 && (
               <div className="dt-oc-loss">
-                <b>−{money(sm.unusedValue, phase.currency)}</b>
+                <b>{flow(-sm.unusedValue, phase.currency)}</b>
                 <small>
                   {[
                     t('core.stop.lossTitle'),
                     t('core.stop.lossDays', { count: sm.wastedDays }),
-                    phase.currency !== base ? `≈ ${money(toBase(state, sm.unusedValue, phase.currency), base)}` : '',
+                    phase.currency !== base ? `≈ ${flow(-toBase(state, sm.unusedValue, phase.currency), base)}` : '',
                   ]
                     .filter(Boolean)
                     .join(' · ')}
@@ -809,7 +810,7 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
               <Prop k={t('core.stop.date')}>{cnDateFull(sm.date)}</Prop>
               <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(sm.paidThrough)}</Prop>
               <Prop k={t('core.stop.refundAmount')} hint={sm.refundStatus === 'full' ? t('core.stop.fullyRefunded') : undefined}>
-                {sm.refunded > 0 ? <span className="dt-in">{money(sm.refunded, phase.currency, { sign: true })}</span> : t('core.stop.refundNo')}
+                {sm.refunded > 0 ? <span className="dt-in">{flow(sm.refunded, phase.currency)}</span> : t('core.stop.refundNo')}
               </Prop>
             </dl>
           </section>
@@ -966,7 +967,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
                     <Prop k={t('detail.share.myShare')}>{money(mine, sub.currency)}</Prop>
                   ) : (
                     <Prop k={t('detail.share.myShare')}>
-                      <span className="dt-settled">{t('detail.share.surplus', { amount: money(-mine, sub.currency) })}</span>
+                      <span className="dt-in">{t('detail.share.surplus', { amount: flow(-mine, sub.currency) })}</span>
                     </Prop>
                   );
                 })()}
@@ -1039,7 +1040,9 @@ function Charges({
                       <b>{y}</b>
                       {t('detail.stats.count', { count: ys.length })}
                     </span>
-                    <span>{money(-ys.reduce((a, r) => a + (r.b || 0), 0), base, { sign: true })}</span>
+                    <span className={ys.reduce((a, r) => a + (r.b || 0), 0) < 0 ? 'dt-in' : undefined}>
+                      {flow(-ys.reduce((a, r) => a + (r.b || 0), 0), base)}
+                    </span>
                   </div>
                 )}
                 {shown
@@ -1053,11 +1056,11 @@ function Charges({
                     >
                       <span className="d">{c.date.slice(5)}</span>
                       <span className="o">
-                        {c.currency !== base || c.settled ? money(-c.amount, c.currency, { sign: true }) : ''}
+                        {c.currency !== base || c.settled ? flow(-c.amount, c.currency) : ''}
                         {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
                         {multi && c.sub.region && !c.kind && <em className="dt-kind">{c.sub.region}</em>}
                       </span>
-                      <span className="c">{Number.isFinite(b) ? money(-b, base, { sign: true }) : '—'}</span>
+                      <span className="c">{Number.isFinite(b) ? flow(-b, base) : '—'}</span>
                     </div>
                   ))}
               </Fragment>

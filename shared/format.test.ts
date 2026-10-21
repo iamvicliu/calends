@@ -1,0 +1,68 @@
+import { afterEach, test } from 'node:test';
+import assert from 'node:assert/strict';
+import { flow, flowSign, money, setSignedAmounts } from './format.ts';
+import { setLocale } from './i18n.ts';
+import { DEFAULT_SETTINGS } from './types.ts';
+
+afterEach(() => {
+  setSignedAmounts(true);
+  setLocale('en', []);
+});
+
+test('cash flow signs default on, including settings saved before the option existed', () => {
+  assert.equal(DEFAULT_SETTINGS.signedAmounts, undefined);
+  assert.equal(flow(-66.94, 'CNY'), '−¥66.94');
+  assert.equal(flow(66.94, 'CNY'), '+¥66.94');
+  assert.equal(flow(0, 'CNY'), '¥0.00');
+  assert.equal(flow(-0, 'CNY'), '¥0.00');
+});
+
+test('switching off removes both directions and switching back restores them', () => {
+  setSignedAmounts(false);
+  assert.equal(flow(-70.02, 'CNY'), '¥70.02');
+  assert.equal(flow(70.02, 'CNY'), '¥70.02');
+  assert.equal(flowSign(-70.02), '');
+  assert.equal(flowSign(70.02), '');
+  setSignedAmounts(true);
+  assert.equal(flow(-70.02, 'CNY'), '−¥70.02');
+  assert.equal(flow(70.02, 'CNY'), '+¥70.02');
+});
+
+test('flow preserves currency, compact, decimals and localized grouping from money', () => {
+  for (const ccy of ['USD', 'JPY', 'KRW', 'VND', 'IDR', 'CHF']) {
+    for (const n of [0, 7, 66.94, 12345.678]) {
+      for (const opts of [{}, { compact: true }, { decimals: 3 }, { compact: true, decimals: 1 }]) {
+        assert.equal(flow(-n, ccy, opts), `${n ? '−' : ''}${money(n, ccy, opts)}`);
+        assert.equal(flow(n, ccy, opts), `${n ? '+' : ''}${money(n, ccy, opts)}`);
+        setSignedAmounts(false);
+        assert.equal(flow(-n, ccy, opts), money(n, ccy, opts));
+        setSignedAmounts(true);
+      }
+    }
+  }
+  setLocale('de', []);
+  assert.equal(flow(-1234.56, 'EUR'), '−€1.234,56');
+  setSignedAmounts(false);
+  assert.equal(flow(1234.56, 'EUR'), '€1.234,56');
+});
+
+test('unavailable financial values remain unavailable with either setting', () => {
+  for (const on of [true, false]) {
+    setSignedAmounts(on);
+    for (const n of [NaN, Infinity, -Infinity]) {
+      assert.equal(flow(n, 'USD'), '—');
+      assert.equal(flowSign(n), '');
+    }
+    assert.equal(flowSign(0), '');
+    assert.equal(flowSign(-0), '');
+  }
+});
+
+test('prices and comparison signs keep money semantics regardless of cash flow setting', () => {
+  for (const on of [true, false]) {
+    setSignedAmounts(on);
+    assert.equal(money(66.94, 'CNY'), '¥66.94');
+    assert.equal(money(5, 'USD', { sign: true }), '+$5.00');
+    assert.equal(money(-5, 'USD', { sign: true }), '−$5.00');
+  }
+});

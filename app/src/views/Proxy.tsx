@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
-import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -98,11 +98,11 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
         <div className="proxy-facts">
           <div>
             <small>{t('proxy.paidPeriods', { count: list.length })}</small>
-            <b>{money(charged, base, { compact: true })}</b>
+            <b>{flow(-charged, base, { compact: true })}</b>
           </div>
           <div>
             <small>{t('proxy.received')}</small>
-            <b>{money(received, base, { compact: true })}</b>
+            <b className="green">{flow(received, base, { compact: true })}</b>
           </div>
           <div>
             <small>{open.length ? t('proxy.owedPeriods', { count: open.length }) : t('proxy.owed')}</small>
@@ -199,11 +199,11 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           <div className="proxy-facts four">
             <div>
               <small>{t('proxy.paidPeriods', { count: list.length })}</small>
-              <b>{money(charged, base, { compact: true })}</b>
+              <b>{flow(-charged, base, { compact: true })}</b>
             </div>
             <div>
               <small>{t('proxy.received')}</small>
-              <b>{money(received, base, { compact: true })}</b>
+              <b className="green">{flow(received, base, { compact: true })}</b>
             </div>
             <div>
               <small>{t('proxy.owed')}</small>
@@ -219,10 +219,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             </div>
             <div>
               <small>{t('proxy.diffLabel')}</small>
-              <b className={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>
-                {diff > 0.5 ? '+' : ''}
-                {money(diff, base, { compact: true })}
-              </b>
+              <b className={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>{flow(diff, base, { compact: true })}</b>
             </div>
           </div>
         </div>
@@ -242,22 +239,22 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               <button key={r.date} className="ld-row" disabled={ro} onClick={() => setEdit(r)}>
                 <span className="ld-date">{cnDate(r.date)}</span>
                 <span>
-                  <b>{money(r.charged, r.currency)}</b>
+                  <b>{flow(-r.charged, r.currency)}</b>
                   {/* 窄屏没有「当时成本」一列，折合写在实扣下面 */}
-                  <small className="ld-cost-inline">≈ {money(r.chargedBase, base)}</small>
+                  <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>
                 </span>
-                <span className="ld-cost">{money(r.chargedBase, base)}</span>
-                <span>
+                <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
+                <span className={r.receivedBase != null ? 'green' : undefined}>
                   {r.receivedBase == null ? (
                     <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
                   ) : (
                     <>
-                      <b>{money(r.entry!.received!, rc)}</b>
+                      <b className="green">{flow(r.entry!.received!, rc)}</b>
                       {(r.entry?.receivedOn || rc !== base) && (
-                        <small>
+                        <small style={{ color: 'var(--green)' }}>
                           {[
                             r.entry?.receivedOn && t('proxy.table.receivedOn', { date: cnDate(r.entry.receivedOn) }),
-                            rc !== base && `≈ ${money(r.receivedBase, base)}`,
+                            rc !== base && `≈ ${flow(r.receivedBase, base)}`,
                           ]
                             .filter(Boolean)
                             .join(' · ')}
@@ -267,7 +264,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                   )}
                 </span>
                 <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
-                  {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : `${d > 0 ? '+' : '−'}${money(Math.abs(d), base)}`}
+                  {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base)}
                 </span>
               </button>
             );
@@ -275,18 +272,11 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           {list.length > 1 && (
             <div className="ld-row ld-tf">
               <span>{t('proxy.table.total', { count: list.length })}</span>
-              <span>
-                {new Set(list.map((r) => r.currency)).size === 1
-                  ? money(
-                      list.reduce((a, r) => a + r.charged, 0),
-                      list[0].currency,
-                    )
-                  : ''}
-              </span>
-              <span className="ld-cost">{money(charged, base)}</span>
-              <span>{money(received, base)}</span>
+              <span>{new Set(list.map((r) => r.currency)).size === 1 ? flow(-list.reduce((a, r) => a + r.charged, 0), list[0].currency) : ''}</span>
+              <span className="ld-cost">{flow(-charged, base)}</span>
+              <span className="green">{flow(received, base)}</span>
               <span className={Math.abs(diff) < 0.5 ? 'muted' : diff > 0 ? 'gain' : 'loss'}>
-                {Math.abs(diff) < 0.5 ? t('proxy.table.even') : `${diff > 0 ? '+' : '−'}${money(Math.abs(diff), base)}`}
+                {Math.abs(diff) < 0.5 ? t('proxy.table.even') : flow(diff, base)}
               </span>
             </div>
           )}
@@ -370,7 +360,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       <div className="stack">
         <Group
           title={t('proxy.table.charged')}
-          foot={t('proxy.entry.chargedFoot', { amount: money(chargedBase, base), list: money(row.list, row.listCurrency) })}
+          foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
         >
           <Cell label={t('proxy.entry.amount')}>
             <input className="num" inputMode="decimal" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
@@ -385,7 +375,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             diff == null
               ? t('proxy.entry.receivedEmpty')
               : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
-                  amount: money(recvBase!, base),
+                  amount: flow(recvBase!, base),
                   diff: money(Math.abs(diff), base),
                 })
           }
@@ -448,14 +438,14 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
           <div className="card stat">
             <div className="stat-label">{t('proxy.owed')}</div>
             <div className="stat-value" style={{ color: sum.owedCount ? 'var(--orange)' : undefined }}>
-              <Amount value={sum.owed} ccy={base} />
+              <Amount plain value={sum.owed} ccy={base} />
             </div>
             <div className="stat-sub">{sum.owedCount ? t('proxy.page.owedSub', { count: sum.owedCount }) : t('proxy.page.allBack')}</div>
           </div>
           <div className="card stat">
             <div className="stat-label">{t('proxy.page.total')}</div>
             <div className="stat-value">
-              <Amount value={sum.charged} ccy={base} />
+              <Amount value={-sum.charged} ccy={base} />
             </div>
             <div className="stat-sub">{t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) })}</div>
           </div>

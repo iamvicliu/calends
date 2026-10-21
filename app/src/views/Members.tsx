@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { addDays, addMonths, todayIn, uid, memberUnpaidFrom } from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
-import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
@@ -157,7 +157,7 @@ export function MemberSheet({
     const next = { ...f, payments, paidUntil };
     setF(next);
     setAdding(false);
-    if (!isNew) save(next, t('family.member.toastPaid', { name: f.name || t('family.member.defaultName'), amount: money(pay.amount, pay.currency) }));
+    if (!isNew) save(next, t('family.member.toastPaid', { name: f.name || t('family.member.defaultName'), amount: flow(pay.amount, pay.currency) }));
   };
   const removePayment = (i: number) => {
     const payments = (f.payments ?? []).filter((_, k) => k !== i);
@@ -329,7 +329,7 @@ export function MemberSheet({
 
         <Group
           title={t('family.member.payments', { count: (f.payments ?? []).length })}
-          foot={received ? t('family.member.receivedTotal', { amount: money(received, base) }) : undefined}
+          foot={received ? <span className="green">{t('family.member.receivedTotal', { amount: flow(received, base) })}</span> : undefined}
         >
           <Cell label={t('family.member.paidUntil')}>
             <DatePicker value={f.paidUntil} clearable placeholder={t('family.member.paidUntilPh')} onChange={(v) => up({ paidUntil: v })} />
@@ -339,7 +339,7 @@ export function MemberSheet({
             return (
               <div key={`${p.date}-${i}`} className="cell member-pay">
                 <span className="cell-l">
-                  {money(p.amount, p.currency)}
+                  <span className="green">{flow(p.amount, p.currency)}</span>
                   <small>
                     {p.from
                       ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) })

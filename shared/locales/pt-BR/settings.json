@@ -19,6 +19,8 @@
     "startPage": "Abrir em",
     "startPageAria": "Página inicial",
     "baseCurrency": "Moeda base",
+    "signedAmounts": "Sinais de entradas e saídas",
+    "signedAmountsSub": "Exibir − nas despesas e + nos reembolsos e recebimentos",
     "timezone": "Fuso horário",
     "weekStart": "Semana começa em",
     "weekStartAria": "Primeiro dia da semana",

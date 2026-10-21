@@ -22,6 +22,8 @@
     "startPage": "Ouvrir sur",
     "startPageAria": "Page d’accueil",
     "baseCurrency": "Devise de référence",
+    "signedAmounts": "Signes des entrées et sorties",
+    "signedAmountsSub": "Afficher − pour les dépenses et + pour les remboursements et encaissements",
     "timezone": "Fuseau horaire",
     "weekStart": "Début de semaine",
     "weekStartAria": "Premier jour de la semaine",

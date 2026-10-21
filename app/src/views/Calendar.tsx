@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../../shared/billing.ts';
-import { cnDate, money, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
+import { flow, cnDate, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
@@ -90,7 +90,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       <Toolbar
         title={mode === 'month' ? monthLabel(month, { long: true }) : t('calendar.yearTitle', { year })}
         // 月视图的笔数与合计放进右侧的指标卡；年视图没有右栏，仍写在标题下
-        sub={mode === 'year' ? t('calendar.summary', { count: list.length, amount: money(sumOf(list), base, { compact: true }) }) : undefined}
+        sub={mode === 'year' ? t('calendar.summary', { count: list.length, amount: flow(-sumOf(list), base, { compact: true }) }) : undefined}
       >
         <Seg
           value={mode}
@@ -157,14 +157,14 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       >
                         <div className="cal-day">
                           <b>{Number(d.slice(8))}</b>
-                          {items.length > 0 && <span className="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
+                          {items.length > 0 && <span className="sum">{flow(-sumOf(items), base, { decimals: 0 })}</span>}
                         </div>
                         <div className="cal-icons" style={{ '--m0': `${fits(shown.length) ? 3 : step - icon}px` } as Record<string, string>}>
                           {shown.map((c, i) => (
                             <span
                               key={c.sub.id}
                               style={{ '--i': i } as Record<string, number>}
-                              {...tipProps(() => `${c.sub.name} · ${money(c.amount, c.currency)}`)}
+                              {...tipProps(() => `${c.sub.name} · ${flow(-c.amount, c.currency)}`)}
                             >
                               <SubIcon sub={c.sub} size={24} />
                             </span>
@@ -178,14 +178,14 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               </div>
               <section className="cal-dayhead">
                 <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
-                {selList.length > 0 && <span>{t('calendar.summary', { count: selList.length, amount: money(sumOf(selList), base, { compact: true }) })}</span>}
+                {selList.length > 0 && <span>{t('calendar.summary', { count: selList.length, amount: flow(-sumOf(selList), base, { compact: true }) })}</span>}
               </section>
               {selList.length === 0 ? (
                 <div className="card cal-none">{t('calendar.noneDay')}</div>
               ) : (
                 <div className="cal-daycards">
                   {selList.map((c) => {
-                    const amt = pair(c.amount, c.currency, { value: chargeValue(state, c) });
+                    const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
                     return (
                       <button key={c.sub.id} className="card cal-daycard" onClick={() => onOpen(c.sub)}>
                         <SubIcon sub={c.sub} size={40} />
@@ -225,7 +225,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                     <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>
                       {t('calendar.day', { day: Number(c.date.slice(8)) })}
                     </span>
-                    <b style={{ color: 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>{money(c.amount, c.currency, { compact: true })}</b>
+                    <b style={{ color: c.amount < 0 ? 'var(--green)' : 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      {flow(-c.amount, c.currency, { compact: true })}
+                    </b>
                   </Cell>
                 ))}
               </Group>
@@ -268,7 +270,7 @@ function YearHeat({
               {monthLabel(m, { year: false })}
               <span>
                 {count ? t('calendar.heatCount', { count }) : ''}
-                {money(total, base, { compact: true })}
+                {flow(-total, base, { compact: true })}
               </span>
             </div>
             <div className="heat-g">
@@ -294,7 +296,7 @@ function YearHeat({
                         <b>{cnDate(d, true)}</b>
                         {list.map((c) => (
                           <div key={c.sub.id}>
-                            {c.sub.name} · {money(c.amount, c.currency)}
+                            {c.sub.name} · {flow(-c.amount, c.currency)}
                           </div>
                         ))}
                       </>
@@ -327,7 +329,7 @@ function MonthStat({ charges, month, sumOf, base }: { charges: Charge[]; month: 
     <div className="card cal-stat">
       <small>{t('calendar.monthTotal', { month: monthLabel(month, { year: false }) })}</small>
       <div className="cal-stat-big">
-        <b>{money(total, base, { compact: true })}</b>
+        <b>{flow(-total, base, { compact: true })}</b>
         <span>{t('calendar.count', { count: charges.length })}</span>
       </div>
       <div className="cal-stat-bar" aria-hidden="true">
@@ -336,12 +338,12 @@ function MonthStat({ charges, month, sumOf, base }: { charges: Charge[]; month: 
       <div className="cal-stat-split">
         <div>
           <small>{t('calendar.charged')}</small>
-          <b>{money(paid, base, { compact: true })}</b>
+          <b>{flow(-paid, base, { compact: true })}</b>
           <span>{t('calendar.count', { count: done.length })}</span>
         </div>
         <div>
           <small>{t('calendar.pending')}</small>
-          <b>{money(total - paid, base, { compact: true })}</b>
+          <b>{flow(-(total - paid), base, { compact: true })}</b>
           <span>{t('calendar.count', { count: left.length })}</span>
         </div>
       </div>

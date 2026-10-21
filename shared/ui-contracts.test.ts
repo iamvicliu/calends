@@ -173,7 +173,7 @@ test('9/17. 所有语言说明全额实付和日历客户端边界；ICS 仍声�
 test('报告损失明细可打开原订阅；四种年度分享在非零且未隐藏时展示损失', async () => {
   const { cancelSavings, stopLosses, yearReview } = await import('./metrics.ts');
   const { stopSubscription } = await import('./phases.ts');
-  const { cnDate, money } = await import('./format.ts');
+  const { cnDate, flow, money } = await import('./format.ts');
   const { flatten, setLocale, t } = await import('./i18n.ts');
   type Element = { type: string; props: Record<string, any>; children: unknown[] };
   const React = {
@@ -204,6 +204,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     React,
     t,
     money,
+    flow,
     cnDate,
     useMemo: (f: () => unknown) => f(),
     cancelSavings,
@@ -252,7 +253,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     const rows = all(tree).filter((e) => e.props.className === 'stop-row');
     assert.equal(rows.length, 2);
     const terminated = rows.find((e) => text(e).includes('abuse'))!;
-    assert.ok(text(terminated).includes(t('core.stop.partial', { money: money(6, 'USD') })));
+    assert.ok(text(terminated).includes(t('core.stop.partial', { money: flow(6, 'USD') })));
     assert.ok(text(terminated).includes(money(10, 'USD')));
     assert.ok(text(terminated).includes(t('core.stop.lossDays', { count: 10 })));
     assert.ok(text(terminated).includes('−'));
@@ -275,16 +276,16 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
       name: 'Alex',
       whose: 'Alex',
       ongoing: true,
-      m: (n: number) => money(n, 'USD'),
+      m: (n: number) => flow(n, 'USD'),
       pct: () => '50%',
       byMethod: [],
       tip: 'Tip',
       today,
       mrr: 0,
-      saved: 0,
+      saved: '',
     };
     for (const style of [Receipt, Poster, Card, Stars]) {
-      const line = t('review.stopLoss', { amount: money(26, 'USD') });
+      const line = t('review.stopLoss', { amount: flow(-26, 'USD') });
       assert.ok(text(style({ ...ctx, hide: false })).includes(line));
       assert.ok(!text(style({ ...ctx, hide: true })).includes(line));
       assert.ok(text(style({ ...ctx, r: { ...r, stopLoss: NaN }, hide: false })).includes(t('core.stop.fxMissing')));

@@ -1,7 +1,7 @@
 import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../../shared/billing.ts';
-import { cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
+import { flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
 import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosses } from '../../../shared/metrics.ts';
@@ -39,7 +39,7 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
         </div>
         <Tips state={state} today={today} onOpen={onOpen} />
         <p className="card-note" style={{ textAlign: 'center' }}>
-          {t('overview.footer', { count: tot.activeCount, amount: money(tot.mrr, base) })}{' '}
+          {t('overview.footer', { count: tot.activeCount, amount: flow(-tot.mrr, base) })}{' '}
           <a href={appPath('/report')} style={{ textDecoration: 'underline' }}>
             {t('overview.fullReport')}
           </a>
@@ -72,7 +72,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
         g.items.push({
           key: `${c.sub.id}-${c.date}-${g.items.length}`,
           icon: <SubIcon sub={c.sub} size={30} />,
-          tip: `${c.sub.name} · ${money(c.amount, c.currency)}`,
+          tip: `${c.sub.name} · ${flow(-c.amount, c.currency)}`,
           onClick: () => onOpen(real),
         });
         map.set(c.date, g);
@@ -86,7 +86,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
       <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
         <h3 className="sec-title">{t('overview.timeline.title')}</h3>
         <span className="sec-sub" style={{ marginTop: 0 }}>
-          {t('overview.timeline.sub', { past: money(past30, base, { compact: true }), next: money(next30, base, { compact: true }) })}
+          {t('overview.timeline.sub', { past: flow(-past30, base, { compact: true }), next: flow(-next30, base, { compact: true }) })}
         </span>
       </div>
       <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
@@ -209,7 +209,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
           >
             <i style={{ background: catColor(k) }} />
             {k}
-            <b>{money(v, base, { compact: true })}</b>
+            <b>{flow(-v, base, { compact: true })}</b>
           </button>
         ))}
       </div>
@@ -221,11 +221,11 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
             {isFuture ? t('overview.spending.projected') : sel === curKey ? t('overview.spending.inProgress') : ''}
           </h4>
           <div className="big">
-            <Amount value={selTotal} ccy={base} />
+            <Amount value={-selTotal} ccy={base} />
           </div>
           <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
             {t('overview.n.subs', { count: items.length })} · {t('overview.n.charges', { count: selData?.cs.length ?? 0 })}
-            {sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: money(selPaid, base, { compact: true }) }) : ''}
+            {sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: flow(-selPaid, base, { compact: true }) }) : ''}
           </div>
         </div>
         <div className="sel-items">
@@ -241,7 +241,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
                 {e.sub.name}
                 {e.n > 1 ? ` ×${e.n}` : ''}
               </span>
-              <b>{money(e.v, base, { compact: true })}</b>
+              <b>{flow(-e.v, base, { compact: true })}</b>
             </button>
           ))}
         </div>
@@ -271,7 +271,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
       <div className="card-h">
         <h3>{t('overview.due.title')}</h3>
         <span className="meta">
-          {t('overview.n.charges', { count: cs.length })} · {money(total, base, { compact: true })}
+          {t('overview.n.charges', { count: cs.length })} · {flow(-total, base, { compact: true })}
         </span>
       </div>
       {cs.length === 0 && <div className="empty">{t('overview.due.empty')}</div>}
@@ -284,7 +284,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
               {list.slice(0, g === 'thisWeek' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
                 const m = state.methods.find((x) => x.id === c.sub.methodId);
-                const amt = pair(c.amount, c.currency, { value: chargeValue(state, c) });
+                const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
                 return (
                   <button key={c.sub.id + c.date + i} className="due-row" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={36} />
@@ -467,22 +467,22 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
         </svg>
         <div className="stmt-facts">
           <div>
-            <b>{money(tot.mrr * 12, base, { compact: true })}</b>
+            <b>{flow(-tot.mrr * 12, base, { compact: true })}</b>
             <span>{t('overview.stmt.annual')}</span>
           </div>
           <div>
-            <b>{money(ytd, base, { compact: true })}</b>
+            <b>{flow(-ytd, base, { compact: true })}</b>
             <span>{t('overview.stmt.ytd', { year: today.slice(0, 4) })}</span>
             <div className="stmt-paid-note">
               {!state.readonly && loss !== 0 && (
                 <button type="button" className="stmt-loss-note" onClick={openLosses} title={!Number.isFinite(loss) ? t('core.stop.fxMissing') : undefined}>
-                  {t('overview.stmt.loss')} <strong>{money(loss, base, { compact: true })}</strong>
+                  {t('overview.stmt.loss')} <strong>{flow(-loss, base, { compact: true })}</strong>
                 </button>
               )}
             </div>
           </div>
           <div>
-            <b>{money(tot.mrr / 30.4375, base)}</b>
+            <b>{flow(-tot.mrr / 30.4375, base)}</b>
             <span>{t('overview.stmt.perDay')}</span>
           </div>
           <div>
@@ -495,7 +495,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
         <div className="stmt-cap m-hide">
           {hv ? (
             <>
-              <b>{hv.s.name}</b> · {t('overview.stmt.share', { amount: money(hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) })}
+              <b>{hv.s.name}</b> · {t('overview.stmt.share', { amount: flow(-hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) })}
             </>
           ) : (
             <>{t('overview.stmt.caption')}</>
@@ -523,10 +523,10 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
                   onMouseEnter={() => setHover(b.i)}
                   onMouseLeave={() => setHover(null)}
                   onClick={() => onOpen(s)}
-                  aria-label={t('overview.stmt.aria', { name: s.name, amount: money(v, base) })}
+                  aria-label={t('overview.stmt.aria', { name: s.name, amount: flow(-v, base) })}
                 >
                   <SubIcon sub={s} size={Math.max(12, Math.round(d * 0.5))} />
-                  {d > 86 && <span className="star-amt">{money(v, base, { compact: true })}</span>}
+                  {d > 86 && <span className="star-amt">{flow(-v, base, { compact: true })}</span>}
                 </button>
               );
             })}

@@ -26,7 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import { cycleLabel } from '../../../shared/billing.ts';
-import { billLabel, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, billLabel, cnDateFull, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
@@ -696,7 +696,7 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
   switch (tool) {
     case 'record_receivable':
       add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
-      add(t('assistant.f.amount'), a.amount != null ? money(Number(a.amount), String(a.currency ?? collect)) : undefined);
+      add(t('assistant.f.amount'), a.amount != null ? <span className="green">{flow(Number(a.amount), String(a.currency ?? collect))}</span> : undefined);
       add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
       add(t('assistant.f.paidUntil'), day(a.until));
       break;
@@ -734,7 +734,14 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
       break;
     case 'record_payment':
       add(t('assistant.f.kind'), a.kind && a.kind !== 'charge' ? t(`detail.charges.kind.${String(a.kind)}`) : t('assistant.v.charge'));
-      add(t('assistant.f.amount'), a.amount != null ? money(Number(a.amount), subCcy ?? state.settings.baseCurrency) : undefined);
+      add(
+        t('assistant.f.amount'),
+        a.amount != null ? (
+          <span className={a.kind === 'refund' ? 'green' : undefined}>
+            {flow(a.kind === 'refund' ? Math.abs(Number(a.amount)) : -Number(a.amount), subCcy ?? state.settings.baseCurrency)}
+          </span>
+        ) : undefined,
+      );
       add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
       break;
     case 'delete_subscription':
@@ -839,7 +846,7 @@ function Proposal(props: {
           <div>
             {part.preview.next_charges.map((c) => (
               <span key={c.date}>
-                {c.date.slice(5).replace('-', '/')} · {money(c.amount, c.currency)}
+                {c.date.slice(5).replace('-', '/')} · {flow(-c.amount, c.currency)}
               </span>
             ))}
           </div>

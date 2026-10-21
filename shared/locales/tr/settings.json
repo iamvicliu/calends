@@ -19,6 +19,8 @@
     "startPage": "Açılış sayfası",
     "startPageAria": "Başlangıç sayfası",
     "baseCurrency": "Ana para birimi",
+    "signedAmounts": "Gelir ve gider işaretleri",
+    "signedAmountsSub": "Giderlerde −, iadelerde ve tahsilatlarda + göster",
     "timezone": "Saat dilimi",
     "weekStart": "Hafta başlangıcı",
     "weekStartAria": "Haftanın ilk günü",

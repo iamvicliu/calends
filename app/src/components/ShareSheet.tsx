@@ -1,7 +1,7 @@
 import { toBlob } from 'html-to-image';
 import type { ReactNode as ComponentChildren } from 'react';
 import { useRef, useState } from 'react';
-import { money } from '../../../shared/format.ts';
+import { flow } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { toast, usePref } from '../store.ts';
 import type { PrefKey } from '../../../shared/prefs.ts';
@@ -38,7 +38,7 @@ export function ShareSheet<S extends string>({
   const [amounts, setAmounts] = useState(true);
   const [busy, setBusy] = useState(false);
   const node = useRef<HTMLDivElement>(null);
-  const m = (v: number, ccy = base) => money(v, ccy, { compact: true });
+  const m = (v: number, ccy = base) => flow(v, ccy, { compact: true });
   const pick = (s: S) => setStyle(s);
 
   // 3 倍像素导出，发到聊天里也清楚

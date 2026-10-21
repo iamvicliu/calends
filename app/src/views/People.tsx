@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { uid } from '../../../shared/billing.ts';
-import { cnDateAuto, money } from '../../../shared/format.ts';
+import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { proxyRows } from '../../../shared/proxy.ts';
@@ -127,7 +127,7 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
           <div className="card stat">
             <div className="stat-label">{t('people.stat.owed')}</div>
             <div className="stat-value" style={{ color: owed > 0 ? 'var(--orange)' : undefined }}>
-              <Amount value={owed} ccy={base} />
+              <Amount plain value={owed} ccy={base} />
             </div>
             <div className="stat-sub">{owing.length ? t('people.stat.owedSub', { count: owing.length }) : t('people.stat.allSettled')}</div>
           </div>
@@ -205,7 +205,7 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
         </div>
         <div>
           <small>{t('people.sheet.received')}</small>
-          <b>{money(l.received, base, { compact: true })}</b>
+          <b className="green">{flow(l.received, base, { compact: true })}</b>
         </div>
         <div>
           <small>{t('people.sheet.last')}</small>
@@ -326,7 +326,7 @@ function PersonSheet({
           </div>
           <div>
             <small>{t('people.sheet.received')}</small>
-            <b>{money(l.received, base, { compact: true })}</b>
+            <b className="green">{flow(l.received, base, { compact: true })}</b>
           </div>
           <div>
             <small>{t('people.sheet.last')}</small>
@@ -351,7 +351,7 @@ function PersonSheet({
                   ) : (
                     <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
                   )}
-                  <small>{t('people.item.received', { amount: money(i.received, base, { compact: true }) })}</small>
+                  <small style={{ color: 'var(--green)' }}>{t('people.item.received', { amount: flow(i.received, base, { compact: true }) })}</small>
                 </span>
                 {!ro && !i.member?.exempt && (i.active || i.periodsOwed > 0) && (
                   <button className={`btn ${i.periodsOwed > 0 ? 'tinted' : ''} pp-collect`} onClick={() => record(i)}>

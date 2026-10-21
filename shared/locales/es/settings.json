@@ -19,6 +19,8 @@
     "startPage": "Abrir en",
     "startPageAria": "Página de inicio",
     "baseCurrency": "Moneda base",
+    "signedAmounts": "Signos de ingresos y gastos",
+    "signedAmountsSub": "Mostrar − en gastos y + en reembolsos y cobros",
     "timezone": "Zona horaria",
     "weekStart": "La semana empieza el",
     "weekStartAria": "Primer día de la semana",

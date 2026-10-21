@@ -1,7 +1,7 @@
 import { base as appPath } from '../base.ts';
 import { chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge } from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
-import { billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -86,14 +86,16 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           <div className="card stat">
             <div className="stat-label">{yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}</div>
             <div className="stat-value" style={{ color: yearNet < 0 ? 'var(--green)' : undefined }}>
-              <Amount value={Math.abs(yearNet)} ccy={base} />
+              <Amount value={-yearNet} ccy={base} />
             </div>
-            <div className="stat-sub">{t('family.pool.yearIncome', { amount: money(yearIncome, base, { compact: true }) })}</div>
+            <div className="stat-sub" style={{ color: 'var(--green)' }}>
+              {t('family.pool.yearIncome', { amount: flow(yearIncome, base, { compact: true }) })}
+            </div>
           </div>
           <div className="card stat">
             <div className="stat-label">{t('family.pool.owed')}</div>
             <div className="stat-value" style={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}>
-              <Amount value={owedSum} ccy={base} />
+              <Amount plain value={owedSum} ccy={base} />
             </div>
             <div className="stat-sub">{t('family.pool.owedSub', { count: owedAll.length })}</div>
           </div>
@@ -234,7 +236,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 sub={undefined}
                 onClick={() => onOpen(s)}
               >
-                {t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: money(s.price, s.currency) })}
+                {t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: flow(-s.price, s.currency) })}
               </Cell>
             ))}
           </Group>
@@ -401,7 +403,7 @@ export function CarSheet({
   const onboard = sh.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, sh.seats - 1 - onboard.length);
   const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).filter((d) => d.periodsOwed > 0).length;
-  const fmt = (v: number) => money(v, base, { compact: true });
+  const fmt = (v: number) => flow(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;
   const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${m.billEvery ?? 1}`);
@@ -480,29 +482,26 @@ export function CarSheet({
           <div className="proxy-facts four car-sheet-facts">
             <div>
               <small>{t('family.facts.cost')}</small>
-              <b>{fmt(book.yearCost)}</b>
+              <b>{fmt(-book.yearCost)}</b>
             </div>
             <div>
               <small>{t('family.facts.income')}</small>
-              <b>{fmt(book.yearIncome)}</b>
+              <b className="green">{fmt(book.yearIncome)}</b>
             </div>
             <div>
               <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
-              <b className={profit >= 0 ? 'done' : 'loss'}>
-                {profit >= 0 ? '+' : '−'}
-                {fmt(Math.abs(profit))}
-              </b>
+              <b className={profit >= 0 ? 'done' : 'loss'}>{fmt(profit)}</b>
             </div>
             <div>
               <small>{t('family.facts.sinceNone')}</small>
               {/* 还没收过款：只说付出了多少，别显示成「亏」或「赚 ¥0」 */}
               {book.received > 0 ? (
                 <b className={actual >= 0 ? 'done' : 'loss'}>
-                  {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
+                  {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(actual) })}
                 </b>
               ) : (
                 <>
-                  <b>{t('family.sheet.paidOut', { amount: fmt(book.paid) })}</b>
+                  <b>{t('family.sheet.paidOut', { amount: fmt(-book.paid) })}</b>
                   <em className="warn">{t('family.sheet.noReceiptsYet')}</em>
                 </>
               )}
@@ -540,10 +539,10 @@ export function CarSheet({
               ['out', t('family.sheet.tabOut', { count: outs.length })],
             ]}
           />
-          <span>
+          <span className={tab === 'in' ? 'green' : undefined}>
             {tab === 'in'
               ? t('family.sheet.receiptsSum', { count: receipts.length, amount: fmt(total) })
-              : t('family.sheet.receiptsSum', { count: outs.length, amount: fmt(outTotal) })}
+              : t('family.sheet.receiptsSum', { count: outs.length, amount: fmt(-outTotal) })}
           </span>
         </div>
         {tab === 'out' ? (
@@ -557,17 +556,17 @@ export function CarSheet({
               <Fragment key={g.y}>
                 <div className="ld-row car-period">
                   <span>{t('calendar.yearTitle', { year: g.y })}</span>
-                  <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+                  <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(-g.sum) })}</span>
                 </div>
                 {g.list.map(({ c, base: v }, i) => (
                   <div key={`${c.date}-${i}`} className="ld-row">
                     <span className="ld-date">{cnDate(c.date)}</span>
                     <span>
-                      <b>{money(c.amount, c.currency)}</b>
+                      <b className={c.amount < 0 ? 'green' : undefined}>{flow(-c.amount, c.currency)}</b>
                       {c.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
                     </span>
                     <span>
-                      <b>{money(v, base)}</b>
+                      <b className={v < 0 ? 'green' : undefined}>{flow(-v, base)}</b>
                     </span>
                   </div>
                 ))}
@@ -590,7 +589,7 @@ export function CarSheet({
               <Fragment key={g.key}>
                 <div className="ld-row car-period">
                   <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
-                  <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+                  <span style={{ color: 'var(--green)' }}>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
                 </div>
                 {g.list.map(({ m, p, base: v }, i) => (
                   <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
@@ -601,8 +600,8 @@ export function CarSheet({
                     {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
                     <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
                     <span>
-                      <b>{money(p.amount, p.currency)}</b>
-                      {p.currency !== base && <small>≈ {money(v, base)}</small>}
+                      <b className="green">{flow(p.amount, p.currency)}</b>
+                      {p.currency !== base && <small style={{ color: 'var(--green)' }}>≈ {flow(v, base)}</small>}
                     </span>
                   </button>
                 ))}
@@ -703,24 +702,24 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
  */
 /** 车卡上的数字：这辆车从发起到现在一共付出、收回多少，赚还是亏；按年的在弹窗里看 */
 function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: string }) {
-  const fmt = (v: number) => money(v, base, { compact: true });
+  const fmt = (v: number) => flow(v, base, { compact: true });
   const actual = -book.net;
   return (
     <div className="car-book">
       <div className="car-facts">
         <div>
           <small>{t('family.facts.paidAll')}</small>
-          <b>{fmt(book.paid)}</b>
+          <b>{fmt(-book.paid)}</b>
         </div>
         <div>
           <small>{t('family.facts.receivedAll')}</small>
-          <b>{fmt(book.received)}</b>
+          <b className="green">{fmt(book.received)}</b>
         </div>
         <div>
           {book.received > 0 ? (
             <>
               <small>{actual >= 0 ? t('family.facts.netGain') : t('family.facts.netLoss')}</small>
-              <b className={actual >= 0 ? 'gain' : 'loss'}>{fmt(Math.abs(actual))}</b>
+              <b className={actual >= 0 ? 'gain' : 'loss'}>{fmt(actual)}</b>
             </>
           ) : (
             <>

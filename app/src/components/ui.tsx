@@ -2,7 +2,7 @@ import { base } from '../base.ts';
 import type { ReactNode as ComponentChildren, JSX } from 'react';
 import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
-import { symbol } from '../../../shared/format.ts';
+import { flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
@@ -288,9 +288,8 @@ export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; h
 }
 
 /** 小组件式金额：小数位缩小 */
-export function Amount({ value, ccy, compact }: { value: number; ccy: string; compact?: boolean }) {
+export function Amount({ value, ccy, compact, plain }: { value: number; ccy: string; compact?: boolean; plain?: boolean }) {
   if (!Number.isFinite(value)) return <span className="amt">—</span>;
-  const neg = value < 0;
   const abs = Math.abs(value);
   const noDec = compact && abs >= 1000;
   // 整数分组和小数点都跟随当前语言（德语 1.234,56、法语 1 234,56），小数部分缩小显示
@@ -302,8 +301,8 @@ export function Amount({ value, ccy, compact }: { value: number; ccy: string; co
   const point = parts.find((p) => p.type === 'decimal')?.value;
   const dec = parts.find((p) => p.type === 'fraction')?.value;
   return (
-    <span className="amt">
-      {neg ? '−' : ''}
+    <span className="amt" style={!plain && value > 0 ? { color: 'var(--green)' } : undefined}>
+      {plain ? (value < 0 ? '−' : '') : flowSign(value)}
       <span className="cur">{symbol(ccy).trim()}</span>
       {int}
       {dec && (

@@ -19,6 +19,8 @@
     "startPage": "Открывать",
     "startPageAria": "Стартовая страница",
     "baseCurrency": "Основная валюта",
+    "signedAmounts": "Знаки доходов и расходов",
+    "signedAmountsSub": "Показывать − для расходов и + для возвратов и поступлений",
     "timezone": "Часовой пояс",
     "weekStart": "Начало недели",
     "weekStartAria": "Первый день недели",

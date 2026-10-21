@@ -2,7 +2,7 @@ import { StopBadge, stopDescription, stopLabel } from '../components/StopPanel.t
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
-import { cnDate, money, relDays } from '../../../shared/format.ts';
+import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
@@ -157,7 +157,7 @@ export function List({
     <>
       <Toolbar
         title={category ?? t('list.title')}
-        sub={t('list.summary', { count: rows.length, monthly: money(sum, base, { compact: true }), yearly: money(sum * 12, base, { compact: true }) })}
+        sub={t('list.summary', { count: rows.length, monthly: flow(-sum, base, { compact: true }), yearly: flow(-sum * 12, base, { compact: true }) })}
       >
         <label className="tb-search">
           <Icon name="search" />
@@ -296,7 +296,7 @@ export function List({
                     <PayBadge m={m} />
                   </div>
                   <div className="sc-price">
-                    <Amount value={shown(s, n).value} ccy={shown(s, n).ccy} />
+                    <Amount plain value={shown(s, n).value} ccy={shown(s, n).ccy} />
                     <span className="sc-per">/{perLabel(cur)}</span>
                   </div>
                   {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
@@ -408,7 +408,7 @@ export function List({
                     </span>
                     <span className="lt-amt">
                       <span>
-                        <Amount value={v.value} ccy={v.ccy} />
+                        <Amount plain value={v.value} ccy={v.ccy} />
                         <small>/{perLabel(cur)}</small>
                       </span>
                       {money2 !== 'orig' && s.currency !== money2 && <small>{v.sub}</small>}

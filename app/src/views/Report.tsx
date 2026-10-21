@@ -1,7 +1,7 @@
 import { base as appPath } from '../base.ts';
 import { Fragment, useMemo, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../../shared/billing.ts';
-import { cnDate, money, monthLabel } from '../../../shared/format.ts';
+import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import {
@@ -150,7 +150,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           markers={markers}
           tip={(i) => (
             <>
-              <b>{series[i].month}</b> · {perMonth(money(series[i].mrr, base, { compact: true }))}
+              <b>{series[i].month}</b> · {perMonth(flow(-series[i].mrr, base, { compact: true }))}
             </>
           )}
         />
@@ -205,10 +205,10 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
         <div>
           <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
           {/* 和顶部一致：花出去为负 */}
-          <b className="num">{perMonth(`−${money(mv.to, base, { compact: true })}`)}</b>
+          <b className="num">{perMonth(flow(-mv.to, base, { compact: true }))}</b>
         </div>
         <div className={`mv-delta ${Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'up' : 'down'}`}>
-          <small>{t('report.wf.vsFrom', { amount: `−${money(mv.from, base, { compact: true })}` })}</small>
+          <small>{t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}</small>
           <b className="num">
             {Math.abs(delta) < 0.5 ? t('report.wf.flat') : `${delta > 0 ? '−' : '+'}${money(Math.abs(delta), base, { compact: true })}`}
             {Math.abs(delta) >= 0.5 && mv.from > 0 && <em>{`${pct > 0 ? '−' : '+'}${Math.abs(pct * 100).toFixed(1)}%`}</em>}
@@ -333,7 +333,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
               <b>{rows[i].month}</b>
               {rows[i].projected ? t('report.cash.forecast') : ''}
               <br />
-              {t('report.cash.tip', { cash: money(rows[i].cash, base, { compact: true }), cost: money(rows[i].accrual, base, { compact: true }) })}
+              {t('report.cash.tip', { cash: flow(-rows[i].cash, base, { compact: true }), cost: flow(-rows[i].accrual, base, { compact: true }) })}
             </>
           )}
         />
@@ -351,14 +351,14 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           >
             <span>{t('report.cash.prepaid')}</span>
             <b>
-              <Amount value={pv.total} ccy={base} compact />
+              <Amount plain value={pv.total} ccy={base} compact />
             </b>
             <small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>
           </div>
           <div>
             <span>{t('report.cash.next90')}</span>
             <b>
-              <Amount value={next90} ccy={base} compact />
+              <Amount value={-next90} ccy={base} compact />
             </b>
             <small>{t('report.cash.fullPaidHint')}</small>
             <small>
@@ -366,7 +366,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
                 ? t('report.cash.peak', {
                     n: Number(peak.month.slice(5)),
                     month: monthLabel(peak.month.slice(0, 7), { year: false }),
-                    amount: money(peak.cash, base, { compact: true }),
+                    amount: flow(-peak.cash, base, { compact: true }),
                   })
                 : ''}
             </small>
@@ -397,15 +397,14 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
           <span>{t('report.stops.saved')}</span>
           <b className="green">
             {saved.total > 0 ? '+' : ''}
-            <Amount value={saved.total} ccy={base} compact />
+            <Amount plain value={saved.total} ccy={base} compact />
           </b>
           <small>{t('report.stops.savedHint')}</small>
         </div>
         <div>
           <span>{t('report.stops.loss')}</span>
           <b className="red">
-            {losses.total > 0 ? '−' : ''}
-            <Amount value={losses.total} ccy={base} compact />
+            <Amount value={-losses.total} ccy={base} compact />
           </b>
           <small>{t('report.stops.lossHint')}</small>
         </div>
@@ -425,14 +424,16 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
                   {cnDate(i.date)} · {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
                   {i.reason ? ` · ${i.reason}` : ''}
                 </small>
-                <small>{i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: money(i.refunded, i.currency) })}</small>
+                <small style={i.refunded > 0 ? { color: 'var(--green)' } : undefined}>
+                  {i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: flow(i.refunded, i.currency) })}
+                </small>
               </span>
               <span className="stop-amount">
                 <b className="red">
                   <span className="stop-days">{t('core.stop.lossDays', { count: i.wastedDays })} ·</span>
-                  <span>{i.fxMissing ? money(i.lossBase, base) : `−${money(i.lossBase, base)}`}</span>
+                  <span>{flow(-i.lossBase, base)}</span>
                 </b>
-                {i.currency !== base && <small>{money(i.loss, i.currency)}</small>}
+                {i.currency !== base && <small>{flow(-i.loss, i.currency)}</small>}
               </span>
             </button>
           ))}
@@ -497,18 +498,18 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           className={`tm-cell ${side > 200 ? 'lg' : ''}`}
           style={{ left: r.x, top: r.y, width: r.w, height: r.h, background: bg(x.s.category) }}
           onClick={() => (onPick ? onPick() : onOpen(x.s))}
-          {...tipProps(() => `${x.s.name} · ${perMonth(money(x.v, base))}`)}
+          {...tipProps(() => `${x.s.name} · ${perMonth(flow(-x.v, base))}`)}
         >
           {ico >= 12 && <SubIcon sub={x.s} size={ico} />}
           {label && <b>{x.s.name}</b>}
-          {label && r.h > ico + 52 && <span>{money(x.v, base, { compact: true })}</span>}
+          {label && r.h > ico + 52 && <span>{flow(-x.v, base, { compact: true })}</span>}
         </button>
       );
     });
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{sel ? `${sel.k} · ${perMonth(money(sel.v, base, { compact: true }))}` : t('report.comp.title')}</h3>
+        <h3>{sel ? `${sel.k} · ${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title')}</h3>
         {sel ? (
           <button className="btn plain" onClick={() => setFocus(null)}>
             {t('report.comp.back')}
@@ -546,7 +547,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                       <button
                         className="tm-head"
                         onClick={() => setFocus(e.k)}
-                        {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: money(e.v, base) }))}
+                        {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: flow(-e.v, base) }))}
                       >
                         <b>
                           {dim === 'cat' && <CatIcon cat={e.k} size={11} />}
@@ -554,7 +555,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                         </b>
                         {g.w > 150 && (
                           <span>
-                            {Math.round((e.v / total) * 100)}% · {money(e.v, base, { compact: true })}
+                            {Math.round((e.v / total) * 100)}% · {flow(-e.v, base, { compact: true })}
                           </span>
                         )}
                       </button>
@@ -606,7 +607,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
             <div className="muted" style={{ fontSize: 12.5 }}>
               {t('report.topup.summary', {
                 balance: money(p.current, p.method.currency, { compact: true }),
-                monthly: money(p.monthly, p.method.currency, { compact: true }),
+                monthly: flow(-p.monthly, p.method.currency, { compact: true }),
               })}
             </div>
             {p.need > 0 ? (
@@ -614,7 +615,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                 <div className="topup-why">
                   {t('report.topup.why', {
                     span,
-                    due: money(p.due, p.method.currency, { compact: true }),
+                    due: flow(-p.due, p.method.currency, { compact: true }),
                     balance: money(p.current, p.method.currency, { compact: true }),
                     need: money(p.need, p.method.currency, { compact: true }),
                   })}
@@ -630,7 +631,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                       .sort((x, y) => y[0] - x[0])
                       .map(([c, n]) => (
                         <span key={c} className="gift">
-                          {money(c, p.method.currency, { compact: true })}
+                          {flow(-c, p.method.currency, { compact: true })}
                           {n > 1 && <em>×{n}</em>}
                         </span>
                       ))}
@@ -648,7 +649,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
           {p.need > 0 && (
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontWeight: 700 }}>
-                <Amount value={p.need} ccy={p.method.currency} compact />
+                <Amount plain value={p.need} ccy={p.method.currency} compact />
               </div>
               <div className="muted" style={{ fontSize: 12 }}>
                 ≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}

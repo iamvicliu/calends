@@ -22,6 +22,8 @@
     "startPage": "Öffnen mit",
     "startPageAria": "Startseite",
     "baseCurrency": "Basiswährung",
+    "signedAmounts": "Vorzeichen für Geldflüsse",
+    "signedAmountsSub": "− für Ausgaben und + für Erstattungen und Zahlungseingänge anzeigen",
     "timezone": "Zeitzone",
     "weekStart": "Woche beginnt am",
     "weekStartAria": "Erster Wochentag",

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { billingPeriod, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
-import { cnDateFull, money } from '../../../shared/format.ts';
+import { flow, cnDateFull } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { cancelAtEnd, reactivate, stopSubscription } from '../../../shared/phases.ts';
 import type { Subscription } from '../../../shared/types.ts';
@@ -15,8 +15,8 @@ export function stopLabel(sub: Subscription, today: string): string | undefined 
   const summary = stopSummary(sub, today);
   if (!summary || summary.date > today) return undefined;
   if (summary.refunded > 0)
-    return t(summary.refundStatus === 'full' ? 'core.stop.refunded' : 'core.stop.partial', { money: money(summary.refunded, sub.currency) });
-  return summary.unusedValue > 0 ? t('core.stop.unrefunded', { money: money(summary.unusedValue, sub.currency) }) : t('core.stop.refundNo');
+    return t(summary.refundStatus === 'full' ? 'core.stop.refunded' : 'core.stop.partial', { money: flow(summary.refunded, sub.currency) });
+  return summary.unusedValue > 0 ? t('core.stop.unrefunded', { money: flow(-summary.unusedValue, sub.currency) }) : t('core.stop.refundNo');
 }
 
 export function stopDescription(sub: Subscription, today: string): string {
@@ -29,10 +29,10 @@ export function stopDescription(sub: Subscription, today: string): string {
     summary.refundStatus === 'full'
       ? t('core.stop.fullyRefunded')
       : summary.refunded > 0
-        ? t('core.stop.partial', { money: money(summary.refunded, sub.currency) })
+        ? t('core.stop.partial', { money: flow(summary.refunded, sub.currency) })
         : t('core.stop.refundNo'),
     summary.unusedValue > 0
-      ? t('core.stop.unused', { days: t('core.stop.lossDays', { count: summary.wastedDays }), money: money(summary.unusedValue, sub.currency) })
+      ? t('core.stop.unused', { days: t('core.stop.lossDays', { count: summary.wastedDays }), money: flow(-summary.unusedValue, sub.currency) })
       : '',
   ]
     .filter(Boolean)
@@ -43,7 +43,11 @@ export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: 
   const cur = currentPhase(sub, today);
   const label = readonly ? undefined : stopLabel(cur, today);
   return label ? (
-    <span className="badge stop-badge" title={stopDescription(cur, today)}>
+    <span
+      className="badge stop-badge"
+      style={stopSummary(cur, today)!.refunded > 0 ? { color: 'var(--green)' } : undefined}
+      title={stopDescription(cur, today)}
+    >
       {label}
     </span>
   ) : null;

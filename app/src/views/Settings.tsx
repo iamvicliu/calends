@@ -238,6 +238,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               ariaLabel={t('settings.general.baseCurrency')}
             />
           </Cell>
+          <Cell label={t('settings.general.signedAmounts')} sub={t('settings.general.signedAmountsSub')}>
+            <Toggle
+              label={t('settings.general.signedAmounts')}
+              checked={s.signedAmounts !== false}
+              onChange={(v) => run(() => saveSettings({ signedAmounts: v }))}
+            />
+          </Cell>
           <Cell label={t('settings.general.timezone')}>
             <Picker
               value={s.timezone}

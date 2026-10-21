@@ -19,6 +19,8 @@
     "startPage": "Open to",
     "startPageAria": "Start page",
     "baseCurrency": "Base currency",
+    "signedAmounts": "Cash flow signs",
+    "signedAmountsSub": "Show − for expenses and + for refunds and money received",
     "timezone": "Time zone",
     "weekStart": "Week starts on",
     "weekStartAria": "First day of week",

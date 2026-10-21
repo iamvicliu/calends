@@ -19,6 +19,8 @@
     "startPage": "打开后先看",
     "startPageAria": "启动页",
     "baseCurrency": "本位币",
+    "signedAmounts": "收支正负号",
+    "signedAmountsSub": "支出显示 −，退款和收回的钱显示 +",
     "timezone": "时区",
     "weekStart": "每周从",
     "weekStartAria": "每周起始日",

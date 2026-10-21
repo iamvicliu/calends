@@ -72,6 +72,23 @@ export function money(n: number, ccy: string, opts: { compact?: boolean; sign?: 
   return `${sign}${symbol(ccy)}${s}`;
 }
 
+let signedAmounts = true;
+
+/** 只控制收支展示，不改变 money() 的标价及对比差额语义。 */
+export function setSignedAmounts(on: boolean): void {
+  signedAmounts = on;
+}
+
+/** 收支符号：负数流出，正数流入，零不带符号。 */
+export function flowSign(n: number): string {
+  return signedAmounts && Number.isFinite(n) ? (n < 0 ? '−' : n > 0 ? '+' : '') : '';
+}
+
+/** 带方向的收支金额；格式选项与 money() 一致。 */
+export function flow(n: number, ccy: string, opts: { compact?: boolean; decimals?: number } = {}): string {
+  return `${flowSign(n)}${money(Math.abs(n), ccy, opts)}`;
+}
+
 /** 日期字符串（YYYY-MM-DD）按当前语言格式化；按 UTC 解析，避免时区把日期挪一天 */
 function fmtDate(d: string, o: Intl.DateTimeFormatOptions): string {
   const [y, m, day] = d.split('-').map(Number);

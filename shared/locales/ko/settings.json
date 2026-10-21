@@ -21,6 +21,8 @@
     "startPage": "시작 화면",
     "startPageAria": "시작 페이지",
     "baseCurrency": "기준 통화",
+    "signedAmounts": "수입·지출 부호",
+    "signedAmountsSub": "지출은 −, 환불과 돌려받은 돈은 +로 표시",
     "timezone": "시간대",
     "weekStart": "한 주의 시작",
     "weekStartAria": "한 주의 첫 요일",

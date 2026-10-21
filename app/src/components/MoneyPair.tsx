@@ -3,7 +3,7 @@
 // - 选了原币：大字是原币，小字是折算成本位币的约数
 // - 原币就是本位币：只显示一个数
 import type { ReactNode as ComponentChildren } from 'react';
-import { money } from '../../../shared/format.ts';
+import { flow, money } from '../../../shared/format.ts';
 import { convert } from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState } from '../../../shared/types.ts';
@@ -24,11 +24,12 @@ export interface Pair {
 export function useMoneyPair(state: AppState) {
   const orig = useOrig();
   const base = state.settings.baseCurrency;
-  return (amount: number, ccy: string, opts: { date?: string; value?: number; compact?: boolean } = {}): Pair => {
-    if (ccy === base) return { main: <Amount value={amount} ccy={ccy} /> };
+  return (amount: number, ccy: string, opts: { date?: string; value?: number; compact?: boolean; plain?: boolean } = {}): Pair => {
+    const fmt = opts.plain ? money : flow;
+    if (ccy === base) return { main: <Amount value={amount} ccy={ccy} plain={opts.plain} /> };
     const inBase = opts.value ?? (opts.date ? toBaseAt(state, amount, ccy, opts.date) : convert(amount, ccy, base, state.fx));
     return orig
-      ? { main: <Amount value={amount} ccy={ccy} />, alt: `≈ ${money(inBase, base, { compact: opts.compact ?? true })}` }
-      : { main: <Amount value={inBase} ccy={base} />, alt: money(amount, ccy, { compact: opts.compact }) };
+      ? { main: <Amount value={amount} ccy={ccy} plain={opts.plain} />, alt: `≈ ${fmt(inBase, base, { compact: opts.compact ?? true })}` }
+      : { main: <Amount value={inBase} ccy={base} plain={opts.plain} />, alt: fmt(amount, ccy, { compact: opts.compact }) };
   };
 }

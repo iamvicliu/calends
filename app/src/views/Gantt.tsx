@@ -12,7 +12,7 @@ import {
   phaseSubs,
   priceAt,
 } from '../../../shared/billing.ts';
-import { cnDate, money, monthLabel } from '../../../shared/format.ts';
+import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { GANTT_STEP, ganttLabelBounds, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
@@ -434,7 +434,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     const unused = !state.readonly && !!stopped && stopped.wastedDays > 0;
                     const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
                     const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
-                    const unusedAmount = unused ? `−${money(stopped!.unusedValue, g.v.currency, { compact: true })}` : '';
+                    const unusedAmount = unused ? flow(-stopped!.unusedValue, g.v.currency, { compact: true }) : '';
                     // 留出左右内边距；停用标志占据的半圆不计入文字空间。
                     const showUnusedAmount = unusedWidth >= Math.max(56, [...unusedAmount].length * 7 + 18);
                     if ((unused ? wastedUntil : to) < start || g.from > end) return null;
@@ -539,7 +539,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       key={k2}
                       className={`gt-charge ${c.amount < 0 ? 'refund' : ''} ${c.date > today ? 'future' : ''}`}
                       style={{ left: x(c.date) }}
-                      title={`${cnDate(c.date)} · ${c.kind === 'refund' ? t('editor.payment.kind.refund') : t('editor.payment.kind.charge')} · ${money(c.amount, c.currency)}`}
+                      title={`${cnDate(c.date)} · ${c.kind === 'refund' ? t('editor.payment.kind.refund') : t('editor.payment.kind.charge')} · ${flow(-c.amount, c.currency)}`}
                     />
                   ))}
                 </div>

@@ -19,6 +19,8 @@
     "startPage": "Buka ke",
     "startPageAria": "Halaman awal",
     "baseCurrency": "Mata uang dasar",
+    "signedAmounts": "Tanda pemasukan dan pengeluaran",
+    "signedAmountsSub": "Tampilkan − untuk pengeluaran dan + untuk pengembalian dana serta uang yang diterima",
     "timezone": "Zona waktu",
     "weekStart": "Minggu dimulai pada",
     "weekStartAria": "Hari pertama dalam minggu",

@@ -19,6 +19,8 @@
     "startPage": "開啟後先顯示",
     "startPageAria": "啟動頁",
     "baseCurrency": "基準貨幣",
+    "signedAmounts": "收支正負號",
+    "signedAmountsSub": "支出顯示 −，退款和收回的錢顯示 +",
     "timezone": "時區",
     "weekStart": "每週從",
     "weekStartAria": "每週起始日",
