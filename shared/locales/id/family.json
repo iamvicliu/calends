@@ -120,7 +120,19 @@
       "custom": {
         "other": "Catat pembayaran ({fee} per {count} bulan)"
       }
-    }
+    },
+    "firstPeriod": "Periode pertama",
+    "firstAmount": "Jumlah periode pertama",
+    "firstMode": {
+      "prorate": "Prorata harian",
+      "full": "Periode penuh",
+      "free": "Periode pertama gratis"
+    },
+    "collectionSchedule": "Tanggal penagihan: setiap tahun {dates}",
+    "coverAligned": "Berakhir pada batas periode bersama",
+    "recordNext": "Catat pembayaran · {amount}",
+    "collectionAnchor": "Awal penagihan bersama",
+    "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "{count} kosong",

@@ -246,3 +246,37 @@ test('13. 合租收款提醒仅包含已加入且未退出的成员', () => {
   assert.ok(text.includes('Live'));
   for (const name of ['Future', 'Left', 'Free']) assert.ok(!text.includes(name), text);
 });
+
+test('合租提醒与首期应收一致，免费首期跳至统一收款日', () => {
+  const st = state();
+  st.settings.collectCurrency = 'CNY';
+  st.subscriptions = [
+    {
+      id: 'collection',
+      name: 'Fictional sharing',
+      category: 'Tools',
+      tags: [],
+      price: 200,
+      currency: 'CNY',
+      cycle: { unit: 'month', every: 1 },
+      start: '2026-01-17',
+      status: 'active',
+      share: {
+        role: 'owner',
+        seats: 3,
+        since: '2026-01-17',
+        members: [{ id: 'jj', name: 'Test JJ', share: 10, fee: 40.67, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-20' }],
+      },
+    },
+  ];
+  const m = st.subscriptions[0].share!.members[0];
+  const first = JSON.stringify(buildDaily(st, '2026-10-20'));
+  assert.ok(first.includes('19.67'), first);
+  m.firstPeriod = 'free';
+  assert.ok(!JSON.stringify(buildDaily(st, '2026-10-20') ?? null).includes('Test JJ'));
+  assert.ok(JSON.stringify(buildDaily(st, '2027-01-17')).includes('40.67'));
+  m.firstPeriod = 'prorate';
+  m.paidUntil = '2027-01-16';
+  assert.ok(JSON.stringify(buildDaily(st, '2027-01-14')).includes('Test JJ'));
+  assert.ok(!JSON.stringify(buildDaily(st, '2027-01-20') ?? null).includes('Test JJ'));
+});

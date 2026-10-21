@@ -123,7 +123,19 @@
         "one": "Enregistrer un paiement ({fee} tous les {count} mois)",
         "other": "Enregistrer un paiement ({fee} tous les {count} mois)"
       }
-    }
+    },
+    "firstPeriod": "Première période",
+    "firstAmount": "Montant de la première période",
+    "firstMode": {
+      "prorate": "Prorata journalier",
+      "full": "Période complète",
+      "free": "Première période gratuite"
+    },
+    "collectionSchedule": "Dates de collecte : chaque année {dates}",
+    "coverAligned": "Se termine à la fin de la période commune",
+    "recordNext": "Enregistrer un paiement · {amount}",
+    "collectionAnchor": "Début commun de collecte",
+    "firstSummary": "Première période {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "{count} libre(s)",

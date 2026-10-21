@@ -120,7 +120,19 @@
       "custom": {
         "other": "Ghi nhận thanh toán ({fee} mỗi {count} tháng)"
       }
-    }
+    },
+    "firstPeriod": "Kỳ đầu",
+    "firstAmount": "Số tiền kỳ đầu",
+    "firstMode": {
+      "prorate": "Tính theo ngày",
+      "full": "Thu trọn kỳ",
+      "free": "Miễn phí kỳ đầu"
+    },
+    "collectionSchedule": "Ngày thu chung: hằng năm {dates}",
+    "coverAligned": "Kết thúc vào cuối kỳ thu chung",
+    "recordNext": "Ghi nhận thanh toán · {amount}",
+    "collectionAnchor": "Mốc bắt đầu thu chung",
+    "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "Trống {count}",

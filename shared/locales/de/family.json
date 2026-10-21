@@ -123,7 +123,19 @@
         "one": "Zahlung erfassen ({fee} jeden {count}. Monat)",
         "other": "Zahlung erfassen ({fee} alle {count} Monate)"
       }
-    }
+    },
+    "firstPeriod": "Erster Zeitraum",
+    "firstAmount": "Betrag im ersten Zeitraum",
+    "firstMode": {
+      "prorate": "Tageweise anteilig",
+      "full": "Voller Zeitraum",
+      "free": "Erster Zeitraum kostenlos"
+    },
+    "collectionSchedule": "Einzugstermine: jährlich {dates}",
+    "coverAligned": "Endet an der gemeinsamen Zeitraumgrenze",
+    "recordNext": "Zahlung erfassen · {amount}",
+    "collectionAnchor": "Gemeinsamer Einzugsbeginn",
+    "firstSummary": "Erster Zeitraum {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "{count} frei",

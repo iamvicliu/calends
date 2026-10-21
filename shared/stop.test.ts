@@ -25,6 +25,7 @@ import { flatten, LOCALES, setLocale, t } from './i18n.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 import { TOOLS, type ToolCtx } from '../worker/ai/mcp-tools.ts';
 import { MIGRATIONS } from '../worker/migrations.gen.ts';
+import { exportAll, parseBackup } from '../worker/backup.ts';
 import { buildDaily } from '../worker/notify.ts';
 import type { Env } from '../worker/env.ts';
 
@@ -699,5 +700,89 @@ test('MCP 新建订阅可带完整历史扣款：逐期金额即历史，之后�
     });
   } finally {
     f.db.close();
+  }
+});
+
+test('MCP 合租：首期字段预览不写入、保存/备份保留、收款默认对齐且不回退已付至', async () => {
+  const s = base({ id: 'collection', start: '2026-01-17', share: { role: 'owner', seats: 5, since: '2026-01-17', members: [] } });
+  const f = fixture(s);
+  try {
+    f.ctx.overlay = new Map();
+    const args = { id: 'jj', name: 'Test JJ', fee: 60, fee_currency: 'CNY', bill_every: 6, joined: '2026-10-20', first_period: 'prorate', first_amount: 21.5 };
+    await f.run('save_share_member', { ...args, dry_run: true });
+    assert.equal(f.saved().share!.members.length, 0);
+    assert.equal(f.ctx.overlay.get(s.id)!.share!.members[0].firstAmount, 21.5);
+    f.ctx.overlay.clear();
+    await f.run('save_share_member', args);
+    f.ctx.overlay.clear();
+    assert.equal(f.saved().share!.collectFrom, '2026-01-17');
+    assert.equal(f.saved().share!.members[0].firstPeriod, 'prorate');
+    assert.equal(f.saved().share!.members[0].firstAmount, 21.5);
+    await f.run('save_share_member', { member: 'jj', first_period: 'prorate' });
+    assert.equal(f.saved().share!.members[0].firstAmount, 21.5);
+    await assert.rejects(f.run('save_share_member', { member: 'jj', first_amount: -1 }));
+    await assert.rejects(f.run('save_share_member', { member: 'jj', first_period: 'invalid' }));
+    await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 21.5, date: '2026-10-22', dry_run: true });
+    assert.equal(f.saved().share!.members[0].paidUntil, undefined);
+    assert.equal(f.ctx.overlay.get(s.id)!.share!.members[0].payments![0].until, '2027-01-16');
+    f.ctx.overlay.clear();
+    await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 21.5, date: '2026-10-22' });
+    assert.deepEqual(f.saved().share!.members[0].payments![0], { date: '2026-10-22', amount: 21.5, currency: 'CNY', from: '2026-10-20', until: '2027-01-16' });
+    await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 60, date: '2027-01-17' });
+    assert.equal(f.saved().share!.members[0].paidUntil, '2027-07-16');
+    await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 0, date: '2027-01-17', until: '2026-12-01' });
+    assert.equal(f.saved().share!.members[0].paidUntil, '2027-07-16');
+    await f.run('set_share', { role: 'owner', collect_from: '2026-01-31', dry_run: true });
+    assert.equal(f.saved().share!.collectFrom, '2026-01-17');
+    assert.equal(f.ctx.overlay.get(s.id)!.share!.collectFrom, '2026-01-31');
+    f.ctx.overlay.clear();
+    await f.run('set_share', { role: 'owner' });
+    assert.equal(f.saved().share!.collectFrom, '2026-01-17');
+    const backup = await exportAll(f.ctx.env);
+    assert.deepEqual(parseBackup(JSON.parse(JSON.stringify(backup))).subscriptions[0].share, f.saved().share);
+  } finally {
+    f.db.close();
+  }
+});
+
+test('合租新字段经 Worker API 保存、重读；拒绝非法首期金额与起点', async () => {
+  const { registerHooks } = await import('node:module');
+  const hook = registerHooks({
+    load(url, ctx, next) {
+      if (url.endsWith('.json')) return { format: 'module', source: `export default ${readFileSync(new URL(url), 'utf8')}`, shortCircuit: true };
+      return next(url, ctx);
+    },
+  });
+  const { default: worker } = await import('../worker/index.ts');
+  const f = fixture();
+  f.db.exec('CREATE TABLE IF NOT EXISTS d1_migrations (id INTEGER PRIMARY KEY, name TEXT UNIQUE)');
+  for (const m of MIGRATIONS) f.db.prepare('INSERT INTO d1_migrations (name) VALUES (?)').run(m.name);
+  const env = { ...f.ctx.env, DEV_BYPASS_AUTH: '1' };
+  const s = {
+    ...f.sub,
+    share: {
+      role: 'owner' as const,
+      seats: 3,
+      collectFrom: '2026-01-17',
+      members: [{ id: 'jj', name: 'Fictional member', share: 10, fee: 60, billEvery: 6, joined: '2026-10-20', firstPeriod: 'full' as const, firstAmount: 20 }],
+    },
+  };
+  const put = (sub: Subscription) =>
+    worker.fetch(
+      new Request('http://localhost/api/subscriptions/s', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(sub) }),
+      env,
+    );
+  try {
+    assert.equal((await put(s)).status, 200);
+    const response = await worker.fetch(new Request('http://localhost/api/state'), env);
+    const st = (await response.json()) as AppState;
+    assert.deepEqual(st.subscriptions[0].share, f.saved().share);
+    assert.equal(st.subscriptions[0].share!.members[0].firstAmount, 20);
+    assert.equal((await put({ ...s, share: { ...s.share, collectFrom: '2026-02-30' } })).status, 400);
+    assert.equal((await put({ ...s, share: { ...s.share, members: [{ ...s.share.members[0], firstAmount: -1 }] } })).status, 400);
+    assert.equal(f.saved().share!.members[0].firstAmount, 20);
+  } finally {
+    f.db.close();
+    hook.deregister();
   }
 });

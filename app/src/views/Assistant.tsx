@@ -754,6 +754,8 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
             : undefined,
       );
       add(t('assistant.f.paidUntil'), day(a.paid_until));
+      add(t('family.member.firstPeriod'), a.first_period ? t(`family.member.firstMode.${String(a.first_period)}`) : undefined);
+      add(t('family.member.firstAmount'), a.first_amount != null ? money(Number(a.first_amount), String(a.fee_currency ?? collect)) : undefined);
       add(t('assistant.f.joined'), day(a.joined));
       add(t('assistant.f.left'), day(a.left));
       add(t('assistant.f.contact'), [a.contact_via, a.contact].filter(Boolean).join(' ') || undefined);
@@ -766,6 +768,7 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
       add(t('assistant.f.seats'), a.seats != null ? String(a.seats) : undefined);
       add(t('assistant.f.ownerName'), a.owner_name ? String(a.owner_name) : undefined);
       add(t('assistant.f.since'), day(a.since));
+      add(t('family.member.collectionAnchor'), day(a.collect_from));
       break;
     case 'change_price':
       add(t('assistant.f.newPrice'), a.amount != null ? money(Number(a.amount), subCcy ?? state.settings.baseCurrency) : undefined);

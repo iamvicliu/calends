@@ -9,6 +9,10 @@ import {
   effectiveStatus,
   lastCharge,
   memberDues,
+  collectionAnchor,
+  memberBillMonths,
+  memberCollection,
+  memberUnpaidFrom,
   monthlyGross,
   myShareFactor,
   memberAboard,
@@ -538,12 +542,15 @@ export const TOOLS: Tool[] = [
         share: s.share
           ? {
               role: s.share.role,
+              collect_from: collectionAnchor(s),
               seats: s.share.seats,
               members: s.share.members.map((m) => ({
                 id: m.id,
                 name: m.name,
                 paid_until: m.paidUntil ?? null,
                 joined: m.joined ?? null,
+                first_period: m.firstPeriod ?? 'prorate',
+                first_amount: m.firstAmount ?? null,
                 left: m.left ?? null,
                 exempt: !!m.exempt,
               })),
@@ -1293,6 +1300,7 @@ export const TOOLS: Tool[] = [
               seats: { total: sh.seats, taken: live.length + 1, free: Math.max(0, sh.seats - live.length - 1) },
               owner: sh.role === 'member' ? (sh.ownerName ?? null) : undefined,
               since: book.since ?? null,
+              collect_from: collectionAnchor(s),
               // 方向写清楚：i_pay = 我自己净掏的钱，i_earn = 收的比付的多（赚了）；两者至多一个大于 0
               year: {
                 cost: round(book.yearCost),
@@ -1316,8 +1324,11 @@ export const TOOLS: Tool[] = [
                   active: memberAboard(m, today),
                   joined: m.joined ?? null,
                   left: m.left ?? null,
-                  fee: { amount: fee.amount, currency: fee.currency, every_months: m.billEvery ?? 1 },
+                  fee: { amount: fee.amount, currency: fee.currency, every_months: memberBillMonths(s, m) },
                   paid_until: m.paidUntil ?? null,
+                  first_period: m.firstPeriod ?? 'prorate',
+                  first_amount: m.firstAmount ?? null,
+                  next_collection: memberCollection(s, m, memberUnpaidFrom(s, m), st.settings.collectCurrency ?? st.settings.baseCurrency),
                   owed: d && d.periodsOwed > 0 ? money(st, d.owed, d.currency) : null,
                   payments: (m.payments ?? []).length,
                 };
@@ -1348,7 +1359,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'set_share',
     description:
-      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. role none stops sharing.',
+      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest coverage start, or subscription start is inferred. Each member aligns to anchor + k × bill_every months. role none stops sharing.',
     write: true,
     inputSchema: obj(
       {
@@ -1357,6 +1368,7 @@ export const TOOLS: Tool[] = [
         seats: { type: 'integer', minimum: 1, description: 'Total seats including me.' },
         owner_name: { type: 'string' },
         since: DATE,
+        collect_from: DATE,
         dry_run: DRY,
       },
       ['subscription', 'role'],
@@ -1372,7 +1384,8 @@ export const TOOLS: Tool[] = [
         seats: Math.max(1, Math.round(Number(a.seats ?? cur?.seats ?? 2))),
         members: cur?.members ?? [],
         ownerName: role === 'member' ? (str(a.owner_name) ?? cur?.ownerName) : undefined,
-        since: a.since ? date(a.since, 'since') : (cur?.since ?? today),
+        since: a.since ? date(a.since, 'since') : cur ? cur.since : today,
+        collectFrom: a.collect_from ? date(a.collect_from, 'collect_from') : cur?.collectFrom,
       } as NonNullable<Subscription['share']>;
       return commit(ctx, st, today, { ...s, share }, a.dry_run, [cur ? 'share_updated' : 'share_created']);
     },
@@ -1380,7 +1393,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'save_share_member',
     description:
-      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date.',
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Collection periods align to the shared anchor. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee.',
     write: true,
     inputSchema: obj(
       {
@@ -1391,6 +1404,8 @@ export const TOOLS: Tool[] = [
         fee: { type: 'number', minimum: 0 },
         fee_currency: { type: 'string' },
         bill_every: { type: 'integer', enum: [1, 3, 6, 12] },
+        first_period: { type: 'string', enum: ['prorate', 'full', 'free'] },
+        first_amount: { type: ['number', 'null'], minimum: 0, description: 'Custom first-period fee; null resets to calculated amount.' },
         exempt: { type: 'boolean' },
         paid_until: DATE,
         joined: DATE,
@@ -1413,15 +1428,23 @@ export const TOOLS: Tool[] = [
       const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
-      const billEvery = a.bill_every != null ? Number(a.bill_every) : (old?.billEvery ?? 1);
+      const billEvery = a.bill_every != null ? Number(a.bill_every) : old ? memberBillMonths(s, old) : 1;
+      if (a.first_period != null && !['prorate', 'full', 'free'].includes(String(a.first_period))) throw new Error(t('mcp.error.invalidFirstPeriod'));
       const m: ShareMember = {
         ...(old ?? { id: str(a.id) ?? uid(), name: '', share: 0 }),
         name: str(a.name) ?? old?.name ?? '',
         ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : {}),
         billEvery,
+        ...(a.first_period != null
+          ? {
+              firstPeriod: a.first_period as ShareMember['firstPeriod'],
+              ...(a.first_period !== (old?.firstPeriod ?? 'prorate') ? { firstAmount: undefined } : {}),
+            }
+          : {}),
+        ...('first_amount' in a ? { firstAmount: a.first_amount == null ? undefined : num(a.first_amount, 'first_amount') } : {}),
         ...(a.exempt != null ? { exempt: !!a.exempt } : {}),
         ...(a.paid_until ? { paidUntil: date(a.paid_until, 'paid_until') } : {}),
-        ...(a.joined ? { joined: date(a.joined, 'joined') } : {}),
+        ...(a.joined ? { joined: date(a.joined, 'joined') } : !old ? { joined: today } : {}),
         ...(a.left ? { left: date(a.left, 'left') } : {}),
         ...(a.contact_via ? { contactVia: String(a.contact_via) } : {}),
         ...(a.contact ? { contact: String(a.contact) } : {}),
@@ -1432,7 +1455,9 @@ export const TOOLS: Tool[] = [
       // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
       m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, billEvery) : m.share;
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
-      return commit(ctx, st, today, { ...s, share: { ...s.share, members } }, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`]);
+      return commit(ctx, st, today, { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } }, a.dry_run, [
+        old ? `member_updated:${m.name}` : `member_added:${m.name}`,
+      ]);
     },
   },
   {
@@ -1448,15 +1473,20 @@ export const TOOLS: Tool[] = [
       const q = String(a.member).trim().toLowerCase();
       const m = s.share.members.find((x) => x.id === q || x.name.toLowerCase() === q);
       if (!m) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
-      return commit(ctx, st, today, { ...s, share: { ...s.share, members: s.share.members.filter((x) => x.id !== m.id) } }, a.dry_run, [
-        `member_removed:${m.name}`,
-      ]);
+      return commit(
+        ctx,
+        st,
+        today,
+        { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members: s.share.members.filter((x) => x.id !== m.id) } },
+        a.dry_run,
+        [`member_removed:${m.name}`],
+      );
     },
   },
   {
     name: 'record_receivable',
     description:
-      'Mark money received from others: a shared-plan member paid their share (kind=share; advances their paid-until date by their billing cycle unless until is given), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
+      'Mark money received from others: a shared-plan member paid their share (kind=share; defaults to their first partial period or next aligned full period unless until is given; free first periods are skipped), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
     write: true,
     inputSchema: obj(
       {
@@ -1501,15 +1531,18 @@ export const TOOLS: Tool[] = [
               : t('mcp.error.noMember', { list: candidates(s.share.members) }),
           );
         const m = ms[0];
-        const months = m.billEvery ?? 1;
-        const from = m.paidUntil ? addDays(m.paidUntil, 1) : (m.joined ?? s.share.since ?? on);
-        const until = a.until ? date(a.until, 'until') : addDays(addMonths(from, months), -1);
+        const from = memberUnpaidFrom(s, m);
+        const until = a.until ? date(a.until, 'until') : memberCollection(s, m, from).until;
         const members = s.share.members.map((x) =>
           x.id === m.id
-            ? { ...x, paidUntil: until, payments: [...(x.payments ?? []), { date: on, amount, currency: ccy, from, until, note: str(a.note) }] }
+            ? {
+                ...x,
+                paidUntil: !x.paidUntil || until > x.paidUntil ? until : x.paidUntil,
+                payments: [...(x.payments ?? []), { date: on, amount, currency: ccy, from, until, note: str(a.note) }],
+              }
             : x,
         );
-        return commit(ctx, st, today, { ...s, share: { ...s.share, members } }, a.dry_run, [`share_payment:${m.name}`]);
+        return commit(ctx, st, today, { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } }, a.dry_run, [`share_payment:${m.name}`]);
       }
       if (!s.proxy) throw new Error(t('mcp.error.notProxy', { name: s.name }));
       const cs = chargesBetween(s, s.start, today, today);

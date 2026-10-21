@@ -54,7 +54,8 @@
     "invalidStop": "L’arrêt doit correspondre au dernier jour de service ; seul le fournisseur peut motiver une désactivation.",
     "invalidRefund": "Les montants remboursés doivent être valides et enregistrés en négatif.",
     "refundBeforeStop": "La date du remboursement ne peut pas précéder l’arrêt.",
-    "paymentOutOfRange": "La date de paiement {date} doit être comprise entre la date de début et aujourd’hui"
+    "paymentOutOfRange": "La date de paiement {date} doit être comprise entre la date de début et aujourd’hui",
+    "invalidFirstPeriod": "first_period doit être prorate, full ou free."
   },
   "tool": {
     "get_overview": "Aperçu du registre",

@@ -54,7 +54,8 @@
     "invalidStop": "Thông tin dừng phải khớp ngày dịch vụ cuối; chỉ nhà cung cấp vô hiệu hóa mới có lý do.",
     "invalidRefund": "Tiền hoàn phải là số hợp lệ và được lưu dưới dạng số âm.",
     "refundBeforeStop": "Ngày hoàn tiền không được trước ngày dừng.",
-    "paymentOutOfRange": "Ngày thanh toán {date} phải nằm giữa ngày bắt đầu và hôm nay"
+    "paymentOutOfRange": "Ngày thanh toán {date} phải nằm giữa ngày bắt đầu và hôm nay",
+    "invalidFirstPeriod": "first_period phải là prorate, full hoặc free."
   },
   "tool": {
     "get_overview": "Tổng quan sổ",

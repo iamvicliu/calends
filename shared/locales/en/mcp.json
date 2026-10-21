@@ -54,7 +54,8 @@
     "invalidStop": "Stop information must match the last service day; only provider termination may include a reason.",
     "invalidRefund": "Refund amounts must be valid and stored as negative values.",
     "refundBeforeStop": "Refund date cannot precede the stop date.",
-    "paymentOutOfRange": "Payment date {date} must be between the start date and today"
+    "paymentOutOfRange": "Payment date {date} must be between the start date and today",
+    "invalidFirstPeriod": "first_period must be prorate, full or free."
   },
   "tool": {
     "get_overview": "Ledger overview",

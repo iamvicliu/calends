@@ -3,12 +3,13 @@ import {
   addMonths,
   chargesBetween,
   convert,
-  cycleDays,
   diffDays,
   effectiveStatus,
   nextCharge,
   memberAboard,
   memberUnpaidFrom,
+  memberCollection,
+  memberBillMonths,
   priceAt,
   runwayFor,
   todayIn,
@@ -139,20 +140,17 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
   const collect = settings.collectCurrency ?? base;
   for (const s of state.subscriptions) {
     if (s.share?.role !== 'owner' || !['active', 'ending'].includes(effectiveStatus(s, today))) continue;
-    const months = cycleDays(s.cycle) / 30.4375;
     for (const m of s.share.members) {
       if (m.exempt || !memberAboard(m, today)) continue;
       const due = memberUnpaidFrom(s, m);
       // 订阅到期不续（或已经结束）时，结束日之后的下一期不存在了，不用再催收
-      if (s.end && due > s.end) continue;
+      if ((s.end && due > s.end) || (m.left && due >= m.left)) continue;
       const d = diffDays(today, due);
       // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
-      const every = m.billEvery ?? 1;
-      const fee =
-        m.fee != null
-          ? money(m.fee, m.feeCurrency ?? collect)
-          : money(toBaseAt(state, ((m.share || 0) * every) / months, s.currency, undefined, collect), collect);
+      const every = memberBillMonths(s, m);
+      const period = memberCollection(s, m, due, collect);
+      const fee = money(toBaseAt(state, period.amount, period.currency, undefined, collect), collect);
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
       carpool.push({
         title: `${m.name} · ${s.name}`,
