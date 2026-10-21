@@ -103,6 +103,8 @@
       "other": "{count} дня"
     },
     "noRegion": "Без региона",
+    "zoom3m": "3 мес.",
+    "zoom6m": "6 мес.",
     "zoom1y": "1 г.",
     "zoom3y": "3 г.",
     "byMethod": "По оплате",
@@ -116,7 +118,6 @@
     "introShort": "Вводная ",
     "planned": "В планах",
     "gap": "Перерыв",
-    "zoomYear": "Этот год",
     "earlier": "Раньше",
     "later": "Позже",
     "backToNow": "Вернуться к сегодня"

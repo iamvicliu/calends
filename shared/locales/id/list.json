@@ -88,6 +88,8 @@
       "other": "{count} hari"
     },
     "noRegion": "Tanpa wilayah",
+    "zoom3m": "3B",
+    "zoom6m": "6B",
     "zoom1y": "1T",
     "zoom3y": "3T",
     "byMethod": "Per pembayaran",
@@ -101,7 +103,6 @@
     "introShort": "Promo ",
     "planned": "Rencana",
     "gap": "Terputus",
-    "zoomYear": "Tahun ini",
     "earlier": "Sebelumnya",
     "later": "Berikutnya",
     "backToNow": "Kembali ke sekarang"

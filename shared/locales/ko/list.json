@@ -88,6 +88,8 @@
       "other": "{count}일"
     },
     "noRegion": "지역 없음",
+    "zoom3m": "3개월",
+    "zoom6m": "6개월",
     "zoom1y": "1년",
     "zoom3y": "3년",
     "byMethod": "결제 수단별",
@@ -101,7 +103,6 @@
     "introShort": "프로모션 ",
     "planned": "예정",
     "gap": "중단",
-    "zoomYear": "올해",
     "earlier": "이전",
     "later": "다음",
     "backToNow": "현재로"

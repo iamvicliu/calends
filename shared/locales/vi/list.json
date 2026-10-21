@@ -88,6 +88,8 @@
       "other": "{count} ngày"
     },
     "noRegion": "Không có khu vực",
+    "zoom3m": "3Th",
+    "zoom6m": "6Th",
     "zoom1y": "1N",
     "zoom3y": "3N",
     "byMethod": "Theo thanh toán",
@@ -101,7 +103,6 @@
     "introShort": "Ưu đãi ",
     "planned": "Dự định",
     "gap": "Gián đoạn",
-    "zoomYear": "Năm nay",
     "earlier": "Trước",
     "later": "Sau",
     "backToNow": "Về hiện tại"

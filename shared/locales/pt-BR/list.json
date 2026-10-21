@@ -93,6 +93,8 @@
       "other": "{count} dias"
     },
     "noRegion": "Sem região",
+    "zoom3m": "3M",
+    "zoom6m": "6M",
     "zoom1y": "1A",
     "zoom3y": "3A",
     "byMethod": "Por pagamento",
@@ -106,7 +108,6 @@
     "introShort": "Promo ",
     "planned": "Planejada",
     "gap": "Interrupção",
-    "zoomYear": "Este ano",
     "earlier": "Anterior",
     "later": "Próximo",
     "backToNow": "Voltar para hoje"

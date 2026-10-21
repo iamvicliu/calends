@@ -6254,6 +6254,11 @@ button.seat:disabled {
   gap: 8px;
   margin-bottom: 10px;
 }
+.gt-bar > .seg:first-child {
+  display: inline-grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-width: 100%;
+}
 .gt {
   border-radius: var(--r);
   background: var(--card);
@@ -6471,6 +6476,12 @@ button.seat:disabled {
 @media (max-width: 700px) {
   .gantt {
     --lw: 112px;
+  }
+  .gt-bar > .seg:first-child {
+    flex: 0 0 100%;
+  }
+  .gt-bar > .seg:first-child button {
+    padding-inline: 6px;
   }
   .gt-label {
     padding: 0 6px 0 10px;

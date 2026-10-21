@@ -88,6 +88,8 @@
       "other": "{count}日"
     },
     "noRegion": "地域なし",
+    "zoom3m": "3か月",
+    "zoom6m": "半年",
     "zoom1y": "1年",
     "zoom3y": "3年",
     "byMethod": "支払い方法別",
@@ -101,7 +103,6 @@
     "introShort": "特典 ",
     "planned": "予定",
     "gap": "中断",
-    "zoomYear": "今年",
     "earlier": "前へ",
     "later": "次へ",
     "backToNow": "現在に戻る"
