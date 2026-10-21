@@ -395,6 +395,11 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
+    // 旧域名：页面跳到新域名，接口、MCP、日历订阅继续在旧域名上可用
+    if (env.OLD_HOSTS && env.SITE_URL && env.OLD_HOSTS.split(',').some((h) => h.trim() === url.hostname)) {
+      const keep = url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/');
+      if (!keep) return Response.redirect(new URL(url.pathname + url.search, env.SITE_URL).href, 301);
+    }
     // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
     if (!env.SITE_URL) env = { ...env, SITE_URL: url.origin };
     try {

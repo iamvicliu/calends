@@ -109,6 +109,7 @@ codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALE
 | `SETUP_TOKEN`                                | secret / 环境变量 | 新部署首次设置密码时需要。                                                                                                                                    |
 | `SITE_URL`                                   | 变量 / 环境变量   | 提醒和日历里使用的站点地址；不设时自动识别。                                                                                                                  |
 | `EMAIL` 绑定 + `MAIL_FROM`、`MAIL_FROM_NAME` | wrangler          | 可选：通过 [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/) 发邮件提醒；其他渠道无需服务端配置。 |
+| `OLD_HOSTS`                                  | var / env         | 可选：换域名后填旧域名（逗号分隔）。在旧域名打开页面会 301 到 `SITE_URL`；接口、MCP 和日历订阅照常可用，已有客户端不受影响。                                  |
 | `TRUST_PROXY`                                | 环境变量          | 在反向代理后面时设为 `1`，登录限速才能拿到真实访客 IP。                                                                                                       |
 | `DATA_DIR`、`PORT`                           | Docker 环境变量   | 数据目录（默认 `/data`）和端口（默认 `8787`）。                                                                                                               |
 

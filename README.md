@@ -111,6 +111,7 @@ Tools include `get_overview`, `list_subscriptions`, `spending_stats`, `get_trend
 | `SETUP_TOKEN`                                   | secret / env | Required once to set the owner password on a fresh install.                                                                                                                        |
 | `SITE_URL`                                      | var / env    | Public URL used in reminders and calendar links. Auto-detected if unset.                                                                                                           |
 | `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler     | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
+| `OLD_HOSTS`                                     | var / env    | Optional: comma-separated old domains after moving to a new one. Pages there 301 to `SITE_URL`; API, MCP and calendar feeds keep working, so existing clients don't break.         |
 | `TRUST_PROXY`                                   | env          | Set to `1` behind a reverse proxy so login rate limiting sees the real client IP.                                                                                                  |
 | `DATA_DIR`, `PORT`                              | Docker env   | Data directory (default `/data`) and port (default `8787`).                                                                                                                        |
 
