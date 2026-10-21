@@ -55,7 +55,7 @@
     "switch": "Tarifwechsel",
     "resume": "Fortgesetzt"
   },
-  "generate": "Aktuellen Bericht erstellen",
+  "generate": "Bericht erstellen",
   "search": "Suche „{query}“",
   "selectionTitle": {
     "one": "{scope} · {count} Abonnement",

@@ -55,7 +55,7 @@
     "switch": "Changement de formule",
     "resume": "Reprise"
   },
-  "generate": "Générer le rapport actuel",
+  "generate": "Générer le rapport",
   "search": "Recherche « {query} »",
   "selectionTitle": {
     "one": "{scope} · {count} abonnement",

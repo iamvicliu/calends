@@ -55,7 +55,7 @@
     "switch": "Plan değişti",
     "resume": "Yeniden başlatıldı"
   },
-  "generate": "Geçerli raporu oluştur",
+  "generate": "Rapor oluştur",
   "search": "“{query}” araması",
   "selectionTitle": {
     "one": "{scope} · {count} abonelik",

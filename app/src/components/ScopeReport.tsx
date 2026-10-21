@@ -8,7 +8,7 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
 import { BarLine } from './charts.tsx';
-import { Icon } from './ui.tsx';
+import { Hint, Icon } from './ui.tsx';
 import './scope-report.css';
 
 interface Props {
@@ -20,6 +20,17 @@ interface Props {
   animate: boolean;
   open: boolean;
   onToggle: () => void;
+}
+
+/** Spending increases use the same direction and unsigned comparison in both calendar modes. */
+export function SpendingDelta({ value, base }: { value: Comparison; base: string }) {
+  const direction = value.amount > 0.005 ? 'up' : value.amount < -0.005 ? 'down' : '';
+  return (
+    <span className={`chip-d ${direction}`}>
+      {direction === 'up' ? '↑' : direction === 'down' ? '↓' : '·'} {money(Math.abs(value.amount), base)}
+      {value.percent != null && ` · ${new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`}
+    </span>
+  );
 }
 
 /** Shared presentation for subscription selections and calendar months; callers own disclosure state. */
@@ -39,7 +50,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         // 让新挂载图表的宽度测量完成，组装动画在复制后保持关闭。
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         const image = await snapshot(el, {
-          radius: getComputedStyle(el).borderRadius,
+          width: el.offsetWidth + 40,
+          height: el.offsetHeight + 40,
+          style: { backgroundColor: getComputedStyle(el).getPropertyValue('--bg'), padding: '20px', borderRadius: '20px' },
           filter: (n) => !(n instanceof Element && n.matches('.scope-actions')),
         });
         if (!image) throw new Error(t('ui.error.requestFailed', { status: 'PNG' }));
@@ -54,12 +67,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const expense = (v: number) => flow(-v, base);
   const income = (v: number) => flow(v, base);
   const percent = (v: number) => new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v));
-  const delta = (value: Comparison) => (
-    <span className={`chip-d ${value.amount > 0.005 ? 'up' : value.amount < -0.005 ? 'down' : ''}`}>
-      {value.amount > 0.005 ? '↑' : value.amount < -0.005 ? '↓' : '·'} {money(Math.abs(value.amount), base)}
-      {value.percent != null && ` · ${percent(value.percent)}`}
-    </span>
-  );
+  const delta = (value: Comparison) => <SpendingDelta value={value} base={base} />;
   const fact = (label: string, value: ReactNode) => (
     <div>
       <b className="num">{value}</b>
@@ -81,9 +89,10 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         <b className="num">{expense(r.amount)}</b>
       </div>
     ));
-  const heading = (key: string) => (
+  const heading = (key: string, hint?: string) => (
     <div className="card-h">
       <h3>{t(`scope.${key}`)}</h3>
+      {hint && <Hint text={t(`scope.${hint}`)} />}
     </div>
   );
   const render = (block: Block): ReactNode => {
@@ -106,7 +115,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           </>
         ) : (
           <>
-            <div className="stat-label">{t('scope.monthTotal')}</div>
+            <div className="stat-label">
+              {t('scope.monthTotal')} <Hint text={t('scope.cashBasis')} />
+            </div>
             <div className="hero-num num">{expense(block.total)}</div>
             <div className="hero-delta">
               <span className="scope-comparison">
@@ -125,15 +136,13 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               {fact(t('scope.pending'), expense(block.pending))}
               {fact(t('scope.count'), block.count)}
             </div>
-            <p className="scope-note">{t('scope.cashBasis')}</p>
           </>
         );
       case 'trend': {
         if (block.mode === 'scope')
           return (
             <>
-              {heading('cash')}
-              <p className="scope-note">{t('scope.cashWindow')}</p>
+              {heading('cash', 'cashWindow')}
               <BarLine
                 bars={block.rows.map((r) => r.cash)}
                 line={[]}
@@ -310,12 +319,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       case 'sharing':
         return (
           <>
-            {heading('sharing')}
+            {heading('sharing', 'sharingBasis')}
             <div className="hero-facts scope-facts">
               {block.received !== 0 && fact(t('scope.received'), income(block.received))}
               {block.owed > 0 && fact(t('scope.owed'), income(block.owed))}
             </div>
-            <p className="scope-note">{t('scope.sharingBasis')}</p>
             {block.rows.map((r) => (
               <div className="scope-row" key={r.sub.id}>
                 {name(r.sub)}
@@ -332,7 +340,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   return (
     <section ref={root} className={`scope-report ${animate && copyState === 'idle' ? 'scope-animate' : ''}`} aria-labelledby={`${id}-title`}>
       <header className="scope-header">
-        <h2 id={`${id}-title`}>{title}</h2>
+        <h2 id={`${id}-title`}>
+          <button type="button" className="scope-title" aria-expanded={expanded} aria-controls={id} onClick={onToggle} disabled={copying}>
+            {expanded ? title : t('scope.expand')}
+          </button>
+        </h2>
         <div className="scope-actions">
           {typeof ClipboardItem !== 'undefined' && (
             <button

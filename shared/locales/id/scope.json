@@ -55,7 +55,7 @@
     "switch": "Paket berubah",
     "resume": "Dilanjutkan"
   },
-  "generate": "Buat laporan saat ini",
+  "generate": "Buat laporan",
   "search": "Pencarian “{query}”",
   "selectionTitle": {
     "other": "{scope} · {count} langganan"

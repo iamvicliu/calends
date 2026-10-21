@@ -55,7 +55,7 @@
     "switch": "Смена тарифа",
     "resume": "Возобновлена"
   },
-  "generate": "Создать текущий отчёт",
+  "generate": "Создать отчёт",
   "search": "Поиск «{query}»",
   "selectionTitle": {
     "one": "{scope} · {count} подписка",

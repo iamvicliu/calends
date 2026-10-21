@@ -55,7 +55,7 @@
     "switch": "プラン変更",
     "resume": "再開"
   },
-  "generate": "現在のレポートを生成",
+  "generate": "レポートを生成",
   "search": "「{query}」の検索",
   "selectionTitle": {
     "other": "{scope} · {count} 件のサブスクリプション"

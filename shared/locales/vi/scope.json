@@ -55,7 +55,7 @@
     "switch": "Đổi gói",
     "resume": "Tiếp tục đăng ký"
   },
-  "generate": "Tạo báo cáo hiện tại",
+  "generate": "Tạo báo cáo",
   "search": "Tìm kiếm “{query}”",
   "selectionTitle": {
     "other": "{scope} · {count} gói đăng ký"

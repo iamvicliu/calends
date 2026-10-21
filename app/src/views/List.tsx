@@ -156,6 +156,8 @@ export function List({
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
   // 只按筛选范围识别报告，排序、视图及时间轴窗口不影响报告。
   const reportKey = JSON.stringify([category ?? null, filter, cat, pay, words.join(' ')]);
+  const [reportPref] = usePref<string>('list-report', '');
+  const reportVisible = dirty && rows.length > 0 && readReportPref(reportPref, reportKey)?.open;
   const reportScope = [
     cat !== 'all' && cat,
     filter !== 'all' && filter !== 'live' && FILTERS().find(([k]) => k === filter)?.[1],
@@ -169,7 +171,11 @@ export function List({
     <>
       <Toolbar
         title={category ?? t('list.title')}
-        sub={t('list.summary', { count: rows.length, monthly: flow(-sum, base, { compact: true }), yearly: flow(-sum * 12, base, { compact: true }) })}
+        sub={
+          reportVisible
+            ? undefined
+            : t('list.summary', { count: rows.length, monthly: flow(-sum, base, { compact: true }), yearly: flow(-sum * 12, base, { compact: true }) })
+        }
       >
         <label className="tb-search">
           <Icon name="search" />
@@ -488,13 +494,7 @@ function ListReport({
 }) {
   const [pref, setPref] = usePref<string>('list-report', '');
   const [animate, setAnimate] = useState(false);
-  let saved: { key: string; open: boolean } | undefined;
-  try {
-    const value = JSON.parse(pref);
-    if (value && value.key === reportKey && typeof value.open === 'boolean') saved = value;
-  } catch {
-    // 未生成或旧偏好损坏时保留生成入口。
-  }
+  const saved = readReportPref(pref, reportKey);
   return (
     <div className="list-report">
       {saved ? (
@@ -514,7 +514,7 @@ function ListReport({
       ) : (
         <button
           type="button"
-          className="btn"
+          className="scope-trigger"
           onClick={() => {
             setAnimate(true);
             setPref(JSON.stringify({ key: reportKey, open: true }));
@@ -525,6 +525,15 @@ function ListReport({
       )}
     </div>
   );
+}
+
+function readReportPref(pref: string, key: string): { key: string; open: boolean } | undefined {
+  try {
+    const value = JSON.parse(pref);
+    if (value && value.key === key && typeof value.open === 'boolean') return value;
+  } catch {
+    // 未生成或旧偏好损坏时保留生成入口。
+  }
 }
 
 /** 待生效变更的一行提示：「10月27日起 🇺🇸 $9.99/月 · 支付方式」，未来才开始的订阅写「10月27日开始」 */

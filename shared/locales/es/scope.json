@@ -55,7 +55,7 @@
     "switch": "Cambio de plan",
     "resume": "Reanudada"
   },
-  "generate": "Generar informe actual",
+  "generate": "Generar informe",
   "search": "Búsqueda «{query}»",
   "selectionTitle": {
     "one": "{scope} · {count} suscripción",

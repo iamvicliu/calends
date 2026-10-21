@@ -38,7 +38,10 @@ function inlineSvg(el: HTMLElement) {
 }
 
 /** 把元素渲染成 PNG：圆角与弹窗一致、圆角外透明，filter 可去掉按钮等 */
-export async function snapshot(el: HTMLElement, opts: { radius?: string; filter?: (n: HTMLElement) => boolean } = {}) {
+export async function snapshot(
+  el: HTMLElement,
+  opts: { radius?: string; width?: number; height?: number; style?: Partial<CSSStyleDeclaration>; filter?: (n: HTMLElement) => boolean } = {},
+) {
   const fontEmbedCSS = await fontCSS();
   const restore = inlineSvg(el);
   try {
@@ -47,7 +50,9 @@ export async function snapshot(el: HTMLElement, opts: { radius?: string; filter?
       fontEmbedCSS,
       cacheBust: false,
       includeQueryParams: true,
-      style: { borderRadius: opts.radius ?? '0', overflow: 'hidden' },
+      width: opts.width,
+      height: opts.height,
+      style: { borderRadius: opts.radius ?? '0', overflow: 'hidden', ...opts.style },
       filter: opts.filter,
     });
   } finally {

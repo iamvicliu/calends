@@ -55,7 +55,7 @@
     "switch": "요금제 변경",
     "resume": "구독 재개"
   },
-  "generate": "현재 보고서 생성",
+  "generate": "보고서 생성",
   "search": "“{query}” 검색",
   "selectionTitle": {
     "other": "{scope} · 구독 {count}개"

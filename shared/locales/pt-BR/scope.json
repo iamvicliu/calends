@@ -55,7 +55,7 @@
     "switch": "Mudança de plano",
     "resume": "Retomada"
   },
-  "generate": "Gerar relatório atual",
+  "generate": "Gerar relatório",
   "search": "Busca por “{query}”",
   "selectionTitle": {
     "one": "{scope} · {count} assinatura",
