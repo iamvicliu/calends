@@ -33,6 +33,8 @@ interface Row {
 /** 并行的段往下错开的距离（条高 18） */
 const LANE = 21;
 
+/** 一个周期至少这么宽才按续费切开，太窄会密成一串圆点 */
+const CYCLE_MIN_PX = 28;
 const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.round(d / 30.4) }) : t('list.gantt.days', { count: d }));
 
 /**
@@ -301,28 +303,42 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                     if (lifetime) return <span key={g.from} className="gt-lifetime" style={{ left, top: top + 2, background: color(g.v) }} title={tip} />;
-                    // 段内按调价、首期优惠切成几截，每截标自己的价格
-                    const cuts = [...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), g.to])]
+                    // 段内按调价、首期优惠切成几截，每截标自己的价格；
+                    // 周期够宽时再按每次续费切开：每个周期一颗圆角胶囊，连续续订的首尾相接
+                    const renewals = chargesBetween(g.v, g.from, g.to, today)
+                      .filter((c) => c.amount > 0 && c.date > g.from && c.date < g.to)
+                      .map((c) => c.date);
+                    const perCycle = renewals.length > 1 ? diffDays(renewals[0], renewals[1]) * k : Infinity;
+                    const cycleCuts = new Set(perCycle >= CYCLE_MIN_PX ? renewals : []);
+                    const cuts = [
+                      ...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), ...cycleCuts, g.to]),
+                    ]
                       .filter((d) => d >= g.from && d <= g.to)
                       .sort();
+                    let labeled = '';
                     return cuts.slice(0, -1).map((a, n) => {
                       const b = cuts[n + 1];
+                      if (b < start || a > end) return null;
                       const pl = x(a);
                       const pw = Math.max(3, x(b) - pl);
                       const intro = g.v.intro && a < g.v.intro.until;
                       const price = priceAt(g.v, a);
                       const last = n === cuts.length - 2;
                       const pnow = Math.min(pw, Math.max(0, x(today) - pl));
+                      // 同价的一串只标一次：标在窗口内第一截放得下的
+                      const run = `${price}|${intro ? 1 : 0}`;
+                      const label = pw > 70 && labeled !== run;
+                      if (label) labeled = run;
                       const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${flag(g.v.region)} ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                       return (
                         <span
                           key={a}
-                          className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 ? 'cont' : ''} ${!last ? 'cut' : ''} ${intro ? 'intro' : ''}`}
+                          className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${intro ? 'intro' : ''}`}
                           style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                           title={ptip || tip}
                         >
                           {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />}
-                          {pw > 70 && (
+                          {label && (
                             <em>
                               {n === 0 && g.v.region ? `${flag(g.v.region)} ` : ''}
                               {intro ? t('list.gantt.introShort') : ''}
