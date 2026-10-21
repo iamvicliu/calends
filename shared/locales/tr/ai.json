@@ -54,7 +54,7 @@
     "terminal": "Bunu terminalinizde çalıştırın.",
     "codex": "Bunu terminalinizde çalıştırın. Token'ın yeniden başlatmalardan sonra da geçerli kalması için export satırını kabuk profilinize ekleyin.",
     "file": "Bunu {path} dosyasına ekleyin.",
-    "trae": "Trae → Ayarlar → MCP → Elle ekle yolunu açın ve bunu yapıştırın.",
+    "grok": "Grok’u xAI API ile çağırırken Calends’i uzak MCP aracı olarak verin. xAI sunucuları doğrudan bağlanır, bu yüzden adres herkese açık olmalı.",
     "http": "Streamable HTTP destekleyen her MCP istemcisi. Bu kısa bir test isteğidir."
   },
   "step": {

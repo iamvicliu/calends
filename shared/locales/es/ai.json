@@ -54,7 +54,7 @@
     "terminal": "Ejecuta esto en tu terminal.",
     "codex": "Ejecuta esto en tu terminal. Añade la línea export al perfil de tu shell para que el token se conserve tras reiniciar.",
     "file": "Añade esto a {path}.",
-    "trae": "Abre Trae → Configuración → MCP → Añadir manualmente y pega esto.",
+    "grok": "Pasa Calends como herramienta MCP remota al llamar a Grok con la API de xAI. Los servidores de xAI se conectan directamente, así que la dirección debe ser pública.",
     "http": "Cualquier cliente MCP compatible con Streamable HTTP. Esta es una solicitud de prueba rápida."
   },
   "step": {

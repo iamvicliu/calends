@@ -52,7 +52,7 @@
     "terminal": "在终端里运行。",
     "codex": "在终端里运行。把 export 那一行加到 shell 配置文件里，重启后令牌仍然有效。",
     "file": "添加到 {path}。",
-    "trae": "打开 Trae → 设置 → MCP → 手动添加，粘贴这段配置。",
+    "grok": "用 xAI API 调用 Grok 时，把 Calends 作为远程 MCP 工具传入。xAI 的服务器会直接连接，地址需要公网可访问。",
     "http": "任何支持 Streamable HTTP 的 MCP 客户端都可以。下面是一条测试请求。"
   },
   "step": {

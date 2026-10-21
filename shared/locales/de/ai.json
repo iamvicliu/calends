@@ -54,7 +54,7 @@
     "terminal": "Führe das in deinem Terminal aus.",
     "codex": "Führe das in deinem Terminal aus. Füge die export-Zeile deinem Shell-Profil hinzu, damit das Token Neustarts übersteht.",
     "file": "Füge das zu {path} hinzu.",
-    "trae": "Öffne Trae → Einstellungen → MCP → Manuell hinzufügen und füge das ein.",
+    "grok": "Beim Aufruf von Grok über die xAI-API Calends als Remote-MCP-Tool übergeben. Die Server von xAI verbinden sich direkt, die Adresse muss öffentlich erreichbar sein.",
     "http": "Jeder MCP-Client mit Streamable HTTP. Das ist eine kurze Testanfrage."
   },
   "step": {

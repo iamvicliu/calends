@@ -52,7 +52,7 @@
     "terminal": "Jalankan ini di terminal Anda.",
     "codex": "Jalankan ini di terminal Anda. Tambahkan baris export ke profil shell agar token tetap berlaku setelah restart.",
     "file": "Tambahkan ini ke {path}.",
-    "trae": "Buka Trae → Pengaturan → MCP → Tambah manual, lalu tempel ini.",
+    "grok": "Kirim Calends sebagai alat MCP jarak jauh saat memanggil Grok lewat API xAI. Server xAI terhubung langsung, jadi alamatnya harus bisa diakses publik.",
     "http": "Klien MCP apa pun yang mendukung Streamable HTTP. Ini permintaan uji singkat."
   },
   "step": {
