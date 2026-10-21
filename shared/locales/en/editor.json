@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "Login email, phone or username", "phone": "Phone number" },
   "overlap": {
     "keep": "Keep the old one running",
     "keepHint": "Already prepaid and not expired yet: both run side by side and are billed as usual",
@@ -70,6 +71,8 @@
     "tags": "Tags & notes"
   },
   "field": {
+    "account": "Account",
+    "phone": "Phone number",
     "category": "Category",
     "amount": "Amount",
     "currency": "Currency",

@@ -1,4 +1,6 @@
 {
+  "copy": "コピー",
+  "copied": "コピーしました",
   "overlap": { "title": "並行中", "previous": "以前のプラン", "until": "{date}まで · {rel}" },
   "action": { "edit": "編集", "pause": "一時停止", "resume": "再開", "manage": "管理", "website": "Web サイト", "share": "共有" },
   "toast": { "resumed": "請求を再開しました", "paused": "一時停止しました。今後の請求は予測に含まれません" },

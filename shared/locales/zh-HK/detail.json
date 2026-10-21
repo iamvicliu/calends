@@ -1,4 +1,6 @@
 {
+  "copy": "複製",
+  "copied": "已複製",
   "overlap": { "title": "同時進行中", "previous": "原本的方案", "until": "用到 {date} · {rel}" },
   "action": { "edit": "編輯", "pause": "暫停", "resume": "恢復", "manage": "管理", "website": "官網", "share": "分享" },
   "toast": { "resumed": "已恢復計費", "paused": "已暫停，不再推算之後的扣款" },

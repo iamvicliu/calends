@@ -28,9 +28,9 @@ import { chargeValue, convertOn, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
 import { PaymentSheet } from './PaymentSheet.tsx';
 import { CatIcon, PayBadge, Seg, SubIcon } from '../components/ui.tsx';
-import { catColor, toBase } from '../derive.ts';
+import { catColor, presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
-import { run, saveSub } from '../store.ts';
+import { run, saveSub, toast } from '../store.ts';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan } from '../../shared/phases.ts';
 import { t } from '../../shared/i18n.ts';
@@ -692,6 +692,19 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
           {cur.region && (
             <Prop k={t('detail.field.region')}>
               <Region cc={cur.region} />
+            </Prop>
+          )}
+          {sub.account && (
+            <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
+              {/* 点一下复制，登录时直接粘贴 */}
+              <button
+                type="button"
+                className="dt-copy"
+                title={t('detail.copy')}
+                onClick={() => void navigator.clipboard?.writeText(sub.account!).then(() => toast(t('detail.copied')))}
+              >
+                {sub.account}
+              </button>
             </Prop>
           )}
           <Prop k={t('detail.field.start')}>{cnDateFull(sub.start)}</Prop>

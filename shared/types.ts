@@ -197,6 +197,8 @@ export interface Subscription {
   intro?: { price: number; until: string };
   /** 赠送时长（如买一年送一年）：[from, until) 期间不扣款，之后从 until 起重新按周期扣 */
   bonus?: { from: string; until: string };
+  /** 登录账号：邮箱、手机号或用户名（通信类就是手机号）。公开页不下发 */
+  account?: string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;

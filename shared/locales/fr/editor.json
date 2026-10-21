@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "E-mail, téléphone ou identifiant", "phone": "Numéro de téléphone" },
   "overlap": {
     "keep": "Garder l’ancien encore un temps",
     "keepHint": "Déjà prépayé et pas encore expiré : les deux tournent en parallèle et sont facturés normalement",
@@ -70,6 +71,8 @@
     "tags": "Tags et notes"
   },
   "field": {
+    "account": "Compte",
+    "phone": "Numéro",
     "category": "Catégorie",
     "amount": "Montant",
     "currency": "Devise",

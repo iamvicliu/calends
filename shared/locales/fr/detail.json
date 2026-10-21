@@ -1,4 +1,6 @@
 {
+  "copy": "Copier",
+  "copied": "Copié",
   "overlap": { "title": "Aussi en cours", "previous": "Ancienne formule", "until": "Jusqu’au {date} · {rel}" },
   "action": { "edit": "Modifier", "pause": "Suspendre", "resume": "Reprendre", "manage": "Gérer", "website": "Site web", "share": "Partager" },
   "toast": { "resumed": "Facturation reprise", "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus" },

@@ -1,4 +1,6 @@
 {
+  "copy": "Copy",
+  "copied": "Copied",
   "overlap": { "title": "Also running", "previous": "Previous plan", "until": "Runs until {date} · {rel}" },
   "action": { "edit": "Edit", "pause": "Pause", "resume": "Resume", "manage": "Manage", "website": "Website", "share": "Share" },
   "toast": { "resumed": "Billing resumed", "paused": "Paused. Future charges won't be projected" },

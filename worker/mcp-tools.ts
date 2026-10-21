@@ -491,6 +491,7 @@ export const TOOLS: Tool[] = [
       return {
         ...row(st, s, today, out),
         notes: s.notes ?? null,
+        account: s.account ?? null,
         url: s.url ?? null,
         intro: s.intro ?? null,
         bonus: s.bonus ?? null,
@@ -854,6 +855,7 @@ export const TOOLS: Tool[] = [
         url: { type: 'string' },
         icon: { type: 'string', description: 'Icon image URL (https), e.g. artwork from search_app_store.' },
         notes: { type: 'string' },
+        account: { type: 'string', description: 'Login account: email, phone number (for carriers) or username shown on the receipt.' },
         status: { type: 'string', enum: ['active', 'trial'], default: 'active' },
         trial_end: DATE,
         end: { ...DATE, description: 'Will not renew after this date.' },
@@ -894,6 +896,7 @@ export const TOOLS: Tool[] = [
         url: str(a.url),
         icon: str(a.icon)?.startsWith('https://') ? str(a.icon) : undefined,
         notes: str(a.notes),
+        account: str(a.account),
         trialEnd: a.trial_end ? date(a.trial_end, 'trial_end') : undefined,
         end: a.end ? date(a.end, 'end') : undefined,
         intro: a.intro
@@ -919,6 +922,7 @@ export const TOOLS: Tool[] = [
           url: { type: 'string' },
           manage_url: { type: 'string' },
           notes: { type: 'string' },
+          account: { type: 'string', description: 'Login account (email / phone / username).' },
           method: { type: 'string', description: 'Payment method id or name.' },
           region: { type: 'string' },
           remind_days: { type: 'integer', description: '-1 = no reminder.' },
@@ -948,6 +952,7 @@ export const TOOLS: Tool[] = [
       if ('url' in set) put('url', str(set.url));
       if ('manage_url' in set) put('manageUrl', str(set.manage_url), 'manage_url');
       if ('notes' in set) put('notes', str(set.notes));
+      if ('account' in set) put('account', str(set.account));
       if ('method' in set) put('methodId', methodRef(st, set.method), 'method');
       if ('region' in set) put('region', str(set.region)?.toUpperCase());
       if ('remind_days' in set) put('remindDays', set.remind_days == null ? undefined : Number(set.remind_days), 'remind_days');

@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "登录邮箱、手机号或用户名", "phone": "手机号码" },
   "overlap": {
     "keep": "旧的继续用一段时间",
     "keepHint": "旧的已经预付、还没到期：两段并行，各自照常计费",
@@ -57,6 +58,8 @@
     "tags": "标签与备注"
   },
   "field": {
+    "account": "账号",
+    "phone": "手机号",
     "category": "分类",
     "amount": "金额",
     "currency": "币种",

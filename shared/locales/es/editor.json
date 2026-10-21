@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "Correo, teléfono o usuario", "phone": "Número de teléfono" },
   "overlap": {
     "keep": "Mantener el anterior un tiempo",
     "keepHint": "Ya está prepagado y aún no vence: ambos funcionan a la vez y se cobran como siempre",
@@ -70,6 +71,8 @@
     "tags": "Etiquetas y notas"
   },
   "field": {
+    "account": "Cuenta",
+    "phone": "Teléfono",
     "category": "Categoría",
     "amount": "Importe",
     "currency": "Moneda",

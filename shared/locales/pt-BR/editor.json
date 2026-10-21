@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "E-mail, telefone ou usuário", "phone": "Número de telefone" },
   "overlap": {
     "keep": "Manter o anterior por um tempo",
     "keepHint": "Já foi pago antecipadamente e ainda não venceu: os dois rodam juntos e são cobrados normalmente",
@@ -70,6 +71,8 @@
     "tags": "Tags e notas"
   },
   "field": {
+    "account": "Conta",
+    "phone": "Telefone",
     "category": "Categoria",
     "amount": "Valor",
     "currency": "Moeda",

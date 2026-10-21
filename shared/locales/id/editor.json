@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "Email, telepon, atau nama pengguna", "phone": "Nomor telepon" },
   "overlap": {
     "keep": "Tetap pakai yang lama sementara",
     "keepHint": "Sudah dibayar di muka dan belum habis: keduanya berjalan bersamaan dan ditagih seperti biasa",
@@ -65,6 +66,8 @@
     "tags": "Tag & catatan"
   },
   "field": {
+    "account": "Akun",
+    "phone": "Nomor telepon",
     "category": "Kategori",
     "amount": "Jumlah",
     "currency": "Mata uang",

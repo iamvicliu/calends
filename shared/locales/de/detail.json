@@ -1,4 +1,6 @@
 {
+  "copy": "Kopieren",
+  "copied": "Kopiert",
   "overlap": { "title": "Läuft parallel", "previous": "Vorheriger Tarif", "until": "Bis {date} · {rel}" },
   "action": { "edit": "Bearbeiten", "pause": "Pausieren", "resume": "Fortsetzen", "manage": "Verwalten", "website": "Website", "share": "Teilen" },
   "toast": { "resumed": "Abrechnung fortgesetzt", "paused": "Pausiert. Künftige Abbuchungen werden nicht mehr prognostiziert" },

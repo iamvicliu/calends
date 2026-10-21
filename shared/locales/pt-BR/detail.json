@@ -1,4 +1,6 @@
 {
+  "copy": "Copiar",
+  "copied": "Copiado",
   "overlap": { "title": "Também ativo", "previous": "Plano anterior", "until": "Até {date} · {rel}" },
   "action": { "edit": "Editar", "pause": "Pausar", "resume": "Retomar", "manage": "Gerenciar", "website": "Site", "share": "Compartilhar" },
   "toast": { "resumed": "Cobrança retomada", "paused": "Pausada. Cobranças futuras não serão previstas" },

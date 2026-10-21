@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "Login-E-Mail, Telefon oder Benutzername", "phone": "Telefonnummer" },
   "overlap": {
     "keep": "Altes noch weiterlaufen lassen",
     "keepHint": "Bereits vorausbezahlt und noch nicht abgelaufen: Beide laufen parallel und werden normal abgerechnet",
@@ -70,6 +71,8 @@
     "tags": "Tags & Notizen"
   },
   "field": {
+    "account": "Konto",
+    "phone": "Telefonnummer",
     "category": "Kategorie",
     "amount": "Betrag",
     "currency": "Währung",

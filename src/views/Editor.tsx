@@ -115,7 +115,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const save = () =>
     run(
       async () => {
-        let out: Subscription = { ...f, name: f.name.trim() };
+        let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
         // 直接改了价格框：视为今天起调价，过往账单保持原价
         if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
         else out = syncPhase(out, today);
@@ -217,6 +217,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
 }
 
 function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscription>) => void; state: AppState; today: string }) {
+  const phoneCat = f.category === presetCat('phone');
   const cycleKey = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'custom';
   const share = f.share;
   const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) =>
@@ -353,6 +354,19 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
                 ) as string[],
               ),
             ]}
+          />
+        </Cell>
+        {/* 账号：通信类叫「手机号」、用电话键盘，其余叫「账号」 */}
+        <Cell label={phoneCat ? t('editor.field.phone') : t('editor.field.account')}>
+          <input
+            className="ed-account"
+            type={phoneCat ? 'tel' : 'text'}
+            inputMode={phoneCat ? 'tel' : 'email'}
+            autoComplete="off"
+            spellCheck={false}
+            value={f.account ?? ''}
+            placeholder={phoneCat ? t('editor.ph.phone') : t('editor.ph.account')}
+            onChange={(e) => up({ account: e.target.value || undefined })}
           />
         </Cell>
       </Group>

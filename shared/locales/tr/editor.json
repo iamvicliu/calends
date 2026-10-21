@@ -1,4 +1,5 @@
 {
+  "ph": { "account": "Giriş e-postası, telefon veya kullanıcı adı", "phone": "Telefon numarası" },
   "overlap": {
     "keep": "Eskisini bir süre daha kullan",
     "keepHint": "Önceden ödendi ve süresi henüz dolmadı: ikisi birlikte çalışır, her biri normal şekilde ücretlendirilir",
@@ -70,6 +71,8 @@
     "tags": "Etiketler ve notlar"
   },
   "field": {
+    "account": "Hesap",
+    "phone": "Telefon",
     "category": "Kategori",
     "amount": "Tutar",
     "currency": "Para birimi",
