@@ -17,8 +17,7 @@
     "email:preview": "node --experimental-strip-types scripts/email-preview.ts",
     "db:migrate:local": "node scripts/wrangler.mjs d1 migrations apply DB --local",
     "db:migrate:remote": "node scripts/wrangler.mjs d1 migrations apply DB --remote",
-    "deploy": "npm run build && node scripts/wrangler.mjs deploy && node scripts/wrangler.mjs d1 migrations apply DB --remote",
-    "seed": "node --experimental-strip-types scripts/seed.ts"
+    "deploy": "npm run build && node scripts/wrangler.mjs deploy && node scripts/wrangler.mjs d1 migrations apply DB --remote"
   },
   "prettier": {
     "singleQuote": true,
