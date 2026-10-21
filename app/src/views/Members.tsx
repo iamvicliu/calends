@@ -141,6 +141,8 @@ export function MemberSheet({
     next.share = shareFromFee(state, s, next.fee ?? 0, next.feeCurrency ?? base, next.billEvery ?? 1);
     setF(next);
     if (!adding) setPay(freshPay(next));
+    // 正在记一笔收款时改了收费周期：覆盖结束日按新周期从覆盖起始日重算（界面写着「按周期自动算出」）
+    else if (p.billEvery !== undefined) setPay((x) => ({ ...x, until: coverEnd(x.from ?? today, next.billEvery ?? 1) }));
   };
 
   const save = (next: ShareMember, msg: string) => {
