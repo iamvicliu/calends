@@ -35,7 +35,11 @@
     "paidUntil": "Bezahlt bis {date}",
     "unpaid": "Noch nicht bezahlt",
     "owed": "{amount} offen",
-    "settled": "Beglichen"
+    "settled": "Beglichen",
+    "me": "Ich",
+    "seatsLeft": { "one": "{seats} Plätze, {count} frei", "other": "{seats} Plätze, {count} frei" },
+    "seatsFull": "Alle {seats} Plätze belegt",
+    "surplus": "Kostenlos, {amount} mehr eingenommen"
   },
   "charges": {
     "recentN": { "one": "Nur die letzten {count}", "other": "Nur die letzten {count}" },
@@ -58,7 +62,7 @@
     "perMonth": "Tatsächlich pro Monat"
   },
   "tab": { "charges": "Abbuchungen · {count}", "details": "Details" },
-  "kpi": { "noGaps": "Keine Unterbrechung" },
+  "kpi": { "noGaps": "Keine Unterbrechung", "startedToday": "Heute begonnen", "expectedMonthly": "Voraussichtlich pro Monat" },
   "chart": {
     "title": "Pro Abbuchung · {ccy}",
     "orig": "Original",
@@ -81,6 +85,13 @@
     "ended": "Beendet",
     "ending": "Endet",
     "phases": { "one": "{count} Phase", "other": "{count} Phasen" },
-    "more": { "one": "{count} frühere anzeigen", "other": "{count} frühere anzeigen" }
+    "more": { "one": "{count} frühere anzeigen", "other": "{count} frühere anzeigen" },
+    "shareStart": "Teilen begonnen"
+  },
+  "upcoming": {
+    "title": "Nächste 12 Monate",
+    "total": { "one": "≈ {amount} · {count} Abbuchung", "other": "≈ {amount} · {count} Abbuchungen" },
+    "more": { "one": "{count} weitere", "other": "{count} weitere" },
+    "none": "Keine Abbuchungen in den nächsten 12 Monaten"
   }
 }

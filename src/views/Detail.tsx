@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
 import {
   activePhases,
+  addDays,
   addMonths,
   chargesBetween,
   coveredUntil,
@@ -13,6 +14,7 @@ import {
   effectiveStatus,
   isGap,
   memberDues,
+  monthlyGross,
   nextCharge,
   phaseLanes,
   phaseSubs,
@@ -26,7 +28,7 @@ import { chargeValue, convertOn, rateOn } from '../../shared/fx.ts';
 import type { AppState, Payment, Subscription } from '../../shared/types.ts';
 import { PaymentSheet } from './PaymentSheet.tsx';
 import { CatIcon, PayBadge, Seg, SubIcon } from '../components/ui.tsx';
-import { catColor } from '../derive.ts';
+import { catColor, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub } from '../store.ts';
 import { SubShare } from './SubShare.tsx';
@@ -211,6 +213,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         <div className="dt-col">
           <Kpis sub={sub} state={state} today={today} history={history} />
           <Trendline sub={sub} state={state} today={today} history={history} />
+          <Upcoming sub={sub} state={state} today={today} />
           <Events sub={sub} state={state} today={today} />
         </div>
         <div className="dt-col dt-right">
@@ -270,15 +273,22 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const years = Math.floor(active / 365);
   const months = Math.floor((active % 365) / 30.44);
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
-  const perMonth = active > 0 ? total / Math.max(1, active / 30.44) : 0;
-  const perTrend = per.length > 1 && per[0] > 0 ? per[per.length - 1] / per[0] - 1 : undefined;
-  const duration = years
-    ? months
-      ? t('detail.stats.yearsMonths', { years, months })
-      : t('detail.stats.years', { count: years })
-    : months
-      ? t('detail.stats.months', { count: months })
-      : t('detail.stats.days', { count: active });
+  // 订了不到一个月（或只有一笔）时，「实际每月」没有意义：改用标价折算的预计每月
+  const young = active < 30 || per.length < 2;
+  const perMonth = young
+    ? toBase(state, monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency)
+    : total / Math.max(1, active / 30.44);
+  const perTrend = !young && per.length > 1 && per[0] > 0 ? per[per.length - 1] / per[0] - 1 : undefined;
+  const duration =
+    active < 1
+      ? t('detail.kpi.startedToday')
+      : years
+        ? months
+          ? t('detail.stats.yearsMonths', { years, months })
+          : t('detail.stats.years', { count: years })
+        : months
+          ? t('detail.stats.months', { count: months })
+          : t('detail.stats.days', { count: active });
 
   return (
     <div className={`dt-kpis ${lifetime ? 'two' : ''}`}>
@@ -303,7 +313,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
       {!lifetime && (
         <div className="dt-panel dt-kpi">
           <div className="dt-kpi-top">
-            <small>{t('detail.stats.perMonth')}</small>
+            <small>{young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}</small>
             <Trend pct={perTrend} />
           </div>
           <div className="dt-kpi-val">
@@ -312,6 +322,61 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * 未来 12 个月的扣款：12 根小柱看节奏，下面列出最近几笔（日期、距今、原币与折合），合计一年大约多少。
+ * 新订阅还没有历史时，这块是左栏的主要内容。
+ */
+function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+  const base = state.settings.baseCurrency;
+  const end = addMonths(today, 12);
+  const cs = chargesBetween(sub, addDays(today, 1), end, today).filter((c) => !c.kind);
+  if (effectiveStatus(sub, today) === 'ended' || sub.cycle.unit === 'lifetime') return null;
+  // 本月剩下的 + 往后 12 个月，共 13 格：年付订阅一年后的那笔也落在格子里
+  const labels = Array.from({ length: 13 }, (_, i) => addMonths(`${today.slice(0, 7)}-01`, i).slice(0, 7));
+  const vals = cs.map((c) => ({ c, v: chargeValue(state, c, base) }));
+  const bars = labels.map((m) => vals.filter((x) => x.c.date.startsWith(m)).reduce((a, x) => a + (x.v || 0), 0));
+  const total = vals.reduce((a, x) => a + (x.v || 0), 0);
+  const max = Math.max(...bars, 1);
+  const show = vals.slice(0, 5);
+  return (
+    <Panel
+      className="dt-upcoming"
+      title={t('detail.upcoming.title')}
+      aside={cs.length ? t('detail.upcoming.total', { amount: money(total, base), count: cs.length }) : undefined}
+    >
+      {cs.length > 0 ? (
+        <>
+          <div className="dt-up-bars" aria-hidden="true">
+            {bars.map((v, i) => (
+              <div key={labels[i]} className={v ? 'on' : ''}>
+                <i style={{ height: `${v ? Math.max(14, (v / max) * 100) : 6}%` }} />
+                <small>{Number(labels[i].slice(5))}</small>
+              </div>
+            ))}
+          </div>
+          <ul className="dt-up-list">
+            {show.map(({ c, v }) => (
+              <li key={`${c.date}-${c.sub.start}`}>
+                <span className="d">
+                  <b>{cnDateFull(c.date)}</b>
+                  <small>{relDays(diffDays(today, c.date))}</small>
+                </span>
+                <span className="a">
+                  <b>{money(c.amount, c.currency)}</b>
+                  {c.currency !== base && Number.isFinite(v) && <small>≈ {money(v, base)}</small>}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {cs.length > show.length && <div className="dt-up-more">{t('detail.upcoming.more', { count: cs.length - show.length })}</div>}
+        </>
+      ) : (
+        <div className="dt-empty">{t('detail.upcoming.none')}</div>
+      )}
+    </Panel>
   );
 }
 
@@ -508,6 +573,21 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
   if (sub.intro && sub.intro.until <= today) evs.push({ date: sub.intro.until, title: t('detail.intro.title'), sub: t('detail.ev.introEnd') });
   if (sub.trialEnd) evs.push({ date: sub.trialEnd, title: t('detail.field.trialEnd'), future: sub.trialEnd > today });
   if (sub.pausedAt && sub.status === 'paused') evs.push({ date: sub.pausedAt, title: t('detail.ev.paused'), tone: 'warn' });
+  if (sub.share?.since)
+    evs.push({
+      date: sub.share.since,
+      title: t('detail.ev.shareStart'),
+      sub: sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member'),
+      tone: 'ok',
+    });
+  const nx = nextCharge(sub, today);
+  if (nx && nx > today && effectiveStatus(sub, today) !== 'ended')
+    evs.push({
+      date: nx,
+      title: t('detail.ev.next'),
+      sub: `${money(priceAt(sub, nx), currentPhase(sub, nx).currency)} · ${relDays(diffDays(today, nx))}`,
+      future: true,
+    });
   const up = upcomingPhase(sub, today);
   if (up?.planned) evs.push({ date: up.start, title: t('detail.up.planned'), sub: plan(up), future: true });
   if (sub.end) evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
@@ -541,6 +621,28 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
         </button>
       )}
     </Panel>
+  );
+}
+
+/** 合租座位：我、在车的成员、空位各一格 */
+function Seats({ share, today }: { share: NonNullable<Subscription['share']>; today: string }) {
+  const live = share.members.filter((m) => !(m.left && m.left <= today));
+  const free = Math.max(0, share.seats - live.length - 1);
+  return (
+    <div className="dt-seats">
+      <div className="dt-seat-row">
+        <span className="dt-seat me">{t('detail.share.me')}</span>
+        {live.map((m) => (
+          <span key={m.id} className={`dt-seat ${m.exempt ? 'exempt' : 'taken'}`} title={m.name}>
+            {[...m.name][0]?.toUpperCase()}
+          </span>
+        ))}
+        {Array.from({ length: free }, (_, i) => (
+          <span key={`f${i}`} className="dt-seat free" />
+        ))}
+      </div>
+      <small>{free ? t('detail.share.seatsLeft', { count: free, seats: share.seats }) : t('detail.share.seatsFull', { seats: share.seats })}</small>
+    </div>
   );
 }
 
@@ -684,11 +786,22 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
             sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')
           }
         >
+          {sub.share.role === 'owner' && <Seats share={sub.share} today={today} />}
           <dl className="dt-props one">
             {sub.share.role === 'member' && <Prop k={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Prop>}
             {sub.share.role === 'owner' && (
               <>
-                <Prop k={t('detail.share.myShare')}>{money(sub.price - sub.share.members.reduce((a, m) => a + m.share, 0), sub.currency)}</Prop>
+                {(() => {
+                  // 成员交的比总价还多时，不显示负的份额，直接说多收了多少
+                  const mine = sub.price - sub.share.members.reduce((a, m) => a + m.share, 0);
+                  return mine >= 0 ? (
+                    <Prop k={t('detail.share.myShare')}>{money(mine, sub.currency)}</Prop>
+                  ) : (
+                    <Prop k={t('detail.share.myShare')}>
+                      <span className="dt-settled">{t('detail.share.surplus', { amount: money(-mine, sub.currency) })}</span>
+                    </Prop>
+                  );
+                })()}
                 {dues.map((d) => (
                   <Prop
                     key={d.member.id}

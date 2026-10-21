@@ -35,7 +35,11 @@
     "paidUntil": "Payé jusqu’au {date}",
     "unpaid": "Pas encore payé",
     "owed": "{amount} dû",
-    "settled": "Réglé"
+    "settled": "Réglé",
+    "me": "Moi",
+    "seatsLeft": { "one": "{seats} places, {count} libre", "other": "{seats} places, {count} libres" },
+    "seatsFull": "Les {seats} places sont prises",
+    "surplus": "Rien à payer, {amount} en plus"
   },
   "charges": {
     "recentN": { "one": "Seulement le dernier", "other": "Seulement les {count} derniers" },
@@ -58,7 +62,7 @@
     "perMonth": "Coût mensuel réel"
   },
   "tab": { "charges": "Prélèvements · {count}", "details": "Détails" },
-  "kpi": { "noGaps": "Sans interruption" },
+  "kpi": { "noGaps": "Sans interruption", "startedToday": "Commencé aujourd’hui", "expectedMonthly": "Prévu par mois" },
   "chart": {
     "title": "Par prélèvement · {ccy}",
     "orig": "Devise d’origine",
@@ -81,6 +85,13 @@
     "ended": "Terminé",
     "ending": "Se termine",
     "phases": { "one": "{count} phase", "other": "{count} phases" },
-    "more": { "one": "Afficher {count} plus ancien", "other": "Afficher {count} plus anciens" }
+    "more": { "one": "Afficher {count} plus ancien", "other": "Afficher {count} plus anciens" },
+    "shareStart": "Partage commencé"
+  },
+  "upcoming": {
+    "title": "12 prochains mois",
+    "total": { "one": "≈ {amount} · {count} prélèvement", "other": "≈ {amount} · {count} prélèvements" },
+    "more": { "one": "{count} de plus", "other": "{count} de plus" },
+    "none": "Aucun prélèvement dans les 12 prochains mois"
   }
 }

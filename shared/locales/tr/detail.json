@@ -40,7 +40,11 @@
     "paidUntil": "{date} tarihine kadar ödendi",
     "unpaid": "Henüz ödenmedi",
     "owed": "{amount} borç",
-    "settled": "Ödeşildi"
+    "settled": "Ödeşildi",
+    "me": "Ben",
+    "seatsLeft": { "one": "{seats} koltuk, {count} boş", "other": "{seats} koltuk, {count} boş" },
+    "seatsFull": "{seats} koltuğun hepsi dolu",
+    "surplus": "Ücretsiz, {amount} fazla"
   },
   "charges": {
     "recentN": "Yalnızca son {count}",
@@ -63,7 +67,7 @@
     "perMonth": "Gerçek aylık"
   },
   "tab": { "charges": "Ödemeler · {count}", "details": "Ayrıntılar" },
-  "kpi": { "noGaps": "Kesinti yok" },
+  "kpi": { "noGaps": "Kesinti yok", "startedToday": "Bugün başladı", "expectedMonthly": "Tahmini aylık" },
   "chart": {
     "title": "Ödeme başına · {ccy}",
     "orig": "Orijinal",
@@ -86,6 +90,13 @@
     "ended": "Bitti",
     "ending": "Bitiyor",
     "phases": "{count} dönem",
-    "more": "Önceki {count} kaydı göster"
+    "more": "Önceki {count} kaydı göster",
+    "shareStart": "Paylaşım başladı"
+  },
+  "upcoming": {
+    "title": "Önümüzdeki 12 ay",
+    "total": { "one": "≈ {amount} · {count} ödeme", "other": "≈ {amount} · {count} ödeme" },
+    "more": { "one": "{count} tane daha", "other": "{count} tane daha" },
+    "none": "Önümüzdeki 12 ayda ödeme yok"
   }
 }

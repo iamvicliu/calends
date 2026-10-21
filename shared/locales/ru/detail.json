@@ -40,7 +40,16 @@
     "paidUntil": "Оплачено до {date}",
     "unpaid": "Ещё не оплачено",
     "owed": "К оплате {amount}",
-    "settled": "Рассчитались"
+    "settled": "Рассчитались",
+    "me": "Я",
+    "seatsLeft": {
+      "one": "Мест: {seats}, свободно {count}",
+      "few": "Мест: {seats}, свободно {count}",
+      "many": "Мест: {seats}, свободно {count}",
+      "other": "Мест: {seats}, свободно {count}"
+    },
+    "seatsFull": "Все {seats} мест заняты",
+    "surplus": "Бесплатно, сверх: {amount}"
   },
   "charges": {
     "recentN": "Только последние {count}",
@@ -63,7 +72,7 @@
     "perMonth": "Фактически в месяц"
   },
   "tab": { "charges": "Списания · {count}", "details": "Подробности" },
-  "kpi": { "noGaps": "Без перерывов" },
+  "kpi": { "noGaps": "Без перерывов", "startedToday": "С сегодняшнего дня", "expectedMonthly": "Ожидается в месяц" },
   "chart": {
     "title": "За списание · {ccy}",
     "orig": "Исходная",
@@ -86,6 +95,18 @@
     "ended": "Завершена",
     "ending": "Завершится",
     "phases": "Этапов: {count}",
-    "more": "Показать ранние ({count})"
+    "more": "Показать ранние ({count})",
+    "shareStart": "Начало совместной подписки"
+  },
+  "upcoming": {
+    "title": "Следующие 12 месяцев",
+    "total": {
+      "one": "≈ {amount} · {count} списание",
+      "few": "≈ {amount} · {count} списания",
+      "many": "≈ {amount} · {count} списаний",
+      "other": "≈ {amount} · {count} списания"
+    },
+    "more": { "one": "ещё {count}", "few": "ещё {count}", "many": "ещё {count}", "other": "ещё {count}" },
+    "none": "В ближайшие 12 месяцев списаний нет"
   }
 }

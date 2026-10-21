@@ -35,7 +35,11 @@
     "paidUntil": "{date}까지 납부 완료",
     "unpaid": "미납",
     "owed": "{amount} 미납",
-    "settled": "정산 완료"
+    "settled": "정산 완료",
+    "me": "나",
+    "seatsLeft": { "other": "{seats}자리 중 {count}자리 남음" },
+    "seatsFull": "{seats}자리가 모두 찼어요",
+    "surplus": "부담 없음, {amount} 더 받음"
   },
   "charges": {
     "recentN": "최근 {count}건만",
@@ -58,7 +62,7 @@
     "perMonth": "실제 월평균"
   },
   "tab": { "charges": "결제 내역 · {count}", "details": "상세" },
-  "kpi": { "noGaps": "중단 없음" },
+  "kpi": { "noGaps": "중단 없음", "startedToday": "오늘 시작", "expectedMonthly": "예상 월 비용" },
   "chart": {
     "title": "회당 결제 · {ccy}",
     "orig": "원래 통화",
@@ -81,6 +85,13 @@
     "ended": "종료됨",
     "ending": "종료 예정",
     "phases": "{count}개 구간",
-    "more": "이전 {count}건 보기"
+    "more": "이전 {count}건 보기",
+    "shareStart": "공유 시작"
+  },
+  "upcoming": {
+    "title": "앞으로 12개월",
+    "total": { "other": "약 {amount} · {count}건" },
+    "more": { "other": "{count}건 더" },
+    "none": "앞으로 12개월 동안 결제가 없어요"
   }
 }

@@ -30,7 +30,11 @@
     "paidUntil": "Pago até {date}",
     "unpaid": "Ainda não pago",
     "owed": "{amount} pendente",
-    "settled": "Quitado"
+    "settled": "Quitado",
+    "me": "Eu",
+    "seatsLeft": { "one": "{seats} vagas, {count} livre", "other": "{seats} vagas, {count} livres" },
+    "seatsFull": "Todas as {seats} vagas ocupadas",
+    "surplus": "Sem custo, {amount} a mais"
   },
   "charges": {
     "recentN": { "one": "Só a última", "other": "Só as últimas {count}" },
@@ -53,7 +57,7 @@
     "perMonth": "Custo mensal real"
   },
   "tab": { "charges": "Cobranças · {count}", "details": "Detalhes" },
-  "kpi": { "noGaps": "Sem interrupções" },
+  "kpi": { "noGaps": "Sem interrupções", "startedToday": "Começou hoje", "expectedMonthly": "Previsto por mês" },
   "chart": {
     "title": "Por cobrança · {ccy}",
     "orig": "Original",
@@ -76,6 +80,13 @@
     "ended": "Encerrada",
     "ending": "Termina",
     "phases": { "one": "{count} fase", "other": "{count} fases" },
-    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" }
+    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" },
+    "shareStart": "Compartilhamento iniciado"
+  },
+  "upcoming": {
+    "title": "Próximos 12 meses",
+    "total": { "one": "≈ {amount} · {count} cobrança", "other": "≈ {amount} · {count} cobranças" },
+    "more": { "one": "mais {count}", "other": "mais {count}" },
+    "none": "Nenhuma cobrança nos próximos 12 meses"
   }
 }

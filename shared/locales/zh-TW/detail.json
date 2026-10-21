@@ -30,7 +30,11 @@
     "paidUntil": "已付至 {date}",
     "unpaid": "尚未收款",
     "owed": "待收 {amount}",
-    "settled": "已結清"
+    "settled": "已結清",
+    "me": "我",
+    "seatsLeft": "{seats} 個位置，還剩 {count} 個空位",
+    "seatsFull": "{seats} 個位置已坐滿",
+    "surplus": "不用出錢，多收 {amount}"
   },
   "charges": {
     "recentN": "只看最近 {count} 筆",
@@ -53,7 +57,7 @@
     "perMonth": "實際每月"
   },
   "tab": { "charges": "扣款紀錄 · {count}", "details": "詳情" },
-  "kpi": { "noGaps": "無中斷" },
+  "kpi": { "noGaps": "無中斷", "startedToday": "今天開始", "expectedMonthly": "預計每月" },
   "chart": {
     "title": "每筆扣款 · {ccy}",
     "orig": "原幣",
@@ -76,6 +80,8 @@
     "ended": "已結束",
     "ending": "將結束",
     "phases": "{count} 段",
-    "more": "顯示更早的 {count} 條"
-  }
+    "more": "顯示更早的 {count} 條",
+    "shareStart": "開始合租"
+  },
+  "upcoming": { "title": "未來 12 個月", "total": "約 {amount} · {count} 筆", "more": "還有 {count} 筆", "none": "未來 12 個月沒有扣款" }
 }

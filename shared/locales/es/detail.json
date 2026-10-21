@@ -35,7 +35,11 @@
     "paidUntil": "Pagado hasta el {date}",
     "unpaid": "Aún sin pagar",
     "owed": "{amount} pendiente",
-    "settled": "Al día"
+    "settled": "Al día",
+    "me": "Yo",
+    "seatsLeft": { "one": "{seats} plazas, {count} libre", "other": "{seats} plazas, {count} libres" },
+    "seatsFull": "Las {seats} plazas están ocupadas",
+    "surplus": "Sin coste, {amount} de más"
   },
   "charges": {
     "recentN": { "one": "Solo el último", "other": "Solo los últimos {count}" },
@@ -58,7 +62,7 @@
     "perMonth": "Coste mensual real"
   },
   "tab": { "charges": "Cargos · {count}", "details": "Detalles" },
-  "kpi": { "noGaps": "Sin interrupciones" },
+  "kpi": { "noGaps": "Sin interrupciones", "startedToday": "Empezó hoy", "expectedMonthly": "Previsto al mes" },
   "chart": {
     "title": "Por cargo · {ccy}",
     "orig": "Original",
@@ -81,6 +85,13 @@
     "ended": "Terminada",
     "ending": "Termina",
     "phases": { "one": "{count} fase", "other": "{count} fases" },
-    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" }
+    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" },
+    "shareStart": "Empezó a compartirse"
+  },
+  "upcoming": {
+    "title": "Próximos 12 meses",
+    "total": { "one": "≈ {amount} · {count} cargo", "other": "≈ {amount} · {count} cargos" },
+    "more": { "one": "{count} más", "other": "{count} más" },
+    "none": "Sin cargos en los próximos 12 meses"
   }
 }

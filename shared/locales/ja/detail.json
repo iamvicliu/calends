@@ -35,7 +35,11 @@
     "paidUntil": "{date}まで支払い済み",
     "unpaid": "未払い",
     "owed": "未払い {amount}",
-    "settled": "精算済み"
+    "settled": "精算済み",
+    "me": "自分",
+    "seatsLeft": { "other": "{seats} 席中、空き {count} 席" },
+    "seatsFull": "{seats} 席すべて埋まっています",
+    "surplus": "自己負担なし、{amount} 多く回収"
   },
   "charges": {
     "recentN": "最新 {count} 件のみ",
@@ -58,7 +62,7 @@
     "perMonth": "実質月額"
   },
   "tab": { "charges": "請求履歴 · {count}", "details": "詳細" },
-  "kpi": { "noGaps": "中断なし" },
+  "kpi": { "noGaps": "中断なし", "startedToday": "今日から", "expectedMonthly": "月あたりの見込み" },
   "chart": {
     "title": "1 回の請求 · {ccy}",
     "orig": "原通貨",
@@ -81,6 +85,13 @@
     "ended": "終了",
     "ending": "終了予定",
     "phases": "{count} 期間",
-    "more": "以前の {count} 件を表示"
+    "more": "以前の {count} 件を表示",
+    "shareStart": "シェア開始"
+  },
+  "upcoming": {
+    "title": "今後 12 か月",
+    "total": { "other": "約 {amount} · {count} 件" },
+    "more": { "other": "ほか {count} 件" },
+    "none": "今後 12 か月は請求がありません"
   }
 }

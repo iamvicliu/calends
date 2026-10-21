@@ -30,7 +30,11 @@
     "paidUntil": "已付至 {date}",
     "unpaid": "尚未收款",
     "owed": "待收 {amount}",
-    "settled": "已结清"
+    "settled": "已结清",
+    "me": "我",
+    "seatsLeft": "{seats} 个位置，还剩 {count} 个空位",
+    "seatsFull": "{seats} 个位置已坐满",
+    "surplus": "不用出钱，多收 {amount}"
   },
   "charges": {
     "recentN": "只看最近 {count} 笔",
@@ -53,7 +57,7 @@
     "perMonth": "实际每月"
   },
   "tab": { "charges": "扣款记录 · {count}", "details": "详情" },
-  "kpi": { "noGaps": "无断档" },
+  "kpi": { "noGaps": "无断档", "startedToday": "今天开始", "expectedMonthly": "预计每月" },
   "chart": {
     "title": "每笔扣款 · {ccy}",
     "orig": "原币",
@@ -76,6 +80,8 @@
     "ended": "已结束",
     "ending": "将结束",
     "phases": "{count} 段",
-    "more": "显示更早的 {count} 条"
-  }
+    "more": "显示更早的 {count} 条",
+    "shareStart": "开始合租"
+  },
+  "upcoming": { "title": "未来 12 个月", "total": "约 {amount} · {count} 笔", "more": "还有 {count} 笔", "none": "未来 12 个月没有扣款" }
 }

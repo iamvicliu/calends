@@ -35,7 +35,11 @@
     "paidUntil": "Lunas hingga {date}",
     "unpaid": "Belum bayar",
     "owed": "Tertunggak {amount}",
-    "settled": "Lunas"
+    "settled": "Lunas",
+    "me": "Saya",
+    "seatsLeft": { "other": "{seats} kursi, {count} kosong" },
+    "seatsFull": "Semua {seats} kursi terisi",
+    "surplus": "Gratis, lebih {amount}"
   },
   "charges": {
     "recentN": "Hanya {count} terakhir",
@@ -58,7 +62,7 @@
     "perMonth": "Biaya bulanan riil"
   },
   "tab": { "charges": "Tagihan · {count}", "details": "Detail" },
-  "kpi": { "noGaps": "Tanpa jeda" },
+  "kpi": { "noGaps": "Tanpa jeda", "startedToday": "Mulai hari ini", "expectedMonthly": "Perkiraan per bulan" },
   "chart": {
     "title": "Per tagihan · {ccy}",
     "orig": "Asli",
@@ -81,6 +85,13 @@
     "ended": "Berakhir",
     "ending": "Akan berakhir",
     "phases": "{count} fase",
-    "more": "Tampilkan {count} sebelumnya"
+    "more": "Tampilkan {count} sebelumnya",
+    "shareStart": "Mulai patungan"
+  },
+  "upcoming": {
+    "title": "12 bulan ke depan",
+    "total": { "other": "≈ {amount} · {count} tagihan" },
+    "more": { "other": "{count} lagi" },
+    "none": "Tidak ada tagihan dalam 12 bulan ke depan"
   }
 }

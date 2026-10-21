@@ -35,7 +35,11 @@
     "paidUntil": "Đã trả đến {date}",
     "unpaid": "Chưa trả",
     "owed": "Còn nợ {amount}",
-    "settled": "Đã thanh toán đủ"
+    "settled": "Đã thanh toán đủ",
+    "me": "Tôi",
+    "seatsLeft": { "other": "{seats} chỗ, còn trống {count}" },
+    "seatsFull": "Đã kín cả {seats} chỗ",
+    "surplus": "Không mất tiền, dư {amount}"
   },
   "charges": {
     "recentN": "Chỉ {count} lần gần nhất",
@@ -58,7 +62,7 @@
     "perMonth": "Thực chi mỗi tháng"
   },
   "tab": { "charges": "Lần trừ tiền · {count}", "details": "Chi tiết" },
-  "kpi": { "noGaps": "Không gián đoạn" },
+  "kpi": { "noGaps": "Không gián đoạn", "startedToday": "Bắt đầu hôm nay", "expectedMonthly": "Dự kiến mỗi tháng" },
   "chart": {
     "title": "Mỗi lần trừ · {ccy}",
     "orig": "Gốc",
@@ -81,6 +85,13 @@
     "ended": "Đã kết thúc",
     "ending": "Sắp kết thúc",
     "phases": "{count} giai đoạn",
-    "more": "Xem {count} mục trước"
+    "more": "Xem {count} mục trước",
+    "shareStart": "Bắt đầu dùng chung"
+  },
+  "upcoming": {
+    "title": "12 tháng tới",
+    "total": { "other": "≈ {amount} · {count} lần" },
+    "more": { "other": "Thêm {count} lần" },
+    "none": "Không có khoản trừ nào trong 12 tháng tới"
   }
 }

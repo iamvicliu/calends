@@ -30,7 +30,11 @@
     "paidUntil": "Paid through {date}",
     "unpaid": "Not paid yet",
     "owed": "{amount} due",
-    "settled": "Settled"
+    "settled": "Settled",
+    "me": "Me",
+    "seatsLeft": { "one": "{seats} seats, {count} free", "other": "{seats} seats, {count} free" },
+    "seatsFull": "All {seats} seats taken",
+    "surplus": "Covered, {amount} extra"
   },
   "charges": {
     "recentN": { "one": "Latest {count} only", "other": "Latest {count} only" },
@@ -53,7 +57,7 @@
     "perMonth": "Actual monthly"
   },
   "tab": { "charges": "Charges · {count}", "details": "Details" },
-  "kpi": { "noGaps": "No lapses" },
+  "kpi": { "noGaps": "No lapses", "startedToday": "Started today", "expectedMonthly": "Expected monthly" },
   "chart": {
     "title": "Per charge · {ccy}",
     "orig": "Original",
@@ -76,6 +80,13 @@
     "ended": "Ended",
     "ending": "Ends",
     "phases": { "one": "{count} phase", "other": "{count} phases" },
-    "more": { "one": "Show {count} earlier", "other": "Show {count} earlier" }
+    "more": { "one": "Show {count} earlier", "other": "Show {count} earlier" },
+    "shareStart": "Sharing started"
+  },
+  "upcoming": {
+    "title": "Next 12 months",
+    "total": { "one": "≈ {amount} · {count} charge", "other": "≈ {amount} · {count} charges" },
+    "more": { "one": "{count} more", "other": "{count} more" },
+    "none": "No charges in the next 12 months"
   }
 }
