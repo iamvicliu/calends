@@ -80,6 +80,12 @@ test('子路径 SW 的预缓存、旧缓存清理和 API 请求不跨安装作�
   const root = sw('/');
   root.request('/claude/api/state');
   assert.equal(root.getResponse(), undefined);
-  root.request('/claude/admin', 'navigate');
+  root.request('/claude/list', 'navigate');
   assert.equal(root.getResponse(), undefined);
+  for (const page of ['/', '/connect', '/cat/AI', '/login']) {
+    root.request(page, 'navigate');
+    assert.ok(root.getResponse(), page);
+  }
+  worker.request('/claude/settings', 'navigate');
+  assert.ok(worker.getResponse());
 });

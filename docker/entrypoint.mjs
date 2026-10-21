@@ -58,9 +58,9 @@ async function ready() {
   throw new Error('worker did not start');
 }
 const status = await ready();
-log(`listening on port ${PORT} — open ${process.env.BASE_PATH || ''}/admin in your browser`);
+log(`listening on port ${PORT} — open ${process.env.BASE_PATH || ''}/ in your browser`);
 if (status.needsSetup) {
-  log(`first run: create your password at ${process.env.BASE_PATH || ''}/admin with this setup token:`);
+  log(`first run: create your password at ${process.env.BASE_PATH || ''}/ with this setup token:`);
   log(`    ${setupToken}`);
   log(`(also saved in ${tokenFile}; you can set SETUP_TOKEN yourself instead)`);
 }

@@ -1,12 +1,8 @@
 import { base } from './base.ts';
-// 根路径是对外公开的只读页（不出现任何登录入口）；/admin 才是需要登录的后台。
+// /public 是对外公开的只读页（不出现任何登录入口），其余地址都是需要登录的应用。
 // 两边各自按需加载，样式互不影响。
-if (location.pathname === base('/admin') || location.pathname.startsWith(base('/admin/'))) {
-  import('./admin.tsx');
-} else {
-  if (location.pathname !== base('/')) history.replaceState(null, '', base('/'));
-  import('./public/main.tsx');
-}
+if (location.pathname.replace(/\/+$/, '') === base('/public')) import('./public/main.tsx');
+else import('./app.tsx');
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   navigator.serviceWorker.register(base('/sw.js'), { scope: base('/') }).catch(() => {});

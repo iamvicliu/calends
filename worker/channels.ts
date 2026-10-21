@@ -27,7 +27,7 @@ function toText(d: Digest, siteUrl: string): string {
     if (s.total) lines.push(`${s.total.label}  ${s.total.amount}`);
     lines.push('');
   }
-  lines.push(`${siteUrl}/admin`);
+  lines.push(`${siteUrl}/`);
   return lines.join('\n').trim();
 }
 
@@ -56,7 +56,7 @@ function toMarkdown(d: Digest, siteUrl: string, grey: Grey = plain): string {
   const out = [d.intro];
   if (d.stats?.length) out.push(d.stats.map((x) => `${x.label} **${x.value}**`).join('　'));
   for (const s of d.sections) out.push(sectionMarkdown(s, grey));
-  out.push(`[${t('notify.email.open')} →](${siteUrl}/admin)`);
+  out.push(`[${t('notify.email.open')} →](${siteUrl}/)`);
   return out.join('\n\n').trim();
 }
 
@@ -67,7 +67,7 @@ function toLarkCard(d: Digest, siteUrl: string) {
   for (const s of d.sections) blocks.push({ tag: 'hr' }, { tag: 'markdown', content: sectionMarkdown(s, GREY.lark) });
   blocks.push({
     tag: 'action',
-    actions: [{ tag: 'button', text: { tag: 'plain_text', content: t('notify.email.open') }, type: 'primary', url: `${siteUrl}/admin` }],
+    actions: [{ tag: 'button', text: { tag: 'plain_text', content: t('notify.email.open') }, type: 'primary', url: `${siteUrl}/` }],
   });
   return {
     config: { wide_screen_mode: true },
@@ -91,7 +91,7 @@ function toTelegram(d: Digest, siteUrl: string): string {
     if (s.total) out.push(`<b>${esc(s.total.label)}  ${esc(s.total.amount)}</b>`);
     out.push('');
   }
-  out.push(`<a href="${esc(siteUrl)}/admin">${esc(t('notify.email.open'))} →</a>`);
+  out.push(`<a href="${esc(siteUrl)}/">${esc(t('notify.email.open'))} →</a>`);
   return out.join('\n').trim().slice(0, 4000);
 }
 
@@ -179,7 +179,7 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
         device_key: need(c, 'key', 'deviceKey'),
         title: d.subject,
         body: toText(d, site),
-        url: `${site}/admin`,
+        url: `${site}/`,
         group: t('notify.appName'),
       });
       return;
@@ -187,7 +187,7 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
     case 'ntfy': {
       const server = (c.config.server?.trim() || 'https://ntfy.sh').replace(/\/$/, '');
       const auth: Record<string, string> = c.config.token?.trim() ? { authorization: `Bearer ${c.config.token.trim()}` } : {};
-      await post(server, { topic: need(c, 'topic', 'topic'), title: d.subject, message: toText(d, site), click: `${site}/admin`, markdown: false }, auth);
+      await post(server, { topic: need(c, 'topic', 'topic'), title: d.subject, message: toText(d, site), click: `${site}/`, markdown: false }, auth);
       return;
     }
     case 'serverchan': {
@@ -201,7 +201,7 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
     case 'discord': {
       await post(need(c, 'webhook', 'webhook'), {
         username: t('notify.appName'),
-        embeds: [{ title: d.subject, description: toMarkdown(d, site).slice(0, 4000), url: `${site}/admin`, color: 0x3e63dd }],
+        embeds: [{ title: d.subject, description: toMarkdown(d, site).slice(0, 4000), url: `${site}/`, color: 0x3e63dd }],
       });
       return;
     }
@@ -220,7 +220,7 @@ export async function sendTo(env: Env, c: Channel, d: Digest): Promise<void> {
       }
       await post(
         need(c, 'url', 'url'),
-        { subject: d.subject, intro: d.intro, kind: d.kind, sections: d.sections, text: toText(d, site), markdown: toMarkdown(d, site), url: `${site}/admin` },
+        { subject: d.subject, intro: d.intro, kind: d.kind, sections: d.sections, text: toText(d, site), markdown: toMarkdown(d, site), url: `${site}/` },
         headers,
       );
       return;

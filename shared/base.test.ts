@@ -4,7 +4,7 @@ import { normalizeBasePath, siteUrl, stripBase, withBase } from './base.ts';
 
 test('前缀按路径段匹配，可重复应用且根目录行为不变', () => {
   assert.equal(normalizeBasePath('/claude/'), '/claude');
-  for (const path of ['/admin', '/api/state', '/mcp', '/cal/key.ics', '/icons/logo.svg', '/']) {
+  for (const path of ['/list', '/api/state', '/mcp', '/cal/key.ics', '/icons/logo.svg', '/']) {
     assert.equal(withBase(path), path);
     const prefixed = withBase(path, '/claude');
     assert.equal(prefixed, '/claude' + path);

@@ -170,7 +170,8 @@ const err = (error: string, status = 400) => Response.json({ error }, { status }
 
 export async function authStatus(env: Env): Promise<Response> {
   const passkeys = await env.DB.prepare('SELECT COUNT(*) AS n FROM passkeys').first<{ n: number }>();
-  return Response.json({ needsSetup: await needsSetup(env), passkeys: passkeys?.n ?? 0 });
+  // 公开页开着时，未登录访客打开根路径看到公开页而不是登录页
+  return Response.json({ needsSetup: await needsSetup(env), passkeys: passkeys?.n ?? 0, publicView: !!(await getSettings(env)).publicView });
 }
 
 /** 首次设置密码：必须带上部署时配置的 SETUP_TOKEN */

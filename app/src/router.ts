@@ -1,6 +1,5 @@
-import { base } from './base.ts';
-// 后台路由：地址形如 /admin/list、/admin/cat/AI，用 History API 切换，不带 #
-const BASE = base('/admin');
+import { BASE_PATH as BASE } from './base.ts';
+// 应用路由：地址形如 /list、/cat/AI，用 History API 切换，不带 #
 const EVENT = 'routechange';
 
 /** 侧边栏模块的排序键：概览的路由是空串，存成 overview */
@@ -19,11 +18,20 @@ export function sortNav<T>(items: T[], keyOf: (x: T) => string, order: string[] 
     .map((a) => a.x);
 }
 
-/** 当前路由（/admin 之后的部分，不含开头的 /） */
+/** 不归前端路由管的地址：公开页单独打包，接口、MCP、日历订阅和静态文件由服务端处理 */
+const isAppPath = (path: string) => !/^(public|mcp)$|^(api|cal)\//.test(path) && !/\.[\w]+$/.test(path);
+
+/** 当前路由（部署前缀之后的部分，不含开头的 /） */
 export const currentRoute = () => decodeURIComponent(location.pathname.slice(BASE.length).replace(/^\/+|\/+$/g, ''));
 
-/** 某个路由的完整地址，用于 <a href> */
-export const href = (path: string) => (path ? `${BASE}/${path}` : BASE);
+/** 某个路由的完整地址，用于 <a href>；可以带查询串 */
+export const href = (path: string) => `${BASE}/${path}`;
+
+/** 登录后要回到的路由：只取站内路由，防止被用来跳到别的网站 */
+export const loginNext = () => {
+  const next = (new URLSearchParams(location.search).get('next') ?? '').replace(/^\/+/, '');
+  return next !== 'login' && isAppPath(next) ? next : '';
+};
 
 /** 替换当前地址（不留历史记录），用于启动页跳转 */
 export function replaceRoute(path: string) {
@@ -47,15 +55,16 @@ export function onRoute(fn: () => void) {
   };
 }
 
-/** 旧链接 /admin#/list 换成 /admin/list；后台内的普通链接点击时不整页刷新 */
+/** 应用内的普通链接点击时不整页刷新 */
 export function initRouter() {
-  if (location.hash.startsWith('#/')) history.replaceState(null, '', href(decodeURIComponent(location.hash.slice(2))));
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element).closest?.('a');
     if (!a || a.target || a.hasAttribute('download') || a.origin !== location.origin) return;
     if (a.pathname !== BASE && !a.pathname.startsWith(`${BASE}/`)) return;
+    const path = decodeURIComponent(a.pathname.slice(BASE.length).replace(/^\/+|\/+$/g, ''));
+    if (!isAppPath(path)) return;
     e.preventDefault();
-    go(decodeURIComponent(a.pathname.slice(BASE.length).replace(/^\/+/, '')));
+    go(path);
   });
 }

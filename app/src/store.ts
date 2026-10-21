@@ -351,7 +351,7 @@ export async function login(password: string): Promise<void> {
   await boot();
 }
 
-export const authStatus = () => api<{ needsSetup: boolean; passkeys: number }>('/api/auth/status');
+export const authStatus = () => api<{ needsSetup: boolean; passkeys: number; publicView: boolean }>('/api/auth/status');
 
 /** 首次设置密码（需要部署时配置的初始化令牌） */
 export async function setupPassword(setupToken: string, password: string): Promise<void> {

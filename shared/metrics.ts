@@ -609,7 +609,7 @@ export function insights(state: AppState, today: string): Insight[] {
           need: money(r.shortfall.amount, r.shortfall.currency),
           current: money(r.current, m.currency),
         }),
-        href: '/admin/wallet',
+        href: '/wallet',
       });
     }
   }

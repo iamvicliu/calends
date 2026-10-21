@@ -2,7 +2,7 @@
   "name": "Calends",
   "short_name": "Calends",
   "description": "A self-hosted, AI-native subscription ledger.",
-  "start_url": "/admin",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f3f6f8",
@@ -28,15 +28,15 @@
   "shortcuts": [
     {
       "name": "Calendar",
-      "url": "/admin/calendar"
+      "url": "/calendar"
     },
     {
       "name": "Wallet",
-      "url": "/admin/wallet"
+      "url": "/wallet"
     },
     {
       "name": "Shared plans",
-      "url": "/admin/family"
+      "url": "/family"
     }
   ]
 }

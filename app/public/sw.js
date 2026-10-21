@@ -5,6 +5,8 @@ const path = (value) => ROOT + value.replace(/^\//, '');
 const PREFIX = `calends:${ROOT}:`;
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const DATA = `${PREFIX}data-${VERSION}`;
+// 与 app/src/app.tsx 的路由一致
+const PAGES = /^(|login|public|list|calendar|report|wallet|family|family\/people|behalf|assistant|connect|settings|cat\/[^/]+)\/?$/;
 const match = async (name, request) => (await caches.open(name)).match(request);
 
 self.addEventListener('install', (e) => {
@@ -43,7 +45,8 @@ self.addEventListener('fetch', (e) => {
     if (relative.startsWith('cal/') || relative === 'mcp' || /(?:^|\/)(api|cal|mcp)(?:\/|$)/.test(relative)) return;
   }
   if (req.mode === 'navigate') {
-    if (url.origin !== location.origin || (url.pathname !== ROOT && url.pathname !== path('/admin') && !url.pathname.startsWith(path('/admin/')))) return;
+    // 只接管本安装的页面路由；根目录的 SW 不碰别的安装前缀（如 /claude/list）
+    if (url.origin !== location.origin || !url.pathname.startsWith(ROOT) || !PAGES.test(url.pathname.slice(ROOT.length))) return;
     e.respondWith(
       fetch(req)
         .then((res) => {

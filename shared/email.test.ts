@@ -50,13 +50,13 @@ test('到期提醒：金额、折合、日期、距今天数、支付方式', ()
   assert.match(html, /Visa ·4821/);
   assert.match(html, /src="https:\/\/cdn\.example\.com\/n\.png"/);
   // 站点地址末尾的斜杠不会变成双斜杠
-  assert.ok(html.includes(`href="${SITE}/admin"`));
+  assert.ok(html.includes(`href="${SITE}/"`));
   assert.ok(html.includes(`src="${SITE}/icons/icon-192.png"`));
   assert.match(html, /prefers-color-scheme: dark/);
   assert.match(html, /<html lang="zh-CN">/);
   // 纯文本备用正文同样有关键信息
   assert.match(text, /Netflix {2}\$15\.49 \(≈ ¥/);
-  assert.ok(text.includes(`${SITE}/admin`));
+  assert.ok(text.includes(`${SITE}/`));
 });
 
 test('订阅名称与图标里的 HTML 一律转义', () => {

@@ -320,7 +320,7 @@ test('14 种语言统一未退款损失语义，金额标签取代未用天数�
 });
 
 test('登录与首次设置表单为密码管理器提供同一账号和正确的 autocomplete、无障碍标签', () => {
-  const source = read('../app/src/admin.tsx');
+  const source = read('../app/src/app.tsx');
   const login = source.slice(source.indexOf('function Login('), source.indexOf('function Sidebar('));
   const result = transformSync('Login.tsx', login, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);

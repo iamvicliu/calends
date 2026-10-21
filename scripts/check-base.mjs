@@ -9,7 +9,7 @@ assert.ok(html.includes(`${prefix}/assets/`));
 const manifest = JSON.parse(readFileSync('dist/manifest.webmanifest', 'utf8'));
 check(manifest.start_url);
 check(manifest.scope);
-assert.equal(manifest.start_url, `${prefix}/admin`);
+assert.equal(manifest.start_url, `${prefix}/`);
 assert.equal(manifest.scope, `${prefix}/`);
 for (const icon of manifest.icons) check(icon.src);
 for (const shortcut of manifest.shortcuts ?? []) check(shortcut.url);

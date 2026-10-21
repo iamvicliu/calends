@@ -26,7 +26,7 @@ import { Report } from './views/Report.tsx';
 import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
-import { currentRoute, go as navigate, href, initRouter, onRoute, orderKey, replaceRoute, sortNav } from './router.ts';
+import { currentRoute, go as navigate, href, initRouter, loginNext, onRoute, orderKey, replaceRoute, sortNav } from './router.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { monthEnd } from '../../shared/metrics.ts';
@@ -44,13 +44,13 @@ const NAV = [
   { path: 'family', label: 'family', icon: 'users' },
   { path: 'behalf', label: 'behalf', icon: 'swap' },
   { path: 'assistant', label: 'assistant', icon: 'chat' },
-  { path: 'mcp', label: 'ai', icon: 'bot' },
+  { path: 'connect', label: 'ai', icon: 'bot' },
 ];
 
 /** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
 function navOf(st: AppState['settings']) {
   const hidden = st.hiddenNav ?? [];
-  const shown = NAV.filter((n) => !hidden.includes(n.path) && (n.path !== 'mcp' || st.aiEnabled !== false));
+  const shown = NAV.filter((n) => !hidden.includes(n.path) && (n.path !== 'connect' || st.aiEnabled !== false));
   return sortNav(shown, (n) => orderKey(n.path), st.navOrder).map((n) => ({
     ...n,
     label: t(`app.nav.${n.label}`),
@@ -431,14 +431,25 @@ function App() {
   const [drawer, setDrawer] = useState(false);
 
   useEffect(() => setDrawer(false), [route]);
-  // 启动页：打开 /admin 时按设置跳到指定页面（只在首次加载时）
+  // 未登录：除登录页外都跳到 /login 并记下原地址；根路径在开了公开页时让访客看公开页
+  useEffect(() => {
+    if (phase !== 'login' || route === 'login') return;
+    if (route) return replaceRoute(`login?next=${encodeURIComponent(route)}`);
+    authStatus().then(
+      (s) => (s.publicView ? location.replace(base('/public')) : replaceRoute('login')),
+      () => replaceRoute('login'),
+    );
+  }, [phase, route]);
+  // 登录后回到原地址；打开根路径时按设置跳到启动页（只在首次进入时）
   const started = useRef(false);
   useEffect(() => {
-    if (!state || started.current) return;
+    if (!state || (started.current && route !== 'login')) return;
     started.current = true;
     const sp = state.settings.startPage;
-    if (sp && currentRoute() === '' && navOf(state.settings).some((n) => n.path === sp)) replaceRoute(sp);
-  }, [state]);
+    const start = sp && navOf(state.settings).some((n) => n.path === sp) ? sp : '';
+    if (route === 'login') replaceRoute(loginNext() || start);
+    else if (route === '' && start) replaceRoute(start);
+  }, [state, route]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -475,7 +486,7 @@ function App() {
     };
   }, [state, collapsed, editing, viewId, review, ics, palette]);
 
-  if (phase === 'loading') return <div className="login" />;
+  if (phase === 'loading' || (phase === 'login' && route !== 'login')) return <div className="login" />;
   if (phase === 'login' || !state) return <Login error={phase === 'offline' ? t('app.offlineError', { error: error ?? '' }) : undefined} />;
   // 分类表（图标、颜色、顺序）先于各页面同步，页面里按分类名直接查
   syncCategories(state);
@@ -518,7 +529,7 @@ function App() {
       case 'behalf':
         view = <ProxyPage state={state} today={d} onOpen={open} />;
         break;
-      case 'mcp':
+      case 'connect':
         view = <Ai state={state} />;
         break;
       case 'assistant':
@@ -533,6 +544,10 @@ function App() {
         break;
       case 'settings':
         view = ro ? null : <Settings state={state} today={d} />;
+        break;
+      case 'login':
+        // 已登录，等上面的副作用跳回原地址
+        view = null;
         break;
       default:
         // 不认识的地址回到概览，地址栏也一并改正

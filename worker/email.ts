@@ -202,7 +202,7 @@ function renderText(d: Digest, site: string): string {
   }
   if (!d.sections.some((s) => s.rows.length)) lines.push(d.kind === 'monthly' ? t('notify.email.noCharges') : t('notify.email.testNote'), '');
   lines.push(
-    `${t('notify.email.open')}: ${site}/admin`,
+    `${t('notify.email.open')}: ${site}/`,
     '',
     '—',
     t('notify.email.why', { app: t('notify.appName') }),
@@ -236,14 +236,14 @@ export function renderEmail(d: Digest, siteUrl: string): { html: string; text: s
   const cta = `<tr><td class="px" style="padding:${hasRows ? 28 : 24}px 32px 32px">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
 <td bgcolor="${BUTTON}" style="border-radius:10px;background:${BUTTON}">
-<a href="${esc(site)}/admin" target="_blank" style="display:inline-block;padding:13px 22px;font-family:${FONT};font-size:14px;font-weight:600;line-height:1;color:#ffffff;text-decoration:none;border-radius:10px">${esc(t('notify.email.open'))}&nbsp;&nbsp;→</a>
+<a href="${esc(site)}/" target="_blank" style="display:inline-block;padding:13px 22px;font-family:${FONT};font-size:14px;font-weight:600;line-height:1;color:#ffffff;text-decoration:none;border-radius:10px">${esc(t('notify.email.open'))}&nbsp;&nbsp;→</a>
 </td></tr></table>
 </td></tr>`;
 
   const footer = `<tr><td class="px c-faint" style="padding:24px 32px 0;font-family:${FONT};font-size:12px;line-height:1.7;color:${L.faint}">
 ${esc(t('notify.email.why', { app }))}<br>
 ${esc(t('notify.email.footer'))} ${esc(t('notify.email.off'))}<br>
-<a class="c-mute" href="${esc(site)}/admin/settings" target="_blank" style="color:${L.mute};text-decoration:underline">${esc(t('notify.email.settings'))}</a>${host ? `<span class="c-faint" style="color:${L.faint}">&nbsp;&nbsp;·&nbsp;&nbsp;</span><a class="c-mute" href="${esc(site)}" target="_blank" style="color:${L.mute};text-decoration:none">${esc(host)}</a>` : ''}
+<a class="c-mute" href="${esc(site)}/settings" target="_blank" style="color:${L.mute};text-decoration:underline">${esc(t('notify.email.settings'))}</a>${host ? `<span class="c-faint" style="color:${L.faint}">&nbsp;&nbsp;·&nbsp;&nbsp;</span><a class="c-mute" href="${esc(site)}" target="_blank" style="color:${L.mute};text-decoration:none">${esc(host)}</a>` : ''}
 </td></tr>`;
 
   const html = `<!DOCTYPE html>

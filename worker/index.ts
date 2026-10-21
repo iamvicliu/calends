@@ -440,7 +440,11 @@ export default {
         }
       }
       if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
-      if (url.pathname === '/mcp') return await mcp(req, env);
+      if (url.pathname === '/mcp') {
+        // 在浏览器里打开 MCP 地址时，带去连接页查看令牌和配置
+        if (req.method === 'GET' && req.headers.get('accept')?.includes('text/html')) return Response.redirect(`${env.SITE_URL}/connect`, 302);
+        return await mcp(req, env);
+      }
       const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
       if (cal) {
         const state = await loadState(env);

@@ -33,7 +33,7 @@ const NAV_ROWS: Array<[string, string, boolean]> = [
   ['family', 'family', true],
   ['behalf', 'behalf', true],
   ['assistant', 'assistant', true],
-  ['mcp', 'ai', true],
+  ['connect', 'ai', true],
 ];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { localTime } from '../../../shared/format.ts';
@@ -470,7 +470,9 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))}
             />
           </Cell>
-          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('mcp')} />}
+          {s.aiEnabled !== false && (
+            <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('connect')} />
+          )}
         </Group>
 
         {!state.readonly && <SecurityGroup state={state} />}

@@ -593,7 +593,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
         <div className="empty">
           {t('report.topup.empty')}
           <br />
-          <a className="btn plain" href={appPath('/admin/wallet')}>
+          <a className="btn plain" href={appPath('/wallet')}>
             {t('report.topup.emptyCta')}
           </a>
         </div>

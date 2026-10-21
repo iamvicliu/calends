@@ -60,9 +60,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
         `DTSTART;VALUE=DATE:${d}`,
         `DTEND;VALUE=DATE:${addDays(c.date, 1).replace(/-/g, '')}`,
         fold(`SUMMARY:${icsText(`${s.icon && !s.icon.startsWith('http') ? s.icon + ' ' : ''}${s.name} ${money(c.amount, c.currency)}`)}`),
-        fold(
-          `DESCRIPTION:${icsText([method ? t('server.ics.method', { name: method.name }) : '', s.category, `${siteUrl}/admin`].filter(Boolean).join('\n'))}`,
-        ),
+        fold(`DESCRIPTION:${icsText([method ? t('server.ics.method', { name: method.name }) : '', s.category, `${siteUrl}/`].filter(Boolean).join('\n'))}`),
         'TRANSP:TRANSPARENT',
       );
       if (remind >= 0 && c.projected) {
