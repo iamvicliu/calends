@@ -371,7 +371,7 @@ function MemberRows({
  * 合租弹窗：一辆车的全部信息。上面是基本信息和指标，中间是成员与收款，下面是历来所有收款；
  * 订阅本身（价格、阶段、扣款）点「查看订阅详情」切过去
  */
-function CarSheet({
+export function CarSheet({
   state,
   s,
   today,

@@ -23,6 +23,7 @@
   "plan": { "drop": "Don't switch", "droppedToast": "Won't switch. Ends after {date}", "confirm": "Confirm switch", "confirmedToast": "Switch confirmed" },
   "intro": { "title": "Intro offer", "price": "Intro price", "until": "Offer ends", "then": "Then" },
   "share": {
+    "open": "Open plan",
     "owner": "Shared · I host ({count}/{seats})",
     "member": "Shared · I joined",
     "payTo": "Pay to",
@@ -73,6 +74,7 @@
     "few": "Need at least two charges to draw a trend"
   },
   "ev": {
+    "next": "Next charge",
     "gap": "Lapsed",
     "start": "Subscribed",
     "switch": "Plan switched",

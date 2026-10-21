@@ -23,6 +23,7 @@
   "plan": { "drop": "Não trocar", "droppedToast": "Sem troca. Termina após {date}", "confirm": "Confirmar troca", "confirmedToast": "Troca confirmada" },
   "intro": { "title": "Oferta inicial", "price": "Preço promocional", "until": "Fim da oferta", "then": "Depois" },
   "share": {
+    "open": "Ver plano",
     "owner": "Compartilhado · Eu organizo ({count}/{seats})",
     "member": "Compartilhado · Participo",
     "payTo": "Pagar a",
@@ -73,6 +74,7 @@
     "few": "São necessárias ao menos duas cobranças para ver a tendência"
   },
   "ev": {
+    "next": "Próxima cobrança",
     "gap": "Interrupção",
     "start": "Assinatura",
     "switch": "Troca de plano",

@@ -28,6 +28,7 @@
   },
   "intro": { "title": "Offre de lancement", "price": "Prix de lancement", "until": "Fin de l’offre", "then": "Ensuite" },
   "share": {
+    "open": "Voir le partage",
     "owner": "Partagé · j’organise ({count}/{seats})",
     "member": "Partagé · j’ai rejoint",
     "payTo": "Payer à",
@@ -78,6 +79,7 @@
     "few": "Il faut au moins deux prélèvements pour tracer une tendance"
   },
   "ev": {
+    "next": "Prochain prélèvement",
     "gap": "Interruption",
     "start": "Abonnement",
     "switch": "Changement d’offre",

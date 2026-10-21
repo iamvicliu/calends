@@ -28,6 +28,7 @@
   },
   "intro": { "title": "Oferta inicial", "price": "Precio inicial", "until": "Fin de la oferta", "then": "Después" },
   "share": {
+    "open": "Ver plan",
     "owner": "Compartido · lo organizo yo ({count}/{seats})",
     "member": "Compartido · me uní",
     "payTo": "Pagar a",
@@ -78,6 +79,7 @@
     "few": "Se necesitan al menos dos cargos para ver la tendencia"
   },
   "ev": {
+    "next": "Próximo cargo",
     "gap": "Interrupción",
     "start": "Suscripción",
     "switch": "Cambio de plan",

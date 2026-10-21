@@ -23,6 +23,7 @@
   "plan": { "drop": "不切换了", "droppedToast": "不切换了，{date} 到期后不再续", "confirm": "确认切换", "confirmedToast": "已确认切换" },
   "intro": { "title": "首期优惠", "price": "优惠价", "until": "优惠截止", "then": "之后恢复" },
   "share": {
+    "open": "查看合租",
     "owner": "合租 · 我发起（{count}/{seats}）",
     "member": "合租 · 我加入",
     "payTo": "付给",
@@ -73,6 +74,7 @@
     "few": "扣款少于两笔，还画不出走势"
   },
   "ev": {
+    "next": "下次扣款",
     "gap": "断更",
     "start": "开始订阅",
     "switch": "切换方案",

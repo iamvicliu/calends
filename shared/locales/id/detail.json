@@ -28,6 +28,7 @@
   },
   "intro": { "title": "Promo awal", "price": "Harga promo", "until": "Promo berakhir", "then": "Setelahnya" },
   "share": {
+    "open": "Lihat patungan",
     "owner": "Bersama · saya pengelola ({count}/{seats})",
     "member": "Bersama · saya bergabung",
     "payTo": "Bayar ke",
@@ -78,6 +79,7 @@
     "few": "Perlu minimal dua tagihan untuk melihat tren"
   },
   "ev": {
+    "next": "Tagihan berikutnya",
     "gap": "Jeda",
     "start": "Mulai berlangganan",
     "switch": "Ganti paket",

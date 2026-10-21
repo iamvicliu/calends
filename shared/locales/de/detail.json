@@ -28,6 +28,7 @@
   },
   "intro": { "title": "Einführungsangebot", "price": "Einführungspreis", "until": "Angebot endet", "then": "Danach" },
   "share": {
+    "open": "Gruppe öffnen",
     "owner": "Geteilt · ich organisiere ({count}/{seats})",
     "member": "Geteilt · ich bin dabei",
     "payTo": "Zahlen an",
@@ -78,6 +79,7 @@
     "few": "Für einen Verlauf braucht es mindestens zwei Abbuchungen"
   },
   "ev": {
+    "next": "Nächste Abbuchung",
     "gap": "Unterbrochen",
     "start": "Abonniert",
     "switch": "Tarif gewechselt",

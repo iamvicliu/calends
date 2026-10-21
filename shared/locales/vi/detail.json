@@ -28,6 +28,7 @@
   },
   "intro": { "title": "Ưu đãi mở đầu", "price": "Giá ưu đãi", "until": "Ưu đãi kết thúc", "then": "Sau đó" },
   "share": {
+    "open": "Xem nhóm",
     "owner": "Chia sẻ · tôi làm chủ nhóm ({count}/{seats})",
     "member": "Chia sẻ · tôi tham gia",
     "payTo": "Trả cho",
@@ -78,6 +79,7 @@
     "few": "Cần ít nhất hai lần trừ tiền để vẽ xu hướng"
   },
   "ev": {
+    "next": "Lần trừ tiếp theo",
     "gap": "Gián đoạn",
     "start": "Bắt đầu đăng ký",
     "switch": "Đổi gói",

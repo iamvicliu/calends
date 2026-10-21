@@ -33,6 +33,7 @@
   },
   "intro": { "title": "Tanıtım teklifi", "price": "Tanıtım fiyatı", "until": "Teklif bitişi", "then": "Sonra" },
   "share": {
+    "open": "Planı aç",
     "owner": "Ortak · yönetici benim ({count}/{seats})",
     "member": "Ortak · katıldım",
     "payTo": "Ödenecek kişi",
@@ -83,6 +84,7 @@
     "few": "Eğilim için en az iki ödeme gerekir"
   },
   "ev": {
+    "next": "Sonraki ödeme",
     "gap": "Kesinti",
     "start": "Abone olundu",
     "switch": "Plan değişti",

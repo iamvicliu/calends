@@ -25,7 +25,9 @@ import {
 } from '../../shared/billing.ts';
 import { cnDateFull, money, relDays, weekdayOf } from '../../shared/format.ts';
 import { chargeValue, convertOn, rateOn } from '../../shared/fx.ts';
-import type { AppState, Payment, Subscription } from '../../shared/types.ts';
+import type { AppState, Payment, ShareMember, Subscription } from '../../shared/types.ts';
+import { CarSheet } from './Carpool.tsx';
+import { carLedger, MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
 import { CatIcon, PayBadge, Seg, SubIcon } from '../components/ui.tsx';
 import { catColor, presetCat, toBase } from '../derive.ts';
@@ -109,9 +111,27 @@ function Act({ icon, label, onClick, href, round }: { icon: ReactNode; label: st
   );
 }
 
-function Panel({ title, aside, children, className = '' }: { title?: ReactNode; aside?: ReactNode; children: ReactNode; className?: string }) {
+function Panel({
+  title,
+  aside,
+  children,
+  className = '',
+  onClick,
+}: {
+  title?: ReactNode;
+  aside?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}) {
   return (
-    <section className={`dt-panel ${className}`}>
+    <section
+      className={`dt-panel ${className} ${onClick ? 'dt-tap' : ''}`}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick()) : undefined}
+    >
       {title && (
         <div className="dt-ph">
           <h3>{title}</h3>
@@ -133,6 +153,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const ro = !!state.readonly;
   const [pay, setPay] = useState<{ pay?: Payment; index?: number; phase?: string } | null>(null);
   const [share, setShare] = useState(false);
+  // 合租弹窗：从详情的合租区点进去，看收了多少、付了多少；成员资料再叠一层
+  const [car, setCar] = useState(false);
+  const [member, setMember] = useState<{ m?: ShareMember; collect?: boolean } | null>(null);
   const [tab, setTab] = useState<'charges' | 'details'>('charges');
 
   const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
@@ -214,7 +237,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       {compact ? (
         <div className="dt-stack">
           <Kpis sub={sub} state={state} today={today} history={history} />
-          <Details sub={sub} state={state} today={today} />
+          <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} />
           <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
         </div>
       ) : (
@@ -237,7 +260,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               />
             </div>
             <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>
-              <Details sub={sub} state={state} today={today} />
+              <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} />
             </div>
             <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>
               <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
@@ -248,6 +271,22 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
 
       {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
       {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
+      {car &&
+        sub.share?.role === 'owner' &&
+        createPortal(
+          <CarSheet
+            state={state}
+            s={sub}
+            today={today}
+            ro={ro}
+            book={carLedger(state, sub, today)}
+            onClose={() => setCar(false)}
+            onOpenSub={() => setCar(false)}
+            onMember={(m, collect) => setMember({ m, collect })}
+          />,
+          document.body,
+        )}
+      {member && createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
       {pay &&
         createPortal(
           <PaymentSheet
@@ -668,7 +707,7 @@ function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?:
 }
 
 /** 详情：金额、周期、分类、支付方式、日期等，以及并行、计划变更、优惠、合租、提醒和备注 */
-function Details({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppState; today: string; onCar: () => void }) {
   const st = effectiveStatus(sub, today);
   const cur = currentPhase(sub, today);
   const up = upcomingPhase(sub, today);
@@ -807,6 +846,9 @@ function Details({ sub, state, today }: { sub: Subscription; state: AppState; to
           title={
             sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')
           }
+          // 我发起的合租：整块点开合租弹窗，看收付明细
+          onClick={sub.share.role === 'owner' ? onCar : undefined}
+          aside={sub.share.role === 'owner' ? <span className="dt-more">{t('detail.share.open')} ›</span> : undefined}
         >
           {sub.share.role === 'owner' && <Seats share={sub.share} today={today} />}
           <dl className="dt-props one">
