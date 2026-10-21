@@ -361,7 +361,9 @@ function fixture(sub = base({ start: addDays(todayIn('UTC'), -14) })) {
         return { results: db.prepare(sql).all(...args) };
       },
       async run() {
-        return { meta: { changes: Number(db.prepare(sql).run(...args).changes) } };
+        const query = db.prepare(sql);
+        if (query.columns().length) return { results: query.all(...args) };
+        return { results: [], meta: { changes: Number(query.run(...args).changes) } };
       },
     };
     return stmt;

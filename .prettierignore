@@ -9,3 +9,5 @@ public
 worker/migrations.gen.ts
 app/src/components/cat-icons.gen.ts
 shared/locales/categories.gen.ts
+# Prettier has no SQL parser; migrations are verified by SQLite and Wrangler.
+worker/migrations/*.sql

@@ -76,7 +76,7 @@ function writeDraft(key: string, d: Draft | undefined) {
 }
 
 export function Editor({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
-  const isNew = !state.subscriptions.some((s) => s.id === sub.id);
+  const [isNew] = useState(() => !state.subscriptions.some((s) => s.id === sub.id));
   const key = draftKey(isNew, sub.id);
   // 有多个阶段时，表单显示今天所在的阶段
   const [initialForm] = useState(() => toEditForm(structuredClone(sub), today));

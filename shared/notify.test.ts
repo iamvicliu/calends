@@ -29,6 +29,9 @@ function fixture() {
   db.exec('CREATE TABLE d1_migrations (id INTEGER PRIMARY KEY, name TEXT UNIQUE)');
   for (const m of MIGRATIONS) db.prepare('INSERT INTO d1_migrations (name) VALUES (?)').run(m.name);
   let fxReads = 0;
+  const countFxRead = (sql: string, args: Array<string | number | null>) => {
+    if ((sql.includes('SELECT value FROM kv') && args[0] === 'fx') || sql.includes("SELECT key, value FROM kv WHERE key IN ('settings', 'fx'")) fxReads++;
+  };
   const prepare = (sql: string) => {
     let args: Array<string | number | null> = [];
     const stmt = {
@@ -37,14 +40,17 @@ function fixture() {
         return stmt;
       },
       async first() {
-        if (sql.includes('SELECT value FROM kv') && args[0] === 'fx') fxReads++;
+        countFxRead(sql, args);
         return db.prepare(sql).get(...args) ?? null;
       },
       async all() {
         return { results: db.prepare(sql).all(...args) };
       },
       async run() {
-        return { meta: { changes: Number(db.prepare(sql).run(...args).changes) } };
+        countFxRead(sql, args);
+        const query = db.prepare(sql);
+        if (query.columns().length) return { results: query.all(...args) };
+        return { results: [], meta: { changes: Number(query.run(...args).changes) } };
       },
     };
     return stmt;

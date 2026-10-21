@@ -33,10 +33,9 @@ function neededDates(state: AppState): string[] {
   return [...set].sort();
 }
 
-export async function loadFxHistory(env: Env, keep: Set<string>): Promise<FxHistory> {
-  const rows = await env.DB.prepare('SELECT date, rates FROM fx_daily').all<{ date: string; rates: string }>();
+export function slimFxHistory(rows: Array<{ date: string; rates: string }>, keep: Set<string>): FxHistory {
   const out: FxHistory = {};
-  for (const r of rows.results) {
+  for (const r of rows) {
     const all = JSON.parse(r.rates) as Record<string, number>;
     const slim: Record<string, number> = {};
     for (const c of keep) if (all[c]) slim[c] = all[c];
