@@ -1,5 +1,5 @@
 // 订阅账本 Service Worker：静态资源缓存优先，数据走网络、失败回退缓存，保证离线可读。
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = `shell-${VERSION}`;
 const DATA = `data-${VERSION}`;
 
