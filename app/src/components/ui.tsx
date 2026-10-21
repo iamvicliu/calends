@@ -443,10 +443,10 @@ export function NumInput({
   const shown = (v: number | undefined) => (v == null ? '' : String(v));
   const [text, setText] = useState(shown(value));
   const [seen, setSeen] = useState(value);
-  const focused = useRef(false);
+  const [focused, setFocused] = useState(false);
   if (!Object.is(value, seen)) {
     setSeen(value);
-    if (!focused.current && toNum(text) !== value) setText(shown(value));
+    if (!focused && toNum(text) !== value) setText(shown(value));
   }
   return (
     <input
@@ -454,11 +454,11 @@ export function NumInput({
       {...rest}
       value={text}
       onFocus={(e) => {
-        focused.current = true;
+        setFocused(true);
         rest.onFocus?.(e);
       }}
       onBlur={(e) => {
-        focused.current = false;
+        setFocused(false);
         if (toNum(text) !== value) setText(shown(value));
         rest.onBlur?.(e);
       }}
