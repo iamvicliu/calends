@@ -1657,6 +1657,21 @@ a {
     0 0 0 3px var(--accent-soft),
     var(--shadow);
 }
+.login-account {
+  width: 100%;
+  color: var(--label-2);
+  font-size: 12px;
+}
+.login-card .login-account input {
+  height: 38px;
+  font-size: 14px;
+  color: var(--label-2);
+  background: transparent;
+  box-shadow: none;
+}
+.login-card .login-account input:focus {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
 .login-card .btn {
   width: 100%;
 }

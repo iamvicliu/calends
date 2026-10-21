@@ -1,3 +1,5 @@
+import { browserSupportsWebAuthnAutofill, startAuthentication, WebAuthnAbortService } from '@simplewebauthn/browser';
+import { beginPasskeyAutofill } from './passkey-autofill.ts';
 import { BASE_PATH, base, storageKey } from './base.ts';
 import { useEffect, useState } from 'react';
 import { todayIn } from '../../shared/billing.ts';
@@ -129,8 +131,8 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       set({ phase: 'login', state: undefined });
       throw new Error(t('ui.error.loginRequired'));
     }
-    const body = (await res.json().catch(() => ({}))) as T & { error?: string };
-    if (!res.ok) throw new Error(body.error ?? t('ui.error.requestFailed', { status: res.status }));
+    const body = (await res.json().catch(() => ({}))) as T & { error?: string; code?: string };
+    if (!res.ok) throw Object.assign(new Error(body.error ?? t('ui.error.requestFailed', { status: res.status })), { code: body.code });
     if (writing) acknowledgeWrite(res);
     return body;
   } finally {
@@ -409,16 +411,27 @@ function guessCurrency(): string | undefined {
   return undefined;
 }
 
-export async function loginPasskey(): Promise<void> {
-  const { startAuthentication } = await import('@simplewebauthn/browser');
+export async function loginPasskey(useBrowserAutofill = false, signal?: AbortSignal): Promise<void> {
   const { options, challengeId } = await api<{ options: Parameters<typeof startAuthentication>[0]['optionsJSON']; challengeId: string }>(
     '/api/auth/passkey/login/options',
-    { method: 'POST' },
+    { method: 'POST', signal },
   );
-  const response = await startAuthentication({ optionsJSON: options });
-  await api('/api/auth/passkey/login', { method: 'POST', body: JSON.stringify({ challengeId, response }) });
+  signal?.throwIfAborted();
+  const response = await startAuthentication({ optionsJSON: options, useBrowserAutofill });
+  signal?.throwIfAborted();
+  await api('/api/auth/passkey/login', { method: 'POST', body: JSON.stringify({ challengeId, response }), signal });
+  signal?.throwIfAborted();
   set({ phase: 'loading' });
   await boot();
+}
+
+/** 条件式登录与按钮登录各取独立挑战；停止时也取消尚未返回的网络请求。 */
+export function startPasskeyAutofill(): () => void {
+  return beginPasskeyAutofill({
+    supports: browserSupportsWebAuthnAutofill,
+    login: (signal) => loginPasskey(true, signal),
+    cancel: () => WebAuthnAbortService.cancelCeremony(),
+  });
 }
 
 export async function registerPasskey(name: string): Promise<void> {

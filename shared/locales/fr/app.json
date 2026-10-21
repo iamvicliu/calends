@@ -15,6 +15,7 @@
     "settings": "Réglages"
   },
   "login": {
+    "username": "Compte",
     "setupHint": "Première visite ? Définissez un mot de passe pour vous connecter.",
     "tagline": "Chaque abonnement, chaque carte, chaque partage.",
     "setupToken": "Jeton de configuration (SETUP_TOKEN)",

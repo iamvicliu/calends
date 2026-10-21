@@ -15,6 +15,7 @@
     "settings": "设置"
   },
   "login": {
+    "username": "账号",
     "setupHint": "首次使用，请设置登录密码。",
     "tagline": "每一笔订阅、每一张卡、每一辆车。",
     "setupToken": "初始化令牌（SETUP_TOKEN）",

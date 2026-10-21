@@ -15,6 +15,7 @@
     "settings": "Settings"
   },
   "login": {
+    "username": "Account",
     "setupHint": "First time here? Set a password to sign in.",
     "tagline": "Every subscription, every card, every shared plan.",
     "setupToken": "Setup token (SETUP_TOKEN)",

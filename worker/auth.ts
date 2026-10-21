@@ -354,11 +354,13 @@ export async function deletePasskey(env: Env, id: string): Promise<void> {
 /** 已登录时绑定新的 Passkey：第一步，生成注册选项 */
 export async function passkeyRegisterOptions(req: Request, env: Env): Promise<Response> {
   const existing = await env.DB.prepare('SELECT id, transports FROM passkeys').all<{ id: string; transports: string | null }>();
+  const { rpID } = rp(req, env);
+  const { displayName } = await getSettings(env);
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
-    rpID: rp(req, env).rpID,
-    userName: 'owner',
-    userDisplayName: 'Owner',
+    rpID,
+    userName: `owner@${rpID}`,
+    userDisplayName: `${displayName.trim() || RP_NAME} · ${rpID}`,
     attestationType: 'none',
     excludeCredentials: existing.results.map((c) => ({ id: c.id, transports: c.transports ? JSON.parse(c.transports) : undefined })),
     authenticatorSelection: { residentKey: 'required', userVerification: 'preferred' },
@@ -405,7 +407,7 @@ export async function passkeyLoginVerify(req: Request, env: Env): Promise<Respon
   if (th.blocked) return err(t('server.auth.tooMany'), 429);
   const body = (await req.json()) as { challengeId: string; response: AuthenticationResponseJSON };
   const expected = await takeChallenge(env, body.challengeId, 'login');
-  if (!expected) return err(t('server.auth.expired'));
+  if (!expected) return Response.json({ error: t('server.auth.expired'), code: 'PASSKEY_CHALLENGE_EXPIRED' }, { status: 400 });
   const row = await env.DB.prepare('SELECT * FROM passkeys WHERE id = ?1').bind(body.response.id).first<PasskeyRow>();
   if (!row) {
     await th.fail();

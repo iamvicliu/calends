@@ -15,6 +15,7 @@
     "settings": "설정"
   },
   "login": {
+    "username": "계정",
     "setupHint": "처음이신가요? 로그인할 비밀번호를 설정하세요.",
     "tagline": "모든 구독, 모든 카드, 모든 공유 플랜을 한곳에서.",
     "setupToken": "설정 토큰(SETUP_TOKEN)",

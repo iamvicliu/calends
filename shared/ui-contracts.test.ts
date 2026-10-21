@@ -318,3 +318,47 @@ test('14 种语言统一未退款损失语义，金额标签取代未用天数�
   assert.equal(locale('zh-CN', 'report').stops.lossHint, '服务提前终止、没有退回的费用');
   assert.equal(locale('en', 'report').stops.lossHint, 'Paid for service that ended early and was not refunded');
 });
+
+test('登录与首次设置表单为密码管理器提供同一账号和正确的 autocomplete、无障碍标签', () => {
+  const source = read('../app/src/admin.tsx');
+  const login = source.slice(source.indexOf('function Login('), source.indexOf('function Sidebar('));
+  const result = transformSync('Login.tsx', login, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  assert.equal(result.fatal, false);
+  type Element = { type: string; props: Record<string, any>; children: unknown[] };
+  const React = { createElement: (type: string, props: Record<string, any> | null, ...children: unknown[]) => ({ type, props: props ?? {}, children }) };
+  const all = (node: unknown): Element[] => {
+    if (Array.isArray(node)) return node.flatMap(all);
+    if (!node || typeof node !== 'object' || !('type' in node)) return [];
+    const e = node as Element;
+    return [e, ...all(e.children)];
+  };
+  for (const needsSetup of [false, true]) {
+    let cursor = 0;
+    const deps = {
+      React,
+      useState: (v: unknown) => [cursor++ === 0 ? { needsSetup, passkeys: 1 } : v, () => {}],
+      useRef: () => ({ current: undefined }),
+      useEffect() {},
+      location: { hostname: 'ledger.example.test' },
+      window: { PublicKeyCredential: function () {} },
+      Icon: 'Icon',
+      t: (key: string) => key,
+      base: (path: string) => path,
+    };
+    const Login = new Function(...Object.keys(deps), `${result.code}; return Login;`)(...Object.values(deps));
+    const nodes = all(Login({}));
+    const username = nodes.find((e) => e.type === 'input' && e.props.name === 'username')!;
+    assert.equal(username.props.value, 'owner@ledger.example.test');
+    assert.equal(username.props.autoComplete, needsSetup ? 'username' : 'username webauthn');
+    assert.equal(username.props.readOnly, true);
+    const label = nodes.find((e) => e.type === 'label' && e.props.htmlFor === username.props.id)!;
+    assert.ok(JSON.stringify(label.children).includes('app.login.username'));
+    const password = nodes.find((e) => e.type === 'input' && e.props.name === 'password')!;
+    assert.equal(password.props.type, 'password');
+    assert.equal(password.props.autoComplete, needsSetup ? 'new-password' : 'current-password webauthn');
+    assert.equal(password.props['aria-label'], needsSetup ? 'app.login.newPassword' : 'app.login.password');
+    for (const { code } of LOCALES) assert.ok(locale(code, 'app').login.username, code);
+  }
+  assert.ok(login.includes('autofill.current?.();')); // 密码提交和 Passkey 按钮共用 go() 的同步取消
+  assert.ok(login.includes('return stop;')); // 卸载时清理条件式请求
+});
