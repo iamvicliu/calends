@@ -1,4 +1,4 @@
-/* ---------------- 订阅详情（B2）：宽屏左右两栏，左边指标、走势、历程，右边详情与扣款记录；窄屏单列 ---------------- */
+/* ---------------- 订阅详情：停止卡片、指标、走势通栏，其余区块宽屏在两栏里按内容流动；窄屏单列 ---------------- */
 .dt {
   --dt-bg: #f6f6f7;
   --dt-panel: var(--card);
@@ -274,16 +274,56 @@
 }
 
 /* 两栏 */
-.dt-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-}
-.dt-col {
+.dt-body,
+.dt-main,
+.dt-side {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+}
+/* 窄屏单列：摘要、历程排在扣款记录前面 */
+@media (max-width: 999px) {
+  .dt-main,
+  .dt-side {
+    display: contents;
+  }
+  .dt-charges {
+    order: 10;
+  }
+  .dt-outcome {
+    order: -1;
+  }
+}
+
+/* 停止卡片：侧栏第一块，损失金额最醒目，下面是停止日、原本付到和退款 */
+.dt-outcome.bad,
+.dt-outcome.loss {
+  background: color-mix(in srgb, var(--dt-bad) 5%, var(--dt-panel));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-bad) 22%, transparent);
+}
+.dt-outcome.bad .dt-ph h3 {
+  color: var(--dt-bad);
+}
+.dt-oc-loss {
+  margin: 2px 0 6px;
+}
+.dt-oc-loss b {
+  display: block;
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--dt-bad);
+  font-variant-numeric: tabular-nums;
+}
+.dt-oc-loss small {
+  font-size: 12px;
+  color: var(--label-2);
+}
+/* 收回来的钱：正号、绿色 */
+.dt-in {
+  color: var(--dt-ok);
 }
 .dt-panel {
   background: var(--dt-panel);
@@ -685,17 +725,26 @@
   list-style: none;
   padding: 0;
   margin-top: 8px !important;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2px 24px;
 }
+/* 一条竖线串起各节点，新的在上 */
 .dt-ev {
+  position: relative;
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) auto;
   column-gap: 8px;
   padding: 6px 0;
 }
+.dt-ev:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 16px;
+  bottom: -12px;
+  width: 1px;
+  background: var(--dt-line-2);
+}
 .dt-ev > i {
+  position: relative;
   width: 9px;
   height: 9px;
   margin: 5px 0 0 3px;
@@ -951,24 +1000,6 @@
   border-top: 1px solid var(--dt-line);
   flex: none;
 }
-.dt-tabs {
-  display: flex;
-}
-.dt-tabs .seg {
-  flex: 1;
-  margin: 0;
-}
-.dt-tabs .seg button {
-  flex: 1;
-}
-.dt-pane {
-  display: none;
-  flex-direction: column;
-  gap: 16px;
-}
-.dt-pane.on {
-  display: flex;
-}
 
 /* 窄屏：按钮只留图标，表格去掉星期 */
 @media (max-width: 640px) {
@@ -1128,28 +1159,14 @@
     padding: 24px 24px 12px;
     background: var(--dt-bg);
   }
-  .dt-grid {
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 20px;
+  .dt-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
     align-items: start;
   }
   .dt-kpis {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .dt-evs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(var(--rows), auto);
-    grid-auto-flow: column;
-  }
-  /* 宽屏两块都显示，不用切换 */
-  .dt-tabs {
-    display: none;
-  }
-  .dt-pane {
-    display: flex;
-  }
-  .dt-right {
-    gap: 16px;
   }
 }
 @media (min-width: 641px) and (max-width: 999px) {
@@ -1159,11 +1176,6 @@
 }
 
 /* 买断等内容少的：窄弹窗、单列、高度随内容 */
-.dt-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
 @media (min-width: 641px) {
   .sheet.bare:has(.dt.compact) {
     width: min(620px, calc(100vw - 32px));
@@ -1175,6 +1187,9 @@
   }
   .dt.compact {
     height: auto;
+  }
+  .dt.compact .dt-body {
+    display: flex;
   }
   .dt.compact .dt-kpis {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1211,6 +1226,10 @@
   }
 }
 @media (max-width: 640px) {
+  /* 复制为图片只在桌面端提供 */
+  .dt-act.desk {
+    display: none;
+  }
   .dt-actions {
     grid-auto-flow: row;
     grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));

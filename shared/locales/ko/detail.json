@@ -2,8 +2,12 @@
   "copy": "복사",
   "copied": "복사됨",
   "overlap": { "title": "함께 진행 중", "previous": "기존 플랜", "until": "{date}까지 · {rel}" },
-  "action": { "edit": "편집", "pause": "일시 정지", "resume": "재개", "manage": "관리", "website": "웹사이트", "share": "공유" },
-  "toast": { "resumed": "결제를 재개했습니다", "paused": "일시 정지했습니다. 앞으로의 결제는 예측에 포함되지 않습니다" },
+  "action": { "edit": "편집", "pause": "일시 정지", "resume": "재개", "manage": "관리", "website": "웹사이트", "share": "공유", "copyImage": "이미지로 복사" },
+  "toast": {
+    "resumed": "결제를 재개했습니다",
+    "paused": "일시 정지했습니다. 앞으로의 결제는 예측에 포함되지 않습니다",
+    "imageCopied": "이미지를 복사했습니다"
+  },
   "history": "기록",
   "summary": "요약",
   "field": {

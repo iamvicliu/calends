@@ -2,8 +2,16 @@
   "copy": "Copiar",
   "copied": "Copiado",
   "overlap": { "title": "También activo", "previous": "Plan anterior", "until": "Hasta el {date} · {rel}" },
-  "action": { "edit": "Editar", "pause": "Pausar", "resume": "Reanudar", "manage": "Gestionar", "website": "Sitio web", "share": "Compartir" },
-  "toast": { "resumed": "Facturación reanudada", "paused": "En pausa. No se prevén cobros futuros" },
+  "action": {
+    "edit": "Editar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "manage": "Gestionar",
+    "website": "Sitio web",
+    "share": "Compartir",
+    "copyImage": "Copiar como imagen"
+  },
+  "toast": { "resumed": "Facturación reanudada", "paused": "En pausa. No se prevén cobros futuros", "imageCopied": "Imagen copiada" },
   "history": "Historial",
   "summary": "Resumen",
   "field": {

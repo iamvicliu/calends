@@ -205,8 +205,8 @@ const withClass = (node: unknown, cls: string) =>
       .includes(cls),
   );
 
-// 使用真实 Details / Statement，执行组件树；仅替换宿主、Hooks 和不相关的可视化。
-test('详情停止与退款：无 stop 完全不渲染；仅正损失有红色行；全额退款、零损失和公开视图隐藏损失', () => {
+// 使用真实 Outcome / Statement，执行组件树；仅替换宿主、Hooks 和不相关的可视化。
+test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色金额；全额退款、零损失和公开视图隐藏损失', () => {
   const r = runtime(
     '../app/src/views/Detail.tsx',
     {
@@ -215,18 +215,16 @@ test('详情停止与退款：无 stop 完全不渲染；仅正损失有红色�
       CatIcon: 'CatIcon',
       PayBadge: 'PayBadge',
     },
-    'Details',
+    'Outcome',
   );
   const render = (s: Subscription, readonly = false) =>
-    r.render('Details', {
+    r.render('Outcome', {
       sub: s,
       today,
       state: { subscriptions: [s], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX, readonly },
-      onCar() {},
     });
   for (const s of [sub, { ...sub, status: 'cancelled' as const, end: today }]) {
-    assert.equal(withClass(render(s), 'dt-stops').length, 0);
-    assert.ok(!text(render(s)).includes(t('detail.stop.title')));
+    assert.equal(withClass(render(s), 'dt-outcome').length, 0);
   }
   for (const kind of ['cancel', 'terminate'] as const) {
     for (const amount of [undefined, 6, 16, 31]) {
@@ -239,14 +237,14 @@ test('详情停止与退款：无 stop 完全不渲染；仅正损失有红色�
         amount == null ? undefined : { amount },
       );
       const tree = render(s);
-      const section = withClass(tree, 'dt-stops');
+      const section = withClass(tree, 'dt-outcome');
       assert.equal(section.length, 1);
       const summary = billing.stopSummary(s, today)!;
       assert.ok(text(section).includes(format.cnDateFull(today)));
       assert.ok(text(section).includes(format.cnDateFull(summary.paidThrough)));
       assert.ok(text(section).includes(t(kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')));
       assert.equal(text(section).includes('Provider closure'), kind === 'terminate');
-      assert.equal(withClass(section, 'dt-stop-loss').length, summary.unusedValue > 0 ? 1 : 0);
+      assert.equal(withClass(section, 'dt-oc-loss').length, summary.unusedValue > 0 ? 1 : 0);
       if (summary.unusedValue > 0) {
         assert.ok(text(section).includes(t('core.stop.lossTitle')));
         assert.ok(text(section).includes(`−${format.money(summary.unusedValue, 'USD')}`));
@@ -257,26 +255,29 @@ test('详情停止与退款：无 stop 完全不渲染；仅正损失有红色�
       }
       if (amount == null) assert.ok(text(section).includes(t('core.stop.refundNo')));
       else assert.ok(text(section).includes(format.money(amount, 'USD')));
-      assert.equal(withClass(render(s, true), 'dt-stops').length, 0);
+      assert.equal(withClass(render(s, true), 'dt-outcome').length, 0);
     }
   }
   const free = phases.stopSubscription({ ...sub, price: 0 }, today, 'cancel');
-  assert.equal(withClass(render(free), 'dt-stops').length, 1);
-  assert.equal(withClass(render(free), 'dt-stop-loss').length, 0);
+  assert.equal(withClass(render(free), 'dt-outcome').length, 1);
+  assert.equal(withClass(render(free), 'dt-oc-loss').length, 0);
   assert.ok(!text(render(free)).includes(t('core.stop.fullyRefunded')));
 });
 
 test('详情历史阶段：各停止阶段使用自己的退款、币种、停止日期，当前未停止的阶段不混入', () => {
-  const r = runtime('../app/src/views/Detail.tsx', { React: renderedReact }, 'StopDetails');
+  const r = runtime('../app/src/views/Detail.tsx', { React: renderedReact }, 'Outcome');
   const first = phases.stopSubscription(sub, today, 'terminate', today, 'Provider closure', { amount: 6 });
   const second = phases.stopSubscription({ ...sub, start: '2026-11-05', currency: 'EUR', price: 60 }, '2026-11-19', 'cancel', '2026-11-19', undefined, {
     amount: 32,
   });
   const multi = { ...sub, phases: [first, second, { ...sub, start: '2026-12-05', currency: 'JPY', price: 3000 }] };
-  const tree = r.render('StopDetails', { sub: multi, today: '2026-12-10' });
-  assert.equal(withClass(tree, 'dt-stops').length, 1);
-  assert.equal(withClass(tree, 'dt-props').length, 2);
-  assert.equal(withClass(tree, 'dt-stop-loss').length, 1);
+  const tree = r.render('Outcome', {
+    sub: multi,
+    today: '2026-12-10',
+    state: { subscriptions: [multi], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX },
+  });
+  assert.equal(withClass(tree, 'dt-outcome').length, 2);
+  assert.equal(withClass(tree, 'dt-oc-loss').length, 1);
   assert.ok(text(tree).includes(`−${format.money(10, 'USD')}`));
   assert.ok(text(tree).includes(format.money(32, 'EUR')));
   assert.ok(text(tree).includes(t('core.stop.fullyRefunded')));

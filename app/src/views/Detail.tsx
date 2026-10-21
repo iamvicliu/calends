@@ -1,9 +1,9 @@
-import { StopBadge, StopPanel, stopDescription } from '../components/StopPanel.tsx';
+import { StopPanel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, Copy, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
 import {
   activePhases,
   addDays,
@@ -37,6 +37,7 @@ import { CatIcon, PayBadge, Seg, Sheet, SubIcon } from '../components/ui.tsx';
 import { catColor, presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
+import { snapshot } from '../snapshot.ts';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan, reactivate } from '../../../shared/phases.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -97,14 +98,28 @@ const methodOf = (state: AppState, id?: string) => state.methods.find((m) => m.i
  * 详情顶部的操作按钮。宽屏：常用的带文字（胶囊），次要的只有图标（正圆）；
  * 窄屏：一排等宽的大圆按钮，图标下面写名称，方便手指点
  */
-function Act({ icon, label, onClick, href, round }: { icon: ReactNode; label: string; onClick?: () => void; href?: string; round?: boolean }) {
+function Act({
+  icon,
+  label,
+  onClick,
+  href,
+  round,
+  desk,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick?: () => void;
+  href?: string;
+  round?: boolean;
+  desk?: boolean;
+}) {
   const inner = (
     <>
       <i className="dt-act-i">{icon}</i>
       <span className="dt-act-l">{label}</span>
     </>
   );
-  const cls = `dt-act ${round ? 'round' : ''}`;
+  const cls = `dt-act ${round ? 'round' : ''} ${desk ? 'desk' : ''}`;
   return href ? (
     <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
       {inner}
@@ -114,6 +129,17 @@ function Act({ icon, label, onClick, href, round }: { icon: ReactNode; label: st
       {inner}
     </button>
   );
+}
+
+/** 把详情复制成图片：和弹窗一样的圆角，圆角外透明；去掉顶部按钮 */
+function copyImage(el: HTMLElement) {
+  const sheet = el.closest<HTMLElement>('.sheet') ?? el;
+  const blob = snapshot(el, {
+    radius: getComputedStyle(sheet).borderRadius,
+    filter: (n) => !(n instanceof Element && n.matches('.dt-actions, .dt-close, .dt-add')),
+  }).then((b) => b!);
+  // Safari 要求在点击的同一个调用里拿到 ClipboardItem，所以传 Promise 进去
+  void run(() => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]), t('detail.toast.imageCopied'));
 }
 
 function Panel({
@@ -162,7 +188,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   // 合租弹窗：从详情的合租区点进去，看收了多少、付了多少；成员资料再叠一层
   const [car, setCar] = useState(false);
   const [member, setMember] = useState<{ m?: ShareMember; collect?: boolean } | null>(null);
-  const [tab, setTab] = useState<'charges' | 'details'>('charges');
+  const root = useRef<HTMLDivElement>(null);
 
   const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
   const big = pair(nowPrice, cur.currency, { compact: false });
@@ -205,12 +231,15 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       {!ro && st === 'terminated' && <Act icon={<Plus size={15} />} label={t('editor.change.resume')} onClick={onEdit} />}
       {sub.manageUrl && <Act icon={<Settings2 size={15} />} label={t('detail.action.manage')} href={sub.manageUrl} />}
       {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
+      {typeof ClipboardItem !== 'undefined' && (
+        <Act icon={<Copy size={15} />} label={t('detail.action.copyImage')} onClick={() => copyImage(root.current!)} round desk />
+      )}
       <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
     </>
   );
 
   return (
-    <div className={`dt ${compact ? 'compact' : ''}`}>
+    <div className={`dt ${compact ? 'compact' : ''}`} ref={root}>
       <header className="dt-head">
         <SubIcon sub={sub} size={48} />
         <div className="dt-id">
@@ -220,7 +249,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               <i />
               {t(`list.status.${st}`)}
             </span>
-            <StopBadge sub={sub} today={today} readonly={ro} />
           </h2>
           <div className="dt-meta">
             <b>
@@ -248,40 +276,20 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         </button>
       </header>
 
-      {compact ? (
-        <div className="dt-stack">
+      {/* 主栏放要扫读的数字、走势和扣款；右侧窄栏放属性与历程（参考 Stripe、Linear 的详情页） */}
+      <div className="dt-body">
+        <div className="dt-main">
           <Kpis sub={sub} state={state} today={today} history={history} />
-          <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} />
+          {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
+          {!compact && <Upcoming sub={sub} state={state} today={today} />}
           <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
         </div>
-      ) : (
-        <div className="dt-grid">
-          <div className="dt-col">
-            <Kpis sub={sub} state={state} today={today} history={history} />
-            <Trendline sub={sub} state={state} today={today} history={history} />
-            <Upcoming sub={sub} state={state} today={today} />
-            <Events sub={sub} state={state} today={today} />
-          </div>
-          <div className="dt-col dt-right">
-            <div className="dt-tabs">
-              <Seg
-                value={tab}
-                onChange={setTab}
-                options={[
-                  ['charges', t('detail.tab.charges', { count: history.length })],
-                  ['details', t('detail.tab.details')],
-                ]}
-              />
-            </div>
-            <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>
-              <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} />
-            </div>
-            <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>
-              <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
-            </div>
-          </div>
+        <div className="dt-side">
+          <Outcome sub={sub} state={state} today={today} />
+          <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} />
+          {!compact && <Events sub={sub} state={state} today={today} />}
         </div>
-      )}
+      </div>
 
       {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
       {stopping &&
@@ -331,7 +339,16 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   );
 }
 
-const roDescription = (sub: Subscription, state: AppState, today: string) => (state.readonly ? undefined : stopDescription(sub, today));
+/** 历程里停止那一条只写原因和损失，完整信息在顶部的停止卡片 */
+const stopLine = (v: Subscription, state: AppState, today: string) => {
+  const sm = state.readonly ? undefined : stopSummary(v, today);
+  if (!sm) return undefined;
+  return (
+    [sm.kind === 'terminate' ? sm.reason : '', sm.unusedValue > 0 ? `${t('core.stop.lossTitle')} ${money(sm.unusedValue, v.currency)}` : '']
+      .filter(Boolean)
+      .join(' · ') || undefined
+  );
+};
 
 /** 正常扣款（不含退款、补差、失败）：走势和「每笔」都只看这些 */
 const regular = (h: Charge[]) => h.filter((c) => !c.kind);
@@ -445,8 +462,8 @@ function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; t
                   <small>{relDays(diffDays(today, c.date))}</small>
                 </span>
                 <span className="a">
-                  <b>{money(c.amount, c.currency)}</b>
-                  {c.currency !== base && Number.isFinite(v) && <small>≈ {money(v, base)}</small>}
+                  <b>{money(-c.amount, c.currency, { sign: true })}</b>
+                  {c.currency !== base && Number.isFinite(v) && <small>≈ {money(-v, base, { sign: true })}</small>}
                 </span>
               </li>
             ))}
@@ -675,21 +692,28 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       evs.push({
         date: v.stop.date,
         title: t(v.stop.kind === 'terminate' ? 'core.stop.terminate' : 'core.stop.cancel'),
-        sub: roDescription(v, state, today),
+        sub: stopLine(v, state, today),
         tone: v.stop.kind === 'terminate' ? 'bad' : 'ink',
       });
     if (!state.readonly)
       for (const p of v.payments ?? [])
         if (p.kind === 'refund')
-          evs.push({ date: p.date, title: t('editor.payment.kind.refund'), sub: money(-p.amount, v.currency), tone: 'ok', future: p.date > today });
+          evs.push({
+            date: p.date,
+            title: t('editor.payment.kind.refund'),
+            sub: money(-p.amount, v.currency, { sign: true }),
+            tone: 'ok',
+            future: p.date > today,
+          });
   }
   if (sub.end && !sub.stop)
     evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
-  evs.sort((a, b) => a.date.localeCompare(b.date));
+  // 一条时间线，新的在上
+  evs.sort((a, b) => b.date.localeCompare(a.date));
 
   // 只有「开始订阅」一条时，没什么可看的
   if (evs.length < 2) return null;
-  const shown = all || evs.length <= 6 ? evs : evs.slice(-6);
+  const shown = all || evs.length <= 6 ? evs : evs.slice(0, 6);
   const gaps = servedTime(sub, today).gaps.length;
   return (
     <Panel
@@ -697,7 +721,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       title={t('detail.history')}
       aside={`${t('detail.ev.phases', { count: vs.length })} · ${gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.kpi.noGaps')}`}
     >
-      <ol className="dt-evs" style={{ '--rows': Math.ceil(shown.length / 2) } as Record<string, number>}>
+      <ol className="dt-evs">
         {shown.map((e, i) => (
           <li key={`${e.date}-${i}`} className={`dt-ev ${e.future ? 'fut' : ''} ${e.tone ?? ''}`}>
             <i />
@@ -752,35 +776,46 @@ function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?:
   );
 }
 
-/** 每个停止阶段保留自己的日期、币种与退款记录。 */
-function StopDetails({ sub, today, readonly }: { sub: Subscription; today: string; readonly?: boolean }) {
+/** 停止卡片：放在顶部，一句话说清怎么停的、退了多少、亏了多少；每个停止阶段各一张 */
+function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
   const stopped = phaseSubs(sub).filter((phase) => phase.stop);
-  if (readonly || !stopped.length) return null;
+  const base = state.settings.baseCurrency;
+  if (state.readonly || !stopped.length) return null;
   return (
-    <Panel title={t('detail.stop.title')} className="dt-stops">
+    <>
       {stopped.map((phase) => {
-        const summary = stopSummary(phase, today)!;
+        const sm = stopSummary(phase, today)!;
         return (
-          <dl className="dt-props" key={phase.start}>
-            <Prop k={t('detail.stop.type')} hint={summary.kind === 'terminate' ? summary.reason : undefined}>
-              {t(summary.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}
-            </Prop>
-            <Prop k={t('core.stop.date')}>{cnDateFull(summary.date)}</Prop>
-            <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(summary.paidThrough)}</Prop>
-            <Prop k={t('core.stop.refundAmount')} hint={summary.refundStatus === 'full' ? t('core.stop.fullyRefunded') : undefined}>
-              {summary.refunded > 0 ? money(summary.refunded, phase.currency) : t('core.stop.refundNo')}
-            </Prop>
-            {summary.unusedValue > 0 && (
-              <Prop k={t('core.stop.lossTitle')}>
-                <span className="dt-stop-loss">
-                  {t('detail.stop.loss', { money: money(summary.unusedValue, phase.currency), days: t('core.stop.lossDays', { count: summary.wastedDays }) })}
-                </span>
-              </Prop>
+          <section key={phase.start} className={`dt-panel dt-outcome ${sm.kind === 'terminate' ? 'bad' : ''} ${sm.unusedValue > 0 ? 'loss' : ''}`}>
+            <div className="dt-ph">
+              <h3>{t(sm.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}</h3>
+              {sm.kind === 'terminate' && sm.reason && <div className="dt-aside">{sm.reason}</div>}
+            </div>
+            {sm.unusedValue > 0 && (
+              <div className="dt-oc-loss">
+                <b>−{money(sm.unusedValue, phase.currency)}</b>
+                <small>
+                  {[
+                    t('core.stop.lossTitle'),
+                    t('core.stop.lossDays', { count: sm.wastedDays }),
+                    phase.currency !== base ? `≈ ${money(toBase(state, sm.unusedValue, phase.currency), base)}` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </small>
+              </div>
             )}
-          </dl>
+            <dl className="dt-props">
+              <Prop k={t('core.stop.date')}>{cnDateFull(sm.date)}</Prop>
+              <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(sm.paidThrough)}</Prop>
+              <Prop k={t('core.stop.refundAmount')} hint={sm.refundStatus === 'full' ? t('core.stop.fullyRefunded') : undefined}>
+                {sm.refunded > 0 ? <span className="dt-in">{money(sm.refunded, phase.currency, { sign: true })}</span> : t('core.stop.refundNo')}
+              </Prop>
+            </dl>
+          </section>
         );
       })}
-    </Panel>
+    </>
   );
 }
 
@@ -798,19 +833,10 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
     <>
       <Panel title={t('detail.summary')}>
         <dl className="dt-props">
-          <Prop k={t('detail.field.amount')}>{money(cur.price, cur.currency)}</Prop>
-          <Prop k={t('detail.field.cycle')}>{cycleLabel(cur.cycle)}</Prop>
-          <Prop k={t('detail.field.category')}>
-            <CatTag cat={sub.category} />
-          </Prop>
+          {/* 金额、周期、分类、地区已在标题下方，这里不再重复 */}
           <Prop k={t('detail.field.method')}>
             <PayBadge m={method} />
           </Prop>
-          {cur.region && (
-            <Prop k={t('detail.field.region')}>
-              <Region cc={cur.region} />
-            </Prop>
-          )}
           {sub.account && (
             <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
               {/* 点一下复制，登录时直接粘贴 */}
@@ -845,8 +871,6 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
           </div>
         )}
       </Panel>
-
-      <StopDetails sub={sub} today={today} readonly={ro} />
 
       {parallel.length > 0 && (
         <Panel title={t('detail.overlap.title')}>
@@ -988,26 +1012,36 @@ function Charges({
   const rows = history.map((c) => ({ c, b: chargeValue(state, c, base) })).reverse();
   const shown = all ? rows : rows.slice(0, 24);
   const years = [...new Set(shown.map((r) => r.c.date.slice(0, 4)))];
+  // 只有一年时不分组，标题里已经有笔数
+  const grouped = new Set(rows.map((r) => r.c.date.slice(0, 4))).size > 1;
   return (
-    <Panel className="dt-charges" title={t('detail.charges.title', { count: history.length })}>
+    <Panel
+      className="dt-charges"
+      title={t('detail.charges.title', { count: history.length })}
+      // 记一笔放在标题右侧，不额外占一行
+      aside={
+        onAdd && (
+          <button className="dt-btn sm dt-add" onClick={onAdd} title={t('detail.charges.add')}>
+            <Plus size={14} /> {t('detail.charges.addShort')}
+          </button>
+        )
+      }
+    >
       {history.length > 0 && (
         <div className="dt-tbl">
           {years.map((y) => {
             const ys = rows.filter((r) => r.c.date.startsWith(y));
             return (
               <Fragment key={y}>
-                <div className="dt-grp">
-                  <span>
-                    <b>{y}</b>
-                    {t('detail.stats.count', { count: ys.length })}
-                  </span>
-                  <span>
-                    {money(
-                      ys.reduce((a, r) => a + (r.b || 0), 0),
-                      base,
-                    )}
-                  </span>
-                </div>
+                {grouped && (
+                  <div className="dt-grp">
+                    <span>
+                      <b>{y}</b>
+                      {t('detail.stats.count', { count: ys.length })}
+                    </span>
+                    <span>{money(-ys.reduce((a, r) => a + (r.b || 0), 0), base, { sign: true })}</span>
+                  </div>
+                )}
                 {shown
                   .filter((r) => r.c.date.startsWith(y))
                   .map(({ c, b }, i) => (
@@ -1019,11 +1053,11 @@ function Charges({
                     >
                       <span className="d">{c.date.slice(5)}</span>
                       <span className="o">
-                        {c.currency !== base || c.settled ? money(c.amount, c.currency) : ''}
+                        {c.currency !== base || c.settled ? money(-c.amount, c.currency, { sign: true }) : ''}
                         {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
                         {multi && c.sub.region && !c.kind && <em className="dt-kind">{c.sub.region}</em>}
                       </span>
-                      <span className="c">{Number.isFinite(b) ? money(b, base) : '—'}</span>
+                      <span className="c">{Number.isFinite(b) ? money(-b, base, { sign: true }) : '—'}</span>
                     </div>
                   ))}
               </Fragment>
@@ -1031,20 +1065,13 @@ function Charges({
           })}
         </div>
       )}
-      <div className="dt-tfoot">
-        {rows.length > 24 ? (
+      {rows.length > 24 && (
+        <div className="dt-tfoot">
           <button className="dt-link" onClick={() => setAll(!all)}>
             {all ? t('detail.charges.recentN', { count: 24 }) : t('detail.charges.all', { count: history.length })}
           </button>
-        ) : (
-          <span />
-        )}
-        {onAdd && (
-          <button className="dt-btn sm" onClick={onAdd} title={t('detail.charges.add')}>
-            <Plus size={14} /> {t('detail.charges.addShort')}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </Panel>
   );
 }

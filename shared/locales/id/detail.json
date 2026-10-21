@@ -2,8 +2,16 @@
   "copy": "Salin",
   "copied": "Disalin",
   "overlap": { "title": "Juga berjalan", "previous": "Paket sebelumnya", "until": "Sampai {date} · {rel}" },
-  "action": { "edit": "Edit", "pause": "Jeda", "resume": "Lanjutkan", "manage": "Kelola", "website": "Situs web", "share": "Bagikan" },
-  "toast": { "resumed": "Tagihan dilanjutkan", "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan" },
+  "action": {
+    "edit": "Edit",
+    "pause": "Jeda",
+    "resume": "Lanjutkan",
+    "manage": "Kelola",
+    "website": "Situs web",
+    "share": "Bagikan",
+    "copyImage": "Salin sebagai gambar"
+  },
+  "toast": { "resumed": "Tagihan dilanjutkan", "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan", "imageCopied": "Gambar disalin" },
   "history": "Riwayat",
   "summary": "Ringkasan",
   "field": {

@@ -25,7 +25,7 @@ const PAD_L = 44;
 const PAD_R = 14;
 const LANE = 24;
 /** 曲线区高度与顶部留白 */
-const H = 200;
+const H = 150;
 const T = 10;
 
 /** 刻度取 1、2、2.5、5 × 10ⁿ，让 4 格左右正好盖住最大值 */

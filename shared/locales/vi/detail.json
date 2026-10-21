@@ -2,8 +2,16 @@
   "copy": "Sao chép",
   "copied": "Đã sao chép",
   "overlap": { "title": "Đang chạy song song", "previous": "Gói trước", "until": "Đến {date} · {rel}" },
-  "action": { "edit": "Sửa", "pause": "Tạm dừng", "resume": "Tiếp tục", "manage": "Quản lý", "website": "Trang web", "share": "Chia sẻ" },
-  "toast": { "resumed": "Đã tiếp tục thanh toán", "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến" },
+  "action": {
+    "edit": "Sửa",
+    "pause": "Tạm dừng",
+    "resume": "Tiếp tục",
+    "manage": "Quản lý",
+    "website": "Trang web",
+    "share": "Chia sẻ",
+    "copyImage": "Sao chép thành ảnh"
+  },
+  "toast": { "resumed": "Đã tiếp tục thanh toán", "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến", "imageCopied": "Đã sao chép ảnh" },
   "history": "Lịch sử",
   "summary": "Tóm tắt",
   "field": {
