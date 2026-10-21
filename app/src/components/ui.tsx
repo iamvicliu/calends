@@ -579,12 +579,20 @@ export function NameLink({ children, onClick }: { children: ComponentChildren; o
 export function useWidth<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const [w, setW] = useState(0);
+  const watching = useRef<{ el: T | null; ro?: ResizeObserver }>({ el: null });
+  // 被测的元素可能条件渲染（如日历年视图没有月网格）：每次渲染后对一下，元素出现才监听、换了就重挂、没了就停
   useLayoutEffect(() => {
-    const el = ref.current!;
+    const el = ref.current;
+    if (el === watching.current.el) return;
+    watching.current.ro?.disconnect();
+    watching.current = { el };
+    if (!el) return;
+    setW(el.clientWidth);
     const ro = new ResizeObserver(() => setW(el.clientWidth));
     ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+    watching.current.ro = ro;
+  });
+  useEffect(() => () => watching.current.ro?.disconnect(), []);
   return [ref, w] as const;
 }
 
