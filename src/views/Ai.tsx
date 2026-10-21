@@ -292,22 +292,21 @@ export function Ai({ state }: { state: AppState }) {
             <div className="ai-tokens" role="table">
               {tokens.map((tk) => (
                 <div key={tk.id} className="ai-token" role="row">
-                  <span className="ai-token-name">
-                    <b>{tk.name}</b>
-                    <span className={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
-                  </span>
-                  <code className="ai-token-prefix">{tk.prefix}…</code>
-                  <span className="ai-token-meta">
-                    {t('ai.createdAt', { time: localTime(tk.createdAt, state.settings.timezone, true) })}
-                    <br />
-                    {t('ai.lastUsed', { time: when(tk.lastUsedAt) })}
-                  </span>
+                  <div className="ai-token-main">
+                    <span className="ai-token-name">
+                      <b>{tk.name}</b>
+                      <span className={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
+                    </span>
+                    <span className="ai-token-meta">
+                      <code>{tk.prefix}…</code>
+                      <span className="m-hide">{t('ai.createdAt', { time: localTime(tk.createdAt, state.settings.timezone, true) })}</span>
+                      <span>{tk.lastUsedAt ? t('ai.lastUsed', { time: when(tk.lastUsedAt) }) : t('ai.neverUsed')}</span>
+                    </span>
+                  </div>
                   {!ro && (
                     <button
                       type="button"
-                      className="icon-btn ai-revoke"
-                      aria-label={t('ai.revoke')}
-                      title={t('ai.revoke')}
+                      className="chip-btn ai-revoke"
                       onClick={() =>
                         confirmDelete(t('ai.confirmRevoke', { name: tk.name })) &&
                         run(async () => {
@@ -317,7 +316,7 @@ export function Ai({ state }: { state: AppState }) {
                         }, t('ai.revoked'))
                       }
                     >
-                      <Icon name="x" size={15} />
+                      {t('ai.revoke')}
                     </button>
                   )}
                 </div>

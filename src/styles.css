@@ -7517,15 +7517,22 @@ button.seat:disabled {
   flex-direction: column;
 }
 .ai-token {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 0;
+  padding: 14px 0;
   border-top: 0.5px solid var(--sep);
 }
 .ai-token:first-child {
   border-top: 0;
+  padding-top: 4px;
+}
+.ai-token-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
 .ai-token-name {
   display: flex;
@@ -7539,26 +7546,30 @@ button.seat:disabled {
   white-space: nowrap;
   font-weight: 600;
 }
-.ai-token-prefix {
+.ai-token-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 0;
+  color: var(--label-3);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.ai-token-meta > * + *::before {
+  content: '·';
+  margin: 0 7px;
+  color: var(--label-4, var(--label-3));
+}
+.ai-token-meta code {
   font:
-    12.5px/1 ui-monospace,
+    12px/1 ui-monospace,
     'SF Mono',
     Menlo,
     monospace;
   color: var(--label-2);
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: var(--fill-2);
-}
-.ai-token-meta {
-  color: var(--label-3);
-  font-size: 12px;
-  line-height: 1.5;
 }
 .ai-revoke {
-  width: 30px !important;
-  height: 30px !important;
-  color: var(--label-2);
+  flex-shrink: 0;
 }
 .ai-revoke:hover {
   color: var(--red);
@@ -7715,13 +7726,6 @@ button.seat:disabled {
 @media (max-width: 680px) {
   .ai-card {
     padding: 16px;
-  }
-  .ai-token {
-    grid-template-columns: minmax(0, 1fr) auto;
-    row-gap: 6px;
-  }
-  .ai-token-meta {
-    grid-column: 1;
   }
   .ai-tools {
     grid-template-columns: 1fr;
