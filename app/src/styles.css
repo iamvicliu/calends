@@ -861,10 +861,11 @@ a {
 }
 
 /* ---------------- 开关 ---------------- */
+/* 实心开关视觉上比浅灰下拉框重，略小一号（28px）才显得和 32px 的下拉框一样高 */
 .toggle {
   position: relative;
-  width: 51px;
-  height: 31px;
+  width: 46px;
+  height: 28px;
   flex-shrink: 0;
 }
 .toggle[data-focus-visible] i {
@@ -886,8 +887,8 @@ a {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 27px;
-  height: 27px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #fff;
   box-shadow:
@@ -899,7 +900,7 @@ a {
   background: var(--green);
 }
 .toggle[data-selected] i::after {
-  transform: translateX(20px);
+  transform: translateX(18px);
 }
 
 /* ---------------- 日历 ---------------- */
