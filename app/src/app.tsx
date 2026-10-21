@@ -26,7 +26,7 @@ import { Report } from './views/Report.tsx';
 import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
-import { currentRoute, go as navigate, href, initRouter, loginNext, onRoute, orderKey, replaceRoute, sortNav } from './router.ts';
+import { currentRoute, go as navigate, href, initRouter, loginNext, onRoute, replaceRoute, sortNav } from './router.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { monthEnd } from '../../shared/metrics.ts';
@@ -36,7 +36,7 @@ const Assistant = lazy(() => import('./views/Assistant.tsx').then((m) => ({ defa
 
 /** label 是 app.nav.* 的键，取用时再翻译 */
 const NAV = [
-  { path: '', label: 'overview', icon: 'home' },
+  { path: 'overview', label: 'overview', icon: 'home' },
   { path: 'list', label: 'list', icon: 'list' },
   { path: 'calendar', label: 'calendar', icon: 'cal' },
   { path: 'report', label: 'report', icon: 'chart' },
@@ -51,7 +51,7 @@ const NAV = [
 function navOf(st: AppState['settings']) {
   const hidden = st.hiddenNav ?? [];
   const shown = NAV.filter((n) => !hidden.includes(n.path) && (n.path !== 'connect' || st.aiEnabled !== false));
-  return sortNav(shown, (n) => orderKey(n.path), st.navOrder).map((n) => ({
+  return sortNav(shown, (n) => n.path, st.navOrder).map((n) => ({
     ...n,
     label: t(`app.nav.${n.label}`),
   }));
@@ -206,7 +206,7 @@ function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sb-top">
-        <a className="sb-mark" href={href('')}>
+        <a className="sb-mark" href={href('overview')}>
           <img src={base(avatarOf(state.settings))} alt="" />
           {t('app.name')}
         </a>
@@ -440,15 +440,12 @@ function App() {
       () => replaceRoute('login'),
     );
   }, [phase, route]);
-  // 登录后回到原地址；打开根路径时按设置跳到启动页（只在首次进入时）
-  const started = useRef(false);
+  // 根路径和登录页都不是页面：登录后回到原地址，否则去设置里的启动页（默认概览）
   useEffect(() => {
-    if (!state || (started.current && route !== 'login')) return;
-    started.current = true;
+    if (!state || (route !== '' && route !== 'login')) return;
     const sp = state.settings.startPage;
-    const start = sp && navOf(state.settings).some((n) => n.path === sp) ? sp : '';
-    if (route === 'login') replaceRoute(loginNext() || start);
-    else if (route === '' && start) replaceRoute(start);
+    const start = sp && navOf(state.settings).some((n) => n.path === sp) ? sp : 'overview';
+    replaceRoute((route === 'login' && loginNext()) || start);
   }, [state, route]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -545,14 +542,18 @@ function App() {
       case 'settings':
         view = ro ? null : <Settings state={state} today={d} />;
         break;
+      case '':
       case 'login':
-        // 已登录，等上面的副作用跳回原地址
+        // 等上面的副作用跳到启动页或原地址
         view = null;
+        break;
+      case 'overview':
+        view = <Overview state={state} today={d} onOpen={open} onAdd={add} />;
         break;
       default:
         // 不认识的地址回到概览，地址栏也一并改正
-        if (route) queueMicrotask(() => replaceRoute(''));
-        view = <Overview state={state} today={d} onOpen={open} onAdd={add} />;
+        queueMicrotask(() => replaceRoute('overview'));
+        view = null;
     }
 
   return (

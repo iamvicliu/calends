@@ -6,7 +6,7 @@ const PREFIX = `calends:${ROOT}:`;
 const SHELL = `${PREFIX}shell-${VERSION}`;
 const DATA = `${PREFIX}data-${VERSION}`;
 // 与 app/src/app.tsx 的路由一致
-const PAGES = /^(|login|public|list|calendar|report|wallet|family|family\/people|behalf|assistant|connect|settings|cat\/[^/]+)\/?$/;
+const PAGES = /^(|login|public|overview|list|calendar|report|wallet|family|family\/people|behalf|assistant|connect|settings|cat\/[^/]+)\/?$/;
 const match = async (name, request) => (await caches.open(name)).match(request);
 
 self.addEventListener('install', (e) => {

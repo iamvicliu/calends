@@ -2,9 +2,6 @@ import { BASE_PATH as BASE } from './base.ts';
 // 应用路由：地址形如 /list、/cat/AI，用 History API 切换，不带 #
 const EVENT = 'routechange';
 
-/** 侧边栏模块的排序键：概览的路由是空串，存成 overview */
-export const orderKey = (path: string) => path || 'overview';
-
 /** 按设置里的顺序排侧边栏模块；没出现在设置里的（比如以后新增的模块）按默认位置排在后面 */
 export function sortNav<T>(items: T[], keyOf: (x: T) => string, order: string[] | undefined): T[] {
   const o = order ?? [];
