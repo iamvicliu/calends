@@ -1,5 +1,5 @@
 import { stopDescription } from '../components/StopPanel.tsx';
-import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   addDays,
   addMonths,
@@ -53,6 +53,13 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
  * 时间轴（甘特图）：一行一个订阅，一段一根条。
  * 条按支付方式或地区上色；过去的实心、未来的半透明；计划中的斜线；两段之间空着的是断订；条下的小刻度是每笔扣款。
  */
+const NARROW = '(max-width: 700px)';
+function subscribeNarrow(cb: () => void) {
+  const mq = matchMedia(NARROW);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+
 export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription[]; state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   // 缩放与着色方式存在服务端，多台设备一致
   const [zoom, setZoomRaw] = usePref<GanttZoom>('gantt-zoom', '1y', isGanttZoom);
@@ -68,6 +75,35 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     setDrag(0);
   };
   const [colorBy, setColorBy] = usePref<ColorBy>('gantt-color', 'method', isColorBy);
+  // 名称列宽度可拖动调整；手机与桌面各记一份，桌面上调宽的值不会挤占手机上的时间轴
+  const narrow = useSyncExternalStore(
+    subscribeNarrow,
+    () => matchMedia(NARROW).matches,
+    () => false,
+  );
+  const [minW, maxW] = narrow ? [80, 200] : [120, 360];
+  const [savedW, setSavedW] = usePref<string>(narrow ? 'gantt-label-w-m' : 'gantt-label-w', '', (v): v is string => /^\d{2,3}$/.test(v));
+  const [liveW, setLiveW] = useState<number | null>(null);
+  const labelW = liveW ?? (savedW ? Math.min(maxW, Math.max(minW, Number(savedW))) : null);
+  const resizeFrom = useRef<{ x: number; w: number } | null>(null);
+  const onResizeDown = (e: React.PointerEvent<HTMLElement>) => {
+    e.stopPropagation();
+    const label = gtEl.current?.querySelector('.gt-head .gt-label');
+    resizeFrom.current = { x: e.clientX, w: label?.getBoundingClientRect().width ?? minW };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onResizeMove = (e: React.PointerEvent<HTMLElement>) => {
+    const from = resizeFrom.current;
+    if (!from) return;
+    e.stopPropagation();
+    setLiveW(Math.round(Math.min(maxW, Math.max(minW, from.w + e.clientX - from.x))));
+  };
+  const onResizeUp = (e: React.PointerEvent<HTMLElement>) => {
+    e.stopPropagation();
+    resizeFrom.current = null;
+    if (liveW != null) setSavedW(String(liveW));
+    setLiveW(null);
+  };
   const [box, w] = useWidth();
 
   // 排序、筛选变化时的过渡（FLIP）：记下每行上一次的位置，重排后从旧位置平滑滑到新位置；新出现的行淡入
@@ -247,12 +283,26 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
       </div>
       <div
         ref={gtEl}
-        className={`gt ${pannable ? 'pannable' : ''} ${drag ? 'dragging' : ''}`}
+        className={`gt ${pannable ? 'pannable' : ''} ${drag ? 'dragging' : ''} ${liveW != null ? 'resizing' : ''}`}
+        style={labelW ? ({ '--lw': `${labelW}px` } as Record<string, string>) : undefined}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
+        <div
+          className="gt-resize"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={t('list.gantt.resize')}
+          title={t('list.gantt.resize')}
+          onPointerDown={onResizeDown}
+          onPointerMove={onResizeMove}
+          onPointerUp={onResizeUp}
+          onPointerCancel={onResizeUp}
+          onClick={(e) => e.stopPropagation()}
+          onDoubleClick={() => setSavedW(null)}
+        />
         <div className="gt-head">
           <div className="gt-label" />
           <div className="gt-track" ref={box}>

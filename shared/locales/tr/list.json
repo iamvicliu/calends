@@ -111,7 +111,8 @@
     "gap": "Ara",
     "earlier": "Önceki",
     "later": "Sonraki",
-    "backToNow": "Bugüne dön"
+    "backToNow": "Bugüne dön",
+    "resize": "Ad sütununu boyutlandırmak için sürükleyin · sıfırlamak için çift tıklayın"
   },
   "kind": {
     "debit": "Banka kartı",

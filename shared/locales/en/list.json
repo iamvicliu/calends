@@ -111,7 +111,8 @@
     "gap": "Lapsed",
     "earlier": "Earlier",
     "later": "Later",
-    "backToNow": "Back to now"
+    "backToNow": "Back to now",
+    "resize": "Drag to resize the name column · double-click to reset"
   },
   "kind": {
     "debit": "Bank card",

@@ -131,6 +131,7 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
       }
     },
     useLayoutEffect() {},
+    useSyncExternalStore: (_subscribe: unknown, _get: unknown, server: () => unknown) => server(),
     useEffectEvent: (fn: (...args: unknown[]) => unknown) => {
       const ref = useRef(fn);
       ref.current = fn;

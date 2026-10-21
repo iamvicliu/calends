@@ -106,7 +106,8 @@
     "gap": "중단",
     "earlier": "이전",
     "later": "다음",
-    "backToNow": "현재로"
+    "backToNow": "현재로",
+    "resize": "드래그해 이름 열 너비 조절 · 더블클릭하면 기본값"
   },
   "kind": {
     "debit": "체크카드",

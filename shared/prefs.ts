@@ -11,6 +11,8 @@ export const PREF_KEYS = [
   'list-ccy',
   'gantt-zoom',
   'gantt-color',
+  'gantt-label-w',
+  'gantt-label-w-m',
   'theme',
   'sidebar-collapsed',
   'car-open',

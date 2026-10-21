@@ -111,7 +111,8 @@
     "gap": "Interrupção",
     "earlier": "Anterior",
     "later": "Próximo",
-    "backToNow": "Voltar para hoje"
+    "backToNow": "Voltar para hoje",
+    "resize": "Arraste para ajustar a coluna de nomes · clique duplo para redefinir"
   },
   "kind": {
     "debit": "Cartão de débito",

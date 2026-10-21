@@ -111,7 +111,8 @@
     "gap": "Interruption",
     "earlier": "Plus tôt",
     "later": "Plus tard",
-    "backToNow": "Revenir à aujourd’hui"
+    "backToNow": "Revenir à aujourd’hui",
+    "resize": "Faites glisser pour redimensionner la colonne des noms · double-clic pour réinitialiser"
   },
   "kind": {
     "debit": "Carte bancaire",

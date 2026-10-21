@@ -111,7 +111,8 @@
     "gap": "Unterbrochen",
     "earlier": "Früher",
     "later": "Später",
-    "backToNow": "Zurück zu heute"
+    "backToNow": "Zurück zu heute",
+    "resize": "Ziehen, um die Namensspalte anzupassen · Doppelklick zum Zurücksetzen"
   },
   "kind": {
     "debit": "Bankkarte",

@@ -96,7 +96,8 @@
     "gap": "断订",
     "earlier": "往前",
     "later": "往后",
-    "backToNow": "回到现在"
+    "backToNow": "回到现在",
+    "resize": "拖动调整名称列宽度 · 双击恢复默认"
   },
   "kind": {
     "debit": "银行卡",

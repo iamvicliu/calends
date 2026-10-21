@@ -60,6 +60,7 @@ function runtime(file: string, extra: Record<string, unknown>) {
     },
     useEffect() {},
     useLayoutEffect() {},
+    useSyncExternalStore: (_subscribe: unknown, _get: unknown, server: () => unknown) => server(),
     useEffectEvent: (fn: unknown) => fn,
     ...billing,
     ...phases,

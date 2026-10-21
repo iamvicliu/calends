@@ -106,7 +106,8 @@
     "gap": "Terputus",
     "earlier": "Sebelumnya",
     "later": "Berikutnya",
-    "backToNow": "Kembali ke sekarang"
+    "backToNow": "Kembali ke sekarang",
+    "resize": "Seret untuk mengubah lebar kolom nama · klik dua kali untuk mengatur ulang"
   },
   "kind": {
     "debit": "Kartu debit",

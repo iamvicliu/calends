@@ -96,7 +96,8 @@
     "gap": "中斷",
     "earlier": "往前",
     "later": "往後",
-    "backToNow": "回到現在"
+    "backToNow": "回到現在",
+    "resize": "拖曳調整名稱欄寬度 · 按兩下恢復預設"
   },
   "kind": {
     "debit": "金融卡",

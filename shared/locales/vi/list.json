@@ -106,7 +106,8 @@
     "gap": "Gián đoạn",
     "earlier": "Trước",
     "later": "Sau",
-    "backToNow": "Về hiện tại"
+    "backToNow": "Về hiện tại",
+    "resize": "Kéo để chỉnh độ rộng cột tên · nhấp đúp để đặt lại"
   },
   "kind": {
     "debit": "Thẻ ngân hàng",
