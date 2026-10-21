@@ -227,5 +227,5 @@
   "timeline": {
     "home": "Voltar para hoje (ou clique duas vezes na linha do tempo)"
   },
-  "ai": { "title": "Preencher com IA", "hint": "Cole um recibo, uma captura ou texto e o resto é automático" }
+  "ai": { "title": "Preencher com IA", "hint": "Cole um recibo, uma captura ou texto e o resto é automático", "go": "Colar" }
 }

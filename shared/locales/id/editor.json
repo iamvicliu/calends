@@ -218,5 +218,5 @@
   "timeline": {
     "home": "Kembali ke hari ini (atau klik dua kali linimasa)"
   },
-  "ai": { "title": "Isi dengan AI", "hint": "Tempel struk, tangkapan layar, atau teks, sisanya otomatis" }
+  "ai": { "title": "Isi dengan AI", "hint": "Tempel struk, tangkapan layar, atau teks, sisanya otomatis", "go": "Tempel" }
 }

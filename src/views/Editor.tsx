@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ChevronRight, MessageSquareText } from 'lucide-react';
+import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../shared/billing.ts';
 import { cnDateFull, money } from '../../shared/format.ts';
@@ -188,12 +188,14 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       {restored && dirty && <div className="ed-draft">{t('editor.draftRestored')}</div>}
       {isNew && (
         <button type="button" className="ed-ai" onClick={() => toAssistant()}>
-          <MessageSquareText size={18} />
-          <span>
+          <span className="ed-ai-ico">
+            <ReceiptText size={18} />
+          </span>
+          <span className="ed-ai-text">
             <b>{t('editor.ai.title')}</b>
             <small>{t('editor.ai.hint')}</small>
           </span>
-          <ChevronRight size={16} />
+          <span className="ed-ai-go">{t('editor.ai.go')}</span>
         </button>
       )}
       <div
@@ -246,7 +248,14 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
     <div className="ed">
       {/* 一、是什么：图标 + 名称（输入时联想 App Store）+ 分类 */}
       <div className="ed-id">
-        <SubIcon sub={{ ...f, name: f.name || '?' }} size={64} />
+        {/* 有图标或网址时显示真实图标；否则是灰色占位（填了名称就显示首字母） */}
+        {f.icon || f.url ? (
+          <SubIcon sub={f} size={36} />
+        ) : (
+          <span className="ed-id-ph" aria-hidden="true">
+            {[...f.name.trim()][0]?.toUpperCase()}
+          </span>
+        )}
         <div className="ed-id-main">
           <NameField
             value={f.name}
@@ -266,23 +275,6 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
             }
             onPickCatalog={(c) => up({ name: c.name, icon: c.icon, url: f.url || c.url, category: c.category })}
           />
-          <div className="ed-id-sub">
-            <Picker
-              value={f.category}
-              onChange={(c) => (c === '__new' ? setNewCat(true) : up({ category: c }))}
-              options={[
-                ...catOptions.map((c) => ({ value: c, label: c, icon: <CatIcon cat={c} size={14} /> })),
-                { value: '__new', label: t('editor.category.new'), icon: <Icon name="plus" size={14} /> },
-              ]}
-              ariaLabel={t('editor.field.category')}
-              display={
-                <>
-                  <CatIcon cat={f.category} size={13} />
-                  <span>{f.category || t('editor.category.choose')}</span>
-                </>
-              }
-            />
-          </div>
         </div>
       </div>
 
@@ -328,6 +320,23 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
             />
           </Cell>
         )}
+        <Cell label={t('editor.field.category')}>
+          <Picker
+            value={f.category}
+            onChange={(c) => (c === '__new' ? setNewCat(true) : up({ category: c }))}
+            options={[
+              ...catOptions.map((c) => ({ value: c, label: c, icon: <CatIcon cat={c} size={14} /> })),
+              { value: '__new', label: t('editor.category.new'), icon: <Icon name="plus" size={14} /> },
+            ]}
+            ariaLabel={t('editor.field.category')}
+            display={
+              <>
+                <CatIcon cat={f.category} size={13} />
+                <span>{f.category || t('editor.category.choose')}</span>
+              </>
+            }
+          />
+        </Cell>
         <Cell label={t('editor.field.method')}>
           <MethodPicker
             methods={state.methods}

@@ -6621,18 +6621,18 @@ button.seat:disabled {
 }
 
 /* ---------------- 订阅编辑表单：单列，按「是什么 → 怎么付 → 状态 → 谁在用 → 更多」排 ---------------- */
-/* 新建订阅：AI 识别入口 */
+/* 新建订阅：AI 识别入口。强调色淡底 + 实心图标块 + 右侧胶囊按钮，比普通行更醒目 */
 .ed-ai {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin: 0 0 14px;
-  padding: 12px 14px;
+  margin: 0 0 16px;
+  padding: 12px 12px 12px 14px;
   border: 0;
-  border-radius: 14px;
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
   color: var(--label);
   font: inherit;
   text-align: left;
@@ -6640,28 +6640,40 @@ button.seat:disabled {
   transition: background 0.15s;
 }
 .ed-ai:hover {
-  background: var(--fill-2);
+  background: color-mix(in srgb, var(--accent) 13%, var(--card));
 }
-.ed-ai > svg:first-child {
+.ed-ai-ico {
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
-  color: var(--label-2);
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: #fff;
 }
-.ed-ai span {
+.ed-ai-text {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-width: 0;
 }
-.ed-ai b {
-  font-size: 14px;
+.ed-ai-text b {
+  font-size: 15px;
   font-weight: 600;
 }
-.ed-ai small {
+.ed-ai-text small {
   color: var(--label-2);
   font-size: 12.5px;
 }
-.ed-ai > svg:last-child {
-  color: var(--label-3);
+.ed-ai-go {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
 }
 .sheet.narrow:has(.ed) {
   width: min(540px, 100%);
@@ -6674,8 +6686,21 @@ button.seat:disabled {
 .ed-id {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 4px 4px 0;
+}
+.ed-id-ph {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 22.5%;
+  background: var(--fill-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--label-2);
+  font-size: 16px;
+  font-weight: 600;
 }
 .ed-id > .ico {
   flex-shrink: 0;
@@ -6683,9 +6708,6 @@ button.seat:disabled {
 .ed-id-main {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
 }
 .ed-name {
   position: relative;
@@ -6704,22 +6726,6 @@ button.seat:disabled {
 .ed-name input::placeholder {
   color: var(--label-3);
   font-weight: 600;
-}
-.ed-id-sub {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.ed-id-sub .pk-btn.inline {
-  padding: 3px 10px 3px 8px;
-  border-radius: 999px;
-  background: var(--fill-2);
-  color: var(--label-2);
-  font-size: 13px;
-}
-.ed-id-sub .pk-btn.inline .i {
-  width: 13px;
-  height: 13px;
 }
 .ed-suggest {
   position: absolute;
