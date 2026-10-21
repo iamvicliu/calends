@@ -297,7 +297,10 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               <Picker
                 value={s.upcomingDays ?? 45}
                 onChange={(n) => run(() => saveSettings({ upcomingDays: n }))}
-                options={[7, 14, 30, 45, 60, 90].map((n) => ({ value: n, label: t('settings.days', { count: n }) }))}
+                options={[
+                  { value: 0, label: t('settings.sidebar.thisMonth') },
+                  ...[3, 7, 14, 30, 45, 60, 90, 180].map((n) => ({ value: n, label: t('settings.days', { count: n }) })),
+                ]}
                 ariaLabel={t('settings.sidebar.lookAheadAria')}
                 search={false}
               />

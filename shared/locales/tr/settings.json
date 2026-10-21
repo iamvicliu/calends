@@ -24,6 +24,7 @@
     "sunday": "Pazar"
   },
   "sidebar": {
+    "thisMonth": "Bu ay",
     "dragFoot": "Sıralamak için tutamaçları sürükleyin; kenar çubuğu bu sırayı izler.",
     "title": "Kenar çubuğu",
     "upcoming": "Yaklaşan ödemeler",

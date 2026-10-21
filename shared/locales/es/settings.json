@@ -24,6 +24,7 @@
     "sunday": "Domingo"
   },
   "sidebar": {
+    "thisMonth": "Este mes",
     "dragFoot": "Arrastra los controles para reordenar; la barra lateral sigue este orden.",
     "title": "Barra lateral",
     "upcoming": "Próximos cobros",

@@ -27,6 +27,7 @@
     "sunday": "Sonntag"
   },
   "sidebar": {
+    "thisMonth": "Dieser Monat",
     "dragFoot": "Zum Sortieren an den Griffen ziehen; die Seitenleiste folgt dieser Reihenfolge.",
     "title": "Seitenleiste",
     "upcoming": "Anstehende Abbuchungen",

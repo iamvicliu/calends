@@ -295,6 +295,7 @@ export interface Settings {
   displayName: string;
   /** 侧边栏显示「即将扣款」，以及往后看多少天；缺省显示、45 天 */
   sidebarUpcoming?: boolean;
+  /** 侧边栏「即将扣款」往后看几天；0 = 看到本月月底 */
   upcomingDays?: number;
   /** 侧边栏里隐藏的模块（路由名） */
   hiddenNav?: string[];

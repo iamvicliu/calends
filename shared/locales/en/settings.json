@@ -24,6 +24,7 @@
     "sunday": "Sunday"
   },
   "sidebar": {
+    "thisMonth": "This month",
     "dragFoot": "Drag the handles to reorder; the sidebar follows this order.",
     "title": "Sidebar",
     "upcoming": "Upcoming charges",

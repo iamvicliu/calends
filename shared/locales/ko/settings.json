@@ -26,6 +26,7 @@
     "sunday": "일요일"
   },
   "sidebar": {
+    "thisMonth": "이번 달",
     "dragFoot": "왼쪽 핸들을 끌어 순서를 바꾸면 사이드바도 이 순서로 표시됩니다.",
     "title": "사이드바",
     "upcoming": "예정된 결제",

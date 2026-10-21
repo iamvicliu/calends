@@ -28,6 +28,7 @@ import { currentRoute, go as navigate, href, initRouter, onRoute, orderKey, repl
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { PROJECT_URL } from '../shared/brand.ts';
+import { monthEnd } from '../shared/metrics.ts';
 
 // AI 助手页带着 Markdown 渲染器（Streamdown），按需加载，不拖慢其他页面的首屏
 const Assistant = lazy(() => import('./views/Assistant.tsx').then((m) => ({ default: m.Assistant })));
@@ -168,11 +169,13 @@ function Sidebar({
   onSearch: () => void;
   onCollapse: () => void;
 }) {
-  // 即将扣款：像聊天记录一样列在导航下方
+  // 即将扣款：像聊天记录一样列在导航下方；往后看 0 天表示看到本月月底
+  const days = state.settings.upcomingDays ?? 45;
+  const horizon = days === 0 ? monthEnd(d.slice(0, 7)) : addDays(d, days);
   const upcoming = state.subscriptions
     .filter((s) => !s.proxy) // 代付在「代付」页单独管
     .map((s) => ({ s, n: nextCharge(s, d) }))
-    .filter((x) => x.n && x.n <= addDays(d, state.settings.upcomingDays ?? 45))
+    .filter((x) => x.n && x.n <= horizon)
     .sort((a, b) => a.n!.localeCompare(b.n!))
     .slice(0, 12);
   const showUpcoming = state.settings.sidebarUpcoming !== false;
