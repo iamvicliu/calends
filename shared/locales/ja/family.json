@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "支払い {amount}",
+    "noReceiptsYet": "まだ受け取りなし",
+    "receiptHint": "受け取ったらメンバー横の「受取」で記録",
+    "tabIn": "受取 {count}",
+    "tabOut": "支払い {count}",
+    "chargeDate": "引き落とし日",
+    "refund": "返金",
+    "noCharges": "まだ引き落としはありません",
     "people": "{count} 人",
     "title": "シェアの詳細",
     "seats": "席",
@@ -188,6 +196,10 @@
     "ownerPh": "支払う相手"
   },
   "facts": {
+    "paidAll": "累計支払い",
+    "receivedAll": "累計受取",
+    "netGain": "累計プラス",
+    "netLoss": "累計マイナス",
     "cost": "コスト / 年",
     "income": "収入 / 年",
     "loss": "損失 / 年",

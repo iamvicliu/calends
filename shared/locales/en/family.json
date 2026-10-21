@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Paid {amount}",
+    "noReceiptsYet": "Nothing received yet",
+    "receiptHint": "When a member pays you, tap “Collect” next to them",
+    "tabIn": "Received {count}",
+    "tabOut": "Paid {count}",
+    "chargeDate": "Charged on",
+    "refund": "Refund",
+    "noCharges": "No charges yet",
     "people": "{count} people",
     "title": "Shared plan",
     "seats": "Seats",
@@ -158,6 +166,10 @@
     "ownerPh": "Who you pay"
   },
   "facts": {
+    "paidAll": "Paid so far",
+    "receivedAll": "Received so far",
+    "netGain": "Net gain",
+    "netLoss": "Net cost",
     "cost": "Cost / yr",
     "income": "Income / yr",
     "loss": "Loss / yr",

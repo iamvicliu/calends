@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Ödenen {amount}",
+    "noReceiptsYet": "Henüz tahsilat yok",
+    "receiptHint": "Biri ödediğinde üyenin yanındaki “Tahsil et”e dokunun",
+    "tabIn": "Alınan {count}",
+    "tabOut": "Ödenen {count}",
+    "chargeDate": "Ödeme günü",
+    "refund": "İade",
+    "noCharges": "Henüz ödeme yok",
     "people": "{count} kişi",
     "title": "Ortak plan",
     "seats": "Koltuk",
@@ -152,6 +160,10 @@
     "ownerPh": "Kime ödüyorsunuz"
   },
   "facts": {
+    "paidAll": "Toplam ödenen",
+    "receivedAll": "Toplam alınan",
+    "netGain": "Net kazanç",
+    "netLoss": "Net maliyet",
     "cost": "Maliyet / yıl",
     "income": "Gelir / yıl",
     "loss": "Zarar / yıl",

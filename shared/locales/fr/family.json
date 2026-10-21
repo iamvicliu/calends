@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Payé {amount}",
+    "noReceiptsYet": "Rien reçu pour l’instant",
+    "receiptHint": "Quand un membre paie, touchez « Encaisser » à côté de son nom",
+    "tabIn": "Reçu {count}",
+    "tabOut": "Payé {count}",
+    "chargeDate": "Prélevé le",
+    "refund": "Remboursement",
+    "noCharges": "Aucun prélèvement",
     "people": "{count} personnes",
     "title": "Abonnement partagé",
     "seats": "Places",
@@ -196,6 +204,10 @@
     "ownerPh": "La personne que vous payez"
   },
   "facts": {
+    "paidAll": "Payé au total",
+    "receivedAll": "Reçu au total",
+    "netGain": "Gain net",
+    "netLoss": "Coût net",
     "cost": "Coût / an",
     "income": "Revenu / an",
     "loss": "Perte / an",

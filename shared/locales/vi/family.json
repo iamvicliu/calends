@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Đã trả {amount}",
+    "noReceiptsYet": "Chưa thu được",
+    "receiptHint": "Khi thành viên trả tiền, bấm «Thu» cạnh tên họ",
+    "tabIn": "Đã nhận {count}",
+    "tabOut": "Đã trả {count}",
+    "chargeDate": "Ngày trừ",
+    "refund": "Hoàn tiền",
+    "noCharges": "Chưa có khoản trừ",
     "people": "{count} người",
     "title": "Chi tiết nhóm",
     "seats": "Chỗ",
@@ -146,6 +154,10 @@
     "ownerPh": "Người bạn trả tiền"
   },
   "facts": {
+    "paidAll": "Tổng đã trả",
+    "receivedAll": "Tổng đã thu",
+    "netGain": "Lãi ròng",
+    "netLoss": "Chi ròng",
     "cost": "Chi phí / năm",
     "income": "Thu nhập / năm",
     "loss": "Lỗ / năm",

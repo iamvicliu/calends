@@ -1,9 +1,8 @@
-import { cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
+import { chargesBetween, cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
 import { Fragment, useState } from 'react';
-import { billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } from '../../shared/format.ts';
+import { billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
-import { tx } from '../i18n.ts';
-import { toBaseAt } from '../../shared/fx.ts';
+import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../shared/types.ts';
 import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
 import { Amount, Cell, Group, Icon, NameLink, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
@@ -195,7 +194,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         <Icon name="down" size={14} />
                       </button>
                     </div>
-                    <CarFacts book={books.get(s.id)!} base={base} detail={expanded.has(s.id)} />
+                    <CarFacts book={books.get(s.id)!} base={base} />
                     {expanded.has(s.id) && (
                       <>
                         {!ro && free > 0 && live(s) && (
@@ -407,6 +406,17 @@ function CarSheet({
   /** 期间：两端都在今年只写月日；只要有一端不在今年，两端都带年份，免得看成倒序 */
   const range = (a: string, b: string) =>
     a.slice(0, 4) === today.slice(0, 4) && b.slice(0, 4) === today.slice(0, 4) ? `${cnDate(a)} – ${cnDate(b)}` : `${cnDateFull(a)} – ${cnDateFull(b)}`;
+  // 我付出去的：发起合租以来这个订阅的每次扣款（没记发起日期就从订阅开始算），按年分组
+  const [tab, setTab] = useState<'in' | 'out'>('in');
+  const outs = chargesBetween(s, book.since ?? s.start, today, today)
+    .filter((c) => c.kind !== 'failed')
+    .map((c) => ({ c, base: chargeValue(state, c) }))
+    .reverse();
+  const outTotal = outs.reduce((a, r) => a + r.base, 0);
+  const outYears = [...new Set(outs.map((r) => r.c.date.slice(0, 4)))].map((y) => {
+    const list = outs.filter((r) => r.c.date.startsWith(y));
+    return { y, list, sum: list.reduce((a, r) => a + r.base, 0) };
+  });
   const byPeriod = new Map<string, typeof receipts>();
   for (const r of receipts) {
     const k = `${r.p.from ?? ''}|${r.p.until}`;
@@ -460,7 +470,7 @@ function CarSheet({
               {t('proxy.viewDetail')}
             </Cell>
           </Group>
-          <div className="proxy-facts four">
+          <div className="proxy-facts four car-sheet-facts">
             <div>
               <small>{t('family.facts.cost')}</small>
               <b>{fmt(book.yearCost)}</b>
@@ -478,9 +488,17 @@ function CarSheet({
             </div>
             <div>
               <small>{t('family.facts.sinceNone')}</small>
-              <b className={actual >= 0 ? 'done' : 'loss'}>
-                {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
-              </b>
+              {/* 还没收过款：只说付出了多少，别显示成「亏」或「赚 ¥0」 */}
+              {book.received > 0 ? (
+                <b className={actual >= 0 ? 'done' : 'loss'}>
+                  {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
+                </b>
+              ) : (
+                <>
+                  <b>{t('family.sheet.paidOut', { amount: fmt(book.paid) })}</b>
+                  <em className="warn">{t('family.sheet.noReceiptsYet')}</em>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -504,44 +522,93 @@ function CarSheet({
           </div>
         ))}
 
+        {/* 收进来的和我付出去的左右切换，两边对照看这辆车的钱 */}
         <div className="car-sheet-sec">
-          <h3>{t('family.sheet.receipts')}</h3>
-          <span>{t('family.sheet.receiptsSum', { count: receipts.length, amount: fmt(total) })}</span>
+          <Seg
+            small
+            value={tab}
+            onChange={setTab}
+            options={[
+              ['in', t('family.sheet.tabIn', { count: receipts.length })],
+              ['out', t('family.sheet.tabOut', { count: outs.length })],
+            ]}
+          />
+          <span>
+            {tab === 'in'
+              ? t('family.sheet.receiptsSum', { count: receipts.length, amount: fmt(total) })
+              : t('family.sheet.receiptsSum', { count: outs.length, amount: fmt(outTotal) })}
+          </span>
         </div>
-        <div className="ld-table car-receipts">
-          <div className="ld-row ld-th">
-            <span>{t('family.sheet.member')}</span>
-            <span>{t('family.sheet.date')}</span>
-            <span>{t('family.sheet.amount')}</span>
-          </div>
-          {periods.map((g) => (
-            <Fragment key={g.key}>
-              <div className="ld-row car-period">
-                <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
-                <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
-              </div>
-              {g.list.map(({ m, p, base: v }, i) => (
-                <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
-                  <span>
-                    <b>{m.name || t('family.pool.unnamed')}</b>
-                    {p.note && <small>{p.note}</small>}
-                  </span>
-                  {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
-                  <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
-                  <span>
-                    <b>{money(p.amount, p.currency)}</b>
-                    {p.currency !== base && <small>≈ {money(v, base)}</small>}
-                  </span>
-                </button>
-              ))}
-            </Fragment>
-          ))}
-          {receipts.length === 0 && (
-            <div className="muted" style={{ fontSize: 13, padding: '12px 14px' }}>
-              {t('family.facts.noRecords')}
+        {tab === 'out' ? (
+          <div className="ld-table car-receipts">
+            <div className="ld-row ld-th">
+              <span>{t('family.sheet.chargeDate')}</span>
+              <span>{t('proxy.table.charged')}</span>
+              <span>{t('proxy.table.cost')}</span>
             </div>
-          )}
-        </div>
+            {outYears.map((g) => (
+              <Fragment key={g.y}>
+                <div className="ld-row car-period">
+                  <span>{t('calendar.yearTitle', { year: g.y })}</span>
+                  <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+                </div>
+                {g.list.map(({ c, base: v }, i) => (
+                  <div key={`${c.date}-${i}`} className="ld-row">
+                    <span className="ld-date">{cnDate(c.date)}</span>
+                    <span>
+                      <b>{money(c.amount, c.currency)}</b>
+                      {c.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
+                    </span>
+                    <span>
+                      <b>{money(v, base)}</b>
+                    </span>
+                  </div>
+                ))}
+              </Fragment>
+            ))}
+            {outs.length === 0 && (
+              <div className="car-empty">
+                <b>{t('family.sheet.noCharges')}</b>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="ld-table car-receipts">
+            <div className="ld-row ld-th">
+              <span>{t('family.sheet.member')}</span>
+              <span>{t('family.sheet.date')}</span>
+              <span>{t('family.sheet.amount')}</span>
+            </div>
+            {periods.map((g) => (
+              <Fragment key={g.key}>
+                <div className="ld-row car-period">
+                  <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
+                  <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+                </div>
+                {g.list.map(({ m, p, base: v }, i) => (
+                  <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
+                    <span>
+                      <b>{m.name || t('family.pool.unnamed')}</b>
+                      {p.note && <small>{p.note}</small>}
+                    </span>
+                    {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
+                    <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
+                    <span>
+                      <b>{money(p.amount, p.currency)}</b>
+                      {p.currency !== base && <small>≈ {money(v, base)}</small>}
+                    </span>
+                  </button>
+                ))}
+              </Fragment>
+            ))}
+            {receipts.length === 0 && (
+              <div className="car-empty">
+                <b>{t('family.facts.noRecords')}</b>
+                <span>{t('family.sheet.receiptHint')}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Sheet>
   );
@@ -627,53 +694,35 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
  * 合租账本，像一张小利润表：订阅一年花多少（成本）、成员一年交多少（收入）、两者之差（利润）。
  * 利润为负就是我自己用的那部分；下面一行是发起以来实际付出和收回的钱。
  */
-function CarFacts({ book, base, detail }: { book: ReturnType<typeof carLedger>; base: string; detail: boolean }) {
+/** 车卡上的数字：这辆车从发起到现在一共付出、收回多少，赚还是亏；按年的在弹窗里看 */
+function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: string }) {
   const fmt = (v: number) => money(v, base, { compact: true });
-  const profit = -book.yearNet;
   const actual = -book.net;
-  const signed = (v: number) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v))}`;
   return (
     <div className="car-book">
       <div className="car-facts">
         <div>
-          <small>{t('family.facts.cost')}</small>
-          <b>{fmt(book.yearCost)}</b>
+          <small>{t('family.facts.paidAll')}</small>
+          <b>{fmt(book.paid)}</b>
         </div>
         <div>
-          <small>{t('family.facts.income')}</small>
-          <b>{fmt(book.yearIncome)}</b>
+          <small>{t('family.facts.receivedAll')}</small>
+          <b>{fmt(book.received)}</b>
         </div>
         <div>
-          <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
-          <b className={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
-        </div>
-      </div>
-      {/* 发起至今的实际收支是明细，展开后才看 */}
-      {detail && (
-        <div className="car-actual">
-          {book.since ? (
+          {book.received > 0 ? (
             <>
-              <span className="m-hide">{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
-              <span>
-                {tx('family.facts.actual', {
-                  paid: fmt(book.paid),
-                  received: fmt(book.received),
-                  result: (
-                    <b className={actual >= 0 ? 'gain' : 'loss'}>
-                      {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
-                    </b>
-                  ),
-                })}
-              </span>
+              <small>{actual >= 0 ? t('family.facts.netGain') : t('family.facts.netLoss')}</small>
+              <b className={actual >= 0 ? 'gain' : 'loss'}>{fmt(Math.abs(actual))}</b>
             </>
           ) : (
             <>
-              <span className="m-hide">{t('family.facts.sinceNone')}</span>
-              <span>{t('family.facts.noRecords')}</span>
+              <small>{t('family.facts.sinceNone')}</small>
+              <b className="warn">{t('family.sheet.noReceiptsYet')}</b>
             </>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Pagado {amount}",
+    "noReceiptsYet": "Aún sin cobros",
+    "receiptHint": "Cuando alguien pague, toca «Cobrar» junto al miembro",
+    "tabIn": "Recibido {count}",
+    "tabOut": "Pagado {count}",
+    "chargeDate": "Cargado el",
+    "refund": "Reembolso",
+    "noCharges": "Aún no hay cargos",
     "people": "{count} personas",
     "title": "Plan compartido",
     "seats": "Plazas",
@@ -165,6 +173,10 @@
     "ownerPh": "A quién pagas"
   },
   "facts": {
+    "paidAll": "Pagado en total",
+    "receivedAll": "Recibido en total",
+    "netGain": "Ganancia neta",
+    "netLoss": "Coste neto",
     "cost": "Coste / año",
     "income": "Ingresos / año",
     "loss": "Pérdida / año",

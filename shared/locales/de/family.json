@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Bezahlt {amount}",
+    "noReceiptsYet": "Noch nichts erhalten",
+    "receiptHint": "Wenn jemand zahlt, tippe neben dem Mitglied auf „Kassieren“",
+    "tabIn": "Erhalten {count}",
+    "tabOut": "Bezahlt {count}",
+    "chargeDate": "Abgebucht am",
+    "refund": "Erstattung",
+    "noCharges": "Noch keine Abbuchungen",
     "people": "{count} Personen",
     "title": "Geteilter Plan",
     "seats": "Plätze",
@@ -196,6 +204,10 @@
     "ownerPh": "An wen du zahlst"
   },
   "facts": {
+    "paidAll": "Bisher bezahlt",
+    "receivedAll": "Bisher erhalten",
+    "netGain": "Gewinn",
+    "netLoss": "Kosten",
     "cost": "Kosten / Jahr",
     "income": "Einnahmen / Jahr",
     "loss": "Verlust / Jahr",

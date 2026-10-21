@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "付出 {amount}",
+    "noReceiptsYet": "还没收款",
+    "receiptHint": "收到钱后，点成员旁的「收款」记一笔",
+    "tabIn": "收款 {count}",
+    "tabOut": "付款 {count}",
+    "chargeDate": "扣款日",
+    "refund": "退款",
+    "noCharges": "还没有扣款记录",
     "people": "{count} 人",
     "title": "合租详情",
     "seats": "座位",
@@ -146,6 +154,10 @@
     "ownerPh": "付给谁"
   },
   "facts": {
+    "paidAll": "累计付出",
+    "receivedAll": "累计收回",
+    "netGain": "累计赚",
+    "netLoss": "累计亏",
     "cost": "成本 / 年",
     "income": "收入 / 年",
     "loss": "没赚钱 / 年",

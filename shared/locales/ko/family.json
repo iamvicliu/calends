@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "지출 {amount}",
+    "noReceiptsYet": "아직 받은 돈 없음",
+    "receiptHint": "돈을 받으면 멤버 옆 「받기」로 기록하세요",
+    "tabIn": "받음 {count}",
+    "tabOut": "결제 {count}",
+    "chargeDate": "결제일",
+    "refund": "환불",
+    "noCharges": "아직 결제 내역이 없습니다",
     "people": "{count}명",
     "title": "공유 상세",
     "seats": "좌석",
@@ -188,6 +196,10 @@
     "ownerPh": "돈을 보낼 사람"
   },
   "facts": {
+    "paidAll": "누적 지출",
+    "receivedAll": "누적 수입",
+    "netGain": "누적 이익",
+    "netLoss": "누적 손실",
     "cost": "비용 / 년",
     "income": "수입 / 년",
     "loss": "손실 / 년",

@@ -1,5 +1,13 @@
 {
   "sheet": {
+    "paidOut": "Dibayar {amount}",
+    "noReceiptsYet": "Belum ada yang diterima",
+    "receiptHint": "Saat anggota membayar, ketuk “Terima” di sebelahnya",
+    "tabIn": "Diterima {count}",
+    "tabOut": "Dibayar {count}",
+    "chargeDate": "Tanggal tagihan",
+    "refund": "Refund",
+    "noCharges": "Belum ada tagihan",
     "people": "{count} orang",
     "title": "Detail patungan",
     "seats": "Kursi",
@@ -146,6 +154,10 @@
     "ownerPh": "Kepada siapa Anda membayar"
   },
   "facts": {
+    "paidAll": "Total dibayar",
+    "receivedAll": "Total diterima",
+    "netGain": "Untung bersih",
+    "netLoss": "Biaya bersih",
     "cost": "Biaya / thn",
     "income": "Pemasukan / thn",
     "loss": "Rugi / thn",
