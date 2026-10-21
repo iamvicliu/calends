@@ -461,7 +461,10 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             </Cell>
           )}
           {s.publicView && (
-            <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open(base('/public'), '_blank')} />
+            <Cell
+              label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>}
+              onClick={() => window.open(base('/public'), '_blank')}
+            />
           )}
           <Cell label={t('settings.open.ai')}>
             <Toggle
