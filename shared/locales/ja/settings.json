@@ -273,12 +273,8 @@
     "namePlaceholder": "カテゴリ名",
     "color": "カラー",
     "icon": "アイコン",
-    "tabIcons": "アイコン",
-    "tabEmoji": "絵文字",
     "search": "アイコンを検索",
     "noMatch": "一致するアイコンがありません",
-    "emojiPlaceholder": "好きな絵文字を入力または貼り付け",
-    "emojiCommon": "おすすめ",
     "delete": "カテゴリを削除",
     "moveTo": {
       "other": "含まれる {count} 件のサブスクの移動先"

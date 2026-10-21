@@ -247,12 +247,8 @@
     "namePlaceholder": "Category name",
     "color": "Color",
     "icon": "Icon",
-    "tabIcons": "Icons",
-    "tabEmoji": "Emoji",
     "search": "Search icons",
     "noMatch": "No matching icons",
-    "emojiPlaceholder": "Type or paste any emoji",
-    "emojiCommon": "Suggestions",
     "delete": "Delete category",
     "moveTo": {
       "one": "Move its {count} subscription to",

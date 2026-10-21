@@ -126,13 +126,6 @@ export function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
-/** 国家/地区代码转国旗 emoji：TR → 🇹🇷；不是两位字母则返回空串 */
-export function flag(region?: string): string {
-  const r = region?.trim().toUpperCase();
-  if (!r || !/^[A-Z]{2}$/.test(r)) return '';
-  return String.fromCodePoint(...[...r].map((c) => 0x1f1a5 + c.charCodeAt(0)));
-}
-
 /** 把服务端的 UTC 时间（ISO 或 SQLite 的「YYYY-MM-DD HH:MM:SS」）按设置的时区显示成「2026-10-20 19:03」；dateOnly 只要日期 */
 export function localTime(raw: string, timeZone: string, dateOnly = false): string {
   const iso = /[TZ]/.test(raw) ? raw : raw.replace(' ', 'T') + 'Z';

@@ -245,12 +245,8 @@
     "namePlaceholder": "Tên danh mục",
     "color": "Màu",
     "icon": "Biểu tượng",
-    "tabIcons": "Biểu tượng",
-    "tabEmoji": "Emoji",
     "search": "Tìm biểu tượng",
     "noMatch": "Không có biểu tượng phù hợp",
-    "emojiPlaceholder": "Nhập hoặc dán emoji bất kỳ",
-    "emojiCommon": "Gợi ý",
     "delete": "Xóa danh mục",
     "moveTo": {
       "other": "Chuyển {count} gói đăng ký của nó sang"

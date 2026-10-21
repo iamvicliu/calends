@@ -289,12 +289,8 @@
     "namePlaceholder": "Name der Kategorie",
     "color": "Farbe",
     "icon": "Symbol",
-    "tabIcons": "Symbole",
-    "tabEmoji": "Emoji",
     "search": "Symbole suchen",
     "noMatch": "Keine passenden Symbole",
-    "emojiPlaceholder": "Beliebiges Emoji eingeben oder einfügen",
-    "emojiCommon": "Vorschläge",
     "delete": "Kategorie löschen",
     "moveTo": {
       "one": "Ihr {count} Abo verschieben nach",

@@ -273,12 +273,8 @@
     "namePlaceholder": "카테고리 이름",
     "color": "색상",
     "icon": "아이콘",
-    "tabIcons": "아이콘",
-    "tabEmoji": "이모지",
     "search": "아이콘 검색",
     "noMatch": "일치하는 아이콘이 없습니다",
-    "emojiPlaceholder": "이모지를 입력하거나 붙여넣으세요",
-    "emojiCommon": "추천",
     "delete": "카테고리 삭제",
     "moveTo": {
       "other": "포함된 구독 {count}개를 옮길 곳"

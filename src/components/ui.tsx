@@ -1,7 +1,8 @@
 import type { ReactNode as ComponentChildren, JSX } from 'react';
 import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
-import { flag, symbol } from '../../shared/format.ts';
+import { symbol } from '../../shared/format.ts';
+import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { CatGlyph } from './CatGlyph.tsx';
@@ -248,7 +249,7 @@ export function CatChip({ cat }: { cat: string }) {
 export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }) {
   const brand = brandOf(m);
   const bank = bankOf(m);
-  const f = flag(methodRegion(m));
+  const region = methodRegion(m);
   // 小圆标优先用银行图标集（专为小尺寸设计）；其余用自定义 / 平台 / 官网 logo
   const logo = bank ? undefined : methodLogo(m);
   const bg = bank || brand === 'appstore' ? undefined : markBg(m, logo, BRANDS.find((b) => b.key === brand)?.onColor);
@@ -264,7 +265,7 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
       ) : (
         <b>{[...m.name][0]}</b>
       )}
-      {f && <em className="mm-flag">{f}</em>}
+      {region && <FlagImg cc={region} className="mm-flag" />}
     </span>
   );
 }
@@ -442,6 +443,15 @@ export function Toasts() {
 }
 
 /** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
+/**
+ * 国旗：用图片，不用 emoji（Windows 不显示国旗 emoji，只会变成两个字母）；没有对应图片时不显示
+ */
+export function FlagImg({ cc, className = '' }: { cc?: string; className?: string }) {
+  const k = cc?.trim().toLowerCase();
+  if (!k || !FLAGS.has(k)) return null;
+  return <img className={`flag-img ${className}`} src={`/flags/${k}.png`} alt="" loading="lazy" />;
+}
+
 /** 右上角的状态胶囊：进行中绿点、待收橙点、已停止换成红色「禁止」图标，形状都一样 */
 export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop'; children: ComponentChildren }) {
   return (

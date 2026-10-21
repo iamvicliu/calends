@@ -245,12 +245,8 @@
     "namePlaceholder": "分類名稱",
     "color": "顏色",
     "icon": "圖示",
-    "tabIcons": "圖示",
-    "tabEmoji": "Emoji",
     "search": "搜尋圖示",
     "noMatch": "沒有相符的圖示",
-    "emojiPlaceholder": "輸入或貼上任何 emoji",
-    "emojiCommon": "推介",
     "delete": "刪除分類",
     "moveTo": {
       "other": "其中 {count} 個訂閱移到"

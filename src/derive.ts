@@ -1,6 +1,5 @@
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, parseDay, type Charge } from '../shared/billing.ts';
 import { chargeValue } from '../shared/fx.ts';
-import { flag } from '../shared/format.ts';
 import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../shared/types.ts';
 import { BANKS } from './banks.ts';
 import { locale, t } from '../shared/i18n.ts';
@@ -195,10 +194,9 @@ export function bankOf(m: Pick<PaymentMethod, 'name' | 'kind' | 'bank'>): string
   return BANKS.find(([name]) => m.name.includes(name))?.[1];
 }
 
-/** 支付方式显示名：有地区的前面加国旗，一眼分清土耳其区、尼日利亚区 */
+/** 支付方式显示名（纯文字；国旗用 FlagImg 另画，不拼 emoji） */
 export function methodName(m: Pick<PaymentMethod, 'name' | 'region' | 'kind' | 'currency'>): string {
-  const f = flag(methodRegion(m));
-  return f ? `${f} ${m.name}` : m.name;
+  return m.name;
 }
 
 export function liveSubs(state: AppState, today: string): Subscription[] {

@@ -1,5 +1,5 @@
 import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime } from '../../shared/billing.ts';
-import { cnDate, cnDateFull, flag, money } from '../../shared/format.ts';
+import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 
 /** 不是今年的日期带上年份 */
@@ -7,7 +7,7 @@ const when = (d: string, today: string) => (d.slice(0, 4) === today.slice(0, 4) 
 import { chargeValue } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { ShareSheet } from '../components/ShareSheet.tsx';
-import { SubIcon } from '../components/ui.tsx';
+import { FlagImg, SubIcon } from '../components/ui.tsx';
 import { catColor } from '../derive.ts';
 
 type Style = 'card' | 'receipt' | 'timeline' | 'poster' | 'years';
@@ -187,7 +187,15 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
         <div key={i} className="rc-row">
           <span className="rc-d">{c.date}</span>
           <span className="rc-n">
-            {c.kind === 'refund' ? t('share.refund') : c.sub.region ? `${flag(c.sub.region)} ${c.sub.region}` : cycleLabel(c.sub.cycle)}
+            {c.kind === 'refund' ? (
+              t('share.refund')
+            ) : c.sub.region ? (
+              <>
+                <FlagImg cc={c.sub.region} /> {c.sub.region}
+              </>
+            ) : (
+              cycleLabel(c.sub.cycle)
+            )}
           </span>
           <span className="rc-v">
             {hide ? (c.kind === 'refund' ? t('share.refundShort') : t('share.nth', { n: rows.length - i })) : m(c.amount, c.currency)}
@@ -265,7 +273,11 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
                   {it.to ? (it.to > today ? t('share.planned', { date: when(it.to, today) }) : when(it.to, today)) : t('share.present')}
                 </small>
                 <b>
-                  {it.v!.region ? `${flag(it.v!.region)} ${it.v!.region} · ` : ''}
+                  {it.v!.region ? (
+                    <>
+                      <FlagImg cc={it.v!.region} /> {it.v!.region} ·{' '}
+                    </>
+                  ) : null}
                   {hide ? cycleLabel(it.v!.cycle) : `${money(it.v!.price, it.v!.currency, { compact: true })} ${cycleLabel(it.v!.cycle)}`}
                 </b>
                 {(it.v!.priceHistory?.length ?? 0) > 1 && !hide && (

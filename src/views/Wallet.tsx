@@ -2,11 +2,11 @@ import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, us
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { useRef, useState } from 'react';
 import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../shared/billing.ts';
-import { cnDate, cnDateFull, flag, money, relDays } from '../../shared/format.ts';
+import { cnDate, cnDateFull, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
+import { Amount, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { confirmDelete } from './Editor.tsx';
@@ -137,7 +137,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
         <div className="sim-name">
           {m.name}
           <small>
-            {flag(methodRegion(m))} {m.phone ? fmtPhone(m.phone) : `${KIND_LABEL[m.kind]} · ${m.currency}`}
+            <FlagImg cc={methodRegion(m)} /> {m.phone ? fmtPhone(m.phone) : `${KIND_LABEL[m.kind]} · ${m.currency}`}
           </small>
         </div>
         <div className="pc-foot">
@@ -162,7 +162,9 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
             <span className="ac-logo" aria-hidden="true" />
             <div className="ac-name">{m.name}</div>
           </div>
-          <span className="ac-flag">{flag(methodRegion(m))}</span>
+          <span className="ac-flag">
+            <FlagImg cc={methodRegion(m)} />
+          </span>
         </div>
         <div className="pc-foot">
           <div>

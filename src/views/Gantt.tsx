@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../shared/billing.ts';
-import { cnDate, flag, money, monthLabel } from '../../shared/format.ts';
+import { cnDate, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
+import { FlagImg, Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
 import { usePref } from '../store.ts';
 
@@ -192,11 +192,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   const keys = useMemo(() => [...new Set(rows.flatMap((r) => r.segs.map((g) => keyOf(g.v))))], [rows, colorBy]);
   const color = (v: Subscription) => PALETTE[keys.indexOf(keyOf(v)) % PALETTE.length];
   const labelOf = (key: string) =>
-    colorBy === 'method'
-      ? (state.methods.find((m) => m.id === key)?.name ?? t('list.unassigned'))
-      : key === '—'
-        ? t('list.gantt.noRegion')
-        : `${flag(key)} ${key}`;
+    colorBy === 'method' ? (state.methods.find((m) => m.id === key)?.name ?? t('list.unassigned')) : key === '—' ? t('list.gantt.noRegion') : key;
 
   // 刻度：年份始终标；1 年视图再标每个月
   const ticks: Array<{ d: string; label: string; major: boolean }> = [];
@@ -307,7 +303,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
 
                     if (g.to < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
-                    const tip = `${g.v.region ? `${flag(g.v.region)} ${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
+                    const tip = `${g.v.region ? `${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                     // 买断：一个圆点；有结束日（如含一年更新、之后改订阅）时，再拉一条细线到结束日，和后面的虚线、下一段接上
                     if (lifetime)
                       return (
@@ -344,7 +340,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       const run = `${price}|${intro ? 1 : 0}`;
                       const label = pw > 70 && labeled !== run;
                       if (label) labeled = run;
-                      const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${flag(g.v.region)} ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
+                      const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                       return (
                         <span
                           key={a}
@@ -355,7 +351,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />}
                           {label && (
                             <em>
-                              {n === 0 && g.v.region ? `${flag(g.v.region)} ` : ''}
+                              {n === 0 && g.v.region ? <FlagImg cc={g.v.region} /> : null}
                               {intro ? t('list.gantt.introShort') : ''}
                               {money(price, g.v.currency, { compact: true })}/{perLabel(g.v)}
                             </em>

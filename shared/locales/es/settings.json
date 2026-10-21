@@ -250,12 +250,8 @@
     "namePlaceholder": "Nombre de la categoría",
     "color": "Color",
     "icon": "Icono",
-    "tabIcons": "Iconos",
-    "tabEmoji": "Emoji",
     "search": "Buscar iconos",
     "noMatch": "Ningún icono coincide",
-    "emojiPlaceholder": "Escribe o pega cualquier emoji",
-    "emojiCommon": "Sugerencias",
     "delete": "Eliminar categoría",
     "moveTo": {
       "one": "Mover su {count} suscripción a",

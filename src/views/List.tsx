@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
-import { cnDate, flag, money, relDays } from '../../shared/format.ts';
+import { cnDate, money, relDays } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
@@ -437,7 +437,7 @@ function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; up: Subs
   const when = d <= 14 ? relDays(d) : cnDate(up.start);
   const m = state.methods.find((x) => x.id === up.methodId);
   const parts = [
-    up.region && up.region !== cur.region ? `${flag(up.region)} ${up.region}` : '',
+    up.region && up.region !== cur.region ? up.region : '',
     st === 'upcoming' || up.price !== cur.price || up.currency !== cur.currency ? `${money(up.price, up.currency)}/${perLabel(up)}` : '',
     up.methodId !== cur.methodId || st === 'upcoming' ? (m ? m.name : t('list.change.noMethod')) : '',
   ].filter(Boolean);
@@ -465,7 +465,7 @@ function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subscriptio
         {vs
           .map((v) =>
             t('list.overlap.note', {
-              what: v.region && v.region !== cur.region ? `${flag(v.region)} ${v.region}` : `${money(v.price, v.currency)}/${perLabel(v)}`,
+              what: v.region && v.region !== cur.region ? v.region : `${money(v.price, v.currency)}/${perLabel(v)}`,
               date: cnDate(v.end!),
             }),
           )

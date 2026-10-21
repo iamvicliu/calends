@@ -8614,3 +8614,35 @@ button.seat:disabled {
   color: var(--orange);
   font-size: 13px;
 }
+
+/* 国旗图片（不用 emoji）：和文字基线对齐 */
+.flag-img {
+  display: inline-block;
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: cover;
+  vertical-align: -1px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+}
+.ac-flag .flag-img {
+  width: 26px;
+  height: 19px;
+  border-radius: 3px;
+}
+img.mm-flag {
+  width: max(11px, calc(var(--s) * 0.42));
+  height: auto;
+  border-radius: 2px;
+  filter: none;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+.pay img.mm-flag {
+  width: 11px;
+}
+.gt-seg em .flag-img {
+  width: 13px;
+  height: 10px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}

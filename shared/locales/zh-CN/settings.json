@@ -245,12 +245,8 @@
     "namePlaceholder": "分类名称",
     "color": "颜色",
     "icon": "图标",
-    "tabIcons": "图标",
-    "tabEmoji": "Emoji",
     "search": "搜索图标",
     "noMatch": "没有匹配的图标",
-    "emojiPlaceholder": "输入或粘贴任意 emoji",
-    "emojiCommon": "推荐",
     "delete": "删除分类",
     "moveTo": {
       "other": "其中 {count} 个订阅移到"

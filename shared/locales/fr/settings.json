@@ -289,12 +289,8 @@
     "namePlaceholder": "Nom de la catégorie",
     "color": "Couleur",
     "icon": "Icône",
-    "tabIcons": "Icônes",
-    "tabEmoji": "Emoji",
     "search": "Rechercher une icône",
     "noMatch": "Aucune icône correspondante",
-    "emojiPlaceholder": "Saisissez ou collez un emoji",
-    "emojiCommon": "Suggestions",
     "delete": "Supprimer la catégorie",
     "moveTo": {
       "one": "Déplacer son abonnement vers",

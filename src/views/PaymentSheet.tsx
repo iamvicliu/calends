@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { activePhases, currentPhase, cycleLabel } from '../../shared/billing.ts';
-import { flag, money } from '../../shared/format.ts';
+import { money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { deletePayment, savePayment } from '../../shared/phases.ts';
 import type { Payment, Subscription } from '../../shared/types.ts';
@@ -102,7 +102,7 @@ export function PaymentSheet({
                 }}
                 options={lanes.map((v) => ({
                   value: v.start,
-                  label: `${v.region ? `${flag(v.region)} ${v.region} · ` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`,
+                  label: `${v.region ? `${v.region} · ` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`,
                 }))}
                 ariaLabel={t('editor.overlap.payPhase')}
               />

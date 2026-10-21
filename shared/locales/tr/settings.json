@@ -247,12 +247,8 @@
     "namePlaceholder": "Kategori adı",
     "color": "Renk",
     "icon": "Simge",
-    "tabIcons": "Simgeler",
-    "tabEmoji": "Emoji",
     "search": "Simge ara",
     "noMatch": "Eşleşen simge yok",
-    "emojiPlaceholder": "Herhangi bir emoji yazın veya yapıştırın",
-    "emojiCommon": "Öneriler",
     "delete": "Kategoriyi sil",
     "moveTo": {
       "one": "İçindeki {count} aboneliği taşı:",

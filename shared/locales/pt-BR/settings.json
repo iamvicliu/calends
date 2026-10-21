@@ -250,12 +250,8 @@
     "namePlaceholder": "Nome da categoria",
     "color": "Cor",
     "icon": "Ícone",
-    "tabIcons": "Ícones",
-    "tabEmoji": "Emoji",
     "search": "Buscar ícones",
     "noMatch": "Nenhum ícone encontrado",
-    "emojiPlaceholder": "Digite ou cole qualquer emoji",
-    "emojiCommon": "Sugestões",
     "delete": "Excluir categoria",
     "moveTo": {
       "one": "Mover a {count} assinatura dela para",

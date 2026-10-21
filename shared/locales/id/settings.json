@@ -245,12 +245,8 @@
     "namePlaceholder": "Nama kategori",
     "color": "Warna",
     "icon": "Ikon",
-    "tabIcons": "Ikon",
-    "tabEmoji": "Emoji",
     "search": "Cari ikon",
     "noMatch": "Tidak ada ikon yang cocok",
-    "emojiPlaceholder": "Ketik atau tempel emoji apa saja",
-    "emojiCommon": "Saran",
     "delete": "Hapus kategori",
     "moveTo": {
       "other": "Pindahkan {count} langganannya ke"

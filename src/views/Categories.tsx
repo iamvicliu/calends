@@ -2,13 +2,13 @@
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useMemo, useState } from 'react';
-import { CAT_COLORS, categoryColor, categoryCounts, isIconName, type Category } from '../../shared/categories.ts';
+import { CAT_COLORS, categoryColor, categoryCounts, type Category } from '../../shared/categories.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState } from '../../shared/types.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { CAT_ICON_GROUPS } from '../components/cat-icons.gen.ts';
 import { Picker } from '../components/Picker.tsx';
-import { Cell, Group, Icon, Seg, Sheet } from '../components/ui.tsx';
+import { Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { categories } from '../derive.ts';
 import { run, saveCategories, toast } from '../store.ts';
 
@@ -119,73 +119,9 @@ function CategoriesSheet({ state, onClose }: { state: AppState; onClose: () => v
   );
 }
 
-/** 常用 emoji；也可以在输入框里填任意 emoji */
-const EMOJIS = [
-  '🤖',
-  '🧠',
-  '💡',
-  '🛠️',
-  '⚙️',
-  '💻',
-  '📱',
-  '☁️',
-  '🌐',
-  '🔒',
-  '🛡️',
-  '🎬',
-  '📺',
-  '🎵',
-  '🎧',
-  '🎮',
-  '🕹️',
-  '📚',
-  '📰',
-  '✏️',
-  '🎨',
-  '📷',
-  '🛒',
-  '🛍️',
-  '💳',
-  '💰',
-  '🏦',
-  '📈',
-  '🏠',
-  '🛋️',
-  '🍔',
-  '☕',
-  '🍿',
-  '🏋️',
-  '🚴',
-  '💊',
-  '❤️',
-  '✈️',
-  '🚗',
-  '🚆',
-  '🗺️',
-  '👪',
-  '👶',
-  '🐶',
-  '🐱',
-  '🌱',
-  '⭐',
-  '🎁',
-  '🔥',
-  '⚡',
-  '📦',
-  '🎓',
-];
-
-/** 输入框里的最后一个 emoji（字素簇）；不是 emoji 的字符忽略 */
-function lastEmoji(text: string): string | undefined {
-  const parts = typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter().segment(text)].map((x) => x.segment) : Array.from(text);
-  return parts.reverse().find((g) => /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(g));
-}
-
-/** 图标选择：按主题分组、可搜索的 Lucide 图标，或者 emoji */
+/** 图标选择：按主题分组、可搜索的线性图标。不提供 emoji：各系统显示不一致，Windows 上国旗等还会变成字母 */
 function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: string) => void; tint: string }) {
-  const [tab, setTab] = useState<'icons' | 'emoji'>(value && !isIconName(value) ? 'emoji' : 'icons');
   const [q, setQ] = useState('');
-  const [emoji, setEmoji] = useState(value && !isIconName(value) ? value : '');
   const k = q.trim().toLowerCase();
   const groups = Object.entries(CAT_ICON_GROUPS)
     .map(([g, names]) => {
@@ -196,74 +132,33 @@ function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: s
     .filter((x) => x.names.length);
   return (
     <div className="cat-picker" style={{ '--tint': tint } as Record<string, string>}>
-      <Seg
-        value={tab}
-        onChange={setTab}
-        options={[
-          ['icons', t('settings.cat.tabIcons')],
-          ['emoji', t('settings.cat.tabEmoji')],
-        ]}
-      />
-      {tab === 'icons' ? (
-        <>
-          <label className="cp-search">
-            <Icon name="search" />
-            <input value={q} placeholder={t('settings.cat.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
-          </label>
-          <div className="cat-icon-scroll">
-            {groups.map((x) => (
-              <section key={x.g}>
-                <div className="cp-head">{x.label}</div>
-                <div className="cat-grid">
-                  {x.names.map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      className={`cat-pick ${value === n ? 'on' : ''}`}
-                      aria-pressed={value === n}
-                      aria-label={n}
-                      title={n}
-                      onClick={() => onChange(n)}
-                    >
-                      <CatGlyph icon={n} size={20} />
-                    </button>
-                  ))}
-                </div>
-              </section>
-            ))}
-            {!groups.length && <div className="cp-empty">{t('settings.cat.noMatch')}</div>}
-          </div>
-        </>
-      ) : (
-        <>
-          <label className="cp-search">
-            <input
-              value={emoji}
-              placeholder={t('settings.cat.emojiPlaceholder')}
-              onChange={(e) => {
-                const v = (e.target as HTMLInputElement).value;
-                setEmoji(v);
-                const g = lastEmoji(v);
-                if (g) onChange(g);
-              }}
-            />
-          </label>
-          <div className="cp-head">{t('settings.cat.emojiCommon')}</div>
-          <div className="cat-grid">
-            {EMOJIS.map((e) => (
-              <button
-                key={e}
-                type="button"
-                className={`cat-pick emo ${value === e ? 'on' : ''}`}
-                aria-pressed={value === e}
-                onClick={() => (setEmoji(e), onChange(e))}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      <label className="cp-search">
+        <Icon name="search" />
+        <input value={q} placeholder={t('settings.cat.search')} onChange={(e) => setQ((e.target as HTMLInputElement).value)} />
+      </label>
+      <div className="cat-icon-scroll">
+        {groups.map((x) => (
+          <section key={x.g}>
+            <div className="cp-head">{x.label}</div>
+            <div className="cat-grid">
+              {x.names.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`cat-pick ${value === n ? 'on' : ''}`}
+                  aria-pressed={value === n}
+                  aria-label={n}
+                  title={n}
+                  onClick={() => onChange(n)}
+                >
+                  <CatGlyph icon={n} size={20} />
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
+        {!groups.length && <div className="cp-empty">{t('settings.cat.noMatch')}</div>}
+      </div>
     </div>
   );
 }
