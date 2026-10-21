@@ -105,15 +105,17 @@ Tools include `get_overview`, `list_subscriptions`, `spending_stats`, `get_trend
 
 ## Configuration
 
-| Variable                                        | Where        | Purpose                                                                                                                                                                            |
-| ----------------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEMO_MODE`                                     | env          | Set to `1` for an anonymous, editable demo that resets daily at 00:00 UTC (Docker triggers around 00:05). See below.                                                               |
-| `SETUP_TOKEN`                                   | secret / env | Required once to set the owner password on a fresh install.                                                                                                                        |
-| `SITE_URL`                                      | var / env    | Public URL used in reminders and calendar links. Auto-detected if unset.                                                                                                           |
-| `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler     | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
-| `OLD_HOSTS`                                     | var / env    | Optional: comma-separated old domains after moving to a new one. Pages there 301 to `SITE_URL`; API, MCP and calendar feeds keep working, so existing clients don't break.         |
-| `TRUST_PROXY`                                   | env          | Set to `1` behind a reverse proxy so login rate limiting sees the real client IP.                                                                                                  |
-| `DATA_DIR`, `PORT`                              | Docker env   | Data directory (default `/data`) and port (default `8787`).                                                                                                                        |
+| Variable                                        | Where           | Purpose                                                                                                                                                                            |
+| ----------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEMO_MODE`                                     | env             | Set to `1` for an anonymous, editable demo that resets daily at 00:00 UTC (Docker triggers around 00:05). See below.                                                               |
+| `SETUP_TOKEN`                                   | secret / env    | Required once to set the owner password on a fresh install.                                                                                                                        |
+| `BASE_PATH`                                     | build arg + env | Optional subpath without a trailing slash, e.g. `/claude`; defaults to the root. Set the same value at frontend build time and Worker/Docker runtime.                              |
+| `DEMO_PROFILE`                                  | env             | `default` (41 subscriptions) or `ai` (61 fictional AI subscriptions); used with `DEMO_MODE=1`.                                                                                     |
+| `SITE_URL`                                      | var / env       | Public URL used in reminders and calendar links. Auto-detected if unset.                                                                                                           |
+| `EMAIL` binding + `MAIL_FROM`, `MAIL_FROM_NAME` | wrangler        | Optional: email reminders via [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/). Other channels need no server config. |
+| `OLD_HOSTS`                                     | var / env       | Optional: comma-separated old domains after moving to a new one. Pages there 301 to `SITE_URL`; API, MCP and calendar feeds keep working, so existing clients don't break.         |
+| `TRUST_PROXY`                                   | env             | Set to `1` behind a reverse proxy so login rate limiting sees the real client IP.                                                                                                  |
+| `DATA_DIR`, `PORT`                              | Docker env      | Data directory (default `/data`) and port (default `8787`).                                                                                                                        |
 
 Personal deployment settings (your domain, database id, sender address, your own icons) can live in a git-ignored `local/` folder: `local/wrangler.jsonc` is picked up automatically by the npm scripts and files in `local/public/` override `public/` at build time.
 
@@ -121,7 +123,20 @@ Personal deployment settings (your domain, database id, sender address, your own
 
 Run the Docker image with `DEMO_MODE=1` and `SITE_URL=https://demo.calends.date` using a dedicated, initially empty data volume. Set `TRUST_PROXY=1` behind a reverse proxy. No setup token or owner password is required; `/` opens `/admin` directly. All visitors share the same editable ledger and display settings. A fresh empty database is seeded automatically with 41 fictional subscriptions; at the UTC midnight scheduled run it resets subscriptions, wallet, people, settings, preferences, chats and credentials. Exchange rates and migration records are retained.
 
-Password, passkeys, device management, notification channel saving/testing and delivery, MCP, AI assistant, private ICS links and public-page switching are unavailable. The demo also disables backup restore and CSV import entirely to prevent bulk uploads; exports remain available. These restrictions are enforced by the Worker with localized errors as well as explained in the UI. Normal installations without `DEMO_MODE=1` keep their existing behavior.
+Password, passkeys, device management, notification channel saving/testing and delivery, MCP, private ICS links and public-page switching are unavailable. The demo also disables backup restore and CSV import entirely to prevent bulk uploads; exports remain available. These restrictions are enforced by the Worker with localized errors as well as explained in the UI. Normal installations without `DEMO_MODE=1` keep their existing behavior.
+
+The assistant offers local scripted conversations in both demo profiles: receipt drafts, current-month charges, recent price increases, and (AI profile) Claude plan reviews. It makes no AI API requests and keeps chats only in the browser. Confirmed receipt drafts are saved to the shared demo ledger and reset with it. A self-hosted instance uses your own API key for real AI.
+
+For an AI account-management demo under `/claude/` (the reverse proxy must preserve the prefix):
+
+```bash
+docker build --build-arg BASE_PATH=/claude -t calends-ai .
+docker run -d --name calends-ai -p 8788:8787 -v calends-ai-data:/data \
+  -e BASE_PATH=/claude -e DEMO_MODE=1 -e DEMO_PROFILE=ai \
+  -e SITE_URL=https://demo.calends.date -e TRUST_PROXY=1 calends-ai
+```
+
+Open `https://demo.calends.date/claude/admin`. Use a separate initially empty volume from the default demo. `SITE_URL` may include `/claude`; it is appended only once. Unprefixed health-check API paths remain available. The AI profile has 40 Claude accounts (13 monthly Pro, 3 annual Pro, 14 Max 5x, 10 Max 20x), 16 ChatGPT accounts (7 Plus, 4 Pro 5x, 3 Pro 10x, 2 Pro 50x), and five other AI tools. All identities, prices and sharing arrangements are fictional examples; ChatGPT plan names in this profile are demo labels. Generate a backup with `node --experimental-strip-types scripts/demo.ts --profile ai`.
 
 ## Development
 

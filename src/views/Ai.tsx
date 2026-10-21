@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../shared/types.ts';
 import { Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
@@ -43,7 +44,7 @@ const CLIENTS: Client[] = [
   {
     id: 'claude-code',
     name: 'Claude Code',
-    logo: '/ai/claude.svg',
+    logo: base('/ai/claude.svg'),
     lang: 'shell',
     where: () => t('ai.where.terminal'),
     snippet: (url, tk) => `claude mcp add --transport http calends ${url} \\\n  --header "Authorization: Bearer ${tk}"`,
@@ -51,7 +52,7 @@ const CLIENTS: Client[] = [
   {
     id: 'codex',
     name: 'Codex',
-    logo: '/ai/openai.svg',
+    logo: base('/ai/openai.svg'),
     lang: 'shell',
     where: () => t('ai.where.codex'),
     snippet: (url, tk) => `export CALENDS_TOKEN=${tk}\ncodex mcp add calends --url ${url} --bearer-token-env-var CALENDS_TOKEN`,
@@ -59,7 +60,7 @@ const CLIENTS: Client[] = [
   {
     id: 'cursor',
     name: 'Cursor',
-    logo: '/ai/cursor.svg',
+    logo: base('/ai/cursor.svg'),
     lang: 'json',
     where: () => t('ai.where.file', { path: '~/.cursor/mcp.json' }),
     snippet: (url, tk) => json({ mcpServers: { calends: { url, headers: { Authorization: `Bearer ${tk}` } } } }),
@@ -69,7 +70,7 @@ const CLIENTS: Client[] = [
   {
     id: 'claude-desktop',
     name: 'Claude Desktop',
-    logo: '/ai/claude.svg',
+    logo: base('/ai/claude.svg'),
     lang: 'json',
     where: () => t('ai.where.file', { path: 'claude_desktop_config.json' }),
     snippet: (url, tk) => json({ mcpServers: { calends: { command: 'npx', args: ['-y', 'mcp-remote', url, '--header', `Authorization: Bearer ${tk}`] } } }),
@@ -77,7 +78,7 @@ const CLIENTS: Client[] = [
   {
     id: 'gemini',
     name: 'Gemini CLI',
-    logo: '/ai/gemini.svg',
+    logo: base('/ai/gemini.svg'),
     lang: 'shell',
     where: () => t('ai.where.terminal'),
     snippet: (url, tk) => `gemini mcp add --transport http calends ${url} \\\n  --header "Authorization: Bearer ${tk}"`,
@@ -85,7 +86,7 @@ const CLIENTS: Client[] = [
   {
     id: 'grokbot',
     name: 'Grok Bot',
-    logo: '/ai/grokbot.png',
+    logo: base('/ai/grokbot.png'),
     lang: 'yaml',
     where: () => t('ai.where.grokbot'),
     snippet: (url, tk) => `name: calends\nurl: ${url}\nheaders:\n  Authorization: Bearer ${tk}`,
@@ -93,7 +94,7 @@ const CLIENTS: Client[] = [
   {
     id: 'deepseek',
     name: 'DeepSeek Harness',
-    logo: '/ai/deepseek.svg',
+    logo: base('/ai/deepseek.svg'),
     lang: 'yaml',
     experimental: true,
     where: () => t('ai.where.file', { path: '~/.dsh/profiles/web/cordis.patch.yml' }),
@@ -221,7 +222,7 @@ function Connect({
  * 这里不做聊天，只负责开关、令牌和各家客户端的接入方式；AI 助手拿到令牌后，用自己的对话来查询、记账。
  */
 export function Ai({ state }: { state: AppState }) {
-  const url = `${location.origin}/mcp`;
+  const url = `${location.origin}${base('/mcp')}`;
   const [tokens, setTokens] = useState<Token[] | null>(null);
   const [tools, setTools] = useState<ToolMeta[]>([]);
   const [client, setClient] = useState('claude-code');

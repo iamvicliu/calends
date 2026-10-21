@@ -25,7 +25,7 @@ if (!setupToken && process.env.DEMO_MODE !== '1') {
 
 // 3. 透传给 Worker 的变量
 const vars = setupToken ? { SETUP_TOKEN: setupToken } : {};
-for (const k of ['SITE_URL', 'OWNER_PASSCODE', 'TRUST_PROXY', 'DEMO_MODE']) if (process.env[k]) vars[k] = process.env[k];
+for (const k of ['SITE_URL', 'OWNER_PASSCODE', 'TRUST_PROXY', 'DEMO_MODE', 'BASE_PATH', 'DEMO_PROFILE']) if (process.env[k]) vars[k] = process.env[k];
 const args = [
   'dev',
   '--local',
@@ -58,9 +58,9 @@ async function ready() {
   throw new Error('worker did not start');
 }
 const status = await ready();
-log(`listening on port ${PORT} — open /admin in your browser`);
+log(`listening on port ${PORT} — open ${process.env.BASE_PATH || ''}/admin in your browser`);
 if (status.needsSetup) {
-  log('first run: create your password at /admin with this setup token:');
+  log(`first run: create your password at ${process.env.BASE_PATH || ''}/admin with this setup token:`);
   log(`    ${setupToken}`);
   log(`(also saved in ${tokenFile}; you can set SETUP_TOKEN yourself instead)`);
 }

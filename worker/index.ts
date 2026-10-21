@@ -1,3 +1,4 @@
+import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.ts';
 import { addDays, subError, todayIn } from '../shared/billing.ts';
 import {
   DEFAULT_SETTINGS,
@@ -395,19 +396,23 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
+    const prefix = normalizeBasePath(env.BASE_PATH);
+    url.pathname = stripBase(url.pathname, prefix);
     // 旧域名：页面跳到新域名，接口、MCP、日历订阅继续在旧域名上可用
     if (env.OLD_HOSTS && env.SITE_URL && env.OLD_HOSTS.split(',').some((h) => h.trim() === url.hostname)) {
       const keep = url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/');
-      if (!keep) return Response.redirect(new URL(url.pathname + url.search, env.SITE_URL).href, 301);
+      if (!keep) return Response.redirect(`${siteUrl(env.SITE_URL, prefix)}${url.pathname}${url.search}`, 301);
     }
     // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
-    if (!env.SITE_URL) env = { ...env, SITE_URL: url.origin };
+    env = { ...env, SITE_URL: siteUrl(env.SITE_URL || url.origin, prefix) };
     try {
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
       if (env.DEMO_MODE === '1') {
-        await ensureMigrated(env);
-        await ensureDemo(env);
-        if (url.pathname === '/') return Response.redirect(`${url.origin}/admin`, 302);
+        if (url.pathname === '/' || url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
+          await ensureMigrated(env);
+          await ensureDemo(env);
+        }
+        if (url.pathname === '/') return Response.redirect(`${url.origin}${prefix}/admin`, 302);
       }
       // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
@@ -425,7 +430,19 @@ export default {
           headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
         });
       }
-      return env.ASSETS.fetch(req);
+      const asset = await env.ASSETS.fetch(new Request(url, req));
+      // Assets 对 index.html 等的规范化重定向也必须留在当前安装前缀下。
+      const location = asset.headers.get('location');
+      if (prefix && asset.status >= 300 && asset.status < 400 && location) {
+        const target = new URL(location, url);
+        if (target.origin === url.origin) {
+          target.pathname = withBase(target.pathname, prefix);
+          const headers = new Headers(asset.headers);
+          headers.set('location', target.href);
+          return new Response(asset.body, { status: asset.status, headers });
+        }
+      }
+      return asset;
     } catch (e) {
       console.error(e);
       return bad('server error', 500);
@@ -445,7 +462,7 @@ export default {
     const state = await loadState(env);
     applyLocale(settingsLocale(state.settings));
     // 定时任务没有请求地址：用后台最近一次访问时记下的地址
-    if (!env.SITE_URL) env = { ...env, SITE_URL: state.settings.siteUrl };
+    env = { ...env, SITE_URL: siteUrl(env.SITE_URL || state.settings.siteUrl || '', env.BASE_PATH) };
     const log = await runScheduled(env, state);
     if (log.length) console.log('[notify]', log.join('; '));
   },

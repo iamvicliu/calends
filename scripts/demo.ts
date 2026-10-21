@@ -2,11 +2,14 @@
 // 用法：
 //   node --experimental-strip-types scripts/demo.ts > demo.json          备份文件，可在设置里「从备份恢复」
 //   node --experimental-strip-types scripts/demo.ts --sql > demo.sql     直接写库：wrangler d1 execute DB --file demo.sql
+//   加 --profile ai：AI 账号管理档位（本位币保持 USD）
 //   加 --lang zh-CN 等：界面语言、分类名、本位币按该语言来（官网截图用）
 import { readFileSync } from 'node:fs';
 import { demoState } from '../shared/demo.ts';
 
-const { subscriptions, methods, people, settings } = demoState(new Date().toISOString().slice(0, 10));
+const profile = process.argv.includes('--profile') ? process.argv[process.argv.indexOf('--profile') + 1] : 'default';
+if (profile !== 'default' && profile !== 'ai') throw new Error('Unknown demo profile (use default or ai)');
+const { subscriptions, methods, people, settings } = demoState(new Date().toISOString().slice(0, 10), profile);
 
 // CLI 仍供官网截图、普通部署的示例备份使用，沿用公开页与 AI 接入的展示开关。
 settings.publicView = true;
@@ -37,7 +40,7 @@ if (process.argv.includes('--lang') && LANG) {
     vi: 'VND',
   };
   settings.language = LANG;
-  settings.baseCurrency = CCY[LANG] ?? 'USD';
+  if (profile !== 'ai') settings.baseCurrency = CCY[LANG] ?? 'USD';
 }
 
 const backup = { format: 'calends-backup', version: 3, exportedAt: new Date().toISOString(), subscriptions, methods, people, settings, fxDaily: [] };

@@ -1,3 +1,4 @@
+import { base } from '../../base.ts';
 import { useState } from 'react';
 import type { Subscription } from '../../../shared/types.ts';
 import { faviconOf, isDomainCat } from '../../derive.ts';
@@ -13,18 +14,18 @@ export function AppIcon({ sub, className, size, eager }: { sub: Pick<Subscriptio
   if (isDomainCat(sub.category)) {
     return (
       <span style={style} className={cn(box, 'bg-white')}>
-        <img src={sub.icon?.startsWith('http') ? sub.icon : '/brands/cloudflare.svg'} alt="" className="size-[70%] object-contain" />
+        <img src={sub.icon?.startsWith('http') ? sub.icon : base('/brands/cloudflare.svg')} alt="" className="size-[70%] object-contain" />
       </span>
     );
   }
   const icon = sub.icon?.trim();
-  if (icon && !/^https?:/.test(icon)) return <span style={style} className={cn(box, 'bg-muted text-[1.05em]')}>{icon}</span>;
+  if (icon && !/^(https?:|\/)/.test(icon)) return <span style={style} className={cn(box, 'bg-muted text-[1.05em]')}>{icon}</span>;
   const src = icon || faviconOf(sub.url);
   if (src && !failed.has(src)) {
     return (
       <span style={style} className={cn(box, icon ? 'bg-muted' : 'bg-white p-[5px]')}>
         <img
-          src={src}
+          src={base(src)}
           alt=""
           loading={eager ? 'eager' : 'lazy'}
           decoding="async"

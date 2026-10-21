@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../shared/billing.ts';
 import { cnDate, money, relDays } from '../../shared/format.ts';
@@ -534,7 +535,7 @@ function CardGlow({ sub }: { sub: Subscription }) {
   const src = isDomainCat(sub.category)
     ? sub.icon?.startsWith('http')
       ? sub.icon
-      : '/brands/cloudflare.svg'
+      : base('/brands/cloudflare.svg')
     : sub.icon?.startsWith('/')
       ? sub.icon
       : subImage(sub);

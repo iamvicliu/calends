@@ -1,3 +1,4 @@
+import { base as appPath } from '../base.ts';
 import { Fragment, useMemo, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../shared/format.ts';
@@ -545,7 +546,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
         <div className="empty">
           {t('report.topup.empty')}
           <br />
-          <a className="btn plain" href="/admin/wallet">
+          <a className="btn plain" href={appPath('/admin/wallet')}>
             {t('report.topup.emptyCta')}
           </a>
         </div>

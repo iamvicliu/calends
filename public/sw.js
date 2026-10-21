@@ -1,15 +1,21 @@
-// 订阅账本 Service Worker：静态资源缓存优先，数据走网络、失败回退缓存，保证离线可读。
-const VERSION = 'v4';
-const SHELL = `shell-${VERSION}`;
-const DATA = `data-${VERSION}`;
+// 订阅账本 Service Worker：每个安装前缀有独立作用域和缓存。
+const VERSION = 'v5';
+const ROOT = new URL(self.registration.scope).pathname;
+const path = (value) => ROOT + value.replace(/^\//, '');
+const PREFIX = `calends:${ROOT}:`;
+const SHELL = `${PREFIX}shell-${VERSION}`;
+const DATA = `${PREFIX}data-${VERSION}`;
+const match = async (name, request) => (await caches.open(name)).match(request);
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll(['/', '/manifest.webmanifest', '/icons/icon-192.png'])).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll([ROOT, path('/manifest.webmanifest'), path('/icons/icon-192.png')])).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => ![SHELL, DATA].includes(k)).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
+    caches.keys().then((keys) => Promise.all(keys.filter((k) =>
+      (k.startsWith(PREFIX) || (ROOT === '/' && /^(shell|data)-v\d+$/.test(k))) && ![SHELL, DATA].includes(k),
+    ).map((k) => caches.delete(k)))).then(() => self.clients.claim()),
   );
 });
 
@@ -17,48 +23,47 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);
   if (req.method !== 'GET') return;
-  if (url.origin === location.origin && url.pathname.startsWith('/api/')) {
-    // 只缓存账本状态，其它接口直连
-    if (url.pathname !== '/api/state') return;
-    e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          if (res.ok) caches.open(DATA).then((c) => c.put(req, copy));
-          else if (res.status === 401) caches.open(DATA).then((c) => c.delete(req));
-          return res;
-        })
-        .catch(() => caches.match(req).then((r) => r || Response.json({ error: 'offline' }, { status: 503 }))),
-    );
-    return;
+  if (url.origin === location.origin) {
+    // 即使根目录的旧 SW 控制了页面，也不拦截别的安装前缀的 API。
+    if (!url.pathname.startsWith(ROOT)) return;
+    const relative = url.pathname.slice(ROOT.length);
+    if (relative.startsWith('api/')) {
+      if (relative !== 'api/state') return;
+      e.respondWith(
+        fetch(req)
+          .then((res) => {
+            const copy = res.clone();
+            e.waitUntil(caches.open(DATA).then((c) => res.ok ? c.put(req, copy) : res.status === 401 ? c.delete(req) : undefined));
+            return res;
+          })
+          .catch(async () => (await match(DATA, req)) || Response.json({ error: 'offline' }, { status: 503 })),
+      );
+      return;
+    }
+    if (relative.startsWith('cal/') || relative === 'mcp' || /(?:^|\/)(api|cal|mcp)(?:\/|$)/.test(relative)) return;
   }
-  if (url.pathname.startsWith('/cal/')) return;
   if (req.mode === 'navigate') {
+    if (url.origin !== location.origin || (url.pathname !== ROOT && url.pathname !== path('/admin') && !url.pathname.startsWith(path('/admin/')))) return;
     e.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          if (res.ok) caches.open(SHELL).then((c) => c.put('/', copy));
+          if (res.ok) e.waitUntil(caches.open(SHELL).then((c) => c.put(ROOT, copy)));
           return res;
         })
-        .catch(() => caches.match('/')),
+        .catch(() => match(SHELL, ROOT)),
     );
     return;
   }
-  // 静态资源与字体、站点图标：缓存优先
   if (url.origin === location.origin || /fonts\.(googleapis|gstatic)\.com|icons\.duckduckgo\.com/.test(url.host)) {
     e.respondWith(
-      caches.match(req).then(
-        (hit) =>
-          hit ||
-          fetch(req).then((res) => {
-            if (res.ok || res.type === 'opaque') {
-              const copy = res.clone();
-              caches.open(SHELL).then((c) => c.put(req, copy));
-            }
-            return res;
-          }),
-      ),
+      match(SHELL, req).then((hit) => hit || fetch(req).then((res) => {
+        if (res.ok || res.type === 'opaque') {
+          const copy = res.clone();
+          e.waitUntil(caches.open(SHELL).then((c) => c.put(req, copy)));
+        }
+        return res;
+      })),
     );
   }
 });

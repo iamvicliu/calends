@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import { useRef, useState } from 'react';
 import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
@@ -785,7 +786,7 @@ function NameField({
               {i === 0 && x.c && <div className="ed-suggest-h">{t('editor.name.catalog')}</div>}
               {x.h && (i === 0 || all[i - 1].c) && (
                 <div className="ed-suggest-h">
-                  App Store · <img className="pk-flag" src={`/flags/${x.h.country}.png`} alt="" />
+                  App Store · <img className="pk-flag" src={base(`/flags/${x.h.country}.png`)} alt="" />
                 </div>
               )}
               <button
@@ -797,7 +798,7 @@ function NameField({
               >
                 {x.c ? (
                   <span className="ed-cat-ico">
-                    <img src={x.c.icon} alt="" />
+                    <img src={base(x.c.icon)} alt="" />
                   </span>
                 ) : (
                   <SubIcon sub={{ name: x.h!.name, icon: x.h!.icon, category: '' }} size={32} />

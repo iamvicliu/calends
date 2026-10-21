@@ -1,3 +1,4 @@
+import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel, relDays } from '../../shared/format.ts';
@@ -38,7 +39,7 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
         <Tips state={state} today={today} onOpen={onOpen} />
         <p className="card-note" style={{ textAlign: 'center' }}>
           {t('overview.footer', { count: tot.activeCount, amount: money(tot.mrr, base) })}{' '}
-          <a href="/admin/report" style={{ textDecoration: 'underline' }}>
+          <a href={appPath('/admin/report')} style={{ textDecoration: 'underline' }}>
             {t('overview.fullReport')}
           </a>
         </p>
@@ -317,7 +318,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
     <div className="card">
       <div className="card-h">
         <h3>{t('overview.wallet.title')}</h3>
-        <a className="btn plain" href="/admin/wallet">
+        <a className="btn plain" href={appPath('/admin/wallet')}>
           {t('overview.wallet.manage')}
         </a>
       </div>
@@ -325,7 +326,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
         const days = r?.runsOutOn ? diffDays(today, r.runsOutOn) : undefined;
         const pct = r ? (r.monthlyDrain <= 0 ? 100 : Math.min(100, ((days ?? 365) / 365) * 100)) : 0;
         return (
-          <a key={m.id} className="wal-row" href="/admin/wallet">
+          <a key={m.id} className="wal-row" href={appPath('/admin/wallet')}>
             <MethodMark m={m} size={28} />
             <span className="nm">
               <b>{m.name}</b>

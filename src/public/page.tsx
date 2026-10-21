@@ -1,3 +1,4 @@
+import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
@@ -73,7 +74,7 @@ export function PublicPage() {
   const [err, setErr] = useState<string>();
   useEffect(() => {
     document.title = title();
-    fetch('/api/public')
+    fetch(appPath('/api/public'))
       .then(async (r) => {
         const body = (await r.json()) as AppState & { error?: string };
         if (!r.ok) throw new Error(body.error ?? t('public.loadFailed'));
@@ -107,7 +108,7 @@ function Shell({ children, right, avatar }: { children: React.ReactNode; right?:
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-12 sm:px-6 sm:pt-10">
       <header className="mb-5 flex items-center gap-3 sm:mb-6">
-        <img src={avatarOf({ avatar })} alt="" className="size-9 rounded-[22%] object-cover" />
+        <img src={appPath(avatarOf({ avatar }))} alt="" className="size-9 rounded-[22%] object-cover" />
         <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title()}</h1>
         {right}
       </header>
@@ -317,7 +318,7 @@ function Ledger({ state }: { state: AppState }) {
 
       <footer className="mt-10 flex items-center justify-between border-t border-border/70 pt-5 text-[13px] text-muted-foreground">
         <a href={PROJECT_URL} className="flex items-center gap-2 transition hover:text-foreground">
-          <img src="/icons/logo.svg" alt="" className="size-5 rounded-[22%]" />
+          <img src={appPath("/icons/logo.svg")} alt="" className="size-5 rounded-[22%]" />
           <span className="font-medium text-foreground">{PROJECT_NAME}</span>
           <span>v{__APP_VERSION__}</span>
         </a>

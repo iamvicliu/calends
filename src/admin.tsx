@@ -1,9 +1,10 @@
+import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../shared/types.ts';
-import { Icon, Sheet, SubIcon, TipLayer, Toasts, Toolbar } from './components/ui.tsx';
+import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -100,7 +101,7 @@ function Login({ error }: { error?: string }) {
   return (
     <div className="login">
       <form className="login-card fade-in" onSubmit={submit}>
-        <img src="/icons/icon-192.png" alt="" />
+        <img src={base('/icons/icon-192.png')} alt="" />
         <h1>{t('app.name')}</h1>
         <p>{setupMode ? t('app.login.setupHint') : t('app.login.tagline')}</p>
         {setupMode && (
@@ -182,7 +183,7 @@ function Sidebar({
     <aside className="sidebar">
       <div className="sb-top">
         <a className="sb-mark" href={href('')}>
-          <img src={avatarOf(state.settings)} alt="" />
+          <img src={base(avatarOf(state.settings))} alt="" />
           {t('app.name')}
         </a>
         <button className="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
@@ -498,14 +499,7 @@ function App() {
         view = <Ai state={state} />;
         break;
       case 'assistant':
-        view = state.demo ? (
-          <>
-            <Toolbar title={t('app.nav.assistant')} />
-            <div className="page fade-in">
-              <p className="muted">{t('app.demo.unavailable')}</p>
-            </div>
-          </>
-        ) : ro ? null : (
+        view = ro ? null : (
           <Suspense fallback={null}>
             <Assistant state={state} today={d} onOpen={open} />
           </Suspense>
@@ -589,8 +583,13 @@ function Root() {
     if (state && !state.demo && !state.readonly && !state.settings.language && state.settings.languageSeen !== want)
       void saveSettings({ languageSeen: want }).catch(() => {});
     // 记下站点地址，定时提醒里的链接要用（本地开发不记）
-    if (state && !state.readonly && state.settings.siteUrl !== location.origin && !/^http:\/\/(localhost|127\.)/.test(location.origin))
-      void saveSettings({ siteUrl: location.origin }).catch(() => {});
+    if (
+      state &&
+      !state.readonly &&
+      state.settings.siteUrl !== `${location.origin}${base('/').replace(/\/$/, '')}` &&
+      !/^http:\/\/(localhost|127\.)/.test(location.origin)
+    )
+      void saveSettings({ siteUrl: `${location.origin}${base('/').replace(/\/$/, '')}` }).catch(() => {});
   }, [want, loc]);
   return <App key={loc} />;
 }

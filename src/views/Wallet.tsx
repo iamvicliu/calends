@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { useRef, useState } from 'react';
@@ -129,7 +130,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
         <div className="sim-top">
           {/* 只有认出是哪家运营商（如 SMART）才放它的 logo，否则写名字，不默认套某一家 */}
           {methodLogo(m) ? (
-            <img className={`sim-logo ${m.logoWide ? 'wide' : ''}`} src={methodLogo(m)} alt="" />
+            <img className={`sim-logo ${m.logoWide ? 'wide' : ''}`} src={base(methodLogo(m) || '')} alt="" />
           ) : (
             <b className="sim-carrier">{m.name.split(/\s/)[0]}</b>
           )}
@@ -185,13 +186,13 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
   const cls = m.logoWide ? 'wide' : (brand ?? '');
   return (
     <>
-      {logo && <img className={`pc-mark ${cls}`} src={logo} alt="" aria-hidden="true" />}
+      {logo && <img className={`pc-mark ${cls}`} src={base(logo)} alt="" aria-hidden="true" />}
       <div className="pc-top">
         <div className="pc-id">
           {logo ? (
-            <img className={`pc-logo ${cls}`} src={logo} alt="" />
+            <img className={`pc-logo ${cls}`} src={base(logo)} alt="" />
           ) : bank ? (
-            <img className="pc-logo bank" src={`/banks/${bank}-rect.svg`} alt="" />
+            <img className="pc-logo bank" src={base(`/banks/${bank}-rect.svg`)} alt="" />
           ) : null}
           <div style={{ minWidth: 0 }}>
             <div className="pc-name">{m.name}</div>
@@ -743,7 +744,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
                   { value: '', label: t('wallet.editor.bankAuto') },
                   ...[...BANKS]
                     .sort((x, y) => x[0].localeCompare(y[0], 'zh'))
-                    .map(([name, code]) => ({ value: code, label: name, icon: <img className="pk-brand" src={`/banks/${code}-rect.svg`} alt="" /> })),
+                    .map(([name, code]) => ({ value: code, label: name, icon: <img className="pk-brand" src={base(`/banks/${code}-rect.svg`)} alt="" /> })),
                 ]}
                 ariaLabel={t('wallet.editor.bank')}
               />
@@ -771,7 +772,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
                     ...(Object.keys(NETWORKS) as CardNetwork[]).map((n) => ({
                       value: n,
                       label: NETWORKS[n],
-                      icon: <img className="pk-net" src={`/networks/${n}.svg`} alt="" />,
+                      icon: <img className="pk-net" src={base(`/networks/${n}.svg`)} alt="" />,
                     })),
                   ]}
                   ariaLabel={t('wallet.editor.network')}

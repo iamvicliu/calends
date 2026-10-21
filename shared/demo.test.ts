@@ -230,3 +230,111 @@ test('演示模式连直接调用通知发送也不会访问外部渠道或写�
     db.close();
   }
 });
+
+test('AI 档位 40 个 Claude、16 个 ChatGPT、5 个点缀订阅在边界日期合法且引用完整', () => {
+  for (const today of ['2024-02-29', '2026-01-01', '2026-10-31', '2027-12-31']) {
+    const state = demoState(today, 'ai');
+    assert.deepEqual(state, demoState(today, 'ai'));
+    assert.equal(state.subscriptions.length, 61);
+    const count = (prefix: string) => state.subscriptions.filter((s) => s.name.startsWith(prefix)).length;
+    assert.equal(count('Claude Pro'), 16);
+    assert.equal(count('Claude Max 5x'), 14);
+    assert.equal(count('Claude Max 20x'), 10);
+    assert.equal(count('ChatGPT Plus'), 7);
+    assert.equal(count('ChatGPT Pro 5x'), 4);
+    assert.equal(count('ChatGPT Pro 10x'), 3);
+    assert.equal(count('ChatGPT Pro 50x'), 2);
+    assert.equal(state.subscriptions.filter((s) => s.cycle.unit === 'year').length, 3);
+    assert.equal(state.settings.baseCurrency, 'USD');
+    assert.equal(state.settings.language, undefined);
+    assert.equal(state.settings.displayName, 'Alex');
+    assert.equal(new Set(state.subscriptions.map((s) => s.account)).size, 61);
+    assert.equal(new Set(state.subscriptions.map((s) => s.id)).size, 61);
+    for (const s of state.subscriptions) {
+      assert.equal(subError(s), undefined, `${s.name}: ${subError(s)}`);
+      assert.ok(s.account?.endsWith('@example.com'));
+      assert.ok(state.methods.some((m) => m.id === s.methodId));
+      for (const phase of s.phases ?? []) assert.ok(state.methods.some((m) => m.id === phase.methodId));
+      if (s.proxy) assert.ok(state.people.some((p) => p.id === s.proxy?.personId));
+      for (const member of s.share?.members ?? []) assert.ok(state.people.some((p) => p.id === member.personId));
+    }
+    for (const status of ['active', 'trial', 'paused', 'cancelled']) assert.ok(state.subscriptions.some((s) => s.status === status));
+    assert.equal(state.subscriptions.filter((s) => s.share?.role === 'owner').length, 3);
+    assert.equal(state.subscriptions.filter((s) => s.proxy).length, 5);
+    state.subscriptions.pop();
+    assert.equal(demoState(today, 'ai').subscriptions.length, 61);
+  }
+});
+
+test('AI 档位首次初始化、定时复原与生成数据一致，前缀 API 和无前缀健康检查均可用', async () => {
+  const { db, env } = fixture();
+  env.DEMO_PROFILE = 'ai';
+  env.BASE_PATH = '/claude';
+  env.SITE_URL = 'https://demo.example';
+  const assets: string[] = [];
+  env.ASSETS = {
+    fetch: async (req: Request) => {
+      assets.push(new URL(req.url).pathname);
+      return new Response('asset');
+    },
+  } as Fetcher;
+  try {
+    await ensureDemo(env, Date.parse('2026-10-20T12:00Z'));
+    const expected = JSON.parse(JSON.stringify(demoState('2026-10-20', 'ai')));
+    const seeded = await loadState(env);
+    for (const key of ['subscriptions', 'methods', 'people', 'settings'] as const) assert.deepEqual(seeded[key], expected[key]);
+    assert.equal((await request(env, '/claude/')).headers.get('location'), 'https://demo.example/claude/admin');
+    assert.equal((await request(env, '/claude')).headers.get('location'), 'https://demo.example/claude/admin');
+    for (const path of ['/claude/api/state', '/api/state']) assert.equal((await (await request(env, path)).json()).subscriptions.length, 61);
+    await request(env, '/claude/admin/calendar');
+    await request(env, '/claude/icons/logo.svg');
+    await request(env, '/claudette/icons/logo.svg');
+    assert.deepEqual(assets, ['/admin/calendar', '/icons/logo.svg', '/claudette/icons/logo.svg']);
+    assert.equal((await request(env, '/claude/api/assistant/chat', 'POST', {})).status, 403);
+    const { demoReceipt } = await import('./assistant-demo.ts');
+    const draft = demoReceipt(seeded, '2026-10-20');
+    assert.equal((await request(env, `/claude/api/subscriptions/${draft.id}`, 'PUT', draft)).status, 200);
+    assert.ok((await loadState(env)).subscriptions.some((s) => s.id === draft.id));
+    await worker.scheduled({ scheduledTime: Date.parse('2026-10-21T00:05Z') } as ScheduledController, env, ctx);
+    const reset = await loadState(env);
+    const next = JSON.parse(JSON.stringify(demoState('2026-10-21', 'ai')));
+    for (const key of ['subscriptions', 'methods', 'people', 'settings'] as const) assert.deepEqual(reset[key], next[key]);
+    env.DEMO_MODE = undefined;
+    assert.equal((await request(env, '/claude/api/state')).status, 401);
+  } finally {
+    db.close();
+  }
+});
+
+test('子路径普通安装保留密码访问、公开页、邮件、ICS 与静态重定向前缀', async () => {
+  const { db, env } = fixture();
+  env.DEMO_MODE = undefined;
+  env.BASE_PATH = '/claude';
+  env.SITE_URL = 'https://demo.example/claude/';
+  env.ASSETS = { fetch: async () => Response.redirect('https://demo.example/', 307) } as Fetcher;
+  try {
+    const asset = await request(env, '/claude/index.html');
+    assert.equal(asset.headers.get('location'), 'https://demo.example/claude/');
+    const loggedOut = await request(env, '/claude/api/logout', 'POST');
+    assert.match(loggedOut.headers.get('set-cookie')!, /Path=\/claude;/);
+    assert.equal((await request(env, '/claude/api/state')).status, 401);
+    env.DEV_BYPASS_AUTH = '1';
+    const data = demoState(new Date().toISOString().slice(0, 10));
+    data.settings.publicView = true;
+    data.settings.icsToken = '0123456789abcdef0123456789abcdef';
+    assert.equal((await request(env, '/claude/api/import', 'POST', { ...data, mode: 'replace' })).status, 200);
+    assert.equal((await request(env, '/claude/api/settings', 'PUT', data.settings)).status, 200);
+    // ICS token 只通过正常旋转接口生成，不允许由设置导入覆盖。
+    const settings = await (await request(env, '/claude/api/ics/rotate', 'POST')).json();
+    const calendar = await (await request(env, `/claude/cal/${settings.icsToken}.ics`)).text();
+    assert.ok(calendar.replace(/\r\n /g, '').includes('https://demo.example/claude/admin'));
+    const preview = await (await request(env, '/claude/api/notify/preview?html=1')).text();
+    assert.ok(preview.includes('https://demo.example/claude/admin'));
+    assert.ok(preview.includes('https://demo.example/claude/icons/icon-192.png'));
+    assert.equal((await request(env, '/claude/api/public')).status, 200);
+    env.BASE_PATH = undefined;
+    assert.match((await request(env, '/api/logout', 'POST')).headers.get('set-cookie')!, /Path=\/;/);
+  } finally {
+    db.close();
+  }
+});

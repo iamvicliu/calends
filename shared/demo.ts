@@ -1,7 +1,12 @@
 // 纯演示账本：只依赖传入的 UTC 日期，不读时钟、环境或文件。
 import type { PaymentMethod, Person, Settings, Subscription } from './types.ts';
 
-export function demoState(today: string): { subscriptions: Subscription[]; methods: PaymentMethod[]; people: Person[]; settings: Settings } {
+export type DemoProfile = 'default' | 'ai';
+
+export function demoState(
+  today: string,
+  profile: DemoProfile = 'default',
+): { subscriptions: Subscription[]; methods: PaymentMethod[]; people: Person[]; settings: Settings } {
   const TODAY = today;
   const day = (offset: number) => {
     const d = new Date(`${TODAY}T00:00:00Z`);
@@ -16,6 +21,8 @@ export function demoState(today: string): { subscriptions: Subscription[]; metho
     d.setUTCDate(Math.min(dom, 28));
     return d.toISOString().slice(0, 10);
   };
+
+  if (profile === 'ai') return aiDemoState(today, day, monthsAgo);
 
   const methods: PaymentMethod[] = [
     { id: 'm-sapphire', name: 'Sapphire Preferred', kind: 'credit', currency: 'USD', network: 'visa', last4: '4821', color: '#1c3f94', cashback: 2, order: 0 },
@@ -528,4 +535,255 @@ export function demoState(today: string): { subscriptions: Subscription[]; metho
   find('domain-app').expires = day(40);
 
   return { subscriptions, methods, people, settings };
+}
+
+/** 所有账号、同事、卡号和当地币种价格均为虚构示例；不是厂商报价。 */
+function aiDemoState(today: string, day: (offset: number) => string, monthsAgo: (n: number, dom?: number) => string): ReturnType<typeof demoState> {
+  const monthly = { unit: 'month', every: 1 } as const;
+  const yearly = { unit: 'year', every: 1 } as const;
+  const methods: PaymentMethod[] = [
+    { id: 'm-studio', name: 'Studio · Visa 4821', kind: 'credit', currency: 'USD', network: 'visa', last4: '4821', color: '#1c3f94', order: 0 },
+    { id: 'm-lab', name: 'Research · Mastercard 0193', kind: 'credit', currency: 'USD', network: 'mastercard', last4: '0193', color: '#633c78', order: 1 },
+    { id: 'm-europe', name: 'Europe · Visa 5508', kind: 'credit', currency: 'EUR', network: 'visa', last4: '5508', color: '#284e45', order: 2 },
+    { id: 'm-alex', name: 'Alex · Personal 7702', kind: 'debit', currency: 'USD', network: 'visa', last4: '7702', color: '#31373e', order: 3 },
+    {
+      id: 'm-apple-tr',
+      name: 'App Store · Türkiye',
+      kind: 'appstore',
+      currency: 'TRY',
+      region: 'TR',
+      balance: 380,
+      balanceAsOf: today,
+      lowRunwayDays: 45,
+      order: 4,
+    },
+    {
+      id: 'm-apple-ng',
+      name: 'App Store · Nigeria',
+      kind: 'appstore',
+      currency: 'NGN',
+      region: 'NG',
+      balance: 18000,
+      balanceAsOf: today,
+      lowRunwayDays: 45,
+      order: 5,
+    },
+    {
+      id: 'm-apple-ph',
+      name: 'App Store · Philippines',
+      kind: 'appstore',
+      currency: 'PHP',
+      region: 'PH',
+      balance: 36000,
+      balanceAsOf: today,
+      lowRunwayDays: 45,
+      order: 6,
+    },
+  ];
+  const people: Person[] = ['Jamie', 'Priya', 'Leo', 'Sam', 'Morgan', 'Riley'].map((name, i) => ({
+    id: `p-${name.toLowerCase()}`,
+    name,
+    contactVia: 'Email',
+    contact: `${name.toLowerCase()}@example.com`,
+    color: (['blue', 'pink', 'green', 'orange', 'purple', 'teal'] as const)[i],
+    createdAt: day(-360),
+  }));
+  // 固定的示例换算仅用于构造本地价格，不写入汇率表。
+  const rate: Record<string, number> = { USD: 1, EUR: 0.92, TRY: 35, NGN: 1500, PHP: 56 };
+  const subscriptions: Subscription[] = [];
+  const add = (brand: 'Claude' | 'ChatGPT', index: number, plan: string, usd: number, annual = false) => {
+    const n = index + 1;
+    const method = methods[index % methods.length];
+    const dom = ((index * 5 + (brand === 'ChatGPT' ? 3 : 0)) % 28) + 1;
+    const start = monthsAgo(14 + (index % 10), dom);
+    const price = Math.round(usd * rate[method.currency] * 100) / 100;
+    const label = index === 0 ? 'alex' : ['设计组', '研发组', '研究组', '内容组'][index % 4] + ` ${String(n).padStart(2, '0')}`;
+    const s: Subscription = {
+      id: `s-${brand.toLowerCase()}-${n}`,
+      name: `${brand} ${plan} · ${label}`,
+      account: `${brand.toLowerCase()}-${String(n).padStart(2, '0')}@example.com`,
+      icon: brand === 'Claude' ? '/ai/claude.svg' : '/ai/openai.svg',
+      url: brand === 'Claude' ? 'https://claude.ai' : 'https://chatgpt.com',
+      category: 'AI',
+      tags: ['demo', brand, plan],
+      price,
+      currency: method.currency,
+      cycle: annual ? yearly : monthly,
+      start,
+      status: 'active',
+      methodId: method.id,
+      region: method.region,
+      createdAt: start,
+      notes: 'Fictional account and demo pricing. No real credentials or usage data.',
+    };
+    if (usd > 20 && !annual) {
+      const upgrade = monthsAgo(3, dom);
+      s.phases = [
+        {
+          start,
+          end: monthsAgo(8, dom),
+          price: 20 * rate[method.currency],
+          currency: method.currency,
+          cycle: monthly,
+          methodId: method.id,
+          region: method.region,
+          note: `${brand} ${brand === 'Claude' ? 'Pro' : 'Plus'}`,
+        },
+        {
+          start: monthsAgo(8, dom),
+          end: upgrade,
+          price: 80 * rate[method.currency],
+          currency: method.currency,
+          cycle: monthly,
+          methodId: method.id,
+          region: method.region,
+          note: 'Intermediate plan',
+        },
+        {
+          start: upgrade,
+          price,
+          currency: method.currency,
+          cycle: monthly,
+          methodId: method.id,
+          region: method.region,
+          note: plan,
+          priceHistory: [
+            { from: upgrade, amount: 80 * rate[method.currency] },
+            { from: day(-10 - (index % 15)), amount: price },
+          ],
+        },
+      ];
+      // 保留明确的 Pro → Max 5x → Max 20x 升级历程。
+      if (brand === 'Claude') {
+        s.phases[1].price = 100 * rate[method.currency];
+        s.phases[1].note = 'Max 5x';
+        s.phases[2].priceHistory![0].amount = (usd === 200 ? 150 : 80) * rate[method.currency];
+      }
+    } else if (!annual) {
+      s.priceHistory = [
+        { from: start, amount: price * 0.9 },
+        { from: day(-7 - (index % 12)), amount: price },
+      ];
+    }
+    // 换区单独展示历史币种和支付方式，顶层始终镜像最后一段。
+    if (method.region && index % 2 === 0 && !annual) {
+      s.phases = [
+        { start, end: monthsAgo(2, dom), price: usd, currency: 'USD', cycle: monthly, methodId: 'm-studio', region: 'US', note: 'US billing' },
+        {
+          start: monthsAgo(2, dom),
+          price,
+          currency: method.currency,
+          cycle: monthly,
+          methodId: method.id,
+          region: method.region,
+          note: 'Region switch (fictional price)',
+        },
+      ];
+    }
+    subscriptions.push(s);
+    return s;
+  };
+  // Claude: 13 月付 Pro + 3 年付 Pro + 14 Max 5x + 10 Max 20x。
+  for (let i = 0; i < 40; i++)
+    add('Claude', i, i < 16 ? 'Pro' : i < 30 ? 'Max 5x' : 'Max 20x', i < 16 ? (i >= 13 ? 200 : 20) : i < 30 ? 100 : 200, i >= 13 && i < 16);
+  // ChatGPT 演示套餐名与价格由演示场景定义，不表示官方产品。
+  for (let i = 0; i < 16; i++)
+    add('ChatGPT', i, i < 7 ? 'Plus' : i < 11 ? 'Pro 5x' : i < 14 ? 'Pro 10x' : 'Pro 50x', i < 7 ? 20 : i < 11 ? 100 : i < 14 ? 200 : 1000);
+  const claude = subscriptions.slice(0, 40);
+  for (const i of [2, 15, 36])
+    Object.assign(claude[i], { status: 'trial', start: day(-4), trialEnd: day(3 + (i % 6)), phases: undefined, priceHistory: undefined });
+  for (const i of [8, 28, 34]) Object.assign(claude[i], { status: 'paused', pausedAt: day(-18 - i) });
+  for (const i of [10, 39]) Object.assign(claude[i], { status: 'cancelled', end: day(-20 - i) });
+  for (const i of [4, 21, 32]) claude[i].end = day(5 + (i % 17));
+  // 三个虚构合租，成员有已付、欠费、季度结算；不表示厂商允许共享账号。
+  for (const [group, i] of [18, 30, 33].entries()) {
+    const s = claude[i];
+    Object.assign(s, { price: i < 30 ? 100 : 200, currency: 'USD', methodId: 'm-studio', region: undefined, phases: undefined, priceHistory: undefined });
+    s.share = {
+      role: 'owner',
+      seats: 4,
+      since: monthsAgo(6, 5),
+      members: people.slice(group, group + 3).map((p, j) => ({
+        id: `sm-${i}-${j}`,
+        personId: p.id,
+        name: p.name,
+        contactVia: p.contactVia,
+        contact: p.contact,
+        account: p.contact,
+        share: s.price / 4,
+        joined: monthsAgo(6, 5),
+        paidUntil: day(j === 0 ? -20 : j === 1 ? 10 : 45),
+        billEvery: j === 2 ? 3 : 1,
+        fee: (s.price / 4) * (j === 2 ? 3 : 1),
+        feeCurrency: 'USD',
+        payments: [{ date: day(-35), amount: s.price / 4, currency: 'USD', until: day(j === 0 ? -20 : 10) }],
+      })),
+    };
+    s.notes += ' Fictional shared-seat bookkeeping scenario.';
+  }
+  for (const [j, index] of [5, 20, 25, 43, 48].entries()) {
+    const s = subscriptions[index];
+    const p = people[j];
+    s.proxy = {
+      personId: p.id,
+      forName: p.name,
+      contactVia: p.contactVia,
+      contact: p.contact,
+      note: 'Fictional colleague; monthly reimbursement.',
+      entries: [
+        {
+          charge: monthsAgo(1, Number(s.start.slice(8))),
+          charged: s.price,
+          received: j % 2 === 0 ? s.price : s.price / 2,
+          receivedCurrency: s.currency,
+          receivedOn: day(-12),
+        },
+      ],
+    };
+  }
+  const extras = [
+    ['cursor', 'Cursor Pro', '开发', 20],
+    ['githubcopilot', 'GitHub Copilot', '开发', 10],
+    ['perplexity', 'Perplexity Pro', 'AI', 20],
+    ['gemini', 'Gemini Pro', 'AI', 20],
+    ['midjourney', 'Midjourney Standard', '设计', 30],
+  ] as const;
+  for (const [i, [file, name, category, price]] of extras.entries())
+    subscriptions.push({
+      id: `s-extra-${file}`,
+      name,
+      category,
+      price,
+      currency: 'USD',
+      cycle: monthly,
+      start: monthsAgo(10, 2 + i * 6),
+      status: 'active',
+      methodId: 'm-alex',
+      account: `${file}@example.com`,
+      tags: ['demo'],
+      icon: `/ai/${file}.svg`,
+      createdAt: monthsAgo(10, 2 + i * 6),
+    });
+  return {
+    subscriptions,
+    methods,
+    people,
+    settings: {
+      baseCurrency: 'USD',
+      notifyEmail: '',
+      remindDays: 3,
+      notifyHour: 9,
+      timezone: 'UTC',
+      publicView: false,
+      monthlyDigest: true,
+      displayName: 'Alex',
+      weekStart: 0,
+      aiEnabled: true,
+      categories: [
+        { name: 'AI', preset: 'ai', icon: 'bot', color: 'c8' },
+        { name: '开发', preset: 'developer', icon: 'code', color: 'c1' },
+        { name: '设计', preset: 'design', icon: 'palette', color: 'c7' },
+      ],
+    },
+  };
 }

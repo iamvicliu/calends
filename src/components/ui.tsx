@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import type { ReactNode as ComponentChildren, JSX } from 'react';
 import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
@@ -165,7 +166,10 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   if (isDomainCat(sub.category)) {
     return (
       <span className="ico domain" style={style}>
-        <img src={sub.icon?.startsWith('http') ? (proxied ? `/api/img?u=${encodeURIComponent(sub.icon)}` : sub.icon) : '/brands/cloudflare.svg'} alt="" />
+        <img
+          src={sub.icon?.startsWith('http') ? (proxied ? base(`/api/img?u=${encodeURIComponent(sub.icon)}`) : sub.icon) : base('/brands/cloudflare.svg')}
+          alt=""
+        />
       </span>
     );
   }
@@ -179,7 +183,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
     );
   }
   // 依次尝试：填写的图标 → 官网图标；都加载失败才用首字母
-  const viaProxy = (u: string) => (proxied && /^https?:/.test(u) ? `/api/img?u=${encodeURIComponent(u)}` : u);
+  const viaProxy = (u: string) => (proxied && /^https?:/.test(u) ? base(`/api/img?u=${encodeURIComponent(u)}`) : base(u));
   const raw = [icon, faviconOf(sub.url)].find((u): u is string => tried >= 0 && !!u && !failed.has(viaProxy(u)));
   const src = raw && viaProxy(raw);
   if (src) {
@@ -191,7 +195,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
       // 目录里的 AI 标是透明底的矢量图，按站点图标那样放在白底上
       <span className={`ico ${raw === icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
         <img
-          src={src}
+          src={base(src)}
           alt=""
           loading="lazy"
           referrerPolicy="no-referrer"
@@ -257,11 +261,11 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
   return (
     <span className={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
       {bank ? (
-        <img src={`/banks/${bank}-rect.svg`} alt="" />
+        <img src={base(`/banks/${bank}-rect.svg`)} alt="" />
       ) : brand === 'appstore' ? (
         <i className="mm-glyph" />
       ) : logo ? (
-        <img src={logo} alt="" />
+        <img src={base(logo)} alt="" />
       ) : (
         <b>{[...m.name][0]}</b>
       )}
@@ -280,7 +284,7 @@ function markBg(m: PaymentMethod, logo: string | undefined, onColor: boolean | u
 /** 卡组织标：Visa、Mastercard、银联… */
 export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; height?: number }) {
   if (!network) return null;
-  return <img className="net-mark" src={`/networks/${network}.svg`} alt={NETWORKS[network]} title={NETWORKS[network]} style={{ height }} />;
+  return <img className="net-mark" src={base(`/networks/${network}.svg`)} alt={NETWORKS[network]} title={NETWORKS[network]} style={{ height }} />;
 }
 
 /** 小组件式金额：小数位缩小 */
@@ -449,7 +453,7 @@ export function Toasts() {
 export function FlagImg({ cc, className = '' }: { cc?: string; className?: string }) {
   const k = cc?.trim().toLowerCase();
   if (!k || !FLAGS.has(k)) return null;
-  return <img className={`flag-img ${className}`} src={`/flags/${k}.png`} alt="" loading="lazy" />;
+  return <img className={`flag-img ${className}`} src={base(`/flags/${k}.png`)} alt="" loading="lazy" />;
 }
 
 /** 右上角的状态胶囊：进行中绿点、待收橙点、已停止换成红色「禁止」图标，形状都一样 */

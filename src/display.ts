@@ -1,3 +1,4 @@
+import { base } from './base.ts';
 // 金额显示偏好：列表里显示原币，还是折算成本位币。只存在本机，侧边栏与列表共用
 import { intlLocale, t } from '../shared/i18n.ts';
 import { usePref, writePref } from './store.ts';
@@ -60,5 +61,5 @@ const CCY_FLAG: Record<string, string> = { EUR: 'eu', ANG: 'cw', XCG: 'cw', XCD:
 /** 货币对应的国旗图片地址：一般取代码前两位作国家码 */
 export function ccyFlag(code: string): string | undefined {
   const cc = CCY_FLAG[code] ?? (code.startsWith('X') ? '' : code.slice(0, 2).toLowerCase());
-  return cc && FLAGS.has(cc) ? `/flags/${cc}.png` : undefined;
+  return cc && FLAGS.has(cc) ? base(`/flags/${cc}.png`) : undefined;
 }

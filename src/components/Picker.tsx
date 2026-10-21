@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import type { ReactNode as ComponentChildren } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CURRENCIES } from '../../shared/format.ts';
@@ -213,7 +214,7 @@ export function RegionSelect({ value, onChange, common = [] }: { value?: string;
         v ? (
           <>
             <span className="cp-flag">
-              <img src={`/flags/${v}.png`} alt="" />
+              <img src={base(`/flags/${v}.png`)} alt="" />
             </span>
             <span>{name(v)}</span>
           </>
@@ -229,7 +230,7 @@ export function RegionSelect({ value, onChange, common = [] }: { value?: string;
 function CcyFlagImg({ cc }: { cc: string }) {
   return (
     <span className="cp-flag">
-      <img src={`/flags/${cc}.png`} alt="" loading="lazy" />
+      <img src={base(`/flags/${cc}.png`)} alt="" loading="lazy" />
     </span>
   );
 }

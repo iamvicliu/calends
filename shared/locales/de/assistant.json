@@ -168,5 +168,19 @@
     "reactivate": "Fortsetzen",
     "charge": "Abbuchung",
     "deleteAll": "Löscht das Abo und alle Abbuchungen. Dies kann nicht rückgängig gemacht werden."
+  },
+  "demo": {
+    "label": "Demo",
+    "downgrade": "Welche Claude-Konten könnten einen kleineren Tarif nutzen?",
+    "receipt": "Fiktiver Beleg\n{name}\n{amount} / Monat\nKonto: {account}\nDatum: {date}",
+    "thinking": "Ich prüfe das aktuelle Buch lokal. Es wird kein KI-Dienst kontaktiert.",
+    "duplicate": "Dieser Beleg ist bereits erfasst. Es wurde kein doppelter Entwurf erstellt.",
+    "draft": "Kein passendes Konto gefunden. Prüfe den Entwurf und füge ihn dem Demo-Buch hinzu.",
+    "month": "Diesen Monat: {amount} bei {count} Abbuchungen, ohne Auslagen für andere. Größte: {name}, {largest}.",
+    "hikes": "Erhöhungen der monatlichen Kosten im letzten Jahr (Originalwährung):",
+    "noHikes": "Keine Preiserhöhungen im letzten Jahr gefunden.",
+    "downgradeReply": "Prüfe diese pausierten oder auslaufenden Max-20x-Konten vor der Reaktivierung. Ohne Nutzungsdaten lassen sich aktive Konten nicht bewerten.",
+    "freeform": "Diese Demo spielt vorgefertigte Gespräche ab. Wähle unten ein Szenario. Mit deinem eigenen Calends und API-Schlüssel kannst du echte KI verwenden.",
+    "disclaimer": "Lokale Skript-Demo. Bestätigte Entwürfe werden gespeichert und täglich zurückgesetzt."
   }
 }

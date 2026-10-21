@@ -1,3 +1,4 @@
+import { base, storageKey } from './base.ts';
 import { useEffect, useState } from 'react';
 import { todayIn } from '../shared/billing.ts';
 import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../shared/types.ts';
@@ -8,7 +9,7 @@ import { resyncShares } from '../shared/carpool.ts';
 import { PREF_KEYS, type PrefKey } from '../shared/prefs.ts';
 import { toast as sonner } from 'sonner';
 
-const CACHE_KEY = 'ledger:state:v1';
+const CACHE_KEY = storageKey('ledger:state:v1');
 
 type Phase = 'loading' | 'login' | 'ready' | 'offline';
 
@@ -61,7 +62,7 @@ function replaceState(state: AppState) {
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(base(path), {
     ...init,
     credentials: 'same-origin',
     // 服务端按当前界面语言返回错误等文案
@@ -270,7 +271,7 @@ export async function registerPasskey(name: string): Promise<void> {
 
 export async function logout(): Promise<void> {
   await api('/api/logout', { method: 'POST' }).catch(() => {});
-  await globalThis.caches?.delete('data-v1').catch(() => false);
+  await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
   try {
     localStorage.removeItem(CACHE_KEY);
   } catch {

@@ -104,14 +104,17 @@ codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALE
 
 ## 配置
 
-| 变量                                         | 位置              | 作用                                                                                                                                                          |
-| -------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SETUP_TOKEN`                                | secret / 环境变量 | 新部署首次设置密码时需要。                                                                                                                                    |
-| `SITE_URL`                                   | 变量 / 环境变量   | 提醒和日历里使用的站点地址；不设时自动识别。                                                                                                                  |
-| `EMAIL` 绑定 + `MAIL_FROM`、`MAIL_FROM_NAME` | wrangler          | 可选：通过 [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/) 发邮件提醒；其他渠道无需服务端配置。 |
-| `OLD_HOSTS`                                  | var / env         | 可选：换域名后填旧域名（逗号分隔）。在旧域名打开页面会 301 到 `SITE_URL`；接口、MCP 和日历订阅照常可用，已有客户端不受影响。                                  |
-| `TRUST_PROXY`                                | 环境变量          | 在反向代理后面时设为 `1`，登录限速才能拿到真实访客 IP。                                                                                                       |
-| `DATA_DIR`、`PORT`                           | Docker 环境变量   | 数据目录（默认 `/data`）和端口（默认 `8787`）。                                                                                                               |
+| 变量                                         | 位置                | 作用                                                                                                                                                          |
+| -------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SETUP_TOKEN`                                | secret / 环境变量   | 新部署首次设置密码时需要。                                                                                                                                    |
+| `BASE_PATH`                                  | 构建参数 + 环境变量 | 可选子路径（如 `/claude`，不带结尾斜杠），默认空。前端构建与 Worker/Docker 运行时须设置相同值。                                                               |
+| `DEMO_MODE`                                  | 环境变量            | `1`：免登录、可编辑的演示账本，每日 UTC 零点复原。                                                                                                            |
+| `DEMO_PROFILE`                               | 环境变量            | 配合 `DEMO_MODE=1`，选 `default`（默认 41 条）或 `ai`（61 条虚构 AI 订阅）。                                                                                  |
+| `SITE_URL`                                   | 变量 / 环境变量     | 提醒和日历里使用的站点地址；不设时自动识别。                                                                                                                  |
+| `EMAIL` 绑定 + `MAIL_FROM`、`MAIL_FROM_NAME` | wrangler            | 可选：通过 [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/) 发邮件提醒；其他渠道无需服务端配置。 |
+| `OLD_HOSTS`                                  | var / env           | 可选：换域名后填旧域名（逗号分隔）。在旧域名打开页面会 301 到 `SITE_URL`；接口、MCP 和日历订阅照常可用，已有客户端不受影响。                                  |
+| `TRUST_PROXY`                                | 环境变量            | 在反向代理后面时设为 `1`，登录限速才能拿到真实访客 IP。                                                                                                       |
+| `DATA_DIR`、`PORT`                           | Docker 环境变量     | 数据目录（默认 `/data`）和端口（默认 `8787`）。                                                                                                               |
 
 个人部署的配置（自己的域名、数据库 ID、发件地址、头像等）可以放在被 git 忽略的 `local/` 目录：npm 脚本会自动使用 `local/wrangler.jsonc`，构建时 `local/public/` 里的文件会覆盖 `public/` 里的同名文件。
 
@@ -119,7 +122,20 @@ codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALE
 
 Docker 设置 `DEMO_MODE=1`、`SITE_URL=https://demo.calends.date`，使用独立的初始空数据卷；反向代理后设置 `TRUST_PROXY=1`。无需初始化令牌或密码，访问 `/` 直接进入 `/admin`。所有访客共用可编辑账本和显示设置。空库自动生成 41 条虚构订阅；每日 UTC 零点的定时任务复原账本、支付方式、人员、设置、偏好、聊天记录和凭据（Docker 约 00:05 执行），保留汇率与迁移记录。
 
-演示模式禁用密码、Passkey、设备管理、通知渠道保存与测试、提醒实际发送、MCP、AI 助手、ICS 链接和公开页开关。备份恢复与 CSV 导入选择完全禁用，防止批量灌入；仍可导出。界面说明「演示站不可用」，服务端也返回本地化错误。不设置 `DEMO_MODE=1` 的正常自托管行为不变。
+演示模式禁用密码、Passkey、设备管理、通知渠道保存与测试、提醒实际发送、MCP、ICS 链接和公开页开关。备份恢复与 CSV 导入选择完全禁用，防止批量灌入；仍可导出。界面说明「演示站不可用」，服务端也返回本地化错误。不设置 `DEMO_MODE=1` 的正常自托管行为不变。
+
+两个演示档位的助手均提供前端本地预设对话：收据草稿、本月扣款、最近涨价；AI 档位另有 Claude 降级建议。不会请求 AI 接口，聊天仅保存在浏览器；确认收据草稿会真实写入共用演示账本，随账本每日复原。部署自己的实例并配置自己的 API Key 后，使用真实 AI。
+
+在 `/claude/` 子路径提供 AI 账号管理演示（反向代理需原样保留前缀）：
+
+```bash
+docker build --build-arg BASE_PATH=/claude -t calends-ai .
+docker run -d --name calends-ai -p 8788:8787 -v calends-ai-data:/data \
+  -e BASE_PATH=/claude -e DEMO_MODE=1 -e DEMO_PROFILE=ai \
+  -e SITE_URL=https://demo.calends.date -e TRUST_PROXY=1 calends-ai
+```
+
+入口为 `https://demo.calends.date/claude/admin`。使用独立的初始空数据卷，不与默认演示共库。`SITE_URL` 也可包含 `/claude`，不会重复添加；容器内不带前缀的健康检查接口仍可访问。AI 档位包括 Claude 40 个（Pro 月付 13、年付 3，Max 5x 14，Max 20x 10），ChatGPT 16 个（Plus 7，Pro 5x 4，Pro 10x 3，Pro 50x 2），以及其他 AI 工具 5 个。账号、价格、合租安排均为虚构示例，ChatGPT 套餐名仅用于演示。可运行 `node --experimental-strip-types scripts/demo.ts --profile ai` 导出备份。
 
 ## 本地开发
 

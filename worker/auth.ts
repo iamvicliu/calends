@@ -1,3 +1,4 @@
+import { normalizeBasePath } from '../shared/base.ts';
 // 登录与会话。
 // - 密码：PBKDF2-SHA256 加盐哈希存在 kv 的 auth 键里，从不保存明文；首次设置需要部署时配置的 SETUP_TOKEN，防止陌生人抢先占用新部署。
 // - 兼容旧部署：配置了 OWNER_PASSCODE 密钥的，第一次用它登录成功后自动转存为哈希。
@@ -141,7 +142,11 @@ async function startSession(req: Request, env: Env, method: 'password' | 'passke
   ]);
   return Response.json(
     { ok: true },
-    { headers: { 'set-cookie': `${COOKIE}=${token}; Path=/; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}` } },
+    {
+      headers: {
+        'set-cookie': `${COOKIE}=${token}; Path=${normalizeBasePath(env.BASE_PATH) || '/'}; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`,
+      },
+    },
   );
 }
 
@@ -221,7 +226,10 @@ export async function logout(req: Request, env: Env): Promise<Response> {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?1')
       .bind(await sha256(token))
       .run();
-  return Response.json({ ok: true }, { headers: { 'set-cookie': `${COOKIE}=; Path=/; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=0` } });
+  return Response.json(
+    { ok: true },
+    { headers: { 'set-cookie': `${COOKIE}=; Path=${normalizeBasePath(env.BASE_PATH) || '/'}; HttpOnly${secure(req)}; SameSite=Lax; Max-Age=0` } },
+  );
 }
 
 /** 退出其他所有设备 */

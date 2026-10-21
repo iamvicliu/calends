@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -70,7 +71,7 @@ function Region({ cc }: { cc: string }) {
   const k = cc.toLowerCase();
   return (
     <span className="dt-region">
-      {FLAGS.has(k) && <img src={`/flags/${k}.png`} alt="" />}
+      {FLAGS.has(k) && <img src={base(`/flags/${k}.png`)} alt="" />}
       {cc.toUpperCase()}
     </span>
   );

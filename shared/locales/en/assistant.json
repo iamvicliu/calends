@@ -168,5 +168,19 @@
     "reactivate": "Resume",
     "charge": "Charge",
     "deleteAll": "Deletes the subscription and all its charges. This can’t be undone."
+  },
+  "demo": {
+    "label": "Demo",
+    "downgrade": "Which Claude accounts could downgrade?",
+    "receipt": "Fictional receipt\n{name}\n{amount} / month\nAccount: {account}\nDate: {date}",
+    "thinking": "I’ll check the current ledger locally. No AI service is being contacted.",
+    "duplicate": "This receipt already exists in the ledger. No duplicate draft was created.",
+    "draft": "I found no matching account. Review the draft below, then add it to the demo ledger.",
+    "month": "This month: {amount} across {count} charges, excluding payments for others. Largest: {name}, {largest}.",
+    "hikes": "Recent increases in monthly equivalent cost (original currency):",
+    "noHikes": "No price increases found in the past year.",
+    "downgradeReply": "Review these paused or non-renewing Max 20x accounts before resuming or renewing. The ledger has no usage data; it cannot tell whether an active account is underused.",
+    "freeform": "This demo plays preset conversations. Choose a scenario below. Deploy your own Calends and configure your own API key to use a real AI assistant.",
+    "disclaimer": "Local scripted demo. Drafts you confirm are saved to the demo ledger and reset daily."
   }
 }

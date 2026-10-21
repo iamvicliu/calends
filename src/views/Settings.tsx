@@ -1,3 +1,4 @@
+import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEffect, useRef, useState } from 'react';
@@ -57,7 +58,7 @@ function download(name: string, text: string, type: string) {
 }
 
 function icsUrl(state: AppState) {
-  return state.settings.icsToken ? `${location.origin}/cal/${state.settings.icsToken}.ics` : '';
+  return state.settings.icsToken ? `${location.origin}${base(`/cal/${state.settings.icsToken}.ics`)}` : '';
 }
 
 export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => void }) {
@@ -211,7 +212,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                   label: l.name,
                   icon: (
                     <span className="cp-flag">
-                      <img src={`/flags/${l.flag}.png`} alt="" />
+                      <img src={base(`/flags/${l.flag}.png`)} alt="" />
                     </span>
                   ),
                 })),
@@ -362,7 +363,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           )}
           <Cell
             label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.preview')}</span>}
-            onClick={() => window.open('/api/notify/preview?html=1', '_blank')}
+            onClick={() => window.open(base('/api/notify/preview?html=1'), '_blank')}
           />
         </Group>
 
@@ -452,7 +453,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           ) : (
             <>
               {' '}
-              <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}/` : undefined}>
+              <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}${base('/')}` : undefined}>
                 <Toggle
                   label={t('settings.open.public')}
                   checked={s.publicView}
@@ -518,7 +519,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             onClick={state.demo ? undefined : () => pickFile('.json,application/json', onJson)}
           />
           <Cell label={t('settings.data.exportCsv')} onClick={exportCsv} />
-          <Cell label={t('settings.data.backup')} onClick={() => (location.href = '/api/backup')} />
+          <Cell label={t('settings.data.backup')} onClick={() => (location.href = base('/api/backup'))} />
         </Group>
 
         {!state.demo && (
@@ -682,7 +683,7 @@ function AvatarField({ avatar }: { avatar?: string }) {
           <small>{source}</small>
         </span>
         <span className="cell-r">
-          <img className="avatar-preview" src={avatarOf({ avatar })} alt="" />
+          <img className="avatar-preview" src={base(avatarOf({ avatar }))} alt="" />
           <button type="button" className="chip-btn" onClick={() => file.current?.click()}>
             {t('wallet.logo.upload')}
           </button>

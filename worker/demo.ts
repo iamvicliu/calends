@@ -18,7 +18,7 @@ export function demoBlocked(path: string, method: string): boolean {
 }
 
 export async function resetDemo(env: Env, today: string): Promise<void> {
-  const state = demoState(today);
+  const state = demoState(today, env.DEMO_PROFILE === 'ai' ? 'ai' : 'default');
   const stmts = ['subscriptions', 'methods', 'sessions', 'passkeys', 'auth_challenges', 'login_attempts', 'notify_log', 'chats'].map((table) =>
     env.DB.prepare(`DELETE FROM ${table}`),
   );

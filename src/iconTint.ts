@@ -1,3 +1,4 @@
+import { base } from './base.ts';
 import { useEffect, useState } from 'react';
 
 /**
@@ -50,7 +51,7 @@ function sample(src: string): Promise<string | null> {
         resolve(null);
       }
     };
-    img.src = /^https?:/.test(src) ? `/api/img?u=${encodeURIComponent(src)}` : src;
+    img.src = /^https?:/.test(src) ? base(`/api/img?u=${encodeURIComponent(src)}`) : base(src);
   });
 }
 

@@ -6,7 +6,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .
-RUN rm -rf local && npm run build
+ARG BASE_PATH=""
+RUN rm -rf local && BASE_PATH="$BASE_PATH" npm run build
 
 FROM node:22-bookworm-slim
 WORKDIR /app

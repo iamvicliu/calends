@@ -1,5 +1,6 @@
+import { base } from './base.ts';
 // 后台路由：地址形如 /admin/list、/admin/cat/AI，用 History API 切换，不带 #
-const BASE = '/admin';
+const BASE = base('/admin');
 const EVENT = 'routechange';
 
 /** 侧边栏模块的排序键：概览的路由是空串，存成 overview */

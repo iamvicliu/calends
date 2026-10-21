@@ -162,5 +162,19 @@
     "reactivate": "恢复",
     "charge": "扣款",
     "deleteAll": "删除订阅及全部扣款记录，无法恢复"
+  },
+  "demo": {
+    "label": "演示",
+    "downgrade": "哪些 Claude 账号该降级？",
+    "receipt": "虚构收据\n{name}\n{amount} / 月\n账号：{account}\n日期：{date}",
+    "thinking": "我会在本地读取当前账本，不会请求任何 AI 服务。",
+    "duplicate": "账本里已有这笔收据，没有重复生成草稿。",
+    "draft": "没有找到相同账号。请核对下方草稿，确认后添加到演示账本。",
+    "month": "本月合计 {amount}，共 {count} 笔，不含代付。最大一笔是 {name}，金额 {largest}。",
+    "hikes": "最近一年月均费用上涨的记录（原币）：",
+    "noHikes": "最近一年没有发现涨价。",
+    "downgradeReply": "这些 Max 20x 账号已暂停或设为到期不续，可在恢复或续费前评估降级。账本没有使用量数据，无法判断活跃账号是否闲置。",
+    "freeform": "演示站播放预设对话，请点击下方场景。部署自己的 Calends 并配置自己的 API Key 后，即可使用真实 AI 助手。",
+    "disclaimer": "本地脚本演示。确认的草稿会写入演示账本，每天复原。"
   }
 }

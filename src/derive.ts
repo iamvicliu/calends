@@ -1,3 +1,4 @@
+import { base } from './base.ts';
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, parseDay, type Charge } from '../shared/billing.ts';
 import { chargeValue } from '../shared/fx.ts';
 import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../shared/types.ts';
@@ -96,15 +97,15 @@ interface Brand {
   onColor?: boolean;
 }
 export const BRANDS: Brand[] = [
-  { key: 'appstore', name: 'App Store', logo: '/brands/appstore.svg', kinds: ['appstore'] },
-  { key: 'googleplay', name: 'Google Play', logo: '/brands/googleplay.svg', kinds: ['googleplay'] },
-  { key: 'paypal', name: 'PayPal', logo: '/brands/paypal.svg', kinds: ['paypal'], onColor: true },
+  { key: 'appstore', name: 'App Store', logo: base('/brands/appstore.svg'), kinds: ['appstore'] },
+  { key: 'googleplay', name: 'Google Play', logo: base('/brands/googleplay.svg'), kinds: ['googleplay'] },
+  { key: 'paypal', name: 'PayPal', logo: base('/brands/paypal.svg'), kinds: ['paypal'], onColor: true },
   {
     key: 'alipay',
     get name() {
       return t('list.kind.alipay');
     },
-    logo: '/brands/alipay.svg',
+    logo: base('/brands/alipay.svg'),
     kinds: ['alipay'],
     onColor: true,
   },
@@ -113,7 +114,7 @@ export const BRANDS: Brand[] = [
     get name() {
       return t('list.kind.wechat');
     },
-    logo: '/brands/wechat.svg',
+    logo: base('/brands/wechat.svg'),
     kinds: ['wechat'],
     onColor: true,
   },
