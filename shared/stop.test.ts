@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { beforeEach, describe, test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import {
@@ -785,4 +785,323 @@ test('合租新字段经 Worker API 保存、重读；拒绝非法首期金额�
     f.db.close();
     hook.deregister();
   }
+});
+
+describe('MCP 合租统一收款与首期', () => {
+  beforeEach((t) => t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-22T12:00:00Z') }));
+  const owned = (members: NonNullable<Subscription['share']>['members'] = []) =>
+    base({ start: '2026-01-17', share: { role: 'owner', seats: 5, since: '2026-01-17', members } });
+  const args = { id: 'jj', name: 'Fictional JJ', fee: 60, fee_currency: 'CNY', bill_every: 6, joined: '2026-10-20' };
+
+  test('中途加入预览：默认按天、整期、免费和覆盖金额；草稿可查但不写库', async () => {
+    for (const [extra, amount, next] of [
+      [{}, 29.02, '2026-10-20'],
+      [{ first_period: 'full' }, 60, '2026-10-20'],
+      [{ first_period: 'free', first_amount: 20 }, 0, '2027-01-17'],
+      [{ first_amount: 21.5 }, 21.5, '2026-10-20'],
+    ] as const) {
+      const f = fixture(owned());
+      f.ctx.overlay = new Map();
+      try {
+        const preview = await f.run('save_share_member', { ...args, ...extra, dry_run: true });
+        assert.equal(preview.dry_run, true);
+        assert.equal(preview.member.collect_from, '2026-01-17');
+        assert.deepEqual(preview.member.first_collection, {
+          from: '2026-10-20',
+          until: '2027-01-16',
+          next: '2027-01-17',
+          amount,
+          currency: 'CNY',
+          partial: true,
+        });
+        assert.equal(preview.member.next_collection_date, next);
+        assert.equal(preview.member.is_first_period, extra.first_period !== 'free');
+        assert.equal(preview.member.pending_amount.amount, amount);
+        const plan = (await f.run('get_carpool')).plans[0];
+        assert.equal(plan.collect_from, '2026-01-17');
+        assert.equal(plan.members[0].next_collection_date, next);
+        assert.equal(plan.members[0].fee.every_months, 6);
+        assert.deepEqual(plan.members[0].first_collection, preview.member.first_collection);
+        assert.deepEqual(f.saved().share!.members, []);
+      } finally {
+        f.db.close();
+      }
+    }
+  });
+
+  test('收款默认首期区间和金额：预览不落库，保存后返回已付至与下一次收款', async () => {
+    const f = fixture(owned());
+    try {
+      await f.run('save_share_member', args);
+      await f.run('get_carpool');
+      const before = f.saved();
+      const preview = await f.run('record_receivable', { member: 'jj', dry_run: true });
+      assert.deepEqual(preview.receipt, {
+        date: '2026-10-22',
+        from: '2026-10-20',
+        until: '2027-01-16',
+        amount: 29.02,
+        currency: 'CNY',
+        note: undefined,
+      });
+      assert.equal(preview.member.paid_until, '2027-01-16');
+      assert.equal(preview.member.next_collection_date, '2027-01-17');
+      assert.equal(preview.member.is_first_period, false);
+      assert.deepEqual(f.saved(), before);
+      const saved = await f.run('record_receivable', { member: 'jj' });
+      assert.deepEqual(saved.receipt, preview.receipt);
+      assert.equal(f.saved().share!.members[0].payments![0].amount, 29.02);
+      const member = (await f.run('get_carpool')).plans[0].members[0];
+      assert.equal(member.paid_until, '2027-01-16');
+      assert.equal(member.next_collection_date, '2027-01-17');
+      assert.equal(member.next_collection.amount, 60);
+      assert.equal(member.pending_amount.amount, 0);
+      assert.equal(member.pending_amount.currency, 'CNY');
+      assert.equal(member.owed, null); // 兼容旧返回字段。
+      const second = await f.run('record_receivable', { member: 'jj', date: '2027-01-18' });
+      assert.equal(second.receipt.from, '2027-01-17');
+      assert.equal(second.receipt.until, '2027-07-16');
+      assert.equal(second.receipt.amount, 60);
+      assert.equal(second.member.next_collection_date, '2027-07-17');
+    } finally {
+      f.db.close();
+    }
+  });
+
+  test('待收包含逾期首期和当期；迟收仍从最早未付区间开始', async (t) => {
+    t.mock.timers.setTime(Date.parse('2027-01-17T12:00:00Z'));
+    const f = fixture(owned());
+    try {
+      await f.run('save_share_member', args);
+      let member = (await f.run('get_carpool')).plans[0].members[0];
+      assert.equal(member.pending_amount.amount, 89.02);
+      assert.equal(member.next_collection_date, '2026-10-20');
+      assert.equal(member.is_first_period, true);
+      const receipt = await f.run('record_receivable', { member: 'jj' });
+      assert.equal(receipt.receipt.amount, 29.02);
+      assert.equal(receipt.receipt.from, '2026-10-20');
+      member = (await f.run('get_carpool')).plans[0].members[0];
+      assert.equal(member.pending_amount.amount, 60);
+      assert.equal(member.next_collection_date, '2027-01-17');
+    } finally {
+      f.db.close();
+    }
+  });
+
+  test('实际金额可不同或为零；旧式显式金额默认收款币种，覆盖区间可指定且已付至不回退', async () => {
+    const f = fixture(owned());
+    try {
+      await f.run('save_share_member', args);
+      const first = await f.run('record_receivable', { member: 'jj', amount: 12.34 });
+      assert.equal(first.receipt.amount, 12.34);
+      assert.equal(first.receipt.currency, DEFAULT_SETTINGS.collectCurrency ?? DEFAULT_SETTINGS.baseCurrency);
+      assert.equal(first.receipt.until, '2027-01-16');
+      const second = await f.run('record_receivable', { member: 'jj', amount: 0, currency: 'CNY' });
+      assert.equal(second.receipt.amount, 0);
+      assert.equal(second.member.paid_until, '2027-07-16');
+      await f.run('record_receivable', { member: 'jj', amount: 5, from: '2026-10-20', until: '2026-11-01' });
+      const m = f.saved().share!.members[0];
+      assert.equal(m.paidUntil, '2027-07-16');
+      assert.equal(m.payments!.at(-1)!.from, '2026-10-20');
+      assert.equal(m.payments!.at(-1)!.until, '2026-11-01');
+    } finally {
+      f.db.close();
+    }
+  });
+
+  test('免费首期跳过；省略金额可按指定币种换算，缺失汇率不记零元', async () => {
+    const f = fixture(owned());
+    try {
+      await f.run('save_share_member', { ...args, first_period: 'free' });
+      const preview = await f.run('record_receivable', { member: 'jj', dry_run: true, currency: 'USD' });
+      assert.equal(preview.receipt.from, '2027-01-17');
+      assert.equal(preview.receipt.until, '2027-07-16');
+      assert.equal(preview.receipt.amount, 8.43);
+      assert.equal(preview.receipt.currency, 'USD');
+      await assert.rejects(f.run('record_receivable', { member: 'jj', currency: 'XYZ' }));
+      assert.equal(f.saved().share!.members[0].payments, undefined);
+      assert.equal((await f.run('record_receivable', { member: 'jj' })).receipt.amount, 60);
+    } finally {
+      f.db.close();
+    }
+  });
+
+  test('旧数据没有新字段时按历史覆盖推断，查询不补写；旧调用与删除仍可用', async () => {
+    const s = owned([
+      {
+        id: 'old',
+        name: 'Legacy',
+        share: 10,
+        paidUntil: '2026-10-16',
+        payments: [{ date: '2026-09-17', from: '2026-09-17', until: '2026-10-16', amount: 10, currency: 'USD' }],
+      },
+    ]);
+    delete s.share!.since;
+    const f = fixture(s);
+    try {
+      await f.run('get_carpool'); // 首次读取可能关联旧成员到联系人；以关联后的存储作基线。
+      const before = f.saved();
+      const plan = (await f.run('get_carpool')).plans[0];
+      assert.equal(plan.collect_from, '2026-09-17');
+      assert.equal(plan.members[0].fee.every_months, 1);
+      assert.equal(plan.members[0].paid_until, '2026-10-16');
+      assert.equal(plan.members[0].next_collection_date, '2026-10-17');
+      assert.equal(plan.members[0].pending_amount.amount, 10);
+      assert.equal(plan.members[0].is_first_period, false);
+      assert.deepEqual(f.saved(), before);
+      const preview = await f.run('set_share', { role: 'owner', dry_run: true });
+      assert.equal(preview.collect_from, '2026-09-17');
+      assert.equal(f.saved().share!.collectFrom, undefined);
+      const set = await f.run('set_share', { role: 'owner', collect_from: '2026-01-31', dry_run: true });
+      assert.equal(set.collect_from, '2026-01-31');
+      assert.deepEqual(f.saved(), before);
+      await f.run('set_share', { role: 'owner', collect_from: '2026-01-31' });
+      assert.equal((await f.run('get_carpool')).plans[0].collect_from, '2026-01-31');
+      const received = await f.run('record_receivable', { kind: 'share', member: 'old', amount: 9, currency: 'USD', until: '2026-11-15' });
+      assert.equal(received.member.paid_until, '2026-11-15');
+      const history = f.saved().share!.members[0].payments!;
+      assert.deepEqual(history[0], s.share!.members[0].payments![0]);
+      await f.run('remove_share_member', { member: 'old', dry_run: true });
+      assert.equal(f.saved().share!.members.length, 1);
+      await f.run('remove_share_member', { member: 'old' });
+      assert.equal(f.saved().share!.members.length, 0);
+      assert.equal(f.saved().share!.collectFrom, '2026-01-31');
+    } finally {
+      f.db.close();
+    }
+  });
+
+  test('旧数据只有已付至、没有覆盖记录或周期，也能推断统一日与默认下一笔', async () => {
+    const s = owned([{ id: 'old', name: 'Legacy', share: 10, paidUntil: '2026-10-16' }]);
+    delete s.share!.since;
+    const f = fixture(s);
+    try {
+      const plan = (await f.run('get_carpool')).plans[0];
+      assert.equal(plan.collect_from, '2026-09-17');
+      assert.equal(plan.members[0].pending_amount.amount, 10);
+      const saved = await f.run('record_receivable', { member: 'old' });
+      assert.equal(saved.receipt.from, '2026-10-17');
+      assert.equal(saved.receipt.until, '2026-11-16');
+      assert.equal(saved.receipt.amount, 10);
+      assert.equal(saved.receipt.currency, 'USD');
+      assert.equal(saved.member.next_collection_date, '2026-11-17');
+      assert.equal(f.saved().share!.collectFrom, '2026-09-17');
+    } finally {
+      f.db.close();
+    }
+  });
+
+  test('Worker /mcp：无令牌拒绝，只读隐藏且拒绝全部写工具，读写预览和默认收款可执行', async () => {
+    const { registerHooks } = await import('node:module');
+    const hook = registerHooks({
+      load(url, ctx, next) {
+        if (url.endsWith('.json')) return { format: 'module', source: `export default ${readFileSync(new URL(url), 'utf8')}`, shortCircuit: true };
+        return next(url, ctx);
+      },
+    });
+    const { default: worker } = await import('../worker/index.ts');
+    const { createToken } = await import('../worker/ai/mcp.ts');
+    const f = fixture(owned());
+    f.db.exec('CREATE TABLE IF NOT EXISTS d1_migrations (id INTEGER PRIMARY KEY, name TEXT UNIQUE)');
+    for (const m of MIGRATIONS) f.db.prepare('INSERT INTO d1_migrations (name) VALUES (?)').run(m.name);
+    const rpc = async (token: string, method: string, params: Record<string, unknown> = {}) => {
+      const response = await worker.fetch(
+        new Request('http://localhost/mcp', {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+        }),
+        f.ctx.env,
+      );
+      return { status: response.status, body: await response.json() };
+    };
+    try {
+      const read = (await createToken(f.ctx.env, 'Fictional read', 'read')).token;
+      const write = (await createToken(f.ctx.env, 'Fictional write', 'write')).token;
+      assert.equal((await rpc('', 'tools/list')).status, 401);
+      const list = await rpc(read, 'tools/list');
+      assert.equal(list.status, 200);
+      assert.ok(list.body.result.tools.some((x: { name: string }) => x.name === 'get_carpool'));
+      for (const name of ['set_share', 'save_share_member', 'remove_share_member', 'record_receivable']) {
+        assert.ok(!list.body.result.tools.some((x: { name: string }) => x.name === name));
+        for (const dry_run of [false, true]) {
+          const denied = await rpc(read, 'tools/call', { name, arguments: { subscription: f.sub.id, ...args, dry_run } });
+          assert.equal(denied.body.result.isError, true);
+        }
+      }
+      assert.equal(f.saved().share!.members.length, 0);
+      const preview = await rpc(write, 'tools/call', { name: 'save_share_member', arguments: { subscription: f.sub.id, ...args, dry_run: true } });
+      assert.equal(preview.body.result.structuredContent.member.first_collection.amount, 29.02);
+      assert.equal(f.saved().share!.members.length, 0);
+      await rpc(write, 'tools/call', { name: 'save_share_member', arguments: { subscription: f.sub.id, ...args } });
+      const readback = await rpc(read, 'tools/call', { name: 'get_carpool', arguments: { subscription: f.sub.id } });
+      assert.equal(readback.body.result.structuredContent.plans[0].members[0].pending_amount.amount, 29.02);
+      const paymentArgs = { subscription: f.sub.id, member: 'jj' };
+      const receiptPreview = await rpc(write, 'tools/call', { name: 'record_receivable', arguments: { ...paymentArgs, dry_run: true } });
+      assert.equal(receiptPreview.body.result.structuredContent.receipt.amount, 29.02);
+      assert.equal(f.saved().share!.members[0].paidUntil, undefined);
+      const receipt = await rpc(write, 'tools/call', { name: 'record_receivable', arguments: paymentArgs });
+      assert.equal(receipt.body.result.structuredContent.member.next_collection_date, '2027-01-17');
+      assert.equal(f.saved().share!.members[0].payments![0].amount, 29.02);
+      const tools = (await rpc(write, 'tools/list')).body.result.tools;
+      const schema = tools.find((x: { name: string }) => x.name === 'record_receivable').inputSchema;
+      assert.ok(!schema.required.includes('amount'));
+    } finally {
+      f.db.close();
+      hook.deregister();
+      setLocale('en', [messages]);
+    }
+  });
+
+  test('助手多步草稿共享首期状态，确认参数固定默认收款；确认前不写入', async (t) => {
+    const { chat, apply } = await import('../worker/ai/assistant.ts');
+    const f = fixture(owned());
+    f.db
+      .prepare('INSERT INTO kv (key, value) VALUES (?, ?)')
+      .run('assistant', JSON.stringify({ apiKey: 'fictional', baseUrl: 'https://fictional.invalid/v1' }));
+    let calls = 0;
+    t.mock.method(globalThis, 'fetch', async (_url: unknown, init: RequestInit) => {
+      const request = JSON.parse(String(init.body));
+      assert.ok(request.messages[0].content.includes('first_period defaults to prorate'));
+      assert.ok(request.messages[0].content.includes('get_carpool results, never mental arithmetic'));
+      if (calls++ === 0) {
+        const tool_calls = [
+          { index: 0, id: 'add', type: 'function', function: { name: 'save_share_member', arguments: JSON.stringify({ subscription: f.sub.id, ...args }) } },
+          {
+            index: 1,
+            id: 'receive',
+            type: 'function',
+            function: { name: 'record_receivable', arguments: JSON.stringify({ subscription: f.sub.id, member: 'jj' }) },
+          },
+          { index: 2, id: 'read', type: 'function', function: { name: 'get_carpool', arguments: JSON.stringify({ subscription: f.sub.id }) } },
+        ];
+        return new Response(`data: ${JSON.stringify({ choices: [{ delta: { tool_calls } }] })}\n\ndata: [DONE]\n\n`);
+      }
+      const results = request.messages.filter((m: { role: string }) => m.role === 'tool').map((m: { content: string }) => JSON.parse(m.content));
+      assert.equal(results[1].preview.receipt.amount, 29.02);
+      assert.equal(results[2].plans[0].members[0].next_collection_date, '2027-01-17');
+      return new Response(`data: ${JSON.stringify({ choices: [{ delta: { content: 'Drafts ready.' } }] })}\n\ndata: [DONE]\n\n`);
+    });
+    try {
+      const response = chat(f.ctx.env, { text: 'Add Fictional JJ and record their first payment.' }, new AbortController().signal);
+      const events = (await response.text())
+        .split('\n')
+        .filter((s) => s.startsWith('data: '))
+        .map((s) => JSON.parse(s.slice(6)));
+      assert.equal(calls, 2);
+      assert.ok(!events.some((e) => e.type === 'error' || e.status === 'error'));
+      const proposals = events.filter((e) => e.type === 'proposal');
+      assert.equal(proposals.length, 2);
+      assert.equal(proposals[1].args.amount, 29.02);
+      assert.equal(proposals[1].args.currency, 'CNY');
+      assert.equal(proposals[1].args.from, '2026-10-20');
+      assert.equal(proposals[1].args.until, '2027-01-16');
+      assert.equal(f.saved().share!.members.length, 0);
+      for (const proposal of proposals) await apply(f.ctx.env, { tool: proposal.tool, args: proposal.args });
+      assert.equal(f.saved().share!.members[0].paidUntil, '2027-01-16');
+      assert.equal(f.saved().share!.members[0].payments![0].amount, 29.02);
+    } finally {
+      f.db.close();
+    }
+  });
 });
