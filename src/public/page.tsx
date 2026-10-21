@@ -47,7 +47,8 @@ const clean = (name: string) => name.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, ' ').
 
 /** 标题：「某某的订阅」；没设名字时用通用标题 */
 let owner = '';
-const title = () => (owner.trim() ? t('public.title', { name: owner.trim() }) : t('public.titleAnon'));
+let custom = '';
+const title = () => custom.trim() || (owner.trim() ? t('public.title', { name: owner.trim() }) : t('public.titleAnon'));
 
 /** 文案里嵌元素：先按 params 填文字（含复数），再把 {name} 换成 parts 里的节点 */
 function rich(key: string, params: Params, parts: Record<string, React.ReactNode>): React.ReactNode[] {
@@ -77,6 +78,7 @@ export function PublicPage() {
         const body = (await r.json()) as AppState & { error?: string };
         if (!r.ok) throw new Error(body.error ?? t('public.loadFailed'));
         owner = body.settings.displayName ?? '';
+        custom = body.settings.publicTitle ?? '';
         document.title = title();
         setState(body);
       })

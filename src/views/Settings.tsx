@@ -120,6 +120,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const unassigned = state.subscriptions.filter((x) => !x.methodId && !x.phases?.length && !x.proxy);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [name, setName] = useState(s.displayName);
+  const [pubTitle, setPubTitle] = useState(s.publicTitle ?? '');
   const [ics, setIcs] = useState(false);
   const [pubSubs, setPubSubs] = useState(false);
   const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[]; created: PaymentMethod[] } | null>(null);
@@ -443,6 +444,19 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                 const hidden = new Set(s.publicHidden ?? []);
                 return `${all.filter((x) => !hidden.has(x.id)).length} / ${all.length}`;
               })()}
+            </Cell>
+          )}
+          {s.publicView && (
+            <Cell label={t('settings.open.publicTitle')}>
+              <input
+                value={pubTitle}
+                placeholder={s.displayName.trim() ? t('public.title', { name: s.displayName.trim() }) : t('public.titleAnon')}
+                onChange={(e) => setPubTitle((e.target as HTMLInputElement).value)}
+                onBlur={() =>
+                  pubTitle.trim() !== (s.publicTitle ?? '') &&
+                  run(() => saveSettings({ publicTitle: (pubTitle.trim() || null) as string | undefined }), t('settings.toast.saved'))
+                }
+              />
             </Cell>
           )}
           {s.publicView && (

@@ -295,6 +295,8 @@ export interface Settings {
   displayName: string;
   /** 侧边栏、公开页与合租里「我」的头像：图片链接或上传后的 data URL；缺省用 Calends 图标 */
   avatar?: string;
+  /** 公开页标题（页头和浏览器页签）；缺省「名字的订阅」 */
+  publicTitle?: string;
   /** 侧边栏显示「即将扣款」，以及往后看多少天；缺省显示、45 天 */
   sidebarUpcoming?: boolean;
   /** 侧边栏「即将扣款」往后看几天；0 = 看到本月月底 */
