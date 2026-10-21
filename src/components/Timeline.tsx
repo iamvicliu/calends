@@ -102,19 +102,46 @@ export function Timeline({
   };
   useLayoutEffect(() => center(), [today]);
 
-  // 滚轮：鼠标在时间线上时，竖向滚动换成左右移动；到了两端就放行，让页面继续往下滚
+  // 滚轮：鼠标在时间线上时，竖向滚动换成左右移动；到了两端改为滚动页面。
+  // 浏览器按「一次连续滚动」锁定目标：这次滚动开头被拦下后，后面的滚轮事件都不会再滚页面，
+  // 所以到了两端不能只是放行，要自己把这段距离交给页面（缓动跟上，和原生滚动手感接近）
   useEffect(() => {
     const el = scroller.current!;
+    const page = document.scrollingElement ?? document.documentElement;
+    let pageTarget: number | null = null;
+    let pageGlide = 0;
+    const glidePage = () => {
+      if (pageTarget == null) return;
+      const d = pageTarget - page.scrollTop;
+      if (Math.abs(d) < 1) {
+        page.scrollTop = pageTarget;
+        pageTarget = null;
+        return;
+      }
+      page.scrollTop += d * 0.25;
+      pageGlide = requestAnimationFrame(glidePage);
+    };
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return; // 触控板横滑，浏览器自己处理
+      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
       const max = el.scrollWidth - el.clientWidth;
-      if ((e.deltaY < 0 && el.scrollLeft <= 0) || (e.deltaY > 0 && el.scrollLeft >= max - 1)) return;
       e.preventDefault();
+      if ((dy < 0 && el.scrollLeft <= 0) || (dy > 0 && el.scrollLeft >= max - 1)) {
+        const maxTop = page.scrollHeight - page.clientHeight;
+        pageTarget = Math.min(maxTop, Math.max(0, (pageTarget ?? page.scrollTop) + dy));
+        cancelAnimationFrame(pageGlide);
+        pageGlide = requestAnimationFrame(glidePage);
+        return;
+      }
+      pageTarget = null;
       cancelAnimationFrame(glide.current);
-      el.scrollLeft += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      el.scrollLeft += dy;
     };
     el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      cancelAnimationFrame(pageGlide);
+    };
   }, []);
 
   // 鼠标按住拖动：按在空白或图标上都拖整条时间线；松手后带惯性滑一段。拖过之后不触发点击
