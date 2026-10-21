@@ -71,7 +71,7 @@
     "prepaid": "Nilai prabayar",
     "prepaidSub": "{count} sudah dibayar, belum habis",
     "savedItem": "{name} · {amount} · sejak {since}",
-    "saved": "Hemat karena dibatalkan",
+    "saved": "Lebih hemat per bulan karena dibatalkan",
     "savedSub": "{count} dibatalkan",
     "next90": "Jatuh tempo dalam 90 hari ke depan",
     "peak": "Puncak pada {month} · {amount}"

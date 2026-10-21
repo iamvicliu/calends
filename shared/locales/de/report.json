@@ -72,7 +72,7 @@
     "prepaid": "Vorausbezahlter Wert",
     "prepaidSub": "{count} bezahlt, nicht aufgebraucht",
     "savedItem": "{name} · {amount} · seit {since}",
-    "saved": "Durch Kündigen gespart",
+    "saved": "Monatlich weniger durch Kündigen",
     "savedSub": "{count} gekündigt",
     "next90": "Fällig in den nächsten 90 Tagen",
     "peak": "Höchststand im {month} · {amount}"

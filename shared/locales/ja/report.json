@@ -71,7 +71,7 @@
     "prepaid": "前払いの残存価値",
     "prepaidSub": "{count}件が支払い済み・未消化",
     "savedItem": "{name} · {amount} · {since}から",
-    "saved": "解約による節約",
+    "saved": "解約で毎月減った額",
     "savedSub": "{count}件を解約",
     "next90": "今後90日間の請求",
     "peak": "ピークは{month} · {amount}"

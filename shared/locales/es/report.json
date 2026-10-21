@@ -72,7 +72,7 @@
     "prepaid": "Valor prepagado",
     "prepaidSub": "{count} pagadas, aún sin consumir",
     "savedItem": "{name} · {amount} · desde {since}",
-    "saved": "Ahorrado al cancelar",
+    "saved": "Menos al mes por cancelar",
     "savedSub": "{count} canceladas",
     "next90": "Vence en los próximos 90 días",
     "peak": "Pico en {month} · {amount}"

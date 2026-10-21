@@ -71,7 +71,7 @@
     "prepaid": "Giá trị trả trước",
     "prepaidSub": "{count} đã trả, chưa dùng hết",
     "savedItem": "{name} · {amount} · từ {since}",
-    "saved": "Tiết kiệm nhờ hủy",
+    "saved": "Mỗi tháng bớt nhờ hủy",
     "savedSub": "{count} đã hủy",
     "next90": "Đến hạn trong 90 ngày tới",
     "peak": "Cao nhất vào {month} · {amount}"

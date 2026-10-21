@@ -302,7 +302,10 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const rows = useMemo(() => cashVsAccrual(state, today, 23, 12), [state, today]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
-  const sv = useMemo(() => cancelSavings(state, today), [state, today]);
+  const sv = useMemo(() => {
+    const items = cancelSavings(state, today).items.sort((a, b) => b.monthly - a.monthly);
+    return { items, total: items.reduce((n, x) => n + x.monthly, 0) };
+  }, [state, today]);
   const next90 = sumBase(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
@@ -358,7 +361,9 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
               sv.items
                 .slice(0, 6)
                 .map((x) => (
-                  <div key={x.sub.id}>{t('report.cash.savedItem', { name: x.sub.name, amount: money(x.saved, base, { compact: true }), since: x.since })}</div>
+                  <div key={x.sub.id}>
+                    {t('report.cash.savedItem', { name: x.sub.name, amount: money(x.monthly, base, { compact: true }), since: x.since })}
+                  </div>
                 )),
             )}
           >

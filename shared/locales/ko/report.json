@@ -71,7 +71,7 @@
     "prepaid": "선결제 잔여 가치",
     "prepaidSub": "{count}개 결제 완료, 아직 사용 중",
     "savedItem": "{name} · {amount} · {since}부터",
-    "saved": "해지로 절약",
+    "saved": "해지 후 매달 절약",
     "savedSub": "{count}개 해지",
     "next90": "다음 90일 결제 예정",
     "peak": "최고점 {month} · {amount}"

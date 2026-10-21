@@ -72,7 +72,7 @@
     "prepaid": "Ön ödemeli değer",
     "prepaidSub": "{count} ödendi, henüz tüketilmedi",
     "savedItem": "{name} · {amount} · {since} tarihinden beri",
-    "saved": "İptalle tasarruf",
+    "saved": "İptallerle aylık tasarruf",
     "savedSub": "{count} iptal edildi",
     "next90": "Önümüzdeki 90 günde ödenecek",
     "peak": "Zirve: {month} · {amount}"

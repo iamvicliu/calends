@@ -62,7 +62,7 @@
     "prepaid": "預付餘值",
     "prepaidSub": "{count} 項已付未用完",
     "savedItem": "{name} · {amount} · 自 {since}",
-    "saved": "退訂至今省下",
+    "saved": "退訂後每月少花",
     "savedSub": "{count} 個已退訂",
     "next90": "未來 90 天要付",
     "peak": "高峰在 {n} 月 · {amount}"
