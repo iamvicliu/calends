@@ -154,6 +154,9 @@
     "lossDays": {
       "other": "{count} 天"
     },
-    "fullyRefunded": "已全額退款"
+    "fullyRefunded": "已全額退款",
+    "chargeOnEnd": "這一天仍會續費扣款，改成前一天才不會扣",
+    "nonrenewDone": "已設為到期不續，{date} 後不再扣款",
+    "stoppedDone": "已停止服務"
   }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { billingPeriod, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
+import { billingPeriod, chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
 import { flow, cnDateFull } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { cancelAtEnd, reactivate, stopSubscription } from '../../../shared/phases.ts';
@@ -56,7 +56,11 @@ export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: 
 /** 作为草稿应用到编辑器，或由详情的弹层保存。所有金额与校验复用 shared。 */
 export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: string; onApply: (s: Subscription) => void }) {
   const [mode, setMode] = useState<Mode>('nonrenew');
-  const [date, setDate] = useState(sub.end ?? billingPeriod(currentPhase(sub, today), today).paidThrough);
+  // 到期不续默认停在本期付到的那天（续费日前一天）；已有更早的结束日就沿用它
+  const [date, setDate] = useState(() => {
+    const paid = billingPeriod(currentPhase(sub, today), today).paidThrough;
+    return sub.end && sub.end < paid ? sub.end : paid;
+  });
   const [refund, setRefund] = useState(false);
   const [amount, setAmount] = useState<string | undefined>();
   const [refundDate, setRefundDate] = useState<string | undefined>();
@@ -126,7 +130,15 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
           ariaLabel={t('core.stop.title')}
         />
       </Cell>
-      <Cell label={t(mode === 'nonrenew' ? 'editor.field.end' : 'core.stop.date')}>
+      <Cell
+        label={t(mode === 'nonrenew' ? 'editor.field.end' : 'core.stop.date')}
+        // 结束日当天正好是续费日时仍会扣款：提醒改成前一天
+        sub={
+          mode === 'nonrenew' && chargesBetween(sub, date, date, today).some((c) => !c.kind && c.amount > 0) ? (
+            <span className="stop-warn">{t('core.stop.chargeOnEnd')}</span>
+          ) : undefined
+        }
+      >
         <DatePicker
           value={date}
           onChange={(value) => {

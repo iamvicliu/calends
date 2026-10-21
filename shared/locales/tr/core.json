@@ -185,6 +185,9 @@
       "one": "{count} gün",
       "other": "{count} gün"
     },
-    "fullyRefunded": "Tamamı iade edildi"
+    "fullyRefunded": "Tamamı iade edildi",
+    "chargeOnEnd": "Bu gün hâlâ yenileme ücreti alınır. Önlemek için bir önceki günü seçin.",
+    "nonrenewDone": "Yenilenmeyecek. {date} sonrasında ücret alınmaz.",
+    "stoppedDone": "Hizmet durduruldu"
   }
 }

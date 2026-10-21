@@ -185,6 +185,9 @@
       "one": "{count} day",
       "other": "{count} days"
     },
-    "fullyRefunded": "Fully refunded"
+    "fullyRefunded": "Fully refunded",
+    "chargeOnEnd": "This day is still a renewal charge. Pick the day before to avoid it.",
+    "nonrenewDone": "Set to not renew. No charges after {date}.",
+    "stoppedDone": "Service stopped"
   }
 }

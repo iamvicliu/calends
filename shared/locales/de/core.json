@@ -185,6 +185,9 @@
       "one": "{count} Tag",
       "other": "{count} Tage"
     },
-    "fullyRefunded": "Vollständig erstattet"
+    "fullyRefunded": "Vollständig erstattet",
+    "chargeOnEnd": "An diesem Tag wird noch verlängert. Wähle den Vortag, um das zu vermeiden.",
+    "nonrenewDone": "Keine Verlängerung. Nach dem {date} keine Abbuchungen mehr.",
+    "stoppedDone": "Dienst beendet"
   }
 }

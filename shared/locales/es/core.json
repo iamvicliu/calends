@@ -185,6 +185,9 @@
       "one": "{count} día",
       "other": "{count} días"
     },
-    "fullyRefunded": "Reembolso completo"
+    "fullyRefunded": "Reembolso completo",
+    "chargeOnEnd": "Ese día aún se cobra la renovación. Elige el día anterior para evitarlo.",
+    "nonrenewDone": "No se renovará. Sin cargos después del {date}.",
+    "stoppedDone": "Servicio detenido"
   }
 }

@@ -174,6 +174,9 @@
     "lossDays": {
       "other": "{count}일"
     },
-    "fullyRefunded": "전액 환불됨"
+    "fullyRefunded": "전액 환불됨",
+    "chargeOnEnd": "이날은 갱신 결제일입니다. 전날로 바꾸면 결제되지 않습니다.",
+    "nonrenewDone": "만료 후 갱신하지 않도록 설정했습니다. {date} 이후 결제되지 않습니다.",
+    "stoppedDone": "서비스를 중지했습니다"
   }
 }

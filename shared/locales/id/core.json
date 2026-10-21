@@ -174,6 +174,9 @@
     "lossDays": {
       "other": "{count} hari"
     },
-    "fullyRefunded": "Dana dikembalikan penuh"
+    "fullyRefunded": "Dana dikembalikan penuh",
+    "chargeOnEnd": "Hari ini masih ada tagihan perpanjangan. Pilih sehari sebelumnya agar tidak ditagih.",
+    "nonrenewDone": "Tidak akan diperpanjang. Tidak ada tagihan setelah {date}.",
+    "stoppedDone": "Layanan dihentikan"
   }
 }

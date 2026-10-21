@@ -299,10 +299,13 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               sub={sub}
               today={today}
               onApply={(next) =>
-                run(async () => {
-                  await saveSub(next);
-                  setStopping(false);
-                })
+                run(
+                  async () => {
+                    await saveSub(next);
+                    setStopping(false);
+                  },
+                  next.stop ? t('core.stop.stoppedDone') : next.end ? t('core.stop.nonrenewDone', { date: cnDateFull(next.end) }) : t('detail.toast.resumed'),
+                )
               }
             />
           </Sheet>,

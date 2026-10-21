@@ -4619,6 +4619,11 @@ select.btn {
   color: #fff;
   box-shadow: none;
 }
+/* 停止面板：结束日正好是扣款日时的提醒 */
+.stop-warn {
+  color: var(--orange);
+}
+
 /* 确认弹窗的正文 */
 .ask-msg {
   margin: 0;
