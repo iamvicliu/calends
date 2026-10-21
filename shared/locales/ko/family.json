@@ -101,6 +101,8 @@
     }
   },
   "pool": {
+    "seatsFree": "빈자리 {count}",
+    "seatsFull": "만석",
     "filter": { "all": "전체", "live": "진행 중", "owe": "받을 돈", "settled": "정산 완료", "ended": "종료", "none": "조건에 맞는 공유가 없습니다" },
     "title": "공유 플랜",
     "netGain": "연간 순이익",

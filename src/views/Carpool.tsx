@@ -30,7 +30,11 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
     settled: owned.filter((s) => !owes(s)),
     ended,
   };
-  const shown = groups[filter];
+  // 有待收的在前，其余按下次扣款从近到远；已停止的排最后
+  const nextOf = (s: Subscription) => nextCharge(s, today) ?? '9999-12-31';
+  const shown = [...groups[filter]].sort(
+    (a, b) => Number(!live(a)) - Number(!live(b)) || Number(!owes(a)) - Number(!owes(b)) || nextOf(a).localeCompare(nextOf(b)),
+  );
   const books = new Map([...owned, ...ended].map((s) => [s.id, carLedger(state, s, today)]));
   const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
@@ -120,18 +124,23 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 const dues = memberDues(s, today);
                 // 已退出的成员不占座，只在展开的明细里保留
                 const onboard = sh.members.filter((m) => !m.left || m.left > today);
+                const free = Math.max(0, sh.seats - 1 - onboard.length);
                 const next = nextCharge(s, today);
                 return (
-                  <div key={s.id} className="card stack" style={{ gap: 14, order: idx }}>
-                    <button className="row" style={{ border: 0, background: 'none', padding: 0, textAlign: 'left' }} onClick={() => onOpen(s)}>
-                      <SubIcon sub={s} size={46} />
+                  <div key={s.id} className={`card stack car-card ${live(s) ? '' : 'stopped'}`} style={{ order: idx }}>
+                    <button className="car-head" onClick={() => onOpen(s)}>
+                      <SubIcon sub={s} size={40} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, fontSize: 16 }}>{s.name}</div>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="car-name">{s.name}</div>
+                        <div className="muted car-sub">
                           {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                          {next ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
+                          {next && live(s) ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
                         </div>
                       </div>
+                      {/* 只提示满没满车；空位的「+」放到展开后的「添加成员」 */}
+                      <span className={`car-seats ${free ? '' : 'full'}`}>
+                        {!live(s) ? t('family.pool.filter.ended') : free ? t('family.pool.seatsFree', { count: free }) : t('family.pool.seatsFull')}
+                      </span>
                     </button>
                     <div className="seats-row">
                       <div className="seats">
@@ -153,19 +162,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                             </button>
                           );
                         })}
-                        {Array.from({ length: Math.max(0, sh.seats - 1 - onboard.length) }, (_, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            className="seat add"
-                            disabled={ro}
-                            onClick={() => setMember({ s })}
-                            aria-label={t('family.pool.addMember')}
-                            title={t('family.pool.addMember')}
-                          >
-                            +
-                          </button>
-                        ))}
                       </div>
                       {s.manageUrl && (
                         <a className="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
@@ -186,12 +182,12 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         <Icon name="down" size={14} />
                       </button>
                     </div>
-                    <CarFacts book={books.get(s.id)!} base={base} />
+                    <CarFacts book={books.get(s.id)!} base={base} detail={expanded.has(s.id)} />
                     {expanded.has(s.id) && (
                       <>
-                        {!ro && onboard.length < sh.seats - 1 && (
+                        {!ro && free > 0 && live(s) && (
                           <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
-                            <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: sh.seats - 1 - onboard.length })}
+                            <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
                           </button>
                         )}
                         <div>
@@ -394,14 +390,14 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
  * 合租账本，像一张小利润表：订阅一年花多少（成本）、成员一年交多少（收入）、两者之差（利润）。
  * 利润为负就是我自己用的那部分；下面一行是发起以来实际付出和收回的钱。
  */
-function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: string }) {
+function CarFacts({ book, base, detail }: { book: ReturnType<typeof carLedger>; base: string; detail: boolean }) {
   const fmt = (v: number) => money(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;
   const signed = (v: number) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v))}`;
   return (
     <div className="car-book">
-      <div className="proxy-facts">
+      <div className="car-facts">
         <div>
           <small>{t('family.facts.cost')}</small>
           <b>{fmt(book.yearCost)}</b>
@@ -415,30 +411,32 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
           <b className={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
         </div>
       </div>
-      {/* 实际收支这一行始终占位，卡片高度才一致 */}
-      <div className="car-actual">
-        {book.since ? (
-          <>
-            <span className="m-hide">{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
-            <span>
-              {tx('family.facts.actual', {
-                paid: fmt(book.paid),
-                received: fmt(book.received),
-                result: (
-                  <b className={actual >= 0 ? 'gain' : 'loss'}>
-                    {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
-                  </b>
-                ),
-              })}
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="m-hide">{t('family.facts.sinceNone')}</span>
-            <span>{t('family.facts.noRecords')}</span>
-          </>
-        )}
-      </div>
+      {/* 发起至今的实际收支是明细，展开后才看 */}
+      {detail && (
+        <div className="car-actual">
+          {book.since ? (
+            <>
+              <span className="m-hide">{t('family.facts.since', { month: monthLabel(book.since.slice(0, 7)) })}</span>
+              <span>
+                {tx('family.facts.actual', {
+                  paid: fmt(book.paid),
+                  received: fmt(book.received),
+                  result: (
+                    <b className={actual >= 0 ? 'gain' : 'loss'}>
+                      {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
+                    </b>
+                  ),
+                })}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="m-hide">{t('family.facts.sinceNone')}</span>
+              <span>{t('family.facts.noRecords')}</span>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

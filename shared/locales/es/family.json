@@ -81,6 +81,8 @@
     }
   },
   "pool": {
+    "seatsFree": "{count} libres",
+    "seatsFull": "Completo",
     "filter": {
       "all": "Todos",
       "live": "Activos",

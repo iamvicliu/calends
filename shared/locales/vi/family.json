@@ -75,6 +75,8 @@
     }
   },
   "pool": {
+    "seatsFree": "Trống {count}",
+    "seatsFull": "Đủ chỗ",
     "filter": { "all": "Tất cả", "live": "Đang chạy", "owe": "Chờ thu", "settled": "Đã đủ", "ended": "Đã dừng", "none": "Không có nhóm phù hợp" },
     "title": "Gói chia sẻ",
     "netGain": "Lãi ròng mỗi năm",

@@ -75,6 +75,8 @@
     }
   },
   "pool": {
+    "seatsFree": "空 {count} 位",
+    "seatsFull": "满车",
     "filter": { "all": "全部", "live": "进行中", "owe": "待收", "settled": "已结清", "ended": "已停止", "none": "没有符合条件的合租" },
     "title": "合租",
     "netGain": "合租每年净赚",

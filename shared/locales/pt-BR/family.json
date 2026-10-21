@@ -81,6 +81,8 @@
     }
   },
   "pool": {
+    "seatsFree": "{count} livres",
+    "seatsFull": "Lotado",
     "filter": {
       "all": "Todos",
       "live": "Ativos",

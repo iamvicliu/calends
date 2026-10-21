@@ -104,6 +104,8 @@
     }
   },
   "pool": {
+    "seatsFree": "{count} frei",
+    "seatsFull": "Voll",
     "filter": { "all": "Alle", "live": "Aktiv", "owe": "Offen", "settled": "Beglichen", "ended": "Beendet", "none": "Keine passenden Gruppen" },
     "title": "Geteilte Abos",
     "netGain": "Nettogewinn pro Jahr",
