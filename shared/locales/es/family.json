@@ -22,8 +22,17 @@
     "amount": "Importe"
   },
   "contact": {
-    "via": { "wechat": "WeChat", "email": "Correo electrónico", "phone": "Teléfono", "other": "Otro" },
-    "hint": { "wechat": "ID de WeChat", "discord": "Nombre de usuario", "generic": "Cuenta / ID" },
+    "via": {
+      "wechat": "WeChat",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "other": "Otro"
+    },
+    "hint": {
+      "wechat": "ID de WeChat",
+      "discord": "Nombre de usuario",
+      "generic": "Cuenta / ID"
+    },
     "viaAria": "Método de contacto",
     "open": "Abrir {via}"
   },
@@ -32,7 +41,10 @@
     "unnamed": "Sin nombre",
     "toastPaid": "Registrado: {amount} de {name}",
     "paymentRemoved": "Pago eliminado",
-    "copied": { "one": "Copiado a {count} miembro", "other": "Copiado a {count} miembros" },
+    "copied": {
+      "one": "Copiado a {count} miembro",
+      "other": "Copiado a {count} miembros"
+    },
     "titleNew": "Añadir miembro · {name}",
     "confirmDelete": "¿Eliminar a «{name}» para siempre? También se eliminará su historial de pagos, lo que reducirá tus ingresos registrados.\nSi solo dejó el plan, indica una fecha de salida.",
     "deleted": "Eliminado",
@@ -54,13 +66,21 @@
     "left": "Salió",
     "leftPh": "Sigue en el plan",
     "feeGroup": "Facturación",
-    "seg": { "m1": "Mensual", "m3": "Trimestral", "m6": "Semestral", "m12": "Anual" },
+    "seg": {
+      "m1": "Mensual",
+      "m3": "Trimestral",
+      "m6": "Semestral",
+      "m12": "Anual"
+    },
     "feeLabel": {
       "m1": "Al mes",
       "m3": "Al trimestre",
       "m6": "Al semestre",
       "m12": "Al año",
-      "custom": { "one": "Cada {count} mes", "other": "Cada {count} meses" }
+      "custom": {
+        "one": "Cada {count} mes",
+        "other": "Cada {count} meses"
+      }
     },
     "feeCcyAria": "Moneda",
     "exempt": "No paga",
@@ -99,7 +119,10 @@
       "m3": "Registrar pago ({fee}/trimestre)",
       "m6": "Registrar pago ({fee}/semestre)",
       "m12": "Registrar pago ({fee}/año)",
-      "custom": { "one": "Registrar pago ({fee} cada {count} mes)", "other": "Registrar pago ({fee} cada {count} meses)" }
+      "custom": {
+        "one": "Registrar pago ({fee} cada {count} mes)",
+        "other": "Registrar pago ({fee} cada {count} meses)"
+      }
     }
   },
   "pool": {
@@ -118,29 +141,41 @@
     "netCost": "Coste neto anual",
     "yearIncome": "Los miembros pagan {amount}/año",
     "owed": "Por cobrar",
-    "owedSub": { "one": "{count} miembro sin pagar", "other": "{count} miembros sin pagar" },
+    "owedSub": {
+      "one": "{count} miembro sin pagar",
+      "other": "{count} miembros sin pagar"
+    },
     "count": "Planes",
     "countStarted": " organizados · ",
     "countJoined": " unidos",
     "countSub": "Organizados · Unidos",
     "emptyTitle": "Aún no hay planes compartidos",
-    "emptyBody": "En el editor de una suscripción, indica en «Quién la usa» que «Lo organizo» y añade los miembros y sus partes.",
+    "emptyBody": "En el editor de una suscripción, elige «Lo organizo» en «Quién la usa» y añade los miembros y sus partes.",
     "next": "próximo: {date}",
     "me": "Yo",
     "exemptTitle": "{name} (no paga)",
     "addMember": "Añadir miembro",
     "manageTitle": "Abrir la página de gestión familiar",
     "manage": "Gestionar",
-    "owedN": { "one": "{count} por cobrar", "other": "{count} por cobrar" },
+    "owedN": {
+      "one": "{count} por cobrar",
+      "other": "{count} por cobrar"
+    },
     "settled": "Al día",
     "noMembers": "Aún no hay miembros",
-    "addMemberSeats": { "one": "Añadir miembro ({count} plaza libre)", "other": "Añadir miembro ({count} plazas libres)" },
+    "addMemberSeats": {
+      "one": "Añadir miembro ({count} plaza libre)",
+      "other": "Añadir miembro ({count} plazas libres)"
+    },
     "unnamed": "Sin nombre",
     "leftOn": "Salió {date}",
     "exemptNote": "Ocupa una plaza, no paga",
     "paidUntil": "Pagado hasta {date}",
     "noPay": "Aún no hay pagos",
-    "paymentsN": { "one": "{count} pago", "other": "{count} pagos" },
+    "paymentsN": {
+      "one": "{count} pago",
+      "other": "{count} pagos"
+    },
     "from": "vía {source}",
     "exempt": "No paga",
     "owedAmount": "{amount} pendiente",
@@ -149,7 +184,10 @@
       "m3": "{fee}/trimestre",
       "m6": "{fee}/semestre",
       "m12": "{fee}/año",
-      "custom": { "one": "{fee} cada {count} mes", "other": "{fee} cada {count} meses" }
+      "custom": {
+        "one": "{fee} cada {count} mes",
+        "other": "{fee} cada {count} meses"
+      }
     },
     "collect": "Cobrar",
     "joinedGroup": "Planes a los que me uní",

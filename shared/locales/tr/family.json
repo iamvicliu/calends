@@ -22,8 +22,17 @@
     "amount": "Tutar"
   },
   "contact": {
-    "via": { "wechat": "WeChat", "email": "E-posta", "phone": "Telefon", "other": "Diğer" },
-    "hint": { "wechat": "WeChat ID", "discord": "Kullanıcı adı", "generic": "Hesap / ID" },
+    "via": {
+      "wechat": "WeChat",
+      "email": "E-posta",
+      "phone": "Telefon",
+      "other": "Diğer"
+    },
+    "hint": {
+      "wechat": "WeChat ID",
+      "discord": "Kullanıcı adı",
+      "generic": "Hesap / ID"
+    },
     "viaAria": "İletişim yöntemi",
     "open": "{via} uygulamasını aç"
   },
@@ -32,7 +41,10 @@
     "unnamed": "Adsız",
     "toastPaid": "{name} kişisinden {amount} kaydedildi",
     "paymentRemoved": "Ödeme silindi",
-    "copied": { "one": "{count} üyeye kopyalandı", "other": "{count} üyeye kopyalandı" },
+    "copied": {
+      "one": "{count} üyeye kopyalandı",
+      "other": "{count} üyeye kopyalandı"
+    },
     "titleNew": "Üye ekle · {name}",
     "confirmDelete": "“{name}” kalıcı olarak silinsin mi? Ödeme geçmişi de silinir ve kayıtlı geliriniz azalır.\nYalnızca plandan ayrıldıysa bunun yerine ayrılış tarihi girin.",
     "deleted": "Silindi",
@@ -54,8 +66,22 @@
     "left": "Ayrılma",
     "leftPh": "Hâlâ planda",
     "feeGroup": "Ödeme",
-    "seg": { "m1": "Aylık", "m3": "Üç aylık", "m6": "Altı aylık", "m12": "Yıllık" },
-    "feeLabel": { "m1": "Aylık", "m3": "Üç aylık", "m6": "Altı aylık", "m12": "Yıllık", "custom": { "one": "{count} ayda bir", "other": "{count} ayda bir" } },
+    "seg": {
+      "m1": "Aylık",
+      "m3": "Üç aylık",
+      "m6": "Altı aylık",
+      "m12": "Yıllık"
+    },
+    "feeLabel": {
+      "m1": "Aylık",
+      "m3": "Üç aylık",
+      "m6": "Altı aylık",
+      "m12": "Yıllık",
+      "custom": {
+        "one": "{count} ayda bir",
+        "other": "{count} ayda bir"
+      }
+    },
     "feeCcyAria": "Para birimi",
     "exempt": "Ödemiyor",
     "other": "Diğer",
@@ -93,41 +119,63 @@
       "m3": "Ödemeyi kaydet ({fee}/çeyrek)",
       "m6": "Ödemeyi kaydet (6 ayda bir {fee})",
       "m12": "Ödemeyi kaydet ({fee}/yıl)",
-      "custom": { "one": "Ödemeyi kaydet ({count} ayda bir {fee})", "other": "Ödemeyi kaydet ({count} ayda bir {fee})" }
+      "custom": {
+        "one": "Ödemeyi kaydet ({count} ayda bir {fee})",
+        "other": "Ödemeyi kaydet ({count} ayda bir {fee})"
+      }
     }
   },
   "pool": {
     "seatsFree": "{count} boş",
     "seatsFull": "Dolu",
-    "filter": { "all": "Tümü", "live": "Devam eden", "owe": "Alacak", "settled": "Kapanan", "ended": "Biten", "none": "Eşleşen ortak plan yok" },
+    "filter": {
+      "all": "Tümü",
+      "live": "Devam eden",
+      "owe": "Alacak",
+      "settled": "Kapanan",
+      "ended": "Biten",
+      "none": "Eşleşen ortak plan yok"
+    },
     "title": "Ortak planlar",
     "netGain": "Yıllık net kazanç",
     "netCost": "Yıllık net maliyet",
     "yearIncome": "Üyeler yılda {amount} ödüyor",
     "owed": "Tahsil edilecek",
-    "owedSub": { "one": "{count} üye ödemedi", "other": "{count} üye ödemedi" },
+    "owedSub": {
+      "one": "{count} üye ödemedi",
+      "other": "{count} üye ödemedi"
+    },
     "count": "Planlar",
     "countStarted": " yönetilen · ",
     "countJoined": " katılınan",
     "countSub": "Yönetilen · Katılınan",
     "emptyTitle": "Henüz ortak plan yok",
-    "emptyBody": "Bir aboneliğin düzenleyicisinde kimin kullandığını “Yönetici benim” olarak ayarlayın, ardından üyeleri ve paylarını ekleyin.",
+    "emptyBody": "Abonelik düzenleyicisinde “Kim kullanıyor” altında “Yönetici benim” seçeneğini seçin, ardından üyeleri ve paylarını ekleyin.",
     "next": "sonraki {date}",
     "me": "Ben",
     "exemptTitle": "{name} (ödemiyor)",
     "addMember": "Üye ekle",
     "manageTitle": "Aile yönetimi sayfasını aç",
     "manage": "Yönet",
-    "owedN": { "one": "{count} tahsilat", "other": "{count} tahsilat" },
+    "owedN": {
+      "one": "{count} tahsilat",
+      "other": "{count} tahsilat"
+    },
     "settled": "Ödeşildi",
     "noMembers": "Henüz üye yok",
-    "addMemberSeats": { "one": "Üye ekle ({count} yer boş)", "other": "Üye ekle ({count} yer boş)" },
+    "addMemberSeats": {
+      "one": "Üye ekle ({count} yer boş)",
+      "other": "Üye ekle ({count} yer boş)"
+    },
     "unnamed": "Adsız",
     "leftOn": "{date} ayrıldı",
     "exemptNote": "Yer tutuyor, ödemiyor",
     "paidUntil": "{date} tarihine kadar ödendi",
     "noPay": "Henüz ödeme yok",
-    "paymentsN": { "one": "{count} ödeme", "other": "{count} ödeme" },
+    "paymentsN": {
+      "one": "{count} ödeme",
+      "other": "{count} ödeme"
+    },
     "from": "kaynak: {source}",
     "exempt": "Ödemiyor",
     "owedAmount": "{amount} borç",
@@ -136,7 +184,10 @@
       "m3": "{fee}/çeyrek",
       "m6": "6 ayda bir {fee}",
       "m12": "{fee}/yıl",
-      "custom": { "one": "{count} ayda bir {fee}", "other": "{count} ayda bir {fee}" }
+      "custom": {
+        "one": "{count} ayda bir {fee}",
+        "other": "{count} ayda bir {fee}"
+      }
     },
     "collect": "Tahsil et",
     "joinedGroup": "Katıldığım planlar",

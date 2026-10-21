@@ -1,14 +1,28 @@
 {
-  "filter": { "all": "Tất cả", "live": "Đang chạy", "owe": "Chờ thu", "ended": "Đã dừng", "none": "Không có khoản trả hộ phù hợp" },
+  "filter": {
+    "all": "Tất cả",
+    "live": "Đang chạy",
+    "owe": "Chờ thu",
+    "ended": "Đã dừng",
+    "none": "Không có khoản trả hộ phù hợp"
+  },
   "title": "Trả hộ",
-  "status": { "active": "Đang hoạt động", "ending": "Sắp kết thúc", "ended": "Đã dừng" },
-  "owedPeriods": { "other": "{count} khoản chưa trả lại" },
+  "status": {
+    "active": "Đang hoạt động",
+    "ending": "Sắp kết thúc",
+    "ended": "Đã dừng"
+  },
+  "owedPeriods": {
+    "other": "{count} khoản chưa trả lại"
+  },
   "viewSub": "Xem gói đăng ký",
   "stoppedOn": " · dừng {date}",
   "nextOn": " · kỳ tới {date}",
   "payFor": "Cho {name}",
   "unset": "chưa đặt",
-  "paidPeriods": { "other": "Đã trả hộ {count} khoản phí" },
+  "paidPeriods": {
+    "other": "Đã trả hộ {count} khoản phí"
+  },
   "received": "Đã trả lại",
   "owed": "Chưa trả lại",
   "settled": "Đã trả đủ",
@@ -55,13 +69,19 @@
     "notePlaceholder": "Tùy chọn, VD: chuyển khoản ngân hàng"
   },
   "page": {
-    "owedSub": { "other": "{count} khoản chưa trả lại, theo tỷ giá ngày trừ tiền" },
+    "owedSub": {
+      "other": "{count} khoản chưa trả lại, theo tỷ giá ngày trừ tiền"
+    },
     "allBack": "Đã trả lại hết",
     "total": "Tổng đã trả hộ",
-    "totalSub": { "other": "{count} khoản phí · {subs}" },
-    "subs": { "other": "{count} gói đăng ký" },
+    "totalSub": {
+      "other": "{count} khoản phí · {subs}"
+    },
+    "subs": {
+      "other": "{count} gói đăng ký"
+    },
     "diffSub": "Chênh lệch do tỷ giá và phí trên các khoản đã được trả lại",
     "emptyTitle": "Chưa có khoản trả hộ nào",
-    "emptyBody": "Tạo hoặc sửa một gói đăng ký, chọn “Trả hộ” ở mục Ai sử dụng, rồi nhập người được trả hộ."
+    "emptyBody": "Tạo hoặc sửa gói đăng ký, chọn “Trả hộ” ở mục “Ai sử dụng”, rồi nhập người được trả hộ."
   }
 }

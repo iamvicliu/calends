@@ -1,5 +1,11 @@
 {
-  "filter": { "all": "Alle", "live": "Aktiv", "owe": "Offen", "ended": "Beendet", "none": "Keine passenden Vorauszahlungen" },
+  "filter": {
+    "all": "Alle",
+    "live": "Aktiv",
+    "owe": "Offen",
+    "ended": "Beendet",
+    "none": "Keine passenden Vorauszahlungen"
+  },
   "title": "Für andere bezahlt",
   "status": {
     "active": "Aktiv",
@@ -81,6 +87,6 @@
     },
     "diffSub": "Differenz durch Wechselkurse und Gebühren bei zurückgezahlten Abbuchungen",
     "emptyTitle": "Noch nichts für andere bezahlt",
-    "emptyBody": "Lege ein Abo an oder bearbeite eins, wähle beim Teilen „Für andere bezahlt“ und gib an, für wen."
+    "emptyBody": "Erstelle oder bearbeite ein Abo, wähle unter „Wer es nutzt“ die Option „Ich zahle für“ und gib an, für wen."
   }
 }

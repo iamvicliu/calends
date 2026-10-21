@@ -51,7 +51,7 @@
   },
   "ics": {
     "title": "S’abonner dans le calendrier",
-    "intro": "Synchronisez les dates de prélèvement avec Apple Calendrier, Google Agenda ou Outlook. Actualisé toutes les 6 heures, avec une alerte avant chaque prélèvement selon vos réglages de rappel.",
+    "intro": "Synchronisez les prélèvements avec Apple Calendrier, Google Agenda ou Outlook. Une actualisation toutes les 6 heures est suggérée ; l’intervalle réel dépend du client. Les alarmes sont relatives aux événements sur la journée ; leur horaire et leur affichage dépendent du client.",
     "subscribe": "S’abonner",
     "copy": "Copier le lien",
     "copied": "Copié",

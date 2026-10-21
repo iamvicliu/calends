@@ -22,8 +22,17 @@
     "amount": "Jumlah"
   },
   "contact": {
-    "via": { "wechat": "WeChat", "email": "Email", "phone": "Telepon", "other": "Lainnya" },
-    "hint": { "wechat": "ID WeChat", "discord": "Nama pengguna", "generic": "Akun / ID" },
+    "via": {
+      "wechat": "WeChat",
+      "email": "Email",
+      "phone": "Telepon",
+      "other": "Lainnya"
+    },
+    "hint": {
+      "wechat": "ID WeChat",
+      "discord": "Nama pengguna",
+      "generic": "Akun / ID"
+    },
     "viaAria": "Cara menghubungi",
     "open": "Buka {via}"
   },
@@ -32,7 +41,9 @@
     "unnamed": "Tanpa nama",
     "toastPaid": "Tercatat {amount} dari {name}",
     "paymentRemoved": "Pembayaran dihapus",
-    "copied": { "other": "Disalin ke {count} anggota" },
+    "copied": {
+      "other": "Disalin ke {count} anggota"
+    },
     "titleNew": "Tambah anggota · {name}",
     "confirmDelete": "Hapus “{name}” secara permanen? Riwayat pembayarannya juga akan dihapus, sehingga pemasukan tercatat Anda berkurang.\nJika mereka hanya keluar dari paket, atur tanggal keluar saja.",
     "deleted": "Dihapus",
@@ -54,8 +65,21 @@
     "left": "Keluar",
     "leftPh": "Masih di paket",
     "feeGroup": "Tagihan",
-    "seg": { "m1": "Bulanan", "m3": "Triwulanan", "m6": "6 bulan", "m12": "Tahunan" },
-    "feeLabel": { "m1": "Per bulan", "m3": "Per triwulan", "m6": "Per 6 bulan", "m12": "Per tahun", "custom": { "other": "Per {count} bulan" } },
+    "seg": {
+      "m1": "Bulanan",
+      "m3": "Triwulanan",
+      "m6": "6 bulan",
+      "m12": "Tahunan"
+    },
+    "feeLabel": {
+      "m1": "Per bulan",
+      "m3": "Per triwulan",
+      "m6": "Per 6 bulan",
+      "m12": "Per tahun",
+      "custom": {
+        "other": "Per {count} bulan"
+      }
+    },
     "feeCcyAria": "Mata uang",
     "exempt": "Tidak membayar",
     "other": "Lainnya",
@@ -93,45 +117,70 @@
       "m3": "Catat pembayaran ({fee}/triwulan)",
       "m6": "Catat pembayaran ({fee} per 6 bulan)",
       "m12": "Catat pembayaran ({fee}/thn)",
-      "custom": { "other": "Catat pembayaran ({fee} per {count} bulan)" }
+      "custom": {
+        "other": "Catat pembayaran ({fee} per {count} bulan)"
+      }
     }
   },
   "pool": {
     "seatsFree": "{count} kosong",
     "seatsFull": "Penuh",
-    "filter": { "all": "Semua", "live": "Berjalan", "owe": "Belum dibayar", "settled": "Lunas", "ended": "Berakhir", "none": "Tidak ada patungan yang cocok" },
+    "filter": {
+      "all": "Semua",
+      "live": "Berjalan",
+      "owe": "Belum dibayar",
+      "settled": "Lunas",
+      "ended": "Berakhir",
+      "none": "Tidak ada patungan yang cocok"
+    },
     "title": "Paket bersama",
     "netGain": "Untung bersih per tahun",
     "netCost": "Biaya bersih per tahun",
     "yearIncome": "Anggota membayar {amount}/thn",
     "owed": "Perlu ditagih",
-    "owedSub": { "other": "{count} anggota belum bayar" },
+    "owedSub": {
+      "other": "{count} anggota belum bayar"
+    },
     "count": "Paket",
     "countStarted": " dikelola · ",
     "countJoined": " diikuti",
     "countSub": "Dikelola · Diikuti",
     "emptyTitle": "Belum ada paket bersama",
-    "emptyBody": "Di editor langganan, atur siapa yang memakai menjadi “Saya pengelola”, lalu tambahkan anggota beserta bagiannya.",
+    "emptyBody": "Di editor langganan, pilih “Saya pengelola” pada “Siapa yang memakai”, lalu tambahkan anggota dan bagiannya.",
     "next": "berikutnya {date}",
     "me": "Saya",
     "exemptTitle": "{name} (tidak membayar)",
     "addMember": "Tambah anggota",
     "manageTitle": "Buka halaman kelola keluarga",
     "manage": "Kelola",
-    "owedN": { "other": "{count} perlu ditagih" },
+    "owedN": {
+      "other": "{count} perlu ditagih"
+    },
     "settled": "Lunas",
     "noMembers": "Belum ada anggota",
-    "addMemberSeats": { "other": "Tambah anggota ({count} kursi kosong)" },
+    "addMemberSeats": {
+      "other": "Tambah anggota ({count} kursi kosong)"
+    },
     "unnamed": "Tanpa nama",
     "leftOn": "Keluar {date}",
     "exemptNote": "Mengisi kursi, tidak membayar",
     "paidUntil": "Lunas hingga {date}",
     "noPay": "Belum ada pembayaran",
-    "paymentsN": { "other": "{count} pembayaran" },
+    "paymentsN": {
+      "other": "{count} pembayaran"
+    },
     "from": "via {source}",
     "exempt": "Tidak membayar",
     "owedAmount": "Tertunggak {amount}",
-    "perFee": { "m1": "{fee}/bln", "m3": "{fee}/triwulan", "m6": "{fee} per 6 bulan", "m12": "{fee}/thn", "custom": { "other": "{fee} per {count} bulan" } },
+    "perFee": {
+      "m1": "{fee}/bln",
+      "m3": "{fee}/triwulan",
+      "m6": "{fee} per 6 bulan",
+      "m12": "{fee}/thn",
+      "custom": {
+        "other": "{fee} per {count} bulan"
+      }
+    },
     "collect": "Tagih",
     "joinedGroup": "Paket yang saya ikuti",
     "payTo": "Dibayar ke {name} · {amount}",

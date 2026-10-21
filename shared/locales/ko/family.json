@@ -125,7 +125,14 @@
   "pool": {
     "seatsFree": "빈자리 {count}",
     "seatsFull": "만석",
-    "filter": { "all": "전체", "live": "진행 중", "owe": "받을 돈", "settled": "정산 완료", "ended": "종료", "none": "조건에 맞는 공유가 없습니다" },
+    "filter": {
+      "all": "전체",
+      "live": "진행 중",
+      "owe": "받을 돈",
+      "settled": "정산 완료",
+      "ended": "종료",
+      "none": "조건에 맞는 공유가 없습니다"
+    },
     "title": "공유 플랜",
     "netGain": "연간 순이익",
     "netCost": "연간 순비용",
@@ -139,7 +146,7 @@
     "countJoined": "개 참여",
     "countSub": "주최 · 참여",
     "emptyTitle": "아직 공유 플랜이 없습니다",
-    "emptyBody": "구독 편집 화면에서 사용자를 ‘내가 주최’로 설정한 다음 멤버와 분담금을 추가하세요.",
+    "emptyBody": "구독 편집기의 “사용자”에서 “내가 주최”를 선택한 다음 멤버와 분담금을 추가하세요.",
     "next": "다음 {date}",
     "me": "나",
     "exemptTitle": "{name}(납부 면제)",

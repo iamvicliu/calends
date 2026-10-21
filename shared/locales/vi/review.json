@@ -93,5 +93,6 @@
   "stars": {
     "head": "{year} · Chòm sao gói đăng ký của {whose}",
     "foot": "Bong bóng càng lớn, chi càng nhiều"
-  }
+  },
+  "spendBasis": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên"
 }

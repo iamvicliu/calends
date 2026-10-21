@@ -101,5 +101,6 @@
   "stars": {
     "head": "{year} · Constellation d’abonnements {whose}",
     "foot": "Plus la bulle est grosse, plus la dépense est élevée"
-  }
+  },
+  "spendBasis": "Montant total payé, avances pour les membres comprises"
 }

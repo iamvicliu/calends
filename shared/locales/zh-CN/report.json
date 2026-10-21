@@ -11,9 +11,16 @@
     "quarter": "季度",
     "halfYear": "半年",
     "twoYears": "两年",
-    "n": { "day": " {count} 天", "week": " {count} 周", "month": " {count} 个月", "year": " {count} 年" }
+    "n": {
+      "day": " {count} 天",
+      "week": " {count} 周",
+      "month": " {count} 个月",
+      "year": " {count} 年"
+    }
   },
-  "axis": { "year": "{yy}年" },
+  "axis": {
+    "year": "{yy}年"
+  },
   "hero": {
     "label": "每月订阅支出",
     "vsLastMonth": "较上月末",
@@ -65,7 +72,8 @@
     "saved": "退订后每月少花",
     "savedSub": "{count} 个已退订",
     "next90": "未来 90 天要付",
-    "peak": "高峰在 {n} 月 · {amount}"
+    "peak": "高峰在 {n} 月 · {amount}",
+    "fullPaidHint": "全额实付，含替成员垫付"
   },
   "comp": {
     "title": "钱花在哪",

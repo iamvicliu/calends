@@ -51,7 +51,7 @@
   },
   "ics": {
     "title": "Assinar no calendário",
-    "intro": "Sincronize as datas de cobrança com o Calendário da Apple, Google Agenda ou Outlook. Atualiza a cada 6 horas e avisa antes de cada cobrança conforme seus ajustes de lembrete.",
+    "intro": "Sincronize cobranças com o Calendário da Apple, Google Agenda ou Outlook. Sugere-se atualizar a cada 6 horas; o intervalo real depende do aplicativo. Os alarmes são relativos a eventos de dia inteiro; o horário e a exibição dependem do aplicativo.",
     "subscribe": "Assinar",
     "copy": "Copiar link",
     "copied": "Copiado",

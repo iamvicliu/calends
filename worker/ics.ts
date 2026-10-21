@@ -66,7 +66,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
         'TRANSP:TRANSPARENT',
       );
       if (remind >= 0 && c.projected) {
-        // 全天事件从当天 0 点算起：提前 N 天的上午 9 点
+        // 相对全天事件起点提前 N 天再加 9 小时；实际提醒时刻由日历客户端解释。
         const trigger = remind === 0 ? 'PT9H' : `-P${remind - 1}DT15H`;
         lines.push(
           'BEGIN:VALARM',

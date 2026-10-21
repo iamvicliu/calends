@@ -50,7 +50,7 @@
   },
   "ics": {
     "title": "Langganan di kalender",
-    "intro": "Sinkronkan tanggal tagihan ke Apple Calendar, Google Calendar, atau Outlook. Diperbarui setiap 6 jam dan mengingatkan Anda sebelum setiap tagihan sesuai pengaturan pengingat.",
+    "intro": "Sinkronkan tanggal tagihan ke Apple Calendar, Google Calendar, atau Outlook. Penyegaran setiap 6 jam disarankan; interval sebenarnya bergantung pada aplikasi kalender. Alarm relatif terhadap acara sepanjang hari; waktu dan tampilannya bergantung pada aplikasi.",
     "subscribe": "Tambahkan",
     "copy": "Salin tautan",
     "copied": "Disalin",

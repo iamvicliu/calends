@@ -379,6 +379,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             <b>
               <Amount value={next90} ccy={base} compact />
             </b>
+            <small>{t('report.cash.fullPaidHint')}</small>
             <small>
               {peak
                 ? t('report.cash.peak', {

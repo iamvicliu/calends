@@ -1,7 +1,17 @@
 {
-  "filter": { "all": "全部", "live": "進行中", "owe": "待收", "ended": "已停止", "none": "沒有符合條件的代付" },
+  "filter": {
+    "all": "全部",
+    "live": "進行中",
+    "owe": "待收",
+    "ended": "已停止",
+    "none": "沒有符合條件的代付"
+  },
   "title": "代付",
-  "status": { "active": "進行中", "ending": "到期停付", "ended": "已停止" },
+  "status": {
+    "active": "進行中",
+    "ending": "到期停付",
+    "ended": "已停止"
+  },
   "owedPeriods": "待收 {count} 期",
   "viewSub": "檢視訂閱",
   "stoppedOn": " · {date}停止",
@@ -62,6 +72,6 @@
     "subs": "{count} 個訂閱",
     "diffSub": "已收的期數中，匯率與手續費造成的差額",
     "emptyTitle": "還沒有代付",
-    "emptyBody": "新增或編輯訂閱，在「共享 / 代付」中選擇「代付」並填寫替誰付。"
+    "emptyBody": "新增或編輯訂閱，在「誰在用」中選「代付」並填寫替誰付。"
   }
 }

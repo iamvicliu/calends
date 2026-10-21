@@ -227,9 +227,8 @@ export function Ai({ state }: { state: AppState }) {
   const [tools, setTools] = useState<ToolMeta[]>([]);
   const [client, setClient] = useState('claude-code');
   const [creating, setCreating] = useState<string | null>(null);
-  // 刚生成的令牌留在本页（刷新前），主页面的配置也能直接带上；弹层只负责第一次展示
+  // 原始令牌只存在于首次展示的弹层中，关闭即丢弃。
   const [fresh, setFresh] = useState<{ token: string; item: Token } | null>(null);
-  const [showFresh, setShowFresh] = useState(false);
   const [showTools, setShowTools] = useState(false);
   const ro = !!state.readonly;
   const enabled = state.settings.aiEnabled !== false;
@@ -280,7 +279,7 @@ export function Ai({ state }: { state: AppState }) {
             <h2>{t('ai.setup')}</h2>
             <p className="m-hide">{t('ai.setupHint')}</p>
           </header>
-          <Connect url={url} token={fresh ?? undefined} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
+          <Connect url={url} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
         </section>
 
         <section className="ai-card">
@@ -358,20 +357,19 @@ export function Ai({ state }: { state: AppState }) {
           onClose={() => setCreating(null)}
           onCreated={(r) => {
             setFresh(r);
-            setShowFresh(true);
             setCreating(null);
             load();
           }}
         />
       )}
-      {fresh && showFresh && (
+      {fresh && (
         <Sheet
           title={t('ai.created.title')}
-          onClose={() => setShowFresh(false)}
+          onClose={() => setFresh(null)}
           foot={
             <>
               <span className="grow" />
-              <button className="btn primary" onClick={() => setShowFresh(false)}>
+              <button className="btn primary" onClick={() => setFresh(null)}>
                 {t('ai.created.saved')}
               </button>
             </>

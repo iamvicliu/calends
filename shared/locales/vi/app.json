@@ -50,7 +50,7 @@
   },
   "ics": {
     "title": "Đăng ký trên lịch",
-    "intro": "Đồng bộ ngày thanh toán vào Apple Calendar, Google Calendar hoặc Outlook. Làm mới mỗi 6 giờ và nhắc bạn trước mỗi lần trừ tiền theo cài đặt nhắc nhở.",
+    "intro": "Đồng bộ ngày thanh toán vào Apple Calendar, Google Calendar hoặc Outlook. Đề xuất làm mới mỗi 6 giờ; khoảng thời gian thực tế tùy ứng dụng lịch. Báo thức được đặt tương đối với sự kiện cả ngày; thời điểm và cách hiển thị tùy ứng dụng.",
     "subscribe": "Thêm vào lịch",
     "copy": "Sao chép liên kết",
     "copied": "Đã sao chép",

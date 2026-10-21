@@ -75,7 +75,8 @@
     "saved": "İptallerle aylık tasarruf",
     "savedSub": "{count} iptal edildi",
     "next90": "Önümüzdeki 90 günde ödenecek",
-    "peak": "Zirve: {month} · {amount}"
+    "peak": "Zirve: {month} · {amount}",
+    "fullPaidHint": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar"
   },
   "comp": {
     "title": "Para nereye gidiyor",

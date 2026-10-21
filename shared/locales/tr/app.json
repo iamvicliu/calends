@@ -51,7 +51,7 @@
   },
   "ics": {
     "title": "Takvime abone ol",
-    "intro": "Ödeme tarihlerini Apple Takvim, Google Takvim veya Outlook ile eşzamanlayın. 6 saatte bir yenilenir ve hatırlatma ayarlarınıza göre her ödemeden önce uyarır.",
+    "intro": "Ödeme tarihlerini Apple Takvim, Google Takvim veya Outlook ile eşzamanlayın. 6 saatte bir yenileme önerilir; gerçek aralık takvim uygulamasına bağlıdır. Alarmlar tüm gün etkinliklerine göredir; saatleri ve gösterilmeleri uygulamaya bağlıdır.",
     "subscribe": "Abone ol",
     "copy": "Bağlantıyı kopyala",
     "copied": "Kopyalandı",

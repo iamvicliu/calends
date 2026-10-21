@@ -51,7 +51,7 @@
   },
   "ics": {
     "title": "Im Kalender abonnieren",
-    "intro": "Synchronisiere Abbuchungstermine mit Apple Kalender, Google Kalender oder Outlook. Wird alle 6 Stunden aktualisiert und erinnert dich gemäß deinen Erinnerungseinstellungen vor jeder Abbuchung.",
+    "intro": "Synchronisiere Abbuchungen mit Apple Kalender, Google Kalender oder Outlook. Eine Aktualisierung alle 6 Stunden wird empfohlen; das tatsächliche Intervall hängt vom Kalenderprogramm ab. Alarme beziehen sich auf ganztägige Ereignisse; Zeitpunkt und Anzeige hängen vom Kalenderprogramm ab.",
     "subscribe": "Abonnieren",
     "copy": "Link kopieren",
     "copied": "Kopiert",

@@ -101,5 +101,6 @@
   "stars": {
     "head": "{year} · {whose} subscription stars",
     "foot": "Bigger bubble, bigger spend"
-  }
+  },
+  "spendBasis": "Full amount paid, including advances for members"
 }

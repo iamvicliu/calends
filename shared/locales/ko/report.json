@@ -74,7 +74,8 @@
     "saved": "해지 후 매달 절약",
     "savedSub": "{count}개 해지",
     "next90": "다음 90일 결제 예정",
-    "peak": "최고점 {month} · {amount}"
+    "peak": "최고점 {month} · {amount}",
+    "fullPaidHint": "멤버 대신 낸 금액을 포함한 전체 결제액"
   },
   "comp": {
     "title": "돈이 나가는 곳",

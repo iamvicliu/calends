@@ -22,8 +22,17 @@
     "amount": "Số tiền"
   },
   "contact": {
-    "via": { "wechat": "WeChat", "email": "Email", "phone": "Điện thoại", "other": "Khác" },
-    "hint": { "wechat": "ID WeChat", "discord": "Tên người dùng", "generic": "Tài khoản / ID" },
+    "via": {
+      "wechat": "WeChat",
+      "email": "Email",
+      "phone": "Điện thoại",
+      "other": "Khác"
+    },
+    "hint": {
+      "wechat": "ID WeChat",
+      "discord": "Tên người dùng",
+      "generic": "Tài khoản / ID"
+    },
     "viaAria": "Cách liên hệ",
     "open": "Mở {via}"
   },
@@ -32,7 +41,9 @@
     "unnamed": "Chưa đặt tên",
     "toastPaid": "Đã ghi nhận {amount} từ {name}",
     "paymentRemoved": "Đã xóa khoản thanh toán",
-    "copied": { "other": "Đã sao chép cho {count} thành viên" },
+    "copied": {
+      "other": "Đã sao chép cho {count} thành viên"
+    },
     "titleNew": "Thêm thành viên · {name}",
     "confirmDelete": "Xóa vĩnh viễn “{name}”? Lịch sử thanh toán của họ cũng sẽ bị xóa, làm giảm khoản thu đã ghi nhận.\nNếu họ chỉ rời gói, hãy đặt ngày rời đi.",
     "deleted": "Đã xóa",
@@ -54,8 +65,21 @@
     "left": "Ngày rời",
     "leftPh": "Vẫn đang trong gói",
     "feeGroup": "Thanh toán",
-    "seg": { "m1": "Hằng tháng", "m3": "Hằng quý", "m6": "6 tháng", "m12": "Hằng năm" },
-    "feeLabel": { "m1": "Mỗi tháng", "m3": "Mỗi quý", "m6": "Mỗi 6 tháng", "m12": "Mỗi năm", "custom": { "other": "Mỗi {count} tháng" } },
+    "seg": {
+      "m1": "Hằng tháng",
+      "m3": "Hằng quý",
+      "m6": "6 tháng",
+      "m12": "Hằng năm"
+    },
+    "feeLabel": {
+      "m1": "Mỗi tháng",
+      "m3": "Mỗi quý",
+      "m6": "Mỗi 6 tháng",
+      "m12": "Mỗi năm",
+      "custom": {
+        "other": "Mỗi {count} tháng"
+      }
+    },
     "feeCcyAria": "Tiền tệ",
     "exempt": "Không trả tiền",
     "other": "Khác",
@@ -93,45 +117,70 @@
       "m3": "Ghi nhận thanh toán ({fee}/quý)",
       "m6": "Ghi nhận thanh toán ({fee} mỗi 6 tháng)",
       "m12": "Ghi nhận thanh toán ({fee}/năm)",
-      "custom": { "other": "Ghi nhận thanh toán ({fee} mỗi {count} tháng)" }
+      "custom": {
+        "other": "Ghi nhận thanh toán ({fee} mỗi {count} tháng)"
+      }
     }
   },
   "pool": {
     "seatsFree": "Trống {count}",
     "seatsFull": "Đủ chỗ",
-    "filter": { "all": "Tất cả", "live": "Đang chạy", "owe": "Chờ thu", "settled": "Đã đủ", "ended": "Đã dừng", "none": "Không có nhóm phù hợp" },
+    "filter": {
+      "all": "Tất cả",
+      "live": "Đang chạy",
+      "owe": "Chờ thu",
+      "settled": "Đã đủ",
+      "ended": "Đã dừng",
+      "none": "Không có nhóm phù hợp"
+    },
     "title": "Gói chia sẻ",
     "netGain": "Lãi ròng mỗi năm",
     "netCost": "Chi phí ròng mỗi năm",
     "yearIncome": "Thành viên trả {amount}/năm",
     "owed": "Cần thu",
-    "owedSub": { "other": "{count} thành viên chưa trả" },
+    "owedSub": {
+      "other": "{count} thành viên chưa trả"
+    },
     "count": "Gói",
     "countStarted": " làm chủ · ",
     "countJoined": " tham gia",
     "countSub": "Làm chủ · Tham gia",
     "emptyTitle": "Chưa có gói chia sẻ",
-    "emptyBody": "Trong trình sửa gói đăng ký, đặt mục Ai sử dụng thành “Tôi làm chủ nhóm”, rồi thêm thành viên và phần của họ.",
+    "emptyBody": "Trong trình sửa gói đăng ký, chọn “Tôi làm chủ nhóm” ở mục “Ai sử dụng”, rồi thêm thành viên và phần của họ.",
     "next": "kỳ tới {date}",
     "me": "Tôi",
     "exemptTitle": "{name} (không trả tiền)",
     "addMember": "Thêm thành viên",
     "manageTitle": "Mở trang quản lý gia đình",
     "manage": "Quản lý",
-    "owedN": { "other": "{count} cần thu" },
+    "owedN": {
+      "other": "{count} cần thu"
+    },
     "settled": "Đã thanh toán đủ",
     "noMembers": "Chưa có thành viên",
-    "addMemberSeats": { "other": "Thêm thành viên (còn {count} suất)" },
+    "addMemberSeats": {
+      "other": "Thêm thành viên (còn {count} suất)"
+    },
     "unnamed": "Chưa đặt tên",
     "leftOn": "Rời ngày {date}",
     "exemptNote": "Giữ một suất, không trả tiền",
     "paidUntil": "Đã trả đến {date}",
     "noPay": "Chưa có khoản thanh toán",
-    "paymentsN": { "other": "{count} khoản thanh toán" },
+    "paymentsN": {
+      "other": "{count} khoản thanh toán"
+    },
     "from": "qua {source}",
     "exempt": "Không trả tiền",
     "owedAmount": "Còn nợ {amount}",
-    "perFee": { "m1": "{fee}/tháng", "m3": "{fee}/quý", "m6": "{fee} mỗi 6 tháng", "m12": "{fee}/năm", "custom": { "other": "{fee} mỗi {count} tháng" } },
+    "perFee": {
+      "m1": "{fee}/tháng",
+      "m3": "{fee}/quý",
+      "m6": "{fee} mỗi 6 tháng",
+      "m12": "{fee}/năm",
+      "custom": {
+        "other": "{fee} mỗi {count} tháng"
+      }
+    },
     "collect": "Thu tiền",
     "joinedGroup": "Gói tôi tham gia",
     "payTo": "Trả cho {name} · {amount}",

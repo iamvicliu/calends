@@ -75,7 +75,8 @@
     "saved": "En moins par mois grâce aux résiliations",
     "savedSub": "{count} résiliés",
     "next90": "À payer dans les 90 prochains jours",
-    "peak": "Pic en {month} · {amount}"
+    "peak": "Pic en {month} · {amount}",
+    "fullPaidHint": "Montant total payé, avances pour les membres comprises"
   },
   "comp": {
     "title": "Où va l’argent",

@@ -74,7 +74,8 @@
     "saved": "Lebih hemat per bulan karena dibatalkan",
     "savedSub": "{count} dibatalkan",
     "next90": "Jatuh tempo dalam 90 hari ke depan",
-    "peak": "Puncak pada {month} · {amount}"
+    "peak": "Puncak pada {month} · {amount}",
+    "fullPaidHint": "Total pembayaran, termasuk talangan untuk anggota"
   },
   "comp": {
     "title": "Ke mana uangnya pergi",

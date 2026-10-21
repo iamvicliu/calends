@@ -74,7 +74,8 @@
     "saved": "Mỗi tháng bớt nhờ hủy",
     "savedSub": "{count} đã hủy",
     "next90": "Đến hạn trong 90 ngày tới",
-    "peak": "Cao nhất vào {month} · {amount}"
+    "peak": "Cao nhất vào {month} · {amount}",
+    "fullPaidHint": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên"
   },
   "comp": {
     "title": "Tiền đi đâu",

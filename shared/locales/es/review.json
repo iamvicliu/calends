@@ -101,5 +101,6 @@
   "stars": {
     "head": "{year} · Constelación de suscripciones {whose}",
     "foot": "Burbuja más grande, más gasto"
-  }
+  },
+  "spendBasis": "Importe total pagado, incluidos los adelantos por los miembros"
 }

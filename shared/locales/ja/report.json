@@ -74,7 +74,8 @@
     "saved": "解約で毎月減った額",
     "savedSub": "{count}件を解約",
     "next90": "今後90日間の請求",
-    "peak": "ピークは{month} · {amount}"
+    "peak": "ピークは{month} · {amount}",
+    "fullPaidHint": "支払総額（メンバーへの立て替えを含む）"
   },
   "comp": {
     "title": "お金の行き先",

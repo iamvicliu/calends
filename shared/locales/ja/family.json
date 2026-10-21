@@ -125,7 +125,14 @@
   "pool": {
     "seatsFree": "空き {count}",
     "seatsFull": "満席",
-    "filter": { "all": "すべて", "live": "進行中", "owe": "未回収", "settled": "精算済み", "ended": "終了", "none": "該当するシェアはありません" },
+    "filter": {
+      "all": "すべて",
+      "live": "進行中",
+      "owe": "未回収",
+      "settled": "精算済み",
+      "ended": "終了",
+      "none": "該当するシェアはありません"
+    },
     "title": "共有プラン",
     "netGain": "年間の純利益",
     "netCost": "年間の純コスト",
@@ -139,7 +146,7 @@
     "countJoined": " 参加",
     "countSub": "主催 · 参加",
     "emptyTitle": "共有プランはまだありません",
-    "emptyBody": "サブスクの編集画面で利用者を「主催」に設定し、メンバーと負担額を追加してください。",
+    "emptyBody": "サブスクリプションの編集画面で「利用者」から「主催」を選び、メンバーと負担額を追加します。",
     "next": "次回 {date}",
     "me": "自分",
     "exemptTitle": "{name}（支払いなし）",

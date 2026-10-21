@@ -101,5 +101,6 @@
   "stars": {
     "head": "{year} · Constelação de assinaturas {whose}",
     "foot": "Bolha maior, gasto maior"
-  }
+  },
+  "spendBasis": "Valor total pago, incluindo adiantamentos para membros"
 }

@@ -158,6 +158,7 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
       <div className="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.count', { items: r.items.length, charges: r.charges })} r="" />
       {!hide && <Line l={t('review.receipt.total')} r={m(r.total)} b />}
+      {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
       <div className="rp-rule">{'-'.repeat(60)}</div>
       {byMethod.slice(0, 5).map((x) => (
         <Line key={x.name} l={x.name} r={amt(x.sum)} />
@@ -185,6 +186,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
       <div className="ps-year">{year}</div>
       <div className="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
       <div className="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</div>
+      {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
       <div className="ps-line">
         {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, {
           charges: t('review.n.charges', { count: r.charges }),
@@ -232,6 +234,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
       <div className="rv-big">
         <small>{t(`review.card.intro.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`)}</small>
         <span className="rv-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</span>
+        {!hide && <small>{t('review.spendBasis')}</small>}
         <span>
           {hide
             ? `${t('review.n.charges', { count: r.charges })} · ${t('review.n.currencyKinds', { count: r.currencies })}`
@@ -315,6 +318,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
         <span>{t('review.stars.head', { year, whose }).trim()}</span>
         <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(r.total)}</b>
       </div>
+      {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
       <div className="st-map" style={{ height: (bubbles[0]?.h ?? 1) * W }}>
         {bubbles.map((b) => {
           const x = items[b.i];

@@ -93,5 +93,6 @@
   "stars": {
     "head": "{year} · Bintang langganan {whose}",
     "foot": "Gelembung makin besar, pengeluaran makin besar"
-  }
+  },
+  "spendBasis": "Total pembayaran, termasuk talangan untuk anggota"
 }

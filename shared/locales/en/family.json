@@ -22,8 +22,17 @@
     "amount": "Amount"
   },
   "contact": {
-    "via": { "wechat": "WeChat", "email": "Email", "phone": "Phone", "other": "Other" },
-    "hint": { "wechat": "WeChat ID", "discord": "Username", "generic": "Account / ID" },
+    "via": {
+      "wechat": "WeChat",
+      "email": "Email",
+      "phone": "Phone",
+      "other": "Other"
+    },
+    "hint": {
+      "wechat": "WeChat ID",
+      "discord": "Username",
+      "generic": "Account / ID"
+    },
     "viaAria": "Contact method",
     "open": "Open {via}"
   },
@@ -32,7 +41,10 @@
     "unnamed": "Unnamed",
     "toastPaid": "Recorded {amount} from {name}",
     "paymentRemoved": "Payment deleted",
-    "copied": { "one": "Copied to {count} member", "other": "Copied to {count} members" },
+    "copied": {
+      "one": "Copied to {count} member",
+      "other": "Copied to {count} members"
+    },
     "titleNew": "Add member · {name}",
     "confirmDelete": "Permanently delete “{name}”? Their payment history will be deleted too, lowering your recorded income.\nIf they just left the plan, set a leave date instead.",
     "deleted": "Deleted",
@@ -54,13 +66,21 @@
     "left": "Left",
     "leftPh": "Still on the plan",
     "feeGroup": "Billing",
-    "seg": { "m1": "Monthly", "m3": "Quarterly", "m6": "6 months", "m12": "Yearly" },
+    "seg": {
+      "m1": "Monthly",
+      "m3": "Quarterly",
+      "m6": "6 months",
+      "m12": "Yearly"
+    },
     "feeLabel": {
       "m1": "Per month",
       "m3": "Per quarter",
       "m6": "Per 6 months",
       "m12": "Per year",
-      "custom": { "one": "Every {count} month", "other": "Every {count} months" }
+      "custom": {
+        "one": "Every {count} month",
+        "other": "Every {count} months"
+      }
     },
     "feeCcyAria": "Currency",
     "exempt": "Doesn't pay",
@@ -99,41 +119,63 @@
       "m3": "Record payment ({fee}/quarter)",
       "m6": "Record payment ({fee} every 6 months)",
       "m12": "Record payment ({fee}/yr)",
-      "custom": { "one": "Record payment ({fee} every {count} month)", "other": "Record payment ({fee} every {count} months)" }
+      "custom": {
+        "one": "Record payment ({fee} every {count} month)",
+        "other": "Record payment ({fee} every {count} months)"
+      }
     }
   },
   "pool": {
     "seatsFree": "{count} open",
     "seatsFull": "Full",
-    "filter": { "all": "All", "live": "Active", "owe": "Owed", "settled": "Settled", "ended": "Ended", "none": "No shared plans match" },
+    "filter": {
+      "all": "All",
+      "live": "Active",
+      "owe": "Owed",
+      "settled": "Settled",
+      "ended": "Ended",
+      "none": "No shared plans match"
+    },
     "title": "Shared plans",
     "netGain": "Net gain per year",
     "netCost": "Net cost per year",
     "yearIncome": "Members pay {amount}/yr",
     "owed": "To collect",
-    "owedSub": { "one": "{count} member unpaid", "other": "{count} members unpaid" },
+    "owedSub": {
+      "one": "{count} member unpaid",
+      "other": "{count} members unpaid"
+    },
     "count": "Plans",
     "countStarted": " organized · ",
     "countJoined": " joined",
     "countSub": "Organized · Joined",
     "emptyTitle": "No shared plans yet",
-    "emptyBody": "In a subscription's editor, set who uses it to “I organize”, then add members and their shares.",
+    "emptyBody": "In a subscription’s editor, choose “I host” under “Who uses it”, then add members and their shares.",
     "next": "next {date}",
     "me": "Me",
     "exemptTitle": "{name} (doesn't pay)",
     "addMember": "Add member",
     "manageTitle": "Open family management page",
     "manage": "Manage",
-    "owedN": { "one": "{count} to collect", "other": "{count} to collect" },
+    "owedN": {
+      "one": "{count} to collect",
+      "other": "{count} to collect"
+    },
     "settled": "Settled",
     "noMembers": "No members yet",
-    "addMemberSeats": { "one": "Add member ({count} seat open)", "other": "Add member ({count} seats open)" },
+    "addMemberSeats": {
+      "one": "Add member ({count} seat open)",
+      "other": "Add member ({count} seats open)"
+    },
     "unnamed": "Unnamed",
     "leftOn": "Left {date}",
     "exemptNote": "Holds a seat, doesn't pay",
     "paidUntil": "Paid through {date}",
     "noPay": "No payments yet",
-    "paymentsN": { "one": "{count} payment", "other": "{count} payments" },
+    "paymentsN": {
+      "one": "{count} payment",
+      "other": "{count} payments"
+    },
     "from": "via {source}",
     "exempt": "Doesn't pay",
     "owedAmount": "{amount} due",
@@ -142,7 +184,10 @@
       "m3": "{fee}/quarter",
       "m6": "{fee} every 6 months",
       "m12": "{fee}/yr",
-      "custom": { "one": "{fee} every {count} month", "other": "{fee} every {count} months" }
+      "custom": {
+        "one": "{fee} every {count} month",
+        "other": "{fee} every {count} months"
+      }
     },
     "collect": "Collect",
     "joinedGroup": "Plans I've joined",

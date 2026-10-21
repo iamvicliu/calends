@@ -1,14 +1,30 @@
 {
-  "filter": { "all": "All", "live": "Active", "owe": "Owed", "ended": "Ended", "none": "No proxy payments match" },
+  "filter": {
+    "all": "All",
+    "live": "Active",
+    "owe": "Owed",
+    "ended": "Ended",
+    "none": "No proxy payments match"
+  },
   "title": "Paid for others",
-  "status": { "active": "Active", "ending": "Ending", "ended": "Stopped" },
-  "owedPeriods": { "one": "{count} payment due", "other": "{count} payments due" },
+  "status": {
+    "active": "Active",
+    "ending": "Ending",
+    "ended": "Stopped"
+  },
+  "owedPeriods": {
+    "one": "{count} payment due",
+    "other": "{count} payments due"
+  },
   "viewSub": "View subscription",
   "stoppedOn": " · stopped {date}",
   "nextOn": " · next {date}",
   "payFor": "For {name}",
   "unset": "not set",
-  "paidPeriods": { "one": "Paid {count} charge", "other": "Paid {count} charges" },
+  "paidPeriods": {
+    "one": "Paid {count} charge",
+    "other": "Paid {count} charges"
+  },
   "received": "Paid back",
   "owed": "Due",
   "settled": "Settled",
@@ -55,13 +71,22 @@
     "notePlaceholder": "Optional, e.g. bank transfer"
   },
   "page": {
-    "owedSub": { "one": "{count} unpaid, at charge-date rates", "other": "{count} unpaid, at charge-date rates" },
+    "owedSub": {
+      "one": "{count} unpaid, at charge-date rates",
+      "other": "{count} unpaid, at charge-date rates"
+    },
     "allBack": "All paid back",
     "total": "Total paid",
-    "totalSub": { "one": "{count} charge · {subs}", "other": "{count} charges · {subs}" },
-    "subs": { "one": "{count} subscription", "other": "{count} subscriptions" },
+    "totalSub": {
+      "one": "{count} charge · {subs}",
+      "other": "{count} charges · {subs}"
+    },
+    "subs": {
+      "one": "{count} subscription",
+      "other": "{count} subscriptions"
+    },
     "diffSub": "Difference from exchange rates and fees on paid-back charges",
     "emptyTitle": "Nothing paid for others yet",
-    "emptyBody": "Create or edit a subscription, choose “Paid for others” under sharing, and enter who it's for."
+    "emptyBody": "Create or edit a subscription, choose “Paying for” under “Who uses it”, and enter who it’s for."
   }
 }

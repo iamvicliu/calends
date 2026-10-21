@@ -51,7 +51,7 @@
   },
   "ics": {
     "title": "Suscribirse en el calendario",
-    "intro": "Sincroniza las fechas de cobro con Apple Calendar, Google Calendar u Outlook. Se actualiza cada 6 horas y te avisa antes de cada cobro según tus ajustes de recordatorio.",
+    "intro": "Sincroniza los cobros con Apple Calendar, Google Calendar u Outlook. Se sugiere actualizar cada 6 horas; el intervalo real depende del cliente. Las alarmas son relativas a eventos de todo el día; su hora y visualización dependen del cliente.",
     "subscribe": "Suscribirse",
     "copy": "Copiar enlace",
     "copied": "Copiado",

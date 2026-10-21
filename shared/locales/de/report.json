@@ -75,7 +75,8 @@
     "saved": "Monatlich weniger durch Kündigen",
     "savedSub": "{count} gekündigt",
     "next90": "Fällig in den nächsten 90 Tagen",
-    "peak": "Höchststand im {month} · {amount}"
+    "peak": "Höchststand im {month} · {amount}",
+    "fullPaidHint": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder"
   },
   "comp": {
     "title": "Wohin das Geld geht",

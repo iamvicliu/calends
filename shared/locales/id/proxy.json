@@ -1,14 +1,28 @@
 {
-  "filter": { "all": "Semua", "live": "Berjalan", "owe": "Belum dibayar", "ended": "Berakhir", "none": "Tidak ada pembayaran talangan yang cocok" },
+  "filter": {
+    "all": "Semua",
+    "live": "Berjalan",
+    "owe": "Belum dibayar",
+    "ended": "Berakhir",
+    "none": "Tidak ada pembayaran talangan yang cocok"
+  },
   "title": "Talangan",
-  "status": { "active": "Aktif", "ending": "Akan berakhir", "ended": "Dihentikan" },
-  "owedPeriods": { "other": "{count} pembayaran tertunggak" },
+  "status": {
+    "active": "Aktif",
+    "ending": "Akan berakhir",
+    "ended": "Dihentikan"
+  },
+  "owedPeriods": {
+    "other": "{count} pembayaran tertunggak"
+  },
   "viewSub": "Lihat langganan",
   "stoppedOn": " · dihentikan {date}",
   "nextOn": " · berikutnya {date}",
   "payFor": "Untuk {name}",
   "unset": "belum diatur",
-  "paidPeriods": { "other": "Menalangi {count} tagihan" },
+  "paidPeriods": {
+    "other": "Menalangi {count} tagihan"
+  },
   "received": "Sudah diganti",
   "owed": "Tertunggak",
   "settled": "Lunas",
@@ -55,13 +69,19 @@
     "notePlaceholder": "Opsional, mis. transfer bank"
   },
   "page": {
-    "owedSub": { "other": "{count} belum dibayar, dengan kurs tanggal tagihan" },
+    "owedSub": {
+      "other": "{count} belum dibayar, dengan kurs tanggal tagihan"
+    },
     "allBack": "Semua sudah diganti",
     "total": "Total ditalangi",
-    "totalSub": { "other": "{count} tagihan · {subs}" },
-    "subs": { "other": "{count} langganan" },
+    "totalSub": {
+      "other": "{count} tagihan · {subs}"
+    },
+    "subs": {
+      "other": "{count} langganan"
+    },
     "diffSub": "Selisih dari kurs dan biaya pada tagihan yang sudah diganti",
     "emptyTitle": "Belum ada talangan",
-    "emptyBody": "Buat atau edit langganan, pilih “Talangan” di bagian siapa yang memakai, lalu masukkan untuk siapa."
+    "emptyBody": "Buat atau edit langganan, pilih “Talangan” pada “Siapa yang memakai”, lalu masukkan untuk siapa."
   }
 }

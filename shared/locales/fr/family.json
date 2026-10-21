@@ -128,7 +128,14 @@
   "pool": {
     "seatsFree": "{count} libre(s)",
     "seatsFull": "Complet",
-    "filter": { "all": "Tous", "live": "En cours", "owe": "À encaisser", "settled": "Réglés", "ended": "Terminés", "none": "Aucun partage ne correspond" },
+    "filter": {
+      "all": "Tous",
+      "live": "En cours",
+      "owe": "À encaisser",
+      "settled": "Réglés",
+      "ended": "Terminés",
+      "none": "Aucun partage ne correspond"
+    },
     "title": "Abonnements partagés",
     "netGain": "Gain net par an",
     "netCost": "Coût net par an",
@@ -143,7 +150,7 @@
     "countJoined": " rejoints",
     "countSub": "Organisés · Rejoints",
     "emptyTitle": "Aucun abonnement partagé",
-    "emptyBody": "Dans l’éditeur d’un abonnement, réglez « Qui l’utilise » sur « J’organise », puis ajoutez les membres et leurs parts.",
+    "emptyBody": "Dans l’éditeur d’un abonnement, choisissez « J’organise » dans « Qui l’utilise », puis ajoutez les membres et leurs parts.",
     "next": "prochain le {date}",
     "me": "Moi",
     "exemptTitle": "{name} (ne paie pas)",

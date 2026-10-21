@@ -1,7 +1,17 @@
 {
-  "filter": { "all": "全部", "live": "进行中", "owe": "待收", "ended": "已停止", "none": "没有符合条件的代付" },
+  "filter": {
+    "all": "全部",
+    "live": "进行中",
+    "owe": "待收",
+    "ended": "已停止",
+    "none": "没有符合条件的代付"
+  },
   "title": "代付",
-  "status": { "active": "进行中", "ending": "到期停付", "ended": "已停止" },
+  "status": {
+    "active": "进行中",
+    "ending": "到期停付",
+    "ended": "已停止"
+  },
   "owedPeriods": "待收 {count} 期",
   "viewSub": "查看订阅",
   "stoppedOn": " · {date}停止",
@@ -62,6 +72,6 @@
     "subs": "{count} 个订阅",
     "diffSub": "已收的期数里，汇率和手续费带来的差额",
     "emptyTitle": "还没有代付",
-    "emptyBody": "新建或编辑订阅，在「合租 / 代付」里选「代付」并填上替谁付。"
+    "emptyBody": "新建或编辑订阅，在「谁在用」里选「代付」并填上替谁付。"
   }
 }

@@ -51,7 +51,7 @@
   },
   "ics": {
     "title": "Subscribe in calendar",
-    "intro": "Sync billing dates to Apple Calendar, Google Calendar or Outlook. Refreshes every 6 hours and alerts you before each charge based on your reminder settings.",
+    "intro": "Sync billing dates to Apple Calendar, Google Calendar or Outlook. A refresh every 6 hours is suggested; the actual interval depends on your calendar client. Alarms are relative to all-day events; their timing and display depend on the client.",
     "subscribe": "Subscribe",
     "copy": "Copy link",
     "copied": "Copied",

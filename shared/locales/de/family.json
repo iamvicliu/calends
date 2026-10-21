@@ -128,7 +128,14 @@
   "pool": {
     "seatsFree": "{count} frei",
     "seatsFull": "Voll",
-    "filter": { "all": "Alle", "live": "Aktiv", "owe": "Offen", "settled": "Beglichen", "ended": "Beendet", "none": "Keine passenden Gruppen" },
+    "filter": {
+      "all": "Alle",
+      "live": "Aktiv",
+      "owe": "Offen",
+      "settled": "Beglichen",
+      "ended": "Beendet",
+      "none": "Keine passenden Gruppen"
+    },
     "title": "Geteilte Abos",
     "netGain": "Nettogewinn pro Jahr",
     "netCost": "Nettokosten pro Jahr",
@@ -143,7 +150,7 @@
     "countJoined": " beigetreten",
     "countSub": "Organisiert · Beigetreten",
     "emptyTitle": "Noch keine geteilten Abos",
-    "emptyBody": "Stelle im Editor eines Abos „Wer es nutzt“ auf „Ich organisiere“ und füge dann Mitglieder und ihre Anteile hinzu.",
+    "emptyBody": "Wähle im Abo-Editor unter „Wer es nutzt“ die Option „Ich organisiere“ und füge Mitglieder und ihre Anteile hinzu.",
     "next": "nächste am {date}",
     "me": "Ich",
     "exemptTitle": "{name} (zahlt nicht)",

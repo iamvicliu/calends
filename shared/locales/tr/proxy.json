@@ -1,14 +1,30 @@
 {
-  "filter": { "all": "Tümü", "live": "Devam eden", "owe": "Alacak", "ended": "Biten", "none": "Eşleşen ödeme yok" },
+  "filter": {
+    "all": "Tümü",
+    "live": "Devam eden",
+    "owe": "Alacak",
+    "ended": "Biten",
+    "none": "Eşleşen ödeme yok"
+  },
   "title": "Başkaları için",
-  "status": { "active": "Etkin", "ending": "Sona eriyor", "ended": "Durduruldu" },
-  "owedPeriods": { "one": "{count} ödeme bekliyor", "other": "{count} ödeme bekliyor" },
+  "status": {
+    "active": "Etkin",
+    "ending": "Sona eriyor",
+    "ended": "Durduruldu"
+  },
+  "owedPeriods": {
+    "one": "{count} ödeme bekliyor",
+    "other": "{count} ödeme bekliyor"
+  },
   "viewSub": "Aboneliği gör",
   "stoppedOn": " · {date} durduruldu",
   "nextOn": " · sonraki {date}",
   "payFor": "{name} için",
   "unset": "belirtilmedi",
-  "paidPeriods": { "one": "{count} ödeme yapıldı", "other": "{count} ödeme yapıldı" },
+  "paidPeriods": {
+    "one": "{count} ödeme yapıldı",
+    "other": "{count} ödeme yapıldı"
+  },
   "received": "Geri ödenen",
   "owed": "Borç",
   "settled": "Ödeşildi",
@@ -55,13 +71,22 @@
     "notePlaceholder": "İsteğe bağlı, ör. banka havalesi"
   },
   "page": {
-    "owedSub": { "one": "{count} ödenmemiş, ödeme tarihindeki kurlarla", "other": "{count} ödenmemiş, ödeme tarihindeki kurlarla" },
+    "owedSub": {
+      "one": "{count} ödenmemiş, ödeme tarihindeki kurlarla",
+      "other": "{count} ödenmemiş, ödeme tarihindeki kurlarla"
+    },
     "allBack": "Tamamı geri ödendi",
     "total": "Toplam ödenen",
-    "totalSub": { "one": "{count} ödeme · {subs}", "other": "{count} ödeme · {subs}" },
-    "subs": { "one": "{count} abonelik", "other": "{count} abonelik" },
+    "totalSub": {
+      "one": "{count} ödeme · {subs}",
+      "other": "{count} ödeme · {subs}"
+    },
+    "subs": {
+      "one": "{count} abonelik",
+      "other": "{count} abonelik"
+    },
     "diffSub": "Geri ödenen ödemelerde kur ve ücretlerden kaynaklanan fark",
     "emptyTitle": "Henüz başkası için ödeme yok",
-    "emptyBody": "Bir abonelik oluşturun veya düzenleyin, kimin kullandığı bölümünde “Başkası için ödüyorum” seçeneğini seçin ve kimin için olduğunu girin."
+    "emptyBody": "Bir abonelik oluşturun veya düzenleyin, “Kim kullanıyor” altında “Başkası için ödüyorum” seçeneğini seçip kimin için olduğunu girin."
   }
 }

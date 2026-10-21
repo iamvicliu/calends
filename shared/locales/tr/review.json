@@ -101,5 +101,6 @@
   "stars": {
     "head": "{year} · {whose} · abonelik yıldızları",
     "foot": "Balon büyüdükçe harcama büyür"
-  }
+  },
+  "spendBasis": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar"
 }

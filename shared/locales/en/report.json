@@ -75,7 +75,8 @@
     "saved": "Less per month from cancelling",
     "savedSub": "{count} cancelled",
     "next90": "Due in the next 90 days",
-    "peak": "Peak in {month} · {amount}"
+    "peak": "Peak in {month} · {amount}",
+    "fullPaidHint": "Full amount paid, including advances for members"
   },
   "comp": {
     "title": "Where the money goes",

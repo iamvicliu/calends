@@ -1,14 +1,30 @@
 {
-  "filter": { "all": "Todos", "live": "Activos", "owe": "Pendientes", "ended": "Finalizados", "none": "Ningún pago por otros coincide" },
+  "filter": {
+    "all": "Todos",
+    "live": "Activos",
+    "owe": "Pendientes",
+    "ended": "Finalizados",
+    "none": "Ningún pago por otros coincide"
+  },
   "title": "Pagos por otros",
-  "status": { "active": "Activo", "ending": "Termina", "ended": "Detenido" },
-  "owedPeriods": { "one": "{count} pago pendiente", "other": "{count} pagos pendientes" },
+  "status": {
+    "active": "Activo",
+    "ending": "Termina",
+    "ended": "Detenido"
+  },
+  "owedPeriods": {
+    "one": "{count} pago pendiente",
+    "other": "{count} pagos pendientes"
+  },
   "viewSub": "Ver suscripción",
   "stoppedOn": " · detenido {date}",
   "nextOn": " · próximo {date}",
   "payFor": "Para {name}",
   "unset": "sin definir",
-  "paidPeriods": { "one": "{count} cobro pagado", "other": "{count} cobros pagados" },
+  "paidPeriods": {
+    "one": "{count} cobro pagado",
+    "other": "{count} cobros pagados"
+  },
   "received": "Devuelto",
   "owed": "Pendiente",
   "settled": "Al día",
@@ -55,11 +71,20 @@
     "notePlaceholder": "Opcional, p. ej. transferencia bancaria"
   },
   "page": {
-    "owedSub": { "one": "{count} sin pagar, al tipo de cambio de la fecha de cobro", "other": "{count} sin pagar, al tipo de cambio de la fecha de cobro" },
+    "owedSub": {
+      "one": "{count} sin pagar, al tipo de cambio de la fecha de cobro",
+      "other": "{count} sin pagar, al tipo de cambio de la fecha de cobro"
+    },
     "allBack": "Todo devuelto",
     "total": "Total pagado",
-    "totalSub": { "one": "{count} cobro · {subs}", "other": "{count} cobros · {subs}" },
-    "subs": { "one": "{count} suscripción", "other": "{count} suscripciones" },
+    "totalSub": {
+      "one": "{count} cobro · {subs}",
+      "other": "{count} cobros · {subs}"
+    },
+    "subs": {
+      "one": "{count} suscripción",
+      "other": "{count} suscripciones"
+    },
     "diffSub": "Diferencia por tipos de cambio y comisiones en los cobros devueltos",
     "emptyTitle": "Aún no has pagado nada por otros",
     "emptyBody": "Crea o edita una suscripción, elige «Pago por otro» en «Quién la usa» e indica para quién es."

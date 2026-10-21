@@ -75,7 +75,8 @@
     "saved": "A menos por mês com cancelamentos",
     "savedSub": "{count} canceladas",
     "next90": "A vencer nos próximos 90 dias",
-    "peak": "Pico em {month} · {amount}"
+    "peak": "Pico em {month} · {amount}",
+    "fullPaidHint": "Valor total pago, incluindo adiantamentos para membros"
   },
   "comp": {
     "title": "Para onde vai o dinheiro",
