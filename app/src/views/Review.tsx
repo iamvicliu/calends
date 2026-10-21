@@ -22,7 +22,7 @@ interface Ctx {
   r: YearReview;
   year: string;
   name: string;
-  /** 所有格：「张三」/「Ethan's」；没填名字时是「我」/「My」 */
+  /** 所有格：「张三」/「Alex's」；没填名字时是「我」/「My」 */
   whose: string;
   ongoing: boolean;
   m: (v: number) => string;
