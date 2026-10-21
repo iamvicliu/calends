@@ -350,8 +350,8 @@ const stopLine = (v: Subscription, state: AppState, today: string) => {
   );
 };
 
-/** 正常扣款（不含退款、补差、失败）：走势和「每笔」都只看这些 */
-const regular = (h: Charge[]) => h.filter((c) => !c.kind);
+/** 正常扣款（不含退款、补差、失败，也不含记成负数的返佣、抵扣）：走势和「每笔」都只看这些 */
+const regular = (h: Charge[]) => h.filter((c) => !c.kind && c.amount > 0);
 
 /**
  * 指标卡：累计花了多少、订了多久（扣掉断档）、按实际算每月多少。
