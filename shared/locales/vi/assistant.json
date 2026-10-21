@@ -1,4 +1,9 @@
 {
+  "imagesSent": "Đã gửi {count} ảnh",
+  "clearChatsHint": "Xóa toàn bộ hội thoại trên máy chủ và thiết bị này. Không thể hoàn tác.",
+  "clearChats": "Xóa mọi cuộc trò chuyện",
+  "clearChatsConfirm": "Xóa mọi cuộc trò chuyện? Không thể hoàn tác.",
+  "clearChatsDone": "Đã xóa mọi cuộc trò chuyện",
   "title": "Trợ lý AI",
   "new": "Cuộc trò chuyện mới",
   "settings": "Cài đặt AI",

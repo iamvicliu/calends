@@ -1,4 +1,9 @@
 {
+  "imagesSent": "{count} görsel gönderildi",
+  "clearChatsHint": "Sunucudaki ve bu cihazdaki tüm sohbetler silinir. Geri alınamaz.",
+  "clearChats": "Tüm sohbetleri temizle",
+  "clearChatsConfirm": "Tüm sohbetler temizlensin mi? Geri alınamaz.",
+  "clearChatsDone": "Tüm sohbetler temizlendi",
   "title": "Yapay zekâ asistanı",
   "new": "Yeni sohbet",
   "settings": "Yapay zekâ ayarları",

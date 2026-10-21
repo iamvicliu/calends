@@ -322,3 +322,32 @@ export async function apply(env: Env, b: { tool?: string; args?: Record<string, 
   if (!tool) throw new Error(t('server.assistant.badTool'));
   return tool.run({ ...b.args, dry_run: false }, { env });
 }
+
+// ---------- 聊天记录：存在服务端，多台设备共用；「新对话」只是开新的一段，清空要在设置里明确操作 ----------
+
+const CHAT_MAX = 1_500_000;
+
+/** 全部对话，按开始时间从早到晚 */
+export async function listChats(env: Env): Promise<unknown[]> {
+  const rows = (await env.DB.prepare('SELECT id, data FROM chats').all<{ id: string; data: string }>()).results;
+  return rows
+    .map((r) => ({ id: r.id, ...(JSON.parse(r.data) as { createdAt?: string }) }))
+    .sort((a, b) => String(a.createdAt ?? '').localeCompare(String(b.createdAt ?? '')));
+}
+
+/** 保存一个对话（整段覆盖）；过大的拒绝，免得一条对话撑爆数据库 */
+export async function saveChat(env: Env, id: string, body: unknown): Promise<void> {
+  const b = body as { createdAt?: unknown; turns?: unknown; history?: unknown } | null;
+  if (!b || !Array.isArray(b.turns) || !Array.isArray(b.history)) throw new Error('invalid chat');
+  const data = JSON.stringify({ createdAt: typeof b.createdAt === 'string' ? b.createdAt : new Date().toISOString(), turns: b.turns, history: b.history });
+  if (data.length > CHAT_MAX) throw new Error('chat too large');
+  await env.DB.prepare(
+    `INSERT INTO chats (id, data, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
+  )
+    .bind(id, data)
+    .run();
+}
+
+export async function clearChats(env: Env): Promise<void> {
+  await env.DB.prepare('DELETE FROM chats').run();
+}

@@ -43,7 +43,7 @@ import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { searchAppStore, TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
-import { apply, chat, saveConfig, testConfig, viewConfig } from './assistant.ts';
+import { apply, chat, clearChats, listChats, saveChat, saveConfig, testConfig, viewConfig } from './assistant.ts';
 import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 import { ensureMigrated } from './migrate.ts';
@@ -319,6 +319,20 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/assistant/config' && method === 'PUT') return json(await saveConfig(env, (await req.json()) as Parameters<typeof saveConfig>[1]));
   if (path === '/api/assistant/test' && method === 'POST')
     return json(await testConfig(env, (await req.json().catch(() => ({}))) as { apiKey?: string; baseUrl?: string }));
+  // 聊天记录
+  if (path === '/api/assistant/chats' && method === 'GET') return json(await listChats(env));
+  if (path === '/api/assistant/chats' && method === 'DELETE') return (await clearChats(env), json({ ok: true }));
+  {
+    const cm = path.match(/^\/api\/assistant\/chats\/([\w-]{1,40})$/);
+    if (cm && method === 'PUT') {
+      try {
+        await saveChat(env, cm[1], await req.json());
+        return json({ ok: true });
+      } catch (e) {
+        return bad(e instanceof Error ? e.message : String(e));
+      }
+    }
+  }
   if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await req.json()) as Parameters<typeof chat>[1], req.signal);
   if (path === '/api/assistant/apply' && method === 'POST') {
     try {

@@ -11,6 +11,7 @@ import {
   ChevronDown,
   CircleAlert,
   Copy,
+  Image as ImageIcon,
   ImagePlus,
   KeyRound,
   Loader2,
@@ -64,26 +65,47 @@ interface Preview {
 }
 
 type ChatTurn =
-  | { id: string; role: 'user'; text: string; images: string[]; /** 发送时历史的长度：重试、重新生成时截回这里 */ at: number }
+  | {
+      id: string;
+      role: 'user';
+      text: string;
+      images: string[];
+      /** 发送时历史的长度：重试、重新生成时截回这里 */ at: number;
+      /** 存到服务端时图片不保存，只记张数 */ imgs?: number;
+    }
   | { id: string; role: 'assistant'; parts: Part[]; status: 'streaming' | 'done' | 'error' | 'stopped'; error?: { kind: ErrorKind; message: string } };
 
 interface Saved {
+  /** 对话 id：服务端按它存；「新对话」换一个新的 */
+  id: string;
+  createdAt: string;
   turns: ChatTurn[];
   history: ApiMessage[];
 }
 
 const STORE = 'calends.assistant';
 const rid = () => Math.random().toString(36).slice(2, 10);
+const newChat = (): Saved => ({ id: rid(), createdAt: new Date().toISOString(), turns: [], history: [] });
+
+/** 存到服务端的样子：图片换成张数，历史里的图片换成占位文字 */
+function forServer(s: Saved) {
+  return {
+    createdAt: s.createdAt,
+    turns: s.turns.map((x) => (x.role === 'user' && x.images.length ? { ...x, images: [], imgs: x.images.length } : x)),
+    history: dropOldImages(s.history, 0, '[image]'),
+  };
+}
 
 /** 会话存在本机浏览器里（只是方便，不是账本数据）：较早的图片不存，免得撑爆存储 */
 function load(): Saved {
   try {
     const raw = localStorage.getItem(STORE);
-    if (raw) return JSON.parse(raw) as Saved;
+    // 老版本没有 id：补上，之后照常存到服务端
+    if (raw) return { ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved;
   } catch {
     /* 隐私模式等读不到就当新会话 */
   }
-  return { turns: [], history: [] };
+  return newChat();
 }
 function persist(s: Saved) {
   try {
@@ -93,10 +115,18 @@ function persist(s: Saved) {
       .reverse()
       .map((x) => (x.role === 'user' && x.images.length && ++users > 2 ? { ...x, images: [] } : x))
       .reverse();
-    localStorage.setItem(STORE, JSON.stringify({ turns, history: dropOldImages(s.history, 0, '[image]') }));
+    localStorage.setItem(STORE, JSON.stringify({ id: s.id, createdAt: s.createdAt, turns, history: dropOldImages(s.history, 0, '[image]') }));
   } catch {
     /* 存不下就算了 */
   }
+}
+
+/** 对话分隔线上的时间：今年的不写年份 */
+function fmtWhen(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleString(locale(), { ...(sameYear ? {} : { year: 'numeric' }), month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 // ---------- 流式请求 ----------
@@ -189,6 +219,8 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   const [cfg, setCfg] = useState<AssistantConfigView | null>(null);
   const [setup, setSetup] = useState(false);
   const [chat, setChat] = useState<Saved>(load);
+  // 以前的对话（服务端）：显示在当前对话上面，往上翻就能看到；只读
+  const [past, setPast] = useState<Saved[]>([]);
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const [atBottom, setAtBottom] = useState(true);
@@ -198,6 +230,19 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     void api<AssistantConfigView>('/api/assistant/config').then(setCfg, () => setCfg(null));
   }, []);
   useEffect(() => persist(chat), [chat]);
+  useEffect(() => {
+    void api<Saved[]>('/api/assistant/chats').then(
+      (list) => setPast(list.filter((c) => c.turns?.length)),
+      () => {},
+    );
+  }, []);
+  // 每轮回复结束后存到服务端（流式过程中不存）；其他设备也能看到
+  useEffect(() => {
+    if (busy || !chat.turns.length) return;
+    const h = setTimeout(() => void api(`/api/assistant/chats/${chat.id}`, { method: 'PUT', body: JSON.stringify(forServer(chat)) }).catch(() => {}), 600);
+    return () => clearTimeout(h);
+  }, [chat, busy]);
+  const shownPast = past.filter((c) => c.id !== chat.id);
   // 别处（新建订阅表单）带着文字或图片跳过来：放进输入框
   useEffect(() => {
     const h = takeHandoff();
@@ -221,7 +266,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     if (busy || (!text.trim() && !images.length)) return;
     const user: ChatTurn = { id: rid(), role: 'user', text, images, at: history.length };
     let bot: Extract<ChatTurn, { role: 'assistant' }> = { id: rid(), role: 'assistant', parts: [], status: 'streaming' };
-    setChat({ history, turns: [...base, user, bot] });
+    setChat((c) => ({ ...c, history, turns: [...base, user, bot] }));
     setAtBottom(true);
     setBusy(true);
     const ctrl = new AbortController();
@@ -321,12 +366,15 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     window.dispatchEvent(new CustomEvent('ledger:add', { detail: draft }));
   };
 
+  /** 新对话：只是开新的一段，之前的留在上面（服务端也还在）；真正清空在设置里 */
   const reset = () => {
     abort.current?.abort();
-    setChat({ turns: [], history: [] });
+    if (chat.turns.length) setPast((p) => [...p.filter((c) => c.id !== chat.id), chat]);
+    setChat(newChat());
   };
 
   const empty = !chat.turns.length;
+  const noop = () => {};
   const ready = !!cfg?.configured;
   return (
     <>
@@ -345,6 +393,34 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       <div className="as">
         <div className="as-scroll">
           <div className="as-col">
+            {shownPast.map((c) => (
+              <div key={c.id} className="as-past">
+                <div className="as-past-head">{fmtWhen(c.createdAt)}</div>
+                {c.turns.map((turn) =>
+                  turn.role === 'user' ? (
+                    <UserBubble key={turn.id} turn={turn} />
+                  ) : (
+                    <BotMessage
+                      key={turn.id}
+                      turn={turn.status === 'streaming' ? { ...turn, status: 'stopped' } : turn}
+                      state={state}
+                      last={false}
+                      onRetry={noop}
+                      onSetup={() => setSetup(true)}
+                      onApply={noop}
+                      onEdit={noop}
+                      onDismiss={noop}
+                      onApplyAll={noop}
+                      onOpen={(id) => {
+                        const s = state.subscriptions.find((x) => x.id === id);
+                        if (s) onOpen(s);
+                      }}
+                    />
+                  ),
+                )}
+              </div>
+            ))}
+            {shownPast.length > 0 && !empty && <div className="as-past-head">{fmtWhen(chat.createdAt)}</div>}
             {empty ? (
               <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
             ) : (
@@ -390,7 +466,18 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
           onReset={empty ? undefined : reset}
         />
       </div>
-      {setup && <SetupSheet cfg={cfg} onClose={() => setSetup(false)} onSaved={setCfg} />}
+      {setup && (
+        <SetupSheet
+          cfg={cfg}
+          onClose={() => setSetup(false)}
+          onSaved={setCfg}
+          onClearChats={() => {
+            abort.current?.abort();
+            setPast([]);
+            setChat(newChat());
+          }}
+        />
+      )}
     </>
   );
 }
@@ -446,6 +533,11 @@ function UserBubble({ turn }: { turn: Extract<ChatTurn, { role: 'user' }> }) {
           {turn.images.map((src, i) => (
             <img key={i} src={src} alt="" />
           ))}
+        </div>
+      )}
+      {!turn.images.length && !!turn.imgs && (
+        <div className="as-user-imgnote">
+          <ImageIcon size={13} /> {t('assistant.imagesSent', { count: turn.imgs })}
         </div>
       )}
       {turn.text && <div className="as-bubble">{turn.text}</div>}
@@ -1026,7 +1118,17 @@ function Composer({
 
 // ---------- 配置：DeepSeek API Key、Base URL、模型、思考强度 ----------
 
-function SetupSheet({ cfg, onClose, onSaved }: { cfg: AssistantConfigView | null; onClose: () => void; onSaved: (c: AssistantConfigView) => void }) {
+function SetupSheet({
+  cfg,
+  onClose,
+  onSaved,
+  onClearChats,
+}: {
+  cfg: AssistantConfigView | null;
+  onClose: () => void;
+  onSaved: (c: AssistantConfigView) => void;
+  onClearChats: () => void;
+}) {
   const [key, setKey] = useState('');
   const [baseUrl, setBaseUrl] = useState(cfg?.baseUrl ?? 'https://api.deepseek.com');
   const [model, setModel] = useState(cfg?.model ?? 'deepseek-flash');
@@ -1087,6 +1189,28 @@ function SetupSheet({ cfg, onClose, onSaved }: { cfg: AssistantConfigView | null
       }
     >
       <div className="as-setup">
+        {/* 清空聊天记录：服务端和本机都删掉，不可恢复，所以要确认 */}
+        <div className="as-clear-chats">
+          <span>{t('assistant.clearChatsHint')}</span>
+          <button
+            type="button"
+            className="btn danger"
+            onClick={() =>
+              window.confirm(t('assistant.clearChatsConfirm')) &&
+              void api('/api/assistant/chats', { method: 'DELETE' }).then(() => {
+                try {
+                  localStorage.removeItem(STORE);
+                } catch {
+                  /* ignore */
+                }
+                onClearChats();
+                toast(t('assistant.clearChatsDone'));
+              })
+            }
+          >
+            {t('assistant.clearChats')}
+          </button>
+        </div>
         <p className="as-setup-intro">
           {t('assistant.setup.intro')}{' '}
           <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">

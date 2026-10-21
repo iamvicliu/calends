@@ -1,4 +1,9 @@
 {
+  "imagesSent": "{count} imagem(ns) enviada(s)",
+  "clearChatsHint": "Apaga todas as conversas do servidor e deste dispositivo. Não dá para desfazer.",
+  "clearChats": "Limpar todas as conversas",
+  "clearChatsConfirm": "Limpar todas as conversas? Não dá para desfazer.",
+  "clearChatsDone": "Conversas apagadas",
   "title": "Assistente de IA",
   "new": "Nova conversa",
   "settings": "Ajustes de IA",

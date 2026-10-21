@@ -1,4 +1,9 @@
 {
+  "imagesSent": "画像 {count} 枚を送信",
+  "clearChatsHint": "サーバーとこの端末の会話がすべて削除され、元に戻せません。",
+  "clearChats": "すべての会話を消去",
+  "clearChatsConfirm": "すべての会話を消去しますか？元に戻せません。",
+  "clearChatsDone": "すべての会話を消去しました",
   "title": "アシスタント",
   "new": "新しいチャット",
   "settings": "AI 設定",

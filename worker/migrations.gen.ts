@@ -32,5 +32,11 @@ export const MIGRATIONS: Array<{ name: string; statements: string[] }> = [
       "ALTER TABLE sessions ADD COLUMN method TEXT",
       "ALTER TABLE sessions ADD COLUMN last_seen_at INTEGER"
     ]
+  },
+  {
+    "name": "0005_chats.sql",
+    "statements": [
+      "CREATE TABLE IF NOT EXISTS chats (\n  id TEXT PRIMARY KEY,\n  data TEXT NOT NULL,\n  updated_at TEXT NOT NULL DEFAULT (datetime('now'))\n)"
+    ]
   }
 ];

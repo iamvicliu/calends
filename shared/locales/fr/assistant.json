@@ -1,4 +1,9 @@
 {
+  "imagesSent": "{count} image(s) envoyée(s)",
+  "clearChatsHint": "Supprime toutes les conversations sur le serveur et cet appareil. Irréversible.",
+  "clearChats": "Effacer toutes les discussions",
+  "clearChatsConfirm": "Effacer toutes les discussions ? Action irréversible.",
+  "clearChatsDone": "Discussions effacées",
   "title": "Assistant IA",
   "new": "Nouvelle discussion",
   "settings": "Réglages IA",

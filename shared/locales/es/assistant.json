@@ -1,4 +1,9 @@
 {
+  "imagesSent": "{count} imagen(es) enviada(s)",
+  "clearChatsHint": "Borra todas las conversaciones del servidor y de este dispositivo. No se puede deshacer.",
+  "clearChats": "Borrar todos los chats",
+  "clearChatsConfirm": "¿Borrar todos los chats? No se puede deshacer.",
+  "clearChatsDone": "Chats borrados",
   "title": "Asistente de IA",
   "new": "Nuevo chat",
   "settings": "Ajustes de IA",

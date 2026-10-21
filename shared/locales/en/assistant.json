@@ -1,4 +1,9 @@
 {
+  "imagesSent": "{count} image(s) sent",
+  "clearChatsHint": "Clearing deletes every conversation on the server and this device. This can’t be undone.",
+  "clearChats": "Clear all chats",
+  "clearChatsConfirm": "Clear all chats? This can’t be undone.",
+  "clearChatsDone": "All chats cleared",
   "title": "AI Assistant",
   "new": "New chat",
   "settings": "AI settings",

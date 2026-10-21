@@ -1,4 +1,9 @@
 {
+  "imagesSent": "{count} gambar terkirim",
+  "clearChatsHint": "Menghapus semua percakapan di server dan perangkat ini. Tidak bisa dibatalkan.",
+  "clearChats": "Hapus semua obrolan",
+  "clearChatsConfirm": "Hapus semua obrolan? Tidak bisa dibatalkan.",
+  "clearChatsDone": "Semua obrolan dihapus",
   "title": "Asisten AI",
   "new": "Obrolan baru",
   "settings": "Pengaturan AI",
