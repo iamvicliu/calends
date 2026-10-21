@@ -1,7 +1,7 @@
 // AI 助手：用 DeepSeek 识别用户粘贴的文字、截图，整理成订阅草稿；查询与修改直接复用 MCP 工具。
 // 写操作一律先 dry_run 出草稿，由用户在页面上确认后再经同一个工具真正执行。
-import { todayIn } from '../shared/billing.ts';
-import { categoryList, presetCategory, presetOf } from '../shared/categories.ts';
+import { todayIn } from '../../shared/billing.ts';
+import { categoryList, presetCategory, presetOf } from '../../shared/categories.ts';
 import {
   applyLine,
   assistantMessage,
@@ -17,11 +17,11 @@ import {
   type Effort,
   type ErrorKind,
   type Turn,
-} from '../shared/deepseek.ts';
-import { locale, t } from '../shared/i18n.ts';
-import type { Env } from './env.ts';
+} from '../../shared/deepseek.ts';
+import { locale, t } from '../../shared/i18n.ts';
+import type { Env } from '../env.ts';
 import { searchAppStore, TOOLS, type Tool } from './mcp-tools.ts';
-import { getKv, loadState, putKv } from './store.ts';
+import { getKv, loadState, putKv } from '../store.ts';
 
 const KEY = 'assistant';
 /** 一次提问里最多跟模型来回几轮（每轮可能调用多个工具） */

@@ -21,18 +21,18 @@ import {
   totals,
   uid,
   type Charge,
-} from '../shared/billing.ts';
-import { chargeValue, toBaseAt } from '../shared/fx.ts';
-import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../shared/metrics.ts';
-import { changePrice, confirmPlan, deletePayment, dropPlan, prependPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
-import { matchEntries } from '../shared/proxy.ts';
-import { normName, peopleLedger, type PersonLedger } from '../shared/people.ts';
-import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../shared/types.ts';
-import type { Env } from './env.ts';
-import { loadState, remove, upsert } from './store.ts';
-import { carLedger, memberFee, resyncShares, shareFromFee } from '../shared/carpool.ts';
-import { t } from '../shared/i18n.ts';
-import { categoryCounts, categoryList, presetCategory } from '../shared/categories.ts';
+} from '../../shared/billing.ts';
+import { chargeValue, toBaseAt } from '../../shared/fx.ts';
+import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../../shared/metrics.ts';
+import { changePrice, confirmPlan, deletePayment, dropPlan, prependPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../../shared/phases.ts';
+import { matchEntries } from '../../shared/proxy.ts';
+import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
+import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../../shared/types.ts';
+import type { Env } from '../env.ts';
+import { loadState, remove, upsert } from '../store.ts';
+import { carLedger, memberFee, resyncShares, shareFromFee } from '../../shared/carpool.ts';
+import { t } from '../../shared/i18n.ts';
+import { categoryCounts, categoryList, presetCategory } from '../../shared/categories.ts';
 
 /** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
 export async function searchAppStore(query: string, country = 'us') {

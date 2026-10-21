@@ -1,11 +1,11 @@
 // MCP 服务器：让 Codex、Claude、Cursor 等 AI 助手通过 /mcp 读写账本。
 // 传输：Streamable HTTP 的无状态模式——每个 POST 是一条 JSON-RPC 请求，直接返回 JSON，不开 SSE、不保留会话。
 // 鉴权：Authorization: Bearer <令牌>；令牌在后台「AI」页生成，库里只存 SHA-256，分只读 / 读写两种权限。
-import { randomToken, sha256 } from './auth.ts';
-import type { Env } from './env.ts';
-import { getKv, getSettings, putKv } from './store.ts';
+import { randomToken, sha256 } from '../auth.ts';
+import type { Env } from '../env.ts';
+import { getKv, getSettings, putKv } from '../store.ts';
 import { TOOLS, toolTitle, type ToolCtx } from './mcp-tools.ts';
-import { t } from '../shared/i18n.ts';
+import { t } from '../../shared/i18n.ts';
 
 export interface McpToken {
   id: string;
