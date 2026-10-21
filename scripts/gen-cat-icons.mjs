@@ -1,4 +1,4 @@
-// 生成分类图标集（src/components/cat-icons.gen.ts）：从 lucide-react 取精选图标的路径数据，按主题分组。
+// 生成分类图标集（app/src/components/cat-icons.gen.ts）：从 lucide-react 取精选图标的路径数据，按主题分组。
 // 只嵌路径，不引入 React 组件，后台和公开页按名称渲染。改了下面的列表后运行：node scripts/gen-cat-icons.mjs
 // 图标来自 Lucide（ISC 许可）。
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -190,5 +190,5 @@ const out = [
   `export const CAT_ICON_GROUPS: Record<string, string[]> = ${JSON.stringify(groups)};`,
   '',
 ].join('\n');
-writeFileSync(new URL('../src/components/cat-icons.gen.ts', import.meta.url), out);
+writeFileSync(new URL('../app/src/components/cat-icons.gen.ts', import.meta.url), out);
 console.log(`${Object.keys(icons).length} icons`);

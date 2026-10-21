@@ -25,8 +25,8 @@ process.on('SIGTERM', shutdown);
 
 // wrangler 需要 dist 目录存在（静态资源绑定），开发时页面由 Vite 提供
 if (!existsSync('dist/index.html')) {
-  const b = spawn('npx', ['vite', 'build'], { stdio: 'inherit' });
+  const b = spawn('npx', ['vite', 'build', 'app'], { stdio: 'inherit' });
   await new Promise((r) => b.on('exit', r));
 }
 run('worker', '35', 'node', ['scripts/wrangler.mjs', 'dev', '--port', '8787', '--local']);
-run('vite', '36', 'npx', ['vite', '--host', '127.0.0.1', '--port', '5173', '--strictPort']);
+run('vite', '36', 'npx', ['vite', 'app', '--host', '127.0.0.1', '--port', '5173', '--strictPort']);

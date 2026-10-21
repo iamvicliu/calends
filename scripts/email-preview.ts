@@ -1,7 +1,7 @@
 // 本地预览提醒邮件：用示例数据把每种邮件渲染成 HTML，写到 .preview/email/（已被 git 忽略），不发送任何东西。
 // 用法：npm run email:preview                         中文与英文
 //       npm run email:preview -- ja ko                指定语言
-//       SITE_URL=https://example.com npm run email:preview   图片、链接用线上地址（默认指向本地 public/）
+//       SITE_URL=https://example.com npm run email:preview   图片、链接用线上地址（默认指向本地 app/public/）
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -13,7 +13,7 @@ import { buildDaily, buildMonthly, type Digest } from '../worker/notify.ts';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const OUT = join(ROOT, '.preview/email');
-const SITE = (process.env.SITE_URL ?? pathToFileURL(join(ROOT, 'public')).href).replace(/\/+$/, '');
+const SITE = (process.env.SITE_URL ?? pathToFileURL(join(ROOT, 'app/public')).href).replace(/\/+$/, '');
 /** 示例日期取某月 1 日：当天既有到期提醒，也有月度账单 */
 const TODAY = '2026-11-01';
 

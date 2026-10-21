@@ -10,7 +10,7 @@ function sw(root: string) {
   const pending: Promise<unknown>[] = [];
   let response: Promise<Response> | undefined;
   const keys = ['calends:/:shell-v5', 'calends:/:data-v5', 'calends:/claude/:shell-v4', 'calends:/claude/:data-v5', 'unrelated'];
-  runInNewContext(readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8'), {
+  runInNewContext(readFileSync(new URL('../app/public/sw.js', import.meta.url), 'utf8'), {
     URL,
     Response,
     location: { origin: 'https://demo.example' },

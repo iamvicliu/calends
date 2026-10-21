@@ -12,7 +12,7 @@ const locale = (loc: string, ns: string) => JSON.parse(read(`./locales/${loc}/${
 
 test('14. 真实 Ai 组件创建令牌后仅弹层可见，关闭和“已保存”都清空令牌', () => {
   // 在 Node 中执行真实组件的事件，不加载浏览器或其他页面；只替换 React 宿主与外部依赖。
-  const source = read('../src/views/Ai.tsx').replace(/^import .*;\n/gm, '');
+  const source = read('../app/src/views/Ai.tsx').replace(/^import .*;\n/gm, '');
   const result = transformSync('Ai.tsx', source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   type Element = { type: string | { name: string }; props: Record<string, unknown>; children: Element[] };

@@ -1,0 +1,88 @@
+// 主题：亮色 → 暗色 → 跟随系统 三者轮换，后台与公开页共用
+import { useEffect } from 'react';
+import { t } from '../../shared/i18n.ts';
+import { usePref } from './store.ts';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+const NEXT: Record<ThemeMode, ThemeMode> = { light: 'dark', dark: 'system', system: 'light' };
+/** 主题名称：用 getter 在读取时翻译，THEME_LABEL[mode] 的写法不变 */
+export const THEME_LABEL: Record<ThemeMode, string> = {
+  get light() {
+    return t('ui.theme.light');
+  },
+  get dark() {
+    return t('ui.theme.dark');
+  },
+  get system() {
+    return t('ui.theme.system');
+  },
+};
+
+const mq = () => matchMedia('(prefers-color-scheme: dark)');
+
+const isMode = (v: string): v is ThemeMode => v === 'light' || v === 'dark' || v === 'system';
+
+/** 始终写入 data-theme，跟随系统时按系统当前外观取值 */
+function apply(m: ThemeMode) {
+  document.documentElement.dataset.theme = m === 'system' ? (mq().matches ? 'dark' : 'light') : m;
+}
+
+/** 主题跟着账号走，多台设备一致；公开页没有登录数据时只用本机副本 */
+export function useThemeMode(): [ThemeMode, () => void] {
+  const [mode, setMode] = usePref<ThemeMode>('theme', 'system', isMode);
+  useEffect(() => {
+    apply(mode);
+    if (mode !== 'system') return;
+    const m = mq();
+    const on = () => apply('system');
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, [mode]);
+  const cycle = () => {
+    const n = NEXT[mode];
+    setMode(n === 'system' ? null : n);
+  };
+  return [mode, cycle];
+}
+
+/**
+ * 三个图标叠在一起，当前的转正放大显示，其余旋转缩小淡出；
+ * 切换时新图标带一点回弹转进来，旧图标反向转出。
+ */
+export function ThemeIcon({ mode, size = 18 }: { mode: ThemeMode; size?: number }) {
+  const layer = (m: ThemeMode, turn: number) =>
+    ({
+      transformBox: 'fill-box',
+      transformOrigin: 'center',
+      transform: mode === m ? 'rotate(0deg) scale(1)' : `rotate(${turn}deg) scale(0.3)`,
+      opacity: mode === m ? 1 : 0,
+      transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
+    }) as React.CSSProperties;
+  return (
+    <svg
+      className="i"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <g style={layer('light', -90)}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </g>
+      <g style={layer('dark', 90)}>
+        <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z" />
+      </g>
+      <g style={layer('system', 180)}>
+        <rect x="2.5" y="4" width="19" height="13" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </g>
+    </svg>
+  );
+}

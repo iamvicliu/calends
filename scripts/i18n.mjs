@@ -82,7 +82,7 @@ if (process.argv.includes('--check')) {
       }
     }
   };
-  for (const d of ['src', 'worker', 'shared']) scan(join(ROOT, '..', '..', d));
+  for (const d of ['app/src', 'worker', 'shared']) scan(join(ROOT, '..', '..', d));
   const zh = load('zh-CN');
   const unknown = [...used].filter(([k]) => !zh.has(k) && k !== 'ns.key');
   if (unknown.length) {

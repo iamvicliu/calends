@@ -4,11 +4,11 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "dev:web": "vite",
+    "dev:web": "vite app",
     "dev:worker": "node scripts/wrangler.mjs dev --port 8787 --local",
-    "build": "node scripts/migrations.mjs && node scripts/i18n.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/migrations.mjs && node scripts/i18n.mjs && tsc --noEmit && vite build app",
     "test": "node --experimental-strip-types --test shared/*.test.ts",
-    "lint": "oxlint --deny-warnings src shared worker scripts docker",
+    "lint": "oxlint --deny-warnings app shared worker scripts docker",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
@@ -19,6 +19,11 @@
     "db:migrate:remote": "node scripts/wrangler.mjs d1 migrations apply DB --remote",
     "deploy": "npm run build && node scripts/wrangler.mjs deploy && node scripts/wrangler.mjs d1 migrations apply DB --remote",
     "seed": "node --experimental-strip-types scripts/seed.ts"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 160,
+    "trailingComma": "all"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

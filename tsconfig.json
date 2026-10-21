@@ -14,10 +14,10 @@
     "verbatimModuleSyntax": true,
     "noUnusedLocals": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./app/src/*"]
     },
     "resolveJsonModule": true
   },
-  "include": ["src", "shared", "worker"],
+  "include": ["app/src", "shared", "worker"],
   "exclude": ["shared/*.test.ts"]
 }

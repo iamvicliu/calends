@@ -14,7 +14,7 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": true,
   },
-  "d1_databases": [{ "binding": "DB", "database_name": "calends", "migrations_dir": "migrations" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "calends", "migrations_dir": "worker/migrations" }],
   // 每 15 分钟检查本地提醒时刻；维护任务仍只在整点执行
   "triggers": { "crons": ["*/15 * * * *"] },
   // 可选：邮件提醒需要 Cloudflare Email Sending，取消注释并换成你在 Cloudflare 验证过的域名
