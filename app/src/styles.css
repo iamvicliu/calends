@@ -6550,10 +6550,15 @@ button.seat:disabled {
   padding: 0 12px 0 16px;
   font-size: 13px;
 }
-.gt-label span {
+.gt-label > .gt-name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.gt-icon {
+  display: inline-flex;
+  flex: 0 0 20px;
 }
 .gt-row .gt-track {
   height: 100%;
@@ -6685,9 +6690,6 @@ button.seat:disabled {
   border-radius: 0;
 }
 @media (max-width: 700px) {
-  .gantt {
-    --lw: 112px;
-  }
   .gt-bar > .seg:first-child {
     flex: 0 0 100%;
   }
@@ -6695,11 +6697,8 @@ button.seat:disabled {
     padding-inline: 6px;
   }
   .gt-label {
-    padding: 0 6px 0 10px;
+    padding: 0 12px;
     font-size: 12px;
-  }
-  .gt-label .ico {
-    display: none;
   }
 }
 

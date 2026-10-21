@@ -14,7 +14,7 @@ import {
 } from '../../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
-import { GANTT_STEP, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
+import { GANTT_STEP, ganttLabelBounds, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { FlagImg, Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
@@ -56,8 +56,14 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
 /** 停用标志与条同高，作为条的末端 */
 const STOP_CAP = 18;
 const NARROW = '(max-width: 700px)';
+const PORTRAIT = '(max-width: 700px) and (orientation: portrait)';
 function subscribeNarrow(cb: () => void) {
   const mq = matchMedia(NARROW);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+function subscribePortrait(cb: () => void) {
+  const mq = matchMedia(PORTRAIT);
   mq.addEventListener('change', cb);
   return () => mq.removeEventListener('change', cb);
 }
@@ -83,10 +89,28 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     () => matchMedia(NARROW).matches,
     () => false,
   );
-  const [minW, maxW] = narrow ? [80, 200] : [120, 360];
-  const [savedW, setSavedW] = usePref<string>(narrow ? 'gantt-label-w-m' : 'gantt-label-w', '', (v): v is string => /^\d{2,3}$/.test(v));
+  const portrait = useSyncExternalStore(
+    subscribePortrait,
+    () => matchMedia(PORTRAIT).matches,
+    () => false,
+  );
+  const gtEl = useRef<HTMLDivElement>(null);
+  const [measured, setMeasured] = useState<{ textWidth: number; containerWidth: number; paddingLeft: number; paddingRight: number; gap: number } | null>(null);
+  const bounds = ganttLabelBounds(measured?.textWidth ?? 144, measured?.containerWidth ?? 0, {
+    paddingLeft: measured?.paddingLeft ?? (narrow ? 12 : 16),
+    paddingRight: measured?.paddingRight ?? 12,
+    gap: measured?.gap ?? 8,
+    iconWidth: 20,
+  });
+  const { min: minW, max: maxW } = bounds;
+  const [savedW, setSavedW] = usePref<string>(
+    narrow ? 'gantt-label-w-m' : 'gantt-label-w',
+    '',
+    (v): v is string => /^\d+$/.test(v) && Number.isSafeInteger(Number(v)),
+  );
   const [liveW, setLiveW] = useState<number | null>(null);
-  const labelW = liveW ?? (savedW ? Math.min(maxW, Math.max(minW, Number(savedW))) : null);
+  const labelW = portrait ? minW : Math.min(maxW, Math.max(minW, liveW ?? (savedW ? Number(savedW) : bounds.default)));
+  const iconOnly = portrait || labelW <= minW;
   const resizeFrom = useRef<{ x: number; w: number } | null>(null);
   const onResizeDown = (e: React.PointerEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -196,8 +220,50 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     clearTimeout(wheelIdle.current);
     wheelIdle.current = window.setTimeout(() => setPan((p) => snap(p)), 150);
   };
+  const locale = intlLocale();
+  useLayoutEffect(() => {
+    const el = gtEl.current;
+    const label = el?.querySelector<HTMLElement>('.gt-head .gt-label');
+    if (!el || !label) return;
+    let active = true;
+    const measure = () => {
+      if (!active) return;
+      const style = getComputedStyle(label);
+      // 临时文字继承名称格的真实字体，脱离布局测量，折叠名称后也能重新展开。
+      const probe = document.createElement('span');
+      probe.style.cssText = 'position:fixed;visibility:hidden;white-space:nowrap;width:max-content;max-width:none;';
+      label.appendChild(probe);
+      let textWidth = 0;
+      for (const sub of subs) {
+        probe.textContent = sub.name;
+        textWidth = Math.max(textWidth, probe.getBoundingClientRect().width);
+      }
+      probe.remove();
+      const next = {
+        textWidth,
+        containerWidth: el.clientWidth,
+        paddingLeft: parseFloat(style.paddingLeft) || 0,
+        paddingRight: parseFloat(style.paddingRight) || 0,
+        gap: parseFloat(style.columnGap) || 0,
+      };
+      setMeasured((prev) => (prev && Object.keys(next).every((key) => prev[key as keyof typeof next] === next[key as keyof typeof next]) ? prev : next));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    void document.fonts.ready.then(measure);
+    document.fonts.addEventListener('loadingdone', measure);
+    return () => {
+      active = false;
+      observer.disconnect();
+      document.fonts.removeEventListener('loadingdone', measure);
+    };
+  }, [subs, narrow, locale]);
+  useLayoutEffect(() => {
+    resizeFrom.current = null;
+    setLiveW(null);
+  }, [portrait, narrow]);
   // React 的 wheel 监听是被动的，拦不住页面滚动；横向滑动改用原生监听（非被动），并始终调用最新的处理函数
-  const gtEl = useRef<HTMLDivElement>(null);
   const wheel = useEffectEvent((e: WheelEvent) => onWheel(e));
   useEffect(() => {
     const el = gtEl.current;
@@ -286,25 +352,27 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
       <div
         ref={gtEl}
         className={`gt ${pannable ? 'pannable' : ''} ${drag ? 'dragging' : ''} ${liveW != null ? 'resizing' : ''}`}
-        style={labelW ? ({ '--lw': `${labelW}px` } as Record<string, string>) : undefined}
+        style={{ '--lw': `${labelW}px` } as Record<string, string>}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        <div
-          className="gt-resize"
-          role="separator"
-          aria-orientation="vertical"
-          aria-label={t('list.gantt.resize')}
-          title={t('list.gantt.resize')}
-          onPointerDown={onResizeDown}
-          onPointerMove={onResizeMove}
-          onPointerUp={onResizeUp}
-          onPointerCancel={onResizeUp}
-          onClick={(e) => e.stopPropagation()}
-          onDoubleClick={() => setSavedW(null)}
-        />
+        {!portrait && (
+          <div
+            className="gt-resize"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label={t('list.gantt.resize')}
+            title={t('list.gantt.resize')}
+            onPointerDown={onResizeDown}
+            onPointerMove={onResizeMove}
+            onPointerUp={onResizeUp}
+            onPointerCancel={onResizeUp}
+            onClick={(e) => e.stopPropagation()}
+            onDoubleClick={() => setSavedW(null)}
+          />
+        )}
         <div className="gt-head">
           <div className="gt-label" />
           <div className="gt-track" ref={box}>
@@ -338,8 +406,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                 onClick={() => !dragged.current && onOpen(r.s)}
               >
                 <div className="gt-label" title={r.s.name}>
-                  <SubIcon sub={r.s} size={20} />
-                  <span>{r.s.name}</span>
+                  <span className="gt-icon" role="img" title={r.s.name} aria-label={r.s.name}>
+                    <SubIcon sub={r.s} size={20} />
+                  </span>
+                  {!iconOnly && <span className="gt-name">{r.s.name}</span>}
                 </div>
                 <div className="gt-track">
                   {r.gaps

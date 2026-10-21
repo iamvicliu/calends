@@ -4,6 +4,19 @@ export type GanttZoom = '3m' | '6m' | '1y' | '3y' | 'all';
 export const isGanttZoom = (v: string): v is GanttZoom => ['3m', '6m', '1y', '3y', 'all'].includes(v);
 export const GANTT_STEP: Record<Exclude<GanttZoom, 'all'>, number> = { '3m': 3, '6m': 6, '1y': 12, '3y': 36 };
 
+/** 名称列以图标为下限、最长名称为上限，至少给轨道留出一半容器。 */
+export function ganttLabelBounds(
+  textWidth: number,
+  containerWidth: number,
+  style: { paddingLeft: number; paddingRight: number; iconWidth: number; gap: number },
+  defaultWidth = 200,
+): { min: number; max: number; default: number } {
+  const min = Math.ceil(style.paddingLeft + style.iconWidth + style.paddingRight);
+  const full = Math.ceil(min + (textWidth > 0 ? style.gap + textWidth : 0));
+  const max = Math.max(min, Math.min(full, containerWidth > 0 ? Math.floor(containerWidth / 2) : full));
+  return { min, max, default: Math.max(min, Math.min(defaultWidth, max)) };
+}
+
 /** 今天留在中偏右；短范围仍保留足够的未来空间。全部从最早一笔的月初开始。 */
 export function ganttWindow(zoom: GanttZoom, today: string, earliest = today): { start: string; end: string } {
   switch (zoom) {
