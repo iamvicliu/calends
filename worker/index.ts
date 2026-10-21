@@ -39,7 +39,22 @@ import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, runScheduled, sendDigest, type Digest } from './notify.ts';
 import { renderEmail } from './email.ts';
-import { getFx, getKv, getPeople, getSettings, loadState, loadSubs, putKv, remove, replaceAll, saveSettingsWithSubs, upsert, writePeople } from './store.ts';
+import {
+  getFx,
+  getKv,
+  getPeople,
+  getRev,
+  getSettings,
+  loadState,
+  loadSubs,
+  putKv,
+  remove,
+  replaceAll,
+  saveSettingsWithSubs,
+  upsert,
+  writePeople,
+} from './store.ts';
+import type { Revision } from './store.ts';
 import { mergePrefs, type Prefs } from '../shared/prefs.ts';
 import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './ai/mcp.ts';
@@ -50,7 +65,15 @@ import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 import { ensureMigrated } from './migrate.ts';
 
-const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
+const json = (data: unknown, status = 200, rev?: number | Revision) =>
+  Response.json(data, {
+    status,
+    headers: {
+      'cache-control': 'no-store',
+      ...(rev === undefined ? {} : { 'x-calends-rev': String(typeof rev === 'number' ? rev : rev.rev) }),
+      ...(typeof rev === 'object' ? { 'x-calends-rev-from': String(rev.from) } : {}),
+    },
+  });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
 
 async function refreshFx(env: Env): Promise<FxTable> {
@@ -117,13 +140,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     if (!state.settings.publicView && !dev) return bad(t('server.notPublic'), 404);
     return json(maskForPublic(state));
   }
-  if (path === '/api/state' && method === 'GET') {
-    const state = await loadState(env);
-    // 后台数据只给登录用户；访客的公开数据走 /api/public
-    if (authed) return json(state);
-    return bad('unauthorized', 401);
-  }
   if (!authed) return bad('unauthorized', 401);
+  if (path === '/api/rev' && method === 'GET') return json({ rev: await getRev(env) });
+  if (path === '/api/state' && method === 'GET') return json(await loadState(env));
   if (method !== 'GET' && !dev && !sameOrigin(req)) return bad('forbidden', 403);
 
   // 图片中转：分享图要把订阅图标画进 canvas，跨域图片会污染画布，所以经同源转一道。只转 https 的图片，限 1MB
@@ -174,12 +193,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       const err = validSub(sub) ?? statusChangeError(previous, sub, todayIn((await getSettings(env)).timezone));
       if (err) return bad(err);
       sub.updatedAt = new Date().toISOString();
-      await upsert(env, 'subscriptions', sub.id, sub);
-      return json(sub);
+      const rev = await upsert(env, 'subscriptions', sub.id, sub);
+      return json(sub, 200, rev);
     }
     if (method === 'DELETE') {
-      await remove(env, 'subscriptions', m[1]);
-      return json({ ok: true });
+      const rev = await remove(env, 'subscriptions', m[1]);
+      return json({ ok: true }, 200, rev);
     }
   }
   // 人：保存时把称呼、联系方式同步到所有引用他的成员、代付上，返回改动过的订阅
@@ -192,8 +211,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       if (!people.some((p) => p.id === id) || !people.some((p) => p.id === into) || into === id) return bad(t('server.personNotFound'), 404);
       const r = mergePeople(people, await subsOf(env), id, into);
       const subscriptions = r.subs.map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
-      await writePeople(env, r.people, subscriptions);
-      return json({ people: r.people, subscriptions });
+      const rev = await writePeople(env, r.people, subscriptions);
+      return json({ people: r.people, subscriptions }, 200, rev);
     }
     if (!m[2] && method === 'PUT') {
       const p = cleanPerson((await req.json()) as Partial<Person>, id);
@@ -202,19 +221,19 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       if (old?.createdAt) p.createdAt = old.createdAt;
       const next = old ? people.map((x) => (x.id === id ? p : x)) : [...people, p];
       const subscriptions = syncPerson(await subsOf(env), p).map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
-      await writePeople(env, next, subscriptions);
-      return json({ person: p, subscriptions });
+      const rev = await writePeople(env, next, subscriptions);
+      return json({ person: p, subscriptions }, 200, rev);
     }
     if (!m[2] && method === 'DELETE') {
       // 还有合租、代付指向他时不删：先合并到别人名下或从那些订阅里移除，账不会悬空
       const n = refsFor(await subsOf(env), id).length;
       if (n) return bad(t('server.personInUse', { count: n }), 409);
-      await putKv(
+      const rev = await putKv(
         env,
         'people',
         people.filter((x) => x.id !== id),
       );
-      return json({ ok: true });
+      return json({ ok: true }, 200, rev);
     }
   }
   m = path.match(/^\/api\/methods\/([\w-]+)$/);
@@ -222,19 +241,19 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     if (method === 'PUT') {
       const pm = (await req.json()) as PaymentMethod;
       if (pm.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
-      await upsert(env, 'methods', pm.id, pm);
-      return json(pm);
+      const rev = await upsert(env, 'methods', pm.id, pm);
+      return json(pm, 200, rev);
     }
     if (method === 'DELETE') {
-      await remove(env, 'methods', m[1]);
-      return json({ ok: true });
+      const rev = await remove(env, 'methods', m[1]);
+      return json({ ok: true }, 200, rev);
     }
   }
   // 界面配置：按项合并，两台设备改不同的项互不覆盖
   if (path === '/api/prefs' && method === 'PATCH') {
     const next = mergePrefs((await getKv<Prefs>(env, 'prefs')) ?? {}, await req.json().catch(() => null));
-    await putKv(env, 'prefs', next);
-    return json(next);
+    const rev = await putKv(env, 'prefs', next);
+    return json(next, 200, rev);
   }
   if (path === '/api/settings' && method === 'PUT') {
     const cur = await getSettings(env);
@@ -249,9 +268,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     )
       return bad(t('server.invalidAvatar'));
     if (next.maxSessions !== undefined) next.maxSessions = Math.min(50, Math.max(1, Math.round(next.maxSessions)));
-    await putKv(env, 'settings', next);
+    const rev = await putKv(env, 'settings', next);
     if (next.maxSessions !== cur.maxSessions) await pruneSessions(req, env, next.maxSessions ?? DEFAULT_MAX_SESSIONS);
-    return json(next);
+    return json(next, 200, rev);
   }
   // 分类表：整表保存；renames（旧名 → 新名）把相关订阅一起改掉，改名、删除时移走订阅都靠它
   if (path === '/api/categories' && method === 'PUT') {
@@ -263,14 +282,14 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const now = new Date().toISOString();
     const changed = renameInSubs(await loadSubs(env), renames).map((s) => ({ ...s, updatedAt: now }));
     const settings = { ...(await getSettings(env)), categories: r.list };
-    await saveSettingsWithSubs(env, settings, changed);
-    return json({ settings, subscriptions: changed });
+    const rev = await saveSettingsWithSubs(env, settings, changed);
+    return json({ settings, subscriptions: changed }, 200, rev);
   }
   if (path === '/api/ics/rotate' && method === 'POST') {
     const cur = await getSettings(env);
     const next = { ...cur, icsToken: randomToken(16) };
-    await putKv(env, 'settings', next);
-    return json(next);
+    const rev = await putKv(env, 'settings', next);
+    return json(next, 200, rev);
   }
   // 完整备份：导出文件可在全新部署上原样恢复
   if (path === '/api/backup' && method === 'GET') {
@@ -292,7 +311,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     }
     const err = invalidIn(b.subscriptions);
     if (err) return bad(err);
-    return json({ restored: await restoreAll(env, b), state: await loadState(env) });
+    const restored = await restoreAll(env, b);
+    const state = await loadState(env);
+    return json({ restored, state }, 200, state.rev);
   }
   if (path === '/api/import' && method === 'POST') {
     const body = (await req.json()) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; settings?: Partial<Settings>; mode?: 'merge' | 'replace' };
@@ -304,18 +325,21 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       const cur = await getSettings(env);
       await putKv(env, 'settings', { ...cur, ...body.settings, icsToken: cur.icsToken });
     }
-    return json(await loadState(env));
+    const state = await loadState(env);
+    return json(state, 200, state.rev);
   }
   if (path === '/api/fx/status' && method === 'GET') {
     const st = await fxStatus(env, await loadState(env));
     return json({ ...st, missing: st.missing.slice(0, 50) });
   }
   if (path === '/api/fx/backfill' && method === 'POST') {
-    return json(await backfill(env, await loadState(env)));
+    const result = await backfill(env, await loadState(env));
+    return json(result, 200, await getRev(env));
   }
   if (path === '/api/fx/refresh' && method === 'POST') {
     try {
-      return json(await refreshFx(env));
+      const fx = await refreshFx(env);
+      return json(fx, 200, await getRev(env));
     } catch (e) {
       return bad(e instanceof Error ? e.message : t('server.refreshFailed'), 502);
     }
@@ -342,7 +366,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await req.json()) as Parameters<typeof chat>[1], req.signal);
   if (path === '/api/assistant/apply' && method === 'POST') {
     try {
-      return json(await apply(env, (await req.json()) as Parameters<typeof apply>[1]));
+      const result = await apply(env, (await req.json()) as Parameters<typeof apply>[1]);
+      return json(result, 200, await getRev(env));
     } catch (e) {
       return bad(e instanceof Error ? e.message : String(e));
     }
@@ -409,8 +434,10 @@ export default {
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
       // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
       if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
-        const s = await getSettings(env);
-        applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+        if (url.pathname !== '/api/rev') {
+          const s = await getSettings(env);
+          applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+        }
       }
       if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
       if (url.pathname === '/mcp') return await mcp(req, env);

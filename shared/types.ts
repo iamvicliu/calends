@@ -346,6 +346,8 @@ export interface FxTable {
 export type FxHistory = Record<string, Record<string, number>>;
 
 export interface AppState {
+  /** Authenticated state snapshot revision; absent on public/demo state. */
+  rev?: number;
   subscriptions: Subscription[];
   methods: PaymentMethod[];
   /** 人：合租成员、代付对象的名册（公开页不下发） */

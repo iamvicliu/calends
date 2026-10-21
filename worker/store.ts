@@ -3,7 +3,26 @@ import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type
 import { linkPeople } from '../shared/people.ts';
 import type { Prefs } from '../shared/prefs.ts';
 import type { Env } from './env.ts';
-import { keepSet, loadFxHistory } from './fx.ts';
+import { keepSet, slimFxHistory } from './fx.ts';
+
+const revSql = "SELECT CAST(value AS INTEGER) AS rev FROM kv WHERE key = 'rev'";
+
+export async function getRev(env: Env): Promise<number> {
+  const row = await env.DB.prepare(revSql).first<{ rev: number }>();
+  if (!row) throw new Error('Missing ledger revision');
+  return row.rev;
+}
+
+/** Return the revision in the same transaction as the writes (triggers increment it). */
+export interface Revision {
+  from: number;
+  rev: number;
+}
+
+async function mutate(env: Env, stmts: D1PreparedStatement[]): Promise<Revision> {
+  const results = await env.DB.batch<{ rev: number }>([env.DB.prepare(revSql), ...stmts, env.DB.prepare(revSql)]);
+  return { from: results[0].results[0].rev, rev: results[results.length - 1].results[0].rev };
+}
 
 export async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
   const row = await env.DB.prepare('SELECT value FROM kv WHERE key = ?1').bind(key).first<{ value: string }>();
@@ -16,7 +35,8 @@ function putKvStmt(env: Env, key: string, value: unknown): D1PreparedStatement {
   ).bind(key, JSON.stringify(value));
 }
 
-export async function putKv(env: Env, key: string, value: unknown): Promise<void> {
+export async function putKv(env: Env, key: string, value: unknown): Promise<Revision | undefined> {
+  if (['settings', 'people', 'prefs', 'fx'].includes(key)) return mutate(env, [putKvStmt(env, key, value)]);
   await putKvStmt(env, key, value).run();
 }
 
@@ -39,33 +59,43 @@ const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
   ).bind(JSON.stringify(people));
 
 /** 把名册和改动过的订阅一起写入（分批，D1 一次 batch 的语句数有限） */
-export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<void> {
+export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<Revision | undefined> {
   const stmts = [...(people ? [putPeopleStmt(env, people)] : []), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))];
-  for (let i = 0; i < stmts.length; i += 50) await env.DB.batch(stmts.slice(i, i + 50));
+  let revision: Revision | undefined;
+  for (let i = 0; i < stmts.length; i += 50) {
+    const next = await mutate(env, stmts.slice(i, i + 50));
+    // Only acknowledge a contiguous series; interleaved remote writes require a reload.
+    revision = { from: revision && revision.rev === next.from ? revision.from : next.from, rev: next.rev };
+  }
+  return revision;
 }
 
 /**
  * 自动建档（一次性迁移，可重复执行）：老数据里的合租成员、代付对象还没有 personId 时，按称呼 + 联系方式归并成人并写回。
  * 全部关联后这里不再写库；导入、恢复了旧备份时会再补一次。id 由数据算出，同时打开两个标签页也不会重复建档。
  */
-async function ensurePeople(env: Env, state: AppState): Promise<void> {
+async function ensurePeople(env: Env, state: AppState): Promise<boolean> {
   const r = linkPeople(state.people ?? [], state.subscriptions);
-  if (!r.created.length && !r.subs.length) return;
+  if (!r.created.length && !r.subs.length) return false;
   await writePeople(env, r.created.length ? r.people : undefined, r.subs);
   state.people = r.people;
-  state.subscriptions = state.subscriptions.map((s) => r.subs.find((x) => x.id === s.id) ?? s);
+  return true;
 }
 
 export async function loadState(env: Env): Promise<AppState> {
-  const [subs, methods, settings, fx, people, prefs] = await Promise.all([
-    env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>(),
-    env.DB.prepare('SELECT data FROM methods').all<{ data: string }>(),
-    getSettings(env),
-    getFx(env),
-    getPeople(env),
-    getKv<Prefs>(env, 'prefs'),
+  // D1 batch reads one transactional snapshot: never pair stale data with a newer rev.
+  const rows = await env.DB.batch([
+    env.DB.prepare('SELECT data FROM subscriptions'),
+    env.DB.prepare('SELECT data FROM methods'),
+    env.DB.prepare("SELECT key, value FROM kv WHERE key IN ('settings', 'fx', 'people', 'prefs', 'rev')"),
+    env.DB.prepare('SELECT date, rates FROM fx_daily'),
   ]);
+  const subs = rows[0] as D1Result<{ data: string }>;
+  const methods = rows[1] as D1Result<{ data: string }>;
+  const kv = Object.fromEntries((rows[2] as D1Result<{ key: string; value: string }>).results.map((r) => [r.key, JSON.parse(r.value)]));
+  if (typeof kv.rev !== 'number') throw new Error('Missing ledger revision');
   const state: AppState = {
+    rev: kv.rev,
     subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
     // 按用户在钱包里拖出来的顺序；没排过的保持原有先后
     methods: methods.results
@@ -73,13 +103,13 @@ export async function loadState(env: Env): Promise<AppState> {
       .map((m, i) => ({ m, i }))
       .sort((a, b) => (a.m.order ?? 1e9) - (b.m.order ?? 1e9) || a.i - b.i)
       .map((x) => x.m),
-    people,
-    settings,
-    fx,
-    prefs: prefs ?? {},
+    people: kv.people ?? [],
+    settings: { ...DEFAULT_SETTINGS, ...kv.settings },
+    fx: kv.fx ?? FALLBACK_FX,
+    prefs: (kv.prefs as Prefs | undefined) ?? {},
   };
-  await ensurePeople(env, state);
-  state.fxHistory = await loadFxHistory(env, keepSet(state));
+  if (await ensurePeople(env, state)) return loadState(env);
+  state.fxHistory = slimFxHistory((rows[3] as D1Result<{ date: string; rates: string }>).results, keepSet(state));
   return state;
 }
 
@@ -91,22 +121,22 @@ function upsertStmt(env: Env, table: Table, id: string, data: unknown): D1Prepar
   ).bind(id, JSON.stringify(data));
 }
 
-export async function upsert(env: Env, table: Table, id: string, data: unknown): Promise<void> {
-  await upsertStmt(env, table, id, data).run();
+export async function upsert(env: Env, table: Table, id: string, data: unknown): Promise<Revision> {
+  return mutate(env, [upsertStmt(env, table, id, data)]);
 }
 
-export async function remove(env: Env, table: Table, id: string): Promise<void> {
-  await env.DB.prepare(`DELETE FROM ${table} WHERE id = ?1`).bind(id).run();
+export async function remove(env: Env, table: Table, id: string): Promise<Revision> {
+  return mutate(env, [env.DB.prepare(`DELETE FROM ${table} WHERE id = ?1`).bind(id)]);
 }
 
-export async function replaceAll(env: Env, subs: Subscription[], methods: PaymentMethod[], mode: 'merge' | 'replace'): Promise<void> {
+export async function replaceAll(env: Env, subs: Subscription[], methods: PaymentMethod[], mode: 'merge' | 'replace'): Promise<Revision> {
   const stmts: D1PreparedStatement[] = [];
   if (mode === 'replace') {
     stmts.push(env.DB.prepare('DELETE FROM subscriptions'), env.DB.prepare('DELETE FROM methods'));
   }
   for (const m of methods) stmts.push(upsertStmt(env, 'methods', m.id, m));
   for (const s of subs) stmts.push(upsertStmt(env, 'subscriptions', s.id, s));
-  await env.DB.batch(stmts);
+  return mutate(env, stmts);
 }
 
 export async function loadSubs(env: Env): Promise<Subscription[]> {
@@ -114,6 +144,6 @@ export async function loadSubs(env: Env): Promise<Subscription[]> {
 }
 
 /** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */
-export async function saveSettingsWithSubs(env: Env, settings: Settings, subs: Subscription[]): Promise<void> {
-  await env.DB.batch([putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))]);
+export async function saveSettingsWithSubs(env: Env, settings: Settings, subs: Subscription[]): Promise<Revision> {
+  return mutate(env, [putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))]);
 }
