@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billing.ts';
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
@@ -18,7 +18,6 @@ import { PeopleView } from './views/People.tsx';
 import { Ai } from './views/Ai.tsx';
 import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
-import { Assistant } from './views/Assistant.tsx';
 import { List } from './views/List.tsx';
 import { Overview } from './views/Overview.tsx';
 import { Report } from './views/Report.tsx';
@@ -29,6 +28,9 @@ import { currentRoute, go as navigate, href, initRouter, onRoute, replaceRoute }
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { PROJECT_URL } from '../shared/brand.ts';
+
+// AI 助手页带着 Markdown 渲染器（Streamdown），按需加载，不拖慢其他页面的首屏
+const Assistant = lazy(() => import('./views/Assistant.tsx').then((m) => ({ default: m.Assistant })));
 
 /** label 是 app.nav.* 的键，取用时再翻译 */
 const NAV = [
@@ -491,7 +493,11 @@ function App() {
         view = <Ai state={state} />;
         break;
       case 'assistant':
-        view = ro ? null : <Assistant state={state} today={d} onOpen={open} />;
+        view = ro ? null : (
+          <Suspense fallback={null}>
+            <Assistant state={state} today={d} onOpen={open} />
+          </Suspense>
+        );
         break;
       case 'report':
         view = <Report state={state} today={d} onOpen={open} onReview={() => setReview(true)} />;

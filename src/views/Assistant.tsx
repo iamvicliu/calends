@@ -35,6 +35,7 @@ import { api, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
 import './assistant.css';
+import { Streamdown, type Components } from 'streamdown';
 
 // ---------- 会话数据 ----------
 
@@ -474,7 +475,7 @@ function BotMessage(props: {
         {waiting && <Dots />}
         {turn.parts.map((p, i) => {
           if (p.kind === 'reasoning') return <Reasoning key={i} part={p} live={turn.status === 'streaming' && p.ms == null} />;
-          if (p.kind === 'text') return <Markdown key={i} text={p.text} />;
+          if (p.kind === 'text') return <Markdown key={i} text={p.text} streaming={turn.status === 'streaming'} />;
           if (p.kind === 'tool') return <ToolCard key={p.id} part={p} />;
           return (
             <Proposal
@@ -823,49 +824,40 @@ function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; mess
   );
 }
 
-/** 极简 Markdown：段落、列表、**粗体**、`代码`、链接；不用 innerHTML */
-function Markdown({ text }: { text: string }) {
-  const inline = (s: string, key: number): ReactNode[] =>
-    s.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\(https?:\/\/[^)\s]+\))/g).map((seg, i) => {
-      if (/^\*\*[^*]+\*\*$/.test(seg)) return <b key={`${key}-${i}`}>{seg.slice(2, -2)}</b>;
-      if (/^`[^`]+`$/.test(seg)) return <code key={`${key}-${i}`}>{seg.slice(1, -1)}</code>;
-      const m = seg.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
-      if (m)
-        return (
-          <a key={`${key}-${i}`} href={m[2]} target="_blank" rel="noreferrer">
-            {m[1]}
-          </a>
-        );
-      return seg;
-    });
-  const blocks: ReactNode[] = [];
-  let list: { ordered: boolean; items: string[] } | null = null;
-  const flush = () => {
-    if (!list) return;
-    const items = list.items.map((x, i) => <li key={i}>{inline(x, i)}</li>);
-    blocks.push(list.ordered ? <ol key={blocks.length}>{items}</ol> : <ul key={blocks.length}>{items}</ul>);
-    list = null;
-  };
-  for (const raw of text.split('\n')) {
-    const line = raw.trimEnd();
-    const ul = line.match(/^\s*[-*•]\s+(.*)$/);
-    const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
-    if (ul || ol) {
-      const ordered = !!ol;
-      if (!list || list.ordered !== ordered) {
-        flush();
-        list = { ordered, items: [] };
-      }
-      list.items.push((ul ?? ol)![1]);
-      continue;
-    }
-    flush();
-    if (!line.trim()) continue;
-    const h = line.match(/^#{1,4}\s+(.*)$/);
-    blocks.push(h ? <h4 key={blocks.length}>{inline(h[1], blocks.length)}</h4> : <p key={blocks.length}>{inline(line, blocks.length)}</p>);
-  }
-  flush();
-  return <div className="as-md">{blocks}</div>;
+/**
+ * 消息正文：Streamdown（AI Elements 用的渲染器），支持表格、标题、引用、代码块、删除线、任务列表等 GFM，
+ * 流式输出时自动补全没写完的 Markdown（半张表、没闭合的粗体）。后台不用 Tailwind，样式写在 assistant.css；
+ * 关掉它自带的复制 / 下载按钮和外链确认弹窗，外链直接新标签打开。
+ */
+const MD_COMPONENTS: Components = {
+  table: ({ children }) => (
+    <div className="as-table">
+      <table>{children}</table>
+    </div>
+  ),
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  ),
+  pre: ({ children }) => <pre className="as-pre">{children}</pre>,
+  code: ({ className, children }) => <code className={className}>{children}</code>,
+};
+
+function Markdown({ text, streaming }: { text: string; streaming?: boolean }) {
+  return (
+    <Streamdown
+      className="as-md"
+      mode={streaming ? 'streaming' : 'static'}
+      isAnimating={streaming}
+      parseIncompleteMarkdown
+      controls={false}
+      linkSafety={{ enabled: false }}
+      components={MD_COMPONENTS}
+    >
+      {text}
+    </Streamdown>
+  );
 }
 
 // ---------- 输入框：文字 + 图片（粘贴、拖拽、选择） ----------
