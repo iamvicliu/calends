@@ -4,7 +4,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 57px);
+  /* 撑满 .main 剩余高度，输入框才能一直吸在可视区底部 */
+  flex: 1;
 }
 .as-scroll {
   flex: 1;
@@ -961,9 +962,6 @@
   }
   .as-icon.m-only {
     display: grid;
-  }
-  .as {
-    min-height: calc(100dvh - 60px);
   }
   .as-scroll {
     padding: 12px 14px 6px;

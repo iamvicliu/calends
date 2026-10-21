@@ -1112,7 +1112,7 @@
   /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */
   .sheet.bare:has(.dt) .sheet-body {
     /* 和弹窗外壳的最大高度一致，否则底部的内边距会被外壳裁掉，滚到底时比左右边距窄 */
-    max-height: min(90vh, 920px);
+    max-height: min(90dvh, 920px);
     overflow: auto;
     overscroll-behavior: contain;
   }

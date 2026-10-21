@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Collez du texte ou une capture, ou posez une question…",
-  "placeholderSetup": "Configurez d’abord votre clé API DeepSeek (en haut à droite)",
+  "placeholderSetup": "Configurez d’abord votre clé API DeepSeek",
   "addImage": "Ajouter une image",
   "removeImage": "Retirer l’image",
   "send": "Envoyer",

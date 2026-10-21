@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Metin ya da ekran görüntüsü yapıştırın veya bir şey sorun…",
-  "placeholderSetup": "Önce sağ üstten DeepSeek API Key'inizi ayarlayın",
+  "placeholderSetup": "Önce DeepSeek API Key'inizi ayarlayın",
   "addImage": "Görsel ekle",
   "removeImage": "Görseli kaldır",
   "send": "Gönder",

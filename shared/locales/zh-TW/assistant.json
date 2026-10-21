@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "貼上文字或截圖，或者問點什麼…",
-  "placeholderSetup": "請先在右上角設定 DeepSeek API Key",
+  "placeholderSetup": "請先設定 DeepSeek API Key",
   "addImage": "加入圖片",
   "removeImage": "移除圖片",
   "send": "傳送",

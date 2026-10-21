@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Вставьте текст или скриншот либо задайте вопрос…",
-  "placeholderSetup": "Сначала настройте API Key DeepSeek (справа вверху)",
+  "placeholderSetup": "Сначала настройте API Key DeepSeek",
   "addImage": "Добавить изображение",
   "removeImage": "Удалить изображение",
   "send": "Отправить",

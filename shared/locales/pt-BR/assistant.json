@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Cole um texto ou print, ou pergunte qualquer coisa…",
-  "placeholderSetup": "Configure primeiro sua API Key do DeepSeek (canto superior direito)",
+  "placeholderSetup": "Configure primeiro sua API Key do DeepSeek",
   "addImage": "Adicionar imagem",
   "removeImage": "Remover imagem",
   "send": "Enviar",

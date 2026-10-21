@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Tempel teks atau tangkapan layar, atau tanyakan apa saja…",
-  "placeholderSetup": "Atur DeepSeek API Key dulu di kanan atas",
+  "placeholderSetup": "Atur DeepSeek API Key dulu",
   "addImage": "Tambah gambar",
   "removeImage": "Hapus gambar",
   "send": "Kirim",

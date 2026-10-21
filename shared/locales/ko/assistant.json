@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "텍스트나 스크린샷을 붙여 넣거나 무엇이든 물어보세요…",
-  "placeholderSetup": "먼저 오른쪽 위에서 DeepSeek API Key를 설정하세요",
+  "placeholderSetup": "먼저 DeepSeek API Key를 설정하세요",
   "addImage": "이미지 추가",
   "removeImage": "이미지 삭제",
   "send": "보내기",

@@ -130,7 +130,7 @@ body {
   letter-spacing: -0.005em;
   color: var(--label);
   background: var(--bg);
-  min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -271,7 +271,7 @@ a {
 
 .main {
   margin-left: var(--side-w);
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -1365,7 +1365,7 @@ a {
 }
 .sheet {
   width: min(760px, 100%);
-  max-height: min(90vh, 920px);
+  max-height: min(90dvh, 920px);
   overflow: auto;
   overscroll-behavior: contain;
   background: var(--bg);
@@ -1581,7 +1581,7 @@ a {
   margin-bottom: 4px;
 }
 .login {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 24px;

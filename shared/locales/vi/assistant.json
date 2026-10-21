@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Dán văn bản hoặc ảnh chụp màn hình, hoặc hỏi bất cứ điều gì…",
-  "placeholderSetup": "Hãy cài đặt DeepSeek API Key ở góc trên bên phải trước",
+  "placeholderSetup": "Hãy cài đặt DeepSeek API Key trước",
   "addImage": "Thêm ảnh",
   "removeImage": "Xóa ảnh",
   "send": "Gửi",

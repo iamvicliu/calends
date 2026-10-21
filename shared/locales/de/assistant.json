@@ -35,7 +35,7 @@
     }
   },
   "placeholder": "Text oder Screenshot einfügen oder etwas fragen …",
-  "placeholderSetup": "Richte zuerst oben rechts deinen DeepSeek-API-Key ein",
+  "placeholderSetup": "Richte zuerst deinen DeepSeek-API-Key ein",
   "addImage": "Bild hinzufügen",
   "removeImage": "Bild entfernen",
   "send": "Senden",
