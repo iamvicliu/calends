@@ -87,7 +87,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
           {t('overview.timeline.sub', { past: money(past30, base, { compact: true }), next: money(next30, base, { compact: true }) })}
         </span>
       </div>
-      <Timeline load={load} today={today} />
+      <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
     </section>
   );
 }

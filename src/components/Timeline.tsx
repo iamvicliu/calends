@@ -1,5 +1,5 @@
 import type { ReactNode as ComponentChildren } from 'react';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { addDays, addMonths, diffDays } from '../../shared/billing.ts';
 import { monthLabel } from '../../shared/format.ts';
 import { intlLocale, t } from '../../shared/i18n.ts';
@@ -23,28 +23,33 @@ const DAY = 12;
 const ICON = 30;
 const LEVELS = 3; // 同一处最多往上叠三层，再多的折成「+N」
 const AXIS = 140;
-/** 初始范围与每次往两边延伸的天数；离边缘不到 EDGE 像素就继续加载 */
-const BEFORE = 120;
-const AFTER = 240;
-const STEP = 180;
-const EDGE = 900;
+/** 右端：今天往后一年（未来的扣款看一年就够） */
+const AHEAD_MONTHS = 12;
 
 const yearLabel = (d: string) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
 
 /**
- * 扣款时间线：今天在正中，左边是已扣的、右边是将要扣的，可以一直往两边拖（滑到边缘自动加载更多）。
+ * 扣款时间线：最左是账本里最早的订阅开始那天，最右是今天往后一年；打开时今天在正中。
+ * 鼠标按住拖动、触控板横滑、或在时间线上滚动滚轮都能左右移动。
  * 刻度按真实天数等距：每天一小格、每周一中格、每月一长格并标出月份；图标落在当天的位置，挤在一起时往上叠。
  * load 需用 useCallback 固定下来，否则每次渲染都会重算。
  */
-export function Timeline({ load, today }: { load: (from: string, to: string) => TimelineGroup[]; today: string }) {
+export function Timeline({
+  load,
+  today,
+  start,
+}: {
+  load: (from: string, to: string) => TimelineGroup[];
+  today: string;
+  /** 最早的订阅开始日 */ start?: string;
+}) {
   const scroller = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
-  const [range, setRange] = useState(() => ({ from: addDays(today, -BEFORE), to: addDays(today, AFTER) }));
-  const prevFrom = useRef(range.from);
-  const busy = useRef(false); // 一次只加载一段
   const drag = useRef<{ x: number; left: number; moved: boolean; v: number; t: number; id: number } | null>(null);
-  const { from, to } = range;
+  // 左边留半屏的余量，最早那一笔也能滚到中间附近
+  const from = addDays(start && start < today ? start : addDays(today, -30), -30);
+  const to = addMonths(today, AHEAD_MONTHS);
 
   const layout = useMemo(() => {
     const xOf = (d: string) => diffDays(from, d) * DAY;
@@ -96,28 +101,21 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
     glide.current = requestAnimationFrame(step);
   };
   useLayoutEffect(() => center(), [today]);
-  // 往左加载后内容整体右移，补偿滚动位置（拖动中的起点也一起补），画面不跳
-  useLayoutEffect(() => {
-    const dx = diffDays(from, prevFrom.current) * DAY;
-    prevFrom.current = from;
-    if (dx && scroller.current) {
-      scroller.current.scrollLeft += dx;
-      if (drag.current) drag.current.left += dx;
-    }
-    busy.current = false;
-  }, [from, to]);
 
-  const onScroll = () => {
+  // 滚轮：鼠标在时间线上时，竖向滚动换成左右移动；到了两端就放行，让页面继续往下滚
+  useEffect(() => {
     const el = scroller.current!;
-    if (busy.current) return;
-    if (el.scrollLeft < EDGE) {
-      busy.current = true;
-      setRange((r) => ({ ...r, from: addDays(r.from, -STEP) }));
-    } else if (el.scrollWidth - el.scrollLeft - el.clientWidth < EDGE) {
-      busy.current = true;
-      setRange((r) => ({ ...r, to: addDays(r.to, STEP) }));
-    }
-  };
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return; // 触控板横滑，浏览器自己处理
+      const max = el.scrollWidth - el.clientWidth;
+      if ((e.deltaY < 0 && el.scrollLeft <= 0) || (e.deltaY > 0 && el.scrollLeft >= max - 1)) return;
+      e.preventDefault();
+      cancelAnimationFrame(glide.current);
+      el.scrollLeft += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
 
   // 鼠标按住拖动：按在空白或图标上都拖整条时间线；松手后带惯性滑一段。拖过之后不触发点击
   const glide = useRef(0);
@@ -170,7 +168,6 @@ export function Timeline({ load, today }: { load: (from: string, to: string) => 
       <div
         className="tl-scroll"
         ref={scroller}
-        onScroll={onScroll}
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}

@@ -148,7 +148,7 @@ function Ledger({ state }: { state: AppState }) {
   // 折算金额取整；不足 10 的保留分，免得出现 ¥0
   const fmt = (v: number) => money(v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 });
   const diff = (d.mrr - d.yearAgoMrr) * k;
-  // 时间线按需加载：拖到哪段算哪段，按日分组
+  // 时间线上的扣款：按日分组
   const loadTimeline = useCallback(
     (from: string, to: string) => {
       const map = new Map<string, TimelineGroup>();
@@ -216,7 +216,7 @@ function Ledger({ state }: { state: AppState }) {
                   {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} prefix={sym} className="text-foreground" /> })}
                 </span>
               </div>
-              <Timeline today={today} load={loadTimeline} />
+              <Timeline today={today} load={loadTimeline} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
             </CardContent>
 
             <Separator />
