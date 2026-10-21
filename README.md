@@ -51,7 +51,7 @@ Track what you pay, when it renews, and who owes you. Calends brings subscriptio
 
 [Try the live demo](https://demo.calends.date) to explore before deploying. It is shared by all visitors and resets daily; external notifications are disabled.
 
-Open Calends at `/` and sign in at `/login`. Public sharing is optional: enable it in Settings to make the read-only page available at `/public`. See [routes and login redirects](ARCHITECTURE.md#web-requests-and-state) for details.
+Open Calends at `/` and sign in at `/login`. After signing in, `/` redirects to your configured start page, defaulting to `/overview`. Public sharing is optional: enable it in Settings to make the read-only page available at `/public`. See [routes and login redirects](ARCHITECTURE.md#web-requests-and-state) for details.
 
 ### Cloudflare Workers
 
@@ -77,7 +77,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.2.0` instead of `latest`.
+Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.3.0` instead of `latest`.
 
 Alternatively, build from source with Compose. From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
 

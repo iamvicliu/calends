@@ -16,7 +16,7 @@ docker logs calends
 
 打开 `http://localhost:8787/`，在登录页使用日志中的初始化令牌设置密码。命名卷 `calends-data` 持久化整个 `/data`，包括 SQLite 数据库状态与自动生成的初始化令牌，无需 Cloudflare 账号。
 
-生产环境建议固定完整版本标签，如 `xizozhe/calends:1.2.0`，升级时再主动修改。`latest` 跟随 main 分支，`1.2` 跟随该次版本系列的发布；这类浮动标签方便更新，但不锁定某次发布。以下命令中的 `xizozhe/calends` 也可替换为 `ghcr.io/imetn/calends`。
+生产环境建议固定完整版本标签，如 `xizozhe/calends:1.3.0`，升级时再主动修改。`latest` 跟随 main 分支，`1.3` 跟随该次版本系列的发布；这类浮动标签方便更新，但不锁定某次发布。以下命令中的 `xizozhe/calends` 也可替换为 `ghcr.io/imetn/calends`。
 
 使用 `latest` 部署时，先拉取新版镜像，再用同一数据卷重建容器：
 
@@ -37,7 +37,7 @@ docker logs calends
 - Docker Hub：`xizozhe/calends`（等同于 `docker.io/xizozhe/calends`）。
 - GitHub Container Registry（GHCR）：`ghcr.io/imetn/calends`。
 
-两处均提供 `linux/amd64` 和 `linux/arm64` 多架构镜像。[镜像工作流](../.github/workflows/docker.yml) 为 main 分支构建发布 `latest`，为版本发布生成版本标签，例如 `v1.2.0` 对应 `1.2.0` 和 `1.2`。
+两处均提供 `linux/amd64` 和 `linux/arm64` 多架构镜像。[镜像工作流](../.github/workflows/docker.yml) 为 main 分支构建发布 `latest`，为版本发布生成版本标签，例如 `v1.3.0` 对应 `1.3.0` 和 `1.3`。
 
 从源码构建不依赖已发布的 Calends 镜像，但仍需下载基础镜像与构建依赖。
 
@@ -72,7 +72,7 @@ volumes:
   calends-data:
 ```
 
-也可改用 `ghcr.io/imetn/calends:latest`，或固定 `1.2.0` 等版本标签。在 `docker/` 下依次运行 `docker compose pull` 和 `docker compose up -d`，即可启动或升级此配置。镜像变化时，Compose 会重建容器并保留 `calends_calends-data` 数据卷。
+也可改用 `ghcr.io/imetn/calends:latest`，或固定 `1.3.0` 等版本标签。在 `docker/` 下依次运行 `docker compose pull` 和 `docker compose up -d`，即可启动或升级此配置。镜像变化时，Compose 会重建容器并保留 `calends_calends-data` 数据卷。
 
 不使用 Compose 时，也可以在仓库根目录直接构建和运行：
 
@@ -178,7 +178,7 @@ Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Serv
    用 node scripts/wrangler.mjs secret put SETUP_TOKEN 设置，再执行 npm run deploy。
    如果我需要自定义域名，部署前加到实际使用的 Wrangler 配置中。
 3. Docker：优先使用 xizozhe/calends（或 ghcr.io/imetn/calends）的预构建镜像。
-   生产环境固定 1.2.0 等版本标签，拉取后在 8787 端口运行，将 calends-data 挂载到 /data。
+   生产环境固定 1.3.0 等版本标签，拉取后在 8787 端口运行，将 calends-data 挂载到 /data。
    用 docker logs calends 读取初始化令牌。
    仅在需要时从源码构建，例如部署到子路径。
    需要公网访问时，用我选择的反向代理配置 HTTPS。
@@ -196,4 +196,4 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data \
   -e BASE_PATH=/calends -e SITE_URL=https://example.com/calends -e TRUST_PROXY=1 calends:local
 ```
 
-打开 `https://example.com/calends/`；登录页为 `/calends/login`，「连接」页为 `/calends/connect`，可选的只读公开页为 `/calends/public`。MCP 客户端使用 `/calends/mcp`。Cloudflare 部署时，在运行 `npm run deploy` 的环境变量和 Worker 的 `vars` 中都设置 `BASE_PATH`。访问与登录回跳规则见[架构说明](../ARCHITECTURE.md#web-requests-and-state)。
+打开 `https://example.com/calends/`；登录后跳转到设置中的启动页（默认 `/calends/overview`）。登录页为 `/calends/login`，「连接」页为 `/calends/connect`，可选的只读公开页为 `/calends/public`。MCP 客户端使用 `/calends/mcp`。Cloudflare 部署时，在运行 `npm run deploy` 的环境变量和 Worker 的 `vars` 中都设置 `BASE_PATH`。访问与登录回跳规则见[架构说明](../ARCHITECTURE.md#web-requests-and-state)。
