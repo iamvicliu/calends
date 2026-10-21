@@ -230,7 +230,10 @@ function Form({
   today: string;
 }) {
   const phoneCat = f.category === presetCat('phone');
-  const cycleKey = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'custom';
+  const preset = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0];
+  // 选了「自定义」就一直停在自定义，填到恰好等于某个预设（如每 1 个月）时也不跳回去
+  const [custom, setCustom] = useState(!preset);
+  const cycleKey = custom || !preset ? 'custom' : preset;
   const share = f.share;
   const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) =>
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
@@ -301,6 +304,7 @@ function Form({
             value={cycleKey}
             onChange={(k) => {
               const c = CYCLES.find(([key]) => key === k);
+              setCustom(!c);
               if (c) up({ cycle: c[1] });
               else up({ cycle: { unit: 'month', every: 2 } });
             }}
@@ -310,12 +314,12 @@ function Form({
         </Cell>
         {cycleKey === 'custom' && (
           <Cell label={t('editor.unit.every')}>
-            <input
+            <NumInput
               className="num"
               style={{ width: 60 }}
               inputMode="numeric"
               value={f.cycle.every}
-              onChange={(e) => up({ cycle: { unit: f.cycle.unit === 'lifetime' ? 'month' : f.cycle.unit, every: Math.max(1, Number(val(e)) || 1) } })}
+              onValue={(n) => up({ cycle: { unit: f.cycle.unit === 'lifetime' ? 'month' : f.cycle.unit, every: Math.max(1, Math.round(n ?? 1)) } })}
             />
             <Picker
               value={f.cycle.unit}
