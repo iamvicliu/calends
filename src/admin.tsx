@@ -24,7 +24,7 @@ import { Report } from './views/Report.tsx';
 import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
 import { Wallet } from './views/Wallet.tsx';
-import { currentRoute, go as navigate, href, initRouter, onRoute, replaceRoute } from './router.ts';
+import { currentRoute, go as navigate, href, initRouter, navKey, onRoute, replaceRoute } from './router.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { PROJECT_URL } from '../shared/brand.ts';
@@ -42,12 +42,13 @@ const NAV = [
   { path: 'family', label: 'family', icon: 'users' },
   { path: 'behalf', label: 'behalf', icon: 'swap' },
   { path: 'assistant', label: 'assistant', icon: 'chat' },
-  { path: 'ai', label: 'ai', icon: 'bot' },
+  { path: 'mcp', label: 'ai', icon: 'bot' },
 ];
 
 /** 侧边栏实际显示的模块：去掉设置里隐藏的；AI 接入关掉时也不显示 */
 function navOf(st: AppState['settings']) {
-  return NAV.filter((n) => !(st.hiddenNav ?? []).includes(n.path) && (n.path !== 'ai' || st.aiEnabled !== false)).map((n) => ({
+  const hidden = (st.hiddenNav ?? []).map(navKey);
+  return NAV.filter((n) => !hidden.includes(n.path) && (n.path !== 'mcp' || st.aiEnabled !== false)).map((n) => ({
     ...n,
     label: t(`app.nav.${n.label}`),
   }));
@@ -489,7 +490,7 @@ function App() {
       case 'behalf':
         view = <ProxyPage state={state} today={d} onOpen={open} />;
         break;
-      case 'ai':
+      case 'mcp':
         view = <Ai state={state} />;
         break;
       case 'assistant':

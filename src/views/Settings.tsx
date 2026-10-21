@@ -9,7 +9,7 @@ import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
 import { CategoriesGroup } from './Categories.tsx';
 import { PublicSubsSheet, publicCandidates } from './PublicSubs.tsx';
-import { go } from '../router.ts';
+import { go, navKey } from '../router.ts';
 import { LOCALES, isLocale, t } from '../../shared/i18n.ts';
 import { preferredLocale } from '../i18n.ts';
 
@@ -28,7 +28,7 @@ const SIDE_MODULES: Array<[string, string]> = [
   ['family', 'family'],
   ['behalf', 'behalf'],
   ['assistant', 'assistant'],
-  ['ai', 'ai'],
+  ['mcp', 'ai'],
 ];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { localTime } from '../../shared/format.ts';
@@ -268,8 +268,12 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           {SIDE_MODULES.map(([k, l]) => (
             <Cell key={k} label={t(`app.nav.${l}`)}>
               <Toggle
-                checked={!(s.hiddenNav ?? []).includes(k)}
-                onChange={(v) => run(() => saveSettings({ hiddenNav: v ? (s.hiddenNav ?? []).filter((x) => x !== k) : [...(s.hiddenNav ?? []), k] }))}
+                checked={!(s.hiddenNav ?? []).map(navKey).includes(k)}
+                onChange={(v) => {
+                  // 旧设置里的 ai 和新的 mcp 是同一项：先统一成新写法再增删
+                  const rest = (s.hiddenNav ?? []).map(navKey).filter((x) => x !== k);
+                  void run(() => saveSettings({ hiddenNav: v ? rest : [...rest, k] }));
+                }}
               />
             </Cell>
           ))}
@@ -421,7 +425,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))}
             />
           </Cell>
-          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('ai')} />}
+          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('mcp')} />}
         </Group>
 
         {!state.readonly && <SecurityGroup state={state} />}

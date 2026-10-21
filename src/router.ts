@@ -2,6 +2,9 @@
 const BASE = '/admin';
 const EVENT = 'routechange';
 
+/** 连接页的地址从 ai 改成了 mcp：旧设置里隐藏的 ai 按 mcp 算 */
+export const navKey = (k: string) => (k === 'ai' ? 'mcp' : k);
+
 /** 当前路由（/admin 之后的部分，不含开头的 /） */
 export const currentRoute = () => decodeURIComponent(location.pathname.slice(BASE.length).replace(/^\/+|\/+$/g, ''));
 
@@ -33,6 +36,8 @@ export function onRoute(fn: () => void) {
 /** 旧链接 /admin#/list 换成 /admin/list；后台内的普通链接点击时不整页刷新 */
 export function initRouter() {
   if (location.hash.startsWith('#/')) history.replaceState(null, '', href(decodeURIComponent(location.hash.slice(2))));
+  // 连接页的地址从 /admin/ai 改成了 /admin/mcp
+  if (currentRoute() === 'ai') history.replaceState(null, '', href('mcp'));
   document.addEventListener('click', (e) => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = (e.target as Element).closest?.('a');
