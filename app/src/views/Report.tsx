@@ -94,9 +94,9 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           <Amount value={-now} ccy={base} />
         </div>
         <div className="hero-delta">
-          {/* 正负号按钱的方向：花出去是负、收回来是正。支出变多 = 净额更负，所以是 ▼ 和负号 */}
+          {/* 和概览一样说「支出」的增减：多了是 ↑、少了是 ↓，金额不带正负号 */}
           <span className={`chip-d ${delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}`}>
-            {delta > 0.5 ? '▼' : delta < -0.5 ? '▲' : '—'} {signed(-delta)}
+            {delta > 0.5 ? '↑' : delta < -0.5 ? '↓' : '·'} {money(Math.abs(delta), base, { compact: true })}
           </span>
           <span className="muted">{t('report.hero.vsLastMonth')}</span>
           {yearAgo != null && yearAgo > 0 && <span className="muted">{t('report.hero.yearAgo', { amount: signed(-yearAgo) })}</span>}
