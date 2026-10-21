@@ -24,6 +24,7 @@
     "sunday": "週日開始"
   },
   "sidebar": {
+    "dragFoot": "拖動左側把手調整順序，側邊欄會按這個順序顯示。",
     "title": "側邊欄",
     "upcoming": "即將扣款",
     "lookAhead": "往後看",

@@ -5,6 +5,22 @@ const EVENT = 'routechange';
 /** 连接页的地址从 ai 改成了 mcp：旧设置里隐藏的 ai 按 mcp 算 */
 export const navKey = (k: string) => (k === 'ai' ? 'mcp' : k);
 
+/** 侧边栏模块的排序键：概览的路由是空串，存成 overview */
+export const orderKey = (path: string) => navKey(path) || 'overview';
+
+/** 按设置里的顺序排侧边栏模块；没出现在设置里的（比如以后新增的模块）按默认位置排在后面 */
+export function sortNav<T>(items: T[], keyOf: (x: T) => string, order: string[] | undefined): T[] {
+  const o = (order ?? []).map(navKey);
+  const rank = (x: T, i: number) => {
+    const at = o.indexOf(keyOf(x));
+    return at < 0 ? 1000 + i : at;
+  };
+  return items
+    .map((x, i) => ({ x, r: rank(x, i) }))
+    .sort((a, b) => a.r - b.r)
+    .map((a) => a.x);
+}
+
 /** 当前路由（/admin 之后的部分，不含开头的 /） */
 export const currentRoute = () => decodeURIComponent(location.pathname.slice(BASE.length).replace(/^\/+|\/+$/g, ''));
 

@@ -24,6 +24,7 @@
     "sunday": "Domingo"
   },
   "sidebar": {
+    "dragFoot": "Arraste as alças para reordenar; a barra lateral segue esta ordem.",
     "title": "Barra lateral",
     "upcoming": "Próximas cobranças",
     "lookAhead": "Antecedência",

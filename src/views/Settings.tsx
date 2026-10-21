@@ -1,3 +1,5 @@
+import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
 import { cycleShort } from '../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../shared/csv.ts';
@@ -9,7 +11,7 @@ import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
 import { CategoriesGroup } from './Categories.tsx';
 import { PublicSubsSheet, publicCandidates } from './PublicSubs.tsx';
-import { go, navKey } from '../router.ts';
+import { go, navKey, sortNav } from '../router.ts';
 import { LOCALES, isLocale, t } from '../../shared/i18n.ts';
 import { preferredLocale } from '../i18n.ts';
 
@@ -20,15 +22,17 @@ const START_PAGES: Array<[string, string]> = [
   ['report', 'report'],
   ['wallet', 'wallet'],
 ];
-/** 侧边栏里可以隐藏的模块；概览、订阅始终显示 */
-const SIDE_MODULES: Array<[string, string]> = [
-  ['calendar', 'calendar'],
-  ['report', 'report'],
-  ['wallet', 'wallet'],
-  ['family', 'family'],
-  ['behalf', 'behalf'],
-  ['assistant', 'assistant'],
-  ['mcp', 'ai'],
+/** 侧边栏模块：[排序键, 文案键, 能否隐藏]。概览、订阅始终显示，只能调整位置 */
+const NAV_ROWS: Array<[string, string, boolean]> = [
+  ['overview', 'overview', false],
+  ['list', 'list', false],
+  ['calendar', 'calendar', true],
+  ['report', 'report', true],
+  ['wallet', 'wallet', true],
+  ['family', 'family', true],
+  ['behalf', 'behalf', true],
+  ['assistant', 'assistant', true],
+  ['mcp', 'ai', true],
 ];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { localTime } from '../../shared/format.ts';
@@ -105,6 +109,13 @@ function timeZones(current: string) {
 
 export function Settings({ state, today }: { state: AppState; today: string }) {
   const s = state.settings;
+  // 侧边栏模块按设置里的顺序列出，拖动后存回 navOrder（服务端，多台设备一致）
+  const navRows = sortNav(NAV_ROWS, ([k]) => k, s.navOrder);
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   // 只补没有分段、也不是代付的订阅：分段的每段各有支付方式，代付用的是别人的钱
   const unassigned = state.subscriptions.filter((x) => !x.methodId && !x.phases?.length && !x.proxy);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -246,7 +257,35 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Cell>
         </Group>
 
-        <Group title={t('settings.sidebar.title')}>
+        <Group title={t('settings.sidebar.title')} foot={t('settings.sidebar.dragFoot')}>
+          {/* 模块顺序：拖动把手调整，侧边栏跟着变；能隐藏的右边有开关 */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e: DragEndEvent) => {
+              if (!e.over || e.active.id === e.over.id) return;
+              const keys = navRows.map(([k]) => k);
+              const next = arrayMove(keys, keys.indexOf(String(e.active.id)), keys.indexOf(String(e.over.id)));
+              void run(() => saveSettings({ navOrder: next }));
+            }}
+          >
+            <SortableContext items={navRows.map(([k]) => k)} strategy={verticalListSortingStrategy}>
+              {navRows.map(([k, l, hideable]) => (
+                <NavRow
+                  key={k}
+                  id={k}
+                  label={t(`app.nav.${l}`)}
+                  checked={hideable ? !(s.hiddenNav ?? []).map(navKey).includes(k) : undefined}
+                  onToggle={(v) => {
+                    // 旧设置里的 ai 和新的 mcp 是同一项：先统一成新写法再增删
+                    const rest = (s.hiddenNav ?? []).map(navKey).filter((x) => x !== k);
+                    void run(() => saveSettings({ hiddenNav: v ? rest : [...rest, k] }));
+                  }}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+          {/* 即将扣款在侧边栏最下面，这里也放在最后 */}
           <Cell label={t('settings.sidebar.upcoming')}>
             <Toggle
               label={t('settings.sidebar.upcoming')}
@@ -265,18 +304,6 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               />
             </Cell>
           )}
-          {SIDE_MODULES.map(([k, l]) => (
-            <Cell key={k} label={t(`app.nav.${l}`)}>
-              <Toggle
-                checked={!(s.hiddenNav ?? []).map(navKey).includes(k)}
-                onChange={(v) => {
-                  // 旧设置里的 ai 和新的 mcp 是同一项：先统一成新写法再增删
-                  const rest = (s.hiddenNav ?? []).map(navKey).filter((x) => x !== k);
-                  void run(() => saveSettings({ hiddenNav: v ? rest : [...rest, k] }));
-                }}
-              />
-            </Cell>
-          ))}
         </Group>
 
         <Group title={t('settings.remind.title')}>
@@ -533,5 +560,30 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
         </Sheet>
       )}
     </>
+  );
+}
+
+/** 侧边栏模块的一行：左边拖动把手，右边是显示开关（概览、订阅没有开关） */
+function NavRow({ id, label, checked, onToggle }: { id: string; label: string; checked?: boolean; onToggle: (v: boolean) => void }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef as (el: HTMLDivElement | null) => void}
+      className={`cell cat-row nav-row ${isDragging ? 'lifted' : ''}`}
+      style={{ transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined, transition } as Record<string, string | undefined>}
+    >
+      <button
+        type="button"
+        ref={setActivatorNodeRef as (el: HTMLButtonElement | null) => void}
+        className="cat-grip"
+        aria-label={t('settings.cat.dragHandle')}
+        {...(attributes as unknown as Record<string, unknown>)}
+        {...(listeners as Record<string, unknown>)}
+      >
+        <Icon name="grip" />
+      </button>
+      <span className="nav-row-name">{label}</span>
+      {checked !== undefined && <Toggle label={label} checked={checked} onChange={onToggle} />}
+    </div>
   );
 }

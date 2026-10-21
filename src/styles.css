@@ -8773,3 +8773,14 @@ img.mm-flag {
 .hero-facts b.gain {
   color: var(--green);
 }
+
+/* 设置 · 侧边栏模块：把手 + 名称 + 开关 */
+.nav-row {
+  gap: 10px;
+  /* 右边距和普通行一致，开关才能和下面「即将扣款」的开关对齐 */
+  padding-right: 16px;
+}
+.nav-row-name {
+  flex: 1;
+  min-width: 0;
+}

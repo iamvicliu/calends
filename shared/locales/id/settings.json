@@ -24,6 +24,7 @@
     "sunday": "Minggu"
   },
   "sidebar": {
+    "dragFoot": "Seret pegangan untuk mengurutkan; bilah samping mengikuti urutan ini.",
     "title": "Bilah samping",
     "upcoming": "Tagihan mendatang",
     "lookAhead": "Rentang ke depan",

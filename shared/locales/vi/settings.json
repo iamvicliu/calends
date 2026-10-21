@@ -24,6 +24,7 @@
     "sunday": "Chủ Nhật"
   },
   "sidebar": {
+    "dragFoot": "Kéo tay nắm để sắp xếp; thanh bên hiển thị theo thứ tự này.",
     "title": "Thanh bên",
     "upcoming": "Khoản phí sắp tới",
     "lookAhead": "Xem trước",

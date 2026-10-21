@@ -27,6 +27,7 @@
     "sunday": "Dimanche"
   },
   "sidebar": {
+    "dragFoot": "Faites glisser les poignées pour réordonner ; la barre latérale suit cet ordre.",
     "title": "Barre latérale",
     "upcoming": "Prélèvements à venir",
     "lookAhead": "Horizon",

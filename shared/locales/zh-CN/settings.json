@@ -24,6 +24,7 @@
     "sunday": "周日开始"
   },
   "sidebar": {
+    "dragFoot": "拖动左侧把手调整顺序，侧边栏会按这个顺序显示。",
     "title": "侧边栏",
     "upcoming": "即将扣款",
     "lookAhead": "往后看",
