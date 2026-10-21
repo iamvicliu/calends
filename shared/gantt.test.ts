@@ -10,6 +10,17 @@ import { DEFAULT_SETTINGS, type Subscription } from './types.ts';
 
 const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
 
+test('名称列上下限包含实际内边距、图标与间距，默认随短名称收窄并保留半幅轨道', () => {
+  const style = { paddingLeft: 16, paddingRight: 12, iconWidth: 20, gap: 8 };
+  assert.deepEqual(gantt.ganttLabelBounds(35, 1000, style), { min: 48, max: 91, default: 91 });
+  assert.deepEqual(gantt.ganttLabelBounds(430.2, 1000, style), { min: 48, max: 487, default: 200 });
+  assert.deepEqual(gantt.ganttLabelBounds(800, 601, style), { min: 48, max: 300, default: 200 });
+  assert.deepEqual(gantt.ganttLabelBounds(800, 300, style), { min: 48, max: 150, default: 150 });
+  assert.deepEqual(gantt.ganttLabelBounds(0, 1000, style), { min: 48, max: 48, default: 48 });
+  assert.deepEqual(gantt.ganttLabelBounds(100, 60, style), { min: 48, max: 48, default: 48 });
+  assert.deepEqual(gantt.ganttLabelBounds(35, 600, { ...style, paddingLeft: 12 }), { min: 44, max: 87, default: 87 });
+});
+
 test('时间窗口保留过去与未来空间，兼容月末、闰年和跨年', () => {
   assert.deepEqual(gantt.ganttWindow('3m', '2026-10-21'), { start: '2026-08-21', end: '2026-11-21' });
   assert.deepEqual(gantt.ganttWindow('6m', '2026-10-21'), { start: '2026-06-06', end: '2026-12-06' });
@@ -99,17 +110,41 @@ const all = (node: unknown): Element[] => {
 function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
   const values: any[] = [];
   let cursor = 0;
-  const prefs: Record<string, string | undefined> = { 'gantt-zoom': rawZoom };
+  const prefs: Record<string, string | null | undefined> = { 'gantt-zoom': rawZoom };
   const prefCalls: Array<{ key: string; fallback: string; valid: (v: string) => boolean }> = [];
   const pendingEffects: Array<() => void> = [];
   const listeners: Record<string, (event: unknown) => void> = {};
   const timers = new Map<number, () => void>();
   let timerId = 0;
   let opened = 0;
+  let changed = false;
+  const env = { narrow: false, portrait: false, containerWidth: 1000, textScale: 7 };
+  const fontListeners = new Map<string, () => void>();
+  let fontReady = () => {};
+  const fontsReady = new Promise<void>((resolve) => {
+    fontReady = resolve;
+  });
+  let resized = () => {};
+  const effect = (fn: () => (() => void) | void, deps?: unknown[]) => {
+    const i = cursor++;
+    const prev = values[i];
+    if (!prev || !deps || deps.some((v, n) => !Object.is(v, prev.deps[n]))) {
+      prev?.cleanup?.();
+      values[i] = { deps };
+      pendingEffects.push(() => (values[i].cleanup = fn()));
+    }
+  };
   const useState = (initial: unknown) => {
     const i = cursor++;
-    if (!(i in values)) values[i] = initial;
-    return [values[i], (v: any) => (values[i] = typeof v === 'function' ? v(values[i]) : v)];
+    if (!(i in values)) values[i] = typeof initial === 'function' ? initial() : initial;
+    return [
+      values[i],
+      (v: any) => {
+        const next = typeof v === 'function' ? v(values[i]) : v;
+        if (!Object.is(values[i], next)) changed = true;
+        values[i] = next;
+      },
+    ];
   };
   const useRef = (current: unknown) => useState({ current })[0];
   const deps = {
@@ -123,15 +158,29 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     useState,
     useRef,
     useMemo: (fn: () => unknown) => fn(),
-    useEffect: (fn: () => void) => {
-      const i = cursor++;
-      if (!(i in values)) {
-        values[i] = true;
-        pendingEffects.push(fn);
+    useEffect: effect,
+    useLayoutEffect: effect,
+    useSyncExternalStore: (_subscribe: unknown, get: () => unknown) => get(),
+    matchMedia: (query: string) => ({ matches: query.includes('portrait') ? env.narrow && env.portrait : query.includes('700px') && env.narrow }),
+    getComputedStyle: () => ({ paddingLeft: env.narrow ? '12px' : '16px', paddingRight: '12px', columnGap: '8px' }),
+    ResizeObserver: class {
+      constructor(fn: () => void) {
+        resized = fn;
       }
+      observe() {}
+      disconnect() {}
     },
-    useLayoutEffect() {},
-    useSyncExternalStore: (_subscribe: unknown, _get: unknown, server: () => unknown) => server(),
+    document: {
+      createElement: () => {
+        const probe = { style: {}, textContent: '', getBoundingClientRect: () => ({ width: [...probe.textContent].length * env.textScale }), remove() {} };
+        return probe;
+      },
+      fonts: {
+        ready: fontsReady,
+        addEventListener: (event: string, fn: () => void) => fontListeners.set(event, fn),
+        removeEventListener: (event: string) => fontListeners.delete(event),
+      },
+    },
     useEffectEvent: (fn: (...args: unknown[]) => unknown) => {
       const ref = useRef(fn);
       ref.current = fn;
@@ -140,7 +189,7 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     usePref: (key: string, fallback: string, valid: (v: string) => boolean) => {
       prefCalls.push({ key, fallback, valid });
       const raw = prefs[key];
-      return [raw != null && valid(raw) ? raw : fallback, (v: string) => (prefs[key] = v)];
+      return [raw != null && valid(raw) ? raw : fallback, (v: string | null) => (prefs[key] = v)];
     },
     FlagImg: 'FlagImg',
     Icon: 'Icon',
@@ -168,19 +217,41 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     status: 'active',
   };
   const render = (rows: Subscription[] = [sub]) => {
-    cursor = 0;
-    const nodes = all(
-      Gantt({ rows, today, state: { subscriptions: rows, methods: [], fx: billing.FALLBACK_FX, settings: DEFAULT_SETTINGS }, onOpen: () => opened++ }),
-    );
-    const track = nodes.find((el) => el.type === 'div' && el.props.className?.split(' ').includes('gt'))!;
-    track.props.ref.current = {
-      addEventListener: (name: string, fn: (event: unknown) => void) => (listeners[name] = fn),
-      removeEventListener: (name: string) => delete listeners[name],
-    };
-    pendingEffects.splice(0).forEach((fn) => fn());
+    let nodes: Element[] = [];
+    let passes = 0;
+    do {
+      assert.ok(++passes < 10, 'layout effects must settle');
+      changed = false;
+      cursor = 0;
+      nodes = all(
+        Gantt({ rows, today, state: { subscriptions: rows, methods: [], fx: billing.FALLBACK_FX, settings: DEFAULT_SETTINGS }, onOpen: () => opened++ }),
+      );
+      const track = nodes.find((el) => el.type === 'div' && el.props.className?.split(' ').includes('gt'))!;
+      track.props.ref.current = {
+        get clientWidth() {
+          return env.containerWidth;
+        },
+        querySelector: () => ({ appendChild() {}, getBoundingClientRect: () => ({ width: parseFloat(track.props.style['--lw']) }) }),
+        addEventListener: (name: string, fn: (event: unknown) => void) => (listeners[name] = fn),
+        removeEventListener: (name: string) => delete listeners[name],
+      };
+      pendingEffects.splice(0).forEach((fn) => fn());
+    } while (changed);
     return nodes;
   };
-  return { render, prefs, prefCalls, listeners, timers, sub, opened: () => opened };
+  return {
+    render,
+    prefs,
+    prefCalls,
+    listeners,
+    timers,
+    sub,
+    env,
+    fontReady: () => fontReady(),
+    fontDone: () => fontListeners.get('loadingdone')?.(),
+    resize: () => resized(),
+    opened: () => opened,
+  };
 }
 
 test('真实时间轴的默认/旧偏好回退为 1 年，五档按顺序保存且翻页、拖动、滚轮可用', () => {
@@ -284,4 +355,91 @@ test('短窗口在窄/宽轨道中绘出价格、扣款、试用、首期优惠�
       }
     }
   }
+});
+
+test('名称列测量：筛选与名称变化收敛旧偏好，字体加载、语言和容器变化重新测量', async () => {
+  const host = mount();
+  const long = { ...host.sub, name: 'W'.repeat(60) };
+  const short = { ...host.sub, name: 'Wi' };
+  const shortRows = [short];
+  const width = (rows: Subscription[]) => host.render(rows).find((el) => el.props.className?.split(' ').includes('gt'))!.props.style['--lw'];
+  const rows = [long, { ...short, id: 'short' }];
+  assert.equal(width(rows), '200px');
+  host.prefs['gantt-label-w'] = '999';
+  assert.equal(width(rows), '476px', '上限可超过旧的固定 360px');
+  assert.equal(width(shortRows), '70px', '筛掉最长行后按当前可见名称收敛');
+  assert.equal(host.prefs['gantt-label-w'], '999', '显示收敛不覆盖原偏好');
+  host.env.textScale = 10;
+  await host.fontReady();
+  assert.equal(width(shortRows), '76px');
+  host.env.textScale = 12;
+  host.fontDone();
+  assert.equal(width(shortRows), '80px');
+  host.env.textScale = 13;
+  setLocale('zh-CN', [flatten('list', JSON.parse(read('./locales/zh-CN/list.json')))]);
+  assert.equal(width(shortRows), '82px');
+  setLocale('en', [flatten('list', JSON.parse(read('./locales/en/list.json')))]);
+  assert.equal(width(rows), '500px');
+  host.env.containerWidth = 300;
+  host.resize();
+  assert.equal(width(rows), '150px', '容器收窄时限制为一半');
+});
+
+test('名称列交互：拖到图标最小值隐藏名称、保留可访问名称，拖动保存并可双击恢复', () => {
+  const host = mount();
+  const find = (cls: string) => host.render().find((el) => el.props.className?.split(' ').includes(cls))!;
+  const pointer = (clientX: number) => ({ clientX, pointerId: 1, stopPropagation() {}, currentTarget: { setPointerCapture() {} } });
+  assert.equal(find('gt').props.style['--lw'], '105px');
+  find('gt-resize').props.onPointerDown(pointer(100));
+  find('gt-resize').props.onPointerMove(pointer(-1000));
+  assert.equal(find('gt').props.style['--lw'], '48px');
+  assert.ok(find('gt').props.className.includes('resizing'));
+  assert.equal(host.render().filter((el) => el.props.className === 'gt-name').length, 0);
+  const icon = find('gt-icon');
+  assert.equal(icon.props.title, host.sub.name);
+  assert.equal(icon.props['aria-label'], host.sub.name);
+  assert.equal(icon.props.role, 'img');
+  find('gt-resize').props.onPointerUp(pointer(-1000));
+  assert.equal(host.prefs['gantt-label-w'], '48');
+  assert.ok(!find('gt').props.className.includes('resizing'));
+  find('gt-resize').props.onDoubleClick();
+  assert.equal(host.prefs['gantt-label-w'], null);
+  assert.equal(find('gt').props.style['--lw'], '105px');
+  assert.equal(find('gt-name').children[0], host.sub.name);
+  find('gt-resize').props.onPointerDown(pointer(100));
+  find('gt-resize').props.onPointerMove(pointer(1000));
+  assert.equal(find('gt').props.style['--lw'], '105px', '拖动不可超过最长名称');
+  find('gt-resize').props.onPointerUp(pointer(1000));
+  assert.equal(host.prefs['gantt-label-w'], '105');
+});
+
+test('手机竖屏不渲染名称和拖拽线，整行打开详情，横屏恢复单独保存的宽度', () => {
+  const host = mount();
+  host.env.narrow = true;
+  host.env.portrait = true;
+  host.prefs['gantt-label-w-m'] = '80';
+  host.prefs['gantt-label-w'] = '150';
+  const find = (cls: string) => host.render().find((el) => el.props.className?.split(' ').includes(cls));
+  assert.equal(find('gt')!.props.style['--lw'], '44px');
+  assert.equal(find('gt-name'), undefined);
+  assert.equal(find('gt-resize'), undefined);
+  assert.equal(host.render().find((el) => el.props.className === 'gt-label' && el.props.title)?.props.title, host.sub.name);
+  assert.equal(find('gt-icon')!.props.title, host.sub.name);
+  host
+    .render()
+    .find((el) => el.props.className === 'gt-row')!
+    .props.onClick();
+  assert.equal(host.opened(), 1);
+  host.env.portrait = false;
+  assert.equal(find('gt')!.props.style['--lw'], '80px');
+  assert.ok(find('gt-resize'));
+  assert.equal(find('gt-name')!.children[0], host.sub.name);
+  host.prefs['gantt-label-w-m'] = '44';
+  assert.equal(find('gt-name'), undefined, '横屏也可拖到只剩图标');
+  find('gt-resize')!.props.onDoubleClick();
+  assert.equal(find('gt')!.props.style['--lw'], '101px', '窄屏默认按名称计算');
+  assert.equal(host.prefs['gantt-label-w'], '150');
+  host.env.narrow = false;
+  assert.equal(find('gt')!.props.style['--lw'], '105px', '桌面偏好按上限显示');
+  assert.equal(host.prefs['gantt-label-w'], '150');
 });
