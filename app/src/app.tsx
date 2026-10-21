@@ -193,6 +193,7 @@ function Sidebar({
   onSearch: () => void;
   onCollapse: () => void;
 }) {
+  const [gear, setGear] = useState(0);
   // 即将扣款：像聊天记录一样列在导航下方；往后看 0 天表示看到本月月底
   const days = state.settings.upcomingDays ?? 45;
   const horizon = days === 0 ? monthEnd(d.slice(0, 7)) : addDays(d, days);
@@ -267,8 +268,11 @@ function Sidebar({
           <small>{THEME_LABEL[theme]}</small>
         </button>
         {!state.readonly && (
-          <a className={`side-item ${route === 'settings' ? 'active' : ''}`} href={href('settings')}>
-            <Icon name="gear" />
+          <a className={`side-item ${route === 'settings' ? 'active' : ''}`} href={href('settings')} onClick={() => setGear(gear + 1)}>
+            {/* 每点一下齿轮转一圈：先慢、再快、再慢 */}
+            <span className="ico-turn gear" style={{ transform: `rotate(${gear * 360}deg)` }}>
+              <Icon name="gear" />
+            </span>
             <span>{t('app.nav.settings')}</span>
           </a>
         )}

@@ -54,6 +54,7 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
     e.preventDefault();
   };
 
+  const [turn, setTurn] = useState(0);
   const orig = value === 'orig';
   let n = 0;
   return (
@@ -62,12 +63,18 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
         type="button"
         ref={btn}
         className={`side-item theme-item ${open ? 'open' : ''}`}
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          setOpen(!open);
+          setTurn(turn + 1);
+        }}
         aria-haspopup="listbox"
         aria-expanded={open}
         title={t('picker.ccy.switch')}
       >
-        <Icon name="coins" />
+        {/* 每点一下两枚硬币交换位置（转半圈，带回弹） */}
+        <span className="ico-turn swap" style={{ transform: `rotate(${turn * 180}deg)` }}>
+          <Icon name="coins" />
+        </span>
         <span>{t('picker.ccy.label')}</span>
         <small>{orig ? t('picker.ccy.orig') : ccyName(value)}</small>
       </button>
