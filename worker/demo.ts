@@ -5,13 +5,11 @@ import { getKv } from './store.ts';
 
 export function demoBlocked(path: string, method: string): boolean {
   return (
-    path === '/mcp' ||
     path.startsWith('/cal/') ||
     path === '/api/public' ||
     (path.startsWith('/api/auth/') && path !== '/api/auth/status') ||
     path === '/api/login' ||
     path === '/api/logout' ||
-    path.startsWith('/api/mcp/') ||
     path.startsWith('/api/assistant/') ||
     path === '/api/notify/test' ||
     path.startsWith('/api/ics/') ||

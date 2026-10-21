@@ -461,7 +461,7 @@ export function demoState(today: string): { subscriptions: Subscription[]; metho
     monthlyDigest: true,
     displayName: 'Alex',
     weekStart: 0,
-    aiEnabled: false,
+    aiEnabled: true,
   };
 
   // 钱包包含高余额和即将用尽的余额，订阅均关联实际支付账户。

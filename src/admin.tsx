@@ -494,16 +494,8 @@ function App() {
         view = <ProxyPage state={state} today={d} onOpen={open} />;
         break;
       case 'mcp':
-        view = state.demo ? (
-          <>
-            <Toolbar title={t('app.nav.ai')} />
-            <div className="page fade-in">
-              <p className="muted">{t('app.demo.unavailable')}</p>
-            </div>
-          </>
-        ) : (
-          <Ai state={state} />
-        );
+        // 演示站也开放连接：令牌与写入都会在每天复原时清空
+        view = <Ai state={state} />;
         break;
       case 'assistant':
         view = state.demo ? (

@@ -123,7 +123,6 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
     'access-control-allow-headers': 'authorization, content-type, mcp-protocol-version, mcp-session-id',
     'access-control-allow-methods': 'POST, GET, OPTIONS',
   };
-  if (env.DEMO_MODE === '1') return Response.json(fail(null, -32002, t('server.demoUnavailable')), { status: 403, headers: cors });
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   // 无状态服务器不提供服务端推送流
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405, headers: { ...cors, allow: 'POST' } });

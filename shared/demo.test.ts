@@ -163,8 +163,6 @@ test('演示站敏感接口返回本地化 403，入口免登录，账本和显�
       ['/api/auth/logout-others', 'POST'],
       ['/api/auth/passkey/id', 'DELETE'],
       ['/api/notify/test', 'POST'],
-      ['/api/mcp/tokens', 'POST'],
-      ['/api/mcp/tokens', 'GET'],
       ['/api/assistant/config', 'PUT'],
       ['/api/assistant/test', 'POST'],
       ['/api/assistant/chat', 'POST'],
@@ -173,8 +171,6 @@ test('演示站敏感接口返回本地化 403，入口免登录，账本和显�
       ['/api/ics/rotate', 'POST'],
       ['/api/backup', 'POST'],
       ['/api/import', 'POST'],
-      ['/mcp', 'POST'],
-      ['/mcp', 'GET'],
       ['/cal/01234567890123456789012345678901.ics', 'GET'],
       ['/api/public', 'GET'],
     ];
@@ -198,7 +194,7 @@ test('演示站敏感接口返回本地化 403，入口免登录，账本和显�
       { channels: [] },
       { notifyEmail: 'demo@example.com' },
       { publicView: true },
-      { aiEnabled: true },
+      { aiEnabled: false },
       { icsToken: 'token' },
       { maxSessions: 1 },
     ])
