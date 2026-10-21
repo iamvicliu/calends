@@ -43,3 +43,21 @@ export function memberFee(state: AppState, s: Subscription, m: ShareMember): { a
 export function shareFromFee(state: AppState, s: Subscription, fee: number, ccy: string, billEvery: number): number {
   return Math.round(((toBaseAt(state, fee, ccy, undefined, s.currency) * cycleMonths(s)) / billEvery) * 100) / 100;
 }
+
+/**
+ * 订阅换了币种或计费周期后，成员按收费标准（fee）重新折算每期份额。
+ * 份额是保存成员时按当时的币种、周期算好存下的，不重算会把 ¥60 当成 $60
+ */
+export function resyncShares(state: AppState, prev: Subscription | undefined, next: Subscription): Subscription {
+  if (!next.share || !prev || (prev.currency === next.currency && cycleMonths(prev) === cycleMonths(next))) return next;
+  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  return {
+    ...next,
+    share: {
+      ...next.share,
+      members: next.share.members.map((m) =>
+        m.fee != null && !m.exempt ? { ...m, share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, m.billEvery ?? 1) } : m,
+      ),
+    },
+  };
+}

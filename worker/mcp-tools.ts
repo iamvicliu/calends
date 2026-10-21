@@ -29,7 +29,7 @@ import { normName, peopleLedger, type PersonLedger } from '../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
 import { loadState, remove, upsert } from './store.ts';
-import { carLedger, memberFee, shareFromFee } from '../shared/carpool.ts';
+import { carLedger, memberFee, resyncShares, shareFromFee } from '../shared/carpool.ts';
 import { t } from '../shared/i18n.ts';
 import { categoryCounts, categoryList, presetCategory } from '../shared/categories.ts';
 
@@ -329,7 +329,14 @@ async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscrip
     ctx.overlay?.set(after.id, after);
     return { dry_run: true, ...preview };
   }
-  const saved = { ...after, updatedAt: new Date().toISOString() };
+  const saved = {
+    ...resyncShares(
+      st,
+      st.subscriptions.find((x) => x.id === after.id),
+      after,
+    ),
+    updatedAt: new Date().toISOString(),
+  };
   await upsert(ctx.env, 'subscriptions', saved.id, saved);
   return { ok: true, ...preview };
 }

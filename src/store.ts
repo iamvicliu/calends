@@ -4,6 +4,7 @@ import type { AppState, PaymentMethod, Person, Settings, Subscription } from '..
 import { mergePeople, syncPerson } from '../shared/people.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { renameInSubs, type Category } from '../shared/categories.ts';
+import { resyncShares } from '../shared/carpool.ts';
 import { toast as sonner } from 'sonner';
 
 const CACHE_KEY = 'ledger:state:v1';
@@ -300,9 +301,15 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
   }
 }
 
-export function saveSub(sub: Subscription) {
+export function saveSub(next: Subscription) {
   // 改了开始日期或周期后，新的扣款日需要补汇率
   setTimeout(() => void syncFx(), 500);
+  const st = getState();
+  const sub = resyncShares(
+    st,
+    st.subscriptions.find((x) => x.id === next.id),
+    next,
+  );
   return optimistic(
     (s) => ({ ...s, subscriptions: upsertById(s.subscriptions, sub) }),
     () => api(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
