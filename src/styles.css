@@ -4957,27 +4957,29 @@ select.btn {
   background: var(--red);
 }
 /* 已停止：一枚放大、模糊的 🚫 水印压在卡片右侧，不挡内容 */
+/* 已停止：右上角一枚小的停止标记，到上边、右边距离一致，代替「已停止」胶囊 */
 .stop-stamp {
   position: absolute;
-  z-index: 0;
-  top: 50%;
-  right: -34px;
-  width: 168px;
-  height: 168px;
-  transform: translateY(-50%) rotate(-14deg);
+  z-index: 2;
+  top: 18px;
+  right: 18px;
+  width: 30px;
+  height: 30px;
   color: var(--red);
-  opacity: 0.1;
-  filter: blur(1.5px);
+  opacity: 0.55;
   pointer-events: none;
 }
 .stop-stamp svg {
   width: 100%;
   height: 100%;
 }
-.proxy-card.stopped .proxy-head .ico,
-.proxy-card.stopped .ph-name,
-.proxy-card.stopped .ph-meta {
-  opacity: 0.55;
+.proxy-card.stopped .ph-status {
+  display: none;
+}
+/* 其余内容整体去色变淡：图标、文字、胶囊、指标卡都一样 */
+.proxy-card.stopped > :not(.stop-stamp) {
+  filter: grayscale(1);
+  opacity: 0.5;
 }
 .proxy-card > .proxy-top,
 .proxy-card > .ph-chips,
