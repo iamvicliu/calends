@@ -529,12 +529,16 @@ const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
   { key: 'hikes', send: true },
 ];
 
+/** 欢迎语共 20 套：每次出现空状态（进入助手页、开新对话）随机一套，停留期间不变 */
+const WELCOME_COUNT = 20;
+
 function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
+  const [n] = useState(() => Math.floor(Math.random() * WELCOME_COUNT) + 1);
   return (
     <div className="as-welcome">
       <img className="as-orb" src={base('/icons/logo.svg')} alt="" />
-      <h2>{t('assistant.welcome.title')}</h2>
-      <p>{t('assistant.welcome.body')}</p>
+      <h2>{t(`assistant.welcome.variants.v${n}.title`)}</h2>
+      <p>{t(`assistant.welcome.variants.v${n}.body`)}</p>
       {!ready && cfg && (
         <button className="as-setup-cta" onClick={onSetup}>
           <KeyRound size={16} />

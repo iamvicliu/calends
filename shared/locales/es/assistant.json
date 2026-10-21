@@ -9,8 +9,88 @@
   "settings": "Ajustes de IA",
   "toBottom": "Ir al final",
   "welcome": {
-    "title": "Pásame una factura o una captura",
-    "body": "Pega un recibo de App Store, un SMS de cobro, una captura de tu página de suscripciones o cualquier texto. Lo convierto en un borrador de suscripción que solo tienes que confirmar. También puedes preguntarme por tus gastos."
+    "variants": {
+      "v1": {
+        "title": "Pásame tus facturas y capturas",
+        "body": "Pega un recibo de App Store, un SMS de cobro, una captura de tus suscripciones o cualquier texto. Prepararé borradores para que los confirmes. También puedes preguntarme por tus gastos."
+      },
+      "v2": {
+        "title": "¿En qué se va el dinero este mes?",
+        "body": "Pregúntame qué toca pagar este mes, cuáles son los cobros más caros o cuánto has gastado este año. Lo consultaré en tu registro."
+      },
+      "v3": {
+        "title": "¿Avisos de cobro? Pásamelos",
+        "body": "Pega un aviso de cobro de tu banco, monedero digital u operador. Identificaré la suscripción y el importe para registrarlo."
+      },
+      "v4": {
+        "title": "Una captura para toda una página de suscripciones",
+        "body": "Envía una captura de tus suscripciones de App Store o de una página de membresías. Prepararé un borrador por suscripción para que los confirmes."
+      },
+      "v5": {
+        "title": "¿Ha subido el precio? Dime desde cuándo",
+        "body": "Di «Netflix cuesta 17.99 a partir del mes que viene» y cambiaré el precio desde esa fecha. Los cobros anteriores quedarán como estaban."
+      },
+      "v6": {
+        "title": "¿No quieres seguir? Solo dímelo",
+        "body": "No renovar, dar de baja ahora o un bloqueo del proveedor: distingo cada caso y también puedo registrar un reembolso."
+      },
+      "v7": {
+        "title": "Yo llevo las cuentas del plan compartido",
+        "body": "¿Compartís un plan familiar? Dime cuánto le toca a cada persona y quién ha pagado. Registraré los miembros y los pagos para que veas quién debe cuánto."
+      },
+      "v8": {
+        "title": "¿Has encontrado las facturas de todo un año?",
+        "body": "Pega una tabla de facturas por mes. Crearé una suscripción por columna y registraré el importe real de cada mes en su historial."
+      },
+      "v9": {
+        "title": "¿Qué suscripciones puedes quitar?",
+        "body": "Pregúntame por las que no usas, las duplicadas o las que más han subido. Las buscaré en tu registro y prepararé una lista de posibles bajas."
+      },
+      "v10": {
+        "title": "¿Qué se cobra la semana que viene?",
+        "body": "Pregunta por los próximos días o lo que queda de mes. Ordenaré los cobros por fecha para que puedas preverlos."
+      },
+      "v11": {
+        "title": "Suscripciones en otras monedas, bajo control",
+        "body": "Los precios de las tiendas de Turquía o Nigeria se guardan en su moneda original. Los convierto a tu moneda base al cambio del día y también puedo registrar el cargo real de tu tarjeta."
+      },
+      "v12": {
+        "title": "Recibos por correo: copia todo el mensaje",
+        "body": "No hace falta buscar los datos en los recibos de Apple, Google o Spotify. Pega el correo completo y encontraré el importe, el ciclo y la fecha."
+      },
+      "v13": {
+        "title": "Añade una suscripción que tienes desde hace años",
+        "body": "Di «Desde 2021, al principio 8, ahora 18» y completaré el historial de precios para que el gasto acumulado sea correcto."
+      },
+      "v14": {
+        "title": "¿Cuánto llevas en suscripciones este año?",
+        "body": "Pregunta por este año, el anterior o cualquier periodo. Desglosaré tus gastos por categoría o forma de pago."
+      },
+      "v15": {
+        "title": "Que no se te olvide cancelar la prueba",
+        "body": "Dime cuándo termina la prueba. Registraré la fecha para que recibas un recordatorio antes de que empiece el cobro."
+      },
+      "v16": {
+        "title": "¿Pagas por otra persona? Lleva la cuenta",
+        "body": "Dime si pagas una suscripción por otra persona. Llevaré por separado lo que has pagado y lo que te han devuelto."
+      },
+      "v17": {
+        "title": "¿Has cambiado de región o de plan?",
+        "body": "¿Has pasado de la tienda de EE. UU. a la de Turquía o a un plan familiar? Dime cuándo y seguiré con el nuevo plan, conservando el historial anterior."
+      },
+      "v18": {
+        "title": "Pregunta lo que quieras, sin complicarte",
+        "body": "«¿Qué suscripción tengo desde hace más tiempo?» «¿Qué tarjeta acumula más cobros?» Pregunta y lo consultaré en tu registro."
+      },
+      "v19": {
+        "title": "Tú confirmas cada cambio",
+        "body": "Yo solo preparo borradores. Las altas, los cambios de precio y las bajas aparecen como tarjetas. No se guarda nada hasta que lo confirmes."
+      },
+      "v20": {
+        "title": "Empieza aquí tu registro",
+        "body": "Envía un recibo, una captura o dime qué suscripciones tienes. Yo me encargo del resto."
+      }
+    }
   },
   "suggest": {
     "receipt": {

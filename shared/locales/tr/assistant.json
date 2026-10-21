@@ -9,8 +9,88 @@
   "settings": "Yapay zekâ ayarları",
   "toBottom": "En alta git",
   "welcome": {
-    "title": "Faturayı ya da ekran görüntüsünü bana bırakın",
-    "body": "Bir App Store makbuzu, ödeme SMS'i, abonelik sayfasının ekran görüntüsü ya da herhangi bir metin yapıştırın. Onaylamanız için bir abonelik taslağına dönüştüreyim. Harcamalarınızı da doğrudan sorabilirsiniz."
+    "variants": {
+      "v1": {
+        "title": "Faturaları ve ekran görüntülerini buraya bırakın",
+        "body": "App Store makbuzu, ödeme SMS’i, abonelik sayfasının ekran görüntüsü veya herhangi bir metin yapıştırın. Onaylamanız için abonelik taslakları hazırlayayım. Harcamalarınızı da sorabilirsiniz."
+      },
+      "v2": {
+        "title": "Bu ay para nereye gidiyor?",
+        "body": "Bu ay nelerin ödeneceğini, en yüksek ücretleri veya bu yıl ne kadar harcadığınızı sorun. Kayıtlarınızdan bulayım."
+      },
+      "v3": {
+        "title": "Ödeme bildirimleri mi? Bana bırakın",
+        "body": "Banka, dijital cüzdan veya operatörden gelen ödeme bildirimini yapıştırın. Hangi abonelik olduğunu ve ne kadar ödendiğini bulup kaydedeyim."
+      },
+      "v4": {
+        "title": "Tek ekran görüntüsüyle bir sayfa abonelik",
+        "body": "App Store aboneliklerinizin veya üyelik sayfanızın ekran görüntüsünü gönderin. Her abonelik için ayrı bir taslak hazırlayıp onayınıza sunayım."
+      },
+      "v5": {
+        "title": "Fiyat mı arttı? Ne zamandan itibaren?",
+        "body": "“Netflix gelecek aydan itibaren 17.99” deyin, fiyatı o tarihten başlayarak değiştireyim. Önceki ödemeler aynı kalsın."
+      },
+      "v6": {
+        "title": "Devam etmek istemiyor musunuz? Söylemeniz yeterli",
+        "body": "Yenilememe, hemen durdurma veya sağlayıcının hesabı kapatması: farklarını biliyorum, para iadesini de aynı anda kaydedebilirim."
+      },
+      "v7": {
+        "title": "Ortak planın hesabını ben tutayım",
+        "body": "Aile planını mı paylaşıyorsunuz? Kişi başı tutarı ve kimin ödediğini söyleyin. Üyeleri ve ödemeleri kaydedeyim, kimin ne kadar borcu kaldığı belli olsun."
+      },
+      "v8": {
+        "title": "Bir yıllık fatura tablosu mu buldunuz?",
+        "body": "Aylık fatura tablosunu yapıştırın. Her sütun için bir abonelik oluşturup her ayın gerçek tutarını geçmişine kaydedeyim."
+      },
+      "v9": {
+        "title": "Hangi aboneliklerden vazgeçebilirsiniz?",
+        "body": "Kullanmadığınız, yinelenen veya en çok zamlanan abonelikleri sorun. Kayıtlarınızdan bulup iptal edebileceklerinizi listeleyeyim."
+      },
+      "v10": {
+        "title": "Gelecek hafta hangi ödemeler var?",
+        "body": "Önümüzdeki günlerin veya ayın kalanının ödemelerini sorun. Önceden plan yapabilmeniz için tarihe göre sıralayayım."
+      },
+      "v11": {
+        "title": "Dövizli abonelikler de kontrol altında",
+        "body": "Türkiye veya Nijerya mağazasındaki fiyatları kendi para biriminde saklarım. O günün kuruyla ana para biriminize çevirir, kartınızdan gerçekten çekilen tutarı da kaydedebilirim."
+      },
+      "v12": {
+        "title": "Makbuz e-postasını tümüyle kopyalayın",
+        "body": "Apple, Google veya Spotify makbuzlarından ayrıntıları ayıklamanıza gerek yok. E-postanın tamamını yapıştırın; tutarı, ödeme dönemini ve tarihi bulayım."
+      },
+      "v13": {
+        "title": "Yıllardır kullandığınız aboneliği ekleyin",
+        "body": "“2021’den beri kullanıyorum, önce 8, şimdi 18” deyin. Toplam harcamanız doğru hesaplansın diye fiyat geçmişini tamamlayayım."
+      },
+      "v14": {
+        "title": "Bu yıl aboneliklere ne kadar harcadınız?",
+        "body": "Bu yılın, geçen yılın veya istediğiniz dönemin abonelik harcamalarını sorun. Kategoriye veya ödeme yöntemine göre ayırayım."
+      },
+      "v15": {
+        "title": "Deneme aboneliğini iptal etmeyi unutmayın",
+        "body": "Deneme süresinin ne zaman bittiğini söyleyin. Ücretliye geçmeden önce hatırlatma almanız için tarihi kaydedeyim."
+      },
+      "v16": {
+        "title": "Başkasının yerine mi ödüyorsunuz? Takip edin",
+        "body": "Bir aboneliği başkası adına ödüyorsanız söyleyin. Ödediklerinizi ve geri aldıklarınızı ayrı ayrı takip edeyim."
+      },
+      "v17": {
+        "title": "Bölge veya plan mı değiştirdiniz?",
+        "body": "ABD mağazasından Türkiye’ye mi geçtiniz, yoksa aile planına mı yükselttiniz? Ne zaman olduğunu söyleyin. Eski geçmişi koruyup yeni planla hesaplamaya devam edeyim."
+      },
+      "v18": {
+        "title": "Aklınıza geleni sorun",
+        "body": "“En uzun süredir hangi aboneliği kullanıyorum?” “En çok hangi karttan ödeme yapılıyor?” Sorun, kayıtlarınıza bakıp cevaplayayım."
+      },
+      "v19": {
+        "title": "Her değişikliği siz onaylarsınız",
+        "body": "Ben yalnızca taslak hazırlarım. Yeni abonelikler, fiyat değişiklikleri ve iptaller önce kart olarak görünür. Siz onaylamadan hiçbir şey kaydedilmez."
+      },
+      "v20": {
+        "title": "Kayıt tutmaya buradan başlayın",
+        "body": "Bir makbuz veya ekran görüntüsü gönderin ya da nereye abone olduğunuzu söyleyin. Gerisini bana bırakın."
+      }
+    }
   },
   "suggest": {
     "receipt": {
