@@ -54,6 +54,7 @@
     "get_receivables": "Receivables",
     "get_insights": "Checkup & year in review",
     "list_events": "Change log",
+    "search_app_store": "Find app",
     "create_subscription": "Add subscription",
     "update_subscription": "Edit subscription",
     "change_price": "Record price change",

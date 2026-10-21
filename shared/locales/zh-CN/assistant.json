@@ -1,0 +1,104 @@
+{
+  "title": "AI 助手",
+  "new": "新对话",
+  "settings": "AI 设置",
+  "toBottom": "回到底部",
+  "welcome": {
+    "title": "把账单、截图直接丢给我",
+    "body": "粘贴 App Store 收据、扣款短信、订阅页面截图或任意一段文字，我会整理成订阅草稿，你确认后就记进账本。也可以直接问花销。"
+  },
+  "suggest": {
+    "receipt": {
+      "title": "粘贴一封收据",
+      "hint": "App Store、Google Play 或扣款邮件",
+      "text": "帮我把这封收据记成订阅：\n"
+    },
+    "screenshot": {
+      "title": "发一张截图",
+      "hint": "订阅管理页、账单页都行，可直接粘贴",
+      "text": "帮我识别截图里的订阅："
+    },
+    "month": {
+      "title": "这个月要扣多少？",
+      "hint": "按扣款日列出本月剩下的扣款",
+      "text": "这个月还要扣哪些订阅？一共多少钱？"
+    },
+    "hikes": {
+      "title": "最近谁涨价了？",
+      "hint": "找出过去一年涨价的订阅",
+      "text": "过去一年哪些订阅涨价了？各涨了多少？"
+    }
+  },
+  "placeholder": "粘贴文字或截图，或者问点什么…",
+  "placeholderSetup": "先在右上角配置 DeepSeek API Key",
+  "addImage": "添加图片",
+  "removeImage": "移除图片",
+  "send": "发送",
+  "stop": "停止",
+  "imageFailed": "图片读取失败",
+  "disclaimer": "由 DeepSeek 生成，添加前请核对金额与日期。",
+  "thinking": "思考中…",
+  "thought": "思考了 {count} 秒",
+  "stopped": "已停止生成",
+  "copy": "复制",
+  "copied": "已复制",
+  "regenerate": "重新生成",
+  "retry": "重试",
+  "applied": "已记进账本",
+  "tool": {
+    "running": "运行中",
+    "done": "完成",
+    "error": "出错",
+    "input": "参数",
+    "output": "结果"
+  },
+  "card": {
+    "draft": "订阅草稿",
+    "start": "开始日期",
+    "today": "今天",
+    "next": "接下来的扣款",
+    "add": "添加",
+    "confirm": "确认",
+    "edit": "编辑后添加",
+    "dismiss": "忽略",
+    "dismissed": "已忽略",
+    "added": "已添加",
+    "done": "已完成",
+    "view": "查看",
+    "missing": "未识别到{fields}，已用默认值，请核对",
+    "sep": "、",
+    "filled": "图标和链接已从 App Store 补全"
+  },
+  "error": {
+    "auth": "API Key 无效",
+    "balance": "DeepSeek 账户余额不足",
+    "rate": "请求太频繁，稍后再试",
+    "params": "请求参数有误",
+    "server": "DeepSeek 服务暂时异常",
+    "network": "网络连接失败",
+    "config": "还没有配置 API Key"
+  },
+  "setup": {
+    "title": "AI 助手设置",
+    "intro": "使用你自己的 DeepSeek API Key，费用按 DeepSeek 的价格计入你的账户。获取 Key：",
+    "keySaved": "已保存（{hint}），留空则不修改",
+    "baseHint": "官方地址无需修改；用代理或兼容服务时再填。",
+    "model": "模型",
+    "modelHint": "deepseek-flash 即 V4.1 Flash，支持识别图片。",
+    "effort": "思考强度",
+    "effort_none": "不思考",
+    "effort_noneHint": "最快，适合简单收据",
+    "effort_low": "轻度",
+    "effort_lowHint": "推荐：快且准确",
+    "effort_high": "深度",
+    "effort_highHint": "复杂账单更稳，速度较慢",
+    "test": "测试连接",
+    "testOk": "连接成功，可用 {count} 个模型",
+    "saved": "已保存",
+    "clear": "清除 Key",
+    "cleared": "已清除 API Key",
+    "cta": "配置 DeepSeek API Key",
+    "ctaHint": "只需一次，Key 只保存在你的服务器上",
+    "privacy": "Key 只保存在你的服务器上，不会发送到浏览器或写进备份。识别时，你发送的文字和图片会经你的服务器转发给 DeepSeek。"
+  }
+}

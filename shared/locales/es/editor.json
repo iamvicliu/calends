@@ -221,5 +221,6 @@
   },
   "timeline": {
     "home": "Volver a hoy (o haz doble clic en la línea de tiempo)"
-  }
+  },
+  "ai": { "title": "Rellenar con IA", "hint": "Pega un recibo, una captura o texto y se organiza solo" }
 }

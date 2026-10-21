@@ -1,0 +1,110 @@
+{
+  "title": "KI-Assistent",
+  "new": "Neuer Chat",
+  "settings": "KI-Einstellungen",
+  "toBottom": "Nach unten",
+  "welcome": {
+    "title": "Wirf mir eine Rechnung oder einen Screenshot hin",
+    "body": "Füge eine App-Store-Quittung, eine Abbuchungs-SMS, einen Screenshot deiner Abo-Seite oder beliebigen Text ein. Ich mache daraus einen Abo-Entwurf, den du nur noch bestätigst. Du kannst auch einfach nach deinen Ausgaben fragen."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "Quittung einfügen",
+      "hint": "App Store, Google Play oder eine Rechnungs-E-Mail",
+      "text": "Trag diese Quittung als Abo ein:\n"
+    },
+    "screenshot": {
+      "title": "Screenshot senden",
+      "hint": "Abo- oder Abrechnungsseite – einfach einfügen",
+      "text": "Finde die Abos auf diesem Screenshot:"
+    },
+    "month": {
+      "title": "Was wird diesen Monat fällig?",
+      "hint": "Die restlichen Abbuchungen des Monats nach Datum",
+      "text": "Welche Abos werden diesen Monat noch abgebucht, und wie viel ist das insgesamt?"
+    },
+    "hikes": {
+      "title": "Was ist teurer geworden?",
+      "hint": "Abos mit Preiserhöhung im letzten Jahr",
+      "text": "Welche Abos sind im letzten Jahr teurer geworden, und um wie viel?"
+    }
+  },
+  "placeholder": "Text oder Screenshot einfügen oder etwas fragen …",
+  "placeholderSetup": "Richte zuerst oben rechts deinen DeepSeek-API-Key ein",
+  "addImage": "Bild hinzufügen",
+  "removeImage": "Bild entfernen",
+  "send": "Senden",
+  "stop": "Stoppen",
+  "imageFailed": "Bild konnte nicht gelesen werden",
+  "disclaimer": "Von DeepSeek erstellt. Prüfe Beträge und Daten, bevor du etwas hinzufügst.",
+  "thinking": "Denkt nach …",
+  "thought": {
+    "one": "{count} Sekunde nachgedacht",
+    "other": "{count} Sekunden nachgedacht"
+  },
+  "stopped": "Abgebrochen",
+  "copy": "Kopieren",
+  "copied": "Kopiert",
+  "regenerate": "Neu generieren",
+  "retry": "Erneut versuchen",
+  "applied": "Im Haushaltsbuch eingetragen",
+  "tool": {
+    "running": "Läuft",
+    "done": "Fertig",
+    "error": "Fehler",
+    "input": "Eingabe",
+    "output": "Ausgabe"
+  },
+  "card": {
+    "draft": "Abo-Entwurf",
+    "start": "Startdatum",
+    "today": "Heute",
+    "next": "Nächste Abbuchungen",
+    "add": "Hinzufügen",
+    "confirm": "Bestätigen",
+    "edit": "Erst bearbeiten",
+    "dismiss": "Verwerfen",
+    "dismissed": "Verworfen",
+    "added": "Hinzugefügt",
+    "done": "Erledigt",
+    "view": "Ansehen",
+    "missing": "{fields} nicht erkannt – Standardwerte verwendet, bitte prüfen",
+    "sep": ", ",
+    "filled": "Symbol und Link aus dem App Store ergänzt"
+  },
+  "error": {
+    "auth": "Ungültiger API-Key",
+    "balance": "Dein DeepSeek-Guthaben reicht nicht aus",
+    "rate": "Zu viele Anfragen – versuch es gleich noch einmal",
+    "params": "Die Anfrage wurde abgelehnt",
+    "server": "DeepSeek hat gerade Probleme",
+    "network": "Netzwerkfehler",
+    "config": "Noch kein API-Key eingerichtet"
+  },
+  "setup": {
+    "title": "KI-Assistent einrichten",
+    "intro": "Nutzt deinen eigenen DeepSeek-API-Key; die Kosten werden zu DeepSeek-Preisen deinem Konto belastet. Key erhältst du unter",
+    "keySaved": "Gespeichert ({hint}) – leer lassen, um ihn zu behalten",
+    "baseHint": "Behalte die offizielle URL, außer du nutzt einen Proxy oder einen kompatiblen Dienst.",
+    "model": "Modell",
+    "modelHint": "deepseek-flash ist V4.1 Flash und kann Bilder lesen.",
+    "effort": "Nachdenken",
+    "effort_none": "Aus",
+    "effort_noneHint": "Am schnellsten, reicht für einfache Quittungen",
+    "effort_low": "Leicht",
+    "effort_lowHint": "Empfohlen: schnell und genau",
+    "effort_high": "Gründlich",
+    "effort_highHint": "Zuverlässiger bei komplexen Rechnungen, langsamer",
+    "test": "Verbindung testen",
+    "testOk": {
+      "one": "Verbunden – {count} Modell verfügbar",
+      "other": "Verbunden – {count} Modelle verfügbar"
+    },
+    "saved": "Gespeichert",
+    "clear": "Key entfernen",
+    "cleared": "API-Key entfernt",
+    "cta": "DeepSeek-API-Key einrichten",
+    "ctaHint": "Nur einmal nötig; der Key bleibt auf deinem eigenen Server",
+    "privacy": "Der Key wird nur auf deinem Server gespeichert – nie an den Browser gesendet und nie in Backups aufgenommen. Texte und Bilder, die du sendest, leitet dein Server an DeepSeek weiter."
+  }
+}

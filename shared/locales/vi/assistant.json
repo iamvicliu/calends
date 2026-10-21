@@ -1,0 +1,108 @@
+{
+  "title": "Trợ lý AI",
+  "new": "Cuộc trò chuyện mới",
+  "settings": "Cài đặt AI",
+  "toBottom": "Xuống cuối",
+  "welcome": {
+    "title": "Cứ gửi hóa đơn hay ảnh chụp màn hình cho tôi",
+    "body": "Dán biên lai App Store, tin nhắn trừ tiền, ảnh chụp trang gói đăng ký hoặc bất kỳ đoạn văn bản nào. Tôi sẽ soạn thành bản nháp gói đăng ký để bạn xác nhận rồi ghi vào sổ. Bạn cũng có thể hỏi thẳng về chi tiêu."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "Dán một biên lai",
+      "hint": "App Store, Google Play hoặc email thanh toán",
+      "text": "Thêm biên lai này thành gói đăng ký giúp tôi:\n"
+    },
+    "screenshot": {
+      "title": "Gửi ảnh chụp màn hình",
+      "hint": "Trang quản lý gói hoặc trang hóa đơn, dán trực tiếp được",
+      "text": "Tìm các gói đăng ký trong ảnh chụp màn hình này:"
+    },
+    "month": {
+      "title": "Tháng này phải trả bao nhiêu?",
+      "hint": "Các khoản còn lại trong tháng, theo ngày trừ tiền",
+      "text": "Tháng này còn những gói đăng ký nào sẽ trừ tiền, tổng cộng bao nhiêu?"
+    },
+    "hikes": {
+      "title": "Gói nào vừa tăng giá?",
+      "hint": "Các gói đăng ký tăng giá trong năm qua",
+      "text": "Trong năm qua những gói đăng ký nào đã tăng giá, mỗi gói tăng bao nhiêu?"
+    }
+  },
+  "placeholder": "Dán văn bản hoặc ảnh chụp màn hình, hoặc hỏi bất cứ điều gì…",
+  "placeholderSetup": "Hãy cài đặt DeepSeek API Key ở góc trên bên phải trước",
+  "addImage": "Thêm ảnh",
+  "removeImage": "Xóa ảnh",
+  "send": "Gửi",
+  "stop": "Dừng",
+  "imageFailed": "Không đọc được ảnh",
+  "disclaimer": "Do DeepSeek tạo. Hãy kiểm tra số tiền và ngày trước khi thêm.",
+  "thinking": "Đang suy nghĩ…",
+  "thought": {
+    "other": "Đã suy nghĩ {count} giây"
+  },
+  "stopped": "Đã dừng",
+  "copy": "Sao chép",
+  "copied": "Đã sao chép",
+  "regenerate": "Tạo lại",
+  "retry": "Thử lại",
+  "applied": "Đã ghi vào sổ",
+  "tool": {
+    "running": "Đang chạy",
+    "done": "Xong",
+    "error": "Lỗi",
+    "input": "Đầu vào",
+    "output": "Kết quả"
+  },
+  "card": {
+    "draft": "Bản nháp gói đăng ký",
+    "start": "Ngày bắt đầu",
+    "today": "Hôm nay",
+    "next": "Các lần trừ tiền tới",
+    "add": "Thêm",
+    "confirm": "Xác nhận",
+    "edit": "Sửa rồi thêm",
+    "dismiss": "Bỏ qua",
+    "dismissed": "Đã bỏ qua",
+    "added": "Đã thêm",
+    "done": "Đã xong",
+    "view": "Xem",
+    "missing": "Không nhận ra {fields}, đã dùng giá trị mặc định, hãy kiểm tra",
+    "sep": ", ",
+    "filled": "Biểu tượng và liên kết lấy từ App Store"
+  },
+  "error": {
+    "auth": "API Key không hợp lệ",
+    "balance": "Số dư tài khoản DeepSeek không đủ",
+    "rate": "Yêu cầu quá nhiều, hãy thử lại sau ít phút",
+    "params": "Tham số yêu cầu không hợp lệ",
+    "server": "Dịch vụ DeepSeek đang tạm gặp sự cố",
+    "network": "Lỗi kết nối mạng",
+    "config": "Chưa cài đặt API Key"
+  },
+  "setup": {
+    "title": "Cài đặt trợ lý AI",
+    "intro": "Dùng DeepSeek API Key của riêng bạn; chi phí tính vào tài khoản DeepSeek của bạn theo giá của DeepSeek. Lấy Key tại:",
+    "keySaved": "Đã lưu ({hint}), để trống nếu không đổi",
+    "baseHint": "Giữ nguyên địa chỉ chính thức, trừ khi bạn dùng proxy hoặc dịch vụ tương thích.",
+    "model": "Mô hình",
+    "modelHint": "deepseek-flash chính là V4.1 Flash, có thể đọc ảnh.",
+    "effort": "Mức suy nghĩ",
+    "effort_none": "Tắt",
+    "effort_noneHint": "Nhanh nhất, hợp với biên lai đơn giản",
+    "effort_low": "Nhẹ",
+    "effort_lowHint": "Khuyên dùng: nhanh và chính xác",
+    "effort_high": "Sâu",
+    "effort_highHint": "Ổn định hơn với hóa đơn phức tạp, chậm hơn",
+    "test": "Kiểm tra kết nối",
+    "testOk": {
+      "other": "Kết nối thành công, có {count} mô hình khả dụng"
+    },
+    "saved": "Đã lưu",
+    "clear": "Xóa Key",
+    "cleared": "Đã xóa API Key",
+    "cta": "Cài đặt DeepSeek API Key",
+    "ctaHint": "Chỉ cần một lần, Key chỉ lưu trên máy chủ của bạn",
+    "privacy": "Key chỉ được lưu trên máy chủ của bạn, không gửi tới trình duyệt và không có trong bản sao lưu. Khi nhận diện, văn bản và hình ảnh bạn gửi sẽ được máy chủ của bạn chuyển tiếp tới DeepSeek."
+  }
+}

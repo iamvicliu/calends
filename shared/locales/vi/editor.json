@@ -212,5 +212,6 @@
   },
   "timeline": {
     "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)"
-  }
+  },
+  "ai": { "title": "Điền bằng AI", "hint": "Dán hóa đơn, ảnh chụp màn hình hoặc văn bản, phần còn lại tự động" }
 }

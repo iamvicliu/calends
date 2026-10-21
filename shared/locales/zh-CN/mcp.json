@@ -54,6 +54,7 @@
     "get_receivables": "待收款",
     "get_insights": "体检与年度回顾",
     "list_events": "变更日志",
+    "search_app_store": "查找 App",
     "create_subscription": "新增订阅",
     "update_subscription": "修改订阅信息",
     "change_price": "记录调价",

@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import { ChevronRight, MessageSquareText } from 'lucide-react';
+import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../shared/billing.ts';
 import { cnDateFull, money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -54,6 +56,12 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   // 有未保存的修改时，关闭前确认一下
   const [initial] = useState(() => JSON.stringify(f));
   const close = () => (JSON.stringify(f) === initial || confirmDelete(t('editor.confirmDiscard'))) && onClose();
+
+  /** 交给 AI 助手：已经填的名称一并带过去 */
+  const toAssistant = (images: string[] = []) => {
+    onClose();
+    handoff(f.name.trim() ? `${f.name.trim()}\n` : '', images);
+  };
 
   const save = () =>
     run(
@@ -121,7 +129,27 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         </>
       }
     >
-      <Form f={f} up={up} state={state} today={today} />
+      {isNew && (
+        <button type="button" className="ed-ai" onClick={() => toAssistant()}>
+          <MessageSquareText size={18} />
+          <span>
+            <b>{t('editor.ai.title')}</b>
+            <small>{t('editor.ai.hint')}</small>
+          </span>
+          <ChevronRight size={16} />
+        </button>
+      )}
+      <div
+        onPaste={(e) => {
+          // 新建时在表单里粘贴截图：交给 AI 助手识别
+          const files = isNew ? [...e.clipboardData.files].filter((x) => x.type.startsWith('image/')) : [];
+          if (!files.length) return;
+          e.preventDefault();
+          void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
+        }}
+      >
+        <Form f={f} up={up} state={state} today={today} />
+      </div>
       {!isNew && (
         <div style={{ marginTop: 18 }}>
           <ChangePanel f={f} setF={setF} state={state} today={today} />

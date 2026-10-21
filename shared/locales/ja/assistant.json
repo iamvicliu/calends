@@ -1,0 +1,108 @@
+{
+  "title": "AI アシスタント",
+  "new": "新しいチャット",
+  "settings": "AI 設定",
+  "toBottom": "一番下へ",
+  "welcome": {
+    "title": "請求書やスクリーンショットをそのままどうぞ",
+    "body": "App Store のレシート、引き落としの SMS、サブスク画面のスクリーンショット、どんなテキストでも貼り付けてください。サブスクの下書きにまとめ、確認すると台帳に記録します。支出について質問することもできます。"
+  },
+  "suggest": {
+    "receipt": {
+      "title": "レシートを貼り付ける",
+      "hint": "App Store、Google Play、請求メールなど",
+      "text": "このレシートをサブスクとして登録して：\n"
+    },
+    "screenshot": {
+      "title": "スクリーンショットを送る",
+      "hint": "サブスク管理画面や請求画面。そのまま貼り付けできます",
+      "text": "このスクリーンショットに写っているサブスクを読み取って："
+    },
+    "month": {
+      "title": "今月の引き落としはいくら？",
+      "hint": "今月残りの引き落としを日付順に",
+      "text": "今月まだ引き落とされるサブスクはどれ？合計はいくら？"
+    },
+    "hikes": {
+      "title": "最近値上げしたのは？",
+      "hint": "過去1年に値上げしたサブスク",
+      "text": "過去1年で値上げしたサブスクはどれ？それぞれいくら上がった？"
+    }
+  },
+  "placeholder": "テキストやスクリーンショットを貼り付けるか、質問してください…",
+  "placeholderSetup": "まず右上で DeepSeek API Key を設定してください",
+  "addImage": "画像を追加",
+  "removeImage": "画像を削除",
+  "send": "送信",
+  "stop": "停止",
+  "imageFailed": "画像を読み込めませんでした",
+  "disclaimer": "DeepSeek による生成です。追加する前に金額と日付を確認してください。",
+  "thinking": "考え中…",
+  "thought": {
+    "other": "{count}秒考えました"
+  },
+  "stopped": "生成を停止しました",
+  "copy": "コピー",
+  "copied": "コピーしました",
+  "regenerate": "再生成",
+  "retry": "再試行",
+  "applied": "台帳に記録しました",
+  "tool": {
+    "running": "実行中",
+    "done": "完了",
+    "error": "エラー",
+    "input": "入力",
+    "output": "出力"
+  },
+  "card": {
+    "draft": "サブスクの下書き",
+    "start": "開始日",
+    "today": "今日",
+    "next": "今後の引き落とし",
+    "add": "追加",
+    "confirm": "確定",
+    "edit": "編集して追加",
+    "dismiss": "無視",
+    "dismissed": "無視しました",
+    "added": "追加しました",
+    "done": "完了",
+    "view": "表示",
+    "missing": "{fields}を読み取れなかったため既定値を使いました。確認してください",
+    "sep": "、",
+    "filled": "アイコンとリンクは App Store から補完しました"
+  },
+  "error": {
+    "auth": "API Key が無効です",
+    "balance": "DeepSeek の残高が不足しています",
+    "rate": "リクエストが多すぎます。しばらくしてからお試しください",
+    "params": "リクエストのパラメータが正しくありません",
+    "server": "DeepSeek で一時的な問題が発生しています",
+    "network": "ネットワークに接続できません",
+    "config": "API Key がまだ設定されていません"
+  },
+  "setup": {
+    "title": "AI アシスタントの設定",
+    "intro": "ご自身の DeepSeek API Key を使います。料金は DeepSeek の価格でご自身のアカウントに請求されます。Key の取得：",
+    "keySaved": "保存済み（{hint}）。空欄のままなら変更しません",
+    "baseHint": "通常は公式 URL のままで大丈夫です。プロキシや互換サービスを使う場合のみ入力してください。",
+    "model": "モデル",
+    "modelHint": "deepseek-flash は V4.1 Flash で、画像を読み取れます。",
+    "effort": "思考の深さ",
+    "effort_none": "オフ",
+    "effort_noneHint": "最速。シンプルなレシート向け",
+    "effort_low": "軽め",
+    "effort_lowHint": "おすすめ：速くて正確",
+    "effort_high": "じっくり",
+    "effort_highHint": "複雑な請求書でも安定。やや遅め",
+    "test": "接続をテスト",
+    "testOk": {
+      "other": "接続しました。{count} 個のモデルが利用できます"
+    },
+    "saved": "保存しました",
+    "clear": "Key を削除",
+    "cleared": "API Key を削除しました",
+    "cta": "DeepSeek API Key を設定",
+    "ctaHint": "設定は一度だけ。Key はご自身のサーバーにのみ保存されます",
+    "privacy": "Key はご自身のサーバーにのみ保存され、ブラウザに送られたりバックアップに含まれたりすることはありません。読み取りの際、送信したテキストや画像はサーバーを経由して DeepSeek に転送されます。"
+  }
+}

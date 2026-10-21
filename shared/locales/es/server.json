@@ -48,5 +48,6 @@
     "invalid": "Lista de categorías no válida",
     "duplicate": "Categoría duplicada: {name}"
   },
-  "demoReadonly": "Esta es una demo de solo lectura: los cambios no se guardan."
+  "demoReadonly": "Esta es una demo de solo lectura: los cambios no se guardan.",
+  "assistant": { "noKey": "Aún no hay una clave API de DeepSeek.", "badTool": "Acción no admitida." }
 }

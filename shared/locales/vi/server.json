@@ -43,5 +43,6 @@
     "invalid": "Danh sách danh mục không hợp lệ",
     "duplicate": "Danh mục bị trùng: {name}"
   },
-  "demoReadonly": "Đây là bản demo chỉ xem — không thể lưu thay đổi."
+  "demoReadonly": "Đây là bản demo chỉ xem — không thể lưu thay đổi.",
+  "assistant": { "noKey": "Chưa cấu hình khóa API DeepSeek.", "badTool": "Thao tác không được hỗ trợ." }
 }

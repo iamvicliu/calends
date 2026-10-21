@@ -54,6 +54,7 @@
     "get_receivables": "Cuentas por cobrar",
     "get_insights": "Revisión y resumen del año",
     "list_events": "Registro de cambios",
+    "search_app_store": "Buscar app",
     "create_subscription": "Añadir suscripción",
     "update_subscription": "Editar suscripción",
     "change_price": "Registrar cambio de precio",

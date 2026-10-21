@@ -40,8 +40,9 @@ import { renderEmail } from './email.ts';
 import { getFx, getPeople, getSettings, loadState, loadSubs, putKv, remove, replaceAll, saveSettingsWithSubs, upsert, writePeople } from './store.ts';
 import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
-import { TOOLS, toolTitle } from './mcp-tools.ts';
+import { searchAppStore, TOOLS, toolTitle } from './mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
+import { apply, chat, saveConfig, testConfig, viewConfig } from './assistant.ts';
 import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 import { ensureMigrated } from './migrate.ts';
@@ -306,31 +307,22 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       return bad(e instanceof Error ? e.message : t('server.refreshFailed'), 502);
     }
   }
+  // AI 助手（DeepSeek）
+  if (path === '/api/assistant/config' && method === 'GET') return json(await viewConfig(env));
+  if (path === '/api/assistant/config' && method === 'PUT') return json(await saveConfig(env, (await req.json()) as Parameters<typeof saveConfig>[1]));
+  if (path === '/api/assistant/test' && method === 'POST')
+    return json(await testConfig(env, (await req.json().catch(() => ({}))) as { apiKey?: string; baseUrl?: string }));
+  if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await req.json()) as Parameters<typeof chat>[1], req.signal);
+  if (path === '/api/assistant/apply' && method === 'POST') {
+    try {
+      return json(await apply(env, (await req.json()) as Parameters<typeof apply>[1]));
+    } catch (e) {
+      return bad(e instanceof Error ? e.message : String(e));
+    }
+  }
   if (path === '/api/appstore/search' && method === 'GET') {
     const url = new URL(req.url);
-    const term = (url.searchParams.get('q') ?? '').trim().slice(0, 80);
-    const country =
-      (url.searchParams.get('country') ?? 'us')
-        .toLowerCase()
-        .replace(/[^a-z]/g, '')
-        .slice(0, 2) || 'us';
-    if (!term) return json({ results: [] });
-    // 粘贴 App Store 链接时按 id 精确查找
-    const id = term.match(/id(\d{6,})/)?.[1];
-    const api = id
-      ? `https://itunes.apple.com/lookup?id=${id}&country=${country}`
-      : `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=software&limit=8&country=${country}`;
-    const res = await fetch(api, { cf: { cacheTtl: 86400 } });
-    const body = (await res.json().catch(() => ({}))) as { results?: Array<Record<string, unknown>> };
-    return json({
-      results: (body.results ?? []).map((r) => ({
-        name: r.trackName,
-        icon: r.artworkUrl100,
-        url: r.trackViewUrl,
-        seller: r.sellerName,
-        genre: r.primaryGenreName,
-      })),
-    });
+    return json({ results: await searchAppStore(url.searchParams.get('q') ?? '', url.searchParams.get('country') ?? 'us') });
   }
   if (path === '/api/notify/preview' && method === 'GET') {
     const state = await loadState(env);

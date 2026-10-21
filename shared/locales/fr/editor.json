@@ -221,5 +221,6 @@
   },
   "timeline": {
     "home": "Revenir à aujourd’hui (ou double-cliquez sur la frise)"
-  }
+  },
+  "ai": { "title": "Remplir avec l’IA", "hint": "Collez un reçu, une capture ou du texte, le reste se fait tout seul" }
 }

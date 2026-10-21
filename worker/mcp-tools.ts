@@ -32,6 +32,30 @@ import { loadState, upsert } from './store.ts';
 import { t } from '../shared/i18n.ts';
 import { categoryCounts, categoryList, presetCategory } from '../shared/categories.ts';
 
+/** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
+export async function searchAppStore(query: string, country = 'us') {
+  const term = query.trim().slice(0, 80);
+  const cc =
+    country
+      .toLowerCase()
+      .replace(/[^a-z]/g, '')
+      .slice(0, 2) || 'us';
+  if (!term) return [];
+  const id = term.match(/id(\d{6,})/)?.[1];
+  const api = id
+    ? `https://itunes.apple.com/lookup?id=${id}&country=${cc}`
+    : `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=software&limit=8&country=${cc}`;
+  const res = await fetch(api, { cf: { cacheTtl: 86400 } });
+  const body = (await res.json().catch(() => ({}))) as { results?: Array<Record<string, unknown>> };
+  return (body.results ?? []).map((r) => ({
+    name: r.trackName as string,
+    icon: r.artworkUrl100 as string,
+    url: r.trackViewUrl as string,
+    seller: r.sellerName as string,
+    genre: r.primaryGenreName as string,
+  }));
+}
+
 export interface ToolCtx {
   env: Env;
 }
@@ -781,6 +805,17 @@ export const TOOLS: Tool[] = [
 
   // ---------- 写入 ----------
   {
+    name: 'search_app_store',
+    description:
+      'Look up an app on the App Store by name or App Store link: returns name, icon URL, store URL, seller and genre. Use it to fill icon and url when creating a subscription for an app.',
+    inputSchema: obj({ query: { type: 'string' }, country: { type: 'string', description: 'Two-letter store region, e.g. us, tr, cn. Defaults to us.' } }, [
+      'query',
+    ]),
+    async run(a) {
+      return { results: await searchAppStore(String(a.query ?? ''), str(a.country) ?? 'us') };
+    },
+  },
+  {
     name: 'create_subscription',
     description:
       'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. category: reuse a name from list_categories when possible.',
@@ -797,6 +832,7 @@ export const TOOLS: Tool[] = [
         method: { type: 'string', description: 'Payment method id or name.' },
         region: { type: 'string', description: 'ISO country code for region-priced stores (App Store TR, NG…).' },
         url: { type: 'string' },
+        icon: { type: 'string', description: 'Icon image URL (https), e.g. artwork from search_app_store.' },
         notes: { type: 'string' },
         status: { type: 'string', enum: ['active', 'trial'], default: 'active' },
         trial_end: DATE,
@@ -834,6 +870,7 @@ export const TOOLS: Tool[] = [
         methodId: methodRef(st, a.method) ?? st.settings.defaultMethodId,
         region: str(a.region)?.toUpperCase(),
         url: str(a.url),
+        icon: str(a.icon)?.startsWith('https://') ? str(a.icon) : undefined,
         notes: str(a.notes),
         trialEnd: a.trial_end ? date(a.trial_end, 'trial_end') : undefined,
         end: a.end ? date(a.end, 'end') : undefined,

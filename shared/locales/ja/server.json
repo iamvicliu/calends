@@ -43,5 +43,6 @@
     "invalid": "カテゴリの一覧が正しくありません",
     "duplicate": "カテゴリ名が重複しています：{name}"
   },
-  "demoReadonly": "これは閲覧専用のデモのため、変更は保存できません。"
+  "demoReadonly": "これは閲覧専用のデモのため、変更は保存できません。",
+  "assistant": { "noKey": "DeepSeek の API キーがまだ設定されていません。", "badTool": "サポートされていない操作です。" }
 }

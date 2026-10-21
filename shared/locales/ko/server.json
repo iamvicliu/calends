@@ -43,5 +43,6 @@
     "invalid": "카테고리 목록이 올바르지 않습니다",
     "duplicate": "카테고리 이름이 중복됩니다: {name}"
   },
-  "demoReadonly": "읽기 전용 데모라 변경 내용을 저장할 수 없습니다."
+  "demoReadonly": "읽기 전용 데모라 변경 내용을 저장할 수 없습니다.",
+  "assistant": { "noKey": "DeepSeek API 키가 아직 설정되지 않았습니다.", "badTool": "지원하지 않는 작업입니다." }
 }

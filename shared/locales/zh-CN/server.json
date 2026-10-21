@@ -39,5 +39,6 @@
     "invalid": "分类列表无效",
     "duplicate": "分类重名：{name}"
   },
-  "demoReadonly": "这是只读演示，无法保存修改。"
+  "demoReadonly": "这是只读演示，无法保存修改。",
+  "assistant": { "noKey": "还没有配置 DeepSeek API Key。", "badTool": "不支持的操作。" }
 }

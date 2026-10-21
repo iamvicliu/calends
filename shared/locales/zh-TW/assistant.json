@@ -1,0 +1,108 @@
+{
+  "title": "AI 助理",
+  "new": "新對話",
+  "settings": "AI 設定",
+  "toBottom": "回到底部",
+  "welcome": {
+    "title": "把帳單、截圖直接丟給我",
+    "body": "貼上 App Store 收據、扣款簡訊、訂閱頁面截圖或任何一段文字，我會整理成訂閱草稿，你確認後就記進帳本。也可以直接問花費。"
+  },
+  "suggest": {
+    "receipt": {
+      "title": "貼上一封收據",
+      "hint": "App Store、Google Play 或扣款郵件",
+      "text": "幫我把這封收據記成訂閱：\n"
+    },
+    "screenshot": {
+      "title": "傳一張截圖",
+      "hint": "訂閱管理頁、帳單頁都可以，能直接貼上",
+      "text": "幫我辨識截圖裡的訂閱："
+    },
+    "month": {
+      "title": "這個月要扣多少？",
+      "hint": "依扣款日列出本月剩下的扣款",
+      "text": "這個月還有哪些訂閱要扣款？一共多少錢？"
+    },
+    "hikes": {
+      "title": "最近誰漲價了？",
+      "hint": "找出過去一年漲價的訂閱",
+      "text": "過去一年哪些訂閱漲價了？各漲了多少？"
+    }
+  },
+  "placeholder": "貼上文字或截圖，或者問點什麼…",
+  "placeholderSetup": "請先在右上角設定 DeepSeek API Key",
+  "addImage": "加入圖片",
+  "removeImage": "移除圖片",
+  "send": "傳送",
+  "stop": "停止",
+  "imageFailed": "圖片讀取失敗",
+  "disclaimer": "由 DeepSeek 產生，新增前請核對金額與日期。",
+  "thinking": "思考中…",
+  "thought": {
+    "other": "思考了 {count} 秒"
+  },
+  "stopped": "已停止產生",
+  "copy": "複製",
+  "copied": "已複製",
+  "regenerate": "重新產生",
+  "retry": "重試",
+  "applied": "已記進帳本",
+  "tool": {
+    "running": "執行中",
+    "done": "完成",
+    "error": "出錯",
+    "input": "參數",
+    "output": "結果"
+  },
+  "card": {
+    "draft": "訂閱草稿",
+    "start": "開始日期",
+    "today": "今天",
+    "next": "接下來的扣款",
+    "add": "新增",
+    "confirm": "確認",
+    "edit": "編輯後新增",
+    "dismiss": "忽略",
+    "dismissed": "已忽略",
+    "added": "已新增",
+    "done": "已完成",
+    "view": "查看",
+    "missing": "未辨識到{fields}，已用預設值，請核對",
+    "sep": "、",
+    "filled": "圖示和連結已從 App Store 補全"
+  },
+  "error": {
+    "auth": "API Key 無效",
+    "balance": "DeepSeek 帳戶餘額不足",
+    "rate": "請求太頻繁，請稍後再試",
+    "params": "請求參數有誤",
+    "server": "DeepSeek 服務暫時異常",
+    "network": "網路連線失敗",
+    "config": "尚未設定 API Key"
+  },
+  "setup": {
+    "title": "AI 助理設定",
+    "intro": "使用你自己的 DeepSeek API Key，費用依 DeepSeek 的價格計入你的帳戶。取得 Key：",
+    "keySaved": "已儲存（{hint}），留空則不修改",
+    "baseHint": "官方網址無需修改；使用代理或相容服務時再填。",
+    "model": "模型",
+    "modelHint": "deepseek-flash 即 V4.1 Flash，支援辨識圖片。",
+    "effort": "思考強度",
+    "effort_none": "不思考",
+    "effort_noneHint": "最快，適合簡單收據",
+    "effort_low": "輕度",
+    "effort_lowHint": "推薦：快速又準確",
+    "effort_high": "深度",
+    "effort_highHint": "複雜帳單更穩，速度較慢",
+    "test": "測試連線",
+    "testOk": {
+      "other": "連線成功，可用 {count} 個模型"
+    },
+    "saved": "已儲存",
+    "clear": "清除 Key",
+    "cleared": "已清除 API Key",
+    "cta": "設定 DeepSeek API Key",
+    "ctaHint": "只需一次，Key 只保存在你的伺服器上",
+    "privacy": "Key 只保存在你的伺服器上，不會傳到瀏覽器或寫進備份。辨識時，你傳送的文字和圖片會經你的伺服器轉發給 DeepSeek。"
+  }
+}

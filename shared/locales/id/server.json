@@ -43,5 +43,6 @@
     "invalid": "Daftar kategori tidak valid",
     "duplicate": "Kategori ganda: {name}"
   },
-  "demoReadonly": "Ini demo hanya-baca — perubahan tidak dapat disimpan."
+  "demoReadonly": "Ini demo hanya-baca — perubahan tidak dapat disimpan.",
+  "assistant": { "noKey": "Kunci API DeepSeek belum diatur.", "badTool": "Tindakan tidak didukung." }
 }

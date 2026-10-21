@@ -18,6 +18,7 @@ import { PeopleView } from './views/People.tsx';
 import { Ai } from './views/Ai.tsx';
 import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
+import { Assistant } from './views/Assistant.tsx';
 import { List } from './views/List.tsx';
 import { Overview } from './views/Overview.tsx';
 import { Report } from './views/Report.tsx';
@@ -38,6 +39,7 @@ const NAV = [
   { path: 'wallet', label: 'wallet', icon: 'wallet' },
   { path: 'family', label: 'family', icon: 'users' },
   { path: 'behalf', label: 'behalf', icon: 'swap' },
+  { path: 'assistant', label: 'assistant', icon: 'chat' },
   { path: 'ai', label: 'ai', icon: 'bot' },
 ];
 
@@ -446,7 +448,11 @@ function App() {
       if (state && idx >= 1 && idx <= navOf(state.settings).length) navigate(navOf(state.settings)[idx - 1].path);
     };
     const onDrawer = () => (matchMedia('(max-width: 860px)').matches ? setDrawer(true) : setCollapsed(false));
-    const onAdd = () => state && !state.readonly && setEditing(newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
+    // 可以带着草稿（AI 助手「编辑后添加」）
+    const onAdd = (e: Event) =>
+      state &&
+      !state.readonly &&
+      setEditing((e as CustomEvent<Subscription | undefined>).detail ?? newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
     document.addEventListener('keydown', onKey);
     window.addEventListener('ledger:drawer', onDrawer);
     window.addEventListener('ledger:add', onAdd);
@@ -502,6 +508,9 @@ function App() {
         break;
       case 'ai':
         view = <Ai state={state} />;
+        break;
+      case 'assistant':
+        view = ro ? null : <Assistant state={state} today={d} onOpen={open} />;
         break;
       case 'report':
         view = <Report state={state} today={d} onOpen={open} onReview={() => setReview(true)} />;

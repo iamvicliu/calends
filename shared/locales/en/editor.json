@@ -221,5 +221,6 @@
   },
   "timeline": {
     "home": "Back to today (or double-click the timeline)"
-  }
+  },
+  "ai": { "title": "Fill in with AI", "hint": "Paste a receipt, screenshot or any text and let it sort things out" }
 }

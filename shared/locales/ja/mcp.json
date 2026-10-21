@@ -54,6 +54,7 @@
     "get_receivables": "未回収金",
     "get_insights": "診断と年間まとめ",
     "list_events": "変更履歴",
+    "search_app_store": "App を検索",
     "create_subscription": "サブスクを追加",
     "update_subscription": "サブスクを編集",
     "change_price": "価格変更を記録",

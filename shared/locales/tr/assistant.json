@@ -1,0 +1,110 @@
+{
+  "title": "Yapay zekâ asistanı",
+  "new": "Yeni sohbet",
+  "settings": "Yapay zekâ ayarları",
+  "toBottom": "En alta git",
+  "welcome": {
+    "title": "Faturayı ya da ekran görüntüsünü bana bırakın",
+    "body": "Bir App Store makbuzu, ödeme SMS'i, abonelik sayfasının ekran görüntüsü ya da herhangi bir metin yapıştırın. Onaylamanız için bir abonelik taslağına dönüştüreyim. Harcamalarınızı da doğrudan sorabilirsiniz."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "Makbuz yapıştır",
+      "hint": "App Store, Google Play ya da bir fatura e-postası",
+      "text": "Bu makbuzu abonelik olarak ekle:\n"
+    },
+    "screenshot": {
+      "title": "Ekran görüntüsü gönder",
+      "hint": "Abonelik ya da fatura sayfası; doğrudan yapıştırabilirsiniz",
+      "text": "Bu ekran görüntüsündeki abonelikleri bul:"
+    },
+    "month": {
+      "title": "Bu ay ne kadar ödenecek?",
+      "hint": "Bu ay kalan ödemeler, tarihe göre",
+      "text": "Bu ay hangi abonelikler daha ödenecek ve toplam ne kadar?"
+    },
+    "hikes": {
+      "title": "Hangisine zam geldi?",
+      "hint": "Son bir yılda zamlanan abonelikler",
+      "text": "Son bir yılda hangi aboneliklere zam geldi, ne kadar?"
+    }
+  },
+  "placeholder": "Metin ya da ekran görüntüsü yapıştırın veya bir şey sorun…",
+  "placeholderSetup": "Önce sağ üstten DeepSeek API Key'inizi ayarlayın",
+  "addImage": "Görsel ekle",
+  "removeImage": "Görseli kaldır",
+  "send": "Gönder",
+  "stop": "Durdur",
+  "imageFailed": "Görsel okunamadı",
+  "disclaimer": "DeepSeek tarafından üretildi. Eklemeden önce tutarları ve tarihleri kontrol edin.",
+  "thinking": "Düşünüyor…",
+  "thought": {
+    "one": "{count} saniye düşündü",
+    "other": "{count} saniye düşündü"
+  },
+  "stopped": "Durduruldu",
+  "copy": "Kopyala",
+  "copied": "Kopyalandı",
+  "regenerate": "Yeniden oluştur",
+  "retry": "Tekrar dene",
+  "applied": "Kayıt defterinize eklendi",
+  "tool": {
+    "running": "Çalışıyor",
+    "done": "Tamamlandı",
+    "error": "Başarısız",
+    "input": "Girdi",
+    "output": "Çıktı"
+  },
+  "card": {
+    "draft": "Abonelik taslağı",
+    "start": "Başlangıç tarihi",
+    "today": "Bugün",
+    "next": "Sıradaki ödemeler",
+    "add": "Ekle",
+    "confirm": "Onayla",
+    "edit": "Önce düzenle",
+    "dismiss": "Yoksay",
+    "dismissed": "Yoksayıldı",
+    "added": "Eklendi",
+    "done": "Tamamlandı",
+    "view": "Görüntüle",
+    "missing": "{fields} bulunamadı; varsayılanlar kullanıldı, lütfen kontrol edin",
+    "sep": ", ",
+    "filled": "Simge ve bağlantı App Store’dan dolduruldu"
+  },
+  "error": {
+    "auth": "Geçersiz API Key",
+    "balance": "DeepSeek bakiyeniz yetersiz",
+    "rate": "Çok fazla istek; biraz sonra tekrar deneyin",
+    "params": "İstek reddedildi",
+    "server": "DeepSeek'te geçici bir sorun var",
+    "network": "Ağ hatası",
+    "config": "Henüz API Key ayarlanmadı"
+  },
+  "setup": {
+    "title": "Yapay zekâ asistanı ayarları",
+    "intro": "Kendi DeepSeek API Key'inizi kullanır; kullanım ücreti DeepSeek hesabınıza yansıtılır. Key almak için:",
+    "keySaved": "Kaydedildi ({hint}); değiştirmemek için boş bırakın",
+    "baseHint": "Proxy ya da uyumlu bir hizmet kullanmıyorsanız resmî adresi değiştirmeyin.",
+    "model": "Model",
+    "modelHint": "deepseek-flash, V4.1 Flash'tır ve görselleri okuyabilir.",
+    "effort": "Düşünme",
+    "effort_none": "Kapalı",
+    "effort_noneHint": "En hızlısı, basit makbuzlar için yeterli",
+    "effort_low": "Hafif",
+    "effort_lowHint": "Önerilen: hızlı ve doğru",
+    "effort_high": "Derin",
+    "effort_highHint": "Karmaşık faturalarda daha sağlam, daha yavaş",
+    "test": "Bağlantıyı test et",
+    "testOk": {
+      "one": "Bağlandı; {count} model kullanılabilir",
+      "other": "Bağlandı; {count} model kullanılabilir"
+    },
+    "saved": "Kaydedildi",
+    "clear": "Key'i kaldır",
+    "cleared": "API Key kaldırıldı",
+    "cta": "DeepSeek API Key'inizi ayarlayın",
+    "ctaHint": "Yalnızca bir kez; Key kendi sunucunuzda kalır",
+    "privacy": "Key yalnızca sunucunuzda saklanır; tarayıcıya gönderilmez ve yedeklere eklenmez. Gönderdiğiniz metin ve görseller sunucunuz üzerinden DeepSeek'e iletilir."
+  }
+}

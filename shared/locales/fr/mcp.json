@@ -54,6 +54,7 @@
     "get_receivables": "Sommes à recevoir",
     "get_insights": "Bilan de santé et bilan annuel",
     "list_events": "Journal des changements",
+    "search_app_store": "Rechercher une app",
     "create_subscription": "Ajouter un abonnement",
     "update_subscription": "Modifier un abonnement",
     "change_price": "Noter un changement de prix",

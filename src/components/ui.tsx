@@ -70,6 +70,13 @@ const P: Record<string, JSX.Element> = {
       <circle cx="15" cy="18" r="1" />
     </>
   ),
+  // 侧边栏「AI 助手」：带两行字的对话气泡
+  chat: (
+    <>
+      <path d="M21 12a8.5 8.5 0 0 1-12.6 7.45L3 21l1.55-5.4A8.5 8.5 0 1 1 21 12Z" />
+      <path d="M8.5 10.5h7M8.5 14h4.5" />
+    </>
+  ),
   // 侧边栏「AI」
   bot: (
     <>
@@ -142,7 +149,8 @@ const failed = new Set<string>();
 
 /** proxied：经 /api/img 同源中转，导出图片时画布不会被跨域图片污染 */
 export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'>; size?: number; proxied?: boolean }) {
-  const [, force] = useState(0);
+  // failed 是模块级的集合，React Compiler 看不到它的变化：用 tried 计数让「挑哪张图」随失败重新计算
+  const [tried, force] = useState(0);
   const tint = catColor(sub.category);
   const style = { '--s': `${size}px`, '--tint': tint } as Record<string, string>;
   // 域名用注册商的图标，不用各自的站点图标：默认 Cloudflare，其他注册商在 icon 里填它的图标
@@ -162,16 +170,18 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
       </span>
     );
   }
-  const raw = icon || faviconOf(sub.url);
-  const src = raw && proxied && /^https?:/.test(raw) ? `/api/img?u=${encodeURIComponent(raw)}` : raw;
-  if (src && !failed.has(src)) {
+  // 依次尝试：填写的图标 → 官网图标；都加载失败才用首字母
+  const viaProxy = (u: string) => (proxied && /^https?:/.test(u) ? `/api/img?u=${encodeURIComponent(u)}` : u);
+  const raw = [icon, faviconOf(sub.url)].find((u): u is string => tried >= 0 && !!u && !failed.has(viaProxy(u)));
+  const src = raw && viaProxy(raw);
+  if (src) {
     const fail = () => {
       failed.add(src);
       force((n) => n + 1);
     };
     return (
       // 目录里的 AI 标是透明底的矢量图，按站点图标那样放在白底上
-      <span className={`ico ${icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
+      <span className={`ico ${raw === icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
         <img
           src={src}
           alt=""
@@ -179,9 +189,13 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
           referrerPolicy="no-referrer"
           onLoad={(e) => {
             // Google 对未知域名返回 16px 的地球占位图
-            if (!icon && e.currentTarget.naturalWidth <= 16) fail();
+            if (raw !== icon && e.currentTarget.naturalWidth <= 16) fail();
           }}
           onError={fail}
+          // 失败的图片（尤其是缓存里的）可能在监听器挂上之前就已报错：挂载时补查一次
+          ref={(el) => {
+            if (el?.complete && el.naturalWidth === 0) queueMicrotask(fail);
+          }}
         />
       </span>
     );

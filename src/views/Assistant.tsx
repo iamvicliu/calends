@@ -1,0 +1,1052 @@
+import type { ReactNode } from 'react';
+import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Brain,
+  CircleCheck,
+  CircleX,
+  Clock,
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Copy,
+  ImagePlus,
+  KeyRound,
+  Loader2,
+  Pencil,
+  RotateCcw,
+  Settings2,
+  ReceiptText,
+  Square,
+  SquarePen,
+  Wrench,
+  X,
+} from 'lucide-react';
+import { cycleLabel } from '../../shared/billing.ts';
+import { cnDateFull, money } from '../../shared/format.ts';
+import { t } from '../../shared/i18n.ts';
+import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../shared/deepseek.ts';
+import { dropOldImages } from '../../shared/deepseek.ts';
+import type { AppState, Subscription } from '../../shared/types.ts';
+import { PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { catColor } from '../derive.ts';
+import { api, refresh, toast } from '../store.ts';
+import { newSub } from './Editor.tsx';
+import { compressImage as compress, takeHandoff } from '../handoff.ts';
+import './assistant.css';
+
+// ---------- 会话数据 ----------
+
+type ToolStatus = 'running' | 'done' | 'error';
+type ProposalState = 'pending' | 'applying' | 'applied' | 'dismissed' | 'error';
+
+type Part =
+  | { kind: 'reasoning'; text: string; start: number; ms?: number }
+  | { kind: 'text'; text: string }
+  | { kind: 'tool'; id: string; name: string; args: Record<string, unknown>; status: ToolStatus; result?: unknown; error?: string }
+  | {
+      kind: 'proposal';
+      id: string;
+      tool: string;
+      args: Record<string, unknown>;
+      preview: Preview;
+      filled?: string[];
+      state: ProposalState;
+      error?: string;
+      subId?: string;
+    };
+
+interface Preview {
+  subscription?: { id: string; name: string; category?: string; price?: number; currency?: string; cycle?: string; next_charge?: string | null };
+  next_charges?: Array<{ date: string; amount: number; currency: string }>;
+}
+
+type ChatTurn =
+  | { id: string; role: 'user'; text: string; images: string[]; /** 发送时历史的长度：重试、重新生成时截回这里 */ at: number }
+  | { id: string; role: 'assistant'; parts: Part[]; status: 'streaming' | 'done' | 'error' | 'stopped'; error?: { kind: ErrorKind; message: string } };
+
+interface Saved {
+  turns: ChatTurn[];
+  history: ApiMessage[];
+}
+
+const STORE = 'calends.assistant';
+const rid = () => Math.random().toString(36).slice(2, 10);
+
+/** 会话存在本机浏览器里（只是方便，不是账本数据）：较早的图片不存，免得撑爆存储 */
+function load(): Saved {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) return JSON.parse(raw) as Saved;
+  } catch {
+    /* 隐私模式等读不到就当新会话 */
+  }
+  return { turns: [], history: [] };
+}
+function persist(s: Saved) {
+  try {
+    let users = 0;
+    const turns = s.turns
+      .slice()
+      .reverse()
+      .map((x) => (x.role === 'user' && x.images.length && ++users > 2 ? { ...x, images: [] } : x))
+      .reverse();
+    localStorage.setItem(STORE, JSON.stringify({ turns, history: dropOldImages(s.history, 0, '[image]') }));
+  } catch {
+    /* 存不下就算了 */
+  }
+}
+
+// ---------- 流式请求 ----------
+
+type ServerEvent =
+  | { type: 'reasoning'; delta: string }
+  | { type: 'text'; delta: string }
+  | { type: 'step' }
+  | { type: 'tool'; id: string; name: string; args: Record<string, unknown>; status: ToolStatus; result?: unknown; error?: string }
+  | { type: 'proposal'; id: string; tool: string; args: Record<string, unknown>; preview: Preview; filled?: string[] }
+  | { type: 'usage' }
+  | { type: 'error'; kind: ErrorKind; message: string }
+  | { type: 'done'; messages: ApiMessage[]; aborted?: boolean };
+
+async function stream(body: unknown, signal: AbortSignal, on: (e: ServerEvent) => void) {
+  const res = await fetch('/api/assistant/chat', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (!res.ok || !res.body) {
+    const b = (await res.json().catch(() => ({}))) as { error?: string };
+    throw Object.assign(new Error(b.error ?? `HTTP ${res.status}`), { kind: res.status === 401 ? 'auth' : 'server' });
+  }
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    let i;
+    while ((i = buf.indexOf('\n\n')) >= 0) {
+      const chunk = buf.slice(0, i);
+      buf = buf.slice(i + 2);
+      for (const line of chunk.split('\n')) if (line.startsWith('data:')) on(JSON.parse(line.slice(5)) as ServerEvent);
+    }
+  }
+}
+
+/** 把服务端事件并进当前这条助手消息 */
+function reduce(turn: Extract<ChatTurn, { role: 'assistant' }>, e: ServerEvent): Extract<ChatTurn, { role: 'assistant' }> {
+  const parts = turn.parts.slice();
+  const last = parts[parts.length - 1];
+  const closeReasoning = () => {
+    const r = parts[parts.length - 1];
+    if (r?.kind === 'reasoning' && r.ms == null) parts[parts.length - 1] = { ...r, ms: Date.now() - r.start };
+  };
+  switch (e.type) {
+    case 'reasoning':
+      if (last?.kind === 'reasoning' && last.ms == null) parts[parts.length - 1] = { ...last, text: last.text + e.delta };
+      else parts.push({ kind: 'reasoning', text: e.delta, start: Date.now() });
+      break;
+    case 'text':
+      closeReasoning();
+      if (parts[parts.length - 1]?.kind === 'text') {
+        const p = parts[parts.length - 1] as Extract<Part, { kind: 'text' }>;
+        parts[parts.length - 1] = { ...p, text: p.text + e.delta };
+      } else parts.push({ kind: 'text', text: e.delta });
+      break;
+    case 'step':
+      closeReasoning();
+      break;
+    case 'tool': {
+      closeReasoning();
+      const i = parts.findIndex((p) => p.kind === 'tool' && p.id === e.id);
+      const next: Part = { kind: 'tool', id: e.id, name: e.name, args: e.args, status: e.status, result: e.result, error: e.error };
+      if (i >= 0) parts[i] = next;
+      else parts.push(next);
+      break;
+    }
+    case 'proposal':
+      parts.push({ kind: 'proposal', id: e.id, tool: e.tool, args: e.args, preview: e.preview, filled: e.filled, state: 'pending' });
+      break;
+    case 'error':
+      closeReasoning();
+      return { ...turn, parts, status: 'error', error: { kind: e.kind, message: e.message } };
+    case 'done':
+      closeReasoning();
+      return { ...turn, parts, status: e.aborted ? 'stopped' : 'done' };
+  }
+  return { ...turn, parts };
+}
+
+// ---------- 页面 ----------
+
+export function Assistant({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+  const [cfg, setCfg] = useState<AssistantConfigView | null>(null);
+  const [setup, setSetup] = useState(false);
+  const [chat, setChat] = useState<Saved>(load);
+  const [busy, setBusy] = useState(false);
+  const abort = useRef<AbortController | null>(null);
+  const [atBottom, setAtBottom] = useState(true);
+  const composer = useRef<ComposerHandle>(null);
+
+  useEffect(() => {
+    void api<AssistantConfigView>('/api/assistant/config').then(setCfg, () => setCfg(null));
+  }, []);
+  useEffect(() => persist(chat), [chat]);
+  // 别处（新建订阅表单）带着文字或图片跳过来：放进输入框
+  useEffect(() => {
+    const h = takeHandoff();
+    if (h) composer.current?.prefill(h.text, h.images);
+  }, []);
+
+  // 新内容到来时贴着底部滚；用户往上翻了就不打扰，显示「回到底部」
+  useLayoutEffect(() => {
+    if (atBottom) window.scrollTo(0, document.documentElement.scrollHeight);
+  }, [chat, atBottom]);
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.documentElement;
+      setAtBottom(el.scrollHeight - window.scrollY - window.innerHeight < 120);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const send = async (text: string, images: string[], history = chat.history, base = chat.turns) => {
+    if (busy || (!text.trim() && !images.length)) return;
+    const user: ChatTurn = { id: rid(), role: 'user', text, images, at: history.length };
+    let bot: Extract<ChatTurn, { role: 'assistant' }> = { id: rid(), role: 'assistant', parts: [], status: 'streaming' };
+    setChat({ history, turns: [...base, user, bot] });
+    setAtBottom(true);
+    setBusy(true);
+    const ctrl = new AbortController();
+    abort.current = ctrl;
+    let added: ApiMessage[] | null = null;
+    try {
+      await stream({ history, text, images }, ctrl.signal, (e) => {
+        bot = reduce(bot, e);
+        if (e.type === 'done') added = e.messages;
+        setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? bot : x)) }));
+      });
+    } catch (err) {
+      const aborted = ctrl.signal.aborted;
+      bot = aborted
+        ? { ...bot, status: 'stopped' }
+        : { ...bot, status: 'error', error: { kind: ((err as { kind?: ErrorKind }).kind ?? 'network') as ErrorKind, message: (err as Error).message } };
+      setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? bot : x)) }));
+    } finally {
+      // 成功（或中途停止）才把这轮写进历史；出错的这轮不进历史，重试时原样再发
+      const done = added as ApiMessage[] | null;
+      if (done) setChat((c) => ({ ...c, history: [...history, ...done] }));
+      if (bot.status === 'streaming') setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? { ...bot, status: 'done' } : x)) }));
+      setBusy(false);
+      abort.current = null;
+    }
+  };
+
+  /** 重试 / 重新生成：去掉最后一问一答，用原来的内容和当时的历史再发一次 */
+  const retry = () => {
+    const i = chat.turns.map((x) => x.role).lastIndexOf('user');
+    const u = chat.turns[i];
+    if (!u || u.role !== 'user') return;
+    void send(u.text, u.images, chat.history.slice(0, u.at), chat.turns.slice(0, i));
+  };
+
+  const setPart = (turnId: string, partId: string, patch: Partial<Extract<Part, { kind: 'proposal' }>>) =>
+    setChat((c) => ({
+      ...c,
+      turns: c.turns.map((x) =>
+        x.id === turnId && x.role === 'assistant'
+          ? { ...x, parts: x.parts.map((p) => (p.kind === 'proposal' && p.id === partId ? { ...p, ...patch } : p)) }
+          : x,
+      ),
+    }));
+
+  /** 确认草稿：同一个 MCP 工具真正执行；结果作为备注写进历史，模型下一轮就知道已经加上了 */
+  const applyProposal = async (turnId: string, p: Extract<Part, { kind: 'proposal' }>) => {
+    setPart(turnId, p.id, { state: 'applying', error: undefined });
+    try {
+      const r = await api<{ subscription?: { id: string; name: string } }>('/api/assistant/apply', {
+        method: 'POST',
+        body: JSON.stringify({ tool: p.tool, args: p.args }),
+      });
+      await refresh();
+      setPart(turnId, p.id, { state: 'applied', subId: r.subscription?.id });
+      setChat((c) => ({
+        ...c,
+        history: [
+          ...c.history,
+          { role: 'user', content: `[note] The user confirmed ${p.tool} for "${String(p.args.name ?? r.subscription?.name ?? '')}". It is saved now.` },
+        ],
+      }));
+      toast(t('assistant.applied'));
+    } catch (e) {
+      setPart(turnId, p.id, { state: 'error', error: (e as Error).message });
+    }
+  };
+
+  /** 编辑后再添加：用草稿填好新建表单 */
+  const editProposal = (p: Extract<Part, { kind: 'proposal' }>) => {
+    const a = p.args;
+    const cyc = (a.cycle ?? {}) as { unit?: Subscription['cycle']['unit']; every?: number };
+    const draft: Subscription = {
+      ...newSub(
+        String(a.start ?? today),
+        state.methods.find((m) => m.id === a.method || m.name === a.method)?.id ?? state.settings.defaultMethodId,
+        String(a.currency ?? state.settings.baseCurrency),
+      ),
+      name: String(a.name ?? ''),
+      price: Number(a.price ?? 0),
+      cycle: { unit: cyc.unit ?? 'month', every: Number(cyc.every ?? 1) },
+      ...(a.category ? { category: String(a.category) } : {}),
+      ...(a.region ? { region: String(a.region).toUpperCase() } : {}),
+      ...(a.url ? { url: String(a.url) } : {}),
+      ...(a.icon ? { icon: String(a.icon) } : {}),
+      ...(a.notes ? { notes: String(a.notes) } : {}),
+      ...(a.status === 'trial' ? { status: 'trial' as const } : {}),
+      ...(a.trial_end ? { trialEnd: String(a.trial_end) } : {}),
+    };
+    window.dispatchEvent(new CustomEvent('ledger:add', { detail: draft }));
+  };
+
+  const reset = () => {
+    abort.current?.abort();
+    setChat({ turns: [], history: [] });
+  };
+
+  const empty = !chat.turns.length;
+  const ready = !!cfg?.configured;
+  return (
+    <>
+      <Toolbar title={t('assistant.title')}>
+        <span className="as-tb">
+          {!empty && (
+            <button className="icon-btn" onClick={reset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+              <SquarePen size={16} />
+            </button>
+          )}
+          <button className="icon-btn" onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
+            <Settings2 size={16} />
+          </button>
+        </span>
+      </Toolbar>
+      <div className="as">
+        <div className="as-scroll">
+          <div className="as-col">
+            {empty ? (
+              <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
+            ) : (
+              chat.turns.map((turn, i) =>
+                turn.role === 'user' ? (
+                  <UserBubble key={turn.id} turn={turn} />
+                ) : (
+                  <BotMessage
+                    key={turn.id}
+                    turn={turn}
+                    state={state}
+                    last={i === chat.turns.length - 1}
+                    onRetry={retry}
+                    onSetup={() => setSetup(true)}
+                    onApply={(p) => void applyProposal(turn.id, p)}
+                    onEdit={editProposal}
+                    onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
+                    onOpen={(id) => {
+                      const s = state.subscriptions.find((x) => x.id === id);
+                      if (s) onOpen(s);
+                    }}
+                  />
+                ),
+              )
+            )}
+          </div>
+        </div>
+        {!atBottom && (
+          <button className="as-bottom" onClick={() => setAtBottom(true)} aria-label={t('assistant.toBottom')}>
+            <ArrowDown size={16} />
+          </button>
+        )}
+        <Composer
+          ref={composer}
+          above={empty && ready ? <Suggestions onPick={(x) => (x.send ? void send(x.text, []) : composer.current?.prefill(x.text))} /> : undefined}
+          busy={busy}
+          disabled={!ready}
+          model={cfg?.model}
+          onSend={(text, imgs) => void send(text, imgs)}
+          onStop={() => abort.current?.abort()}
+          onSettings={() => setSetup(true)}
+          onReset={empty ? undefined : reset}
+        />
+      </div>
+      {setup && <SetupSheet cfg={cfg} onClose={() => setSetup(false)} onSaved={setCfg} />}
+    </>
+  );
+}
+
+// ---------- 空状态（对应 AI Elements 的 ConversationEmptyState）与建议（Suggestions） ----------
+
+const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
+  { key: 'receipt', send: false },
+  { key: 'screenshot', send: false },
+  { key: 'month', send: true },
+  { key: 'hikes', send: true },
+];
+
+function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
+  return (
+    <div className="as-welcome">
+      <img className="as-orb" src="/icons/logo.svg" alt="" />
+      <h2>{t('assistant.welcome.title')}</h2>
+      <p>{t('assistant.welcome.body')}</p>
+      {!ready && cfg && (
+        <button className="as-setup-cta" onClick={onSetup}>
+          <KeyRound size={16} />
+          <span>
+            <b>{t('assistant.setup.cta')}</b>
+            <small>{t('assistant.setup.ctaHint')}</small>
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** 输入框上方一排可横向滑动的建议（窄屏换行） */
+function Suggestions({ onPick }: { onPick: (s: { text: string; send: boolean }) => void }) {
+  return (
+    <div className="as-suggest">
+      {SUGGESTIONS.map((s) => (
+        <button key={s.key} title={t(`assistant.suggest.${s.key}.hint`)} onClick={() => onPick({ text: t(`assistant.suggest.${s.key}.text`), send: s.send })}>
+          {t(`assistant.suggest.${s.key}.title`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ---------- 消息 ----------
+
+function UserBubble({ turn }: { turn: Extract<ChatTurn, { role: 'user' }> }) {
+  return (
+    <div className="as-user">
+      {turn.images.length > 0 && (
+        <div className="as-user-imgs">
+          {turn.images.map((src, i) => (
+            <img key={i} src={src} alt="" />
+          ))}
+        </div>
+      )}
+      {turn.text && <div className="as-bubble">{turn.text}</div>}
+    </div>
+  );
+}
+
+function BotMessage(props: {
+  turn: Extract<ChatTurn, { role: 'assistant' }>;
+  state: AppState;
+  last: boolean;
+  onRetry: () => void;
+  onSetup: () => void;
+  onApply: (p: Extract<Part, { kind: 'proposal' }>) => void;
+  onEdit: (p: Extract<Part, { kind: 'proposal' }>) => void;
+  onDismiss: (p: Extract<Part, { kind: 'proposal' }>) => void;
+  onOpen: (id: string) => void;
+}) {
+  const { turn } = props;
+  const text = turn.parts.flatMap((p) => (p.kind === 'text' ? [p.text] : [])).join('\n\n');
+  const waiting = turn.status === 'streaming' && !turn.parts.length;
+  return (
+    <div className="as-bot">
+      <div className="as-bot-body">
+        {waiting && <Dots />}
+        {turn.parts.map((p, i) => {
+          if (p.kind === 'reasoning') return <Reasoning key={i} part={p} live={turn.status === 'streaming' && p.ms == null} />;
+          if (p.kind === 'text') return <Markdown key={i} text={p.text} />;
+          if (p.kind === 'tool') return <ToolCard key={p.id} part={p} />;
+          return (
+            <Proposal
+              key={p.id}
+              part={p}
+              state={props.state}
+              onApply={() => props.onApply(p)}
+              onEdit={() => props.onEdit(p)}
+              onDismiss={() => props.onDismiss(p)}
+              onOpen={props.onOpen}
+            />
+          );
+        })}
+        {turn.status === 'error' && turn.error && <ErrorCard error={turn.error} onRetry={props.onRetry} onSetup={props.onSetup} />}
+        {turn.status === 'stopped' && <div className="as-stopped">{t('assistant.stopped')}</div>}
+        {props.last && turn.status !== 'streaming' && turn.status !== 'error' && (
+          <div className="as-actions">
+            {text && (
+              <button
+                onClick={() => void navigator.clipboard.writeText(text).then(() => toast(t('assistant.copied')))}
+                title={t('assistant.copy')}
+                aria-label={t('assistant.copy')}
+              >
+                <Copy size={14} />
+              </button>
+            )}
+            <button onClick={props.onRetry} title={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
+              <RotateCcw size={14} />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Dots() {
+  return (
+    <div className="as-dots" aria-label={t('assistant.thinking')}>
+      <i />
+      <i />
+      <i />
+    </div>
+  );
+}
+
+/** 思考过程（AI Elements Reasoning）：进行中展开并显示流光，结束 1 秒后自动收起成「思考了 N 秒」 */
+function Reasoning({ part, live }: { part: Extract<Part, { kind: 'reasoning' }>; live: boolean }) {
+  const [open, setOpen] = useState(live);
+  useEffect(() => {
+    if (live) return setOpen(true);
+    const id = setTimeout(() => setOpen(false), 1000);
+    return () => clearTimeout(id);
+  }, [live]);
+  const secs = Math.max(1, Math.round((part.ms ?? 0) / 1000));
+  return (
+    <div className={`as-reason ${open ? 'open' : ''}`}>
+      <button className="as-reason-h" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <Brain size={15} />
+        <span className={live ? 'shimmer' : ''}>{live ? t('assistant.thinking') : t('assistant.thought', { count: secs })}</span>
+        <ChevronDown size={15} className="chev" />
+      </button>
+      {open && <div className="as-reason-b">{part.text}</div>}
+    </div>
+  );
+}
+
+/** 工具调用：名称、状态，点开看参数与结果 */
+function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
+  const [open, setOpen] = useState(false);
+  const title = t(`mcp.tool.${part.name}`) || part.name;
+  const json = (v: unknown) => {
+    const s = JSON.stringify(v, null, 2);
+    return s.length > 4000 ? `${s.slice(0, 4000)}\n…` : s;
+  };
+  return (
+    <div className={`as-tool ${part.status}`}>
+      <button className="as-tool-h" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <Wrench size={15} />
+        <span className="as-tool-name">{title}</span>
+        <span className={`as-pill ${part.status}`}>
+          {part.status === 'running' ? <Clock size={13} className="pulse" /> : part.status === 'done' ? <CircleCheck size={13} /> : <CircleX size={13} />}
+          {t(`assistant.tool.${part.status}`)}
+        </span>
+        <ChevronDown size={15} className="chev" />
+      </button>
+      {open && (
+        <div className="as-tool-b">
+          <small>{t('assistant.tool.input')}</small>
+          <pre>{json(part.args)}</pre>
+          {part.status !== 'running' && (
+            <>
+              <small>{part.error ? t('assistant.tool.error') : t('assistant.tool.output')}</small>
+              <pre className={part.error ? 'err' : ''}>{part.error ?? json(part.result)}</pre>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** 草稿卡片：新增订阅时显示图标、名称、价格与接下来的扣款；其他写操作显示要改的内容 */
+function Proposal(props: {
+  part: Extract<Part, { kind: 'proposal' }>;
+  state: AppState;
+  onApply: () => void;
+  onEdit: () => void;
+  onDismiss: () => void;
+  onOpen: (id: string) => void;
+}) {
+  const { part, state } = props;
+  const a = part.args;
+  const create = part.tool === 'create_subscription';
+  const sub = part.preview.subscription;
+  const name = String(a.name ?? sub?.name ?? '');
+  const icon: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'> = {
+    name,
+    icon: a.icon ? String(a.icon) : state.subscriptions.find((s) => s.id === sub?.id)?.icon,
+    url: a.url ? String(a.url) : state.subscriptions.find((s) => s.id === sub?.id)?.url,
+    category: String(a.category ?? sub?.category ?? ''),
+  };
+  const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number } | undefined;
+  const method =
+    state.methods.find((m) => m.id === a.method || m.name === a.method) ??
+    (create ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
+  const done = part.state === 'applied';
+  // 没识别出来、用了默认值的字段：提醒用户核对
+  const missing = create
+    ? [!a.start && t('assistant.card.start'), !a.method && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
+    : [];
+  const gone = part.state === 'dismissed';
+  const rows: Array<[string, ReactNode]> = create
+    ? [
+        [t('assistant.card.start'), a.start ? cnDateFull(String(a.start)) : t('assistant.card.today')],
+        ...(a.region ? [[t('detail.field.region'), String(a.region).toUpperCase()] as [string, ReactNode]] : []),
+        ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), cnDateFull(String(a.trial_end))] as [string, ReactNode]] : []),
+        [t('detail.field.method'), <PayBadge key="m" m={method} />],
+      ]
+    : Object.entries(a)
+        .filter(([k]) => !['id', 'subscription', 'force'].includes(k))
+        .map(([k, v]) => [k, typeof v === 'object' ? JSON.stringify(v) : String(v)]);
+  return (
+    <div className={`as-card ${part.state}`} style={{ '--tint': catColor(icon.category) } as Record<string, string>}>
+      <div className="as-card-tag">
+        <ReceiptText size={12} /> {create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}
+      </div>
+      <div className="as-card-head">
+        <SubIcon sub={icon} size={44} />
+        <div className="as-card-id">
+          <b>{name}</b>
+          {create && cyc ? (
+            <span>
+              {money(Number(a.price), String(a.currency))} {cycleLabel({ unit: cyc.unit, every: Number(cyc.every ?? 1) })}
+              {a.category ? ` · ${String(a.category)}` : ''}
+            </span>
+          ) : (
+            sub && <span>{[sub.price != null && sub.currency ? money(sub.price, sub.currency) : '', sub.cycle].filter(Boolean).join(' · ')}</span>
+          )}
+        </div>
+      </div>
+      <dl className="as-card-rows">
+        {rows.map(([k, v]) => (
+          <Fragment key={k}>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </Fragment>
+        ))}
+      </dl>
+      {create && part.preview.next_charges && part.preview.next_charges.length > 0 && (
+        <div className="as-card-next">
+          <small>{t('assistant.card.next')}</small>
+          <div>
+            {part.preview.next_charges.map((c) => (
+              <span key={c.date}>
+                {c.date.slice(5).replace('-', '/')} · {money(c.amount, c.currency)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {create && part.state === 'pending' && (missing.length > 0 || part.filled?.length) ? (
+        <div className="as-card-note">
+          {missing.length > 0 && (
+            <span className="warn">
+              <CircleAlert size={13} /> {t('assistant.card.missing', { fields: missing.join(t('assistant.card.sep')) })}
+            </span>
+          )}
+          {part.filled?.length ? <span>{t('assistant.card.filled')}</span> : null}
+        </div>
+      ) : null}
+      {part.state === 'error' && part.error && (
+        <div className="as-card-err">
+          <CircleAlert size={14} /> {part.error}
+        </div>
+      )}
+      <div className="as-card-foot">
+        {done ? (
+          <>
+            <span className="as-ok">
+              <Check size={15} /> {create ? t('assistant.card.added') : t('assistant.card.done')}
+            </span>
+            {part.subId && (
+              <button className="btn" onClick={() => props.onOpen(part.subId!)}>
+                {t('assistant.card.view')}
+              </button>
+            )}
+          </>
+        ) : gone ? (
+          <span className="as-muted">
+            <CircleX size={15} /> {t('assistant.card.dismissed')}
+          </span>
+        ) : (
+          <>
+            <button className="btn plain" onClick={props.onDismiss} disabled={part.state === 'applying'}>
+              {t('assistant.card.dismiss')}
+            </button>
+            {create && (
+              <button className="btn" onClick={props.onEdit} disabled={part.state === 'applying'}>
+                <Pencil size={14} /> {t('assistant.card.edit')}
+              </button>
+            )}
+            <button className="btn primary" onClick={props.onApply} disabled={part.state === 'applying'}>
+              {part.state === 'applying' ? <Loader2 size={14} className="spin" /> : <Check size={14} />}
+              {create ? t('assistant.card.add') : t('assistant.card.confirm')}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry: () => void; onSetup: () => void }) {
+  const fixable = error.kind === 'auth' || error.kind === 'config' || error.kind === 'balance';
+  return (
+    <div className="as-error" role="alert">
+      <CircleAlert size={16} />
+      <div>
+        <b>{t(`assistant.error.${error.kind}`)}</b>
+        <small>{error.message}</small>
+        <div className="as-error-acts">
+          <button className="btn" onClick={onRetry}>
+            <RotateCcw size={14} /> {t('assistant.retry')}
+          </button>
+          {fixable && (
+            <button className="btn plain" onClick={onSetup}>
+              {t('assistant.settings')}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 极简 Markdown：段落、列表、**粗体**、`代码`、链接；不用 innerHTML */
+function Markdown({ text }: { text: string }) {
+  const inline = (s: string, key: number): ReactNode[] =>
+    s.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\(https?:\/\/[^)\s]+\))/g).map((seg, i) => {
+      if (/^\*\*[^*]+\*\*$/.test(seg)) return <b key={`${key}-${i}`}>{seg.slice(2, -2)}</b>;
+      if (/^`[^`]+`$/.test(seg)) return <code key={`${key}-${i}`}>{seg.slice(1, -1)}</code>;
+      const m = seg.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
+      if (m)
+        return (
+          <a key={`${key}-${i}`} href={m[2]} target="_blank" rel="noreferrer">
+            {m[1]}
+          </a>
+        );
+      return seg;
+    });
+  const blocks: ReactNode[] = [];
+  let list: { ordered: boolean; items: string[] } | null = null;
+  const flush = () => {
+    if (!list) return;
+    const items = list.items.map((x, i) => <li key={i}>{inline(x, i)}</li>);
+    blocks.push(list.ordered ? <ol key={blocks.length}>{items}</ol> : <ul key={blocks.length}>{items}</ul>);
+    list = null;
+  };
+  for (const raw of text.split('\n')) {
+    const line = raw.trimEnd();
+    const ul = line.match(/^\s*[-*•]\s+(.*)$/);
+    const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
+    if (ul || ol) {
+      const ordered = !!ol;
+      if (!list || list.ordered !== ordered) {
+        flush();
+        list = { ordered, items: [] };
+      }
+      list.items.push((ul ?? ol)![1]);
+      continue;
+    }
+    flush();
+    if (!line.trim()) continue;
+    const h = line.match(/^#{1,4}\s+(.*)$/);
+    blocks.push(h ? <h4 key={blocks.length}>{inline(h[1], blocks.length)}</h4> : <p key={blocks.length}>{inline(line, blocks.length)}</p>);
+  }
+  flush();
+  return <div className="as-md">{blocks}</div>;
+}
+
+// ---------- 输入框：文字 + 图片（粘贴、拖拽、选择） ----------
+
+interface ComposerHandle {
+  prefill: (text: string, images?: string[]) => void;
+}
+
+function Composer({
+  ref,
+  busy,
+  disabled,
+  model,
+  onSend,
+  onStop,
+  onSettings,
+  onReset,
+  above,
+}: {
+  ref: React.Ref<ComposerHandle>;
+  busy: boolean;
+  disabled: boolean;
+  model?: string;
+  onSend: (text: string, images: string[]) => void;
+  onStop: () => void;
+  onSettings: () => void;
+  /** 有会话时才有：窄屏工具栏放不下，「新对话」放在输入框里 */
+  onReset?: () => void;
+  /** 输入框上方的内容（建议） */
+  above?: ReactNode;
+}) {
+  const [text, setText] = useState('');
+  const [images, setImages] = useState<string[]>([]);
+  const [drag, setDrag] = useState(false);
+  const area = useRef<HTMLTextAreaElement>(null);
+  const file = useRef<HTMLInputElement>(null);
+
+  useImperativeHandle(ref, () => ({ prefill }));
+  function prefill(s: string, imgs: string[] = []) {
+    setText(s);
+    if (imgs.length) setImages(imgs.slice(0, 8));
+    requestAnimationFrame(() => {
+      const el = area.current;
+      if (!el) return;
+      el.focus();
+      el.setSelectionRange(s.length, s.length);
+    });
+  }
+  // 高度随内容增长，最多约 8 行
+  useLayoutEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [text]);
+
+  const addFiles = async (files: Iterable<File>) => {
+    const list = [...files].filter((f) => f.type.startsWith('image/')).slice(0, 8 - images.length);
+    if (!list.length) return;
+    try {
+      const urls = await Promise.all(list.map(compress));
+      setImages((x) => [...x, ...urls].slice(0, 8));
+    } catch {
+      toast(t('assistant.imageFailed'), true);
+    }
+  };
+  const submit = () => {
+    if (busy || disabled || (!text.trim() && !images.length)) return;
+    onSend(text, images);
+    setText('');
+    setImages([]);
+  };
+
+  return (
+    <div
+      className={`as-composer ${drag ? 'drag' : ''}`}
+      onDragOver={(e) => {
+        if ([...e.dataTransfer.items].some((i) => i.type.startsWith('image/'))) {
+          e.preventDefault();
+          setDrag(true);
+        }
+      }}
+      onDragLeave={() => setDrag(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDrag(false);
+        void addFiles(e.dataTransfer.files);
+      }}
+    >
+      {above}
+      <div className="as-input">
+        {images.length > 0 && (
+          <div className="as-atts">
+            {images.map((src, i) => (
+              <span key={i} className="as-att">
+                <img src={src} alt="" />
+                <button onClick={() => setImages((x) => x.filter((_, k) => k !== i))} aria-label={t('assistant.removeImage')}>
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <textarea
+          ref={area}
+          rows={1}
+          value={text}
+          disabled={disabled}
+          placeholder={disabled ? t('assistant.placeholderSetup') : t('assistant.placeholder')}
+          onChange={(e) => setText(e.target.value)}
+          onPaste={(e) => {
+            const files = [...e.clipboardData.files].filter((f) => f.type.startsWith('image/'));
+            if (files.length) {
+              e.preventDefault();
+              void addFiles(files);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              submit();
+            }
+          }}
+        />
+        <div className="as-input-bar">
+          <button
+            className="as-icon"
+            onClick={() => file.current?.click()}
+            disabled={disabled}
+            title={t('assistant.addImage')}
+            aria-label={t('assistant.addImage')}
+          >
+            <ImagePlus size={17} />
+          </button>
+          <input ref={file} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files && void addFiles(e.target.files)} />
+          <button className="as-model" onClick={onSettings} title={t('assistant.settings')}>
+            {model === 'deepseek-flash' ? 'DeepSeek V4.1 Flash' : (model ?? 'DeepSeek')}
+          </button>
+          {onReset && (
+            <button className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+              <SquarePen size={16} />
+            </button>
+          )}
+          <span className="grow" />
+          {busy ? (
+            <button className="as-send stop" onClick={onStop} title={t('assistant.stop')} aria-label={t('assistant.stop')}>
+              <Square size={13} fill="currentColor" />
+            </button>
+          ) : (
+            <button
+              className="as-send"
+              onClick={submit}
+              disabled={disabled || (!text.trim() && !images.length)}
+              title={t('assistant.send')}
+              aria-label={t('assistant.send')}
+            >
+              <ArrowUp size={17} />
+            </button>
+          )}
+        </div>
+      </div>
+      <p className="as-foot">{t('assistant.disclaimer')}</p>
+    </div>
+  );
+}
+
+// ---------- 配置：DeepSeek API Key、Base URL、模型、思考强度 ----------
+
+function SetupSheet({ cfg, onClose, onSaved }: { cfg: AssistantConfigView | null; onClose: () => void; onSaved: (c: AssistantConfigView) => void }) {
+  const [key, setKey] = useState('');
+  const [baseUrl, setBaseUrl] = useState(cfg?.baseUrl ?? 'https://api.deepseek.com');
+  const [model, setModel] = useState(cfg?.model ?? 'deepseek-flash');
+  const [effort, setEffort] = useState<Effort>(cfg?.effort ?? 'low');
+  const [test, setTest] = useState<{ ok: boolean; message?: string; models?: string[] } | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const runTest = async () => {
+    setTesting(true);
+    setTest(null);
+    try {
+      setTest(await api('/api/assistant/test', { method: 'POST', body: JSON.stringify({ apiKey: key || undefined, baseUrl }) }));
+    } catch (e) {
+      setTest({ ok: false, message: (e as Error).message });
+    } finally {
+      setTesting(false);
+    }
+  };
+  const save = async () => {
+    setSaving(true);
+    try {
+      const v = await api<AssistantConfigView>('/api/assistant/config', { method: 'PUT', body: JSON.stringify({ apiKey: key, baseUrl, model, effort }) });
+      onSaved(v);
+      toast(t('assistant.setup.saved'));
+      onClose();
+    } catch (e) {
+      toast((e as Error).message, true);
+    } finally {
+      setSaving(false);
+    }
+  };
+  const clear = async () => {
+    const v = await api<AssistantConfigView>('/api/assistant/config', { method: 'PUT', body: JSON.stringify({ apiKey: null }) });
+    onSaved(v);
+    toast(t('assistant.setup.cleared'));
+  };
+
+  return (
+    <Sheet
+      narrow
+      title={t('assistant.setup.title')}
+      onClose={onClose}
+      foot={
+        <>
+          {cfg?.configured && (
+            <button className="btn danger" style={{ marginRight: 'auto' }} onClick={() => void clear()}>
+              {t('assistant.setup.clear')}
+            </button>
+          )}
+          <button className="btn" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button className="btn primary" onClick={() => void save()} disabled={saving || (!key && !cfg?.configured)}>
+            {t('common.save')}
+          </button>
+        </>
+      }
+    >
+      <div className="as-setup">
+        <p className="as-setup-intro">
+          {t('assistant.setup.intro')}{' '}
+          <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">
+            platform.deepseek.com
+          </a>
+        </p>
+        <label className="as-field">
+          <span>API Key</span>
+          <input
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            value={key}
+            placeholder={cfg?.configured ? t('assistant.setup.keySaved', { hint: cfg.keyHint ?? '' }) : 'sk-…'}
+            onChange={(e) => setKey(e.target.value)}
+          />
+        </label>
+        <label className="as-field">
+          <span>Base URL</span>
+          <input spellCheck={false} value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
+          <small>{t('assistant.setup.baseHint')}</small>
+        </label>
+        <label className="as-field">
+          <span>{t('assistant.setup.model')}</span>
+          <input spellCheck={false} value={model} list="as-models" onChange={(e) => setModel(e.target.value)} />
+          <datalist id="as-models">
+            {(test?.models ?? ['deepseek-flash', 'deepseek-v4-pro']).map((m) => (
+              <option key={m} value={m} />
+            ))}
+          </datalist>
+          <small>{t('assistant.setup.modelHint')}</small>
+        </label>
+        <div className="as-field">
+          <span>{t('assistant.setup.effort')}</span>
+          <div className="as-effort">
+            {(['none', 'low', 'high'] as Effort[]).map((e) => (
+              <button key={e} className={effort === e ? 'on' : ''} onClick={() => setEffort(e)}>
+                <b>{t(`assistant.setup.effort_${e}`)}</b>
+                <small>{t(`assistant.setup.effort_${e}Hint`)}</small>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="as-test">
+          <button className="btn" onClick={() => void runTest()} disabled={testing || (!key && !cfg?.configured)}>
+            {testing ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {t('assistant.setup.test')}
+          </button>
+          {test && (
+            <span className={test.ok ? 'ok' : 'bad'}>
+              {test.ok ? t('assistant.setup.testOk', { count: test.models?.length ?? 0 }) : (test.message ?? t('assistant.error.network'))}
+            </span>
+          )}
+        </div>
+        <p className="as-setup-note">{t('assistant.setup.privacy')}</p>
+      </div>
+    </Sheet>
+  );
+}

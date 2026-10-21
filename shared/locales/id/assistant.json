@@ -1,0 +1,108 @@
+{
+  "title": "Asisten AI",
+  "new": "Obrolan baru",
+  "settings": "Pengaturan AI",
+  "toBottom": "Ke bawah",
+  "welcome": {
+    "title": "Kirim saja tagihan atau tangkapan layar",
+    "body": "Tempel struk App Store, SMS tagihan, tangkapan layar halaman langganan, atau teks apa pun. Saya akan merapikannya jadi draf langganan yang tinggal Anda konfirmasi untuk dicatat. Anda juga bisa langsung bertanya soal pengeluaran."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "Tempel struk",
+      "hint": "App Store, Google Play, atau email tagihan",
+      "text": "Tolong catat struk ini sebagai langganan:\n"
+    },
+    "screenshot": {
+      "title": "Kirim tangkapan layar",
+      "hint": "Halaman langganan atau tagihan, bisa langsung ditempel",
+      "text": "Tolong kenali langganan di tangkapan layar ini:"
+    },
+    "month": {
+      "title": "Bulan ini bayar berapa?",
+      "hint": "Sisa tagihan bulan ini, urut tanggal",
+      "text": "Langganan apa saja yang masih akan ditagih bulan ini, dan totalnya berapa?"
+    },
+    "hikes": {
+      "title": "Apa yang naik harga?",
+      "hint": "Langganan yang naik harga dalam setahun terakhir",
+      "text": "Langganan apa saja yang naik harga dalam setahun terakhir, dan naik berapa?"
+    }
+  },
+  "placeholder": "Tempel teks atau tangkapan layar, atau tanyakan apa saja…",
+  "placeholderSetup": "Atur DeepSeek API Key dulu di kanan atas",
+  "addImage": "Tambah gambar",
+  "removeImage": "Hapus gambar",
+  "send": "Kirim",
+  "stop": "Berhenti",
+  "imageFailed": "Gagal membaca gambar",
+  "disclaimer": "Dibuat oleh DeepSeek. Periksa jumlah dan tanggal sebelum menambahkan.",
+  "thinking": "Berpikir…",
+  "thought": {
+    "other": "Berpikir selama {count} detik"
+  },
+  "stopped": "Dihentikan",
+  "copy": "Salin",
+  "copied": "Disalin",
+  "regenerate": "Buat ulang",
+  "retry": "Coba lagi",
+  "applied": "Sudah dicatat",
+  "tool": {
+    "running": "Berjalan",
+    "done": "Selesai",
+    "error": "Gagal",
+    "input": "Masukan",
+    "output": "Hasil"
+  },
+  "card": {
+    "draft": "Draf langganan",
+    "start": "Tanggal mulai",
+    "today": "Hari ini",
+    "next": "Tagihan berikutnya",
+    "add": "Tambah",
+    "confirm": "Konfirmasi",
+    "edit": "Edit dulu",
+    "dismiss": "Abaikan",
+    "dismissed": "Diabaikan",
+    "added": "Ditambahkan",
+    "done": "Selesai",
+    "view": "Lihat",
+    "missing": "{fields} tidak terbaca, nilai bawaan dipakai, mohon periksa",
+    "sep": ", ",
+    "filled": "Ikon dan tautan dilengkapi dari App Store"
+  },
+  "error": {
+    "auth": "API Key tidak valid",
+    "balance": "Saldo DeepSeek Anda tidak cukup",
+    "rate": "Terlalu banyak permintaan, coba lagi sebentar lagi",
+    "params": "Permintaan ditolak",
+    "server": "Layanan DeepSeek sedang bermasalah",
+    "network": "Gagal terhubung ke jaringan",
+    "config": "API Key belum diatur"
+  },
+  "setup": {
+    "title": "Pengaturan asisten AI",
+    "intro": "Menggunakan DeepSeek API Key milik Anda sendiri; biaya ditagihkan ke akun DeepSeek Anda sesuai harga DeepSeek. Dapatkan Key di",
+    "keySaved": "Tersimpan ({hint}), biarkan kosong agar tidak berubah",
+    "baseHint": "Biarkan URL resmi, kecuali Anda memakai proxy atau layanan yang kompatibel.",
+    "model": "Model",
+    "modelHint": "deepseek-flash adalah V4.1 Flash dan bisa membaca gambar.",
+    "effort": "Tingkat berpikir",
+    "effort_none": "Mati",
+    "effort_noneHint": "Paling cepat, cukup untuk struk sederhana",
+    "effort_low": "Ringan",
+    "effort_lowHint": "Disarankan: cepat dan akurat",
+    "effort_high": "Mendalam",
+    "effort_highHint": "Lebih andal untuk tagihan rumit, lebih lambat",
+    "test": "Uji koneksi",
+    "testOk": {
+      "other": "Terhubung, {count} model tersedia"
+    },
+    "saved": "Tersimpan",
+    "clear": "Hapus Key",
+    "cleared": "API Key dihapus",
+    "cta": "Atur DeepSeek API Key",
+    "ctaHint": "Cukup sekali; Key hanya disimpan di server Anda",
+    "privacy": "Key hanya disimpan di server Anda, tidak pernah dikirim ke browser atau dimasukkan ke cadangan. Teks dan gambar yang Anda kirim diteruskan ke DeepSeek melalui server Anda."
+  }
+}

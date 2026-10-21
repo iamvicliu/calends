@@ -48,5 +48,6 @@
     "invalid": "Ungültige Kategorienliste",
     "duplicate": "Doppelte Kategorie: {name}"
   },
-  "demoReadonly": "Das ist eine schreibgeschützte Demo – Änderungen werden nicht gespeichert."
+  "demoReadonly": "Das ist eine schreibgeschützte Demo – Änderungen werden nicht gespeichert.",
+  "assistant": { "noKey": "Noch kein DeepSeek-API-Schlüssel eingerichtet.", "badTool": "Nicht unterstützte Aktion." }
 }

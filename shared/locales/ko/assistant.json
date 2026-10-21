@@ -1,0 +1,108 @@
+{
+  "title": "AI 어시스턴트",
+  "new": "새 대화",
+  "settings": "AI 설정",
+  "toBottom": "맨 아래로",
+  "welcome": {
+    "title": "청구서나 스크린샷을 그대로 주세요",
+    "body": "App Store 영수증, 결제 문자, 구독 페이지 스크린샷 등 어떤 텍스트든 붙여 넣으세요. 구독 초안으로 정리해 드리고, 확인하면 장부에 기록합니다. 지출에 대해 바로 물어봐도 됩니다."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "영수증 붙여 넣기",
+      "hint": "App Store, Google Play 또는 결제 메일",
+      "text": "이 영수증을 구독으로 추가해 주세요:\n"
+    },
+    "screenshot": {
+      "title": "스크린샷 보내기",
+      "hint": "구독 관리 화면이나 결제 화면, 바로 붙여 넣을 수 있습니다",
+      "text": "이 스크린샷에 있는 구독을 찾아 주세요:"
+    },
+    "month": {
+      "title": "이번 달 결제 금액은?",
+      "hint": "이번 달 남은 결제를 날짜순으로",
+      "text": "이번 달에 아직 결제될 구독은 무엇이고, 모두 얼마인가요?"
+    },
+    "hikes": {
+      "title": "최근 가격이 오른 구독은?",
+      "hint": "지난 1년간 가격이 오른 구독",
+      "text": "지난 1년 동안 가격이 오른 구독은 무엇이고, 각각 얼마나 올랐나요?"
+    }
+  },
+  "placeholder": "텍스트나 스크린샷을 붙여 넣거나 무엇이든 물어보세요…",
+  "placeholderSetup": "먼저 오른쪽 위에서 DeepSeek API Key를 설정하세요",
+  "addImage": "이미지 추가",
+  "removeImage": "이미지 삭제",
+  "send": "보내기",
+  "stop": "중지",
+  "imageFailed": "이미지를 읽지 못했습니다",
+  "disclaimer": "DeepSeek가 생성한 내용입니다. 추가하기 전에 금액과 날짜를 확인하세요.",
+  "thinking": "생각하는 중…",
+  "thought": {
+    "other": "{count}초 동안 생각함"
+  },
+  "stopped": "생성을 중지했습니다",
+  "copy": "복사",
+  "copied": "복사됨",
+  "regenerate": "다시 생성",
+  "retry": "다시 시도",
+  "applied": "장부에 기록했습니다",
+  "tool": {
+    "running": "실행 중",
+    "done": "완료",
+    "error": "오류",
+    "input": "입력",
+    "output": "출력"
+  },
+  "card": {
+    "draft": "구독 초안",
+    "start": "시작일",
+    "today": "오늘",
+    "next": "다음 결제",
+    "add": "추가",
+    "confirm": "확인",
+    "edit": "수정 후 추가",
+    "dismiss": "무시",
+    "dismissed": "무시함",
+    "added": "추가됨",
+    "done": "완료",
+    "view": "보기",
+    "missing": "{fields}을(를) 인식하지 못해 기본값을 썼어요. 확인해 주세요",
+    "sep": ", ",
+    "filled": "아이콘과 링크는 App Store에서 채웠어요"
+  },
+  "error": {
+    "auth": "API Key가 유효하지 않습니다",
+    "balance": "DeepSeek 계정 잔액이 부족합니다",
+    "rate": "요청이 너무 많습니다. 잠시 후 다시 시도하세요",
+    "params": "요청 매개변수가 올바르지 않습니다",
+    "server": "DeepSeek 서비스에 일시적인 문제가 있습니다",
+    "network": "네트워크에 연결하지 못했습니다",
+    "config": "아직 API Key를 설정하지 않았습니다"
+  },
+  "setup": {
+    "title": "AI 어시스턴트 설정",
+    "intro": "내 DeepSeek API Key를 사용하며, 요금은 DeepSeek 가격 기준으로 내 계정에 청구됩니다. Key 발급:",
+    "keySaved": "저장됨({hint}). 비워 두면 변경하지 않습니다",
+    "baseHint": "공식 주소는 그대로 두세요. 프록시나 호환 서비스를 쓸 때만 입력합니다.",
+    "model": "모델",
+    "modelHint": "deepseek-flash는 V4.1 Flash이며 이미지를 인식할 수 있습니다.",
+    "effort": "사고 강도",
+    "effort_none": "끄기",
+    "effort_noneHint": "가장 빠름, 간단한 영수증에 적합",
+    "effort_low": "가볍게",
+    "effort_lowHint": "추천: 빠르고 정확함",
+    "effort_high": "깊게",
+    "effort_highHint": "복잡한 청구서에 더 안정적, 느림",
+    "test": "연결 테스트",
+    "testOk": {
+      "other": "연결 성공 · 사용 가능한 모델 {count}개"
+    },
+    "saved": "저장했습니다",
+    "clear": "Key 삭제",
+    "cleared": "API Key를 삭제했습니다",
+    "cta": "DeepSeek API Key 설정",
+    "ctaHint": "한 번만 설정하면 되며, Key는 내 서버에만 저장됩니다",
+    "privacy": "Key는 내 서버에만 저장되며 브라우저로 전송되거나 백업에 포함되지 않습니다. 인식할 때 보낸 텍스트와 이미지는 내 서버를 거쳐 DeepSeek로 전달됩니다."
+  }
+}

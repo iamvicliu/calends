@@ -48,5 +48,6 @@
     "invalid": "Liste de catégories invalide",
     "duplicate": "Catégorie en double : {name}"
   },
-  "demoReadonly": "Ceci est une démo en lecture seule : les modifications ne sont pas enregistrées."
+  "demoReadonly": "Ceci est une démo en lecture seule : les modifications ne sont pas enregistrées.",
+  "assistant": { "noKey": "Aucune clé API DeepSeek configurée.", "badTool": "Action non prise en charge." }
 }

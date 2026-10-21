@@ -1,0 +1,110 @@
+{
+  "title": "Assistant IA",
+  "new": "Nouvelle discussion",
+  "settings": "Réglages IA",
+  "toBottom": "Aller en bas",
+  "welcome": {
+    "title": "Déposez une facture ou une capture d’écran",
+    "body": "Collez un reçu App Store, un SMS de prélèvement, une capture de votre page d’abonnements ou n’importe quel texte. J’en fais un brouillon d’abonnement que vous n’avez plus qu’à confirmer. Vous pouvez aussi poser des questions sur vos dépenses."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "Coller un reçu",
+      "hint": "App Store, Google Play ou un e-mail de facturation",
+      "text": "Ajoute ce reçu comme abonnement :\n"
+    },
+    "screenshot": {
+      "title": "Envoyer une capture",
+      "hint": "Page d’abonnements ou de facturation — collez-la directement",
+      "text": "Trouve les abonnements dans cette capture d’écran :"
+    },
+    "month": {
+      "title": "Qu’est-ce qui tombe ce mois-ci ?",
+      "hint": "Les prélèvements restants du mois, par date",
+      "text": "Quels abonnements seront encore prélevés ce mois-ci, et pour combien au total ?"
+    },
+    "hikes": {
+      "title": "Qu’est-ce qui a augmenté ?",
+      "hint": "Les abonnements dont le prix a augmenté depuis un an",
+      "text": "Quels abonnements ont augmenté leur prix au cours de l’année passée, et de combien ?"
+    }
+  },
+  "placeholder": "Collez du texte ou une capture, ou posez une question…",
+  "placeholderSetup": "Configurez d’abord votre clé API DeepSeek (en haut à droite)",
+  "addImage": "Ajouter une image",
+  "removeImage": "Retirer l’image",
+  "send": "Envoyer",
+  "stop": "Arrêter",
+  "imageFailed": "Impossible de lire cette image",
+  "disclaimer": "Généré par DeepSeek. Vérifiez les montants et les dates avant d’ajouter.",
+  "thinking": "Réflexion…",
+  "thought": {
+    "one": "A réfléchi {count} seconde",
+    "other": "A réfléchi {count} secondes"
+  },
+  "stopped": "Arrêté",
+  "copy": "Copier",
+  "copied": "Copié",
+  "regenerate": "Régénérer",
+  "retry": "Réessayer",
+  "applied": "Ajouté à votre registre",
+  "tool": {
+    "running": "En cours",
+    "done": "Terminé",
+    "error": "Échec",
+    "input": "Entrée",
+    "output": "Sortie"
+  },
+  "card": {
+    "draft": "Brouillon d’abonnement",
+    "start": "Date de début",
+    "today": "Aujourd’hui",
+    "next": "Prochains prélèvements",
+    "add": "Ajouter",
+    "confirm": "Confirmer",
+    "edit": "Modifier d’abord",
+    "dismiss": "Ignorer",
+    "dismissed": "Ignoré",
+    "added": "Ajouté",
+    "done": "Terminé",
+    "view": "Voir",
+    "missing": "{fields} introuvable(s) — valeurs par défaut utilisées, à vérifier",
+    "sep": ", ",
+    "filled": "Icône et lien complétés depuis l’App Store"
+  },
+  "error": {
+    "auth": "Clé API invalide",
+    "balance": "Votre solde DeepSeek est insuffisant",
+    "rate": "Trop de requêtes — réessayez dans un instant",
+    "params": "La requête a été refusée",
+    "server": "DeepSeek rencontre un problème",
+    "network": "Erreur réseau",
+    "config": "Aucune clé API configurée"
+  },
+  "setup": {
+    "title": "Réglages de l’assistant IA",
+    "intro": "Utilise votre propre clé API DeepSeek ; l’usage est facturé sur votre compte DeepSeek. Obtenir une clé :",
+    "keySaved": "Enregistrée ({hint}) — laissez vide pour la conserver",
+    "baseHint": "Gardez l’URL officielle, sauf si vous utilisez un proxy ou un service compatible.",
+    "model": "Modèle",
+    "modelHint": "deepseek-flash correspond à V4.1 Flash et sait lire les images.",
+    "effort": "Réflexion",
+    "effort_none": "Désactivée",
+    "effort_noneHint": "La plus rapide, suffisante pour les reçus simples",
+    "effort_low": "Légère",
+    "effort_lowHint": "Recommandé : rapide et précis",
+    "effort_high": "Approfondie",
+    "effort_highHint": "Plus fiable sur les factures complexes, plus lente",
+    "test": "Tester la connexion",
+    "testOk": {
+      "one": "Connecté — {count} modèle disponible",
+      "other": "Connecté — {count} modèles disponibles"
+    },
+    "saved": "Enregistré",
+    "clear": "Supprimer la clé",
+    "cleared": "Clé API supprimée",
+    "cta": "Configurer votre clé API DeepSeek",
+    "ctaHint": "Une seule fois ; la clé reste sur votre propre serveur",
+    "privacy": "La clé est stockée uniquement sur votre serveur — jamais envoyée au navigateur ni incluse dans les sauvegardes. Les textes et images que vous envoyez sont transmis à DeepSeek via votre serveur."
+  }
+}

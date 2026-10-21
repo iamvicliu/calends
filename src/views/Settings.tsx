@@ -27,6 +27,7 @@ const SIDE_MODULES: Array<[string, string]> = [
   ['wallet', 'wallet'],
   ['family', 'family'],
   ['behalf', 'behalf'],
+  ['assistant', 'assistant'],
   ['ai', 'ai'],
 ];
 import { CurrencySelect, Picker } from '../components/Picker.tsx';

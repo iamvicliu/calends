@@ -1,0 +1,110 @@
+{
+  "title": "Assistente de IA",
+  "new": "Nova conversa",
+  "settings": "Ajustes de IA",
+  "toBottom": "Ir para o fim",
+  "welcome": {
+    "title": "Mande uma fatura ou um print",
+    "body": "Cole um recibo da App Store, um SMS de cobrança, um print da sua página de assinaturas ou qualquer texto. Eu transformo tudo em um rascunho de assinatura para você confirmar. Você também pode perguntar sobre seus gastos."
+  },
+  "suggest": {
+    "receipt": {
+      "title": "Colar um recibo",
+      "hint": "App Store, Google Play ou um e-mail de cobrança",
+      "text": "Adicione este recibo como assinatura:\n"
+    },
+    "screenshot": {
+      "title": "Enviar um print",
+      "hint": "Página de assinaturas ou de cobrança — é só colar",
+      "text": "Encontre as assinaturas neste print:"
+    },
+    "month": {
+      "title": "O que vence este mês?",
+      "hint": "As cobranças que faltam no mês, por data",
+      "text": "Quais assinaturas ainda vão cobrar este mês e quanto dá no total?"
+    },
+    "hikes": {
+      "title": "O que ficou mais caro?",
+      "hint": "Assinaturas com aumento de preço no último ano",
+      "text": "Quais assinaturas aumentaram de preço no último ano, e quanto?"
+    }
+  },
+  "placeholder": "Cole um texto ou print, ou pergunte qualquer coisa…",
+  "placeholderSetup": "Configure primeiro sua API Key do DeepSeek (canto superior direito)",
+  "addImage": "Adicionar imagem",
+  "removeImage": "Remover imagem",
+  "send": "Enviar",
+  "stop": "Parar",
+  "imageFailed": "Não foi possível ler a imagem",
+  "disclaimer": "Gerado pelo DeepSeek. Confira valores e datas antes de adicionar.",
+  "thinking": "Pensando…",
+  "thought": {
+    "one": "Pensou por {count} segundo",
+    "other": "Pensou por {count} segundos"
+  },
+  "stopped": "Interrompido",
+  "copy": "Copiar",
+  "copied": "Copiado",
+  "regenerate": "Gerar novamente",
+  "retry": "Tentar de novo",
+  "applied": "Adicionado ao seu registro",
+  "tool": {
+    "running": "Executando",
+    "done": "Concluído",
+    "error": "Falhou",
+    "input": "Entrada",
+    "output": "Saída"
+  },
+  "card": {
+    "draft": "Rascunho de assinatura",
+    "start": "Data de início",
+    "today": "Hoje",
+    "next": "Próximas cobranças",
+    "add": "Adicionar",
+    "confirm": "Confirmar",
+    "edit": "Editar antes",
+    "dismiss": "Descartar",
+    "dismissed": "Descartado",
+    "added": "Adicionado",
+    "done": "Concluído",
+    "view": "Ver",
+    "missing": "Não foi possível identificar {fields}: usamos valores padrão, confira",
+    "sep": ", ",
+    "filled": "Ícone e link preenchidos pela App Store"
+  },
+  "error": {
+    "auth": "API Key inválida",
+    "balance": "Seu saldo no DeepSeek é insuficiente",
+    "rate": "Muitas solicitações — tente de novo daqui a pouco",
+    "params": "A solicitação foi recusada",
+    "server": "O DeepSeek está com problemas",
+    "network": "Erro de rede",
+    "config": "Nenhuma API Key configurada ainda"
+  },
+  "setup": {
+    "title": "Ajustes do assistente de IA",
+    "intro": "Usa sua própria API Key do DeepSeek; o uso é cobrado na sua conta do DeepSeek. Obtenha uma em",
+    "keySaved": "Salva ({hint}) — deixe em branco para mantê-la",
+    "baseHint": "Mantenha a URL oficial, a menos que use um proxy ou serviço compatível.",
+    "model": "Modelo",
+    "modelHint": "deepseek-flash é o V4.1 Flash e consegue ler imagens.",
+    "effort": "Raciocínio",
+    "effort_none": "Desligado",
+    "effort_noneHint": "O mais rápido, bom para recibos simples",
+    "effort_low": "Leve",
+    "effort_lowHint": "Recomendado: rápido e preciso",
+    "effort_high": "Profundo",
+    "effort_highHint": "Mais confiável em faturas complexas, mais lento",
+    "test": "Testar conexão",
+    "testOk": {
+      "one": "Conectado — {count} modelo disponível",
+      "other": "Conectado — {count} modelos disponíveis"
+    },
+    "saved": "Salvo",
+    "clear": "Remover chave",
+    "cleared": "API Key removida",
+    "cta": "Configurar sua API Key do DeepSeek",
+    "ctaHint": "Só uma vez; a chave fica no seu próprio servidor",
+    "privacy": "A chave fica guardada só no seu servidor — nunca é enviada ao navegador nem incluída em backups. Os textos e imagens que você envia são encaminhados ao DeepSeek pelo seu servidor."
+  }
+}

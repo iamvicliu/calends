@@ -221,5 +221,6 @@
   },
   "timeline": {
     "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"
-  }
+  },
+  "ai": { "title": "Mit KI ausfüllen", "hint": "Beleg, Screenshot oder Text einfügen – der Rest geht automatisch" }
 }

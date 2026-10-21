@@ -221,5 +221,6 @@
   },
   "timeline": {
     "home": "Bugüne dön (veya zaman çizelgesine çift tıklayın)"
-  }
+  },
+  "ai": { "title": "Yapay zekâ ile doldur", "hint": "Fiş, ekran görüntüsü ya da metin yapıştırın; gerisi otomatik" }
 }
