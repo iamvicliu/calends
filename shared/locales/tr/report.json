@@ -36,6 +36,8 @@
     "rangeAll": "Tümü"
   },
   "wf": {
+    "vsFrom": "geçen ay sonu {amount} karşısında",
+    "flat": "Değişmedi",
     "title": "{month} değişiklikleri",
     "prev": "Önceki ay",
     "next": "Sonraki ay",

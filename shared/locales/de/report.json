@@ -36,6 +36,8 @@
     "rangeAll": "Alle"
   },
   "wf": {
+    "vsFrom": "ggü. {amount} Ende Vormonat",
+    "flat": "Unverändert",
     "title": "Änderungen im {month}",
     "prev": "Vorheriger Monat",
     "next": "Nächster Monat",

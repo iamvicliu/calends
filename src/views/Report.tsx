@@ -169,8 +169,12 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
     { k: t('report.wf.churned'), v: -mv.churned, kind: 'down' },
     { k: offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd'), v: mv.to, kind: 'total' },
   ];
-  const max = Math.max(1, mv.from + Math.max(0, mv.fx) + mv.added + mv.expansion, mv.to, mv.from);
-  let run = 0;
+  // 不画瀑布：总额两千多、变化几十上百，放在一根轴上变化量只剩几条细线。
+  // 改成「一句结论 + 变化来源清单」，清单的横条只在各项之间比大小
+  const drivers = steps.filter((x) => x.kind !== 'total' && Math.abs(x.v) >= 0.5);
+  const peak = Math.max(1, ...drivers.map((x) => Math.abs(x.v)));
+  const delta = mv.to - mv.from;
+  const pct = mv.from > 0 ? delta / mv.from : 0;
   const kindLabel = (k: 'added' | 'expansion' | 'contraction' | 'churned') => t(`report.wf.${k}`);
   return (
     <div className="card">
@@ -191,37 +195,35 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           </button>
         </div>
       </div>
-      <div className="wf">
-        {steps.map((s) => {
-          let bottom = 0;
-          let h = 0;
-          if (s.kind === 'total') {
-            h = s.v;
-            run = s.v;
-          } else if (s.v >= 0) {
-            bottom = run;
-            h = s.v;
-            run += s.v;
-          } else {
-            run += s.v;
-            bottom = run;
-            h = -s.v;
-          }
-          const sign = s.kind === 'total' ? '' : s.v >= 0 ? '+' : '−';
-          return (
-            <div key={s.k} className={`wf-col ${s.kind}`} {...tipProps(() => `${s.k} ${perMonth(`${sign}${money(Math.abs(s.v), base)}`)}`)}>
-              <div className="wf-track">
-                <i style={{ bottom: `${(bottom / max) * 100}%`, height: `max(${h > 0 ? 3 : 1}px, ${(h / max) * 100}%)` }} />
+      <div className="mv-head">
+        <div>
+          <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
+          <b className="num">{perMonth(money(mv.to, base, { compact: true }))}</b>
+        </div>
+        <div className={`mv-delta ${Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'up' : 'down'}`}>
+          <small>{t('report.wf.vsFrom', { amount: money(mv.from, base, { compact: true }) })}</small>
+          <b className="num">
+            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : `${delta > 0 ? '+' : '−'}${money(Math.abs(delta), base, { compact: true })}`}
+            {Math.abs(delta) >= 0.5 && mv.from > 0 && <em>{`${pct > 0 ? '+' : '−'}${Math.abs(pct * 100).toFixed(1)}%`}</em>}
+          </b>
+        </div>
+      </div>
+      {drivers.length > 0 && (
+        <div className="mv-rows">
+          {drivers.map((x) => (
+            <div key={x.k} className={`mv-row ${x.v > 0 ? 'up' : 'down'}`}>
+              <span>{x.k}</span>
+              <div className="mv-bar">
+                <i style={{ width: `${(Math.abs(x.v) / peak) * 100}%` }} />
               </div>
               <b className="num">
-                {sign}
-                {Math.abs(s.v) >= 1000 ? `${(Math.abs(s.v) / 1000).toFixed(1)}k` : Math.round(Math.abs(s.v))}
+                {x.v > 0 ? '+' : '−'}
+                {money(Math.abs(x.v), base, { compact: true })}
               </b>
-              <span>{s.k}</span>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
       <div className="wf-items">
         {mv.items.length === 0 && (
           <div className="muted" style={{ fontSize: 13, padding: '8px 0' }}>

@@ -36,6 +36,8 @@
     "rangeAll": "全期間"
   },
   "wf": {
+    "vsFrom": "先月末 {amount} から",
+    "flat": "変化なし",
     "title": "{month}の変動",
     "prev": "前月",
     "next": "翌月",

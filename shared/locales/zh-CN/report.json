@@ -29,6 +29,8 @@
     "rangeAll": "全部"
   },
   "wf": {
+    "vsFrom": "比上月末 {amount}",
+    "flat": "持平",
     "title": "{n}月变动",
     "prev": "上个月",
     "next": "下个月",

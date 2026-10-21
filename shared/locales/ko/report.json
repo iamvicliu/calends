@@ -36,6 +36,8 @@
     "rangeAll": "전체"
   },
   "wf": {
+    "vsFrom": "지난달 말 {amount} 대비",
+    "flat": "변동 없음",
     "title": "{month} 변동",
     "prev": "이전 달",
     "next": "다음 달",

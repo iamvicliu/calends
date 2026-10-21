@@ -36,6 +36,8 @@
     "rangeAll": "Tất cả"
   },
   "wf": {
+    "vsFrom": "so với {amount} cuối tháng trước",
+    "flat": "Không đổi",
     "title": "Biến động {month}",
     "prev": "Tháng trước",
     "next": "Tháng sau",

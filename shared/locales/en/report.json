@@ -36,6 +36,8 @@
     "rangeAll": "All"
   },
   "wf": {
+    "vsFrom": "vs. {amount} at last month-end",
+    "flat": "No change",
     "title": "Changes in {month}",
     "prev": "Previous month",
     "next": "Next month",

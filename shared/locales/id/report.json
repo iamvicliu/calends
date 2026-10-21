@@ -36,6 +36,8 @@
     "rangeAll": "Semua"
   },
   "wf": {
+    "vsFrom": "vs. {amount} akhir bulan lalu",
+    "flat": "Tidak berubah",
     "title": "Perubahan {month}",
     "prev": "Bulan sebelumnya",
     "next": "Bulan berikutnya",
