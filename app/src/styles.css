@@ -6887,9 +6887,11 @@ button.seat:disabled {
   font-weight: 600;
 }
 
-/* 切换 1 年 / 3 年 / 全部时，条、刻度、今天线平滑伸缩到新位置 */
+/* 切换范围、平移时，条、刻度、今天线平滑伸缩到新位置；已付未用与停用标志必须同步，否则会和实线分开 */
 .gt-seg,
 .gt-gap,
+.gt-unused,
+.gt-stop,
 .gt-lifetime,
 .gt-life-tail,
 .gt-charge,
@@ -6903,6 +6905,8 @@ button.seat:disabled {
 @media (prefers-reduced-motion: reduce) {
   .gt-seg,
   .gt-gap,
+  .gt-unused,
+  .gt-stop,
   .gt-lifetime,
   .gt-life-tail,
   .gt-charge,
