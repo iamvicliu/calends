@@ -33,6 +33,9 @@
   "note": "Notiz",
   "diffLabel": "Zurückgezahlt − abgebucht",
   "table": {
+    "cost": "Kosten damals",
+    "total": "Summe · {count}",
+    "receivedOn": "Erhalten {date}",
     "date": "Abbuchungsdatum",
     "charged": "Abgebucht",
     "received": "Zurückgezahlt",

@@ -5414,6 +5414,49 @@ button.seat:disabled {
 .ld-th > span {
   font-weight: 400;
 }
+.ld-tf {
+  cursor: default;
+  background: var(--fill-2);
+  font-weight: 600;
+}
+.ld-tf > span:first-child {
+  color: var(--label-2);
+  font-weight: 400;
+}
+.ld-top {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ld-top > * {
+  margin: 0;
+}
+/* 宽屏：基本信息与四格汇总并排，表格多一列「当时成本」 */
+.ld-cost {
+  display: none !important;
+}
+@media (min-width: 720px) {
+  .ld-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .ld-top .proxy-facts.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    height: 100%;
+  }
+  .ld-row {
+    grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 96px;
+    padding: 12px 18px;
+  }
+  .ld-cost {
+    display: flex !important;
+  }
+  .ld-cost-inline {
+    display: none;
+  }
+}
 
 /* 侧边栏分组：新建/搜索、导航、即将扣款之间留出更明显的间距 */
 .side-gap {

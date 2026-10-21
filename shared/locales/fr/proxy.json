@@ -33,6 +33,9 @@
   "note": "Note",
   "diffLabel": "Remboursé − prélevé",
   "table": {
+    "cost": "Coût à l’époque",
+    "total": "Total · {count}",
+    "receivedOn": "Reçu le {date}",
     "date": "Date du prélèvement",
     "charged": "Prélevé",
     "received": "Remboursé",

@@ -23,6 +23,9 @@
   "note": "Nota",
   "diffLabel": "Devuelto − cobrado",
   "table": {
+    "cost": "Coste entonces",
+    "total": "Total · {count}",
+    "receivedOn": "Recibido {date}",
     "date": "Fecha de cobro",
     "charged": "Cobrado",
     "received": "Devuelto",

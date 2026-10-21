@@ -31,6 +31,9 @@
   "note": "メモ",
   "diffLabel": "返済額 − 請求額",
   "table": {
+    "cost": "当時のコスト",
+    "total": "合計 {count} 回",
+    "receivedOn": "{date} 受取",
     "date": "請求日",
     "charged": "請求額",
     "received": "返済額",

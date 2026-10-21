@@ -31,6 +31,9 @@
   "note": "메모",
   "diffLabel": "돌려받은 금액 − 결제 금액",
   "table": {
+    "cost": "당시 비용",
+    "total": "합계 {count}회",
+    "receivedOn": "{date} 받음",
     "date": "결제일",
     "charged": "결제 금액",
     "received": "돌려받음",

@@ -161,7 +161,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const cardCcy = list.find((r) => r.currency !== r.listCurrency)?.currency;
 
   return (
-    <Sheet narrow title={t('proxy.detailTitle')} onClose={onClose}>
+    <Sheet title={t('proxy.detailTitle')} onClose={onClose}>
       <div className="stack">
         <div className="ld-head">
           <SubIcon sub={live} size={52} />
@@ -178,58 +178,60 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           </span>
         </div>
 
-        <Group>
-          <Cell label={t('proxy.forWhom')}>
-            <span className="ld-who">
-              {px.forName || t('proxy.unset')}
-              {contactText(px) && <small>{contactText(px)}</small>}
-            </span>
-          </Cell>
-          <Cell label={t('proxy.method')}>
-            <PayBadge m={method} />
-          </Cell>
-          <Cell
-            label={t('proxy.subscription')}
-            onClick={() => {
-              onClose();
-              onOpen(live);
-            }}
-          >
-            {t('proxy.viewDetail')}
-          </Cell>
-          <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
-            {stopped ? (live.end ? cnDateFull(live.end) : '—') : next ? cnDateFull(next) : '—'}
-          </Cell>
-          {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
-        </Group>
+        <div className="ld-top">
+          <Group>
+            <Cell label={t('proxy.forWhom')}>
+              <span className="ld-who">
+                {px.forName || t('proxy.unset')}
+                {contactText(px) && <small>{contactText(px)}</small>}
+              </span>
+            </Cell>
+            <Cell label={t('proxy.method')}>
+              <PayBadge m={method} />
+            </Cell>
+            <Cell
+              label={t('proxy.subscription')}
+              onClick={() => {
+                onClose();
+                onOpen(live);
+              }}
+            >
+              {t('proxy.viewDetail')}
+            </Cell>
+            <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
+              {stopped ? (live.end ? cnDateFull(live.end) : '—') : next ? cnDateFull(next) : '—'}
+            </Cell>
+            {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
+          </Group>
 
-        <div className="proxy-facts four">
-          <div>
-            <small>{t('proxy.paidPeriods', { count: list.length })}</small>
-            <b>{money(charged, base, { compact: true })}</b>
-          </div>
-          <div>
-            <small>{t('proxy.received')}</small>
-            <b>{money(received, base, { compact: true })}</b>
-          </div>
-          <div>
-            <small>{t('proxy.owed')}</small>
-            <b className={open.length ? 'warn' : 'done'}>
-              {open.length
-                ? `≈ ${money(
-                    open.reduce((a, r) => a + r.chargedBase, 0),
-                    base,
-                    { compact: true },
-                  )}`
-                : t('proxy.settled')}
-            </b>
-          </div>
-          <div>
-            <small>{t('proxy.diffLabel')}</small>
-            <b className={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>
-              {diff > 0.5 ? '+' : ''}
-              {money(diff, base, { compact: true })}
-            </b>
+          <div className="proxy-facts four">
+            <div>
+              <small>{t('proxy.paidPeriods', { count: list.length })}</small>
+              <b>{money(charged, base, { compact: true })}</b>
+            </div>
+            <div>
+              <small>{t('proxy.received')}</small>
+              <b>{money(received, base, { compact: true })}</b>
+            </div>
+            <div>
+              <small>{t('proxy.owed')}</small>
+              <b className={open.length ? 'warn' : 'done'}>
+                {open.length
+                  ? `≈ ${money(
+                      open.reduce((a, r) => a + r.chargedBase, 0),
+                      base,
+                      { compact: true },
+                    )}`
+                  : t('proxy.settled')}
+              </b>
+            </div>
+            <div>
+              <small>{t('proxy.diffLabel')}</small>
+              <b className={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>
+                {diff > 0.5 ? '+' : ''}
+                {money(diff, base, { compact: true })}
+              </b>
+            </div>
           </div>
         </div>
 
@@ -237,23 +239,39 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           <div className="ld-row ld-th">
             <span>{t('proxy.table.date')}</span>
             <span>{t('proxy.table.charged')}</span>
+            <span className="ld-cost">{t('proxy.table.cost')}</span>
             <span>{t('proxy.table.received')}</span>
             <span>{t('proxy.table.diff')}</span>
           </div>
           {list.map((r) => {
             const d = r.receivedBase == null ? undefined : r.receivedBase - r.chargedBase;
+            const rc = r.entry?.receivedCurrency ?? base;
             return (
               <button key={r.date} className="ld-row" disabled={ro} onClick={() => setEdit(r)}>
                 <span className="ld-date">{cnDate(r.date)}</span>
                 <span>
                   <b>{money(r.charged, r.currency)}</b>
-                  <small>≈ {money(r.chargedBase, base)}</small>
+                  {/* 窄屏没有「当时成本」一列，折合写在实扣下面 */}
+                  <small className="ld-cost-inline">≈ {money(r.chargedBase, base)}</small>
                 </span>
+                <span className="ld-cost">{money(r.chargedBase, base)}</span>
                 <span>
                   {r.receivedBase == null ? (
                     <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
                   ) : (
-                    <b>{money(r.entry!.received!, r.entry!.receivedCurrency ?? base)}</b>
+                    <>
+                      <b>{money(r.entry!.received!, rc)}</b>
+                      {(r.entry?.receivedOn || rc !== base) && (
+                        <small>
+                          {[
+                            r.entry?.receivedOn && t('proxy.table.receivedOn', { date: cnDate(r.entry.receivedOn) }),
+                            rc !== base && `≈ ${money(r.receivedBase, base)}`,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </small>
+                      )}
+                    </>
                   )}
                 </span>
                 <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
@@ -262,6 +280,24 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               </button>
             );
           })}
+          {list.length > 1 && (
+            <div className="ld-row ld-tf">
+              <span>{t('proxy.table.total', { count: list.length })}</span>
+              <span>
+                {new Set(list.map((r) => r.currency)).size === 1
+                  ? money(
+                      list.reduce((a, r) => a + r.charged, 0),
+                      list[0].currency,
+                    )
+                  : ''}
+              </span>
+              <span className="ld-cost">{money(charged, base)}</span>
+              <span>{money(received, base)}</span>
+              <span className={Math.abs(diff) < 0.5 ? 'muted' : diff > 0 ? 'gain' : 'loss'}>
+                {Math.abs(diff) < 0.5 ? t('proxy.table.even') : `${diff > 0 ? '+' : '−'}${money(Math.abs(diff), base)}`}
+              </span>
+            </div>
+          )}
           {list.length === 0 && (
             <div className="muted" style={{ fontSize: 13, padding: '12px 0' }}>
               {t('proxy.table.none')}

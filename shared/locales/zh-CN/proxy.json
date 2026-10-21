@@ -22,7 +22,18 @@
   "nextCharge": "下次扣款",
   "note": "备注",
   "diffLabel": "收回 − 实扣",
-  "table": { "date": "扣款日", "charged": "卡上实扣", "received": "收回", "diff": "差额", "record": "记收款", "even": "持平", "none": "还没有扣过款。" },
+  "table": {
+    "cost": "当时成本",
+    "total": "合计 {count} 期",
+    "receivedOn": "{date} 收到",
+    "date": "扣款日",
+    "charged": "卡上实扣",
+    "received": "收回",
+    "diff": "差额",
+    "record": "记收款",
+    "even": "持平",
+    "none": "还没有扣过款。"
+  },
   "entry": {
     "markedDue": "已改为待收",
     "saved": "已保存",
