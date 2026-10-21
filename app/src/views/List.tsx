@@ -17,6 +17,8 @@ import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { usePref } from '../store.ts';
+import { scopeReport } from '../../../shared/scope-report.ts';
+import { ScopeReport } from '../components/ScopeReport.tsx';
 
 type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'terminated' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
@@ -152,6 +154,16 @@ export function List({
   });
   const sum = rows.reduce((a, s) => a + (['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
+  // 只按筛选范围识别报告，排序、视图及时间轴窗口不影响报告。
+  const reportKey = JSON.stringify([category ?? null, filter, cat, pay, words.join(' ')]);
+  const reportScope = [
+    cat !== 'all' && cat,
+    filter !== 'all' && filter !== 'live' && FILTERS().find(([k]) => k === filter)?.[1],
+    pay !== 'all' && (pay === 'none' ? t('list.unassigned') : methodName.get(pay)),
+    q.trim() && t('scope.search', { query: q.trim().replace(/\s+/g, ' ') }),
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <>
@@ -442,8 +454,76 @@ export function List({
             </div>
           </div>
         )}
+        {dirty && rows.length > 0 && (
+          <ListReport
+            key={reportKey}
+            reportKey={reportKey}
+            state={state}
+            rows={rows}
+            today={today}
+            onOpen={onOpen}
+            title={t('scope.selectionTitle', { scope: reportScope || FILTERS().find(([k]) => k === filter)![1], count: rows.length })}
+          />
+        )}
       </div>
     </>
+  );
+}
+
+/** 换范围时重置本次生成动画；匹配服务端偏好时直接恢复报告及折叠状态。 */
+function ListReport({
+  reportKey,
+  state,
+  rows,
+  today,
+  onOpen,
+  title,
+}: {
+  reportKey: string;
+  state: AppState;
+  rows: Subscription[];
+  today: string;
+  onOpen: (s: Subscription) => void;
+  title: string;
+}) {
+  const [pref, setPref] = usePref<string>('list-report', '');
+  const [animate, setAnimate] = useState(false);
+  let saved: { key: string; open: boolean } | undefined;
+  try {
+    const value = JSON.parse(pref);
+    if (value && value.key === reportKey && typeof value.open === 'boolean') saved = value;
+  } catch {
+    // 未生成或旧偏好损坏时保留生成入口。
+  }
+  return (
+    <div className="list-report">
+      {saved ? (
+        <ScopeReport
+          report={scopeReport(state, rows, today)}
+          state={state}
+          today={today}
+          onOpen={onOpen}
+          title={title}
+          animate={animate}
+          open={saved.open}
+          onToggle={() => {
+            setAnimate(false);
+            setPref(JSON.stringify({ key: reportKey, open: !saved.open }));
+          }}
+        />
+      ) : (
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            setAnimate(true);
+            setPref(JSON.stringify({ key: reportKey, open: true }));
+          }}
+        >
+          {t('scope.generate')}
+        </button>
+      )}
+    </div>
   );
 }
 

@@ -53,5 +53,11 @@
     "decrease": "Fiyat düşüşü",
     "switch": "Plan değişti",
     "resume": "Yeniden başlatıldı"
+  },
+  "generate": "Geçerli raporu oluştur",
+  "search": "“{query}” araması",
+  "selectionTitle": {
+    "one": "{scope} · {count} abonelik",
+    "other": "{scope} · {count} abonelik"
   }
 }

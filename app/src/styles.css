@@ -6481,6 +6481,10 @@ button.seat:disabled {
   max-width: 240px;
 }
 
+.list-report {
+  margin-top: 24px;
+}
+
 /* ---------------- 时间轴（甘特图） ---------------- */
 .gantt {
   --lw: 200px;

@@ -53,5 +53,10 @@
     "decrease": "Harga turun",
     "switch": "Paket berubah",
     "resume": "Dilanjutkan"
+  },
+  "generate": "Buat laporan saat ini",
+  "search": "Pencarian “{query}”",
+  "selectionTitle": {
+    "other": "{scope} · {count} langganan"
   }
 }

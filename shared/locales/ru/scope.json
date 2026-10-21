@@ -53,5 +53,13 @@
     "decrease": "Снижение цены",
     "switch": "Смена тарифа",
     "resume": "Возобновлена"
+  },
+  "generate": "Создать текущий отчёт",
+  "search": "Поиск «{query}»",
+  "selectionTitle": {
+    "one": "{scope} · {count} подписка",
+    "few": "{scope} · {count} подписки",
+    "many": "{scope} · {count} подписок",
+    "other": "{scope} · {count} подписки"
   }
 }

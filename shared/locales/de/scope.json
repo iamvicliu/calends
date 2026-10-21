@@ -53,5 +53,11 @@
     "decrease": "Preissenkung",
     "switch": "Tarifwechsel",
     "resume": "Fortgesetzt"
+  },
+  "generate": "Aktuellen Bericht erstellen",
+  "search": "Suche „{query}“",
+  "selectionTitle": {
+    "one": "{scope} · {count} Abonnement",
+    "other": "{scope} · {count} Abonnements"
   }
 }

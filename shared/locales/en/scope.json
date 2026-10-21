@@ -53,5 +53,11 @@
     "decrease": "Price decrease",
     "switch": "Plan changed",
     "resume": "Resumed"
+  },
+  "generate": "Generate current report",
+  "search": "Search “{query}”",
+  "selectionTitle": {
+    "one": "{scope} · {count} subscription",
+    "other": "{scope} · {count} subscriptions"
   }
 }

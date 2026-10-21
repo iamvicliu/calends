@@ -53,5 +53,12 @@
     "decrease": "Baisse de prix",
     "switch": "Changement de formule",
     "resume": "Reprise"
+  },
+  "generate": "Générer le rapport actuel",
+  "search": "Recherche « {query} »",
+  "selectionTitle": {
+    "one": "{scope} · {count} abonnement",
+    "other": "{scope} · {count} abonnements",
+    "many": "{scope} · {count} abonnements"
   }
 }

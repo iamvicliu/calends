@@ -53,5 +53,11 @@
     "decrease": "Bajada de precio",
     "switch": "Cambio de plan",
     "resume": "Reanudada"
+  },
+  "generate": "Generar informe actual",
+  "search": "Búsqueda «{query}»",
+  "selectionTitle": {
+    "one": "{scope} · {count} suscripción",
+    "other": "{scope} · {count} suscripciones"
   }
 }

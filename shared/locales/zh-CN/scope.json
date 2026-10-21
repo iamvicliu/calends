@@ -53,5 +53,10 @@
     "decrease": "降价",
     "switch": "套餐变更",
     "resume": "恢复订阅"
+  },
+  "generate": "生成当前报告",
+  "search": "搜索“{query}”",
+  "selectionTitle": {
+    "other": "{scope} · {count} 个订阅"
   }
 }

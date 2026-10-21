@@ -53,5 +53,10 @@
     "decrease": "降價",
     "switch": "方案變更",
     "resume": "恢復訂閱"
+  },
+  "generate": "產生目前報告",
+  "search": "搜尋「{query}」",
+  "selectionTitle": {
+    "other": "{scope} · {count} 個訂閱"
   }
 }

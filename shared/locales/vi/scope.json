@@ -53,5 +53,10 @@
     "decrease": "Giảm giá",
     "switch": "Đổi gói",
     "resume": "Tiếp tục đăng ký"
+  },
+  "generate": "Tạo báo cáo hiện tại",
+  "search": "Tìm kiếm “{query}”",
+  "selectionTitle": {
+    "other": "{scope} · {count} gói đăng ký"
   }
 }

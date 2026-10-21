@@ -53,5 +53,12 @@
     "decrease": "Redução de preço",
     "switch": "Mudança de plano",
     "resume": "Retomada"
+  },
+  "generate": "Gerar relatório atual",
+  "search": "Busca por “{query}”",
+  "selectionTitle": {
+    "one": "{scope} · {count} assinatura",
+    "other": "{scope} · {count} assinaturas",
+    "many": "{scope} · {count} assinaturas"
   }
 }

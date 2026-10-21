@@ -19,6 +19,7 @@ export const PREF_KEYS = [
   'share-style',
   'sub-share-style',
   'list-status',
+  'list-report',
   'car-filter',
   'proxy-filter',
   'cal-mode',
