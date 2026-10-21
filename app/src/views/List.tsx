@@ -135,7 +135,7 @@ export function List({
   const cats = categories()
     .map((c) => c.name)
     .filter((c) => mine.some((s) => s.category === c));
-  const dirty = filter !== 'live' || cat !== (category ?? 'all') || pay !== 'all' || !!q;
+  const dirty = filter !== 'all' || cat !== (category ?? 'all') || pay !== 'all' || !!q;
   const mo = (s: Subscription) => monthlyMine(state, s, today);
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
@@ -238,7 +238,7 @@ export function List({
             <button
               className="facet-clear"
               onClick={() => {
-                setFilter('live');
+                setFilter('all');
                 setCat(category ?? 'all');
                 setPay('all');
                 setQ('');
