@@ -13,7 +13,9 @@
   },
   "addTitle": "Abo hinzufügen",
   "editTitle": "„{name}“ bearbeiten",
-  "confirmDiscard": "Ungesicherte Änderungen verwerfen?",
+  "clearForm": "Formular leeren",
+  "revert": "Änderungen verwerfen",
+  "draftRestored": "Ungespeicherter Entwurf wiederhergestellt",
   "confirmDelete": "„{name}“ löschen? Der Verlauf wird ebenfalls gelöscht. Wenn du nur nicht mehr verlängerst, markiere es stattdessen als „Gekündigt“.",
   "toast": {
     "added": "Hinzugefügt",

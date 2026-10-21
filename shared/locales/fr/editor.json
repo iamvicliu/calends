@@ -13,7 +13,9 @@
   },
   "addTitle": "Ajouter un abonnement",
   "editTitle": "Modifier « {name} »",
-  "confirmDiscard": "Abandonner les modifications non enregistrées ?",
+  "clearForm": "Vider le formulaire",
+  "revert": "Annuler les modifications",
+  "draftRestored": "Brouillon non enregistré restauré",
   "confirmDelete": "Supprimer « {name} » ? Son historique sera également supprimé. Si vous avez simplement arrêté le renouvellement, marquez-le plutôt comme Résilié.",
   "toast": {
     "added": "Ajouté",

@@ -12,7 +12,9 @@
   },
   "addTitle": "添加订阅",
   "editTitle": "编辑「{name}」",
-  "confirmDiscard": "放弃未保存的修改？",
+  "clearForm": "清空表单",
+  "revert": "撤销修改",
+  "draftRestored": "已恢复上次未保存的内容",
   "confirmDelete": "删除「{name}」？历史记录会一并清除；只是不再续费的话，建议改为「已退订」。",
   "toast": {
     "added": "已添加",

@@ -41,25 +41,74 @@ export function confirmDelete(msg: string): boolean {
   return window.confirm(msg);
 }
 
+/**
+ * 表单草稿：关掉时有改动就存一份，下次打开接着填，不再弹「放弃修改？」。
+ * 新建共用一份，编辑按订阅各存一份；只存在本机。编辑的订阅在别处改过后，旧草稿作废
+ */
+interface Draft {
+  form: Subscription;
+  basePrice: number;
+  /** 打开表单时订阅的样子：和现在不一样说明别处改过，草稿不再适用 */
+  base: string;
+}
+const draftKey = (isNew: boolean, id: string) => `ledger:draft:${isNew ? 'new' : id}`;
+/** 比较表单内容时不看 id：清空后的新表单 id 不同，但内容是空的 */
+const sig = (x: Subscription) => JSON.stringify({ ...x, id: '' });
+function readDraft(key: string, base: string): Draft | undefined {
+  try {
+    const d = JSON.parse(localStorage.getItem(key) ?? 'null') as Draft | null;
+    if (d && d.base === base) return d;
+    localStorage.removeItem(key);
+  } catch {
+    /* 隐私模式或坏数据 */
+  }
+  return undefined;
+}
+function writeDraft(key: string, d: Draft | undefined) {
+  try {
+    if (d) localStorage.setItem(key, JSON.stringify(d));
+    else localStorage.removeItem(key);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function Editor({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
   const isNew = !state.subscriptions.some((s) => s.id === sub.id);
+  const key = draftKey(isNew, sub.id);
   // 有多个阶段时，表单显示今天所在的阶段
-  const [f, setFRaw] = useState<Subscription>(() => toEditForm(structuredClone(sub), today));
+  const [initialForm] = useState(() => toEditForm(structuredClone(sub), today));
+  const [initial] = useState(() => sig(initialForm));
+  // 新建的草稿不看 base（每次新建 id 都不同）；编辑的要求订阅没被别处改过
+  const [draft] = useState(() => readDraft(key, isNew ? 'new' : initial));
+  const [restored, setRestored] = useState(!!draft);
+  const [f, setFRaw] = useState<Subscription>(() => draft?.form ?? initialForm);
   // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
-  const [basePrice, setBasePrice] = useState(f.price);
+  const [basePrice, setBasePrice] = useState(draft?.basePrice ?? initialForm.price);
   const setF = (next: Subscription) => {
     const form = toEditForm(next, today);
     setFRaw(form);
     setBasePrice(form.price);
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
-  // 有未保存的修改时，关闭前确认一下
-  const [initial] = useState(() => JSON.stringify(f));
-  const close = () => (JSON.stringify(f) === initial || confirmDelete(t('editor.confirmDiscard'))) && onClose();
+  const dirty = sig(f) !== initial;
+  // 关闭即存草稿；没改动就清掉
+  const close = () => {
+    writeDraft(key, dirty ? { form: f, basePrice, base: isNew ? 'new' : initial } : undefined);
+    onClose();
+  };
+  /** 新建：清空成一张新表；编辑：回到保存过的样子 */
+  const reset = () => {
+    writeDraft(key, undefined);
+    setRestored(false);
+    const fresh = isNew ? toEditForm(newSub(today, state.settings.defaultMethodId, state.settings.baseCurrency), today) : initialForm;
+    setFRaw(fresh);
+    setBasePrice(fresh.price);
+  };
 
   /** 交给 AI 助手：已经填的名称一并带过去 */
   const toAssistant = (images: string[] = []) => {
-    onClose();
+    close();
     handoff(f.name.trim() ? `${f.name.trim()}\n` : '', images);
   };
 
@@ -89,6 +138,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
               ),
         );
         if (link.after) await savePerson(link.after);
+        writeDraft(key, undefined);
         onClose();
       },
       t(isNew ? 'editor.toast.added' : 'editor.toast.saved'),
@@ -109,6 +159,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
                 run(
                   async () => {
                     await deleteSub(sub.id);
+                    writeDraft(key, undefined);
                     onClose();
                   },
                   // 删了还能撤销：把删掉的订阅原样存回去
@@ -119,6 +170,11 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
               {t('common.delete')}
             </button>
           )}
+          {dirty ? (
+            <button className="btn plain" onClick={reset}>
+              {isNew ? t('editor.clearForm') : t('editor.revert')}
+            </button>
+          ) : null}
           <span className="grow" />
           <button className="btn" onClick={close}>
             {t('common.cancel')}
@@ -129,6 +185,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         </>
       }
     >
+      {restored && dirty && <div className="ed-draft">{t('editor.draftRestored')}</div>}
       {isNew && (
         <button type="button" className="ed-ai" onClick={() => toAssistant()}>
           <MessageSquareText size={18} />

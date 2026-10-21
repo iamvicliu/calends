@@ -12,7 +12,9 @@
   },
   "addTitle": "Tambah langganan",
   "editTitle": "Edit “{name}”",
-  "confirmDiscard": "Buang perubahan yang belum disimpan?",
+  "clearForm": "Kosongkan formulir",
+  "revert": "Batalkan perubahan",
+  "draftRestored": "Draf yang belum disimpan dipulihkan",
   "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, tandai sebagai Dibatalkan saja.",
   "toast": {
     "added": "Ditambahkan",

@@ -13,7 +13,9 @@
   },
   "addTitle": "Añadir suscripción",
   "editTitle": "Editar «{name}»",
-  "confirmDiscard": "¿Descartar los cambios sin guardar?",
+  "clearForm": "Vaciar formulario",
+  "revert": "Deshacer cambios",
+  "draftRestored": "Se restauró el borrador sin guardar",
   "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, márcala como Cancelada.",
   "toast": {
     "added": "Añadida",

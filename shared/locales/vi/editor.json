@@ -12,7 +12,9 @@
   },
   "addTitle": "Thêm gói đăng ký",
   "editTitle": "Sửa “{name}”",
-  "confirmDiscard": "Bỏ các thay đổi chưa lưu?",
+  "clearForm": "Xóa biểu mẫu",
+  "revert": "Hoàn tác thay đổi",
+  "draftRestored": "Đã khôi phục bản nháp chưa lưu",
   "confirmDelete": "Xóa “{name}”? Lịch sử của gói cũng sẽ bị xóa. Nếu bạn chỉ ngừng gia hạn, hãy đánh dấu là Đã hủy.",
   "toast": {
     "added": "Đã thêm",

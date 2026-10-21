@@ -13,7 +13,9 @@
   },
   "addTitle": "Adicionar assinatura",
   "editTitle": "Editar “{name}”",
-  "confirmDiscard": "Descartar alterações não salvas?",
+  "clearForm": "Limpar formulário",
+  "revert": "Desfazer alterações",
+  "draftRestored": "Rascunho não salvo restaurado",
   "confirmDelete": "Apagar “{name}”? O histórico também será apagado. Se você só parou de renovar, marque como Cancelada.",
   "toast": {
     "added": "Adicionada",

@@ -13,7 +13,9 @@
   },
   "addTitle": "Add subscription",
   "editTitle": "Edit “{name}”",
-  "confirmDiscard": "Discard unsaved changes?",
+  "clearForm": "Clear form",
+  "revert": "Revert changes",
+  "draftRestored": "Restored your unsaved draft",
   "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, mark it as Cancelled instead.",
   "toast": {
     "added": "Added",

@@ -13,7 +13,9 @@
   "addTitle": "サブスクを追加",
   "editTitle": "「{name}」を編集",
   "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「解約済み」にしてください。",
-  "confirmDiscard": "保存していない変更を破棄しますか？",
+  "clearForm": "フォームをクリア",
+  "revert": "変更を元に戻す",
+  "draftRestored": "前回の未保存の内容を復元しました",
   "toast": {
     "added": "追加しました",
     "saved": "保存しました",

@@ -8262,3 +8262,13 @@ button.seat:disabled {
 .car-card.stopped .car-facts b.loss {
   color: var(--label-2);
 }
+
+/* 表单顶部：恢复了草稿时的一行提示 */
+.ed-draft {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--fill-2);
+  color: var(--label-2);
+  font-size: 12.5px;
+}
