@@ -142,6 +142,8 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       if (m.exempt) continue;
       const due = m.paidUntil ? addDays(m.paidUntil, 1) : s.share.since;
       if (!due) continue;
+      // 订阅到期不续（或已经结束）时，下一期从结束日起就不存在了，不用再催收
+      if (s.end && due >= s.end) continue;
       const d = diffDays(today, due);
       // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
