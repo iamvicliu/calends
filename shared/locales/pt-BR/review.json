@@ -102,5 +102,6 @@
     "head": "{year} · Constelação de assinaturas {whose}",
     "foot": "Bolha maior, gasto maior"
   },
-  "spendBasis": "Valor total pago, incluindo adiantamentos para membros"
+  "spendBasis": "Valor total pago, incluindo adiantamentos para membros",
+  "stopLoss": "Neste ano, perda de {amount} por desativações / cancelamentos antecipados"
 }

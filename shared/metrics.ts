@@ -1,5 +1,5 @@
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
-// 全部按「固定汇率」（当前汇率）折算到本位币，避免汇率波动掩盖真实的增减决策。
+// MRR 与退订省钱按当前汇率；历史现金、停用损失按发生日汇率。
 import {
   activePhases,
   stopSummary,
@@ -20,7 +20,7 @@ import {
   runwayFor,
   type Charge,
 } from './billing.ts';
-import { chargeValue, toBaseAt } from './fx.ts';
+import { chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
@@ -287,6 +287,72 @@ export function cashVsAccrual(state: AppState, today: string, back: number, fwd:
   return [...rows.values()];
 }
 
+export interface StopLoss {
+  sub: Subscription;
+  /** 展开的历史阶段；phaseIndex 按开始日排序，从 0 起 */
+  phase: Subscription;
+  phaseIndex: number;
+  kind: 'cancel' | 'terminate';
+  date: string;
+  paidThrough: string;
+  reason?: string;
+  currency: string;
+  /** 金额均为我的份额；无 Base 后缀为阶段原币，Base 为停止日汇率折算 */
+  paid: number;
+  paidBase: number;
+  refunded: number;
+  refundedBase: number;
+  loss: number;
+  lossBase: number;
+  /** 缺少可用汇率时保留原币明细，本位币数值为 NaN */
+  fxMissing: boolean;
+  refundStatus: 'none' | 'partial' | 'full';
+  wastedDays: number;
+}
+
+/** 已付未用且未退回的损失；退款截至 today，范围按停止日（含两端）筛选。 */
+export function stopLosses(state: AppState, today: string, range?: { from?: string; to?: string }) {
+  const items: StopLoss[] = [];
+  const byKind = { cancel: 0, terminate: 0 };
+  for (const sub of state.subscriptions) {
+    if (sub.proxy) continue;
+    phaseSubs(sub).forEach((phase, phaseIndex) => {
+      if (!phase.stop || phase.stop.date > today || (range?.from && phase.stop.date < range.from) || (range?.to && phase.stop.date > range.to)) return;
+      const summary = stopSummary(phase, today)!;
+      const factor = myShareFactor(phase, summary.date);
+      const loss = summary.unusedValue * factor;
+      if (loss <= 0) return;
+      const rate = convertOn(1, phase.currency, state.settings.baseCurrency, summary.date, state.fxHistory, state.fx);
+      const lossBase = loss * rate;
+      if (lossBase <= 0.005) return;
+      const paid = summary.paid * factor;
+      const refunded = summary.refunded * factor;
+      items.push({
+        sub,
+        phase,
+        phaseIndex,
+        kind: summary.kind,
+        date: summary.date,
+        paidThrough: summary.paidThrough,
+        reason: summary.kind === 'terminate' ? summary.reason : undefined,
+        currency: phase.currency,
+        paid,
+        paidBase: paid * rate,
+        refunded,
+        refundedBase: refunded * rate,
+        loss,
+        lossBase,
+        fxMissing: !Number.isFinite(lossBase),
+        refundStatus: summary.refundStatus,
+        wastedDays: summary.wastedDays,
+      });
+      byKind[summary.kind] += lossBase;
+    });
+  }
+  items.sort((a, b) => b.date.localeCompare(a.date) || b.lossBase - a.lossBase);
+  return { total: items.reduce((sum, i) => sum + i.lossBase, 0), byKind, items, incomplete: items.some((i) => i.fxMissing) };
+}
+
 /** 预付余值：已经付了钱、但服务期还没用完的部分 */
 export function prepaidValue(
   state: AppState,
@@ -294,22 +360,19 @@ export function prepaidValue(
 ): {
   total: number;
   unusedTotal: number;
+  unusedIncomplete: boolean;
   unusedItems: Array<{ sub: Subscription; value: number; until: string }>;
   items: Array<{ sub: Subscription; value: number; until: string }>;
 } {
   const items: Array<{ sub: Subscription; value: number; until: string }> = [];
-  const unusedItems: typeof items = [];
+  const losses = stopLosses(state, today);
+  const unusedItems = losses.items.map((i) => ({ sub: i.sub, value: i.lossBase, until: i.paidThrough }));
   for (const s of state.subscriptions) {
     // 按阶段各算各的：换区后旧区域预付的时长和新区域的一样都是余值
     let value = 0;
     let until = '';
     for (const p of phaseSubs(s)) {
-      const stopped = stopSummary(p, today);
-      if (stopped && stopped.date <= today) {
-        const unused = toBase(state, stopped.unusedValue, p.currency, stopped.date) * myShareFactor(p, stopped.date);
-        if (unused > 0.005 && !s.proxy) unusedItems.push({ sub: s, value: unused, until: stopped.paidThrough });
-        continue;
-      }
+      if (p.stop && p.stop.date <= today) continue;
       if (p.cycle.unit === 'lifetime' || p.start > today) continue;
       const past = chargesBetween(p, addMonths(today, -12 * Math.max(1, p.cycle.unit === 'year' ? p.cycle.every : 1) - 1), today, today).filter((c) => !c.kind);
       const last = past[past.length - 1];
@@ -323,7 +386,7 @@ export function prepaidValue(
     if (value > 0.01) items.push({ sub: s, value, until });
   }
   items.sort((x, y) => y.value - x.value);
-  return { total: items.reduce((t, i) => t + i.value, 0), items, unusedTotal: unusedItems.reduce((sum, i) => sum + i.value, 0), unusedItems };
+  return { total: items.reduce((t, i) => t + i.value, 0), items, unusedTotal: losses.total, unusedIncomplete: losses.incomplete, unusedItems };
 }
 
 /** 退订省下的钱：如果没退，从退订到今天还要付多少 */
@@ -461,14 +524,14 @@ function ccyLabel(c: string): string {
 
 export function insights(state: AppState, today: string): Insight[] {
   const out: Insight[] = [];
-  const unused = prepaidValue(state, today);
-  if (unused.unusedTotal > 0.005)
+  const unused = stopLosses(state, today);
+  if (unused.items.length)
     out.push({
       id: 'unused',
       tone: 'warn',
       title: t('core.stop.unusedTitle'),
-      body: money(unused.unusedTotal, state.settings.baseCurrency),
-      subs: unused.unusedItems.map((i) => i.sub),
+      body: unused.incomplete ? t('core.stop.fxMissing') : money(unused.total, state.settings.baseCurrency),
+      subs: [...new Map(unused.items.map((i) => [i.sub.id, i.sub])).values()],
     });
   const base = state.settings.baseCurrency;
   // 代付是别人的订阅，不参与体检
@@ -599,6 +662,8 @@ export function insights(state: AppState, today: string): Insight[] {
 
 export interface YearReview {
   year: string;
+  /** 当年停止的阶段截至 today 仍未退回的损失（我的份额、本位币） */
+  stopLoss: number;
   total: number;
   charges: number;
   top: Array<{ sub: Subscription; sum: number }>;
@@ -634,6 +699,7 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
   const busiest = [...byMonth.entries()].sort((a, b) => b[1] - a[1])[0];
   return {
     year,
+    stopLoss: stopLosses(state, today, { from, to }).total,
     total,
     charges: cs.length,
     top: [...bySub.values()].sort((a, b) => b.sum - a.sum).slice(0, 5),

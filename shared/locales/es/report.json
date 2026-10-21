@@ -131,5 +131,16 @@
       "other": "{count} decisiones"
     },
     "more": "Entradas anteriores"
+  },
+  "stops": {
+    "title": "Cancelaciones y bajas",
+    "saved": "Ahorrado",
+    "loss": "Perdido",
+    "savedHint": "Estimación de renovaciones evitadas desde la cancelación hasta hoy",
+    "lossHint": "Pagado, sin usar y sin reembolso",
+    "basis": "Todo el historial · Mi parte; ahorro al cambio actual y pérdidas al cambio del día de la baja.",
+    "details": "Detalle de pérdidas sin reembolso",
+    "empty": "No hay pérdidas por servicios sin usar y sin reembolso.",
+    "cancel": "Cancelación anticipada"
   }
 }

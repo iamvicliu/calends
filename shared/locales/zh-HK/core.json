@@ -1,15 +1,36 @@
 {
-  "bill": { "m1": "按月", "m3": "按季", "m6": "按半年", "m12": "按年", "custom": "按 {count} 個月" },
+  "bill": {
+    "m1": "按月",
+    "m3": "按季",
+    "m6": "按半年",
+    "m12": "按年",
+    "custom": "按 {count} 個月"
+  },
   "cycle": {
     "lifetime": "買斷",
     "once": "一次",
-    "every": { "day": "每天", "week": "每週", "month": "每月", "year": "每年" },
+    "every": {
+      "day": "每天",
+      "week": "每週",
+      "month": "每月",
+      "year": "每年"
+    },
     "quarterly": "每季",
     "halfYearly": "每半年",
     "biennial": "每兩年",
-    "everyN": { "day": "每 {count} 天", "week": "每 {count} 週", "month": "每 {count} 個月", "year": "每 {count} 年" }
+    "everyN": {
+      "day": "每 {count} 天",
+      "week": "每 {count} 週",
+      "month": "每 {count} 個月",
+      "year": "每 {count} 年"
+    }
   },
-  "subError": { "name": "名稱不能為空", "price": "價格無效", "start": "開始日期無效", "cycle": "週期無效" },
+  "subError": {
+    "name": "名稱不能為空",
+    "price": "價格無效",
+    "start": "開始日期無效",
+    "cycle": "週期無效"
+  },
   "phase": {
     "switchTooEarly": "生效日期要晚於目前階段的開始日期",
     "resumeTooEarly": "續訂日期不能早於上次結束的日期",
@@ -22,18 +43,47 @@
   "event": {
     "label": "{region}{price}/{per}",
     "region": "{region} ",
-    "per": { "year": "年", "month": "月", "months": "{count}月", "week": "週", "day": "天" }
+    "per": {
+      "year": "年",
+      "month": "月",
+      "months": "{count}月",
+      "week": "週",
+      "day": "天"
+    }
   },
   "listSep": "、",
   "insight": {
-    "yearly": { "title": "{count} 個長週期訂閱 60 天內續訂", "body": "合計約 {sum}。年繳一旦扣款就很難退款，現在正是決定去留的時候。" },
-    "dup": { "title": "{names} 可能重複", "body": "這 {count} 個訂閱每月合計約 {sum}，確認是否都還需要。" },
-    "hikes": { "title": "{count} 個訂閱過去一年漲了價" },
-    "intro": { "title": "{name} 的優惠 {count} 天後結束", "body": "之後從 {from} 恢復到 {to}。" },
-    "balance": { "title": "{name} 餘額撐不到 {date}", "body": "{sub} 需要 {need}，目前約 {current}。" },
-    "fx": { "title": "{pct}% 的支出以外幣計價", "body": "最大宗是{ccy}（{share}%）。{ccy}貶值時這部分會變便宜，反之則變貴。" },
-    "noMethod": { "title": "{count} 個訂閱沒有指定付款方式", "body": "補上之後，餘額推算與依付款方式的統計才會完整。" },
-    "top": { "title": "{name} 是最貴的訂閱", "body": "每天約 {perDay}，佔月支出 {pct}%。" }
+    "yearly": {
+      "title": "{count} 個長週期訂閱 60 天內續訂",
+      "body": "合計約 {sum}。年繳一旦扣款就很難退款，現在正是決定去留的時候。"
+    },
+    "dup": {
+      "title": "{names} 可能重複",
+      "body": "這 {count} 個訂閱每月合計約 {sum}，確認是否都還需要。"
+    },
+    "hikes": {
+      "title": "{count} 個訂閱過去一年漲了價"
+    },
+    "intro": {
+      "title": "{name} 的優惠 {count} 天後結束",
+      "body": "之後從 {from} 恢復到 {to}。"
+    },
+    "balance": {
+      "title": "{name} 餘額撐不到 {date}",
+      "body": "{sub} 需要 {need}，目前約 {current}。"
+    },
+    "fx": {
+      "title": "{pct}% 的支出以外幣計價",
+      "body": "最大宗是{ccy}（{share}%）。{ccy}貶值時這部分會變便宜，反之則變貴。"
+    },
+    "noMethod": {
+      "title": "{count} 個訂閱沒有指定付款方式",
+      "body": "補上之後，餘額推算與依付款方式的統計才會完整。"
+    },
+    "top": {
+      "title": "{name} 是最貴的訂閱",
+      "body": "每天約 {perDay}，佔月支出 {pct}%。"
+    }
   },
   "methodKind": {
     "debit": "扣帳卡",
@@ -50,8 +100,13 @@
     "other": "其他"
   },
   "publicMethod": "{kind} · {region}",
-  "channel": { "email": "電郵" },
-  "csv": { "appStoreBalance": "App Store {region} 餘額", "otherCategory": "其他" },
+  "channel": {
+    "email": "電郵"
+  },
+  "csv": {
+    "appStoreBalance": "App Store {region} 餘額",
+    "otherCategory": "其他"
+  },
   "category": {
     "ai": "AI",
     "tools": "工具",
@@ -93,6 +148,7 @@
     "unused": "已付未用 {days} 天，約 {money}",
     "unusedTitle": "已付未用",
     "terminated": "已停用",
-    "restore": "恢復訂閱"
+    "restore": "恢復訂閱",
+    "fxMissing": "部分損失缺少匯率，暫時無法合計為本位幣；原幣金額保留在明細中。"
   }
 }

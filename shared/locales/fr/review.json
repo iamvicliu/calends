@@ -102,5 +102,6 @@
     "head": "{year} · Constellation d’abonnements {whose}",
     "foot": "Plus la bulle est grosse, plus la dépense est élevée"
   },
-  "spendBasis": "Montant total payé, avances pour les membres comprises"
+  "spendBasis": "Montant total payé, avances pour les membres comprises",
+  "stopLoss": "Cette année, {amount} perdus à la suite de suspensions / résiliations anticipées"
 }

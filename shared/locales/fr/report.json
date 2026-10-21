@@ -131,5 +131,16 @@
       "other": "{count} décisions"
     },
     "more": "Entrées plus anciennes"
+  },
+  "stops": {
+    "title": "Résiliations et suspensions",
+    "saved": "Économisé",
+    "loss": "Perdu",
+    "savedHint": "Renouvellements évités estimés depuis la résiliation, jusqu’à aujourd’hui",
+    "lossHint": "Payé, inutilisé et non remboursé",
+    "basis": "Tout l’historique · Ma part ; économies au taux actuel, pertes au taux du jour de l’arrêt.",
+    "details": "Détail des pertes non remboursées",
+    "empty": "Aucune perte liée à un service inutilisé non remboursé.",
+    "cancel": "Résiliation anticipée"
   }
 }

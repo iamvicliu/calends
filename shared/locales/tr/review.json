@@ -102,5 +102,6 @@
     "head": "{year} · {whose} · abonelik yıldızları",
     "foot": "Balon büyüdükçe harcama büyür"
   },
-  "spendBasis": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar"
+  "spendBasis": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar",
+  "stopLoss": "Bu yıl sonlandırma / erken iptal nedeniyle {amount} kayıp"
 }

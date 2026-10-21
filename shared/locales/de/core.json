@@ -178,6 +178,7 @@
     "unused": "{days} bezahlte, ungenutzte Tage, etwa {money}",
     "unusedTitle": "Bezahlt, ungenutzt",
     "terminated": "Gesperrt",
-    "restore": "Reaktivieren"
+    "restore": "Reaktivieren",
+    "fxMissing": "Einige Verluste können wegen fehlender Wechselkurse nicht umgerechnet werden. Die Originalbeträge bleiben in den Details erhalten."
   }
 }

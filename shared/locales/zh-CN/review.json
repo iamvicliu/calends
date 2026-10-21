@@ -78,5 +78,6 @@
     "head": "{year} · {whose}的订阅星图",
     "foot": "圆越大，这一年花得越多"
   },
-  "spendBasis": "全额实付，含替成员垫付"
+  "spendBasis": "全额实付，含替成员垫付",
+  "stopLoss": "这一年因停用 / 提前退订损失 {amount}"
 }

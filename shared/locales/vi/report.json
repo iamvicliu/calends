@@ -128,5 +128,16 @@
       "other": "{count} quyết định"
     },
     "more": "Mục cũ hơn"
+  },
+  "stops": {
+    "title": "Hủy và ngừng dịch vụ",
+    "saved": "Tiết kiệm",
+    "loss": "Tổn thất",
+    "savedHint": "Ước tính phí gia hạn tránh được từ khi hủy đến hôm nay",
+    "lossHint": "Đã trả, chưa dùng và chưa được hoàn",
+    "basis": "Toàn bộ lịch sử · Phần của tôi; tiết kiệm theo tỷ giá hiện tại, tổn thất theo tỷ giá ngày ngừng.",
+    "details": "Chi tiết tổn thất chưa được hoàn",
+    "empty": "Không có tổn thất do dịch vụ chưa dùng và chưa được hoàn tiền.",
+    "cancel": "Hủy sớm"
   }
 }

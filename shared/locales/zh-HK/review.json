@@ -78,5 +78,6 @@
     "head": "{year} · {whose}的訂閱星圖",
     "foot": "圓越大，這一年花得越多"
   },
-  "spendBasis": "全額實付，含替成員墊付"
+  "spendBasis": "全額實付，含替成員墊付",
+  "stopLoss": "這一年因停用 / 提前退訂損失 {amount}"
 }
