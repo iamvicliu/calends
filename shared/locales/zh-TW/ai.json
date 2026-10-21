@@ -52,7 +52,7 @@
     "terminal": "在終端機中執行。",
     "codex": "在終端機中執行。把 export 那一行加到 shell 設定檔裡，重新啟動後權杖仍然有效。",
     "file": "新增到 {path}。",
-    "grok": "用 xAI API 呼叫 Grok 時，把 Calends 作為遠端 MCP 工具傳入。xAI 的伺服器會直接連線，位址需要公開網路可存取。",
+    "grokbot": "在 Grok Bot 開啟 設定 → Plugins，新增 MCP 伺服器，依下方填寫名稱、位址和請求標頭。Grok Bot 在雲端執行，位址需要公開網路可存取。",
     "http": "任何支援 Streamable HTTP 的 MCP 用戶端都可以。下方是一則測試請求。"
   },
   "step": {

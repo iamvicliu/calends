@@ -52,7 +52,7 @@
     "terminal": "Chạy lệnh này trong terminal.",
     "codex": "Chạy lệnh này trong terminal. Thêm dòng export vào tệp cấu hình shell để token vẫn còn sau khi khởi động lại.",
     "file": "Thêm đoạn này vào {path}.",
-    "grok": "Truyền Calends làm công cụ MCP từ xa khi gọi Grok qua API xAI. Máy chủ xAI kết nối trực tiếp nên địa chỉ phải truy cập công khai được.",
+    "grokbot": "Trong Grok Bot, mở Cài đặt → Plugins, thêm máy chủ MCP rồi điền tên, URL và header bên dưới. Grok Bot chạy trên đám mây nên địa chỉ phải truy cập công khai được.",
     "http": "Mọi MCP client hỗ trợ Streamable HTTP. Đây là một yêu cầu thử nhanh."
   },
   "step": {

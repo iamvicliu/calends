@@ -54,7 +54,7 @@
     "terminal": "Run this in your terminal.",
     "codex": "Run this in your terminal. Add the export line to your shell profile so the token survives restarts.",
     "file": "Add this to {path}.",
-    "grok": "Pass Calends as a remote MCP tool when calling Grok through the xAI API. xAI’s servers connect directly, so the address must be publicly reachable.",
+    "grokbot": "In Grok Bot, open Settings → Plugins, add an MCP server and fill in the name, URL and header below. Grok Bot runs in the cloud, so the address must be publicly reachable.",
     "http": "Any MCP client that speaks Streamable HTTP. This is a quick test request."
   },
   "step": {

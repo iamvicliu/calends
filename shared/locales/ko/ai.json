@@ -52,7 +52,7 @@
     "terminal": "터미널에서 실행하세요.",
     "codex": "터미널에서 실행하세요. 재시작 후에도 토큰이 유지되도록 export 줄을 셸 프로필에 추가하세요.",
     "file": "{path}에 추가하세요.",
-    "grok": "xAI API로 Grok을 호출할 때 Calends를 원격 MCP 도구로 전달하세요. xAI 서버가 직접 연결하므로 공개 주소여야 합니다.",
+    "grokbot": "Grok Bot의 설정 → Plugins에서 MCP 서버를 추가하고 아래 이름, URL, 헤더를 입력하세요. Grok Bot은 클라우드에서 실행되므로 공개 주소여야 합니다.",
     "http": "Streamable HTTP를 지원하는 모든 MCP 클라이언트에서 사용할 수 있습니다. 아래는 간단한 테스트 요청입니다."
   },
   "step": {

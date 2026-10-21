@@ -54,7 +54,7 @@
     "terminal": "Execute isto no seu terminal.",
     "codex": "Execute isto no seu terminal. Adicione a linha export ao perfil do seu shell para o token continuar valendo após reiniciar.",
     "file": "Adicione isto a {path}.",
-    "grok": "Passe o Calends como ferramenta MCP remota ao chamar o Grok pela API da xAI. Os servidores da xAI se conectam diretamente, então o endereço precisa ser público.",
+    "grokbot": "No Grok Bot, abra Ajustes → Plugins, adicione um servidor MCP e preencha nome, URL e cabeçalho abaixo. O Grok Bot roda na nuvem, então o endereço precisa ser público.",
     "http": "Qualquer cliente MCP compatível com Streamable HTTP. Esta é uma requisição de teste rápida."
   },
   "step": {

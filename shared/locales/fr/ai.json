@@ -54,7 +54,7 @@
     "terminal": "Exécutez ceci dans votre terminal.",
     "codex": "Exécutez ceci dans votre terminal. Ajoutez la ligne export à votre profil shell pour que le jeton persiste après un redémarrage.",
     "file": "Ajoutez ceci à {path}.",
-    "grok": "Passez Calends comme outil MCP distant lors d’un appel à Grok via l’API xAI. Les serveurs de xAI s’y connectent directement : l’adresse doit être publique.",
+    "grokbot": "Dans Grok Bot, ouvrez Réglages → Plugins, ajoutez un serveur MCP et renseignez le nom, l’URL et l’en-tête ci-dessous. Grok Bot tourne dans le cloud : l’adresse doit être publique.",
     "http": "Tout client MCP compatible Streamable HTTP. Voici une requête de test rapide."
   },
   "step": {

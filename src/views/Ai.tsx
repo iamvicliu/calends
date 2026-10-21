@@ -83,13 +83,12 @@ const CLIENTS: Client[] = [
     snippet: (url, tk) => `gemini mcp add --transport http calends ${url} \\\n  --header "Authorization: Bearer ${tk}"`,
   },
   {
-    id: 'grok',
-    name: 'Grok',
-    logo: '/ai/grok.svg',
-    lang: 'shell',
-    where: () => t('ai.where.grok'),
-    snippet: (url, tk) =>
-      `curl https://api.x.ai/v1/responses \\\n  -H "Authorization: Bearer $XAI_API_KEY" -H "Content-Type: application/json" \\\n  -d '${JSON.stringify({ model: 'grok-4.7', input: 'What renews next week?', tools: [{ type: 'mcp', server_url: url, server_label: 'calends', headers: { Authorization: `Bearer ${tk}` } }] })}'`,
+    id: 'grokbot',
+    name: 'Grok Bot',
+    logo: '/ai/grokbot.png',
+    lang: 'yaml',
+    where: () => t('ai.where.grokbot'),
+    snippet: (url, tk) => `name: calends\nurl: ${url}\nheaders:\n  Authorization: Bearer ${tk}`,
   },
   {
     id: 'deepseek',
