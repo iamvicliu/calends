@@ -15,6 +15,7 @@
     "settings": "Ajustes"
   },
   "login": {
+    "username": "Conta",
     "setupHint": "Primeira vez aqui? Defina uma senha para entrar.",
     "tagline": "Todas as assinaturas, todos os cartões, todos os planos compartilhados.",
     "setupToken": "Token de configuração (SETUP_TOKEN)",

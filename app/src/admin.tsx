@@ -1,3 +1,4 @@
+import { isPasskeyCancellation } from './passkey-autofill.ts';
 import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
@@ -5,7 +6,7 @@ import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/bil
 import { cnDate, money } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
-import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, usePref, useStore } from './store.ts';
+import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
 import { CurrencyPicker } from './components/CurrencyPicker.tsx';
@@ -76,17 +77,19 @@ function Login({ error }: { error?: string }) {
   const [token, setToken] = useState('');
   const [err, setErr] = useState(error);
   const [busy, setBusy] = useState(false);
+  const autofill = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
     authStatus().then(setStatus, () => setStatus({ needsSetup: false, passkeys: 0 }));
   }, []);
   const go = async (fn: () => Promise<void>) => {
+    autofill.current?.();
     setBusy(true);
     setErr(undefined);
     try {
       await fn();
     } catch (x) {
       // 用户在系统弹窗里取消 Passkey 不算错误
-      if (!(x instanceof Error && x.name === 'NotAllowedError')) setErr(x instanceof Error ? x.message : String(x));
+      if (!isPasskeyCancellation(x)) setErr(x instanceof Error ? x.message : String(x));
     } finally {
       setBusy(false);
     }
@@ -98,16 +101,34 @@ function Login({ error }: { error?: string }) {
     void go(() => (setupMode ? setupPassword(token.trim(), pw) : login(pw)));
   };
   const canPasskey = !setupMode && !!status?.passkeys && typeof window.PublicKeyCredential === 'function';
+  useEffect(() => {
+    if (!canPasskey || busy) return;
+    const stop = startPasskeyAutofill();
+    autofill.current = stop;
+    return stop;
+  }, [canPasskey, busy]);
   return (
     <div className="login">
       <form className="login-card fade-in" onSubmit={submit}>
         <img src={base('/icons/icon-192.png')} alt="" />
         <h1>{t('app.name')}</h1>
         <p>{setupMode ? t('app.login.setupHint') : t('app.login.tagline')}</p>
+        <label className="login-account" htmlFor="login-username">
+          <span>{t('app.login.username')}</span>
+          <input
+            id="login-username"
+            name="username"
+            type="text"
+            autoComplete={setupMode ? 'username' : 'username webauthn'}
+            value={`owner@${location.hostname}`}
+            readOnly
+          />
+        </label>
         {setupMode && (
           <input
             type="password"
             autoComplete="off"
+            aria-label={t('app.login.setupToken')}
             placeholder={t('app.login.setupToken')}
             value={token}
             onChange={(e) => setToken((e.target as HTMLInputElement).value)}
@@ -116,7 +137,9 @@ function Login({ error }: { error?: string }) {
         <input
           type="password"
           autoFocus
-          autoComplete={setupMode ? 'new-password' : 'current-password'}
+          name="password"
+          aria-label={setupMode ? t('app.login.newPassword') : t('app.login.password')}
+          autoComplete={setupMode ? 'new-password' : 'current-password webauthn'}
           placeholder={setupMode ? t('app.login.newPassword') : t('app.login.password')}
           value={pw}
           onChange={(e) => setPw((e.target as HTMLInputElement).value)}
@@ -125,6 +148,7 @@ function Login({ error }: { error?: string }) {
           <input
             type="password"
             autoComplete="new-password"
+            aria-label={t('app.login.again')}
             placeholder={t('app.login.again')}
             value={pw2}
             onChange={(e) => setPw2((e.target as HTMLInputElement).value)}
@@ -139,7 +163,7 @@ function Login({ error }: { error?: string }) {
           {busy ? t('app.login.verifying') : setupMode ? t('app.login.setupEnter') : t('app.login.enter')}
         </button>
         {canPasskey && (
-          <button type="button" className="btn lg" disabled={busy} onClick={() => go(loginPasskey)}>
+          <button type="button" className="btn lg" disabled={busy} onClick={() => go(() => loginPasskey())}>
             <Icon name="key" /> {t('app.login.passkey')}
           </button>
         )}

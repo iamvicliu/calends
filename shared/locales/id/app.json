@@ -15,6 +15,7 @@
     "settings": "Pengaturan"
   },
   "login": {
+    "username": "Akun",
     "setupHint": "Pertama kali di sini? Atur kata sandi untuk masuk.",
     "tagline": "Semua langganan, semua kartu, semua paket bersama.",
     "setupToken": "Token penyiapan (SETUP_TOKEN)",

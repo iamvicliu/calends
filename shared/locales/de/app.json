@@ -15,6 +15,7 @@
     "settings": "Einstellungen"
   },
   "login": {
+    "username": "Konto",
     "setupHint": "Zum ersten Mal hier? Lege ein Passwort zum Anmelden fest.",
     "tagline": "Jedes Abo, jede Karte, jedes geteilte Abo.",
     "setupToken": "Einrichtungstoken (SETUP_TOKEN)",

@@ -84,7 +84,7 @@ Backup versioning and compatibility live in `worker/backup.ts`. Exports include 
 
 ## Authentication, public data and AI
 
-`worker/auth.ts` owns password setup, salted password hashes, passkey challenges, session cookies and device revocation. `SETUP_TOKEN` protects the first owner-password setup. Authenticated browser APIs use sessions; an ICS URL contains its own private feed token.
+`worker/auth.ts` owns password setup, salted password hashes, passkey challenges, session cookies and device revocation. `SETUP_TOKEN` protects the first owner-password setup. Login offers cancellable WebAuthn conditional autofill alongside password and explicit passkey login, using independent five-minute challenges; expired autofill challenges are retried silently. New passkeys use `owner@<hostname>` as the form account identifier and a display name combining the configured name (or Calends) with the hostname; existing credentials remain valid. Authenticated browser APIs use sessions; an ICS URL contains its own private feed token.
 
 `worker/ai/mcp.ts` provides stateless Streamable HTTP at `/mcp`, using JSON-RPC responses rather than a persistent server-push stream. Only token hashes are stored. Read tokens cannot call write tools; the AI-access setting can disable the endpoint.
 

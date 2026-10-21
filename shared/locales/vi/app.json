@@ -15,6 +15,7 @@
     "settings": "Cài đặt"
   },
   "login": {
+    "username": "Tài khoản",
     "setupHint": "Lần đầu đến đây? Hãy đặt mật khẩu để đăng nhập.",
     "tagline": "Mọi gói đăng ký, mọi thẻ, mọi gói chia sẻ.",
     "setupToken": "Token thiết lập (SETUP_TOKEN)",

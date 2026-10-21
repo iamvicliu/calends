@@ -15,6 +15,7 @@
     "settings": "設定"
   },
   "login": {
+    "username": "アカウント",
     "setupHint": "初めての方は、ログイン用のパスワードを設定してください。",
     "tagline": "サブスクも、カードも、共有プランも、ひとつに。",
     "setupToken": "セットアップトークン（SETUP_TOKEN）",

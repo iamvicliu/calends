@@ -15,6 +15,7 @@
     "settings": "Ayarlar"
   },
   "login": {
+    "username": "Hesap",
     "setupHint": "İlk kez mi buradasınız? Giriş için bir parola belirleyin.",
     "tagline": "Tüm abonelikler, tüm kartlar, tüm ortak planlar.",
     "setupToken": "Kurulum token'ı (SETUP_TOKEN)",

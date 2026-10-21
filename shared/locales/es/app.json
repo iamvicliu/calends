@@ -15,6 +15,7 @@
     "settings": "Ajustes"
   },
   "login": {
+    "username": "Cuenta",
     "setupHint": "¿Primera vez aquí? Crea una contraseña para iniciar sesión.",
     "tagline": "Cada suscripción, cada tarjeta, cada plan compartido.",
     "setupToken": "Token de configuración (SETUP_TOKEN)",

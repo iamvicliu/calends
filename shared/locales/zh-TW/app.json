@@ -15,6 +15,7 @@
     "settings": "設定"
   },
   "login": {
+    "username": "帳號",
     "setupHint": "首次使用，請設定登入密碼。",
     "tagline": "每一筆訂閱、每一張卡、每一個共享方案。",
     "setupToken": "初始化權杖（SETUP_TOKEN）",
