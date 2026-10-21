@@ -1,0 +1,140 @@
+.scope-report {
+  width: 100%;
+  min-width: 0;
+}
+.scope-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.scope-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.scope-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.scope-block {
+  min-width: 0;
+}
+.scope-report .mv-row {
+  grid-template-columns: minmax(0, 140px) minmax(24px, 1fr) auto;
+}
+.scope-headline,
+.scope-trend {
+  grid-column: 1 / -1;
+}
+.scope-note {
+  margin: 8px 0 12px;
+  color: var(--label-2);
+  font-size: 12px;
+}
+.scope-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--sep);
+  font-size: 13px;
+}
+.scope-row:last-child {
+  border-bottom: 0;
+}
+.scope-row > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.scope-row > :last-child:not(:first-child) {
+  text-align: end;
+}
+.scope-row small {
+  display: block;
+  margin-top: 3px;
+  color: var(--label-2);
+  font-size: 12px;
+}
+.scope-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: inherit;
+  text-align: start;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.scope-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.scope-composition h4 {
+  margin: 16px 0 4px;
+  color: var(--label-2);
+  font-size: 12px;
+  font-weight: 500;
+}
+.scope-share {
+  padding-bottom: 10px;
+}
+.scope-share .scope-row {
+  border: 0;
+}
+.scope-report .scope-facts {
+  margin-top: 0;
+  padding-top: 0;
+  border: 0;
+}
+.scope-comparison {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.scope-chart-data {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--label-2);
+}
+.scope-chart-data summary {
+  cursor: pointer;
+}
+.scope-chevron {
+  display: flex;
+}
+.scope-chevron.open {
+  transform: rotate(180deg);
+}
+.scope-animate .scope-block {
+  animation: scope-assemble 180ms ease-out both;
+}
+@keyframes scope-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 680px) {
+  .scope-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .scope-report .mv-row {
+    grid-template-columns: minmax(0, 1fr) minmax(24px, 1fr) auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scope-animate .scope-block {
+    animation: none;
+  }
+}

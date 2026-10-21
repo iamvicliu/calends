@@ -87,10 +87,13 @@ export function BarLine({
   tip: (i: number) => ComponentChildren;
 }) {
   const max = Math.max(1, ...bars, ...line) * 1.08;
+  const min = Math.min(0, ...bars, ...line) * 1.08;
+  const span = max - min;
+  const y = (v: number) => ((max - v) / span) * height;
   const n = bars.length;
   const W = 1000;
   const cx = (i: number) => ((i + 0.5) / n) * W;
-  const path = line.map((v, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${(height - (v / max) * height).toFixed(1)}`).join('');
+  const path = line.map((v, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
   // 每个月份标签约占 44px，按实际宽度决定隔几根柱子标一次，窄屏不挤
   const [box, w] = useWidth();
   const step = Math.max(1, Math.ceil(n / Math.min(12, Math.max(2, Math.floor(w / 44) || 12))));
@@ -98,12 +101,13 @@ export function BarLine({
     <div className="barline" ref={box} style={{ height: height + 22 }}>
       <div className="bl-bars" style={{ height }}>
         {bars.map((v, i) => (
-          <div key={i} className={`bl-col ${future[i] ? 'future' : ''}`} {...tipProps(() => tip(i))}>
-            <i style={{ height: `${(v / max) * 100}%` }} />
+          <div key={i} className={`bl-col ${future[i] ? 'future' : ''}`} style={{ position: 'relative' }} {...tipProps(() => tip(i))}>
+            <i style={{ position: 'absolute', top: y(Math.max(0, v)), height: `${(Math.abs(v) / span) * 100}%` }} />
           </div>
         ))}
       </div>
       <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }} className="bl-line">
+        {min < 0 && <line x1="0" x2={W} y1={y(0)} y2={y(0)} stroke="var(--sep)" vectorEffect="non-scaling-stroke" />}
         <path d={path} fill="none" stroke="var(--orange)" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <div className="area-x">

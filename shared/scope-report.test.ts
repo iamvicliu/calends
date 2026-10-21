@@ -1,0 +1,313 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { FALLBACK_FX, memberDues } from './billing.ts';
+import { chargeValue } from './fx.ts';
+import { cashVsAccrual, contributionOn, movement, mrrOn, stopLosses } from './metrics.ts';
+import { monthReport, scopeReport, type Block, type ScopeReport } from './scope-report.ts';
+import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
+
+const today = '2026-10-22';
+const sub = (id: string, extra: Partial<Subscription> = {}): Subscription => ({
+  id,
+  name: id,
+  category: 'Tools',
+  tags: [],
+  price: 10,
+  currency: 'USD',
+  cycle: { unit: 'month', every: 1 },
+  start: '2025-01-01',
+  status: 'active',
+  ...extra,
+});
+const state = (subscriptions: Subscription[], extra: Partial<AppState> = {}): AppState => ({
+  subscriptions,
+  methods: [],
+  settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' },
+  fx: FALLBACK_FX,
+  ...extra,
+});
+const get = <T extends Block['type']>(report: ScopeReport, type: T) => report.blocks.find((b): b is Extract<Block, { type: T }> => b.type === type);
+const stopped = (extra: Partial<Subscription> = {}) =>
+  sub('Stopped', {
+    price: 120,
+    cycle: { unit: 'year', every: 1 },
+    start: '2026-01-01',
+    status: 'terminated',
+    end: '2026-10-10',
+    stop: { kind: 'terminate', date: '2026-10-10', paidThrough: '2026-12-31' },
+    payments: [{ date: '2026-01-01', amount: 120 }],
+    ...extra,
+  });
+const owner = () =>
+  sub('Owner', {
+    share: {
+      role: 'owner',
+      seats: 3,
+      members: [
+        {
+          id: 'm',
+          name: 'Member',
+          share: 4,
+          fee: 4,
+          feeCurrency: 'USD',
+          joined: '2026-01-01',
+          billEvery: 1,
+          payments: [
+            { date: '2026-09-01', amount: 4, currency: 'USD', until: '2026-09-30' },
+            { date: '2026-10-03', amount: 4, currency: 'USD', until: '2026-10-31' },
+          ],
+        },
+      ],
+    },
+  });
+
+test('empty reports contain only the mandatory headline', () => {
+  assert.deepEqual(
+    scopeReport(state([]), [], today).blocks.map((b) => b.type),
+    ['headline'],
+  );
+  assert.deepEqual(
+    monthReport(state([]), '2026-10', today).blocks.map((b) => b.type),
+    ['headline'],
+  );
+});
+
+test('reports are deterministic, keep fixed block order and do not mutate frozen input', () => {
+  const st = state([sub('A', { methodId: 'a', category: 'AI', start: '2026-10-01' }), sub('B', { methodId: 'b', start: '2025-01-25' }), stopped(), owner()]);
+  const freeze = (v: unknown) => {
+    if (v && typeof v === 'object') {
+      Object.freeze(v);
+      Object.values(v).forEach(freeze);
+    }
+  };
+  freeze(st);
+  const order = ['headline', 'trend', 'composition', 'top', 'upcoming', 'events', 'losses', 'sharing'];
+  for (const generate of [() => scopeReport(st, st.subscriptions, today), () => monthReport(st, '2026-10', today)]) {
+    const a = generate();
+    assert.deepEqual(a, generate());
+    assert.deepEqual(
+      a.blocks.map((b) => b.type),
+      order,
+    );
+  }
+});
+
+test('losses appear only for a loss or refund and match stopLosses', () => {
+  const plain = state([sub('A')]);
+  assert.equal(get(scopeReport(plain, plain.subscriptions, today), 'losses'), undefined);
+  const st = state([stopped()]);
+  for (const r of [scopeReport(st, st.subscriptions, today), monthReport(st, '2026-10', today)]) {
+    const loss = get(r, 'losses')!;
+    assert.equal(loss.loss, stopLosses(st, today).total);
+    assert.ok(loss.loss > 0);
+    assert.equal(loss.refunds.length, 0);
+  }
+});
+
+test('fully refunded stops and ordinary refunds still produce a refunds block', () => {
+  const st = state([
+    stopped({
+      payments: [
+        { date: '2026-01-01', amount: 120 },
+        { date: '2026-10-11', amount: -120, kind: 'refund' },
+      ],
+    }),
+  ]);
+  assert.equal(stopLosses(st, today).items.length, 0);
+  const loss = get(monthReport(st, '2026-10', today), 'losses')!;
+  assert.equal(loss.loss, 0);
+  assert.equal(loss.refunded, 120);
+  assert.equal(loss.rows.length, 0);
+});
+
+test('monthly losses use stop dates; refunds use payment dates, including later refunds', () => {
+  const s = stopped({
+    end: '2026-09-10',
+    stop: { kind: 'terminate', date: '2026-09-10', paidThrough: '2026-12-31' },
+    payments: [
+      { date: '2026-01-01', amount: 120 },
+      { date: '2026-10-11', amount: -10, kind: 'refund' },
+    ],
+  });
+  const st = state([s]);
+  const oct = get(monthReport(st, '2026-10', today), 'losses')!;
+  assert.equal(oct.loss, 0);
+  assert.equal(oct.refunded, 10);
+  const sep = get(monthReport(st, '2026-09', today), 'losses')!;
+  assert.equal(sep.loss, stopLosses(st, today, { from: '2026-09-01', to: '2026-09-30' }).total);
+  assert.equal(sep.refunds.length, 0);
+});
+
+test('scope MRR matches the subset; one category and one method are omitted', () => {
+  const a = sub('A');
+  const st = state([a, sub('Outside', { price: 100 })]);
+  const r = scopeReport(st, [a], today);
+  const h = get(r, 'headline')!;
+  assert.equal(h.mode, 'scope');
+  if (h.mode !== 'scope') return;
+  assert.equal(h.mrr, mrrOn({ ...st, subscriptions: [a] }, today));
+  assert.equal(h.annual, h.mrr * 12);
+  assert.equal(h.activeCount, 1);
+  assert.equal(get(r, 'composition'), undefined);
+  assert.equal(get(r, 'top')!.rows.length, 1);
+});
+
+test('scope composition uses active historical phases for payment methods', () => {
+  const s = sub('Parallel', {
+    phases: [
+      { start: '2026-01-01', end: '2026-12-31', price: 10, currency: 'USD', cycle: { unit: 'month', every: 1 }, methodId: 'old' },
+      { start: '2026-10-01', price: 20, currency: 'USD', cycle: { unit: 'month', every: 1 }, methodId: 'new' },
+    ],
+  });
+  const st = state([s]);
+  const c = get(scopeReport(st, [s], today), 'composition')!;
+  assert.deepEqual(c.categories, []);
+  assert.deepEqual(
+    c.methods.map((r) => [r.key, r.amount]),
+    [
+      ['new', 20],
+      ['old', 10],
+    ],
+  );
+  assert.equal(
+    c.methods.reduce((a, r) => a + r.amount, 0),
+    contributionOn(st, s, today),
+  );
+});
+
+test('month comparisons use full-month net cash, today is charged, failed payments are excluded', () => {
+  const s = sub('Cash', {
+    cycle: { unit: 'lifetime', every: 1 },
+    payments: [
+      { date: '2025-10-01', amount: 40 },
+      { date: '2026-09-01', amount: 50 },
+      { date: today, amount: 100 },
+      { date: '2026-10-25', amount: 20 },
+      { date: '2026-10-03', amount: -10, kind: 'refund' },
+      { date: '2026-10-02', amount: 999, kind: 'failed' },
+    ],
+  });
+  const h = get(monthReport(state([s]), '2026-10', today), 'headline')!;
+  assert.equal(h.mode, 'month');
+  if (h.mode !== 'month') return;
+  assert.equal(h.total, 110);
+  assert.equal(h.paid, 90);
+  assert.equal(h.pending, 20);
+  assert.equal(h.total, h.paid + h.pending);
+  assert.equal(h.count, 2);
+  assert.deepEqual(h.previous, { amount: 60, percent: 1.2 });
+  assert.deepEqual(h.yearly, { amount: 70, percent: 1.75 });
+});
+
+test('no year comparison without prior-year charges, zero denominator has no percentage', () => {
+  const st = state([sub('New', { start: '2026-10-01' })]);
+  const h = get(monthReport(st, '2026-10', today), 'headline')!;
+  if (h.mode !== 'month') assert.fail('month headline');
+  assert.equal(h.yearly, undefined);
+  assert.deepEqual(h.previous, { amount: 10, percent: undefined });
+});
+
+test('cash uses settlement FX and my share, matching cashVsAccrual', () => {
+  const s = owner();
+  s.currency = 'EUR';
+  s.payments = [{ date: '2026-10-01', amount: 10, settled: { amount: 14, currency: 'USD' } }];
+  const st = state([s]);
+  const r = monthReport(st, '2026-10', today);
+  const h = get(r, 'headline')!;
+  if (h.mode !== 'month') assert.fail('month headline');
+  assert.equal(h.total, cashVsAccrual(st, today, 0, 0)[0].cash);
+  assert.equal(h.total, 14 * 0.6);
+  const top = get(r, 'top')!;
+  assert.equal(top.rows[0].sub, s);
+});
+
+test('month movement matches the report page and is absent for future months', () => {
+  const st = state([sub('New', { start: '2026-10-01' }), sub('Sep', { start: '2026-09-01' })]);
+  const current = get(monthReport(st, '2026-10', today), 'trend')!;
+  if (current.mode !== 'month') assert.fail('month trend');
+  assert.deepEqual(current.movement, movement(st, '2026-09-30', today));
+  const past = get(monthReport(st, '2026-09', today), 'trend')!;
+  if (past.mode !== 'month') assert.fail('month trend');
+  assert.deepEqual(past.movement, movement(st, '2026-08-31', '2026-09-30', '2026-09-30'));
+  assert.equal(get(monthReport(st, '2026-11', today), 'trend'), undefined);
+});
+
+test('scope has a fixed 15-month cash series, while upcoming is tomorrow through day 30', () => {
+  const st = state([sub('Today', { start: today }), sub('Day30', { start: '2026-11-21' })]);
+  const report = scopeReport(st, st.subscriptions, today);
+  const trend = get(report, 'trend')!;
+  if (trend.mode !== 'scope') assert.fail('scope trend');
+  assert.equal(trend.rows.length, 15);
+  assert.equal(trend.rows[0].month, '2025-11');
+  assert.equal(trend.rows.at(-1)!.month, '2027-01');
+  assert.equal(trend.rows.filter((r) => r.projected).length, 3);
+  assert.deepEqual(
+    get(report, 'upcoming')!.rows.map((r) => r.date),
+    ['2026-11-21'],
+  );
+  assert.equal(get(monthReport(st, '2026-09', today), 'upcoming'), undefined);
+  assert.ok(get(monthReport(st, '2026-11', today), 'upcoming')!.rows.every((r) => r.date > today));
+});
+
+test('scope omits an all-zero cash chart even when an older prepayment is still being amortized', () => {
+  const s = sub('Prepaid', { price: 360, cycle: { unit: 'year', every: 3 }, start: '2025-01-01' });
+  const st = state([s]);
+  assert.ok(cashVsAccrual(st, today, 11, 3).some((r) => r.accrual > 0));
+  assert.equal(get(scopeReport(st, [s], today), 'trend'), undefined);
+});
+
+test('events include trial end, nonrenewal and immediate stop, with original subscriptions for details', () => {
+  const trial = sub('Trial', { start: '2026-10-01', trialEnd: '2026-10-31', status: 'trial' });
+  const ending = sub('Ending', { end: '2026-10-30', status: 'cancelled' });
+  const immediate = stopped({ id: 'Immediate', stop: { kind: 'cancel', date: '2026-10-10', paidThrough: '2026-12-31' } });
+  const st = state([trial, ending, immediate]);
+  const rows = get(monthReport(st, '2026-10', today), 'events')!.rows;
+  assert.ok(rows.some((r) => r.kind === 'trial' && r.date === '2026-10-31' && r.sub === trial));
+  assert.ok(rows.some((r) => r.kind === 'end' && r.date === '2026-10-31' && r.sub === ending));
+  assert.ok(rows.some((r) => r.kind === 'cancel' && r.date === '2026-10-10' && r.sub === immediate));
+  assert.ok(rows.every((r) => r.date >= '2026-10-01' && r.date <= '2026-10-31'));
+});
+
+test('sharing includes owner receipts in the window and only unpaid periods starting in the window', () => {
+  const s = owner();
+  const joined = sub('Joined', { share: { ...s.share!, role: 'member' } });
+  const st = state([s, joined]);
+  const oct = get(monthReport(st, '2026-10', today), 'sharing')!;
+  assert.equal(oct.received, 4);
+  assert.equal(oct.owed, 4);
+  assert.equal(oct.rows.length, 1);
+  assert.equal(oct.rows[0].sub, s);
+  const year = get(scopeReport(st, st.subscriptions, today), 'sharing')!;
+  assert.equal(year.received, 8);
+  assert.equal(year.owed, memberDues(s, today, 'USD')[0].owed);
+  assert.equal(get(monthReport(st, '2026-11', today), 'sharing')!.owed, 4);
+});
+
+test('missing stop FX stays incomplete and preserves the original-currency loss', () => {
+  const s = stopped({ currency: 'XYZ' });
+  const st = state([s]);
+  const loss = get(scopeReport(st, [s], today), 'losses')!;
+  assert.ok(Number.isNaN(loss.loss));
+  assert.equal(loss.incomplete, true);
+  assert.ok(loss.rows[0].loss > 0);
+});
+
+test('top is limited to five, refunds are not charges, and ties are stable', () => {
+  const subs = Array.from({ length: 7 }, (_, i) => sub(String(i), { price: 10 + i, start: '2026-10-01' })).reverse();
+  const st = state(subs);
+  assert.deepEqual(
+    get(scopeReport(st, subs, today), 'top')!.rows.map((r) => r.sub.id),
+    ['6', '5', '4', '3', '2'],
+  );
+  const rows = get(monthReport(st, '2026-10', today), 'top')!.rows;
+  assert.equal(rows.length, 5);
+  assert.equal(rows[0].amount, chargeValue(st, { date: '2026-10-01', amount: 16, currency: 'USD', projected: false }));
+});
+
+test('proxy subscriptions never enter any block', () => {
+  const own = sub('Own');
+  const proxy = sub('Proxy', { ...stopped(), id: 'Proxy', proxy: { forName: 'Other', entries: [] }, share: owner().share });
+  const st = state([own, proxy]);
+  assert.deepEqual(scopeReport(st, [own, proxy], today), scopeReport(st, [own], today));
+  assert.deepEqual(monthReport(st, '2026-10', today), monthReport(state([own]), '2026-10', today));
+});
