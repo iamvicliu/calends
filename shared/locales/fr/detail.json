@@ -62,7 +62,7 @@
     "perMonth": "Coût mensuel réel"
   },
   "tab": { "charges": "Prélèvements · {count}", "details": "Détails" },
-  "kpi": { "noGaps": "Sans interruption", "startedToday": "Commencé aujourd’hui", "expectedMonthly": "Prévu par mois" },
+  "kpi": { "amortized": "Par mois de possession", "noGaps": "Sans interruption", "startedToday": "Commencé aujourd’hui", "expectedMonthly": "Prévu par mois" },
   "chart": {
     "title": "Par prélèvement · {ccy}",
     "orig": "Devise d’origine",

@@ -62,7 +62,7 @@
     "perMonth": "実質月額"
   },
   "tab": { "charges": "請求履歴 · {count}", "details": "詳細" },
-  "kpi": { "noGaps": "中断なし", "startedToday": "今日から", "expectedMonthly": "月あたりの見込み" },
+  "kpi": { "amortized": "月あたり", "noGaps": "中断なし", "startedToday": "今日から", "expectedMonthly": "月あたりの見込み" },
   "chart": {
     "title": "1 回の請求 · {ccy}",
     "orig": "原通貨",

@@ -150,6 +150,8 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   };
 
   const paused = sub.status === 'paused';
+  // 买断（一段、不合租）没有走势、未来扣款和历程可看：换成窄的单列，不留半屏空白
+  const compact = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1 && !sub.share;
   const actions = (
     <>
       {!ro && <Act icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
@@ -172,7 +174,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   );
 
   return (
-    <div className="dt">
+    <div className={`dt ${compact ? 'compact' : ''}`}>
       <header className="dt-head">
         <SubIcon sub={sub} size={48} />
         <div className="dt-id">
@@ -209,32 +211,40 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         </button>
       </header>
 
-      <div className="dt-grid">
-        <div className="dt-col">
+      {compact ? (
+        <div className="dt-stack">
           <Kpis sub={sub} state={state} today={today} history={history} />
-          <Trendline sub={sub} state={state} today={today} history={history} />
-          <Upcoming sub={sub} state={state} today={today} />
-          <Events sub={sub} state={state} today={today} />
+          <Details sub={sub} state={state} today={today} />
+          <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
         </div>
-        <div className="dt-col dt-right">
-          <div className="dt-tabs">
-            <Seg
-              value={tab}
-              onChange={setTab}
-              options={[
-                ['charges', t('detail.tab.charges', { count: history.length })],
-                ['details', t('detail.tab.details')],
-              ]}
-            />
+      ) : (
+        <div className="dt-grid">
+          <div className="dt-col">
+            <Kpis sub={sub} state={state} today={today} history={history} />
+            <Trendline sub={sub} state={state} today={today} history={history} />
+            <Upcoming sub={sub} state={state} today={today} />
+            <Events sub={sub} state={state} today={today} />
           </div>
-          <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>
-            <Details sub={sub} state={state} today={today} />
-          </div>
-          <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>
-            <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
+          <div className="dt-col dt-right">
+            <div className="dt-tabs">
+              <Seg
+                value={tab}
+                onChange={setTab}
+                options={[
+                  ['charges', t('detail.tab.charges', { count: history.length })],
+                  ['details', t('detail.tab.details')],
+                ]}
+              />
+            </div>
+            <div className={`dt-pane ${tab === 'details' ? 'on' : ''}`}>
+              <Details sub={sub} state={state} today={today} />
+            </div>
+            <div className={`dt-pane ${tab === 'charges' ? 'on' : ''}`}>
+              <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
       {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
@@ -291,7 +301,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
           : t('detail.stats.days', { count: active });
 
   return (
-    <div className={`dt-kpis ${lifetime ? 'two' : ''}`}>
+    <div className="dt-kpis">
       <div className="dt-panel dt-kpi">
         <div className="dt-kpi-top">
           <small>{t('detail.stats.spent')}</small>
@@ -310,17 +320,16 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
           <b>{duration}</b>
         </div>
       </div>
-      {!lifetime && (
-        <div className="dt-panel dt-kpi">
-          <div className="dt-kpi-top">
-            <small>{young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}</small>
-            <Trend pct={perTrend} />
-          </div>
-          <div className="dt-kpi-val">
-            <b>{money(perMonth, base, { compact: true })}</b>
-          </div>
+      <div className="dt-panel dt-kpi">
+        <div className="dt-kpi-top">
+          <small>{lifetime ? t('detail.kpi.amortized') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}</small>
+          {!lifetime && <Trend pct={perTrend} />}
         </div>
-      )}
+        <div className="dt-kpi-val">
+          {/* 买断：花的钱摊到拥有的每个月，越用越便宜 */}
+          <b>{money(lifetime ? total / Math.max(1, active / 30.44) : perMonth, base, { compact: true })}</b>
+        </div>
+      </div>
     </div>
   );
 }

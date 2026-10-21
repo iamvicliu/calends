@@ -57,7 +57,7 @@
     "perMonth": "Actual monthly"
   },
   "tab": { "charges": "Charges · {count}", "details": "Details" },
-  "kpi": { "noGaps": "No lapses", "startedToday": "Started today", "expectedMonthly": "Expected monthly" },
+  "kpi": { "amortized": "Per month owned", "noGaps": "No lapses", "startedToday": "Started today", "expectedMonthly": "Expected monthly" },
   "chart": {
     "title": "Per charge · {ccy}",
     "orig": "Original",

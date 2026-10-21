@@ -67,7 +67,7 @@
     "perMonth": "Gerçek aylık"
   },
   "tab": { "charges": "Ödemeler · {count}", "details": "Ayrıntılar" },
-  "kpi": { "noGaps": "Kesinti yok", "startedToday": "Bugün başladı", "expectedMonthly": "Tahmini aylık" },
+  "kpi": { "amortized": "Aylık maliyet", "noGaps": "Kesinti yok", "startedToday": "Bugün başladı", "expectedMonthly": "Tahmini aylık" },
   "chart": {
     "title": "Ödeme başına · {ccy}",
     "orig": "Orijinal",

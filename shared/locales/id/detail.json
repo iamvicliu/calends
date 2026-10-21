@@ -62,7 +62,7 @@
     "perMonth": "Biaya bulanan riil"
   },
   "tab": { "charges": "Tagihan · {count}", "details": "Detail" },
-  "kpi": { "noGaps": "Tanpa jeda", "startedToday": "Mulai hari ini", "expectedMonthly": "Perkiraan per bulan" },
+  "kpi": { "amortized": "Per bulan dimiliki", "noGaps": "Tanpa jeda", "startedToday": "Mulai hari ini", "expectedMonthly": "Perkiraan per bulan" },
   "chart": {
     "title": "Per tagihan · {ccy}",
     "orig": "Asli",

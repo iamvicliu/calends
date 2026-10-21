@@ -1058,9 +1058,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
   }
-  .dt-kpis.two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .dt-kpi {
     padding: 10px 12px 12px;
   }
@@ -1140,9 +1137,6 @@
   .dt-kpis {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .dt-kpis.two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .dt-evs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(var(--rows), auto);
@@ -1162,5 +1156,28 @@
 @media (min-width: 641px) and (max-width: 999px) {
   .sheet.bare:has(.dt) {
     width: min(760px, calc(100vw - 32px));
+  }
+}
+
+/* 买断等内容少的：窄弹窗、单列、高度随内容 */
+.dt-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (min-width: 641px) {
+  .sheet.bare:has(.dt.compact) {
+    width: min(620px, calc(100vw - 32px));
+  }
+  .sheet.bare:has(.dt.compact) .sheet-body {
+    height: auto;
+    max-height: 92vh;
+    overflow: auto;
+  }
+  .dt.compact {
+    height: auto;
+  }
+  .dt.compact .dt-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

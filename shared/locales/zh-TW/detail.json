@@ -57,7 +57,7 @@
     "perMonth": "實際每月"
   },
   "tab": { "charges": "扣款紀錄 · {count}", "details": "詳情" },
-  "kpi": { "noGaps": "無中斷", "startedToday": "今天開始", "expectedMonthly": "預計每月" },
+  "kpi": { "amortized": "攤到每月", "noGaps": "無中斷", "startedToday": "今天開始", "expectedMonthly": "預計每月" },
   "chart": {
     "title": "每筆扣款 · {ccy}",
     "orig": "原幣",

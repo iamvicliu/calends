@@ -62,7 +62,7 @@
     "perMonth": "Thực chi mỗi tháng"
   },
   "tab": { "charges": "Lần trừ tiền · {count}", "details": "Chi tiết" },
-  "kpi": { "noGaps": "Không gián đoạn", "startedToday": "Bắt đầu hôm nay", "expectedMonthly": "Dự kiến mỗi tháng" },
+  "kpi": { "amortized": "Chia theo tháng", "noGaps": "Không gián đoạn", "startedToday": "Bắt đầu hôm nay", "expectedMonthly": "Dự kiến mỗi tháng" },
   "chart": {
     "title": "Mỗi lần trừ · {ccy}",
     "orig": "Gốc",

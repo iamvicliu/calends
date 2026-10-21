@@ -62,7 +62,7 @@
     "perMonth": "Tatsächlich pro Monat"
   },
   "tab": { "charges": "Abbuchungen · {count}", "details": "Details" },
-  "kpi": { "noGaps": "Keine Unterbrechung", "startedToday": "Heute begonnen", "expectedMonthly": "Voraussichtlich pro Monat" },
+  "kpi": { "amortized": "Pro Monat Besitz", "noGaps": "Keine Unterbrechung", "startedToday": "Heute begonnen", "expectedMonthly": "Voraussichtlich pro Monat" },
   "chart": {
     "title": "Pro Abbuchung · {ccy}",
     "orig": "Original",

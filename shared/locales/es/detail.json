@@ -62,7 +62,7 @@
     "perMonth": "Coste mensual real"
   },
   "tab": { "charges": "Cargos · {count}", "details": "Detalles" },
-  "kpi": { "noGaps": "Sin interrupciones", "startedToday": "Empezó hoy", "expectedMonthly": "Previsto al mes" },
+  "kpi": { "amortized": "Por mes de uso", "noGaps": "Sin interrupciones", "startedToday": "Empezó hoy", "expectedMonthly": "Previsto al mes" },
   "chart": {
     "title": "Por cargo · {ccy}",
     "orig": "Original",

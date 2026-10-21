@@ -62,7 +62,7 @@
     "perMonth": "실제 월평균"
   },
   "tab": { "charges": "결제 내역 · {count}", "details": "상세" },
-  "kpi": { "noGaps": "중단 없음", "startedToday": "오늘 시작", "expectedMonthly": "예상 월 비용" },
+  "kpi": { "amortized": "월 환산", "noGaps": "중단 없음", "startedToday": "오늘 시작", "expectedMonthly": "예상 월 비용" },
   "chart": {
     "title": "회당 결제 · {ccy}",
     "orig": "원래 통화",

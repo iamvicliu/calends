@@ -72,7 +72,7 @@
     "perMonth": "Фактически в месяц"
   },
   "tab": { "charges": "Списания · {count}", "details": "Подробности" },
-  "kpi": { "noGaps": "Без перерывов", "startedToday": "С сегодняшнего дня", "expectedMonthly": "Ожидается в месяц" },
+  "kpi": { "amortized": "В месяц владения", "noGaps": "Без перерывов", "startedToday": "С сегодняшнего дня", "expectedMonthly": "Ожидается в месяц" },
   "chart": {
     "title": "За списание · {ccy}",
     "orig": "Исходная",

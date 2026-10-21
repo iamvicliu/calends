@@ -57,7 +57,7 @@
     "perMonth": "Custo mensal real"
   },
   "tab": { "charges": "Cobranças · {count}", "details": "Detalhes" },
-  "kpi": { "noGaps": "Sem interrupções", "startedToday": "Começou hoje", "expectedMonthly": "Previsto por mês" },
+  "kpi": { "amortized": "Por mês de uso", "noGaps": "Sem interrupções", "startedToday": "Começou hoje", "expectedMonthly": "Previsto por mês" },
   "chart": {
     "title": "Por cobrança · {ccy}",
     "orig": "Original",
