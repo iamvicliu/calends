@@ -103,7 +103,11 @@ function load(): Saved {
   try {
     const raw = localStorage.getItem(STORE);
     // 老版本没有 id：补上，之后照常存到服务端
-    if (raw) return { ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved;
+    if (raw) {
+      const saved = { ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved;
+      // 还没说过话的对话：分割线上的时间按这次打开算
+      return saved.turns.length ? saved : { ...saved, createdAt: new Date().toISOString() };
+    }
   } catch {
     /* 隐私模式等读不到就当新会话 */
   }
@@ -127,8 +131,7 @@ function persist(s: Saved) {
 function fmtWhen(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  const sameYear = d.getFullYear() === new Date().getFullYear();
-  return d.toLocaleString(locale(), { ...(sameYear ? {} : { year: 'numeric' }), month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString(locale(), { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 // ---------- 流式请求 ----------
@@ -251,10 +254,35 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     if (h) composer.current?.prefill(h.text, h.images);
   }, []);
 
+  // 有历史时，当前对话至少占满一屏（顶栏与输入框之间）：滚到底就是一段全新的对话，往上翻才看到历史
+  const [fill, setFill] = useState(0);
+  useLayoutEffect(() => {
+    const measure = () => {
+      // 顶栏只在吸顶时（窄屏）占可视高度；分割线留在可视区最上方
+      const tb = document.querySelector<HTMLElement>('.toolbar');
+      const bar = tb && getComputedStyle(tb).position === 'sticky' ? tb.getBoundingClientRect().height : 0;
+      const dock = document.querySelector('.as-composer')?.getBoundingClientRect().height ?? 0;
+      setFill(Math.max(0, window.innerHeight - bar - dock - 24));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [chat.id, !chat.turns.length]);
+
   // 新内容到来时贴着底部滚；用户往上翻了就不打扰，显示「回到底部」
   useLayoutEffect(() => {
     if (atBottom) window.scrollTo(0, document.documentElement.scrollHeight);
-  }, [chat, atBottom]);
+  }, [chat, atBottom, fill, past]);
+  // 滚到底后按实际位置校正：分割线正好落在顶栏下方 12px，上面的历史全部移出可视区
+  const session = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const head = session.current?.querySelector('.as-past-head');
+    if (!head || !atBottom) return;
+    const tb = document.querySelector<HTMLElement>('.toolbar');
+    const top = tb && getComputedStyle(tb).position === 'sticky' ? tb.getBoundingClientRect().bottom : 0;
+    const d = head.getBoundingClientRect().top - (top + 12);
+    if (Math.abs(d) > 1) setFill((f) => Math.max(0, Math.round(f + d)));
+  }, [fill, past, chat.id, atBottom]);
   useEffect(() => {
     const onScroll = () => {
       const el = document.documentElement;
@@ -378,6 +406,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     abort.current?.abort();
     if (chat.turns.length) setPast((p) => [...p.filter((c) => c.id !== chat.id), chat]);
     setChat(newChat());
+    setAtBottom(true);
   };
 
   const empty = !chat.turns.length;
@@ -427,33 +456,35 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
                 )}
               </div>
             ))}
-            {shownPast.length > 0 && !empty && <div className="as-past-head">{fmtWhen(chat.createdAt)}</div>}
-            {empty ? (
-              <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
-            ) : (
-              chat.turns.map((turn, i) =>
-                turn.role === 'user' ? (
-                  <UserBubble key={turn.id} turn={turn} />
-                ) : (
-                  <BotMessage
-                    key={turn.id}
-                    turn={turn}
-                    state={state}
-                    last={i === chat.turns.length - 1}
-                    onRetry={retry}
-                    onSetup={() => setSetup(true)}
-                    onApply={(p) => void applyProposal(turn.id, p)}
-                    onEdit={editProposal}
-                    onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
-                    onApplyAll={() => void applyAll(turn.id)}
-                    onOpen={(id) => {
-                      const s = state.subscriptions.find((x) => x.id === id);
-                      if (s) onOpen(s);
-                    }}
-                  />
-                ),
-              )
-            )}
+            <section ref={session} className={`as-session ${shownPast.length ? 'fresh' : ''}`} style={shownPast.length ? { minHeight: fill } : undefined}>
+              {shownPast.length > 0 && <div className="as-past-head">{fmtWhen(chat.createdAt)}</div>}
+              {empty ? (
+                <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
+              ) : (
+                chat.turns.map((turn, i) =>
+                  turn.role === 'user' ? (
+                    <UserBubble key={turn.id} turn={turn} />
+                  ) : (
+                    <BotMessage
+                      key={turn.id}
+                      turn={turn}
+                      state={state}
+                      last={i === chat.turns.length - 1}
+                      onRetry={retry}
+                      onSetup={() => setSetup(true)}
+                      onApply={(p) => void applyProposal(turn.id, p)}
+                      onEdit={editProposal}
+                      onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
+                      onApplyAll={() => void applyAll(turn.id)}
+                      onOpen={(id) => {
+                        const s = state.subscriptions.find((x) => x.id === id);
+                        if (s) onOpen(s);
+                      }}
+                    />
+                  ),
+                )
+              )}
+            </section>
           </div>
         </div>
         {!atBottom && (
