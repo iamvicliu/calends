@@ -15,8 +15,8 @@
     "run_worker_first": true,
   },
   "d1_databases": [{ "binding": "DB", "database_name": "calends", "migrations_dir": "migrations" }],
-  // 每小时触发：到设置中的提醒时刻才发送；每日刷新汇率
-  "triggers": { "crons": ["5 * * * *"] },
+  // 每 15 分钟检查本地提醒时刻；维护任务仍只在整点执行
+  "triggers": { "crons": ["*/15 * * * *"] },
   // 可选：邮件提醒需要 Cloudflare Email Sending，取消注释并换成你在 Cloudflare 验证过的域名
   // "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["calends@example.com"] }],
   // "vars": { "SITE_URL": "https://calends.example.com", "MAIL_FROM": "calends@example.com", "MAIL_FROM_NAME": "Calends" },

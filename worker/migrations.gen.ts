@@ -38,5 +38,14 @@ export const MIGRATIONS: Array<{ name: string; statements: string[] }> = [
     "statements": [
       "CREATE TABLE IF NOT EXISTS chats (\n  id TEXT PRIMARY KEY,\n  data TEXT NOT NULL,\n  updated_at TEXT NOT NULL DEFAULT (datetime('now'))\n)"
     ]
+  },
+  {
+    "name": "0006_notify_retry.sql",
+    "statements": [
+      "ALTER TABLE notify_log ADD COLUMN digest TEXT",
+      "ALTER TABLE notify_log ADD COLUMN attempts INTEGER NOT NULL DEFAULT 1",
+      "ALTER TABLE notify_log ADD COLUMN retry_at INTEGER",
+      "CREATE INDEX notify_retry ON notify_log(status, retry_at)"
+    ]
   }
 ];

@@ -195,7 +195,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
     download(`subscriptions-${today}.csv`, toCsv([head, ...rows]), 'text/csv');
   };
 
-  const hour = (h: number) => `${String(h).padStart(2, '0')}:05`;
+  const hour = (h: number) => `${String(h).padStart(2, '0')}:00`;
   return (
     <>
       <Toolbar title={t('settings.title')} />

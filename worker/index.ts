@@ -393,6 +393,15 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   return bad('not found', 404);
 }
 
+async function scheduledNotifications(env: Env, now: number): Promise<void> {
+  const state = await loadState(env);
+  applyLocale(settingsLocale(state.settings));
+  // 定时任务没有请求地址：用后台最近一次访问时记下的地址
+  env = { ...env, SITE_URL: siteUrl(env.SITE_URL || state.settings.siteUrl || '', env.BASE_PATH) };
+  const log = await runScheduled(env, state, now);
+  if (log.length) console.log('[notify]', log.join('; '));
+}
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
@@ -451,6 +460,11 @@ export default {
 
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     await ensureMigrated(env);
+    // 通知每刻钟检查；原有的每日维护仍只在 UTC 整点执行。
+    if (new Date(controller.scheduledTime).getUTCMinutes() >= 15) {
+      await scheduledNotifications(env, controller.scheduledTime);
+      return;
+    }
     if (env.DEMO_MODE === '1') {
       await ensureDemo(env, controller.scheduledTime, true);
       return;
@@ -459,11 +473,6 @@ export default {
     if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
       ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
     }
-    const state = await loadState(env);
-    applyLocale(settingsLocale(state.settings));
-    // 定时任务没有请求地址：用后台最近一次访问时记下的地址
-    env = { ...env, SITE_URL: siteUrl(env.SITE_URL || state.settings.siteUrl || '', env.BASE_PATH) };
-    const log = await runScheduled(env, state);
-    if (log.length) console.log('[notify]', log.join('; '));
+    await scheduledNotifications(env, controller.scheduledTime);
   },
 } satisfies ExportedHandler<Env>;

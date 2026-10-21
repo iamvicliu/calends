@@ -7,6 +7,8 @@ import {
   diffDays,
   effectiveStatus,
   nextCharge,
+  memberAboard,
+  memberUnpaidFrom,
   priceAt,
   runwayFor,
   todayIn,
@@ -139,11 +141,10 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     if (s.share?.role !== 'owner' || !['active', 'ending'].includes(effectiveStatus(s, today))) continue;
     const months = cycleDays(s.cycle) / 30.4375;
     for (const m of s.share.members) {
-      if (m.exempt) continue;
-      const due = m.paidUntil ? addDays(m.paidUntil, 1) : s.share.since;
-      if (!due) continue;
-      // 订阅到期不续（或已经结束）时，下一期从结束日起就不存在了，不用再催收
-      if (s.end && due >= s.end) continue;
+      if (m.exempt || !memberAboard(m, today)) continue;
+      const due = memberUnpaidFrom(s, m);
+      // 订阅到期不续（或已经结束）时，结束日之后的下一期不存在了，不用再催收
+      if (s.end && due > s.end) continue;
       const d = diffDays(today, due);
       // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
@@ -300,23 +301,27 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
 
 /**
  * 把一份提醒发到所有开着的渠道（或只发 only 指定的那一个）。
- * 任一渠道成功就算发出；全部失败则撤掉占位，下一小时重试。
+ * 任一渠道成功即完成，不重复补发；全部失败持久化原提醒，在之后的整点最多补发 3 次。
  */
 export async function sendDigest(
   env: Env,
   state: AppState,
   d: Digest,
-  opts: { force?: boolean; only?: string } = {},
+  opts: { force?: boolean; only?: string; now?: number } = {},
 ): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
   if (env.DEMO_MODE === '1') return { sent: false, reason: t('server.demoUnavailable') };
   const targets = channelsOf(state.settings).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
   if (!targets.length) return { sent: false, reason: opts.only ? t('notify.send.noChannel') : t('notify.send.noneEnabled') };
+  const now = opts.now ?? Date.now();
   if (!opts.force) {
-    // 先占位后发送：重叠触发时只有一个能占到
+    // 原子占位：新提醒或到期的失败重试只有一个任务能取得发送权。
     const claim = await env.DB.prepare(
-      "INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, 'sending') ON CONFLICT(dedupe_key) DO NOTHING",
+      `INSERT INTO notify_log (dedupe_key, kind, subject, status, digest, attempts)
+       VALUES (?1, ?2, ?3, 'sending', ?4, 1)
+       ON CONFLICT(dedupe_key) DO UPDATE SET status = 'sending', attempts = notify_log.attempts + 1, retry_at = NULL
+       WHERE notify_log.status = 'failed' AND notify_log.attempts < 4 AND notify_log.retry_at <= ?5`,
     )
-      .bind(d.key, d.kind, d.subject)
+      .bind(d.key, d.kind, d.subject, JSON.stringify(d), now)
       .run();
     if (!claim.meta.changes) return { sent: false, reason: t('notify.send.alreadySent') };
   }
@@ -335,7 +340,12 @@ export async function sendDigest(
   const okCount = results.filter((r) => r.ok).length;
   const status = okCount === results.length ? 'sent' : okCount ? `partial ${okCount}/${results.length}` : 'failed';
   if (!okCount) {
-    if (!opts.force) await env.DB.prepare('DELETE FROM notify_log WHERE dedupe_key = ?1').bind(d.key).run();
+    if (!opts.force) {
+      const retryAt = (Math.floor(now / 3_600_000) + 1) * 3_600_000;
+      await env.DB.prepare("UPDATE notify_log SET status = 'failed', retry_at = ?2, error = ?3 WHERE dedupe_key = ?1")
+        .bind(d.key, retryAt, results.map((r) => r.error).join('; '))
+        .run();
+    }
     return {
       sent: false,
       reason: results.map((r) => t('notify.send.failure', { channel: r.channel, error: r.error })).join(t('notify.send.failureSep')),
@@ -343,29 +353,39 @@ export async function sendDigest(
     };
   }
   await env.DB.prepare(
-    "INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(dedupe_key) DO UPDATE SET status = excluded.status, sent_at = datetime('now')",
+    "INSERT INTO notify_log (dedupe_key, kind, subject, status) VALUES (?1, ?2, ?3, ?4) ON CONFLICT(dedupe_key) DO UPDATE SET status = excluded.status, sent_at = datetime('now'), retry_at = NULL, error = NULL",
   )
     .bind(opts.force ? `${d.key}:${Date.now()}` : d.key, d.kind, d.subject, status)
     .run();
   return { sent: true, results };
 }
 
-function localHour(tz: string): number {
+function localHour(tz: string, now = Date.now()): number {
   try {
-    return Number(new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
+    return Number(new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', hourCycle: 'h23' }).format(new Date(now)));
   } catch {
-    return new Date().getUTCHours();
+    return new Date(now).getUTCHours();
   }
 }
 
-export async function runScheduled(env: Env, state: AppState): Promise<string[]> {
+export async function runScheduled(env: Env, state: AppState, now = Date.now()): Promise<string[]> {
   if (env.DEMO_MODE === '1') return [];
   const log: string[] = [];
-  const today = todayIn(state.settings.timezone);
-  if (localHour(state.settings.timezone) !== state.settings.notifyHour) return log;
+  // 重试使用原提醒快照，跨日后也保留原日期与去重键。
+  const pending = await env.DB.prepare("SELECT digest FROM notify_log WHERE status = 'failed' AND attempts < 4 AND retry_at <= ?1")
+    .bind(now)
+    .all<{ digest: string }>();
+  for (const row of pending.results) {
+    const d: Digest = JSON.parse(row.digest);
+    const r = await sendDigest(env, state, d, { now });
+    log.push(`${d.key}: ${r.sent ? 'sent' : r.reason}`);
+  }
+  const today = todayIn(state.settings.timezone, now);
+  // 每 15 分钟运行：当地整点到达后的首轮发出；延迟任务允许当天补发，去重键保证每日一次。
+  if (localHour(state.settings.timezone, now) < state.settings.notifyHour) return log;
   for (const d of [buildMonthly(state, today), buildDaily(state, today)]) {
     if (!d) continue;
-    const r = await sendDigest(env, state, d);
+    const r = await sendDigest(env, state, d, { now });
     log.push(`${d.key}: ${r.sent ? 'sent' : r.reason}`);
   }
   return log;

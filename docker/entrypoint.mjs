@@ -65,15 +65,14 @@ if (status.needsSetup) {
   log(`(also saved in ${tokenFile}; you can set SETUP_TOKEN yourself instead)`);
 }
 
-// 5. 定时任务：wrangler 本地模式不会自己跑 cron，这里每小时第 5 分钟触发一次（与 Cloudflare 上的配置一致）
+// 5. 定时任务：wrangler 本地模式不会自己跑 cron，这里每 15 分钟触发一次（与 Cloudflare 上的配置一致）
 function scheduleNext() {
   const now = new Date();
   const next = new Date(now);
-  next.setUTCMinutes(5, 0, 0);
-  if (next <= now) next.setUTCHours(next.getUTCHours() + 1);
+  next.setUTCMinutes((Math.floor(now.getUTCMinutes() / 15) + 1) * 15, 0, 0);
   setTimeout(async () => {
     try {
-      await fetch(`${base}/cdn-cgi/local/scheduled?cron=${encodeURIComponent('5 * * * *')}`);
+      await fetch(`${base}/cdn-cgi/local/scheduled?cron=${encodeURIComponent('*/15 * * * *')}`);
     } catch (e) {
       log('scheduled trigger failed:', e.message);
     }
