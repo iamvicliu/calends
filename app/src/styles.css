@@ -5100,15 +5100,6 @@ select.btn {
   font: inherit;
   text-align: left;
   color: var(--label);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.proxy-head:hover {
-  background: var(--fill-2);
-}
-.proxy-head:hover .ph-name {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .proxy-card {
   cursor: pointer;
