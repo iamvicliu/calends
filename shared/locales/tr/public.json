@@ -68,7 +68,6 @@
   },
   "titleAnon": "Abonelikler",
   "pile": {
-    "label": "Abonelik yığını: simge büyüdükçe aylık maliyet artar",
-    "reset": "Yeniden düşür"
+    "label": "Abonelik yığını: simge büyüdükçe aylık maliyet artar"
   }
 }

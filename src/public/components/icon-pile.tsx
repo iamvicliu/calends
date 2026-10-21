@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { RotateCcw } from 'lucide-react';
 import type Matter from 'matter-js';
 import type { Subscription } from '../../../shared/types.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -29,12 +28,9 @@ function sizes(items: PileItem[], width: number, height: number): number[] {
 /**
  * 页脚下方的「订阅堆」。
  * 访客滚到页面最底、继续往下滑让这块落地区露出来时，图标才从屏幕顶端落下，越过页面内容（最上层），按真实物理堆在页脚下面。
- * 点一下消失一个；右上角的按钮让它们重新落下。物理引擎（matter-js）到这时才加载；系统开启「减少动态效果」时直接显示堆好的样子。
+ * 点一下消失一个；想让它们重新落下，刷新页面即可。物理引擎（matter-js）到这时才加载；系统开启「减少动态效果」时直接显示堆好的样子。
  */
 export function IconPile({ items, height = 300 }: { items: PileItem[]; height?: number }) {
-  // 换一个 key 就整个重建物理世界，图标重新落下
-  const [epoch, setEpoch] = useState(0);
-  const [gone, setGone] = useState(0);
   const zone = useRef<HTMLDivElement>(null);
   const [armed, setArmed] = useState(false);
   // 预热时就量好落地区、算好每个图标的边长并渲染出来（先隐藏），开始落下时只剩物理计算，不再整体重排
@@ -69,21 +65,7 @@ export function IconPile({ items, height = 300 }: { items: PileItem[]; height?: 
 
   return (
     <div ref={zone} className="relative" style={{ height }} aria-label={t('public.pile.label')} role="img">
-      {side && <PileStage key={epoch} items={items} side={side} go={armed} zone={zone} onGone={setGone} />}
-      {gone > 0 && (
-        <button
-          type="button"
-          onClick={() => {
-            setGone(0);
-            setEpoch((n) => n + 1);
-          }}
-          className="absolute top-2 right-0 z-[61] flex size-8 items-center justify-center rounded-full bg-card text-muted-foreground shadow-sm ring-1 ring-foreground/10 transition hover:text-foreground"
-          aria-label={t('public.pile.reset')}
-          title={t('public.pile.reset')}
-        >
-          <RotateCcw className="size-4" />
-        </button>
-      )}
+      {side && <PileStage items={items} side={side} go={armed} zone={zone} />}
     </div>
   );
 }
@@ -94,18 +76,14 @@ function PileStage({
   side,
   go,
   zone,
-  onGone,
 }: {
   items: PileItem[];
   side: number[];
   go: boolean;
   zone: { current: HTMLDivElement | null };
-  onGone: (n: number) => void;
 }) {
   const nodes = useRef<Array<HTMLDivElement | null>>([]);
-  const [gone, setGone] = useState<Set<string>>(new Set());
   const removeRef = useRef<(i: number) => void>(() => {});
-  useEffect(() => onGone(gone.size), [gone, onGone]);
 
   useEffect(() => {
     if (!go) return;
@@ -233,7 +211,6 @@ function PileStage({
             downAt.current = null;
             if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
             removeRef.current(i);
-            window.setTimeout(() => setGone((g) => new Set(g).add(x.s.id)), 50);
           }}
         >
           <AppIcon sub={x.s} size={side[i]} eager className="size-full rounded-[22%] shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)]" />

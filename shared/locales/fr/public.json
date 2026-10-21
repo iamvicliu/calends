@@ -68,7 +68,6 @@
   },
   "titleAnon": "Abonnements",
   "pile": {
-    "label": "Tes abonnements en pile — plus l’icône est grande, plus il coûte",
-    "reset": "Les refaire tomber"
+    "label": "Tes abonnements en pile — plus l’icône est grande, plus il coûte"
   }
 }
