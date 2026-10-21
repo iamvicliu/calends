@@ -33,8 +33,7 @@
   },
   "ended": {
     "title": "Résiliés",
-    "saved": "{amount} économisés depuis la résiliation",
-    "item": "{amount} économisés"
+    "saved": "{amount} de moins par mois depuis la résiliation"
   },
   "perMonth": "{amount}/mois",
   "lifetime": {

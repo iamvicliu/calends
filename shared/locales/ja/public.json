@@ -32,8 +32,7 @@
   },
   "ended": {
     "title": "解約済み",
-    "saved": "解約後に{amount}節約",
-    "item": "{amount}節約"
+    "saved": "解約で毎月 {amount} 減少"
   },
   "perMonth": "{amount}/月",
   "lifetime": {

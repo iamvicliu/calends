@@ -33,8 +33,7 @@
   },
   "ended": {
     "title": "Cancelled",
-    "saved": "{amount} saved since cancelling",
-    "item": "Saved {amount}"
+    "saved": "{amount} less per month since cancelling"
   },
   "perMonth": "{amount}/mo",
   "lifetime": {

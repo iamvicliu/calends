@@ -33,8 +33,7 @@
   },
   "ended": {
     "title": "Canceladas",
-    "saved": "{amount} economizados desde o cancelamento",
-    "item": "{amount} economizados"
+    "saved": "{amount} a menos por mês desde o cancelamento"
   },
   "perMonth": "{amount}/mês",
   "lifetime": {

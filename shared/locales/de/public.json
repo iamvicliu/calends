@@ -33,8 +33,7 @@
   },
   "ended": {
     "title": "Gekündigt",
-    "saved": "{amount} gespart seit der Kündigung",
-    "item": "{amount} gespart"
+    "saved": "{amount} weniger pro Monat seit der Kündigung"
   },
   "perMonth": "{amount}/Mon.",
   "lifetime": {

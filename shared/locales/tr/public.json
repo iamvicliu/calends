@@ -33,8 +33,7 @@
   },
   "ended": {
     "title": "İptal edilenler",
-    "saved": "İptalden bu yana {amount} tasarruf",
-    "item": "{amount} tasarruf"
+    "saved": "İptalden beri ayda {amount} daha az"
   },
   "perMonth": "{amount}/ay",
   "lifetime": {

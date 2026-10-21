@@ -32,8 +32,7 @@
   },
   "ended": {
     "title": "Dibatalkan",
-    "saved": "Hemat {amount} sejak dibatalkan",
-    "item": "Hemat {amount}"
+    "saved": "{amount} lebih hemat per bulan sejak berhenti"
   },
   "perMonth": "{amount}/bln",
   "lifetime": {

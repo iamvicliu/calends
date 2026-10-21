@@ -32,8 +32,7 @@
   },
   "ended": {
     "title": "Đã hủy",
-    "saved": "Đã tiết kiệm {amount} kể từ khi hủy",
-    "item": "Tiết kiệm {amount}"
+    "saved": "Mỗi tháng bớt {amount} kể từ khi hủy"
   },
   "perMonth": "{amount}/tháng",
   "lifetime": {

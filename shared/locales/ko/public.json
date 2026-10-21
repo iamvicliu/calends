@@ -32,8 +32,7 @@
   },
   "ended": {
     "title": "해지됨",
-    "saved": "해지 후 {amount} 절약",
-    "item": "{amount} 절약"
+    "saved": "해지 후 매달 {amount} 절약"
   },
   "perMonth": "{amount}/월",
   "lifetime": {

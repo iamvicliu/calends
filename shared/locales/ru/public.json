@@ -35,8 +35,7 @@
   },
   "ended": {
     "title": "Отменённые",
-    "saved": "С момента отмены сэкономлено {amount}",
-    "item": "Сэкономлено {amount}"
+    "saved": "На {amount} меньше в месяц после отмены"
   },
   "perMonth": "{amount}/мес.",
   "lifetime": {

@@ -30,8 +30,7 @@
   },
   "ended": {
     "title": "已退訂",
-    "saved": "退訂至今少花 {amount}",
-    "item": "省 {amount}"
+    "saved": "退訂後每月少花 {amount}"
   },
   "perMonth": "{amount}/月",
   "lifetime": {
