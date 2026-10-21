@@ -241,7 +241,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   return (
     <div className={`dt ${compact ? 'compact' : ''}`} ref={root}>
       <header className="dt-head">
-        <SubIcon sub={sub} size={48} />
+        <SubIcon sub={sub} size={48} proxied />
         <div className="dt-id">
           <h2>
             <span className="dt-name">{sub.name}</span>
