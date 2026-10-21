@@ -69,6 +69,7 @@
     "active": "Aktiv",
     "share": "{amount}/Mon. · {pct} %",
     "caption": "Abo-Sternenhimmel · Blasengröße zeigt monatliche Kosten",
-    "aria": "{name}, {amount} pro Monat"
+    "aria": "{name}, {amount} pro Monat",
+    "loss": "Verlust durch Kündigungen"
   }
 }

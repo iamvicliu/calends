@@ -383,7 +383,7 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
   const saved = useMemo(() => cancelSavings(state, today), [state, today]);
   const losses = useMemo(() => stopLosses(state, today), [state, today]);
   return (
-    <div className="card stop-report">
+    <div className="card stop-report" id="report-stops">
       <div className="card-h">
         <h3>{t('report.stops.title')}</h3>
       </div>

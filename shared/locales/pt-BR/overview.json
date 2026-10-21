@@ -69,6 +69,7 @@
     "active": "Ativas",
     "share": "{amount}/mês · {pct}%",
     "caption": "Constelação de assinaturas · o tamanho da bolha mostra o custo mensal",
-    "aria": "{name}, {amount} por mês"
+    "aria": "{name}, {amount} por mês",
+    "loss": "Perdas com cancelamentos"
   }
 }

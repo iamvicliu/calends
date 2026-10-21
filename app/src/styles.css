@@ -4194,6 +4194,37 @@ select.btn {
   font-size: 12px;
   color: var(--label-3);
 }
+/* 退订、停用后没退回的钱：横跨两列的一行，红色金额，点开到报告明细 */
+.stmt-facts .stmt-loss {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.stmt-facts .stmt-loss:hover {
+  background: color-mix(in srgb, var(--red) 13%, transparent);
+}
+.stmt-facts .stmt-loss span {
+  flex: 1;
+  color: var(--label-2);
+}
+.stmt-facts .stmt-loss b {
+  display: inline;
+  font-size: 15px;
+  color: var(--red);
+}
+.stmt-facts .stmt-loss .i {
+  color: var(--label-3);
+}
 .stmt-r {
   display: flex;
   flex-direction: column;
@@ -9072,4 +9103,9 @@ img.mm-flag {
   .dt-id h2 {
     flex-wrap: wrap;
   }
+}
+
+/* 从概览跳来时滚到这张卡：留出顶部吸附栏的高度，标题不被遮住 */
+#report-stops {
+  scroll-margin-top: 72px;
 }

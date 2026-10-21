@@ -4,13 +4,14 @@ import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charg
 import { cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
-import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries } from '../../../shared/metrics.ts';
+import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosses } from '../../../shared/metrics.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { Amount, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
+import { go } from '../router.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 
 type Scale = 'month' | 'year';
@@ -397,12 +398,25 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
 export { perLabel };
 
 /** 账单头：深色底，左边负 MRR，右边订阅星图（圆的面积 = 每月成本） */
+/** 打开报告页并滚到「退订与停用」卡片；报告页是按需加载的，等卡片渲染出来再滚动 */
+function openLosses() {
+  go('report');
+  let tries = 0;
+  const scroll = () => {
+    const el = document.getElementById('report-stops');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else if (tries++ < 60) requestAnimationFrame(scroll);
+  };
+  requestAnimationFrame(scroll);
+}
+
 function Statement({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const tot = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const delta = mrrChangeSinceLastMonth(state, today);
   const ytd = useMemo(() => sumBase(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
+  const loss = useMemo(() => (state.readonly ? 0 : stopLosses(state, today).total), [state, today]);
   const live = useMemo(
     () =>
       state.subscriptions
@@ -468,6 +482,14 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             <b>{tot.activeCount}</b>
             <span>{t('overview.stmt.active')}</span>
           </div>
+          {/* 退订、停用后没退回的钱：有才显示，点开到报告页的明细 */}
+          {loss > 0.005 && (
+            <button type="button" className="stmt-loss" onClick={openLosses}>
+              <span>{t('overview.stmt.loss')}</span>
+              <b>{money(loss, base, { compact: true })}</b>
+              <Icon name="right" size={14} />
+            </button>
+          )}
         </div>
       </div>
       <div className="stmt-r">

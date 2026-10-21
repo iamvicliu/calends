@@ -69,6 +69,7 @@
     "active": "Active",
     "share": "{amount}/mo · {pct}%",
     "caption": "Subscription stars · bubble size shows monthly cost",
-    "aria": "{name}, {amount} per month"
+    "aria": "{name}, {amount} per month",
+    "loss": "Lost to cancellations"
   }
 }

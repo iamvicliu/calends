@@ -65,6 +65,7 @@
     "active": "Aktif",
     "share": "{amount}/bln · {pct}%",
     "caption": "Bintang langganan · ukuran gelembung menunjukkan biaya bulanan",
-    "aria": "{name}, {amount} per bulan"
+    "aria": "{name}, {amount} per bulan",
+    "loss": "Kerugian pembatalan"
   }
 }
