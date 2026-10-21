@@ -431,7 +431,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           <Cell label={t('settings.open.ics')} onClick={() => setIcs(true)}>
             {s.icsToken ? t('settings.open.on') : t('settings.open.off')}
           </Cell>
-          <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}${base('/')}` : undefined}>
+          <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}${base('/public')}` : undefined}>
             <Toggle
               label={t('settings.open.public')}
               checked={s.publicView}
@@ -461,7 +461,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             </Cell>
           )}
           {s.publicView && (
-            <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />
+            <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open(base('/public'), '_blank')} />
           )}
           <Cell label={t('settings.open.ai')}>
             <Toggle
