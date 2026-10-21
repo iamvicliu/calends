@@ -5,7 +5,8 @@ import { transformSync } from 'oxc-transform-react';
 import * as billing from './billing.ts';
 import * as phases from './phases.ts';
 import * as format from './format.ts';
-import { flatten, setLocale, t } from './i18n.ts';
+import * as gantt from './gantt.ts';
+import { flatten, intlLocale, setLocale, t } from './i18n.ts';
 import { DEFAULT_SETTINGS, type Subscription } from './types.ts';
 
 const messages = {};
@@ -63,7 +64,9 @@ function runtime(file: string, extra: Record<string, unknown>) {
     ...billing,
     ...phases,
     ...format,
+    ...gantt,
     t,
+    intlLocale,
     Cell: 'Cell',
     Picker: 'Picker',
     CurrencySelect: 'CurrencySelect',

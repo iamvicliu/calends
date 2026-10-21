@@ -13,18 +13,14 @@ import {
   priceAt,
 } from '../../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../../shared/format.ts';
-import { t } from '../../../shared/i18n.ts';
+import { intlLocale, t } from '../../../shared/i18n.ts';
+import { GANTT_STEP, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { FlagImg, Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
 import { usePref } from '../store.ts';
 
-type Zoom = 'year' | '1y' | '3y' | 'all';
-
-/** 每种范围一次翻多少个月 */
-const STEP: Record<Exclude<Zoom, 'all'>, number> = { year: 12, '1y': 12, '3y': 36 };
 type ColorBy = 'method' | 'region';
-const isZoom = (v: string): v is Zoom => ['year', '1y', '3y', 'all'].includes(v);
 const isColorBy = (v: string): v is ColorBy => v === 'method' || v === 'region';
 
 const PALETTE = ['var(--c1)', 'var(--c4)', 'var(--c5)', 'var(--c3)', 'var(--c6)', 'var(--c7)', 'var(--c2)', 'var(--c8)', 'var(--c10)', 'var(--c9)'];
@@ -59,11 +55,14 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
  */
 export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription[]; state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   // 缩放与着色方式存在服务端，多台设备一致
-  const [zoom, setZoomRaw] = usePref<Zoom>('gantt-zoom', 'year', isZoom);
-  // 左右平移：pan 是已确定的偏移（天），drag 是拖动中尚未松手的偏移；松手后对齐到月初
+  const [zoom, setZoomRaw] = usePref<GanttZoom>('gantt-zoom', '1y', isGanttZoom);
+  // 左右平移：pan 是已确定的偏移（天），drag 是拖动中尚未松手的偏移；松手后对齐到月份锚点
   const [pan, setPan] = useState(0);
   const [drag, setDrag] = useState(0);
-  const setZoom = (z: Zoom) => {
+  const setZoom = (z: GanttZoom) => {
+    clearTimeout(wheelIdle.current);
+    dragFrom.current = null;
+    dragged.current = false;
     setZoomRaw(z);
     setPan(0);
     setDrag(0);
@@ -137,37 +136,20 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   }, [subs, today, state.readonly]);
 
   const earliest = rows.reduce((m, r) => (r.first < m ? r.first : m), today);
-  // 基准窗口：今年 = 1 月 1 日到年底；1 年、3 年以今天为中偏右；全部 = 最早一笔到半年后
-  const baseStart =
-    zoom === 'year'
-      ? `${today.slice(0, 4)}-01-01`
-      : zoom === '1y'
-        ? addMonths(today, -9)
-        : zoom === '3y'
-          ? addMonths(today, -30)
-          : `${earliest.slice(0, 7)}-01`;
-  const baseEnd = zoom === 'year' ? `${Number(today.slice(0, 4)) + 1}-01-01` : addMonths(today, zoom === '1y' ? 3 : 6);
+  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest);
   const offset = zoom === 'all' ? 0 : Math.round(pan + drag);
   const start = addDays(baseStart, offset);
   const end = addDays(baseEnd, offset);
   const days = Math.max(1, diffDays(start, end));
   const k = w / days;
   const pannable = zoom !== 'all';
-  /** 把窗口起点对齐到最近的月份（与基准窗口同一天），返回对应的偏移 */
-  const snap = (raw: number) => {
-    const d = addDays(baseStart, Math.round(raw));
-    const [y, m] = d.split('-').map(Number);
-    const idx = y * 12 + (m - 1) + (Number(d.slice(8)) > 15 ? 1 : 0);
-    const aligned = idx;
-    const target = `${Math.floor(aligned / 12)}-${String((aligned % 12) + 1).padStart(2, '0')}-${baseStart.slice(8)}`;
-    return diffDays(baseStart, target);
-  };
+  const snap = (raw: number) => snapGanttPan(baseStart, raw);
   const step = (dir: 1 | -1) => {
     if (zoom === 'all') return;
-    setPan(diffDays(baseStart, addMonths(start, dir * STEP[zoom])));
+    setPan(stepGanttPan(baseStart, offset, dir * GANTT_STEP[zoom]));
   };
 
-  // 触控板横向滑动：直接平移，停下 150ms 后对齐到月初
+  // 触控板横向滑动：直接平移，停下 150ms 后对齐到月份锚点
   const wheelIdle = useRef<number | undefined>(undefined);
   const onWheel = (e: WheelEvent) => {
     if (!pannable || !k || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
@@ -184,7 +166,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     if (!el) return;
     const h = (e: WheelEvent) => wheel(e);
     el.addEventListener('wheel', h, { passive: false });
-    return () => el.removeEventListener('wheel', h);
+    return () => {
+      el.removeEventListener('wheel', h);
+      clearTimeout(wheelIdle.current);
+    };
   }, []);
   // 按住拖动：超过 6px 才算拖动，拖动后吞掉这次点击，避免误开详情
   const dragFrom = useRef<number | null>(null);
@@ -210,10 +195,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
       setDrag(0);
     }
   };
-  const rangeLabel =
-    zoom === 'year' && start.slice(5) === '01-01' && end.slice(0, 4) !== start.slice(0, 4) && end.slice(5) === '01-01'
-      ? start.slice(0, 4)
-      : `${monthLabel(start.slice(0, 7))} – ${monthLabel(addDays(end, -1).slice(0, 7))}`;
+  const rangeLabel = `${monthLabel(start.slice(0, 7))} – ${monthLabel(addDays(end, -1).slice(0, 7))}`;
   const x = (d: string) => Math.min(w, Math.max(0, diffDays(start, d) * k));
 
   // 颜色：按支付方式或地区，固定顺序分配
@@ -223,17 +205,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   const labelOf = (key: string) =>
     colorBy === 'method' ? (state.methods.find((m) => m.id === key)?.name ?? t('list.unassigned')) : key === '—' ? t('list.gantt.noRegion') : key;
 
-  // 刻度：年份始终标；1 年视图再标每个月
-  const ticks: Array<{ d: string; label: string; major: boolean }> = [];
-  // 相邻刻度至少隔 40px：窄屏隔月、隔季度甚至只标年份，免得月份文字挤在一起
-  const monthPx = k * 30.4;
-  const every = [1, 2, 3, 6, 12].find((n) => n >= (zoom === '3y' ? 3 : 1) && monthPx * n >= 40) ?? 12;
-  for (let d = `${start.slice(0, 7)}-01`; d <= end; d = addMonths(d, 1)) {
-    if (d < start) continue;
-    const jan = d.slice(5, 7) === '01';
-    const m = Number(d.slice(5, 7)) - 1;
-    if (jan || (zoom !== 'all' && m % every === 0)) ticks.push({ d, label: jan ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false }), major: jan });
-  }
+  const ticks = ganttTicks(zoom, start, end, w, intlLocale());
 
   return (
     <div className="gantt">
@@ -243,7 +215,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           value={zoom}
           onChange={setZoom}
           options={[
-            ['year', t('list.gantt.zoomYear')],
+            ['3m', t('list.gantt.zoom3m')],
+            ['6m', t('list.gantt.zoom6m')],
             ['1y', t('list.gantt.zoom1y')],
             ['3y', t('list.gantt.zoom3y')],
             ['all', t('list.all')],
@@ -283,11 +256,13 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         <div className="gt-head">
           <div className="gt-label" />
           <div className="gt-track" ref={box}>
-            {ticks.map((t) => (
-              <span key={t.d} className={`gt-tick ${t.major ? 'major' : ''}`} style={{ left: x(t.d) }}>
-                {t.label}
-              </span>
-            ))}
+            {ticks
+              .filter((t) => t.label)
+              .map((t) => (
+                <span key={t.d} className={`gt-tick ${t.major ? 'major' : ''}`} style={{ left: t.labelX }}>
+                  {t.label}
+                </span>
+              ))}
           </div>
         </div>
         <div className="gt-body" ref={body}>
@@ -297,7 +272,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
               {ticks.map((t) => (
                 <i key={t.d} className={t.major ? 'major' : ''} style={{ left: x(t.d) }} />
               ))}
-              <b className="gt-today" style={{ left: x(today) }} />
+              {today >= start && today <= end && <b className="gt-today" style={{ left: x(today) }} />}
             </div>
           </div>
           {rows.map((r) => {
@@ -315,25 +290,28 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                   <span>{r.s.name}</span>
                 </div>
                 <div className="gt-track">
-                  {r.gaps.map((g) => (
-                    <span
-                      key={g.from}
-                      className="gt-gap"
-                      // 两端各伸进相邻段的圆角下面，虚线和前后两段首尾相接
-                      style={{ left: x(g.from) - GAP_TUCK, width: Math.max(0, x(g.to) - x(g.from) + GAP_TUCK * 2) }}
-                      title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
-                    >
-                      {x(g.to) - x(g.from) > 90 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
-                    </span>
-                  ))}
+                  {r.gaps
+                    .filter((g) => g.to >= start && g.from <= end)
+                    .map((g) => (
+                      <span
+                        key={g.from}
+                        className="gt-gap"
+                        // 两端各伸进相邻段的圆角下面，虚线和前后两段首尾相接
+                        style={{ left: x(g.from) - GAP_TUCK, width: Math.max(0, x(g.to) - x(g.from) + GAP_TUCK * 2) }}
+                        title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
+                      >
+                        {x(g.to) - x(g.from) > 90 && <em>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>}
+                      </span>
+                    ))}
                   {r.segs.map((g, gi) => {
+                    const to = g.open && end > g.to ? end : g.to;
                     const left = x(g.from);
                     const top = 8 + r.lanes[gi] * LANE;
 
                     const stopped = stopSummary(g.v, today);
                     const unused = !state.readonly && !!stopped && stopped.wastedDays > 0;
                     const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
-                    if ((unused ? wastedUntil : g.to) < start || g.from > end) return null;
+                    if ((unused ? wastedUntil : to) < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                     // 买断：一个圆点；有结束日（如含一年更新、之后改订阅）时，再拉一条细线到结束日，和后面的虚线、下一段接上
@@ -348,15 +326,17 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       );
                     // 段内按调价、首期优惠切成几截，每截标自己的价格；
                     // 周期够宽时再按每次续费切开：每个周期一颗圆角胶囊，连续续订的首尾相接
-                    const renewals = chargesBetween(g.v, g.from, g.to, today)
-                      .filter((c) => c.amount > 0 && c.date > g.from && c.date < g.to)
+                    const renewals = chargesBetween(g.v, g.from, to, today)
+                      .filter((c) => c.amount > 0 && c.date > g.from && c.date < to)
                       .map((c) => c.date);
                     const perCycle = renewals.length > 1 ? diffDays(renewals[0], renewals[1]) * k : Infinity;
-                    const cycleCuts = new Set(perCycle >= CYCLE_MIN_PX ? renewals : []);
+                    // 短窗口优先给价格留空间，避免窄屏每期都切开后没有一截能放下价格。
+                    const cycleMin = zoom === '3m' || zoom === '6m' ? 80 : CYCLE_MIN_PX;
+                    const cycleCuts = new Set(perCycle >= cycleMin ? renewals : []);
                     const cuts = [
-                      ...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), ...cycleCuts, g.to]),
+                      ...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), ...cycleCuts, to]),
                     ]
-                      .filter((d) => d >= g.from && d <= g.to)
+                      .filter((d) => d >= g.from && d <= to)
                       .sort();
                     let labeled = '';
                     return (
@@ -382,7 +362,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                               style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                               title={ptip || tip}
                             >
-                              {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && (
+                              {g.v.trialEnd && a < g.v.trialEnd && x(g.v.trialEnd) > pl && (
                                 <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />
                               )}
                               {label && (

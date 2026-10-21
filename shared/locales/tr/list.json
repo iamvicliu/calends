@@ -94,6 +94,8 @@
       "other": "{count} gün"
     },
     "noRegion": "Bölge yok",
+    "zoom3m": "3A",
+    "zoom6m": "6A",
     "zoom1y": "1Y",
     "zoom3y": "3Y",
     "byMethod": "Ödemeye göre",
@@ -107,7 +109,6 @@
     "introShort": "Tanıtım ",
     "planned": "Planlandı",
     "gap": "Ara",
-    "zoomYear": "Bu yıl",
     "earlier": "Önceki",
     "later": "Sonraki",
     "backToNow": "Bugüne dön"
