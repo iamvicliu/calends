@@ -3,7 +3,7 @@ import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../share
 import { cnDate, money, monthLabel, relDays, weekdayShort } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar } from '../components/ui.tsx';
+import { Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -44,6 +44,15 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       ),
     [state, year, month, today],
   );
+  // 图标只排一行、叠放约四成：按格子实际宽度算能放几个，放不下的换成「+N」，格子高度始终不变。
+  // 悬停格子时依次轻浮一下，悬停某个图标时它浮到最上层；是哪几项看右侧当天列表
+  const [gridRef, gridW] = useWidth();
+  const narrow = gridW > 0 && gridW < 560;
+  const icon = narrow ? 17 : 24;
+  const step = Math.round(icon * 0.6);
+  const inner = gridW / 7 - (narrow ? 6 : 14);
+  const MORE_W = 20;
+  const iconCap = gridW ? Math.max(2, Math.floor((inner - icon - MORE_W) / step) + 1) : 4;
   const byDay = useMemo(() => {
     const m = new Map<string, Charge[]>();
     for (const c of charges) m.set(c.date, [...(m.get(c.date) ?? []), c]);
@@ -107,7 +116,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         ) : (
           <div className="cal-wrap">
             <div className="card cal">
-              <div className="cal-grid">
+              <div className="cal-grid" ref={gridRef}>
                 {DOW.map((d, i) => (
                   <div key={i} className="cal-dow">
                     {d}
@@ -115,6 +124,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                 ))}
                 {grid.map((d) => {
                   const items = byDay.get(d) ?? [];
+                  const shown = items.length > iconCap ? items.slice(0, iconCap) : items;
                   return (
                     <button
                       key={d}
@@ -125,13 +135,17 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                         <b>{Number(d.slice(8))}</b>
                         {items.length > 0 && <span className="sum">{money(sumOf(items), base, { decimals: 0 })}</span>}
                       </div>
-                      <div className="cal-icons">
-                        {items.slice(0, 4).map((c) => (
-                          <span key={c.sub.id} {...tipProps(() => `${c.sub.name} · ${money(c.amount, c.currency)}`)}>
+                      <div className="cal-icons" style={{ '--m0': `${step - icon}px` } as Record<string, string>}>
+                        {shown.map((c, i) => (
+                          <span
+                            key={c.sub.id}
+                            style={{ '--i': i } as Record<string, number>}
+                            {...tipProps(() => `${c.sub.name} · ${money(c.amount, c.currency)}`)}
+                          >
                             <SubIcon sub={c.sub} size={24} />
                           </span>
                         ))}
-                        {items.length > 4 && <span className="cal-more">+{items.length - 4}</span>}
+                        {items.length > shown.length && <span className="cal-more">+{items.length - shown.length}</span>}
                       </div>
                     </button>
                   );

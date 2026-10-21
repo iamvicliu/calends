@@ -941,7 +941,37 @@ a {
 .cal-cell:hover {
   background: var(--fill-2);
 }
-.cal-cell.out {
+/* 格子之间的分隔线：极浅的细实线，画在格子间隙正中；第一列不画竖线。窄屏只留横线 */
+.cal-cell::before,
+.cal-cell::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+.cal-cell::before {
+  left: -2px;
+  right: -2px;
+  top: -2.5px;
+  border-top: 1px dashed color-mix(in srgb, var(--label) 9%, transparent);
+}
+.cal-cell::after {
+  top: -2px;
+  bottom: -2px;
+  left: -2.5px;
+  border-left: 1px dashed color-mix(in srgb, var(--label) 9%, transparent);
+}
+.cal-cell:nth-child(7n + 8)::after {
+  display: none;
+}
+/* 选中、今天的高亮块自成一块：把贴着它四边的线隐去（自己的上、左，右邻的左，下邻的上） */
+.cal-cell.sel::before,
+.cal-cell.sel::after,
+.cal-cell.sel + .cal-cell::after,
+.cal-cell.sel + * + * + * + * + * + * + .cal-cell::before {
+  display: none;
+}
+/* 只让内容变淡，分隔线保持一致 */
+.cal-cell.out > * {
   opacity: 0.3;
 }
 .cal-cell.sel {
@@ -978,9 +1008,41 @@ a {
 }
 .cal-icons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
+  flex-wrap: nowrap;
+  align-items: center;
   margin-top: auto;
+  min-width: 0;
+}
+/* 叠放：后一个压住前一个约四成，描一圈底色隔开。悬停格子时依次轻浮，悬停某个图标时它浮到最上层 */
+.cal-icons > span {
+  position: relative;
+  transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.cal-icons > span + span {
+  margin-left: var(--m0, -10px);
+}
+@media (hover: hover) {
+  .cal-cell:hover .cal-icons > span:not(.cal-more) {
+    transform: translateY(-3px);
+    transition-delay: calc(var(--i, 0) * 35ms);
+  }
+  .cal-cell:hover .cal-icons > span:not(.cal-more):hover {
+    z-index: 2;
+    transform: translateY(-4px) scale(1.15);
+    transition-delay: 0s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cal-icons > span {
+    transition: none;
+  }
+}
+.cal-icons .ico {
+  box-shadow: 0 0 0 1.5px var(--card);
+}
+.cal-icons > span.cal-more,
+.cal-cell:hover .cal-icons > span.cal-more {
+  margin-left: 4px;
 }
 .cal-more {
   font-size: 10.5px;
@@ -1016,6 +1078,9 @@ a {
   .cal-icons {
     justify-content: center;
     margin-top: 0;
+  }
+  .cal-cell::after {
+    display: none;
   }
   .cal-icons .ico {
     --s: 17px !important;
