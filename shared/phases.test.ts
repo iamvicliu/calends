@@ -93,6 +93,9 @@ test('并行期间：当前阶段取最晚开始的那段，activePhases 列出�
   assert.equal(effectiveStatus(s, '2026-09-01'), 'active');
   assert.deepEqual(phaseLanes(phaseSubs(s)), [0, 1]);
   assert.deepEqual(phaseLanes(phaseSubs(switchPlan(base(), '2026-06-01', TR))), [0, 0]);
+  // 首尾同一天交接的连续升级仍是一行；真正并行（旧段结束晚于新段开始）才分行
+  assert.deepEqual(phaseLanes([{ start: '2026-06-16', end: '2026-07-16' }, { start: '2026-07-16', end: '2026-08-16' }, { start: '2026-08-16' }]), [0, 0, 0]);
+  assert.deepEqual(phaseLanes([{ start: '2026-06-16', end: '2026-07-20' }, { start: '2026-07-16' }]), [0, 1]);
 });
 
 test('并行期间的月成本是两段之和', () => {

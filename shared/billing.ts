@@ -157,7 +157,8 @@ export function isGap(prevEnd: string | undefined, nextStart: string): boolean {
 export function phaseLanes(vs: Array<{ start: string; end?: string }>): number[] {
   const laneEnd: string[] = [];
   return vs.map((v) => {
-    let l = laneEnd.findIndex((e) => e < v.start);
+    // 同一天交接（旧段结束日 = 新段开始日）是换套餐，不是并行：仍放在同一行
+    let l = laneEnd.findIndex((e) => e <= v.start);
     if (l < 0) l = laneEnd.length;
     laneEnd[l] = v.end ?? '9999-12-31';
     return l;
