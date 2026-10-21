@@ -4307,6 +4307,17 @@ select.btn {
   color: #6e6e73;
 }
 
+/* 白底卡面（Google Play）：深色文字与细描边 */
+.paycard.light {
+  color: #1d1d1f;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.paycard.light .pc-ccy {
+  background: rgba(0, 0, 0, 0.06);
+}
+
 /* 支付方式标记：产品 logo + 国旗角标 */
 .mmark {
   --s: 36px;

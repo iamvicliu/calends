@@ -98,8 +98,8 @@ function fmtPhone(p: string): string {
 
 const isSim = (m: PaymentMethod) => m.kind === 'phone';
 
-/** 卡面样式：手机话费做成 SIM 卡，App Store 余额做成钛金属卡（参照 Apple Card） */
-const faceClass = (m: PaymentMethod) => (isSim(m) ? 'sim' : brandOf(m) === 'appstore' ? 'apple' : '');
+/** 卡面样式：手机话费做成 SIM 卡，App Store 余额做成钛金属卡（参照 Apple Card），Google Play 是白底深字 */
+const faceClass = (m: PaymentMethod) => (isSim(m) ? 'sim' : brandOf(m) === 'appstore' ? 'apple' : m.kind === 'googleplay' ? 'light' : '');
 
 /** 卡面：品牌标旋转放大做水印并渐隐，角上放清晰的小 logo；手机话费做成 SIM 卡 */
 function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; label: string; value: React.ReactNode; right: string; rightSub: string }) {
