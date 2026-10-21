@@ -86,7 +86,7 @@ export function SubShare({ sub, state, today, onClose }: { sub: Subscription; st
     <ShareSheet
       title={t('share.title', { name: sub.name })}
       styles={STYLES()}
-      storageKey="ledger:sub-share-style"
+      prefKey="sub-share-style"
       base={st.base}
       fileName={(l) => `${sub.name}-${l}.png`}
       onClose={onClose}

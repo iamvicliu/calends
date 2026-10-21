@@ -1,3 +1,4 @@
+import type { Prefs } from './prefs.ts';
 // 前端与 Worker 共用的数据模型。日期一律用 'YYYY-MM-DD' 字符串，按「日」计算，避免时区漂移。
 import { t } from './i18n.ts';
 import type { Category } from './categories.ts';
@@ -331,6 +332,8 @@ export interface AppState {
   fx: FxTable;
   /** 扣款日的历史汇率；缺失的日期用相邻日期或当前汇率兜底 */
   fxHistory?: FxHistory;
+  /** 界面配置（视图、排序、主题等），多台设备同步；公开页不下发 */
+  prefs?: Prefs;
   /** 匿名公开视图时为 true（已脱敏、只读） */
   readonly?: boolean;
   /** 演示站的只读数据 */

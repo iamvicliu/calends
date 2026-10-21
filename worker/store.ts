@@ -1,6 +1,7 @@
 import { FALLBACK_FX } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import { linkPeople } from '../shared/people.ts';
+import type { Prefs } from '../shared/prefs.ts';
 import type { Env } from './env.ts';
 import { keepSet, loadFxHistory } from './fx.ts';
 
@@ -56,12 +57,13 @@ async function ensurePeople(env: Env, state: AppState): Promise<void> {
 }
 
 export async function loadState(env: Env): Promise<AppState> {
-  const [subs, methods, settings, fx, people] = await Promise.all([
+  const [subs, methods, settings, fx, people, prefs] = await Promise.all([
     env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>(),
     env.DB.prepare('SELECT data FROM methods').all<{ data: string }>(),
     getSettings(env),
     getFx(env),
     getPeople(env),
+    getKv<Prefs>(env, 'prefs'),
   ]);
   const state: AppState = {
     subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
@@ -74,6 +76,7 @@ export async function loadState(env: Env): Promise<AppState> {
     people,
     settings,
     fx,
+    prefs: prefs ?? {},
   };
   await ensurePeople(env, state);
   state.fxHistory = await loadFxHistory(env, keepSet(state));

@@ -3,7 +3,8 @@ import type { ReactNode as ComponentChildren } from 'react';
 import { useRef, useState } from 'react';
 import { money } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
-import { toast } from '../store.ts';
+import { toast, usePref } from '../store.ts';
+import type { PrefKey } from '../../shared/prefs.ts';
 import { Icon, Seg, Sheet, Toggle } from './ui.tsx';
 
 /**
@@ -13,7 +14,7 @@ import { Icon, Seg, Sheet, Toggle } from './ui.tsx';
 export function ShareSheet<S extends string>({
   title,
   styles,
-  storageKey,
+  prefKey,
   fileName,
   base,
   top,
@@ -23,7 +24,8 @@ export function ShareSheet<S extends string>({
   title: string;
   styles: Array<[S, string]>;
   /** 记住上次选的样式 */
-  storageKey: string;
+  /** 记住上次选的样式（多台设备同步） */
+  prefKey: PrefKey;
   fileName: (style: string) => string;
   base: string;
   /** 样式选择上方的额外控件（如年份） */
@@ -32,26 +34,13 @@ export function ShareSheet<S extends string>({
   render: (style: S, ctx: { hide: boolean; m: (v: number, ccy?: string) => string }) => ComponentChildren;
   onClose: () => void;
 }) {
-  const [style, setStyle] = useState<S>(() => {
-    try {
-      const v = localStorage.getItem(storageKey) as S | null;
-      return v && styles.some(([k]) => k === v) ? v : styles[0][0];
-    } catch {
-      return styles[0][0];
-    }
-  });
+  const [style, setStyle] = usePref<S>(prefKey, styles[0][0], (v): v is S => styles.some(([k]) => k === v));
   const [amounts, setAmounts] = useState(true);
   const [busy, setBusy] = useState(false);
   const node = useRef<HTMLDivElement>(null);
   const m = (v: number, ccy = base) => money(v, ccy, { compact: true });
-  const pick = (s: S) => {
-    setStyle(s);
-    try {
-      localStorage.setItem(storageKey, s);
-    } catch {
-      /* ignore */
-    }
-  };
+  const pick = (s: S) => setStyle(s);
+
   // 3 倍像素导出，发到聊天里也清楚
   const render3x = () => toBlob(node.current!, { pixelRatio: 3, skipFonts: true, cacheBust: false, includeQueryParams: true });
   const copy = async () => {

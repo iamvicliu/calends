@@ -37,7 +37,8 @@ import { backfill, fxStatus, recordToday } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, runScheduled, sendDigest, type Digest } from './notify.ts';
 import { renderEmail } from './email.ts';
-import { getFx, getPeople, getSettings, loadState, loadSubs, putKv, remove, replaceAll, saveSettingsWithSubs, upsert, writePeople } from './store.ts';
+import { getFx, getKv, getPeople, getSettings, loadState, loadSubs, putKv, remove, replaceAll, saveSettingsWithSubs, upsert, writePeople } from './store.ts';
+import { mergePrefs, type Prefs } from '../shared/prefs.ts';
 import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './mcp.ts';
 import { searchAppStore, TOOLS, toolTitle } from './mcp-tools.ts';
@@ -228,6 +229,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       await remove(env, 'methods', m[1]);
       return json({ ok: true });
     }
+  }
+  // 界面配置：按项合并，两台设备改不同的项互不覆盖
+  if (path === '/api/prefs' && method === 'PATCH') {
+    const next = mergePrefs((await getKv<Prefs>(env, 'prefs')) ?? {}, await req.json().catch(() => null));
+    await putKv(env, 'prefs', next);
+    return json(next);
   }
   if (path === '/api/settings' && method === 'PUT') {
     const cur = await getSettings(env);

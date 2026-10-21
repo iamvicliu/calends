@@ -86,7 +86,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     <ShareSheet
       title={t('review.title')}
       styles={STYLES()}
-      storageKey="ledger:share-style"
+      prefKey="share-style"
       base={state.settings.baseCurrency}
       fileName={(l) => t('review.fileName', { year, style: l })}
       top={years.length > 1 && <Seg value={year} onChange={setYear} options={years.map((y) => [y, y] as [string, string])} />}

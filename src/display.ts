@@ -1,9 +1,6 @@
 // 金额显示偏好：列表里显示原币，还是折算成本位币。只存在本机，侧边栏与列表共用
-import { useEffect, useState } from 'react';
 import { intlLocale, t } from '../shared/i18n.ts';
-
-const KEY = 'ledger:list-ccy';
-const EVENT = 'ledger:display-ccy';
+import { usePref, writePref } from './store.ts';
 
 /** 按当前语言缓存一份货币名称表 */
 let namesLoc = '';
@@ -41,32 +38,14 @@ export function ccyName(code: string): string {
   }
 }
 
-function getOrig(): boolean {
-  try {
-    return localStorage.getItem(KEY) !== 'base';
-  } catch {
-    return true;
-  }
-}
-
 export function setOrig(orig: boolean) {
-  try {
-    localStorage.setItem(KEY, orig ? 'orig' : 'base');
-  } catch {
-    /* ignore */
-  }
-  window.dispatchEvent(new Event(EVENT));
+  writePref('list-ccy', orig ? 'orig' : 'base');
 }
 
-/** 列表是否显示原币 */
+/** 列表是否显示原币（多台设备同步） */
 export function useOrig(): boolean {
-  const [v, setV] = useState(getOrig);
-  useEffect(() => {
-    const on = () => setV(getOrig());
-    window.addEventListener(EVENT, on);
-    return () => window.removeEventListener(EVENT, on);
-  }, []);
-  return v;
+  const [v] = usePref<'orig' | 'base'>('list-ccy', 'orig', (x): x is 'orig' | 'base' => x === 'orig' || x === 'base');
+  return v !== 'base';
 }
 
 /** public/flags 里有的国旗（来自 flagpedia，公有领域），避免请求不存在的图片 */

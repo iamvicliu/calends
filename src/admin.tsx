@@ -4,7 +4,7 @@ import { addDays, diffDays, effectiveStatus, nextCharge } from '../shared/billin
 import { cnDate, money } from '../shared/format.ts';
 import type { AppState, Subscription } from '../shared/types.ts';
 import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
-import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, useStore } from './store.ts';
+import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
 import { CurrencyPicker } from './components/CurrencyPicker.tsx';
@@ -385,27 +385,6 @@ function Palette({
   );
 }
 
-function useLocalFlag(key: string): [boolean, (v: boolean) => void] {
-  const [v, setV] = useState(() => {
-    try {
-      return localStorage.getItem(key) === '1';
-    } catch {
-      return false;
-    }
-  });
-  return [
-    v,
-    (nv: boolean) => {
-      setV(nv);
-      try {
-        localStorage.setItem(key, nv ? '1' : '0');
-      } catch {
-        /* ignore */
-      }
-    },
-  ];
-}
-
 function App() {
   const { phase, state, error } = useStore();
   const route = useRoute();
@@ -415,7 +394,9 @@ function App() {
   const [review, setReview] = useState(false);
   const [ics, setIcs] = useState(false);
   const [palette, setPalette] = useState(false);
-  const [collapsed, setCollapsed] = useLocalFlag('ledger:sidebar-collapsed');
+  const [collapsedPref, setCollapsedPref] = usePref<'0' | '1'>('sidebar-collapsed', '0', (v): v is '0' | '1' => v === '0' || v === '1');
+  const collapsed = collapsedPref === '1';
+  const setCollapsed = (v: boolean) => setCollapsedPref(v ? '1' : '0');
   const [drawer, setDrawer] = useState(false);
 
   useEffect(() => setDrawer(false), [route]);

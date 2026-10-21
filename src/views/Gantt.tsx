@@ -5,12 +5,15 @@ import { t } from '../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
 import { Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
+import { usePref } from '../store.ts';
 
 type Zoom = 'year' | '1y' | '3y' | 'all';
 
 /** 每种范围一次翻多少个月 */
 const STEP: Record<Exclude<Zoom, 'all'>, number> = { year: 12, '1y': 12, '3y': 36 };
 type ColorBy = 'method' | 'region';
+const isZoom = (v: string): v is Zoom => ['year', '1y', '3y', 'all'].includes(v);
+const isColorBy = (v: string): v is ColorBy => v === 'method' || v === 'region';
 
 const PALETTE = ['var(--c1)', 'var(--c4)', 'var(--c5)', 'var(--c3)', 'var(--c6)', 'var(--c7)', 'var(--c2)', 'var(--c8)', 'var(--c10)', 'var(--c9)'];
 
@@ -43,7 +46,8 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
  * 条按支付方式或地区上色；过去的实心、未来的半透明；计划中的斜线；两段之间空着的是断订；条下的小刻度是每笔扣款。
  */
 export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription[]; state: AppState; today: string; onOpen: (s: Subscription) => void }) {
-  const [zoom, setZoomRaw] = useState<Zoom>('year');
+  // 缩放与着色方式存在服务端，多台设备一致
+  const [zoom, setZoomRaw] = usePref<Zoom>('gantt-zoom', 'year', isZoom);
   // 左右平移：pan 是已确定的偏移（天），drag 是拖动中尚未松手的偏移；松手后对齐到月初
   const [pan, setPan] = useState(0);
   const [drag, setDrag] = useState(0);
@@ -52,7 +56,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     setPan(0);
     setDrag(0);
   };
-  const [colorBy, setColorBy] = useState<ColorBy>('method');
+  const [colorBy, setColorBy] = usePref<ColorBy>('gantt-color', 'method', isColorBy);
   const [box, w] = useWidth();
 
   // 排序、筛选变化时的过渡（FLIP）：记下每行上一次的位置，重排后从旧位置平滑滑到新位置；新出现的行淡入

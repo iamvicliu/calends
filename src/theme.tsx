@@ -1,10 +1,10 @@
 // 主题：亮色 → 暗色 → 跟随系统 三者轮换，后台与公开页共用
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { t } from '../shared/i18n.ts';
+import { usePref } from './store.ts';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-const KEY = 'ledger:theme';
 const NEXT: Record<ThemeMode, ThemeMode> = { light: 'dark', dark: 'system', system: 'light' };
 /** 主题名称：用 getter 在读取时翻译，THEME_LABEL[mode] 的写法不变 */
 export const THEME_LABEL: Record<ThemeMode, string> = {
@@ -21,22 +21,16 @@ export const THEME_LABEL: Record<ThemeMode, string> = {
 
 const mq = () => matchMedia('(prefers-color-scheme: dark)');
 
-function readMode(): ThemeMode {
-  try {
-    const v = localStorage.getItem(KEY);
-    return v === 'light' || v === 'dark' ? v : 'system';
-  } catch {
-    return 'system';
-  }
-}
+const isMode = (v: string): v is ThemeMode => v === 'light' || v === 'dark' || v === 'system';
 
 /** 始终写入 data-theme，跟随系统时按系统当前外观取值 */
 function apply(m: ThemeMode) {
   document.documentElement.dataset.theme = m === 'system' ? (mq().matches ? 'dark' : 'light') : m;
 }
 
+/** 主题跟着账号走，多台设备一致；公开页没有登录数据时只用本机副本 */
 export function useThemeMode(): [ThemeMode, () => void] {
-  const [mode, setMode] = useState(readMode);
+  const [mode, setMode] = usePref<ThemeMode>('theme', 'system', isMode);
   useEffect(() => {
     apply(mode);
     if (mode !== 'system') return;
@@ -47,13 +41,7 @@ export function useThemeMode(): [ThemeMode, () => void] {
   }, [mode]);
   const cycle = () => {
     const n = NEXT[mode];
-    try {
-      if (n === 'system') localStorage.removeItem(KEY);
-      else localStorage.setItem(KEY, n);
-    } catch {
-      /* 隐私模式下只在本次生效 */
-    }
-    setMode(n);
+    setMode(n === 'system' ? null : n);
   };
   return [mode, cycle];
 }

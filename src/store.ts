@@ -5,6 +5,7 @@ import { mergePeople, syncPerson } from '../shared/people.ts';
 import { locale, t } from '../shared/i18n.ts';
 import { renameInSubs, type Category } from '../shared/categories.ts';
 import { resyncShares } from '../shared/carpool.ts';
+import { PREF_KEYS, type PrefKey } from '../shared/prefs.ts';
 import { toast as sonner } from 'sonner';
 
 const CACHE_KEY = 'ledger:state:v1';
@@ -86,7 +87,10 @@ export async function boot(): Promise<void> {
     const state = await api<AppState>('/api/state');
     cache(state);
     set({ phase: 'ready', state });
-    if (!state.readonly) void syncFx();
+    if (!state.readonly) {
+      void syncFx();
+      migratePrefs();
+    }
   } catch (e) {
     if (store.phase === 'login') {
       // 401 时丢弃旧缓存，避免他人设备残留数据
@@ -475,4 +479,87 @@ export async function run(fn: () => Promise<unknown>, ok?: string | (ToastOption
     clearTimeout(timer);
     toast(e instanceof Error ? e.message : String(e), true, { id: pending });
   }
+}
+
+// ---------- 界面配置：服务端为准，本机留一份副本供首屏和离线用 ----------
+
+const PREF_LS = (k: string) => `ledger:${k}`;
+
+function localPref(key: PrefKey): string | null {
+  try {
+    return localStorage.getItem(PREF_LS(key));
+  } catch {
+    return null;
+  }
+}
+
+let prefQueue: Record<string, string | null> = {};
+let prefTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** 改一项配置：立即生效，短暂合并后发给服务端；离线失败的留到下次一起发 */
+export function writePref(key: PrefKey, value: string | null) {
+  try {
+    if (value == null) localStorage.removeItem(PREF_LS(key));
+    else localStorage.setItem(PREF_LS(key), value);
+  } catch {
+    /* 隐私模式等 */
+  }
+  const st = store.state;
+  if (!st) return set({});
+  const prefs = { ...st.prefs };
+  if (value == null) delete prefs[key];
+  else prefs[key] = value;
+  replaceState({ ...st, prefs });
+  if (!st.readonly) queuePrefs({ [key]: value });
+}
+
+function queuePrefs(patch: Record<string, string | null>) {
+  Object.assign(prefQueue, patch);
+  // 等待发送期间算作写操作，期间拉回来的旧数据不覆盖本地
+  if (!prefTimer) {
+    writes++;
+    writeSeq++;
+  }
+  clearTimeout(prefTimer);
+  prefTimer = setTimeout(() => void flushPrefs(), 400);
+}
+
+async function flushPrefs() {
+  const body = prefQueue;
+  prefQueue = {};
+  prefTimer = undefined;
+  try {
+    await api('/api/prefs', { method: 'PATCH', body: JSON.stringify(body) });
+  } catch {
+    prefQueue = { ...body, ...prefQueue };
+  } finally {
+    writes--;
+    writeSeq++;
+  }
+}
+
+/** 老版本只存在本机的配置：服务端还没有的，上传一次 */
+function migratePrefs() {
+  const patch: Record<string, string> = {};
+  for (const k of PREF_KEYS) {
+    if (store.state?.prefs?.[k] != null) continue;
+    try {
+      const v = localStorage.getItem(PREF_LS(k));
+      if (v != null) patch[k] = v;
+    } catch {
+      return;
+    }
+  }
+  if (!Object.keys(patch).length) return;
+  replaceState({ ...store.state!, prefs: { ...store.state!.prefs, ...patch } });
+  queuePrefs(patch);
+}
+
+/** 组件里用：值变了（本机改、别的设备改后刷新）会重新渲染 */
+export function usePref<T extends string>(key: PrefKey, fallback: T, valid?: (v: string) => v is T): [T, (v: T | null) => void] {
+  // 从 useStore 的返回值取，React Compiler 才知道它会变（直接读模块里的 store 会被缓存住）
+  const { state } = useStore();
+  const raw = state?.prefs?.[key] ?? localPref(key);
+  const value = raw != null && (!valid || valid(raw)) ? (raw as T) : fallback;
+  return [value, (v) => writePref(key, v)];
 }

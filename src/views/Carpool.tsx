@@ -8,11 +8,21 @@ import type { AppState, ShareMember, Subscription } from '../../shared/types.ts'
 import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
 import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
-import { run, saveSub } from '../store.ts';
+import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
 
 const CAR_FILTERS = ['all', 'live', 'owe', 'settled', 'ended'] as const;
 type CarFilter = (typeof CAR_FILTERS)[number];
+
+/** 展开了哪些车卡（JSON 数组），解析失败当作都收起 */
+function parseIds(raw: string): Set<string> {
+  try {
+    const v = JSON.parse(raw) as unknown;
+    return new Set(Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
 
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
@@ -45,23 +55,13 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean } | null>(null);
   // 车卡默认收起，只看净成本与座位；展开才看账本与成员明细
-  const [expanded, setExpanded] = useState<Set<string>>(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem('ledger:car-open') ?? '[]') as string[]);
-    } catch {
-      return new Set();
-    }
-  });
+  const [openRaw, setOpen] = usePref<string>('car-open', '[]');
+  const expanded = parseIds(openRaw);
   const toggle = (id: string) => {
     const next = new Set(expanded);
     if (next.has(id)) next.delete(id);
     else next.add(id);
-    setExpanded(next);
-    try {
-      localStorage.setItem('ledger:car-open', JSON.stringify([...next]));
-    } catch {
-      /* ignore */
-    }
+    setOpen(JSON.stringify([...next]));
   };
   const candidates = state.subscriptions.filter((s) => !s.share && !s.proxy && live(s) && s.tags.some((tag) => /合租|拼车|家庭|family|shared/i.test(tag)));
 

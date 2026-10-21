@@ -14,26 +14,17 @@ import { useOrig } from '../display.ts';
 import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
 import { Picker } from '../components/Picker.tsx';
+import { usePref } from '../store.ts';
 
 type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
 type Dir = 'asc' | 'desc';
 /** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、最新开始在前 */
 const DEFAULT_DIR: Record<Sort, Dir> = { next: 'asc', cost: 'desc', name: 'asc', start: 'desc' };
-const pref = (k: string) => {
-  try {
-    return localStorage.getItem(k);
-  } catch {
-    return null;
-  }
-};
-const keep = (k: string, v: string) => {
-  try {
-    localStorage.setItem(k, v);
-  } catch {
-    /* 隐私模式等 */
-  }
-};
+type View = 'grid' | 'list' | 'gantt';
+const isSort = (v: string): v is Sort => ['next', 'cost', 'name', 'start'].includes(v);
+const isDir = (v: string): v is Dir => v === 'asc' || v === 'desc';
+const isView = (v: string): v is View => ['grid', 'list', 'gantt'].includes(v);
 
 const FILTERS = (): Array<[Filter, string]> => [
   ['all', t('list.all')],
@@ -66,31 +57,15 @@ export function List({
   const [pay, setPay] = useState<string>('all');
   const [q, setQ] = useState('');
   useEffect(() => setCat(category ?? 'all'), [category]);
-  // 排序与方向记在本机；切换到另一种排序时用它的默认方向，再点同一种则反转
-  const [sort, setSortRaw] = useState<Sort>(() => {
-    const v = pref('ledger:list-sort');
-    return v === 'cost' || v === 'name' || v === 'start' ? v : 'next';
-  });
-  const [dir, setDirRaw] = useState<Dir>(() =>
-    pref('ledger:list-dir') === 'asc' || pref('ledger:list-dir') === 'desc' ? (pref('ledger:list-dir') as Dir) : DEFAULT_DIR[sort],
-  );
-  const setDir = (d: Dir) => {
-    setDirRaw(d);
-    keep('ledger:list-dir', d);
-  };
+  // 排序、方向、视图存在服务端，多台设备一致；切换到另一种排序时用它的默认方向，再点同一种则反转
+  const [sort, setSort] = usePref<Sort>('list-sort', 'next', isSort);
+  const [dir, setDir] = usePref<Dir>('list-dir', DEFAULT_DIR[sort], isDir);
   const chooseSort = (k: Sort) => {
-    setSortRaw(k);
-    keep('ledger:list-sort', k);
+    setSort(k);
     setDir(DEFAULT_DIR[k]);
   };
   const toggleSort = (k: Sort) => (k === sort ? setDir(dir === 'asc' ? 'desc' : 'asc') : chooseSort(k));
-  const [view, setViewRaw] = useState<'grid' | 'list' | 'gantt'>(() => {
-    try {
-      return (localStorage.getItem('ledger:list-view') as 'grid' | 'list' | 'gantt') || 'grid';
-    } catch {
-      return 'grid';
-    }
-  });
+  const [view, setView] = usePref<View>('list-view', 'grid', isView);
   // 金额显示：原币，或折算成侧边栏选的货币（大字为折算后，小字为原币）
   const orig = useOrig();
   const money2 = orig ? 'orig' : state.settings.baseCurrency;
@@ -113,14 +88,6 @@ export function List({
       }; // 外币或不是按月付的，都折成每月多少
     }
     return { value: toBaseAt(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
-  };
-  const setView = (v: 'grid' | 'list' | 'gantt') => {
-    setViewRaw(v);
-    try {
-      localStorage.setItem('ledger:list-view', v);
-    } catch {
-      /* ignore */
-    }
   };
   const base = state.settings.baseCurrency;
 
