@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/icons/icon-192.png" width="96" height="96" alt="Calends" />
+  <img src="app/public/icons/logo.svg" width="96" height="96" alt="Calends" />
 </p>
 
 <h1 align="center">Calends · 订阅账本</h1>
@@ -20,136 +20,103 @@
 <p align="center">
   <img src="docs/screenshots/overview.zh-CN.png" alt="Calends 概览" width="880" />
 </p>
-<p align="center">
-  <img src="docs/screenshots/timeline.zh-CN.png" alt="时间轴视图" width="880" />
-</p>
+<p align="center"><sub>概览 · 虚构演示数据</sub></p>
 
 ---
 
-> Calends 是罗马历每个月的第一天，那天结清账目、收回欠款；英文的 calendar（日历）就由它而来。
+## 把订阅记在一起
 
-## 为什么做它
+花了多少、何时续费、谁还没付钱——Calends 把个人订阅、合租分摊和预付余额记在同一本单用户私密账本里，也支持按需开启只读公开页和 MCP 接入。
 
-大多数订阅记账工具默认你只有一种货币、一张卡、一个人。现实要复杂得多：土耳其区的 App Store、你当车主向成员收钱的家庭套餐、慢慢花完的预付卡、按年用欧元付的服务器、悄悄涨了价的会员。Calends 记下完整的来龙去脉，还能让你的 AI 助手直接查询和修改。
+- **灵活的计费周期**：月付、年付、自定义周期和买断，支持试用、首期优惠、赠送时长与暂停。
+- **完整的订阅历程**：保留调价、换套餐、换区、断订和重叠时段，查看累计支出、实际月均费用与每笔扣款。
+- **多币种记账**：历史扣款使用当日汇率，未来支出使用当前汇率，可切换显示币种。
+- **余额与合租分摊**：管理银行卡、预付余额和礼品卡，估算余额还能用多久，记录家庭套餐收款与替朋友代付的费用。
+- **报告与日历**：支出趋势、现金与权责对比、预付价值、退订节省、订阅体检和可分享的年度回顾；支持月历、年历与私密 ICS 订阅。
+- **续费提醒**：邮件、Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Server酱与自定义 Webhook。
+- **AI 接入**：通过支持 MCP 的助手查询和修改账本，令牌可限制权限，写入前可预览。
+- **数据由你掌握**：密码与 Passkey 登录、设备远程下线、可选的服务端脱敏公开页、JSON 备份恢复和 CSV 导入导出，支持 14 种语言。
 
-## 功能
+<details>
+<summary>查看订阅时间轴</summary>
 
-- **各种周期**：月付、年付、每 N 天/周/月、买断；试用、首期优惠、赠送时长、暂停、到期不续。
-- **完整历程**：调价、换套餐、换区、断更与续订；提前开通新区、旧区尚未到期时，两段可以重叠。每个订阅都有自己的详情页：累计花了多少、实际每月多少、每笔扣款与标价的走势，以及按年分组的扣款记录。
-- **多币种**：过去的扣款按当天汇率折算，未来按今天汇率；可随时切换本位币或显示原币。
-- **钱包与余额续航**：银行卡、App Store / Google Play 余额、礼品卡、手机卡；看余额还能扣几期、撑满一年还要充多少。
-- **合租与代付**：车主记录成员付到哪天、一键收款；也能记替朋友付的钱。「人」是独立的数据，一眼看清每个人欠你多少。
-- **报告**：负 MRR、月度变动瀑布、现金与权责对比、预付价值、退订省下的钱、可执行的「体检」建议，以及可分享的年度回顾图。
-- **日历**：月视图、年视图，以及可订阅到苹果 / 谷歌日历的私密 ICS 链接。
-- **多渠道提醒**：邮件、Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Server酱、自定义 Webhook。
-- **原生 AI**：内置 [MCP](https://modelcontextprotocol.io) 服务器，20 多个工具，Claude、ChatGPT、Codex、Cursor 都能回答「下周有什么要续费」，或者执行「Netflix 从今天起涨到 17.99 美元」。
-- **默认私密**：单用户；密码加 Passkey，登录设备可远程下线。只读公开页可选开启，敏感信息在服务端脱敏，展示哪些订阅由你挑选。
-- **14 种语言**：English、简体中文、繁體中文（台灣／香港）、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский、Türkçe、Bahasa Indonesia、Tiếng Việt。
-- **数据归你**：完整 JSON 备份与恢复、CSV 导入导出。Cloudflare 免费额度就够用，也能用 Docker 跑在任何机器上。
+<p align="center">
+  <img src="docs/screenshots/timeline.zh-CN.png" alt="Calends 订阅时间轴：计费时段、套餐变更与支付方式" width="880" />
+</p>
+<p align="center"><sub>计费时段与订阅历程 · 虚构演示数据</sub></p>
+
+</details>
 
 ## 快速开始
 
-### 方式一：Cloudflare（免费额度足够）
+可以先试用[在线演示](https://demo.calends.date)。演示账本由所有访客共用，每日重置，对外通知等功能不可用。
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/imetn/calends)
+### Cloudflare Workers
 
-或者在本机执行：
+使用 Workers 和 D1，可[一键部署](https://deploy.workers.cloudflare.com/?url=https://github.com/imetn/calends)，也可以从源码部署：
 
 ```bash
-git clone https://github.com/imetn/calends && cd calends
+git clone https://github.com/imetn/calends
+cd calends
 npm ci
 npx wrangler login
-npx wrangler secret put SETUP_TOKEN   # 填一串足够长的随机字符串，只用一次
-npm run deploy                        # 构建、创建 D1 数据库、部署、迁移
+node scripts/wrangler.mjs secret put SETUP_TOKEN
+npm run deploy
 ```
 
-打开 `https://<你的 worker>.workers.dev/admin`，输入初始化令牌并设置密码。之后建议在「设置 → 安全」里绑定 Passkey。
+`SETUP_TOKEN` 请填写一串足够长的随机字符串。部署命令会构建应用、在首次部署时创建 D1 数据库并执行迁移。打开 `https://<你的 worker>.workers.dev/admin`，输入令牌并设置密码。
 
-### 方式二：Docker
+### Docker
+
+在源码目录的 `docker/` 下执行，Compose 会使用仓库中的 [Dockerfile](docker/Dockerfile) 构建并启动应用：
 
 ```bash
-docker run -d --name calends -p 8787:8787 -v calends-data:/data ghcr.io/imetn/calends:latest
-docker logs calends   # 首次启动会打印一次性的初始化令牌
+cd docker
+docker compose up -d --build
+docker compose logs calends
 ```
 
-打开 `http://localhost:8787/admin`。数据以 SQLite 文件保存在 `calends-data` 卷里。compose 配置见 [`docker-compose.yml`](docker-compose.yml)。公网使用请放在 Caddy / Nginx / Traefik 等反向代理后面启用 HTTPS（Passkey 需要 HTTPS），并设置 `TRUST_PROXY=1`。
+打开 `http://localhost:8787/admin`，使用日志中的初始化令牌设置密码。[Compose 配置](docker/docker-compose.yml) 会通过挂载到 `/data` 的命名卷持久化 SQLite 数据。本地构建无需已发布的 Calends 镜像或 Cloudflare 账号。`docker build` / `docker run` 命令及镜像发布说明见 [Docker 部署指南](docs/self-hosting.zh-CN.md#从源码部署-docker)。
 
-### 方式三：交给你的 AI 助手
+公网访问时，通过反向代理启用 HTTPS，并设置 `TRUST_PROXY=1`。初始化后可在「设置 → 安全」中添加 Passkey。
 
-把下面这段话发给 Claude Code、Codex、Cursor 等能操作终端的 AI：
-
-```text
-帮我部署 Calends（https://github.com/imetn/calends），一个可自托管的订阅账本。
-1. 先问我部署到 Cloudflare Workers（免费）还是这台机器/服务器上的 Docker。
-2. Cloudflare：克隆仓库，执行 npm ci，确认 `npx wrangler whoami` 正常（不行就 `npx wrangler login`），
-   生成一个随机的 SETUP_TOKEN 并用 `npx wrangler secret put SETUP_TOKEN` 设置，然后 `npm run deploy`。
-   如果我要自定义域名，部署前在 wrangler.jsonc 的 routes 里以 custom_domain 加上。
-3. Docker：运行官方镜像 ghcr.io/imetn/calends，给 /data 挂一个命名卷，开放 8787 端口，
-   再从容器日志里读出初始化令牌；顺便问我要不要用 Caddy 配 HTTPS。
-4. 最后把 /admin 地址和初始化令牌告诉我，并提醒我绑定 Passkey，以及在后台「连接」页接入我的 AI 助手。
-```
+自定义域名、配置项、邮件提醒、子路径部署，以及交给 AI 部署的提示词，见[自托管指南](docs/self-hosting.zh-CN.md)。
 
 ## AI 与 MCP
 
-Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口（Streamable HTTP）。在后台「连接」页生成令牌（只读或读写），然后：
+你可以问「下周有什么要续费」「今年一共花了多少」，也可以说「Netflix 从今天起涨到 17.99 美元」。Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口，使用 Streamable HTTP，内置 20 多个工具。
+
+在后台「连接」页创建只读或读写令牌，再接入客户端：
+
+**Claude Code**
 
 ```bash
-# Claude Code
 claude mcp add --transport http calends https://你的域名/mcp --header "Authorization: Bearer <令牌>"
-# Codex
+```
+
+**Codex**
+
+```bash
+export CALENDS_TOKEN='<令牌>'
 codex mcp add calends --url https://你的域名/mcp --bearer-token-env-var CALENDS_TOKEN
 ```
 
-工具包括 `get_overview`、`list_subscriptions`、`spending_stats`、`get_trends`、`get_receivables`、`get_insights`、`create_subscription`、`change_price`、`change_plan`、`set_status`、`record_payment` 等。所有写操作都支持 `dry_run` 预览，也可以在设置里一键关闭 AI 连接。
+启动 Codex 的环境中需要保留 `CALENDS_TOKEN`。工具涵盖订阅、支出、趋势、应收款和体检，也能修改价格、套餐、状态与付款记录。所有写操作都支持 `dry_run` 预览；可在设置中关闭 AI 连接。
 
-## 配置
+## 参与贡献
 
-| 变量                                         | 位置                | 作用                                                                                                                                                          |
-| -------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SETUP_TOKEN`                                | secret / 环境变量   | 新部署首次设置密码时需要。                                                                                                                                    |
-| `BASE_PATH`                                  | 构建参数 + 环境变量 | 可选子路径（如 `/claude`，不带结尾斜杠），默认空。前端构建与 Worker/Docker 运行时须设置相同值。                                                               |
-| `DEMO_MODE`                                  | 环境变量            | `1`：免登录、可编辑的演示账本，每日 UTC 零点复原。                                                                                                            |
-| `DEMO_PROFILE`                               | 环境变量            | 配合 `DEMO_MODE=1`，选 `default`（默认 41 条）或 `ai`（61 条虚构 AI 订阅）。                                                                                  |
-| `SITE_URL`                                   | 变量 / 环境变量     | 提醒和日历里使用的站点地址；不设时自动识别。                                                                                                                  |
-| `EMAIL` 绑定 + `MAIL_FROM`、`MAIL_FROM_NAME` | wrangler            | 可选：通过 [Cloudflare Email Sending](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/) 发邮件提醒；其他渠道无需服务端配置。 |
-| `OLD_HOSTS`                                  | var / env           | 可选：换域名后填旧域名（逗号分隔）。在旧域名打开页面会 301 到 `SITE_URL`；接口、MCP 和日历订阅照常可用，已有客户端不受影响。                                  |
-| `TRUST_PROXY`                                | 环境变量            | 在反向代理后面时设为 `1`，登录限速才能拿到真实访客 IP。                                                                                                       |
-| `DATA_DIR`、`PORT`                           | Docker 环境变量     | 数据目录（默认 `/data`）和端口（默认 `8787`）。                                                                                                               |
+欢迎提交问题、改进翻译或发起 Pull Request。本地开发、检查命令与贡献约定见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-个人部署的配置（自己的域名、数据库 ID、发件地址、头像等）可以放在被 git 忽略的 `local/` 目录：npm 脚本会自动使用 `local/wrangler.jsonc`，构建时 `local/public/` 里的文件会覆盖 `public/` 里的同名文件。
+修改子系统前，请先阅读[架构说明](ARCHITECTURE.md)和[代码规范](docs/code-standards.md)。AI 编程助手从 [AGENTS.md](AGENTS.md) 读取项目约定，`CLAUDE.md` 引用同一份规则。
 
-## 公开演示站
+技术栈为 React 19、Vite、HeroUI / React Aria、shadcn/ui，以及 Cloudflare Workers + D1（SQLite）。计费、汇率等领域逻辑位于 `shared/`，由浏览器和 Worker 共用。
 
-Docker 设置 `DEMO_MODE=1`、`SITE_URL=https://demo.calends.date`，使用独立的初始空数据卷；反向代理后设置 `TRUST_PROXY=1`。无需初始化令牌或密码，访问 `/` 直接进入 `/admin`。所有访客共用可编辑账本和显示设置。空库自动生成 41 条虚构订阅；每日 UTC 零点的定时任务复原账本、支付方式、人员、设置、偏好、聊天记录和凭据（Docker 约 00:05 执行），保留汇率与迁移记录。
+翻译位于 `shared/locales/<locale>/<namespace>.json`，以英文和简体中文为源语言。
 
-演示模式禁用密码、Passkey、设备管理、通知渠道保存与测试、提醒实际发送、MCP、ICS 链接和公开页开关。备份恢复与 CSV 导入选择完全禁用，防止批量灌入；仍可导出。界面说明「演示站不可用」，服务端也返回本地化错误。不设置 `DEMO_MODE=1` 的正常自托管行为不变。
+## 名字由来
 
-两个演示档位的助手均提供前端本地预设对话：收据草稿、本月扣款、最近涨价；AI 档位另有 Claude 降级建议。不会请求 AI 接口，聊天仅保存在浏览器；确认收据草稿会真实写入共用演示账本，随账本每日复原。部署自己的实例并配置自己的 API Key 后，使用真实 AI。
-
-在 `/claude/` 子路径提供 AI 账号管理演示（反向代理需原样保留前缀）：
-
-```bash
-docker build --build-arg BASE_PATH=/claude -t calends-ai .
-docker run -d --name calends-ai -p 8788:8787 -v calends-ai-data:/data \
-  -e BASE_PATH=/claude -e DEMO_MODE=1 -e DEMO_PROFILE=ai \
-  -e SITE_URL=https://demo.calends.date -e TRUST_PROXY=1 calends-ai
-```
-
-入口为 `https://demo.calends.date/claude/admin`。使用独立的初始空数据卷，不与默认演示共库。`SITE_URL` 也可包含 `/claude`，不会重复添加；容器内不带前缀的健康检查接口仍可访问。AI 档位包括 Claude 40 个（Pro 月付 13、年付 3，Max 5x 14，Max 20x 10），ChatGPT 16 个（Plus 7，Pro 5x 4，Pro 10x 3，Pro 50x 2），以及其他 AI 工具 5 个。账号、价格、合租安排均为虚构示例，ChatGPT 套餐名仅用于演示。可运行 `node --experimental-strip-types scripts/demo.ts --profile ai` 导出备份。
-
-## 本地开发
-
-```bash
-npm ci
-npm run db:migrate:local
-echo "DEV_BYPASS_AUTH=1" > .dev.vars   # 仅本地：跳过登录
-npm run dev                            # Vite :5173 + Worker :8787
-```
-
-技术栈：后台用 React 19（开启 React Compiler）+ Vite，弹窗、下拉、开关等交互组件基于 react-aria-components；公开页用 shadcn/ui；服务端是 Cloudflare Workers + D1（SQLite）；计费、汇率、脱敏等领域逻辑放在 `shared/`，浏览器和 Worker 共用。
-
-`npm test` 单元测试，`npm run typecheck` / `lint` / `format` 类型检查、代码检查与格式化，`npm run i18n:check` 检查各语言文案是否齐全。贡献指南见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+Calends 是罗马历每个月的第一天，那天结清账目、收回欠款；英文的 calendar（日历）就由它而来。
 
 ## 许可
 
-[MIT](LICENSE)
+Calends 以 MIT 许可开源，详见 [LICENSE](LICENSE)。你可以使用、修改和分发它，包括用于商业用途，但须在软件副本或实质性部分中保留版权与许可声明。如果你 Fork Calends，请使用独立的项目名称，并注明 Calends 是上游来源，让用户能够区分你的版本与本项目。
