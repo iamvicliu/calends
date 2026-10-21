@@ -8874,6 +8874,12 @@ img.mm-flag {
 .gt-legend .lg-unused {
   border-radius: 999px;
 }
+/* 图例里与色块等高略高一点，线条加粗保持清晰 */
+.gt-legend .lg-stop {
+  width: 11px;
+  height: 11px;
+  stroke-width: 3;
+}
 /* 服务方停用：红色禁止标志压在接缝上 */
 .gt-stop {
   position: absolute;
