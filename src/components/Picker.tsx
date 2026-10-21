@@ -107,7 +107,8 @@ export function Picker<T extends string | number>({
             <span>{cur?.label ?? t('picker.choose')}</span>
           </>
         )}
-        <Icon name="down" />
+        {/* 上下双箭头：一眼看出是下拉选择，不是链接 */}
+        <Icon name="updown" />
       </button>
       {open && (
         <Pop triggerRef={btn} onClose={close} label={ariaLabel ?? t('picker.choose')} className="cp-pop pk-pop" style={{ height: H }}>

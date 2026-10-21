@@ -97,6 +97,13 @@ const P: Record<string, JSX.Element> = {
   'sort-desc': <path d="m3 16 4 4 4-4M7 20V4M11 4h10M11 8h7M11 12h4" />,
   right: <path d="m9 18 6-6-6-6" />,
   down: <path d="m6 9 6 6 6-6" />,
+  updown: <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />,
+  ban: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m5.7 5.7 12.6 12.6" />
+    </>
+  ),
   receipt: <path d="M6 2.5h12v19l-3-2-3 2-3-2-3 2zM9 7.5h6M9 11.5h6M9 15.5h3" />,
   link: <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
@@ -435,6 +442,16 @@ export function Toasts() {
 }
 
 /** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
+/** 右上角的状态胶囊：进行中绿点、待收橙点、已停止换成红色「禁止」图标，形状都一样 */
+export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop'; children: ComponentChildren }) {
+  return (
+    <span className={`ph-status ${tone}`}>
+      {tone === 'stop' ? <Icon name="ban" size={13} /> : <i />}
+      {children}
+    </span>
+  );
+}
+
 /**
  * 卡片里的订阅名：悬停出现下划线，点它只打开订阅本身；卡片其余区域打开合租 / 代付自己的弹窗
  */

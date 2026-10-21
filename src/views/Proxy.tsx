@@ -4,7 +4,7 @@ import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
 import { run, saveSub } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -71,14 +71,6 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
         onClick={() => setLedger(true)}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setLedger(true))}
       >
-        {stopped && (
-          <span className="stop-stamp" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M5.6 5.6l12.8 12.8" />
-            </svg>
-          </span>
-        )}
         <div className="proxy-top">
           <div className="proxy-head">
             <SubIcon sub={s} size={46} />
@@ -92,10 +84,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
               </div>
             </div>
           </div>
-          <span className={`ph-status ${tone}`}>
-            <i />
-            {label}
-          </span>
+          <StatusPill tone={tone}>{label}</StatusPill>
         </div>
         <div className="ph-chips">
           <span className="who-chip" title={s.proxy!.note}>
@@ -176,10 +165,9 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               {cardCcy ? t('proxy.cardCcy', { ccy: cardCcy }) : ''}
             </div>
           </div>
-          <span className={`ph-status ${stopped ? 'stop' : open.length ? 'owe' : 'ok'}`}>
-            <i />
+          <StatusPill tone={stopped ? 'stop' : open.length ? 'owe' : 'ok'}>
             {stopped ? t('proxy.status.ended') : open.length ? t('proxy.owedPeriods', { count: open.length }) : statusLabel(st)}
-          </span>
+          </StatusPill>
         </div>
 
         <div className="ld-top">

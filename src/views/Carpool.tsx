@@ -5,7 +5,7 @@ import { t } from '../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../shared/types.ts';
 import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
-import { Amount, Cell, Group, Icon, NameLink, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -150,9 +150,13 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         </div>
                       </div>
                       {/* 只提示满没满车；空位的「+」放到展开后的「添加成员」 */}
-                      <span className={`car-seats ${free ? '' : 'full'}`}>
-                        {!live(s) ? t('family.pool.filter.ended') : free ? t('family.pool.seatsFree', { count: free }) : t('family.pool.seatsFull')}
-                      </span>
+                      {live(s) ? (
+                        <span className={`car-seats ${free ? '' : 'full'}`}>
+                          {free ? t('family.pool.seatsFree', { count: free }) : t('family.pool.seatsFull')}
+                        </span>
+                      ) : (
+                        <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+                      )}
                     </div>
                     <div className="seats-row">
                       <div className="seats">
@@ -445,10 +449,9 @@ function CarSheet({
               {next && !stopped ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
             </div>
           </div>
-          <span className={`ph-status ${stopped ? 'stop' : owe ? 'owe' : 'ok'}`}>
-            <i />
+          <StatusPill tone={stopped ? 'stop' : owe ? 'owe' : 'ok'}>
             {stopped ? t('family.pool.filter.ended') : owe ? t('family.pool.owedN', { count: owe }) : t('family.pool.settled')}
-          </span>
+          </StatusPill>
         </div>
 
         <div className="ld-top">

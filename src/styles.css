@@ -4956,28 +4956,13 @@ select.btn {
 .ph-status.stop i {
   background: var(--red);
 }
-/* 已停止：一枚放大、模糊的 🚫 水印压在卡片右侧，不挡内容 */
-/* 已停止：右上角一枚小的停止标记，到上边、右边距离一致，代替「已停止」胶囊 */
-.stop-stamp {
-  position: absolute;
-  z-index: 2;
-  top: 18px;
-  right: 18px;
-  width: 30px;
-  height: 30px;
-  color: var(--red);
-  opacity: 0.55;
-  pointer-events: none;
+.ph-status .i {
+  flex-shrink: 0;
 }
-.stop-stamp svg {
-  width: 100%;
-  height: 100%;
-}
-.proxy-card.stopped .ph-status {
-  display: none;
-}
-/* 其余内容整体去色变淡：图标、文字、胶囊、指标卡都一样 */
-.proxy-card.stopped > :not(.stop-stamp) {
+/* 已停止：整卡去色变淡，只有右上角的状态胶囊保留颜色 */
+.proxy-card.stopped .proxy-head,
+.proxy-card.stopped .ph-chips,
+.proxy-card.stopped .proxy-facts {
   filter: grayscale(1);
   opacity: 0.5;
 }
@@ -6496,17 +6481,29 @@ button.seat:disabled {
   color: var(--label-3);
   transition: transform 0.18s;
 }
-.pk-btn.open > .i {
-  transform: rotate(180deg);
-}
+/* 默认样式：和日期选择器一样的浅灰底胶囊，悬停加深、展开时描边，看得出能点开 */
 .pk-btn.inline {
-  padding: 4px 0;
-  color: var(--accent);
-  font-size: 15px;
+  height: 32px;
+  padding: 0 8px 0 11px;
+  border-radius: 9px;
+  background: var(--fill-2);
+  color: var(--label);
+  font-size: 14px;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+.pk-btn.inline:hover {
+  background: var(--fill);
+}
+.pk-btn.inline.open {
+  background: var(--card);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 .pk-btn.inline > .i {
-  color: currentColor;
-  opacity: 0.6;
+  width: 12px;
+  height: 12px;
+  color: var(--label-3);
 }
 .pk-btn.btn {
   height: 34px;
@@ -8328,9 +8325,14 @@ button.seat:disabled {
 .car-card .car-actual {
   margin-top: 0;
 }
-.car-card.stopped {
+.car-card.stopped .car-head > :not(.ph-status),
+.car-card.stopped .seats-row,
+.car-card.stopped .car-book {
   filter: grayscale(1);
-  opacity: 0.6;
+  opacity: 0.5;
+}
+.car-card .ph-status {
+  align-self: flex-start;
 }
 .car-card.stopped .car-facts b.gain,
 .car-card.stopped .car-facts b.loss {
