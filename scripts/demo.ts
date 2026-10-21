@@ -2,6 +2,8 @@
 // 用法：
 //   node --experimental-strip-types scripts/demo.ts > demo.json          备份文件，可在设置里「从备份恢复」
 //   node --experimental-strip-types scripts/demo.ts --sql > demo.sql     直接写库：wrangler d1 execute DB --file demo.sql
+//   加 --lang zh-CN 等：界面语言、分类名、本位币按该语言来（官网截图用）
+import { readFileSync } from 'node:fs';
 import type { PaymentMethod, Person, Settings, Subscription } from '../shared/types.ts';
 
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -462,6 +464,19 @@ const settings: Settings = {
   weekStart: 0,
   aiEnabled: true,
 };
+
+// 指定语言时：分类名换成该语言的内置分类名，本位币换成当地货币
+const LANG = process.argv[process.argv.indexOf('--lang') + 1];
+if (process.argv.includes('--lang') && LANG) {
+  const cats = (lang: string) => (JSON.parse(readFileSync(new URL(`../shared/locales/${lang}/core.json`, import.meta.url), 'utf8')) as { category: Record<string, string> }).category;
+  const en = cats('en');
+  const to = cats(LANG);
+  const rename = new Map(Object.entries(en).map(([code, name]) => [name, to[code] ?? name]));
+  for (const s of subscriptions) s.category = rename.get(s.category) ?? s.category;
+  const CCY: Record<string, string> = { 'zh-CN': 'CNY', 'zh-TW': 'TWD', 'zh-HK': 'HKD', ja: 'JPY', ko: 'KRW', de: 'EUR', fr: 'EUR', es: 'EUR', 'pt-BR': 'BRL', ru: 'RUB', tr: 'TRY', id: 'IDR', vi: 'VND' };
+  settings.language = LANG;
+  settings.baseCurrency = CCY[LANG] ?? 'USD';
+}
 
 const backup = { format: 'calends-backup', version: 3, exportedAt: new Date().toISOString(), subscriptions, methods, people, settings, fxDaily: [] };
 
