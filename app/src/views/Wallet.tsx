@@ -7,7 +7,7 @@ import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, ask, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
+import { Amount, ask, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, NumInput, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { go } from '../router.ts';
@@ -809,24 +809,17 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
             </Cell>
           )}
           <Cell label={t('wallet.editor.cashback')}>
-            <input
-              className="num"
-              inputMode="decimal"
-              value={f.cashback ?? ''}
-              placeholder={t('wallet.editor.cashbackPh')}
-              onChange={(e) => up({ cashback: Number(val(e)) || undefined })}
-            />
+            <NumInput className="num" value={f.cashback} placeholder={t('wallet.editor.cashbackPh')} onValue={(n) => up({ cashback: n || undefined })} />
           </Cell>
         </Group>
         {balanceKind && (
           <Group title={t('wallet.editor.balanceGroup')}>
             <Cell label={t('wallet.editor.balance')}>
-              <input
+              <NumInput
                 className="num"
-                inputMode="decimal"
-                value={f.balance ?? ''}
+                value={f.balance}
                 placeholder={t('wallet.editor.optional')}
-                onChange={(e) => up({ balance: val(e) === '' ? undefined : Number(val(e)), balanceAsOf: f.balanceAsOf ?? today() })}
+                onValue={(n) => up({ balance: n, balanceAsOf: f.balanceAsOf ?? today() })}
               />
             </Cell>
             <Cell label={t('wallet.editor.asOf')}>

@@ -429,6 +429,47 @@ export function Sheet(props: {
   );
 }
 
+const toNum = (v: string) => (v.trim() === '' || !Number.isFinite(Number(v)) ? undefined : Number(v));
+
+/**
+ * 数字输入：自己保存正在输入的文字（「12.」「0.0」），只把解析出的数字往外报，小数点不会被吞。
+ * 正在输入时不被外部值覆盖；没在输入时外部改了值（如切换周期重算）就显示新值，失焦时按当前值整理
+ */
+export function NumInput({
+  value,
+  onValue,
+  ...rest
+}: { value: number | undefined; onValue: (n: number | undefined) => void } & Omit<JSX.IntrinsicElements['input'], 'value' | 'onChange'>) {
+  const shown = (v: number | undefined) => (v == null ? '' : String(v));
+  const [text, setText] = useState(shown(value));
+  const [seen, setSeen] = useState(value);
+  const focused = useRef(false);
+  if (!Object.is(value, seen)) {
+    setSeen(value);
+    if (!focused.current && toNum(text) !== value) setText(shown(value));
+  }
+  return (
+    <input
+      inputMode="decimal"
+      {...rest}
+      value={text}
+      onFocus={(e) => {
+        focused.current = true;
+        rest.onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        focused.current = false;
+        if (toNum(text) !== value) setText(shown(value));
+        rest.onBlur?.(e);
+      }}
+      onChange={(e) => {
+        setText(e.target.value);
+        onValue(toNum(e.target.value));
+      }}
+    />
+  );
+}
+
 /**
  * 确认弹窗：替代浏览器原生 confirm（全局禁止 alert / confirm / prompt）。
  * const ok = await ask('删除？')；取消、Esc、点遮罩都算否。由 AskLayer 统一渲染

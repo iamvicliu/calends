@@ -8,7 +8,7 @@ import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, CatIcon, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
@@ -292,7 +292,7 @@ function Form({
       <Group title={t('editor.group.billing')}>
         <Cell label={t('editor.field.amount')}>
           <span className="ed-amount">
-            <input className="num" inputMode="decimal" value={f.price || ''} placeholder="0.00" onChange={(e) => up({ price: Number(val(e)) || 0 })} />
+            <NumInput className="num" value={f.price || undefined} placeholder="0.00" onValue={(n) => up({ price: n ?? 0 })} />
             <CurrencySelect value={f.currency} onChange={(c) => up({ currency: c })} />
           </span>
         </Cell>
@@ -495,13 +495,7 @@ function Form({
             {share.members.map((m, i) => (
               <div key={m.id} className="member-edit">
                 <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
-                <input
-                  className="num"
-                  inputMode="decimal"
-                  value={m.share}
-                  title={t('editor.share.perPeriod')}
-                  onChange={(e) => setMember(i, { share: Number(val(e)) || 0 })}
-                />
+                <NumInput className="num" value={m.share} title={t('editor.share.perPeriod')} onValue={(n) => setMember(i, { share: n ?? 0 })} />
                 <span className="wide">
                   <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
                 </span>
@@ -560,12 +554,7 @@ function Form({
                 {f.intro && (
                   <>
                     <Cell label={t('editor.intro.price')}>
-                      <input
-                        className="num"
-                        inputMode="decimal"
-                        value={f.intro.price}
-                        onChange={(e) => up({ intro: { ...f.intro!, price: Number(val(e)) || 0 } })}
-                      />
+                      <NumInput className="num" value={f.intro.price} onValue={(n) => up({ intro: { ...f.intro!, price: n ?? 0 } })} />
                     </Cell>
                     <Cell label={t('editor.intro.until')}>
                       <DatePicker value={f.intro.until} onChange={(v) => up({ intro: { ...f.intro!, until: v ?? today } })} />

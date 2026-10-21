@@ -4,7 +4,7 @@ import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
+import { ask, Cell, Group, Icon, NumInput, Seg, Sheet, Toggle } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
@@ -312,7 +312,7 @@ export function MemberSheet({
           <Cell label={perBill('family.member.feeLabel', months)}>
             <span className="contact-field">
               <CurrencySelect value={f.feeCurrency ?? base} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
-              <input className="num" inputMode="decimal" value={f.fee ?? ''} placeholder="0" onChange={(e) => setFee({ fee: Number(val(e)) || 0 })} />
+              <NumInput className="num" value={f.fee || undefined} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
             </span>
           </Cell>
           <Cell label={<span>{t('family.member.exempt')}</span>}>
@@ -401,7 +401,7 @@ export function MemberSheet({
           {adding ? (
             <>
               <Cell label={t('family.member.amount')}>
-                <input className="num" inputMode="decimal" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: Number(val(e)) || 0 })} />
+                <NumInput className="num" value={pay.amount} onValue={(n) => setPay({ ...pay, amount: n ?? 0 })} />
               </Cell>
               <Cell label={t('family.member.currency')}>
                 <CurrencySelect value={pay.currency} onChange={(c) => setPay({ ...pay, currency: c })} />
