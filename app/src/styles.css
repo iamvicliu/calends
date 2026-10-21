@@ -4612,6 +4612,23 @@ select.btn {
   font-size: 12px;
   color: var(--label-3);
 }
+/* 说明图标：跟在标题后面，悬停显示说明 */
+.with-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.hint {
+  display: inline-flex;
+  color: var(--label-3);
+  cursor: help;
+  border-radius: 50%;
+}
+.hint:hover,
+.hint:focus-visible {
+  color: var(--label-2);
+}
+
 /* 侧边栏小图标的点击动效：货币两枚硬币换位（半圈回弹），设置齿轮转一圈（慢—快—慢） */
 .ico-turn {
   display: inline-flex;

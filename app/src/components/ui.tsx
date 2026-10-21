@@ -132,6 +132,12 @@ const P: Record<string, JSX.Element> = {
     </>
   ),
   share: <path d="M12 3v12M8 7l4-4 4 4M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />,
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </>
+  ),
 };
 
 export function Icon({ name, size }: { name: keyof typeof P | string; size?: number }) {
@@ -519,12 +525,22 @@ export function TipLayer() {
 
 export function tipProps(html: () => ComponentChildren) {
   return {
-    onMouseEnter: (e: React.MouseEvent) => {
+    onMouseEnter: (e: { currentTarget: EventTarget }) => {
       const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
       tipSet?.({ x: r.left + r.width / 2, y: r.top, html: html() });
     },
     onMouseLeave: () => tipSet?.(null),
   };
+}
+
+/** 标题旁的说明图标：悬停或键盘聚焦时显示说明，不常驻占位 */
+export function Hint({ text }: { text: string }) {
+  const tip = tipProps(() => text);
+  return (
+    <span className="hint" tabIndex={0} role="img" aria-label={text} {...tip} onClick={tip.onMouseEnter} onFocus={tip.onMouseEnter} onBlur={tip.onMouseLeave}>
+      <Icon name="info" size={14} />
+    </span>
+  );
 }
 
 export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label?: string }) {

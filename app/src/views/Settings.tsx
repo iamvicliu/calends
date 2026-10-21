@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cycleShort } from '../../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../../shared/csv.ts';
 import { avatarOf, type AppState, type PaymentMethod, type Subscription } from '../../../shared/types.ts';
-import { Cell, Group, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { Cell, Group, Hint, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
@@ -238,7 +238,14 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
               ariaLabel={t('settings.general.baseCurrency')}
             />
           </Cell>
-          <Cell label={t('settings.general.signedAmounts')} sub={t('settings.general.signedAmountsSub')}>
+          <Cell
+            label={
+              <span className="with-hint">
+                {t('settings.general.signedAmounts')}
+                <Hint text={t('settings.general.signedAmountsSub')} />
+              </span>
+            }
+          >
             <Toggle
               label={t('settings.general.signedAmounts')}
               checked={s.signedAmounts !== false}
