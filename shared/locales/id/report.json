@@ -22,7 +22,7 @@
     "year": "{year}"
   },
   "hero": {
-    "label": "Pengeluaran langganan bulanan · MRR negatif",
+    "label": "Pengeluaran langganan bulanan",
     "vsLastMonth": "dibanding akhir bulan lalu",
     "yearAgo": "· {amount} setahun lalu",
     "annual": "Per tahun",

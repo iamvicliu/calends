@@ -22,7 +22,7 @@
     "year": "{year}"
   },
   "hero": {
-    "label": "Dépenses mensuelles en abonnements · MRR négatif",
+    "label": "Dépenses mensuelles en abonnements",
     "vsLastMonth": "par rapport à fin du mois dernier",
     "yearAgo": "· {amount} il y a un an",
     "annual": "Par an",

@@ -22,7 +22,7 @@
     "year": "{year}"
   },
   "hero": {
-    "label": "Monatliche Abo-Ausgaben · negative MRR",
+    "label": "Monatliche Abo-Ausgaben",
     "vsLastMonth": "ggü. Ende letzten Monats",
     "yearAgo": "· vor einem Jahr {amount}",
     "annual": "Pro Jahr",

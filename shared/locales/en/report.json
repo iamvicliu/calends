@@ -22,7 +22,7 @@
     "year": "{year}"
   },
   "hero": {
-    "label": "Monthly subscription spend · negative MRR",
+    "label": "Monthly subscription spend",
     "vsLastMonth": "vs. end of last month",
     "yearAgo": "· {amount} a year ago",
     "annual": "Per year",

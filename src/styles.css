@@ -8770,3 +8770,6 @@ img.mm-flag {
 .dt-copy:hover {
   text-decoration-color: var(--label-3);
 }
+.hero-facts b.gain {
+  color: var(--green);
+}

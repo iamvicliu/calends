@@ -22,7 +22,7 @@
     "year": "{year}년"
   },
   "hero": {
-    "label": "월 구독 지출 · 마이너스 MRR",
+    "label": "월 구독 지출",
     "vsLastMonth": "지난달 말 대비",
     "yearAgo": "· 1년 전 {amount}",
     "annual": "연간",

@@ -22,7 +22,7 @@
     "year": "{year}"
   },
   "hero": {
-    "label": "Aylık abonelik harcaması · negatif MRR",
+    "label": "Aylık abonelik harcaması",
     "vsLastMonth": "geçen ay sonuna göre",
     "yearAgo": "· bir yıl önce {amount}",
     "annual": "Yıllık",

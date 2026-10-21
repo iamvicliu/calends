@@ -81,6 +81,8 @@ function Hero({ state, today }: { state: AppState; today: string }) {
       .map((e) => e.date.slice(0, 7)),
   );
   const markers = series.map((p, i) => (evDates.has(p.month) ? i : -1)).filter((i) => i >= 0);
+  /** 带正负号的金额：支出为负、收入为正 */
+  const signed = (v: number, compact = true) => `${v > 0.005 ? '+' : v < -0.005 ? '−' : ''}${money(Math.abs(v), base, { compact })}`;
   return (
     <div className="card hero-card">
       <div className="hero-l">
@@ -89,19 +91,20 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           <Amount value={-now} ccy={base} />
         </div>
         <div className="hero-delta">
+          {/* 正负号按钱的方向：花出去是负、收回来是正。支出变多 = 净额更负，所以是 ▼ 和负号 */}
           <span className={`chip-d ${delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}`}>
-            {delta > 0.5 ? '▲' : delta < -0.5 ? '▼' : '—'} {money(Math.abs(delta), base, { compact: true })}
+            {delta > 0.5 ? '▼' : delta < -0.5 ? '▲' : '—'} {signed(-delta)}
           </span>
           <span className="muted">{t('report.hero.vsLastMonth')}</span>
-          {yearAgo != null && yearAgo > 0 && <span className="muted">{t('report.hero.yearAgo', { amount: money(yearAgo, base, { compact: true }) })}</span>}
+          {yearAgo != null && yearAgo > 0 && <span className="muted">{t('report.hero.yearAgo', { amount: signed(-yearAgo) })}</span>}
         </div>
         <div className="hero-facts">
           <div>
-            <b>{money(now * 12, base, { compact: true })}</b>
+            <b>{signed(-now * 12)}</b>
             <span>{t('report.hero.annual')}</span>
           </div>
           <div>
-            <b>{money(now / 30.4375, base)}</b>
+            <b>{signed(-now / 30.4375, false)}</b>
             <span>{t('report.hero.perDay')}</span>
           </div>
           <div>
@@ -110,7 +113,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           </div>
           {tot.recoverMrr > 1 && (
             <div>
-              <b>{money(tot.recoverMrr, base, { compact: true })}</b>
+              <b className="gain">{signed(tot.recoverMrr)}</b>
               <span>{t('report.hero.recover')}</span>
             </div>
           )}
@@ -198,13 +201,14 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
       <div className="mv-head">
         <div>
           <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
-          <b className="num">{perMonth(money(mv.to, base, { compact: true }))}</b>
+          {/* 和顶部一致：花出去为负 */}
+          <b className="num">{perMonth(`−${money(mv.to, base, { compact: true })}`)}</b>
         </div>
         <div className={`mv-delta ${Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'up' : 'down'}`}>
-          <small>{t('report.wf.vsFrom', { amount: money(mv.from, base, { compact: true }) })}</small>
+          <small>{t('report.wf.vsFrom', { amount: `−${money(mv.from, base, { compact: true })}` })}</small>
           <b className="num">
-            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : `${delta > 0 ? '+' : '−'}${money(Math.abs(delta), base, { compact: true })}`}
-            {Math.abs(delta) >= 0.5 && mv.from > 0 && <em>{`${pct > 0 ? '+' : '−'}${Math.abs(pct * 100).toFixed(1)}%`}</em>}
+            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : `${delta > 0 ? '−' : '+'}${money(Math.abs(delta), base, { compact: true })}`}
+            {Math.abs(delta) >= 0.5 && mv.from > 0 && <em>{`${pct > 0 ? '−' : '+'}${Math.abs(pct * 100).toFixed(1)}%`}</em>}
           </b>
         </div>
       </div>
@@ -217,7 +221,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
                 <i style={{ width: `${(Math.abs(x.v) / peak) * 100}%` }} />
               </div>
               <b className="num">
-                {x.v > 0 ? '+' : '−'}
+                {x.v > 0 ? '−' : '+'}
                 {money(Math.abs(x.v), base, { compact: true })}
               </b>
             </div>
@@ -238,7 +242,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             <span className="wf-name">{it.sub.name}</span>
             <em className={it.delta > 0 ? 'up' : 'down'}>{kindLabel(it.kind)}</em>
             <b className="num">
-              {it.delta > 0 ? '+' : '−'}
+              {it.delta > 0 ? '−' : '+'}
               {money(Math.abs(it.delta), base, { compact: true })}
             </b>
           </button>

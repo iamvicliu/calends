@@ -22,7 +22,7 @@
     "year": "{year}年"
   },
   "hero": {
-    "label": "毎月のサブスク支出 · マイナス MRR",
+    "label": "毎月のサブスク支出",
     "vsLastMonth": "先月末比",
     "yearAgo": "· 1年前は{amount}",
     "annual": "年額",

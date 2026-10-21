@@ -22,7 +22,7 @@
     "year": "{year}"
   },
   "hero": {
-    "label": "Chi tiêu gói đăng ký hằng tháng · MRR âm",
+    "label": "Chi tiêu gói đăng ký hằng tháng",
     "vsLastMonth": "so với cuối tháng trước",
     "yearAgo": "· {amount} một năm trước",
     "annual": "Mỗi năm",
