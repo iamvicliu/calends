@@ -62,12 +62,6 @@ function icsUrl(state: AppState) {
 }
 
 export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => void }) {
-  if (state.demo)
-    return (
-      <Sheet narrow title={t('app.ics.title')} onClose={onClose}>
-        <p className="muted">{t('app.demo.unavailable')}</p>
-      </Sheet>
-    );
   const url = icsUrl(state);
   return (
     <Sheet narrow title={t('app.ics.title')} onClose={onClose}>
@@ -317,7 +311,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           )}
         </Group>
 
-        <Group title={t('settings.remind.title')} foot={state.demo ? t('app.demo.unavailable') : undefined}>
+        <Group title={t('settings.remind.title')}>
           <Cell label={t('settings.remind.lead')}>
             <Picker
               value={s.remindDays}
@@ -338,42 +332,31 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           <Cell label={t('settings.remind.monthly')}>
             <Toggle label={t('settings.remind.monthly')} checked={s.monthlyDigest} onChange={(v) => run(() => saveSettings({ monthlyDigest: v }))} />
           </Cell>
-          {!state.demo && (
-            <Cell
-              label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.test')}</span>}
-              onClick={() =>
-                run(async () => {
-                  const r = await api<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }>(
-                    '/api/notify/test',
-                    {
-                      method: 'POST',
-                      body: '{}',
-                    },
+          <Cell
+            label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.test')}</span>}
+            onClick={() =>
+              run(async () => {
+                const r = await api<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }>('/api/notify/test', {
+                  method: 'POST',
+                  body: '{}',
+                });
+                if (!r.sent) throw new Error(r.reason ?? t('settings.remind.testFailed'));
+                const bad = r.results?.filter((x) => !x.ok) ?? [];
+                if (bad.length)
+                  throw new Error(
+                    bad.map((x) => t('settings.remind.channelError', { channel: x.channel, error: x.error })).join(t('settings.remind.errorSep')),
                   );
-                  if (!r.sent) throw new Error(r.reason ?? t('settings.remind.testFailed'));
-                  const bad = r.results?.filter((x) => !x.ok) ?? [];
-                  if (bad.length)
-                    throw new Error(
-                      bad.map((x) => t('settings.remind.channelError', { channel: x.channel, error: x.error })).join(t('settings.remind.errorSep')),
-                    );
-                  loadPreview();
-                }, t('settings.remind.testSent'))
-              }
-            />
-          )}
+                loadPreview();
+              }, t('settings.remind.testSent'))
+            }
+          />
           <Cell
             label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.preview')}</span>}
             onClick={() => window.open(base('/api/notify/preview?html=1'), '_blank')}
           />
         </Group>
 
-        {state.demo ? (
-          <Group title={t('settings.channels.title', { count: 0 })}>
-            <Cell label={t('app.demo.unavailable')} />
-          </Group>
-        ) : (
-          <ChannelsGroup state={state} />
-        )}
+        <ChannelsGroup state={state} />
 
         {preview && (preview.digests.length > 0 || preview.log.length > 0) && (
           <Group title={t('settings.today.title', { day: preview.day })}>
@@ -448,87 +431,62 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           <Cell label={t('settings.open.ics')} onClick={() => setIcs(true)}>
             {s.icsToken ? t('settings.open.on') : t('settings.open.off')}
           </Cell>
-          {state.demo ? (
-            <Cell label={t('settings.open.public')} sub={t('app.demo.unavailable')} />
-          ) : (
-            <>
-              {' '}
-              <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}${base('/')}` : undefined}>
-                <Toggle
-                  label={t('settings.open.public')}
-                  checked={s.publicView}
-                  onChange={(v) => run(() => saveSettings({ publicView: v }), v ? t('settings.open.publicOn') : t('settings.open.publicOff'))}
-                />
-              </Cell>
-              {s.publicView && (
-                <Cell label={t('settings.open.publicSubs')} onClick={() => setPubSubs(true)}>
-                  {(() => {
-                    const all = publicCandidates(state, today);
-                    const hidden = new Set(s.publicHidden ?? []);
-                    return `${all.filter((x) => !hidden.has(x.id)).length} / ${all.length}`;
-                  })()}
-                </Cell>
-              )}
-              {s.publicView && (
-                <Cell label={t('settings.open.publicTitle')}>
-                  <input
-                    value={pubTitle}
-                    placeholder={s.displayName.trim() ? t('public.title', { name: s.displayName.trim() }) : t('public.titleAnon')}
-                    onChange={(e) => setPubTitle((e.target as HTMLInputElement).value)}
-                    onBlur={() =>
-                      pubTitle.trim() !== (s.publicTitle ?? '') &&
-                      run(() => saveSettings({ publicTitle: (pubTitle.trim() || null) as string | undefined }), t('settings.toast.saved'))
-                    }
-                  />
-                </Cell>
-              )}
-              {s.publicView && (
-                <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />
-              )}
-              <Cell label={t('settings.open.ai')}>
-                <Toggle
-                  label={t('settings.open.ai')}
-                  checked={s.aiEnabled !== false}
-                  onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))}
-                />
-              </Cell>
-              {s.aiEnabled !== false && (
-                <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('mcp')} />
-              )}
-            </>
+          <Cell label={t('settings.open.public')} sub={s.publicView ? `${location.origin}${base('/')}` : undefined}>
+            <Toggle
+              label={t('settings.open.public')}
+              checked={s.publicView}
+              onChange={(v) => run(() => saveSettings({ publicView: v }), v ? t('settings.open.publicOn') : t('settings.open.publicOff'))}
+            />
+          </Cell>
+          {s.publicView && (
+            <Cell label={t('settings.open.publicSubs')} onClick={() => setPubSubs(true)}>
+              {(() => {
+                const all = publicCandidates(state, today);
+                const hidden = new Set(s.publicHidden ?? []);
+                return `${all.filter((x) => !hidden.has(x.id)).length} / ${all.length}`;
+              })()}
+            </Cell>
           )}
+          {s.publicView && (
+            <Cell label={t('settings.open.publicTitle')}>
+              <input
+                value={pubTitle}
+                placeholder={s.displayName.trim() ? t('public.title', { name: s.displayName.trim() }) : t('public.titleAnon')}
+                onChange={(e) => setPubTitle((e.target as HTMLInputElement).value)}
+                onBlur={() =>
+                  pubTitle.trim() !== (s.publicTitle ?? '') &&
+                  run(() => saveSettings({ publicTitle: (pubTitle.trim() || null) as string | undefined }), t('settings.toast.saved'))
+                }
+              />
+            </Cell>
+          )}
+          {s.publicView && (
+            <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.previewPublic')}</span>} onClick={() => window.open('/', '_blank')} />
+          )}
+          <Cell label={t('settings.open.ai')}>
+            <Toggle
+              label={t('settings.open.ai')}
+              checked={s.aiEnabled !== false}
+              onChange={(v) => run(() => saveSettings({ aiEnabled: v }), v ? t('settings.open.aiOn') : t('settings.open.aiOff'))}
+            />
+          </Cell>
+          {s.aiEnabled !== false && <Cell label={<span style={{ color: 'var(--accent)' }}>{t('settings.open.manageAi')}</span>} onClick={() => go('mcp')} />}
         </Group>
 
-        {state.demo ? (
-          <Group title={t('settings.security.title')}>
-            <Cell label={t('app.demo.unavailable')} />
-          </Group>
-        ) : (
-          !state.readonly && <SecurityGroup state={state} />
-        )}
+        {!state.readonly && <SecurityGroup state={state} />}
 
         <Group title={t('settings.data.title')}>
-          <Cell
-            label={t('settings.data.importCsv')}
-            sub={state.demo ? t('app.demo.unavailable') : undefined}
-            onClick={state.demo ? undefined : () => pickFile('.csv,text/csv', onCsv)}
-          />
-          <Cell
-            label={t('settings.data.restore')}
-            sub={state.demo ? t('app.demo.unavailable') : undefined}
-            onClick={state.demo ? undefined : () => pickFile('.json,application/json', onJson)}
-          />
+          <Cell label={t('settings.data.importCsv')} onClick={() => pickFile('.csv,text/csv', onCsv)} />
+          <Cell label={t('settings.data.restore')} onClick={() => pickFile('.json,application/json', onJson)} />
           <Cell label={t('settings.data.exportCsv')} onClick={exportCsv} />
           <Cell label={t('settings.data.backup')} onClick={() => (location.href = base('/api/backup'))} />
         </Group>
 
-        {!state.demo && (
-          <Group>
-            <button className="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => logout()}>
-              {t('settings.logout')}
-            </button>
-          </Group>
-        )}
+        <Group>
+          <button className="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => logout()}>
+            {t('settings.logout')}
+          </button>
+        </Group>
       </div>
 
       {restoring && (

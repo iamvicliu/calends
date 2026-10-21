@@ -309,7 +309,6 @@ export async function sendDigest(
   d: Digest,
   opts: { force?: boolean; only?: string; now?: number } = {},
 ): Promise<{ sent: boolean; reason?: string; results?: Array<{ channel: string; ok: boolean; error?: string }> }> {
-  if (env.DEMO_MODE === '1') return { sent: false, reason: t('server.demoUnavailable') };
   const targets = channelsOf(state.settings).filter((c) => (opts.only ? c.id === opts.only : c.enabled));
   if (!targets.length) return { sent: false, reason: opts.only ? t('notify.send.noChannel') : t('notify.send.noneEnabled') };
   const now = opts.now ?? Date.now();
@@ -369,7 +368,6 @@ function localHour(tz: string, now = Date.now()): number {
 }
 
 export async function runScheduled(env: Env, state: AppState, now = Date.now()): Promise<string[]> {
-  if (env.DEMO_MODE === '1') return [];
   const log: string[] = [];
   // 重试使用原提醒快照，跨日后也保留原日期与去重键。
   const pending = await env.DB.prepare("SELECT digest FROM notify_log WHERE status = 'failed' AND attempts < 4 AND retry_at <= ?1")

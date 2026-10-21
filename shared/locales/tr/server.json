@@ -1,5 +1,4 @@
 {
-  "demoUnavailable": "Demo sitesinde kullanılamaz",
   "fxApiError": "Döviz kuru hizmeti hata döndürdü",
   "missingId": "id eksik",
   "invalidItem": "{name}: {error}",
@@ -49,7 +48,9 @@
     "invalid": "Geçersiz kategori listesi",
     "duplicate": "Yinelenen kategori: {name}"
   },
-  "demoReadonly": "Bu salt okunur bir demo; değişiklikler kaydedilmez.",
-  "assistant": { "noKey": "Henüz DeepSeek API anahtarı ayarlanmadı.", "badTool": "Desteklenmeyen işlem." },
+  "assistant": {
+    "noKey": "Henüz DeepSeek API anahtarı ayarlanmadı.",
+    "badTool": "Desteklenmeyen işlem."
+  },
   "invalidAvatar": "Geçersiz görsel"
 }

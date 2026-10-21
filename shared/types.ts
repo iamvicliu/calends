@@ -346,8 +346,6 @@ export interface AppState {
   prefs?: Prefs;
   /** 匿名公开视图时为 true（已脱敏、只读） */
   readonly?: boolean;
-  /** 公开可编辑的演示账本 */
-  demo?: boolean;
 }
 
 export const BALANCE_KINDS: MethodKind[] = ['appstore', 'googleplay', 'giftcard', 'prepaid', 'phone', 'paypal', 'alipay', 'wechat', 'crypto'];

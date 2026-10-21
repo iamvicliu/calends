@@ -166,19 +166,5 @@
     "reactivate": "恢復",
     "charge": "扣款",
     "deleteAll": "刪除訂閱及全部扣款記錄，無法復原"
-  },
-  "demo": {
-    "label": "示範",
-    "downgrade": "哪些 Claude 帳戶適合降級？",
-    "receipt": "虛構收據\n{name}\n{amount} / 月\n帳戶：{account}\n日期：{date}",
-    "thinking": "我會在本機讀取目前帳簿，不會請求任何 AI 服務。",
-    "duplicate": "帳簿已有這張收據，沒有重複產生草稿。",
-    "draft": "找不到相同帳戶。請核對下方草稿，確認後加入示範帳簿。",
-    "month": "本月合共 {amount}，共 {count} 筆，不包括代付。最大一筆是 {name}，金額 {largest}。",
-    "hikes": "最近一年每月平均費用上升的紀錄（原幣）：",
-    "noHikes": "最近一年未發現加價。",
-    "downgradeReply": "這些 Max 20x 帳戶已暫停或設為到期不續，可在恢復或續費前評估降級。帳簿沒有用量資料，無法判斷啟用帳戶是否閒置。",
-    "freeform": "示範網站播放預設對話，請選擇下方情境。部署自己的 Calends 並設定自己的 API Key 後，即可使用真正的 AI 助手。",
-    "disclaimer": "本機腳本示範。確認的草稿會寫入示範帳簿，每天還原。"
   }
 }

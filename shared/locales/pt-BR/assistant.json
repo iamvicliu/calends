@@ -168,19 +168,5 @@
     "reactivate": "Retomar",
     "charge": "Cobrança",
     "deleteAll": "Exclui a assinatura e todas as cobranças. Não é possível desfazer."
-  },
-  "demo": {
-    "label": "Demo",
-    "downgrade": "Quais contas Claude poderiam reduzir o plano?",
-    "receipt": "Recibo fictício\n{name}\n{amount} / mês\nConta: {account}\nData: {date}",
-    "thinking": "Vou consultar o registro atual localmente. Nenhum serviço de IA será acessado.",
-    "duplicate": "Este recibo já está registrado. Nenhum rascunho duplicado foi criado.",
-    "draft": "Nenhuma conta correspondente. Confira o rascunho e adicione ao registro de demonstração.",
-    "month": "Neste mês: {amount} em {count} cobranças, sem pagamentos para terceiros. Maior: {name}, {largest}.",
-    "hikes": "Aumentos do custo mensal equivalente no último ano (moeda original):",
-    "noHikes": "Nenhum aumento de preço no último ano.",
-    "downgradeReply": "Revise estas contas Max 20x pausadas ou sem renovação antes de reativar. Sem dados de uso, não é possível avaliar contas ativas.",
-    "freeform": "Esta demo reproduz conversas prontas. Escolha um cenário abaixo. Instale seu próprio Calends e configure sua chave API para usar IA real.",
-    "disclaimer": "Demonstração local com roteiro. Rascunhos confirmados são salvos e restaurados diariamente."
   }
 }

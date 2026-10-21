@@ -168,19 +168,5 @@
     "reactivate": "Devam ettir",
     "charge": "Ödeme",
     "deleteAll": "Abonelik ve tüm ödeme kayıtları silinir. Bu işlem geri alınamaz."
-  },
-  "demo": {
-    "label": "Demo",
-    "downgrade": "Hangi Claude hesapları daha düşük plana geçebilir?",
-    "receipt": "Kurgusal makbuz\n{name}\n{amount} / ay\nHesap: {account}\nTarih: {date}",
-    "thinking": "Güncel defteri yerel olarak kontrol edeceğim. Hiçbir yapay zekâ hizmetine bağlanılmayacak.",
-    "duplicate": "Bu makbuz zaten kayıtlı. Yinelenen taslak oluşturulmadı.",
-    "draft": "Eşleşen hesap yok. Taslağı kontrol edip demo defterine ekleyin.",
-    "month": "Bu ay: {count} ödeme, toplam {amount}; başkaları için yapılan ödemeler hariç. En büyük: {name}, {largest}.",
-    "hikes": "Son yıldaki aylık eşdeğer maliyet artışları (orijinal para birimi):",
-    "noHikes": "Son yılda fiyat artışı bulunamadı.",
-    "downgradeReply": "Bu duraklatılmış veya yenilenmeyecek Max 20x hesaplarını yeniden açmadan önce inceleyin. Kullanım verisi olmadığından aktif hesaplar değerlendirilemez.",
-    "freeform": "Bu demo hazır konuşmaları oynatır. Aşağıdan bir senaryo seçin. Gerçek yapay zekâ için kendi Calends kurulumunuzu ve API anahtarınızı kullanın.",
-    "disclaimer": "Yerel senaryo demosu. Onaylanan taslaklar kaydedilir ve her gün sıfırlanır."
   }
 }

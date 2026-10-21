@@ -1,5 +1,4 @@
 {
-  "demoUnavailable": "No disponible en el sitio de demostración",
   "fxApiError": "El servicio de tipos de cambio devolvió un error",
   "missingId": "Falta el id",
   "invalidItem": "{name}: {error}",
@@ -49,7 +48,9 @@
     "invalid": "Lista de categorías no válida",
     "duplicate": "Categoría duplicada: {name}"
   },
-  "demoReadonly": "Esta es una demo de solo lectura: los cambios no se guardan.",
-  "assistant": { "noKey": "Aún no hay una clave API de DeepSeek.", "badTool": "Acción no admitida." },
+  "assistant": {
+    "noKey": "Aún no hay una clave API de DeepSeek.",
+    "badTool": "Acción no admitida."
+  },
   "invalidAvatar": "Imagen no válida"
 }

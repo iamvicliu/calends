@@ -18,14 +18,14 @@ if (m.status !== 0) process.exit(m.status ?? 1);
 // 2. 初始化令牌：环境变量优先；否则首次启动时生成并保存在数据目录，设好密码后就用不到了
 let setupToken = process.env.SETUP_TOKEN;
 const tokenFile = join(DATA, 'setup-token');
-if (!setupToken && process.env.DEMO_MODE !== '1') {
+if (!setupToken) {
   if (!existsSync(tokenFile)) writeFileSync(tokenFile, randomBytes(18).toString('base64url') + '\n', { mode: 0o600 });
   setupToken = readFileSync(tokenFile, 'utf8').trim();
 }
 
 // 3. 透传给 Worker 的变量
 const vars = setupToken ? { SETUP_TOKEN: setupToken } : {};
-for (const k of ['SITE_URL', 'OWNER_PASSCODE', 'TRUST_PROXY', 'DEMO_MODE', 'BASE_PATH', 'DEMO_PROFILE']) if (process.env[k]) vars[k] = process.env[k];
+for (const k of ['SITE_URL', 'OWNER_PASSCODE', 'TRUST_PROXY', 'BASE_PATH']) if (process.env[k]) vars[k] = process.env[k];
 const args = [
   'dev',
   '--local',
