@@ -277,6 +277,11 @@ export function refresh(): Promise<void> {
       return;
     }
     const { rev } = await api<{ rev: number }>('/api/rev', { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+    // 版本号变小：服务端数据被重建或恢复过（新数据卷、备份恢复等），旧版本号不再可比，按新库重新拉取
+    if (knownRev !== undefined && rev < knownRev && writes === 0) {
+      knownRev = undefined;
+      ownRevisions = [];
+    }
     if (rev !== knownRev || forceSnapshot) {
       const state = await freshState();
       if (state) {
