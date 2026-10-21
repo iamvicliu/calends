@@ -6,7 +6,7 @@ import type { AppState, ProxyEntry, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Amount, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
-import { run, saveSub } from '../store.ts';
+import { run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
 import { proxyRows, type ProxyRow } from '../../shared/proxy.ts';
 import { t } from '../../shared/i18n.ts';
@@ -422,7 +422,7 @@ type ProxyFilter = (typeof PROXY_FILTERS)[number];
 export function ProxyPage({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const sum = proxySummary(state, today);
-  const [filter, setFilter] = useState<ProxyFilter>('all');
+  const [filter, setFilter] = usePref<ProxyFilter>('proxy-filter', 'all', (v): v is ProxyFilter => (PROXY_FILTERS as readonly string[]).includes(v));
   const stopped = (s: Subscription) => effectiveStatus(s, today) === 'ended';
   const groups: Record<ProxyFilter, Subscription[]> = {
     all: sum.subs,

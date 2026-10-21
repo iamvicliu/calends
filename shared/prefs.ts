@@ -16,6 +16,10 @@ export const PREF_KEYS = [
   'car-open',
   'share-style',
   'sub-share-style',
+  'list-status',
+  'car-filter',
+  'proxy-filter',
+  'cal-mode',
 ] as const;
 export type PrefKey = (typeof PREF_KEYS)[number];
 

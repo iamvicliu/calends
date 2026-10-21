@@ -29,7 +29,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));
   const joined = state.subscriptions.filter((s) => s.share?.role === 'member' && live(s));
   // 卡片按状态筛选；顶部的统计始终按进行中的合租算
-  const [filter, setFilter] = useState<CarFilter>('live');
+  // 筛选记在服务端：切到别的页面再回来、换台设备都还是上次选的
+  const [filter, setFilter] = usePref<CarFilter>('car-filter', 'live', (v): v is CarFilter => (CAR_FILTERS as readonly string[]).includes(v));
   const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
   const owes = (s: Subscription) => memberDues(s, today).some((d) => d.periodsOwed > 0);
   const groups: Record<CarFilter, Subscription[]> = {

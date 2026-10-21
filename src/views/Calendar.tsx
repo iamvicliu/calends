@@ -7,6 +7,7 @@ import { Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth 
 import { chargeValue } from '../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
+import { usePref } from '../store.ts';
 
 /** 表头的星期简称，按周起始日排好 */
 const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
@@ -28,7 +29,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   weekStart = state.settings.weekStart ?? 1;
   const DOW = dows();
   const [month, setMonth] = useState(today.slice(0, 7));
-  const [mode, setMode] = useState<'month' | 'year'>('month');
+  const [mode, setMode] = usePref<'month' | 'year'>('cal-mode', 'month', (v): v is 'month' | 'year' => v === 'month' || v === 'year');
   const [sel, setSel] = useState<string>(today);
   const base = state.settings.baseCurrency;
 
