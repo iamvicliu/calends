@@ -18,7 +18,7 @@ import {
   totals,
 } from './billing.ts';
 import { contributionOn, events, prepaidValue } from './metrics.ts';
-import { deletePayment, dropPlan, removePhase, savePayment, setPhaseEnd, switchPlan, syncPhase, toEditForm } from './phases.ts';
+import { deletePayment, dropPlan, prependPlan, removePhase, savePayment, setPhaseEnd, switchPlan, syncPhase, toEditForm } from './phases.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const base = (o: Partial<Subscription> = {}): Subscription => ({
@@ -238,4 +238,32 @@ test('并行期间记一笔扣款：可指定阶段，缺省记到最晚开始�
     chargesBetween(edited, '2026-07-15', '2026-07-15', '2026-07-20').map((c) => `${c.amount} ${c.currency}`),
     ['12 USD'],
   );
+});
+
+test('补一段更早的买断：插在最前面，开始日前移，之后的年付照旧', () => {
+  const yearly = base({ price: 14.99, cycle: { unit: 'year', every: 1 }, start: '2024-07-05' });
+  const s = prependPlan(yearly, '2022-01-01', { price: 39.99, currency: 'USD', cycle: { unit: 'lifetime', every: 1 }, region: 'US' });
+  assert.equal(s.start, '2022-01-01');
+  assert.deepEqual(
+    s.phases!.map((p) => [p.start, p.end, p.cycle.unit]),
+    [
+      ['2022-01-01', '2024-07-05', 'lifetime'],
+      ['2024-07-05', undefined, 'year'],
+    ],
+  );
+  // 顶层仍镜像最后一段（年付）
+  assert.equal(s.price, 14.99);
+  const cs = chargesBetween(s, '2021-01-01', '2025-12-31', '2025-12-31').map((c) => [c.date, c.amount]);
+  assert.deepEqual(cs, [
+    ['2022-01-01', 39.99],
+    ['2024-07-05', 14.99],
+    ['2025-07-05', 14.99],
+  ]);
+  // 有断档：买断那段早早结束
+  assert.equal(
+    prependPlan(yearly, '2022-01-01', { price: 39.99, currency: 'USD', cycle: { unit: 'lifetime', every: 1 } }, '2023-01-01').phases![0].end,
+    '2023-01-01',
+  );
+  assert.throws(() => prependPlan(yearly, '2024-07-05', TR));
+  assert.throws(() => prependPlan(yearly, '2022-01-01', TR, '2025-01-01'));
 });

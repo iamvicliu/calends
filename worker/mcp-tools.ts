@@ -23,7 +23,7 @@ import {
 } from '../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../shared/metrics.ts';
-import { changePrice, confirmPlan, deletePayment, dropPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
+import { changePrice, confirmPlan, deletePayment, dropPlan, prependPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../shared/phases.ts';
 import { matchEntries } from '../shared/proxy.ts';
 import { normName, peopleLedger, type PersonLedger } from '../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../shared/types.ts';
@@ -973,12 +973,12 @@ export const TOOLS: Tool[] = [
   {
     name: 'change_plan',
     description:
-      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap (action=resume), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
+      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap (action=resume), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
         subscription: SUBREF,
-        action: { type: 'string', enum: ['switch', 'resume', 'confirm', 'drop'] },
+        action: { type: 'string', enum: ['switch', 'resume', 'earlier', 'confirm', 'drop'] },
         at: DATE,
         plan: obj(
           {
@@ -996,6 +996,7 @@ export const TOOLS: Tool[] = [
           ...DATE,
           description: 'action=switch only: the previous phase keeps running until this date (after `at`), overlapping the new one.',
         },
+        earlier_until: { ...DATE, description: 'action=earlier only: the earlier phase ended on this date (a gap before the next one).' },
         dry_run: DRY,
       },
       ['subscription', 'action', 'at'],
@@ -1020,6 +1021,8 @@ export const TOOLS: Tool[] = [
         planned: p.planned ? true : undefined,
       };
       if (!st.fx.rates[plan.currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: plan.currency }));
+      if (act === 'earlier')
+        return commit(ctx, st, today, prependPlan(s, at, plan, a.earlier_until != null ? date(a.earlier_until, 'earlier_until') : undefined), a.dry_run, [act]);
       const keep = act === 'switch' && a.keep_previous_until != null ? date(a.keep_previous_until, 'keep_previous_until') : undefined;
       return commit(
         ctx,

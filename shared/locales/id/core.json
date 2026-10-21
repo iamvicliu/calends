@@ -18,6 +18,8 @@
   "phase": {
     "switchTooEarly": "Tanggal berlaku harus setelah fase saat ini dimulai",
     "resumeTooEarly": "Tanggal lanjut tidak boleh sebelum tanggal berakhir terakhir",
+    "prependTooLate": "Fase sebelumnya harus dimulai sebelum tanggal mulai langganan",
+    "prependUntil": "Fase sebelumnya harus berakhir setelah dimulai dan paling lambat pada tanggal mulai semula",
     "priceOutOfRange": "Tanggal perubahan harga tidak berada di fase mana pun",
     "keepTooEarly": "Tanggal tetap berjalan harus setelah tanggal peralihan",
     "endTooEarly": "Tanggal berakhir harus setelah awal fase ini"

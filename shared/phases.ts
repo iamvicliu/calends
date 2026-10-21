@@ -78,6 +78,19 @@ export function switchPlan(s: Subscription, at: string, next: PlanChange, keepUn
   return { ...mirror(s, phases), status: 'active', pausedAt: undefined };
 }
 
+/**
+ * 补一段更早的历史：插在第一段之前，从 at 起；默认一直用到原来第一段开始（无缝），
+ * 给了 until 时在那天结束，中间算断档。比如先买断、后来才改订阅，买断那段是后补的
+ */
+export function prependPlan(s: Subscription, at: string, prev: PlanChange, until?: string): Subscription {
+  const phases = phasesOf(s);
+  const first = phases[0];
+  if (at >= first.start) throw new Error(t('core.phase.prependTooLate'));
+  if (until && (until <= at || until > first.start)) throw new Error(t('core.phase.prependUntil'));
+  phases.unshift({ start: at, end: until ?? first.start, ...prev });
+  return mirror({ ...s, start: at }, phases);
+}
+
 /** 计划成真：去掉「计划」标记 */
 export function confirmPlan(s: Subscription, start: string): Subscription {
   return mirror(
