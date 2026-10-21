@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../shared/billing.ts';
 import { cnDate, money, monthLabel, relDays, weekdayShort } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
@@ -65,6 +65,23 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
   const shift = (n: number) => setMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));
+  // ← → 翻上/下一页（月视图翻月，年视图翻年），T 回到今天；输入框里、弹层打开时不响应
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      if (document.querySelector('.scrim, [aria-modal="true"]')) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        setMonth(addMonths(month + '-01', (e.key === 'ArrowLeft' ? -1 : 1) * (mode === 'year' ? 12 : 1)).slice(0, 7));
+      } else if (e.key === 't' || e.key === 'T') {
+        setMonth(today.slice(0, 7));
+        setSel(today);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [month, mode, today]);
   const selList = byDay.get(sel) ?? [];
   const list = mode === 'month' ? monthCharges : yearCharges;
 
@@ -83,11 +100,12 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             ['year', t('calendar.mode.year')],
           ]}
         />
-        <button className="icon-btn" aria-label={t('calendar.prev')} onClick={() => shift(-1)}>
+        <button className="icon-btn" aria-label={t('calendar.prev')} title={`${t('calendar.prev')} ←`} onClick={() => shift(-1)}>
           <Icon name="left" />
         </button>
         <button
           className="btn"
+          title={`${t('calendar.today')} T`}
           onClick={() => {
             setMonth(today.slice(0, 7));
             setSel(today);
@@ -95,7 +113,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         >
           {t('calendar.today')}
         </button>
-        <button className="icon-btn" aria-label={t('calendar.next')} onClick={() => shift(1)}>
+        <button className="icon-btn" aria-label={t('calendar.next')} title={`${t('calendar.next')} →`} onClick={() => shift(1)}>
           <Icon name="right" />
         </button>
         {!state.readonly && (
