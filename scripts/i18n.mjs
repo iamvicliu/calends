@@ -70,5 +70,24 @@ if (process.argv.includes('--check')) {
       `${loc.padEnd(6)} ${have.size} keys · missing ${missing.length} · extra ${extra.length}${missing.length ? '\n  - ' + missing.slice(0, 10).join('\n  - ') : ''}${extra.length ? '\n  + ' + extra.slice(0, 10).join('\n  + ') : ''}`,
     );
   }
+  // 代码里写死的文案键（t('a.b.c')）必须在语言文件里存在：各语言之间互相比对发现不了「大家都漏了」
+  const used = new Map();
+  const scan = (dir) => {
+    for (const f of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, f.name);
+      if (f.isDirectory()) {
+        if (f.name !== 'node_modules' && f.name !== 'locales') scan(p);
+      } else if (/\.(ts|tsx)$/.test(f.name)) {
+        for (const m of readFileSync(p, 'utf8').matchAll(/\bt\(\s*'([a-zA-Z0-9_.]+)'/g)) if (!used.has(m[1])) used.set(m[1], p);
+      }
+    }
+  };
+  for (const d of ['src', 'worker', 'shared']) scan(join(ROOT, '..', '..', d));
+  const zh = load('zh-CN');
+  const unknown = [...used].filter(([k]) => !zh.has(k) && k !== 'ns.key');
+  if (unknown.length) {
+    bad++;
+    console.log(`code   ${unknown.length} keys used in code but missing in locales\n${unknown.map(([k, f]) => `  ! ${k}  (${f})`).join('\n')}`);
+  }
   process.exitCode = bad ? 1 : 0;
 }
