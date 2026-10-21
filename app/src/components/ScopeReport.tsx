@@ -1,8 +1,12 @@
-import { useId, type ReactNode } from 'react';
+import { useId, useRef, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
+import { Copy } from 'lucide-react';
 import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import type { Block, ChargeRow, Comparison, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
+import { snapshot } from '../snapshot.ts';
+import { run } from '../store.ts';
 import { BarLine } from './charts.tsx';
 import { Icon } from './ui.tsx';
 import './scope-report.css';
@@ -21,6 +25,31 @@ interface Props {
 /** Shared presentation for subscription selections and calendar months; callers own disclosure state. */
 export function ScopeReport({ report, state, today, onOpen, title, animate, open, onToggle }: Props) {
   const id = useId();
+  const root = useRef<HTMLElement>(null);
+  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'done'>('idle');
+  const copying = copyState === 'copying';
+  const expanded = open || copying;
+  const copyImage = () => {
+    if (!root.current || copying) return;
+    const el = root.current;
+    // 只临时展开，不写入调用方的折叠偏好；同步提交以便 Safari 在点击内创建 ClipboardItem。
+    flushSync(() => setCopyState('copying'));
+    const blob = (async () => {
+      try {
+        // 让新挂载图表的宽度测量完成，组装动画在复制后保持关闭。
+        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        const image = await snapshot(el, {
+          radius: getComputedStyle(el).borderRadius,
+          filter: (n) => !(n instanceof Element && n.matches('.scope-actions')),
+        });
+        if (!image) throw new Error(t('ui.error.requestFailed', { status: 'PNG' }));
+        return image;
+      } finally {
+        setCopyState('done');
+      }
+    })();
+    void run(() => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]), t('detail.toast.imageCopied'));
+  };
   const base = state.settings.baseCurrency;
   const expense = (v: number) => flow(-v, base);
   const income = (v: number) => flow(v, base);
@@ -301,23 +330,38 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
     }
   };
   return (
-    <section className={`scope-report ${animate ? 'scope-animate' : ''}`} aria-labelledby={`${id}-title`}>
+    <section ref={root} className={`scope-report ${animate && copyState === 'idle' ? 'scope-animate' : ''}`} aria-labelledby={`${id}-title`}>
       <header className="scope-header">
         <h2 id={`${id}-title`}>{title}</h2>
-        <button
-          type="button"
-          className="icon-btn"
-          aria-expanded={open}
-          aria-controls={id}
-          aria-label={t(open ? 'scope.collapse' : 'scope.expand')}
-          onClick={onToggle}
-        >
-          <span className={open ? 'scope-chevron open' : 'scope-chevron'}>
-            <Icon name="down" />
-          </span>
-        </button>
+        <div className="scope-actions">
+          {typeof ClipboardItem !== 'undefined' && (
+            <button
+              type="button"
+              className="icon-btn"
+              title={t('detail.action.copyImage')}
+              aria-label={t('detail.action.copyImage')}
+              disabled={copying}
+              onClick={copyImage}
+            >
+              <Copy size={15} />
+            </button>
+          )}
+          <button
+            type="button"
+            className="icon-btn"
+            aria-expanded={expanded}
+            aria-controls={id}
+            aria-label={t(open ? 'scope.collapse' : 'scope.expand')}
+            onClick={onToggle}
+            disabled={copying}
+          >
+            <span className={open ? 'scope-chevron open' : 'scope-chevron'}>
+              <Icon name="down" />
+            </span>
+          </button>
+        </div>
       </header>
-      {open && (
+      {expanded && (
         <div id={id} className="scope-grid">
           {report.blocks.map((block, i) => (
             <div className={`card scope-block scope-${block.type}`} key={block.type} style={{ animationDelay: `${i * 65}ms` }}>

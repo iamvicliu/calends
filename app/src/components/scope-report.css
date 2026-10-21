@@ -1,6 +1,15 @@
 .scope-report {
   width: 100%;
   min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--bg);
+}
+.scope-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
 }
 .scope-header {
   display: flex;
