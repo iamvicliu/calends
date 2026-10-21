@@ -57,7 +57,8 @@
     "active": "Active",
     "trial": "Trial",
     "paused": "Paused",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "terminated": "Terminated"
   },
   "category": {
     "choose": "Choose category",

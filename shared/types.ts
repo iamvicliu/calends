@@ -10,10 +10,20 @@ export interface Cycle {
   every: number;
 }
 
-export type SubStatus = 'active' | 'trial' | 'paused' | 'cancelled';
+export type SubStatus = 'active' | 'trial' | 'paused' | 'cancelled' | 'terminated';
 
 /** 一笔实际发生的钱。amount 是订阅币种的金额（退款为负）；settled 是卡上实际扣的币种和金额（不同时才填） */
+export interface Stop {
+  kind: 'cancel' | 'terminate';
+  date: string;
+  /** 原已付服务期最后一天（含），停止之后的天数为已付未用 */
+  paidThrough: string;
+  reason?: string;
+}
+
 export interface Payment {
+  /** 缺省同所属阶段币种；退款不得使用其他币种，卡上实退使用 settled */
+  currency?: string;
   date: string;
   amount: number;
   note?: string;
@@ -135,6 +145,7 @@ export interface Phase {
   start: string;
   /** 最后服务日（含）；缺省为下一阶段开始前一天，最后一段取订阅的 end */
   end?: string;
+  stop?: Stop;
   price: number;
   currency: string;
   cycle: Cycle;
@@ -166,6 +177,7 @@ export interface Subscription {
   start: string;
   /** 最后服务日（含当天）：次日结束，不再产生预测扣款 */
   end?: string;
+  stop?: Stop;
   status: SubStatus;
   /** 首个付费日；前一天为试用最后一天 */
   trialEnd?: string;

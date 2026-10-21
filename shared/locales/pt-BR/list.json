@@ -18,7 +18,8 @@
     "pausedShort": "Pausada",
     "ending": "Sem renovação",
     "ended": "Cancelada",
-    "lifetime": "Vitalícia"
+    "lifetime": "Vitalícia",
+    "terminated": "Desativado"
   },
   "proxyExcluded": "Pago para outros · não contabilizado",
   "perMonthApprox": "≈ {amount}/mês",

@@ -42,7 +42,18 @@
     "personNoItems": "{name} không có gói hay khoản trả hộ nào để ghi",
     "personItemsAmbiguous": "{name} có ở nhiều nơi — hãy chỉ định subscription: {list}",
     "needSubOrPerson": "Cần subscription hoặc person",
-    "needKind": "Cần kind (share hoặc proxy)"
+    "needKind": "Cần kind (share hoặc proxy)",
+    "stopBeforeStart": "Ngày dừng không được trước ngày bắt đầu.",
+    "stopAfterPaidThrough": "Ngày dừng vượt quá kỳ đã trả. Hãy chọn không gia hạn.",
+    "refundExceedsPaid": "Tổng hoàn tiền không được vượt quá số thực trả kỳ này.",
+    "refundCurrency": "Đơn vị tiền hoàn phải giống gói đăng ký. Dùng settled cho thẻ.",
+    "subscriptionEnded": "Gói đã kết thúc. Hãy đăng ký lại bằng giai đoạn mới.",
+    "terminatedReactivate": "Không thể kích hoạt lại gói bị nhà cung cấp vô hiệu hóa. Dùng change_plan (resume / giai đoạn mới).",
+    "needStop": "Gói bị vô hiệu hóa cần thông tin dừng.",
+    "invalidPaidThrough": "Ngày đã trả phải khớp kỳ thanh toán ban đầu.",
+    "invalidStop": "Thông tin dừng phải khớp ngày dịch vụ cuối; chỉ nhà cung cấp vô hiệu hóa mới có lý do.",
+    "invalidRefund": "Tiền hoàn phải là số hợp lệ và được lưu dưới dạng số âm.",
+    "refundBeforeStop": "Ngày hoàn tiền không được trước ngày dừng."
   },
   "tool": {
     "get_overview": "Tổng quan sổ",

@@ -44,7 +44,8 @@
     "active": "計費中",
     "trial": "試用中",
     "paused": "已暫停",
-    "cancelled": "已退訂"
+    "cancelled": "已退訂",
+    "terminated": "已停用"
   },
   "category": {
     "choose": "選擇分類",

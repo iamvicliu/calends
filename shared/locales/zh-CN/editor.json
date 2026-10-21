@@ -44,7 +44,8 @@
     "active": "计费中",
     "trial": "试用中",
     "paused": "已暂停",
-    "cancelled": "已退订"
+    "cancelled": "已退订",
+    "terminated": "已停用"
   },
   "category": {
     "choose": "选择分类",

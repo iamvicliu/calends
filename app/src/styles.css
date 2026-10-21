@@ -8788,3 +8788,94 @@ img.mm-flag {
   flex: 1;
   min-width: 0;
 }
+
+/* 停止服务：沿用表单栅格；较长的翻译在窄屏上自然换行。 */
+.stop-panel {
+  min-width: 0;
+}
+.stop-panel .cell {
+  gap: 12px;
+}
+.stop-panel .cell-l {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.stop-panel .cell-r {
+  min-width: 0;
+}
+.stop-hint,
+.stop-summary {
+  padding: 10px 16px;
+  color: var(--label-2);
+  font-size: 13px;
+}
+.stop-summary {
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+.stop-summary b {
+  font-weight: 500;
+}
+.stop-actions {
+  justify-content: flex-end;
+}
+.stop-badge {
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.5;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+.gt-unused,
+.gt-legend .lg-unused {
+  border-radius: 0;
+  background: repeating-linear-gradient(90deg, var(--label-3) 0 7px, transparent 7px 12px);
+  opacity: 0.55;
+}
+.gt-unused {
+  position: absolute;
+  height: 18px;
+  z-index: 1;
+}
+.gt-stop,
+.gt-stop-end {
+  position: absolute;
+  z-index: 3;
+  color: var(--label);
+}
+.gt-stop,
+.lg-stop {
+  width: 20px;
+  height: 20px;
+  fill: var(--card);
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+.gt-stop-end {
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--label-2);
+}
+@media (max-width: 480px) {
+  .stop-panel .cell {
+    flex-wrap: wrap;
+  }
+  .stop-panel .cell-r {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
+  .stop-panel .cell-l {
+    max-width: 100%;
+  }
+  .stop-panel input {
+    max-width: 100%;
+  }
+  .sc-flags {
+    flex-wrap: wrap;
+  }
+  .dt-id h2 {
+    flex-wrap: wrap;
+  }
+}

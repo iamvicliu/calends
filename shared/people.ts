@@ -236,7 +236,7 @@ function proxyItem(state: AppState, s: Subscription, today: string): PersonItem 
       const d = r.entry?.receivedOn ?? r.date;
       return !a || d > a ? d : a;
     }, undefined),
-    active: effectiveStatus(s, today) !== 'ended',
+    active: !['ended', 'terminated'].includes(effectiveStatus(s, today)),
   };
 }
 

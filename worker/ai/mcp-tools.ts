@@ -16,7 +16,7 @@ import {
   phaseSubs,
   priceAt,
   runwayFor,
-  subError,
+  stopSummary,
   todayIn,
   totals,
   uid,
@@ -24,7 +24,22 @@ import {
 } from '../../shared/billing.ts';
 import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, topUpPlan, yearReview } from '../../shared/metrics.ts';
-import { changePrice, confirmPlan, deletePayment, dropPlan, prependPlan, resume, savePayment, switchPlan, syncPhase, toEditForm } from '../../shared/phases.ts';
+import {
+  changePrice,
+  confirmPlan,
+  deletePayment,
+  dropPlan,
+  prependPlan,
+  resume,
+  savePayment,
+  switchPlan,
+  syncPhase,
+  toEditForm,
+  stopSubscription,
+  reactivate,
+  statusChangeError,
+  cancelAtEnd,
+} from '../../shared/phases.ts';
 import { matchEntries } from '../../shared/proxy.ts';
 import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../../shared/types.ts';
@@ -233,6 +248,7 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
     region: cur.region ?? null,
     start: s.start,
     end: s.end ?? null,
+    stop: stopSummary(cur, today) ?? null,
     has_planned_change: !!s.phases?.some((p) => p.planned),
     ...(parallel.length
       ? {
@@ -317,7 +333,11 @@ const obj = (properties: Record<string, unknown>, required: string[] = []) => ({
 
 /** 写入：dry_run 只返回预览；否则保存并返回最新一行 + 接下来几笔扣款 */
 async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscription, dry: unknown, changed: string[]) {
-  const errs = subError(after);
+  const errs = statusChangeError(
+    st.subscriptions.find((x) => x.id === after.id),
+    after,
+    today,
+  );
   if (errs) throw new Error(errs);
   const preview = {
     subscription: row(st, after, today),
@@ -421,12 +441,12 @@ export const TOOLS: Tool[] = [
   {
     name: 'list_subscriptions',
     description:
-      'List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner = shared plan I organize / share_member = shared plan I joined / proxy = paid on behalf of someone), category, method or region. Use query to find a subscription id.',
+      'List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner = shared plan I organize / share_member = shared plan I joined / proxy = paid on behalf of someone), category, method or region. Stop summaries distinguish non-renewal (end only), voluntary immediate cancellation and provider termination; stop includes kind, date, paidThrough, reason, refunded, refundStatus (none / partial / full; a pro-rata refund of the remaining days counts as full), unusedDays (stop date to paidThrough), unusedValue and wastedDays (days not covered by the refund). Use query to find a subscription id.',
     inputSchema: obj({
       query: { type: 'string', description: 'Fuzzy match on name, tags, notes, category.' },
       status: {
         type: 'string',
-        enum: ['active', 'trial', 'paused', 'ending', 'ended', 'upcoming', 'lifetime', 'live', 'all'],
+        enum: ['active', 'trial', 'paused', 'ending', 'ended', 'terminated', 'upcoming', 'lifetime', 'live', 'all'],
         default: 'live',
         description: 'live = active+trial+ending+paused.',
       },
@@ -469,7 +489,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'get_subscription',
     description:
-      'Full detail of one subscription: every phase (region or plan switches, gaps = lapses), price history, intro/bonus periods, recent and upcoming charges, shared-plan member dues, proxy repayments, and totals spent so far.',
+      'Full detail of one subscription: every phase (region or plan switches, gaps = lapses), price history, intro/bonus periods, recent and upcoming charges, shared-plan member dues, proxy repayments, and totals spent so far. Stop summaries include provider termination reasons, refunds and paid-but-unused days/value for each phase.',
     inputSchema: obj(
       { subscription: SUBREF, months_back: { type: 'integer', default: 12 }, months_forward: { type: 'integer', default: 6 }, currency_out: CURRENCY_OUT },
       ['subscription'],
@@ -501,6 +521,7 @@ export const TOOLS: Tool[] = [
         phases: phaseSubs(s).map((v) => ({
           start: v.start,
           end: v.end ?? null,
+          stop: stopSummary(v, today) ?? null,
           price: v.price,
           currency: v.currency,
           cycle: cycleLabel(v.cycle),
@@ -799,7 +820,13 @@ export const TOOLS: Tool[] = [
       }
       if (sec === 'prepaid') {
         const p = prepaidValue(st, today);
-        return { currency: base, total: round(p.total), items: p.items.map((i) => ({ name: i.sub.name, value: round(i.value), until: i.until })) };
+        return {
+          currency: base,
+          total: round(p.total),
+          unused_total: round(p.unusedTotal),
+          unused_items: p.unusedItems.map((i) => ({ name: i.sub.name, value: round(i.value), until: i.until })),
+          items: p.items.map((i) => ({ name: i.sub.name, value: round(i.value), until: i.until })),
+        };
       }
       const c = cancelSavings(st, today);
       return {
@@ -986,7 +1013,7 @@ export const TOOLS: Tool[] = [
   {
     name: 'change_plan',
     description:
-      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap (action=resume), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
+      'Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
@@ -1049,13 +1076,25 @@ export const TOOLS: Tool[] = [
   },
   {
     name: 'set_status',
-    description: 'Pause a subscription (stop projecting charges), cancel it (no renewal after a date), or reactivate it (clear pause / end date).',
+    description:
+      'Pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions.',
     write: true,
     inputSchema: obj(
       {
         subscription: SUBREF,
-        action: { type: 'string', enum: ['pause', 'cancel', 'reactivate'] },
-        at: { ...DATE, description: 'Defaults to today. For cancel: last day of service / no renewal from this date.' },
+        action: { type: 'string', enum: ['pause', 'cancel', 'terminate', 'reactivate'] },
+        at: { ...DATE, description: 'Defaults to today. Non-immediate cancel: last service day. Immediate cancel / terminate: actual stop day.' },
+        immediate: { type: 'boolean', default: false, description: 'cancel only: stop using the service immediately instead of non-renewal.' },
+        reason: { type: 'string', description: 'Optional provider termination reason; terminate only.' },
+        refund: obj(
+          {
+            amount: { type: 'number', minimum: 0 },
+            date: DATE,
+            currency: { type: 'string', description: 'Must equal the subscription currency; usually omit.' },
+            settled: obj({ amount: { type: 'number', minimum: 0 }, currency: { type: 'string' } }, ['amount', 'currency']),
+          },
+          ['amount'],
+        ),
         dry_run: DRY,
       },
       ['subscription', 'action'],
@@ -1066,27 +1105,49 @@ export const TOOLS: Tool[] = [
       const at = date(a.at, 'at', today);
       const act = String(a.action);
       let next: Subscription;
-      if (act === 'pause') next = { ...s, status: 'paused', pausedAt: at };
-      else if (act === 'cancel') {
-        // 退订日之后排好的阶段（包括计划中的换套餐）一并取消，再给生效的那段设上结束日
-        let c = s;
-        for (const ph of (s.phases ?? []).filter((x) => x.start >= at && x.start > s.start).sort((x, y) => y.start.localeCompare(x.start)))
-          c = dropPlan(c, ph.start);
-        next = syncPhase({ ...toEditForm(c, today), status: 'cancelled', end: at }, today);
-      } else next = syncPhase({ ...toEditForm(s, today), status: 'active', pausedAt: undefined, end: undefined }, today);
+      if (act === 'reactivate') next = reactivate(s, today);
+      else if (act === 'terminate' || (act === 'cancel' && a.immediate === true)) {
+        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | undefined;
+        next = stopSubscription(
+          s,
+          today,
+          act === 'terminate' ? 'terminate' : 'cancel',
+          at,
+          str(a.reason),
+          r
+            ? {
+                amount: num(r.amount, 'refund.amount'),
+                date: date(r.date, 'refund.date', at),
+                currency: str(r.currency)?.toUpperCase(),
+                settled: r.settled ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() } : undefined,
+              }
+            : undefined,
+        );
+      } else {
+        if (['ended', 'terminated'].includes(effectiveStatus(s, today)) || s.stop) throw new Error(t('mcp.error.subscriptionEnded'));
+        if (act === 'pause') next = { ...s, status: 'paused', pausedAt: at };
+        else if (act === 'cancel') {
+          if (a.refund) throw new Error(t('mcp.error.invalidStop'));
+          next = cancelAtEnd(s, at, today);
+        } else throw new Error(t('mcp.error.invalidStop'));
+      }
       return commit(ctx, st, today, next, a.dry_run, [act]);
     },
   },
   {
     name: 'record_payment',
     description:
-      'Record an actual charge, refund (positive amount — stored negative), adjustment or failed charge for a subscription, in the subscription’s currency. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). Rejects same-day same-amount duplicates unless allow_duplicate.',
+      'Record an actual charge, refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for refunds. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). Rejects same-day same-amount duplicates unless allow_duplicate.',
     write: true,
     inputSchema: obj(
       {
         subscription: SUBREF,
         date: { ...DATE, description: 'Defaults to today.' },
         amount: { type: 'number', minimum: 0 },
+        currency: {
+          type: 'string',
+          description: 'Refund currency must equal the subscription / selected phase currency. Use settled for a different card currency.',
+        },
         kind: { type: 'string', enum: ['charge', 'refund', 'adjust', 'failed'], default: 'charge' },
         settled: obj({ amount: { type: 'number' }, currency: { type: 'string' } }, ['amount', 'currency']),
         note: { type: 'string' },
@@ -1115,6 +1176,7 @@ export const TOOLS: Tool[] = [
       const st2 = a.settled as { amount: unknown; currency: unknown } | undefined;
       const pay: Payment = {
         date: d,
+        currency: str(a.currency)?.toUpperCase(),
         amount,
         kind: kind === 'charge' ? undefined : (kind as Payment['kind']),
         settled: st2 ? { amount: sign * Math.abs(num(st2.amount, 'settled.amount')), currency: String(st2.currency).toUpperCase() } : undefined,

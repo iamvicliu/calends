@@ -1,6 +1,6 @@
 // 合租的账：一年的成本与预计收入、从开始合租起实际付出与收回；成员每次该收多少。
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
-import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard } from './billing.ts';
+import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import type { AppState, ShareMember, Subscription } from './types.ts';
 
@@ -14,7 +14,9 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   const perYear = 365.25 / cycleDays(cur.cycle);
   const yearCost = toBaseAt(state, monthlyGross(cur, today) * 12, cur.currency);
   // 预计收入只算还在车上的；实际收回保留所有人（包括已退出的）的历史收款
-  const yearIncome = members.reduce((a, m) => a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (m.share || 0) * perYear, cur.currency)), 0);
+  const yearIncome = ['ended', 'terminated'].includes(effectiveStatus(s, today))
+    ? 0
+    : members.reduce((a, m) => a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (m.share || 0) * perYear, cur.currency)), 0);
   const firstPay = members.flatMap((m) => m.payments ?? []).reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);

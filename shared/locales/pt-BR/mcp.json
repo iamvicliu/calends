@@ -42,7 +42,18 @@
     "personNoItems": "{name} não tem planos ou pagamentos para registrar",
     "personItemsAmbiguous": "{name} está em vários; informe subscription: {list}",
     "needSubOrPerson": "subscription ou person é obrigatório",
-    "needKind": "kind é obrigatório (share ou proxy)"
+    "needKind": "kind é obrigatório (share ou proxy)",
+    "stopBeforeStart": "A interrupção não pode ser anterior ao início.",
+    "stopAfterPaidThrough": "A interrupção excede o período pago. Use não renovar.",
+    "refundExceedsPaid": "O total reembolsado não pode exceder o valor pago no período.",
+    "refundCurrency": "A moeda do reembolso deve ser a da assinatura. Use settled para o cartão.",
+    "subscriptionEnded": "A assinatura já terminou. Adicione uma nova fase para assinar novamente.",
+    "terminatedReactivate": "Uma assinatura desativada pelo provedor não pode ser reativada. Use change_plan (resume / nova fase).",
+    "needStop": "Uma assinatura desativada exige informações de interrupção.",
+    "invalidPaidThrough": "A data paga deve corresponder ao período de cobrança original.",
+    "invalidStop": "A interrupção deve coincidir com o último dia de serviço; apenas a desativação pelo provedor aceita motivo.",
+    "invalidRefund": "Os reembolsos devem ser valores válidos e armazenados como negativos.",
+    "refundBeforeStop": "A data do reembolso não pode preceder a interrupção."
   },
   "tool": {
     "get_overview": "Visão geral",

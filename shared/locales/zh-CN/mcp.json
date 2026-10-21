@@ -42,7 +42,18 @@
     "personNoItems": "{name} 没有可记收款的合租或代付",
     "personItemsAmbiguous": "{name} 在多处，请用 subscription 指定：{list}",
     "needSubOrPerson": "需要 subscription 或 person",
-    "needKind": "需要 kind（share 或 proxy）"
+    "needKind": "需要 kind（share 或 proxy）",
+    "stopBeforeStart": "停止日不能早于开始日。",
+    "stopAfterPaidThrough": "停止日晚于本期已付到日，请改用到期不续。",
+    "refundExceedsPaid": "退款合计不能超过当期实付。",
+    "refundCurrency": "退款币种必须与订阅币种一致，卡上实退请使用 settled。",
+    "subscriptionEnded": "订阅已结束，请通过新阶段重新订阅。",
+    "terminatedReactivate": "已停用订阅不能恢复，请通过 change_plan（resume / 新阶段）重新订阅。",
+    "needStop": "已停用订阅必须填写停止信息。",
+    "invalidPaidThrough": "本期付到日必须与原计费周期一致。",
+    "invalidStop": "停止信息必须与最后服务日一致，只有服务方停用可填写原因。",
+    "invalidRefund": "退款金额须为有效数字，并以负数记录。",
+    "refundBeforeStop": "退款日期不能早于停止日。"
   },
   "tool": {
     "get_overview": "账本概况",

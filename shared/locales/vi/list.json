@@ -17,7 +17,8 @@
     "pausedShort": "Tạm dừng",
     "ending": "Không gia hạn",
     "ended": "Đã hủy",
-    "lifetime": "Trọn đời"
+    "lifetime": "Trọn đời",
+    "terminated": "Đã vô hiệu hóa"
   },
   "proxyExcluded": "Trả hộ · không tính",
   "perMonthApprox": "≈ {amount}/tháng",

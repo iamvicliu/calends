@@ -301,7 +301,7 @@ function Palette({
       const hay = `${s.name} ${s.category} ${s.tags.join(' ')} ${m} ${s.region ?? ''} ${s.notes ?? ''} ${s.proxy?.forName ?? ''}`.toLowerCase();
       return lower.split(/\s+/).every((w) => hay.includes(w));
     })
-    .sort((a, b) => (effectiveStatus(a, d) === 'ended' ? 1 : 0) - (effectiveStatus(b, d) === 'ended' ? 1 : 0))
+    .sort((a, b) => (['ended', 'terminated'].includes(effectiveStatus(a, d)) ? 1 : 0) - (['ended', 'terminated'].includes(effectiveStatus(b, d)) ? 1 : 0))
     .slice(0, 8);
   const pages = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }].filter(
     (n) => !lower || n.label.toLowerCase().includes(lower),

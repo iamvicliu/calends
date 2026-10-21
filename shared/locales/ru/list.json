@@ -20,7 +20,8 @@
     "pausedShort": "Пауза",
     "ending": "Не продлевается",
     "ended": "Отменена",
-    "lifetime": "Навсегда"
+    "lifetime": "Навсегда",
+    "terminated": "Отключено"
   },
   "proxyExcluded": "Оплата за других · не учитывается",
   "perMonthApprox": "≈ {amount}/мес.",

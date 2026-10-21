@@ -1,5 +1,17 @@
+import { stopDescription } from '../components/StopPanel.tsx';
 import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { addDays, addMonths, chargesBetween, coveredUntil, diffDays, effectiveStatus, phaseLanes, phaseSubs, priceAt } from '../../../shared/billing.ts';
+import {
+  addDays,
+  addMonths,
+  chargesBetween,
+  coveredUntil,
+  diffDays,
+  effectiveStatus,
+  stopSummary,
+  phaseLanes,
+  phaseSubs,
+  priceAt,
+} from '../../../shared/billing.ts';
 import { cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
@@ -101,11 +113,28 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         const until = coveredUntil(spans, i + 1);
         return until && until < g.from ? [{ from: until, to: g.from }] : [];
       });
-      return { s, segs, lanes: phaseLanes(spans), gaps, first: segs[0].from, last: segs.reduce((m, g) => (g.to > m ? g.to : m), segs[0].to) };
+      return {
+        s,
+        segs,
+        lanes: phaseLanes(
+          segs.map((g) => ({
+            start: g.from,
+            end:
+              !state.readonly && g.v.stop && (stopSummary(g.v, today)?.wastedDays ?? 0) > 0
+                ? addDays(g.v.stop.date, stopSummary(g.v, today)!.wastedDays)
+                : g.open
+                  ? undefined
+                  : g.to,
+          })),
+        ),
+        gaps,
+        first: segs[0].from,
+        last: segs.reduce((m, g) => (g.to > m ? g.to : m), segs[0].to),
+      };
     });
     // 每个订阅各占一行、互相独立；顺序跟随页面顶部的排序与筛选
     return out;
-  }, [subs, today]);
+  }, [subs, today, state.readonly]);
 
   const earliest = rows.reduce((m, r) => (r.first < m ? r.first : m), today);
   // 基准窗口：今年 = 1 月 1 日到年底；1 年、3 年以今天为中偏右；全部 = 最早一笔到半年后
@@ -301,7 +330,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     const left = x(g.from);
                     const top = 8 + r.lanes[gi] * LANE;
 
-                    if (g.to < start || g.from > end) return null;
+                    const stopped = stopSummary(g.v, today);
+                    const unused = !state.readonly && !!stopped && stopped.wastedDays > 0;
+                    const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
+                    if ((unused ? wastedUntil : g.to) < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                     // 买断：一个圆点；有结束日（如含一年更新、之后改订阅）时，再拉一条细线到结束日，和后面的虚线、下一段接上
@@ -327,41 +359,81 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       .filter((d) => d >= g.from && d <= g.to)
                       .sort();
                     let labeled = '';
-                    return cuts.slice(0, -1).map((a, n) => {
-                      const b = cuts[n + 1];
-                      if (b < start || a > end) return null;
-                      const pl = x(a);
-                      const pw = Math.max(3, x(b) - pl);
-                      const intro = g.v.intro && a < g.v.intro.until;
-                      const price = priceAt(g.v, a);
-                      const last = n === cuts.length - 2;
-                      const pnow = Math.min(pw, Math.max(0, x(today) - pl));
-                      // 同价的一串只标一次：标在窗口内第一截放得下的
-                      const run = `${price}|${intro ? 1 : 0}`;
-                      const label = pw > 70 && labeled !== run;
-                      if (label) labeled = run;
-                      const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
-                      return (
-                        <span
-                          key={a}
-                          className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${intro ? 'intro' : ''}`}
-                          style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
-                          title={ptip || tip}
-                        >
-                          {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />}
-                          {label && (
-                            <em>
-                              {n === 0 && g.v.region ? <FlagImg cc={g.v.region} /> : null}
-                              {intro ? t('list.gantt.introShort') : ''}
-                              {money(price, g.v.currency, { compact: true })}/{perLabel(g.v)}
-                            </em>
-                          )}
-                        </span>
-                      );
-                    });
+                    return (
+                      <Fragment key={g.from}>
+                        {cuts.slice(0, -1).map((a, n) => {
+                          const b = cuts[n + 1];
+                          if (b < start || a > end) return null;
+                          const pl = x(a);
+                          const pw = Math.max(3, x(b) - pl);
+                          const intro = g.v.intro && a < g.v.intro.until;
+                          const price = priceAt(g.v, a);
+                          const last = n === cuts.length - 2;
+                          const pnow = Math.min(pw, Math.max(0, x(today) - pl));
+                          // 同价的一串只标一次：标在窗口内第一截放得下的
+                          const run = `${price}|${intro ? 1 : 0}`;
+                          const label = pw > 70 && labeled !== run;
+                          if (label) labeled = run;
+                          const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
+                          return (
+                            <span
+                              key={a}
+                              className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${intro ? 'intro' : ''}`}
+                              style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
+                              title={ptip || tip}
+                            >
+                              {n === 0 && g.v.trialEnd && g.v.trialEnd > g.from && (
+                                <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />
+                              )}
+                              {label && (
+                                <em>
+                                  {n === 0 && g.v.region ? <FlagImg cc={g.v.region} /> : null}
+                                  {intro ? t('list.gantt.introShort') : ''}
+                                  {money(price, g.v.currency, { compact: true })}/{perLabel(g.v)}
+                                </em>
+                              )}
+                            </span>
+                          );
+                        })}
+                        {unused && (
+                          <span
+                            className="gt-unused"
+                            style={{ left: x(stopped!.date), width: Math.max(0, x(wastedUntil) - x(stopped!.date)), top }}
+                            title={stopDescription(g.v, today)}
+                          />
+                        )}
+                        {stopped &&
+                          stopped.date >= start &&
+                          stopped.date <= end &&
+                          (stopped.kind === 'terminate' ? (
+                            <svg
+                              className="gt-stop"
+                              role="img"
+                              aria-label={t('core.stop.terminate')}
+                              style={{ left: x(stopped.date) - 10, top: top - 1 }}
+                              viewBox="0 0 20 20"
+                            >
+                              <title>{state.readonly ? t('core.stop.terminate') : stopDescription(g.v, today)}</title>
+                              <circle cx="10" cy="10" r="8" />
+                              <path d="M4.4 15.6 15.6 4.4" />
+                            </svg>
+                          ) : (
+                            <span
+                              className="gt-stop-end"
+                              style={{ left: x(stopped.date) - 2, top }}
+                              title={state.readonly ? t('core.stop.cancel') : stopDescription(g.v, today)}
+                            />
+                          ))}
+                      </Fragment>
+                    );
                   })}
                   {charges.map((c, k2) => (
-                    <i key={k2} className={`gt-charge ${c.amount < 0 ? 'refund' : ''} ${c.date > today ? 'future' : ''}`} style={{ left: x(c.date) }} />
+                    <i
+                      key={k2}
+                      className={`gt-charge ${c.amount < 0 ? 'refund' : ''} ${c.date > today ? 'future' : ''}`}
+                      style={{ left: x(c.date) }}
+                      title={`${cnDate(c.date)} · ${c.kind === 'refund' ? t('editor.payment.kind.refund') : t('editor.payment.kind.charge')} · ${money(c.amount, c.currency)}`}
+                    />
                   ))}
                 </div>
               </div>
@@ -370,6 +442,17 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         </div>
       </div>
       <div className="gt-legend">
+        <span>
+          <i className="lg-unused" />
+          {t('core.stop.unusedTitle')}
+        </span>
+        <span>
+          <svg className="lg-stop" viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="10" r="8" />
+            <path d="M4.4 15.6 15.6 4.4" />
+          </svg>
+          {t('core.stop.terminate')}
+        </span>
         {keys.map((key, i) => (
           <span key={key}>
             <i style={{ background: PALETTE[i % PALETTE.length] }} />

@@ -57,7 +57,8 @@
     "active": "Etkin",
     "trial": "Deneme",
     "paused": "Duraklatıldı",
-    "cancelled": "İptal edildi"
+    "cancelled": "İptal edildi",
+    "terminated": "Kapatıldı"
   },
   "category": {
     "choose": "Kategori seçin",

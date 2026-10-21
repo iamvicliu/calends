@@ -15,7 +15,8 @@
     "pausedShort": "暫停",
     "ending": "到期不續",
     "ended": "已退訂",
-    "lifetime": "買斷"
+    "lifetime": "買斷",
+    "terminated": "已停用"
   },
   "proxyExcluded": "代付 · 不計入支出",
   "perMonthApprox": "≈ {amount}/月",

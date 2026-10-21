@@ -17,7 +17,8 @@
     "pausedShort": "Dijeda",
     "ending": "Tidak diperpanjang",
     "ended": "Dibatalkan",
-    "lifetime": "Seumur hidup"
+    "lifetime": "Seumur hidup",
+    "terminated": "Dinonaktifkan"
   },
   "proxyExcluded": "Talangan · tidak dihitung",
   "perMonthApprox": "≈ {amount}/bln",

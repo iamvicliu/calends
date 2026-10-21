@@ -57,7 +57,8 @@
     "active": "Ativa",
     "trial": "Teste",
     "paused": "Pausada",
-    "cancelled": "Cancelada"
+    "cancelled": "Cancelada",
+    "terminated": "Desativado"
   },
   "category": {
     "choose": "Escolher categoria",

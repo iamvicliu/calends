@@ -93,8 +93,13 @@ export function cycleShort(c: Cycle): string {
 export function subError(s: Subscription): string | undefined {
   if (!s.name?.trim()) return t('core.subError.name');
   if (!Number.isFinite(s.price) || s.price < 0) return t('core.subError.price');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) return t('core.subError.start');
-  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !(s.cycle.every >= 1)) return t('core.subError.cycle');
+  if (!validDay(s.start)) return t('core.subError.start');
+  if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !Number.isInteger(s.cycle.every) || !(s.cycle.every >= 1))
+    return t('core.subError.cycle');
+  for (const v of phaseSubs(s)) {
+    const error = stopError(v) ?? paymentError(v);
+    if (error) return error;
+  }
   return undefined;
 }
 
@@ -122,6 +127,7 @@ export function phaseSubs(s: Subscription): Subscription[] {
     return {
       ...s,
       phases: undefined,
+      stop: p.stop ?? (last ? s.stop : undefined),
       start: p.start,
       end: s.end && (!natural || natural > s.end) ? s.end : natural,
       price: p.price,
@@ -224,7 +230,7 @@ export function upcomingPhase(s: Subscription, today: string): Subscription | un
   return phaseSubs(s).find((v) => v.start > today);
 }
 
-export function effectiveStatus(s: Subscription, today: string): 'upcoming' | 'active' | 'trial' | 'paused' | 'ending' | 'ended' | 'lifetime' {
+export function effectiveStatus(s: Subscription, today: string): 'upcoming' | 'active' | 'trial' | 'paused' | 'ending' | 'ended' | 'terminated' | 'lifetime' {
   if (s.phases?.length) {
     const vs = phaseSubs(s);
     const v = phaseAt(s, today);
@@ -238,6 +244,8 @@ export function effectiveStatus(s: Subscription, today: string): 'upcoming' | 'a
     return effectiveStatus(vs[vs.length - 1], today);
   }
   if (s.start > today) return 'upcoming';
+  if (s.stop && s.stop.date <= today) return s.stop.kind === 'terminate' ? 'terminated' : 'ended';
+  if (s.status === 'terminated' && !s.stop) return 'terminated';
   if (s.cycle.unit === 'lifetime') return 'lifetime';
   if (s.status === 'paused') return 'paused';
   if (!isLive(s, today)) return 'ended';
@@ -274,6 +282,13 @@ export interface Charge {
 /** 按周期从 anchor 推算 [from, to] 内、晚于 after 的扣款 */
 function schedule(s: Subscription, anchor: string, from: string, to: string, today: string, after = ''): Charge[] {
   const out: Charge[] = [];
+  const begin = anchor;
+  // 实付或固化记录落在原周期上时继续使用原始日号，避免 1/31 → 2/28 → 3/28。
+  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : s.start;
+  if (s.cycle.unit === 'month' || s.cycle.unit === 'year') {
+    const k = Math.max(0, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
+    if (nthCharge(original, s.cycle, k) === anchor) anchor = original;
+  }
   const firstPaid = s.status === 'trial' && s.trialEnd ? s.trialEnd : '';
   const stopAt = s.end && s.end < to ? s.end : to;
   const pausedFrom = s.status === 'paused' ? (s.pausedAt ?? today) : undefined;
@@ -283,7 +298,7 @@ function schedule(s: Subscription, anchor: string, from: string, to: string, tod
     const d = nthCharge(anchor, s.cycle, k);
     if (d > stopAt) break;
     if (s.status === 'cancelled' && !s.end && d > s.start) break;
-    if (d < from || d < firstPaid || d <= after) continue;
+    if (d < begin || d < from || d < firstPaid || d <= after) continue;
     if (pausedFrom && d >= pausedFrom) break;
     out.push({ sub: s, date: d, amount: priceAt(s, d), currency: s.currency, projected: d > today });
   }
@@ -306,7 +321,7 @@ export function chargesBetween(s: Subscription, from: string, to: string, today:
   if (!b || s.cycle.unit === 'lifetime') return raw;
   // 赠送期：期间的预测扣款去掉，之后从赠送结束日重新按周期起算；实际扣款记录照旧保留
   const paid = new Set((s.payments ?? []).map((p) => p.date));
-  const lastPaid = (s.payments ?? []).reduce((m, p) => (p.date > m ? p.date : m), '');
+  const lastPaid = (s.payments ?? []).filter((p) => !p.kind).reduce((m, p) => (p.date > m ? p.date : m), '');
   const keep = raw.filter((c) => paid.has(c.date) || c.date < b.from);
   const after = schedule(s, b.until, from, to, today, lastPaid > b.until ? lastPaid : addDays(b.until, -1));
   return keep.concat(after.filter((c) => !paid.has(c.date))).sort((x, y) => x.date.localeCompare(y.date));
@@ -314,10 +329,11 @@ export function chargesBetween(s: Subscription, from: string, to: string, today:
 
 function rawCharges(s: Subscription, from: string, to: string, today: string): Charge[] {
   const pays = (s.payments ?? []).slice().sort((a, b) => a.date.localeCompare(b.date));
+  const renewals = pays.filter((p) => !p.kind);
   if (pays.length) {
     // 扣款失败的记一笔 0，不计入支出，但留在记录里
     const out: Charge[] = pays
-      .filter((p) => p.date >= from && p.date <= to)
+      .filter((p) => p.date >= from && p.date <= to && (!s.stop || p.date <= s.stop.date || p.kind === 'refund'))
       .map((p) => ({
         sub: s,
         date: p.date,
@@ -329,8 +345,8 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
         note: p.note,
       }));
     if (s.cycle.unit === 'lifetime') return out;
-    const last = pays[pays.length - 1].date;
-    return out.concat(schedule(s, s.nextDue ?? nthCharge(last, s.cycle, 1), from, to, today, last));
+    const last = renewals.at(-1)?.date ?? s.start;
+    return out.concat(schedule(s, s.nextDue ?? last, from, to, today, last));
   }
   if (s.cycle.unit === 'lifetime') {
     return s.start >= from && s.start <= to ? [{ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today }] : [];
@@ -347,12 +363,89 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
 
 export function nextCharge(s: Subscription, today: string): string | undefined {
   if (s.cycle.unit === 'lifetime') return s.start > today ? s.start : undefined;
-  return chargesBetween(s, today, addMonths(today, 12 * Math.max(1, s.cycle.unit === 'year' ? s.cycle.every : 1) + 1), today)[0]?.date;
+  if (s.stop && s.stop.date <= today) return undefined;
+  return chargesBetween(s, today, addMonths(today, 12 * Math.max(1, s.cycle.unit === 'year' ? s.cycle.every : 1) + 1), today).find((c) => !c.kind)?.date;
 }
 
 export function lastCharge(s: Subscription, today: string): string | undefined {
-  const all = chargesBetween(s, s.start, today, today);
+  const all = chargesBetween(s, s.start, today, today).filter((c) => !c.kind);
   return all[all.length - 1]?.date;
+}
+
+/** 停止前原账期。按原始锚点推算，保留月末夹紧、nextDue、实付与赠送期。 */
+export function billingPeriod(s: Subscription, at: string): { from: string; paidThrough: string; paid: number; days: number } {
+  if (s.phases?.length) return billingPeriod(currentPhase(s, at), at);
+  const open = { ...s, stop: undefined, end: undefined, status: s.status === 'trial' || (s.stop && s.trialEnd) ? ('trial' as const) : ('active' as const) };
+  const past = chargesBetween(open, s.start, at, at).filter((c) => !c.kind);
+  const last = past.at(-1);
+  const from = last?.date ?? s.start;
+  const horizon = addDays(at, Math.ceil(cycleDays(s.cycle) === Infinity ? 366 : cycleDays(s.cycle) * 2) + 32);
+  const next =
+    s.cycle.unit === 'lifetime'
+      ? addDays(at, 1)
+      : (chargesBetween(open, addDays(at, 1), horizon, at).find((c) => !c.kind)?.date ?? nthCharge(from, s.cycle, 1));
+  const paidThrough = addDays(next, -1);
+  const paid = last
+    ? chargesBetween(open, from, at, at)
+        .filter((c) => c.amount > 0 && c.kind !== 'failed')
+        .reduce((a, c) => a + c.amount, 0)
+    : 0;
+  return { from, paidThrough, paid, days: Math.max(1, diffDays(from, next)) };
+}
+
+export function stopSummary(s: Subscription, asOf = '9999-12-31') {
+  if (!s.stop) return undefined;
+  const period = billingPeriod(s, s.stop.date);
+  const unusedDays = Math.max(0, diffDays(s.stop.date, s.stop.paidThrough));
+  const prorated = (period.paid * unusedDays) / period.days;
+  const refunded = (s.payments ?? []).filter((p) => p.kind === 'refund' && p.date >= s.stop!.date && p.date <= asOf).reduce((a, p) => a - p.amount, 0);
+  // 商家通常按天退剩余部分：退回金额达到按天折算额即视为全额退款
+  const refundStatus = refunded < 0.005 ? 'none' : refunded + 0.005 >= Math.min(prorated, period.paid) ? 'full' : 'partial';
+  const unusedValue = refundStatus === 'full' ? 0 : Math.max(0, prorated - refunded);
+  return {
+    ...s.stop,
+    refunded,
+    refundStatus,
+    unusedDays,
+    unusedValue,
+    /** 真正浪费的天数：没退回的钱按日价折算，部分退款时短于 unusedDays */
+    wastedDays: prorated > 0 ? Math.round((unusedDays * unusedValue) / prorated) : 0,
+    suggestedRefund: Math.round(prorated * 100) / 100,
+    paid: period.paid,
+  };
+}
+
+export function validDay(day: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) && Number.isFinite(parseDay(day)) && fmtDay(parseDay(day)) === day;
+}
+
+export function stopError(s: Subscription): string | undefined {
+  const stop = s.stop;
+  if (!stop) return s.status === 'terminated' ? t('mcp.error.needStop') : undefined;
+  if (!['cancel', 'terminate'].includes(stop.kind) || !validDay(stop.date) || !validDay(stop.paidThrough)) return t('mcp.error.notDate', { what: 'stop' });
+  if (stop.date < s.start) return t('mcp.error.stopBeforeStart');
+  if (stop.date > stop.paidThrough) return t('mcp.error.stopAfterPaidThrough');
+  if (stop.paidThrough !== billingPeriod(s, stop.date).paidThrough) return t('mcp.error.invalidPaidThrough');
+  if (s.end !== stop.date || (stop.kind === 'cancel' && stop.reason)) return t('mcp.error.invalidStop');
+  return undefined;
+}
+
+/** 所有写入入口共用：逐账期限制退款总额，settled 只影响卡上实退，不改变原币上限。 */
+export function paymentError(s: Subscription): string | undefined {
+  for (const p of s.payments ?? []) {
+    if (!validDay(p.date)) return t('mcp.error.notDate', { what: 'payment.date' });
+    if (!Number.isFinite(p.amount) || (p.settled && (!Number.isFinite(p.settled.amount) || !p.settled.currency))) return t('core.subError.price');
+    if (p.kind !== 'refund') continue;
+    if (p.currency && p.currency !== s.currency) return t('mcp.error.refundCurrency');
+    if (p.amount > 0 || (p.settled && p.settled.amount > 0)) return t('mcp.error.invalidRefund');
+    const stopPeriod = s.stop && p.date >= s.stop.date;
+    const period = billingPeriod(s, stopPeriod ? s.stop!.date : s.end && p.date > s.end ? s.end : p.date);
+    const refunded = -(s.payments ?? [])
+      .filter((r) => r.kind === 'refund' && r.date >= period.from && (stopPeriod || r.date <= period.paidThrough))
+      .reduce((a, r) => a + r.amount, 0);
+    if (refunded > period.paid + 0.005) return t('mcp.error.refundExceedsPaid');
+  }
+  return undefined;
 }
 
 // ---------- 金额 ----------

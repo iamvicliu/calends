@@ -57,7 +57,8 @@
     "active": "Actif",
     "trial": "Essai",
     "paused": "Suspendu",
-    "cancelled": "Résilié"
+    "cancelled": "Résilié",
+    "terminated": "Désactivé"
   },
   "category": {
     "choose": "Choisir une catégorie",

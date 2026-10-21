@@ -1,5 +1,6 @@
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
+import { StopPanel } from '../components/StopPanel.tsx';
 import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
@@ -10,7 +11,7 @@ import { DatePicker } from '../components/DatePicker.tsx';
 import { CatIcon, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
-import { changePrice, syncPhase, toEditForm } from '../../../shared/phases.ts';
+import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ContactField } from './Members.tsx';
@@ -208,7 +209,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
         }}
       >
-        <Form f={f} up={up} state={state} today={today} />
+        <Form f={f} setF={setF} up={up} state={state} today={today} />
       </div>
       {!isNew && (
         <div style={{ marginTop: 18 }}>
@@ -219,7 +220,19 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   );
 }
 
-function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscription>) => void; state: AppState; today: string }) {
+function Form({
+  f,
+  setF,
+  up,
+  state,
+  today,
+}: {
+  f: Subscription;
+  setF: (s: Subscription) => void;
+  up: (p: Partial<Subscription>) => void;
+  state: AppState;
+  today: string;
+}) {
   const phoneCat = f.category === presetCat('phone');
   const cycleKey = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'custom';
   const share = f.share;
@@ -384,17 +397,24 @@ function Form({ f, up, state, today }: { f: Subscription; up: (p: Partial<Subscr
       {/* 三、现在的状态 */}
       {!lt && (
         <Group title={t('editor.group.status')}>
-          <div className="cell">
-            <Seg value={f.status} onChange={(v) => up({ status: v })} options={STATUS.map((s) => [s, t(`editor.status.${s}`)] as [SubStatus, string])} />
-          </div>
+          {!f.stop && (
+            <div className="cell">
+              <Seg
+                value={f.status}
+                onChange={(v) => {
+                  if (f.stop) setF(reactivate(f, today));
+                  up({ status: v });
+                }}
+                options={STATUS.map((s) => [s, t(`editor.status.${s}`)] as [SubStatus, string])}
+              />
+            </div>
+          )}
           {f.status === 'trial' && (
             <Cell label={t('editor.field.trialEnd')}>
               <DatePicker value={f.trialEnd} clearable onChange={(v) => up({ trialEnd: v })} />
             </Cell>
           )}
-          <Cell label={t('editor.field.end')}>
-            <DatePicker value={f.end} clearable placeholder={t('editor.field.notSet')} onChange={(v) => up({ end: v })} />
-          </Cell>
+          <StopPanel sub={syncPhase(f, today)} today={today} onApply={setF} />
         </Group>
       )}
 

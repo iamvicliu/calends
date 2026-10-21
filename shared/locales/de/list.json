@@ -18,7 +18,8 @@
     "pausedShort": "Pausiert",
     "ending": "Wird nicht verlängert",
     "ended": "Gekündigt",
-    "lifetime": "Lebenslang"
+    "lifetime": "Lebenslang",
+    "terminated": "Gesperrt"
   },
   "proxyExcluded": "Für andere bezahlt · nicht mitgezählt",
   "perMonthApprox": "≈ {amount}/Mon.",

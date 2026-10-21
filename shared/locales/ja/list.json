@@ -17,7 +17,8 @@
     "pausedShort": "停止中",
     "ending": "更新なし",
     "ended": "解約済み",
-    "lifetime": "買い切り"
+    "lifetime": "買い切り",
+    "terminated": "利用停止"
   },
   "proxyExcluded": "立て替え · 集計対象外",
   "perMonthApprox": "≈ {amount}/月",

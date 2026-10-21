@@ -47,7 +47,7 @@ export function History({
     const isLast = i === vs.length - 1;
     items.push(
       <li key={`p${i}`} className={`h-phase ${live && v.start <= today ? 'now' : ''} ${lanes[i] > 0 ? 'lane' : ''} ${editable ? 'edit' : ''}`}>
-        {editable ? (
+        {editable && !v.stop ? (
           <div className="h-range h-edit">
             <span>{cnDateFull(v.start)} →</span>
             <DatePicker

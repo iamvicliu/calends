@@ -42,7 +42,18 @@
     "personNoItems": "{name} no tiene planes ni pagos donde registrar",
     "personItemsAmbiguous": "{name} está en varios; indica subscription: {list}",
     "needSubOrPerson": "Se requiere subscription o person",
-    "needKind": "Se requiere kind (share o proxy)"
+    "needKind": "Se requiere kind (share o proxy)",
+    "stopBeforeStart": "La fecha de cese no puede preceder al inicio.",
+    "stopAfterPaidThrough": "El cese supera el período pagado. Usa no renovar.",
+    "refundExceedsPaid": "Los reembolsos no pueden superar lo pagado en este período.",
+    "refundCurrency": "La moneda del reembolso debe ser la de la suscripción. Usa settled para la tarjeta.",
+    "subscriptionEnded": "La suscripción ya terminó. Añade una nueva fase para volver a suscribirte.",
+    "terminatedReactivate": "Una suscripción desactivada por el proveedor no se puede reactivar. Usa change_plan (resume / nueva fase).",
+    "needStop": "La suscripción desactivada requiere información de cese.",
+    "invalidPaidThrough": "La fecha pagada debe coincidir con el período de facturación original.",
+    "invalidStop": "El cese debe coincidir con el último día de servicio; solo la desactivación del proveedor admite motivo.",
+    "invalidRefund": "Los importes de reembolso deben ser válidos y guardarse como negativos.",
+    "refundBeforeStop": "El reembolso no puede ser anterior al cese."
   },
   "tool": {
     "get_overview": "Resumen del registro",

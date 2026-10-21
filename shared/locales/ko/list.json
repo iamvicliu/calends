@@ -17,7 +17,8 @@
     "pausedShort": "정지",
     "ending": "갱신 안 함",
     "ended": "해지됨",
-    "lifetime": "평생 이용"
+    "lifetime": "평생 이용",
+    "terminated": "사용 중지됨"
   },
   "proxyExcluded": "대신 결제 · 집계 제외",
   "perMonthApprox": "≈ {amount}/월",

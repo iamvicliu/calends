@@ -37,7 +37,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   // 换区时旧的继续用到某天（已预付、还没到期），两段并行
   const [keep, setKeep] = useState(false);
   const [keepUntil, setKeepUntil] = useState(today);
-  const ended = !!f.end || f.status === 'cancelled';
+  const ended = !!f.end || f.status === 'cancelled' || f.status === 'terminated';
   const phases = phaseSubs(f).length;
 
   const open = (m: Mode) => {

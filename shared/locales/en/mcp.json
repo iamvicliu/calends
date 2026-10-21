@@ -42,7 +42,18 @@
     "personNoItems": "{name} isn't in any shared plan or proxy payment to record against",
     "personItemsAmbiguous": "{name} is in several — pass subscription to choose: {list}",
     "needSubOrPerson": "subscription or person is required",
-    "needKind": "kind is required (share or proxy)"
+    "needKind": "kind is required (share or proxy)",
+    "stopBeforeStart": "Stop date cannot precede the start date.",
+    "stopAfterPaidThrough": "Stop date is after the paid-through date. Use non-renewal instead.",
+    "refundExceedsPaid": "Total refunds cannot exceed the amount paid for this period.",
+    "refundCurrency": "Refund currency must match the subscription currency. Use settled for the card refund.",
+    "subscriptionEnded": "This subscription has already ended. Resubscribe with a new phase.",
+    "terminatedReactivate": "A provider-terminated subscription cannot reactivate. Resubscribe using change_plan (resume / new phase).",
+    "needStop": "A terminated subscription requires stop information.",
+    "invalidPaidThrough": "Paid-through date must match the original billing period.",
+    "invalidStop": "Stop information must match the last service day; only provider termination may include a reason.",
+    "invalidRefund": "Refund amounts must be valid and stored as negative values.",
+    "refundBeforeStop": "Refund date cannot precede the stop date."
   },
   "tool": {
     "get_overview": "Ledger overview",

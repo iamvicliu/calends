@@ -52,7 +52,8 @@
     "active": "利用中",
     "trial": "トライアル",
     "paused": "一時停止",
-    "cancelled": "解約済み"
+    "cancelled": "解約済み",
+    "terminated": "利用停止"
   },
   "category": {
     "choose": "カテゴリを選択",

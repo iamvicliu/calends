@@ -27,7 +27,7 @@ function proxySummary(state: AppState, today: string) {
   // 进行中的在前，已停止的排到最后
   const subs = state.subscriptions
     .filter((s) => s.proxy)
-    .sort((a, b) => Number(effectiveStatus(a, today) === 'ended') - Number(effectiveStatus(b, today) === 'ended'));
+    .sort((a, b) => Number(['ended', 'terminated'].includes(effectiveStatus(a, today))) - Number(['ended', 'terminated'].includes(effectiveStatus(b, today))));
   const all = subs.flatMap((s) => rows(state, s, today));
   const open = all.filter((r) => r.receivedBase == null);
   const closed = all.filter((r) => r.receivedBase != null);
@@ -56,7 +56,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const received = list.reduce((a, r) => a + (r.receivedBase ?? 0), 0);
   const open = list.filter((r) => r.receivedBase == null);
   const st = effectiveStatus(s, today);
-  const stopped = st === 'ended';
+  const stopped = ['ended', 'terminated'].includes(st);
   // 状态胶囊只说进度：进行中 / 待收 / 已停止；是否结清看下面的「待收」格
   const tone = stopped ? 'stop' : open.length ? 'owe' : 'ok';
   const label = open.length && !stopped ? t('proxy.owedPeriods', { count: open.length }) : stopped ? t('proxy.status.ended') : statusLabel(st);
@@ -134,7 +134,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const ro = !!state.readonly;
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
-  const stopped = st === 'ended';
+  const stopped = ['ended', 'terminated'].includes(st);
   const next = nextCharge(live, today);
   const method = state.methods.find((m) => m.id === live.methodId);
   const charged = list.reduce((a, r) => a + r.chargedBase, 0);
@@ -423,7 +423,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
   const base = state.settings.baseCurrency;
   const sum = proxySummary(state, today);
   const [filter, setFilter] = usePref<ProxyFilter>('proxy-filter', 'all', (v): v is ProxyFilter => (PROXY_FILTERS as readonly string[]).includes(v));
-  const stopped = (s: Subscription) => effectiveStatus(s, today) === 'ended';
+  const stopped = (s: Subscription) => ['ended', 'terminated'].includes(effectiveStatus(s, today));
   const groups: Record<ProxyFilter, Subscription[]> = {
     all: sum.subs,
     live: sum.subs.filter((s) => !stopped(s)),

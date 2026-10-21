@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { activePhases, currentPhase, cycleLabel } from '../../../shared/billing.ts';
+import { activePhases, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { deletePayment, savePayment } from '../../../shared/phases.ts';
@@ -30,7 +30,7 @@ export function PaymentSheet({
   const [date, setDate] = useState(edit?.pay.date ?? today);
   const [kind, setKind] = useState<Kind>(edit?.pay.kind ?? 'charge');
   // 换区后新旧两段并行的日子：要选这笔记在哪一段（缺省为最晚开始的那段，修改时为原记录所在的段）
-  const lanes = sub.phases?.length ? activePhases(sub, date) : [];
+  const lanes = sub.phases?.length ? (kind === 'refund' ? phaseSubs(sub).filter((v) => v.start <= date) : activePhases(sub, date)) : [];
   const [lane, setLane] = useState(edit?.phase);
   const phase = (lanes.length > 1 && lanes.find((v) => v.start === lane)) || currentPhase(sub, date);
   const pick = lanes.length > 1 ? phase.start : edit?.phase;
@@ -47,6 +47,7 @@ export function PaymentSheet({
     const pay: Payment = {
       date,
       amount: sign * n,
+      currency: ccy,
       kind: kind === 'charge' ? undefined : kind,
       settled: settled !== '' && Number(settled) >= 0 ? { amount: sign * Number(settled), currency: settledCcy } : undefined,
       note: note.trim() || undefined,
@@ -116,7 +117,7 @@ export function PaymentSheet({
               ariaLabel={t('editor.payment.kind.label')}
             />
           </Cell>
-          <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('editor.payment.refundHint') : undefined}>
+          <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('core.stop.currencyHint', { currency: ccy }) : undefined}>
             <input className="num" inputMode="decimal" value={amount} onChange={(e) => setAmount((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>

@@ -42,7 +42,18 @@
     "personNoItems": "{name} tidak punya paket atau talangan untuk dicatat",
     "personItemsAmbiguous": "{name} ada di beberapa; tentukan subscription: {list}",
     "needSubOrPerson": "subscription atau person wajib diisi",
-    "needKind": "kind wajib diisi (share atau proxy)"
+    "needKind": "kind wajib diisi (share atau proxy)",
+    "stopBeforeStart": "Tanggal berhenti tidak boleh sebelum mulai.",
+    "stopAfterPaidThrough": "Tanggal berhenti melewati periode dibayar. Gunakan jangan perpanjang.",
+    "refundExceedsPaid": "Total pengembalian tidak boleh melebihi pembayaran periode ini.",
+    "refundCurrency": "Mata uang pengembalian harus sama dengan langganan. Gunakan settled untuk kartu.",
+    "subscriptionEnded": "Langganan sudah berakhir. Berlangganan lagi dengan fase baru.",
+    "terminatedReactivate": "Langganan yang dinonaktifkan penyedia tidak dapat diaktifkan kembali. Gunakan change_plan (resume / fase baru).",
+    "needStop": "Langganan nonaktif memerlukan informasi penghentian.",
+    "invalidPaidThrough": "Tanggal dibayar harus sesuai periode tagihan awal.",
+    "invalidStop": "Penghentian harus sesuai hari layanan terakhir; alasan hanya untuk penonaktifan penyedia.",
+    "invalidRefund": "Jumlah pengembalian harus valid dan disimpan negatif.",
+    "refundBeforeStop": "Tanggal pengembalian tidak boleh sebelum penghentian."
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
