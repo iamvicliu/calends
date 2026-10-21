@@ -311,3 +311,35 @@ test('proxy subscriptions never enter any block', () => {
   assert.deepEqual(scopeReport(st, [own, proxy], today), scopeReport(st, [own], today));
   assert.deepEqual(monthReport(st, '2026-10', today), monthReport(state([own]), '2026-10', today));
 });
+
+test('mini calendar series uses six consecutive selected months and the exact full headline cash basis', () => {
+  const s = owner();
+  s.currency = 'EUR';
+  s.payments = [
+    { date: '2026-10-01', amount: 10, settled: { amount: 14, currency: 'USD' } },
+    { date: '2026-10-22', amount: -30, kind: 'refund' },
+    { date: '2026-10-23', amount: 999, kind: 'failed' },
+  ];
+  const st = state([s, sub('Proxy', { price: 999, proxy: { forName: 'Other', entries: [] } })]);
+  for (const month of ['2026-01', '2026-10', '2026-12']) {
+    const report = monthReport(st, month, today);
+    assert.equal(report.months.length, 6);
+    assert.equal(report.months.at(-1)!.month, month);
+    for (const row of report.months) {
+      const headline = get(monthReport(st, row.month, today), 'headline')!;
+      if (headline.mode !== 'month') assert.fail('month headline');
+      assert.equal(row.total, headline.total);
+      assert.equal(row.paid, headline.paid);
+      assert.equal(row.pending, headline.pending);
+      assert.ok(Math.abs(row.total - row.paid - row.pending) < 1e-10);
+    }
+  }
+  const rows = monthReport(st, '2026-10', today).months;
+  assert.equal(rows[0].month, '2026-05');
+  assert.ok(rows.at(-1)!.paid < 0, 'refund-heavy months stay negative');
+  assert.ok(rows.at(-1)!.total < 0);
+  assert.equal(
+    monthReport(state([]), '2026-10', today).months.every((r) => r.total === 0),
+    true,
+  );
+});

@@ -1,7 +1,13 @@
 {
   "yearTitle": "{year}",
-  "summary": { "one": "{count} cobro · {amount}", "other": "{count} cobros · {amount}" },
-  "mode": { "month": "Mes", "year": "Año" },
+  "summary": {
+    "one": "{count} cobro · {amount}",
+    "other": "{count} cobros · {amount}"
+  },
+  "mode": {
+    "month": "Mes",
+    "year": "Año"
+  },
   "prev": "Anterior",
   "next": "Siguiente",
   "today": "Hoy",
@@ -15,5 +21,11 @@
   "monthAll": "Todos los cobros de {month}",
   "noneMonth": "No hay cobros este mes",
   "day": "{day}",
-  "heatCount": { "one": "{count} cobro · ", "other": "{count} cobros · " }
+  "heatCount": {
+    "one": "{count} cobro · ",
+    "other": "{count} cobros · "
+  },
+  "pickDay": "Selecciona una fecha para ver sus cargos",
+  "nextCharge": "Próximo cargo · {date}",
+  "expandReport": "Ampliar informe completo"
 }

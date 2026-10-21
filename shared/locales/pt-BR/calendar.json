@@ -1,7 +1,13 @@
 {
   "yearTitle": "{year}",
-  "summary": { "one": "{count} cobrança · {amount}", "other": "{count} cobranças · {amount}" },
-  "mode": { "month": "Mês", "year": "Ano" },
+  "summary": {
+    "one": "{count} cobrança · {amount}",
+    "other": "{count} cobranças · {amount}"
+  },
+  "mode": {
+    "month": "Mês",
+    "year": "Ano"
+  },
   "prev": "Anterior",
   "next": "Próximo",
   "today": "Hoje",
@@ -15,5 +21,11 @@
   "monthAll": "Todas as cobranças de {month}",
   "noneMonth": "Nenhuma cobrança neste mês",
   "day": "{day}",
-  "heatCount": { "one": "{count} cobrança · ", "other": "{count} cobranças · " }
+  "heatCount": {
+    "one": "{count} cobrança · ",
+    "other": "{count} cobranças · "
+  },
+  "pickDay": "Selecione uma data para ver as cobranças",
+  "nextCharge": "Próxima cobrança · {date}",
+  "expandReport": "Expandir relatório completo"
 }

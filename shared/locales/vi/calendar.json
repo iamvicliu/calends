@@ -1,7 +1,12 @@
 {
   "yearTitle": "{year}",
-  "summary": { "other": "{count} khoản phí · {amount}" },
-  "mode": { "month": "Tháng", "year": "Năm" },
+  "summary": {
+    "other": "{count} khoản phí · {amount}"
+  },
+  "mode": {
+    "month": "Tháng",
+    "year": "Năm"
+  },
   "prev": "Trước",
   "next": "Sau",
   "today": "Hôm nay",
@@ -15,5 +20,10 @@
   "monthAll": "Tất cả khoản phí {month}",
   "noneMonth": "Không có khoản phí nào trong tháng này",
   "day": "{day}",
-  "heatCount": { "other": "{count} khoản phí · " }
+  "heatCount": {
+    "other": "{count} khoản phí · "
+  },
+  "pickDay": "Chọn ngày để xem các khoản thu trong ngày",
+  "nextCharge": "Lần thu tiếp theo · {date}",
+  "expandReport": "Mở báo cáo đầy đủ"
 }

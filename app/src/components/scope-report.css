@@ -208,3 +208,128 @@
     animation: none;
   }
 }
+.cal-mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+  font-size: 12px;
+  color: var(--label-2);
+}
+.cal-mini-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-expand {
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.cal-stat:hover .cal-expand,
+.cal-stat:focus-within .cal-expand {
+  opacity: 1;
+}
+.cal-comparisons {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0;
+}
+.cal-comparisons > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--label-2);
+}
+.cal-mini-chart {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+.cal-mini-month {
+  min-width: 0;
+  color: var(--label-3);
+  text-align: center;
+}
+.cal-mini-month.current {
+  color: var(--accent);
+}
+.cal-mini-month small {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.cal-mini-bars {
+  display: flex;
+  flex-direction: column;
+  height: 76px;
+  margin: 0 3px 4px;
+}
+.cal-mini-positive,
+.cal-mini-negative {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 50%;
+  border-bottom: 1px solid var(--sep);
+}
+.cal-mini-negative {
+  flex-direction: column;
+  border-bottom: 0;
+}
+.cal-mini-bars i {
+  display: block;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.cal-mini-bars .forecast {
+  border: 1px dashed currentColor;
+  background: none;
+}
+.cal-dc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 12px;
+  color: var(--label-2);
+}
+.cal-dc-main > small {
+  font-size: 11px;
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px), (hover: none) {
+  .cal-expand {
+    opacity: 1;
+  }
+}
+@media (max-width: 680px) {
+  .cal-daycards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cal-daycard {
+    flex-wrap: wrap;
+    padding: 12px;
+    gap: 8px;
+  }
+  .cal-dc-main {
+    flex-basis: calc(100% - 40px);
+  }
+  .cal-dc-amt {
+    flex-basis: 100%;
+    padding-left: 40px;
+    align-items: flex-start;
+    text-align: start;
+  }
+  .cal-dc-amt small {
+    white-space: normal;
+  }
+}
+.cal-mini-bars:not(.signed) .cal-mini-positive {
+  height: 100%;
+}
+.cal-mini-bars:not(.signed) .cal-mini-negative {
+  display: none;
+}

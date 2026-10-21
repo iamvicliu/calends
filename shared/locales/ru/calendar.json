@@ -6,7 +6,10 @@
     "many": "{count} списаний · {amount}",
     "other": "{count} списания · {amount}"
   },
-  "mode": { "month": "Месяц", "year": "Год" },
+  "mode": {
+    "month": "Месяц",
+    "year": "Год"
+  },
   "prev": "Назад",
   "next": "Вперёд",
   "today": "Сегодня",
@@ -20,5 +23,13 @@
   "monthAll": "Все списания за {month}",
   "noneMonth": "В этом месяце списаний нет",
   "day": "{day}",
-  "heatCount": { "one": "{count} списание · ", "few": "{count} списания · ", "many": "{count} списаний · ", "other": "{count} списания · " }
+  "heatCount": {
+    "one": "{count} списание · ",
+    "few": "{count} списания · ",
+    "many": "{count} списаний · ",
+    "other": "{count} списания · "
+  },
+  "pickDay": "Выберите дату для просмотра списаний",
+  "nextCharge": "Следующее списание · {date}",
+  "expandReport": "Открыть полный отчёт"
 }

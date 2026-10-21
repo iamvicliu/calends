@@ -1,7 +1,13 @@
 {
   "yearTitle": "{year}",
-  "summary": { "one": "{count} charge · {amount}", "other": "{count} charges · {amount}" },
-  "mode": { "month": "Month", "year": "Year" },
+  "summary": {
+    "one": "{count} charge · {amount}",
+    "other": "{count} charges · {amount}"
+  },
+  "mode": {
+    "month": "Month",
+    "year": "Year"
+  },
   "prev": "Previous",
   "next": "Next",
   "today": "Today",
@@ -15,5 +21,11 @@
   "monthAll": "All charges in {month}",
   "noneMonth": "No charges this month",
   "day": "{day}",
-  "heatCount": { "one": "{count} charge · ", "other": "{count} charges · " }
+  "heatCount": {
+    "one": "{count} charge · ",
+    "other": "{count} charges · "
+  },
+  "pickDay": "Click a date to view its charges",
+  "nextCharge": "Next charge · {date}",
+  "expandReport": "Expand full report"
 }

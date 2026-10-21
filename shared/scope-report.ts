@@ -55,6 +55,13 @@ export interface ScopeReport {
   blocks: Block[];
 }
 
+export interface MonthCash {
+  month: string;
+  total: number;
+  paid: number;
+  pending: number;
+}
+
 const sum = (rows: Array<{ amount: number }>) => rows.reduce((a, r) => a + r.amount, 0);
 const compare = (amount: number, previous: number): Comparison => ({
   amount: amount - previous,
@@ -62,6 +69,10 @@ const compare = (amount: number, previous: number): Comparison => ({
 });
 const byAmount = (a: { sub: Subscription; amount: number }, b: { sub: Subscription; amount: number }) =>
   b.amount - a.amount || a.sub.id.localeCompare(b.sub.id);
+
+function cashMonth(rows: ChargeRow[], month: string, today: string): MonthCash {
+  return { month, total: sum(rows), paid: sum(rows.filter((r) => r.date <= today)), pending: sum(rows.filter((r) => r.date > today)) };
+}
 
 function charges(state: AppState, from: string, to: string, today: string): ChargeRow[] {
   return state.subscriptions
@@ -181,7 +192,7 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
 }
 
 /** Monthly cash uses the same net, my-share cash basis as cashVsAccrual, including refunds. */
-export function monthReport(state: AppState, month: string, today: string): ScopeReport {
+export function monthReport(state: AppState, month: string, today: string): ScopeReport & { months: MonthCash[] } {
   const scoped = { ...state, subscriptions: state.subscriptions.filter((s) => !s.proxy) };
   const from = `${month}-01`;
   const to = monthEnd(month);
@@ -195,10 +206,7 @@ export function monthReport(state: AppState, month: string, today: string): Scop
     {
       type: 'headline',
       mode: 'month',
-      month,
-      total: sum(rows),
-      paid: sum(rows.filter((r) => r.date <= today)),
-      pending: sum(rows.filter((r) => r.date > today)),
+      ...cashMonth(rows, month, today),
       count: rows.filter((r) => r.original.kind !== 'refund').length,
       previous: compare(sum(rows), sum(previous)),
       yearly: yearly.some((r) => r.original.kind !== 'refund') ? compare(sum(rows), sum(yearly)) : undefined,
@@ -219,5 +227,9 @@ export function monthReport(state: AppState, month: string, today: string): Scop
   const upcoming = debits.filter((r) => r.date > today);
   if (to >= today && upcoming.length) blocks.push({ type: 'upcoming', rows: upcoming, total: sum(upcoming) });
   blocks.push(...details(scoped, today, from, to, { from, to }, from, to < today ? to : from > today ? to : today));
-  return { blocks };
+  const months = Array.from({ length: 6 }, (_, i) => {
+    const m = addMonths(from, i - 5).slice(0, 7);
+    return cashMonth(m === month ? rows : charges(scoped, `${m}-01`, monthEnd(m), today), m, today);
+  });
+  return { blocks, months };
 }

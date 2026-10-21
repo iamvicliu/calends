@@ -1,7 +1,12 @@
 {
   "yearTitle": "{year}",
-  "summary": { "other": "{count} tagihan · {amount}" },
-  "mode": { "month": "Bulan", "year": "Tahun" },
+  "summary": {
+    "other": "{count} tagihan · {amount}"
+  },
+  "mode": {
+    "month": "Bulan",
+    "year": "Tahun"
+  },
   "prev": "Sebelumnya",
   "next": "Berikutnya",
   "today": "Hari ini",
@@ -15,5 +20,10 @@
   "monthAll": "Semua tagihan {month}",
   "noneMonth": "Tidak ada tagihan bulan ini",
   "day": "{day}",
-  "heatCount": { "other": "{count} tagihan · " }
+  "heatCount": {
+    "other": "{count} tagihan · "
+  },
+  "pickDay": "Pilih tanggal untuk melihat tagihan hari itu",
+  "nextCharge": "Tagihan berikutnya · {date}",
+  "expandReport": "Buka laporan lengkap"
 }

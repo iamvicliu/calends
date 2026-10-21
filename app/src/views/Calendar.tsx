@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { addDays, addMonths, diffDays, parseDay, type Charge } from '../../../shared/billing.ts';
-import { flow, cnDate, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
+import { Maximize2 } from 'lucide-react';
+import { addDays, addMonths, diffDays, parseDay, cycleLabel, currentPhase, effectiveStatus, nextCharge, type Charge } from '../../../shared/billing.ts';
+import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Cell, Group, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { Cell, Group, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { usePref } from '../store.ts';
 import { monthReport } from '../../../shared/scope-report.ts';
-import { ScopeReport } from '../components/ScopeReport.tsx';
+import { ScopeReport, SpendingDelta } from '../components/ScopeReport.tsx';
+import { stopDescription, stopLabel } from '../components/StopPanel.tsx';
 
 /** 表头的星期简称，按周起始日排好 */
 const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
@@ -32,8 +34,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const DOW = dows();
   const [month, setMonth] = useState(today.slice(0, 7));
   const [mode, setMode] = usePref<'month' | 'year'>('cal-mode', 'month', (v): v is 'month' | 'year' => v === 'month' || v === 'year');
-  const [sel, setSel] = useState<string | null>(null);
-  const [reportOpen, setReportOpen] = usePref<'0' | '1'>('cal-report-open', '1', (v): v is '0' | '1' => v === '0' || v === '1');
+  const [sel, setSel] = useState<string | null>(today);
+  const [reportMode, setReportMode] = usePref<'mini' | 'full'>('cal-report-mode', 'mini', (v): v is 'mini' | 'full' => v === 'mini' || v === 'full');
   const report = useMemo(() => (mode === 'month' ? monthReport(state, month, today) : null), [state, month, today, mode]);
   const base = state.settings.baseCurrency;
 
@@ -46,7 +48,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         grid[0] < `${year}-01-01` ? grid[0] : `${year}-01-01`,
         grid[grid.length - 1] > `${year}-12-31` ? grid[grid.length - 1] : `${year}-12-31`,
         today,
-      ),
+      ).filter((c) => c.kind !== 'failed'),
     [state, year, month, today],
   );
   // 图标只排一行、叠放约四成：按格子实际宽度算能放几个，放不下的换成「+N」，格子高度始终不变。
@@ -68,10 +70,14 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const sumOf = (list: Charge[] = []) => sumBase(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
-  // 翻月或回到今天时清空选择，默认展示整月报告
+  // 翻月清空选择；今天按钮和 T 明确选中今天。
   const goMonth = (m: string) => {
     setMonth(m);
     setSel(null);
+  };
+  const goToday = () => {
+    setMonth(today.slice(0, 7));
+    setSel(today);
   };
   const shift = (n: number) => goMonth(addMonths(month + '-01', mode === 'year' ? n * 12 : n).slice(0, 7));
   // ← → 翻上/下一页（月视图翻月，年视图翻年），T 回到今天；输入框里、弹层打开时不响应
@@ -84,7 +90,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         e.preventDefault();
         goMonth(addMonths(month + '-01', (e.key === 'ArrowLeft' ? -1 : 1) * (mode === 'year' ? 12 : 1)).slice(0, 7));
       } else if (e.key === 't' || e.key === 'T') {
-        goMonth(today.slice(0, 7));
+        goToday();
       }
     };
     document.addEventListener('keydown', onKey);
@@ -115,7 +121,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
           className="btn"
           title={`${t('calendar.today')} T`}
           onClick={() => {
-            goMonth(today.slice(0, 7));
+            goToday();
           }}
         >
           {t('calendar.today')}
@@ -186,53 +192,65 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   })}
                 </div>
               </div>
-              {sel && selList.length > 0 ? (
+              {reportMode === 'full' && report ? (
+                <ScopeReport
+                  key={month}
+                  report={report}
+                  state={state}
+                  today={today}
+                  onOpen={onOpen}
+                  title={t('scope.monthTitle', { month: monthLabel(month, { long: true }) })}
+                  animate={true}
+                  open={true}
+                  onToggle={() => setReportMode('mini')}
+                />
+              ) : sel ? (
                 <>
                   <section className="cal-dayhead">
                     <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
-                    <span>{t('calendar.summary', { count: selList.length, amount: flow(-sumOf(selList), base, { compact: true }) })}</span>
                   </section>
-                  <div className="cal-daycards">
-                    {selList.map((c) => {
-                      const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
-                      return (
-                        <button key={c.sub.id} className="card cal-daycard" onClick={() => onOpen(c.sub)}>
-                          <SubIcon sub={c.sub} size={40} />
-                          <span className="cal-dc-main">
-                            <b>{c.sub.name}</b>
-                            <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
-                          </span>
-                          <span className="cal-dc-amt">
-                            {amt.main}
-                            <small>
-                              {/* 先说原币金额，再说状态；放在一起时「预计 · $45.99」容易读成预计扣 $45.99 */}
-                              {amt.alt ? `${t('list.originalPrice', { amount: amt.alt })} · ` : ''}
-                              {c.projected ? t('calendar.projected') : t('calendar.charged')}
-                            </small>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {selList.length === 0 ? (
+                    <div className="cal-none">{t('calendar.noneDay')}</div>
+                  ) : (
+                    <div className="cal-daycards">
+                      {selList.map((c, i) => {
+                        const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                        const sub = state.subscriptions.find((s) => s.id === c.sub.id) ?? c.sub;
+                        const cur = currentPhase(sub, today);
+                        const status = effectiveStatus(sub, today);
+                        const next = nextCharge(sub, addDays(today, 1));
+                        const stopped = !state.readonly && c.kind !== 'refund' && stopLabel(cur, today);
+                        return (
+                          <button key={`${c.sub.id}-${i}`} className="card cal-daycard" onClick={() => onOpen(sub)}>
+                            <SubIcon sub={sub} size={32} />
+                            <span className="cal-dc-main">
+                              <b>{sub.name}</b>
+                              <span className="cal-dc-meta">
+                                <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                                <span>{cycleLabel(c.sub.cycle)}</span>
+                                {status !== 'active' && <span className="badge">{t(`list.status.${status}`)}</span>}
+                                {c.kind === 'refund' && <span className="badge green">{t('detail.charges.kind.refund')}</span>}
+                              </span>
+                              <small>{t('calendar.nextCharge', { date: next ? cnDateAuto(next, today) : '—' })}</small>
+                              {stopped && <small title={stopDescription(cur, today)}>{stopped}</small>}
+                            </span>
+                            <span className={`cal-dc-amt ${c.amount < 0 ? 'green' : ''}`}>
+                              {amt.main}
+                              {amt.alt && <small>{amt.alt}</small>}
+                              <small>{c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged'))}</small>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </>
               ) : (
-                report && (
-                  <ScopeReport
-                    key={month}
-                    report={report}
-                    state={state}
-                    today={today}
-                    onOpen={onOpen}
-                    title={t('scope.monthTitle', { month: monthLabel(month, { long: true }) })}
-                    animate={true}
-                    open={reportOpen === '1'}
-                    onToggle={() => setReportOpen(reportOpen === '1' ? '0' : '1')}
-                  />
-                )
+                <div className="cal-none">{t('calendar.pickDay')}</div>
               )}
             </div>
             <div className="stack">
-              <MonthStat charges={monthCharges} month={month} sumOf={sumOf} base={base} />
+              {reportMode === 'mini' && report && <MiniReport report={report} base={base} today={today} onExpand={() => setReportMode('full')} />}
               <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
@@ -342,35 +360,69 @@ function YearHeat({
   );
 }
 
-/** 右栏顶部：本月合计，拆成已扣与待扣，下面一条进度看已经扣了多少 */
-function MonthStat({ charges, month, sumOf, base }: { charges: Charge[]; month: string; sumOf: (l?: Charge[]) => number; base: string }) {
-  const done = charges.filter((c) => !c.projected);
-  const left = charges.filter((c) => c.projected);
-  const total = sumOf(charges);
-  const paid = sumOf(done);
-  const pct = total > 0 ? Math.min(100, Math.max(0, (paid / total) * 100)) : 0;
+/** 月度净现金只读 monthReport 的结果，迷你和完整报告共用同一口径。 */
+function MiniReport({ report, base, today, onExpand }: { report: ReturnType<typeof monthReport>; base: string; today: string; onExpand: () => void }) {
+  const headline = report.blocks.find((b) => b.type === 'headline');
+  if (!headline || headline.mode !== 'month') return null;
+  const peak = Math.max(1, ...report.months.map((r) => Math.abs(r.paid) + Math.abs(r.pending)));
   return (
-    <div className="card cal-stat">
-      <small>{t('calendar.monthTotal', { month: monthLabel(month, { year: false }) })}</small>
-      <div className="cal-stat-big">
-        <b>{flow(-total, base, { compact: true })}</b>
-        <span>{t('calendar.count', { count: charges.length })}</span>
+    <section className="card cal-stat">
+      <div className="cal-mini-head">
+        <span>
+          {t('scope.monthTotal')} <Hint text={t('scope.cashBasis')} />
+        </span>
+        <button type="button" className="icon-btn cal-expand" aria-label={t('calendar.expandReport')} title={t('calendar.expandReport')} onClick={onExpand}>
+          <Maximize2 size={15} />
+        </button>
       </div>
-      <div className="cal-stat-bar" aria-hidden="true">
-        <i style={{ width: `${pct}%` }} />
+      <div className="cal-stat-big">
+        <b>{flow(-headline.total, base)}</b>
       </div>
       <div className="cal-stat-split">
         <div>
-          <small>{t('calendar.charged')}</small>
-          <b>{flow(-paid, base, { compact: true })}</b>
-          <span>{t('calendar.count', { count: done.length })}</span>
+          <small>{t('scope.paid')}</small>
+          <b>{flow(-headline.paid, base)}</b>
         </div>
         <div>
-          <small>{t('calendar.pending')}</small>
-          <b>{flow(-(total - paid), base, { compact: true })}</b>
-          <span>{t('calendar.count', { count: left.length })}</span>
+          <small>{t('scope.pending')}</small>
+          <b>{flow(-headline.pending, base)}</b>
         </div>
       </div>
-    </div>
+      <div className="cal-comparisons">
+        <div>
+          <span>{t('scope.previousMonth')}</span>
+          <SpendingDelta value={headline.previous} base={base} />
+        </div>
+        {headline.yearly && (
+          <div>
+            <span>{t('scope.previousYear')}</span>
+            <SpendingDelta value={headline.yearly} base={base} />
+          </div>
+        )}
+      </div>
+      <div className="cal-mini-chart">
+        {report.months.map((r) => (
+          <div
+            key={r.month}
+            className={`cal-mini-month ${r.month === headline.month ? 'current' : ''}`}
+            {...tipProps(
+              () => `${monthLabel(r.month)} · ${flow(-r.total, base)}${r.month >= today.slice(0, 7) && r.pending !== 0 ? ` · ${t('scope.forecast')}` : ''}`,
+            )}
+          >
+            <div className={`cal-mini-bars ${report.months.some((m) => m.paid < 0 || m.pending < 0) ? 'signed' : ''}`}>
+              <div className="cal-mini-positive">
+                <i style={{ height: `${(Math.max(0, r.paid) / peak) * 100}%` }} />
+                <i className="forecast" style={{ height: `${(Math.max(0, r.pending) / peak) * 100}%` }} />
+              </div>
+              <div className="cal-mini-negative">
+                <i style={{ height: `${(Math.max(0, -r.paid) / peak) * 100}%` }} />
+                <i className="forecast" style={{ height: `${(Math.max(0, -r.pending) / peak) * 100}%` }} />
+              </div>
+            </div>
+            <small>{monthLabel(r.month, { year: false })}</small>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

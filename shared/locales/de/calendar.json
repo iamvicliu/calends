@@ -24,5 +24,8 @@
   "heatCount": {
     "one": "{count} Abbuchung · ",
     "other": "{count} Abbuchungen · "
-  }
+  },
+  "pickDay": "Datum wählen, um Abbuchungen anzuzeigen",
+  "nextCharge": "Nächste Abbuchung · {date}",
+  "expandReport": "Vollständigen Bericht öffnen"
 }

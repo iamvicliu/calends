@@ -1,7 +1,13 @@
 {
   "yearTitle": "{year}",
-  "summary": { "one": "{count} ödeme · {amount}", "other": "{count} ödeme · {amount}" },
-  "mode": { "month": "Ay", "year": "Yıl" },
+  "summary": {
+    "one": "{count} ödeme · {amount}",
+    "other": "{count} ödeme · {amount}"
+  },
+  "mode": {
+    "month": "Ay",
+    "year": "Yıl"
+  },
   "prev": "Önceki",
   "next": "Sonraki",
   "today": "Bugün",
@@ -15,5 +21,11 @@
   "monthAll": "Tüm ödemeler · {month}",
   "noneMonth": "Bu ay ödeme yok",
   "day": "{day}",
-  "heatCount": { "one": "{count} ödeme · ", "other": "{count} ödeme · " }
+  "heatCount": {
+    "one": "{count} ödeme · ",
+    "other": "{count} ödeme · "
+  },
+  "pickDay": "Ödemeleri görmek için bir tarih seçin",
+  "nextCharge": "Sonraki ödeme · {date}",
+  "expandReport": "Tam raporu aç"
 }

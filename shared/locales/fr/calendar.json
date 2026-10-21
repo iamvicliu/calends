@@ -24,5 +24,8 @@
   "heatCount": {
     "one": "{count} prélèvement · ",
     "other": "{count} prélèvements · "
-  }
+  },
+  "pickDay": "Choisissez une date pour voir ses prélèvements",
+  "nextCharge": "Prochain prélèvement · {date}",
+  "expandReport": "Afficher le rapport complet"
 }
