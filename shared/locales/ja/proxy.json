@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "すべて", "live": "進行中", "owe": "未回収", "ended": "終了", "none": "該当する立替はありません" },
   "title": "立て替え",
   "status": {
     "active": "継続中",

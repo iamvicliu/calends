@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "All", "live": "Active", "owe": "Owed", "ended": "Ended", "none": "No proxy payments match" },
   "title": "Paid for others",
   "status": { "active": "Active", "ending": "Ending", "ended": "Stopped" },
   "owedPeriods": { "one": "{count} payment due", "other": "{count} payments due" },

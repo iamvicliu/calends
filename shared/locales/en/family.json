@@ -81,6 +81,7 @@
     }
   },
   "pool": {
+    "filter": { "all": "All", "live": "Active", "owe": "Owed", "settled": "Settled", "ended": "Ended", "none": "No shared plans match" },
     "title": "Shared plans",
     "netGain": "Net gain per year",
     "netCost": "Net cost per year",

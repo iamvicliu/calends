@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Semua", "live": "Berjalan", "owe": "Belum dibayar", "ended": "Berakhir", "none": "Tidak ada pembayaran talangan yang cocok" },
   "title": "Talangan",
   "status": { "active": "Aktif", "ending": "Akan berakhir", "ended": "Dihentikan" },
   "owedPeriods": { "other": "{count} pembayaran tertunggak" },

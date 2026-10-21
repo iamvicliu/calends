@@ -75,6 +75,7 @@
     }
   },
   "pool": {
+    "filter": { "all": "全部", "live": "進行中", "owe": "待收", "settled": "已結清", "ended": "已停止", "none": "沒有符合條件的合租" },
     "title": "共享",
     "netGain": "共享每年淨賺",
     "netCost": "共享每年淨成本",

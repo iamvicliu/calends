@@ -81,6 +81,14 @@
     }
   },
   "pool": {
+    "filter": {
+      "all": "Todos",
+      "live": "Activos",
+      "owe": "Pendientes",
+      "settled": "Saldados",
+      "ended": "Finalizados",
+      "none": "Ningún plan compartido coincide"
+    },
     "title": "Planes compartidos",
     "netGain": "Ganancia neta anual",
     "netCost": "Coste neto anual",

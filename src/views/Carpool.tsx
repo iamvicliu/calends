@@ -11,14 +11,29 @@ import { toBase } from '../derive.ts';
 import { run, saveSub } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
 
+const CAR_FILTERS = ['all', 'live', 'owe', 'settled', 'ended'] as const;
+type CarFilter = (typeof CAR_FILTERS)[number];
+
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused'].includes(effectiveStatus(s, today));
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));
   const joined = state.subscriptions.filter((s) => s.share?.role === 'member' && live(s));
-  const books = new Map(owned.map((s) => [s.id, carLedger(state, s, today)]));
-  const yearNet = [...books.values()].reduce((a, b) => a + b.yearNet, 0);
-  const yearIncome = [...books.values()].reduce((a, b) => a + b.yearIncome, 0);
+  // 卡片按状态筛选；顶部的统计始终按进行中的合租算
+  const [filter, setFilter] = useState<CarFilter>('live');
+  const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
+  const owes = (s: Subscription) => memberDues(s, today).some((d) => d.periodsOwed > 0);
+  const groups: Record<CarFilter, Subscription[]> = {
+    all: [...owned, ...ended],
+    live: owned,
+    owe: owned.filter(owes),
+    settled: owned.filter((s) => !owes(s)),
+    ended,
+  };
+  const shown = groups[filter];
+  const books = new Map([...owned, ...ended].map((s) => [s.id, carLedger(state, s, today)]));
+  const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
+  const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = owned.flatMap((s) => memberDues(s, today)).filter((d) => d.periodsOwed > 0);
   const owedSum = owedAll.reduce((a, d) => a + toBase(state, d.owed, d.sub.currency), 0);
   const ro = !!state.readonly;
@@ -48,7 +63,15 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
 
   return (
     <>
-      <Toolbar title={t('family.pool.title')}>{!ro && <FamilyTabs tab="plans" />}</Toolbar>
+      <Toolbar title={t('family.pool.title')}>
+        <Seg
+          small
+          value={filter}
+          onChange={setFilter}
+          options={CAR_FILTERS.map((f) => [f, `${t(`family.pool.filter.${f}`)} ${groups[f].length}`] as [CarFilter, string])}
+        />
+        {!ro && <FamilyTabs tab="plans" />}
+      </Toolbar>
       <div className="page fade-in stack">
         <div className="grid g-3">
           <div className="card stat">
@@ -79,17 +102,19 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           </div>
         </div>
 
-        {owned.length === 0 && (
+        {owned.length + ended.length === 0 ? (
           <div className="card empty">
             <b>{t('family.pool.emptyTitle')}</b>
             {t('family.pool.emptyBody')}
           </div>
+        ) : (
+          shown.length === 0 && <div className="card empty">{t('family.pool.filter.none')}</div>
         )}
         {/* 两列各自独立：展开一张卡只撑高它所在的那一列，不影响同一行的另一张 */}
         <div className="car-cols">
           {[0, 1].map((col) => (
             <div className="car-col" key={col}>
-              {owned.map((s, idx) => {
+              {shown.map((s, idx) => {
                 if (idx % 2 !== col) return null;
                 const sh = s.share!;
                 const dues = memberDues(s, today);

@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "全部", "live": "進行中", "owe": "待收", "ended": "已停止", "none": "沒有符合條件的代付" },
   "title": "代付",
   "status": { "active": "進行中", "ending": "到期停付", "ended": "已停止" },
   "owedPeriods": "待收 {count} 期",

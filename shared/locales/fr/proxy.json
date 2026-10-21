@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Tous", "live": "En cours", "owe": "À encaisser", "ended": "Terminés", "none": "Aucune avance ne correspond" },
   "title": "Payé pour d’autres",
   "status": {
     "active": "Actif",

@@ -104,6 +104,7 @@
     }
   },
   "pool": {
+    "filter": { "all": "Tous", "live": "En cours", "owe": "À encaisser", "settled": "Réglés", "ended": "Terminés", "none": "Aucun partage ne correspond" },
     "title": "Abonnements partagés",
     "netGain": "Gain net par an",
     "netCost": "Coût net par an",

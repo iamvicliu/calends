@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Tümü", "live": "Devam eden", "owe": "Alacak", "ended": "Biten", "none": "Eşleşen ödeme yok" },
   "title": "Başkaları için",
   "status": { "active": "Etkin", "ending": "Sona eriyor", "ended": "Durduruldu" },
   "owedPeriods": { "one": "{count} ödeme bekliyor", "other": "{count} ödeme bekliyor" },

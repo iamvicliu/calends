@@ -75,6 +75,7 @@
     }
   },
   "pool": {
+    "filter": { "all": "Tất cả", "live": "Đang chạy", "owe": "Chờ thu", "settled": "Đã đủ", "ended": "Đã dừng", "none": "Không có nhóm phù hợp" },
     "title": "Gói chia sẻ",
     "netGain": "Lãi ròng mỗi năm",
     "netCost": "Chi phí ròng mỗi năm",

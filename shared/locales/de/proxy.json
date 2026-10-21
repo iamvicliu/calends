@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Alle", "live": "Aktiv", "owe": "Offen", "ended": "Beendet", "none": "Keine passenden Vorauszahlungen" },
   "title": "Für andere bezahlt",
   "status": {
     "active": "Aktiv",

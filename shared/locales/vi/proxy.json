@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Tất cả", "live": "Đang chạy", "owe": "Chờ thu", "ended": "Đã dừng", "none": "Không có khoản trả hộ phù hợp" },
   "title": "Trả hộ",
   "status": { "active": "Đang hoạt động", "ending": "Sắp kết thúc", "ended": "Đã dừng" },
   "owedPeriods": { "other": "{count} khoản chưa trả lại" },

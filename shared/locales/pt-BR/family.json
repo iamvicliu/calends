@@ -81,6 +81,14 @@
     }
   },
   "pool": {
+    "filter": {
+      "all": "Todos",
+      "live": "Ativos",
+      "owe": "A receber",
+      "settled": "Quitados",
+      "ended": "Encerrados",
+      "none": "Nenhum plano compartilhado corresponde"
+    },
     "title": "Planos compartilhados",
     "netGain": "Ganho líquido por ano",
     "netCost": "Custo líquido por ano",

@@ -374,6 +374,11 @@ a {
   max-width: 1280px;
 }
 
+/* 侧边栏展开时它的「新建」就是唯一入口，页面右上角不再重复；收起侧边栏后才显示 */
+.app:not(.collapsed) .page-add {
+  display: none;
+}
+
 @media (max-width: 860px) {
   :root {
     --side-w: 0px;
@@ -2814,6 +2819,13 @@ select.btn {
   }
   .tb-actions .seg {
     flex: 1;
+    /* 状态筛选项多时横向滑动，不挤压文字 */
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tb-actions .seg button {
+    flex-shrink: 0;
   }
   .tb-actions .d-only {
     display: none;

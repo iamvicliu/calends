@@ -75,6 +75,7 @@
     }
   },
   "pool": {
+    "filter": { "all": "Tümü", "live": "Devam eden", "owe": "Alacak", "settled": "Kapanan", "ended": "Biten", "none": "Eşleşen ortak plan yok" },
     "title": "Ortak planlar",
     "netGain": "Yıllık net kazanç",
     "netCost": "Yıllık net maliyet",

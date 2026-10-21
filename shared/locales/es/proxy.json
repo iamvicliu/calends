@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Todos", "live": "Activos", "owe": "Pendientes", "ended": "Finalizados", "none": "Ningún pago por otros coincide" },
   "title": "Pagos por otros",
   "status": { "active": "Activo", "ending": "Termina", "ended": "Detenido" },
   "owedPeriods": { "one": "{count} pago pendiente", "other": "{count} pagos pendientes" },

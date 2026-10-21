@@ -235,7 +235,7 @@ export function List({
           <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
         </button>
         {!state.readonly && (
-          <button className="icon-btn accent d-only" onClick={onAdd} aria-label={t('list.add')}>
+          <button className="icon-btn accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
           </button>
         )}

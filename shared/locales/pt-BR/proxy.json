@@ -1,4 +1,5 @@
 {
+  "filter": { "all": "Todos", "live": "Ativos", "owe": "A receber", "ended": "Encerrados", "none": "Nenhum pagamento por terceiros corresponde" },
   "title": "Pagamentos para outros",
   "status": { "active": "Ativo", "ending": "Terminando", "ended": "Encerrado" },
   "owedPeriods": { "one": "{count} pagamento pendente", "other": "{count} pagamentos pendentes" },

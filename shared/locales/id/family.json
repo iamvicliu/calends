@@ -75,6 +75,7 @@
     }
   },
   "pool": {
+    "filter": { "all": "Semua", "live": "Berjalan", "owe": "Belum dibayar", "settled": "Lunas", "ended": "Berakhir", "none": "Tidak ada patungan yang cocok" },
     "title": "Paket bersama",
     "netGain": "Untung bersih per tahun",
     "netCost": "Biaya bersih per tahun",

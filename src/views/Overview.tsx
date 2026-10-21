@@ -22,7 +22,7 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
     <>
       <Toolbar title={t('overview.title')}>
         {!state.readonly && (
-          <button className="btn primary d-only" onClick={onAdd}>
+          <button className="btn primary d-only page-add" onClick={onAdd}>
             <Icon name="plus" /> {t('overview.add')}
           </button>
         )}

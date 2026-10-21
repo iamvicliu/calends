@@ -4,7 +4,7 @@ import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, Group, Icon, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, Cell, Group, Icon, PayBadge, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
 import { run, saveSub } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -387,13 +387,34 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   );
 }
 
+const PROXY_FILTERS = ['all', 'live', 'owe', 'ended'] as const;
+type ProxyFilter = (typeof PROXY_FILTERS)[number];
+
 /** 代付页：替别人付的订阅，逐期记录实扣与收回 */
 export function ProxyPage({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const sum = proxySummary(state, today);
+  const [filter, setFilter] = useState<ProxyFilter>('all');
+  const stopped = (s: Subscription) => effectiveStatus(s, today) === 'ended';
+  const groups: Record<ProxyFilter, Subscription[]> = {
+    all: sum.subs,
+    live: sum.subs.filter((s) => !stopped(s)),
+    owe: sum.subs.filter((s) => proxyOwed(state, s, today) > 0),
+    ended: sum.subs.filter(stopped),
+  };
+  const shown = groups[filter];
   return (
     <>
-      <Toolbar title={t('proxy.title')} />
+      <Toolbar title={t('proxy.title')}>
+        {sum.subs.length > 0 && (
+          <Seg
+            small
+            value={filter}
+            onChange={setFilter}
+            options={PROXY_FILTERS.map((f) => [f, `${t(`proxy.filter.${f}`)} ${groups[f].length}`] as [ProxyFilter, string])}
+          />
+        )}
+      </Toolbar>
       <div className="page fade-in stack">
         <div className="grid g-3">
           <div className="card stat">
@@ -425,7 +446,8 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
           </div>
         ) : (
           <div className="grid g-2">
-            {sum.subs.map((s) => (
+            {shown.length === 0 && <div className="card empty">{t('proxy.filter.none')}</div>}
+            {shown.map((s) => (
               <ProxyCard key={s.id} state={state} s={s} onOpen={onOpen} />
             ))}
           </div>
