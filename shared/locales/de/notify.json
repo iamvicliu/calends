@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "Heute gibt es keine Erinnerungen zu senden.",
   "appName": "Calends",
   "trial": {
     "sub": "Testphase endet {when} ({date}), danach {price}",

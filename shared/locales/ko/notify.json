@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "오늘 보낼 알림이 없습니다",
   "appName": "Calends",
   "trial": {
     "sub": "체험이 {when}({date}) 종료되며, 이후 {price}",

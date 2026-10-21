@@ -366,7 +366,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           />
           <Cell
             label={<span style={{ color: 'var(--accent)' }}>{t('settings.remind.preview')}</span>}
-            onClick={() => window.open(base('/api/notify/preview?html=1'), '_blank')}
+            // 今天没有要发的提醒：直接说明，不打开空白或原始数据页
+            onClick={() => (preview && !preview.digests.length ? toast(t('notify.previewEmpty')) : window.open(base('/api/notify/preview?html=1'), '_blank'))}
           />
         </Group>
 

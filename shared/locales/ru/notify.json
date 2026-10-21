@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "Сегодня нет напоминаний для отправки.",
   "appName": "Calends",
   "trial": {
     "sub": "Пробный период закончится {when} ({date}), затем {price}",

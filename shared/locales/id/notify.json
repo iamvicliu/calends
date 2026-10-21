@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "Tidak ada pengingat untuk dikirim hari ini.",
   "appName": "Calends",
   "trial": {
     "sub": "Uji coba berakhir {when} ({date}), lalu {price}",

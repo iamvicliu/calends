@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "Bugün gönderilecek hatırlatma yok.",
   "appName": "Calends",
   "trial": {
     "sub": "Deneme {when} bitiyor ({date}), ardından {price}",

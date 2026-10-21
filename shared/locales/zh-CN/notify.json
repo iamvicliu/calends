@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "今天没有要发送的提醒",
   "appName": "订阅账本",
   "trial": {
     "sub": "试用 {when}结束（{date}），之后按 {price} 扣费",

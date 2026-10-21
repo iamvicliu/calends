@@ -1,4 +1,5 @@
 {
+  "previewEmpty": "今日送信するリマインダーはありません",
   "appName": "Calends",
   "trial": {
     "sub": "トライアルは{when}（{date}）に終了、その後は{price}",

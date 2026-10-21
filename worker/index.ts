@@ -382,8 +382,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const day = url.searchParams.get('day') ?? todayIn(state.settings.timezone);
     const digests = [buildMonthly(state, day), buildDaily(state, day)].filter(Boolean) as Digest[];
     const log = await env.DB.prepare('SELECT dedupe_key, kind, subject, status, sent_at FROM notify_log ORDER BY sent_at DESC LIMIT 20').all();
-    if (url.searchParams.get('html') === '1' && digests[0]) {
-      return new Response(renderEmail(digests[0], env.SITE_URL ?? '').html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
+    if (url.searchParams.get('html') === '1') {
+      // 没有要发的提醒时也给一页可读的说明，不回落成原始 JSON
+      const html = digests[0]
+        ? renderEmail(digests[0], env.SITE_URL ?? '').html
+        : `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${t('notify.previewEmpty')}</title><p style="font:15px/1.6 system-ui,sans-serif;color:#555;text-align:center;margin-top:20vh">${t('notify.previewEmpty')}</p>`;
+      return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
     }
     return json({ day, digests, log: log.results });
   }
