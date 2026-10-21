@@ -65,6 +65,8 @@ Horizontal-dominant wheel events inside the subscription timeline are always con
 
 The subscription timeline in `app/src/views/Gantt.tsx` measures visible subscription names with the current font and label padding. `ganttLabelBounds()` in `shared/gantt.ts` limits the name column between its icon-only width and the longest name, capped at half the container width. Filtering, locale, font loading and container resizing refresh that measurement. Desktop and narrow-screen width preferences remain separate; rendering clamps saved widths without rewriting them. Narrow portrait screens show only named icons and suspend resizing, preserving the preference for landscape.
 
+The report footer in `app/src/views/Report.tsx` uses a stretched two-column row above 680px. Its top-up card determines the height, with a 300px minimum when content is short. Size containment keeps the collapsed changelog from growing the row; a resize observer measures entry and year-heading heights to show only complete entries within the available space. The existing More action adds twelve entries and releases containment so the cards can grow. At 680px and below, both cards have natural heights and the log starts with eight entries. Disclosure is local component state and does not change the ledger or saved preferences.
+
 `worker/index.ts` dispatches APIs, MCP, private ICS feeds and static assets. It runs schema setup before database-backed requests. App writes go through validation and session checks; a public visitor uses `/api/public`, whose response passes through `maskForPublic`. Public privacy therefore belongs at the response boundary, not only in React.
 
 ## Billing and historical truth
