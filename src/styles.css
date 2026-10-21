@@ -8506,7 +8506,20 @@ button.seat:disabled {
   border-bottom: 0;
 }
 .car-receipts .ld-row {
-  grid-template-columns: minmax(0, 1fr) 96px auto;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, auto) minmax(96px, auto);
+  column-gap: 24px;
+}
+.car-receipts .ld-row > span {
+  white-space: nowrap;
+}
+.car-receipts .ld-row > span:first-child {
+  white-space: normal;
+}
+@media (max-width: 560px) {
+  .car-receipts .ld-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: 14px;
+  }
 }
 /* 收款按期分组：组标题一行写期间与合计 */
 .car-receipts .car-period {

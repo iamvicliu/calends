@@ -404,6 +404,9 @@ function CarSheet({
   // 历来所有收款，按这笔钱覆盖的那一期分组（同一期的人排在一起），新的期在前；已退出的成员也保留
   const receipts = sh.members.flatMap((m) => (m.payments ?? []).map((p) => ({ m, p, base: toBaseAt(state, p.amount, p.currency, p.date) })));
   const total = receipts.reduce((a, r) => a + r.base, 0);
+  /** 期间：两端都在今年只写月日；只要有一端不在今年，两端都带年份，免得看成倒序 */
+  const range = (a: string, b: string) =>
+    a.slice(0, 4) === today.slice(0, 4) && b.slice(0, 4) === today.slice(0, 4) ? `${cnDate(a)} – ${cnDate(b)}` : `${cnDateFull(a)} – ${cnDateFull(b)}`;
   const byPeriod = new Map<string, typeof receipts>();
   for (const r of receipts) {
     const k = `${r.p.from ?? ''}|${r.p.until}`;
@@ -514,9 +517,7 @@ function CarSheet({
           {periods.map((g) => (
             <Fragment key={g.key}>
               <div className="ld-row car-period">
-                <span>
-                  {g.from ? `${cnDateAuto(g.from, today)} – ${cnDateAuto(g.until, today)}` : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}
-                </span>
+                <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
                 <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
               </div>
               {g.list.map(({ m, p, base: v }, i) => (
@@ -525,7 +526,8 @@ function CarSheet({
                     <b>{m.name || t('family.pool.unnamed')}</b>
                     {p.note && <small>{p.note}</small>}
                   </span>
-                  <span className="ld-date">{cnDateAuto(p.date, today)}</span>
+                  {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
+                  <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
                   <span>
                     <b>{money(p.amount, p.currency)}</b>
                     {p.currency !== base && <small>≈ {money(v, base)}</small>}
