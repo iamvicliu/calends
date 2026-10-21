@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} người",
+    "title": "Chi tiết nhóm",
+    "seats": "Chỗ",
+    "seatsVal": "{used}/{total}",
+    "since": "Bắt đầu",
+    "members": "Thành viên",
+    "receipts": "Đã nhận",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Ngày",
+    "member": "Thành viên",
+    "covers": "Kỳ",
+    "amount": "Số tiền"
+  },
   "contact": {
     "via": { "wechat": "WeChat", "email": "Email", "phone": "Điện thoại", "other": "Khác" },
     "hint": { "wechat": "ID WeChat", "discord": "Tên người dùng", "generic": "Tài khoản / ID" },

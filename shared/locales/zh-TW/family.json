@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} 人",
+    "title": "合租詳情",
+    "seats": "座位",
+    "seatsVal": "{used}/{total} 位",
+    "since": "發起於",
+    "members": "成員",
+    "receipts": "收款紀錄",
+    "receiptsSum": "{count} 筆 · {amount}",
+    "date": "收款日",
+    "member": "成員",
+    "covers": "涵蓋期間",
+    "amount": "金額"
+  },
   "contact": {
     "via": { "wechat": "微信", "email": "電子郵件", "phone": "手機", "other": "其他" },
     "hint": { "wechat": "微信 ID", "discord": "使用者名稱", "generic": "帳號 / ID" },

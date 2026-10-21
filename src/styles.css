@@ -8476,3 +8476,84 @@ button.seat:disabled {
   font-size: 15px;
   font-weight: 600;
 }
+
+/* 合租弹窗：小节标题、成员、收款表 */
+.car-sheet-sec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 4px -6px;
+}
+.car-sheet-sec h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-2);
+}
+.car-sheet-sec > span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+.car-sheet-members {
+  padding: 2px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.car-sheet-members .member:last-child {
+  border-bottom: 0;
+}
+.car-receipts .ld-row {
+  grid-template-columns: minmax(0, 1fr) 96px auto;
+}
+/* 收款按期分组：组标题一行写期间与合计 */
+.car-receipts .car-period {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--fill-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--label-2);
+  cursor: default;
+}
+.car-receipts .car-period > span:last-child {
+  font-weight: 600;
+  color: var(--label-2);
+}
+.car-group-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--label-3);
+}
+.car-group-head span {
+  font-weight: 400;
+}
+/* 卡片里的订阅名：悬停才出现下划线，点它看订阅本身 */
+.name-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.15s;
+}
+.name-link:hover,
+.name-link:focus-visible {
+  text-decoration-color: currentColor;
+  outline: none;
+}
+.car-card {
+  cursor: pointer;
+}
+.car-head {
+  cursor: inherit;
+}
+.car-facts {
+  cursor: inherit;
+}

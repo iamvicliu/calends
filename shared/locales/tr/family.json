@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} kişi",
+    "title": "Ortak plan",
+    "seats": "Koltuk",
+    "seatsVal": "{used}/{total}",
+    "since": "Başlangıç",
+    "members": "Üyeler",
+    "receipts": "Alınan ödemeler",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Tarih",
+    "member": "Üye",
+    "covers": "Dönem",
+    "amount": "Tutar"
+  },
   "contact": {
     "via": { "wechat": "WeChat", "email": "E-posta", "phone": "Telefon", "other": "Diğer" },
     "hint": { "wechat": "WeChat ID", "discord": "Kullanıcı adı", "generic": "Hesap / ID" },

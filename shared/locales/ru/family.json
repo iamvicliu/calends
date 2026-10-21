@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} чел.",
+    "title": "Складчина",
+    "seats": "Места",
+    "seatsVal": "{used}/{total}",
+    "since": "Начало",
+    "members": "Участники",
+    "receipts": "Полученные платежи",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Дата",
+    "member": "Участник",
+    "covers": "Период",
+    "amount": "Сумма"
+  },
   "contact": {
     "via": { "wechat": "WeChat", "email": "Эл. почта", "phone": "Телефон", "other": "Другое" },
     "hint": { "wechat": "WeChat ID", "discord": "Имя пользователя", "generic": "Аккаунт / ID" },

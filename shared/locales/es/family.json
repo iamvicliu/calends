@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} personas",
+    "title": "Plan compartido",
+    "seats": "Plazas",
+    "seatsVal": "{used}/{total}",
+    "since": "Inicio",
+    "members": "Miembros",
+    "receipts": "Pagos recibidos",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Fecha",
+    "member": "Miembro",
+    "covers": "Periodo",
+    "amount": "Importe"
+  },
   "contact": {
     "via": { "wechat": "WeChat", "email": "Correo electrónico", "phone": "Teléfono", "other": "Otro" },
     "hint": { "wechat": "ID de WeChat", "discord": "Nombre de usuario", "generic": "Cuenta / ID" },

@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} personnes",
+    "title": "Abonnement partagé",
+    "seats": "Places",
+    "seatsVal": "{used}/{total}",
+    "since": "Lancé le",
+    "members": "Membres",
+    "receipts": "Paiements reçus",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Date",
+    "member": "Membre",
+    "covers": "Période",
+    "amount": "Montant"
+  },
   "contact": {
     "via": {
       "wechat": "WeChat",

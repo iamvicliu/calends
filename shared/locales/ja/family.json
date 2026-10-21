@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} 人",
+    "title": "シェアの詳細",
+    "seats": "席",
+    "seatsVal": "{used}/{total} 席",
+    "since": "開始日",
+    "members": "メンバー",
+    "receipts": "受け取り履歴",
+    "receiptsSum": "{count} 件 · {amount}",
+    "date": "受取日",
+    "member": "メンバー",
+    "covers": "対象期間",
+    "amount": "金額"
+  },
   "contact": {
     "via": {
       "wechat": "WeChat",

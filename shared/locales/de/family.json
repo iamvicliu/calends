@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} Personen",
+    "title": "Geteilter Plan",
+    "seats": "Plätze",
+    "seatsVal": "{used}/{total}",
+    "since": "Gestartet",
+    "members": "Mitglieder",
+    "receipts": "Erhaltene Zahlungen",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Datum",
+    "member": "Mitglied",
+    "covers": "Zeitraum",
+    "amount": "Betrag"
+  },
   "contact": {
     "via": {
       "wechat": "WeChat",

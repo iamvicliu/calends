@@ -4,7 +4,7 @@ import { cnDate, cnDateFull, money } from '../../shared/format.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, Group, Icon, PayBadge, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
 import { run, saveSub } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -80,23 +80,18 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
           </span>
         )}
         <div className="proxy-top">
-          <button
-            className="proxy-head"
-            title={t('proxy.viewSub')}
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpen(s);
-            }}
-          >
+          <div className="proxy-head">
             <SubIcon sub={s} size={46} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="ph-name">{s.name}</div>
+              <div className="ph-name">
+                <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
+              </div>
               <div className="muted ph-meta">
                 {money(s.price, s.currency)} {cycleLabel(s.cycle)}
                 {stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : ''}
               </div>
             </div>
-          </button>
+          </div>
           <span className={`ph-status ${tone}`}>
             <i />
             {label}
@@ -166,7 +161,16 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
         <div className="ld-head">
           <SubIcon sub={live} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name">{live.name}</div>
+            <div className="ph-name">
+              <NameLink
+                onClick={() => {
+                  onClose();
+                  onOpen(live);
+                }}
+              >
+                {live.name}
+              </NameLink>
+            </div>
             <div className="muted ph-meta">
               {money(live.price, live.currency)} {cycleLabel(live.cycle)}
               {cardCcy ? t('proxy.cardCcy', { ccy: cardCcy }) : ''}

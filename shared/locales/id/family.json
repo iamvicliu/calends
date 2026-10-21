@@ -1,4 +1,18 @@
 {
+  "sheet": {
+    "people": "{count} orang",
+    "title": "Detail patungan",
+    "seats": "Kursi",
+    "seatsVal": "{used}/{total}",
+    "since": "Mulai",
+    "members": "Anggota",
+    "receipts": "Pembayaran diterima",
+    "receiptsSum": "{count} · {amount}",
+    "date": "Tanggal",
+    "member": "Anggota",
+    "covers": "Periode",
+    "amount": "Jumlah"
+  },
   "contact": {
     "via": { "wechat": "WeChat", "email": "Email", "phone": "Telepon", "other": "Lainnya" },
     "hint": { "wechat": "ID WeChat", "discord": "Nama pengguna", "generic": "Akun / ID" },

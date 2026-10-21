@@ -435,6 +435,31 @@ export function Toasts() {
 }
 
 /** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
+/**
+ * 卡片里的订阅名：悬停出现下划线，点它只打开订阅本身；卡片其余区域打开合租 / 代付自己的弹窗
+ */
+export function NameLink({ children, onClick }: { children: ComponentChildren; onClick: () => void }) {
+  return (
+    <span
+      className="name-link"
+      role="link"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function useWidth<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const [w, setW] = useState(0);

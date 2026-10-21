@@ -1,12 +1,12 @@
 import { cycleLabel, effectiveStatus, memberDues, nextCharge } from '../../shared/billing.ts';
-import { useState } from 'react';
-import { billLabel, cnDate, cnDateAuto, money, monthLabel } from '../../shared/format.ts';
+import { Fragment, useState } from 'react';
+import { billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } from '../../shared/format.ts';
 import { t } from '../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { toBaseAt } from '../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../shared/types.ts';
 import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
-import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, Cell, Group, Icon, NameLink, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -51,9 +51,11 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owedAll = owned.flatMap((s) => memberDues(s, today)).filter((d) => d.periodsOwed > 0);
   const owedSum = owedAll.reduce((a, d) => a + toBase(state, d.owed, d.sub.currency), 0);
   const ro = !!state.readonly;
-  const collect = state.settings.collectCurrency ?? base;
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean } | null>(null);
+  // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
+  const [sheet, setSheet] = useState<string | null>(null);
+  const sheetSub = sheet ? state.subscriptions.find((x) => x.id === sheet) : undefined;
   // 车卡默认收起，只看净成本与座位；展开才看账本与成员明细
   const [openRaw, setOpen] = usePref<string>('car-open', '[]');
   const expanded = parseIds(openRaw);
@@ -127,11 +129,22 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 const free = Math.max(0, sh.seats - 1 - onboard.length);
                 const next = nextCharge(s, today);
                 return (
-                  <div key={s.id} className={`card stack car-card ${live(s) ? '' : 'stopped'}`} style={{ order: idx }}>
-                    <button className="car-head" onClick={() => onOpen(s)}>
+                  // 整张卡片打开合租弹窗；里面的按钮、链接和订阅名各管各的
+                  <div
+                    key={s.id}
+                    className={`card stack car-card ${live(s) ? '' : 'stopped'}`}
+                    style={{ order: idx }}
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => !(e.target as HTMLElement).closest('button, a, [role=link]') && setSheet(s.id)}
+                    onKeyDown={(e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setSheet(s.id))}
+                  >
+                    <div className="car-head">
                       <SubIcon sub={s} size={40} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="car-name">{s.name}</div>
+                        <div className="car-name">
+                          <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
+                        </div>
                         <div className="muted car-sub">
                           {money(s.price, s.currency)} {cycleLabel(s.cycle)}
                           {next && live(s) ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
@@ -141,7 +154,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                       <span className={`car-seats ${free ? '' : 'full'}`}>
                         {!live(s) ? t('family.pool.filter.ended') : free ? t('family.pool.seatsFree', { count: free }) : t('family.pool.seatsFull')}
                       </span>
-                    </button>
+                    </div>
                     <div className="seats-row">
                       <div className="seats">
                         <span className="seat me" title={t('family.pool.me')}>
@@ -182,7 +195,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         <Icon name="down" size={14} />
                       </button>
                     </div>
-                    <CarFacts book={books.get(s.id)!} base={base} detail={expanded.has(s.id)} onOpen={() => onOpen(s)} />
+                    <CarFacts book={books.get(s.id)!} base={base} detail={expanded.has(s.id)} />
                     {expanded.has(s.id) && (
                       <>
                         {!ro && free > 0 && live(s) && (
@@ -190,63 +203,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                             <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
                           </button>
                         )}
-                        <div>
-                          {dues.map((d) => (
-                            <div key={d.member.id} className="member">
-                              <button className="member-info" disabled={ro} onClick={() => setMember({ s, m: d.member })}>
-                                <div style={{ fontWeight: 600, fontSize: 14 }}>
-                                  {d.member.name || t('family.pool.unnamed')}
-                                  {d.member.left && d.member.left <= today && (
-                                    <span className="badge" style={{ marginLeft: 6 }}>
-                                      {t('family.pool.leftOn', { date: cnDate(d.member.left) })}
-                                    </span>
-                                  )}
-                                  {contactText(d.member) && (
-                                    <span className="muted" style={{ fontWeight: 400 }}>
-                                      {' '}
-                                      · {contactText(d.member)}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="muted" style={{ fontSize: 12 }}>
-                                  {d.member.exempt
-                                    ? (d.member.note ?? t('family.pool.exemptNote'))
-                                    : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
-                                  <span className="m-hide">
-                                    {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
-                                    {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
-                                  </span>
-                                </div>
-                              </button>
-                              <div style={{ textAlign: 'right', fontSize: 13.5 }}>
-                                {d.member.exempt ? (
-                                  <span className="muted" style={{ fontWeight: 600 }}>
-                                    {t('family.pool.exempt')}
-                                  </span>
-                                ) : d.periodsOwed > 0 ? (
-                                  <b style={{ color: 'var(--orange)' }}>
-                                    {t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect) })}
-                                  </b>
-                                ) : (
-                                  <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
-                                )}
-                                {!d.member.exempt && (
-                                  <div className="muted m-hide" style={{ fontSize: 12 }}>
-                                    {perBill('family.pool.perFee', d.member.billEvery ?? 1, {
-                                      fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
-                                    })}
-                                  </div>
-                                )}
-                              </div>
-                              {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
-                              {!ro && !d.member.exempt && d.periodsOwed > 0 && (
-                                <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => setMember({ s, m: d.member, collect: true })}>
-                                  <Icon name="check" /> {t('family.pool.collect')}
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                        <MemberRows state={state} s={s} today={today} ro={ro} onMember={(m, c) => setMember({ s, m, collect: c })} />
                       </>
                     )}
                   </div>
@@ -297,6 +254,21 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           </Group>
         )}
         {convert && <ConvertSheet s={convert} today={today} onClose={() => setConvert(null)} />}
+        {sheetSub?.share && (
+          <CarSheet
+            state={state}
+            s={sheetSub}
+            today={today}
+            ro={ro}
+            book={books.get(sheetSub.id) ?? carLedger(state, sheetSub, today)}
+            onClose={() => setSheet(null)}
+            onOpenSub={() => {
+              setSheet(null);
+              onOpen(sheetSub);
+            }}
+            onMember={(m, c) => setMember({ s: sheetSub, m, collect: c })}
+          />
+        )}
         {member && (
           <MemberSheet
             state={state}
@@ -308,6 +280,268 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         )}
       </div>
     </>
+  );
+}
+
+/** 成员明细：收款状态、应收、收款按钮；车卡展开和合租弹窗共用 */
+function MemberRows({
+  state,
+  s,
+  today,
+  ro,
+  onMember,
+  only,
+}: {
+  state: AppState;
+  s: Subscription;
+  today: string;
+  ro: boolean;
+  onMember: (m: ShareMember, collect?: boolean) => void;
+  /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
+  only?: (m: ShareMember) => boolean;
+}) {
+  const dues = memberDues(s, today).filter((d) => !only || only(d.member));
+  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  return (
+    <div>
+      {dues.map((d) => (
+        <div key={d.member.id} className="member">
+          <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>
+              {d.member.name || t('family.pool.unnamed')}
+              {d.member.left && d.member.left <= today && (
+                <span className="badge" style={{ marginLeft: 6 }}>
+                  {t('family.pool.leftOn', { date: cnDate(d.member.left) })}
+                </span>
+              )}
+              {contactText(d.member) && (
+                <span className="muted" style={{ fontWeight: 400 }}>
+                  {' '}
+                  · {contactText(d.member)}
+                </span>
+              )}
+            </div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              {d.member.exempt
+                ? (d.member.note ?? t('family.pool.exemptNote'))
+                : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
+              <span className="m-hide">
+                {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
+                {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
+              </span>
+            </div>
+          </button>
+          <div style={{ textAlign: 'right', fontSize: 13.5 }}>
+            {d.member.exempt ? (
+              <span className="muted" style={{ fontWeight: 600 }}>
+                {t('family.pool.exempt')}
+              </span>
+            ) : d.periodsOwed > 0 ? (
+              <b style={{ color: 'var(--orange)' }}>
+                {t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, s.currency, undefined, collect), collect) })}
+              </b>
+            ) : (
+              <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
+            )}
+            {!d.member.exempt && (
+              <div className="muted m-hide" style={{ fontSize: 12 }}>
+                {perBill('family.pool.perFee', d.member.billEvery ?? 1, {
+                  fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
+                })}
+              </div>
+            )}
+          </div>
+          {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
+          {!ro && !d.member.exempt && d.periodsOwed > 0 && (
+            <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => onMember(d.member, true)}>
+              <Icon name="check" /> {t('family.pool.collect')}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * 合租弹窗：一辆车的全部信息。上面是基本信息和指标，中间是成员与收款，下面是历来所有收款；
+ * 订阅本身（价格、阶段、扣款）点「查看订阅详情」切过去
+ */
+function CarSheet({
+  state,
+  s,
+  today,
+  ro,
+  book,
+  onClose,
+  onOpenSub,
+  onMember,
+}: {
+  state: AppState;
+  s: Subscription;
+  today: string;
+  ro: boolean;
+  book: ReturnType<typeof carLedger>;
+  onClose: () => void;
+  onOpenSub: () => void;
+  onMember: (m?: ShareMember, collect?: boolean) => void;
+}) {
+  const base = state.settings.baseCurrency;
+  const sh = s.share!;
+  const st = effectiveStatus(s, today);
+  const stopped = st === 'ended';
+  const next = nextCharge(s, today);
+  const onboard = sh.members.filter((m) => !m.left || m.left > today);
+  const free = Math.max(0, sh.seats - 1 - onboard.length);
+  const owe = memberDues(s, today).filter((d) => d.periodsOwed > 0).length;
+  const fmt = (v: number) => money(v, base, { compact: true });
+  const profit = -book.yearNet;
+  const actual = -book.net;
+  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${m.billEvery ?? 1}`);
+  const memberGroups = [...new Set(sh.members.map(groupOf))]
+    .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
+    .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), sh.members.filter((m) => groupOf(m) === k).length] as const);
+  // 历来所有收款，按这笔钱覆盖的那一期分组（同一期的人排在一起），新的期在前；已退出的成员也保留
+  const receipts = sh.members.flatMap((m) => (m.payments ?? []).map((p) => ({ m, p, base: toBaseAt(state, p.amount, p.currency, p.date) })));
+  const total = receipts.reduce((a, r) => a + r.base, 0);
+  const byPeriod = new Map<string, typeof receipts>();
+  for (const r of receipts) {
+    const k = `${r.p.from ?? ''}|${r.p.until}`;
+    byPeriod.set(k, [...(byPeriod.get(k) ?? []), r]);
+  }
+  const periods = [...byPeriod.entries()]
+    .map(([key, list]) => ({
+      key,
+      from: list[0].p.from,
+      until: list[0].p.until,
+      list: list.sort((a, b) => a.p.date.localeCompare(b.p.date)),
+      sum: list.reduce((a, r) => a + r.base, 0),
+    }))
+    .sort((a, b) => (b.from ?? b.until).localeCompare(a.from ?? a.until));
+  return (
+    <Sheet title={t('family.sheet.title')} onClose={onClose}>
+      <div className="stack">
+        <div className="ld-head">
+          <SubIcon sub={s} size={52} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="ph-name">
+              <NameLink onClick={onOpenSub}>{s.name}</NameLink>
+            </div>
+            <div className="muted ph-meta">
+              {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+              {next && !stopped ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
+            </div>
+          </div>
+          <span className={`ph-status ${stopped ? 'stop' : owe ? 'owe' : 'ok'}`}>
+            <i />
+            {stopped ? t('family.pool.filter.ended') : owe ? t('family.pool.owedN', { count: owe }) : t('family.pool.settled')}
+          </span>
+        </div>
+
+        <div className="ld-top">
+          <Group>
+            <Cell label={t('family.sheet.seats')}>
+              {t('family.sheet.seatsVal', { used: onboard.length + 1, total: sh.seats })}
+              {free ? ` · ${t('family.pool.seatsFree', { count: free })}` : ''}
+            </Cell>
+            <Cell label={t('family.sheet.since')}>{book.since ? cnDateFull(book.since) : '—'}</Cell>
+            <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
+              {stopped ? (s.end ? cnDateFull(s.end) : '—') : next ? cnDateFull(next) : '—'}
+            </Cell>
+            {s.manageUrl && (
+              <Cell label={t('family.pool.manage')} onClick={() => window.open(s.manageUrl, '_blank', 'noopener')}>
+                {t('family.pool.manageTitle')}
+              </Cell>
+            )}
+            <Cell label={t('proxy.subscription')} onClick={onOpenSub}>
+              {t('proxy.viewDetail')}
+            </Cell>
+          </Group>
+          <div className="proxy-facts four">
+            <div>
+              <small>{t('family.facts.cost')}</small>
+              <b>{fmt(book.yearCost)}</b>
+            </div>
+            <div>
+              <small>{t('family.facts.income')}</small>
+              <b>{fmt(book.yearIncome)}</b>
+            </div>
+            <div>
+              <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
+              <b className={profit >= 0 ? 'done' : 'loss'}>
+                {profit >= 0 ? '+' : '−'}
+                {fmt(Math.abs(profit))}
+              </b>
+            </div>
+            <div>
+              <small>{t('family.facts.sinceNone')}</small>
+              <b className={actual >= 0 ? 'done' : 'loss'}>
+                {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(-actual) })}
+              </b>
+            </div>
+          </div>
+        </div>
+
+        <div className="car-sheet-sec">
+          <h3>{t('family.sheet.members')}</h3>
+          {!ro && free > 0 && !stopped && (
+            <button className="btn tinted" onClick={() => onMember()}>
+              <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
+            </button>
+          )}
+        </div>
+        {/* 成员按收费周期分组：按月、按季、按半年、按年各一组，不分摊的单独一组 */}
+        {memberGroups.map(([key, label, n]) => (
+          <div key={key} className="car-sheet-members">
+            <div className="car-group-head">
+              {label}
+              <span>{t('family.sheet.people', { count: n })}</span>
+            </div>
+            <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} />
+          </div>
+        ))}
+
+        <div className="car-sheet-sec">
+          <h3>{t('family.sheet.receipts')}</h3>
+          <span>{t('family.sheet.receiptsSum', { count: receipts.length, amount: fmt(total) })}</span>
+        </div>
+        <div className="ld-table car-receipts">
+          <div className="ld-row ld-th">
+            <span>{t('family.sheet.member')}</span>
+            <span>{t('family.sheet.date')}</span>
+            <span>{t('family.sheet.amount')}</span>
+          </div>
+          {periods.map((g) => (
+            <Fragment key={g.key}>
+              <div className="ld-row car-period">
+                <span>
+                  {g.from ? `${cnDateAuto(g.from, today)} – ${cnDateAuto(g.until, today)}` : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}
+                </span>
+                <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+              </div>
+              {g.list.map(({ m, p, base: v }, i) => (
+                <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
+                  <span>
+                    <b>{m.name || t('family.pool.unnamed')}</b>
+                    {p.note && <small>{p.note}</small>}
+                  </span>
+                  <span className="ld-date">{cnDateAuto(p.date, today)}</span>
+                  <span>
+                    <b>{money(p.amount, p.currency)}</b>
+                    {p.currency !== base && <small>≈ {money(v, base)}</small>}
+                  </span>
+                </button>
+              ))}
+            </Fragment>
+          ))}
+          {receipts.length === 0 && (
+            <div className="muted" style={{ fontSize: 13, padding: '12px 14px' }}>
+              {t('family.facts.noRecords')}
+            </div>
+          )}
+        </div>
+      </div>
+    </Sheet>
   );
 }
 
@@ -391,15 +625,14 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
  * 合租账本，像一张小利润表：订阅一年花多少（成本）、成员一年交多少（收入）、两者之差（利润）。
  * 利润为负就是我自己用的那部分；下面一行是发起以来实际付出和收回的钱。
  */
-function CarFacts({ book, base, detail, onOpen }: { book: ReturnType<typeof carLedger>; base: string; detail: boolean; onOpen: () => void }) {
+function CarFacts({ book, base, detail }: { book: ReturnType<typeof carLedger>; base: string; detail: boolean }) {
   const fmt = (v: number) => money(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;
   const signed = (v: number) => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v))}`;
   return (
     <div className="car-book">
-      {/* 数字区和头部一样，点开订阅详情 */}
-      <button type="button" className="car-facts" onClick={onOpen}>
+      <div className="car-facts">
         <div>
           <small>{t('family.facts.cost')}</small>
           <b>{fmt(book.yearCost)}</b>
@@ -412,7 +645,7 @@ function CarFacts({ book, base, detail, onOpen }: { book: ReturnType<typeof carL
           <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
           <b className={profit >= 0 ? 'gain' : 'loss'}>{signed(profit)}</b>
         </div>
-      </button>
+      </div>
       {/* 发起至今的实际收支是明细，展开后才看 */}
       {detail && (
         <div className="car-actual">
