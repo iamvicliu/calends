@@ -273,15 +273,20 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   useLayoutEffect(() => {
     if (atBottom) window.scrollTo(0, document.documentElement.scrollHeight);
   }, [chat, atBottom, fill, past]);
-  // 滚到底后按实际位置校正：分割线正好落在顶栏下方 12px，上面的历史全部移出可视区
+  // 布局完成后直接校正滚动位置，不把受滚动影响的坐标反写为高度。
+  // 浏览器缩放或滚动尚未完成时，反复 setFill 会形成同步更新循环。
   const session = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
-    const head = session.current?.querySelector('.as-past-head');
-    if (!head || !atBottom) return;
-    const tb = document.querySelector<HTMLElement>('.toolbar');
-    const top = tb && getComputedStyle(tb).position === 'sticky' ? tb.getBoundingClientRect().bottom : 0;
-    const d = head.getBoundingClientRect().top - (top + 12);
-    if (Math.abs(d) > 1) setFill((f) => Math.max(0, Math.round(f + d)));
+    if (!atBottom) return;
+    const frame = requestAnimationFrame(() => {
+      const head = session.current?.querySelector('.as-past-head');
+      if (!head) return;
+      const tb = document.querySelector<HTMLElement>('.toolbar');
+      const top = tb && getComputedStyle(tb).position === 'sticky' ? tb.getBoundingClientRect().bottom : 0;
+      const d = head.getBoundingClientRect().top - (top + 12);
+      if (Math.abs(d) > 1) window.scrollTo({ top: window.scrollY + d, behavior: 'instant' });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [fill, past, chat.id, atBottom]);
   useEffect(() => {
     const onScroll = () => {
