@@ -269,7 +269,7 @@ ${esc(t('notify.email.footer'))} ${esc(t('notify.email.off'))}<br>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
 <td style="vertical-align:middle">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-<td style="padding-right:10px;line-height:0;vertical-align:middle"><img class="logo-dark-bd" src="${esc(site)}/icons/icon-192.png" alt="" width="28" height="28" style="display:block;width:28px;height:28px;border-radius:7px;border:1px solid transparent"></td>
+<td style="padding-right:10px;line-height:0;vertical-align:middle"><img class="logo-dark-bd" referrerpolicy="no-referrer" src="${esc(site)}/icons/icon-192.png" alt="" width="28" height="28" style="display:block;width:28px;height:28px;border-radius:7px;border:1px solid transparent"></td>
 <td class="c-ink" style="vertical-align:middle;font-family:${FONT};font-size:15px;font-weight:700;letter-spacing:-.01em;color:${L.ink}">${esc(app)}</td>
 </tr></table>
 </td>
