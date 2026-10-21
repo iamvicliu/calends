@@ -1,6 +1,8 @@
 {
   "save": "Guardar",
   "cancel": "Cancelar",
+  "confirm": "Confirmar",
+  "confirmTitle": "¿Seguro?",
   "delete": "Eliminar",
   "done": "Listo",
   "add": "Añadir",

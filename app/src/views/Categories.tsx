@@ -8,7 +8,7 @@ import type { AppState } from '../../../shared/types.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { CAT_ICON_GROUPS } from '../components/cat-icons.gen.ts';
 import { Picker } from '../components/Picker.tsx';
-import { Cell, Group, Icon, Sheet } from '../components/ui.tsx';
+import { ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { categories } from '../derive.ts';
 import { run, saveCategories, toast } from '../store.ts';
 
@@ -197,9 +197,9 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
       onClose();
     });
   };
-  const remove = () => {
+  const remove = async () => {
     if (!cat) return;
-    if (!n && !window.confirm(t('settings.cat.confirmDelete', { name: cat.name }))) return;
+    if (!n && !(await ask(t('settings.cat.confirmDelete', { name: cat.name })))) return;
     void run(async () => {
       await saveCategories(others, n ? { [cat.name]: target } : {});
       onClose();

@@ -583,10 +583,6 @@
 .as-card-foot .btn {
   height: 34px;
 }
-.as-card-foot .btn.danger-solid {
-  background: var(--red);
-  color: #fff;
-}
 .as-card-foot .btn:disabled {
   opacity: 0.55;
 }

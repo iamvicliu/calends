@@ -6,10 +6,9 @@ import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } f
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
-import { Amount, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, ask, Cell, Group, Icon, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { go } from '../router.ts';
 import { deletePerson, mergePerson, run, savePerson } from '../store.ts';
-import { confirmDelete } from './Editor.tsx';
 import { ContactField, contactText, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 
@@ -287,8 +286,8 @@ function PersonSheet({
               <button
                 className="btn plain"
                 style={{ color: 'var(--red)' }}
-                onClick={() =>
-                  confirmDelete(t('people.sheet.confirmDelete', { name: stored.name })) &&
+                onClick={async () =>
+                  (await ask(t('people.sheet.confirmDelete', { name: stored.name }))) &&
                   run(async () => {
                     await deletePerson(stored.id);
                     onClose();
@@ -405,9 +404,9 @@ function PersonSheet({
                 search={others.length > 6}
                 ariaLabel={t('people.sheet.merge')}
                 display={<span>{t('people.sheet.mergePick')}</span>}
-                onChange={(into) => {
+                onChange={async (into) => {
                   const target = others.find((p) => p.id === into);
-                  if (!target || !confirmDelete(t('people.sheet.mergeConfirm', { from: stored.name, into: target.name }))) return;
+                  if (!target || !(await ask(t('people.sheet.mergeConfirm', { from: stored.name, into: target.name })))) return;
                   run(
                     async () => {
                       await mergePerson(stored.id, target.id);

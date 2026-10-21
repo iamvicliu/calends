@@ -24,6 +24,7 @@ These rules apply to human and AI-authored changes. They describe what an author
 ## UI and translations
 
 - Reuse the existing components and visual system. App components live in `app/src/components/` and `app/src/views/`; the public page has its own components and styles under `app/src/public/`. Avoid broad CSS rules that leak between them.
+- Never use the browser's `alert`, `confirm` or `prompt` (lint enforces `no-alert`). Ask for confirmation with `await ask(message)` from `app/src/components/ui.tsx`, which renders an in-app dialog.
 - Route user-visible strings through `t()`. Do not evaluate translated text at module initialization. Keep source strings in English and Simplified Chinese, preserve placeholders and update the other supported locales.
 - Check affected UI in English and Simplified Chinese, at desktop and 390px widths, and in light and dark themes. Check empty, loading and error states where the change affects them. For financial displays, include zero, negative and incomplete-data cases where meaningful.
 - Reproduce the user's actual interaction: saving and reloading, switching currencies, navigating, keyboard use or opening a narrow layout. Type checking and screenshots alone do not prove those interactions.

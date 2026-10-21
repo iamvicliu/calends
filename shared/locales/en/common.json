@@ -1,6 +1,8 @@
 {
   "save": "Save",
   "cancel": "Cancel",
+  "confirm": "Confirm",
+  "confirmTitle": "Are you sure?",
   "delete": "Delete",
   "done": "Done",
   "add": "Add",

@@ -5,7 +5,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/billing.ts';
 import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
-import { Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
+import { AskLayer, Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -602,6 +602,7 @@ function App() {
       {palette && <Palette state={state} d={d} onClose={() => setPalette(false)} onOpen={open} onAdd={add} />}
       <Toasts />
       <TipLayer />
+      <AskLayer />
     </div>
   );
 }

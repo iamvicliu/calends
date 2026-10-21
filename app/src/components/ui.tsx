@@ -429,6 +429,45 @@ export function Sheet(props: {
   );
 }
 
+/**
+ * 确认弹窗：替代浏览器原生 confirm（全局禁止 alert / confirm / prompt）。
+ * const ok = await ask('删除？')；取消、Esc、点遮罩都算否。由 AskLayer 统一渲染
+ */
+type AskReq = { message: ComponentChildren; ok?: string; resolve: (v: boolean) => void };
+let askSet: ((r: AskReq | null) => void) | null = null;
+export function ask(message: ComponentChildren, opts: { ok?: string } = {}): Promise<boolean> {
+  return new Promise((resolve) => (askSet ? askSet({ message, ...opts, resolve }) : resolve(false)));
+}
+
+export function AskLayer() {
+  const [req, setReq] = useState<AskReq | null>(null);
+  askSet = setReq;
+  if (!req) return null;
+  const done = (v: boolean) => {
+    setReq(null);
+    req.resolve(v);
+  };
+  return (
+    <Sheet
+      narrow
+      title={t('common.confirmTitle')}
+      onClose={() => done(false)}
+      foot={
+        <>
+          <button className="btn" onClick={() => done(false)}>
+            {t('common.cancel')}
+          </button>
+          <button className="btn danger-solid" autoFocus onClick={() => done(true)}>
+            {req.ok ?? t('common.confirm')}
+          </button>
+        </>
+      }
+    >
+      <p className="ask-msg">{req.message}</p>
+    </Sheet>
+  );
+}
+
 /** 全局提示（Sonner）：跟随亮色/暗色主题；手机上避开底部的安全区 */
 export function Toasts() {
   const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'));

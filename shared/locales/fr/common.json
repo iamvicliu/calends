@@ -1,6 +1,8 @@
 {
   "save": "Enregistrer",
   "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "confirmTitle": "Confirmer ?",
   "delete": "Supprimer",
   "done": "OK",
   "add": "Ajouter",

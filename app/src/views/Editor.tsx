@@ -8,7 +8,7 @@ import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { CatIcon, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { ask, CatIcon, Cell, Group, Icon, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
@@ -37,10 +37,6 @@ export function newSub(today: string, methodId?: string, currency = 'USD'): Subs
     status: 'active',
     methodId,
   };
-}
-
-export function confirmDelete(msg: string): boolean {
-  return window.confirm(msg);
 }
 
 /**
@@ -156,8 +152,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           {!isNew && (
             <button
               className="btn danger"
-              onClick={() =>
-                confirmDelete(t('editor.confirmDelete', { name: sub.name })) &&
+              onClick={async () =>
+                (await ask(t('editor.confirmDelete', { name: sub.name }))) &&
                 run(
                   async () => {
                     await deleteSub(sub.id);

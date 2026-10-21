@@ -1,6 +1,8 @@
 {
   "save": "Simpan",
   "cancel": "Batal",
+  "confirm": "Konfirmasi",
+  "confirmTitle": "Yakin?",
   "delete": "Hapus",
   "done": "Selesai",
   "add": "Tambah",

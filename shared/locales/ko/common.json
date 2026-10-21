@@ -1,6 +1,8 @@
 {
   "save": "저장",
   "cancel": "취소",
+  "confirm": "확인",
+  "confirmTitle": "확인해 주세요",
   "delete": "삭제",
   "done": "완료",
   "add": "추가",

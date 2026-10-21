@@ -1,6 +1,8 @@
 {
   "save": "Kaydet",
   "cancel": "Vazgeç",
+  "confirm": "Onayla",
+  "confirmTitle": "Emin misiniz?",
   "delete": "Sil",
   "done": "Bitti",
   "add": "Ekle",

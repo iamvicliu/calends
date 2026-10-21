@@ -1,9 +1,8 @@
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { ask, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, run, saveSettings, toast } from '../store.ts';
-import { confirmDelete } from './Editor.tsx';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 
@@ -307,8 +306,8 @@ export function Ai({ state }: { state: AppState }) {
                     <button
                       type="button"
                       className="chip-btn ai-revoke"
-                      onClick={() =>
-                        confirmDelete(t('ai.confirmRevoke', { name: tk.name })) &&
+                      onClick={async () =>
+                        (await ask(t('ai.confirmRevoke', { name: tk.name }))) &&
                         run(async () => {
                           await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
                           if (fresh?.item.id === tk.id) setFresh(null);

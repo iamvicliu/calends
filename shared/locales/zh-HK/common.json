@@ -1,6 +1,8 @@
 {
   "save": "儲存",
   "cancel": "取消",
+  "confirm": "確定",
+  "confirmTitle": "請確認",
   "delete": "刪除",
   "done": "完成",
   "add": "新增",

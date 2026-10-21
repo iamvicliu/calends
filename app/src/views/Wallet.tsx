@@ -7,10 +7,9 @@ import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
+import { Amount, ask, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
-import { confirmDelete } from './Editor.tsx';
 import { go } from '../router.ts';
 import { BANKS } from '../banks.ts';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
@@ -670,8 +669,8 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
           {!isNew && (
             <button
               className="btn danger"
-              onClick={() =>
-                confirmDelete(t('wallet.editor.confirmDelete', { name: m.name })) &&
+              onClick={async () =>
+                (await ask(t('wallet.editor.confirmDelete', { name: m.name }))) &&
                 run(async () => {
                   await deleteMethod(m.id);
                   onClose();

@@ -4,8 +4,7 @@ import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
-import { confirmDelete } from './Editor.tsx';
+import { ask, Cell, Group, Icon, Seg, Sheet, Toggle } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
@@ -210,8 +209,8 @@ export function MemberSheet({
             <button
               className="btn plain"
               style={{ color: 'var(--red)' }}
-              onClick={() =>
-                confirmDelete(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') })) &&
+              onClick={async () =>
+                (await ask(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') }))) &&
                 run(async () => {
                   await saveSub({ ...s, share: { ...s.share!, members: s.share!.members.filter((x) => x.id !== f.id) } });
                   onClose();

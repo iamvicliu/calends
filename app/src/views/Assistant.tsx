@@ -31,7 +31,7 @@ import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
 import { api, refresh, toast } from '../store.ts';
@@ -1244,8 +1244,8 @@ function SetupSheet({
           <button
             type="button"
             className="btn danger"
-            onClick={() =>
-              window.confirm(t('assistant.clearChatsConfirm')) &&
+            onClick={async () =>
+              (await ask(t('assistant.clearChatsConfirm'))) &&
               void api('/api/assistant/chats', { method: 'DELETE' }).then(() => {
                 try {
                   localStorage.removeItem(STORE);

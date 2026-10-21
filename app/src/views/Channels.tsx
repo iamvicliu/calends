@@ -2,10 +2,9 @@ import { base } from '../base.ts';
 import { useState } from 'react';
 import { uid } from '../../../shared/billing.ts';
 import { channelsOf, type AppState, type Channel, type ChannelKind } from '../../../shared/types.ts';
-import { Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
+import { ask, Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, run, saveSettings, toast } from '../store.ts';
-import { confirmDelete } from './Editor.tsx';
 import { t } from '../../../shared/i18n.ts';
 
 interface Field {
@@ -199,8 +198,8 @@ export function ChannelsGroup({ state }: { state: AppState }) {
               setEdit(null);
             }, t('settings.toast.saved'))
           }
-          onDelete={() =>
-            confirmDelete(t('settings.channels.confirmDelete', { name: edit.name })) &&
+          onDelete={async () =>
+            (await ask(t('settings.channels.confirmDelete', { name: edit.name }))) &&
             run(async () => {
               await save(list.filter((x) => x.id !== edit.id));
               setEdit(null);

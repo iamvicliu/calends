@@ -1,6 +1,8 @@
 {
   "save": "Lưu",
   "cancel": "Hủy",
+  "confirm": "Xác nhận",
+  "confirmTitle": "Bạn chắc chứ?",
   "delete": "Xóa",
   "done": "Xong",
   "add": "Thêm",

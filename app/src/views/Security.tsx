@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
 import { localTime } from '../../../shared/format.ts';
-import { Cell, Group, Icon, Sheet } from '../components/ui.tsx';
+import { ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, registerPasskey, run, saveSettings } from '../store.ts';
-import { confirmDelete } from './Editor.tsx';
 import { t } from '../../../shared/i18n.ts';
 
 interface Device {
@@ -129,8 +128,8 @@ export function SecurityGroup({ state }: { state: AppState }) {
             <button
               type="button"
               className="chip-btn"
-              onClick={() =>
-                confirmDelete(t('settings.security.confirmRemovePasskey', { name: p.name })) &&
+              onClick={async () =>
+                (await ask(t('settings.security.confirmRemovePasskey', { name: p.name }))) &&
                 run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))
               }
             >
@@ -188,8 +187,8 @@ export function SecurityGroup({ state }: { state: AppState }) {
           <button
             className="cell tap"
             style={{ justifyContent: 'center', color: 'var(--red)' }}
-            onClick={() =>
-              confirmDelete(t('settings.security.confirmLogoutOthers')) &&
+            onClick={async () =>
+              (await ask(t('settings.security.confirmLogoutOthers'))) &&
               run(() => api('/api/auth/logout-others', { method: 'POST' }).then(load), t('settings.security.loggedOutOthers'))
             }
           >

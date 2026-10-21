@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cycleShort } from '../../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../../shared/csv.ts';
 import { avatarOf, type AppState, type PaymentMethod, type Subscription } from '../../../shared/types.ts';
-import { Cell, Group, Hint, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { ask, Cell, Group, Hint, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
@@ -556,8 +556,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
             <>
               <button
                 className="btn danger"
-                onClick={() =>
-                  window.confirm(t('settings.import.confirmReplace')) &&
+                onClick={async () =>
+                  (await ask(t('settings.import.confirmReplace'))) &&
                   run(async () => {
                     await importData({ subscriptions: importing.subs, methods: importing.methods, mode: 'replace' });
                     setImporting(null);
