@@ -8674,6 +8674,7 @@ img.mm-flag {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 .mv-delta {
   align-items: flex-end;
