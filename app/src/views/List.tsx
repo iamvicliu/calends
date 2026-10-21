@@ -56,7 +56,7 @@ export function List({
   category?: string;
 }) {
   // 全部订阅页的状态筛选记在服务端；分类页默认看全部状态，只在本页有效
-  const [savedFilter, setSavedFilter] = usePref<Filter>('list-status', 'live', (v): v is Filter => FILTERS().some(([k]) => k === v));
+  const [savedFilter, setSavedFilter] = usePref<Filter>('list-status', 'all', (v): v is Filter => FILTERS().some(([k]) => k === v));
   const [catFilter, setCatFilter] = useState<Filter>('all');
   const filter = category ? catFilter : savedFilter;
   const setFilter = (v: Filter) => (category ? setCatFilter(v) : setSavedFilter(v));
