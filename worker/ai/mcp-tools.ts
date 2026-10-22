@@ -229,7 +229,7 @@ function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: M
     first_collection: first,
     next_collection: next,
     next_collection_date: next.from,
-    overdue_days: next.from < today ? diffDays(next.from, today) : 0,
+    overdue_days: due && due.periodsOwed > 0 && next.from < today ? diffDays(next.from, today) : 0,
     is_first_period: next.from <= first.until,
     pending_amount: money(st, due?.owed ?? 0, due?.currency ?? next.currency),
   };
@@ -1626,7 +1626,7 @@ const CATALOGUE: Tool[] = [
     name: 'set_share',
     destructive: true,
     description:
-      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Each member aligns to anchor + k × bill_every months. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing. rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule.',
+      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing. rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.',
     write: true,
     inputSchema: obj(
       {
@@ -1693,7 +1693,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'save_share_member',
     description:
-      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result equals the rule. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
     write: true,
     inputSchema: obj(
       {
@@ -1707,7 +1707,7 @@ const CATALOGUE: Tool[] = [
         fee_from: {
           ...DATE,
           description:
-            'Effective date for a fee/currency/billing-cycle change; defaults to today. Period start selects the whole-period rate; no split at price changes.',
+            'Effective date for a fee/currency/billing-cycle change; omit when the user gave no date (today), including follow_rule switches. Do not align it to a future plan-rule date. Period start selects the whole-period rate; no split at price changes.',
         },
         bill_every: { type: 'integer', enum: [1, 3, 6, 12] },
         follow_rule: { type: 'boolean', description: 'true = follow the plan collection rule (ignores fee/fee_currency/bill_every); false = custom fee.' },
@@ -1744,14 +1744,15 @@ const CATALOGUE: Tool[] = [
       if (q && !old) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
       const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
-      const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
+      const feeArgs = a.follow_rule === true ? {} : a;
+      const ccy = (str(feeArgs.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
       validateCurrency(st, ccy);
       // 新成员没给收费标准时按车的收款规则
       const rule = carRule(st, s, today);
       const ruleDefault = !old && a.fee == null && a.bill_every == null && a.fee_currency == null;
       const billEvery =
-        a.bill_every != null
-          ? Number(a.bill_every)
+        feeArgs.bill_every != null
+          ? Number(feeArgs.bill_every)
           : old
             ? memberBillMonths(s, old, a.fee_from ? date(a.fee_from, 'fee_from') : today)
             : ruleDefault
@@ -1761,7 +1762,7 @@ const CATALOGUE: Tool[] = [
       let m: ShareMember = {
         ...(old ?? { id: str(a.id) ?? uid(), name: '', share: 0 }),
         name: str(a.name) ?? old?.name ?? '',
-        ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : ruleDefault ? { fee: rule.fee, feeCurrency: rule.currency } : {}),
+        ...(feeArgs.fee != null ? { fee: num(feeArgs.fee, 'fee'), feeCurrency: ccy } : ruleDefault ? { fee: rule.fee, feeCurrency: rule.currency } : {}),
         billEvery,
         ...(a.first_period != null
           ? {
@@ -1779,7 +1780,7 @@ const CATALOGUE: Tool[] = [
         ...(a.account ? { account: String(a.account) } : {}),
         ...(a.note ? { note: String(a.note) } : {}),
       };
-      if ('fee_currency' in a) m.feeCurrency = ccy;
+      if ('fee_currency' in feeArgs) m.feeCurrency = ccy;
       if (a.person === null) m.personId = undefined;
       if (a.person) {
         const p = findPerson(st, a.person);
@@ -1823,8 +1824,9 @@ const CATALOGUE: Tool[] = [
           : { ...m, custom: undefined, fee: rule.fee, feeCurrency: rule.currency, billEvery: rule.billEvery };
       else if (a.follow_rule === false) m = { ...m, custom: true };
       else if (feeEdited) {
-        const r = memberFee(st, s, m, today);
-        m = { ...m, custom: sameRule({ fee: r.amount, currency: r.currency, billEvery: memberBillMonths(s, m, today) }, rule) ? undefined : true };
+        const from = date(a.fee_from, 'fee_from', today);
+        const r = memberFee(st, s, m, from);
+        m = { ...m, custom: sameRule({ fee: r.amount, currency: r.currency, billEvery: memberBillMonths(s, m, from) }, rule) ? undefined : true };
       }
       // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
       m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;

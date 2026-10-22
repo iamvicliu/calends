@@ -130,3 +130,14 @@ test('老车第一次存规则时，与规则不一致的成员标为自定义�
   assert.equal(followsCar(state, next, next.share!.members[2], today), false);
   assert.equal(followsCar(state, next, next.share!.members[0], today), true);
 });
+
+test('已退出成员在首次存规则和追溯调价时保持原样', () => {
+  for (const fee of [44, 99]) {
+    const s = ruleCar();
+    s.share!.members[0] = { ...s.share!.members[0], fee, left: '2026-09-01' };
+    for (const from of ['2026-08-01', '2026-11-01']) {
+      const next = applyCarRule(state, s, { billEvery: 3, fee: 30, currency: 'CNY' }, from, today);
+      assert.deepEqual(next.share!.members[0], s.share!.members[0]);
+    }
+  }
+});

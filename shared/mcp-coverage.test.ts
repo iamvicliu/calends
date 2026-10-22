@@ -10,7 +10,7 @@ import { TOOLS, type ToolCtx } from '../worker/ai/mcp-tools.ts';
 import { createToken } from '../worker/ai/mcp.ts';
 import { ASSISTANT_TOOLS, apply, chat, enrichDraft } from '../worker/ai/assistant.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
-import { todayIn } from './billing.ts';
+import { addDays, memberRate, todayIn } from './billing.ts';
 const hook = registerHooks({
   load(url, ctx, next) {
     if (url.endsWith('.json')) return { format: 'module', source: `export default ${readFileSync(new URL(url), 'utf8')}`, shortCircuit: true };
@@ -1030,4 +1030,117 @@ test('carpool collection rule: MCP reads, sets, follows and customizes member fe
   } finally {
     f.db.close();
   }
+});
+
+test('future custom fees are classified at their effective date, before later car-rule edits', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const today = todayIn('UTC');
+  const from = addDays(today, 40);
+  const s = { ...sub(), start: '2025-01-01', share: { ...sub().share!, rule: { fee: 3, currency: 'USD', billEvery: 1 } } };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const edit = { subscription: 's', member: 'member', fee: 100, bill_every: 12, fee_from: from };
+  const before = await f.snapshot();
+  assert.equal((await f.call('save_share_member', { ...edit, dry_run: true })).isError, undefined);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('save_share_member', edit, f.read)).isError, true);
+  assert.equal((await f.call('save_share_member', edit)).isError, undefined);
+  let saved = (await f.snapshot()).subscriptions[0];
+  assert.equal(saved.share!.members[0].custom, true);
+  assert.equal(memberRate(saved, saved.share!.members[0], today).amount, 3);
+  assert.equal(memberRate(saved, saved.share!.members[0], from).amount, 100);
+  const custom = structuredClone(saved.share!.members[0]);
+  assert.equal((await f.call('set_share', { subscription: 's', role: 'owner', rule: { fee: 4 } })).isError, undefined);
+  saved = (await f.snapshot()).subscriptions[0];
+  assert.deepEqual(saved.share!.members[0], custom);
+  assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', fee: 4, bill_every: 1, fee_from: from })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions[0].share!.members[0].custom, undefined);
+});
+
+test('follow_rule ignores explicit fee fields without losing the old fee baseline or receipts', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const today = todayIn('UTC');
+  const s = { ...sub(), start: '2025-01-01', share: { ...sub().share!, rule: { fee: 6, currency: 'USD', billEvery: 3 } } };
+  await upsert(f.env, 'subscriptions', 's', s);
+  assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', follow_rule: true, fee: 6, bill_every: 3 })).isError, undefined);
+  const saved = (await f.snapshot()).subscriptions[0];
+  const m = saved.share!.members[0];
+  assert.deepEqual(memberRate(saved, m, addDays(today, -1)), { amount: 3, currency: 'USD', billEvery: 1 });
+  assert.deepEqual(memberRate(saved, m, today), { amount: 6, currency: 'USD', billEvery: 3 });
+  assert.deepEqual(m.payments, s.share.members[0].payments);
+  assert.equal(m.paidUntil, s.share.members[0].paidUntil);
+});
+
+test('MCP overdue days match the UI for exempt and departed members with no unpaid periods', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s = sub();
+  s.start = '2025-01-01';
+  s.share!.members = [
+    { id: 'exempt', name: 'Exempt', share: 0, fee: 0, exempt: true, joined: '2025-01-01' },
+    { id: 'left', name: 'Departed settled', share: 3, fee: 3, left: '2025-06-01', paidUntil: '2025-05-31', joined: '2025-01-01' },
+    { id: 'arrears', name: 'Departed owing', share: 3, fee: 3, left: '2025-06-01', joined: '2025-01-01' },
+  ];
+  await upsert(f.env, 'subscriptions', 's', s);
+  const result = await f.call('get_carpool', { subscription: 's' });
+  const rows = result.structuredContent.plans[0].members;
+  assert.equal(rows.find((m: { id: string }) => m.id === 'exempt').overdue_days, 0);
+  assert.equal(rows.find((m: { id: string }) => m.id === 'left').overdue_days, 0);
+  assert.ok(rows.find((m: { id: string }) => m.id === 'arrears').overdue_days > 0);
+});
+
+test('assistant car-rule and member drafts compose without saving; confirmation preserves dates and receipts', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+  const before = await f.snapshot();
+  const today = todayIn('UTC');
+  const from = addDays(today, 40);
+  const edits = [
+    { name: 'set_share', args: { subscription: 's', role: 'owner', rule: { fee: 6, bill_every: 3 }, rule_from: from } },
+    { name: 'save_share_member', args: { subscription: 's', member: 'member', fee: 100, bill_every: 12, follow_rule: false } },
+    { name: 'save_share_member', args: { subscription: 's', member: 'member', fee: 100, bill_every: 12, follow_rule: false, fee_from: from } },
+    { name: 'save_share_member', args: { subscription: 's', name: 'Carol' } },
+  ];
+  let round = 0;
+  t.mock.method(globalThis, 'fetch', async () => {
+    const delta =
+      round++ === 0
+        ? {
+            tool_calls: edits.map((e, index) => ({
+              index,
+              id: `car-${index}`,
+              type: 'function',
+              function: { name: e.name, arguments: JSON.stringify({ ...e.args, dry_run: false }) },
+            })),
+          }
+        : { content: 'Drafts ready.' };
+    return new Response(`data: ${JSON.stringify({ choices: [{ delta, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`, {
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  });
+  const stream = await chat(f.env, { text: 'Change the rule, customize a member, and add Carol' }, new AbortController().signal).text();
+  const proposals = stream
+    .split('\n')
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => JSON.parse(line.slice(6)))
+    .filter((e) => e.type === 'proposal');
+  assert.equal(proposals.length, 4, stream);
+  assert.ok(proposals.every((p) => p.preview.dry_run === true));
+  assert.deepEqual(await f.snapshot(), before);
+  for (const p of proposals) {
+    const response = await f.request('assistant/apply', 'POST', p);
+    assert.equal(response.status, 200);
+  }
+  const s = (await f.snapshot()).subscriptions[0];
+  const m = s.share!.members.find((m) => m.id === 'member')!;
+  assert.deepEqual(memberRate(s, m, today), { amount: 100, currency: 'USD', billEvery: 12 });
+  assert.deepEqual(memberRate(s, m, from), { amount: 100, currency: 'USD', billEvery: 12 });
+  assert.equal(m.custom, true);
+  assert.deepEqual(m.payments, before.subscriptions[0].share!.members[0].payments);
+  assert.equal(m.paidUntil, before.subscriptions[0].share!.members[0].paidUntil);
+  const carol = s.share!.members.find((m) => m.name === 'Carol')!;
+  assert.equal(carol.id, proposals[3].args.id);
+  assert.deepEqual(memberRate(s, carol, today), { amount: 6, currency: 'USD', billEvery: 3 });
 });
