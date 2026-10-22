@@ -52,6 +52,7 @@
     "preview": "Heutige Erinnerungen ansehen"
   },
   "today": {
+    "recent": "Zuletzt gesendet",
     "title": "Heute ({day})",
     "items": {
       "one": "{count} Eintrag",

@@ -101,6 +101,8 @@ The overview timeline's past thirty-day cash window includes today; upcoming cha
 
 Sharing includes only owner-organized plans. Receipts use member payment dates and dated FX; pending collections use the difference between `memberDues()` at the window's end and immediately before its start, excluding older arrears. The window is year-to-date for scopes, the selected month through today for the current month, and the full selected month for past/future months (future dues are forecasts). Directed amounts use `flow()`; spending comparisons use unsigned amounts with increase/decrease arrows independently of the signed-amounts setting. The shared `BarLine` chart places negative net-cash months below its zero baseline.
 
+Reminder preview groups today's candidates and sends separately from recent history. Send dates and times use the owner's configured timezone; previous days never appear under Today.
+
 ## Persistence and migration
 
 `worker/store.ts` is the persistence layer. The database stores:

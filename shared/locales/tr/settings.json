@@ -49,6 +49,7 @@
     "preview": "Bugünün hatırlatmalarını önizle"
   },
   "today": {
+    "recent": "Son gönderimler",
     "title": "Bugün ({day})",
     "items": { "one": "{count} öğe", "other": "{count} öğe" }
   },

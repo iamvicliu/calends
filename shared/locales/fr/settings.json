@@ -52,6 +52,7 @@
     "preview": "Aperçu des rappels du jour"
   },
   "today": {
+    "recent": "Envois récents",
     "title": "Aujourd’hui ({day})",
     "items": {
       "one": "{count} élément",

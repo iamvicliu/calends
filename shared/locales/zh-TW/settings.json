@@ -49,6 +49,7 @@
     "preview": "預覽今天的提醒"
   },
   "today": {
+    "recent": "最近傳送",
     "title": "今天（{day}）",
     "items": { "other": "{count} 項" }
   },

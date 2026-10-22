@@ -108,6 +108,40 @@ function timeZones(current: string) {
   return [...new Set(['UTC', ...all, current])].map((z) => ({ value: z, label: z.replace(/_/g, ' '), hint: offset(z) }));
 }
 
+function ReminderPreview({ preview, timezone }: { preview: Preview | null; timezone: string }) {
+  if (!preview) return null;
+  const todayLog = preview?.log.filter((l) => localTime(l.sent_at, timezone, true) === preview.day) ?? [];
+  const recentLog = preview?.log.filter((l) => localTime(l.sent_at, timezone, true) !== preview.day) ?? [];
+  return (
+    <>
+      {preview && (preview.digests.length > 0 || todayLog.length > 0) && (
+        <Group title={t('settings.today.title', { day: preview.day })}>
+          {preview.digests.map((d) => (
+            <Cell key={d.key} label={d.subject}>
+              {t('settings.today.items', { count: d.sections.reduce((a, x) => a + x.rows.length, 0) })}
+            </Cell>
+          ))}
+          {todayLog.map((l) => (
+            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
+              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{localTime(l.sent_at, timezone).slice(11)}</span>
+            </Cell>
+          ))}
+        </Group>
+      )}
+
+      {recentLog.length > 0 && (
+        <Group title={t('settings.today.recent')}>
+          {recentLog.slice(0, 6).map((l) => (
+            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
+              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{localTime(l.sent_at, timezone)}</span>
+            </Cell>
+          ))}
+        </Group>
+      )}
+    </>
+  );
+}
+
 export function Settings({ state, today }: { state: AppState; today: string }) {
   const s = state.settings;
   // 侧边栏模块按设置里的顺序列出，拖动后存回 navOrder（服务端，多台设备一致）
@@ -373,20 +407,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <ChannelsGroup state={state} />
 
-        {preview && (preview.digests.length > 0 || preview.log.length > 0) && (
-          <Group title={t('settings.today.title', { day: preview.day })}>
-            {preview.digests.map((d) => (
-              <Cell key={d.key} label={d.subject}>
-                {t('settings.today.items', { count: d.sections.reduce((a, x) => a + x.rows.length, 0) })}
-              </Cell>
-            ))}
-            {preview.log.slice(0, 6).map((l) => (
-              <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
-                <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{l.sent_at.slice(5, 16)}</span>
-              </Cell>
-            ))}
-          </Group>
-        )}
+        <ReminderPreview preview={preview} timezone={s.timezone} />
 
         <Group title={t('settings.books.title')}>
           <Cell label={t('settings.books.defaultMethod')}>

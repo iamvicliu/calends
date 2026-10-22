@@ -752,3 +752,31 @@ test('收款草稿切周期：手改金额或币种后保留，备注和收款�
     }
   }
 });
+
+test('提醒预览按所有者时区分出今天与最近发送，空预览不显示分组', () => {
+  const r = harness('../app/src/views/Settings.tsx', 'ReminderPreview');
+  const preview = {
+    day: today,
+    digests: [],
+    log: [
+      { dedupe_key: 'today', subject: 'Sent today', status: 'sent', sent_at: '2026-10-21 18:00:00' },
+      { dedupe_key: 'yesterday', subject: 'Sent yesterday', status: 'sent', sent_at: '2026-10-21 04:01:00' },
+    ],
+  };
+  const nodes = r.render('ReminderPreview', { preview, timezone: 'Asia/Shanghai' });
+  const groups = nodes.filter((n) => n.type === 'Group');
+  assert.deepEqual(
+    groups.map((n) => n.props.title),
+    ['settings.today.title', 'settings.today.recent'],
+  );
+  assert.deepEqual(
+    all(groups[0])
+      .filter((n) => n.type === 'Cell')
+      .map((n) => all(n.props.label).flatMap((n) => n.children)),
+    [['Sent today']],
+  );
+  assert.ok(all(groups[0]).some((n) => n.children.includes('02:00')));
+  assert.ok(all(groups[1]).some((n) => n.children.includes('2026-10-21 12:01')));
+  assert.equal(r.render('ReminderPreview', { preview: { ...preview, log: [] }, timezone: 'UTC' }).filter((n) => n.type === 'Group').length, 0);
+  assert.equal(r.render('ReminderPreview', { preview: null, timezone: 'UTC' }).length, 0);
+});

@@ -49,6 +49,7 @@
     "preview": "Xem trước nhắc nhở hôm nay"
   },
   "today": {
+    "recent": "Đã gửi gần đây",
     "title": "Hôm nay ({day})",
     "items": { "other": "{count} mục" }
   },
