@@ -339,3 +339,10 @@ test('grids aligned to start reset align-items when a breakpoint turns them into
   );
   assert.deepEqual(failures, []);
 });
+
+test('timeline loss amount uses its own line box so the digits stay vertically centered', () => {
+  const rule = cssRules(allCss).find(([sel]) => sel === '.gt-unused-amount');
+  assert.ok(rule);
+  assert.match(rule[1], /display:\s*block/);
+  assert.match(rule[1], /line-height:\s*18px/);
+});

@@ -9336,6 +9336,8 @@ img.mm-flag {
   box-sizing: border-box;
 }
 .gt-unused-amount {
+  /* 块级才用自己的 18px 行高；行内会沿用外层更大的行高，基线下移约 3px，数字不居中 */
+  display: block;
   padding: 0 9px;
   font-size: 11px;
   font-style: normal;
