@@ -369,17 +369,17 @@ export function Ai({ state }: { state: AppState }) {
               <Icon name="down" size={16} />
             </span>
             <p className="m-hide">{t('ai.toolsHint')}</p>
+            <span className="ai-tools-legend">
+              <span>
+                <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
+              </span>
+              <span className="write">
+                <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
+              </span>
+            </span>
           </button>
           {showTools && (
             <>
-              <div className="ai-tools-legend">
-                <span>
-                  <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
-                </span>
-                <span className="write">
-                  <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
-                </span>
-              </div>
               <div className="ai-tools">
                 {groups.map(({ key, icon: DomainIcon, list }) => (
                   <section key={key} className="ai-tool-group">

@@ -8041,9 +8041,7 @@ a.car-toggle {
 .ai-tools-legend {
   display: flex;
   gap: 16px;
-  margin: 18px 0 0;
-  padding-top: 16px;
-  border-top: 0.5px solid var(--sep);
+  margin-top: 10px;
   color: var(--label-2);
   font-size: 12.5px;
 }
