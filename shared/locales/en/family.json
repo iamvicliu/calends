@@ -19,7 +19,13 @@
     "date": "Date",
     "member": "Member",
     "covers": "Covers",
-    "amount": "Amount"
+    "amount": "Amount",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "groupSum": {
+      "one": "{count} payment · {amount}",
+      "other": "{count} payments · {amount}"
+    }
   },
   "contact": {
     "via": {

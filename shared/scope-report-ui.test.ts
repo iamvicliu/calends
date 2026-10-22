@@ -1685,3 +1685,118 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
     assert.equal(saved!.share!.members[0].paidUntil, paidUntil === '2026-11-10' ? paidUntil : undefined);
   }
 });
+
+test('合租备注仅上移共有次数/周期，保留不同次数、周期、自由备注和缺失备注', () => {
+  const r = harness('../app/src/views/Carpool.tsx', 'receiptNotes');
+  const split = (...notes: (string | undefined)[]) => r.call('receiptNotes', notes);
+  assert.deepEqual(split('第12次收款（半年）', '第12次收款（半年）'), { common: '第12次收款（半年）', rows: ['', ''] });
+  assert.deepEqual(split('第12次收款（半年）· 银行转账', '第12次收款（季度）· 现金'), {
+    common: '第12次收款',
+    rows: ['半年 · 银行转账', '季度 · 现金'],
+  });
+  assert.deepEqual(split('第12次收款（半年）', '第3次收款（半年）'), { common: '半年', rows: ['第12次收款', '第3次收款'] });
+  assert.deepEqual(split('第12次收款（半年）', undefined), { common: '', rows: ['第12次收款（半年）', ''] });
+  assert.deepEqual(split('第12次收款（半年）', '第3次收款（季度）'), { common: '', rows: ['第12次收款（半年）', '第3次收款（季度）'] });
+  assert.deepEqual(split('Collection #12 (6 months): bank', 'Collection #12 (6 months): cash'), {
+    common: 'Collection #12 · 6 months',
+    rows: ['bank', 'cash'],
+  });
+  assert.deepEqual(split('银行转账', '已抵扣优惠'), { common: '', rows: ['银行转账', '已抵扣优惠'] });
+});
+
+test('合租收付款默认折叠，分组独立切换，表头在部分展开时全部展开并可全部收起', () => {
+  const sub: Subscription = {
+    id: 'car',
+    name: 'Fictional six-seat plan',
+    category: 'Tools',
+    tags: [],
+    start: '2024-01-17',
+    status: 'active',
+    price: 240,
+    currency: 'CNY',
+    cycle: { unit: 'month', every: 6 },
+    share: {
+      role: 'owner',
+      seats: 6,
+      since: '2024-01-17',
+      members: [
+        {
+          id: 'a',
+          name: 'A',
+          share: 40,
+          billEvery: 6,
+          payments: [
+            { date: '2026-01-17', from: '2026-01-17', until: '2026-07-16', amount: 40, currency: 'CNY', note: '第5次收款（半年）' },
+            { date: '2025-07-17', from: '2025-07-17', until: '2026-01-16', amount: 0, currency: 'CNY', note: '第4次收款（半年）' },
+          ],
+        },
+        {
+          id: 'b',
+          name: 'B',
+          share: 40,
+          billEvery: 3,
+          joined: '2025-03-01',
+          payments: [{ date: '2026-01-18', from: '2026-01-17', until: '2026-07-16', amount: -5, currency: 'USD', note: '第5次收款（季度）' }],
+        },
+      ],
+    },
+  };
+  const state = { ...st, subscriptions: [sub] };
+  const r = harness('../app/src/views/Carpool.tsx', 'CarSheet', {}, { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill' });
+  const props = { state, s: sub, today, ro: false, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
+  const render = () => r.render('CarSheet', props);
+  const groups = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row car-period');
+  const head = (nodes: Node[]) => nodes.find((n) => n.props.className === 'ld-row ld-th car-ledger-head')!;
+  const details = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row');
+  let nodes = render();
+  assert.equal(groups(nodes).length, 2);
+  assert.ok(groups(nodes).every((g) => g.type === 'button' && g.props['aria-expanded'] === false));
+  assert.equal(head(nodes).props['aria-expanded'], false);
+  assert.equal(details(nodes).length, 0);
+  groups(nodes)[0].props.onClick();
+  nodes = render();
+  assert.deepEqual(
+    groups(nodes).map((g) => g.props['aria-expanded']),
+    [true, false],
+  );
+  assert.equal(details(nodes).length, 2);
+  assert.ok(nodes.some((n) => n.children.includes('半年')));
+  assert.ok(nodes.some((n) => n.children.includes('季度')));
+  assert.equal(nodes.filter((n) => n.children.includes('第5次收款')).length, 1);
+  head(nodes).props.onClick();
+  nodes = render();
+  assert.equal(details(nodes).length, 3);
+  assert.equal(head(nodes).props['aria-expanded'], true);
+  head(nodes).props.onClick();
+  nodes = render();
+  assert.equal(details(nodes).length, 0);
+  nodes.find((n) => n.type === 'Seg')!.props.onChange('out');
+  nodes = render();
+  assert.equal(groups(nodes).length, 3);
+  assert.equal(details(nodes).length, 0);
+  groups(nodes)[1].props.onClick();
+  nodes = render();
+  assert.deepEqual(
+    groups(nodes).map((g) => g.props['aria-expanded']),
+    [false, true, false],
+  );
+  head(nodes).props.onClick();
+  nodes = render();
+  assert.equal(details(nodes).length, 6);
+  assert.equal(head(nodes).props['aria-expanded'], true);
+  head(nodes).props.onClick();
+  assert.equal(details(render()).length, 0);
+  // 单组也折叠；只读状态不阻止查看历史，空记录不提供无效的全部展开操作。
+  const single = {
+    ...sub,
+    start: '2026-01-17',
+    share: { ...sub.share!, members: [{ ...sub.share!.members[0], payments: [sub.share!.members[0].payments![0]] }] },
+  };
+  const fresh = harness('../app/src/views/Carpool.tsx', 'CarSheet', {}, { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill' });
+  nodes = fresh.render('CarSheet', { ...props, s: single, ro: true });
+  assert.equal(groups(nodes).length, 1);
+  assert.ok(groups(nodes).every((g) => g.props['aria-expanded'] === false && !g.props.disabled));
+  nodes = fresh.render('CarSheet', { ...props, s: { ...single, share: { ...single.share!, members: [] } } });
+  assert.equal(head(nodes).props.disabled, true);
+  assert.equal(head(nodes).props['aria-expanded'], false);
+});

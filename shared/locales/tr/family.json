@@ -19,7 +19,13 @@
     "date": "Tarih",
     "member": "Üye",
     "covers": "Dönem",
-    "amount": "Tutar"
+    "amount": "Tutar",
+    "expandAll": "Tümünü genişlet",
+    "collapseAll": "Tümünü daralt",
+    "groupSum": {
+      "one": "{count} ödeme · {amount}",
+      "other": "{count} ödeme · {amount}"
+    }
   },
   "contact": {
     "via": {

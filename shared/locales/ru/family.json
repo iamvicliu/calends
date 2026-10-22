@@ -19,7 +19,14 @@
     "date": "Дата",
     "member": "Участник",
     "covers": "Период",
-    "amount": "Сумма"
+    "amount": "Сумма",
+    "expandAll": "Развернуть все",
+    "collapseAll": "Свернуть все",
+    "groupSum": {
+      "one": "{count} платёж · {amount}",
+      "other": "{count} платежей · {amount}",
+      "few": "{count} платежа · {amount}"
+    }
   },
   "contact": {
     "via": {

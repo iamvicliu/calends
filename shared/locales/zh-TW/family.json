@@ -19,7 +19,12 @@
     "date": "收款日",
     "member": "成員",
     "covers": "涵蓋期間",
-    "amount": "金額"
+    "amount": "金額",
+    "expandAll": "全部展開",
+    "collapseAll": "全部收起",
+    "groupSum": {
+      "other": "{count} 筆 · {amount}"
+    }
   },
   "contact": {
     "via": {

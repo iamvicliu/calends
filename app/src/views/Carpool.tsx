@@ -375,6 +375,21 @@ function MemberRows({
   );
 }
 
+/** 只上移所有行共有的备注信息；无法识别的自由备注原样保留。 */
+function receiptNotes(notes: (string | undefined)[]) {
+  const raw = notes.map((note) => note ?? '');
+  if (raw.every((note) => note === raw[0])) return { common: raw[0] ?? '', rows: raw.map(() => '') };
+  // 历史收款的次数/周期存在备注中，不从今天的成员收费标准反推历史。
+  const parts = raw.map((note) => /^(第\s*\d+\s*次收款|Collection\s*#?\d+)(?:\s*[（(]([^（）()]+)[）)])?\s*(?:[·，,:：]\s*)?([\s\S]*)$/i.exec(note));
+  const commonNo = parts[0]?.[1] && parts.every((p) => p?.[1] === parts[0]![1]) ? parts[0][1] : '';
+  const commonCycle = parts[0]?.[2] && parts.every((p) => p?.[2] === parts[0]![2]) ? parts[0][2] : '';
+  if (!commonNo && !commonCycle) return { common: '', rows: raw };
+  return {
+    common: [commonNo, commonCycle].filter(Boolean).join(' · '),
+    rows: parts.map((p) => [commonNo ? '' : p?.[1], commonCycle ? '' : p?.[2], p?.[3]].filter(Boolean).join(' · ')),
+  };
+}
+
 /**
  * 合租弹窗：一辆车的全部信息。上面是基本信息和指标，中间是成员与收款，下面是历来所有收款；
  * 订阅本身（价格、阶段、扣款）点「查看订阅详情」切过去
@@ -421,6 +436,36 @@ export function CarSheet({
     a.slice(0, 4) === today.slice(0, 4) && b.slice(0, 4) === today.slice(0, 4) ? `${cnDate(a)} – ${cnDate(b)}` : `${cnDateFull(a)} – ${cnDateFull(b)}`;
   // 我付出去的：发起合租以来这个订阅的每次扣款（没记发起日期就从订阅开始算），按年分组
   const [tab, setTab] = useState<'in' | 'out'>('in');
+  const [openIn, setOpenIn] = useState<Set<string>>(() => new Set());
+  const [openOut, setOpenOut] = useState<Set<string>>(() => new Set());
+  const toggleGroup = (key: string, open: Set<string>, setOpen: (next: Set<string>) => void) => {
+    const next = new Set(open);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setOpen(next);
+  };
+  const tableHead = (columns: string[], keys: string[], open: Set<string>, setOpen: (next: Set<string>) => void) => {
+    const allOpen = keys.length > 0 && keys.every((key) => open.has(key));
+    return (
+      <button
+        type="button"
+        className="ld-row ld-th car-ledger-head"
+        aria-expanded={allOpen}
+        disabled={!keys.length}
+        onClick={() => setOpen(new Set(allOpen ? [] : keys))}
+      >
+        <span>{columns[0]}</span>
+        <span>{columns[1]}</span>
+        <span>
+          {columns[2]}
+          <small className="car-ledger-disclosure">
+            {t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}
+            <Icon name={allOpen ? 'down' : 'right'} size={12} />
+          </small>
+        </span>
+      </button>
+    );
+  };
   const outs = chargesBetween(s, book.since ?? s.start, today, today)
     .filter((c) => c.kind !== 'failed')
     .map((c) => ({ c, base: chargeValue(state, c) }))
@@ -442,6 +487,7 @@ export function CarSheet({
       until: list[0].p.until,
       list: list.sort((a, b) => a.p.date.localeCompare(b.p.date)),
       sum: list.reduce((a, r) => a + r.base, 0),
+      notes: receiptNotes(list.map((r) => r.p.note)),
     }))
     .sort((a, b) => (b.from ?? b.until).localeCompare(a.from ?? a.until));
   return (
@@ -542,37 +588,36 @@ export function CarSheet({
               ['out', t('family.sheet.tabOut', { count: outs.length })],
             ]}
           />
-          <span className={tab === 'in' ? 'green' : undefined}>
-            {tab === 'in'
-              ? t('family.sheet.receiptsSum', { count: receipts.length, amount: fmt(total) })
-              : t('family.sheet.receiptsSum', { count: outs.length, amount: fmt(-outTotal) })}
-          </span>
+          <span className={tab === 'in' ? 'green' : undefined}>{tab === 'in' ? fmt(total) : fmt(-outTotal)}</span>
         </div>
         {tab === 'out' ? (
-          <div className="ld-table car-receipts">
-            <div className="ld-row ld-th">
-              <span>{t('family.sheet.chargeDate')}</span>
-              <span>{t('proxy.table.charged')}</span>
-              <span>{t('proxy.table.cost')}</span>
-            </div>
+          <div className="ld-table car-receipts car-receipts-out">
+            {tableHead(
+              [t('family.sheet.chargeDate'), t('proxy.table.charged'), t('proxy.table.cost')],
+              outYears.map((g) => g.y),
+              openOut,
+              setOpenOut,
+            )}
             {outYears.map((g) => (
               <Fragment key={g.y}>
-                <div className="ld-row car-period">
+                <button type="button" className="ld-row car-period" aria-expanded={openOut.has(g.y)} onClick={() => toggleGroup(g.y, openOut, setOpenOut)}>
+                  <Icon name={openOut.has(g.y) ? 'down' : 'right'} size={14} />
                   <span>{t('calendar.yearTitle', { year: g.y })}</span>
-                  <span>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(-g.sum) })}</span>
-                </div>
-                {g.list.map(({ c, base: v }, i) => (
-                  <div key={`${c.date}-${i}`} className="ld-row">
-                    <span className="ld-date">{cnDate(c.date)}</span>
-                    <span>
-                      <b className={c.amount < 0 ? 'green' : undefined}>{flow(-c.amount, c.currency)}</b>
-                      {c.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
-                    </span>
-                    <span>
-                      <b className={v < 0 ? 'green' : undefined}>{flow(-v, base)}</b>
-                    </span>
-                  </div>
-                ))}
+                  <span>{t('family.sheet.groupSum', { count: g.list.length, amount: fmt(-g.sum) })}</span>
+                </button>
+                {openOut.has(g.y) &&
+                  g.list.map(({ c, base: v }, i) => (
+                    <div key={`${c.date}-${i}`} className="ld-row">
+                      <span className="ld-date">{cnDate(c.date)}</span>
+                      <span>
+                        <b className={c.amount < 0 ? 'green' : undefined}>{flow(-c.amount, c.currency)}</b>
+                        {c.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
+                      </span>
+                      <span>
+                        <b className={v < 0 ? 'green' : undefined}>{flow(-v, base)}</b>
+                      </span>
+                    </div>
+                  ))}
               </Fragment>
             ))}
             {outs.length === 0 && (
@@ -583,31 +628,37 @@ export function CarSheet({
           </div>
         ) : (
           <div className="ld-table car-receipts">
-            <div className="ld-row ld-th">
-              <span>{t('family.sheet.member')}</span>
-              <span>{t('family.sheet.date')}</span>
-              <span>{t('family.sheet.amount')}</span>
-            </div>
+            {tableHead(
+              [t('family.sheet.member'), t('family.sheet.date'), t('family.sheet.amount')],
+              periods.map((g) => g.key),
+              openIn,
+              setOpenIn,
+            )}
             {periods.map((g) => (
               <Fragment key={g.key}>
-                <div className="ld-row car-period">
-                  <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
-                  <span style={{ color: 'var(--green)' }}>{t('family.sheet.receiptsSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
-                </div>
-                {g.list.map(({ m, p, base: v }, i) => (
-                  <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
-                    <span>
-                      <b>{m.name || t('family.pool.unnamed')}</b>
-                      {p.note && <small>{p.note}</small>}
-                    </span>
-                    {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
-                    <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
-                    <span>
-                      <b className="green">{flow(p.amount, p.currency)}</b>
-                      {p.currency !== base && <small style={{ color: 'var(--green)' }}>≈ {flow(v, base)}</small>}
-                    </span>
-                  </button>
-                ))}
+                <button type="button" className="ld-row car-period" aria-expanded={openIn.has(g.key)} onClick={() => toggleGroup(g.key, openIn, setOpenIn)}>
+                  <Icon name={openIn.has(g.key) ? 'down' : 'right'} size={14} />
+                  <span>
+                    {g.notes.common && <b>{g.notes.common}</b>}
+                    <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
+                  </span>
+                  <span className="green">{t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+                </button>
+                {openIn.has(g.key) &&
+                  g.list.map(({ m, p, base: v }, i) => (
+                    <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
+                      <span>
+                        <b>{m.name || t('family.pool.unnamed')}</b>
+                        {g.notes.rows[i] && <small>{g.notes.rows[i]}</small>}
+                      </span>
+                      {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
+                      <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
+                      <span>
+                        <b className="green">{flow(p.amount, p.currency)}</b>
+                        {p.currency !== base && <small style={{ color: 'var(--green)' }}>≈ {flow(v, base)}</small>}
+                      </span>
+                    </button>
+                  ))}
               </Fragment>
             ))}
             {receipts.length === 0 && (

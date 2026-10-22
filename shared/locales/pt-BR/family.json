@@ -19,7 +19,13 @@
     "date": "Data",
     "member": "Membro",
     "covers": "Período",
-    "amount": "Valor"
+    "amount": "Valor",
+    "expandAll": "Expandir tudo",
+    "collapseAll": "Recolher tudo",
+    "groupSum": {
+      "one": "{count} pagamento · {amount}",
+      "other": "{count} pagamentos · {amount}"
+    }
   },
   "contact": {
     "via": {

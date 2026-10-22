@@ -19,7 +19,12 @@
     "date": "Ngày",
     "member": "Thành viên",
     "covers": "Kỳ",
-    "amount": "Số tiền"
+    "amount": "Số tiền",
+    "expandAll": "Mở rộng tất cả",
+    "collapseAll": "Thu gọn tất cả",
+    "groupSum": {
+      "other": "{count} khoản · {amount}"
+    }
   },
   "contact": {
     "via": {
