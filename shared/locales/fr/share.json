@@ -60,6 +60,8 @@
   "chargeCount": "Prélèvements",
   "count": "{count}",
   "switches": "Changements de région / formule",
+  "stoppedOn": "Arrêté le {date}",
+  "endsOn": "Se termine le {date}",
   "thanks": "Merci · À la prochaine échéance",
   "n": {
     "charges": {

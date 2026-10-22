@@ -60,6 +60,8 @@
   "chargeCount": "Cobros",
   "count": "{count}",
   "switches": "Cambios de región / plan",
+  "stoppedOn": "Finalizó el {date}",
+  "endsOn": "Termina el {date}",
   "thanks": "Gracias · Hasta el próximo ciclo",
   "n": {
     "charges": {

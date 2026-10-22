@@ -47,6 +47,8 @@
   "chargeCount": "扣款笔数",
   "count": "{count} 笔",
   "switches": "换区 / 换套餐",
+  "stoppedOn": "已于 {date} 停止",
+  "endsOn": "将于 {date} 结束",
   "thanks": "谢谢惠顾 · 下期见",
   "n": {
     "charges": "{count} 次扣款"

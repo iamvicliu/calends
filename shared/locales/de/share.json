@@ -60,6 +60,8 @@
   "chargeCount": "Abbuchungen",
   "count": "{count}",
   "switches": "Region- / Tarifwechsel",
+  "stoppedOn": "Beendet am {date}",
+  "endsOn": "Endet am {date}",
   "thanks": "Danke · Bis zum nächsten Zeitraum",
   "n": {
     "charges": {

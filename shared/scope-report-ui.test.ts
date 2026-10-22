@@ -820,3 +820,36 @@ test('公开页时间线的支出和退款使用同一收支格式，关闭符�
     format.setSignedAmounts(true);
   }
 });
+
+test('小票结束语按实际状态显示停止日、到期日或下期见', () => {
+  const r = harness(
+    '../app/src/views/SubShare.tsx',
+    'SReceipt, story',
+    {},
+    { location: { host: 'example.test' }, t: (key: string, p?: { date?: string }) => (p?.date ? `${key} ${p.date}` : key) },
+  );
+  const base: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    start: '2026-10-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+  };
+  for (const [sub, key, date] of [
+    [base, 'share.thanks', undefined],
+    [{ ...base, status: 'cancelled', end: '2026-11-01' }, 'share.endsOn', '2026-11-01'],
+    ...(['cancel', 'terminate'] as const).map((kind) => [
+      { ...base, status: kind === 'cancel' ? 'cancelled' : 'terminated', end: today, stop: { kind, date: today, paidThrough: '2026-10-31' } },
+      'share.stoppedOn',
+      today,
+    ]),
+  ] as Array<[Subscription, string, string | undefined]>) {
+    const story = r.call('story', { ...st, subscriptions: [sub] }, sub, today);
+    const nodes = r.render('SReceipt', { sub, st: story, today, hide: false, m: (n: number) => format.flow(n, 'USD') });
+    assert.deepEqual(nodes.find((n) => n.props.className === 'rc-thanks')!.children, [date ? `${key} ${format.cnDateFull(date)}` : key]);
+  }
+});
