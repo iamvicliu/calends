@@ -1089,3 +1089,58 @@ test('MCP overdue days match the UI for exempt and departed members with no unpa
   assert.equal(rows.find((m: { id: string }) => m.id === 'left').overdue_days, 0);
   assert.ok(rows.find((m: { id: string }) => m.id === 'arrears').overdue_days > 0);
 });
+
+test('assistant car-rule and member drafts compose without saving; confirmation preserves dates and receipts', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+  const before = await f.snapshot();
+  const today = todayIn('UTC');
+  const from = addDays(today, 40);
+  const edits = [
+    { name: 'set_share', args: { subscription: 's', role: 'owner', rule: { fee: 6, bill_every: 3 }, rule_from: from } },
+    { name: 'save_share_member', args: { subscription: 's', member: 'member', fee: 100, bill_every: 12, follow_rule: false } },
+    { name: 'save_share_member', args: { subscription: 's', member: 'member', fee: 100, bill_every: 12, follow_rule: false, fee_from: from } },
+    { name: 'save_share_member', args: { subscription: 's', name: 'Carol' } },
+  ];
+  let round = 0;
+  t.mock.method(globalThis, 'fetch', async () => {
+    const delta =
+      round++ === 0
+        ? {
+            tool_calls: edits.map((e, index) => ({
+              index,
+              id: `car-${index}`,
+              type: 'function',
+              function: { name: e.name, arguments: JSON.stringify({ ...e.args, dry_run: false }) },
+            })),
+          }
+        : { content: 'Drafts ready.' };
+    return new Response(`data: ${JSON.stringify({ choices: [{ delta, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`, {
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  });
+  const stream = await chat(f.env, { text: 'Change the rule, customize a member, and add Carol' }, new AbortController().signal).text();
+  const proposals = stream
+    .split('\n')
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => JSON.parse(line.slice(6)))
+    .filter((e) => e.type === 'proposal');
+  assert.equal(proposals.length, 4, stream);
+  assert.ok(proposals.every((p) => p.preview.dry_run === true));
+  assert.deepEqual(await f.snapshot(), before);
+  for (const p of proposals) {
+    const response = await f.request('assistant/apply', 'POST', p);
+    assert.equal(response.status, 200);
+  }
+  const s = (await f.snapshot()).subscriptions[0];
+  const m = s.share!.members.find((m) => m.id === 'member')!;
+  assert.deepEqual(memberRate(s, m, today), { amount: 100, currency: 'USD', billEvery: 12 });
+  assert.deepEqual(memberRate(s, m, from), { amount: 100, currency: 'USD', billEvery: 12 });
+  assert.equal(m.custom, true);
+  assert.deepEqual(m.payments, before.subscriptions[0].share!.members[0].payments);
+  assert.equal(m.paidUntil, before.subscriptions[0].share!.members[0].paidUntil);
+  const carol = s.share!.members.find((m) => m.name === 'Carol')!;
+  assert.equal(carol.id, proposals[3].args.id);
+  assert.deepEqual(memberRate(s, carol, today), { amount: 6, currency: 'USD', billEvery: 3 });
+});
