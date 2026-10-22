@@ -65,7 +65,7 @@
     "name": "Tên",
     "namePh": "Cách bạn gọi họ",
     "contact": "Liên hệ",
-    "account": "Tài khoản trong gói này",
+    "account": "Tài khoản thành viên",
     "accountPh": "Email, điện thoại, tên người dùng hoặc ID trên {name}",
     "joined": "Ngày tham gia",
     "joinedPh": "Ngày bắt đầu gói ({date})",
@@ -142,7 +142,7 @@
     "collectionAnchor": "Mốc bắt đầu thu chung",
     "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}",
     "accountEmpty": "Chưa điền tài khoản",
-    "editAccount": "Sửa tài khoản trong gói này",
+    "editAccount": "Sửa tài khoản thành viên",
     "copyAccount": "Sao chép tài khoản"
   },
   "pool": {
@@ -244,7 +244,7 @@
   "collect": {
     "title": "Ghi khoản thu · {name}",
     "next": "Lần thu tiếp theo {date}",
-    "editMember": "Sửa thành viên",
+    "editMember": "Sửa",
     "until": "Áp dụng đến",
     "covers": "Khoản này áp dụng {from} – {until}",
     "changeFee": "Đổi mức phí",

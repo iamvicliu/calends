@@ -272,12 +272,20 @@ export function MemberSheet({
         }
       >
         <div className="stack">
-          <div className="row">
-            <PersonAvatar p={personFor(state, f.personId, f.name)} size={36} />
-            <div className="collect-person-id">
+          {/* 人员与订阅同样是圆角卡片：头像、称呼，下面一行成员账号与联系方式（直接写内容，不加标签） */}
+          <div className="collect-sub">
+            <PersonAvatar p={personFor(state, f.personId, f.name)} size={32} />
+            <span className="collect-sub-id">
               <b>{f.name}</b>
-              {f.account && <small className="muted">{f.account}</small>}
-            </div>
+              {(f.account || contactText(f)) && (
+                <small>
+                  {[f.account && `${t('family.member.account')} ${f.account}`, f.account !== (f.contact ?? f.tg) && contactText(f)].filter(Boolean).join(' · ')}
+                </small>
+              )}
+            </span>
+            <button type="button" className="collect-sub-link" onClick={() => setQuick(false)}>
+              {t('family.collect.editMember')}
+            </button>
           </div>
           {/* 同一个人可能在多辆车上：顶部单独一行标明是哪个订阅 */}
           <div className="collect-sub">
@@ -296,7 +304,6 @@ export function MemberSheet({
             )}
           </div>
           <Group>
-            {contactText(f) && f.account !== (f.contact ?? f.tg) && <Cell label={t('family.member.contact')}>{contactText(f)}</Cell>}
             <Cell label={t('family.member.feeGroup')}>
               <span>
                 {perBill('family.pool.perFee', memberBillMonths(s, f, pay.from), {
@@ -352,9 +359,6 @@ export function MemberSheet({
               <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onChange={(e) => setPay({ ...pay, note: val(e) || undefined })} />
             </Cell>
           </Group>
-          <button className="btn plain" onClick={() => setQuick(false)}>
-            {t('family.collect.editMember')}
-          </button>
         </div>
       </Sheet>
     );

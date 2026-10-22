@@ -70,7 +70,7 @@
     "name": "Имя",
     "namePh": "Как к нему обращаться",
     "contact": "Контакт",
-    "account": "Аккаунт в этом плане",
+    "account": "Аккаунт участника",
     "accountPh": "Почта, телефон, имя пользователя или ID в {name}",
     "joined": "Присоединился",
     "joinedPh": "Начало подписки ({date})",
@@ -153,7 +153,7 @@
     "collectionAnchor": "Общая дата начала сбора",
     "firstSummary": "Первый период {from}–{until} · {mode} {amount}",
     "accountEmpty": "Аккаунт не указан",
-    "editAccount": "Изменить аккаунт в этом плане",
+    "editAccount": "Изменить аккаунт участника",
     "copyAccount": "Копировать аккаунт"
   },
   "pool": {
@@ -270,7 +270,7 @@
   "collect": {
     "title": "Записать оплату · {name}",
     "next": "Следующий сбор {date}",
-    "editMember": "Изменить участника",
+    "editMember": "Изменить",
     "until": "Покрывает до",
     "covers": "Оплата покрывает {from} – {until}",
     "changeFee": "Изменить тариф",

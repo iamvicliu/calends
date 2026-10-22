@@ -67,7 +67,7 @@
     "name": "Ad",
     "namePh": "Ona ne diyorsunuz",
     "contact": "İletişim",
-    "account": "Bu plandaki hesap",
+    "account": "Üye hesabı",
     "accountPh": "{name} için e-posta, telefon, kullanıcı adı veya ID",
     "joined": "Katılma",
     "joinedPh": "Plan başlangıcı ({date})",
@@ -146,7 +146,7 @@
     "collectionAnchor": "Ortak tahsilat başlangıcı",
     "firstSummary": "İlk dönem {from}–{until} · {mode} {amount}",
     "accountEmpty": "Hesap girilmedi",
-    "editAccount": "Bu plandaki hesabı düzenle",
+    "editAccount": "Üye hesabını düzenle",
     "copyAccount": "Hesabı kopyala"
   },
   "pool": {
@@ -253,7 +253,7 @@
   "collect": {
     "title": "Ödeme kaydet · {name}",
     "next": "Sonraki tahsilat {date}",
-    "editMember": "Üyeyi düzenle",
+    "editMember": "Düzenle",
     "until": "Kapsadığı son tarih",
     "covers": "Ödeme {from} – {until} dönemini kapsar",
     "changeFee": "Ücreti değiştir",

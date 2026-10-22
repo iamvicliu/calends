@@ -63,7 +63,7 @@
     "name": "稱呼",
     "namePh": "怎麼稱呼",
     "contact": "聯絡方式",
-    "account": "這輛車上的帳戶",
+    "account": "成員帳戶",
     "accountPh": "{name} 的電郵、手機號碼、用戶名稱或 ID",
     "joined": "加入日",
     "joinedPh": "同發起日 {date}",
@@ -136,7 +136,7 @@
     "collectionAnchor": "收款對齊起點",
     "firstSummary": "首期 {from}–{until} · {mode} {amount}",
     "accountEmpty": "未填帳戶",
-    "editAccount": "編輯這輛車上的帳戶",
+    "editAccount": "編輯成員帳戶",
     "copyAccount": "複製帳戶"
   },
   "pool": {
@@ -228,7 +228,7 @@
   "collect": {
     "title": "記收款 · {name}",
     "next": "下次收款 {date}",
-    "editMember": "編輯成員資料",
+    "editMember": "編輯資料",
     "until": "覆蓋到",
     "covers": "這筆覆蓋 {from} – {until}",
     "changeFee": "改收費",

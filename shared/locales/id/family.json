@@ -65,7 +65,7 @@
     "name": "Nama",
     "namePh": "Panggilan untuknya",
     "contact": "Kontak",
-    "account": "Akun di paket ini",
+    "account": "Akun anggota",
     "accountPh": "Email, telepon, nama pengguna atau ID di {name}",
     "joined": "Bergabung",
     "joinedPh": "Awal paket ({date})",
@@ -142,7 +142,7 @@
     "collectionAnchor": "Awal penagihan bersama",
     "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}",
     "accountEmpty": "Akun belum diisi",
-    "editAccount": "Edit akun di paket ini",
+    "editAccount": "Edit akun anggota",
     "copyAccount": "Salin akun"
   },
   "pool": {
@@ -244,7 +244,7 @@
   "collect": {
     "title": "Catat pembayaran · {name}",
     "next": "Penagihan berikutnya {date}",
-    "editMember": "Edit anggota",
+    "editMember": "Edit",
     "until": "Berlaku sampai",
     "covers": "Pembayaran mencakup {from} – {until}",
     "changeFee": "Ubah biaya",

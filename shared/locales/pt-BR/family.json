@@ -67,7 +67,7 @@
     "name": "Nome",
     "namePh": "Como chamar a pessoa",
     "contact": "Contato",
-    "account": "Conta neste plano",
+    "account": "Conta do membro",
     "accountPh": "E-mail, telefone, usuário ou ID no {name}",
     "joined": "Entrou em",
     "joinedPh": "Início do plano ({date})",
@@ -146,7 +146,7 @@
     "collectionAnchor": "Início comum de cobrança",
     "firstSummary": "Primeiro período {from}–{until} · {mode} {amount}",
     "accountEmpty": "Conta não informada",
-    "editAccount": "Editar conta neste plano",
+    "editAccount": "Editar conta do membro",
     "copyAccount": "Copiar conta"
   },
   "pool": {
@@ -253,7 +253,7 @@
   "collect": {
     "title": "Registrar recebimento · {name}",
     "next": "Próxima cobrança {date}",
-    "editMember": "Editar membro",
+    "editMember": "Editar",
     "until": "Cobre até",
     "covers": "O pagamento cobre {from} – {until}",
     "changeFee": "Alterar valor",

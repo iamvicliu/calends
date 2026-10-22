@@ -65,7 +65,7 @@
     "name": "名前",
     "namePh": "呼び名",
     "contact": "連絡先",
-    "account": "このプランのアカウント",
+    "account": "メンバーアカウント",
     "accountPh": "{name} のメール、電話番号、ユーザー名または ID",
     "joined": "参加日",
     "joinedPh": "プラン開始日（{date}）",
@@ -142,7 +142,7 @@
     "collectionAnchor": "共通の集金起点",
     "firstSummary": "初回 {from}–{until} · {mode} {amount}",
     "accountEmpty": "アカウント未入力",
-    "editAccount": "このプランのアカウントを編集",
+    "editAccount": "メンバーアカウントを編集",
     "copyAccount": "アカウントをコピー"
   },
   "pool": {
@@ -244,7 +244,7 @@
   "collect": {
     "title": "入金を記録 · {name}",
     "next": "次回の集金 {date}",
-    "editMember": "メンバーを編集",
+    "editMember": "編集",
     "until": "対象期間の終わり",
     "covers": "この入金の対象 {from} – {until}",
     "changeFee": "料金を変更",

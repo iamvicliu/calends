@@ -65,7 +65,7 @@
     "name": "이름",
     "namePh": "부를 이름",
     "contact": "연락처",
-    "account": "이 플랜의 계정",
+    "account": "멤버 계정",
     "accountPh": "{name}의 이메일, 전화번호, 사용자 이름 또는 ID",
     "joined": "참여일",
     "joinedPh": "플랜 시작일({date})",
@@ -142,7 +142,7 @@
     "collectionAnchor": "공통 수금 시작일",
     "firstSummary": "첫 기간 {from}–{until} · {mode} {amount}",
     "accountEmpty": "계정 미입력",
-    "editAccount": "이 플랜의 계정 편집",
+    "editAccount": "멤버 계정 편집",
     "copyAccount": "계정 복사"
   },
   "pool": {
@@ -244,7 +244,7 @@
   "collect": {
     "title": "입금 기록 · {name}",
     "next": "다음 수금 {date}",
-    "editMember": "멤버 편집",
+    "editMember": "편집",
     "until": "적용 종료일",
     "covers": "이번 입금 적용 {from} – {until}",
     "changeFee": "요금 변경",

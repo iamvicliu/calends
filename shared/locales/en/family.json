@@ -67,7 +67,7 @@
     "name": "Name",
     "namePh": "What to call them",
     "contact": "Contact",
-    "account": "Account on this plan",
+    "account": "Member account",
     "accountPh": "Email, phone, username or ID on {name}",
     "joined": "Joined",
     "joinedPh": "Plan start ({date})",
@@ -146,7 +146,7 @@
     "collectionAnchor": "Collection anchor",
     "firstSummary": "First period {from}–{until} · {mode} {amount}",
     "accountEmpty": "No account added",
-    "editAccount": "Edit account on this plan",
+    "editAccount": "Edit member account",
     "copyAccount": "Copy account"
   },
   "pool": {
