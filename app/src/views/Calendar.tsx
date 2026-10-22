@@ -270,15 +270,20 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                               endedOn && <small>{t('list.endedOn', { date: cnDateAuto(endedOn, today) })}</small>
                             ) : status === 'ending' && cur.end ? (
                               <small>{t('core.stop.paidThrough', { date: cnDateAuto(cur.end, today) })}</small>
-                            ) : next ? (
+                            ) : next && next !== c.date ? (
+                              // 下次扣款就是选中的这一天时，标题已写明日期，不再重复
                               <small>{t('calendar.nextCharge', { date: cnDateAuto(next, today) })}</small>
                             ) : null}
                             {stopped && <small title={stopDescription(cur, today)}>{stopped}</small>}
                           </span>
                           <span className="cal-dc-amt">
                             {amt.main}
-                            {amt.alt && <small>{amt.alt}</small>}
-                            <small>{c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged'))}</small>
+                            {/* 已扣/预计与原币合成一行：「预计 · −₺499.99」 */}
+                            {(amt.alt || c.kind !== 'refund') && (
+                              <small>
+                                {[c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged')), amt.alt].filter(Boolean).join(' · ')}
+                              </small>
+                            )}
                           </span>
                         </button>
                       );
