@@ -28,10 +28,10 @@
 
 Track what you pay, when it renews, and who owes you. Calends brings subscriptions, shared plans and prepaid balances into one private, single-owner ledger, with an optional read-only public page and AI access through MCP.
 
-- **Flexible billing** — monthly, yearly, custom cycles and lifetime purchases, with trials, intro prices, bonus periods and pauses.
+- **Flexible billing** — monthly, yearly, custom cycles and lifetime purchases, with trials, intro prices, bonus periods, pauses, advance charging and cancellation deadlines.
 - **A history that adds up** — keep price, plan and region changes, gaps and overlapping subscriptions. See total spent, actual monthly cost and every charge.
 - **Multiple currencies** — historical exchange rates for past charges, current rates for forecasts, and your choice of display currency.
-- **Balances and shared plans** — track cards, prepaid credit and gift cards, estimate when balances run out, and manage family-plan collections and payments for friends.
+- **Balances and shared plans** — track prepaid credit and gift cards, estimate when balances run out, and manage payments for friends. Shared plans have dated collection rules, member overrides, independent coverage periods and overdue tracking; people have private avatars and a separate account for each plan.
 - **Reports and calendar** — spending trends, cash vs. accrual, prepaid value, cancellation savings, subscription checkups and a shareable year in review. Includes month/year calendars and a private ICS feed.
 - **Renewal reminders** — email, Telegram, Lark/Feishu, DingTalk, WeCom, Slack, Discord, Bark, ntfy, ServerChan and custom webhooks.
 - **AI access** — query and update your ledger from an MCP-compatible assistant, with scoped tokens and previews for write operations.
@@ -77,7 +77,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.6.0` instead of `latest`.
+Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.7.0` instead of `latest`.
 
 Alternatively, build from source with Compose. From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
 
@@ -95,7 +95,7 @@ See the [self-hosting guide](docs/self-hosting.md) for custom domains, configura
 
 ## AI & MCP
 
-Ask “What renews next week?”, “How much did I spend this year?” or “Netflix went up to $17.99 from today.” Calends provides 20+ tools over a stateless [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` using Streamable HTTP.
+Ask “What renews next week?”, “How much did I spend this year?” or “Netflix went up to $17.99 from today.” Calends provides 32 tools over a stateless [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` using Streamable HTTP.
 
 On the **AI access** page (`/connect`), create a read-only or read/write token, then connect your client. Opening `/mcp` in a browser takes you to this page; MCP clients use the `/mcp` endpoint:
 
