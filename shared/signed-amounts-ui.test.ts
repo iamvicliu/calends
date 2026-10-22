@@ -122,3 +122,135 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     assert.ok(html.includes('dt-in')); // Net-refund annual subtotal stays green with signs off.
   }
 });
+
+test('Detail defaults to the current charge year, falls back to the latest populated year and toggles the full history', () => {
+  const file = '../app/src/views/Detail.tsx';
+  const source = read(file).split('function Charges(')[1];
+  let all = false;
+  const Charges = load(file, 'Charges', `function Charges(${source}`, {
+    React,
+    Fragment: React.Fragment,
+    useState: () => [
+      all,
+      (value: boolean) => {
+        all = value;
+      },
+    ],
+    phaseSubs,
+    chargeValue,
+    flow,
+    t: (key: string, args?: { count: number }) => `${key}:${args?.count ?? ''}`,
+    Panel: ({ children, title }: { children: React.ReactNode; title: string }) => React.createElement('section', null, title, children),
+  });
+  const sub = {
+    id: 'fictional-history',
+    name: 'Fictional monthly',
+    price: 12,
+    currency: 'USD',
+    start: '2020-01-15',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    tags: [],
+    category: 'tools',
+  };
+  const state = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
+  const history = Array.from({ length: 82 }, (_, i) => ({
+    sub,
+    date: `${2020 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}-15`,
+    amount: 12,
+    currency: 'USD',
+  }));
+  const render = (rows = history, today = '2026-10-22') => renderToStaticMarkup(React.createElement(Charges, { sub, state, today, history: rows }));
+  const count = (html: string) => (html.match(/class="dt-tr dt-row/g) ?? []).length;
+  let html = render();
+  assert.equal(count(html), 10);
+  assert.ok(text(html).includes('detail.charges.title:82'));
+  assert.ok(text(html).includes('2026'));
+  assert.ok(!text(html).includes('2025'));
+  assert.ok(html.includes('aria-expanded="false"'));
+  // Exercise the actual disclosure handler, then render its resulting state.
+  const findToggle = (node: React.ReactNode): React.ReactElement<{ onClick: () => void }> | undefined => {
+    if (!React.isValidElement(node)) return;
+    const props = node.props as { children?: React.ReactNode; 'aria-expanded'?: boolean };
+    if (props['aria-expanded'] !== undefined) return node as React.ReactElement<{ onClick: () => void }>;
+    for (const child of React.Children.toArray(props.children)) {
+      const found = findToggle(child);
+      if (found) return found;
+    }
+  };
+  const toggle = () => findToggle(Charges({ sub, state, today: '2026-10-22', history }))!.props.onClick();
+  toggle();
+  html = render();
+  assert.equal(count(html), 82);
+  assert.ok(text(html).includes('2020'));
+  assert.ok(html.includes('aria-expanded="true"'));
+  toggle();
+  assert.equal(count(render()), 10);
+  const old = history.filter((c) => c.date < '2025');
+  html = render(old);
+  assert.equal(count(html), 12);
+  assert.ok(text(html).includes('2024'));
+  assert.ok(!text(html).includes('2023'));
+  // A single year is complete even with more than 24 entries; no disclosure.
+  const daily = Array.from({ length: 30 }, (_, i) => ({ ...history[0], date: `2024-06-${String(i + 1).padStart(2, '0')}` }));
+  html = render(daily);
+  assert.equal(count(html), 30);
+  assert.ok(!html.includes('aria-expanded'));
+  assert.ok(text(html).includes('2024-06-30'));
+  assert.equal(count(render([])), 0);
+  assert.ok(!render([]).includes('aria-expanded'));
+});
+
+test('shared-plan avatars retain owner images, initials, dues colors and overflow in both sizes', async () => {
+  const { memberAboard, memberDues } = await import('./billing.ts');
+  const file = '../app/src/components/ShareAvatars.tsx';
+  const source = read(file).split('export function ShareAvatars(')[1];
+  const ShareAvatars = load(file, 'ShareAvatars', `function ShareAvatars(${source}`, {
+    React,
+    memberAboard,
+    memberDues,
+    base: (path: string) => path,
+    t: (key: string) => key,
+  });
+  const sub = {
+    id: 'fictional-sharing',
+    name: 'Fictional sharing',
+    price: 12,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    tags: [],
+    category: 'tools',
+    share: {
+      role: 'owner',
+      seats: 12,
+      since: '2026-01-01',
+      members: Array.from({ length: 9 }, (_, i) => ({
+        id: `member-${i}`,
+        name: i === 0 ? '' : `Name ${i}`,
+        share: 1,
+        exempt: i === 2,
+        paidUntil: i === 1 ? '2027-12-31' : undefined,
+        left: i === 8 ? '2026-02-01' : undefined,
+      })),
+    },
+  };
+  const state = { settings: { ...DEFAULT_SETTINGS, avatar: 'https://example.invalid/fictional.png' }, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
+  const render = (size: number, overlap: number, onMember?: () => void) =>
+    renderToStaticMarkup(React.createElement(ShareAvatars, { sub, state, today: '2026-10-22', size, overlap, onMember }));
+  const card = render(20, 3, () => {});
+  const detail = render(36, 2);
+  assert.equal(text(card), text(detail));
+  assert.ok(text(card).endsWith('+4'));
+  assert.ok(text(card).includes('?'));
+  assert.ok(card.includes('seat on'));
+  assert.ok(card.includes('seat owe'));
+  assert.ok(card.includes('seat free'));
+  assert.ok(card.includes('fictional.png'));
+  assert.ok(!card.includes('Name 8'));
+  assert.ok(card.includes('<button'));
+  assert.ok(!detail.includes('<button'));
+  state.settings.avatar = '';
+  assert.ok(render(36, 2).includes('/icons/avatar.png'));
+});
