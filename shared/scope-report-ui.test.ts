@@ -1696,6 +1696,8 @@ test('合租备注仅上移共有次数/周期，保留不同次数、周期、�
   });
   assert.deepEqual(split('第12次收款（半年）', '第3次收款（半年）'), { common: '半年', rows: ['第12次收款', '第3次收款'] });
   assert.deepEqual(split('第12次收款（半年）', undefined), { common: '', rows: ['第12次收款（半年）', ''] });
+  // 备注用中文分号接在次数后面时，上移共有部分后不留前导分号
+  assert.deepEqual(split('第12次收款（半年）；实收待核对', '第12次收款（半年）'), { common: '第12次收款 · 半年', rows: ['实收待核对', ''] });
   assert.deepEqual(split('第12次收款（半年）', '第3次收款（季度）'), { common: '', rows: ['第12次收款（半年）', '第3次收款（季度）'] });
   assert.deepEqual(split('Collection #12 (6 months): bank', 'Collection #12 (6 months): cash'), {
     common: 'Collection #12 · 6 months',

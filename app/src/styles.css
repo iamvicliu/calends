@@ -8969,14 +8969,18 @@ a.car-toggle {
 .car-receipts .car-period:hover:not(:disabled) {
   background: var(--hover);
 }
+.car-receipts .car-ledger-head {
+  min-height: 46px;
+}
 .car-receipts .car-ledger-head > span {
   white-space: nowrap;
 }
 .car-receipts .car-period {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
-  padding: 10px 14px;
-  min-height: 64px;
+  /* 分组条比表头矮：表头是整张表的层级，分组条是表内的层级 */
+  padding: 6px 14px;
+  min-height: 36px;
   background: var(--fill-2);
   font-size: 12.5px;
   font-weight: 600;
@@ -8984,7 +8988,7 @@ a.car-toggle {
 }
 .car-receipts .car-period > .car-period-title {
   white-space: normal;
-  line-height: 1.5;
+  line-height: 1.35;
 }
 .car-receipts .car-period > span:last-child {
   white-space: nowrap;
@@ -8992,6 +8996,19 @@ a.car-toggle {
 .car-receipts .car-period-title small {
   color: var(--label-3);
   font-weight: 400;
+}
+/* 共有信息跟在区间后面同一行，分组条保持单行、比表头矮 */
+.car-receipts .car-period > .car-period-title {
+  flex-direction: row;
+}
+.car-receipts .car-period-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+}
+.car-receipts .car-period-title small::before {
+  content: '· ';
 }
 .car-receipts .ld-row:not(.car-period) > span:first-child small {
   font-size: 11px;

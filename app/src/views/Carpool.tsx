@@ -379,7 +379,7 @@ function MemberRows({
 function receiptNotes(notes: (string | undefined)[]) {
   const raw = notes.map((note) => note ?? '');
   // 历史收款的次数/周期存在备注中，不从今天的成员收费标准反推历史。
-  const parts = raw.map((note) => /^(第\s*\d+\s*次收款|Collection\s*#?\d+)(?:\s*[（(]([^（）()]+)[）)])?\s*(?:[·，,:：]\s*)?([\s\S]*)$/i.exec(note));
+  const parts = raw.map((note) => /^(第\s*\d+\s*次收款|Collection\s*#?\d+)(?:\s*[（(]([^（）()]+)[）)])?\s*(?:[·，,:：；;]\s*)?([\s\S]*)$/i.exec(note));
   if (raw.every((note) => note === raw[0])) {
     return { common: parts[0] ? parts[0].slice(1).filter(Boolean).join(' · ') : (raw[0] ?? ''), rows: raw.map(() => '') };
   }
@@ -434,8 +434,8 @@ export function CarSheet({
   const receipts = sh.members.flatMap((m) => (m.payments ?? []).map((p) => ({ m, p, base: toBaseAt(state, p.amount, p.currency, p.date) })));
   const total = receipts.reduce((a, r) => a + r.base, 0);
   /** 期间：两端都在今年只写月日；只要有一端不在今年，两端都带年份，免得看成倒序 */
-  const range = (a: string, b: string) =>
-    a.slice(0, 4) === today.slice(0, 4) && b.slice(0, 4) === today.slice(0, 4) ? `${cnDate(a)} – ${cnDate(b)}` : `${cnDateFull(a)} – ${cnDateFull(b)}`;
+  // 分组条的区间一律带年份，跨年与不跨年的组格式一致
+  const range = (a: string, b: string) => `${cnDateFull(a)} – ${cnDateFull(b)}`;
   // 我付出去的：发起合租以来这个订阅的每次扣款（没记发起日期就从订阅开始算），按年分组
   const [tab, setTab] = useState<'in' | 'out'>('in');
   const [openIn, setOpenIn] = useState<Set<string>>(() => new Set());
