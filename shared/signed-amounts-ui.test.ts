@@ -292,6 +292,7 @@ test('Detail keeps renewal context and places only short default histories in th
     Prop: ({ k, children, hint }: { k: string; children: React.ReactNode; hint?: string }) => React.createElement('div', null, k, children, hint),
     Act: empty,
     IconButton: empty,
+    regular: (h: { kind?: string; amount: number }[]) => h.filter((c) => !c.kind && c.amount > 0),
     SubIcon: empty,
     CatTag: empty,
     Region: empty,
@@ -351,11 +352,12 @@ test('Detail keeps renewal context and places only short default histories in th
     assert.ok(!html.includes('dt-renewal'));
     assert.equal((html.match(/class="dt-charges"/g) ?? []).length, 1);
     const [main, side] = html.split('class="dt-side');
-    const inSidebar = unit === 'year';
+    // 只扣过一笔的年付和买断一样内容少，改用窄单列，扣款记录留在主栏
+    const inSidebar = false;
     assert.equal(main.includes('class="dt-charges"'), !inSidebar);
     assert.equal(side.includes('class="dt-charges"'), inSidebar);
     if (inSidebar) assert.ok(side.indexOf('detail.summary') < side.indexOf('class="dt-charges"'));
-    assert.equal(html.includes('dt compact'), unit === 'lifetime');
+    assert.equal(html.includes('dt compact'), unit === 'lifetime' || unit === 'year');
   }
   // Fictional annual plans: ordinary renewals plus commissions recorded as negative charges.
   const annual: Subscription = {
@@ -373,7 +375,7 @@ test('Detail keeps renewal context and places only short default histories in th
     [3, '2020-01-15', '2026-10-22', true], // Four charges + year heading = five rows.
     [4, '2020-01-15', '2026-10-22', false], // Five charges + year heading = six rows.
     [8, '2020-01-15', '2026-10-22', false], // Reported case: nine charges, mostly commissions.
-    [4, '2026-01-15', '2026-10-22', true], // Single year: no group heading, five charges fit.
+    [4, '2026-01-15', '2026-10-22', false], // Only one renewal: no trend line, compact single column keeps charges in the main flow.
     [5, '2026-01-15', '2026-10-22', false],
     [3, '2020-01-15', '2027-01-01', true], // Latest populated year is the default after ending.
     [4, '2020-01-15', '2027-01-01', false],
