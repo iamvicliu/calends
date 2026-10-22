@@ -133,25 +133,23 @@ test('calendar selects today, toggles off, clears on month navigation, and Today
   assert.equal(render().find((n) => n.props['aria-current'] === 'date')!.props['aria-pressed'], true);
 });
 
-test('calendar full report collapses locally to its title line, reopens, resets on month navigation, and stays absent in year view', () => {
+test('calendar full report collapses to persisted mini with day details, expands again, and stays absent in year view', () => {
   const r = harness('../app/src/views/Calendar.tsx', 'Calendar', { 'cal-report-mode': 'full' });
   const render = () => r.render('Calendar', { state: st, today, onOpen() {}, onIcs() {} });
+  const mini = (nodes: Node[]) => nodes.find((n) => typeof n.type === 'function' && n.type.name === 'MiniReport');
   let nodes = render();
-  const full = nodes.find((n) => n.type === 'ScopeReport')!;
-  assert.ok(full);
-  assert.equal(
-    nodes.some((n) => typeof n.type === 'function' && n.type.name === 'MiniReport'),
-    false,
-  );
-  full.props.onToggle();
-  nodes = render();
-  assert.equal(r.prefs['cal-report-mode'], 'full');
-  assert.equal(nodes.find((n) => n.type === 'ScopeReport')!.props.open, false);
-  assert.equal(
-    nodes.some((n) => typeof n.type === 'function' && n.type.name === 'MiniReport'),
-    false,
-  );
+  assert.equal(nodes.find((n) => n.type === 'ScopeReport')!.props.open, true);
+  assert.equal(mini(nodes), undefined);
   nodes.find((n) => n.type === 'ScopeReport')!.props.onToggle();
+  nodes = render();
+  assert.equal(r.prefs['cal-report-mode'], 'mini');
+  assert.ok(mini(nodes));
+  assert.ok(nodes.some((n) => n.props.className === 'cal-dayhead'));
+  assert.equal(
+    nodes.find((n) => n.type === 'ScopeReport'),
+    undefined,
+  );
+  mini(nodes)!.props.onExpand();
   assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.open, true);
   render()
     .find((n) => n.type === 'ScopeReport')!
@@ -159,7 +157,7 @@ test('calendar full report collapses locally to its title line, reopens, resets 
   render()
     .find((n) => n.props['aria-label'] === 'calendar.next')!
     .props.onClick();
-  assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.open, true);
+  assert.ok(mini(render()));
   r.prefs['cal-mode'] = 'year';
   nodes = render();
   assert.equal(
