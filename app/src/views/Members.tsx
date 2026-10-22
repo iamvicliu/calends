@@ -1,5 +1,15 @@
 import { useRef, useState } from 'react';
-import { addDays, todayIn, uid, memberUnpaidFrom, memberBillMonths, memberCollection, collectionAnchor } from '../../../shared/billing.ts';
+import {
+  addDays,
+  cycleLabel,
+  nextCharge,
+  todayIn,
+  uid,
+  memberUnpaidFrom,
+  memberBillMonths,
+  memberCollection,
+  collectionAnchor,
+} from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -92,12 +102,15 @@ export function MemberSheet({
   member,
   collect,
   onClose,
+  onOpenSub,
 }: {
   state: AppState;
   s: Subscription;
   member?: ShareMember;
   collect?: boolean;
   onClose: () => void;
+  /** 记收款弹窗顶部「查看详情」：打开这条订阅的详情 */
+  onOpenSub?: () => void;
 }) {
   const today = todayIn(state.settings.timezone);
   const isNew = !member;
@@ -267,8 +280,19 @@ export function MemberSheet({
         <div className="stack">
           {/* 同一个人可能在多辆车上：顶部单独一行标明是哪个订阅 */}
           <div className="collect-sub">
-            <SubIcon sub={s} size={28} />
-            <b>{s.name}</b>
+            <SubIcon sub={s} size={32} />
+            <span className="collect-sub-id">
+              <b>{s.name}</b>
+              <small>
+                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                {nextCharge(s, today) ? ` · ${t('family.pool.next', { date: cnDate(nextCharge(s, today)!) })}` : ''}
+              </small>
+            </span>
+            {onOpenSub && (
+              <button type="button" className="collect-sub-link" onClick={onOpenSub}>
+                {t('family.collect.viewSub')}
+              </button>
+            )}
           </div>
           <Group>
             {contactText(f) && <Cell label={t('family.member.contact')}>{contactText(f)}</Cell>}

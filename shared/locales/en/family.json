@@ -248,6 +248,7 @@
     "lastPayment": "Last payment",
     "adjustFee": "Adjust fee",
     "feeFrom": "Effective from",
-    "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged."
+    "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",
+    "viewSub": "View details"
   }
 }

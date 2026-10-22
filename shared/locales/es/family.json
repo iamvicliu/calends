@@ -248,6 +248,7 @@
     "lastPayment": "Último pago",
     "adjustFee": "Ajustar cuota",
     "feeFrom": "Vigente desde",
-    "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian."
+    "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian.",
+    "viewSub": "Ver detalles"
   }
 }

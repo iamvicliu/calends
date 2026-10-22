@@ -240,6 +240,7 @@
     "lastPayment": "Pembayaran terakhir",
     "adjustFee": "Sesuaikan biaya",
     "feeFrom": "Berlaku mulai",
-    "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah."
+    "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",
+    "viewSub": "Lihat detail"
   }
 }

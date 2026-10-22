@@ -248,6 +248,7 @@
     "lastPayment": "Son ödeme",
     "adjustFee": "Ücreti ayarla",
     "feeFrom": "Geçerlilik tarihi",
-    "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez."
+    "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez.",
+    "viewSub": "Ayrıntıları gör"
   }
 }

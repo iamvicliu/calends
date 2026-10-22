@@ -248,6 +248,7 @@
     "lastPayment": "Dernier paiement",
     "adjustFee": "Ajuster le tarif",
     "feeFrom": "À partir du",
-    "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés."
+    "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés.",
+    "viewSub": "Voir les détails"
   }
 }

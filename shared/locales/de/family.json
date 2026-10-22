@@ -248,6 +248,7 @@
     "lastPayment": "Letzte Zahlung",
     "adjustFee": "Gebühr anpassen",
     "feeFrom": "Gültig ab",
-    "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert."
+    "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert.",
+    "viewSub": "Details ansehen"
   }
 }

@@ -281,6 +281,12 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             member={member.m}
             collect={member.collect}
             onClose={() => setMember(null)}
+            onOpenSub={() => {
+              const sub = state.subscriptions.find((x) => x.id === member.s.id) ?? member.s;
+              setMember(null);
+              setSheet(null);
+              onOpen(sub);
+            }}
           />
         )}
       </div>

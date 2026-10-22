@@ -240,6 +240,7 @@
     "lastPayment": "Lần thu gần nhất",
     "adjustFee": "Điều chỉnh phí",
     "feeFrom": "Có hiệu lực từ",
-    "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi."
+    "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",
+    "viewSub": "Xem chi tiết"
   }
 }
