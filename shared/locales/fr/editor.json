@@ -20,7 +20,7 @@
   "clearForm": "Vider le formulaire",
   "revert": "Annuler les modifications",
   "draftRestored": "Brouillon non enregistré restauré",
-  "confirmDelete": "Supprimer « {name} » ? Son historique sera également supprimé. Si vous avez simplement arrêté le renouvellement, marquez-le plutôt comme Résilié.",
+  "confirmDelete": "Supprimer « {name} » ? Son historique sera également supprimé. Si vous avez simplement arrêté le renouvellement, choisissez plutôt « Arrêter ».",
   "toast": {
     "added": "Ajouté",
     "saved": "Enregistré",
@@ -61,7 +61,8 @@
     "trial": "Essai",
     "paused": "Suspendu",
     "cancelled": "Résilié",
-    "terminated": "Désactivé"
+    "terminated": "Désactivé",
+    "stop": "Arrêter"
   },
   "category": {
     "choose": "Choisir une catégorie",
@@ -98,7 +99,8 @@
     "showDomainOn": "Les visiteurs voient le domaine complet",
     "showDomainOff": "Masqué sur la page publique",
     "tagsPlaceholder": "Séparés par des espaces",
-    "notesPlaceholder": "Notes (facultatif)"
+    "notesPlaceholder": "Notes (facultatif)",
+    "pausedAt": "Date de pause"
   },
   "share": {
     "none": "Moi seul",

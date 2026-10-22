@@ -1,6 +1,6 @@
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
-import { StopPanel } from '../components/StopPanel.tsx';
+import { StopFields } from '../components/StopPanel.tsx';
 import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
@@ -11,6 +11,7 @@ import { DatePicker } from '../components/DatePicker.tsx';
 import { IconButton, ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
+import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-form.ts';
 import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
@@ -22,7 +23,8 @@ import { searchCatalog, type CatalogItem } from '../catalog.ts';
 
 const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetime', every: 1 }]];
 
-const STATUS: SubStatus[] = ['active', 'trial', 'paused', 'cancelled'];
+type EditorStatus = 'active' | 'trial' | 'paused' | 'stop';
+const STATUS: EditorStatus[] = ['active', 'trial', 'paused', 'stop'];
 
 export function newSub(today: string, methodId?: string, currency = 'USD'): Subscription {
   return {
@@ -46,6 +48,7 @@ export function newSub(today: string, methodId?: string, currency = 'USD'): Subs
 interface Draft {
   form: Subscription;
   basePrice: number;
+  stop?: StopForm;
   /** 打开表单时订阅的样子：和现在不一样说明别处改过，草稿不再适用 */
   base: string;
 }
@@ -81,18 +84,28 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const [draft] = useState(() => readDraft(key, isNew ? 'new' : initial));
   const [restored, setRestored] = useState(!!draft);
   const [f, setFRaw] = useState<Subscription>(() => draft?.form ?? initialForm);
+  const [stop, setStop] = useState<StopForm | undefined>(
+    () => draft?.stop ?? (f.stop || f.end || ['cancelled', 'terminated'].includes(f.status) ? stopForm(f, today) : undefined),
+  );
   // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
   const [basePrice, setBasePrice] = useState(draft?.basePrice ?? initialForm.price);
   const setF = (next: Subscription) => {
     const form = toEditForm(next, today);
     setFRaw(form);
     setBasePrice(form.price);
+    // Existing history actions can resume or change an end date; keep the status draft aligned.
+    if (form.end !== f.end || form.status !== f.status || JSON.stringify(form.stop) !== JSON.stringify(f.stop)) {
+      setStop(form.stop || form.end || ['cancelled', 'terminated'].includes(form.status) ? stopForm(form, today) : undefined);
+    }
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
-  const dirty = sig(f) !== initial;
+  const dirty =
+    sig(f) !== initial ||
+    !!stop !== !!(initialForm.stop || initialForm.end || ['cancelled', 'terminated'].includes(initialForm.status)) ||
+    (!!stop && JSON.stringify(stop) !== JSON.stringify(stopForm(initialForm, today)));
   // 关闭即存草稿；没改动就清掉
   const close = () => {
-    writeDraft(key, dirty ? { form: f, basePrice, base: isNew ? 'new' : initial } : undefined);
+    writeDraft(key, dirty ? { form: f, basePrice, stop, base: isNew ? 'new' : initial } : undefined);
     onClose();
   };
   /** 新建：清空成一张新表；编辑：回到保存过的样子 */
@@ -102,6 +115,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     const fresh = isNew ? toEditForm(newSub(today, state.settings.defaultMethodId, state.settings.baseCurrency), today) : initialForm;
     setFRaw(fresh);
     setBasePrice(fresh.price);
+    setStop(fresh.stop || fresh.end || ['cancelled', 'terminated'].includes(fresh.status) ? stopForm(fresh, today) : undefined);
   };
 
   /** 交给 AI 助手：已经填的名称一并带过去 */
@@ -117,6 +131,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
         // 直接改了价格框：视为今天起调价，过往账单保持原价
         if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
         else out = syncPhase(out, today);
+        if (stop && out.cycle.unit !== 'lifetime') out = applyStopForm(out, stop, today);
         if (out.status === 'cancelled' && !out.end) out.end = today;
         if (out.status === 'paused' && !out.pausedAt) out.pausedAt = today;
         if (out.status !== 'paused') delete out.pausedAt;
@@ -174,7 +189,13 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
             </button>
           ) : null}
           <span className="grow" />
-          <button className="btn" onClick={close}>
+          <button
+            className="btn"
+            onClick={() => {
+              writeDraft(key, undefined);
+              onClose();
+            }}
+          >
             {t('common.cancel')}
           </button>
           <button className="btn primary" disabled={!f.name.trim()} onClick={save}>
@@ -205,7 +226,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
         }}
       >
-        <Form f={f} setF={setF} up={up} state={state} today={today} />
+        <Form f={f} setF={setF} up={up} state={state} today={today} stop={stop} setStop={setStop} />
       </div>
       {!isNew && (
         <div style={{ marginTop: 18 }}>
@@ -217,12 +238,16 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
 }
 
 function Form({
+  stop,
+  setStop,
   f,
   setF,
   up,
   state,
   today,
 }: {
+  stop?: StopForm;
+  setStop: (value: StopForm | undefined) => void;
   f: Subscription;
   setF: (s: Subscription) => void;
   up: (p: Partial<Subscription>) => void;
@@ -399,24 +424,33 @@ function Form({
       {/* 三、现在的状态 */}
       {!lt && (
         <Group title={t('editor.group.status')}>
-          {!f.stop && (
-            <div className="cell">
-              <Seg
-                value={f.status}
-                onChange={(v) => {
-                  if (f.stop) setF(reactivate(f, today));
-                  up({ status: v });
-                }}
-                options={STATUS.map((s) => [s, t(`editor.status.${s}`)] as [SubStatus, string])}
-              />
-            </div>
-          )}
-          {f.status === 'trial' && (
+          <div className="cell">
+            <Seg<EditorStatus>
+              value={stop ? 'stop' : (f.status as EditorStatus)}
+              disabledKeys={f.stop?.kind === 'terminate' || f.status === 'terminated' ? ['active', 'trial', 'paused'] : undefined}
+              onChange={(v) => {
+                if (v === 'stop') {
+                  setStop(stopForm(syncPhase(f, today), today));
+                } else {
+                  const next = reactivate(f, today);
+                  up({ ...next, status: v as SubStatus, pausedAt: v === 'paused' ? (f.pausedAt ?? today) : undefined });
+                  setStop(undefined);
+                }
+              }}
+              options={STATUS.map((s) => [s, t(`editor.status.${s}`)])}
+            />
+          </div>
+          {!stop && f.status === 'trial' && (
             <Cell label={t('editor.field.trialEnd')}>
               <DatePicker value={f.trialEnd} clearable onChange={(v) => up({ trialEnd: v })} />
             </Cell>
           )}
-          <StopPanel sub={syncPhase(f, today)} today={today} onApply={setF} />
+          {!stop && f.status === 'paused' && (
+            <Cell label={t('editor.field.pausedAt')}>
+              <DatePicker value={f.pausedAt ?? today} onChange={(v) => up({ pausedAt: v ?? today })} />
+            </Cell>
+          )}
+          {stop && <StopFields sub={syncPhase(f, today)} today={today} value={stop} onChange={setStop} />}
         </Group>
       )}
 

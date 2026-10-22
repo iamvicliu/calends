@@ -362,11 +362,13 @@ export function Seg<T extends string>({
   options,
   onChange,
   small,
+  disabledKeys,
 }: {
   value: T;
   options: Array<[T, string]>;
   onChange: (v: T) => void;
   small?: boolean;
+  disabledKeys?: T[];
 }) {
   return (
     <ToggleButtonGroup
@@ -380,7 +382,7 @@ export function Seg<T extends string>({
       }}
     >
       {options.map(([k, l]) => (
-        <ToggleButton key={k} id={k} className={({ isSelected }) => (isSelected ? 'on' : '')}>
+        <ToggleButton key={k} id={k} isDisabled={disabledKeys?.includes(k)} className={({ isSelected }) => (isSelected ? 'on' : '')}>
           {l}
         </ToggleButton>
       ))}

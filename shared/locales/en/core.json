@@ -189,6 +189,8 @@
     "fullyRefunded": "Fully refunded",
     "chargeOnEnd": "This day is still a renewal charge. Pick the day before to avoid it.",
     "nonrenewDone": "Set to not renew. No charges after {date}.",
-    "stoppedDone": "Service stopped"
+    "stoppedDone": "Service stopped",
+    "method": "Stop method",
+    "latestRefundHint": "These fields edit the latest refund. Earlier refunds stay in payment history."
   }
 }

@@ -19,7 +19,7 @@
   "clearForm": "Kosongkan formulir",
   "revert": "Batalkan perubahan",
   "draftRestored": "Draf yang belum disimpan dipulihkan",
-  "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, tandai sebagai Dibatalkan saja.",
+  "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, pilih Hentikan saja.",
   "toast": {
     "added": "Ditambahkan",
     "saved": "Disimpan",
@@ -56,7 +56,8 @@
     "trial": "Uji coba",
     "paused": "Dijeda",
     "cancelled": "Dibatalkan",
-    "terminated": "Dinonaktifkan"
+    "terminated": "Dinonaktifkan",
+    "stop": "Hentikan"
   },
   "category": {
     "choose": "Pilih kategori",
@@ -93,7 +94,8 @@
     "showDomainOn": "Pengunjung melihat domain lengkap",
     "showDomainOff": "Disamarkan di halaman publik",
     "tagsPlaceholder": "Pisahkan dengan spasi",
-    "notesPlaceholder": "Catatan (opsional)"
+    "notesPlaceholder": "Catatan (opsional)",
+    "pausedAt": "Tanggal jeda"
   },
   "share": {
     "none": "Hanya saya",

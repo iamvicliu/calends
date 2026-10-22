@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { billingPeriod, chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
+import { chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
 import { flow, cnDateFull } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { cancelAtEnd, reactivate, stopSubscription } from '../../../shared/phases.ts';
+import { reactivate } from '../../../shared/phases.ts';
+import { applyStopForm, stopForm, stopPreview, type StopForm, type StopMode } from '../../../shared/stop-form.ts';
 import type { Subscription } from '../../../shared/types.ts';
 import { toast } from '../store.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect, Picker } from './Picker.tsx';
 import { Cell } from './ui.tsx';
-
-type Mode = 'nonrenew' | 'cancel' | 'terminate';
 
 export function stopLabel(sub: Subscription, today: string): string | undefined {
   const summary = stopSummary(sub, today);
@@ -53,47 +52,14 @@ export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: 
   ) : null;
 }
 
-/** 作为草稿应用到编辑器，或由详情的弹层保存。所有金额与校验复用 shared。 */
+/** Standalone detail action: fields plus an explicit confirmation. */
 export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: string; onApply: (s: Subscription) => void }) {
-  const [mode, setMode] = useState<Mode>('nonrenew');
-  // 到期不续默认停在本期付到的那天（续费日前一天）；已有更早的结束日就沿用它
-  const [date, setDate] = useState(() => {
-    const paid = billingPeriod(currentPhase(sub, today), today).paidThrough;
-    return sub.end && sub.end < paid ? sub.end : paid;
-  });
-  const [refund, setRefund] = useState(false);
-  const [amount, setAmount] = useState<string | undefined>();
-  const [refundDate, setRefundDate] = useState<string | undefined>();
-  const [reason, setReason] = useState('');
-  const [settled, setSettled] = useState('');
-  const [settledCurrency, setSettledCurrency] = useState('USD');
-  const cur = currentPhase(sub, date);
-  const period = billingPeriod(cur, date < today ? date : today);
-  const preview = stopSummary({ ...cur, stop: { kind: mode === 'terminate' ? 'terminate' : 'cancel', date, paidThrough: period.paidThrough } });
+  const [form, setForm] = useState(() => stopForm(sub, today));
   const ended = ['ended', 'terminated'].includes(effectiveStatus(sub, today));
   const stops = phaseSubs(sub).filter((p) => p.stop);
   const apply = () => {
     try {
-      if (refund && (!(Number(amount ?? preview!.suggestedRefund) >= 0) || amount === '')) throw new Error(t('mcp.error.invalidRefund'));
-      if (settled !== '' && !(Number(settled) >= 0)) throw new Error(t('mcp.error.invalidRefund'));
-      const next =
-        mode === 'nonrenew'
-          ? cancelAtEnd(sub, date, today)
-          : stopSubscription(
-              sub,
-              today,
-              mode,
-              date,
-              reason,
-              refund
-                ? {
-                    amount: Number(amount ?? preview!.suggestedRefund),
-                    date: refundDate ?? date,
-                    settled: settled !== '' ? { amount: Number(settled), currency: settledCurrency } : undefined,
-                  }
-                : undefined,
-            );
-      onApply(next);
+      onApply(applyStopForm(sub, form, today));
     } catch (error) {
       toast(error instanceof Error ? error.message : String(error), true);
     }
@@ -118,23 +84,56 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
     );
   return (
     <div className="stop-panel">
-      <Cell label={t('core.stop.title')}>
+      <StopFields sub={sub} today={today} value={form} onChange={setForm} />
+      <div className="cell stop-actions">
+        {sub.end && (
+          <button type="button" className="btn" onClick={() => onApply(reactivate(sub, today))}>
+            {t('core.stop.restore')}
+          </button>
+        )}
+        <button type="button" className="btn" onClick={apply}>
+          {t('core.stop.title')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Controlled fields: the editor owns this draft and submits it with Done. */
+export function StopFields({ sub, today, value, onChange }: { sub: Subscription; today: string; value: StopForm; onChange: (value: StopForm) => void }) {
+  const { mode, date, refund, amount, refundDate, reason, settled, settledCurrency } = value;
+  const up = (patch: Partial<StopForm>) => onChange({ ...value, ...patch });
+  const { cur, period, summary: preview } = stopPreview(sub, value, today);
+  const priorRefunds = cur.stop ? (cur.payments?.filter((p) => p.kind === 'refund' && p.date >= cur.stop!.date).length ?? 0) : 0;
+  const terminated = sub.stop?.kind === 'terminate' || sub.status === 'terminated';
+  return (
+    <div className="stop-panel">
+      <Cell label={t('core.stop.method')}>
         <Picker
           value={mode}
           onChange={(v) => {
-            setMode(v);
-            setDate(v === 'nonrenew' ? period.paidThrough : today);
-            setAmount(undefined);
+            up({
+              mode: v as StopMode,
+              date: v === 'nonrenew' ? period.paidThrough : today,
+              amount: sub.stop ? amount : undefined,
+              refundDate: sub.stop ? refundDate : undefined,
+            });
           }}
-          options={(['nonrenew', 'cancel', 'terminate'] as const).map((value) => ({ value, label: t(`core.stop.${value}`) }))}
-          ariaLabel={t('core.stop.title')}
+          options={(terminated ? (['terminate'] as const) : (['nonrenew', 'cancel', 'terminate'] as const)).map((value) => ({
+            value,
+            label: t(`core.stop.${value}`),
+          }))}
+          ariaLabel={t('core.stop.method')}
         />
       </Cell>
       <Cell
-        label={t(mode === 'nonrenew' ? 'editor.field.end' : 'core.stop.date')}
+        label={t('core.stop.date')}
         // 结束日当天正好是续费日时仍会扣款：提醒改成前一天
         sub={
-          mode === 'nonrenew' && chargesBetween(sub, date, date, today).some((c) => !c.kind && c.amount > 0) ? (
+          mode === 'nonrenew' &&
+          chargesBetween({ ...cur, end: undefined, stop: undefined, status: sub.status === 'trial' ? 'trial' : 'active' }, date, date, today).some(
+            (c) => !c.kind && c.amount > 0,
+          ) ? (
             <span className="stop-warn">{t('core.stop.chargeOnEnd')}</span>
           ) : undefined
         }
@@ -143,8 +142,7 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
           value={date}
           onChange={(value) => {
             if (value) {
-              setDate(value);
-              setAmount(undefined);
+              up({ date: value, amount: sub.stop ? amount : undefined });
             }
           }}
         />
@@ -154,13 +152,13 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
           <p className="stop-hint">{t('core.stop.paidThrough', { date: cnDateFull(period.paidThrough) })}</p>
           {mode === 'terminate' && (
             <Cell label={t('core.stop.reason')}>
-              <input value={reason} onChange={(e) => setReason(e.target.value)} />
+              <input value={reason} onChange={(e) => up({ reason: e.target.value })} />
             </Cell>
           )}
-          <Cell label={t('editor.payment.kind.refund')}>
+          <Cell label={t('editor.payment.kind.refund')} sub={priorRefunds > 1 ? t('core.stop.latestRefundHint') : undefined}>
             <Picker
               value={refund ? 'yes' : 'no'}
-              onChange={(v) => setRefund(v === 'yes')}
+              onChange={(v) => up({ refund: v === 'yes' })}
               options={[
                 { value: 'no', label: t('core.stop.refundNo') },
                 { value: 'yes', label: t('core.stop.refundYes') },
@@ -171,31 +169,21 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
           {refund && (
             <>
               <Cell label={`${t('core.stop.refundAmount')} · ${cur.currency}`} sub={t('core.stop.currencyHint', { currency: cur.currency })}>
-                <input inputMode="decimal" value={amount ?? String(preview!.suggestedRefund)} onChange={(e) => setAmount(e.target.value)} />
+                <input inputMode="decimal" value={amount ?? String(preview!.suggestedRefund)} onChange={(e) => up({ amount: e.target.value })} />
               </Cell>
               <Cell label={t('core.stop.refundDate')}>
-                <DatePicker value={refundDate ?? date} min={date} onChange={(v) => setRefundDate(v)} />
+                <DatePicker value={refundDate ?? date} min={date} onChange={(v) => up({ refundDate: v })} />
               </Cell>
               <Cell label={t('editor.payment.settledCcy')}>
-                <CurrencySelect value={settledCurrency} onChange={setSettledCurrency} />
+                <CurrencySelect value={settledCurrency} onChange={(v) => up({ settledCurrency: v })} />
               </Cell>
               <Cell label={t('editor.payment.settledAmount')}>
-                <input inputMode="decimal" value={settled} placeholder={t('editor.field.optional')} onChange={(e) => setSettled(e.target.value)} />
+                <input inputMode="decimal" value={settled} placeholder={t('editor.field.optional')} onChange={(e) => up({ settled: e.target.value })} />
               </Cell>
             </>
           )}
         </>
       )}
-      <div className="cell stop-actions">
-        {sub.end && (
-          <button type="button" className="btn" onClick={() => onApply(reactivate(sub, today))}>
-            {t('core.stop.restore')}
-          </button>
-        )}
-        <button type="button" className="btn" onClick={apply}>
-          {t('common.apply')}
-        </button>
-      </div>
     </div>
   );
 }

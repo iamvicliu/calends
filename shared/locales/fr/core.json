@@ -189,6 +189,8 @@
     "fullyRefunded": "Intégralement remboursé",
     "chargeOnEnd": "Ce jour-là, le renouvellement est encore prélevé. Choisissez la veille pour l’éviter.",
     "nonrenewDone": "Ne sera pas renouvelé. Plus de prélèvement après le {date}.",
-    "stoppedDone": "Service arrêté"
+    "stoppedDone": "Service arrêté",
+    "method": "Mode d’arrêt",
+    "latestRefundHint": "Ces champs modifient le dernier remboursement. Les précédents restent dans l’historique des paiements."
   }
 }

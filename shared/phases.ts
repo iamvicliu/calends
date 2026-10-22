@@ -457,7 +457,10 @@ export function statusChangeError(previous: Subscription | undefined, next: Subs
   const error = subError(next);
   if (error) return error;
   if (previous && !previous.stop && next.stop) {
-    if (['ended', 'terminated'].includes(effectiveStatus(previous, today))) return t('mcp.error.subscriptionEnded');
+    // An existing end date can be corrected into an explicit stop by the full editor.
+    // Action-based MCP callers still reject ended subscriptions before reaching this validator.
+    const status = effectiveStatus(previous, today);
+    if (status === 'terminated' || (status === 'ended' && !previous.end)) return t('mcp.error.subscriptionEnded');
     const period = billingPeriod(currentPhase(previous, next.stop.date), next.stop.date < today ? next.stop.date : today);
     if (next.stop.date > period.paidThrough) return t('mcp.error.stopAfterPaidThrough');
   }

@@ -189,6 +189,8 @@
     "fullyRefunded": "Reembolso completo",
     "chargeOnEnd": "Ese día aún se cobra la renovación. Elige el día anterior para evitarlo.",
     "nonrenewDone": "No se renovará. Sin cargos después del {date}.",
-    "stoppedDone": "Servicio detenido"
+    "stoppedDone": "Servicio detenido",
+    "method": "Forma de baja",
+    "latestRefundHint": "Estos campos editan el último reembolso. Los anteriores se conservan en el historial de pagos."
   }
 }

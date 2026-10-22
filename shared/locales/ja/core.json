@@ -178,6 +178,8 @@
     "fullyRefunded": "全額返金済み",
     "chargeOnEnd": "この日は更新の請求日です。前日にすると請求されません。",
     "nonrenewDone": "期限で更新しない設定にしました。{date} 以降は請求されません。",
-    "stoppedDone": "サービスを停止しました"
+    "stoppedDone": "サービスを停止しました",
+    "method": "停止方法",
+    "latestRefundHint": "ここでは直近の返金を編集します。それ以前の返金は支払い履歴に残ります。"
   }
 }

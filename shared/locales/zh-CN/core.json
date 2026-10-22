@@ -158,6 +158,8 @@
     "fullyRefunded": "已全额退款",
     "chargeOnEnd": "这一天仍会续费扣款，改成前一天才不会扣",
     "nonrenewDone": "已设为到期不续，{date} 后不再扣款",
-    "stoppedDone": "已停止服务"
+    "stoppedDone": "已停止服务",
+    "method": "停止方式",
+    "latestRefundHint": "此处修改最近一笔退款，之前的退款保留在扣款记录中。"
   }
 }

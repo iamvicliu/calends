@@ -178,6 +178,8 @@
     "fullyRefunded": "Dana dikembalikan penuh",
     "chargeOnEnd": "Hari ini masih ada tagihan perpanjangan. Pilih sehari sebelumnya agar tidak ditagih.",
     "nonrenewDone": "Tidak akan diperpanjang. Tidak ada tagihan setelah {date}.",
-    "stoppedDone": "Layanan dihentikan"
+    "stoppedDone": "Layanan dihentikan",
+    "method": "Cara penghentian",
+    "latestRefundHint": "Kolom ini mengubah pengembalian dana terakhir. Pengembalian sebelumnya tetap ada di riwayat pembayaran."
   }
 }

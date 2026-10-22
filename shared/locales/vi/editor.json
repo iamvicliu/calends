@@ -19,7 +19,7 @@
   "clearForm": "Xóa biểu mẫu",
   "revert": "Hoàn tác thay đổi",
   "draftRestored": "Đã khôi phục bản nháp chưa lưu",
-  "confirmDelete": "Xóa “{name}”? Lịch sử của gói cũng sẽ bị xóa. Nếu bạn chỉ ngừng gia hạn, hãy đánh dấu là Đã hủy.",
+  "confirmDelete": "Xóa “{name}”? Lịch sử của gói cũng sẽ bị xóa. Nếu bạn chỉ ngừng gia hạn, hãy chọn Dừng.",
   "toast": {
     "added": "Đã thêm",
     "saved": "Đã lưu",
@@ -56,7 +56,8 @@
     "trial": "Dùng thử",
     "paused": "Tạm dừng",
     "cancelled": "Đã hủy",
-    "terminated": "Đã vô hiệu hóa"
+    "terminated": "Đã vô hiệu hóa",
+    "stop": "Dừng"
   },
   "category": {
     "choose": "Chọn danh mục",
@@ -93,7 +94,8 @@
     "showDomainOn": "Khách truy cập thấy đầy đủ tên miền",
     "showDomainOff": "Được che trên trang công khai",
     "tagsPlaceholder": "Phân tách bằng dấu cách",
-    "notesPlaceholder": "Ghi chú (tùy chọn)"
+    "notesPlaceholder": "Ghi chú (tùy chọn)",
+    "pausedAt": "Ngày tạm dừng"
   },
   "share": {
     "none": "Chỉ mình tôi",

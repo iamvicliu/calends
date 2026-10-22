@@ -16,7 +16,7 @@
   },
   "addTitle": "サブスクを追加",
   "editTitle": "「{name}」を編集",
-  "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「解約済み」にしてください。",
+  "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「停止」を選んでください。",
   "clearForm": "フォームをクリア",
   "revert": "変更を元に戻す",
   "draftRestored": "前回の未保存の内容を復元しました",
@@ -56,7 +56,8 @@
     "trial": "トライアル",
     "paused": "一時停止",
     "cancelled": "解約済み",
-    "terminated": "利用停止"
+    "terminated": "利用停止",
+    "stop": "停止"
   },
   "category": {
     "choose": "カテゴリを選択",
@@ -93,7 +94,8 @@
     "showDomainOn": "訪問者に完全なドメインが表示されます",
     "showDomainOff": "公開ページでは伏せて表示されます",
     "tagsPlaceholder": "スペースで区切る",
-    "notesPlaceholder": "メモ（任意）"
+    "notesPlaceholder": "メモ（任意）",
+    "pausedAt": "一時停止日"
   },
   "share": {
     "none": "自分だけ",

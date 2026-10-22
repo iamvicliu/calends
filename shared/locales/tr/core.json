@@ -189,6 +189,8 @@
     "fullyRefunded": "Tamamı iade edildi",
     "chargeOnEnd": "Bu gün hâlâ yenileme ücreti alınır. Önlemek için bir önceki günü seçin.",
     "nonrenewDone": "Yenilenmeyecek. {date} sonrasında ücret alınmaz.",
-    "stoppedDone": "Hizmet durduruldu"
+    "stoppedDone": "Hizmet durduruldu",
+    "method": "Durdurma şekli",
+    "latestRefundHint": "Bu alanlar son iadeyi düzenler. Önceki iadeler ödeme geçmişinde kalır."
   }
 }

@@ -20,7 +20,7 @@
   "clearForm": "Formular leeren",
   "revert": "Änderungen verwerfen",
   "draftRestored": "Ungespeicherter Entwurf wiederhergestellt",
-  "confirmDelete": "„{name}“ löschen? Der Verlauf wird ebenfalls gelöscht. Wenn du nur nicht mehr verlängerst, markiere es stattdessen als „Gekündigt“.",
+  "confirmDelete": "„{name}“ löschen? Der Verlauf wird ebenfalls gelöscht. Wenn du nur nicht mehr verlängerst, wähle stattdessen „Beenden“.",
   "toast": {
     "added": "Hinzugefügt",
     "saved": "Gesichert",
@@ -61,7 +61,8 @@
     "trial": "Testphase",
     "paused": "Pausiert",
     "cancelled": "Gekündigt",
-    "terminated": "Gesperrt"
+    "terminated": "Gesperrt",
+    "stop": "Beenden"
   },
   "category": {
     "choose": "Kategorie wählen",
@@ -98,7 +99,8 @@
     "showDomainOn": "Besucher sehen die vollständige Domain",
     "showDomainOff": "Auf der öffentlichen Seite verborgen",
     "tagsPlaceholder": "Mit Leerzeichen trennen",
-    "notesPlaceholder": "Notizen (optional)"
+    "notesPlaceholder": "Notizen (optional)",
+    "pausedAt": "Pausiert ab"
   },
   "share": {
     "none": "Nur ich",
