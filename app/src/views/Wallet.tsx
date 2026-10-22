@@ -17,7 +17,7 @@ import { t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 
-function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
+function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: string; state: AppState; flat?: boolean; detailsOnly?: boolean }) {
   // 大字 / 小字金额跟随显示货币设置
   const pair = useMoneyPair(state);
   const m = r.method;
@@ -31,18 +31,22 @@ function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state
         <MethodMark m={m} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600 }}>{m.name}</div>
-          <div className="muted" style={{ fontSize: 12.5 }}>
-            {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div className="rw-bal">{bal.main}</div>
-          {bal.alt && (
-            <div className="soft" style={{ fontSize: 11.5 }}>
-              {bal.alt}
+          {!detailsOnly && (
+            <div className="muted" style={{ fontSize: 12.5 }}>
+              {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
             </div>
           )}
         </div>
+        {!detailsOnly && (
+          <div style={{ textAlign: 'right' }}>
+            <div className="rw-bal">{bal.main}</div>
+            {bal.alt && (
+              <div className="soft" style={{ fontSize: 11.5 }}>
+                {bal.alt}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className={`rw-track ${tone}`}>
         <span style={{ width: `${pct}%` }} />
@@ -341,7 +345,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                           ? t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })
                           : t('wallet.card.subs', { count: liveHere.length })
                       }
-                      rightSub={cardHint(m, r)}
+                      rightSub={r && r.monthlyDrain > 0 ? t('wallet.card.subs', { count: liveHere.length }) : cardHint(m, r)}
                     />
                   </SortableCard>
                 );
@@ -358,7 +362,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
               .filter((r): r is NonNullable<typeof r> => r != null && r.monthlyDrain > 0)
               .map((r) => (
                 <div key={r.method.id} className="cell" style={{ display: 'block', padding: '14px 16px' }}>
-                  <RunwayCard r={r} today={today} state={state} flat />
+                  <RunwayCard r={r} today={today} state={state} flat detailsOnly />
                 </div>
               ))}
           </Group>

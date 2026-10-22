@@ -638,3 +638,67 @@ test('scope composition uses category colors for both marks and bars and exports
   assert.ok(nodes.some((n) => n.type === 'i' && n.props.style.background === 'color-Tools'));
   assert.ok(nodes.some((n) => n.type === 'MethodMark' && n.props.m === method && n.props.proxied));
 });
+
+test('单项停止损失只显示明细；多项和零损失保留汇总', () => {
+  const sub: Subscription = {
+    id: 's',
+    name: 'Stopped',
+    category: 'Tools',
+    tags: [],
+    price: 31,
+    currency: 'USD',
+    start: '2026-10-05',
+    cycle: { unit: 'month', every: 1 },
+    status: 'cancelled',
+    end: '2026-10-19',
+    stop: { kind: 'cancel', date: '2026-10-19', paidThrough: '2026-11-04' },
+  };
+  const r = harness('../app/src/views/Report.tsx', 'StopsCard', {}, { tipProps: () => ({}) });
+  for (const count of [0, 1, 2]) {
+    const state = { ...st, subscriptions: Array.from({ length: count }, (_, i) => ({ ...sub, id: String(i) })) };
+    const nodes = r.render('StopsCard', { state, today, onOpen() {} });
+    assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, count);
+    assert.equal(nodes.filter((n) => n.children.includes('report.stops.loss')).length, count === 1 ? 0 : 1);
+  }
+});
+
+test('钱包续航列表不重复卡面余额和月扣；单年度分享用时长替代重复总额', () => {
+  const wallet = harness('../app/src/views/Wallet.tsx', 'RunwayCard', {}, { tx: (key: string) => key });
+  const method = { id: 'w', name: 'Wallet', kind: 'debit' as const, currency: 'USD', balance: 30, balanceAsOf: today };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    start: today,
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    methodId: 'w',
+  };
+  const state = { ...st, methods: [method], subscriptions: [sub] };
+  const r = billing.runwayFor(method, state, today);
+  const render = (detailsOnly: boolean) => wallet.render('RunwayCard', { r, today, state, flat: true, detailsOnly });
+  assert.equal(
+    render(true).find((n) => n.props.className === 'rw-bal'),
+    undefined,
+  );
+  assert.ok(render(false).find((n) => n.props.className === 'rw-bal'));
+  const share = harness('../app/src/views/SubShare.tsx', 'SYears', {}, { location: { host: 'example.test' } });
+  for (const years of [
+    [['2026', 10]],
+    [
+      ['2025', 4],
+      ['2026', 6],
+    ],
+  ] as Array<Array<[string, number]>>) {
+    const nodes = share.render('SYears', {
+      sub,
+      st: { years, total: 10, duration: '20 days', charges: [], vs: [sub], change: 0 },
+      hide: false,
+      m: (n: number) => format.flow(n, 'USD'),
+    });
+    assert.deepEqual(nodes.find((n) => n.props.className === 'sy-big')!.children, [years.length === 1 ? '20 days' : '−$10.00']);
+  }
+});

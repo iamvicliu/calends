@@ -400,13 +400,15 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
           </b>
           <small>{t('report.stops.savedHint')}</small>
         </div>
-        <div>
-          <span>{t('report.stops.loss')}</span>
-          <b className="red">
-            <Amount value={-losses.total} ccy={base} compact />
-          </b>
-          <small>{t('report.stops.lossHint')}</small>
-        </div>
+        {losses.items.length !== 1 && (
+          <div>
+            <span>{t('report.stops.loss')}</span>
+            <b className="red">
+              <Amount value={-losses.total} ccy={base} compact />
+            </b>
+            <small>{t('report.stops.lossHint')}</small>
+          </div>
+        )}
       </div>
       {losses.incomplete && <p className="stop-basis red">{t('core.stop.fxMissing')}</p>}
       <h4 className="stop-list-title">{t('report.stops.details')}</h4>

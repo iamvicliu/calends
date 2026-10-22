@@ -334,7 +334,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
           <span>{t('share.byYear')}</span>
         </div>
       </div>
-      <div className="sy-big">{hide ? st.duration : m(-st.total)}</div>
+      <div className="sy-big">{hide || st.years.length === 1 ? st.duration : m(-st.total)}</div>
       <div className="sy-bars">
         {st.years.map(([y, v]) => (
           <div key={y} className="sy-col">
