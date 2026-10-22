@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Не указан",
     "anyRegion": "Любой регион",
-    "total": "Итого"
+    "total": "Итого",
+    "createCategory": "Будет создана категория: {name}",
+    "createdCategory": "Создана категория: {name}"
   },
   "error": {
     "shareFull": "«{name}» заполнена (мест: {seats})",
@@ -59,7 +61,8 @@
     "invalidInput": "Invalid tool input: {field}",
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
-    "staleRecord": "This record changed since the preview. Read and preview again."
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Категория не найдена или неоднозначна: {q}. Варианты: {list}"
   },
   "tool": {
     "get_overview": "Обзор учёта",

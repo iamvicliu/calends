@@ -1,7 +1,7 @@
 // AI 助手：用 DeepSeek 识别用户粘贴的文字、截图，整理成订阅草稿；查询与修改直接复用 MCP 工具。
 // 写操作一律先 dry_run 出草稿，由用户在页面上确认后再经同一个工具真正执行。
 import { todayIn } from '../../shared/billing.ts';
-import { categoryList, presetCategory, presetOf } from '../../shared/categories.ts';
+import { categoryList } from '../../shared/categories.ts';
 import {
   applyLine,
   assistantMessage,
@@ -85,7 +85,7 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Past and ended subscriptions (pasted notes, "used it for 3 years"): start = when it began — for "N years/months so far" count back from the latest charge on the stated billing day; month only → that month’s billing day, else day 1. Ended ("A – B", "cancelled in June 2022") → end = the last service day (inclusive; charges may still fall on that day). Earlier prices ("8 yuan at first, 18 since January") → create_subscription with the first price, then change_price on the returned id for each later price, in the same turn; region/plan switches → change_plan.',
     '- What the user states wins: never add an end date, change a price or drop a field because of an existing record; mention the overlap in your reply instead. Do not rename or recategorize an existing subscription unless asked.',
     '- Figures in replies (yearly cost, my share, per month) come from tool results such as get_carpool or get_subscription; do not do mental arithmetic.',
-    '- Pick the closest category from the list and the payment method that matches the card, store account or wallet mentioned; omit method if unclear.',
+    '- Call list_categories first and reuse an existing category code/name. If the requested category is missing, use save_category action=create or explicitly pass create_category=true (optional category_icon/category_color). Unknown or ambiguous references fail. Pick the payment method that matches the card, store account or wallet mentioned; omit method if unclear.',
     '- Fill in as much as the input supports: name WITH the plan/tier (e.g. "Spotify Premium Family", "iCloud+ 200GB", "ChatGPT Plus"), price, currency, cycle, start, region, method, category, url, icon, account (the login email, phone number for carriers, or username shown), and notes for useful extras (order number, seats). Never leave out a field you can read or infer.',
     '- Icon and url are required for every app or service: call search_app_store (country = the store region, else us) and pass the matching result’s icon (prefer the 256x256 artwork) and url; for web-only services and ones that are not mainly an app (carriers, utilities, cloud hosting) use the official homepage as url. If nothing matches, still give the official url.',
     '- Bill tables and statements covering several months (one row per month, one column per service or line): each column/service is ONE subscription — never one per month or per amount. Keep each name exactly as written (fix only obvious typos such as "T-Moblie" → "T-Mobile"); never translate it or swap it for a different provider, and do not search the ledger under other names. start = its first month with an amount (billing day 1 unless a day is shown); months shown as —/blank are before it started or unknown, not charges. price = the latest month’s amount. Usage-based amounts that vary month to month are actual charges, not price changes: pass ALL of them in create_subscription.payments (every month listed, including ones equal to price), and do not call change_price or record_payment for them. Ignore total/sum columns. If no currency is shown, use the currency of the provider’s home market (T-Mobile, AT&T → USD; CUniq → HKD) and say in the reply which currency you assumed.',
@@ -104,39 +104,15 @@ async function systemPrompt(env: Env): Promise<string> {
 
 type Emit = (event: Record<string, unknown>) => void;
 
-async function categoryNames(env: Env): Promise<string[]> {
-  const st = await loadState(env, false);
-  return categoryList(st.settings, st.subscriptions).map((c) => c.name);
-}
-
 const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 
 /**
  * 新增订阅的草稿补全：模型没给图标或链接时，按名称（和地区）查 App Store，
  * 名称对得上才采用，补上图标和链接，并告诉模型补了什么
  */
-export async function enrichDraft(args: Record<string, unknown>, cats: string[] = []): Promise<{ args: Record<string, unknown>; filled: string[] }> {
+export async function enrichDraft(args: Record<string, unknown>): Promise<{ args: Record<string, unknown>; filled: string[] }> {
   const name = decodeEntities(String(args.name ?? '').trim());
   const fixed: Record<string, unknown> = { ...args, ...(args.name != null ? { name } : {}) };
-  // 分类：内置分类不管用哪种语言写，都换成账本里当前语言的那个名字；不认识也不在账本里的不新建，交给默认分类
-  const fixCat = (v: unknown) => {
-    const name = String(v);
-    const p = presetOf(name);
-    if (p) return presetCategory([], p.code);
-    return cats.includes(name) ? name : undefined;
-  };
-  if (fixed.category != null) {
-    const c = fixCat(fixed.category);
-    if (c) fixed.category = c;
-    else delete fixed.category;
-  }
-  if (fixed.set && typeof fixed.set === 'object' && (fixed.set as Record<string, unknown>).category != null) {
-    const set = { ...(fixed.set as Record<string, unknown>) };
-    const c = fixCat(set.category);
-    if (c) set.category = c;
-    else delete set.category;
-    fixed.set = set;
-  }
   // App Store 图标给的是 100px，卡片上显得糊：换成 256px
   if (typeof fixed.icon === 'string') fixed.icon = fixed.icon.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/256x256bb.$1');
   args = fixed;
@@ -253,9 +229,7 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
             if (parseError) throw new Error(`invalid arguments: ${parseError}`);
             if (tool.write) {
               const { args: full, filled } =
-                tool.name === 'create_subscription' || tool.name === 'update_subscription'
-                  ? await enrichDraft(args, await categoryNames(env))
-                  : { args, filled: [] as string[] };
+                tool.name === 'create_subscription' || tool.name === 'update_subscription' ? await enrichDraft(args) : { args, filled: [] as string[] };
               const draft = { ...full, dry_run: true };
               const preview = await tool.run(draft, ctx);
               const { dry_run: _d, ...clean } = draft as Record<string, unknown>;

@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Unassigned",
     "anyRegion": "Any region",
-    "total": "Total"
+    "total": "Total",
+    "createCategory": "Will create category: {name}",
+    "createdCategory": "Created category: {name}"
   },
   "error": {
     "shareFull": "“{name}” is full ({seats} seats)",
@@ -59,7 +61,8 @@
     "invalidInput": "Invalid tool input: {field}",
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
-    "staleRecord": "This record changed since the preview. Read and preview again."
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Category not found or ambiguous: {q}. Options: {list}"
   },
   "tool": {
     "get_overview": "Ledger overview",
