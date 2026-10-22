@@ -27,7 +27,7 @@
     "write": "Okuma ve yazma",
     "read": "Salt okunur",
     "label": "İzin",
-    "writeDesc": "Abonelikleri, ödemeleri ve geri ödemeleri sorgulayın, ekleyin ve düzenleyin.",
+    "writeDesc": "Abonelikleri, ödemeleri, tahsilatları, cüzdanları, kişileri, kategorileri ve defter ayarlarını sorgula ve yönet.",
     "readDesc": "Yalnızca sorgulama. Hiçbir şey değiştirilemez."
   },
   "created": {

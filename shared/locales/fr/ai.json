@@ -27,7 +27,7 @@
     "write": "Lecture et écriture",
     "read": "Lecture seule",
     "label": "Autorisation",
-    "writeDesc": "Consulter, ajouter et modifier les abonnements, prélèvements et remboursements.",
+    "writeDesc": "Consulter et gérer abonnements, paiements, encaissements, portefeuilles, personnes, catégories et paramètres du registre.",
     "readDesc": "Consultation uniquement. Aucune modification possible."
   },
   "created": {
