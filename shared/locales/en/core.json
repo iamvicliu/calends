@@ -194,5 +194,15 @@
     "stoppedDone": "Service stopped",
     "method": "Stop method",
     "latestRefundHint": "These fields edit the latest refund. Earlier refunds stay in payment history."
+  },
+  "renewal": {
+    "title": "Renewal rules",
+    "chargeLeadDays": "Charge in advance",
+    "cancelLeadDays": "Cancel in advance",
+    "hint": "Charge before service renewal; cancel before that charge. Enter days; 0 means none. Service periods stay fixed.",
+    "cancelBy": "Cancel by",
+    "invalid": "Enter whole numbers from 0 to 3660 days.",
+    "tooLate": "The cancellation deadline has passed. The next period will still be charged.",
+    "cancelReminder": "Cancel by {date} to avoid the next charge."
   }
 }

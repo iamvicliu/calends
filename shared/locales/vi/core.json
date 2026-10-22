@@ -183,5 +183,15 @@
     "stoppedDone": "Đã dừng dịch vụ",
     "method": "Cách dừng",
     "latestRefundHint": "Các trường này sửa khoản hoàn tiền gần nhất. Các khoản trước vẫn được giữ trong lịch sử thanh toán."
+  },
+  "renewal": {
+    "title": "Quy tắc gia hạn",
+    "chargeLeadDays": "Thu tiền trước",
+    "cancelLeadDays": "Hủy trước",
+    "hint": "Thu tiền trước khi gia hạn, hủy trước khoản thu đó. Nhập số ngày; 0 là không áp dụng. Kỳ dịch vụ không đổi.",
+    "cancelBy": "Hạn chót hủy",
+    "invalid": "Nhập số ngày nguyên từ 0 đến 3660.",
+    "tooLate": "Đã quá hạn hủy. Kỳ tiếp theo vẫn bị tính phí.",
+    "cancelReminder": "Hủy trước {date} để tránh khoản thu tiếp theo."
   }
 }

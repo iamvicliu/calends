@@ -1,3 +1,4 @@
+import { reconcileRenewalRules, preserveRenewalHistory, renewalDates } from '../../shared/billing.ts';
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
 import {
   activePhases,
@@ -276,6 +277,8 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
     monthly: money(st, monthly, cur.currency, undefined, out),
     my_share_factor: round(myShareFactor(cur, today)),
     next_charge: next ?? null,
+    service_expires: renewalDates(s, today).serviceExpires ?? null,
+    cancel_by: renewalDates(s, today).cancelBy ?? null,
     last_charge: lastCharge(s, today) ?? null,
     method: st.methods.find((m) => m.id === cur.methodId)?.name ?? null,
     method_id: cur.methodId ?? null,
@@ -387,6 +390,11 @@ export async function commit(
   changed: string[],
   categoryCreation?: CategoryCreation,
 ) {
+  after = reconcileRenewalRules(
+    st.subscriptions.find((s) => s.id === after.id),
+    after,
+    today,
+  );
   after = resyncShares(
     st,
     st.subscriptions.find((s) => s.id === after.id),
@@ -627,7 +635,7 @@ const CATALOGUE: Tool[] = [
         url: s.url ?? null,
         intro: s.intro ?? null,
         bonus: s.bonus ?? null,
-        expires: s.expires ?? null,
+        expires: renewalDates(s, today).serviceExpires ?? null,
         spent_total: { amount: round(spent), currency: out ?? st.settings.baseCurrency, charges: all.length },
         phases: phaseSubs(s).map((v) => ({
           start: v.start,
@@ -1037,6 +1045,8 @@ const CATALOGUE: Tool[] = [
         account: { type: 'string', description: 'Login account: email, phone number (for carriers) or username shown on the receipt.' },
         status: { type: 'string', enum: ['active', 'trial'], default: 'active' },
         trial_end: DATE,
+        chargeLeadDays: { type: 'integer', minimum: 0, maximum: 3660 },
+        cancelLeadDays: { type: 'integer', minimum: 0, maximum: 3660 },
         end: { ...DATE, description: 'Will not renew after this date.' },
         intro: {
           type: 'object',
@@ -1087,6 +1097,8 @@ const CATALOGUE: Tool[] = [
         currency,
         cycle: { unit: cyc?.unit, every: Math.max(1, Number(cyc?.every ?? 1)) },
         start,
+        chargeLeadDays: a.chargeLeadDays == null ? undefined : Number(a.chargeLeadDays),
+        cancelLeadDays: a.cancelLeadDays == null ? undefined : Number(a.cancelLeadDays),
         status: a.status === 'trial' ? 'trial' : 'active',
         methodId: methodRef(st, a.method) ?? st.settings.defaultMethodId,
         region: str(a.region)?.toUpperCase(),
@@ -1138,6 +1150,8 @@ const CATALOGUE: Tool[] = [
           next_due: { type: ['string', 'null'] },
           trial_end: { type: ['string', 'null'] },
           expires: { type: ['string', 'null'] },
+          chargeLeadDays: { type: 'integer', minimum: 0, maximum: 3660 },
+          cancelLeadDays: { type: 'integer', minimum: 0, maximum: 3660 },
         }),
         ...CATEGORY_CREATE,
         dry_run: DRY,
@@ -1155,6 +1169,8 @@ const CATALOGUE: Tool[] = [
         next[k] = v;
         changed.push(label);
       };
+      if ('chargeLeadDays' in set) put('chargeLeadDays', Number(set.chargeLeadDays));
+      if ('cancelLeadDays' in set) put('cancelLeadDays', Number(set.cancelLeadDays));
       if ('icon' in set) put('icon', str(set.icon));
       if ('show_on_public' in set) put('showOnPublic', set.show_on_public as boolean);
       if ('start' in set) {
@@ -1183,7 +1199,7 @@ const CATALOGUE: Tool[] = [
         if (k in set) put(f, set[k] == null ? undefined : date(set[k], k), k);
       }
       if (!changed.length) throw new Error(t('mcp.error.noFields'));
-      return commit(ctx, st, today, syncPhase(next, today), a.dry_run, changed, category?.creation);
+      return commit(ctx, st, today, syncPhase(preserveRenewalHistory(s, next, today), today), a.dry_run, changed, category?.creation);
     },
   },
   {

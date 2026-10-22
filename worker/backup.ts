@@ -3,6 +3,7 @@
 // 不包含：登录会话、AI 接入令牌（属于凭据，新部署应重新生成）、提醒发送记录。
 import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
+import { migrateRenewalRules } from '../shared/billing.ts';
 import { t } from '../shared/i18n.ts';
 import { putFxDayStmt } from './fx.ts';
 import { getFx, getPeople, getSettings, putKv, replaceAll } from './store.ts';
@@ -55,7 +56,7 @@ export function parseBackup(raw: unknown): Backup {
     format: BACKUP_FORMAT,
     version: b.version ?? 1,
     exportedAt: b.exportedAt ?? '',
-    subscriptions: b.subscriptions,
+    subscriptions: b.subscriptions.map(migrateRenewalRules),
     methods: b.methods ?? [],
     people: Array.isArray(b.people) ? b.people.filter((p) => p && typeof p.id === 'string' && typeof p.name === 'string') : [],
     settings: (b.settings ?? {}) as Settings,

@@ -1,5 +1,6 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
 import { DEFAULT_SETTINGS, type AppState, type PaymentMethod, type Subscription } from './types.ts';
+import { migrateRenewalRules } from './billing.ts';
 import { t } from './i18n.ts';
 import { categoryList, isDomainCategory, presetOf, type Category } from './categories.ts';
 
@@ -50,6 +51,7 @@ function originOf(url?: string): string | undefined {
 }
 
 function publicSub(s: Subscription, cats: Category[]): Subscription {
+  s = migrateRenewalRules(s);
   const domain = isDomainSub(s, cats);
   // 未上线项目的域名打码；已上线的（showOnPublic）原样展示
   const hide = domain && !s.showOnPublic;
@@ -66,6 +68,11 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     cycle: s.cycle,
     start: s.start,
     billingStart: s.billingStart,
+    chargeLeadDays: s.chargeLeadDays,
+    cancelLeadDays: s.cancelLeadDays,
+    renewalHistory: s.renewalHistory,
+    renewalOffsetDays: s.renewalOffsetDays,
+
     end: s.end,
     status: s.status,
     stop: s.stop && { kind: s.stop.kind, date: s.stop.date, paidThrough: s.stop.paidThrough },

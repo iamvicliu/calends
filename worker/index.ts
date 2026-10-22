@@ -1,6 +1,6 @@
 import { statusChangeError } from '../shared/phases.ts';
 import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.ts';
-import { addDays, subError, todayIn } from '../shared/billing.ts';
+import { addDays, reconcileRenewalRules, subError, todayIn } from '../shared/billing.ts';
 import {
   DEFAULT_SETTINGS,
   PERSON_COLORS,
@@ -187,10 +187,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {
-      const sub = (await req.json()) as Subscription;
+      let sub = (await req.json()) as Subscription;
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
       const previous = (await subsOf(env)).find((x) => x.id === sub.id);
-      const err = validSub(sub) ?? statusChangeError(previous, sub, todayIn((await getSettings(env)).timezone));
+      const today = todayIn((await getSettings(env)).timezone);
+      sub = reconcileRenewalRules(previous, sub, today);
+      const err = validSub(sub) ?? statusChangeError(previous, sub, today);
       if (err) return bad(err);
       sub.updatedAt = new Date().toISOString();
       const rev = await upsert(env, 'subscriptions', sub.id, sub);

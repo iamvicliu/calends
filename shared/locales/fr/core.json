@@ -194,5 +194,15 @@
     "stoppedDone": "Service arrêté",
     "method": "Mode d’arrêt",
     "latestRefundHint": "Ces champs modifient le dernier remboursement. Les précédents restent dans l’historique des paiements."
+  },
+  "renewal": {
+    "title": "Règles de renouvellement",
+    "chargeLeadDays": "Prélèvement anticipé",
+    "cancelLeadDays": "Annulation anticipée",
+    "hint": "Prélèvement avant le renouvellement, annulation avant ce prélèvement. Indiquez les jours ; 0 signifie aucun. Les périodes restent fixes.",
+    "cancelBy": "Date limite d’annulation",
+    "invalid": "Saisissez un nombre entier de 0 à 3660 jours.",
+    "tooLate": "Le délai d’annulation est dépassé. La prochaine période sera facturée.",
+    "cancelReminder": "Annulez avant le {date} pour éviter le prochain prélèvement."
   }
 }

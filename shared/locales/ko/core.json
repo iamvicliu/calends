@@ -183,5 +183,15 @@
     "stoppedDone": "서비스를 중지했습니다",
     "method": "중지 방식",
     "latestRefundHint": "여기서는 가장 최근 환불을 수정합니다. 이전 환불은 결제 내역에 유지됩니다."
+  },
+  "renewal": {
+    "title": "갱신 규칙",
+    "chargeLeadDays": "미리 결제할 일수",
+    "cancelLeadDays": "미리 취소할 일수",
+    "hint": "서비스 갱신 전 결제와 결제 전 취소에 필요한 일수입니다. 0은 없음이며 서비스 기간은 유지됩니다.",
+    "cancelBy": "취소 기한",
+    "invalid": "0~3660 사이의 정수 일수를 입력하세요.",
+    "tooLate": "취소 기한이 지나 다음 기간에도 요금이 청구됩니다.",
+    "cancelReminder": "다음 결제를 피하려면 {date}까지 취소하세요."
   }
 }

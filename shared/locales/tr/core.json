@@ -194,5 +194,15 @@
     "stoppedDone": "Hizmet durduruldu",
     "method": "Durdurma şekli",
     "latestRefundHint": "Bu alanlar son iadeyi düzenler. Önceki iadeler ödeme geçmişinde kalır."
+  },
+  "renewal": {
+    "title": "Yenileme kuralları",
+    "chargeLeadDays": "Erken tahsilat",
+    "cancelLeadDays": "Önceden iptal",
+    "hint": "Yenilemeden önce tahsilat, tahsilattan önce iptal. Gün sayısını girin; 0, yok demektir. Hizmet dönemleri değişmez.",
+    "cancelBy": "Son iptal tarihi",
+    "invalid": "0 ile 3660 arasında tam gün sayısı girin.",
+    "tooLate": "İptal süresi geçti. Sonraki dönem yine tahsil edilecek.",
+    "cancelReminder": "Sonraki ödemeyi önlemek için {date} tarihine kadar iptal edin."
   }
 }
