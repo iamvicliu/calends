@@ -24,7 +24,8 @@ import { searchCatalog, type CatalogItem } from '../catalog.ts';
 const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetime', every: 1 }]];
 
 type EditorStatus = 'active' | 'trial' | 'paused' | 'stop';
-const STATUS: EditorStatus[] = ['active', 'trial', 'paused', 'stop'];
+// 按订阅生命周期排列：先试用，再计费，可暂停，最后停止
+const STATUS: EditorStatus[] = ['trial', 'active', 'paused', 'stop'];
 
 export function newSub(today: string, methodId?: string, currency = 'USD'): Subscription {
   return {

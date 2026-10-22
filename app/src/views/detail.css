@@ -104,8 +104,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
+  height: 32px;
+  padding: 0 13px;
   border: 0;
   border-radius: 999px;
   background: var(--dt-panel);
@@ -135,14 +135,14 @@
   background: var(--fill);
   box-shadow: none;
 }
-/* 顶部操作：宽屏为胶囊（带文字）与正圆（只有图标），34px 高，与关闭按钮对齐 */
+/* 顶部操作：宽屏为胶囊（带文字）与正圆（只有图标），32px 高，与关闭按钮对齐 */
 .dt-act {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
+  height: 32px;
+  padding: 0 13px;
   border: 0;
   border-radius: 999px;
   background: var(--dt-panel);

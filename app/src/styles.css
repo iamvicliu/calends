@@ -213,6 +213,14 @@ a {
   margin: 0 -4px;
   padding: 0 4px;
 }
+/* 鼠标操作后不显示聚焦框（含弹层关闭时焦点回到触发按钮），键盘操作照常显示 */
+[data-input='pointer'] :focus-visible {
+  outline: none;
+}
+.side-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .side-item {
   display: flex;
   align-items: center;
