@@ -278,8 +278,7 @@
     "sheetTitle": "Plan collection rule",
     "from": "Effective from",
     "anchor": "Collection anchor",
-    "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged.",
-    "summary": "{rule} · anchor {date}"
+    "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged."
   },
   "quick": {
     "more": "More details",

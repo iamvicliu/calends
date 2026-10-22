@@ -278,8 +278,7 @@
     "sheetTitle": "Regla de cobro del plan",
     "from": "Desde",
     "anchor": "Fecha de cobro común",
-    "applyNote": "{count} miembros que siguen el plan cambian desde la fecha indicada; los personalizados y los cobros anteriores no cambian.",
-    "summary": "{rule} · ancla {date}"
+    "applyNote": "{count} miembros que siguen el plan cambian desde la fecha indicada; los personalizados y los cobros anteriores no cambian."
   },
   "quick": {
     "more": "Más datos",

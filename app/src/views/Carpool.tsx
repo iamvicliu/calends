@@ -674,20 +674,20 @@ export function CarSheet({
             </Cell>
             {/* 车的收款规则：跟随车的成员都按这个收；点开修改 */}
             <Cell label={t('family.rule.title')} onClick={ro ? undefined : () => setEditingRule(true)}>
-              {t('family.rule.summary', {
-                rule: perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) }),
-                date: cnDate(collectionAnchor(s)),
-              })}
+              {/* 窄屏放不下时只在「·」处换行，不把日期拆开 */}
+              <span className="cell-wrap">
+                <span className="nowrap">{perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}</span>
+                {' · '}
+                <span className="nowrap">
+                  {t('family.rule.anchor')} {cnDate(collectionAnchor(s))}
+                </span>
+              </span>
             </Cell>
             <Cell label={t('family.sheet.since')}>{book.since ? cnDateFull(book.since) : '—'}</Cell>
             <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
               {stopped ? (s.end ? cnDateFull(s.end) : '—') : next ? cnDateFull(next) : '—'}
             </Cell>
-            {s.manageUrl && (
-              <Cell label={t('family.pool.manage')} onClick={() => window.open(s.manageUrl, '_blank', 'noopener')}>
-                {t('family.pool.manageTitle')}
-              </Cell>
-            )}
+            {/* 家庭组管理页入口在合租卡片的「管理」按钮，这里不重复 */}
             <Cell label={t('proxy.subscription')} onClick={onOpenSub}>
               {t('proxy.viewDetail')}
             </Cell>

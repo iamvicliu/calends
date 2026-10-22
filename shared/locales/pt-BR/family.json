@@ -278,8 +278,7 @@
     "sheetTitle": "Regra de cobrança do plano",
     "from": "A partir de",
     "anchor": "Data comum de cobrança",
-    "applyNote": "{count} membros que seguem o plano mudam a partir da data; personalizados e cobranças anteriores não mudam.",
-    "summary": "{rule} · âncora {date}"
+    "applyNote": "{count} membros que seguem o plano mudam a partir da data; personalizados e cobranças anteriores não mudam."
   },
   "quick": {
     "more": "Mais dados",

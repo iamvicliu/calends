@@ -278,8 +278,7 @@
     "sheetTitle": "Plan tahsilat kuralı",
     "from": "Geçerlilik",
     "anchor": "Ortak tahsilat günü",
-    "applyNote": "Planı izleyen {count} üye bu tarihten itibaren yeni kurala geçer; özel üyeler ve geçmiş tahsilatlar değişmez.",
-    "summary": "{rule} · çapa {date}"
+    "applyNote": "Planı izleyen {count} üye bu tarihten itibaren yeni kurala geçer; özel üyeler ve geçmiş tahsilatlar değişmez."
   },
   "quick": {
     "more": "Diğer bilgiler",

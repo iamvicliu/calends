@@ -278,8 +278,7 @@
     "sheetTitle": "Einzugsregel des Abos",
     "from": "Gültig ab",
     "anchor": "Einzugsstichtag",
-    "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert.",
-    "summary": "{rule} · Stichtag {date}"
+    "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert."
   },
   "quick": {
     "more": "Weitere Angaben",

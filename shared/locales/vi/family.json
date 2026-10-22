@@ -269,8 +269,7 @@
     "sheetTitle": "Quy tắc thu của gói",
     "from": "Áp dụng từ",
     "anchor": "Ngày thu chung",
-    "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi.",
-    "summary": "{rule} · mốc {date}"
+    "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi."
   },
   "quick": {
     "more": "Thêm thông tin",

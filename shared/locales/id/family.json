@@ -269,8 +269,7 @@
     "sheetTitle": "Aturan penagihan paket",
     "from": "Berlaku mulai",
     "anchor": "Tanggal tagih bersama",
-    "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah.",
-    "summary": "{rule} · acuan {date}"
+    "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah."
   },
   "quick": {
     "more": "Detail lainnya",
