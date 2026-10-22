@@ -178,9 +178,13 @@ async function priceEditorHarness() {
   return {
     open: (from = '2026-07-01') => history().props.onPrice('2026-01-01', from),
     change: (type, value) =>
-      walk(inline())
-        .find((el) => el.type === 'input' && (type === 'date' ? el.props.type === 'date' : el.props.inputMode === 'decimal'))
-        .props.onChange({ target: { value } }),
+      type === 'date'
+        ? walk(inline())
+            .find((el) => el.type === 'date-picker')
+            .props.onChange(value || undefined)
+        : walk(inline())
+            .find((el) => el.type === 'input' && el.props.inputMode === 'decimal')
+            .props.onChange({ target: { value } }),
     remove: () =>
       walk(inline())
         .find((el) => el.type === 'icon-button')
@@ -236,7 +240,7 @@ test('invalid price drafts remain visible and block completion until corrected',
     h.inline().props.onBlur({ currentTarget: { contains: () => false }, relatedTarget: null });
     assert.ok(h.inline());
     h.open('2026-04-01');
-    assert.equal(h.nodes().find((el) => el.type === 'input' && el.props.type === 'date').props.value, field === 'date' ? value : '2026-07-01');
+    assert.equal(h.nodes().find((el) => el.type === 'date-picker').props.value, field === 'date' ? value : '2026-07-01');
     assert.equal(h.form().price, 18);
   }
   h.change('amount', '19');

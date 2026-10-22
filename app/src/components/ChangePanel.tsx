@@ -199,14 +199,12 @@ export function ChangePanel({
                   >
                     <label>
                       {t('editor.change.priceDate')}
-                      <input
-                        type="date"
+                      <DatePicker
                         value={point.date}
                         min={pointPhase.start}
                         max={pointPhase.end}
-                        aria-invalid={!!pointError}
-                        aria-describedby={pointError ? pointErrorId : undefined}
-                        onChange={(e) => updatePoint({ date: e.target.value })}
+                        ariaLabel={t('editor.change.priceDate')}
+                        onChange={(d) => updatePoint({ date: d ?? '' })}
                       />
                     </label>
                     <label>

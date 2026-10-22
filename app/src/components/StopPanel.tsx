@@ -169,7 +169,12 @@ export function StopFields({ sub, today, value, onChange }: { sub: Subscription;
           {refund && (
             <>
               <Cell label={`${t('core.stop.refundAmount')} · ${cur.currency}`} sub={t('core.stop.currencyHint', { currency: cur.currency })}>
-                <input inputMode="decimal" value={amount ?? String(preview!.suggestedRefund)} onChange={(e) => up({ amount: e.target.value })} />
+                <input
+                  className="num"
+                  inputMode="decimal"
+                  value={amount ?? String(preview!.suggestedRefund)}
+                  onChange={(e) => up({ amount: e.target.value })}
+                />
               </Cell>
               <Cell label={t('core.stop.refundDate')}>
                 <DatePicker value={refundDate ?? date} min={date} onChange={(v) => up({ refundDate: v })} />
@@ -178,7 +183,13 @@ export function StopFields({ sub, today, value, onChange }: { sub: Subscription;
                 <CurrencySelect value={settledCurrency} onChange={(v) => up({ settledCurrency: v })} />
               </Cell>
               <Cell label={t('editor.payment.settledAmount')}>
-                <input inputMode="decimal" value={settled} placeholder={t('editor.field.optional')} onChange={(e) => up({ settled: e.target.value })} />
+                <input
+                  className="num"
+                  inputMode="decimal"
+                  value={settled}
+                  placeholder={t('editor.field.optional')}
+                  onChange={(e) => up({ settled: e.target.value })}
+                />
               </Cell>
             </>
           )}
