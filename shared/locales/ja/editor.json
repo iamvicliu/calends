@@ -111,7 +111,11 @@
     "perPeriod": "1期間あたりの負担額",
     "paidUntil": "支払い済み期限",
     "remove": "削除",
-    "addMember": "メンバーを追加"
+    "addMember": "メンバーを追加",
+    "manageHint": "メンバーの料金・アカウント・入金は共有プランの詳細で管理します。",
+    "follows": "プラン共通",
+    "custom": "個別",
+    "nextDue": "次回 {date}"
   },
   "proxy": {
     "for": "立て替え先",

@@ -116,7 +116,11 @@
     "perPeriod": "Anteil pro Zeitraum",
     "paidUntil": "Bezahlt bis",
     "remove": "Entfernen",
-    "addMember": "Mitglied hinzufügen"
+    "addMember": "Mitglied hinzufügen",
+    "manageHint": "Beiträge, Konten und Zahlungen der Mitglieder verwaltest du in den Abo-Details.",
+    "follows": "Wie Abo",
+    "custom": "Eigen",
+    "nextDue": "Nächste {date}"
   },
   "proxy": {
     "for": "Ich zahle für",

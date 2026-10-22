@@ -264,5 +264,16 @@
     "feeFrom": "Vigente desde",
     "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian.",
     "viewSub": "Ver detalles"
+  },
+  "rule": {
+    "title": "Regla de cobro",
+    "follow": "Seguir plan",
+    "custom": "Personalizado",
+    "followValue": "{rule} (regla del plan)",
+    "sheetTitle": "Regla de cobro del plan",
+    "from": "Desde",
+    "anchor": "Fecha de cobro común",
+    "applyNote": "{count} miembros que siguen el plan cambian desde la fecha indicada; los personalizados y los cobros anteriores no cambian.",
+    "summary": "{rule} · ancla {date}"
   }
 }

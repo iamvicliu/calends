@@ -19,7 +19,7 @@ import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Togg
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
-import { carLedger, memberFee, changeMemberFee, refreshReceiptDraft } from '../../../shared/carpool.ts';
+import { carLedger, carRule, followCarRule, followsCar, memberFee, changeMemberFee, refreshReceiptDraft, shareFromFee } from '../../../shared/carpool.ts';
 
 export { carLedger, memberFee };
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
@@ -130,7 +130,20 @@ export function MemberSheet({
     const init =
       member?.tg && !member.contact
         ? { ...member, contactVia: 'Telegram', contact: member.tg, tg: undefined }
-        : (member ?? { id: uid(), name: '', share: Math.round((s.price / Math.max(1, s.share?.seats ?? 1)) * 100) / 100, billEvery: 1, joined: today });
+        : (member ??
+          (() => {
+            // 新成员默认跟随车的收款规则
+            const r = carRule(state, s, today);
+            return {
+              id: uid(),
+              name: '',
+              share: shareFromFee(state, s, r.fee, r.currency, r.billEvery),
+              fee: r.fee,
+              feeCurrency: r.currency,
+              billEvery: r.billEvery,
+              joined: today,
+            };
+          })());
     // 老数据只有每期份额：换算成「每次收多少人民币」
     const fee = memberFee(state, s, init, today);
     return { ...init, fee: fee.amount, feeCurrency: fee.currency };
@@ -149,6 +162,9 @@ export function MemberSheet({
   // 从「收款」按钮进来：只显示记一笔收款的小表单，不展开成员资料；需要时再切到完整资料
   const [quick, setQuick] = useState(!!collect && !isNew);
   const [feeFrom, setFeeFrom] = useState(today);
+  // 收费方式：跟随车的规则，或这个人自定义周期与金额（老数据收费与车不一致时视为自定义）
+  const rule = carRule(state, s, today);
+  const [feeMode, setFeeMode] = useState<'follow' | 'custom'>(() => (!member || followsCar(state, s, member, today) ? 'follow' : 'custom'));
   const [feeBase, setFeeBase] = useState<ShareMember | null>(null);
   const feeSection = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
@@ -404,7 +420,13 @@ export function MemberSheet({
                 async () => {
                   // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
                   const link = await linkPerson(state, f.personId, f.name, f.contact ? via : undefined, f.contact);
-                  const next = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
+                  const next = {
+                    ...f,
+                    name: f.name.trim(),
+                    account: f.account?.trim() || undefined,
+                    personId: link.id,
+                    custom: feeMode === 'custom' && !f.exempt ? true : undefined,
+                  };
                   const sh = getState().subscriptions.find((x) => x.id === s.id)?.share ?? s.share!;
                   await saveSub({
                     ...s,
@@ -521,24 +543,53 @@ export function MemberSheet({
                 />
               </Cell>
             )}
-            <div className="cell">
-              <Seg
-                value={String(months)}
-                onChange={(v) => setFee({ billEvery: Number(v) })}
-                options={[
-                  ['1', t('family.member.seg.m1')],
-                  ['3', t('family.member.seg.m3')],
-                  ['6', t('family.member.seg.m6')],
-                  ['12', t('family.member.seg.m12')],
-                ]}
-              />
-            </div>
-            <Cell label={perBill('family.member.feeLabel', months)}>
-              <span className="contact-field">
-                <CurrencySelect value={editFee.currency} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
-                <NumInput ccy={editFee.currency} className="num" value={editFee.amount} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
-              </span>
-            </Cell>
+            {!f.exempt && (
+              <div className="cell">
+                <Seg
+                  value={feeMode}
+                  onChange={(v) => {
+                    setFeeMode(v);
+                    if (v === 'follow') {
+                      const next = followCarRule(state, s, f, isNew ? (f.joined ?? today) : feeFrom, today);
+                      setF(next);
+                      setPay((draft) => refreshReceiptDraft(draft, freshPay(next, draft.from), payMoneyEdited));
+                    }
+                  }}
+                  options={[
+                    ['follow', t('family.rule.follow')],
+                    ['custom', t('family.rule.custom')],
+                  ]}
+                />
+              </div>
+            )}
+            {feeMode === 'follow' && !f.exempt ? (
+              <Cell label={t('family.member.feeGroup')}>
+                <span className="muted">
+                  {t('family.rule.followValue', { rule: perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) }) })}
+                </span>
+              </Cell>
+            ) : (
+              <>
+                <div className="cell">
+                  <Seg
+                    value={String(months)}
+                    onChange={(v) => setFee({ billEvery: Number(v) })}
+                    options={[
+                      ['1', t('family.member.seg.m1')],
+                      ['3', t('family.member.seg.m3')],
+                      ['6', t('family.member.seg.m6')],
+                      ['12', t('family.member.seg.m12')],
+                    ]}
+                  />
+                </div>
+                <Cell label={perBill('family.member.feeLabel', months)}>
+                  <span className="contact-field">
+                    <CurrencySelect value={editFee.currency} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
+                    <NumInput ccy={editFee.currency} className="num" value={editFee.amount} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
+                  </span>
+                </Cell>
+              </>
+            )}
             <Cell label={<span>{t('family.member.exempt')}</span>}>
               <Toggle checked={!!f.exempt} onChange={(v) => up({ exempt: v || undefined })} />
             </Cell>

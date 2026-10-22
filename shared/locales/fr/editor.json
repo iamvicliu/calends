@@ -116,7 +116,11 @@
     "perPeriod": "Part par période",
     "paidUntil": "Payé jusqu’au",
     "remove": "Retirer",
-    "addMember": "Ajouter un membre"
+    "addMember": "Ajouter un membre",
+    "manageHint": "Les tarifs, comptes et paiements des membres se gèrent dans le détail du forfait partagé.",
+    "follows": "Suit le forfait",
+    "custom": "Personnalisé",
+    "nextDue": "Prochain {date}"
   },
   "proxy": {
     "for": "Je paie pour",

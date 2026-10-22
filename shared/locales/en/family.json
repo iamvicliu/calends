@@ -264,5 +264,16 @@
     "feeFrom": "Effective from",
     "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",
     "viewSub": "View details"
+  },
+  "rule": {
+    "title": "Collection rule",
+    "follow": "Follow plan",
+    "custom": "Custom",
+    "followValue": "{rule} (plan rule)",
+    "sheetTitle": "Plan collection rule",
+    "from": "Effective from",
+    "anchor": "Collection anchor",
+    "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged.",
+    "summary": "{rule} · anchor {date}"
   }
 }

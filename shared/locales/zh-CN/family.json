@@ -239,5 +239,16 @@
     "feeFrom": "生效日期",
     "feeHelp": "整期按覆盖起点的收费标准计算，已记收款不变。",
     "viewSub": "查看详情"
+  },
+  "rule": {
+    "title": "收款规则",
+    "follow": "跟随车",
+    "custom": "自定义",
+    "followValue": "{rule}（跟随车）",
+    "sheetTitle": "车的收款规则",
+    "from": "生效日",
+    "anchor": "统一收款日",
+    "applyNote": "{count} 位跟随车的成员从生效日起改用新标准；自定义收费的成员不受影响，历史收款不变。",
+    "summary": "{rule} · 统一收款日 {date}"
   }
 }

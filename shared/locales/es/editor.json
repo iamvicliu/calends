@@ -116,7 +116,11 @@
     "perPeriod": "Parte por periodo",
     "paidUntil": "Pagado hasta",
     "remove": "Quitar",
-    "addMember": "Añadir miembro"
+    "addMember": "Añadir miembro",
+    "manageHint": "Las cuotas, cuentas y cobros se gestionan en los detalles del plan compartido.",
+    "follows": "Sigue el plan",
+    "custom": "Personalizado",
+    "nextDue": "Próximo {date}"
   },
   "proxy": {
     "for": "Pago por",

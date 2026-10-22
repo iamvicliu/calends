@@ -255,5 +255,16 @@
     "feeFrom": "적용 시작일",
     "feeHelp": "적용 기간 시작일의 요금이 전체 기간에 적용됩니다. 저장된 수금 내역은 변경되지 않습니다.",
     "viewSub": "상세 보기"
+  },
+  "rule": {
+    "title": "수금 규칙",
+    "follow": "요금제 따름",
+    "custom": "개별",
+    "followValue": "{rule} (요금제 규칙)",
+    "sheetTitle": "요금제 수금 규칙",
+    "from": "적용일",
+    "anchor": "공통 수금일",
+    "applyNote": "요금제를 따르는 {count}명은 적용일부터 새 규칙을 사용합니다. 개별 설정과 지난 수금은 바뀌지 않습니다.",
+    "summary": "{rule} · 공통 수금일 {date}"
   }
 }

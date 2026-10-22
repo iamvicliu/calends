@@ -3,6 +3,7 @@ import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
   addDays,
   chargesBetween,
+  collectionAnchor,
   cycleLabel,
   effectiveStatus,
   memberDues,
@@ -13,12 +14,17 @@ import {
   memberUnpaidFrom,
 } from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
-import { carLedger, contactText, contactValue, MemberSheet, memberFee } from './Members.tsx';
-import { CardTitle, Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar, useWidth } from '../components/ui.tsx';
+import { carLedger, contactText, contactValue, MemberSheet, memberFee, perBill } from './Members.tsx';
+import { applyCarRule, carRule, followsCar } from '../../../shared/carpool.ts';
+import type { CarRule } from '../../../shared/types.ts';
+import { DatePicker } from '../components/DatePicker.tsx';
+import { CurrencySelect } from '../components/Picker.tsx';
+import { CardTitle, Amount, Cell, Group, Icon, NameLink, NumInput, Seg, Sheet, StatusPill, SubIcon, Toolbar, useWidth } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -564,6 +570,8 @@ export function CarSheet({
   const free = Math.max(0, sh.seats - 1 - onboard.length);
   const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0).length;
   const fmt = (v: number) => flow(v, base, { compact: true });
+  const rule = carRule(state, s, today);
+  const [editingRule, setEditingRule] = useState(false);
   const profit = -book.yearNet;
   const actual = -book.net;
   const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m, today)}`);
@@ -651,6 +659,13 @@ export function CarSheet({
             <Cell label={t('family.sheet.seats')}>
               {t('family.sheet.seatsVal', { used: onboard.length + 1, total: sh.seats })}
               {free ? ` · ${t('family.pool.seatsFree', { count: free })}` : ''}
+            </Cell>
+            {/* 车的收款规则：跟随车的成员都按这个收；点开修改 */}
+            <Cell label={t('family.rule.title')} onClick={ro ? undefined : () => setEditingRule(true)}>
+              {t('family.rule.summary', {
+                rule: perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) }),
+                date: cnDate(collectionAnchor(s)),
+              })}
             </Cell>
             <Cell label={t('family.sheet.since')}>{book.since ? cnDateFull(book.since) : '—'}</Cell>
             <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
@@ -824,6 +839,7 @@ export function CarSheet({
           </div>
         )}
       </div>
+      {editingRule && createPortal(<CarRuleSheet state={state} s={s} today={today} rule={rule} onClose={() => setEditingRule(false)} />, document.body)}
     </Sheet>
   );
 }
@@ -938,5 +954,66 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
         </div>
       </div>
     </div>
+  );
+}
+
+/** 修改车的收款规则：周期、每次收多少、统一收款日；跟随车的成员从生效日起改用新标准 */
+function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: Subscription; today: string; rule: CarRule; onClose: () => void }) {
+  const [draft, setDraft] = useState<CarRule>(rule);
+  const [from, setFrom] = useState(today);
+  const [anchor, setAnchor] = useState(collectionAnchor(s));
+  const followers = (s.share?.members ?? []).filter((m) => followsCar(state, s, m, today) && (!m.left || m.left > today)).length;
+  const save = () =>
+    run(async () => {
+      const next = applyCarRule(state, s, draft, from, today);
+      await saveSub({ ...next, share: { ...next.share!, collectFrom: anchor } });
+      onClose();
+    }, t('family.member.saved'));
+  return (
+    <Sheet
+      narrow
+      title={t('family.rule.sheetTitle')}
+      onClose={onClose}
+      foot={
+        <>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
+            {t('family.member.cancel')}
+          </button>
+          <button className="btn primary" disabled={!(draft.fee >= 0)} onClick={() => void save()}>
+            {t('family.member.save')}
+          </button>
+        </>
+      }
+    >
+      <div className="stack">
+        <Group foot={t('family.rule.applyNote', { count: followers })}>
+          <div className="cell">
+            <Seg
+              value={String(draft.billEvery)}
+              onChange={(v) => setDraft({ ...draft, billEvery: Number(v) })}
+              options={[
+                ['1', t('family.member.seg.m1')],
+                ['3', t('family.member.seg.m3')],
+                ['6', t('family.member.seg.m6')],
+                ['12', t('family.member.seg.m12')],
+              ]}
+            />
+          </div>
+          <Cell label={perBill('family.member.feeLabel', draft.billEvery)}>
+            <span className="contact-field">
+              <CurrencySelect value={draft.currency} onChange={(c) => setDraft({ ...draft, currency: c })} ariaLabel={t('family.member.feeCcyAria')} />
+              <NumInput ccy={draft.currency} className="num" value={draft.fee} placeholder="0" onValue={(n) => setDraft({ ...draft, fee: n ?? 0 })} />
+            </span>
+          </Cell>
+          <Cell label={t('family.rule.from')}>
+            <DatePicker value={from} onChange={(v) => v && setFrom(v)} />
+          </Cell>
+          <Cell label={t('family.rule.anchor')}>
+            <DatePicker value={anchor} onChange={(v) => v && setAnchor(v)} />
+          </Cell>
+        </Group>
+      </div>
+    </Sheet>
   );
 }

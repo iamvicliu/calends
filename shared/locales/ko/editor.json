@@ -111,7 +111,11 @@
     "perPeriod": "주기당 분담금",
     "paidUntil": "납부 완료 기한",
     "remove": "삭제",
-    "addMember": "멤버 추가"
+    "addMember": "멤버 추가",
+    "manageHint": "멤버 요금, 계정, 수금은 공유 요금제 상세에서 관리합니다.",
+    "follows": "요금제 따름",
+    "custom": "개별",
+    "nextDue": "다음 {date}"
   },
   "proxy": {
     "for": "대신 결제 대상",

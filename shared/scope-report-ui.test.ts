@@ -782,9 +782,13 @@ test('收款只显示实收表单；编辑成员后切周期仍保留实际草�
       .props.onClick();
     const before = input('family.member.amount', 'NumInput').props.value;
     input('family.collect.feeFrom', 'DatePicker').props.onChange('2026-10-14');
+    // 成员默认跟随车的规则；要单独改周期先切到自定义
+    render()
+      .find((n) => n.type === 'Seg' && n.props.value === 'follow')
+      ?.props.onChange('custom');
     for (const months of [1, 3, 6]) {
       render()
-        .find((n) => n.type === 'Seg')!
+        .find((n) => n.type === 'Seg' && n.props.value !== 'custom')!
         .props.onChange(String(months));
       assert.equal(input('family.member.note', 'input').props.value, '审查草稿');
       assert.equal(input('family.member.receivedOn', 'DatePicker').props.value, '2026-10-21');
@@ -1618,6 +1622,9 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
   );
   const render = () => r.render('MemberSheet', { state: st, s: sub, member, onClose() {} });
   render()
+    .find((n) => n.type === 'Seg' && n.props.value === 'follow')
+    ?.props.onChange('custom');
+  render()
     .find((n) => n.type === 'NumInput' && n.props.value === 40)!
     .props.onValue(44);
   const dateCell = render().find((n) => n.type === 'Cell' && n.props.label === 'family.collect.feeFrom')!;
@@ -1748,7 +1755,12 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
     },
   };
   const state = { ...st, subscriptions: [sub] };
-  const r = harness('../app/src/views/Carpool.tsx', 'CarSheet', {}, { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill' });
+  const r = harness(
+    '../app/src/views/Carpool.tsx',
+    'CarSheet',
+    {},
+    { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill', perBill: () => '', createPortal: () => null },
+  );
   const props = { state, s: sub, today, ro: false, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
   const render = () => r.render('CarSheet', props);
   const groups = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row car-period');
@@ -1813,7 +1825,12 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
     start: '2026-01-17',
     share: { ...sub.share!, members: [{ ...sub.share!.members[0], payments: [sub.share!.members[0].payments![0]] }] },
   };
-  const fresh = harness('../app/src/views/Carpool.tsx', 'CarSheet', {}, { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill' });
+  const fresh = harness(
+    '../app/src/views/Carpool.tsx',
+    'CarSheet',
+    {},
+    { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill', perBill: () => '', createPortal: () => null },
+  );
   nodes = fresh.render('CarSheet', { ...props, s: single, ro: true });
   assert.equal(groups(nodes).length, 1);
   assert.ok(groups(nodes).every((g) => g.props['aria-expanded'] === false && !g.props.disabled));
@@ -1851,7 +1868,12 @@ test('合租分组以覆盖区间为主标题，共有信息为可选副标题�
       },
     };
     const state = { ...st, subscriptions: [sub] };
-    const r = harness('../app/src/views/Carpool.tsx', 'CarSheet', {}, { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill' });
+    const r = harness(
+      '../app/src/views/Carpool.tsx',
+      'CarSheet',
+      {},
+      { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill', perBill: () => '', createPortal: () => null },
+    );
     const props = { state, s: sub, today, ro: true, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
     let nodes = r.render('CarSheet', props);
     const title = nodes.find((n) => n.props.className === 'car-period-title')!;

@@ -2,7 +2,7 @@
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
 import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths, memberRate } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
-import type { AppState, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
+import type { AppState, CarRule, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
 
 /**
  * 合租账本：订阅本身多少钱、我付出去多少、从成员身上收回多少，算出净成本（负数就是赚了）。
@@ -110,4 +110,63 @@ export function refreshReceiptDraft(draft: MemberPayment, next: MemberPayment, m
     until: next.until,
     ...(!moneyEdited ? { amount: next.amount, currency: next.currency } : {}),
   };
+}
+
+const sameRule = (a: CarRule, b: CarRule) => a.billEvery === b.billEvery && a.currency === b.currency && Math.abs(a.fee - b.fee) < 0.005;
+
+/**
+ * 车的收款规则：存了就用存的；老数据没存时，取在车成员里最常见的收费标准（周期 + 金额 + 币种）。
+ * 没有可参考的成员时按订阅价格除以座位、周期同订阅推一个默认值。
+ */
+export function carRule(state: AppState, s: Subscription, today: string): CarRule {
+  if (s.share?.rule) return s.share.rule;
+  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const counts = new Map<string, { rule: CarRule; n: number }>();
+  for (const m of s.share?.members ?? []) {
+    if (m.exempt || (m.left && m.left <= today)) continue;
+    const r = memberRate(s, m, today, ccy);
+    const rule = { billEvery: r.billEvery, fee: r.amount, currency: r.currency };
+    const key = `${rule.billEvery}|${rule.currency}|${rule.fee}`;
+    counts.set(key, { rule, n: (counts.get(key)?.n ?? 0) + 1 });
+  }
+  const top = [...counts.values()].sort((a, b) => b.n - a.n)[0];
+  if (top) return top.rule;
+  const months = Math.max(1, Math.round(cycleMonths(s)));
+  const fee = toBaseAt(state, s.price / Math.max(1, s.share?.seats ?? 1), s.currency, undefined, ccy);
+  return { billEvery: months, fee: Math.round(fee * 100) / 100, currency: ccy };
+}
+
+/** 成员是否跟随车的规则：没标自定义、要分摊；老数据未存规则时，收费与规则一致才算跟随 */
+export function followsCar(state: AppState, s: Subscription, m: ShareMember, today: string): boolean {
+  if (m.custom || m.exempt) return false;
+  if (s.share?.rule) return true;
+  const r = memberRate(s, m, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, carRule(state, s, today));
+}
+
+/**
+ * 改车的收款规则：存下新规则，跟随车的成员从生效日起改用新标准（沿用调价机制，历史收款不变）；
+ * 自定义收费、不分摊、已退出的成员不动。
+ */
+export function applyCarRule(state: AppState, s: Subscription, rule: CarRule, from: string, today: string): Subscription {
+  if (!s.share) return s;
+  const members = s.share.members.map((m) => {
+    // 规则第一次存下时，原本就与车不一致的成员明确标为自定义，之后不会被当成跟随车
+    if (!followsCar(state, s, m, today)) return m.exempt || m.custom ? m : { ...m, custom: true };
+    if (m.left && m.left <= from) return m;
+    const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
+    if (sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)) return m;
+    return changeMemberFee(state, s, m, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
+  });
+  return { ...s, share: { ...s.share, rule, members } };
+}
+
+/** 成员改回跟随车：从生效日起套用车的规则 */
+export function followCarRule(state: AppState, s: Subscription, m: ShareMember, from: string, today: string): ShareMember {
+  const rule = carRule(state, s, today);
+  const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const next = { ...m, custom: undefined };
+  return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)
+    ? next
+    : changeMemberFee(state, s, next, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
 }

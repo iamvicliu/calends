@@ -264,5 +264,16 @@
     "feeFrom": "Gültig ab",
     "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert.",
     "viewSub": "Details ansehen"
+  },
+  "rule": {
+    "title": "Einzugsregel",
+    "follow": "Wie Abo",
+    "custom": "Eigen",
+    "followValue": "{rule} (Abo-Regel)",
+    "sheetTitle": "Einzugsregel des Abos",
+    "from": "Gültig ab",
+    "anchor": "Einzugsstichtag",
+    "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert.",
+    "summary": "{rule} · Stichtag {date}"
   }
 }

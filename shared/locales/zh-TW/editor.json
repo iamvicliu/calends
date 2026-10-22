@@ -103,7 +103,11 @@
     "perPeriod": "每期份額",
     "paidUntil": "已付至",
     "remove": "移除",
-    "addMember": "新增成員"
+    "addMember": "新增成員",
+    "manageHint": "成員的收費方式、成員帳號和收款在「合租詳情」裡維護",
+    "follows": "跟隨車",
+    "custom": "自訂",
+    "nextDue": "下次應收 {date}"
   },
   "proxy": {
     "for": "替誰付",

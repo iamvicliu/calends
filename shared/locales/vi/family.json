@@ -255,5 +255,16 @@
     "feeFrom": "Có hiệu lực từ",
     "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",
     "viewSub": "Xem chi tiết"
+  },
+  "rule": {
+    "title": "Quy tắc thu",
+    "follow": "Theo gói",
+    "custom": "Tùy chỉnh",
+    "followValue": "{rule} (quy tắc gói)",
+    "sheetTitle": "Quy tắc thu của gói",
+    "from": "Áp dụng từ",
+    "anchor": "Ngày thu chung",
+    "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi.",
+    "summary": "{rule} · mốc {date}"
   }
 }

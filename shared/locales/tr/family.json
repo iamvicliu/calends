@@ -264,5 +264,16 @@
     "feeFrom": "Geçerlilik tarihi",
     "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez.",
     "viewSub": "Ayrıntıları gör"
+  },
+  "rule": {
+    "title": "Tahsilat kuralı",
+    "follow": "Planı izle",
+    "custom": "Özel",
+    "followValue": "{rule} (plan kuralı)",
+    "sheetTitle": "Plan tahsilat kuralı",
+    "from": "Geçerlilik",
+    "anchor": "Ortak tahsilat günü",
+    "applyNote": "Planı izleyen {count} üye bu tarihten itibaren yeni kurala geçer; özel üyeler ve geçmiş tahsilatlar değişmez.",
+    "summary": "{rule} · çapa {date}"
   }
 }

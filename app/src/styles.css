@@ -9841,3 +9841,20 @@ img.mm-flag {
 .car-member-table .warn {
   color: var(--orange);
 }
+
+/* 编辑页「谁在用」：已保存成员只显示摘要（称呼 + 收费方式 · 下次应收） */
+.member-edit.member-summary {
+  grid-template-columns: minmax(0, 1fr) var(--ctl-h-md);
+}
+.member-summary-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.member-summary-name b {
+  font-size: 14px;
+  font-weight: 500;
+}
+.member-summary-name small {
+  font-size: 12px;
+}

@@ -264,5 +264,16 @@
     "feeFrom": "À partir du",
     "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés.",
     "viewSub": "Voir les détails"
+  },
+  "rule": {
+    "title": "Règle de collecte",
+    "follow": "Suivre le forfait",
+    "custom": "Personnalisé",
+    "followValue": "{rule} (règle du forfait)",
+    "sheetTitle": "Règle de collecte du forfait",
+    "from": "À partir du",
+    "anchor": "Date de collecte commune",
+    "applyNote": "{count} membres qui suivent le forfait passent à la nouvelle règle ; les membres personnalisés et les paiements passés ne changent pas.",
+    "summary": "{rule} · référence {date}"
   }
 }

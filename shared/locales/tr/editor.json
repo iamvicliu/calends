@@ -116,7 +116,11 @@
     "perPeriod": "Dönem başına pay",
     "paidUntil": "Ödendiği tarih",
     "remove": "Kaldır",
-    "addMember": "Üye ekle"
+    "addMember": "Üye ekle",
+    "manageHint": "Üye ücretleri, hesapları ve tahsilatları ortak plan ayrıntılarında yönetilir.",
+    "follows": "Planı izler",
+    "custom": "Özel",
+    "nextDue": "Sonraki {date}"
   },
   "proxy": {
     "for": "Kimin için",

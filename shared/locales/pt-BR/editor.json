@@ -116,7 +116,11 @@
     "perPeriod": "Parte por período",
     "paidUntil": "Pago até",
     "remove": "Remover",
-    "addMember": "Adicionar membro"
+    "addMember": "Adicionar membro",
+    "manageHint": "Valores, contas e recebimentos dos membros ficam nos detalhes do plano compartilhado.",
+    "follows": "Segue o plano",
+    "custom": "Personalizado",
+    "nextDue": "Próximo {date}"
   },
   "proxy": {
     "for": "Pago para",

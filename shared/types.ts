@@ -67,6 +67,8 @@ export interface ShareMember {
   account?: string;
   /** 不分摊：占一个位置但不交钱（比如自己的另一个账号、家人） */
   exempt?: boolean;
+  /** 自定义收费：不跟随车的收款规则（周期、金额由成员自己的收费标准决定） */
+  custom?: boolean;
   /** 每次收多少（按收费周期），币种默认人民币；每期份额 share 由它按汇率换算得出 */
   fee?: number;
   feeCurrency?: string;
@@ -99,6 +101,13 @@ export interface MemberPayment {
   note?: string;
 }
 
+/** 一辆车默认怎么收：每几个月收一次、每次收多少 */
+export interface CarRule {
+  billEvery: number;
+  fee: number;
+  currency: string;
+}
+
 export interface Share {
   /** owner = 我发起合租，代付全款向他人收钱；member = 我加入合租，price 记录的是我的那份 */
   role: 'owner' | 'member';
@@ -110,6 +119,8 @@ export interface Share {
   since?: string;
   /** 统一收款起点；缺省依次取 since、最早收款覆盖起点、订阅开始日 */
   collectFrom?: string;
+  /** 车的收款规则：跟随车的成员按这个周期和金额收；缺省时取成员里最常见的收费标准 */
+  rule?: CarRule;
 }
 
 /** 代付的一期：卡上实扣多少（订阅币种），对方还了多少（币种可以不同，比如扣日元、收人民币） */

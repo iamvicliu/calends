@@ -255,5 +255,16 @@
     "feeFrom": "Berlaku mulai",
     "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",
     "viewSub": "Lihat detail"
+  },
+  "rule": {
+    "title": "Aturan penagihan",
+    "follow": "Ikuti paket",
+    "custom": "Kustom",
+    "followValue": "{rule} (aturan paket)",
+    "sheetTitle": "Aturan penagihan paket",
+    "from": "Berlaku mulai",
+    "anchor": "Tanggal tagih bersama",
+    "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah.",
+    "summary": "{rule} · acuan {date}"
   }
 }

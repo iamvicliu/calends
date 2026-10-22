@@ -111,7 +111,11 @@
     "perPeriod": "Phần mỗi kỳ",
     "paidUntil": "Đã trả đến",
     "remove": "Xóa",
-    "addMember": "Thêm thành viên"
+    "addMember": "Thêm thành viên",
+    "manageHint": "Phí, tài khoản và khoản thu của thành viên được quản lý trong chi tiết gói chung.",
+    "follows": "Theo gói",
+    "custom": "Tùy chỉnh",
+    "nextDue": "Lần tới {date}"
   },
   "proxy": {
     "for": "Trả hộ cho",

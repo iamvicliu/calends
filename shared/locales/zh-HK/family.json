@@ -239,5 +239,16 @@
     "feeFrom": "生效日期",
     "feeHelp": "整期按涵蓋起點的收費標準計算，已記收款不變。",
     "viewSub": "查看詳情"
+  },
+  "rule": {
+    "title": "收款規則",
+    "follow": "跟隨車",
+    "custom": "自訂",
+    "followValue": "{rule}（跟隨車）",
+    "sheetTitle": "車的收款規則",
+    "from": "生效日",
+    "anchor": "統一收款日",
+    "applyNote": "{count} 位跟隨車的成員從生效日起改用新標準；自訂收費的成員不受影響，歷史收款不變。",
+    "summary": "{rule} · 統一收款日 {date}"
   }
 }

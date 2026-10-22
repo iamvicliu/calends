@@ -4,8 +4,9 @@ import { useRef, useState } from 'react';
 import { StopFields } from '../components/StopPanel.tsx';
 import { Minus, Plus, ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
-import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
-import { cnDateFull, money } from '../../../shared/format.ts';
+import { addDays, addMonths, memberCollection, memberUnpaidFrom, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
+import { carRule, followsCar, shareFromFee } from '../../../shared/carpool.ts';
+import { cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -285,6 +286,8 @@ function Form({
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
   const setMember = (i: number, p: Partial<ShareMember>) => setShare({ members: share!.members.map((m, j) => (j === i ? { ...m, ...p } : m)) });
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
+  // 已保存过的成员只显示摘要；刚在这里加的成员可以先填称呼
+  const savedMembers = new Set(state.subscriptions.find((x) => x.id === f.id)?.share?.members.map((m) => m.id) ?? []);
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const method = state.methods.find((m) => m.id === f.methodId);
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
@@ -495,7 +498,7 @@ function Form({
             : share?.role === 'member'
               ? t('editor.share.memberHint')
               : share?.role === 'owner'
-                ? t('editor.share.perHead', { amount: money(perHead, f.currency) })
+                ? `${t('editor.share.perHead', { amount: money(perHead, f.currency) })} · ${t('editor.share.manageHint')}`
                 : undefined
         }
       >
@@ -564,29 +567,55 @@ function Form({
             <Cell label={t('editor.share.seats')}>
               <input className="num" inputMode="numeric" value={share.seats} onChange={(e) => setShare({ seats: Math.max(1, Number(val(e)) || 1) })} />
             </Cell>
-            {share.members.map((m, i) => (
-              <div key={m.id} className="member-edit">
-                <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
-                <NumInput
-                  ccy={f.currency}
-                  className="num"
-                  value={m.share}
-                  title={t('editor.share.perPeriod')}
-                  onValue={(n) => setMember(i, { share: n ?? 0 })}
-                />
-                <span className="wide">
-                  <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
-                </span>
-                <IconButton aria-label={t('editor.share.remove')} onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}>
-                  <Icon name="x" />
-                </IconButton>
-              </div>
-            ))}
+            {/* 这里只管名单：已有成员只显示摘要，收费方式、成员账号、收款在合租详情里维护 */}
+            {share.members.map((m, i) => {
+              const saved = savedMembers.has(m.id);
+              const due = saved && !m.exempt ? memberCollection(f, m, memberUnpaidFrom(f, m)).from : undefined;
+              return (
+                <div key={m.id} className="member-edit member-summary">
+                  {saved ? (
+                    <span className="member-summary-name">
+                      <b className="text-ellipsis">{m.name || t('editor.share.memberN', { n: i + 1 })}</b>
+                      <small className="muted text-ellipsis">
+                        {[
+                          m.exempt ? t('family.pool.exempt') : followsCar(state, f, m, today) ? t('editor.share.follows') : t('editor.share.custom'),
+                          due && t('editor.share.nextDue', { date: cnDateAuto(due, today) }),
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </small>
+                    </span>
+                  ) : (
+                    <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
+                  )}
+                  <IconButton aria-label={t('editor.share.remove')} onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}>
+                    <Icon name="x" />
+                  </IconButton>
+                </div>
+              );
+            })}
             {share.members.length < share.seats - 1 && (
               <button
                 className="cell tap"
                 style={{ color: 'var(--accent)' }}
-                onClick={() => setShare({ members: [...share.members, { id: uid(), name: '', share: perHead }] })}
+                onClick={() => {
+                  // 新成员按车的收款规则收费
+                  const r = carRule(state, f, today);
+                  setShare({
+                    members: [
+                      ...share.members,
+                      {
+                        id: uid(),
+                        name: '',
+                        share: shareFromFee(state, f, r.fee, r.currency, r.billEvery),
+                        fee: r.fee,
+                        feeCurrency: r.currency,
+                        billEvery: r.billEvery,
+                        joined: today,
+                      },
+                    ],
+                  });
+                }}
               >
                 <Icon name="plus" /> {t('editor.share.addMember')}
               </button>

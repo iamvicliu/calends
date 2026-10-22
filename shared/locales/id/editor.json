@@ -111,7 +111,11 @@
     "perPeriod": "Bagian per periode",
     "paidUntil": "Lunas hingga",
     "remove": "Hapus",
-    "addMember": "Tambah anggota"
+    "addMember": "Tambah anggota",
+    "manageHint": "Biaya, akun, dan pembayaran anggota dikelola di detail patungan.",
+    "follows": "Ikuti paket",
+    "custom": "Kustom",
+    "nextDue": "Berikutnya {date}"
   },
   "proxy": {
     "for": "Ditalangi untuk",
