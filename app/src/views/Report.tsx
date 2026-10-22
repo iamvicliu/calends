@@ -1,5 +1,5 @@
 import { base as appPath } from '../base.ts';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../../shared/billing.ts';
 import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -56,7 +56,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
         <CashCard state={state} today={today} />
         <StopsCard state={state} today={today} onOpen={onOpen} />
         <Composition state={state} today={today} onOpen={onOpen} />
-        <div className="grid g-2">
+        <div className="grid g-2 report-bottom">
           <TopUps state={state} today={today} />
           <Changelog state={state} today={today} onOpen={onOpen} base={base} />
         </div>
@@ -682,15 +682,61 @@ const EV: Record<EventKind, [string, string]> = {
 /** 变更日志 */
 function Changelog({ state, today, onOpen, base }: { state: AppState; today: string; onOpen: (s: Subscription) => void; base: string }) {
   const list = useMemo(() => events(state, today), [state, today]);
-  const [n, setN] = useState(8);
+  const [fit, setFit] = useState<number | null>(null);
+  const [extra, setExtra] = useState(0);
+  const log = useRef<HTMLDivElement>(null);
+  const n = (fit ?? 8) + extra;
+  // 右卡不撑高桌面网格；按左卡留下的空间显示完整条目，包含跨年的标题。
+  useLayoutEffect(() => {
+    const el = log.current;
+    if (!el) return;
+    const desktop = matchMedia('(min-width: 681px)');
+    const measure = () => {
+      if (!desktop.matches) {
+        setFit(null);
+        return;
+      }
+      if (extra > 0) return;
+      const row = el.querySelector<HTMLElement>('.log-item');
+      const year = el.querySelector<HTMLElement>('.log-year');
+      if (!row || !year) return;
+      const rowHeight = row.getBoundingClientRect().height;
+      const yearHeight = year.getBoundingClientRect().height;
+      const available = el.getBoundingClientRect().height;
+      let height = 0;
+      let count = 0;
+      let last = '';
+      for (const event of list) {
+        const yr = event.date.slice(0, 4);
+        const next = height + rowHeight + (yr !== last ? yearHeight : 0);
+        if (next > available) break;
+        height = next;
+        last = yr;
+        count++;
+      }
+      setFit(Math.max(1, count));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    const row = el.querySelector('.log-item');
+    const year = el.querySelector('.log-year');
+    if (row) observer.observe(row);
+    if (year) observer.observe(year);
+    desktop.addEventListener('change', measure);
+    return () => {
+      observer.disconnect();
+      desktop.removeEventListener('change', measure);
+    };
+  }, [list, extra]);
   let lastYear = '';
   return (
-    <div className="card">
+    <div className={`card report-log ${extra > 0 ? 'expanded' : ''}`}>
       <div className="card-h">
         <h3>{t('report.log.title')}</h3>
         <span className="meta">{t('report.log.decisions', { count: list.length })}</span>
       </div>
-      <div className="log">
+      <div className="log" ref={log}>
         {list.slice(0, n).map((e, i) => {
           const yr = e.date.slice(0, 4);
           const showYear = yr !== lastYear;
@@ -722,11 +768,13 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
           );
         })}
       </div>
-      {list.length > n && (
-        <button className="btn plain" style={{ marginTop: 6 }} onClick={() => setN(n + 12)}>
-          {t('report.log.more')}
-        </button>
-      )}
+      <div className="log-actions">
+        {list.length > n && (
+          <button className="btn plain" onClick={() => setExtra(extra + 12)}>
+            {t('report.log.more')}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

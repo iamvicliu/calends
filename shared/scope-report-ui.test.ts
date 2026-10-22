@@ -32,6 +32,10 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...fx,
     ...reports,
     ...metrics,
+    locale: () => 'en',
+    useOrig: () => false,
+    categories: () => [],
+    Picker: 'Picker',
     t: (key: string) => key,
     useMemo: (fn: () => unknown) => fn(),
     useEffect: (fn: () => unknown) => fn(),
@@ -76,6 +80,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Timeline: 'Timeline',
     Amount: 'Amount',
     Maximize2: 'Maximize2',
+    ChevronUp: 'ChevronUp',
     SpendingDelta: 'SpendingDelta',
     ...extra,
   };
@@ -125,7 +130,7 @@ test('calendar selects today, toggles off, clears on month navigation, and Today
   assert.equal(render().find((n) => n.props['aria-current'] === 'date')!.props['aria-pressed'], true);
 });
 
-test('calendar mini/full modes are exclusive, remote preference is read, collapse restores mini, year has neither', () => {
+test('calendar full report collapses locally to its title line, reopens, resets on month navigation, and stays absent in year view', () => {
   const r = harness('../app/src/views/Calendar.tsx', 'Calendar', { 'cal-report-mode': 'full' });
   const render = () => r.render('Calendar', { state: st, today, onOpen() {}, onIcs() {} });
   let nodes = render();
@@ -137,18 +142,21 @@ test('calendar mini/full modes are exclusive, remote preference is read, collaps
   );
   full.props.onToggle();
   nodes = render();
-  assert.equal(r.prefs['cal-report-mode'], 'mini');
+  assert.equal(r.prefs['cal-report-mode'], 'full');
+  assert.equal(nodes.find((n) => n.type === 'ScopeReport')!.props.open, false);
   assert.equal(
-    nodes.some((n) => n.type === 'ScopeReport'),
+    nodes.some((n) => typeof n.type === 'function' && n.type.name === 'MiniReport'),
     false,
   );
-  const mini = nodes.find((n) => typeof n.type === 'function' && n.type.name === 'MiniReport')!;
-  assert.ok(mini);
-  mini.props.onExpand();
-  assert.equal(
-    render().some((n) => n.type === 'ScopeReport'),
-    true,
-  );
+  nodes.find((n) => n.type === 'ScopeReport')!.props.onToggle();
+  assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.open, true);
+  render()
+    .find((n) => n.type === 'ScopeReport')!
+    .props.onToggle();
+  render()
+    .find((n) => n.props['aria-label'] === 'calendar.next')!
+    .props.onClick();
+  assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.open, true);
   r.prefs['cal-mode'] = 'year';
   nodes = render();
   assert.equal(
@@ -487,5 +495,28 @@ test('same-currency cash pairs retain a distinct actual settlement and never hid
     assert.equal(actual.alt, orig ? '≈ −$14' : '−$12.00');
     const unknown = pair(-12, 'USD', { value: NaN });
     assert.equal(orig ? unknown.alt : format.flow(unknown.main.props.value, 'USD'), orig ? '≈ —' : '—');
+  }
+});
+
+test('订阅筛选默认全部时无清空按钮，任一条件变化后清空恢复当前路由默认值', () => {
+  for (const category of [undefined, 'Tools']) {
+    for (const field of ['status', 'category', 'pay', 'search']) {
+      const r = harness('../app/src/views/List.tsx', 'List');
+      const render = () => r.render('List', { state: st, today, category, onOpen() {}, onAdd() {} });
+      const clear = (nodes: Node[]) => nodes.find((n) => n.props.className === 'facet-clear');
+      let nodes = render();
+      assert.equal(clear(nodes), undefined, '默认全部不显示清空');
+      if (field === 'search') nodes.find((n) => n.type === 'input')!.props.onChange({ target: { value: 'sample' } });
+      else nodes.find((n) => n.props.label === `list.facet.${field}`)!.props.onChange(field === 'status' ? 'live' : field === 'category' ? 'Other' : 'none');
+      nodes = render();
+      assert.ok(clear(nodes), `${category ?? 'all'} ${field} 显示清空`);
+      clear(nodes)!.props.onClick();
+      nodes = render();
+      assert.equal(clear(nodes), undefined);
+      assert.equal(nodes.find((n) => n.props.label === 'list.facet.status')!.props.value, 'all');
+      assert.equal(nodes.find((n) => n.props.label === 'list.facet.category')!.props.value, category ?? 'all');
+      assert.equal(nodes.find((n) => n.props.label === 'list.facet.pay')!.props.value, 'all');
+      assert.equal(nodes.find((n) => n.type === 'input')!.props.value, '');
+    }
   }
 });

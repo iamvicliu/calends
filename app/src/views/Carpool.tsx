@@ -1,5 +1,5 @@
 import { base as appPath } from '../base.ts';
-import { addDays, chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge } from '../../../shared/billing.ts';
+import { addDays, chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge, memberBillMonths } from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -333,7 +333,7 @@ function MemberRows({
             <div className="muted" style={{ fontSize: 12 }}>
               {d.member.exempt
                 ? (d.member.note ?? t('family.pool.exemptNote'))
-                : `${billLabel(d.member.billEvery)} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
+                : `${billLabel(memberBillMonths(s, d.member))} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
               <span className="m-hide">
                 {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
                 {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
@@ -354,7 +354,7 @@ function MemberRows({
             )}
             {!d.member.exempt && (
               <div className="muted m-hide" style={{ fontSize: 12 }}>
-                {perBill('family.pool.perFee', d.member.billEvery ?? 1, {
+                {perBill('family.pool.perFee', memberBillMonths(s, d.member), {
                   fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
                 })}
               </div>
@@ -406,7 +406,7 @@ export function CarSheet({
   const fmt = (v: number) => flow(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;
-  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${m.billEvery ?? 1}`);
+  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m)}`);
   const memberGroups = [...new Set(sh.members.map(groupOf))]
     .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
     .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), sh.members.filter((m) => groupOf(m) === k).length] as const);

@@ -214,9 +214,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   // 触控板横向滑动：直接平移，停下 150ms 后对齐到月份锚点
   const wheelIdle = useRef<number | undefined>(undefined);
   const onWheel = (e: WheelEvent) => {
-    if (!pannable || !k || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-    e.preventDefault();
-    setPan((p) => p + e.deltaX / k);
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault(); // 全部范围或尚未测得宽度时也不能把横滑交给浏览器
+    if (!pannable || !k) return;
+    const pixels = e.deltaX * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? w : 1);
+    setPan((p) => p + pixels / k);
     clearTimeout(wheelIdle.current);
     wheelIdle.current = window.setTimeout(() => setPan((p) => snap(p)), 150);
   };

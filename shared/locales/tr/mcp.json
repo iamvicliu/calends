@@ -54,7 +54,8 @@
     "invalidStop": "Durdurma son hizmet günüyle eşleşmelidir; yalnızca sağlayıcı kapatması neden içerebilir.",
     "invalidRefund": "İade tutarları geçerli sayılar olmalı ve negatif kaydedilmelidir.",
     "refundBeforeStop": "İade tarihi durdurma tarihinden önce olamaz.",
-    "paymentOutOfRange": "Ödeme tarihi {date}, başlangıç tarihi ile bugün arasında olmalıdır"
+    "paymentOutOfRange": "Ödeme tarihi {date}, başlangıç tarihi ile bugün arasında olmalıdır",
+    "invalidFirstPeriod": "first_period prorate, full veya free olmalıdır."
   },
   "tool": {
     "get_overview": "Defter özeti",

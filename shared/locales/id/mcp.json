@@ -54,7 +54,8 @@
     "invalidStop": "Penghentian harus sesuai hari layanan terakhir; alasan hanya untuk penonaktifan penyedia.",
     "invalidRefund": "Jumlah pengembalian harus valid dan disimpan negatif.",
     "refundBeforeStop": "Tanggal pengembalian tidak boleh sebelum penghentian.",
-    "paymentOutOfRange": "Tanggal pembayaran {date} harus antara tanggal mulai dan hari ini"
+    "paymentOutOfRange": "Tanggal pembayaran {date} harus antara tanggal mulai dan hari ini",
+    "invalidFirstPeriod": "first_period harus prorate, full, atau free."
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",

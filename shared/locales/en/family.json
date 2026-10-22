@@ -123,7 +123,19 @@
         "one": "Record payment ({fee} every {count} month)",
         "other": "Record payment ({fee} every {count} months)"
       }
-    }
+    },
+    "firstPeriod": "First period",
+    "firstAmount": "First-period amount",
+    "firstMode": {
+      "prorate": "Prorated daily",
+      "full": "Full period",
+      "free": "Free first period"
+    },
+    "collectionSchedule": "Collection dates: every year {dates}",
+    "coverAligned": "Ends at the aligned period boundary",
+    "recordNext": "Record payment · {amount}",
+    "collectionAnchor": "Collection anchor",
+    "firstSummary": "First period {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "{count} open",

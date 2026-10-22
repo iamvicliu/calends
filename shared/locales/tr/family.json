@@ -123,7 +123,19 @@
         "one": "Ödemeyi kaydet ({count} ayda bir {fee})",
         "other": "Ödemeyi kaydet ({count} ayda bir {fee})"
       }
-    }
+    },
+    "firstPeriod": "İlk dönem",
+    "firstAmount": "İlk dönem tutarı",
+    "firstMode": {
+      "prorate": "Günlük orantılı",
+      "full": "Tam dönem",
+      "free": "İlk dönem ücretsiz"
+    },
+    "collectionSchedule": "Tahsilat tarihleri: her yıl {dates}",
+    "coverAligned": "Ortak dönem sınırında sona erer",
+    "recordNext": "Ödeme kaydet · {amount}",
+    "collectionAnchor": "Ortak tahsilat başlangıcı",
+    "firstSummary": "İlk dönem {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "{count} boş",

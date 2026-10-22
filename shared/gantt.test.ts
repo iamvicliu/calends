@@ -315,7 +315,7 @@ test('真实时间轴的默认/旧偏好回退为 1 年，五档按顺序保存�
     );
     prevented = false;
     host.listeners.wheel({ deltaX: 90, deltaY: 0, preventDefault: () => (prevented = true) });
-    assert.equal(prevented, false);
+    assert.equal(prevented, true, '全部范围也要阻止浏览器横滑');
   }
 });
 
@@ -442,4 +442,25 @@ test('手机竖屏不渲染名称和拖拽线，整行打开详情，横屏恢�
   host.env.narrow = false;
   assert.equal(find('gt')!.props.style['--lw'], '105px', '桌面偏好按上限显示');
   assert.equal(host.prefs['gantt-label-w'], '150');
+});
+
+test('时间轴横滑在零宽度和全部范围仍被拦截，纵滑与等量斜滑始终放行', () => {
+  for (const zoom of ['1y', 'all']) {
+    for (const width of [0, 214]) {
+      const host = mount(zoom, width);
+      host.render();
+      for (const [deltaX, deltaY, expected] of [
+        [90, 0, true],
+        [-90, 2, true],
+        [2, 90, false],
+        [0, -90, false],
+        [40, 40, false],
+      ] as const) {
+        let prevented = false;
+        host.listeners.wheel({ deltaX, deltaY, preventDefault: () => (prevented = true) });
+        assert.equal(prevented, expected, `${zoom} ${width} ${deltaX}/${deltaY}`);
+      }
+      if (width === 0 || zoom === 'all') assert.equal(host.timers.size, 0);
+    }
+  }
 });

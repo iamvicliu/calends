@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { Copy } from 'lucide-react';
+import { ChevronUp, Copy } from 'lucide-react';
 import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import type { Block, ChargeRow, Comparison, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
@@ -8,7 +8,7 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
 import { BarLine } from './charts.tsx';
-import { Hint, Icon } from './ui.tsx';
+import { Hint } from './ui.tsx';
 import './scope-report.css';
 
 interface Props {
@@ -43,11 +43,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const copyImage = () => {
     if (!root.current || copying) return;
     const el = root.current;
-    // 只临时展开，不写入调用方的折叠偏好；同步提交以便 Safari 在点击内创建 ClipboardItem。
+    // 同步关闭动画并锁定操作，以便 Safari 在点击内创建 ClipboardItem。
     flushSync(() => setCopyState('copying'));
     const blob = (async () => {
       try {
-        // 让新挂载图表的宽度测量完成，组装动画在复制后保持关闭。
+        // 等待图表布局稳定，组装动画在复制后保持关闭。
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         const image = await snapshot(el, {
           width: el.offsetWidth + 40,
@@ -102,14 +102,45 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       {hint && <Hint text={t(`scope.${hint}`)} />}
     </div>
   );
+  const headlineHeading = (label: string, hint?: string) => (
+    <div className="scope-headline-header">
+      <div className="stat-label">
+        {t(label)} {hint && <Hint text={t(hint)} />}
+      </div>
+      <div className="scope-actions">
+        {typeof ClipboardItem !== 'undefined' && (
+          <button
+            type="button"
+            className="icon-btn"
+            title={t('detail.action.copyImage')}
+            aria-label={t('detail.action.copyImage')}
+            disabled={copying}
+            onClick={copyImage}
+          >
+            <Copy size={15} />
+          </button>
+        )}
+        <button
+          type="button"
+          className="icon-btn"
+          title={t('scope.collapse')}
+          aria-expanded={expanded}
+          aria-controls={id}
+          aria-label={t('scope.collapse')}
+          onClick={onToggle}
+          disabled={copying}
+        >
+          <ChevronUp size={15} />
+        </button>
+      </div>
+    </div>
+  );
   const render = (block: Block): ReactNode => {
     switch (block.type) {
       case 'headline':
         return block.mode === 'scope' ? (
           <>
-            <div className="stat-label">
-              {t('scope.monthly')} <Hint text={t('scope.mrrBasis')} />
-            </div>
+            {headlineHeading('scope.monthly', 'scope.mrrBasis')}
             <div className="hero-num num">{expense(block.mrr)}</div>
             <div className="hero-delta">
               {delta(block.change)}
@@ -124,9 +155,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           </>
         ) : (
           <>
-            <div className="stat-label">
-              {t('scope.monthTotal')} <Hint text={t('scope.cashBasis')} />
-            </div>
+            {headlineHeading('scope.monthTotal', 'scope.cashBasis')}
             <div className={`hero-num num ${block.total < 0 ? 'green' : ''}`}>{expense(block.total)}</div>
             <div className="hero-delta">
               <span className="scope-comparison">
@@ -353,41 +382,15 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   };
   return (
     <section ref={root} className={`scope-report ${animate && copyState === 'idle' ? 'scope-animate' : ''}`} aria-labelledby={`${id}-title`}>
-      <header className="scope-header">
-        <h2 id={`${id}-title`}>
-          <button type="button" className="scope-title" aria-expanded={expanded} aria-controls={id} onClick={onToggle} disabled={copying}>
-            {expanded ? title : t('scope.expand')}
+      <h2 id={`${id}-title`} className="scope-header">
+        {expanded ? (
+          <span className="scope-title">{title}</span>
+        ) : (
+          <button type="button" className="scope-trigger" aria-expanded={false} aria-controls={id} onClick={onToggle}>
+            {t('scope.expand')} · {title}
           </button>
-        </h2>
-        <div className="scope-actions">
-          {typeof ClipboardItem !== 'undefined' && (
-            <button
-              type="button"
-              className="icon-btn"
-              title={t('detail.action.copyImage')}
-              aria-label={t('detail.action.copyImage')}
-              disabled={copying}
-              onClick={copyImage}
-            >
-              <Copy size={15} />
-            </button>
-          )}
-          <button
-            type="button"
-            className="icon-btn"
-            aria-expanded={expanded}
-            aria-controls={id}
-            aria-label={t(open ? 'scope.collapse' : 'scope.expand')}
-            title={t(open ? 'scope.collapse' : 'scope.expand')}
-            onClick={onToggle}
-            disabled={copying}
-          >
-            <span className={open ? 'scope-chevron open' : 'scope-chevron'}>
-              <Icon name="down" />
-            </span>
-          </button>
-        </div>
-      </header>
+        )}
+      </h2>
       {expanded && (
         <div id={id} className="scope-grid">
           {blocks.map((block, i) => (

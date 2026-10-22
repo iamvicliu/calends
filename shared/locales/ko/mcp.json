@@ -54,7 +54,8 @@
     "invalidStop": "중지 정보는 마지막 서비스 날짜와 같아야 하며, 사유는 제공업체 중지에만 입력할 수 있습니다.",
     "invalidRefund": "환불액은 유효한 숫자이며 음수로 기록해야 합니다.",
     "refundBeforeStop": "환불일은 중지일보다 빠를 수 없습니다.",
-    "paymentOutOfRange": "결제일 {date}은(는) 시작일과 오늘 사이여야 합니다"
+    "paymentOutOfRange": "결제일 {date}은(는) 시작일과 오늘 사이여야 합니다",
+    "invalidFirstPeriod": "first_period는 prorate, full 또는 free여야 합니다."
   },
   "tool": {
     "get_overview": "장부 개요",

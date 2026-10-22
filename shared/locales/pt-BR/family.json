@@ -123,7 +123,19 @@
         "one": "Registrar pagamento ({fee} a cada {count} mês)",
         "other": "Registrar pagamento ({fee} a cada {count} meses)"
       }
-    }
+    },
+    "firstPeriod": "Primeiro período",
+    "firstAmount": "Valor do primeiro período",
+    "firstMode": {
+      "prorate": "Proporcional por dia",
+      "full": "Período completo",
+      "free": "Primeiro período grátis"
+    },
+    "collectionSchedule": "Datas de cobrança: todo ano {dates}",
+    "coverAligned": "Termina no limite do período comum",
+    "recordNext": "Registrar pagamento · {amount}",
+    "collectionAnchor": "Início comum de cobrança",
+    "firstSummary": "Primeiro período {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "{count} livres",
