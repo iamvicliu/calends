@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "미지정",
     "anyRegion": "모든 지역",
-    "total": "합계"
+    "total": "합계",
+    "createCategory": "새 카테고리 생성 예정: {name}",
+    "createdCategory": "카테고리 생성 완료: {name}"
   },
   "error": {
     "shareFull": "「{name}」은(는) 자리가 다 찼어요({seats}석)",
@@ -59,7 +61,8 @@
     "invalidInput": "Invalid tool input: {field}",
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
-    "staleRecord": "This record changed since the preview. Read and preview again."
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "카테고리가 없거나 모호합니다: {q}. 선택 가능: {list}"
   },
   "tool": {
     "get_overview": "장부 개요",

@@ -58,8 +58,9 @@ import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
-import { validateCurrency, reviseReceivable } from '../../shared/ledger-edit.ts';
-import { categoryCounts, categoryList, presetCategory } from '../../shared/categories.ts';
+import { validateCurrency, reviseReceivable, categoryEdit } from '../../shared/ledger-edit.ts';
+import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
+import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
 
 /** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
 export async function searchAppStore(query: string, country = 'us') {
@@ -359,6 +360,12 @@ const CYCLE = {
   description: 'Billing cycle, e.g. {"unit":"month","every":1}; lifetime = one-time purchase.',
 };
 const DRY = { type: 'boolean', default: false, description: 'Preview the result without saving.' };
+const CATEGORY = { type: 'string', description: 'Existing category code or name from list_categories; localized names are case-insensitive.' };
+const CATEGORY_CREATE = {
+  create_category: { type: 'boolean', default: false, description: 'If category is unknown, explicitly create it. Ambiguous references always fail.' },
+  category_icon: { type: ['string', 'null'], description: 'New category only: Lucide icon name or emoji; same validation as save_category set.icon.' },
+  category_color: { type: ['string', 'null'], description: 'New category only: palette code or #rrggbb; same validation as save_category set.color.' },
+};
 const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required, additionalProperties: false });
 
 /** 写入：dry_run 只返回预览；否则保存并返回最新一行 + 接下来几笔扣款 */
@@ -366,7 +373,17 @@ const obj = (properties: Record<string, unknown>, required: string[] = []) => ({
 export const decodeEntities = (s: string) =>
   s.replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, e: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'" })[e]!);
 
-export async function commit(ctx: ToolCtx, st: AppState, today: string, after: Subscription, dry: unknown, changed: string[]) {
+type CategoryCreation = { category: Category; categories: Category[] };
+
+export async function commit(
+  ctx: ToolCtx,
+  st: AppState,
+  today: string,
+  after: Subscription,
+  dry: unknown,
+  changed: string[],
+  categoryCreation?: CategoryCreation,
+) {
   after = resyncShares(
     st,
     st.subscriptions.find((s) => s.id === after.id),
@@ -392,16 +409,24 @@ export async function commit(ctx: ToolCtx, st: AppState, today: string, after: S
     after,
     references: { subscription: after.id },
     changed,
+    ...(categoryCreation
+      ? {
+          created_category: categoryCreation.category,
+          category_notice: t(dry ? 'mcp.label.createCategory' : 'mcp.label.createdCategory', { name: categoryCreation.category.name }),
+        }
+      : {}),
     next_charges: chargesBetween(after, today, addMonths(today, 13), today)
       .slice(0, 3)
       .map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })),
   };
   if (dry) {
+    if (categoryCreation) ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, categories: categoryCreation.categories } };
     ctx.overlay?.set(after.id, after);
     return { dry_run: true, ...preview };
   }
   const saved = { ...after, updatedAt: new Date().toISOString() };
-  await upsert(ctx.env, 'subscriptions', saved.id, saved);
+  if (categoryCreation) await saveLedgerEdit(ctx.env, { subscriptions: [saved], settings: { ...st.settings, categories: categoryCreation.categories } });
+  else await upsert(ctx.env, 'subscriptions', saved.id, saved);
   return { ok: true, ...preview };
 }
 
@@ -427,6 +452,41 @@ export const methodRef = (st: AppState, v: unknown) => {
   const m = matches[0];
   return m.id;
 };
+
+/** Exact code/name first, then case-insensitive names (including localized preset aliases); never fuzzy. */
+function categoryMatches(list: Category[], q: string): Category[] {
+  const exact = list.filter((c) => c.name === q || c.preset === q);
+  if (exact.length) return exact;
+  const key = q.toLowerCase();
+  return list.filter(
+    (c) =>
+      c.name.toLowerCase() === key ||
+      (c.preset && [...(CATEGORY_ALIASES[c.preset] ?? []), ...(PRESETS.find((p) => p.code === c.preset)?.legacy ?? [])].some((n) => n.toLowerCase() === key)),
+  );
+}
+
+export const categoryRef = (st: AppState, v: unknown): string | undefined => {
+  if (v == null) return undefined;
+  const q = String(v).trim();
+  const list = categoryList(st.settings, st.subscriptions);
+  const matches = categoryMatches(list, q);
+  if (matches.length !== 1)
+    throw new Error(
+      t('mcp.error.noCategory', { q, list: candidates((matches.length ? matches : list).map((c) => ({ name: c.name, id: c.preset ?? c.name }))) }),
+    );
+  return matches[0].name;
+};
+
+function subscriptionCategory(st: AppState, v: unknown, args: Record<string, unknown>): { name: string; creation?: CategoryCreation } {
+  const q = String(v).trim();
+  const list = categoryList(st.settings, st.subscriptions);
+  if (args.create_category === true && !categoryMatches(list, q).length) {
+    const { categories } = categoryEdit(st, 'create', undefined, { name: q, icon: str(args.category_icon), color: str(args.category_color) });
+    const category = categories.find((c) => c.name === q)!;
+    return { name: category.name, creation: { category, categories } };
+  }
+  return { name: categoryRef(st, q)! };
+}
 
 // ---------- 工具 ----------
 
@@ -467,7 +527,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'list_categories',
     description:
-      'List the user’s categories in display order: name, icon (a Lucide icon name or an emoji), color, built-in code if any, and how many subscriptions use it (total / live). Use these exact names for the category field of create_subscription and update_subscription; a new name creates a new category.',
+      'List the user’s categories in display order: name, icon (a Lucide icon name or an emoji), color, built-in code if any, and how many subscriptions use it (total / live). Call this before assigning categories. Use an existing code/name in create_subscription and update_subscription; unknown names fail unless create_category=true. For a missing category use save_category action=create or explicitly set create_category=true.',
     inputSchema: obj({}),
     async run(_a, ctx) {
       const { st, today } = await state(ctx);
@@ -954,7 +1014,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'create_subscription',
     description:
-      'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. category: reuse a name from list_categories when possible.',
+      'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. Call list_categories first and reuse an existing code/name. Unknown categories fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
     write: true,
     inputSchema: obj(
       {
@@ -963,7 +1023,8 @@ const CATALOGUE: Tool[] = [
         currency: { type: 'string', description: 'ISO code, e.g. USD, CNY, TRY.' },
         cycle: CYCLE,
         start: { ...DATE, description: 'First charge / purchase date. Defaults to today.' },
-        category: { type: 'string', description: 'Defaults to the Tools category.' },
+        category: { ...CATEGORY, description: `${CATEGORY.description} Defaults to the existing Tools category; if absent, specify an existing category.` },
+        ...CATEGORY_CREATE,
         tags: { type: 'array', items: { type: 'string' } },
         method: { type: 'string', description: 'Payment method id or name.' },
         region: { type: 'string', description: 'ISO country code for region-priced stores (App Store TR, NG…).' },
@@ -1008,12 +1069,16 @@ const CATALOGUE: Tool[] = [
       if (!st.fx.rates[currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: currency }));
       if (!a.force && st.subscriptions.some((s) => s.name.toLowerCase() === name.toLowerCase() && s.start === start))
         throw new Error(t('mcp.error.duplicateSub', { name }));
+      const category =
+        a.category === undefined
+          ? { name: categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))! }
+          : subscriptionCategory(st, a.category, a);
       const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       const sub: Subscription = {
         // 确认草稿时沿用草稿里生成的 id，后续基于它的草稿（合租、成员）才能对上
         id: str(a.id) && !st.subscriptions.some((s) => s.id === str(a.id)) ? str(a.id)! : uid(),
         name,
-        category: str(a.category) ?? presetCategory(categoryList(st.settings, st.subscriptions), 'tools'),
+        category: category.name,
         tags: Array.isArray(a.tags) ? a.tags.map(String) : [],
         price: num(a.price, 'price'),
         currency,
@@ -1034,13 +1099,13 @@ const CATALOGUE: Tool[] = [
         ...(payments.length ? { payments } : {}),
         createdAt: today,
       };
-      return commit(ctx, st, today, sub, a.dry_run, ['created']);
+      return commit(ctx, st, today, sub, a.dry_run, ['created'], category.creation);
     },
   },
   {
     name: 'update_subscription',
     description:
-      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, payment method, region, reminder days, end date (no renewal after it), next due date, trial end). Only provided keys change. For price changes use change_price; for plan/region switches use change_plan.',
+      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, payment method, region, reminder days, end date (no renewal after it), next due date, trial end). Only provided keys change. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
     write: true,
     inputSchema: obj(
       {
@@ -1057,7 +1122,7 @@ const CATALOGUE: Tool[] = [
           },
           bonus: { type: ['object', 'null'], properties: { from: DATE, until: DATE }, required: ['from', 'until'], additionalProperties: false },
           name: { type: 'string' },
-          category: { type: 'string' },
+          category: CATEGORY,
           tags: { type: 'array', items: { type: 'string' } },
           url: { type: 'string' },
           manage_url: { type: 'string' },
@@ -1071,6 +1136,7 @@ const CATALOGUE: Tool[] = [
           trial_end: { type: ['string', 'null'] },
           expires: { type: ['string', 'null'] },
         }),
+        ...CATEGORY_CREATE,
         dry_run: DRY,
       },
       ['subscription', 'set'],
@@ -1095,7 +1161,8 @@ const CATALOGUE: Tool[] = [
       if ('intro' in set) put('intro', set.intro == null ? undefined : (set.intro as Subscription['intro']));
       if ('bonus' in set) put('bonus', set.bonus == null ? undefined : (set.bonus as Subscription['bonus']));
       if ('name' in set) put('name', String(set.name).trim());
-      if ('category' in set) put('category', String(set.category));
+      const category = 'category' in set ? subscriptionCategory(st, set.category, a) : undefined;
+      if (category) put('category', category.name);
       if ('tags' in set) put('tags', Array.isArray(set.tags) ? set.tags.map(String) : []);
       if ('url' in set) put('url', str(set.url));
       if ('manage_url' in set) put('manageUrl', str(set.manage_url), 'manage_url');
@@ -1113,7 +1180,7 @@ const CATALOGUE: Tool[] = [
         if (k in set) put(f, set[k] == null ? undefined : date(set[k], k), k);
       }
       if (!changed.length) throw new Error(t('mcp.error.noFields'));
-      return commit(ctx, st, today, syncPhase(next, today), a.dry_run, changed);
+      return commit(ctx, st, today, syncPhase(next, today), a.dry_run, changed, category?.creation);
     },
   },
   {

@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "未設定",
     "anyRegion": "すべての地域",
-    "total": "合計"
+    "total": "合計",
+    "createCategory": "カテゴリを新規作成します：{name}",
+    "createdCategory": "カテゴリを作成しました：{name}"
   },
   "error": {
     "shareFull": "「{name}」は満席です（{seats} 席）",
@@ -59,7 +61,8 @@
     "invalidInput": "Invalid tool input: {field}",
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
-    "staleRecord": "This record changed since the preview. Read and preview again."
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "カテゴリが見つからないか、曖昧です：{q}。候補：{list}"
   },
   "tool": {
     "get_overview": "台帳の概要",

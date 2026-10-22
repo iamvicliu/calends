@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Atanmamış",
     "anyRegion": "Tüm bölgeler",
-    "total": "Toplam"
+    "total": "Toplam",
+    "createCategory": "Kategori oluşturulacak: {name}",
+    "createdCategory": "Kategori oluşturuldu: {name}"
   },
   "error": {
     "shareFull": "“{name}” dolu ({seats} koltuk)",
@@ -59,7 +61,8 @@
     "invalidInput": "Invalid tool input: {field}",
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
-    "staleRecord": "This record changed since the preview. Read and preview again."
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Kategori bulunamadı veya belirsiz: {q}. Seçenekler: {list}"
   },
   "tool": {
     "get_overview": "Defter özeti",

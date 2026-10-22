@@ -8,7 +8,7 @@ import { getRev, loadState, putKv, upsert } from '../worker/store.ts';
 import type { Env } from '../worker/env.ts';
 import { TOOLS, type ToolCtx } from '../worker/ai/mcp-tools.ts';
 import { createToken } from '../worker/ai/mcp.ts';
-import { ASSISTANT_TOOLS, apply, chat } from '../worker/ai/assistant.ts';
+import { ASSISTANT_TOOLS, apply, chat, enrichDraft } from '../worker/ai/assistant.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 import { todayIn } from './billing.ts';
 const hook = registerHooks({
@@ -381,6 +381,201 @@ test('multi-entity migrations roll back atomically when a later write fails', as
   f.db.exec("CREATE TRIGGER fictional_fail BEFORE DELETE ON methods BEGIN SELECT RAISE(ABORT, 'Fictional write failure'); END");
   assert.equal((await f.call('update_payment_method', { action: 'delete', method: 'wallet', migrate_to: 'target' })).isError, true);
   assert.deepEqual(await f.snapshot(), before);
+});
+
+const categoryWrite = (tool: string, category: string, extra: object = {}) =>
+  tool === 'create_subscription'
+    ? { name: 'New fictional subscription', price: 12, currency: 'USD', cycle: { unit: 'month' }, category, ...extra }
+    : { subscription: 's', set: { category }, ...extra };
+
+for (const tool of ['create_subscription', 'update_subscription']) {
+  test(`strict category references: ${tool} rejects unknown names without any writes`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    const before = await f.snapshot();
+    for (const dry_run of [false, true]) {
+      for (const category of ['Typo category', 'Tes', '']) {
+        const r = await f.call(tool, categoryWrite(tool, category, { dry_run }));
+        assert.equal(r.isError, true, JSON.stringify(r));
+        assert.match(r.content[0].text, /Test/);
+        assert.match(r.content[0].text, /Other/);
+        assert.deepEqual(await f.snapshot(), before);
+      }
+    }
+  });
+
+  test(`strict category references: ${tool} explicitly creates and references a validated category atomically`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    const before = await f.snapshot();
+    const args = categoryWrite(tool, 'New category', { create_category: true, category_icon: 'book', category_color: '#aabbcc' });
+    const ctx: ToolCtx = { env: f.env, overlay: new Map() };
+    const preview = (await TOOLS.find((x) => x.name === tool)!.run({ ...args, dry_run: true }, ctx)) as any;
+    assert.deepEqual(preview.created_category, { name: 'New category', icon: 'book', color: '#aabbcc' });
+    assert.match(preview.category_notice, /New category/);
+    assert.equal(preview.after.category, 'New category');
+    assert.deepEqual(await f.snapshot(), before);
+    const rpcPreview = await f.call(tool, { ...args, dry_run: true });
+    assert.equal(rpcPreview.isError, undefined, JSON.stringify(rpcPreview));
+    assert.deepEqual(rpcPreview.structuredContent.created_category, preview.created_category);
+    assert.equal((await f.call(tool, args, f.read)).isError, true);
+    assert.deepEqual(await f.snapshot(), before);
+    const later = await TOOLS.find((x) => x.name === 'update_subscription')!.run({ subscription: 's', set: { category: 'NEW CATEGORY' }, dry_run: true }, ctx);
+    assert.equal((later as any).after.category, 'New category');
+    assert.deepEqual(await f.snapshot(), before);
+
+    // Settings are written after subscriptions in saveLedgerEdit: both must roll back.
+    f.db.exec("CREATE TRIGGER fictional_category_fail BEFORE UPDATE ON kv WHEN NEW.key = 'settings' BEGIN SELECT RAISE(ABORT, 'Fictional write failure'); END");
+    assert.equal((await f.call(tool, args)).isError, true);
+    assert.deepEqual(await f.snapshot(), before);
+    f.db.exec('DROP TRIGGER fictional_category_fail');
+    const result = await f.call(tool, args);
+    assert.equal(result.isError, undefined, JSON.stringify(result));
+    assert.deepEqual(result.structuredContent.created_category, preview.created_category);
+    const saved = await f.snapshot();
+    assert.deepEqual(saved.settings.categories?.at(-1), preview.created_category);
+    assert.equal(saved.subscriptions.find((s) => s.id === result.structuredContent.after.id)?.category, 'New category');
+    assert.equal((await f.call('list_categories', {})).structuredContent.items.filter((c: any) => c.name === 'New category').length, 1);
+  });
+
+  test(`strict category references: ${tool} matches codes, case and localized aliases while retaining historical names`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    const st = await f.snapshot();
+    await putKv(f.env, 'settings', { ...st.settings, categories: [{ name: 'Renamed tools', preset: 'tools' }, { name: 'Custom' }] });
+    // Test is now a historical subscription category absent from the registry.
+    const before = await f.snapshot();
+    for (const [category, expected] of [
+      ['tools', 'Renamed tools'],
+      ['rEnAmEd ToOlS', 'Renamed tools'],
+      ['tOoLs', 'Renamed tools'],
+      ['工具', 'Renamed tools'],
+      ['oUtIlS', 'Renamed tools'],
+      ['ツール', 'Renamed tools'],
+      ['custom', 'Custom'],
+      ['TEST', 'Test'],
+    ]) {
+      const r = await f.call(tool, categoryWrite(tool, category, { create_category: true, dry_run: true }));
+      assert.equal(r.isError, undefined, JSON.stringify(r));
+      assert.equal(r.structuredContent.after.category, expected);
+      assert.equal(r.structuredContent.created_category, undefined);
+      assert.deepEqual(await f.snapshot(), before);
+    }
+    const saved = await f.call(tool, categoryWrite(tool, 'TEST'));
+    assert.equal(saved.isError, undefined, JSON.stringify(saved));
+    assert.equal(saved.structuredContent.after.category, 'Test');
+    assert.deepEqual((await f.snapshot()).settings.categories, before.settings.categories);
+  });
+
+  test(`strict category references: ${tool} rejects ambiguity even with explicit creation`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    const st = await f.snapshot();
+    await putKv(f.env, 'settings', {
+      ...st.settings,
+      categories: [{ name: 'Mixed' }, { name: 'MIXED' }, { name: 'First', preset: 'tools' }, { name: 'Second', preset: 'tools' }],
+    });
+    const before = await f.snapshot();
+    for (const category of ['mixed', 'tools', 'OUTILS']) {
+      for (const create_category of [false, true]) {
+        const r = await f.call(tool, categoryWrite(tool, category, { create_category }));
+        assert.equal(r.isError, true);
+        assert.match(r.content[0].text, category === 'mixed' ? /Mixed.*MIXED/ : /First.*Second/);
+        assert.deepEqual(await f.snapshot(), before);
+      }
+    }
+    const exact = await f.call(tool, categoryWrite(tool, 'Mixed', { dry_run: true }));
+    assert.equal(exact.isError, undefined, JSON.stringify(exact));
+    assert.equal(exact.structuredContent.after.category, 'Mixed');
+  });
+
+  test(`strict category references: ${tool} shares save_category validation and leaves no failed drafts`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    const before = await f.snapshot();
+    for (const name of [' ', 'x'.repeat(41)]) {
+      assert.equal((await f.call(tool, categoryWrite(tool, name, { create_category: true }))).isError, true);
+      assert.deepEqual(await f.snapshot(), before);
+    }
+    const ctx: ToolCtx = { env: f.env, overlay: new Map() };
+    const invalid = tool === 'create_subscription' ? { method: 'Missing wallet' } : { set: { category: 'New category', method: 'Missing wallet' } };
+    await assert.rejects(() =>
+      TOOLS.find((x) => x.name === tool)!.run(categoryWrite(tool, 'New category', { create_category: true, dry_run: true, ...invalid }), ctx),
+    );
+    assert.equal(ctx.draftState, undefined);
+    assert.equal(ctx.overlay!.size, 0);
+    // Existing save_category drops invalid optional icon/color values; inline creation must do the same.
+    const fields = { name: 'Cleaned category', icon: 'x'.repeat(33), color: 'invalid' };
+    const registry = await f.call('save_category', { action: 'create', set: fields, dry_run: true });
+    const inline = await f.call(
+      tool,
+      categoryWrite(tool, fields.name, { create_category: true, category_icon: fields.icon, category_color: fields.color, dry_run: true }),
+    );
+    assert.equal(inline.isError, undefined, JSON.stringify(inline));
+    assert.deepEqual(inline.structuredContent.created_category, registry.structuredContent.after.at(-1));
+    assert.deepEqual(await f.snapshot(), before);
+  });
+}
+
+test('strict category references: assistant enrichment preserves unknown/localized inputs and confirmation creates only on apply', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const before = await f.snapshot();
+  for (const category of ['Typo category', '工具']) {
+    const args = categoryWrite('create_subscription', category, { icon: 'https://example.test/icon.png', url: 'https://example.test' });
+    assert.equal((await enrichDraft(args)).args.category, category);
+    const enriched = await enrichDraft({ set: { category } });
+    assert.equal((enriched.args.set as any).category, category);
+  }
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test', model: 'fictional' });
+  const args = categoryWrite('create_subscription', 'Assistant category', {
+    create_category: true,
+    category_icon: 'book',
+    category_color: 'c3',
+    icon: 'https://example.test/icon.png',
+    url: 'https://example.test',
+    dry_run: false,
+  });
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', async () => {
+    const delta =
+      calls++ === 0
+        ? { tool_calls: [{ index: 0, id: 'category-call', type: 'function', function: { name: 'create_subscription', arguments: JSON.stringify(args) } }] }
+        : { content: 'Draft ready.' };
+    return new Response(`data: ${JSON.stringify({ choices: [{ delta, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`, {
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  });
+  const stream = await (await chat(f.env, { text: 'Create a subscription and category', history: [] }, new AbortController().signal)).text();
+  const proposal = stream
+    .split('\n')
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => JSON.parse(line.slice(6)))
+    .find((e) => e.type === 'proposal');
+  assert.ok(proposal, stream);
+  assert.equal(proposal.preview.created_category.name, 'Assistant category');
+  assert.equal(proposal.args.create_category, true);
+  assert.deepEqual(await f.snapshot(), before);
+  await apply(f.env, { tool: proposal.tool, args: proposal.args });
+  const after = await f.snapshot();
+  assert.ok(after.settings.categories?.some((c) => c.name === 'Assistant category' && c.icon === 'book' && c.color === 'c3'));
+  assert.equal(after.subscriptions.find((s) => s.id === proposal.args.id)?.category, 'Assistant category');
+});
+
+test('strict category references: omitted category uses an existing Tools category and never recreates a removed default', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const args = { name: 'Fictional default category', price: 12, currency: 'USD', cycle: { unit: 'month' }, dry_run: true };
+  const before = await f.snapshot();
+  assert.equal((await f.call('create_subscription', args)).isError, true);
+  assert.equal((await f.call('create_subscription', { ...args, create_category: true })).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  await putKv(f.env, 'settings', { ...before.settings, categories: [{ name: 'Renamed tools', preset: 'tools' }] });
+  const withDefault = await f.snapshot();
+  const preview = await f.call('create_subscription', args);
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.after.category, 'Renamed tools');
+  assert.deepEqual(await f.snapshot(), withDefault);
 });
 
 test('assistant draft dependencies cover wallets/categories/people/settings; stable ids apply in order', async (t) => {

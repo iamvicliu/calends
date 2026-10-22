@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Nicht zugeordnet",
     "anyRegion": "Jede Region",
-    "total": "Gesamt"
+    "total": "Gesamt",
+    "createCategory": "Kategorie wird erstellt: {name}",
+    "createdCategory": "Kategorie erstellt: {name}"
   },
   "error": {
     "shareFull": "„{name}“ ist voll ({seats} Plätze)",
@@ -59,7 +61,8 @@
     "invalidInput": "Invalid tool input: {field}",
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
-    "staleRecord": "This record changed since the preview. Read and preview again."
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Kategorie nicht gefunden oder mehrdeutig: {q}. Optionen: {list}"
   },
   "tool": {
     "get_overview": "Kontoübersicht",

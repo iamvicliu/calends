@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "未指定",
     "anyRegion": "不区分地区",
-    "total": "合计"
+    "total": "合计",
+    "createCategory": "将新建分类：{name}",
+    "createdCategory": "已新建分类：{name}"
   },
   "error": {
     "shareFull": "「{name}」已经坐满了（{seats} 个位置）",
@@ -59,7 +61,8 @@
     "invalidInput": "工具参数不合法：{field}",
     "invalidTarget": "目标不存在、不唯一、重复或不合法。请先读取最新记录并指定准确的 ID/索引。",
     "references": "此项仍被引用。请指定 migrate_to 或先移除这些引用：{references}",
-    "staleRecord": "记录在预览后已变化，请重新读取并预览。"
+    "staleRecord": "记录在预览后已变化，请重新读取并预览。",
+    "noCategory": "分类不存在或有歧义：{q}。可选分类：{list}"
   },
   "tool": {
     "get_overview": "账本概况",
