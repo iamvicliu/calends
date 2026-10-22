@@ -8228,7 +8228,7 @@ button.seat:disabled {
 }
 .ai-tools {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   margin-top: 16px;
 }
@@ -8247,6 +8247,7 @@ button.seat:disabled {
   padding: 8px 0;
   border-top: 0.5px solid var(--sep);
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .ai-tool code {
   color: var(--label-3);

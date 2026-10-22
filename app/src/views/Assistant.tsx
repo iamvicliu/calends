@@ -62,6 +62,9 @@ type Part =
     };
 
 interface Preview {
+  before?: unknown;
+  after?: unknown;
+  references?: unknown;
   subscription?: { id: string; name: string; category?: string; price?: number; currency?: string; cycle?: string; next_charge?: string | null };
   next_charges?: Array<{ date: string; amount: number; currency: string }>;
 }
@@ -738,6 +741,15 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
   const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
   switch (tool) {
     case 'record_receivable':
+      if (a.action === 'update' || a.action === 'delete' || a.entry) {
+        for (const [key, value] of Object.entries(a))
+          if (!['subscription', 'dry_run'].includes(key))
+            add(
+              t(`assistant.f.${key}`) === `assistant.f.${key}` ? key : t(`assistant.f.${key}`),
+              typeof value === 'object' ? JSON.stringify(value) : String(value),
+            );
+        break;
+      }
       add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
       add(t('assistant.f.amount'), a.amount != null ? <span className="green">{flow(Number(a.amount), String(a.currency ?? collect))}</span> : undefined);
       add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
@@ -830,7 +842,9 @@ function Proposal(props: {
   const a = part.args;
   const create = part.tool === 'create_subscription';
   const sub = part.preview.subscription;
-  const name = String(a.name ?? sub?.name ?? '');
+  const name = String(
+    a.name ?? sub?.name ?? (a.set as { name?: string } | undefined)?.name ?? a.method ?? a.person ?? a.category ?? t(`mcp.tool.${part.tool}`),
+  );
   const sib = props.siblings.find((x) => x.tool === 'create_subscription' && x.args.id && x.args.id === sub?.id)?.args;
   const sibling = sib ? { icon: sib.icon ? String(sib.icon) : undefined, url: sib.url ? String(sib.url) : undefined } : undefined;
   const icon: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'> = {
@@ -846,7 +860,14 @@ function Proposal(props: {
     state.methods.find((m) => m.id === a.method || m.name === a.method) ??
     (create ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
   const done = part.state === 'applied';
-  const destructive = part.tool === 'delete_subscription' || part.tool === 'remove_share_member';
+  const destructive =
+    part.tool === 'delete_subscription' ||
+    part.tool === 'delete_payment' ||
+    part.tool === 'remove_share_member' ||
+    a.action === 'delete' ||
+    a.action === 'remove' ||
+    a.top_up_action === 'delete' ||
+    (part.tool === 'set_share' && a.role === 'none');
   // 没识别出来、用了默认值的字段：提醒用户核对
   const missing = create
     ? [!a.start && t('assistant.card.start'), !a.method && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
@@ -895,6 +916,14 @@ function Proposal(props: {
           </Fragment>
         ))}
       </dl>
+      {!create && part.preview.before !== undefined && (
+        <details className="as-tool-detail">
+          <summary>{t('assistant.card.changes')}</summary>
+          <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 260, overflow: 'auto', fontSize: 12 }}>
+            {JSON.stringify({ before: part.preview.before, after: part.preview.after, references: part.preview.references }, null, 2)}
+          </pre>
+        </details>
+      )}
       {create && part.preview.next_charges && part.preview.next_charges.length > 0 && (
         <div className="as-card-next">
           <small>{t('assistant.card.next')}</small>

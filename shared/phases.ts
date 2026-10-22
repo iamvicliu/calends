@@ -298,6 +298,7 @@ export function removePhase(s: Subscription, index: number): Subscription {
       region: p.region,
       priceHistory: p.priceHistory,
       intro: p.intro,
+      bonus: p.bonus,
       payments: p.payments,
       nextDue: p.nextDue,
     };
@@ -344,11 +345,14 @@ function materialize(p: Phase, sub: Subscription, today: string): Phase {
 /** 新增或修改一笔扣款记录；old 为原记录的日期与序号（修改时） */
 export function savePayment(s: Subscription, today: string, pay: Payment, old?: { date: string; index: number }, phase?: string): Subscription {
   const phases = phasesOf(s);
+  let originalPhase: number | undefined;
   if (old) {
     const oi = phaseIndexAt(phases, old.date, s, phase, true);
     phases[oi] = materialize(phases[oi], s, today);
+    originalPhase = oi;
     const list = (phases[oi].payments ?? []).filter((x) => x.date === old.date);
-    const target = list[old.index] ?? list[0];
+    const target = list[old.index];
+    if (!target) throw new Error(t('mcp.error.invalidTarget'));
     phases[oi] = { ...phases[oi], payments: (phases[oi].payments ?? []).filter((x) => x !== target) };
   }
   // 原日期不变的编辑始终留在原阶段（修正开始日后可能在服务期外）；改日期或新记录仍按覆盖范围归段
@@ -358,7 +362,9 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
       )
     : -1;
   const i = keep >= 0 ? keep : phaseIndexAt(phases, pay.date);
-  phases[i] = materialize(phases[i], s, today);
+  // The original phase was already materialized before removal. Repeating it after
+  // removing its sole payment would recreate the estimate being replaced.
+  if (i !== originalPhase) phases[i] = materialize(phases[i], s, today);
   phases[i] = { ...phases[i], payments: [...(phases[i].payments ?? []), pay].sort((a, b) => a.date.localeCompare(b.date)) };
   const next = fromPhases(s, phases);
   const error = subError(next);
@@ -372,7 +378,8 @@ export function deletePayment(s: Subscription, today: string, date: string, inde
   const i = phaseIndexAt(phases, date, s, phase, true);
   phases[i] = materialize(phases[i], s, today);
   const list = (phases[i].payments ?? []).filter((x) => x.date === date);
-  const target = list[index] ?? list[0];
+  const target = list[index];
+  if (!target) throw new Error(t('mcp.error.invalidTarget'));
   phases[i] = { ...phases[i], payments: (phases[i].payments ?? []).filter((x) => x !== target) };
   return fromPhases(s, phases);
 }
@@ -472,4 +479,25 @@ export function cancelAtEnd(s: Subscription, at: string, today: string): Subscri
   let c = s;
   for (const p of (s.phases ?? []).filter((p) => p.start > at).sort((a, b) => b.start.localeCompare(a.start))) c = dropPlan(c, p.start);
   return syncPhase({ ...toEditForm(c, today), status: 'cancelled', end: at, stop: undefined }, today);
+}
+
+/** Correct one existing phase without replacing unrelated phases or recorded payments. */
+export function editPhase(s: Subscription, start: string, patch: Partial<Phase>): Subscription {
+  const phases = phasesOf(s);
+  const index = phases.findIndex((p) => p.start === start);
+  if (index < 0) throw new Error(t('mcp.error.invalidTarget'));
+  const p = { ...phases[index] } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null) delete p[key];
+    else p[key] = value;
+  }
+  phases[index] = p as unknown as Phase;
+  phases.sort((a, b) => a.start.localeCompare(b.start));
+  if (new Set(phases.map((p) => p.start)).size !== phases.length) throw new Error(t('mcp.error.invalidTarget'));
+  for (const phase of phases) {
+    const error = subError({ ...s, ...phase, phases: undefined });
+    if (error) throw new Error(error);
+    if (phase.end && phase.end < phase.start) throw new Error(t('core.phase.endTooEarly'));
+  }
+  return mirror({ ...s, start: phases[0].start }, phases);
 }

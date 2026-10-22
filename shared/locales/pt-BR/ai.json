@@ -27,7 +27,7 @@
     "write": "Leitura e escrita",
     "read": "Somente leitura",
     "label": "Permissão",
-    "writeDesc": "Consultar, adicionar e editar assinaturas, cobranças e reembolsos.",
+    "writeDesc": "Consultar e gerenciar assinaturas, pagamentos, recebimentos, carteiras, pessoas, categorias e configurações do registro.",
     "readDesc": "Apenas consultar. Não pode alterar nada."
   },
   "created": {

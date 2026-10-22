@@ -162,7 +162,11 @@
     },
     "applyAll": "Tout confirmer",
     "history": "Prélèvements passés",
-    "historyCount": { "one": "{count} prélèvement", "other": "{count} prélèvements" }
+    "historyCount": {
+      "one": "{count} prélèvement",
+      "other": "{count} prélèvements"
+    },
+    "changes": "Voir les modifications et références"
   },
   "error": {
     "auth": "Clé API invalide",

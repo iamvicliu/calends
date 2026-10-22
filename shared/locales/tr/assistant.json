@@ -162,7 +162,8 @@
     },
     "applyAll": "Tümünü onayla",
     "history": "Geçmiş ödemeler",
-    "historyCount": "{count} ödeme"
+    "historyCount": "{count} ödeme",
+    "changes": "Değişiklikleri ve referansları göster"
   },
   "error": {
     "auth": "Geçersiz API Key",

@@ -27,7 +27,7 @@
     "write": "Read & write",
     "read": "Read-only",
     "label": "Permission",
-    "writeDesc": "Query, add and edit subscriptions, payments and receivables.",
+    "writeDesc": "Query and manage subscriptions, payments, wallets, people, categories and ledger settings.",
     "readDesc": "Query only. Can't change anything."
   },
   "created": {

@@ -25,7 +25,7 @@
     "write": "Baca & tulis",
     "read": "Hanya baca",
     "label": "Izin",
-    "writeDesc": "Lihat, tambah, dan ubah langganan, tagihan, dan penerimaan.",
+    "writeDesc": "Lihat dan kelola langganan, pembayaran, penerimaan, dompet, orang, kategori, dan pengaturan buku catatan.",
     "readDesc": "Hanya lihat. Tidak bisa mengubah apa pun."
   },
   "created": {

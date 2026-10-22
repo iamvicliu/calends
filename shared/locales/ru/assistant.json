@@ -166,7 +166,13 @@
     },
     "applyAll": "Подтвердить все",
     "history": "История списаний",
-    "historyCount": { "one": "{count} списание", "few": "{count} списания", "many": "{count} списаний", "other": "{count} списания" }
+    "historyCount": {
+      "one": "{count} списание",
+      "few": "{count} списания",
+      "many": "{count} списаний",
+      "other": "{count} списания"
+    },
+    "changes": "Просмотр изменений и ссылок"
   },
   "error": {
     "auth": "Недействительный API Key",

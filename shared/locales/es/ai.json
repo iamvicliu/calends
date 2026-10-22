@@ -27,7 +27,7 @@
     "write": "Lectura y escritura",
     "read": "Solo lectura",
     "label": "Permiso",
-    "writeDesc": "Consultar, añadir y editar suscripciones, cargos y cobros.",
+    "writeDesc": "Consultar y gestionar suscripciones, pagos, cobros, monederos, personas, categorías y ajustes del registro.",
     "readDesc": "Solo consultar. No puede cambiar nada."
   },
   "created": {
