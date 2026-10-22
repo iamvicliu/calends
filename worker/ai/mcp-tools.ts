@@ -1823,8 +1823,9 @@ const CATALOGUE: Tool[] = [
           : { ...m, custom: undefined, fee: rule.fee, feeCurrency: rule.currency, billEvery: rule.billEvery };
       else if (a.follow_rule === false) m = { ...m, custom: true };
       else if (feeEdited) {
-        const r = memberFee(st, s, m, today);
-        m = { ...m, custom: sameRule({ fee: r.amount, currency: r.currency, billEvery: memberBillMonths(s, m, today) }, rule) ? undefined : true };
+        const from = date(a.fee_from, 'fee_from', today);
+        const r = memberFee(st, s, m, from);
+        m = { ...m, custom: sameRule({ fee: r.amount, currency: r.currency, billEvery: memberBillMonths(s, m, from) }, rule) ? undefined : true };
       }
       // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
       m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;

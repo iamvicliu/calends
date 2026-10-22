@@ -10,7 +10,7 @@ import { TOOLS, type ToolCtx } from '../worker/ai/mcp-tools.ts';
 import { createToken } from '../worker/ai/mcp.ts';
 import { ASSISTANT_TOOLS, apply, chat, enrichDraft } from '../worker/ai/assistant.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
-import { todayIn } from './billing.ts';
+import { addDays, memberRate, todayIn } from './billing.ts';
 const hook = registerHooks({
   load(url, ctx, next) {
     if (url.endsWith('.json')) return { format: 'module', source: `export default ${readFileSync(new URL(url), 'utf8')}`, shortCircuit: true };
@@ -1030,4 +1030,29 @@ test('carpool collection rule: MCP reads, sets, follows and customizes member fe
   } finally {
     f.db.close();
   }
+});
+
+test('future custom fees are classified at their effective date, before later car-rule edits', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const today = todayIn('UTC');
+  const from = addDays(today, 40);
+  const s = { ...sub(), start: '2025-01-01', share: { ...sub().share!, rule: { fee: 3, currency: 'USD', billEvery: 1 } } };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const edit = { subscription: 's', member: 'member', fee: 100, bill_every: 12, fee_from: from };
+  const before = await f.snapshot();
+  assert.equal((await f.call('save_share_member', { ...edit, dry_run: true })).isError, undefined);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('save_share_member', edit, f.read)).isError, true);
+  assert.equal((await f.call('save_share_member', edit)).isError, undefined);
+  let saved = (await f.snapshot()).subscriptions[0];
+  assert.equal(saved.share!.members[0].custom, true);
+  assert.equal(memberRate(saved, saved.share!.members[0], today).amount, 3);
+  assert.equal(memberRate(saved, saved.share!.members[0], from).amount, 100);
+  const custom = structuredClone(saved.share!.members[0]);
+  assert.equal((await f.call('set_share', { subscription: 's', role: 'owner', rule: { fee: 4 } })).isError, undefined);
+  saved = (await f.snapshot()).subscriptions[0];
+  assert.deepEqual(saved.share!.members[0], custom);
+  assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', fee: 4, bill_every: 1, fee_from: from })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions[0].share!.members[0].custom, undefined);
 });
