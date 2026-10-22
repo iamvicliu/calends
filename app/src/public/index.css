@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import './shadcn.css';
+@import '../control-sizes.css';
 
 @custom-variant dark (&:is([data-theme='dark'] *));
 
@@ -130,8 +131,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--ctl-h-md);
+  height: var(--ctl-h-md);
   border: 0;
   border-radius: 50%;
   color: var(--muted-foreground);
@@ -151,9 +152,11 @@
 .public-icon-btn:disabled {
   opacity: 0.45;
 }
-@media (max-width: 860px), (pointer: coarse) {
-  .public-icon-btn {
-    width: 40px;
-    height: 40px;
-  }
+
+/* Public tabs and their neighboring icon actions share the outer frame. */
+[data-slot='tabs-list'][data-orientation='horizontal'] {
+  height: var(--ctl-h-md);
+}
+.public-filter-btn {
+  height: var(--ctl-h-sm);
 }

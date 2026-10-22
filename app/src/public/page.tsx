@@ -603,7 +603,7 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
                 key={c || '*'}
                 type="button"
                 onClick={() => setTab(c)}
-                className={cn('relative h-7 rounded-full px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground ring-1 ring-border hover:text-foreground')}
+                className={cn('public-filter-btn relative rounded-full px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground ring-1 ring-border hover:text-foreground')}
               >
                 {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-full bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
                 <span className="relative flex items-center gap-1">

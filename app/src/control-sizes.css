@@ -1,0 +1,13 @@
+/* Shared size tokens only: app and public keep their own component styles. */
+:root {
+  --ctl-h-sm: 28px;
+  --ctl-h-md: 32px;
+  --ctl-h-lg: 40px;
+}
+@media (max-width: 860px), (pointer: coarse) {
+  :root {
+    --ctl-h-sm: 40px;
+    --ctl-h-md: 40px;
+    --ctl-h-lg: 40px;
+  }
+}

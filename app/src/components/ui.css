@@ -1,6 +1,8 @@
+@import '../control-sizes.css';
+
 /* Shared alignment and interaction primitives. App only; public has its own style tree. */
 :root {
-  --icon-button-size: 32px;
+  --icon-button-size: var(--ctl-h-md);
 }
 .ui-title,
 .icon-text {
@@ -100,9 +102,4 @@
   font-size: 12.5px;
   font-weight: 400;
   line-height: 1.5;
-}
-@media (max-width: 860px), (pointer: coarse) {
-  :root {
-    --icon-button-size: 40px;
-  }
 }

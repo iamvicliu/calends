@@ -84,7 +84,7 @@
 }
 .as-suggest button {
   flex-shrink: 0;
-  height: 34px;
+  height: var(--ctl-h-md);
   padding: 0 14px;
   border: 0;
   border-radius: 999px;
@@ -579,7 +579,7 @@
   margin-top: 14px;
 }
 .as-card-foot .btn {
-  height: 34px;
+  height: var(--ctl-h-md);
 }
 .as-card-foot .btn:disabled {
   opacity: 0.55;
@@ -628,7 +628,7 @@
   color: var(--label-2);
 }
 .as-applyall .btn {
-  height: 34px;
+  height: var(--ctl-h-md);
 }
 
 /* 错误 */
@@ -778,6 +778,7 @@
   display: none;
 }
 .as-model {
+  height: var(--ctl-h-md);
   padding: 3px 10px;
   border: 0;
   font: inherit;

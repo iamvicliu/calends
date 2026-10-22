@@ -104,7 +104,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 32px;
+  height: var(--ctl-h-md);
   padding: 0 13px;
   border: 0;
   border-radius: 999px;
@@ -141,7 +141,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 32px;
+  height: var(--ctl-h-md);
   padding: 0 13px;
   border: 0;
   border-radius: 999px;
@@ -175,13 +175,13 @@
   display: none;
 }
 .dt-btn.sm {
-  height: 30px;
+  height: var(--ctl-h-md);
   padding: 0 12px;
   font-size: 12.5px;
 }
-/* 标题右侧的小操作（记一笔）：和 13px 标题同高 */
+/* 标题右侧的操作和同排图标、分段控件同高。 */
 .dt-btn.dt-add {
-  height: 24px;
+  height: var(--ctl-h-md);
   padding: 0 9px;
   gap: 4px;
   font-size: 12px;
@@ -988,12 +988,12 @@
   flex: none;
 }
 
-/* 窄屏：按钮只留图标，表格去掉星期 */
+/* 窄屏：文字与图标操作同高，表格去掉星期 */
 @media (max-width: 640px) {
   .dt {
     padding: 24px 12px 24px;
   }
-  /* 第一行：图标 · 名称 · 关闭；第二行：一排等宽的圆形操作按钮 */
+  /* 第一行：图标 · 名称 · 关闭；第二行：同高操作，空间不足时整项换行 */
   .dt-head {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1022,20 +1022,16 @@
   }
   .dt-actions {
     grid-area: act;
-    display: grid;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 4px;
   }
   .dt-act {
-    flex-direction: column;
+    flex-direction: row;
     gap: 6px;
-    width: auto;
-    height: auto;
-    padding: 0;
-    background: none;
-    box-shadow: none;
+    height: var(--ctl-h-md);
+    padding: 0 8px;
     font-size: 11.5px;
     font-weight: 500;
     color: var(--label-2);
@@ -1044,14 +1040,7 @@
     background: none;
   }
   .dt-act .dt-act-i {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--dt-panel);
     color: var(--label);
-    box-shadow:
-      0 0 0 1px var(--dt-line-2),
-      0 1px 2px rgba(0, 0, 0, 0.05);
   }
   .dt-act .dt-act-i svg {
     width: 20px;
