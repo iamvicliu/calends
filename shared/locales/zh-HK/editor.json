@@ -110,7 +110,8 @@
     "nextDue": "下次應收 {date}",
     "editMember": "編輯",
     "overdue": "已逾期 {count} 天",
-    "dueOn": "應收 {date}"
+    "dueOn": "應收 {date}",
+    "confirmRemove": "確認"
   },
   "proxy": {
     "for": "替誰付",

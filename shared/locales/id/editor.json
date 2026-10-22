@@ -120,7 +120,8 @@
     "overdue": {
       "other": "Terlambat {count} hari"
     },
-    "dueOn": "Jatuh tempo {date}"
+    "dueOn": "Jatuh tempo {date}",
+    "confirmRemove": "Hapus"
   },
   "proxy": {
     "for": "Ditalangi untuk",

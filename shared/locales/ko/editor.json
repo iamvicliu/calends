@@ -120,7 +120,8 @@
     "overdue": {
       "other": "{count}일 연체"
     },
-    "dueOn": "{date} 수금 예정"
+    "dueOn": "{date} 수금 예정",
+    "confirmRemove": "확인"
   },
   "proxy": {
     "for": "대신 결제 대상",

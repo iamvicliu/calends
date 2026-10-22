@@ -126,7 +126,8 @@
       "one": "{count} Tag überfällig",
       "other": "{count} Tage überfällig"
     },
-    "dueOn": "Fällig {date}"
+    "dueOn": "Fällig {date}",
+    "confirmRemove": "Löschen"
   },
   "proxy": {
     "for": "Ich zahle für",

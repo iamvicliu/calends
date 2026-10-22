@@ -138,7 +138,8 @@
       "many": "Просрочено на {count} дней",
       "other": "Просрочено на {count} дня"
     },
-    "dueOn": "К оплате {date}"
+    "dueOn": "К оплате {date}",
+    "confirmRemove": "Удалить"
   },
   "proxy": {
     "for": "За кого плачу",

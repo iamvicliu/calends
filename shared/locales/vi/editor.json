@@ -120,7 +120,8 @@
     "overdue": {
       "other": "Quá hạn {count} ngày"
     },
-    "dueOn": "Đến hạn {date}"
+    "dueOn": "Đến hạn {date}",
+    "confirmRemove": "Xác nhận"
   },
   "proxy": {
     "for": "Trả hộ cho",

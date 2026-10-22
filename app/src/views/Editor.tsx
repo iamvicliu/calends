@@ -11,7 +11,8 @@ import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { IconButton, ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { RowActions } from '../components/RowActions.tsx';
+import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-form.ts';
@@ -609,25 +610,15 @@ function Form({
                       </small>
                     </button>
                   ) : (
-                    <input
-                      style={{ gridColumn: 'span 2' }}
-                      value={m.name}
-                      placeholder={t('editor.share.memberN', { n: i + 1 })}
-                      onChange={(e) => setMember(i, { name: val(e) })}
-                    />
+                    <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
                   )}
-                  {saved && (
-                    <IconButton aria-label={t('editor.share.editMember')} onClick={() => openMember(m)}>
-                      <Icon name="edit" />
-                    </IconButton>
-                  )}
-                  <IconButton
-                    className="danger"
-                    aria-label={t('editor.share.remove')}
-                    onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}
-                  >
-                    <Icon name="x" />
-                  </IconButton>
+                  <RowActions
+                    onEdit={saved ? () => openMember(m) : undefined}
+                    editLabel={t('editor.share.editMember')}
+                    removeLabel={t('editor.share.remove')}
+                    confirmLabel={t('editor.share.confirmRemove')}
+                    onRemove={() => setShare({ members: share.members.filter((x) => x.id !== m0.id) })}
+                  />
                 </div>
               );
             })}

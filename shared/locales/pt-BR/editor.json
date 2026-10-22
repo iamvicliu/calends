@@ -126,7 +126,8 @@
       "one": "{count} dia de atraso",
       "other": "{count} dias de atraso"
     },
-    "dueOn": "Vence {date}"
+    "dueOn": "Vence {date}",
+    "confirmRemove": "Confirmar"
   },
   "proxy": {
     "for": "Pago para",

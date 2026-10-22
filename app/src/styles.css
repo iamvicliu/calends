@@ -9882,7 +9882,7 @@ img.mm-flag {
 
 /* 编辑页「谁在用」：已保存成员只显示摘要（称呼 + 收费方式 · 下次应收） */
 .member-edit.member-summary {
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
 }
 .member-summary-name {

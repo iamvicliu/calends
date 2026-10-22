@@ -2027,3 +2027,38 @@ test('合租表格的收费弹窗：已付期按开始日自动算结束日；�
   assert.equal(m.fee, 50);
   assert.deepEqual(m.feeHistory!.at(-1)!.from, today);
 });
+
+test('行尾删除需二次确认：第一次点只展开「确认」，第二次才删除；未保存条目直接删除', async () => {
+  const g = globalThis as { matchMedia?: unknown };
+  const had = g.matchMedia;
+  g.matchMedia = () => ({ matches: true });
+  try {
+    let removed = 0;
+    const r = harness('../app/src/components/RowActions.tsx', 'RowActions', {}, { IconButton: 'IconButton', useEffect() {} });
+    const props = { onEdit() {}, editLabel: 'edit', removeLabel: 'remove', confirmLabel: 'confirm', onRemove: () => removed++ };
+    const button = () =>
+      all(r.render('RowActions', props))
+        .filter((n) => n.type === 'IconButton')
+        .at(-1)!;
+    assert.equal(button().props['aria-label'], 'remove');
+    button().props.onClick();
+    assert.equal(removed, 0);
+    assert.equal(button().props['aria-label'], 'confirm');
+    // 失焦收回
+    button().props.onBlur();
+    assert.equal(button().props['aria-label'], 'remove');
+    button().props.onClick();
+    button().props.onClick();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.equal(removed, 1);
+
+    let direct = 0;
+    const single = harness('../app/src/components/RowActions.tsx', 'RowActions', {}, { IconButton: 'IconButton', useEffect() {} });
+    all(single.render('RowActions', { removeLabel: 'remove', confirmLabel: 'confirm', onRemove: () => direct++ }))
+      .find((n) => n.type === 'IconButton')!
+      .props.onClick();
+    assert.equal(direct, 1);
+  } finally {
+    g.matchMedia = had;
+  }
+});

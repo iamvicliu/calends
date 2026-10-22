@@ -126,7 +126,8 @@
       "one": "{count} gün gecikti",
       "other": "{count} gün gecikti"
     },
-    "dueOn": "Vade {date}"
+    "dueOn": "Vade {date}",
+    "confirmRemove": "Onayla"
   },
   "proxy": {
     "for": "Kimin için",
