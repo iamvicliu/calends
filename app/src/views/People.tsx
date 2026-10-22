@@ -11,7 +11,7 @@ import { Picker } from '../components/Picker.tsx';
 import { Amount, ask, Cell, Group, Icon, IconButton, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { go } from '../router.ts';
 import { deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
-import { ContactField, contactText, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
+import { ContactField, contactText, contactValue, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 import './people-list.css';
 
@@ -215,7 +215,8 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
 }
 
 function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string; today: string; onClick: () => void }) {
-  const contact = contactText(l.person);
+  // 列表里只写联系方式本身，不带渠道名
+  const contact = contactValue(l.person);
   // One icon per subscription, while retaining all account names in its tooltip.
   const plans = [...new Map(l.items.map((i) => [i.sub.id, i.sub])).values()];
   const planTitle = (id: string) =>

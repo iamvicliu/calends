@@ -43,6 +43,14 @@ const AT_VIA = new Set(['Telegram', 'X']);
 const bare = (id: string) => id.replace(/^@+/, '');
 
 /** 成员联系方式的一行文字：「Telegram @abc」 */
+/** 只要联系方式本身（如 @name、手机号），不带「Telegram」「微信」等渠道名；列表里用 */
+export function contactValue(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'>): string {
+  const via = m.contactVia ?? (m.tg ? 'Telegram' : '');
+  const id = m.contact ?? m.tg;
+  if (!id) return '';
+  return AT_VIA.has(via) ? `@${bare(id)}` : id;
+}
+
 export function contactText(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'>): string {
   const via = m.contactVia ?? (m.tg ? 'Telegram' : '');
   const id = m.contact ?? m.tg;

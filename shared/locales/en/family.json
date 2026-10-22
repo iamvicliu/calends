@@ -27,7 +27,7 @@
       "other": "{count} payments · {amount}"
     },
     "fee": "Fee",
-    "nextCollection": "Next collection",
+    "nextCollection": "Next due",
     "actions": "Actions"
   },
   "contact": {

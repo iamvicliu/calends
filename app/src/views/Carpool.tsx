@@ -17,7 +17,7 @@ import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../..
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
-import { carLedger, contactText, MemberSheet, memberFee } from './Members.tsx';
+import { carLedger, contactText, contactValue, MemberSheet, memberFee } from './Members.tsx';
 import { CardTitle, Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar, useWidth } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
@@ -435,9 +435,6 @@ function MemberTable({
             {t('family.sheet.fee')}
           </th>
           <th role="columnheader" scope="col">
-            {t('family.member.paidUntil')}
-          </th>
-          <th role="columnheader" scope="col">
             {t('family.sheet.nextCollection')}
           </th>
           <th role="columnheader" scope="col" className="num">
@@ -451,7 +448,7 @@ function MemberTable({
       {groups.map(([key, label, n]) => (
         <tbody role="rowgroup" key={key}>
           <tr role="row" className="car-member-group">
-            <th role="rowheader" scope="rowgroup" colSpan={8}>
+            <th role="rowheader" scope="rowgroup" colSpan={7}>
               {label} · {t('family.sheet.people', { count: n })}
             </th>
           </tr>
@@ -492,17 +489,16 @@ function MemberTable({
                     </span>
                   </td>
                   <td role="cell" className="muted">
+                    {/* 只写联系方式本身，渠道名放在悬停提示里 */}
                     <span className="text-ellipsis" title={contactText(m)}>
-                      {m.account && m.account === (m.contact ?? m.tg) ? '—' : contactText(m) || '—'}
+                      {m.account && m.account === (m.contact ?? m.tg) ? '—' : contactValue(m) || '—'}
                     </span>
                   </td>
                   <td role="cell" className="num">
                     {m.exempt ? '—' : money(rate.amount, rate.currency)}
                   </td>
-                  <td role="cell" className="muted">
-                    {m.paidUntil ? cnDateAuto(m.paidUntil, today) : '—'}
-                  </td>
-                  <td role="cell" className="muted">
+                  {/* 已付至只比下次应收早一天，只留下次应收；到期未收用橙色 */}
+                  <td role="cell" className={d.periodsOwed > 0 && collection.from <= today ? 'warn' : 'muted'}>
                     {next ? cnDateAuto(collection.from, today) : '—'}
                   </td>
                   <td role="cell" className="num">
