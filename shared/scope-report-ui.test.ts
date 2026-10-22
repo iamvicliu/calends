@@ -76,7 +76,11 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Seg: 'Seg',
     SubIcon: 'SubIcon',
     CatIcon: 'CatIcon',
+    BarLine: 'BarLine',
     MethodMark: 'MethodMark',
+    bankOf: () => undefined,
+    brandOf: () => undefined,
+    methodLogo: (m: { logo?: string }) => m.logo,
     catColor: (cat: string) => `color-${cat}`,
     Toolbar: 'Toolbar',
     ScopeReport: 'ScopeReport',
@@ -638,7 +642,14 @@ test('scope composition uses category colors for both marks and bars and exports
     '../app/src/components/ScopeReport.tsx',
     'ScopeReport',
     {},
-    { useId: () => 'scope', useRef: () => ({ current: null }), intlLocale: () => 'en-US' },
+    {
+      useId: () => 'scope',
+      useRef: () => ({ current: null }),
+      intlLocale: () => 'en-US',
+      bankOf: () => undefined,
+      brandOf: () => undefined,
+      methodLogo: (m: { logo?: string }) => m.logo,
+    },
   );
   const method = { id: 'm', name: 'Sample card', kind: 'card', currency: 'USD', logo: 'https://example.test/card.png' };
   const report = { blocks: [{ type: 'composition', categories: [{ key: 'Tools', amount: 10, share: 1 }], methods: [{ key: 'm', amount: 10, share: 1 }] }] };
@@ -928,7 +939,7 @@ test('report layout keeps compact composition, five distinct upcoming rows and a
   assert.ok(render(reports.scopeReport(state, subscriptions, today)).some((n) => n.props['aria-label'] === 'scope.collapse'));
 });
 
-test('monthly movement subtitles own unsigned before/after costs and event rows omit their repeated delta', () => {
+test('monthly movement subtitles own unsigned before/after costs without a duplicate event card', () => {
   const r = harness(
     '../app/src/components/ScopeReport.tsx',
     'ScopeReport',
@@ -969,9 +980,8 @@ test('monthly movement subtitles own unsigned before/after costs and event rows 
   assert.ok(all(movement).some((n) => n.children.includes('scope.added')));
   assert.ok(all(movement).some((n) => n.children.includes('$0.00') && n.children.includes('$10.00')));
   assert.ok(all(movement).some((n) => n.props.className === 'scope-movement-date' && n.children.includes(format.cnDateAuto('2026-10-03', today))));
-  const event = nodes.find((n) => String(n.props.className).includes('scope-block scope-events'))!;
   assert.equal(
-    all(event).some((n) => typeof n.type === 'function' && n.type.name === 'SpendingDelta'),
+    nodes.some((n) => String(n.props.className).includes('scope-block scope-events')),
     false,
   );
 });
@@ -1126,4 +1136,99 @@ test('monthly report hides selected-day charge/refund rows, restores them on des
     onToggle() {},
   });
   assert.equal(rows(copied).length, 4, 'PNG capture retains every report row, including the selected day');
+});
+
+test('monthly movement preserves provider termination, stop reason, multi-event and zero-net history in one card', () => {
+  const base: Subscription = {
+    id: 'stopped',
+    name: 'Fictional stopped plan',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2025-01-01',
+    status: 'terminated',
+    end: '2026-10-10',
+    stop: { kind: 'terminate', date: '2026-10-10', paidThrough: '2026-10-31', reason: 'Fictional provider closure' },
+  };
+  const price = (id: string, amounts: number[]): Subscription => ({
+    ...base,
+    id,
+    name: id,
+    status: 'active',
+    end: undefined,
+    stop: undefined,
+    price: amounts.at(-1)!,
+    priceHistory: amounts.map((amount, i) => ({ from: ['2025-01-01', '2026-10-03', '2026-10-12'][i], amount })),
+  });
+  const state = { ...st, subscriptions: [base, price('multi', [10, 20, 30]), price('zero-net', [10, 20, 10])] };
+  const opened: Subscription[] = [];
+  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US' });
+  const nodes = r.render('ScopeReport', {
+    report: reports.monthReport(state, '2026-10', today),
+    state,
+    today,
+    onOpen: (s: Subscription) => opened.push(s),
+    title: 'Month',
+    animate: false,
+    open: true,
+    onToggle() {},
+  });
+  assert.equal(
+    nodes.some((n) => String(n.props.className).includes('scope-block scope-events')),
+    false,
+  );
+  const movement = nodes.find((n) => n.props.className === 'scope-movements')!;
+  const rows = all(movement).filter((n) => n.type === 'button');
+  assert.equal(rows.length, 4, 'two net movements plus the two zero-net price events');
+  const text = JSON.stringify(movement.children);
+  assert.ok(text.includes('scope.event.terminate'));
+  assert.ok(text.includes('Fictional provider closure'));
+  const losses = nodes.find((n) => String(n.props.className).includes('scope-block scope-losses'))!;
+  assert.equal(JSON.stringify(losses.children).includes('scope.event.terminate'), false, 'stop context is already owned by the movement row');
+  assert.ok(text.includes(format.cnDateAuto('2026-10-03', today)));
+  assert.ok(text.includes(format.cnDateAuto('2026-10-12', today)));
+  rows.find((n) => all(n).some((c) => c.children.includes(base.name)))!.props.onClick();
+  assert.equal(opened.at(-1), base);
+});
+
+test('scope history remains visible without monthly movement; unbranded payment methods use a wallet glyph', () => {
+  const sub: Subscription = {
+    id: 'new',
+    name: 'Fictional plan',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-03',
+    status: 'active',
+  };
+  const state = { ...st, subscriptions: [sub], methods: [{ id: 'plain', name: 'Demo Card 1', kind: 'card' as const, currency: 'USD' }] };
+  const r = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    {
+      useId: () => 'scope',
+      intlLocale: () => 'en-US',
+      bankOf: () => undefined,
+      brandOf: () => undefined,
+      methodLogo: () => undefined,
+    },
+  );
+  const props = { state, today, onOpen() {}, title: 'Scope', animate: false, open: true, onToggle() {} };
+  const nodes = r.render('ScopeReport', { ...props, report: reports.scopeReport(state, [sub], today) });
+  const event = nodes.find((n) => String(n.props.className).includes('scope-block scope-events'))!;
+  assert.ok(all(event).some((n) => n.children.includes('scope.event.start')));
+  const marks = r.render('ScopeReport', {
+    ...props,
+    report: { blocks: [{ type: 'composition', categories: [], methods: [{ key: 'plain', amount: 10, share: 1 }] }] },
+  });
+  assert.ok(marks.some((n) => n.type === 'Icon' && n.props.name === 'wallet' && n.props.size === 18));
+  assert.equal(
+    marks.some((n) => n.type === 'MethodMark'),
+    false,
+  );
 });

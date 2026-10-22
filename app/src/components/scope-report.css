@@ -89,6 +89,8 @@
 }
 .scope-headline,
 .scope-trend,
+.scope-events,
+.scope-losses,
 .scope-grid > .scope-composition {
   grid-column: 1 / -1;
 }

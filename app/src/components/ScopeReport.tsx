@@ -3,11 +3,11 @@ import { flushSync } from 'react-dom';
 import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
 import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
-import type { Block, ChargeRow, Comparison, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
+import type { Block, ChargeRow, Comparison, MovementRow, ReportEvent, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
-import { catColor } from '../derive.ts';
+import { bankOf, brandOf, catColor, methodLogo } from '../derive.ts';
 import { BarLine } from './charts.tsx';
 import { CatIcon, Hint, Icon, MethodMark, SubIcon } from './ui.tsx';
 import './scope-report.css';
@@ -69,6 +69,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const base = state.settings.baseCurrency;
   const monthly = report.blocks.some((b) => b.type === 'headline' && b.mode === 'month');
   const monthlyMovement = report.blocks.find((b) => b.type === 'trend' && b.mode === 'month');
+  const events = report.blocks.find((b) => b.type === 'events')?.rows ?? [];
+  const movementEvents = (row: MovementRow) => events.filter((e) => e.sub.id === row.sub.id && e.date >= row.since && e.date <= row.until);
+  const remainingEvents = events.filter(
+    (e) => monthlyMovement?.mode !== 'month' || !monthlyMovement.movement.items.some((row) => movementEvents(row).includes(e)),
+  );
   const top = report.blocks.find((b) => b.type === 'top' && b.mode === 'month');
   const visibleCharges = (rows: ChargeRow[]) => rows.filter((r) => copying || !monthly || r.date !== selectedChargeDate);
   const upcomingRows = (rows: ChargeRow[]) =>
@@ -76,15 +81,17 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       .filter((r) => !top?.rows.includes(r))
       .slice(0, 5);
   const blocks = report.blocks.filter((b) =>
-    b.type === 'upcoming'
-      ? upcomingRows(b.rows).length > 0
-      : b.type === 'top'
-        ? b.mode === 'month'
-          ? visibleCharges(b.rows).length > 0
-          : b.rows.length > 1
-        : b.type === 'losses'
-          ? b.rows.length > 0 || visibleCharges(b.refunds).length > 0 || b.incomplete
-          : true,
+    b.type === 'events' && monthlyMovement?.mode === 'month'
+      ? false
+      : b.type === 'upcoming'
+        ? upcomingRows(b.rows).length > 0
+        : b.type === 'top'
+          ? b.mode === 'month'
+            ? visibleCharges(b.rows).length > 0
+            : b.rows.length > 1
+          : b.type === 'losses'
+            ? b.rows.length > 0 || visibleCharges(b.refunds).length > 0 || b.incomplete
+            : true,
   );
   const losses = report.blocks.find((b) => b.type === 'losses');
   const expense = (v: number) => flow(-v, base);
@@ -111,6 +118,19 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
         {name(r.sub, cnDateAuto(r.date, today))}
         <b className="num">{expense(r.amount)}</b>
+      </button>
+    ));
+  const eventLabel = (r: ReportEvent) => t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`);
+  const eventRows = (rows: ReportEvent[]) =>
+    rows.map((r, i) => (
+      <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
+        {name(
+          r.sub,
+          <>
+            {cnDateAuto(r.date, today)} · {eventLabel(r)}
+          </>,
+        )}
+        {r.delta !== 0 && delta({ amount: r.delta })}
       </button>
     ));
   const heading = (key: string, hint?: string, count?: number) => (
@@ -264,7 +284,22 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                   {name(
                     r.sub,
                     <>
-                      {t(`scope.${r.kind}`)} ·{' '}
+                      {t(`scope.${r.kind}`)}
+                      {movementEvents(r).map((e, i, rows) => {
+                        const redundant =
+                          (e.kind === 'start' && r.kind === 'added') ||
+                          ((e.kind === 'price' || e.kind === 'intro-end') &&
+                            ((e.delta > 0 && r.kind === 'expansion') || (e.delta < 0 && r.kind === 'contraction')));
+                        return redundant ? null : (
+                          <span key={`${e.date}-${e.kind}-${i}`}>
+                            {' · '}
+                            {eventLabel(e)}
+                            {rows.length > 1 && ` (${cnDateAuto(e.date, today)})`}
+                          </span>
+                        );
+                      })}
+                      {movementEvents(r).some((e) => e.kind === 'cancel' || e.kind === 'terminate') && r.sub.stop?.reason && ` · ${r.sub.stop.reason}`}
+                      {' · '}
                       <span className="num">
                         {money(r.from, base)} → {money(r.to, base)}
                       </span>
@@ -276,6 +311,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                   )}
                 </button>
               ))}
+              {eventRows(remainingEvents)}
             </div>
           </>
         );
@@ -305,10 +341,12 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                                   <span className="scope-cat" style={{ color }}>
                                     <CatIcon cat={r.key} size={18} />
                                   </span>
-                                ) : method ? (
+                                ) : method && (bankOf(method) || brandOf(method) || methodLogo(method)) ? (
                                   <MethodMark m={method} size={24} proxied />
                                 ) : (
-                                  <Icon name="wallet" size={24} />
+                                  <span className="scope-cat" style={{ color }}>
+                                    <Icon name="wallet" size={18} />
+                                  </span>
                                 )}
                                 <span>
                                   {r.other
@@ -364,25 +402,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('events')}
-            {block.rows.map((r, i) => (
-              <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
-                {name(
-                  r.sub,
-                  <>
-                    {cnDateAuto(r.date, today)} ·{' '}
-                    {t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`)}
-                  </>,
-                )}
-                {r.delta !== 0 &&
-                  !(
-                    monthlyMovement?.mode === 'month' &&
-                    monthlyMovement.movement.items.some(
-                      (item) => item.sub.id === r.sub.id && r.date >= item.since && r.date <= item.until && Math.abs(item.delta - r.delta) < 0.005,
-                    )
-                  ) &&
-                  delta({ amount: r.delta })}
-              </button>
-            ))}
+            <div className="scope-movements">{eventRows(block.rows)}</div>
           </>
         );
       case 'losses':
@@ -398,9 +418,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
                 {name(
                   r.sub,
-                  <>
-                    {cnDateAuto(r.date, today)} · {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
-                  </>,
+                  events.some((e) => e.sub.id === r.sub.id && e.date === r.date && (e.kind === 'cancel' || e.kind === 'terminate')) ? undefined : (
+                    <>
+                      {cnDateAuto(r.date, today)} · {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
+                    </>
+                  ),
                 )}
                 <span>
                   <b className="num">{expense(r.lossBase)}</b>
