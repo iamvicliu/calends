@@ -629,11 +629,13 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
 
 function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: string; ccy: Ccy; k: number; fmt: (v: number) => string }) {
   const ph = currentPhase(s, today);
-  const n = nextCharge(s, addDays(today, 1));
+  const status = effectiveStatus(s, today);
+  const ending = ['ending', 'ended', 'terminated'].includes(status);
+  const end = ph.stop?.date ?? ph.end ?? s.stop?.date ?? s.end;
+  const n = ending ? undefined : nextCharge(s, addDays(today, 1));
   const soon = n !== undefined && diffDays(today, n) <= 7;
   const monthly = ph.currency === ccy && ph.cycle.unit === 'month' && ph.cycle.every === 1;
   const repeatsPrice = monthly && Math.abs(v * k - ph.price) < 0.005;
-  const status = effectiveStatus(s, today);
   return (
     <div className="flex items-center gap-3 py-3">
       <AppIcon sub={s} className="size-9 rounded-[10px]" />
@@ -649,7 +651,7 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
         </div>
         <div className="truncate text-[13px] text-muted-foreground tnum">
           {cycleLabel(ph.cycle)}{!repeatsPrice && ` ${money(ph.price, ph.currency)}`}
-          {n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
+          {ending && end ? <span>{t('public.row.ends', { date: cnDate(end) })}</span> : n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
         </div>
       </div>
       <div className="text-right tnum">

@@ -452,6 +452,14 @@ test('public rows keep the amount once for an ordinary monthly plan and distingu
     true,
     'future list price remains separate from zero trial MRR',
   );
+  for (const stopped of [
+    { ...s, end: '2026-11-01', status: 'cancelled' as const },
+    { ...s, status: 'terminated' as const, stop: { kind: 'terminate' as const, date: today, paidThrough: '2026-11-01' } },
+  ]) {
+    const ended = render(stopped, 0);
+    assert.ok(ended.some((n) => n.children.some((child) => String(child).startsWith('public.row.ends'))));
+    assert.ok(!ended.some((n) => n.children.some((child) => String(child).startsWith('public.row.renews'))));
+  }
   nodes = render(s, 6);
   assert.equal(
     nodes.some((n) => n.children.includes(' $10.00')),

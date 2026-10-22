@@ -62,6 +62,7 @@
     "all": "Tümü"
   },
   "row": {
+    "ends": " · Bitiş {date}",
     "renews": " · {date} yenilenir",
     "monthly": "Aylık",
     "perMonthEq": "Aylık karşılığı"

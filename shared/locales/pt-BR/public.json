@@ -62,6 +62,7 @@
     "all": "Todas"
   },
   "row": {
+    "ends": " · Termina em {date}",
     "renews": " · Renova em {date}",
     "monthly": "Mensal",
     "perMonthEq": "Por mês"

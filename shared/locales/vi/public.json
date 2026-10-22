@@ -60,6 +60,7 @@
     "all": "Tất cả"
   },
   "row": {
+    "ends": " · Kết thúc {date}",
     "renews": " · Gia hạn {date}",
     "monthly": "Hằng tháng",
     "perMonthEq": "Mỗi tháng"
