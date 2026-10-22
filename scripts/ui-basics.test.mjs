@@ -285,3 +285,57 @@ test('mobile carpool cards stretch to full width instead of shrinking to content
   assert.ok(rule);
   assert.match(rule[1], /align-items:\s*stretch/);
 });
+
+const cssRules = (text) => {
+  const out = [];
+  const clean = text.replace(/\/\*[\s\S]*?\*\//g, '');
+  let i = 0;
+  for (;;) {
+    const m = /([^{}]+)\{/.exec(clean.slice(i));
+    if (!m) break;
+    const start = i + m.index + m[0].length;
+    let depth = 1;
+    let j = start;
+    while (depth) {
+      depth += clean[j] === '{' ? 1 : clean[j] === '}' ? -1 : 0;
+      j++;
+    }
+    out.push([m[1].trim(), clean.slice(start, j - 1)]);
+    i = j;
+  }
+  return out;
+};
+const allCss = ['styles.css', 'components/ui.css'].map((f) => readFileSync(new URL(f, root), 'utf8')).join('\n');
+
+test('viewport-height sizes also get a dvh override so iOS toolbars cannot push content off screen', () => {
+  const failures = [];
+  const walk = (rules, scope) => {
+    for (const [sel, body] of rules) {
+      if (sel.startsWith('@media')) walk(cssRules(body), sel);
+      else
+        for (const [, prop] of body.matchAll(/(height|max-height|margin-top):\s*[^;]*\d+vh/g))
+          if (!new RegExp(`${prop}:[^;]*dvh`).test(body)) failures.push(`${scope} ${sel} ${prop}`);
+    }
+  };
+  walk(cssRules(allCss), '');
+  assert.deepEqual(failures, []);
+});
+
+test('grids aligned to start reset align-items when a breakpoint turns them into a flex column', () => {
+  const base = new Map();
+  const media = [];
+  for (const [sel, body] of cssRules(allCss)) {
+    if (sel.startsWith('@media')) for (const [s, b] of cssRules(body)) media.push([sel, s, b]);
+    else if (!sel.startsWith('@')) for (const s of sel.split(',')) base.set(s.trim(), [...(base.get(s.trim()) ?? []), body]);
+  }
+  const failures = media.flatMap(([mq, sel, body]) =>
+    /flex-direction:\s*column/.test(body) && !/align-items/.test(body)
+      ? sel
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => (base.get(s) ?? []).some((b) => /align-items:\s*(start|flex-start)/.test(b)))
+          .map((s) => `${mq} ${s}`)
+      : [],
+  );
+  assert.deepEqual(failures, []);
+});

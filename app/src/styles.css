@@ -2925,6 +2925,7 @@ select.btn {
   width: min(600px, 100%);
   align-self: flex-start;
   margin-top: 12vh;
+  margin-top: 12dvh;
   background: var(--card);
   border-radius: 18px;
   box-shadow: var(--shadow-lg);
@@ -2951,6 +2952,7 @@ select.btn {
 }
 .palette-list {
   max-height: 50vh;
+  max-height: 50dvh;
   overflow: auto;
   padding: 6px;
 }
@@ -4873,6 +4875,8 @@ button.h-price-row:focus-visible {
 }
 .dp-pop.mp-pop.mobile {
   max-height: 70vh;
+  /* iOS 工具栏显示时 vh 偏大，按可见高度再限一次 */
+  max-height: min(70dvh, calc(100dvh - var(--safe-t) - 16px));
 }
 
 /* 待生效变更：卡片上的一行提示 */
@@ -5965,6 +5969,8 @@ a.car-toggle {
 }
 .dp-pop.cp-pop.mobile {
   height: 70vh;
+  /* iOS 工具栏显示时 vh 偏大，按可见高度再限一次 */
+  height: min(70dvh, calc(100dvh - var(--safe-t) - 16px));
 }
 .cp-search {
   display: flex;
@@ -6889,6 +6895,8 @@ a.car-toggle {
 .dp-pop.pk-pop.mobile {
   height: auto;
   max-height: 70vh;
+  /* iOS 工具栏显示时 vh 偏大，按可见高度再限一次 */
+  max-height: min(70dvh, calc(100dvh - var(--safe-t) - 16px));
 }
 .pk-net {
   height: 14px;
