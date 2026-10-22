@@ -165,7 +165,7 @@
     "refunded": "Dikembalikan {money}",
     "partial": "Pengembalian sebagian {money}",
     "unrefunded": "Tanpa pengembalian dana · Kerugian {money}",
-    "unused": "Kerugian tanpa pengembalian dana: −{money} ({days})",
+    "unused": "Kerugian tanpa pengembalian dana: {money} ({days})",
     "unusedTitle": "Tanpa pengembalian dana",
     "terminated": "Dinonaktifkan",
     "restore": "Aktifkan kembali",

@@ -175,7 +175,7 @@
     "refunded": "Erstattet {money}",
     "partial": "Teilerstattung {money}",
     "unrefunded": "Keine Erstattung · Verlust {money}",
-    "unused": "Nicht erstatteter Verlust: −{money} ({days})",
+    "unused": "Nicht erstatteter Verlust: {money} ({days})",
     "unusedTitle": "Nicht erstattet",
     "terminated": "Gesperrt",
     "restore": "Reaktivieren",

@@ -66,3 +66,20 @@ test('prices and comparison signs keep money semantics regardless of cash flow s
     assert.equal(money(-5, 'USD', { sign: true }), '−$5.00');
   }
 });
+
+test('unrefunded loss translations leave cash-flow signs to flow in every locale', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { LOCALES, flatten, t } = await import('./i18n.ts');
+  for (const { code: loc } of LOCALES) {
+    const messages = {};
+    flatten('core', JSON.parse(readFileSync(new URL(`./locales/${loc}/core.json`, import.meta.url), 'utf8')), messages);
+    setLocale(loc, [messages]);
+    for (const on of [true, false]) {
+      setSignedAmounts(on);
+      const amount = flow(-3.16, 'USD');
+      const text = t('core.stop.unused', { money: amount, days: '10' });
+      assert.ok(text.includes(amount));
+      assert.equal((text.match(/−/g) ?? []).length, on ? 1 : 0, `${loc}: ${text}`);
+    }
+  }
+});

@@ -175,7 +175,7 @@
     "refunded": "İade edildi {money}",
     "partial": "Kısmi iade {money}",
     "unrefunded": "İade yok · Kayıp {money}",
-    "unused": "İade edilmeyen kayıp: −{money} ({days})",
+    "unused": "İade edilmeyen kayıp: {money} ({days})",
     "unusedTitle": "İade edilmedi",
     "terminated": "Kapatıldı",
     "restore": "Yeniden etkinleştir",

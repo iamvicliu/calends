@@ -165,7 +165,7 @@
     "refunded": "환불됨 {money}",
     "partial": "부분 환불 {money}",
     "unrefunded": "미환불 · 손실 {money}",
-    "unused": "미환불 손실: −{money} ({days})",
+    "unused": "미환불 손실: {money} ({days})",
     "unusedTitle": "미환불",
     "terminated": "사용 중지됨",
     "restore": "다시 활성화",

@@ -175,7 +175,7 @@
     "refunded": "Refunded {money}",
     "partial": "Partial refund {money}",
     "unrefunded": "No refund · Loss {money}",
-    "unused": "Unrefunded loss: −{money} ({days})",
+    "unused": "Unrefunded loss: {money} ({days})",
     "unusedTitle": "Unrefunded",
     "terminated": "Terminated",
     "restore": "Reactivate",

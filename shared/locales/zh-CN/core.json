@@ -145,7 +145,7 @@
     "refunded": "已退款 {money}",
     "partial": "部分退款 {money}",
     "unrefunded": "未退款 · 损失 {money}",
-    "unused": "未退款损失：−{money}（{days}）",
+    "unused": "未退款损失：{money}（{days}）",
     "unusedTitle": "未退款",
     "terminated": "已停用",
     "restore": "恢复订阅",

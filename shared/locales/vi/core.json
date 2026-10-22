@@ -165,7 +165,7 @@
     "refunded": "Đã hoàn {money}",
     "partial": "Hoàn một phần {money}",
     "unrefunded": "Chưa hoàn tiền · Tổn thất {money}",
-    "unused": "Tổn thất chưa hoàn tiền: −{money} ({days})",
+    "unused": "Tổn thất chưa hoàn tiền: {money} ({days})",
     "unusedTitle": "Chưa hoàn tiền",
     "terminated": "Đã vô hiệu hóa",
     "restore": "Kích hoạt lại",

@@ -165,7 +165,7 @@
     "refunded": "返金済み {money}",
     "partial": "一部返金 {money}",
     "unrefunded": "未返金 · 損失 {money}",
-    "unused": "未返金損失: −{money} ({days})",
+    "unused": "未返金損失: {money} ({days})",
     "unusedTitle": "未返金",
     "terminated": "利用停止",
     "restore": "再開",

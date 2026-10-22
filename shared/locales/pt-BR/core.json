@@ -175,7 +175,7 @@
     "refunded": "Reembolsado {money}",
     "partial": "Reembolso parcial {money}",
     "unrefunded": "Sem reembolso · Perda {money}",
-    "unused": "Perda não reembolsada: −{money} ({days})",
+    "unused": "Perda não reembolsada: {money} ({days})",
     "unusedTitle": "Sem reembolso",
     "terminated": "Desativado",
     "restore": "Reativar",

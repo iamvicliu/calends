@@ -195,7 +195,7 @@
     "refunded": "Возвращено {money}",
     "partial": "Частичный возврат {money}",
     "unrefunded": "Без возврата · Убыток {money}",
-    "unused": "Невозмещённый убыток: −{money} ({days})",
+    "unused": "Невозмещённый убыток: {money} ({days})",
     "unusedTitle": "Без возврата",
     "terminated": "Отключено",
     "restore": "Возобновить",

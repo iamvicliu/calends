@@ -630,7 +630,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                       .sort((x, y) => y[0] - x[0])
                       .map(([c, n]) => (
                         <span key={c} className="gift">
-                          {flow(-c, p.method.currency, { compact: true })}
+                          {money(c, p.method.currency, { compact: true })}
                           {n > 1 && <em>×{n}</em>}
                         </span>
                       ))}
