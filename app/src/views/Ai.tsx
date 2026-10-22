@@ -388,15 +388,17 @@ export function Ai({ state }: { state: AppState }) {
                       {t(`ai.domain.${key}`)}
                       <small>{list.length}</small>
                     </h3>
-                    {list.map((tool) => (
-                      <div key={tool.name} className={`ai-tool ${tool.write ? 'write' : ''}`}>
-                        <span className="ai-tool-ico" title={tool.write ? t('ai.toolsWrite') : t('ai.toolsRead')}>
-                          {tool.write ? <PencilLine size={13} /> : <Eye size={13} />}
-                        </span>
-                        <b>{tool.title ?? tool.name}</b>
-                        <code>{tool.name}</code>
-                      </div>
-                    ))}
+                    <div className="ai-tool-list">
+                      {list.map((tool) => (
+                        <div key={tool.name} className={`ai-tool ${tool.write ? 'write' : ''}`}>
+                          <span className="ai-tool-ico" title={tool.write ? t('ai.toolsWrite') : t('ai.toolsRead')}>
+                            {tool.write ? <PencilLine size={13} /> : <Eye size={13} />}
+                          </span>
+                          <b>{tool.title ?? tool.name}</b>
+                          <code>{tool.name}</code>
+                        </div>
+                      ))}
+                    </div>
                   </section>
                 ))}
               </div>

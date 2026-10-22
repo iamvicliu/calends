@@ -8041,7 +8041,9 @@ a.car-toggle {
 .ai-tools-legend {
   display: flex;
   gap: 16px;
-  margin-top: 14px;
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--sep);
   color: var(--label-2);
   font-size: 12.5px;
 }
@@ -8055,20 +8057,20 @@ a.car-toggle {
 .ai-tool.write .ai-tool-ico {
   color: var(--orange);
 }
-/* 领域分组排成两列瀑布流，组不拆开 */
+/* 按领域分成分组列表（iOS 设置式）：组标题在外，组内是浅底圆角的行，组与组之间留足间距 */
 .ai-tools {
   columns: 2;
-  column-gap: 28px;
-  margin-top: 12px;
+  column-gap: 24px;
+  margin-top: 18px;
 }
 .ai-tool-group {
   break-inside: avoid;
-  padding-bottom: 18px;
+  margin-bottom: 24px;
 }
 .ai-tools h3 {
-  margin: 0 0 4px;
-  color: var(--label);
-  font-size: 13px;
+  margin: 0 0 8px 4px;
+  color: var(--label-2);
+  font-size: 12.5px;
   font-weight: 600;
 }
 .ai-tools h3 svg {
@@ -8078,14 +8080,22 @@ a.car-toggle {
   color: var(--label-3);
   font-weight: 500;
 }
+.ai-tool-list {
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--fill-2);
+}
 .ai-tool {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 7px 0;
-  border-top: 0.5px solid var(--sep);
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
   font-size: 13.5px;
+}
+.ai-tool + .ai-tool {
+  box-shadow: inset 0 0.5px 0 var(--sep);
 }
 .ai-tool-ico {
   display: inline-flex;
