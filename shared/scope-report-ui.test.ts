@@ -1689,7 +1689,7 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
 test('合租备注仅上移共有次数/周期，保留不同次数、周期、自由备注和缺失备注', () => {
   const r = harness('../app/src/views/Carpool.tsx', 'receiptNotes');
   const split = (...notes: (string | undefined)[]) => r.call('receiptNotes', notes);
-  assert.deepEqual(split('第12次收款（半年）', '第12次收款（半年）'), { common: '第12次收款（半年）', rows: ['', ''] });
+  assert.deepEqual(split('第12次收款（半年）', '第12次收款（半年）'), { common: '第12次收款 · 半年', rows: ['', ''] });
   assert.deepEqual(split('第12次收款（半年）· 银行转账', '第12次收款（季度）· 现金'), {
     common: '第12次收款',
     rows: ['半年 · 银行转账', '季度 · 现金'],
@@ -1752,6 +1752,14 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
   assert.equal(groups(nodes).length, 2);
   assert.ok(groups(nodes).every((g) => g.type === 'button' && g.props['aria-expanded'] === false));
   assert.equal(head(nodes).props['aria-expanded'], false);
+  assert.equal(head(nodes).props['aria-label'], 'family.sheet.member · family.sheet.date · family.sheet.amount · family.sheet.expandAll');
+  assert.equal(all(head(nodes).children).filter((n) => n.type === 'small').length, 0);
+  assert.equal(all(head(nodes).children).filter((n) => n.type === 'Icon').length, 0);
+  assert.ok(groups(nodes).every((g) => g.props['aria-label'] && !all(g.children).some((n) => n.type === 'Icon')));
+  assert.deepEqual(
+    head(nodes).children.map((n: Node) => n.children.join('')),
+    ['family.sheet.member', 'family.sheet.date', 'family.sheet.amount'],
+  );
   assert.equal(details(nodes).length, 0);
   groups(nodes)[0].props.onClick();
   nodes = render();
@@ -1767,12 +1775,19 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
   nodes = render();
   assert.equal(details(nodes).length, 3);
   assert.equal(head(nodes).props['aria-expanded'], true);
+  assert.ok(head(nodes).props['aria-label'].endsWith('family.sheet.collapseAll'));
+  assert.equal(all(head(nodes).children).filter((n) => n.type === 'Icon').length, 0);
   head(nodes).props.onClick();
   nodes = render();
   assert.equal(details(nodes).length, 0);
   nodes.find((n) => n.type === 'Seg')!.props.onChange('out');
   nodes = render();
   assert.equal(groups(nodes).length, 3);
+  assert.ok(groups(nodes).every((g) => g.props['aria-label'] && !all(g.children).some((n) => n.type === 'Icon')));
+  assert.deepEqual(
+    head(nodes).children.map((n: Node) => n.children.join('')),
+    ['family.sheet.chargeDate', 'proxy.table.charged', 'proxy.table.cost'],
+  );
   assert.equal(details(nodes).length, 0);
   groups(nodes)[1].props.onClick();
   nodes = render();
@@ -1799,4 +1814,70 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
   nodes = fresh.render('CarSheet', { ...props, s: { ...single, share: { ...single.share!, members: [] } } });
   assert.equal(head(nodes).props.disabled, true);
   assert.equal(head(nodes).props['aria-expanded'], false);
+});
+
+test('合租分组以覆盖区间为主标题，共有信息为可选副标题，差异信息留在行内', () => {
+  for (const { notes, common, rows } of [
+    { notes: ['第6次收款（半年）', '第6次收款（半年）'], common: '第6次收款 · 半年', rows: ['', ''] },
+    { notes: ['第6次收款（半年）', '第2次收款（半年）· 抵扣调整'], common: '半年', rows: ['第6次收款', '第2次收款 · 抵扣调整'] },
+    { notes: ['第6次收款（半年）', undefined], common: '', rows: ['第6次收款（半年）', ''] },
+  ]) {
+    const sub: Subscription = {
+      id: 'car',
+      name: 'Fictional plan',
+      category: 'Tools',
+      tags: [],
+      start: '2026-01-17',
+      status: 'active',
+      price: 240,
+      currency: 'CNY',
+      cycle: { unit: 'month', every: 6 },
+      share: {
+        role: 'owner',
+        seats: 3,
+        members: notes.map((note, i) => ({
+          id: String(i),
+          name: `Member ${i}`,
+          share: 40,
+          billEvery: 6,
+          payments: [{ date: '2026-07-17', from: '2026-07-17', until: '2027-01-16', amount: 40, currency: 'CNY', note }],
+        })),
+      },
+    };
+    const state = { ...st, subscriptions: [sub] };
+    const r = harness('../app/src/views/Carpool.tsx', 'CarSheet', {}, { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill' });
+    const props = { state, s: sub, today, ro: true, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
+    let nodes = r.render('CarSheet', props);
+    const title = nodes.find((n) => n.props.className === 'car-period-title')!;
+    assert.deepEqual(
+      all(title.children)
+        .filter((n) => n.type === 'b')
+        .map((n) => n.children.join('')),
+      [`${format.cnDateFull('2026-07-17')} – ${format.cnDateFull('2027-01-16')}`],
+    );
+    assert.deepEqual(
+      all(title.children)
+        .filter((n) => n.type === 'small')
+        .map((n) => n.children.join('')),
+      common ? [common] : [],
+    );
+    nodes.find((n) => n.props.className === 'ld-row car-period')!.props.onClick();
+    nodes = r.render('CarSheet', props);
+    assert.deepEqual(
+      nodes
+        .filter((n) => n.props.className === 'ld-row')
+        .map((n) =>
+          all(n.children[0])
+            .filter((child) => child.type === 'small')
+            .map((child) => child.children.join(''))
+            .join(''),
+        ),
+      rows,
+    );
+    nodes.find((n) => n.type === 'Seg')!.props.onChange('out');
+    nodes = r.render('CarSheet', props);
+    const yearTitle = nodes.find((n) => n.props.className === 'car-period-title')!;
+    assert.equal(all(yearTitle.children).filter((n) => n.type === 'b').length, 1);
+    assert.equal(all(yearTitle.children).filter((n) => n.type === 'small').length, 0);
+  }
 });

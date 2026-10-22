@@ -378,9 +378,11 @@ function MemberRows({
 /** 只上移所有行共有的备注信息；无法识别的自由备注原样保留。 */
 function receiptNotes(notes: (string | undefined)[]) {
   const raw = notes.map((note) => note ?? '');
-  if (raw.every((note) => note === raw[0])) return { common: raw[0] ?? '', rows: raw.map(() => '') };
   // 历史收款的次数/周期存在备注中，不从今天的成员收费标准反推历史。
   const parts = raw.map((note) => /^(第\s*\d+\s*次收款|Collection\s*#?\d+)(?:\s*[（(]([^（）()]+)[）)])?\s*(?:[·，,:：]\s*)?([\s\S]*)$/i.exec(note));
+  if (raw.every((note) => note === raw[0])) {
+    return { common: parts[0] ? parts[0].slice(1).filter(Boolean).join(' · ') : (raw[0] ?? ''), rows: raw.map(() => '') };
+  }
   const commonNo = parts[0]?.[1] && parts.every((p) => p?.[1] === parts[0]![1]) ? parts[0][1] : '';
   const commonCycle = parts[0]?.[2] && parts.every((p) => p?.[2] === parts[0]![2]) ? parts[0][2] : '';
   if (!commonNo && !commonCycle) return { common: '', rows: raw };
@@ -451,18 +453,13 @@ export function CarSheet({
         type="button"
         className="ld-row ld-th car-ledger-head"
         aria-expanded={allOpen}
+        aria-label={`${columns.join(' · ')} · ${t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}`}
         disabled={!keys.length}
         onClick={() => setOpen(new Set(allOpen ? [] : keys))}
       >
         <span>{columns[0]}</span>
         <span>{columns[1]}</span>
-        <span>
-          {columns[2]}
-          <small className="car-ledger-disclosure">
-            {t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}
-            <Icon name={allOpen ? 'down' : 'right'} size={12} />
-          </small>
-        </span>
+        <span>{columns[2]}</span>
       </button>
     );
   };
@@ -600,9 +597,16 @@ export function CarSheet({
             )}
             {outYears.map((g) => (
               <Fragment key={g.y}>
-                <button type="button" className="ld-row car-period" aria-expanded={openOut.has(g.y)} onClick={() => toggleGroup(g.y, openOut, setOpenOut)}>
-                  <Icon name={openOut.has(g.y) ? 'down' : 'right'} size={14} />
-                  <span>{t('calendar.yearTitle', { year: g.y })}</span>
+                <button
+                  type="button"
+                  className="ld-row car-period"
+                  aria-expanded={openOut.has(g.y)}
+                  aria-label={t('calendar.yearTitle', { year: g.y })}
+                  onClick={() => toggleGroup(g.y, openOut, setOpenOut)}
+                >
+                  <span className="car-period-title">
+                    <b>{t('calendar.yearTitle', { year: g.y })}</b>
+                  </span>
                   <span>{t('family.sheet.groupSum', { count: g.list.length, amount: fmt(-g.sum) })}</span>
                 </button>
                 {openOut.has(g.y) &&
@@ -636,11 +640,18 @@ export function CarSheet({
             )}
             {periods.map((g) => (
               <Fragment key={g.key}>
-                <button type="button" className="ld-row car-period" aria-expanded={openIn.has(g.key)} onClick={() => toggleGroup(g.key, openIn, setOpenIn)}>
-                  <Icon name={openIn.has(g.key) ? 'down' : 'right'} size={14} />
-                  <span>
-                    {g.notes.common && <b>{g.notes.common}</b>}
-                    <span>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</span>
+                <button
+                  type="button"
+                  className="ld-row car-period"
+                  aria-expanded={openIn.has(g.key)}
+                  aria-label={[g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) }), g.notes.common]
+                    .filter(Boolean)
+                    .join(' · ')}
+                  onClick={() => toggleGroup(g.key, openIn, setOpenIn)}
+                >
+                  <span className="car-period-title">
+                    <b>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</b>
+                    {g.notes.common && <small>{g.notes.common}</small>}
                   </span>
                   <span className="green">{t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
                 </button>

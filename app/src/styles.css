@@ -8958,37 +8958,43 @@ a.car-toggle {
   text-align: right;
   align-items: flex-end;
 }
-.car-receipts button:focus-visible {
+:root:not([data-input='pointer']) .car-receipts button:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
 .car-receipts .car-ledger-head:not(:disabled) {
   cursor: pointer;
 }
-.car-ledger-disclosure {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 400;
+.car-receipts .car-ledger-head:hover:not(:disabled),
+.car-receipts .car-period:hover:not(:disabled) {
+  background: var(--hover);
+}
+.car-receipts .car-ledger-head > span {
+  white-space: nowrap;
 }
 .car-receipts .car-period {
-  grid-template-columns: 14px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   padding: 10px 14px;
+  min-height: 64px;
   background: var(--fill-2);
   font-size: 12.5px;
   font-weight: 600;
   color: var(--label-2);
 }
-.car-receipts .car-period > span:nth-child(2) {
+.car-receipts .car-period > .car-period-title {
   white-space: normal;
+  line-height: 1.5;
 }
 .car-receipts .car-period > span:last-child {
   white-space: nowrap;
 }
-.car-receipts .car-period > span > span {
+.car-receipts .car-period-title small {
+  color: var(--label-3);
   font-weight: 400;
+}
+.car-receipts .ld-row:not(.car-period) > span:first-child small {
+  font-size: 11px;
 }
 @media (max-width: 560px) {
   .car-receipts .ld-row {
@@ -8998,7 +9004,7 @@ a.car-toggle {
     font-size: 12px;
   }
   .car-receipts .car-period {
-    grid-template-columns: 14px minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px;
   }
 }
