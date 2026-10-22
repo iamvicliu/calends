@@ -1,10 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
-import { addDays, addMonths, diffDays, parseDay, cycleLabel, currentPhase, effectiveStatus, nextCharge, type Charge } from '../../../shared/billing.ts';
+import {
+  addDays,
+  addMonths,
+  billingPeriod,
+  diffDays,
+  parseDay,
+  cycleLabel,
+  currentPhase,
+  effectiveStatus,
+  nextCharge,
+  type Charge,
+} from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Cell, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { Amount, Cell, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -98,6 +109,18 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   }, [month, mode, today]);
   const selList = (sel && byDay.get(sel)) || [];
   const selection = useRef<HTMLDivElement>(null);
+  const timeline = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const list = timeline.current;
+    const group = list?.querySelector<HTMLElement>(`[data-date="${sel}"]`);
+    // 只滚动右栏内部，避免把刚点击的日历或下方明细滚出视口。
+    if (!list || !group || list.scrollHeight <= list.clientHeight) return;
+    const bounds = group.getBoundingClientRect();
+    const view = list.getBoundingClientRect();
+    if (bounds.top < view.top || bounds.bottom > view.bottom) {
+      list.scrollTo({ top: list.scrollTop + bounds.top - view.top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    }
+  }, [sel, month, mode]);
   const hasSelection = selList.length > 0;
   useEffect(() => {
     if (mode !== 'month' || reportMode !== 'full' || !hasSelection) return;
@@ -186,7 +209,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       >
                         <div className="cal-day">
                           <b>{Number(d.slice(8))}</b>
-                          {items.length > 0 && <span className="sum">{flow(-sumOf(items), base, { decimals: 0 })}</span>}
+                          {items.length > 0 && (
+                            <span className="sum">
+                              <Amount value={-sumOf(items)} ccy={base} decimals={0} />
+                            </span>
+                          )}
                         </div>
                         <div className="cal-icons" style={{ '--m0': `${fits(shown.length) ? 3 : step - icon}px` } as Record<string, string>}>
                           {shown.map((c, i) => (
@@ -205,49 +232,67 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   })}
                 </div>
               </div>
-              {sel && (reportMode !== 'full' || hasSelection) ? (
+              {sel && hasSelection ? (
                 <div className="stack cal-selection" ref={selection}>
                   <section className="cal-dayhead">
-                    <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
-                    <Hint text={t('report.cash.fullPaidHint')} />
+                    <h3>
+                      {`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`} <Hint text={t('report.cash.fullPaidHint')} />
+                    </h3>
                   </section>
-                  {selList.length === 0 ? (
-                    <div className="cal-none">{t('calendar.noneDay')}</div>
-                  ) : (
-                    <div className="cal-daycards">
-                      {selList.map((c, i) => {
-                        const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
-                        const sub = state.subscriptions.find((s) => s.id === c.sub.id) ?? c.sub;
-                        const cur = currentPhase(sub, today);
-                        const status = effectiveStatus(sub, today);
-                        const next = nextCharge(sub, addDays(today, 1));
-                        const stopped = !state.readonly && c.kind !== 'refund' && stopLabel(cur, today);
-                        return (
-                          <button key={`${c.sub.id}-${i}`} className="card cal-daycard" onClick={() => onOpen(sub)}>
-                            <SubIcon sub={sub} size={32} />
-                            <span className="cal-dc-main">
-                              <b>{sub.name}</b>
-                              <span className="cal-dc-meta">
-                                <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
-                                <span>{cycleLabel(c.sub.cycle)}</span>
-                                {status !== 'active' && <span className="badge">{t(`list.status.${status}`)}</span>}
-                                {c.kind === 'refund' && <span className="badge green">{t('detail.charges.kind.refund')}</span>}
-                              </span>
-                              <small>{t('calendar.nextCharge', { date: next ? cnDateAuto(next, today) : '—' })}</small>
-                              {stopped && <small title={stopDescription(cur, today)}>{stopped}</small>}
+                  <div className="cal-daycards">
+                    {selList.map((c, i) => {
+                      const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                      const sub = state.subscriptions.find((s) => s.id === c.sub.id) ?? c.sub;
+                      const cur = currentPhase(sub, today);
+                      const status = effectiveStatus(sub, today);
+                      const next = nextCharge(sub, addDays(today, 1));
+                      const period = c.kind !== 'refund' && c.sub.cycle.unit !== 'lifetime' ? billingPeriod(c.sub, c.date) : undefined;
+                      const endedOn = cur.stop?.date ?? cur.end;
+                      const stopped = !state.readonly && c.kind !== 'refund' && stopLabel(cur, today);
+                      return (
+                        <button key={`${c.sub.id}-${i}`} className="card cal-daycard" onClick={() => onOpen(sub)}>
+                          <SubIcon sub={sub} size={48} />
+                          <span className="cal-dc-main">
+                            <b>{sub.name}</b>
+                            <span className="cal-dc-meta">
+                              <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                              <span>{cycleLabel(c.sub.cycle)}</span>
+                              {status !== 'active' && <span className="badge">{t(`list.status.${status}`)}</span>}
+                              {c.kind === 'refund' && <span className="badge green">{t('detail.charges.kind.refund')}</span>}
                             </span>
-                            <span className={`cal-dc-amt ${c.amount < 0 ? 'green' : ''}`}>
-                              {amt.main}
-                              {amt.alt && <small>{amt.alt}</small>}
-                              <small>{c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged'))}</small>
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                          </span>
+                          <span className="cal-dc-info">
+                            {period && (
+                              <small>
+                                {cnDateAuto(period.from, today)} – {cnDateAuto(period.paidThrough, today)}
+                              </small>
+                            )}
+                            {status === 'paused' ? (
+                              cur.pausedAt && (
+                                <small>
+                                  {t('detail.ev.paused')} · {cnDateAuto(cur.pausedAt, today)}
+                                </small>
+                              )
+                            ) : ['ended', 'terminated'].includes(status) ? (
+                              endedOn && <small>{t('list.endedOn', { date: cnDateAuto(endedOn, today) })}</small>
+                            ) : status === 'ending' && cur.end ? (
+                              <small>{t('core.stop.paidThrough', { date: cnDateAuto(cur.end, today) })}</small>
+                            ) : next ? (
+                              <small>{t('calendar.nextCharge', { date: cnDateAuto(next, today) })}</small>
+                            ) : null}
+                            {stopped && <small title={stopDescription(cur, today)}>{stopped}</small>}
+                          </span>
+                          <span className="cal-dc-amt">
+                            {amt.main}
+                            {amt.alt && <small>{amt.alt}</small>}
+                            <small>{c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged'))}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : reportMode !== 'full' ? (
+              ) : !sel && reportMode !== 'full' ? (
                 <div className="cal-none">{t('calendar.pickDay')}</div>
               ) : null}
               {reportMode === 'full' && report && (
@@ -270,29 +315,39 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               <section className="card cal-charges">
                 <div className="card-h">
                   <h3>{t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}</h3>
-                  <Hint text={t('detail.chart.origAmount')} />
                 </div>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
-                <div className="cal-charge-list">
-                  {monthCharges.map((c, i) => (
-                    <Cell
-                      key={c.sub.id + c.date + i}
-                      label={
-                        <span className="row cal-name">
-                          <SubIcon sub={c.sub} size={24} />
-                          <span>{c.sub.name}</span>
-                        </span>
-                      }
-                      onClick={() => onOpen(c.sub)}
-                    >
-                      <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>
-                        {t('calendar.day', { day: Number(c.date.slice(8)) })}
-                      </span>
-                      <b style={{ color: c.amount < 0 ? 'var(--green)' : 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {flow(-c.amount, c.currency, { compact: true })}
-                      </b>
-                    </Cell>
-                  ))}
+                <div className="cal-charge-list" ref={timeline}>
+                  {[...byDay]
+                    .filter(([date]) => date.startsWith(month))
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([date, items]) => (
+                      <section key={date} data-date={date} className={`cal-charge-group ${date === sel ? 'selected' : ''}`}>
+                        <h4 className={`cal-charge-day ${date === today ? 'today' : ''}`} aria-label={cnDate(date, true)}>
+                          <span>{Number(date.slice(8))}</span>
+                          <i aria-hidden="true" />
+                        </h4>
+                        {items.map((c, i) => {
+                          const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                          return (
+                            <Cell
+                              key={c.sub.id + date + i}
+                              label={
+                                <span className="row cal-name">
+                                  <SubIcon sub={c.sub} size={24} />
+                                  <span>{c.sub.name}</span>
+                                </span>
+                              }
+                              onClick={() => onOpen(state.subscriptions.find((s) => s.id === c.sub.id) ?? c.sub)}
+                            >
+                              <span className="cal-charge-amount" title={amt.alt}>
+                                {amt.main}
+                              </span>
+                            </Cell>
+                          );
+                        })}
+                      </section>
+                    ))}
                 </div>
               </section>
             </div>

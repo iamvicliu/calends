@@ -294,12 +294,15 @@ export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; h
 }
 
 /** 小组件式金额：小数位缩小 */
-export function Amount({ value, ccy, compact, plain }: { value: number; ccy: string; compact?: boolean; plain?: boolean }) {
+export function Amount({ value, ccy, compact, plain, decimals }: { value: number; ccy: string; compact?: boolean; plain?: boolean; decimals?: number }) {
   if (!Number.isFinite(value)) return <span className="amt">—</span>;
   const abs = Math.abs(value);
   const noDec = compact && abs >= 1000;
   // 整数分组和小数点都跟随当前语言（德语 1.234,56、法语 1 234,56），小数部分缩小显示
-  const parts = new Intl.NumberFormat(intlLocale(), { minimumFractionDigits: noDec ? 0 : 2, maximumFractionDigits: noDec ? 0 : 2 }).formatToParts(abs);
+  const parts = new Intl.NumberFormat(intlLocale(), {
+    minimumFractionDigits: decimals ?? (noDec ? 0 : 2),
+    maximumFractionDigits: decimals ?? (noDec ? 0 : 2),
+  }).formatToParts(abs);
   const int = parts
     .filter((p) => p.type !== 'decimal' && p.type !== 'fraction')
     .map((p) => p.value)
@@ -312,7 +315,7 @@ export function Amount({ value, ccy, compact, plain }: { value: number; ccy: str
       <span className="cur">{symbol(ccy).trim()}</span>
       {int}
       {dec && (
-        <small>
+        <small className="amt-fraction" style={{ color: 'inherit', opacity: 0.72 }}>
           {point}
           {dec}
         </small>

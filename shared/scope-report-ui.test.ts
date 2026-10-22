@@ -152,7 +152,11 @@ test('calendar full report collapses to persisted mini with day details, expands
   nodes = render();
   assert.equal(r.prefs['cal-report-mode'], 'mini');
   assert.ok(mini(nodes));
-  assert.ok(nodes.some((n) => n.props.className === 'cal-dayhead'));
+  assert.equal(
+    nodes.some((n) => n.props.className === 'cal-dayhead'),
+    false,
+    'empty days have no block in mini mode either',
+  );
   assert.equal(
     nodes.find((n) => n.type === 'ScopeReport'),
     undefined,
@@ -1050,7 +1054,12 @@ test('calendar full selection scrolls into view only when needed and respects re
     [30, 170, true, 'instant'],
   ] as const) {
     const scrolls: unknown[] = [];
-    const element = { style: { scrollMarginTop: '' }, getBoundingClientRect: () => ({ top, bottom }), scrollIntoView: (opts: unknown) => scrolls.push(opts) };
+    const element = {
+      querySelector: () => null,
+      style: { scrollMarginTop: '' },
+      getBoundingClientRect: () => ({ top, bottom }),
+      scrollIntoView: (opts: unknown) => scrolls.push(opts),
+    };
     const r = harness(
       '../app/src/views/Calendar.tsx',
       'Calendar',
@@ -1231,4 +1240,145 @@ test('scope history remains visible without monthly movement; unbranded payment 
     marks.some((n) => n.type === 'MethodMark'),
     false,
   );
+});
+
+test('calendar groups dates chronologically, follows the currency preference and retains whole-row detail actions', () => {
+  const subscriptions = ['Long fictional subscription name', 'Same day EUR', 'Refund'].map((name, i) => ({
+    id: String(i),
+    name,
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: i === 1 ? 'EUR' : 'USD',
+    start: '2026-09-22',
+    status: 'active',
+    cycle: { unit: 'month', every: 1 },
+  })) as Subscription[];
+  const charges = [
+    { sub: subscriptions[0], date: today, amount: 10, currency: 'USD', projected: false },
+    { sub: subscriptions[1], date: today, amount: 5, currency: 'EUR', projected: false },
+    { sub: subscriptions[2], date: '2026-10-16', amount: -3, currency: 'USD', projected: false, kind: 'refund' },
+  ];
+  const state = {
+    ...st,
+    readonly: true,
+    subscriptions,
+    settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+    fx: { base: 'USD' as const, rates: { USD: 1, CNY: 7, EUR: 0.9 }, fetchedAt: today },
+  };
+  for (const orig of [false, true]) {
+    const money = harness('../app/src/components/MoneyPair.tsx', 'useMoneyPair', {}, { useOrig: () => orig });
+    const opened: Subscription[] = [];
+    const r = harness(
+      '../app/src/views/Calendar.tsx',
+      'Calendar',
+      {},
+      {
+        allCharges: () => charges,
+        sumBase: (s: AppState, rows: billing.Charge[]) => rows.reduce((n, c) => n + fx.chargeValue(s, c), 0),
+        useMoneyPair: () => money.call('useMoneyPair', state),
+      },
+    );
+    const render = () => r.render('Calendar', { state, today, onOpen: (sub: Subscription) => opened.push(sub), onIcs() {} });
+    let nodes = render();
+    assert.deepEqual(
+      nodes.filter((n) => n.props['data-date']).map((n) => n.props['data-date']),
+      ['2026-10-16', today],
+    );
+    const timeline = nodes.find((n) => n.props.className === 'cal-charge-list')!;
+    const rows = all(timeline).filter((n) => n.type === 'Cell');
+    assert.equal(rows.length, 3);
+    const amounts = rows.map((n) => all(n).find((n) => n.type === 'Amount')!.props);
+    assert.deepEqual(
+      amounts.map((n) => n.ccy),
+      orig ? ['USD', 'USD', 'EUR'] : ['CNY', 'CNY', 'CNY'],
+    );
+    assert.equal(amounts[0].value, orig ? 3 : 21);
+    assert.equal(amounts[1].value, orig ? -10 : -70);
+    const refundGrid = nodes.find((n) => n.props['aria-label'] === format.cnDate('2026-10-16', true))!;
+    const gridAmount = all(refundGrid).find((n) => n.type === 'Amount')!;
+    assert.equal(gridAmount.props.ccy, 'CNY');
+    assert.equal(gridAmount.props.value, 21);
+    assert.equal(gridAmount.props.decimals, 0);
+    assert.equal(all(timeline).filter((n) => n.props.className === 'cal-charge-day today').length, 1);
+    assert.ok(nodes.some((n) => n.props['data-date'] === today && n.props.className.includes('selected')));
+    rows[1].props.onClick();
+    assert.equal(opened[0], subscriptions[0]);
+    const details = nodes.filter((n) => n.props.className === 'card cal-daycard');
+    assert.equal(all(details[0]).find((n) => n.type === 'Amount')!.props.ccy, orig ? 'USD' : 'CNY');
+    nodes.find((n) => n.props['aria-label'] === format.cnDate('2026-10-17', true))!.props.onClick();
+    nodes = render();
+    assert.equal(
+      nodes.some((n) => n.props.className === 'stack cal-selection' || n.props.className === 'cal-none'),
+      false,
+    );
+    nodes.find((n) => n.props['aria-label'] === 'calendar.next')!.props.onClick();
+    assert.equal(
+      render().some((n) => n.props.className === 'cal-charge-day today'),
+      false,
+    );
+  }
+});
+
+test('calendar day cards show charged coverage and real stop/pause dates without a missing next-charge placeholder', () => {
+  for (const paused of [false, true]) {
+    const sub: Subscription = {
+      id: 's',
+      name: 'Fictional',
+      category: 'Tools',
+      tags: [],
+      price: 20,
+      currency: 'USD',
+      start: '2026-07-06',
+      cycle: { unit: 'month', every: 1 },
+      status: paused ? 'paused' : 'cancelled',
+      ...(paused ? { pausedAt: '2026-10-18' } : { end: '2026-10-16', stop: { kind: 'cancel', date: '2026-10-16', paidThrough: '2026-11-05' } }),
+    };
+    const r = harness(
+      '../app/src/views/Calendar.tsx',
+      'Calendar',
+      {},
+      {
+        allCharges: () => [{ sub, date: '2026-10-06', amount: 20, currency: 'USD', projected: false }],
+        t: (key: string, args: Record<string, unknown> = {}) => `${key} ${Object.values(args).join(' ')}`,
+      },
+    );
+    const render = () => r.render('Calendar', { state: { ...st, readonly: true, subscriptions: [sub] }, today, onOpen() {}, onIcs() {} });
+    render()
+      .find((n) => n.props['aria-label'] === format.cnDate('2026-10-06', true))!
+      .props.onClick();
+    const card = render().find((n) => n.props.className === 'card cal-daycard')!;
+    const content = all(card)
+      .flatMap((n) => n.children)
+      .filter((n) => typeof n === 'string')
+      .join(' ');
+    assert.ok(content.includes(format.cnDateAuto('2026-10-06', today)) && content.includes(format.cnDateAuto('2026-11-05', today)));
+    assert.ok(content.includes(format.cnDateAuto(paused ? '2026-10-18' : '2026-10-16', today)));
+    assert.ok(!content.includes('calendar.nextCharge') && !content.includes('—'));
+    assert.equal(all(card).find((n) => n.type === 'SubIcon')!.props.size, 48);
+  }
+});
+
+test('calendar selection scrolls the monthly list internally without moving the page', () => {
+  for (const reduced of [false, true]) {
+    const scrolls: unknown[] = [];
+    let refs = 0;
+    const group = { getBoundingClientRect: () => ({ top: 720, bottom: 850 }) };
+    const list = {
+      querySelector: () => group,
+      scrollHeight: 1000,
+      clientHeight: 400,
+      scrollTop: 20,
+      getBoundingClientRect: () => ({ top: 100, bottom: 500 }),
+      scrollTo: (opts: unknown) => scrolls.push(opts),
+    };
+    const r = harness(
+      '../app/src/views/Calendar.tsx',
+      'Calendar',
+      {},
+      { useRef: () => ({ current: refs++ === 0 ? null : list }), matchMedia: () => ({ matches: reduced }) },
+    );
+    r.render('Calendar', { state: st, today, onOpen() {}, onIcs() {} });
+    assert.deepEqual(scrolls, [{ top: 640, behavior: reduced ? 'instant' : 'smooth' }]);
+  }
 });

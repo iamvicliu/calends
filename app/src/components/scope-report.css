@@ -350,20 +350,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .cal-daycard {
-    flex-wrap: wrap;
     gap: 8px;
-  }
-  .cal-dc-main {
-    flex-basis: calc(100% - 40px);
-  }
-  .cal-dc-amt {
-    flex-basis: 100%;
-    padding-left: 40px;
-    align-items: flex-start;
-    text-align: start;
-  }
-  .cal-dc-amt small {
-    white-space: normal;
   }
 }
 .cal-mini-bars:not(.signed) .cal-mini-positive {

@@ -36,6 +36,13 @@ test('Amount renders directed flows, zero, unavailable values and neutral prices
     assert.equal(text(render(-66.94)), `${on ? '−' : ''}¥66.94`);
     assert.equal(text(render(10)), `${on ? '+' : ''}¥10.00`);
     assert.ok(render(10).includes('color:var(--green)'));
+    for (const value of [198.65, -198.65, 0]) {
+      assert.match(render(value), /class="amt-fraction" style="color:inherit;opacity:0.72"/);
+    }
+    assert.ok(!render(198.65, true).includes('--green'));
+    const whole = renderToStaticMarkup(React.createElement(Amount, { value: 198.65, ccy: 'CNY', decimals: 0 }));
+    assert.equal(text(whole), `${on ? '+' : ''}¥199`);
+    assert.ok(!whole.includes('amt-fraction'));
     assert.equal(text(render(0)), '¥0.00');
     assert.equal(text(render(-0)), '¥0.00');
     assert.equal(text(render(NaN)), '—');
