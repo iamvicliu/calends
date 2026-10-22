@@ -230,6 +230,8 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   const [chat, setChat] = useState<Saved>(load);
   // 以前的对话（服务端）：显示在当前对话上面，往上翻就能看到；只读
   const [past, setPast] = useState<Saved[]>([]);
+  // 历史记录加载完才显示欢迎语：加载前后滚动位置不同，提前显示会先出现在一处再跳到另一处
+  const [pastLoaded, setPastLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const [atBottom, setAtBottom] = useState(true);
@@ -240,10 +242,12 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   }, []);
   useEffect(() => persist(chat), [chat]);
   useEffect(() => {
-    void api<Saved[]>('/api/assistant/chats').then(
-      (list) => setPast(list.filter((c) => c.turns?.length)),
-      () => {},
-    );
+    void api<Saved[]>('/api/assistant/chats')
+      .then(
+        (list) => setPast(list.filter((c) => c.turns?.length)),
+        () => {},
+      )
+      .finally(() => setPastLoaded(true));
   }, []);
   // 每轮回复结束后存到服务端（流式过程中不存）；其他设备也能看到
   useEffect(() => {
@@ -467,32 +471,30 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
             ))}
             <section ref={session} className={`as-session ${shownPast.length ? 'fresh' : ''}`} style={shownPast.length ? { minHeight: fill } : undefined}>
               {shownPast.length > 0 && <div className="as-past-head">{fmtWhen(chat.createdAt)}</div>}
-              {empty ? (
-                <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
-              ) : (
-                chat.turns.map((turn, i) =>
-                  turn.role === 'user' ? (
-                    <UserBubble key={turn.id} turn={turn} />
-                  ) : (
-                    <BotMessage
-                      key={turn.id}
-                      turn={turn}
-                      state={state}
-                      last={i === chat.turns.length - 1}
-                      onRetry={retry}
-                      onSetup={() => setSetup(true)}
-                      onApply={(p) => void applyProposal(turn.id, p)}
-                      onEdit={editProposal}
-                      onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
-                      onApplyAll={() => void applyAll(turn.id)}
-                      onOpen={(id) => {
-                        const s = state.subscriptions.find((x) => x.id === id);
-                        if (s) onOpen(s);
-                      }}
-                    />
-                  ),
-                )
-              )}
+              {empty
+                ? pastLoaded && <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
+                : chat.turns.map((turn, i) =>
+                    turn.role === 'user' ? (
+                      <UserBubble key={turn.id} turn={turn} />
+                    ) : (
+                      <BotMessage
+                        key={turn.id}
+                        turn={turn}
+                        state={state}
+                        last={i === chat.turns.length - 1}
+                        onRetry={retry}
+                        onSetup={() => setSetup(true)}
+                        onApply={(p) => void applyProposal(turn.id, p)}
+                        onEdit={editProposal}
+                        onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
+                        onApplyAll={() => void applyAll(turn.id)}
+                        onOpen={(id) => {
+                          const s = state.subscriptions.find((x) => x.id === id);
+                          if (s) onOpen(s);
+                        }}
+                      />
+                    ),
+                  )}
             </section>
           </div>
         </div>

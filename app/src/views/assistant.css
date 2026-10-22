@@ -990,15 +990,12 @@
   flex: 1;
   border-top: 1px dashed var(--sep);
 }
-/* 当前对话：有历史时至少占满一屏（高度由脚本按顶栏与输入框算出），空状态在其中居中 */
+/* 当前对话：有历史时至少占满一屏（高度由脚本按顶栏与输入框算出）；空状态始终贴在上方，
+   不随历史记录加载完成后改为居中，避免进入页面时跳动 */
 .as-session {
   display: flex;
   flex-direction: column;
   gap: 22px;
-}
-.as-session.fresh > .as-welcome {
-  margin: auto 0;
-  padding-top: 0;
 }
 .as-past .as-card-foot .btn,
 .as-past .as-applyall,
