@@ -19,7 +19,6 @@ import {
   Pencil,
   RotateCcw,
   Settings2,
-  ReceiptText,
   Square,
   SquarePen,
   Wrench,
@@ -869,9 +868,7 @@ function Proposal(props: {
     : summaryRows(part.tool, a, state, sub?.currency);
   return (
     <div className={`as-card ${part.state}`}>
-      <div className="as-card-tag">
-        <ReceiptText size={12} /> {create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}
-      </div>
+      <div className="as-card-tag">{create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}</div>
       <div className="as-card-head">
         <SubIcon sub={icon} size={44} />
         <div className="as-card-id">

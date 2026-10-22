@@ -564,9 +564,9 @@ function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) =>
             return (
               <li key={f.c} className="flex items-center gap-2.5">
                 <i className="size-2.5 shrink-0 rounded-[3px]" style={{ background: shade(i) }} />
-                <Badge variant="outline" className="w-12 justify-center font-mono text-[11px]">
+                <span className="w-12 shrink-0 text-xs font-medium">
                   {f.c}
-                </Badge>
+                </span>
                 <span className="flex-1 text-[13px] text-muted-foreground tnum">
                   1 {f.c} = {now < 0.1 ? now.toFixed(4) : now.toFixed(3)} {ccy}
                 </span>
@@ -602,9 +602,10 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
                 key={c || '*'}
                 type="button"
                 onClick={() => setTab(c)}
-                className={cn('relative h-7 rounded-full px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground ring-1 ring-border hover:text-foreground')}
+                aria-pressed={tab === c}
+                className={cn('relative h-7 rounded-md px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}
               >
-                {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-full bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
+                {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-md bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
                 <span className="relative flex items-center gap-1">
                   {c && <CatGlyph icon={catIcon(c)} size={13} className="size-[13px]" />}
                   {c || t('public.list.all')} <span className="opacity-60 tnum">{n}</span>
@@ -642,9 +643,9 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
           <span className="truncate font-medium">{clean(s.name)}</span>
           {['trial', 'paused', 'ending'].includes(status) && <Badge variant="secondary" className="text-[10px]">{t(`list.status.${status}`)}</Badge>}
           {ph.region && (
-            <Badge variant="secondary" className="h-4 px-1.5 font-mono text-[10px] font-normal text-muted-foreground">
+            <span className="shrink-0 text-[10px] text-muted-foreground">
               {ph.region}
-            </Badge>
+            </span>
           )}
         </div>
         <div className="truncate text-[13px] text-muted-foreground tnum">
