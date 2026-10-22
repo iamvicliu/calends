@@ -193,15 +193,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const [member, setMember] = useState<{ m?: ShareMember; collect?: boolean } | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
-  const forecast = detailForecast(sub, today);
   const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
-  const nextBill = forecast.charges[0];
-  const compactNext =
-    forecast.sparse &&
-    nextBill &&
-    nextBill.amount === nowPrice &&
-    nextBill.currency === cur.currency &&
-    cycleLabel(nextBill.sub.cycle) === cycleLabel(cur.cycle);
+  const forecast = detailForecast(sub, today);
+  const showForecast = !forecast.sparse && forecast.charges.length > 0;
   const once = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   // 买断按买下那天的汇率折算，与扣款记录、摊到每月同一口径；按今天汇率会和记录里的金额对不上
   const big = pair(nowPrice, cur.currency, { compact: false, plain: true, date: once ? history[0]?.date : undefined });
@@ -264,12 +258,10 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             </span>
           </h2>
           <div className="dt-meta">
-            {!compactNext && (
-              <b>
-                {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
-              </b>
-            )}
-            {!compactNext && big.alt && (
+            <b>
+              {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
+            </b>
+            {big.alt && (
               <>
                 <s>·</s>
                 {big.alt}
@@ -277,11 +269,11 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             )}
             {cur.region && (
               <>
-                {!compactNext && <s>·</s>}
+                <s>·</s>
                 <Region cc={cur.region} />
               </>
             )}
-            {(!compactNext || cur.region) && <s>·</s>}
+            <s>·</s>
             <CatTag cat={sub.category} />
           </div>
         </div>
@@ -296,16 +288,18 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         <div className="dt-main">
           <Kpis sub={sub} state={state} today={today} history={history} />
           {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
-          {!compact && <Upcoming sub={sub} state={state} today={today} />}
-          {/* 买断已有那一笔就不再提示记一笔，行仍可点开修改 */}
-          <Charges
-            sub={sub}
-            state={state}
-            today={today}
-            history={history}
-            onRow={ro ? undefined : editPay}
-            onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
-          />
+          <div className={`dt-billing ${showForecast ? 'has-forecast' : ''}`}>
+            {!compact && showForecast && <Upcoming sub={sub} state={state} today={today} />}
+            {/* 买断已有那一笔就不再提示记一笔，行仍可点开修改 */}
+            <Charges
+              sub={sub}
+              state={state}
+              today={today}
+              history={history}
+              onRow={ro ? undefined : editPay}
+              onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
+            />
+          </div>
         </div>
         <div className="dt-side">
           <Outcome sub={sub} state={state} today={today} />
@@ -438,11 +432,11 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   );
 }
 
-/** 月付/季付保留节奏图；长周期或一年最多两笔时只展示下一笔。 */
+/** 月付/季付保留节奏图；稀疏扣款由摘要展示下次日期。 */
 function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const { sparse, charges: cs } = detailForecast(sub, today);
-  if (!cs.length) return null;
+  if (sparse || !cs.length) return null;
   const labels = Array.from({ length: 13 }, (_, i) => addMonths(`${today.slice(0, 7)}-01`, i).slice(0, 7));
   const vals = cs.map((c) => ({ c, v: chargeValue(state, c, base) }));
   const bars = labels.map((m) => vals.filter((x) => x.c.date.startsWith(m)).reduce((a, x) => a + x.v, 0));
@@ -451,20 +445,18 @@ function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; t
   const show = vals.slice(0, 5);
   return (
     <Panel
-      className={`dt-upcoming ${sparse ? 'dt-next' : ''}`}
-      title={t(sparse ? 'detail.ev.next' : 'detail.upcoming.title')}
-      aside={!sparse && cs.length && Number.isFinite(total) ? t('detail.upcoming.total', { amount: flow(-total, base), count: cs.length }) : undefined}
+      className="dt-upcoming"
+      title={t('detail.upcoming.title')}
+      aside={Number.isFinite(total) ? t('detail.upcoming.total', { amount: flow(-total, base), count: cs.length }) : undefined}
     >
-      {!sparse && (
-        <div className="dt-up-bars" aria-hidden="true">
-          {bars.map((v, i) => (
-            <div key={labels[i]} className={v ? 'on' : ''}>
-              <i style={{ height: `${v ? Math.max(14, (v / max) * 100) : 6}%` }} />
-              <small>{Number(labels[i].slice(5))}</small>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="dt-up-bars" aria-hidden="true">
+        {bars.map((v, i) => (
+          <div key={labels[i]} className={v ? 'on' : ''}>
+            <i style={{ height: `${v ? Math.max(14, (v / max) * 100) : 6}%` }} />
+            <small>{Number(labels[i].slice(5))}</small>
+          </div>
+        ))}
+      </div>
       <div className="dt-tbl">
         {show.map(({ c, v }, i) => (
           <div className="dt-tr dt-row" key={`${c.date}-${c.sub.start}-${i}`}>
@@ -480,13 +472,7 @@ function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; t
           </div>
         ))}
       </div>
-      {sparse && (
-        <div className="dt-renewal">
-          {cycleLabel(cs[0].sub.cycle)}
-          {cs[0].sub.planned ? ` · ${t('detail.up.planned')}` : ''}
-        </div>
-      )}
-      {!sparse && cs.length > show.length && <div className="dt-up-more">{t('detail.upcoming.more', { count: cs.length - show.length })}</div>}
+      {cs.length > show.length && <div className="dt-up-more">{t('detail.upcoming.more', { count: cs.length - show.length })}</div>}
     </Panel>
   );
 }
@@ -835,6 +821,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
   const up = upcomingPhase(sub, today);
   const ro = !!state.readonly;
   const next = nextCharge(sub, addDays(today, 1));
+  const nextBill = detailForecast(sub, today).charges[0];
   const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
   const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
@@ -861,6 +848,11 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
           )}
           {/* 买断的开始日就是扣款记录里那一笔，不再重复 */}
           {!(sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1) && <Prop k={t('detail.field.start')}>{cnDateFull(sub.start)}</Prop>}
+          {nextBill && (
+            <Prop k={t('detail.ev.next')} hint={relDays(diffDays(today, nextBill.date))}>
+              {cnDateFull(nextBill.date)}
+            </Prop>
+          )}
           {sub.expires && !sub.end && (
             <Prop k={t('detail.field.expires')} hint={next && next < sub.expires ? t('detail.field.expiresHint') : relDays(diffDays(today, sub.expires))}>
               {cnDateFull(sub.expires)}
@@ -1066,7 +1058,10 @@ function Charges({
                       title={c.note}
                     >
                       {/* 分年时组头已有年份；不分组且不是今年的（如多年前的买断）要带上年份 */}
-                      <span className="d">{grouped || c.date.startsWith(thisYear) ? c.date.slice(5) : c.date}</span>
+                      <span className="d">
+                        <time dateTime={c.date}>{grouped || c.date.startsWith(thisYear) ? c.date.slice(5) : c.date}</time>
+                        <small>{relDays(diffDays(today, c.date))}</small>
+                      </span>
                       <span className="o">
                         {c.currency !== base || c.settled ? flow(-c.amount, c.currency) : ''}
                         {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}

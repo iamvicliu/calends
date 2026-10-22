@@ -4,11 +4,14 @@ import { afterEach, test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { flow, flowSign, setSignedAmounts, symbol } from './format.ts';
+import { flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateFull } from './format.ts';
 import { intlLocale, locale, setLocale } from './i18n.ts';
 import { chargeValue } from './fx.ts';
-import { FALLBACK_FX, phaseSubs } from './billing.ts';
+import { FALLBACK_FX, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
+import * as billing from './billing.ts';
+import { detailForecast } from '../app/src/views/detail-data.ts';
+import type { AppState, Subscription } from './types.ts';
 
 const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
 function load(file: string, name: string, source: string, deps: Record<string, unknown>) {
@@ -88,6 +91,8 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     useState: () => [true, () => {}],
     phaseSubs,
     chargeValue,
+    diffDays,
+    relDays,
     flow,
     t: (key: string) => key,
     Panel: ({ children }: { children: React.ReactNode }) => React.createElement('section', null, children),
@@ -138,6 +143,8 @@ test('Detail defaults to the current charge year, falls back to the latest popul
     ],
     phaseSubs,
     chargeValue,
+    diffDays,
+    relDays,
     flow,
     t: (key: string, args?: { count: number }) => `${key}:${args?.count ?? ''}`,
     Panel: ({ children, title }: { children: React.ReactNode; title: string }) => React.createElement('section', null, title, children),
@@ -253,4 +260,82 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
   assert.ok(!detail.includes('<button'));
   state.settings.avatar = '';
   assert.ok(render(36, 2).includes('/icons/avatar.png'));
+});
+
+test('Detail keeps plan prices in every header and puts renewal dates in the summary without sparse cards', () => {
+  const file = '../app/src/views/Detail.tsx';
+  const source = read(file);
+  const empty = () => null;
+  const Panel = ({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) =>
+    React.createElement('section', { className }, title, children);
+  const deps = {
+    React,
+    ...billing,
+    detailForecast,
+    money,
+    cnDateFull,
+    relDays,
+    flow,
+    chargeValue,
+    t: (key: string) => key,
+    useState: (initial: unknown) => [initial, empty],
+    useRef: () => ({ current: null }),
+    useMoneyPair: () => (amount: number, currency: string) => ({ main: money(amount, currency), alt: '≈ ¥766.18' }),
+    TONE: {},
+    methodOf: empty,
+    presetCat: () => 'phone',
+    Panel,
+    Prop: ({ k, children, hint }: { k: string; children: React.ReactNode; hint?: string }) => React.createElement('div', null, k, children, hint),
+    Act: empty,
+    SubIcon: empty,
+    CatTag: empty,
+    Region: empty,
+    X: empty,
+    Pencil: empty,
+    Pause: empty,
+    Play: empty,
+    Plus: empty,
+    Share: empty,
+    Kpis: empty,
+    Trendline: empty,
+    Charges: empty,
+    Outcome: empty,
+    Details: empty,
+    Events: empty,
+    PayBadge: empty,
+  };
+  const Upcoming = load(file, 'Upcoming', `function Upcoming(${source.split('function Upcoming(')[1].split('type Unit =')[0]}`, deps);
+  const Detail = load(file, 'Detail', `function Detail(${source.split('export function Detail(')[1].split('/** 正常扣款')[0]}`, { ...deps, Upcoming });
+  const Details = load(file, 'Details', `function Details(${source.split('function Details(')[1].split('/** 扣款记录')[0]}`, deps);
+  for (const unit of ['year', 'month', 'lifetime'] as const) {
+    const sub: Subscription = {
+      id: 'fictional-renewal',
+      name: 'Fictional plan',
+      price: 99,
+      currency: 'EUR',
+      cycle: { unit, every: 1 },
+      start: '2025-12-15',
+      status: 'active',
+      category: 'tools',
+      tags: [],
+    };
+    const state: AppState = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
+    const props = { sub, state, today: '2026-10-22', onEdit: empty, onClose: empty, onCar: empty };
+    const html = renderToStaticMarkup(React.createElement(Detail, props));
+    const header = html.split('class="dt-meta"')[1].split('</header>')[0];
+    assert.ok(text(header).includes('€99.00'));
+    assert.ok(text(header).includes('≈ ¥766.18'));
+    const summary = text(renderToStaticMarkup(React.createElement(Details, props)));
+    if (unit === 'lifetime') {
+      assert.ok(!summary.includes('detail.ev.next'));
+    } else {
+      const next = detailForecast(sub, props.today).charges[0].date;
+      assert.ok(summary.includes('detail.ev.next'));
+      assert.ok(summary.includes(cnDateFull(next)));
+      assert.ok(summary.includes(relDays(diffDays(props.today, next))));
+      assert.ok(!summary.includes('€99.00'));
+    }
+    assert.equal(html.includes('dt-upcoming'), unit === 'month');
+    assert.ok(!html.includes('dt-renewal'));
+  }
 });

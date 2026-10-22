@@ -293,6 +293,21 @@
   gap: 16px;
   min-width: 0;
 }
+.dt-body,
+.dt-main {
+  container: detail-main / inline-size;
+}
+.dt-billing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+@container detail-main (min-width: 720px) {
+  .dt-billing.has-forecast {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 /* 窄屏单列：保留主栏顺序，让预测与扣款记录相邻 */
 @media (max-width: 999px) {
   .dt-main,
@@ -652,14 +667,6 @@
   width: calc(100% - 40px);
   margin-inline: 20px;
 }
-.dt-next .dt-tbl {
-  margin-top: 4px;
-}
-.dt-renewal {
-  padding-top: 8px;
-  color: var(--label-2);
-  font-size: 12px;
-}
 .dt-up-more {
   padding-top: 8px;
   border-top: 1px solid var(--sep);
@@ -855,7 +862,6 @@
 .dt-tbl {
   --cols: minmax(82px, 1fr) minmax(0, 1.15fr) minmax(0, 1.3fr);
   width: 100%;
-  max-width: 430px;
 }
 .dt-tr {
   display: grid;
@@ -868,7 +874,7 @@
   line-height: 18px;
   font-variant-numeric: tabular-nums;
 }
-.dt-tr > :nth-child(n + 3) {
+.dt-tr > :nth-child(n + 2) {
   text-align: right;
   overflow-wrap: anywhere;
 }
@@ -885,7 +891,8 @@
 .dt-grp {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 10px;
   padding: 0;
   font-variant-numeric: tabular-nums;
   position: sticky;
@@ -1112,7 +1119,7 @@
 /* 宽屏：弹层撑大，两栏各自滚动 */
 @media (min-width: 1000px) {
   .sheet.bare:has(.dt) {
-    width: min(1080px, calc(100vw - 48px));
+    width: min(1280px, calc(100vw - 48px));
     overflow: hidden;
   }
   /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */
