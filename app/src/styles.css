@@ -9423,3 +9423,19 @@ img.mm-flag {
 .member-fee-section {
   scroll-margin-top: 84px;
 }
+
+/* 记收款弹窗顶部：订阅 logo + 名称一行 */
+.collect-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 2px 4px;
+}
+.collect-sub b {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

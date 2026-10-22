@@ -4,7 +4,7 @@ import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Toggle } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
@@ -265,6 +265,11 @@ export function MemberSheet({
         }
       >
         <div className="stack">
+          {/* 同一个人可能在多辆车上：顶部单独一行标明是哪个订阅 */}
+          <div className="collect-sub">
+            <SubIcon sub={s} size={28} />
+            <b>{s.name}</b>
+          </div>
           <Group>
             {contactText(f) && <Cell label={t('family.member.contact')}>{contactText(f)}</Cell>}
             <Cell label={t('family.member.feeGroup')}>
