@@ -27,7 +27,8 @@
     },
     "fee": "Biaya",
     "nextCollection": "Penagihan berikutnya",
-    "actions": "Tindakan"
+    "actions": "Tindakan",
+    "status": "Status pembayaran"
   },
   "contact": {
     "via": {
@@ -266,5 +267,16 @@
     "anchor": "Tanggal tagih bersama",
     "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah.",
     "summary": "{rule} · acuan {date}"
+  },
+  "quick": {
+    "more": "Detail lainnya",
+    "paid": "Dibayar sampai",
+    "paidFrom": "Awal periode",
+    "paidTo": "Akhir periode",
+    "late": {
+      "other": "Terlambat {count} hari"
+    },
+    "owe": "Tagihan {amount} · sejak {date}",
+    "settled": "Lunas · berikutnya {date}"
   }
 }

@@ -28,7 +28,8 @@
     },
     "fee": "Tarifa",
     "nextCollection": "Próxima cobrança",
-    "actions": "Ações"
+    "actions": "Ações",
+    "status": "Situação do pagamento"
   },
   "contact": {
     "via": {
@@ -275,5 +276,17 @@
     "anchor": "Data comum de cobrança",
     "applyNote": "{count} membros que seguem o plano mudam a partir da data; personalizados e cobranças anteriores não mudam.",
     "summary": "{rule} · âncora {date}"
+  },
+  "quick": {
+    "more": "Mais dados",
+    "paid": "Pago até",
+    "paidFrom": "Início do período",
+    "paidTo": "Fim do período",
+    "late": {
+      "one": "{count} dia de atraso",
+      "other": "{count} dias de atraso"
+    },
+    "owe": "{amount} pendente · desde {date}",
+    "settled": "Em dia · próxima cobrança {date}"
   }
 }

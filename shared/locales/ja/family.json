@@ -27,7 +27,8 @@
     },
     "fee": "料金",
     "nextCollection": "次回集金",
-    "actions": "操作"
+    "actions": "操作",
+    "status": "支払い状況"
   },
   "contact": {
     "via": {
@@ -266,5 +267,16 @@
     "anchor": "共通集金日",
     "applyNote": "プランに合わせる {count} 人は適用開始日から新ルールになります。個別設定と過去の入金は変わりません。",
     "summary": "{rule} · 共通集金日 {date}"
+  },
+  "quick": {
+    "more": "詳細",
+    "paid": "支払済みの期間",
+    "paidFrom": "期間の開始",
+    "paidTo": "期間の終了",
+    "late": {
+      "other": "{count}日超過"
+    },
+    "owe": "未収 {amount} · {date}から",
+    "settled": "精算済み · 次回 {date}"
   }
 }

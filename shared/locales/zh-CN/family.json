@@ -27,7 +27,8 @@
     },
     "fee": "收费",
     "nextCollection": "下次应收",
-    "actions": "操作"
+    "actions": "操作",
+    "status": "收款状态"
   },
   "contact": {
     "via": {
@@ -250,5 +251,14 @@
     "anchor": "统一收款日",
     "applyNote": "{count} 位跟随车的成员从生效日起改用新标准；自定义收费的成员不受影响，历史收款不变。",
     "summary": "{rule} · 统一收款日 {date}"
+  },
+  "quick": {
+    "more": "更多资料",
+    "paid": "已付到",
+    "paidFrom": "这一期开始",
+    "paidTo": "这一期结束",
+    "late": "已逾期 {count} 天",
+    "owe": "待收 {amount} · 应收 {date}",
+    "settled": "已结清 · 下次应收 {date}"
   }
 }

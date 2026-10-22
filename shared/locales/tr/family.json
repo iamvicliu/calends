@@ -28,7 +28,8 @@
     },
     "fee": "Ücret",
     "nextCollection": "Sonraki tahsilat",
-    "actions": "İşlemler"
+    "actions": "İşlemler",
+    "status": "Ödeme durumu"
   },
   "contact": {
     "via": {
@@ -275,5 +276,17 @@
     "anchor": "Ortak tahsilat günü",
     "applyNote": "Planı izleyen {count} üye bu tarihten itibaren yeni kurala geçer; özel üyeler ve geçmiş tahsilatlar değişmez.",
     "summary": "{rule} · çapa {date}"
+  },
+  "quick": {
+    "more": "Diğer bilgiler",
+    "paid": "Ödendiği tarih",
+    "paidFrom": "Dönem başlangıcı",
+    "paidTo": "Dönem sonu",
+    "late": {
+      "one": "{count} gün gecikti",
+      "other": "{count} gün gecikti"
+    },
+    "owe": "{amount} bekliyor · {date} tarihinden beri",
+    "settled": "Ödendi · sonraki {date}"
   }
 }

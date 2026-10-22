@@ -9749,8 +9749,8 @@ img.mm-flag {
   }
   .car-member-table {
     display: grid;
-    /* 成员 | 成员账号 | 联系方式 | 收费 | 下次应收 | 待收 | 操作：文字列按比例分，数字列定宽，间距统一 */
-    grid-template-columns: minmax(130px, 1.1fr) minmax(140px, 1.4fr) minmax(100px, 1fr) 72px 104px 76px 60px;
+    /* 成员（账号） | 收费（跟随车/自定义） | 收款状态 | 操作 */
+    grid-template-columns: minmax(160px, 1.3fr) minmax(140px, 1fr) minmax(200px, 1.4fr) 72px;
     column-gap: 28px;
     width: 100%;
     border-collapse: collapse;
@@ -9840,6 +9840,20 @@ img.mm-flag {
 /* 成员表：待收金额与到期的下次应收用橙色 */
 .car-member-table .warn {
   color: var(--orange);
+}
+.car-member-table .late {
+  color: var(--red);
+}
+.car-member-lines {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.car-member-lines small {
+  font-size: 12px;
+}
+.car-member-lines b {
+  font-weight: 600;
 }
 
 /* 编辑页「谁在用」：已保存成员只显示摘要（称呼 + 收费方式 · 下次应收） */

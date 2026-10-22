@@ -27,7 +27,8 @@
     },
     "fee": "收費",
     "nextCollection": "下次應收",
-    "actions": "操作"
+    "actions": "操作",
+    "status": "收款狀態"
   },
   "contact": {
     "via": {
@@ -250,5 +251,14 @@
     "anchor": "統一收款日",
     "applyNote": "{count} 位跟隨車的成員從生效日起改用新標準；自訂收費的成員不受影響，歷史收款不變。",
     "summary": "{rule} · 統一收款日 {date}"
+  },
+  "quick": {
+    "more": "更多資料",
+    "paid": "已付到",
+    "paidFrom": "這一期開始",
+    "paidTo": "這一期結束",
+    "late": "已逾期 {count} 天",
+    "owe": "待收 {amount} · 應收 {date}",
+    "settled": "已結清 · 下次應收 {date}"
   }
 }

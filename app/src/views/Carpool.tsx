@@ -5,6 +5,7 @@ import {
   chargesBetween,
   collectionAnchor,
   cycleLabel,
+  diffDays,
   effectiveStatus,
   memberDues,
   memberAboard,
@@ -19,7 +20,7 @@ import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../..
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
-import { carLedger, contactText, contactValue, MemberSheet, memberFee, perBill } from './Members.tsx';
+import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberStatus, perBill } from './Members.tsx';
 import { applyCarRule, carRule, followsCar } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -75,7 +76,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
-  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean } | null>(null);
+  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; full?: boolean } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
   const [sheet, setSheet] = useState<string | null>(null);
   const sheetSub = sheet ? state.subscriptions.find((x) => x.id === sheet) : undefined;
@@ -283,7 +284,16 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             onMember={(m, c) => setMember({ s: sheetSub, m, collect: c })}
           />
         )}
-        {member && (
+        {member?.m && !member.collect && !member.full && (
+          <MemberBillingSheet
+            state={state}
+            s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
+            member={member.m}
+            onClose={() => setMember(null)}
+            onMore={() => setMember({ ...member, full: true })}
+          />
+        )}
+        {member && (!member.m || member.collect || member.full) && (
           <MemberSheet
             state={state}
             s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
@@ -359,7 +369,9 @@ function MemberRows({
                     ? (d.member.note ?? t('family.pool.exemptNote'))
                     : d.member.left && collection.from >= d.member.left
                       ? t('family.pool.leftOn', { date: cnDateAuto(d.member.left, today) })
-                      : t(d.periodsOwed > 0 ? 'family.pool.dueOn' : 'family.pool.nextDueOn', { date: cnDateAuto(collection.from, today) })}
+                      : d.periodsOwed > 0 && collection.from < today
+                        ? `${t('family.quick.late', { count: diffDays(collection.from, today) })} · ${t('family.pool.dueOn', { date: cnDateFull(collection.from) })}`
+                        : t(d.periodsOwed > 0 ? 'family.pool.dueOn' : 'family.pool.nextDueOn', { date: cnDateFull(collection.from) })}
                 </span>
               </div>
             </button>
@@ -404,26 +416,20 @@ function receiptNotes(notes: (string | undefined)[]) {
   };
 }
 
-/** 宽屏成员表：组头与成员共用列宽，账号直接取成员关系记录。 */
+/** 宽屏成员表：每人的收费（周期、金额、跟随车与否）和收款状态；点一行改收费，点「收款」记一笔。 */
 function MemberTable({
   state,
   s,
   today,
   ro,
   onMember,
-  groups,
-  groupOf,
 }: {
   state: AppState;
   s: Subscription;
   today: string;
   ro: boolean;
   onMember: (m: ShareMember, collect?: boolean) => void;
-  groups: ReadonlyArray<readonly [string, string, number]>;
-  groupOf: (m: ShareMember) => string;
 }) {
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
-  const dues = memberDues(s, today, collect, state);
   return (
     <table role="table" className="car-member-table" aria-label={t('family.sheet.members')}>
       <thead role="rowgroup">
@@ -432,108 +438,93 @@ function MemberTable({
             {t('family.sheet.member')}
           </th>
           <th role="columnheader" scope="col">
-            {t('family.member.account')}
-          </th>
-          <th role="columnheader" scope="col">
-            {t('family.member.contact')}
-          </th>
-          <th role="columnheader" scope="col" className="num">
             {t('family.sheet.fee')}
           </th>
           <th role="columnheader" scope="col">
-            {t('family.sheet.nextCollection')}
-          </th>
-          <th role="columnheader" scope="col" className="num">
-            {t('family.pool.filter.owe')}
+            {t('family.sheet.status')}
           </th>
           <th role="columnheader" scope="col">
             {t('family.sheet.actions')}
           </th>
         </tr>
       </thead>
-      {groups.map(([key, label, n]) => (
-        <tbody role="rowgroup" key={key}>
-          <tr role="row" className="car-member-group">
-            <th role="rowheader" scope="rowgroup" colSpan={7}>
-              {label} · {t('family.sheet.people', { count: n })}
-            </th>
-          </tr>
-          {dues
-            .filter((d) => groupOf(d.member) === key)
-            .map((d) => {
-              const m = d.member;
-              const collection = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
-              const rate = memberFee(state, s, m, collection.from);
-              const next = !m.exempt && (!m.left || collection.from < m.left);
-              return (
-                <tr
-                  role="row"
-                  key={m.id}
-                  className="car-member-row"
-                  tabIndex={ro ? undefined : 0}
-                  aria-label={m.name || t('family.pool.unnamed')}
-                  onClick={() => !ro && onMember(m)}
-                  onKeyDown={(e) => {
-                    if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
-                      e.preventDefault();
-                      onMember(m);
-                    }
-                  }}
-                >
-                  <td role="cell">
-                    <span className="car-member-name">
-                      <PersonAvatar p={personFor(state, m.personId, m.name)} size={28} />
-                      <span className="text-ellipsis" title={m.name}>
-                        {m.name || t('family.pool.unnamed')}
-                      </span>
+      <tbody role="rowgroup">
+        {(s.share?.members ?? []).map((m) => {
+          const st = memberStatus(state, s, m, today);
+          const rate = memberFee(state, s, m, today);
+          const left = !!m.left && m.left <= today;
+          return (
+            <tr
+              role="row"
+              key={m.id}
+              className="car-member-row"
+              tabIndex={ro ? undefined : 0}
+              aria-label={m.name || t('family.pool.unnamed')}
+              onClick={() => !ro && onMember(m)}
+              onKeyDown={(e) => {
+                if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  onMember(m);
+                }
+              }}
+            >
+              <td role="cell">
+                <span className="car-member-name">
+                  <PersonAvatar p={personFor(state, m.personId, m.name)} size={28} />
+                  <span className="car-member-lines">
+                    <span className="text-ellipsis" title={m.name}>
+                      {m.name || t('family.pool.unnamed')}
                     </span>
-                    {m.left && m.left <= today && <small className="muted">{t('family.pool.leftOn', { date: cnDate(m.left) })}</small>}
-                  </td>
-                  <td role="cell" className="muted">
-                    <span className="text-ellipsis" title={m.account}>
-                      {m.account || t('family.member.accountEmpty')}
-                    </span>
-                  </td>
-                  <td role="cell" className="muted">
-                    {/* 只写联系方式本身，渠道名放在悬停提示里 */}
-                    <span className="text-ellipsis" title={contactText(m)}>
-                      {m.account && m.account === (m.contact ?? m.tg) ? '—' : contactValue(m) || '—'}
-                    </span>
-                  </td>
-                  <td role="cell" className="num">
-                    {m.exempt ? '—' : money(rate.amount, rate.currency)}
-                  </td>
-                  {/* 已付至只比下次应收早一天，只留下次应收；到期未收用橙色 */}
-                  <td role="cell" className={d.periodsOwed > 0 && collection.from <= today ? 'warn' : 'muted'}>
-                    {next ? cnDateAuto(collection.from, today) : '—'}
-                  </td>
-                  <td role="cell" className="num">
-                    {m.exempt ? (
-                      <span className="muted">{t('family.pool.exempt')}</span>
-                    ) : d.periodsOwed > 0 ? (
-                      <b className="warn">{money(d.owed, d.currency)}</b>
-                    ) : (
-                      <span className="muted">{t('family.pool.settled')}</span>
+                    {(left || m.account) && (
+                      <small className="muted text-ellipsis" title={m.account}>
+                        {left ? t('family.pool.leftOn', { date: cnDateFull(m.left!) }) : m.account}
+                      </small>
                     )}
-                  </td>
-                  <td role="cell">
-                    {!ro && !m.exempt && d.periodsOwed > 0 && (
-                      <button
-                        className="btn primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onMember(m, true);
-                        }}
-                      >
-                        {t('family.pool.collect')}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-        </tbody>
-      ))}
+                  </span>
+                </span>
+              </td>
+              <td role="cell">
+                {m.exempt ? (
+                  <span className="muted">{t('family.pool.exempt')}</span>
+                ) : (
+                  <span className="car-member-lines">
+                    <span>{perBill('family.pool.perFee', memberBillMonths(s, m, today), { fee: money(rate.amount, rate.currency) })}</span>
+                    <small className="muted">{followsCar(state, s, m, today) ? t('family.rule.follow') : t('family.rule.custom')}</small>
+                  </span>
+                )}
+              </td>
+              <td role="cell">
+                {m.exempt || st.gone ? (
+                  <span className="muted">—</span>
+                ) : st.owe ? (
+                  <span className="car-member-lines">
+                    <b className={st.late > 0 ? 'late' : 'warn'}>{st.late > 0 ? t('family.quick.late', { count: st.late }) : t('family.pool.owed')}</b>
+                    <small className="muted">{t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}</small>
+                  </span>
+                ) : (
+                  <span className="car-member-lines">
+                    <span className="muted">{t('family.pool.settled')}</span>
+                    <small className="muted">{t('family.pool.nextDueOn', { date: cnDateFull(st.next.from) })}</small>
+                  </span>
+                )}
+              </td>
+              <td role="cell">
+                {!ro && !m.exempt && st.owe && (
+                  <button
+                    className="btn primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMember(m, true);
+                    }}
+                  >
+                    {t('family.pool.collect')}
+                  </button>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
     </table>
   );
 }
@@ -719,7 +710,7 @@ export function CarSheet({
           )}
         </div>
         <div className="car-members">
-          <MemberTable state={state} s={s} today={today} ro={ro} onMember={onMember} groups={memberGroups} groupOf={groupOf} />
+          <MemberTable state={state} s={s} today={today} ro={ro} onMember={onMember} />
           <div className="car-member-cards">
             {memberGroups.map(([key, label, n]) => (
               <div key={key} className="car-sheet-members">

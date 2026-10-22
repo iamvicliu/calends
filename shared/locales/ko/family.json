@@ -27,7 +27,8 @@
     },
     "fee": "요금",
     "nextCollection": "다음 수금",
-    "actions": "작업"
+    "actions": "작업",
+    "status": "납부 상태"
   },
   "contact": {
     "via": {
@@ -266,5 +267,16 @@
     "anchor": "공통 수금일",
     "applyNote": "요금제를 따르는 {count}명은 적용일부터 새 규칙을 사용합니다. 개별 설정과 지난 수금은 바뀌지 않습니다.",
     "summary": "{rule} · 공통 수금일 {date}"
+  },
+  "quick": {
+    "more": "자세히",
+    "paid": "납부한 기간",
+    "paidFrom": "기간 시작",
+    "paidTo": "기간 종료",
+    "late": {
+      "other": "{count}일 연체"
+    },
+    "owe": "미수 {amount} · {date}부터",
+    "settled": "정산 완료 · 다음 {date}"
   }
 }

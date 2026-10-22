@@ -27,7 +27,8 @@
     },
     "fee": "Phí",
     "nextCollection": "Lần thu tiếp theo",
-    "actions": "Thao tác"
+    "actions": "Thao tác",
+    "status": "Tình trạng thanh toán"
   },
   "contact": {
     "via": {
@@ -266,5 +267,16 @@
     "anchor": "Ngày thu chung",
     "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi.",
     "summary": "{rule} · mốc {date}"
+  },
+  "quick": {
+    "more": "Thêm thông tin",
+    "paid": "Đã trả đến",
+    "paidFrom": "Đầu kỳ",
+    "paidTo": "Cuối kỳ",
+    "late": {
+      "other": "Quá hạn {count} ngày"
+    },
+    "owe": "Còn nợ {amount} · từ {date}",
+    "settled": "Đã thanh toán · lần tới {date}"
   }
 }

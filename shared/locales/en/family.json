@@ -28,7 +28,8 @@
     },
     "fee": "Fee",
     "nextCollection": "Next due",
-    "actions": "Actions"
+    "actions": "Actions",
+    "status": "Payment status"
   },
   "contact": {
     "via": {
@@ -275,5 +276,17 @@
     "anchor": "Collection anchor",
     "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged.",
     "summary": "{rule} · anchor {date}"
+  },
+  "quick": {
+    "more": "More details",
+    "paid": "Paid through",
+    "paidFrom": "Period starts",
+    "paidTo": "Period ends",
+    "late": {
+      "one": "{count} day overdue",
+      "other": "{count} days overdue"
+    },
+    "owe": "{amount} due · since {date}",
+    "settled": "Settled · next due {date}"
   }
 }

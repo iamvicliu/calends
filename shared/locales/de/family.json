@@ -28,7 +28,8 @@
     },
     "fee": "Gebühr",
     "nextCollection": "Nächster Einzug",
-    "actions": "Aktionen"
+    "actions": "Aktionen",
+    "status": "Zahlungsstatus"
   },
   "contact": {
     "via": {
@@ -275,5 +276,17 @@
     "anchor": "Einzugsstichtag",
     "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert.",
     "summary": "{rule} · Stichtag {date}"
+  },
+  "quick": {
+    "more": "Weitere Angaben",
+    "paid": "Bezahlt bis",
+    "paidFrom": "Zeitraum ab",
+    "paidTo": "Zeitraum bis",
+    "late": {
+      "one": "{count} Tag überfällig",
+      "other": "{count} Tage überfällig"
+    },
+    "owe": "{amount} offen · seit {date}",
+    "settled": "Beglichen · nächste Fälligkeit {date}"
   }
 }

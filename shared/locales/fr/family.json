@@ -28,7 +28,8 @@
     },
     "fee": "Tarif",
     "nextCollection": "Prochain encaissement",
-    "actions": "Actions"
+    "actions": "Actions",
+    "status": "État du paiement"
   },
   "contact": {
     "via": {
@@ -275,5 +276,17 @@
     "anchor": "Date de collecte commune",
     "applyNote": "{count} membres qui suivent le forfait passent à la nouvelle règle ; les membres personnalisés et les paiements passés ne changent pas.",
     "summary": "{rule} · référence {date}"
+  },
+  "quick": {
+    "more": "Plus de détails",
+    "paid": "Payé jusqu’au",
+    "paidFrom": "Début de la période",
+    "paidTo": "Fin de la période",
+    "late": {
+      "one": "{count} jour de retard",
+      "other": "{count} jours de retard"
+    },
+    "owe": "{amount} dû · depuis le {date}",
+    "settled": "Réglé · prochaine échéance {date}"
   }
 }

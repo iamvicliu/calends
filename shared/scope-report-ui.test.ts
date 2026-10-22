@@ -1963,3 +1963,67 @@ test('person avatar drafts remain unsaved until Save; server field order does no
   assert.equal(writes, 2);
   assert.equal(save().props.disabled, true);
 });
+
+test('合租表格的收费弹窗：已付期按开始日自动算结束日；改自定义收费从生效日起记调价', async () => {
+  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2026-07-16' };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 15,
+    currency: 'USD',
+    start: '2025-01-17',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2025-01-17', members: [member] },
+  };
+  let saved: Subscription | undefined;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberBillingSheet',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      PersonAvatar: 'PersonAvatar',
+      personFor: () => undefined,
+      todayIn: () => today,
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (s: Subscription) => {
+        saved = s;
+      },
+    },
+  );
+  const render = () => r.render('MemberBillingSheet', { state: st, s: sub, member, onClose() {}, onMore() {} });
+  const save = async () =>
+    all(render().find((n) => n.type === 'Sheet')!.props.foot)
+      .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
+      .props.onClick();
+  // 跟随车，已付期从已付至倒推：2026-01-17 起
+  assert.equal(render().find((n) => n.type === 'DatePicker' && n.props.value === '2026-01-17') != null, true);
+  render()
+    .find((n) => n.type === 'DatePicker' && n.props.value === '2026-01-17')!
+    .props.onChange('2026-07-17');
+  assert.ok(
+    all(render().find((n) => n.type === 'Cell' && n.props.label === 'family.quick.paidTo')!).some((n) => n.children.includes(format.cnDateFull('2027-01-16'))),
+  );
+  await save();
+  assert.equal(saved!.share!.members[0].paidUntil, '2027-01-16');
+
+  render()
+    .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
+    .props.onChange('custom');
+  render()
+    .find((n) => n.type === 'NumInput' && n.props.value === 44)!
+    .props.onValue(50);
+  await save();
+  const m = saved!.share!.members[0];
+  assert.equal(m.custom, true);
+  assert.equal(m.fee, 50);
+  assert.deepEqual(m.feeHistory!.at(-1)!.from, today);
+});
