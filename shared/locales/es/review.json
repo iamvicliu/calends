@@ -52,7 +52,7 @@
       "other": "{amount} al día: más o menos {count} bubble teas"
     },
     "saved": "Cancelar ya te ha ahorrado {amount} este año",
-    "fallback": "Saber lo que pagas es el primer paso para pagar menos"
+    "fallback": "Revisa las suscripciones que se renuevan pronto."
   },
   "receipt": {
     "shop": "Tienda de suscripciones {whose}",

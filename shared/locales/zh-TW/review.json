@@ -28,7 +28,7 @@
     "soon": "接下來 30 天還有 {count} 筆扣款，記得看看還要不要",
     "milkTea": "平均每天 {amount}，差不多是 {count} 杯手搖飲",
     "saved": "今年的退訂已經幫你省下 {amount}",
-    "fallback": "訂閱這件事，記清楚就是省錢"
+    "fallback": "核對即將續訂的訂閱。"
   },
   "receipt": {
     "shop": "{whose} 訂閱商店",

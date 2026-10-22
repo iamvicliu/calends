@@ -44,7 +44,7 @@
       "other": "{amount} per hari — kira-kira {count} gelas boba"
     },
     "saved": "Membatalkan langganan sudah menghemat {amount} tahun ini",
-    "fallback": "Tahu apa yang Anda bayar adalah langkah pertama untuk membayar lebih sedikit"
+    "fallback": "Periksa langganan yang akan segera diperpanjang."
   },
   "receipt": {
     "shop": "Toko Langganan {whose}",

@@ -19,8 +19,8 @@
         "body": "Bu ay nelerin ödeneceğini, en yüksek ücretleri veya bu yıl ne kadar harcadığınızı sorun. Kayıtlarınızdan bulayım."
       },
       "v3": {
-        "title": "Ödeme bildirimleri mi? Bana bırakın",
-        "body": "Banka, dijital cüzdan veya operatörden gelen ödeme bildirimini yapıştırın. Hangi abonelik olduğunu ve ne kadar ödendiğini bulup kaydedeyim."
+        "title": "Ödeme bildirimlerinden taslak oluşturun",
+        "body": "Banka, cüzdan veya operatörün ödeme bildirimini yapıştırın. İnceleyip onaylamanız için abonelik ve ödeme ayrıntılarını içeren bir taslak hazırlayacağım."
       },
       "v4": {
         "title": "Tek ekran görüntüsüyle bir sayfa abonelik",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Kayıt tutmaya buradan başlayın",
-        "body": "Bir makbuz veya ekran görüntüsü gönderin ya da nereye abone olduğunuzu söyleyin. Gerisini bana bırakın."
+        "body": "Makbuz, ekran görüntüsü veya abonelik listesi gönderin. İnceleyip onaylamanız için taslaklar hazırlayacağım."
       }
     }
   },

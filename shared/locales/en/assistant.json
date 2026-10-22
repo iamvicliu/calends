@@ -19,8 +19,8 @@
         "body": "Ask what's due this month, which charges cost the most, or how much you've spent this year. I'll look it up in your ledger."
       },
       "v3": {
-        "title": "Charge alerts? Hand them over",
-        "body": "Paste a bank, wallet or carrier charge notice. I'll work out which subscription it is and how much was charged, and record it."
+        "title": "Create drafts from charge notices",
+        "body": "Paste a bank, wallet or carrier charge notice. I'll draft the subscription and charge details for you to review and confirm."
       },
       "v4": {
         "title": "One screenshot, a whole page of subscriptions",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Start your ledger here",
-        "body": "Send a receipt, a screenshot, or just tell me what you subscribe to. I'll handle the rest."
+        "body": "Send a receipt, a screenshot, or a list of subscriptions. I'll prepare drafts for you to review and confirm."
       }
     }
   },

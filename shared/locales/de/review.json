@@ -52,7 +52,7 @@
       "other": "{amount} pro Tag – etwa {count} Bubble Teas"
     },
     "saved": "Kündigungen haben dir dieses Jahr schon {amount} gespart",
-    "fallback": "Wer weiß, wofür er zahlt, zahlt bald weniger"
+    "fallback": "Prüfe die Abos, die sich bald verlängern."
   },
   "receipt": {
     "shop": "{whose} Abo-Laden",

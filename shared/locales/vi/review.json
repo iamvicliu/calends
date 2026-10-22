@@ -44,7 +44,7 @@
       "other": "{amount} mỗi ngày — khoảng {count} ly trà sữa"
     },
     "saved": "Năm nay việc hủy gói đã giúp bạn tiết kiệm {amount}",
-    "fallback": "Biết rõ mình trả tiền cho những gì là bước đầu để trả ít hơn"
+    "fallback": "Kiểm tra các gói đăng ký sắp gia hạn."
   },
   "receipt": {
     "shop": "Cửa hàng gói đăng ký của {whose}",

@@ -52,7 +52,7 @@
       "other": "Günde {amount}; aşağı yukarı {count} bubble tea"
     },
     "saved": "İptaller bu yıl size şimdiden {amount} kazandırdı",
-    "fallback": "Neye ödediğinizi bilmek, daha az ödemenin ilk adımıdır"
+    "fallback": "Yakında yenilenecek abonelikleri gözden geçirin."
   },
   "receipt": {
     "shop": "{whose} · Abonelik Mağazası",

@@ -52,7 +52,7 @@
       "other": "{amount} a day — about {count} bubble teas"
     },
     "saved": "Cancelling has already saved you {amount} this year",
-    "fallback": "Knowing what you pay for is the first step to paying less"
+    "fallback": "Review subscriptions that renew soon."
   },
   "receipt": {
     "shop": "{whose} Subscription Store",

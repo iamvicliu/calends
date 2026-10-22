@@ -44,7 +44,7 @@
       "other": "하루 {amount}, 버블티 약 {count}잔"
     },
     "saved": "해지 덕분에 올해 벌써 {amount}을(를) 절약했습니다",
-    "fallback": "무엇에 돈을 내는지 아는 것이 덜 쓰는 첫걸음입니다"
+    "fallback": "곧 갱신되는 구독을 확인하세요."
   },
   "receipt": {
     "shop": "{whose} 구독 상점",

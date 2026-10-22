@@ -19,8 +19,8 @@
         "body": "Demandez-moi ce qui est à payer ce mois-ci, quels prélèvements coûtent le plus cher ou combien vous avez dépensé cette année. Je consulterai votre registre."
       },
       "v3": {
-        "title": "Des avis de prélèvement ? Confiez-les-moi",
-        "body": "Collez un avis de prélèvement de votre banque, portefeuille électronique ou opérateur. Je repère l’abonnement et le montant pour enregistrer le paiement."
+        "title": "Créer des brouillons à partir des avis de débit",
+        "body": "Collez un avis de débit de votre banque, portefeuille ou opérateur. Je préparerai un brouillon avec les détails de l’abonnement et du paiement pour que vous puissiez le vérifier et le confirmer."
       },
       "v4": {
         "title": "Une capture pour toute une page d’abonnements",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Commencez votre registre ici",
-        "body": "Envoyez un reçu, une capture ou dites-moi simplement à quoi vous êtes abonné. Je m’occupe du reste."
+        "body": "Envoyez un reçu, une capture d’écran ou une liste d’abonnements. Je préparerai des brouillons à vérifier et à confirmer."
       }
     }
   },

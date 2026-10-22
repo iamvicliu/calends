@@ -19,8 +19,8 @@
         "body": "Pergunte o que vence neste mês, quais cobranças são mais caras ou quanto você gastou neste ano. Eu consulto seus registros."
       },
       "v3": {
-        "title": "Avisos de cobrança? Pode mandar",
-        "body": "Cole um aviso de cobrança do banco, da carteira digital ou da operadora. Eu identifico a assinatura e o valor e registro o pagamento."
+        "title": "Crie rascunhos a partir de avisos de cobrança",
+        "body": "Cole um aviso de cobrança do banco, carteira ou operadora. Vou preparar um rascunho com os dados da assinatura e da cobrança para você revisar e confirmar."
       },
       "v4": {
         "title": "Um print para uma página inteira de assinaturas",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Comece seus registros por aqui",
-        "body": "Envie um recibo, um print ou apenas me conte quais assinaturas você tem. Eu cuido do resto."
+        "body": "Envie um recibo, uma captura de tela ou uma lista de assinaturas. Vou preparar rascunhos para você revisar e confirmar."
       }
     }
   },

@@ -52,7 +52,7 @@
       "other": "{amount} par jour, environ {count} bubble teas"
     },
     "saved": "Les résiliations vous ont déjà fait économiser {amount} cette année",
-    "fallback": "Savoir ce que l’on paie, c’est le premier pas pour payer moins"
+    "fallback": "Vérifiez les abonnements qui seront bientôt renouvelés."
   },
   "receipt": {
     "shop": "Boutique d’abonnements {whose}",

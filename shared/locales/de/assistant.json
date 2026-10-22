@@ -19,8 +19,8 @@
         "body": "Frag mich, was diesen Monat fällig ist, welche Abbuchungen am teuersten sind oder wie viel du dieses Jahr ausgegeben hast. Ich schaue in deinem Haushaltsbuch nach."
       },
       "v3": {
-        "title": "Abbuchungsmitteilungen? Her damit",
-        "body": "Füge eine Abbuchungsmitteilung deiner Bank, deines Bezahldienstes oder Mobilfunkanbieters ein. Ich erkenne das Abo und den Betrag und trage die Zahlung ein."
+        "title": "Entwürfe aus Abbuchungsmitteilungen",
+        "body": "Füge eine Abbuchungsmitteilung einer Bank, Wallet oder eines Mobilfunkanbieters ein. Ich erstelle einen Entwurf mit Abo- und Zahlungsdetails, den du prüfen und bestätigen kannst."
       },
       "v4": {
         "title": "Ein Screenshot für eine ganze Seite Abos",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Starte hier dein Haushaltsbuch",
-        "body": "Schick einen Beleg, einen Screenshot oder sag mir einfach, welche Abos du hast. Ich kümmere mich um den Rest."
+        "body": "Sende einen Beleg, einen Screenshot oder eine Liste deiner Abos. Ich erstelle Entwürfe, die du prüfen und bestätigen kannst."
       }
     }
   },

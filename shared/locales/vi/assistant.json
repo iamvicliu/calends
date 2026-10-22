@@ -19,8 +19,8 @@
         "body": "Hỏi tôi tháng này cần trả bao nhiêu, khoản nào tốn nhất hoặc năm nay đã chi bao nhiêu. Tôi sẽ tra trong sổ của bạn."
       },
       "v3": {
-        "title": "Có thông báo trừ tiền? Cứ gửi tôi",
-        "body": "Dán thông báo trừ tiền từ ngân hàng, ví điện tử hoặc nhà mạng. Tôi sẽ xác định gói đăng ký, số tiền và ghi lại khoản thanh toán."
+        "title": "Tạo bản nháp từ thông báo thanh toán",
+        "body": "Dán thông báo thanh toán từ ngân hàng, ví hoặc nhà mạng. Tôi sẽ soạn bản nháp thông tin gói đăng ký và khoản thanh toán để bạn kiểm tra rồi xác nhận."
       },
       "v4": {
         "title": "Một ảnh chụp, cả trang gói đăng ký",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Bắt đầu ghi sổ tại đây",
-        "body": "Gửi biên lai, ảnh chụp màn hình hoặc chỉ cần nói bạn đang đăng ký gì. Phần còn lại để tôi lo."
+        "body": "Gửi biên lai, ảnh chụp màn hình hoặc danh sách gói đăng ký. Tôi sẽ chuẩn bị các bản nháp để bạn kiểm tra rồi xác nhận."
       }
     }
   },

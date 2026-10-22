@@ -19,8 +19,8 @@
         "body": "Tanyakan tagihan bulan ini, biaya yang paling besar, atau total pengeluaran tahun ini. Saya akan mencarinya di buku catatan Anda."
       },
       "v3": {
-        "title": "Ada notifikasi tagihan? Kirim saja",
-        "body": "Tempel notifikasi tagihan dari bank, dompet digital, atau operator. Saya akan mengenali langganan dan jumlahnya, lalu mencatatnya."
+        "title": "Buat draf dari notifikasi tagihan",
+        "body": "Tempel notifikasi tagihan dari bank, dompet digital, atau operator. Saya akan menyiapkan draf rincian langganan dan tagihan untuk Anda periksa dan konfirmasi."
       },
       "v4": {
         "title": "Satu tangkapan layar untuk satu halaman langganan",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Mulai catatan Anda di sini",
-        "body": "Kirim struk, tangkapan layar, atau cukup ceritakan langganan Anda. Sisanya saya yang urus."
+        "body": "Kirim struk, tangkapan layar, atau daftar langganan. Saya akan menyiapkan draf untuk Anda periksa dan konfirmasi."
       }
     }
   },

@@ -19,8 +19,8 @@
         "body": "Pregúntame qué toca pagar este mes, cuáles son los cobros más caros o cuánto has gastado este año. Lo consultaré en tu registro."
       },
       "v3": {
-        "title": "¿Avisos de cobro? Pásamelos",
-        "body": "Pega un aviso de cobro de tu banco, monedero digital u operador. Identificaré la suscripción y el importe para registrarlo."
+        "title": "Borradores a partir de avisos de cobro",
+        "body": "Pega un aviso de cobro del banco, monedero u operador. Prepararé un borrador con los datos de la suscripción y del cobro para que lo revises y confirmes."
       },
       "v4": {
         "title": "Una captura para toda una página de suscripciones",
@@ -88,7 +88,7 @@
       },
       "v20": {
         "title": "Empieza aquí tu registro",
-        "body": "Envía un recibo, una captura o dime qué suscripciones tienes. Yo me encargo del resto."
+        "body": "Envía un recibo, una captura o una lista de suscripciones. Prepararé borradores para que los revises y confirmes."
       }
     }
   },

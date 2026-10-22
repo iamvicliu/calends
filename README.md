@@ -5,8 +5,7 @@
 <h1 align="center">Calends</h1>
 
 <p align="center">
-  <b>The settlement day for everything you subscribe to.</b><br />
-  A self-hosted, AI-native subscription ledger — multi-currency, shared plans, prepaid balances, reminders, and a built-in MCP server.
+  Track subscription charges, shared payments and prepaid balances on your own server.
 </p>
 
 <p align="center">
@@ -24,18 +23,18 @@
 
 ---
 
-## Your subscriptions, in one place
+## Billing and payment history
 
 Track what you pay, when it renews, and who owes you. Calends brings subscriptions, shared plans and prepaid balances into one private, single-owner ledger, with an optional read-only public page and AI access through MCP.
 
 - **Flexible billing** — monthly, yearly, custom cycles and lifetime purchases, with trials, intro prices, bonus periods and pauses.
-- **A history that adds up** — keep price, plan and region changes, gaps and overlapping subscriptions. See total spent, actual monthly cost and every charge.
+- **Billing history** — keep price, plan and region changes, gaps and overlapping subscriptions. See total spent, actual monthly cost and every charge.
 - **Multiple currencies** — historical exchange rates for past charges, current rates for forecasts, and your choice of display currency.
 - **Balances and shared plans** — track cards, prepaid credit and gift cards, estimate when balances run out, and manage family-plan collections and payments for friends.
 - **Reports and calendar** — spending trends, cash vs. accrual, prepaid value, cancellation savings, subscription checkups and a shareable year in review. Includes month/year calendars and a private ICS feed.
 - **Renewal reminders** — email, Telegram, Lark/Feishu, DingTalk, WeCom, Slack, Discord, Bark, ntfy, ServerChan and custom webhooks.
 - **AI access** — query and update your ledger from an MCP-compatible assistant, with scoped tokens and previews for write operations.
-- **Your data, your server** — password and passkey sign-in, remote device sign-out, optional public sharing with server-side masking, JSON backup/restore and CSV import/export. Available in 14 languages.
+- **Storage and access** — password and passkey sign-in, remote device sign-out, optional public sharing with server-side masking, JSON backup/restore and CSV import/export. Available in 14 languages.
 
 <details>
 <summary>Explore the subscription timeline</summary>

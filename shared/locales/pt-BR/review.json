@@ -52,7 +52,7 @@
       "other": "{amount} por dia — mais ou menos {count} cafezinhos"
     },
     "saved": "Os cancelamentos já economizaram {amount} este ano",
-    "fallback": "Saber pelo que você paga é o primeiro passo para pagar menos"
+    "fallback": "Revise as assinaturas que serão renovadas em breve."
   },
   "receipt": {
     "shop": "Loja de Assinaturas {whose}",
