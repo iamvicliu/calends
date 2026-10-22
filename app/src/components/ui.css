@@ -79,7 +79,7 @@
 }
 :where(button, a, input, textarea, [role='button'], [role='link'], [tabindex]):focus-visible,
 .icon-btn[data-focus-visible] {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
 :where(button):disabled,

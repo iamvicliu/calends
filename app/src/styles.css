@@ -214,8 +214,12 @@ a {
   padding: 0 4px;
 }
 /* 鼠标操作后不显示聚焦框（含弹层关闭时焦点回到触发按钮），键盘操作照常显示 */
+/* 全站聚焦描边统一用浅主题色（不用黑色）；鼠标/触摸操作后一律不显示，只有键盘操作才显示 */
+:root {
+  --focus-ring: color-mix(in srgb, var(--accent) 55%, transparent);
+}
 [data-input='pointer'] :focus-visible {
-  outline: none;
+  outline: none !important;
 }
 .side-item:focus-visible {
   outline: 2px solid var(--accent);
@@ -3683,7 +3687,7 @@ button.h-price-row:focus-visible {
 }
 .change-form input:focus,
 .change-form select:focus {
-  box-shadow: inset 0 0 0 1.5px var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--focus-ring);
 }
 .change-actions {
   display: flex;
@@ -5167,7 +5171,7 @@ button.h-price-row:focus-visible {
   transform: scale(0.99);
 }
 .proxy-card:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 .ph-name {
@@ -5245,7 +5249,7 @@ button.h-price-row:focus-visible {
   outline: none;
 }
 .paycard:focus-visible {
-  outline: 2px solid var(--label);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 .member-info {
@@ -8434,7 +8438,7 @@ a.car-toggle {
   transform: scale(0.99);
 }
 .pp-card:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 .pp-top {
@@ -9517,18 +9521,50 @@ img.mm-flag {
   scroll-margin-top: 84px;
 }
 
-/* 记收款弹窗顶部：订阅 logo + 名称一行 */
+/* 记收款弹窗顶部：订阅卡片一行（图标、名称与价格、查看详情） */
 .collect-sub {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
-  padding: 2px 4px;
+  padding: 10px 14px;
+  border-radius: var(--r);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
-.collect-sub b {
+.collect-sub-id {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.collect-sub-id b,
+.collect-sub-id small {
   overflow: hidden;
-  font-size: 15px;
-  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.collect-sub-id b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.collect-sub-id small {
+  color: var(--label-2);
+  font-size: 12.5px;
+}
+.collect-sub-link {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--label-2);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.collect-sub-link:hover {
+  color: var(--label);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
