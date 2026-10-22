@@ -1384,3 +1384,26 @@ test('calendar selection scrolls the monthly list internally without moving the 
     assert.deepEqual(scrolls, [{ top: 640, behavior: reduced ? 'instant' : 'smooth' }]);
   }
 });
+
+test('member rows do not claim no receipts when only the coverage date is missing', () => {
+  const member = { id: 'm', name: 'Fictional member', share: 5, payments: [{ date: today, amount: 5, currency: 'USD', until: '2026-10-31' }] };
+  const sub: Subscription = {
+    id: 'shared',
+    name: 'Shared plan',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-01',
+    status: 'active',
+    share: { role: 'owner', seats: 2, members: [member] },
+  };
+  const r = harness('../app/src/views/Carpool.tsx', 'MemberRows', {}, { ...carpool, contactText: () => '', perBill: () => '' });
+  const render = () => JSON.stringify(r.render('MemberRows', { state: { ...st, subscriptions: [sub] }, s: sub, today, ro: false, onMember() {} }));
+  assert.ok(render().includes('family.member.notSet'));
+  assert.ok(!render().includes('family.pool.noPay'));
+  sub.share!.members = [{ ...member, payments: [] }];
+  assert.ok(render().includes('family.pool.noPay'));
+  assert.ok(!render().includes('family.member.notSet'));
+});

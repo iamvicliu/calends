@@ -332,7 +332,7 @@ function MemberRows({
             <div className="muted text-ellipsis" style={{ fontSize: 12 }}>
               {d.member.exempt
                 ? (d.member.note ?? t('family.pool.exemptNote'))
-                : `${billLabel(memberBillMonths(s, d.member))} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
+                : `${billLabel(memberBillMonths(s, d.member))} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t(d.member.payments?.length ? 'family.member.notSet' : 'family.pool.noPay')}`}
               <span className="m-hide">
                 {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
                 {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
