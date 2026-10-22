@@ -61,5 +61,7 @@
     "one": "{scope} · {count} abonnement",
     "other": "{scope} · {count} abonnements",
     "many": "{scope} · {count} abonnements"
-  }
+  },
+  "mrrBasis": "Coût mensuel normalisé de ma part des abonnements facturés. Les forfaits annuels sont répartis par mois ; ce ne sont pas les prélèvements du mois.",
+  "debitBasis": "Prélèvements positifs uniquement ; les remboursements figurent séparément et ne réduisent ni la répartition ni le classement."
 }

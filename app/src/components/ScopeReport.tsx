@@ -64,6 +64,13 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
     void run(() => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]), t('detail.toast.imageCopied'));
   };
   const base = state.settings.baseCurrency;
+  const monthly = report.blocks.some((b) => b.type === 'headline' && b.mode === 'month');
+  const top = report.blocks.find((b) => b.type === 'top' && b.mode === 'month');
+  const upcomingRows = (rows: ChargeRow[]) => rows.filter((r) => !top?.rows.includes(r));
+  const blocks = report.blocks.filter((b) =>
+    b.type === 'upcoming' ? upcomingRows(b.rows).length > 0 : !(b.type === 'top' && b.mode === 'scope' && b.rows.length === 1),
+  );
+  const losses = report.blocks.find((b) => b.type === 'losses');
   const expense = (v: number) => flow(-v, base);
   const income = (v: number) => flow(v, base);
   const percent = (v: number) => new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v));
@@ -100,7 +107,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       case 'headline':
         return block.mode === 'scope' ? (
           <>
-            <div className="stat-label">{t('scope.monthly')}</div>
+            <div className="stat-label">
+              {t('scope.monthly')} <Hint text={t('scope.mrrBasis')} />
+            </div>
             <div className="hero-num num">{expense(block.mrr)}</div>
             <div className="hero-delta">
               {delta(block.change)}
@@ -110,7 +119,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               {fact(t('scope.annual'), expense(block.annual))}
               {fact(t('scope.active'), block.activeCount)}
               {fact(t('scope.yearPaid'), expense(block.paid))}
-              {(block.loss > 0 || !Number.isFinite(block.loss)) && fact(t('scope.includedLoss'), expense(block.loss))}
+              {(block.loss > 0 || !Number.isFinite(block.loss)) && block.loss !== losses?.loss && fact(t('scope.includedLoss'), expense(block.loss))}
             </div>
           </>
         ) : (
@@ -118,7 +127,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             <div className="stat-label">
               {t('scope.monthTotal')} <Hint text={t('scope.cashBasis')} />
             </div>
-            <div className="hero-num num">{expense(block.total)}</div>
+            <div className={`hero-num num ${block.total < 0 ? 'green' : ''}`}>{expense(block.total)}</div>
             <div className="hero-delta">
               <span className="scope-comparison">
                 {delta(block.previous)}
@@ -178,13 +187,16 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           { key: 'fx', amount: mv.fx },
         ].filter((r) => Math.abs(r.amount) >= 0.005);
         const peak = Math.max(1, ...drivers.map((r) => Math.abs(r.amount)));
+        const net = mv.to - mv.from;
+        const singleDriver = drivers.length === 1 && Math.abs(drivers[0].amount - net) < 0.005;
+        const singleItem = mv.items.length === 1 && Math.abs(mv.items[0].delta - net) < 0.005;
         return (
           <>
             <div className="card-h">
               <h3>{t('scope.movement', { month: monthLabel(block.month) })}</h3>
             </div>
             <div className="hero-delta">
-              {delta({ amount: mv.to - mv.from })}
+              {!singleDriver && delta({ amount: net })}
               <span className="muted">{t('scope.previousEnd')}</span>
             </div>
             <div className="mv-rows">
@@ -203,7 +215,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             {mv.items.map((r) => (
               <div className="scope-row" key={r.sub.id}>
                 {name(r.sub)}
-                <span>{delta({ amount: r.delta })}</span>
+                {!singleItem && <span>{delta({ amount: r.delta })}</span>}
               </div>
             ))}
           </>
@@ -212,7 +224,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       case 'composition':
         return (
           <>
-            {heading('composition')}
+            {heading('composition', monthly ? 'debitBasis' : undefined)}
             {(['categories', 'methods'] as const).map(
               (dim) =>
                 block[dim].length > 0 && (
@@ -243,7 +255,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       case 'top':
         return (
           <>
-            {heading(block.mode === 'scope' ? 'topMonthly' : 'topCharges')}
+            {heading(block.mode === 'scope' ? 'topMonthly' : 'topCharges', block.mode === 'month' ? 'debitBasis' : undefined)}
             {block.mode === 'month'
               ? chargeRows(block.rows)
               : block.rows.map((r) => (
@@ -258,8 +270,8 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('upcoming')}
-            <p className="scope-note num">{expense(block.total)}</p>
-            {chargeRows(block.rows)}
+            {!monthly && block.rows.length > 1 && <p className="scope-note num">{expense(block.total)}</p>}
+            {chargeRows(upcomingRows(block.rows))}
           </>
         );
       case 'events':
@@ -285,8 +297,8 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <>
             {heading('losses')}
             <div className="hero-facts scope-facts">
-              {block.rows.length > 0 && fact(t('scope.loss'), expense(block.loss))}
-              {block.refunds.length > 0 && fact(t('scope.refunded'), income(block.refunded))}
+              {block.rows.length > 1 && fact(t('scope.loss'), expense(block.loss))}
+              {block.refunds.length > 1 && fact(t('scope.refunded'), income(block.refunded))}
             </div>
             {block.incomplete && <p className="scope-note red">{t('scope.incomplete')}</p>}
             {block.rows.map((r) => (
@@ -320,10 +332,12 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('sharing', 'sharingBasis')}
-            <div className="hero-facts scope-facts">
-              {block.received !== 0 && fact(t('scope.received'), income(block.received))}
-              {block.owed > 0 && fact(t('scope.owed'), income(block.owed))}
-            </div>
+            {block.rows.length > 1 && (
+              <div className="hero-facts scope-facts">
+                {block.received !== 0 && fact(t('scope.received'), income(block.received))}
+                {block.owed > 0 && fact(t('scope.owed'), income(block.owed))}
+              </div>
+            )}
             {block.rows.map((r) => (
               <div className="scope-row" key={r.sub.id}>
                 {name(r.sub)}
@@ -364,6 +378,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             aria-expanded={expanded}
             aria-controls={id}
             aria-label={t(open ? 'scope.collapse' : 'scope.expand')}
+            title={t(open ? 'scope.collapse' : 'scope.expand')}
             onClick={onToggle}
             disabled={copying}
           >
@@ -375,7 +390,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       </header>
       {expanded && (
         <div id={id} className="scope-grid">
-          {report.blocks.map((block, i) => (
+          {blocks.map((block, i) => (
             <div className={`card scope-block scope-${block.type}`} key={block.type} style={{ animationDelay: `${i * 65}ms` }}>
               {render(block)}
             </div>

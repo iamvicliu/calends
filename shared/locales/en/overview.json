@@ -22,7 +22,8 @@
   },
   "timeline": {
     "title": "Timeline",
-    "sub": "{past} charged in the last 30 days · {next} due in the next 30"
+    "sub": "{past} charged in the last 30 days · {next} due in the next 30",
+    "past": "Past 30 days · {amount}"
   },
   "spending": {
     "title": "Monthly spending",

@@ -1,5 +1,5 @@
 import { base as appPath } from '../base.ts';
-import { chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge } from '../../../shared/billing.ts';
+import { addDays, chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge } from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -42,7 +42,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
     ended,
   };
   // 有待收的在前，其余按下次扣款从近到远；已停止的排最后
-  const nextOf = (s: Subscription) => nextCharge(s, today) ?? '9999-12-31';
+  const nextOf = (s: Subscription) => nextCharge(s, addDays(today, 1)) ?? '9999-12-31';
   const shown = [...groups[filter]].sort(
     (a, b) => Number(!live(a)) - Number(!live(b)) || Number(!owes(a)) - Number(!owes(b)) || nextOf(a).localeCompare(nextOf(b)),
   );
@@ -132,7 +132,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 // 已退出的成员不占座，只在展开的明细里保留
                 const onboard = sh.members.filter((m) => memberAboard(m, today));
                 const free = Math.max(0, sh.seats - 1 - onboard.length);
-                const next = nextCharge(s, today);
+                const next = nextCharge(s, addDays(today, 1));
                 return (
                   // 整张卡片打开合租弹窗；里面的按钮、链接和订阅名各管各的
                   <div
@@ -399,7 +399,7 @@ export function CarSheet({
   const sh = s.share!;
   const st = effectiveStatus(s, today);
   const stopped = ['ended', 'terminated'].includes(st);
-  const next = nextCharge(s, today);
+  const next = nextCharge(s, addDays(today, 1));
   const onboard = sh.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, sh.seats - 1 - onboard.length);
   const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).filter((d) => d.periodsOwed > 0).length;

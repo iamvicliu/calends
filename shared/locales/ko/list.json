@@ -125,5 +125,6 @@
   },
   "network": {
     "unionpay": "UnionPay"
-  }
+  },
+  "monthlySame": "표시 가격과 동일"
 }

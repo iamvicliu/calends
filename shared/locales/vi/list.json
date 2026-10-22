@@ -125,5 +125,6 @@
   },
   "network": {
     "unionpay": "UnionPay"
-  }
+  },
+  "monthlySame": "Bằng giá niêm yết"
 }

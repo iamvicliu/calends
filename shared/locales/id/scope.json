@@ -59,5 +59,7 @@
   "search": "Pencarian “{query}”",
   "selectionTitle": {
     "other": "{scope} · {count} langganan"
-  }
+  },
+  "mrrBasis": "Biaya bulanan bagian saya dari langganan yang sedang ditagih. Paket tahunan dibagi per bulan; ini bukan pembayaran aktual bulan ini.",
+  "debitBasis": "Hanya pembayaran positif; pengembalian dana ditampilkan terpisah dan tidak mengurangi rincian atau peringkat."
 }

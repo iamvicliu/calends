@@ -22,7 +22,8 @@
   },
   "timeline": {
     "title": "Zeitleiste",
-    "sub": "{past} in den letzten 30 Tagen abgebucht · {next} fällig in den nächsten 30"
+    "sub": "{past} in den letzten 30 Tagen abgebucht · {next} fällig in den nächsten 30",
+    "past": "Letzte 30 Tage · {amount}"
   },
   "spending": {
     "title": "Monatliche Ausgaben",

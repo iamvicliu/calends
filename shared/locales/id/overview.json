@@ -19,7 +19,8 @@
   },
   "timeline": {
     "title": "Linimasa",
-    "sub": "{past} ditagih dalam 30 hari terakhir · {next} jatuh tempo dalam 30 hari ke depan"
+    "sub": "{past} ditagih dalam 30 hari terakhir · {next} jatuh tempo dalam 30 hari ke depan",
+    "past": "30 hari terakhir · {amount}"
   },
   "spending": {
     "title": "Pengeluaran bulanan",

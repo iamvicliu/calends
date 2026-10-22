@@ -13,7 +13,8 @@
   },
   "timeline": {
     "title": "時間軸",
-    "sub": "過去 30 天扣了 {past} · 接下來 30 天要扣 {next}"
+    "sub": "過去 30 天扣了 {past} · 接下來 30 天要扣 {next}",
+    "past": "過去 30 天 · {amount}"
   },
   "spending": {
     "title": "每月花了多少",

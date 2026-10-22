@@ -1,7 +1,7 @@
 import { StopBadge, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
-import { activePhases, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
+import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
@@ -142,12 +142,12 @@ export function List({
     if (sort === 'name') return a.name.localeCompare(b.name, locale());
     if (sort === 'cost') return mo(a) - mo(b) || toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
     if (sort === 'start') return a.start.localeCompare(b.start);
-    return (nextCharge(a, today) ?? '').localeCompare(nextCharge(b, today) ?? '');
+    return (nextCharge(a, addDays(today, 1)) ?? '').localeCompare(nextCharge(b, addDays(today, 1)) ?? '');
   };
   const rows = mine.filter(match).sort((a, b) => {
     if (sort === 'next') {
-      const na = nextCharge(a, today);
-      const nb = nextCharge(b, today);
+      const na = nextCharge(a, addDays(today, 1));
+      const nb = nextCharge(b, addDays(today, 1));
       if (!na || !nb) return na ? -1 : nb ? 1 : 0;
     }
     return dir === 'asc' ? asc(a, b) : asc(b, a);
@@ -280,7 +280,7 @@ export function List({
           <div className="sgrid">
             {rows.map((s) => {
               const st = effectiveStatus(s, today);
-              const n = nextCharge(s, today);
+              const n = nextCharge(s, addDays(today, 1));
               const d = n ? diffDays(today, n) : undefined;
               const cur = currentPhase(s, today);
               const up = upcomingPhase(s, today);
@@ -377,7 +377,7 @@ export function List({
               </div>
               {rows.map((s) => {
                 const st = effectiveStatus(s, today);
-                const n = nextCharge(s, today);
+                const n = nextCharge(s, addDays(today, 1));
                 const d = n ? diffDays(today, n) : undefined;
                 const cur = currentPhase(s, today);
                 const up = upcomingPhase(s, today);
@@ -431,7 +431,19 @@ export function List({
                       </span>
                       {money2 !== 'orig' && s.currency !== money2 && <small>{v.sub}</small>}
                     </span>
-                    <span className="lt-mo">{s.proxy ? <small>{t('list.notCounted')}</small> : live ? money(mo(s), base, { compact: true }) : '—'}</span>
+                    <span className="lt-mo">
+                      {s.proxy ? (
+                        <small>{t('list.notCounted')}</small>
+                      ) : live ? (
+                        cur.cycle.unit === 'month' && cur.cycle.every === 1 && v.ccy === base && Math.abs(mo(s) - v.value) < 0.005 ? (
+                          <small>{t('list.monthlySame')}</small>
+                        ) : (
+                          money(mo(s), base, { compact: true })
+                        )
+                      ) : (
+                        '—'
+                      )}
+                    </span>
                     <span className="lt-start">
                       {cnDate(s.start)}
                       <small>{s.start.slice(0, 4)}</small>

@@ -22,7 +22,8 @@
   },
   "timeline": {
     "title": "Cronología",
-    "sub": "{past} cobrados en los últimos 30 días · {next} en los próximos 30"
+    "sub": "{past} cobrados en los últimos 30 días · {next} en los próximos 30",
+    "past": "Últimos 30 días · {amount}"
   },
   "spending": {
     "title": "Gasto mensual",

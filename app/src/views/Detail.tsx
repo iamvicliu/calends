@@ -66,7 +66,7 @@ function Trend({ pct }: { pct: number | undefined }) {
   return (
     <span className={`dt-badge ${cls}`}>
       {flat ? <ArrowRight size={12} /> : pct < 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
-      {flat ? '0%' : `${pct > 0 ? '+' : '−'}${(Math.abs(pct) * 100).toFixed(Math.abs(pct) < 0.1 ? 1 : 0)}%`}
+      {flat ? '0%' : `${(Math.abs(pct) * 100).toFixed(Math.abs(pct) < 0.1 ? 1 : 0)}%`}
     </span>
   );
 }
@@ -177,7 +177,7 @@ function Panel({
 export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscription; state: AppState; today: string; onEdit: () => void; onClose: () => void }) {
   const pair = useMoneyPair(state);
   const st = effectiveStatus(sub, today);
-  const next = nextCharge(sub, today);
+  const next = nextCharge(sub, addDays(today, 1));
   // 显示今天生效的那一段（换区前仍是旧区的价格与支付方式），未来的变更单独列出
   const cur = currentPhase(sub, today);
   const history = chargesBetween(sub, sub.start, today, today);
@@ -342,17 +342,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   );
 }
 
-/** 历程里停止那一条只写原因和损失，完整信息在顶部的停止卡片 */
-const stopLine = (v: Subscription, state: AppState, today: string) => {
-  const sm = state.readonly ? undefined : stopSummary(v, today);
-  if (!sm) return undefined;
-  return (
-    [sm.kind === 'terminate' ? sm.reason : '', sm.unusedValue > 0 ? `${t('core.stop.lossTitle')} ${flow(-sm.unusedValue, v.currency)}` : '']
-      .filter(Boolean)
-      .join(' · ') || undefined
-  );
-};
-
 /** 正常扣款（不含退款、补差、失败，也不含记成负数的返佣、抵扣）：走势和「每笔」都只看这些 */
 const regular = (h: Charge[]) => h.filter((c) => !c.kind && c.amount > 0);
 
@@ -392,16 +381,17 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
           : t('detail.stats.days', { count: active });
 
   return (
-    <div className="dt-kpis">
-      <div className="dt-panel dt-kpi">
-        <div className="dt-kpi-top">
-          <small>{t('detail.stats.spent')}</small>
-          <span className="dt-badge">{t('detail.stats.count', { count: history.length })}</span>
+    <div className="dt-kpis" style={history.length === 1 ? { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } : undefined}>
+      {history.length !== 1 && (
+        <div className="dt-panel dt-kpi">
+          <div className="dt-kpi-top">
+            <small>{t('detail.stats.spent')}</small>
+          </div>
+          <div className="dt-kpi-val">
+            <b>{flow(-total, base, { compact: true })}</b>
+          </div>
         </div>
-        <div className="dt-kpi-val">
-          <b>{flow(-total, base, { compact: true })}</b>
-        </div>
-      </div>
+      )}
       <div className="dt-panel dt-kpi">
         <div className="dt-kpi-top">
           <small>{lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}</small>
@@ -681,7 +671,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       sub: sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member'),
       tone: 'ok',
     });
-  const nx = nextCharge(sub, today);
+  const nx = nextCharge(sub, addDays(today, 1));
   if (nx && nx > today && !['ended', 'terminated'].includes(effectiveStatus(sub, today)))
     evs.push({
       date: nx,
@@ -696,7 +686,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       evs.push({
         date: v.stop.date,
         title: t(v.stop.kind === 'terminate' ? 'core.stop.terminate' : 'core.stop.cancel'),
-        sub: stopLine(v, state, today),
+        sub: !state.readonly && v.stop.kind === 'terminate' ? v.stop.reason : undefined,
         tone: v.stop.kind === 'terminate' ? 'bad' : 'ink',
       });
     if (!state.readonly)
@@ -705,7 +695,6 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
           evs.push({
             date: p.date,
             title: t('editor.payment.kind.refund'),
-            sub: flow(-p.amount, v.currency),
             tone: 'ok',
             future: p.date > today,
           });
@@ -812,8 +801,16 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
             <dl className="dt-props">
               <Prop k={t('core.stop.date')}>{cnDateFull(sm.date)}</Prop>
               <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(sm.paidThrough)}</Prop>
-              <Prop k={t('core.stop.refundAmount')} hint={sm.refundStatus === 'full' ? t('core.stop.fullyRefunded') : undefined}>
-                {sm.refunded > 0 ? <span className="dt-in">{flow(sm.refunded, phase.currency)}</span> : t('core.stop.refundNo')}
+              <Prop k={t('editor.payment.kind.refund')}>
+                {sm.refunded > 0 ? (
+                  <span className="dt-in">
+                    {(phase.payments ?? []).filter((p) => p.kind === 'refund' && p.date >= sm.date && p.date <= today).length > 1
+                      ? flow(sm.refunded, phase.currency)
+                      : t(sm.refundStatus === 'full' ? 'core.stop.fullyRefunded' : 'core.stop.partial', { money: '' }).trim()}
+                  </span>
+                ) : (
+                  t('core.stop.refundNo')
+                )}
               </Prop>
             </dl>
           </section>
@@ -829,7 +826,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
   const cur = currentPhase(sub, today);
   const up = upcomingPhase(sub, today);
   const ro = !!state.readonly;
-  const next = nextCharge(sub, today);
+  const next = nextCharge(sub, addDays(today, 1));
   const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
   const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
@@ -865,7 +862,9 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
               {cnDateFull(sub.expires)}
             </Prop>
           )}
-          {sub.end && <Prop k={['ended', 'terminated'].includes(st) ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Prop>}
+          {sub.end && !sub.stop && (
+            <Prop k={['ended', 'terminated'].includes(st) ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Prop>
+          )}
           {sub.trialEnd && <Prop k={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Prop>}
         </dl>
         {sub.notes && (

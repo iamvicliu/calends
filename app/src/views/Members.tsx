@@ -330,10 +330,19 @@ export function MemberSheet({
 
         <Group
           title={t('family.member.payments', { count: (f.payments ?? []).length })}
-          foot={received ? <span className="green">{t('family.member.receivedTotal', { amount: flow(received, base) })}</span> : undefined}
+          foot={
+            received && (payments.length > 1 || payments[0]?.currency !== base) ? (
+              <span className="green">{t('family.member.receivedTotal', { amount: flow(received, base) })}</span>
+            ) : undefined
+          }
         >
           <Cell label={t('family.member.paidUntil')}>
-            <DatePicker value={f.paidUntil} clearable placeholder={t('family.member.paidUntilPh')} onChange={(v) => up({ paidUntil: v })} />
+            <DatePicker
+              value={f.paidUntil}
+              clearable
+              placeholder={t(f.payments?.length ? 'family.member.notSet' : 'family.member.paidUntilPh')}
+              onChange={(v) => up({ paidUntil: v })}
+            />
           </Cell>
           {payments.map((p) => {
             const i = (f.payments ?? []).indexOf(p);

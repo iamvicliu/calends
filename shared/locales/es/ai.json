@@ -67,7 +67,7 @@
   "status": {
     "on": "El acceso de IA está activado",
     "off": "El acceso de IA está desactivado",
-    "onHint": "Los asistentes con un token válido pueden consultar y actualizar tu registro.",
+    "onHint": "Un token válido permite al asistente de IA acceder al registro según los permisos asignados.",
     "offHint": "Todas las solicitudes MCP se rechazan hasta que lo vuelvas a activar."
   },
   "promptLabel": "Prompt",

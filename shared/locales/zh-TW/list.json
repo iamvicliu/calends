@@ -115,5 +115,6 @@
   },
   "network": {
     "unionpay": "銀聯"
-  }
+  },
+  "monthlySame": "同標價"
 }

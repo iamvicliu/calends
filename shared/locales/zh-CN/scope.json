@@ -42,7 +42,7 @@
   "sharingBasis": "统计本期收款及本期开始的未付收费期，不含此前欠款。",
   "receivedAmount": "已收 {amount}",
   "owedAmount": "待收 {amount}",
-  "collapse": "折叠报告",
+  "collapse": "收起报告",
   "expand": "展开报告",
   "event": {
     "start": "新订阅",
@@ -59,5 +59,7 @@
   "search": "搜索“{query}”",
   "selectionTitle": {
     "other": "{scope} · {count} 个订阅"
-  }
+  },
+  "mrrBasis": "当前计费订阅按我的份额折算的月成本；年付等按月摊算，不代表本月实扣。",
+  "debitBasis": "仅统计正向扣款；退款单列，不抵减构成与排名。"
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../../shared/types.ts';
@@ -50,7 +50,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const base = state.settings.baseCurrency;
   const list = rows(state, s, today);
   const [ledger, setLedger] = useState(false);
-  const next = nextCharge(s, today);
+  const next = nextCharge(s, addDays(today, 1));
   const method = state.methods.find((m) => m.id === s.methodId);
   const charged = list.reduce((a, r) => a + r.chargedBase, 0);
   const received = list.reduce((a, r) => a + (r.receivedBase ?? 0), 0);
@@ -59,7 +59,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const stopped = ['ended', 'terminated'].includes(st);
   // 状态胶囊只说进度：进行中 / 待收 / 已停止；是否结清看下面的「待收」格
   const tone = stopped ? 'stop' : open.length ? 'owe' : 'ok';
-  const label = open.length && !stopped ? t('proxy.owedPeriods', { count: open.length }) : stopped ? t('proxy.status.ended') : statusLabel(st);
+  const label = open.length && !stopped ? t('proxy.owed') : stopped ? t('proxy.status.ended') : statusLabel(st);
 
   return (
     <>
@@ -135,7 +135,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
   const stopped = ['ended', 'terminated'].includes(st);
-  const next = nextCharge(live, today);
+  const next = nextCharge(live, addDays(today, 1));
   const method = state.methods.find((m) => m.id === live.methodId);
   const charged = list.reduce((a, r) => a + r.chargedBase, 0);
   const done = list.filter((r) => r.receivedBase != null);
@@ -166,7 +166,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             </div>
           </div>
           <StatusPill tone={stopped ? 'stop' : open.length ? 'owe' : 'ok'}>
-            {stopped ? t('proxy.status.ended') : open.length ? t('proxy.owedPeriods', { count: open.length }) : statusLabel(st)}
+            {stopped ? t('proxy.status.ended') : open.length ? t('proxy.owed') : statusLabel(st)}
           </StatusPill>
         </div>
 

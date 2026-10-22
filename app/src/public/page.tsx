@@ -372,8 +372,8 @@ function derive(state: AppState, today: string) {
   });
 
 
-  const upcoming = allCharges(state, today, addDays(today, 29), today)
-    .filter((c) => c.projected || c.date === today)
+  const upcoming = allCharges(state, addDays(today, 1), addDays(today, 30), today)
+    .filter((c) => c.amount > 0 && c.kind !== 'refund' && c.kind !== 'failed')
     .map((c) => ({ ...c, value: chargeValue(state, c) }));
 
   const byCcy = new Map<string, { v: number }>();
@@ -593,9 +593,6 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
     <Card className={cn(roomy, 'h-full')}>
       <CardHeader>
         <CardTitle>{t('public.list.title')}</CardTitle>
-        <CardDescription className="tnum">
-          {t('public.list.summary', { count: rows.length, amount: fmt(rows.reduce((a, x) => a + x.v, 0) * k) })}
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="-mx-1 mb-2 overflow-x-auto px-1 py-0.5 [scrollbar-width:none]">
@@ -632,15 +629,18 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
 
 function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: string; ccy: Ccy; k: number; fmt: (v: number) => string }) {
   const ph = currentPhase(s, today);
-  const n = nextCharge(s, today);
+  const n = nextCharge(s, addDays(today, 1));
   const soon = n !== undefined && diffDays(today, n) <= 7;
   const monthly = ph.currency === ccy && ph.cycle.unit === 'month' && ph.cycle.every === 1;
+  const repeatsPrice = monthly && Math.abs(v * k - ph.price) < 0.005;
+  const status = effectiveStatus(s, today);
   return (
     <div className="flex items-center gap-3 py-3">
       <AppIcon sub={s} className="size-9 rounded-[10px]" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="truncate font-medium">{clean(s.name)}</span>
+          {['trial', 'paused', 'ending'].includes(status) && <Badge variant="secondary" className="text-[10px]">{t(`list.status.${status}`)}</Badge>}
           {ph.region && (
             <Badge variant="secondary" className="h-4 px-1.5 font-mono text-[10px] font-normal text-muted-foreground">
               {ph.region}
@@ -648,7 +648,7 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
           )}
         </div>
         <div className="truncate text-[13px] text-muted-foreground tnum">
-          {cycleLabel(ph.cycle)} {money(ph.price, ph.currency)}
+          {cycleLabel(ph.cycle)}{!repeatsPrice && ` ${money(ph.price, ph.currency)}`}
           {n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
         </div>
       </div>

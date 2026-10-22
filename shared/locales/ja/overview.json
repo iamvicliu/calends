@@ -19,7 +19,8 @@
   },
   "timeline": {
     "title": "タイムライン",
-    "sub": "過去30日間に{past}請求 · 今後30日間に{next}予定"
+    "sub": "過去30日間に{past}請求 · 今後30日間に{next}予定",
+    "past": "過去30日間 · {amount}"
   },
   "spending": {
     "title": "月間支出",

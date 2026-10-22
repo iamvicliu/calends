@@ -22,7 +22,8 @@
   },
   "timeline": {
     "title": "Frise",
-    "sub": "{past} prélevés ces 30 derniers jours · {next} à venir dans les 30 prochains"
+    "sub": "{past} prélevés ces 30 derniers jours · {next} à venir dans les 30 prochains",
+    "past": "30 derniers jours · {amount}"
   },
   "spending": {
     "title": "Dépenses mensuelles",

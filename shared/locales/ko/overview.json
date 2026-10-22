@@ -19,7 +19,8 @@
   },
   "timeline": {
     "title": "타임라인",
-    "sub": "지난 30일 결제 {past} · 다음 30일 예정 {next}"
+    "sub": "지난 30일 결제 {past} · 다음 30일 예정 {next}",
+    "past": "지난 30일 · {amount}"
   },
   "spending": {
     "title": "월별 지출",

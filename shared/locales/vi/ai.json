@@ -65,7 +65,7 @@
   "status": {
     "on": "Đã bật truy cập AI",
     "off": "Đã tắt truy cập AI",
-    "onHint": "Trợ lý có token hợp lệ có thể tra cứu và cập nhật sổ của bạn.",
+    "onHint": "Token hợp lệ cho phép trợ lý AI truy cập sổ theo quyền đã được cấp.",
     "offHint": "Mọi yêu cầu MCP đều bị từ chối cho đến khi bạn bật lại."
   },
   "promptLabel": "Prompt",

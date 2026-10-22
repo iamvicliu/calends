@@ -67,7 +67,7 @@
   "status": {
     "on": "L’accès IA est activé",
     "off": "L’accès IA est désactivé",
-    "onHint": "Les assistants disposant d’un jeton valide peuvent consulter et mettre à jour votre registre.",
+    "onHint": "Un jeton valide permet à un assistant IA d’accéder au registre selon les autorisations attribuées.",
     "offHint": "Toutes les requêtes MCP sont refusées jusqu’à sa réactivation."
   },
   "promptLabel": "Prompt",

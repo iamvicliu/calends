@@ -208,6 +208,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                 <>
                   <section className="cal-dayhead">
                     <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
+                    <Hint text={t('report.cash.fullPaidHint')} />
                   </section>
                   {selList.length === 0 ? (
                     <div className="cal-none">{t('calendar.noneDay')}</div>
@@ -251,7 +252,13 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             </div>
             <div className="stack">
               {reportMode === 'mini' && report && <MiniReport report={report} base={base} today={today} onExpand={() => setReportMode('full')} />}
-              <Group title={t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}>
+              <Group
+                title={
+                  <span className="row">
+                    {t('calendar.monthAll', { month: monthLabel(month, { year: false }) })} <Hint text={t('detail.chart.origAmount')} />
+                  </span>
+                }
+              >
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
                   <Cell
@@ -376,7 +383,7 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
         </button>
       </div>
       <div className="cal-stat-big">
-        <b>{flow(-headline.total, base)}</b>
+        <b className={headline.total < 0 ? 'green' : undefined}>{flow(-headline.total, base)}</b>
       </div>
       <div className="cal-stat-split">
         <div>
@@ -404,6 +411,8 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
         {report.months.map((r) => (
           <div
             key={r.month}
+            role="img"
+            aria-label={`${monthLabel(r.month)} · ${flow(-r.total, base)}`}
             className={`cal-mini-month ${r.month === headline.month ? 'current' : ''}`}
             {...tipProps(
               () => `${monthLabel(r.month)} · ${flow(-r.total, base)}${r.month >= today.slice(0, 7) && r.pending !== 0 ? ` · ${t('scope.forecast')}` : ''}`,

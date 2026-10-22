@@ -65,7 +65,7 @@
   "status": {
     "on": "Akses AI aktif",
     "off": "Akses AI nonaktif",
-    "onHint": "Asisten dengan token yang valid bisa melihat dan memperbarui catatan Anda.",
+    "onHint": "Token yang valid memungkinkan asisten AI mengakses buku catatan sesuai izin yang diberikan.",
     "offHint": "Semua permintaan MCP ditolak hingga Anda mengaktifkannya kembali."
   },
   "promptLabel": "Prompt",

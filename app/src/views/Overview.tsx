@@ -8,7 +8,7 @@ import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosse
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
-import { Amount, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, Hint, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
@@ -18,8 +18,6 @@ type Scale = 'month' | 'year';
 const PROJ = '__proj';
 
 export function Overview({ state, today, onOpen, onAdd }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onAdd: () => void }) {
-  const base = state.settings.baseCurrency;
-  const tot = totals(state, today);
   return (
     <>
       <Toolbar title={t('overview.title')}>
@@ -39,7 +37,6 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
         </div>
         <Tips state={state} today={today} onOpen={onOpen} />
         <p className="card-note" style={{ textAlign: 'center' }}>
-          {t('overview.footer', { count: tot.activeCount, amount: flow(-tot.mrr, base) })}{' '}
           <a href={appPath('/report')} style={{ textDecoration: 'underline' }}>
             {t('overview.fullReport')}
           </a>
@@ -52,15 +49,13 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
 /** 扣款时间线：今天居中，左右滑动看前后的扣款 */
 function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
-  const { past30, next30 } = useMemo(() => {
+  const past30 = useMemo(() => {
     let past30 = 0;
-    let next30 = 0;
-    for (const c of allCharges(state, addDays(today, -30), addDays(today, 30), today)) {
+    for (const c of allCharges(state, addDays(today, -29), today, today)) {
       const v = chargeValue(state, c);
-      if (c.date < today) past30 += v;
-      else next30 += v;
+      past30 += v;
     }
-    return { past30, next30 };
+    return past30;
   }, [state, today]);
   // 时间线按需加载：拖到哪段算哪段
   const load = useCallback(
@@ -86,7 +81,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
       <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
         <h3 className="sec-title">{t('overview.timeline.title')}</h3>
         <span className="sec-sub" style={{ marginTop: 0 }}>
-          {t('overview.timeline.sub', { past: flow(-past30, base, { compact: true }), next: flow(-next30, base, { compact: true }) })}
+          {t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) })}
         </span>
       </div>
       <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
@@ -175,7 +170,9 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
     <div className="card" style={{ padding: '22px 24px 20px' }}>
       <div className="ov-head">
         <div>
-          <h3 className="sec-title">{t('overview.spending.title')}</h3>
+          <h3 className="sec-title">
+            {t('overview.spending.title')} <Hint text={t('report.cash.fullPaidHint')} />
+          </h3>
           <div className="sec-sub">{t('overview.spending.sub')}</div>
         </div>
         <Seg
@@ -260,7 +257,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
   // 大字 / 小字金额跟随显示货币设置
   const pair = useMoneyPair(state);
   const base = state.settings.baseCurrency;
-  const cs = allCharges(state, today, addDays(today, 30), today);
+  const cs = allCharges(state, addDays(today, 1), addDays(today, 30), today).filter((c) => c.amount > 0 && c.kind !== 'refund' && c.kind !== 'failed');
   const total = sumBase(state, cs);
   const groups: Array<['thisWeek' | 'later', Charge[]]> = [
     ['thisWeek', cs.filter((c) => diffDays(today, c.date) <= 6)],
@@ -365,7 +362,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
 
 /** 三条最值得看的洞察 */
 function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
-  const list = useMemo(() => insights(state, today), [state, today]);
+  const list = useMemo(() => insights(state, today).filter((i) => i.id !== 'unused'), [state, today]);
   const order = { warn: 0, info: 1, good: 2 } as const;
   const top = [...list].sort((a, b) => order[a.tone] - order[b.tone]).slice(0, 3);
   if (!top.length) return null;
@@ -445,7 +442,9 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   return (
     <section className="stmt">
       <div className="stmt-l">
-        <div className="stmt-kicker">{t('overview.stmt.kicker')}</div>
+        <div className="stmt-kicker">
+          {t('overview.stmt.kicker')} <Hint text={t('scope.mrrBasis')} />
+        </div>
         <div className="stmt-num">
           <Amount value={-tot.mrr} ccy={base} />
         </div>

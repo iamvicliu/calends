@@ -67,7 +67,7 @@
   "status": {
     "on": "AI access is on",
     "off": "AI access is off",
-    "onHint": "Assistants with a valid token can read and update your ledger.",
+    "onHint": "A valid token lets an AI assistant access the ledger within its assigned permissions.",
     "offHint": "All MCP requests are rejected until you turn it back on."
   },
   "promptLabel": "Prompt",

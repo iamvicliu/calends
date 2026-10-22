@@ -59,5 +59,7 @@
   "search": "Tìm kiếm “{query}”",
   "selectionTitle": {
     "other": "{scope} · {count} gói đăng ký"
-  }
+  },
+  "mrrBasis": "Chi phí hàng tháng quy đổi theo phần của tôi cho các gói đang tính phí. Gói năm được phân bổ theo tháng, không phải khoản thu thực tế tháng này.",
+  "debitBasis": "Chỉ tính các khoản chi dương; tiền hoàn được liệt kê riêng và không khấu trừ vào cơ cấu hoặc xếp hạng."
 }

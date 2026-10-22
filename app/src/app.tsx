@@ -199,7 +199,7 @@ function Sidebar({
   const horizon = days === 0 ? monthEnd(d.slice(0, 7)) : addDays(d, days);
   const upcoming = state.subscriptions
     .filter((s) => !s.proxy) // 代付在「代付」页单独管
-    .map((s) => ({ s, n: nextCharge(s, d) }))
+    .map((s) => ({ s, n: nextCharge(s, addDays(d, 1)) }))
     .filter((x) => x.n && x.n <= horizon)
     .sort((a, b) => a.n!.localeCompare(b.n!))
     .slice(0, 12);

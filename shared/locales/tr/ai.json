@@ -67,7 +67,7 @@
   "status": {
     "on": "Yapay zekâ erişimi açık",
     "off": "Yapay zekâ erişimi kapalı",
-    "onHint": "Geçerli token'a sahip asistanlar kayıt defterinizi sorgulayabilir ve güncelleyebilir.",
+    "onHint": "Geçerli bir token, yapay zekâ asistanının atanan izinler kapsamında deftere erişmesini sağlar.",
     "offHint": "Yeniden açana kadar tüm MCP istekleri reddedilir."
   },
   "promptLabel": "İstem",

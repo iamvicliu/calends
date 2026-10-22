@@ -60,5 +60,7 @@
   "selectionTitle": {
     "one": "{scope} · {count} Abonnement",
     "other": "{scope} · {count} Abonnements"
-  }
+  },
+  "mrrBasis": "Monatlich umgelegte Kosten meines Anteils der laufenden Abonnements. Jahrespläne werden verteilt; dies sind nicht die tatsächlichen Abbuchungen dieses Monats.",
+  "debitBasis": "Nur positive Abbuchungen; Erstattungen werden separat aufgeführt und mindern weder Aufschlüsselung noch Rangliste."
 }

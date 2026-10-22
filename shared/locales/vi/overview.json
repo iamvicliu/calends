@@ -19,7 +19,8 @@
   },
   "timeline": {
     "title": "Dòng thời gian",
-    "sub": "{past} đã trừ trong 30 ngày qua · {next} đến hạn trong 30 ngày tới"
+    "sub": "{past} đã trừ trong 30 ngày qua · {next} đến hạn trong 30 ngày tới",
+    "past": "30 ngày qua · {amount}"
   },
   "spending": {
     "title": "Chi tiêu hằng tháng",

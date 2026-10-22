@@ -12,7 +12,6 @@ import {
   insights,
   monthEnd,
   movement,
-  mrrChangeSinceLastMonth,
   mrrSeries,
   prepaidValue,
   stopLosses,
@@ -21,8 +20,9 @@ import {
 } from '../../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { Amount, CatIcon, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { Amount, CatIcon, Hint, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, sumBase, toBase } from '../derive.ts';
+import { SpendingDelta } from '../components/ScopeReport.tsx';
 
 export function perLabel(s: Subscription): string {
   const { unit, every } = s.cycle;
@@ -77,7 +77,6 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const tot = totals(state, today);
   const now = series[series.length - 1].mrr;
   const yearAgo = series.length > 12 ? series[series.length - 13].mrr : undefined;
-  const delta = mrrChangeSinceLastMonth(state, today);
   const evDates = new Set(
     events(state, today)
       .filter((e) => e.kind !== 'buy')
@@ -85,20 +84,17 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   );
   const markers = series.map((p, i) => (evDates.has(p.month) ? i : -1)).filter((i) => i >= 0);
   /** 带正负号的金额：支出为负、收入为正 */
-  const signed = (v: number, compact = true) => `${v > 0.005 ? '+' : v < -0.005 ? '−' : ''}${money(Math.abs(v), base, { compact })}`;
+  const signed = (v: number, compact = true) => flow(v, base, { compact });
   return (
     <div className="card hero-card">
       <div className="hero-l">
-        <div className="stat-label">{t('report.hero.label')}</div>
+        <div className="stat-label">
+          {t('report.hero.label')} <Hint text={t('scope.mrrBasis')} />
+        </div>
         <div className="hero-num">
           <Amount value={-now} ccy={base} />
         </div>
         <div className="hero-delta">
-          {/* 和概览一样说「支出」的增减：多了是 ↑、少了是 ↓，金额不带正负号 */}
-          <span className={`chip-d ${delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}`}>
-            {delta > 0.5 ? '↑' : delta < -0.5 ? '↓' : '·'} {money(Math.abs(delta), base, { compact: true })}
-          </span>
-          <span className="muted">{t('report.hero.vsLastMonth')}</span>
           {yearAgo != null && yearAgo > 0 && <span className="muted">{t('report.hero.yearAgo', { amount: signed(-yearAgo) })}</span>}
         </div>
         <div className="hero-facts">
@@ -180,6 +176,8 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
   const drivers = steps.filter((x) => x.kind !== 'total' && Math.abs(x.v) >= 0.5);
   const peak = Math.max(1, ...drivers.map((x) => Math.abs(x.v)));
   const delta = mv.to - mv.from;
+  const singleDriver = drivers.length === 1 && Math.abs(drivers[0].v - delta) < 0.005;
+  const singleItem = Math.abs(delta) >= 0.5 && mv.items.length === 1 && Math.abs(mv.items[0].delta - delta) < 0.005;
   const pct = mv.from > 0 ? delta / mv.from : 0;
   const kindLabel = (k: 'added' | 'expansion' | 'contraction' | 'churned') => t(`report.wf.${k}`);
   return (
@@ -202,20 +200,21 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
         </div>
       </div>
       <div className="mv-head">
-        <div>
-          <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
-          {/* 和顶部一致：花出去为负 */}
-          <b className="num">{perMonth(flow(-mv.to, base, { compact: true }))}</b>
-        </div>
+        {offset !== 0 && (
+          <div>
+            <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
+            {/* 和顶部一致：花出去为负 */}
+            <b className="num">{perMonth(flow(-mv.to, base, { compact: true }))}</b>
+          </div>
+        )}
         <div className={`mv-delta ${Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'up' : 'down'}`}>
           <small>{t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}</small>
           <b className="num">
-            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : `${delta > 0 ? '−' : '+'}${money(Math.abs(delta), base, { compact: true })}`}
-            {Math.abs(delta) >= 0.5 && mv.from > 0 && <em>{`${pct > 0 ? '−' : '+'}${Math.abs(pct * 100).toFixed(1)}%`}</em>}
+            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : <SpendingDelta value={{ amount: delta, percent: mv.from > 0 ? pct : undefined }} base={base} />}
           </b>
         </div>
       </div>
-      {drivers.length > 0 && (
+      {drivers.length > 0 && !singleDriver && (
         <div className="mv-rows">
           {drivers.map((x) => (
             <div key={x.k} className={`mv-row ${x.v > 0 ? 'up' : 'down'}`}>
@@ -224,8 +223,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
                 <i style={{ width: `${(Math.abs(x.v) / peak) * 100}%` }} />
               </div>
               <b className="num">
-                {x.v > 0 ? '−' : '+'}
-                {money(Math.abs(x.v), base, { compact: true })}
+                {x.v > 0 ? '↑' : '↓'} {money(Math.abs(x.v), base, { compact: true })}
               </b>
             </div>
           ))}
@@ -234,9 +232,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
       <div className="wf-items">
         {mv.items.length === 0 && (
           <div className="muted" style={{ fontSize: 13, padding: '8px 0' }}>
-            {Math.abs(mv.fx) >= 0.5
-              ? t('report.wf.emptyFx', { amount: `${mv.fx > 0 ? '+' : '−'}${money(Math.abs(mv.fx), base, { compact: true })}` })
-              : t('report.wf.empty')}
+            {Math.abs(mv.fx) >= 0.5 ? t('report.wf.fx') : t('report.wf.empty')}
           </div>
         )}
         {mv.items.slice(0, 4).map((it) => (
@@ -244,10 +240,11 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             <SubIcon sub={it.sub} size={24} />
             <span className="wf-name">{it.sub.name}</span>
             <em className={it.delta > 0 ? 'up' : 'down'}>{kindLabel(it.kind)}</em>
-            <b className="num">
-              {it.delta > 0 ? '−' : '+'}
-              {money(Math.abs(it.delta), base, { compact: true })}
-            </b>
+            {!singleItem && (
+              <b className="num">
+                {it.delta > 0 ? '↑' : '↓'} {money(Math.abs(it.delta), base, { compact: true })}
+              </b>
+            )}
           </button>
         ))}
       </div>
@@ -257,7 +254,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
 
 /** 体检：规则驱动的提醒与洞察 */
 function Checkup({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
-  const list = useMemo(() => insights(state, today), [state, today]);
+  const list = useMemo(() => insights(state, today).filter((i) => i.id !== 'unused'), [state, today]);
   const [all, setAll] = useState(false);
   const shown = all ? list : list.slice(0, 5);
   return (
@@ -310,7 +307,9 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{t('report.cash.title')}</h3>
+        <h3>
+          {t('report.cash.title')} <Hint text={t('scope.cashBasis')} />
+        </h3>
         <div className="legend-inline">
           <span>
             <i style={{ background: 'var(--accent)' }} />
@@ -716,7 +715,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
                 <b className={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
                   {tone === 'buy'
                     ? money(e.delta, base, { compact: true })
-                    : perMonth(`${e.delta >= 0 ? '+' : '−'}${money(Math.abs(e.delta), base, { compact: true })}`)}
+                    : perMonth(`${e.delta > 0 ? '↑' : e.delta < 0 ? '↓' : '·'} ${money(Math.abs(e.delta), base, { compact: true })}`)}
                 </b>
               </button>
             </Fragment>

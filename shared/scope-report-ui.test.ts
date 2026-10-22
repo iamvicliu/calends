@@ -6,7 +6,9 @@ import * as billing from './billing.ts';
 import * as format from './format.ts';
 import * as fx from './fx.ts';
 import * as reports from './scope-report.ts';
-import { DEFAULT_SETTINGS, type AppState } from './types.ts';
+import * as metrics from './metrics.ts';
+import * as carpool from './carpool.ts';
+import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 // Execute component event handlers in the existing JSX harness, retaining pure financial builders.
 type Node = { type: string; props: Record<string, any>; children: unknown[] };
@@ -14,8 +16,10 @@ const all = (n: unknown): Node[] =>
   Array.isArray(n) ? n.flatMap(all) : n && typeof n === 'object' && 'type' in n ? [n as Node, ...all((n as Node).children)] : [];
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
 const today = '2026-10-22';
-function harness(file: string, names: string, prefs: Record<string, string> = {}) {
-  const source = readFileSync(new URL(file, import.meta.url), 'utf8').replace(/^import[\s\S]*?;\n/gm, '');
+function harness(file: string, names: string, prefs: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
+  const source = readFileSync(new URL(file, import.meta.url), 'utf8')
+    .replace(/^import[\s\S]*?;\n/gm, '')
+    .replace(/^export \{.*\};\n/gm, '');
   const result = transformSync(file, source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   const values: unknown[] = [];
@@ -27,12 +31,13 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...format,
     ...fx,
     ...reports,
+    ...metrics,
     t: (key: string) => key,
     useMemo: (fn: () => unknown) => fn(),
     useEffect: (fn: () => unknown) => fn(),
     useState(initial: unknown) {
       const i = cursor++;
-      if (!(i in values)) values[i] = initial;
+      if (!(i in values)) values[i] = typeof initial === 'function' ? initial() : initial;
       return [
         values[i],
         (next: unknown) => {
@@ -66,13 +71,19 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     SubIcon: 'SubIcon',
     Toolbar: 'Toolbar',
     ScopeReport: 'ScopeReport',
+    useCallback: (fn: unknown) => fn,
+    Fragment: 'Fragment',
+    Timeline: 'Timeline',
+    Amount: 'Amount',
     Maximize2: 'Maximize2',
     SpendingDelta: 'SpendingDelta',
+    ...extra,
   };
   const exports = new Function(...Object.keys(deps), `${result.code.replace(/export /g, '')}; return {${names}};`)(...Object.values(deps));
   return {
     prefs,
     keys,
+    call: (name: string, ...args: unknown[]) => exports[name](...args),
     render: (name: string, props: unknown) => {
       cursor = 0;
       return all(exports[name](props));
@@ -161,4 +172,320 @@ test('list report restores matching preferences without animation and requires g
   nodes = r.render('ListReport', { ...props, reportKey: 'VPS' });
   assert.equal(nodes.find((n) => n.type === 'ScopeReport')!.props.open, true);
   assert.equal(JSON.parse(r.prefs['list-report']).key, 'VPS');
+});
+
+test('overview upcoming excludes today, refunds and failed charges; timeline owns the past including today', () => {
+  const sub = (id: string, start: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    name: id,
+    start,
+    price: 10,
+    currency: 'USD',
+    category: 'Tools',
+    tags: [],
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+    ...extra,
+  });
+  const state = {
+    ...st,
+    subscriptions: [
+      sub('today', today),
+      sub('future', '2026-10-25'),
+      sub('refund', '2026-01-01', { cycle: { unit: 'lifetime', every: 1 }, payments: [{ date: '2026-10-24', amount: -10, kind: 'refund' }] }),
+      sub('failed', '2026-01-01', { cycle: { unit: 'lifetime', every: 1 }, payments: [{ date: '2026-10-24', amount: 10, kind: 'failed' }] }),
+    ],
+  };
+  const calls: string[][] = [];
+  const r = harness(
+    '../app/src/views/Overview.tsx',
+    'DueSoon, ChargeTimeline',
+    {},
+    {
+      allCharges: (s: AppState, from: string, to: string, at: string) => {
+        calls.push([from, to]);
+        return s.subscriptions.flatMap((sub) => billing.chargesBetween(sub, from, to, at));
+      },
+      sumBase: (s: AppState, charges: billing.Charge[]) => charges.reduce((n, c) => n + fx.chargeValue(s, c), 0),
+    },
+  );
+  const nodes = r.render('DueSoon', { state, today, onOpen() {} });
+  const rows = nodes.filter((n) => n.props.className === 'due-row');
+  assert.equal(rows.length, 1);
+  assert.equal(
+    all(rows[0]).some((n) => n.children.includes('future')),
+    true,
+  );
+  assert.deepEqual(calls[0], ['2026-10-23', '2026-11-21']);
+  r.render('ChargeTimeline', { state, today, onOpen() {} });
+  assert.deepEqual(calls.at(-1), ['2026-09-23', today]);
+  const publicView = harness(
+    '../app/src/public/page.tsx',
+    'derive',
+    {},
+    {
+      syncCategories: () => [],
+      periodRange: () => ['2026-10-01', '2026-10-31'],
+      allCharges: (s: AppState, from: string, to: string, at: string) => s.subscriptions.flatMap((sub) => billing.chargesBetween(sub, from, to, at)),
+      sumBase: (s: AppState, rows: billing.Charge[]) => rows.reduce((n, c) => n + fx.chargeValue(s, c), 0),
+    },
+  );
+  const derived = publicView.call('derive', state, today);
+  assert.deepEqual(
+    derived.upcoming.map((c: billing.Charge) => c.sub.id),
+    ['future'],
+  );
+});
+
+test('report changes use unsigned spending direction and omit the current total already owned by the hero', () => {
+  const r = harness(
+    '../app/src/views/Report.tsx',
+    'Waterfall',
+    {},
+    {
+      movement: () => ({ from: 100, to: 80, fx: 0, added: 0, expansion: 0, contraction: 0, churned: 20, items: [] }),
+    },
+  );
+  const nodes = r.render('Waterfall', { state: st, today, onOpen() {} });
+  const delta = nodes.find((n) => n.type === 'SpendingDelta')!;
+  assert.deepEqual(delta.props.value, { amount: -20, percent: -0.2 });
+  assert.equal(
+    nodes.some((n) => n.children.includes('−$80.00')),
+    false,
+  );
+  assert.equal(
+    nodes.some((n) => n.props.className === 'mv-row down'),
+    false,
+    'a single driver must not repeat the overall delta',
+  );
+  const mixed = harness(
+    '../app/src/views/Report.tsx',
+    'Waterfall',
+    {},
+    {
+      movement: () => ({ from: 100, to: 110, fx: 0, added: 30, expansion: 0, contraction: 0, churned: 20, items: [] }),
+    },
+  );
+  const mixedNodes = mixed.render('Waterfall', { state: st, today, onOpen() {} });
+  const driver = mixedNodes.find((n) => n.props.className === 'mv-row down')!;
+  assert.equal(
+    all(driver).some((n) => n.children.includes('↓')),
+    true,
+  );
+  assert.equal(
+    all(driver).some((n) => n.children.includes('+')),
+    false,
+  );
+});
+
+test('scope presentation gives single refunds/receipts one numeric owner and avoids repeated upcoming/top charge rows', () => {
+  const r = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    {
+      useId: () => 'scope',
+      useRef: () => ({ current: null }),
+      intlLocale: () => 'en-US',
+      BarLine: 'BarLine',
+      Copy: 'Copy',
+    },
+  );
+  const subscription = {
+    id: 'service',
+    name: 'Service',
+    category: 'Tools',
+    tags: [],
+    price: 120,
+    currency: 'USD',
+    cycle: { unit: 'year' as const, every: 1 },
+    start: '2026-01-01',
+    status: 'cancelled' as const,
+    end: '2026-10-12',
+    stop: { kind: 'cancel' as const, date: '2026-10-12', paidThrough: '2026-12-31' },
+    payments: [
+      { date: '2026-01-01', amount: 120 },
+      { date: '2026-10-22', amount: -10, kind: 'refund' as const },
+    ],
+  };
+  const state = { ...st, subscriptions: [subscription] };
+  const render = (report: reports.ScopeReport) =>
+    r.render('ScopeReport', { report, state, today, onOpen() {}, title: 'Scope', animate: false, open: true, onToggle() {} });
+  let nodes = render(reports.monthReport(state, '2026-10', today));
+  const loss = nodes.find((n) => String(n.props.className).includes('scope-block scope-losses'))!;
+  assert.equal(all(loss).filter((n) => n.children.includes('+$10.00')).length, 1);
+  const mv = {
+    from: 100,
+    to: 80,
+    fx: 0,
+    added: 0,
+    expansion: 0,
+    contraction: 0,
+    churned: 20,
+    items: [{ sub: subscription, kind: 'churned' as const, delta: -20, from: 20, to: 0 }],
+  };
+  const trendNodes = render({ blocks: [{ type: 'trend', mode: 'month', month: '2026-10', movement: mv }] });
+  assert.equal(
+    trendNodes.some((n) => typeof n.type === 'function' && n.type.name === 'SpendingDelta'),
+    false,
+    'one driver owns the total, without repeating it in summary or single-item rows',
+  );
+  const root = subscription;
+  nodes = render({ blocks: [{ type: 'sharing', rows: [{ sub: root, received: 10, owed: 0 }], received: 10, owed: 0 }] });
+  assert.equal(
+    nodes.some((n) => n.props.className === 'hero-facts scope-facts'),
+    false,
+  );
+  const upcoming = {
+    ...subscription,
+    id: 'next',
+    status: 'active' as const,
+    stop: undefined,
+    end: undefined,
+    start: '2026-10-25',
+    cycle: { unit: 'month' as const, every: 1 },
+    payments: undefined,
+  };
+  nodes = render(reports.monthReport({ ...st, subscriptions: [upcoming] }, '2026-10', today));
+  assert.equal(
+    nodes.some((n) => String(n.props.className).includes('scope-block scope-top')),
+    true,
+  );
+  assert.equal(
+    nodes.some((n) => String(n.props.className).includes('scope-block scope-upcoming')),
+    false,
+  );
+});
+
+test('member with a receipt and no paid-through date never claims no receipts and omits a duplicate singleton total', () => {
+  const member = {
+    id: 'member',
+    name: 'Member',
+    share: 10,
+    fee: 10,
+    feeCurrency: 'USD',
+    payments: [{ date: today, amount: 10, currency: 'USD', until: '2026-10-31' }],
+  };
+  const sub = {
+    id: 'owner',
+    name: 'Owner',
+    category: 'Tools',
+    tags: [],
+    price: 30,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+    share: { role: 'owner' as const, seats: 3, members: [member] },
+  };
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberSheet',
+    {},
+    { ...carpool, Sheet: 'Sheet', DatePicker: 'DatePicker', Toggle: 'Toggle', CurrencySelect: 'CurrencySelect', NumInput: 'NumInput', Picker: 'Picker' },
+  );
+  const nodes = r.render('MemberSheet', { state: { ...st, subscriptions: [sub] }, s: sub, member, onClose() {} });
+  const date = nodes.find((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.member.notSet');
+  assert.ok(date);
+  assert.equal(date.props.value, undefined, 'display correction does not invent a paid-through date');
+  const receipts = nodes.find((n) => n.type === 'Group' && String(n.props.title).startsWith('family.member.payments'))!;
+  assert.equal(receipts.props.foot, undefined);
+  assert.equal(
+    nodes.some((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.member.paidUntilPh'),
+    false,
+  );
+});
+
+test('public rows keep the amount once for an ordinary monthly plan and distinguish trials and sharing', () => {
+  const r = harness(
+    '../app/src/public/page.tsx',
+    'Row',
+    {},
+    {
+      AppIcon: 'AppIcon',
+      Badge: 'Badge',
+      cn: (...s: string[]) => s.filter(Boolean).join(' '),
+      t: (key: string, params?: { date?: string }) => (params?.date ? `${key} ${params.date}` : key),
+    },
+  );
+  const s = {
+    id: 'service',
+    name: 'Service',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+  };
+  const render = (sub: Subscription, v: number) => r.render('Row', { s: sub, v, today, ccy: 'USD', k: 1, fmt: (n: number) => format.money(n, 'USD') });
+  let nodes = render(s, 10);
+  const todayNodes = render({ ...s, start: today }, 10);
+  assert.ok(
+    todayNodes.some((n) => n.children.includes(`public.row.renews ${format.cnDate('2026-11-22')}`)),
+    'next charge starts after the already-charged day',
+  );
+  assert.equal(nodes.filter((n) => n.children.includes('$10.00')).length, 1);
+  assert.equal(
+    nodes.some((n) => n.children.includes(' $10.00')),
+    false,
+  );
+  nodes = render({ ...s, status: 'trial', trialEnd: '2026-11-01' }, 0);
+  assert.equal(
+    nodes.some((n) => n.children.includes('list.status.trial')),
+    true,
+  );
+  assert.equal(
+    nodes.some((n) => n.children.includes(' $10.00')),
+    true,
+    'future list price remains separate from zero trial MRR',
+  );
+  nodes = render(s, 6);
+  assert.equal(
+    nodes.some((n) => n.children.includes(' $10.00')),
+    true,
+    'full plan price remains when my share differs',
+  );
+  assert.equal(
+    nodes.some((n) => n.children.includes('$6.00')),
+    true,
+  );
+});
+
+test('a single charge owns its amount instead of repeating an identical cumulative-spend KPI', () => {
+  const r = harness('../app/src/views/Detail.tsx', 'Kpis', {}, { toBase: (s: AppState, n: number, ccy: string) => fx.toBaseAt(s, n, ccy) });
+  const sub = {
+    id: 'service',
+    name: 'Service',
+    category: 'Tools',
+    tags: [],
+    price: 120,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'year' as const, every: 1 },
+    status: 'active' as const,
+  };
+  const history = billing.chargesBetween(sub, sub.start, today, today);
+  assert.equal(history.length, 1);
+  const nodes = r.render('Kpis', { sub, state: { ...st, subscriptions: [sub] }, today, history });
+  assert.equal(
+    nodes.some((n) => n.children.includes('detail.stats.spent')),
+    false,
+  );
+  assert.equal(nodes.filter((n) => n.props.className === 'dt-panel dt-kpi').length, 2);
+});
+
+test('same-currency cash pairs retain a distinct actual settlement and never hide fees behind the list price', () => {
+  for (const orig of [false, true]) {
+    const r = harness('../app/src/components/MoneyPair.tsx', 'useMoneyPair', {}, { useOrig: () => orig });
+    const pair = r.call('useMoneyPair', st);
+    const same = pair(-12, 'USD', { value: -12 });
+    assert.equal(same.alt, undefined);
+    const actual = pair(-12, 'USD', { value: -14 });
+    assert.equal(actual.main.props.value, orig ? -12 : -14);
+    assert.equal(actual.alt, orig ? '≈ −$14' : '−$12.00');
+    const unknown = pair(-12, 'USD', { value: NaN });
+    assert.equal(orig ? unknown.alt : format.flow(unknown.main.props.value, 'USD'), orig ? '≈ —' : '—');
+  }
 });

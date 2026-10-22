@@ -140,5 +140,6 @@
   },
   "network": {
     "unionpay": "UnionPay"
-  }
+  },
+  "monthlySame": "Равно цене"
 }

@@ -22,7 +22,8 @@
   },
   "timeline": {
     "title": "Zaman çizelgesi",
-    "sub": "Son 30 günde {past} ödendi · önümüzdeki 30 günde {next} ödenecek"
+    "sub": "Son 30 günde {past} ödendi · önümüzdeki 30 günde {next} ödenecek",
+    "past": "Son 30 gün · {amount}"
   },
   "spending": {
     "title": "Aylık harcama",

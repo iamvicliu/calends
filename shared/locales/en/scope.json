@@ -60,5 +60,7 @@
   "selectionTitle": {
     "one": "{scope} · {count} subscription",
     "other": "{scope} · {count} subscriptions"
-  }
+  },
+  "mrrBasis": "Current billing subscriptions, my share, normalized to a monthly cost. Annual plans are spread across months; this is not this month’s cash charges.",
+  "debitBasis": "Positive charges only; refunds are listed separately and do not reduce the breakdown or ranking."
 }

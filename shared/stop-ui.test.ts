@@ -79,6 +79,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     Fragment: 'Fragment',
     Seg: 'Seg',
     Icon: 'Icon',
+    Hint: 'Hint',
     SubIcon: 'SubIcon',
     FlagImg: 'FlagImg',
     ...extra,
@@ -254,7 +255,10 @@ test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色�
         assert.ok(!text(section).includes(t('core.stop.lossTitle')));
       }
       if (amount == null) assert.ok(text(section).includes(t('core.stop.refundNo')));
-      else assert.ok(text(section).includes(format.money(amount, 'USD')));
+      else {
+        assert.ok(text(section).includes(t(summary.refundStatus === 'full' ? 'core.stop.fullyRefunded' : 'core.stop.partial', { money: '' }).trim()));
+        assert.ok(!text(section).includes(format.flow(amount, 'USD')), 'a single refund amount is owned by the charge record');
+      }
       assert.equal(withClass(render(s, true), 'dt-outcome').length, 0);
     }
   }
@@ -279,7 +283,7 @@ test('详情历史阶段：各停止阶段使用自己的退款、币种、停�
   assert.equal(withClass(tree, 'dt-outcome').length, 2);
   assert.equal(withClass(tree, 'dt-oc-loss').length, 1);
   assert.ok(text(tree).includes(`−${format.money(10, 'USD')}`));
-  assert.ok(text(tree).includes(format.money(32, 'EUR')));
+  assert.ok(!text(tree).includes(format.flow(32, 'EUR')), 'a single historical refund is not repeated in the outcome card');
   assert.ok(text(tree).includes(t('core.stop.fullyRefunded')));
   assert.ok(text(tree).includes(format.cnDateFull('2026-11-19')));
   assert.ok(!text(tree).includes(format.cnDateFull('2026-12-05')));

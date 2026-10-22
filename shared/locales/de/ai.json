@@ -67,7 +67,7 @@
   "status": {
     "on": "KI-Zugriff ist aktiviert",
     "off": "KI-Zugriff ist deaktiviert",
-    "onHint": "Assistenten mit gültigem Token können dein Haushaltsbuch abfragen und aktualisieren.",
+    "onHint": "Mit einem gültigen Token kann ein KI-Assistent im Rahmen der zugewiesenen Berechtigungen auf das Buch zugreifen.",
     "offHint": "Alle MCP-Anfragen werden abgelehnt, bis du ihn wieder aktivierst."
   },
   "promptLabel": "Prompt",

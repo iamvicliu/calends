@@ -196,7 +196,8 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
           <div style={{ minWidth: 0 }}>
             <div className="pc-name">{m.name}</div>
             <div className="pc-kind">
-              {KIND_LABEL[m.kind]} · {m.currency}
+              {KIND_LABEL[m.kind]}
+              {m.network ? ` · ${m.currency}` : ''}
               {m.region ? ` · ${m.region}` : ''}
               {m.cashback ? ` · ${t('wallet.card.cashback', { pct: m.cashback })}` : ''}
             </div>
