@@ -191,6 +191,8 @@
     "fullyRefunded": "Vollständig erstattet",
     "chargeOnEnd": "An diesem Tag wird noch verlängert. Wähle den Vortag, um das zu vermeiden.",
     "nonrenewDone": "Keine Verlängerung. Nach dem {date} keine Abbuchungen mehr.",
-    "stoppedDone": "Dienst beendet"
+    "stoppedDone": "Dienst beendet",
+    "method": "Art der Beendigung",
+    "latestRefundHint": "Diese Felder bearbeiten die letzte Erstattung. Frühere Erstattungen bleiben im Zahlungsverlauf."
   }
 }

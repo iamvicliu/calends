@@ -19,7 +19,7 @@
   "clearForm": "양식 지우기",
   "revert": "변경 취소",
   "draftRestored": "저장하지 않은 내용을 복원했습니다",
-  "confirmDelete": "‘{name}’을(를) 삭제할까요? 기록도 함께 삭제됩니다. 갱신만 중단한 경우라면 ‘해지됨’으로 표시하세요.",
+  "confirmDelete": "‘{name}’을(를) 삭제할까요? 기록도 함께 삭제됩니다. 갱신만 중단한 경우라면 ‘중지’를 선택하세요.",
   "toast": {
     "added": "추가했습니다",
     "saved": "저장했습니다",
@@ -56,7 +56,8 @@
     "trial": "체험",
     "paused": "일시 정지",
     "cancelled": "해지됨",
-    "terminated": "사용 중지됨"
+    "terminated": "사용 중지됨",
+    "stop": "중지"
   },
   "category": {
     "choose": "카테고리 선택",
@@ -93,7 +94,8 @@
     "showDomainOn": "방문자에게 전체 도메인이 표시됩니다",
     "showDomainOff": "공개 페이지에서 가려서 표시됩니다",
     "tagsPlaceholder": "공백으로 구분",
-    "notesPlaceholder": "메모(선택 사항)"
+    "notesPlaceholder": "메모(선택 사항)",
+    "pausedAt": "일시 중지일"
   },
   "share": {
     "none": "나만 사용",

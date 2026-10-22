@@ -20,7 +20,7 @@
   "clearForm": "Vaciar formulario",
   "revert": "Deshacer cambios",
   "draftRestored": "Se restauró el borrador sin guardar",
-  "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, márcala como Cancelada.",
+  "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, elige «Detener».",
   "toast": {
     "added": "Añadida",
     "saved": "Guardado",
@@ -61,7 +61,8 @@
     "trial": "Prueba",
     "paused": "En pausa",
     "cancelled": "Cancelada",
-    "terminated": "Desactivado"
+    "terminated": "Desactivado",
+    "stop": "Detener"
   },
   "category": {
     "choose": "Elegir categoría",
@@ -98,7 +99,8 @@
     "showDomainOn": "Los visitantes ven el dominio completo",
     "showDomainOff": "Oculto en la página pública",
     "tagsPlaceholder": "Separadas por espacios",
-    "notesPlaceholder": "Notas (opcional)"
+    "notesPlaceholder": "Notas (opcional)",
+    "pausedAt": "Fecha de pausa"
   },
   "share": {
     "none": "Solo yo",

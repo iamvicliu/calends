@@ -20,7 +20,7 @@
   "clearForm": "Clear form",
   "revert": "Revert changes",
   "draftRestored": "Restored your unsaved draft",
-  "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, mark it as Cancelled instead.",
+  "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, choose Stop instead.",
   "toast": {
     "added": "Added",
     "saved": "Saved",
@@ -61,7 +61,8 @@
     "trial": "Trial",
     "paused": "Paused",
     "cancelled": "Cancelled",
-    "terminated": "Terminated"
+    "terminated": "Terminated",
+    "stop": "Stop"
   },
   "category": {
     "choose": "Choose category",
@@ -98,7 +99,8 @@
     "showDomainOn": "Visitors see the full domain",
     "showDomainOff": "Masked on the public page",
     "tagsPlaceholder": "Separate with spaces",
-    "notesPlaceholder": "Notes (optional)"
+    "notesPlaceholder": "Notes (optional)",
+    "pausedAt": "Paused on"
   },
   "share": {
     "none": "Just me",

@@ -180,6 +180,8 @@
     "fullyRefunded": "Đã hoàn toàn bộ",
     "chargeOnEnd": "Ngày này vẫn bị trừ tiền gia hạn. Chọn ngày hôm trước để tránh.",
     "nonrenewDone": "Đã đặt không gia hạn. Sau {date} không còn bị trừ tiền.",
-    "stoppedDone": "Đã dừng dịch vụ"
+    "stoppedDone": "Đã dừng dịch vụ",
+    "method": "Cách dừng",
+    "latestRefundHint": "Các trường này sửa khoản hoàn tiền gần nhất. Các khoản trước vẫn được giữ trong lịch sử thanh toán."
   }
 }

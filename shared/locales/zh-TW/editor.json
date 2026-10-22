@@ -19,7 +19,7 @@
   "clearForm": "清空表單",
   "revert": "撤銷修改",
   "draftRestored": "已恢復上次未儲存的內容",
-  "confirmDelete": "刪除「{name}」？歷史記錄會一併清除；若只是不再續訂，建議改為「已退訂」。",
+  "confirmDelete": "刪除「{name}」？歷史記錄會一併清除；若只是不再續訂，建議選擇「停止」。",
   "toast": {
     "added": "已新增",
     "saved": "已儲存",
@@ -48,7 +48,8 @@
     "trial": "試用中",
     "paused": "已暫停",
     "cancelled": "已退訂",
-    "terminated": "已停用"
+    "terminated": "已停用",
+    "stop": "停止"
   },
   "category": {
     "choose": "選擇分類",
@@ -85,7 +86,8 @@
     "showDomainOn": "訪客能看到完整網域",
     "showDomainOff": "公開頁遮蔽顯示",
     "tagsPlaceholder": "以空格分隔",
-    "notesPlaceholder": "備註（選填）"
+    "notesPlaceholder": "備註（選填）",
+    "pausedAt": "暫停日"
   },
   "share": {
     "none": "自用",

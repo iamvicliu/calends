@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { transformSync } from 'oxc-transform-react';
 import * as billing from './billing.ts';
 import * as phases from './phases.ts';
+import * as stopForm from './stop-form.ts';
 import * as format from './format.ts';
 import * as gantt from './gantt.ts';
 import * as metrics from './metrics.ts';
@@ -68,6 +69,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     useEffectEvent: (fn: unknown) => fn,
     ...billing,
     ...phases,
+    ...stopForm,
     ...format,
     ...gantt,
     ...metrics,
@@ -102,10 +104,10 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
 test('真实停止表单：三种模式、日期默认值、币种锁定、按天预填、超额拒绝、实退和恢复权限', () => {
   const applied: Subscription[] = [];
   const errors: string[] = [];
-  const r = runtime('../app/src/components/StopPanel.tsx', { toast: (message: string) => errors.push(message) });
+  const r = runtime('../app/src/components/StopPanel.tsx', { React: renderedReact, toast: (message: string) => errors.push(message) });
   const render = (s = sub) => all(r.render('StopPanel', { sub: s, today, onApply: (value: Subscription) => applied.push(value) }));
   let nodes = render();
-  const mode = nodes.find((e) => e.type === 'Picker' && e.props.ariaLabel === t('core.stop.title'))!;
+  const mode = nodes.find((e) => e.type === 'Picker' && e.props.ariaLabel === t('core.stop.method'))!;
   assert.equal(mode.props.options.length, 3);
   assert.equal(nodes.find((e) => e.type === 'DatePicker')!.props.value, '2026-11-04');
   mode.props.onChange('terminate');
@@ -113,6 +115,7 @@ test('真实停止表单：三种模式、日期默认值、币种锁定、按�
   assert.equal(nodes.find((e) => e.type === 'DatePicker')!.props.value, today);
   const cell = (label: string) => nodes.find((e) => e.type === 'Cell' && e.props.label === label)!;
   all(cell(t('core.stop.reason')))[1].props.onChange({ target: { value: 'abuse' } });
+  nodes = render();
   nodes.find((e) => e.type === 'Picker' && e.props.ariaLabel === t('editor.payment.kind.refund'))!.props.onChange('yes');
   nodes = render();
   const amount = all(cell(`${t('core.stop.refundAmount')} · USD`)).find((e) => e.type === 'input')!;
@@ -121,16 +124,20 @@ test('真实停止表单：三种模式、日期默认值、币种锁定、按�
   assert.equal(nodes.filter((e) => e.type === 'CurrencySelect').length, 1);
   amount.props.onChange({ target: { value: '32' } });
   nodes = render();
-  nodes.find((e) => e.type === 'button' && e.children.includes(t('common.apply')))!.props.onClick();
+  nodes.find((e) => e.type === 'button' && e.children.includes(t('core.stop.title')))!.props.onClick();
   assert.equal(applied.length, 0);
   assert.equal(errors.at(-1), t('mcp.error.refundExceedsPaid'));
-  amount.props.onChange({ target: { value: '6' } });
+  all(cell(`${t('core.stop.refundAmount')} · USD`))
+    .find((e) => e.type === 'input')!
+    .props.onChange({ target: { value: '6' } });
+  nodes = render();
   all(cell(t('editor.payment.settledAmount')))
     .find((e) => e.type === 'input')!
     .props.onChange({ target: { value: '40' } });
+  nodes = render();
   nodes.find((e) => e.type === 'CurrencySelect')!.props.onChange('CNY');
   nodes = render();
-  nodes.find((e) => e.type === 'button' && e.children.includes(t('common.apply')))!.props.onClick();
+  nodes.find((e) => e.type === 'button' && e.children.includes(t('core.stop.title')))!.props.onClick();
   const saved = applied[0];
   assert.equal(saved.stop!.reason, 'abuse');
   assert.equal(saved.payments!.at(-1)!.amount, -6);
@@ -411,4 +418,189 @@ test('详情与报告的停止损失采用同一份额和停止日汇率；缺�
     assert.ok(text(tree).includes(`≈ ${format.flow(-expected.lossBase, 'CNY')}`));
     assert.ok(!text(tree).includes(format.flow(-expected.loss * 7, 'CNY')));
   }
+});
+
+// Execute the editor and its real form together; replace only unrelated widgets and persistence.
+function editorRuntime(original: Subscription) {
+  const saved: Subscription[] = [];
+  const errors: string[] = [];
+  const storage = new Map<string, string>();
+  let closed = 0;
+  const state = { subscriptions: [original], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
+  const stops = runtime('../app/src/components/StopPanel.tsx', {}, 'StopFields').exports;
+  const r = runtime(
+    '../app/src/views/Editor.tsx',
+    {
+      React: renderedReact,
+      StopFields: stops.StopFields,
+      localStorage: {
+        getItem: (key: string) => storage.get(key) ?? null,
+        setItem: (key: string, value: string) => storage.set(key, value),
+        removeItem: (key: string) => storage.delete(key),
+      },
+      structuredClone,
+      Sheet: 'Sheet',
+      Group: 'Group',
+      CategorySheet: 'CategorySheet',
+      Toggle: 'Toggle',
+      NumInput: 'NumInput',
+      RegionSelect: 'RegionSelect',
+      MethodPicker: 'MethodPicker',
+      ContactField: 'ContactField',
+      PersonPicker: 'PersonPicker',
+      ChangePanel: 'ChangePanel',
+      CatIcon: 'CatIcon',
+      ReceiptText: 'ReceiptText',
+      searchCatalog: () => [],
+      base: (path: string) => path,
+      RENEW_CYCLES: [['m1', { unit: 'month', every: 1 }]],
+      cycleName: (cycle: any) => cycle.unit,
+      categories: () => [],
+      presetCat: (name: string) => name,
+      isDomainCat: () => false,
+      saveSub: async (value: Subscription) => saved.push(value),
+      mergeEdits: (_old: Subscription, next: Subscription) => next,
+      getState: () => state,
+      run: async (fn: () => Promise<void>) => {
+        try {
+          await fn();
+        } catch (e) {
+          errors.push(String(e));
+        }
+      },
+    },
+    'Editor',
+  );
+  const render = () => {
+    const tree = r.render('Editor', { sub: original, state, today, onClose: () => closed++ });
+    return [...all(tree), ...all(tree.props.foot)];
+  };
+  return { render, saved, errors, storage, closed: () => closed };
+}
+const statusControl = (nodes: Element[]) => nodes.find((e) => e.type === 'Seg' && e.props.options.some(([value]: string[]) => value === 'stop'))!;
+const button = (nodes: Element[], key: string) => nodes.find((e) => e.type === 'button' && e.children.includes(t(key)))!;
+
+test('编辑状态：唯一控件，选择停止不写入，完成才保存到期不续；取消丢弃草稿', async () => {
+  const r = editorRuntime(sub);
+  let nodes = r.render();
+  assert.ok(statusControl(nodes), 'Status must offer a single Stop option');
+  assert.equal(statusControl(nodes).props.value, 'active');
+  assert.equal(nodes.filter((n) => n.type === 'Picker' && n.props.ariaLabel === t('core.stop.method')).length, 0);
+  statusControl(nodes).props.onChange('stop');
+  nodes = r.render();
+  assert.equal(statusControl(nodes).props.value, 'stop');
+  assert.equal(r.saved.length, 0);
+  assert.ok(!nodes.some((n) => n.type === 'button' && n.children.includes(t('common.apply'))));
+  await button(nodes, 'common.done').props.onClick();
+  assert.equal(r.saved[0].status, 'cancelled');
+  assert.equal(r.saved[0].end, '2026-11-04');
+  assert.equal(r.saved[0].stop, undefined);
+  assert.equal(r.errors.length, 0);
+  const cancelled = editorRuntime(sub);
+  statusControl(cancelled.render()).props.onChange('stop');
+  button(cancelled.render(), 'common.cancel').props.onClick();
+  assert.equal(cancelled.saved.length, 0);
+  assert.equal(cancelled.closed(), 1);
+  assert.equal(cancelled.storage.size, 0);
+});
+
+test('编辑状态：立即停止及退款随完成保存，错误不关闭，改回计费中清除停止信息', async () => {
+  const r = editorRuntime(sub);
+  statusControl(r.render()).props.onChange('stop');
+  let nodes = r.render();
+  nodes.find((n) => n.type === 'Picker' && n.props.ariaLabel === t('core.stop.method'))!.props.onChange('cancel');
+  nodes = r.render();
+  nodes.find((n) => n.type === 'Picker' && n.props.ariaLabel === t('editor.payment.kind.refund'))!.props.onChange('yes');
+  nodes = r.render();
+  const refundAmount = () =>
+    all(nodes.find((n) => n.type === 'Cell' && n.props.label === `${t('core.stop.refundAmount')} · USD`)).find((n) => n.type === 'input')!;
+  refundAmount().props.onChange({ target: { value: '32' } });
+  await button(r.render(), 'common.done').props.onClick();
+  assert.equal(r.saved.length, 0);
+  assert.equal(r.closed(), 0);
+  nodes = r.render();
+  refundAmount().props.onChange({ target: { value: '6' } });
+  await button(r.render(), 'common.done').props.onClick();
+  assert.equal(r.saved[0].stop!.kind, 'cancel');
+  assert.equal(r.saved[0].payments!.filter((p) => p.kind === 'refund')[0].amount, -6);
+  const restore = editorRuntime(r.saved[0]);
+  assert.equal(statusControl(restore.render()).props.value, 'stop');
+  assert.equal(restore.render().find((n) => n.type === 'Picker' && n.props.ariaLabel === t('core.stop.method'))!.props.value, 'cancel');
+  statusControl(restore.render()).props.onChange('active');
+  assert.equal(restore.saved.length, 0);
+  await button(restore.render(), 'common.done').props.onClick();
+  assert.equal(restore.saved[0].status, 'active');
+  assert.equal(restore.saved[0].stop, undefined);
+  assert.equal(restore.saved[0].end, undefined);
+  assert.deepEqual(restore.saved[0].payments, r.saved[0].payments);
+});
+
+test('编辑状态：已有到期不续、试用、暂停、服务方停用及买断', async () => {
+  for (const original of [phases.cancelAtEnd(sub, '2026-11-04', today), { ...sub, status: 'cancelled' as const, end: '2026-10-10' }]) {
+    const r = editorRuntime(original);
+    assert.equal(statusControl(r.render()).props.value, 'stop');
+    assert.ok(r.render().some((n) => n.type === 'Picker' && n.props.value === 'nonrenew'));
+  }
+  const trial = editorRuntime(sub);
+  statusControl(trial.render()).props.onChange('trial');
+  let nodes = trial.render();
+  all(nodes.find((n) => n.type === 'Cell' && n.props.label === t('editor.field.trialEnd')))
+    .find((n) => n.type === 'DatePicker')!
+    .props.onChange('2026-10-30');
+  await button(trial.render(), 'common.done').props.onClick();
+  assert.equal(trial.saved[0].trialEnd, '2026-10-30');
+  assert.equal(trial.saved[0].status, 'trial');
+  const paused = editorRuntime(sub);
+  statusControl(paused.render()).props.onChange('paused');
+  nodes = paused.render();
+  all(nodes.find((n) => n.type === 'Cell' && n.props.label === t('editor.field.pausedAt')))
+    .find((n) => n.type === 'DatePicker')!
+    .props.onChange('2026-10-18');
+  await button(paused.render(), 'common.done').props.onClick();
+  assert.equal(paused.saved[0].pausedAt, '2026-10-18');
+  assert.equal(paused.saved[0].status, 'paused');
+  const terminated = editorRuntime(phases.stopSubscription(sub, today, 'terminate'));
+  assert.deepEqual(statusControl(terminated.render()).props.disabledKeys, ['active', 'trial', 'paused']);
+  assert.deepEqual(
+    terminated
+      .render()
+      .find((n) => n.type === 'Picker' && n.props.ariaLabel === t('core.stop.method'))!
+      .props.options.map((o: any) => o.value),
+    ['terminate'],
+  );
+  const lifetime = editorRuntime({ ...sub, cycle: { unit: 'lifetime', every: 1 } });
+  assert.equal(statusControl(lifetime.render()), undefined);
+});
+
+test('编辑停止字段：延期到续费日仍提示扣款；已有退款金额随日期修改保留', () => {
+  const scheduled = editorRuntime(phases.cancelAtEnd(sub, '2026-11-04', today));
+  let nodes = scheduled.render();
+  nodes.find((n) => n.type === 'DatePicker' && n.props.value === '2026-11-04')!.props.onChange('2026-11-05');
+  nodes = scheduled.render();
+  const warning = nodes.find((n) => n.type === 'Cell' && n.props.label === t('core.stop.date'))!.props.sub;
+  assert.equal(text(warning), t('core.stop.chargeOnEnd'));
+  const refunded = editorRuntime(phases.stopSubscription(sub, today, 'cancel', today, undefined, { amount: 6 }));
+  nodes = refunded.render();
+  nodes.find((n) => n.type === 'DatePicker' && n.props.value === today)!.props.onChange('2026-10-18');
+  nodes = refunded.render();
+  const amount = all(nodes.find((n) => n.type === 'Cell' && n.props.label === `${t('core.stop.refundAmount')} · USD`)).find((n) => n.type === 'input')!;
+  assert.equal(amount.props.value, '6');
+});
+
+test('编辑状态跟随既有历程操作：停用后新增阶段续订不会再次提交旧停止草稿', async () => {
+  const original = phases.stopSubscription(sub, '2026-10-18', 'terminate', '2026-10-18', 'Closure', { amount: 6 });
+  const r = editorRuntime(original);
+  const resumed = phases.resume(original, today, { price: 40, currency: 'EUR', cycle: sub.cycle });
+  r.render()
+    .find((n) => n.type === 'ChangePanel')!
+    .props.setF(resumed);
+  const nodes = r.render();
+  assert.equal(statusControl(nodes).props.value, 'active');
+  assert.ok(!nodes.some((n) => n.type === 'Picker' && n.props.ariaLabel === t('core.stop.method')));
+  await button(nodes, 'common.done').props.onClick();
+  assert.equal(r.errors.length, 0);
+  assert.equal(r.saved[0].stop, undefined);
+  assert.equal(r.saved[0].phases!.length, 2);
+  assert.equal(r.saved[0].phases![0].stop!.kind, 'terminate');
+  assert.equal(r.saved[0].phases![0].payments!.filter((p) => p.kind === 'refund').length, 1);
 });

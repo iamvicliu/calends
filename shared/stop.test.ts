@@ -1110,3 +1110,19 @@ describe('MCP 合租统一收款与首期', () => {
     }
   });
 });
+
+test('MCP set_status keeps rejecting new stops on an expired nonrenewal after full-editor corrections are allowed', async () => {
+  const now = todayIn('UTC');
+  const original = base({ start: addDays(now, -14), status: 'cancelled', end: addDays(now, -1) });
+  const f = fixture(original);
+  try {
+    for (const action of ['cancel', 'terminate'] as const) {
+      for (const dry_run of [false, true]) {
+        await assert.rejects(() => f.run('set_status', { action, immediate: true, dry_run }), { message: t('mcp.error.subscriptionEnded') });
+        assert.deepEqual(f.saved(), original);
+      }
+    }
+  } finally {
+    f.db.close();
+  }
+});
