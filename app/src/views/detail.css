@@ -1120,7 +1120,8 @@
 /* 宽屏：弹层撑大，两栏各自滚动 */
 @media (min-width: 1000px) {
   .sheet.bare:has(.dt) {
-    width: min(1280px, calc(100vw - 48px));
+    /* 左右各留至少 80px 遮罩，方便点空白处关闭 */
+    width: min(1120px, calc(100vw - 160px));
     overflow: hidden;
   }
   /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */
@@ -1154,7 +1155,7 @@
 }
 @media (min-width: 641px) and (max-width: 999px) {
   .sheet.bare:has(.dt) {
-    width: min(760px, calc(100vw - 32px));
+    width: min(760px, calc(100vw - 96px));
   }
 }
 
