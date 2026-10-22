@@ -152,9 +152,9 @@ export function followsCar(state: AppState, s: Subscription, m: ShareMember, tod
 export function applyCarRule(state: AppState, s: Subscription, rule: CarRule, from: string, today: string): Subscription {
   if (!s.share) return s;
   const members = s.share.members.map((m) => {
+    if (m.left && (m.left <= today || m.left <= from)) return m;
     // 规则第一次存下时，原本就与车不一致的成员明确标为自定义，之后不会被当成跟随车
     if (!followsCar(state, s, m, today)) return m.exempt || m.custom ? m : { ...m, custom: true };
-    if (m.left && m.left <= from) return m;
     const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
     if (sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)) return m;
     return changeMemberFee(state, s, m, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
