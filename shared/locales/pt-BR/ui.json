@@ -2,7 +2,8 @@
   "close": "Fechar",
   "error": {
     "loginRequired": "Entre primeiro",
-    "requestFailed": "Falha na solicitação ({status})"
+    "requestFailed": "Falha na solicitação ({status})",
+    "wholeCurrency": "Os valores em {currency} devem ser inteiros"
   },
   "theme": {
     "light": "Claro",

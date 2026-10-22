@@ -16,13 +16,13 @@ import {
   ToggleButtonGroup,
 } from 'react-aria-components';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
-import { flowSign, symbol } from '../../../shared/format.ts';
+import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { CatGlyph } from './CatGlyph.tsx';
 import { intlLocale, t } from '../../../shared/i18n.ts';
-import { Toaster } from 'sonner';
+import { Toaster, toast as notify } from 'sonner';
 
 // ---------- SF Symbols 风格线性图标 ----------
 const P: Record<string, JSX.Element> = {
@@ -329,11 +329,11 @@ export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; h
 export function Amount({ value, ccy, compact, plain, decimals }: { value: number; ccy: string; compact?: boolean; plain?: boolean; decimals?: number }) {
   if (!Number.isFinite(value)) return <span className="amt">—</span>;
   const abs = Math.abs(value);
-  const noDec = compact && abs >= 1000;
+  const digits = moneyDecimals(value, ccy, { compact, decimals });
   // 整数分组和小数点都跟随当前语言（德语 1.234,56、法语 1 234,56），小数部分缩小显示
   const parts = new Intl.NumberFormat(intlLocale(), {
-    minimumFractionDigits: decimals ?? (noDec ? 0 : 2),
-    maximumFractionDigits: decimals ?? (noDec ? 0 : 2),
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
   }).formatToParts(abs);
   const int = parts
     .filter((p) => p.type !== 'decimal' && p.type !== 'fraction')
@@ -473,8 +473,9 @@ const toNum = (v: string) => (v.trim() === '' || !Number.isFinite(Number(v)) ? u
 export function NumInput({
   value,
   onValue,
+  ccy,
   ...rest
-}: { value: number | undefined; onValue: (n: number | undefined) => void } & Omit<JSX.IntrinsicElements['input'], 'value' | 'onChange'>) {
+}: { value: number | undefined; onValue: (n: number | undefined) => void; ccy?: string } & Omit<JSX.IntrinsicElements['input'], 'value' | 'onChange'>) {
   const shown = (v: number | undefined) => (v == null ? '' : String(v));
   const [text, setText] = useState(shown(value));
   const [seen, setSeen] = useState(value);
@@ -485,7 +486,8 @@ export function NumInput({
   }
   return (
     <input
-      inputMode="decimal"
+      inputMode={ccy && currencyDecimals(ccy) === 0 ? 'numeric' : 'decimal'}
+      step={ccy ? 10 ** -currencyDecimals(ccy) : undefined}
       {...rest}
       value={text}
       onFocus={(e) => {
@@ -498,8 +500,33 @@ export function NumInput({
         rest.onBlur?.(e);
       }}
       onChange={(e) => {
+        if (ccy && !acceptCurrencyInput(e.target.value, ccy)) return;
         setText(e.target.value);
         onValue(toNum(e.target.value));
+      }}
+    />
+  );
+}
+
+/** 新输入的零小数金额拒绝小数；已有值与汇率计算结果不在这里改写。 */
+export function acceptCurrencyInput(text: string, ccy: string): boolean {
+  const n = toNum(text);
+  if (currencyDecimals(ccy) === 0 && n != null && !Number.isInteger(n)) {
+    notify.error(t('ui.error.wholeCurrency', { currency: ccy }));
+    return false;
+  }
+  return true;
+}
+
+/** 保留字符串草稿语义的金额输入（空值、负号等由调用方校验）。 */
+export function MoneyInput({ ccy, onChange, ...props }: { ccy: string } & JSX.IntrinsicElements['input']) {
+  return (
+    <input
+      {...props}
+      inputMode={currencyDecimals(ccy) === 0 ? 'numeric' : 'decimal'}
+      step={10 ** -currencyDecimals(ccy)}
+      onChange={(e) => {
+        if (acceptCurrencyInput(e.target.value, ccy)) onChange?.(e);
       }}
     />
   );

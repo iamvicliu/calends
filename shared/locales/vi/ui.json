@@ -2,7 +2,8 @@
   "close": "Đóng",
   "error": {
     "loginRequired": "Vui lòng đăng nhập trước",
-    "requestFailed": "Yêu cầu thất bại ({status})"
+    "requestFailed": "Yêu cầu thất bại ({status})",
+    "wholeCurrency": "Số tiền {currency} phải là số nguyên"
   },
   "theme": {
     "light": "Sáng",

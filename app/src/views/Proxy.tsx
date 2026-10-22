@@ -4,7 +4,7 @@ import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, MoneyInput, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
 import { run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -363,7 +363,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
         >
           <Cell label={t('proxy.entry.amount')}>
-            <input className="num" inputMode="decimal" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
+            <MoneyInput ccy={chargedCcy} className="num" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
           </Cell>
           <Cell label={t('proxy.entry.currency')}>
             <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
@@ -381,9 +381,9 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           }
         >
           <Cell label={t('proxy.entry.amount')}>
-            <input
+            <MoneyInput
+              ccy={ccy}
               className="num"
-              inputMode="decimal"
               autoFocus
               value={received}
               placeholder={t('proxy.entry.notReceived')}

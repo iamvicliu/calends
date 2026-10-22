@@ -320,7 +320,13 @@ export function MemberSheet({
               </Cell>
               {f.firstPeriod !== 'free' && (
                 <Cell label={t('family.member.firstAmount')}>
-                  <NumInput className="num" value={f.firstAmount} placeholder={String(first.amount)} onValue={(n) => up({ firstAmount: n })} />
+                  <NumInput
+                    ccy={first.currency}
+                    className="num"
+                    value={f.firstAmount}
+                    placeholder={String(first.amount)}
+                    onValue={(n) => up({ firstAmount: n })}
+                  />
                 </Cell>
               )}
             </>
@@ -346,7 +352,7 @@ export function MemberSheet({
           <Cell label={perBill('family.member.feeLabel', months)}>
             <span className="contact-field">
               <CurrencySelect value={f.feeCurrency ?? base} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
-              <NumInput className="num" value={f.fee || undefined} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
+              <NumInput ccy={f.feeCurrency ?? base} className="num" value={f.fee || undefined} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
             </span>
           </Cell>
           <Cell label={<span>{t('family.member.exempt')}</span>}>
@@ -446,6 +452,7 @@ export function MemberSheet({
               <Cell label={t('family.member.amount')}>
                 <NumInput
                   className="num"
+                  ccy={pay.currency}
                   value={pay.amount}
                   onValue={(n) => {
                     setPayMoneyEdited(true);

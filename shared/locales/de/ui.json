@@ -2,7 +2,8 @@
   "close": "Schließen",
   "error": {
     "loginRequired": "Bitte melde dich zuerst an",
-    "requestFailed": "Anfrage fehlgeschlagen ({status})"
+    "requestFailed": "Anfrage fehlgeschlagen ({status})",
+    "wholeCurrency": "Beträge in {currency} müssen ganze Zahlen sein"
   },
   "theme": {
     "light": "Hell",

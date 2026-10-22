@@ -5735,7 +5735,9 @@ a.car-toggle {
 
 /* 列表模式：整宽表格，一行一个订阅，点按弹出详情 */
 .ltable {
-  --cols: minmax(220px, 2.4fr) 92px minmax(120px, 1.1fr) minmax(110px, 1fr) 84px 76px 92px;
+  --cols: minmax(180px, 1.6fr) max-content max-content max-content minmax(max-content, 1fr) minmax(max-content, 1fr) minmax(max-content, 1fr);
+  display: grid;
+  grid-template-columns: var(--cols);
   border-radius: var(--r);
   background: var(--card);
   box-shadow: inset 0 0 0 1px var(--line);
@@ -5743,7 +5745,8 @@ a.car-toggle {
 }
 .lt-row {
   display: grid;
-  grid-template-columns: var(--cols);
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
   align-items: center;
   gap: 12px;
   width: 100%;
@@ -5850,6 +5853,7 @@ a.car-toggle {
   margin-left: 1px;
 }
 .lt-mo {
+  white-space: nowrap;
   color: var(--label-2);
   font-variant-numeric: tabular-nums;
 }
@@ -5873,7 +5877,7 @@ a.car-toggle {
 }
 @container (max-width: 940px) {
   .ltable {
-    --cols: minmax(200px, 2fr) minmax(110px, 1fr) minmax(100px, 1fr) 80px 92px;
+    --cols: minmax(160px, 1.6fr) max-content max-content minmax(max-content, 1fr) minmax(max-content, 1fr);
   }
   .lt-cat,
   .lt-start,

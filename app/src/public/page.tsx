@@ -3,7 +3,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn } from '../../../shared/billing.ts';
-import { cnDate, flow, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
+import { cnDate, flow, moneyTick, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
 import { t, type Params } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../../shared/metrics.ts';
@@ -200,15 +200,15 @@ function Ledger({ state }: { state: AppState }) {
             <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">{t('public.hero.monthly')}</div>
-                <Num value={d.mrr * k} prefix={sym} className="mt-1 text-5xl font-semibold tracking-tight tnum sm:text-6xl" />
+                <Num value={d.mrr * k} ccy={ccy} prefix={sym} className="mt-1 text-5xl font-semibold tracking-tight tnum sm:text-6xl" />
                 <div className="mt-2 text-[13px] text-muted-foreground tnum">
                   {Math.abs(diff) < 1 ? t('public.hero.flat') : t(diff > 0 ? 'public.hero.more' : 'public.hero.less', { amount: fmt(Math.abs(diff)) })}
                 </div>
               </div>
               <dl className="grid grid-cols-3 gap-6 sm:gap-10">
-                <Stat label={t('public.hero.yearly')} value={<Num value={d.mrr * 12 * k} prefix={sym} />} />
+                <Stat label={t('public.hero.yearly')} value={<Num value={d.mrr * 12 * k} ccy={ccy} prefix={sym} />} />
                 <Stat label={t('public.hero.live')} value={<Num value={d.live.filter((x) => ['active', 'ending'].includes(effectiveStatus(x.s, today))).length} />} />
-                <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === base ? d.paidBase : d.paidUsd} prefix={sym} />} />
+                <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === base ? d.paidBase : d.paidUsd} ccy={ccy} prefix={sym} />} />
               </dl>
             </CardContent>
 
@@ -218,7 +218,7 @@ function Ledger({ state }: { state: AppState }) {
               <div className="mb-2 flex items-baseline justify-between gap-3 pr-16">
                 <h2 className="font-medium">{t('public.timeline.title')}</h2>
                 <span className="text-[13px] text-muted-foreground tnum">
-                  {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} prefix={sym} className="text-foreground" /> })}
+                  {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} ccy={ccy} prefix={sym} className="text-foreground" /> })}
                 </span>
               </div>
               <Timeline today={today} load={loadTimeline} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
@@ -242,10 +242,10 @@ function Ledger({ state }: { state: AppState }) {
                 </CardAction>
               </CardHeader>
               <TabsContent value="paid" className="mt-4 px-2 sm:px-4">
-                <PaidChart months={ccy === base ? d.monthsBase : d.monthsUsd} cur={today.slice(0, 7)} sym={sym} fmt={fmt} />
+                <PaidChart months={ccy === base ? d.monthsBase : d.monthsUsd} cur={today.slice(0, 7)} ccy={ccy} fmt={fmt} />
               </TabsContent>
               <TabsContent value="mrr" className="mt-4 px-2 sm:px-4">
-                <MrrChart data={d.mrrTrend.map((p) => ({ ...p, mrr: p.mrr * k }))} sym={sym} fmt={fmt} />
+                <MrrChart data={d.mrrTrend.map((p) => ({ ...p, mrr: p.mrr * k }))} ccy={ccy} fmt={fmt} />
               </TabsContent>
             </Tabs>
           </Card>
@@ -423,7 +423,7 @@ function derive(state: AppState, today: string) {
 
 const monthTick = (m: string, cur: string) => (m === cur ? t('public.chart.thisMonth') : monthLabel(m, { year: false }));
 const monthFull = (m: string) => monthLabel(m);
-const short = (v: number, sym: string) => (v >= 1000 ? `${sym}${+(v / 1000).toFixed(1)}k` : `${sym}${Math.round(v)}`);
+
 
 // ---------- 组件 ----------
 
@@ -437,14 +437,14 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 
-function PaidChart({ months, cur, sym, fmt }: { months: Array<{ m: string; v: number }>; cur: string; sym: string; fmt: (v: number) => string }) {
+function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: number }>; cur: string; ccy: string; fmt: (v: number) => string }) {
   const paidConfig = { v: { label: t('public.chart.charge'), color: 'var(--foreground)' } } satisfies ChartConfig;
   return (
     <ChartContainer config={paidConfig} className="aspect-auto h-52 w-full">
       <BarChart data={months} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="2 4" />
         <XAxis dataKey="m" tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" minTickGap={6} tickFormatter={(m: string) => monthTick(m, cur)} />
-        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => short(v, sym)} />
+        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent hideIndicator labelFormatter={(m) => (String(m) > cur ? t('public.chart.projected', { month: monthFull(String(m)) }) : monthFull(String(m)))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />}
@@ -465,7 +465,7 @@ function PaidChart({ months, cur, sym, fmt }: { months: Array<{ m: string; v: nu
 }
 
 
-function MrrChart({ data, sym, fmt }: { data: Array<{ month: string; mrr: number }>; sym: string; fmt: (v: number) => string }) {
+function MrrChart({ data, ccy, fmt }: { data: Array<{ month: string; mrr: number }>; ccy: string; fmt: (v: number) => string }) {
   const mrrConfig = { mrr: { label: t('public.chart.mrr'), color: 'var(--foreground)' } } satisfies ChartConfig;
   return (
     <ChartContainer config={mrrConfig} className="aspect-auto h-52 w-full">
@@ -478,7 +478,7 @@ function MrrChart({ data, sym, fmt }: { data: Array<{ month: string; mrr: number
         </defs>
         <CartesianGrid vertical={false} strokeDasharray="2 4" />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} minTickGap={28} tickFormatter={(m: string) => `${m.slice(2, 4)}/${Number(m.slice(5))}`} />
-        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => short(v, sym)} />
+        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip cursor={false} content={<ChartTooltipContent hideIndicator labelFormatter={(m) => monthFull(String(m))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />} />
         <Area dataKey="mrr" type="stepAfter" stroke="var(--color-mrr)" strokeWidth={1.5} fill="url(#mrr-fill)" />
       </AreaChart>

@@ -2,7 +2,8 @@
   "close": "關閉",
   "error": {
     "loginRequired": "請先登入",
-    "requestFailed": "請求失敗 {status}"
+    "requestFailed": "請求失敗 {status}",
+    "wholeCurrency": "{currency} 金額只能輸入整數"
   },
   "theme": {
     "light": "淺色",

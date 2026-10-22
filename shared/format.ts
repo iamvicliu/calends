@@ -56,17 +56,39 @@ export const CURRENCIES = [
   'UAH',
   'KZT',
   'CHF',
+  'CLP',
+  'HUF',
+  'PYG',
+  'MGA',
+  'BIF',
 ];
 
 export function symbol(ccy: string): string {
   return SYMBOL[ccy] ?? ccy + ' ';
 }
 
+/** 展示精度；不改变计算、存储或历史原值。 */
+export function currencyDecimals(ccy: string): number {
+  return ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'HUF', 'TWD', 'PYG', 'MGA', 'BIF'].includes(ccy) ? 0 : 2;
+}
+
+type MoneyOptions = { compact?: boolean; sign?: boolean; decimals?: number };
+
+/** 金额文本和分段金额组件共用；显式精度和紧凑显示也不能为零小数货币添加小数。 */
+export function moneyDecimals(n: number, ccy: string, opts: MoneyOptions = {}): number {
+  const digits = currencyDecimals(ccy);
+  return digits === 0 ? 0 : (opts.decimals ?? (opts.compact && (Math.abs(n) >= 1000 || Number.isInteger(n)) ? 0 : digits));
+}
+
+/** 图表的缩略金额刻度，精度同样服从币种规则。 */
+export function moneyTick(n: number, ccy: string): string {
+  return Math.abs(n) >= 1000 ? `${money(n / 1000, ccy, { decimals: Math.abs(n) >= 10000 ? 0 : 1 })}k` : money(n, ccy, { decimals: 0 });
+}
+
 /** 带币种符号的金额；compact 去掉多余小数。数字分组跟随当前语言 */
-export function money(n: number, ccy: string, opts: { compact?: boolean; sign?: boolean; decimals?: number } = {}): string {
+export function money(n: number, ccy: string, opts: MoneyOptions = {}): string {
   if (!Number.isFinite(n)) return '—';
-  const big = Math.abs(n) >= 1000;
-  const decimals = opts.decimals ?? (opts.compact ? (big || Number.isInteger(n) ? 0 : 2) : ['JPY', 'KRW', 'VND', 'IDR'].includes(ccy) ? 0 : 2);
+  const decimals = moneyDecimals(n, ccy, opts);
   const s = Math.abs(n).toLocaleString(intlLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
   const sign = n < 0 ? '−' : opts.sign && n > 0 ? '+' : '';
   return `${sign}${symbol(ccy)}${s}`;

@@ -2,7 +2,8 @@
   "close": "Close",
   "error": {
     "loginRequired": "Please sign in first",
-    "requestFailed": "Request failed ({status})"
+    "requestFailed": "Request failed ({status})",
+    "wholeCurrency": "{currency} amounts must be whole numbers"
   },
   "theme": {
     "light": "Light",

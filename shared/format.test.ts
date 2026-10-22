@@ -1,6 +1,6 @@
 import { afterEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { flow, flowSign, money, setSignedAmounts } from './format.ts';
+import { currencyDecimals, moneyTick, symbol, flow, flowSign, money, setSignedAmounts } from './format.ts';
 import { setLocale } from './i18n.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 
@@ -82,4 +82,30 @@ test('unrefunded loss translations leave cash-flow signs to flow in every locale
       assert.equal((text.match(/−/g) ?? []).length, on ? 1 : 0, `${loc}: ${text}`);
     }
   }
+});
+
+test('all currency display precision follows the shared rule, including negative and compact values', () => {
+  setLocale('en', []);
+  for (const ccy of ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'HUF', 'TWD', 'PYG', 'MGA', 'BIF']) {
+    assert.equal(currencyDecimals(ccy), 0, ccy);
+    for (const opts of [{}, { compact: true }, { decimals: 2 }]) {
+      assert.equal(money(19.8, ccy, opts), `${symbol(ccy)}20`);
+      assert.equal(money(-19.8, ccy, opts), `−${symbol(ccy)}20`);
+      assert.equal(money(1234567.89, ccy, opts), `${symbol(ccy)}1,234,568`);
+      assert.equal(money(0, ccy, opts), `${symbol(ccy)}0`);
+      assert.equal(flow(-19.8, ccy, opts), `−${symbol(ccy)}20`);
+    }
+    assert.equal(moneyTick(1470.07, ccy), `${symbol(ccy)}1k`);
+  }
+  for (const ccy of ['USD', 'CNY', 'NGN', 'TRY', 'CHF', 'KWD', 'XXX']) {
+    assert.equal(currencyDecimals(ccy), 2, ccy);
+    assert.equal(money(19.8, ccy), `${symbol(ccy)}19.80`);
+    assert.equal(money(-1234567.89, ccy), `−${symbol(ccy)}1,234,567.89`);
+    assert.equal(money(19, ccy, { compact: true }), `${symbol(ccy)}19`);
+    assert.equal(money(19.8, ccy, { compact: true }), `${symbol(ccy)}19.80`);
+    assert.equal(money(1234567.89, ccy, { compact: true }), `${symbol(ccy)}1,234,568`);
+  }
+  setLocale('de', []);
+  assert.equal(money(1234567.89, 'TWD'), 'NT$1.234.568');
+  assert.equal(money(1234567.89, 'USD'), '$1.234.567,89');
 });

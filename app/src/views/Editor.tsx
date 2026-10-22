@@ -305,7 +305,7 @@ function Form({
       <Group title={t('editor.group.billing')}>
         <Cell label={t('editor.field.amount')}>
           <span className="ed-amount">
-            <NumInput className="num" value={f.price || undefined} placeholder="0.00" onValue={(n) => up({ price: n ?? 0 })} />
+            <NumInput ccy={f.currency} className="num" value={f.price || undefined} placeholder="0.00" onValue={(n) => up({ price: n ?? 0 })} />
             <CurrencySelect value={f.currency} onChange={(c) => up({ currency: c })} />
           </span>
         </Cell>
@@ -511,7 +511,13 @@ function Form({
             {share.members.map((m, i) => (
               <div key={m.id} className="member-edit">
                 <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
-                <NumInput className="num" value={m.share} title={t('editor.share.perPeriod')} onValue={(n) => setMember(i, { share: n ?? 0 })} />
+                <NumInput
+                  ccy={f.currency}
+                  className="num"
+                  value={m.share}
+                  title={t('editor.share.perPeriod')}
+                  onValue={(n) => setMember(i, { share: n ?? 0 })}
+                />
                 <span className="wide">
                   <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
                 </span>
@@ -565,7 +571,7 @@ function Form({
                 {f.intro && (
                   <>
                     <Cell label={t('editor.intro.price')}>
-                      <NumInput className="num" value={f.intro.price} onValue={(n) => up({ intro: { ...f.intro!, price: n ?? 0 } })} />
+                      <NumInput ccy={f.currency} className="num" value={f.intro.price} onValue={(n) => up({ intro: { ...f.intro!, price: n ?? 0 } })} />
                     </Cell>
                     <Cell label={t('editor.intro.until')}>
                       <DatePicker value={f.intro.until} onChange={(v) => up({ intro: { ...f.intro!, until: v ?? today } })} />
