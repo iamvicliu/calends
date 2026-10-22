@@ -379,8 +379,11 @@ function fixture(sub = base({ start: addDays(todayIn('UTC'), -14) })) {
       },
     } as unknown as Env,
   };
-  const run = async (name: string, args: Record<string, unknown> = {}) =>
-    TOOLS.find((tool) => tool.name === name)!.run({ subscription: sub.id, ...args }, ctx) as Promise<Record<string, any>>;
+  const run = async (name: string, args: Record<string, unknown> = {}) => {
+    const tool = TOOLS.find((tool) => tool.name === name)!;
+    const hasSubscription = Object.hasOwn(tool.inputSchema.properties as object, 'subscription');
+    return tool.run({ ...(hasSubscription ? { subscription: sub.id } : {}), ...args }, ctx) as Promise<Record<string, any>>;
+  };
   const saved = () => JSON.parse((db.prepare('SELECT data FROM subscriptions WHERE id = ?').get(sub.id) as { data: string }).data) as Subscription;
   return { db, ctx, run, saved, sub };
 }
@@ -516,7 +519,9 @@ test('MCP 全部新增业务错误不写库', async () => {
       [{ action: 'terminate', refund: { amount: -1 } }, 'invalidRefund'],
     ];
     for (const [args, key] of cases) {
-      await assert.rejects(() => f.run('set_status', args), { message: t(`mcp.error.${key}`) });
+      await assert.rejects(() => f.run('set_status', args), {
+        message: key === 'invalidRefund' ? t('mcp.error.invalidInput', { field: 'arguments.refund.amount' }) : t(`mcp.error.${key}`),
+      });
       assert.equal(f.saved().stop, undefined);
     }
     await f.run('set_status', { action: 'terminate' });

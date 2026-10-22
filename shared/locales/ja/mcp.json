@@ -55,7 +55,11 @@
     "invalidRefund": "返金額は有効な数値で、負の値として記録してください。",
     "refundBeforeStop": "返金日は停止日より前にできません。",
     "paymentOutOfRange": "請求日 {date} は開始日から今日までの間にしてください",
-    "invalidFirstPeriod": "first_period は prorate、full、free のいずれかです。"
+    "invalidFirstPeriod": "first_period は prorate、full、free のいずれかです。",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "台帳の概要",
@@ -84,6 +88,11 @@
     "delete_payment": "請求記録を削除",
     "record_receivable": "受け取りを記録",
     "update_payment_method": "支払い方法の残高を更新",
-    "list_people": "相手と未回収"
+    "list_people": "相手と未回収",
+    "save_category": "カテゴリを管理",
+    "save_person": "人物を管理",
+    "get_settings": "台帳設定",
+    "update_settings": "台帳設定を更新",
+    "set_proxy": "立替関係を管理"
   }
 }

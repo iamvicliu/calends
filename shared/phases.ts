@@ -246,6 +246,7 @@ export function removePhase(s: Subscription, index: number): Subscription {
       region: p.region,
       priceHistory: p.priceHistory,
       intro: p.intro,
+      bonus: p.bonus,
       payments: p.payments,
       nextDue: p.nextDue,
     };
@@ -298,7 +299,8 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
     phases[oi] = materialize(phases[oi], s, today);
     originalPhase = oi;
     const list = (phases[oi].payments ?? []).filter((x) => x.date === old.date);
-    const target = list[old.index] ?? list[0];
+    const target = list[old.index];
+    if (!target) throw new Error(t('mcp.error.invalidTarget'));
     phases[oi] = { ...phases[oi], payments: (phases[oi].payments ?? []).filter((x) => x !== target) };
   }
   // 指定了阶段（并行时选的那一段，或原记录所在的段）且日期仍在那段里：记在那段；否则按日期归段
@@ -320,7 +322,8 @@ export function deletePayment(s: Subscription, today: string, date: string, inde
   const i = phaseIndexAt(phases, date, s, phase, true);
   phases[i] = materialize(phases[i], s, today);
   const list = (phases[i].payments ?? []).filter((x) => x.date === date);
-  const target = list[index] ?? list[0];
+  const target = list[index];
+  if (!target) throw new Error(t('mcp.error.invalidTarget'));
   phases[i] = { ...phases[i], payments: (phases[i].payments ?? []).filter((x) => x !== target) };
   return fromPhases(s, phases);
 }
@@ -420,4 +423,25 @@ export function cancelAtEnd(s: Subscription, at: string, today: string): Subscri
   let c = s;
   for (const p of (s.phases ?? []).filter((p) => p.start > at).sort((a, b) => b.start.localeCompare(a.start))) c = dropPlan(c, p.start);
   return syncPhase({ ...toEditForm(c, today), status: 'cancelled', end: at, stop: undefined }, today);
+}
+
+/** Correct one existing phase without replacing unrelated phases or recorded payments. */
+export function editPhase(s: Subscription, start: string, patch: Partial<Phase>): Subscription {
+  const phases = phasesOf(s);
+  const index = phases.findIndex((p) => p.start === start);
+  if (index < 0) throw new Error(t('mcp.error.invalidTarget'));
+  const p = { ...phases[index] } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null) delete p[key];
+    else p[key] = value;
+  }
+  phases[index] = p as unknown as Phase;
+  phases.sort((a, b) => a.start.localeCompare(b.start));
+  if (new Set(phases.map((p) => p.start)).size !== phases.length) throw new Error(t('mcp.error.invalidTarget'));
+  for (const phase of phases) {
+    const error = subError({ ...s, ...phase, phases: undefined });
+    if (error) throw new Error(error);
+    if (phase.end && phase.end < phase.start) throw new Error(t('core.phase.endTooEarly'));
+  }
+  return mirror({ ...s, start: phases[0].start }, phases);
 }

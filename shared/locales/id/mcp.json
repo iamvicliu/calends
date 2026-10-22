@@ -55,7 +55,11 @@
     "invalidRefund": "Jumlah pengembalian harus valid dan disimpan negatif.",
     "refundBeforeStop": "Tanggal pengembalian tidak boleh sebelum penghentian.",
     "paymentOutOfRange": "Tanggal pembayaran {date} harus antara tanggal mulai dan hari ini",
-    "invalidFirstPeriod": "first_period harus prorate, full, atau free."
+    "invalidFirstPeriod": "first_period harus prorate, full, atau free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
@@ -84,6 +88,11 @@
     "delete_payment": "Hapus catatan tagihan",
     "record_receivable": "Catat uang diterima",
     "update_payment_method": "Perbarui saldo metode pembayaran",
-    "list_people": "Orang & piutang"
+    "list_people": "Orang & piutang",
+    "save_category": "Kelola kategori",
+    "save_person": "Kelola orang",
+    "get_settings": "Pengaturan buku",
+    "update_settings": "Ubah pengaturan",
+    "set_proxy": "Kelola pembayaran titipan"
   }
 }

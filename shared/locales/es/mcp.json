@@ -55,7 +55,11 @@
     "invalidRefund": "Los importes de reembolso deben ser válidos y guardarse como negativos.",
     "refundBeforeStop": "El reembolso no puede ser anterior al cese.",
     "paymentOutOfRange": "La fecha de pago {date} debe estar entre la fecha de inicio y hoy",
-    "invalidFirstPeriod": "first_period debe ser prorate, full o free."
+    "invalidFirstPeriod": "first_period debe ser prorate, full o free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "Resumen del registro",
@@ -84,6 +88,11 @@
     "delete_payment": "Eliminar un registro de cobro",
     "record_receivable": "Registrar dinero recibido",
     "update_payment_method": "Actualizar el saldo de un método de pago",
-    "list_people": "Personas y cobros"
+    "list_people": "Personas y cobros",
+    "save_category": "Gestionar categoría",
+    "save_person": "Gestionar persona",
+    "get_settings": "Ajustes del registro",
+    "update_settings": "Actualizar ajustes",
+    "set_proxy": "Gestionar pagos por terceros"
   }
 }

@@ -55,7 +55,11 @@
     "invalidRefund": "Les montants remboursés doivent être valides et enregistrés en négatif.",
     "refundBeforeStop": "La date du remboursement ne peut pas précéder l’arrêt.",
     "paymentOutOfRange": "La date de paiement {date} doit être comprise entre la date de début et aujourd’hui",
-    "invalidFirstPeriod": "first_period doit être prorate, full ou free."
+    "invalidFirstPeriod": "first_period doit être prorate, full ou free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "Aperçu du registre",
@@ -84,6 +88,11 @@
     "delete_payment": "Supprimer un prélèvement",
     "record_receivable": "Enregistrer une somme reçue",
     "update_payment_method": "Mettre à jour le solde d’un moyen de paiement",
-    "list_people": "Personnes et créances"
+    "list_people": "Personnes et créances",
+    "save_category": "Gérer une catégorie",
+    "save_person": "Gérer une personne",
+    "get_settings": "Paramètres du registre",
+    "update_settings": "Modifier les paramètres",
+    "set_proxy": "Gérer les avances"
   }
 }

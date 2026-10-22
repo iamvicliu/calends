@@ -55,7 +55,11 @@
     "invalidRefund": "退款金额须为有效数字，并以负数记录。",
     "refundBeforeStop": "退款日期不能早于停止日。",
     "paymentOutOfRange": "扣款日期 {date} 必须在开始日期到今天之间",
-    "invalidFirstPeriod": "首期方式必须是 prorate、full 或 free。"
+    "invalidFirstPeriod": "首期方式必须是 prorate、full 或 free。",
+    "invalidInput": "工具参数不合法：{field}",
+    "invalidTarget": "目标不存在、不唯一、重复或不合法。请先读取最新记录并指定准确的 ID/索引。",
+    "references": "此项仍被引用。请指定 migrate_to 或先移除这些引用：{references}",
+    "staleRecord": "记录在预览后已变化，请重新读取并预览。"
   },
   "tool": {
     "get_overview": "账本概况",
@@ -83,7 +87,12 @@
     "record_payment": "记一笔扣款",
     "delete_payment": "删除一笔扣款记录",
     "record_receivable": "记一笔收款",
-    "update_payment_method": "更新支付方式余额",
-    "list_people": "人与应收"
+    "update_payment_method": "管理支付方式与充值",
+    "list_people": "人与应收",
+    "save_category": "管理分类",
+    "save_person": "管理人员",
+    "get_settings": "账本设置",
+    "update_settings": "修改账本设置",
+    "set_proxy": "管理代付关系"
   }
 }

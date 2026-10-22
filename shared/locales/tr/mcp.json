@@ -55,7 +55,11 @@
     "invalidRefund": "İade tutarları geçerli sayılar olmalı ve negatif kaydedilmelidir.",
     "refundBeforeStop": "İade tarihi durdurma tarihinden önce olamaz.",
     "paymentOutOfRange": "Ödeme tarihi {date}, başlangıç tarihi ile bugün arasında olmalıdır",
-    "invalidFirstPeriod": "first_period prorate, full veya free olmalıdır."
+    "invalidFirstPeriod": "first_period prorate, full veya free olmalıdır.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "Defter özeti",
@@ -84,6 +88,11 @@
     "delete_payment": "Ödeme kaydını sil",
     "record_receivable": "Alınan parayı kaydet",
     "update_payment_method": "Ödeme yöntemi bakiyesini güncelle",
-    "list_people": "Kişiler ve alacaklar"
+    "list_people": "Kişiler ve alacaklar",
+    "save_category": "Kategori yönetimi",
+    "save_person": "Kişi yönetimi",
+    "get_settings": "Defter ayarları",
+    "update_settings": "Ayarları güncelle",
+    "set_proxy": "Vekil ödeme yönetimi"
   }
 }

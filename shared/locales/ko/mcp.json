@@ -55,7 +55,11 @@
     "invalidRefund": "환불액은 유효한 숫자이며 음수로 기록해야 합니다.",
     "refundBeforeStop": "환불일은 중지일보다 빠를 수 없습니다.",
     "paymentOutOfRange": "결제일 {date}은(는) 시작일과 오늘 사이여야 합니다",
-    "invalidFirstPeriod": "first_period는 prorate, full 또는 free여야 합니다."
+    "invalidFirstPeriod": "first_period는 prorate, full 또는 free여야 합니다.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "장부 개요",
@@ -84,6 +88,11 @@
     "delete_payment": "결제 기록 삭제",
     "record_receivable": "받은 돈 기록",
     "update_payment_method": "결제 수단 잔액 업데이트",
-    "list_people": "사람과 받을 돈"
+    "list_people": "사람과 받을 돈",
+    "save_category": "카테고리 관리",
+    "save_person": "사람 관리",
+    "get_settings": "장부 설정",
+    "update_settings": "장부 설정 변경",
+    "set_proxy": "대납 관계 관리"
   }
 }

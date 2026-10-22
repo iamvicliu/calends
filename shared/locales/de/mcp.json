@@ -55,7 +55,11 @@
     "invalidRefund": "Erstattungsbeträge müssen gültige Zahlen und negativ gespeichert sein.",
     "refundBeforeStop": "Das Erstattungsdatum darf nicht vor dem Enddatum liegen.",
     "paymentOutOfRange": "Das Zahlungsdatum {date} muss zwischen Startdatum und heute liegen",
-    "invalidFirstPeriod": "first_period muss prorate, full oder free sein."
+    "invalidFirstPeriod": "first_period muss prorate, full oder free sein.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again."
   },
   "tool": {
     "get_overview": "Kontoübersicht",
@@ -84,6 +88,11 @@
     "delete_payment": "Abbuchung löschen",
     "record_receivable": "Zahlungseingang erfassen",
     "update_payment_method": "Guthaben der Zahlungsmethode aktualisieren",
-    "list_people": "Personen & Forderungen"
+    "list_people": "Personen & Forderungen",
+    "save_category": "Kategorie verwalten",
+    "save_person": "Person verwalten",
+    "get_settings": "Bucheinstellungen",
+    "update_settings": "Einstellungen ändern",
+    "set_proxy": "Auslagen verwalten"
   }
 }
