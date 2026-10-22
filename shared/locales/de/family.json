@@ -29,7 +29,9 @@
     "fee": "Gebühr",
     "nextCollection": "Nächster Einzug",
     "actions": "Aktionen",
-    "status": "Zahlungsstatus"
+    "status": "Zahlungsstatus",
+    "period": "Aktueller Zeitraum",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

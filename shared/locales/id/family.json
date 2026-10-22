@@ -28,7 +28,9 @@
     "fee": "Biaya",
     "nextCollection": "Penagihan berikutnya",
     "actions": "Tindakan",
-    "status": "Status pembayaran"
+    "status": "Status pembayaran",
+    "period": "Periode ini",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

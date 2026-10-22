@@ -28,7 +28,9 @@
     "fee": "요금",
     "nextCollection": "다음 수금",
     "actions": "작업",
-    "status": "납부 상태"
+    "status": "납부 상태",
+    "period": "이번 기간",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

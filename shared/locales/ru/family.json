@@ -30,7 +30,9 @@
     "fee": "Плата",
     "nextCollection": "Следующий сбор",
     "actions": "Действия",
-    "status": "Статус оплаты"
+    "status": "Статус оплаты",
+    "period": "Текущий период",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

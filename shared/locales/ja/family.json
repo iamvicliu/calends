@@ -28,7 +28,9 @@
     "fee": "料金",
     "nextCollection": "次回集金",
     "actions": "操作",
-    "status": "支払い状況"
+    "status": "支払い状況",
+    "period": "今期",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

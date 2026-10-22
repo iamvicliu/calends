@@ -29,7 +29,9 @@
     "fee": "Tarif",
     "nextCollection": "Prochain encaissement",
     "actions": "Actions",
-    "status": "État du paiement"
+    "status": "État du paiement",
+    "period": "Période en cours",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

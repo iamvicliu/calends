@@ -29,7 +29,9 @@
     "fee": "Tarifa",
     "nextCollection": "Próxima cobrança",
     "actions": "Ações",
-    "status": "Situação do pagamento"
+    "status": "Situação do pagamento",
+    "period": "Período atual",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

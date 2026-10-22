@@ -371,7 +371,12 @@ function MemberRows({
                       ? t('family.pool.leftOn', { date: cnDateAuto(d.member.left, today) })
                       : d.periodsOwed > 0 && collection.from < today
                         ? `${t('family.quick.late', { count: diffDays(collection.from, today) })} · ${t('family.pool.dueOn', { date: cnDateFull(collection.from) })}`
-                        : t(d.periodsOwed > 0 ? 'family.pool.dueOn' : 'family.pool.nextDueOn', { date: cnDateFull(collection.from) })}
+                        : d.periodsOwed > 0
+                          ? t('family.pool.dueOn', { date: cnDateFull(collection.from) })
+                          : (() => {
+                              const p = memberStatus(state, s, d.member, today).period;
+                              return t('family.sheet.range', { from: cnDateFull(p.from), until: cnDateFull(p.until) });
+                            })()}
                 </span>
               </div>
             </button>
@@ -441,6 +446,9 @@ function MemberTable({
             {t('family.sheet.fee')}
           </th>
           <th role="columnheader" scope="col">
+            {t('family.sheet.period')}
+          </th>
+          <th role="columnheader" scope="col">
             {t('family.sheet.status')}
           </th>
           <th role="columnheader" scope="col">
@@ -475,7 +483,7 @@ function MemberTable({
                     <span className="text-ellipsis" title={m.name}>
                       {m.name || t('family.pool.unnamed')}
                     </span>
-                    {(left || m.account) && (
+                    {(left || (m.account && m.account !== m.name)) && (
                       <small className="muted text-ellipsis" title={m.account}>
                         {left ? t('family.pool.leftOn', { date: cnDateFull(m.left!) }) : m.account}
                       </small>
@@ -487,10 +495,21 @@ function MemberTable({
                 {m.exempt ? (
                   <span className="muted">{t('family.pool.exempt')}</span>
                 ) : (
-                  <span className="car-member-lines">
+                  <span className="car-member-fee">
                     <span>{perBill('family.pool.perFee', memberBillMonths(s, m, today), { fee: money(rate.amount, rate.currency) })}</span>
-                    <small className="muted">{followsCar(state, s, m, today) ? t('family.rule.follow') : t('family.rule.custom')}</small>
+                    {followsCar(state, s, m, today) ? (
+                      <span className="badge">{t('family.rule.follow')}</span>
+                    ) : (
+                      <span className="badge custom">{t('family.rule.custom')}</span>
+                    )}
                   </span>
+                )}
+              </td>
+              <td role="cell">
+                {m.exempt || st.gone ? (
+                  <span className="muted">—</span>
+                ) : (
+                  <span className="num-text">{t('family.sheet.range', { from: cnDateFull(st.period.from), until: cnDateFull(st.period.until) })}</span>
                 )}
               </td>
               <td role="cell">
@@ -499,13 +518,10 @@ function MemberTable({
                 ) : st.owe ? (
                   <span className="car-member-lines">
                     <b className={st.late > 0 ? 'late' : 'warn'}>{st.late > 0 ? t('family.quick.late', { count: st.late }) : t('family.pool.owed')}</b>
-                    <small className="muted">{t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}</small>
+                    <small className="muted">{t('family.pool.owedAmount', { amount: st.owed })}</small>
                   </span>
                 ) : (
-                  <span className="car-member-lines">
-                    <span className="muted">{t('family.pool.settled')}</span>
-                    <small className="muted">{t('family.pool.nextDueOn', { date: cnDateFull(st.next.from) })}</small>
-                  </span>
+                  <span className="muted">{t('family.pool.settled')}</span>
                 )}
               </td>
               <td role="cell">

@@ -29,7 +29,9 @@
     "fee": "Fee",
     "nextCollection": "Next due",
     "actions": "Actions",
-    "status": "Payment status"
+    "status": "Payment status",
+    "period": "Current period",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

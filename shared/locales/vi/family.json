@@ -28,7 +28,9 @@
     "fee": "Phí",
     "nextCollection": "Lần thu tiếp theo",
     "actions": "Thao tác",
-    "status": "Tình trạng thanh toán"
+    "status": "Tình trạng thanh toán",
+    "period": "Kỳ hiện tại",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

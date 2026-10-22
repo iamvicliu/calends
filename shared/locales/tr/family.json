@@ -29,7 +29,9 @@
     "fee": "Ücret",
     "nextCollection": "Sonraki tahsilat",
     "actions": "İşlemler",
-    "status": "Ödeme durumu"
+    "status": "Ödeme durumu",
+    "period": "Geçerli dönem",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

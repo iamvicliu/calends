@@ -759,8 +759,20 @@ export function memberStatus(state: AppState, s: Subscription, m: ShareMember, t
   const d = memberDues(s, today, collect, state).find((x) => x.member.id === m.id);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
   const owe = !!d && d.periodsOwed > 0;
+  // 本期：今天所在的这个人自己的收费期。欠款时从最早未付往后数到今天；已付到将来时是已付的最后一期
+  let period = { from: next.from, until: next.until, paid: false };
+  if (next.from > today) {
+    const joined = m.joined ?? s.share?.since ?? s.start;
+    const from = addMonths(next.from, -memberBillMonths(s, m, addDays(next.from, -1)));
+    period = { from: from < joined ? joined : from, until: addDays(next.from, -1), paid: true };
+  } else
+    for (let guard = 0; period.until < today && guard < 600; guard++) {
+      const c = memberCollection(s, m, addDays(period.until, 1), collect);
+      period = { from: c.from, until: c.until, paid: false };
+    }
   return {
     owe,
+    period,
     owed: owe ? money(d!.owed, d!.currency) : '',
     late: owe && next.from < today ? diffDays(next.from, today) : 0,
     next,

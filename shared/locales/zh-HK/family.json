@@ -28,7 +28,9 @@
     "fee": "收費",
     "nextCollection": "下次應收",
     "actions": "操作",
-    "status": "收款狀態"
+    "status": "收款狀態",
+    "period": "本期",
+    "range": "{from} – {until}"
   },
   "contact": {
     "via": {

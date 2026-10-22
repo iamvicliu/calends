@@ -9749,8 +9749,8 @@ img.mm-flag {
   }
   .car-member-table {
     display: grid;
-    /* 成员（账号） | 收费（跟随车/自定义） | 收款状态 | 操作 */
-    grid-template-columns: minmax(160px, 1.3fr) minmax(140px, 1fr) minmax(200px, 1.4fr) 72px;
+    /* 成员（账号） | 收费 + 跟随车/自定义 | 本期起止 | 收款状态 | 操作 */
+    grid-template-columns: minmax(170px, 1.5fr) minmax(170px, 1fr) minmax(210px, 1.2fr) minmax(100px, 0.7fr) 72px;
     column-gap: 28px;
     width: 100%;
     border-collapse: collapse;
@@ -9843,6 +9843,17 @@ img.mm-flag {
 }
 .car-member-table .late {
   color: var(--red);
+}
+.car-member-fee {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.car-member-fee .badge.custom {
+  background: color-mix(in srgb, var(--orange) 14%, transparent);
+  color: var(--orange);
 }
 .car-member-lines {
   display: grid;
