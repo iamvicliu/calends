@@ -192,7 +192,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const root = useRef<HTMLDivElement>(null);
 
   const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
-  const big = pair(nowPrice, cur.currency, { compact: false, plain: true });
+  const once = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
+  // 买断按买下那天的汇率折算，与扣款记录、摊到每月同一口径；按今天汇率会和记录里的金额对不上
+  const big = pair(nowPrice, cur.currency, { compact: false, plain: true, date: once ? history[0]?.date : undefined });
 
   const editPay = (c: Charge) => {
     if (ro) return;
@@ -253,7 +255,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           </h2>
           <div className="dt-meta">
             <b>
-              {big.main} {cycleLabel(cur.cycle)}
+              {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
             </b>
             {big.alt && (
               <>
@@ -283,7 +285,15 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           <Kpis sub={sub} state={state} today={today} history={history} />
           {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
           {!compact && <Upcoming sub={sub} state={state} today={today} />}
-          <Charges sub={sub} state={state} history={history} onRow={editPay} onAdd={ro ? undefined : () => setPay({})} />
+          {/* 买断已有那一笔就不再提示记一笔，行仍可点开修改 */}
+          <Charges
+            sub={sub}
+            state={state}
+            today={today}
+            history={history}
+            onRow={ro ? undefined : editPay}
+            onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
+          />
         </div>
         <div className="dt-side">
           <Outcome sub={sub} state={state} today={today} />
@@ -856,7 +866,8 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
               </button>
             </Prop>
           )}
-          <Prop k={t('detail.field.start')}>{cnDateFull(sub.start)}</Prop>
+          {/* 买断的开始日就是扣款记录里那一笔，不再重复 */}
+          {!(sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1) && <Prop k={t('detail.field.start')}>{cnDateFull(sub.start)}</Prop>}
           {next && (
             <Prop k={t('detail.field.next')} hint={relDays(diffDays(today, next))}>
               {cnDateFull(next)}
@@ -1004,14 +1015,16 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
 function Charges({
   sub,
   state,
+  today,
   history,
   onRow,
   onAdd,
 }: {
   sub: Subscription;
   state: AppState;
+  today: string;
   history: Charge[];
-  onRow: (c: Charge) => void;
+  onRow?: (c: Charge) => void;
   onAdd?: () => void;
 }) {
   const base = state.settings.baseCurrency;
@@ -1022,6 +1035,7 @@ function Charges({
   const years = [...new Set(shown.map((r) => r.c.date.slice(0, 4)))];
   // 只有一年时不分组，标题里已经有笔数
   const grouped = new Set(rows.map((r) => r.c.date.slice(0, 4))).size > 1;
+  const thisYear = today.slice(0, 4);
   return (
     <Panel
       className="dt-charges"
@@ -1036,7 +1050,7 @@ function Charges({
       }
     >
       {history.length > 0 && (
-        <div className="dt-tbl">
+        <div className={`dt-tbl ${!grouped && !years.includes(thisYear) ? 'long' : ''}`}>
           {years.map((y) => {
             const ys = rows.filter((r) => r.c.date.startsWith(y));
             return (
@@ -1057,11 +1071,12 @@ function Charges({
                   .map(({ c, b }, i) => (
                     <div
                       key={`${c.date}-${c.sub.start}-${i}`}
-                      className={`dt-tr dt-row ${onAdd ? 'edit' : ''} ${c.kind ?? ''}`}
-                      onClick={() => onAdd && onRow(c)}
+                      className={`dt-tr dt-row ${onRow ? 'edit' : ''} ${c.kind ?? ''}`}
+                      onClick={() => onRow?.(c)}
                       title={c.note}
                     >
-                      <span className="d">{c.date.slice(5)}</span>
+                      {/* 分年时组头已有年份；不分组且不是今年的（如多年前的买断）要带上年份 */}
+                      <span className="d">{grouped || c.date.startsWith(thisYear) ? c.date.slice(5) : c.date}</span>
                       <span className="o">
                         {c.currency !== base || c.settled ? flow(-c.amount, c.currency) : ''}
                         {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}

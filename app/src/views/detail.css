@@ -908,6 +908,9 @@
 .dt-tbl {
   --cols: 52px minmax(0, 1fr) auto;
 }
+.dt-tbl.long {
+  --cols: 88px minmax(0, 1fr) auto;
+}
 .dt-tr {
   display: grid;
   grid-template-columns: var(--cols);
@@ -1201,6 +1204,8 @@
   }
   .dt.compact .dt-body {
     display: flex;
+    /* 宽屏两栏的 align-items: start 会让单列里的卡片缩成内容宽度 */
+    align-items: stretch;
   }
   .dt.compact .dt-kpis {
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -104,7 +104,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
   ];
   for (const on of [true, false]) {
     setSignedAmounts(on);
-    const html = renderToStaticMarkup(React.createElement(Charges, { sub, state, history, onRow() {} }));
+    const html = renderToStaticMarkup(React.createElement(Charges, { sub, state, today: '2026-10-22', history, onRow() {} }));
     assert.ok(html.includes('dt-row '));
     assert.ok(html.includes('refund'));
     const content = text(html);
