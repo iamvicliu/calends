@@ -977,3 +977,57 @@ test('accounts belong to person × plan: API/MCP persistence, independent update
     f.db.close();
   }
 });
+
+test('carpool collection rule: MCP reads, sets, follows and customizes member fees', async () => {
+  const f = await setup();
+  try {
+    const plan = async () => (await f.call('get_carpool', { subscription: 's' }, f.read)).structuredContent.plans[0];
+    const member = async (id: string) =>
+      (await f.snapshot()).subscriptions.find((s) => s.id === 's')!.share!.members.find((m) => m.id === id || m.name === id)!;
+    let p = await plan();
+    assert.deepEqual(p.rule, { fee: 3, currency: 'USD', every_months: 1, stored: false });
+    assert.equal(p.members[0].follows_rule, true);
+    assert.equal(p.members[0].overdue_days, 0);
+
+    // 新成员没给收费标准时按车的规则
+    assert.equal((await f.call('save_share_member', { subscription: 's', name: 'Newcomer' })).isError, undefined);
+    assert.equal((await member('Newcomer')).fee, 3);
+    assert.equal((await member('Newcomer')).feeCurrency, 'USD');
+
+    // 预览不写入
+    const before = await f.snapshot();
+    assert.equal((await f.call('set_share', { subscription: 's', role: 'owner', rule: { fee: 4 }, dry_run: true })).isError, undefined);
+    assert.deepEqual(await f.snapshot(), before);
+
+    const set = await f.call('set_share', { subscription: 's', role: 'owner', rule: { fee: 4 } });
+    assert.equal(set.isError, undefined);
+    assert.deepEqual(set.structuredContent.rule, { fee: 4, currency: 'USD', every_months: 1, stored: true });
+    assert.equal((await member('member')).fee, 4);
+    assert.equal((await member('Newcomer')).fee, 4);
+    // 收款记录不受改规则影响
+    assert.equal((await member('member')).payments?.length, 1);
+
+    // 单独改收费 → 自定义，之后改车的规则不再影响他
+    const custom = await f.call('save_share_member', { subscription: 's', member: 'member', fee: 5 });
+    assert.equal(custom.structuredContent.member.custom, true);
+    assert.equal(custom.structuredContent.member.follows_rule, false);
+    assert.equal((await f.call('set_share', { subscription: 's', role: 'owner', rule: { fee: 6, bill_every: 3 } })).isError, undefined);
+    assert.equal((await member('member')).fee, 5);
+    assert.equal((await member('Newcomer')).fee, 6);
+    assert.equal((await member('Newcomer')).billEvery, 3);
+
+    // 改回跟随车
+    const follow = await f.call('save_share_member', { subscription: 's', member: 'member', follow_rule: true });
+    assert.equal(follow.structuredContent.member.follows_rule, true);
+    assert.equal((await member('member')).fee, 6);
+    assert.equal((await member('member')).custom, undefined);
+    p = await plan();
+    assert.ok(p.members.every((m: { follows_rule: boolean }) => m.follows_rule));
+
+    // 只读令牌不能改规则；非法周期报错
+    assert.equal((await f.call('set_share', { subscription: 's', role: 'owner', rule: { fee: 1 } }, f.read)).isError, true);
+    assert.equal((await f.call('set_share', { subscription: 's', role: 'owner', rule: { bill_every: 5 } })).isError, true);
+  } finally {
+    f.db.close();
+  }
+});

@@ -8,6 +8,7 @@ import {
   chargesBetween,
   currentPhase,
   cycleLabel,
+  diffDays,
   effectiveStatus,
   lastCharge,
   memberDues,
@@ -58,7 +59,18 @@ import { normName, peopleLedger, type PersonLedger } from '../../shared/people.t
 import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
 import { loadState, saveLedgerEdit, upsert } from '../store.ts';
-import { carLedger, memberFee, changeMemberFee, resyncShares, shareFromFee } from '../../shared/carpool.ts';
+import {
+  applyCarRule,
+  carLedger,
+  carRule,
+  followCarRule,
+  followsCar,
+  memberFee,
+  changeMemberFee,
+  resyncShares,
+  sameRule,
+  shareFromFee,
+} from '../../shared/carpool.ts';
 import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
@@ -205,19 +217,28 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
 }
 
 /** 收款摘要：日期是最早未付的覆盖起点（可能已逾期），金额由 shared 计算。 */
-function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: MemberDue | undefined) {
+function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: MemberDue | undefined, today: string) {
+  const rule = s.share?.role === 'owner' ? carRule(st, s, today) : undefined;
   const currency = st.settings.collectCurrency ?? st.settings.baseCurrency;
   const first = memberCollection(s, m, m.joined ?? s.share?.since ?? s.start, currency);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), currency);
   return {
+    follows_rule: rule ? followsCar(st, s, m, today) : false,
     collect_from: collectionAnchor(s),
     paid_until: m.paidUntil ?? null,
     first_collection: first,
     next_collection: next,
     next_collection_date: next.from,
+    overdue_days: next.from < today ? diffDays(next.from, today) : 0,
     is_first_period: next.from <= first.until,
     pending_amount: money(st, due?.owed ?? 0, due?.currency ?? next.currency),
   };
+}
+
+/** 车的收款规则；stored=false 表示老数据没存规则，按成员最常见的收费推断 */
+function ruleOut(st: AppState, s: Subscription, today: string) {
+  const r = carRule(st, s, today);
+  return { fee: r.fee, currency: r.currency, every_months: r.billEvery, stored: !!s.share?.rule };
 }
 
 /** 时间范围：today / next_3_days / next_7_days / next_30_days / this_month / next_month / last_30_days / this_year / custom */
@@ -1508,7 +1529,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'get_carpool',
     description:
-      'Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from); members with their fee and billing months, alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.',
+      'Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from), the plan collection rule (rule: fee, currency, every_months; stored=false means inferred from the most common member rate); members with their fee and billing months, follows_rule (true = fee follows the plan rule, false = custom fee or exempt), overdue_days (days the next unpaid collection is past due, 0 if not), alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.',
     inputSchema: obj({ subscription: { ...SUBREF, description: 'Optional: only this plan.' } }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
@@ -1533,6 +1554,7 @@ const CATALOGUE: Tool[] = [
               owner: sh.role === 'member' ? (sh.ownerName ?? null) : undefined,
               since: book.since ?? null,
               collect_from: collectionAnchor(s),
+              rule: sh.role === 'owner' ? ruleOut(st, s, today) : null,
               // 方向写清楚：i_pay = 我自己净掏的钱，i_earn = 收的比付的多（赚了）；两者至多一个大于 0
               year: {
                 cost: round(book.yearCost),
@@ -1557,7 +1579,7 @@ const CATALOGUE: Tool[] = [
                   joined: m.joined ?? null,
                   left: m.left ?? null,
                   fee: { amount: fee.amount, currency: fee.currency, every_months: memberBillMonths(s, m, today) },
-                  ...collectionSummary(st, s, m, d),
+                  ...collectionSummary(st, s, m, d, today),
                   first_period: m.firstPeriod ?? 'prorate',
                   first_amount: m.firstAmount ?? null,
                   owed: d && d.periodsOwed > 0 ? money(st, d.owed, d.currency) : null,
@@ -1604,7 +1626,7 @@ const CATALOGUE: Tool[] = [
     name: 'set_share',
     destructive: true,
     description:
-      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Each member aligns to anchor + k × bill_every months. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing.',
+      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Each member aligns to anchor + k × bill_every months. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing. rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule.',
     write: true,
     inputSchema: obj(
       {
@@ -1619,6 +1641,17 @@ const CATALOGUE: Tool[] = [
           description:
             'Optional shared collection anchor. Members align to this date + k × bill_every months, preserving month-end alignment. Omit to preserve the existing anchor or infer from since, recorded coverage / paid-until, then subscription start.',
         },
+        rule: {
+          type: 'object',
+          description: 'Owner only: the plan collection rule followed by non-custom members.',
+          properties: {
+            fee: { type: 'number', minimum: 0, description: 'Amount collected from each member per bill.' },
+            fee_currency: { type: 'string', description: 'Defaults to the current rule currency, else the collection currency.' },
+            bill_every: { type: 'integer', enum: [1, 3, 6, 12] },
+          },
+          additionalProperties: false,
+        },
+        rule_from: { ...DATE, description: 'Effective date for the rule change; defaults to today. Whole periods starting on/after it use the new fee.' },
         dry_run: DRY,
       },
       ['subscription', 'role'],
@@ -1636,15 +1669,31 @@ const CATALOGUE: Tool[] = [
         ownerName: role === 'member' ? ('owner_name' in a ? str(a.owner_name) : cur?.ownerName) : undefined,
         since: 'since' in a ? (a.since == null ? undefined : date(a.since, 'since')) : cur ? cur.since : today,
         collectFrom: 'collect_from' in a ? (a.collect_from == null ? undefined : date(a.collect_from, 'collect_from')) : cur?.collectFrom,
+        rule: role === 'owner' ? cur?.rule : undefined,
       } as NonNullable<Subscription['share']>;
-      const after = { ...s, share };
-      return { ...(await commit(ctx, st, today, after, a.dry_run, [cur ? 'share_updated' : 'share_created'])), collect_from: collectionAnchor(after) };
+      let after: Subscription = { ...s, share };
+      if (a.rule != null) {
+        if (role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
+        const r = a.rule as Record<string, unknown>;
+        const prev = carRule(st, after, today);
+        const currency = (str(r.fee_currency) ?? prev.currency).toUpperCase();
+        validateCurrency(st, currency);
+        const billEvery = r.bill_every != null ? Number(r.bill_every) : prev.billEvery;
+        if (![1, 3, 6, 12].includes(billEvery)) throw new Error(t('mcp.error.invalidInput', { field: 'rule.bill_every' }));
+        const rule = { fee: r.fee != null ? num(r.fee, 'rule.fee') : prev.fee, currency, billEvery };
+        after = applyCarRule(st, after, rule, date(a.rule_from, 'rule_from', today), today);
+      }
+      return {
+        ...(await commit(ctx, st, today, after, a.dry_run, [cur ? 'share_updated' : 'share_created', ...(a.rule != null ? ['rule_updated'] : [])])),
+        collect_from: collectionAnchor(after),
+        ...(after.share?.role === 'owner' ? { rule: ruleOut(st, after, today) } : {}),
+      };
     },
   },
   {
     name: 'save_share_member',
     description:
-      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. Preview and save return member.first_collection (inclusive coverage and amount), collect_from, paid_until and next_collection_date.',
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result equals the rule. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
     write: true,
     inputSchema: obj(
       {
@@ -1661,6 +1710,7 @@ const CATALOGUE: Tool[] = [
             'Effective date for a fee/currency/billing-cycle change; defaults to today. Period start selects the whole-period rate; no split at price changes.',
         },
         bill_every: { type: 'integer', enum: [1, 3, 6, 12] },
+        follow_rule: { type: 'boolean', description: 'true = follow the plan collection rule (ignores fee/fee_currency/bill_every); false = custom fee.' },
         first_period: {
           type: 'string',
           enum: ['prorate', 'full', 'free'],
@@ -1696,12 +1746,22 @@ const CATALOGUE: Tool[] = [
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
       validateCurrency(st, ccy);
-      const billEvery = a.bill_every != null ? Number(a.bill_every) : old ? memberBillMonths(s, old, a.fee_from ? date(a.fee_from, 'fee_from') : today) : 1;
+      // 新成员没给收费标准时按车的收款规则
+      const rule = carRule(st, s, today);
+      const ruleDefault = !old && a.fee == null && a.bill_every == null && a.fee_currency == null;
+      const billEvery =
+        a.bill_every != null
+          ? Number(a.bill_every)
+          : old
+            ? memberBillMonths(s, old, a.fee_from ? date(a.fee_from, 'fee_from') : today)
+            : ruleDefault
+              ? rule.billEvery
+              : 1;
       if (a.first_period != null && !['prorate', 'full', 'free'].includes(String(a.first_period))) throw new Error(t('mcp.error.invalidFirstPeriod'));
       let m: ShareMember = {
         ...(old ?? { id: str(a.id) ?? uid(), name: '', share: 0 }),
         name: str(a.name) ?? old?.name ?? '',
-        ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : {}),
+        ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : ruleDefault ? { fee: rule.fee, feeCurrency: rule.currency } : {}),
         billEvery,
         ...(a.first_period != null
           ? {
@@ -1740,7 +1800,8 @@ const CATALOGUE: Tool[] = [
       ] as const)
         if (input in a) m[field] = field === 'account' ? str(a[input])?.trim() || undefined : str(a[input]);
       if (!m.name) throw new Error(t('mcp.error.needMemberName'));
-      if (old && ['fee', 'fee_currency', 'bill_every'].some((key) => key in a)) {
+      const feeEdited = ['fee', 'fee_currency', 'bill_every'].some((key) => key in a);
+      if (old && feeEdited && a.follow_rule !== true) {
         const from = date(a.fee_from, 'fee_from', today);
         const prev = memberFee(st, s, old, from);
         m = changeMemberFee(
@@ -1756,6 +1817,15 @@ const CATALOGUE: Tool[] = [
           today,
         );
       }
+      if (a.follow_rule === true)
+        m = old
+          ? followCarRule(st, s, m, date(a.fee_from, 'fee_from', today), today)
+          : { ...m, custom: undefined, fee: rule.fee, feeCurrency: rule.currency, billEvery: rule.billEvery };
+      else if (a.follow_rule === false) m = { ...m, custom: true };
+      else if (feeEdited) {
+        const r = memberFee(st, s, m, today);
+        m = { ...m, custom: sameRule({ fee: r.amount, currency: r.currency, billEvery: memberBillMonths(s, m, today) }, rule) ? undefined : true };
+      }
       // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
       m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
@@ -1765,12 +1835,14 @@ const CATALOGUE: Tool[] = [
         member: {
           id: m.id,
           name: m.name,
+          custom: !!m.custom,
           fee_history: m.feeHistory ?? [],
           ...collectionSummary(
             st,
             after,
             m,
             memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+            today,
           ),
         },
       };
@@ -1941,6 +2013,7 @@ const CATALOGUE: Tool[] = [
               after,
               updated,
               memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+              today,
             ),
           },
         };

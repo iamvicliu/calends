@@ -112,7 +112,8 @@ export function refreshReceiptDraft(draft: MemberPayment, next: MemberPayment, m
   };
 }
 
-const sameRule = (a: CarRule, b: CarRule) => a.billEvery === b.billEvery && a.currency === b.currency && Math.abs(a.fee - b.fee) < 0.005;
+/** 两条收费标准是否相同（金额容差一分钱） */
+export const sameRule = (a: CarRule, b: CarRule) => a.billEvery === b.billEvery && a.currency === b.currency && Math.abs(a.fee - b.fee) < 0.005;
 
 /**
  * 车的收款规则：存了就用存的；老数据没存时，取在车成员里最常见的收费标准（周期 + 金额 + 币种）。

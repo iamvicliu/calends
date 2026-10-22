@@ -117,10 +117,15 @@
     "paidUntil": "Pagado hasta",
     "remove": "Quitar",
     "addMember": "Añadir miembro",
-    "manageHint": "Las cuotas, cuentas y cobros se gestionan en los detalles del plan compartido.",
+    "manageHint": "Toca un miembro para seguir la regla del plan o definir una cuota y un ciclo propios",
     "follows": "Sigue el plan",
     "custom": "Personalizado",
-    "nextDue": "Próximo {date}"
+    "nextDue": "Próximo {date}",
+    "editMember": "Editar",
+    "overdue": {
+      "one": "{count} día de retraso",
+      "other": "{count} días de retraso"
+    }
   },
   "proxy": {
     "for": "Pago por",

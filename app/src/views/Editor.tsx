@@ -1,12 +1,13 @@
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { StopFields } from '../components/StopPanel.tsx';
 import { Minus, Plus, ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
-import { addDays, addMonths, memberCollection, memberUnpaidFrom, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
+import { addDays, addMonths, diffDays, memberCollection, memberUnpaidFrom, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
 import { carRule, followsCar, shareFromFee } from '../../../shared/carpool.ts';
-import { cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
+import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -17,7 +18,7 @@ import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-for
 import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField } from './Members.tsx';
+import { ContactField, MemberSheet } from './Members.tsx';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
@@ -287,7 +288,24 @@ function Form({
   const setMember = (i: number, p: Partial<ShareMember>) => setShare({ members: share!.members.map((m, j) => (j === i ? { ...m, ...p } : m)) });
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
   // 已保存过的成员只显示摘要；刚在这里加的成员可以先填称呼
-  const savedMembers = new Set(state.subscriptions.find((x) => x.id === f.id)?.share?.members.map((m) => m.id) ?? []);
+  const stored = state.subscriptions.find((x) => x.id === f.id);
+  const savedMembers = new Map((stored?.share?.members ?? []).map((m) => [m.id, m]));
+  // 单个成员的收费方式、周期、收款在成员弹窗里编辑，弹窗直接保存到账本
+  const [editMember, setEditMember] = useState<ShareMember>();
+  // 打开成员弹窗时表单里的合租设置是否已和账本不同；没改过就不动表单，保存时整体沿用账本里的新数据
+  const shareEdited = useRef(false);
+  const openMember = (m: ShareMember) => {
+    shareEdited.current = JSON.stringify(share) !== JSON.stringify(stored?.share);
+    setEditMember(m);
+  };
+  const closeMember = () => {
+    setEditMember(undefined);
+    // 这里改过合租设置时，表单里的成员换成刚保存的版本，免得点「完成」把弹窗里的修改覆盖回去
+    const latest = getState()?.subscriptions.find((x) => x.id === f.id)?.share?.members;
+    if (!latest || !share || !shareEdited.current) return;
+    const byId = new Map(latest.map((m) => [m.id, m]));
+    setShare({ members: share.members.filter((m) => !savedMembers.has(m.id) || byId.has(m.id)).map((m) => byId.get(m.id) ?? m) });
+  };
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const method = state.methods.find((m) => m.id === f.methodId);
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
@@ -568,23 +586,27 @@ function Form({
               <input className="num" inputMode="numeric" value={share.seats} onChange={(e) => setShare({ seats: Math.max(1, Number(val(e)) || 1) })} />
             </Cell>
             {/* 这里只管名单：已有成员只显示摘要，收费方式、成员账号、收款在合租详情里维护 */}
-            {share.members.map((m, i) => {
-              const saved = savedMembers.has(m.id);
-              const due = saved && !m.exempt ? memberCollection(f, m, memberUnpaidFrom(f, m)).from : undefined;
+            {share.members.map((m0, i) => {
+              // 摘要按账本里最新保存的成员与订阅算，成员弹窗保存后立即更新
+              const m = savedMembers.get(m0.id) ?? m0;
+              const saved = savedMembers.has(m0.id);
+              const due = saved && stored && !m.exempt ? memberCollection(stored, m, memberUnpaidFrom(stored, m)).from : undefined;
+              const late = due && due < today ? diffDays(due, today) : 0;
               return (
                 <div key={m.id} className="member-edit member-summary">
                   {saved ? (
-                    <span className="member-summary-name">
+                    <button type="button" className="member-summary-name tap" onClick={() => openMember(m)}>
                       <b className="text-ellipsis">{m.name || t('editor.share.memberN', { n: i + 1 })}</b>
-                      <small className="muted text-ellipsis">
-                        {[
-                          m.exempt ? t('family.pool.exempt') : followsCar(state, f, m, today) ? t('editor.share.follows') : t('editor.share.custom'),
-                          due && t('editor.share.nextDue', { date: cnDateAuto(due, today) }),
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
+                      <small className="muted">
+                        {m.exempt ? t('family.pool.exempt') : followsCar(state, stored!, m, today) ? t('editor.share.follows') : t('editor.share.custom')}
+                        {late > 0 && <span className="member-late"> · {t('editor.share.overdue', { count: late })}</span>}
+                        {due && ` · ${t('editor.share.nextDue', { date: cnDateFull(due) })}`}
                       </small>
-                    </span>
+                      <span className="member-summary-edit">
+                        {t('editor.share.editMember')}
+                        <Icon name="right" size={14} />
+                      </span>
+                    </button>
                   ) : (
                     <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
                   )}
@@ -620,6 +642,7 @@ function Form({
                 <Icon name="plus" /> {t('editor.share.addMember')}
               </button>
             )}
+            {editMember && stored && createPortal(<MemberSheet state={state} s={stored} member={editMember} onClose={closeMember} />, document.body)}
           </>
         )}
       </Group>

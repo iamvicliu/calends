@@ -117,10 +117,15 @@
     "paidUntil": "Ödendiği tarih",
     "remove": "Kaldır",
     "addMember": "Üye ekle",
-    "manageHint": "Üye ücretleri, hesapları ve tahsilatları ortak plan ayrıntılarında yönetilir.",
+    "manageHint": "Plan kuralını izlemek ya da özel ücret ve dönem belirlemek için üyeye dokunun",
     "follows": "Planı izler",
     "custom": "Özel",
-    "nextDue": "Sonraki {date}"
+    "nextDue": "Sonraki {date}",
+    "editMember": "Düzenle",
+    "overdue": {
+      "one": "{count} gün gecikti",
+      "other": "{count} gün gecikti"
+    }
   },
   "proxy": {
     "for": "Kimin için",

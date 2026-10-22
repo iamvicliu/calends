@@ -117,10 +117,15 @@
     "paidUntil": "Paid until",
     "remove": "Remove",
     "addMember": "Add member",
-    "manageHint": "Member fees, accounts and receipts are managed in the shared plan details.",
+    "manageHint": "Tap a member to follow the plan rule or set a custom fee and cycle",
     "follows": "Follows plan",
     "custom": "Custom",
-    "nextDue": "Next due {date}"
+    "nextDue": "Next due {date}",
+    "editMember": "Edit",
+    "overdue": {
+      "one": "{count} day overdue",
+      "other": "{count} days overdue"
+    }
   },
   "proxy": {
     "for": "Paying for",

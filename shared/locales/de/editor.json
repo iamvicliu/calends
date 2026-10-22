@@ -117,10 +117,15 @@
     "paidUntil": "Bezahlt bis",
     "remove": "Entfernen",
     "addMember": "Mitglied hinzufügen",
-    "manageHint": "Beiträge, Konten und Zahlungen der Mitglieder verwaltest du in den Abo-Details.",
+    "manageHint": "Tippe auf ein Mitglied, um der Abo-Regel zu folgen oder Betrag und Zyklus individuell festzulegen",
     "follows": "Wie Abo",
     "custom": "Eigen",
-    "nextDue": "Nächste {date}"
+    "nextDue": "Nächste {date}",
+    "editMember": "Bearbeiten",
+    "overdue": {
+      "one": "{count} Tag überfällig",
+      "other": "{count} Tage überfällig"
+    }
   },
   "proxy": {
     "for": "Ich zahle für",

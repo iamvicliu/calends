@@ -112,10 +112,14 @@
     "paidUntil": "支払い済み期限",
     "remove": "削除",
     "addMember": "メンバーを追加",
-    "manageHint": "メンバーの料金・アカウント・入金は共有プランの詳細で管理します。",
+    "manageHint": "メンバーをタップして、プランのルールに従うか独自の料金と周期を設定",
     "follows": "プラン共通",
     "custom": "個別",
-    "nextDue": "次回 {date}"
+    "nextDue": "次回 {date}",
+    "editMember": "編集",
+    "overdue": {
+      "other": "{count}日超過"
+    }
   },
   "proxy": {
     "for": "立て替え先",

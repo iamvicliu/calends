@@ -117,10 +117,15 @@
     "paidUntil": "Payé jusqu’au",
     "remove": "Retirer",
     "addMember": "Ajouter un membre",
-    "manageHint": "Les tarifs, comptes et paiements des membres se gèrent dans le détail du forfait partagé.",
+    "manageHint": "Touchez un membre pour suivre la règle du forfait ou définir un montant et un cycle personnalisés",
     "follows": "Suit le forfait",
     "custom": "Personnalisé",
-    "nextDue": "Prochain {date}"
+    "nextDue": "Prochain {date}",
+    "editMember": "Modifier",
+    "overdue": {
+      "one": "{count} jour de retard",
+      "other": "{count} jours de retard"
+    }
   },
   "proxy": {
     "for": "Je paie pour",

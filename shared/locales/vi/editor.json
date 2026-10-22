@@ -112,10 +112,14 @@
     "paidUntil": "Đã trả đến",
     "remove": "Xóa",
     "addMember": "Thêm thành viên",
-    "manageHint": "Phí, tài khoản và khoản thu của thành viên được quản lý trong chi tiết gói chung.",
+    "manageHint": "Chạm vào thành viên để theo quy tắc của nhóm hoặc đặt phí và chu kỳ riêng",
     "follows": "Theo gói",
     "custom": "Tùy chỉnh",
-    "nextDue": "Lần tới {date}"
+    "nextDue": "Lần tới {date}",
+    "editMember": "Sửa",
+    "overdue": {
+      "other": "Quá hạn {count} ngày"
+    }
   },
   "proxy": {
     "for": "Trả hộ cho",

@@ -112,10 +112,14 @@
     "paidUntil": "Lunas hingga",
     "remove": "Hapus",
     "addMember": "Tambah anggota",
-    "manageHint": "Biaya, akun, dan pembayaran anggota dikelola di detail patungan.",
+    "manageHint": "Ketuk anggota untuk mengikuti aturan paket atau atur biaya dan siklus sendiri",
     "follows": "Ikuti paket",
     "custom": "Kustom",
-    "nextDue": "Berikutnya {date}"
+    "nextDue": "Berikutnya {date}",
+    "editMember": "Ubah",
+    "overdue": {
+      "other": "Terlambat {count} hari"
+    }
   },
   "proxy": {
     "for": "Ditalangi untuk",

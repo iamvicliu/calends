@@ -117,10 +117,15 @@
     "paidUntil": "Pago até",
     "remove": "Remover",
     "addMember": "Adicionar membro",
-    "manageHint": "Valores, contas e recebimentos dos membros ficam nos detalhes do plano compartilhado.",
+    "manageHint": "Toque em um membro para seguir a regra do plano ou definir valor e ciclo próprios",
     "follows": "Segue o plano",
     "custom": "Personalizado",
-    "nextDue": "Próximo {date}"
+    "nextDue": "Próximo {date}",
+    "editMember": "Editar",
+    "overdue": {
+      "one": "{count} dia de atraso",
+      "other": "{count} dias de atraso"
+    }
   },
   "proxy": {
     "for": "Pago para",

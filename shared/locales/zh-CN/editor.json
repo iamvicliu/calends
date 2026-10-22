@@ -104,10 +104,12 @@
     "paidUntil": "已付至",
     "remove": "移除",
     "addMember": "添加成员",
-    "manageHint": "成员的收费方式、成员账号和收款在「合租详情」里维护",
+    "manageHint": "点成员可单独设置跟随车或自定义收费、周期",
     "follows": "跟随车",
     "custom": "自定义",
-    "nextDue": "下次应收 {date}"
+    "nextDue": "下次应收 {date}",
+    "editMember": "编辑",
+    "overdue": "已逾期 {count} 天"
   },
   "proxy": {
     "for": "替谁付",
