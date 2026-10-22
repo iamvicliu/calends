@@ -48,7 +48,8 @@
     "mergeFoot": "同じ人が二重に登録されていたら、統合して記録をまとめられます。",
     "mergeConfirm": "「{from}」を「{into}」に統合しますか？{from} の共有と立て替えはすべて {into} に移り、呼び名と連絡先は {into} のものになります。",
     "merged": "{name} に統合しました",
-    "confirmDelete": "「{name}」を削除しますか？"
+    "confirmDelete": "「{name}」を削除しますか？",
+    "accountMissing": "このメンバー関係は存在しません。詳細を開き直してください。"
   },
   "pick": {
     "new": "新しい相手",
@@ -57,5 +58,12 @@
   "field": {
     "person": "相手",
     "syncFoot": "この人はほかに {count} か所あり、呼び名や連絡先の変更はそちらにも反映されます。"
+  },
+  "avatar": {
+    "change": "アバターを変更",
+    "help": "PNG・JPEG・WebP 画像をクリック、ドロップ、貼り付け（最大 8 MB）。",
+    "remove": "アバターを削除",
+    "removeConfirm": "このアバターを削除しますか？保存すると反映されます。",
+    "fallbackColor": "代替色"
   }
 }

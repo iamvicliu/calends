@@ -5,7 +5,10 @@
   },
   "stat": {
     "owed": "Te deben",
-    "owedSub": { "one": "{count} persona debe", "other": "{count} personas deben" },
+    "owedSub": {
+      "one": "{count} persona debe",
+      "other": "{count} personas deben"
+    },
     "allSettled": "Todos al día",
     "received": "Cobrado hasta hoy",
     "receivedSub": "Planes compartidos y pagos por otros",
@@ -19,7 +22,10 @@
   "card": {
     "noContact": "Sin contacto",
     "nothing": "No está en ningún plan",
-    "past": { "one": "Y {count} ya terminado", "other": "Y {count} ya terminados" }
+    "past": {
+      "one": "Y {count} ya terminado",
+      "other": "Y {count} ya terminados"
+    }
   },
   "kind": {
     "share": "Plan compartido",
@@ -28,7 +34,10 @@
   "item": {
     "paidUntil": "Pagado hasta {date}",
     "noPay": "Sin pagos aún",
-    "owedPeriods": { "one": "Debe {count} periodo", "other": "Debe {count} periodos" },
+    "owedPeriods": {
+      "one": "Debe {count} periodo",
+      "other": "Debe {count} periodos"
+    },
     "left": "Salió",
     "ended": "Detenido",
     "received": "Pagado {amount}"
@@ -37,7 +46,10 @@
     "owed": "Pendiente",
     "received": "Pagado hasta hoy",
     "last": "Último pago",
-    "in": { "one": "En {count} plan", "other": "En {count} planes" },
+    "in": {
+      "one": "En {count} plan",
+      "other": "En {count} planes"
+    },
     "inEmpty": "No está en ningún plan ni pago por otros. Puedes eliminarla.",
     "profile": "Perfil",
     "notePh": "p. ej., compañero, paga a fin de mes",
@@ -51,7 +63,8 @@
     "mergeFoot": "¿La misma persona aparece dos veces? Combínalas para unir sus planes y pagos.",
     "mergeConfirm": "¿Combinar «{from}» con «{into}»? Todos los planes y pagos de {from} pasan a {into}, y se conservan el nombre y contacto de {into}.",
     "merged": "Combinado con {name}",
-    "confirmDelete": "¿Eliminar a «{name}»?"
+    "confirmDelete": "¿Eliminar a «{name}»?",
+    "accountMissing": "Esta relación ya no existe. Vuelve a abrir los detalles de la persona."
   },
   "pick": {
     "new": "Persona nueva",
@@ -63,5 +76,12 @@
       "one": "También aparece en {count} lugar más: los cambios de nombre y contacto se aplican ahí también.",
       "other": "También aparece en {count} lugares más: los cambios de nombre y contacto se aplican ahí también."
     }
+  },
+  "avatar": {
+    "change": "Cambiar avatar",
+    "help": "Haz clic, arrastra o pega una imagen PNG, JPEG o WebP (hasta 8 MB).",
+    "remove": "Quitar avatar",
+    "removeConfirm": "¿Quitar este avatar? Guarda para aplicar.",
+    "fallbackColor": "Color de respaldo"
   }
 }

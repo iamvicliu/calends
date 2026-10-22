@@ -48,7 +48,8 @@
     "mergeFoot": "Một người bị ghi thành hai? Gộp lại để dồn gói và khoản thu về một chỗ.",
     "mergeConfirm": "Gộp “{from}” vào “{into}”? Mọi gói và khoản thu của {from} chuyển sang {into}, giữ tên và liên hệ của {into}.",
     "merged": "Đã gộp vào {name}",
-    "confirmDelete": "Xoá “{name}”?"
+    "confirmDelete": "Xoá “{name}”?",
+    "accountMissing": "Quan hệ thành viên này không còn tồn tại. Hãy mở lại chi tiết người này."
   },
   "pick": {
     "new": "Người mới",
@@ -57,5 +58,12 @@
   "field": {
     "person": "Người",
     "syncFoot": "Người này còn ở {count} chỗ khác — đổi tên hoặc liên hệ sẽ áp dụng luôn."
+  },
+  "avatar": {
+    "change": "Đổi ảnh đại diện",
+    "help": "Nhấp, kéo thả hoặc dán ảnh PNG, JPEG hay WebP (tối đa 8 MB).",
+    "remove": "Xóa ảnh đại diện",
+    "removeConfirm": "Xóa ảnh đại diện này? Lưu để áp dụng.",
+    "fallbackColor": "Màu dự phòng"
   }
 }

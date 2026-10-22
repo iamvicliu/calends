@@ -8,7 +8,7 @@ import * as fx from './fx.ts';
 import * as reports from './scope-report.ts';
 import * as metrics from './metrics.ts';
 import * as carpool from './carpool.ts';
-import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
+import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 // Execute component event handlers in the existing JSX harness, retaining pure financial builders.
 type Node = { type: string; props: Record<string, any>; children: unknown[] };
@@ -36,6 +36,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     useOrig: () => false,
     categories: () => [],
     Picker: 'Picker',
+    PersonAvatar: 'PersonAvatar',
+    personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     t: (key: string) => key,
     tipProps: () => ({}),
     useMemo: (fn: () => unknown) => fn(),
@@ -1882,4 +1884,58 @@ test('合租分组以覆盖区间为主标题，共有信息为可选副标题�
     assert.equal(all(yearTitle.children).filter((n) => n.type === 'b').length, 1);
     assert.equal(all(yearTitle.children).filter((n) => n.type === 'small').length, 0);
   }
+});
+
+test('person avatar drafts remain unsaved until Save; server field order does not leave Save enabled', async () => {
+  const people = await import('./people.ts');
+  const state = { ...st, people: [{ id: 'person', name: 'Fictional person', color: 'blue' as const }] };
+  const avatar = 'data:image/webp;base64,fixture';
+  let writes = 0;
+  const r = harness(
+    '../app/src/views/People.tsx',
+    'PersonSheet',
+    {},
+    {
+      ...people,
+      PERSON_COLORS,
+      Sheet: 'Sheet',
+      ContactField: 'ContactField',
+      contactText: () => '',
+      compressAvatar: async () => avatar,
+      ask: async () => true,
+      run: (fn: () => Promise<unknown>) => fn(),
+      savePerson: async (p: (typeof state.people)[number]) => {
+        writes++;
+        // Simulate normalized server field order and an added timestamp.
+        const saved = { name: p.name, createdAt: '2026-10-22', ...p };
+        state.people = [saved];
+        return saved;
+      },
+    },
+  );
+  const render = () => r.render('PersonSheet', { state, today, l: { person: state.people[0], items: [], owed: 0, received: 0 }, onClose() {}, onOpen() {} });
+  const walkFoot = (n: Node): Node[] => all(n.props.foot);
+  const save = () =>
+    render()
+      .filter((n) => n.type === 'Sheet')
+      .flatMap(walkFoot)
+      .find((n) => n.type === 'button' && n.props.className === 'btn primary')!;
+  assert.equal(save().props.disabled, true);
+  render()
+    .find((n) => n.type === 'input' && n.props.type === 'file')!
+    .props.onChange({ target: { files: [{}], value: '' } });
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(writes, 0);
+  assert.equal(save().props.disabled, false);
+  await save().props.onClick();
+  assert.equal(writes, 1);
+  assert.equal(save().props.disabled, true);
+  const remove = render().find((n) => n.type === 'button' && n.children.includes('people.avatar.remove'))!;
+  await remove.props.onClick();
+  assert.equal(writes, 1);
+  assert.equal(save().props.disabled, false);
+  await save().props.onClick();
+  assert.equal(writes, 2);
+  assert.equal(save().props.disabled, true);
 });

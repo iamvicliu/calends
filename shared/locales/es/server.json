@@ -52,5 +52,7 @@
     "noKey": "Aún no hay una clave API de DeepSeek.",
     "badTool": "Acción no admitida."
   },
-  "invalidAvatar": "Imagen no válida"
+  "invalidAvatar": "Imagen no válida",
+  "avatarInvalid": "Usa un PNG/WebP cuadrado sin metadatos, de hasta 128×128 y 64 KB. Cargas: PNG/JPEG/WebP hasta 8 MB y 40 megapíxeles.",
+  "avatarRosterFull": "La lista de personas está llena. Quita un avatar antes de añadir otro."
 }

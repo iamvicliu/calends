@@ -47,5 +47,7 @@
     "noKey": "Chưa cấu hình khóa API DeepSeek.",
     "badTool": "Thao tác không được hỗ trợ."
   },
-  "invalidAvatar": "Ảnh không hợp lệ"
+  "invalidAvatar": "Ảnh không hợp lệ",
+  "avatarInvalid": "Dùng PNG/WebP vuông không có siêu dữ liệu, tối đa 128×128 và 64 KB. Tải lên PNG/JPEG/WebP tối đa 8 MB và 40 megapixel.",
+  "avatarRosterFull": "Danh sách người đã đầy. Hãy xóa một ảnh đại diện trước."
 }

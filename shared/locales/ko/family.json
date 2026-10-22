@@ -24,7 +24,10 @@
     "collapseAll": "모두 접기",
     "groupSum": {
       "other": "{count}건 · {amount}"
-    }
+    },
+    "fee": "요금",
+    "nextCollection": "다음 수금",
+    "actions": "작업"
   },
   "contact": {
     "via": {
@@ -62,8 +65,8 @@
     "name": "이름",
     "namePh": "부를 이름",
     "contact": "연락처",
-    "account": "초대한 계정",
-    "accountPh": "{name}에 초대한 이메일 또는 사용자 이름",
+    "account": "이 플랜의 계정",
+    "accountPh": "{name}의 이메일, 전화번호, 사용자 이름 또는 ID",
     "joined": "참여일",
     "joinedPh": "플랜 시작일({date})",
     "notSet": "설정 안 함",
@@ -137,7 +140,10 @@
     "coverAligned": "공통 청구 기간 종료일로 자동 설정",
     "recordNext": "수금 기록 · {amount}",
     "collectionAnchor": "공통 수금 시작일",
-    "firstSummary": "첫 기간 {from}–{until} · {mode} {amount}"
+    "firstSummary": "첫 기간 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "계정 미입력",
+    "editAccount": "이 플랜의 계정 편집",
+    "copyAccount": "계정 복사"
   },
   "pool": {
     "seatsFree": "빈자리 {count}",

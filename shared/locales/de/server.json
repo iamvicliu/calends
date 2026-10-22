@@ -52,5 +52,7 @@
     "noKey": "Noch kein DeepSeek-API-Schlüssel eingerichtet.",
     "badTool": "Nicht unterstützte Aktion."
   },
-  "invalidAvatar": "Ungültiges Bild"
+  "invalidAvatar": "Ungültiges Bild",
+  "avatarInvalid": "Quadratisches PNG/WebP ohne Metadaten, bis 128×128 und 64 KB. Uploads: PNG/JPEG/WebP bis 8 MB und 40 Megapixel.",
+  "avatarRosterFull": "Die Personenliste ist voll. Entferne zuerst ein Profilbild."
 }

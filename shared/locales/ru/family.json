@@ -26,7 +26,10 @@
       "one": "{count} платёж · {amount}",
       "other": "{count} платежей · {amount}",
       "few": "{count} платежа · {amount}"
-    }
+    },
+    "fee": "Плата",
+    "nextCollection": "Следующий сбор",
+    "actions": "Действия"
   },
   "contact": {
     "via": {
@@ -67,8 +70,8 @@
     "name": "Имя",
     "namePh": "Как к нему обращаться",
     "contact": "Контакт",
-    "account": "Приглашённый аккаунт",
-    "accountPh": "Почта или логин, приглашённый в {name}",
+    "account": "Аккаунт в этом плане",
+    "accountPh": "Почта, телефон, имя пользователя или ID в {name}",
     "joined": "Присоединился",
     "joinedPh": "Начало подписки ({date})",
     "notSet": "Не задано",
@@ -148,7 +151,10 @@
     "coverAligned": "До конца общего расчётного периода",
     "recordNext": "Записать платёж · {amount}",
     "collectionAnchor": "Общая дата начала сбора",
-    "firstSummary": "Первый период {from}–{until} · {mode} {amount}"
+    "firstSummary": "Первый период {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Аккаунт не указан",
+    "editAccount": "Изменить аккаунт в этом плане",
+    "copyAccount": "Копировать аккаунт"
   },
   "pool": {
     "seatsFree": "Свободно {count}",

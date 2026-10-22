@@ -25,7 +25,10 @@
     "groupSum": {
       "one": "{count} paiement · {amount}",
       "other": "{count} paiements · {amount}"
-    }
+    },
+    "fee": "Tarif",
+    "nextCollection": "Prochain encaissement",
+    "actions": "Actions"
   },
   "contact": {
     "via": {
@@ -64,8 +67,8 @@
     "name": "Nom",
     "namePh": "Comment l’appeler",
     "contact": "Contact",
-    "account": "Compte invité",
-    "accountPh": "E-mail ou identifiant invité sur {name}",
+    "account": "Compte sur ce forfait",
+    "accountPh": "E-mail, téléphone, pseudo ou ID sur {name}",
     "joined": "Arrivée",
     "joinedPh": "Début du partage ({date})",
     "notSet": "Non défini",
@@ -141,7 +144,10 @@
     "coverAligned": "Se termine à la fin de la période commune",
     "recordNext": "Enregistrer un paiement · {amount}",
     "collectionAnchor": "Début commun de collecte",
-    "firstSummary": "Première période {from}–{until} · {mode} {amount}"
+    "firstSummary": "Première période {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Compte non renseigné",
+    "editAccount": "Modifier le compte sur ce forfait",
+    "copyAccount": "Copier le compte"
   },
   "pool": {
     "seatsFree": "{count} libre(s)",

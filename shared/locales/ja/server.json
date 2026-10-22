@@ -47,5 +47,7 @@
     "noKey": "DeepSeek の API キーがまだ設定されていません。",
     "badTool": "サポートされていない操作です。"
   },
-  "invalidAvatar": "画像が無効です"
+  "invalidAvatar": "画像が無効です",
+  "avatarInvalid": "メタデータなしの正方形 PNG/WebP（最大 128×128、64 KB）を使用してください。アップロードは PNG/JPEG/WebP、最大 8 MB・4000 万画素です。",
+  "avatarRosterFull": "人物リストの容量がいっぱいです。先にアバターを削除してください。"
 }

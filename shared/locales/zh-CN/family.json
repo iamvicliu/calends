@@ -24,7 +24,10 @@
     "collapseAll": "全部收起",
     "groupSum": {
       "other": "{count} 笔 · {amount}"
-    }
+    },
+    "fee": "收费",
+    "nextCollection": "下次收款",
+    "actions": "操作"
   },
   "contact": {
     "via": {
@@ -60,8 +63,8 @@
     "name": "称呼",
     "namePh": "怎么称呼",
     "contact": "联系方式",
-    "account": "受邀账号",
-    "accountPh": "拉进 {name} 家庭组的邮箱或用户名",
+    "account": "这辆车上的账号",
+    "accountPh": "{name} 的邮箱、手机号、用户名或 ID",
     "joined": "加入日",
     "joinedPh": "同发起日 {date}",
     "notSet": "不设置",
@@ -131,7 +134,10 @@
     "coverAligned": "按统一收款期自动算出",
     "recordNext": "记一笔收款 · {amount}",
     "collectionAnchor": "收款对齐起点",
-    "firstSummary": "首期 {from}–{until} · {mode} {amount}"
+    "firstSummary": "首期 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "未填账号",
+    "editAccount": "编辑这辆车上的账号",
+    "copyAccount": "复制账号"
   },
   "pool": {
     "seatsFree": "空 {count} 位",

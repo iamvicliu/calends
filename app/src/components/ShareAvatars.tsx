@@ -1,3 +1,4 @@
+import { PersonAvatar, personFor } from './PersonAvatar.tsx';
 import type { CSSProperties } from 'react';
 import { memberAboard, memberDues } from '../../../shared/billing.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -39,14 +40,14 @@ export function ShareAvatars({
           className: `seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`,
           title: m.exempt ? t('family.pool.exemptTitle', { name: m.name }) : m.name || t('detail.share.unnamed'),
         };
-        const initial = [...(m.name || '?')][0];
+        const avatar = <PersonAvatar p={personFor(state, m.personId, m.name || '?')} size={size} />;
         return onMember ? (
           <button key={m.id} type="button" {...props} onClick={() => onMember(m)}>
-            {initial}
+            {avatar}
           </button>
         ) : (
           <span key={m.id} {...props}>
-            {initial}
+            {avatar}
           </span>
         );
       })}

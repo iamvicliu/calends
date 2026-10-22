@@ -844,3 +844,136 @@ test('renewal rules: MCP create/update preview, read scope, dates, validation an
   const denied = await f.request(`subscriptions/${domain.id}`, 'PUT', updated, false);
   assert.equal(denied.status, 401);
 });
+
+const avatarPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==';
+
+test('private person avatar: authenticated API, MCP permissions/preview/removal, masking and backup round-trip', async () => {
+  const f = await setup();
+  try {
+    const avatar = avatarPng;
+    const args = { action: 'update', person: 'person', avatar_base64: avatar.split(',')[1], mime: 'image/png' };
+    const rev = await getRev(f.env);
+    const snapshot = JSON.stringify(await f.snapshot());
+    assert.equal((await f.call('save_person', { ...args, dry_run: true })).isError, undefined);
+    assert.equal(await getRev(f.env), rev);
+    assert.equal(JSON.stringify(await f.snapshot()), snapshot);
+    assert.equal((await f.call('save_person', args, f.read)).isError, true);
+    assert.equal((await f.call('save_person', args)).isError, undefined);
+    assert.equal((await f.snapshot()).people?.find((p) => p.id === 'person')?.avatar, avatar);
+    const rows = await f.call('list_people', {});
+    assert.ok(JSON.stringify(rows).includes('has_avatar'));
+    assert.ok(!JSON.stringify(rows).includes('data:image'));
+    assert.ok(!JSON.stringify(rows).includes(args.avatar_base64));
+    const changedRev = await getRev(f.env);
+    for (const invalid of [
+      { avatar_url: 'http://example.test/a.png' },
+      { avatar_url: 'https://example.test/a.png' },
+      { avatar_url: 'file:///a.png' },
+      { avatar_base64: 'A'.repeat(90_000), mime: 'image/png' },
+      { avatar_base64: args.avatar_base64, mime: 'image/svg+xml' },
+      { avatar: null, avatar_base64: args.avatar_base64, mime: 'image/png' },
+      { mime: 'image/png' },
+    ])
+      assert.equal((await f.call('save_person', { action: 'update', person: 'person', ...invalid })).isError, true);
+    assert.equal(await getRev(f.env), changedRev);
+    assert.equal((await f.request('people/person', 'PUT', { id: 'person', name: 'Fictional person', avatar }, false)).status, 401);
+    assert.equal((await f.request('people/person', 'PUT', { id: 'person', name: 'Fictional person', avatar: 'https://example.test/a.png' })).status, 400);
+    assert.equal((await f.request('people/person', 'PUT', { id: 'person', name: 'Fictional person', avatar })).status, 200);
+    await putKv(f.env, 'settings', { ...(await f.snapshot()).settings, publicView: true });
+    await upsert(f.env, 'subscriptions', 'public-sharing', { ...sub(), id: 'public-sharing', proxy: undefined });
+    const publicResponse = await f.request('public', 'GET', undefined, false);
+    assert.equal(publicResponse.status, 200);
+    const publicState = await publicResponse.json();
+    assert.equal(publicState.people, undefined);
+    assert.equal(publicState.subscriptions.length, 1);
+    assert.equal(publicState.subscriptions[0].share.members.length, 1);
+    assert.ok(!JSON.stringify(publicState).includes(avatar));
+    assert.ok(!JSON.stringify(publicState).includes('personId'));
+    const backup = await (await f.request('backup')).json();
+    assert.equal(backup.people.find((p: { id: string }) => p.id === 'person').avatar, avatar);
+    const { parseBackup } = await import('../worker/backup.ts');
+    assert.equal(parseBackup({ subscriptions: [], version: 2 }).people.length, 0);
+    const malformed = structuredClone(backup);
+    malformed.people[0].avatar = 'http://example.test/a.png';
+    assert.equal((await f.request('backup', 'POST', malformed)).status, 400);
+    assert.equal((await f.call('save_person', { action: 'update', person: 'person', avatar: null, dry_run: true })).isError, undefined);
+    assert.equal((await f.snapshot()).people?.find((p) => p.id === 'person')?.avatar, avatar);
+    assert.equal((await f.call('save_person', { action: 'update', person: 'person', avatar: null })).isError, undefined);
+    assert.equal((await f.snapshot()).people?.find((p) => p.id === 'person')?.avatar, undefined);
+    assert.equal((await f.request('backup', 'POST', backup)).status, 200);
+    assert.equal((await f.snapshot()).people?.find((p) => p.id === 'person')?.avatar, avatar);
+    assert.equal((await f.request('people/person', 'PUT', { id: 'person', name: 'Fictional person' })).status, 200);
+    assert.equal((await f.snapshot()).people?.find((p) => p.id === 'person')?.avatar, undefined);
+    await apply(f.env, { tool: 'save_person', args });
+    assert.equal((await f.snapshot()).people?.find((p) => p.id === 'person')?.avatar, avatar);
+  } finally {
+    f.db.close();
+  }
+});
+
+test('accounts belong to person × plan: API/MCP persistence, independent updates, preview, permissions and public privacy', async () => {
+  const f = await setup();
+  try {
+    const make = (id: string, name: string, account: string): Subscription => ({
+      ...sub(),
+      id,
+      name,
+      proxy: undefined,
+      share: { ...sub().share!, members: [{ ...sub().share!.members[0], account }] },
+    });
+    for (const s of [make('youtube', 'YouTube', 'alex@example.test'), make('spotify', 'Spotify', '+65 8000 0000')]) {
+      assert.equal((await f.request(`subscriptions/${s.id}`, 'PUT', s, false)).status, 401);
+      assert.equal((await f.request(`subscriptions/${s.id}`, 'PUT', s)).status, 200);
+    }
+    const accounts = async () => {
+      const result = await f.call('list_people', {}, f.read);
+      assert.equal(result.isError, undefined);
+      const person = result.structuredContent.people.find((p: { person_id: string }) => p.person_id === 'person');
+      assert.ok(!('account' in person.record));
+      assert.ok(!('account' in person.in.find((i: { kind: string }) => i.kind === 'proxy')));
+      return Object.fromEntries(
+        person.in.filter((i: { kind: string }) => i.kind === 'share').map((i: { subscription_id: string; account?: string }) => [i.subscription_id, i.account]),
+      );
+    };
+    assert.deepEqual(await accounts(), { s: null, youtube: 'alex@example.test', spotify: '+65 8000 0000' });
+    // The fixture also has a share membership and a proxy relationship on s.
+    const patch = { subscription: 'youtube', member: 'member', account: '  user / arbitrary ID #42  ' };
+    const before = await f.snapshot();
+    const rev = await getRev(f.env);
+    assert.equal((await f.call('save_share_member', { ...patch, dry_run: true })).isError, undefined);
+    assert.deepEqual(await f.snapshot(), before);
+    assert.equal(await getRev(f.env), rev);
+    assert.equal((await f.call('save_share_member', patch, f.read)).isError, true);
+    assert.equal((await f.call('save_share_member', patch)).isError, undefined);
+    assert.equal((await accounts()).youtube, 'user / arbitrary ID #42');
+    assert.equal((await accounts()).spotify, '+65 8000 0000');
+    assert.equal(
+      (await f.call('save_person', { action: 'update', person: 'person', set: { name: 'Alex', contact: 'alex-contact@example.test', contactVia: '邮箱' } }))
+        .isError,
+      undefined,
+    );
+    assert.equal((await accounts()).youtube, 'user / arbitrary ID #42');
+    assert.equal((await accounts()).spotify, '+65 8000 0000');
+    assert.equal((await f.call('save_person', { action: 'update', person: 'person', set: { account: 'wrong scope' } })).isError, true);
+    await putKv(f.env, 'settings', { ...(await f.snapshot()).settings, publicView: true });
+    const response = await f.request('public', 'GET', undefined, false);
+    assert.equal(response.status, 200);
+    const publicState = await response.json();
+    assert.equal(publicState.subscriptions.length, 2);
+    for (const s of publicState.subscriptions) {
+      assert.equal(s.account, undefined);
+      assert.equal(s.share.members.length, 1);
+      assert.ok(!('account' in s.share.members[0]));
+    }
+    const serialized = JSON.stringify(publicState);
+    for (const secret of ['alex@example.test', '+65 8000 0000', 'user / arbitrary ID #42', 'alex-contact@example.test'])
+      assert.ok(!serialized.includes(secret));
+    assert.equal((await f.call('save_share_member', { ...patch, account: '  ' })).isError, undefined);
+    const cleared = (await f.snapshot()).subscriptions.find((s) => s.id === 'youtube')!.share!.members[0];
+    assert.equal(cleared.account, undefined);
+    assert.equal((await accounts()).youtube, null);
+    assert.equal((await accounts()).spotify, '+65 8000 0000');
+  } finally {
+    f.db.close();
+  }
+});

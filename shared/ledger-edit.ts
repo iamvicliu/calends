@@ -1,3 +1,4 @@
+import { validatePeopleAvatars } from './avatar.ts';
 // Ledger references and non-secret settings. Pure functions; no storage or platform APIs.
 import { categoryList, cleanCategories, renameInSubs, type Category } from './categories.ts';
 import { mergePeople, refsFor, syncPerson } from './people.ts';
@@ -138,7 +139,9 @@ export function personEdit(st: AppState, person: Person, deleting: boolean, into
     return { people: result.people, subscriptions: result.subs, references };
   }
   if (!person.name.trim()) throw new Error(t('mcp.error.invalidInput', { field: 'name' }));
-  return { people: [...(st.people ?? []).filter((p) => p.id !== person.id), person], subscriptions: syncPerson(st.subscriptions, person), references };
+  const people = [...(st.people ?? []).filter((p) => p.id !== person.id), person];
+  validatePeopleAvatars(people);
+  return { people, subscriptions: syncPerson(st.subscriptions, person), references };
 }
 export function validateCurrency(st: AppState, code: string): void {
   if (!/^[A-Z]{3}$/.test(code) || !(st.fx.rates[code] > 0)) throw new Error(t('mcp.error.unsupportedCurrency', { code }));

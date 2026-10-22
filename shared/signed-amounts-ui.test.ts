@@ -10,6 +10,7 @@ import { chargeValue } from './fx.ts';
 import { FALLBACK_FX, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
+import { colorFor } from './people.ts';
 import { detailChargeHistory, detailForecast } from '../app/src/views/detail-data.ts';
 import type { AppState, Subscription } from './types.ts';
 
@@ -282,10 +283,18 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
   const { memberAboard, memberDues } = await import('./billing.ts');
   const file = '../app/src/components/ShareAvatars.tsx';
   const source = read(file).split('export function ShareAvatars(')[1];
+  const PersonAvatar = load(
+    '../app/src/components/PersonAvatar.tsx',
+    'PersonAvatar',
+    read('../app/src/components/PersonAvatar.tsx').split('/** Shared private-person')[1].split('*/')[1],
+    { React, useState: React.useState, colorFor },
+  );
   const ShareAvatars = load(file, 'ShareAvatars', `function ShareAvatars(${source}`, {
     React,
     memberAboard,
     memberDues,
+    PersonAvatar,
+    personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     base: (path: string) => path,
     t: (key: string) => key,
   });
@@ -330,6 +339,14 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
   assert.ok(!detail.includes('<button'));
   state.settings.avatar = '';
   assert.ok(render(36, 2).includes('/icons/avatar.png'));
+  const avatar = 'data:image/png;base64,iVBORw0KGgo=';
+  const linked = { ...sub, share: { ...sub.share, members: sub.share.members.map((m, i) => (i === 1 ? { ...m, personId: 'person' } : m)) } };
+  const linkedState = { ...state, people: [{ id: 'person', name: 'Linked person', avatar }] };
+  const linkedHtml = renderToStaticMarkup(React.createElement(ShareAvatars, { sub: linked, state: linkedState, today: '2026-10-22' }));
+  assert.ok(linkedHtml.includes(avatar));
+  linkedState.people[0].avatar = 'https://tracking.invalid/avatar.png';
+  const remoteHtml = renderToStaticMarkup(React.createElement(ShareAvatars, { sub: linked, state: linkedState, today: '2026-10-22' }));
+  assert.ok(!remoteHtml.includes('tracking.invalid'));
 });
 
 test('Detail keeps renewal context and places only short default histories in the sidebar', () => {

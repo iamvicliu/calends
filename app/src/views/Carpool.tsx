@@ -1,3 +1,4 @@
+import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
   addDays,
@@ -319,14 +320,33 @@ function MemberRows({
         const collection = memberCollection(s, d.member, memberUnpaidFrom(s, d.member), collect);
         const rate = memberFee(state, s, d.member, collection.from);
         return (
-          <div key={d.member.id} className="member">
+          <div
+            key={d.member.id}
+            className="member"
+            role={ro ? undefined : 'button'}
+            tabIndex={ro ? undefined : 0}
+            onClick={(e) => {
+              if (!ro && !(e.target as HTMLElement).closest('button')) {
+                e.stopPropagation();
+                onMember(d.member);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                e.stopPropagation();
+                onMember(d.member);
+              }
+            }}
+          >
             <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
-                <span className="text-ellipsis">{d.member.name || t('family.pool.unnamed')}</span>
+                <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
+                <span className="text-ellipsis member-label">{d.member.name || t('family.pool.unnamed')}</span>
                 {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
-                {contactText(d.member) && (
+                {(d.member.account || contactText(d.member) || only) && (
                   <span className="muted text-ellipsis" style={{ fontWeight: 400 }}>
-                    · {contactText(d.member)}
+                    · {d.member.account || (only ? t('family.member.accountEmpty') : contactText(d.member))}
                   </span>
                 )}
               </div>
@@ -352,7 +372,7 @@ function MemberRows({
               ) : d.periodsOwed > 0 ? (
                 <b style={{ color: 'var(--orange)' }}>{t('family.pool.owedAmount', { amount: money(collection.amount, collection.currency) })}</b>
               ) : (
-                <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
+                <span className="muted">{t('family.pool.settled')}</span>
               )}
               {!d.member.exempt && (
                 <div className="muted m-hide" style={{ fontSize: 12 }}>
@@ -390,6 +410,144 @@ function receiptNotes(notes: (string | undefined)[]) {
     common: [commonNo, commonCycle].filter(Boolean).join(' · '),
     rows: parts.map((p) => [commonNo ? '' : p?.[1], commonCycle ? '' : p?.[2], p?.[3]].filter(Boolean).join(' · ')),
   };
+}
+
+/** 宽屏成员表：组头与成员共用列宽，账号直接取成员关系记录。 */
+function MemberTable({
+  state,
+  s,
+  today,
+  ro,
+  onMember,
+  groups,
+  groupOf,
+}: {
+  state: AppState;
+  s: Subscription;
+  today: string;
+  ro: boolean;
+  onMember: (m: ShareMember, collect?: boolean) => void;
+  groups: ReadonlyArray<readonly [string, string, number]>;
+  groupOf: (m: ShareMember) => string;
+}) {
+  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const dues = memberDues(s, today, collect, state);
+  return (
+    <table role="table" className="car-member-table" aria-label={t('family.sheet.members')}>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th role="columnheader" scope="col">
+            {t('family.sheet.member')}
+          </th>
+          <th role="columnheader" scope="col">
+            {t('family.member.account')}
+          </th>
+          <th role="columnheader" scope="col">
+            {t('family.member.contact')}
+          </th>
+          <th role="columnheader" scope="col" className="num">
+            {t('family.sheet.fee')}
+          </th>
+          <th role="columnheader" scope="col">
+            {t('family.member.paidUntil')}
+          </th>
+          <th role="columnheader" scope="col">
+            {t('family.sheet.nextCollection')}
+          </th>
+          <th role="columnheader" scope="col" className="num">
+            {t('family.pool.filter.owe')}
+          </th>
+          <th role="columnheader" scope="col">
+            {t('family.sheet.actions')}
+          </th>
+        </tr>
+      </thead>
+      {groups.map(([key, label, n]) => (
+        <tbody role="rowgroup" key={key}>
+          <tr role="row" className="car-member-group">
+            <th role="rowheader" scope="rowgroup" colSpan={8}>
+              {label} · {t('family.sheet.people', { count: n })}
+            </th>
+          </tr>
+          {dues
+            .filter((d) => groupOf(d.member) === key)
+            .map((d) => {
+              const m = d.member;
+              const collection = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
+              const rate = memberFee(state, s, m, collection.from);
+              const next = !m.exempt && (!m.left || collection.from < m.left);
+              return (
+                <tr
+                  role="row"
+                  key={m.id}
+                  className="car-member-row"
+                  tabIndex={ro ? undefined : 0}
+                  aria-label={m.name || t('family.pool.unnamed')}
+                  onClick={() => !ro && onMember(m)}
+                  onKeyDown={(e) => {
+                    if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      onMember(m);
+                    }
+                  }}
+                >
+                  <td role="cell">
+                    <span className="car-member-name">
+                      <PersonAvatar p={personFor(state, m.personId, m.name)} size={28} />
+                      <span className="text-ellipsis" title={m.name}>
+                        {m.name || t('family.pool.unnamed')}
+                      </span>
+                    </span>
+                    {m.left && m.left <= today && <small className="muted">{t('family.pool.leftOn', { date: cnDate(m.left) })}</small>}
+                  </td>
+                  <td role="cell" className="muted">
+                    <span className="text-ellipsis" title={m.account}>
+                      {m.account || t('family.member.accountEmpty')}
+                    </span>
+                  </td>
+                  <td role="cell" className="muted">
+                    <span className="text-ellipsis" title={contactText(m)}>
+                      {m.account && m.account === (m.contact ?? m.tg) ? '—' : contactText(m) || '—'}
+                    </span>
+                  </td>
+                  <td role="cell" className="num">
+                    {m.exempt ? '—' : money(rate.amount, rate.currency)}
+                  </td>
+                  <td role="cell" className="muted">
+                    {m.paidUntil ? cnDateAuto(m.paidUntil, today) : '—'}
+                  </td>
+                  <td role="cell" className="muted">
+                    {next ? cnDateAuto(collection.from, today) : '—'}
+                  </td>
+                  <td role="cell" className="num">
+                    {m.exempt ? (
+                      <span className="muted">{t('family.pool.exempt')}</span>
+                    ) : d.periodsOwed > 0 ? (
+                      <b className="warn">{money(d.owed, d.currency)}</b>
+                    ) : (
+                      <span className="muted">{t('family.pool.settled')}</span>
+                    )}
+                  </td>
+                  <td role="cell">
+                    {!ro && !m.exempt && d.periodsOwed > 0 && (
+                      <button
+                        className="btn primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMember(m, true);
+                        }}
+                      >
+                        {t('family.pool.collect')}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+        </tbody>
+      ))}
+    </table>
+  );
 }
 
 /**
@@ -563,16 +721,19 @@ export function CarSheet({
             </button>
           )}
         </div>
-        {/* 成员按收费周期分组：按月、按季、按半年、按年各一组，不分摊的单独一组 */}
-        {memberGroups.map(([key, label, n]) => (
-          <div key={key} className="car-sheet-members">
-            <div className="car-group-head">
-              {label}
-              <span>{t('family.sheet.people', { count: n })}</span>
-            </div>
-            <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} />
+        <div className="car-members">
+          <MemberTable state={state} s={s} today={today} ro={ro} onMember={onMember} groups={memberGroups} groupOf={groupOf} />
+          <div className="car-member-cards">
+            {memberGroups.map(([key, label, n]) => (
+              <div key={key} className="car-sheet-members">
+                <div className="car-group-head">
+                  {label} · {t('family.sheet.people', { count: n })}
+                </div>
+                <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
 
         {/* 收进来的和我付出去的左右切换，两边对照看这辆车的钱 */}
         <div className="car-sheet-sec row">

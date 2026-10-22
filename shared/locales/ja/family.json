@@ -24,7 +24,10 @@
     "collapseAll": "すべて折りたたむ",
     "groupSum": {
       "other": "{count} 件 · {amount}"
-    }
+    },
+    "fee": "料金",
+    "nextCollection": "次回集金",
+    "actions": "操作"
   },
   "contact": {
     "via": {
@@ -62,8 +65,8 @@
     "name": "名前",
     "namePh": "呼び名",
     "contact": "連絡先",
-    "account": "招待したアカウント",
-    "accountPh": "{name}に招待したメールアドレスまたはユーザー名",
+    "account": "このプランのアカウント",
+    "accountPh": "{name} のメール、電話番号、ユーザー名または ID",
     "joined": "参加日",
     "joinedPh": "プラン開始日（{date}）",
     "notSet": "未設定",
@@ -137,7 +140,10 @@
     "coverAligned": "共通の請求期間の終了日を自動設定",
     "recordNext": "入金を記録 · {amount}",
     "collectionAnchor": "共通の集金起点",
-    "firstSummary": "初回 {from}–{until} · {mode} {amount}"
+    "firstSummary": "初回 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "アカウント未入力",
+    "editAccount": "このプランのアカウントを編集",
+    "copyAccount": "アカウントをコピー"
   },
   "pool": {
     "seatsFree": "空き {count}",

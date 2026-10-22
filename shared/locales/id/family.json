@@ -24,7 +24,10 @@
     "collapseAll": "Tutup semua",
     "groupSum": {
       "other": "{count} pembayaran · {amount}"
-    }
+    },
+    "fee": "Biaya",
+    "nextCollection": "Penagihan berikutnya",
+    "actions": "Tindakan"
   },
   "contact": {
     "via": {
@@ -62,8 +65,8 @@
     "name": "Nama",
     "namePh": "Panggilan untuknya",
     "contact": "Kontak",
-    "account": "Akun yang diundang",
-    "accountPh": "Email atau nama pengguna yang diundang ke {name}",
+    "account": "Akun di paket ini",
+    "accountPh": "Email, telepon, nama pengguna atau ID di {name}",
     "joined": "Bergabung",
     "joinedPh": "Awal paket ({date})",
     "notSet": "Belum diatur",
@@ -137,7 +140,10 @@
     "coverAligned": "Berakhir pada batas periode bersama",
     "recordNext": "Catat pembayaran · {amount}",
     "collectionAnchor": "Awal penagihan bersama",
-    "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}"
+    "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Akun belum diisi",
+    "editAccount": "Edit akun di paket ini",
+    "copyAccount": "Salin akun"
   },
   "pool": {
     "seatsFree": "{count} kosong",

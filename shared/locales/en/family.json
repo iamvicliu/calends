@@ -25,7 +25,10 @@
     "groupSum": {
       "one": "{count} payment · {amount}",
       "other": "{count} payments · {amount}"
-    }
+    },
+    "fee": "Fee",
+    "nextCollection": "Next collection",
+    "actions": "Actions"
   },
   "contact": {
     "via": {
@@ -64,8 +67,8 @@
     "name": "Name",
     "namePh": "What to call them",
     "contact": "Contact",
-    "account": "Invited account",
-    "accountPh": "Email or username invited to {name}",
+    "account": "Account on this plan",
+    "accountPh": "Email, phone, username or ID on {name}",
     "joined": "Joined",
     "joinedPh": "Plan start ({date})",
     "notSet": "Not set",
@@ -141,7 +144,10 @@
     "coverAligned": "Ends at the aligned period boundary",
     "recordNext": "Record payment · {amount}",
     "collectionAnchor": "Collection anchor",
-    "firstSummary": "First period {from}–{until} · {mode} {amount}"
+    "firstSummary": "First period {from}–{until} · {mode} {amount}",
+    "accountEmpty": "No account added",
+    "editAccount": "Edit account on this plan",
+    "copyAccount": "Copy account"
   },
   "pool": {
     "seatsFree": "{count} open",

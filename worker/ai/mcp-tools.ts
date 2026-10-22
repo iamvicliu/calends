@@ -1,3 +1,4 @@
+import { personSummary } from '../../shared/avatar.ts';
 import { reconcileRenewalRules, preserveRenewalHistory, renewalDates } from '../../shared/billing.ts';
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
 import {
@@ -180,7 +181,8 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
     name: l.person.name,
     contact: contactLine(l.person),
     note: l.person.note ?? null,
-    record: l.person,
+    has_avatar: !!l.person.avatar,
+    record: personSummary(l.person),
     owed: conv(l.owed),
     periods_owed: l.periodsOwed,
     received: conv(l.received),
@@ -190,6 +192,7 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
       name: i.sub.name,
       kind: i.kind,
       member_id: i.member?.id ?? null,
+      ...(i.member ? { account: i.member.account ?? null } : {}),
       active: i.active,
       left: i.member?.left && i.member.left <= today ? i.member.left : null,
       owed: conv(i.owed),
@@ -833,7 +836,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'list_people',
     description:
-      'People in the ledger (shared-plan members and people I pay on behalf of, each listed once): contact, which shared plans / proxy payments they are in, how much they owe me now, how much they have paid so far and when they last paid. Use query to find someone by name.',
+      'People in the ledger (shared-plan members and people I pay on behalf of, each listed once): contact, which shared plans / proxy payments they are in and the separate account on each shared plan, how much they owe me now, how much they have paid so far and when they last paid. Use query to find someone by name.',
     inputSchema: obj({
       query: { type: 'string', description: 'Fuzzy name filter.' },
       owing_only: { type: 'boolean', default: false },
@@ -1676,7 +1679,7 @@ const CATALOGUE: Tool[] = [
         source: { type: 'string' },
         contact_via: { type: 'string', description: 'e.g. 微信, Telegram, 邮箱' },
         contact: { type: 'string' },
-        account: { type: 'string', description: 'Invited account / email.' },
+        account: { type: 'string', description: 'This person’s account on this shared plan (arbitrary text: email, phone number, username or ID).' },
         note: { type: 'string' },
         dry_run: DRY,
       },
@@ -1735,7 +1738,7 @@ const CATALOGUE: Tool[] = [
         ['note', 'note'],
         ['source', 'source'],
       ] as const)
-        if (input in a) m[field] = str(a[input]);
+        if (input in a) m[field] = field === 'account' ? str(a[input])?.trim() || undefined : str(a[input]);
       if (!m.name) throw new Error(t('mcp.error.needMemberName'));
       if (old && ['fee', 'fee_currency', 'bill_every'].some((key) => key in a)) {
         const from = date(a.fee_from, 'fee_from', today);

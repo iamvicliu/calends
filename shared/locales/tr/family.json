@@ -25,7 +25,10 @@
     "groupSum": {
       "one": "{count} ödeme · {amount}",
       "other": "{count} ödeme · {amount}"
-    }
+    },
+    "fee": "Ücret",
+    "nextCollection": "Sonraki tahsilat",
+    "actions": "İşlemler"
   },
   "contact": {
     "via": {
@@ -64,8 +67,8 @@
     "name": "Ad",
     "namePh": "Ona ne diyorsunuz",
     "contact": "İletişim",
-    "account": "Davet edilen hesap",
-    "accountPh": "{name} için davet edilen e-posta veya kullanıcı adı",
+    "account": "Bu plandaki hesap",
+    "accountPh": "{name} için e-posta, telefon, kullanıcı adı veya ID",
     "joined": "Katılma",
     "joinedPh": "Plan başlangıcı ({date})",
     "notSet": "Belirtilmedi",
@@ -141,7 +144,10 @@
     "coverAligned": "Ortak dönem sınırında sona erer",
     "recordNext": "Ödeme kaydet · {amount}",
     "collectionAnchor": "Ortak tahsilat başlangıcı",
-    "firstSummary": "İlk dönem {from}–{until} · {mode} {amount}"
+    "firstSummary": "İlk dönem {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Hesap girilmedi",
+    "editAccount": "Bu plandaki hesabı düzenle",
+    "copyAccount": "Hesabı kopyala"
   },
   "pool": {
     "seatsFree": "{count} boş",

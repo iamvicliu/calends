@@ -1,3 +1,4 @@
+import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useRef, useState } from 'react';
 import {
   addDays,
@@ -133,15 +134,8 @@ export function MemberSheet({
       setPay((draft) => refreshReceiptDraft(draft, freshPay(next), payMoneyEdited));
   };
   const via = f.contactVia ?? 'Telegram';
-  const setVia = (v: string) => up({ contactVia: v, ...(v === '邮箱' && f.contact && !f.account ? { account: f.contact } : {}) });
-  // 联系方式选的是邮箱且还没填受邀邮箱时，顺手填上
-  const setContact = (c: string) =>
-    up({
-      contactVia: via,
-      contact: c || undefined,
-      tg: undefined,
-      ...(via === '邮箱' && (!f.account || f.account === f.contact) ? { account: c || undefined } : {}),
-    });
+  const setVia = (v: string) => up({ contactVia: v });
+  const setContact = (c: string) => up({ contactVia: via, contact: c || undefined, tg: undefined });
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
   // 从「收款」按钮进来：只显示记一笔收款的小表单，不展开成员资料；需要时再切到完整资料
@@ -278,6 +272,13 @@ export function MemberSheet({
         }
       >
         <div className="stack">
+          <div className="row">
+            <PersonAvatar p={personFor(state, f.personId, f.name)} size={36} />
+            <div className="collect-person-id">
+              <b>{f.name}</b>
+              {f.account && <small className="muted">{f.account}</small>}
+            </div>
+          </div>
           {/* 同一个人可能在多辆车上：顶部单独一行标明是哪个订阅 */}
           <div className="collect-sub">
             <SubIcon sub={s} size={32} />
@@ -295,7 +296,7 @@ export function MemberSheet({
             )}
           </div>
           <Group>
-            {contactText(f) && <Cell label={t('family.member.contact')}>{contactText(f)}</Cell>}
+            {contactText(f) && f.account !== (f.contact ?? f.tg) && <Cell label={t('family.member.contact')}>{contactText(f)}</Cell>}
             <Cell label={t('family.member.feeGroup')}>
               <span>
                 {perBill('family.pool.perFee', memberBillMonths(s, f, pay.from), {
@@ -392,7 +393,7 @@ export function MemberSheet({
                 async () => {
                   // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
                   const link = await linkPerson(state, f.personId, f.name, f.contact ? via : undefined, f.contact);
-                  const next = { ...f, name: f.name.trim(), personId: link.id };
+                  const next = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
                   const sh = getState().subscriptions.find((x) => x.id === s.id)?.share ?? s.share!;
                   await saveSub({
                     ...s,
@@ -429,7 +430,14 @@ export function MemberSheet({
               />
             </Cell>
           )}
-          <Cell label={t('family.member.name')}>
+          <Cell
+            label={
+              <span className="row">
+                <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
+                {t('family.member.name')}
+              </span>
+            }
+          >
             <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
           </Cell>
           <Cell label={t('family.member.contact')}>
@@ -437,11 +445,10 @@ export function MemberSheet({
           </Cell>
           <Cell label={t('family.member.account')}>
             <input
-              inputMode="email"
               autoCapitalize="off"
               value={f.account ?? ''}
               placeholder={t('family.member.accountPh', { name: s.name })}
-              onChange={(e) => up({ account: val(e).trim() || undefined })}
+              onChange={(e) => up({ account: val(e) })}
             />
           </Cell>
           <Cell label={t('family.member.joined')}>

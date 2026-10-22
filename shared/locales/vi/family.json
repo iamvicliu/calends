@@ -24,7 +24,10 @@
     "collapseAll": "Thu gọn tất cả",
     "groupSum": {
       "other": "{count} khoản · {amount}"
-    }
+    },
+    "fee": "Phí",
+    "nextCollection": "Lần thu tiếp theo",
+    "actions": "Thao tác"
   },
   "contact": {
     "via": {
@@ -62,8 +65,8 @@
     "name": "Tên",
     "namePh": "Cách bạn gọi họ",
     "contact": "Liên hệ",
-    "account": "Tài khoản được mời",
-    "accountPh": "Email hoặc tên người dùng được mời vào {name}",
+    "account": "Tài khoản trong gói này",
+    "accountPh": "Email, điện thoại, tên người dùng hoặc ID trên {name}",
     "joined": "Ngày tham gia",
     "joinedPh": "Ngày bắt đầu gói ({date})",
     "notSet": "Chưa đặt",
@@ -137,7 +140,10 @@
     "coverAligned": "Kết thúc vào cuối kỳ thu chung",
     "recordNext": "Ghi nhận thanh toán · {amount}",
     "collectionAnchor": "Mốc bắt đầu thu chung",
-    "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}"
+    "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Chưa điền tài khoản",
+    "editAccount": "Sửa tài khoản trong gói này",
+    "copyAccount": "Sao chép tài khoản"
   },
   "pool": {
     "seatsFree": "Trống {count}",

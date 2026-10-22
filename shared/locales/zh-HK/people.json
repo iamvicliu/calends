@@ -48,7 +48,8 @@
     "mergeFoot": "同一個人被記成兩個？合併後帳目會歸埋一齊。",
     "mergeConfirm": "將「{from}」合併到「{into}」？{from} 的共享和代付都會轉到 {into} 名下，稱呼和聯絡方式以 {into} 為準。",
     "merged": "已合併到 {name}",
-    "confirmDelete": "刪除「{name}」？"
+    "confirmDelete": "刪除「{name}」？",
+    "accountMissing": "此成員關係已不存在，請重新開啟人員詳情。"
   },
   "pick": {
     "new": "新嘅人",
@@ -57,5 +58,12 @@
   "field": {
     "person": "人",
     "syncFoot": "呢個人仲出現喺另外 {count} 處，改稱呼或聯絡方式會一齊更新。"
+  },
+  "avatar": {
+    "change": "更換頭像",
+    "help": "點擊、拖放或貼上 PNG、JPEG、WebP 圖片（最大 8 MB）。",
+    "remove": "移除頭像",
+    "removeConfirm": "移除這個頭像？儲存後生效。",
+    "fallbackColor": "備用顏色"
   }
 }
