@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "登入電郵、手機號碼或用戶名", "phone": "手機號碼" },
+  "ph": {
+    "account": "登入電郵、手機號碼或用戶名",
+    "phone": "手機號碼"
+  },
   "overlap": {
     "keep": "舊的繼續用一段時間",
     "keepHint": "舊的已經預付、未到期：兩段並行，各自照常計費",
@@ -174,7 +177,8 @@
     "range": "{start} → {end}",
     "now": "至今",
     "initial": "起始",
-    "priceChange": "{date} 調價"
+    "priceChange": "{date} 調價",
+    "outsidePayments": "將有 {count} 筆已有扣款落在服務期之外。保留原日期、金額和所屬階段，繼續修改？"
   },
   "payment": {
     "addTitle": "記一筆",
@@ -203,5 +207,9 @@
   "timeline": {
     "home": "回到今天（也可以在時間軸上按兩下）"
   },
-  "ai": { "title": "用 AI 識別", "hint": "貼上收據、截圖或一段文字，自動整理好", "go": "貼上辨識" }
+  "ai": {
+    "title": "用 AI 識別",
+    "hint": "貼上收據、截圖或一段文字，自動整理好",
+    "go": "貼上辨識"
+  }
 }

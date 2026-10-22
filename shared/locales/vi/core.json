@@ -48,7 +48,8 @@
     "prependUntil": "Giai đoạn trước phải kết thúc sau khi bắt đầu và không muộn hơn ngày bắt đầu ban đầu",
     "priceOutOfRange": "Ngày đổi giá không thuộc giai đoạn nào",
     "keepTooEarly": "Ngày tiếp tục dùng đến phải sau ngày chuyển",
-    "endTooEarly": "Ngày kết thúc phải sau ngày bắt đầu của giai đoạn này"
+    "endTooEarly": "Ngày kết thúc phải sau ngày bắt đầu của giai đoạn này",
+    "startOrder": "Ngày bắt đầu phải nằm giữa ngày bắt đầu của hai giai đoạn liền kề."
   },
   "event": {
     "label": "{region}{price}/{per}",

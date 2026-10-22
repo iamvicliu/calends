@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Email, số điện thoại hoặc tên đăng nhập", "phone": "Số điện thoại" },
+  "ph": {
+    "account": "Email, số điện thoại hoặc tên đăng nhập",
+    "phone": "Số điện thoại"
+  },
   "overlap": {
     "keep": "Vẫn dùng gói cũ thêm một thời gian",
     "keepHint": "Đã trả trước và chưa hết hạn: hai giai đoạn chạy song song, mỗi bên tính phí như thường",
@@ -190,7 +193,8 @@
     "range": "{start} → {end}",
     "now": "nay",
     "initial": "Ban đầu",
-    "priceChange": "Đổi giá {date}"
+    "priceChange": "Đổi giá {date}",
+    "outsidePayments": "{count} khoản thanh toán sẽ nằm ngoài thời gian dịch vụ. Tiếp tục giữ ngày, số tiền và giai đoạn ban đầu?"
   },
   "payment": {
     "addTitle": "Thêm khoản thanh toán",
@@ -219,5 +223,9 @@
   "timeline": {
     "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)"
   },
-  "ai": { "title": "Điền bằng AI", "hint": "Dán hóa đơn, ảnh chụp màn hình hoặc văn bản, phần còn lại tự động", "go": "Dán" }
+  "ai": {
+    "title": "Điền bằng AI",
+    "hint": "Dán hóa đơn, ảnh chụp màn hình hoặc văn bản, phần còn lại tự động",
+    "go": "Dán"
+  }
 }

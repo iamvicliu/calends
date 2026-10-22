@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Email, telepon, atau nama pengguna", "phone": "Nomor telepon" },
+  "ph": {
+    "account": "Email, telepon, atau nama pengguna",
+    "phone": "Nomor telepon"
+  },
   "overlap": {
     "keep": "Tetap pakai yang lama sementara",
     "keepHint": "Sudah dibayar di muka dan belum habis: keduanya berjalan bersamaan dan ditagih seperti biasa",
@@ -190,7 +193,8 @@
     "range": "{start} → {end}",
     "now": "sekarang",
     "initial": "Awal",
-    "priceChange": "Perubahan harga {date}"
+    "priceChange": "Perubahan harga {date}",
+    "outsidePayments": "{count} pembayaran akan berada di luar masa layanan. Lanjutkan dengan tanggal, jumlah, dan tahap asli?"
   },
   "payment": {
     "addTitle": "Tambah pembayaran",
@@ -219,5 +223,9 @@
   "timeline": {
     "home": "Kembali ke hari ini (atau klik dua kali linimasa)"
   },
-  "ai": { "title": "Isi dengan AI", "hint": "Tempel struk, tangkapan layar, atau teks, sisanya otomatis", "go": "Tempel" }
+  "ai": {
+    "title": "Isi dengan AI",
+    "hint": "Tempel struk, tangkapan layar, atau teks, sisanya otomatis",
+    "go": "Tempel"
+  }
 }

@@ -3558,7 +3558,8 @@ select.btn {
 .h-phase::before {
   content: '';
   position: absolute;
-  left: -17px;
+  left: calc(var(--h-track, -12.25px) - 4.5px);
+  z-index: 1;
   top: 15px;
   width: 9px;
   height: 9px;
@@ -3611,37 +3612,51 @@ select.btn {
 }
 /* 并行的阶段：第二条轨道，圆点落在右边那条线上 */
 .history.laned {
-  padding-left: 48px;
+  padding-left: var(--h-padding);
 }
-.history.laned .h-phase::before {
-  left: -31.5px;
-}
-.history.laned .h-phase.lane::before {
-  left: -17.5px;
+.history.laned .h-phase {
+  --h-track: calc(21.75px - var(--h-padding) + var(--h-lane, 0) * 14px);
 }
 .history.laned .h-phase.lane::after {
   content: '';
   position: absolute;
-  left: -13.75px;
+  left: calc(var(--h-track) - 0.75px);
   top: 0;
   bottom: 0;
   width: 1.5px;
   background: color-mix(in srgb, var(--accent) 45%, var(--line));
   border-radius: 1px;
 }
+.h-error {
+  color: var(--red);
+  font-size: 13px;
+  margin: 6px 16px;
+}
 .h-par {
   font-weight: 500;
 }
 .h-edit {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+}
+.h-edit > .badge {
+  grid-column: 1 / -1;
+  justify-self: start;
 }
 .h-edit .dp-btn {
-  height: 28px;
-  padding: 0 9px;
+  min-width: 0;
+  min-height: 28px;
+  height: auto;
+  padding: 4px 6px;
+  gap: 5px;
+  justify-content: center;
+  white-space: normal;
   font-size: 12.5px;
+}
+.h-edit .dp-btn .i {
+  flex-shrink: 0;
 }
 .h-phase.edit::before {
   top: 19px;

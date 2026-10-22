@@ -38,7 +38,8 @@
     "prependUntil": "补的这段的结束日期要在它开始之后、原来的开始日期之前",
     "priceOutOfRange": "调价日期不在任何阶段内",
     "keepTooEarly": "继续使用的截止日期要晚于生效日期",
-    "endTooEarly": "结束日期要晚于这一阶段的开始日期"
+    "endTooEarly": "结束日期要晚于这一阶段的开始日期",
+    "startOrder": "开始日必须晚于上一段开始日、早于下一段开始日。"
   },
   "event": {
     "label": "{region}{price}/{per}",

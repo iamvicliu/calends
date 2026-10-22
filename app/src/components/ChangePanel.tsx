@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { addDays, addMonths, nextCharge, phaseSubs } from '../../../shared/billing.ts';
-import { changePrice, removePhase, resume, setPhaseEnd, switchPlan } from '../../../shared/phases.ts';
+import { changePrice, movePhaseStart, paymentsOutsideMovedPhase, syncPhase, removePhase, resume, setPhaseEnd, switchPlan } from '../../../shared/phases.ts';
 import type { AppState, Cycle, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { History } from './History.tsx';
-import { Group, Icon, Toggle } from './ui.tsx';
+import { ask, Group, Icon, Toggle } from './ui.tsx';
 import { MethodPicker } from './MethodPicker.tsx';
 import { toast } from '../store.ts';
 import { CurrencySelect, Picker, RegionSelect } from './Picker.tsx';
@@ -61,6 +61,18 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
     setKeep(on);
     if (on) setKeepUntil(paidThrough(date));
   };
+  const [startError, setStartError] = useState('');
+  const setStart = async (start: string, nextStart: string) => {
+    setStartError('');
+    try {
+      const next = movePhaseStart(syncPhase(f, today), start, nextStart);
+      const outside = paymentsOutsideMovedPhase(f, next);
+      if (outside.length && !(await ask(t('editor.history.outsidePayments', { count: outside.length })))) return;
+      setF(next);
+    } catch (e) {
+      setStartError(e instanceof Error ? e.message : String(e));
+    }
+  };
   const setEnd = (start: string, end: string | undefined) => {
     try {
       setF(setPhaseEnd(f, start, end));
@@ -96,7 +108,12 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
 
   return (
     <Group title={t('editor.change.title')}>
-      <History sub={f} state={state} today={today} onEnd={setEnd} />
+      <History sub={f} state={state} today={today} onEnd={setEnd} onStart={setStart} />
+      {startError && (
+        <p className="h-error" role="alert">
+          {startError}
+        </p>
+      )}
       <div className="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
         <button className={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
           {t('editor.change.price')}

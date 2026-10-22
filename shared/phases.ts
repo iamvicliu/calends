@@ -1,5 +1,5 @@
 // 订阅历程的编辑操作：调价、换区/换套餐、断更、续订。全部为纯函数，返回新的订阅对象。
-import { addDays, billingPeriod, chargesBetween, currentPhase, effectiveStatus, phaseSubs, priceAt, subError, validDay } from './billing.ts';
+import { addDays, billingPeriod, chargesBetween, collectionAnchor, currentPhase, effectiveStatus, phaseSubs, priceAt, subError, validDay } from './billing.ts';
 import type { Cycle, Payment, Phase, Stop, Subscription } from './types.ts';
 import { t } from './i18n.ts';
 
@@ -18,6 +18,7 @@ export interface PlanChange {
 function fromTop(s: Subscription, start: string): Phase {
   return {
     start,
+    billingStart: s.billingStart,
     end: s.end,
     stop: s.stop,
     price: s.price,
@@ -54,6 +55,7 @@ function mirror(s: Subscription, phases: Phase[]): Subscription {
     bonus: last.bonus,
     payments: undefined,
     nextDue: undefined,
+    billingStart: undefined,
     end: endOf(phases),
     stop: last.stop,
   };
@@ -113,6 +115,7 @@ export function dropPlan(s: Subscription, start: string): Subscription {
       ...s,
       phases: undefined,
       start: p.start,
+      billingStart: p.billingStart,
       end: p.end,
       stop: p.stop,
       price: p.price,
@@ -214,13 +217,61 @@ export function syncPhase(s: Subscription, today: string): Subscription {
  * 晚于下一段的开始日即为并行，早于则中间是断更；最后一段的结束日就是整个订阅的结束日
  */
 export function setPhaseEnd(s: Subscription, start: string, end: string | undefined): Subscription {
-  if (end && end < start) throw new Error(t('core.phase.endTooEarly'));
+  if (end && end <= start) throw new Error(t('core.phase.endTooEarly'));
   if (!s.phases?.length) return { ...s, end };
   const phases = phasesOf(s);
   const p = phases.find((x) => x.start === start);
   if (!p) throw new Error(t('core.phase.priceOutOfRange'));
   p.end = end;
   return mirror(s, phases);
+}
+
+/**
+ * 改阶段标识（开始日），不移动实际发生的付款、停止、优惠、赠送和合租覆盖日期。
+ * billingStart 固定原计费锚点，避免改服务开始日连带重算历史扣款；买断固化原购买记录。
+ * priceHistory 中的初始价随标识迁移；跨过调价点时保留原历史并补新起点的有效价。
+ */
+export function movePhaseStart(s: Subscription, start: string, nextStart: string): Subscription {
+  if (!validDay(nextStart)) throw new Error(t('core.subError.start'));
+  const phases = phasesOf(s);
+  const i = phases.findIndex((p) => p.start === start);
+  if (i < 0) throw new Error(t('core.phase.priceOutOfRange'));
+  if (start === nextStart) return s;
+  const p = phases[i];
+  if ((i > 0 && nextStart <= phases[i - 1].start) || (phases[i + 1] && nextStart >= phases[i + 1].start)) throw new Error(t('core.phase.startOrder'));
+  const end = phaseSubs(s).find((v) => v.start === start)?.end ?? p.end;
+  if (end && nextStart >= end) throw new Error(t('core.phase.endTooEarly'));
+  if (p.stop && nextStart > p.stop.date) throw new Error(t('mcp.error.stopBeforeStart'));
+  const v = { ...s, phases: undefined, ...p };
+  const hist = p.priceHistory ?? [];
+  const crossed = hist.some((h) => h.from !== start && h.from > start && h.from <= nextStart);
+  const priceHistory = crossed
+    ? [...hist, ...(hist.some((h) => h.from === nextStart) ? [] : [{ from: nextStart, amount: priceAt(v, nextStart) }])]
+    : hist.map((h) => (h.from === start ? { ...h, from: nextStart } : h));
+  const payments = p.cycle.unit === 'lifetime' && !p.payments?.length ? [{ date: start, amount: priceAt(v, start) }] : p.payments;
+  phases[i] = {
+    ...p,
+    start: nextStart,
+    priceHistory: p.priceHistory ? priceHistory : undefined,
+    payments,
+    billingStart: p.billingStart ?? start,
+  };
+  const share = s.share && i === 0 ? { ...s.share, collectFrom: collectionAnchor(s), since: s.share.since ?? s.start } : s.share;
+  const next = s.phases?.length ? mirror({ ...s, start: phases[0].start, share }, phases) : { ...s, ...phases[0], share };
+  const error = subError(next);
+  if (error) throw new Error(error);
+  return next;
+}
+
+/** 开始日移动后新落到服务期之外的已有扣款；退款允许晚于服务结束日。 */
+export function paymentsOutsideMovedPhase(previous: Subscription, next: Subscription): Payment[] {
+  const before = phaseSubs(previous);
+  return phaseSubs(next).flatMap((v, i) =>
+    (v.payments ?? []).filter((p) => {
+      const outside = (x: Subscription) => p.date < x.start || (!!x.end && p.date > x.end && p.kind !== 'refund');
+      return outside(v) && !outside(before[i]);
+    }),
+  );
 }
 
 /** 删除一个阶段（误操作撤回）；只剩一个阶段时退回普通订阅 */
@@ -237,6 +288,7 @@ export function removePhase(s: Subscription, index: number): Subscription {
       ...s,
       phases: undefined,
       start: p.start,
+      billingStart: p.billingStart,
       end: p.end,
       stop: p.stop,
       price: p.price,
@@ -299,8 +351,12 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
     const target = list[old.index] ?? list[0];
     phases[oi] = { ...phases[oi], payments: (phases[oi].payments ?? []).filter((x) => x !== target) };
   }
-  // 指定了阶段（并行时选的那一段，或原记录所在的段）且日期仍在那段里：记在那段；否则按日期归段
-  const keep = phase ? phases.findIndex((p, k) => p.start === phase && p.start <= pay.date && (pay.kind === 'refund' || pay.date < endAt(phases, k))) : -1;
+  // 原日期不变的编辑始终留在原阶段（修正开始日后可能在服务期外）；改日期或新记录仍按覆盖范围归段
+  const keep = phase
+    ? phases.findIndex(
+        (p, k) => p.start === phase && (old?.date === pay.date || (p.start <= pay.date && (pay.kind === 'refund' || pay.date < endAt(phases, k)))),
+      )
+    : -1;
   const i = keep >= 0 ? keep : phaseIndexAt(phases, pay.date);
   phases[i] = materialize(phases[i], s, today);
   phases[i] = { ...phases[i], payments: [...(phases[i].payments ?? []), pay].sort((a, b) => a.date.localeCompare(b.date)) };

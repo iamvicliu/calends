@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Login-E-Mail, Telefon oder Benutzername", "phone": "Telefonnummer" },
+  "ph": {
+    "account": "Login-E-Mail, Telefon oder Benutzername",
+    "phone": "Telefonnummer"
+  },
   "overlap": {
     "keep": "Altes noch weiterlaufen lassen",
     "keepHint": "Bereits vorausbezahlt und noch nicht abgelaufen: Beide laufen parallel und werden normal abgerechnet",
@@ -199,7 +202,8 @@
     "range": "{start} → {end}",
     "now": "heute",
     "initial": "Anfang",
-    "priceChange": "Preisänderung {date}"
+    "priceChange": "Preisänderung {date}",
+    "outsidePayments": "{count} vorhandene Zahlungen liegen dann außerhalb des Leistungszeitraums. Mit ursprünglichem Datum, Betrag und Phase fortfahren?"
   },
   "payment": {
     "addTitle": "Zahlung hinzufügen",
@@ -228,5 +232,9 @@
   "timeline": {
     "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"
   },
-  "ai": { "title": "Mit KI ausfüllen", "hint": "Beleg, Screenshot oder Text einfügen – der Rest geht automatisch", "go": "Einfügen" }
+  "ai": {
+    "title": "Mit KI ausfüllen",
+    "hint": "Beleg, Screenshot oder Text einfügen – der Rest geht automatisch",
+    "go": "Einfügen"
+  }
 }
