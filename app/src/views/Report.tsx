@@ -54,8 +54,8 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
         <CashCard state={state} today={today} />
-        <StopsCard state={state} today={today} onOpen={onOpen} />
         <Composition state={state} today={today} onOpen={onOpen} />
+        <StopsCard state={state} today={today} onOpen={onOpen} />
         <div className="grid g-2 report-bottom">
           <TopUps state={state} today={today} />
           <Changelog state={state} today={today} onOpen={onOpen} base={base} />
