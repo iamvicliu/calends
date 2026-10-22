@@ -229,5 +229,17 @@
     "gain": "Lãi {amount}",
     "lost": "Lỗ {amount}",
     "noRecords": "Chưa có khoản thanh toán"
+  },
+  "collect": {
+    "title": "Ghi khoản thu · {name}",
+    "next": "Lần thu tiếp theo {date}",
+    "editMember": "Sửa thành viên",
+    "until": "Áp dụng đến",
+    "covers": "Khoản này áp dụng {from} – {until}",
+    "changeFee": "Đổi mức phí",
+    "lastPayment": "Lần thu gần nhất",
+    "adjustFee": "Điều chỉnh phí",
+    "feeFrom": "Có hiệu lực từ",
+    "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi."
   }
 }

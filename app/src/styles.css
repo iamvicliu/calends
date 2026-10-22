@@ -9402,3 +9402,24 @@ img.mm-flag {
 .member-amount {
   flex-shrink: 0;
 }
+
+/* 成员独立到期日：卡片可收缩，已付至与下次收款各占一行。 */
+.car-card {
+  min-width: 0;
+  max-width: 100%;
+}
+.member-dates {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.member-dates > span {
+  display: block;
+}
+.member-info .icon-text > span:first-child {
+  flex-shrink: 0;
+  max-width: 60%;
+}
+
+.member-fee-section {
+  scroll-margin-top: 84px;
+}

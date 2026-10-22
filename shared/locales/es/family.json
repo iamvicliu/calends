@@ -237,5 +237,17 @@
     "gain": "+{amount}",
     "lost": "−{amount}",
     "noRecords": "Aún no hay pagos"
+  },
+  "collect": {
+    "title": "Registrar cobro · {name}",
+    "next": "Próximo cobro {date}",
+    "editMember": "Editar miembro",
+    "until": "Cubre hasta",
+    "covers": "El pago cubre {from} – {until}",
+    "changeFee": "Cambiar cuota",
+    "lastPayment": "Último pago",
+    "adjustFee": "Ajustar cuota",
+    "feeFrom": "Vigente desde",
+    "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian."
   }
 }

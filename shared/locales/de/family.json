@@ -237,5 +237,17 @@
     "gain": "Plus {amount}",
     "lost": "Minus {amount}",
     "noRecords": "Noch keine Zahlungen"
+  },
+  "collect": {
+    "title": "Zahlung erfassen · {name}",
+    "next": "Nächste Einnahme {date}",
+    "editMember": "Mitglied bearbeiten",
+    "until": "Gedeckt bis",
+    "covers": "Zahlung deckt {from} – {until}",
+    "changeFee": "Gebühr ändern",
+    "lastPayment": "Letzte Zahlung",
+    "adjustFee": "Gebühr anpassen",
+    "feeFrom": "Gültig ab",
+    "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert."
   }
 }

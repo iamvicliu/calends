@@ -229,5 +229,17 @@
     "gain": "{amount} 이익",
     "lost": "{amount} 손해",
     "noRecords": "아직 납부 없음"
+  },
+  "collect": {
+    "title": "입금 기록 · {name}",
+    "next": "다음 수금 {date}",
+    "editMember": "멤버 편집",
+    "until": "적용 종료일",
+    "covers": "이번 입금 적용 {from} – {until}",
+    "changeFee": "요금 변경",
+    "lastPayment": "최근 수금",
+    "adjustFee": "요금 조정",
+    "feeFrom": "적용 시작일",
+    "feeHelp": "적용 기간 시작일의 요금이 전체 기간에 적용됩니다. 저장된 수금 내역은 변경되지 않습니다."
   }
 }

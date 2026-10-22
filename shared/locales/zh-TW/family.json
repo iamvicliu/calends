@@ -213,5 +213,17 @@
     "gain": "賺 {amount}",
     "lost": "虧 {amount}",
     "noRecords": "還沒有收款記錄"
+  },
+  "collect": {
+    "title": "記收款 · {name}",
+    "next": "下次收款 {date}",
+    "editMember": "編輯成員資料",
+    "until": "涵蓋到",
+    "covers": "這筆涵蓋 {from} – {until}",
+    "changeFee": "改收費",
+    "lastPayment": "上次收款",
+    "adjustFee": "調整收費（從某日起）",
+    "feeFrom": "生效日期",
+    "feeHelp": "整期按涵蓋起點的收費標準計算，已記收款不變。"
   }
 }

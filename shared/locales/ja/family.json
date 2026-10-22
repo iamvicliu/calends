@@ -229,5 +229,17 @@
     "gain": "{amount}のプラス",
     "lost": "{amount}のマイナス",
     "noRecords": "まだ支払いはありません"
+  },
+  "collect": {
+    "title": "入金を記録 · {name}",
+    "next": "次回の集金 {date}",
+    "editMember": "メンバーを編集",
+    "until": "対象期間の終わり",
+    "covers": "この入金の対象 {from} – {until}",
+    "changeFee": "料金を変更",
+    "lastPayment": "前回の入金",
+    "adjustFee": "料金を調整",
+    "feeFrom": "適用開始日",
+    "feeHelp": "対象期間の開始日の料金を期間全体に適用します。記録済みの入金は変更されません。"
   }
 }
