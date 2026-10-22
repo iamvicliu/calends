@@ -73,5 +73,21 @@
   "promptLabel": "İstem",
   "copyConfigOnly": "Yalnızca yapılandırmayı kopyala",
   "configCopied": "Yapılandırma kopyalandı",
-  "agentPrompt": "Calends abonelik defterimi \"calends\" adlı bir MCP sunucusu olarak bağla. {where}\n\n{code}\n\nKurulum bitince çalıştığını doğrulamak için {verify} aracını çağır ve kaç aktif aboneliğim olduğunu söyle."
+  "agentPrompt": "Calends abonelik defterimi \"calends\" adlı bir MCP sunucusu olarak bağla. {where}\n\n{code}\n\nKurulum bitince çalıştığını doğrulamak için {verify} aracını çağır ve kaç aktif aboneliğim olduğunu söyle.",
+  "col": {
+    "name": "Ad",
+    "key": "Anahtar",
+    "created": "Oluşturuldu",
+    "lastUsed": "Son kullanım"
+  },
+  "domain": {
+    "overview": "Genel bakış ve istatistikler",
+    "subs": "Abonelikler ve planlar",
+    "charges": "Ödemeler",
+    "wallet": "Cüzdan ve ödeme yöntemleri",
+    "people": "Ortak planlar ve başkası adına ödemeler",
+    "categories": "Kategoriler",
+    "settings": "Ayarlar",
+    "other": "Diğer"
+  }
 }

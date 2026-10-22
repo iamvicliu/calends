@@ -1,7 +1,9 @@
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { CardTitle, ask, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { CardTitle, ask, Icon, IconButton, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Trash2, Users, Wallet } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { api, run, saveSettings, toast } from '../store.ts';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -21,23 +23,18 @@ interface ToolMeta {
   write: boolean;
 }
 
-// 只调整展示顺序，工具仍全部来自接口；未匹配的新领域排在末尾。
-const TOOL_DOMAINS = [
-  /overview/,
-  /subscription|price|plan|status/,
-  /charges|payment$/,
-  /stats|trends|insights/,
-  /payment_method/,
-  /people|person|carpool|share|proxy|receivable/,
-  /categor/,
-  /settings/,
-  /events/,
-  /app_store/,
+// 只调整展示顺序和分组，工具仍全部来自接口；未匹配的新工具归到「其他」
+const TOOL_DOMAINS: Array<{ key: string; icon: LucideIcon; test: RegExp }> = [
+  { key: 'overview', icon: ChartPie, test: /overview|stats|trends|insights/ },
+  { key: 'subs', icon: Layers, test: /subscription|price|plan|status|events/ },
+  { key: 'charges', icon: ReceiptText, test: /charges|payment$/ },
+  { key: 'wallet', icon: Wallet, test: /payment_method/ },
+  { key: 'people', icon: Users, test: /people|person|carpool|share|proxy|receivable/ },
+  { key: 'categories', icon: Tags, test: /categor/ },
+  { key: 'settings', icon: Settings2, test: /settings/ },
 ];
-const toolDomain = (name: string) => {
-  const index = TOOL_DOMAINS.findIndex((domain) => domain.test(name));
-  return index < 0 ? TOOL_DOMAINS.length : index;
-};
+const OTHER = { key: 'other', icon: Shapes, test: /$^/ };
+const toolDomain = (name: string) => TOOL_DOMAINS.find((d) => d.test.test(name)) ?? OTHER;
 
 /** 一个接入客户端：标志、配置写在哪、配置内容；有官方一键安装链接的也给出来 */
 interface Client {
@@ -255,11 +252,11 @@ export function Ai({ state }: { state: AppState }) {
     api<ToolMeta[]>('/api/mcp/tools').then(setTools, () => setTools([]));
   }, []);
   const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : t('ai.neverUsed'));
-  const orderedTools = [...tools].sort((a, b) => toolDomain(a.name) - toolDomain(b.name));
-  const groups: Array<[string, ToolMeta[]]> = [
-    [t('ai.toolsRead'), orderedTools.filter((x) => !x.write)],
-    [t('ai.toolsWrite'), orderedTools.filter((x) => x.write)],
-  ];
+  // 按领域分组，组内先读后写；读写用图标区分（参考 GitHub 细粒度令牌的权限列表）
+  const groups = [...TOOL_DOMAINS, OTHER]
+    .map((d) => ({ ...d, list: tools.filter((x) => toolDomain(x.name) === d).sort((a, b) => Number(a.write) - Number(b.write)) }))
+    .filter((g) => g.list.length);
+  const readCount = tools.filter((x) => !x.write).length;
 
   return (
     <>
@@ -307,36 +304,58 @@ export function Ai({ state }: { state: AppState }) {
           </header>
           {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
           {!!tokens?.length && (
+            // 密钥列表参考 Stripe、OpenAI、Vercel 的 API Keys：名称与权限、遮蔽后的密钥、创建和最近使用分列对齐，操作收进行尾图标
             <div className="ai-tokens" role="table">
+              <div className="ai-token ai-token-head m-hide" role="row">
+                <span role="columnheader">{t('ai.col.name')}</span>
+                <span role="columnheader">{t('ai.col.key')}</span>
+                <span role="columnheader">{t('ai.col.created')}</span>
+                <span role="columnheader">{t('ai.col.lastUsed')}</span>
+                <span />
+              </div>
               {tokens.map((tk) => (
                 <div key={tk.id} className="ai-token" role="row">
-                  <div className="ai-token-main">
-                    <span className="ai-token-name icon-text">
-                      <b>{tk.name}</b>
-                      <span className={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
+                  <span className="ai-token-name" role="cell">
+                    <span className="ai-token-ico" aria-hidden>
+                      <KeyRound size={15} />
                     </span>
-                    <span className="ai-token-meta">
-                      <code>{tk.prefix}…</code>
-                      <span className="m-hide">{t('ai.createdAt', { time: localTime(tk.createdAt, state.settings.timezone, true) })}</span>
-                      <span>{tk.lastUsedAt ? t('ai.lastUsed', { time: when(tk.lastUsedAt) }) : t('ai.neverUsed')}</span>
+                    <b>{tk.name}</b>
+                    <span className={`ai-scope ${tk.scope}`}>
+                      {tk.scope === 'write' ? <PencilLine size={12} /> : <Eye size={12} />}
+                      {tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}
                     </span>
-                  </div>
-                  {!ro && (
-                    <button
-                      type="button"
-                      className="chip-btn ai-revoke"
-                      onClick={async () =>
-                        (await ask(t('ai.confirmRevoke', { name: tk.name }))) &&
-                        run(async () => {
-                          await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
-                          if (fresh?.item.id === tk.id) setFresh(null);
-                          await load();
-                        }, t('ai.revoked'))
-                      }
-                    >
-                      {t('ai.revoke')}
-                    </button>
-                  )}
+                  </span>
+                  <code className="ai-token-key" role="cell">
+                    {tk.prefix}
+                    <span aria-hidden>••••••••</span>
+                  </code>
+                  <span className="ai-token-when created" role="cell">
+                    <small>{t('ai.col.created')}</small>
+                    {localTime(tk.createdAt, state.settings.timezone, true)}
+                  </span>
+                  <span className={`ai-token-when used ${tk.lastUsedAt ? '' : 'never'}`} role="cell">
+                    <small>{t('ai.col.lastUsed')}</small>
+                    {when(tk.lastUsedAt)}
+                  </span>
+                  <span className="ai-token-act" role="cell">
+                    {!ro && (
+                      <IconButton
+                        className="ai-revoke"
+                        aria-label={t('ai.revoke')}
+                        title={t('ai.revoke')}
+                        onClick={async () =>
+                          (await ask(t('ai.confirmRevoke', { name: tk.name }))) &&
+                          run(async () => {
+                            await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
+                            if (fresh?.item.id === tk.id) setFresh(null);
+                            await load();
+                          }, t('ai.revoked'))
+                        }
+                      >
+                        <Trash2 size={15} />
+                      </IconButton>
+                    )}
+                  </span>
                 </div>
               ))}
             </div>
@@ -352,19 +371,36 @@ export function Ai({ state }: { state: AppState }) {
             <p className="m-hide">{t('ai.toolsHint')}</p>
           </button>
           {showTools && (
-            <div className="ai-tools">
-              {groups.map(([title, list]) => (
-                <div key={title}>
-                  <CardTitle>{title}</CardTitle>
-                  {list.map((tool) => (
-                    <div key={tool.name} className="ai-tool">
-                      <b>{tool.title ?? tool.name}</b>
-                      <code>{tool.name}</code>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+            <>
+              <div className="ai-tools-legend">
+                <span>
+                  <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
+                </span>
+                <span className="write">
+                  <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
+                </span>
+              </div>
+              <div className="ai-tools">
+                {groups.map(({ key, icon: DomainIcon, list }) => (
+                  <section key={key} className="ai-tool-group">
+                    <h3>
+                      <DomainIcon size={15} />
+                      {t(`ai.domain.${key}`)}
+                      <small>{list.length}</small>
+                    </h3>
+                    {list.map((tool) => (
+                      <div key={tool.name} className={`ai-tool ${tool.write ? 'write' : ''}`}>
+                        <span className="ai-tool-ico" title={tool.write ? t('ai.toolsWrite') : t('ai.toolsRead')}>
+                          {tool.write ? <PencilLine size={13} /> : <Eye size={13} />}
+                        </span>
+                        <b>{tool.title ?? tool.name}</b>
+                        <code>{tool.name}</code>
+                      </div>
+                    ))}
+                  </section>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </div>

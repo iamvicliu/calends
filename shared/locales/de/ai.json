@@ -73,5 +73,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Nur Konfiguration kopieren",
   "configCopied": "Konfiguration kopiert",
-  "agentPrompt": "Verbinde mein Calends-Abo-Konto als MCP-Server namens „calends“. {where}\n\n{code}\n\nWenn alles eingerichtet ist, ruf das Tool {verify} auf, um es zu prüfen, und sag mir, wie viele aktive Abos ich habe."
+  "agentPrompt": "Verbinde mein Calends-Abo-Konto als MCP-Server namens „calends“. {where}\n\n{code}\n\nWenn alles eingerichtet ist, ruf das Tool {verify} auf, um es zu prüfen, und sag mir, wie viele aktive Abos ich habe.",
+  "col": {
+    "name": "Name",
+    "key": "Schlüssel",
+    "created": "Erstellt",
+    "lastUsed": "Zuletzt verwendet"
+  },
+  "domain": {
+    "overview": "Übersicht & Statistik",
+    "subs": "Abos & Tarife",
+    "charges": "Abbuchungen",
+    "wallet": "Wallet & Zahlungsmittel",
+    "people": "Geteilte Abos & Auslagen",
+    "categories": "Kategorien",
+    "settings": "Einstellungen",
+    "other": "Sonstiges"
+  }
 }

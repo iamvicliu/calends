@@ -71,5 +71,21 @@
   "promptLabel": "提示词",
   "copyConfigOnly": "只复制配置",
   "configCopied": "配置已复制",
-  "agentPrompt": "请把我的 Calends 订阅账本接入为你的 MCP 服务器，名称叫 calends。{where}\n\n{code}\n\n配置好后调用 {verify} 工具验证一下，再告诉我现在有几个在用的订阅。"
+  "agentPrompt": "请把我的 Calends 订阅账本接入为你的 MCP 服务器，名称叫 calends。{where}\n\n{code}\n\n配置好后调用 {verify} 工具验证一下，再告诉我现在有几个在用的订阅。",
+  "col": {
+    "name": "名称",
+    "key": "密钥",
+    "created": "创建",
+    "lastUsed": "最近使用"
+  },
+  "domain": {
+    "overview": "概览与统计",
+    "subs": "订阅与套餐",
+    "charges": "扣款记录",
+    "wallet": "钱包与支付方式",
+    "people": "合租与代付",
+    "categories": "分类",
+    "settings": "设置",
+    "other": "其他"
+  }
 }

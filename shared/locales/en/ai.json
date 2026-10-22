@@ -73,5 +73,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Copy config only",
   "configCopied": "Config copied",
-  "agentPrompt": "Connect my Calends subscription ledger to you as an MCP server named \"calends\". {where}\n\n{code}\n\nOnce it's set up, call the {verify} tool to check it works, then tell me how many active subscriptions I have."
+  "agentPrompt": "Connect my Calends subscription ledger to you as an MCP server named \"calends\". {where}\n\n{code}\n\nOnce it's set up, call the {verify} tool to check it works, then tell me how many active subscriptions I have.",
+  "col": {
+    "name": "Name",
+    "key": "Key",
+    "created": "Created",
+    "lastUsed": "Last used"
+  },
+  "domain": {
+    "overview": "Overview & stats",
+    "subs": "Subscriptions & plans",
+    "charges": "Charges",
+    "wallet": "Wallet & payment methods",
+    "people": "Shared plans & paid for others",
+    "categories": "Categories",
+    "settings": "Settings",
+    "other": "Other"
+  }
 }

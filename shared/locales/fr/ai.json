@@ -73,5 +73,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Copier seulement la config",
   "configCopied": "Configuration copiée",
-  "agentPrompt": "Connecte mon registre d’abonnements Calends comme serveur MCP nommé « calends ». {where}\n\n{code}\n\nUne fois configuré, appelle l’outil {verify} pour vérifier que tout marche, puis dis-moi combien d’abonnements actifs j’ai."
+  "agentPrompt": "Connecte mon registre d’abonnements Calends comme serveur MCP nommé « calends ». {where}\n\n{code}\n\nUne fois configuré, appelle l’outil {verify} pour vérifier que tout marche, puis dis-moi combien d’abonnements actifs j’ai.",
+  "col": {
+    "name": "Nom",
+    "key": "Clé",
+    "created": "Créé",
+    "lastUsed": "Dernière utilisation"
+  },
+  "domain": {
+    "overview": "Aperçu et statistiques",
+    "subs": "Abonnements et forfaits",
+    "charges": "Prélèvements",
+    "wallet": "Portefeuille et moyens de paiement",
+    "people": "Abonnements partagés et avances",
+    "categories": "Catégories",
+    "settings": "Réglages",
+    "other": "Autres"
+  }
 }

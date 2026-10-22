@@ -73,5 +73,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Copiar só a configuração",
   "configCopied": "Configuração copiada",
-  "agentPrompt": "Conecte meu registro de assinaturas Calends como um servidor MCP chamado \"calends\". {where}\n\n{code}\n\nQuando estiver pronto, chame a ferramenta {verify} para confirmar que funciona e me diga quantas assinaturas ativas eu tenho."
+  "agentPrompt": "Conecte meu registro de assinaturas Calends como um servidor MCP chamado \"calends\". {where}\n\n{code}\n\nQuando estiver pronto, chame a ferramenta {verify} para confirmar que funciona e me diga quantas assinaturas ativas eu tenho.",
+  "col": {
+    "name": "Nome",
+    "key": "Chave",
+    "created": "Criado",
+    "lastUsed": "Último uso"
+  },
+  "domain": {
+    "overview": "Visão geral e estatísticas",
+    "subs": "Assinaturas e planos",
+    "charges": "Cobranças",
+    "wallet": "Carteira e formas de pagamento",
+    "people": "Planos compartilhados e pagos por outros",
+    "categories": "Categorias",
+    "settings": "Configurações",
+    "other": "Outros"
+  }
 }
