@@ -9751,7 +9751,7 @@ img.mm-flag {
     display: grid;
     /* 成员（账号） | 收费 + 跟随车/自定义 | 本期起止 | 收款状态 | 操作；最小宽度之和 + 间距不超过 720px，
        各列统一两行：收费 + 标签、本期开始 + 结束、状态 + 待收 */
-    grid-template-columns: minmax(140px, 1.4fr) minmax(130px, 1.1fr) minmax(150px, 1.2fr) minmax(96px, 0.8fr) max-content;;
+    grid-template-columns: minmax(140px, 1.4fr) minmax(130px, 1.1fr) minmax(150px, 1.2fr) minmax(96px, 0.8fr) max-content;
     column-gap: 28px;
     width: 100%;
     border-collapse: collapse;
