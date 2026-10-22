@@ -24,6 +24,20 @@ Before opening a PR, make sure these pass:
 npm run typecheck && npm run lint && npm run format:check && npm run i18n:check && npm test && npm run build
 ```
 
+For MCP release verification, run `node --experimental-strip-types scripts/mcp-release-check.mjs`.
+It starts a loopback-only Worker with a fresh temporary persistence directory, creates fictional monthly,
+quarterly and half-yearly carpools through the API, checks JSON-RPC schemas, permissions, previews,
+dated collection rules, member fees and receipts, then stops the Worker and removes its database.
+It does not use personal Wrangler configuration or an existing ledger.
+
+Add `--deepseek` with `DEEPSEEK_API_KEY` supplied through the process environment to run the six
+Chinese carpool tasks through both an external MCP client and the in-app assistant using the project's
+default model. This optional check calls the real provider and incurs usage; it is separate from `npm test`.
+The script checks stored values and receipt history, requires previews before external writes, and verifies
+that assistant confirmation-card proposals do not save until `/api/assistant/apply` is called.
+Preview-only tasks are never confirmed. Tokens are held in memory; the assistant key exists only in the
+disposable local configuration and is cleared before cleanup. Do not paste credentials into shell history.
+
 ## Guidelines
 
 - **Domain logic lives in `shared/`** and must run in both the browser and the Worker (no DOM or Node APIs). Add unit tests in `shared/*.test.ts` for billing, phase or metric changes.
