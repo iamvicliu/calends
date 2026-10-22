@@ -459,7 +459,7 @@ export function MemberSheet({
               onChange={(v) => up({ joined: v })}
             />
           </Cell>
-          {first.partial && !f.exempt && (
+          {first.partial && !f.exempt && !f.payments?.some((p) => p.from === first.from && p.until >= first.until) && (
             <>
               <div className="cell">
                 <small className="muted">
