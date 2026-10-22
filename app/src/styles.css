@@ -9678,7 +9678,13 @@ img.mm-flag {
 
 /* 成员区按实际内容宽度切换，收付款记录区保持原布局。 */
 .sheet:has(.car-members) {
-  width: min(1160px, 100%);
+  width: min(920px, 100%);
+}
+/* 所有弹窗在桌面上两侧至少留 80px，既不撑满屏幕，也能点空白处关闭 */
+@media (min-width: 1000px) {
+  .sheet {
+    max-width: calc(100vw - 160px);
+  }
 }
 .car-members {
   container-type: inline-size;
