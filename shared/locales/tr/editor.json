@@ -125,7 +125,8 @@
     "overdue": {
       "one": "{count} gün gecikti",
       "other": "{count} gün gecikti"
-    }
+    },
+    "dueOn": "Vade {date}"
   },
   "proxy": {
     "for": "Kimin için",

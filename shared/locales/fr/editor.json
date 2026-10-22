@@ -125,7 +125,8 @@
     "overdue": {
       "one": "{count} jour de retard",
       "other": "{count} jours de retard"
-    }
+    },
+    "dueOn": "À percevoir le {date}"
   },
   "proxy": {
     "for": "Je paie pour",

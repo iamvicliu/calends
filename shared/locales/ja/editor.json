@@ -119,7 +119,8 @@
     "editMember": "編集",
     "overdue": {
       "other": "{count}日超過"
-    }
+    },
+    "dueOn": "{date} 集金予定"
   },
   "proxy": {
     "for": "立て替え先",

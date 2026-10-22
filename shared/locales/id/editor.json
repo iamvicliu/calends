@@ -119,7 +119,8 @@
     "editMember": "Ubah",
     "overdue": {
       "other": "Terlambat {count} hari"
-    }
+    },
+    "dueOn": "Jatuh tempo {date}"
   },
   "proxy": {
     "for": "Ditalangi untuk",

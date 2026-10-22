@@ -600,17 +600,32 @@ function Form({
                       <small className="muted">
                         {m.exempt ? t('family.pool.exempt') : followsCar(state, stored!, m, today) ? t('editor.share.follows') : t('editor.share.custom')}
                         {late > 0 && <span className="member-late"> · {t('editor.share.overdue', { count: late })}</span>}
-                        {due && ` · ${t('editor.share.nextDue', { date: cnDateFull(due) })}`}
+                        {due && (
+                          <>
+                            {' · '}
+                            <span className="nowrap">{t(late > 0 ? 'editor.share.dueOn' : 'editor.share.nextDue', { date: cnDateFull(due) })}</span>
+                          </>
+                        )}
                       </small>
-                      <span className="member-summary-edit">
-                        {t('editor.share.editMember')}
-                        <Icon name="right" size={14} />
-                      </span>
                     </button>
                   ) : (
-                    <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
+                    <input
+                      style={{ gridColumn: 'span 2' }}
+                      value={m.name}
+                      placeholder={t('editor.share.memberN', { n: i + 1 })}
+                      onChange={(e) => setMember(i, { name: val(e) })}
+                    />
                   )}
-                  <IconButton aria-label={t('editor.share.remove')} onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}>
+                  {saved && (
+                    <IconButton aria-label={t('editor.share.editMember')} onClick={() => openMember(m)}>
+                      <Icon name="edit" />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    className="danger"
+                    aria-label={t('editor.share.remove')}
+                    onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}
+                  >
                     <Icon name="x" />
                   </IconButton>
                 </div>

@@ -119,7 +119,8 @@
     "editMember": "Sửa",
     "overdue": {
       "other": "Quá hạn {count} ngày"
-    }
+    },
+    "dueOn": "Đến hạn {date}"
   },
   "proxy": {
     "for": "Trả hộ cho",

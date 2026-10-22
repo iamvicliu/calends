@@ -9882,14 +9882,12 @@ img.mm-flag {
 
 /* 编辑页「谁在用」：已保存成员只显示摘要（称呼 + 收费方式 · 下次应收） */
 .member-edit.member-summary {
-  grid-template-columns: minmax(0, 1fr) var(--ctl-h-md);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
 }
 .member-summary-name {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 12px;
-  row-gap: 2px;
-  align-items: center;
+  gap: 2px;
   min-width: 0;
   padding: 0;
   border: 0;
@@ -9898,19 +9896,6 @@ img.mm-flag {
   font: inherit;
   text-align: left;
   cursor: pointer;
-}
-.member-summary-name > b,
-.member-summary-name > small {
-  grid-column: 1;
-}
-.member-summary-edit {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--accent);
-  font-size: 13px;
 }
 .member-late {
   color: var(--red);

@@ -119,7 +119,8 @@
     "editMember": "편집",
     "overdue": {
       "other": "{count}일 연체"
-    }
+    },
+    "dueOn": "{date} 수금 예정"
   },
   "proxy": {
     "for": "대신 결제 대상",

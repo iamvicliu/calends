@@ -125,7 +125,8 @@
     "overdue": {
       "one": "{count} day overdue",
       "other": "{count} days overdue"
-    }
+    },
+    "dueOn": "Due {date}"
   },
   "proxy": {
     "for": "Paying for",

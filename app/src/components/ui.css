@@ -61,6 +61,16 @@
   color: var(--on-ink);
   box-shadow: none;
 }
+/* 删除类操作：浅红底红色图标，与同排普通圆形按钮同尺寸 */
+.icon-btn.danger {
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+  color: var(--red);
+  box-shadow: none;
+}
+.icon-btn.danger:hover {
+  background: color-mix(in srgb, var(--red) 18%, transparent);
+  color: var(--red);
+}
 .icon-btn svg,
 .icon-btn .i {
   display: block;

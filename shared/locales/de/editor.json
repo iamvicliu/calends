@@ -125,7 +125,8 @@
     "overdue": {
       "one": "{count} Tag überfällig",
       "other": "{count} Tage überfällig"
-    }
+    },
+    "dueOn": "Fällig {date}"
   },
   "proxy": {
     "for": "Ich zahle für",
