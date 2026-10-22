@@ -85,6 +85,7 @@
     "fallbackColor": "Cor alternativa"
   },
   "list": {
-    "none": "Nenhuma pessoa encontrada"
+    "none": "Nenhuma pessoa encontrada",
+    "status": "Status"
   }
 }

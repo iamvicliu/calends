@@ -124,7 +124,16 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   const current = open ? book.find((l) => (l.person.id || l.person.name) === open) : undefined;
   return (
     <>
+      {/* 筛选与「合租」页同位置：工具栏右上角 */}
       <Toolbar title={t('family.pool.title')}>
+        {book.length > 0 && (
+          <Seg
+            small
+            value={filter}
+            onChange={setFilter}
+            options={(['all', 'owe', 'settled'] as const).map((key) => [key, `${t(`family.pool.filter.${key}`)} ${counts[key]}`])}
+          />
+        )}
         <FamilyTabs tab="people" />
       </Toolbar>
       <div className="page fade-in stack people-page">
@@ -161,12 +170,6 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
         ) : (
           <>
             <div className="people-controls">
-              <Seg
-                small
-                value={filter}
-                onChange={setFilter}
-                options={(['all', 'owe', 'settled'] as const).map((key) => [key, `${t(`family.pool.filter.${key}`)} ${counts[key]}`])}
-              />
               <div className="people-mobile-sort">
                 <Picker
                   variant="btn"
@@ -193,6 +196,9 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
                     ? [
                         <div key="plans" role="columnheader">
                           {t('app.nav.list')}
+                        </div>,
+                        <div key="status" role="columnheader">
+                          {t('people.list.status')}
                         </div>,
                       ]
                     : []),
@@ -223,7 +229,7 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
   return (
     <div className="people-row" role="row" onClick={onClick}>
       <div className="people-identity" role="cell">
-        <PersonAvatar p={l.person} size={34} />
+        <PersonAvatar p={l.person} size={24} />
         <span className="people-person">
           <button
             className="people-open"
@@ -264,17 +270,12 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
           </span>
         )}
       </div>
+      {/* 收款状态单独一列：欠几期 / 已结清；待收列只放金额 */}
+      <div className={`people-status ${Number.isFinite(l.owed) && l.owed > 0.005 ? 'owe' : ''}`} role="cell">
+        {!Number.isFinite(l.owed) ? '—' : l.owed > 0.005 ? t('people.item.owedPeriods', { count: l.periodsOwed }) : t('family.pool.settled')}
+      </div>
       <div className="people-owed" role="cell">
-        {!Number.isFinite(l.owed) ? (
-          <span className="muted">—</span>
-        ) : l.owed > 0.005 ? (
-          <>
-            <b>{money(l.owed, base)}</b>
-            <small>{t('people.item.owedPeriods', { count: l.periodsOwed })}</small>
-          </>
-        ) : (
-          <span className="muted">{t('family.pool.settled')}</span>
-        )}
+        {Number.isFinite(l.owed) && l.owed > 0.005 ? <b>{money(l.owed, base)}</b> : <span className="muted">—</span>}
       </div>
       <div className="people-received" role="cell">
         {flow(l.received, base)}

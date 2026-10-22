@@ -2,15 +2,16 @@
 .people-page {
   container: people / inline-size;
 }
-.people-controls,
+.people-controls {
+  display: none;
+}
 .people-mobile-sort {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.people-controls {
-  justify-content: space-between;
-  flex-wrap: wrap;
+.people-mobile-sort {
+  justify-content: flex-end;
 }
 .people-mobile-sort {
   display: none;
@@ -21,10 +22,11 @@
 .people-head,
 .people-row {
   display: grid;
-  grid-template-columns: minmax(160px, 1.5fr) minmax(132px, 1fr) minmax(105px, 0.8fr) minmax(105px, 0.8fr) minmax(105px, 0.8fr);
+  /* 称呼 | 订阅 | 收款状态 | 待收 | 至今收回 | 最近收款 */
+  grid-template-columns: minmax(180px, 1.6fr) minmax(120px, 1fr) 88px 100px 110px 116px;
   align-items: center;
   gap: 16px;
-  padding: 12px 20px;
+  padding: 6px 20px;
 }
 .people-head {
   color: var(--label-2);
@@ -32,15 +34,22 @@
   background: var(--fill-2);
   border-radius: var(--r) var(--r) 0 0;
 }
-.people-head > :nth-child(n + 3),
+.people-head > :nth-child(n + 4),
 .people-owed,
 .people-received,
 .people-last {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-.people-head > :nth-child(n + 3) {
+.people-head > :nth-child(n + 4) {
   justify-self: end;
+}
+.people-status {
+  color: var(--label-3);
+  white-space: nowrap;
+}
+.people-status.owe {
+  color: var(--orange);
 }
 .people-head .lt-sort {
   min-height: var(--ctl-h-md);
@@ -53,7 +62,7 @@
   border-radius: 4px;
 }
 .people-row {
-  min-height: 66px;
+  min-height: 40px;
   border-top: 0.5px solid var(--sep);
   cursor: pointer;
   font-size: 13px;
@@ -73,9 +82,11 @@
   min-width: 0;
 }
 .people-person {
-  display: grid;
+  /* 称呼与联系方式同一行，行高减半 */
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   min-width: 0;
-  gap: 2px;
 }
 .people-open {
   display: block;
@@ -126,7 +137,7 @@
 @media (max-width: 1100px) and (min-width: 720px) {
   .people-head,
   .people-row {
-    grid-template-columns: minmax(130px, 1.3fr) 130px minmax(95px, 1fr) minmax(95px, 1fr) minmax(95px, 1fr);
+    grid-template-columns: minmax(130px, 1.3fr) 110px 76px 90px 96px 110px;
     gap: 10px;
     padding-inline: 16px;
   }
@@ -136,12 +147,13 @@
   .people-received {
     display: none;
   }
+  .people-controls,
   .people-mobile-sort {
     display: flex;
   }
   .people-row {
     grid-template-columns: minmax(0, 1fr) max-content;
-    grid-template-areas: 'person owed' 'plans last';
+    grid-template-areas: 'person owed' 'plans status';
     gap: 8px 12px;
     padding: 12px 14px;
   }
@@ -151,21 +163,23 @@
   .people-owed {
     grid-area: owed;
   }
+  .people-status {
+    grid-area: status;
+    justify-self: end;
+    font-size: 11px;
+  }
+  .people-last {
+    display: none;
+  }
   .people-plans {
     grid-area: plans;
-    padding-left: 44px;
+    padding-left: 34px;
     gap: 4px;
   }
   .people-plans .ico {
     --s: 18px !important;
   }
-  .people-last {
-    grid-area: last;
-    font-size: 11px;
-  }
-  .people-last-label {
-    display: inline;
-  }
+
   .people-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;

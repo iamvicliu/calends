@@ -67,6 +67,7 @@
     "fallbackColor": "Warna cadangan"
   },
   "list": {
-    "none": "Tidak ada orang yang cocok"
+    "none": "Tidak ada orang yang cocok",
+    "status": "Status"
   }
 }

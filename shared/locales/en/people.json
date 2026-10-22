@@ -85,6 +85,7 @@
     "fallbackColor": "Fallback color"
   },
   "list": {
-    "none": "No matching people"
+    "none": "No matching people",
+    "status": "Status"
   }
 }
