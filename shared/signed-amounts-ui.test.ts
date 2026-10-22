@@ -10,7 +10,7 @@ import { chargeValue } from './fx.ts';
 import { FALLBACK_FX, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
-import { detailForecast } from '../app/src/views/detail-data.ts';
+import { detailChargeHistory, detailForecast } from '../app/src/views/detail-data.ts';
 import type { AppState, Subscription } from './types.ts';
 
 const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
@@ -90,6 +90,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     Fragment: React.Fragment,
     useState: () => [true, () => {}],
     phaseSubs,
+    detailChargeHistory,
     chargeValue,
     diffDays,
     relDays,
@@ -142,6 +143,7 @@ test('Detail defaults to the current charge year, falls back to the latest popul
       },
     ],
     phaseSubs,
+    detailChargeHistory,
     chargeValue,
     diffDays,
     relDays,
@@ -262,7 +264,7 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
   assert.ok(render(36, 2).includes('/icons/avatar.png'));
 });
 
-test('Detail keeps plan prices and renewal dates, placing unpaired history below the sidebar summary except in compact details', () => {
+test('Detail keeps renewal context and places only short default histories in the sidebar', () => {
   const file = '../app/src/views/Detail.tsx';
   const source = read(file);
   const empty = () => null;
@@ -273,6 +275,7 @@ test('Detail keeps plan prices and renewal dates, placing unpaired history below
     Fragment: React.Fragment,
     ...billing,
     detailForecast,
+    detailChargeHistory,
     money,
     cnDateFull,
     relDays,
@@ -348,10 +351,49 @@ test('Detail keeps plan prices and renewal dates, placing unpaired history below
     assert.ok(!html.includes('dt-renewal'));
     assert.equal((html.match(/class="dt-charges"/g) ?? []).length, 1);
     const [main, side] = html.split('class="dt-side');
-    const inSidebar = unit === 'year' || !!end;
+    const inSidebar = unit === 'year';
     assert.equal(main.includes('class="dt-charges"'), !inSidebar);
     assert.equal(side.includes('class="dt-charges"'), inSidebar);
     if (inSidebar) assert.ok(side.indexOf('detail.summary') < side.indexOf('class="dt-charges"'));
     assert.equal(html.includes('dt compact'), unit === 'lifetime');
+  }
+  // Fictional annual plans: ordinary renewals plus commissions recorded as negative charges.
+  const annual: Subscription = {
+    id: 'fictional-annual-commissions',
+    name: 'Fictional annual with credits',
+    price: 120,
+    currency: 'EUR',
+    cycle: { unit: 'year', every: 1 },
+    start: '2020-01-15',
+    status: 'active',
+    category: 'tools',
+    tags: [],
+  };
+  for (const [count, start, today, inSidebar] of [
+    [3, '2020-01-15', '2026-10-22', true], // Four charges + year heading = five rows.
+    [4, '2020-01-15', '2026-10-22', false], // Five charges + year heading = six rows.
+    [8, '2020-01-15', '2026-10-22', false], // Reported case: nine charges, mostly commissions.
+    [4, '2026-01-15', '2026-10-22', true], // Single year: no group heading, five charges fit.
+    [5, '2026-01-15', '2026-10-22', false],
+    [3, '2020-01-15', '2027-01-01', true], // Latest populated year is the default after ending.
+    [4, '2020-01-15', '2027-01-01', false],
+  ] as const) {
+    const sub: Subscription = {
+      ...annual,
+      start,
+      end: '2026-12-31',
+      payments: [
+        ...Array.from({ length: 2027 - Number(start.slice(0, 4)) }, (_, i) => ({ date: `${Number(start.slice(0, 4)) + i}-01-15`, amount: 120 })),
+        ...Array.from({ length: count }, (_, i) => ({ date: `2026-${String(i + 2).padStart(2, '0')}-02`, amount: -5 })),
+      ],
+    };
+    const state: AppState = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
+    const html = renderToStaticMarkup(React.createElement(Detail, { sub, state, today, onEdit: empty, onClose: empty }));
+    const [main, side] = html.split('class="dt-side');
+    assert.equal(main.includes('class="dt-charges"'), !inSidebar, `${count} credits from ${start} at ${today}`);
+    assert.equal(side.includes('class="dt-charges"'), inSidebar);
+    assert.equal((html.match(/class="dt-tr dt-row/g) ?? []).length, count + 1);
+    assert.ok(text(html).includes('+$5.00') || text(html).includes('+€5.00'));
+    assert.equal(html.includes('dt-upcoming'), false);
   }
 });

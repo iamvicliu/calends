@@ -44,7 +44,7 @@ import { confirmPlan, dropPlan, reactivate } from '../../../shared/phases.ts';
 import { t } from '../../../shared/i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { ChargeChart, type ChartLane } from './DetailChart.tsx';
-import { detailForecast } from './detail-data.ts';
+import { detailChargeHistory, detailForecast } from './detail-data.ts';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import './detail.css';
 
@@ -218,7 +218,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const paused = sub.status === 'paused';
   // 买断（一段、不合租）没有走势、未来扣款和历程可看：换成窄的单列，不留半屏空白
   const compact = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1 && !sub.share;
-  const sidebarCharges = !compact && !showForecast;
+  // 最多五行（含可见年份头）才进侧栏：短记录填补摘要下方，返佣等密集记录留在走势下方，避免侧栏过长。
+  // 以默认年份计数；展开全部历史时保持位置，避免交互后卡片跳栏。
+  const sidebarCharges = !compact && !showForecast && detailChargeHistory(history, today).defaultRowCount <= 5;
   const charges = (
     <Charges
       sub={sub}
@@ -299,7 +301,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         </IconButton>
       </header>
 
-      {/* 无预测卡片的宽屏详情把扣款记录放到摘要下方；窄屏仍按数字、走势、扣款、摘要排列 */}
+      {/* 无预测卡片且默认记录较少时，宽屏把扣款记录放到摘要下方；窄屏仍按数字、走势、扣款、摘要排列 */}
       <div className="dt-body">
         <div className="dt-main">
           <Kpis sub={sub} state={state} today={today} history={history} />
@@ -1035,13 +1037,9 @@ function Charges({
   const multi = phaseSubs(sub).length > 1;
   const rows = history.map((c) => ({ c, b: chargeValue(state, c, base) })).reverse();
   const thisYear = today.slice(0, 4);
-  const defaultYear = rows.some((r) => r.c.date.startsWith(thisYear))
-    ? thisYear
-    : rows.reduce((y, r) => (r.c.date.slice(0, 4) > y ? r.c.date.slice(0, 4) : y), '');
+  const { defaultYear, grouped } = detailChargeHistory(history, today);
   const shown = all ? rows : rows.filter((r) => r.c.date.startsWith(defaultYear));
   const years = [...new Set(shown.map((r) => r.c.date.slice(0, 4)))];
-  // 只有一年时不分组，标题里已经有笔数
-  const grouped = new Set(rows.map((r) => r.c.date.slice(0, 4))).size > 1;
   return (
     <Panel
       className="dt-charges"

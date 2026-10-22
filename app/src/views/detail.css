@@ -295,6 +295,17 @@
   align-items: start;
   gap: 16px;
 }
+/* 主栏单卡靠左限宽，标题、年份头与分隔线随整张卡收拢。 */
+.dt:not(.compact) .dt-billing:not(.has-forecast) > .dt-charges {
+  width: 100%;
+  max-width: 480px;
+  justify-self: start;
+}
+@media (min-width: 641px) {
+  .dt:not(.compact) .dt-billing:not(.has-forecast) > .dt-charges .dt-tbl {
+    --cols: 96px minmax(0, 148px) minmax(0, 180px);
+  }
+}
 @container detail-main (min-width: 720px) {
   .dt-billing.has-forecast {
     grid-template-columns: repeat(2, minmax(0, 1fr));
