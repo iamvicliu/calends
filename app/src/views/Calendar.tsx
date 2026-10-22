@@ -4,7 +4,7 @@ import { addDays, addMonths, diffDays, parseDay, cycleLabel, currentPhase, effec
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Cell, Group, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { Cell, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -254,13 +254,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             </div>
             <div className="stack">
               {reportMode === 'mini' && report && <MiniReport report={report} base={base} today={today} onExpand={() => setReportMode('full')} />}
-              <Group
-                title={
-                  <span className="row">
-                    {t('calendar.monthAll', { month: monthLabel(month, { year: false }) })} <Hint text={t('detail.chart.origAmount')} />
-                  </span>
-                }
-              >
+              <section className="card cal-charges">
+                <div className="card-h">
+                  <h3>{t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}</h3>
+                  <Hint text={t('detail.chart.origAmount')} />
+                </div>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 {monthCharges.map((c, i) => (
                   <Cell
@@ -281,7 +279,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                     </b>
                   </Cell>
                 ))}
-              </Group>
+              </section>
             </div>
           </div>
         )}

@@ -520,3 +520,21 @@ test('订阅筛选默认全部时无清空按钮，任一条件变化后清空�
     }
   }
 });
+
+test('calendar monthly list owns its heading inside the card in mini and full modes', () => {
+  for (const mode of ['mini', 'full']) {
+    const r = harness('../app/src/views/Calendar.tsx', 'Calendar', { 'cal-report-mode': mode });
+    const nodes = r.render('Calendar', { state: st, today, onOpen() {}, onIcs() {} });
+    const card = nodes.find((n) => n.props.className === 'card cal-charges')!;
+    assert.ok(card);
+    assert.ok(all(card).some((n) => n.type === 'h3' && n.children.includes('calendar.monthAll')));
+    assert.equal(
+      all(card).some((n) => n.type === 'Group'),
+      false,
+    );
+    assert.equal(
+      all(card).some((n) => n.props.className === 'cal-stat-big'),
+      false,
+    );
+  }
+});
