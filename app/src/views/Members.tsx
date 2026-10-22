@@ -272,16 +272,15 @@ export function MemberSheet({
         }
       >
         <div className="stack">
-          {/* 人员与订阅同样是圆角卡片：头像、称呼，下面一行成员账号与联系方式（直接写内容，不加标签） */}
+          {/* 人员与订阅同样是圆角卡片：头像、称呼，下面一行成员账号 */}
           <div className="collect-sub">
             <PersonAvatar p={personFor(state, f.personId, f.name)} size={32} />
             <span className="collect-sub-id">
               <b>{f.name}</b>
-              {(f.account || contactText(f)) && (
-                <small>
-                  {[f.account && `${t('family.member.account')} ${f.account}`, f.account !== (f.contact ?? f.tg) && contactText(f)].filter(Boolean).join(' · ')}
-                </small>
-              )}
+              {/* 收款时要核对的是他在这辆车上的成员账号，联系方式在资料里看 */}
+              <small className={f.account ? undefined : 'muted'}>
+                {f.account ? `${t('family.member.account')} ${f.account}` : t('family.member.accountEmpty')}
+              </small>
             </span>
             <button type="button" className="collect-sub-link" onClick={() => setQuick(false)}>
               {t('family.collect.editMember')}
