@@ -572,7 +572,7 @@ function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) =>
                 </span>
                 <span className="text-[13px] text-muted-foreground tnum">{t('public.fx.share', { pct: Math.round(f.share * 100) })}</span>
                 <span className={cn('w-14 text-right tnum', Math.abs(f.chg) < 0.005 ? 'text-muted-foreground' : f.chg > 0 ? 'text-up' : 'text-down')}>
-                  {f.chg > 0 ? '+' : f.chg < 0 ? '−' : ''}
+                  {f.chg > 0 ? '↑' : f.chg < 0 ? '↓' : ''}
                   {Math.abs(f.chg * 100).toFixed(1)}%
                 </span>
               </li>
