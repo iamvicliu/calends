@@ -37,7 +37,9 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     categories: () => [],
     Picker: 'Picker',
     t: (key: string) => key,
+    tipProps: () => ({}),
     useMemo: (fn: () => unknown) => fn(),
+    useRef: () => ({ current: null }),
     useEffect: (fn: () => unknown) => fn(),
     useState(initial: unknown) {
       const i = cursor++;
@@ -972,4 +974,156 @@ test('monthly movement subtitles own unsigned before/after costs and event rows 
     all(event).some((n) => typeof n.type === 'function' && n.type.name === 'SpendingDelta'),
     false,
   );
+});
+
+test('calendar full report keeps only populated selected-day details above its divider and updates on selection', () => {
+  const sub: Subscription = {
+    id: 'calendar-plan',
+    name: 'Fictional plan',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2025-01-09',
+    status: 'active',
+  };
+  const state = { ...st, readonly: true, subscriptions: [sub] };
+  const opened: Subscription[] = [];
+  const r = harness(
+    '../app/src/views/Calendar.tsx',
+    'Calendar',
+    { 'cal-report-mode': 'full' },
+    {
+      allCharges: (s: AppState, from: string, to: string, at: string) => s.subscriptions.flatMap((sub) => billing.chargesBetween(sub, from, to, at)),
+    },
+  );
+  const render = () => r.render('Calendar', { state, today, onOpen: (s: Subscription) => opened.push(s), onIcs() {} });
+  const pick = (day: string) =>
+    render()
+      .find((n) => n.props['aria-label'] === format.cnDate(day, true))!
+      .props.onClick();
+  const details = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'card cal-daycard');
+  assert.equal(
+    render().some((n) => n.props.className === 'stack cal-selection'),
+    false,
+    'empty today has no block in full mode',
+  );
+  pick('2026-10-09');
+  let nodes = render();
+  assert.equal(details(nodes).length, 1);
+  assert.ok(nodes.indexOf(details(nodes)[0]) < nodes.findIndex((n) => n.type === 'ScopeReport'));
+  assert.equal(nodes.find((n) => n.type === 'ScopeReport')!.props.selectedChargeDate, '2026-10-09');
+  details(nodes)[0].props.onClick();
+  assert.equal(opened[0], sub);
+  pick('2026-10-10');
+  assert.equal(
+    render().some((n) => n.props.className === 'stack cal-selection'),
+    false,
+  );
+  pick('2026-10-09');
+  assert.equal(details(render()).length, 1);
+  pick('2026-10-09');
+  assert.equal(details(render()).length, 0, 'second click removes the selected block');
+  assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.selectedChargeDate, undefined);
+  pick('2026-10-09');
+  render()
+    .find((n) => n.props['aria-label'] === 'calendar.next')!
+    .props.onClick();
+  assert.equal(details(render()).length, 0, 'month navigation clears selection');
+});
+
+test('calendar full selection scrolls into view only when needed and respects reduced motion', () => {
+  for (const [top, bottom, reduced, expected] of [
+    [100, 250, false, undefined],
+    [600, 850, false, 'smooth'],
+    [30, 170, true, 'instant'],
+  ] as const) {
+    const scrolls: unknown[] = [];
+    const element = { style: { scrollMarginTop: '' }, getBoundingClientRect: () => ({ top, bottom }), scrollIntoView: (opts: unknown) => scrolls.push(opts) };
+    const r = harness(
+      '../app/src/views/Calendar.tsx',
+      'Calendar',
+      { 'cal-report-mode': 'full' },
+      {
+        allCharges: () => [
+          {
+            date: today,
+            amount: 10,
+            currency: 'USD',
+            sub: { id: 's', name: 'Fictional', start: today, price: 10, currency: 'USD', status: 'active', cycle: { unit: 'month', every: 1 } },
+          },
+        ],
+        useRef: () => ({ current: element }),
+        window: { innerHeight: 700 },
+        matchMedia: () => ({ matches: reduced }),
+        document: { addEventListener() {}, removeEventListener() {}, querySelector: () => ({ getBoundingClientRect: () => ({ bottom: 60 }) }) },
+        stopLabel: () => undefined,
+      },
+    );
+    r.render('Calendar', { state: { ...st, readonly: true }, today, onOpen() {}, onIcs() {} });
+    assert.deepEqual(scrolls, expected ? [{ block: 'nearest', behavior: expected }] : []);
+    assert.equal(element.style.scrollMarginTop, '60px');
+  }
+});
+
+test('monthly report hides selected-day charge/refund rows, restores them on deselection and keeps complete totals', () => {
+  const sub: Subscription = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2025-01-09',
+    status: 'active',
+  };
+  const state = { ...st, subscriptions: [sub] };
+  const row = (date: string, amount = 10): reports.ChargeRow => ({ sub, date, amount, original: { sub, date, amount, currency: 'USD', projected: false } });
+  const selected = row('2026-10-26'),
+    other = row('2026-10-28'),
+    refund = row('2026-10-26', -3);
+  const report: reports.ScopeReport = {
+    blocks: [
+      { type: 'headline', mode: 'month', month: '2026-10', total: 27, paid: 7, pending: 20, count: 3, previous: { amount: 0 } },
+      { type: 'top', mode: 'month', rows: [selected, other] },
+      { type: 'upcoming', rows: [selected, other, row('2026-10-26', 20)], total: 40 },
+      { type: 'losses', rows: [], refunds: [refund], refunded: 3, loss: 0, incomplete: false },
+    ],
+  };
+  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US' });
+  const render = (selectedChargeDate?: string) =>
+    r.render('ScopeReport', { report, state, today, selectedChargeDate, onOpen() {}, title: 'Month', open: true, animate: false, onToggle() {} });
+  const rows = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'scope-row scope-tap');
+  const selectedNodes = render('2026-10-26');
+  assert.equal(rows(selectedNodes).length, 1, 'only the other day remains, without an empty upcoming/refund card');
+  assert.ok(rows(selectedNodes)[0].children.some((n) => all(n).some((n) => n.children.includes(format.cnDateAuto(other.date, today)))));
+  assert.ok(
+    selectedNodes.some((n) => n.children.includes(format.flow(-27, 'USD'))),
+    'headline still contains selected charges and refund',
+  );
+  assert.equal(rows(render()).length, 4, 'deselection restores all distinct top/upcoming/refund rows');
+  const copying = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    {
+      useId: () => 'copy',
+      intlLocale: () => 'en-US',
+      useState: () => ['copying', () => {}],
+    },
+  );
+  const copied = copying.render('ScopeReport', {
+    report,
+    state,
+    today,
+    selectedChargeDate: '2026-10-26',
+    onOpen() {},
+    title: 'Month',
+    open: true,
+    animate: false,
+    onToggle() {},
+  });
+  assert.equal(rows(copied).length, 4, 'PNG capture retains every report row, including the selected day');
 });

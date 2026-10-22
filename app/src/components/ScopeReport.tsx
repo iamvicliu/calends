@@ -21,6 +21,8 @@ interface Props {
   animate: boolean;
   open: boolean;
   onToggle: () => void;
+  /** The calendar owns these charge rows above the report divider. Aggregates stay complete. */
+  selectedChargeDate?: string;
 }
 
 /** Spending increases use the same direction and unsigned comparison in both calendar modes. */
@@ -35,7 +37,7 @@ export function SpendingDelta({ value, base }: { value: Comparison; base: string
 }
 
 /** Shared presentation for subscription selections and calendar months; callers own disclosure state. */
-export function ScopeReport({ report, state, today, onOpen, title, animate, open, onToggle }: Props) {
+export function ScopeReport({ report, state, today, onOpen, title, animate, open, onToggle, selectedChargeDate }: Props) {
   const id = useId();
   const root = useRef<HTMLElement>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copying' | 'done'>('idle');
@@ -68,9 +70,21 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const monthly = report.blocks.some((b) => b.type === 'headline' && b.mode === 'month');
   const monthlyMovement = report.blocks.find((b) => b.type === 'trend' && b.mode === 'month');
   const top = report.blocks.find((b) => b.type === 'top' && b.mode === 'month');
-  const upcomingRows = (rows: ChargeRow[]) => rows.filter((r) => !top?.rows.includes(r)).slice(0, 5);
+  const visibleCharges = (rows: ChargeRow[]) => rows.filter((r) => copying || !monthly || r.date !== selectedChargeDate);
+  const upcomingRows = (rows: ChargeRow[]) =>
+    visibleCharges(rows)
+      .filter((r) => !top?.rows.includes(r))
+      .slice(0, 5);
   const blocks = report.blocks.filter((b) =>
-    b.type === 'upcoming' ? upcomingRows(b.rows).length > 0 : !(b.type === 'top' && b.mode === 'scope' && b.rows.length === 1),
+    b.type === 'upcoming'
+      ? upcomingRows(b.rows).length > 0
+      : b.type === 'top'
+        ? b.mode === 'month'
+          ? visibleCharges(b.rows).length > 0
+          : b.rows.length > 1
+        : b.type === 'losses'
+          ? b.rows.length > 0 || visibleCharges(b.refunds).length > 0 || b.incomplete
+          : true,
   );
   const losses = report.blocks.find((b) => b.type === 'losses');
   const expense = (v: number) => flow(-v, base);
@@ -323,9 +337,13 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       case 'top':
         return (
           <>
-            {heading(block.mode === 'scope' ? 'topMonthly' : 'topCharges', block.mode === 'month' ? 'debitBasis' : undefined, block.rows.length)}
+            {heading(
+              block.mode === 'scope' ? 'topMonthly' : 'topCharges',
+              block.mode === 'month' ? 'debitBasis' : undefined,
+              block.mode === 'month' ? visibleCharges(block.rows).length : block.rows.length,
+            )}
             {block.mode === 'month'
-              ? chargeRows(block.rows)
+              ? chargeRows(visibleCharges(block.rows))
               : block.rows.map((r) => (
                   <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
                     {name(r.sub)}
@@ -390,7 +408,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </span>
               </button>
             ))}
-            {block.refunds.map((r, i) => (
+            {visibleCharges(block.refunds).map((r, i) => (
               <button type="button" className="scope-row scope-tap" key={`refund-${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
                 {name(
                   r.sub,

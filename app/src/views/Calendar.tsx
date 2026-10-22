@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 import { addDays, addMonths, diffDays, parseDay, cycleLabel, currentPhase, effectiveStatus, nextCharge, type Charge } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
@@ -97,6 +97,19 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
     return () => document.removeEventListener('keydown', onKey);
   }, [month, mode, today]);
   const selList = (sel && byDay.get(sel)) || [];
+  const selection = useRef<HTMLDivElement>(null);
+  const hasSelection = selList.length > 0;
+  useEffect(() => {
+    if (mode !== 'month' || reportMode !== 'full' || !hasSelection) return;
+    const el = selection.current;
+    if (!el) return;
+    const bounds = el.getBoundingClientRect();
+    const toolbarBottom = document.querySelector('.toolbar')?.getBoundingClientRect().bottom ?? 0;
+    el.style.scrollMarginTop = `${toolbarBottom}px`;
+    if (bounds.top < toolbarBottom || bounds.bottom > window.innerHeight) {
+      el.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    }
+  }, [sel, reportMode, mode, hasSelection]);
   const list = mode === 'month' ? monthCharges : yearCharges;
 
   return (
@@ -192,20 +205,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   })}
                 </div>
               </div>
-              {reportMode === 'full' && report ? (
-                <ScopeReport
-                  key={month}
-                  report={report}
-                  state={state}
-                  today={today}
-                  onOpen={onOpen}
-                  title={t('scope.monthTitle', { month: monthLabel(month, { long: true }) })}
-                  animate={true}
-                  open={true}
-                  onToggle={() => setReportMode('mini')}
-                />
-              ) : sel ? (
-                <>
+              {sel && (reportMode !== 'full' || hasSelection) ? (
+                <div className="stack cal-selection" ref={selection}>
                   <section className="cal-dayhead">
                     <h3>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</h3>
                     <Hint text={t('report.cash.fullPaidHint')} />
@@ -245,9 +246,23 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                       })}
                     </div>
                   )}
-                </>
-              ) : (
+                </div>
+              ) : reportMode !== 'full' ? (
                 <div className="cal-none">{t('calendar.pickDay')}</div>
+              ) : null}
+              {reportMode === 'full' && report && (
+                <ScopeReport
+                  key={month}
+                  report={report}
+                  state={state}
+                  today={today}
+                  onOpen={onOpen}
+                  title={t('scope.monthTitle', { month: monthLabel(month, { long: true }) })}
+                  animate={true}
+                  open={true}
+                  onToggle={() => setReportMode('mini')}
+                  selectedChargeDate={sel ?? undefined}
+                />
               )}
             </div>
             <div className="stack">
@@ -258,25 +273,27 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   <Hint text={t('detail.chart.origAmount')} />
                 </div>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
-                {monthCharges.map((c, i) => (
-                  <Cell
-                    key={c.sub.id + c.date + i}
-                    label={
-                      <span className="row cal-name">
-                        <SubIcon sub={c.sub} size={24} />
-                        <span>{c.sub.name}</span>
+                <div className="cal-charge-list">
+                  {monthCharges.map((c, i) => (
+                    <Cell
+                      key={c.sub.id + c.date + i}
+                      label={
+                        <span className="row cal-name">
+                          <SubIcon sub={c.sub} size={24} />
+                          <span>{c.sub.name}</span>
+                        </span>
+                      }
+                      onClick={() => onOpen(c.sub)}
+                    >
+                      <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>
+                        {t('calendar.day', { day: Number(c.date.slice(8)) })}
                       </span>
-                    }
-                    onClick={() => onOpen(c.sub)}
-                  >
-                    <span style={{ color: c.date < today ? 'var(--label-3)' : undefined, whiteSpace: 'nowrap' }}>
-                      {t('calendar.day', { day: Number(c.date.slice(8)) })}
-                    </span>
-                    <b style={{ color: c.amount < 0 ? 'var(--green)' : 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                      {flow(-c.amount, c.currency, { compact: true })}
-                    </b>
-                  </Cell>
-                ))}
+                      <b style={{ color: c.amount < 0 ? 'var(--green)' : 'var(--label)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                        {flow(-c.amount, c.currency, { compact: true })}
+                      </b>
+                    </Cell>
+                  ))}
+                </div>
               </section>
             </div>
           </div>

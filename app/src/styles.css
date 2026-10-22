@@ -929,11 +929,10 @@ a {
   }
 }
 .cal-charges {
-  padding: 0;
   overflow: hidden;
 }
 .cal-charges .card-h {
-  padding: 16px 18px 0;
+  padding: 0;
   margin-bottom: 8px;
 }
 .cal {
@@ -6170,12 +6169,41 @@ button.seat:disabled {
   mask-image: linear-gradient(#000 calc(100% - 32px), transparent);
 }
 
-/* 日历月份清单：名字过长时省略，日期与金额不换行 */
+/* 月份清单与卡片共用内边距；各行共享日期、金额列宽。 */
+.cal-charge-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content max-content 14px;
+  column-gap: 8px;
+}
+.cal-charge-list .cell {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  padding-inline: 0;
+}
+.cal-charge-list .cell + .cell::before {
+  left: 0;
+}
+.cal-charge-list .cell-l {
+  min-width: 0;
+  max-width: none;
+}
+.cal-charge-list .cell-r {
+  display: contents;
+}
+.cal-charge-list .cell-r > * {
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
 .cal-name {
   min-width: 0;
   flex-wrap: nowrap;
 }
-.cal-name > span {
+.cal-name > :first-child {
+  flex-shrink: 0;
+}
+.cal-name > :last-child {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -8756,7 +8784,6 @@ button.seat:disabled {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
   border: 0;
   text-align: left;
   color: inherit;
@@ -8789,6 +8816,7 @@ button.seat:disabled {
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
+  flex-shrink: 0;
   text-align: right;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -8805,7 +8833,6 @@ button.seat:disabled {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px 18px;
 }
 .cal-stat > small,
 .cal-stat-split small {
