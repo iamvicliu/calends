@@ -61,14 +61,12 @@
   color: var(--on-ink);
   box-shadow: none;
 }
-/* 删除类操作：浅红底红色图标，与同排普通圆形按钮同尺寸 */
+/* 删除类操作：与同排圆形按钮同样的灰色描边、无底色，只把图标换成红色；悬停时浅红底 */
 .icon-btn.danger {
-  background: color-mix(in srgb, var(--red) 10%, transparent);
   color: var(--red);
-  box-shadow: none;
 }
 .icon-btn.danger:hover {
-  background: color-mix(in srgb, var(--red) 18%, transparent);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
   color: var(--red);
 }
 .icon-btn svg,
