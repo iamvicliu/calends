@@ -1,0 +1,185 @@
+/* The roster owns its density; person detail sheets retain their existing layout. */
+.people-page {
+  container: people / inline-size;
+}
+.people-controls,
+.people-mobile-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.people-controls {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.people-mobile-sort {
+  display: none;
+}
+.people-list {
+  padding: 0;
+}
+.people-head,
+.people-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.5fr) minmax(132px, 1fr) minmax(105px, 0.8fr) minmax(105px, 0.8fr) minmax(105px, 0.8fr);
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+}
+.people-head {
+  color: var(--label-2);
+  font-size: 12px;
+  background: var(--fill-2);
+  border-radius: var(--r) var(--r) 0 0;
+}
+.people-head > :nth-child(n + 3),
+.people-owed,
+.people-received,
+.people-last {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.people-head > :nth-child(n + 3) {
+  justify-self: end;
+}
+.people-head .lt-sort {
+  min-height: var(--ctl-h-md);
+}
+.people-head .lt-sort:focus-visible,
+.people-open:focus-visible,
+.people-mobile-sort button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.people-row {
+  min-height: 66px;
+  border-top: 0.5px solid var(--sep);
+  cursor: pointer;
+  font-size: 13px;
+}
+.people-row:last-child {
+  border-radius: 0 0 var(--r) var(--r);
+}
+.people-row:hover,
+.people-row:focus-within {
+  background: var(--fill-2);
+}
+.people-identity,
+.people-plans {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.people-person {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.people-open {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--label);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.people-person small,
+.people-owed small {
+  font-size: 11px;
+}
+.people-plans {
+  gap: 6px;
+}
+.people-plans > span {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.people-more {
+  color: var(--label-2);
+  font-size: 11px;
+  font-weight: 600;
+}
+.people-owed {
+  display: grid;
+  gap: 2px;
+  color: var(--orange);
+}
+.people-owed b,
+.people-received,
+.people-last {
+  white-space: nowrap;
+}
+.people-owed small {
+  color: var(--label-2);
+}
+.people-last-label {
+  display: none;
+}
+@media (max-width: 1100px) and (min-width: 720px) {
+  .people-head,
+  .people-row {
+    grid-template-columns: minmax(130px, 1.3fr) 130px minmax(95px, 1fr) minmax(95px, 1fr) minmax(95px, 1fr);
+    gap: 10px;
+    padding-inline: 16px;
+  }
+}
+@container people (max-width: 719px) {
+  .people-head,
+  .people-received {
+    display: none;
+  }
+  .people-mobile-sort {
+    display: flex;
+  }
+  .people-row {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-areas: 'person owed' 'plans last';
+    gap: 8px 12px;
+    padding: 12px 14px;
+  }
+  .people-identity {
+    grid-area: person;
+  }
+  .people-owed {
+    grid-area: owed;
+  }
+  .people-plans {
+    grid-area: plans;
+    padding-left: 44px;
+    gap: 4px;
+  }
+  .people-plans .ico {
+    --s: 18px !important;
+  }
+  .people-last {
+    grid-area: last;
+    font-size: 11px;
+  }
+  .people-last-label {
+    display: inline;
+  }
+  .people-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .people-stats .stat {
+    min-width: 0;
+    padding: 12px 10px;
+  }
+  .people-stats .stat-value {
+    font-size: clamp(16px, 4.3vw, 24px);
+  }
+  .people-stats .stat-sub {
+    display: block;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+}

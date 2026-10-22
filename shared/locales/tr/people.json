@@ -83,5 +83,8 @@
     "remove": "Avatarı kaldır",
     "removeConfirm": "Bu avatar kaldırılsın mı? Uygulamak için kaydedin.",
     "fallbackColor": "Yedek renk"
+  },
+  "list": {
+    "none": "Eşleşen kişi yok"
   }
 }

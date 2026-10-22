@@ -83,5 +83,8 @@
     "remove": "Profilbild entfernen",
     "removeConfirm": "Dieses Profilbild entfernen? Zum Anwenden speichern.",
     "fallbackColor": "Ersatzfarbe"
+  },
+  "list": {
+    "none": "Keine passenden Personen"
   }
 }

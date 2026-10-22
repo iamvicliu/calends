@@ -83,5 +83,8 @@
     "remove": "Quitar avatar",
     "removeConfirm": "¿Quitar este avatar? Guarda para aplicar.",
     "fallbackColor": "Color de respaldo"
+  },
+  "list": {
+    "none": "No hay personas que coincidan"
   }
 }

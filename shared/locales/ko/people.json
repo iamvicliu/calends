@@ -65,5 +65,8 @@
     "remove": "아바타 삭제",
     "removeConfirm": "이 아바타를 삭제할까요? 저장하면 적용됩니다.",
     "fallbackColor": "대체 색상"
+  },
+  "list": {
+    "none": "조건에 맞는 사람이 없습니다"
   }
 }

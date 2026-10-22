@@ -83,5 +83,8 @@
     "remove": "Supprimer l’avatar",
     "removeConfirm": "Supprimer cet avatar ? Enregistrez pour appliquer.",
     "fallbackColor": "Couleur de secours"
+  },
+  "list": {
+    "none": "Aucune personne correspondante"
   }
 }

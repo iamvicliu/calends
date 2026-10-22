@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FALLBACK_FX, memberDues } from './billing.ts';
 import { maskForPublic } from './mask.ts';
-import { linkPeople, mergePeople, normContact, peopleLedger, personKey, refsFor, syncPerson } from './people.ts';
+import { linkPeople, mergePeople, normContact, peopleLedger, peopleListRows, personKey, refsFor, syncPerson } from './people.ts';
 import { proxyRows } from './proxy.ts';
 import { DEFAULT_SETTINGS, type AppState, type Person, type Subscription } from './types.ts';
 
@@ -212,4 +212,37 @@ test('同一人的两辆车各有账号，人员同步、合并和公开脱敏�
   const publicState = maskForPublic(state);
   for (const s of publicState.subscriptions) assert.ok(!('account' in s.share!.members[0]));
   assert.equal(publicState.people, undefined);
+});
+
+test('人员列表按待收、最近收款排序，筛选不重复跨车人员且不修改总账', () => {
+  const linked = linkPeople([], [spotify, yt, proxy]);
+  const book = peopleLedger(st(linked.subs, linked.people), '2026-10-22');
+  assert.equal(book.length, 3);
+  assert.equal(book.find((l) => l.person.name === 'Alice')?.items.length, 2);
+  const before = JSON.stringify(book);
+  const owing = peopleListRows(book, { filter: 'owe' });
+  const settled = peopleListRows(book, { filter: 'settled' });
+  assert.equal(owing.length + settled.length, book.length);
+  assert.ok(owing.every((l) => l.owed > 0.005));
+  assert.ok(settled.every((l) => l.owed <= 0.005));
+  assert.ok(owing.every((l, i) => !i || owing[i - 1].owed >= l.owed));
+  assert.equal(JSON.stringify(book), before);
+});
+
+test('人员列表金额同值时最近收款优先，表头切换方向，缺失与未知始终靠后', () => {
+  const row = (name: string, owed: number, lastPaid?: string) => ({ person: { id: name, name }, owed, received: owed, periodsOwed: 1, items: [], lastPaid });
+  const book = [row('A', 0), row('B', 20, '2026-10-01'), row('C', 20, '2026-10-20'), row('D', NaN), row('E', -10, '2026-09-01')];
+  const names = (rows: ReturnType<typeof peopleListRows>) => rows.map((l) => l.person.name);
+  assert.deepEqual(names(peopleListRows(book)), ['C', 'B', 'A', 'E', 'D']);
+  assert.deepEqual(names(peopleListRows(book, { sort: 'received', dir: 'asc' })), ['E', 'A', 'C', 'B', 'D']);
+  assert.deepEqual(names(peopleListRows(book, { sort: 'lastPaid', dir: 'asc' })), ['E', 'B', 'C', 'A', 'D']);
+  assert.deepEqual(names(peopleListRows(book, { sort: 'lastPaid' })), ['C', 'B', 'E', 'A', 'D']);
+  assert.deepEqual(names(peopleListRows(book, { sort: 'name', dir: 'asc' })), ['A', 'B', 'C', 'D', 'E']);
+  assert.deepEqual(names(peopleListRows(book, { sort: 'name', dir: 'desc' })), ['E', 'D', 'C', 'B', 'A']);
+  assert.deepEqual(names(peopleListRows(book, { filter: 'settled' })), ['A', 'E']);
+  assert.deepEqual(
+    peopleListRows(book, { filter: 'owe' }).map((l) => l.person.name),
+    ['C', 'B'],
+  );
+  assert.deepEqual(peopleListRows([], { filter: 'owe' }), []);
 });

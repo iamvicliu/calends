@@ -3,8 +3,8 @@ import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
 import { uid } from '../../../shared/billing.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
-import { t } from '../../../shared/i18n.ts';
-import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
+import { locale, t } from '../../../shared/i18n.ts';
+import { colorFor, peopleLedger, peopleListRows, refsFor, type PeopleSort, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
@@ -13,6 +13,7 @@ import { go } from '../router.ts';
 import { deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
 import { ContactField, contactText, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
+import './people-list.css';
 
 /** 选人：已有的人（可搜索）或「新的人」；选中已有的人时把称呼、联系方式带过去 */
 export function PersonPicker({ state, value, onPick }: { state: AppState; value?: string; onPick: (p: Person | undefined) => void }) {
@@ -99,8 +100,24 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   const base = state.settings.baseCurrency;
   const book = peopleLedger(state, today);
   const [open, setOpen] = useState<string | null>(null);
-  const owing = book.filter((l) => l.owed > 0.005);
-  const owed = owing.reduce((a, l) => a + l.owed, 0);
+  const [filter, setFilter] = useState<'all' | 'owe' | 'settled'>('all');
+  const [sort, setSort] = useState<PeopleSort>('owed');
+  const [dir, setDir] = useState<'asc' | 'desc'>('desc');
+  const chooseSort = (key: PeopleSort) => {
+    setSort(key);
+    setDir(key === 'name' ? 'asc' : 'desc');
+  };
+  const toggleSort = (key: PeopleSort) => (key === sort ? setDir(dir === 'asc' ? 'desc' : 'asc') : chooseSort(key));
+  const rows = peopleListRows(book, { filter, sort, dir, locale: locale() });
+  const owing = peopleListRows(book, { filter: 'owe' });
+  const counts = { all: book.length, owe: owing.length, settled: peopleListRows(book, { filter: 'settled' }).length };
+  const columns: Array<[PeopleSort, string]> = [
+    ['name', t('family.member.name')],
+    ['owed', t('people.sheet.owed')],
+    ['received', t('people.sheet.received')],
+    ['lastPaid', t('people.sheet.last')],
+  ];
+  const owed = book.some((l) => !Number.isFinite(l.owed)) ? NaN : owing.reduce((a, l) => a + l.owed, 0);
   const received = book.reduce((a, l) => a + l.received, 0);
   const inShare = book.filter((l) => l.items.some((i) => i.kind === 'share')).length;
   const inProxy = book.filter((l) => l.items.some((i) => i.kind === 'proxy')).length;
@@ -110,19 +127,21 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
       <Toolbar title={t('family.pool.title')}>
         <FamilyTabs tab="people" />
       </Toolbar>
-      <div className="page fade-in stack">
-        <div className="grid g-3">
+      <div className="page fade-in stack people-page">
+        <div className="grid g-3 people-stats">
           <div className="card stat">
             <div className="stat-label">{t('people.stat.owed')}</div>
             <div className="stat-value" style={{ color: owed > 0 ? 'var(--orange)' : undefined }}>
-              <Amount plain value={owed} ccy={base} />
+              <Amount plain compact value={owed} ccy={base} />
             </div>
-            <div className="stat-sub">{owing.length ? t('people.stat.owedSub', { count: owing.length }) : t('people.stat.allSettled')}</div>
+            <div className="stat-sub">
+              {owing.length ? t('people.stat.owedSub', { count: owing.length }) : Number.isFinite(owed) ? t('people.stat.allSettled') : '—'}
+            </div>
           </div>
           <div className="card stat">
             <div className="stat-label">{t('people.stat.received')}</div>
             <div className="stat-value">
-              <Amount value={received} ccy={base} />
+              <Amount compact value={received} ccy={base} />
             </div>
             <div className="stat-sub">{t('people.stat.receivedSub')}</div>
           </div>
@@ -140,11 +159,51 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
             {t('people.empty.body')}
           </div>
         ) : (
-          <div className="grid g-2">
-            {book.map((l) => (
-              <PersonCard key={l.person.id || l.person.name} l={l} base={base} today={today} onClick={() => setOpen(l.person.id || l.person.name)} />
-            ))}
-          </div>
+          <>
+            <div className="people-controls">
+              <Seg
+                small
+                value={filter}
+                onChange={setFilter}
+                options={(['all', 'owe', 'settled'] as const).map((key) => [key, `${t(`family.pool.filter.${key}`)} ${counts[key]}`])}
+              />
+              <div className="people-mobile-sort">
+                <Picker
+                  variant="btn"
+                  value={sort}
+                  onChange={chooseSort}
+                  ariaLabel={t('list.sort.label')}
+                  options={columns.map(([value, label]) => ({ value, label }))}
+                />
+                <IconButton onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')} aria-label={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}>
+                  <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
+                </IconButton>
+              </div>
+            </div>
+            <div className="card people-list" role="table" aria-label={t('people.tab.people')}>
+              <div className="people-head" role="row">
+                {columns.flatMap(([key, label], index) => [
+                  <div key={key} role="columnheader" aria-sort={sort === key ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                    <button className={`lt-sort ${sort === key ? 'on' : ''}`} onClick={() => toggleSort(key)}>
+                      {label}
+                      {sort === key && <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} size={12} />}
+                    </button>
+                  </div>,
+                  ...(index === 0
+                    ? [
+                        <div key="plans" role="columnheader">
+                          {t('app.nav.list')}
+                        </div>,
+                      ]
+                    : []),
+                ])}
+              </div>
+              {rows.map((l) => (
+                <PersonRow key={l.person.id || l.person.name} l={l} base={base} today={today} onClick={() => setOpen(l.person.id || l.person.name)} />
+              ))}
+              {rows.length === 0 && <div className="empty">{t('people.list.none')}</div>}
+            </div>
+          </>
         )}
       </div>
       {current && <PersonSheet state={state} today={today} l={current} onOpen={onOpen} onClose={() => setOpen(null)} />}
@@ -152,57 +211,78 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   );
 }
 
-function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string; today: string; onClick: () => void }) {
-  const p = l.person;
-  const contact = contactText(p);
-  const live = l.items.filter((i) => i.active);
+function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string; today: string; onClick: () => void }) {
+  const contact = contactText(l.person);
+  // One icon per subscription, while retaining all account names in its tooltip.
+  const plans = [...new Map(l.items.map((i) => [i.sub.id, i.sub])).values()];
+  const planTitle = (id: string) =>
+    l.items
+      .filter((i) => i.sub.id === id)
+      .map((i) => [i.sub.name, i.member?.account].filter(Boolean).join(' · '))
+      .join('\n');
   return (
-    <div
-      className="card pp-card"
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}
-    >
-      <div className="pp-top">
-        <PersonAvatar p={p} size={44} />
-        <div className="pp-id">
-          <div className="ph-name text-ellipsis">{p.name}</div>
-          <div className={`muted ph-meta ${contact || p.note ? '' : 'm-hide'}`}>{contact || p.note || t('people.card.noContact')}</div>
-        </div>
-        <ContactLink p={p} />
+    <div className="people-row" role="row" onClick={onClick}>
+      <div className="people-identity" role="cell">
+        <PersonAvatar p={l.person} size={34} />
+        <span className="people-person">
+          <button
+            className="people-open"
+            title={l.person.name}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            {l.person.name}
+          </button>
+          {contact && (
+            <small className="muted text-ellipsis" title={contact}>
+              {contact}
+            </small>
+          )}
+        </span>
       </div>
-      <div className="ph-chips">
-        {l.items.length === 0 && (
-          <span className="muted" style={{ fontSize: 13 }}>
-            {t('people.card.nothing')}
+      <div className="people-plans" role="cell">
+        {plans.length ? (
+          plans.slice(0, 4).map((sub) => (
+            <span key={sub.id} title={planTitle(sub.id)} aria-label={planTitle(sub.id)}>
+              <SubIcon sub={sub} size={22} />
+            </span>
+          ))
+        ) : (
+          <span className="muted">—</span>
+        )}
+        {plans.length > 4 && (
+          <span
+            className="people-more"
+            title={plans
+              .slice(4)
+              .map((sub) => planTitle(sub.id))
+              .join('\n')}
+          >
+            +{plans.length - 4}
           </span>
         )}
-        {l.items.map((i) => (
-          <span key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} className={`pp-chip ${i.active ? '' : 'off'}`} title={itemLine(i, today)}>
-            <SubIcon sub={i.sub} size={16} />
-            {i.sub.name}
-            {i.periodsOwed > 0 && <i className="dot" />}
-          </span>
-        ))}
       </div>
-      <div className="proxy-facts">
-        <div>
-          <small>{l.periodsOwed ? t('people.item.owedPeriods', { count: l.periodsOwed }) : t('people.sheet.owed')}</small>
-          <b className={l.owed > 0.005 ? 'warn' : 'done'}>{l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}</b>
-        </div>
-        <div>
-          <small>{t('people.sheet.received')}</small>
-          <b className="green">{flow(l.received, base, { compact: true })}</b>
-        </div>
-        <div>
-          <small>{t('people.sheet.last')}</small>
-          <b className={l.lastPaid ? '' : 'muted'}>{l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}</b>
-        </div>
+      <div className="people-owed" role="cell">
+        {!Number.isFinite(l.owed) ? (
+          <span className="muted">—</span>
+        ) : l.owed > 0.005 ? (
+          <>
+            <b>{money(l.owed, base)}</b>
+            <small>{t('people.item.owedPeriods', { count: l.periodsOwed })}</small>
+          </>
+        ) : (
+          <span className="muted">{t('family.pool.settled')}</span>
+        )}
       </div>
-      {live.length !== l.items.length && live.length > 0 && (
-        <div className="muted pp-foot">{t('people.card.past', { count: l.items.length - live.length })}</div>
-      )}
+      <div className="people-received" role="cell">
+        {flow(l.received, base)}
+      </div>
+      <div className="people-last muted" role="cell">
+        <span className="people-last-label">{t('people.sheet.last')} </span>
+        {l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}
+      </div>
     </div>
   );
 }

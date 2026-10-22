@@ -65,5 +65,8 @@
     "remove": "移除头像",
     "removeConfirm": "移除这个头像？保存后生效。",
     "fallbackColor": "回退颜色"
+  },
+  "list": {
+    "none": "没有符合条件的人员"
   }
 }
