@@ -380,7 +380,7 @@
   padding: 14px 16px 16px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--dt-panel)), var(--dt-panel) 60%);
+  background: var(--dt-panel);
 }
 .dt-kpi-top {
   display: flex;

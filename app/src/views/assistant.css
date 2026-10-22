@@ -470,17 +470,6 @@
     0 8px 28px -14px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
-.as-card::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 90px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 14%, transparent), transparent);
-  pointer-events: none;
-}
-.as-card > * {
-  position: relative;
-}
 .as-card.dismissed {
   opacity: 0.55;
 }

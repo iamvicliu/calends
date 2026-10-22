@@ -4038,24 +4038,6 @@ select.btn {
 .scard:active {
   transform: scale(0.985);
 }
-/* 用 App 图标本身晕染出卡片顶部的氛围色 */
-.sc-glow {
-  position: absolute;
-  z-index: -1;
-  left: -20%;
-  right: -20%;
-  top: -60%;
-  height: 120%;
-  filter: blur(36px);
-  opacity: 0.3;
-  pointer-events: none;
-}
-.sc-glow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 30%, var(--card) 75%);
-}
 .sc-top {
   display: flex;
   justify-content: space-between;
@@ -4134,10 +4116,8 @@ select.btn {
 }
 .scard.st-ended .ico,
 .scard.st-ended .sc-name,
-.scard.st-ended .sc-glow,
 .scard.st-terminated .ico,
-.scard.st-terminated .sc-name,
-.scard.st-terminated .sc-glow {
+.scard.st-terminated .sc-name {
   opacity: 0.5;
 }
 .scard.st-ended .sc-price .amt,
