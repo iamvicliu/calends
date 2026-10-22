@@ -214,6 +214,18 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const paused = sub.status === 'paused';
   // 买断（一段、不合租）没有走势、未来扣款和历程可看：换成窄的单列，不留半屏空白
   const compact = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1 && !sub.share;
+  const sidebarCharges = !compact && !showForecast;
+  const charges = (
+    <Charges
+      sub={sub}
+      state={state}
+      today={today}
+      history={history}
+      onRow={ro ? undefined : editPay}
+      // 买断已有那一笔就不再提示记一笔，行仍可点开修改
+      onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
+    />
+  );
   const actions = (
     <>
       {!ro && <Act icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
@@ -283,27 +295,21 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         </button>
       </header>
 
-      {/* 主栏放要扫读的数字、走势和扣款；右侧窄栏放属性与历程（参考 Stripe、Linear 的详情页） */}
+      {/* 无预测卡片的宽屏详情把扣款记录放到摘要下方；窄屏仍按数字、走势、扣款、摘要排列 */}
       <div className="dt-body">
         <div className="dt-main">
           <Kpis sub={sub} state={state} today={today} history={history} />
           {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
-          <div className={`dt-billing ${showForecast ? 'has-forecast' : ''}`}>
-            {!compact && showForecast && <Upcoming sub={sub} state={state} today={today} />}
-            {/* 买断已有那一笔就不再提示记一笔，行仍可点开修改 */}
-            <Charges
-              sub={sub}
-              state={state}
-              today={today}
-              history={history}
-              onRow={ro ? undefined : editPay}
-              onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
-            />
-          </div>
+          {!sidebarCharges && (
+            <div className={`dt-billing ${showForecast ? 'has-forecast' : ''}`}>
+              {!compact && showForecast && <Upcoming sub={sub} state={state} today={today} />}
+              {charges}
+            </div>
+          )}
         </div>
-        <div className="dt-side">
+        <div className={`dt-side ${sidebarCharges ? 'has-charges' : ''}`}>
           <Outcome sub={sub} state={state} today={today} />
-          <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} />
+          <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} afterSummary={sidebarCharges ? charges : undefined} />
           {!compact && <Events sub={sub} state={state} today={today} />}
         </div>
       </div>
@@ -815,7 +821,19 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
 }
 
 /** 详情：金额、周期、分类、支付方式、日期等，以及并行、计划变更、优惠、合租、提醒和备注 */
-function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppState; today: string; onCar: () => void }) {
+function Details({
+  sub,
+  state,
+  today,
+  onCar,
+  afterSummary,
+}: {
+  sub: Subscription;
+  state: AppState;
+  today: string;
+  onCar: () => void;
+  afterSummary?: ReactNode;
+}) {
   const st = effectiveStatus(sub, today);
   const cur = currentPhase(sub, today);
   const up = upcomingPhase(sub, today);
@@ -871,6 +889,7 @@ function Details({ sub, state, today, onCar }: { sub: Subscription; state: AppSt
         )}
       </Panel>
 
+      {afterSummary}
       {parallel.length > 0 && (
         <Panel title={t('detail.overlap.title')}>
           <dl className="dt-props one">

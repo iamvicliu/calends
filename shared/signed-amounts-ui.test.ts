@@ -262,7 +262,7 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
   assert.ok(render(36, 2).includes('/icons/avatar.png'));
 });
 
-test('Detail keeps plan prices in every header and puts renewal dates in the summary without sparse cards', () => {
+test('Detail keeps plan prices and renewal dates, placing unpaired history below the sidebar summary except in compact details', () => {
   const file = '../app/src/views/Detail.tsx';
   const source = read(file);
   const empty = () => null;
@@ -270,6 +270,7 @@ test('Detail keeps plan prices in every header and puts renewal dates in the sum
     React.createElement('section', { className }, title, children);
   const deps = {
     React,
+    Fragment: React.Fragment,
     ...billing,
     detailForecast,
     money,
@@ -305,9 +306,15 @@ test('Detail keeps plan prices in every header and puts renewal dates in the sum
     PayBadge: empty,
   };
   const Upcoming = load(file, 'Upcoming', `function Upcoming(${source.split('function Upcoming(')[1].split('type Unit =')[0]}`, deps);
-  const Detail = load(file, 'Detail', `function Detail(${source.split('export function Detail(')[1].split('/** 正常扣款')[0]}`, { ...deps, Upcoming });
   const Details = load(file, 'Details', `function Details(${source.split('function Details(')[1].split('/** 扣款记录')[0]}`, deps);
-  for (const unit of ['year', 'month', 'lifetime'] as const) {
+  const Charges = load(file, 'Charges', `function Charges(${source.split('function Charges(')[1]}`, deps);
+  const Detail = load(file, 'Detail', `function Detail(${source.split('export function Detail(')[1].split('/** 正常扣款')[0]}`, {
+    ...deps,
+    Upcoming,
+    Details,
+    Charges,
+  });
+  for (const [unit, end] of [['year'], ['month'], ['lifetime'], ['month', '2026-07-01']] as const) {
     const sub: Subscription = {
       id: 'fictional-renewal',
       name: 'Fictional plan',
@@ -315,6 +322,7 @@ test('Detail keeps plan prices in every header and puts renewal dates in the sum
       currency: 'EUR',
       cycle: { unit, every: 1 },
       start: '2025-12-15',
+      end,
       status: 'active',
       category: 'tools',
       tags: [],
@@ -326,7 +334,7 @@ test('Detail keeps plan prices in every header and puts renewal dates in the sum
     assert.ok(text(header).includes('€99.00'));
     assert.ok(text(header).includes('≈ ¥766.18'));
     const summary = text(renderToStaticMarkup(React.createElement(Details, props)));
-    if (unit === 'lifetime') {
+    if (unit === 'lifetime' || end) {
       assert.ok(!summary.includes('detail.ev.next'));
     } else {
       const next = detailForecast(sub, props.today).charges[0].date;
@@ -335,7 +343,14 @@ test('Detail keeps plan prices in every header and puts renewal dates in the sum
       assert.ok(summary.includes(relDays(diffDays(props.today, next))));
       assert.ok(!summary.includes('€99.00'));
     }
-    assert.equal(html.includes('dt-upcoming'), unit === 'month');
+    assert.equal(html.includes('dt-upcoming'), unit === 'month' && !end);
     assert.ok(!html.includes('dt-renewal'));
+    assert.equal((html.match(/class="dt-charges"/g) ?? []).length, 1);
+    const [main, side] = html.split('class="dt-side');
+    const inSidebar = unit === 'year' || !!end;
+    assert.equal(main.includes('class="dt-charges"'), !inSidebar);
+    assert.equal(side.includes('class="dt-charges"'), inSidebar);
+    if (inSidebar) assert.ok(side.indexOf('detail.summary') < side.indexOf('class="dt-charges"'));
+    assert.equal(html.includes('dt compact'), unit === 'lifetime');
   }
 });

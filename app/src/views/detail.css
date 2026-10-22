@@ -314,6 +314,9 @@
   .dt-side {
     display: contents;
   }
+  .dt-side.has-charges > .dt-panel:not(.dt-charges):not(.dt-outcome) {
+    order: 1;
+  }
   .dt-outcome {
     order: -1;
   }
