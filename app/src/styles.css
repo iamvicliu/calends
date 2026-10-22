@@ -928,9 +928,6 @@ a {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-.cal-charges {
-  overflow: hidden;
-}
 .cal-charges .card-h {
   padding: 0;
   margin-bottom: 8px;
@@ -6167,24 +6164,22 @@ button.seat:disabled {
   mask-image: linear-gradient(#000 calc(100% - 32px), transparent);
 }
 
-/* 日期标题共用横线；金额列跨组对齐，不再占用名称宽度显示日期。 */
+/* 整月扣款随页面自然增高；两列共用宽度，让名称、金额与日期横线对齐。 */
 .cal-charge-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content 14px;
+  grid-template-columns: minmax(0, 1fr) max-content;
   column-gap: 8px;
-  max-height: 660px;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  row-gap: 8px;
 }
 .cal-charge-group,
-.cal-charge-list .cell {
+.cal-charge-row {
   display: grid;
   grid-template-columns: subgrid;
   grid-column: 1 / -1;
+  min-width: 0;
 }
 .cal-charge-group {
-  padding-block: 4px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .cal-charge-group.selected {
   background: var(--fill-2);
@@ -6193,23 +6188,24 @@ button.seat:disabled {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 4px 0;
+  gap: 8px;
+  margin: 0 0 2px;
 }
 .cal-charge-day > span {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
+  border: 1px solid var(--line);
   border-radius: 50%;
-  background: var(--fill-2);
   color: var(--label-2);
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .cal-charge-day.today > span {
+  border-color: var(--red);
   background: var(--red);
   color: #fff;
 }
@@ -6218,29 +6214,29 @@ button.seat:disabled {
   height: 1px;
   background: var(--sep);
 }
-.cal-charge-list .cell {
-  padding: 10px 0;
+.cal-charge-row {
+  align-items: center;
+  min-height: 34px;
+  padding: 5px 0;
+  border: 0;
   border-radius: 6px;
+  background: none;
+  text-align: left;
+  font-size: 14px;
 }
-.cal-charge-list .cell + .cell::before {
-  content: none;
-}
-.cal-charge-list .cell-l {
-  min-width: 0;
-  max-width: none;
-}
-.cal-charge-list .cell-r {
-  display: contents;
+.cal-charge-row:hover {
+  background: var(--fill-2);
 }
 .cal-charge-amount {
   text-align: right;
   white-space: nowrap;
+  color: var(--label-2);
   font-variant-numeric: tabular-nums;
 }
 .cal-charge-amount .amt {
   font-weight: 600;
 }
-.cal-charge-list .cell:focus-visible,
+.cal-charge-row:focus-visible,
 .cal-daycard:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;

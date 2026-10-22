@@ -1286,7 +1286,7 @@ test('calendar groups dates chronologically, follows the currency preference and
       ['2026-10-16', today],
     );
     const timeline = nodes.find((n) => n.props.className === 'cal-charge-list')!;
-    const rows = all(timeline).filter((n) => n.type === 'Cell');
+    const rows = all(timeline).filter((n) => n.props.className === 'cal-charge-row');
     assert.equal(rows.length, 3);
     const amounts = rows.map((n) => all(n).find((n) => n.type === 'Amount')!.props);
     assert.deepEqual(
@@ -1359,7 +1359,7 @@ test('calendar day cards show charged coverage and real stop/pause dates without
   }
 });
 
-test('calendar selection scrolls the monthly list internally without moving the page', () => {
+test('calendar keeps a long month complete and selection never scrolls a nested list', () => {
   for (const reduced of [false, true]) {
     const scrolls: unknown[] = [];
     let refs = 0;
@@ -1376,9 +1376,33 @@ test('calendar selection scrolls the monthly list internally without moving the 
       '../app/src/views/Calendar.tsx',
       'Calendar',
       {},
-      { useRef: () => ({ current: refs++ === 0 ? null : list }), matchMedia: () => ({ matches: reduced }) },
+      {
+        useRef: () => ({ current: refs++ === 0 ? null : list }),
+        matchMedia: () => ({ matches: reduced }),
+        allCharges: (state: AppState, from: string, to: string, day: string) =>
+          state.subscriptions.flatMap((sub) => billing.chargesBetween(sub, from, to, day)),
+      },
     );
-    r.render('Calendar', { state: st, today, onOpen() {}, onIcs() {} });
-    assert.deepEqual(scrolls, [{ top: 640, behavior: reduced ? 'instant' : 'smooth' }]);
+    const subscriptions: Subscription[] = Array.from({ length: 24 }, (_, i) => ({
+      id: `long-month-${i}`,
+      name: `Fictional subscription ${i}`,
+      category: 'Tools',
+      tags: [],
+      price: 10,
+      currency: 'USD',
+      cycle: { unit: 'month', every: 1 },
+      start: `2022-10-${String(i + 1).padStart(2, '0')}`,
+      status: 'active',
+    }));
+    const props = { state: { ...st, subscriptions, readonly: true }, today, onOpen() {}, onIcs() {} };
+    let nodes = r.render('Calendar', props);
+    assert.deepEqual(scrolls, [], 'initial selection leaves the full month in page flow');
+    const rows = () => nodes.filter((n) => n.props.className === 'cal-charge-row');
+    assert.equal(rows().length, 24);
+    nodes.find((n) => n.props['aria-label'] === format.cnDate('2026-10-24', true))!.props.onClick();
+    nodes = r.render('Calendar', props);
+    assert.deepEqual(scrolls, [], 'changing the selected date never scrolls a nested list');
+    assert.equal(rows().length, 24);
+    assert.ok(nodes.some((n) => n.props['data-date'] === '2026-10-24' && n.props.className.includes('selected')));
   }
 });

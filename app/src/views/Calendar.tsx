@@ -15,7 +15,7 @@ import {
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Amount, Cell, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { Amount, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -109,18 +109,6 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   }, [month, mode, today]);
   const selList = (sel && byDay.get(sel)) || [];
   const selection = useRef<HTMLDivElement>(null);
-  const timeline = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const list = timeline.current;
-    const group = list?.querySelector<HTMLElement>(`[data-date="${sel}"]`);
-    // 只滚动右栏内部，避免把刚点击的日历或下方明细滚出视口。
-    if (!list || !group || list.scrollHeight <= list.clientHeight) return;
-    const bounds = group.getBoundingClientRect();
-    const view = list.getBoundingClientRect();
-    if (bounds.top < view.top || bounds.bottom > view.bottom) {
-      list.scrollTo({ top: list.scrollTop + bounds.top - view.top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-    }
-  }, [sel, month, mode]);
   const hasSelection = selList.length > 0;
   useEffect(() => {
     if (mode !== 'month' || reportMode !== 'full' || !hasSelection) return;
@@ -317,7 +305,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   <h3>{t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}</h3>
                 </div>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
-                <div className="cal-charge-list" ref={timeline}>
+                <div className="cal-charge-list">
                   {[...byDay]
                     .filter(([date]) => date.startsWith(month))
                     .sort(([a], [b]) => a.localeCompare(b))
@@ -330,20 +318,20 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                         {items.map((c, i) => {
                           const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
                           return (
-                            <Cell
+                            <button
+                              type="button"
+                              className="cal-charge-row"
                               key={c.sub.id + date + i}
-                              label={
-                                <span className="row cal-name">
-                                  <SubIcon sub={c.sub} size={24} />
-                                  <span>{c.sub.name}</span>
-                                </span>
-                              }
                               onClick={() => onOpen(state.subscriptions.find((s) => s.id === c.sub.id) ?? c.sub)}
                             >
+                              <span className="row cal-name">
+                                <SubIcon sub={c.sub} size={24} />
+                                <span>{c.sub.name}</span>
+                              </span>
                               <span className="cal-charge-amount" title={amt.alt}>
                                 {amt.main}
                               </span>
-                            </Cell>
+                            </button>
                           );
                         })}
                       </section>
