@@ -702,3 +702,53 @@ test('钱包续航列表不重复卡面余额和月扣；单年度分享用时�
     assert.deepEqual(nodes.find((n) => n.props.className === 'sy-big')!.children, [years.length === 1 ? '20 days' : '−$10.00']);
   }
 });
+
+test('收款草稿切周期：手改金额或币种后保留，备注和收款日始终保留；未手改金额跟随默认', () => {
+  for (const edit of ['none', 'amount', 'zero', 'currency']) {
+    const member = { id: 'm', name: 'Member', share: 7.5, fee: 150, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-14' };
+    const sub: Subscription = {
+      id: 's',
+      name: 'Plan',
+      category: 'Tools',
+      tags: [],
+      price: 15,
+      currency: 'USD',
+      start: '2026-01-14',
+      cycle: { unit: 'month', every: 1 },
+      status: 'active',
+      share: { role: 'owner', seats: 2, since: '2026-01-14', members: [member] },
+    };
+    const r = harness(
+      '../app/src/views/Members.tsx',
+      'MemberSheet',
+      {},
+      { ...carpool, Sheet: 'Sheet', DatePicker: 'DatePicker', Toggle: 'Toggle', CurrencySelect: 'CurrencySelect', NumInput: 'NumInput', Picker: 'Picker' },
+    );
+    const render = () => r.render('MemberSheet', { state: st, s: sub, member, collect: true, onClose() {} });
+    const cell = (label: string) => render().find((n) => n.type === 'Cell' && n.props.label === label)!;
+    const input = (label: string, type: string) => all(cell(label)).find((n) => n.type === type)!;
+    input('family.member.note', 'input').props.onChange({ target: { value: '审查草稿' } });
+    input('family.member.receivedOn', 'DatePicker').props.onChange('2026-10-21');
+    if (edit === 'amount' || edit === 'zero') input('family.member.amount', 'NumInput').props.onValue(edit === 'zero' ? 0 : 12.34);
+    if (edit === 'currency') input('family.member.currency', 'CurrencySelect').props.onChange('EUR');
+    const before = input('family.member.amount', 'NumInput').props.value;
+    for (const months of [1, 3, 6]) {
+      render()
+        .find((n) => n.type === 'Seg')!
+        .props.onChange(String(months));
+      assert.equal(input('family.member.note', 'input').props.value, '审查草稿');
+      assert.equal(input('family.member.receivedOn', 'DatePicker').props.value, '2026-10-21');
+      const dates = render()
+        .filter((n) => n.type === 'DatePicker')
+        .map((n) => n.props.value);
+      assert.ok(dates.includes(months === 1 ? '2026-11-13' : '2027-01-13'));
+      if (edit !== 'none') assert.equal(input('family.member.amount', 'NumInput').props.value, before);
+      else
+        assert.equal(
+          input('family.member.amount', 'NumInput').props.value,
+          billing.memberCollection(sub, { ...member, billEvery: months }, '2026-10-14', 'USD').amount,
+        );
+      assert.equal(input('family.member.currency', 'CurrencySelect').props.value, edit === 'currency' ? 'EUR' : 'CNY');
+    }
+  }
+});

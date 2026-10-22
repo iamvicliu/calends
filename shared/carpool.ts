@@ -2,7 +2,7 @@
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
 import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
-import type { AppState, ShareMember, Subscription } from './types.ts';
+import type { AppState, MemberPayment, ShareMember, Subscription } from './types.ts';
 
 /**
  * 合租账本：订阅本身多少钱、我付出去多少、从成员身上收回多少，算出净成本（负数就是赚了）。
@@ -63,5 +63,15 @@ export function resyncShares(state: AppState, prev: Subscription | undefined, ne
         m.fee != null && !m.exempt ? { ...m, share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, memberBillMonths(next, m)) } : m,
       ),
     },
+  };
+}
+
+/** 更新应收和覆盖期时保留实际收款草稿；金额或币种手改后，两者都不再跟随默认值。 */
+export function refreshReceiptDraft(draft: MemberPayment, next: MemberPayment, moneyEdited: boolean): MemberPayment {
+  return {
+    ...draft,
+    from: next.from,
+    until: next.until,
+    ...(!moneyEdited ? { amount: next.amount, currency: next.currency } : {}),
   };
 }

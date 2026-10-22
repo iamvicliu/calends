@@ -8,7 +8,7 @@ import { ask, Cell, Group, Icon, NumInput, Seg, Sheet, Toggle } from '../compone
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
-import { carLedger, memberFee, shareFromFee } from '../../../shared/carpool.ts';
+import { carLedger, memberFee, refreshReceiptDraft, shareFromFee } from '../../../shared/carpool.ts';
 
 export { carLedger, memberFee };
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
@@ -116,7 +116,8 @@ export function MemberSheet({
   const up = (p: Partial<ShareMember>) => {
     const next = { ...f, ...p };
     setF(next);
-    if (adding && ['joined', 'left', 'firstPeriod', 'firstAmount', 'paidUntil'].some((key) => key in p)) setPay(freshPay(next));
+    if (adding && ['joined', 'left', 'firstPeriod', 'firstAmount', 'paidUntil'].some((key) => key in p))
+      setPay((draft) => refreshReceiptDraft(draft, freshPay(next), payMoneyEdited));
   };
   const via = f.contactVia ?? 'Telegram';
   const setVia = (v: string) => up({ contactVia: v, ...(v === '邮箱' && f.contact && !f.account ? { account: f.contact } : {}) });
@@ -131,12 +132,12 @@ export function MemberSheet({
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
   const months = memberBillMonths(s, f);
-  const freshPay = (m: ShareMember): MemberPayment => {
-    const from = memberUnpaidFrom(s, m);
+  const freshPay = (m: ShareMember, from = memberUnpaidFrom(s, m)): MemberPayment => {
     const period = memberCollection(s, m, from, base);
     return { date: today, amount: period.amount, currency: period.currency, from, until: period.until };
   };
   const [pay, setPay] = useState<MemberPayment>(() => freshPay(f));
+  const [payMoneyEdited, setPayMoneyEdited] = useState(false);
   const first = memberCollection(s, f, f.joined ?? s.share?.since ?? s.start, base);
   const schedule = collectionDates(s, f, today.slice(0, 4))
     .map((d) => cnDate(d))
@@ -146,7 +147,7 @@ export function MemberSheet({
     const next = { ...f, ...p };
     next.share = shareFromFee(state, s, next.fee ?? 0, next.feeCurrency ?? base, memberBillMonths(s, next));
     setF(next);
-    setPay(freshPay(next));
+    setPay((draft) => refreshReceiptDraft(draft, freshPay(next, draft.from), payMoneyEdited));
   };
 
   const save = (next: ShareMember, msg: string) => {
@@ -443,10 +444,23 @@ export function MemberSheet({
           {adding ? (
             <>
               <Cell label={t('family.member.amount')}>
-                <NumInput className="num" value={pay.amount} onValue={(n) => setPay({ ...pay, amount: n ?? 0 })} />
+                <NumInput
+                  className="num"
+                  value={pay.amount}
+                  onValue={(n) => {
+                    setPayMoneyEdited(true);
+                    setPay({ ...pay, amount: n ?? 0 });
+                  }}
+                />
               </Cell>
               <Cell label={t('family.member.currency')}>
-                <CurrencySelect value={pay.currency} onChange={(c) => setPay({ ...pay, currency: c })} />
+                <CurrencySelect
+                  value={pay.currency}
+                  onChange={(c) => {
+                    setPayMoneyEdited(true);
+                    setPay({ ...pay, currency: c });
+                  }}
+                />
               </Cell>
               <Cell label={t('family.member.coverFrom')}>
                 <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v, until: memberCollection(s, f, v, base).until })} />
@@ -488,6 +502,7 @@ export function MemberSheet({
               style={{ color: 'var(--accent)' }}
               onClick={() => {
                 setPay(freshPay(f));
+                setPayMoneyEdited(false);
                 setAdding(true);
               }}
             >
