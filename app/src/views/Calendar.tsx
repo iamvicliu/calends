@@ -245,11 +245,18 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                             <span className="cal-dc-meta">
                               <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
                               <span>{cycleLabel(c.sub.cycle)}</span>
-                              {status !== 'active' && <span className="badge">{t(`list.status.${status}`)}</span>}
+                              {status !== 'active' && !(status === 'lifetime' && c.sub.cycle.unit === 'lifetime') && (
+                                <span className="badge">{t(`list.status.${status}`)}</span>
+                              )}
                               {c.kind === 'refund' && <span className="badge green">{t('detail.charges.kind.refund')}</span>}
                             </span>
                           </span>
                           <span className="cal-dc-info">
+                            {c.sub.cycle.unit === 'lifetime' && c.kind !== 'refund' && (
+                              <small>
+                                {t('editor.field.purchased')} · {cnDateAuto(c.sub.start, today)}
+                              </small>
+                            )}
                             {period && (
                               <small>
                                 {cnDateAuto(period.from, today)} – {cnDateAuto(period.paidThrough, today)}
@@ -310,7 +317,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                     .filter(([date]) => date.startsWith(month))
                     .sort(([a], [b]) => a.localeCompare(b))
                     .map(([date, items]) => (
-                      <section key={date} data-date={date} className={`cal-charge-group ${date === sel ? 'selected' : ''}`}>
+                      <section key={date} data-date={date} className="cal-charge-group">
                         <h4 className={`cal-charge-day ${date === today ? 'today' : ''}`} aria-label={cnDate(date, true)}>
                           <span>{Number(date.slice(8))}</span>
                           <i aria-hidden="true" />

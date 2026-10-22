@@ -1301,7 +1301,7 @@ test('calendar groups dates chronologically, follows the currency preference and
     assert.equal(gridAmount.props.value, 21);
     assert.equal(gridAmount.props.decimals, 0);
     assert.equal(all(timeline).filter((n) => n.props.className === 'cal-charge-day today').length, 1);
-    assert.ok(nodes.some((n) => n.props['data-date'] === today && n.props.className.includes('selected')));
+    assert.ok(nodes.some((n) => n.props['data-date'] === today));
     rows[1].props.onClick();
     assert.equal(opened[0], subscriptions[0]);
     const details = nodes.filter((n) => n.props.className === 'card cal-daycard');
@@ -1403,6 +1403,70 @@ test('calendar keeps a long month complete and selection never scrolls a nested 
     nodes = r.render('Calendar', props);
     assert.deepEqual(scrolls, [], 'changing the selected date never scrolls a nested list');
     assert.equal(rows().length, 24);
-    assert.ok(nodes.some((n) => n.props['data-date'] === '2026-10-24' && n.props.className.includes('selected')));
+    assert.ok(nodes.some((n) => n.props['data-date'] === '2026-10-24'));
+    assert.equal(nodes.filter((n) => n.props.className === 'cal-charge-day today').length, 1, 'today stays red independently of selection');
   }
+});
+
+test('calendar lifetime charge has one lifetime label and a purchase date beside recurring coverage', () => {
+  const subscriptions: Subscription[] = ['month', 'lifetime'].map((unit, i) => ({
+    id: String(i),
+    name: `Fictional ${unit}`,
+    category: 'Tools',
+    tags: [],
+    price: 20,
+    currency: 'USD',
+    start: today,
+    cycle: { unit: unit as 'month' | 'lifetime', every: 1 },
+    status: 'active',
+  }));
+  const r = harness(
+    '../app/src/views/Calendar.tsx',
+    'Calendar',
+    {},
+    {
+      allCharges: () => subscriptions.map((sub) => ({ sub, date: today, amount: 20, currency: 'USD', projected: false })),
+    },
+  );
+  const nodes = r.render('Calendar', { state: { ...st, readonly: true, subscriptions }, today, onOpen() {}, onIcs() {} });
+  const cards = nodes.filter((n) => n.props.className === 'card cal-daycard');
+  assert.equal(cards.length, 2);
+  const lifetime = all(cards[1]);
+  assert.equal(
+    lifetime.some((n) => n.children.includes('list.status.lifetime')),
+    false,
+    'cycle already identifies lifetime',
+  );
+  const info = lifetime.find((n) => n.props.className === 'cal-dc-info')!;
+  assert.ok(all(info).some((n) => n.children.includes('editor.field.purchased') && n.children.includes(format.cnDateAuto(today, today))));
+  assert.ok(
+    all(cards[0]).some((n) => n.children.includes(format.cnDateAuto('2026-11-21', today))),
+    'recurring coverage remains visible',
+  );
+});
+
+test('payment marks fall back for missing, legacy and failed logos and recover when the logo changes', () => {
+  const r = harness(
+    '../app/src/components/ui.tsx',
+    'MethodMark',
+    {},
+    {
+      base: (s: string) => s,
+      methodRegion: () => undefined,
+      BRANDS: [],
+      KIND_BG: { credit: '#222', other: '#444' },
+    },
+  );
+  const render = (logo?: string, kind?: string) => r.render('MethodMark', { m: { id: 'm', name: 'Fictional Visa', currency: 'USD', kind, logo } });
+  const glyph = (nodes: Node[]) => nodes.some((n) => typeof n.type === 'function' && n.type.name === 'Icon' && n.props.name === 'wallet');
+  assert.ok(glyph(render(undefined, 'credit')));
+  let nodes = render();
+  assert.ok(glyph(nodes), 'legacy method without kind gets a visible glyph');
+  assert.equal(nodes[0].props.style.background, '#444');
+  nodes = render('/missing-logo.svg', 'credit');
+  nodes.find((n) => n.type === 'img')!.props.onError();
+  assert.ok(glyph(render('/missing-logo.svg', 'credit')));
+  nodes = render('/replacement.svg', 'credit');
+  assert.equal(glyph(nodes), false);
+  assert.equal(nodes.find((n) => n.type === 'img')!.props.src, '/replacement.svg');
 });
