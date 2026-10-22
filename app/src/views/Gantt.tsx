@@ -55,6 +55,21 @@ const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.roun
  */
 /** 停用标志与条同高，作为条的末端 */
 const STOP_CAP = 18;
+
+/** 损失金额（.gt-unused-amount：11px、600）的实际宽度；无法测量时按每字 7px 保守估算 */
+let measureCtx: CanvasRenderingContext2D | null | undefined;
+function amountWidth(text: string): number {
+  if (measureCtx === undefined) {
+    try {
+      measureCtx = document.createElement('canvas').getContext('2d');
+    } catch {
+      measureCtx = null;
+    }
+  }
+  if (!measureCtx) return [...text].length * 7;
+  measureCtx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
+  return Math.ceil(measureCtx.measureText(text).width) + 1;
+}
 const NARROW = '(max-width: 700px)';
 const PORTRAIT = '(max-width: 700px) and (orientation: portrait)';
 function subscribeNarrow(cb: () => void) {
@@ -436,9 +451,15 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     const unused = !state.readonly && !!stopped && stopped.wastedDays > 0;
                     const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
                     const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
-                    const unusedAmount = unused ? flow(-stopped!.unusedValue, g.v.currency, { compact: true }) : '';
-                    // 留出左右内边距；停用标志占据的半圆不计入文字空间。
-                    const showUnusedAmount = unusedWidth >= Math.max(56, [...unusedAmount].length * 7 + 18);
+                    // 按实际字体量文字宽度，加左右各 9px 内边距；停用标志占据的半圆不计入文字空间。
+                    // 完整金额放不下时退到取整金额（精确值在悬停提示里），仍放不下才不显示
+                    const unusedAmount = unused
+                      ? [
+                          flow(-stopped!.unusedValue, g.v.currency, { compact: true }),
+                          flow(-Math.round(stopped!.unusedValue), g.v.currency, { compact: true }),
+                        ].find((text) => unusedWidth >= amountWidth(text) + 18)
+                      : undefined;
+                    const showUnusedAmount = !!unusedAmount;
                     if ((unused ? wastedUntil : to) < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
                     const tip = `${g.v.region ? `${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
