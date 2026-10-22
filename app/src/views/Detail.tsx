@@ -216,8 +216,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   };
 
   const paused = sub.status === 'paused';
-  // 买断（一段、不合租）没有走势、未来扣款和历程可看：换成窄的单列，不留半屏空白
-  const compact = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1 && !sub.share;
+  // 买断，或刚开始的长周期订阅（一段、不合租，不到两笔扣款画不出走势，也没有未来扣款图）：
+  // 主栏只剩指标卡，换成窄的单列，不留半屏空白
+  const compact = phaseSubs(sub).length === 1 && !sub.share && (sub.cycle.unit === 'lifetime' || (!showForecast && regular(history).length < 2));
   // 最多五行（含可见年份头）才进侧栏：短记录填补摘要下方，返佣等密集记录留在走势下方，避免侧栏过长。
   // 以默认年份计数；展开全部历史时保持位置，避免交互后卡片跳栏。
   const sidebarCharges = !compact && !showForecast && detailChargeHistory(history, today).defaultRowCount <= 5;

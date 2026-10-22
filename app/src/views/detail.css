@@ -1172,6 +1172,16 @@
   .dt.compact {
     height: auto;
   }
+  /* 窄弹窗放不下名称和一整排按钮：按钮另起一行，名称不被挤成省略号 */
+  .dt.compact .dt-head {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+  .dt.compact .dt-actions {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+  }
   .dt.compact .dt-body {
     display: flex;
     /* 宽屏两栏的 align-items: start 会让单列里的卡片缩成内容宽度 */
