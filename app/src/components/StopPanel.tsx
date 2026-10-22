@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
+import { nonrenewalDate, renewalDates, chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
 import { flow, cnDateFull } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { reactivate } from '../../../shared/phases.ts';
@@ -114,7 +114,7 @@ export function StopFields({ sub, today, value, onChange }: { sub: Subscription;
           onChange={(v) => {
             up({
               mode: v as StopMode,
-              date: v === 'nonrenew' ? period.paidThrough : today,
+              date: v === 'nonrenew' ? nonrenewalDate(sub, today) : today,
               amount: sub.stop ? amount : undefined,
               refundDate: sub.stop ? refundDate : undefined,
             });
@@ -147,6 +147,9 @@ export function StopFields({ sub, today, value, onChange }: { sub: Subscription;
           }}
         />
       </Cell>
+      {mode === 'nonrenew' && renewalDates(sub, today).cancelBy && today > renewalDates(sub, today).cancelBy! && (
+        <p className="stop-warn">{t('core.renewal.tooLate')}</p>
+      )}
       {mode !== 'nonrenew' && (
         <>
           <p className="stop-hint">{t('core.stop.paidThrough', { date: cnDateFull(period.paidThrough) })}</p>

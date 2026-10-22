@@ -10,11 +10,13 @@ export interface CatalogItem {
   icon: string;
   category: string;
   url: string;
+  chargeLeadDays?: number;
+  cancelLeadDays?: number;
 }
 
-type Cat = 'ai' | 'tools' | 'productivity';
+type Cat = 'ai' | 'tools' | 'productivity' | 'domains';
 /** 目录里只存分类代码；名称在 catalog.name.<file> 里有译名时按当前语言显示，原名仍参与搜索 */
-type Entry = { name: string; file: string; aka: string[]; cat: Cat; url: string };
+type Entry = { name: string; file: string; aka: string[]; cat: Cat; url: string; icon?: string; chargeLeadDays?: number; cancelLeadDays?: number };
 const LOCALIZED = new Set(['qwen', 'doubao', 'yuanbao', 'zhipu', 'coze', 'kling', 'hailuo', 'hunyuan']);
 
 const ai = (name: string, file: string, url: string, aka: string[] = [], cat: Cat = 'ai'): Entry => ({ name, file, aka, cat, url });
@@ -22,10 +24,36 @@ const ai = (name: string, file: string, url: string, aka: string[] = [], cat: Ca
 /** 选中目录项时才取文案：分类会写进订阅，所以按当前语言给默认值 */
 function resolve(e: Entry): CatalogItem {
   const name = LOCALIZED.has(e.file) ? t(`catalog.name.${e.file}`) : e.name;
-  return { name, aka: name === e.name ? e.aka : [e.name, ...e.aka], icon: `/ai/${e.file}.svg`, category: presetCat(e.cat), url: e.url };
+  return {
+    name,
+    aka: name === e.name ? e.aka : [e.name, ...e.aka],
+    icon: e.icon ?? `/ai/${e.file}.svg`,
+    chargeLeadDays: e.chargeLeadDays,
+    cancelLeadDays: e.cancelLeadDays,
+    category: presetCat(e.cat),
+    url: e.url,
+  };
 }
 
 const CATALOG: Entry[] = [
+  {
+    name: 'Cloudflare Registrar',
+    file: 'cloudflare',
+    aka: ['cloudflare', 'domain', '域名'],
+    cat: 'domains',
+    url: 'https://www.cloudflare.com/products/registrar/',
+    icon: 'https://www.cloudflare.com/favicon.ico',
+    chargeLeadDays: 30,
+  },
+  {
+    name: 'Apple App Store',
+    file: 'appstore',
+    aka: ['apple', 'app store', '苹果订阅'],
+    cat: 'tools',
+    url: 'https://apps.apple.com',
+    icon: 'https://www.apple.com/favicon.ico',
+    cancelLeadDays: 1,
+  },
   ai('ChatGPT', 'openai', 'https://chatgpt.com', ['openai', 'gpt', 'chatgpt plus', 'chatgpt pro']),
   ai('Claude', 'claude', 'https://claude.ai', ['anthropic', 'claude pro', 'claude max']),
   ai('Gemini', 'gemini', 'https://gemini.google.com', ['google ai pro', 'google one ai', 'bard']),

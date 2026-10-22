@@ -1,3 +1,4 @@
+import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
 import { StopFields } from '../components/StopPanel.tsx';
@@ -79,7 +80,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const [isNew] = useState(() => !state.subscriptions.some((s) => s.id === sub.id));
   const key = draftKey(isNew, sub.id);
   // 有多个阶段时，表单显示今天所在的阶段
-  const [initialForm] = useState(() => toEditForm(structuredClone(sub), today));
+  const [initialForm] = useState(() => toEditForm(migrateRenewalRules(structuredClone(sub)), today));
   const [initial] = useState(() => sig(initialForm));
   // 新建的草稿不看 base（每次新建 id 都不同）；编辑的要求订阅没被别处改过
   const [draft] = useState(() => readDraft(key, isNew ? 'new' : initial));
@@ -133,6 +134,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const save = async () => {
     if (!priceValid) return;
     let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
+    if (!isNew) out = preserveRenewalHistory(sub, out, today);
     // 直接改了价格框：视为今天起调价，过往账单保持原价
     try {
       if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
@@ -243,7 +245,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
         }}
       >
-        <Form f={f} setF={setF} up={up} state={state} today={today} stop={stop} setStop={setStop} />
+        <Form isNew={isNew} f={f} setF={setF} up={up} state={state} today={today} stop={stop} setStop={setStop} />
       </div>
       {!isNew && (
         <div style={{ marginTop: 18 }}>
@@ -255,6 +257,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
 }
 
 function Form({
+  isNew,
   stop,
   setStop,
   f,
@@ -263,6 +266,7 @@ function Form({
   state,
   today,
 }: {
+  isNew: boolean;
   stop?: StopForm;
   setStop: (value: StopForm | undefined) => void;
   f: Subscription;
@@ -290,6 +294,7 @@ function Form({
     f.intro && t('editor.more.intro'),
     f.bonus && t('editor.more.bonus'),
     f.remindDays != null && t('editor.more.remind'),
+    (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
     (f.url || f.manageUrl) && t('editor.more.links'),
     f.tags.length > 0 && t('editor.more.tags'),
     f.notes && t('editor.more.notes'),
@@ -321,6 +326,7 @@ function Form({
                 // 「Spotify: Music and Podcasts」只取冒号、破折号前的产品名
                 name: h.name.split(/\s*[:：|]\s*|\s[-–—]\s/)[0].trim(),
                 icon: h.icon,
+                ...(isNew && f.cancelLeadDays == null ? { cancelLeadDays: 1 } : {}),
                 url: f.url || h.url,
                 // 只有粘贴的链接里带了地区才填，按名称搜时不猜
                 ...(h.fromLink && !f.region && h.country !== 'cn' ? { region: h.country!.toUpperCase() } : {}),
@@ -328,7 +334,15 @@ function Form({
                 ...(!f.name.trim() || f.category === presetCat('tools') ? { category: GENRE_CAT[h.genre] ? presetCat(GENRE_CAT[h.genre]) : f.category } : {}),
               })
             }
-            onPickCatalog={(c) => up({ name: c.name, icon: c.icon, url: f.url || c.url, category: c.category })}
+            onPickCatalog={(c) =>
+              up({
+                name: c.name,
+                icon: c.icon,
+                url: f.url || c.url,
+                category: c.category,
+                ...(isNew ? { chargeLeadDays: f.chargeLeadDays ?? c.chargeLeadDays, cancelLeadDays: f.cancelLeadDays ?? c.cancelLeadDays } : {}),
+              })
+            }
           />
         </div>
       </div>
@@ -400,6 +414,7 @@ function Form({
             onChange={(id) =>
               up({
                 methodId: id,
+                ...(isNew && f.cancelLeadDays == null && state.methods.find((m) => m.id === id)?.kind === 'appstore' ? { cancelLeadDays: 1 } : {}),
                 ...(!f.region && state.methods.find((m) => m.id === id)?.region ? { region: state.methods.find((m) => m.id === id)!.region } : {}),
               })
             }
@@ -667,6 +682,25 @@ function Form({
                     </div>
                   </>
                 )}
+              </Group>
+              <Group title={t('core.renewal.title')}>
+                <p className="stop-hint">{t('core.renewal.hint')}</p>
+                {(['chargeLeadDays', 'cancelLeadDays'] as const).map((field) => (
+                  <Cell key={field} label={t(`core.renewal.${field}`)}>
+                    <input
+                      className="num"
+                      type="number"
+                      min={0}
+                      max={3660}
+                      step={1}
+                      inputMode="numeric"
+                      aria-label={t(`core.renewal.${field}`)}
+                      value={f[field] ?? 0}
+                      onChange={(e) => up({ [field]: e.target.value === '' ? 0 : Number(e.target.value) })}
+                    />
+                    <span>{t('editor.unit.day', { count: f[field] ?? 0 })}</span>
+                  </Cell>
+                ))}
               </Group>
               <Group title={t('editor.more.remind')}>
                 <Cell
