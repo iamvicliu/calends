@@ -1071,3 +1071,21 @@ test('follow_rule ignores explicit fee fields without losing the old fee baselin
   assert.deepEqual(m.payments, s.share.members[0].payments);
   assert.equal(m.paidUntil, s.share.members[0].paidUntil);
 });
+
+test('MCP overdue days match the UI for exempt and departed members with no unpaid periods', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s = sub();
+  s.start = '2025-01-01';
+  s.share!.members = [
+    { id: 'exempt', name: 'Exempt', share: 0, fee: 0, exempt: true, joined: '2025-01-01' },
+    { id: 'left', name: 'Departed settled', share: 3, fee: 3, left: '2025-06-01', paidUntil: '2025-05-31', joined: '2025-01-01' },
+    { id: 'arrears', name: 'Departed owing', share: 3, fee: 3, left: '2025-06-01', joined: '2025-01-01' },
+  ];
+  await upsert(f.env, 'subscriptions', 's', s);
+  const result = await f.call('get_carpool', { subscription: 's' });
+  const rows = result.structuredContent.plans[0].members;
+  assert.equal(rows.find((m: { id: string }) => m.id === 'exempt').overdue_days, 0);
+  assert.equal(rows.find((m: { id: string }) => m.id === 'left').overdue_days, 0);
+  assert.ok(rows.find((m: { id: string }) => m.id === 'arrears').overdue_days > 0);
+});

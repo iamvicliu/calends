@@ -229,7 +229,7 @@ function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: M
     first_collection: first,
     next_collection: next,
     next_collection_date: next.from,
-    overdue_days: next.from < today ? diffDays(next.from, today) : 0,
+    overdue_days: due && due.periodsOwed > 0 && next.from < today ? diffDays(next.from, today) : 0,
     is_first_period: next.from <= first.until,
     pending_amount: money(st, due?.owed ?? 0, due?.currency ?? next.currency),
   };
