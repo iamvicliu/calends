@@ -57,5 +57,12 @@
   "field": {
     "person": "相手",
     "syncFoot": "この人はほかに {count} か所あり、呼び名や連絡先の変更はそちらにも反映されます。"
+  },
+  "avatar": {
+    "change": "アバターを変更",
+    "help": "PNG・JPEG・WebP 画像をクリック、ドロップ、貼り付け（最大 8 MB）。",
+    "remove": "アバターを削除",
+    "removeConfirm": "このアバターを削除しますか？保存すると反映されます。",
+    "fallbackColor": "代替色"
   }
 }

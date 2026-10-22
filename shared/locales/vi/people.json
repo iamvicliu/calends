@@ -57,5 +57,12 @@
   "field": {
     "person": "Người",
     "syncFoot": "Người này còn ở {count} chỗ khác — đổi tên hoặc liên hệ sẽ áp dụng luôn."
+  },
+  "avatar": {
+    "change": "Đổi ảnh đại diện",
+    "help": "Nhấp, kéo thả hoặc dán ảnh PNG, JPEG hay WebP (tối đa 8 MB).",
+    "remove": "Xóa ảnh đại diện",
+    "removeConfirm": "Xóa ảnh đại diện này? Lưu để áp dụng.",
+    "fallbackColor": "Màu dự phòng"
   }
 }

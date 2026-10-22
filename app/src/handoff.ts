@@ -1,3 +1,5 @@
+import { AVATAR_INPUT_MAX_BYTES, avatarCrop, prepareAvatarThumbnail } from '../../shared/avatar.ts';
+import { t } from '../../shared/i18n.ts';
 // 从别的页面（新建订阅表单）把文字、图片交给 AI 助手：先存进 sessionStorage，助手页打开时取走
 import { go } from './router.ts';
 
@@ -39,5 +41,29 @@ export function takeHandoff(): { text: string; images: string[] } | null {
     return JSON.parse(raw) as { text: string; images: string[] };
   } catch {
     return null;
+  }
+}
+
+/** Private roster thumbnail: center-crop and re-encode to strip source metadata. */
+export async function compressAvatar(file: Blob): Promise<string> {
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || !file.size || file.size > AVATAR_INPUT_MAX_BYTES)
+    throw new Error(t('server.avatarInvalid'));
+  let bmp: ImageBitmap;
+  try {
+    bmp = await createImageBitmap(file);
+  } catch {
+    throw new Error(t('server.avatarInvalid'));
+  }
+  try {
+    const crop = avatarCrop(bmp.width, bmp.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = crop.size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error(t('server.avatarInvalid'));
+    ctx.drawImage(bmp, crop.x, crop.y, crop.side, crop.side, 0, 0, crop.size, crop.size);
+    // PNG fallback covers browsers without a WebP encoder.
+    return prepareAvatarThumbnail(canvas.toDataURL('image/webp', 0.82));
+  } finally {
+    bmp.close();
   }
 }

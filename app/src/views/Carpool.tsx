@@ -1,3 +1,4 @@
+import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
   addDays,
@@ -322,6 +323,7 @@ function MemberRows({
           <div key={d.member.id} className="member">
             <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
+                <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
                 <span className="text-ellipsis">{d.member.name || t('family.pool.unnamed')}</span>
                 {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
                 {contactText(d.member) && (

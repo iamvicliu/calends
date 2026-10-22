@@ -57,5 +57,12 @@
   "field": {
     "person": "人",
     "syncFoot": "这个人还在另外 {count} 处出现，改称呼或联系方式会一起改。"
+  },
+  "avatar": {
+    "change": "更换头像",
+    "help": "点击、拖放或粘贴 PNG、JPEG、WebP 图片（最大 8 MB）。",
+    "remove": "移除头像",
+    "removeConfirm": "移除这个头像？保存后生效。",
+    "fallbackColor": "回退颜色"
   }
 }

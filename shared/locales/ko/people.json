@@ -57,5 +57,12 @@
   "field": {
     "person": "사람",
     "syncFoot": "이 사람은 다른 {count}곳에도 있어요. 이름이나 연락처를 바꾸면 함께 바뀌어요."
+  },
+  "avatar": {
+    "change": "아바타 변경",
+    "help": "PNG, JPEG, WebP 이미지를 클릭하거나 끌어 놓거나 붙여넣으세요(최대 8 MB).",
+    "remove": "아바타 삭제",
+    "removeConfirm": "이 아바타를 삭제할까요? 저장하면 적용됩니다.",
+    "fallbackColor": "대체 색상"
   }
 }

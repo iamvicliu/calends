@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { PersonAvatar } from '../components/PersonAvatar.tsx';
+import { compressAvatar } from '../handoff.ts';
 import { uid } from '../../../shared/billing.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -11,19 +13,6 @@ import { go } from '../router.ts';
 import { deletePerson, mergePerson, run, savePerson } from '../store.ts';
 import { ContactField, contactText, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
-
-/** 头像：称呼的第一个字 + 这个人的颜色 */
-function PersonAvatar({ p, size = 36 }: { p: Pick<Person, 'name' | 'color' | 'id'>; size?: number }) {
-  return (
-    <span
-      className={`pp-ava c-${p.color ?? colorFor(p.id || p.name)}`}
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }}
-      aria-hidden="true"
-    >
-      {[...(p.name.trim() || '?')][0].toUpperCase()}
-    </span>
-  );
-}
 
 /** 选人：已有的人（可搜索）或「新的人」；选中已有的人时把称呼、联系方式带过去 */
 export function PersonPicker({ state, value, onPick }: { state: AppState; value?: string; onPick: (p: Person | undefined) => void }) {
@@ -237,22 +226,38 @@ function PersonSheet({
   const [f, setF] = useState<Person>(() => ({ ...l.person }));
   const up = (p: Partial<Person>) => setF({ ...f, ...p });
   const via = f.contactVia ?? 'Telegram';
-  const dirty =
-    !!stored &&
-    JSON.stringify({ ...stored, contactVia: stored.contact ? stored.contactVia : undefined }) !==
-      JSON.stringify({ ...f, contactVia: f.contact ? f.contactVia : undefined });
+  const profile = (p: Person) => JSON.stringify([p.name, p.contact ? p.contactVia : undefined, p.contact, p.note, p.color, p.avatar]);
+  const dirty = !!stored && profile(stored) !== profile(f);
   const refs = l.person.id ? refsFor(state.subscriptions, l.person.id).length : l.items.length;
   const others = (state.people ?? []).filter((p) => p.id !== l.person.id).sort((a, b) => a.name.localeCompare(b.name));
   const [member, setMember] = useState<{ s: Subscription; m: ShareMember; collect?: boolean } | null>(null);
   const [ledger, setLedger] = useState<Subscription | null>(null);
   const [entry, setEntry] = useState<{ s: Subscription; row: ReturnType<typeof proxyRows>[number] } | null>(null);
   const ro = !!state.readonly;
+  const fileInput = useRef<HTMLInputElement>(null);
+  const busyRef = useRef(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const uploadAvatar = async (file?: File) => {
+    if (!file || ro || !stored || busyRef.current) return;
+    busyRef.current = true;
+    setAvatarBusy(true);
+    try {
+      const avatar = await compressAvatar(file);
+      setF((current) => ({ ...current, avatar }));
+    } catch (error) {
+      await ask(error instanceof Error ? error.message : t('server.avatarInvalid'));
+    } finally {
+      busyRef.current = false;
+      setAvatarBusy(false);
+    }
+  };
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const live = (s: Subscription) => state.subscriptions.find((x) => x.id === s.id) ?? s;
 
   const save = () =>
     run(async () => {
-      await savePerson({ ...f, name: f.name.trim(), contactVia: f.contact ? via : undefined });
+      const saved = await savePerson({ ...f, name: f.name.trim(), contactVia: f.contact ? via : undefined });
+      setF((current) => (profile(current) === profile(f) ? saved : current));
     }, t('family.member.saved'));
   /** 记收款：合租打开成员的收款表单，代付打开最早一期没收的 */
   const record = (i: PersonItem) => {
@@ -301,7 +306,7 @@ function PersonSheet({
             <button className="btn" onClick={onClose}>
               {t('family.member.cancel')}
             </button>
-            <button className="btn primary" disabled={!dirty || !f.name.trim()} onClick={save}>
+            <button className="btn primary" disabled={!dirty || !f.name.trim() || avatarBusy} onClick={save}>
               {t('family.member.save')}
             </button>
           </>
@@ -310,7 +315,44 @@ function PersonSheet({
     >
       <div className="stack">
         <div className="ld-head">
-          <PersonAvatar p={f} size={52} />
+          {stored && !ro ? (
+            <>
+              <input
+                ref={fileInput}
+                type="file"
+                hidden
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => {
+                  void uploadAvatar(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+              <button
+                type="button"
+                className="person-avatar-edit"
+                aria-label={t('people.avatar.change')}
+                title={t('people.avatar.help')}
+                disabled={avatarBusy}
+                onClick={() => fileInput.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  void uploadAvatar(e.dataTransfer.files[0]);
+                }}
+                onPaste={(e) => {
+                  const file = [...e.clipboardData.files][0];
+                  if (file) {
+                    e.preventDefault();
+                    void uploadAvatar(file);
+                  }
+                }}
+              >
+                <PersonAvatar p={f} size={52} />
+              </button>
+            </>
+          ) : (
+            <PersonAvatar p={f} size={52} />
+          )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="ph-name text-ellipsis">{f.name || l.person.name}</div>
             <div className={`muted ph-meta ${contactText(f) ? '' : 'm-hide'}`}>{contactText(f) || t('people.card.noContact')}</div>
@@ -318,6 +360,23 @@ function PersonSheet({
           <ContactLink p={f} />
         </div>
 
+        {stored && !ro && (
+          <div className="row person-avatar-help">
+            <span className="grow">{t('people.avatar.help')}</span>
+            {f.avatar && (
+              <button
+                type="button"
+                className="btn plain"
+                disabled={avatarBusy}
+                onClick={async () => {
+                  if (await ask(t('people.avatar.removeConfirm'))) setF((current) => ({ ...current, avatar: undefined }));
+                }}
+              >
+                {t('people.avatar.remove')}
+              </button>
+            )}
+          </div>
+        )}
         <div className="proxy-facts">
           <div>
             <small>{t('people.sheet.owed')}</small>
@@ -378,7 +437,7 @@ function PersonSheet({
             <Cell label={t('family.member.note')}>
               <input value={f.note ?? ''} disabled={ro} placeholder={t('people.sheet.notePh')} onChange={(e) => up({ note: val(e) || undefined })} />
             </Cell>
-            <Cell label={t('people.sheet.color')}>
+            <Cell label={t(f.avatar ? 'people.avatar.fallbackColor' : 'people.sheet.color')}>
               <span className="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
                 {PERSON_COLORS.map((c, i) => (
                   <button

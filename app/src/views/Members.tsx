@@ -1,3 +1,4 @@
+import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useRef, useState } from 'react';
 import {
   addDays,
@@ -278,6 +279,10 @@ export function MemberSheet({
         }
       >
         <div className="stack">
+          <div className="row">
+            <PersonAvatar p={personFor(state, f.personId, f.name)} size={36} />
+            <b>{f.name}</b>
+          </div>
           {/* 同一个人可能在多辆车上：顶部单独一行标明是哪个订阅 */}
           <div className="collect-sub">
             <SubIcon sub={s} size={32} />
@@ -429,7 +434,14 @@ export function MemberSheet({
               />
             </Cell>
           )}
-          <Cell label={t('family.member.name')}>
+          <Cell
+            label={
+              <span className="row">
+                <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
+                {t('family.member.name')}
+              </span>
+            }
+          >
             <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
           </Cell>
           <Cell label={t('family.member.contact')}>

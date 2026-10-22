@@ -5,7 +5,10 @@
   },
   "stat": {
     "owed": "Ausstehend",
-    "owedSub": { "one": "{count} Person schuldet", "other": "{count} Personen schulden" },
+    "owedSub": {
+      "one": "{count} Person schuldet",
+      "other": "{count} Personen schulden"
+    },
     "allSettled": "Alle beglichen",
     "received": "Bisher erhalten",
     "receivedSub": "Geteilte Abos und Auslagen zusammen",
@@ -19,7 +22,10 @@
   "card": {
     "noContact": "Kein Kontakt",
     "nothing": "In keinem Abo",
-    "past": { "one": "Dazu {count} beendet", "other": "Dazu {count} beendet" }
+    "past": {
+      "one": "Dazu {count} beendet",
+      "other": "Dazu {count} beendet"
+    }
   },
   "kind": {
     "share": "Geteilt",
@@ -28,7 +34,10 @@
   "item": {
     "paidUntil": "Bezahlt bis {date}",
     "noPay": "Noch keine Zahlung",
-    "owedPeriods": { "one": "{count} Zeitraum offen", "other": "{count} Zeiträume offen" },
+    "owedPeriods": {
+      "one": "{count} Zeitraum offen",
+      "other": "{count} Zeiträume offen"
+    },
     "left": "Ausgestiegen",
     "ended": "Beendet",
     "received": "Erhalten {amount}"
@@ -37,7 +46,10 @@
     "owed": "Offen",
     "received": "Bisher bezahlt",
     "last": "Letzte Zahlung",
-    "in": { "one": "In {count} Abo", "other": "In {count} Abos" },
+    "in": {
+      "one": "In {count} Abo",
+      "other": "In {count} Abos"
+    },
     "inEmpty": "In keinem geteilten Abo und keiner Auslage. Du kannst die Person löschen.",
     "profile": "Profil",
     "notePh": "z. B. Kollege, zahlt zum Monatsende",
@@ -63,5 +75,12 @@
       "one": "Auch an {count} weiteren Stelle – Änderungen an Name und Kontakt gelten dort mit.",
       "other": "Auch an {count} weiteren Stellen – Änderungen an Name und Kontakt gelten dort mit."
     }
+  },
+  "avatar": {
+    "change": "Profilbild ändern",
+    "help": "PNG, JPEG oder WebP anklicken, ablegen oder einfügen (bis 8 MB).",
+    "remove": "Profilbild entfernen",
+    "removeConfirm": "Dieses Profilbild entfernen? Zum Anwenden speichern.",
+    "fallbackColor": "Ersatzfarbe"
   }
 }
