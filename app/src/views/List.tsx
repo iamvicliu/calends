@@ -5,7 +5,7 @@ import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthly
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
@@ -188,9 +188,9 @@ export function List({
             onKeyDown={(e) => e.key === 'Escape' && q && (e.stopPropagation(), setQ(''))}
           />
           {q && (
-            <button type="button" className="tb-search-x" onClick={() => setQ('')} aria-label={t('common.clear')}>
+            <IconButton type="button" className="tb-search-x" onClick={() => setQ('')} aria-label={t('common.clear')}>
               <Icon name="x" size={14} />
-            </button>
+            </IconButton>
           )}
         </label>
         <Seg
@@ -217,19 +217,19 @@ export function List({
             ] as Array<{ value: Sort; label: string }>
           }
         />
-        <button
+        <IconButton
           type="button"
-          className="icon-btn"
+
           onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')}
           aria-label={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
           title={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
         >
           <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
-        </button>
+        </IconButton>
         {!state.readonly && (
-          <button className="icon-btn accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
+          <IconButton className="accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
-          </button>
+          </IconButton>
         )}
       </Toolbar>
       <div className="page fade-in">

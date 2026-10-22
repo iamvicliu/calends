@@ -15,7 +15,7 @@ import {
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Amount, Cell, Hint, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { IconButton, Amount, Cell, CardTitle, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -150,9 +150,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             ['year', t('calendar.mode.year')],
           ]}
         />
-        <button className="icon-btn" aria-label={t('calendar.prev')} title={`${t('calendar.prev')} ←`} onClick={() => shift(-1)}>
+        <IconButton aria-label={t('calendar.prev')} title={`${t('calendar.prev')} ←`} onClick={() => shift(-1)}>
           <Icon name="left" />
-        </button>
+        </IconButton>
         <button
           className="btn"
           title={`${t('calendar.today')} T`}
@@ -162,13 +162,13 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         >
           {t('calendar.today')}
         </button>
-        <button className="icon-btn" aria-label={t('calendar.next')} title={`${t('calendar.next')} →`} onClick={() => shift(1)}>
+        <IconButton aria-label={t('calendar.next')} title={`${t('calendar.next')} →`} onClick={() => shift(1)}>
           <Icon name="right" />
-        </button>
+        </IconButton>
         {!state.readonly && (
-          <button className="icon-btn" onClick={onIcs} title={t('calendar.ics')} aria-label={t('calendar.ics')}>
+          <IconButton onClick={onIcs} title={t('calendar.ics')} aria-label={t('calendar.ics')}>
             <Icon name="share" />
-          </button>
+          </IconButton>
         )}
       </Toolbar>
       <div className="page fade-in">
@@ -235,9 +235,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               {sel && hasSelection ? (
                 <div className="stack cal-selection" ref={selection}>
                   <section className="cal-dayhead">
-                    <h3>
-                      {`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`} <Hint text={t('report.cash.fullPaidHint')} />
-                    </h3>
+                    <CardTitle as="h3" hint={t('report.cash.fullPaidHint')}>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</CardTitle>
                   </section>
                   <div className="cal-daycards">
                     {selList.map((c, i) => {
@@ -314,7 +312,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               {reportMode === 'mini' && report && <MiniReport report={report} base={base} today={today} onExpand={() => setReportMode('full')} />}
               <section className="card cal-charges">
                 <div className="card-h">
-                  <h3>{t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}</h3>
+                  <CardTitle>{t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}</CardTitle>
                 </div>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 <div className="cal-charge-list" ref={timeline}>
@@ -445,12 +443,12 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
   return (
     <section className="card cal-stat">
       <div className="cal-mini-head">
-        <span>
-          {t('scope.monthTotal')} <Hint text={t('scope.cashBasis')} />
-        </span>
-        <button type="button" className="icon-btn cal-expand" aria-label={t('calendar.expandReport')} title={t('calendar.expandReport')} onClick={onExpand}>
+        <CardTitle as="span" hint={t('scope.cashBasis')}>
+          {t('scope.monthTotal')}
+        </CardTitle>
+        <IconButton type="button" className="cal-expand" aria-label={t('calendar.expandReport')} title={t('calendar.expandReport')} onClick={onExpand}>
           <Maximize2 size={15} />
-        </button>
+        </IconButton>
       </div>
       <div className="cal-stat-big">
         <b className={headline.total < 0 ? 'green' : undefined}>{flow(-headline.total, base)}</b>

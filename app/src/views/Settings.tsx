@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cycleShort } from '../../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../../shared/csv.ts';
 import { avatarOf, type AppState, type PaymentMethod, type Subscription } from '../../../shared/types.ts';
-import { ask, Cell, Group, Hint, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
@@ -274,10 +274,9 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Cell>
           <Cell
             label={
-              <span className="with-hint">
+              <CardTitle as="span" hint={t('settings.general.signedAmountsSub')}>
                 {t('settings.general.signedAmounts')}
-                <Hint text={t('settings.general.signedAmountsSub')} />
-              </span>
+              </CardTitle>
             }
           >
             <Toggle
@@ -631,7 +630,7 @@ function NavRow({ id, label, checked, onToggle }: { id: string; label: string; c
       className={`cell cat-row nav-row ${isDragging ? 'lifted' : ''}`}
       style={{ transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined, transition } as Record<string, string | undefined>}
     >
-      <button
+      <IconButton
         type="button"
         ref={setActivatorNodeRef as (el: HTMLButtonElement | null) => void}
         className="cat-grip"
@@ -640,7 +639,7 @@ function NavRow({ id, label, checked, onToggle }: { id: string; label: string; c
         {...(listeners as Record<string, unknown>)}
       >
         <Icon name="grip" />
-      </button>
+      </IconButton>
       <span className="nav-row-name">{label}</span>
       {checked !== undefined && <Toggle label={label} checked={checked} onChange={onToggle} />}
     </div>

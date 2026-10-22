@@ -1,0 +1,108 @@
+/* Shared alignment and interaction primitives. App only; public has its own style tree. */
+:root {
+  --icon-button-size: 32px;
+}
+.ui-title,
+.icon-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.ui-title {
+  margin: 0;
+  line-height: 1.4;
+}
+.ui-title-text,
+.text-ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-title > .hint,
+.icon-text > svg,
+.icon-text > img {
+  flex-shrink: 0;
+}
+.icon-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  min-width: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--label-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: pointer;
+  transition:
+    background 120ms,
+    color 120ms,
+    transform 100ms;
+}
+.icon-btn:hover {
+  background: var(--hover);
+  color: var(--label);
+}
+.icon-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.icon-btn.accent {
+  background: var(--ink);
+  color: var(--on-ink);
+  box-shadow: none;
+}
+.icon-btn svg,
+.icon-btn .i {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.icon-btn.hint {
+  box-shadow: none;
+  font-size: inherit;
+}
+.icon-btn.hint .i {
+  width: 1em;
+  height: 1em;
+  max-width: 18px;
+  max-height: 18px;
+}
+:where(button, a, input, textarea, [role='button'], [role='link'], [tabindex]):focus-visible,
+.icon-btn[data-focus-visible] {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+:where(button):disabled,
+.icon-btn[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.info-tip {
+  z-index: 100;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--label);
+  box-shadow: var(--shadow-lg);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+@media (max-width: 860px), (pointer: coarse) {
+  :root {
+    --icon-button-size: 40px;
+  }
+}

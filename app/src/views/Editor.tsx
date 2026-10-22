@@ -8,7 +8,7 @@ import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
+import { IconButton, ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
@@ -503,14 +503,9 @@ function Form({
                 <span className="wide">
                   <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
                 </span>
-                <button
-                  className="icon-btn"
-                  style={{ width: 26, height: 26 }}
-                  aria-label={t('editor.share.remove')}
-                  onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}
-                >
+                <IconButton aria-label={t('editor.share.remove')} onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}>
                   <Icon name="x" />
-                </button>
+                </IconButton>
               </div>
             ))}
             {share.members.length < share.seats - 1 && (

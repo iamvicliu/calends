@@ -193,6 +193,8 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     },
     FlagImg: 'FlagImg',
     Icon: 'Icon',
+    IconButton: 'button',
+    CardTitle: 'h3',
     Seg: 'Seg',
     SubIcon: 'SubIcon',
     useWidth: () => [null, width],

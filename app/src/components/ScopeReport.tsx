@@ -9,7 +9,7 @@ import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
 import { bankOf, brandOf, catColor, methodLogo } from '../derive.ts';
 import { BarLine } from './charts.tsx';
-import { CatIcon, Hint, Icon, MethodMark, SubIcon } from './ui.tsx';
+import { IconButton, CatIcon, CardTitle, Icon, MethodMark, SubIcon } from './ui.tsx';
 import './scope-report.css';
 
 interface Props {
@@ -135,31 +135,30 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
     ));
   const heading = (key: string, hint?: string, count?: number) => (
     <div className="card-h">
-      <h3>{t(`scope.${key}`, { count })}</h3>
-      {hint && <Hint text={t(`scope.${hint}`)} />}
+      <CardTitle hint={hint ? t(`scope.${hint}`) : undefined}>{t(`scope.${key}`, { count })}</CardTitle>
     </div>
   );
   const headlineHeading = (label: string, hint?: string) => (
     <div className="scope-headline-header">
-      <div className="stat-label">
-        {t(label)} {hint && <Hint text={t(hint)} />}
-      </div>
+      <CardTitle as="div" className="stat-label" hint={hint ? t(hint) : undefined}>
+        {t(label)}
+      </CardTitle>
       <div className="scope-actions">
         {typeof ClipboardItem !== 'undefined' && (
-          <button
+          <IconButton
             type="button"
-            className="icon-btn"
+
             title={t('detail.action.copyImage')}
             aria-label={t('detail.action.copyImage')}
             disabled={copying}
             onClick={copyImage}
           >
             <Copy size={15} />
-          </button>
+          </IconButton>
         )}
-        <button
+        <IconButton
           type="button"
-          className="icon-btn"
+
           title={t(monthly ? 'scope.minimize' : 'scope.collapse')}
           aria-expanded={expanded}
           aria-controls={id}
@@ -168,7 +167,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           disabled={copying}
         >
           {monthly ? <Minimize2 size={15} /> : <ChevronUp size={15} />}
-        </button>
+        </IconButton>
       </div>
     </div>
   );
@@ -258,8 +257,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             <div className="card-h">
-              <h3>{t('scope.movement', { month: monthLabel(block.month) })}</h3>
-              <Hint text={t('scope.movementBasis')} />
+              <CardTitle hint={t('scope.movementBasis')}>{t('scope.movement', { month: monthLabel(block.month) })}</CardTitle>
             </div>
             <div className="hero-delta">
               {!singleDriver && delta({ amount: net })}

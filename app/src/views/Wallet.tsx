@@ -7,7 +7,23 @@ import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, ask, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, NumInput, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
+import {
+  IconButton,
+  Amount,
+  ask,
+  Cell,
+  FlagImg,
+  Group,
+  Icon,
+  MethodMark,
+  NetworkMark,
+  NumInput,
+  Seg,
+  Sheet,
+  SubIcon,
+  Toggle,
+  Toolbar,
+} from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { go } from '../router.ts';
@@ -198,7 +214,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
             <img className="pc-logo bank" src={base(`/banks/${bank}-rect.svg`)} alt="" />
           ) : null}
           <div style={{ minWidth: 0 }}>
-            <div className="pc-name">{m.name}</div>
+            <div className="pc-name text-ellipsis">{m.name}</div>
             <div className="pc-kind">
               {KIND_LABEL[m.kind]}
               {m.network ? ` · ${m.currency}` : ''}
@@ -644,9 +660,9 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
                         )}
                       </span>
                     )}
-                    <button className="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
+                    <IconButton aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
                       <Icon name="x" />
-                    </button>
+                    </IconButton>
                   </span>
                 </div>
               );

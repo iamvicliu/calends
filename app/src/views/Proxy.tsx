@@ -75,7 +75,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
           <div className="proxy-head">
             <SubIcon sub={s} size={46} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="ph-name">
+              <div className="ph-name text-ellipsis">
                 <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
               </div>
               <div className="muted ph-meta">
@@ -150,7 +150,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
         <div className="ld-head">
           <SubIcon sub={live} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name">
+            <div className="ph-name text-ellipsis">
               <NameLink
                 onClick={() => {
                   onClose();

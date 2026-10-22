@@ -82,6 +82,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     Fragment: 'Fragment',
     Seg: 'Seg',
     Icon: 'Icon',
+    IconButton: 'button',
+    CardTitle: 'h3',
     Hint: 'Hint',
     SubIcon: 'SubIcon',
     FlagImg: 'FlagImg',

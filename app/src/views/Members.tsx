@@ -4,7 +4,7 @@ import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, Cell, Group, Icon, NumInput, Seg, Sheet, Toggle } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Toggle } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
@@ -391,19 +391,19 @@ export function MemberSheet({
                 </span>
                 <span className="cell-r">
                   {others.length > 0 && (
-                    <button
-                      className={`icon-btn ${copying === i ? 'on' : ''}`}
-                      style={{ width: 26, height: 26 }}
+                    <IconButton
+                      className={`${copying === i ? 'on' : ''}`}
+
                       aria-label={t('family.member.copyAria')}
                       title={t('family.member.copyAria')}
                       onClick={() => (copying === i ? setCopying(null) : startCopy(i))}
                     >
                       <Icon name="copy" />
-                    </button>
+                    </IconButton>
                   )}
-                  <button className="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
+                  <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
                     <Icon name="x" />
-                  </button>
+                  </IconButton>
                 </span>
                 {copying === i && (
                   <div className="copy-pay">

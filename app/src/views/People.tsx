@@ -178,7 +178,7 @@ function PersonCard({ l, base, today, onClick }: { l: PersonLedger; base: string
       <div className="pp-top">
         <PersonAvatar p={p} size={44} />
         <div className="pp-id">
-          <div className="ph-name">{p.name}</div>
+          <div className="ph-name text-ellipsis">{p.name}</div>
           <div className={`muted ph-meta ${contact || p.note ? '' : 'm-hide'}`}>{contact || p.note || t('people.card.noContact')}</div>
         </div>
         <ContactLink p={p} />
@@ -312,7 +312,7 @@ function PersonSheet({
         <div className="ld-head">
           <PersonAvatar p={f} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name">{f.name || l.person.name}</div>
+            <div className="ph-name text-ellipsis">{f.name || l.person.name}</div>
             <div className={`muted ph-meta ${contactText(f) ? '' : 'm-hide'}`}>{contactText(f) || t('people.card.noContact')}</div>
           </div>
           <ContactLink p={f} />

@@ -6,7 +6,7 @@ import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
-import { Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
+import { CardTitle, Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -320,21 +320,16 @@ function MemberRows({
       {dues.map((d) => (
         <div key={d.member.id} className="member">
           <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
-            <div style={{ fontWeight: 600, fontSize: 14 }}>
-              {d.member.name || t('family.pool.unnamed')}
-              {d.member.left && d.member.left <= today && (
-                <span className="badge" style={{ marginLeft: 6 }}>
-                  {t('family.pool.leftOn', { date: cnDate(d.member.left) })}
-                </span>
-              )}
+            <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
+              <span className="text-ellipsis">{d.member.name || t('family.pool.unnamed')}</span>
+              {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
               {contactText(d.member) && (
-                <span className="muted" style={{ fontWeight: 400 }}>
-                  {' '}
+                <span className="muted text-ellipsis" style={{ fontWeight: 400 }}>
                   · {contactText(d.member)}
                 </span>
               )}
             </div>
-            <div className="muted" style={{ fontSize: 12 }}>
+            <div className="muted text-ellipsis" style={{ fontSize: 12 }}>
               {d.member.exempt
                 ? (d.member.note ?? t('family.pool.exemptNote'))
                 : `${billLabel(memberBillMonths(s, d.member))} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t('family.pool.noPay')}`}
@@ -344,7 +339,7 @@ function MemberRows({
               </span>
             </div>
           </button>
-          <div style={{ textAlign: 'right', fontSize: 13.5 }}>
+          <div className="member-amount num" style={{ textAlign: 'right', fontSize: 13.5 }}>
             {d.member.exempt ? (
               <span className="muted" style={{ fontWeight: 600 }}>
                 {t('family.pool.exempt')}
@@ -451,7 +446,7 @@ export function CarSheet({
         <div className="ld-head">
           <SubIcon sub={s} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name">
+            <div className="ph-name text-ellipsis">
               <NameLink onClick={onOpenSub}>{s.name}</NameLink>
             </div>
             <div className="muted ph-meta">
@@ -513,8 +508,8 @@ export function CarSheet({
           </div>
         </div>
 
-        <div className="car-sheet-sec">
-          <h3>{t('family.sheet.members')}</h3>
+        <div className="car-sheet-sec row">
+          <CardTitle>{t('family.sheet.members')}</CardTitle>
           {!ro && free > 0 && !stopped && (
             <button className="btn tinted" onClick={() => onMember()}>
               <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
@@ -533,7 +528,7 @@ export function CarSheet({
         ))}
 
         {/* 收进来的和我付出去的左右切换，两边对照看这辆车的钱 */}
-        <div className="car-sheet-sec">
+        <div className="car-sheet-sec row">
           <Seg
             small
             value={tab}

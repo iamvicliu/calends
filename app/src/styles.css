@@ -348,17 +348,7 @@ a {
 .tb-search input::-webkit-search-cancel-button {
   display: none;
 }
-.tb-search-x {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--fill);
-  color: var(--label-2);
-  cursor: pointer;
-}
+
 .tb-actions {
   display: flex;
   align-items: center;
@@ -470,33 +460,6 @@ a {
   opacity: 0.45;
   pointer-events: none;
 }
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 0;
-  display: grid;
-  place-items: center;
-  background: var(--fill-2);
-  color: var(--label);
-}
-.icon-btn:hover {
-  background: var(--fill);
-}
-.icon-btn.accent {
-  background: var(--accent);
-  color: #fff;
-}
-.icon-btn .i {
-  width: 16px;
-  height: 16px;
-}
-@media (max-width: 860px) {
-  .icon-btn {
-    width: 36px;
-    height: 36px;
-  }
-}
 
 .seg {
   display: inline-flex;
@@ -541,6 +504,8 @@ a {
   min-width: 0;
 }
 .card-h {
+  min-width: 0;
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -812,7 +777,9 @@ a {
   height: 14px;
 }
 .cell-l {
-  flex-shrink: 0;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  flex-shrink: 1;
   display: flex;
   flex-direction: column;
   max-width: 62%;
@@ -1450,7 +1417,8 @@ a {
   position: sticky;
   top: 0;
   z-index: 2;
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--icon-button-size) minmax(0, 1fr) var(--icon-button-size);
   align-items: center;
   gap: 12px;
   padding: 16px 18px 12px;
@@ -1464,7 +1432,8 @@ a {
   font-weight: 700;
   flex: 1;
   text-align: center;
-  padding-left: 32px;
+  min-width: 0;
+  grid-column: 2;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1613,8 +1582,11 @@ a {
   padding: 8px 11px;
   border-radius: 10px;
   box-shadow: var(--shadow-lg);
-  white-space: nowrap;
-  transform: translate(-50%, calc(-100% - 10px));
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow: auto;
 }
 
 /* ---------------- 其他 ---------------- */
@@ -2316,11 +2288,6 @@ select.btn {
   width: 11px;
   height: 11px;
   stroke-width: 2.2;
-  margin-right: 4px;
-  vertical-align: -1px;
-}
-.tm-head b .cat-emo {
-  margin-right: 4px;
 }
 .tm-head span {
   margin-left: auto;
@@ -2665,24 +2632,7 @@ select.btn {
   border-radius: 22%;
   object-fit: cover;
 }
-.sb-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 0;
-  background: none;
-  display: grid;
-  place-items: center;
-  color: var(--label-2);
-}
-.sb-btn:hover {
-  background: var(--hover);
-  color: var(--label);
-}
-.sb-btn .i {
-  width: 19px;
-  height: 19px;
-}
+
 .side-item {
   height: 36px;
   padding: 0 10px;
@@ -2834,18 +2784,7 @@ select.btn {
   color: var(--label);
   background: none;
 }
-.icon-btn {
-  background: none;
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-.icon-btn:hover {
-  background: var(--hover);
-}
-.icon-btn.accent {
-  background: var(--ink);
-  color: var(--on-ink);
-  box-shadow: none;
-}
+
 .seg {
   background: var(--fill);
   border-radius: 999px;
@@ -2860,7 +2799,7 @@ select.btn {
     0 1px 2px rgba(0, 0, 0, 0.08),
     0 0 0 1px var(--line);
 }
-/* 工具栏里的分段控件、按钮、图标按钮统一 34px 高；新建按钮做成胶囊形，更醒目 */
+/* 工具栏文案控件在桌面端保持 34px 高；图标操作遵循共享尺寸。 */
 .tb-actions .seg {
   height: 34px;
   box-sizing: border-box;
@@ -3800,19 +3739,7 @@ select.btn {
   height: 14px;
   color: var(--label-2);
 }
-.dp-nav {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: 0;
-  background: none;
-  display: grid;
-  place-items: center;
-  color: var(--label);
-}
-.dp-nav:hover {
-  background: var(--hover);
-}
+
 .dp-nav .i {
   width: 16px;
   height: 16px;
@@ -4680,21 +4607,6 @@ select.btn {
 }
 
 /* 说明图标：跟在标题后面，悬停显示说明 */
-.with-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.hint {
-  display: inline-flex;
-  color: var(--label-3);
-  cursor: help;
-  border-radius: 50%;
-}
-.hint:hover,
-.hint:focus-visible {
-  color: var(--label-2);
-}
 
 /* 侧边栏小图标的点击动效：货币两枚硬币换位（半圈回弹），设置齿轮转一圈（慢—快—慢） */
 .ico-turn {
@@ -4996,18 +4908,7 @@ select.btn {
 .cat-row.lifted::before {
   display: none;
 }
-.cat-grip {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  align-self: stretch;
-  border: 0;
-  background: none;
-  color: var(--label-3);
-  cursor: grab;
-  touch-action: none;
-  flex-shrink: 0;
-}
+
 .cat-grip:active {
   cursor: grabbing;
 }
@@ -6801,7 +6702,6 @@ button.seat:disabled {
 .gt-seg em {
   position: relative;
   z-index: 1;
-  display: block;
   padding: 0 9px;
   font-size: 11px;
   font-style: normal;
@@ -7812,23 +7712,7 @@ button.seat:disabled {
 }
 
 /* 工具栏里的图标按钮与分段控件、按钮同高（34px），保持正圆不被拉伸；新建按钮是加宽的胶囊 */
-.toolbar .tb-actions > .icon-btn {
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-.toolbar .tb-actions > .icon-btn.accent {
-  width: 56px;
-  aspect-ratio: auto;
-  border-radius: 999px;
-}
-.toolbar .tb-actions > .icon-btn.accent .i {
-  width: 19px;
-  height: 19px;
-  stroke-width: 2.2;
-}
+
 /* 合租卡片：座位不压缩，放不下时操作按钮换到下一行 */
 .seats-row {
   flex-wrap: wrap;
@@ -7864,8 +7748,6 @@ button.seat:disabled {
   min-width: 0;
 }
 .ai-status-l b {
-  display: flex;
-  align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   font-size: 15px;
@@ -7933,8 +7815,7 @@ button.seat:disabled {
   background: var(--card);
   box-shadow: inset 0 0 0 1px var(--line);
 }
-.ai-card > header,
-.ai-tools-toggle > span {
+.ai-card > header {
   display: block;
   margin-bottom: 16px;
 }
@@ -8145,8 +8026,6 @@ button.seat:disabled {
   min-width: 0;
 }
 .ai-token-name {
-  display: flex;
-  align-items: center;
   gap: 8px;
   min-width: 0;
 }
@@ -8199,8 +8078,7 @@ button.seat:disabled {
   color: var(--orange);
 }
 .ai-tools-toggle {
-  display: flex;
-  align-items: flex-start;
+  display: block;
   justify-content: space-between;
   width: 100%;
   padding: 0;
@@ -8210,11 +8088,10 @@ button.seat:disabled {
   text-align: left;
   cursor: pointer;
 }
-.ai-tools-toggle > span {
-  margin-bottom: 0;
+.ai-tools-toggle > .row {
+  justify-content: space-between;
 }
 .ai-tools-toggle .i {
-  margin-top: 4px;
   transition: transform 0.2s;
 }
 .ai-tools-toggle[aria-expanded='true'] .i {
@@ -8631,10 +8508,7 @@ button.seat:disabled {
 .gt-range.moved {
   color: var(--accent);
 }
-.gt-nav .icon-btn {
-  width: 28px;
-  height: 28px;
-}
+
 .gt.pannable .gt-body {
   cursor: grab;
   touch-action: pan-y;
@@ -8720,7 +8594,6 @@ button.seat:disabled {
 .car-seats {
   flex-shrink: 0;
   align-self: flex-start;
-  margin-top: 2px;
   font-size: 12px;
   color: var(--label-2);
 }
@@ -8952,8 +8825,6 @@ button.seat:disabled {
 
 /* 合租弹窗：小节标题、成员、收款表 */
 .car-sheet-sec {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin: 6px 4px -6px;
@@ -9032,7 +8903,6 @@ button.seat:disabled {
 .name-link:hover,
 .name-link:focus-visible {
   text-decoration-color: currentColor;
-  outline: none;
 }
 .car-card {
   cursor: pointer;
@@ -9091,7 +8961,7 @@ button.seat:disabled {
   height: 12px;
   border-radius: 2px;
   object-fit: cover;
-  vertical-align: -1px;
+
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12);
 }
 .ac-flag .flag-img {
@@ -9112,8 +8982,6 @@ img.mm-flag {
 .gt-seg em .flag-img {
   width: 13px;
   height: 10px;
-  margin-right: 4px;
-  vertical-align: -1px;
 }
 
 /* 报告 · 月度变动：一句结论 + 变化来源（横条只在各项之间比大小） */
@@ -9305,7 +9173,6 @@ img.mm-flag {
   box-sizing: border-box;
 }
 .gt-unused-amount {
-  display: block;
   padding: 0 9px;
   font-size: 11px;
   font-style: normal;
@@ -9362,4 +9229,108 @@ img.mm-flag {
 /* 从概览跳来时滚到这张卡：留出顶部吸附栏的高度，标题不被遮住 */
 #report-stops {
   scroll-margin-top: 72px;
+}
+
+/* Headers keep titles, legends and controls inside the same card padding. */
+.card-h > .ui-title {
+  flex: 0 1 auto;
+}
+.card-h > .meta,
+.card-h > .row,
+.card-h > .seg {
+  flex-shrink: 0;
+}
+.name-link {
+  display: block;
+}
+.proxy-head > div,
+.car-head > div,
+.ld-head > div,
+.pc-id {
+  min-width: 0;
+  flex: 1;
+}
+.pk-btn > span:not(.pk-ico),
+.pk-opt > span:not(.pk-ico) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.4;
+}
+.tm-head b,
+.gt-seg em {
+  gap: 4px;
+}
+.tm-head b > span,
+.gt-seg em > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 860px) {
+  .toolbar .tb-actions > .icon-btn {
+    flex: 0 0 auto;
+  }
+  .tb-actions .btn,
+  .tb-actions .seg {
+    min-height: 40px;
+  }
+}
+
+.sheet-head > .icon-btn {
+  grid-column: 3;
+}
+.ins-subs {
+  flex-wrap: wrap;
+}
+.sub-shortcut {
+  box-shadow: none;
+}
+
+.cat-grip {
+  align-self: center;
+  cursor: grab;
+  touch-action: none;
+  box-shadow: none;
+}
+@media (max-width: 860px) {
+  .btn,
+  .pk-btn,
+  .dp-btn,
+  .mp-btn {
+    min-height: 40px;
+  }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+  .toggle i {
+    position: relative;
+    inset: auto;
+    width: 46px;
+    height: 28px;
+  }
+}
+
+.stop-totals > :only-child {
+  grid-column: 1 / -1;
+}
+
+.cell-r input:focus-visible,
+.cell-r textarea:focus-visible,
+.cp-search input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.member-amount {
+  flex-shrink: 0;
 }

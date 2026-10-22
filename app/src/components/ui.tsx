@@ -1,6 +1,20 @@
+import './ui.css';
+import { createPortal } from 'react-dom';
+import { tooltipPosition } from './tooltip-position.ts';
 import { base } from '../base.ts';
 import type { ReactNode as ComponentChildren, JSX } from 'react';
-import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
+import {
+  Button as AriaButton,
+  Tooltip,
+  TooltipTrigger,
+  Dialog,
+  Heading,
+  Modal,
+  ModalOverlay,
+  Switch as AriaSwitch,
+  ToggleButton,
+  ToggleButtonGroup,
+} from 'react-aria-components';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
 import { flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
@@ -360,16 +374,16 @@ export function Seg<T extends string>({
 export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (
     <header className="toolbar">
-      <button className="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
+      <IconButton className="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
         <Icon name="menu" />
-      </button>
+      </IconButton>
       <div className="tb-title">
         <h1>{title}</h1>
         {sub && <div className="tb-sub">{sub}</div>}
       </div>
-      <button className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
+      <IconButton className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
         <Icon name="compose" />
-      </button>
+      </IconButton>
       <div className="tb-actions">{children}</div>
     </header>
   );
@@ -411,17 +425,17 @@ export function Sheet(props: {
         <Dialog className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
           <div className="grabber" />
           {props.bare ? (
-            <button className="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
+            <IconButton className="sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
               <Icon name="x" />
-            </button>
+            </IconButton>
           ) : (
             <div className="sheet-head">
-              <Heading slot="title" level={3}>
-                {props.title}
+              <Heading slot="title" level={3} className="ui-title">
+                <span className="ui-title-text">{props.title}</span>
               </Heading>
-              <button className="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
+              <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
                 <Icon name="x" />
-              </button>
+              </IconButton>
             </div>
           )}
           <div className="sheet-body">{props.children}</div>
@@ -560,7 +574,7 @@ export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop'; ch
 export function NameLink({ children, onClick }: { children: ComponentChildren; onClick: () => void }) {
   return (
     <span
-      className="name-link"
+      className="name-link text-ellipsis"
       role="link"
       tabIndex={0}
       onClick={(e) => {
@@ -600,37 +614,97 @@ export function useWidth<T extends HTMLElement = HTMLDivElement>() {
 }
 
 // ---------- 悬浮提示 ----------
-let tipSet: ((t: { x: number; y: number; html: ComponentChildren } | null) => void) | undefined;
+type Tip = { x: number; top: number; bottom: number; html: ComponentChildren };
+let tipSet: ((tip: Tip | null) => void) | undefined;
 
 export function TipLayer() {
-  const [tip, setTip] = useState<{ x: number; y: number; html: ComponentChildren } | null>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
+  const [position, setPosition] = useState({ left: 8, top: 8 });
+  const ref = useRef<HTMLDivElement>(null);
   tipSet = setTip;
-  if (!tip) return null;
-  const x = Math.min(Math.max(tip.x, 90), window.innerWidth - 90);
+  useLayoutEffect(() => {
+    if (!tip || !ref.current) return;
+    const box = ref.current.getBoundingClientRect();
+    setPosition(tooltipPosition(tip, box, { width: window.innerWidth, height: window.innerHeight }));
+  }, [tip]);
+  useEffect(() => {
+    const hide = () => setTip(null);
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') hide();
+    };
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    window.addEventListener('keydown', key);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+      window.removeEventListener('keydown', key);
+      tipSet = undefined;
+    };
+  }, []);
   return (
-    <div className="tip" style={{ left: x, top: tip.y }}>
-      {tip.html}
-    </div>
+    tip &&
+    createPortal(
+      <div ref={ref} className="tip" role="tooltip" style={position}>
+        {tip.html}
+      </div>,
+      document.body,
+    )
   );
 }
 
 export function tipProps(html: () => ComponentChildren) {
-  return {
-    onMouseEnter: (e: { currentTarget: EventTarget }) => {
-      const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      tipSet?.({ x: r.left + r.width / 2, y: r.top, html: html() });
-    },
-    onMouseLeave: () => tipSet?.(null),
+  const show = (e: { currentTarget: EventTarget }) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    tipSet?.({ x: r.left + r.width / 2, top: r.top, bottom: r.bottom, html: html() });
   };
+  const hide = () => tipSet?.(null);
+  return { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide };
 }
 
-/** 标题旁的说明图标：悬停或键盘聚焦时显示说明，不常驻占位 */
-export function Hint({ text }: { text: string }) {
-  const tip = tipProps(() => text);
+/** 标题内容和说明始终作为一个居中对齐的整体，操作区由 card-h 等容器承载。 */
+export function CardTitle({
+  as: Tag = 'h3',
+  className = '',
+  hint,
+  children,
+}: {
+  as?: 'h2' | 'h3' | 'h4' | 'div' | 'span';
+  className?: string;
+  hint?: string;
+  children: ComponentChildren;
+}) {
   return (
-    <span className="hint" tabIndex={0} role="img" aria-label={text} {...tip} onClick={tip.onMouseEnter} onFocus={tip.onMouseEnter} onBlur={tip.onMouseLeave}>
-      <Icon name="info" size={14} />
-    </span>
+    <Tag className={`ui-title ${className}`}>
+      <span className="ui-title-text">{children}</span>
+      {hint && <Hint text={hint} />}
+    </Tag>
+  );
+}
+
+/** 所有圆形图标操作共用命中区域和状态；尺寸由 CSS 按视口统一。 */
+export function IconButton({ className = '', type = 'button', ...props }: JSX.IntrinsicElements['button'] & { 'aria-label': string }) {
+  return <button {...props} type={type} className={`icon-btn ${className}`} />;
+}
+
+/** 说明可悬停、键盘聚焦或点按；React Aria 负责 portal、翻转、视口边界和 Escape。 */
+export function Hint({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <TooltipTrigger isOpen={open} onOpenChange={setOpen} shouldCloseOnPress={false} delay={150} closeDelay={100}>
+      <AriaButton
+        className="icon-btn hint"
+        aria-label={text}
+        onHoverStart={() => setOpen(true)}
+        onHoverEnd={() => setOpen(false)}
+        onPress={() => setOpen(true)}
+      >
+        <Icon name="info" />
+      </AriaButton>
+      <Tooltip className="info-tip" placement="top" offset={8} containerPadding={8}>
+        {text}
+      </Tooltip>
+    </TooltipTrigger>
   );
 }
 

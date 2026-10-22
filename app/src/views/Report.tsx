@@ -20,7 +20,7 @@ import {
 } from '../../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { Amount, CatIcon, Hint, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, sumBase, toBase } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
@@ -88,9 +88,9 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   return (
     <div className="card hero-card">
       <div className="hero-l">
-        <div className="stat-label">
-          {t('report.hero.label')} <Hint text={t('scope.mrrBasis')} />
-        </div>
+        <CardTitle as="div" className="stat-label" hint={t('scope.mrrBasis')}>
+          {t('report.hero.label')}
+        </CardTitle>
         <div className="hero-num">
           <Amount value={-now} ccy={base} />
         </div>
@@ -183,20 +183,19 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{t('report.wf.title', { n: Number(month.slice(5)), month: monthLabel(month, { year: false, long: true }) })}</h3>
+        <CardTitle>{t('report.wf.title', { n: Number(month.slice(5)), month: monthLabel(month, { year: false, long: true }) })}</CardTitle>
         <div className="row" style={{ gap: 4 }}>
-          <button className="icon-btn" aria-label={t('report.wf.prev')} onClick={() => setOffset(offset - 1)}>
+          <IconButton aria-label={t('report.wf.prev')} onClick={() => setOffset(offset - 1)}>
             <Icon name="left" />
-          </button>
-          <button
-            className="icon-btn"
+          </IconButton>
+          <IconButton
             aria-label={t('report.wf.next')}
             disabled={offset >= 0}
-            style={{ opacity: offset >= 0 ? 0.35 : 1 }}
+
             onClick={() => setOffset(Math.min(0, offset + 1))}
           >
             <Icon name="right" />
-          </button>
+          </IconButton>
         </div>
       </div>
       <div className="mv-head">
@@ -260,7 +259,7 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{t('report.checkup.title')}</h3>
+        <CardTitle>{t('report.checkup.title')}</CardTitle>
         <span className="meta">{t('report.checkup.warn', { count: list.filter((i) => i.tone === 'warn').length })}</span>
       </div>
       <div className="insights">
@@ -273,9 +272,9 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
               {i.subs && i.subs.length > 0 && (
                 <div className="ins-subs">
                   {i.subs.slice(0, 6).map((s) => (
-                    <button key={s.id} onClick={() => onOpen(s)} title={s.name}>
+                    <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                       <SubIcon sub={s} size={22} />
-                    </button>
+                    </IconButton>
                   ))}
                 </div>
               )}
@@ -307,9 +306,9 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   return (
     <div className="card">
       <div className="card-h">
-        <h3>
-          {t('report.cash.title')} <Hint text={t('scope.cashBasis')} />
-        </h3>
+        <CardTitle as="h3" hint={t('scope.cashBasis')}>
+          {t('report.cash.title')}
+        </CardTitle>
         <div className="legend-inline">
           <span>
             <i style={{ background: 'var(--accent)' }} />
@@ -384,7 +383,7 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
   return (
     <div className="card stop-report" id="report-stops">
       <div className="card-h">
-        <h3>{t('report.stops.title')}</h3>
+        <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
       <p className="stop-basis">{t('report.stops.basis')}</p>
       <div className="stop-totals">
@@ -510,7 +509,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{sel ? `${sel.k} · ${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title')}</h3>
+        <CardTitle>{sel ? `${sel.k} · ${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title')}</CardTitle>
         {sel ? (
           <button className="btn plain" onClick={() => setFocus(null)}>
             {t('report.comp.back')}
@@ -550,9 +549,9 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                         onClick={() => setFocus(e.k)}
                         {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: flow(-e.v, base) }))}
                       >
-                        <b>
+                        <b className="icon-text">
                           {dim === 'cat' && <CatIcon cat={e.k} size={11} />}
-                          {e.k}
+                          <span>{e.k}</span>
                         </b>
                         {g.w > 150 && (
                           <span>
@@ -579,7 +578,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{t('report.topup.title')}</h3>
+        <CardTitle>{t('report.topup.title')}</CardTitle>
         <Seg
           small
           value={months}
@@ -735,7 +734,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
   return (
     <div className={`card report-log ${extra > 0 ? 'expanded' : ''}`}>
       <div className="card-h">
-        <h3>{t('report.log.title')}</h3>
+        <CardTitle>{t('report.log.title')}</CardTitle>
         <span className="meta">{t('report.log.decisions', { count: list.length })}</span>
       </div>
       <div className="log" ref={log}>

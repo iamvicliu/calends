@@ -31,7 +31,7 @@ import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
 import { api, refresh, toast } from '../store.ts';
@@ -422,13 +422,13 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       <Toolbar title={t('assistant.title')}>
         <span className="as-tb">
           {!empty && (
-            <button className="icon-btn" onClick={reset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+            <IconButton onClick={reset} title={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
-            </button>
+            </IconButton>
           )}
-          <button className="icon-btn" onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
+          <IconButton onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
             <Settings2 size={16} />
-          </button>
+          </IconButton>
         </span>
       </Toolbar>
       <div className="as">
@@ -493,9 +493,9 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
           </div>
         </div>
         {!atBottom && (
-          <button className="as-bottom" onClick={() => setAtBottom(true)} aria-label={t('assistant.toBottom')}>
+          <IconButton className="as-bottom" onClick={() => setAtBottom(true)} aria-label={t('assistant.toBottom')}>
             <ArrowDown size={16} />
-          </button>
+          </IconButton>
         )}
         <Composer
           ref={composer}
@@ -642,17 +642,17 @@ function BotMessage(props: {
         {props.last && turn.status !== 'streaming' && turn.status !== 'error' && (
           <div className="as-actions">
             {text && (
-              <button
+              <IconButton
                 onClick={() => void navigator.clipboard.writeText(text).then(() => toast(t('assistant.copied')))}
                 title={t('assistant.copy')}
                 aria-label={t('assistant.copy')}
               >
                 <Copy size={14} />
-              </button>
+              </IconButton>
             )}
-            <button onClick={props.onRetry} title={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
+            <IconButton onClick={props.onRetry} title={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
               <RotateCcw size={14} />
-            </button>
+            </IconButton>
           </div>
         )}
       </div>
@@ -873,10 +873,10 @@ function Proposal(props: {
       <div className="as-card-tag">
         <ReceiptText size={12} /> {create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}
       </div>
-      <div className="as-card-head">
+      <div className="as-card-head row">
         <SubIcon sub={icon} size={44} />
         <div className="as-card-id">
-          <b>{name}</b>
+          <b className="text-ellipsis">{name}</b>
           {create && cyc ? (
             <span>
               {money(Number(a.price), String(a.currency))} {cycleLabel({ unit: cyc.unit, every: Number(cyc.every ?? 1) })}
@@ -918,14 +918,14 @@ function Proposal(props: {
         </div>
       ) : null}
       {part.state === 'error' && part.error && (
-        <div className="as-card-err">
+        <div className="as-card-err icon-text">
           <CircleAlert size={14} /> {part.error}
         </div>
       )}
       <div className="as-card-foot">
         {done ? (
           <>
-            <span className="as-ok">
+            <span className="as-ok icon-text">
               <Check size={15} /> {create ? t('assistant.card.added') : t('assistant.card.done')}
             </span>
             {part.subId && (
@@ -935,7 +935,7 @@ function Proposal(props: {
             )}
           </>
         ) : gone ? (
-          <span className="as-muted">
+          <span className="as-muted icon-text">
             <CircleX size={15} /> {t('assistant.card.dismissed')}
           </span>
         ) : (
@@ -962,7 +962,7 @@ function Proposal(props: {
 function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry: () => void; onSetup: () => void }) {
   const fixable = error.kind === 'auth' || error.kind === 'config' || error.kind === 'balance';
   return (
-    <div className="as-error" role="alert">
+    <div className="as-error row" role="alert">
       <CircleAlert size={16} />
       <div>
         <b>{t(`assistant.error.${error.kind}`)}</b>
@@ -1112,9 +1112,9 @@ function Composer({
             {images.map((src, i) => (
               <span key={i} className="as-att">
                 <img src={base(src)} alt="" />
-                <button onClick={() => setImages((x) => x.filter((_, k) => k !== i))} aria-label={t('assistant.removeImage')}>
+                <IconButton onClick={() => setImages((x) => x.filter((_, k) => k !== i))} aria-label={t('assistant.removeImage')}>
                   <X size={12} />
-                </button>
+                </IconButton>
               </span>
             ))}
           </div>
@@ -1141,7 +1141,7 @@ function Composer({
           }}
         />
         <div className="as-input-bar">
-          <button
+          <IconButton
             className="as-icon"
             onClick={() => file.current?.click()}
             disabled={disabled}
@@ -1149,31 +1149,31 @@ function Composer({
             aria-label={t('assistant.addImage')}
           >
             <ImagePlus size={17} />
-          </button>
+          </IconButton>
           <input ref={file} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files && void addFiles(e.target.files)} />
           <button className="as-model" onClick={onSettings} title={t('assistant.settings')}>
             {model === 'deepseek-flash' ? 'DeepSeek V4.1 Flash' : (model ?? 'DeepSeek')}
           </button>
           {onReset && (
-            <button className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+            <IconButton className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
-            </button>
+            </IconButton>
           )}
           <span className="grow" />
           {busy ? (
-            <button className="as-send stop" onClick={onStop} title={t('assistant.stop')} aria-label={t('assistant.stop')}>
+            <IconButton className="as-send accent stop" onClick={onStop} title={t('assistant.stop')} aria-label={t('assistant.stop')}>
               <Square size={13} fill="currentColor" />
-            </button>
+            </IconButton>
           ) : (
-            <button
-              className="as-send"
+            <IconButton
+              className="as-send accent"
               onClick={submit}
               disabled={disabled || (!text.trim() && !images.length)}
               title={t('assistant.send')}
               aria-label={t('assistant.send')}
             >
               <ArrowUp size={17} />
-            </button>
+            </IconButton>
           )}
         </div>
       </div>

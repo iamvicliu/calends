@@ -34,7 +34,7 @@ import type { AppState, Payment, ShareMember, Subscription } from '../../../shar
 import { CarSheet } from './Carpool.tsx';
 import { carLedger, MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { CatIcon, PayBadge, Seg, Sheet, SubIcon } from '../components/ui.tsx';
+import { CardTitle, IconButton, CatIcon, PayBadge, Seg, Sheet, SubIcon } from '../components/ui.tsx';
 import { catColor, presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
@@ -120,11 +120,15 @@ function Act({
       <span className="dt-act-l">{label}</span>
     </>
   );
-  const cls = `dt-act ${round ? 'round' : ''} ${desk ? 'desk' : ''}`;
+  const cls = `${round ? 'icon-btn dt-round' : 'dt-act'} ${desk ? 'desk' : ''}`;
   return href ? (
     <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
       {inner}
     </a>
+  ) : round ? (
+    <IconButton className={`dt-round ${desk ? 'desk' : ''}`} onClick={onClick} title={label} aria-label={label}>
+      {inner}
+    </IconButton>
   ) : (
     <button className={cls} onClick={onClick} title={label} aria-label={label}>
       {inner}
@@ -165,8 +169,8 @@ function Panel({
       onKeyDown={onClick ? (e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick()) : undefined}
     >
       {title && (
-        <div className="dt-ph">
-          <h3>{title}</h3>
+        <div className="dt-ph row">
+          <CardTitle>{title}</CardTitle>
           {aside && <div className="dt-aside">{aside}</div>}
         </div>
       )}
@@ -274,9 +278,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           </div>
         </div>
         <div className="dt-actions">{actions}</div>
-        <button className="dt-btn icon dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')}>
+        <IconButton className="dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')}>
           <X size={17} />
-        </button>
+        </IconButton>
       </header>
 
       {/* 主栏放要扫读的数字、走势和扣款；右侧窄栏放属性与历程（参考 Stripe、Linear 的详情页） */}
@@ -793,8 +797,8 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
         const loss = losses.find((item) => item.phase.start === phase.start);
         return (
           <section key={phase.start} className={`dt-panel dt-outcome ${sm.kind === 'terminate' ? 'bad' : ''} ${sm.unusedValue > 0 ? 'loss' : ''}`}>
-            <div className="dt-ph">
-              <h3>{t(sm.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}</h3>
+            <div className="dt-ph row">
+              <CardTitle>{t(sm.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}</CardTitle>
               {sm.kind === 'terminate' && sm.reason && <div className="dt-aside">{sm.reason}</div>}
             </div>
             {sm.unusedValue > 0 && (

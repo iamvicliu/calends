@@ -8,7 +8,7 @@ import type { AppState } from '../../../shared/types.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { CAT_ICON_GROUPS } from '../components/cat-icons.gen.ts';
 import { Picker } from '../components/Picker.tsx';
-import { ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { categories } from '../derive.ts';
 import { run, saveCategories, toast } from '../store.ts';
 
@@ -49,7 +49,7 @@ function SortableRow({ cat, n, onOpen }: { cat: Category; n: number; onOpen: () 
       className={`cell cat-row ${isDragging ? 'lifted' : ''}`}
       style={{ transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined, transition } as Record<string, string | undefined>}
     >
-      <button
+      <IconButton
         type="button"
         ref={setActivatorNodeRef as (el: HTMLButtonElement | null) => void}
         className="cat-grip"
@@ -58,7 +58,7 @@ function SortableRow({ cat, n, onOpen }: { cat: Category; n: number; onOpen: () 
         {...(listeners as Record<string, unknown>)}
       >
         <Icon name="grip" />
-      </button>
+      </IconButton>
       <button type="button" className="cat-row-main" onClick={onOpen}>
         <CatTile cat={cat} />
         <span className="cat-row-name">{cat.name}</span>

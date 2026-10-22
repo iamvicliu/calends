@@ -1,7 +1,7 @@
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { ask, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { CardTitle, ask, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, run, saveSettings, toast } from '../store.ts';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -256,7 +256,7 @@ export function Ai({ state }: { state: AppState }) {
         <div className={`ai-status ${enabled ? 'on' : ''}`}>
           {/* 状态用标题旁的徽标表示（同 Vercel、Linear 设置页的做法），不再用前置圆点，标题与下方内容左对齐 */}
           <div className="ai-status-l">
-            <b>
+            <b className="icon-text">
               {t('settings.open.ai')}
               <span className={`ai-badge ${enabled ? 'on' : ''}`}>
                 {enabled && <Icon name="check" size={12} />}
@@ -275,7 +275,7 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <header>
-            <h2>{t('ai.setup')}</h2>
+            <CardTitle as="h2">{t('ai.setup')}</CardTitle>
             <p className="m-hide">{t('ai.setupHint')}</p>
           </header>
           <Connect url={url} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
@@ -283,7 +283,7 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <header>
-            <h2>{t('ai.tokens', { count: tokens?.length ?? 0 })}</h2>
+            <CardTitle as="h2">{t('ai.tokens', { count: tokens?.length ?? 0 })}</CardTitle>
             <p className="m-hide">{t('ai.tokensHint')}</p>
           </header>
           {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
@@ -292,7 +292,7 @@ export function Ai({ state }: { state: AppState }) {
               {tokens.map((tk) => (
                 <div key={tk.id} className="ai-token" role="row">
                   <div className="ai-token-main">
-                    <span className="ai-token-name">
+                    <span className="ai-token-name icon-text">
                       <b>{tk.name}</b>
                       <span className={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
                     </span>
@@ -326,17 +326,17 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <button type="button" className="ai-tools-toggle" onClick={() => setShowTools(!showTools)} aria-expanded={showTools}>
-            <span>
-              <h2>{t('ai.tools', { count: tools.length })}</h2>
-              <p className="m-hide">{t('ai.toolsHint')}</p>
+            <span className="row">
+              <CardTitle as="h2">{t('ai.tools', { count: tools.length })}</CardTitle>
+              <Icon name="down" size={16} />
             </span>
-            <Icon name="down" size={16} />
+            <p className="m-hide">{t('ai.toolsHint')}</p>
           </button>
           {showTools && (
             <div className="ai-tools">
               {groups.map(([title, list]) => (
                 <div key={title}>
-                  <h3>{title}</h3>
+                  <CardTitle>{title}</CardTitle>
                   {list.map((tool) => (
                     <div key={tool.name} className="ai-tool">
                       <b>{tool.title ?? tool.name}</b>

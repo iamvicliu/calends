@@ -133,7 +133,7 @@ function ThemeButton() {
       title={t('public.theme.title', { mode: THEME_LABEL[mode] })}
       aria-label={t('public.theme.aria', { mode: THEME_LABEL[mode] })}
       onClick={cycle}
-      className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
+      className="public-icon-btn"
     >
       <ThemeIcon mode={mode} size={16} />
     </button>

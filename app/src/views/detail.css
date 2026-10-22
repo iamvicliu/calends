@@ -129,10 +129,6 @@
 .dt-btn:active {
   transform: scale(0.97);
 }
-.dt-btn.icon {
-  width: 34px;
-  padding: 0;
-}
 .dt-close {
   flex-shrink: 0;
   margin-left: 4px;
@@ -175,11 +171,7 @@
   place-items: center;
   font-style: normal;
 }
-.dt-act.round {
-  width: 34px;
-  padding: 0;
-}
-.dt-act.round .dt-act-l {
+.dt-round .dt-act-l {
   display: none;
 }
 .dt-btn.sm {
@@ -346,8 +338,6 @@
   min-width: 0;
 }
 .dt-ph {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 8px;
   min-height: 28px;
@@ -1045,8 +1035,6 @@
   }
   .dt-close {
     grid-area: close;
-    width: 36px;
-    height: 36px;
     margin: 0;
   }
   .dt-actions {
@@ -1057,8 +1045,7 @@
     gap: 8px;
     margin-top: 4px;
   }
-  .dt-act,
-  .dt-act.round {
+  .dt-act {
     flex-direction: column;
     gap: 6px;
     width: auto;
@@ -1073,7 +1060,7 @@
   .dt-act:hover {
     background: none;
   }
-  .dt-act-i {
+  .dt-act .dt-act-i {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -1083,13 +1070,11 @@
       0 0 0 1px var(--dt-line-2),
       0 1px 2px rgba(0, 0, 0, 0.05);
   }
-  .dt-act-i svg {
+  .dt-act .dt-act-i svg {
     width: 20px;
     height: 20px;
   }
-  .dt-act.round .dt-act-l {
-    display: block;
-  }
+
   .dt-act-l {
     max-width: 100%;
     overflow: hidden;
@@ -1243,7 +1228,7 @@
 }
 @media (max-width: 640px) {
   /* 复制为图片只在桌面端提供 */
-  .dt-act.desk {
+  .dt-actions .desk {
     display: none;
   }
   .dt-actions {
@@ -1273,4 +1258,9 @@
 }
 .dt-stop-loss {
   color: var(--dt-bad);
+}
+
+.dt-actions > .dt-round {
+  justify-self: center;
+  align-self: center;
 }

@@ -16,7 +16,7 @@ import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { GANTT_STEP, ganttLabelBounds, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { FlagImg, Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
+import { IconButton, FlagImg, Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
 import { usePref } from '../store.ts';
 
@@ -330,15 +330,15 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         />
         {pannable && (
           <div className="gt-nav">
-            <button type="button" className="icon-btn" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
+            <IconButton type="button" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
               <Icon name="left" />
-            </button>
+            </IconButton>
             <button type="button" className={`gt-range ${offset === 0 ? '' : 'moved'}`} onClick={() => setPan(0)} title={t('list.gantt.backToNow')}>
               {rangeLabel}
             </button>
-            <button type="button" className="icon-btn" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
+            <IconButton type="button" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
               <Icon name="right" />
-            </button>
+            </IconButton>
           </div>
         )}
         <Seg
@@ -496,10 +496,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                                 <i className="gt-trial" style={{ width: Math.min(pw, x(g.v.trialEnd) - pl) }} />
                               )}
                               {label && (
-                                <em>
+                                <em className="icon-text">
                                   {n === 0 && g.v.region ? <FlagImg cc={g.v.region} /> : null}
-                                  {intro ? t('list.gantt.introShort') : ''}
-                                  {money(price, g.v.currency, { compact: true })}/{perLabel(g.v)}
+                                  <span>
+                                    {intro ? t('list.gantt.introShort') : ''}
+                                    {money(price, g.v.currency, { compact: true })}/{perLabel(g.v)}
+                                  </span>
                                 </em>
                               )}
                             </span>

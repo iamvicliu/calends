@@ -71,6 +71,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Cell: 'Cell',
     Group: 'Group',
     Icon: 'Icon',
+    IconButton: 'button',
+    CardTitle: 'h3',
     Hint: 'Hint',
     PayBadge: 'PayBadge',
     Seg: 'Seg',
