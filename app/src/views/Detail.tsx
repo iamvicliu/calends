@@ -880,7 +880,8 @@ function Details({
               {cnDateFull(nextBill.date)}
             </Prop>
           )}
-          {renewal.serviceExpires && !sub.end && (
+          {/* 没有提前扣款时，服务到期就是下次扣款那天，不重复显示 */}
+          {renewal.serviceExpires && !sub.end && renewal.serviceExpires !== nextBill?.date && (
             <Prop k={t('detail.field.expires')} hint={relDays(diffDays(today, renewal.serviceExpires))}>
               {cnDateFull(renewal.serviceExpires)}
             </Prop>
