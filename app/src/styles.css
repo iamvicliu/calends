@@ -8108,10 +8108,16 @@ a.car-toggle {
 .ai-tools-toggle[aria-expanded='true'] .i {
   transform: rotate(180deg);
 }
+.ai-tools-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  min-width: 0;
+}
 .ai-tools-legend {
   display: flex;
-  gap: 16px;
-  margin-top: 10px;
+  gap: 14px;
   color: var(--label-2);
   font-size: 12.5px;
 }

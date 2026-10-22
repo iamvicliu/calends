@@ -365,18 +365,21 @@ export function Ai({ state }: { state: AppState }) {
         <section className="ai-card">
           <button type="button" className="ai-tools-toggle" onClick={() => setShowTools(!showTools)} aria-expanded={showTools}>
             <span className="row">
-              <CardTitle as="h2">{t('ai.tools', { count: tools.length })}</CardTitle>
+              {/* 读写数量紧跟在总数后面，不单独占一行 */}
+              <span className="ai-tools-title">
+                <CardTitle as="h2">{t('ai.tools', { count: tools.length })}</CardTitle>
+                <span className="ai-tools-legend">
+                  <span>
+                    <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
+                  </span>
+                  <span className="write">
+                    <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
+                  </span>
+                </span>
+              </span>
               <Icon name="down" size={16} />
             </span>
             <p className="m-hide">{t('ai.toolsHint')}</p>
-            <span className="ai-tools-legend">
-              <span>
-                <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
-              </span>
-              <span className="write">
-                <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
-              </span>
-            </span>
           </button>
           {showTools && (
             <>
