@@ -19,7 +19,10 @@
     "date": "Datum",
     "member": "Mitglied",
     "covers": "Zeitraum",
-    "amount": "Betrag"
+    "amount": "Betrag",
+    "fee": "Gebühr",
+    "nextCollection": "Nächster Einzug",
+    "actions": "Aktionen"
   },
   "contact": {
     "via": {
@@ -58,8 +61,8 @@
     "name": "Name",
     "namePh": "Wie du die Person nennst",
     "contact": "Kontakt",
-    "account": "Eingeladenes Konto",
-    "accountPh": "E-Mail oder Benutzername, eingeladen zu {name}",
+    "account": "Konto in diesem Abo",
+    "accountPh": "E-Mail, Telefon, Benutzername oder ID bei {name}",
     "joined": "Beigetreten",
     "joinedPh": "Abo-Beginn ({date})",
     "notSet": "Nicht festgelegt",
@@ -135,7 +138,10 @@
     "coverAligned": "Endet an der gemeinsamen Zeitraumgrenze",
     "recordNext": "Zahlung erfassen · {amount}",
     "collectionAnchor": "Gemeinsamer Einzugsbeginn",
-    "firstSummary": "Erster Zeitraum {from}–{until} · {mode} {amount}"
+    "firstSummary": "Erster Zeitraum {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Kein Konto eingetragen",
+    "editAccount": "Konto in diesem Abo bearbeiten",
+    "copyAccount": "Konto kopieren"
   },
   "pool": {
     "seatsFree": "{count} frei",

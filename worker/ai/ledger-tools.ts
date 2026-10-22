@@ -184,7 +184,7 @@ export const ledgerTools: Tool[] = [
     write: true,
     destructive: true,
     description:
-      'Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. Avatar upload: avatar_base64 plus mime (image/png or image/webp), square <=128px and <=64KiB, no metadata. avatar=null removes it. Remote URLs are unsupported; upload a prepared thumbnail. All linked names and contacts update together. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.',
+      'Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. Avatar upload: avatar_base64 plus mime (image/png or image/webp), square <=128px and <=64KiB, no metadata. avatar=null removes it. Remote URLs are unsupported; upload a prepared thumbnail. All linked names and contacts update together. Accounts belong to person × shared-plan memberships; use save_share_member.account, never save_person. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.',
     inputSchema: obj(
       {
         action: action(['create', 'update', 'delete']),

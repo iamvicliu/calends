@@ -48,7 +48,8 @@
     "mergeFoot": "Một người bị ghi thành hai? Gộp lại để dồn gói và khoản thu về một chỗ.",
     "mergeConfirm": "Gộp “{from}” vào “{into}”? Mọi gói và khoản thu của {from} chuyển sang {into}, giữ tên và liên hệ của {into}.",
     "merged": "Đã gộp vào {name}",
-    "confirmDelete": "Xoá “{name}”?"
+    "confirmDelete": "Xoá “{name}”?",
+    "accountMissing": "Quan hệ thành viên này không còn tồn tại. Hãy mở lại chi tiết người này."
   },
   "pick": {
     "new": "Người mới",

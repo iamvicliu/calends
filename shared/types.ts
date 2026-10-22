@@ -63,7 +63,7 @@ export interface ShareMember {
   tg?: string;
   /** 来源：从哪个群 / 渠道来的 */
   source?: string;
-  /** 受邀账号：被邀请进家庭组的邮箱（多数服务用邮箱邀请） */
+  /** 此人在这辆车上的账号：邮箱、手机号、用户名或 ID 等任意文本；不随人员资料同步 */
   account?: string;
   /** 不分摊：占一个位置但不交钱（比如自己的另一个账号、家人） */
   exempt?: boolean;

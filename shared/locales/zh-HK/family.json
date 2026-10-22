@@ -19,7 +19,10 @@
     "date": "收款日",
     "member": "成員",
     "covers": "涵蓋期間",
-    "amount": "金額"
+    "amount": "金額",
+    "fee": "收費",
+    "nextCollection": "下次收款",
+    "actions": "操作"
   },
   "contact": {
     "via": {
@@ -55,8 +58,8 @@
     "name": "稱呼",
     "namePh": "怎麼稱呼",
     "contact": "聯絡方式",
-    "account": "受邀帳號",
-    "accountPh": "加入 {name} 家庭群組的電郵或用戶名稱",
+    "account": "這輛車上的帳戶",
+    "accountPh": "{name} 的電郵、手機號碼、用戶名稱或 ID",
     "joined": "加入日",
     "joinedPh": "同發起日 {date}",
     "notSet": "不設定",
@@ -126,7 +129,10 @@
     "coverAligned": "按統一收款期自動計算",
     "recordNext": "記一筆收款 · {amount}",
     "collectionAnchor": "收款對齊起點",
-    "firstSummary": "首期 {from}–{until} · {mode} {amount}"
+    "firstSummary": "首期 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "未填帳戶",
+    "editAccount": "編輯這輛車上的帳戶",
+    "copyAccount": "複製帳戶"
   },
   "pool": {
     "seatsFree": "空 {count} 位",

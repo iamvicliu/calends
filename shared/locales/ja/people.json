@@ -48,7 +48,8 @@
     "mergeFoot": "同じ人が二重に登録されていたら、統合して記録をまとめられます。",
     "mergeConfirm": "「{from}」を「{into}」に統合しますか？{from} の共有と立て替えはすべて {into} に移り、呼び名と連絡先は {into} のものになります。",
     "merged": "{name} に統合しました",
-    "confirmDelete": "「{name}」を削除しますか？"
+    "confirmDelete": "「{name}」を削除しますか？",
+    "accountMissing": "このメンバー関係は存在しません。詳細を開き直してください。"
   },
   "pick": {
     "new": "新しい相手",

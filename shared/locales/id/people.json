@@ -48,7 +48,8 @@
     "mergeFoot": "Orang yang sama tercatat dua kali? Gabungkan agar paket dan pembayarannya menyatu.",
     "mergeConfirm": "Gabungkan “{from}” ke “{into}”? Semua paket dan pembayaran {from} pindah ke {into}, nama dan kontak mengikuti {into}.",
     "merged": "Digabung ke {name}",
-    "confirmDelete": "Hapus “{name}”?"
+    "confirmDelete": "Hapus “{name}”?",
+    "accountMissing": "Keanggotaan ini sudah tidak ada. Buka kembali detail orang tersebut."
   },
   "pick": {
     "new": "Orang baru",

@@ -63,7 +63,8 @@
     "mergeFoot": "¿La misma persona aparece dos veces? Combínalas para unir sus planes y pagos.",
     "mergeConfirm": "¿Combinar «{from}» con «{into}»? Todos los planes y pagos de {from} pasan a {into}, y se conservan el nombre y contacto de {into}.",
     "merged": "Combinado con {name}",
-    "confirmDelete": "¿Eliminar a «{name}»?"
+    "confirmDelete": "¿Eliminar a «{name}»?",
+    "accountMissing": "Esta relación ya no existe. Vuelve a abrir los detalles de la persona."
   },
   "pick": {
     "new": "Persona nueva",

@@ -19,7 +19,10 @@
     "date": "Data",
     "member": "Membro",
     "covers": "Período",
-    "amount": "Valor"
+    "amount": "Valor",
+    "fee": "Tarifa",
+    "nextCollection": "Próxima cobrança",
+    "actions": "Ações"
   },
   "contact": {
     "via": {
@@ -58,8 +61,8 @@
     "name": "Nome",
     "namePh": "Como chamar a pessoa",
     "contact": "Contato",
-    "account": "Conta convidada",
-    "accountPh": "E-mail ou usuário convidado para {name}",
+    "account": "Conta neste plano",
+    "accountPh": "E-mail, telefone, usuário ou ID no {name}",
     "joined": "Entrou em",
     "joinedPh": "Início do plano ({date})",
     "notSet": "Não definido",
@@ -135,7 +138,10 @@
     "coverAligned": "Termina no limite do período comum",
     "recordNext": "Registrar pagamento · {amount}",
     "collectionAnchor": "Início comum de cobrança",
-    "firstSummary": "Primeiro período {from}–{until} · {mode} {amount}"
+    "firstSummary": "Primeiro período {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Conta não informada",
+    "editAccount": "Editar conta neste plano",
+    "copyAccount": "Copiar conta"
   },
   "pool": {
     "seatsFree": "{count} livres",
