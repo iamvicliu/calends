@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "E-mail, téléphone ou identifiant", "phone": "Numéro de téléphone" },
+  "ph": {
+    "account": "E-mail, téléphone ou identifiant",
+    "phone": "Numéro de téléphone"
+  },
   "overlap": {
     "keep": "Garder l’ancien encore un temps",
     "keepHint": "Déjà prépayé et pas encore expiré : les deux tournent en parallèle et sont facturés normalement",
@@ -199,7 +202,8 @@
     "range": "{start} → {end}",
     "now": "aujourd’hui",
     "initial": "Initial",
-    "priceChange": "Changement de prix {date}"
+    "priceChange": "Changement de prix {date}",
+    "outsidePayments": "{count} paiement(s) existant(s) seront hors de la période de service. Continuer en conservant leurs dates, montants et phase ?"
   },
   "payment": {
     "addTitle": "Ajouter un paiement",
@@ -228,5 +232,9 @@
   "timeline": {
     "home": "Revenir à aujourd’hui (ou double-cliquez sur la frise)"
   },
-  "ai": { "title": "Remplir avec l’IA", "hint": "Collez un reçu, une capture ou du texte, le reste se fait tout seul", "go": "Coller" }
+  "ai": {
+    "title": "Remplir avec l’IA",
+    "hint": "Collez un reçu, une capture ou du texte, le reste se fait tout seul",
+    "go": "Coller"
+  }
 }

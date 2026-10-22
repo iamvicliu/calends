@@ -53,7 +53,8 @@
     "prependUntil": "A fase anterior deve terminar depois de começar e no máximo na data de início original",
     "priceOutOfRange": "A data da mudança de preço não está dentro de nenhuma fase",
     "keepTooEarly": "A data até quando manter deve ser posterior à da troca",
-    "endTooEarly": "A data de término deve ser posterior ao início desta fase"
+    "endTooEarly": "A data de término deve ser posterior ao início desta fase",
+    "startOrder": "O início deve ficar estritamente entre os inícios das fases vizinhas."
   },
   "event": {
     "label": "{region}{price}/{per}",

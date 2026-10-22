@@ -363,9 +363,11 @@ function Form({
             }
           />
         </Cell>
-        <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
-          <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
-        </Cell>
+        {!state.subscriptions.some((s) => s.id === f.id) && (
+          <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
+            <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
+          </Cell>
+        )}
         <Cell label={t('editor.field.region')}>
           <RegionSelect
             value={f.region}

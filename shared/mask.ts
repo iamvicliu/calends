@@ -65,6 +65,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     currency: s.currency,
     cycle: s.cycle,
     start: s.start,
+    billingStart: s.billingStart,
     end: s.end,
     status: s.status,
     stop: s.stop && { kind: s.stop.kind, date: s.stop.date, paidThrough: s.stop.paidThrough },

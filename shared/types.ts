@@ -149,6 +149,8 @@ export interface Person {
 /** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
 export interface Phase {
   start: string;
+  /** 修正服务开始日时保留的原计费起点；缺省使用 start */
+  billingStart?: string;
   /** 最后服务日（含）；缺省为下一阶段开始前一天，最后一段取订阅的 end */
   end?: string;
   stop?: Stop;
@@ -181,6 +183,8 @@ export interface Subscription {
   currency: string;
   cycle: Cycle;
   start: string;
+  /** 修正服务开始日时保留的原计费起点；缺省使用 start */
+  billingStart?: string;
   /** 最后服务日（含当天）：次日结束，不再产生预测扣款 */
   end?: string;
   stop?: Stop;

@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Giriş e-postası, telefon veya kullanıcı adı", "phone": "Telefon numarası" },
+  "ph": {
+    "account": "Giriş e-postası, telefon veya kullanıcı adı",
+    "phone": "Telefon numarası"
+  },
   "overlap": {
     "keep": "Eskisini bir süre daha kullan",
     "keepHint": "Önceden ödendi ve süresi henüz dolmadı: ikisi birlikte çalışır, her biri normal şekilde ücretlendirilir",
@@ -199,7 +202,8 @@
     "range": "{start} → {end}",
     "now": "şimdi",
     "initial": "Başlangıç",
-    "priceChange": "Fiyat değişikliği {date}"
+    "priceChange": "Fiyat değişikliği {date}",
+    "outsidePayments": "Mevcut {count} ödeme hizmet dönemi dışında kalacak. Özgün tarihleri, tutarları ve aşamayı koruyarak devam edilsin mi?"
   },
   "payment": {
     "addTitle": "Ödeme ekle",
@@ -228,5 +232,9 @@
   "timeline": {
     "home": "Bugüne dön (veya zaman çizelgesine çift tıklayın)"
   },
-  "ai": { "title": "Yapay zekâ ile doldur", "hint": "Fiş, ekran görüntüsü ya da metin yapıştırın; gerisi otomatik", "go": "Yapıştır" }
+  "ai": {
+    "title": "Yapay zekâ ile doldur",
+    "hint": "Fiş, ekran görüntüsü ya da metin yapıştırın; gerisi otomatik",
+    "go": "Yapıştır"
+  }
 }

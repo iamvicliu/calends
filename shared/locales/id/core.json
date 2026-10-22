@@ -48,7 +48,8 @@
     "prependUntil": "Fase sebelumnya harus berakhir setelah dimulai dan paling lambat pada tanggal mulai semula",
     "priceOutOfRange": "Tanggal perubahan harga tidak berada di fase mana pun",
     "keepTooEarly": "Tanggal tetap berjalan harus setelah tanggal peralihan",
-    "endTooEarly": "Tanggal berakhir harus setelah awal fase ini"
+    "endTooEarly": "Tanggal berakhir harus setelah awal fase ini",
+    "startOrder": "Tanggal mulai harus berada di antara tanggal mulai tahap sebelumnya dan berikutnya."
   },
   "event": {
     "label": "{region}{price}/{per}",
