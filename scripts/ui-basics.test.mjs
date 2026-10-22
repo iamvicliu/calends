@@ -268,3 +268,20 @@ test('inline deletion confirms once and only changes the form; initial price has
     false,
   );
 });
+
+test('mobile sheets fit the visible viewport so the header and close button stay on screen', () => {
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const start = css.search(/\.scrim \{\s*align-items: flex-end;/);
+  assert.ok(start > 0);
+  const block = css.slice(start, css.indexOf('.grabber', start));
+  // iOS 的 vh 按工具栏收起后的大视口计算；最后生效的 max-height 必须基于 dvh
+  const heights = [...block.matchAll(/max-height:\s*([^;]+);/g)].map((m) => m[1]);
+  assert.match(heights.at(-1) ?? '', /dvh/);
+});
+
+test('mobile carpool cards stretch to full width instead of shrinking to content', () => {
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const rule = /@media \(max-width: 860px\) \{\s*\.car-cols \{([^}]*)\}/.exec(css);
+  assert.ok(rule);
+  assert.match(rule[1], /align-items:\s*stretch/);
+});

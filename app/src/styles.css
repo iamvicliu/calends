@@ -1467,7 +1467,10 @@ a {
   .sheet,
   .sheet.bare {
     width: 100%;
+    /* iOS 的 vh 按工具栏收起后的大视口计算，工具栏显示时弹窗顶部（标题与关闭按钮）会被推出屏幕；
+       改用随工具栏变化的 dvh，并在顶部留出安全区与一点空隙，旧浏览器回退到 vh */
     max-height: 94vh;
+    max-height: calc(100dvh - var(--safe-t) - 16px);
     border-radius: 22px 22px 0 0;
     animation: up 0.42s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
@@ -5450,6 +5453,8 @@ a.car-toggle {
   .car-cols {
     display: flex;
     flex-direction: column;
+    /* 桌面网格的 align-items: start 在这里会让卡片按内容收窄，窄屏改为铺满 */
+    align-items: stretch;
     gap: 12px;
   }
   .car-col {
