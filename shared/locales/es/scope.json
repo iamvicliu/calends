@@ -62,5 +62,8 @@
     "other": "{scope} · {count} suscripciones"
   },
   "mrrBasis": "Coste mensual normalizado de mi parte de las suscripciones en facturación. Los planes anuales se reparten por meses; no son los cargos de este mes.",
-  "debitBasis": "Solo cargos positivos; los reembolsos se muestran aparte y no reducen el desglose ni la clasificación."
+  "debitBasis": "Solo cargos positivos; los reembolsos se muestran aparte y no reducen el desglose ni la clasificación.",
+  "other": "Otros",
+  "minimize": "Reducir a resumen",
+  "movementBasis": "Costes mensuales de mi parte en la moneda base, al tipo de cambio de fin de período. Las fechas indican los cambios o el período del informe si no hay eventos registrados."
 }

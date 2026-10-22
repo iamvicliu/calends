@@ -63,5 +63,8 @@
     "many": "{scope} · {count} abonnements"
   },
   "mrrBasis": "Coût mensuel normalisé de ma part des abonnements facturés. Les forfaits annuels sont répartis par mois ; ce ne sont pas les prélèvements du mois.",
-  "debitBasis": "Prélèvements positifs uniquement ; les remboursements figurent séparément et ne réduisent ni la répartition ni le classement."
+  "debitBasis": "Prélèvements positifs uniquement ; les remboursements figurent séparément et ne réduisent ni la répartition ni le classement.",
+  "other": "Autres",
+  "minimize": "Réduire au résumé",
+  "movementBasis": "Coûts mensuels de ma part en devise de base, au taux de fin de période. Les dates indiquent les changements ou la période du rapport sans événement enregistré."
 }

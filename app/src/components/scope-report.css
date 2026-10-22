@@ -100,8 +100,29 @@
   grid-template-columns: minmax(0, 140px) minmax(24px, 1fr) auto;
 }
 .scope-headline,
-.scope-trend {
+.scope-trend,
+.scope-grid > .scope-composition {
   grid-column: 1 / -1;
+}
+.scope-compositions,
+.scope-movements {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+.scope-movements {
+  margin-top: 8px;
+}
+.scope-compositions > :only-child {
+  grid-column: 1 / -1;
+}
+.scope-movements .scope-row {
+  align-items: flex-start;
+}
+.scope-movement-date {
+  display: block;
+  margin-top: 2px;
+  color: var(--label-3);
 }
 .scope-note {
   margin: 8px 0 12px;
@@ -222,6 +243,10 @@
 }
 @media (max-width: 680px) {
   .scope-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .scope-compositions,
+  .scope-movements {
     grid-template-columns: minmax(0, 1fr);
   }
   .scope-report .mv-row {

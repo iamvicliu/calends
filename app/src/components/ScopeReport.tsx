@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { ChevronUp, Copy } from 'lucide-react';
+import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
 import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import type { Block, ChargeRow, Comparison, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
@@ -66,8 +66,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   };
   const base = state.settings.baseCurrency;
   const monthly = report.blocks.some((b) => b.type === 'headline' && b.mode === 'month');
+  const monthlyMovement = report.blocks.find((b) => b.type === 'trend' && b.mode === 'month');
   const top = report.blocks.find((b) => b.type === 'top' && b.mode === 'month');
-  const upcomingRows = (rows: ChargeRow[]) => rows.filter((r) => !top?.rows.includes(r));
+  const upcomingRows = (rows: ChargeRow[]) => rows.filter((r) => !top?.rows.includes(r)).slice(0, 5);
   const blocks = report.blocks.filter((b) =>
     b.type === 'upcoming' ? upcomingRows(b.rows).length > 0 : !(b.type === 'top' && b.mode === 'scope' && b.rows.length === 1),
   );
@@ -125,14 +126,14 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         <button
           type="button"
           className="icon-btn"
-          title={t('scope.collapse')}
+          title={t(monthly ? 'scope.minimize' : 'scope.collapse')}
           aria-expanded={expanded}
           aria-controls={id}
-          aria-label={t('scope.collapse')}
+          aria-label={t(monthly ? 'scope.minimize' : 'scope.collapse')}
           onClick={onToggle}
           disabled={copying}
         >
-          <ChevronUp size={15} />
+          {monthly ? <Minimize2 size={15} /> : <ChevronUp size={15} />}
         </button>
       </div>
     </div>
@@ -220,11 +221,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         const peak = Math.max(1, ...drivers.map((r) => Math.abs(r.amount)));
         const net = mv.to - mv.from;
         const singleDriver = drivers.length === 1 && Math.abs(drivers[0].amount - net) < 0.005;
-        const singleItem = mv.items.length === 1 && Math.abs(mv.items[0].delta - net) < 0.005;
         return (
           <>
             <div className="card-h">
               <h3>{t('scope.movement', { month: monthLabel(block.month) })}</h3>
+              <Hint text={t('scope.movementBasis')} />
             </div>
             <div className="hero-delta">
               {!singleDriver && delta({ amount: net })}
@@ -243,12 +244,25 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </div>
               ))}
             </div>
-            {mv.items.map((r) => (
-              <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
-                {name(r.sub)}
-                {!singleItem && <span>{delta({ amount: r.delta })}</span>}
-              </button>
-            ))}
+            <div className="scope-movements">
+              {mv.items.map((r) => (
+                <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
+                  {name(
+                    r.sub,
+                    <>
+                      {t(`scope.${r.kind}`)} ·{' '}
+                      <span className="num">
+                        {money(r.from, base)} → {money(r.to, base)}
+                      </span>
+                      <span className="scope-movement-date">
+                        {cnDateAuto(r.since, today)}
+                        {r.until !== r.since && ` – ${cnDateAuto(r.until, today)}`}
+                      </span>
+                    </>,
+                  )}
+                </button>
+              ))}
+            </div>
           </>
         );
       }
@@ -256,42 +270,54 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('composition', monthly ? 'debitBasis' : undefined)}
-            {(['categories', 'methods'] as const).map(
-              (dim) =>
-                block[dim].length > 0 && (
-                  <div className="scope-composition" key={dim}>
-                    <h4>{t(`scope.${dim}`)}</h4>
-                    {block[dim].map((r) => {
-                      const method = state.methods.find((m) => m.id === r.key);
-                      const color = dim === 'categories' ? catColor(r.key) : 'var(--accent)';
-                      return (
-                        <div className="scope-share" key={r.key}>
-                          <div className="scope-row">
-                            <span className="scope-sub">
-                              {dim === 'categories' ? (
-                                <span className="scope-cat" style={{ color }}>
-                                  <CatIcon cat={r.key} size={18} />
+            <div className="scope-compositions">
+              {(['categories', 'methods'] as const).map(
+                (dim) =>
+                  block[dim].length > 0 && (
+                    <div className="scope-composition" key={dim}>
+                      <h4>{t(`scope.${dim}`)}</h4>
+                      {block[dim].map((r) => {
+                        const method = state.methods.find((m) => m.id === r.key);
+                        const color = r.other ? 'var(--label-3)' : dim === 'categories' ? catColor(r.key) : 'var(--accent)';
+                        return (
+                          <div className="scope-share" key={r.other ? 'other' : `key-${r.key}`}>
+                            <div className="scope-row">
+                              <span className="scope-sub">
+                                {r.other ? (
+                                  <span className="scope-cat">
+                                    <Layers size={18} />
+                                  </span>
+                                ) : dim === 'categories' ? (
+                                  <span className="scope-cat" style={{ color }}>
+                                    <CatIcon cat={r.key} size={18} />
+                                  </span>
+                                ) : method ? (
+                                  <MethodMark m={method} size={24} proxied />
+                                ) : (
+                                  <Icon name="wallet" size={24} />
+                                )}
+                                <span>
+                                  {r.other
+                                    ? t('scope.other')
+                                    : dim === 'categories'
+                                      ? r.key || t('scope.uncategorized')
+                                      : (method?.name ?? t('scope.noMethod'))}
                                 </span>
-                              ) : method ? (
-                                <MethodMark m={method} size={24} proxied />
-                              ) : (
-                                <Icon name="wallet" size={24} />
-                              )}
-                              <span>{dim === 'categories' ? r.key || t('scope.uncategorized') : (method?.name ?? t('scope.noMethod'))}</span>
-                            </span>
-                            <b className="num">
-                              {expense(r.amount)} · {percent(r.share)}
-                            </b>
+                              </span>
+                              <b className="num">
+                                {expense(r.amount)} · {percent(r.share)}
+                              </b>
+                            </div>
+                            <div className="mv-bar">
+                              <i style={{ width: `${r.share * 100}%`, background: color }} />
+                            </div>
                           </div>
-                          <div className="mv-bar">
-                            <i style={{ width: `${r.share * 100}%`, background: color }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ),
-            )}
+                        );
+                      })}
+                    </div>
+                  ),
+              )}
+            </div>
           </>
         );
       case 'top':
@@ -329,7 +355,14 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                     {t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`)}
                   </>,
                 )}
-                {r.delta !== 0 && delta({ amount: r.delta })}
+                {r.delta !== 0 &&
+                  !(
+                    monthlyMovement?.mode === 'month' &&
+                    monthlyMovement.movement.items.some(
+                      (item) => item.sub.id === r.sub.id && r.date >= item.since && r.date <= item.until && Math.abs(item.delta - r.delta) < 0.005,
+                    )
+                  ) &&
+                  delta({ amount: r.delta })}
               </button>
             ))}
           </>

@@ -83,6 +83,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Timeline: 'Timeline',
     Amount: 'Amount',
     Maximize2: 'Maximize2',
+    Minimize2: 'Minimize2',
+    Layers: 'Layers',
     ChevronUp: 'ChevronUp',
     SpendingDelta: 'SpendingDelta',
     ...extra,
@@ -331,7 +333,7 @@ test('scope presentation gives single refunds/receipts one numeric owner and avo
     expansion: 0,
     contraction: 0,
     churned: 20,
-    items: [{ sub: subscription, kind: 'churned' as const, delta: -20, from: 20, to: 0 }],
+    items: [{ sub: subscription, kind: 'churned' as const, delta: -20, from: 20, to: 0, since: '2026-10-12', until: '2026-10-12' }],
   };
   const trendNodes = render({ blocks: [{ type: 'trend', mode: 'month', month: '2026-10', movement: mv }] });
   assert.equal(
@@ -593,7 +595,16 @@ test('scope subscription rows show exportable 24px icons and open details from e
       type: 'trend',
       mode: 'month',
       month: '2026-10',
-      movement: { from: 0, to: 10, fx: 0, added: 10, expansion: 0, contraction: 0, churned: 0, items: [{ sub, kind: 'added', delta: 10 }] },
+      movement: {
+        from: 0,
+        to: 10,
+        fx: 0,
+        added: 10,
+        expansion: 0,
+        contraction: 0,
+        churned: 0,
+        items: [{ sub, kind: 'added', delta: 10, from: 0, to: 10, since: '2026-01-01', until: '2026-01-01' }],
+      },
     },
   ];
   const nodes = r.render('ScopeReport', {
@@ -852,4 +863,113 @@ test('小票结束语按实际状态显示停止日、到期日或下期见', ()
     const nodes = r.render('SReceipt', { sub, st: story, today, hide: false, m: (n: number) => format.flow(n, 'USD') });
     assert.deepEqual(nodes.find((n) => n.props.className === 'rc-thanks')!.children, [date ? `${key} ${format.cnDateFull(date)}` : key]);
   }
+});
+
+test('report layout keeps compact composition, five distinct upcoming rows and a monthly minimize action', () => {
+  let toggles = 0;
+  const r = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    {
+      useId: () => 'scope',
+      useRef: () => ({ current: null }),
+      intlLocale: () => 'en-US',
+      BarLine: 'BarLine',
+    },
+  );
+  const subscriptions: Subscription[] = Array.from({ length: 12 }, (_, i) => ({
+    id: String(i),
+    name: `Sample ${i}`,
+    category: `Category ${i}`,
+    tags: [],
+    price: 100 - i,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-25',
+    status: 'active',
+    methodId: String(i),
+  }));
+  const state = { ...st, subscriptions };
+  const render = (report: reports.ScopeReport) =>
+    r.render('ScopeReport', {
+      report,
+      state,
+      today,
+      onOpen() {},
+      title: 'Report',
+      animate: false,
+      open: true,
+      onToggle() {
+        toggles++;
+      },
+    });
+  const nodes = render(reports.monthReport(state, '2026-10', today));
+  const minimize = nodes.find((n) => n.props['aria-label'] === 'scope.minimize')!;
+  assert.equal(minimize.props.title, 'scope.minimize');
+  assert.ok(all(minimize).some((n) => n.type === 'Minimize2'));
+  minimize.props.onClick();
+  assert.equal(toggles, 1);
+  const card = (type: string) => nodes.find((n) => String(n.props.className).includes(`scope-block scope-${type}`))!;
+  const rows = (node: Node) => all(node).filter((n) => n.type === 'button' && n.props.className === 'scope-row scope-tap');
+  const top = rows(card('top'));
+  const upcoming = rows(card('upcoming'));
+  assert.equal(top.length, 5);
+  assert.equal(upcoming.length, 5);
+  const ids = (rows: Node[]) => rows.map((row) => all(row).find((n) => n.type === 'SubIcon')!.props.sub.id);
+  assert.deepEqual(ids(upcoming), ['10', '11', '5', '6', '7']);
+  assert.ok(ids(upcoming).every((id) => !ids(top).includes(id)));
+  const comp = all(card('composition'));
+  assert.equal(comp.filter((n) => n.props.className === 'scope-share').length, 12);
+  assert.equal(comp.filter((n) => n.children.includes('scope.other')).length, 2);
+  assert.equal(comp.filter((n) => n.type === 'button').length, 0);
+  assert.ok(render(reports.scopeReport(state, subscriptions, today)).some((n) => n.props['aria-label'] === 'scope.collapse'));
+});
+
+test('monthly movement subtitles own unsigned before/after costs and event rows omit their repeated delta', () => {
+  const r = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    {
+      useId: () => 'scope',
+      useRef: () => ({ current: null }),
+      intlLocale: () => 'en-US',
+    },
+  );
+  const state: AppState = {
+    ...st,
+    subscriptions: [
+      {
+        id: 'new',
+        name: 'New',
+        category: 'Tools',
+        tags: [],
+        price: 10,
+        currency: 'USD',
+        cycle: { unit: 'month', every: 1 },
+        start: '2026-10-03',
+        status: 'active',
+      },
+    ],
+  };
+  const nodes = r.render('ScopeReport', {
+    report: reports.monthReport(state, '2026-10', today),
+    state,
+    today,
+    onOpen() {},
+    title: 'Month',
+    animate: false,
+    open: true,
+    onToggle() {},
+  });
+  const movement = nodes.find((n) => n.props.className === 'scope-movements')!;
+  assert.ok(all(movement).some((n) => n.children.includes('scope.added')));
+  assert.ok(all(movement).some((n) => n.children.includes('$0.00') && n.children.includes('$10.00')));
+  assert.ok(all(movement).some((n) => n.props.className === 'scope-movement-date' && n.children.includes(format.cnDateAuto('2026-10-03', today))));
+  const event = nodes.find((n) => String(n.props.className).includes('scope-block scope-events'))!;
+  assert.equal(
+    all(event).some((n) => typeof n.type === 'function' && n.type.name === 'SpendingDelta'),
+    false,
+  );
 });

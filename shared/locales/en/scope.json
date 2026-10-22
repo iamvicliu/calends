@@ -62,5 +62,8 @@
     "other": "{scope} · {count} subscriptions"
   },
   "mrrBasis": "Current billing subscriptions, my share, normalized to a monthly cost. Annual plans are spread across months; this is not this month’s cash charges.",
-  "debitBasis": "Positive charges only; refunds are listed separately and do not reduce the breakdown or ranking."
+  "debitBasis": "Positive charges only; refunds are listed separately and do not reduce the breakdown or ranking.",
+  "other": "Other",
+  "minimize": "Minimize to summary",
+  "movementBasis": "Monthly costs in the base currency, my share, valued at the period-end exchange rate. Dates show the contributing events, or the reporting window when no event is recorded."
 }
