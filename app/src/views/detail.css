@@ -285,14 +285,29 @@
   gap: 16px;
   min-width: 0;
 }
-/* 窄屏单列：摘要、历程排在扣款记录前面 */
+.dt-body,
+.dt-main {
+  container: detail-main / inline-size;
+}
+.dt-billing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+@container detail-main (min-width: 720px) {
+  .dt-billing.has-forecast {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* 窄屏单列：保留主栏顺序，让预测与扣款记录相邻 */
 @media (max-width: 999px) {
   .dt-main,
   .dt-side {
     display: contents;
   }
-  .dt-charges {
-    order: 10;
+  .dt-side.has-charges > .dt-panel:not(.dt-charges):not(.dt-outcome) {
+    order: 1;
   }
   .dt-outcome {
     order: -1;
@@ -638,36 +653,12 @@
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
 }
-.dt-up-list {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: 0;
+.dt-upcoming .dt-tbl {
+  margin-top: 10px;
 }
-.dt-up-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 9px 0;
-  border-top: 1px solid var(--sep);
-}
-.dt-up-list span {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.dt-up-list .a {
-  align-items: flex-end;
-  text-align: right;
-}
-.dt-up-list b {
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.dt-up-list small {
-  font-size: 12px;
-  color: var(--label-3);
-  font-variant-numeric: tabular-nums;
+.dt-charges .dt-tbl {
+  width: calc(100% - 40px);
+  margin-inline: 20px;
 }
 .dt-up-more {
   padding-top: 8px;
@@ -679,40 +670,6 @@
 /* 合租座位 */
 .dt-seats {
   margin: 10px 0 6px;
-}
-.dt-seat-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.dt-seat {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.dt-seat.me {
-  background: var(--ink);
-  color: var(--on-ink);
-  font-size: 11px;
-}
-.dt-seat.taken {
-  background: color-mix(in srgb, var(--accent) 14%, var(--dt-panel));
-  color: var(--accent);
-}
-.dt-seat.exempt {
-  background: var(--fill);
-  color: var(--label-2);
-}
-.dt-seat.free {
-  box-shadow: inset 0 0 0 1.5px var(--dt-line-2);
-  background-image: radial-gradient(var(--label-3) 1px, transparent 1.5px);
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 .dt-seats > small {
   display: block;
@@ -896,30 +853,40 @@
   padding: 14px 20px 10px;
 }
 .dt-tbl {
-  --cols: 52px minmax(0, 1fr) auto;
-}
-.dt-tbl.long {
-  --cols: 88px minmax(0, 1fr) auto;
+  --cols: minmax(82px, 1fr) minmax(0, 1.15fr) minmax(0, 1.3fr);
+  width: 100%;
 }
 .dt-tr {
   display: grid;
   grid-template-columns: var(--cols);
   align-items: center;
   column-gap: 8px;
-  min-height: 34px;
-  padding: 0 20px;
+  min-height: 48px;
+  padding: 7px 0;
+  font-size: 12.5px;
+  line-height: 18px;
   font-variant-numeric: tabular-nums;
 }
-.dt-tr > :nth-child(n + 3) {
+.dt-tr > :nth-child(n + 2) {
   text-align: right;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+}
+.dt-tr .d {
+  display: flex;
+  flex-direction: column;
+}
+.dt-tr small {
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--label-3);
 }
 
 .dt-grp {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
   font-variant-numeric: tabular-nums;
   position: sticky;
   top: 0;
@@ -953,10 +920,13 @@
 .dt-row .o {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   font-weight: 500;
   min-width: 0;
-  white-space: nowrap;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 .dt-row .c {
   font-weight: 500;
@@ -998,9 +968,9 @@
 .dt-tfoot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   min-height: 46px;
-  padding: 0 12px 0 20px;
+  padding: 0 20px;
   border-top: 1px solid var(--dt-line);
   flex: none;
 }
@@ -1125,8 +1095,9 @@
     font-size: 18px;
     line-height: 24px;
   }
-  .dt-tr {
-    padding: 0 14px;
+  .dt-charges .dt-tbl {
+    width: calc(100% - 28px);
+    margin-inline: 14px;
   }
   .dt-charges .dt-ph {
     padding: 12px 14px 8px;
@@ -1136,7 +1107,7 @@
 /* 宽屏：弹层撑大，两栏各自滚动 */
 @media (min-width: 1000px) {
   .sheet.bare:has(.dt) {
-    width: min(1080px, calc(100vw - 48px));
+    width: min(1280px, calc(100vw - 48px));
     overflow: hidden;
   }
   /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */

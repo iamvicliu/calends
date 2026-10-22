@@ -1,4 +1,4 @@
-import { base as appPath } from '../base.ts';
+import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import { addDays, chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge, memberBillMonths } from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
@@ -169,26 +169,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                       )}
                     </div>
                     <div className="seats-row">
-                      <div className="seats">
-                        <span className="seat me" title={t('family.pool.me')}>
-                          <img src={state.settings.avatar || appPath('/icons/avatar.png')} alt={t('family.pool.me')} />
-                        </span>
-                        {onboard.map((m) => {
-                          const owe = dues.find((d) => d.member.id === m.id)?.periodsOwed;
-                          return (
-                            <button
-                              key={m.id}
-                              type="button"
-                              disabled={ro}
-                              onClick={() => setMember({ s, m })}
-                              className={`seat ${m.exempt ? 'free' : owe ? 'owe' : 'on'}`}
-                              title={m.exempt ? t('family.pool.exemptTitle', { name: m.name }) : m.name}
-                            >
-                              {[...(m.name || '?')][0]}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <ShareAvatars sub={s} state={state} today={today} onMember={ro ? undefined : (m) => setMember({ s, m })} />
                       {s.manageUrl && (
                         <a className="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
                           <Icon name="gear" size={14} /> {t('family.pool.manage')}

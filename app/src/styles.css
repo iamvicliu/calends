@@ -1329,34 +1329,6 @@ a {
 }
 
 /* 合租 */
-.seats {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.seat {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 13px;
-  font-weight: 600;
-  background: var(--fill-2);
-  color: var(--label-3);
-}
-.seat.me {
-  background: var(--accent);
-  color: #fff;
-}
-.seat.on {
-  background: rgba(52, 199, 89, 0.16);
-  color: #1f9d48;
-}
-.seat.owe {
-  background: rgba(255, 149, 0, 0.16);
-  color: #c76a00;
-}
 .member {
   display: flex;
   align-items: center;
@@ -2885,10 +2857,6 @@ select.btn {
 .badge.blue {
   color: var(--label);
   background: var(--fill);
-}
-.seat.me {
-  background: var(--ink);
-  color: var(--on-ink);
 }
 
 /* 弹层 */
@@ -5299,19 +5267,6 @@ select.btn {
   height: 26px;
   color: var(--accent);
 }
-.seat.me {
-  padding: 0;
-  overflow: hidden;
-  background: none;
-  box-shadow:
-    0 0 0 2px var(--card),
-    0 0 0 3px var(--line);
-}
-.seat.me img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 /* 合租账本 */
 .car-book {
@@ -5340,11 +5295,6 @@ select.btn {
 .car-actual b {
   font-weight: 600;
   color: var(--label);
-}
-.seat.free {
-  background: var(--fill-2);
-  color: var(--label-3);
-  box-shadow: inset 0 0 0 1px var(--line);
 }
 
 /* 车卡：收起时只有头部、座位与一个展开按钮 */
@@ -5382,9 +5332,6 @@ select.btn {
 }
 .seats-row {
   justify-content: flex-start;
-}
-.seats-row .seats {
-  margin-right: auto;
 }
 a.car-toggle {
   text-decoration: none;
@@ -5577,34 +5524,6 @@ a.car-toggle {
     top: 12px;
     right: 10px;
   }
-}
-
-/* 座位可点：成员头像打开资料，空位「+」直接添加成员 */
-button.seat {
-  border: 0;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-  transition:
-    transform 0.12s,
-    box-shadow 0.15s;
-}
-button.seat:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow:
-    0 0 0 2px var(--card),
-    0 0 0 3.5px var(--label-3);
-}
-button.seat:disabled {
-  cursor: default;
-}
-.seat.add {
-  color: var(--label-3);
-  font-size: 16px;
-}
-.seat.add:hover:not(:disabled) {
-  color: var(--label);
-  background: var(--fill);
 }
 
 /* 代付详情弹窗：基本信息 + 四格汇总 + 逐期表格 */
@@ -6166,26 +6085,6 @@ button.seat:disabled {
   white-space: nowrap;
 }
 
-/* 合租卡片的座位：头像略微叠在一起，一行放得下，不会把「+」挤到第二行 */
-.seats-row .seats {
-  flex-wrap: nowrap;
-  gap: 0;
-  min-width: 0;
-}
-.seats-row .seat {
-  flex-shrink: 0;
-  box-shadow: 0 0 0 2px var(--card);
-  transition: transform 0.15s;
-  position: relative;
-}
-.seats-row .seat + .seat {
-  margin-left: -5px;
-}
-.seats-row .seat:hover {
-  transform: translateY(-2px);
-  z-index: 1;
-}
-
 /* 时间线标题：窄屏时标题不折行，说明文字换到下一行 */
 .tl-head {
   flex-wrap: wrap;
@@ -6462,27 +6361,6 @@ button.seat:disabled {
   margin-top: 14px;
   font-size: 10.5px;
   color: #8e8e93;
-}
-/* 叠在一起时底色必须不透明，否则能透过去看到下面那个圆 */
-.seats-row .seat {
-  background: color-mix(in srgb, var(--label) 6%, var(--card));
-}
-.seats-row .seat.on {
-  background: color-mix(in srgb, #34c759 18%, var(--card));
-}
-.seats-row .seat.owe {
-  background: color-mix(in srgb, #ff9500 18%, var(--card));
-}
-.seats-row .seat.free {
-  box-shadow:
-    0 0 0 2px var(--card),
-    inset 0 0 0 1px var(--line);
-}
-.seats-row .seat.add:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--label) 11%, var(--card));
-}
-.seats-row .seat.me {
-  background: var(--card);
 }
 
 .car-actual b.loss {
@@ -7724,9 +7602,6 @@ button.seat:disabled {
   flex-wrap: wrap;
   row-gap: 8px;
 }
-.seats-row .seats {
-  flex-shrink: 0;
-}
 
 /* AI 接入页：状态条、地址、接入卡片（客户端网格 + 三步）、令牌表、工具清单 */
 .ai-page {
@@ -8606,15 +8481,6 @@ button.seat:disabled {
 }
 .car-seats.full {
   color: var(--label-3);
-}
-.car-card .seats-row .seat {
-  width: 20px;
-  height: 20px;
-  font-size: 10px;
-  box-shadow: 0 0 0 1.5px var(--card);
-}
-.car-card .seats-row .seat + .seat {
-  margin-left: -3px;
 }
 .car-card .car-toggle {
   height: 26px;
