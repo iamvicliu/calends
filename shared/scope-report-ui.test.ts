@@ -73,6 +73,9 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     PayBadge: 'PayBadge',
     Seg: 'Seg',
     SubIcon: 'SubIcon',
+    CatIcon: 'CatIcon',
+    MethodMark: 'MethodMark',
+    catColor: (cat: string) => `color-${cat}`,
     Toolbar: 'Toolbar',
     ScopeReport: 'ScopeReport',
     useCallback: (fn: unknown) => fn,
@@ -537,4 +540,101 @@ test('calendar monthly list owns its heading inside the card in mini and full mo
       false,
     );
   }
+});
+
+test('scope subscription rows show exportable 24px icons and open details from every block', () => {
+  const opened: Subscription[] = [];
+  const r = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    {
+      useId: () => 'scope',
+      useRef: () => ({ current: null }),
+      intlLocale: () => 'en-US',
+      BarLine: 'BarLine',
+      t: (key: string, params?: { count?: number }) => (params?.count == null ? key : `${key} ${params.count}`),
+    },
+  );
+  const sub: Subscription = {
+    id: 's',
+    name: 'Sample',
+    category: 'Tools',
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    status: 'active',
+    tags: [],
+  };
+  const charge = { sub, date: today, amount: 10, original: billing.chargesBetween(sub, today.slice(0, 8) + '01', today, today)[0] };
+  const stopped: Subscription = { ...sub, status: 'cancelled', end: today, stop: { kind: 'cancel', date: today, paidThrough: '2026-10-31' } };
+  const loss = metrics.stopLosses({ ...st, subscriptions: [stopped] }, today).items[0];
+  const blocks: reports.Block[] = [
+    { type: 'top', mode: 'scope', rows: [charge, { ...charge, sub: { ...sub, id: 's2' } }] },
+    { type: 'upcoming', rows: [charge], total: 10 },
+    { type: 'events', rows: [{ ...charge, kind: 'start', delta: 10 }] },
+    {
+      type: 'losses',
+      rows: [loss],
+      loss: 10,
+      incomplete: false,
+      refunds: [charge],
+      refunded: -10,
+    },
+    { type: 'sharing', rows: [{ sub, received: 10, owed: 2 }], received: 10, owed: 2 },
+    {
+      type: 'trend',
+      mode: 'month',
+      month: '2026-10',
+      movement: { from: 0, to: 10, fx: 0, added: 10, expansion: 0, contraction: 0, churned: 0, items: [{ sub, kind: 'added', delta: 10 }] },
+    },
+  ];
+  const nodes = r.render('ScopeReport', {
+    report: { blocks },
+    state: st,
+    today,
+    onOpen: (sub: Subscription) => opened.push(sub),
+    title: 'Scope',
+    open: true,
+    animate: false,
+    onToggle() {},
+  });
+  const rows = nodes.filter((n) => n.props.className === 'scope-row scope-tap');
+  assert.equal(rows.length, 8);
+  for (const row of rows) {
+    assert.equal(row.type, 'button');
+    const icon = all(row).find((n) => n.type === 'SubIcon')!;
+    assert.equal(icon.props.size, 24);
+    assert.equal(icon.props.proxied, true);
+    row.props.onClick();
+    assert.equal(opened.at(-1), icon.props.sub);
+    assert.equal(all(row).filter((n) => n.type === 'button').length, 1);
+  }
+  assert.ok(nodes.some((n) => n.type === 'h3' && n.children.includes('scope.topMonthly 2')));
+});
+
+test('scope composition uses category colors for both marks and bars and exports method images through the proxy', () => {
+  const r = harness(
+    '../app/src/components/ScopeReport.tsx',
+    'ScopeReport',
+    {},
+    { useId: () => 'scope', useRef: () => ({ current: null }), intlLocale: () => 'en-US' },
+  );
+  const method = { id: 'm', name: 'Sample card', kind: 'card', currency: 'USD', logo: 'https://example.test/card.png' };
+  const report = { blocks: [{ type: 'composition', categories: [{ key: 'Tools', amount: 10, share: 1 }], methods: [{ key: 'm', amount: 10, share: 1 }] }] };
+  const nodes = r.render('ScopeReport', {
+    report,
+    state: { ...st, methods: [method] },
+    today,
+    onOpen() {},
+    title: 'Scope',
+    open: true,
+    animate: false,
+    onToggle() {},
+  });
+  assert.ok(nodes.some((n) => n.type === 'CatIcon' && n.props.cat === 'Tools'));
+  assert.ok(nodes.some((n) => n.props.className === 'scope-cat' && n.props.style.color === 'color-Tools'));
+  assert.ok(nodes.some((n) => n.type === 'i' && n.props.style.background === 'color-Tools'));
+  assert.ok(nodes.some((n) => n.type === 'MethodMark' && n.props.m === method && n.props.proxied));
 });

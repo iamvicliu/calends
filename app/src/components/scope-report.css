@@ -133,20 +133,48 @@
   color: var(--label-2);
   font-size: 12px;
 }
-.scope-name {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-weight: 500;
-  color: inherit;
+.scope-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
   text-align: start;
+}
+.scope-sub > :first-child {
+  flex-shrink: 0;
+}
+.scope-sub > span:last-child {
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+.scope-name {
+  font-weight: 500;
+}
+.scope-cat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+.scope-tap {
+  width: 100%;
+  border: 0;
+  border-bottom: 0.5px solid var(--sep);
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: start;
   cursor: pointer;
 }
-.scope-name:hover {
+.scope-tap:hover .scope-name {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+.scope-tap:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 .scope-composition h4 {
   margin: 10px 0 2px;

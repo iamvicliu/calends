@@ -256,7 +256,7 @@ export function CatChip({ cat }: { cat: string }) {
  * 支付方式标记：统一显示支付产品自己的 logo —— 银行卡用银行图标集，
  * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有 logo 的用卡面色 + 名称首字。
  */
-export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }) {
+export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?: number; proxied?: boolean }) {
   const brand = brandOf(m);
   const bank = bankOf(m);
   const region = methodRegion(m);
@@ -271,7 +271,7 @@ export function MethodMark({ m, size = 36 }: { m: PaymentMethod; size?: number }
       ) : brand === 'appstore' ? (
         <i className="mm-glyph" />
       ) : logo ? (
-        <img src={base(logo)} alt="" />
+        <img src={proxied && /^https?:/.test(logo) ? base(`/api/img?u=${encodeURIComponent(logo)}`) : base(logo)} alt="" />
       ) : (
         <b>{[...m.name][0]}</b>
       )}

@@ -7,8 +7,9 @@ import type { Block, ChargeRow, Comparison, ScopeReport as ReportData } from '..
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
+import { catColor } from '../derive.ts';
 import { BarLine } from './charts.tsx';
-import { Hint } from './ui.tsx';
+import { CatIcon, Hint, Icon, MethodMark, SubIcon } from './ui.tsx';
 import './scope-report.css';
 
 interface Props {
@@ -81,24 +82,25 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       <span>{label}</span>
     </div>
   );
-  const name = (sub: Subscription) => (
-    <button type="button" className="scope-name" onClick={() => onOpen(sub)}>
-      {sub.name}
-    </button>
+  const name = (sub: Subscription, meta?: ReactNode) => (
+    <span className="scope-sub">
+      <SubIcon sub={sub} size={24} proxied />
+      <span>
+        <span className="scope-name">{sub.name}</span>
+        {meta && <small>{meta}</small>}
+      </span>
+    </span>
   );
   const chargeRows = (rows: ChargeRow[]) =>
     rows.map((r, i) => (
-      <div className="scope-row" key={`${r.sub.id}-${r.date}-${i}`}>
-        <div>
-          {name(r.sub)}
-          <small>{cnDateAuto(r.date, today)}</small>
-        </div>
+      <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
+        {name(r.sub, cnDateAuto(r.date, today))}
         <b className="num">{expense(r.amount)}</b>
-      </div>
+      </button>
     ));
-  const heading = (key: string, hint?: string) => (
+  const heading = (key: string, hint?: string, count?: number) => (
     <div className="card-h">
-      <h3>{t(`scope.${key}`)}</h3>
+      <h3>{t(`scope.${key}`, { count })}</h3>
       {hint && <Hint text={t(`scope.${hint}`)} />}
     </div>
   );
@@ -242,10 +244,10 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               ))}
             </div>
             {mv.items.map((r) => (
-              <div className="scope-row" key={r.sub.id}>
+              <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
                 {name(r.sub)}
                 {!singleItem && <span>{delta({ amount: r.delta })}</span>}
-              </div>
+              </button>
             ))}
           </>
         );
@@ -259,23 +261,34 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 block[dim].length > 0 && (
                   <div className="scope-composition" key={dim}>
                     <h4>{t(`scope.${dim}`)}</h4>
-                    {block[dim].map((r) => (
-                      <div className="scope-share" key={r.key}>
-                        <div className="scope-row">
-                          <span>
-                            {dim === 'categories'
-                              ? r.key || t('scope.uncategorized')
-                              : (state.methods.find((m) => m.id === r.key)?.name ?? t('scope.noMethod'))}
-                          </span>
-                          <b className="num">
-                            {expense(r.amount)} · {percent(r.share)}
-                          </b>
+                    {block[dim].map((r) => {
+                      const method = state.methods.find((m) => m.id === r.key);
+                      const color = dim === 'categories' ? catColor(r.key) : 'var(--accent)';
+                      return (
+                        <div className="scope-share" key={r.key}>
+                          <div className="scope-row">
+                            <span className="scope-sub">
+                              {dim === 'categories' ? (
+                                <span className="scope-cat" style={{ color }}>
+                                  <CatIcon cat={r.key} size={18} />
+                                </span>
+                              ) : method ? (
+                                <MethodMark m={method} size={24} proxied />
+                              ) : (
+                                <Icon name="wallet" size={24} />
+                              )}
+                              <span>{dim === 'categories' ? r.key || t('scope.uncategorized') : (method?.name ?? t('scope.noMethod'))}</span>
+                            </span>
+                            <b className="num">
+                              {expense(r.amount)} · {percent(r.share)}
+                            </b>
+                          </div>
+                          <div className="mv-bar">
+                            <i style={{ width: `${r.share * 100}%`, background: color }} />
+                          </div>
                         </div>
-                        <div className="mv-bar">
-                          <i style={{ width: `${r.share * 100}%`, background: 'var(--accent)' }} />
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ),
             )}
@@ -284,14 +297,14 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       case 'top':
         return (
           <>
-            {heading(block.mode === 'scope' ? 'topMonthly' : 'topCharges', block.mode === 'month' ? 'debitBasis' : undefined)}
+            {heading(block.mode === 'scope' ? 'topMonthly' : 'topCharges', block.mode === 'month' ? 'debitBasis' : undefined, block.rows.length)}
             {block.mode === 'month'
               ? chargeRows(block.rows)
               : block.rows.map((r) => (
-                  <div className="scope-row" key={r.sub.id}>
+                  <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
                     {name(r.sub)}
                     <b className="num">{expense(r.amount)}</b>
-                  </div>
+                  </button>
                 ))}
           </>
         );
@@ -308,16 +321,16 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <>
             {heading('events')}
             {block.rows.map((r, i) => (
-              <div className="scope-row" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`}>
-                <div>
-                  {name(r.sub)}
-                  <small>
+              <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
+                {name(
+                  r.sub,
+                  <>
                     {cnDateAuto(r.date, today)} ·{' '}
                     {t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`)}
-                  </small>
-                </div>
+                  </>,
+                )}
                 {r.delta !== 0 && delta({ amount: r.delta })}
-              </div>
+              </button>
             ))}
           </>
         );
@@ -331,29 +344,29 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             </div>
             {block.incomplete && <p className="scope-note red">{t('scope.incomplete')}</p>}
             {block.rows.map((r) => (
-              <div className="scope-row" key={`${r.sub.id}-${r.phaseIndex}`}>
-                <div>
-                  {name(r.sub)}
-                  <small>
+              <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
+                {name(
+                  r.sub,
+                  <>
                     {cnDateAuto(r.date, today)} · {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
-                  </small>
-                </div>
-                <div>
+                  </>,
+                )}
+                <span>
                   <b className="num">{expense(r.lossBase)}</b>
                   {r.currency !== base && <small>{flow(-r.loss, r.currency)}</small>}
-                </div>
-              </div>
+                </span>
+              </button>
             ))}
             {block.refunds.map((r, i) => (
-              <div className="scope-row" key={`refund-${r.sub.id}-${r.date}-${i}`}>
-                <div>
-                  {name(r.sub)}
-                  <small>
+              <button type="button" className="scope-row scope-tap" key={`refund-${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
+                {name(
+                  r.sub,
+                  <>
                     {cnDateAuto(r.date, today)} · {t('scope.refunded')}
-                  </small>
-                </div>
+                  </>,
+                )}
                 <b className="num green">{income(-r.amount)}</b>
-              </div>
+              </button>
             ))}
           </>
         );
@@ -368,13 +381,13 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               </div>
             )}
             {block.rows.map((r) => (
-              <div className="scope-row" key={r.sub.id}>
+              <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
                 {name(r.sub)}
-                <div>
+                <span>
                   {r.received !== 0 && <b className="num green">{t('scope.receivedAmount', { amount: income(r.received) })}</b>}
                   {r.owed > 0 && <small className="num">{t('scope.owedAmount', { amount: income(r.owed) })}</small>}
-                </div>
-              </div>
+                </span>
+              </button>
             ))}
           </>
         );
