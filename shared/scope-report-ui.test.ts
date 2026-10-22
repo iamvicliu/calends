@@ -788,3 +788,37 @@ test('提醒预览按所有者时区分出今天与最近发送，空预览不�
   assert.equal(r.render('ReminderPreview', { preview: { ...preview, log: [] }, timezone: 'UTC' }).filter((n) => n.type === 'Group').length, 0);
   assert.equal(r.render('ReminderPreview', { preview: null, timezone: 'UTC' }).length, 0);
 });
+
+test('公开页时间线的支出和退款使用同一收支格式，关闭符号后同时移除', () => {
+  let load: (from: string, to: string) => any[];
+  const captured = new Error('timeline captured');
+  const r = harness(
+    '../app/src/public/page.tsx',
+    'Ledger',
+    {},
+    {
+      syncCategories: () => [],
+      periodRange: () => ['2026-10-01', '2026-10-31'],
+      AppIcon: 'AppIcon',
+      useCallback: (fn: typeof load) => {
+        load = fn;
+        throw captured;
+      },
+      allCharges: () => [
+        { sub: { id: 's', name: 'Service' }, date: today, amount: 10, currency: 'USD', projected: false },
+        { sub: { id: 's', name: 'Service' }, date: today, amount: -3, currency: 'USD', projected: false, kind: 'refund' },
+      ],
+    },
+  );
+  try {
+    for (const on of [true, false]) {
+      format.setSignedAmounts(on);
+      assert.throws(() => r.render('Ledger', { state: st }), captured);
+      const items = load!(today, today)[0].items;
+      assert.equal(items[0].tip, `Service · ${on ? '−' : ''}$10.00`);
+      assert.equal(items[1].tip, `Service · ${on ? '+' : ''}$3.00`);
+    }
+  } finally {
+    format.setSignedAmounts(true);
+  }
+});

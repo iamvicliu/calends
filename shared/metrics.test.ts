@@ -235,3 +235,23 @@ test('代付不计入我的月成本，公开页也不出现', async () => {
   assert.equal(out.subscriptions.length, 1);
   assert.ok(!JSON.stringify(out).includes('朋友'));
 });
+
+
+test('公开页仅带出所有者收支符号设置，旧设置缺省开启', async () => {
+  const { maskForPublic } = await import('./mask.ts');
+  const { flow, setSignedAmounts } = await import('./format.ts');
+  try {
+    for (const signedAmounts of [undefined, true, false]) {
+      const st = state([sub({ payments: [{ date: '2026-10-16', amount: -3 }] })]);
+      st.settings = { ...st.settings, signedAmounts, notifyEmail: 'private@example.test' };
+      const pub = maskForPublic(st);
+      assert.equal(pub.settings.signedAmounts, signedAmounts !== false);
+      assert.equal(pub.settings.notifyEmail, '');
+      setSignedAmounts(pub.settings.signedAmounts !== false);
+      assert.equal(flow(-15, 'USD'), signedAmounts === false ? '$15.00' : '−$15.00');
+      assert.equal(flow(-pub.subscriptions[0].payments![0].amount, 'USD'), signedAmounts === false ? '$3.00' : '+$3.00');
+    }
+  } finally {
+    setSignedAmounts(true);
+  }
+});

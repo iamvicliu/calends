@@ -113,6 +113,7 @@ export function maskForPublic(state: AppState): AppState {
     settings: {
       ...DEFAULT_SETTINGS,
       baseCurrency: state.settings.baseCurrency,
+      signedAmounts: state.settings.signedAmounts !== false,
       timezone: state.settings.timezone,
       displayName: state.settings.displayName,
       avatar: state.settings.avatar,

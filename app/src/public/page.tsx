@@ -3,7 +3,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn } from '../../../shared/billing.ts';
-import { cnDate, money, monthLabel, symbol } from '../../../shared/format.ts';
+import { cnDate, flow, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
 import { t, type Params } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../../shared/metrics.ts';
@@ -81,6 +81,7 @@ export function PublicPage() {
         owner = body.settings.displayName ?? '';
         custom = body.settings.publicTitle ?? '';
         document.title = title();
+        setSignedAmounts(body.settings.signedAmounts !== false);
         setState(body);
       })
       .catch((e: Error) => setErr(e.message));
@@ -158,7 +159,7 @@ function Ledger({ state }: { state: AppState }) {
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const v = chargeValue(state, c) * k;
-        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-[8px] bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${money(c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${fmt(v)}` : ''}` });
+        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-[8px] bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
         map.set(c.date, g);
       }
       return [...map.values()];
