@@ -28,6 +28,7 @@ import {
   type Charge,
 } from '../../../shared/billing.ts';
 import { flow, cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
+import { stopLosses } from '../../../shared/metrics.ts';
 import { chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { CarSheet } from './Carpool.tsx';
@@ -772,12 +773,14 @@ function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?:
 /** 停止卡片：放在顶部，一句话说清怎么停的、退了多少、亏了多少；每个停止阶段各一张 */
 function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
   const stopped = phaseSubs(sub).filter((phase) => phase.stop);
+  const losses = stopLosses({ ...state, subscriptions: [sub] }, today).items;
   const base = state.settings.baseCurrency;
   if (state.readonly || !stopped.length) return null;
   return (
     <>
       {stopped.map((phase) => {
         const sm = stopSummary(phase, today)!;
+        const loss = losses.find((item) => item.phase.start === phase.start);
         return (
           <section key={phase.start} className={`dt-panel dt-outcome ${sm.kind === 'terminate' ? 'bad' : ''} ${sm.unusedValue > 0 ? 'loss' : ''}`}>
             <div className="dt-ph">
@@ -786,12 +789,14 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
             </div>
             {sm.unusedValue > 0 && (
               <div className="dt-oc-loss">
-                <b>{flow(-sm.unusedValue, phase.currency)}</b>
+                <b>{flow(-(loss?.loss ?? sm.unusedValue), phase.currency)}</b>
                 <small>
                   {[
                     t('core.stop.lossTitle'),
                     t('core.stop.lossDays', { count: sm.wastedDays }),
-                    phase.currency !== base ? `≈ ${flow(-toBase(state, sm.unusedValue, phase.currency), base)}` : '',
+                    phase.currency !== base
+                      ? `≈ ${flow(-(loss?.lossBase ?? convertOn(sm.unusedValue, phase.currency, base, sm.date, state.fxHistory, state.fx)), base)}`
+                      : '',
                   ]
                     .filter(Boolean)
                     .join(' · ')}

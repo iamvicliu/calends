@@ -7,6 +7,7 @@ import * as phases from './phases.ts';
 import * as format from './format.ts';
 import * as gantt from './gantt.ts';
 import * as metrics from './metrics.ts';
+import * as fx from './fx.ts';
 import { flatten, intlLocale, setLocale, t } from './i18n.ts';
 import { DEFAULT_SETTINGS, type Subscription } from './types.ts';
 
@@ -70,6 +71,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     ...format,
     ...gantt,
     ...metrics,
+    ...fx,
+    toBase: fx.toBaseAt,
     t,
     intlLocale,
     Cell: 'Cell',
@@ -384,4 +387,26 @@ test('时间轴金额：宽段显示紧凑负金额，窄段仅保留悬停说�
     assert.equal(withClass(render(full), 'gt-unused-amount').length, 0);
   }
   assert.ok(text(render(phases.stopSubscription(sub, today, 'cancel'))).includes(t('core.stop.unusedTitle')));
+});
+
+test('详情与报告的停止损失采用同一份额和停止日汇率；缺失汇率不变成零', () => {
+  const r = runtime('../app/src/views/Detail.tsx', { React: renderedReact }, 'Outcome');
+  const stopped = phases.stopSubscription(sub, today, 'cancel', today, undefined, { amount: 6 });
+  for (const [rates, history] of [
+    [{ USD: 1, CNY: 7 }, { [today]: { USD: 1, CNY: 6.8 } }],
+    [{ USD: 1 }, { [today]: { USD: 1, CNY: 6.8 } }],
+    [{ USD: 1 }, {}],
+  ]) {
+    const state = {
+      subscriptions: [stopped],
+      methods: [],
+      settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+      fx: { base: 'USD', fetchedAt: today, rates },
+      fxHistory: history,
+    };
+    const expected = metrics.stopLosses(state, today).items[0];
+    const tree = r.render('Outcome', { sub: stopped, state, today });
+    assert.ok(text(tree).includes(`≈ ${format.flow(-expected.lossBase, 'CNY')}`));
+    assert.ok(!text(tree).includes(format.flow(-expected.loss * 7, 'CNY')));
+  }
 });
