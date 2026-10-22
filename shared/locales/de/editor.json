@@ -203,7 +203,10 @@
     "now": "heute",
     "initial": "Anfang",
     "priceChange": "Preisänderung {date}",
-    "outsidePayments": "{count} vorhandene Zahlungen liegen dann außerhalb des Leistungszeitraums. Mit ursprünglichem Datum, Betrag und Phase fortfahren?"
+    "outsidePayments": "{count} vorhandene Zahlungen liegen dann außerhalb des Leistungszeitraums. Mit ursprünglichem Datum, Betrag und Phase fortfahren?",
+    "editPrice": "Preis ab {date} bearbeiten",
+    "deletePrice": "Diesen Preis löschen? Der vorherige Preis gilt bis zur nächsten Änderung.",
+    "repriceCharges": "Beim Speichern werden {count} vergangene geschätzte Abbuchungen neu berechnet. Erfasste Zahlungen bleiben unverändert. Fortfahren?"
   },
   "payment": {
     "addTitle": "Zahlung hinzufügen",

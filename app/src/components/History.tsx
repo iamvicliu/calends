@@ -2,6 +2,7 @@ import { addDays, coveredUntil, cycleLabel, diffDays, isGap, phaseLanes, phaseSu
 import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
+import { pricePoints } from '../../../shared/phases.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { PayBadge } from './ui.tsx';
 
@@ -16,12 +17,16 @@ export function History({
   today,
   onEnd,
   onStart,
+  onPrice,
+  priceEditor,
 }: {
   sub: Subscription;
   state: AppState;
   today: string;
   onStart?: (start: string, next: string) => void;
   onEnd?: (start: string, end: string | undefined) => void;
+  onPrice?: (start: string, from: string) => void;
+  priceEditor?: { start: string; from: string; content: React.ReactNode };
 }) {
   const vs = phaseSubs(sub);
   const hasStory = vs.length > 1 || (vs[0].priceHistory?.length ?? 0) > 1;
@@ -44,7 +49,8 @@ export function History({
     }
     const parallel = i > 0 && until && until > v.start ? diffDays(v.start, v.end && v.end < until ? v.end : until) : 0;
     const live = !v.end || v.end > today;
-    const hist = (v.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
+    const hist = pricePoints(v);
+    const showPrices = hist.length > 1 || !!onPrice;
     const raw = sub.phases?.find((p) => p.start === v.start);
     const isLast = i === vs.length - 1;
     items.push(
@@ -86,23 +92,46 @@ export function History({
         )}
         <div className="h-plan">
           {v.region && <span className="badge">{v.region}</span>}
-          <b>{money(v.price, v.currency)}</b> {cycleLabel(v.cycle)}
+          {!showPrices && <b>{money(v.price, v.currency)}</b>} {cycleLabel(v.cycle)}
           {method(v.methodId) && <PayBadge m={method(v.methodId)} />}
           {parallel > 0 && <span className="badge blue h-par">{t('editor.overlap.parallel', { count: parallel })}</span>}
         </div>
-        {hist.length > 1 && (
+        {showPrices && (
           <ul className="h-prices">
-            {hist.map((p, k) => (
-              <li key={p.from}>
-                {k === 0 ? t('editor.history.initial') : t('editor.history.priceChange', { date: p.from })} · {money(p.amount, v.currency)}
-                {k > 0 && hist[k - 1].amount > 0 && (
-                  <em className={p.amount > hist[k - 1].amount ? 'up' : 'down'}>
-                    {p.amount > hist[k - 1].amount ? '+' : ''}
-                    {Math.round(((p.amount - hist[k - 1].amount) / hist[k - 1].amount) * 100)}%
-                  </em>
-                )}
-              </li>
-            ))}
+            {hist
+              .map((p, k) => {
+                const label = k === 0 ? t('editor.history.initial') : cnDateFull(p.from);
+                const content = (
+                  <>
+                    <span className="h-price-date">{label}</span>
+                    <b>{money(p.amount, v.currency)}</b>
+                    {k > 0 && hist[k - 1].amount > 0 && p.amount !== hist[k - 1].amount && (
+                      <em className={p.amount > hist[k - 1].amount ? 'up' : 'down'}>
+                        {p.amount > hist[k - 1].amount ? '+' : ''}
+                        {Math.round(((p.amount - hist[k - 1].amount) / hist[k - 1].amount) * 100)}%
+                      </em>
+                    )}
+                  </>
+                );
+                return (
+                  <li key={p.from}>
+                    {onPrice ? (
+                      <button
+                        className="h-price-row"
+                        onClick={() => onPrice(v.start, p.from)}
+                        aria-label={t('editor.history.editPrice', { date: p.from })}
+                        aria-expanded={priceEditor?.start === v.start && priceEditor.from === p.from}
+                      >
+                        {content}
+                      </button>
+                    ) : (
+                      <div className="h-price-row">{content}</div>
+                    )}
+                    {priceEditor?.start === v.start && priceEditor.from === p.from && priceEditor.content}
+                  </li>
+                );
+              })
+              .reverse()}
           </ul>
         )}
       </li>,

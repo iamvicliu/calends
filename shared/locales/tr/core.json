@@ -54,7 +54,9 @@
     "priceOutOfRange": "Fiyat değişikliği tarihi hiçbir dönemin içinde değil",
     "keepTooEarly": "Devam etme tarihi geçiş tarihinden sonra olmalı",
     "endTooEarly": "Bitiş tarihi bu dönemin başlangıcından sonra olmalı",
-    "startOrder": "Başlangıç tarihi, önceki ve sonraki aşamaların başlangıç tarihleri arasında olmalıdır."
+    "startOrder": "Başlangıç tarihi, önceki ve sonraki aşamaların başlangıç tarihleri arasında olmalıdır.",
+    "priceDuplicate": "Bu tarihte zaten bir fiyat var",
+    "priceInitial": "Başlangıç fiyatı silinemez"
   },
   "event": {
     "label": "{region}{price}/{per}",

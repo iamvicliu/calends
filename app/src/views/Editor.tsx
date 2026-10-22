@@ -11,7 +11,7 @@ import { DatePicker } from '../components/DatePicker.tsx';
 import { IconButton, ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
-import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
+import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ContactField } from './Members.tsx';
@@ -110,13 +110,22 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     handoff(f.name.trim() ? `${f.name.trim()}\n` : '', images);
   };
 
-  const save = () =>
-    run(
+  const save = async () => {
+    let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
+    // 直接改了价格框：视为今天起调价，过往账单保持原价
+    try {
+      if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
+      else out = syncPhase(out, today);
+    } catch (e) {
+      await run(async () => {
+        throw e;
+      });
+      return;
+    }
+    const affected = !isNew && affectedPriceCharges(sub, out, today);
+    if (affected && !(await ask(t('editor.history.repriceCharges', { count: affected })))) return;
+    await run(
       async () => {
-        let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
-        // 直接改了价格框：视为今天起调价，过往账单保持原价
-        if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
-        else out = syncPhase(out, today);
         if (out.status === 'cancelled' && !out.end) out.end = today;
         if (out.status === 'paused' && !out.pausedAt) out.pausedAt = today;
         if (out.status !== 'paused') delete out.pausedAt;
@@ -141,6 +150,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       },
       t(isNew ? 'editor.toast.added' : 'editor.toast.saved'),
     );
+  };
 
   return (
     <Sheet

@@ -178,7 +178,10 @@
     "now": "至今",
     "initial": "起始",
     "priceChange": "{date} 调价",
-    "outsidePayments": "将有 {count} 笔已有扣款落在服务期之外。保留原日期、金额和所属阶段，继续修改？"
+    "outsidePayments": "将有 {count} 笔已有扣款落在服务期之外。保留原日期、金额和所属阶段，继续修改？",
+    "editPrice": "编辑 {date} 生效的价格",
+    "deletePrice": "删除这条调价记录？此前价格将沿用至下次调价。",
+    "repriceCharges": "保存后将重新推算 {count} 笔历史预计扣款，实付记录保持原样。继续保存？"
   },
   "payment": {
     "addTitle": "记一笔",

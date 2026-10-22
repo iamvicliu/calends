@@ -49,7 +49,9 @@
     "priceOutOfRange": "Tanggal perubahan harga tidak berada di fase mana pun",
     "keepTooEarly": "Tanggal tetap berjalan harus setelah tanggal peralihan",
     "endTooEarly": "Tanggal berakhir harus setelah awal fase ini",
-    "startOrder": "Tanggal mulai harus berada di antara tanggal mulai tahap sebelumnya dan berikutnya."
+    "startOrder": "Tanggal mulai harus berada di antara tanggal mulai tahap sebelumnya dan berikutnya.",
+    "priceDuplicate": "Harga sudah ada pada tanggal ini",
+    "priceInitial": "Harga awal tidak dapat dihapus"
   },
   "event": {
     "label": "{region}{price}/{per}",

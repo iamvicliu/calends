@@ -203,7 +203,10 @@
     "now": "aujourd’hui",
     "initial": "Initial",
     "priceChange": "Changement de prix {date}",
-    "outsidePayments": "{count} paiement(s) existant(s) seront hors de la période de service. Continuer en conservant leurs dates, montants et phase ?"
+    "outsidePayments": "{count} paiement(s) existant(s) seront hors de la période de service. Continuer en conservant leurs dates, montants et phase ?",
+    "editPrice": "Modifier le prix à compter du {date}",
+    "deletePrice": "Supprimer ce prix ? Le prix précédent sera appliqué jusqu’au prochain changement.",
+    "repriceCharges": "L’enregistrement recalculera {count} prélèvements passés estimés. Les paiements enregistrés resteront inchangés. Continuer ?"
   },
   "payment": {
     "addTitle": "Ajouter un paiement",

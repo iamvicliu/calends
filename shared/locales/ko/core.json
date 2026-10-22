@@ -49,7 +49,9 @@
     "priceOutOfRange": "가격 변경일이 어떤 구간에도 속하지 않습니다",
     "keepTooEarly": "계속 사용할 종료일은 전환일 이후여야 합니다",
     "endTooEarly": "종료일은 이 구간의 시작일 이후여야 합니다",
-    "startOrder": "시작일은 이전 단계의 시작일 이후, 다음 단계의 시작일 이전이어야 합니다."
+    "startOrder": "시작일은 이전 단계의 시작일 이후, 다음 단계의 시작일 이전이어야 합니다.",
+    "priceDuplicate": "이 날짜에 이미 가격이 있습니다",
+    "priceInitial": "초기 가격은 삭제할 수 없습니다"
   },
   "event": {
     "label": "{region}{price}/{per}",

@@ -3514,6 +3514,55 @@ select.btn {
 .h-prices em.down {
   color: var(--green);
 }
+.h-price-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 48px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+button.h-price-row {
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+button.h-price-row:hover,
+button.h-price-row:focus-visible {
+  background: var(--fill-2);
+}
+button.h-price-row:focus-visible {
+  outline: 2px solid var(--accent);
+}
+.h-price-date {
+  min-width: 0;
+}
+.h-price-row b {
+  font-weight: 500;
+  white-space: nowrap;
+}
+.h-price-row em {
+  width: 48px;
+  flex-shrink: 0;
+  text-align: right;
+  margin: 0;
+}
+.h-price-editor {
+  margin: 4px 0 12px;
+}
+.h-price-editor .h-error {
+  grid-column: 1 / -1;
+}
+@media (max-width: 600px), (pointer: coarse) {
+  button.h-price-row {
+    min-height: 40px;
+  }
+}
 /* 并行的阶段：第二条轨道，圆点落在右边那条线上 */
 .history.laned {
   padding-left: var(--h-padding);

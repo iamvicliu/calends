@@ -1,6 +1,6 @@
 // 订阅历程的编辑操作：调价、换区/换套餐、断更、续订。全部为纯函数，返回新的订阅对象。
 import { addDays, billingPeriod, chargesBetween, collectionAnchor, currentPhase, effectiveStatus, phaseSubs, priceAt, subError, validDay } from './billing.ts';
-import type { Cycle, Payment, Phase, Stop, Subscription } from './types.ts';
+import type { Cycle, Payment, Phase, PricePoint, Stop, Subscription } from './types.ts';
 import { t } from './i18n.ts';
 
 export interface PlanChange {
@@ -144,26 +144,79 @@ export function resume(s: Subscription, at: string, next: PlanChange): Subscript
 
 /** 在当前阶段记一次调价：from 起按新价格扣费 */
 export function changePrice(s: Subscription, from: string, amount: number): Subscription {
-  if (!s.phases?.length) {
-    const hist = s.priceHistory?.length ? [...s.priceHistory] : [{ from: s.start, amount: priceAt(s, addDays(from, -1)) }];
-    const merged = hist
-      .filter((p) => p.from !== from)
-      .concat({ from, amount })
-      .sort((a, b) => a.from.localeCompare(b.from));
-    return { ...s, priceHistory: merged, price: merged[merged.length - 1].amount };
-  }
+  const v = phaseSubs(s).findLast((p) => p.start <= from && (!p.end || from <= p.end));
+  if (!v) throw new Error(t('core.phase.priceOutOfRange'));
+  const hist = pricePoints(v);
+  return replacePricePoints(s, v.start, hist.filter((p) => p.from !== from).concat({ from, amount }));
+}
+
+/** 无历史的阶段也有一个可编辑的起始价；不把首期优惠当作常规价格。 */
+export function pricePoints(phase: Pick<Phase, 'priceHistory' | 'price' | 'start'>): PricePoint[] {
+  return (phase.priceHistory?.length ? phase.priceHistory : [{ from: phase.start, amount: phase.price }]).slice().sort((a, b) => a.from.localeCompare(b.from));
+}
+
+/** 以阶段开始日定位，替换价格历史；不触碰扣款、计费锚点或其他阶段。 */
+function replacePricePoints(s: Subscription, start: string, points: PricePoint[]): Subscription {
   const phases = phasesOf(s);
-  const idx = phases.findIndex((p, i) => p.start <= from && (!phases[i + 1] || phases[i + 1].start > from));
-  if (idx < 0) throw new Error(t('core.phase.priceOutOfRange'));
-  const p = phases[idx];
-  const old = phaseSubs({ ...s, phases })[idx];
-  const hist = p.priceHistory?.length ? [...p.priceHistory] : [{ from: p.start, amount: priceAt(old, addDays(from, -1)) }];
-  p.priceHistory = hist
-    .filter((x) => x.from !== from)
-    .concat({ from, amount })
-    .sort((a, b) => a.from.localeCompare(b.from));
-  p.price = p.priceHistory[p.priceHistory.length - 1].amount;
-  return mirror(s, phases);
+  const p = phases.find((p) => p.start === start);
+  const v = phaseSubs(s).find((p) => p.start === start);
+  if (!p || !v || !points.length) throw new Error(t('mcp.error.invalidTarget'));
+  const old = pricePoints(p);
+  for (const point of points) {
+    if (!validDay(point.from) || point.from < start || (v.end && point.from > v.end)) {
+      // movePhaseStart may retain older dated points. An unchanged historical point is still valid.
+      if (!old.some((x) => x.from === point.from && x.amount === point.amount)) throw new Error(t('core.phase.priceOutOfRange'));
+    }
+    if (!Number.isFinite(point.amount) || point.amount < 0) throw new Error(t('core.subError.price'));
+  }
+  if (new Set(points.map((p) => p.from)).size !== points.length) throw new Error(t('core.phase.priceDuplicate'));
+  p.priceHistory = points.map((p) => ({ ...p })).sort((a, b) => a.from.localeCompare(b.from));
+  p.price = p.priceHistory.at(-1)!.amount;
+  return s.phases?.length ? mirror(s, phases) : { ...s, price: p.price, priceHistory: p.priceHistory };
+}
+
+/** 修改一个价格点（包括起始价），oldFrom 为原生效日。 */
+export function editPricePoint(s: Subscription, start: string, oldFrom: string, point: PricePoint): Subscription {
+  const v = phaseSubs(s).find((p) => p.start === start);
+  if (!v || !pricePoints(v).some((p) => p.from === oldFrom)) throw new Error(t('mcp.error.invalidTarget'));
+  if (!validDay(point.from) || point.from < start || (v.end && point.from > v.end)) throw new Error(t('core.phase.priceOutOfRange'));
+  return replacePricePoints(
+    s,
+    start,
+    pricePoints(v).map((p) => (p.from === oldFrom ? point : p)),
+  );
+}
+
+/** 删除调价后沿用前一个价格；最早的起始价不能删除。 */
+export function removePricePoint(s: Subscription, start: string, from: string): Subscription {
+  const v = phaseSubs(s).find((p) => p.start === start);
+  if (!v) throw new Error(t('mcp.error.invalidTarget'));
+  const hist = pricePoints(v);
+  if (hist[0].from === from) throw new Error(t('core.phase.priceInitial'));
+  if (!hist.some((p) => p.from === from)) throw new Error(t('mcp.error.invalidTarget'));
+  return replacePricePoints(
+    s,
+    start,
+    hist.filter((p) => p.from !== from),
+  );
+}
+
+/** 已发生、没有实付覆盖且因价格修正改变金额的预计扣款笔数。 */
+export function affectedPriceCharges(previous: Subscription, next: Subscription, today: string): number {
+  const after = phaseSubs(next);
+  return phaseSubs(previous).reduce((count, before, i) => {
+    const v = after[i];
+    if (!v) return count;
+    const charges = new Map(chargesBetween(v, v.start, today, today).map((c) => [c.date, c]));
+    return (
+      count +
+      chargesBetween(before, before.start, today, today).filter((c) => {
+        if (before.payments?.some((p) => p.date === c.date)) return false;
+        const revised = charges.get(c.date);
+        return revised && revised.currency === c.currency && revised.amount !== c.amount;
+      }).length
+    );
+  }, 0);
 }
 
 /** 阶段 i 最后一个服务日（含）；无缝切换在下一段开始前一天结束。 */
@@ -483,6 +536,7 @@ export function cancelAtEnd(s: Subscription, at: string, today: string): Subscri
 
 /** Correct one existing phase without replacing unrelated phases or recorded payments. */
 export function editPhase(s: Subscription, start: string, patch: Partial<Phase>): Subscription {
+  if (patch.priceHistory === null) throw new Error(t('core.phase.priceInitial'));
   const phases = phasesOf(s);
   const index = phases.findIndex((p) => p.start === start);
   if (index < 0) throw new Error(t('mcp.error.invalidTarget'));
@@ -499,5 +553,17 @@ export function editPhase(s: Subscription, start: string, patch: Partial<Phase>)
     if (error) throw new Error(error);
     if (phase.end && phase.end < phase.start) throw new Error(t('core.phase.endTooEarly'));
   }
-  return mirror({ ...s, start: phases[0].start }, phases);
+  let next = mirror({ ...s, start: phases[0].start }, phases);
+  const target = phases.find((p) => p.start === (patch.start ?? start))!;
+  if (patch.priceHistory) {
+    const initial = pricePoints(phasesOf(s).find((p) => p.start === start)!)[0];
+    if (!patch.priceHistory.some((p) => p.from === initial.from)) throw new Error(t('core.phase.priceInitial'));
+    const end = phaseSubs(next).find((p) => p.start === target.start)?.end;
+    if (patch.priceHistory.some((p) => !validDay(p.from) || p.from < target.start || (end && p.from > end))) throw new Error(t('core.phase.priceOutOfRange'));
+    next = replacePricePoints(next, target.start, patch.priceHistory);
+  } else if (patch.price !== undefined && target.priceHistory?.length) {
+    const hist = pricePoints(target);
+    next = editPricePoint(next, target.start, hist.at(-1)!.from, { ...hist.at(-1)!, amount: patch.price });
+  }
+  return next;
 }

@@ -701,3 +701,99 @@ test('assistant pins member id when adding by person without a name; later recei
   assert.equal(member.personId, 'target');
   assert.equal(member.payments?.[0].amount, 2);
 });
+
+test('价格历史 MCP：编辑、删除、起始价保护、预览及只读权限', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = {
+    ...sub(),
+    start: '2022-01-15',
+    price: 15,
+    currency: 'USD',
+    share: undefined,
+    proxy: undefined,
+    phases: [
+      {
+        start: '2022-01-15',
+        end: '2025-12-31',
+        price: 200,
+        currency: 'TRY',
+        cycle: { unit: 'month', every: 1 },
+        region: 'TR',
+        priceHistory: [
+          { from: '2022-01-15', amount: 40 },
+          { from: '2023-01-15', amount: 60 },
+          { from: '2024-01-15', amount: 120 },
+          { from: '2025-01-15', amount: 200 },
+        ],
+        payments: [{ date: '2022-01-15', amount: 39, note: 'Actual' }],
+      },
+      { start: '2026-01-01', price: 15, currency: 'USD', cycle: { unit: 'month', every: 1 }, region: 'US' },
+    ],
+  };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const phases = s.phases!;
+  for (const args of [
+    { action: 'edit', phase: s.start, original_from: '2024-01-15', from: '2024-02-15', amount: 130 },
+    { action: 'remove', phase: s.start, original_from: '2023-01-15' },
+    { action: 'edit', phase: s.start, original_from: s.start, amount: 35 },
+  ]) {
+    const before = await f.snapshot();
+    const preview = await f.call('change_price', { subscription: 's', ...args, dry_run: true });
+    assert.equal(preview.isError, undefined, JSON.stringify(preview));
+    assert.ok(preview.structuredContent.affected_estimated_charges > 0);
+    assert.deepEqual(await f.snapshot(), before);
+    const denied = await f.call('change_price', { subscription: 's', ...args }, f.read);
+    assert.equal(denied.isError, true);
+    assert.deepEqual(await f.snapshot(), before);
+    const saved = await f.call('change_price', { subscription: 's', ...args });
+    assert.equal(saved.isError, undefined, JSON.stringify(saved));
+    const actual = (await f.snapshot()).subscriptions[0];
+    assert.deepEqual(actual.phases![0].payments, phases[0].payments);
+    assert.deepEqual(actual.phases![1], phases[1]);
+    assert.equal(actual.price, 15);
+  }
+  const revised = (await f.snapshot()).subscriptions[0];
+  assert.deepEqual(revised.phases![0].priceHistory, [
+    { from: '2022-01-15', amount: 35 },
+    { from: '2024-02-15', amount: 130 },
+    { from: '2025-01-15', amount: 200 },
+  ]);
+  const before = await f.snapshot();
+  for (const args of [
+    { action: 'remove', phase: s.start, original_from: s.start },
+    { action: 'edit', phase: s.start, original_from: '2025-01-15', from: '2024-02-15', amount: 90 },
+    { action: 'edit', phase: s.start, original_from: '2025-01-15', from: '2026-01-01', amount: 90 },
+    { action: 'edit', original_from: '2025-01-15', amount: 90 },
+  ]) {
+    const failed = await f.call('change_price', { subscription: 's', ...args });
+    assert.equal(failed.isError, true, JSON.stringify(failed));
+    assert.deepEqual(await f.snapshot(), before);
+  }
+  const planArgs = {
+    subscription: 's',
+    action: 'edit',
+    at: s.start,
+    set: {
+      priceHistory: [
+        { from: '2025-01-15', amount: 180 },
+        { from: s.start, amount: 32 },
+      ],
+    },
+  };
+  const preview = await f.call('change_plan', { ...planArgs, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.ok(preview.structuredContent.affected_estimated_charges > 0);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('change_plan', planArgs, f.read)).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('change_plan', planArgs)).isError, undefined);
+  const after = (await f.snapshot()).subscriptions[0];
+  assert.equal(after.phases![0].price, 180);
+  assert.deepEqual(after.phases![0].priceHistory, [
+    { from: s.start, amount: 32 },
+    { from: '2025-01-15', amount: 180 },
+  ]);
+  assert.deepEqual(after.phases![0].payments, phases[0].payments);
+  assert.deepEqual(after.phases![1], phases[1]);
+});

@@ -194,7 +194,10 @@
     "now": "nay",
     "initial": "Ban đầu",
     "priceChange": "Đổi giá {date}",
-    "outsidePayments": "{count} khoản thanh toán sẽ nằm ngoài thời gian dịch vụ. Tiếp tục giữ ngày, số tiền và giai đoạn ban đầu?"
+    "outsidePayments": "{count} khoản thanh toán sẽ nằm ngoài thời gian dịch vụ. Tiếp tục giữ ngày, số tiền và giai đoạn ban đầu?",
+    "editPrice": "Sửa giá có hiệu lực từ {date}",
+    "deletePrice": "Xóa giá này? Giá trước đó sẽ áp dụng đến lần thay đổi tiếp theo.",
+    "repriceCharges": "Lưu sẽ tính lại {count} khoản trừ tiền ước tính trong quá khứ. Các khoản thanh toán đã ghi giữ nguyên. Tiếp tục?"
   },
   "payment": {
     "addTitle": "Thêm khoản thanh toán",

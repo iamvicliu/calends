@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { addDays, addMonths, nextCharge, phaseSubs } from '../../../shared/billing.ts';
-import { changePrice, movePhaseStart, paymentsOutsideMovedPhase, syncPhase, removePhase, resume, setPhaseEnd, switchPlan } from '../../../shared/phases.ts';
+import {
+  changePrice,
+  editPricePoint,
+  removePricePoint,
+  pricePoints,
+  movePhaseStart,
+  paymentsOutsideMovedPhase,
+  syncPhase,
+  removePhase,
+  resume,
+  setPhaseEnd,
+  switchPlan,
+} from '../../../shared/phases.ts';
 import type { AppState, Cycle, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { History } from './History.tsx';
@@ -27,6 +39,32 @@ type Mode = 'price' | 'switch' | 'resume';
 /** 编辑页里的「历程与变更」：调价、换区 / 换套餐、续订 */
 export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: (s: Subscription) => void; state: AppState; today: string }) {
   const [mode, setMode] = useState<Mode | null>(null);
+  const [point, setPoint] = useState<{ start: string; from: string; date: string; amount: string } | null>(null);
+  const [pointError, setPointError] = useState('');
+  const pointPhase = point && phaseSubs(f).find((v) => v.start === point.start);
+  const openPoint = (start: string, from: string) => {
+    if (point?.start === start && point.from === from) return setPoint(null);
+    const v = phaseSubs(f).find((v) => v.start === start)!;
+    setPoint({ start, from, date: from, amount: String(pricePoints(v).find((p) => p.from === from)!.amount) });
+    setPointError('');
+    setMode(null);
+  };
+  const applyPoint = async (remove = false) => {
+    if (!point) return;
+    setPointError('');
+    try {
+      if (!remove && !point.amount.trim()) throw new Error(t('editor.change.needPrice'));
+      const current = syncPhase(f, today);
+      const next = remove
+        ? removePricePoint(current, point.start, point.from)
+        : editPricePoint(current, point.start, point.from, { from: point.date, amount: Number(point.amount) });
+      if (remove && !(await ask(t('editor.history.deletePrice')))) return;
+      setF(next);
+      setPoint(null);
+    } catch (e) {
+      setPointError(e instanceof Error ? e.message : String(e));
+    }
+  };
   const [date, setDate] = useState(today);
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState(f.currency);
@@ -41,6 +79,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   const phases = phaseSubs(f).length;
 
   const open = (m: Mode) => {
+    setPoint(null);
     setMode(m);
     // 生效日要晚于当前阶段的开始日：今天就开始的新订阅，默认放到下次续费（或第二天）
     const lastStart = phaseSubs(f).pop()!.start;
@@ -108,7 +147,58 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
 
   return (
     <Group title={t('editor.change.title')}>
-      <History sub={f} state={state} today={today} onEnd={setEnd} onStart={setStart} />
+      <History
+        sub={f}
+        state={state}
+        today={today}
+        onEnd={setEnd}
+        onStart={setStart}
+        onPrice={openPoint}
+        priceEditor={
+          point && pointPhase
+            ? {
+                start: point.start,
+                from: point.from,
+                content: (
+                  <div className="change-form h-price-editor">
+                    <label>
+                      {t('editor.change.priceDate')}
+                      <DatePicker
+                        value={point.date}
+                        min={pointPhase.start}
+                        max={pointPhase.end}
+                        ariaLabel={t('editor.change.priceDate')}
+                        onChange={(date) => date && setPoint({ ...point, date })}
+                      />
+                    </label>
+                    <label>
+                      {t('editor.change.newPrice', { currency: pointPhase.currency })}
+                      <input inputMode="decimal" value={point.amount} autoFocus onChange={(e) => setPoint({ ...point, amount: e.target.value })} />
+                    </label>
+                    {pointError && (
+                      <p className="h-error" role="alert">
+                        {pointError}
+                      </p>
+                    )}
+                    <div className="change-actions">
+                      {pricePoints(pointPhase)[0].from !== point.from && (
+                        <button className="btn danger" onClick={() => void applyPoint(true)}>
+                          {t('common.delete')}
+                        </button>
+                      )}
+                      <button className="btn" onClick={() => setPoint(null)}>
+                        {t('common.cancel')}
+                      </button>
+                      <button className="btn primary" onClick={() => void applyPoint()}>
+                        {t('common.apply')}
+                      </button>
+                    </div>
+                  </div>
+                ),
+              }
+            : undefined
+        }
+      />
       {startError && (
         <p className="h-error" role="alert">
           {startError}

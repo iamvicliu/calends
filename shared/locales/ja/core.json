@@ -49,7 +49,9 @@
     "priceOutOfRange": "価格変更日がどの期間にも含まれていません",
     "keepTooEarly": "継続利用の終了日は切り替え日より後にしてください",
     "endTooEarly": "終了日はこの期間の開始日より後にしてください",
-    "startOrder": "開始日は前の期間の開始日より後、次の期間の開始日より前にしてください。"
+    "startOrder": "開始日は前の期間の開始日より後、次の期間の開始日より前にしてください。",
+    "priceDuplicate": "この日付の価格は既に登録されています",
+    "priceInitial": "初期価格は削除できません"
   },
   "event": {
     "label": "{region}{price}/{per}",

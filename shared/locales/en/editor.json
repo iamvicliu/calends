@@ -203,7 +203,10 @@
     "now": "now",
     "initial": "Initial",
     "priceChange": "Price change {date}",
-    "outsidePayments": "{count} existing payment(s) will fall outside the service period. Keep their original dates, amounts and phase, and continue?"
+    "outsidePayments": "{count} existing payment(s) will fall outside the service period. Keep their original dates, amounts and phase, and continue?",
+    "editPrice": "Edit price effective {date}",
+    "deletePrice": "Delete this price point? The preceding price will apply until the next change.",
+    "repriceCharges": "Saving will recalculate {count} past estimated charges. Recorded payments will stay unchanged. Continue?"
   },
   "payment": {
     "addTitle": "Add payment",

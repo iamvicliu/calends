@@ -203,7 +203,10 @@
     "now": "şimdi",
     "initial": "Başlangıç",
     "priceChange": "Fiyat değişikliği {date}",
-    "outsidePayments": "Mevcut {count} ödeme hizmet dönemi dışında kalacak. Özgün tarihleri, tutarları ve aşamayı koruyarak devam edilsin mi?"
+    "outsidePayments": "Mevcut {count} ödeme hizmet dönemi dışında kalacak. Özgün tarihleri, tutarları ve aşamayı koruyarak devam edilsin mi?",
+    "editPrice": "{date} tarihinden itibaren fiyatı düzenle",
+    "deletePrice": "Bu fiyat silinsin mi? Önceki fiyat bir sonraki değişikliğe kadar uygulanır.",
+    "repriceCharges": "Kaydetme, geçmişteki {count} tahmini ödemeyi yeniden hesaplar. Kayıtlı ödemeler değişmez. Devam edilsin mi?"
   },
   "payment": {
     "addTitle": "Ödeme ekle",

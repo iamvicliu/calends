@@ -28,6 +28,7 @@ export function DatePicker({
   placeholder = t('picker.date.placeholder'),
   clearable,
   min,
+  max,
   ariaLabel,
 }: {
   value?: string;
@@ -35,6 +36,7 @@ export function DatePicker({
   placeholder?: string;
   clearable?: boolean;
   min?: string;
+  max?: string;
   ariaLabel?: string;
 }) {
   const today = todayOf();
@@ -76,7 +78,7 @@ export function DatePicker({
     }
     setOpen(!open);
   };
-  const disabled = (d: string) => !!min && d < min;
+  const disabled = (d: string) => (!!min && d < min) || (!!max && d > max);
   const pick = (d: string) => {
     if (disabled(d)) return;
     onChange(d);

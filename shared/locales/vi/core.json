@@ -49,7 +49,9 @@
     "priceOutOfRange": "Ngày đổi giá không thuộc giai đoạn nào",
     "keepTooEarly": "Ngày tiếp tục dùng đến phải sau ngày chuyển",
     "endTooEarly": "Ngày kết thúc phải sau ngày bắt đầu của giai đoạn này",
-    "startOrder": "Ngày bắt đầu phải nằm giữa ngày bắt đầu của hai giai đoạn liền kề."
+    "startOrder": "Ngày bắt đầu phải nằm giữa ngày bắt đầu của hai giai đoạn liền kề.",
+    "priceDuplicate": "Đã có giá vào ngày này",
+    "priceInitial": "Không thể xóa giá ban đầu"
   },
   "event": {
     "label": "{region}{price}/{per}",

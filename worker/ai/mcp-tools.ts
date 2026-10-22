@@ -34,6 +34,9 @@ import {
   editPhase,
   removePhase,
   changePrice,
+  editPricePoint,
+  removePricePoint,
+  affectedPriceCharges,
   confirmPlan,
   deletePayment,
   dropPlan,
@@ -1185,16 +1188,38 @@ const CATALOGUE: Tool[] = [
   },
   {
     name: 'change_price',
-    description: 'Record a price change for the current plan, effective from a date (vendor raised/lowered the price). Past charges keep the old price.',
+    description:
+      'Add (default), edit or remove a dated price point in an existing plan. edit/remove require phase and original_from. The initial price can be edited but not removed. Dates must be within the phase and unique. Past estimated charges are recalculated; recorded payments stay unchanged. Preview reports affected_estimated_charges.',
     write: true,
     inputSchema: obj(
-      { subscription: SUBREF, amount: { type: 'number', minimum: 0 }, from: { ...DATE, description: 'Effective date; defaults to today.' }, dry_run: DRY },
-      ['subscription', 'amount'],
+      {
+        subscription: SUBREF,
+        action: {
+          type: 'string',
+          enum: ['add', 'edit', 'remove'],
+          description: 'Default add (upsert by date). edit/remove target an existing point using phase and original_from. The initial point cannot be removed.',
+        },
+        phase: { ...DATE, description: 'Exact phase start; required for edit/remove, including single-phase subscriptions.' },
+        original_from: { ...DATE, description: 'Original effective date; required for edit/remove.' },
+        amount: { type: 'number', minimum: 0 },
+        from: { ...DATE, description: 'Effective date; defaults to today for add, original_from for edit.' },
+        dry_run: DRY,
+      },
+      ['subscription'],
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
-      return commit(ctx, st, today, changePrice(s, date(a.from, 'from', today), num(a.amount, 'amount')), a.dry_run, ['price']);
+      const action = a.action ?? 'add';
+      const phase = action === 'add' ? undefined : date(a.phase, 'phase');
+      const original = action === 'add' ? undefined : date(a.original_from, 'original_from');
+      const after =
+        action === 'remove'
+          ? removePricePoint(s, phase!, original!)
+          : action === 'edit'
+            ? editPricePoint(s, phase!, original!, { from: date(a.from, 'from', original), amount: num(a.amount, 'amount') })
+            : changePrice(s, date(a.from, 'from', today), num(a.amount, 'amount'));
+      return { ...(await commit(ctx, st, today, after, a.dry_run, ['price'])), affected_estimated_charges: affectedPriceCharges(s, after, today) };
     },
   },
   {
@@ -1219,7 +1244,12 @@ const CATALOGUE: Tool[] = [
           note: { type: ['string', 'null'] },
           nextDue: { type: ['string', 'null'], format: 'date' },
           planned: { type: 'boolean' },
-          priceHistory: { type: ['array', 'null'], items: obj({ from: DATE, amount: { type: 'number', minimum: 0 } }, ['from', 'amount']) },
+          priceHistory: {
+            type: ['array', 'null'],
+            description:
+              'Full replacement, retaining the initial effective date; use change_price action=edit to move that initial date. Latest amount becomes phase price.',
+            items: obj({ from: DATE, amount: { type: 'number', minimum: 0 } }, ['from', 'amount']),
+          },
           intro: {
             type: ['object', 'null'],
             properties: { price: { type: 'number', minimum: 0 }, until: DATE },
@@ -1267,6 +1297,7 @@ const CATALOGUE: Tool[] = [
         const after = act === 'remove' ? removePhase(s, index) : editPhase(s, at, patch);
         return {
           ...(await commit(ctx, st, today, after, a.dry_run, [act])),
+          affected_estimated_charges: affectedPriceCharges(s, after, today),
           before: phases[index],
           after: act === 'remove' ? null : after.phases?.find((p) => p.start === (patch.start ?? at)),
           references: { subscription: s.id, phase: at, removed_payments: act === 'remove' ? (phases[index].payments ?? []) : [] },

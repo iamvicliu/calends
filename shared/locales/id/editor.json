@@ -194,7 +194,10 @@
     "now": "sekarang",
     "initial": "Awal",
     "priceChange": "Perubahan harga {date}",
-    "outsidePayments": "{count} pembayaran akan berada di luar masa layanan. Lanjutkan dengan tanggal, jumlah, dan tahap asli?"
+    "outsidePayments": "{count} pembayaran akan berada di luar masa layanan. Lanjutkan dengan tanggal, jumlah, dan tahap asli?",
+    "editPrice": "Edit harga berlaku {date}",
+    "deletePrice": "Hapus harga ini? Harga sebelumnya berlaku hingga perubahan berikutnya.",
+    "repriceCharges": "Menyimpan akan menghitung ulang {count} perkiraan tagihan lampau. Pembayaran tercatat tidak berubah. Lanjutkan?"
   },
   "payment": {
     "addTitle": "Tambah pembayaran",

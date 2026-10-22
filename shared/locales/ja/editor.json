@@ -194,7 +194,10 @@
     "now": "現在",
     "initial": "初期",
     "priceChange": "価格変更 {date}",
-    "outsidePayments": "既存の支払い {count} 件がサービス期間外になります。元の日付、金額、所属期間を保持して続けますか？"
+    "outsidePayments": "既存の支払い {count} 件がサービス期間外になります。元の日付、金額、所属期間を保持して続けますか？",
+    "editPrice": "{date} からの価格を編集",
+    "deletePrice": "この価格を削除しますか？次の変更まで直前の価格が適用されます。",
+    "repriceCharges": "保存すると過去の推定請求 {count} 件を再計算します。記録済みの支払いは変更されません。続行しますか？"
   },
   "payment": {
     "addTitle": "支払いを追加",

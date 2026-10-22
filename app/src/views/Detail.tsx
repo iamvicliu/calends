@@ -40,7 +40,7 @@ import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
 import { snapshot } from '../snapshot.ts';
 import { SubShare } from './SubShare.tsx';
-import { confirmPlan, dropPlan, reactivate } from '../../../shared/phases.ts';
+import { confirmPlan, dropPlan, pricePoints, reactivate } from '../../../shared/phases.ts';
 import { t } from '../../../shared/i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { ChargeChart, type ChartLane } from './DetailChart.tsx';
@@ -643,7 +643,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
     return (
       <span className="dt-inline">
         {v.region && <Region cc={v.region} />}
-        {[`${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`, m?.name].filter(Boolean).join(' · ')}
+        {[`${money(pricePoints(v)[0].amount, v.currency)} ${cycleLabel(v.cycle)}`, m?.name].filter(Boolean).join(' · ')}
       </span>
     );
   };
@@ -668,7 +668,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
         tone: 'acc',
         future: v.start > today,
       });
-    const hist = (v.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
+    const hist = pricePoints(v);
     hist.forEach((p, k) => {
       if (!k || p.from === v.start) return;
       const prev = hist[k - 1].amount;

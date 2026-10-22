@@ -194,7 +194,10 @@
     "now": "현재",
     "initial": "최초",
     "priceChange": "가격 변경 {date}",
-    "outsidePayments": "기존 결제 {count}건이 서비스 기간을 벗어납니다. 원래 날짜, 금액, 단계를 유지하고 계속할까요?"
+    "outsidePayments": "기존 결제 {count}건이 서비스 기간을 벗어납니다. 원래 날짜, 금액, 단계를 유지하고 계속할까요?",
+    "editPrice": "{date}부터 적용되는 가격 편집",
+    "deletePrice": "이 가격을 삭제할까요? 다음 변경까지 이전 가격이 적용됩니다.",
+    "repriceCharges": "저장하면 과거 예상 청구 {count}건이 다시 계산됩니다. 기록된 결제는 변경되지 않습니다. 계속할까요?"
   },
   "payment": {
     "addTitle": "결제 추가",

@@ -54,7 +54,9 @@
     "priceOutOfRange": "La fecha del cambio de precio no está dentro de ninguna fase",
     "keepTooEarly": "La fecha hasta la que se mantiene debe ser posterior a la del cambio",
     "endTooEarly": "La fecha de fin debe ser posterior al inicio de esta fase",
-    "startOrder": "El inicio debe ser posterior al de la fase anterior y anterior al de la siguiente."
+    "startOrder": "El inicio debe ser posterior al de la fase anterior y anterior al de la siguiente.",
+    "priceDuplicate": "Ya existe un precio en esta fecha",
+    "priceInitial": "No se puede eliminar el precio inicial"
   },
   "event": {
     "label": "{region}{price}/{per}",

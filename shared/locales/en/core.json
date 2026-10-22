@@ -54,7 +54,9 @@
     "priceOutOfRange": "The price change date isn't within any phase",
     "keepTooEarly": "The keep-until date must be after the switch date",
     "endTooEarly": "The end date must be after this phase's start date",
-    "startOrder": "Phase starts must stay strictly between the adjacent phase starts."
+    "startOrder": "Phase starts must stay strictly between the adjacent phase starts.",
+    "priceDuplicate": "A price point already exists on this date",
+    "priceInitial": "The initial price cannot be deleted"
   },
   "event": {
     "label": "{region}{price}/{per}",
