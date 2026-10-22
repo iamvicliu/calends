@@ -19,7 +19,13 @@
     "date": "Fecha",
     "member": "Miembro",
     "covers": "Periodo",
-    "amount": "Importe"
+    "amount": "Importe",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
+    "groupSum": {
+      "one": "{count} pago · {amount}",
+      "other": "{count} pagos · {amount}"
+    }
   },
   "contact": {
     "via": {

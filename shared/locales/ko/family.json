@@ -19,7 +19,12 @@
     "date": "받은 날",
     "member": "멤버",
     "covers": "기간",
-    "amount": "금액"
+    "amount": "금액",
+    "expandAll": "모두 펼치기",
+    "collapseAll": "모두 접기",
+    "groupSum": {
+      "other": "{count}건 · {amount}"
+    }
   },
   "contact": {
     "via": {

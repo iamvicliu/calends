@@ -19,7 +19,13 @@
     "date": "Datum",
     "member": "Mitglied",
     "covers": "Zeitraum",
-    "amount": "Betrag"
+    "amount": "Betrag",
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle zuklappen",
+    "groupSum": {
+      "one": "{count} Zahlung · {amount}",
+      "other": "{count} Zahlungen · {amount}"
+    }
   },
   "contact": {
     "via": {

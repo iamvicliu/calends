@@ -19,7 +19,12 @@
     "date": "Tanggal",
     "member": "Anggota",
     "covers": "Periode",
-    "amount": "Jumlah"
+    "amount": "Jumlah",
+    "expandAll": "Buka semua",
+    "collapseAll": "Tutup semua",
+    "groupSum": {
+      "other": "{count} pembayaran · {amount}"
+    }
   },
   "contact": {
     "via": {

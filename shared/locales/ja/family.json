@@ -19,7 +19,12 @@
     "date": "受取日",
     "member": "メンバー",
     "covers": "対象期間",
-    "amount": "金額"
+    "amount": "金額",
+    "expandAll": "すべて展開",
+    "collapseAll": "すべて折りたたむ",
+    "groupSum": {
+      "other": "{count} 件 · {amount}"
+    }
   },
   "contact": {
     "via": {

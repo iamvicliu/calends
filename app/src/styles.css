@@ -8944,35 +8944,69 @@ a.car-toggle {
   border-bottom: 0;
 }
 .car-receipts .ld-row {
-  grid-template-columns: minmax(0, 1fr) minmax(130px, auto) minmax(96px, auto);
+  grid-template-columns: minmax(0, 1fr) 130px 120px;
   column-gap: 24px;
+  min-height: var(--ctl-h-md);
 }
 .car-receipts .ld-row > span {
+  overflow-wrap: anywhere;
+}
+.car-receipts .ld-row > span:not(:first-child) {
   white-space: nowrap;
 }
-.car-receipts .ld-row > span:first-child {
-  white-space: normal;
+.car-receipts-out .ld-row:not(.car-period) > span:nth-child(2) {
+  text-align: right;
+  align-items: flex-end;
 }
-@media (max-width: 560px) {
-  .car-receipts .ld-row {
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    column-gap: 14px;
-  }
+:root:not([data-input='pointer']) .car-receipts button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
 }
-/* 收款按期分组：组标题一行写期间与合计 */
+.car-receipts .car-ledger-head:not(:disabled) {
+  cursor: pointer;
+}
+.car-receipts .car-ledger-head:hover:not(:disabled),
+.car-receipts .car-period:hover:not(:disabled) {
+  background: var(--hover);
+}
+.car-receipts .car-ledger-head > span {
+  white-space: nowrap;
+}
 .car-receipts .car-period {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 10px 14px;
+  min-height: 64px;
   background: var(--fill-2);
   font-size: 12.5px;
   font-weight: 600;
   color: var(--label-2);
-  cursor: default;
+}
+.car-receipts .car-period > .car-period-title {
+  white-space: normal;
+  line-height: 1.5;
 }
 .car-receipts .car-period > span:last-child {
-  font-weight: 600;
-  color: var(--label-2);
+  white-space: nowrap;
+}
+.car-receipts .car-period-title small {
+  color: var(--label-3);
+  font-weight: 400;
+}
+.car-receipts .ld-row:not(.car-period) > span:first-child small {
+  font-size: 11px;
+}
+@media (max-width: 560px) {
+  .car-receipts .ld-row {
+    grid-template-columns: minmax(0, 1fr) 84px 98px;
+    column-gap: 10px;
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+  .car-receipts .car-period {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
 }
 .car-group-head {
   display: flex;
