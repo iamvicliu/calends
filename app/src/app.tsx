@@ -429,6 +429,8 @@ function App() {
   const [theme, toggleTheme] = useThemeMode();
   const [editing, setEditing] = useState<Subscription | null>(null);
   const [viewId, setViewId] = useState<string | null>(null);
+  // 从详情点「编辑」时记下来源，编辑关闭后回到这条订阅的详情，直接看到改动效果（删除后该订阅不存在，就不再打开）
+  const [backTo, setBackTo] = useState<string | null>(null);
   const [review, setReview] = useState(false);
   const [ics, setIcs] = useState(false);
   const [palette, setPalette] = useState(false);
@@ -631,10 +633,31 @@ function App() {
 
       {viewing && (
         <Sheet bare label={viewing.name} onClose={() => setViewId(null)}>
-          <Detail sub={viewing} state={state} today={d} onEdit={() => edit(viewing)} onClose={() => setViewId(null)} />
+          <Detail
+            sub={viewing}
+            state={state}
+            today={d}
+            onEdit={() => {
+              setBackTo(viewing.id);
+              edit(viewing);
+            }}
+            onClose={() => setViewId(null)}
+          />
         </Sheet>
       )}
-      {editing && <Editor key={editing.id} sub={editing} state={state} today={d} onClose={() => setEditing(null)} />}
+      {editing && (
+        <Editor
+          key={editing.id}
+          sub={editing}
+          state={state}
+          today={d}
+          onClose={() => {
+            setEditing(null);
+            if (backTo) setViewId(backTo);
+            setBackTo(null);
+          }}
+        />
+      )}
       {review && <Review state={state} today={d} onClose={() => setReview(false)} />}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {palette && <Palette state={state} d={d} onClose={() => setPalette(false)} onOpen={open} onAdd={add} />}
