@@ -18,7 +18,7 @@ import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
-import { CardTitle, Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
+import { CardTitle, Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar, useWidth } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -38,6 +38,8 @@ function parseIds(raw: string): Set<string> {
 
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
+  const [colsRef, colsWidth] = useWidth();
+  const colCount = Math.max(1, Math.min(4, Math.floor((colsWidth + 16) / 356)));
   const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused'].includes(effectiveStatus(s, today));
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));
   const joined = state.subscriptions.filter((s) => s.share?.role === 'member' && live(s));
@@ -137,12 +139,12 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         ) : (
           shown.length === 0 && <div className="card empty">{t('family.pool.filter.none')}</div>
         )}
-        {/* 两列各自独立：展开一张卡只撑高它所在的那一列，不影响同一行的另一张 */}
-        <div className="car-cols">
-          {[0, 1].map((col) => (
+        {/* 列数随宽度变化（每列至少约 340px）；各列独立：展开一张卡只撑高它所在的那一列 */}
+        <div className="car-cols" ref={colsRef} style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+          {Array.from({ length: colCount }, (_, col) => (
             <div className="car-col" key={col}>
               {shown.map((s, idx) => {
-                if (idx % 2 !== col) return null;
+                if (idx % colCount !== col) return null;
                 const sh = s.share!;
                 const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
                 // 已退出的成员不占座，只在展开的明细里保留
