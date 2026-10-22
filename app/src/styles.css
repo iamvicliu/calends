@@ -8762,7 +8762,8 @@ a.car-toggle {
 .cal-daycard {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) max-content;
-  grid-template-rows: minmax(48px, auto) minmax(64px, auto);
+  /* 第二行随内容高度，不预留固定高度；同排卡片由网格拉齐 */
+  grid-template-rows: minmax(48px, auto) auto;
   align-items: start;
   align-content: start;
   gap: 12px;
