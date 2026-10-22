@@ -148,7 +148,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       const d = diffDays(today, due);
       // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
-      const every = memberBillMonths(s, m);
+      const every = memberBillMonths(s, m, due);
       const period = memberCollection(s, m, due, collect);
       const fee = money(toBaseAt(state, period.amount, period.currency, undefined, collect), collect);
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';

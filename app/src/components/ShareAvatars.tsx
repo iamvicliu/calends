@@ -24,7 +24,7 @@ export function ShareAvatars({
   onMember?: (member: ShareMember) => void;
 }) {
   const members = sub.share!.members.filter((m) => memberAboard(m, today));
-  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
   const limit = Math.max(2, max);
   const shown = members.slice(0, members.length + 1 > limit ? limit - 2 : limit - 1);
   const extra = members.length - shown.length;

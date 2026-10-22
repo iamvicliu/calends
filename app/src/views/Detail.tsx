@@ -849,7 +849,7 @@ function Details({
   const nextBill = detailForecast(sub, today).charges[0];
   const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
-  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
   return (
     <>
       <Panel title={t('detail.summary')}>

@@ -1126,3 +1126,48 @@ test('MCP set_status keeps rejecting new stops on an expired nonrenewal after fu
     f.db.close();
   }
 });
+
+test('MCP 成员生效日调价：预览、保存、备份、默认收款和独立到期日共用标准', async (t) => {
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-10-22T12:00:00Z') });
+  const old = {
+    id: 'm',
+    name: 'Fictional Price',
+    share: 6.67,
+    fee: 40,
+    feeCurrency: 'CNY',
+    billEvery: 6,
+    joined: '2025-10-14',
+    paidUntil: '2026-07-16',
+    payments: [{ date: '2026-01-17', amount: 40, currency: 'CNY', from: '2026-01-17', until: '2026-07-16' }],
+  };
+  const f = fixture(base({ start: '2025-10-14', share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [old] } }));
+  f.ctx.overlay = new Map();
+  try {
+    const patch = { member: 'm', fee: 44, fee_from: '2026-07-01' };
+    const preview = await f.run('save_share_member', { ...patch, dry_run: true });
+    assert.equal(preview.member.next_collection.amount, 44);
+    assert.equal(preview.member.next_collection.until, '2027-01-16');
+    assert.equal(f.saved().share!.members[0].fee, 40);
+    f.ctx.overlay.clear();
+    await f.run('save_share_member', patch);
+    const member = f.saved().share!.members[0];
+    assert.equal(member.feeHistory!.length, 2);
+    assert.deepEqual(member.payments, old.payments);
+    const draft = await f.run('record_receivable', { member: 'm', dry_run: true });
+    assert.deepEqual([draft.receipt.amount, draft.receipt.currency, draft.receipt.from, draft.receipt.until], [44, 'CNY', '2026-07-17', '2027-01-16']);
+    assert.equal(f.saved().share!.members[0].payments!.length, 1);
+    f.ctx.overlay.clear();
+    const saved = await f.run('record_receivable', { member: 'm', until: '2027-02-03' });
+    assert.equal(saved.member.next_collection_date, '2027-02-04');
+    const backup = parseBackup(JSON.parse(JSON.stringify(await exportAll(f.ctx.env))));
+    assert.deepEqual(backup.subscriptions[0].share, f.saved().share);
+    await f.run('save_share_member', { member: 'm', fee: 48 }); // no effective date means today
+    assert.equal(f.saved().share!.members[0].feeHistory!.at(-1)!.from, '2026-10-22');
+    const next = await f.run('record_receivable', { member: 'm', currency: 'USD', dry_run: true });
+    near(next.receipt.amount, 48 / FALLBACK_FX.rates.CNY);
+    assert.equal(next.receipt.until, '2027-08-03');
+    await assert.rejects(f.run('save_share_member', { member: 'm', fee: 20, fee_from: '2026-02-30' }));
+  } finally {
+    f.db.close();
+  }
+});
