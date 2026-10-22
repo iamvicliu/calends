@@ -1744,14 +1744,15 @@ const CATALOGUE: Tool[] = [
       if (q && !old) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
       const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
-      const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
+      const feeArgs = a.follow_rule === true ? {} : a;
+      const ccy = (str(feeArgs.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
       validateCurrency(st, ccy);
       // 新成员没给收费标准时按车的收款规则
       const rule = carRule(st, s, today);
       const ruleDefault = !old && a.fee == null && a.bill_every == null && a.fee_currency == null;
       const billEvery =
-        a.bill_every != null
-          ? Number(a.bill_every)
+        feeArgs.bill_every != null
+          ? Number(feeArgs.bill_every)
           : old
             ? memberBillMonths(s, old, a.fee_from ? date(a.fee_from, 'fee_from') : today)
             : ruleDefault
@@ -1761,7 +1762,7 @@ const CATALOGUE: Tool[] = [
       let m: ShareMember = {
         ...(old ?? { id: str(a.id) ?? uid(), name: '', share: 0 }),
         name: str(a.name) ?? old?.name ?? '',
-        ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : ruleDefault ? { fee: rule.fee, feeCurrency: rule.currency } : {}),
+        ...(feeArgs.fee != null ? { fee: num(feeArgs.fee, 'fee'), feeCurrency: ccy } : ruleDefault ? { fee: rule.fee, feeCurrency: rule.currency } : {}),
         billEvery,
         ...(a.first_period != null
           ? {
@@ -1779,7 +1780,7 @@ const CATALOGUE: Tool[] = [
         ...(a.account ? { account: String(a.account) } : {}),
         ...(a.note ? { note: String(a.note) } : {}),
       };
-      if ('fee_currency' in a) m.feeCurrency = ccy;
+      if ('fee_currency' in feeArgs) m.feeCurrency = ccy;
       if (a.person === null) m.personId = undefined;
       if (a.person) {
         const p = findPerson(st, a.person);

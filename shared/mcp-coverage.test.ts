@@ -1056,3 +1056,18 @@ test('future custom fees are classified at their effective date, before later ca
   assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', fee: 4, bill_every: 1, fee_from: from })).isError, undefined);
   assert.equal((await f.snapshot()).subscriptions[0].share!.members[0].custom, undefined);
 });
+
+test('follow_rule ignores explicit fee fields without losing the old fee baseline or receipts', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const today = todayIn('UTC');
+  const s = { ...sub(), start: '2025-01-01', share: { ...sub().share!, rule: { fee: 6, currency: 'USD', billEvery: 3 } } };
+  await upsert(f.env, 'subscriptions', 's', s);
+  assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', follow_rule: true, fee: 6, bill_every: 3 })).isError, undefined);
+  const saved = (await f.snapshot()).subscriptions[0];
+  const m = saved.share!.members[0];
+  assert.deepEqual(memberRate(saved, m, addDays(today, -1)), { amount: 3, currency: 'USD', billEvery: 1 });
+  assert.deepEqual(memberRate(saved, m, today), { amount: 6, currency: 'USD', billEvery: 3 });
+  assert.deepEqual(m.payments, s.share.members[0].payments);
+  assert.equal(m.paidUntil, s.share.members[0].paidUntil);
+});
