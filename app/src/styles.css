@@ -5249,7 +5249,8 @@ button.h-price-row:focus-visible {
   outline-offset: 2px;
 }
 .member-info {
-  height: var(--ctl-h-lg);
+  /* 名称、已付至、下次收款可能三行：最小高度对齐按钮，内容多时撑开 */
+  min-height: var(--ctl-h-lg);
   flex: 1;
   min-width: 0;
   border: 0;
@@ -9436,8 +9437,12 @@ img.mm-flag {
   text-overflow: ellipsis;
 }
 
+/* 成员行的收款按钮与卡片头部的「管理」「待收」胶囊同高 */
 .member > .btn {
-  height: var(--ctl-h-lg);
+  flex-shrink: 0;
+  height: var(--ctl-h-md);
+  padding: 0 12px;
+  font-size: 13px;
 }
 
 /* 天数步进器：与下拉胶囊同高同底色，数字可直接输入，聚焦时整个胶囊描边 */
