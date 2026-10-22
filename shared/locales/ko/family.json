@@ -30,7 +30,9 @@
     "actions": "작업",
     "status": "납부 상태",
     "period": "이번 기간",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "시작",
+    "rangeTo": "종료"
   },
   "contact": {
     "via": {

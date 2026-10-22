@@ -32,7 +32,9 @@
     "actions": "Действия",
     "status": "Статус оплаты",
     "period": "Текущий период",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "С",
+    "rangeTo": "По"
   },
   "contact": {
     "via": {

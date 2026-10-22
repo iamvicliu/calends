@@ -9749,8 +9749,9 @@ img.mm-flag {
   }
   .car-member-table {
     display: grid;
-    /* 成员（账号） | 收费 + 跟随车/自定义 | 本期起止 | 收款状态 | 操作 */
-    grid-template-columns: minmax(170px, 1.5fr) minmax(170px, 1fr) minmax(210px, 1.2fr) minmax(100px, 0.7fr) 72px;
+    /* 成员（账号） | 收费 + 跟随车/自定义 | 本期起止 | 收款状态 | 操作；最小宽度之和 + 间距不超过 720px，
+       各列统一两行：收费 + 标签、本期开始 + 结束、状态 + 待收 */
+    grid-template-columns: minmax(140px, 1.4fr) minmax(130px, 1.1fr) minmax(150px, 1.2fr) minmax(96px, 0.8fr) max-content;;
     column-gap: 28px;
     width: 100%;
     border-collapse: collapse;
@@ -9844,14 +9845,7 @@ img.mm-flag {
 .car-member-table .late {
   color: var(--red);
 }
-.car-member-fee {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  white-space: nowrap;
-}
-.car-member-fee .badge.custom {
+.car-member-lines .badge.custom {
   background: color-mix(in srgb, var(--orange) 14%, transparent);
   color: var(--orange);
 }
@@ -9859,6 +9853,25 @@ img.mm-flag {
   display: grid;
   gap: 2px;
   min-width: 0;
+}
+/* 本期：「从 / 至」一列，日期一列左对齐、等宽数字 */
+.car-member-range {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: baseline;
+  gap: 2px 8px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.car-member-range small {
+  font-size: 12px;
+}
+.car-member-lines > span:first-child {
+  white-space: nowrap;
+}
+.car-member-lines .badge {
+  justify-self: start;
 }
 .car-member-lines small {
   font-size: 12px;

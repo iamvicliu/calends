@@ -31,7 +31,9 @@
     "actions": "İşlemler",
     "status": "Ödeme durumu",
     "period": "Geçerli dönem",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "Başlangıç",
+    "rangeTo": "Bitiş"
   },
   "contact": {
     "via": {

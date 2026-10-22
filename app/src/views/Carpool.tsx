@@ -495,7 +495,7 @@ function MemberTable({
                 {m.exempt ? (
                   <span className="muted">{t('family.pool.exempt')}</span>
                 ) : (
-                  <span className="car-member-fee">
+                  <span className="car-member-lines">
                     <span>{perBill('family.pool.perFee', memberBillMonths(s, m, today), { fee: money(rate.amount, rate.currency) })}</span>
                     {followsCar(state, s, m, today) ? (
                       <span className="badge">{t('family.rule.follow')}</span>
@@ -509,7 +509,12 @@ function MemberTable({
                 {m.exempt || st.gone ? (
                   <span className="muted">—</span>
                 ) : (
-                  <span className="num-text">{t('family.sheet.range', { from: cnDateFull(st.period.from), until: cnDateFull(st.period.until) })}</span>
+                  <span className="car-member-range">
+                    <small className="muted">{t('family.sheet.rangeFrom')}</small>
+                    <span>{cnDateFull(st.period.from)}</span>
+                    <small className="muted">{t('family.sheet.rangeTo')}</small>
+                    <span>{cnDateFull(st.period.until)}</span>
+                  </span>
                 )}
               </td>
               <td role="cell">

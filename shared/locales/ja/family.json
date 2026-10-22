@@ -30,7 +30,9 @@
     "actions": "操作",
     "status": "支払い状況",
     "period": "今期",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "開始",
+    "rangeTo": "終了"
   },
   "contact": {
     "via": {

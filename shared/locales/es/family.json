@@ -31,7 +31,9 @@
     "actions": "Acciones",
     "status": "Estado de pago",
     "period": "Periodo actual",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "Desde",
+    "rangeTo": "Hasta"
   },
   "contact": {
     "via": {

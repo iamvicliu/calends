@@ -30,7 +30,9 @@
     "actions": "操作",
     "status": "收款状态",
     "period": "本期",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "从",
+    "rangeTo": "至"
   },
   "contact": {
     "via": {

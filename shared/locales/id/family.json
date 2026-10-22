@@ -30,7 +30,9 @@
     "actions": "Tindakan",
     "status": "Status pembayaran",
     "period": "Periode ini",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "Dari",
+    "rangeTo": "Sampai"
   },
   "contact": {
     "via": {

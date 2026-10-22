@@ -31,7 +31,9 @@
     "actions": "Actions",
     "status": "État du paiement",
     "period": "Période en cours",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "Du",
+    "rangeTo": "Au"
   },
   "contact": {
     "via": {

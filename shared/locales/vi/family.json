@@ -30,7 +30,9 @@
     "actions": "Thao tác",
     "status": "Tình trạng thanh toán",
     "period": "Kỳ hiện tại",
-    "range": "{from} – {until}"
+    "range": "{from} – {until}",
+    "rangeFrom": "Từ",
+    "rangeTo": "Đến"
   },
   "contact": {
     "via": {
