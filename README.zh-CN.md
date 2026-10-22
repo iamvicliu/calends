@@ -28,10 +28,10 @@
 
 花了多少、何时续费、谁还没付钱——Calends 把个人订阅、合租分摊和预付余额记在同一本单用户私密账本里，也支持按需开启只读公开页和 MCP 接入。
 
-- **灵活的计费周期**：月付、年付、自定义周期和买断，支持试用、首期优惠、赠送时长与暂停。
+- **灵活的计费周期**：月付、年付、自定义周期和买断，支持试用、首期优惠、赠送时长、暂停、提前扣款与取消截止日。
 - **完整的订阅历程**：保留调价、换套餐、换区、断订和重叠时段，查看累计支出、实际月均费用与每笔扣款。
 - **多币种记账**：历史扣款使用当日汇率，未来支出使用当前汇率，可切换显示币种。
-- **余额与合租分摊**：管理银行卡、预付余额和礼品卡，估算余额还能用多久，记录家庭套餐收款与替朋友代付的费用。
+- **余额与合租分摊**：管理预付余额和礼品卡，估算余额还能用多久，记录替朋友代付的费用。合租支持生效日收款规则、成员自定义收费、独立覆盖期与逾期追踪；人员可设置私密头像和每辆车的独立成员账号。
 - **报告与日历**：支出趋势、现金与权责对比、预付价值、退订节省、订阅体检和可分享的年度回顾；支持月历、年历与私密 ICS 订阅。
 - **续费提醒**：邮件、Telegram、飞书、钉钉、企业微信、Slack、Discord、Bark、ntfy、Server酱与自定义 Webhook。
 - **AI 接入**：通过支持 MCP 助手查询和修改账本，令牌可限制权限，写入前可预览。
@@ -77,7 +77,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-打开 `http://localhost:8787/`，在登录页使用日志中的初始化令牌设置密码。命名卷 `calends-data` 将 SQLite 数据持久化到 `/data`。也可使用 `ghcr.io/imetn/calends:latest`。生产环境建议固定版本标签，如 `1.6.0`，而不是使用 `latest`。
+打开 `http://localhost:8787/`，在登录页使用日志中的初始化令牌设置密码。命名卷 `calends-data` 将 SQLite 数据持久化到 `/data`。也可使用 `ghcr.io/imetn/calends:latest`。生产环境建议固定版本标签，如 `1.7.0`，而不是使用 `latest`。
 
 也可以通过 Compose 从源码构建。在源码目录的 `docker/` 下执行，Compose 会使用仓库中的 [Dockerfile](docker/Dockerfile) 构建并启动应用：
 
@@ -95,7 +95,7 @@ docker compose logs calends
 
 ## AI 与 MCP
 
-你可以问「下周有什么要续费」「今年一共花了多少」，也可以说「Netflix 从今天起涨到 17.99 美元」。Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口，使用 Streamable HTTP，内置 20 多个工具。
+你可以问「下周有什么要续费」「今年一共花了多少」，也可以说「Netflix 从今天起涨到 17.99 美元」。Calends 在 `/mcp` 提供无状态的 [MCP](https://modelcontextprotocol.io) 接口，使用 Streamable HTTP，内置 32 个工具。
 
 在 Calends 的「连接」页（`/connect`）创建只读或读写令牌，再接入客户端。浏览器打开 `/mcp` 会跳转到此页；MCP 客户端使用 `/mcp` 接口：
 
