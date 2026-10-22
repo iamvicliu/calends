@@ -203,6 +203,7 @@
     "cancelBy": "Kündigungsfrist",
     "invalid": "Ganze Zahlen von 0 bis 3660 Tagen eingeben.",
     "tooLate": "Die Kündigungsfrist ist abgelaufen. Der nächste Zeitraum wird noch berechnet.",
-    "cancelReminder": "Bis {date} kündigen, um die nächste Abbuchung zu vermeiden."
+    "cancelReminder": "Bis {date} kündigen, um die nächste Abbuchung zu vermeiden.",
+    "none": "Keine"
   }
 }

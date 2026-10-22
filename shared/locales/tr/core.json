@@ -203,6 +203,7 @@
     "cancelBy": "Son iptal tarihi",
     "invalid": "0 ile 3660 arasında tam gün sayısı girin.",
     "tooLate": "İptal süresi geçti. Sonraki dönem yine tahsil edilecek.",
-    "cancelReminder": "Sonraki ödemeyi önlemek için {date} tarihine kadar iptal edin."
+    "cancelReminder": "Sonraki ödemeyi önlemek için {date} tarihine kadar iptal edin.",
+    "none": "Yok"
   }
 }

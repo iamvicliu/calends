@@ -2,7 +2,7 @@ import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/bil
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
 import { StopFields } from '../components/StopPanel.tsx';
-import { ReceiptText } from 'lucide-react';
+import { Minus, Plus, ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
 import { cnDateFull, money } from '../../../shared/format.ts';
@@ -683,22 +683,11 @@ function Form({
                   </>
                 )}
               </Group>
-              <Group title={t('core.renewal.title')}>
-                <p className="stop-hint">{t('core.renewal.hint')}</p>
+              {/* 天数是手填的：减号、可直接输入的数字、加号收在一个胶囊里；说明放在组下方 */}
+              <Group title={t('core.renewal.title')} foot={t('core.renewal.hint')}>
                 {(['chargeLeadDays', 'cancelLeadDays'] as const).map((field) => (
                   <Cell key={field} label={t(`core.renewal.${field}`)}>
-                    <input
-                      className="num"
-                      type="number"
-                      min={0}
-                      max={3660}
-                      step={1}
-                      inputMode="numeric"
-                      aria-label={t(`core.renewal.${field}`)}
-                      value={f[field] ?? 0}
-                      onChange={(e) => up({ [field]: e.target.value === '' ? 0 : Number(e.target.value) })}
-                    />
-                    <span>{t('editor.unit.day', { count: f[field] ?? 0 })}</span>
+                    <DaysStepper label={t(`core.renewal.${field}`)} value={f[field] ?? 0} onChange={(n) => up({ [field]: n })} />
                   </Cell>
                 ))}
               </Group>
@@ -910,5 +899,45 @@ function NameField({
         </div>
       )}
     </div>
+  );
+}
+
+/** 天数步进器：0–3660 的整数，可直接输入，也可用两侧按钮加减；0 显示为「不需要」以外的数字 0 */
+function DaysStepper({ value, onChange, label }: { value: number; onChange: (n: number) => void; label: string }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const clamp = (n: number) => Math.min(3660, Math.max(0, Math.round(n)));
+  const commit = (raw: string) => {
+    setDraft(null);
+    const n = Number(raw);
+    if (raw.trim() !== '' && Number.isFinite(n)) onChange(clamp(n));
+  };
+  return (
+    <span className="days-stepper" role="group" aria-label={label}>
+      <button type="button" aria-label="−1" disabled={value <= 0} onClick={() => onChange(clamp(value - 1))}>
+        <Minus size={14} />
+      </button>
+      <input
+        inputMode="numeric"
+        aria-label={label}
+        value={draft ?? String(value)}
+        onChange={(e) => {
+          const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+          setDraft(raw);
+          if (raw) onChange(clamp(Number(raw)));
+        }}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            onChange(clamp(value + (e.key === 'ArrowUp' ? 1 : -1)));
+            setDraft(null);
+          }
+        }}
+      />
+      <span className="days-unit">{t('editor.unit.day', { count: value })}</span>
+      <button type="button" aria-label="+1" disabled={value >= 3660} onClick={() => onChange(clamp(value + 1))}>
+        <Plus size={14} />
+      </button>
+    </span>
   );
 }

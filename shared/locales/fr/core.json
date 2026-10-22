@@ -203,6 +203,7 @@
     "cancelBy": "Date limite d’annulation",
     "invalid": "Saisissez un nombre entier de 0 à 3660 jours.",
     "tooLate": "Le délai d’annulation est dépassé. La prochaine période sera facturée.",
-    "cancelReminder": "Annulez avant le {date} pour éviter le prochain prélèvement."
+    "cancelReminder": "Annulez avant le {date} pour éviter le prochain prélèvement.",
+    "none": "Aucun"
   }
 }

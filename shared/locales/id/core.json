@@ -192,6 +192,7 @@
     "cancelBy": "Batas pembatalan",
     "invalid": "Masukkan bilangan bulat dari 0 hingga 3660 hari.",
     "tooLate": "Batas pembatalan telah lewat. Periode berikutnya tetap akan ditagih.",
-    "cancelReminder": "Batalkan sebelum {date} untuk menghindari tagihan berikutnya."
+    "cancelReminder": "Batalkan sebelum {date} untuk menghindari tagihan berikutnya.",
+    "none": "Tidak ada"
   }
 }

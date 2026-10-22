@@ -192,6 +192,7 @@
     "cancelBy": "Hạn chót hủy",
     "invalid": "Nhập số ngày nguyên từ 0 đến 3660.",
     "tooLate": "Đã quá hạn hủy. Kỳ tiếp theo vẫn bị tính phí.",
-    "cancelReminder": "Hủy trước {date} để tránh khoản thu tiếp theo."
+    "cancelReminder": "Hủy trước {date} để tránh khoản thu tiếp theo.",
+    "none": "Không"
   }
 }

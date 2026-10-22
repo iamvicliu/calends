@@ -203,6 +203,7 @@
     "cancelBy": "Fecha límite de cancelación",
     "invalid": "Introduce un número entero de 0 a 3660 días.",
     "tooLate": "El plazo de cancelación ha vencido. Se cobrará el siguiente período.",
-    "cancelReminder": "Cancela antes del {date} para evitar el próximo cobro."
+    "cancelReminder": "Cancela antes del {date} para evitar el próximo cobro.",
+    "none": "Ninguno"
   }
 }

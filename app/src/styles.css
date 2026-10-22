@@ -9399,10 +9399,14 @@ img.mm-flag {
   grid-column: 1 / -1;
 }
 
+/* 表单单元格里的输入框是无边框行内样式，聚焦靠光标即可，不再套深色粗框；
+   搜索框用浅色主题描边提示焦点 */
 .cell-r input:focus-visible,
-.cell-r textarea:focus-visible,
+.cell-r textarea:focus-visible {
+  outline: none;
+}
 .cp-search input:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   outline-offset: 2px;
 }
 
@@ -9435,4 +9439,55 @@ img.mm-flag {
 
 .member > .btn {
   height: var(--ctl-h-lg);
+}
+
+/* 天数步进器：与下拉胶囊同高同底色，数字可直接输入，聚焦时整个胶囊描边 */
+.days-stepper {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: var(--ctl-h-md);
+  padding: 0 2px;
+  border-radius: 999px;
+  background: var(--fill-2);
+  font-variant-numeric: tabular-nums;
+}
+.days-stepper:focus-within {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.days-stepper button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--label-2);
+  cursor: pointer;
+}
+.days-stepper button:hover:not(:disabled) {
+  background: var(--fill);
+  color: var(--label);
+}
+.days-stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.cell-r .days-stepper input {
+  flex: none;
+  width: 4ch;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  color: var(--label);
+  font: inherit;
+  font-weight: 600;
+  text-align: right;
+}
+.days-stepper .days-unit {
+  margin: 0 4px 0 3px;
+  color: var(--label-2);
 }

@@ -192,6 +192,7 @@
     "cancelBy": "취소 기한",
     "invalid": "0~3660 사이의 정수 일수를 입력하세요.",
     "tooLate": "취소 기한이 지나 다음 기간에도 요금이 청구됩니다.",
-    "cancelReminder": "다음 결제를 피하려면 {date}까지 취소하세요."
+    "cancelReminder": "다음 결제를 피하려면 {date}까지 취소하세요.",
+    "none": "없음"
   }
 }
