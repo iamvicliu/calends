@@ -85,7 +85,6 @@
     "fallbackColor": "Couleur de secours"
   },
   "list": {
-    "none": "Aucune personne correspondante",
-    "status": "Statut"
+    "none": "Aucune personne correspondante"
   }
 }

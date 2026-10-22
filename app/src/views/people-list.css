@@ -22,11 +22,11 @@
 .people-head,
 .people-row {
   display: grid;
-  /* 称呼 | 订阅 | 收款状态 | 待收 | 至今收回 | 最近收款 */
-  grid-template-columns: minmax(180px, 1.6fr) minmax(120px, 1fr) 88px 100px 110px 116px;
+  /* 称呼 | 订阅 | 待收（含状态） | 至今收回 | 最近收款 */
+  grid-template-columns: minmax(200px, 1fr) 132px 168px 120px 128px;
   align-items: center;
-  gap: 16px;
-  padding: 6px 20px;
+  gap: 24px;
+  padding: 8px 20px;
 }
 .people-head {
   color: var(--label-2);
@@ -34,22 +34,18 @@
   background: var(--fill-2);
   border-radius: var(--r) var(--r) 0 0;
 }
-.people-head > :nth-child(n + 4),
+.people-head > :nth-child(n + 3),
 .people-owed,
 .people-received,
 .people-last {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-.people-head > :nth-child(n + 4) {
+.people-head > :nth-child(n + 3) {
   justify-self: end;
 }
-.people-status {
+.people-settled {
   color: var(--label-3);
-  white-space: nowrap;
-}
-.people-status.owe {
-  color: var(--orange);
 }
 .people-head .lt-sort {
   min-height: var(--ctl-h-md);
@@ -62,7 +58,8 @@
   border-radius: 4px;
 }
 .people-row {
-  min-height: 40px;
+  /* 参考常见组件库中等密度表格（约 48px） */
+  min-height: 48px;
   border-top: 0.5px solid var(--sep);
   cursor: pointer;
   font-size: 13px;
@@ -119,9 +116,12 @@
   font-weight: 600;
 }
 .people-owed {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 6px;
   color: var(--orange);
+  white-space: nowrap;
 }
 .people-owed b,
 .people-received,
@@ -137,7 +137,8 @@
 @media (max-width: 1100px) and (min-width: 720px) {
   .people-head,
   .people-row {
-    grid-template-columns: minmax(130px, 1.3fr) 110px 76px 90px 96px 110px;
+    grid-template-columns: minmax(140px, 1fr) 110px 150px 100px 116px;
+    gap: 16px;
     gap: 10px;
     padding-inline: 16px;
   }
@@ -153,7 +154,7 @@
   }
   .people-row {
     grid-template-columns: minmax(0, 1fr) max-content;
-    grid-template-areas: 'person owed' 'plans status';
+    grid-template-areas: 'person owed' 'plans last';
     gap: 8px 12px;
     padding: 12px 14px;
   }
@@ -163,13 +164,12 @@
   .people-owed {
     grid-area: owed;
   }
-  .people-status {
-    grid-area: status;
-    justify-self: end;
+  .people-last {
+    grid-area: last;
     font-size: 11px;
   }
-  .people-last {
-    display: none;
+  .people-last-label {
+    display: inline;
   }
   .people-plans {
     grid-area: plans;

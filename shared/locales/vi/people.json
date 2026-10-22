@@ -67,7 +67,6 @@
     "fallbackColor": "Màu dự phòng"
   },
   "list": {
-    "none": "Không có người phù hợp",
-    "status": "Trạng thái"
+    "none": "Không có người phù hợp"
   }
 }

@@ -197,9 +197,6 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
                         <div key="plans" role="columnheader">
                           {t('app.nav.list')}
                         </div>,
-                        <div key="status" role="columnheader">
-                          {t('people.list.status')}
-                        </div>,
                       ]
                     : []),
                 ])}
@@ -229,7 +226,7 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
   return (
     <div className="people-row" role="row" onClick={onClick}>
       <div className="people-identity" role="cell">
-        <PersonAvatar p={l.person} size={24} />
+        <PersonAvatar p={l.person} size={28} />
         <span className="people-person">
           <button
             className="people-open"
@@ -270,19 +267,25 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
           </span>
         )}
       </div>
-      {/* 收款状态单独一列：欠几期 / 已结清；待收列只放金额 */}
-      <div className={`people-status ${Number.isFinite(l.owed) && l.owed > 0.005 ? 'owe' : ''}`} role="cell">
-        {!Number.isFinite(l.owed) ? '—' : l.owed > 0.005 ? t('people.item.owedPeriods', { count: l.periodsOwed }) : t('family.pool.settled')}
-      </div>
+      {/* 待收与收款状态合成一列：欠款写「金额 · 欠 N 期」，结清写「已结清」，不留空格子 */}
       <div className="people-owed" role="cell">
-        {Number.isFinite(l.owed) && l.owed > 0.005 ? <b>{money(l.owed, base)}</b> : <span className="muted">—</span>}
+        {!Number.isFinite(l.owed) ? (
+          <span className="muted">—</span>
+        ) : l.owed > 0.005 ? (
+          <>
+            <b>{money(l.owed, base)}</b>
+            <small>{t('people.item.owedPeriods', { count: l.periodsOwed })}</small>
+          </>
+        ) : (
+          <span className="people-settled">{t('family.pool.settled')}</span>
+        )}
       </div>
-      <div className="people-received" role="cell">
-        {flow(l.received, base)}
+      <div className={`people-received ${l.received ? '' : 'muted'}`} role="cell">
+        {l.received ? flow(l.received, base) : '—'}
       </div>
       <div className="people-last muted" role="cell">
-        <span className="people-last-label">{t('people.sheet.last')} </span>
-        {l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}
+        {l.lastPaid && <span className="people-last-label">{t('people.sheet.last')} </span>}
+        {l.lastPaid ? cnDateAuto(l.lastPaid, today) : t('people.item.noPay')}
       </div>
     </div>
   );

@@ -85,7 +85,6 @@
     "fallbackColor": "Yedek renk"
   },
   "list": {
-    "none": "Eşleşen kişi yok",
-    "status": "Durum"
+    "none": "Eşleşen kişi yok"
   }
 }

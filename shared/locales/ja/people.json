@@ -67,7 +67,6 @@
     "fallbackColor": "代替色"
   },
   "list": {
-    "none": "該当する人はいません",
-    "status": "状況"
+    "none": "該当する人はいません"
   }
 }

@@ -85,7 +85,6 @@
     "fallbackColor": "Color de respaldo"
   },
   "list": {
-    "none": "No hay personas que coincidan",
-    "status": "Estado"
+    "none": "No hay personas que coincidan"
   }
 }

@@ -85,7 +85,6 @@
     "fallbackColor": "Ersatzfarbe"
   },
   "list": {
-    "none": "Keine passenden Personen",
-    "status": "Status"
+    "none": "Keine passenden Personen"
   }
 }
