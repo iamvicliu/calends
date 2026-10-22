@@ -98,6 +98,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
         id: `m${i}`,
         name: '',
         share: m.share,
+        ...(m.feeHistory ? { feeHistory: m.feeHistory.map(({ from, fee, currency, billEvery, share }) => ({ from, fee, currency, billEvery, share })) } : {}),
         paidUntil: m.paidUntil,
         exempt: m.exempt,
         joined: m.joined,

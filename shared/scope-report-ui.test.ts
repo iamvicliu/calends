@@ -739,7 +739,7 @@ test('钱包续航列表不重复卡面余额和月扣；单年度分享用时�
   }
 });
 
-test('收款草稿切周期：手改金额或币种后保留，备注和收款日始终保留；未手改金额跟随默认', () => {
+test('收款只显示实收表单；编辑成员后切周期仍保留实际草稿，默认覆盖按成员周期顺延', () => {
   for (const edit of ['none', 'amount', 'zero', 'currency']) {
     const member = { id: 'm', name: 'Member', share: 7.5, fee: 150, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-14' };
     const sub: Subscription = {
@@ -767,7 +767,19 @@ test('收款草稿切周期：手改金额或币种后保留，备注和收款�
     input('family.member.receivedOn', 'DatePicker').props.onChange('2026-10-21');
     if (edit === 'amount' || edit === 'zero') input('family.member.amount', 'NumInput').props.onValue(edit === 'zero' ? 0 : 12.34);
     if (edit === 'currency') input('family.member.currency', 'CurrencySelect').props.onChange('EUR');
+    assert.equal(
+      render().some((n) => n.type === 'Seg'),
+      false,
+    );
+    assert.equal(
+      render().some((n) => n.type === 'Cell' && n.props.label === 'family.member.name'),
+      false,
+    );
+    render()
+      .find((n) => n.type === 'button' && n.children.includes('family.collect.editMember'))!
+      .props.onClick();
     const before = input('family.member.amount', 'NumInput').props.value;
+    input('family.collect.feeFrom', 'DatePicker').props.onChange('2026-10-14');
     for (const months of [1, 3, 6]) {
       render()
         .find((n) => n.type === 'Seg')!
@@ -777,7 +789,7 @@ test('收款草稿切周期：手改金额或币种后保留，备注和收款�
       const dates = render()
         .filter((n) => n.type === 'DatePicker')
         .map((n) => n.props.value);
-      assert.ok(dates.includes(months === 1 ? '2026-11-13' : '2027-01-13'));
+      assert.ok(dates.includes(billing.memberCollection(sub, { ...member, billEvery: months }, '2026-10-14', 'USD').until));
       if (edit !== 'none') assert.equal(input('family.member.amount', 'NumInput').props.value, before);
       else
         assert.equal(
@@ -1494,4 +1506,182 @@ test('payment marks fall back for missing, legacy and failed logos and recover w
   nodes = render('/replacement.svg', 'credit');
   assert.equal(glyph(nodes), false);
   assert.equal(nodes.find((n) => n.type === 'img')!.props.src, '/replacement.svg');
+});
+
+test('收款保存失败保留草稿且不关闭；重试成功只增加一条并关闭', async () => {
+  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-10-14', paidUntil: '2026-07-16' };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 15,
+    currency: 'USD',
+    start: '2025-10-14',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [member] },
+  };
+  let fail = true,
+    closed = 0;
+  let saved: Subscription | undefined;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberSheet',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      run: async (fn: () => Promise<unknown>) => {
+        try {
+          await fn();
+        } catch {
+          /* Matches run's toast-and-retain behavior. */
+        }
+      },
+      saveSub: async (s: Subscription) => {
+        if (fail) throw Error('offline');
+        saved = s;
+      },
+    },
+  );
+  const render = () =>
+    r.render('MemberSheet', {
+      state: st,
+      s: sub,
+      member,
+      collect: true,
+      onClose() {
+        closed++;
+      },
+    });
+  render()
+    .find((n) => n.type === 'input' && n.props.placeholder === 'family.member.notePh')!
+    .props.onChange({ target: { value: 'keep draft' } });
+  const record = () =>
+    all(render().find((n) => n.type === 'Sheet')!.props.foot)
+      .find((n) => n.type === 'button' && n.children.includes('family.member.record'))!
+      .props.onClick();
+  await record();
+  assert.equal(closed, 0);
+  assert.equal(saved, undefined);
+  assert.equal(render().find((n) => n.type === 'input')!.props.value, 'keep draft');
+  fail = false;
+  await record();
+  assert.equal(closed, 1);
+  assert.equal(saved!.share!.members[0].payments!.length, 1);
+  assert.equal(saved!.share!.members[0].paidUntil, '2027-01-16');
+});
+
+test('成员先改收费再改生效日只留下一个调整，今天标准与旧收款保持', async () => {
+  const member = { id: 'm', name: 'Member', share: 6.67, fee: 40, feeCurrency: 'CNY', billEvery: 6, joined: '2025-10-14', paidUntil: '2026-07-16' };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 15,
+    currency: 'USD',
+    start: '2025-10-14',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [member] },
+  };
+  let saved: Subscription | undefined;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberSheet',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      linkPerson: async () => ({ id: 'p' }),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (s: Subscription) => {
+        saved = s;
+      },
+    },
+  );
+  const render = () => r.render('MemberSheet', { state: st, s: sub, member, onClose() {} });
+  render()
+    .find((n) => n.type === 'NumInput' && n.props.value === 40)!
+    .props.onValue(44);
+  const dateCell = render().find((n) => n.type === 'Cell' && n.props.label === 'family.collect.feeFrom')!;
+  all(dateCell)
+    .find((n) => n.type === 'DatePicker')!
+    .props.onChange('2026-11-01');
+  await all(render().find((n) => n.type === 'Sheet')!.props.foot)
+    .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
+    .props.onClick();
+  assert.equal(saved!.share!.members[0].fee, 40);
+  assert.deepEqual(
+    saved!.share!.members[0].feeHistory!.map((p) => [p.from, p.fee]),
+    [
+      ['2025-10-14', 40],
+      ['2026-11-01', 44],
+    ],
+  );
+});
+
+test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继续保留', async () => {
+  for (const paidUntil of ['2026-08-02', '2026-11-10']) {
+    const member = {
+      id: 'm',
+      name: 'Member',
+      share: 7,
+      fee: 44,
+      feeCurrency: 'CNY',
+      billEvery: 6,
+      joined: '2025-10-14',
+      paidUntil,
+      payments: [{ date: '2026-02-03', amount: 44, currency: 'CNY', from: '2026-02-03', until: '2026-08-02' }],
+    };
+    const sub: Subscription = {
+      id: 's',
+      name: 'Plan',
+      category: 'Tools',
+      tags: [],
+      price: 15,
+      currency: 'USD',
+      start: '2025-10-14',
+      cycle: { unit: 'month', every: 1 },
+      status: 'active',
+      share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [member] },
+    };
+    let saved: Subscription | undefined;
+    const r = harness(
+      '../app/src/views/Members.tsx',
+      'MemberSheet',
+      {},
+      {
+        ...carpool,
+        Sheet: 'Sheet',
+        DatePicker: 'DatePicker',
+        Toggle: 'Toggle',
+        CurrencySelect: 'CurrencySelect',
+        NumInput: 'NumInput',
+        getState: () => ({ ...st, subscriptions: [sub] }),
+        run: (fn: () => Promise<unknown>) => fn(),
+        saveSub: async (s: Subscription) => {
+          saved = s;
+        },
+      },
+    );
+    r.render('MemberSheet', { state: st, s: sub, member, onClose() {} })
+      .find((n) => n.type === 'button' && n.props['aria-label'] === 'family.member.removePayAria')!
+      .props.onClick();
+    await Promise.resolve();
+    assert.equal(saved!.share!.members[0].payments!.length, 0);
+    assert.equal(saved!.share!.members[0].paidUntil, paidUntil === '2026-11-10' ? paidUntil : undefined);
+  }
 });

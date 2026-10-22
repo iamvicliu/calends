@@ -237,5 +237,17 @@
     "gain": "Up {amount}",
     "lost": "Down {amount}",
     "noRecords": "No payments yet"
+  },
+  "collect": {
+    "title": "Record payment · {name}",
+    "next": "Next collection {date}",
+    "editMember": "Edit member",
+    "until": "Covers through",
+    "covers": "Payment covers {from} – {until}",
+    "changeFee": "Change fee",
+    "lastPayment": "Last payment",
+    "adjustFee": "Adjust fee",
+    "feeFrom": "Effective from",
+    "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged."
   }
 }

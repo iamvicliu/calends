@@ -38,6 +38,15 @@ export interface PricePoint {
   amount: number;
 }
 
+export interface MemberFeePoint {
+  /** 按保存时汇率折算的订阅每期份额，供按日期的净成本计算 */
+  share?: number;
+  from: string;
+  fee: number;
+  currency: string;
+  billEvery: number;
+}
+
 export interface ShareMember {
   id: string;
   /** 关联的人（people 名册）；有则以那个人的称呼、联系方式为准，下面的 name、contact 是镜像副本，老数据只有副本 */
@@ -61,9 +70,11 @@ export interface ShareMember {
   /** 每次收多少（按收费周期），币种默认人民币；每期份额 share 由它按汇率换算得出 */
   fee?: number;
   feeCurrency?: string;
+  /** 生效日收费历史；覆盖起点决定整期标准，历史实收不变 */
+  feeHistory?: MemberFeePoint[];
   /** 收费周期（月）：1 按月、3 按季、6 按半年、12 按年；旧数据缺省沿用订阅周期折算月数 */
   billEvery?: number;
-  /** 中途加入首期：缺省按天折算，之后按合租收款起点对齐 */
+  /** 中途加入首期：缺省按天折算，仅首期按合租收款起点对齐 */
   firstPeriod?: 'prorate' | 'full' | 'free';
   /** 首期应收自定义金额（收费币种）；缺省按 firstPeriod 计算 */
   firstAmount?: number;

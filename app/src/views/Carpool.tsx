@@ -1,5 +1,16 @@
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
-import { addDays, chargesBetween, cycleLabel, effectiveStatus, memberDues, memberAboard, nextCharge, memberBillMonths } from '../../../shared/billing.ts';
+import {
+  addDays,
+  chargesBetween,
+  cycleLabel,
+  effectiveStatus,
+  memberDues,
+  memberAboard,
+  nextCharge,
+  memberBillMonths,
+  memberCollection,
+  memberUnpaidFrom,
+} from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -33,7 +44,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   // 筛选记在服务端：切到别的页面再回来、换台设备都还是上次选的
   const [filter, setFilter] = usePref<CarFilter>('car-filter', 'live', (v): v is CarFilter => (CAR_FILTERS as readonly string[]).includes(v));
   const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
-  const owes = (s: Subscription) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).some((d) => d.periodsOwed > 0);
+  const owes = (s: Subscription) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).some((d) => d.periodsOwed > 0);
   const groups: Record<CarFilter, Subscription[]> = {
     all: [...owned, ...ended],
     live: owned,
@@ -50,9 +61,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = [...owned, ...ended]
-    .flatMap((s) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency))
+    .flatMap((s) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state))
     .filter((d) => d.periodsOwed > 0);
-  const owedSum = owedAll.reduce((a, d) => a + toBase(state, d.owed, d.currency), 0);
+  const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean } | null>(null);
@@ -132,7 +143,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               {shown.map((s, idx) => {
                 if (idx % 2 !== col) return null;
                 const sh = s.share!;
-                const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
+                const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
                 // 已退出的成员不占座，只在展开的明细里保留
                 const onboard = sh.members.filter((m) => memberAboard(m, today));
                 const free = Math.max(0, sh.seats - 1 - onboard.length);
@@ -294,60 +305,66 @@ function MemberRows({
   /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
   only?: (m: ShareMember) => boolean;
 }) {
-  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).filter((d) => !only || only(d.member));
+  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => !only || only(d.member));
   const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
   return (
     <div>
-      {dues.map((d) => (
-        <div key={d.member.id} className="member">
-          <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
-            <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
-              <span className="text-ellipsis">{d.member.name || t('family.pool.unnamed')}</span>
-              {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
-              {contactText(d.member) && (
-                <span className="muted text-ellipsis" style={{ fontWeight: 400 }}>
-                  · {contactText(d.member)}
+      {dues.map((d) => {
+        const collection = memberCollection(s, d.member, memberUnpaidFrom(s, d.member), collect);
+        const rate = memberFee(state, s, d.member, collection.from);
+        return (
+          <div key={d.member.id} className="member">
+            <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
+              <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
+                <span className="text-ellipsis">{d.member.name || t('family.pool.unnamed')}</span>
+                {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
+                {contactText(d.member) && (
+                  <span className="muted text-ellipsis" style={{ fontWeight: 400 }}>
+                    · {contactText(d.member)}
+                  </span>
+                )}
+              </div>
+              <div className="muted member-dates">
+                <span className="text-ellipsis">
+                  {d.member.exempt
+                    ? (d.member.note ?? t('family.pool.exemptNote'))
+                    : d.member.paidUntil
+                      ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) })
+                      : t(d.member.payments?.length ? 'family.member.notSet' : 'family.pool.noPay')}
                 </span>
+                {!d.member.exempt && (!d.member.left || collection.from < d.member.left) && (
+                  <span className="text-ellipsis">{t('family.collect.next', { date: cnDateAuto(collection.from, today) })}</span>
+                )}
+                {d.member.source && <span className="m-hide">{t('family.pool.from', { source: d.member.source })}</span>}
+              </div>
+            </button>
+            <div className="member-amount num" style={{ textAlign: 'right', fontSize: 13.5 }}>
+              {d.member.exempt ? (
+                <span className="muted" style={{ fontWeight: 600 }}>
+                  {t('family.pool.exempt')}
+                </span>
+              ) : d.periodsOwed > 0 ? (
+                <b style={{ color: 'var(--orange)' }}>{t('family.pool.owedAmount', { amount: money(collection.amount, collection.currency) })}</b>
+              ) : (
+                <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
+              )}
+              {!d.member.exempt && (
+                <div className="muted m-hide" style={{ fontSize: 12 }}>
+                  {d.periodsOwed > 0 && collection.amount === rate.amount && collection.currency === rate.currency
+                    ? billLabel(memberBillMonths(s, d.member, collection.from))
+                    : perBill('family.pool.perFee', memberBillMonths(s, d.member, collection.from), { fee: money(rate.amount, rate.currency) })}
+                </div>
               )}
             </div>
-            <div className="muted text-ellipsis" style={{ fontSize: 12 }}>
-              {d.member.exempt
-                ? (d.member.note ?? t('family.pool.exemptNote'))
-                : `${billLabel(memberBillMonths(s, d.member))} · ${d.member.paidUntil ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) }) : t(d.member.payments?.length ? 'family.member.notSet' : 'family.pool.noPay')}`}
-              <span className="m-hide">
-                {d.member.payments?.length ? ` · ${t('family.pool.paymentsN', { count: d.member.payments.length })}` : ''}
-                {d.member.source ? ` · ${t('family.pool.from', { source: d.member.source })}` : ''}
-              </span>
-            </div>
-          </button>
-          <div className="member-amount num" style={{ textAlign: 'right', fontSize: 13.5 }}>
-            {d.member.exempt ? (
-              <span className="muted" style={{ fontWeight: 600 }}>
-                {t('family.pool.exempt')}
-              </span>
-            ) : d.periodsOwed > 0 ? (
-              <b style={{ color: 'var(--orange)' }}>
-                {t('family.pool.owedAmount', { amount: money(toBaseAt(state, d.owed, d.currency, undefined, collect), collect) })}
-              </b>
-            ) : (
-              <span style={{ color: 'var(--green)', fontWeight: 600 }}>{t('family.pool.settled')}</span>
-            )}
-            {!d.member.exempt && (
-              <div className="muted m-hide" style={{ fontSize: 12 }}>
-                {perBill('family.pool.perFee', memberBillMonths(s, d.member), {
-                  fee: money(memberFee(state, s, d.member).amount, memberFee(state, s, d.member).currency),
-                })}
-              </div>
+            {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
+            {!ro && !d.member.exempt && d.periodsOwed > 0 && (
+              <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => onMember(d.member, true)}>
+                <Icon name="check" /> {t('family.pool.collect')}
+              </button>
             )}
           </div>
-          {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
-          {!ro && !d.member.exempt && d.periodsOwed > 0 && (
-            <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => onMember(d.member, true)}>
-              <Icon name="check" /> {t('family.pool.collect')}
-            </button>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -382,11 +399,11 @@ export function CarSheet({
   const next = nextCharge(s, addDays(today, 1));
   const onboard = sh.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, sh.seats - 1 - onboard.length);
-  const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency).filter((d) => d.periodsOwed > 0).length;
+  const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0).length;
   const fmt = (v: number) => flow(v, base, { compact: true });
   const profit = -book.yearNet;
   const actual = -book.net;
-  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m)}`);
+  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m, today)}`);
   const memberGroups = [...new Set(sh.members.map(groupOf))]
     .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
     .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), sh.members.filter((m) => groupOf(m) === k).length] as const);

@@ -237,5 +237,17 @@
     "gain": "{amount} kârda",
     "lost": "{amount} zararda",
     "noRecords": "Henüz ödeme yok"
+  },
+  "collect": {
+    "title": "Ödeme kaydet · {name}",
+    "next": "Sonraki tahsilat {date}",
+    "editMember": "Üyeyi düzenle",
+    "until": "Kapsadığı son tarih",
+    "covers": "Ödeme {from} – {until} dönemini kapsar",
+    "changeFee": "Ücreti değiştir",
+    "lastPayment": "Son ödeme",
+    "adjustFee": "Ücreti ayarla",
+    "feeFrom": "Geçerlilik tarihi",
+    "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez."
   }
 }

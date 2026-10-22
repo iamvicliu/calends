@@ -1,6 +1,6 @@
 import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment, ShareMember, RenewalRule } from './types.ts';
 import { t } from './i18n.ts';
-import { chargeValue } from './fx.ts';
+import { chargeValue, convertOn } from './fx.ts';
 import { matchEntries } from './proxy.ts';
 
 // ---------- 日期：全部按 UTC 日计算 ----------
@@ -95,6 +95,23 @@ export function subError(s: Subscription): string | undefined {
   if (!Number.isFinite(s.price) || s.price < 0) return t('core.subError.price');
   if (!validDay(s.start) || (s.share?.collectFrom && !validDay(s.share.collectFrom))) return t('core.subError.start');
   for (const m of s.share?.members ?? []) {
+    if (
+      m.feeHistory != null &&
+      (!Array.isArray(m.feeHistory) ||
+        m.feeHistory.some(
+          (p) =>
+            !p ||
+            !validDay(p.from) ||
+            !Number.isFinite(p.fee) ||
+            p.fee < 0 ||
+            !/^[A-Z]{3}$/.test(p.currency) ||
+            !Number.isInteger(p.billEvery) ||
+            p.billEvery < 1 ||
+            p.billEvery > 120 ||
+            (p.share != null && (!Number.isFinite(p.share) || p.share < 0)),
+        ))
+    )
+      return t('core.subError.price');
     if (m.firstPeriod != null && !['prorate', 'full', 'free'].includes(m.firstPeriod)) return t('mcp.error.invalidFirstPeriod');
     if (m.firstAmount != null && (!Number.isFinite(m.firstAmount) || m.firstAmount < 0)) return t('core.subError.price');
   }
@@ -690,7 +707,7 @@ export function myShareFactor(s: Subscription, day: string): number {
   if (s.proxy) return 0;
   const sh = s.share;
   if (!sh || sh.role !== 'owner' || s.price <= 0) return 1;
-  const others = sh.members.reduce((t, m) => t + (m.exempt || !memberAboard(m, day) ? 0 : m.share || 0), 0);
+  const others = sh.members.reduce((t, m) => t + (m.exempt || !memberAboard(m, day) ? 0 : (memberFeePoint(m, day)?.share ?? m.share) || 0), 0);
   return Math.max(0, (s.price - others) / s.price);
 }
 
@@ -857,8 +874,22 @@ export interface MemberDue {
 }
 
 /** 旧成员未设置周期时沿用订阅周期。 */
-export function memberBillMonths(s: Subscription, m: ShareMember): number {
-  return Math.max(1, Math.round(m.billEvery ?? cycleDays(s.cycle) / 30.4375));
+export function memberBillMonths(s: Subscription, m: ShareMember, day?: string): number {
+  return Math.max(1, Math.round(memberFeePoint(m, day)?.billEvery ?? m.billEvery ?? cycleDays(s.cycle) / 30.4375));
+}
+
+/** 无历史的旧成员继续读原字段；历史按生效日读取，不依赖系统时间。 */
+export function memberFeePoint(m: ShareMember, day?: string) {
+  const history = [...(m.feeHistory ?? [])].sort((a, b) => a.from.localeCompare(b.from));
+  return history.filter((p) => !day || p.from <= day).at(-1) ?? history[0];
+}
+
+export function memberRate(s: Subscription, m: ShareMember, day: string, collectCurrency = s.currency) {
+  const point = memberFeePoint(m, day);
+  const billEvery = memberBillMonths(s, m, day);
+  const amount = point?.fee ?? m.fee ?? ((m.share || 0) * billEvery) / (cycleDays(s.cycle) / 30.4375);
+  const currency = point?.currency ?? (m.fee != null ? (m.feeCurrency ?? collectCurrency) : s.currency);
+  return { amount: Math.round(amount * 100) / 100, currency, billEvery };
 }
 
 /** 不写回旧数据；有覆盖起点优先使用，只有已付至时反推最近一期起点。 */
@@ -876,7 +907,7 @@ export function collectionAnchor(s: Subscription): string {
 /** 包含 day 的对齐期。每次从原始 anchor 加月，短月夹紧不会累积漂移。 */
 export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
   const anchor = collectionAnchor(s);
-  const every = memberBillMonths(s, m);
+  const every = memberBillMonths(s, m, m.joined ?? s.share?.since ?? s.start);
   const monthIndex = (d: string) => Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7));
   let k = Math.floor((monthIndex(day) - monthIndex(anchor)) / every);
   while (addMonths(anchor, k * every) > day) k--;
@@ -886,38 +917,36 @@ export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
   return { from, until: addDays(next, -1), next };
 }
 
-/** 一年内的统一收款日，按真实年份处理闰年和月末。 */
+/** 一年内该成员的后续收款日；已付至是独立起点。 */
 export function collectionDates(s: Subscription, m: ShareMember, year: string): string[] {
-  let day = collectionPeriod(s, m, `${year}-01-01`).from;
-  if (day < `${year}-01-01`) day = collectionPeriod(s, m, day).next;
+  let day = memberUnpaidFrom(s, m);
   const dates: string[] = [];
-  while (day <= `${year}-12-31`) {
-    dates.push(day);
-    day = collectionPeriod(s, m, day).next;
+  while (day <= `${year}-12-31` && (!m.left || day < m.left) && (!s.end || day <= s.end)) {
+    if (day >= `${year}-01-01`) dates.push(day);
+    day = memberCollection(s, m, day).next;
   }
   return dates;
 }
 
-/** 一段待覆盖期；首期可截短至退出前一天，退出日不计服务。 */
+/** 只有首次未收款的加入期对齐统一日；之后按成员自己的覆盖起点收完整一期。 */
 export function memberCollection(s: Subscription, m: ShareMember, from: string, collectCurrency = s.currency) {
-  const period = collectionPeriod(s, m, from);
   const joined = m.joined ?? s.share?.since ?? s.start;
   const first = collectionPeriod(s, m, joined);
-  const isFirst = from >= joined && from <= first.until;
-  const until = isFirst && m.left && m.left <= period.until ? addDays(m.left, -1) : period.until;
+  const isFirst = from === joined;
+  const rate = memberRate(s, m, from, collectCurrency);
+  const next = isFirst ? first.next : addMonths(from, rate.billEvery);
+  const until = isFirst && m.left && m.left <= next ? addDays(m.left, -1) : addDays(next, -1);
   const partial = isFirst && (joined > first.from || until < first.until);
-  const fee = m.fee ?? ((m.share || 0) * memberBillMonths(s, m)) / (cycleDays(s.cycle) / 30.4375);
-  const currency = m.fee != null ? (m.feeCurrency ?? collectCurrency) : s.currency;
-  let amount = fee;
+  let amount = rate.amount;
   if (partial) {
     const mode = m.firstPeriod ?? 'prorate';
     amount =
       mode === 'free'
         ? 0
-        : (m.firstAmount ?? (mode === 'full' ? fee : (fee * Math.max(0, diffDays(from, until) + 1)) / (diffDays(period.from, period.until) + 1)));
+        : (m.firstAmount ?? (mode === 'full' ? amount : (amount * Math.max(0, diffDays(from, until) + 1)) / (diffDays(first.from, first.until) + 1)));
   }
-  if (m.exempt || until < from) amount = 0;
-  return { from, until, next: period.next, amount: Math.round(amount * 100) / 100, currency, partial };
+  if (m.exempt || until < from || (m.left && from >= m.left) || (s.end && from > s.end)) amount = 0;
+  return { from, until, next: addDays(until, 1) > from ? addDays(until, 1) : next, amount: Math.round(amount * 100) / 100, currency: rate.currency, partial };
 }
 
 /** 最早未覆盖的收费期起点；免费首期无需记零元收款即可跳过。 */
@@ -930,7 +959,12 @@ export function memberUnpaidFrom(s: Subscription, m: ShareMember): string {
   return from;
 }
 
-export function memberDues(s: Subscription, today: string, collectCurrency = s.currency): MemberDue[] {
+export function memberDues(
+  s: Subscription,
+  today: string,
+  collectCurrency = s.currency,
+  fxState?: Pick<AppState, 'fx' | 'fxHistory' | 'settings'>,
+): MemberDue[] {
   if (!s.share || s.share.role !== 'owner') return [];
   const stop = [
     s.end,
@@ -950,7 +984,11 @@ export function memberDues(s: Subscription, today: string, collectCurrency = s.c
     if (!m.exempt) {
       while (from <= until) {
         const period = memberCollection(s, m, from, collectCurrency);
-        owed += period.amount;
+        if (period.amount !== 0 && period.currency !== currency && !fxState) throw new Error('FX state required for member fee currency changes');
+        owed +=
+          period.amount === 0 || period.currency === currency
+            ? period.amount
+            : convertOn(period.amount, period.currency, currency, today, fxState!.fxHistory, fxState!.fx);
         periodsOwed++;
         from = period.next;
       }

@@ -163,14 +163,18 @@ function details(
         .filter((p) => p.date >= sharingFrom && p.date <= sharingTo && p.date <= today)
         .reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0);
       // Only still-unpaid periods originating in this window, not older arrears.
-      const before = new Map(memberDues(sub, addDays(sharingFrom, -1), state.settings.collectCurrency).map((d) => [d.member.id, d.owed]));
-      const owed = memberDues(sub, sharingTo, state.settings.collectCurrency).reduce(
-        (a, d) => a + toBaseAt(state, Math.max(0, d.owed - (before.get(d.member.id) ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo),
+      const before = new Map(memberDues(sub, addDays(sharingFrom, -1), state.settings.collectCurrency, state).map((d) => [d.member.id, d.owed]));
+      const owed = memberDues(sub, sharingTo, state.settings.collectCurrency, state).reduce(
+        (a, d) =>
+          a +
+          (Number.isFinite(d.owed) && Number.isFinite(before.get(d.member.id) ?? 0)
+            ? toBaseAt(state, Math.max(0, d.owed - (before.get(d.member.id) ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo)
+            : NaN),
         0,
       );
       return { sub, received, owed };
     })
-    .filter((r) => r.received !== 0 || r.owed > 0);
+    .filter((r) => r.received !== 0 || r.owed > 0 || !Number.isFinite(r.owed));
   if (sharing.length)
     blocks.push({ type: 'sharing', rows: sharing, received: sharing.reduce((a, r) => a + r.received, 0), owed: sharing.reduce((a, r) => a + r.owed, 0) });
   return blocks;

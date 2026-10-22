@@ -9427,7 +9427,6 @@ img.mm-flag {
 .ch-main {
   height: var(--ctl-h-lg);
 }
-.ch-row .toggle,
 .ch-main .cell-l {
   line-height: 1.25;
   white-space: nowrap;
@@ -9490,4 +9489,41 @@ img.mm-flag {
 .days-stepper .days-unit {
   margin: 0 4px 0 3px;
   color: var(--label-2);
+}
+
+/* 成员独立到期日：卡片可收缩，已付至与下次收款各占一行。 */
+.car-card {
+  min-width: 0;
+  max-width: 100%;
+}
+.member-dates {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.member-dates > span {
+  display: block;
+}
+.member-info .icon-text > span:first-child {
+  flex-shrink: 0;
+  max-width: 60%;
+}
+
+.member-fee-section {
+  scroll-margin-top: 84px;
+}
+
+/* 记收款弹窗顶部：订阅 logo + 名称一行 */
+.collect-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 2px 4px;
+}
+.collect-sub b {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

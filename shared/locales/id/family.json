@@ -229,5 +229,17 @@
     "gain": "Untung {amount}",
     "lost": "Rugi {amount}",
     "noRecords": "Belum ada pembayaran"
+  },
+  "collect": {
+    "title": "Catat pembayaran · {name}",
+    "next": "Penagihan berikutnya {date}",
+    "editMember": "Edit anggota",
+    "until": "Berlaku sampai",
+    "covers": "Pembayaran mencakup {from} – {until}",
+    "changeFee": "Ubah biaya",
+    "lastPayment": "Pembayaran terakhir",
+    "adjustFee": "Sesuaikan biaya",
+    "feeFrom": "Berlaku mulai",
+    "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah."
   }
 }

@@ -1,8 +1,8 @@
 // 合租的账：一年的成本与预计收入、从开始合租起实际付出与收回；成员每次该收多少。
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
-import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths } from './billing.ts';
+import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths, memberRate } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
-import type { AppState, MemberPayment, ShareMember, Subscription } from './types.ts';
+import type { AppState, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
 
 /**
  * 合租账本：订阅本身多少钱、我付出去多少、从成员身上收回多少，算出净成本（负数就是赚了）。
@@ -11,12 +11,14 @@ import type { AppState, MemberPayment, ShareMember, Subscription } from './types
 export function carLedger(state: AppState, s: Subscription, today: string) {
   const cur = currentPhase(s, today);
   const members = s.share?.members ?? [];
-  const perYear = 365.25 / cycleDays(cur.cycle);
   const yearCost = toBaseAt(state, monthlyGross(cur, today) * 12, cur.currency);
   // 预计收入只算还在车上的；实际收回保留所有人（包括已退出的）的历史收款
   const yearIncome = ['ended', 'terminated'].includes(effectiveStatus(s, today))
     ? 0
-    : members.reduce((a, m) => a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (m.share || 0) * perYear, cur.currency)), 0);
+    : members.reduce((a, m) => {
+        const rate = memberFee(state, s, m, today);
+        return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
+      }, 0);
   const firstPay = members.flatMap((m) => m.payments ?? []).reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
@@ -36,11 +38,39 @@ export function billAmount(s: Subscription, m: ShareMember): number {
   return Math.round((((m.share || 0) * memberBillMonths(s, m)) / cycleMonths(s)) * 100) / 100;
 }
 
-/** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算成本位币 */
-export function memberFee(state: AppState, s: Subscription, m: ShareMember): { amount: number; currency: string } {
+/** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算（订阅币种） */
+export function memberFee(state: AppState, s: Subscription, m: ShareMember, day = m.joined ?? s.share?.since ?? s.start): { amount: number; currency: string } {
   const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
-  if (m.fee != null) return { amount: m.fee, currency: m.feeCurrency ?? ccy };
-  return { amount: Math.round(toBaseAt(state, billAmount(s, m), s.currency, undefined, ccy)), currency: ccy };
+  return memberRate(s, m, day, ccy);
+}
+
+/** 首次调价固定旧基线；只插入收费标准，绝不改写历史收款。 */
+export function changeMemberFee(state: AppState, s: Subscription, m: ShareMember, point: MemberFeePoint, today: string): ShareMember {
+  const baseline = memberRate(s, m, m.joined ?? s.share?.since ?? s.start, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const history = m.feeHistory?.length
+    ? m.feeHistory
+    : [
+        {
+          from: [m.joined ?? s.share?.since ?? s.start, point.from].sort()[0],
+          fee: baseline.amount,
+          currency: baseline.currency,
+          billEvery: baseline.billEvery,
+          share: m.share,
+        },
+      ];
+  const feeHistory = [
+    ...history.filter((p) => p.from !== point.from),
+    { ...point, share: shareFromFee(state, s, point.fee, point.currency, point.billEvery) },
+  ].sort((a, b) => a.from.localeCompare(b.from));
+  const next = { ...m, feeHistory };
+  const current = memberRate(s, next, today);
+  return {
+    ...next,
+    fee: current.amount,
+    feeCurrency: current.currency,
+    billEvery: current.billEvery,
+    share: m.exempt ? 0 : shareFromFee(state, s, current.amount, current.currency, current.billEvery),
+  };
 }
 
 /** 由收费标准反推每期份额（订阅币种），用于算我自己的份额与成员应交 */
@@ -60,7 +90,13 @@ export function resyncShares(state: AppState, prev: Subscription | undefined, ne
     share: {
       ...next.share,
       members: next.share.members.map((m) =>
-        m.fee != null && !m.exempt ? { ...m, share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, memberBillMonths(next, m)) } : m,
+        m.fee != null && !m.exempt
+          ? {
+              ...m,
+              share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, m.billEvery ?? memberBillMonths(next, m)),
+              feeHistory: m.feeHistory?.map((p) => ({ ...p, share: shareFromFee(state, next, p.fee, p.currency, p.billEvery) })),
+            }
+          : m,
       ),
     },
   };

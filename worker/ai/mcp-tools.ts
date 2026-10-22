@@ -57,7 +57,7 @@ import { normName, peopleLedger, type PersonLedger } from '../../shared/people.t
 import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
 import { loadState, saveLedgerEdit, upsert } from '../store.ts';
-import { carLedger, memberFee, resyncShares, shareFromFee } from '../../shared/carpool.ts';
+import { carLedger, memberFee, changeMemberFee, resyncShares, shareFromFee } from '../../shared/carpool.ts';
 import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
@@ -123,7 +123,7 @@ export async function state(ctx: ToolCtx): Promise<{ st: AppState; today: string
 
 /** 金额：原币 + 折算成目标币种（默认本位币） */
 export function money(st: AppState, amount: number, currency: string, date?: string, to = st.settings.baseCurrency) {
-  const conv = currency === to ? amount : toBaseAt(st, amount, currency, date, to);
+  const conv = !Number.isFinite(amount) ? NaN : currency === to ? amount : toBaseAt(st, amount, currency, date, to);
   return { amount: round(amount), currency, converted: round(conv), convertedCurrency: to };
 }
 export const round = (n: number) => Math.round(n * 100) / 100;
@@ -665,7 +665,7 @@ const CATALOGUE: Tool[] = [
                 left: m.left ?? null,
                 exempt: !!m.exempt,
               })),
-              dues: memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency)
+              dues: memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({ member: d.member.name, periods_owed: d.periodsOwed, owed: money(st, d.owed, d.currency, undefined, out) })),
             }
@@ -861,7 +861,7 @@ const CATALOGUE: Tool[] = [
         kind === 'proxy'
           ? []
           : st.subscriptions.flatMap((s) =>
-              memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency)
+              memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({
                   subscription_id: s.id,
@@ -1518,7 +1518,7 @@ const CATALOGUE: Tool[] = [
           .map((s) => {
             const sh = s.share!;
             const live = sh.members.filter((m) => memberAboard(m, today));
-            const dues = new Map(memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency).map((d) => [d.member.id, d]));
+            const dues = new Map(memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).map((d) => [d.member.id, d]));
             const book = carLedger(st, s, today);
             return {
               id: s.id,
@@ -1544,7 +1544,7 @@ const CATALOGUE: Tool[] = [
                 i_earn: round(Math.max(0, -book.net)),
               },
               members: sh.members.map((m) => {
-                const fee = memberFee(st, s, m);
+                const fee = memberFee(st, s, m, today);
                 const d = dues.get(m.id);
                 return {
                   id: m.id,
@@ -1553,7 +1553,7 @@ const CATALOGUE: Tool[] = [
                   active: memberAboard(m, today),
                   joined: m.joined ?? null,
                   left: m.left ?? null,
-                  fee: { amount: fee.amount, currency: fee.currency, every_months: memberBillMonths(s, m) },
+                  fee: { amount: fee.amount, currency: fee.currency, every_months: memberBillMonths(s, m, today) },
                   ...collectionSummary(st, s, m, d),
                   first_period: m.firstPeriod ?? 'prorate',
                   first_amount: m.firstAmount ?? null,
@@ -1641,7 +1641,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'save_share_member',
     description:
-      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Collection periods align to the shared anchor. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. Preview and save return member.first_collection (inclusive coverage and amount), collect_from, paid_until and next_collection_date.',
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. Preview and save return member.first_collection (inclusive coverage and amount), collect_from, paid_until and next_collection_date.',
     write: true,
     inputSchema: obj(
       {
@@ -1652,6 +1652,11 @@ const CATALOGUE: Tool[] = [
         name: { type: 'string' },
         fee: { type: 'number', minimum: 0 },
         fee_currency: { type: 'string' },
+        fee_from: {
+          ...DATE,
+          description:
+            'Effective date for a fee/currency/billing-cycle change; defaults to today. Period start selects the whole-period rate; no split at price changes.',
+        },
         bill_every: { type: 'integer', enum: [1, 3, 6, 12] },
         first_period: {
           type: 'string',
@@ -1688,9 +1693,9 @@ const CATALOGUE: Tool[] = [
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const ccy = (str(a.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
       validateCurrency(st, ccy);
-      const billEvery = a.bill_every != null ? Number(a.bill_every) : old ? memberBillMonths(s, old) : 1;
+      const billEvery = a.bill_every != null ? Number(a.bill_every) : old ? memberBillMonths(s, old, a.fee_from ? date(a.fee_from, 'fee_from') : today) : 1;
       if (a.first_period != null && !['prorate', 'full', 'free'].includes(String(a.first_period))) throw new Error(t('mcp.error.invalidFirstPeriod'));
-      const m: ShareMember = {
+      let m: ShareMember = {
         ...(old ?? { id: str(a.id) ?? uid(), name: '', share: 0 }),
         name: str(a.name) ?? old?.name ?? '',
         ...(a.fee != null ? { fee: num(a.fee, 'fee'), feeCurrency: ccy } : {}),
@@ -1732,8 +1737,24 @@ const CATALOGUE: Tool[] = [
       ] as const)
         if (input in a) m[field] = str(a[input]);
       if (!m.name) throw new Error(t('mcp.error.needMemberName'));
+      if (old && ['fee', 'fee_currency', 'bill_every'].some((key) => key in a)) {
+        const from = date(a.fee_from, 'fee_from', today);
+        const prev = memberFee(st, s, old, from);
+        m = changeMemberFee(
+          st,
+          s,
+          { ...m, fee: old.fee, feeCurrency: old.feeCurrency, billEvery: old.billEvery },
+          {
+            from,
+            fee: a.fee == null ? prev.amount : num(a.fee, 'fee'),
+            currency: a.fee_currency == null ? prev.currency : ccy,
+            billEvery,
+          },
+          today,
+        );
+      }
       // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
-      m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, billEvery) : m.share;
+      m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
       const after = { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } };
       return {
@@ -1741,11 +1762,12 @@ const CATALOGUE: Tool[] = [
         member: {
           id: m.id,
           name: m.name,
+          fee_history: m.feeHistory ?? [],
           ...collectionSummary(
             st,
             after,
             m,
-            memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency).find((d) => d.member.id === m.id),
+            memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
           ),
         },
       };
@@ -1842,7 +1864,7 @@ const CATALOGUE: Tool[] = [
         until: {
           ...DATE,
           description:
-            'share: coverage end, inclusive; defaults to the aligned period end for from. Overrides automatic advance; paid_until never moves backward.',
+            'share: coverage end, inclusive; defaults to one member billing period from coverage start (only the joining period aligns to the shared anchor). Overrides automatic advance; paid_until never moves backward.',
         },
         note: { type: 'string' },
         dry_run: DRY,
@@ -1915,7 +1937,7 @@ const CATALOGUE: Tool[] = [
               st,
               after,
               updated,
-              memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency).find((d) => d.member.id === m.id),
+              memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
             ),
           },
         };

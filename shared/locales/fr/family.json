@@ -237,5 +237,17 @@
     "gain": "+{amount}",
     "lost": "−{amount}",
     "noRecords": "Aucun paiement pour l’instant"
+  },
+  "collect": {
+    "title": "Enregistrer un paiement · {name}",
+    "next": "Prochain encaissement {date}",
+    "editMember": "Modifier le membre",
+    "until": "Couvre jusqu’au",
+    "covers": "Ce paiement couvre {from} – {until}",
+    "changeFee": "Modifier le tarif",
+    "lastPayment": "Dernier paiement",
+    "adjustFee": "Ajuster le tarif",
+    "feeFrom": "À partir du",
+    "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés."
   }
 }

@@ -237,5 +237,17 @@
     "gain": "Ganho de {amount}",
     "lost": "Perda de {amount}",
     "noRecords": "Nenhum pagamento ainda"
+  },
+  "collect": {
+    "title": "Registrar recebimento · {name}",
+    "next": "Próxima cobrança {date}",
+    "editMember": "Editar membro",
+    "until": "Cobre até",
+    "covers": "O pagamento cobre {from} – {until}",
+    "changeFee": "Alterar valor",
+    "lastPayment": "Último pagamento",
+    "adjustFee": "Ajustar valor",
+    "feeFrom": "Vigente a partir de",
+    "feeHelp": "O início da cobertura define a tarifa de todo o período. Os pagamentos registrados permanecem inalterados."
   }
 }
