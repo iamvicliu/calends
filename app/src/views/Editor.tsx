@@ -80,6 +80,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   // 新建的草稿不看 base（每次新建 id 都不同）；编辑的要求订阅没被别处改过
   const [draft] = useState(() => readDraft(key, isNew ? 'new' : initial));
   const [restored, setRestored] = useState(!!draft);
+  const [priceValid, setPriceValid] = useState(true);
+  const [historyReset, setHistoryReset] = useState(0);
   const [f, setFRaw] = useState<Subscription>(() => draft?.form ?? initialForm);
   // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
   const [basePrice, setBasePrice] = useState(draft?.basePrice ?? initialForm.price);
@@ -89,7 +91,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     setBasePrice(form.price);
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
-  const dirty = sig(f) !== initial;
+  const dirty = sig(f) !== initial || !priceValid;
   // 关闭即存草稿；没改动就清掉
   const close = () => {
     writeDraft(key, dirty ? { form: f, basePrice, base: isNew ? 'new' : initial } : undefined);
@@ -99,6 +101,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const reset = () => {
     writeDraft(key, undefined);
     setRestored(false);
+    setPriceValid(true);
+    setHistoryReset((n) => n + 1);
     const fresh = isNew ? toEditForm(newSub(today, state.settings.defaultMethodId, state.settings.baseCurrency), today) : initialForm;
     setFRaw(fresh);
     setBasePrice(fresh.price);
@@ -111,6 +115,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   };
 
   const save = async () => {
+    if (!priceValid) return;
     let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
     // 直接改了价格框：视为今天起调价，过往账单保持原价
     try {
@@ -184,10 +189,16 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
             </button>
           ) : null}
           <span className="grow" />
-          <button className="btn" onClick={close}>
+          <button
+            className="btn"
+            onClick={() => {
+              writeDraft(key, undefined);
+              onClose();
+            }}
+          >
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={!f.name.trim()} onClick={save}>
+          <button className="btn primary" disabled={!f.name.trim() || !priceValid} onClick={save}>
             {isNew ? t('common.add') : t('common.done')}
           </button>
         </>
@@ -219,7 +230,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       </div>
       {!isNew && (
         <div style={{ marginTop: 18 }}>
-          <ChangePanel f={f} setF={setF} state={state} today={today} />
+          <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />
         </div>
       )}
     </Sheet>

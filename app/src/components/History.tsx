@@ -114,7 +114,7 @@ export function History({
                   </>
                 );
                 return (
-                  <li key={p.from}>
+                  <li key={priceEditor?.start === v.start && priceEditor.from === p.from ? 'editing' : p.from}>
                     {onPrice ? (
                       <button
                         className="h-price-row"

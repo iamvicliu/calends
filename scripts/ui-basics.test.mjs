@@ -97,3 +97,170 @@ test('title and icon primitives preserve heading semantics, accessible names and
   assert.match(button, /class="icon-btn accent"/);
   assert.match(button, /disabled=""/);
 });
+
+// Exercise the real price editor handlers with a small hook driver; domain validation stays real.
+async function priceEditorHarness() {
+  const billing = await import('../shared/billing.ts');
+  const phases = await import('../shared/phases.ts');
+  const { t } = await import('../shared/i18n.ts');
+  const [, ast, source] = sources.find(([file]) => file === 'components/ChangePanel.tsx');
+  const range = functionRange(ast, 'ChangePanel');
+  const result = transformSync('ChangePanel.tsx', source.slice(...range), { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  assert.equal(result.fatal, false);
+  const hooks = [];
+  let cursor = 0;
+  let valid = true;
+  let confirmations = 0;
+  let confirm = true;
+  let form = {
+    id: 'fictional',
+    name: 'Orbit Notes',
+    category: 'tools',
+    tags: [],
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    end: '2026-12-31',
+    status: 'active',
+    price: 18,
+    priceHistory: [
+      { from: '2026-01-01', amount: 10 },
+      { from: '2026-04-01', amount: 14 },
+      { from: '2026-07-01', amount: 18 },
+    ],
+  };
+  const deps = {
+    ...billing,
+    ...phases,
+    React,
+    t,
+    useState(initial) {
+      const index = cursor++;
+      if (!(index in hooks)) hooks[index] = initial;
+      return [
+        hooks[index],
+        (value) => {
+          hooks[index] = value;
+        },
+      ];
+    },
+    useId: () => 'point-error',
+    CYCLES: [['m1', { unit: 'month', every: 1 }]],
+    Trash2: 'trash',
+    History: 'history',
+    Group: 'group',
+    Icon: 'icon',
+    IconButton: 'icon-button',
+    DatePicker: 'date-picker',
+    ask: async () => {
+      confirmations++;
+      return confirm;
+    },
+  };
+  const Component = new Function(...Object.keys(deps), `${result.code}; return ChangePanel;`)(...Object.values(deps));
+  const walk = (el) => (!el || typeof el !== 'object' ? [] : [el, ...React.Children.toArray(el.props?.children).flatMap(walk)]);
+  const render = () => {
+    cursor = 0;
+    return Component({
+      f: form,
+      setF: (next) => {
+        form = next;
+      },
+      state: { methods: [] },
+      today: '2026-10-22',
+      onPriceValidity: (v) => {
+        valid = v;
+      },
+    });
+  };
+  const history = () => walk(render()).find((el) => el.type === 'history');
+  const inline = () => history().props.priceEditor?.content;
+  return {
+    open: (from = '2026-07-01') => history().props.onPrice('2026-01-01', from),
+    change: (type, value) =>
+      walk(inline())
+        .find((el) => el.type === 'input' && (type === 'date' ? el.props.type === 'date' : el.props.inputMode === 'decimal'))
+        .props.onChange({ target: { value } }),
+    remove: () =>
+      walk(inline())
+        .find((el) => el.type === 'icon-button')
+        .props.onClick(),
+    inline,
+    form: () => form,
+    valid: () => valid,
+    confirmations: () => confirmations,
+    confirm: (v) => {
+      confirm = v;
+    },
+    nodes: () => walk(inline()),
+  };
+}
+
+test('inline price edits update the form immediately without an inner apply/cancel or confirmation', async () => {
+  const h = await priceEditorHarness();
+  h.open();
+  h.change('amount', '22');
+  assert.equal(h.form().priceHistory.at(-1).amount, 22);
+  h.change('date', '2026-06-15');
+  assert.equal(h.form().priceHistory.at(-1).from, '2026-06-15');
+  h.change('amount', '0');
+  assert.equal(h.form().priceHistory.at(-1).amount, 0);
+  assert.equal(h.valid(), true);
+  assert.equal(h.confirmations(), 0);
+  assert.equal(
+    h.nodes().some((el) => el.type === 'button'),
+    false,
+  );
+  h.inline().props.onBlur({ currentTarget: { contains: () => false }, relatedTarget: null });
+  assert.equal(h.inline(), undefined);
+});
+
+test('invalid price drafts remain visible and block completion until corrected', async () => {
+  const h = await priceEditorHarness();
+  h.open();
+  for (const [field, value] of [
+    ['date', '2025-12-31'],
+    ['date', '2027-01-01'],
+    ['date', '2026-04-01'],
+    ['date', ''],
+    ['amount', '-1'],
+    ['amount', ''],
+    ['amount', 'no'],
+    ['amount', 'Infinity'],
+  ]) {
+    h.change('date', '2026-07-01');
+    h.change('amount', '18');
+    h.change(field, value);
+    assert.equal(h.valid(), false, `${field}: ${value}`);
+    assert.ok(h.nodes().some((el) => el.props?.role === 'alert'));
+    h.inline().props.onBlur({ currentTarget: { contains: () => false }, relatedTarget: null });
+    assert.ok(h.inline());
+    h.open('2026-04-01');
+    assert.equal(h.nodes().find((el) => el.type === 'input' && el.props.type === 'date').props.value, field === 'date' ? value : '2026-07-01');
+    assert.equal(h.form().price, 18);
+  }
+  h.change('amount', '19');
+  assert.equal(h.valid(), true);
+  assert.equal(h.form().price, 19);
+});
+
+test('inline deletion confirms once and only changes the form; initial price has no delete action', async () => {
+  const h = await priceEditorHarness();
+  h.open();
+  h.confirm(false);
+  await h.remove();
+  assert.equal(h.form().priceHistory.length, 3);
+  h.confirm(true);
+  h.change('amount', 'invalid');
+  await h.remove();
+  assert.equal(h.form().priceHistory.length, 2);
+  assert.equal(h.form().price, 14);
+  assert.equal(h.valid(), true);
+  assert.equal(h.inline(), undefined);
+  assert.equal(h.confirmations(), 2);
+  h.open('2026-01-01');
+  assert.equal(
+    h.nodes().some((el) => el.type === 'icon-button'),
+    false,
+  );
+});

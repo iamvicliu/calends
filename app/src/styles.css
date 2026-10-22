@@ -3552,8 +3552,15 @@ button.h-price-row:focus-visible {
   text-align: right;
   margin: 0;
 }
-.h-price-editor {
+.change-form.h-price-editor {
   margin: 4px 0 12px;
+  position: relative;
+  padding-right: 52px;
+}
+.h-price-delete {
+  position: absolute;
+  top: 26px;
+  right: 4px;
 }
 .h-price-editor .h-error {
   grid-column: 1 / -1;
