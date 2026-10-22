@@ -274,3 +274,28 @@ test('补一段更早的买断：插在最前面，开始日前移，之后的�
   assert.throws(() => prependPlan(yearly, '2024-07-05', TR));
   assert.throws(() => prependPlan(yearly, '2022-01-01', TR, '2025-01-01'));
 });
+
+// Regression: the sole inferred/recorded payment must not be regenerated during replacement.
+test('替换唯一推算扣款时只保存实扣金额，不重新生成原标价', () => {
+  const s: Subscription = {
+    id: 'replacement',
+    name: 'Fictional',
+    category: 'tools',
+    tags: [],
+    price: 12,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-22',
+    status: 'active',
+  };
+  const after = savePayment(s, '2026-10-22', { date: '2026-10-22', amount: 11 }, { date: '2026-10-22', index: 0 });
+  assert.deepEqual(
+    after.payments?.map((p) => p.amount),
+    [11],
+  );
+  const corrected = savePayment(after, '2026-10-22', { date: '2026-10-22', amount: 9 }, { date: '2026-10-22', index: 0 });
+  assert.deepEqual(
+    corrected.payments?.map((p) => p.amount),
+    [9],
+  );
+});
