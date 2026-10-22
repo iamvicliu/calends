@@ -196,7 +196,7 @@
   top: 0;
   right: 0;
   z-index: 4;
-  height: 24px;
+  height: var(--ctl-h-md);
   padding: 0 9px;
   border: 0;
   border-radius: 999px;

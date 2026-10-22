@@ -324,7 +324,7 @@ a {
   gap: 6px;
   flex: 0 1 200px;
   min-width: 120px;
-  height: 34px;
+  height: var(--ctl-h-md);
   padding: 0 6px 0 12px;
   border-radius: 999px;
   background: var(--fill);
@@ -414,7 +414,7 @@ a {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 32px;
+  height: var(--ctl-h-md);
   padding: 0 14px;
   border-radius: 999px;
   border: 0;
@@ -458,7 +458,7 @@ a {
   padding: 0 6px;
 }
 .btn.lg {
-  height: 46px;
+  height: var(--ctl-h-lg);
   padding: 0 20px;
   font-size: 16px;
   font-weight: 600;
@@ -474,6 +474,9 @@ a {
   padding: 2px;
   border-radius: 9px;
   background: var(--fill);
+  box-sizing: border-box;
+  height: var(--ctl-h-md);
+  align-items: stretch;
 }
 .seg button {
   white-space: nowrap;
@@ -485,6 +488,11 @@ a {
   font-weight: 500;
   color: var(--label);
   min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding-block: 0;
 }
 .seg button[data-focus-visible] {
   outline: 2px solid var(--accent);
@@ -498,7 +506,7 @@ a {
   font-weight: 600;
 }
 .seg.sm button {
-  padding: 3px 10px;
+  padding: 0 10px;
   font-size: 12px;
   min-width: 0;
 }
@@ -846,11 +854,12 @@ a {
 }
 
 /* ---------------- 开关 ---------------- */
-/* 实心开关视觉上比浅灰下拉框重，略小一号（28px）才显得和 32px 的下拉框一样高 */
+/* 开关与同排下拉、测试按钮共用高度，圆点随轨道缩放。 */
 .toggle {
+  --toggle-h: var(--ctl-h-md);
   position: relative;
-  width: 46px;
-  height: 28px;
+  width: calc(var(--toggle-h) + 18px);
+  height: var(--toggle-h);
   flex-shrink: 0;
 }
 .toggle[data-focus-visible] i {
@@ -872,8 +881,8 @@ a {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 24px;
-  height: 24px;
+  width: calc(var(--toggle-h) - 4px);
+  height: calc(var(--toggle-h) - 4px);
   border-radius: 50%;
   background: #fff;
   box-shadow:
@@ -2590,6 +2599,7 @@ select.btn {
   padding: 2px 4px 10px 8px;
 }
 .sb-mark {
+  height: var(--ctl-h-md);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2727,7 +2737,7 @@ select.btn {
 .btn {
   background: var(--card);
   box-shadow: inset 0 0 0 1px var(--line);
-  height: 34px;
+  height: var(--ctl-h-md);
   font-weight: 500;
 }
 .btn:hover {
@@ -2776,9 +2786,9 @@ select.btn {
     0 1px 2px rgba(0, 0, 0, 0.08),
     0 0 0 1px var(--line);
 }
-/* 工具栏文案控件在桌面端保持 34px 高；图标操作遵循共享尺寸。 */
+/* 工具栏外框与图标操作使用同一尺寸档。 */
 .tb-actions .seg {
-  height: 34px;
+  height: var(--ctl-h-md);
   box-sizing: border-box;
   align-items: stretch;
 }
@@ -3011,7 +3021,7 @@ select.btn {
   .tb-search {
     order: -1;
     flex-basis: 100%;
-    height: 38px;
+    height: var(--ctl-h-md);
   }
   .tb-actions .seg {
     flex: 1;
@@ -3199,7 +3209,7 @@ select.btn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: 30px;
+  height: var(--ctl-h-sm);
   padding: 0 11px;
   border-radius: 15px;
   border: 0;
@@ -3575,7 +3585,7 @@ button.h-price-row:focus-visible {
 }
 @media (max-width: 600px), (pointer: coarse) {
   button.h-price-row {
-    min-height: 40px;
+    min-height: var(--ctl-h-md);
   }
 }
 /* 并行的阶段：第二条轨道，圆点落在右边那条线上 */
@@ -3615,12 +3625,11 @@ button.h-price-row:focus-visible {
 }
 .h-edit .dp-btn {
   min-width: 0;
-  min-height: 28px;
-  height: auto;
-  padding: 4px 6px;
+  height: var(--ctl-h-md);
+  padding: 0 6px;
   gap: 5px;
   justify-content: center;
-  white-space: normal;
+  white-space: nowrap;
   font-size: 12.5px;
 }
 .h-edit .dp-btn .i {
@@ -3654,7 +3663,7 @@ button.h-price-row:focus-visible {
 }
 .change-form input,
 .change-form select {
-  height: 34px;
+  height: var(--ctl-h-md);
   border-radius: 8px;
   border: 0;
   box-shadow: inset 0 0 0 1px var(--line);
@@ -3682,7 +3691,7 @@ button.h-price-row:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: 32px;
+  height: var(--ctl-h-md);
   padding: 0 11px;
   border-radius: 9px;
   border: 0;
@@ -3763,6 +3772,7 @@ button.h-price-row:focus-visible {
   margin-bottom: 8px;
 }
 .dp-title {
+  height: var(--ctl-h-md);
   flex: 1;
   display: inline-flex;
   align-items: center;
@@ -3771,7 +3781,7 @@ button.h-price-row:focus-visible {
   background: none;
   font-size: 15px;
   font-weight: 600;
-  padding: 4px 6px;
+  padding: 0 6px;
   border-radius: 8px;
   text-align: left;
 }
@@ -3839,7 +3849,7 @@ button.h-price-row:focus-visible {
   padding: 4px 0;
 }
 .dp-month {
-  height: 40px;
+  height: var(--ctl-h-lg);
   border: 0;
   border-radius: 10px;
   background: var(--fill-2);
@@ -4762,7 +4772,7 @@ button.h-price-row:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 32px;
+  height: var(--ctl-h-md);
   max-width: 100%;
   padding: 0 10px 0 8px;
   border-radius: 9px;
@@ -4941,6 +4951,7 @@ button.h-price-row:focus-visible {
   gap: 4px;
 }
 .cat-row {
+  --icon-button-size: var(--ctl-h-lg);
   padding: 0 8px 0 0;
   gap: 0;
   background: var(--card);
@@ -4967,7 +4978,8 @@ button.h-price-row:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 50px;
+  height: var(--ctl-h-lg);
+  min-height: var(--ctl-h-lg);
   border: 0;
   background: none;
   padding: 0;
@@ -5002,7 +5014,7 @@ button.h-price-row:focus-visible {
 .cat-name {
   flex: 1;
   min-width: 0;
-  height: 44px;
+  height: var(--ctl-h-lg);
   padding: 0 12px;
   border: 0;
   border-radius: 12px;
@@ -5024,8 +5036,8 @@ button.h-price-row:focus-visible {
   padding: 12px 14px;
 }
 .cat-swatch {
-  width: 26px;
-  height: 26px;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
   border-radius: 50%;
   border: 0;
   padding: 0;
@@ -5075,7 +5087,7 @@ button.h-price-row:focus-visible {
 .cat-pick {
   display: grid;
   place-items: center;
-  height: 40px;
+  height: var(--ctl-h-lg);
   border: 0;
   border-radius: 10px;
   background: none;
@@ -5229,6 +5241,7 @@ button.h-price-row:focus-visible {
   outline-offset: 2px;
 }
 .member-info {
+  height: var(--ctl-h-lg);
   flex: 1;
   min-width: 0;
   border: 0;
@@ -5328,8 +5341,8 @@ button.h-price-row:focus-visible {
 }
 .contact-go {
   flex-shrink: 0;
-  width: 26px;
-  height: 26px;
+  width: var(--ctl-h-md);
+  height: var(--ctl-h-md);
   color: var(--accent);
 }
 
@@ -5374,7 +5387,7 @@ button.h-price-row:focus-visible {
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-  height: 30px;
+  height: var(--ctl-h-md);
   padding: 0 10px;
   border: 0;
   border-radius: 999px;
@@ -5494,7 +5507,7 @@ a.car-toggle {
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  height: 28px;
+  height: var(--ctl-h-sm);
   padding: 0 10px;
   border: 0;
   border-radius: 999px;
@@ -5548,13 +5561,13 @@ a.car-toggle {
 }
 .facet-clear {
   position: absolute;
-  top: 14px;
+  top: 11px;
   right: 12px;
   z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 22px;
+  height: var(--ctl-h-sm);
   padding: 0 8px;
   border: 0;
   border-radius: 999px;
@@ -5586,7 +5599,7 @@ a.car-toggle {
     min-width: 30px;
   }
   .facet-clear {
-    top: 12px;
+    top: 9px;
     right: 10px;
   }
 }
@@ -5934,7 +5947,7 @@ a.car-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 34px;
+  height: var(--ctl-h-md);
   margin: 2px 2px 6px;
   padding: 0 10px;
   border-radius: 10px;
@@ -6797,7 +6810,7 @@ a.car-toggle {
 }
 /* 默认样式：和日期选择器一样的浅灰底胶囊，悬停加深、展开时描边，看得出能点开 */
 .pk-btn.inline {
-  height: 32px;
+  height: var(--ctl-h-md);
   padding: 0 8px 0 11px;
   border-radius: 9px;
   background: var(--fill-2);
@@ -6820,7 +6833,7 @@ a.car-toggle {
   color: var(--label-3);
 }
 .pk-btn.btn {
-  height: 34px;
+  height: var(--ctl-h-md);
   padding: 0 12px 0 14px;
   border-radius: 999px;
   background: var(--card);
@@ -6883,7 +6896,7 @@ a.car-toggle {
   gap: 6px;
 }
 .chip-btn {
-  height: 28px;
+  height: var(--ctl-h-sm);
   padding: 0 11px;
   border: 0;
   border-radius: 999px;
@@ -7914,7 +7927,7 @@ a.car-toggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 26px;
+  height: var(--ctl-h-md);
   padding: 0 10px;
   border: 0;
   border-radius: 7px;
@@ -8224,7 +8237,7 @@ a.car-toggle {
   color: var(--label-2);
 }
 .ai-field input {
-  height: 44px;
+  height: var(--ctl-h-lg);
   padding: 0 14px;
   border: 0;
   border-radius: 12px;
@@ -8507,7 +8520,7 @@ a.car-toggle {
   color: var(--label-3);
 }
 .pp-collect {
-  height: 30px;
+  height: var(--ctl-h-md);
   padding: 0 11px;
   font-size: 13px;
   gap: 4px;
@@ -8564,7 +8577,7 @@ a.car-toggle {
 }
 .gt-range {
   min-width: 96px;
-  height: 28px;
+  height: var(--ctl-h-md);
   padding: 0 10px;
   border: 0;
   border-radius: 999px;
@@ -8672,7 +8685,7 @@ a.car-toggle {
   color: var(--label-3);
 }
 .car-card .car-toggle {
-  height: 26px;
+  height: var(--ctl-h-md);
   font-size: 12px;
 }
 .car-facts {
@@ -9348,7 +9361,7 @@ img.mm-flag {
   }
   .tb-actions .btn,
   .tb-actions .seg {
-    min-height: 40px;
+    min-height: var(--ctl-h-md);
   }
 }
 
@@ -9373,18 +9386,12 @@ img.mm-flag {
   .pk-btn,
   .dp-btn,
   .mp-btn {
-    min-height: 40px;
+    min-height: var(--ctl-h-md);
   }
   .toggle {
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
-  }
-  .toggle i {
-    position: relative;
-    inset: auto;
-    width: 46px;
-    height: 28px;
+    min-height: var(--ctl-h-md);
   }
 }
 
@@ -9401,4 +9408,31 @@ img.mm-flag {
 
 .member-amount {
   flex-shrink: 0;
+}
+
+/* Form/action rows share the same outer box as their neighboring pickers. */
+.cell-r input:not([type='checkbox']),
+.cell-r select {
+  box-sizing: border-box;
+  height: var(--ctl-h-md);
+}
+.ch-row .chip-btn,
+.ch-main {
+  height: var(--ctl-h-lg);
+}
+.ch-row .toggle,
+.cat-row .toggle {
+  --toggle-h: var(--ctl-h-lg);
+}
+.ch-main .cell-l {
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.ch-main .cell-l small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member > .btn {
+  height: var(--ctl-h-lg);
 }

@@ -99,7 +99,7 @@ const methodOf = (state: AppState, id?: string) => state.methods.find((m) => m.i
 
 /**
  * 详情顶部的操作按钮。宽屏：常用的带文字（胶囊），次要的只有图标（正圆）；
- * 窄屏：一排等宽的大圆按钮，图标下面写名称，方便手指点
+ * 窄屏：同高的胶囊与圆形图标操作，空间不足时整项换行
  */
 function Act({
   icon,
