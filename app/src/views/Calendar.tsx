@@ -36,6 +36,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const [mode, setMode] = usePref<'month' | 'year'>('cal-mode', 'month', (v): v is 'month' | 'year' => v === 'month' || v === 'year');
   const [sel, setSel] = useState<string | null>(today);
   const [reportMode, setReportMode] = usePref<'mini' | 'full'>('cal-report-mode', 'mini', (v): v is 'mini' | 'full' => v === 'mini' || v === 'full');
+  const [reportOpen, setReportOpen] = useState(true);
   const report = useMemo(() => (mode === 'month' ? monthReport(state, month, today) : null), [state, month, today, mode]);
   const base = state.settings.baseCurrency;
 
@@ -73,6 +74,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   // 翻月清空选择；今天按钮和 T 明确选中今天。
   const goMonth = (m: string) => {
     setMonth(m);
+    setReportOpen(true);
     setSel(null);
   };
   const goToday = () => {
@@ -201,8 +203,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   onOpen={onOpen}
                   title={t('scope.monthTitle', { month: monthLabel(month, { long: true }) })}
                   animate={true}
-                  open={true}
-                  onToggle={() => setReportMode('mini')}
+                  open={reportOpen}
+                  onToggle={() => setReportOpen((open) => !open)}
                 />
               ) : sel ? (
                 <>

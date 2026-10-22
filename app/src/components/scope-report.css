@@ -2,35 +2,33 @@
   width: 100%;
   min-width: 0;
 }
+.scope-headline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
 .scope-actions {
   display: flex;
   flex-shrink: 0;
   gap: 4px;
 }
+.scope-actions .icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--label-2);
+}
+.scope-actions .icon-btn:hover {
+  background: var(--fill);
+  color: var(--label);
+}
 .scope-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  color: var(--label-3);
-}
-.scope-header::before,
-.scope-header::after,
-.scope-trigger::before,
-.scope-trigger::after {
-  content: '';
-  flex: 1;
-  border-top: 1px dashed currentColor;
-}
-.scope-header::after {
-  order: 1;
-}
-.scope-actions {
-  order: 2;
-}
-.scope-header h2 {
-  margin: 0;
+  margin: 0 0 10px;
   min-width: 0;
+  color: var(--label-3);
   font-size: 13px;
   font-weight: 500;
   text-align: center;
@@ -38,26 +36,31 @@
 }
 .scope-title,
 .scope-trigger {
-  padding: 6px 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-.scope-trigger {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  color: var(--label-3);
-  font-size: 13px;
+  padding: 6px 0;
 }
-.scope-title:hover,
+.scope-title::before,
+.scope-title::after,
+.scope-trigger::before,
+.scope-trigger::after {
+  content: '';
+  flex: 1;
+  border-top: 1px dashed currentColor;
+}
+.scope-trigger {
+  border: 0;
+  background: none;
+  color: var(--label-3);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
 .scope-trigger:hover {
   color: var(--label-2);
 }
-.scope-title:focus-visible,
 .scope-trigger:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
@@ -175,12 +178,6 @@
 }
 .scope-chart-data summary {
   cursor: pointer;
-}
-.scope-chevron {
-  display: flex;
-}
-.scope-chevron.open {
-  transform: rotate(180deg);
 }
 .scope-animate .scope-block {
   animation: scope-assemble 180ms ease-out both;

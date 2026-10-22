@@ -120,7 +120,7 @@ test('calendar selects today, toggles off, clears on month navigation, and Today
   assert.equal(render().find((n) => n.props['aria-current'] === 'date')!.props['aria-pressed'], true);
 });
 
-test('calendar mini/full modes are exclusive, remote preference is read, collapse restores mini, year has neither', () => {
+test('calendar full report collapses locally to its title line, reopens, resets on month navigation, and stays absent in year view', () => {
   const r = harness('../app/src/views/Calendar.tsx', 'Calendar', { 'cal-report-mode': 'full' });
   const render = () => r.render('Calendar', { state: st, today, onOpen() {}, onIcs() {} });
   let nodes = render();
@@ -132,18 +132,21 @@ test('calendar mini/full modes are exclusive, remote preference is read, collaps
   );
   full.props.onToggle();
   nodes = render();
-  assert.equal(r.prefs['cal-report-mode'], 'mini');
+  assert.equal(r.prefs['cal-report-mode'], 'full');
+  assert.equal(nodes.find((n) => n.type === 'ScopeReport')!.props.open, false);
   assert.equal(
-    nodes.some((n) => n.type === 'ScopeReport'),
+    nodes.some((n) => typeof n.type === 'function' && n.type.name === 'MiniReport'),
     false,
   );
-  const mini = nodes.find((n) => typeof n.type === 'function' && n.type.name === 'MiniReport')!;
-  assert.ok(mini);
-  mini.props.onExpand();
-  assert.equal(
-    render().some((n) => n.type === 'ScopeReport'),
-    true,
-  );
+  nodes.find((n) => n.type === 'ScopeReport')!.props.onToggle();
+  assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.open, true);
+  render()
+    .find((n) => n.type === 'ScopeReport')!
+    .props.onToggle();
+  render()
+    .find((n) => n.props['aria-label'] === 'calendar.next')!
+    .props.onClick();
+  assert.equal(render().find((n) => n.type === 'ScopeReport')!.props.open, true);
   r.prefs['cal-mode'] = 'year';
   nodes = render();
   assert.equal(
