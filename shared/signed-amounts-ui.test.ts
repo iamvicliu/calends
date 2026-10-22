@@ -288,6 +288,7 @@ test('Detail keeps plan prices and renewal dates, placing unpaired history below
     Panel,
     Prop: ({ k, children, hint }: { k: string; children: React.ReactNode; hint?: string }) => React.createElement('div', null, k, children, hint),
     Act: empty,
+    IconButton: empty,
     SubIcon: empty,
     CatTag: empty,
     Region: empty,
