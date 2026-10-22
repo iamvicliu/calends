@@ -244,6 +244,7 @@ export function List({
                 setQ('');
               }}
             >
+              <Icon name="x" size={12} />
               {t('list.clear')}
             </button>
           )}
