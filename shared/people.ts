@@ -270,3 +270,29 @@ export function peopleLedger(state: AppState, today: string): PersonLedger[] {
     (a, b) => (b.owed > 0.005 ? 1 : 0) - (a.owed > 0.005 ? 1 : 0) || b.owed - a.owed || a.person.name.localeCompare(b.person.name),
   );
 }
+
+/** Roster presentation only: never alter the underlying ledger or its financial totals. */
+export type PeopleSort = 'owed' | 'received' | 'lastPaid' | 'name';
+export function peopleListRows(
+  book: PersonLedger[],
+  {
+    filter = 'all',
+    sort = 'owed',
+    dir = 'desc',
+    locale,
+  }: { filter?: 'all' | 'owe' | 'settled'; sort?: PeopleSort; dir?: 'asc' | 'desc'; locale?: string } = {},
+): PersonLedger[] {
+  const byName = (a: PersonLedger, b: PersonLedger) => a.person.name.localeCompare(b.person.name, locale);
+  return book
+    .filter((l) => filter === 'all' || (Number.isFinite(l.owed) && (filter === 'owe' ? l.owed > 0.005 : l.owed <= 0.005)))
+    .sort((a, b) => {
+      if (sort === 'name') return (dir === 'asc' ? 1 : -1) * byName(a, b);
+      if (sort === 'lastPaid') {
+        // Missing dates stay last in either direction.
+        if (!a.lastPaid || !b.lastPaid) return Number(!!b.lastPaid) - Number(!!a.lastPaid) || byName(a, b);
+        return (dir === 'asc' ? 1 : -1) * a.lastPaid.localeCompare(b.lastPaid) || byName(a, b);
+      }
+      if (!Number.isFinite(a[sort]) || !Number.isFinite(b[sort])) return Number(Number.isFinite(b[sort])) - Number(Number.isFinite(a[sort])) || byName(a, b);
+      return (dir === 'asc' ? 1 : -1) * (a[sort] - b[sort]) || (b.lastPaid ?? '').localeCompare(a.lastPaid ?? '') || byName(a, b);
+    });
+}

@@ -64,5 +64,8 @@
     "remove": "Xóa ảnh đại diện",
     "removeConfirm": "Xóa ảnh đại diện này? Lưu để áp dụng.",
     "fallbackColor": "Màu dự phòng"
+  },
+  "list": {
+    "none": "Không có người phù hợp"
   }
 }

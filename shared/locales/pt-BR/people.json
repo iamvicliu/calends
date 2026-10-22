@@ -82,5 +82,8 @@
     "remove": "Remover avatar",
     "removeConfirm": "Remover este avatar? Salve para aplicar.",
     "fallbackColor": "Cor alternativa"
+  },
+  "list": {
+    "none": "Nenhuma pessoa encontrada"
   }
 }

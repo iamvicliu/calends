@@ -64,5 +64,8 @@
     "remove": "移除頭像",
     "removeConfirm": "移除這個頭像？儲存後生效。",
     "fallbackColor": "備用顏色"
+  },
+  "list": {
+    "none": "沒有符合條件的人員"
   }
 }

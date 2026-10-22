@@ -82,5 +82,8 @@
     "remove": "Remove avatar",
     "removeConfirm": "Remove this avatar? Save to apply.",
     "fallbackColor": "Fallback color"
+  },
+  "list": {
+    "none": "No matching people"
   }
 }
