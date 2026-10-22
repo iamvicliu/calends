@@ -218,7 +218,9 @@
     "payTo": "Pago a {name} · {amount}",
     "ownerDefault": "organizador",
     "maybeGroup": "Talvez compartilhadas",
-    "convert": "Tornar compartilhado"
+    "convert": "Tornar compartilhado",
+    "dueOn": "Vence {date}",
+    "nextDueOn": "Próxima cobrança {date}"
   },
   "convert": {
     "title": "Tornar “{name}” compartilhado",

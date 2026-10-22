@@ -209,7 +209,9 @@
     "payTo": "{name}에게 납부 · {amount}",
     "ownerDefault": "주최자",
     "maybeGroup": "공유 가능성 있음",
-    "convert": "공유로 전환"
+    "convert": "공유로 전환",
+    "dueOn": "{date} 수금 예정",
+    "nextDueOn": "다음 {date}"
   },
   "convert": {
     "title": "‘{name}’을(를) 공유로 전환",

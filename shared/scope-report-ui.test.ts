@@ -1424,7 +1424,7 @@ test('calendar keeps a long month complete and selection never scrolls a nested 
   }
 });
 
-test('member rows do not claim no receipts when only the coverage date is missing', () => {
+test('member rows show one dynamic due date instead of claiming no receipts', () => {
   const member = { id: 'm', name: 'Fictional member', share: 5, payments: [{ date: today, amount: 5, currency: 'USD', until: '2026-10-31' }] };
   const sub: Subscription = {
     id: 'shared',
@@ -1440,11 +1440,13 @@ test('member rows do not claim no receipts when only the coverage date is missin
   };
   const r = harness('../app/src/views/Carpool.tsx', 'MemberRows', {}, { ...carpool, contactText: () => '', perBill: () => '' });
   const render = () => JSON.stringify(r.render('MemberRows', { state: { ...st, subscriptions: [sub] }, s: sub, today, ro: false, onMember() {} }));
-  assert.ok(render().includes('family.member.notSet'));
-  assert.ok(!render().includes('family.pool.noPay'));
+  // 成员行只写一条日期：欠款「应收 某日」，结清「下次应收 某日」；有收款记录时不再出现「尚未收款」
+  const rendered = render();
+  assert.ok(rendered.includes('family.pool.dueOn') || rendered.includes('family.pool.nextDueOn'));
+  assert.ok(!rendered.includes('family.pool.noPay'));
   sub.share!.members = [{ ...member, payments: [] }];
-  assert.ok(render().includes('family.pool.noPay'));
-  assert.ok(!render().includes('family.member.notSet'));
+  assert.ok(render().includes('family.pool.dueOn'));
+  assert.ok(!render().includes('family.pool.noPay'));
 });
 
 test('calendar lifetime charge has one lifetime label and a purchase date beside recurring coverage', () => {

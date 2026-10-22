@@ -218,7 +218,9 @@
     "payTo": "Ödenen: {name} · {amount}",
     "ownerDefault": "yönetici",
     "maybeGroup": "Ortak olabilir",
-    "convert": "Ortak yap"
+    "convert": "Ortak yap",
+    "dueOn": "Vade {date}",
+    "nextDueOn": "Sonraki {date}"
   },
   "convert": {
     "title": "“{name}” ortak yapılsın",

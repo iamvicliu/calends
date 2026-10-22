@@ -193,7 +193,9 @@
     "payTo": "付給 {name} · {amount}",
     "ownerDefault": "發起人",
     "maybeGroup": "可能是共享方案",
-    "convert": "轉為共享方案"
+    "convert": "轉為共享方案",
+    "dueOn": "應收 {date}",
+    "nextDueOn": "下次應收 {date}"
   },
   "convert": {
     "title": "將「{name}」轉為共享方案",

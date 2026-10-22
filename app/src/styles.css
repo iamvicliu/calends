@@ -1511,11 +1511,16 @@ a {
 
 .member-edit {
   display: grid;
-  grid-template-columns: 1fr 72px 132px 28px;
+  /* 叉号按钮 32px 宽，日期列按内容留够空间，避免互相压住 */
+  grid-template-columns: minmax(0, 1fr) 80px 150px var(--ctl-h-md);
   gap: 6px;
   align-items: center;
   padding: 8px 12px 8px 16px;
   position: relative;
+}
+.member-edit .wide > * {
+  width: 100%;
+  justify-content: flex-start;
 }
 .member-edit input {
   border: 0;
@@ -1529,7 +1534,7 @@ a {
 }
 @media (max-width: 680px) {
   .member-edit {
-    grid-template-columns: 1fr 72px 28px;
+    grid-template-columns: minmax(0, 1fr) 80px var(--ctl-h-md);
   }
   .member-edit .wide {
     grid-column: 1 / 3;
@@ -9817,4 +9822,9 @@ img.mm-flag {
     padding: 0 12px;
     font-size: 13px;
   }
+}
+
+/* 成员行的应收日期已到期时用橙色提醒 */
+.member-dates .owe {
+  color: var(--orange);
 }

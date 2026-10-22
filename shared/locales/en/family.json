@@ -218,7 +218,9 @@
     "payTo": "Paid to {name} · {amount}",
     "ownerDefault": "organizer",
     "maybeGroup": "Possibly shared",
-    "convert": "Make shared"
+    "convert": "Make shared",
+    "dueOn": "Due {date}",
+    "nextDueOn": "Next due {date}"
   },
   "convert": {
     "title": "Make “{name}” shared",

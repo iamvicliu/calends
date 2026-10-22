@@ -209,7 +209,9 @@
     "payTo": "Trả cho {name} · {amount}",
     "ownerDefault": "chủ nhóm",
     "maybeGroup": "Có thể đang chia sẻ",
-    "convert": "Chuyển thành gói chia sẻ"
+    "convert": "Chuyển thành gói chia sẻ",
+    "dueOn": "Đến hạn {date}",
+    "nextDueOn": "Lần tới {date}"
   },
   "convert": {
     "title": "Chuyển “{name}” thành gói chia sẻ",

@@ -17,7 +17,7 @@ import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../..
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
-import { carLedger, contactText, MemberSheet, memberFee, perBill } from './Members.tsx';
+import { carLedger, contactText, MemberSheet, memberFee } from './Members.tsx';
 import { CardTitle, Amount, Cell, Group, Icon, NameLink, Seg, Sheet, StatusPill, SubIcon, Toolbar, useWidth } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
@@ -320,7 +320,6 @@ function MemberRows({
     <div>
       {dues.map((d) => {
         const collection = memberCollection(s, d.member, memberUnpaidFrom(s, d.member), collect);
-        const rate = memberFee(state, s, d.member, collection.from);
         return (
           <div
             key={d.member.id}
@@ -341,29 +340,21 @@ function MemberRows({
               }
             }}
           >
+            {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
             <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
                 <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
                 <span className="text-ellipsis member-label">{d.member.name || t('family.pool.unnamed')}</span>
                 {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
-                {(d.member.account || contactText(d.member) || only) && (
-                  <span className="muted text-ellipsis" style={{ fontWeight: 400 }}>
-                    · {d.member.account || (only ? t('family.member.accountEmpty') : contactText(d.member))}
-                  </span>
-                )}
               </div>
               <div className="muted member-dates">
-                <span className="text-ellipsis">
+                <span className={`text-ellipsis ${d.periodsOwed > 0 && collection.from <= today ? 'owe' : ''}`}>
                   {d.member.exempt
                     ? (d.member.note ?? t('family.pool.exemptNote'))
-                    : d.member.paidUntil
-                      ? t('family.pool.paidUntil', { date: cnDateAuto(d.member.paidUntil, today) })
-                      : t(d.member.payments?.length ? 'family.member.notSet' : 'family.pool.noPay')}
+                    : d.member.left && collection.from >= d.member.left
+                      ? t('family.pool.leftOn', { date: cnDateAuto(d.member.left, today) })
+                      : t(d.periodsOwed > 0 ? 'family.pool.dueOn' : 'family.pool.nextDueOn', { date: cnDateAuto(collection.from, today) })}
                 </span>
-                {!d.member.exempt && (!d.member.left || collection.from < d.member.left) && (
-                  <span className="text-ellipsis">{t('family.collect.next', { date: cnDateAuto(collection.from, today) })}</span>
-                )}
-                {d.member.source && <span className="m-hide">{t('family.pool.from', { source: d.member.source })}</span>}
               </div>
             </button>
             <div className="member-amount num" style={{ textAlign: 'right', fontSize: 13.5 }}>
@@ -372,16 +363,9 @@ function MemberRows({
                   {t('family.pool.exempt')}
                 </span>
               ) : d.periodsOwed > 0 ? (
-                <b style={{ color: 'var(--orange)' }}>{t('family.pool.owedAmount', { amount: money(collection.amount, collection.currency) })}</b>
+                <b style={{ color: 'var(--orange)' }}>{money(collection.amount, collection.currency)}</b>
               ) : (
                 <span className="muted">{t('family.pool.settled')}</span>
-              )}
-              {!d.member.exempt && (
-                <div className="muted m-hide" style={{ fontSize: 12 }}>
-                  {d.periodsOwed > 0 && collection.amount === rate.amount && collection.currency === rate.currency
-                    ? billLabel(memberBillMonths(s, d.member, collection.from))
-                    : perBill('family.pool.perFee', memberBillMonths(s, d.member, collection.from), { fee: money(rate.amount, rate.currency) })}
-                </div>
               )}
             </div>
             {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}

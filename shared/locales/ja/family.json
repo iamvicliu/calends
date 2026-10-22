@@ -209,7 +209,9 @@
     "payTo": "{name}に支払い · {amount}",
     "ownerDefault": "主催者",
     "maybeGroup": "共有の可能性あり",
-    "convert": "共有にする"
+    "convert": "共有にする",
+    "dueOn": "{date} 集金予定",
+    "nextDueOn": "次回 {date}"
   },
   "convert": {
     "title": "「{name}」を共有にする",

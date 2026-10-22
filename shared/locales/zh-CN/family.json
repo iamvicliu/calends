@@ -193,7 +193,9 @@
     "payTo": "付给 {name} · {amount}",
     "ownerDefault": "发起人",
     "maybeGroup": "可能在合租",
-    "convert": "转为合租"
+    "convert": "转为合租",
+    "dueOn": "应收 {date}",
+    "nextDueOn": "下次应收 {date}"
   },
   "convert": {
     "title": "「{name}」转为合租",

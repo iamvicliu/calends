@@ -209,7 +209,9 @@
     "payTo": "Dibayar ke {name} · {amount}",
     "ownerDefault": "pengelola",
     "maybeGroup": "Mungkin dipakai bersama",
-    "convert": "Jadikan bersama"
+    "convert": "Jadikan bersama",
+    "dueOn": "Jatuh tempo {date}",
+    "nextDueOn": "Berikutnya {date}"
   },
   "convert": {
     "title": "Jadikan “{name}” paket bersama",

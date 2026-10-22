@@ -218,7 +218,9 @@
     "payTo": "An {name} gezahlt · {amount}",
     "ownerDefault": "Organisator",
     "maybeGroup": "Evtl. geteilt",
-    "convert": "Als geteilt markieren"
+    "convert": "Als geteilt markieren",
+    "dueOn": "Fällig {date}",
+    "nextDueOn": "Nächste Fälligkeit {date}"
   },
   "convert": {
     "title": "„{name}“ teilen",

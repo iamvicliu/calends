@@ -235,7 +235,9 @@
     "payTo": "Плачу {name} · {amount}",
     "ownerDefault": "организатор",
     "maybeGroup": "Возможно, совместные",
-    "convert": "Сделать совместной"
+    "convert": "Сделать совместной",
+    "dueOn": "К оплате {date}",
+    "nextDueOn": "Следующий сбор {date}"
   },
   "convert": {
     "title": "Сделать «{name}» совместной",
