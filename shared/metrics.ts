@@ -55,9 +55,14 @@ export function monthEnd(month: string): string {
   return addDays(addMonths(month + '-01', 1), -1);
 }
 
-/** 和上月末相比每月成本变了多少；两头都按当前汇率，只反映订阅本身的变化 */
+/** 从上月末到 day 的月成本变动；包含汇率影响，与月度变动报告使用同一口径。 */
+export function monthMovement(state: AppState, day: string, historical = false): Movement {
+  return movement(state, addDays(day.slice(0, 8) + '01', -1), day, historical ? day : undefined);
+}
+
 export function mrrChangeSinceLastMonth(state: AppState, today: string): number {
-  return mrrOn(state, today) - mrrOn(state, monthEnd(addMonths(today.slice(0, 8) + '01', -1).slice(0, 7)));
+  const change = monthMovement(state, today);
+  return change.to - change.from;
 }
 
 export interface MrrPoint {

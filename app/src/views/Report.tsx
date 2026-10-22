@@ -11,7 +11,7 @@ import {
   events,
   insights,
   monthEnd,
-  movement,
+  monthMovement,
   mrrSeries,
   prepaidValue,
   stopLosses,
@@ -161,7 +161,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
   const [offset, setOffset] = useState(0);
   const month = addMonths(today.slice(0, 8) + '01', offset).slice(0, 7);
   const end = offset === 0 ? today : monthEnd(month);
-  const mv = useMemo(() => movement(state, addDays(month + '-01', -1), end, offset === 0 ? undefined : end), [state, month, end, offset]);
+  const mv = useMemo(() => monthMovement(state, end, offset !== 0), [state, month, end, offset]);
   const steps = [
     { k: t('report.wf.from'), v: mv.from, kind: 'total' },
     { k: t('report.wf.fx'), v: mv.fx, kind: mv.fx >= 0 ? 'up' : 'down' },

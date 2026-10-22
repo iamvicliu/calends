@@ -252,7 +252,7 @@ test('report changes use unsigned spending direction and omit the current total 
     'Waterfall',
     {},
     {
-      movement: () => ({ from: 100, to: 80, fx: 0, added: 0, expansion: 0, contraction: 0, churned: 20, items: [] }),
+      monthMovement: () => ({ from: 100, to: 80, fx: 0, added: 0, expansion: 0, contraction: 0, churned: 20, items: [] }),
     },
   );
   const nodes = r.render('Waterfall', { state: st, today, onOpen() {} });
@@ -272,7 +272,7 @@ test('report changes use unsigned spending direction and omit the current total 
     'Waterfall',
     {},
     {
-      movement: () => ({ from: 100, to: 110, fx: 0, added: 30, expansion: 0, contraction: 0, churned: 20, items: [] }),
+      monthMovement: () => ({ from: 100, to: 110, fx: 0, added: 30, expansion: 0, contraction: 0, churned: 20, items: [] }),
     },
   );
   const mixedNodes = mixed.render('Waterfall', { state: st, today, onOpen() {} });

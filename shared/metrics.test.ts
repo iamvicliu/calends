@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FALLBACK_FX } from './billing.ts';
-import { cancelSavings, cashVsAccrual, events, movement, mrrOn, prepaidValue, topUpPlan } from './metrics.ts';
+import { cancelSavings, cashVsAccrual, events, monthMovement, mrrChangeSinceLastMonth, movement, mrrOn, prepaidValue, topUpPlan } from './metrics.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const sub = (o: Partial<Subscription>): Subscription => ({
@@ -236,7 +236,6 @@ test('代付不计入我的月成本，公开页也不出现', async () => {
   assert.ok(!JSON.stringify(out).includes('朋友'));
 });
 
-
 test('公开页仅带出所有者收支符号设置，旧设置缺省开启', async () => {
   const { maskForPublic } = await import('./mask.ts');
   const { flow, setSignedAmounts } = await import('./format.ts');
@@ -254,4 +253,21 @@ test('公开页仅带出所有者收支符号设置，旧设置缺省开启', as
   } finally {
     setSignedAmounts(true);
   }
+});
+
+test('概览与月度变动报告比较上月末时包含相同的汇率影响', () => {
+  const st = state([sub({ price: 10, cycle: { unit: 'month', every: 1 } })], {
+    settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+    fx: { base: 'USD', fetchedAt: '2026-10-22', rates: { USD: 1, CNY: 6.7 } },
+    fxHistory: { '2026-09-30': { USD: 1, CNY: 6.8 }, '2026-08-31': { USD: 1, CNY: 6.9 } },
+  });
+  const report = monthMovement(st, '2026-10-22');
+  assert.equal(report.from, 68);
+  assert.equal(report.to, 67);
+  assert.equal(report.fx, -1);
+  assert.equal(mrrChangeSinceLastMonth(st, '2026-10-22'), -1);
+  assert.equal(mrrChangeSinceLastMonth(st, '2026-10-22'), report.to - report.from);
+  const historical = monthMovement(st, '2026-09-30', true);
+  assert.equal(historical.to, 68);
+  assert.equal(historical.from, 69);
 });
