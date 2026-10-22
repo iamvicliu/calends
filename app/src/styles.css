@@ -9750,8 +9750,8 @@ img.mm-flag {
   .car-member-table {
     display: grid;
     /* 成员 | 成员账号 | 联系方式 | 收费 | 下次应收 | 待收 | 操作：文字列按比例分，数字列定宽，间距统一 */
-    grid-template-columns: minmax(130px, 1.1fr) minmax(130px, 1.4fr) minmax(100px, 1fr) 76px 112px 80px 64px;
-    column-gap: 20px;
+    grid-template-columns: minmax(130px, 1.1fr) minmax(140px, 1.4fr) minmax(100px, 1fr) 72px 104px 76px 60px;
+    column-gap: 28px;
     width: 100%;
     border-collapse: collapse;
     border-radius: 14px;
@@ -9771,11 +9771,18 @@ img.mm-flag {
     grid-column: 1 / -1;
     align-items: center;
   }
+  /* 表头略高于分组行，成员行 48px（按钮 32px 上下各留 8px） */
   .car-member-table th,
   .car-member-table td {
     min-width: 0;
-    padding: 12px 0;
+    padding: 8px 0;
     text-align: left;
+  }
+  .car-member-table thead th {
+    padding: 12px 0;
+  }
+  .car-member-row {
+    min-height: 48px;
   }
   .car-member-table th {
     color: var(--label-3);
