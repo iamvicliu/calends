@@ -107,6 +107,7 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Distinguish three ways to stop: non-renewal uses set_status cancel (immediate=false) with at as the last service day; voluntary early stopping uses cancel with immediate=true; provider-disabled access uses terminate with an optional reason. Immediate stops may include refund {amount,date?,settled?}; omit refund when none occurred. Terminated subscriptions must resubscribe using change_plan action=resume with a new phase, never reactivate. Refund currency must equal the subscription currency, and total refunds cannot exceed the current period paid amount.',
     '- Other changes use the matching tool: update_subscription (details), change_price (price change from a date), change_plan (switch plan/region), set_status (pause/cancel/terminate/reactivate), delete_subscription (remove completely), record_payment (a charge happened / refund).',
     '- Shared plans (合租/拼车): set_share to start or change sharing (seats include me), save_share_member to add or edit a member (fee per billing cycle, bill_every months), remove_share_member, record_receivable when a member paid me. get_carpool answers questions about a carpool: seats free, yearly cost vs. income, profit, who owes what.',
+    '- Carpool collection: mid-period members align to the shared collection anchor; first_period defaults to prorate by actual days. For record_receivable, omit coverage and amount to use the member’s next unpaid collection; pass the actual amount when stated, even if different. Answer when to collect next and how much is pending from get_carpool results, never mental arithmetic.',
     '- Carpool details: if I use more than one seat myself, add one exempt member per extra seat (name e.g. "自己 · 第 2 台"). Money members already paid in the past → record_receivable for each payment with its date and amount, not just a note. If it is unclear whether an amount is per person or the total, take the reading that fits the other numbers and say which you chose.',
     '- History missing BEFORE an existing subscription’s start (e.g. it was a one-time purchase before it became a subscription) → change_plan action=earlier on that subscription; never create a separate subscription for it.',
     '- Drafts in the same turn build on each other: later tools already see earlier drafts (a new subscription’s id from create_subscription, a member just added). So do multi-step requests in ONE turn — e.g. create_subscription, then set_share on the returned id, then save_share_member for each member, then record_receivable. Never stop to ask the user to confirm an earlier card first; the user confirms all cards together, in order.',
@@ -271,7 +272,12 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
               const draft = { ...full, dry_run: true };
               const preview = await tool.run(draft, ctx);
               const { dry_run: _d, ...clean } = draft as Record<string, unknown>;
-              const pv = preview as { subscription?: { id?: string; members?: Array<{ id: string; name: string }> } };
+              const pv = preview as {
+                subscription?: { id?: string; members?: Array<{ id: string; name: string }> };
+                receipt?: { amount: number; currency: string; date: string; from: string; until: string };
+              };
+              // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览的覆盖区间。
+              if (tool.name === 'record_receivable' && pv.receipt) Object.assign(clean, pv.receipt);
               if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;
               if (tool.name === 'save_share_member' && !clean.member) {
                 const added = ctx.overlay.get(String(pv.subscription?.id ?? ''))?.share?.members.find((m: { name: string }) => m.name === clean.name);

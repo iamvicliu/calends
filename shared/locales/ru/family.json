@@ -129,7 +129,19 @@
         "many": "Записать платёж ({fee} за {count} месяцев)",
         "other": "Записать платёж ({fee} за {count} месяца)"
       }
-    }
+    },
+    "firstPeriod": "Первый период",
+    "firstAmount": "Сумма за первый период",
+    "firstMode": {
+      "prorate": "Пропорционально дням",
+      "full": "Полный период",
+      "free": "Первый период бесплатно"
+    },
+    "collectionSchedule": "Даты сбора: ежегодно {dates}",
+    "coverAligned": "До конца общего расчётного периода",
+    "recordNext": "Записать платёж · {amount}",
+    "collectionAnchor": "Общая дата начала сбора",
+    "firstSummary": "Первый период {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "Свободно {count}",

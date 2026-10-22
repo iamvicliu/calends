@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addDays, addMonths, todayIn, uid, memberUnpaidFrom } from '../../../shared/billing.ts';
+import { todayIn, uid, memberUnpaidFrom, memberBillMonths, memberCollection, collectionAnchor, collectionDates } from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -85,9 +85,6 @@ export function contactUrl(via: string, id?: string): string | undefined {
   return undefined;
 }
 
-/** 覆盖期：给定起始日，按收费周期算出结束日（含） */
-const coverEnd = (from: string, months: number) => addDays(addMonths(from, months), -1);
-
 /** 成员资料与收款记录：TG、联系方式、来源、服务账号、收费周期，以及每一笔收款 */
 export function MemberSheet({
   state,
@@ -111,12 +108,16 @@ export function MemberSheet({
     const init =
       member?.tg && !member.contact
         ? { ...member, contactVia: 'Telegram', contact: member.tg, tg: undefined }
-        : (member ?? { id: uid(), name: '', share: Math.round((s.price / Math.max(1, s.share?.seats ?? 1)) * 100) / 100, billEvery: 1 });
+        : (member ?? { id: uid(), name: '', share: Math.round((s.price / Math.max(1, s.share?.seats ?? 1)) * 100) / 100, billEvery: 1, joined: today });
     // 老数据只有每期份额：换算成「每次收多少人民币」
     const fee = memberFee(state, s, init);
     return { ...init, fee: fee.amount, feeCurrency: fee.currency };
   });
-  const up = (p: Partial<ShareMember>) => setF({ ...f, ...p });
+  const up = (p: Partial<ShareMember>) => {
+    const next = { ...f, ...p };
+    setF(next);
+    if (adding && ['joined', 'left', 'firstPeriod', 'firstAmount', 'paidUntil'].some((key) => key in p)) setPay(freshPay(next));
+  };
   const via = f.contactVia ?? 'Telegram';
   const setVia = (v: string) => up({ contactVia: v, ...(v === '邮箱' && f.contact && !f.account ? { account: f.contact } : {}) });
   // 联系方式选的是邮箱且还没填受邀邮箱时，顺手填上
@@ -129,27 +130,30 @@ export function MemberSheet({
     });
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
-  const months = f.billEvery ?? 1;
+  const months = memberBillMonths(s, f);
   const freshPay = (m: ShareMember): MemberPayment => {
     const from = memberUnpaidFrom(s, m);
-    return { date: today, amount: m.fee ?? 0, currency: m.feeCurrency ?? base, from, until: coverEnd(from, m.billEvery ?? 1) };
+    const period = memberCollection(s, m, from, base);
+    return { date: today, amount: period.amount, currency: period.currency, from, until: period.until };
   };
   const [pay, setPay] = useState<MemberPayment>(() => freshPay(f));
+  const first = memberCollection(s, f, f.joined ?? s.share?.since ?? s.start, base);
+  const schedule = collectionDates(s, f, today.slice(0, 4))
+    .map((d) => cnDate(d))
+    .join(' · ');
   // 改收费周期或金额时，份额跟着换算
   const setFee = (p: { fee?: number; feeCurrency?: string; billEvery?: number }) => {
     const next = { ...f, ...p };
-    next.share = shareFromFee(state, s, next.fee ?? 0, next.feeCurrency ?? base, next.billEvery ?? 1);
+    next.share = shareFromFee(state, s, next.fee ?? 0, next.feeCurrency ?? base, memberBillMonths(s, next));
     setF(next);
-    if (!adding) setPay(freshPay(next));
-    // 正在记一笔收款时改了收费周期：覆盖结束日按新周期从覆盖起始日重算（界面写着「按周期自动算出」）
-    else if (p.billEvery !== undefined) setPay((x) => ({ ...x, until: coverEnd(x.from ?? today, next.billEvery ?? 1) }));
+    setPay(freshPay(next));
   };
 
   const save = (next: ShareMember, msg: string) => {
     const sh = s.share!;
     const members = sh.members.some((x) => x.id === next.id) ? sh.members.map((x) => (x.id === next.id ? next : x)) : [...sh.members, next];
     return run(async () => {
-      await saveSub({ ...s, share: { ...sh, members } });
+      await saveSub({ ...s, share: { ...sh, collectFrom: collectionAnchor(s), members } });
     }, msg);
   };
   const addPayment = () => {
@@ -186,7 +190,7 @@ export function MemberSheet({
     });
     run(
       async () => {
-        await saveSub({ ...s, share: { ...sh, members } });
+        await saveSub({ ...s, share: { ...sh, collectFrom: collectionAnchor(s), members } });
         setCopying(null);
       },
       t('family.member.copied', { count: targets.length }),
@@ -214,7 +218,7 @@ export function MemberSheet({
               onClick={async () =>
                 (await ask(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') }))) &&
                 run(async () => {
-                  await saveSub({ ...s, share: { ...s.share!, members: s.share!.members.filter((x) => x.id !== f.id) } });
+                  await saveSub({ ...s, share: { ...s.share!, collectFrom: collectionAnchor(s), members: s.share!.members.filter((x) => x.id !== f.id) } });
                   onClose();
                 }, t('family.member.deleted'))
               }
@@ -240,6 +244,7 @@ export function MemberSheet({
                     ...s,
                     share: {
                       ...sh,
+                      collectFrom: collectionAnchor(s),
                       members: sh.members.some((x) => x.id === next.id) ? sh.members.map((x) => (x.id === next.id ? next : x)) : [...sh.members, next],
                     },
                   });
@@ -293,12 +298,38 @@ export function MemberSheet({
               onChange={(v) => up({ joined: v })}
             />
           </Cell>
+          {first.partial && !f.exempt && (
+            <>
+              <div className="cell">
+                <small className="muted">
+                  {t('family.member.firstSummary', {
+                    from: cnDate(first.from),
+                    until: cnDate(first.until),
+                    mode: t(`family.member.firstMode.${f.firstPeriod ?? 'prorate'}`),
+                    amount: money(first.amount, first.currency),
+                  })}
+                </small>
+              </div>
+              <Cell label={t('family.member.firstPeriod')}>
+                <Picker
+                  value={f.firstPeriod ?? 'prorate'}
+                  onChange={(v) => up({ firstPeriod: v as ShareMember['firstPeriod'], firstAmount: undefined })}
+                  options={['prorate', 'full', 'free'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
+                />
+              </Cell>
+              {f.firstPeriod !== 'free' && (
+                <Cell label={t('family.member.firstAmount')}>
+                  <NumInput className="num" value={f.firstAmount} placeholder={String(first.amount)} onValue={(n) => up({ firstAmount: n })} />
+                </Cell>
+              )}
+            </>
+          )}
           <Cell label={t('family.member.left')}>
             <DatePicker value={f.left} clearable placeholder={t('family.member.leftPh')} onChange={(v) => up({ left: v })} />
           </Cell>
         </Group>
 
-        <Group title={t('family.member.feeGroup')}>
+        <Group title={t('family.member.feeGroup')} foot={t('family.member.collectionSchedule', { dates: schedule })}>
           <div className="cell">
             <Seg
               value={String(months)}
@@ -409,14 +440,14 @@ export function MemberSheet({
                 <CurrencySelect value={pay.currency} onChange={(c) => setPay({ ...pay, currency: c })} />
               </Cell>
               <Cell label={t('family.member.coverFrom')}>
-                <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v, until: coverEnd(v, months) })} />
+                <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v, until: memberCollection(s, f, v, base).until })} />
               </Cell>
               <Cell
                 label={
                   <span>
                     {t('family.member.coverTo')}
                     <small className="muted" style={{ display: 'block', fontSize: 12 }}>
-                      {perBill('family.member.coverAuto', months)}
+                      {t('family.member.coverAligned')}
                     </small>
                   </span>
                 }
@@ -433,7 +464,11 @@ export function MemberSheet({
                 <button className="btn" onClick={() => setAdding(false)}>
                   {t('family.member.cancel')}
                 </button>
-                <button className="btn primary" disabled={!pay.amount} onClick={addPayment}>
+                <button
+                  className="btn primary"
+                  disabled={pay.amount < 0 || !pay.from || pay.until < pay.from || (!!f.left && pay.from >= f.left) || (!!s.end && pay.from > s.end)}
+                  onClick={addPayment}
+                >
                   {t('family.member.record')}
                 </button>
               </div>
@@ -447,7 +482,7 @@ export function MemberSheet({
                 setAdding(true);
               }}
             >
-              <Icon name="plus" /> {perBill('family.member.recordBtn', months, { fee: money(f.fee ?? 0, f.feeCurrency ?? base) })}
+              <Icon name="plus" /> {t('family.member.recordNext', { amount: money(freshPay(f).amount, freshPay(f).currency) })}
             </button>
           )}
         </Group>

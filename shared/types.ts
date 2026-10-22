@@ -61,8 +61,12 @@ export interface ShareMember {
   /** 每次收多少（按收费周期），币种默认人民币；每期份额 share 由它按汇率换算得出 */
   fee?: number;
   feeCurrency?: string;
-  /** 收费周期（月）：1 按月、3 按季、12 按年；缺省按月 */
+  /** 收费周期（月）：1 按月、3 按季、6 按半年、12 按年；旧数据缺省沿用订阅周期折算月数 */
   billEvery?: number;
+  /** 中途加入首期：缺省按天折算，之后按合租收款起点对齐 */
+  firstPeriod?: 'prorate' | 'full' | 'free';
+  /** 首期应收自定义金额（收费币种）；缺省按 firstPeriod 计算 */
+  firstAmount?: number;
   /** 收款记录 */
   payments?: MemberPayment[];
   note?: string;
@@ -93,6 +97,8 @@ export interface Share {
   ownerName?: string;
   /** 开始合租的日期：从这天起统计我付了多少、收回多少 */
   since?: string;
+  /** 统一收款起点；缺省依次取 since、最早收款覆盖起点、订阅开始日 */
+  collectFrom?: string;
 }
 
 /** 代付的一期：卡上实扣多少（订阅币种），对方还了多少（币种可以不同，比如扣日元、收人民币） */

@@ -120,7 +120,19 @@
       "custom": {
         "other": "支払いを記録（{count}か月ごとに{fee}）"
       }
-    }
+    },
+    "firstPeriod": "初回の請求方法",
+    "firstAmount": "初回の金額",
+    "firstMode": {
+      "prorate": "日割り",
+      "full": "全期間分",
+      "free": "初回無料"
+    },
+    "collectionSchedule": "共通の集金日：毎年 {dates}",
+    "coverAligned": "共通の請求期間の終了日を自動設定",
+    "recordNext": "入金を記録 · {amount}",
+    "collectionAnchor": "共通の集金起点",
+    "firstSummary": "初回 {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "空き {count}",

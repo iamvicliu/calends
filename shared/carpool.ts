@@ -1,6 +1,6 @@
 // 合租的账：一年的成本与预计收入、从开始合租起实际付出与收回；成员每次该收多少。
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
-import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus } from './billing.ts';
+import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import type { AppState, ShareMember, Subscription } from './types.ts';
 
@@ -33,7 +33,7 @@ export function cycleMonths(s: Subscription): number {
 
 /** 按收费周期应收的金额：每期份额 × 周期月数 ÷ 订阅一期的月数 */
 export function billAmount(s: Subscription, m: ShareMember): number {
-  return Math.round((((m.share || 0) * (m.billEvery ?? 1)) / cycleMonths(s)) * 100) / 100;
+  return Math.round((((m.share || 0) * memberBillMonths(s, m)) / cycleMonths(s)) * 100) / 100;
 }
 
 /** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算成本位币 */
@@ -60,7 +60,7 @@ export function resyncShares(state: AppState, prev: Subscription | undefined, ne
     share: {
       ...next.share,
       members: next.share.members.map((m) =>
-        m.fee != null && !m.exempt ? { ...m, share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, m.billEvery ?? 1) } : m,
+        m.fee != null && !m.exempt ? { ...m, share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, memberBillMonths(next, m)) } : m,
       ),
     },
   };

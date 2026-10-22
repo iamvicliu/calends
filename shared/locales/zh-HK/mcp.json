@@ -54,7 +54,8 @@
     "invalidStop": "停止資料必須與最後服務日一致，只有服務方停用可填寫原因。",
     "invalidRefund": "退款金額須為有效數字，並以負數記錄。",
     "refundBeforeStop": "退款日期不能早於停止日。",
-    "paymentOutOfRange": "扣款日期 {date} 必須在開始日期到今天之間"
+    "paymentOutOfRange": "扣款日期 {date} 必須在開始日期到今天之間",
+    "invalidFirstPeriod": "首期方式必須是 prorate、full 或 free。"
   },
   "tool": {
     "get_overview": "帳本概況",

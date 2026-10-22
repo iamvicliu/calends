@@ -114,7 +114,19 @@
       "m6": "記一筆收款（每半年 {fee}）",
       "m12": "記一筆收款（每年 {fee}）",
       "custom": "記一筆收款（每 {count} 個月 {fee}）"
-    }
+    },
+    "firstPeriod": "首期方式",
+    "firstAmount": "首期金額",
+    "firstMode": {
+      "prorate": "按日折算",
+      "full": "收整期",
+      "free": "首期免費"
+    },
+    "collectionSchedule": "統一收款日：每年 {dates}",
+    "coverAligned": "按統一收款期自動計算",
+    "recordNext": "記一筆收款 · {amount}",
+    "collectionAnchor": "收款對齊起點",
+    "firstSummary": "首期 {from}–{until} · {mode} {amount}"
   },
   "pool": {
     "seatsFree": "空 {count} 位",

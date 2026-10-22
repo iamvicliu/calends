@@ -54,7 +54,8 @@
     "invalidStop": "A interrupção deve coincidir com o último dia de serviço; apenas a desativação pelo provedor aceita motivo.",
     "invalidRefund": "Os reembolsos devem ser valores válidos e armazenados como negativos.",
     "refundBeforeStop": "A data do reembolso não pode preceder a interrupção.",
-    "paymentOutOfRange": "A data de pagamento {date} deve estar entre a data de início e hoje"
+    "paymentOutOfRange": "A data de pagamento {date} deve estar entre a data de início e hoje",
+    "invalidFirstPeriod": "first_period deve ser prorate, full ou free."
   },
   "tool": {
     "get_overview": "Visão geral",

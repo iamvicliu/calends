@@ -54,7 +54,8 @@
     "invalidStop": "El cese debe coincidir con el último día de servicio; solo la desactivación del proveedor admite motivo.",
     "invalidRefund": "Los importes de reembolso deben ser válidos y guardarse como negativos.",
     "refundBeforeStop": "El reembolso no puede ser anterior al cese.",
-    "paymentOutOfRange": "La fecha de pago {date} debe estar entre la fecha de inicio y hoy"
+    "paymentOutOfRange": "La fecha de pago {date} debe estar entre la fecha de inicio y hoy",
+    "invalidFirstPeriod": "first_period debe ser prorate, full o free."
   },
   "tool": {
     "get_overview": "Resumen del registro",

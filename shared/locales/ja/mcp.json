@@ -54,7 +54,8 @@
     "invalidStop": "停止情報は最終利用日と一致させてください。理由は提供元による停止のみ設定できます。",
     "invalidRefund": "返金額は有効な数値で、負の値として記録してください。",
     "refundBeforeStop": "返金日は停止日より前にできません。",
-    "paymentOutOfRange": "請求日 {date} は開始日から今日までの間にしてください"
+    "paymentOutOfRange": "請求日 {date} は開始日から今日までの間にしてください",
+    "invalidFirstPeriod": "first_period は prorate、full、free のいずれかです。"
   },
   "tool": {
     "get_overview": "台帳の概要",
