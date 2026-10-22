@@ -27,7 +27,7 @@
     "write": "Lesen & Schreiben",
     "read": "Nur lesen",
     "label": "Berechtigung",
-    "writeDesc": "Abos, Abbuchungen und Rückzahlungen abfragen, hinzufügen und bearbeiten.",
+    "writeDesc": "Abos, Zahlungen, Wallets, Personen, Kategorien und Bucheinstellungen abfragen und verwalten.",
     "readDesc": "Nur abfragen. Es kann nichts geändert werden."
   },
   "created": {

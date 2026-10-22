@@ -53,7 +53,8 @@
     "prependUntil": "The earlier phase must end after it starts and no later than the original start date",
     "priceOutOfRange": "The price change date isn't within any phase",
     "keepTooEarly": "The keep-until date must be after the switch date",
-    "endTooEarly": "The end date must be after this phase's start date"
+    "endTooEarly": "The end date must be after this phase's start date",
+    "startOrder": "Phase starts must stay strictly between the adjacent phase starts."
   },
   "event": {
     "label": "{region}{price}/{per}",

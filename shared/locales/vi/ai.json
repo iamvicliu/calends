@@ -25,7 +25,7 @@
     "write": "Đọc & ghi",
     "read": "Chỉ đọc",
     "label": "Quyền",
-    "writeDesc": "Tra cứu, thêm và sửa gói đăng ký, khoản trừ tiền và khoản thu.",
+    "writeDesc": "Tra cứu và quản lý gói đăng ký, thanh toán, tiền đã nhận, ví, người, danh mục và cài đặt sổ.",
     "readDesc": "Chỉ tra cứu. Không thể thay đổi gì."
   },
   "created": {

@@ -28,12 +28,14 @@ export function DatePicker({
   placeholder = t('picker.date.placeholder'),
   clearable,
   min,
+  ariaLabel,
 }: {
   value?: string;
   onChange: (v: string | undefined) => void;
   placeholder?: string;
   clearable?: boolean;
   min?: string;
+  ariaLabel?: string;
 }) {
   const today = todayOf();
   const [open, setOpen] = useState(false);
@@ -89,6 +91,7 @@ export function DatePicker({
         ref={btn}
         className={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`}
         onClick={toggle}
+        aria-label={ariaLabel ? `${ariaLabel}: ${value ? cnDateFull(value) : placeholder}` : undefined}
         aria-haspopup="dialog"
         aria-expanded={open}
       >

@@ -21,6 +21,24 @@ interface ToolMeta {
   write: boolean;
 }
 
+// 只调整展示顺序，工具仍全部来自接口；未匹配的新领域排在末尾。
+const TOOL_DOMAINS = [
+  /overview/,
+  /subscription|price|plan|status/,
+  /charges|payment$/,
+  /stats|trends|insights/,
+  /payment_method/,
+  /people|person|carpool|share|proxy|receivable/,
+  /categor/,
+  /settings/,
+  /events/,
+  /app_store/,
+];
+const toolDomain = (name: string) => {
+  const index = TOOL_DOMAINS.findIndex((domain) => domain.test(name));
+  return index < 0 ? TOOL_DOMAINS.length : index;
+};
+
 /** 一个接入客户端：标志、配置写在哪、配置内容；有官方一键安装链接的也给出来 */
 interface Client {
   id: string;
@@ -237,9 +255,10 @@ export function Ai({ state }: { state: AppState }) {
     api<ToolMeta[]>('/api/mcp/tools').then(setTools, () => setTools([]));
   }, []);
   const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : t('ai.neverUsed'));
+  const orderedTools = [...tools].sort((a, b) => toolDomain(a.name) - toolDomain(b.name));
   const groups: Array<[string, ToolMeta[]]> = [
-    [t('ai.toolsRead'), tools.filter((x) => !x.write)],
-    [t('ai.toolsWrite'), tools.filter((x) => x.write)],
+    [t('ai.toolsRead'), orderedTools.filter((x) => !x.write)],
+    [t('ai.toolsWrite'), orderedTools.filter((x) => x.write)],
   ];
 
   return (

@@ -268,7 +268,7 @@ export function CatChip({ cat }: { cat: string }) {
 
 /**
  * 支付方式标记：统一显示支付产品自己的 logo —— 银行卡用银行图标集，
- * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有 logo 的用卡面色 + 名称首字。
+ * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有可用 logo 时用卡片图标。
  */
 export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?: number; proxied?: boolean }) {
   const brand = brandOf(m);
@@ -276,18 +276,36 @@ export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?:
   const region = methodRegion(m);
   // 小圆标优先用银行图标集（专为小尺寸设计）；其余用自定义 / 平台 / 官网 logo
   const logo = bank ? undefined : methodLogo(m);
-  const bg = bank || brand === 'appstore' ? undefined : markBg(m, logo, BRANDS.find((b) => b.key === brand)?.onColor);
+  const src = bank
+    ? base(`/banks/${bank}-rect.svg`)
+    : logo
+      ? proxied && /^https?:/.test(logo)
+        ? base(`/api/img?u=${encodeURIComponent(logo)}`)
+        : base(logo)
+      : undefined;
+  const [failedSrc, setFailedSrc] = useState<string>();
+  const fallback = brand !== 'appstore' && (!src || failedSrc === src);
+  const bg = fallback
+    ? markBg(m, undefined, undefined)
+    : bank || brand === 'appstore'
+      ? undefined
+      : markBg(m, logo, BRANDS.find((b) => b.key === brand)?.onColor);
   const style = { '--s': `${size}px`, background: bg } as Record<string, string>;
   return (
-    <span className={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
-      {bank ? (
-        <img src={base(`/banks/${bank}-rect.svg`)} alt="" />
+    <span className={`mmark ${bank && !fallback ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
+      {fallback ? (
+        <Icon name="wallet" size={Math.round(size * 0.7)} />
       ) : brand === 'appstore' ? (
         <i className="mm-glyph" />
-      ) : logo ? (
-        <img src={proxied && /^https?:/.test(logo) ? base(`/api/img?u=${encodeURIComponent(logo)}`) : base(logo)} alt="" />
       ) : (
-        <b>{[...m.name][0]}</b>
+        <img
+          src={src}
+          alt=""
+          onError={() => setFailedSrc(src)}
+          ref={(el) => {
+            if (el?.complete && el.naturalWidth === 0) queueMicrotask(() => setFailedSrc(src));
+          }}
+        />
       )}
       {region && <FlagImg cc={region} className="mm-flag" />}
     </span>
@@ -296,9 +314,9 @@ export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?:
 
 /** 标记底色：白色 logo 放在卡面色上，彩色 logo 放在白底上 */
 function markBg(m: PaymentMethod, logo: string | undefined, onColor: boolean | undefined): string {
-  if (onColor) return KIND_BG[m.kind];
+  if (onColor) return KIND_BG[m.kind] ?? KIND_BG.other;
   if (logo) return m.color && m.logo ? m.color : '#fff';
-  return m.color || KIND_BG[m.kind];
+  return m.color || KIND_BG[m.kind] || KIND_BG.other;
 }
 
 /** 卡组织标：Visa、Mastercard、银联… */

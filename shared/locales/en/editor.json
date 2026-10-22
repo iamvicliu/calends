@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Login email, phone or username", "phone": "Phone number" },
+  "ph": {
+    "account": "Login email, phone or username",
+    "phone": "Phone number"
+  },
   "overlap": {
     "keep": "Keep the old one running",
     "keepHint": "Already prepaid and not expired yet: both run side by side and are billed as usual",
@@ -199,7 +202,8 @@
     "range": "{start} → {end}",
     "now": "now",
     "initial": "Initial",
-    "priceChange": "Price change {date}"
+    "priceChange": "Price change {date}",
+    "outsidePayments": "{count} existing payment(s) will fall outside the service period. Keep their original dates, amounts and phase, and continue?"
   },
   "payment": {
     "addTitle": "Add payment",
@@ -228,5 +232,9 @@
   "timeline": {
     "home": "Back to today (or double-click the timeline)"
   },
-  "ai": { "title": "Fill in with AI", "hint": "Paste a receipt, screenshot or any text and let it sort things out", "go": "Paste" }
+  "ai": {
+    "title": "Fill in with AI",
+    "hint": "Paste a receipt, screenshot or any text and let it sort things out",
+    "go": "Paste"
+  }
 }

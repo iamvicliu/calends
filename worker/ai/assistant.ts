@@ -27,22 +27,8 @@ const KEY = 'assistant';
 /** 一次提问里最多跟模型来回几轮（每轮可能调用多个工具） */
 const MAX_ROUNDS = 8;
 
-/** 给模型用的工具：查询类全部开放；写入类只开放常用的几个，而且只出草稿 */
-const READ = TOOLS.filter((x) => !x.write);
-const WRITE = new Set([
-  'create_subscription',
-  'update_subscription',
-  'delete_subscription',
-  'change_price',
-  'change_plan',
-  'set_status',
-  'record_payment',
-  'set_share',
-  'save_share_member',
-  'remove_share_member',
-  'record_receivable',
-]);
-const ASSISTANT_TOOLS: Tool[] = [...READ, ...TOOLS.filter((x) => WRITE.has(x.name))];
+/** Every ledger tool is available; writes are always drafted and only the apply endpoint saves. */
+export const ASSISTANT_TOOLS: Tool[] = TOOLS;
 
 export const getConfig = (env: Env) => getKv<AssistantConfig>(env, KEY);
 
@@ -81,7 +67,7 @@ export async function testConfig(env: Env, draft?: { apiKey?: string; baseUrl?: 
 
 /** 系统提示：今天、本位币、分类与支付方式，以及怎么把粘贴的内容整理成订阅 */
 async function systemPrompt(env: Env): Promise<string> {
-  const st = await loadState(env);
+  const st = await loadState(env, false);
   const today = todayIn(st.settings.timezone);
   const cats = categoryList(st.settings, st.subscriptions).map((c) => c.name);
   const methods = st.methods.map((m) => `${m.id}: ${m.name} (${m.kind}, ${m.currency}${m.region ? `, ${m.region}` : ''})`);
@@ -91,6 +77,7 @@ async function systemPrompt(env: Env): Promise<string> {
     `Categories (reuse these exact names): ${cats.join(', ')}.`,
     `Payment methods (pass the id as "method"): ${methods.join('; ') || 'none'}. Default method id: ${st.settings.defaultMethodId ?? 'none'}.`,
     '',
+    'You can maintain every non-security ledger entity: wallets (update_payment_method action=create/update/delete), categories (save_category), people (save_person), proxy relationships (set_proxy), receivables (record_receivable action=record/update/delete) and settings/preferences (get_settings/update_settings). Never access authentication, credentials, sessions/tokens, backups, resets, migrations or whole-ledger deletion.',
     'Main job: the user pastes receipts, App Store / Google Play emails, bank or SMS notices, subscription pages, invoices or screenshots. Extract every subscription in it and call create_subscription once per subscription.',
     '- Every write tool call is only a draft: the app shows it as a card and the user confirms it. Never ask the user to confirm in text, never repeat a call you already made, and do not claim anything was saved.',
     '- Read amounts exactly as shown, with the currency of the store or receipt (App Store Turkey → TRY and region TR). Price is per billing cycle; cycle unit day/week/month/year with every N.',
@@ -118,7 +105,7 @@ async function systemPrompt(env: Env): Promise<string> {
 type Emit = (event: Record<string, unknown>) => void;
 
 async function categoryNames(env: Env): Promise<string[]> {
-  const st = await loadState(env);
+  const st = await loadState(env, false);
   return categoryList(st.settings, st.subscriptions).map((c) => c.name);
 }
 
@@ -273,16 +260,16 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
               const preview = await tool.run(draft, ctx);
               const { dry_run: _d, ...clean } = draft as Record<string, unknown>;
               const pv = preview as {
+                created?: { id: string };
+                member?: { id: string };
                 subscription?: { id?: string; members?: Array<{ id: string; name: string }> };
                 receipt?: { amount: number; currency: string; date: string; from: string; until: string };
               };
               // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览的覆盖区间。
               if (tool.name === 'record_receivable' && pv.receipt) Object.assign(clean, pv.receipt);
+              if (pv.created) clean.id = pv.created.id;
               if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;
-              if (tool.name === 'save_share_member' && !clean.member) {
-                const added = ctx.overlay.get(String(pv.subscription?.id ?? ''))?.share?.members.find((m: { name: string }) => m.name === clean.name);
-                if (added) clean.id = added.id;
-              }
+              if (tool.name === 'save_share_member' && !clean.member && pv.member) clean.id = pv.member.id;
               emit({ type: 'tool', id: call.id, name: tool.name, args: clean, status: 'done' });
               emit({ type: 'proposal', id: call.id, tool: tool.name, args: clean, preview, filled });
               content = JSON.stringify({

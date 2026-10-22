@@ -101,6 +101,7 @@ export function subError(s: Subscription): string | undefined {
   if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !Number.isInteger(s.cycle.every) || !(s.cycle.every >= 1))
     return t('core.subError.cycle');
   for (const v of phaseSubs(s)) {
+    if (v.billingStart && !validDay(v.billingStart)) return t('core.subError.start');
     const error = stopError(v) ?? paymentError(v);
     if (error) return error;
   }
@@ -133,6 +134,7 @@ export function phaseSubs(s: Subscription): Subscription[] {
       phases: undefined,
       stop: p.stop ?? (last ? s.stop : undefined),
       start: p.start,
+      billingStart: p.billingStart,
       end: s.end && (!natural || natural > s.end) ? s.end : natural,
       price: p.price,
       currency: p.currency,
@@ -287,16 +289,21 @@ export interface Charge {
   note?: string;
 }
 
+/** 实付或固化记录落在原周期上时还原原日号，避免 1/31 → 2/28 → 3/28。 */
+export function renewalAnchor(s: Subscription, anchor: string): string {
+  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
+  if (s.cycle.unit === 'month' || s.cycle.unit === 'year') {
+    const k = Math.max(0, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
+    if (nthCharge(original, s.cycle, k) === anchor) return original;
+  }
+  return anchor;
+}
+
 /** 按周期从 anchor 推算 [from, to] 内、晚于 after 的扣款 */
 function schedule(s: Subscription, anchor: string, from: string, to: string, today: string, after = ''): Charge[] {
   const out: Charge[] = [];
-  const begin = anchor;
-  // 实付或固化记录落在原周期上时继续使用原始日号，避免 1/31 → 2/28 → 3/28。
-  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : s.start;
-  if (s.cycle.unit === 'month' || s.cycle.unit === 'year') {
-    const k = Math.max(0, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
-    if (nthCharge(original, s.cycle, k) === anchor) anchor = original;
-  }
+  const begin = anchor > s.start ? anchor : s.start;
+  anchor = renewalAnchor(s, anchor);
   const firstPaid = s.status === 'trial' && s.trialEnd ? s.trialEnd : '';
   const stopAt = s.end && s.end < to ? s.end : to;
   const pausedFrom = s.status === 'paused' ? (s.pausedAt ?? today) : undefined;
@@ -353,13 +360,13 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
         note: p.note,
       }));
     if (s.cycle.unit === 'lifetime') return out;
-    const last = renewals.at(-1)?.date ?? s.start;
+    const last = renewals.at(-1)?.date ?? s.billingStart ?? s.start;
     return out.concat(schedule(s, s.nextDue ?? last, from, to, today, last));
   }
   if (s.cycle.unit === 'lifetime') {
     return s.start >= from && s.start <= to ? [{ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today }] : [];
   }
-  const anchor = s.status === 'trial' && s.trialEnd ? s.trialEnd : s.start;
+  const anchor = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
   if (s.nextDue) {
     const before = schedule(s, anchor, from, to < s.nextDue ? to : addDays(s.nextDue, -1), today).filter(
       (c) => diffDays(c.date, s.nextDue!) > cycleDays(s.cycle) / 2,
@@ -384,17 +391,22 @@ export function lastCharge(s: Subscription, today: string): string | undefined {
 export function billingPeriod(s: Subscription, at: string): { from: string; paidThrough: string; paid: number; days: number } {
   if (s.phases?.length) return billingPeriod(currentPhase(s, at), at);
   const open = { ...s, stop: undefined, end: undefined, status: s.status === 'trial' || (s.stop && s.trialEnd) ? ('trial' as const) : ('active' as const) };
-  const past = chargesBetween(open, s.start, at, at).filter((c) => !c.kind);
+  // 修正服务开始日后，之前的实付/计费锚点仍决定已付账期。
+  const paidFrom = [s.start, s.billingStart, s.nextDue, ...(s.payments ?? []).filter((p) => !p.kind).map((p) => p.date)]
+    .filter((d): d is string => !!d)
+    .sort()[0];
+  const paidOpen = { ...open, start: paidFrom };
+  const past = chargesBetween(paidOpen, paidFrom, at, at).filter((c) => !c.kind);
   const last = past.at(-1);
   const from = last?.date ?? s.start;
   const horizon = addDays(at, Math.ceil(cycleDays(s.cycle) === Infinity ? 366 : cycleDays(s.cycle) * 2) + 32);
   const next =
     s.cycle.unit === 'lifetime'
       ? addDays(at, 1)
-      : (chargesBetween(open, addDays(at, 1), horizon, at).find((c) => !c.kind)?.date ?? nthCharge(from, s.cycle, 1));
+      : (chargesBetween(paidOpen, addDays(at, 1), horizon, at).find((c) => !c.kind)?.date ?? nthCharge(from, s.cycle, 1));
   const paidThrough = addDays(next, -1);
   const paid = last
-    ? chargesBetween(open, from, at, at)
+    ? chargesBetween(paidOpen, from, at, at)
         .filter((c) => c.amount > 0 && c.kind !== 'failed')
         .reduce((a, c) => a + c.amount, 0)
     : 0;

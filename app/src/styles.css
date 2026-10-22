@@ -895,9 +895,6 @@ a {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-.cal-charges {
-  overflow: hidden;
-}
 .cal-charges .card-h {
   padding: 0;
   margin-bottom: 8px;
@@ -3497,7 +3494,8 @@ select.btn {
 .h-phase::before {
   content: '';
   position: absolute;
-  left: -17px;
+  left: calc(var(--h-track, -12.25px) - 4.5px);
+  z-index: 1;
   top: 15px;
   width: 9px;
   height: 9px;
@@ -3550,37 +3548,51 @@ select.btn {
 }
 /* 并行的阶段：第二条轨道，圆点落在右边那条线上 */
 .history.laned {
-  padding-left: 48px;
+  padding-left: var(--h-padding);
 }
-.history.laned .h-phase::before {
-  left: -31.5px;
-}
-.history.laned .h-phase.lane::before {
-  left: -17.5px;
+.history.laned .h-phase {
+  --h-track: calc(21.75px - var(--h-padding) + var(--h-lane, 0) * 14px);
 }
 .history.laned .h-phase.lane::after {
   content: '';
   position: absolute;
-  left: -13.75px;
+  left: calc(var(--h-track) - 0.75px);
   top: 0;
   bottom: 0;
   width: 1.5px;
   background: color-mix(in srgb, var(--accent) 45%, var(--line));
   border-radius: 1px;
 }
+.h-error {
+  color: var(--red);
+  font-size: 13px;
+  margin: 6px 16px;
+}
 .h-par {
   font-weight: 500;
 }
 .h-edit {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+}
+.h-edit > .badge {
+  grid-column: 1 / -1;
+  justify-self: start;
 }
 .h-edit .dp-btn {
-  height: 28px;
-  padding: 0 9px;
+  min-width: 0;
+  min-height: 28px;
+  height: auto;
+  padding: 4px 6px;
+  gap: 5px;
+  justify-content: center;
+  white-space: normal;
   font-size: 12.5px;
+}
+.h-edit .dp-btn .i {
+  flex-shrink: 0;
 }
 .h-phase.edit::before {
   top: 19px;
@@ -6068,80 +6080,74 @@ button.seat:disabled {
   mask-image: linear-gradient(#000 calc(100% - 32px), transparent);
 }
 
-/* 日期标题共用横线；金额列跨组对齐，不再占用名称宽度显示日期。 */
+/* 整月扣款随页面自然增高；两列共用宽度，让名称、金额与日期横线对齐。 */
 .cal-charge-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content 14px;
+  grid-template-columns: minmax(0, 1fr) max-content;
   column-gap: 8px;
-  max-height: 660px;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  row-gap: 8px;
 }
 .cal-charge-group,
-.cal-charge-list .cell {
+.cal-charge-row {
   display: grid;
   grid-template-columns: subgrid;
   grid-column: 1 / -1;
-}
-.cal-charge-group {
-  padding-block: 4px;
-  border-radius: 8px;
-}
-.cal-charge-group.selected {
-  background: var(--fill-2);
+  min-width: 0;
 }
 .cal-charge-day {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 4px 0;
+  gap: 8px;
+  margin: 0 0 2px;
 }
 .cal-charge-day > span {
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
+  border: 1px solid var(--line);
   border-radius: 50%;
-  background: var(--fill-2);
+  background: color-mix(in srgb, var(--label-3) 22%, var(--card));
   color: var(--label-2);
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .cal-charge-day.today > span {
+  border-color: var(--red);
   background: var(--red);
   color: #fff;
 }
 .cal-charge-day > i {
   flex: 1;
   height: 1px;
-  background: var(--sep);
+  background: var(--line);
 }
-.cal-charge-list .cell {
-  padding: 10px 0;
+.cal-charge-row {
+  align-items: center;
+  min-height: 34px;
+  padding: 5px 0;
+  border: 0;
   border-radius: 6px;
+  background: none;
+  text-align: left;
+  font-size: 14px;
 }
-.cal-charge-list .cell + .cell::before {
-  content: none;
-}
-.cal-charge-list .cell-l {
-  min-width: 0;
-  max-width: none;
-}
-.cal-charge-list .cell-r {
-  display: contents;
+.cal-charge-row:hover {
+  background: var(--fill-2);
 }
 .cal-charge-amount {
   text-align: right;
   white-space: nowrap;
+  color: var(--label-2);
   font-variant-numeric: tabular-nums;
 }
 .cal-charge-amount .amt {
   font-weight: 600;
 }
-.cal-charge-list .cell:focus-visible,
+.cal-charge-row:focus-visible,
 .cal-daycard:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
@@ -8099,7 +8105,7 @@ button.seat:disabled {
 }
 .ai-tools {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   margin-top: 16px;
 }
@@ -8118,6 +8124,7 @@ button.seat:disabled {
   padding: 8px 0;
   border-top: 0.5px solid var(--sep);
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .ai-tool code {
   color: var(--label-3);
@@ -8706,7 +8713,9 @@ button.seat:disabled {
 .cal-daycard {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) max-content;
+  grid-template-rows: minmax(48px, auto) minmax(64px, auto);
   align-items: start;
+  align-content: start;
   gap: 12px;
   border: 0;
   text-align: left;
@@ -8722,6 +8731,7 @@ button.seat:disabled {
 }
 .cal-dc-main {
   grid-column: 2 / -1;
+  grid-row: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -8737,7 +8747,8 @@ button.seat:disabled {
 }
 .cal-dc-info {
   grid-column: 1 / 3;
-  align-self: end;
+  grid-row: 2;
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -8750,7 +8761,8 @@ button.seat:disabled {
 }
 .cal-dc-amt {
   grid-column: 3;
-  align-self: end;
+  grid-row: 2;
+  align-self: start;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

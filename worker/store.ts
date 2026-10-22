@@ -82,7 +82,7 @@ async function ensurePeople(env: Env, state: AppState): Promise<boolean> {
   return true;
 }
 
-export async function loadState(env: Env): Promise<AppState> {
+export async function loadState(env: Env, migratePeople = true): Promise<AppState> {
   // D1 batch reads one transactional snapshot: never pair stale data with a newer rev.
   const rows = await env.DB.batch([
     env.DB.prepare('SELECT data FROM subscriptions'),
@@ -108,7 +108,7 @@ export async function loadState(env: Env): Promise<AppState> {
     fx: kv.fx ?? FALLBACK_FX,
     prefs: (kv.prefs as Prefs | undefined) ?? {},
   };
-  if (await ensurePeople(env, state)) return loadState(env);
+  if (migratePeople && (await ensurePeople(env, state))) return loadState(env);
   state.fxHistory = slimFxHistory((rows[3] as D1Result<{ date: string; rates: string }>).results, keepSet(state));
   return state;
 }
@@ -146,4 +146,21 @@ export async function loadSubs(env: Env): Promise<Subscription[]> {
 /** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */
 export async function saveSettingsWithSubs(env: Env, settings: Settings, subs: Subscription[]): Promise<Revision> {
   return mutate(env, [putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))]);
+}
+
+/** Atomic multi-entity tool write: never leave a migration or settings/prefs edit half-applied. */
+export async function saveLedgerEdit(
+  env: Env,
+  patch: Partial<AppState>,
+  deletedMethods: string[] = [],
+  deletedSubscriptions: string[] = [],
+): Promise<Revision> {
+  const stmts = [
+    ...(patch.subscriptions ?? []).map((s) => upsertStmt(env, 'subscriptions', s.id, s)),
+    ...(patch.methods ?? []).map((m) => upsertStmt(env, 'methods', m.id, m)),
+    ...deletedMethods.map((id) => env.DB.prepare('DELETE FROM methods WHERE id = ?1').bind(id)),
+    ...deletedSubscriptions.map((id) => env.DB.prepare('DELETE FROM subscriptions WHERE id = ?1').bind(id)),
+    ...(['settings', 'people', 'prefs'] as const).filter((k) => patch[k] !== undefined).map((k) => putKvStmt(env, k, patch[k])),
+  ];
+  return mutate(env, stmts);
 }

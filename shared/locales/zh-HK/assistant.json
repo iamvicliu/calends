@@ -160,7 +160,8 @@
     },
     "applyAll": "全部確認",
     "history": "歷史扣款",
-    "historyCount": "{count} 筆"
+    "historyCount": "{count} 筆",
+    "changes": "預覽變更與引用"
   },
   "error": {
     "auth": "API Key 無效",
