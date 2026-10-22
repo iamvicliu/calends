@@ -2,6 +2,7 @@
 // MRR 与退订省钱按当前汇率；历史现金、停用损失按发生日汇率。
 import {
   activePhases,
+  chargeServicePeriod,
   stopSummary,
   addDays,
   addMonths,
@@ -238,6 +239,10 @@ export function events(state: AppState, today: string): LedgerEvent[] {
 function coverage(c: Charge): [string, string] {
   const s = c.sub;
   if (s.cycle.unit === 'lifetime') return [c.date, addDays(c.date, 1)];
+  if (s.chargeLeadDays || s.renewalHistory?.length) {
+    const period = chargeServicePeriod(s, c.date, c.serviceDate);
+    return [period.from, s.end && s.end < period.until ? addDays(s.end, 1) : period.until];
+  }
   const horizon = addDays(c.date, Math.round(cycleDays(s.cycle) * 3) + 31);
   const next = chargesBetween(
     { ...s, stop: undefined, end: undefined, status: s.status === 'paused' ? 'active' : s.status },

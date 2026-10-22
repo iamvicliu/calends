@@ -1,4 +1,4 @@
-import { addDays, addMonths, chargesBetween, todayIn } from '../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, renewalRuleAt, todayIn } from '../shared/billing.ts';
 import { money } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
 import type { AppState } from '../shared/types.ts';
@@ -73,6 +73,18 @@ export function buildIcs(state: AppState, siteUrl: string): string {
           `TRIGGER:${trigger}`,
           'END:VALARM',
         );
+      }
+      const cancelLead = renewalRuleAt(c.sub, c.date).cancelLeadDays;
+      if (remind >= 0 && c.projected && cancelLead > 0) {
+        const deadline = addDays(c.date, -cancelLead);
+        if (deadline >= today)
+          lines.push(
+            'BEGIN:VALARM',
+            'ACTION:DISPLAY',
+            fold(`DESCRIPTION:${icsText(t('core.renewal.cancelReminder', { date: deadline }))}`),
+            `TRIGGER:-P${cancelLead + remind - 1}DT15H`,
+            'END:VALARM',
+          );
       }
       lines.push('END:VEVENT');
     }

@@ -1,9 +1,9 @@
 // 订阅历程的编辑操作：调价、换区/换套餐、断更、续订。全部为纯函数，返回新的订阅对象。
 import { addDays, billingPeriod, chargesBetween, collectionAnchor, currentPhase, effectiveStatus, phaseSubs, priceAt, subError, validDay } from './billing.ts';
-import type { Cycle, Payment, Phase, PricePoint, Stop, Subscription } from './types.ts';
+import type { Cycle, Payment, Phase, PricePoint, Stop, Subscription, RenewalRules } from './types.ts';
 import { t } from './i18n.ts';
 
-export interface PlanChange {
+export interface PlanChange extends RenewalRules {
   price: number;
   currency: string;
   cycle: Cycle;
@@ -19,6 +19,10 @@ function fromTop(s: Subscription, start: string): Phase {
   return {
     start,
     billingStart: s.billingStart,
+    chargeLeadDays: s.chargeLeadDays,
+    cancelLeadDays: s.cancelLeadDays,
+    renewalHistory: s.renewalHistory,
+    renewalOffsetDays: s.renewalOffsetDays,
     end: s.end,
     stop: s.stop,
     price: s.price,
@@ -49,6 +53,11 @@ function mirror(s: Subscription, phases: Phase[]): Subscription {
     cycle: last.cycle,
     methodId: last.methodId,
     region: last.region,
+    chargeLeadDays: last.chargeLeadDays,
+    cancelLeadDays: last.cancelLeadDays,
+    renewalHistory: last.renewalHistory,
+    renewalOffsetDays: last.renewalOffsetDays,
+
     priceHistory: undefined,
     // 首期优惠、赠送时长跟着最后一段走，编辑表单才能看到并修改；计费只读阶段，不会重复生效
     intro: last.intro,
@@ -116,6 +125,10 @@ export function dropPlan(s: Subscription, start: string): Subscription {
       phases: undefined,
       start: p.start,
       billingStart: p.billingStart,
+      chargeLeadDays: p.chargeLeadDays,
+      cancelLeadDays: p.cancelLeadDays,
+      renewalHistory: p.renewalHistory,
+      renewalOffsetDays: p.renewalOffsetDays,
       end: p.end,
       stop: p.stop,
       price: p.price,
@@ -241,7 +254,20 @@ export function toEditForm(s: Subscription, today: string): Subscription {
   if (!s.phases?.length) return s;
   const phases = phasesOf(s);
   const p = phases[editIndex(phases, today)];
-  return { ...s, price: p.price, currency: p.currency, cycle: p.cycle, methodId: p.methodId, region: p.region, intro: p.intro, bonus: p.bonus };
+  return {
+    ...s,
+    price: p.price,
+    currency: p.currency,
+    cycle: p.cycle,
+    methodId: p.methodId,
+    region: p.region,
+    chargeLeadDays: p.chargeLeadDays,
+    cancelLeadDays: p.cancelLeadDays,
+    renewalHistory: p.renewalHistory,
+    renewalOffsetDays: p.renewalOffsetDays,
+    intro: p.intro,
+    bonus: p.bonus,
+  };
 }
 
 /**
@@ -257,6 +283,10 @@ export function syncPhase(s: Subscription, today: string): Subscription {
     cycle: s.cycle,
     methodId: s.methodId,
     region: s.region,
+    chargeLeadDays: s.chargeLeadDays,
+    cancelLeadDays: s.cancelLeadDays,
+    renewalHistory: s.renewalHistory,
+    renewalOffsetDays: s.renewalOffsetDays,
     intro: s.intro,
     bonus: s.bonus,
   });
@@ -342,6 +372,10 @@ export function removePhase(s: Subscription, index: number): Subscription {
       phases: undefined,
       start: p.start,
       billingStart: p.billingStart,
+      chargeLeadDays: p.chargeLeadDays,
+      cancelLeadDays: p.cancelLeadDays,
+      renewalHistory: p.renewalHistory,
+      renewalOffsetDays: p.renewalOffsetDays,
       end: p.end,
       stop: p.stop,
       price: p.price,

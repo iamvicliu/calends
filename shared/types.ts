@@ -146,8 +146,23 @@ export interface Person {
   createdAt?: string;
 }
 
+/** 阶段内续费规则；历史项的 from 是实际扣款规则的生效日。 */
+export interface RenewalRule {
+  from: string;
+  chargeLeadDays: number;
+  cancelLeadDays: number;
+}
+
+export interface RenewalRules {
+  chargeLeadDays?: number;
+  cancelLeadDays?: number;
+  renewalHistory?: RenewalRule[];
+  /** 旧 expires 的服务边界偏移，保留原扣款锚点。 */
+  renewalOffsetDays?: number;
+}
+
 /** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
-export interface Phase {
+export interface Phase extends RenewalRules {
   start: string;
   /** 修正服务开始日时保留的原计费起点；缺省使用 start */
   billingStart?: string;
@@ -170,7 +185,7 @@ export interface Phase {
   planned?: boolean;
 }
 
-export interface Subscription {
+export interface Subscription extends RenewalRules {
   id: string;
   name: string;
   icon?: string; // emoji 或图片 URL

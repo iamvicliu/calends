@@ -1,5 +1,5 @@
 // Transient stop fields owned by the editor or the standalone stop dialog.
-import { billingPeriod, currentPhase, stopSummary, subError } from './billing.ts';
+import { nonrenewalDate, billingPeriod, currentPhase, stopSummary, subError } from './billing.ts';
 import { cancelAtEnd, reactivate, statusChangeError, stopSubscription } from './phases.ts';
 import { t } from './i18n.ts';
 import type { Subscription } from './types.ts';
@@ -19,7 +19,7 @@ export interface StopForm {
 /** Existing refunds remain ordinary payment records; the fields edit the latest stop refund. */
 export function stopForm(sub: Subscription, today: string): StopForm {
   const cur = currentPhase(sub, sub.stop?.date ?? today);
-  const paid = billingPeriod(cur, today).paidThrough;
+  const paid = nonrenewalDate(cur, today);
   const payment = cur.stop ? cur.payments?.filter((p) => p.kind === 'refund' && p.date >= cur.stop!.date).at(-1) : undefined;
   return {
     mode: sub.stop?.kind ?? 'nonrenew',

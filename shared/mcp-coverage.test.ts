@@ -797,3 +797,50 @@ test('价格历史 MCP：编辑、删除、起始价保护、预览及只读权�
   assert.deepEqual(after.phases![0].payments, phases[0].payments);
   assert.deepEqual(after.phases![1], phases[1]);
 });
+
+test('renewal rules: MCP create/update preview, read scope, dates, validation and API history', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const before = await f.snapshot();
+  const args = {
+    name: 'Fictional domain',
+    category: 'Test',
+    price: 12,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'year', every: 1 },
+    chargeLeadDays: 30,
+    cancelLeadDays: 1,
+  };
+  const preview = await f.call('create_subscription', { ...args, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('create_subscription', args, f.read)).isError, true);
+  const saved = await f.call('create_subscription', args);
+  assert.equal(saved.isError, undefined, JSON.stringify(saved));
+  const domain = (await f.snapshot()).subscriptions.find((s) => s.name === args.name)!;
+  const detail = await f.call('get_subscription', { subscription: domain.id }, f.read);
+  assert.equal(detail.structuredContent.next_charge, '2026-12-02');
+  assert.equal(detail.structuredContent.service_expires, '2027-01-01');
+  assert.equal(detail.structuredContent.cancel_by, '2026-12-01');
+  const patch = { subscription: domain.id, set: { chargeLeadDays: 10, cancelLeadDays: 2 } };
+  const original = await f.snapshot();
+  assert.equal((await f.call('update_subscription', { ...patch, dry_run: true })).isError, undefined);
+  assert.deepEqual(await f.snapshot(), original);
+  assert.equal((await f.call('update_subscription', patch, f.read)).isError, true);
+  assert.equal((await f.call('update_subscription', patch)).isError, undefined);
+  const updated = (await f.snapshot()).subscriptions.find((s) => s.id === domain.id)!;
+  assert.equal(updated.renewalHistory?.[0].chargeLeadDays, 30);
+  assert.equal(updated.renewalHistory?.at(-1)?.chargeLeadDays, 10);
+  for (const value of [-1, 1.5, 3661]) {
+    assert.equal((await f.call('update_subscription', { subscription: domain.id, set: { chargeLeadDays: value } })).isError, true);
+    assert.equal((await f.call('create_subscription', { ...args, name: `Invalid ${value}`, chargeLeadDays: value })).isError, true);
+  }
+  const response = await f.request(`subscriptions/${domain.id}`, 'PUT', { ...updated, cancelLeadDays: 7, renewalHistory: undefined });
+  assert.equal(response.status, 200, await response.clone().text());
+  const apiRecord = await response.json();
+  assert.equal(apiRecord.renewalHistory[0].chargeLeadDays, 30);
+  assert.equal(apiRecord.renewalHistory.at(-1).cancelLeadDays, 7);
+  const denied = await f.request(`subscriptions/${domain.id}`, 'PUT', updated, false);
+  assert.equal(denied.status, 401);
+});

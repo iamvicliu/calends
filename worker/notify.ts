@@ -6,6 +6,7 @@ import {
   diffDays,
   effectiveStatus,
   nextCharge,
+  renewalDates,
   memberAboard,
   memberUnpaidFrom,
   memberCollection,
@@ -80,6 +81,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
   const base = settings.baseCurrency;
   const renew: Row[] = [];
   const trials: Row[] = [];
+  const cancellation: Row[] = [];
   const ending: Row[] = [];
   const carpool: Row[] = [];
   const proxy: Row[] = [];
@@ -124,6 +126,23 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
             note: introEnds ? t('notify.renew.introEnds') : undefined,
           });
           headline.push(t('notify.renew.headline', { name: s.name, when: relDays(d), price: money(price, s.currency) }));
+        }
+      }
+    }
+    if (['active', 'trial'].includes(st) && !s.end) {
+      const deadline = renewalDates(s, today).cancelBy;
+      if (deadline) {
+        const d = diffDays(today, deadline);
+        if (d === remind || (remind > 1 && d === 1) || d === 0) {
+          cancellation.push({
+            title: s.name,
+            sub: t('core.renewal.cancelReminder', { date: cnDate(deadline, true) }),
+            amount: cnDate(deadline),
+            days: d,
+            tone: 'warn',
+            icon: iconOf(s),
+          });
+          headline.push(t('core.renewal.cancelReminder', { date: cnDate(deadline, true) }));
         }
       }
     }
@@ -218,6 +237,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
   const sections: Section[] = [
     { heading: t('notify.section.renew'), rows: renew },
     { heading: t('notify.section.trials'), rows: trials },
+    { heading: t('core.renewal.cancelBy'), rows: cancellation },
     { heading: t('notify.section.balance'), rows: balance },
     { heading: t('notify.section.carpool'), rows: carpool },
     { heading: t('notify.section.proxy'), rows: proxy },

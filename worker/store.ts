@@ -1,4 +1,4 @@
-import { FALLBACK_FX } from '../shared/billing.ts';
+import { FALLBACK_FX, migrateRenewalRules } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import { linkPeople } from '../shared/people.ts';
 import type { Prefs } from '../shared/prefs.ts';
@@ -96,7 +96,7 @@ export async function loadState(env: Env, migratePeople = true): Promise<AppStat
   if (typeof kv.rev !== 'number') throw new Error('Missing ledger revision');
   const state: AppState = {
     rev: kv.rev,
-    subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
+    subscriptions: subs.results.map((r) => migrateRenewalRules(JSON.parse(r.data) as Subscription)),
     // 按用户在钱包里拖出来的顺序；没排过的保持原有先后
     methods: methods.results
       .map((r) => JSON.parse(r.data) as PaymentMethod)
@@ -140,7 +140,9 @@ export async function replaceAll(env: Env, subs: Subscription[], methods: Paymen
 }
 
 export async function loadSubs(env: Env): Promise<Subscription[]> {
-  return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
+  return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) =>
+    migrateRenewalRules(JSON.parse(r.data) as Subscription),
+  );
 }
 
 /** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */

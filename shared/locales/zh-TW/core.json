@@ -163,5 +163,15 @@
     "stoppedDone": "已停止服務",
     "method": "停止方式",
     "latestRefundHint": "此處修改最近一筆退款，之前的退款保留在扣款紀錄中。"
+  },
+  "renewal": {
+    "title": "續費規則",
+    "chargeLeadDays": "提前扣款",
+    "cancelLeadDays": "需提前取消",
+    "hint": "在服務到期前扣款，在扣款前取消。填寫提前天數，0 表示無，服務帳期不變。",
+    "cancelBy": "最晚取消日",
+    "invalid": "請輸入 0 至 3660 的整數天數。",
+    "tooLate": "本期已過取消截止，下一期仍會扣款",
+    "cancelReminder": "請在 {date} 前取消，避免下一期扣款。"
   }
 }

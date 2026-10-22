@@ -194,5 +194,15 @@
     "stoppedDone": "Dienst beendet",
     "method": "Art der Beendigung",
     "latestRefundHint": "Diese Felder bearbeiten die letzte Erstattung. Frühere Erstattungen bleiben im Zahlungsverlauf."
+  },
+  "renewal": {
+    "title": "Verlängerungsregeln",
+    "chargeLeadDays": "Tage vorab abbuchen",
+    "cancelLeadDays": "Tage vorher kündigen",
+    "hint": "Abbuchung vor der Verlängerung, Kündigung vor der Abbuchung. Tage eingeben; 0 bedeutet keine. Leistungszeiträume bleiben gleich.",
+    "cancelBy": "Kündigungsfrist",
+    "invalid": "Ganze Zahlen von 0 bis 3660 Tagen eingeben.",
+    "tooLate": "Die Kündigungsfrist ist abgelaufen. Der nächste Zeitraum wird noch berechnet.",
+    "cancelReminder": "Bis {date} kündigen, um die nächste Abbuchung zu vermeiden."
   }
 }

@@ -1,3 +1,4 @@
+import { renewalDates } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
@@ -845,8 +846,9 @@ function Details({
   const cur = currentPhase(sub, today);
   const up = upcomingPhase(sub, today);
   const ro = !!state.readonly;
-  const next = nextCharge(sub, addDays(today, 1));
+
   const nextBill = detailForecast(sub, today).charges[0];
+  const renewal = renewalDates(sub, addDays(today, 1));
   const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
   const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
@@ -878,9 +880,14 @@ function Details({
               {cnDateFull(nextBill.date)}
             </Prop>
           )}
-          {sub.expires && !sub.end && (
-            <Prop k={t('detail.field.expires')} hint={next && next < sub.expires ? t('detail.field.expiresHint') : relDays(diffDays(today, sub.expires))}>
-              {cnDateFull(sub.expires)}
+          {renewal.serviceExpires && !sub.end && (
+            <Prop k={t('detail.field.expires')} hint={relDays(diffDays(today, renewal.serviceExpires))}>
+              {cnDateFull(renewal.serviceExpires)}
+            </Prop>
+          )}
+          {renewal.cancelBy && (
+            <Prop k={t('core.renewal.cancelBy')} hint={relDays(diffDays(today, renewal.cancelBy))}>
+              {cnDateFull(renewal.cancelBy)}
             </Prop>
           )}
           {sub.end && !sub.stop && (
