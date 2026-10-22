@@ -1,3 +1,4 @@
+import { personSummary } from '../../shared/avatar.ts';
 import { reconcileRenewalRules, preserveRenewalHistory, renewalDates } from '../../shared/billing.ts';
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
 import {
@@ -180,7 +181,8 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
     name: l.person.name,
     contact: contactLine(l.person),
     note: l.person.note ?? null,
-    record: l.person,
+    has_avatar: !!l.person.avatar,
+    record: personSummary(l.person),
     owed: conv(l.owed),
     periods_owed: l.periodsOwed,
     received: conv(l.received),

@@ -43,5 +43,7 @@
     "noKey": "还没有配置 DeepSeek API Key。",
     "badTool": "不支持的操作。"
   },
-  "invalidAvatar": "图片无效"
+  "invalidAvatar": "图片无效",
+  "avatarInvalid": "头像须为不含元数据的正方形 PNG/WebP，最大 128×128、64 KB。上传支持 PNG/JPEG/WebP，最大 8 MB、4000 万像素。",
+  "avatarRosterFull": "人员名册空间已满，请先移除一个头像。"
 }

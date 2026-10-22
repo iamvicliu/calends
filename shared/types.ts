@@ -154,6 +154,8 @@ export interface Person {
   contact?: string;
   note?: string;
   color?: PersonColor;
+  /** Private PNG/WebP data URL, square, at most 128px and 64 KiB. */
+  avatar?: string;
   createdAt?: string;
 }
 

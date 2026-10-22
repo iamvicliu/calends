@@ -1,3 +1,4 @@
+import { validateAvatar, personSummary } from '../../shared/avatar.ts';
 // Non-secret ledger editing, shared by external MCP and the confirmed in-app assistant.
 import type { AppState, PaymentMethod, Person, Proxy, TopUp } from '../../shared/types.ts';
 import { PERSON_COLORS } from '../../shared/types.ts';
@@ -183,12 +184,15 @@ export const ledgerTools: Tool[] = [
     write: true,
     destructive: true,
     description:
-      'Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. All linked names and contacts update together. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.',
+      'Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. Avatar upload: avatar_base64 plus mime (image/png or image/webp), square <=128px and <=64KiB, no metadata. avatar=null removes it. Remote URLs are unsupported; upload a prepared thumbnail. All linked names and contacts update together. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.',
     inputSchema: obj(
       {
         action: action(['create', 'update', 'delete']),
         id: text,
         person: text,
+        avatar: { type: 'null' },
+        avatar_base64: text,
+        mime: { type: 'string', enum: ['image/png', 'image/webp'] },
         migrate_to: text,
         set: obj({
           name: text,
@@ -207,6 +211,10 @@ export const ledgerTools: Tool[] = [
       const id = old?.id ?? String(a.id ?? uid());
       if (!old && st.people?.some((p) => p.id === id)) throw new Error(t('mcp.error.invalidTarget'));
       const person = applyFields(old ?? { id, createdAt: today }, body(a.set)) as Person;
+      if ('avatar' in a && ('avatar_base64' in a || 'mime' in a)) throw new Error(t('server.avatarInvalid'));
+      if ('avatar_base64' in a || 'mime' in a) person.avatar = validateAvatar(`data:${a.mime};base64,${a.avatar_base64}`);
+      if (a.avatar === null) delete person.avatar;
+      if (a.action === 'delete' && ('avatar' in a || 'avatar_base64' in a || 'mime' in a)) throw new Error(t('server.avatarInvalid'));
       if (a.action !== 'delete' && !person.name?.trim()) throw new Error(t('mcp.error.needMemberName'));
       const into = a.migrate_to ? findPerson(st, a.migrate_to).id : undefined;
       const result = personEdit(st, person, a.action === 'delete', into);
@@ -216,8 +224,9 @@ export const ledgerTools: Tool[] = [
         { people: result.people, subscriptions: result.subscriptions },
         [],
         {
-          before: old ?? null,
-          after: a.action === 'delete' ? null : person,
+          avatar_action: a.avatar === null ? 'remove' : a.avatar_base64 ? 'replace' : null,
+          before: old ? personSummary(old) : null,
+          after: a.action === 'delete' ? null : personSummary(person),
           references: result.references,
           ...(a.action === 'create' ? { created: { id } } : {}),
         },

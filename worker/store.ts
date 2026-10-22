@@ -1,3 +1,4 @@
+import { validatePeopleAvatars } from '../shared/avatar.ts';
 import { FALLBACK_FX, migrateRenewalRules } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import { linkPeople } from '../shared/people.ts';
@@ -30,6 +31,7 @@ export async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
 }
 
 function putKvStmt(env: Env, key: string, value: unknown): D1PreparedStatement {
+  if (key === 'people') validatePeopleAvatars(value as Person[]);
   return env.DB.prepare(
     "INSERT INTO kv (key, value, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
   ).bind(key, JSON.stringify(value));
@@ -60,6 +62,7 @@ const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
 
 /** 把名册和改动过的订阅一起写入（分批，D1 一次 batch 的语句数有限） */
 export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<Revision | undefined> {
+  if (people) validatePeopleAvatars(people);
   const stmts = [...(people ? [putPeopleStmt(env, people)] : []), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))];
   let revision: Revision | undefined;
   for (let i = 0; i < stmts.length; i += 50) {

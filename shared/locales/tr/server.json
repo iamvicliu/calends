@@ -52,5 +52,7 @@
     "noKey": "Henüz DeepSeek API anahtarı ayarlanmadı.",
     "badTool": "Desteklenmeyen işlem."
   },
-  "invalidAvatar": "Geçersiz görsel"
+  "invalidAvatar": "Geçersiz görsel",
+  "avatarInvalid": "Meta veri içermeyen, kare PNG/WebP kullanın: en fazla 128×128 ve 64 KB. Yükleme: PNG/JPEG/WebP, en fazla 8 MB ve 40 megapiksel.",
+  "avatarRosterFull": "Kişi listesi dolu. Önce bir avatarı kaldırın."
 }
