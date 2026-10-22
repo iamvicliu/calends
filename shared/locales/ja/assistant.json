@@ -160,7 +160,8 @@
     },
     "applyAll": "すべて確定",
     "history": "過去の請求",
-    "historyCount": "{count} 件"
+    "historyCount": "{count} 件",
+    "changes": "変更と参照を確認"
   },
   "error": {
     "auth": "API Key が無効です",
