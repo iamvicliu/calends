@@ -18,6 +18,7 @@ import {
   MethodMark,
   NetworkMark,
   NumInput,
+  MoneyInput,
   Seg,
   Sheet,
   SubIcon,
@@ -595,9 +596,9 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
         />
         <Group>
           <Cell label={mode === 'add' ? t('wallet.topup.amount', { ccy: m.currency }) : t('wallet.topup.actual')}>
-            <input
+            <MoneyInput
+              ccy={m.currency}
               className="num"
-              inputMode="decimal"
               autoFocus
               value={val}
               onChange={(e) => setVal((e.target as HTMLInputElement).value)}
@@ -618,9 +619,9 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
               <CurrencySelect value={costCcy} onChange={setCostCcy} />
             </Cell>
             <Cell label={t('wallet.topup.cost')}>
-              <input
+              <MoneyInput
+                ccy={costCcy}
                 className="num"
-                inputMode="decimal"
                 value={cost}
                 placeholder={t('wallet.topup.costPh')}
                 onChange={(e) => setCost((e.target as HTMLInputElement).value)}
@@ -838,6 +839,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
             <Cell label={t('wallet.editor.balance')}>
               <NumInput
                 className="num"
+                ccy={f.currency}
                 value={f.balance}
                 placeholder={t('wallet.editor.optional')}
                 onValue={(n) => up({ balance: n, balanceAsOf: f.balanceAsOf ?? today() })}

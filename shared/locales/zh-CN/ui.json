@@ -2,7 +2,8 @@
   "close": "关闭",
   "error": {
     "loginRequired": "请先登录",
-    "requestFailed": "请求失败 {status}"
+    "requestFailed": "请求失败 {status}",
+    "wholeCurrency": "{currency} 金额只能输入整数"
   },
   "theme": {
     "light": "亮色",

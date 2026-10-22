@@ -2,7 +2,8 @@
   "close": "Cerrar",
   "error": {
     "loginRequired": "Inicia sesión primero",
-    "requestFailed": "La solicitud falló ({status})"
+    "requestFailed": "La solicitud falló ({status})",
+    "wholeCurrency": "Los importes en {currency} deben ser números enteros"
   },
   "theme": {
     "light": "Claro",

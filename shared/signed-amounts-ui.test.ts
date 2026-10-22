@@ -4,7 +4,7 @@ import { afterEach, test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateFull } from './format.ts';
+import { currencyDecimals, moneyDecimals, flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateFull } from './format.ts';
 import { intlLocale, locale, setLocale } from './i18n.ts';
 import { chargeValue } from './fx.ts';
 import { FALLBACK_FX, phaseSubs, diffDays } from './billing.ts';
@@ -32,7 +32,7 @@ afterEach(() => {
 test('Amount renders directed flows, zero, unavailable values and neutral prices/balances with both settings', () => {
   const file = '../app/src/components/ui.tsx';
   const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
-  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, flowSign, symbol, intlLocale });
+  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale });
   for (const on of [true, false]) {
     setSignedAmounts(on);
     const render = (value: number, plain = false) => renderToStaticMarkup(React.createElement(Amount, { value, ccy: 'CNY', plain }));
@@ -54,6 +54,74 @@ test('Amount renders directed flows, zero, unavailable values and neutral prices
     assert.equal(text(render(-10, true)), '−¥10.00'); // A balance's mathematical sign is independent of cash flow notation.
     assert.ok(!render(1000, true).includes('--green'));
   }
+});
+
+test('Amount never renders fractional markup for zero-decimal currencies, including compact/explicit precision', () => {
+  const file = '../app/src/components/ui.tsx';
+  const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
+  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale });
+  for (const ccy of ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'HUF', 'TWD', 'PYG', 'MGA', 'BIF', 'USD', 'CNY', 'NGN', 'TRY']) {
+    for (const value of [0, 19.8, -19.8, 1234567.89]) {
+      for (const opts of [{}, { compact: true }, { decimals: 2 }, { plain: true }]) {
+        const html = renderToStaticMarkup(React.createElement(Amount, { value, ccy, ...opts }));
+        const expected = opts.plain ? money(value, ccy, opts) : flow(value, ccy, opts);
+        assert.equal(text(html), expected.replace(symbol(ccy), symbol(ccy).trim()));
+        if (currencyDecimals(ccy) === 0) assert.ok(!html.includes('amt-fraction'), `${ccy}: ${html}`);
+      }
+    }
+  }
+});
+
+test('MoneyPair formats both original and converted currencies with the shared precision', () => {
+  const file = '../app/src/components/ui.tsx';
+  const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
+  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale });
+  let orig = true;
+  const useMoneyPair = load(
+    'MoneyPair.tsx',
+    'useMoneyPair',
+    read('../app/src/components/MoneyPair.tsx').split('export function useMoneyPair')[1].replace(/^/, 'function useMoneyPair'),
+    {
+      React,
+      Amount,
+      flow,
+      money,
+      useOrig: () => orig,
+      convert: () => 1234.56,
+      toBaseAt: () => 1234.56,
+    },
+  );
+  const state = { settings: { baseCurrency: 'JPY' } };
+  for (const plain of [true, false]) {
+    orig = true;
+    let pair = useMoneyPair(state)(1470.07, 'TRY', { plain });
+    assert.ok(text(renderToStaticMarkup(pair.main)).includes('₺1,470.07'));
+    assert.ok(pair.alt.includes('JP¥1,235'));
+    orig = false;
+    pair = useMoneyPair(state)(1470.07, 'TRY', { plain });
+    assert.ok(text(renderToStaticMarkup(pair.main)).includes('JP¥1,235'));
+    assert.ok(!renderToStaticMarkup(pair.main).includes('amt-fraction'));
+    assert.ok(pair.alt.includes('₺1,470.07'));
+  }
+});
+
+test('currency-aware inputs reject fractional drafts with a translated hint without rounding stored values', () => {
+  const file = '../app/src/components/ui.tsx';
+  const source = read(file).split('export function acceptCurrencyInput(')[1].split('/** 保留字符串')[0];
+  const hints: string[] = [];
+  const accept = load(file, 'acceptCurrencyInput', `function acceptCurrencyInput(${source}`, {
+    currencyDecimals,
+    toNum: (v: string) => (v.trim() === '' || !Number.isFinite(Number(v)) ? undefined : Number(v)),
+    notify: { error: (hint: string) => hints.push(hint) },
+    t: (key: string, args: { currency: string }) => `${key}:${args.currency}`,
+  });
+  assert.equal(accept('19.8', 'JPY'), false);
+  assert.equal(accept('-19.8', 'TWD'), false);
+  assert.equal(accept('1e-1', 'HUF'), false);
+  assert.equal(hints.length, 3);
+  assert.equal(hints[0], 'ui.error.wholeCurrency:JPY');
+  for (const text of ['', '-', '19.', '1900', '-19', '19.00']) assert.equal(accept(text, 'JPY'), true);
+  assert.equal(accept('19.8', 'USD'), true);
 });
 
 test('Root applies loaded/changed signed settings before rendering and changes the app key for cached children', () => {

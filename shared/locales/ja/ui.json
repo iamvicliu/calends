@@ -2,7 +2,8 @@
   "close": "閉じる",
   "error": {
     "loginRequired": "先にログインしてください",
-    "requestFailed": "リクエストに失敗しました（{status}）"
+    "requestFailed": "リクエストに失敗しました（{status}）",
+    "wholeCurrency": "{currency} の金額は整数で入力してください"
   },
   "theme": {
     "light": "ライト",

@@ -1,7 +1,7 @@
 import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../../shared/billing.ts';
-import { flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
+import { moneyTick, flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
 import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosses } from '../../../shared/metrics.ts';
@@ -194,7 +194,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         selected={selKey ? sel : undefined}
         current={sel}
         onSelect={(k) => setSelKey(k === selKey ? undefined : k)}
-        fmt={(v) => (v >= 10000 ? `${(v / 1000).toFixed(0)}k` : v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(Math.round(v)))}
+        fmt={(v) => moneyTick(v, base)}
       />
 
       <div className="legend-chips">

@@ -2,7 +2,8 @@
   "close": "Tutup",
   "error": {
     "loginRequired": "Silakan masuk terlebih dahulu",
-    "requestFailed": "Permintaan gagal ({status})"
+    "requestFailed": "Permintaan gagal ({status})",
+    "wholeCurrency": "Jumlah {currency} harus berupa bilangan bulat"
   },
   "theme": {
     "light": "Terang",

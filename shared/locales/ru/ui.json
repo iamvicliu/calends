@@ -2,7 +2,8 @@
   "close": "Закрыть",
   "error": {
     "loginRequired": "Сначала войдите",
-    "requestFailed": "Ошибка запроса ({status})"
+    "requestFailed": "Ошибка запроса ({status})",
+    "wholeCurrency": "Суммы в {currency} должны быть целыми числами"
   },
   "theme": {
     "light": "Светлая",

@@ -2,7 +2,8 @@
   "close": "닫기",
   "error": {
     "loginRequired": "먼저 로그인하세요",
-    "requestFailed": "요청에 실패했습니다({status})"
+    "requestFailed": "요청에 실패했습니다({status})",
+    "wholeCurrency": "{currency} 금액은 정수로 입력하세요"
   },
   "theme": {
     "light": "라이트",
