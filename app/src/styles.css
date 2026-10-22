@@ -605,7 +605,8 @@ a {
   display: flex;
   align-items: center;
   gap: 6px;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .stat-label .i {
   width: 14px;
@@ -615,6 +616,15 @@ a {
   font-size: 28px;
   line-height: 1.15;
   margin-top: 8px;
+}
+.amt.car-plan-count {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 5px;
+  white-space: normal;
+}
+.car-plan-count > span {
+  white-space: nowrap;
 }
 .stat-sub {
   font-size: 12.5px;

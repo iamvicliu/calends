@@ -102,11 +102,15 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           <div className="card stat">
             <div className="stat-label">{t('family.pool.count')}</div>
             <div className="stat-value">
-              <span className="amt">
-                {owned.length}
-                <small>{t('family.pool.countStarted')}</small>
-                {joined.length}
-                <small>{t('family.pool.countJoined')}</small>
+              <span className="amt car-plan-count">
+                <span>
+                  {owned.length}
+                  <small>{t('family.pool.countStarted')}</small>
+                </span>
+                <span>
+                  {joined.length}
+                  <small>{t('family.pool.countJoined')}</small>
+                </span>
               </span>
             </div>
             <div className="stat-sub">{t('family.pool.countSub')}</div>
