@@ -33,7 +33,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "시작",
     "rangeTo": "종료",
-    "showAllPeriods": "전체 {count}개 기간 보기"
+    "showAllPeriods": "전체 {count}개 기간 보기",
+    "vacancy": "빈자리",
+    "departed": "탈퇴 {count}명"
   },
   "contact": {
     "via": {
@@ -263,11 +265,11 @@
     "viewSub": "상세 보기"
   },
   "rule": {
-    "title": "수금 규칙",
+    "title": "요금",
     "follow": "요금제 따름",
     "custom": "개별",
     "followValue": "{rule} (요금제 규칙)",
-    "sheetTitle": "요금제 수금 규칙",
+    "sheetTitle": "요금",
     "from": "적용일",
     "anchor": "공통 수금일",
     "applyNote": "요금제를 따르는 {count}명은 적용일부터 새 규칙을 사용합니다. 개별 설정과 지난 수금은 바뀌지 않습니다."

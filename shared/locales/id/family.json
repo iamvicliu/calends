@@ -33,7 +33,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "Dari",
     "rangeTo": "Sampai",
-    "showAllPeriods": "Tampilkan semua {count} periode"
+    "showAllPeriods": "Tampilkan semua {count} periode",
+    "vacancy": "Kursi kosong",
+    "departed": "{count} keluar"
   },
   "contact": {
     "via": {
@@ -78,7 +80,7 @@
     "notSet": "Belum diatur",
     "left": "Keluar",
     "leftPh": "Masih di paket",
-    "feeGroup": "Tagihan",
+    "feeGroup": "Biaya",
     "seg": {
       "m1": "Bulanan",
       "m3": "Triwulanan",
@@ -263,11 +265,11 @@
     "viewSub": "Lihat detail"
   },
   "rule": {
-    "title": "Aturan penagihan",
+    "title": "Biaya",
     "follow": "Ikuti paket",
     "custom": "Kustom",
     "followValue": "{rule} (aturan paket)",
-    "sheetTitle": "Aturan penagihan paket",
+    "sheetTitle": "Biaya",
     "from": "Berlaku mulai",
     "anchor": "Tanggal tagih bersama",
     "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah."

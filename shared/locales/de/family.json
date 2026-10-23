@@ -34,7 +34,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "Von",
     "rangeTo": "Bis",
-    "showAllPeriods": "Alle {count} Zeiträume anzeigen"
+    "showAllPeriods": "Alle {count} Zeiträume anzeigen",
+    "vacancy": "Freier Platz",
+    "departed": "{count} ausgeschieden"
   },
   "contact": {
     "via": {
@@ -80,7 +82,7 @@
     "notSet": "Nicht festgelegt",
     "left": "Ausgetreten",
     "leftPh": "Noch dabei",
-    "feeGroup": "Abrechnung",
+    "feeGroup": "Gebühr",
     "seg": {
       "m1": "Monatlich",
       "m3": "Vierteljährlich",
@@ -272,11 +274,11 @@
     "viewSub": "Details ansehen"
   },
   "rule": {
-    "title": "Einzugsregel",
+    "title": "Gebühr",
     "follow": "Wie Abo",
     "custom": "Eigen",
     "followValue": "{rule} (Abo-Regel)",
-    "sheetTitle": "Einzugsregel des Abos",
+    "sheetTitle": "Gebühr",
     "from": "Gültig ab",
     "anchor": "Einzugsstichtag",
     "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert."

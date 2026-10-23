@@ -34,7 +34,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "Başlangıç",
     "rangeTo": "Bitiş",
-    "showAllPeriods": "{count} dönemin tümünü göster"
+    "showAllPeriods": "{count} dönemin tümünü göster",
+    "vacancy": "Boş yer",
+    "departed": "{count} kişi ayrıldı"
   },
   "contact": {
     "via": {
@@ -80,7 +82,7 @@
     "notSet": "Belirtilmedi",
     "left": "Ayrılma",
     "leftPh": "Hâlâ planda",
-    "feeGroup": "Ödeme",
+    "feeGroup": "Ücret",
     "seg": {
       "m1": "Aylık",
       "m3": "Üç aylık",
@@ -272,11 +274,11 @@
     "viewSub": "Ayrıntıları gör"
   },
   "rule": {
-    "title": "Tahsilat kuralı",
+    "title": "Ücret",
     "follow": "Planı izle",
     "custom": "Özel",
     "followValue": "{rule} (plan kuralı)",
-    "sheetTitle": "Plan tahsilat kuralı",
+    "sheetTitle": "Ücret",
     "from": "Geçerlilik",
     "anchor": "Ortak tahsilat günü",
     "applyNote": "Planı izleyen {count} üye bu tarihten itibaren yeni kurala geçer; özel üyeler ve geçmiş tahsilatlar değişmez."

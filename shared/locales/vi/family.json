@@ -33,7 +33,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "Từ",
     "rangeTo": "Đến",
-    "showAllPeriods": "Hiện tất cả {count} kỳ"
+    "showAllPeriods": "Hiện tất cả {count} kỳ",
+    "vacancy": "Chỗ trống",
+    "departed": "{count} người đã rời"
   },
   "contact": {
     "via": {
@@ -78,7 +80,7 @@
     "notSet": "Chưa đặt",
     "left": "Ngày rời",
     "leftPh": "Vẫn đang trong gói",
-    "feeGroup": "Thanh toán",
+    "feeGroup": "Phí",
     "seg": {
       "m1": "Hằng tháng",
       "m3": "Hằng quý",
@@ -263,11 +265,11 @@
     "viewSub": "Xem chi tiết"
   },
   "rule": {
-    "title": "Quy tắc thu",
+    "title": "Phí",
     "follow": "Theo gói",
     "custom": "Tùy chỉnh",
     "followValue": "{rule} (quy tắc gói)",
-    "sheetTitle": "Quy tắc thu của gói",
+    "sheetTitle": "Phí",
     "from": "Áp dụng từ",
     "anchor": "Ngày thu chung",
     "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi."
