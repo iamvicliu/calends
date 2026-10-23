@@ -1028,3 +1028,73 @@ test('metric slots retain negative, zero and unavailable amounts, notes and sema
   assert.match(css, /@container \(max-width: 520px\)[\s\S]*?repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(css, /@container \(max-width: 300px\)[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\)/);
 });
+
+// Adjacent full-size action buttons differ from field controls, pickers, table rows
+// and disclosure buttons. Look through conditional JSX, but never through a new layout container.
+function sheetActionViolations(ast, source, sharedForm = false) {
+  const failures = [];
+  const scan = (node, inSheet = sharedForm) => {
+    if (!node || typeof node !== 'object') return;
+    if (node.type === 'JSXElement') {
+      inSheet ||= node.openingElement.name.name === 'Sheet';
+      if (inSheet && ['div', 'span'].includes(node.openingElement.name.name)) {
+        const buttons = [];
+        const direct = (child) => {
+          if (!child || typeof child !== 'object') return;
+          if (child.type === 'JSXElement') {
+            const o = child.openingElement;
+            if (['button', 'a'].includes(o.name.name) && /(?<![\w-])btn(?![\w-])/.test(text(attr(o, 'className')?.value, source))) buttons.push(child);
+            return;
+          }
+          for (const [key, value] of Object.entries(child)) {
+            if (['loc', 'range', 'comments', 'tokens'].includes(key)) continue;
+            if (Array.isArray(value)) value.forEach(direct);
+            else direct(value);
+          }
+        };
+        node.children.forEach(direct);
+        if (
+          buttons.filter((b) => !attr(b.openingElement, 'aria-pressed')).length > 1 &&
+          !/\bsheet-actions\b/.test(text(attr(node.openingElement, 'className')?.value, source))
+        )
+          failures.push('action row missing sheet-actions');
+        if (
+          /\bsheet-actions\b/.test(text(attr(node.openingElement, 'className')?.value, source)) &&
+          /justifyContent|flexDirection|flexWrap/.test(text(attr(node.openingElement, 'style'), source))
+        )
+          failures.push('local action alignment');
+      }
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (['loc', 'range', 'comments', 'tokens'].includes(key)) continue;
+      if (Array.isArray(value)) value.forEach((child) => scan(child, inSheet));
+      else scan(value, inSheet);
+    }
+  };
+  scan(ast);
+  return failures;
+}
+
+test('sheet and embedded form action rows use one right-aligned container with the primary action last', async () => {
+  for (const [file, ast, source] of sources) {
+    assert.deepEqual(sheetActionViolations(ast, source, ['components/ChangePanel.tsx', 'components/StopPanel.tsx'].includes(file)), [], file);
+  }
+  const bad = '<Sheet><div className="row"><button className="btn">Edit</button><button className="btn primary">Save</button></div></Sheet>';
+  assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(bad), bad), ['action row missing sheet-actions']);
+  const good = bad.replace('className="row"', 'className="sheet-actions"');
+  assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(good), good), []);
+  const ui = readFileSync(new URL('components/ui.tsx', root), 'utf8');
+  assert.match(ui, /className="sheet-foot sheet-actions"/);
+  const detail = readFileSync(new URL('views/Detail.tsx', root), 'utf8');
+  assert.match(detail, /className="sheet-actions dt-actions"/);
+  const css = readFileSync(new URL('components/ui.css', root), 'utf8');
+  assert.match(css, /\.sheet-actions\s*\{[^}]*justify-content:\s*flex-end/);
+  assert.match(css, /\.sheet-actions > :is\(\.primary, \.danger-solid\)\s*\{\s*order:\s*1/);
+  for (const [file, css] of styleSources) {
+    if (file.startsWith('public/')) continue;
+    for (const [selector, body] of nestedCssRules(css)) {
+      if (/\.(?:dt-actions|sheet-foot|copy-actions|change-actions|stop-actions|pubs-acts)(?![\w-])/.test(selector))
+        assert.doesNotMatch(body, /justify-content:\s*|flex-wrap:\s*|grid-template-columns:\s*/, `${file}: local action layout ${selector}`);
+    }
+  }
+});

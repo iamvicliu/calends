@@ -552,7 +552,7 @@ export function Sheet(props: {
             </div>
           )}
           <div className="sheet-body">{props.children}</div>
-          {props.foot && <div className="sheet-foot">{copyParts(props.foot)}</div>}
+          {props.foot && <div className="sheet-foot sheet-actions">{copyParts(props.foot)}</div>}
         </Dialog>
       </Modal>
     </ModalOverlay>

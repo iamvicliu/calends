@@ -22,18 +22,6 @@
   font-weight: 600;
   color: var(--label-2);
 }
-.pubs-acts {
-  display: flex;
-  gap: 8px;
-}
-.pubs-acts .btn {
-  height: var(--ctl-h-md);
-  font-size: var(--fs-2);
-}
-.pubs-acts .btn:disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
 .pubs-chips {
   display: flex;
   flex-wrap: wrap;

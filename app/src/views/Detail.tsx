@@ -108,6 +108,7 @@ function Act({
   href,
   round,
   desk,
+  primary,
 }: {
   icon: ReactNode;
   label: string;
@@ -115,6 +116,7 @@ function Act({
   href?: string;
   round?: boolean;
   desk?: boolean;
+  primary?: boolean;
 }) {
   const inner = (
     <>
@@ -122,7 +124,7 @@ function Act({
       <span className="dt-act-l">{label}</span>
     </>
   );
-  const cls = `${round ? 'icon-btn dt-round' : 'dt-act'} ${desk ? 'desk' : ''}`;
+  const cls = `${round ? 'icon-btn dt-round' : 'btn dt-act'} ${primary ? 'primary' : ''} ${desk ? 'desk' : ''}`;
   return href ? (
     <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
       {inner}
@@ -235,7 +237,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   );
   const actions = (
     <>
-      {!ro && <Act icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
       {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
         <Act
           icon={paused ? <Play size={15} /> : <Pause size={15} />}
@@ -261,6 +262,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         <Act icon={<Copy size={15} />} label={t('detail.action.copyImage')} onClick={() => copyImage(root.current!)} round desk />
       )}
       <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
+      {!ro && <Act primary icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
     </>
   );
 
@@ -292,7 +294,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             <CatTag cat={sub.category} />
           </div>
         </div>
-        <div className="dt-actions">{actions}</div>
+        <div className="sheet-actions dt-actions">{actions}</div>
         <IconButton className="dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')}>
           <X size={17} />
         </IconButton>

@@ -29,7 +29,7 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
         <p className="pubs-hint">{t('settings.open.publicSubsHint')}</p>
         <div className="pubs-bar">
           <span>{copyParts(t('settings.open.publicShown', { count: shown.length }))}</span>
-          <div className="pubs-acts">
+          <div className="sheet-actions">
             <button className="btn" disabled={!off.length} onClick={() => save([])}>
               {t('settings.open.publicShowAll')}
             </button>

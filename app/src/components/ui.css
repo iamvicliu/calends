@@ -327,3 +327,20 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.sheet-actions,
+.cell.sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.sheet-actions > :is(.primary, .danger-solid) {
+  order: 1;
+}
+.sheet-actions > :is(.btn, .dt-act) {
+  border-radius: var(--radius-pill);
+}

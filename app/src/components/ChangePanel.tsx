@@ -243,14 +243,14 @@ export function ChangePanel({
         </p>
       )}
       <div className="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
-        <button className={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
+        <button aria-pressed={mode === 'price'} className={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
           {t('editor.change.price')}
         </button>
-        <button className={`btn ${mode === 'switch' ? 'primary' : ''}`} onClick={() => open('switch')}>
+        <button aria-pressed={mode === 'switch'} className={`btn ${mode === 'switch' ? 'primary' : ''}`} onClick={() => open('switch')}>
           {t('editor.change.switch')}
         </button>
         {ended && (
-          <button className={`btn ${mode === 'resume' ? 'primary' : ''}`} onClick={() => open('resume')}>
+          <button aria-pressed={mode === 'resume'} className={`btn ${mode === 'resume' ? 'primary' : ''}`} onClick={() => open('resume')}>
             {t('editor.change.resume')}
           </button>
         )}
@@ -261,7 +261,7 @@ export function ChangePanel({
         )}
       </div>
       {mode && (
-        <div className="change-form" data-submit=".change-actions .btn.primary">
+        <div className="change-form" data-submit=".sheet-actions .btn.primary">
           <label>
             {t(mode === 'price' ? 'editor.change.priceDate' : mode === 'switch' ? 'editor.change.switchDate' : 'editor.change.resumeDate')}
             <DatePicker
@@ -339,7 +339,7 @@ export function ChangePanel({
               )}
             </>
           )}
-          <div className="change-actions">
+          <div className="sheet-actions">
             <button className="btn" onClick={() => setMode(null)}>
               {t('common.cancel')}
             </button>

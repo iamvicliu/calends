@@ -237,8 +237,6 @@
   color: var(--tint);
 }
 .dt-actions {
-  display: flex;
-  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -937,9 +935,6 @@
   }
   .dt-actions {
     grid-area: act;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
     margin-top: 4px;
   }
   .dt-act {
@@ -1039,7 +1034,6 @@
   .dt.compact .dt-actions {
     order: 3;
     flex-basis: 100%;
-    flex-wrap: wrap;
   }
   .dt.compact .dt-body {
     display: flex;
@@ -1072,18 +1066,12 @@
   .dt-actions {
     order: 2;
     width: 100%;
-    flex-wrap: wrap;
   }
 }
 @media (max-width: 640px) {
   /* 复制为图片只在桌面端提供 */
   .dt-actions .desk {
     display: none;
-  }
-  .dt-actions {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-    row-gap: 14px;
   }
   .dt-act-l {
     white-space: normal;
