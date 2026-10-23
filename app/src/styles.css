@@ -366,7 +366,8 @@ a {
 .seg {
   display: inline-flex;
   padding: 2px;
-  border-radius: var(--radius-md);
+  /* 与同排搜索框、排序按钮、圆形图标按钮一致用胶囊；内外都是胶囊，天然同心 */
+  border-radius: var(--radius-pill);
   background: var(--fill);
   box-sizing: border-box;
   height: var(--ctl-h-md);
@@ -4619,7 +4620,7 @@ button.h-price-row:focus-visible {
   height: var(--ctl-h-md);
   max-width: 100%;
   padding: 0 10px 0 8px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   border: 0;
   background: var(--fill-2);
   color: var(--label);
@@ -6651,7 +6652,7 @@ a.car-toggle {
 .pk-btn.inline {
   height: var(--ctl-h-md);
   padding: 0 8px 0 11px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   background: var(--fill-2);
   color: var(--label);
   font-size: var(--fs-2);
@@ -7768,7 +7769,7 @@ a.car-toggle {
   height: var(--ctl-h-md);
   padding: 0 10px;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--white-a12) 8%, transparent);
   color: var(--label);
   font-family: inherit;
@@ -9746,14 +9747,6 @@ img.mm-flag {
 .cal-daycard:hover,
 .heat-m:hover {
   background-color: var(--gray-3);
-}
-/* 14px outside with 4px inset produces a concentric 10px inner control. */
-.seg {
-  padding: 4px;
-  border-radius: var(--radius-md);
-}
-.seg button {
-  border-radius: var(--radius-sm);
 }
 .gt-unused,
 .gt-legend .lg-unused {

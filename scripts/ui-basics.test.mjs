@@ -480,3 +480,15 @@ test('UI copy and locale templates never introduce middle-dot separators', async
   }
   assert.deepEqual(failures, []);
 });
+
+test('controls that sit in toolbars and rows share the pill shape instead of mixing pills and rectangles', () => {
+  const css = allCss + readFileSync(new URL('views/assistant.css', root), 'utf8');
+  const last = (sel) =>
+    cssRules(css)
+      .filter(([s]) => s.split(',').some((x) => x.trim() === sel))
+      .map(([, body]) => /border-radius:\s*([^;]+)/.exec(body)?.[1])
+      .filter(Boolean)
+      .at(-1);
+  for (const sel of ['.seg', '.seg button', '.as-suggest button', '.pk-btn.inline', '.mp-btn', '.ai-copy'])
+    assert.match(last(sel) ?? '', /radius-pill|999px/, sel);
+});
