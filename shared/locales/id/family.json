@@ -35,7 +35,13 @@
     "rangeTo": "Sampai",
     "showAllPeriods": "Tampilkan semua {count} periode",
     "vacancy": "Kursi kosong",
-    "departed": "{count} keluar"
+    "departed": "{count} keluar",
+    "hidePersonal": "Sembunyikan data pribadi",
+    "showPersonal": "Tampilkan data pribadi",
+    "hiddenMember": "Anggota disembunyikan",
+    "addMember": "Tambah anggota",
+    "vacancyTrack": "Sementara kosong",
+    "copyFailed": "Gagal menyalin gambar"
   },
   "contact": {
     "via": {
@@ -289,7 +295,11 @@
     "yearNet": "Bersih per tahun",
     "costIncome": "Biaya {cost}\nPendapatan {income}",
     "noneOwed": "Tidak ada tunggakan",
-    "since": "Sejak {date}"
+    "since": "Sejak {date}",
+    "profit": "Laba / rugi",
+    "annualApprox": "Sekitar {amount} per tahun",
+    "paid": "Dibayar",
+    "received": "Diterima"
   },
   "timeline": {
     "paid": "Lunas",

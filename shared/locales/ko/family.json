@@ -35,7 +35,13 @@
     "rangeTo": "종료",
     "showAllPeriods": "전체 {count}개 기간 보기",
     "vacancy": "빈자리",
-    "departed": "탈퇴 {count}명"
+    "departed": "탈퇴 {count}명",
+    "hidePersonal": "개인정보 숨기기",
+    "showPersonal": "개인정보 표시",
+    "hiddenMember": "숨겨진 멤버",
+    "addMember": "멤버 추가",
+    "vacancyTrack": "현재 빈자리",
+    "copyFailed": "이미지 복사 실패"
   },
   "contact": {
     "via": {
@@ -289,7 +295,11 @@
     "yearNet": "연간 순액",
     "costIncome": "비용 {cost}\n수입 {income}",
     "noneOwed": "미납 없음",
-    "since": "{date}부터"
+    "since": "{date}부터",
+    "profit": "손익",
+    "annualApprox": "연간 약 {amount}",
+    "paid": "지출",
+    "received": "회수"
   },
   "timeline": {
     "paid": "납부 완료",

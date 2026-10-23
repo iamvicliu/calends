@@ -35,7 +35,13 @@
     "rangeTo": "終了",
     "showAllPeriods": "全 {count} 期間を表示",
     "vacancy": "空席",
-    "departed": "退席 {count} 人"
+    "departed": "退席 {count} 人",
+    "hidePersonal": "個人情報を隠す",
+    "showPersonal": "個人情報を表示",
+    "hiddenMember": "非表示のメンバー",
+    "addMember": "メンバーを追加",
+    "vacancyTrack": "現在空席",
+    "copyFailed": "画像をコピーできませんでした"
   },
   "contact": {
     "via": {
@@ -289,7 +295,11 @@
     "yearNet": "年間の収支",
     "costIncome": "費用 {cost}\n収入 {income}",
     "noneOwed": "未払いなし",
-    "since": "{date}から"
+    "since": "{date}から",
+    "profit": "損益",
+    "annualApprox": "年間約 {amount}",
+    "paid": "支出",
+    "received": "回収"
   },
   "timeline": {
     "paid": "支払済み",

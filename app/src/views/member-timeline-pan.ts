@@ -1,6 +1,17 @@
 import { useEffect, useRef } from 'react';
 import type { carpoolTimeline } from '../../../shared/carpool-timeline.ts';
 
+/** 只有完整放得下的标签才显示；平移、尺寸变化及 PNG 布局都重新测量。 */
+export function fitTimelineLabels(root: HTMLElement) {
+  root.querySelectorAll<HTMLElement>('.mt-axis').forEach((axis) => {
+    const bounds = axis.getBoundingClientRect();
+    axis.querySelectorAll<HTMLElement>('.mt-mark').forEach((mark) => {
+      const box = mark.getBoundingClientRect();
+      mark.style.visibility = box.left >= bounds.left && box.right <= bounds.right ? 'visible' : 'hidden';
+    });
+  });
+}
+
 type Window = ReturnType<typeof carpoolTimeline>;
 
 /** 日期偏移共享给各行；滚轮和拖拽只在一帧中写一次 CSS，不触发 React 渲染。 */
@@ -13,6 +24,7 @@ export function attachTimelinePan(root: HTMLElement, win: Window) {
     frame = 0;
     root.style.setProperty('--mt-x', `${(-offset / win.totalDays) * 100}%`);
     root.dataset.mtLeft = String(offset > 0.01);
+    fitTimelineLabels(root);
   };
   const move = (next: number) => {
     offset = Math.max(0, Math.min(win.maxOffset, next));
@@ -20,6 +32,12 @@ export function attachTimelinePan(root: HTMLElement, win: Window) {
   };
   root.style.setProperty('--mt-scale', `${(win.totalDays / win.viewDays) * 100}%`);
   paint();
+  const observer = new ResizeObserver(() => {
+    if (!frame) frame = requestAnimationFrame(paint);
+  });
+  observer.observe(root);
+  let disposed = false;
+  void document.fonts.ready.then(() => !disposed && paint());
   const viewportOf = (e: Event) => (e.target as Element).closest<HTMLElement>('.mt-viewport');
   const wheel = (e: WheelEvent) => {
     const viewport = viewportOf(e);
@@ -70,6 +88,8 @@ export function attachTimelinePan(root: HTMLElement, win: Window) {
   root.addEventListener('pointercancel', up);
   root.addEventListener('click', click, true);
   return () => {
+    disposed = true;
+    observer.disconnect();
     if (frame) cancelAnimationFrame(frame);
     up();
     root.removeEventListener('wheel', wheel);

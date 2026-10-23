@@ -36,7 +36,13 @@
     "rangeTo": "To",
     "showAllPeriods": "Show all {count} periods",
     "vacancy": "Vacant",
-    "departed": "{count} departed"
+    "departed": "{count} departed",
+    "hidePersonal": "Hide personal details",
+    "showPersonal": "Show personal details",
+    "hiddenMember": "Hidden member",
+    "addMember": "Add member",
+    "vacancyTrack": "Currently vacant",
+    "copyFailed": "Could not copy image"
   },
   "contact": {
     "via": {
@@ -299,7 +305,11 @@
     "yearNet": "Net per year",
     "costIncome": "Cost {cost}\nIncome {income}",
     "noneOwed": "Nobody owes",
-    "since": "Since {date}"
+    "since": "Since {date}",
+    "profit": "Profit / loss",
+    "annualApprox": "About {amount} per year",
+    "paid": "Paid",
+    "received": "Received"
   },
   "timeline": {
     "paid": "Paid",

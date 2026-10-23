@@ -36,7 +36,13 @@
     "rangeTo": "Au",
     "showAllPeriods": "Afficher les {count} périodes",
     "vacancy": "Place libre",
-    "departed": "Départs : {count}"
+    "departed": "Départs : {count}",
+    "hidePersonal": "Masquer les données personnelles",
+    "showPersonal": "Afficher les données personnelles",
+    "hiddenMember": "Membre masqué",
+    "addMember": "Ajouter un membre",
+    "vacancyTrack": "Place libre",
+    "copyFailed": "Impossible de copier l’image"
   },
   "contact": {
     "via": {
@@ -299,7 +305,11 @@
     "yearNet": "Net par an",
     "costIncome": "Coût {cost}\nRecettes {income}",
     "noneOwed": "Personne ne doit rien",
-    "since": "Depuis le {date}"
+    "since": "Depuis le {date}",
+    "profit": "Bénéfice / perte",
+    "annualApprox": "Environ {amount} par an",
+    "paid": "Payé",
+    "received": "Reçu"
   },
   "timeline": {
     "paid": "Payé",

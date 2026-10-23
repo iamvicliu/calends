@@ -36,7 +36,13 @@
     "rangeTo": "Bis",
     "showAllPeriods": "Alle {count} Zeiträume anzeigen",
     "vacancy": "Freier Platz",
-    "departed": "{count} ausgeschieden"
+    "departed": "{count} ausgeschieden",
+    "hidePersonal": "Persönliche Daten ausblenden",
+    "showPersonal": "Persönliche Daten anzeigen",
+    "hiddenMember": "Verstecktes Mitglied",
+    "addMember": "Mitglied hinzufügen",
+    "vacancyTrack": "Derzeit frei",
+    "copyFailed": "Bild konnte nicht kopiert werden"
   },
   "contact": {
     "via": {
@@ -299,7 +305,11 @@
     "yearNet": "Netto pro Jahr",
     "costIncome": "Kosten {cost}\nEinnahmen {income}",
     "noneOwed": "Niemand im Rückstand",
-    "since": "Seit {date}"
+    "since": "Seit {date}",
+    "profit": "Gewinn / Verlust",
+    "annualApprox": "Etwa {amount} pro Jahr",
+    "paid": "Gezahlt",
+    "received": "Erhalten"
   },
   "timeline": {
     "paid": "Bezahlt",

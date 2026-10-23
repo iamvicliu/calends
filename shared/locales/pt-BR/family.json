@@ -36,7 +36,13 @@
     "rangeTo": "Até",
     "showAllPeriods": "Mostrar todos os {count} períodos",
     "vacancy": "Vaga",
-    "departed": "Saídas: {count}"
+    "departed": "Saídas: {count}",
+    "hidePersonal": "Ocultar dados pessoais",
+    "showPersonal": "Mostrar dados pessoais",
+    "hiddenMember": "Membro oculto",
+    "addMember": "Adicionar membro",
+    "vacancyTrack": "Vaga disponível",
+    "copyFailed": "Não foi possível copiar a imagem"
   },
   "contact": {
     "via": {
@@ -299,7 +305,11 @@
     "yearNet": "Líquido por ano",
     "costIncome": "Custo {cost}\nReceita {income}",
     "noneOwed": "Ninguém deve",
-    "since": "Desde {date}"
+    "since": "Desde {date}",
+    "profit": "Lucro / prejuízo",
+    "annualApprox": "Cerca de {amount} por ano",
+    "paid": "Pago",
+    "received": "Recebido"
   },
   "timeline": {
     "paid": "Pago",

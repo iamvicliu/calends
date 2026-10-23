@@ -64,12 +64,12 @@ test('短历史全部展示，空车使用车规则周期，收款起点优先�
   s.share!.collectFrom = today;
   const win = carpoolTimeline(s, today, 3);
   assert.equal(win.end, addDays(addMonths(today, 3), 14));
-  assert.equal(win.start, today);
+  assert.equal(win.start, addMonths(today, -3));
   assert.equal(win.maxOffset, 0);
   assert.equal(win.totalDays, win.viewDays);
   delete s.share!.collectFrom;
-  s.share!.since = '2026-10-01';
-  assert.equal(carpoolTimeline(s, today, 1).start, '2026-10-01');
+  s.share!.since = '2026-06-01';
+  assert.equal(carpoolTimeline(s, today, 1).start, '2026-06-01');
 });
 
 test('首期对齐、免费首期及未来收费周期参与下一期边界', () => {
@@ -88,4 +88,21 @@ test('首期对齐、免费首期及未来收费周期参与下一期边界', ()
 test('不分摊成员没有 future 或 due 段，不把右界拉长到订阅的默认年周期', () => {
   const s = sub([member(), member({ id: 'exempt', exempt: true, billEvery: 12, paidUntil: '2030-01-01' })]);
   assert.equal(carpoolTimeline(s, today, 1).end, '2026-12-14');
+});
+
+test('逾期 1658 天与长期预付同车时，默认窗口仍含今天及前三个月', () => {
+  const overdue = member({ joined: addDays(today, -1658) });
+  const prepaid = member({ id: 'prepaid', paidUntil: '2030-01-31', billEvery: 12 });
+  const win = carpoolTimeline(sub([overdue, prepaid]), today, 1);
+  const left = addDays(win.end, -win.viewDays);
+  assert.ok(win.end >= addMonths(today, 1));
+  assert.ok(left <= addMonths(today, -3));
+  assert.ok(left < today && today < win.end);
+  assert.ok(win.end >= '2031-01-31');
+});
+
+test('短收费周期右侧也至少留出一个月，不丢今天线', () => {
+  const win = carpoolTimeline(sub([member({ joined: today })]), '2026-10-01', 1);
+  assert.ok(win.end >= '2026-11-01');
+  assert.ok(addDays(win.end, -win.viewDays) <= '2026-07-01');
 });

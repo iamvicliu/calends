@@ -15,20 +15,39 @@ import {
   memberCollection,
   memberUnpaidFrom,
 } from '../../../shared/billing.ts';
-import { Fragment, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { carpoolSnapshot } from './carpool-snapshot.ts';
 import { createPortal } from 'react-dom';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
+import { tx } from '../i18n.ts';
+import { chargeValue, convertOn } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
 import { applyCarRule, carRule, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { CardTitle, Amount, Cell, Group, Icon, NameLink, NumInput, Seg, Sheet, StatusPill, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import {
+  CardTitle,
+  Amount,
+  Cell,
+  Group,
+  Icon,
+  IconButton,
+  NameLink,
+  NumInput,
+  Seg,
+  Sheet,
+  StatusPill,
+  SubIcon,
+  tipProps,
+  Toolbar,
+  useWidth,
+} from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
-import { run, saveSub, usePref } from '../store.ts';
+import { run, saveSub, toast, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
 import { carpoolRoster, carpoolTimeline } from '../../../shared/carpool-timeline.ts';
 import { useTimelinePan } from './member-timeline-pan.ts';
@@ -324,6 +343,7 @@ function MemberRows({
   only,
   timeline,
   includeLeft = false,
+  masked = false,
   win,
 }: {
   state: AppState;
@@ -336,6 +356,7 @@ function MemberRows({
   /** 合租详情里在每人下方画时间条（与宽屏表格一致） */
   timeline?: boolean;
   includeLeft?: boolean;
+  masked?: boolean;
   win?: ReturnType<typeof carpoolTimeline>;
 }) {
   const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter(
@@ -367,17 +388,25 @@ function MemberRows({
             }}
           >
             {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
-            <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
+            <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} disabled={ro} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 'var(--fs-2)' }}>
-                <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
-                <span className="text-ellipsis member-label">{d.member.name || t('family.pool.unnamed')}</span>
+                {masked ? (
+                  <span className="car-private-avatar" style={{ width: 28, height: 28 }} />
+                ) : (
+                  <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
+                )}
+                <span className={`text-ellipsis member-label ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
+                  {d.member.name || t('family.pool.unnamed')}
+                </span>
                 {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
               </div>
               <div className="muted member-dates">
                 <span className={`text-ellipsis ${d.periodsOwed > 0 && collection.from <= today ? 'owe' : ''}`}>
                   {copyParts(
                     d.member.exempt
-                      ? (d.member.note ?? t('family.pool.exemptNote'))
+                      ? masked
+                        ? t('family.pool.exemptNote')
+                        : (d.member.note ?? t('family.pool.exemptNote'))
                       : d.member.left && collection.from >= d.member.left
                         ? t('family.pool.leftOn', { date: cnDateAuto(d.member.left, today) })
                         : d.periodsOwed > 0 && collection.from < today
@@ -503,6 +532,7 @@ function MemberTable({
   win,
   expanded,
   onToggle,
+  masked,
 }: {
   state: AppState;
   s: Subscription;
@@ -511,6 +541,7 @@ function MemberTable({
   onMember: (m?: ShareMember, collect?: boolean) => void;
   win: ReturnType<typeof carpoolTimeline>;
   expanded: boolean;
+  masked: boolean;
   onToggle: () => void;
 }) {
   const roster = carpoolRoster(s, today);
@@ -536,7 +567,12 @@ function MemberTable({
         </tr>
       </thead>
       <tbody role="rowgroup">
-        {[...roster.active, ...Array.from({ length: roster.vacancies }, () => null), ...(expanded ? roster.departed : [])].map((m, index) => {
+        {[
+          ...roster.active.filter((m) => !m.exempt),
+          ...Array.from({ length: roster.vacancies }, () => null),
+          ...roster.active.filter((m) => m.exempt),
+          ...(expanded ? roster.departed : []),
+        ].map((m, index) => {
           if (!m) return <Vacancy key={`vacancy-${index}`} ro={ro} onAdd={() => onMember()} table />;
           const st = memberStatus(state, s, m, today);
           const rate = memberFee(state, s, m, today);
@@ -548,7 +584,7 @@ function MemberTable({
               className="car-member-row"
               data-readonly={ro || undefined}
               tabIndex={ro ? undefined : 0}
-              aria-label={m.name || t('family.pool.unnamed')}
+              aria-label={masked ? t('family.sheet.hiddenMember') : m.name || t('family.pool.unnamed')}
               onClick={() => !ro && onMember(m)}
               onKeyDown={(e) => {
                 if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
@@ -560,17 +596,21 @@ function MemberTable({
               <td role="cell">
                 <span
                   className={`car-member-chip ${left ? 'left' : ''}`}
-                  {...tipProps(() => (
-                    <>
-                      <b>{m.name || t('family.pool.unnamed')}</b>
-                      {m.account && m.account !== m.name && <div>{m.account}</div>}
-                      {left && <div>{t('family.pool.leftOn', { date: cnDateFull(m.left!) })}</div>}
-                      {!m.exempt && <div className="muted">{t(followsCar(state, s, m, today) ? 'family.rule.follow' : 'family.rule.custom')}</div>}
-                    </>
-                  ))}
+                  {...(masked
+                    ? {}
+                    : tipProps(() => (
+                        <>
+                          <b>{m.name || t('family.pool.unnamed')}</b>
+                          {m.account && m.account !== m.name && <div>{m.account}</div>}
+                          {left && <div>{t('family.pool.leftOn', { date: cnDateFull(m.left!) })}</div>}
+                          {!m.exempt && <div className="muted">{t(followsCar(state, s, m, today) ? 'family.rule.follow' : 'family.rule.custom')}</div>}
+                        </>
+                      )))}
                 >
-                  <PersonAvatar p={personFor(state, m.personId, m.name)} size={24} />
-                  <span className="text-ellipsis">{m.name || t('family.pool.unnamed')}</span>
+                  {masked ? <span className="car-private-avatar" /> : <PersonAvatar p={personFor(state, m.personId, m.name)} size={24} />}
+                  <span className={`text-ellipsis ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
+                    {m.name || t('family.pool.unnamed')}
+                  </span>
                 </span>
               </td>
               <td role="cell">
@@ -642,7 +682,7 @@ function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void;
     role: table ? 'row' : ro ? undefined : 'button',
     'data-readonly': ro || undefined,
     tabIndex: ro ? undefined : 0,
-    'aria-label': t('family.sheet.vacancy'),
+    'aria-label': t(ro ? 'family.sheet.vacancy' : 'family.sheet.addMember'),
     onClick: () => !ro && onAdd(),
     onKeyDown: (e: React.KeyboardEvent) => {
       if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
@@ -651,10 +691,15 @@ function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void;
       }
     },
   };
-  const chip = <span className="car-member-chip vacancy">{t('family.sheet.vacancy')}</span>;
+  const chip = (
+    <span className="car-member-chip vacancy">
+      <span className="vacancy-label">{t('family.sheet.vacancy')}</span>
+      <span className="vacancy-add">{t('family.sheet.addMember')}</span>
+    </span>
+  );
   const track = (
     <span className="mt-viewport mt-track vacant">
-      <span className="mt-inner" />
+      <span>{t('family.sheet.vacancyTrack')}</span>
     </span>
   );
   return table ? (
@@ -696,6 +741,27 @@ export function CarSheet({
   onOpenSub: () => void;
   onMember: (m?: ShareMember, collect?: boolean) => void;
 }) {
+  const [masked, setMasked] = useState(false);
+  const [copying, setCopying] = useState(false);
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const copyImage = () => {
+    if (!summaryRef.current || copying) return;
+    if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+      toast(t('family.sheet.copyFailed'), true);
+      return;
+    }
+    setCopying(true);
+    const blob = carpoolSnapshot(summaryRef.current);
+    void (async () => {
+      try {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        toast(t('detail.toast.imageCopied'));
+      } catch {
+        toast(t('family.sheet.copyFailed'), true);
+      }
+      setCopying(false);
+    })();
+  };
   const base = state.settings.baseCurrency;
   const sh = s.share!;
   const st = effectiveStatus(s, today);
@@ -705,7 +771,8 @@ export function CarSheet({
   const free = roster.vacancies;
   const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
-  const oweSum = dues.reduce((a, d) => a + toBaseAt(state, d.owed, d.currency), 0);
+  const oweSum = dues.reduce((a, d) => a + convertOn(d.owed, d.currency, base, today, undefined, state.fx), 0);
+  const hasPending = oweSum > 0 || !Number.isFinite(oweSum);
   const fmt = (v: number) => flow(v, base, { compact: true });
   const rule = carRule(state, s, today);
   const [editingRule, setEditingRule] = useState(false);
@@ -722,7 +789,6 @@ export function CarSheet({
     .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), roster.active.filter((m) => groupOf(m) === k).length] as const);
   // 历来所有收款，按这笔钱覆盖的那一期分组（同一期的人排在一起），新的期在前；已退出的成员也保留
   const receipts = sh.members.flatMap((m) => memberCashFlows(m).map((p) => ({ m, p, base: memberFlowValue(state, p) })));
-  const total = receipts.reduce((a, r) => a + r.base, 0);
   /** 期间：两端都在今年只写月日；只要有一端不在今年，两端都带年份，免得看成倒序 */
   // 分组条的区间一律带年份，跨年与不跨年的组格式一致
   const range = (a: string, b: string) => `${cnDateFull(a)} – ${cnDateFull(b)}`;
@@ -757,7 +823,6 @@ export function CarSheet({
     .filter((c) => c.kind !== 'failed')
     .map((c) => ({ c, base: chargeValue(state, c) }))
     .reverse();
-  const outTotal = outs.reduce((a, r) => a + r.base, 0);
   const outYears = [...new Set(outs.map((r) => r.c.date.slice(0, 4)))].map((y) => {
     const list = outs.filter((r) => r.c.date.startsWith(y));
     return { y, list, sum: list.reduce((a, r) => a + r.base, 0) };
@@ -780,104 +845,139 @@ export function CarSheet({
   return (
     <Sheet title={t('family.sheet.title')} onClose={onClose}>
       <div className="stack">
-        {/* 页头：名称（点开订阅）+ 一行概况；右侧直接显示收款规则并可修改 */}
-        <div className="ld-head">
-          <SubIcon sub={s} size={52} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name text-ellipsis">
-              <NameLink onClick={onOpenSub}>{s.name}</NameLink>
+        <div className="stack car-summary" ref={summaryRef}>
+          {/* 页头：名称（点开订阅）+ 一行概况；右侧直接显示收款规则并可修改 */}
+          <div className="ld-head">
+            <SubIcon sub={s} size={52} proxied />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="ph-name text-ellipsis">
+                <NameLink onClick={onOpenSub}>{s.name}</NameLink>
+              </div>
+              <div className="muted ph-meta">
+                {copyParts(
+                  [
+                    `${money(s.price, s.currency)} ${cycleLabel(s.cycle)}`,
+                    stopped ? '' : next ? t('family.pool.next', { date: cnDate(next) }) : '',
+                    t('family.sheet.seatsVal', { used: roster.active.length, total: sh.seats }),
+                  ]
+                    .filter(Boolean)
+                    .join('\n'),
+                )}
+              </div>
             </div>
-            <div className="muted ph-meta">
-              {copyParts(
-                [
-                  `${money(s.price, s.currency)} ${cycleLabel(s.cycle)}`,
-                  stopped ? '' : next ? t('family.pool.next', { date: cnDate(next) }) : '',
-                  t('family.sheet.seatsVal', { used: roster.active.length, total: sh.seats }),
-                ]
-                  .filter(Boolean)
-                  .join('\n'),
+            <div className="car-sheet-actions" data-snapshot-hide>
+              <IconButton
+                aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
+                aria-pressed={masked}
+                onClick={() => setMasked(!masked)}
+              >
+                {masked ? <EyeOff size={18} /> : <Eye size={18} />}
+              </IconButton>
+              <IconButton aria-label={t('detail.action.copyImage')} disabled={copying} onClick={copyImage}>
+                <Icon name="copy" />
+              </IconButton>
+              {stopped ? (
+                <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+              ) : (
+                <button className="btn car-rule-btn" disabled={ro} onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
+                  {perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
+                  {!ro && <Icon name="right" size={14} />}
+                </button>
               )}
             </div>
           </div>
-          {stopped ? (
-            <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
-          ) : (
-            <button className="btn car-rule-btn" disabled={ro} onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
-              {perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
-              {!ro && <Icon name="right" size={14} />}
-            </button>
-          )}
-        </div>
 
-        {/* 指标条：一张卡里三格，标签 / 数字 / 说明三层 */}
-        <div className="car-strip">
-          <div>
-            <small>{t('family.strip.yearNet')}</small>
-            <b className={profit >= 0 ? 'done' : 'loss'}>{fmt(profit)}</b>
-            <span>{copyParts(t('family.strip.costIncome', { cost: fmt(-book.yearCost), income: fmt(book.yearIncome) }))}</span>
+          <div className="car-strip" style={{ gridTemplateColumns: `repeat(${hasPending ? 4 : 3}, minmax(0, 1fr))` }}>
+            <div>
+              <small>{t('family.strip.paid')}</small>
+              <b>{fmt(-book.paid)}</b>
+              <span aria-hidden="true">&nbsp;</span>
+            </div>
+            <div>
+              <small>{t('family.strip.received')}</small>
+              <b className={book.received > 0 ? 'done' : undefined}>{fmt(book.received)}</b>
+              <span aria-hidden="true">&nbsp;</span>
+            </div>
+            <div>
+              <small>{t('family.strip.profit')}</small>
+              <b className={actual > 0 ? 'done' : actual < 0 ? 'loss' : undefined}>{fmt(actual)}</b>
+              <span>{tx('family.strip.annualApprox', { amount: <span className="nowrap">{fmt(profit)}</span> })}</span>
+            </div>
+            {hasPending && (
+              <div>
+                <small>{t('family.pool.owed')}</small>
+                <b className="warn">{money(oweSum, base, { compact: true })}</b>
+                <span>{t('family.pool.owedSub', { count: owe })}</span>
+              </div>
+            )}
           </div>
-          <div>
-            <small>{t('family.pool.owed')}</small>
-            <b className={owe ? 'warn' : ''}>{money(oweSum, base, { compact: true })}</b>
-            <span>{owe ? t('family.pool.owedSub', { count: owe }) : t('family.strip.noneOwed')}</span>
-          </div>
-          <div>
-            <small>{t('family.facts.sinceNone')}</small>
-            {book.hasRecords ? <b className={actual >= 0 ? 'done' : 'loss'}>{fmt(actual)}</b> : <b>{fmt(-book.paid)}</b>}
-            <span>{book.hasRecords ? (book.since ? t('family.strip.since', { date: cnDateFull(book.since) }) : '') : t('family.sheet.noReceiptsYet')}</span>
-          </div>
-        </div>
 
-        <div className="car-sheet-sec row">
-          <CardTitle>{t('family.sheet.members')}</CardTitle>
-          {!ro && free > 0 && !stopped && (
-            <button className="btn tinted" onClick={() => onMember()}>
-              <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
-            </button>
-          )}
-        </div>
-        <div className="car-members" ref={timelineRef}>
-          <MemberTable
-            state={state}
-            s={s}
-            today={today}
-            ro={ro}
-            onMember={onMember}
-            win={win}
-            expanded={departedOpen}
-            onToggle={() => setDepartedOpen(!departedOpen)}
-          />
-          <div className="car-member-cards">
-            <TimelineAxis win={win} />
-            {memberGroups.map(([key, label, n]) => (
-              <div key={key} className="car-sheet-members">
-                <div className="car-group-head">
-                  {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
+          <div className="car-sheet-sec row">
+            <CardTitle>{t('family.sheet.members')}</CardTitle>
+          </div>
+          <div className="car-members" ref={timelineRef}>
+            <MemberTable
+              state={state}
+              s={s}
+              today={today}
+              ro={ro}
+              onMember={onMember}
+              win={win}
+              masked={masked}
+              expanded={departedOpen}
+              onToggle={() => setDepartedOpen(!departedOpen)}
+            />
+            <div className="car-member-cards">
+              <TimelineAxis win={win} />
+              {memberGroups
+                .filter(([key]) => key !== 'exempt')
+                .map(([key, label, n]) => (
+                  <div key={key} className="car-sheet-members">
+                    <div className="car-group-head">
+                      {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
+                    </div>
+                    <MemberRows
+                      state={state}
+                      s={s}
+                      today={today}
+                      ro={ro}
+                      onMember={onMember}
+                      only={(m) => groupOf(m) === key}
+                      masked={masked}
+                      timeline
+                      win={win}
+                    />
+                  </div>
+                ))}
+              {Array.from({ length: free }, (_, i) => (
+                <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
+              ))}
+              {roster.active.some((m) => m.exempt) && (
+                <div className="car-sheet-members">
+                  <div className="car-group-head">{t('family.pool.exempt')}</div>
+                  <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
                 </div>
-                <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} timeline win={win} />
-              </div>
-            ))}
-            {Array.from({ length: free }, (_, i) => (
-              <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
-            ))}
-            {departedOpen && (
-              <div className="car-sheet-members">
-                <MemberRows
-                  state={state}
-                  s={s}
-                  today={today}
-                  ro={ro}
-                  onMember={onMember}
-                  only={(m) => !!m.left && m.left <= today}
-                  includeLeft
-                  timeline
-                  win={win}
-                />
-              </div>
-            )}
-            {roster.departed.length > 0 && (
-              <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
-            )}
+              )}
+              {departedOpen && (
+                <div className="car-sheet-members">
+                  <MemberRows
+                    state={state}
+                    s={s}
+                    today={today}
+                    ro={ro}
+                    onMember={onMember}
+                    only={(m) => !!m.left && m.left <= today}
+                    includeLeft
+                    masked={masked}
+                    timeline
+                    win={win}
+                  />
+                </div>
+              )}
+              {roster.departed.length > 0 && (
+                <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
+              )}
+            </div>
           </div>
         </div>
 
@@ -892,10 +992,6 @@ export function CarSheet({
               ['out', t('family.sheet.tabOut', { count: outs.length })],
             ]}
           />
-          <span className="car-total">
-            <small>{t(tab === 'in' ? 'family.facts.receivedAll' : 'family.facts.paidAll')}</small>
-            <b className={tab === 'in' && total > 0 ? 'green' : undefined}>{tab === 'in' ? fmt(total) : fmt(-outTotal)}</b>
-          </span>
         </div>
         {tab === 'out' ? (
           <div className="ld-table car-receipts car-receipts-out">
@@ -954,7 +1050,7 @@ export function CarSheet({
                   type="button"
                   className="ld-row car-period"
                   aria-expanded={openIn.has(g.key)}
-                  aria-label={[g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) }), g.notes.common]
+                  aria-label={[g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) }), masked ? '' : g.notes.common]
                     .filter(Boolean)
                     .join('\n')}
                   onClick={() => toggleGroup(g.key, openIn, setOpenIn)}
@@ -968,9 +1064,11 @@ export function CarSheet({
                   g.list.map(({ m, p, base: v }, i) => (
                     <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
                       <span>
-                        <b>{m.name || t('family.pool.unnamed')}</b>
+                        <b className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
+                          {m.name || t('family.pool.unnamed')}
+                        </b>
                         {p.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
-                        {g.notes.rows[i] && <small>{copyParts(g.notes.rows[i])}</small>}
+                        {!masked && g.notes.rows[i] && <small>{copyParts(g.notes.rows[i])}</small>}
                       </span>
                       {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
                       <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>

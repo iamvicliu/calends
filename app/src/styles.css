@@ -10010,7 +10010,7 @@ img.mm-flag {
   height: 100%;
   transform: translateX(var(--mt-x, 0%));
 }
-.car-members[data-mt-left='true'] .mt-viewport {
+.car-members[data-mt-left='true'] .mt-viewport:not(.vacant) {
   mask-image: linear-gradient(to right, transparent, var(--gray-12) 14px);
 }
 .car-members[data-mt-dragging='true'] .mt-viewport {
@@ -10093,4 +10093,89 @@ img.mm-flag {
     grid-column: 1 / -1;
     border-top: var(--hairline) solid var(--sep);
   }
+}
+
+.car-sheet-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.car-private {
+  display: inline-block;
+  color: transparent !important;
+  text-shadow: none;
+  border-radius: var(--radius-sm);
+  background: repeating-conic-gradient(var(--gray-6) 0% 25%, var(--gray-8) 0% 50%) 0 / 8px 8px;
+  user-select: none;
+}
+.car-private-avatar {
+  display: inline-block;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--gray-6);
+}
+.car-vacancy .mt-track.vacant {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h-md);
+  color: var(--label-3);
+  font-size: var(--fs-1);
+  cursor: inherit;
+}
+.vacancy-add {
+  display: none;
+}
+.car-vacancy:not([data-readonly]):is(:hover, :focus-visible) {
+  background: var(--fill-2);
+}
+.car-vacancy:not([data-readonly]):is(:hover, :focus-visible) .vacancy-label {
+  display: none;
+}
+.car-vacancy:not([data-readonly]):is(:hover, :focus-visible) .vacancy-add {
+  display: inline;
+}
+.car-members[data-mt-left='true'] .mt-axis {
+  mask-image: none;
+}
+.car-snapshot {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 1000px;
+  padding: 28px;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+}
+@media (max-width: 680px) {
+  .car-summary > .ld-head {
+    flex-wrap: wrap;
+  }
+  .car-summary .car-sheet-actions {
+    flex: 1 0 100%;
+  }
+}
+
+.car-snapshot .car-strip > div {
+  padding: 16px 20px;
+}
+.car-snapshot .car-strip b {
+  font-size: var(--fs-4);
+}
+
+.car-member-chip.vacancy {
+  white-space: nowrap;
+}
+.car-snapshot .car-member-table {
+  grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 0.9fr) minmax(200px, 2fr) minmax(90px, 0.8fr);
+}
+.car-summary .car-strip b {
+  white-space: nowrap;
+}
+.car-summary .car-strip > div {
+  grid-template-rows: auto auto 1fr;
 }

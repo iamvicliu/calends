@@ -1,0 +1,215 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { parsers } from 'prettier/plugins/typescript';
+import { transformSync } from 'oxc-transform-react';
+import * as React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import * as billing from '../shared/billing.ts';
+import * as carpool from '../shared/carpool.ts';
+import * as fx from '../shared/fx.ts';
+import * as format from '../shared/format.ts';
+import { carpoolRoster, carpoolTimeline } from '../shared/carpool-timeline.ts';
+import { DEFAULT_SETTINGS } from '../shared/types.ts';
+import { flatten, setLocale, t } from '../shared/i18n.ts';
+
+const source = readFileSync(new URL('../app/src/views/Carpool.tsx', import.meta.url), 'utf8');
+const ast = await parsers.typescript.parse(source);
+const nodes = ast.body.map((n) => n.declaration ?? n);
+const locales = ['family', 'detail', 'calendar'].reduce((all, ns) => {
+  return { ...all, ...flatten(ns, JSON.parse(readFileSync(new URL(`../shared/locales/en/${ns}.json`, import.meta.url), 'utf8'))) };
+}, {});
+setLocale('en', [locales]);
+const today = '2026-10-23';
+const m = (id, extra = {}) => ({ id, name: id, joined: '2026-10-01', share: 10, fee: 10, feeCurrency: 'CNY', billEvery: 1, ...extra });
+const sub = (members, seats = 4) => ({
+  id: 's',
+  name: 'Fictional plan',
+  price: 30,
+  currency: 'CNY',
+  start: '2026-10-01',
+  cycle: { unit: 'month', every: 1 },
+  status: 'active',
+  tags: [],
+  category: '',
+  share: { role: 'owner', seats, since: '2026-10-01', rule: { billEvery: 1, fee: 10, currency: 'CNY' }, members },
+});
+const state = {
+  subscriptions: [],
+  settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+  fx: { base: 'USD', rates: { CNY: 7, USD: 1 }, fetchedAt: today },
+  methods: [],
+};
+const passthrough = ({ children }) => React.createElement('span', null, children);
+const noop = () => null;
+function compile(names, extra = {}) {
+  const dependencies = {
+    React,
+    Fragment: React.Fragment,
+    useState: React.useState,
+    useRef: React.useRef,
+    ...billing,
+    ...carpool,
+    ...format,
+    ...fx,
+    carpoolRoster,
+    carpoolTimeline,
+    t,
+    copyParts: (text) => text,
+    tx: (key, parts) => React.createElement(React.Fragment, null, t(key, { amount: '' }), parts.amount),
+    perBill: (key, months, values = {}) => t(key, { ...values, count: months }),
+    personFor: (st, id, name) => ({ id, name }),
+    PersonAvatar: () => React.createElement('i', { 'data-avatar': true }),
+    memberStatus: () => ({ owe: true, late: 0, owed: '10', gone: false }),
+    MemberTimeline: noop,
+    TimelineAxis: noop,
+    DepartedToggle: noop,
+    MemberTable: noop,
+    MemberRows: noop,
+    Sheet: passthrough,
+    NameLink: passthrough,
+    CardTitle: passthrough,
+    StatusPill: passthrough,
+    SubIcon: noop,
+    Icon: noop,
+    IconButton: noop,
+    Eye: noop,
+    EyeOff: noop,
+    Seg: noop,
+    useTimelinePan: noop,
+    tipProps: () => ({}),
+    ...extra,
+  };
+  const functions = names.map((name) => source.slice(...nodes.find((n) => n.type === 'FunctionDeclaration' && n.id.name === name).range)).join('\n');
+  const compiled = transformSync('Carpool.tsx', functions, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  assert.equal(compiled.fatal, false);
+  return new Function(...Object.keys(dependencies), `const RECENT_PERIODS=4; ${compiled.code}; return {${names.join(',')}};`)(...Object.values(dependencies));
+}
+
+test('空位整行支持点击与键盘；只读空位不会打开编辑器', () => {
+  const { Vacancy } = compile(['Vacancy']);
+  let opened = 0;
+  for (const table of [false, true]) {
+    const editable = Vacancy({ ro: false, table, onAdd: () => opened++ });
+    editable.props.onClick();
+    editable.props.onKeyDown({ key: 'Enter', target: null, currentTarget: null, preventDefault() {} });
+    const readonly = Vacancy({ ro: true, table, onAdd: () => opened++ });
+    readonly.props.onClick();
+    readonly.props.onKeyDown({ key: ' ', target: null, currentTarget: null, preventDefault() {} });
+    assert.equal(readonly.props.tabIndex, undefined);
+    assert.match(renderToStaticMarkup(editable), /Currently vacant/);
+  }
+  assert.equal(opened, 4);
+});
+
+test('详情按分摊成员、空位、不分摊、已下车排序；满员没有添加入口', () => {
+  const { MemberTable } = compile(['MemberTable', 'Vacancy']);
+  const s = sub([m('exempt', { exempt: true }), m('departed', { left: today }), m('paying')], 3);
+  const props = { state, s, today, win: carpoolTimeline(s, today, 1), ro: false, expanded: true, masked: false, onMember() {}, onToggle() {} };
+  const html = renderToStaticMarkup(React.createElement(MemberTable, props));
+  assert.ok(html.indexOf('aria-label="paying"') < html.indexOf('class="car-vacancy'));
+  assert.ok(html.indexOf('class="car-vacancy') < html.indexOf('aria-label="exempt"'));
+  assert.ok(html.indexOf('aria-label="exempt"') < html.indexOf('aria-label="departed"'));
+  const full = { ...s, share: { ...s.share, seats: 2 } };
+  assert.doesNotMatch(renderToStaticMarkup(React.createElement(MemberTable, { ...props, s: full })), /car-vacancy|Add member/);
+});
+
+test('打码移除真实头像、个人悬停提示和读屏称呼；手机自由备注也隐藏', () => {
+  const tips = [];
+  const { MemberTable, MemberRows } = compile(['MemberTable', 'MemberRows', 'Vacancy'], {
+    tipProps: (render) => {
+      tips.push(render);
+      return {};
+    },
+  });
+  const s = sub([m('Private Name', { account: 'private@example.test', exempt: true, note: 'Private Note' })], 1);
+  const props = { state, s, today, win: carpoolTimeline(s, today, 1), ro: false, expanded: false, onMember() {}, onToggle() {} };
+  const open = renderToStaticMarkup(React.createElement(MemberTable, { ...props, masked: false }));
+  assert.match(open, /data-avatar/);
+  assert.match(renderToStaticMarkup(tips[0]()), /private@example.test/);
+  tips.length = 0;
+  const masked = renderToStaticMarkup(React.createElement(MemberTable, { ...props, masked: true }));
+  assert.equal(tips.length, 0);
+  assert.doesNotMatch(masked, /data-avatar|aria-label="Private Name"|private@example.test/);
+  assert.match(masked, /car-private.*?aria-hidden="true"/);
+  const mobile = renderToStaticMarkup(React.createElement(MemberRows, { ...props, masked: true }));
+  assert.doesNotMatch(mobile, /Private Note|data-avatar/);
+});
+
+test('详情复用累计实付、净收款与盈亏；待收为零时只呈现三格且不重复累计总额', () => {
+  const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy']);
+  for (const settled of [false, true]) {
+    const s = sub([
+      m('payer', {
+        paidUntil: settled ? '2026-12-31' : undefined,
+        payments: [{ date: '2026-10-01', until: '2026-12-31', amount: 100, currency: 'CNY' }],
+        leaveRefund: { date: today, amount: 20, currency: 'CNY' },
+      }),
+    ]);
+    const book = carpool.carLedger(state, s, today);
+    const html = renderToStaticMarkup(React.createElement(CarSheet, { state, s, today, ro: false, book, onClose() {}, onOpenSub() {}, onMember() {} }));
+    assert.match(html, new RegExp(`grid-template-columns:repeat\\(${settled ? 3 : 4},`));
+    assert.equal((html.match(/<small>Paid<\/small>/g) ?? []).length, 1);
+    assert.equal((html.match(/<small>Received<\/small>/g) ?? []).length, 1);
+    assert.match(html, new RegExp(format.flow(book.received, 'CNY', { compact: true }).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(html, new RegExp(format.flow(-book.net, 'CNY', { compact: true }).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(html, /class="done"/);
+  }
+});
+
+test('零盈亏保持中性，亏损为红色，缺失汇率不隐藏尚未确认的待收', () => {
+  const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy']);
+  const s = sub([m('payer')]);
+  const render = (st, book) =>
+    renderToStaticMarkup(React.createElement(CarSheet, { state: st, s, today, ro: false, book, onClose() {}, onOpenSub() {}, onMember() {} }));
+  const book = carpool.carLedger(state, s, today);
+  assert.match(render(state, book), /class="loss"/);
+  assert.doesNotMatch(render(state, { ...book, net: 0 }), /class="loss"|class="done"/);
+  const unavailable = { ...state, settings: { ...state.settings, baseCurrency: 'USD' }, fx: { base: 'USD', rates: {}, fetchedAt: today } };
+  const html = render(unavailable, carpool.carLedger(unavailable, s, today));
+  assert.match(html, /grid-template-columns:repeat\(4,/);
+  assert.match(html, /—/);
+});
+
+test('复制按钮交付 PNG Promise，成功及剪贴板拒绝均通过本地化 toast 反馈', async () => {
+  const s = sub([]);
+  for (const reject of [false, true]) {
+    const image = new Blob(['fictional PNG'], { type: 'image/png' });
+    const source = {};
+    let written;
+    let notify;
+    const done = new Promise((resolve) => {
+      notify = resolve;
+    });
+    const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy'], {
+      useRef: () => ({ current: source }),
+      useState: (value) => [value, () => {}],
+      navigator: {
+        clipboard: {
+          write: async (items) => {
+            written = items;
+            if (reject) throw new Error('Clipboard denied');
+          },
+        },
+      },
+      ClipboardItem: function ClipboardItem(data) {
+        return { data };
+      },
+      carpoolSnapshot: async (el) => {
+        assert.equal(el, source);
+        return image;
+      },
+      toast: (text, error = false) => notify({ text, error }),
+    });
+    const tree = CarSheet({ state, s, today, ro: false, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {}, onMember() {} });
+    const find = (node) => {
+      if (!node || typeof node !== 'object') return undefined;
+      if (node.props?.['aria-label'] === t('detail.action.copyImage')) return node;
+      return React.Children.toArray(node.props?.children).map(find).find(Boolean);
+    };
+    find(tree).props.onClick();
+    const feedback = await done;
+    assert.equal(await written[0].data['image/png'], image);
+    assert.deepEqual(feedback, { text: t(reject ? 'family.sheet.copyFailed' : 'detail.toast.imageCopied'), error: reject });
+  }
+});
