@@ -815,11 +815,13 @@ test('wallet cards keep the main-branch physical-card design with pointer tilt a
   assert.match(bodies('.paycard::after'), /var\(--mx, 50%\) var\(--my, 50%\)/);
   assert.match(bodies('.paycard:hover::after'), /opacity: 1/);
   assert.match(bodies('.wallet-grid.dragging .paycard::after'), /opacity: 0/);
-  assert.match(bodies('.pc-chip'), /linear-gradient\(135deg, #f1e3b5, #c4a462\)/);
   const wallet = sources.find(([file]) => file === 'views/Wallet.tsx')[2];
   assert.match(wallet, /'--card-bg': m\.color \|\| KIND_BG\[m\.kind\]/);
   assert.match(wallet, /setProperty\('--rx'/);
   assert.match(wallet, /setProperty\('--mx'/);
+  // 银行卡芯片画出触点分区，而不是纯色块
+  assert.match(wallet, /function CardChip\(\)/);
+  assert.match(wallet, /<rect x="12" y="8" width="12" height="11"/);
 });
 
 test('connection terminals keep theme-independent dark surfaces and light text', () => {

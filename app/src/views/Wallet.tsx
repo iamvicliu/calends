@@ -2,7 +2,7 @@ import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
@@ -227,7 +227,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
         </div>
         {m.network ? <NetworkMark network={m.network} height={26} /> : <span className="pc-ccy">{m.currency}</span>}
       </div>
-      {CARD_KINDS.includes(m.kind) && <div className="pc-chip" />}
+      {CARD_KINDS.includes(m.kind) && <CardChip />}
       <div className="pc-foot">
         <div>
           {label && <div className="o">{label}</div>}
@@ -942,5 +942,36 @@ function LogoField({ f, up }: { f: PaymentMethod; up: (p: Partial<PaymentMethod>
         </Cell>
       )}
     </>
+  );
+}
+
+/**
+ * 银行卡芯片：金属金色底 + 触点分区（中间焊盘、左右各三格、上下引线）+ 一道斜向高光，
+ * 线条用深金色细线，尺寸由 .pc-chip 决定、随卡片缩放
+ */
+function CardChip() {
+  const id = useId().replace(/:/g, '');
+  return (
+    <svg className="pc-chip" viewBox="0 0 36 27" aria-hidden="true">
+      <defs>
+        <linearGradient id={`${id}g`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#f6e7b8" />
+          <stop offset="0.45" stopColor="#dcbf78" />
+          <stop offset="0.7" stopColor="#c9a65a" />
+          <stop offset="1" stopColor="#e9d39a" />
+        </linearGradient>
+        <linearGradient id={`${id}h`} x1="0" y1="0" x2="1" y2="0.6">
+          <stop offset="0.25" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.45" stopColor="#fff" stopOpacity="0.55" />
+          <stop offset="0.6" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <rect x="0.4" y="0.4" width="35.2" height="26.2" rx="5" fill={`url(#${id}g)`} stroke="rgba(120,90,20,0.5)" strokeWidth="0.6" />
+      <g fill="none" stroke="rgba(110,80,20,0.55)" strokeWidth="0.6" strokeLinecap="round">
+        <rect x="12" y="8" width="12" height="11" rx="2.2" />
+        <path d="M18 0.6V8M18 19v7.4M0.6 9.5H12M0.6 17.5H12M24 9.5h11.4M24 17.5h11.4M12 13.5H0.6M24 13.5h11.4" />
+      </g>
+      <rect x="0.4" y="0.4" width="35.2" height="26.2" rx="5" fill={`url(#${id}h)`} />
+    </svg>
   );
 }
