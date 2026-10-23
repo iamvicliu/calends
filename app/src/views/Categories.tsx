@@ -234,7 +234,6 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
             aria-label={t('settings.cat.name')}
             autoFocus={!cat}
             onChange={(e) => setName((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && save()}
           />
         </div>
         <Group title={t('settings.cat.color')}>

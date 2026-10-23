@@ -61,5 +61,26 @@
     "generate": "Criar link privado do calendário",
     "generated": "Link do calendário criado",
     "note": "O link contém um token privado — quem tiver o link pode ver suas datas de cobrança. Se ele vazar, toque em Redefinir link para revogá-lo."
+  },
+  "shortcuts": {
+    "title": "Atalhos de teclado",
+    "global": "Global",
+    "page": "Página atual",
+    "forms": "Diálogos e formulários",
+    "calendar": "Calendário",
+    "search": "Abrir busca",
+    "sidebar": "Alternar barra lateral",
+    "new": "Nova assinatura",
+    "navigate": "Trocar páginas na ordem da barra lateral",
+    "help": "Mostrar atalhos",
+    "pageSearch": "Focar a busca da página ou abrir a busca global",
+    "edit": "Editar a assinatura aberta e voltar aos detalhes",
+    "enter": "Enviar o formulário mais próximo de um campo de uma linha",
+    "submit": "Enviar o formulário mais próximo de qualquer foco",
+    "close": "Fechar o diálogo ou seletor superior",
+    "confirm": "Ativar o botão de confirmar ou cancelar em foco",
+    "months": "Mês anterior / seguinte (ano na visão anual)",
+    "today": "Ir para hoje",
+    "hint": "Atalhos globais de uma tecla pausam durante a digitação ou com uma camada aberta. Feche os seletores antes de enviar. Em áreas de texto, Enter insere uma nova linha."
   }
 }

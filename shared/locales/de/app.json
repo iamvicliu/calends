@@ -61,5 +61,26 @@
     "generate": "Privaten Kalenderlink erstellen",
     "generated": "Kalenderlink erstellt",
     "note": "Der Link enthält ein privates Token – wer ihn hat, sieht deine Abbuchungstermine. Falls er bekannt wird, tippe auf „Link zurücksetzen“, um ihn ungültig zu machen."
+  },
+  "shortcuts": {
+    "title": "Tastenkürzel",
+    "global": "Global",
+    "page": "Aktuelle Seite",
+    "forms": "Dialoge und Formulare",
+    "calendar": "Kalender",
+    "search": "Suche öffnen",
+    "sidebar": "Seitenleiste umschalten",
+    "new": "Neues Abonnement",
+    "navigate": "Seiten in Seitenleistenreihenfolge wechseln",
+    "help": "Tastenkürzel anzeigen",
+    "pageSearch": "Seitensuche fokussieren oder globale Suche öffnen",
+    "edit": "Offenes Abonnement bearbeiten; danach zu den Details zurückkehren",
+    "enter": "Nächstes Formular aus einem einzeiligen Feld absenden",
+    "submit": "Nächstes Formular unabhängig vom Fokus absenden",
+    "close": "Obersten Dialog oder Auswahl schließen",
+    "confirm": "Fokussierte Bestätigungs- oder Abbrechen-Schaltfläche ausführen",
+    "months": "Voriger / nächster Monat (Jahr in Jahresansicht)",
+    "today": "Zu heute wechseln",
+    "hint": "Globale Einzeltasten sind beim Tippen und bei geöffneten Overlays ausgesetzt. Formulare lassen sich erst nach Schließen der Auswahl absenden. In Textbereichen fügt Enter einen Zeilenumbruch ein."
   }
 }

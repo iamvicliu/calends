@@ -1,3 +1,4 @@
+import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { useId, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { addDays, addMonths, nextCharge, phaseSubs } from '../../../shared/billing.ts';
@@ -187,12 +188,14 @@ export function ChangePanel({
                 content: (
                   <div
                     className="change-form h-price-editor"
+                    data-submit=""
                     onBlur={(e) => {
                       if (!pointError && !e.currentTarget.contains(e.relatedTarget)) setPoint(null);
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+                      if (sheetSubmitKey(e.nativeEvent) && !popupOpen(e.currentTarget.ownerDocument)) {
                         e.preventDefault();
+                        e.stopPropagation();
                         if (!pointError) setPoint(null);
                       }
                     }}
@@ -258,7 +261,7 @@ export function ChangePanel({
         )}
       </div>
       {mode && (
-        <div className="change-form">
+        <div className="change-form" data-submit=".change-actions .btn.primary">
           <label>
             {t(mode === 'price' ? 'editor.change.priceDate' : mode === 'switch' ? 'editor.change.switchDate' : 'editor.change.resumeDate')}
             <DatePicker

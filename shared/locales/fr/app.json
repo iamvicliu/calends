@@ -61,5 +61,26 @@
     "generate": "Créer un lien de calendrier privé",
     "generated": "Lien de calendrier créé",
     "note": "Le lien contient un jeton privé : toute personne qui l’a peut voir vos échéances. En cas de fuite, touchez Réinitialiser le lien pour le révoquer."
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "global": "Général",
+    "page": "Page actuelle",
+    "forms": "Dialogues et formulaires",
+    "calendar": "Calendrier",
+    "search": "Ouvrir la recherche",
+    "sidebar": "Afficher ou masquer la barre latérale",
+    "new": "Nouvel abonnement",
+    "navigate": "Changer de page selon l’ordre de la barre latérale",
+    "help": "Afficher les raccourcis",
+    "pageSearch": "Activer la recherche de la page, sinon la recherche globale",
+    "edit": "Modifier l’abonnement ouvert puis revenir aux détails",
+    "enter": "Envoyer le formulaire le plus proche depuis un champ sur une ligne",
+    "submit": "Envoyer le formulaire le plus proche, quel que soit le focus",
+    "close": "Fermer le dialogue ou le sélecteur au premier plan",
+    "confirm": "Activer le bouton de confirmation ou d’annulation ciblé",
+    "months": "Mois précédent / suivant (année en vue annuelle)",
+    "today": "Aller à aujourd’hui",
+    "hint": "Les raccourcis globaux à une touche sont désactivées pendant la saisie ou lorsqu’une fenêtre est ouverte. Fermez les sélecteurs avant l’envoi. Dans une zone de texte, Entrée ajoute une ligne."
   }
 }

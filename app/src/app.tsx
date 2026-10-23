@@ -1,3 +1,5 @@
+import { commandLabel, focusPageSearch, pageShortcut, preventBrowserSave } from './keyboard.ts';
+import { KeyboardHelp } from './components/KeyboardHelp.tsx';
 import { isPasskeyCancellation } from './passkey-autofill.ts';
 import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
@@ -228,7 +230,7 @@ function Sidebar({
       <button className="side-item" onClick={onSearch}>
         <Icon name="search" />
         <span>{t('app.sidebar.search')}</span>
-        <kbd>⌘K</kbd>
+        <kbd>{commandLabel()}K</kbd>
       </button>
       <div className="side-gap" />
       {navOf(state.settings).map((n) => (
@@ -434,6 +436,14 @@ function App() {
   const [review, setReview] = useState(false);
   const [ics, setIcs] = useState(false);
   const [palette, setPalette] = useState(false);
+  const [keyboardHelp, setKeyboardHelp] = useState(false);
+  const editFromDetail = () => {
+    const sub = state?.subscriptions.find((s) => s.id === viewId);
+    if (!sub || state?.readonly) return;
+    setBackTo(sub.id);
+    setViewId(null);
+    setEditing(sub);
+  };
   const [collapsedPref, setCollapsedPref] = usePref<'0' | '1'>('sidebar-collapsed', '0', (v): v is '0' | '1' => v === '0' || v === '1');
   const collapsed = collapsedPref === '1';
   const setCollapsed = (v: boolean) => setCollapsedPref(v ? '1' : '0');
@@ -488,17 +498,23 @@ function App() {
         setCollapsed(!collapsed);
         return;
       }
-      const el = e.target as HTMLElement;
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || e.metaKey || e.ctrlKey || e.altKey) return;
-      // 有弹层（编辑器、详情、搜索等）打开时，单键快捷键不生效
-      if (editing || viewId || review || ics || palette || document.querySelector('.scrim, [aria-modal="true"]')) return;
-      if (e.key === 'n' && state && !state.readonly) {
-        // 拦下这次按键，不然它会落进刚打开、自动聚焦的名称输入框
+      const detail = viewId ? document.querySelector<HTMLElement>('.sheet-dlg:has(.dt)') : null;
+      const action = pageShortcut(e, detail);
+      if (action === 'edit') {
         e.preventDefault();
-        setEditing(newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
+        editFromDetail();
+      } else if (action === 'search') {
+        e.preventDefault();
+        if (!focusPageSearch(document)) setPalette(true);
+      } else if (action === 'help') {
+        e.preventDefault();
+        setKeyboardHelp(true);
+      } else if (action === 'new' && state && !state.readonly) {
+        e.preventDefault();
+        setEditing(newSub(today(), state.settings.defaultMethodId, state.settings.baseCurrency));
+      } else if (typeof action === 'number' && state && action <= navOf(state.settings).length) {
+        navigate(navOf(state.settings)[action - 1].path);
       }
-      const idx = Number(e.key);
-      if (state && idx >= 1 && idx <= navOf(state.settings).length) navigate(navOf(state.settings)[idx - 1].path);
     };
     const onDrawer = () => (matchMedia('(max-width: 860px)').matches ? setDrawer(true) : setCollapsed(false));
     // 可以带着草稿（AI 助手「编辑后添加」）
@@ -507,10 +523,12 @@ function App() {
       !state.readonly &&
       setEditing((e as CustomEvent<Subscription | undefined>).detail ?? newSub(today(), state?.settings.defaultMethodId, state?.settings.baseCurrency));
     document.addEventListener('keydown', onKey);
+    document.addEventListener('keydown', preventBrowserSave, true);
     window.addEventListener('ledger:drawer', onDrawer);
     window.addEventListener('ledger:add', onAdd);
     return () => {
       document.removeEventListener('keydown', onKey);
+      document.removeEventListener('keydown', preventBrowserSave, true);
       window.removeEventListener('ledger:drawer', onDrawer);
       window.removeEventListener('ledger:add', onAdd);
     };
@@ -526,10 +544,6 @@ function App() {
   const open = (s: Subscription) => {
     setDrawer(false);
     setViewId(s.id);
-  };
-  const edit = (s: Subscription) => {
-    setViewId(null);
-    setEditing(s);
   };
   const add = () => {
     setDrawer(false);
@@ -633,16 +647,7 @@ function App() {
 
       {viewing && (
         <Sheet bare label={viewing.name} onClose={() => setViewId(null)}>
-          <Detail
-            sub={viewing}
-            state={state}
-            today={d}
-            onEdit={() => {
-              setBackTo(viewing.id);
-              edit(viewing);
-            }}
-            onClose={() => setViewId(null)}
-          />
+          <Detail sub={viewing} state={state} today={d} onEdit={editFromDetail} onClose={() => setViewId(null)} />
         </Sheet>
       )}
       {editing && (
@@ -661,6 +666,7 @@ function App() {
       {review && <Review state={state} today={d} onClose={() => setReview(false)} />}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {palette && <Palette state={state} d={d} onClose={() => setPalette(false)} onOpen={open} onAdd={add} />}
+      {keyboardHelp && <KeyboardHelp onClose={() => setKeyboardHelp(false)} />}
       <Toasts />
       <TipLayer />
       <AskLayer />

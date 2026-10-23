@@ -614,6 +614,7 @@ export function MemberSheet({
         </Group>
 
         <Group
+          submit={adding ? '.btn.primary' : undefined}
           title={t('family.member.payments', { count: (f.payments ?? []).length })}
           foot={
             received && (payments.length > 1 || payments[0]?.currency !== base) ? (
@@ -661,7 +662,7 @@ export function MemberSheet({
                   </IconButton>
                 </span>
                 {copying === i && (
-                  <div className="copy-pay">
+                  <div className="copy-pay" data-submit=".btn.primary">
                     {others.map((o) => {
                       const dup = o.payments?.some((x) => x.date === p.date && x.until === p.until && x.amount === p.amount);
                       return (

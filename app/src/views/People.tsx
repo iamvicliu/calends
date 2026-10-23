@@ -1,3 +1,4 @@
+import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useRef, useState } from 'react';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
@@ -524,7 +525,7 @@ function PersonSheet({
                   </span>
                 </button>
                 {i.member && (
-                  <div className="pp-account">
+                  <div className="pp-account" data-submit={editingAccount === accountKey(i) ? '' : undefined}>
                     {editingAccount === accountKey(i) ? (
                       <input
                         autoFocus
@@ -536,8 +537,9 @@ function PersonSheet({
                         onChange={(e) => setAccounts((draft) => ({ ...draft, [accountKey(i)]: e.target.value }))}
                         onBlur={() => setEditingAccount(null)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
+                          if (sheetSubmitKey(e.nativeEvent) && !popupOpen(e.currentTarget.ownerDocument)) {
                             e.preventDefault();
+                            e.stopPropagation();
                             setEditingAccount(null);
                           }
                         }}

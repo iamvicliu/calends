@@ -1,3 +1,4 @@
+import { canUseSingleKey } from '../app/src/keyboard.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -28,6 +29,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
   const keys: Record<string, (e: any) => void> = {};
   const deps = {
     React: { Fragment: 'Fragment', createElement: (type: string, props: Node['props'], ...children: unknown[]) => ({ type, props: props ?? {}, children }) },
+    canUseSingleKey,
     ...billing,
     ...format,
     ...fx,
@@ -137,12 +139,12 @@ test('calendar selects today, toggles off, clears on month navigation, and Today
   nodes.find((n) => n.type === 'button' && n.children.includes('calendar.today'))!.props.onClick();
   nodes = render();
   assert.equal(nodes.find((n) => n.props['aria-current'] === 'date')!.props['aria-pressed'], true);
-  r.keys.keydown({ target: { tagName: 'BODY' }, key: 'ArrowRight', preventDefault() {} });
+  r.keys.keydown({ target: { tagName: 'BODY', closest: () => null, ownerDocument: { querySelectorAll: () => [] } }, key: 'ArrowRight', preventDefault() {} });
   assert.equal(
     render().some((n) => n.props['aria-pressed']),
     false,
   );
-  r.keys.keydown({ target: { tagName: 'BODY' }, key: 't' });
+  r.keys.keydown({ target: { tagName: 'BODY', closest: () => null, ownerDocument: { querySelectorAll: () => [] } }, key: 't' });
   assert.equal(render().find((n) => n.props['aria-current'] === 'date')!.props['aria-pressed'], true);
 });
 

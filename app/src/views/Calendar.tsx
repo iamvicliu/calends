@@ -1,3 +1,4 @@
+import { canUseSingleKey } from '../keyboard.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
@@ -95,9 +96,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   // ← → 翻上/下一页（月视图翻月，年视图翻年），T 回到今天；输入框里、弹层打开时不响应
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const el = e.target as HTMLElement;
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-      if (document.querySelector('.scrim, [aria-modal="true"]')) return;
+      if (!canUseSingleKey(e)) return;
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault();
         goMonth(addMonths(month + '-01', (e.key === 'ArrowLeft' ? -1 : 1) * (mode === 'year' ? 12 : 1)).slice(0, 7));
