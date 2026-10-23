@@ -29,7 +29,9 @@
     "name": "名稱不能為空",
     "price": "價格無效",
     "start": "開始日期無效",
-    "cycle": "週期無效"
+    "cycle": "週期無效",
+    "refundAmount": "退款金額須為正數，貨幣須有效",
+    "refundDate": "請先設定退出日，退款日期不能早於加入日"
   },
   "phase": {
     "switchTooEarly": "生效日期要晚於目前階段的開始日期",

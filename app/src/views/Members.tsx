@@ -15,7 +15,6 @@ import {
   collectionAnchor,
   diffDays,
 } from '../../../shared/billing.ts';
-import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -23,7 +22,20 @@ import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Togg
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
-import { carLedger, carRule, followCarRule, followsCar, memberFee, changeMemberFee, refreshReceiptDraft, shareFromFee } from '../../../shared/carpool.ts';
+import {
+  carLedger,
+  carRule,
+  followCarRule,
+  followsCar,
+  memberFee,
+  changeMemberFee,
+  refreshReceiptDraft,
+  shareFromFee,
+  suggestedLeaveRefund,
+  updateMemberLeave,
+  memberCashFlows,
+  memberFlowValue,
+} from '../../../shared/carpool.ts';
 
 export { carLedger, memberFee };
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
@@ -153,7 +165,7 @@ export function MemberSheet({
     return { ...init, fee: fee.amount, feeCurrency: fee.currency };
   });
   const up = (p: Partial<ShareMember>) => {
-    const next = { ...f, ...p };
+    const next = updateMemberLeave(f, p);
     setF(next);
     if (adding && ['joined', 'left', 'firstPeriod', 'firstAmount', 'paidUntil'].some((key) => key in p))
       setPay((draft) => refreshReceiptDraft(draft, freshPay(next), payMoneyEdited));
@@ -272,7 +284,7 @@ export function MemberSheet({
     ? refsFor(state.subscriptions, f.personId).filter((r) => !(r.kind === 'member' && r.sub.id === s.id && r.member.id === f.id)).length
     : 0;
   const payments = (f.payments ?? []).slice().sort((a, b) => b.date.localeCompare(a.date));
-  const received = (f.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date, base), 0);
+  const received = memberCashFlows(f).reduce((a, p) => a + memberFlowValue(state, p, base), 0);
 
   const payInvalid =
     saving ||
@@ -418,7 +430,7 @@ export function MemberSheet({
           </button>
           <button
             className="btn primary"
-            disabled={!f.name.trim()}
+            disabled={!f.name.trim() || refundInvalid(s, f)}
             onClick={() =>
               run(
                 async () => {
@@ -530,9 +542,7 @@ export function MemberSheet({
               )}
             </>
           )}
-          <Cell label={t('family.member.left')}>
-            <DatePicker value={f.left} clearable placeholder={t('family.member.leftPh')} onChange={(v) => up({ left: v })} />
-          </Cell>
+          {!isNew && <MemberLeaveFields state={state} s={s} member={f} onChange={up} />}
         </Group>
 
         <div ref={feeSection} className="member-fee-section">
@@ -617,8 +627,8 @@ export function MemberSheet({
           submit={adding ? '.btn.primary' : undefined}
           title={t('family.member.payments', { count: (f.payments ?? []).length })}
           foot={
-            received && (payments.length > 1 || payments[0]?.currency !== base) ? (
-              <span className="green">{t('family.member.receivedTotal', { amount: flow(received, base) })}</span>
+            payments.length > 1 || !!f.leaveRefund || (payments[0] && payments[0].currency !== base) ? (
+              <span className={received > 0 ? 'green' : undefined}>{t('family.member.receivedTotal', { amount: flow(received, base) })}</span>
             ) : undefined
           }
         >
@@ -697,6 +707,15 @@ export function MemberSheet({
               </div>
             );
           })}
+          {f.leaveRefund && (
+            <Cell label={t('family.sheet.refund')}>
+              <span>
+                {cnDateFull(f.leaveRefund.date)}
+                {copyParts(f.leaveRefund.note ? `\n${f.leaveRefund.note}` : '')}
+              </span>
+              <b>{flow(-f.leaveRefund.amount, f.leaveRefund.currency)}</b>
+            </Cell>
+          )}
           {adding ? (
             <>
               <Cell label={t('family.member.amount')}>
@@ -790,7 +809,7 @@ export function memberStatus(state: AppState, s: Subscription, m: ShareMember, t
 export interface MemberSegment {
   from: string;
   until: string;
-  kind: 'paid' | 'due' | 'future';
+  kind: 'paid' | 'due' | 'future' | 'unused';
 }
 
 /**
@@ -804,14 +823,14 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
   const out: MemberSegment[] = [];
   const push = (from: string, until: string, kind: MemberSegment['kind']) => {
     const a = from < start ? start : from;
-    const b = until > stop ? stop : until > end ? end : until;
+    const b = [until, stop, end].sort()[0];
     if (a <= b) out.push({ from: a, until: b, kind });
   };
   // 已付：从加入起按周期切，切到已付至
   if (m.paidUntil) {
     let from = joined;
     for (let guard = 0; guard < 400 && from <= m.paidUntil && from <= end; guard++) {
-      const c = memberCollection(s, m, from);
+      const c = memberCollection(s, { ...m, left: undefined }, from);
       push(c.from, c.until < m.paidUntil ? c.until : m.paidUntil, 'paid');
       from = addDays(c.until, 1);
     }
@@ -825,7 +844,83 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
     if (!due) break;
     from = addDays(c.until, 1);
   }
+  if (m.left && m.paidUntil && !m.leaveRefund) {
+    const from = [m.left, joined, start].sort().at(-1)!;
+    const until = m.paidUntil < end ? m.paidUntil : end;
+    if (from <= until) out.push({ from, until, kind: 'unused' });
+  }
   return out;
+}
+
+/** 下车退款仅记录用户确认的实退；选择退还时才填入建议值。 */
+function refundInvalid(s: Subscription, m: ShareMember) {
+  const r = m.leaveRefund;
+  return !!r && (!m.left || !Number.isFinite(r.amount) || r.amount <= 0 || r.date < (m.joined ?? s.share?.since ?? s.start));
+}
+
+function MemberLeaveFields({
+  state,
+  s,
+  member: m,
+  onChange,
+}: {
+  state: AppState;
+  s: Subscription;
+  member: ShareMember;
+  onChange: (p: Partial<ShareMember>) => void;
+}) {
+  const r = m.leaveRefund;
+  return (
+    <>
+      <Cell label={t('family.member.left')}>
+        <DatePicker
+          value={m.left}
+          clearable
+          min={m.joined ?? s.share?.since ?? s.start}
+          placeholder={t('family.member.leftPh')}
+          onChange={(v) => onChange(updateMemberLeave(m, { left: v }))}
+        />
+      </Cell>
+      {m.left && (
+        <>
+          <Cell label={t('family.refund.title')}>
+            <Seg
+              value={r ? 'refund' : 'none'}
+              onChange={(v) => {
+                const suggestion = suggestedLeaveRefund(state, s, m);
+                onChange({
+                  leaveRefund:
+                    v === 'none'
+                      ? undefined
+                      : { amount: Number.isFinite(suggestion.amount) ? suggestion.amount : 0, currency: suggestion.currency, date: m.left! },
+                });
+              }}
+              options={[
+                ['none', t('family.refund.none')],
+                ['refund', t('family.refund.unused')],
+              ]}
+            />
+          </Cell>
+          {r && (
+            <>
+              <Cell label={t('family.member.amount')}>
+                <span className="contact-field">
+                  <CurrencySelect value={r.currency} onChange={(currency) => onChange({ leaveRefund: { ...r, currency } })} />
+                  <NumInput className="num" ccy={r.currency} value={r.amount} onValue={(n) => onChange({ leaveRefund: { ...r, amount: n ?? 0 } })} />
+                </span>
+              </Cell>
+              <Cell label={t('family.refund.date')}>
+                <DatePicker value={r.date} min={m.joined ?? s.share?.since ?? s.start} onChange={(date) => date && onChange({ leaveRefund: { ...r, date } })} />
+              </Cell>
+              <Cell label={t('family.member.note')}>
+                <input value={r.note ?? ''} onChange={(e) => onChange({ leaveRefund: { ...r, note: e.target.value || undefined } })} />
+              </Cell>
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
 }
 
 /**
@@ -851,13 +946,13 @@ export function MemberBillingSheet({
   const cur = memberFee(state, s, member, today);
   const [fee, setFeeDraft] = useState({ amount: cur.amount, currency: cur.currency, billEvery: memberBillMonths(s, member, today) });
   const [from, setFrom] = useState(today);
+  const [leave, setLeave] = useState(member);
   // 已付期：从已付至倒推这一期的开始日
-  const [paidFrom, setPaidFrom] = useState(
-    member.paidUntil ? addMonths(addDays(member.paidUntil, 1), -memberBillMonths(s, member, member.paidUntil)) : undefined,
-  );
+  const initialPaidFrom = member.paidUntil ? addMonths(addDays(member.paidUntil, 1), -memberBillMonths(s, member, member.paidUntil)) : undefined;
+  const [paidFrom, setPaidFrom] = useState(initialPaidFrom);
 
   const draft = (): ShareMember => {
-    let m: ShareMember = { ...member };
+    let m: ShareMember = { ...member, left: leave.left, leaveRefund: leave.leaveRefund };
     if (mode === 'exempt') m = { ...m, exempt: true, custom: undefined, share: 0 };
     else if (mode === 'follow') m = followCarRule(state, s, { ...m, exempt: undefined }, from, today);
     else {
@@ -865,7 +960,7 @@ export function MemberBillingSheet({
       m = { ...m, exempt: undefined, custom: true };
       if (changed) m = changeMemberFee(state, s, m, { from, fee: fee.amount, currency: fee.currency, billEvery: fee.billEvery }, today);
     }
-    const paidUntil = paidFrom ? memberCollection(s, m, paidFrom).until : undefined;
+    const paidUntil = paidFrom === initialPaidFrom ? member.paidUntil : paidFrom ? memberCollection(s, m, paidFrom).until : undefined;
     return { ...m, paidUntil };
   };
   const next = draft();
@@ -900,6 +995,7 @@ export function MemberBillingSheet({
           </button>
           <button
             className="btn primary"
+            disabled={refundInvalid(s, next)}
             onClick={() =>
               run(async () => {
                 const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
@@ -978,10 +1074,13 @@ export function MemberBillingSheet({
               <DatePicker value={paidFrom} clearable placeholder={t('family.pool.noPay')} onChange={setPaidFrom} />
             </Cell>
             <Cell label={t('family.quick.paidTo')}>
-              <span className={paidFrom ? '' : 'muted'}>{paidFrom ? cnDateFull(memberCollection(s, next, paidFrom).until) : '—'}</span>
+              <span className={paidFrom ? '' : 'muted'}>{next.paidUntil ? cnDateFull(next.paidUntil) : '—'}</span>
             </Cell>
           </Group>
         )}
+        <Group>
+          <MemberLeaveFields state={state} s={s} member={next} onChange={(patch) => setLeave(updateMemberLeave(next, patch))} />
+        </Group>
       </div>
     </Sheet>
   );

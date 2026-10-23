@@ -302,6 +302,13 @@
   "timeline": {
     "paid": "Ödendi",
     "due": "Bekleyen",
-    "future": "Sonraki dönem"
+    "future": "Sonraki dönem",
+    "unused": "Ödendi, kullanılmadı"
+  },
+  "refund": {
+    "title": "Ayrılma iadesi",
+    "none": "İade yok",
+    "unused": "Kullanılmayanı iade et",
+    "date": "İade tarihi"
   }
 }

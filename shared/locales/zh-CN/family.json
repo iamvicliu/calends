@@ -274,6 +274,13 @@
   "timeline": {
     "paid": "已付",
     "due": "待收",
-    "future": "下一期"
+    "future": "下一期",
+    "unused": "已付未用"
+  },
+  "refund": {
+    "title": "下车退款",
+    "none": "不退",
+    "unused": "退还未用",
+    "date": "退款日期"
   }
 }

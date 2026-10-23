@@ -734,7 +734,13 @@ function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
 
 /** 草稿卡片：新增订阅时显示图标、名称、价格与接下来的扣款；其他写操作显示要改的内容 */
 /** 各写操作的草稿内容：用人话把参数列出来（标签与取值都本地化） */
-function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, subCcy?: string): Array<[string, ReactNode]> {
+function summaryRows(
+  tool: string,
+  a: Record<string, unknown>,
+  state: AppState,
+  subCcy?: string,
+  preview?: Record<string, unknown>,
+): Array<[string, ReactNode]> {
   const rows: Array<[string, ReactNode]> = [];
   const add = (label: string, v: ReactNode | undefined | null | false) => {
     if (v !== undefined && v !== null && v !== false && v !== '') rows.push([label, v]);
@@ -772,7 +778,17 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
       add(t('family.member.firstPeriod'), a.first_period ? t(`family.member.firstMode.${String(a.first_period)}`) : undefined);
       add(t('family.member.firstAmount'), a.first_amount != null ? money(Number(a.first_amount), String(a.fee_currency ?? collect)) : undefined);
       add(t('assistant.f.joined'), day(a.joined));
-      add(t('assistant.f.left'), day(a.left));
+      add(t('assistant.f.left'), a.left === null ? t('family.member.notSet') : day(a.left));
+      if ('leave_refund' in a || a.left === null) {
+        const r = a.leave_refund as { amount: number; currency?: string; date?: string; note?: string } | null;
+        const actual = (preview?.member as { leave_refund?: { currency: string; date: string } } | undefined)?.leave_refund;
+        const suggested = preview?.suggested_refund as { currency?: string } | undefined;
+        add(t('family.refund.title'), r ? flow(-r.amount, r.currency ?? actual?.currency ?? suggested?.currency ?? collect) : t('family.refund.none'));
+        if (r) {
+          add(t('family.refund.date'), day(r.date ?? actual?.date ?? a.left));
+          add(t('family.member.note'), r.note);
+        }
+      }
       add(t('assistant.f.contact'), [a.contact_via, a.contact].filter(Boolean).join(' ') || undefined);
       break;
     case 'remove_share_member':
@@ -891,7 +907,7 @@ function Proposal(props: {
             ]
           : []),
       ]
-    : summaryRows(part.tool, a, state, sub?.currency);
+    : summaryRows(part.tool, a, state, sub?.currency, part.preview as Record<string, unknown>);
   return (
     <div className={`as-card ${part.state}`} style={{ '--tint': catColor(icon.category) } as Record<string, string>}>
       <div className="as-card-tag">

@@ -44,7 +44,9 @@
     "name": "Le nom est obligatoire",
     "price": "Prix non valide",
     "start": "Date de début non valide",
-    "cycle": "Cycle de facturation non valide"
+    "cycle": "Cycle de facturation non valide",
+    "refundAmount": "Saisissez un montant positif et une devise valide",
+    "refundDate": "Indiquez le départ ; le remboursement ne peut précéder l’arrivée"
   },
   "phase": {
     "switchTooEarly": "La date d’effet doit être postérieure au début de la phase actuelle",

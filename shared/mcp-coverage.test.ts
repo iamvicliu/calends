@@ -1144,3 +1144,146 @@ test('assistant car-rule and member drafts compose without saving; confirmation 
   assert.equal(carol.id, proposals[3].args.id);
   assert.deepEqual(memberRate(s, carol, today), { amount: 6, currency: 'USD', billEvery: 3 });
 });
+
+test('下车退款 MCP：预览无写入、读令牌拒绝写、实际退款保留收款、查询与清除一致', async () => {
+  const f = await setup();
+  try {
+    const s = sub();
+    s.proxy = undefined;
+    s.start = '2026-01-01';
+    const m = s.share!.members[0];
+    Object.assign(m, {
+      joined: '2026-01-01',
+      paidUntil: '2026-01-31',
+      payments: [{ date: '2026-01-01', from: '2026-01-01', until: '2026-01-31', amount: 31, currency: 'USD' }],
+    });
+    await upsert(f.env, 'subscriptions', s.id, s);
+    const args = { subscription: 's', member: 'member', left: '2026-01-16', leave_refund: { amount: 12.34, note: 'Private actual settlement' } };
+    const before = await f.snapshot();
+    const rev = await getRev(f.env);
+    const preview = await f.call('save_share_member', { ...args, dry_run: true });
+    assert.equal(preview.isError, undefined);
+    assert.equal(preview.structuredContent.suggested_refund.amount, 16);
+    assert.equal(preview.structuredContent.unused_days, 16);
+    assert.deepEqual(preview.structuredContent.member.leave_refund, { amount: 12.34, currency: 'USD', date: args.left, note: args.leave_refund.note });
+    assert.deepEqual(await f.snapshot(), before);
+    assert.equal(await getRev(f.env), rev);
+    assert.equal((await f.call('save_share_member', args, f.read)).isError, true);
+    assert.equal((await f.call('save_share_member', args)).isError, undefined);
+    const saved = (await f.snapshot()).subscriptions[0];
+    assert.deepEqual(saved.share!.members[0].payments, m.payments);
+    assert.equal(saved.share!.members[0].paidUntil, m.paidUntil);
+    const car = (await f.call('get_carpool', { subscription: 's' }, f.read)).structuredContent.plans[0];
+    assert.equal(car.to_date.received, 18.66);
+    assert.equal(car.members[0].leave_refund.amount, 12.34);
+    assert.equal((await f.call('get_subscription', { subscription: 's' }, f.read)).structuredContent.share.members[0].leave_refund.amount, 12.34);
+    const people = (await f.call('list_people', {}, f.read)).structuredContent.people;
+    assert.equal(people.find((p: { person_id: string }) => p.person_id === 'person').in[0].leave_refund.amount, 12.34);
+    await putKv(f.env, 'settings', { ...(await f.snapshot()).settings, publicView: true });
+    const pub = await (await f.request('public', 'GET', undefined, false)).json();
+    assert.ok(!JSON.stringify(pub).includes('Private actual settlement'));
+    assert.ok(!('leaveRefund' in pub.subscriptions[0].share.members[0]));
+    const backup = await (await f.request('backup')).json();
+    assert.equal(backup.subscriptions[0].share.members[0].leaveRefund.amount, 12.34);
+    assert.equal((await f.request('backup', 'POST', backup)).status, 200);
+    assert.deepEqual((await f.snapshot()).subscriptions[0].share!.members[0].leaveRefund, saved.share!.members[0].leaveRefund);
+    assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', leave_refund: null })).isError, undefined);
+    assert.equal((await f.snapshot()).subscriptions[0].share!.members[0].leaveRefund, undefined);
+    assert.equal((await f.call('save_share_member', args)).isError, undefined);
+    assert.equal((await f.call('save_share_member', { subscription: 's', member: 'member', left: null })).isError, undefined);
+    const cleared = (await f.snapshot()).subscriptions[0].share!.members[0];
+    assert.equal(cleared.left, undefined);
+    assert.equal(cleared.leaveRefund, undefined);
+    assert.deepEqual(cleared.payments, m.payments);
+    // HTTP save clears an existing leave settlement as well.
+    assert.equal((await f.call('save_share_member', args)).isError, undefined);
+    const http = (await f.snapshot()).subscriptions[0];
+    delete http.share!.members[0].left;
+    assert.equal((await f.request('subscriptions/s', 'PUT', http)).status, 200);
+    assert.equal((await f.snapshot()).subscriptions[0].share!.members[0].leaveRefund, undefined);
+  } finally {
+    f.db.close();
+  }
+});
+
+test('退款校验贯穿 MCP、HTTP 和备份导入：正金额、有效币种日期、先设退出且不早于加入', async () => {
+  const f = await setup();
+  try {
+    const s = sub();
+    s.start = '2026-01-01';
+    s.share!.members[0].joined = '2026-01-01';
+    await upsert(f.env, 'subscriptions', s.id, s);
+    const before = await f.snapshot();
+    for (const patch of [
+      { leave_refund: { amount: 1 } },
+      { left: '2026-01-16', leave_refund: { amount: 0 } },
+      { left: '2026-01-16', leave_refund: { amount: -1 } },
+      { left: '2026-01-16', leave_refund: { amount: 1, date: '2025-12-31' } },
+      { left: '2026-01-16', leave_refund: { amount: 1, date: '2026-02-30' } },
+      { left: '2026-01-16', leave_refund: { amount: 1, currency: 'ZZZ' } },
+      { left: null, leave_refund: { amount: 1 } },
+    ]) {
+      const r = await f.call('save_share_member', { subscription: 's', member: 'member', ...patch, dry_run: true });
+      assert.equal(r.isError, true, JSON.stringify(patch));
+      assert.ok(!JSON.stringify(r).includes('core.subError.refund'), 'refund errors must be translated in the Worker bundle');
+      assert.deepEqual(await f.snapshot(), before);
+    }
+    for (const r of [
+      { amount: 0, date: '2026-01-16', currency: 'USD' },
+      { amount: 1, date: '2025-01-01', currency: 'USD' },
+      { amount: 1, date: 'wrong', currency: 'USD' },
+    ]) {
+      const invalid = structuredClone(s);
+      Object.assign(invalid.share!.members[0], { left: '2026-01-16', leaveRefund: r });
+      assert.equal((await f.request('subscriptions/s', 'PUT', invalid)).status, 400);
+      assert.equal((await f.request('backup', 'POST', { subscriptions: [invalid] })).status, 400);
+    }
+  } finally {
+    f.db.close();
+  }
+});
+
+test('助手下车退款必须确认，确认参数固定预览日期币种并保留实际金额', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s = sub();
+  s.start = '2026-01-01';
+  s.share!.members[0].joined = '2026-01-01';
+  s.share!.members[0].left = '2026-10-01';
+  await upsert(f.env, 'subscriptions', s.id, s);
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test', model: 'fictional' });
+  const before = await f.snapshot();
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', async () => {
+    const delta =
+      calls++ === 0
+        ? {
+            tool_calls: [
+              {
+                index: 0,
+                id: 'refund-call',
+                type: 'function',
+                function: {
+                  name: 'save_share_member',
+                  arguments: JSON.stringify({ subscription: 's', member: 'member', leave_refund: { amount: 1.23 }, dry_run: false }),
+                },
+              },
+            ],
+          }
+        : { content: 'Draft ready.' };
+    return new Response(`data: ${JSON.stringify({ choices: [{ delta, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`, {
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  });
+  const stream = await chat(f.env, { text: 'Record the actual refund' }, new AbortController().signal).text();
+  const proposal = stream
+    .split('\n')
+    .filter((line) => line.startsWith('data: '))
+    .map((line) => JSON.parse(line.slice(6)))
+    .find((e) => e.type === 'proposal');
+  assert.ok(proposal, stream);
+  assert.deepEqual(proposal.args.leave_refund, { amount: 1.23, date: '2026-10-01', currency: 'USD' });
+  assert.deepEqual(await f.snapshot(), before);
+  await apply(f.env, proposal);
+  assert.deepEqual((await f.snapshot()).subscriptions[0].share!.members[0].leaveRefund, proposal.args.leave_refund);
+});

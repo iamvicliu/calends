@@ -1,8 +1,76 @@
 // 合租的账：一年的成本与预计收入、从开始合租起实际付出与收回；成员每次该收多少。
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
-import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths, memberRate } from './billing.ts';
-import { chargeValue, toBaseAt } from './fx.ts';
+import {
+  chargesBetween,
+  currentPhase,
+  cycleDays,
+  monthlyGross,
+  memberAboard,
+  effectiveStatus,
+  memberBillMonths,
+  memberRate,
+  addDays,
+  addMonths,
+  diffDays,
+} from './billing.ts';
+import { chargeValue, convertOn, toBaseAt } from './fx.ts';
+import { currencyDecimals } from './format.ts';
 import type { AppState, CarRule, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
+
+/** 保留收款原件；退款在现金流中作为支出，不改变覆盖期。 */
+export function memberCashFlows(m: ShareMember) {
+  return [
+    ...(m.payments ?? []).map((p) => ({ ...p, kind: 'receipt' as const })),
+    ...(m.leaveRefund
+      ? [
+          {
+            ...m.leaveRefund,
+            amount: -m.leaveRefund.amount,
+            from: m.left,
+            until: m.paidUntil && m.left && m.paidUntil >= m.left ? m.paidUntil : (m.left ?? m.leaveRefund.date),
+            kind: 'refund' as const,
+          },
+        ]
+      : []),
+  ];
+}
+
+/** 实收、实退按各自日期换算；缺汇率保留不可用状态。 */
+export function memberFlowValue(state: AppState, p: { amount: number; currency: string; date: string }, to = state.settings.baseCurrency) {
+  return convertOn(p.amount, p.currency, to, p.date, state.fxHistory, state.fx);
+}
+
+/** 清空退出日时一并清除退款，其他历史不动。 */
+export function updateMemberLeave(m: ShareMember, patch: Partial<ShareMember>): ShareMember {
+  const next = { ...m, ...patch };
+  return next.left ? next : { ...next, leaveRefund: undefined };
+}
+
+/**
+ * 按每笔实收的覆盖期日单价折算，退出当日已不在车上，计入未用天数。
+ * 老收款无 from 时按前笔覆盖终点、收费周期和加入日推断；仅有 paidUntil 不虚构收款。
+ * 默认使用最早一笔未用收款的币种，跨币种按退出日汇总，parts 保留原币种明细；缺汇率返回 NaN。
+ */
+export function suggestedLeaveRefund(state: AppState, s: Subscription, m: ShareMember, currency?: string) {
+  const joined = m.joined ?? s.share?.since ?? s.start;
+  let previous: string | undefined;
+  const parts = (m.payments ?? [])
+    .slice()
+    .sort((a, b) => a.until.localeCompare(b.until))
+    .flatMap((p) => {
+      const inferred = previous ? addDays(previous, 1) : addMonths(addDays(p.until, 1), -memberBillMonths(s, m, p.until));
+      const from = p.from ?? (inferred < joined ? joined : inferred);
+      previous = previous && previous > p.until ? previous : p.until;
+      if (!m.left || p.until < m.left || p.until < from) return [];
+      const unusedFrom = from > m.left ? from : m.left;
+      const unusedDays = diffDays(unusedFrom, p.until) + 1;
+      return [{ from, until: p.until, unusedDays, amount: (p.amount * unusedDays) / (diffDays(from, p.until) + 1), currency: p.currency }];
+    });
+  const ccy = currency ?? parts[0]?.currency ?? m.feeCurrency ?? state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const amount = parts.reduce((sum, p) => sum + convertOn(p.amount, p.currency, ccy, m.left!, state.fxHistory, state.fx), 0);
+  const factor = 10 ** currencyDecimals(ccy);
+  return { amount: Math.round(amount * factor) / factor, currency: ccy, unusedDays: parts.reduce((sum, p) => sum + p.unusedDays, 0), parts };
+}
 
 /**
  * 合租账本：订阅本身多少钱、我付出去多少、从成员身上收回多少，算出净成本（负数就是赚了）。
@@ -13,19 +81,34 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   const members = s.share?.members ?? [];
   const yearCost = toBaseAt(state, monthlyGross(cur, today) * 12, cur.currency);
   // 预计收入只算还在车上的；实际收回保留所有人（包括已退出的）的历史收款
-  const yearIncome = ['ended', 'terminated'].includes(effectiveStatus(s, today))
-    ? 0
-    : members.reduce((a, m) => {
-        const rate = memberFee(state, s, m, today);
-        return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
-      }, 0);
+  const yearRefunded = members.reduce((sum, m) => {
+    const r = m.leaveRefund;
+    return sum + (r && r.date.slice(0, 4) === today.slice(0, 4) && r.date <= today ? memberFlowValue(state, r) : 0);
+  }, 0);
+  const yearIncome =
+    (['ended', 'terminated'].includes(effectiveStatus(s, today))
+      ? 0
+      : members.reduce((a, m) => {
+          const rate = memberFee(state, s, m, today);
+          return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
+        }, 0)) - yearRefunded;
   const firstPay = members.flatMap((m) => m.payments ?? []).reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
   const since = s.share?.since ?? firstPay ?? firstJoin ?? s.start;
   const paid = since ? chargesBetween(s, since, today, today).reduce((a, c) => a + chargeValue(state, c), 0) : 0;
-  const received = members.flatMap((m) => m.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0);
-  return { yearCost, yearIncome, yearNet: yearCost - yearIncome, since, paid, received, net: paid - received };
+  const received = members.flatMap(memberCashFlows).reduce((a, p) => a + memberFlowValue(state, p), 0);
+  return {
+    hasRecords: members.some((m) => memberCashFlows(m).length > 0),
+    yearCost,
+    yearIncome,
+    yearRefunded,
+    yearNet: yearCost - yearIncome,
+    since,
+    paid,
+    received,
+    net: paid - received,
+  };
 }
 
 /** 订阅一期大约几个月，用来把「每期份额」换算成按月 / 季 / 年收的金额 */

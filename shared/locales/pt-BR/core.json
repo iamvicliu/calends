@@ -44,7 +44,9 @@
     "name": "O nome é obrigatório",
     "price": "Preço inválido",
     "start": "Data de início inválida",
-    "cycle": "Ciclo de cobrança inválido"
+    "cycle": "Ciclo de cobrança inválido",
+    "refundAmount": "Insira um valor positivo e uma moeda válida",
+    "refundDate": "Defina a saída; o reembolso não pode ser anterior à entrada"
   },
   "phase": {
     "switchTooEarly": "A data de vigência deve ser posterior ao início da fase atual",

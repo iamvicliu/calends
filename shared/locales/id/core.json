@@ -39,7 +39,9 @@
     "name": "Nama wajib diisi",
     "price": "Harga tidak valid",
     "start": "Tanggal mulai tidak valid",
-    "cycle": "Siklus tagihan tidak valid"
+    "cycle": "Siklus tagihan tidak valid",
+    "refundAmount": "Masukkan jumlah positif dan mata uang yang valid",
+    "refundDate": "Tetapkan tanggal keluar; pengembalian tidak boleh sebelum bergabung"
   },
   "phase": {
     "switchTooEarly": "Tanggal berlaku harus setelah fase saat ini dimulai",

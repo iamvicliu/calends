@@ -1,3 +1,4 @@
+import { memberCashFlows, memberFlowValue } from './carpool.ts';
 import { addDays, addMonths, chargesBetween, memberDues, myShareFactor, phaseSubs, totals, type Charge } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import {
@@ -159,9 +160,9 @@ function details(
     .filter((s) => s.share?.role === 'owner')
     .map((sub) => {
       const received = sub
-        .share!.members.flatMap((m) => m.payments ?? [])
+        .share!.members.flatMap(memberCashFlows)
         .filter((p) => p.date >= sharingFrom && p.date <= sharingTo && p.date <= today)
-        .reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0);
+        .reduce((a, p) => a + memberFlowValue(state, p), 0);
       // Only still-unpaid periods originating in this window, not older arrears.
       const before = new Map(memberDues(sub, addDays(sharingFrom, -1), state.settings.collectCurrency, state).map((d) => [d.member.id, d.owed]));
       const owed = memberDues(sub, sharingTo, state.settings.collectCurrency, state).reduce(

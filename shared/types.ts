@@ -87,6 +87,15 @@ export interface ShareMember {
   joined?: string;
   /** 退出日：之后不再占座、不再计应收，历史收款保留 */
   left?: string;
+  /** 下车时实际退还的金额（正数）；缺省不退，原收款与覆盖期不变 */
+  leaveRefund?: LeaveRefund;
+}
+
+export interface LeaveRefund {
+  date: string;
+  amount: number;
+  currency: string;
+  note?: string;
 }
 
 /** 合租成员的一笔收款：收了多少、覆盖到哪天 */

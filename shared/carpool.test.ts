@@ -2,7 +2,18 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FALLBACK_FX } from './billing.ts';
 import { toBaseAt } from './fx.ts';
-import { applyCarRule, carRule, followCarRule, followsCar, refreshReceiptDraft, resyncShares } from './carpool.ts';
+import {
+  applyCarRule,
+  carRule,
+  followCarRule,
+  followsCar,
+  refreshReceiptDraft,
+  resyncShares,
+  suggestedLeaveRefund,
+  carLedger,
+  memberCashFlows,
+  updateMemberLeave,
+} from './carpool.ts';
 import { memberRate } from './billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
@@ -140,4 +151,75 @@ test('已退出成员在首次存规则和追溯调价时保持原样', () => {
       assert.deepEqual(next.share!.members[0], s.share!.members[0]);
     }
   }
+});
+
+test('下车建议逐笔按实际实收日单价折算，跨两笔、跨币种并保留原币明细', () => {
+  const s = ruleCar();
+  const m = {
+    ...s.share!.members[0],
+    joined: '2026-01-01',
+    left: '2026-01-16',
+    payments: [
+      { date: '2026-01-01', from: '2026-01-01', until: '2026-01-31', amount: 31, currency: 'USD' },
+      { date: '2026-01-15', from: '2026-02-01', until: '2026-02-28', amount: 56, currency: 'CNY' },
+    ],
+  };
+  const fx = { ...state, fxHistory: { '2026-01-16': { USD: 1, CNY: 7 } } };
+  const before = structuredClone(m);
+  const r = suggestedLeaveRefund(fx, s, m);
+  assert.equal(r.currency, 'USD');
+  assert.equal(r.amount, 24); // USD16 + CNY56 / 7
+  assert.equal(r.unusedDays, 44);
+  assert.deepEqual(
+    r.parts.map((p) => [p.amount, p.currency]),
+    [
+      [16, 'USD'],
+      [56, 'CNY'],
+    ],
+  );
+  assert.deepEqual(m, before);
+  assert.equal(suggestedLeaveRefund(fx, s, m, 'CNY').amount, 168);
+  assert.equal(suggestedLeaveRefund(fx, s, { ...m, left: '2026-03-01' }).amount, 0);
+  assert.equal(suggestedLeaveRefund(fx, s, { ...m, left: undefined }).amount, 0);
+  assert.equal(suggestedLeaveRefund(fx, s, { ...m, payments: [] }).amount, 0);
+  const missing = { ...fx, fxHistory: undefined, fx: { ...fx.fx, rates: { USD: 1 } } };
+  assert.ok(Number.isNaN(suggestedLeaveRefund(missing, s, m).amount));
+});
+
+test('旧收款无覆盖起点按周期和加入日推断，退出当日也属未用，零位币种建议不带小数', () => {
+  const s = ruleCar();
+  const m = {
+    ...s.share!.members[0],
+    billEvery: 1,
+    joined: '2026-01-10',
+    left: '2026-01-31',
+    payments: [{ date: '2026-01-10', until: '2026-01-31', amount: 100, currency: 'JPY' }],
+  };
+  assert.equal(suggestedLeaveRefund(state, s, m).amount, 5);
+  assert.equal(suggestedLeaveRefund(state, s, m).unusedDays, 1);
+});
+
+test('账本和现金流按退款日汇率扣实际退款，年度净额包含本年已退，历史完整保留', () => {
+  const s = ruleCar();
+  const m = { ...s.share!.members[0], left: '2026-10-01', leaveRefund: { amount: 2, currency: 'USD', date: '2026-10-02', note: 'Actual refund' } };
+  s.share!.members = [m];
+  const st = { ...state, fxHistory: { '2026-10-02': { USD: 1, CNY: 8 } } };
+  const before = structuredClone(s);
+  const book = carLedger(st, s, '2026-10-23');
+  assert.equal(book.received, 28); // CNY44 - USD2 × 8
+  assert.equal(book.yearRefunded, 16);
+  assert.equal(book.yearIncome, -16);
+  assert.equal(book.yearNet, book.yearCost + 16);
+  assert.equal(book.net, book.paid - 28);
+  assert.equal(memberCashFlows(m).at(-1)!.amount, -2);
+  assert.deepEqual(s, before);
+  assert.equal(carLedger(st, s, '2027-01-01').yearRefunded, 0);
+  assert.equal(
+    carLedger(st, { ...s, share: { ...s.share!, members: [{ ...m, leaveRefund: { ...m.leaveRefund, currency: 'ZZZ' } }] } }, '2026-10-23').received,
+    NaN,
+  );
+  const cleared = updateMemberLeave(m, { left: undefined });
+  assert.equal(cleared.leaveRefund, undefined);
+  assert.deepEqual(cleared.payments, m.payments);
+  assert.equal(cleared.paidUntil, m.paidUntil);
 });

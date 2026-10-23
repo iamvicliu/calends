@@ -44,7 +44,9 @@
     "name": "Ad gerekli",
     "price": "Geçersiz fiyat",
     "start": "Geçersiz başlangıç tarihi",
-    "cycle": "Geçersiz ödeme dönemi"
+    "cycle": "Geçersiz ödeme dönemi",
+    "refundAmount": "Pozitif bir tutar ve geçerli para birimi girin",
+    "refundDate": "Ayrılma tarihini belirleyin; iade katılma tarihinden önce olamaz"
   },
   "phase": {
     "switchTooEarly": "Geçerlilik tarihi mevcut dönemin başlangıcından sonra olmalı",

@@ -61,6 +61,8 @@ import type { Env } from '../env.ts';
 import { loadState, saveLedgerEdit, upsert } from '../store.ts';
 import {
   applyCarRule,
+  suggestedLeaveRefund,
+  updateMemberLeave,
   carLedger,
   carRule,
   followCarRule,
@@ -212,6 +214,7 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
       received: conv(i.received),
       last_paid: i.lastPaid ?? null,
       paid_until: i.paidUntil ?? null,
+      ...(i.member ? { leave_refund: i.member.leaveRefund ?? null } : {}),
     })),
   };
 }
@@ -226,6 +229,7 @@ function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: M
     follows_rule: rule ? followsCar(st, s, m, today) : false,
     collect_from: collectionAnchor(s),
     paid_until: m.paidUntil ?? null,
+    leave_refund: m.leaveRefund ?? null,
     first_collection: first,
     next_collection: next,
     next_collection_date: next.from,
@@ -687,6 +691,7 @@ const CATALOGUE: Tool[] = [
                 first_period: m.firstPeriod ?? 'prorate',
                 first_amount: m.firstAmount ?? null,
                 left: m.left ?? null,
+                leave_refund: m.leaveRefund ?? null,
                 exempt: !!m.exempt,
               })),
               dues: memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
@@ -1529,7 +1534,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'get_carpool',
     description:
-      'Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from), the plan collection rule (rule: fee, currency, every_months; stored=false means inferred from the most common member rate); members with their fee and billing months, follows_rule (true = fee follows the plan rule, false = custom fee or exempt), overdue_days (days the next unpaid collection is past due, 0 if not), alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.',
+      'Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from), the plan collection rule (rule: fee, currency, every_months; stored=false means inferred from the most common member rate); members with their actual leave_refund (null when not refunded), fee and billing months, follows_rule (true = fee follows the plan rule, false = custom fee or exempt), overdue_days (days the next unpaid collection is past due, 0 if not), alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.',
     inputSchema: obj({ subscription: { ...SUBREF, description: 'Optional: only this plan.' } }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
@@ -1693,7 +1698,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'save_share_member',
     description:
-      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Set left to retain all join/receipt history. Optional leave_refund stores the actual positive refund, with date defaulting to left and currency to the suggested refund currency; null means no refund. left=null also clears the refund. Preview returns suggested_refund (including original-currency parts) and unused_days; never save the suggestion as an actual refund without user confirmation. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
     write: true,
     inputSchema: obj(
       {
@@ -1725,7 +1730,19 @@ const CATALOGUE: Tool[] = [
           type: ['string', 'null'],
           description: 'Join date, inclusive; defaults to today for a new member. A mid-period join covers this day through the shared aligned period end.',
         },
-        left: { ...DATE, type: ['string', 'null'], description: 'Left the plan on this date (keeps history).' },
+        left: { ...DATE, type: ['string', 'null'], description: 'Left the plan on this date (keeps history). null also clears leave_refund.' },
+        leave_refund: {
+          type: ['object', 'null'],
+          description: 'Actual refund on leaving, positive amount. Requires left; null clears it. Omit to preserve. Date cannot precede joining.',
+          properties: {
+            amount: { type: 'number', exclusiveMinimum: 0 },
+            date: DATE,
+            currency: { type: 'string' },
+            note: { type: 'string' },
+          },
+          required: ['amount'],
+          additionalProperties: false,
+        },
         source: { type: 'string' },
         contact_via: { type: 'string', description: 'e.g. 微信, Telegram, 邮箱' },
         contact: { type: 'string' },
@@ -1800,6 +1817,20 @@ const CATALOGUE: Tool[] = [
         ['source', 'source'],
       ] as const)
         if (input in a) m[field] = field === 'account' ? str(a[input])?.trim() || undefined : str(a[input]);
+      if ('leave_refund' in a && a.leave_refund !== null) {
+        if (!m.left) throw new Error(t('core.subError.refundDate'));
+        const r = a.leave_refund as Record<string, unknown>;
+        const suggestion = suggestedLeaveRefund(st, s, m);
+        const currency = (str(r.currency) ?? suggestion.currency).toUpperCase();
+        validateCurrency(st, currency);
+        m.leaveRefund = {
+          amount: num(r.amount, 'leave_refund.amount'),
+          date: date(r.date, 'leave_refund.date', m.left),
+          currency,
+          ...(r.note ? { note: String(r.note) } : {}),
+        };
+      } else if (a.leave_refund === null) m.leaveRefund = undefined;
+      m = updateMemberLeave(m, {});
       if (!m.name) throw new Error(t('mcp.error.needMemberName'));
       const feeEdited = ['fee', 'fee_currency', 'bill_every'].some((key) => key in a);
       if (old && feeEdited && a.follow_rule !== true) {
@@ -1832,8 +1863,11 @@ const CATALOGUE: Tool[] = [
       m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
       const after = { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } };
+      const suggestion = suggestedLeaveRefund(st, after, m);
       return {
         ...(await commit(ctx, st, today, after, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`])),
+        suggested_refund: suggestion,
+        unused_days: suggestion.unusedDays,
         member: {
           id: m.id,
           name: m.name,

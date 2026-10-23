@@ -292,6 +292,13 @@
   "timeline": {
     "paid": "Đã trả",
     "due": "Còn nợ",
-    "future": "Kỳ tiếp theo"
+    "future": "Kỳ tiếp theo",
+    "unused": "Đã trả, chưa dùng"
+  },
+  "refund": {
+    "title": "Hoàn tiền khi rời nhóm",
+    "none": "Không hoàn",
+    "unused": "Hoàn phần chưa dùng",
+    "date": "Ngày hoàn tiền"
   }
 }

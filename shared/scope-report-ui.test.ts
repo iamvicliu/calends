@@ -36,6 +36,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...format,
     ...fx,
     ...reports,
+    ...carpool,
     ...metrics,
     locale: () => 'en',
     useOrig: () => false,
@@ -2156,4 +2157,183 @@ test('停用说明里的金额单独着色：未退款损失为红色，已退�
   assert.equal(gain!.props.className, 'stop-money gain');
   assert.equal(money(render({ date: '2026-10-01', refunded: 0, unusedValue: 0 })), undefined);
   assert.deepEqual(all(render({ date: '2099-01-01', refunded: 0, unusedValue: 1 })), []);
+});
+
+test('下车时间条：不退保留已付未用灰段，退款截在退出前一天，窗口边界不溢出', () => {
+  const r = harness('../app/src/views/Members.tsx', 'memberSegments');
+  const m = { id: 'm', name: 'M', share: 31, fee: 31, billEvery: 1, joined: '2026-01-01', left: '2026-01-16', paidUntil: '2026-02-28' };
+  const s = {
+    ...st.subscriptions[0],
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    currency: 'USD',
+    share: { role: 'owner', seats: 2, collectFrom: '2026-01-01', members: [m] },
+  };
+  const segments = (member: unknown, end = '2026-02-28') => r.call('memberSegments', s, member, today, '2026-01-01', end);
+  assert.deepEqual(segments(m), [
+    { from: '2026-01-01', until: '2026-01-15', kind: 'paid' },
+    { from: '2026-01-16', until: '2026-02-28', kind: 'unused' },
+  ]);
+  assert.deepEqual(segments({ ...m, leaveRefund: { date: m.left, amount: 47, currency: 'USD' } }), [{ from: '2026-01-01', until: '2026-01-15', kind: 'paid' }]);
+  assert.deepEqual(segments(m, '2026-01-10'), [{ from: '2026-01-01', until: '2026-01-10', kind: 'paid' }]);
+});
+
+test('下车控件默认建议金额，可编辑实际退款，清退出清退款，新成员不显示', () => {
+  const m = {
+    id: 'm',
+    name: 'M',
+    share: 31,
+    joined: '2026-01-01',
+    left: '2026-01-16',
+    payments: [{ from: '2026-01-01', until: '2026-01-31', date: '2026-01-01', amount: 31, currency: 'USD' }],
+  };
+  const s = { start: '2026-01-01', cycle: { unit: 'month', every: 1 }, currency: 'USD', share: { members: [m] } };
+  let member: any = m;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberLeaveFields',
+    {},
+    { DatePicker: 'DatePicker', NumInput: 'NumInput', CurrencySelect: 'CurrencySelect' },
+  );
+  const render = () =>
+    r.render('MemberLeaveFields', {
+      state: st,
+      s,
+      member,
+      onChange: (patch: object) => {
+        member = carpool.updateMemberLeave(member, patch);
+      },
+    });
+  render()
+    .find((n) => n.type === 'Seg')!
+    .props.onChange('refund');
+  assert.deepEqual(member.leaveRefund, { amount: 16, currency: 'USD', date: m.left });
+  render()
+    .find((n) => n.type === 'NumInput')!
+    .props.onValue(12.34);
+  render()
+    .find((n) => n.type === 'DatePicker' && n.props.value === m.left && !n.props.clearable)!
+    .props.onChange('2026-01-20');
+  assert.equal(member.leaveRefund.amount, 12.34);
+  assert.equal(member.leaveRefund.date, '2026-01-20');
+  render()
+    .find((n) => n.type === 'DatePicker' && n.props.clearable)!
+    .props.onChange(undefined);
+  assert.equal(member.leaveRefund, undefined);
+  assert.ok(!render().some((n) => n.type === 'Seg'));
+});
+
+test('收费弹窗设置下车退款保留原始已付至，金额无效不能保存，新成员隐藏下车退款', async () => {
+  const m = {
+    id: 'm',
+    name: 'M',
+    share: 31,
+    fee: 31,
+    feeCurrency: 'USD',
+    billEvery: 1,
+    joined: '2026-01-01',
+    paidUntil: '2026-01-31',
+    payments: [{ from: '2026-01-01', until: '2026-01-31', date: '2026-01-01', amount: 31, currency: 'USD' }],
+  };
+  const s: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 40,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    start: '2026-01-01',
+    share: { role: 'owner', seats: 4, collectFrom: '2026-01-01', members: [m] },
+  };
+  let saved: Subscription | undefined;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberBillingSheet,MemberSheet',
+    {},
+    {
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      Toggle: 'Toggle',
+      todayIn: () => today,
+      getState: () => ({ ...st, subscriptions: [s] }),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (s: Subscription) => {
+        saved = s;
+      },
+    },
+  );
+  const render = () => r.render('MemberBillingSheet', { state: st, s, member: m, onClose() {}, onMore() {} });
+  const leaveFields = () => render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields')!;
+  const save = () => all(render().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.member.save'))!;
+  leaveFields().props.onChange({ left: '2026-01-16', leaveRefund: { date: '2026-01-20', amount: 12, currency: 'USD' } });
+  assert.ok(
+    all(render().find((n) => n.type === 'Cell' && n.props.label === 'family.quick.paidTo')).some((n) => n.children.includes(format.cnDateFull(m.paidUntil))),
+  );
+  await save().props.onClick();
+  assert.equal(saved!.share!.members[0].paidUntil, m.paidUntil);
+  assert.deepEqual(saved!.share!.members[0].payments, m.payments);
+  leaveFields().props.onChange({ leaveRefund: { date: '2026-01-20', amount: 0, currency: 'USD' } });
+  assert.equal(save().props.disabled, true);
+  const fresh = harness(
+    '../app/src/views/Members.tsx',
+    'MemberSheet',
+    {},
+    { Sheet: 'Sheet', DatePicker: 'DatePicker', NumInput: 'NumInput', Toggle: 'Toggle' },
+  );
+  assert.ok(
+    !fresh.render('MemberSheet', { state: st, s, onClose() {} }).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'),
+  );
+});
+
+test('退款行显示负现金流和退款标签，全额退款后仍保留累计账本，助手展示预览实际日期币种', () => {
+  const member = {
+    id: 'm',
+    name: 'M',
+    share: 3,
+    joined: '2026-01-01',
+    left: '2026-10-01',
+    paidUntil: '2026-12-31',
+    payments: [{ date: '2026-01-01', from: '2026-01-01', until: '2026-12-31', amount: 31, currency: 'USD' }],
+    leaveRefund: { date: '2026-10-02', amount: 31, currency: 'USD' },
+  };
+  const s: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 40,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    start: '2026-01-01',
+    share: { role: 'owner', seats: 4, collectFrom: '2026-01-01', members: [member] },
+  };
+  const r = harness(
+    '../app/src/views/Carpool.tsx',
+    'CarSheet,CarFacts',
+    {},
+    { Sheet: 'Sheet', NameLink: 'NameLink', perBill: () => '', createPortal: () => null },
+  );
+  const render = () => r.render('CarSheet', { state: st, s, today, book: carpool.carLedger(st, s, today), onClose() {}, onMember() {}, onOpenSub() {} });
+  render()
+    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head')!
+    .props.onClick();
+  const refund = render().find((n) => n.props.className === 'ld-row' && all(n.children).some((x) => x.children.includes('family.sheet.refund')))!;
+  assert.ok(refund);
+  assert.ok(all(refund.children).some((n) => n.children.includes(format.flow(-31, 'USD'))));
+  const facts = r.render('CarFacts', { book: carpool.carLedger(st, s, today), base: 'USD' });
+  assert.ok(!facts.some((n) => n.children.includes('family.sheet.noReceiptsYet')));
+  const assistant = harness('../app/src/views/Assistant.tsx', 'summaryRows', {}, { storageKey: (s: string) => s });
+  const rows = assistant.call('summaryRows', 'save_share_member', { member: 'm', leave_refund: { amount: 12 } }, st, 'USD', {
+    member: { leave_refund: { date: '2026-10-02', currency: 'CNY' } },
+  });
+  assert.ok(rows.some(([key, value]: string[]) => key === 'family.refund.title' && value === format.flow(-12, 'CNY')));
+  assert.ok(rows.some(([key, value]: string[]) => key === 'family.refund.date' && value === format.cnDateFull('2026-10-02')));
+  const cleared = assistant.call('summaryRows', 'save_share_member', { member: 'm', left: null }, st);
+  assert.ok(cleared.some(([key, value]: string[]) => key === 'family.refund.title' && value === 'family.refund.none'));
+  assert.ok(cleared.some(([key, value]: string[]) => key === 'assistant.f.left' && value === 'family.member.notSet'));
 });

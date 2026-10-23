@@ -302,6 +302,13 @@
   "timeline": {
     "paid": "Payé",
     "due": "Dû",
-    "future": "Période suivante"
+    "future": "Période suivante",
+    "unused": "Payé, inutilisé"
+  },
+  "refund": {
+    "title": "Remboursement au départ",
+    "none": "Aucun",
+    "unused": "Rembourser l’inutilisé",
+    "date": "Date du remboursement"
   }
 }
