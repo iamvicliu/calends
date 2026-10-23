@@ -78,18 +78,18 @@ export const KIND_LABEL: Record<MethodKind, string> = {
 
 // 卡面底色：中性石墨或品牌纯色，不用蓝紫渐变；App Store 卡另有钛金属卡面
 export const KIND_BG: Record<MethodKind, string> = {
-  debit: 'color-mix(in srgb, var(--slate-9) 75%, var(--black-a12))',
-  credit: 'color-mix(in srgb, var(--gray-9) 75%, var(--black-a12))',
-  alipay: 'color-mix(in srgb, var(--blue-9) 75%, var(--black-a12))',
-  wechat: 'color-mix(in srgb, var(--green-9) 75%, var(--black-a12))',
-  paypal: 'color-mix(in srgb, var(--indigo-9) 75%, var(--black-a12))',
-  appstore: 'var(--gray-2)',
-  googleplay: 'var(--gray-1)',
-  giftcard: 'color-mix(in srgb, var(--orange-9) 75%, var(--black-a12))',
-  prepaid: 'color-mix(in srgb, var(--slate-9) 75%, var(--black-a12))',
-  phone: 'color-mix(in srgb, var(--teal-9) 75%, var(--black-a12))',
-  crypto: 'color-mix(in srgb, var(--gold-9) 75%, var(--black-a12))',
-  other: 'color-mix(in srgb, var(--slate-9) 75%, var(--black-a12))',
+  debit: 'linear-gradient(135deg,#3a3f47,#1c1f24)',
+  credit: 'linear-gradient(135deg,#2c2c30,#111113)',
+  alipay: '#1677ff',
+  wechat: '#07c160',
+  paypal: '#003087',
+  appstore: 'linear-gradient(135deg,#fbfbfd,#e4e4e8)',
+  googleplay: '#ffffff',
+  giftcard: 'linear-gradient(135deg,#f08a4b,#d4532b)',
+  prepaid: 'linear-gradient(135deg,#3a3f47,#1c1f24)',
+  phone: 'linear-gradient(135deg,#2fbf71,#0f7d55)',
+  crypto: 'linear-gradient(135deg,#1f2933,#4a3b10)',
+  other: 'linear-gradient(135deg,#55626c,#262e34)',
 };
 
 /** Map legacy custom UI colors to the shared palette without rewriting stored preferences. */

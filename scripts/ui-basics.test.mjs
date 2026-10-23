@@ -354,10 +354,17 @@ test('timeline loss amount uses its own line box so the digits stay vertically c
 
 const styleFiles = readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.css'));
 const styleSources = styleFiles.map((file) => [file, readFileSync(new URL(file, root), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')]);
+// 钱包卡面按用户要求与 main 第一版保持一致（实体卡模拟：卡面配色、投影、倾斜反光、随卡片缩放的字号），
+// 不受全站视觉规范约束；其余样式仍按规范检查。
+const walletRule = (selector) => selector.split(',').every((sel) => /(?:^|\s)\.(?:paycard|pc-[\w-]+|sim-[\w-]+)(?=[.:\s]|$)|^\.wallet-grid/.test(sel.trim()));
+const withoutWallet = (css) =>
+  cssRules(css)
+    .map(([selector, body]) => (selector.startsWith('@') ? `${selector}{${withoutWallet(body)}}` : walletRule(selector) ? '' : `${selector}{${body}}`))
+    .join('\n');
 
 test('app and public CSS use only the four shared type sizes, including font shorthands', async () => {
   const failures = [];
-  for (const [file, css] of styleSources) {
+  for (const [file, css] of styleSources.map(([f, c]) => [f, withoutWallet(c)])) {
     for (const [, value] of css.matchAll(/font-size:\s*([^;]+);/g)) {
       if (!/^(?:var\(--fs-[1-4]\)|12px|14px|17px|28px)(?: !important)?$/.test(value)) failures.push(`${file}: ${value}`);
     }
@@ -387,13 +394,13 @@ test('colors come from Radix with both themes and package-provided P3 support', 
     }
   }
   assert.match(readFileSync(new URL('theme.tsx', root), 'utf8'), /classList.toggle\('dark', resolved === 'dark'\)/);
-  for (const [file, css] of styleSources) assert.doesNotMatch(css, /#[\da-f]{3,8}\b|rgba?\(/i, file);
+  for (const [file, css] of styleSources.map(([f, c]) => [f, withoutWallet(c)])) assert.doesNotMatch(css, /#[\da-f]{3,8}\b|rgba?\(/i, file);
   for (const entry of ['styles.css', 'public/index.css']) assert.match(readFileSync(new URL(entry, root), 'utf8'), /import ['"]\.\.?\/design-tokens.css/);
 });
 
 test('borders use hairlines and keyboard focus uses only the shared ring', () => {
   const failures = [];
-  for (const [file, css] of styleSources) {
+  for (const [file, css] of styleSources.map(([f, c]) => [f, withoutWallet(c)])) {
     for (const [, value] of css.matchAll(/(?:border(?:-(?:top|right|bottom|left|inline|block|width))?|outline)(?:-width)?:\s*([^;]+);/g)) {
       if (/\d+(?:\.\d+)?px/.test(value) && value !== '0.5px') failures.push(`${file}: ${value}`);
     }
@@ -409,7 +416,7 @@ const physicalCardSelector = (selector) => selector.split(',').every((sel) => /^
 const leafRules = (css) => cssRules(css).flatMap(([selector, body]) => (selector.startsWith('@') ? leafRules(body) : [[selector, body]]));
 
 test('remaining CSS transitions use 250ms ease-out and only physical cards lift on hover', () => {
-  for (const [file, css] of styleSources) {
+  for (const [file, css] of styleSources.map(([f, c]) => [f, withoutWallet(c)])) {
     for (const [selector, body] of leafRules(css)) {
       for (const [, value] of body.matchAll(/transition:\s*([^;]+);/g)) {
         if (value.startsWith('none')) continue;
@@ -793,7 +800,7 @@ test('physical wallet cards keep bounded pointer tilt and reflection without tak
   assert.equal(values['--rx'], '0deg');
 });
 
-test('wallet material styles retain neutral dark and fixed light faces, restrained motion and drag-safe reflections', () => {
+test('wallet cards keep the main-branch physical-card design with pointer tilt and reflection', () => {
   const css = readFileSync(new URL('styles.css', root), 'utf8');
   const rules = leafRules(css);
   const bodies = (sel) =>
@@ -801,23 +808,18 @@ test('wallet material styles retain neutral dark and fixed light faces, restrain
       .filter(([s]) => s.split(',').some((x) => x.trim() === sel))
       .map(([, b]) => b.replace(/\s+/g, ' '))
       .join('\n');
-  assert.match(bodies('.paycard'), /background: var\(\s*--card-bg,\s*linear-gradient\(135deg,.*--slate-9/);
-  for (const [selector, body] of rules.filter(([s]) => physicalCardSelector(s))) assert.doesNotMatch(body, /--(?:iris|purple|indigo|blue)-\d+/, selector);
-  assert.match(bodies('.paycard:hover'), /perspective\(900px\).*rotateX\(var\(--rx, 0deg\)\).*rotateY\(var\(--ry, 0deg\)\).*translateY\(-3px\) scale\(1\.01\)/);
-  assert.match(bodies('.paycard::after'), /radial-gradient.*var\(--mx, 50%\) var\(--my, 50%\)/);
+  assert.match(bodies('.paycard'), /background: var\(--card-bg, linear-gradient\(135deg, #3b4a57, #1d2328\)\)/);
+  assert.match(bodies('.paycard'), /box-shadow: 0 10px 30px/);
+  assert.match(bodies('.paycard:hover'), /perspective\(900px\) rotateX\(var\(--rx, 0deg\)\) rotateY\(var\(--ry, 0deg\)\)/);
+  assert.match(bodies('.paycard::before'), /radial-gradient/);
+  assert.match(bodies('.paycard::after'), /var\(--mx, 50%\) var\(--my, 50%\)/);
   assert.match(bodies('.paycard:hover::after'), /opacity: 1/);
   assert.match(bodies('.wallet-grid.dragging .paycard::after'), /opacity: 0/);
-  assert.match(bodies('.paycard.lifted'), /scale: 1\.02/);
-  for (const sel of ['.paycard.apple', '.paycard.light', '.paycard.sim']) {
-    assert.match(bodies(sel), /background: linear-gradient\([\s\S]*--white-a12/);
-    assert.match(bodies(sel), /color: var\(--pc-ink\)/);
-    assert.match(bodies(`${sel}:hover`), /box-shadow:/);
-  }
-  const reduced = cssRules(css)
-    .filter(([s]) => s === '@media (prefers-reduced-motion: reduce)')
-    .flatMap(([, b]) => cssRules(b));
-  assert.ok(reduced.some(([s, b]) => s.includes('.paycard:hover') && /transform: none/.test(b)));
-  assert.ok(reduced.some(([s, b]) => s.includes('.paycard.lifted') && /scale: 1;/.test(b)));
+  assert.match(bodies('.pc-chip'), /linear-gradient\(135deg, #f1e3b5, #c4a462\)/);
+  const wallet = sources.find(([file]) => file === 'views/Wallet.tsx')[2];
+  assert.match(wallet, /'--card-bg': m\.color \|\| KIND_BG\[m\.kind\]/);
+  assert.match(wallet, /setProperty\('--rx'/);
+  assert.match(wallet, /setProperty\('--mx'/);
 });
 
 test('connection terminals keep theme-independent dark surfaces and light text', () => {

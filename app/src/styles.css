@@ -1062,77 +1062,67 @@ a {
   background: var(--fill-2);
 }
 
+/* 钱包卡面：与 main 第一版一致（实体卡模拟，质感属于内容） */
 /* ---------------- 钱包卡片 ---------------- */
 .paycard {
   position: relative;
-  border-radius: var(--radius-lg);
+  border-radius: 18px;
   /* 百分比相对卡宽：窄卡内边距跟着收 */
   padding: clamp(12px, 5.5%, 18px) clamp(14px, 6.5%, 20px);
   aspect-ratio: 1.586;
-  color: var(--white-a12);
+  color: #fff;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* 实体银行卡模拟：材质、反光和投影属于卡面内容。颜色不随页面主题翻转。 */
-  --pc-ink: color-mix(in srgb, var(--black-a12) 88%, var(--white-a12));
-  --pc-muted: color-mix(in srgb, var(--black-a12) 58%, var(--white-a12));
-  --pc-gold: color-mix(in srgb, var(--amber-9) 64%, var(--white-a12));
-  --pc-gold-edge: color-mix(in srgb, var(--amber-9) 62%, var(--black-a12));
-  box-shadow:
-    0 8px 24px var(--black-a4),
-    inset 0 var(--hairline) 0 var(--white-a4);
+  box-shadow: 0 10px 30px rgba(20, 30, 50, 0.18);
   cursor: pointer;
   isolation: isolate;
   border: 0;
   text-align: left;
   width: 100%;
-  background: var(
-    --card-bg,
-    linear-gradient(135deg, color-mix(in srgb, var(--slate-9) 60%, var(--black-a12)), color-mix(in srgb, var(--slate-9) 28%, var(--black-a12)))
-  );
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  background: var(--card-bg, linear-gradient(135deg, #3b4a57, #1d2328));
+  /* 无回弹的平滑减速（相当于阻尼 1 的弹簧）：进出都从当前位置接着走，不会跳 */
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(0) scale(1);
   transition:
-    transform var(--duration) var(--ease),
-    box-shadow var(--duration) var(--ease),
-    scale var(--duration) var(--ease),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     var(--sort-t, translate 0s);
+  will-change: transform;
 }
 .paycard:hover {
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px) scale(1.01);
-  box-shadow:
-    0 14px 30px -8px var(--black-a6),
-    inset 0 var(--hairline) 0 var(--white-a5);
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-6px) scale(1.015);
+  box-shadow: 0 24px 48px -12px rgba(20, 30, 50, 0.35);
+}
+/* 悬停中跟手：倾斜的变化要快，不然会拖泥带水 */
+.paycard:hover {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    var(--sort-t, translate 0s);
 }
 .paycard:active {
-  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(0.99);
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-2px) scale(0.99);
+  transition-duration: 0.12s;
 }
-.paycard::before,
+.paycard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(400px 200px at 110% -20%, rgba(255, 255, 255, 0.3), transparent 60%);
+}
 .paycard::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
-  pointer-events: none;
-}
-.paycard::before {
-  background: radial-gradient(400px 200px at 0% 0%, var(--white-a5), transparent 65%);
-}
-.paycard::after {
   opacity: 0;
-  transition: opacity var(--duration) var(--ease);
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--white-a5), transparent 60%);
+  transition: opacity 0.3s;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.3), transparent 60%);
 }
 .paycard:hover::after {
   opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .paycard,
-  .paycard:hover,
-  .paycard:active {
-    transform: none;
-    transition: none;
-  }
 }
 .pc-top {
   display: flex;
@@ -1141,7 +1131,7 @@ a {
   gap: 10px;
 }
 .pc-kind {
-  font-size: var(--fs-1);
+  font-size: clamp(11px, 4.4cqw, 12px);
   font-weight: 500;
   opacity: 0.85;
   white-space: nowrap;
@@ -1149,7 +1139,7 @@ a {
   text-overflow: ellipsis;
 }
 .pc-name {
-  font-size: var(--fs-3);
+  font-size: clamp(15px, 6.4cqw, 19px);
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-top: 2px;
@@ -1157,21 +1147,19 @@ a {
 .pc-chip {
   width: clamp(28px, 11cqw, 36px);
   height: clamp(21px, 8.3cqw, 27px);
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--pc-gold), var(--pc-gold-edge));
-  box-shadow:
-    inset 0 0 0 var(--hairline) var(--black-a4),
-    inset 0 var(--hairline) 0 var(--white-a8);
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f1e3b5, #c4a462);
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.2);
 }
 .pc-bal {
-  font-size: var(--fs-4);
+  font-size: clamp(22px, 9.5cqw, 30px);
 }
 .pc-foot {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 10px;
-  font-size: var(--fs-1);
+  font-size: clamp(11px, 4.2cqw, 12.5px);
 }
 .pc-foot .o {
   opacity: 0.85;
@@ -1195,7 +1183,260 @@ a {
 .wallet-grid > * {
   container-type: inline-size;
 }
-/* 大屏手机、平板竖屏一行两张；普通手机一行一张，保证余额与期数完整显示 */
+/* ================================================================
+   卡面 v2：品牌水印 + 角标 + SIM 卡
+   ================================================================ */
+.paycard {
+  overflow: hidden;
+}
+.pc-mark {
+  position: absolute;
+  z-index: -1;
+  right: -16%;
+  bottom: -38%;
+  width: 74%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  transform: rotate(-16deg);
+  opacity: 0.17;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(120deg, transparent 18%, #000 62%);
+  mask-image: linear-gradient(120deg, transparent 18%, #000 62%);
+}
+.pc-mark.appstore {
+  width: 66%;
+  right: -10%;
+  bottom: -30%;
+}
+.pc-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.pc-logo {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
+}
+.pc-logo.appstore {
+  width: 26px;
+  height: 26px;
+}
+.pc-id .pc-name {
+  margin-top: 0;
+  font-size: 17px;
+}
+.pc-id .pc-kind {
+  margin-top: 1px;
+}
+.pc-ccy {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.paycard .pc-chip {
+  margin-top: -6px;
+}
+/* SIM 卡托：普通卡片外形，右半边是 SIM 压痕 */
+.paycard.sim {
+  color: #1b2430;
+  background: linear-gradient(155deg, #ffffff 0%, #f4f6f9 60%, #e9edf2 100%);
+  box-shadow:
+    0 10px 30px rgba(20, 30, 50, 0.12),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.paycard.sim::before {
+  background: radial-gradient(260px 160px at 0% 100%, rgba(250, 196, 0, 0.12), transparent 70%);
+}
+.paycard.sim:hover {
+  box-shadow:
+    0 18px 40px rgba(20, 30, 50, 0.18),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.sim-top {
+  display: flex;
+  align-items: center;
+}
+.sim-logo {
+  height: 24px;
+  width: auto;
+}
+.sim-name {
+  /* 右侧是 SIM 压痕（约占 56%–92%），名称和号码各占一行，窄卡时缩小、仍放不下就省略 */
+  font-size: clamp(13px, 5.6cqw, 16px);
+  font-weight: 700;
+  line-height: 1.3;
+  max-width: 52%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sim-name small {
+  display: block;
+  font-size: clamp(10.5px, 4.2cqw, 12px);
+  font-weight: 500;
+  color: #5b6676;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.paycard.sim .pc-foot .o {
+  color: #5b6676;
+  opacity: 1;
+}
+.paycard.sim .pc-bal .amt {
+  color: #0d2f80;
+}
+.paycard.sim .pc-foot .o {
+  color: #5b6676;
+  opacity: 1;
+}
+.paycard.sim .pc-bal .amt {
+  color: #0d2f80;
+}
+/* ================================================================
+   App Store 卡：参照 Apple Card 的白色钛金属卡面，标志做激光蚀刻效果
+   ================================================================ */
+.paycard.apple {
+  color: #1d1d1f;
+  background: linear-gradient(135deg, #fdfdfe 0%, #f1f1f4 45%, #e1e1e6 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.paycard.apple:hover {
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 18px 36px rgba(0, 0, 0, 0.12);
+}
+/* 拉丝金属的一道斜向反光 */
+.paycard.apple::before {
+  background: linear-gradient(115deg, transparent 28%, rgba(255, 255, 255, 0.75) 44%, transparent 60%);
+}
+.paycard.apple::after {
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.7), transparent 60%);
+}
+.paycard.apple .pc-bal {
+  margin-top: 2px;
+}
+.paycard.apple .pc-id {
+  align-items: center;
+}
+/* 白底卡面（Google Play）：深色文字与细描边 */
+.paycard.light {
+  color: #1d1d1f;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.paycard.light .pc-ccy {
+  background: rgba(0, 0, 0, 0.06);
+}
+/* 钱包卡片拖动排序：拿起的卡片微微放大、阴影加深；拖动中不触发悬停光效；长按不弹系统菜单 */
+.paycard {
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.paycard.lifted {
+  z-index: 5;
+  scale: 1.03;
+  cursor: grabbing;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+}
+.wallet-grid.dragging .paycard::after {
+  opacity: 0 !important;
+}
+/* 卡面里的 logo 不可被浏览器原生拖走，否则会打断卡片排序拖动 */
+.paycard img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
+.pc-logo.wide {
+  width: 64px;
+  height: 24px;
+  object-fit: contain;
+  object-position: left center;
+}
+.pc-mark.wide {
+  opacity: 0.08;
+  width: 90%;
+  right: -20%;
+  bottom: -10%;
+}
+.pc-logo.bank {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+.pc-top .net-mark {
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+/* 卡片点击后不留浏览器默认的焦点框，键盘操作时才显示 */
+.paycard:focus {
+  outline: none;
+}
+.paycard:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* SIM 卡面：卡托右侧按真实比例的 Mini SIM 压痕，垂直居中 */
+.sim-punch {
+  position: absolute;
+  z-index: -1;
+  right: 8%;
+  top: 50%;
+  width: 36%;
+  aspect-ratio: 25 / 15;
+  transform: translateY(-58%);
+  overflow: visible;
+}
+.sim-punch .groove {
+  fill: none;
+  stroke: rgba(27, 36, 48, 0.18);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.sim-punch .groove.inner {
+  stroke: rgba(27, 36, 48, 0.1);
+  stroke-dasharray: 3 3;
+}
+.sim-carrier {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #0d2f80;
+}
+.sim-logo.wide {
+  height: 24px;
+}
+.proxy-head > div,
+.car-head > div,
+.ld-head > div,
+.pc-id {
+  min-width: 0;
+  flex: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .paycard,
+  .paycard:hover,
+  .paycard:active {
+    transform: none;
+    transition:
+      box-shadow 0.2s,
+      var(--sort-t, translate 0s);
+  }
+}
 @media (max-width: 680px) {
   .wallet-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3783,125 +4024,6 @@ button.h-price-row:focus-visible {
 }
 
 /* ================================================================
-   卡面 v2：品牌水印 + 角标 + SIM 卡
-   ================================================================ */
-.paycard {
-  overflow: hidden;
-}
-.pc-mark {
-  position: absolute;
-  z-index: -1;
-  right: -16%;
-  bottom: -38%;
-  width: 74%;
-  aspect-ratio: 1;
-  object-fit: contain;
-  transform: rotate(-16deg);
-  opacity: 0.17;
-  pointer-events: none;
-  -webkit-mask-image: linear-gradient(120deg, transparent 18%, var(--black-a12) 62%);
-  mask-image: linear-gradient(120deg, transparent 18%, var(--black-a12) 62%);
-}
-.pc-mark.appstore {
-  width: 66%;
-  right: -10%;
-  bottom: -30%;
-}
-.pc-id {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-.pc-logo {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 3px var(--black-a3));
-}
-.pc-logo.appstore {
-  width: 26px;
-  height: 26px;
-}
-.pc-id .pc-name {
-  margin-top: 0;
-  font-size: var(--fs-3);
-}
-.pc-id .pc-kind {
-  margin-top: 1px;
-}
-.pc-ccy {
-  font-size: var(--fs-1);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  opacity: 0.8;
-  padding: 3px 7px;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--white-a12) 14%, transparent);
-}
-.paycard .pc-chip {
-  margin-top: -6px;
-}
-
-/* SIM 卡托：普通卡片外形，右半边是 SIM 压痕 */
-.paycard.sim {
-  color: var(--pc-ink);
-  background: linear-gradient(
-    155deg,
-    var(--white-a12) 0%,
-    color-mix(in srgb, var(--white-a12) 96%, var(--black-a12)) 60%,
-    color-mix(in srgb, var(--white-a12) 91%, var(--black-a12)) 100%
-  );
-  box-shadow:
-    0 8px 24px var(--black-a3),
-    inset 0 0 0 var(--hairline) var(--black-a3),
-    inset 0 var(--hairline) 0 var(--white-a11);
-}
-.paycard.sim::before {
-  background: radial-gradient(260px 160px at 0% 100%, color-mix(in srgb, var(--amber-9) 12%, transparent), transparent 70%);
-}
-.paycard.sim:hover {
-  box-shadow:
-    0 12px 28px var(--black-a4),
-    inset 0 0 0 var(--hairline) var(--black-a3),
-    inset 0 var(--hairline) 0 var(--white-a11);
-}
-.sim-top {
-  display: flex;
-  align-items: center;
-}
-.sim-logo {
-  height: 24px;
-  width: auto;
-}
-.sim-name {
-  /* 右侧是 SIM 压痕（约占 56%–92%），名称和号码各占一行，窄卡时缩小、仍放不下就省略 */
-  font-size: var(--fs-3);
-  font-weight: 700;
-  line-height: 1.3;
-  max-width: 52%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sim-name small {
-  display: block;
-  font-size: var(--fs-1);
-  font-weight: 500;
-  color: var(--pc-muted);
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.paycard.sim .pc-foot .o {
-  color: var(--pc-muted);
-  opacity: 1;
-}
-.paycard.sim .pc-bal .amt {
-  color: var(--pc-ink);
-}
-
-/* ================================================================
    订阅卡片视图
    ================================================================ */
 .sgrid {
@@ -4358,37 +4480,6 @@ button.h-price-row:focus-visible {
   object-fit: contain;
 }
 
-/* ================================================================
-   App Store 卡：参照 Apple Card 的白色钛金属卡面，标志做激光蚀刻效果
-   ================================================================ */
-.paycard.apple,
-.paycard.light {
-  color: var(--pc-ink);
-  background: linear-gradient(
-    135deg,
-    var(--white-a12) 0%,
-    color-mix(in srgb, var(--white-a12) 95%, var(--black-a12)) 45%,
-    color-mix(in srgb, var(--white-a12) 88%, var(--black-a12)) 100%
-  );
-  box-shadow:
-    inset 0 0 0 var(--hairline) var(--black-a3),
-    inset 0 var(--hairline) 0 var(--white-a11),
-    0 8px 22px var(--black-a3);
-}
-.paycard.apple:hover,
-.paycard.light:hover {
-  box-shadow:
-    inset 0 0 0 var(--hairline) var(--black-a4),
-    inset 0 var(--hairline) 0 var(--white-a11),
-    0 12px 28px var(--black-a4);
-}
-/* 钛金属斜向反光与随鼠标移动的光泽。 */
-.paycard.apple::before {
-  background: linear-gradient(115deg, transparent 28%, var(--white-a9) 44%, transparent 60%);
-}
-.paycard.apple::after {
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--white-a9), transparent 60%);
-}
 .ac-logo {
   width: 34px;
   height: 34px;
@@ -4405,22 +4496,12 @@ button.h-price-row:focus-visible {
   font-size: var(--fs-1);
   color: var(--pc-muted);
 }
-.paycard.apple .pc-bal {
-  margin-top: 2px;
-}
-.paycard.apple .pc-id {
-  align-items: center;
-}
+
 .ac-name {
   font-size: var(--fs-2);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--pc-muted);
-}
-
-/* 白底卡面（Google Play）：深色文字与细描边 */
-.paycard.light .pc-ccy {
-  background: color-mix(in srgb, var(--black-a12) 6%, transparent);
 }
 
 /* 支付方式标记：产品 logo + 国旗角标 */
@@ -4611,31 +4692,6 @@ button.h-price-row:focus-visible {
   color: var(--orange);
 }
 
-/* 钱包卡片拖动排序：长按不弹系统菜单 */
-.paycard {
-  -webkit-touch-callout: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.paycard.lifted,
-.paycard.lifted:hover {
-  z-index: 5;
-  scale: 1.02;
-  transform: none;
-  cursor: grabbing;
-  box-shadow: 0 18px 36px var(--black-a5);
-}
-
-.wallet-grid.dragging .paycard::after {
-  opacity: 0;
-}
-@media (prefers-reduced-motion: reduce) {
-  .paycard.lifted,
-  .paycard.lifted:hover {
-    scale: 1;
-  }
-}
-
 /* 全站隐藏滚动条（页面、侧边栏、弹窗、横向滚动区），保留滚动能力 */
 * {
   scrollbar-width: none;
@@ -4646,25 +4702,6 @@ button.h-price-row:focus-visible {
   display: none;
   width: 0;
   height: 0;
-}
-/* 卡面里的 logo 不可被浏览器原生拖走，否则会打断卡片排序拖动 */
-.paycard img {
-  -webkit-user-drag: none;
-  user-drag: none;
-  pointer-events: none;
-}
-
-.pc-logo.wide {
-  width: 64px;
-  height: 24px;
-  object-fit: contain;
-  object-position: left center;
-}
-.pc-mark.wide {
-  opacity: 0.08;
-  width: 90%;
-  right: -20%;
-  bottom: -10%;
 }
 
 /* 支付方式选择器 */
@@ -4793,15 +4830,6 @@ button.h-price-row:focus-visible {
   width: auto;
   border-radius: var(--radius-sm);
   box-shadow: 0 0 0 var(--hairline) var(--line);
-}
-.pc-logo.bank {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-sm);
-}
-.pc-top .net-mark {
-  flex-shrink: 0;
-  box-shadow: 0 2px 5px var(--black-a3);
 }
 
 /* 分类胶囊：分类色淡底 + 图标 + 名称 */
@@ -5123,14 +5151,6 @@ button.h-price-row:focus-visible {
   z-index: 1;
 }
 
-/* 卡片点击后不留浏览器默认的焦点框，键盘操作时才显示 */
-.paycard:focus {
-  outline: none;
-}
-.paycard:focus-visible {
-  outline: var(--hairline) solid var(--focus-ring);
-  outline-offset: 2px;
-}
 .member-info {
   /* 名称、已付至、下次收款可能三行：最小高度对齐按钮，内容多时撑开 */
   min-height: var(--ctl-h-lg);
@@ -7387,33 +7407,6 @@ a.car-toggle {
   color: var(--label-2);
 }
 
-/* SIM 卡面：卡托右侧按真实比例的 Mini SIM 压痕，垂直居中 */
-.sim-punch {
-  position: absolute;
-  z-index: -1;
-  right: 8%;
-  top: 50%;
-  width: 36%;
-  aspect-ratio: 25 / 15;
-  transform: translateY(-58%);
-  overflow: visible;
-}
-.sim-punch .groove {
-  fill: none;
-  stroke: color-mix(in srgb, var(--black-a12) 18%, transparent);
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-.sim-punch .groove.inner {
-  stroke: color-mix(in srgb, var(--black-a12) 10%, transparent);
-  stroke-dasharray: 3 3;
-}
-.sim-carrier {
-  font-size: var(--fs-3);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  color: var(--pc-ink);
-}
 .pk-brand {
   width: 20px;
   height: 20px;
@@ -7422,9 +7415,7 @@ a.car-toggle {
   object-fit: contain;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }
-.sim-logo.wide {
-  height: 24px;
-}
+
 .mmark img {
   object-fit: contain;
 }
@@ -9253,13 +9244,7 @@ img.mm-flag {
 .name-link {
   display: block;
 }
-.proxy-head > div,
-.car-head > div,
-.ld-head > div,
-.pc-id {
-  min-width: 0;
-  flex: 1;
-}
+
 .pk-btn > span:not(.pk-ico),
 .pk-opt > span:not(.pk-ico) {
   min-width: 0;
