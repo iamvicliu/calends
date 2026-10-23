@@ -104,8 +104,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
+  height: var(--ctl-h-md);
+  padding: 0 13px;
   border: 0;
   border-radius: 999px;
   background: var(--dt-panel);
@@ -129,24 +129,20 @@
 .dt-btn:active {
   transform: scale(0.97);
 }
-.dt-btn.icon {
-  width: 34px;
-  padding: 0;
-}
 .dt-close {
   flex-shrink: 0;
   margin-left: 4px;
   background: var(--fill);
   box-shadow: none;
 }
-/* 顶部操作：宽屏为胶囊（带文字）与正圆（只有图标），34px 高，与关闭按钮对齐 */
+/* 顶部操作：宽屏为胶囊（带文字）与正圆（只有图标），32px 高，与关闭按钮对齐 */
 .dt-act {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
-  padding: 0 14px;
+  height: var(--ctl-h-md);
+  padding: 0 13px;
   border: 0;
   border-radius: 999px;
   background: var(--dt-panel);
@@ -175,21 +171,17 @@
   place-items: center;
   font-style: normal;
 }
-.dt-act.round {
-  width: 34px;
-  padding: 0;
-}
-.dt-act.round .dt-act-l {
+.dt-round .dt-act-l {
   display: none;
 }
 .dt-btn.sm {
-  height: 30px;
+  height: var(--ctl-h-md);
   padding: 0 12px;
   font-size: 12.5px;
 }
-/* 标题右侧的小操作（记一笔）：和 13px 标题同高 */
+/* 标题右侧的操作和同排图标、分段控件同高。 */
 .dt-btn.dt-add {
-  height: 24px;
+  height: var(--ctl-h-md);
   padding: 0 9px;
   gap: 4px;
   font-size: 12px;
@@ -293,14 +285,29 @@
   gap: 16px;
   min-width: 0;
 }
-/* 窄屏单列：摘要、历程排在扣款记录前面 */
+.dt-body,
+.dt-main {
+  container: detail-main / inline-size;
+}
+.dt-billing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+@container detail-main (min-width: 720px) {
+  .dt-billing.has-forecast {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* 窄屏单列：保留主栏顺序，让预测与扣款记录相邻 */
 @media (max-width: 999px) {
   .dt-main,
   .dt-side {
     display: contents;
   }
-  .dt-charges {
-    order: 10;
+  .dt-side.has-charges > .dt-panel:not(.dt-charges):not(.dt-outcome) {
+    order: 1;
   }
   .dt-outcome {
     order: -1;
@@ -346,8 +353,6 @@
   min-width: 0;
 }
 .dt-ph {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 8px;
   min-height: 28px;
@@ -648,36 +653,12 @@
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
 }
-.dt-up-list {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: 0;
+.dt-upcoming .dt-tbl {
+  margin-top: 10px;
 }
-.dt-up-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 9px 0;
-  border-top: 1px solid var(--sep);
-}
-.dt-up-list span {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.dt-up-list .a {
-  align-items: flex-end;
-  text-align: right;
-}
-.dt-up-list b {
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.dt-up-list small {
-  font-size: 12px;
-  color: var(--label-3);
-  font-variant-numeric: tabular-nums;
+.dt-charges .dt-tbl {
+  width: calc(100% - 40px);
+  margin-inline: 20px;
 }
 .dt-up-more {
   padding-top: 8px;
@@ -689,40 +670,6 @@
 /* 合租座位 */
 .dt-seats {
   margin: 10px 0 6px;
-}
-.dt-seat-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.dt-seat {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.dt-seat.me {
-  background: var(--ink);
-  color: var(--on-ink);
-  font-size: 11px;
-}
-.dt-seat.taken {
-  background: color-mix(in srgb, var(--accent) 14%, var(--dt-panel));
-  color: var(--accent);
-}
-.dt-seat.exempt {
-  background: var(--fill);
-  color: var(--label-2);
-}
-.dt-seat.free {
-  box-shadow: inset 0 0 0 1.5px var(--dt-line-2);
-  background-image: radial-gradient(var(--label-3) 1px, transparent 1.5px);
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 .dt-seats > small {
   display: block;
@@ -901,32 +848,58 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  container: detail-charges / inline-size;
 }
 .dt-charges .dt-ph {
   padding: 14px 20px 10px;
 }
 .dt-tbl {
-  --cols: 52px minmax(0, 1fr) auto;
+  --cols: minmax(82px, 1fr) minmax(0, 1.15fr) minmax(0, 1.3fr);
+  width: 100%;
+}
+/* 卡片撑满主栏；宽卡按时间逐行先左后右，共享网格行高与分隔线。 */
+@container detail-charges (min-width: 640px) {
+  .dt-charges .dt-tbl {
+    --cols: 82px 80px 104px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+  .dt-charges .dt-grp {
+    grid-column: 1 / -1;
+  }
 }
 .dt-tr {
   display: grid;
   grid-template-columns: var(--cols);
   align-items: center;
   column-gap: 8px;
-  min-height: 34px;
-  padding: 0 20px;
+  min-height: 48px;
+  padding: 7px 0;
+  font-size: 12.5px;
+  line-height: 18px;
   font-variant-numeric: tabular-nums;
 }
-.dt-tr > :nth-child(n + 3) {
+.dt-tr > :nth-child(n + 2) {
   text-align: right;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+}
+.dt-tr .d {
+  display: flex;
+  flex-direction: column;
+}
+.dt-tr small {
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--label-3);
 }
 
 .dt-grp {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+  justify-content: center;
+  gap: 10px;
+  padding: 0;
   font-variant-numeric: tabular-nums;
   position: sticky;
   top: 0;
@@ -960,10 +933,13 @@
 .dt-row .o {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   font-weight: 500;
   min-width: 0;
-  white-space: nowrap;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 .dt-row .c {
   font-weight: 500;
@@ -1005,19 +981,19 @@
 .dt-tfoot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   min-height: 46px;
-  padding: 0 12px 0 20px;
+  padding: 0 20px;
   border-top: 1px solid var(--dt-line);
   flex: none;
 }
 
-/* 窄屏：按钮只留图标，表格去掉星期 */
+/* 窄屏：文字与图标操作同高，表格去掉星期 */
 @media (max-width: 640px) {
   .dt {
     padding: 24px 12px 24px;
   }
-  /* 第一行：图标 · 名称 · 关闭；第二行：一排等宽的圆形操作按钮 */
+  /* 第一行：图标 · 名称 · 关闭；第二行：同高操作，空间不足时整项换行 */
   .dt-head {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1042,27 +1018,20 @@
   }
   .dt-close {
     grid-area: close;
-    width: 36px;
-    height: 36px;
     margin: 0;
   }
   .dt-actions {
     grid-area: act;
-    display: grid;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 4px;
   }
-  .dt-act,
-  .dt-act.round {
-    flex-direction: column;
+  .dt-act {
+    flex-direction: row;
     gap: 6px;
-    width: auto;
-    height: auto;
-    padding: 0;
-    background: none;
-    box-shadow: none;
+    height: var(--ctl-h-md);
+    padding: 0 8px;
     font-size: 11.5px;
     font-weight: 500;
     color: var(--label-2);
@@ -1070,23 +1039,14 @@
   .dt-act:hover {
     background: none;
   }
-  .dt-act-i {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--dt-panel);
+  .dt-act .dt-act-i {
     color: var(--label);
-    box-shadow:
-      0 0 0 1px var(--dt-line-2),
-      0 1px 2px rgba(0, 0, 0, 0.05);
   }
-  .dt-act-i svg {
+  .dt-act .dt-act-i svg {
     width: 20px;
     height: 20px;
   }
-  .dt-act.round .dt-act-l {
-    display: block;
-  }
+
   .dt-act-l {
     max-width: 100%;
     overflow: hidden;
@@ -1137,8 +1097,9 @@
     font-size: 18px;
     line-height: 24px;
   }
-  .dt-tr {
-    padding: 0 14px;
+  .dt-charges .dt-tbl {
+    width: calc(100% - 28px);
+    margin-inline: 14px;
   }
   .dt-charges .dt-ph {
     padding: 12px 14px 8px;
@@ -1148,7 +1109,8 @@
 /* 宽屏：弹层撑大，两栏各自滚动 */
 @media (min-width: 1000px) {
   .sheet.bare:has(.dt) {
-    width: min(1080px, calc(100vw - 48px));
+    /* 左右各留至少 80px 遮罩，方便点空白处关闭 */
+    width: min(1120px, calc(100vw - 160px));
     overflow: hidden;
   }
   /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */
@@ -1182,7 +1144,7 @@
 }
 @media (min-width: 641px) and (max-width: 999px) {
   .sheet.bare:has(.dt) {
-    width: min(760px, calc(100vw - 32px));
+    width: min(760px, calc(100vw - 96px));
   }
 }
 
@@ -1199,8 +1161,20 @@
   .dt.compact {
     height: auto;
   }
+  /* 窄弹窗放不下名称和一整排按钮：按钮另起一行，名称不被挤成省略号 */
+  .dt.compact .dt-head {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+  .dt.compact .dt-actions {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+  }
   .dt.compact .dt-body {
     display: flex;
+    /* 宽屏两栏的 align-items: start 会让单列里的卡片缩成内容宽度 */
+    align-items: stretch;
   }
   .dt.compact .dt-kpis {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1238,7 +1212,7 @@
 }
 @media (max-width: 640px) {
   /* 复制为图片只在桌面端提供 */
-  .dt-act.desk {
+  .dt-actions .desk {
     display: none;
   }
   .dt-actions {
@@ -1268,4 +1242,9 @@
 }
 .dt-stop-loss {
   color: var(--dt-bad);
+}
+
+.dt-actions > .dt-round {
+  justify-self: center;
+  align-self: center;
 }

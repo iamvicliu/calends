@@ -60,6 +60,8 @@
   "chargeCount": "Ödemeler",
   "count": "{count}",
   "switches": "Bölge / plan değişiklikleri",
+  "stoppedOn": "{date} tarihinde durduruldu",
+  "endsOn": "{date} tarihinde sona erer",
   "thanks": "Teşekkürler · Bir sonraki dönemde görüşmek üzere",
   "n": {
     "charges": {

@@ -3,7 +3,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn } from '../../../shared/billing.ts';
-import { cnDate, money, monthLabel, symbol } from '../../../shared/format.ts';
+import { cnDate, flow, moneyTick, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
 import { t, type Params } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../../shared/metrics.ts';
@@ -81,6 +81,7 @@ export function PublicPage() {
         owner = body.settings.displayName ?? '';
         custom = body.settings.publicTitle ?? '';
         document.title = title();
+        setSignedAmounts(body.settings.signedAmounts !== false);
         setState(body);
       })
       .catch((e: Error) => setErr(e.message));
@@ -132,7 +133,7 @@ function ThemeButton() {
       title={t('public.theme.title', { mode: THEME_LABEL[mode] })}
       aria-label={t('public.theme.aria', { mode: THEME_LABEL[mode] })}
       onClick={cycle}
-      className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
+      className="public-icon-btn"
     >
       <ThemeIcon mode={mode} size={16} />
     </button>
@@ -158,7 +159,7 @@ function Ledger({ state }: { state: AppState }) {
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const v = chargeValue(state, c) * k;
-        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-[8px] bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${money(c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${fmt(v)}` : ''}` });
+        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-[8px] bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
         map.set(c.date, g);
       }
       return [...map.values()];
@@ -199,15 +200,15 @@ function Ledger({ state }: { state: AppState }) {
             <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">{t('public.hero.monthly')}</div>
-                <Num value={d.mrr * k} prefix={sym} className="mt-1 text-5xl font-semibold tracking-tight tnum sm:text-6xl" />
+                <Num value={d.mrr * k} ccy={ccy} prefix={sym} className="mt-1 text-5xl font-semibold tracking-tight tnum sm:text-6xl" />
                 <div className="mt-2 text-[13px] text-muted-foreground tnum">
                   {Math.abs(diff) < 1 ? t('public.hero.flat') : t(diff > 0 ? 'public.hero.more' : 'public.hero.less', { amount: fmt(Math.abs(diff)) })}
                 </div>
               </div>
               <dl className="grid grid-cols-3 gap-6 sm:gap-10">
-                <Stat label={t('public.hero.yearly')} value={<Num value={d.mrr * 12 * k} prefix={sym} />} />
+                <Stat label={t('public.hero.yearly')} value={<Num value={d.mrr * 12 * k} ccy={ccy} prefix={sym} />} />
                 <Stat label={t('public.hero.live')} value={<Num value={d.live.filter((x) => ['active', 'ending'].includes(effectiveStatus(x.s, today))).length} />} />
-                <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === base ? d.paidBase : d.paidUsd} prefix={sym} />} />
+                <Stat label={t('public.hero.paid', { year: d.first.slice(0, 4) })} value={<Num value={ccy === base ? d.paidBase : d.paidUsd} ccy={ccy} prefix={sym} />} />
               </dl>
             </CardContent>
 
@@ -217,7 +218,7 @@ function Ledger({ state }: { state: AppState }) {
               <div className="mb-2 flex items-baseline justify-between gap-3 pr-16">
                 <h2 className="font-medium">{t('public.timeline.title')}</h2>
                 <span className="text-[13px] text-muted-foreground tnum">
-                  {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} prefix={sym} className="text-foreground" /> })}
+                  {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} ccy={ccy} prefix={sym} className="text-foreground" /> })}
                 </span>
               </div>
               <Timeline today={today} load={loadTimeline} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
@@ -241,10 +242,10 @@ function Ledger({ state }: { state: AppState }) {
                 </CardAction>
               </CardHeader>
               <TabsContent value="paid" className="mt-4 px-2 sm:px-4">
-                <PaidChart months={ccy === base ? d.monthsBase : d.monthsUsd} cur={today.slice(0, 7)} sym={sym} fmt={fmt} />
+                <PaidChart months={ccy === base ? d.monthsBase : d.monthsUsd} cur={today.slice(0, 7)} ccy={ccy} fmt={fmt} />
               </TabsContent>
               <TabsContent value="mrr" className="mt-4 px-2 sm:px-4">
-                <MrrChart data={d.mrrTrend.map((p) => ({ ...p, mrr: p.mrr * k }))} sym={sym} fmt={fmt} />
+                <MrrChart data={d.mrrTrend.map((p) => ({ ...p, mrr: p.mrr * k }))} ccy={ccy} fmt={fmt} />
               </TabsContent>
             </Tabs>
           </Card>
@@ -422,7 +423,7 @@ function derive(state: AppState, today: string) {
 
 const monthTick = (m: string, cur: string) => (m === cur ? t('public.chart.thisMonth') : monthLabel(m, { year: false }));
 const monthFull = (m: string) => monthLabel(m);
-const short = (v: number, sym: string) => (v >= 1000 ? `${sym}${+(v / 1000).toFixed(1)}k` : `${sym}${Math.round(v)}`);
+
 
 // ---------- 组件 ----------
 
@@ -436,14 +437,14 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 
-function PaidChart({ months, cur, sym, fmt }: { months: Array<{ m: string; v: number }>; cur: string; sym: string; fmt: (v: number) => string }) {
+function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: number }>; cur: string; ccy: string; fmt: (v: number) => string }) {
   const paidConfig = { v: { label: t('public.chart.charge'), color: 'var(--foreground)' } } satisfies ChartConfig;
   return (
     <ChartContainer config={paidConfig} className="aspect-auto h-52 w-full">
       <BarChart data={months} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
         <CartesianGrid vertical={false} strokeDasharray="2 4" />
         <XAxis dataKey="m" tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" minTickGap={6} tickFormatter={(m: string) => monthTick(m, cur)} />
-        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => short(v, sym)} />
+        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent hideIndicator labelFormatter={(m) => (String(m) > cur ? t('public.chart.projected', { month: monthFull(String(m)) }) : monthFull(String(m)))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />}
@@ -464,7 +465,7 @@ function PaidChart({ months, cur, sym, fmt }: { months: Array<{ m: string; v: nu
 }
 
 
-function MrrChart({ data, sym, fmt }: { data: Array<{ month: string; mrr: number }>; sym: string; fmt: (v: number) => string }) {
+function MrrChart({ data, ccy, fmt }: { data: Array<{ month: string; mrr: number }>; ccy: string; fmt: (v: number) => string }) {
   const mrrConfig = { mrr: { label: t('public.chart.mrr'), color: 'var(--foreground)' } } satisfies ChartConfig;
   return (
     <ChartContainer config={mrrConfig} className="aspect-auto h-52 w-full">
@@ -477,7 +478,7 @@ function MrrChart({ data, sym, fmt }: { data: Array<{ month: string; mrr: number
         </defs>
         <CartesianGrid vertical={false} strokeDasharray="2 4" />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} minTickGap={28} tickFormatter={(m: string) => `${m.slice(2, 4)}/${Number(m.slice(5))}`} />
-        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => short(v, sym)} />
+        <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip cursor={false} content={<ChartTooltipContent hideIndicator labelFormatter={(m) => monthFull(String(m))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />} />
         <Area dataKey="mrr" type="stepAfter" stroke="var(--color-mrr)" strokeWidth={1.5} fill="url(#mrr-fill)" />
       </AreaChart>
@@ -603,7 +604,7 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
                 type="button"
                 onClick={() => setTab(c)}
                 aria-pressed={tab === c}
-                className={cn('relative h-7 rounded-md px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}
+                className={cn('public-filter-btn relative rounded-md px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}
               >
                 {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-md bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
                 <span className="relative flex items-center gap-1">
@@ -630,11 +631,13 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
 
 function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: string; ccy: Ccy; k: number; fmt: (v: number) => string }) {
   const ph = currentPhase(s, today);
-  const n = nextCharge(s, addDays(today, 1));
+  const status = effectiveStatus(s, today);
+  const ending = ['ending', 'ended', 'terminated'].includes(status);
+  const end = ph.stop?.date ?? ph.end ?? s.stop?.date ?? s.end;
+  const n = ending ? undefined : nextCharge(s, addDays(today, 1));
   const soon = n !== undefined && diffDays(today, n) <= 7;
   const monthly = ph.currency === ccy && ph.cycle.unit === 'month' && ph.cycle.every === 1;
   const repeatsPrice = monthly && Math.abs(v * k - ph.price) < 0.005;
-  const status = effectiveStatus(s, today);
   return (
     <div className="flex items-center gap-3 py-3">
       <AppIcon sub={s} className="size-9 rounded-[10px]" />
@@ -650,7 +653,7 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
         </div>
         <div className="truncate text-[13px] text-muted-foreground tnum">
           {cycleLabel(ph.cycle)}{!repeatsPrice && ` ${money(ph.price, ph.currency)}`}
-          {n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
+          {ending && end ? <span>{t('public.row.ends', { date: cnDate(end) })}</span> : n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
         </div>
       </div>
       <div className="text-right tnum">

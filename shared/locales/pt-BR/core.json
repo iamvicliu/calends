@@ -53,7 +53,10 @@
     "prependUntil": "A fase anterior deve terminar depois de começar e no máximo na data de início original",
     "priceOutOfRange": "A data da mudança de preço não está dentro de nenhuma fase",
     "keepTooEarly": "A data até quando manter deve ser posterior à da troca",
-    "endTooEarly": "A data de término deve ser posterior ao início desta fase"
+    "endTooEarly": "A data de término deve ser posterior ao início desta fase",
+    "startOrder": "O início deve ficar estritamente entre os inícios das fases vizinhas.",
+    "priceDuplicate": "Já existe um preço nesta data",
+    "priceInitial": "O preço inicial não pode ser excluído"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -175,7 +178,7 @@
     "refunded": "Reembolsado {money}",
     "partial": "Reembolso parcial {money}",
     "unrefunded": "Sem reembolso · Perda {money}",
-    "unused": "Perda não reembolsada: −{money} ({days})",
+    "unused": "Perda não reembolsada: {money} ({days})",
     "unusedTitle": "Sem reembolso",
     "terminated": "Desativado",
     "restore": "Reativar",
@@ -188,6 +191,19 @@
     "fullyRefunded": "Reembolso integral",
     "chargeOnEnd": "Nesse dia ainda há cobrança de renovação. Escolha o dia anterior para evitá-la.",
     "nonrenewDone": "Não será renovado. Sem cobranças após {date}.",
-    "stoppedDone": "Serviço interrompido"
+    "stoppedDone": "Serviço interrompido",
+    "method": "Forma de cancelamento",
+    "latestRefundHint": "Estes campos editam o último reembolso. Os anteriores ficam no histórico de pagamentos."
+  },
+  "renewal": {
+    "title": "Regras de renovação",
+    "chargeLeadDays": "Cobrança antecipada",
+    "cancelLeadDays": "Cancelamento antecipado",
+    "hint": "Cobrança antes da renovação e cancelamento antes dessa cobrança. Informe os dias; 0 significa nenhum. Os períodos não mudam.",
+    "cancelBy": "Prazo de cancelamento",
+    "invalid": "Insira um número inteiro de 0 a 3660 dias.",
+    "tooLate": "O prazo de cancelamento passou. O próximo período ainda será cobrado.",
+    "cancelReminder": "Cancele até {date} para evitar a próxima cobrança.",
+    "none": "Nenhum"
   }
 }

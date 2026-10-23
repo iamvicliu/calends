@@ -38,6 +38,15 @@ export interface PricePoint {
   amount: number;
 }
 
+export interface MemberFeePoint {
+  /** 按保存时汇率折算的订阅每期份额，供按日期的净成本计算 */
+  share?: number;
+  from: string;
+  fee: number;
+  currency: string;
+  billEvery: number;
+}
+
 export interface ShareMember {
   id: string;
   /** 关联的人（people 名册）；有则以那个人的称呼、联系方式为准，下面的 name、contact 是镜像副本，老数据只有副本 */
@@ -54,16 +63,20 @@ export interface ShareMember {
   tg?: string;
   /** 来源：从哪个群 / 渠道来的 */
   source?: string;
-  /** 受邀账号：被邀请进家庭组的邮箱（多数服务用邮箱邀请） */
+  /** 此人在这辆车上的账号：邮箱、手机号、用户名或 ID 等任意文本；不随人员资料同步 */
   account?: string;
   /** 不分摊：占一个位置但不交钱（比如自己的另一个账号、家人） */
   exempt?: boolean;
+  /** 自定义收费：不跟随车的收款规则（周期、金额由成员自己的收费标准决定） */
+  custom?: boolean;
   /** 每次收多少（按收费周期），币种默认人民币；每期份额 share 由它按汇率换算得出 */
   fee?: number;
   feeCurrency?: string;
+  /** 生效日收费历史；覆盖起点决定整期标准，历史实收不变 */
+  feeHistory?: MemberFeePoint[];
   /** 收费周期（月）：1 按月、3 按季、6 按半年、12 按年；旧数据缺省沿用订阅周期折算月数 */
   billEvery?: number;
-  /** 中途加入首期：缺省按天折算，之后按合租收款起点对齐 */
+  /** 中途加入首期：缺省按天折算，仅首期按合租收款起点对齐 */
   firstPeriod?: 'prorate' | 'full' | 'free';
   /** 首期应收自定义金额（收费币种）；缺省按 firstPeriod 计算 */
   firstAmount?: number;
@@ -88,6 +101,13 @@ export interface MemberPayment {
   note?: string;
 }
 
+/** 一辆车默认怎么收：每几个月收一次、每次收多少 */
+export interface CarRule {
+  billEvery: number;
+  fee: number;
+  currency: string;
+}
+
 export interface Share {
   /** owner = 我发起合租，代付全款向他人收钱；member = 我加入合租，price 记录的是我的那份 */
   role: 'owner' | 'member';
@@ -99,6 +119,8 @@ export interface Share {
   since?: string;
   /** 统一收款起点；缺省依次取 since、最早收款覆盖起点、订阅开始日 */
   collectFrom?: string;
+  /** 车的收款规则：跟随车的成员按这个周期和金额收；缺省时取成员里最常见的收费标准 */
+  rule?: CarRule;
 }
 
 /** 代付的一期：卡上实扣多少（订阅币种），对方还了多少（币种可以不同，比如扣日元、收人民币） */
@@ -143,12 +165,31 @@ export interface Person {
   contact?: string;
   note?: string;
   color?: PersonColor;
+  /** Private PNG/WebP data URL, square, at most 128px and 64 KiB. */
+  avatar?: string;
   createdAt?: string;
 }
 
+/** 阶段内续费规则；历史项的 from 是实际扣款规则的生效日。 */
+export interface RenewalRule {
+  from: string;
+  chargeLeadDays: number;
+  cancelLeadDays: number;
+}
+
+export interface RenewalRules {
+  chargeLeadDays?: number;
+  cancelLeadDays?: number;
+  renewalHistory?: RenewalRule[];
+  /** 旧 expires 的服务边界偏移，保留原扣款锚点。 */
+  renewalOffsetDays?: number;
+}
+
 /** 订阅的一个阶段：区域、币种、价格、周期、支付方式在阶段内不变（阶段内调价用 priceHistory） */
-export interface Phase {
+export interface Phase extends RenewalRules {
   start: string;
+  /** 修正服务开始日时保留的原计费起点；缺省使用 start */
+  billingStart?: string;
   /** 最后服务日（含）；缺省为下一阶段开始前一天，最后一段取订阅的 end */
   end?: string;
   stop?: Stop;
@@ -168,7 +209,7 @@ export interface Phase {
   planned?: boolean;
 }
 
-export interface Subscription {
+export interface Subscription extends RenewalRules {
   id: string;
   name: string;
   icon?: string; // emoji 或图片 URL
@@ -181,6 +222,8 @@ export interface Subscription {
   currency: string;
   cycle: Cycle;
   start: string;
+  /** 修正服务开始日时保留的原计费起点；缺省使用 start */
+  billingStart?: string;
   /** 最后服务日（含当天）：次日结束，不再产生预测扣款 */
   end?: string;
   stop?: Stop;

@@ -162,7 +162,11 @@
     },
     "applyAll": "Confirm all",
     "history": "Charge history",
-    "historyCount": { "one": "{count} charge", "other": "{count} charges" }
+    "historyCount": {
+      "one": "{count} charge",
+      "other": "{count} charges"
+    },
+    "changes": "Preview changes and references"
   },
   "error": {
     "auth": "Invalid API key",

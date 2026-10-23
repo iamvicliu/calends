@@ -19,7 +19,22 @@
     "date": "Дата",
     "member": "Участник",
     "covers": "Период",
-    "amount": "Сумма"
+    "amount": "Сумма",
+    "expandAll": "Развернуть все",
+    "collapseAll": "Свернуть все",
+    "groupSum": {
+      "one": "{count} платёж · {amount}",
+      "other": "{count} платежей · {amount}",
+      "few": "{count} платежа · {amount}"
+    },
+    "fee": "Плата",
+    "nextCollection": "Следующий сбор",
+    "actions": "Действия",
+    "status": "Статус оплаты",
+    "period": "Текущий период",
+    "range": "{from} – {until}",
+    "rangeFrom": "С",
+    "rangeTo": "По"
   },
   "contact": {
     "via": {
@@ -60,8 +75,8 @@
     "name": "Имя",
     "namePh": "Как к нему обращаться",
     "contact": "Контакт",
-    "account": "Приглашённый аккаунт",
-    "accountPh": "Почта или логин, приглашённый в {name}",
+    "account": "Аккаунт участника",
+    "accountPh": "Почта, телефон, имя пользователя или ID в {name}",
     "joined": "Присоединился",
     "joinedPh": "Начало подписки ({date})",
     "notSet": "Не задано",
@@ -141,7 +156,10 @@
     "coverAligned": "До конца общего расчётного периода",
     "recordNext": "Записать платёж · {amount}",
     "collectionAnchor": "Общая дата начала сбора",
-    "firstSummary": "Первый период {from}–{until} · {mode} {amount}"
+    "firstSummary": "Первый период {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Аккаунт не указан",
+    "editAccount": "Изменить аккаунт участника",
+    "copyAccount": "Копировать аккаунт"
   },
   "pool": {
     "seatsFree": "Свободно {count}",
@@ -222,7 +240,9 @@
     "payTo": "Плачу {name} · {amount}",
     "ownerDefault": "организатор",
     "maybeGroup": "Возможно, совместные",
-    "convert": "Сделать совместной"
+    "convert": "Сделать совместной",
+    "dueOn": "К оплате {date}",
+    "nextDueOn": "Следующий сбор {date}"
   },
   "convert": {
     "title": "Сделать «{name}» совместной",
@@ -253,5 +273,42 @@
     "gain": "В плюсе на {amount}",
     "lost": "В минусе на {amount}",
     "noRecords": "Платежей пока нет"
+  },
+  "collect": {
+    "title": "Записать оплату · {name}",
+    "next": "Следующий сбор {date}",
+    "editMember": "Изменить",
+    "until": "Покрывает до",
+    "covers": "Оплата покрывает {from} – {until}",
+    "changeFee": "Изменить тариф",
+    "lastPayment": "Последний платёж",
+    "adjustFee": "Настроить тариф",
+    "feeFrom": "Действует с",
+    "feeHelp": "Тариф на дату начала покрытия применяется ко всему периоду. Сохранённые платежи не меняются.",
+    "viewSub": "Подробнее"
+  },
+  "rule": {
+    "title": "Правило сбора",
+    "follow": "Как у подписки",
+    "custom": "Своё",
+    "followValue": "{rule} (общее правило)",
+    "sheetTitle": "Правило сбора подписки",
+    "from": "Действует с",
+    "anchor": "Общая дата сбора",
+    "applyNote": "{count} участников с общим правилом перейдут на новое с указанной даты; свои правила и прошлые платежи не меняются."
+  },
+  "quick": {
+    "more": "Подробнее",
+    "paid": "Оплачено до",
+    "paidFrom": "Начало периода",
+    "paidTo": "Конец периода",
+    "late": {
+      "one": "Просрочено на {count} день",
+      "few": "Просрочено на {count} дня",
+      "many": "Просрочено на {count} дней",
+      "other": "Просрочено на {count} дня"
+    },
+    "owe": "Долг {amount} · с {date}",
+    "settled": "Оплачено · следующий платёж {date}"
   }
 }

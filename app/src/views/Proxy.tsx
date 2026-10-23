@@ -1,10 +1,11 @@
+import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
 import { addDays, cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, Cell, Group, Icon, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
+import { Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
 import { run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -75,7 +76,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
           <div className="proxy-head">
             <SubIcon sub={s} size={46} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="ph-name">
+              <div className="ph-name text-ellipsis">
                 <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
               </div>
               <div className="muted ph-meta">
@@ -88,7 +89,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
         </div>
         <div className="ph-chips">
           <span className="who-chip" title={s.proxy!.note}>
-            <Icon name="users" size={12} />
+            <PersonAvatar p={personFor(state, s.proxy!.personId, s.proxy!.forName)} size={20} />
             {t('proxy.payFor', { name: s.proxy!.forName || t('proxy.unset') })}
             {contactText(s.proxy!) && <em>{contactText(s.proxy!)}</em>}
           </span>
@@ -150,7 +151,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
         <div className="ld-head">
           <SubIcon sub={live} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name">
+            <div className="ph-name text-ellipsis">
               <NameLink
                 onClick={() => {
                   onClose();
@@ -172,7 +173,14 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
 
         <div className="ld-top">
           <Group>
-            <Cell label={t('proxy.forWhom')}>
+            <Cell
+              label={
+                <span className="row">
+                  <PersonAvatar p={personFor(state, live.proxy!.personId, live.proxy!.forName)} size={28} />
+                  {t('proxy.forWhom')}
+                </span>
+              }
+            >
               <span className="ld-who">
                 {px.forName || t('proxy.unset')}
                 {contactText(px) && <small>{contactText(px)}</small>}
@@ -358,12 +366,16 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       }
     >
       <div className="stack">
+        <div className="row">
+          <PersonAvatar p={personFor(state, s.proxy!.personId, s.proxy!.forName)} size={36} />
+          <b>{s.proxy!.forName}</b>
+        </div>
         <Group
           title={t('proxy.table.charged')}
           foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
         >
           <Cell label={t('proxy.entry.amount')}>
-            <input className="num" inputMode="decimal" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
+            <MoneyInput ccy={chargedCcy} className="num" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
           </Cell>
           <Cell label={t('proxy.entry.currency')}>
             <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
@@ -381,9 +393,9 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           }
         >
           <Cell label={t('proxy.entry.amount')}>
-            <input
+            <MoneyInput
+              ccy={ccy}
               className="num"
-              inputMode="decimal"
               autoFocus
               value={received}
               placeholder={t('proxy.entry.notReceived')}

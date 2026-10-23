@@ -162,7 +162,11 @@
     },
     "applyAll": "Confirmar todo",
     "history": "Cargos anteriores",
-    "historyCount": { "one": "{count} cargo", "other": "{count} cargos" }
+    "historyCount": {
+      "one": "{count} cargo",
+      "other": "{count} cargos"
+    },
+    "changes": "Ver cambios y referencias"
   },
   "error": {
     "auth": "API Key no válida",

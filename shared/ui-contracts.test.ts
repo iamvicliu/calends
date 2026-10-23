@@ -41,6 +41,20 @@ test('14. 真实 Ai 组件创建令牌后仅弹层可见，关闭和“已保存
     base: (s: string) => s,
     t: (s: string) => s,
     Icon: 'Icon',
+    IconButton: 'IconButton',
+    ChartPie: 'ChartPie',
+    Eye: 'Eye',
+    KeyRound: 'KeyRound',
+    Layers: 'Layers',
+    PencilLine: 'PencilLine',
+    ReceiptText: 'ReceiptText',
+    Settings2: 'Settings2',
+    Shapes: 'Shapes',
+    Tags: 'Tags',
+    Trash2: 'Trash2',
+    Users: 'Users',
+    Wallet: 'Wallet',
+    CardTitle: 'h3',
     Sheet: 'Sheet',
     Toggle: 'Toggle',
     Toolbar: 'Toolbar',
@@ -212,6 +226,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     tipProps: () => ({}),
     SubIcon: 'SubIcon',
     Amount: 'Amount',
+    CardTitle: 'h3',
   };
   const { StopsCard } = load('../app/src/views/Report.tsx', ['StopsCard'], deps);
   const { Receipt, Poster, Card, Stars } = load('../app/src/views/Review.tsx', ['Receipt', 'Poster', 'Card', 'Stars'], {

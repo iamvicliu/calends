@@ -5,7 +5,10 @@
   },
   "stat": {
     "owed": "A receber",
-    "owedSub": { "one": "{count} pessoa deve", "other": "{count} pessoas devem" },
+    "owedSub": {
+      "one": "{count} pessoa deve",
+      "other": "{count} pessoas devem"
+    },
     "allSettled": "Tudo quitado",
     "received": "Recebido até agora",
     "receivedSub": "Planos compartilhados e pagamentos para outros",
@@ -19,7 +22,10 @@
   "card": {
     "noContact": "Sem contato",
     "nothing": "Em nenhum plano",
-    "past": { "one": "Mais {count} encerrado", "other": "Mais {count} encerrados" }
+    "past": {
+      "one": "Mais {count} encerrado",
+      "other": "Mais {count} encerrados"
+    }
   },
   "kind": {
     "share": "Plano compartilhado",
@@ -28,7 +34,10 @@
   "item": {
     "paidUntil": "Pago até {date}",
     "noPay": "Nenhum pagamento",
-    "owedPeriods": { "one": "{count} período em aberto", "other": "{count} períodos em aberto" },
+    "owedPeriods": {
+      "one": "{count} período em aberto",
+      "other": "{count} períodos em aberto"
+    },
     "left": "Saiu",
     "ended": "Encerrado",
     "received": "Pago {amount}"
@@ -37,18 +46,25 @@
     "owed": "A receber",
     "received": "Pago até agora",
     "last": "Último pagamento",
-    "in": { "one": "Em {count} plano", "other": "Em {count} planos" },
+    "in": {
+      "one": "Em {count} plano",
+      "other": "Em {count} planos"
+    },
     "inEmpty": "Não está em nenhum plano ou pagamento. Você pode excluí-la.",
     "profile": "Perfil",
     "notePh": "ex.: colega, paga no fim do mês",
     "color": "Cor",
-    "syncFoot": { "one": "Mudanças de nome e contato valem em {count} lugar.", "other": "Mudanças de nome e contato valem nos {count} lugares." },
+    "syncFoot": {
+      "one": "Mudanças de nome e contato valem em {count} lugar.",
+      "other": "Mudanças de nome e contato valem nos {count} lugares."
+    },
     "merge": "Mesclar com",
     "mergePick": "Escolher…",
     "mergeFoot": "A mesma pessoa aparece duas vezes? Mescle para juntar planos e pagamentos.",
     "mergeConfirm": "Mesclar “{from}” com “{into}”? Todos os planos e pagamentos de {from} passam para {into}, mantendo o nome e o contato de {into}.",
     "merged": "Mesclado com {name}",
-    "confirmDelete": "Excluir “{name}”?"
+    "confirmDelete": "Excluir “{name}”?",
+    "accountMissing": "Este vínculo não existe mais. Reabra os detalhes da pessoa."
   },
   "pick": {
     "new": "Nova pessoa",
@@ -60,5 +76,15 @@
       "one": "Também aparece em mais {count} lugar — mudanças de nome e contato valem lá também.",
       "other": "Também aparece em mais {count} lugares — mudanças de nome e contato valem lá também."
     }
+  },
+  "avatar": {
+    "change": "Alterar avatar",
+    "help": "Clique, arraste ou cole uma imagem PNG, JPEG ou WebP (até 8 MB).",
+    "remove": "Remover avatar",
+    "removeConfirm": "Remover este avatar? Salve para aplicar.",
+    "fallbackColor": "Cor alternativa"
+  },
+  "list": {
+    "none": "Nenhuma pessoa encontrada"
   }
 }

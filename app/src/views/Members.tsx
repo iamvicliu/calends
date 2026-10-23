@@ -1,14 +1,28 @@
-import { useState } from 'react';
-import { todayIn, uid, memberUnpaidFrom, memberBillMonths, memberCollection, collectionAnchor, collectionDates } from '../../../shared/billing.ts';
+import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
+import { useRef, useState } from 'react';
+import {
+  addDays,
+  addMonths,
+  cycleLabel,
+  nextCharge,
+  todayIn,
+  uid,
+  memberUnpaidFrom,
+  memberBillMonths,
+  memberCollection,
+  memberDues,
+  collectionAnchor,
+  diffDays,
+} from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, Cell, Group, Icon, NumInput, Seg, Sheet, Toggle } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { refsFor } from '../../../shared/people.ts';
-import { carLedger, memberFee, shareFromFee } from '../../../shared/carpool.ts';
+import { carLedger, carRule, followCarRule, followsCar, memberFee, changeMemberFee, refreshReceiptDraft, shareFromFee } from '../../../shared/carpool.ts';
 
 export { carLedger, memberFee };
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
@@ -32,6 +46,14 @@ const AT_VIA = new Set(['Telegram', 'X']);
 const bare = (id: string) => id.replace(/^@+/, '');
 
 /** 成员联系方式的一行文字：「Telegram @abc」 */
+/** 只要联系方式本身（如 @name、手机号），不带「Telegram」「微信」等渠道名；列表里用 */
+export function contactValue(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'>): string {
+  const via = m.contactVia ?? (m.tg ? 'Telegram' : '');
+  const id = m.contact ?? m.tg;
+  if (!id) return '';
+  return AT_VIA.has(via) ? `@${bare(id)}` : id;
+}
+
 export function contactText(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'>): string {
   const via = m.contactVia ?? (m.tg ? 'Telegram' : '');
   const id = m.contact ?? m.tg;
@@ -92,12 +114,15 @@ export function MemberSheet({
   member,
   collect,
   onClose,
+  onOpenSub,
 }: {
   state: AppState;
   s: Subscription;
   member?: ShareMember;
   collect?: boolean;
   onClose: () => void;
+  /** 记收款弹窗顶部「查看详情」：打开这条订阅的详情 */
+  onOpenSub?: () => void;
 }) {
   const today = todayIn(state.settings.timezone);
   const isNew = !member;
@@ -108,71 +133,114 @@ export function MemberSheet({
     const init =
       member?.tg && !member.contact
         ? { ...member, contactVia: 'Telegram', contact: member.tg, tg: undefined }
-        : (member ?? { id: uid(), name: '', share: Math.round((s.price / Math.max(1, s.share?.seats ?? 1)) * 100) / 100, billEvery: 1, joined: today });
+        : (member ??
+          (() => {
+            // 新成员默认跟随车的收款规则
+            const r = carRule(state, s, today);
+            return {
+              id: uid(),
+              name: '',
+              share: shareFromFee(state, s, r.fee, r.currency, r.billEvery),
+              fee: r.fee,
+              feeCurrency: r.currency,
+              billEvery: r.billEvery,
+              joined: today,
+            };
+          })());
     // 老数据只有每期份额：换算成「每次收多少人民币」
-    const fee = memberFee(state, s, init);
+    const fee = memberFee(state, s, init, today);
     return { ...init, fee: fee.amount, feeCurrency: fee.currency };
   });
   const up = (p: Partial<ShareMember>) => {
     const next = { ...f, ...p };
     setF(next);
-    if (adding && ['joined', 'left', 'firstPeriod', 'firstAmount', 'paidUntil'].some((key) => key in p)) setPay(freshPay(next));
+    if (adding && ['joined', 'left', 'firstPeriod', 'firstAmount', 'paidUntil'].some((key) => key in p))
+      setPay((draft) => refreshReceiptDraft(draft, freshPay(next), payMoneyEdited));
   };
   const via = f.contactVia ?? 'Telegram';
-  const setVia = (v: string) => up({ contactVia: v, ...(v === '邮箱' && f.contact && !f.account ? { account: f.contact } : {}) });
-  // 联系方式选的是邮箱且还没填受邀邮箱时，顺手填上
-  const setContact = (c: string) =>
-    up({
-      contactVia: via,
-      contact: c || undefined,
-      tg: undefined,
-      ...(via === '邮箱' && (!f.account || f.account === f.contact) ? { account: c || undefined } : {}),
-    });
+  const setVia = (v: string) => up({ contactVia: v });
+  const setContact = (c: string) => up({ contactVia: via, contact: c || undefined, tg: undefined });
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
-  const months = memberBillMonths(s, f);
-  const freshPay = (m: ShareMember): MemberPayment => {
-    const from = memberUnpaidFrom(s, m);
+  // 从「收款」按钮进来：只显示记一笔收款的小表单，不展开成员资料；需要时再切到完整资料
+  const [quick, setQuick] = useState(!!collect && !isNew);
+  const [feeFrom, setFeeFrom] = useState(today);
+  // 收费方式：跟随车的规则，或这个人自定义周期与金额（老数据收费与车不一致时视为自定义）
+  const rule = carRule(state, s, today);
+  const [feeMode, setFeeMode] = useState<'follow' | 'custom'>(() => (!member || followsCar(state, s, member, today) ? 'follow' : 'custom'));
+  const [feeBase, setFeeBase] = useState<ShareMember | null>(null);
+  const feeSection = useRef<HTMLDivElement>(null);
+  const [saving, setSaving] = useState(false);
+  const months = memberBillMonths(s, f, feeFrom);
+  const editFee = memberFee(state, s, f, feeFrom);
+  const freshPay = (m: ShareMember, from = memberUnpaidFrom(s, m)): MemberPayment => {
     const period = memberCollection(s, m, from, base);
     return { date: today, amount: period.amount, currency: period.currency, from, until: period.until };
   };
   const [pay, setPay] = useState<MemberPayment>(() => freshPay(f));
+  const [payMoneyEdited, setPayMoneyEdited] = useState(false);
   const first = memberCollection(s, f, f.joined ?? s.share?.since ?? s.start, base);
-  const schedule = collectionDates(s, f, today.slice(0, 4))
-    .map((d) => cnDate(d))
-    .join(' · ');
   // 改收费周期或金额时，份额跟着换算
-  const setFee = (p: { fee?: number; feeCurrency?: string; billEvery?: number }) => {
-    const next = { ...f, ...p };
-    next.share = shareFromFee(state, s, next.fee ?? 0, next.feeCurrency ?? base, memberBillMonths(s, next));
+  const setFee = (p: { fee?: number; feeCurrency?: string; billEvery?: number }, from = feeFrom) => {
+    const original = feeBase ?? f;
+    setFeeBase(original);
+    const next = changeMemberFee(
+      state,
+      s,
+      { ...f, fee: original.fee, feeCurrency: original.feeCurrency, billEvery: original.billEvery, feeHistory: original.feeHistory, share: original.share },
+      {
+        from: isNew ? (f.joined ?? today) : from,
+        fee: p.fee ?? editFee.amount,
+        currency: p.feeCurrency ?? editFee.currency,
+        billEvery: p.billEvery ?? months,
+      },
+      today,
+    );
     setF(next);
-    setPay(freshPay(next));
+    setPay((draft) => refreshReceiptDraft(draft, freshPay(next, draft.from), payMoneyEdited));
   };
 
   const save = (next: ShareMember, msg: string) => {
-    const sh = s.share!;
+    const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+    const sh = current.share!;
     const members = sh.members.some((x) => x.id === next.id) ? sh.members.map((x) => (x.id === next.id ? next : x)) : [...sh.members, next];
     return run(async () => {
-      await saveSub({ ...s, share: { ...sh, collectFrom: collectionAnchor(s), members } });
+      await saveSub({ ...current, share: { ...sh, collectFrom: collectionAnchor(s), members } });
+      setF(next);
+      setAdding(false);
+      if (quick) onClose();
     }, msg);
   };
-  const addPayment = () => {
+  const addPayment = async () => {
+    if (saving) return;
     const payments = [...(f.payments ?? []), pay].sort((a, b) => a.date.localeCompare(b.date));
     const paidUntil = !f.paidUntil || pay.until > f.paidUntil ? pay.until : f.paidUntil;
     const next = { ...f, payments, paidUntil };
-    setF(next);
-    setAdding(false);
-    if (!isNew) save(next, t('family.member.toastPaid', { name: f.name || t('family.member.defaultName'), amount: flow(pay.amount, pay.currency) }));
+    if (isNew) {
+      setF(next);
+      setAdding(false);
+      return;
+    }
+    setSaving(true);
+    try {
+      await save(next, t('family.member.toastPaid', { name: f.name || t('family.member.defaultName'), amount: flow(pay.amount, pay.currency) }));
+    } finally {
+      setSaving(false);
+    }
   };
   const removePayment = (i: number) => {
     const payments = (f.payments ?? []).filter((_, k) => k !== i);
-    const next = { ...f, payments, paidUntil: payments.length ? payments.reduce((a, p) => (p.until > a ? p.until : a), payments[0].until) : f.paidUntil };
+    const recordedUntil = (f.payments ?? []).reduce((a, p) => (p.until > a ? p.until : a), '');
+    // 单独填过更晚的已付至时，删除较早的补记不能抹掉它。
+    const knownUntil = f.paidUntil && f.paidUntil > recordedUntil ? f.paidUntil : '';
+    const paidUntil = payments.reduce((a, p) => (p.until > a ? p.until : a), knownUntil) || undefined;
+    const next = { ...f, payments, paidUntil };
     setF(next);
     if (!isNew) save(next, t('family.member.paymentRemoved'));
   };
 
   // 同一笔收款复制给其他成员：大家每期交的一样，不用一个个重填
-  const others = (s.share?.members ?? []).filter((x) => x.id !== f.id);
+  const others = (state.subscriptions.find((x) => x.id === s.id)?.share?.members ?? s.share?.members ?? []).filter((x) => x.id !== f.id);
   const [copying, setCopying] = useState<number | null>(null);
   const [targets, setTargets] = useState<string[]>([]);
   const startCopy = (i: number) => {
@@ -181,7 +249,8 @@ export function MemberSheet({
     setCopying(i);
   };
   const copyTo = (p: MemberPayment) => {
-    const sh = s.share!;
+    const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+    const sh = current.share!;
     const members = sh.members.map((m) => {
       if (m.id === f.id) return f;
       if (!targets.includes(m.id)) return m;
@@ -190,7 +259,7 @@ export function MemberSheet({
     });
     run(
       async () => {
-        await saveSub({ ...s, share: { ...sh, collectFrom: collectionAnchor(s), members } });
+        await saveSub({ ...current, share: { ...sh, collectFrom: collectionAnchor(s), members } });
         setCopying(null);
       },
       t('family.member.copied', { count: targets.length }),
@@ -201,8 +270,124 @@ export function MemberSheet({
   const linkedElsewhere = f.personId
     ? refsFor(state.subscriptions, f.personId).filter((r) => !(r.kind === 'member' && r.sub.id === s.id && r.member.id === f.id)).length
     : 0;
-  const payments = (f.payments ?? []).slice().reverse();
+  const payments = (f.payments ?? []).slice().sort((a, b) => b.date.localeCompare(a.date));
   const received = (f.payments ?? []).reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date, base), 0);
+
+  const payInvalid =
+    saving ||
+    !Number.isFinite(pay.amount) ||
+    pay.amount < 0 ||
+    !pay.from ||
+    pay.until < pay.from ||
+    (!!f.left && pay.from >= f.left) ||
+    (!!s.end && pay.from > s.end);
+  if (quick)
+    return (
+      <Sheet
+        narrow
+        title={t('family.collect.title', { name: f.name || t('family.member.defaultName') })}
+        onClose={onClose}
+        foot={
+          <>
+            <button className="btn" onClick={onClose}>
+              {t('family.member.cancel')}
+            </button>
+            <button className="btn primary" disabled={payInvalid} onClick={addPayment}>
+              {t('family.member.record')}
+            </button>
+          </>
+        }
+      >
+        <div className="stack">
+          {/* 人员与订阅同样是圆角卡片：头像、称呼，下面一行成员账号 */}
+          <div className="collect-sub">
+            <PersonAvatar p={personFor(state, f.personId, f.name)} size={32} />
+            <span className="collect-sub-id">
+              <b>{f.name}</b>
+              {/* 收款时要核对的是他在这辆车上的成员账号，联系方式在资料里看 */}
+              <small className={f.account ? undefined : 'muted'}>
+                {f.account ? `${t('family.member.account')} ${f.account}` : t('family.member.accountEmpty')}
+              </small>
+            </span>
+            <button type="button" className="collect-sub-link" onClick={() => setQuick(false)}>
+              {t('family.collect.editMember')}
+            </button>
+          </div>
+          {/* 同一个人可能在多辆车上：顶部单独一行标明是哪个订阅 */}
+          <div className="collect-sub">
+            <SubIcon sub={s} size={32} />
+            <span className="collect-sub-id">
+              <b>{s.name}</b>
+              <small>
+                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                {nextCharge(s, today) ? ` · ${t('family.pool.next', { date: cnDate(nextCharge(s, today)!) })}` : ''}
+              </small>
+            </span>
+            {onOpenSub && (
+              <button type="button" className="collect-sub-link" onClick={onOpenSub}>
+                {t('family.collect.viewSub')}
+              </button>
+            )}
+          </div>
+          <Group>
+            <Cell label={t('family.member.feeGroup')}>
+              <span>
+                {perBill('family.pool.perFee', memberBillMonths(s, f, pay.from), {
+                  fee: money(memberFee(state, s, f, pay.from).amount, memberFee(state, s, f, pay.from).currency),
+                })}
+              </span>
+              <button
+                className="btn plain"
+                onClick={() => {
+                  setQuick(false);
+                  requestAnimationFrame(() => feeSection.current?.scrollIntoView({ block: 'start' }));
+                }}
+              >
+                {t('family.collect.changeFee')}
+              </button>
+            </Cell>
+            <Cell label={t('family.member.paidUntil')}>{f.paidUntil ? cnDateFull(f.paidUntil) : t('family.member.notSet')}</Cell>
+            <Cell label={t('family.collect.lastPayment')}>
+              {payments[0] ? `${cnDateFull(payments[0].date)} · ${money(payments[0].amount, payments[0].currency)}` : t('family.pool.noPay')}
+            </Cell>
+          </Group>
+          <Group
+            foot={`${t('family.collect.covers', { from: cnDateFull(pay.from ?? pay.date), until: cnDateFull(pay.until) })} · ${t('family.collect.next', { date: cnDateFull(addDays(pay.until, 1)) })}`}
+          >
+            <Cell label={t('family.member.receivedOn')}>
+              <DatePicker value={pay.date} onChange={(v) => setPay({ ...pay, date: v ?? today })} />
+            </Cell>
+            <Cell label={t('family.member.amount')}>
+              <NumInput
+                className="num"
+                ccy={pay.currency}
+                value={pay.amount}
+                onValue={(n) => {
+                  setPayMoneyEdited(true);
+                  setPay({ ...pay, amount: n ?? 0 });
+                }}
+              />
+            </Cell>
+            <Cell label={t('family.member.currency')}>
+              <CurrencySelect
+                value={pay.currency}
+                onChange={(c) => {
+                  setPayMoneyEdited(true);
+                  setPay({ ...pay, currency: c });
+                }}
+              />
+            </Cell>
+            {/* 默认按这个人的收费周期算出；可以改成任意日期，每个人的到期日不必统一 */}
+            <Cell label={t('family.collect.until')}>
+              <DatePicker value={pay.until} min={pay.from} onChange={(v) => setPay({ ...pay, until: v ?? pay.until })} />
+            </Cell>
+            <Cell label={t('family.member.note')}>
+              <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onChange={(e) => setPay({ ...pay, note: val(e) || undefined })} />
+            </Cell>
+          </Group>
+        </div>
+      </Sheet>
+    );
 
   return (
     <Sheet
@@ -238,7 +423,13 @@ export function MemberSheet({
                 async () => {
                   // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
                   const link = await linkPerson(state, f.personId, f.name, f.contact ? via : undefined, f.contact);
-                  const next = { ...f, name: f.name.trim(), personId: link.id };
+                  const next = {
+                    ...f,
+                    name: f.name.trim(),
+                    account: f.account?.trim() || undefined,
+                    personId: link.id,
+                    custom: feeMode === 'custom' && !f.exempt ? true : undefined,
+                  };
                   const sh = getState().subscriptions.find((x) => x.id === s.id)?.share ?? s.share!;
                   await saveSub({
                     ...s,
@@ -275,7 +466,14 @@ export function MemberSheet({
               />
             </Cell>
           )}
-          <Cell label={t('family.member.name')}>
+          <Cell
+            label={
+              <span className="row">
+                <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
+                {t('family.member.name')}
+              </span>
+            }
+          >
             <input value={f.name} autoFocus={isNew} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
           </Cell>
           <Cell label={t('family.member.contact')}>
@@ -283,11 +481,10 @@ export function MemberSheet({
           </Cell>
           <Cell label={t('family.member.account')}>
             <input
-              inputMode="email"
               autoCapitalize="off"
               value={f.account ?? ''}
               placeholder={t('family.member.accountPh', { name: s.name })}
-              onChange={(e) => up({ account: val(e).trim() || undefined })}
+              onChange={(e) => up({ account: val(e) })}
             />
           </Cell>
           <Cell label={t('family.member.joined')}>
@@ -298,7 +495,7 @@ export function MemberSheet({
               onChange={(v) => up({ joined: v })}
             />
           </Cell>
-          {first.partial && !f.exempt && (
+          {first.partial && !f.exempt && !f.payments?.some((p) => p.from === first.from && p.until >= first.until) && (
             <>
               <div className="cell">
                 <small className="muted">
@@ -319,7 +516,13 @@ export function MemberSheet({
               </Cell>
               {f.firstPeriod !== 'free' && (
                 <Cell label={t('family.member.firstAmount')}>
-                  <NumInput className="num" value={f.firstAmount} placeholder={String(first.amount)} onValue={(n) => up({ firstAmount: n })} />
+                  <NumInput
+                    ccy={first.currency}
+                    className="num"
+                    value={f.firstAmount}
+                    placeholder={String(first.amount)}
+                    onValue={(n) => up({ firstAmount: n })}
+                  />
                 </Cell>
               )}
             </>
@@ -329,29 +532,77 @@ export function MemberSheet({
           </Cell>
         </Group>
 
-        <Group title={t('family.member.feeGroup')} foot={t('family.member.collectionSchedule', { dates: schedule })}>
-          <div className="cell">
-            <Seg
-              value={String(months)}
-              onChange={(v) => setFee({ billEvery: Number(v) })}
-              options={[
-                ['1', t('family.member.seg.m1')],
-                ['3', t('family.member.seg.m3')],
-                ['6', t('family.member.seg.m6')],
-                ['12', t('family.member.seg.m12')],
-              ]}
-            />
-          </div>
-          <Cell label={perBill('family.member.feeLabel', months)}>
-            <span className="contact-field">
-              <CurrencySelect value={f.feeCurrency ?? base} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
-              <NumInput className="num" value={f.fee || undefined} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
-            </span>
-          </Cell>
-          <Cell label={<span>{t('family.member.exempt')}</span>}>
-            <Toggle checked={!!f.exempt} onChange={(v) => up({ exempt: v || undefined })} />
-          </Cell>
-        </Group>
+        <div ref={feeSection} className="member-fee-section">
+          <Group title={t(isNew ? 'family.member.feeGroup' : 'family.collect.adjustFee')} foot={t('family.collect.feeHelp')}>
+            {!isNew && (
+              <Cell label={t('family.collect.feeFrom')}>
+                <DatePicker
+                  value={feeFrom}
+                  onChange={(v) => {
+                    if (!v) return;
+                    if (feeBase) setFee({}, v);
+                    setFeeFrom(v);
+                  }}
+                />
+              </Cell>
+            )}
+            {!f.exempt && (
+              <div className="cell">
+                <Seg
+                  value={feeMode}
+                  onChange={(v) => {
+                    setFeeMode(v);
+                    if (v === 'follow') {
+                      const next = followCarRule(state, s, f, isNew ? (f.joined ?? today) : feeFrom, today);
+                      setF(next);
+                      setPay((draft) => refreshReceiptDraft(draft, freshPay(next, draft.from), payMoneyEdited));
+                    }
+                  }}
+                  options={[
+                    ['follow', t('family.rule.follow')],
+                    ['custom', t('family.rule.custom')],
+                  ]}
+                />
+              </div>
+            )}
+            {feeMode === 'follow' && !f.exempt ? (
+              <Cell label={t('family.member.feeGroup')}>
+                <span className="muted">
+                  {t('family.rule.followValue', { rule: perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) }) })}
+                </span>
+              </Cell>
+            ) : (
+              <>
+                <div className="cell">
+                  <Seg
+                    value={String(months)}
+                    onChange={(v) => setFee({ billEvery: Number(v) })}
+                    options={[
+                      ['1', t('family.member.seg.m1')],
+                      ['3', t('family.member.seg.m3')],
+                      ['6', t('family.member.seg.m6')],
+                      ['12', t('family.member.seg.m12')],
+                    ]}
+                  />
+                </div>
+                <Cell label={perBill('family.member.feeLabel', months)}>
+                  <span className="contact-field">
+                    <CurrencySelect value={editFee.currency} onChange={(c) => setFee({ feeCurrency: c })} ariaLabel={t('family.member.feeCcyAria')} />
+                    <NumInput ccy={editFee.currency} className="num" value={editFee.amount} placeholder="0" onValue={(n) => setFee({ fee: n ?? 0 })} />
+                  </span>
+                </Cell>
+              </>
+            )}
+            <Cell label={<span>{t('family.member.exempt')}</span>}>
+              <Toggle checked={!!f.exempt} onChange={(v) => up({ exempt: v || undefined })} />
+            </Cell>
+            {(f.feeHistory ?? []).map((point) => (
+              <Cell key={point.from} label={cnDateFull(point.from)}>
+                {perBill('family.pool.perFee', point.billEvery, { fee: money(point.fee, point.currency) })}
+              </Cell>
+            ))}
+          </Group>
+        </div>
 
         <Group title={t('family.member.other')}>
           <Cell label={t('family.member.source')}>
@@ -390,19 +641,19 @@ export function MemberSheet({
                 </span>
                 <span className="cell-r">
                   {others.length > 0 && (
-                    <button
-                      className={`icon-btn ${copying === i ? 'on' : ''}`}
-                      style={{ width: 26, height: 26 }}
+                    <IconButton
+                      className={`${copying === i ? 'on' : ''}`}
+
                       aria-label={t('family.member.copyAria')}
                       title={t('family.member.copyAria')}
                       onClick={() => (copying === i ? setCopying(null) : startCopy(i))}
                     >
                       <Icon name="copy" />
-                    </button>
+                    </IconButton>
                   )}
-                  <button className="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
+                  <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
                     <Icon name="x" />
-                  </button>
+                  </IconButton>
                 </span>
                 {copying === i && (
                   <div className="copy-pay">
@@ -443,24 +694,29 @@ export function MemberSheet({
           {adding ? (
             <>
               <Cell label={t('family.member.amount')}>
-                <NumInput className="num" value={pay.amount} onValue={(n) => setPay({ ...pay, amount: n ?? 0 })} />
+                <NumInput
+                  className="num"
+                  ccy={pay.currency}
+                  value={pay.amount}
+                  onValue={(n) => {
+                    setPayMoneyEdited(true);
+                    setPay({ ...pay, amount: n ?? 0 });
+                  }}
+                />
               </Cell>
               <Cell label={t('family.member.currency')}>
-                <CurrencySelect value={pay.currency} onChange={(c) => setPay({ ...pay, currency: c })} />
+                <CurrencySelect
+                  value={pay.currency}
+                  onChange={(c) => {
+                    setPayMoneyEdited(true);
+                    setPay({ ...pay, currency: c });
+                  }}
+                />
               </Cell>
               <Cell label={t('family.member.coverFrom')}>
-                <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v, until: memberCollection(s, f, v, base).until })} />
+                <DatePicker value={pay.from} onChange={(v) => v && setPay(refreshReceiptDraft(pay, freshPay(f, v), payMoneyEdited))} />
               </Cell>
-              <Cell
-                label={
-                  <span>
-                    {t('family.member.coverTo')}
-                    <small className="muted" style={{ display: 'block', fontSize: 12 }}>
-                      {t('family.member.coverAligned')}
-                    </small>
-                  </span>
-                }
-              >
+              <Cell label={t('family.member.coverTo')}>
                 <DatePicker value={pay.until} onChange={(v) => setPay({ ...pay, until: v ?? pay.until })} />
               </Cell>
               <Cell label={t('family.member.receivedOn')}>
@@ -473,11 +729,7 @@ export function MemberSheet({
                 <button className="btn" onClick={() => setAdding(false)}>
                   {t('family.member.cancel')}
                 </button>
-                <button
-                  className="btn primary"
-                  disabled={pay.amount < 0 || !pay.from || pay.until < pay.from || (!!f.left && pay.from >= f.left) || (!!s.end && pay.from > s.end)}
-                  onClick={addPayment}
-                >
+                <button className="btn primary" disabled={payInvalid} onClick={addPayment}>
                   {t('family.member.record')}
                 </button>
               </div>
@@ -488,6 +740,7 @@ export function MemberSheet({
               style={{ color: 'var(--accent)' }}
               onClick={() => {
                 setPay(freshPay(f));
+                setPayMoneyEdited(false);
                 setAdding(true);
               }}
             >
@@ -495,6 +748,192 @@ export function MemberSheet({
             </button>
           )}
         </Group>
+      </div>
+    </Sheet>
+  );
+}
+
+/** 成员一行的收款状态：逾期几天 / 待收 / 已结清，合租表格和收费弹窗共用 */
+export function memberStatus(state: AppState, s: Subscription, m: ShareMember, today: string) {
+  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const d = memberDues(s, today, collect, state).find((x) => x.member.id === m.id);
+  const next = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
+  const owe = !!d && d.periodsOwed > 0;
+  // 本期：今天所在的这个人自己的收费期。欠款时从最早未付往后数到今天；已付到将来时是已付的最后一期
+  let period = { from: next.from, until: next.until, paid: false };
+  if (next.from > today) {
+    const joined = m.joined ?? s.share?.since ?? s.start;
+    const from = addMonths(next.from, -memberBillMonths(s, m, addDays(next.from, -1)));
+    period = { from: from < joined ? joined : from, until: addDays(next.from, -1), paid: true };
+  } else
+    for (let guard = 0; period.until < today && guard < 600; guard++) {
+      const c = memberCollection(s, m, addDays(period.until, 1), collect);
+      period = { from: c.from, until: c.until, paid: false };
+    }
+  return {
+    owe,
+    period,
+    owed: owe ? money(d!.owed, d!.currency) : '',
+    late: owe && next.from < today ? diffDays(next.from, today) : 0,
+    next,
+    gone: !!m.left && next.from >= m.left,
+  };
+}
+
+/**
+ * 合租表格里点成员打开的收费弹窗：只管跟随车 / 自定义 / 不分摊、收费周期和金额，以及已付到哪一期。
+ * 已付期只选开始日，结束日按这个人的收费周期算出；称呼、联系方式、收款明细在「更多资料」里。
+ */
+export function MemberBillingSheet({
+  state,
+  s,
+  member,
+  onClose,
+  onMore,
+}: {
+  state: AppState;
+  s: Subscription;
+  member: ShareMember;
+  onClose: () => void;
+  onMore: () => void;
+}) {
+  const today = todayIn(state.settings.timezone);
+  const rule = carRule(state, s, today);
+  const [mode, setMode] = useState<'follow' | 'custom' | 'exempt'>(member.exempt ? 'exempt' : followsCar(state, s, member, today) ? 'follow' : 'custom');
+  const cur = memberFee(state, s, member, today);
+  const [fee, setFeeDraft] = useState({ amount: cur.amount, currency: cur.currency, billEvery: memberBillMonths(s, member, today) });
+  const [from, setFrom] = useState(today);
+  // 已付期：从已付至倒推这一期的开始日
+  const [paidFrom, setPaidFrom] = useState(
+    member.paidUntil ? addMonths(addDays(member.paidUntil, 1), -memberBillMonths(s, member, member.paidUntil)) : undefined,
+  );
+
+  const draft = (): ShareMember => {
+    let m: ShareMember = { ...member };
+    if (mode === 'exempt') m = { ...m, exempt: true, custom: undefined, share: 0 };
+    else if (mode === 'follow') m = followCarRule(state, s, { ...m, exempt: undefined }, from, today);
+    else {
+      const changed = fee.amount !== cur.amount || fee.currency !== cur.currency || fee.billEvery !== memberBillMonths(s, member, today) || member.exempt;
+      m = { ...m, exempt: undefined, custom: true };
+      if (changed) m = changeMemberFee(state, s, m, { from, fee: fee.amount, currency: fee.currency, billEvery: fee.billEvery }, today);
+    }
+    const paidUntil = paidFrom ? memberCollection(s, m, paidFrom).until : undefined;
+    return { ...m, paidUntil };
+  };
+  const next = draft();
+  const preview = { ...s, share: { ...s.share!, members: s.share!.members.map((x) => (x.id === next.id ? next : x)) } };
+  const st = memberStatus(state, preview, next, today);
+  const rateChanged =
+    mode !== 'exempt' &&
+    (mode === 'follow' ? !followsCar(state, s, member, today) : true) &&
+    (() => {
+      const r = memberFee(state, s, next, from);
+      return r.amount !== cur.amount || r.currency !== cur.currency || memberBillMonths(s, next, from) !== memberBillMonths(s, member, today);
+    })();
+
+  return (
+    <Sheet
+      narrow
+      title={
+        <span className="icon-text">
+          <PersonAvatar p={personFor(state, member.personId, member.name)} size={24} />
+          {member.name || t('family.pool.unnamed')}
+        </span>
+      }
+      onClose={onClose}
+      foot={
+        <>
+          <button className="btn plain" onClick={onMore}>
+            {t('family.quick.more')}
+          </button>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
+            {t('family.member.cancel')}
+          </button>
+          <button
+            className="btn primary"
+            onClick={() =>
+              run(async () => {
+                const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+                const sh = current.share!;
+                await saveSub({
+                  ...current,
+                  share: { ...sh, collectFrom: collectionAnchor(current), members: sh.members.map((x) => (x.id === next.id ? next : x)) },
+                });
+                onClose();
+              }, t('family.member.saved'))
+            }
+          >
+            {t('family.member.save')}
+          </button>
+        </>
+      }
+    >
+      <div className="stack">
+        <Group title={t('family.sheet.fee')} foot={rateChanged ? t('family.collect.feeHelp') : undefined}>
+          <div className="cell">
+            <Seg
+              value={mode}
+              onChange={setMode}
+              options={[
+                ['follow', t('family.rule.follow')],
+                ['custom', t('family.rule.custom')],
+                ['exempt', t('family.member.exempt')],
+              ]}
+            />
+          </div>
+          {mode === 'follow' && (
+            <Cell label={t('family.member.feeGroup')}>
+              <span className="muted">{perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}</span>
+            </Cell>
+          )}
+          {mode === 'custom' && (
+            <>
+              <div className="cell">
+                <Seg
+                  value={String(fee.billEvery)}
+                  onChange={(v) => setFeeDraft({ ...fee, billEvery: Number(v) })}
+                  options={[
+                    ['1', t('family.member.seg.m1')],
+                    ['3', t('family.member.seg.m3')],
+                    ['6', t('family.member.seg.m6')],
+                    ['12', t('family.member.seg.m12')],
+                  ]}
+                />
+              </div>
+              <Cell label={perBill('family.member.feeLabel', fee.billEvery)}>
+                <span className="contact-field">
+                  <CurrencySelect value={fee.currency} onChange={(c) => setFeeDraft({ ...fee, currency: c })} ariaLabel={t('family.member.feeCcyAria')} />
+                  <NumInput ccy={fee.currency} className="num" value={fee.amount} placeholder="0" onValue={(n) => setFeeDraft({ ...fee, amount: n ?? 0 })} />
+                </span>
+              </Cell>
+            </>
+          )}
+          {rateChanged && (
+            <Cell label={t('family.collect.feeFrom')}>
+              <DatePicker value={from} onChange={(v) => v && setFrom(v)} />
+            </Cell>
+          )}
+        </Group>
+        {mode !== 'exempt' && (
+          <Group
+            title={t('family.quick.paid')}
+            foot={
+              st.gone
+                ? undefined
+                : st.owe
+                  ? `${st.late > 0 ? `${t('family.quick.late', { count: st.late })} · ` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`
+                  : t('family.quick.settled', { date: cnDateFull(st.next.from) })
+            }
+          >
+            <Cell label={t('family.quick.paidFrom')}>
+              <DatePicker value={paidFrom} clearable placeholder={t('family.pool.noPay')} onChange={setPaidFrom} />
+            </Cell>
+            <Cell label={t('family.quick.paidTo')}>
+              <span className={paidFrom ? '' : 'muted'}>{paidFrom ? cnDateFull(memberCollection(s, next, paidFrom).until) : '—'}</span>
+            </Cell>
+          </Group>
+        )}
       </div>
     </Sheet>
   );

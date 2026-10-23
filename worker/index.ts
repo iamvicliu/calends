@@ -1,6 +1,7 @@
+import { validateAvatar, validatePeopleAvatars } from '../shared/avatar.ts';
 import { statusChangeError } from '../shared/phases.ts';
 import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.ts';
-import { addDays, subError, todayIn } from '../shared/billing.ts';
+import { addDays, reconcileRenewalRules, subError, todayIn } from '../shared/billing.ts';
 import {
   DEFAULT_SETTINGS,
   PERSON_COLORS,
@@ -112,6 +113,7 @@ function cleanPerson(raw: Partial<Person>, id: string): Person | undefined {
     contactVia: contact ? s(raw.contactVia) : undefined,
     contact,
     note: s(raw.note),
+    avatar: validateAvatar(raw.avatar),
     color: PERSON_COLORS.includes(raw.color as never) ? raw.color : undefined,
     createdAt: s(raw.createdAt) ?? new Date().toISOString(),
   };
@@ -187,10 +189,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {
-      const sub = (await req.json()) as Subscription;
+      let sub = (await req.json()) as Subscription;
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
       const previous = (await subsOf(env)).find((x) => x.id === sub.id);
-      const err = validSub(sub) ?? statusChangeError(previous, sub, todayIn((await getSettings(env)).timezone));
+      const today = todayIn((await getSettings(env)).timezone);
+      sub = reconcileRenewalRules(previous, sub, today);
+      const err = validSub(sub) ?? statusChangeError(previous, sub, today);
       if (err) return bad(err);
       sub.updatedAt = new Date().toISOString();
       const rev = await upsert(env, 'subscriptions', sub.id, sub);
@@ -215,11 +219,21 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       return json({ people: r.people, subscriptions }, 200, rev);
     }
     if (!m[2] && method === 'PUT') {
-      const p = cleanPerson((await req.json()) as Partial<Person>, id);
+      let p: Person | undefined;
+      try {
+        p = cleanPerson((await req.json()) as Partial<Person>, id);
+      } catch (e) {
+        return bad(e instanceof Error ? e.message : t('server.invalidPerson'));
+      }
       if (!p) return bad(t('server.invalidPerson'));
       const old = people.find((x) => x.id === id);
       if (old?.createdAt) p.createdAt = old.createdAt;
       const next = old ? people.map((x) => (x.id === id ? p : x)) : [...people, p];
+      try {
+        validatePeopleAvatars(next);
+      } catch (e) {
+        return bad(e instanceof Error ? e.message : t('server.invalidPerson'));
+      }
       const subscriptions = syncPerson(await subsOf(env), p).map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
       const rev = await writePeople(env, next, subscriptions);
       return json({ person: p, subscriptions }, 200, rev);

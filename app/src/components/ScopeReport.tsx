@@ -1,15 +1,15 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { ChevronUp, Copy } from 'lucide-react';
+import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
 import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
-import type { Block, ChargeRow, Comparison, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
+import type { Block, ChargeRow, Comparison, MovementRow, ReportEvent, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
-import { catColor } from '../derive.ts';
+import { bankOf, brandOf, catColor, methodLogo } from '../derive.ts';
 import { BarLine } from './charts.tsx';
-import { CatIcon, Hint, Icon, MethodMark, SubIcon } from './ui.tsx';
+import { IconButton, CatIcon, CardTitle, Icon, MethodMark, SubIcon } from './ui.tsx';
 import './scope-report.css';
 
 interface Props {
@@ -21,6 +21,8 @@ interface Props {
   animate: boolean;
   open: boolean;
   onToggle: () => void;
+  /** The calendar owns these charge rows above the report divider. Aggregates stay complete. */
+  selectedChargeDate?: string;
 }
 
 /** Spending increases use the same direction and unsigned comparison in both calendar modes. */
@@ -35,7 +37,7 @@ export function SpendingDelta({ value, base }: { value: Comparison; base: string
 }
 
 /** Shared presentation for subscription selections and calendar months; callers own disclosure state. */
-export function ScopeReport({ report, state, today, onOpen, title, animate, open, onToggle }: Props) {
+export function ScopeReport({ report, state, today, onOpen, title, animate, open, onToggle, selectedChargeDate }: Props) {
   const id = useId();
   const root = useRef<HTMLElement>(null);
   const [copyState, setCopyState] = useState<'idle' | 'copying' | 'done'>('idle');
@@ -66,10 +68,30 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   };
   const base = state.settings.baseCurrency;
   const monthly = report.blocks.some((b) => b.type === 'headline' && b.mode === 'month');
+  const monthlyMovement = report.blocks.find((b) => b.type === 'trend' && b.mode === 'month');
+  const events = report.blocks.find((b) => b.type === 'events')?.rows ?? [];
+  const movementEvents = (row: MovementRow) => events.filter((e) => e.sub.id === row.sub.id && e.date >= row.since && e.date <= row.until);
+  const remainingEvents = events.filter(
+    (e) => monthlyMovement?.mode !== 'month' || !monthlyMovement.movement.items.some((row) => movementEvents(row).includes(e)),
+  );
   const top = report.blocks.find((b) => b.type === 'top' && b.mode === 'month');
-  const upcomingRows = (rows: ChargeRow[]) => rows.filter((r) => !top?.rows.includes(r));
+  const visibleCharges = (rows: ChargeRow[]) => rows.filter((r) => copying || !monthly || r.date !== selectedChargeDate);
+  const upcomingRows = (rows: ChargeRow[]) =>
+    visibleCharges(rows)
+      .filter((r) => !top?.rows.includes(r))
+      .slice(0, 5);
   const blocks = report.blocks.filter((b) =>
-    b.type === 'upcoming' ? upcomingRows(b.rows).length > 0 : !(b.type === 'top' && b.mode === 'scope' && b.rows.length === 1),
+    b.type === 'events' && monthlyMovement?.mode === 'month'
+      ? false
+      : b.type === 'upcoming'
+        ? upcomingRows(b.rows).length > 0
+        : b.type === 'top'
+          ? b.mode === 'month'
+            ? visibleCharges(b.rows).length > 0
+            : b.rows.length > 1
+          : b.type === 'losses'
+            ? b.rows.length > 0 || visibleCharges(b.refunds).length > 0 || b.incomplete
+            : true,
   );
   const losses = report.blocks.find((b) => b.type === 'losses');
   const expense = (v: number) => flow(-v, base);
@@ -98,42 +120,54 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         <b className="num">{expense(r.amount)}</b>
       </button>
     ));
+  const eventLabel = (r: ReportEvent) => t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`);
+  const eventRows = (rows: ReportEvent[]) =>
+    rows.map((r, i) => (
+      <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
+        {name(
+          r.sub,
+          <>
+            {cnDateAuto(r.date, today)} · {eventLabel(r)}
+          </>,
+        )}
+        {r.delta !== 0 && delta({ amount: r.delta })}
+      </button>
+    ));
   const heading = (key: string, hint?: string, count?: number) => (
     <div className="card-h">
-      <h3>{t(`scope.${key}`, { count })}</h3>
-      {hint && <Hint text={t(`scope.${hint}`)} />}
+      <CardTitle hint={hint ? t(`scope.${hint}`) : undefined}>{t(`scope.${key}`, { count })}</CardTitle>
     </div>
   );
   const headlineHeading = (label: string, hint?: string) => (
     <div className="scope-headline-header">
-      <div className="stat-label">
-        {t(label)} {hint && <Hint text={t(hint)} />}
-      </div>
+      <CardTitle as="div" className="stat-label" hint={hint ? t(hint) : undefined}>
+        {t(label)}
+      </CardTitle>
       <div className="scope-actions">
         {typeof ClipboardItem !== 'undefined' && (
-          <button
+          <IconButton
             type="button"
-            className="icon-btn"
+
             title={t('detail.action.copyImage')}
             aria-label={t('detail.action.copyImage')}
             disabled={copying}
             onClick={copyImage}
           >
             <Copy size={15} />
-          </button>
+          </IconButton>
         )}
-        <button
+        <IconButton
           type="button"
-          className="icon-btn"
-          title={t('scope.collapse')}
+
+          title={t(monthly ? 'scope.minimize' : 'scope.collapse')}
           aria-expanded={expanded}
           aria-controls={id}
-          aria-label={t('scope.collapse')}
+          aria-label={t(monthly ? 'scope.minimize' : 'scope.collapse')}
           onClick={onToggle}
           disabled={copying}
         >
-          <ChevronUp size={15} />
-        </button>
+          {monthly ? <Minimize2 size={15} /> : <ChevronUp size={15} />}
+        </IconButton>
       </div>
     </div>
   );
@@ -220,11 +254,10 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         const peak = Math.max(1, ...drivers.map((r) => Math.abs(r.amount)));
         const net = mv.to - mv.from;
         const singleDriver = drivers.length === 1 && Math.abs(drivers[0].amount - net) < 0.005;
-        const singleItem = mv.items.length === 1 && Math.abs(mv.items[0].delta - net) < 0.005;
         return (
           <>
             <div className="card-h">
-              <h3>{t('scope.movement', { month: monthLabel(block.month) })}</h3>
+              <CardTitle hint={t('scope.movementBasis')}>{t('scope.movement', { month: monthLabel(block.month) })}</CardTitle>
             </div>
             <div className="hero-delta">
               {!singleDriver && delta({ amount: net })}
@@ -243,12 +276,41 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </div>
               ))}
             </div>
-            {mv.items.map((r) => (
-              <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
-                {name(r.sub)}
-                {!singleItem && <span>{delta({ amount: r.delta })}</span>}
-              </button>
-            ))}
+            <div className="scope-movements">
+              {mv.items.map((r) => (
+                <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
+                  {name(
+                    r.sub,
+                    <>
+                      {t(`scope.${r.kind}`)}
+                      {movementEvents(r).map((e, i, rows) => {
+                        const redundant =
+                          (e.kind === 'start' && r.kind === 'added') ||
+                          ((e.kind === 'price' || e.kind === 'intro-end') &&
+                            ((e.delta > 0 && r.kind === 'expansion') || (e.delta < 0 && r.kind === 'contraction')));
+                        return redundant ? null : (
+                          <span key={`${e.date}-${e.kind}-${i}`}>
+                            {' · '}
+                            {eventLabel(e)}
+                            {rows.length > 1 && ` (${cnDateAuto(e.date, today)})`}
+                          </span>
+                        );
+                      })}
+                      {movementEvents(r).some((e) => e.kind === 'cancel' || e.kind === 'terminate') && r.sub.stop?.reason && ` · ${r.sub.stop.reason}`}
+                      {' · '}
+                      <span className="num">
+                        {money(r.from, base)} → {money(r.to, base)}
+                      </span>
+                      <span className="scope-movement-date">
+                        {cnDateAuto(r.since, today)}
+                        {r.until !== r.since && ` – ${cnDateAuto(r.until, today)}`}
+                      </span>
+                    </>,
+                  )}
+                </button>
+              ))}
+              {eventRows(remainingEvents)}
+            </div>
           </>
         );
       }
@@ -256,50 +318,68 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('composition', monthly ? 'debitBasis' : undefined)}
-            {(['categories', 'methods'] as const).map(
-              (dim) =>
-                block[dim].length > 0 && (
-                  <div className="scope-composition" key={dim}>
-                    <h4>{t(`scope.${dim}`)}</h4>
-                    {block[dim].map((r) => {
-                      const method = state.methods.find((m) => m.id === r.key);
-                      const color = dim === 'categories' ? catColor(r.key) : 'var(--accent)';
-                      return (
-                        <div className="scope-share" key={r.key}>
-                          <div className="scope-row">
-                            <span className="scope-sub">
-                              {dim === 'categories' ? (
-                                <span className="scope-cat" style={{ color }}>
-                                  <CatIcon cat={r.key} size={18} />
+            <div className="scope-compositions">
+              {(['categories', 'methods'] as const).map(
+                (dim) =>
+                  block[dim].length > 0 && (
+                    <div className="scope-composition" key={dim}>
+                      <h4>{t(`scope.${dim}`)}</h4>
+                      {block[dim].map((r) => {
+                        const method = state.methods.find((m) => m.id === r.key);
+                        const color = r.other ? 'var(--label-3)' : dim === 'categories' ? catColor(r.key) : 'var(--accent)';
+                        return (
+                          <div className="scope-share" key={r.other ? 'other' : `key-${r.key}`}>
+                            <div className="scope-row">
+                              <span className="scope-sub">
+                                {r.other ? (
+                                  <span className="scope-cat">
+                                    <Layers size={18} />
+                                  </span>
+                                ) : dim === 'categories' ? (
+                                  <span className="scope-cat" style={{ color }}>
+                                    <CatIcon cat={r.key} size={18} />
+                                  </span>
+                                ) : method && (bankOf(method) || brandOf(method) || methodLogo(method)) ? (
+                                  <MethodMark m={method} size={24} proxied />
+                                ) : (
+                                  <span className="scope-cat" style={{ color }}>
+                                    <Icon name="wallet" size={18} />
+                                  </span>
+                                )}
+                                <span>
+                                  {r.other
+                                    ? t('scope.other')
+                                    : dim === 'categories'
+                                      ? r.key || t('scope.uncategorized')
+                                      : (method?.name ?? t('scope.noMethod'))}
                                 </span>
-                              ) : method ? (
-                                <MethodMark m={method} size={24} proxied />
-                              ) : (
-                                <Icon name="wallet" size={24} />
-                              )}
-                              <span>{dim === 'categories' ? r.key || t('scope.uncategorized') : (method?.name ?? t('scope.noMethod'))}</span>
-                            </span>
-                            <b className="num">
-                              {expense(r.amount)} · {percent(r.share)}
-                            </b>
+                              </span>
+                              <b className="num">
+                                {expense(r.amount)} · {percent(r.share)}
+                              </b>
+                            </div>
+                            <div className="mv-bar">
+                              <i style={{ width: `${r.share * 100}%`, background: color }} />
+                            </div>
                           </div>
-                          <div className="mv-bar">
-                            <i style={{ width: `${r.share * 100}%`, background: color }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ),
-            )}
+                        );
+                      })}
+                    </div>
+                  ),
+              )}
+            </div>
           </>
         );
       case 'top':
         return (
           <>
-            {heading(block.mode === 'scope' ? 'topMonthly' : 'topCharges', block.mode === 'month' ? 'debitBasis' : undefined, block.rows.length)}
+            {heading(
+              block.mode === 'scope' ? 'topMonthly' : 'topCharges',
+              block.mode === 'month' ? 'debitBasis' : undefined,
+              block.mode === 'month' ? visibleCharges(block.rows).length : block.rows.length,
+            )}
             {block.mode === 'month'
-              ? chargeRows(block.rows)
+              ? chargeRows(visibleCharges(block.rows))
               : block.rows.map((r) => (
                   <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
                     {name(r.sub)}
@@ -320,18 +400,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('events')}
-            {block.rows.map((r, i) => (
-              <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
-                {name(
-                  r.sub,
-                  <>
-                    {cnDateAuto(r.date, today)} ·{' '}
-                    {t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`)}
-                  </>,
-                )}
-                {r.delta !== 0 && delta({ amount: r.delta })}
-              </button>
-            ))}
+            <div className="scope-movements">{eventRows(block.rows)}</div>
           </>
         );
       case 'losses':
@@ -347,9 +416,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
                 {name(
                   r.sub,
-                  <>
-                    {cnDateAuto(r.date, today)} · {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
-                  </>,
+                  events.some((e) => e.sub.id === r.sub.id && e.date === r.date && (e.kind === 'cancel' || e.kind === 'terminate')) ? undefined : (
+                    <>
+                      {cnDateAuto(r.date, today)} · {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
+                    </>
+                  ),
                 )}
                 <span>
                   <b className="num">{expense(r.lossBase)}</b>
@@ -357,7 +428,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </span>
               </button>
             ))}
-            {block.refunds.map((r, i) => (
+            {visibleCharges(block.refunds).map((r, i) => (
               <button type="button" className="scope-row scope-tap" key={`refund-${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
                 {name(
                   r.sub,

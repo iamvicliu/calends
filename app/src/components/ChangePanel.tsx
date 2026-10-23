@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { addDays, addMonths, nextCharge, phaseSubs } from '../../../shared/billing.ts';
-import { changePrice, removePhase, resume, setPhaseEnd, switchPlan } from '../../../shared/phases.ts';
+import {
+  changePrice,
+  editPricePoint,
+  removePricePoint,
+  pricePoints,
+  movePhaseStart,
+  paymentsOutsideMovedPhase,
+  syncPhase,
+  removePhase,
+  resume,
+  setPhaseEnd,
+  switchPlan,
+} from '../../../shared/phases.ts';
 import type { AppState, Cycle, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { History } from './History.tsx';
-import { Group, Icon, Toggle } from './ui.tsx';
+import { ask, Group, Icon, IconButton, Toggle } from './ui.tsx';
 import { MethodPicker } from './MethodPicker.tsx';
 import { toast } from '../store.ts';
 import { CurrencySelect, Picker, RegionSelect } from './Picker.tsx';
@@ -25,8 +38,55 @@ export const cycleName = (k: string) => t(`editor.cycle.${k}`);
 type Mode = 'price' | 'switch' | 'resume';
 
 /** 编辑页里的「历程与变更」：调价、换区 / 换套餐、续订 */
-export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: (s: Subscription) => void; state: AppState; today: string }) {
+export function ChangePanel({
+  f,
+  setF,
+  state,
+  today,
+  onPriceValidity,
+}: {
+  f: Subscription;
+  setF: (s: Subscription) => void;
+  state: AppState;
+  today: string;
+  onPriceValidity: (valid: boolean) => void;
+}) {
   const [mode, setMode] = useState<Mode | null>(null);
+  const [point, setPoint] = useState<{ start: string; from: string; date: string; amount: string } | null>(null);
+  const [pointError, setPointError] = useState('');
+  const pointErrorId = useId();
+  const pointPhase = point && phaseSubs(f).find((v) => v.start === point.start);
+  const openPoint = (start: string, from: string) => {
+    if (pointError) return;
+    if (point?.start === start && point.from === from) return setPoint(null);
+    const v = phaseSubs(f).find((v) => v.start === start)!;
+    setPoint({ start, from, date: from, amount: String(pricePoints(v).find((p) => p.from === from)!.amount) });
+    setPointError('');
+    setMode(null);
+  };
+  const updatePoint = (patch: Partial<{ date: string; amount: string }>) => {
+    if (!point) return;
+    const draft = { ...point, ...patch };
+    setPoint(draft);
+    try {
+      if (!draft.amount.trim()) throw new Error(t('editor.change.needPrice'));
+      const next = editPricePoint(syncPhase(f, today), draft.start, draft.from, { from: draft.date, amount: Number(draft.amount) });
+      setF(next);
+      setPoint({ ...draft, from: draft.date });
+      setPointError('');
+      onPriceValidity(true);
+    } catch (e) {
+      setPointError(e instanceof Error ? e.message : String(e));
+      onPriceValidity(false);
+    }
+  };
+  const deletePoint = async () => {
+    if (!point || !(await ask(t('editor.history.deletePrice')))) return;
+    setF(removePricePoint(syncPhase(f, today), point.start, point.from));
+    setPoint(null);
+    setPointError('');
+    onPriceValidity(true);
+  };
   const [date, setDate] = useState(today);
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState(f.currency);
@@ -41,6 +101,8 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
   const phases = phaseSubs(f).length;
 
   const open = (m: Mode) => {
+    if (pointError) return;
+    setPoint(null);
     setMode(m);
     // 生效日要晚于当前阶段的开始日：今天就开始的新订阅，默认放到下次续费（或第二天）
     const lastStart = phaseSubs(f).pop()!.start;
@@ -61,7 +123,21 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
     setKeep(on);
     if (on) setKeepUntil(paidThrough(date));
   };
+  const [startError, setStartError] = useState('');
+  const setStart = async (start: string, nextStart: string) => {
+    if (pointError) return;
+    setStartError('');
+    try {
+      const next = movePhaseStart(syncPhase(f, today), start, nextStart);
+      const outside = paymentsOutsideMovedPhase(f, next);
+      if (outside.length && !(await ask(t('editor.history.outsidePayments', { count: outside.length })))) return;
+      setF(next);
+    } catch (e) {
+      setStartError(e instanceof Error ? e.message : String(e));
+    }
+  };
   const setEnd = (start: string, end: string | undefined) => {
+    if (pointError) return;
     try {
       setF(setPhaseEnd(f, start, end));
     } catch (e) {
@@ -96,7 +172,73 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
 
   return (
     <Group title={t('editor.change.title')}>
-      <History sub={f} state={state} today={today} onEnd={setEnd} />
+      <History
+        sub={f}
+        state={state}
+        today={today}
+        onEnd={setEnd}
+        onStart={setStart}
+        onPrice={openPoint}
+        priceEditor={
+          point && pointPhase
+            ? {
+                start: point.start,
+                from: point.from,
+                content: (
+                  <div
+                    className="change-form h-price-editor"
+                    onBlur={(e) => {
+                      if (!pointError && !e.currentTarget.contains(e.relatedTarget)) setPoint(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+                        e.preventDefault();
+                        if (!pointError) setPoint(null);
+                      }
+                    }}
+                  >
+                    <label>
+                      {t('editor.change.priceDate')}
+                      <DatePicker
+                        value={point.date}
+                        min={pointPhase.start}
+                        max={pointPhase.end}
+                        ariaLabel={t('editor.change.priceDate')}
+                        onChange={(d) => updatePoint({ date: d ?? '' })}
+                      />
+                    </label>
+                    <label>
+                      {t('editor.change.newPrice', { currency: pointPhase.currency })}
+                      <input
+                        inputMode="decimal"
+                        value={point.amount}
+                        autoFocus
+                        aria-invalid={!!pointError}
+                        aria-describedby={pointError ? pointErrorId : undefined}
+                        onChange={(e) => updatePoint({ amount: e.target.value })}
+                      />
+                    </label>
+                    {pointError && (
+                      <p id={pointErrorId} className="h-error" role="alert">
+                        {pointError}
+                      </p>
+                    )}
+                    {pricePoints(pointPhase)[0].from !== point.from && (
+                      <IconButton className="h-price-delete danger" aria-label={t('common.delete')} onClick={() => void deletePoint()}>
+                        <Trash2 size={16} />
+                      </IconButton>
+                    )}
+                  </div>
+                ),
+              }
+            : undefined
+        }
+      />
+      {startError && (
+        <p className="h-error" role="alert">
+          {startError}
+        </p>
+      )}
       <div className="cell" style={{ flexWrap: 'wrap', gap: 8 }}>
         <button className={`btn ${mode === 'price' ? 'primary' : ''}`} onClick={() => open('price')}>
           {t('editor.change.price')}
@@ -110,7 +252,7 @@ export function ChangePanel({ f, setF, state, today }: { f: Subscription; setF: 
           </button>
         )}
         {phases > 1 && (
-          <button className="btn danger" onClick={() => setF(removePhase(f, phases - 1))}>
+          <button className="btn danger" disabled={!!pointError} onClick={() => setF(removePhase(f, phases - 1))}>
             {t('editor.change.undo')}
           </button>
         )}

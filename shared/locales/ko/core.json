@@ -48,7 +48,10 @@
     "prependUntil": "추가할 기간의 종료일은 시작일 이후, 원래 시작일 이전이어야 합니다",
     "priceOutOfRange": "가격 변경일이 어떤 구간에도 속하지 않습니다",
     "keepTooEarly": "계속 사용할 종료일은 전환일 이후여야 합니다",
-    "endTooEarly": "종료일은 이 구간의 시작일 이후여야 합니다"
+    "endTooEarly": "종료일은 이 구간의 시작일 이후여야 합니다",
+    "startOrder": "시작일은 이전 단계의 시작일 이후, 다음 단계의 시작일 이전이어야 합니다.",
+    "priceDuplicate": "이 날짜에 이미 가격이 있습니다",
+    "priceInitial": "초기 가격은 삭제할 수 없습니다"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -165,7 +168,7 @@
     "refunded": "환불됨 {money}",
     "partial": "부분 환불 {money}",
     "unrefunded": "미환불 · 손실 {money}",
-    "unused": "미환불 손실: −{money} ({days})",
+    "unused": "미환불 손실: {money} ({days})",
     "unusedTitle": "미환불",
     "terminated": "사용 중지됨",
     "restore": "다시 활성화",
@@ -177,6 +180,19 @@
     "fullyRefunded": "전액 환불됨",
     "chargeOnEnd": "이날은 갱신 결제일입니다. 전날로 바꾸면 결제되지 않습니다.",
     "nonrenewDone": "만료 후 갱신하지 않도록 설정했습니다. {date} 이후 결제되지 않습니다.",
-    "stoppedDone": "서비스를 중지했습니다"
+    "stoppedDone": "서비스를 중지했습니다",
+    "method": "중지 방식",
+    "latestRefundHint": "여기서는 가장 최근 환불을 수정합니다. 이전 환불은 결제 내역에 유지됩니다."
+  },
+  "renewal": {
+    "title": "갱신 규칙",
+    "chargeLeadDays": "미리 결제할 일수",
+    "cancelLeadDays": "미리 취소할 일수",
+    "hint": "서비스 갱신 전 결제와 결제 전 취소에 필요한 일수입니다. 0은 없음이며 서비스 기간은 유지됩니다.",
+    "cancelBy": "취소 기한",
+    "invalid": "0~3660 사이의 정수 일수를 입력하세요.",
+    "tooLate": "취소 기한이 지나 다음 기간에도 요금이 청구됩니다.",
+    "cancelReminder": "다음 결제를 피하려면 {date}까지 취소하세요.",
+    "none": "없음"
   }
 }

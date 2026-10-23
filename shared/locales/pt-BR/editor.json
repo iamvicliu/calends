@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "E-mail, telefone ou usuário", "phone": "Número de telefone" },
+  "ph": {
+    "account": "E-mail, telefone ou usuário",
+    "phone": "Número de telefone"
+  },
   "overlap": {
     "keep": "Manter o anterior por um tempo",
     "keepHint": "Já foi pago antecipadamente e ainda não venceu: os dois rodam juntos e são cobrados normalmente",
@@ -17,7 +20,7 @@
   "clearForm": "Limpar formulário",
   "revert": "Desfazer alterações",
   "draftRestored": "Rascunho não salvo restaurado",
-  "confirmDelete": "Apagar “{name}”? O histórico também será apagado. Se você só parou de renovar, marque como Cancelada.",
+  "confirmDelete": "Apagar “{name}”? O histórico também será apagado. Se você só parou de renovar, escolha Parar.",
   "toast": {
     "added": "Adicionada",
     "saved": "Salvo",
@@ -58,7 +61,8 @@
     "trial": "Teste",
     "paused": "Pausada",
     "cancelled": "Cancelada",
-    "terminated": "Desativado"
+    "terminated": "Desativado",
+    "stop": "Parar"
   },
   "category": {
     "choose": "Escolher categoria",
@@ -95,7 +99,8 @@
     "showDomainOn": "Visitantes veem o domínio completo",
     "showDomainOff": "Oculto na página pública",
     "tagsPlaceholder": "Separe com espaços",
-    "notesPlaceholder": "Notas (opcional)"
+    "notesPlaceholder": "Notas (opcional)",
+    "pausedAt": "Data de pausa"
   },
   "share": {
     "none": "Só eu",
@@ -111,7 +116,18 @@
     "perPeriod": "Parte por período",
     "paidUntil": "Pago até",
     "remove": "Remover",
-    "addMember": "Adicionar membro"
+    "addMember": "Adicionar membro",
+    "manageHint": "Toque em um membro para seguir a regra do plano ou definir valor e ciclo próprios",
+    "follows": "Segue o plano",
+    "custom": "Personalizado",
+    "nextDue": "Próximo {date}",
+    "editMember": "Editar",
+    "overdue": {
+      "one": "{count} dia de atraso",
+      "other": "{count} dias de atraso"
+    },
+    "dueOn": "Vence {date}",
+    "confirmRemove": "Confirmar"
   },
   "proxy": {
     "for": "Pago para",
@@ -199,7 +215,11 @@
     "range": "{start} → {end}",
     "now": "agora",
     "initial": "Inicial",
-    "priceChange": "Mudança de preço {date}"
+    "priceChange": "Mudança de preço {date}",
+    "outsidePayments": "{count} pagamento(s) ficarão fora do período de serviço. Continuar mantendo as datas, valores e fase originais?",
+    "editPrice": "Editar preço vigente desde {date}",
+    "deletePrice": "Excluir este preço? O preço anterior será aplicado até a próxima alteração.",
+    "repriceCharges": "Ao salvar, {count} cobranças estimadas anteriores serão recalculadas. Os pagamentos registrados não mudarão. Continuar?"
   },
   "payment": {
     "addTitle": "Adicionar pagamento",
@@ -228,5 +248,9 @@
   "timeline": {
     "home": "Voltar para hoje (ou clique duas vezes na linha do tempo)"
   },
-  "ai": { "title": "Preencher com IA", "hint": "Cole um recibo, uma captura ou texto e o resto é automático", "go": "Colar" }
+  "ai": {
+    "title": "Preencher com IA",
+    "hint": "Cole um recibo, uma captura ou texto e o resto é automático",
+    "go": "Colar"
+  }
 }

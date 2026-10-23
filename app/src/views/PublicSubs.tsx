@@ -2,7 +2,7 @@ import { Plus, X } from 'lucide-react';
 import { effectiveStatus } from '../../../shared/billing.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Sheet, SubIcon } from '../components/ui.tsx';
+import { IconButton, Sheet, SubIcon } from '../components/ui.tsx';
 import { run, saveSettings } from '../store.ts';
 import './public-subs.css';
 
@@ -43,14 +43,14 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
               <span key={s.id} className="pubs-chip">
                 <SubIcon sub={s} size={20} />
                 <span className="pubs-name">{s.name}</span>
-                <button
+                <IconButton
                   className="pubs-x"
                   onClick={() => save([...hidden, s.id])}
                   title={t('settings.open.publicHideOne', { name: s.name })}
                   aria-label={t('settings.open.publicHideOne', { name: s.name })}
                 >
                   <X size={13} strokeWidth={2.4} />
-                </button>
+                </IconButton>
               </span>
             ))}
           </div>

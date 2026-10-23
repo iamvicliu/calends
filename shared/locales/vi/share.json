@@ -56,6 +56,8 @@
   "chargeCount": "Khoản phí",
   "count": "{count}",
   "switches": "Đổi khu vực / gói",
+  "stoppedOn": "Đã dừng vào {date}",
+  "endsOn": "Kết thúc vào {date}",
   "thanks": "Cảm ơn · Hẹn gặp lại kỳ sau",
   "n": {
     "charges": {

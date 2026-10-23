@@ -1,8 +1,8 @@
 // 合租的账：一年的成本与预计收入、从开始合租起实际付出与收回；成员每次该收多少。
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
-import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths } from './billing.ts';
+import { chargesBetween, currentPhase, cycleDays, monthlyGross, memberAboard, effectiveStatus, memberBillMonths, memberRate } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
-import type { AppState, ShareMember, Subscription } from './types.ts';
+import type { AppState, CarRule, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
 
 /**
  * 合租账本：订阅本身多少钱、我付出去多少、从成员身上收回多少，算出净成本（负数就是赚了）。
@@ -11,12 +11,14 @@ import type { AppState, ShareMember, Subscription } from './types.ts';
 export function carLedger(state: AppState, s: Subscription, today: string) {
   const cur = currentPhase(s, today);
   const members = s.share?.members ?? [];
-  const perYear = 365.25 / cycleDays(cur.cycle);
   const yearCost = toBaseAt(state, monthlyGross(cur, today) * 12, cur.currency);
   // 预计收入只算还在车上的；实际收回保留所有人（包括已退出的）的历史收款
   const yearIncome = ['ended', 'terminated'].includes(effectiveStatus(s, today))
     ? 0
-    : members.reduce((a, m) => a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (m.share || 0) * perYear, cur.currency)), 0);
+    : members.reduce((a, m) => {
+        const rate = memberFee(state, s, m, today);
+        return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
+      }, 0);
   const firstPay = members.flatMap((m) => m.payments ?? []).reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
@@ -36,11 +38,39 @@ export function billAmount(s: Subscription, m: ShareMember): number {
   return Math.round((((m.share || 0) * memberBillMonths(s, m)) / cycleMonths(s)) * 100) / 100;
 }
 
-/** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算成本位币 */
-export function memberFee(state: AppState, s: Subscription, m: ShareMember): { amount: number; currency: string } {
+/** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算（订阅币种） */
+export function memberFee(state: AppState, s: Subscription, m: ShareMember, day = m.joined ?? s.share?.since ?? s.start): { amount: number; currency: string } {
   const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
-  if (m.fee != null) return { amount: m.fee, currency: m.feeCurrency ?? ccy };
-  return { amount: Math.round(toBaseAt(state, billAmount(s, m), s.currency, undefined, ccy)), currency: ccy };
+  return memberRate(s, m, day, ccy);
+}
+
+/** 首次调价固定旧基线；只插入收费标准，绝不改写历史收款。 */
+export function changeMemberFee(state: AppState, s: Subscription, m: ShareMember, point: MemberFeePoint, today: string): ShareMember {
+  const baseline = memberRate(s, m, m.joined ?? s.share?.since ?? s.start, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const history = m.feeHistory?.length
+    ? m.feeHistory
+    : [
+        {
+          from: [m.joined ?? s.share?.since ?? s.start, point.from].sort()[0],
+          fee: baseline.amount,
+          currency: baseline.currency,
+          billEvery: baseline.billEvery,
+          share: m.share,
+        },
+      ];
+  const feeHistory = [
+    ...history.filter((p) => p.from !== point.from),
+    { ...point, share: shareFromFee(state, s, point.fee, point.currency, point.billEvery) },
+  ].sort((a, b) => a.from.localeCompare(b.from));
+  const next = { ...m, feeHistory };
+  const current = memberRate(s, next, today);
+  return {
+    ...next,
+    fee: current.amount,
+    feeCurrency: current.currency,
+    billEvery: current.billEvery,
+    share: m.exempt ? 0 : shareFromFee(state, s, current.amount, current.currency, current.billEvery),
+  };
 }
 
 /** 由收费标准反推每期份额（订阅币种），用于算我自己的份额与成员应交 */
@@ -60,8 +90,84 @@ export function resyncShares(state: AppState, prev: Subscription | undefined, ne
     share: {
       ...next.share,
       members: next.share.members.map((m) =>
-        m.fee != null && !m.exempt ? { ...m, share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, memberBillMonths(next, m)) } : m,
+        m.fee != null && !m.exempt
+          ? {
+              ...m,
+              share: shareFromFee(state, next, m.fee, m.feeCurrency ?? ccy, m.billEvery ?? memberBillMonths(next, m)),
+              feeHistory: m.feeHistory?.map((p) => ({ ...p, share: shareFromFee(state, next, p.fee, p.currency, p.billEvery) })),
+            }
+          : m,
       ),
     },
   };
+}
+
+/** 更新应收和覆盖期时保留实际收款草稿；金额或币种手改后，两者都不再跟随默认值。 */
+export function refreshReceiptDraft(draft: MemberPayment, next: MemberPayment, moneyEdited: boolean): MemberPayment {
+  return {
+    ...draft,
+    from: next.from,
+    until: next.until,
+    ...(!moneyEdited ? { amount: next.amount, currency: next.currency } : {}),
+  };
+}
+
+/** 两条收费标准是否相同（金额容差一分钱） */
+export const sameRule = (a: CarRule, b: CarRule) => a.billEvery === b.billEvery && a.currency === b.currency && Math.abs(a.fee - b.fee) < 0.005;
+
+/**
+ * 车的收款规则：存了就用存的；老数据没存时，取在车成员里最常见的收费标准（周期 + 金额 + 币种）。
+ * 没有可参考的成员时按订阅价格除以座位、周期同订阅推一个默认值。
+ */
+export function carRule(state: AppState, s: Subscription, today: string): CarRule {
+  if (s.share?.rule) return s.share.rule;
+  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const counts = new Map<string, { rule: CarRule; n: number }>();
+  for (const m of s.share?.members ?? []) {
+    if (m.exempt || (m.left && m.left <= today)) continue;
+    const r = memberRate(s, m, today, ccy);
+    const rule = { billEvery: r.billEvery, fee: r.amount, currency: r.currency };
+    const key = `${rule.billEvery}|${rule.currency}|${rule.fee}`;
+    counts.set(key, { rule, n: (counts.get(key)?.n ?? 0) + 1 });
+  }
+  const top = [...counts.values()].sort((a, b) => b.n - a.n)[0];
+  if (top) return top.rule;
+  const months = Math.max(1, Math.round(cycleMonths(s)));
+  const fee = toBaseAt(state, s.price / Math.max(1, s.share?.seats ?? 1), s.currency, undefined, ccy);
+  return { billEvery: months, fee: Math.round(fee * 100) / 100, currency: ccy };
+}
+
+/** 成员是否跟随车的规则：没标自定义、要分摊；老数据未存规则时，收费与规则一致才算跟随 */
+export function followsCar(state: AppState, s: Subscription, m: ShareMember, today: string): boolean {
+  if (m.custom || m.exempt) return false;
+  if (s.share?.rule) return true;
+  const r = memberRate(s, m, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, carRule(state, s, today));
+}
+
+/**
+ * 改车的收款规则：存下新规则，跟随车的成员从生效日起改用新标准（沿用调价机制，历史收款不变）；
+ * 自定义收费、不分摊、已退出的成员不动。
+ */
+export function applyCarRule(state: AppState, s: Subscription, rule: CarRule, from: string, today: string): Subscription {
+  if (!s.share) return s;
+  const members = s.share.members.map((m) => {
+    if (m.left && (m.left <= today || m.left <= from)) return m;
+    // 规则第一次存下时，原本就与车不一致的成员明确标为自定义，之后不会被当成跟随车
+    if (!followsCar(state, s, m, today)) return m.exempt || m.custom ? m : { ...m, custom: true };
+    const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
+    if (sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)) return m;
+    return changeMemberFee(state, s, m, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
+  });
+  return { ...s, share: { ...s.share, rule, members } };
+}
+
+/** 成员改回跟随车：从生效日起套用车的规则 */
+export function followCarRule(state: AppState, s: Subscription, m: ShareMember, from: string, today: string): ShareMember {
+  const rule = carRule(state, s, today);
+  const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const next = { ...m, custom: undefined };
+  return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)
+    ? next
+    : changeMemberFee(state, s, next, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
 }

@@ -3,7 +3,7 @@ import { addDays, addMonths, parseDay } from '../../../shared/billing.ts';
 import { cnDateFull, monthLabel, weekdayShort } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { getState, today as todayOf } from '../store.ts';
-import { Icon } from './ui.tsx';
+import { IconButton, Icon } from './ui.tsx';
 import { Pop } from './Pop.tsx';
 
 /** 每周起始日跟随设置（1 周一、0 周日）；weekdayShort 的 0 是周日 */
@@ -28,12 +28,16 @@ export function DatePicker({
   placeholder = t('picker.date.placeholder'),
   clearable,
   min,
+  max,
+  ariaLabel,
 }: {
   value?: string;
   onChange: (v: string | undefined) => void;
   placeholder?: string;
   clearable?: boolean;
   min?: string;
+  max?: string;
+  ariaLabel?: string;
 }) {
   const today = todayOf();
   const [open, setOpen] = useState(false);
@@ -74,7 +78,7 @@ export function DatePicker({
     }
     setOpen(!open);
   };
-  const disabled = (d: string) => !!min && d < min;
+  const disabled = (d: string) => (!!min && d < min) || (!!max && d > max);
   const pick = (d: string) => {
     if (disabled(d)) return;
     onChange(d);
@@ -89,6 +93,7 @@ export function DatePicker({
         ref={btn}
         className={`dp-btn ${value ? '' : 'empty'} ${open ? 'open' : ''}`}
         onClick={toggle}
+        aria-label={ariaLabel ? `${ariaLabel}: ${value ? cnDateFull(value) : placeholder}` : undefined}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
@@ -102,22 +107,22 @@ export function DatePicker({
               {mode === 'day' ? monthLabel(month, { long: true }) : yearLabel(y)}
               <Icon name="down" />
             </button>
-            <button
+            <IconButton
               type="button"
               className="dp-nav"
               aria-label={t('picker.date.prev')}
               onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? -1 : -12).slice(0, 7))}
             >
               <Icon name="left" />
-            </button>
-            <button
+            </IconButton>
+            <IconButton
               type="button"
               className="dp-nav"
               aria-label={t('picker.date.next')}
               onClick={() => setMonth(addMonths(month + '-01', mode === 'day' ? 1 : 12).slice(0, 7))}
             >
               <Icon name="right" />
-            </button>
+            </IconButton>
           </div>
           {mode === 'day' ? (
             <div className="dp-grid">

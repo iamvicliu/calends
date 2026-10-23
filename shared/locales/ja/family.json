@@ -19,7 +19,20 @@
     "date": "受取日",
     "member": "メンバー",
     "covers": "対象期間",
-    "amount": "金額"
+    "amount": "金額",
+    "expandAll": "すべて展開",
+    "collapseAll": "すべて折りたたむ",
+    "groupSum": {
+      "other": "{count} 件 · {amount}"
+    },
+    "fee": "料金",
+    "nextCollection": "次回集金",
+    "actions": "操作",
+    "status": "支払い状況",
+    "period": "今期",
+    "range": "{from} – {until}",
+    "rangeFrom": "開始",
+    "rangeTo": "終了"
   },
   "contact": {
     "via": {
@@ -57,8 +70,8 @@
     "name": "名前",
     "namePh": "呼び名",
     "contact": "連絡先",
-    "account": "招待したアカウント",
-    "accountPh": "{name}に招待したメールアドレスまたはユーザー名",
+    "account": "メンバーアカウント",
+    "accountPh": "{name} のメール、電話番号、ユーザー名または ID",
     "joined": "参加日",
     "joinedPh": "プラン開始日（{date}）",
     "notSet": "未設定",
@@ -132,7 +145,10 @@
     "coverAligned": "共通の請求期間の終了日を自動設定",
     "recordNext": "入金を記録 · {amount}",
     "collectionAnchor": "共通の集金起点",
-    "firstSummary": "初回 {from}–{until} · {mode} {amount}"
+    "firstSummary": "初回 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "アカウント未入力",
+    "editAccount": "メンバーアカウントを編集",
+    "copyAccount": "アカウントをコピー"
   },
   "pool": {
     "seatsFree": "空き {count}",
@@ -198,7 +214,9 @@
     "payTo": "{name}に支払い · {amount}",
     "ownerDefault": "主催者",
     "maybeGroup": "共有の可能性あり",
-    "convert": "共有にする"
+    "convert": "共有にする",
+    "dueOn": "{date} 集金予定",
+    "nextDueOn": "次回 {date}"
   },
   "convert": {
     "title": "「{name}」を共有にする",
@@ -229,5 +247,39 @@
     "gain": "{amount}のプラス",
     "lost": "{amount}のマイナス",
     "noRecords": "まだ支払いはありません"
+  },
+  "collect": {
+    "title": "入金を記録 · {name}",
+    "next": "次回の集金 {date}",
+    "editMember": "編集",
+    "until": "対象期間の終わり",
+    "covers": "この入金の対象 {from} – {until}",
+    "changeFee": "料金を変更",
+    "lastPayment": "前回の入金",
+    "adjustFee": "料金を調整",
+    "feeFrom": "適用開始日",
+    "feeHelp": "対象期間の開始日の料金を期間全体に適用します。記録済みの入金は変更されません。",
+    "viewSub": "詳細を見る"
+  },
+  "rule": {
+    "title": "集金ルール",
+    "follow": "プランに合わせる",
+    "custom": "個別",
+    "followValue": "{rule}（プラン共通）",
+    "sheetTitle": "プランの集金ルール",
+    "from": "適用開始日",
+    "anchor": "共通集金日",
+    "applyNote": "プランに合わせる {count} 人は適用開始日から新ルールになります。個別設定と過去の入金は変わりません。"
+  },
+  "quick": {
+    "more": "詳細",
+    "paid": "支払済みの期間",
+    "paidFrom": "期間の開始",
+    "paidTo": "期間の終了",
+    "late": {
+      "other": "{count}日超過"
+    },
+    "owe": "未収 {amount} · {date}から",
+    "settled": "精算済み · 次回 {date}"
   }
 }

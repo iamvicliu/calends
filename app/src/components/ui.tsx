@@ -1,14 +1,28 @@
+import './ui.css';
+import { createPortal } from 'react-dom';
+import { tooltipPosition } from './tooltip-position.ts';
 import { base } from '../base.ts';
 import type { ReactNode as ComponentChildren, JSX } from 'react';
-import { Dialog, Heading, Modal, ModalOverlay, Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
+import {
+  Button as AriaButton,
+  Tooltip,
+  TooltipTrigger,
+  Dialog,
+  Heading,
+  Modal,
+  ModalOverlay,
+  Switch as AriaSwitch,
+  ToggleButton,
+  ToggleButtonGroup,
+} from 'react-aria-components';
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
-import { flowSign, symbol } from '../../../shared/format.ts';
+import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
 import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { CatGlyph } from './CatGlyph.tsx';
 import { intlLocale, t } from '../../../shared/i18n.ts';
-import { Toaster } from 'sonner';
+import { Toaster, toast as notify } from 'sonner';
 
 // ---------- SF Symbols 风格线性图标 ----------
 const P: Record<string, JSX.Element> = {
@@ -254,7 +268,7 @@ export function CatChip({ cat }: { cat: string }) {
 
 /**
  * 支付方式标记：统一显示支付产品自己的 logo —— 银行卡用银行图标集，
- * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有 logo 的用卡面色 + 名称首字。
+ * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有可用 logo 时用卡片图标。
  */
 export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?: number; proxied?: boolean }) {
   const brand = brandOf(m);
@@ -262,18 +276,36 @@ export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?:
   const region = methodRegion(m);
   // 小圆标优先用银行图标集（专为小尺寸设计）；其余用自定义 / 平台 / 官网 logo
   const logo = bank ? undefined : methodLogo(m);
-  const bg = bank || brand === 'appstore' ? undefined : markBg(m, logo, BRANDS.find((b) => b.key === brand)?.onColor);
+  const src = bank
+    ? base(`/banks/${bank}-rect.svg`)
+    : logo
+      ? proxied && /^https?:/.test(logo)
+        ? base(`/api/img?u=${encodeURIComponent(logo)}`)
+        : base(logo)
+      : undefined;
+  const [failedSrc, setFailedSrc] = useState<string>();
+  const fallback = brand !== 'appstore' && (!src || failedSrc === src);
+  const bg = fallback
+    ? markBg(m, undefined, undefined)
+    : bank || brand === 'appstore'
+      ? undefined
+      : markBg(m, logo, BRANDS.find((b) => b.key === brand)?.onColor);
   const style = { '--s': `${size}px`, background: bg } as Record<string, string>;
   return (
-    <span className={`mmark ${bank ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
-      {bank ? (
-        <img src={base(`/banks/${bank}-rect.svg`)} alt="" />
+    <span className={`mmark ${bank && !fallback ? 'bank' : (brand ?? '')} ${m.logoWide ? 'wide' : ''}`} style={style} aria-hidden="true">
+      {fallback ? (
+        <Icon name="wallet" size={Math.round(size * 0.7)} />
       ) : brand === 'appstore' ? (
         <i className="mm-glyph" />
-      ) : logo ? (
-        <img src={proxied && /^https?:/.test(logo) ? base(`/api/img?u=${encodeURIComponent(logo)}`) : base(logo)} alt="" />
       ) : (
-        <b>{[...m.name][0]}</b>
+        <img
+          src={src}
+          alt=""
+          onError={() => setFailedSrc(src)}
+          ref={(el) => {
+            if (el?.complete && el.naturalWidth === 0) queueMicrotask(() => setFailedSrc(src));
+          }}
+        />
       )}
       {region && <FlagImg cc={region} className="mm-flag" />}
     </span>
@@ -282,9 +314,9 @@ export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?:
 
 /** 标记底色：白色 logo 放在卡面色上，彩色 logo 放在白底上 */
 function markBg(m: PaymentMethod, logo: string | undefined, onColor: boolean | undefined): string {
-  if (onColor) return KIND_BG[m.kind];
+  if (onColor) return KIND_BG[m.kind] ?? KIND_BG.other;
   if (logo) return m.color && m.logo ? m.color : '#fff';
-  return m.color || KIND_BG[m.kind];
+  return m.color || KIND_BG[m.kind] || KIND_BG.other;
 }
 
 /** 卡组织标：Visa、Mastercard、银联… */
@@ -294,12 +326,15 @@ export function NetworkMark({ network, height = 20 }: { network?: CardNetwork; h
 }
 
 /** 小组件式金额：小数位缩小 */
-export function Amount({ value, ccy, compact, plain }: { value: number; ccy: string; compact?: boolean; plain?: boolean }) {
+export function Amount({ value, ccy, compact, plain, decimals }: { value: number; ccy: string; compact?: boolean; plain?: boolean; decimals?: number }) {
   if (!Number.isFinite(value)) return <span className="amt">—</span>;
   const abs = Math.abs(value);
-  const noDec = compact && abs >= 1000;
+  const digits = moneyDecimals(value, ccy, { compact, decimals });
   // 整数分组和小数点都跟随当前语言（德语 1.234,56、法语 1 234,56），小数部分缩小显示
-  const parts = new Intl.NumberFormat(intlLocale(), { minimumFractionDigits: noDec ? 0 : 2, maximumFractionDigits: noDec ? 0 : 2 }).formatToParts(abs);
+  const parts = new Intl.NumberFormat(intlLocale(), {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).formatToParts(abs);
   const int = parts
     .filter((p) => p.type !== 'decimal' && p.type !== 'fraction')
     .map((p) => p.value)
@@ -312,7 +347,7 @@ export function Amount({ value, ccy, compact, plain }: { value: number; ccy: str
       <span className="cur">{symbol(ccy).trim()}</span>
       {int}
       {dec && (
-        <small>
+        <small className="amt-fraction" style={{ color: 'inherit', opacity: 0.72 }}>
           {point}
           {dec}
         </small>
@@ -327,11 +362,13 @@ export function Seg<T extends string>({
   options,
   onChange,
   small,
+  disabledKeys,
 }: {
   value: T;
   options: Array<[T, string]>;
   onChange: (v: T) => void;
   small?: boolean;
+  disabledKeys?: T[];
 }) {
   return (
     <ToggleButtonGroup
@@ -345,7 +382,7 @@ export function Seg<T extends string>({
       }}
     >
       {options.map(([k, l]) => (
-        <ToggleButton key={k} id={k} className={({ isSelected }) => (isSelected ? 'on' : '')}>
+        <ToggleButton key={k} id={k} isDisabled={disabledKeys?.includes(k)} className={({ isSelected }) => (isSelected ? 'on' : '')}>
           {l}
         </ToggleButton>
       ))}
@@ -357,16 +394,16 @@ export function Seg<T extends string>({
 export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (
     <header className="toolbar">
-      <button className="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
+      <IconButton className="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
         <Icon name="menu" />
-      </button>
+      </IconButton>
       <div className="tb-title">
         <h1>{title}</h1>
         {sub && <div className="tb-sub">{sub}</div>}
       </div>
-      <button className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
+      <IconButton className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
         <Icon name="compose" />
-      </button>
+      </IconButton>
       <div className="tb-actions">{children}</div>
     </header>
   );
@@ -408,17 +445,17 @@ export function Sheet(props: {
         <Dialog className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
           <div className="grabber" />
           {props.bare ? (
-            <button className="icon-btn sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
+            <IconButton className="sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
               <Icon name="x" />
-            </button>
+            </IconButton>
           ) : (
             <div className="sheet-head">
-              <Heading slot="title" level={3}>
-                {props.title}
+              <Heading slot="title" level={3} className="ui-title">
+                <span className="ui-title-text">{props.title}</span>
               </Heading>
-              <button className="icon-btn" onClick={props.onClose} aria-label={t('ui.close')}>
+              <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
                 <Icon name="x" />
-              </button>
+              </IconButton>
             </div>
           )}
           <div className="sheet-body">{props.children}</div>
@@ -438,8 +475,9 @@ const toNum = (v: string) => (v.trim() === '' || !Number.isFinite(Number(v)) ? u
 export function NumInput({
   value,
   onValue,
+  ccy,
   ...rest
-}: { value: number | undefined; onValue: (n: number | undefined) => void } & Omit<JSX.IntrinsicElements['input'], 'value' | 'onChange'>) {
+}: { value: number | undefined; onValue: (n: number | undefined) => void; ccy?: string } & Omit<JSX.IntrinsicElements['input'], 'value' | 'onChange'>) {
   const shown = (v: number | undefined) => (v == null ? '' : String(v));
   const [text, setText] = useState(shown(value));
   const [seen, setSeen] = useState(value);
@@ -450,7 +488,8 @@ export function NumInput({
   }
   return (
     <input
-      inputMode="decimal"
+      inputMode={ccy && currencyDecimals(ccy) === 0 ? 'numeric' : 'decimal'}
+      step={ccy ? 10 ** -currencyDecimals(ccy) : undefined}
       {...rest}
       value={text}
       onFocus={(e) => {
@@ -463,8 +502,33 @@ export function NumInput({
         rest.onBlur?.(e);
       }}
       onChange={(e) => {
+        if (ccy && !acceptCurrencyInput(e.target.value, ccy)) return;
         setText(e.target.value);
         onValue(toNum(e.target.value));
+      }}
+    />
+  );
+}
+
+/** 新输入的零小数金额拒绝小数；已有值与汇率计算结果不在这里改写。 */
+export function acceptCurrencyInput(text: string, ccy: string): boolean {
+  const n = toNum(text);
+  if (currencyDecimals(ccy) === 0 && n != null && !Number.isInteger(n)) {
+    notify.error(t('ui.error.wholeCurrency', { currency: ccy }));
+    return false;
+  }
+  return true;
+}
+
+/** 保留字符串草稿语义的金额输入（空值、负号等由调用方校验）。 */
+export function MoneyInput({ ccy, onChange, ...props }: { ccy: string } & JSX.IntrinsicElements['input']) {
+  return (
+    <input
+      {...props}
+      inputMode={currencyDecimals(ccy) === 0 ? 'numeric' : 'decimal'}
+      step={10 ** -currencyDecimals(ccy)}
+      onChange={(e) => {
+        if (acceptCurrencyInput(e.target.value, ccy)) onChange?.(e);
       }}
     />
   );
@@ -557,7 +621,7 @@ export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop'; ch
 export function NameLink({ children, onClick }: { children: ComponentChildren; onClick: () => void }) {
   return (
     <span
-      className="name-link"
+      className="name-link text-ellipsis"
       role="link"
       tabIndex={0}
       onClick={(e) => {
@@ -597,37 +661,97 @@ export function useWidth<T extends HTMLElement = HTMLDivElement>() {
 }
 
 // ---------- 悬浮提示 ----------
-let tipSet: ((t: { x: number; y: number; html: ComponentChildren } | null) => void) | undefined;
+type Tip = { x: number; top: number; bottom: number; html: ComponentChildren };
+let tipSet: ((tip: Tip | null) => void) | undefined;
 
 export function TipLayer() {
-  const [tip, setTip] = useState<{ x: number; y: number; html: ComponentChildren } | null>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
+  const [position, setPosition] = useState({ left: 8, top: 8 });
+  const ref = useRef<HTMLDivElement>(null);
   tipSet = setTip;
-  if (!tip) return null;
-  const x = Math.min(Math.max(tip.x, 90), window.innerWidth - 90);
+  useLayoutEffect(() => {
+    if (!tip || !ref.current) return;
+    const box = ref.current.getBoundingClientRect();
+    setPosition(tooltipPosition(tip, box, { width: window.innerWidth, height: window.innerHeight }));
+  }, [tip]);
+  useEffect(() => {
+    const hide = () => setTip(null);
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') hide();
+    };
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    window.addEventListener('keydown', key);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+      window.removeEventListener('keydown', key);
+      tipSet = undefined;
+    };
+  }, []);
   return (
-    <div className="tip" style={{ left: x, top: tip.y }}>
-      {tip.html}
-    </div>
+    tip &&
+    createPortal(
+      <div ref={ref} className="tip" role="tooltip" style={position}>
+        {tip.html}
+      </div>,
+      document.body,
+    )
   );
 }
 
 export function tipProps(html: () => ComponentChildren) {
-  return {
-    onMouseEnter: (e: { currentTarget: EventTarget }) => {
-      const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      tipSet?.({ x: r.left + r.width / 2, y: r.top, html: html() });
-    },
-    onMouseLeave: () => tipSet?.(null),
+  const show = (e: { currentTarget: EventTarget }) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    tipSet?.({ x: r.left + r.width / 2, top: r.top, bottom: r.bottom, html: html() });
   };
+  const hide = () => tipSet?.(null);
+  return { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide };
 }
 
-/** 标题旁的说明图标：悬停或键盘聚焦时显示说明，不常驻占位 */
-export function Hint({ text }: { text: string }) {
-  const tip = tipProps(() => text);
+/** 标题内容和说明始终作为一个居中对齐的整体，操作区由 card-h 等容器承载。 */
+export function CardTitle({
+  as: Tag = 'h3',
+  className = '',
+  hint,
+  children,
+}: {
+  as?: 'h2' | 'h3' | 'h4' | 'div' | 'span';
+  className?: string;
+  hint?: string;
+  children: ComponentChildren;
+}) {
   return (
-    <span className="hint" tabIndex={0} role="img" aria-label={text} {...tip} onClick={tip.onMouseEnter} onFocus={tip.onMouseEnter} onBlur={tip.onMouseLeave}>
-      <Icon name="info" size={14} />
-    </span>
+    <Tag className={`ui-title ${className}`}>
+      <span className="ui-title-text">{children}</span>
+      {hint && <Hint text={hint} />}
+    </Tag>
+  );
+}
+
+/** 所有圆形图标操作共用命中区域和状态；尺寸由 CSS 按视口统一。 */
+export function IconButton({ className = '', type = 'button', ...props }: JSX.IntrinsicElements['button'] & { 'aria-label': string }) {
+  return <button {...props} type={type} className={`icon-btn ${className}`} />;
+}
+
+/** 说明可悬停、键盘聚焦或点按；React Aria 负责 portal、翻转、视口边界和 Escape。 */
+export function Hint({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <TooltipTrigger isOpen={open} onOpenChange={setOpen} shouldCloseOnPress={false} delay={150} closeDelay={100}>
+      <AriaButton
+        className="icon-btn hint"
+        aria-label={text}
+        onHoverStart={() => setOpen(true)}
+        onHoverEnd={() => setOpen(false)}
+        onPress={() => setOpen(true)}
+      >
+        <Icon name="info" />
+      </AriaButton>
+      <Tooltip className="info-tip" placement="top" offset={8} containerPadding={8}>
+        {text}
+      </Tooltip>
+    </TooltipTrigger>
   );
 }
 

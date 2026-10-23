@@ -49,6 +49,7 @@
     "preview": "Vista previa de los recordatorios de hoy"
   },
   "today": {
+    "recent": "Envíos recientes",
     "title": "Hoy ({day})",
     "items": { "one": "{count} elemento", "other": "{count} elementos" }
   },

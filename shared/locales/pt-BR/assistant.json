@@ -162,7 +162,11 @@
     },
     "applyAll": "Confirmar tudo",
     "history": "Cobranças anteriores",
-    "historyCount": { "one": "{count} cobrança", "other": "{count} cobranças" }
+    "historyCount": {
+      "one": "{count} cobrança",
+      "other": "{count} cobranças"
+    },
+    "changes": "Ver alterações e referências"
   },
   "error": {
     "auth": "API Key inválida",

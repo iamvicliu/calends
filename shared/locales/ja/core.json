@@ -48,7 +48,10 @@
     "prependUntil": "追加する期間の終了日は、その開始日より後、元の開始日以前にしてください",
     "priceOutOfRange": "価格変更日がどの期間にも含まれていません",
     "keepTooEarly": "継続利用の終了日は切り替え日より後にしてください",
-    "endTooEarly": "終了日はこの期間の開始日より後にしてください"
+    "endTooEarly": "終了日はこの期間の開始日より後にしてください",
+    "startOrder": "開始日は前の期間の開始日より後、次の期間の開始日より前にしてください。",
+    "priceDuplicate": "この日付の価格は既に登録されています",
+    "priceInitial": "初期価格は削除できません"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -165,7 +168,7 @@
     "refunded": "返金済み {money}",
     "partial": "一部返金 {money}",
     "unrefunded": "未返金 · 損失 {money}",
-    "unused": "未返金損失: −{money} ({days})",
+    "unused": "未返金損失: {money} ({days})",
     "unusedTitle": "未返金",
     "terminated": "利用停止",
     "restore": "再開",
@@ -177,6 +180,19 @@
     "fullyRefunded": "全額返金済み",
     "chargeOnEnd": "この日は更新の請求日です。前日にすると請求されません。",
     "nonrenewDone": "期限で更新しない設定にしました。{date} 以降は請求されません。",
-    "stoppedDone": "サービスを停止しました"
+    "stoppedDone": "サービスを停止しました",
+    "method": "停止方法",
+    "latestRefundHint": "ここでは直近の返金を編集します。それ以前の返金は支払い履歴に残ります。"
+  },
+  "renewal": {
+    "title": "更新ルール",
+    "chargeLeadDays": "前払いの日数",
+    "cancelLeadDays": "解約に必要な日数",
+    "hint": "サービス更新前の請求と、その請求前の解約に必要な日数です。0 は設定なし。サービス期間は変わりません。",
+    "cancelBy": "解約期限",
+    "invalid": "0～3660 の整数で日数を入力してください。",
+    "tooLate": "解約期限を過ぎたため、次の期間も請求されます。",
+    "cancelReminder": "次回の請求を避けるには {date} までに解約してください。",
+    "none": "なし"
   }
 }

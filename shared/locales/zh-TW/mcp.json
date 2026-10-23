@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "未指定",
     "anyRegion": "不區分地區",
-    "total": "合計"
+    "total": "合計",
+    "createCategory": "將新增分類：{name}",
+    "createdCategory": "已新增分類：{name}"
   },
   "error": {
     "shareFull": "「{name}」已經坐滿了（{seats} 個位置）",
@@ -55,7 +57,12 @@
     "invalidRefund": "退款金額須為有效數字，並以負數記錄。",
     "refundBeforeStop": "退款日期不能早於停止日。",
     "paymentOutOfRange": "扣款日期 {date} 必須在開始日期到今天之間",
-    "invalidFirstPeriod": "首期方式必須是 prorate、full 或 free。"
+    "invalidFirstPeriod": "首期方式必須是 prorate、full 或 free。",
+    "invalidInput": "工具参数不合法：{field}",
+    "invalidTarget": "目标不存在、不唯一、重复或不合法。请先读取最新记录并指定准确的 ID/索引。",
+    "references": "此项仍被引用。请指定 migrate_to 或先移除这些引用：{references}",
+    "staleRecord": "记录在预览后已变化，请重新读取并预览。",
+    "noCategory": "分類不存在或有歧義：{q}。可選分類：{list}"
   },
   "tool": {
     "get_overview": "帳本概況",
@@ -67,23 +74,28 @@
     "get_trends": "趨勢",
     "list_payment_methods": "付款方式與餘額",
     "get_receivables": "待收款",
-    "get_insights": "健檢、省下與損失、年度回顧",
+    "get_insights": "洞察與報告",
     "list_events": "變更日誌",
     "search_app_store": "查找 App",
     "get_carpool": "合租概況",
     "delete_subscription": "刪除訂閱",
-    "set_share": "設定合租",
+    "set_share": "管理合租",
     "save_share_member": "新增或修改成員",
     "remove_share_member": "移除成員",
     "create_subscription": "新增訂閱",
     "update_subscription": "修改訂閱資訊",
     "change_price": "記錄調價",
-    "change_plan": "換區 / 換套餐 / 續訂",
-    "set_status": "暫停 / 退訂 / 恢復",
-    "record_payment": "記一筆扣款",
-    "delete_payment": "刪除一筆扣款記錄",
-    "record_receivable": "記一筆收款",
-    "update_payment_method": "更新付款方式餘額",
-    "list_people": "人與應收"
+    "change_plan": "管理方案與歷史階段",
+    "set_status": "修改訂閱狀態",
+    "record_payment": "記錄或修改扣款",
+    "delete_payment": "刪除扣款記錄",
+    "record_receivable": "管理應收與收款記錄",
+    "update_payment_method": "管理付款方式與錢包",
+    "list_people": "人與應收",
+    "save_category": "管理分類",
+    "save_person": "管理人員",
+    "get_settings": "帳本設定與偏好",
+    "update_settings": "修改帳本設定與偏好",
+    "set_proxy": "管理代付關係"
   }
 }

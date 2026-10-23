@@ -19,7 +19,21 @@
     "date": "Date",
     "member": "Member",
     "covers": "Covers",
-    "amount": "Amount"
+    "amount": "Amount",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "groupSum": {
+      "one": "{count} payment · {amount}",
+      "other": "{count} payments · {amount}"
+    },
+    "fee": "Fee",
+    "nextCollection": "Next due",
+    "actions": "Actions",
+    "status": "Payment status",
+    "period": "Current period",
+    "range": "{from} – {until}",
+    "rangeFrom": "From",
+    "rangeTo": "To"
   },
   "contact": {
     "via": {
@@ -58,8 +72,8 @@
     "name": "Name",
     "namePh": "What to call them",
     "contact": "Contact",
-    "account": "Invited account",
-    "accountPh": "Email or username invited to {name}",
+    "account": "Member account",
+    "accountPh": "Email, phone, username or ID on {name}",
     "joined": "Joined",
     "joinedPh": "Plan start ({date})",
     "notSet": "Not set",
@@ -135,7 +149,10 @@
     "coverAligned": "Ends at the aligned period boundary",
     "recordNext": "Record payment · {amount}",
     "collectionAnchor": "Collection anchor",
-    "firstSummary": "First period {from}–{until} · {mode} {amount}"
+    "firstSummary": "First period {from}–{until} · {mode} {amount}",
+    "accountEmpty": "No account added",
+    "editAccount": "Edit member account",
+    "copyAccount": "Copy account"
   },
   "pool": {
     "seatsFree": "{count} open",
@@ -206,7 +223,9 @@
     "payTo": "Paid to {name} · {amount}",
     "ownerDefault": "organizer",
     "maybeGroup": "Possibly shared",
-    "convert": "Make shared"
+    "convert": "Make shared",
+    "dueOn": "Due {date}",
+    "nextDueOn": "Next due {date}"
   },
   "convert": {
     "title": "Make “{name}” shared",
@@ -237,5 +256,40 @@
     "gain": "Up {amount}",
     "lost": "Down {amount}",
     "noRecords": "No payments yet"
+  },
+  "collect": {
+    "title": "Record payment · {name}",
+    "next": "Next collection {date}",
+    "editMember": "Edit member",
+    "until": "Covers through",
+    "covers": "Payment covers {from} – {until}",
+    "changeFee": "Change fee",
+    "lastPayment": "Last payment",
+    "adjustFee": "Adjust fee",
+    "feeFrom": "Effective from",
+    "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",
+    "viewSub": "View details"
+  },
+  "rule": {
+    "title": "Collection rule",
+    "follow": "Follow plan",
+    "custom": "Custom",
+    "followValue": "{rule} (plan rule)",
+    "sheetTitle": "Plan collection rule",
+    "from": "Effective from",
+    "anchor": "Collection anchor",
+    "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged."
+  },
+  "quick": {
+    "more": "More details",
+    "paid": "Paid through",
+    "paidFrom": "Period starts",
+    "paidTo": "Period ends",
+    "late": {
+      "one": "{count} day overdue",
+      "other": "{count} days overdue"
+    },
+    "owe": "{amount} due · since {date}",
+    "settled": "Settled · next due {date}"
   }
 }

@@ -56,6 +56,8 @@
   "chargeCount": "결제 횟수",
   "count": "{count}",
   "switches": "지역 / 플랜 변경",
+  "stoppedOn": "{date}에 종료됨",
+  "endsOn": "{date}에 종료 예정",
   "thanks": "감사합니다 · 다음 주기에 또 만나요",
   "n": {
     "charges": {

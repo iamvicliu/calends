@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { cycleShort } from '../../../shared/billing.ts';
 import { importSubscriptionsCsv, toCsv } from '../../../shared/csv.ts';
 import { avatarOf, type AppState, type PaymentMethod, type Subscription } from '../../../shared/types.ts';
-import { ask, Cell, Group, Hint, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
@@ -106,6 +106,40 @@ function timeZones(current: string) {
     }
   };
   return [...new Set(['UTC', ...all, current])].map((z) => ({ value: z, label: z.replace(/_/g, ' '), hint: offset(z) }));
+}
+
+function ReminderPreview({ preview, timezone }: { preview: Preview | null; timezone: string }) {
+  if (!preview) return null;
+  const todayLog = preview?.log.filter((l) => localTime(l.sent_at, timezone, true) === preview.day) ?? [];
+  const recentLog = preview?.log.filter((l) => localTime(l.sent_at, timezone, true) !== preview.day) ?? [];
+  return (
+    <>
+      {preview && (preview.digests.length > 0 || todayLog.length > 0) && (
+        <Group title={t('settings.today.title', { day: preview.day })}>
+          {preview.digests.map((d) => (
+            <Cell key={d.key} label={d.subject}>
+              {t('settings.today.items', { count: d.sections.reduce((a, x) => a + x.rows.length, 0) })}
+            </Cell>
+          ))}
+          {todayLog.map((l) => (
+            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
+              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{localTime(l.sent_at, timezone).slice(11)}</span>
+            </Cell>
+          ))}
+        </Group>
+      )}
+
+      {recentLog.length > 0 && (
+        <Group title={t('settings.today.recent')}>
+          {recentLog.slice(0, 6).map((l) => (
+            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
+              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{localTime(l.sent_at, timezone)}</span>
+            </Cell>
+          ))}
+        </Group>
+      )}
+    </>
+  );
 }
 
 export function Settings({ state, today }: { state: AppState; today: string }) {
@@ -240,10 +274,9 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Cell>
           <Cell
             label={
-              <span className="with-hint">
+              <CardTitle as="span" hint={t('settings.general.signedAmountsSub')}>
                 {t('settings.general.signedAmounts')}
-                <Hint text={t('settings.general.signedAmountsSub')} />
-              </span>
+              </CardTitle>
             }
           >
             <Toggle
@@ -373,20 +406,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <ChannelsGroup state={state} />
 
-        {preview && (preview.digests.length > 0 || preview.log.length > 0) && (
-          <Group title={t('settings.today.title', { day: preview.day })}>
-            {preview.digests.map((d) => (
-              <Cell key={d.key} label={d.subject}>
-                {t('settings.today.items', { count: d.sections.reduce((a, x) => a + x.rows.length, 0) })}
-              </Cell>
-            ))}
-            {preview.log.slice(0, 6).map((l) => (
-              <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
-                <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{l.sent_at.slice(5, 16)}</span>
-              </Cell>
-            ))}
-          </Group>
-        )}
+        <ReminderPreview preview={preview} timezone={s.timezone} />
 
         <Group title={t('settings.books.title')}>
           <Cell label={t('settings.books.defaultMethod')}>
@@ -610,7 +630,7 @@ function NavRow({ id, label, checked, onToggle }: { id: string; label: string; c
       className={`cell cat-row nav-row ${isDragging ? 'lifted' : ''}`}
       style={{ transform: transform ? `translate3d(0, ${transform.y}px, 0)` : undefined, transition } as Record<string, string | undefined>}
     >
-      <button
+      <IconButton
         type="button"
         ref={setActivatorNodeRef as (el: HTMLButtonElement | null) => void}
         className="cat-grip"
@@ -619,7 +639,7 @@ function NavRow({ id, label, checked, onToggle }: { id: string; label: string; c
         {...(listeners as Record<string, unknown>)}
       >
         <Icon name="grip" />
-      </button>
+      </IconButton>
       <span className="nav-row-name">{label}</span>
       {checked !== undefined && <Toggle label={label} checked={checked} onChange={onToggle} />}
     </div>

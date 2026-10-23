@@ -162,7 +162,11 @@
     },
     "applyAll": "Alle bestätigen",
     "history": "Bisherige Abbuchungen",
-    "historyCount": { "one": "{count} Abbuchung", "other": "{count} Abbuchungen" }
+    "historyCount": {
+      "one": "{count} Abbuchung",
+      "other": "{count} Abbuchungen"
+    },
+    "changes": "Änderungen und Verweise ansehen"
   },
   "error": {
     "auth": "Ungültiger API-Key",

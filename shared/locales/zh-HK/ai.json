@@ -25,7 +25,7 @@
     "write": "讀寫",
     "read": "唯讀",
     "label": "權限",
-    "writeDesc": "可以查詢，亦可以新增和修改訂閱、扣款與收款。",
+    "writeDesc": "可以查詢和管理訂閱、扣款、收款、錢包、人員、分類及帳本設定。",
     "readDesc": "只能查詢，不能修改任何資料。"
   },
   "created": {
@@ -71,5 +71,21 @@
   "promptLabel": "提示詞",
   "copyConfigOnly": "只複製設定",
   "configCopied": "設定已複製",
-  "agentPrompt": "請把我的 Calends 訂閱帳本接入為你的 MCP 伺服器，名稱叫 calends。{where}\n\n{code}\n\n設定好後呼叫 {verify} 工具驗證一下，再告訴我現在有幾個使用中的訂閱。"
+  "agentPrompt": "請把我的 Calends 訂閱帳本接入為你的 MCP 伺服器，名稱叫 calends。{where}\n\n{code}\n\n設定好後呼叫 {verify} 工具驗證一下，再告訴我現在有幾個使用中的訂閱。",
+  "col": {
+    "name": "名稱",
+    "key": "密鑰",
+    "created": "建立",
+    "lastUsed": "最近使用"
+  },
+  "domain": {
+    "overview": "概覽與統計",
+    "subs": "訂閱與方案",
+    "charges": "扣款記錄",
+    "wallet": "錢包與付款方式",
+    "people": "合租與代付",
+    "categories": "分類",
+    "settings": "設定",
+    "other": "其他"
+  }
 }

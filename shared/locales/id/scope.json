@@ -61,5 +61,8 @@
     "other": "{scope} · {count} langganan"
   },
   "mrrBasis": "Biaya bulanan bagian saya dari langganan yang sedang ditagih. Paket tahunan dibagi per bulan; ini bukan pembayaran aktual bulan ini.",
-  "debitBasis": "Hanya pembayaran positif; pengembalian dana ditampilkan terpisah dan tidak mengurangi rincian atau peringkat."
+  "debitBasis": "Hanya pembayaran positif; pengembalian dana ditampilkan terpisah dan tidak mengurangi rincian atau peringkat.",
+  "other": "Lainnya",
+  "minimize": "Perkecil ke ringkasan",
+  "movementBasis": "Biaya bulanan bagian saya dalam mata uang dasar dengan kurs akhir periode. Tanggal menunjukkan perubahan terkait, atau periode laporan jika tidak ada peristiwa tercatat."
 }

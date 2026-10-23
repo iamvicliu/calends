@@ -60,6 +60,8 @@
   "chargeCount": "Charges",
   "count": "{count}",
   "switches": "Region / plan changes",
+  "stoppedOn": "Stopped on {date}",
+  "endsOn": "Ends on {date}",
   "thanks": "Thank you · See you next cycle",
   "n": {
     "charges": {

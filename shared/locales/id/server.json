@@ -47,5 +47,7 @@
     "noKey": "Kunci API DeepSeek belum diatur.",
     "badTool": "Tindakan tidak didukung."
   },
-  "invalidAvatar": "Gambar tidak valid"
+  "invalidAvatar": "Gambar tidak valid",
+  "avatarInvalid": "Gunakan PNG/WebP persegi tanpa metadata, maksimal 128×128 dan 64 KB. Unggahan: PNG/JPEG/WebP hingga 8 MB dan 40 megapiksel.",
+  "avatarRosterFull": "Daftar orang penuh. Hapus avatar sebelum menambahkan yang baru."
 }

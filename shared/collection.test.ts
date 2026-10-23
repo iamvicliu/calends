@@ -74,7 +74,7 @@ test('月、季、半年、年对齐：月末、闰日及原始日号不会累�
   s.share!.collectFrom = '2024-02-29';
   assert.deepEqual(collectionPeriod(s, newcomer({ billEvery: 12 }), '2028-02-29'), { from: '2028-02-29', until: '2029-02-27', next: '2029-02-28' });
   assert.deepEqual(collectionPeriod(s, newcomer({ billEvery: 6 }), '2023-02-28'), { from: '2023-02-28', until: '2023-08-28', next: '2023-08-29' });
-  assert.deepEqual(collectionDates(sub(), newcomer(), '2026'), ['2026-01-17', '2026-07-17']);
+  assert.deepEqual(collectionDates(sub(), newcomer(), '2026'), ['2026-10-20']);
 });
 
 test('首期按天、整期、免费、自定义；边界加入不折算、零元标准可用', () => {
@@ -140,4 +140,24 @@ test('首期内退出：退出日不计，按天分母仍为整期天数，之�
   }
   const m = newcomer({ left: '2026-10-20' });
   assert.equal(memberDues(sub(m), '2028-01-01')[1].owed, 0);
+});
+
+test('常规收款独立于统一日：7月16日已付至，下一期完整收44并覆盖半年', () => {
+  const m = newcomer({ joined: '2025-10-14', paidUntil: '2026-07-16', fee: 44 });
+  const s = sub(m);
+  s.share!.collectFrom = '2025-10-14';
+  const from = memberUnpaidFrom(s, m);
+  assert.deepEqual(memberCollection(s, m, from), { from: '2026-07-17', until: '2027-01-16', next: '2027-01-17', amount: 44, currency: 'CNY', partial: false });
+  assert.equal(memberDues(s, '2026-10-22')[1].owed, 44);
+  // 已补记了较短的加入首期，随后即使仍在统一周期内也收完整一期。
+  const shortenedFirst = {
+    ...m,
+    joined: '2026-06-01',
+    payments: [{ date: '2026-06-01', amount: 40, currency: 'CNY', from: '2026-06-01', until: '2026-07-16' }],
+  };
+  assert.equal(memberCollection(s, shortenedFirst, memberUnpaidFrom(s, shortenedFirst)).amount, 44);
+  assert.equal(memberCollection(s, shortenedFirst, memberUnpaidFrom(s, shortenedFirst)).partial, false);
+  const customized = { ...m, paidUntil: '2027-02-03' };
+  assert.equal(memberCollection(s, customized, memberUnpaidFrom(s, customized)).until, '2027-08-03');
+  assert.deepEqual(collectionDates(s, customized, '2027'), ['2027-02-04', '2027-08-04']);
 });

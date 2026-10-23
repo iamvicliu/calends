@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Не указан",
     "anyRegion": "Любой регион",
-    "total": "Итого"
+    "total": "Итого",
+    "createCategory": "Будет создана категория: {name}",
+    "createdCategory": "Создана категория: {name}"
   },
   "error": {
     "shareFull": "«{name}» заполнена (мест: {seats})",
@@ -55,7 +57,12 @@
     "invalidRefund": "Суммы возврата должны быть допустимыми числами и храниться отрицательными.",
     "refundBeforeStop": "Дата возврата не может быть раньше остановки.",
     "paymentOutOfRange": "Дата платежа {date} должна быть между датой начала и сегодняшним днём",
-    "invalidFirstPeriod": "first_period должен быть prorate, full или free."
+    "invalidFirstPeriod": "first_period должен быть prorate, full или free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Категория не найдена или неоднозначна: {q}. Варианты: {list}"
   },
   "tool": {
     "get_overview": "Обзор учёта",
@@ -67,23 +74,28 @@
     "get_trends": "Тренды",
     "list_payment_methods": "Способы оплаты и балансы",
     "get_receivables": "К получению",
-    "get_insights": "Проверка, экономия, потери и итоги года",
+    "get_insights": "Аналитика и отчёты",
     "list_events": "Журнал изменений",
     "search_app_store": "Найти приложение",
     "get_carpool": "Совместные подписки",
     "delete_subscription": "Удалить подписку",
-    "set_share": "Настроить совместную подписку",
+    "set_share": "Управление совместными подписками",
     "save_share_member": "Добавить или изменить участника",
     "remove_share_member": "Удалить участника",
     "create_subscription": "Добавить подписку",
     "update_subscription": "Изменить подписку",
     "change_price": "Записать изменение цены",
-    "change_plan": "Сменить регион / тариф / подписаться снова",
-    "set_status": "Приостановить / отменить / возобновить",
-    "record_payment": "Записать списание",
-    "delete_payment": "Удалить запись о списании",
-    "record_receivable": "Записать полученные деньги",
-    "update_payment_method": "Обновить баланс способа оплаты",
-    "list_people": "Люди и долги"
+    "change_plan": "Управление тарифами и историей",
+    "set_status": "Изменить статус подписки",
+    "record_payment": "Записать или изменить платёж",
+    "delete_payment": "Удалить запись о платеже",
+    "record_receivable": "Управление долгами и поступлениями",
+    "update_payment_method": "Управление способами оплаты и кошельками",
+    "list_people": "Люди и долги",
+    "save_category": "Управление категорией",
+    "save_person": "Управление людьми",
+    "get_settings": "Настройки учёта и интерфейса",
+    "update_settings": "Изменить настройки учёта и интерфейса",
+    "set_proxy": "Управление оплатой за других"
   }
 }

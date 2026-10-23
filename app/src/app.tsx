@@ -1,11 +1,12 @@
 import { isPasskeyCancellation } from './passkey-autofill.ts';
 import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
+import { FocusScope } from 'react-aria';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/billing.ts';
 import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
-import { AskLayer, Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
+import { IconButton, AskLayer, Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -182,6 +183,7 @@ function Sidebar({
   onAdd,
   onSearch,
   onCollapse,
+  inert,
 }: {
   state: AppState;
   route: string;
@@ -192,6 +194,7 @@ function Sidebar({
   onAdd: () => void;
   onSearch: () => void;
   onCollapse: () => void;
+  inert?: boolean;
 }) {
   const [gear, setGear] = useState(0);
   // 即将扣款：像聊天记录一样列在导航下方；往后看 0 天表示看到本月月底
@@ -205,15 +208,15 @@ function Sidebar({
     .slice(0, 12);
   const showUpcoming = state.settings.sidebarUpcoming !== false;
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" inert={inert}>
       <div className="sb-top">
         <a className="sb-mark" href={href('overview')}>
           <img src={base(avatarOf(state.settings))} alt="" />
           {t('app.name')}
         </a>
-        <button className="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
+        <IconButton className="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
           <Icon name="sidebar" />
-        </button>
+        </IconButton>
       </div>
       {!state.readonly && (
         <button className="side-item" onClick={onAdd}>
@@ -426,6 +429,8 @@ function App() {
   const [theme, toggleTheme] = useThemeMode();
   const [editing, setEditing] = useState<Subscription | null>(null);
   const [viewId, setViewId] = useState<string | null>(null);
+  // 从详情点「编辑」时记下来源，编辑关闭后回到这条订阅的详情，直接看到改动效果（删除后该订阅不存在，就不再打开）
+  const [backTo, setBackTo] = useState<string | null>(null);
   const [review, setReview] = useState(false);
   const [ics, setIcs] = useState(false);
   const [palette, setPalette] = useState(false);
@@ -433,6 +438,26 @@ function App() {
   const collapsed = collapsedPref === '1';
   const setCollapsed = (v: boolean) => setCollapsedPref(v ? '1' : '0');
   const [drawer, setDrawer] = useState(false);
+  const [narrow, setNarrow] = useState(() => matchMedia('(max-width: 860px)').matches);
+  useEffect(() => {
+    const media = matchMedia('(max-width: 860px)');
+    const change = () => {
+      setNarrow(media.matches);
+      if (!media.matches) setDrawer(false);
+    };
+    media.addEventListener('change', change);
+    return () => media.removeEventListener('change', change);
+  }, []);
+  useEffect(() => {
+    if (!drawer) return;
+    const close = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || document.querySelector('.scrim, [aria-modal="true"]')) return;
+      e.preventDefault();
+      setDrawer(false);
+    };
+    document.addEventListener('keydown', close);
+    return () => document.removeEventListener('keydown', close);
+  }, [drawer]);
 
   useEffect(() => setDrawer(false), [route]);
   // 未登录：除登录页外都跳到 /login 并记下原地址；根路径在开了公开页时让访客看公开页
@@ -564,43 +589,75 @@ function App() {
         view = null;
     }
 
+  const sidebar = (
+    <Sidebar
+      inert={narrow ? !drawer : collapsed}
+      state={state}
+      route={route}
+      d={d}
+      theme={theme}
+      toggleTheme={toggleTheme}
+      onOpen={open}
+      onAdd={add}
+      onSearch={() => {
+        setDrawer(false);
+        setPalette(true);
+      }}
+      onCollapse={() => (drawer ? setDrawer(false) : setCollapsed(true))}
+    />
+  );
+
   return (
     <div className={`app ${collapsed ? 'collapsed' : ''} ${drawer ? 'drawer' : ''}`}>
-      <Sidebar
-        state={state}
-        route={route}
-        d={d}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        onOpen={open}
-        onAdd={add}
-        onSearch={() => {
-          setDrawer(false);
-          setPalette(true);
-        }}
-        onCollapse={() => (drawer ? setDrawer(false) : setCollapsed(true))}
-      />
+      {drawer && narrow ? (
+        <FocusScope contain autoFocus restoreFocus>
+          {sidebar}
+        </FocusScope>
+      ) : (
+        sidebar
+      )}
       <div className="drawer-scrim" onClick={() => setDrawer(false)} />
-      <div className="main">
+      <div className="main" inert={drawer && narrow}>
         {phase === 'offline' && (
           <div className="badge orange" style={{ position: 'fixed', top: 10, right: 10, zIndex: 50 }}>
             {t('app.offline')}
           </div>
         )}
         {collapsed && (
-          <button className="sb-btn reopen" onClick={() => setCollapsed(false)} title={t('app.sidebar.expand')} aria-label={t('app.sidebar.expand')}>
+          <IconButton className="sb-btn reopen" onClick={() => setCollapsed(false)} title={t('app.sidebar.expand')} aria-label={t('app.sidebar.expand')}>
             <Icon name="sidebar" />
-          </button>
+          </IconButton>
         )}
         {view}
       </div>
 
       {viewing && (
         <Sheet bare label={viewing.name} onClose={() => setViewId(null)}>
-          <Detail sub={viewing} state={state} today={d} onEdit={() => edit(viewing)} onClose={() => setViewId(null)} />
+          <Detail
+            sub={viewing}
+            state={state}
+            today={d}
+            onEdit={() => {
+              setBackTo(viewing.id);
+              edit(viewing);
+            }}
+            onClose={() => setViewId(null)}
+          />
         </Sheet>
       )}
-      {editing && <Editor key={editing.id} sub={editing} state={state} today={d} onClose={() => setEditing(null)} />}
+      {editing && (
+        <Editor
+          key={editing.id}
+          sub={editing}
+          state={state}
+          today={d}
+          onClose={() => {
+            setEditing(null);
+            if (backTo) setViewId(backTo);
+            setBackTo(null);
+          }}
+        />
+      )}
       {review && <Review state={state} today={d} onClose={() => setReview(false)} />}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {palette && <Palette state={state} d={d} onClose={() => setPalette(false)} onOpen={open} onAdd={add} />}

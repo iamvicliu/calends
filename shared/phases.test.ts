@@ -18,7 +18,23 @@ import {
   totals,
 } from './billing.ts';
 import { contributionOn, events, prepaidValue } from './metrics.ts';
-import { deletePayment, dropPlan, prependPlan, removePhase, savePayment, setPhaseEnd, switchPlan, syncPhase, toEditForm } from './phases.ts';
+import {
+  affectedPriceCharges,
+  changePrice,
+  editPhase,
+  editPricePoint,
+  removePricePoint,
+  pricePoints,
+  deletePayment,
+  dropPlan,
+  prependPlan,
+  removePhase,
+  savePayment,
+  setPhaseEnd,
+  switchPlan,
+  syncPhase,
+  toEditForm,
+} from './phases.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const base = (o: Partial<Subscription> = {}): Subscription => ({
@@ -273,4 +289,165 @@ test('补一段更早的买断：插在最前面，开始日前移，之后的�
   );
   assert.throws(() => prependPlan(yearly, '2024-07-05', TR));
   assert.throws(() => prependPlan(yearly, '2022-01-01', TR, '2025-01-01'));
+});
+
+// Regression: the sole inferred/recorded payment must not be regenerated during replacement.
+test('替换唯一推算扣款时只保存实扣金额，不重新生成原标价', () => {
+  const s: Subscription = {
+    id: 'replacement',
+    name: 'Fictional',
+    category: 'tools',
+    tags: [],
+    price: 12,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-22',
+    status: 'active',
+  };
+  const after = savePayment(s, '2026-10-22', { date: '2026-10-22', amount: 11 }, { date: '2026-10-22', index: 0 });
+  assert.deepEqual(
+    after.payments?.map((p) => p.amount),
+    [11],
+  );
+  const corrected = savePayment(after, '2026-10-22', { date: '2026-10-22', amount: 9 }, { date: '2026-10-22', index: 0 });
+  assert.deepEqual(
+    corrected.payments?.map((p) => p.amount),
+    [9],
+  );
+});
+
+const priceStory = () =>
+  switchPlan(
+    base({
+      start: '2022-01-15',
+      currency: 'TRY',
+      region: 'TR',
+      price: 200,
+      priceHistory: [
+        { from: '2022-01-15', amount: 40 },
+        { from: '2023-01-15', amount: 60 },
+        { from: '2024-01-15', amount: 120 },
+        { from: '2025-01-15', amount: 200 },
+      ],
+      payments: [{ date: '2022-01-15', amount: 39, settled: { amount: 2, currency: 'USD' }, note: 'Actual' }],
+    }),
+    '2026-01-15',
+    { price: 15, currency: 'USD', cycle: { unit: 'month', every: 1 }, region: 'US' },
+  );
+
+test('修正历史日期与金额：按日期重排、镜像最新价、保持其他阶段和实付', () => {
+  const s = priceStory();
+  const original = JSON.stringify(s);
+  const next = editPricePoint(s, s.start, '2024-01-15', { from: '2025-05-15', amount: 240 });
+  assert.deepEqual(
+    next.phases![0].priceHistory?.map((p) => p.from),
+    ['2022-01-15', '2023-01-15', '2025-01-15', '2025-05-15'],
+  );
+  assert.equal(next.phases![0].price, 240);
+  assert.equal(next.price, 15); // 顶层仍镜像美区，不能被土区历史改写
+  assert.deepEqual(next.phases![1], s.phases![1]);
+  assert.deepEqual(next.phases![0].payments, s.phases![0].payments);
+  assert.equal(JSON.stringify(s), original);
+  assert.equal(chargesBetween(next, '2025-02-15', '2025-02-15', '2026-10-22')[0].amount, 200);
+  assert.equal(chargesBetween(next, '2025-05-15', '2025-05-15', '2026-10-22')[0].amount, 240);
+  const current = editPricePoint(next, '2026-01-15', '2026-01-15', { from: '2026-01-15', amount: 0 });
+  assert.equal(current.price, 0);
+});
+
+test('价格点：拒绝无效日期、阶段外日期、重复日期和无效金额，不改变原始对象', () => {
+  const s = priceStory();
+  for (const from of ['2021-12-31', '2026-01-15', '2024-02-30', '2025-01-15']) {
+    assert.throws(() => editPricePoint(s, s.start, '2024-01-15', { from, amount: 50 }));
+  }
+  for (const amount of [-1, NaN, Infinity]) assert.throws(() => editPricePoint(s, s.start, '2024-01-15', { from: '2024-01-15', amount }));
+  assert.throws(() => editPricePoint(s, '1999-01-01', '2024-01-15', { from: '2024-01-15', amount: 50 }));
+  assert.throws(() => editPricePoint(s, s.start, '1999-01-01', { from: '2024-01-15', amount: 50 }));
+  const end = editPricePoint(s, s.start, '2025-01-15', { from: '2026-01-14', amount: 220 });
+  assert.equal(end.phases![0].price, 220); // 最后服务日可生效
+  assert.throws(() => changePrice(s, '2021-01-01', 20));
+  const gap = setPhaseEnd(s, s.start, '2025-06-01');
+  assert.throws(() => changePrice(gap, '2025-07-01', 20));
+});
+
+test('并行阶段：按阶段定位旧区域价格，日期允许落在并行服务期内', () => {
+  const s = setPhaseEnd(priceStory(), '2022-01-15', '2026-03-01');
+  const next = editPricePoint(s, s.start, '2025-01-15', { from: '2026-02-01', amount: 260 });
+  assert.equal(next.phases![0].price, 260);
+  assert.deepEqual(next.phases![1], s.phases![1]);
+  assert.equal(next.price, 15);
+});
+
+test('删除中间和最新调价：前价衔接，起始价不可删，实付不变', () => {
+  const s = priceStory();
+  const next = removePricePoint(s, s.start, '2024-01-15');
+  assert.equal(chargesBetween(next, '2024-06-15', '2024-06-15', '2026-10-22')[0].amount, 60);
+  assert.equal(chargesBetween(next, '2025-06-15', '2025-06-15', '2026-10-22')[0].amount, 200);
+  const last = removePricePoint(next, s.start, '2025-01-15');
+  assert.equal(last.phases![0].price, 60);
+  assert.deepEqual(last.phases![0].payments, s.phases![0].payments);
+  assert.deepEqual(last.phases![1], s.phases![1]);
+  assert.throws(() => removePricePoint(s, s.start, s.start));
+  assert.throws(() => removePricePoint(s, s.start, '1999-01-01'));
+});
+
+test('无显式历史也可修改起始价及生效日，不引入阶段，首期优惠保留', () => {
+  const s = base({ intro: { until: '2026-02-15', price: 2 } });
+  const next = editPricePoint(s, s.start, s.start, { from: '2026-01-16', amount: 0 });
+  assert.equal(next.phases, undefined);
+  assert.deepEqual(next.priceHistory, [{ from: '2026-01-16', amount: 0 }]);
+  assert.equal(next.price, 0);
+  assert.deepEqual(next.intro, s.intro);
+  assert.equal(chargesBetween(next, '2026-01-15', '2026-01-15', '2026-10-22')[0].amount, 2);
+  assert.throws(() => removePricePoint(next, s.start, '2026-01-16'));
+  assert.equal(pricePoints(changePrice(s, '2026-03-15', 20))[0].amount, 10);
+});
+
+test('价格修正只重算已发生的预计扣款，计数排除实付、未来和无变化', () => {
+  const s = base({
+    price: 20,
+    priceHistory: [
+      { from: '2026-01-15', amount: 10 },
+      { from: '2026-03-15', amount: 20 },
+    ],
+  });
+  const next = editPricePoint(s, s.start, '2026-03-15', { from: '2026-04-15', amount: 25 });
+  assert.equal(affectedPriceCharges(s, next, '2026-05-15'), 3); // 三月改回10，四月五月改25
+  assert.equal(affectedPriceCharges(s, next, '2026-02-15'), 0);
+  assert.equal(affectedPriceCharges(s, s, '2026-05-15'), 0);
+  const actual = { ...s, payments: [{ date: '2026-03-15', amount: 18, note: 'Actual' }], nextDue: '2026-04-15' };
+  const revised = editPricePoint(actual, s.start, '2026-03-15', { from: '2026-04-15', amount: 25 });
+  assert.equal(affectedPriceCharges(actual, revised, '2026-05-15'), 2);
+  assert.deepEqual(
+    chargesBetween(revised, '2026-03-15', '2026-05-15', '2026-05-15').map((c) => c.amount),
+    [18, 25, 25],
+  );
+  assert.deepEqual(revised.payments, actual.payments);
+});
+
+test('change_plan 编辑整个价格历史：排序、最新价保持一致，并验证重复与越界', () => {
+  const s = priceStory();
+  const next = editPhase(s, s.start, {
+    priceHistory: [
+      { from: '2025-01-15', amount: 180 },
+      { from: s.start, amount: 30 },
+    ],
+  });
+  assert.equal(next.phases![0].price, 180);
+  assert.deepEqual(
+    next.phases![0].priceHistory?.map((p) => p.amount),
+    [30, 180],
+  );
+  assert.deepEqual(next.phases![0].payments, s.phases![0].payments);
+  assert.deepEqual(next.phases![1], s.phases![1]);
+  assert.throws(() => editPhase(s, s.start, { priceHistory: [] }));
+  assert.throws(() => editPhase(s, s.start, { priceHistory: [{ from: '2025-01-15', amount: 10 }] }));
+  assert.throws(() =>
+    editPhase(s, s.start, {
+      priceHistory: [
+        { from: s.start, amount: 10 },
+        { from: s.start, amount: 20 },
+      ],
+    }),
+  );
+  assert.throws(() => editPhase(s, s.start, { priceHistory: [{ from: '2026-01-15', amount: 10 }] }));
 });

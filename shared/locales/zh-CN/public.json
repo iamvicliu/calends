@@ -56,6 +56,7 @@
     "all": "全部"
   },
   "row": {
+    "ends": " · {date}结束",
     "renews": " · {date}续费",
     "monthly": "每月",
     "perMonthEq": "折合每月"

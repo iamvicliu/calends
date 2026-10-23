@@ -68,6 +68,8 @@
   "chargeCount": "Списания",
   "count": "{count}",
   "switches": "Смены региона / тарифа",
+  "stoppedOn": "Прекращено {date}",
+  "endsOn": "Окончание {date}",
   "thanks": "Спасибо · До следующего периода",
   "n": {
     "charges": {

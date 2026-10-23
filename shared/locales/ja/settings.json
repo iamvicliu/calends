@@ -51,6 +51,7 @@
     "preview": "今日の通知をプレビュー"
   },
   "today": {
+    "recent": "最近の送信",
     "title": "今日（{day}）",
     "items": {
       "other": "{count}件"

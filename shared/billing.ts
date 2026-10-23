@@ -1,6 +1,6 @@
-import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment, ShareMember } from './types.ts';
+import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment, ShareMember, RenewalRule } from './types.ts';
 import { t } from './i18n.ts';
-import { chargeValue } from './fx.ts';
+import { chargeValue, convertOn } from './fx.ts';
 import { matchEntries } from './proxy.ts';
 
 // ---------- 日期：全部按 UTC 日计算 ----------
@@ -95,12 +95,41 @@ export function subError(s: Subscription): string | undefined {
   if (!Number.isFinite(s.price) || s.price < 0) return t('core.subError.price');
   if (!validDay(s.start) || (s.share?.collectFrom && !validDay(s.share.collectFrom))) return t('core.subError.start');
   for (const m of s.share?.members ?? []) {
+    if (
+      m.feeHistory != null &&
+      (!Array.isArray(m.feeHistory) ||
+        m.feeHistory.some(
+          (p) =>
+            !p ||
+            !validDay(p.from) ||
+            !Number.isFinite(p.fee) ||
+            p.fee < 0 ||
+            !/^[A-Z]{3}$/.test(p.currency) ||
+            !Number.isInteger(p.billEvery) ||
+            p.billEvery < 1 ||
+            p.billEvery > 120 ||
+            (p.share != null && (!Number.isFinite(p.share) || p.share < 0)),
+        ))
+    )
+      return t('core.subError.price');
     if (m.firstPeriod != null && !['prorate', 'full', 'free'].includes(m.firstPeriod)) return t('mcp.error.invalidFirstPeriod');
     if (m.firstAmount != null && (!Number.isFinite(m.firstAmount) || m.firstAmount < 0)) return t('core.subError.price');
   }
   if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !Number.isInteger(s.cycle.every) || !(s.cycle.every >= 1))
     return t('core.subError.cycle');
   for (const v of phaseSubs(s)) {
+    if (v.billingStart && !validDay(v.billingStart)) return t('core.subError.start');
+    if ([v.chargeLeadDays, v.cancelLeadDays, v.renewalOffsetDays].some((n) => n != null && (!Number.isInteger(n) || n < 0 || n > 3660)))
+      return t('core.renewal.invalid');
+    if (
+      v.renewalHistory?.some(
+        (r, i, all) =>
+          !validDay(r.from) ||
+          (i > 0 && r.from <= all[i - 1].from) ||
+          [r.chargeLeadDays, r.cancelLeadDays].some((n) => !Number.isInteger(n) || n < 0 || n > 3660),
+      )
+    )
+      return t('core.renewal.invalid');
     const error = stopError(v) ?? paymentError(v);
     if (error) return error;
   }
@@ -131,8 +160,14 @@ export function phaseSubs(s: Subscription): Subscription[] {
     return {
       ...s,
       phases: undefined,
+      expires: undefined,
       stop: p.stop ?? (last ? s.stop : undefined),
       start: p.start,
+      billingStart: p.billingStart,
+      chargeLeadDays: p.chargeLeadDays,
+      cancelLeadDays: p.cancelLeadDays,
+      renewalHistory: p.renewalHistory,
+      renewalOffsetDays: p.renewalOffsetDays,
       end: s.end && (!natural || natural > s.end) ? s.end : natural,
       price: p.price,
       currency: p.currency,
@@ -285,30 +320,74 @@ export interface Charge {
   /** 卡上实际扣的币种与金额 */
   settled?: Payment['settled'];
   note?: string;
+  /** 本笔续费购买的服务起点，与现金日期分开。 */
+  serviceDate?: string;
 }
 
-/** 按周期从 anchor 推算 [from, to] 内、晚于 after 的扣款 */
-function schedule(s: Subscription, anchor: string, from: string, to: string, today: string, after = ''): Charge[] {
+/** 规则修改只影响尚未发生的扣款；已扣过的服务边界不重复收费。 */
+function renewalDate(s: Subscription, boundary: string, initial = false): string {
+  if (initial) return boundary;
+  const service = addDays(boundary, s.renewalOffsetDays ?? 0);
+  const history = s.renewalHistory;
+  if (!history?.length) return addDays(service, -(s.chargeLeadDays ?? 0));
+  let date = addDays(service, -history[0].chargeLeadDays);
+  for (const rule of history.slice(1)) {
+    if (date < rule.from) break;
+    const proposed = addDays(service, -rule.chargeLeadDays);
+    date = proposed < rule.from ? rule.from : proposed;
+  }
+  return date;
+}
+
+export function renewalRuleAt(s: Subscription, day: string): RenewalRule {
+  return (
+    s.renewalHistory?.findLast((r) => r.from <= day) ?? {
+      from: s.start,
+      chargeLeadDays: s.chargeLeadDays ?? 0,
+      cancelLeadDays: s.cancelLeadDays ?? 0,
+    }
+  );
+}
+
+/** 将实付/nextDue 的现金日期恢复为原服务锚点，保留月底日号。 */
+export function renewalAnchor(s: Subscription, anchor: string): string {
+  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
+  const guess = Math.max(0, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
+  for (
+    let k = Math.max(0, guess - 2);
+    k <= guess + Math.ceil(Math.max(s.chargeLeadDays ?? 0, ...(s.renewalHistory ?? []).map((r) => r.chargeLeadDays)) / cycleDays(s.cycle)) + 2;
+    k++
+  ) {
+    const boundary = nthCharge(original, s.cycle, k);
+    if (renewalDate(s, boundary, k === 0) === anchor) return original;
+  }
+  return addDays(anchor, (renewalRuleAt(s, anchor).chargeLeadDays ?? 0) - (s.renewalOffsetDays ?? 0));
+}
+
+/** 按原服务边界迭代，再转换现金日期；首购和试用转付费不提前扣。 */
+function schedule(s: Subscription, anchor: string, from: string, to: string, today: string, after = '', cashAnchor = false): Charge[] {
   const out: Charge[] = [];
   const begin = anchor;
-  // 实付或固化记录落在原周期上时继续使用原始日号，避免 1/31 → 2/28 → 3/28。
-  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : s.start;
-  if (s.cycle.unit === 'month' || s.cycle.unit === 'year') {
-    const k = Math.max(0, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
-    if (nthCharge(original, s.cycle, k) === anchor) anchor = original;
-  }
-  const firstPaid = s.status === 'trial' && s.trialEnd ? s.trialEnd : '';
-  const stopAt = s.end && s.end < to ? s.end : to;
+  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
+  if (cashAnchor) anchor = renewalAnchor(s, anchor);
   const pausedFrom = s.status === 'paused' ? (s.pausedAt ?? today) : undefined;
-  // 估算起点 k，避免逐期迭代
-  let k = Math.max(0, Math.floor(diffDays(anchor, from) / cycleDays(s.cycle)) - 2);
-  for (let guard = 0; guard < 5000; guard++, k++) {
-    const d = nthCharge(anchor, s.cycle, k);
-    if (d > stopAt) break;
-    if (s.status === 'cancelled' && !s.end && d > s.start) break;
-    if (d < begin || d < from || d < firstPaid || d <= after) continue;
+  let k = Math.max(0, Math.floor(diffDays(anchor, addDays(from, -(s.renewalOffsetDays ?? 0))) / cycleDays(s.cycle)) - 2);
+  const maxLead = Math.max(s.chargeLeadDays ?? 0, ...(s.renewalHistory ?? []).map((r) => r.chargeLeadDays));
+  for (let guard = 0; guard < 10000; guard++, k++) {
+    const boundary = nthCharge(anchor, s.cycle, k);
+    if (boundary > addDays(to, maxLead)) break;
+    const initial = boundary === original;
+    const d = renewalDate(s, boundary, initial);
+    const serviceDate = initial ? boundary : addDays(boundary, s.renewalOffsetDays ?? 0);
+    if (d > to) continue;
+    if (s.stop && d > s.stop.date) break;
+    // end is inclusive service coverage; no purchase of service starting after it.
+    if (s.end && serviceDate > s.end) break;
+    if (s.status === 'cancelled' && !s.end && boundary > original) break;
+    if (serviceDate < s.start || d < s.start || d < from || d <= after || (cashAnchor && d < begin)) continue;
+    if (s.status === 'trial' && s.trialEnd && d < s.trialEnd) continue;
     if (pausedFrom && d >= pausedFrom) break;
-    out.push({ sub: s, date: d, amount: priceAt(s, d), currency: s.currency, projected: d > today });
+    out.push({ sub: s, date: d, serviceDate, amount: priceAt(s, d), currency: s.currency, projected: d > today });
   }
   return out;
 }
@@ -319,6 +398,7 @@ function schedule(s: Subscription, anchor: string, from: string, to: string, tod
  * 只有 nextDue 时，此前按开始日推算，此后从 nextDue 推算（用于扣款日漂移、提前续费等）。
  */
 export function chargesBetween(s: Subscription, from: string, to: string, today: string): Charge[] {
+  if (s.expires && s.chargeLeadDays == null) s = migrateRenewalRules(s);
   if (s.phases?.length) {
     return phaseSubs(s)
       .flatMap((v) => chargesBetween(v, from, to, today))
@@ -330,8 +410,8 @@ export function chargesBetween(s: Subscription, from: string, to: string, today:
   // 赠送期：期间的预测扣款去掉，之后从赠送结束日重新按周期起算；实际扣款记录照旧保留
   const paid = new Set((s.payments ?? []).map((p) => p.date));
   const lastPaid = (s.payments ?? []).filter((p) => !p.kind).reduce((m, p) => (p.date > m ? p.date : m), '');
-  const keep = raw.filter((c) => paid.has(c.date) || c.date < b.from);
-  const after = schedule(s, b.until, from, to, today, lastPaid > b.until ? lastPaid : addDays(b.until, -1));
+  const keep = raw.filter((c) => paid.has(c.date) || (c.serviceDate ?? c.date) < b.from);
+  const after = schedule(s, b.until, from, to, today, lastPaid > renewalDate(s, b.until) ? lastPaid : addDays(renewalDate(s, b.until), -1));
   return keep.concat(after.filter((c) => !paid.has(c.date))).sort((x, y) => x.date.localeCompare(y.date));
 }
 
@@ -353,20 +433,116 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
         note: p.note,
       }));
     if (s.cycle.unit === 'lifetime') return out;
-    const last = renewals.at(-1)?.date ?? s.start;
-    return out.concat(schedule(s, s.nextDue ?? last, from, to, today, last));
+    const last = renewals.at(-1)?.date ?? s.billingStart ?? s.start;
+    return out.concat(schedule(s, s.nextDue ?? last, from, to, today, last, true));
   }
   if (s.cycle.unit === 'lifetime') {
     return s.start >= from && s.start <= to ? [{ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today }] : [];
   }
-  const anchor = s.status === 'trial' && s.trialEnd ? s.trialEnd : s.start;
+  const anchor = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
   if (s.nextDue) {
     const before = schedule(s, anchor, from, to < s.nextDue ? to : addDays(s.nextDue, -1), today).filter(
       (c) => diffDays(c.date, s.nextDue!) > cycleDays(s.cycle) / 2,
     );
-    return before.concat(schedule(s, s.nextDue, from, to, today));
+    return before.concat(schedule(s, s.nextDue, from, to, today, '', true));
   }
   return schedule(s, anchor, from, to, today);
+}
+
+/** 兼容旧 expires：围绕旧到期日查找上一扣款，固定推导结果，不随读取日期漂移。 */
+export function migrateRenewalRules(s: Subscription): Subscription {
+  if (!s.expires || s.chargeLeadDays != null || !validDay(s.expires)) return s;
+  if (s.stop || s.cycle.unit === 'lifetime') return { ...s, chargeLeadDays: 0 };
+  const clean = { ...s, expires: undefined };
+  const candidates = chargesBetween(clean, addDays(s.expires, -3660), s.expires, s.expires).filter((c) => !c.kind);
+  const charge = candidates.at(-1);
+  const n = charge ? diffDays(charge.date, s.expires) : 0;
+  if (n <= 0 || n > 3660) return { ...s, chargeLeadDays: 0 };
+  const patch = { chargeLeadDays: n, cancelLeadDays: s.cancelLeadDays ?? 0, renewalOffsetDays: n };
+  return { ...s, ...patch, ...(s.phases ? { phases: s.phases.map((p) => (p.start === charge!.sub.start ? { ...p, ...patch } : p)) } : {}) };
+}
+
+/** 更新当前阶段规则，旧规则留在历史中；调用方在 syncPhase 前使用。 */
+export function preserveRenewalHistory(previous: Subscription, next: Subscription, today: string): Subscription {
+  const old = currentPhase(migrateRenewalRules(previous), today);
+  if ((old.chargeLeadDays ?? 0) === (next.chargeLeadDays ?? 0) && (old.cancelLeadDays ?? 0) === (next.cancelLeadDays ?? 0))
+    return { ...next, renewalHistory: old.renewalHistory, renewalOffsetDays: old.renewalOffsetDays };
+  const initial = { from: old.start, chargeLeadDays: old.chargeLeadDays ?? 0, cancelLeadDays: old.cancelLeadDays ?? 0 };
+  const history = (old.renewalHistory ?? [initial]).filter((r) => r.from < today);
+  return {
+    ...next,
+    renewalOffsetDays: old.renewalOffsetDays,
+    renewalHistory: [
+      ...history,
+      {
+        from: today,
+        chargeLeadDays: next.chargeLeadDays ?? 0,
+        cancelLeadDays: next.cancelLeadDays ?? 0,
+      },
+    ],
+  };
+}
+
+export function renewalDates(s: Subscription, from: string): { nextCharge?: string; serviceExpires?: string; cancelBy?: string } {
+  s = migrateRenewalRules(s);
+  const phases = phaseSubs(s);
+  const span = Math.max(...phases.map((p) => (p.cycle.unit === 'lifetime' ? 0 : cycleDays(p.cycle))));
+  const lead = Math.max(0, ...phases.map((p) => p.chargeLeadDays ?? 0));
+  const horizon = addDays(from, Math.ceil(span * 2) + lead + 32);
+  const charge = chargesBetween(s, from, horizon, from).find((c) => !c.kind);
+  if (!charge || charge.sub.cycle.unit === 'lifetime') return {};
+  const rule = renewalRuleAt(charge.sub, charge.date);
+  return {
+    nextCharge: charge.date,
+    serviceExpires: charge.serviceDate ?? chargeServicePeriod(charge.sub, charge.date).from,
+    cancelBy: rule.cancelLeadDays > 0 ? addDays(charge.date, -rule.cancelLeadDays) : undefined,
+  };
+}
+
+/** 非续费默认截在下次现金扣款之前；已过取消截止时须再承担下一期。 */
+export function nonrenewalDate(s: Subscription, today: string): string {
+  const dates = renewalDates(s, today);
+  if (!dates.nextCharge) return billingPeriod(s, today).paidThrough;
+  if (dates.cancelBy && today > dates.cancelBy) return billingPeriod(s, dates.nextCharge).paidThrough;
+  return addDays(dates.nextCharge, -1);
+}
+
+/** 服务覆盖期不随现金日提前；实付落在预定扣款上时恢复原始月末日号。 */
+export function chargeServicePeriod(s: Subscription, cashDate: string, serviceDate?: string): { from: string; until: string } {
+  const offset = s.renewalOffsetDays ?? 0;
+  const anchor = renewalAnchor(s, cashDate);
+  const guess = Math.max(0, Math.round(diffDays(anchor, cashDate) / cycleDays(s.cycle)));
+  const maxLead = Math.max(s.chargeLeadDays ?? 0, ...(s.renewalHistory ?? []).map((r) => r.chargeLeadDays));
+  const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
+  const extend = (until: string) => (s.bonus && until >= s.bonus.from && until < s.bonus.until ? s.bonus.until : until);
+  for (let k = Math.max(0, guess - 2); k <= guess + Math.ceil(maxLead / cycleDays(s.cycle)) + 2; k++) {
+    const boundary = nthCharge(anchor, s.cycle, k);
+    if (renewalDate(s, boundary, boundary === original) === cashDate)
+      return {
+        from: serviceDate ?? (boundary === original ? boundary : addDays(boundary, offset)),
+        until: extend(addDays(nthCharge(anchor, s.cycle, k + 1), offset)),
+      };
+  }
+  const from = serviceDate ?? addDays(cashDate, renewalRuleAt(s, cashDate).chargeLeadDays);
+  return { from, until: extend(addDays(nthCharge(addDays(from, -offset), s.cycle, 1), offset)) };
+}
+
+/** 服务端全记录写入也保留规则历史；不依赖客户端是否携带历史项。 */
+export function reconcileRenewalRules(previous: Subscription | undefined, next: Subscription, today: string): Subscription {
+  next = migrateRenewalRules(next);
+  if (!previous) return next;
+  previous = migrateRenewalRules(previous);
+  if (!next.phases?.length) return preserveRenewalHistory(previous, next, today);
+  const old = phaseSubs(previous);
+  return {
+    ...next,
+    phases: next.phases.map((p) => {
+      const before = old.find((v) => v.start === p.start);
+      if (!before) return p;
+      const revised = preserveRenewalHistory(before, { ...next, ...p, phases: undefined }, today);
+      return { ...p, renewalHistory: revised.renewalHistory, renewalOffsetDays: revised.renewalOffsetDays };
+    }),
+  };
 }
 
 export function nextCharge(s: Subscription, today: string): string | undefined {
@@ -384,17 +560,35 @@ export function lastCharge(s: Subscription, today: string): string | undefined {
 export function billingPeriod(s: Subscription, at: string): { from: string; paidThrough: string; paid: number; days: number } {
   if (s.phases?.length) return billingPeriod(currentPhase(s, at), at);
   const open = { ...s, stop: undefined, end: undefined, status: s.status === 'trial' || (s.stop && s.trialEnd) ? ('trial' as const) : ('active' as const) };
-  const past = chargesBetween(open, s.start, at, at).filter((c) => !c.kind);
+  // 修正服务开始日后，之前的实付/计费锚点仍决定已付账期。
+  const paidFrom = [s.start, s.billingStart, s.nextDue, ...(s.payments ?? []).filter((p) => !p.kind).map((p) => p.date)]
+    .filter((d): d is string => !!d)
+    .sort()[0];
+  const paidOpen = { ...open, start: paidFrom };
+  const past = chargesBetween(paidOpen, paidFrom, at, at).filter((c) => !c.kind);
   const last = past.at(-1);
   const from = last?.date ?? s.start;
   const horizon = addDays(at, Math.ceil(cycleDays(s.cycle) === Infinity ? 366 : cycleDays(s.cycle) * 2) + 32);
   const next =
     s.cycle.unit === 'lifetime'
       ? addDays(at, 1)
-      : (chargesBetween(open, addDays(at, 1), horizon, at).find((c) => !c.kind)?.date ?? nthCharge(from, s.cycle, 1));
+      : (chargesBetween(paidOpen, addDays(at, 1), horizon, at).find((c) => !c.kind)?.date ?? nthCharge(from, s.cycle, 1));
+  if ((s.chargeLeadDays ?? 0) > 0 || s.renewalHistory?.length) {
+    const service = last ? chargeServicePeriod(s, last.date, last.serviceDate) : { from: s.start, until: next };
+    return {
+      from: service.from,
+      paidThrough: addDays(service.until, -1),
+      paid: last
+        ? chargesBetween(paidOpen, last.date, at, at)
+            .filter((c) => c.amount > 0 && c.kind !== 'failed')
+            .reduce((sum, c) => sum + c.amount, 0)
+        : 0,
+      days: Math.max(1, diffDays(service.from, service.until)),
+    };
+  }
   const paidThrough = addDays(next, -1);
   const paid = last
-    ? chargesBetween(open, from, at, at)
+    ? chargesBetween(paidOpen, from, at, at)
         .filter((c) => c.amount > 0 && c.kind !== 'failed')
         .reduce((a, c) => a + c.amount, 0)
     : 0;
@@ -404,7 +598,7 @@ export function billingPeriod(s: Subscription, at: string): { from: string; paid
 export function stopSummary(s: Subscription, asOf = '9999-12-31') {
   if (!s.stop) return undefined;
   const period = billingPeriod(s, s.stop.date);
-  const unusedDays = Math.max(0, diffDays(s.stop.date, s.stop.paidThrough));
+  const unusedDays = Math.min(period.days, Math.max(0, diffDays(s.stop.date, s.stop.paidThrough)));
   const prorated = (period.paid * unusedDays) / period.days;
   const refunded = (s.payments ?? []).filter((p) => p.kind === 'refund' && p.date >= s.stop!.date && p.date <= asOf).reduce((a, p) => a - p.amount, 0);
   // 商家通常按天退剩余部分：退回金额达到按天折算额即视为全额退款
@@ -448,8 +642,10 @@ export function paymentError(s: Subscription): string | undefined {
     if (p.amount > 0 || (p.settled && p.settled.amount > 0)) return t('mcp.error.invalidRefund');
     const stopPeriod = s.stop && p.date >= s.stop.date;
     const period = billingPeriod(s, stopPeriod ? s.stop!.date : s.end && p.date > s.end ? s.end : p.date);
+    const paidOn = lastCharge(s, stopPeriod ? s.stop!.date : p.date);
+    const refundFrom = paidOn && paidOn < period.from ? paidOn : period.from;
     const refunded = -(s.payments ?? [])
-      .filter((r) => r.kind === 'refund' && r.date >= period.from && (stopPeriod || r.date <= period.paidThrough))
+      .filter((r) => r.kind === 'refund' && r.date >= refundFrom && (stopPeriod || r.date <= period.paidThrough))
       .reduce((a, r) => a + r.amount, 0);
     if (refunded > period.paid + 0.005) return t('mcp.error.refundExceedsPaid');
   }
@@ -511,7 +707,7 @@ export function myShareFactor(s: Subscription, day: string): number {
   if (s.proxy) return 0;
   const sh = s.share;
   if (!sh || sh.role !== 'owner' || s.price <= 0) return 1;
-  const others = sh.members.reduce((t, m) => t + (m.exempt || !memberAboard(m, day) ? 0 : m.share || 0), 0);
+  const others = sh.members.reduce((t, m) => t + (m.exempt || !memberAboard(m, day) ? 0 : (memberFeePoint(m, day)?.share ?? m.share) || 0), 0);
   return Math.max(0, (s.price - others) / s.price);
 }
 
@@ -678,8 +874,22 @@ export interface MemberDue {
 }
 
 /** 旧成员未设置周期时沿用订阅周期。 */
-export function memberBillMonths(s: Subscription, m: ShareMember): number {
-  return Math.max(1, Math.round(m.billEvery ?? cycleDays(s.cycle) / 30.4375));
+export function memberBillMonths(s: Subscription, m: ShareMember, day?: string): number {
+  return Math.max(1, Math.round(memberFeePoint(m, day)?.billEvery ?? m.billEvery ?? cycleDays(s.cycle) / 30.4375));
+}
+
+/** 无历史的旧成员继续读原字段；历史按生效日读取，不依赖系统时间。 */
+export function memberFeePoint(m: ShareMember, day?: string) {
+  const history = [...(m.feeHistory ?? [])].sort((a, b) => a.from.localeCompare(b.from));
+  return history.filter((p) => !day || p.from <= day).at(-1) ?? history[0];
+}
+
+export function memberRate(s: Subscription, m: ShareMember, day: string, collectCurrency = s.currency) {
+  const point = memberFeePoint(m, day);
+  const billEvery = memberBillMonths(s, m, day);
+  const amount = point?.fee ?? m.fee ?? ((m.share || 0) * billEvery) / (cycleDays(s.cycle) / 30.4375);
+  const currency = point?.currency ?? (m.fee != null ? (m.feeCurrency ?? collectCurrency) : s.currency);
+  return { amount: Math.round(amount * 100) / 100, currency, billEvery };
 }
 
 /** 不写回旧数据；有覆盖起点优先使用，只有已付至时反推最近一期起点。 */
@@ -697,7 +907,7 @@ export function collectionAnchor(s: Subscription): string {
 /** 包含 day 的对齐期。每次从原始 anchor 加月，短月夹紧不会累积漂移。 */
 export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
   const anchor = collectionAnchor(s);
-  const every = memberBillMonths(s, m);
+  const every = memberBillMonths(s, m, m.joined ?? s.share?.since ?? s.start);
   const monthIndex = (d: string) => Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7));
   let k = Math.floor((monthIndex(day) - monthIndex(anchor)) / every);
   while (addMonths(anchor, k * every) > day) k--;
@@ -707,38 +917,36 @@ export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
   return { from, until: addDays(next, -1), next };
 }
 
-/** 一年内的统一收款日，按真实年份处理闰年和月末。 */
+/** 一年内该成员的后续收款日；已付至是独立起点。 */
 export function collectionDates(s: Subscription, m: ShareMember, year: string): string[] {
-  let day = collectionPeriod(s, m, `${year}-01-01`).from;
-  if (day < `${year}-01-01`) day = collectionPeriod(s, m, day).next;
+  let day = memberUnpaidFrom(s, m);
   const dates: string[] = [];
-  while (day <= `${year}-12-31`) {
-    dates.push(day);
-    day = collectionPeriod(s, m, day).next;
+  while (day <= `${year}-12-31` && (!m.left || day < m.left) && (!s.end || day <= s.end)) {
+    if (day >= `${year}-01-01`) dates.push(day);
+    day = memberCollection(s, m, day).next;
   }
   return dates;
 }
 
-/** 一段待覆盖期；首期可截短至退出前一天，退出日不计服务。 */
+/** 只有首次未收款的加入期对齐统一日；之后按成员自己的覆盖起点收完整一期。 */
 export function memberCollection(s: Subscription, m: ShareMember, from: string, collectCurrency = s.currency) {
-  const period = collectionPeriod(s, m, from);
   const joined = m.joined ?? s.share?.since ?? s.start;
   const first = collectionPeriod(s, m, joined);
-  const isFirst = from >= joined && from <= first.until;
-  const until = isFirst && m.left && m.left <= period.until ? addDays(m.left, -1) : period.until;
+  const isFirst = from === joined;
+  const rate = memberRate(s, m, from, collectCurrency);
+  const next = isFirst ? first.next : addMonths(from, rate.billEvery);
+  const until = isFirst && m.left && m.left <= next ? addDays(m.left, -1) : addDays(next, -1);
   const partial = isFirst && (joined > first.from || until < first.until);
-  const fee = m.fee ?? ((m.share || 0) * memberBillMonths(s, m)) / (cycleDays(s.cycle) / 30.4375);
-  const currency = m.fee != null ? (m.feeCurrency ?? collectCurrency) : s.currency;
-  let amount = fee;
+  let amount = rate.amount;
   if (partial) {
     const mode = m.firstPeriod ?? 'prorate';
     amount =
       mode === 'free'
         ? 0
-        : (m.firstAmount ?? (mode === 'full' ? fee : (fee * Math.max(0, diffDays(from, until) + 1)) / (diffDays(period.from, period.until) + 1)));
+        : (m.firstAmount ?? (mode === 'full' ? amount : (amount * Math.max(0, diffDays(from, until) + 1)) / (diffDays(first.from, first.until) + 1)));
   }
-  if (m.exempt || until < from) amount = 0;
-  return { from, until, next: period.next, amount: Math.round(amount * 100) / 100, currency, partial };
+  if (m.exempt || until < from || (m.left && from >= m.left) || (s.end && from > s.end)) amount = 0;
+  return { from, until, next: addDays(until, 1) > from ? addDays(until, 1) : next, amount: Math.round(amount * 100) / 100, currency: rate.currency, partial };
 }
 
 /** 最早未覆盖的收费期起点；免费首期无需记零元收款即可跳过。 */
@@ -751,7 +959,12 @@ export function memberUnpaidFrom(s: Subscription, m: ShareMember): string {
   return from;
 }
 
-export function memberDues(s: Subscription, today: string, collectCurrency = s.currency): MemberDue[] {
+export function memberDues(
+  s: Subscription,
+  today: string,
+  collectCurrency = s.currency,
+  fxState?: Pick<AppState, 'fx' | 'fxHistory' | 'settings'>,
+): MemberDue[] {
   if (!s.share || s.share.role !== 'owner') return [];
   const stop = [
     s.end,
@@ -771,7 +984,11 @@ export function memberDues(s: Subscription, today: string, collectCurrency = s.c
     if (!m.exempt) {
       while (from <= until) {
         const period = memberCollection(s, m, from, collectCurrency);
-        owed += period.amount;
+        if (period.amount !== 0 && period.currency !== currency && !fxState) throw new Error('FX state required for member fee currency changes');
+        owed +=
+          period.amount === 0 || period.currency === currency
+            ? period.amount
+            : convertOn(period.amount, period.currency, currency, today, fxState!.fxHistory, fxState!.fx);
         periodsOwed++;
         from = period.next;
       }

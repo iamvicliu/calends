@@ -25,7 +25,7 @@
     "write": "Đọc & ghi",
     "read": "Chỉ đọc",
     "label": "Quyền",
-    "writeDesc": "Tra cứu, thêm và sửa gói đăng ký, khoản trừ tiền và khoản thu.",
+    "writeDesc": "Tra cứu và quản lý gói đăng ký, thanh toán, tiền đã nhận, ví, người, danh mục và cài đặt sổ.",
     "readDesc": "Chỉ tra cứu. Không thể thay đổi gì."
   },
   "created": {
@@ -71,5 +71,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Chỉ sao chép cấu hình",
   "configCopied": "Đã sao chép cấu hình",
-  "agentPrompt": "Hãy kết nối sổ gói đăng ký Calends của tôi làm máy chủ MCP tên là \"calends\". {where}\n\n{code}\n\nKhi xong, hãy gọi công cụ {verify} để kiểm tra, rồi cho tôi biết tôi đang có bao nhiêu gói đăng ký đang dùng."
+  "agentPrompt": "Hãy kết nối sổ gói đăng ký Calends của tôi làm máy chủ MCP tên là \"calends\". {where}\n\n{code}\n\nKhi xong, hãy gọi công cụ {verify} để kiểm tra, rồi cho tôi biết tôi đang có bao nhiêu gói đăng ký đang dùng.",
+  "col": {
+    "name": "Tên",
+    "key": "Khóa",
+    "created": "Tạo lúc",
+    "lastUsed": "Dùng gần nhất"
+  },
+  "domain": {
+    "overview": "Tổng quan và thống kê",
+    "subs": "Gói đăng ký",
+    "charges": "Khoản thanh toán",
+    "wallet": "Ví và phương thức thanh toán",
+    "people": "Gói dùng chung và trả hộ",
+    "categories": "Danh mục",
+    "settings": "Cài đặt",
+    "other": "Khác"
+  }
 }

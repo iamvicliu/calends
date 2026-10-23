@@ -62,5 +62,8 @@
     "other": "{scope} · {count} Abonnements"
   },
   "mrrBasis": "Monatlich umgelegte Kosten meines Anteils der laufenden Abonnements. Jahrespläne werden verteilt; dies sind nicht die tatsächlichen Abbuchungen dieses Monats.",
-  "debitBasis": "Nur positive Abbuchungen; Erstattungen werden separat aufgeführt und mindern weder Aufschlüsselung noch Rangliste."
+  "debitBasis": "Nur positive Abbuchungen; Erstattungen werden separat aufgeführt und mindern weder Aufschlüsselung noch Rangliste.",
+  "other": "Sonstige",
+  "minimize": "Zur Zusammenfassung verkleinern",
+  "movementBasis": "Monatliche Kosten meines Anteils in der Basiswährung zum Wechselkurs am Periodenende. Die Daten zeigen Änderungen oder ohne erfasste Ereignisse den Berichtszeitraum."
 }

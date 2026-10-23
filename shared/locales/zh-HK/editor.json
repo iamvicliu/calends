@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "登入電郵、手機號碼或用戶名", "phone": "手機號碼" },
+  "ph": {
+    "account": "登入電郵、手機號碼或用戶名",
+    "phone": "手機號碼"
+  },
   "overlap": {
     "keep": "舊的繼續用一段時間",
     "keepHint": "舊的已經預付、未到期：兩段並行，各自照常計費",
@@ -16,7 +19,7 @@
   "clearForm": "清空表單",
   "revert": "撤銷修改",
   "draftRestored": "已恢復上次未儲存的內容",
-  "confirmDelete": "刪除「{name}」？歷史記錄會一併清除；若只是不再續訂，建議改為「已退訂」。",
+  "confirmDelete": "刪除「{name}」？歷史記錄會一併清除；若只是不再續訂，建議選擇「停止」。",
   "toast": {
     "added": "已新增",
     "saved": "已儲存",
@@ -45,7 +48,8 @@
     "trial": "試用中",
     "paused": "已暫停",
     "cancelled": "已退訂",
-    "terminated": "已停用"
+    "terminated": "已停用",
+    "stop": "停止"
   },
   "category": {
     "choose": "選擇分類",
@@ -82,7 +86,8 @@
     "showDomainOn": "訪客能看到完整域名",
     "showDomainOff": "公開頁遮蔽顯示",
     "tagsPlaceholder": "以空格分隔",
-    "notesPlaceholder": "備註（可選）"
+    "notesPlaceholder": "備註（可選）",
+    "pausedAt": "暫停日"
   },
   "share": {
     "none": "自用",
@@ -98,7 +103,15 @@
     "perPeriod": "每期份額",
     "paidUntil": "已付至",
     "remove": "移除",
-    "addMember": "新增成員"
+    "addMember": "新增成員",
+    "manageHint": "點成員可單獨設定跟隨車或自訂收費、週期",
+    "follows": "跟隨車",
+    "custom": "自訂",
+    "nextDue": "下次應收 {date}",
+    "editMember": "編輯",
+    "overdue": "已逾期 {count} 天",
+    "dueOn": "應收 {date}",
+    "confirmRemove": "確認"
   },
   "proxy": {
     "for": "替誰付",
@@ -174,7 +187,11 @@
     "range": "{start} → {end}",
     "now": "至今",
     "initial": "起始",
-    "priceChange": "{date} 調價"
+    "priceChange": "{date} 調價",
+    "outsidePayments": "將有 {count} 筆已有扣款落在服務期之外。保留原日期、金額和所屬階段，繼續修改？",
+    "editPrice": "編輯 {date} 生效的價格",
+    "deletePrice": "刪除這筆調價記錄？此前價格將沿用至下次調價。",
+    "repriceCharges": "儲存後將重新推算 {count} 筆歷史預計扣款，實付記錄維持原樣。繼續儲存？"
   },
   "payment": {
     "addTitle": "記一筆",
@@ -203,5 +220,9 @@
   "timeline": {
     "home": "回到今天（也可以在時間軸上按兩下）"
   },
-  "ai": { "title": "用 AI 識別", "hint": "貼上收據、截圖或一段文字，自動整理好", "go": "貼上辨識" }
+  "ai": {
+    "title": "用 AI 識別",
+    "hint": "貼上收據、截圖或一段文字，自動整理好",
+    "go": "貼上辨識"
+  }
 }

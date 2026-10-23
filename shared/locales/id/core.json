@@ -48,7 +48,10 @@
     "prependUntil": "Fase sebelumnya harus berakhir setelah dimulai dan paling lambat pada tanggal mulai semula",
     "priceOutOfRange": "Tanggal perubahan harga tidak berada di fase mana pun",
     "keepTooEarly": "Tanggal tetap berjalan harus setelah tanggal peralihan",
-    "endTooEarly": "Tanggal berakhir harus setelah awal fase ini"
+    "endTooEarly": "Tanggal berakhir harus setelah awal fase ini",
+    "startOrder": "Tanggal mulai harus berada di antara tanggal mulai tahap sebelumnya dan berikutnya.",
+    "priceDuplicate": "Harga sudah ada pada tanggal ini",
+    "priceInitial": "Harga awal tidak dapat dihapus"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -165,7 +168,7 @@
     "refunded": "Dikembalikan {money}",
     "partial": "Pengembalian sebagian {money}",
     "unrefunded": "Tanpa pengembalian dana · Kerugian {money}",
-    "unused": "Kerugian tanpa pengembalian dana: −{money} ({days})",
+    "unused": "Kerugian tanpa pengembalian dana: {money} ({days})",
     "unusedTitle": "Tanpa pengembalian dana",
     "terminated": "Dinonaktifkan",
     "restore": "Aktifkan kembali",
@@ -177,6 +180,19 @@
     "fullyRefunded": "Dana dikembalikan penuh",
     "chargeOnEnd": "Hari ini masih ada tagihan perpanjangan. Pilih sehari sebelumnya agar tidak ditagih.",
     "nonrenewDone": "Tidak akan diperpanjang. Tidak ada tagihan setelah {date}.",
-    "stoppedDone": "Layanan dihentikan"
+    "stoppedDone": "Layanan dihentikan",
+    "method": "Cara penghentian",
+    "latestRefundHint": "Kolom ini mengubah pengembalian dana terakhir. Pengembalian sebelumnya tetap ada di riwayat pembayaran."
+  },
+  "renewal": {
+    "title": "Aturan perpanjangan",
+    "chargeLeadDays": "Tagih lebih awal",
+    "cancelLeadDays": "Batalkan lebih awal",
+    "hint": "Tagihan sebelum perpanjangan, pembatalan sebelum tagihan itu. Masukkan hari; 0 berarti tidak ada. Periode layanan tetap.",
+    "cancelBy": "Batas pembatalan",
+    "invalid": "Masukkan bilangan bulat dari 0 hingga 3660 hari.",
+    "tooLate": "Batas pembatalan telah lewat. Periode berikutnya tetap akan ditagih.",
+    "cancelReminder": "Batalkan sebelum {date} untuk menghindari tagihan berikutnya.",
+    "none": "Tidak ada"
   }
 }

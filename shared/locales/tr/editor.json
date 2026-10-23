@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Giriş e-postası, telefon veya kullanıcı adı", "phone": "Telefon numarası" },
+  "ph": {
+    "account": "Giriş e-postası, telefon veya kullanıcı adı",
+    "phone": "Telefon numarası"
+  },
   "overlap": {
     "keep": "Eskisini bir süre daha kullan",
     "keepHint": "Önceden ödendi ve süresi henüz dolmadı: ikisi birlikte çalışır, her biri normal şekilde ücretlendirilir",
@@ -17,7 +20,7 @@
   "clearForm": "Formu temizle",
   "revert": "Değişiklikleri geri al",
   "draftRestored": "Kaydedilmemiş taslak geri yüklendi",
-  "confirmDelete": "“{name}” silinsin mi? Geçmişi de silinir. Yalnızca yenilemeyi bıraktıysanız bunun yerine İptal edildi olarak işaretleyin.",
+  "confirmDelete": "“{name}” silinsin mi? Geçmişi de silinir. Yalnızca yenilemeyi bıraktıysanız bunun yerine Durdur seçeneğini kullanın.",
   "toast": {
     "added": "Eklendi",
     "saved": "Kaydedildi",
@@ -58,7 +61,8 @@
     "trial": "Deneme",
     "paused": "Duraklatıldı",
     "cancelled": "İptal edildi",
-    "terminated": "Kapatıldı"
+    "terminated": "Kapatıldı",
+    "stop": "Durdur"
   },
   "category": {
     "choose": "Kategori seçin",
@@ -95,7 +99,8 @@
     "showDomainOn": "Ziyaretçiler alan adının tamamını görür",
     "showDomainOff": "Herkese açık sayfada gizlenir",
     "tagsPlaceholder": "Boşlukla ayırın",
-    "notesPlaceholder": "Notlar (isteğe bağlı)"
+    "notesPlaceholder": "Notlar (isteğe bağlı)",
+    "pausedAt": "Duraklatma tarihi"
   },
   "share": {
     "none": "Yalnızca ben",
@@ -111,7 +116,18 @@
     "perPeriod": "Dönem başına pay",
     "paidUntil": "Ödendiği tarih",
     "remove": "Kaldır",
-    "addMember": "Üye ekle"
+    "addMember": "Üye ekle",
+    "manageHint": "Plan kuralını izlemek ya da özel ücret ve dönem belirlemek için üyeye dokunun",
+    "follows": "Planı izler",
+    "custom": "Özel",
+    "nextDue": "Sonraki {date}",
+    "editMember": "Düzenle",
+    "overdue": {
+      "one": "{count} gün gecikti",
+      "other": "{count} gün gecikti"
+    },
+    "dueOn": "Vade {date}",
+    "confirmRemove": "Onayla"
   },
   "proxy": {
     "for": "Kimin için",
@@ -199,7 +215,11 @@
     "range": "{start} → {end}",
     "now": "şimdi",
     "initial": "Başlangıç",
-    "priceChange": "Fiyat değişikliği {date}"
+    "priceChange": "Fiyat değişikliği {date}",
+    "outsidePayments": "Mevcut {count} ödeme hizmet dönemi dışında kalacak. Özgün tarihleri, tutarları ve aşamayı koruyarak devam edilsin mi?",
+    "editPrice": "{date} tarihinden itibaren fiyatı düzenle",
+    "deletePrice": "Bu fiyat silinsin mi? Önceki fiyat bir sonraki değişikliğe kadar uygulanır.",
+    "repriceCharges": "Kaydetme, geçmişteki {count} tahmini ödemeyi yeniden hesaplar. Kayıtlı ödemeler değişmez. Devam edilsin mi?"
   },
   "payment": {
     "addTitle": "Ödeme ekle",
@@ -228,5 +248,9 @@
   "timeline": {
     "home": "Bugüne dön (veya zaman çizelgesine çift tıklayın)"
   },
-  "ai": { "title": "Yapay zekâ ile doldur", "hint": "Fiş, ekran görüntüsü ya da metin yapıştırın; gerisi otomatik", "go": "Yapıştır" }
+  "ai": {
+    "title": "Yapay zekâ ile doldur",
+    "hint": "Fiş, ekran görüntüsü ya da metin yapıştırın; gerisi otomatik",
+    "go": "Yapıştır"
+  }
 }

@@ -6,7 +6,7 @@ import { deletePayment, savePayment } from '../../../shared/phases.ts';
 import type { Payment, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
-import { Cell, Group, Sheet } from '../components/ui.tsx';
+import { MoneyInput, Cell, Group, Sheet } from '../components/ui.tsx';
 import { run, saveSub } from '../store.ts';
 
 type Kind = 'charge' | NonNullable<Payment['kind']>;
@@ -118,7 +118,7 @@ export function PaymentSheet({
             />
           </Cell>
           <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('core.stop.currencyHint', { currency: ccy }) : undefined}>
-            <input className="num" inputMode="decimal" value={amount} onChange={(e) => setAmount((e.target as HTMLInputElement).value)} />
+            <MoneyInput ccy={ccy} className="num" value={amount} onChange={(e) => setAmount((e.target as HTMLInputElement).value)} />
           </Cell>
         </Group>
         <Group title={t('editor.payment.settled')}>
@@ -126,9 +126,9 @@ export function PaymentSheet({
             <CurrencySelect value={settledCcy} onChange={setSettledCcy} />
           </Cell>
           <Cell label={t('editor.payment.settledAmount')}>
-            <input
+            <MoneyInput
+              ccy={settledCcy}
               className="num"
-              inputMode="decimal"
               placeholder={t('editor.payment.blank')}
               value={settled}
               onChange={(e) => setSettled((e.target as HTMLInputElement).value)}

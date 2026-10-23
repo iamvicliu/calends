@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { FALLBACK_FX, memberDues } from './billing.ts';
 import { chargeValue } from './fx.ts';
 import { cashVsAccrual, contributionOn, movement, mrrOn, stopLosses } from './metrics.ts';
-import { monthReport, scopeReport, type Block, type ScopeReport } from './scope-report.ts';
+import { compactComposition, monthReport, scopeReport, type Block, type ScopeReport } from './scope-report.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const today = '2026-10-22';
@@ -225,11 +225,95 @@ test('month movement matches the report page and is absent for future months', (
   const st = state([sub('New', { start: '2026-10-01' }), sub('Sep', { start: '2026-09-01' })]);
   const current = get(monthReport(st, '2026-10', today), 'trend')!;
   if (current.mode !== 'month') assert.fail('month trend');
-  assert.deepEqual(current.movement, movement(st, '2026-09-30', today));
+  const withoutContext = (mv: typeof current.movement) => ({ ...mv, items: mv.items.map(({ from, to, since, until, ...r }) => r) });
+  assert.deepEqual(withoutContext(current.movement), movement(st, '2026-09-30', today));
+  assert.deepEqual(current.movement.items[0], {
+    sub: st.subscriptions[0],
+    kind: 'added',
+    delta: 10,
+    from: 0,
+    to: 10,
+    since: '2026-10-01',
+    until: '2026-10-01',
+  });
   const past = get(monthReport(st, '2026-09', today), 'trend')!;
   if (past.mode !== 'month') assert.fail('month trend');
-  assert.deepEqual(past.movement, movement(st, '2026-08-31', '2026-09-30', '2026-09-30'));
+  assert.deepEqual(withoutContext(past.movement), movement(st, '2026-08-31', '2026-09-30', '2026-09-30'));
   assert.equal(get(monthReport(st, '2026-11', today), 'trend'), undefined);
+});
+
+test('composition keeps up to six rows and groups only the tail above six without changing totals', () => {
+  for (const count of [0, 1, 5, 6, 7, 12]) {
+    const total = (count * (count + 1)) / 2;
+    const rows = Array.from({ length: count }, (_, i) => Object.freeze({ key: String(i), amount: count - i, share: (count - i) / total }));
+    const result = compactComposition(Object.freeze(rows));
+    assert.equal(result.length, Math.min(count, 6));
+    assert.equal(
+      result.reduce((n, r) => n + r.amount, 0),
+      total,
+    );
+    assert.ok(Math.abs(result.reduce((n, r) => n + r.share, 0) - (count ? 1 : 0)) < 1e-12);
+    if (count <= 6) assert.deepEqual(result, rows);
+    else {
+      assert.deepEqual(result.slice(0, 5), rows.slice(0, 5));
+      assert.deepEqual(result[5], {
+        key: '',
+        other: true,
+        amount: rows.slice(5).reduce((n, r) => n + r.amount, 0),
+        share: rows.slice(5).reduce((n, r) => n + r.share, 0),
+      });
+    }
+  }
+});
+
+test('both report builders compact categories and payment methods independently', () => {
+  const subs = Array.from({ length: 8 }, (_, i) => sub(String(i), { price: 10 + i, category: `Category ${i}`, methodId: `method-${i}`, start: '2026-10-01' }));
+  const st = state(subs);
+  for (const report of [scopeReport(st, subs, today), monthReport(st, '2026-10', today)]) {
+    const c = get(report, 'composition')!;
+    for (const rows of [c.categories, c.methods]) {
+      assert.equal(rows.length, 6);
+      assert.equal(rows[5].other, true);
+      assert.equal(rows[5].amount, 33);
+      assert.equal(
+        rows.reduce((n, r) => n + r.amount, 0),
+        108,
+      );
+      assert.ok(Math.abs(rows.reduce((n, r) => n + r.share, 0) - 1) < 1e-12);
+    }
+  }
+});
+
+test('movement context keeps rebased monthly costs and dates across price, phase and stop changes', () => {
+  const st = state([
+    sub('Price', {
+      price: 30,
+      priceHistory: [
+        { from: '2025-01-01', amount: 10 },
+        { from: '2026-10-03', amount: 20 },
+        { from: '2026-10-12', amount: 30 },
+      ],
+    }),
+    sub('Phase', {
+      phases: [
+        { start: '2025-01-01', end: '2026-10-07', price: 25, currency: 'USD', cycle: { unit: 'month', every: 1 } },
+        { start: '2026-10-08', price: 15, currency: 'USD', cycle: { unit: 'month', every: 1 } },
+      ],
+    }),
+    stopped(),
+  ]);
+  const trend = get(monthReport(st, '2026-10', today), 'trend')!;
+  if (trend.mode !== 'month') assert.fail('month trend');
+  const rows = trend.movement.items;
+  assert.deepEqual(
+    rows.map((r) => [r.sub.id, r.kind, r.from, r.to, r.since, r.until]),
+    [
+      ['Price', 'expansion', 10, 30, '2026-10-03', '2026-10-12'],
+      ['Phase', 'contraction', 25, 15, '2026-10-08', '2026-10-08'],
+      ['Stopped', 'churned', 10, 0, '2026-10-10', '2026-10-10'],
+    ],
+  );
+  assert.ok(rows.every((r) => Math.abs(r.to - r.from - r.delta) < 1e-10));
 });
 
 test('scope has a fixed 15-month cash series, while upcoming is tomorrow through day 30', () => {
@@ -341,5 +425,42 @@ test('mini calendar series uses six consecutive selected months and the exact fu
   assert.equal(
     monthReport(state([]), '2026-10', today).months.every((r) => r.total === 0),
     true,
+  );
+});
+
+test('movement before/after costs use the same end FX and keep FX drift separate', () => {
+  const st = state(
+    [
+      sub('Euro', {
+        currency: 'EUR',
+        price: 20,
+        priceHistory: [
+          { from: '2025-01-01', amount: 10 },
+          { from: '2026-10-12', amount: 20 },
+        ],
+      }),
+    ],
+    {
+      fx: { rates: { USD: 1, EUR: 2 }, fetchedAt: today },
+      fxHistory: { '2026-09-30': { USD: 1, EUR: 1 } },
+    },
+  );
+  const trend = get(monthReport(st, '2026-10', today), 'trend')!;
+  if (trend.mode !== 'month') assert.fail('month trend');
+  assert.equal(trend.movement.fx, -5);
+  assert.deepEqual(
+    trend.movement.items.map((r) => [r.from, r.to, r.delta, r.since, r.until]),
+    [[5, 10, 5, '2026-10-12', '2026-10-12']],
+  );
+  assert.equal(trend.movement.to - trend.movement.from, trend.movement.fx + trend.movement.items[0].delta);
+});
+
+test('movement without a ledger event shows the reporting window rather than an invented date', () => {
+  const st = state([sub('Trial ended', { status: 'trial', trialEnd: '2026-10-10' })]);
+  const trend = get(monthReport(st, '2026-10', today), 'trend')!;
+  if (trend.mode !== 'month') assert.fail('month trend');
+  assert.deepEqual(
+    trend.movement.items.map((r) => [r.from, r.to, r.since, r.until]),
+    [[0, 10, '2026-10-01', today]],
   );
 });

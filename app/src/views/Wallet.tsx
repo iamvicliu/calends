@@ -7,7 +7,24 @@ import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, ask, Cell, FlagImg, Group, Icon, MethodMark, NetworkMark, NumInput, Seg, Sheet, SubIcon, Toggle, Toolbar } from '../components/ui.tsx';
+import {
+  IconButton,
+  Amount,
+  ask,
+  Cell,
+  FlagImg,
+  Group,
+  Icon,
+  MethodMark,
+  NetworkMark,
+  NumInput,
+  MoneyInput,
+  Seg,
+  Sheet,
+  SubIcon,
+  Toggle,
+  Toolbar,
+} from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { go } from '../router.ts';
@@ -17,7 +34,7 @@ import { t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 
-function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state: AppState; flat?: boolean }) {
+function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: string; state: AppState; flat?: boolean; detailsOnly?: boolean }) {
   // 大字 / 小字金额跟随显示货币设置
   const pair = useMoneyPair(state);
   const m = r.method;
@@ -31,18 +48,22 @@ function RunwayCard({ r, today, state, flat }: { r: Runway; today: string; state
         <MethodMark m={m} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600 }}>{m.name}</div>
-          <div className="muted" style={{ fontSize: 12.5 }}>
-            {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div className="rw-bal">{bal.main}</div>
-          {bal.alt && (
-            <div className="soft" style={{ fontSize: 11.5 }}>
-              {bal.alt}
+          {!detailsOnly && (
+            <div className="muted" style={{ fontSize: 12.5 }}>
+              {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
             </div>
           )}
         </div>
+        {!detailsOnly && (
+          <div style={{ textAlign: 'right' }}>
+            <div className="rw-bal">{bal.main}</div>
+            {bal.alt && (
+              <div className="soft" style={{ fontSize: 11.5 }}>
+                {bal.alt}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className={`rw-track ${tone}`}>
         <span style={{ width: `${pct}%` }} />
@@ -194,7 +215,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
             <img className="pc-logo bank" src={base(`/banks/${bank}-rect.svg`)} alt="" />
           ) : null}
           <div style={{ minWidth: 0 }}>
-            <div className="pc-name">{m.name}</div>
+            <div className="pc-name text-ellipsis">{m.name}</div>
             <div className="pc-kind">
               {KIND_LABEL[m.kind]}
               {m.network ? ` · ${m.currency}` : ''}
@@ -341,7 +362,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                           ? t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })
                           : t('wallet.card.subs', { count: liveHere.length })
                       }
-                      rightSub={cardHint(m, r)}
+                      rightSub={r && r.monthlyDrain > 0 ? t('wallet.card.subs', { count: liveHere.length }) : cardHint(m, r)}
                     />
                   </SortableCard>
                 );
@@ -358,7 +379,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
               .filter((r): r is NonNullable<typeof r> => r != null && r.monthlyDrain > 0)
               .map((r) => (
                 <div key={r.method.id} className="cell" style={{ display: 'block', padding: '14px 16px' }}>
-                  <RunwayCard r={r} today={today} state={state} flat />
+                  <RunwayCard r={r} today={today} state={state} flat detailsOnly />
                 </div>
               ))}
           </Group>
@@ -575,9 +596,9 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
         />
         <Group>
           <Cell label={mode === 'add' ? t('wallet.topup.amount', { ccy: m.currency }) : t('wallet.topup.actual')}>
-            <input
+            <MoneyInput
+              ccy={m.currency}
               className="num"
-              inputMode="decimal"
               autoFocus
               value={val}
               onChange={(e) => setVal((e.target as HTMLInputElement).value)}
@@ -598,9 +619,9 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
               <CurrencySelect value={costCcy} onChange={setCostCcy} />
             </Cell>
             <Cell label={t('wallet.topup.cost')}>
-              <input
+              <MoneyInput
+                ccy={costCcy}
                 className="num"
-                inputMode="decimal"
                 value={cost}
                 placeholder={t('wallet.topup.costPh')}
                 onChange={(e) => setCost((e.target as HTMLInputElement).value)}
@@ -640,9 +661,9 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
                         )}
                       </span>
                     )}
-                    <button className="icon-btn" style={{ width: 26, height: 26 }} aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
+                    <IconButton aria-label={t('wallet.topup.removeAria')} onClick={() => removeTop(tp)}>
                       <Icon name="x" />
-                    </button>
+                    </IconButton>
                   </span>
                 </div>
               );
@@ -818,6 +839,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
             <Cell label={t('wallet.editor.balance')}>
               <NumInput
                 className="num"
+                ccy={f.currency}
                 value={f.balance}
                 placeholder={t('wallet.editor.optional')}
                 onValue={(n) => up({ balance: n, balanceAsOf: f.balanceAsOf ?? today() })}

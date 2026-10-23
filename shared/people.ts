@@ -212,7 +212,7 @@ function shareItem(state: AppState, s: Subscription, m: ShareMember, today: stri
     kind: 'share',
     sub: s,
     member: m,
-    owed: d && !m.exempt ? toBaseAt(state, d.owed, d.currency) : 0,
+    owed: d && !m.exempt ? (Number.isFinite(d.owed) ? toBaseAt(state, d.owed, d.currency) : NaN) : 0,
     periodsOwed: d && !m.exempt ? d.periodsOwed : 0,
     received: pays.reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0),
     lastPaid: pays.reduce<string | undefined>((a, p) => (!a || p.date > a ? p.date : a), undefined),
@@ -255,7 +255,8 @@ export function peopleLedger(state: AppState, today: string): PersonLedger[] {
     if (!person.id && !normName(person.name)) continue;
     const key = person.id || `~${personKey(person.name, person.contactVia, person.contact)}`;
     if (!book.has(key)) book.set(key, { person, items: [], owed: 0, periodsOwed: 0, received: 0 });
-    if (r.kind === 'member' && !dues.has(r.sub.id)) dues.set(r.sub.id, memberDues(r.sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency));
+    if (r.kind === 'member' && !dues.has(r.sub.id))
+      dues.set(r.sub.id, memberDues(r.sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state));
     const item = r.kind === 'member' ? shareItem(state, r.sub, r.member, today, dues.get(r.sub.id)!) : proxyItem(state, r.sub, today);
     const l = book.get(key)!;
     l.items.push(item);
@@ -268,4 +269,30 @@ export function peopleLedger(state: AppState, today: string): PersonLedger[] {
   return [...book.values()].sort(
     (a, b) => (b.owed > 0.005 ? 1 : 0) - (a.owed > 0.005 ? 1 : 0) || b.owed - a.owed || a.person.name.localeCompare(b.person.name),
   );
+}
+
+/** Roster presentation only: never alter the underlying ledger or its financial totals. */
+export type PeopleSort = 'owed' | 'received' | 'lastPaid' | 'name';
+export function peopleListRows(
+  book: PersonLedger[],
+  {
+    filter = 'all',
+    sort = 'owed',
+    dir = 'desc',
+    locale,
+  }: { filter?: 'all' | 'owe' | 'settled'; sort?: PeopleSort; dir?: 'asc' | 'desc'; locale?: string } = {},
+): PersonLedger[] {
+  const byName = (a: PersonLedger, b: PersonLedger) => a.person.name.localeCompare(b.person.name, locale);
+  return book
+    .filter((l) => filter === 'all' || (Number.isFinite(l.owed) && (filter === 'owe' ? l.owed > 0.005 : l.owed <= 0.005)))
+    .sort((a, b) => {
+      if (sort === 'name') return (dir === 'asc' ? 1 : -1) * byName(a, b);
+      if (sort === 'lastPaid') {
+        // Missing dates stay last in either direction.
+        if (!a.lastPaid || !b.lastPaid) return Number(!!b.lastPaid) - Number(!!a.lastPaid) || byName(a, b);
+        return (dir === 'asc' ? 1 : -1) * a.lastPaid.localeCompare(b.lastPaid) || byName(a, b);
+      }
+      if (!Number.isFinite(a[sort]) || !Number.isFinite(b[sort])) return Number(Number.isFinite(b[sort])) - Number(Number.isFinite(a[sort])) || byName(a, b);
+      return (dir === 'asc' ? 1 : -1) * (a[sort] - b[sort]) || (b.lastPaid ?? '').localeCompare(a.lastPaid ?? '') || byName(a, b);
+    });
 }

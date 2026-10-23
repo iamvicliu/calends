@@ -1,4 +1,5 @@
-import { FALLBACK_FX } from '../shared/billing.ts';
+import { validatePeopleAvatars } from '../shared/avatar.ts';
+import { FALLBACK_FX, migrateRenewalRules } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import { linkPeople } from '../shared/people.ts';
 import type { Prefs } from '../shared/prefs.ts';
@@ -30,6 +31,7 @@ export async function getKv<T>(env: Env, key: string): Promise<T | undefined> {
 }
 
 function putKvStmt(env: Env, key: string, value: unknown): D1PreparedStatement {
+  if (key === 'people') validatePeopleAvatars(value as Person[]);
   return env.DB.prepare(
     "INSERT INTO kv (key, value, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
   ).bind(key, JSON.stringify(value));
@@ -60,6 +62,7 @@ const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
 
 /** 把名册和改动过的订阅一起写入（分批，D1 一次 batch 的语句数有限） */
 export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<Revision | undefined> {
+  if (people) validatePeopleAvatars(people);
   const stmts = [...(people ? [putPeopleStmt(env, people)] : []), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))];
   let revision: Revision | undefined;
   for (let i = 0; i < stmts.length; i += 50) {
@@ -82,7 +85,7 @@ async function ensurePeople(env: Env, state: AppState): Promise<boolean> {
   return true;
 }
 
-export async function loadState(env: Env): Promise<AppState> {
+export async function loadState(env: Env, migratePeople = true): Promise<AppState> {
   // D1 batch reads one transactional snapshot: never pair stale data with a newer rev.
   const rows = await env.DB.batch([
     env.DB.prepare('SELECT data FROM subscriptions'),
@@ -96,7 +99,7 @@ export async function loadState(env: Env): Promise<AppState> {
   if (typeof kv.rev !== 'number') throw new Error('Missing ledger revision');
   const state: AppState = {
     rev: kv.rev,
-    subscriptions: subs.results.map((r) => JSON.parse(r.data) as Subscription),
+    subscriptions: subs.results.map((r) => migrateRenewalRules(JSON.parse(r.data) as Subscription)),
     // 按用户在钱包里拖出来的顺序；没排过的保持原有先后
     methods: methods.results
       .map((r) => JSON.parse(r.data) as PaymentMethod)
@@ -108,7 +111,7 @@ export async function loadState(env: Env): Promise<AppState> {
     fx: kv.fx ?? FALLBACK_FX,
     prefs: (kv.prefs as Prefs | undefined) ?? {},
   };
-  if (await ensurePeople(env, state)) return loadState(env);
+  if (migratePeople && (await ensurePeople(env, state))) return loadState(env);
   state.fxHistory = slimFxHistory((rows[3] as D1Result<{ date: string; rates: string }>).results, keepSet(state));
   return state;
 }
@@ -140,10 +143,29 @@ export async function replaceAll(env: Env, subs: Subscription[], methods: Paymen
 }
 
 export async function loadSubs(env: Env): Promise<Subscription[]> {
-  return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
+  return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) =>
+    migrateRenewalRules(JSON.parse(r.data) as Subscription),
+  );
 }
 
 /** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */
 export async function saveSettingsWithSubs(env: Env, settings: Settings, subs: Subscription[]): Promise<Revision> {
   return mutate(env, [putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))]);
+}
+
+/** Atomic multi-entity tool write: never leave a migration or settings/prefs edit half-applied. */
+export async function saveLedgerEdit(
+  env: Env,
+  patch: Partial<AppState>,
+  deletedMethods: string[] = [],
+  deletedSubscriptions: string[] = [],
+): Promise<Revision> {
+  const stmts = [
+    ...(patch.subscriptions ?? []).map((s) => upsertStmt(env, 'subscriptions', s.id, s)),
+    ...(patch.methods ?? []).map((m) => upsertStmt(env, 'methods', m.id, m)),
+    ...deletedMethods.map((id) => env.DB.prepare('DELETE FROM methods WHERE id = ?1').bind(id)),
+    ...deletedSubscriptions.map((id) => env.DB.prepare('DELETE FROM subscriptions WHERE id = ?1').bind(id)),
+    ...(['settings', 'people', 'prefs'] as const).filter((k) => patch[k] !== undefined).map((k) => putKvStmt(env, k, patch[k])),
+  ];
+  return mutate(env, stmts);
 }

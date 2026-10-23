@@ -60,6 +60,7 @@
     "all": "すべて"
   },
   "row": {
+    "ends": " · {date}終了",
     "renews": " · {date}に更新",
     "monthly": "月額",
     "perMonthEq": "月あたり"

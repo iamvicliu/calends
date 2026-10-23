@@ -49,6 +49,7 @@
     "preview": "Ver os lembretes de hoje"
   },
   "today": {
+    "recent": "Envios recentes",
     "title": "Hoje ({day})",
     "items": { "one": "{count} item", "other": "{count} itens" }
   },

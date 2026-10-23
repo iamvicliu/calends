@@ -14,17 +14,6 @@
   flex-shrink: 0;
   gap: 4px;
 }
-.scope-actions .icon-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--label-2);
-}
-.scope-actions .icon-btn:hover {
-  background: var(--fill);
-  color: var(--label);
-}
 .scope-header {
   margin: 0 0 10px;
   min-width: 0;
@@ -73,7 +62,6 @@
 }
 .scope-block {
   min-width: 0;
-  padding: 14px 16px;
   line-height: 1.4;
 }
 .scope-block .hero-num {
@@ -100,8 +88,31 @@
   grid-template-columns: minmax(0, 140px) minmax(24px, 1fr) auto;
 }
 .scope-headline,
-.scope-trend {
+.scope-trend,
+.scope-events,
+.scope-losses,
+.scope-grid > .scope-composition {
   grid-column: 1 / -1;
+}
+.scope-compositions,
+.scope-movements {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+.scope-movements {
+  margin-top: 8px;
+}
+.scope-compositions > :only-child {
+  grid-column: 1 / -1;
+}
+.scope-movements .scope-row {
+  align-items: flex-start;
+}
+.scope-movement-date {
+  display: block;
+  margin-top: 2px;
+  color: var(--label-3);
 }
 .scope-note {
   margin: 8px 0 12px;
@@ -224,6 +235,10 @@
   .scope-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+  .scope-compositions,
+  .scope-movements {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .scope-report .mv-row {
     grid-template-columns: minmax(0, 1fr) minmax(24px, 1fr) auto;
   }
@@ -313,6 +328,8 @@
   background: none;
 }
 .cal-dc-meta {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -335,21 +352,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .cal-daycard {
-    flex-wrap: wrap;
-    padding: 12px;
     gap: 8px;
-  }
-  .cal-dc-main {
-    flex-basis: calc(100% - 40px);
-  }
-  .cal-dc-amt {
-    flex-basis: 100%;
-    padding-left: 40px;
-    align-items: flex-start;
-    text-align: start;
-  }
-  .cal-dc-amt small {
-    white-space: normal;
   }
 }
 .cal-mini-bars:not(.signed) .cal-mini-positive {

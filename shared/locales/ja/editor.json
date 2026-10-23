@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "ログインメール・電話番号・ユーザー名", "phone": "電話番号" },
+  "ph": {
+    "account": "ログインメール・電話番号・ユーザー名",
+    "phone": "電話番号"
+  },
   "overlap": {
     "keep": "以前のものをしばらく継続",
     "keepHint": "前払い済みでまだ期限前：2 つを並行し、それぞれ通常どおり課金します",
@@ -13,7 +16,7 @@
   },
   "addTitle": "サブスクを追加",
   "editTitle": "「{name}」を編集",
-  "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「解約済み」にしてください。",
+  "confirmDelete": "「{name}」を削除しますか？履歴も削除されます。更新をやめただけなら「停止」を選んでください。",
   "clearForm": "フォームをクリア",
   "revert": "変更を元に戻す",
   "draftRestored": "前回の未保存の内容を復元しました",
@@ -53,7 +56,8 @@
     "trial": "トライアル",
     "paused": "一時停止",
     "cancelled": "解約済み",
-    "terminated": "利用停止"
+    "terminated": "利用停止",
+    "stop": "停止"
   },
   "category": {
     "choose": "カテゴリを選択",
@@ -90,7 +94,8 @@
     "showDomainOn": "訪問者に完全なドメインが表示されます",
     "showDomainOff": "公開ページでは伏せて表示されます",
     "tagsPlaceholder": "スペースで区切る",
-    "notesPlaceholder": "メモ（任意）"
+    "notesPlaceholder": "メモ（任意）",
+    "pausedAt": "一時停止日"
   },
   "share": {
     "none": "自分だけ",
@@ -106,7 +111,17 @@
     "perPeriod": "1期間あたりの負担額",
     "paidUntil": "支払い済み期限",
     "remove": "削除",
-    "addMember": "メンバーを追加"
+    "addMember": "メンバーを追加",
+    "manageHint": "メンバーをタップして、プランのルールに従うか独自の料金と周期を設定",
+    "follows": "プラン共通",
+    "custom": "個別",
+    "nextDue": "次回 {date}",
+    "editMember": "編集",
+    "overdue": {
+      "other": "{count}日超過"
+    },
+    "dueOn": "{date} 集金予定",
+    "confirmRemove": "確認"
   },
   "proxy": {
     "for": "立て替え先",
@@ -190,7 +205,11 @@
     "range": "{start} → {end}",
     "now": "現在",
     "initial": "初期",
-    "priceChange": "価格変更 {date}"
+    "priceChange": "価格変更 {date}",
+    "outsidePayments": "既存の支払い {count} 件がサービス期間外になります。元の日付、金額、所属期間を保持して続けますか？",
+    "editPrice": "{date} からの価格を編集",
+    "deletePrice": "この価格を削除しますか？次の変更まで直前の価格が適用されます。",
+    "repriceCharges": "保存すると過去の推定請求 {count} 件を再計算します。記録済みの支払いは変更されません。続行しますか？"
   },
   "payment": {
     "addTitle": "支払いを追加",
@@ -219,5 +238,9 @@
   "timeline": {
     "home": "今日に戻る（またはタイムラインをダブルクリック）"
   },
-  "ai": { "title": "AI で読み取る", "hint": "レシートやスクリーンショット、テキストを貼り付けると自動で整理します", "go": "貼り付け" }
+  "ai": {
+    "title": "AI で読み取る",
+    "hint": "レシートやスクリーンショット、テキストを貼り付けると自動で整理します",
+    "go": "貼り付け"
+  }
 }

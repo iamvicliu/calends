@@ -19,7 +19,21 @@
     "date": "Datum",
     "member": "Mitglied",
     "covers": "Zeitraum",
-    "amount": "Betrag"
+    "amount": "Betrag",
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle zuklappen",
+    "groupSum": {
+      "one": "{count} Zahlung · {amount}",
+      "other": "{count} Zahlungen · {amount}"
+    },
+    "fee": "Gebühr",
+    "nextCollection": "Nächster Einzug",
+    "actions": "Aktionen",
+    "status": "Zahlungsstatus",
+    "period": "Aktueller Zeitraum",
+    "range": "{from} – {until}",
+    "rangeFrom": "Von",
+    "rangeTo": "Bis"
   },
   "contact": {
     "via": {
@@ -58,8 +72,8 @@
     "name": "Name",
     "namePh": "Wie du die Person nennst",
     "contact": "Kontakt",
-    "account": "Eingeladenes Konto",
-    "accountPh": "E-Mail oder Benutzername, eingeladen zu {name}",
+    "account": "Mitgliedskonto",
+    "accountPh": "E-Mail, Telefon, Benutzername oder ID bei {name}",
     "joined": "Beigetreten",
     "joinedPh": "Abo-Beginn ({date})",
     "notSet": "Nicht festgelegt",
@@ -135,7 +149,10 @@
     "coverAligned": "Endet an der gemeinsamen Zeitraumgrenze",
     "recordNext": "Zahlung erfassen · {amount}",
     "collectionAnchor": "Gemeinsamer Einzugsbeginn",
-    "firstSummary": "Erster Zeitraum {from}–{until} · {mode} {amount}"
+    "firstSummary": "Erster Zeitraum {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Kein Konto eingetragen",
+    "editAccount": "Mitgliedskonto bearbeiten",
+    "copyAccount": "Konto kopieren"
   },
   "pool": {
     "seatsFree": "{count} frei",
@@ -206,7 +223,9 @@
     "payTo": "An {name} gezahlt · {amount}",
     "ownerDefault": "Organisator",
     "maybeGroup": "Evtl. geteilt",
-    "convert": "Als geteilt markieren"
+    "convert": "Als geteilt markieren",
+    "dueOn": "Fällig {date}",
+    "nextDueOn": "Nächste Fälligkeit {date}"
   },
   "convert": {
     "title": "„{name}“ teilen",
@@ -237,5 +256,40 @@
     "gain": "Plus {amount}",
     "lost": "Minus {amount}",
     "noRecords": "Noch keine Zahlungen"
+  },
+  "collect": {
+    "title": "Zahlung erfassen · {name}",
+    "next": "Nächste Einnahme {date}",
+    "editMember": "Bearbeiten",
+    "until": "Gedeckt bis",
+    "covers": "Zahlung deckt {from} – {until}",
+    "changeFee": "Gebühr ändern",
+    "lastPayment": "Letzte Zahlung",
+    "adjustFee": "Gebühr anpassen",
+    "feeFrom": "Gültig ab",
+    "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert.",
+    "viewSub": "Details ansehen"
+  },
+  "rule": {
+    "title": "Einzugsregel",
+    "follow": "Wie Abo",
+    "custom": "Eigen",
+    "followValue": "{rule} (Abo-Regel)",
+    "sheetTitle": "Einzugsregel des Abos",
+    "from": "Gültig ab",
+    "anchor": "Einzugsstichtag",
+    "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert."
+  },
+  "quick": {
+    "more": "Weitere Angaben",
+    "paid": "Bezahlt bis",
+    "paidFrom": "Zeitraum ab",
+    "paidTo": "Zeitraum bis",
+    "late": {
+      "one": "{count} Tag überfällig",
+      "other": "{count} Tage überfällig"
+    },
+    "owe": "{amount} offen · seit {date}",
+    "settled": "Beglichen · nächste Fälligkeit {date}"
   }
 }

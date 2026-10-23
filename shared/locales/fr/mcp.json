@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Non attribué",
     "anyRegion": "Toute région",
-    "total": "Total"
+    "total": "Total",
+    "createCategory": "Catégorie à créer : {name}",
+    "createdCategory": "Catégorie créée : {name}"
   },
   "error": {
     "shareFull": "« {name} » est complet ({seats} places)",
@@ -55,7 +57,12 @@
     "invalidRefund": "Les montants remboursés doivent être valides et enregistrés en négatif.",
     "refundBeforeStop": "La date du remboursement ne peut pas précéder l’arrêt.",
     "paymentOutOfRange": "La date de paiement {date} doit être comprise entre la date de début et aujourd’hui",
-    "invalidFirstPeriod": "first_period doit être prorate, full ou free."
+    "invalidFirstPeriod": "first_period doit être prorate, full ou free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Catégorie introuvable ou ambiguë : {q}. Options : {list}"
   },
   "tool": {
     "get_overview": "Aperçu du registre",
@@ -67,23 +74,28 @@
     "get_trends": "Tendances",
     "list_payment_methods": "Moyens de paiement et soldes",
     "get_receivables": "Sommes à recevoir",
-    "get_insights": "Bilan, économies, pertes et rétrospective annuelle",
+    "get_insights": "Analyses et rapports",
     "list_events": "Journal des changements",
     "search_app_store": "Rechercher une app",
     "get_carpool": "Abonnements partagés",
     "delete_subscription": "Supprimer l’abonnement",
-    "set_share": "Configurer le partage",
+    "set_share": "Gérer le partage",
     "save_share_member": "Ajouter ou modifier un membre",
     "remove_share_member": "Retirer un membre",
     "create_subscription": "Ajouter un abonnement",
     "update_subscription": "Modifier un abonnement",
     "change_price": "Noter un changement de prix",
-    "change_plan": "Changer de région / formule / se réabonner",
-    "set_status": "Suspendre / résilier / reprendre",
-    "record_payment": "Enregistrer un prélèvement",
-    "delete_payment": "Supprimer un prélèvement",
-    "record_receivable": "Enregistrer une somme reçue",
-    "update_payment_method": "Mettre à jour le solde d’un moyen de paiement",
-    "list_people": "Personnes et créances"
+    "change_plan": "Gérer les formules et l’historique",
+    "set_status": "Modifier le statut d’un abonnement",
+    "record_payment": "Enregistrer ou modifier des paiements",
+    "delete_payment": "Supprimer un paiement enregistré",
+    "record_receivable": "Gérer les créances et encaissements",
+    "update_payment_method": "Gérer les moyens de paiement et portefeuilles",
+    "list_people": "Personnes et créances",
+    "save_category": "Gérer une catégorie",
+    "save_person": "Gérer une personne",
+    "get_settings": "Paramètres et préférences du registre",
+    "update_settings": "Modifier les paramètres et préférences du registre",
+    "set_proxy": "Gérer les avances"
   }
 }

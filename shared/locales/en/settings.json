@@ -49,6 +49,7 @@
     "preview": "Preview today's reminders"
   },
   "today": {
+    "recent": "Recently sent",
     "title": "Today ({day})",
     "items": { "one": "{count} item", "other": "{count} items" }
   },

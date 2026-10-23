@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "미지정",
     "anyRegion": "모든 지역",
-    "total": "합계"
+    "total": "합계",
+    "createCategory": "새 카테고리 생성 예정: {name}",
+    "createdCategory": "카테고리 생성 완료: {name}"
   },
   "error": {
     "shareFull": "「{name}」은(는) 자리가 다 찼어요({seats}석)",
@@ -55,7 +57,12 @@
     "invalidRefund": "환불액은 유효한 숫자이며 음수로 기록해야 합니다.",
     "refundBeforeStop": "환불일은 중지일보다 빠를 수 없습니다.",
     "paymentOutOfRange": "결제일 {date}은(는) 시작일과 오늘 사이여야 합니다",
-    "invalidFirstPeriod": "first_period는 prorate, full 또는 free여야 합니다."
+    "invalidFirstPeriod": "first_period는 prorate, full 또는 free여야 합니다.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "카테고리가 없거나 모호합니다: {q}. 선택 가능: {list}"
   },
   "tool": {
     "get_overview": "장부 개요",
@@ -67,23 +74,28 @@
     "get_trends": "추세",
     "list_payment_methods": "결제 수단 및 잔액",
     "get_receivables": "받을 돈",
-    "get_insights": "점검, 절약, 손실 및 연간 결산",
+    "get_insights": "분석 및 보고서",
     "list_events": "변경 기록",
     "search_app_store": "앱 찾기",
     "get_carpool": "공유 요약",
     "delete_subscription": "구독 삭제",
-    "set_share": "공유 설정",
+    "set_share": "공유 관리",
     "save_share_member": "멤버 추가·수정",
     "remove_share_member": "멤버 삭제",
     "create_subscription": "구독 추가",
     "update_subscription": "구독 편집",
     "change_price": "가격 변경 기록",
-    "change_plan": "지역 / 플랜 변경 / 재구독",
-    "set_status": "일시 정지 / 해지 / 재개",
-    "record_payment": "결제 기록",
+    "change_plan": "플랜 및 이력 관리",
+    "set_status": "구독 상태 변경",
+    "record_payment": "결제 기록·수정",
     "delete_payment": "결제 기록 삭제",
-    "record_receivable": "받은 돈 기록",
-    "update_payment_method": "결제 수단 잔액 업데이트",
-    "list_people": "사람과 받을 돈"
+    "record_receivable": "받을 돈 및 수금 기록 관리",
+    "update_payment_method": "결제 수단 및 지갑 관리",
+    "list_people": "사람과 받을 돈",
+    "save_category": "카테고리 관리",
+    "save_person": "사람 관리",
+    "get_settings": "장부 설정 및 환경설정",
+    "update_settings": "장부 설정 및 환경설정 변경",
+    "set_proxy": "대납 관계 관리"
   }
 }

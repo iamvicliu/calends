@@ -52,5 +52,7 @@
     "noKey": "No DeepSeek API key configured yet.",
     "badTool": "Unsupported action."
   },
-  "invalidAvatar": "Invalid image"
+  "invalidAvatar": "Invalid image",
+  "avatarInvalid": "Use a square PNG/WebP avatar up to 128×128 and 64 KB, without metadata. Uploads accept PNG/JPEG/WebP up to 8 MB and 40 megapixels.",
+  "avatarRosterFull": "The people roster is full. Remove an avatar before adding another."
 }

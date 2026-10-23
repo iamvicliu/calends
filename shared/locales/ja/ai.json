@@ -25,7 +25,7 @@
     "write": "読み書き",
     "read": "読み取り専用",
     "label": "権限",
-    "writeDesc": "サブスク・請求・返済の照会、追加、編集ができます。",
+    "writeDesc": "サブスク、支払い、入金、ウォレット、相手、カテゴリ、台帳設定を確認・管理できます。",
     "readDesc": "照会のみ。データは変更できません。"
   },
   "created": {
@@ -71,5 +71,21 @@
   "promptLabel": "プロンプト",
   "copyConfigOnly": "設定だけコピー",
   "configCopied": "設定をコピーしました",
-  "agentPrompt": "私の Calends サブスク台帳を「calends」という名前の MCP サーバーとして接続してください。{where}\n\n{code}\n\n設定できたら {verify} ツールを呼び出して動作を確認し、利用中のサブスクがいくつあるか教えてください。"
+  "agentPrompt": "私の Calends サブスク台帳を「calends」という名前の MCP サーバーとして接続してください。{where}\n\n{code}\n\n設定できたら {verify} ツールを呼び出して動作を確認し、利用中のサブスクがいくつあるか教えてください。",
+  "col": {
+    "name": "名前",
+    "key": "キー",
+    "created": "作成",
+    "lastUsed": "最終使用"
+  },
+  "domain": {
+    "overview": "概要と統計",
+    "subs": "サブスクとプラン",
+    "charges": "支払い記録",
+    "wallet": "ウォレットと支払い方法",
+    "people": "共有プランと立て替え",
+    "categories": "カテゴリ",
+    "settings": "設定",
+    "other": "その他"
+  }
 }

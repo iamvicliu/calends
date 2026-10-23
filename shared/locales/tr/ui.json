@@ -2,7 +2,8 @@
   "close": "Kapat",
   "error": {
     "loginRequired": "Lütfen önce giriş yapın",
-    "requestFailed": "İstek başarısız oldu ({status})"
+    "requestFailed": "İstek başarısız oldu ({status})",
+    "wholeCurrency": "{currency} tutarları tam sayı olmalıdır"
   },
   "theme": {
     "light": "Açık",

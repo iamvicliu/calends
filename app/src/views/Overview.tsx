@@ -1,14 +1,14 @@
 import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../../shared/billing.ts';
-import { flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
+import { moneyTick, flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
 import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosses } from '../../../shared/metrics.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
-import { Amount, Hint, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, Amount, CardTitle, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
@@ -79,7 +79,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
   return (
     <section className="card">
       <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
-        <h3 className="sec-title">{t('overview.timeline.title')}</h3>
+        <CardTitle className="sec-title">{t('overview.timeline.title')}</CardTitle>
         <span className="sec-sub" style={{ marginTop: 0 }}>
           {t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) })}
         </span>
@@ -170,9 +170,9 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
     <div className="card" style={{ padding: '22px 24px 20px' }}>
       <div className="ov-head">
         <div>
-          <h3 className="sec-title">
-            {t('overview.spending.title')} <Hint text={t('report.cash.fullPaidHint')} />
-          </h3>
+          <CardTitle as="h3" className="sec-title" hint={t('report.cash.fullPaidHint')}>
+            {t('overview.spending.title')}
+          </CardTitle>
           <div className="sec-sub">{t('overview.spending.sub')}</div>
         </div>
         <Seg
@@ -194,7 +194,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         selected={selKey ? sel : undefined}
         current={sel}
         onSelect={(k) => setSelKey(k === selKey ? undefined : k)}
-        fmt={(v) => (v >= 10000 ? `${(v / 1000).toFixed(0)}k` : v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(Math.round(v)))}
+        fmt={(v) => moneyTick(v, base)}
       />
 
       <div className="legend-chips">
@@ -266,7 +266,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{t('overview.due.title')}</h3>
+        <CardTitle>{t('overview.due.title')}</CardTitle>
         <span className="meta">
           {t('overview.n.charges', { count: cs.length })} · {flow(-total, base, { compact: true })}
         </span>
@@ -315,7 +315,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
   return (
     <div className="card">
       <div className="card-h">
-        <h3>{t('overview.wallet.title')}</h3>
+        <CardTitle>{t('overview.wallet.title')}</CardTitle>
         <a className="btn plain" href={appPath('/wallet')}>
           {t('overview.wallet.manage')}
         </a>
@@ -380,9 +380,9 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
           {i.subs && i.subs.length > 0 && (
             <div className="ins-subs">
               {i.subs.slice(0, 7).map((s) => (
-                <button key={s.id} onClick={() => onOpen(s)} title={s.name}>
+                <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                   <SubIcon sub={s} size={22} />
-                </button>
+                </IconButton>
               ))}
             </div>
           )}
@@ -442,9 +442,9 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   return (
     <section className="stmt">
       <div className="stmt-l">
-        <div className="stmt-kicker">
-          {t('overview.stmt.kicker')} <Hint text={t('scope.mrrBasis')} />
-        </div>
+        <CardTitle as="div" className="stmt-kicker" hint={t('scope.mrrBasis')}>
+          {t('overview.stmt.kicker')}
+        </CardTitle>
         <div className="stmt-num">
           <Amount value={-tot.mrr} ccy={base} />
         </div>

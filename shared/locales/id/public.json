@@ -60,6 +60,7 @@
     "all": "Semua"
   },
   "row": {
+    "ends": " · Berakhir {date}",
     "renews": " · Diperpanjang {date}",
     "monthly": "Bulanan",
     "perMonthEq": "Per bulan"

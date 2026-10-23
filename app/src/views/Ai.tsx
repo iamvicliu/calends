@@ -1,7 +1,9 @@
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { ask, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { CardTitle, ask, Icon, IconButton, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Trash2, Users, Wallet } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { api, run, saveSettings, toast } from '../store.ts';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -20,6 +22,19 @@ interface ToolMeta {
   description: string;
   write: boolean;
 }
+
+// 只调整展示顺序和分组，工具仍全部来自接口；未匹配的新工具归到「其他」
+const TOOL_DOMAINS: Array<{ key: string; icon: LucideIcon; test: RegExp }> = [
+  { key: 'overview', icon: ChartPie, test: /overview|stats|trends|insights/ },
+  { key: 'subs', icon: Layers, test: /subscription|price|plan|status|events/ },
+  { key: 'charges', icon: ReceiptText, test: /charges|payment$/ },
+  { key: 'wallet', icon: Wallet, test: /payment_method/ },
+  { key: 'people', icon: Users, test: /people|person|carpool|share|proxy|receivable/ },
+  { key: 'categories', icon: Tags, test: /categor/ },
+  { key: 'settings', icon: Settings2, test: /settings/ },
+];
+const OTHER = { key: 'other', icon: Shapes, test: /$^/ };
+const toolDomain = (name: string) => TOOL_DOMAINS.find((d) => d.test.test(name)) ?? OTHER;
 
 /** 一个接入客户端：标志、配置写在哪、配置内容；有官方一键安装链接的也给出来 */
 interface Client {
@@ -237,10 +252,11 @@ export function Ai({ state }: { state: AppState }) {
     api<ToolMeta[]>('/api/mcp/tools').then(setTools, () => setTools([]));
   }, []);
   const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : t('ai.neverUsed'));
-  const groups: Array<[string, ToolMeta[]]> = [
-    [t('ai.toolsRead'), tools.filter((x) => !x.write)],
-    [t('ai.toolsWrite'), tools.filter((x) => x.write)],
-  ];
+  // 按领域分组，组内先读后写；读写用图标区分（参考 GitHub 细粒度令牌的权限列表）
+  const groups = [...TOOL_DOMAINS, OTHER]
+    .map((d) => ({ ...d, list: tools.filter((x) => toolDomain(x.name) === d).sort((a, b) => Number(a.write) - Number(b.write)) }))
+    .filter((g) => g.list.length);
+  const readCount = tools.filter((x) => !x.write).length;
 
   return (
     <>
@@ -256,7 +272,7 @@ export function Ai({ state }: { state: AppState }) {
         <div className={`ai-status ${enabled ? 'on' : ''}`}>
           {/* 状态用标题旁的徽标表示（同 Vercel、Linear 设置页的做法），不再用前置圆点，标题与下方内容左对齐 */}
           <div className="ai-status-l">
-            <b>
+            <b className="icon-text">
               {t('settings.open.ai')}
               <span className={`ai-badge ${enabled ? 'on' : ''}`}>
                 {enabled && <Icon name="check" size={12} />}
@@ -275,7 +291,7 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <header>
-            <h2>{t('ai.setup')}</h2>
+            <CardTitle as="h2">{t('ai.setup')}</CardTitle>
             <p className="m-hide">{t('ai.setupHint')}</p>
           </header>
           <Connect url={url} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
@@ -283,41 +299,63 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <header>
-            <h2>{t('ai.tokens', { count: tokens?.length ?? 0 })}</h2>
+            <CardTitle as="h2">{t('ai.tokens', { count: tokens?.length ?? 0 })}</CardTitle>
             <p className="m-hide">{t('ai.tokensHint')}</p>
           </header>
           {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
           {!!tokens?.length && (
+            // 密钥列表参考 Stripe、OpenAI、Vercel 的 API Keys：名称与权限、遮蔽后的密钥、创建和最近使用分列对齐，操作收进行尾图标
             <div className="ai-tokens" role="table">
+              <div className="ai-token ai-token-head m-hide" role="row">
+                <span role="columnheader">{t('ai.col.name')}</span>
+                <span role="columnheader">{t('ai.col.key')}</span>
+                <span role="columnheader">{t('ai.col.created')}</span>
+                <span role="columnheader">{t('ai.col.lastUsed')}</span>
+                <span />
+              </div>
               {tokens.map((tk) => (
                 <div key={tk.id} className="ai-token" role="row">
-                  <div className="ai-token-main">
-                    <span className="ai-token-name">
-                      <b>{tk.name}</b>
-                      <span className={`ai-scope ${tk.scope}`}>{tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}</span>
+                  <span className="ai-token-name" role="cell">
+                    <span className="ai-token-ico" aria-hidden>
+                      <KeyRound size={15} />
                     </span>
-                    <span className="ai-token-meta">
-                      <code>{tk.prefix}…</code>
-                      <span className="m-hide">{t('ai.createdAt', { time: localTime(tk.createdAt, state.settings.timezone, true) })}</span>
-                      <span>{tk.lastUsedAt ? t('ai.lastUsed', { time: when(tk.lastUsedAt) }) : t('ai.neverUsed')}</span>
+                    <b>{tk.name}</b>
+                    <span className={`ai-scope ${tk.scope}`}>
+                      {tk.scope === 'write' ? <PencilLine size={12} /> : <Eye size={12} />}
+                      {tk.scope === 'write' ? t('ai.scope.write') : t('ai.scope.read')}
                     </span>
-                  </div>
-                  {!ro && (
-                    <button
-                      type="button"
-                      className="chip-btn ai-revoke"
-                      onClick={async () =>
-                        (await ask(t('ai.confirmRevoke', { name: tk.name }))) &&
-                        run(async () => {
-                          await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
-                          if (fresh?.item.id === tk.id) setFresh(null);
-                          await load();
-                        }, t('ai.revoked'))
-                      }
-                    >
-                      {t('ai.revoke')}
-                    </button>
-                  )}
+                  </span>
+                  <code className="ai-token-key" role="cell">
+                    {tk.prefix}
+                    <span aria-hidden>••••••••</span>
+                  </code>
+                  <span className="ai-token-when created" role="cell">
+                    <small>{t('ai.col.created')}</small>
+                    {localTime(tk.createdAt, state.settings.timezone, true)}
+                  </span>
+                  <span className={`ai-token-when used ${tk.lastUsedAt ? '' : 'never'}`} role="cell">
+                    <small>{t('ai.col.lastUsed')}</small>
+                    {when(tk.lastUsedAt)}
+                  </span>
+                  <span className="ai-token-act" role="cell">
+                    {!ro && (
+                      <IconButton
+                        className="ai-revoke"
+                        aria-label={t('ai.revoke')}
+                        title={t('ai.revoke')}
+                        onClick={async () =>
+                          (await ask(t('ai.confirmRevoke', { name: tk.name }))) &&
+                          run(async () => {
+                            await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
+                            if (fresh?.item.id === tk.id) setFresh(null);
+                            await load();
+                          }, t('ai.revoked'))
+                        }
+                      >
+                        <Trash2 size={15} />
+                      </IconButton>
+                    )}
+                  </span>
                 </div>
               ))}
             </div>
@@ -326,26 +364,48 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <button type="button" className="ai-tools-toggle" onClick={() => setShowTools(!showTools)} aria-expanded={showTools}>
-            <span>
-              <h2>{t('ai.tools', { count: tools.length })}</h2>
-              <p className="m-hide">{t('ai.toolsHint')}</p>
+            <span className="row">
+              {/* 读写数量紧跟在总数后面，不单独占一行 */}
+              <span className="ai-tools-title">
+                <CardTitle as="h2">{t('ai.tools', { count: tools.length })}</CardTitle>
+                <span className="ai-tools-legend">
+                  <span>
+                    <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
+                  </span>
+                  <span className="write">
+                    <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
+                  </span>
+                </span>
+              </span>
+              <Icon name="down" size={16} />
             </span>
-            <Icon name="down" size={16} />
+            <p className="m-hide">{t('ai.toolsHint')}</p>
           </button>
           {showTools && (
-            <div className="ai-tools">
-              {groups.map(([title, list]) => (
-                <div key={title}>
-                  <h3>{title}</h3>
-                  {list.map((tool) => (
-                    <div key={tool.name} className="ai-tool">
-                      <b>{tool.title ?? tool.name}</b>
-                      <code>{tool.name}</code>
+            <>
+              <div className="ai-tools">
+                {groups.map(({ key, icon: DomainIcon, list }) => (
+                  <section key={key} className="ai-tool-group">
+                    <h3>
+                      <DomainIcon size={15} />
+                      {t(`ai.domain.${key}`)}
+                      <small>{list.length}</small>
+                    </h3>
+                    <div className="ai-tool-list">
+                      {list.map((tool) => (
+                        <div key={tool.name} className={`ai-tool ${tool.write ? 'write' : ''}`}>
+                          <span className="ai-tool-ico" title={tool.write ? t('ai.toolsWrite') : t('ai.toolsRead')}>
+                            {tool.write ? <PencilLine size={13} /> : <Eye size={13} />}
+                          </span>
+                          <b>{tool.title ?? tool.name}</b>
+                          <code>{tool.name}</code>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ))}
-            </div>
+                  </section>
+                ))}
+              </div>
+            </>
           )}
         </section>
       </div>

@@ -27,7 +27,7 @@
     "write": "Lectura y escritura",
     "read": "Solo lectura",
     "label": "Permiso",
-    "writeDesc": "Consultar, añadir y editar suscripciones, cargos y cobros.",
+    "writeDesc": "Consultar y gestionar suscripciones, pagos, cobros, monederos, personas, categorías y ajustes del registro.",
     "readDesc": "Solo consultar. No puede cambiar nada."
   },
   "created": {
@@ -73,5 +73,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Copiar solo la configuración",
   "configCopied": "Configuración copiada",
-  "agentPrompt": "Conecta mi registro de suscripciones Calends como servidor MCP llamado \"calends\". {where}\n\n{code}\n\nCuando esté listo, llama a la herramienta {verify} para comprobar que funciona y dime cuántas suscripciones activas tengo."
+  "agentPrompt": "Conecta mi registro de suscripciones Calends como servidor MCP llamado \"calends\". {where}\n\n{code}\n\nCuando esté listo, llama a la herramienta {verify} para comprobar que funciona y dime cuántas suscripciones activas tengo.",
+  "col": {
+    "name": "Nombre",
+    "key": "Clave",
+    "created": "Creado",
+    "lastUsed": "Último uso"
+  },
+  "domain": {
+    "overview": "Resumen y estadísticas",
+    "subs": "Suscripciones y planes",
+    "charges": "Cargos",
+    "wallet": "Cartera y métodos de pago",
+    "people": "Planes compartidos y pagos por otros",
+    "categories": "Categorías",
+    "settings": "Ajustes",
+    "other": "Otros"
+  }
 }

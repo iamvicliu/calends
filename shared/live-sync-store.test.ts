@@ -8,7 +8,7 @@ let instance = 0;
 const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 /** Exercise the real store with controlled events, time and network, without a browser. */
-async function client(t: TestContext, broadcast = true) {
+async function client(t: TestContext, broadcast = true, boot = true) {
   t.mock.timers.enable({ apis: ['Date', 'setTimeout', 'setInterval'], now: 100_000 });
   const document = Object.assign(new EventTarget(), { visibilityState: 'visible' });
   const window = new EventTarget();
@@ -27,7 +27,10 @@ async function client(t: TestContext, broadcast = true) {
       posted.push(data.rev);
     }
   }
+  const prefSnapshots: Array<{ value: unknown; unsubscribe: () => void }> = [];
+  t.after(() => prefSnapshots.forEach((snapshot) => snapshot.unsubscribe()));
   const globals = {
+    __calendsPrefSnapshots: prefSnapshots,
     document,
     window,
     navigator,
@@ -49,7 +52,11 @@ async function client(t: TestContext, broadcast = true) {
   const hook = registerHooks({
     resolve(specifier, ctx, next) {
       // Hooks are irrelevant to lifecycle tests; this also allows reading usePref's value.
-      if (specifier === 'react') return { url: 'data:text/javascript,export const useState=()=>[0,()=>{}];export const useEffect=()=>{};', shortCircuit: true };
+      if (specifier === 'react')
+        return {
+          url: 'data:text/javascript,export const useState=()=>[0,()=>{}];export const useEffect=()=>{};export const useSyncExternalStore=(subscribe,get)=>{const row={value:get()};row.unsubscribe=subscribe(()=>{row.value=get()});globalThis.__calendsPrefSnapshots.push(row);return row.value};',
+          shortCircuit: true,
+        };
       if (specifier === 'sonner') return { url: 'data:text/javascript,export const toast={};', shortCircuit: true };
       return next(specifier, ctx);
     },
@@ -102,14 +109,17 @@ async function client(t: TestContext, broadcast = true) {
     return Response.json(path === 'prefs' ? state.prefs : {}, { headers: { 'x-calends-rev-from': String(from), 'x-calends-rev': String(state.rev) } });
   });
   const store = await import(`../app/src/store.ts?sync-test=${instance++}`);
-  await store.boot();
-  await store.syncFx();
+  if (boot) {
+    await store.boot();
+    await store.syncFx();
+  }
   const tick = async (ms: number) => {
     t.mock.timers.tick(ms);
     await settle();
   };
   return {
     store,
+    prefSnapshots,
     state,
     requests,
     values,
@@ -237,4 +247,18 @@ test('401 clears private state/cache and failed optimistic writes cannot restore
   const count = c.requests.length;
   await c.tick(90_000);
   assert.equal(c.requests.length, count);
+});
+
+test('公开页没有认证 state 时，主题偏好快照立即更新且不发送同步写入', async (t) => {
+  const c = await client(t, true, false);
+  assert.equal(c.store.usePref('theme', 'system')[0], 'system');
+  const snapshot = c.prefSnapshots.at(-1)!;
+  c.store.writePref('theme', 'dark');
+  assert.equal(snapshot.value, 'dark');
+  assert.equal(c.store.usePref('theme', 'system')[0], 'dark');
+  c.store.writePref('theme', null);
+  assert.equal(snapshot.value, null);
+  assert.equal(c.store.usePref('theme', 'system')[0], 'system');
+  await c.tick(1_000);
+  assert.deepEqual(c.requests, []);
 });

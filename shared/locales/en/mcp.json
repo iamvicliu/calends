@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Unassigned",
     "anyRegion": "Any region",
-    "total": "Total"
+    "total": "Total",
+    "createCategory": "Will create category: {name}",
+    "createdCategory": "Created category: {name}"
   },
   "error": {
     "shareFull": "“{name}” is full ({seats} seats)",
@@ -55,7 +57,12 @@
     "invalidRefund": "Refund amounts must be valid and stored as negative values.",
     "refundBeforeStop": "Refund date cannot precede the stop date.",
     "paymentOutOfRange": "Payment date {date} must be between the start date and today",
-    "invalidFirstPeriod": "first_period must be prorate, full or free."
+    "invalidFirstPeriod": "first_period must be prorate, full or free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Category not found or ambiguous: {q}. Options: {list}"
   },
   "tool": {
     "get_overview": "Ledger overview",
@@ -67,23 +74,28 @@
     "get_trends": "Trends",
     "list_payment_methods": "Payment methods & balances",
     "get_receivables": "Receivables",
-    "get_insights": "Checkup, savings, losses & year in review",
+    "get_insights": "Insights & reports",
     "list_events": "Change log",
     "search_app_store": "Find app",
     "get_carpool": "Shared plans",
     "delete_subscription": "Delete subscription",
-    "set_share": "Set up sharing",
+    "set_share": "Manage sharing",
     "save_share_member": "Add or edit member",
     "remove_share_member": "Remove member",
     "create_subscription": "Add subscription",
     "update_subscription": "Edit subscription",
     "change_price": "Record price change",
-    "change_plan": "Switch region / plan / resubscribe",
-    "set_status": "Pause / cancel / resume",
-    "record_payment": "Record a charge",
-    "delete_payment": "Delete a charge record",
-    "record_receivable": "Record money received",
-    "update_payment_method": "Update payment method balance",
-    "list_people": "People & receivables"
+    "change_plan": "Manage plans & history",
+    "set_status": "Update subscription status",
+    "record_payment": "Record or edit payments",
+    "delete_payment": "Delete payment record",
+    "record_receivable": "Manage receivable records",
+    "update_payment_method": "Manage payment methods & wallets",
+    "list_people": "People & receivables",
+    "save_category": "Manage category",
+    "save_person": "Manage person",
+    "get_settings": "Ledger settings & preferences",
+    "update_settings": "Update ledger settings & preferences",
+    "set_proxy": "Manage proxy relationship"
   }
 }

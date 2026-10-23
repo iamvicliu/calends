@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Login-E-Mail, Telefon oder Benutzername", "phone": "Telefonnummer" },
+  "ph": {
+    "account": "Login-E-Mail, Telefon oder Benutzername",
+    "phone": "Telefonnummer"
+  },
   "overlap": {
     "keep": "Altes noch weiterlaufen lassen",
     "keepHint": "Bereits vorausbezahlt und noch nicht abgelaufen: Beide laufen parallel und werden normal abgerechnet",
@@ -17,7 +20,7 @@
   "clearForm": "Formular leeren",
   "revert": "Änderungen verwerfen",
   "draftRestored": "Ungespeicherter Entwurf wiederhergestellt",
-  "confirmDelete": "„{name}“ löschen? Der Verlauf wird ebenfalls gelöscht. Wenn du nur nicht mehr verlängerst, markiere es stattdessen als „Gekündigt“.",
+  "confirmDelete": "„{name}“ löschen? Der Verlauf wird ebenfalls gelöscht. Wenn du nur nicht mehr verlängerst, wähle stattdessen „Beenden“.",
   "toast": {
     "added": "Hinzugefügt",
     "saved": "Gesichert",
@@ -58,7 +61,8 @@
     "trial": "Testphase",
     "paused": "Pausiert",
     "cancelled": "Gekündigt",
-    "terminated": "Gesperrt"
+    "terminated": "Gesperrt",
+    "stop": "Beenden"
   },
   "category": {
     "choose": "Kategorie wählen",
@@ -95,7 +99,8 @@
     "showDomainOn": "Besucher sehen die vollständige Domain",
     "showDomainOff": "Auf der öffentlichen Seite verborgen",
     "tagsPlaceholder": "Mit Leerzeichen trennen",
-    "notesPlaceholder": "Notizen (optional)"
+    "notesPlaceholder": "Notizen (optional)",
+    "pausedAt": "Pausiert ab"
   },
   "share": {
     "none": "Nur ich",
@@ -111,7 +116,18 @@
     "perPeriod": "Anteil pro Zeitraum",
     "paidUntil": "Bezahlt bis",
     "remove": "Entfernen",
-    "addMember": "Mitglied hinzufügen"
+    "addMember": "Mitglied hinzufügen",
+    "manageHint": "Tippe auf ein Mitglied, um der Abo-Regel zu folgen oder Betrag und Zyklus individuell festzulegen",
+    "follows": "Wie Abo",
+    "custom": "Eigen",
+    "nextDue": "Nächste {date}",
+    "editMember": "Bearbeiten",
+    "overdue": {
+      "one": "{count} Tag überfällig",
+      "other": "{count} Tage überfällig"
+    },
+    "dueOn": "Fällig {date}",
+    "confirmRemove": "Löschen"
   },
   "proxy": {
     "for": "Ich zahle für",
@@ -199,7 +215,11 @@
     "range": "{start} → {end}",
     "now": "heute",
     "initial": "Anfang",
-    "priceChange": "Preisänderung {date}"
+    "priceChange": "Preisänderung {date}",
+    "outsidePayments": "{count} vorhandene Zahlungen liegen dann außerhalb des Leistungszeitraums. Mit ursprünglichem Datum, Betrag und Phase fortfahren?",
+    "editPrice": "Preis ab {date} bearbeiten",
+    "deletePrice": "Diesen Preis löschen? Der vorherige Preis gilt bis zur nächsten Änderung.",
+    "repriceCharges": "Beim Speichern werden {count} vergangene geschätzte Abbuchungen neu berechnet. Erfasste Zahlungen bleiben unverändert. Fortfahren?"
   },
   "payment": {
     "addTitle": "Zahlung hinzufügen",
@@ -228,5 +248,9 @@
   "timeline": {
     "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"
   },
-  "ai": { "title": "Mit KI ausfüllen", "hint": "Beleg, Screenshot oder Text einfügen – der Rest geht automatisch", "go": "Einfügen" }
+  "ai": {
+    "title": "Mit KI ausfüllen",
+    "hint": "Beleg, Screenshot oder Text einfügen – der Rest geht automatisch",
+    "go": "Einfügen"
+  }
 }

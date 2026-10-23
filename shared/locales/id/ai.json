@@ -25,7 +25,7 @@
     "write": "Baca & tulis",
     "read": "Hanya baca",
     "label": "Izin",
-    "writeDesc": "Lihat, tambah, dan ubah langganan, tagihan, dan penerimaan.",
+    "writeDesc": "Lihat dan kelola langganan, pembayaran, penerimaan, dompet, orang, kategori, dan pengaturan buku catatan.",
     "readDesc": "Hanya lihat. Tidak bisa mengubah apa pun."
   },
   "created": {
@@ -71,5 +71,21 @@
   "promptLabel": "Prompt",
   "copyConfigOnly": "Salin konfigurasi saja",
   "configCopied": "Konfigurasi disalin",
-  "agentPrompt": "Hubungkan buku langganan Calends saya sebagai server MCP bernama \"calends\". {where}\n\n{code}\n\nSetelah siap, panggil alat {verify} untuk memastikan berfungsi, lalu beri tahu berapa langganan aktif yang saya punya."
+  "agentPrompt": "Hubungkan buku langganan Calends saya sebagai server MCP bernama \"calends\". {where}\n\n{code}\n\nSetelah siap, panggil alat {verify} untuk memastikan berfungsi, lalu beri tahu berapa langganan aktif yang saya punya.",
+  "col": {
+    "name": "Nama",
+    "key": "Kunci",
+    "created": "Dibuat",
+    "lastUsed": "Terakhir dipakai"
+  },
+  "domain": {
+    "overview": "Ringkasan & statistik",
+    "subs": "Langganan & paket",
+    "charges": "Tagihan",
+    "wallet": "Dompet & metode pembayaran",
+    "people": "Patungan & bayar untuk orang lain",
+    "categories": "Kategori",
+    "settings": "Pengaturan",
+    "other": "Lainnya"
+  }
 }

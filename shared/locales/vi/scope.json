@@ -61,5 +61,8 @@
     "other": "{scope} · {count} gói đăng ký"
   },
   "mrrBasis": "Chi phí hàng tháng quy đổi theo phần của tôi cho các gói đang tính phí. Gói năm được phân bổ theo tháng, không phải khoản thu thực tế tháng này.",
-  "debitBasis": "Chỉ tính các khoản chi dương; tiền hoàn được liệt kê riêng và không khấu trừ vào cơ cấu hoặc xếp hạng."
+  "debitBasis": "Chỉ tính các khoản chi dương; tiền hoàn được liệt kê riêng và không khấu trừ vào cơ cấu hoặc xếp hạng.",
+  "other": "Khác",
+  "minimize": "Thu nhỏ về tóm tắt",
+  "movementBasis": "Chi phí hàng tháng phần của tôi bằng tiền tệ cơ sở theo tỷ giá cuối kỳ. Ngày thể hiện các thay đổi liên quan hoặc kỳ báo cáo nếu không có sự kiện được ghi nhận."
 }

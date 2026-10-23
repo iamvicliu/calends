@@ -6,6 +6,7 @@ import {
   diffDays,
   effectiveStatus,
   nextCharge,
+  renewalDates,
   memberAboard,
   memberUnpaidFrom,
   memberCollection,
@@ -80,6 +81,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
   const base = settings.baseCurrency;
   const renew: Row[] = [];
   const trials: Row[] = [];
+  const cancellation: Row[] = [];
   const ending: Row[] = [];
   const carpool: Row[] = [];
   const proxy: Row[] = [];
@@ -127,6 +129,23 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
         }
       }
     }
+    if (['active', 'trial'].includes(st) && !s.end) {
+      const deadline = renewalDates(s, today).cancelBy;
+      if (deadline) {
+        const d = diffDays(today, deadline);
+        if (d === remind || (remind > 1 && d === 1) || d === 0) {
+          cancellation.push({
+            title: s.name,
+            sub: t('core.renewal.cancelReminder', { date: cnDate(deadline, true) }),
+            amount: cnDate(deadline),
+            days: d,
+            tone: 'warn',
+            icon: iconOf(s),
+          });
+          headline.push(t('core.renewal.cancelReminder', { date: cnDate(deadline, true) }));
+        }
+      }
+    }
     if (s.end && st === 'ending') {
       const d = diffDays(today, s.end);
       if (d === 7 || d === 1) {
@@ -148,7 +167,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       const d = diffDays(today, due);
       // 逾期后第 7、14 天提醒，之后每 30 天提醒一次，避免天天打扰
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
-      const every = memberBillMonths(s, m);
+      const every = memberBillMonths(s, m, due);
       const period = memberCollection(s, m, due, collect);
       const fee = money(toBaseAt(state, period.amount, period.currency, undefined, collect), collect);
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
@@ -218,6 +237,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
   const sections: Section[] = [
     { heading: t('notify.section.renew'), rows: renew },
     { heading: t('notify.section.trials'), rows: trials },
+    { heading: t('core.renewal.cancelBy'), rows: cancellation },
     { heading: t('notify.section.balance'), rows: balance },
     { heading: t('notify.section.carpool'), rows: carpool },
     { heading: t('notify.section.proxy'), rows: proxy },

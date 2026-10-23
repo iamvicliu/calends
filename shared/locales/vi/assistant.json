@@ -160,7 +160,8 @@
     },
     "applyAll": "Xác nhận tất cả",
     "history": "Lịch sử thanh toán",
-    "historyCount": "{count} lần"
+    "historyCount": "{count} lần",
+    "changes": "Xem thay đổi và tham chiếu"
   },
   "error": {
     "auth": "API Key không hợp lệ",

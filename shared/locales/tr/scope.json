@@ -62,5 +62,8 @@
     "other": "{scope} · {count} abonelik"
   },
   "mrrBasis": "Faturalandırılan aboneliklerdeki payımın aylık maliyeti. Yıllık planlar aylara bölünür; bu ayki gerçek ödemeler değildir.",
-  "debitBasis": "Yalnızca pozitif ödemeler; iadeler ayrı gösterilir ve dağılımı veya sıralamayı azaltmaz."
+  "debitBasis": "Yalnızca pozitif ödemeler; iadeler ayrı gösterilir ve dağılımı veya sıralamayı azaltmaz.",
+  "other": "Diğer",
+  "minimize": "Özete küçült",
+  "movementBasis": "Dönem sonu kuruyla temel para birimine çevrilmiş payıma düşen aylık maliyet. Tarihler değişiklikleri veya kayıtlı olay yoksa rapor dönemini gösterir."
 }

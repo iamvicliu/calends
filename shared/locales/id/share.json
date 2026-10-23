@@ -56,6 +56,8 @@
   "chargeCount": "Tagihan",
   "count": "{count}",
   "switches": "Ganti wilayah / paket",
+  "stoppedOn": "Berhenti pada {date}",
+  "endsOn": "Berakhir pada {date}",
   "thanks": "Terima kasih · Sampai jumpa di siklus berikutnya",
   "n": {
     "charges": {

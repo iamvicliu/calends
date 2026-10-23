@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Login email, phone or username", "phone": "Phone number" },
+  "ph": {
+    "account": "Login email, phone or username",
+    "phone": "Phone number"
+  },
   "overlap": {
     "keep": "Keep the old one running",
     "keepHint": "Already prepaid and not expired yet: both run side by side and are billed as usual",
@@ -17,7 +20,7 @@
   "clearForm": "Clear form",
   "revert": "Revert changes",
   "draftRestored": "Restored your unsaved draft",
-  "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, mark it as Cancelled instead.",
+  "confirmDelete": "Delete “{name}”? Its history will be deleted too. If you just stopped renewing, choose Stop instead.",
   "toast": {
     "added": "Added",
     "saved": "Saved",
@@ -58,7 +61,8 @@
     "trial": "Trial",
     "paused": "Paused",
     "cancelled": "Cancelled",
-    "terminated": "Terminated"
+    "terminated": "Terminated",
+    "stop": "Stop"
   },
   "category": {
     "choose": "Choose category",
@@ -95,7 +99,8 @@
     "showDomainOn": "Visitors see the full domain",
     "showDomainOff": "Masked on the public page",
     "tagsPlaceholder": "Separate with spaces",
-    "notesPlaceholder": "Notes (optional)"
+    "notesPlaceholder": "Notes (optional)",
+    "pausedAt": "Paused on"
   },
   "share": {
     "none": "Just me",
@@ -111,7 +116,18 @@
     "perPeriod": "Share per period",
     "paidUntil": "Paid until",
     "remove": "Remove",
-    "addMember": "Add member"
+    "addMember": "Add member",
+    "manageHint": "Tap a member to follow the plan rule or set a custom fee and cycle",
+    "follows": "Follows plan",
+    "custom": "Custom",
+    "nextDue": "Next due {date}",
+    "editMember": "Edit",
+    "overdue": {
+      "one": "{count} day overdue",
+      "other": "{count} days overdue"
+    },
+    "dueOn": "Due {date}",
+    "confirmRemove": "Confirm"
   },
   "proxy": {
     "for": "Paying for",
@@ -199,7 +215,11 @@
     "range": "{start} → {end}",
     "now": "now",
     "initial": "Initial",
-    "priceChange": "Price change {date}"
+    "priceChange": "Price change {date}",
+    "outsidePayments": "{count} existing payment(s) will fall outside the service period. Keep their original dates, amounts and phase, and continue?",
+    "editPrice": "Edit price effective {date}",
+    "deletePrice": "Delete this price point? The preceding price will apply until the next change.",
+    "repriceCharges": "Saving will recalculate {count} past estimated charges. Recorded payments will stay unchanged. Continue?"
   },
   "payment": {
     "addTitle": "Add payment",
@@ -228,5 +248,9 @@
   "timeline": {
     "home": "Back to today (or double-click the timeline)"
   },
-  "ai": { "title": "Fill in with AI", "hint": "Paste a receipt, screenshot or any text and let it sort things out", "go": "Paste" }
+  "ai": {
+    "title": "Fill in with AI",
+    "hint": "Paste a receipt, screenshot or any text and let it sort things out",
+    "go": "Paste"
+  }
 }

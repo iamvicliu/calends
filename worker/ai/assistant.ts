@@ -1,7 +1,7 @@
 // AI 助手：用 DeepSeek 识别用户粘贴的文字、截图，整理成订阅草稿；查询与修改直接复用 MCP 工具。
 // 写操作一律先 dry_run 出草稿，由用户在页面上确认后再经同一个工具真正执行。
 import { todayIn } from '../../shared/billing.ts';
-import { categoryList, presetCategory, presetOf } from '../../shared/categories.ts';
+import { categoryList } from '../../shared/categories.ts';
 import {
   applyLine,
   assistantMessage,
@@ -27,22 +27,8 @@ const KEY = 'assistant';
 /** 一次提问里最多跟模型来回几轮（每轮可能调用多个工具） */
 const MAX_ROUNDS = 8;
 
-/** 给模型用的工具：查询类全部开放；写入类只开放常用的几个，而且只出草稿 */
-const READ = TOOLS.filter((x) => !x.write);
-const WRITE = new Set([
-  'create_subscription',
-  'update_subscription',
-  'delete_subscription',
-  'change_price',
-  'change_plan',
-  'set_status',
-  'record_payment',
-  'set_share',
-  'save_share_member',
-  'remove_share_member',
-  'record_receivable',
-]);
-const ASSISTANT_TOOLS: Tool[] = [...READ, ...TOOLS.filter((x) => WRITE.has(x.name))];
+/** Every ledger tool is available; writes are always drafted and only the apply endpoint saves. */
+export const ASSISTANT_TOOLS: Tool[] = TOOLS;
 
 export const getConfig = (env: Env) => getKv<AssistantConfig>(env, KEY);
 
@@ -81,7 +67,7 @@ export async function testConfig(env: Env, draft?: { apiKey?: string; baseUrl?: 
 
 /** 系统提示：今天、本位币、分类与支付方式，以及怎么把粘贴的内容整理成订阅 */
 async function systemPrompt(env: Env): Promise<string> {
-  const st = await loadState(env);
+  const st = await loadState(env, false);
   const today = todayIn(st.settings.timezone);
   const cats = categoryList(st.settings, st.subscriptions).map((c) => c.name);
   const methods = st.methods.map((m) => `${m.id}: ${m.name} (${m.kind}, ${m.currency}${m.region ? `, ${m.region}` : ''})`);
@@ -91,6 +77,7 @@ async function systemPrompt(env: Env): Promise<string> {
     `Categories (reuse these exact names): ${cats.join(', ')}.`,
     `Payment methods (pass the id as "method"): ${methods.join('; ') || 'none'}. Default method id: ${st.settings.defaultMethodId ?? 'none'}.`,
     '',
+    'You can maintain every non-security ledger entity: wallets (update_payment_method action=create/update/delete), categories (save_category), people (save_person), proxy relationships (set_proxy), receivables (record_receivable action=record/update/delete) and settings/preferences (get_settings/update_settings). Never access authentication, credentials, sessions/tokens, backups, resets, migrations or whole-ledger deletion.',
     'Main job: the user pastes receipts, App Store / Google Play emails, bank or SMS notices, subscription pages, invoices or screenshots. Extract every subscription in it and call create_subscription once per subscription.',
     '- Every write tool call is only a draft: the app shows it as a card and the user confirms it. Never ask the user to confirm in text, never repeat a call you already made, and do not claim anything was saved.',
     '- Read amounts exactly as shown, with the currency of the store or receipt (App Store Turkey → TRY and region TR). Price is per billing cycle; cycle unit day/week/month/year with every N.',
@@ -98,7 +85,7 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Past and ended subscriptions (pasted notes, "used it for 3 years"): start = when it began — for "N years/months so far" count back from the latest charge on the stated billing day; month only → that month’s billing day, else day 1. Ended ("A – B", "cancelled in June 2022") → end = the last service day (inclusive; charges may still fall on that day). Earlier prices ("8 yuan at first, 18 since January") → create_subscription with the first price, then change_price on the returned id for each later price, in the same turn; region/plan switches → change_plan.',
     '- What the user states wins: never add an end date, change a price or drop a field because of an existing record; mention the overlap in your reply instead. Do not rename or recategorize an existing subscription unless asked.',
     '- Figures in replies (yearly cost, my share, per month) come from tool results such as get_carpool or get_subscription; do not do mental arithmetic.',
-    '- Pick the closest category from the list and the payment method that matches the card, store account or wallet mentioned; omit method if unclear.',
+    '- Call list_categories first and reuse an existing category code/name. If the requested category is missing, use save_category action=create or explicitly pass create_category=true (optional category_icon/category_color). Unknown or ambiguous references fail. Pick the payment method that matches the card, store account or wallet mentioned; omit method if unclear.',
     '- Fill in as much as the input supports: name WITH the plan/tier (e.g. "Spotify Premium Family", "iCloud+ 200GB", "ChatGPT Plus"), price, currency, cycle, start, region, method, category, url, icon, account (the login email, phone number for carriers, or username shown), and notes for useful extras (order number, seats). Never leave out a field you can read or infer.',
     '- Icon and url are required for every app or service: call search_app_store (country = the store region, else us) and pass the matching result’s icon (prefer the 256x256 artwork) and url; for web-only services and ones that are not mainly an app (carriers, utilities, cloud hosting) use the official homepage as url. If nothing matches, still give the official url.',
     '- Bill tables and statements covering several months (one row per month, one column per service or line): each column/service is ONE subscription — never one per month or per amount. Keep each name exactly as written (fix only obvious typos such as "T-Moblie" → "T-Mobile"); never translate it or swap it for a different provider, and do not search the ledger under other names. start = its first month with an amount (billing day 1 unless a day is shown); months shown as —/blank are before it started or unknown, not charges. price = the latest month’s amount. Usage-based amounts that vary month to month are actual charges, not price changes: pass ALL of them in create_subscription.payments (every month listed, including ones equal to price), and do not call change_price or record_payment for them. Ignore total/sum columns. If no currency is shown, use the currency of the provider’s home market (T-Mobile, AT&T → USD; CUniq → HKD) and say in the reply which currency you assumed.',
@@ -106,8 +93,10 @@ async function systemPrompt(env: Env): Promise<string> {
     '- If a required field (price, currency or cycle) truly cannot be inferred, ask one short question instead of guessing.',
     '- Distinguish three ways to stop: non-renewal uses set_status cancel (immediate=false) with at as the last service day; voluntary early stopping uses cancel with immediate=true; provider-disabled access uses terminate with an optional reason. Immediate stops may include refund {amount,date?,settled?}; omit refund when none occurred. Terminated subscriptions must resubscribe using change_plan action=resume with a new phase, never reactivate. Refund currency must equal the subscription currency, and total refunds cannot exceed the current period paid amount.',
     '- Other changes use the matching tool: update_subscription (details), change_price (price change from a date), change_plan (switch plan/region), set_status (pause/cancel/terminate/reactivate), delete_subscription (remove completely), record_payment (a charge happened / refund).',
-    '- Shared plans (合租/拼车): set_share to start or change sharing (seats include me), save_share_member to add or edit a member (fee per billing cycle, bill_every months), remove_share_member, record_receivable when a member paid me. get_carpool answers questions about a carpool: seats free, yearly cost vs. income, profit, who owes what.',
+    '- Shared plans (合租/拼车): set_share to start or change sharing (seats include me) and to change the plan collection rule (rule: fee, bill_every; applies to members who follow it), save_share_member to add or edit a member (new members follow the rule by default; follow_rule=true/false switches between the rule and a custom fee per billing cycle, bill_every months), remove_share_member, record_receivable when a member paid me. get_carpool answers questions about a carpool: seats free, yearly cost vs. income, profit, who owes what.',
+    '- Member fee dates: fee_from defaults to today when no date is requested. Each call changes one dated point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with that rate in the same turn. Never move the requested/default start to a future date to avoid a scheduled change. A follow_rule switch without a requested date also starts today, using the stored rule.',
     '- Carpool collection: mid-period members align to the shared collection anchor; first_period defaults to prorate by actual days. For record_receivable, omit coverage and amount to use the member’s next unpaid collection; pass the actual amount when stated, even if different. Answer when to collect next and how much is pending from get_carpool results, never mental arithmetic.',
+    '- For collection-rule previews, describe only returned fees, cycles, dates and member changes. Do not calculate annual income, savings or percentage changes unless a tool returns those metrics. Never label a larger after-value as a decrease.',
     '- Carpool details: if I use more than one seat myself, add one exempt member per extra seat (name e.g. "自己 · 第 2 台"). Money members already paid in the past → record_receivable for each payment with its date and amount, not just a note. If it is unclear whether an amount is per person or the total, take the reading that fits the other numbers and say which you chose.',
     '- History missing BEFORE an existing subscription’s start (e.g. it was a one-time purchase before it became a subscription) → change_plan action=earlier on that subscription; never create a separate subscription for it.',
     '- Drafts in the same turn build on each other: later tools already see earlier drafts (a new subscription’s id from create_subscription, a member just added). So do multi-step requests in ONE turn — e.g. create_subscription, then set_share on the returned id, then save_share_member for each member, then record_receivable. Never stop to ask the user to confirm an earlier card first; the user confirms all cards together, in order.',
@@ -117,39 +106,15 @@ async function systemPrompt(env: Env): Promise<string> {
 
 type Emit = (event: Record<string, unknown>) => void;
 
-async function categoryNames(env: Env): Promise<string[]> {
-  const st = await loadState(env);
-  return categoryList(st.settings, st.subscriptions).map((c) => c.name);
-}
-
 const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 
 /**
  * 新增订阅的草稿补全：模型没给图标或链接时，按名称（和地区）查 App Store，
  * 名称对得上才采用，补上图标和链接，并告诉模型补了什么
  */
-export async function enrichDraft(args: Record<string, unknown>, cats: string[] = []): Promise<{ args: Record<string, unknown>; filled: string[] }> {
+export async function enrichDraft(args: Record<string, unknown>): Promise<{ args: Record<string, unknown>; filled: string[] }> {
   const name = decodeEntities(String(args.name ?? '').trim());
   const fixed: Record<string, unknown> = { ...args, ...(args.name != null ? { name } : {}) };
-  // 分类：内置分类不管用哪种语言写，都换成账本里当前语言的那个名字；不认识也不在账本里的不新建，交给默认分类
-  const fixCat = (v: unknown) => {
-    const name = String(v);
-    const p = presetOf(name);
-    if (p) return presetCategory([], p.code);
-    return cats.includes(name) ? name : undefined;
-  };
-  if (fixed.category != null) {
-    const c = fixCat(fixed.category);
-    if (c) fixed.category = c;
-    else delete fixed.category;
-  }
-  if (fixed.set && typeof fixed.set === 'object' && (fixed.set as Record<string, unknown>).category != null) {
-    const set = { ...(fixed.set as Record<string, unknown>) };
-    const c = fixCat(set.category);
-    if (c) set.category = c;
-    else delete set.category;
-    fixed.set = set;
-  }
   // App Store 图标给的是 100px，卡片上显得糊：换成 256px
   if (typeof fixed.icon === 'string') fixed.icon = fixed.icon.replace(/\/\d+x\d+bb\.(jpg|png)$/, '/256x256bb.$1');
   args = fixed;
@@ -266,23 +231,21 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
             if (parseError) throw new Error(`invalid arguments: ${parseError}`);
             if (tool.write) {
               const { args: full, filled } =
-                tool.name === 'create_subscription' || tool.name === 'update_subscription'
-                  ? await enrichDraft(args, await categoryNames(env))
-                  : { args, filled: [] as string[] };
+                tool.name === 'create_subscription' || tool.name === 'update_subscription' ? await enrichDraft(args) : { args, filled: [] as string[] };
               const draft = { ...full, dry_run: true };
               const preview = await tool.run(draft, ctx);
               const { dry_run: _d, ...clean } = draft as Record<string, unknown>;
               const pv = preview as {
+                created?: { id: string };
+                member?: { id: string };
                 subscription?: { id?: string; members?: Array<{ id: string; name: string }> };
                 receipt?: { amount: number; currency: string; date: string; from: string; until: string };
               };
               // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览的覆盖区间。
               if (tool.name === 'record_receivable' && pv.receipt) Object.assign(clean, pv.receipt);
+              if (pv.created) clean.id = pv.created.id;
               if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;
-              if (tool.name === 'save_share_member' && !clean.member) {
-                const added = ctx.overlay.get(String(pv.subscription?.id ?? ''))?.share?.members.find((m: { name: string }) => m.name === clean.name);
-                if (added) clean.id = added.id;
-              }
+              if (tool.name === 'save_share_member' && !clean.member && pv.member) clean.id = pv.member.id;
               emit({ type: 'tool', id: call.id, name: tool.name, args: clean, status: 'done' });
               emit({ type: 'proposal', id: call.id, tool: tool.name, args: clean, preview, filled });
               content = JSON.stringify({

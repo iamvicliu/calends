@@ -19,7 +19,21 @@
     "date": "Data",
     "member": "Membro",
     "covers": "Período",
-    "amount": "Valor"
+    "amount": "Valor",
+    "expandAll": "Expandir tudo",
+    "collapseAll": "Recolher tudo",
+    "groupSum": {
+      "one": "{count} pagamento · {amount}",
+      "other": "{count} pagamentos · {amount}"
+    },
+    "fee": "Tarifa",
+    "nextCollection": "Próxima cobrança",
+    "actions": "Ações",
+    "status": "Situação do pagamento",
+    "period": "Período atual",
+    "range": "{from} – {until}",
+    "rangeFrom": "De",
+    "rangeTo": "Até"
   },
   "contact": {
     "via": {
@@ -58,8 +72,8 @@
     "name": "Nome",
     "namePh": "Como chamar a pessoa",
     "contact": "Contato",
-    "account": "Conta convidada",
-    "accountPh": "E-mail ou usuário convidado para {name}",
+    "account": "Conta do membro",
+    "accountPh": "E-mail, telefone, usuário ou ID no {name}",
     "joined": "Entrou em",
     "joinedPh": "Início do plano ({date})",
     "notSet": "Não definido",
@@ -135,7 +149,10 @@
     "coverAligned": "Termina no limite do período comum",
     "recordNext": "Registrar pagamento · {amount}",
     "collectionAnchor": "Início comum de cobrança",
-    "firstSummary": "Primeiro período {from}–{until} · {mode} {amount}"
+    "firstSummary": "Primeiro período {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Conta não informada",
+    "editAccount": "Editar conta do membro",
+    "copyAccount": "Copiar conta"
   },
   "pool": {
     "seatsFree": "{count} livres",
@@ -206,7 +223,9 @@
     "payTo": "Pago a {name} · {amount}",
     "ownerDefault": "organizador",
     "maybeGroup": "Talvez compartilhadas",
-    "convert": "Tornar compartilhado"
+    "convert": "Tornar compartilhado",
+    "dueOn": "Vence {date}",
+    "nextDueOn": "Próxima cobrança {date}"
   },
   "convert": {
     "title": "Tornar “{name}” compartilhado",
@@ -237,5 +256,40 @@
     "gain": "Ganho de {amount}",
     "lost": "Perda de {amount}",
     "noRecords": "Nenhum pagamento ainda"
+  },
+  "collect": {
+    "title": "Registrar recebimento · {name}",
+    "next": "Próxima cobrança {date}",
+    "editMember": "Editar",
+    "until": "Cobre até",
+    "covers": "O pagamento cobre {from} – {until}",
+    "changeFee": "Alterar valor",
+    "lastPayment": "Último pagamento",
+    "adjustFee": "Ajustar valor",
+    "feeFrom": "Vigente a partir de",
+    "feeHelp": "O início da cobertura define a tarifa de todo o período. Os pagamentos registrados permanecem inalterados.",
+    "viewSub": "Ver detalhes"
+  },
+  "rule": {
+    "title": "Regra de cobrança",
+    "follow": "Seguir plano",
+    "custom": "Personalizado",
+    "followValue": "{rule} (regra do plano)",
+    "sheetTitle": "Regra de cobrança do plano",
+    "from": "A partir de",
+    "anchor": "Data comum de cobrança",
+    "applyNote": "{count} membros que seguem o plano mudam a partir da data; personalizados e cobranças anteriores não mudam."
+  },
+  "quick": {
+    "more": "Mais dados",
+    "paid": "Pago até",
+    "paidFrom": "Início do período",
+    "paidTo": "Fim do período",
+    "late": {
+      "one": "{count} dia de atraso",
+      "other": "{count} dias de atraso"
+    },
+    "owe": "{amount} pendente · desde {date}",
+    "settled": "Em dia · próxima cobrança {date}"
   }
 }

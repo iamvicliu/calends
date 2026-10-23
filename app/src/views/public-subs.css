@@ -27,7 +27,7 @@
   gap: 8px;
 }
 .pubs-acts .btn {
-  height: 32px;
+  height: var(--ctl-h-md);
   font-size: 13px;
 }
 .pubs-acts .btn:disabled {
@@ -43,7 +43,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: 36px;
+  height: var(--ctl-h-md);
   max-width: 100%;
   padding: 0 4px 0 8px;
   border: 0;
@@ -66,23 +66,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.pubs-x {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--fill-2);
-  color: var(--label-2);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.pubs-x:hover {
-  background: var(--fill);
-  color: var(--label);
-}
+
 .pubs-chip.off {
   padding: 0 14px 0 10px;
   background: none;
@@ -118,18 +102,19 @@
   }
   .pubs-chip {
     gap: 6px;
-    height: 34px;
+    height: var(--ctl-h-md);
     padding-left: 7px;
     font-size: 13px;
   }
   .pubs-chip .ico {
     --s: 18px;
   }
-  .pubs-x {
-    width: 26px;
-    height: 26px;
-  }
+
   .pubs-chip.off {
     padding: 0 12px 0 8px;
   }
+}
+
+.pubs-chip {
+  height: var(--ctl-h-md);
 }

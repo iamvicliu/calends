@@ -19,7 +19,20 @@
     "date": "받은 날",
     "member": "멤버",
     "covers": "기간",
-    "amount": "금액"
+    "amount": "금액",
+    "expandAll": "모두 펼치기",
+    "collapseAll": "모두 접기",
+    "groupSum": {
+      "other": "{count}건 · {amount}"
+    },
+    "fee": "요금",
+    "nextCollection": "다음 수금",
+    "actions": "작업",
+    "status": "납부 상태",
+    "period": "이번 기간",
+    "range": "{from} – {until}",
+    "rangeFrom": "시작",
+    "rangeTo": "종료"
   },
   "contact": {
     "via": {
@@ -57,8 +70,8 @@
     "name": "이름",
     "namePh": "부를 이름",
     "contact": "연락처",
-    "account": "초대한 계정",
-    "accountPh": "{name}에 초대한 이메일 또는 사용자 이름",
+    "account": "멤버 계정",
+    "accountPh": "{name}의 이메일, 전화번호, 사용자 이름 또는 ID",
     "joined": "참여일",
     "joinedPh": "플랜 시작일({date})",
     "notSet": "설정 안 함",
@@ -132,7 +145,10 @@
     "coverAligned": "공통 청구 기간 종료일로 자동 설정",
     "recordNext": "수금 기록 · {amount}",
     "collectionAnchor": "공통 수금 시작일",
-    "firstSummary": "첫 기간 {from}–{until} · {mode} {amount}"
+    "firstSummary": "첫 기간 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "계정 미입력",
+    "editAccount": "멤버 계정 편집",
+    "copyAccount": "계정 복사"
   },
   "pool": {
     "seatsFree": "빈자리 {count}",
@@ -198,7 +214,9 @@
     "payTo": "{name}에게 납부 · {amount}",
     "ownerDefault": "주최자",
     "maybeGroup": "공유 가능성 있음",
-    "convert": "공유로 전환"
+    "convert": "공유로 전환",
+    "dueOn": "{date} 수금 예정",
+    "nextDueOn": "다음 {date}"
   },
   "convert": {
     "title": "‘{name}’을(를) 공유로 전환",
@@ -229,5 +247,39 @@
     "gain": "{amount} 이익",
     "lost": "{amount} 손해",
     "noRecords": "아직 납부 없음"
+  },
+  "collect": {
+    "title": "입금 기록 · {name}",
+    "next": "다음 수금 {date}",
+    "editMember": "편집",
+    "until": "적용 종료일",
+    "covers": "이번 입금 적용 {from} – {until}",
+    "changeFee": "요금 변경",
+    "lastPayment": "최근 수금",
+    "adjustFee": "요금 조정",
+    "feeFrom": "적용 시작일",
+    "feeHelp": "적용 기간 시작일의 요금이 전체 기간에 적용됩니다. 저장된 수금 내역은 변경되지 않습니다.",
+    "viewSub": "상세 보기"
+  },
+  "rule": {
+    "title": "수금 규칙",
+    "follow": "요금제 따름",
+    "custom": "개별",
+    "followValue": "{rule} (요금제 규칙)",
+    "sheetTitle": "요금제 수금 규칙",
+    "from": "적용일",
+    "anchor": "공통 수금일",
+    "applyNote": "요금제를 따르는 {count}명은 적용일부터 새 규칙을 사용합니다. 개별 설정과 지난 수금은 바뀌지 않습니다."
+  },
+  "quick": {
+    "more": "자세히",
+    "paid": "납부한 기간",
+    "paidFrom": "기간 시작",
+    "paidTo": "기간 종료",
+    "late": {
+      "other": "{count}일 연체"
+    },
+    "owe": "미수 {amount} · {date}부터",
+    "settled": "정산 완료 · 다음 {date}"
   }
 }

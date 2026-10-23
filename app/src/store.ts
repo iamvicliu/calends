@@ -1,7 +1,7 @@
 import { browserSupportsWebAuthnAutofill, startAuthentication, WebAuthnAbortService } from '@simplewebauthn/browser';
 import { beginPasskeyAutofill } from './passkey-autofill.ts';
 import { BASE_PATH, base, storageKey } from './base.ts';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { todayIn } from '../../shared/billing.ts';
 import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../../shared/types.ts';
 import { mergePeople, syncPerson } from '../../shared/people.ts';
@@ -764,9 +764,16 @@ function migratePrefs() {
 
 /** 组件里用：值变了（本机改、别的设备改后刷新）会重新渲染 */
 export function usePref<T extends string>(key: PrefKey, fallback: T, valid?: (v: string) => v is T): [T, (v: T | null) => void] {
-  // 从 useStore 的返回值取，React Compiler 才知道它会变（直接读模块里的 store 会被缓存住）
-  const { state } = useStore();
-  const raw = state ? state.prefs?.[key] : localPref(key);
+  // 订阅实际偏好值；公开页没有 state 时，本机值变化也必须提供新的快照。
+  const raw = useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    () => (store.state ? (store.state.prefs?.[key] ?? null) : localPref(key)),
+  );
   const value = raw != null && (!valid || valid(raw)) ? (raw as T) : fallback;
   return [value, (v) => writePref(key, v)];
 }

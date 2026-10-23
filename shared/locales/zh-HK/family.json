@@ -19,7 +19,20 @@
     "date": "收款日",
     "member": "成員",
     "covers": "涵蓋期間",
-    "amount": "金額"
+    "amount": "金額",
+    "expandAll": "全部展開",
+    "collapseAll": "全部收起",
+    "groupSum": {
+      "other": "{count} 筆 · {amount}"
+    },
+    "fee": "收費",
+    "nextCollection": "下次應收",
+    "actions": "操作",
+    "status": "收款狀態",
+    "period": "本期",
+    "range": "{from} – {until}",
+    "rangeFrom": "從",
+    "rangeTo": "至"
   },
   "contact": {
     "via": {
@@ -55,8 +68,8 @@
     "name": "稱呼",
     "namePh": "怎麼稱呼",
     "contact": "聯絡方式",
-    "account": "受邀帳號",
-    "accountPh": "加入 {name} 家庭群組的電郵或用戶名稱",
+    "account": "成員帳戶",
+    "accountPh": "{name} 的電郵、手機號碼、用戶名稱或 ID",
     "joined": "加入日",
     "joinedPh": "同發起日 {date}",
     "notSet": "不設定",
@@ -126,7 +139,10 @@
     "coverAligned": "按統一收款期自動計算",
     "recordNext": "記一筆收款 · {amount}",
     "collectionAnchor": "收款對齊起點",
-    "firstSummary": "首期 {from}–{until} · {mode} {amount}"
+    "firstSummary": "首期 {from}–{until} · {mode} {amount}",
+    "accountEmpty": "未填帳戶",
+    "editAccount": "編輯成員帳戶",
+    "copyAccount": "複製帳戶"
   },
   "pool": {
     "seatsFree": "空 {count} 位",
@@ -182,7 +198,9 @@
     "payTo": "付給 {name} · {amount}",
     "ownerDefault": "發起人",
     "maybeGroup": "可能是共享方案",
-    "convert": "轉為共享方案"
+    "convert": "轉為共享方案",
+    "dueOn": "應收 {date}",
+    "nextDueOn": "下次應收 {date}"
   },
   "convert": {
     "title": "將「{name}」轉為共享方案",
@@ -213,5 +231,37 @@
     "gain": "賺 {amount}",
     "lost": "虧 {amount}",
     "noRecords": "還沒有收款記錄"
+  },
+  "collect": {
+    "title": "記收款 · {name}",
+    "next": "下次收款 {date}",
+    "editMember": "編輯資料",
+    "until": "覆蓋到",
+    "covers": "這筆覆蓋 {from} – {until}",
+    "changeFee": "改收費",
+    "lastPayment": "上次收款",
+    "adjustFee": "調整收費（由某日起）",
+    "feeFrom": "生效日期",
+    "feeHelp": "整期按涵蓋起點的收費標準計算，已記收款不變。",
+    "viewSub": "查看詳情"
+  },
+  "rule": {
+    "title": "收款規則",
+    "follow": "跟隨車",
+    "custom": "自訂",
+    "followValue": "{rule}（跟隨車）",
+    "sheetTitle": "車的收款規則",
+    "from": "生效日",
+    "anchor": "統一收款日",
+    "applyNote": "{count} 位跟隨車的成員從生效日起改用新標準；自訂收費的成員不受影響，歷史收款不變。"
+  },
+  "quick": {
+    "more": "更多資料",
+    "paid": "已付到",
+    "paidFrom": "這一期開始",
+    "paidTo": "這一期結束",
+    "late": "已逾期 {count} 天",
+    "owe": "待收 {amount} · 應收 {date}",
+    "settled": "已結清 · 下次應收 {date}"
   }
 }

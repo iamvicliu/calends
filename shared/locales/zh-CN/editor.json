@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "登录邮箱、手机号或用户名", "phone": "手机号码" },
+  "ph": {
+    "account": "登录邮箱、手机号或用户名",
+    "phone": "手机号码"
+  },
   "overlap": {
     "keep": "旧的继续用一段时间",
     "keepHint": "旧的已经预付、还没到期：两段并行，各自照常计费",
@@ -16,7 +19,7 @@
   "clearForm": "清空表单",
   "revert": "撤销修改",
   "draftRestored": "已恢复上次未保存的内容",
-  "confirmDelete": "删除「{name}」？历史记录会一并清除；只是不再续费的话，建议改为「已退订」。",
+  "confirmDelete": "删除「{name}」？历史记录会一并清除；只是不再续费的话，建议选择「停止」。",
   "toast": {
     "added": "已添加",
     "saved": "已保存",
@@ -45,7 +48,8 @@
     "trial": "试用中",
     "paused": "已暂停",
     "cancelled": "已退订",
-    "terminated": "已停用"
+    "terminated": "已停用",
+    "stop": "停止"
   },
   "category": {
     "choose": "选择分类",
@@ -82,7 +86,8 @@
     "showDomainOn": "访客能看到完整域名",
     "showDomainOff": "公开页打码显示",
     "tagsPlaceholder": "空格分隔",
-    "notesPlaceholder": "备注，可选"
+    "notesPlaceholder": "备注，可选",
+    "pausedAt": "暂停日"
   },
   "share": {
     "none": "自用",
@@ -98,7 +103,15 @@
     "perPeriod": "每期份额",
     "paidUntil": "已付至",
     "remove": "移除",
-    "addMember": "添加成员"
+    "addMember": "添加成员",
+    "manageHint": "点成员可单独设置跟随车或自定义收费、周期",
+    "follows": "跟随车",
+    "custom": "自定义",
+    "nextDue": "下次应收 {date}",
+    "editMember": "编辑",
+    "overdue": "已逾期 {count} 天",
+    "dueOn": "应收 {date}",
+    "confirmRemove": "确认"
   },
   "proxy": {
     "for": "替谁付",
@@ -174,7 +187,11 @@
     "range": "{start} → {end}",
     "now": "至今",
     "initial": "起始",
-    "priceChange": "{date} 调价"
+    "priceChange": "{date} 调价",
+    "outsidePayments": "将有 {count} 笔已有扣款落在服务期之外。保留原日期、金额和所属阶段，继续修改？",
+    "editPrice": "编辑 {date} 生效的价格",
+    "deletePrice": "删除这条调价记录？此前价格将沿用至下次调价。",
+    "repriceCharges": "保存后将重新推算 {count} 笔历史预计扣款，实付记录保持原样。继续保存？"
   },
   "payment": {
     "addTitle": "记一笔",
@@ -203,5 +220,9 @@
   "timeline": {
     "home": "回到今天（也可以在时间线上双击）"
   },
-  "ai": { "title": "用 AI 识别", "hint": "粘贴收据、截图或一段文字，自动整理好", "go": "粘贴识别" }
+  "ai": {
+    "title": "用 AI 识别",
+    "hint": "粘贴收据、截图或一段文字，自动整理好",
+    "go": "粘贴识别"
+  }
 }

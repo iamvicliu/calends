@@ -53,7 +53,10 @@
     "prependUntil": "La fase anterior debe terminar después de empezar y como tarde en la fecha de inicio original",
     "priceOutOfRange": "La fecha del cambio de precio no está dentro de ninguna fase",
     "keepTooEarly": "La fecha hasta la que se mantiene debe ser posterior a la del cambio",
-    "endTooEarly": "La fecha de fin debe ser posterior al inicio de esta fase"
+    "endTooEarly": "La fecha de fin debe ser posterior al inicio de esta fase",
+    "startOrder": "El inicio debe ser posterior al de la fase anterior y anterior al de la siguiente.",
+    "priceDuplicate": "Ya existe un precio en esta fecha",
+    "priceInitial": "No se puede eliminar el precio inicial"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -175,7 +178,7 @@
     "refunded": "Reembolsado {money}",
     "partial": "Reembolso parcial {money}",
     "unrefunded": "Sin reembolso · Pérdida {money}",
-    "unused": "Pérdida no reembolsada: −{money} ({days})",
+    "unused": "Pérdida no reembolsada: {money} ({days})",
     "unusedTitle": "Sin reembolso",
     "terminated": "Desactivado",
     "restore": "Reactivar",
@@ -188,6 +191,19 @@
     "fullyRefunded": "Reembolso completo",
     "chargeOnEnd": "Ese día aún se cobra la renovación. Elige el día anterior para evitarlo.",
     "nonrenewDone": "No se renovará. Sin cargos después del {date}.",
-    "stoppedDone": "Servicio detenido"
+    "stoppedDone": "Servicio detenido",
+    "method": "Forma de baja",
+    "latestRefundHint": "Estos campos editan el último reembolso. Los anteriores se conservan en el historial de pagos."
+  },
+  "renewal": {
+    "title": "Reglas de renovación",
+    "chargeLeadDays": "Cobro anticipado",
+    "cancelLeadDays": "Cancelación anticipada",
+    "hint": "Cobro antes de renovar y cancelación antes de ese cobro. Indica los días; 0 significa ninguno. Los períodos no cambian.",
+    "cancelBy": "Fecha límite de cancelación",
+    "invalid": "Introduce un número entero de 0 a 3660 días.",
+    "tooLate": "El plazo de cancelación ha vencido. Se cobrará el siguiente período.",
+    "cancelReminder": "Cancela antes del {date} para evitar el próximo cobro.",
+    "none": "Ninguno"
   }
 }

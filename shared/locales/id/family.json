@@ -19,7 +19,20 @@
     "date": "Tanggal",
     "member": "Anggota",
     "covers": "Periode",
-    "amount": "Jumlah"
+    "amount": "Jumlah",
+    "expandAll": "Buka semua",
+    "collapseAll": "Tutup semua",
+    "groupSum": {
+      "other": "{count} pembayaran · {amount}"
+    },
+    "fee": "Biaya",
+    "nextCollection": "Penagihan berikutnya",
+    "actions": "Tindakan",
+    "status": "Status pembayaran",
+    "period": "Periode ini",
+    "range": "{from} – {until}",
+    "rangeFrom": "Dari",
+    "rangeTo": "Sampai"
   },
   "contact": {
     "via": {
@@ -57,8 +70,8 @@
     "name": "Nama",
     "namePh": "Panggilan untuknya",
     "contact": "Kontak",
-    "account": "Akun yang diundang",
-    "accountPh": "Email atau nama pengguna yang diundang ke {name}",
+    "account": "Akun anggota",
+    "accountPh": "Email, telepon, nama pengguna atau ID di {name}",
     "joined": "Bergabung",
     "joinedPh": "Awal paket ({date})",
     "notSet": "Belum diatur",
@@ -132,7 +145,10 @@
     "coverAligned": "Berakhir pada batas periode bersama",
     "recordNext": "Catat pembayaran · {amount}",
     "collectionAnchor": "Awal penagihan bersama",
-    "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}"
+    "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Akun belum diisi",
+    "editAccount": "Edit akun anggota",
+    "copyAccount": "Salin akun"
   },
   "pool": {
     "seatsFree": "{count} kosong",
@@ -198,7 +214,9 @@
     "payTo": "Dibayar ke {name} · {amount}",
     "ownerDefault": "pengelola",
     "maybeGroup": "Mungkin dipakai bersama",
-    "convert": "Jadikan bersama"
+    "convert": "Jadikan bersama",
+    "dueOn": "Jatuh tempo {date}",
+    "nextDueOn": "Berikutnya {date}"
   },
   "convert": {
     "title": "Jadikan “{name}” paket bersama",
@@ -229,5 +247,39 @@
     "gain": "Untung {amount}",
     "lost": "Rugi {amount}",
     "noRecords": "Belum ada pembayaran"
+  },
+  "collect": {
+    "title": "Catat pembayaran · {name}",
+    "next": "Penagihan berikutnya {date}",
+    "editMember": "Edit",
+    "until": "Berlaku sampai",
+    "covers": "Pembayaran mencakup {from} – {until}",
+    "changeFee": "Ubah biaya",
+    "lastPayment": "Pembayaran terakhir",
+    "adjustFee": "Sesuaikan biaya",
+    "feeFrom": "Berlaku mulai",
+    "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",
+    "viewSub": "Lihat detail"
+  },
+  "rule": {
+    "title": "Aturan penagihan",
+    "follow": "Ikuti paket",
+    "custom": "Kustom",
+    "followValue": "{rule} (aturan paket)",
+    "sheetTitle": "Aturan penagihan paket",
+    "from": "Berlaku mulai",
+    "anchor": "Tanggal tagih bersama",
+    "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah."
+  },
+  "quick": {
+    "more": "Detail lainnya",
+    "paid": "Dibayar sampai",
+    "paidFrom": "Awal periode",
+    "paidTo": "Akhir periode",
+    "late": {
+      "other": "Terlambat {count} hari"
+    },
+    "owe": "Tagihan {amount} · sejak {date}",
+    "settled": "Lunas · berikutnya {date}"
   }
 }

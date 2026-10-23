@@ -7,7 +7,9 @@
   "label": {
     "unassigned": "Sem atribuição",
     "anyRegion": "Qualquer região",
-    "total": "Total"
+    "total": "Total",
+    "createCategory": "Será criada a categoria: {name}",
+    "createdCategory": "Categoria criada: {name}"
   },
   "error": {
     "shareFull": "“{name}” está cheio ({seats} vagas)",
@@ -55,7 +57,12 @@
     "invalidRefund": "Os reembolsos devem ser valores válidos e armazenados como negativos.",
     "refundBeforeStop": "A data do reembolso não pode preceder a interrupção.",
     "paymentOutOfRange": "A data de pagamento {date} deve estar entre a data de início e hoje",
-    "invalidFirstPeriod": "first_period deve ser prorate, full ou free."
+    "invalidFirstPeriod": "first_period deve ser prorate, full ou free.",
+    "invalidInput": "Invalid tool input: {field}",
+    "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
+    "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
+    "staleRecord": "This record changed since the preview. Read and preview again.",
+    "noCategory": "Categoria não encontrada ou ambígua: {q}. Opções: {list}"
   },
   "tool": {
     "get_overview": "Visão geral",
@@ -67,23 +74,28 @@
     "get_trends": "Tendências",
     "list_payment_methods": "Formas de pagamento e saldos",
     "get_receivables": "Valores a receber",
-    "get_insights": "Diagnóstico, economia, perdas e retrospectiva anual",
+    "get_insights": "Análises e relatórios",
     "list_events": "Registro de mudanças",
     "search_app_store": "Buscar app",
     "get_carpool": "Planos compartilhados",
     "delete_subscription": "Excluir assinatura",
-    "set_share": "Configurar compartilhamento",
+    "set_share": "Gerenciar compartilhamento",
     "save_share_member": "Adicionar ou editar membro",
     "remove_share_member": "Remover membro",
     "create_subscription": "Adicionar assinatura",
     "update_subscription": "Editar assinatura",
     "change_price": "Registrar mudança de preço",
-    "change_plan": "Trocar região / plano / assinar de novo",
-    "set_status": "Pausar / cancelar / retomar",
-    "record_payment": "Registrar cobrança",
-    "delete_payment": "Apagar registro de cobrança",
-    "record_receivable": "Registrar valor recebido",
-    "update_payment_method": "Atualizar saldo da forma de pagamento",
-    "list_people": "Pessoas e recebíveis"
+    "change_plan": "Gerenciar planos e histórico",
+    "set_status": "Alterar status da assinatura",
+    "record_payment": "Registrar ou editar pagamentos",
+    "delete_payment": "Excluir registro de pagamento",
+    "record_receivable": "Gerenciar valores a receber e recebimentos",
+    "update_payment_method": "Gerenciar formas de pagamento e carteiras",
+    "list_people": "Pessoas e recebíveis",
+    "save_category": "Gerenciar categoria",
+    "save_person": "Gerenciar pessoa",
+    "get_settings": "Configurações e preferências do registro",
+    "update_settings": "Atualizar configurações e preferências do registro",
+    "set_proxy": "Gerenciar adiantamentos"
   }
 }

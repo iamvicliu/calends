@@ -2,7 +2,8 @@
   "close": "Fermer",
   "error": {
     "loginRequired": "Veuillez d’abord vous connecter",
-    "requestFailed": "Échec de la requête ({status})"
+    "requestFailed": "Échec de la requête ({status})",
+    "wholeCurrency": "Les montants en {currency} doivent être entiers"
   },
   "theme": {
     "light": "Clair",

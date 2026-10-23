@@ -48,7 +48,8 @@
     "mergeFoot": "같은 사람이 두 번 등록됐나요? 병합하면 내역이 합쳐져요.",
     "mergeConfirm": "'{from}'을(를) '{into}'에 병합할까요? {from}의 공유와 대신 결제가 모두 {into}(으)로 옮겨지고, 이름과 연락처는 {into} 기준이 돼요.",
     "merged": "{name}에 병합했어요",
-    "confirmDelete": "'{name}'을(를) 삭제할까요?"
+    "confirmDelete": "'{name}'을(를) 삭제할까요?",
+    "accountMissing": "이 멤버 관계가 더 이상 없습니다. 인물 상세를 다시 여세요."
   },
   "pick": {
     "new": "새 사람",
@@ -57,5 +58,15 @@
   "field": {
     "person": "사람",
     "syncFoot": "이 사람은 다른 {count}곳에도 있어요. 이름이나 연락처를 바꾸면 함께 바뀌어요."
+  },
+  "avatar": {
+    "change": "아바타 변경",
+    "help": "PNG, JPEG, WebP 이미지를 클릭하거나 끌어 놓거나 붙여넣으세요(최대 8 MB).",
+    "remove": "아바타 삭제",
+    "removeConfirm": "이 아바타를 삭제할까요? 저장하면 적용됩니다.",
+    "fallbackColor": "대체 색상"
+  },
+  "list": {
+    "none": "조건에 맞는 사람이 없습니다"
   }
 }

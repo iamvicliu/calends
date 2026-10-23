@@ -30,7 +30,7 @@ import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
@@ -60,6 +60,10 @@ type Part =
     };
 
 interface Preview {
+  before?: unknown;
+  after?: unknown;
+  references?: unknown;
+  created_category?: { name: string };
   subscription?: { id: string; name: string; category?: string; price?: number; currency?: string; cycle?: string; next_charge?: string | null };
   next_charges?: Array<{ date: string; amount: number; currency: string }>;
 }
@@ -224,6 +228,8 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   const [chat, setChat] = useState<Saved>(load);
   // 以前的对话（服务端）：显示在当前对话上面，往上翻就能看到；只读
   const [past, setPast] = useState<Saved[]>([]);
+  // 历史记录加载完才显示欢迎语：加载前后滚动位置不同，提前显示会先出现在一处再跳到另一处
+  const [pastLoaded, setPastLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const [atBottom, setAtBottom] = useState(true);
@@ -234,10 +240,12 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   }, []);
   useEffect(() => persist(chat), [chat]);
   useEffect(() => {
-    void api<Saved[]>('/api/assistant/chats').then(
-      (list) => setPast(list.filter((c) => c.turns?.length)),
-      () => {},
-    );
+    void api<Saved[]>('/api/assistant/chats')
+      .then(
+        (list) => setPast(list.filter((c) => c.turns?.length)),
+        () => {},
+      )
+      .finally(() => setPastLoaded(true));
   }, []);
   // 每轮回复结束后存到服务端（流式过程中不存）；其他设备也能看到
   useEffect(() => {
@@ -420,13 +428,13 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       <Toolbar title={t('assistant.title')}>
         <span className="as-tb">
           {!empty && (
-            <button className="icon-btn" onClick={reset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+            <IconButton onClick={reset} title={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
-            </button>
+            </IconButton>
           )}
-          <button className="icon-btn" onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
+          <IconButton onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
             <Settings2 size={16} />
-          </button>
+          </IconButton>
         </span>
       </Toolbar>
       <div className="as">
@@ -461,39 +469,37 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
             ))}
             <section ref={session} className={`as-session ${shownPast.length ? 'fresh' : ''}`} style={shownPast.length ? { minHeight: fill } : undefined}>
               {shownPast.length > 0 && <div className="as-past-head">{fmtWhen(chat.createdAt)}</div>}
-              {empty ? (
-                <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
-              ) : (
-                chat.turns.map((turn, i) =>
-                  turn.role === 'user' ? (
-                    <UserBubble key={turn.id} turn={turn} />
-                  ) : (
-                    <BotMessage
-                      key={turn.id}
-                      turn={turn}
-                      state={state}
-                      last={i === chat.turns.length - 1}
-                      onRetry={retry}
-                      onSetup={() => setSetup(true)}
-                      onApply={(p) => void applyProposal(turn.id, p)}
-                      onEdit={editProposal}
-                      onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
-                      onApplyAll={() => void applyAll(turn.id)}
-                      onOpen={(id) => {
-                        const s = state.subscriptions.find((x) => x.id === id);
-                        if (s) onOpen(s);
-                      }}
-                    />
-                  ),
-                )
-              )}
+              {empty
+                ? pastLoaded && <Welcome ready={ready} cfg={cfg} onSetup={() => setSetup(true)} />
+                : chat.turns.map((turn, i) =>
+                    turn.role === 'user' ? (
+                      <UserBubble key={turn.id} turn={turn} />
+                    ) : (
+                      <BotMessage
+                        key={turn.id}
+                        turn={turn}
+                        state={state}
+                        last={i === chat.turns.length - 1}
+                        onRetry={retry}
+                        onSetup={() => setSetup(true)}
+                        onApply={(p) => void applyProposal(turn.id, p)}
+                        onEdit={editProposal}
+                        onDismiss={(p) => setPart(turn.id, p.id, { state: 'dismissed' })}
+                        onApplyAll={() => void applyAll(turn.id)}
+                        onOpen={(id) => {
+                          const s = state.subscriptions.find((x) => x.id === id);
+                          if (s) onOpen(s);
+                        }}
+                      />
+                    ),
+                  )}
             </section>
           </div>
         </div>
         {!atBottom && (
-          <button className="as-bottom" onClick={() => setAtBottom(true)} aria-label={t('assistant.toBottom')}>
+          <IconButton className="as-bottom" onClick={() => setAtBottom(true)} aria-label={t('assistant.toBottom')}>
             <ArrowDown size={16} />
-          </button>
+          </IconButton>
         )}
         <Composer
           ref={composer}
@@ -640,17 +646,17 @@ function BotMessage(props: {
         {props.last && turn.status !== 'streaming' && turn.status !== 'error' && (
           <div className="as-actions">
             {text && (
-              <button
+              <IconButton
                 onClick={() => void navigator.clipboard.writeText(text).then(() => toast(t('assistant.copied')))}
                 title={t('assistant.copy')}
                 aria-label={t('assistant.copy')}
               >
                 <Copy size={14} />
-              </button>
+              </IconButton>
             )}
-            <button onClick={props.onRetry} title={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
+            <IconButton onClick={props.onRetry} title={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
               <RotateCcw size={14} />
-            </button>
+            </IconButton>
           </div>
         )}
       </div>
@@ -736,6 +742,15 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
   const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
   switch (tool) {
     case 'record_receivable':
+      if (a.action === 'update' || a.action === 'delete' || a.entry) {
+        for (const [key, value] of Object.entries(a))
+          if (!['subscription', 'dry_run'].includes(key))
+            add(
+              t(`assistant.f.${key}`) === `assistant.f.${key}` ? key : t(`assistant.f.${key}`),
+              typeof value === 'object' ? JSON.stringify(value) : String(value),
+            );
+        break;
+      }
       add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
       add(t('assistant.f.amount'), a.amount != null ? <span className="green">{flow(Number(a.amount), String(a.currency ?? collect))}</span> : undefined);
       add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
@@ -828,7 +843,9 @@ function Proposal(props: {
   const a = part.args;
   const create = part.tool === 'create_subscription';
   const sub = part.preview.subscription;
-  const name = String(a.name ?? sub?.name ?? '');
+  const name = String(
+    a.name ?? sub?.name ?? (a.set as { name?: string } | undefined)?.name ?? a.method ?? a.person ?? a.category ?? t(`mcp.tool.${part.tool}`),
+  );
   const sib = props.siblings.find((x) => x.tool === 'create_subscription' && x.args.id && x.args.id === sub?.id)?.args;
   const sibling = sib ? { icon: sib.icon ? String(sib.icon) : undefined, url: sib.url ? String(sib.url) : undefined } : undefined;
   const icon: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'> = {
@@ -844,7 +861,14 @@ function Proposal(props: {
     state.methods.find((m) => m.id === a.method || m.name === a.method) ??
     (create ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
   const done = part.state === 'applied';
-  const destructive = part.tool === 'delete_subscription' || part.tool === 'remove_share_member';
+  const destructive =
+    part.tool === 'delete_subscription' ||
+    part.tool === 'delete_payment' ||
+    part.tool === 'remove_share_member' ||
+    a.action === 'delete' ||
+    a.action === 'remove' ||
+    a.top_up_action === 'delete' ||
+    (part.tool === 'set_share' && a.role === 'none');
   // 没识别出来、用了默认值的字段：提醒用户核对
   const missing = create
     ? [!a.start && t('assistant.card.start'), !a.method && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
@@ -869,10 +893,10 @@ function Proposal(props: {
   return (
     <div className={`as-card ${part.state}`}>
       <div className="as-card-tag">{create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}</div>
-      <div className="as-card-head">
+      <div className="as-card-head row">
         <SubIcon sub={icon} size={44} />
         <div className="as-card-id">
-          <b>{name}</b>
+          <b className="text-ellipsis">{name}</b>
           {create && cyc ? (
             <span>
               {money(Number(a.price), String(a.currency))} {cycleLabel({ unit: cyc.unit, every: Number(cyc.every ?? 1) })}
@@ -891,6 +915,15 @@ function Proposal(props: {
           </Fragment>
         ))}
       </dl>
+      {part.preview.created_category && <div className="as-card-next">{t('mcp.label.createCategory', { name: part.preview.created_category.name })}</div>}
+      {!create && part.preview.before !== undefined && (
+        <details className="as-tool-detail">
+          <summary>{t('assistant.card.changes')}</summary>
+          <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 260, overflow: 'auto', fontSize: 12 }}>
+            {JSON.stringify({ before: part.preview.before, after: part.preview.after, references: part.preview.references }, null, 2)}
+          </pre>
+        </details>
+      )}
       {create && part.preview.next_charges && part.preview.next_charges.length > 0 && (
         <div className="as-card-next">
           <small>{t('assistant.card.next')}</small>
@@ -914,14 +947,14 @@ function Proposal(props: {
         </div>
       ) : null}
       {part.state === 'error' && part.error && (
-        <div className="as-card-err">
+        <div className="as-card-err icon-text">
           <CircleAlert size={14} /> {part.error}
         </div>
       )}
       <div className="as-card-foot">
         {done ? (
           <>
-            <span className="as-ok">
+            <span className="as-ok icon-text">
               <Check size={15} /> {create ? t('assistant.card.added') : t('assistant.card.done')}
             </span>
             {part.subId && (
@@ -931,7 +964,7 @@ function Proposal(props: {
             )}
           </>
         ) : gone ? (
-          <span className="as-muted">
+          <span className="as-muted icon-text">
             <CircleX size={15} /> {t('assistant.card.dismissed')}
           </span>
         ) : (
@@ -958,7 +991,7 @@ function Proposal(props: {
 function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry: () => void; onSetup: () => void }) {
   const fixable = error.kind === 'auth' || error.kind === 'config' || error.kind === 'balance';
   return (
-    <div className="as-error" role="alert">
+    <div className="as-error row" role="alert">
       <CircleAlert size={16} />
       <div>
         <b>{t(`assistant.error.${error.kind}`)}</b>
@@ -1108,9 +1141,9 @@ function Composer({
             {images.map((src, i) => (
               <span key={i} className="as-att">
                 <img src={base(src)} alt="" />
-                <button onClick={() => setImages((x) => x.filter((_, k) => k !== i))} aria-label={t('assistant.removeImage')}>
+                <IconButton onClick={() => setImages((x) => x.filter((_, k) => k !== i))} aria-label={t('assistant.removeImage')}>
                   <X size={12} />
-                </button>
+                </IconButton>
               </span>
             ))}
           </div>
@@ -1137,7 +1170,7 @@ function Composer({
           }}
         />
         <div className="as-input-bar">
-          <button
+          <IconButton
             className="as-icon"
             onClick={() => file.current?.click()}
             disabled={disabled}
@@ -1145,31 +1178,31 @@ function Composer({
             aria-label={t('assistant.addImage')}
           >
             <ImagePlus size={17} />
-          </button>
+          </IconButton>
           <input ref={file} type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files && void addFiles(e.target.files)} />
           <button className="as-model" onClick={onSettings} title={t('assistant.settings')}>
             {model === 'deepseek-flash' ? 'DeepSeek V4.1 Flash' : (model ?? 'DeepSeek')}
           </button>
           {onReset && (
-            <button className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+            <IconButton className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
-            </button>
+            </IconButton>
           )}
           <span className="grow" />
           {busy ? (
-            <button className="as-send stop" onClick={onStop} title={t('assistant.stop')} aria-label={t('assistant.stop')}>
+            <IconButton className="as-send accent stop" onClick={onStop} title={t('assistant.stop')} aria-label={t('assistant.stop')}>
               <Square size={13} fill="currentColor" />
-            </button>
+            </IconButton>
           ) : (
-            <button
-              className="as-send"
+            <IconButton
+              className="as-send accent"
               onClick={submit}
               disabled={disabled || (!text.trim() && !images.length)}
               title={t('assistant.send')}
               aria-label={t('assistant.send')}
             >
               <ArrowUp size={17} />
-            </button>
+            </IconButton>
           )}
         </div>
       </div>

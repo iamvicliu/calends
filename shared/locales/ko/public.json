@@ -60,6 +60,7 @@
     "all": "전체"
   },
   "row": {
+    "ends": " · {date} 종료",
     "renews": " · {date} 갱신",
     "monthly": "월",
     "perMonthEq": "월 환산"

@@ -1,0 +1,225 @@
+@import '../control-sizes.css';
+
+/* Shared alignment and interaction primitives. App only; public has its own style tree. */
+:root {
+  --icon-button-size: var(--ctl-h-md);
+}
+.ui-title,
+.icon-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.ui-title {
+  margin: 0;
+  line-height: 1.4;
+}
+.ui-title-text,
+.text-ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ui-title > .hint,
+.icon-text > svg,
+.icon-text > img {
+  flex-shrink: 0;
+}
+.icon-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  min-width: var(--icon-button-size);
+  min-height: var(--icon-button-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--label-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: pointer;
+  transition:
+    background 120ms,
+    color 120ms,
+    transform 100ms;
+}
+.icon-btn:hover {
+  background: var(--hover);
+  color: var(--label);
+}
+.icon-btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.icon-btn.accent {
+  background: var(--ink);
+  color: var(--on-ink);
+  box-shadow: none;
+}
+/* 删除类操作：与同排圆形按钮同样的灰色描边、无底色，只把图标换成红色；悬停时浅红底 */
+.icon-btn.danger {
+  color: var(--red);
+}
+.icon-btn.danger:hover {
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+  color: var(--red);
+}
+.icon-btn svg,
+.icon-btn .i {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.icon-btn.hint {
+  box-shadow: none;
+  font-size: inherit;
+}
+.icon-btn.hint .i {
+  width: 1em;
+  height: 1em;
+  max-width: 18px;
+  max-height: 18px;
+}
+:where(button, a, input, textarea, [role='button'], [role='link'], [tabindex]):focus-visible,
+.icon-btn[data-focus-visible] {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+:where(button):disabled,
+.icon-btn[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.info-tip {
+  z-index: 100;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--label);
+  box-shadow: var(--shadow-lg);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* 行尾「编辑 + 删除」：删除第一次点击向左伸展成长条（宽度 = 两个按钮 + 间距），显示「确认 ✓」；再点才删除 */
+.row-actions {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.row-actions.pair {
+  justify-content: flex-start;
+  width: calc(var(--icon-button-size) * 2 + 8px);
+}
+.row-actions .row-edit {
+  transition:
+    opacity 160ms ease,
+    transform 200ms ease;
+}
+.row-actions.armed .row-edit {
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+}
+.row-actions .row-remove {
+  position: relative;
+  overflow: hidden;
+  border-radius: calc(var(--icon-button-size) / 2);
+}
+.row-actions.pair .row-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transition:
+    width 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    background 160ms ease,
+    color 160ms ease;
+}
+.row-actions.armed .row-remove {
+  width: 100%;
+  min-width: max-content;
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+}
+.row-remove .rm-x,
+.row-remove .rm-confirm {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 140ms ease,
+    transform 200ms ease;
+}
+.row-remove .rm-confirm {
+  /* 右端留一个按钮宽的格子，对勾在其中居中，与原叉号同一位置；文字居中在左边剩余空间 */
+  position: static;
+  display: grid;
+  grid-template-columns: 1fr var(--icon-button-size);
+  align-items: center;
+  justify-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+.row-remove .rm-confirm > span {
+  padding-left: 10px;
+}
+.row-remove .rm-confirm svg {
+  width: 16px;
+  height: 16px;
+}
+.row-remove .rm-confirm path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 220ms ease 180ms;
+}
+.row-actions.armed .rm-x {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+.row-actions.armed .rm-confirm {
+  opacity: 1;
+  width: 100%;
+  transition-delay: 90ms;
+}
+.row-actions.armed .rm-confirm path {
+  stroke-dashoffset: 0;
+}
+/* 确认删除：长条填满红色，对勾弹一下 */
+.row-actions.done .row-remove {
+  background: var(--red);
+  color: #fff;
+}
+.row-actions.done .rm-confirm svg {
+  animation: rm-pop 300ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes rm-pop {
+  50% {
+    transform: scale(1.45);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .row-actions *,
+  .row-actions .row-remove,
+  .row-remove .rm-confirm path {
+    transition: none !important;
+    animation: none !important;
+  }
+}

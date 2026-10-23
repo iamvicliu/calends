@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "E-mail, téléphone ou identifiant", "phone": "Numéro de téléphone" },
+  "ph": {
+    "account": "E-mail, téléphone ou identifiant",
+    "phone": "Numéro de téléphone"
+  },
   "overlap": {
     "keep": "Garder l’ancien encore un temps",
     "keepHint": "Déjà prépayé et pas encore expiré : les deux tournent en parallèle et sont facturés normalement",
@@ -17,7 +20,7 @@
   "clearForm": "Vider le formulaire",
   "revert": "Annuler les modifications",
   "draftRestored": "Brouillon non enregistré restauré",
-  "confirmDelete": "Supprimer « {name} » ? Son historique sera également supprimé. Si vous avez simplement arrêté le renouvellement, marquez-le plutôt comme Résilié.",
+  "confirmDelete": "Supprimer « {name} » ? Son historique sera également supprimé. Si vous avez simplement arrêté le renouvellement, choisissez plutôt « Arrêter ».",
   "toast": {
     "added": "Ajouté",
     "saved": "Enregistré",
@@ -58,7 +61,8 @@
     "trial": "Essai",
     "paused": "Suspendu",
     "cancelled": "Résilié",
-    "terminated": "Désactivé"
+    "terminated": "Désactivé",
+    "stop": "Arrêter"
   },
   "category": {
     "choose": "Choisir une catégorie",
@@ -95,7 +99,8 @@
     "showDomainOn": "Les visiteurs voient le domaine complet",
     "showDomainOff": "Masqué sur la page publique",
     "tagsPlaceholder": "Séparés par des espaces",
-    "notesPlaceholder": "Notes (facultatif)"
+    "notesPlaceholder": "Notes (facultatif)",
+    "pausedAt": "Date de pause"
   },
   "share": {
     "none": "Moi seul",
@@ -111,7 +116,18 @@
     "perPeriod": "Part par période",
     "paidUntil": "Payé jusqu’au",
     "remove": "Retirer",
-    "addMember": "Ajouter un membre"
+    "addMember": "Ajouter un membre",
+    "manageHint": "Touchez un membre pour suivre la règle du forfait ou définir un montant et un cycle personnalisés",
+    "follows": "Suit le forfait",
+    "custom": "Personnalisé",
+    "nextDue": "Prochain {date}",
+    "editMember": "Modifier",
+    "overdue": {
+      "one": "{count} jour de retard",
+      "other": "{count} jours de retard"
+    },
+    "dueOn": "À percevoir le {date}",
+    "confirmRemove": "Confirmer"
   },
   "proxy": {
     "for": "Je paie pour",
@@ -199,7 +215,11 @@
     "range": "{start} → {end}",
     "now": "aujourd’hui",
     "initial": "Initial",
-    "priceChange": "Changement de prix {date}"
+    "priceChange": "Changement de prix {date}",
+    "outsidePayments": "{count} paiement(s) existant(s) seront hors de la période de service. Continuer en conservant leurs dates, montants et phase ?",
+    "editPrice": "Modifier le prix à compter du {date}",
+    "deletePrice": "Supprimer ce prix ? Le prix précédent sera appliqué jusqu’au prochain changement.",
+    "repriceCharges": "L’enregistrement recalculera {count} prélèvements passés estimés. Les paiements enregistrés resteront inchangés. Continuer ?"
   },
   "payment": {
     "addTitle": "Ajouter un paiement",
@@ -228,5 +248,9 @@
   "timeline": {
     "home": "Revenir à aujourd’hui (ou double-cliquez sur la frise)"
   },
-  "ai": { "title": "Remplir avec l’IA", "hint": "Collez un reçu, une capture ou du texte, le reste se fait tout seul", "go": "Coller" }
+  "ai": {
+    "title": "Remplir avec l’IA",
+    "hint": "Collez un reçu, une capture ou du texte, le reste se fait tout seul",
+    "go": "Coller"
+  }
 }

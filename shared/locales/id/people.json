@@ -48,7 +48,8 @@
     "mergeFoot": "Orang yang sama tercatat dua kali? Gabungkan agar paket dan pembayarannya menyatu.",
     "mergeConfirm": "Gabungkan “{from}” ke “{into}”? Semua paket dan pembayaran {from} pindah ke {into}, nama dan kontak mengikuti {into}.",
     "merged": "Digabung ke {name}",
-    "confirmDelete": "Hapus “{name}”?"
+    "confirmDelete": "Hapus “{name}”?",
+    "accountMissing": "Keanggotaan ini sudah tidak ada. Buka kembali detail orang tersebut."
   },
   "pick": {
     "new": "Orang baru",
@@ -57,5 +58,15 @@
   "field": {
     "person": "Orang",
     "syncFoot": "Juga ada di {count} tempat lain — perubahan nama dan kontak ikut berlaku."
+  },
+  "avatar": {
+    "change": "Ganti avatar",
+    "help": "Klik, seret, atau tempel gambar PNG, JPEG, atau WebP (maksimal 8 MB).",
+    "remove": "Hapus avatar",
+    "removeConfirm": "Hapus avatar ini? Simpan untuk menerapkan.",
+    "fallbackColor": "Warna cadangan"
+  },
+  "list": {
+    "none": "Tidak ada orang yang cocok"
   }
 }

@@ -1,20 +1,25 @@
+import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
-import { StopPanel } from '../components/StopPanel.tsx';
-import { ReceiptText } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { StopFields } from '../components/StopPanel.tsx';
+import { Minus, Plus, ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
-import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
+import { addDays, addMonths, diffDays, memberCollection, memberUnpaidFrom, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
+import { carRule, followsCar, shareFromFee } from '../../../shared/carpool.ts';
 import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
+import { RowActions } from '../components/RowActions.tsx';
 import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
 import { categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
-import { changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
+import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-form.ts';
+import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField } from './Members.tsx';
+import { ContactField, MemberSheet } from './Members.tsx';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
@@ -22,7 +27,9 @@ import { searchCatalog, type CatalogItem } from '../catalog.ts';
 
 const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetime', every: 1 }]];
 
-const STATUS: SubStatus[] = ['active', 'trial', 'paused', 'cancelled'];
+type EditorStatus = 'active' | 'trial' | 'paused' | 'stop';
+// 按订阅生命周期排列：先试用，再计费，可暂停，最后停止
+const STATUS: EditorStatus[] = ['trial', 'active', 'paused', 'stop'];
 
 export function newSub(today: string, methodId?: string, currency = 'USD'): Subscription {
   return {
@@ -46,6 +53,7 @@ export function newSub(today: string, methodId?: string, currency = 'USD'): Subs
 interface Draft {
   form: Subscription;
   basePrice: number;
+  stop?: StopForm;
   /** 打开表单时订阅的样子：和现在不一样说明别处改过，草稿不再适用 */
   base: string;
 }
@@ -75,33 +83,49 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const [isNew] = useState(() => !state.subscriptions.some((s) => s.id === sub.id));
   const key = draftKey(isNew, sub.id);
   // 有多个阶段时，表单显示今天所在的阶段
-  const [initialForm] = useState(() => toEditForm(structuredClone(sub), today));
+  const [initialForm] = useState(() => toEditForm(migrateRenewalRules(structuredClone(sub)), today));
   const [initial] = useState(() => sig(initialForm));
   // 新建的草稿不看 base（每次新建 id 都不同）；编辑的要求订阅没被别处改过
   const [draft] = useState(() => readDraft(key, isNew ? 'new' : initial));
   const [restored, setRestored] = useState(!!draft);
+  const [priceValid, setPriceValid] = useState(true);
+  const [historyReset, setHistoryReset] = useState(0);
   const [f, setFRaw] = useState<Subscription>(() => draft?.form ?? initialForm);
+  const [stop, setStop] = useState<StopForm | undefined>(
+    () => draft?.stop ?? (f.stop || f.end || ['cancelled', 'terminated'].includes(f.status) ? stopForm(f, today) : undefined),
+  );
   // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
   const [basePrice, setBasePrice] = useState(draft?.basePrice ?? initialForm.price);
   const setF = (next: Subscription) => {
     const form = toEditForm(next, today);
     setFRaw(form);
     setBasePrice(form.price);
+    // Existing history actions can resume or change an end date; keep the status draft aligned.
+    if (form.end !== f.end || form.status !== f.status || JSON.stringify(form.stop) !== JSON.stringify(f.stop)) {
+      setStop(form.stop || form.end || ['cancelled', 'terminated'].includes(form.status) ? stopForm(form, today) : undefined);
+    }
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
-  const dirty = sig(f) !== initial;
+  const dirty =
+    sig(f) !== initial ||
+    !priceValid ||
+    !!stop !== !!(initialForm.stop || initialForm.end || ['cancelled', 'terminated'].includes(initialForm.status)) ||
+    (!!stop && JSON.stringify(stop) !== JSON.stringify(stopForm(initialForm, today)));
   // 关闭即存草稿；没改动就清掉
   const close = () => {
-    writeDraft(key, dirty ? { form: f, basePrice, base: isNew ? 'new' : initial } : undefined);
+    writeDraft(key, dirty ? { form: f, basePrice, stop, base: isNew ? 'new' : initial } : undefined);
     onClose();
   };
   /** 新建：清空成一张新表；编辑：回到保存过的样子 */
   const reset = () => {
     writeDraft(key, undefined);
     setRestored(false);
+    setPriceValid(true);
+    setHistoryReset((n) => n + 1);
     const fresh = isNew ? toEditForm(newSub(today, state.settings.defaultMethodId, state.settings.baseCurrency), today) : initialForm;
     setFRaw(fresh);
     setBasePrice(fresh.price);
+    setStop(fresh.stop || fresh.end || ['cancelled', 'terminated'].includes(fresh.status) ? stopForm(fresh, today) : undefined);
   };
 
   /** 交给 AI 助手：已经填的名称一并带过去 */
@@ -110,13 +134,25 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     handoff(f.name.trim() ? `${f.name.trim()}\n` : '', images);
   };
 
-  const save = () =>
-    run(
+  const save = async () => {
+    if (!priceValid) return;
+    let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
+    if (!isNew) out = preserveRenewalHistory(sub, out, today);
+    // 直接改了价格框：视为今天起调价，过往账单保持原价
+    try {
+      if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
+      else out = syncPhase(out, today);
+      if (stop && out.cycle.unit !== 'lifetime') out = applyStopForm(out, stop, today);
+    } catch (e) {
+      await run(async () => {
+        throw e;
+      });
+      return;
+    }
+    const affected = !isNew && affectedPriceCharges(sub, out, today);
+    if (affected && !(await ask(t('editor.history.repriceCharges', { count: affected })))) return;
+    await run(
       async () => {
-        let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
-        // 直接改了价格框：视为今天起调价，过往账单保持原价
-        if (!isNew && basePrice !== out.price) out = changePrice(syncPhase({ ...out, price: basePrice }, today), today, out.price);
-        else out = syncPhase(out, today);
         if (out.status === 'cancelled' && !out.end) out.end = today;
         if (out.status === 'paused' && !out.pausedAt) out.pausedAt = today;
         if (out.status !== 'paused') delete out.pausedAt;
@@ -141,6 +177,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       },
       t(isNew ? 'editor.toast.added' : 'editor.toast.saved'),
     );
+  };
 
   return (
     <Sheet
@@ -174,10 +211,16 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
             </button>
           ) : null}
           <span className="grow" />
-          <button className="btn" onClick={close}>
+          <button
+            className="btn"
+            onClick={() => {
+              writeDraft(key, undefined);
+              onClose();
+            }}
+          >
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={!f.name.trim()} onClick={save}>
+          <button className="btn primary" disabled={!f.name.trim() || !priceValid} onClick={save}>
             {isNew ? t('common.add') : t('common.done')}
           </button>
         </>
@@ -205,11 +248,11 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
         }}
       >
-        <Form f={f} setF={setF} up={up} state={state} today={today} />
+        <Form isNew={isNew} f={f} setF={setF} up={up} state={state} today={today} stop={stop} setStop={setStop} />
       </div>
       {!isNew && (
         <div style={{ marginTop: 18 }}>
-          <ChangePanel f={f} setF={setF} state={state} today={today} />
+          <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />
         </div>
       )}
     </Sheet>
@@ -217,12 +260,18 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
 }
 
 function Form({
+  isNew,
+  stop,
+  setStop,
   f,
   setF,
   up,
   state,
   today,
 }: {
+  isNew: boolean;
+  stop?: StopForm;
+  setStop: (value: StopForm | undefined) => void;
   f: Subscription;
   setF: (s: Subscription) => void;
   up: (p: Partial<Subscription>) => void;
@@ -239,6 +288,25 @@ function Form({
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
   const setMember = (i: number, p: Partial<ShareMember>) => setShare({ members: share!.members.map((m, j) => (j === i ? { ...m, ...p } : m)) });
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
+  // 已保存过的成员只显示摘要；刚在这里加的成员可以先填称呼
+  const stored = state.subscriptions.find((x) => x.id === f.id);
+  const savedMembers = new Map((stored?.share?.members ?? []).map((m) => [m.id, m]));
+  // 单个成员的收费方式、周期、收款在成员弹窗里编辑，弹窗直接保存到账本
+  const [editMember, setEditMember] = useState<ShareMember>();
+  // 打开成员弹窗时表单里的合租设置是否已和账本不同；没改过就不动表单，保存时整体沿用账本里的新数据
+  const shareEdited = useRef(false);
+  const openMember = (m: ShareMember) => {
+    shareEdited.current = JSON.stringify(share) !== JSON.stringify(stored?.share);
+    setEditMember(m);
+  };
+  const closeMember = () => {
+    setEditMember(undefined);
+    // 这里改过合租设置时，表单里的成员换成刚保存的版本，免得点「完成」把弹窗里的修改覆盖回去
+    const latest = getState()?.subscriptions.find((x) => x.id === f.id)?.share?.members;
+    if (!latest || !share || !shareEdited.current) return;
+    const byId = new Map(latest.map((m) => [m.id, m]));
+    setShare({ members: share.members.filter((m) => !savedMembers.has(m.id) || byId.has(m.id)).map((m) => byId.get(m.id) ?? m) });
+  };
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const method = state.methods.find((m) => m.id === f.methodId);
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
@@ -248,6 +316,7 @@ function Form({
     f.intro && t('editor.more.intro'),
     f.bonus && t('editor.more.bonus'),
     f.remindDays != null && t('editor.more.remind'),
+    (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
     (f.url || f.manageUrl) && t('editor.more.links'),
     f.tags.length > 0 && t('editor.more.tags'),
     f.notes && t('editor.more.notes'),
@@ -279,6 +348,7 @@ function Form({
                 // 「Spotify: Music and Podcasts」只取冒号、破折号前的产品名
                 name: h.name.split(/\s*[:：|]\s*|\s[-–—]\s/)[0].trim(),
                 icon: h.icon,
+                ...(isNew && f.cancelLeadDays == null ? { cancelLeadDays: 1 } : {}),
                 url: f.url || h.url,
                 // 只有粘贴的链接里带了地区才填，按名称搜时不猜
                 ...(h.fromLink && !f.region && h.country !== 'cn' ? { region: h.country!.toUpperCase() } : {}),
@@ -286,7 +356,15 @@ function Form({
                 ...(!f.name.trim() || f.category === presetCat('tools') ? { category: GENRE_CAT[h.genre] ? presetCat(GENRE_CAT[h.genre]) : f.category } : {}),
               })
             }
-            onPickCatalog={(c) => up({ name: c.name, icon: c.icon, url: f.url || c.url, category: c.category })}
+            onPickCatalog={(c) =>
+              up({
+                name: c.name,
+                icon: c.icon,
+                url: f.url || c.url,
+                category: c.category,
+                ...(isNew ? { chargeLeadDays: f.chargeLeadDays ?? c.chargeLeadDays, cancelLeadDays: f.cancelLeadDays ?? c.cancelLeadDays } : {}),
+              })
+            }
           />
         </div>
       </div>
@@ -295,7 +373,7 @@ function Form({
       <Group title={t('editor.group.billing')}>
         <Cell label={t('editor.field.amount')}>
           <span className="ed-amount">
-            <NumInput className="num" value={f.price || undefined} placeholder="0.00" onValue={(n) => up({ price: n ?? 0 })} />
+            <NumInput ccy={f.currency} className="num" value={f.price || undefined} placeholder="0.00" onValue={(n) => up({ price: n ?? 0 })} />
             <CurrencySelect value={f.currency} onChange={(c) => up({ currency: c })} />
           </span>
         </Cell>
@@ -358,14 +436,17 @@ function Form({
             onChange={(id) =>
               up({
                 methodId: id,
+                ...(isNew && f.cancelLeadDays == null && state.methods.find((m) => m.id === id)?.kind === 'appstore' ? { cancelLeadDays: 1 } : {}),
                 ...(!f.region && state.methods.find((m) => m.id === id)?.region ? { region: state.methods.find((m) => m.id === id)!.region } : {}),
               })
             }
           />
         </Cell>
-        <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
-          <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
-        </Cell>
+        {!state.subscriptions.some((s) => s.id === f.id) && (
+          <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
+            <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
+          </Cell>
+        )}
         <Cell label={t('editor.field.region')}>
           <RegionSelect
             value={f.region}
@@ -397,24 +478,33 @@ function Form({
       {/* 三、现在的状态 */}
       {!lt && (
         <Group title={t('editor.group.status')}>
-          {!f.stop && (
-            <div className="cell">
-              <Seg
-                value={f.status}
-                onChange={(v) => {
-                  if (f.stop) setF(reactivate(f, today));
-                  up({ status: v });
-                }}
-                options={STATUS.map((s) => [s, t(`editor.status.${s}`)] as [SubStatus, string])}
-              />
-            </div>
-          )}
-          {f.status === 'trial' && (
+          <div className="cell">
+            <Seg<EditorStatus>
+              value={stop ? 'stop' : (f.status as EditorStatus)}
+              disabledKeys={f.stop?.kind === 'terminate' || f.status === 'terminated' ? ['active', 'trial', 'paused'] : undefined}
+              onChange={(v) => {
+                if (v === 'stop') {
+                  setStop(stopForm(syncPhase(f, today), today));
+                } else {
+                  const next = reactivate(f, today);
+                  up({ ...next, status: v as SubStatus, pausedAt: v === 'paused' ? (f.pausedAt ?? today) : undefined });
+                  setStop(undefined);
+                }
+              }}
+              options={STATUS.map((s) => [s, t(`editor.status.${s}`)])}
+            />
+          </div>
+          {!stop && f.status === 'trial' && (
             <Cell label={t('editor.field.trialEnd')}>
               <DatePicker value={f.trialEnd} clearable onChange={(v) => up({ trialEnd: v })} />
             </Cell>
           )}
-          <StopPanel sub={syncPhase(f, today)} today={today} onApply={setF} />
+          {!stop && f.status === 'paused' && (
+            <Cell label={t('editor.field.pausedAt')}>
+              <DatePicker value={f.pausedAt ?? today} onChange={(v) => up({ pausedAt: v ?? today })} />
+            </Cell>
+          )}
+          {stop && <StopFields sub={syncPhase(f, today)} today={today} value={stop} onChange={setStop} />}
         </Group>
       )}
 
@@ -427,7 +517,7 @@ function Form({
             : share?.role === 'member'
               ? t('editor.share.memberHint')
               : share?.role === 'owner'
-                ? t('editor.share.perHead', { amount: money(perHead, f.currency) })
+                ? `${t('editor.share.perHead', { amount: money(perHead, f.currency) })} · ${t('editor.share.manageHint')}`
                 : undefined
         }
       >
@@ -496,32 +586,69 @@ function Form({
             <Cell label={t('editor.share.seats')}>
               <input className="num" inputMode="numeric" value={share.seats} onChange={(e) => setShare({ seats: Math.max(1, Number(val(e)) || 1) })} />
             </Cell>
-            {share.members.map((m, i) => (
-              <div key={m.id} className="member-edit">
-                <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
-                <NumInput className="num" value={m.share} title={t('editor.share.perPeriod')} onValue={(n) => setMember(i, { share: n ?? 0 })} />
-                <span className="wide">
-                  <DatePicker value={m.paidUntil} clearable placeholder={t('editor.share.paidUntil')} onChange={(v) => setMember(i, { paidUntil: v })} />
-                </span>
-                <button
-                  className="icon-btn"
-                  style={{ width: 26, height: 26 }}
-                  aria-label={t('editor.share.remove')}
-                  onClick={() => setShare({ members: share.members.filter((_, j) => j !== i) })}
-                >
-                  <Icon name="x" />
-                </button>
-              </div>
-            ))}
+            {/* 这里只管名单：已有成员只显示摘要，收费方式、成员账号、收款在合租详情里维护 */}
+            {share.members.map((m0, i) => {
+              // 摘要按账本里最新保存的成员与订阅算，成员弹窗保存后立即更新
+              const m = savedMembers.get(m0.id) ?? m0;
+              const saved = savedMembers.has(m0.id);
+              const due = saved && stored && !m.exempt ? memberCollection(stored, m, memberUnpaidFrom(stored, m)).from : undefined;
+              const late = due && due < today ? diffDays(due, today) : 0;
+              return (
+                <div key={m.id} className="member-edit member-summary">
+                  {saved ? (
+                    <button type="button" className="member-summary-name tap" onClick={() => openMember(m)}>
+                      <b className="text-ellipsis">{m.name || t('editor.share.memberN', { n: i + 1 })}</b>
+                      <small className="muted">
+                        {m.exempt ? t('family.pool.exempt') : followsCar(state, stored!, m, today) ? t('editor.share.follows') : t('editor.share.custom')}
+                        {late > 0 && <span className="member-late"> · {t('editor.share.overdue', { count: late })}</span>}
+                        {due && (
+                          <>
+                            {' · '}
+                            <span className="nowrap">{t(late > 0 ? 'editor.share.dueOn' : 'editor.share.nextDue', { date: cnDateFull(due) })}</span>
+                          </>
+                        )}
+                      </small>
+                    </button>
+                  ) : (
+                    <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
+                  )}
+                  <RowActions
+                    onEdit={saved ? () => openMember(m) : undefined}
+                    editLabel={t('editor.share.editMember')}
+                    removeLabel={t('editor.share.remove')}
+                    confirmLabel={t('editor.share.confirmRemove')}
+                    onRemove={() => setShare({ members: share.members.filter((x) => x.id !== m0.id) })}
+                  />
+                </div>
+              );
+            })}
             {share.members.length < share.seats - 1 && (
               <button
                 className="cell tap"
                 style={{ color: 'var(--accent)' }}
-                onClick={() => setShare({ members: [...share.members, { id: uid(), name: '', share: perHead }] })}
+                onClick={() => {
+                  // 新成员按车的收款规则收费
+                  const r = carRule(state, f, today);
+                  setShare({
+                    members: [
+                      ...share.members,
+                      {
+                        id: uid(),
+                        name: '',
+                        share: shareFromFee(state, f, r.fee, r.currency, r.billEvery),
+                        fee: r.fee,
+                        feeCurrency: r.currency,
+                        billEvery: r.billEvery,
+                        joined: today,
+                      },
+                    ],
+                  });
+                }}
               >
                 <Icon name="plus" /> {t('editor.share.addMember')}
               </button>
             )}
+            {editMember && stored && createPortal(<MemberSheet state={state} s={stored} member={editMember} onClose={closeMember} />, document.body)}
           </>
         )}
       </Group>
@@ -558,7 +685,7 @@ function Form({
                 {f.intro && (
                   <>
                     <Cell label={t('editor.intro.price')}>
-                      <NumInput className="num" value={f.intro.price} onValue={(n) => up({ intro: { ...f.intro!, price: n ?? 0 } })} />
+                      <NumInput ccy={f.currency} className="num" value={f.intro.price} onValue={(n) => up({ intro: { ...f.intro!, price: n ?? 0 } })} />
                     </Cell>
                     <Cell label={t('editor.intro.until')}>
                       <DatePicker value={f.intro.until} onChange={(v) => up({ intro: { ...f.intro!, until: v ?? today } })} />
@@ -613,6 +740,14 @@ function Form({
                     </div>
                   </>
                 )}
+              </Group>
+              {/* 天数是手填的：减号、可直接输入的数字、加号收在一个胶囊里；说明放在组下方 */}
+              <Group title={t('core.renewal.title')} foot={t('core.renewal.hint')}>
+                {(['chargeLeadDays', 'cancelLeadDays'] as const).map((field) => (
+                  <Cell key={field} label={t(`core.renewal.${field}`)}>
+                    <DaysStepper label={t(`core.renewal.${field}`)} value={f[field] ?? 0} onChange={(n) => up({ [field]: n })} />
+                  </Cell>
+                ))}
               </Group>
               <Group title={t('editor.more.remind')}>
                 <Cell
@@ -822,5 +957,45 @@ function NameField({
         </div>
       )}
     </div>
+  );
+}
+
+/** 天数步进器：0–3660 的整数，可直接输入，也可用两侧按钮加减；0 显示为「不需要」以外的数字 0 */
+function DaysStepper({ value, onChange, label }: { value: number; onChange: (n: number) => void; label: string }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const clamp = (n: number) => Math.min(3660, Math.max(0, Math.round(n)));
+  const commit = (raw: string) => {
+    setDraft(null);
+    const n = Number(raw);
+    if (raw.trim() !== '' && Number.isFinite(n)) onChange(clamp(n));
+  };
+  return (
+    <span className="days-stepper" role="group" aria-label={label}>
+      <button type="button" aria-label="−1" disabled={value <= 0} onClick={() => onChange(clamp(value - 1))}>
+        <Minus size={14} />
+      </button>
+      <input
+        inputMode="numeric"
+        aria-label={label}
+        value={draft ?? String(value)}
+        onChange={(e) => {
+          const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+          setDraft(raw);
+          if (raw) onChange(clamp(Number(raw)));
+        }}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            onChange(clamp(value + (e.key === 'ArrowUp' ? 1 : -1)));
+            setDraft(null);
+          }
+        }}
+      />
+      <span className="days-unit">{t('editor.unit.day', { count: value })}</span>
+      <button type="button" aria-label="+1" disabled={value >= 3660} onClick={() => onChange(clamp(value + 1))}>
+        <Plus size={14} />
+      </button>
+    </span>
   );
 }

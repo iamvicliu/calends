@@ -83,7 +83,7 @@
 }
 .as-suggest button {
   flex-shrink: 0;
-  height: 34px;
+  height: var(--ctl-h-md);
   padding: 0 14px;
   border: 0;
   border-radius: 8px;
@@ -476,8 +476,6 @@
   font-weight: 600;
 }
 .as-card-head {
-  display: flex;
-  align-items: center;
   gap: 12px;
   margin-top: 12px;
 }
@@ -485,6 +483,7 @@
   box-shadow: inset 0 0 0 0.5px var(--line);
 }
 .as-card-id {
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -542,9 +541,8 @@
   font-variant-numeric: tabular-nums;
 }
 .as-card-err {
-  display: flex;
+  overflow-wrap: anywhere;
   gap: 6px;
-  align-items: flex-start;
   margin-top: 10px;
   color: var(--red);
   font-size: 13px;
@@ -558,14 +556,13 @@
   margin-top: 14px;
 }
 .as-card-foot .btn {
-  height: 34px;
+  height: var(--ctl-h-md);
 }
 .as-card-foot .btn:disabled {
   opacity: 0.55;
 }
 .as-ok {
   display: inline-flex;
-  align-items: center;
   gap: 5px;
   margin-right: auto;
   color: var(--green);
@@ -574,7 +571,6 @@
 }
 .as-muted {
   display: inline-flex;
-  align-items: center;
   gap: 5px;
   color: var(--label-3);
   font-size: 13.5px;
@@ -609,12 +605,11 @@
   color: var(--label-2);
 }
 .as-applyall .btn {
-  height: 34px;
+  height: var(--ctl-h-md);
 }
 
 /* 错误 */
 .as-error {
-  display: flex;
   gap: 10px;
   padding: 12px 14px;
   border-radius: 14px;
@@ -624,7 +619,6 @@
 }
 .as-error > svg {
   flex-shrink: 0;
-  margin-top: 2px;
 }
 .as-error div {
   display: flex;
@@ -652,22 +646,6 @@
 .as-actions {
   display: flex;
   gap: 2px;
-  margin-left: -6px;
-}
-.as-actions button {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 0;
-  border-radius: 8px;
-  background: none;
-  color: var(--label-3);
-  cursor: pointer;
-}
-.as-actions button:hover {
-  background: var(--fill-2);
-  color: var(--label);
 }
 
 /* 回到底部 */
@@ -678,9 +656,7 @@
   z-index: 3;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  margin-top: -34px;
+  margin-top: calc(-1 * var(--icon-button-size));
   border: 0;
   border-radius: 50%;
   background: var(--card);
@@ -735,14 +711,11 @@
 }
 .as-att button {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 0;
+  right: 0;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
   border: 2px solid var(--card);
-  border-radius: 50%;
   background: var(--label);
   color: var(--bg);
   cursor: pointer;
@@ -770,20 +743,6 @@
   gap: 6px;
   padding: 4px 10px 10px;
 }
-.as-icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: var(--label-2);
-  cursor: pointer;
-}
-.as-icon:hover:not(:disabled) {
-  background: var(--fill-2);
-}
 .as-tb {
   display: flex;
   gap: 8px;
@@ -792,6 +751,7 @@
   display: none;
 }
 .as-model {
+  height: var(--ctl-h-md);
   padding: 3px 10px;
   border: 0;
   font: inherit;
@@ -801,27 +761,6 @@
   color: var(--label-2);
   font-size: 12px;
   white-space: nowrap;
-}
-.as-send {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--on-ink);
-  cursor: pointer;
-  transition:
-    opacity 0.15s,
-    transform 0.1s;
-}
-.as-send:active:not(:disabled) {
-  transform: scale(0.94);
-}
-.as-send:disabled {
-  opacity: 0.25;
-  cursor: default;
 }
 .as-foot {
   max-width: var(--as-w);
@@ -1025,15 +964,12 @@
   flex: 1;
   border-top: 1px dashed var(--sep);
 }
-/* 当前对话：有历史时至少占满一屏（高度由脚本按顶栏与输入框算出），空状态在其中居中 */
+/* 当前对话：有历史时至少占满一屏（高度由脚本按顶栏与输入框算出）；空状态始终贴在上方，
+   不随历史记录加载完成后改为居中，避免进入页面时跳动 */
 .as-session {
   display: flex;
   flex-direction: column;
   gap: 22px;
-}
-.as-session.fresh > .as-welcome {
-  margin: auto 0;
-  padding-top: 0;
 }
 .as-past .as-card-foot .btn,
 .as-past .as-applyall,

@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Correo, teléfono o usuario", "phone": "Número de teléfono" },
+  "ph": {
+    "account": "Correo, teléfono o usuario",
+    "phone": "Número de teléfono"
+  },
   "overlap": {
     "keep": "Mantener el anterior un tiempo",
     "keepHint": "Ya está prepagado y aún no vence: ambos funcionan a la vez y se cobran como siempre",
@@ -17,7 +20,7 @@
   "clearForm": "Vaciar formulario",
   "revert": "Deshacer cambios",
   "draftRestored": "Se restauró el borrador sin guardar",
-  "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, márcala como Cancelada.",
+  "confirmDelete": "¿Eliminar «{name}»? También se eliminará su historial. Si solo dejaste de renovarla, elige «Detener».",
   "toast": {
     "added": "Añadida",
     "saved": "Guardado",
@@ -58,7 +61,8 @@
     "trial": "Prueba",
     "paused": "En pausa",
     "cancelled": "Cancelada",
-    "terminated": "Desactivado"
+    "terminated": "Desactivado",
+    "stop": "Detener"
   },
   "category": {
     "choose": "Elegir categoría",
@@ -95,7 +99,8 @@
     "showDomainOn": "Los visitantes ven el dominio completo",
     "showDomainOff": "Oculto en la página pública",
     "tagsPlaceholder": "Separadas por espacios",
-    "notesPlaceholder": "Notas (opcional)"
+    "notesPlaceholder": "Notas (opcional)",
+    "pausedAt": "Fecha de pausa"
   },
   "share": {
     "none": "Solo yo",
@@ -111,7 +116,18 @@
     "perPeriod": "Parte por periodo",
     "paidUntil": "Pagado hasta",
     "remove": "Quitar",
-    "addMember": "Añadir miembro"
+    "addMember": "Añadir miembro",
+    "manageHint": "Toca un miembro para seguir la regla del plan o definir una cuota y un ciclo propios",
+    "follows": "Sigue el plan",
+    "custom": "Personalizado",
+    "nextDue": "Próximo {date}",
+    "editMember": "Editar",
+    "overdue": {
+      "one": "{count} día de retraso",
+      "other": "{count} días de retraso"
+    },
+    "dueOn": "Vence {date}",
+    "confirmRemove": "Confirmar"
   },
   "proxy": {
     "for": "Pago por",
@@ -199,7 +215,11 @@
     "range": "{start} → {end}",
     "now": "ahora",
     "initial": "Inicial",
-    "priceChange": "Cambio de precio {date}"
+    "priceChange": "Cambio de precio {date}",
+    "outsidePayments": "{count} pago(s) quedarán fuera del período de servicio. ¿Continuar conservando sus fechas, importes y fase originales?",
+    "editPrice": "Editar precio vigente desde {date}",
+    "deletePrice": "¿Eliminar este precio? El precio anterior se aplicará hasta el siguiente cambio.",
+    "repriceCharges": "Se recalcularán {count} cargos históricos estimados al guardar. Los pagos registrados no cambiarán. ¿Continuar?"
   },
   "payment": {
     "addTitle": "Añadir pago",
@@ -228,5 +248,9 @@
   "timeline": {
     "home": "Volver a hoy (o haz doble clic en la línea de tiempo)"
   },
-  "ai": { "title": "Rellenar con IA", "hint": "Pega un recibo, una captura o texto y se organiza solo", "go": "Pegar" }
+  "ai": {
+    "title": "Rellenar con IA",
+    "hint": "Pega un recibo, una captura o texto y se organiza solo",
+    "go": "Pegar"
+  }
 }

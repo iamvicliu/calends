@@ -156,7 +156,8 @@
     "pendingCount": "还有 {count} 张草稿待确认",
     "applyAll": "全部确认",
     "history": "历史扣款",
-    "historyCount": "{count} 笔"
+    "historyCount": "{count} 笔",
+    "changes": "预览改动与引用"
   },
   "error": {
     "auth": "API Key 无效",

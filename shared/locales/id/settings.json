@@ -49,6 +49,7 @@
     "preview": "Pratinjau pengingat hari ini"
   },
   "today": {
+    "recent": "Baru dikirim",
     "title": "Hari ini ({day})",
     "items": { "other": "{count} item" }
   },

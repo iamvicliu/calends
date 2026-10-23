@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Email, telepon, atau nama pengguna", "phone": "Nomor telepon" },
+  "ph": {
+    "account": "Email, telepon, atau nama pengguna",
+    "phone": "Nomor telepon"
+  },
   "overlap": {
     "keep": "Tetap pakai yang lama sementara",
     "keepHint": "Sudah dibayar di muka dan belum habis: keduanya berjalan bersamaan dan ditagih seperti biasa",
@@ -16,7 +19,7 @@
   "clearForm": "Kosongkan formulir",
   "revert": "Batalkan perubahan",
   "draftRestored": "Draf yang belum disimpan dipulihkan",
-  "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, tandai sebagai Dibatalkan saja.",
+  "confirmDelete": "Hapus “{name}”? Riwayatnya juga akan dihapus. Jika Anda hanya berhenti memperpanjang, pilih Hentikan saja.",
   "toast": {
     "added": "Ditambahkan",
     "saved": "Disimpan",
@@ -53,7 +56,8 @@
     "trial": "Uji coba",
     "paused": "Dijeda",
     "cancelled": "Dibatalkan",
-    "terminated": "Dinonaktifkan"
+    "terminated": "Dinonaktifkan",
+    "stop": "Hentikan"
   },
   "category": {
     "choose": "Pilih kategori",
@@ -90,7 +94,8 @@
     "showDomainOn": "Pengunjung melihat domain lengkap",
     "showDomainOff": "Disamarkan di halaman publik",
     "tagsPlaceholder": "Pisahkan dengan spasi",
-    "notesPlaceholder": "Catatan (opsional)"
+    "notesPlaceholder": "Catatan (opsional)",
+    "pausedAt": "Tanggal jeda"
   },
   "share": {
     "none": "Hanya saya",
@@ -106,7 +111,17 @@
     "perPeriod": "Bagian per periode",
     "paidUntil": "Lunas hingga",
     "remove": "Hapus",
-    "addMember": "Tambah anggota"
+    "addMember": "Tambah anggota",
+    "manageHint": "Ketuk anggota untuk mengikuti aturan paket atau atur biaya dan siklus sendiri",
+    "follows": "Ikuti paket",
+    "custom": "Kustom",
+    "nextDue": "Berikutnya {date}",
+    "editMember": "Ubah",
+    "overdue": {
+      "other": "Terlambat {count} hari"
+    },
+    "dueOn": "Jatuh tempo {date}",
+    "confirmRemove": "Hapus"
   },
   "proxy": {
     "for": "Ditalangi untuk",
@@ -190,7 +205,11 @@
     "range": "{start} → {end}",
     "now": "sekarang",
     "initial": "Awal",
-    "priceChange": "Perubahan harga {date}"
+    "priceChange": "Perubahan harga {date}",
+    "outsidePayments": "{count} pembayaran akan berada di luar masa layanan. Lanjutkan dengan tanggal, jumlah, dan tahap asli?",
+    "editPrice": "Edit harga berlaku {date}",
+    "deletePrice": "Hapus harga ini? Harga sebelumnya berlaku hingga perubahan berikutnya.",
+    "repriceCharges": "Menyimpan akan menghitung ulang {count} perkiraan tagihan lampau. Pembayaran tercatat tidak berubah. Lanjutkan?"
   },
   "payment": {
     "addTitle": "Tambah pembayaran",
@@ -219,5 +238,9 @@
   "timeline": {
     "home": "Kembali ke hari ini (atau klik dua kali linimasa)"
   },
-  "ai": { "title": "Isi dengan AI", "hint": "Tempel struk, tangkapan layar, atau teks, sisanya otomatis", "go": "Tempel" }
+  "ai": {
+    "title": "Isi dengan AI",
+    "hint": "Tempel struk, tangkapan layar, atau teks, sisanya otomatis",
+    "go": "Tempel"
+  }
 }

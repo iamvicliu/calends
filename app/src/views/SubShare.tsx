@@ -170,6 +170,16 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
 
 /** 小票：逐笔列出扣款，最后合计；隐藏金额时列出每期的地区和日期 */
 function SReceipt({ sub, st, hide, m, today }: Ctx) {
+  const end = st.cur.stop?.date ?? st.cur.end ?? sub.end;
+  const farewell = ['ended', 'terminated'].includes(st.status)
+    ? end
+      ? t('share.stoppedOn', { date: cnDateFull(end) })
+      : statusText(st)
+    : st.status === 'ending' && end
+      ? t('share.endsOn', { date: cnDateFull(end) })
+      : st.status === 'paused'
+        ? statusText(st)
+        : t('share.thanks');
   const rows = st.charges.map((c, i) => ({ c, v: st.values[i] })).reverse();
   const shown = rows.slice(0, 14);
   const rest = rows.slice(14);
@@ -233,7 +243,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
           <i key={i} style={{ width: w, marginRight: i % 3 === 0 ? 2 : 1 }} />
         ))}
       </div>
-      <div className="rc-thanks">{t('share.thanks')}</div>
+      <div className="rc-thanks">{farewell}</div>
       <div className="rc-site">{location.host}</div>
     </div>
   );
@@ -334,7 +344,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
           <span>{t('share.byYear')}</span>
         </div>
       </div>
-      <div className="sy-big">{hide ? st.duration : m(-st.total)}</div>
+      <div className="sy-big">{hide || st.years.length === 1 ? st.duration : m(-st.total)}</div>
       <div className="sy-bars">
         {st.years.map(([y, v]) => (
           <div key={y} className="sy-col">

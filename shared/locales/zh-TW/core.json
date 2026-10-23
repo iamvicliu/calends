@@ -38,7 +38,10 @@
     "prependUntil": "補的這段的結束日期要在它開始之後、原來的開始日期之前",
     "priceOutOfRange": "調價日期不在任何階段內",
     "keepTooEarly": "繼續使用的截止日期要晚於生效日期",
-    "endTooEarly": "結束日期要晚於這一階段的開始日期"
+    "endTooEarly": "結束日期要晚於這一階段的開始日期",
+    "startOrder": "開始日必須晚於上一段開始日、早於下一段開始日。",
+    "priceDuplicate": "該日期已有價格記錄",
+    "priceInitial": "起始價不可刪除"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -145,7 +148,7 @@
     "refunded": "已退款 {money}",
     "partial": "部分退款 {money}",
     "unrefunded": "未退款 · 損失 {money}",
-    "unused": "未退款損失：−{money}（{days}）",
+    "unused": "未退款損失：{money}（{days}）",
     "unusedTitle": "未退款",
     "terminated": "已停用",
     "restore": "恢復訂閱",
@@ -157,6 +160,19 @@
     "fullyRefunded": "已全額退款",
     "chargeOnEnd": "這一天仍會續費扣款，改成前一天才不會扣",
     "nonrenewDone": "已設為到期不續，{date} 後不再扣款",
-    "stoppedDone": "已停止服務"
+    "stoppedDone": "已停止服務",
+    "method": "停止方式",
+    "latestRefundHint": "此處修改最近一筆退款，之前的退款保留在扣款紀錄中。"
+  },
+  "renewal": {
+    "title": "續費規則",
+    "chargeLeadDays": "提前扣款",
+    "cancelLeadDays": "需提前取消",
+    "hint": "網域等服務常在到期前自動扣款；Apple 等訂閱需在扣款前取消。只影響扣款日與取消截止日，服務帳期不變。",
+    "cancelBy": "最晚取消日",
+    "invalid": "請輸入 0 至 3660 的整數天數。",
+    "tooLate": "本期已過取消截止，下一期仍會扣款",
+    "cancelReminder": "請在 {date} 前取消，避免下一期扣款。",
+    "none": "不需要"
   }
 }

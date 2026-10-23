@@ -53,7 +53,10 @@
     "prependUntil": "Die frühere Phase muss nach ihrem Beginn und spätestens zum ursprünglichen Startdatum enden",
     "priceOutOfRange": "Das Datum der Preisänderung liegt in keiner Phase",
     "keepTooEarly": "Das Weiterlaufen-bis-Datum muss nach dem Wechseldatum liegen",
-    "endTooEarly": "Das Enddatum muss nach dem Beginn dieser Phase liegen"
+    "endTooEarly": "Das Enddatum muss nach dem Beginn dieser Phase liegen",
+    "startOrder": "Der Beginn muss nach dem Beginn der vorherigen und vor dem der nächsten Phase liegen.",
+    "priceDuplicate": "An diesem Datum gibt es bereits einen Preis",
+    "priceInitial": "Der Anfangspreis kann nicht gelöscht werden"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -175,7 +178,7 @@
     "refunded": "Erstattet {money}",
     "partial": "Teilerstattung {money}",
     "unrefunded": "Keine Erstattung · Verlust {money}",
-    "unused": "Nicht erstatteter Verlust: −{money} ({days})",
+    "unused": "Nicht erstatteter Verlust: {money} ({days})",
     "unusedTitle": "Nicht erstattet",
     "terminated": "Gesperrt",
     "restore": "Reaktivieren",
@@ -188,6 +191,19 @@
     "fullyRefunded": "Vollständig erstattet",
     "chargeOnEnd": "An diesem Tag wird noch verlängert. Wähle den Vortag, um das zu vermeiden.",
     "nonrenewDone": "Keine Verlängerung. Nach dem {date} keine Abbuchungen mehr.",
-    "stoppedDone": "Dienst beendet"
+    "stoppedDone": "Dienst beendet",
+    "method": "Art der Beendigung",
+    "latestRefundHint": "Diese Felder bearbeiten die letzte Erstattung. Frühere Erstattungen bleiben im Zahlungsverlauf."
+  },
+  "renewal": {
+    "title": "Verlängerungsregeln",
+    "chargeLeadDays": "Tage vorab abbuchen",
+    "cancelLeadDays": "Tage vorher kündigen",
+    "hint": "Abbuchung vor der Verlängerung, Kündigung vor der Abbuchung. Tage eingeben; 0 bedeutet keine. Leistungszeiträume bleiben gleich.",
+    "cancelBy": "Kündigungsfrist",
+    "invalid": "Ganze Zahlen von 0 bis 3660 Tagen eingeben.",
+    "tooLate": "Die Kündigungsfrist ist abgelaufen. Der nächste Zeitraum wird noch berechnet.",
+    "cancelReminder": "Bis {date} kündigen, um die nächste Abbuchung zu vermeiden.",
+    "none": "Keine"
   }
 }

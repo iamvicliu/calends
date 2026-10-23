@@ -48,7 +48,10 @@
     "prependUntil": "Giai đoạn trước phải kết thúc sau khi bắt đầu và không muộn hơn ngày bắt đầu ban đầu",
     "priceOutOfRange": "Ngày đổi giá không thuộc giai đoạn nào",
     "keepTooEarly": "Ngày tiếp tục dùng đến phải sau ngày chuyển",
-    "endTooEarly": "Ngày kết thúc phải sau ngày bắt đầu của giai đoạn này"
+    "endTooEarly": "Ngày kết thúc phải sau ngày bắt đầu của giai đoạn này",
+    "startOrder": "Ngày bắt đầu phải nằm giữa ngày bắt đầu của hai giai đoạn liền kề.",
+    "priceDuplicate": "Đã có giá vào ngày này",
+    "priceInitial": "Không thể xóa giá ban đầu"
   },
   "event": {
     "label": "{region}{price}/{per}",
@@ -165,7 +168,7 @@
     "refunded": "Đã hoàn {money}",
     "partial": "Hoàn một phần {money}",
     "unrefunded": "Chưa hoàn tiền · Tổn thất {money}",
-    "unused": "Tổn thất chưa hoàn tiền: −{money} ({days})",
+    "unused": "Tổn thất chưa hoàn tiền: {money} ({days})",
     "unusedTitle": "Chưa hoàn tiền",
     "terminated": "Đã vô hiệu hóa",
     "restore": "Kích hoạt lại",
@@ -177,6 +180,19 @@
     "fullyRefunded": "Đã hoàn toàn bộ",
     "chargeOnEnd": "Ngày này vẫn bị trừ tiền gia hạn. Chọn ngày hôm trước để tránh.",
     "nonrenewDone": "Đã đặt không gia hạn. Sau {date} không còn bị trừ tiền.",
-    "stoppedDone": "Đã dừng dịch vụ"
+    "stoppedDone": "Đã dừng dịch vụ",
+    "method": "Cách dừng",
+    "latestRefundHint": "Các trường này sửa khoản hoàn tiền gần nhất. Các khoản trước vẫn được giữ trong lịch sử thanh toán."
+  },
+  "renewal": {
+    "title": "Quy tắc gia hạn",
+    "chargeLeadDays": "Thu tiền trước",
+    "cancelLeadDays": "Hủy trước",
+    "hint": "Thu tiền trước khi gia hạn, hủy trước khoản thu đó. Nhập số ngày; 0 là không áp dụng. Kỳ dịch vụ không đổi.",
+    "cancelBy": "Hạn chót hủy",
+    "invalid": "Nhập số ngày nguyên từ 0 đến 3660.",
+    "tooLate": "Đã quá hạn hủy. Kỳ tiếp theo vẫn bị tính phí.",
+    "cancelReminder": "Hủy trước {date} để tránh khoản thu tiếp theo.",
+    "none": "Không"
   }
 }

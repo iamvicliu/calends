@@ -5,7 +5,10 @@
   },
   "stat": {
     "owed": "Alacaklar",
-    "owedSub": { "one": "{count} kişi borçlu", "other": "{count} kişi borçlu" },
+    "owedSub": {
+      "one": "{count} kişi borçlu",
+      "other": "{count} kişi borçlu"
+    },
     "allSettled": "Herkes ödeşti",
     "received": "Şimdiye kadar tahsil",
     "receivedSub": "Ortak planlar ve başkaları için ödemeler",
@@ -19,7 +22,10 @@
   "card": {
     "noContact": "İletişim yok",
     "nothing": "Hiçbir planda değil",
-    "past": { "one": "Ayrıca {count} tanesi bitti", "other": "Ayrıca {count} tanesi bitti" }
+    "past": {
+      "one": "Ayrıca {count} tanesi bitti",
+      "other": "Ayrıca {count} tanesi bitti"
+    }
   },
   "kind": {
     "share": "Ortak plan",
@@ -28,7 +34,10 @@
   "item": {
     "paidUntil": "{date} tarihine kadar ödendi",
     "noPay": "Henüz ödeme yok",
-    "owedPeriods": { "one": "{count} dönem borç", "other": "{count} dönem borç" },
+    "owedPeriods": {
+      "one": "{count} dönem borç",
+      "other": "{count} dönem borç"
+    },
     "left": "Ayrıldı",
     "ended": "Durduruldu",
     "received": "Alınan {amount}"
@@ -37,7 +46,10 @@
     "owed": "Alacak",
     "received": "Şimdiye kadar ödenen",
     "last": "Son ödeme",
-    "in": { "one": "{count} planda", "other": "{count} planda" },
+    "in": {
+      "one": "{count} planda",
+      "other": "{count} planda"
+    },
     "inEmpty": "Hiçbir ortak planda veya ödemede yok. Silebilirsiniz.",
     "profile": "Profil",
     "notePh": "ör. iş arkadaşı, ay sonu öder",
@@ -51,7 +63,8 @@
     "mergeFoot": "Aynı kişi iki kez mi kaydedildi? Birleştirince planlar ve ödemeler bir araya gelir.",
     "mergeConfirm": "“{from}” kişisi “{into}” ile birleştirilsin mi? {from} kişisinin tüm planları ve ödemeleri {into} kişisine geçer; ad ve iletişim {into} kişisinden alınır.",
     "merged": "{name} ile birleştirildi",
-    "confirmDelete": "“{name}” silinsin mi?"
+    "confirmDelete": "“{name}” silinsin mi?",
+    "accountMissing": "Bu üyelik artık yok. Kişi ayrıntılarını yeniden açın."
   },
   "pick": {
     "new": "Yeni kişi",
@@ -63,5 +76,15 @@
       "one": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır.",
       "other": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır."
     }
+  },
+  "avatar": {
+    "change": "Avatarı değiştir",
+    "help": "PNG, JPEG veya WebP görselini tıklayın, bırakın veya yapıştırın (en fazla 8 MB).",
+    "remove": "Avatarı kaldır",
+    "removeConfirm": "Bu avatar kaldırılsın mı? Uygulamak için kaydedin.",
+    "fallbackColor": "Yedek renk"
+  },
+  "list": {
+    "none": "Eşleşen kişi yok"
   }
 }

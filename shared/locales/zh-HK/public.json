@@ -56,6 +56,7 @@
     "all": "全部"
   },
   "row": {
+    "ends": " · {date}結束",
     "renews": " · {date}續訂",
     "monthly": "每月",
     "perMonthEq": "折合每月"

@@ -160,7 +160,8 @@
     },
     "applyAll": "Konfirmasi semua",
     "history": "Riwayat tagihan",
-    "historyCount": "{count} tagihan"
+    "historyCount": "{count} tagihan",
+    "changes": "Pratinjau perubahan dan referensi"
   },
   "error": {
     "auth": "API Key tidak valid",

@@ -19,7 +19,21 @@
     "date": "Fecha",
     "member": "Miembro",
     "covers": "Periodo",
-    "amount": "Importe"
+    "amount": "Importe",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
+    "groupSum": {
+      "one": "{count} pago · {amount}",
+      "other": "{count} pagos · {amount}"
+    },
+    "fee": "Tarifa",
+    "nextCollection": "Próximo cobro",
+    "actions": "Acciones",
+    "status": "Estado de pago",
+    "period": "Periodo actual",
+    "range": "{from} – {until}",
+    "rangeFrom": "Desde",
+    "rangeTo": "Hasta"
   },
   "contact": {
     "via": {
@@ -58,8 +72,8 @@
     "name": "Nombre",
     "namePh": "Cómo llamarlo",
     "contact": "Contacto",
-    "account": "Cuenta invitada",
-    "accountPh": "Correo o usuario invitado a {name}",
+    "account": "Cuenta del miembro",
+    "accountPh": "Correo, teléfono, usuario o ID en {name}",
     "joined": "Se unió",
     "joinedPh": "Inicio del plan ({date})",
     "notSet": "Sin definir",
@@ -135,7 +149,10 @@
     "coverAligned": "Termina en el límite del período común",
     "recordNext": "Registrar pago · {amount}",
     "collectionAnchor": "Inicio común de cobro",
-    "firstSummary": "Primer período {from}–{until} · {mode} {amount}"
+    "firstSummary": "Primer período {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Sin cuenta",
+    "editAccount": "Editar cuenta del miembro",
+    "copyAccount": "Copiar cuenta"
   },
   "pool": {
     "seatsFree": "{count} libres",
@@ -206,7 +223,9 @@
     "payTo": "Pagado a {name} · {amount}",
     "ownerDefault": "organizador",
     "maybeGroup": "Posiblemente compartidos",
-    "convert": "Hacer compartido"
+    "convert": "Hacer compartido",
+    "dueOn": "Vence {date}",
+    "nextDueOn": "Próximo cobro {date}"
   },
   "convert": {
     "title": "Hacer compartido «{name}»",
@@ -237,5 +256,40 @@
     "gain": "+{amount}",
     "lost": "−{amount}",
     "noRecords": "Aún no hay pagos"
+  },
+  "collect": {
+    "title": "Registrar cobro · {name}",
+    "next": "Próximo cobro {date}",
+    "editMember": "Editar",
+    "until": "Cubre hasta",
+    "covers": "El pago cubre {from} – {until}",
+    "changeFee": "Cambiar cuota",
+    "lastPayment": "Último pago",
+    "adjustFee": "Ajustar cuota",
+    "feeFrom": "Vigente desde",
+    "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian.",
+    "viewSub": "Ver detalles"
+  },
+  "rule": {
+    "title": "Regla de cobro",
+    "follow": "Seguir plan",
+    "custom": "Personalizado",
+    "followValue": "{rule} (regla del plan)",
+    "sheetTitle": "Regla de cobro del plan",
+    "from": "Desde",
+    "anchor": "Fecha de cobro común",
+    "applyNote": "{count} miembros que siguen el plan cambian desde la fecha indicada; los personalizados y los cobros anteriores no cambian."
+  },
+  "quick": {
+    "more": "Más datos",
+    "paid": "Pagado hasta",
+    "paidFrom": "Inicio del periodo",
+    "paidTo": "Fin del periodo",
+    "late": {
+      "one": "{count} día de retraso",
+      "other": "{count} días de retraso"
+    },
+    "owe": "{amount} pendiente · desde {date}",
+    "settled": "Al día · próximo cobro {date}"
   }
 }

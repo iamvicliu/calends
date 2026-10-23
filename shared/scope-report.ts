@@ -34,7 +34,16 @@ export interface CompositionRow {
   key: string;
   amount: number;
   share: number;
+  other?: true;
 }
+
+export type MovementRow = Movement['items'][number] & {
+  from: number;
+  to: number;
+  /** One event date, or the span of events contributing to this net change. */
+  since: string;
+  until: string;
+};
 
 export type ReportEvent = Pick<LedgerEvent, 'date' | 'sub' | 'delta'> & { kind: LedgerEvent['kind'] | 'trial' | 'cancel' };
 
@@ -42,7 +51,7 @@ export type Block =
   | { type: 'headline'; mode: 'scope'; mrr: number; annual: number; activeCount: number; paid: number; loss: number; change: Comparison }
   | { type: 'headline'; mode: 'month'; month: string; total: number; paid: number; pending: number; count: number; previous: Comparison; yearly?: Comparison }
   | { type: 'trend'; mode: 'scope'; rows: CashAccrual[] }
-  | { type: 'trend'; mode: 'month'; month: string; movement: Movement }
+  | { type: 'trend'; mode: 'month'; month: string; movement: Omit<Movement, 'items'> & { items: MovementRow[] } }
   | { type: 'composition'; categories: CompositionRow[]; methods: CompositionRow[] }
   | { type: 'top'; mode: 'scope'; rows: Array<{ sub: Subscription; amount: number }> }
   | { type: 'top'; mode: 'month'; rows: ChargeRow[] }
@@ -84,14 +93,23 @@ function charges(state: AppState, from: string, to: string, today: string): Char
     .sort((a, b) => a.date.localeCompare(b.date) || a.sub.id.localeCompare(b.sub.id));
 }
 
+/** Ranked composition: at most six rows, with the tail sharing one explicit Other row. */
+export function compactComposition(rows: readonly CompositionRow[]): CompositionRow[] {
+  if (rows.length <= 6) return [...rows];
+  const rest = rows.slice(5);
+  return [...rows.slice(0, 5), { key: '', other: true, amount: sum(rest), share: rest.reduce((a, r) => a + r.share, 0) }];
+}
+
 function composition(rows: Array<{ key: string; amount: number }>): CompositionRow[] {
   const groups = new Map<string, number>();
   for (const r of rows) groups.set(r.key, (groups.get(r.key) ?? 0) + r.amount);
   const total = sum(rows);
-  return [...groups]
-    .filter(([, amount]) => amount > 0)
-    .map(([key, amount]) => ({ key, amount, share: amount / total }))
-    .sort((a, b) => b.amount - a.amount || a.key.localeCompare(b.key));
+  return compactComposition(
+    [...groups]
+      .filter(([, amount]) => amount > 0)
+      .map(([key, amount]) => ({ key, amount, share: amount / total }))
+      .sort((a, b) => b.amount - a.amount || a.key.localeCompare(b.key)),
+  );
 }
 
 function addComposition(blocks: Block[], cat: CompositionRow[], pay: CompositionRow[], scope: boolean) {
@@ -145,14 +163,18 @@ function details(
         .filter((p) => p.date >= sharingFrom && p.date <= sharingTo && p.date <= today)
         .reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0);
       // Only still-unpaid periods originating in this window, not older arrears.
-      const before = new Map(memberDues(sub, addDays(sharingFrom, -1), state.settings.collectCurrency).map((d) => [d.member.id, d.owed]));
-      const owed = memberDues(sub, sharingTo, state.settings.collectCurrency).reduce(
-        (a, d) => a + toBaseAt(state, Math.max(0, d.owed - (before.get(d.member.id) ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo),
+      const before = new Map(memberDues(sub, addDays(sharingFrom, -1), state.settings.collectCurrency, state).map((d) => [d.member.id, d.owed]));
+      const owed = memberDues(sub, sharingTo, state.settings.collectCurrency, state).reduce(
+        (a, d) =>
+          a +
+          (Number.isFinite(d.owed) && Number.isFinite(before.get(d.member.id) ?? 0)
+            ? toBaseAt(state, Math.max(0, d.owed - (before.get(d.member.id) ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo)
+            : NaN),
         0,
       );
       return { sub, received, owed };
     })
-    .filter((r) => r.received !== 0 || r.owed > 0);
+    .filter((r) => r.received !== 0 || r.owed > 0 || !Number.isFinite(r.owed));
   if (sharing.length)
     blocks.push({ type: 'sharing', rows: sharing, received: sharing.reduce((a, r) => a + r.received, 0), owed: sharing.reduce((a, r) => a + r.owed, 0) });
   return blocks;
@@ -214,8 +236,26 @@ export function monthReport(state: AppState, month: string, today: string): Scop
   ];
   if (from <= today) {
     const end = to < today ? to : today;
-    const mv = movement(scoped, addDays(from, -1), end, end === today ? undefined : end);
-    if (mv.items.length || Math.abs(mv.fx) >= 0.005) blocks.push({ type: 'trend', mode: 'month', month, movement: mv });
+    const start = addDays(from, -1);
+    const endFx = end === today ? undefined : end;
+    const mv = movement(scoped, start, end, endFx);
+    if (mv.items.length || Math.abs(mv.fx) >= 0.005) {
+      const changes = events(scoped, end).filter((e) => e.date >= from && e.kind !== 'buy');
+      const items = mv.items.map((r): MovementRow => {
+        const dates = changes
+          .filter((e) => e.sub.id === r.sub.id)
+          .map((e) => e.date)
+          .sort();
+        return {
+          ...r,
+          from: contributionOn(scoped, r.sub, start, endFx),
+          to: contributionOn(scoped, r.sub, end, endFx),
+          since: dates[0] ?? from,
+          until: dates.at(-1) ?? end,
+        };
+      });
+      blocks.push({ type: 'trend', mode: 'month', month, movement: { ...mv, items } });
+    }
   }
   addComposition(
     blocks,

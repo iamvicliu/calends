@@ -19,7 +19,20 @@
     "date": "Ngày",
     "member": "Thành viên",
     "covers": "Kỳ",
-    "amount": "Số tiền"
+    "amount": "Số tiền",
+    "expandAll": "Mở rộng tất cả",
+    "collapseAll": "Thu gọn tất cả",
+    "groupSum": {
+      "other": "{count} khoản · {amount}"
+    },
+    "fee": "Phí",
+    "nextCollection": "Lần thu tiếp theo",
+    "actions": "Thao tác",
+    "status": "Tình trạng thanh toán",
+    "period": "Kỳ hiện tại",
+    "range": "{from} – {until}",
+    "rangeFrom": "Từ",
+    "rangeTo": "Đến"
   },
   "contact": {
     "via": {
@@ -57,8 +70,8 @@
     "name": "Tên",
     "namePh": "Cách bạn gọi họ",
     "contact": "Liên hệ",
-    "account": "Tài khoản được mời",
-    "accountPh": "Email hoặc tên người dùng được mời vào {name}",
+    "account": "Tài khoản thành viên",
+    "accountPh": "Email, điện thoại, tên người dùng hoặc ID trên {name}",
     "joined": "Ngày tham gia",
     "joinedPh": "Ngày bắt đầu gói ({date})",
     "notSet": "Chưa đặt",
@@ -132,7 +145,10 @@
     "coverAligned": "Kết thúc vào cuối kỳ thu chung",
     "recordNext": "Ghi nhận thanh toán · {amount}",
     "collectionAnchor": "Mốc bắt đầu thu chung",
-    "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}"
+    "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}",
+    "accountEmpty": "Chưa điền tài khoản",
+    "editAccount": "Sửa tài khoản thành viên",
+    "copyAccount": "Sao chép tài khoản"
   },
   "pool": {
     "seatsFree": "Trống {count}",
@@ -198,7 +214,9 @@
     "payTo": "Trả cho {name} · {amount}",
     "ownerDefault": "chủ nhóm",
     "maybeGroup": "Có thể đang chia sẻ",
-    "convert": "Chuyển thành gói chia sẻ"
+    "convert": "Chuyển thành gói chia sẻ",
+    "dueOn": "Đến hạn {date}",
+    "nextDueOn": "Lần tới {date}"
   },
   "convert": {
     "title": "Chuyển “{name}” thành gói chia sẻ",
@@ -229,5 +247,39 @@
     "gain": "Lãi {amount}",
     "lost": "Lỗ {amount}",
     "noRecords": "Chưa có khoản thanh toán"
+  },
+  "collect": {
+    "title": "Ghi khoản thu · {name}",
+    "next": "Lần thu tiếp theo {date}",
+    "editMember": "Sửa",
+    "until": "Áp dụng đến",
+    "covers": "Khoản này áp dụng {from} – {until}",
+    "changeFee": "Đổi mức phí",
+    "lastPayment": "Lần thu gần nhất",
+    "adjustFee": "Điều chỉnh phí",
+    "feeFrom": "Có hiệu lực từ",
+    "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",
+    "viewSub": "Xem chi tiết"
+  },
+  "rule": {
+    "title": "Quy tắc thu",
+    "follow": "Theo gói",
+    "custom": "Tùy chỉnh",
+    "followValue": "{rule} (quy tắc gói)",
+    "sheetTitle": "Quy tắc thu của gói",
+    "from": "Áp dụng từ",
+    "anchor": "Ngày thu chung",
+    "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi."
+  },
+  "quick": {
+    "more": "Thêm thông tin",
+    "paid": "Đã trả đến",
+    "paidFrom": "Đầu kỳ",
+    "paidTo": "Cuối kỳ",
+    "late": {
+      "other": "Quá hạn {count} ngày"
+    },
+    "owe": "Còn nợ {amount} · từ {date}",
+    "settled": "Đã thanh toán · lần tới {date}"
   }
 }

@@ -1,5 +1,8 @@
 {
-  "ph": { "account": "Email, số điện thoại hoặc tên đăng nhập", "phone": "Số điện thoại" },
+  "ph": {
+    "account": "Email, số điện thoại hoặc tên đăng nhập",
+    "phone": "Số điện thoại"
+  },
   "overlap": {
     "keep": "Vẫn dùng gói cũ thêm một thời gian",
     "keepHint": "Đã trả trước và chưa hết hạn: hai giai đoạn chạy song song, mỗi bên tính phí như thường",
@@ -16,7 +19,7 @@
   "clearForm": "Xóa biểu mẫu",
   "revert": "Hoàn tác thay đổi",
   "draftRestored": "Đã khôi phục bản nháp chưa lưu",
-  "confirmDelete": "Xóa “{name}”? Lịch sử của gói cũng sẽ bị xóa. Nếu bạn chỉ ngừng gia hạn, hãy đánh dấu là Đã hủy.",
+  "confirmDelete": "Xóa “{name}”? Lịch sử của gói cũng sẽ bị xóa. Nếu bạn chỉ ngừng gia hạn, hãy chọn Dừng.",
   "toast": {
     "added": "Đã thêm",
     "saved": "Đã lưu",
@@ -53,7 +56,8 @@
     "trial": "Dùng thử",
     "paused": "Tạm dừng",
     "cancelled": "Đã hủy",
-    "terminated": "Đã vô hiệu hóa"
+    "terminated": "Đã vô hiệu hóa",
+    "stop": "Dừng"
   },
   "category": {
     "choose": "Chọn danh mục",
@@ -90,7 +94,8 @@
     "showDomainOn": "Khách truy cập thấy đầy đủ tên miền",
     "showDomainOff": "Được che trên trang công khai",
     "tagsPlaceholder": "Phân tách bằng dấu cách",
-    "notesPlaceholder": "Ghi chú (tùy chọn)"
+    "notesPlaceholder": "Ghi chú (tùy chọn)",
+    "pausedAt": "Ngày tạm dừng"
   },
   "share": {
     "none": "Chỉ mình tôi",
@@ -106,7 +111,17 @@
     "perPeriod": "Phần mỗi kỳ",
     "paidUntil": "Đã trả đến",
     "remove": "Xóa",
-    "addMember": "Thêm thành viên"
+    "addMember": "Thêm thành viên",
+    "manageHint": "Chạm vào thành viên để theo quy tắc của nhóm hoặc đặt phí và chu kỳ riêng",
+    "follows": "Theo gói",
+    "custom": "Tùy chỉnh",
+    "nextDue": "Lần tới {date}",
+    "editMember": "Sửa",
+    "overdue": {
+      "other": "Quá hạn {count} ngày"
+    },
+    "dueOn": "Đến hạn {date}",
+    "confirmRemove": "Xác nhận"
   },
   "proxy": {
     "for": "Trả hộ cho",
@@ -190,7 +205,11 @@
     "range": "{start} → {end}",
     "now": "nay",
     "initial": "Ban đầu",
-    "priceChange": "Đổi giá {date}"
+    "priceChange": "Đổi giá {date}",
+    "outsidePayments": "{count} khoản thanh toán sẽ nằm ngoài thời gian dịch vụ. Tiếp tục giữ ngày, số tiền và giai đoạn ban đầu?",
+    "editPrice": "Sửa giá có hiệu lực từ {date}",
+    "deletePrice": "Xóa giá này? Giá trước đó sẽ áp dụng đến lần thay đổi tiếp theo.",
+    "repriceCharges": "Lưu sẽ tính lại {count} khoản trừ tiền ước tính trong quá khứ. Các khoản thanh toán đã ghi giữ nguyên. Tiếp tục?"
   },
   "payment": {
     "addTitle": "Thêm khoản thanh toán",
@@ -219,5 +238,9 @@
   "timeline": {
     "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)"
   },
-  "ai": { "title": "Điền bằng AI", "hint": "Dán hóa đơn, ảnh chụp màn hình hoặc văn bản, phần còn lại tự động", "go": "Dán" }
+  "ai": {
+    "title": "Điền bằng AI",
+    "hint": "Dán hóa đơn, ảnh chụp màn hình hoặc văn bản, phần còn lại tự động",
+    "go": "Dán"
+  }
 }
