@@ -8973,11 +8973,6 @@ a.car-toggle {
   border-radius: var(--radius-pill);
   background: var(--fill-2);
 }
-.mt-track.exempt {
-  height: 0;
-  border-top: var(--hairline) dashed var(--label-3);
-  background: none;
-}
 .mt-seg {
   position: absolute;
   top: 0;
@@ -9973,4 +9968,103 @@ img.mm-flag {
 .gt-today,
 .gt-charge {
   margin-left: -0.25px;
+}
+
+/* 同一日期偏移应用到刻度、成员与空轨道；只有内部内容平移。 */
+.mt-viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+}
+.mt-inner {
+  position: relative;
+  display: block;
+  width: var(--mt-scale, 100%);
+  height: 100%;
+  transform: translateX(var(--mt-x, 0%));
+}
+.car-members[data-mt-left='true'] .mt-viewport {
+  mask-image: linear-gradient(to right, transparent, var(--gray-12) 14px);
+}
+.car-members[data-mt-dragging='true'] .mt-viewport {
+  cursor: grabbing;
+  user-select: none;
+}
+.mt-track.exempt {
+  background: none;
+}
+.mt-track.exempt::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: var(--hairline) dashed var(--label-3);
+  pointer-events: none;
+}
+.mt-track.vacant {
+  background: var(--fill-2);
+  box-shadow: inset 0 0 0 var(--hairline) var(--sep);
+}
+.car-member-chip.vacancy {
+  padding: 0 12px;
+  border: var(--hairline) dashed var(--label-3);
+  background: none;
+  color: var(--label-3);
+}
+.car-member-cards .member > .mt-track,
+.car-member-cards .car-vacancy > .mt-track {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 6px;
+}
+.car-member-cards .departed .member-info .icon-text {
+  color: var(--label-3);
+}
+.car-member-cards > .mt-axis {
+  margin-inline: 16px;
+}
+.car-member-cards .car-vacancy {
+  padding: 12px 16px;
+  min-width: 0;
+  border-top: 0;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+}
+.car-member-cards .car-vacancy > .car-member-chip {
+  justify-self: start;
+}
+.car-member-chip.left .pp-ava,
+.car-member-cards .departed .pp-ava {
+  filter: grayscale(1);
+  opacity: 0.65;
+}
+.car-vacancy:not([data-readonly]) {
+  cursor: pointer;
+}
+.car-vacancy:focus-visible {
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+.car-member-row[data-readonly] {
+  cursor: default;
+}
+.car-departed-toggle {
+  justify-self: start;
+  height: var(--ctl-h-md);
+  color: var(--label-3);
+  border-radius: var(--radius-pill);
+}
+.car-departed-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+@container (min-width: 720px) {
+  .car-member-table tfoot {
+    display: contents;
+  }
+  .car-member-table tfoot td {
+    grid-column: 1 / -1;
+    border-top: var(--hairline) solid var(--sep);
+  }
 }

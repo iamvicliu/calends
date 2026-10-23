@@ -34,7 +34,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "Desde",
     "rangeTo": "Hasta",
-    "showAllPeriods": "Mostrar los {count} periodos"
+    "showAllPeriods": "Mostrar los {count} periodos",
+    "vacancy": "Plaza libre",
+    "departed": "Salidas: {count}"
   },
   "contact": {
     "via": {
@@ -80,7 +82,7 @@
     "notSet": "Sin definir",
     "left": "Salió",
     "leftPh": "Sigue en el plan",
-    "feeGroup": "Facturación",
+    "feeGroup": "Tarifa",
     "seg": {
       "m1": "Mensual",
       "m3": "Trimestral",
@@ -272,11 +274,11 @@
     "viewSub": "Ver detalles"
   },
   "rule": {
-    "title": "Regla de cobro",
+    "title": "Tarifa",
     "follow": "Seguir plan",
     "custom": "Personalizado",
     "followValue": "{rule} (regla del plan)",
-    "sheetTitle": "Regla de cobro del plan",
+    "sheetTitle": "Tarifa",
     "from": "Desde",
     "anchor": "Fecha de cobro común",
     "applyNote": "{count} miembros que siguen el plan cambian desde la fecha indicada; los personalizados y los cobros anteriores no cambian."

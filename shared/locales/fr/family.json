@@ -34,7 +34,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "Du",
     "rangeTo": "Au",
-    "showAllPeriods": "Afficher les {count} périodes"
+    "showAllPeriods": "Afficher les {count} périodes",
+    "vacancy": "Place libre",
+    "departed": "Départs : {count}"
   },
   "contact": {
     "via": {
@@ -80,7 +82,7 @@
     "notSet": "Non défini",
     "left": "Départ",
     "leftPh": "Toujours membre",
-    "feeGroup": "Facturation",
+    "feeGroup": "Tarif",
     "seg": {
       "m1": "Mensuel",
       "m3": "Trimestriel",
@@ -272,11 +274,11 @@
     "viewSub": "Voir les détails"
   },
   "rule": {
-    "title": "Règle de collecte",
+    "title": "Tarif",
     "follow": "Suivre le forfait",
     "custom": "Personnalisé",
     "followValue": "{rule} (règle du forfait)",
-    "sheetTitle": "Règle de collecte du forfait",
+    "sheetTitle": "Tarif",
     "from": "À partir du",
     "anchor": "Date de collecte commune",
     "applyNote": "{count} membres qui suivent le forfait passent à la nouvelle règle ; les membres personnalisés et les paiements passés ne changent pas."

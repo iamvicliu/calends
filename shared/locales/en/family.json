@@ -34,7 +34,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "From",
     "rangeTo": "To",
-    "showAllPeriods": "Show all {count} periods"
+    "showAllPeriods": "Show all {count} periods",
+    "vacancy": "Vacant",
+    "departed": "{count} departed"
   },
   "contact": {
     "via": {
@@ -80,7 +82,7 @@
     "notSet": "Not set",
     "left": "Left",
     "leftPh": "Still on the plan",
-    "feeGroup": "Billing",
+    "feeGroup": "Fee",
     "seg": {
       "m1": "Monthly",
       "m3": "Quarterly",
@@ -272,11 +274,11 @@
     "viewSub": "View details"
   },
   "rule": {
-    "title": "Collection rule",
+    "title": "Fee",
     "follow": "Follow plan",
     "custom": "Custom",
     "followValue": "{rule} (plan rule)",
-    "sheetTitle": "Plan collection rule",
+    "sheetTitle": "Fee",
     "from": "Effective from",
     "anchor": "Collection anchor",
     "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged."

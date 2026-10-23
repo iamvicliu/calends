@@ -33,7 +33,9 @@
     "range": "{from} – {until}",
     "rangeFrom": "開始",
     "rangeTo": "終了",
-    "showAllPeriods": "全 {count} 期間を表示"
+    "showAllPeriods": "全 {count} 期間を表示",
+    "vacancy": "空席",
+    "departed": "退席 {count} 人"
   },
   "contact": {
     "via": {
@@ -263,11 +265,11 @@
     "viewSub": "詳細を見る"
   },
   "rule": {
-    "title": "集金ルール",
+    "title": "料金",
     "follow": "プランに合わせる",
     "custom": "個別",
     "followValue": "{rule}（プラン共通）",
-    "sheetTitle": "プランの集金ルール",
+    "sheetTitle": "料金",
     "from": "適用開始日",
     "anchor": "共通集金日",
     "applyNote": "プランに合わせる {count} 人は適用開始日から新ルールになります。個別設定と過去の入金は変わりません。"
