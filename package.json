@@ -45,6 +45,7 @@
     "matter-js": "^0.20.0",
     "motion": "^14.4.0",
     "number-flow": "^0.6.2",
+    "pinyin-pro": "^3.29.5",
     "radix-ui": "^1.8.1",
     "react": "^19.3.1",
     "react-aria": "^3.53.1",
