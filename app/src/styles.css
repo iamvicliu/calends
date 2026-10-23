@@ -9311,6 +9311,17 @@ img.mm-flag {
 .stop-actions {
   justify-content: flex-end;
 }
+/* 停用 / 退款说明里的金额：损失红色、已退款绿色，与时间轴灰段金额同色 */
+.stop-money {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stop-money.loss {
+  color: var(--red);
+}
+.stop-money.gain {
+  color: var(--green);
+}
 .stop-badge {
   max-width: 100%;
   white-space: normal;

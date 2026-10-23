@@ -2062,3 +2062,23 @@ test('行尾删除需二次确认：第一次点只展开「确认」，第二�
     g.matchMedia = had;
   }
 });
+
+test('停用说明里的金额单独着色：未退款损失为红色，已退款为绿色，无金额时只有文字', () => {
+  const render = (summary: unknown) => {
+    const r = harness(
+      '../app/src/components/StopPanel.tsx',
+      'StopText',
+      {},
+      { stopSummary: () => summary, t: (key: string, p?: { money?: string }) => (p?.money ? `${key}[${p.money}]` : key) },
+    );
+    return r.render('StopText', { sub: { currency: 'USD' }, today });
+  };
+  const money = (nodes: Node[]) => all(nodes).find((n) => n.type === 'b');
+  const loss = money(render({ date: '2026-10-01', refunded: 0, unusedValue: 0.67 }));
+  assert.equal(loss!.props.className, 'stop-money loss');
+  assert.deepEqual(loss!.children, ['−$0.67']);
+  const gain = money(render({ date: '2026-10-01', refunded: 5, refundStatus: 'full', unusedValue: 0 }));
+  assert.equal(gain!.props.className, 'stop-money gain');
+  assert.equal(money(render({ date: '2026-10-01', refunded: 0, unusedValue: 0 })), undefined);
+  assert.deepEqual(all(render({ date: '2099-01-01', refunded: 0, unusedValue: 1 })), []);
+});

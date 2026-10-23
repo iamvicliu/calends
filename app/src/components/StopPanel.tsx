@@ -18,6 +18,27 @@ export function stopLabel(sub: Subscription, today: string): string | undefined 
   return summary.unusedValue > 0 ? t('core.stop.unrefunded', { money: flow(-summary.unusedValue, sub.currency) }) : t('core.stop.refundNo');
 }
 
+/** 与 stopLabel 同一句话，金额单独加粗着色：未退款损失为红色（与时间轴灰段金额一致），已退款为绿色 */
+export function StopText({ sub, today }: { sub: Subscription; today: string }) {
+  const summary = stopSummary(sub, today);
+  if (!summary || summary.date > today) return null;
+  const [key, money, tone] =
+    summary.refunded > 0
+      ? [summary.refundStatus === 'full' ? 'core.stop.refunded' : 'core.stop.partial', flow(summary.refunded, sub.currency), 'gain']
+      : summary.unusedValue > 0
+        ? ['core.stop.unrefunded', flow(-summary.unusedValue, sub.currency), 'loss']
+        : ['core.stop.refundNo', '', ''];
+  if (!money) return <>{t(key)}</>;
+  const [before, after = ''] = t(key, { money: '\u0000' }).split('\u0000');
+  return (
+    <>
+      {before}
+      <b className={`stop-money ${tone}`}>{money}</b>
+      {after}
+    </>
+  );
+}
+
 export function stopDescription(sub: Subscription, today: string): string {
   const summary = stopSummary(sub, today);
   if (!summary) return '';
@@ -42,12 +63,8 @@ export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: 
   const cur = currentPhase(sub, today);
   const label = readonly ? undefined : stopLabel(cur, today);
   return label ? (
-    <span
-      className="badge stop-badge"
-      style={stopSummary(cur, today)!.refunded > 0 ? { color: 'var(--green)' } : undefined}
-      title={stopDescription(cur, today)}
-    >
-      {label}
+    <span className="badge stop-badge" title={stopDescription(cur, today)}>
+      <StopText sub={cur} today={today} />
     </span>
   ) : null;
 }

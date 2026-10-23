@@ -22,7 +22,7 @@ import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { usePref } from '../store.ts';
 import { monthReport } from '../../../shared/scope-report.ts';
 import { ScopeReport, SpendingDelta } from '../components/ScopeReport.tsx';
-import { stopDescription, stopLabel } from '../components/StopPanel.tsx';
+import { StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 
 /** 表头的星期简称，按周起始日排好 */
 const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
@@ -274,7 +274,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                               // 下次扣款就是选中的这一天时，标题已写明日期，不再重复
                               <small>{t('calendar.nextCharge', { date: cnDateAuto(next, today) })}</small>
                             ) : null}
-                            {stopped && <small title={stopDescription(cur, today)}>{stopped}</small>}
+                            {stopped && (
+                              <small title={stopDescription(cur, today)}>
+                                <StopText sub={cur} today={today} />
+                              </small>
+                            )}
                           </span>
                           <span className="cal-dc-amt">
                             {amt.main}

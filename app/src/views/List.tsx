@@ -1,4 +1,4 @@
-import { StopBadge, stopDescription, stopLabel } from '../components/StopPanel.tsx';
+import { StopBadge, StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
@@ -412,7 +412,7 @@ export function List({
                         {/* 退款情况单独一行，窄屏不挤掉名称 */}
                         {!state.readonly && stopLabel(cur, today) && (
                           <small className="lt-stop" title={stopDescription(cur, today)}>
-                            {stopLabel(cur, today)}
+                            <StopText sub={cur} today={today} />
                           </small>
                         )}
                         {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
