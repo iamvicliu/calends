@@ -1,7 +1,7 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../../shared/billing.ts';
 import { moneyTick, flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -393,13 +393,13 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
           <b>{i.title}</b>
           <p>{i.body}</p>
           {!!(i.subs?.length || i.methods?.length) && (
-            <div className="ins-subs">
+            <div className="ins-subs" style={{ '--n': (i.methods?.length ?? 0) + Math.min(12, i.subs?.length ?? 0) } as CSSProperties}>
               {i.methods?.map((m) => (
                 <a className="icon-btn sub-shortcut" key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
                   <MethodMark m={m} size={22} />
                 </a>
               ))}
-              {(i.subs ?? []).slice(0, 7).map((s) => (
+              {(i.subs ?? []).slice(0, 12).map((s) => (
                 <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                   <SubIcon sub={s} size={22} />
                 </IconButton>

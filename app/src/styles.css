@@ -3473,7 +3473,20 @@ select.btn {
   line-height: 1.55;
 }
 .tip-card .ins-subs {
-  margin-top: 4px;
+  /* 图标行始终贴在卡片底部，三张卡等高时底边对齐 */
+  margin-top: auto;
+  padding-top: 4px;
+  container-type: inline-size;
+  flex-wrap: nowrap;
+  gap: 0;
+  min-width: 0;
+}
+/* 一行放不下时左右叠放：间距按可用宽度自动收成负值 */
+.tip-card .ins-subs > * {
+  flex-shrink: 0;
+}
+.tip-card .ins-subs > * + * {
+  margin-left: min(4px, (100cqw - var(--n, 1) * var(--icon-button-size)) / max(1, var(--n, 1) - 1));
 }
 
 /* 订阅历程 */
