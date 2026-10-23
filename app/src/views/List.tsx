@@ -20,6 +20,7 @@ import { Picker } from '../components/Picker.tsx';
 import { usePref } from '../store.ts';
 import { scopeReport } from '../../../shared/scope-report.ts';
 import { ScopeReport } from '../components/ScopeReport.tsx';
+import { useTextSearch } from '../use-search.ts';
 
 type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'terminated' | 'lifetime' | 'all';
 type Sort = 'next' | 'cost' | 'name' | 'start';
@@ -110,8 +111,9 @@ export function List({
   const methodName = new Map(state.methods.map((m) => [m.id, m.name]));
   const haystack = (s: Subscription) =>
     [s.name, s.category, ...s.tags, s.notes, s.region, s.url, methodName.get(payOf(s))].filter(Boolean).join(' ').toLowerCase();
+  const matches = useTextSearch(mine.map(haystack));
   const hit = (s: Subscription, skip?: 'status' | 'cat' | 'pay') => {
-    if (words.length && !words.every((w) => haystack(s).includes(w))) return false;
+    if (words.length && !words.every((w) => matches(w, haystack(s)))) return false;
     if (skip !== 'status' && filter !== 'all' && statusOf(effectiveStatus(s, today)) !== filter) return false;
     if (skip !== 'cat' && cat !== 'all' && s.category !== cat) return false;
     if (skip !== 'pay' && pay !== 'all' && payOf(s) !== pay) return false;

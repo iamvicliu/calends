@@ -4,6 +4,7 @@ import { t } from '../../../shared/i18n.ts';
 import { ccyFlag, ccyName } from '../display.ts';
 import { Icon } from './ui.tsx';
 import { Pop } from './Pop.tsx';
+import { useTextSearch } from '../use-search.ts';
 
 /**
  * 侧边栏的货币切换：点开在右侧弹出，可搜索。最上面是「原币」，然后是常用币种，再往下是汇率接口支持的全部货币。
@@ -16,18 +17,22 @@ export function CurrencyPicker({ value, used, all, onChange }: { value: string; 
   const btn = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLDivElement>(null);
 
+  const origText = `${t('picker.ccy.orig')} 原币 original`;
+  const searchText = (c: string) => `${c} ${ccyName(c)} ${symbol(c)}`;
+  const matches = useTextSearch([origText, ...used.map(searchText), ...all.map(searchText)], open);
+
   // 搜索：代码、中文名、符号都能搜
   const sections = useMemo(() => {
     const k = q.trim().toLowerCase();
-    const hit = (c: string) => !k || c.toLowerCase().includes(k) || ccyName(c).toLowerCase().includes(k) || symbol(c).toLowerCase().includes(k);
+    const hit = (c: string) => matches(k, searchText(c));
     const out: Array<{ title?: string; items: string[] }> = [];
-    if (!k || `${t('picker.ccy.orig')} 原币 original`.toLowerCase().includes(k)) out.push({ items: ['orig'] });
+    if (matches(k, origText)) out.push({ items: ['orig'] });
     const u = used.filter(hit);
     if (u.length) out.push({ title: t('picker.common'), items: u });
     const r = all.filter((c) => !used.includes(c) && hit(c));
     if (r.length) out.push({ title: k ? t('common.other') : t('picker.ccy.all'), items: r });
     return out;
-  }, [q, used, all]);
+  }, [q, used, all, matches, origText]);
   const flat = sections.flatMap((s) => s.items);
 
   useEffect(() => setHi(Math.max(0, flat.indexOf(value))), [open]);

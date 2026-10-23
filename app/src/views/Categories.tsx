@@ -11,6 +11,7 @@ import { Picker } from '../components/Picker.tsx';
 import { IconButton, ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
 import { categories } from '../derive.ts';
 import { run, saveCategories, toast } from '../store.ts';
+import { useTextSearch } from '../use-search.ts';
 
 /** 分类色块：分类色的浅底 + 同色图标 */
 function CatTile({ cat, size = 30 }: { cat: Pick<Category, 'name' | 'icon' | 'color'>; size?: number }) {
@@ -123,11 +124,12 @@ function CategoriesSheet({ state, onClose }: { state: AppState; onClose: () => v
 function IconPicker({ value, onChange, tint }: { value?: string; onChange: (v: string) => void; tint: string }) {
   const [q, setQ] = useState('');
   const k = q.trim().toLowerCase();
+  const matches = useTextSearch(Object.keys(CAT_ICON_GROUPS).map((g) => t(`settings.cat.group.${g}`)));
   const groups = Object.entries(CAT_ICON_GROUPS)
     .map(([g, names]) => {
       const label = t(`settings.cat.group.${g}`);
       // 按图标英文名搜，也按分组名搜（输入「出行」能找到车、飞机）
-      return { g, label, names: k && !label.toLowerCase().includes(k) ? names.filter((n) => n.replace(/-/g, ' ').includes(k)) : names };
+      return { g, label, names: k && !matches(k, label) ? names.filter((n) => n.replace(/-/g, ' ').includes(k)) : names };
     })
     .filter((x) => x.names.length);
   return (

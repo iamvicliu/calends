@@ -33,6 +33,98 @@ const functionRange = (ast, name) => {
 };
 const inside = (node, range) => range && node.range[0] >= range[0] && node.range[1] <= range[1];
 
+test('compiled search hook refreshes an unchanged query when the lazy dictionary arrives', async () => {
+  const { loadSearch, searchIndex, matchText } = await import('../app/src/search.ts');
+  const source = readFileSync(new URL('use-search.ts', root), 'utf8').replace(/^import .*;\n/gm, '');
+  const compiled = transformSync('use-search.ts', source, { lang: 'ts', reactCompiler: true });
+  assert.equal(compiled.fatal, false);
+  const code = compiled.code.replace(/^import .*;\n/gm, '').replace('export function', 'function');
+  const memo = [];
+  let ready = 0;
+  let effect;
+  const hook = new Function('useState', 'useEffect', '_c', 'locale', 'loadSearch', 'searchIndex', 'matchText', `${code}; return useTextSearch;`)(
+    () => [
+      ready,
+      (update) => {
+        ready = update(ready);
+      },
+    ],
+    (callback) => {
+      effect = callback;
+    },
+    (size) => {
+      if (!memo.length) memo.push(...Array(size).fill(Symbol.for('react.memo_cache_sentinel')));
+      return memo;
+    },
+    () => 'zh-CN',
+    loadSearch,
+    searchIndex,
+    matchText,
+  );
+  const texts = ['土耳其 TR'];
+  assert.equal(hook(texts)('teq', texts[0]), false);
+  const cleanup = effect();
+  await loadSearch('zh-CN');
+  await Promise.resolve();
+  assert.equal(hook(texts)('teq', texts[0]), true);
+  assert.equal(hook(texts)('TR', texts[0]), true);
+  cleanup();
+});
+
+test('payment method picker filters names by pinyin and keeps currency code matching', async () => {
+  const { loadSearch, searchIndex, matchText } = await import('../app/src/search.ts');
+  await loadSearch('zh-CN');
+  const [, ast, source] = sources.find(([file]) => file === 'components/MethodPicker.tsx');
+  const compiled = transformSync('MethodPicker.tsx', source.slice(...functionRange(ast, 'MethodPicker')), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  const methods = [
+    { id: 'bank', name: '招商银行', kind: 'bank', currency: 'CNY' },
+    { id: 'wallet', name: '土耳其钱包', kind: 'bank', currency: 'TRY' },
+  ];
+  let query = '';
+  let cursor = 0;
+  const Picker = new Function(
+    'React',
+    'useState',
+    'useRef',
+    'useTextSearch',
+    't',
+    'KIND_LABEL',
+    'Icon',
+    'MethodMark',
+    'Pop',
+    `${compiled.code}; return MethodPicker;`,
+  )(
+    React,
+    () => [cursor++ === 0 ? true : query, () => {}],
+    () => ({ current: null }),
+    (texts) => {
+      const indexes = new Map(texts.map((text) => [text, searchIndex(text, 'zh-CN')]));
+      return (key, text) => matchText(key, indexes.get(text), 'zh-CN');
+    },
+    (key) => key,
+    { bank: '银行卡' },
+    () => null,
+    () => null,
+    ({ children }) => React.createElement('div', null, children),
+  );
+  for (const [key, expected, excluded] of [
+    ['zsyh', '招商银行', '土耳其钱包'],
+    ['tuerqi', '土耳其钱包', '招商银行'],
+    ['try', '土耳其钱包', '招商银行'],
+  ]) {
+    query = key;
+    cursor = 0;
+    const html = renderToStaticMarkup(React.createElement(Picker, { methods, onChange() {} }));
+    const list = html.slice(html.indexOf('role="listbox"'));
+    assert.ok(list.includes(expected));
+    assert.ok(!list.includes(excluded));
+  }
+});
+
 test('app title hints go through CardTitle so text and trigger share an alignment context', () => {
   const failures = [];
   for (const [file, ast] of sources) {
