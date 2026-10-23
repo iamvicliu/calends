@@ -157,7 +157,9 @@
     "firstSummary": "Kỳ đầu {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Chưa điền tài khoản",
     "editAccount": "Sửa tài khoản thành viên",
-    "copyAccount": "Sao chép tài khoản"
+    "copyAccount": "Sao chép tài khoản",
+    "toastPayEdited": "Đã cập nhật khoản thu",
+    "editPayAria": "Sửa khoản thu này"
   },
   "pool": {
     "seatsFree": "Trống {count}",
@@ -263,7 +265,8 @@
     "adjustFee": "Điều chỉnh phí",
     "feeFrom": "Có hiệu lực từ",
     "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",
-    "viewSub": "Xem chi tiết"
+    "viewSub": "Xem chi tiết",
+    "editTitle": "Sửa khoản thu\n{name}"
   },
   "rule": {
     "title": "Phí",

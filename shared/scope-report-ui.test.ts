@@ -2442,3 +2442,45 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   // 下车成员的那笔收款仍归入原有账本。
   assert.ok(nodes.some((n) => n.type === 'Seg' && n.props.options[0][1] === 'family.sheet.tabIn'));
 });
+
+test('收款表点某一笔直接进入这笔收款的编辑，而不是成员资料', () => {
+  const payment = { date: '2026-01-01', from: '2026-01-01', until: '2026-06-30', amount: 40, currency: 'USD', note: '实收待核对' };
+  const member = { id: 'm', name: 'M', share: 44, joined: '2026-01-01', paidUntil: '2026-06-30', payments: [payment] };
+  const s: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 40,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    start: '2026-01-01',
+    share: { role: 'owner', seats: 4, collectFrom: '2026-01-01', members: [member] },
+  };
+  const r = harness(
+    '../app/src/views/Carpool.tsx',
+    'CarSheet,CarFacts',
+    {},
+    { Sheet: 'Sheet', NameLink: 'NameLink', perBill: () => '', createPortal: () => null },
+  );
+  const calls: unknown[][] = [];
+  const props = {
+    state: st,
+    s,
+    today,
+    book: carpool.carLedger(st, s, today),
+    onClose() {},
+    onOpenSub() {},
+    onMember: () => calls.push(['member']),
+    onPayment: (m: unknown, p: unknown) => calls.push(['payment', m, p]),
+  };
+  r.render('CarSheet', props)
+    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')!
+    .props.onClick();
+  const row = r.render('CarSheet', props).find((n) => n.type === 'button' && n.props.className === 'ld-row')!;
+  row.props.onClick();
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], 'payment');
+  assert.equal((calls[0][2] as typeof payment).amount, 40);
+});

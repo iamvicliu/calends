@@ -126,6 +126,7 @@ export function MemberSheet({
   s,
   member,
   collect,
+  editPay,
   onClose,
   onOpenSub,
 }: {
@@ -133,6 +134,8 @@ export function MemberSheet({
   s: Subscription;
   member?: ShareMember;
   collect?: boolean;
+  /** 从收款表点某一笔进来：直接打开这笔收款的编辑表单 */
+  editPay?: MemberPayment;
   onClose: () => void;
   /** 记收款弹窗顶部「查看详情」：打开这条订阅的详情 */
   onOpenSub?: () => void;
@@ -176,7 +179,14 @@ export function MemberSheet({
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const [adding, setAdding] = useState(!!collect);
   // 从「收款」按钮进来：只显示记一笔收款的小表单，不展开成员资料；需要时再切到完整资料
-  const [quick, setQuick] = useState(!!collect && !isNew);
+  const [quick, setQuick] = useState((!!collect || !!editPay) && !isNew);
+  // 正在修改的那一笔收款（f.payments 下标）；backToFull 表示从资料页的收款列表进来，保存后回到资料页
+  const [editing, setEditing] = useState<number | null>(() => {
+    if (!editPay) return null;
+    const i = (member?.payments ?? []).findIndex((p) => p.date === editPay.date && p.until === editPay.until && p.amount === editPay.amount);
+    return i < 0 ? null : i;
+  });
+  const [backToFull, setBackToFull] = useState(false);
   const [feeFrom, setFeeFrom] = useState(today);
   // 收费方式：跟随车的规则，或这个人自定义周期与金额（老数据收费与车不一致时视为自定义）
   const rule = carRule(state, s, today);
@@ -190,7 +200,7 @@ export function MemberSheet({
     const period = memberCollection(s, m, from, base);
     return { date: today, amount: period.amount, currency: period.currency, from, until: period.until };
   };
-  const [pay, setPay] = useState<MemberPayment>(() => freshPay(f));
+  const [pay, setPay] = useState<MemberPayment>(() => (editing != null ? { ...f.payments![editing] } : freshPay(f)));
   const [payMoneyEdited, setPayMoneyEdited] = useState(false);
   const first = memberCollection(s, f, f.joined ?? s.share?.since ?? s.start, base);
   // 改收费周期或金额时，份额跟着换算
@@ -240,6 +250,43 @@ export function MemberSheet({
     } finally {
       setSaving(false);
     }
+  };
+  // 修改一笔收款：替换原记录，已付至按全部记录重算（单独填过更晚的已付至仍保留）
+  const updatePayment = async (i: number) => {
+    if (saving) return;
+    const old = f.payments ?? [];
+    const recordedUntil = old.reduce((a, p) => (p.until > a ? p.until : a), '');
+    const knownUntil = f.paidUntil && f.paidUntil > recordedUntil ? f.paidUntil : '';
+    const payments = old.map((p, k) => (k === i ? pay : p)).sort((a, b) => a.date.localeCompare(b.date));
+    const paidUntil = payments.reduce((a, p) => (p.until > a ? p.until : a), knownUntil) || undefined;
+    const next = { ...f, payments, paidUntil };
+    const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+    const sh = current.share!;
+    setSaving(true);
+    try {
+      await run(async () => {
+        await saveSub({ ...current, share: { ...sh, collectFrom: collectionAnchor(s), members: sh.members.map((x) => (x.id === next.id ? next : x)) } });
+        setF(next);
+        leaveEdit();
+      }, t('family.member.toastPayEdited'));
+    } finally {
+      setSaving(false);
+    }
+  };
+  const startEdit = (i: number) => {
+    setEditing(i);
+    setPay({ ...(f.payments ?? [])[i] });
+    setBackToFull(true);
+    setQuick(true);
+  };
+  // 离开编辑：从资料页进来的回到资料页，从收款表直达的关掉
+  const leaveEdit = () => {
+    setEditing(null);
+    if (backToFull) {
+      setQuick(false);
+      setBackToFull(false);
+      setPay(freshPay(f));
+    } else onClose();
   };
   const removePayment = (i: number) => {
     const payments = (f.payments ?? []).filter((_, k) => k !== i);
@@ -298,15 +345,27 @@ export function MemberSheet({
     return (
       <Sheet
         narrow
-        title={t('family.collect.title', { name: f.name || t('family.member.defaultName') })}
-        onClose={onClose}
+        title={t(editing != null ? 'family.collect.editTitle' : 'family.collect.title', { name: f.name || t('family.member.defaultName') })}
+        onClose={editing != null ? leaveEdit : onClose}
         foot={
           <>
-            <button className="btn" onClick={onClose}>
+            {editing != null && (
+              <button
+                className="btn danger"
+                style={{ marginRight: 'auto' }}
+                onClick={() => {
+                  removePayment(editing);
+                  leaveEdit();
+                }}
+              >
+                {t('common.delete')}
+              </button>
+            )}
+            <button className="btn" onClick={editing != null ? leaveEdit : onClose}>
               {t('family.member.cancel')}
             </button>
-            <button className="btn primary" disabled={payInvalid} onClick={addPayment}>
-              {t('family.member.record')}
+            <button className="btn primary" disabled={payInvalid} onClick={() => (editing != null ? updatePayment(editing) : addPayment())}>
+              {editing != null ? t('common.save') : t('family.member.record')}
             </button>
           </>
         }
@@ -644,7 +703,7 @@ export function MemberSheet({
             const i = (f.payments ?? []).indexOf(p);
             return (
               <div key={`${p.date}-${i}`} className="cell member-pay">
-                <span className="cell-l">
+                <button type="button" className="cell-l member-pay-edit" onClick={() => startEdit(i)} aria-label={t('family.member.editPayAria')}>
                   <span className="green">{flow(p.amount, p.currency)}</span>
                   <small>
                     {copyParts(
@@ -654,7 +713,7 @@ export function MemberSheet({
                     )}
                     {copyParts(p.note ? `\n${p.note}` : '')}
                   </small>
-                </span>
+                </button>
                 <span className="cell-r">
                   {others.length > 0 && (
                     <IconButton

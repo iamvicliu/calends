@@ -161,7 +161,9 @@
     "firstSummary": "Primer período {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Sin cuenta",
     "editAccount": "Editar cuenta del miembro",
-    "copyAccount": "Copiar cuenta"
+    "copyAccount": "Copiar cuenta",
+    "toastPayEdited": "Pago actualizado",
+    "editPayAria": "Editar este pago"
   },
   "pool": {
     "seatsFree": "{count} libres",
@@ -272,7 +274,8 @@
     "adjustFee": "Ajustar cuota",
     "feeFrom": "Vigente desde",
     "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian.",
-    "viewSub": "Ver detalles"
+    "viewSub": "Ver detalles",
+    "editTitle": "Editar pago\n{name}"
   },
   "rule": {
     "title": "Tarifa",

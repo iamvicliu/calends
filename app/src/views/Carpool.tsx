@@ -24,7 +24,7 @@ import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } fr
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { chargeValue, convertOn } from '../../../shared/fx.ts';
-import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
+import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { SortControl } from '../components/SortControl.tsx';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
@@ -127,7 +127,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
-  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; full?: boolean } | null>(null);
+  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; full?: boolean; pay?: MemberPayment } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
   const [sheet, setSheet] = useState<string | null>(null);
   const sheetSub = sheet ? state.subscriptions.find((x) => x.id === sheet) : undefined;
@@ -335,9 +335,10 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               onOpen(sheetSub);
             }}
             onMember={(m, c) => setMember({ s: sheetSub, m, collect: c })}
+            onPayment={(m, pay) => setMember({ s: sheetSub, m, pay })}
           />
         )}
-        {member?.m && !member.collect && !member.full && (
+        {member?.m && !member.collect && !member.full && !member.pay && (
           <MemberBillingSheet
             state={state}
             s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
@@ -346,12 +347,13 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             onMore={() => setMember({ ...member, full: true })}
           />
         )}
-        {member && (!member.m || member.collect || member.full) && (
+        {member && (!member.m || member.collect || member.full || member.pay) && (
           <MemberSheet
             state={state}
             s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
             member={member.m}
             collect={member.collect}
+            editPay={member.pay}
             onClose={() => setMember(null)}
             onOpenSub={() => {
               const sub = state.subscriptions.find((x) => x.id === member.s.id) ?? member.s;
@@ -791,6 +793,7 @@ export function CarSheet({
   onClose,
   onOpenSub,
   onMember,
+  onPayment,
 }: {
   state: AppState;
   s: Subscription;
@@ -800,6 +803,8 @@ export function CarSheet({
   onClose: () => void;
   onOpenSub: () => void;
   onMember: (m?: ShareMember, collect?: boolean) => void;
+  /** 收款表点某一笔：直接编辑这笔收款 */
+  onPayment?: (m: ShareMember, pay: MemberPayment) => void;
 }) {
   const [masked, setMasked] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -1119,7 +1124,7 @@ export function CarSheet({
                 </button>
                 {openIn.has(g.key) &&
                   g.list.map(({ m, p, base: v }, i) => (
-                    <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
+                    <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => (onPayment ? onPayment(m, p) : onMember(m))}>
                       <span>
                         <b className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
                           {m.name || t('family.pool.unnamed')}

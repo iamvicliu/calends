@@ -157,7 +157,9 @@
     "firstSummary": "初回 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "アカウント未入力",
     "editAccount": "メンバーアカウントを編集",
-    "copyAccount": "アカウントをコピー"
+    "copyAccount": "アカウントをコピー",
+    "toastPayEdited": "受取を更新しました",
+    "editPayAria": "この受取を編集"
   },
   "pool": {
     "seatsFree": "空き {count}",
@@ -263,7 +265,8 @@
     "adjustFee": "料金を調整",
     "feeFrom": "適用開始日",
     "feeHelp": "対象期間の開始日の料金を期間全体に適用します。記録済みの入金は変更されません。",
-    "viewSub": "詳細を見る"
+    "viewSub": "詳細を見る",
+    "editTitle": "受取を編集\n{name}"
   },
   "rule": {
     "title": "料金",

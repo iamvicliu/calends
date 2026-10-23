@@ -161,7 +161,9 @@
     "firstSummary": "First period {from}–{until}\n{mode} {amount}",
     "accountEmpty": "No account added",
     "editAccount": "Edit member account",
-    "copyAccount": "Copy account"
+    "copyAccount": "Copy account",
+    "toastPayEdited": "Payment updated",
+    "editPayAria": "Edit this payment"
   },
   "pool": {
     "seatsFree": "{count} open",
@@ -272,7 +274,8 @@
     "adjustFee": "Adjust fee",
     "feeFrom": "Effective from",
     "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",
-    "viewSub": "View details"
+    "viewSub": "View details",
+    "editTitle": "Edit payment\n{name}"
   },
   "rule": {
     "title": "Fee",

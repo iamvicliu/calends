@@ -168,7 +168,9 @@
     "firstSummary": "Первый период {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Аккаунт не указан",
     "editAccount": "Изменить аккаунт участника",
-    "copyAccount": "Копировать аккаунт"
+    "copyAccount": "Копировать аккаунт",
+    "toastPayEdited": "Платёж обновлён",
+    "editPayAria": "Изменить этот платёж"
   },
   "pool": {
     "seatsFree": "Свободно {count}",
@@ -289,7 +291,8 @@
     "adjustFee": "Настроить тариф",
     "feeFrom": "Действует с",
     "feeHelp": "Тариф на дату начала покрытия применяется ко всему периоду. Сохранённые платежи не меняются.",
-    "viewSub": "Подробнее"
+    "viewSub": "Подробнее",
+    "editTitle": "Изменить платёж\n{name}"
   },
   "rule": {
     "title": "Плата",

@@ -161,7 +161,9 @@
     "firstSummary": "İlk dönem {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Hesap girilmedi",
     "editAccount": "Üye hesabını düzenle",
-    "copyAccount": "Hesabı kopyala"
+    "copyAccount": "Hesabı kopyala",
+    "toastPayEdited": "Ödeme güncellendi",
+    "editPayAria": "Bu ödemeyi düzenle"
   },
   "pool": {
     "seatsFree": "{count} boş",
@@ -272,7 +274,8 @@
     "adjustFee": "Ücreti ayarla",
     "feeFrom": "Geçerlilik tarihi",
     "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez.",
-    "viewSub": "Ayrıntıları gör"
+    "viewSub": "Ayrıntıları gör",
+    "editTitle": "Ödemeyi düzenle\n{name}"
   },
   "rule": {
     "title": "Ücret",

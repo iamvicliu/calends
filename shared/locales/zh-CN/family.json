@@ -151,7 +151,9 @@
     "firstSummary": "首期 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "未填账号",
     "editAccount": "编辑成员账号",
-    "copyAccount": "复制账号"
+    "copyAccount": "复制账号",
+    "toastPayEdited": "已更新收款",
+    "editPayAria": "修改这笔收款"
   },
   "pool": {
     "seatsFree": "空 {count} 位",
@@ -247,7 +249,8 @@
     "adjustFee": "调整收费（从某日起）",
     "feeFrom": "生效日期",
     "feeHelp": "整期按覆盖起点的收费计算，已记收款不变。",
-    "viewSub": "查看详情"
+    "viewSub": "查看详情",
+    "editTitle": "修改收款\n{name}"
   },
   "rule": {
     "title": "收费",

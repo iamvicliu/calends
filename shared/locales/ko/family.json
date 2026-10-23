@@ -157,7 +157,9 @@
     "firstSummary": "첫 기간 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "계정 미입력",
     "editAccount": "멤버 계정 편집",
-    "copyAccount": "계정 복사"
+    "copyAccount": "계정 복사",
+    "toastPayEdited": "수령 내역을 수정했습니다",
+    "editPayAria": "이 수령 수정"
   },
   "pool": {
     "seatsFree": "빈자리 {count}",
@@ -263,7 +265,8 @@
     "adjustFee": "요금 조정",
     "feeFrom": "적용 시작일",
     "feeHelp": "적용 기간 시작일의 요금이 전체 기간에 적용됩니다. 저장된 수금 내역은 변경되지 않습니다.",
-    "viewSub": "상세 보기"
+    "viewSub": "상세 보기",
+    "editTitle": "수령 수정\n{name}"
   },
   "rule": {
     "title": "요금",

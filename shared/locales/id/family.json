@@ -157,7 +157,9 @@
     "firstSummary": "Periode pertama {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Akun belum diisi",
     "editAccount": "Edit akun anggota",
-    "copyAccount": "Salin akun"
+    "copyAccount": "Salin akun",
+    "toastPayEdited": "Pembayaran diperbarui",
+    "editPayAria": "Ubah pembayaran ini"
   },
   "pool": {
     "seatsFree": "{count} kosong",
@@ -263,7 +265,8 @@
     "adjustFee": "Sesuaikan biaya",
     "feeFrom": "Berlaku mulai",
     "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",
-    "viewSub": "Lihat detail"
+    "viewSub": "Lihat detail",
+    "editTitle": "Ubah pembayaran\n{name}"
   },
   "rule": {
     "title": "Biaya",

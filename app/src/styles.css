@@ -5017,6 +5017,24 @@ button.h-price-row:focus-visible {
   min-width: 0;
   max-width: none;
 }
+/* 整笔收款可点开修改：按钮去掉默认外观，悬停时浅底提示 */
+.member-pay-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: -6px 0 -6px -8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.member-pay-edit:hover {
+  background: var(--hover);
+}
 .member-pay .cell-r {
   flex: 0 0 auto;
   gap: 6px;
@@ -8542,8 +8560,9 @@ a.car-toggle {
   border-bottom: 0;
 }
 .car-receipts .ld-row {
-  grid-template-columns: minmax(0, 1fr) 130px 120px;
-  column-gap: 24px;
+  /* 日期与金额靠在一起，不把三列拉到两端 */
+  grid-template-columns: minmax(0, 1fr) 96px 104px;
+  column-gap: 16px;
   min-height: var(--ctl-h-md);
 }
 .car-receipts .ld-row > span {
@@ -8594,8 +8613,8 @@ a.car-toggle {
 }
 /* 付款表的年份分组与数据行同样三列，卡上实扣与成本各自合计在对应列下 */
 .car-receipts-out .car-period {
-  grid-template-columns: minmax(0, 1fr) 130px 120px;
-  column-gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 96px 104px;
+  column-gap: 16px;
 }
 .car-receipts-out .car-period > span:not(:first-child) {
   text-align: right;
@@ -8624,6 +8643,13 @@ a.car-toggle {
 }
 .car-receipts .ld-row:not(.car-period) > span:first-child small {
   font-size: var(--fs-1);
+}
+/* 备注（如「实收待核对」、退款）跟在名字后面同一行，横向空间足够 */
+.car-receipts .ld-row:not(.car-period):not(.ld-th) > span:first-child {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
 }
 @media (max-width: 560px) {
   .car-receipts .ld-row {
