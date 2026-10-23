@@ -5822,7 +5822,7 @@ a.car-toggle {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  border: var(--hairline) solid var(--line);
+  border: var(--hairline) solid color-mix(in srgb, var(--line) 50%, transparent);
   border-radius: var(--radius-pill);
   background: var(--fill-2);
   color: var(--label-2);
@@ -5837,8 +5837,9 @@ a.car-toggle {
 }
 .cal-charge-day > i {
   flex: 1;
-  height: 0;
-  border-top: var(--hairline) dashed var(--line);
+  height: 1px;
+  /* 自绘虚线：线段 3px、间隔 6px，比浏览器默认的 dashed 疏朗 */
+  background: repeating-linear-gradient(90deg, var(--line) 0 3px, transparent 3px 9px);
 }
 .cal-charge-row {
   align-items: center;
