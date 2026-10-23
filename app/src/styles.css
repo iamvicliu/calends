@@ -1054,26 +1054,57 @@ a {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: none;
+  /* 实体银行卡模拟：材质、反光和投影属于卡面内容。颜色不随页面主题翻转。 */
+  --pc-ink: color-mix(in srgb, var(--black-a12) 88%, var(--white-a12));
+  --pc-muted: color-mix(in srgb, var(--black-a12) 58%, var(--white-a12));
+  --pc-gold: color-mix(in srgb, var(--amber-9) 64%, var(--white-a12));
+  --pc-gold-edge: color-mix(in srgb, var(--amber-9) 62%, var(--black-a12));
+  box-shadow:
+    0 8px 24px var(--black-a4),
+    inset 0 var(--hairline) 0 var(--white-a4);
   cursor: pointer;
   isolation: isolate;
   border: 0;
   text-align: left;
   width: 100%;
-  background: var(--card-bg, linear-gradient(135deg, var(--iris-12), var(--slate-12)));
-  /* 无回弹的平滑减速（相当于阻尼 1 的弹簧）：进出都从当前位置接着走，不会跳 */
-  transition: none;
-  will-change: transform;
+  background: var(
+    --card-bg,
+    linear-gradient(135deg, color-mix(in srgb, var(--slate-9) 60%, var(--black-a12)), color-mix(in srgb, var(--slate-9) 28%, var(--black-a12)))
+  );
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition:
+    transform var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease),
+    scale var(--duration) var(--ease),
+    var(--sort-t, translate 0s);
 }
 .paycard:hover {
-  box-shadow: none;
-}
-/* 悬停中跟手：倾斜的变化要快，不然会拖泥带水 */
-.paycard:hover {
-  transition: none;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px) scale(1.01);
+  box-shadow:
+    0 14px 30px -8px var(--black-a6),
+    inset 0 var(--hairline) 0 var(--white-a5);
 }
 .paycard:active {
-  transition-duration: var(--duration);
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(0.99);
+}
+.paycard::before,
+.paycard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.paycard::before {
+  background: radial-gradient(400px 200px at 0% 0%, var(--white-a5), transparent 65%);
+}
+.paycard::after {
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--white-a5), transparent 60%);
+}
+.paycard:hover::after {
+  opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
   .paycard,
@@ -1107,8 +1138,10 @@ a {
   width: clamp(28px, 11cqw, 36px);
   height: clamp(21px, 8.3cqw, 27px);
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--orange-4), var(--gold-8));
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+  background: linear-gradient(135deg, var(--pc-gold), var(--pc-gold-edge));
+  box-shadow:
+    inset 0 0 0 var(--hairline) var(--black-a4),
+    inset 0 var(--hairline) 0 var(--white-a8);
 }
 .pc-bal {
   font-size: var(--fs-4);
@@ -3764,7 +3797,7 @@ button.h-price-row:focus-visible {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
-  filter: none;
+  filter: drop-shadow(0 2px 3px var(--black-a3));
 }
 .pc-logo.appstore {
   width: 26px;
@@ -3792,12 +3825,26 @@ button.h-price-row:focus-visible {
 
 /* SIM 卡托：普通卡片外形，右半边是 SIM 压痕 */
 .paycard.sim {
-  color: var(--label);
-  background: linear-gradient(155deg, var(--white-a12) 0%, var(--cyan-2) 60%, var(--slate-3) 100%);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+  color: var(--pc-ink);
+  background: linear-gradient(
+    155deg,
+    var(--white-a12) 0%,
+    color-mix(in srgb, var(--white-a12) 96%, var(--black-a12)) 60%,
+    color-mix(in srgb, var(--white-a12) 91%, var(--black-a12)) 100%
+  );
+  box-shadow:
+    0 8px 24px var(--black-a3),
+    inset 0 0 0 var(--hairline) var(--black-a3),
+    inset 0 var(--hairline) 0 var(--white-a11);
+}
+.paycard.sim::before {
+  background: radial-gradient(260px 160px at 0% 100%, color-mix(in srgb, var(--amber-9) 12%, transparent), transparent 70%);
 }
 .paycard.sim:hover {
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+  box-shadow:
+    0 12px 28px var(--black-a4),
+    inset 0 0 0 var(--hairline) var(--black-a3),
+    inset 0 var(--hairline) 0 var(--white-a11);
 }
 .sim-top {
   display: flex;
@@ -3821,24 +3868,17 @@ button.h-price-row:focus-visible {
   display: block;
   font-size: var(--fs-1);
   font-weight: 500;
-  color: var(--label-2);
+  color: var(--pc-muted);
   margin-top: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .paycard.sim .pc-foot .o {
-  color: var(--label-2);
+  color: var(--pc-muted);
   opacity: 1;
 }
 .paycard.sim .pc-bal .amt {
-  color: var(--blue-12);
-}
-.paycard.sim .pc-foot .o {
-  color: var(--label-2);
-  opacity: 1;
-}
-.paycard.sim .pc-bal .amt {
-  color: var(--blue-12);
+  color: var(--pc-ink);
 }
 
 /* ================================================================
@@ -4300,21 +4340,41 @@ button.h-price-row:focus-visible {
 /* ================================================================
    App Store 卡：参照 Apple Card 的白色钛金属卡面，标志做激光蚀刻效果
    ================================================================ */
-.paycard.apple {
-  color: var(--label);
-  background: linear-gradient(135deg, var(--indigo-1) 0%, var(--slate-3) 45%, var(--slate-5) 100%);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+.paycard.apple,
+.paycard.light {
+  color: var(--pc-ink);
+  background: linear-gradient(
+    135deg,
+    var(--white-a12) 0%,
+    color-mix(in srgb, var(--white-a12) 95%, var(--black-a12)) 45%,
+    color-mix(in srgb, var(--white-a12) 88%, var(--black-a12)) 100%
+  );
+  box-shadow:
+    inset 0 0 0 var(--hairline) var(--black-a3),
+    inset 0 var(--hairline) 0 var(--white-a11),
+    0 8px 22px var(--black-a3);
 }
-.paycard.apple:hover {
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+.paycard.apple:hover,
+.paycard.light:hover {
+  box-shadow:
+    inset 0 0 0 var(--hairline) var(--black-a4),
+    inset 0 var(--hairline) 0 var(--white-a11),
+    0 12px 28px var(--black-a4);
+}
+/* 钛金属斜向反光与随鼠标移动的光泽。 */
+.paycard.apple::before {
+  background: linear-gradient(115deg, transparent 28%, var(--white-a9) 44%, transparent 60%);
+}
+.paycard.apple::after {
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), var(--white-a9), transparent 60%);
 }
 .ac-logo {
   width: 34px;
   height: 34px;
-  background: linear-gradient(145deg, var(--slate-7), var(--slate-9));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--white-a12) 82%, var(--black-a12)), color-mix(in srgb, var(--white-a12) 60%, var(--black-a12)));
   -webkit-mask: url('/brands/appstore.svg') center / contain no-repeat;
   mask: url('/brands/appstore.svg') center / contain no-repeat;
-  filter: none;
+  filter: drop-shadow(0 var(--hairline) 0 var(--white-a11));
 }
 .ac-flag {
   font-size: var(--fs-3);
@@ -4322,7 +4382,7 @@ button.h-price-row:focus-visible {
 }
 .ac-o {
   font-size: var(--fs-1);
-  color: var(--label-2);
+  color: var(--pc-muted);
 }
 .paycard.apple .pc-bal {
   margin-top: 2px;
@@ -4334,14 +4394,10 @@ button.h-price-row:focus-visible {
   font-size: var(--fs-2);
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--label-2);
+  color: var(--pc-muted);
 }
 
 /* 白底卡面（Google Play）：深色文字与细描边 */
-.paycard.light {
-  color: var(--label);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
-}
 .paycard.light .pc-ccy {
   background: color-mix(in srgb, var(--black-a12) 6%, transparent);
 }
@@ -4540,11 +4596,23 @@ button.h-price-row:focus-visible {
   user-select: none;
   -webkit-user-select: none;
 }
-.paycard.lifted {
+.paycard.lifted,
+.paycard.lifted:hover {
   z-index: 5;
-  scale: 1;
+  scale: 1.02;
+  transform: none;
   cursor: grabbing;
-  box-shadow: none;
+  box-shadow: 0 18px 36px var(--black-a5);
+}
+
+.wallet-grid.dragging .paycard::after {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .paycard.lifted,
+  .paycard.lifted:hover {
+    scale: 1;
+  }
 }
 
 /* 全站隐藏滚动条（页面、侧边栏、弹窗、横向滚动区），保留滚动能力 */
@@ -4712,7 +4780,7 @@ button.h-price-row:focus-visible {
 }
 .pc-top .net-mark {
   flex-shrink: 0;
-  box-shadow: none;
+  box-shadow: 0 2px 5px var(--black-a3);
 }
 
 /* 分类胶囊：分类色淡底 + 图标 + 名称 */
@@ -7323,7 +7391,7 @@ a.car-toggle {
   font-size: var(--fs-3);
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: var(--blue-12);
+  color: var(--pc-ink);
 }
 .pk-brand {
   width: 20px;

@@ -404,13 +404,22 @@ test('borders use hairlines and keyboard focus uses only the shared ring', () =>
   assert.deepEqual(failures, []);
 });
 
-test('remaining CSS transitions use 250ms ease-out and cards do not lift on hover', () => {
+// Only physical wallet-card surfaces may tilt, reflect light and cast material shadows.
+const physicalCardSelector = (selector) => selector.split(',').every((sel) => /^(?:\.wallet-grid\.dragging )?\.paycard(?=[.:\s]|$)/.test(sel.trim()));
+const leafRules = (css) => cssRules(css).flatMap(([selector, body]) => (selector.startsWith('@') ? leafRules(body) : [[selector, body]]));
+
+test('remaining CSS transitions use 250ms ease-out and only physical cards lift on hover', () => {
   for (const [file, css] of styleSources) {
-    for (const [, value] of css.matchAll(/transition:\s*([^;]+);/g)) {
-      if (value.startsWith('none')) continue;
-      for (const part of value.split(',')) assert.match(part.trim(), /^[\w-]+ var\(--duration\) var\(--ease\)$/, `${file}: ${value}`);
+    for (const [selector, body] of leafRules(css)) {
+      for (const [, value] of body.matchAll(/transition:\s*([^;]+);/g)) {
+        if (value.startsWith('none')) continue;
+        // dnd-kit owns only translate timing; card transform/shadow still use the shared transition.
+        const fixed = physicalCardSelector(selector) ? value.replace(/,\s*var\(--sort-t, translate 0s\)/, '') : value;
+        for (const part of fixed.split(',')) assert.match(part.trim(), /^[\w-]+ var\(--duration\) var\(--ease\)$/, `${file}: ${value}`);
+      }
+      if (selector.includes(':hover') && !physicalCardSelector(selector))
+        assert.doesNotMatch(body, /transform:\s*(?:translateY\(-|perspective)/, `${file}: ${selector}`);
     }
-    assert.doesNotMatch(css, /:hover[^{}]*\{[^{}]*transform:\s*(?:translateY\(-|perspective)/, file);
   }
   const css = readFileSync(new URL('components/ui.css', root), 'utf8');
   assert.match(css, /animation: rm-pop var\(--duration\) var\(--ease\)/);
@@ -563,9 +572,12 @@ test('glass is limited to sticky toolbars and sheet headers and footers', () => 
 
 test('decorative spotlights and left-edge callouts do not return', () => {
   for (const [file, css] of styleSources) {
-    assert.doesNotMatch(css, /--m[xy]\b/, file);
-    for (const [, body] of css.matchAll(/[^{}]+\{([^{}]*radial-gradient[^{}]*)\}/g)) {
-      // The remaining radial gradients cut the functional receipt-paper edges.
+    for (const [selector, body] of leafRules(css)) {
+      // Pointer reflections and material lighting are content on simulated physical cards only.
+      if (physicalCardSelector(selector)) continue;
+      assert.doesNotMatch(body, /--m[xy]\b/, `${file}: ${selector}`);
+      if (!body.includes('radial-gradient')) continue;
+      // The other remaining radial gradients cut functional receipt-paper edges.
       assert.match(body, /(?:-webkit-)?mask:\s*radial-gradient/, file);
       assert.doesNotMatch(body, /background(?:-image)?:[^;]*radial-gradient/, file);
     }
