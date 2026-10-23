@@ -6499,6 +6499,17 @@ a.car-toggle {
 .gt-track {
   position: relative;
   margin-right: 16px;
+  /* 两侧缓冲区画在轨道外，裁掉；纵向不裁，并行段与扣款刻度照常显示 */
+  overflow-x: clip;
+}
+/* 平移层：手势中只改 --gt-shift 整体位移，松手后才按新窗口重排 */
+.gt-pan {
+  position: absolute;
+  inset: 0;
+  transform: translateX(var(--gt-shift, 0px));
+}
+.gt.panning .gt-pan {
+  will-change: transform;
 }
 .gt-tick {
   position: absolute;
@@ -6528,6 +6539,9 @@ a.car-toggle {
   bottom: 0;
   width: 1px;
   background: var(--sep);
+}
+.gt-now {
+  z-index: 3;
 }
 .gt-grid i.major {
   background: var(--line);
@@ -7090,7 +7104,8 @@ a.car-toggle {
     width var(--duration) var(--ease);
 }
 /* 拖动列宽时直接跟手，不做过渡 */
-.gt.resizing :is(.gt-seg, .gt-gap, .gt-unused, .gt-stop, .gt-lifetime, .gt-life-tail, .gt-charge, .gt-tick, .gt-grid i, .gt-today) {
+.gt.resizing :is(.gt-seg, .gt-gap, .gt-unused, .gt-stop, .gt-lifetime, .gt-life-tail, .gt-charge, .gt-tick, .gt-grid i, .gt-today),
+.gt.panning :is(.gt-seg, .gt-gap, .gt-unused, .gt-stop, .gt-lifetime, .gt-life-tail, .gt-charge, .gt-tick, .gt-grid i, .gt-today) {
   transition: none;
 }
 @media (prefers-reduced-motion: reduce) {

@@ -116,6 +116,10 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
   const listeners: Record<string, (event: unknown) => void> = {};
   const timers = new Map<number, () => void>();
   let timerId = 0;
+  // 动画帧：随渲染循环一起冲刷，模拟浏览器在下一帧执行
+  const frames = new Map<number, () => void>();
+  let frameId = 0;
+  const shift: { value?: string; classes: Set<string> } = { classes: new Set() };
   let opened = 0;
   let changed = false;
   const env = { narrow: false, portrait: false, containerWidth: 1000, textScale: 7 };
@@ -201,6 +205,8 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     perLabel: () => 'mo',
     stopDescription: () => '',
     clearTimeout: (id: number) => timers.delete(id),
+    requestAnimationFrame: (fn: () => void) => (frames.set(++frameId, fn), frameId),
+    cancelAnimationFrame: (id: number) => frames.delete(id),
     window: { setTimeout: (fn: () => void) => (timers.set(++timerId, fn), timerId) },
   };
   const source = read('../app/src/views/Gantt.tsx').replace(/^import[\s\S]*?;\n/gm, '');
@@ -236,9 +242,16 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
         querySelector: () => ({ appendChild() {}, getBoundingClientRect: () => ({ width: parseFloat(track.props.style['--lw']) }) }),
         addEventListener: (name: string, fn: (event: unknown) => void) => (listeners[name] = fn),
         removeEventListener: (name: string) => delete listeners[name],
+        style: { setProperty: (_name: string, value: string) => (shift.value = value) },
+        classList: { add: (...c: string[]) => c.forEach((x) => shift.classes.add(x)), remove: (...c: string[]) => c.forEach((x) => shift.classes.delete(x)) },
       };
       pendingEffects.splice(0).forEach((fn) => fn());
-    } while (changed);
+      if (!changed && !pendingEffects.length) {
+        const due = [...frames.values()];
+        frames.clear();
+        due.forEach((fn) => fn());
+      }
+    } while (changed || frames.size);
     return nodes;
   };
   return {
@@ -247,6 +260,7 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     prefCalls,
     listeners,
     timers,
+    shift,
     sub,
     env,
     fontReady: () => fontReady(),
@@ -279,10 +293,8 @@ test('真实时间轴的默认/旧偏好回退为 1 年，五档按顺序保存�
     let nodes = host.render();
     nodes.find((el) => el.props['aria-label'] === 'Later')!.props.onClick();
     assert.ok(find('gt-range').props.className.includes('moved'));
-    assert.equal(
-      host.render().some((el) => el.props.className === 'gt-today'),
-      false,
-    );
+    const todayLine = host.render().find((el) => el.props.className === 'gt-today');
+    assert.ok(!todayLine || todayLine.props.style.left <= 0 || todayLine.props.style.left >= 214, '翻到未来后今天线在可视区外');
     assert.ok(
       host.render().some((el) => el.props.className?.startsWith('gt-seg ')),
       '持续订阅翻到未来仍有条段',
@@ -351,10 +363,13 @@ test('短窗口在窄/宽轨道中绘出价格、扣款、试用、首期优惠�
       assert.ok(trialParts.every((el) => el.props.style.width > 0 && el.props.style.width <= width));
       assert.ok(all(rows[2]).some((el) => el.props.className?.split(' ').includes('planned')));
       assert.ok(all(rows[3]).some((el) => el.props.className?.split(' ').includes('intro')));
-      for (const el of nodes.filter((el) => el.props.className?.startsWith('gt-seg '))) {
-        assert.ok(Number.isFinite(el.props.style.left) && el.props.style.left >= 0 && el.props.style.left <= width);
-        assert.ok(el.props.style.width > 0 && el.props.style.width <= width);
+      // 可平移时左右各多画一屏作缓冲：条段落在 [-width, 2·width] 内，且可视区里有条段
+      const segs = nodes.filter((el) => el.props.className?.startsWith('gt-seg '));
+      for (const el of segs) {
+        assert.ok(Number.isFinite(el.props.style.left) && el.props.style.left >= -width && el.props.style.left <= 2 * width);
+        assert.ok(el.props.style.width > 0 && el.props.style.left + el.props.style.width <= 2 * width + 0.001);
       }
+      assert.ok(segs.some((el) => el.props.style.left < width && el.props.style.left + el.props.style.width > 0));
     }
   }
 });
@@ -465,4 +480,22 @@ test('时间轴横滑在零宽度和全部范围仍被拦截，纵滑与等量�
       if (width === 0 || zoom === 'all') assert.equal(host.timers.size, 0);
     }
   }
+});
+
+test('横滑与拖动在手势中只写位移变量，停下后才提交窗口并恢复过渡', () => {
+  setLocale('en', [flatten('list', JSON.parse(read('./locales/en/list.json')))]);
+  const host = mount('1y', 600);
+  const find = () => host.render().find((el) => el.props.className?.split(' ').includes('gt-range'))!;
+  const before = find().children.join("");
+  for (let i = 0; i < 5; i++) host.listeners.wheel({ deltaX: 20, deltaY: 0, preventDefault() {} });
+  host.render();
+  assert.equal(find().children.join(""), before, '手势中不重算窗口');
+  assert.equal(host.shift.value, '-100px');
+  assert.ok(host.shift.classes.has('panning'), '手势中关闭位置过渡');
+  [...host.timers.values()].forEach((fn) => fn());
+  const after = find();
+  assert.notEqual(after.children.join(""), before);
+  assert.ok(after.props.className.includes('moved'));
+  assert.equal(host.shift.value, '0px', '对齐到月份后无残余位移');
+  assert.ok(!host.shift.classes.has('panning'));
 });
