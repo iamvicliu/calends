@@ -66,5 +66,11 @@
   "debitBasis": "Prélèvements positifs uniquement ; les remboursements figurent séparément et ne réduisent ni la répartition ni le classement.",
   "other": "Autres",
   "minimize": "Réduire au résumé",
-  "movementBasis": "Coûts mensuels de ma part en devise de base, au taux de fin de période. Les dates indiquent les changements ou la période du rapport sans événement enregistré."
+  "movementBasis": "Coûts mensuels de ma part en devise de base, au taux de fin de période. Les dates indiquent les changements ou la période du rapport sans événement enregistré.",
+  "totalSpent": "Total dépensé",
+  "totalBasis": "Dépenses réelles pour ces abonnements depuis le premier prélèvement, selon ma part et remboursements déduits. Les achats à vie et abonnements arrêtés n’ont pas de coût mensuel, le total est donc affiché.",
+  "totalSince": "Depuis le {date}",
+  "subsCount": "Abonnements",
+  "average": "Moyenne par abonnement",
+  "topTotal": "Les {count} plus grosses dépenses totales"
 }

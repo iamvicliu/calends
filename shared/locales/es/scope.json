@@ -65,5 +65,11 @@
   "debitBasis": "Solo cargos positivos; los reembolsos se muestran aparte y no reducen el desglose ni la clasificación.",
   "other": "Otros",
   "minimize": "Reducir a resumen",
-  "movementBasis": "Costes mensuales de mi parte en la moneda base, al tipo de cambio de fin de período. Las fechas indican los cambios o el período del informe si no hay eventos registrados."
+  "movementBasis": "Costes mensuales de mi parte en la moneda base, al tipo de cambio de fin de período. Las fechas indican los cambios o el período del informe si no hay eventos registrados.",
+  "totalSpent": "Total gastado",
+  "totalBasis": "Gasto real en estas suscripciones desde el primer cargo hasta hoy, con mi parte y descontando reembolsos. Las licencias de por vida y las suscripciones detenidas no tienen coste mensual, así que se muestra el total.",
+  "totalSince": "Desde {date}",
+  "subsCount": "Suscripciones",
+  "average": "Media por suscripción",
+  "topTotal": "Los {count} con mayor gasto total"
 }

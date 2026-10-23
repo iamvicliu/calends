@@ -66,5 +66,11 @@
   "debitBasis": "Apenas cobranças positivas; reembolsos aparecem separadamente e não reduzem a composição nem a classificação.",
   "other": "Outros",
   "minimize": "Reduzir ao resumo",
-  "movementBasis": "Custos mensais da minha parte na moeda base, ao câmbio do fim do período. As datas indicam as alterações ou o período do relatório quando não há eventos registrados."
+  "movementBasis": "Custos mensais da minha parte na moeda base, ao câmbio do fim do período. As datas indicam as alterações ou o período do relatório quando não há eventos registrados.",
+  "totalSpent": "Total gasto",
+  "totalBasis": "Gasto real com estas assinaturas desde a primeira cobrança até hoje, na minha parte e descontando reembolsos. Compras vitalícias e assinaturas encerradas não têm custo mensal, então o total é mostrado.",
+  "totalSince": "Desde {date}",
+  "subsCount": "Assinaturas",
+  "average": "Média por assinatura",
+  "topTotal": "Os {count} maiores gastos totais"
 }

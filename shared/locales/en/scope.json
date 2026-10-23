@@ -65,5 +65,11 @@
   "debitBasis": "Positive charges only; refunds are listed separately and do not reduce the breakdown or ranking.",
   "other": "Other",
   "minimize": "Minimize to summary",
-  "movementBasis": "Monthly costs in the base currency, my share, valued at the period-end exchange rate. Dates show the contributing events, or the reporting window when no event is recorded."
+  "movementBasis": "Monthly costs in the base currency, my share, valued at the period-end exchange rate. Dates show the contributing events, or the reporting window when no event is recorded.",
+  "totalSpent": "Total spent",
+  "totalBasis": "Actual spending on these subscriptions from the first charge to today, at my share and net of refunds. Lifetime and stopped subscriptions have no ongoing monthly cost, so the total is shown instead.",
+  "totalSince": "Since {date}",
+  "subsCount": "Subscriptions",
+  "average": "Average each",
+  "topTotal": "Top {count} by total spent"
 }

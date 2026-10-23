@@ -342,8 +342,9 @@
   }
 }
 
-/* 窄栏里的事实：两行两列，无底色、无分割线；与上方大数字留出段落间距 */
-.metric-cards.plain {
+/* 大数字下方的指标与上方说明行留出段落间距（窄栏两列与报告头部一行都适用） */
+.metric-cards.plain,
+.hero-delta + .metric-cards {
   margin-top: 20px;
 }
 .metric-cards.plain .metric-grid {

@@ -64,5 +64,11 @@
   "debitBasis": "Chỉ tính các khoản chi dương; tiền hoàn được liệt kê riêng và không khấu trừ vào cơ cấu hoặc xếp hạng.",
   "other": "Khác",
   "minimize": "Thu nhỏ về tóm tắt",
-  "movementBasis": "Chi phí hàng tháng phần của tôi bằng tiền tệ cơ sở theo tỷ giá cuối kỳ. Ngày thể hiện các thay đổi liên quan hoặc kỳ báo cáo nếu không có sự kiện được ghi nhận."
+  "movementBasis": "Chi phí hàng tháng phần của tôi bằng tiền tệ cơ sở theo tỷ giá cuối kỳ. Ngày thể hiện các thay đổi liên quan hoặc kỳ báo cáo nếu không có sự kiện được ghi nhận.",
+  "totalSpent": "Tổng đã chi",
+  "totalBasis": "Chi tiêu thực tế cho các gói này từ lần thanh toán đầu đến hôm nay, theo phần của tôi và đã trừ hoàn tiền. Mua vĩnh viễn và gói đã dừng không có chi phí hằng tháng nên hiển thị tổng.",
+  "totalSince": "Từ {date}",
+  "subsCount": "Số gói",
+  "average": "Trung bình mỗi gói",
+  "topTotal": "{count} khoản chi tổng cao nhất"
 }

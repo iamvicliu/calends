@@ -65,5 +65,11 @@
   "debitBasis": "Nur positive Abbuchungen; Erstattungen werden separat aufgeführt und mindern weder Aufschlüsselung noch Rangliste.",
   "other": "Sonstige",
   "minimize": "Zur Zusammenfassung verkleinern",
-  "movementBasis": "Monatliche Kosten meines Anteils in der Basiswährung zum Wechselkurs am Periodenende. Die Daten zeigen Änderungen oder ohne erfasste Ereignisse den Berichtszeitraum."
+  "movementBasis": "Monatliche Kosten meines Anteils in der Basiswährung zum Wechselkurs am Periodenende. Die Daten zeigen Änderungen oder ohne erfasste Ereignisse den Berichtszeitraum.",
+  "totalSpent": "Insgesamt ausgegeben",
+  "totalBasis": "Tatsächliche Ausgaben für diese Abos von der ersten Abbuchung bis heute, mit meinem Anteil und abzüglich Erstattungen. Dauerlizenzen und beendete Abos haben keine laufenden Monatskosten, daher wird die Summe gezeigt.",
+  "totalSince": "Seit {date}",
+  "subsCount": "Abos",
+  "average": "Durchschnitt pro Abo",
+  "topTotal": "Die {count} höchsten Gesamtausgaben"
 }

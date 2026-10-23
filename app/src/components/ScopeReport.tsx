@@ -3,7 +3,7 @@ import { numberFormat } from '../../../shared/intl.ts';
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
-import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
+import { cnDateAuto, cnDateFull, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import type { Block, ChargeRow, Comparison, MovementRow, ReportEvent, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
@@ -171,6 +171,21 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const render = (block: Block): ReactNode => {
     switch (block.type) {
       case 'headline':
+        if (block.mode === 'total')
+          return (
+            <>
+              {headlineHeading('scope.totalSpent', 'scope.totalBasis')}
+              <div className="hero-num num">{expense(block.total)}</div>
+              <div className="hero-delta">
+                <span className="muted">{t('scope.totalSince', { date: cnDateFull(block.since) })}</span>
+              </div>
+              <MetricCards inline>
+                {fact(t('scope.subsCount'), block.count)}
+                {block.count > 1 && fact(t('scope.average'), expense(block.average))}
+                {block.yearPaid !== 0 && fact(t('scope.yearPaid'), expense(block.yearPaid))}
+              </MetricCards>
+            </>
+          );
         return block.mode === 'scope' ? (
           <>
             {headlineHeading('scope.monthly', 'scope.mrrBasis')}
@@ -373,7 +388,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading(
-              block.mode === 'scope' ? 'topMonthly' : 'topCharges',
+              block.mode === 'scope' ? 'topMonthly' : block.mode === 'total' ? 'topTotal' : 'topCharges',
               block.mode === 'month' ? 'debitBasis' : undefined,
               block.mode === 'month' ? visibleCharges(block.rows).length : block.rows.length,
             )}

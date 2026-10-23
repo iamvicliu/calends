@@ -50,11 +50,12 @@ export type ReportEvent = Pick<LedgerEvent, 'date' | 'sub' | 'delta'> & { kind: 
 
 export type Block =
   | { type: 'headline'; mode: 'scope'; mrr: number; annual: number; activeCount: number; paid: number; loss: number; change: Comparison }
+  | { type: 'headline'; mode: 'total'; total: number; count: number; average: number; yearPaid: number; since: string }
   | { type: 'headline'; mode: 'month'; month: string; total: number; paid: number; pending: number; count: number; previous: Comparison; yearly?: Comparison }
   | { type: 'trend'; mode: 'scope'; rows: CashAccrual[] }
   | { type: 'trend'; mode: 'month'; month: string; movement: Omit<Movement, 'items'> & { items: MovementRow[] } }
   | { type: 'composition'; categories: CompositionRow[]; methods: CompositionRow[] }
-  | { type: 'top'; mode: 'scope'; rows: Array<{ sub: Subscription; amount: number }> }
+  | { type: 'top'; mode: 'scope' | 'total'; rows: Array<{ sub: Subscription; amount: number }> }
   | { type: 'top'; mode: 'month'; rows: ChargeRow[] }
   | { type: 'upcoming'; rows: ChargeRow[]; total: number }
   | { type: 'events'; rows: ReportEvent[] }
@@ -186,6 +187,8 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
   const scoped = { ...state, subscriptions: subs.filter((s) => !s.proxy) };
   const yearStart = `${today.slice(0, 4)}-01-01`;
   const mrr = mrrOn(scoped, today);
+  // 没有任何持续计费（全是买断，或都已停止）时，月成本恒为 0，改看累计花了多少
+  if (mrr === 0 && scoped.subscriptions.length) return totalReport(scoped, today, yearStart);
   const blocks: Block[] = [
     {
       type: 'headline',
@@ -210,6 +213,40 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
   if (live.length) blocks.push({ type: 'top', mode: 'scope', rows: live.sort(byAmount).slice(0, 5) });
   const upcoming = charges(scoped, addDays(today, 1), addDays(today, 30), today).filter((r) => r.original.kind !== 'refund' && r.amount > 0);
   if (upcoming.length) blocks.push({ type: 'upcoming', rows: upcoming, total: sum(upcoming) });
+  blocks.push(...details(scoped, today, addMonths(today, -12), addDays(today, 30), undefined, yearStart, today));
+  return { blocks };
+}
+
+/** 累计视角：从第一笔到今天按我的份额、扣除退款的实际支出；构成与排行也按累计金额。 */
+function totalReport(scoped: AppState, today: string, yearStart: string): ScopeReport {
+  const first = scoped.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const rows = charges(scoped, first, today, today);
+  const total = sum(rows);
+  const bySub = new Map<string, { sub: Subscription; amount: number }>();
+  for (const r of rows) {
+    const e = bySub.get(r.sub.id) ?? { sub: r.sub, amount: 0 };
+    e.amount += r.amount;
+    bySub.set(r.sub.id, e);
+  }
+  const spent = [...bySub.values()].filter((r) => r.amount > 0);
+  const blocks: Block[] = [
+    {
+      type: 'headline',
+      mode: 'total',
+      total,
+      count: scoped.subscriptions.length,
+      average: scoped.subscriptions.length ? total / scoped.subscriptions.length : 0,
+      yearPaid: sum(rows.filter((r) => r.date >= yearStart)),
+      since: rows[0]?.date ?? first,
+    },
+  ];
+  addComposition(
+    blocks,
+    composition(spent.map((r) => ({ key: r.sub.category, amount: r.amount }))),
+    composition(rows.map((r) => ({ key: r.original.sub.methodId ?? '', amount: r.amount }))),
+    true,
+  );
+  if (spent.length > 1) blocks.push({ type: 'top', mode: 'total', rows: spent.sort(byAmount).slice(0, 5) });
   blocks.push(...details(scoped, today, addMonths(today, -12), addDays(today, 30), undefined, yearStart, today));
   return { blocks };
 }

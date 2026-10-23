@@ -64,5 +64,11 @@
   "debitBasis": "Hanya pembayaran positif; pengembalian dana ditampilkan terpisah dan tidak mengurangi rincian atau peringkat.",
   "other": "Lainnya",
   "minimize": "Perkecil ke ringkasan",
-  "movementBasis": "Biaya bulanan bagian saya dalam mata uang dasar dengan kurs akhir periode. Tanggal menunjukkan perubahan terkait, atau periode laporan jika tidak ada peristiwa tercatat."
+  "movementBasis": "Biaya bulanan bagian saya dalam mata uang dasar dengan kurs akhir periode. Tanggal menunjukkan perubahan terkait, atau periode laporan jika tidak ada peristiwa tercatat.",
+  "totalSpent": "Total pengeluaran",
+  "totalBasis": "Pengeluaran nyata untuk langganan ini sejak tagihan pertama hingga hari ini, sesuai bagian saya dan dikurangi pengembalian dana. Pembelian seumur hidup dan langganan yang berhenti tidak punya biaya bulanan, jadi ditampilkan totalnya.",
+  "totalSince": "Sejak {date}",
+  "subsCount": "Langganan",
+  "average": "Rata-rata per langganan",
+  "topTotal": "{count} pengeluaran total tertinggi"
 }

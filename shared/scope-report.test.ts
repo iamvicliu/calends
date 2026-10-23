@@ -464,3 +464,28 @@ test('movement without a ledger event shows the reporting window rather than an 
     [[0, 10, '2026-10-01', today]],
   );
 });
+
+test('没有持续计费的范围（如只看买断）改为累计花费头部、累计构成与排行；有计费订阅时仍是月成本', () => {
+  const life = (id: string, price: number, start: string) => sub(id, { price, cycle: { unit: 'lifetime', every: 1 }, start, category: id === 'B' ? 'Media' : 'Tools' });
+  const subs = [life('A', 30, '2024-06-01'), life('B', 50, '2026-03-01')];
+  const st = state(subs);
+  const head = get(scopeReport(st, subs, today), 'headline')!;
+  assert.equal(head.mode, 'total');
+  if (head.mode !== 'total') return;
+  assert.equal(head.total, 80);
+  assert.equal(head.count, 2);
+  assert.equal(head.average, 40);
+  assert.equal(head.yearPaid, 50);
+  assert.equal(head.since, '2024-06-01');
+  const top = get(scopeReport(st, subs, today), 'top')!;
+  assert.equal(top.mode, 'total');
+  assert.deepEqual(
+    top.rows.map((r) => [r.sub.id, r.amount]),
+    [
+      ['B', 50],
+      ['A', 30],
+    ],
+  );
+  const mixed = [...subs, sub('M')];
+  assert.equal(get(scopeReport(state(mixed), mixed, today), 'headline')!.mode, 'scope');
+});
