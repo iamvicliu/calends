@@ -53,13 +53,11 @@ import './detail.css';
 /** 状态角标的色调；文案见 list.status.* */
 const TONE: Record<string, string> = {
   upcoming: 'acc',
-  active: 'ok',
   trial: 'ok',
   paused: '',
   ending: 'warn',
   ended: '',
   terminated: 'bad',
-  lifetime: 'acc',
 };
 const LANE_COLORS = ['var(--c1)', 'var(--c6)', 'var(--c5)', 'var(--c3)', 'var(--c4)', 'var(--c7)'];
 
@@ -273,10 +271,12 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         <div className="dt-id">
           <h2>
             <span className="dt-name">{sub.name}</span>
-            <span className={`dt-badge dot ${TONE[st]}`}>
-              <i />
-              {t(`list.status.${st}`)}
-            </span>
+            {st !== 'active' && st !== 'lifetime' && (
+              <span className={`dt-badge dot ${TONE[st]}`}>
+                <i />
+                {t(`list.status.${st}`)}
+              </span>
+            )}
           </h2>
           <div className="dt-meta">
             <b>

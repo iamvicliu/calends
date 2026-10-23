@@ -326,7 +326,7 @@ function SPoster({ sub, st, hide, m }: Ctx) {
         )}
       </div>
       <div className="sp-chips">
-        <span>{statusText(st)}</span>
+        {st.status !== 'active' && st.status !== 'lifetime' && <span>{statusText(st)}</span>}
         {st.gaps.length > 0 && <span>{t('share.lapsed', { count: st.gaps.length })}</span>}
         {st.vs.length > 1 && <span>{t('share.switched', { count: st.vs.length - 1 })}</span>}
         {st.change != null && <span>{changeText(st)}</span>}

@@ -509,3 +509,160 @@ test('assistant tool output and its proposal have distinct stable sibling keys',
     paired.map((el) => el.key),
   );
 });
+
+test('pages and panels hide scrollbars and never assign them accent colors', () => {
+  for (const [file, css] of styleSources) {
+    for (const [, property, value] of css.matchAll(/((?:--)?scrollbar-(?:color|thumb|track|width)|--scrollbar):\s*([^;]+);/g)) {
+      assert.ok(property.endsWith('width') ? value === 'none' : value === 'auto', `${file}: ${property}: ${value}`);
+    }
+    for (const [, body] of css.matchAll(/[^{}]*::-webkit-scrollbar[^{}]*\{([^{}]*)\}/g)) {
+      assert.doesNotMatch(body, /(?:background|color|box-shadow)\s*:/, file);
+    }
+  }
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const global = cssRules(css)
+    .filter(([sel]) => sel === '*')
+    .map(([, body]) => body)
+    .join('\n');
+  assert.match(global, /scrollbar-width:\s*none;/);
+  assert.match(global, /scrollbar-color:\s*auto;/);
+  assert.match(css, /\*::-webkit-scrollbar\s*\{[^}]*display:\s*none;/);
+  const hero = readFileSync(new URL('heroui.css', root), 'utf8');
+  assert.match(hero, /--scrollbar-width:\s*none;/);
+  assert.match(hero, /--scrollbar-color:\s*auto;/);
+});
+
+test('glass is limited to sticky toolbars and sheet headers and footers', () => {
+  const failures = [];
+  const walk = (rules, file) => {
+    for (const [selector, body] of rules) {
+      if (selector.startsWith('@')) walk(cssRules(body), file);
+      else if ([...body.matchAll(/(?:^|;)\s*(?:-webkit-)?backdrop-filter:\s*([^;]+);/g)].some((m) => m[1].trim() !== 'none')) {
+        if (!['.toolbar', '.sheet-head', '.sheet-foot'].includes(selector)) failures.push(`${file}: ${selector}`);
+        assert.match(body, /position:\s*sticky/, `${file}: ${selector}`);
+      }
+    }
+  };
+  for (const [file, css] of styleSources) walk(cssRules(css), file);
+  assert.deepEqual(failures, []);
+});
+
+test('decorative spotlights and left-edge callouts do not return', () => {
+  for (const [file, css] of styleSources) {
+    assert.doesNotMatch(css, /--m[xy]\b/, file);
+    for (const [, body] of css.matchAll(/[^{}]+\{([^{}]*radial-gradient[^{}]*)\}/g)) {
+      // The remaining radial gradients cut the functional receipt-paper edges.
+      assert.match(body, /(?:-webkit-)?mask:\s*radial-gradient/, file);
+      assert.doesNotMatch(body, /background(?:-image)?:[^;]*radial-gradient/, file);
+    }
+  }
+  const detail = readFileSync(new URL('views/detail.css', root), 'utf8');
+  assert.doesNotMatch(detail, /box-shadow:\s*inset\s+[1-9][\d.]*px\s+0\s+0/);
+  const assistant = readFileSync(new URL('views/assistant.css', root), 'utf8');
+  for (const sel of ['.as-md blockquote', '.as-reason-b']) {
+    const body = cssRules(assistant).find(([selector]) => selector === sel)?.[1];
+    assert.ok(body);
+    assert.doesNotMatch(body, /border-left:/);
+    assert.match(body, /padding:/);
+  }
+  for (const css of [detail, readFileSync(new URL('styles.css', root), 'utf8')]) {
+    for (const [, body] of css.matchAll(/(?:\.dt-badge\.dot|\.ph-status)[^{}]*\bi\s*\{([^{}]*)\}/g)) {
+      assert.doesNotMatch(body, /box-shadow:|filter:|animation:/);
+    }
+  }
+});
+
+test('normal settlement is silent while attention status pills retain their labels', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'components/ui.tsx');
+  const result = transformSync('StatusPill.tsx', source.slice(...functionRange(ast, 'StatusPill')), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  const StatusPill = new Function('React', 'Icon', `${result.code}; return StatusPill;`)(React, 'icon');
+  assert.equal(renderToStaticMarkup(React.createElement(StatusPill, { tone: 'ok' }, 'Settled')), '');
+  for (const [tone, label] of [
+    ['owe', 'Pending'],
+    ['stop', 'Stopped'],
+    ['notice', 'Paused'],
+  ]) {
+    assert.match(renderToStaticMarkup(React.createElement(StatusPill, { tone }, label)), new RegExp(label));
+  }
+});
+
+test('assistant welcome resources contain only four concrete variants in every locale', () => {
+  const locales = new URL('../shared/locales/', import.meta.url);
+  for (const { name: lang } of readdirSync(locales, { withFileTypes: true }).filter((entry) => entry.isDirectory())) {
+    const { welcome } = JSON.parse(readFileSync(new URL(`${lang}/assistant.json`, locales), 'utf8'));
+    assert.deepEqual(Object.keys(welcome.variants), ['v1', 'v2', 'v3', 'v4'], lang);
+    for (const { title, body } of Object.values(welcome.variants)) {
+      assert.ok(title.trim() && body.trim(), lang);
+    }
+  }
+});
+
+test('subscription headings omit normal status badges and retain exceptional states', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/Detail.tsx');
+  let header;
+  visit(ast, (node) => {
+    if (node.type === 'JSXElement' && node.openingElement.name.name === 'h2' && text(node, source).includes('dt-name')) header = text(node, source);
+  });
+  assert.ok(header);
+  const result = transformSync('DetailHeader.tsx', `function Header() { return (${header}); }`, {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  for (const st of ['active', 'lifetime', 'trial', 'paused', 'ending', 'ended', 'terminated', 'upcoming']) {
+    const Header = new Function('React', 'sub', 'st', 'TONE', 't', `${result.code}; return Header;`)(React, { name: 'Orbit Notes' }, st, {}, (key) => key);
+    const html = renderToStaticMarkup(React.createElement(Header));
+    assert.match(html, /Orbit Notes/);
+    if (['active', 'lifetime'].includes(st)) assert.doesNotMatch(html, /dt-badge/);
+    else assert.ok(html.includes(`list.status.${st}`), st);
+  }
+});
+
+test('MCP connection headings only add a status badge when access is disabled', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/Ai.tsx');
+  let header;
+  visit(ast, (node) => {
+    if (node.type === 'JSXElement' && node.openingElement.name.name === 'b' && text(node, source).includes('ai-badge')) header = text(node, source);
+  });
+  assert.ok(header);
+  const result = transformSync('ConnectionHeader.tsx', `function Header() { return (${header}); }`, {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  for (const enabled of [true, false]) {
+    const Header = new Function('React', 'enabled', 't', `${result.code}; return Header;`)(React, enabled, (key) => key);
+    const html = renderToStaticMarkup(React.createElement(Header));
+    if (enabled) assert.doesNotMatch(html, /ai-badge/);
+    else assert.match(html, /settings.open.off/);
+  }
+});
+
+test('subscription share posters omit normal status chips but keep attention states', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/SubShare.tsx');
+  let chips;
+  visit(ast, (node) => {
+    if (node.type === 'JSXElement' && text(attr(node.openingElement, 'className')?.value, source) === '"sp-chips"') chips = text(node, source);
+  });
+  assert.ok(chips);
+  const result = transformSync('ShareStatus.tsx', `function Chips() { return (${chips}); }`, {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  for (const status of ['active', 'lifetime', 'trial', 'paused', 'ending', 'ended', 'terminated', 'upcoming']) {
+    const deps = { React, st: { status, gaps: [], vs: [], change: null }, statusText: (st) => st.status, t: (key) => key, changeText: () => '' };
+    const Chips = new Function(...Object.keys(deps), `${result.code}; return Chips;`)(...Object.values(deps));
+    const html = renderToStaticMarkup(React.createElement(Chips));
+    if (['active', 'lifetime'].includes(status)) assert.doesNotMatch(html, /<span/);
+    else assert.ok(html.includes(`<span>${status}</span>`), status);
+  }
+});

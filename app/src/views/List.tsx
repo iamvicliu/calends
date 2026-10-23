@@ -301,7 +301,6 @@ export function List({
                       {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
                       {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
                       <StopBadge sub={s} today={today} readonly={state.readonly} />
-                      {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
                       {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
                       {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                       {s.proxy && <ProxyBadge state={state} s={s} today={today} />}
@@ -401,7 +400,6 @@ export function List({
                           {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
                           {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
                           {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
-                          {st === 'lifetime' && <span className="badge">{t('list.status.lifetime')}</span>}
                           {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
                           {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                           {s.proxy && (
@@ -596,13 +594,14 @@ function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subscriptio
   );
 }
 
-/** 代付状态角标：有待收显示「代付 · 待收 N 期」，否则「代付 · 已结清」 */
+/** 只在代付仍有待收时显示状态角标。 */
 function ProxyBadge({ state, s, today }: { state: AppState; s: Subscription; today: string }) {
   const n = proxyOwed(state, s, today);
   const name = s.proxy?.forName;
-  const key = `list.proxyBadge.${n ? 'owed' : 'settled'}${name ? 'For' : ''}`;
+  if (!n) return null;
+  const key = `list.proxyBadge.owed${name ? 'For' : ''}`;
   return (
-    <span className={`badge ${n ? 'orange' : 'green'}`} title={s.proxy?.note}>
+    <span className="badge orange" title={s.proxy?.note}>
       {t(key, { count: n, name })}
     </span>
   );
