@@ -615,10 +615,10 @@ function BotMessage(props: {
         {turn.parts.map((p, i) => {
           if (p.kind === 'reasoning') return <Reasoning key={i} part={p} live={turn.status === 'streaming' && p.ms == null} />;
           if (p.kind === 'text') return <Markdown key={i} text={p.text} streaming={turn.status === 'streaming'} />;
-          if (p.kind === 'tool') return <ToolCard key={p.id} part={p} />;
+          if (p.kind === 'tool') return <ToolCard key={`tool:${p.id}`} part={p} />;
           return (
             <Proposal
-              key={p.id}
+              key={`proposal:${p.id}`}
               part={p}
               siblings={turn.parts.flatMap((x) => (x.kind === 'proposal' ? [{ tool: x.tool, args: x.args }] : []))}
               state={props.state}

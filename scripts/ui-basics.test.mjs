@@ -480,3 +480,32 @@ test('UI copy and locale templates never introduce middle-dot separators', async
   }
   assert.deepEqual(failures, []);
 });
+
+test('assistant tool output and its proposal have distinct stable sibling keys', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/Assistant.tsx');
+  const result = transformSync('BotMessage.tsx', source.slice(...functionRange(ast, 'BotMessage')), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  const deps = { React, ToolCard: 'tool-card', Proposal: 'proposal', Reasoning: 'reasoning', Markdown: 'markdown' };
+  const BotMessage = new Function(...Object.keys(deps), `${result.code}; return BotMessage;`)(...Object.values(deps));
+  const id = 'call_00_fictional';
+  const tool = { kind: 'tool', id, name: 'create_subscription', args: {}, status: 'done' };
+  const proposal = { kind: 'proposal', id, tool: tool.name, args: {}, preview: {}, state: 'pending' };
+  const render = (parts) => BotMessage({ turn: { parts, status: 'done' }, state: {}, last: false });
+  const children = (tree) => tree.props.children.props.children[1];
+  const initial = children(render([tool]));
+  const paired = children(render([tool, proposal]));
+  assert.equal(new Set(paired.map((el) => el.key)).size, 2);
+  assert.equal(initial[0].key, paired[0].key);
+  assert.equal(paired[0].props.part, tool);
+  assert.equal(paired[1].props.part, proposal);
+  assert.deepEqual(
+    children(render([tool, { kind: 'text', text: 'Review draft' }, proposal]))
+      .filter((el) => el.props.part)
+      .map((el) => el.key),
+    paired.map((el) => el.key),
+  );
+});
