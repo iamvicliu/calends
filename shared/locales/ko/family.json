@@ -292,6 +292,13 @@
   "timeline": {
     "paid": "납부 완료",
     "due": "미수",
-    "future": "다음 기간"
+    "future": "다음 기간",
+    "unused": "결제 완료, 미사용"
+  },
+  "refund": {
+    "title": "탈퇴 환불",
+    "none": "환불 없음",
+    "unused": "미사용분 환불",
+    "date": "환불일"
   }
 }

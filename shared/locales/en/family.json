@@ -302,6 +302,13 @@
   "timeline": {
     "paid": "Paid",
     "due": "Due",
-    "future": "Next period"
+    "future": "Next period",
+    "unused": "Paid, unused"
+  },
+  "refund": {
+    "title": "Leave refund",
+    "none": "No refund",
+    "unused": "Refund unused",
+    "date": "Refund date"
   }
 }

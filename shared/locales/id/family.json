@@ -292,6 +292,13 @@
   "timeline": {
     "paid": "Lunas",
     "due": "Tertagih",
-    "future": "Periode berikutnya"
+    "future": "Periode berikutnya",
+    "unused": "Dibayar, belum dipakai"
+  },
+  "refund": {
+    "title": "Pengembalian saat keluar",
+    "none": "Tanpa pengembalian",
+    "unused": "Kembalikan sisa",
+    "date": "Tanggal pengembalian"
   }
 }

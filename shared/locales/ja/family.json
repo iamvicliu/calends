@@ -292,6 +292,13 @@
   "timeline": {
     "paid": "支払済み",
     "due": "未収",
-    "future": "次の期間"
+    "future": "次の期間",
+    "unused": "支払済み・未使用"
+  },
+  "refund": {
+    "title": "退出時の返金",
+    "none": "返金なし",
+    "unused": "未使用分を返金",
+    "date": "返金日"
   }
 }

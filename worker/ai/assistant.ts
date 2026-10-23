@@ -237,12 +237,13 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
               const { dry_run: _d, ...clean } = draft as Record<string, unknown>;
               const pv = preview as {
                 created?: { id: string };
-                member?: { id: string };
+                member?: { id: string; leave_refund?: { amount: number; currency: string; date: string; note?: string } | null };
                 subscription?: { id?: string; members?: Array<{ id: string; name: string }> };
                 receipt?: { amount: number; currency: string; date: string; from: string; until: string };
               };
               // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览的覆盖区间。
               if (tool.name === 'record_receivable' && pv.receipt) Object.assign(clean, pv.receipt);
+              if (tool.name === 'save_share_member' && clean.leave_refund && pv.member?.leave_refund) clean.leave_refund = pv.member.leave_refund;
               if (pv.created) clean.id = pv.created.id;
               if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;
               if (tool.name === 'save_share_member' && !clean.member && pv.member) clean.id = pv.member.id;

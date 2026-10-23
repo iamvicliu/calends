@@ -302,6 +302,13 @@
   "timeline": {
     "paid": "Pagado",
     "due": "Pendiente",
-    "future": "Siguiente periodo"
+    "future": "Siguiente periodo",
+    "unused": "Pagado, sin usar"
+  },
+  "refund": {
+    "title": "Reembolso al salir",
+    "none": "Sin reembolso",
+    "unused": "Devolver lo no usado",
+    "date": "Fecha de reembolso"
   }
 }

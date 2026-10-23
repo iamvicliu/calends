@@ -302,6 +302,13 @@
   "timeline": {
     "paid": "Bezahlt",
     "due": "Offen",
-    "future": "Nächster Zeitraum"
+    "future": "Nächster Zeitraum",
+    "unused": "Bezahlt, ungenutzt"
+  },
+  "refund": {
+    "title": "Erstattung beim Austritt",
+    "none": "Keine Erstattung",
+    "unused": "Ungenutztes erstatten",
+    "date": "Erstattungsdatum"
   }
 }
