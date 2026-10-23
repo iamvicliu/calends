@@ -23,7 +23,7 @@ import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
-import { applyCarRule, carRule, followsCar } from '../../../shared/carpool.ts';
+import { applyCarRule, carRule, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -456,7 +456,7 @@ function TimelineAxis({ today, win }: { today: string; win: { start: string; end
  */
 function MemberTimeline({ s, m, today, win, fee }: { s: Subscription; m: ShareMember; today: string; win: { start: string; end: string }; fee?: string }) {
   const segs = memberSegments(s, m, today, win.start, win.end);
-  const label = { paid: t('family.timeline.paid'), due: t('family.timeline.due'), future: t('family.timeline.future') };
+  const label = { paid: t('family.timeline.paid'), due: t('family.timeline.due'), future: t('family.timeline.future'), unused: t('family.timeline.unused') };
   return (
     <span className={`mt-track ${m.exempt ? 'exempt' : ''}`}>
       {segs.map((g) => (
@@ -649,7 +649,7 @@ export function CarSheet({
     .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
     .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), sh.members.filter((m) => groupOf(m) === k).length] as const);
   // 历来所有收款，按这笔钱覆盖的那一期分组（同一期的人排在一起），新的期在前；已退出的成员也保留
-  const receipts = sh.members.flatMap((m) => (m.payments ?? []).map((p) => ({ m, p, base: toBaseAt(state, p.amount, p.currency, p.date) })));
+  const receipts = sh.members.flatMap((m) => memberCashFlows(m).map((p) => ({ m, p, base: memberFlowValue(state, p) })));
   const total = receipts.reduce((a, r) => a + r.base, 0);
   /** 期间：两端都在今年只写月日；只要有一端不在今年，两端都带年份，免得看成倒序 */
   // 分组条的区间一律带年份，跨年与不跨年的组格式一致
@@ -751,8 +751,8 @@ export function CarSheet({
           </div>
           <div>
             <small>{t('family.facts.sinceNone')}</small>
-            {book.received > 0 ? <b className={actual >= 0 ? 'done' : 'loss'}>{fmt(actual)}</b> : <b>{fmt(-book.paid)}</b>}
-            <span>{book.received > 0 ? (book.since ? t('family.strip.since', { date: cnDateFull(book.since) }) : '') : t('family.sheet.noReceiptsYet')}</span>
+            {book.hasRecords ? <b className={actual >= 0 ? 'done' : 'loss'}>{fmt(actual)}</b> : <b>{fmt(-book.paid)}</b>}
+            <span>{book.hasRecords ? (book.since ? t('family.strip.since', { date: cnDateFull(book.since) }) : '') : t('family.sheet.noReceiptsYet')}</span>
           </div>
         </div>
 
@@ -791,7 +791,7 @@ export function CarSheet({
           />
           <span className="car-total">
             <small>{t(tab === 'in' ? 'family.facts.receivedAll' : 'family.facts.paidAll')}</small>
-            <b className={tab === 'in' ? 'green' : undefined}>{tab === 'in' ? fmt(total) : fmt(-outTotal)}</b>
+            <b className={tab === 'in' && total > 0 ? 'green' : undefined}>{tab === 'in' ? fmt(total) : fmt(-outTotal)}</b>
           </span>
         </div>
         {tab === 'out' ? (
@@ -859,20 +859,21 @@ export function CarSheet({
                   <span className="car-period-title">
                     <b>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</b>
                   </span>
-                  <span className="green">{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) }))}</span>
+                  <span className={g.sum > 0 ? 'green' : undefined}>{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) }))}</span>
                 </button>
                 {openIn.has(g.key) &&
                   g.list.map(({ m, p, base: v }, i) => (
                     <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
                       <span>
                         <b>{m.name || t('family.pool.unnamed')}</b>
+                        {p.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
                         {g.notes.rows[i] && <small>{copyParts(g.notes.rows[i])}</small>}
                       </span>
                       {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
                       <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
                       <span>
-                        <b className="green">{flow(p.amount, p.currency)}</b>
-                        {p.currency !== base && <small style={{ color: 'var(--green)' }}>≈ {flow(v, base)}</small>}
+                        <b className={p.amount >= 0 ? 'green' : undefined}>{flow(p.amount, p.currency)}</b>
+                        {p.currency !== base && <small className={v >= 0 ? 'green' : undefined}>≈ {flow(v, base)}</small>}
                       </span>
                     </button>
                   ))}
@@ -992,10 +993,10 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
         </div>
         <div>
           <small>{t('family.facts.receivedAll')}</small>
-          <b className="green">{fmt(book.received)}</b>
+          <b className={book.received > 0 ? 'green' : undefined}>{fmt(book.received)}</b>
         </div>
         <div>
-          {book.received > 0 ? (
+          {book.hasRecords ? (
             <>
               <small>{actual >= 0 ? t('family.facts.netGain') : t('family.facts.netLoss')}</small>
               <b className={actual >= 0 ? 'gain' : 'loss'}>{fmt(actual)}</b>

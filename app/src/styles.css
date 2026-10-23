@@ -8974,6 +8974,9 @@ a.car-toggle {
 .mt-seg.paid {
   background: color-mix(in srgb, var(--green) 62%, transparent);
 }
+.mt-seg.unused {
+  background: var(--gray-8);
+}
 .mt-seg.due {
   background: repeating-linear-gradient(135deg, var(--red) 0 2px, color-mix(in srgb, var(--red) 25%, transparent) 2px 5px);
 }
