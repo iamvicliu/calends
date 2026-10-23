@@ -1,6 +1,6 @@
 import type { ReactNode as ComponentChildren } from 'react';
 import { dateFormat } from '../../../shared/intl.ts';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
@@ -27,6 +27,8 @@ const LEVELS = 3; // 同一处最多往上叠三层，再多的折成「+N」
 const AXIS = 140;
 /** 右端：今天往后一年（未来的扣款看一年就够） */
 const AHEAD_MONTHS = 12;
+/** 只挂载视口附近的图标：按这个宽度分块，滚过一块才重新挑选；两侧各留一块余量 */
+const CHUNK = 1200;
 
 const yearLabel = (d: string) => dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
@@ -103,7 +105,19 @@ export function Timeline({
     };
     glide.current = requestAnimationFrame(step);
   };
-  useLayoutEffect(() => center(), [today]);
+  // 视口附近的可见区间（像素）；整条轨道仍按全长排布，滚动条与定位不受影响
+  const [span, setSpan] = useState<[number, number]>([0, 0]);
+  const pick = () => {
+    const el = scroller.current;
+    if (!el) return;
+    const a = (Math.floor(el.scrollLeft / CHUNK) - 1) * CHUNK;
+    const b = (Math.ceil((el.scrollLeft + el.clientWidth) / CHUNK) + 1) * CHUNK;
+    setSpan((prev) => (prev[0] === a && prev[1] === b ? prev : [a, b]));
+  };
+  useLayoutEffect(() => {
+    center();
+    pick();
+  }, [today]);
 
   // 滚轮：鼠标在时间线上时，竖向滚动一律换成左右移动；滚到两端就停住，不带动页面。
   // 想滚页面，把鼠标移出时间线即可
@@ -164,6 +178,7 @@ export function Timeline({
   };
 
   const { xOf, placed, overflow, months, dots, width, monday } = layout;
+  const near = (x: number) => x >= span[0] && x <= span[1];
   return (
     <div className="tl" ref={box}>
       <div
@@ -173,6 +188,7 @@ export function Timeline({
         onPointerMove={onMove}
         onPointerUp={onUp}
         onPointerCancel={onUp}
+        onScroll={pick}
         onDragStart={(e) => e.preventDefault()}
         // 在空白处双击回到今天（双击图标不算，那是打开详情）
         onDoubleClick={(e) => {
@@ -183,36 +199,47 @@ export function Timeline({
         }}
       >
         <div className="tl-track" style={{ width, '--day': `${DAY}px`, '--mon': `${monday * DAY}px` } as Record<string, string | number>}>
-          {months.map((m) => (
-            <i key={m.x} className="tl-month" style={{ left: m.x }}>
-              <span>{m.label}</span>
-            </i>
-          ))}
+          {months
+            .filter((m) => near(m.x))
+            .map((m) => (
+              <i key={m.x} className="tl-month" style={{ left: m.x }}>
+                <span>{m.label}</span>
+              </i>
+            ))}
           <div className="tl-today" style={{ left: xOf(today) }}>
             <span>{t('common.today')}</span>
           </div>
-          {placed.map(({ it, date, x, level }) => (
-            <button
-              key={it.key}
-              type="button"
-              className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
-              style={
-                { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<string, string | number>
-              }
-              data-tip={`${md(date)}\n${it.tip}`}
-              onClick={() => it.onClick?.()}
-            >
-              {it.icon}
-            </button>
-          ))}
-          {[...overflow].map(([d, n]) => (
-            <span key={`more-${d}`} className="tl-more" style={{ left: xOf(d), top: AXIS - 14 - LEVELS * (ICON + 4) - 4 }}>
-              +{n}
-            </span>
-          ))}
-          {dots.map((d) => (
-            <i key={`dot-${d}`} className={`tl-dot ${d < today ? 'past' : ''}`} style={{ left: xOf(d) }} />
-          ))}
+          {placed
+            .filter((p) => near(p.x))
+            .map(({ it, date, x, level }) => (
+              <button
+                key={it.key}
+                type="button"
+                className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
+                style={
+                  { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<
+                    string,
+                    string | number
+                  >
+                }
+                data-tip={`${md(date)}\n${it.tip}`}
+                onClick={() => it.onClick?.()}
+              >
+                {it.icon}
+              </button>
+            ))}
+          {[...overflow]
+            .filter(([d]) => near(xOf(d)))
+            .map(([d, n]) => (
+              <span key={`more-${d}`} className="tl-more" style={{ left: xOf(d), top: AXIS - 14 - LEVELS * (ICON + 4) - 4 }}>
+                +{n}
+              </span>
+            ))}
+          {dots
+            .filter((d) => near(xOf(d)))
+            .map((d) => (
+              <i key={`dot-${d}`} className={`tl-dot ${d < today ? 'past' : ''}`} style={{ left: xOf(d) }} />
+            ))}
         </div>
       </div>
       <button type="button" className="tl-home" onClick={() => center(true)} title={t('editor.timeline.home')}>
