@@ -814,6 +814,7 @@ a {
   padding: 6px 0 4px;
 }
 .cal-cell {
+  contain: layout;
   min-height: 96px;
   padding: 6px;
   border-radius: var(--radius-md);
@@ -989,6 +990,8 @@ a {
   }
 }
 .heat-m {
+  /* 布局与重绘限制在卡片内：年视图 12 张卡同时出现时不牵动整页 */
+  contain: layout paint;
   padding: 12px;
   border-radius: var(--radius-lg);
   background: var(--card);
@@ -9847,6 +9850,10 @@ img.mm-flag {
 }
 ::view-transition-new(root) {
   animation: vt-fade-in calc(var(--duration) * 0.6) var(--ease) calc(var(--duration) * 0.4) both;
+}
+/* 放大进月视图：右侧列表与报告在日历框放大接近完成时才淡淡出现，比缩放滞后 */
+.vt-zoom-in::view-transition-new(root) {
+  animation: vt-fade-in calc(var(--duration) * 1.2) var(--ease) calc(var(--duration) * 0.7) both;
 }
 ::view-transition-old(cal-month),
 ::view-transition-new(cal-month) {

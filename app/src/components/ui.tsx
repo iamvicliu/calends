@@ -190,6 +190,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
     return (
       <span className="ico domain" style={style}>
         <img
+          decoding="async"
           src={sub.icon?.startsWith('http') ? (proxied ? base(`/api/img?u=${encodeURIComponent(sub.icon)}`) : sub.icon) : base('/brands/cloudflare.svg')}
           alt=""
         />
@@ -218,6 +219,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
       // 目录里的 AI 标是透明底的矢量图，按站点图标那样放在白底上
       <span className={`ico ${raw === icon && !icon.startsWith('/ai/') ? 'app' : 'fav'}`} style={style}>
         <img
+          decoding="async"
           src={base(src)}
           alt=""
           loading="lazy"

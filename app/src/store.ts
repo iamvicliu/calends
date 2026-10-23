@@ -72,8 +72,18 @@ function replaceState(state: AppState) {
 function replacePrefs(prefs: NonNullable<AppState['prefs']>) {
   const st = store.state!;
   st.prefs = prefs;
-  cache(st);
   set({});
+  // 整本账本序列化写缓存约十几毫秒：挪到空闲时，不和切换视图的渲染、动画抢主线程
+  cacheSoon();
+}
+let cacheTimer: number | undefined;
+function cacheSoon() {
+  if (cacheTimer !== undefined) return;
+  const flush = () => {
+    cacheTimer = undefined;
+    if (store.state) cache(store.state);
+  };
+  cacheTimer = typeof requestIdleCallback === 'function' ? requestIdleCallback(flush, { timeout: 2000 }) : (setTimeout(flush, 300) as unknown as number);
 }
 
 let knownRev: number | undefined;

@@ -73,7 +73,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       });
     if (next === mode && !pick) return;
     if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
-    document.startViewTransition(apply);
+    // 放大进月视图时，右侧列表与报告要等日历框放大后再淡入：用根元素上的类区分方向
+    const root = document.documentElement;
+    root.classList.toggle('vt-zoom-in', next === 'month');
+    const transition = document.startViewTransition(apply);
+    void transition.finished.finally(() => root.classList.remove('vt-zoom-in'));
   };
   const [sel, setSel] = useState<string | null>(today);
   const [reportMode, setReportMode] = usePref<'mini' | 'full'>('cal-report-mode', 'mini', (v): v is 'mini' | 'full' => v === 'mini' || v === 'full');
