@@ -466,7 +466,8 @@ test('movement without a ledger event shows the reporting window rather than an 
 });
 
 test('没有持续计费的范围（如只看买断）改为累计花费头部、累计构成与排行；有计费订阅时仍是月成本', () => {
-  const life = (id: string, price: number, start: string) => sub(id, { price, cycle: { unit: 'lifetime', every: 1 }, start, category: id === 'B' ? 'Media' : 'Tools' });
+  const life = (id: string, price: number, start: string) =>
+    sub(id, { price, cycle: { unit: 'lifetime', every: 1 }, start, category: id === 'B' ? 'Media' : 'Tools' });
   const subs = [life('A', 30, '2024-06-01'), life('B', 50, '2026-03-01')];
   const st = state(subs);
   const head = get(scopeReport(st, subs, today), 'headline')!;
