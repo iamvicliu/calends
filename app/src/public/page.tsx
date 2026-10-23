@@ -453,8 +453,9 @@ function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: nu
           {months.map((x) => (
             <Cell
               key={x.m}
-              fill={x.m === cur ? 'var(--foreground)' : x.m > cur ? 'transparent' : 'color-mix(in oklab, var(--foreground) 16%, transparent)'}
-              stroke={x.m > cur ? 'color-mix(in oklab, var(--foreground) 35%, transparent)' : undefined}
+              fill={x.m === cur ? 'var(--color-v)' : x.m > cur ? 'transparent' : 'color-mix(in srgb, var(--color-v) 70%, var(--card))'}
+              stroke={x.m > cur ? 'var(--color-v)' : undefined}
+              strokeWidth={0.5}
               strokeDasharray={x.m > cur ? '3 3' : undefined}
             />
           ))}
