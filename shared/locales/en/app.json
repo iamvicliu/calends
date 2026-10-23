@@ -61,5 +61,26 @@
     "generate": "Create private calendar link",
     "generated": "Calendar link created",
     "note": "The link contains a private token — anyone with it can see your billing schedule. If it leaks, tap Reset link to revoke it."
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "global": "Global",
+    "page": "Current page",
+    "forms": "Dialogs and forms",
+    "calendar": "Calendar",
+    "search": "Open search",
+    "sidebar": "Toggle sidebar",
+    "new": "New subscription",
+    "navigate": "Switch pages in sidebar order",
+    "help": "Show keyboard shortcuts",
+    "pageSearch": "Focus page search, or open global search",
+    "edit": "Edit the open subscription; return to details afterward",
+    "enter": "Submit the nearest form from a single-line field",
+    "submit": "Submit the nearest form from any focus",
+    "close": "Close the topmost dialog or picker",
+    "confirm": "Activate the focused confirmation button",
+    "months": "Previous / next month (year in year view)",
+    "today": "Go to today",
+    "hint": "Global single-key shortcuts pause while typing or an overlay is open. Form shortcuts wait until pickers close; textareas keep Enter for new lines."
   }
 }

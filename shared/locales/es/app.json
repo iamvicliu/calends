@@ -61,5 +61,26 @@
     "generate": "Crear enlace de calendario privado",
     "generated": "Enlace de calendario creado",
     "note": "El enlace contiene un token privado: cualquiera que lo tenga puede ver tus fechas de cobro. Si se filtra, toca Restablecer enlace para revocarlo."
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "global": "Global",
+    "page": "Página actual",
+    "forms": "Diálogos y formularios",
+    "calendar": "Calendario",
+    "search": "Abrir búsqueda",
+    "sidebar": "Mostrar u ocultar barra lateral",
+    "new": "Nueva suscripción",
+    "navigate": "Cambiar de página en el orden de la barra lateral",
+    "help": "Mostrar atajos",
+    "pageSearch": "Enfocar búsqueda de la página o abrir búsqueda global",
+    "edit": "Editar la suscripción abierta y volver a los detalles",
+    "enter": "Enviar el formulario más cercano desde un campo de una línea",
+    "submit": "Enviar el formulario más cercano desde cualquier foco",
+    "close": "Cerrar el diálogo o selector superior",
+    "confirm": "Activar el botón de confirmar o cancelar enfocado",
+    "months": "Mes anterior / siguiente (año en vista anual)",
+    "today": "Ir a hoy",
+    "hint": "Los atajos globales de una tecla se pausan al escribir o con una capa abierta. Cierra los selectores antes de enviar. En áreas de texto, Intro inserta una línea nueva."
   }
 }

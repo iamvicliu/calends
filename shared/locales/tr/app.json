@@ -61,5 +61,26 @@
     "generate": "Özel takvim bağlantısı oluştur",
     "generated": "Takvim bağlantısı oluşturuldu",
     "note": "Bağlantı özel bir token içerir; ona sahip olan herkes ödeme takviminizi görebilir. Sızarsa iptal etmek için Bağlantıyı sıfırla'ya dokunun."
+  },
+  "shortcuts": {
+    "title": "Klavye kısayolları",
+    "global": "Genel",
+    "page": "Geçerli sayfa",
+    "forms": "İletişim kutuları ve formlar",
+    "calendar": "Takvim",
+    "search": "Aramayı aç",
+    "sidebar": "Kenar çubuğunu göster veya gizle",
+    "new": "Yeni abonelik",
+    "navigate": "Kenar çubuğu sırasıyla sayfa değiştir",
+    "help": "Kısayolları göster",
+    "pageSearch": "Sayfa aramasına odaklan; yoksa genel aramayı aç",
+    "edit": "Açık aboneliği düzenle ve ayrıntılara dön",
+    "enter": "Tek satırlı alandan en yakın formu gönder",
+    "submit": "Herhangi bir odaktan en yakın formu gönder",
+    "close": "En üstteki iletişim kutusunu veya seçiciyi kapat",
+    "confirm": "Odaktaki onay veya iptal düğmesini etkinleştir",
+    "months": "Önceki / sonraki ay (yıl görünümünde yıl)",
+    "today": "Bugüne git",
+    "hint": "Yazarken veya bir katman açıkken genel tek tuşlu kısayollar duraklar. Göndermeden önce seçicileri kapatın. Çok satırlı alanda Enter yeni satır ekler."
   }
 }

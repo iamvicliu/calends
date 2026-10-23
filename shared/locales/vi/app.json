@@ -60,5 +60,26 @@
     "generate": "Tạo liên kết lịch riêng tư",
     "generated": "Đã tạo liên kết lịch",
     "note": "Liên kết chứa token riêng tư — ai có nó đều xem được lịch thanh toán của bạn. Nếu bị lộ, hãy nhấn Đặt lại liên kết để thu hồi."
+  },
+  "shortcuts": {
+    "title": "Phím tắt",
+    "global": "Toàn cục",
+    "page": "Trang hiện tại",
+    "forms": "Hộp thoại và biểu mẫu",
+    "calendar": "Lịch",
+    "search": "Mở tìm kiếm",
+    "sidebar": "Ẩn hoặc hiện thanh bên",
+    "new": "Thêm đăng ký",
+    "navigate": "Chuyển trang theo thứ tự thanh bên",
+    "help": "Hiện phím tắt",
+    "pageSearch": "Tập trung vào ô tìm kiếm trên trang, hoặc mở tìm kiếm toàn cục",
+    "edit": "Sửa đăng ký đang mở rồi trở về chi tiết",
+    "enter": "Gửi biểu mẫu gần nhất từ ô nhập một dòng",
+    "submit": "Gửi biểu mẫu gần nhất từ vị trí tiêu điểm bất kỳ",
+    "close": "Đóng hộp thoại hoặc bộ chọn trên cùng",
+    "confirm": "Kích hoạt nút xác nhận hoặc hủy đang được chọn",
+    "months": "Tháng trước / sau (năm trong chế độ xem năm)",
+    "today": "Về hôm nay",
+    "hint": "Phím tắt đơn toàn cục tạm dừng khi nhập hoặc khi lớp phủ mở. Đóng bộ chọn trước khi gửi. Trong ô nhiều dòng, Enter xuống dòng."
   }
 }

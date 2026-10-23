@@ -1,3 +1,4 @@
+import { submitSheet } from '../keyboard.ts';
 import { copyParts } from './copy.tsx';
 import './ui.css';
 import { createPortal } from 'react-dom';
@@ -428,22 +429,27 @@ export function Sheet(props: {
   narrow?: boolean;
   bare?: boolean;
 }) {
+  const dialog = useRef<HTMLDivElement>(null);
   // 兜底：焦点不在弹窗里（如落在 body 上）时 react-aria 收不到 Esc，这里替最上面那层关掉
   const close = useEffectEvent(() => props.onClose());
   useEffect(() => {
     const me = {};
     openSheets.push(me);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && e.target === document.body && openSheets[openSheets.length - 1] === me && close();
-    document.addEventListener('keydown', onKey);
+    const onKey = (e: KeyboardEvent) => {
+      if (openSheets[openSheets.length - 1] !== me) return;
+      if (e.key === 'Escape' && e.target === document.body) close();
+      if (dialog.current) submitSheet(e, dialog.current);
+    };
+    document.addEventListener('keydown', onKey, true);
     return () => {
       openSheets.splice(openSheets.indexOf(me), 1);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('keydown', onKey, true);
     };
   }, []);
   return (
     <ModalOverlay className="scrim" isOpen isDismissable onOpenChange={(o) => !o && props.onClose()}>
       <Modal className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`}>
-        <Dialog className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
+        <Dialog ref={dialog} className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
           <div className="grabber" />
           {props.bare ? (
             <IconButton className="sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
@@ -560,10 +566,10 @@ export function AskLayer() {
       onClose={() => done(false)}
       foot={
         <>
-          <button className="btn" onClick={() => done(false)}>
+          <button className="btn" autoFocus onClick={() => done(false)}>
             {t('common.cancel')}
           </button>
-          <button className="btn danger-solid" autoFocus onClick={() => done(true)}>
+          <button className="btn danger-solid" onClick={() => done(true)}>
             {req.ok ?? t('common.confirm')}
           </button>
         </>
@@ -766,9 +772,19 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 }
 
 /** iOS 分组列表 */
-export function Group({ title, foot, children }: { title?: ComponentChildren; foot?: ComponentChildren; children: ComponentChildren }) {
+export function Group({
+  title,
+  foot,
+  children,
+  submit,
+}: {
+  title?: ComponentChildren;
+  foot?: ComponentChildren;
+  children: ComponentChildren;
+  submit?: string;
+}) {
   return (
-    <section className="group">
+    <section className="group" data-submit={submit}>
       {title && <div className="group-title">{copyParts(title)}</div>}
       <div className="group-body">{children}</div>
       {foot && <div className="group-foot">{copyParts(foot)}</div>}

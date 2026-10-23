@@ -60,5 +60,26 @@
     "generate": "Buat tautan kalender pribadi",
     "generated": "Tautan kalender dibuat",
     "note": "Tautan ini berisi token pribadi — siapa pun yang memilikinya bisa melihat jadwal tagihan Anda. Jika bocor, ketuk Atur ulang tautan untuk mencabutnya."
+  },
+  "shortcuts": {
+    "title": "Pintasan keyboard",
+    "global": "Global",
+    "page": "Halaman saat ini",
+    "forms": "Dialog dan formulir",
+    "calendar": "Kalender",
+    "search": "Buka pencarian",
+    "sidebar": "Tampilkan atau sembunyikan bilah samping",
+    "new": "Langganan baru",
+    "navigate": "Pindah halaman sesuai urutan bilah samping",
+    "help": "Tampilkan pintasan",
+    "pageSearch": "Fokus ke pencarian halaman, atau buka pencarian global",
+    "edit": "Edit langganan terbuka lalu kembali ke detail",
+    "enter": "Kirim formulir terdekat dari kolom satu baris",
+    "submit": "Kirim formulir terdekat dari fokus mana pun",
+    "close": "Tutup dialog atau pemilih paling atas",
+    "confirm": "Aktifkan tombol konfirmasi atau batal yang difokuskan",
+    "months": "Bulan sebelumnya / berikutnya (tahun dalam tampilan tahunan)",
+    "today": "Ke hari ini",
+    "hint": "Pintasan global satu tombol dijeda saat mengetik atau lapisan terbuka. Tutup pemilih sebelum mengirim. Di area teks, Enter membuat baris baru."
   }
 }

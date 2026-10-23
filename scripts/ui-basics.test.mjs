@@ -104,6 +104,7 @@ test('title and icon primitives preserve heading semantics, accessible names and
 async function priceEditorHarness() {
   const billing = await import('../shared/billing.ts');
   const phases = await import('../shared/phases.ts');
+  const keyboard = await import('../app/src/keyboard.ts');
   const { t } = await import('../shared/i18n.ts');
   const [, ast, source] = sources.find(([file]) => file === 'components/ChangePanel.tsx');
   const range = functionRange(ast, 'ChangePanel');
@@ -134,6 +135,7 @@ async function priceEditorHarness() {
   const deps = {
     ...billing,
     ...phases,
+    ...keyboard,
     React,
     t,
     useState(initial) {
@@ -677,4 +679,42 @@ test('subscription share posters omit normal status chips but keep attention sta
     if (['active', 'lifetime'].includes(status)) assert.doesNotMatch(html, /<span/);
     else assert.ok(html.includes(`<span>${status}</span>`), status);
   }
+});
+
+test('inline price Enter respects IME and its local boundary, without submitting the sheet', async () => {
+  const h = await priceEditorHarness();
+  h.open();
+  const doc = { querySelector: () => null };
+  const target = { tagName: 'INPUT', type: 'text', closest: () => null };
+  let prevented = 0;
+  let stopped = 0;
+  const event = (extra = {}) => ({
+    nativeEvent: { key: 'Enter', target, ...extra },
+    currentTarget: { ownerDocument: doc },
+    preventDefault: () => prevented++,
+    stopPropagation: () => stopped++,
+  });
+  assert.equal(h.inline().props['data-submit'], '');
+  h.inline().props.onKeyDown(event({ isComposing: true }));
+  h.inline().props.onKeyDown(event({ keyCode: 229 }));
+  assert.ok(h.inline());
+  assert.equal(prevented, 0);
+  h.inline().props.onKeyDown(event());
+  assert.equal(h.inline(), undefined);
+  assert.equal(prevented, 1);
+  assert.equal(stopped, 1);
+});
+
+test('keyboard behavior stays in the shared Sheet and guards, with safe confirmation focus', () => {
+  const ui = sources.find(([file]) => file === 'components/ui.tsx')[2];
+  const app = sources.find(([file]) => file === 'app.tsx')[2];
+  const calendar = sources.find(([file]) => file === 'views/Calendar.tsx')[2];
+  assert.match(ui, /submitSheet\(e, dialog\.current\)/);
+  assert.match(ui, /className="btn" autoFocus onClick=\{\(\) => done\(false\)\}/);
+  assert.doesNotMatch(ui, /danger-solid" autoFocus/);
+  assert.match(calendar, /if \(!canUseSingleKey\(e\)\) return/);
+  assert.match(app, /const action = pageShortcut\(e, detail\)/);
+  assert.match(app, /onEdit=\{editFromDetail\}/);
+  const people = sources.find(([file]) => file === 'views/People.tsx')[2];
+  assert.match(people, /data-submit=\{editingAccount === accountKey\(i\) \? '' : undefined\}/);
 });

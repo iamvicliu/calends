@@ -476,12 +476,7 @@ function NewToken({ initialName, onClose, onCreated }: { initialName: string; on
       <div className="stack">
         <label className="ai-field">
           <span>{t('ai.name')}</span>
-          <input
-            value={name}
-            placeholder={t('ai.namePlaceholder')}
-            onChange={(e) => setName((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && name.trim() && create()}
-          />
+          <input value={name} placeholder={t('ai.namePlaceholder')} onChange={(e) => setName((e.target as HTMLInputElement).value)} />
         </label>
         <div className="ai-scopes" role="radiogroup" aria-label={t('ai.scope.label')}>
           {(['write', 'read'] as const).map((s) => (
