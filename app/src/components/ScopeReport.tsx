@@ -1,4 +1,5 @@
 import { copyParts } from './copy.tsx';
+import { numberFormat } from '../../../shared/intl.ts';
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
@@ -32,9 +33,7 @@ export function SpendingDelta({ value, base }: { value: Comparison; base: string
   return (
     <span className={`chip-d ${direction}`}>
       {copyParts(direction === 'up' ? '↑' : direction === 'down' ? '↓' : '')} {money(Math.abs(value.amount), base)}
-      {copyParts(
-        value.percent != null && `\n${new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`,
-      )}
+      {copyParts(value.percent != null && `\n${numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`)}
     </span>
   );
 }
@@ -99,7 +98,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const losses = report.blocks.find((b) => b.type === 'losses');
   const expense = (v: number) => flow(-v, base);
   const income = (v: number) => flow(v, base);
-  const percent = (v: number) => new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v));
+  const percent = (v: number) => numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v));
   const delta = (value: Comparison) => <SpendingDelta value={value} base={base} />;
   const fact = (label: string, value: ReactNode) => (
     <div>

@@ -1,4 +1,5 @@
 import { addDays, addMonths, diffDays, parseDay } from './billing.ts';
+import { dateFormat } from './intl.ts';
 
 export type GanttZoom = '3m' | '6m' | '1y' | '3y' | 'all';
 export const isGanttZoom = (v: string): v is GanttZoom => ['3m', '6m', '1y', '3y', 'all'].includes(v);
@@ -63,7 +64,7 @@ export function ganttTicks(zoom: GanttZoom, start: string, end: string, width: n
   if (width <= 0) return [];
   const short = zoom === '3m' || zoom === '6m';
   const k = width / Math.max(1, diffDays(start, end));
-  const fmt = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', ...(short ? { month: 'numeric', day: 'numeric' } : { month: 'short' }) });
+  const fmt = dateFormat(locale, { timeZone: 'UTC', ...(short ? { month: 'numeric', day: 'numeric' } : { month: 'short' }) });
   const dates: string[] = [];
   if (zoom === '3m') {
     const weekday = new Date(parseDay(start)).getUTCDay();

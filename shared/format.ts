@@ -1,4 +1,5 @@
 import { intlLocale, t } from './i18n.ts';
+import { dateFormat, numberFormat, relativeFormat } from './intl.ts';
 
 const SYMBOL: Record<string, string> = {
   CNY: '¥',
@@ -89,7 +90,7 @@ export function moneyTick(n: number, ccy: string): string {
 export function money(n: number, ccy: string, opts: MoneyOptions = {}): string {
   if (!Number.isFinite(n)) return '—';
   const decimals = moneyDecimals(n, ccy, opts);
-  const s = Math.abs(n).toLocaleString(intlLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  const s = numberFormat(intlLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(Math.abs(n));
   const sign = n < 0 ? '−' : opts.sign && n > 0 ? '+' : '';
   return `${sign}${symbol(ccy)}${s}`;
 }
@@ -114,13 +115,13 @@ export function flow(n: number, ccy: string, opts: { compact?: boolean; decimals
 /** 日期字符串（YYYY-MM-DD）按当前语言格式化；按 UTC 解析，避免时区把日期挪一天 */
 function fmtDate(d: string, o: Intl.DateTimeFormatOptions): string {
   const [y, m, day] = d.split('-').map(Number);
-  return new Intl.DateTimeFormat(intlLocale(), { ...o, timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, day)));
+  return dateFormat(intlLocale(), { ...o, timeZone: 'UTC' }).format(new Date(Date.UTC(y, m - 1, day)));
 }
 
 /** 「10月20日」「Oct 20」；withWeek 附带星期 */
 export function cnDate(d: string, withWeek = false): string {
   const s = fmtDate(d, { month: 'short', day: 'numeric' });
-  return withWeek ? `${s} · ${fmtDate(d, { weekday: 'short' })}` : s;
+  return withWeek ? `${s} ${fmtDate(d, { weekday: 'short' })}` : s;
 }
 
 /** 星期几的简写：「周一」「Mon」 */
@@ -151,7 +152,7 @@ export function weekdayShort(i: number, narrow = false): string {
 
 /** 今天、明天、3 天后、2 个月后 */
 export function relDays(n: number): string {
-  const rtf = new Intl.RelativeTimeFormat(intlLocale(), { numeric: 'auto' });
+  const rtf = relativeFormat(intlLocale(), { numeric: 'auto' });
   return Math.abs(n) < 60 ? rtf.format(n, 'day') : rtf.format(Math.round(n / 30), 'month');
 }
 

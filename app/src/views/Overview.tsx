@@ -70,7 +70,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
       }
       return [...map.values()];
     },
-    [state, today],
+    [state, today, onOpen],
   );
   return (
     <section className="card">

@@ -1,4 +1,5 @@
 import { canUseSingleKey } from '../app/src/keyboard.ts';
+import { numberFormat } from './intl.ts';
 import { loadSearch, matchText, searchIndex } from '../app/src/search.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -322,6 +323,7 @@ test('scope presentation gives single refunds/receipts one numeric owner and avo
       useId: () => 'scope',
       useRef: () => ({ current: null }),
       intlLocale: () => 'en-US',
+      numberFormat,
       BarLine: 'BarLine',
       Copy: 'Copy',
     },
@@ -627,6 +629,7 @@ test('scope subscription rows show exportable 24px icons and open details from e
       useId: () => 'scope',
       useRef: () => ({ current: null }),
       intlLocale: () => 'en-US',
+      numberFormat,
       BarLine: 'BarLine',
       t: (key: string, params?: { count?: number }) => (params?.count == null ? key : `${key} ${params.count}`),
     },
@@ -707,6 +710,7 @@ test('scope composition uses category colors for both marks and bars and exports
       useId: () => 'scope',
       useRef: () => ({ current: null }),
       intlLocale: () => 'en-US',
+      numberFormat,
       bankOf: () => undefined,
       brandOf: () => undefined,
       methodLogo: (m: { logo?: string }) => m.logo,
@@ -965,6 +969,7 @@ test('report layout keeps compact composition, five distinct upcoming rows and a
       useId: () => 'scope',
       useRef: () => ({ current: null }),
       intlLocale: () => 'en-US',
+      numberFormat,
       BarLine: 'BarLine',
     },
   );
@@ -1025,6 +1030,7 @@ test('monthly movement subtitles own unsigned before/after costs without a dupli
       useId: () => 'scope',
       useRef: () => ({ current: null }),
       intlLocale: () => 'en-US',
+      numberFormat,
     },
   );
   const state: AppState = {
@@ -1184,7 +1190,7 @@ test('monthly report hides selected-day charge/refund rows, restores them on des
       { type: 'losses', rows: [], refunds: [refund], refunded: 3, loss: 0, incomplete: false },
     ],
   };
-  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US' });
+  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US', numberFormat });
   const render = (selectedChargeDate?: string) =>
     r.render('ScopeReport', { report, state, today, selectedChargeDate, onOpen() {}, title: 'Month', open: true, animate: false, onToggle() {} });
   const rows = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'scope-row scope-tap');
@@ -1203,6 +1209,7 @@ test('monthly report hides selected-day charge/refund rows, restores them on des
     {
       useId: () => 'copy',
       intlLocale: () => 'en-US',
+      numberFormat,
       useState: () => ['copying', () => {}],
     },
   );
@@ -1246,7 +1253,7 @@ test('monthly movement preserves provider termination, stop reason, multi-event 
   });
   const state = { ...st, subscriptions: [base, price('multi', [10, 20, 30]), price('zero-net', [10, 20, 10])] };
   const opened: Subscription[] = [];
-  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US' });
+  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US', numberFormat });
   const nodes = r.render('ScopeReport', {
     report: reports.monthReport(state, '2026-10', today),
     state,
@@ -1295,6 +1302,7 @@ test('scope history remains visible without monthly movement; unbranded payment 
     {
       useId: () => 'scope',
       intlLocale: () => 'en-US',
+      numberFormat,
       bankOf: () => undefined,
       brandOf: () => undefined,
       methodLogo: () => undefined,

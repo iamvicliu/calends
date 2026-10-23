@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { numberFormat } from './intl.ts';
 import { readFileSync } from 'node:fs';
 import { afterEach, test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
@@ -33,7 +34,7 @@ afterEach(() => {
 test('Amount renders directed flows, zero, unavailable values and neutral prices/balances with both settings', () => {
   const file = '../app/src/components/ui.tsx';
   const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
-  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale });
+  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale, numberFormat });
   for (const on of [true, false]) {
     setSignedAmounts(on);
     const render = (value: number, plain = false) => renderToStaticMarkup(React.createElement(Amount, { value, ccy: 'CNY', plain }));
@@ -60,7 +61,7 @@ test('Amount renders directed flows, zero, unavailable values and neutral prices
 test('Amount never renders fractional markup for zero-decimal currencies, including compact/explicit precision', () => {
   const file = '../app/src/components/ui.tsx';
   const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
-  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale });
+  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale, numberFormat });
   for (const ccy of ['JPY', 'KRW', 'VND', 'IDR', 'CLP', 'HUF', 'TWD', 'PYG', 'MGA', 'BIF', 'USD', 'CNY', 'NGN', 'TRY']) {
     for (const value of [0, 19.8, -19.8, 1234567.89]) {
       for (const opts of [{}, { compact: true }, { decimals: 2 }, { plain: true }]) {
@@ -76,7 +77,7 @@ test('Amount never renders fractional markup for zero-decimal currencies, includ
 test('MoneyPair formats both original and converted currencies with the shared precision', () => {
   const file = '../app/src/components/ui.tsx';
   const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
-  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale });
+  const Amount = load(file, 'Amount', `function Amount(${source}`, { React, moneyDecimals, flowSign, symbol, intlLocale, numberFormat });
   let orig = true;
   const useMoneyPair = load(
     'MoneyPair.tsx',

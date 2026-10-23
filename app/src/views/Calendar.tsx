@@ -27,11 +27,10 @@ import { ScopeReport, SpendingDelta } from '../components/ScopeReport.tsx';
 import { StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 
 /** 表头的星期简称，按周起始日排好 */
-const dows = () => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
-/** 周起始日：设置里选的，缺省周一 */
-let weekStart: 0 | 1 = 1;
+const dows = (weekStart: 0 | 1) => Array.from({ length: 7 }, (_, i) => weekdayShort((i + weekStart) % 7, true));
 
-function monthGrid(month: string) {
+/** weekStart：周起始日，设置里选的，缺省周一 */
+function monthGrid(month: string, weekStart: 0 | 1) {
   const first = month + '-01';
   const dow = (new Date(parseDay(first)).getUTCDay() + 7 - weekStart) % 7;
   const start = addDays(first, -dow);
@@ -43,8 +42,8 @@ function monthGrid(month: string) {
 export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onIcs: () => void }) {
   // 大字 / 小字金额跟随显示货币设置
   const pair = useMoneyPair(state);
-  weekStart = state.settings.weekStart ?? 1;
-  const DOW = dows();
+  const weekStart = state.settings.weekStart ?? 1;
+  const DOW = dows(weekStart);
   const [month, setMonth] = useState(today.slice(0, 7));
   const [mode, setMode] = usePref<'month' | 'year'>('cal-mode', 'month', (v): v is 'month' | 'year' => v === 'month' || v === 'year');
   const [sel, setSel] = useState<string | null>(today);
@@ -53,17 +52,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const base = state.settings.baseCurrency;
 
   const year = month.slice(0, 4);
-  const grid = monthGrid(month);
-  const charges = useMemo(
-    () =>
-      allCharges(
-        state,
-        grid[0] < `${year}-01-01` ? grid[0] : `${year}-01-01`,
-        grid[grid.length - 1] > `${year}-12-31` ? grid[grid.length - 1] : `${year}-12-31`,
-        today,
-      ).filter((c) => c.kind !== 'failed'),
-    [state, year, month, today],
-  );
+  const grid = monthGrid(month, weekStart);
+  // 取整年与月网格的并集（网格会带出上下月的几天）
+  const from = grid[0] < `${year}-01-01` ? grid[0] : `${year}-01-01`;
+  const to = grid[grid.length - 1] > `${year}-12-31` ? grid[grid.length - 1] : `${year}-12-31`;
+  const charges = allCharges(state, from, to, today).filter((c) => c.kind !== 'failed');
   // 图标只排一行、叠放约四成：按格子实际宽度算能放几个，放不下的换成「+N」，格子高度始终不变。
   // 悬停格子时依次轻浮一下，悬停某个图标时它浮到最上层；是哪几项看右侧当天列表
   const [gridRef, gridW] = useWidth();
@@ -75,11 +68,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const iconCap = gridW ? Math.max(2, Math.floor((inner - icon - MORE_W) / step) + 1) : 4;
   /** 不叠也放得下（间隔 3px）就平铺，放不下才叠 */
   const fits = (n: number) => icon * n + 3 * (n - 1) <= inner;
-  const byDay = useMemo(() => {
-    const m = new Map<string, Charge[]>();
-    for (const c of charges) m.set(c.date, [...(m.get(c.date) ?? []), c]);
-    return m;
-  }, [charges]);
+  const byDay = new Map<string, Charge[]>();
+  for (const c of charges) byDay.set(c.date, [...(byDay.get(c.date) ?? []), c]);
   const sumOf = (list: Charge[] = []) => sumBase(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
@@ -162,6 +152,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       <div className="page fade-in">
         {mode === 'year' ? (
           <YearHeat
+            weekStart={weekStart}
             year={year}
             byDay={byDay}
             today={today}
@@ -377,6 +368,7 @@ function YearHeat({
   sumOf,
   base,
   onPick,
+  weekStart,
 }: {
   year: string;
   byDay: Map<string, Charge[]>;
@@ -384,14 +376,15 @@ function YearHeat({
   sumOf: (l?: Charge[]) => number;
   base: string;
   onPick: (m: string) => void;
+  weekStart: 0 | 1;
 }) {
-  const DOW = dows();
+  const DOW = dows(weekStart);
   return (
     <div className="heat">
       {Array.from({ length: 12 }, (_, i) => {
         const m = `${year}-${String(i + 1).padStart(2, '0')}`;
         // 固定 6 行，让 12 张月卡等高对齐
-        const grid = Array.from({ length: 42 }, (_, k) => addDays(monthGrid(m)[0], k));
+        const grid = Array.from({ length: 42 }, (_, k) => addDays(monthGrid(m, weekStart)[0], k));
         const days = grid.filter((d) => d.startsWith(m));
         const total = days.reduce((a, d) => a + sumOf(byDay.get(d)), 0);
         const count = days.reduce((a, d) => a + (byDay.get(d)?.length ?? 0), 0);

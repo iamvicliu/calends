@@ -109,3 +109,15 @@ test('all currency display precision follows the shared rule, including negative
   assert.equal(money(1234567.89, 'TWD'), 'NT$1.234.568');
   assert.equal(money(1234567.89, 'USD'), '$1.234.567,89');
 });
+
+test('Intl formatters are reused per locale and options without changing output', async () => {
+  const { dateFormat, numberFormat } = await import('./intl.ts');
+  const o = { month: 'short', day: 'numeric', timeZone: 'UTC' } as const;
+  assert.equal(dateFormat('zh-CN', o), dateFormat('zh-CN', { ...o }));
+  assert.notEqual(dateFormat('zh-CN', o), dateFormat('en', o));
+  const d = new Date(Date.UTC(2026, 9, 20));
+  assert.equal(dateFormat('de', o).format(d), new Intl.DateTimeFormat('de', o).format(d));
+  const n = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+  assert.equal(numberFormat('fr', n).format(1234.5), (1234.5).toLocaleString('fr', n));
+  assert.throws(() => dateFormat('en', { timeZone: 'Not/AZone' }));
+});

@@ -1,4 +1,5 @@
 import type { ReactNode as ComponentChildren } from 'react';
+import { dateFormat } from '../../../shared/intl.ts';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { addDays, addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
@@ -27,7 +28,7 @@ const AXIS = 140;
 /** 右端：今天往后一年（未来的扣款看一年就够） */
 const AHEAD_MONTHS = 12;
 
-const yearLabel = (d: string) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
+const yearLabel = (d: string) => dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
 
 /**
@@ -47,6 +48,7 @@ export function Timeline({
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
+  const glide = useRef(0);
   const drag = useRef<{ x: number; left: number; moved: boolean; v: number; t: number; id: number } | null>(null);
   // 左边留半屏的余量，最早那一笔也能滚到中间附近
   const from = addDays(start && start < today ? start : addDays(today, -30), -30);
@@ -118,7 +120,6 @@ export function Timeline({
   }, []);
 
   // 鼠标按住拖动：按在空白或图标上都拖整条时间线；松手后带惯性滑一段。拖过之后不触发点击
-  const glide = useRef(0);
   const onDown = (e: React.PointerEvent) => {
     if (e.pointerType !== 'mouse' || e.button !== 0) return;
     cancelAnimationFrame(glide.current);

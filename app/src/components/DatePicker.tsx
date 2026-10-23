@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { dateFormat } from '../../../shared/intl.ts';
 import { addDays, addMonths, parseDay } from '../../../shared/billing.ts';
 import { cnDateFull, monthLabel, weekdayShort } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
@@ -9,7 +10,7 @@ import { Pop } from './Pop.tsx';
 /** 每周起始日跟随设置（1 周一、0 周日）；weekdayShort 的 0 是周日 */
 const weekStart = () => getState()?.settings.weekStart ?? 1;
 const dows = () => Array.from({ length: 7 }, (_, i) => (i + weekStart()) % 7);
-const yearLabel = (y: number) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, 0, 1)));
+const yearLabel = (y: number) => dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(y, 0, 1)));
 
 function grid(month: string): string[] {
   const first = month + '-01';

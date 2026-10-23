@@ -1,4 +1,5 @@
 import { submitSheet } from '../keyboard.ts';
+import { numberFormat } from '../../../shared/intl.ts';
 import { copyParts } from './copy.tsx';
 import './ui.css';
 import { createPortal } from 'react-dom';
@@ -371,7 +372,7 @@ export function Amount({ value, ccy, compact, plain, decimals }: { value: number
   const abs = Math.abs(value);
   const digits = moneyDecimals(value, ccy, { compact, decimals });
   // 整数分组和小数点都跟随当前语言（德语 1.234,56、法语 1 234,56），小数部分缩小显示
-  const parts = new Intl.NumberFormat(intlLocale(), {
+  const parts = numberFormat(intlLocale(), {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   }).formatToParts(abs);

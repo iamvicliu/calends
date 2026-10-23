@@ -67,12 +67,17 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
 }
 
 /** 头部：负 MRR + 历史走势 */
+/** 从最早订阅所在月到今天的月数，至少 2 个月。放在组件外：Oxc 版 React Compiler 处理组件里的 Math.max 会内部报错并整组件放弃优化 */
+function monthsSince(first: string, today: string): number {
+  return Math.max(2, diffDays(first.slice(0, 8) + '01', today) / 30.4375 + 1);
+}
+
 function Hero({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const [range, setRange] = useState<'12' | '36' | 'all'>('36');
   const [hist, setHist] = useState(true);
   const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
-  const allMonths = Math.max(2, diffDays(first.slice(0, 8) + '01', today) / 30.4375 + 1);
+  const allMonths = monthsSince(first, today);
   const months = range === 'all' ? Math.ceil(allMonths) : Number(range);
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
   const tot = totals(state, today);
@@ -745,7 +750,6 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
       desktop.removeEventListener('change', measure);
     };
   }, [list, extra]);
-  let lastYear = '';
   return (
     <div className={`card report-log ${extra > 0 ? 'expanded' : ''}`}>
       <div className="card-h">
@@ -755,8 +759,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
       <div className="log" ref={log}>
         {list.slice(0, n).map((e, i) => {
           const yr = e.date.slice(0, 4);
-          const showYear = yr !== lastYear;
-          lastYear = yr;
+          const showYear = i === 0 || list[i - 1].date.slice(0, 4) !== yr;
           const [labelKey, tone] = EV[e.kind];
           const label = e.kind === 'terminate' ? t('core.stop.terminate') : t(`report.ev.${labelKey}`);
           const up = e.kind === 'price' || e.kind === 'intro-end' || e.kind === 'switch' ? e.delta > 0 : tone === 'up';
