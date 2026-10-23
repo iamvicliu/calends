@@ -56,6 +56,10 @@
   --label-2: var(--gray-11);
   --label-3: var(--gray-11);
   --ink: var(--gray-12);
+  /* 图表统一用 shadcn 式的黑灰单色：单一数据的线、点、面积、柱都用墨色；按分类堆叠的图才用分类色 */
+  --chart-ink: var(--gray-12);
+  /* 双系列图的第二系列（如报告页现金柱） */
+  --chart-ink-2: var(--gray-8);
   --on-ink: var(--gray-1);
   --accent: var(--indigo-11);
   --accent-solid: var(--indigo-9);

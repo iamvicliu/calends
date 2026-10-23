@@ -28,8 +28,8 @@ export function AreaChart({
       <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }}>
         <defs>
           <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--accent)" stopOpacity="0.28" />
-            <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
+            <stop offset="0" stopColor="var(--chart-ink)" stopOpacity="0.28" />
+            <stop offset="1" stopColor="var(--chart-ink)" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75].map((f) => (
@@ -46,7 +46,7 @@ export function AreaChart({
           />
         ))}
         <path d={area} fill="url(#area-fill)" />
-        <path d={line} fill="none" stroke="var(--accent)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <path d={line} fill="none" stroke="var(--chart-ink)" strokeWidth="2.2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       </svg>
       {markers?.map((i) => (
         <i key={i} className="area-mark" style={{ left: `${(x(i) / W) * 100}%`, top: y(values[i]) }} />
@@ -108,7 +108,7 @@ export function BarLine({
       </div>
       <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }} className="bl-line">
         {min < 0 && <line x1="0" x2={W} y1={y(0)} y2={y(0)} stroke="var(--sep)" vectorEffect="non-scaling-stroke" />}
-        <path d={path} fill="none" stroke="var(--orange)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+        <path d={path} fill="none" stroke="var(--chart-ink)" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <div className="area-x">
         {labels.map((l, i) =>

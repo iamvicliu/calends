@@ -718,3 +718,17 @@ test('keyboard behavior stays in the shared Sheet and guards, with safe confirma
   const people = sources.find(([file]) => file === 'views/People.tsx')[2];
   assert.match(people, /data-submit=\{editingAccount === accountKey\(i\) \? '' : undefined\}/);
 });
+
+test('single-series charts share the monochrome chart ink and keep readable data-line widths', () => {
+  const detail = readFileSync(new URL('views/detail.css', root), 'utf8');
+  const charts = readFileSync(new URL('components/charts.tsx', root), 'utf8');
+  for (const sel of ['.cc-line', '.cc-pt', '.cc-hl']) {
+    const body = cssRules(detail).find(([s]) => s === sel)?.[1] ?? '';
+    assert.match(body, /var\(--chart-ink\)/, sel);
+    assert.doesNotMatch(body, /stroke-width:\s*0\.5\b/, sel);
+  }
+  assert.doesNotMatch(charts, /var\(--(accent|orange|indigo-\d+)\)/);
+  assert.doesNotMatch(charts, /<path[^>]*strokeWidth="0\.5"/);
+  const pub = readFileSync(new URL('public/index.css', root), 'utf8');
+  for (const n of [1, 2, 3, 4, 5]) assert.match(pub, new RegExp(`--chart-${n}:\\s*var\\(--gray-\\d+\\)`));
+});

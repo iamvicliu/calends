@@ -312,11 +312,11 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
         </CardTitle>
         <div className="legend-inline">
           <span>
-            <i style={{ background: 'var(--accent)' }} />
+            <i style={{ background: 'var(--chart-ink-2)' }} />
             {t('report.cash.legendCash')}
           </span>
           <span>
-            <i style={{ background: 'var(--orange)', height: 3 }} />
+            <i style={{ background: 'var(--chart-ink)', height: 3 }} />
             {t('report.cash.legendAccrual')}
           </span>
         </div>

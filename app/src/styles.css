@@ -1661,8 +1661,8 @@ select.btn {
   height: 10px;
   margin: -5px 0 0 -5px;
   border-radius: var(--radius-pill);
-  background: var(--indigo-9);
-  box-shadow: 0 0 0 var(--hairline) var(--accent-soft);
+  background: var(--chart-ink);
+  box-shadow: 0 0 0 var(--hairline) color-mix(in srgb, var(--chart-ink) 20%, transparent);
   pointer-events: none;
 }
 .area-hit {
@@ -2051,7 +2051,7 @@ select.btn {
 .bl-col i {
   width: 100%;
   border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
-  background: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: var(--chart-ink-2);
   min-height: 1px;
 }
 .bl-col.future i {
@@ -2062,7 +2062,7 @@ select.btn {
   );
 }
 .bl-col:hover i {
-  background: var(--indigo-9);
+  background: var(--gray-9);
 }
 .bl-line {
   position: relative;

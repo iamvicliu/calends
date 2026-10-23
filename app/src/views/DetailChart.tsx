@@ -139,8 +139,8 @@ export function ChargeChart({
           <svg className="cc-plot" width={w} height={H}>
             <defs>
               <linearGradient id="cc-fill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stopColor="var(--accent)" stopOpacity="0.16" />
-                <stop offset="1" stopColor="var(--accent)" stopOpacity="0" />
+                <stop offset="0" stopColor="var(--chart-ink)" stopOpacity="0.16" />
+                <stop offset="1" stopColor="var(--chart-ink)" stopOpacity="0" />
               </linearGradient>
             </defs>
             {ticks.map((v) => (

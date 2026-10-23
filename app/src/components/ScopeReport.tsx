@@ -331,7 +331,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                       <h4>{t(`scope.${dim}`)}</h4>
                       {block[dim].map((r) => {
                         const method = state.methods.find((m) => m.id === r.key);
-                        const color = r.other ? 'var(--label-3)' : dim === 'categories' ? catColor(r.key) : 'var(--accent)';
+                        const color = r.other ? 'var(--label-3)' : dim === 'categories' ? catColor(r.key) : 'var(--chart-ink)';
                         return (
                           <div className="scope-share" key={r.other ? 'other' : `key-${r.key}`}>
                             <div className="scope-row">
