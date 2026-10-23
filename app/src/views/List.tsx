@@ -6,7 +6,7 @@ import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthly
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, RegionTag, Seg, subRegion, SubIcon, Toolbar } from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
@@ -293,7 +293,6 @@ export function List({
                   <div className="sc-top">
                     <SubIcon sub={s} size={48} />
                     <span className="sc-flags">
-                      {cur.region && <span className="badge">{cur.region}</span>}
                       {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
                       {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
                       {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
@@ -313,6 +312,7 @@ export function List({
                   <div className="sc-meta">
                     <CatChip cat={s.category} />
                     <PayBadge m={m} />
+                    <RegionTag cc={subRegion(cur, m)} />
                   </div>
                   <div className="sc-price">
                     <Amount plain value={shown(s, n).value} ccy={shown(s, n).ccy} />
@@ -393,7 +393,12 @@ export function List({
                         <span className="nm">
                           <b>{s.name}</b>
                           {s.intro && s.intro.until > today && <Icon name="leaf" size={13} />}
-                          {cur.region && <span className="badge">{cur.region}</span>}
+                          <RegionTag
+                            cc={subRegion(
+                              cur,
+                              state.methods.find((x) => x.id === cur.methodId),
+                            )}
+                          />
                           {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
                           {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
                           {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}

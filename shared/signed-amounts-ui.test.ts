@@ -394,6 +394,8 @@ test('Detail keeps renewal context and places only short default histories in th
     Details: empty,
     Events: empty,
     PayBadge: empty,
+    RegionTag: empty,
+    subRegion: (s: { region?: string }) => s.region,
   };
   const Upcoming = load(file, 'Upcoming', `function Upcoming(${source.split('function Upcoming(')[1].split('type Unit =')[0]}`, deps);
   const Details = load(file, 'Details', `function Details(${source.split('function Details(')[1].split('/** 扣款记录')[0]}`, deps);

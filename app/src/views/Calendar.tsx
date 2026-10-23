@@ -17,7 +17,7 @@ import {
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, Amount, CardTitle, Icon, PayBadge, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { IconButton, Amount, CardTitle, Icon, PayBadge, RegionTag, Seg, subRegion, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -244,6 +244,12 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                             <b>{sub.name}</b>
                             <span className="cal-dc-meta">
                               <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                              <RegionTag
+                                cc={subRegion(
+                                  c.sub,
+                                  state.methods.find((m) => m.id === c.sub.methodId),
+                                )}
+                              />
                               <span>{cycleLabel(c.sub.cycle)}</span>
                               {status !== 'active' && !(status === 'lifetime' && c.sub.cycle.unit === 'lifetime') && (
                                 <span className="badge">{t(`list.status.${status}`)}</span>

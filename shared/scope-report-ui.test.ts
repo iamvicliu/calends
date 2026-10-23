@@ -80,6 +80,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     CardTitle: 'h3',
     Hint: 'Hint',
     PayBadge: 'PayBadge',
+    RegionTag: 'RegionTag',
+    subRegion: (s: { region?: string }) => s.region,
     Seg: 'Seg',
     SubIcon: 'SubIcon',
     CatIcon: 'CatIcon',

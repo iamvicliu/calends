@@ -36,7 +36,7 @@ import type { AppState, Payment, ShareMember, Subscription } from '../../../shar
 import { CarSheet } from './Carpool.tsx';
 import { carLedger, MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { CardTitle, IconButton, CatIcon, PayBadge, Seg, Sheet, SubIcon } from '../components/ui.tsx';
+import { CardTitle, IconButton, CatIcon, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
 import { catColor, presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
@@ -283,7 +283,12 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
               {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
             </b>
             {big.alt && <span>{big.alt}</span>}
-            {cur.region && <Region cc={cur.region} />}
+            <RegionTag
+              cc={subRegion(
+                cur,
+                state.methods.find((x) => x.id === cur.methodId),
+              )}
+            />
             <CatTag cat={sub.category} />
           </div>
         </div>

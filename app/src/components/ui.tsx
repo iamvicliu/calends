@@ -242,13 +242,51 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
   );
 }
 
-/** 支付方式胶囊：logo 标记 + 名称；全站凡是显示支付方式的地方都用它 */
+/**
+ * 支付方式胶囊：只讲「用什么付」。商店账户显示产品名（App Store、Google Play），用户起的账户名放在提示里；
+ * 地区是订阅自己的属性，由 RegionTag 单独显示，这里不加国旗角标。
+ */
 export function PayBadge({ m }: { m?: PaymentMethod }) {
   if (!m) return <span className="pay none">{t('ui.method.none')}</span>;
+  const store = m.kind === 'appstore' || m.kind === 'googleplay';
   return (
     <span className="pay" title={m.name}>
-      <MethodMark m={m} size={16} />
-      <span className="pay-name">{m.name}</span>
+      <MethodMark m={m} size={16} flag={false} />
+      <span className="pay-name">{store ? t(`core.methodKind.${m.kind}`) : m.name}</span>
+    </span>
+  );
+}
+
+/** 地区名跟随当前语言 */
+const regionNameCache = new Map<string, Intl.DisplayNames | undefined>();
+export function regionLabel(cc: string): string {
+  const loc = intlLocale();
+  if (!regionNameCache.has(loc)) {
+    try {
+      regionNameCache.set(loc, new Intl.DisplayNames([loc], { type: 'region' }));
+    } catch {
+      regionNameCache.set(loc, undefined);
+    }
+  }
+  try {
+    return regionNameCache.get(loc)?.of(cc.toUpperCase()) ?? cc.toUpperCase();
+  } catch {
+    return cc.toUpperCase();
+  }
+}
+
+/** 订阅的地区：订阅自己填的优先，没填时用支付账户的地区（商店账户、手机卡等） */
+export function subRegion(sub: { region?: string }, m?: PaymentMethod): string | undefined {
+  return sub.region || (m ? methodRegion(m) : undefined) || undefined;
+}
+
+/** 地区胶囊：国旗 + 地区名，和分类、支付方式并排独立显示 */
+export function RegionTag({ cc }: { cc?: string }) {
+  if (!cc) return null;
+  return (
+    <span className="region-tag" title={cc.toUpperCase()}>
+      <FlagImg cc={cc} />
+      <span>{regionLabel(cc)}</span>
     </span>
   );
 }
@@ -272,7 +310,7 @@ export function CatChip({ cat }: { cat: string }) {
  * 支付方式标记：统一显示支付产品自己的 logo —— 银行卡用银行图标集，
  * App Store、Plasma、SMART、Bybit 用各自的标；有地区的在右下角加国旗角标。没有可用 logo 时用卡片图标。
  */
-export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?: number; proxied?: boolean }) {
+export function MethodMark({ m, size = 36, proxied, flag = true }: { m: PaymentMethod; size?: number; proxied?: boolean; flag?: boolean }) {
   const brand = brandOf(m);
   const bank = bankOf(m);
   const region = methodRegion(m);
@@ -309,7 +347,7 @@ export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?:
           }}
         />
       )}
-      {region && <FlagImg cc={region} className="mm-flag" />}
+      {flag && region && <FlagImg cc={region} className="mm-flag" />}
     </span>
   );
 }

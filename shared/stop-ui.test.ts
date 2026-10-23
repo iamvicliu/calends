@@ -228,6 +228,8 @@ test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色�
       catColor: () => '#777',
       CatIcon: 'CatIcon',
       PayBadge: 'PayBadge',
+      RegionTag: 'RegionTag',
+      subRegion: (s: { region?: string }) => s.region,
     },
     'Outcome',
   );
