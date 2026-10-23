@@ -317,5 +317,9 @@
     "none": "Sin reembolso",
     "unused": "Devolver lo no usado",
     "date": "Fecha de reembolso"
+  },
+  "sort": {
+    "owed": "Pendiente de cobro",
+    "net": "Neto anual"
   }
 }

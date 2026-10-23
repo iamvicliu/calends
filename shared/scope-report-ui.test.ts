@@ -54,6 +54,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     },
     categories: () => [],
     Picker: 'Picker',
+    SortControl: 'SortControl',
     PersonAvatar: 'PersonAvatar',
     personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     t: (key: string) => key,

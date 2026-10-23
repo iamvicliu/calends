@@ -317,5 +317,9 @@
     "none": "Aucun",
     "unused": "Rembourser l’inutilisé",
     "date": "Date du remboursement"
+  },
+  "sort": {
+    "owed": "Montant dû",
+    "net": "Net annuel"
   }
 }

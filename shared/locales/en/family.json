@@ -317,5 +317,9 @@
     "none": "No refund",
     "unused": "Refund unused",
     "date": "Refund date"
+  },
+  "sort": {
+    "owed": "Amount owed",
+    "net": "Yearly net"
   }
 }

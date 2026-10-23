@@ -317,5 +317,9 @@
     "none": "Sem reembolso",
     "unused": "Reembolsar não usado",
     "date": "Data do reembolso"
+  },
+  "sort": {
+    "owed": "Valor a receber",
+    "net": "Líquido anual"
   }
 }

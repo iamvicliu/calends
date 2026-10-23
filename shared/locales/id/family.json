@@ -307,5 +307,9 @@
     "none": "Tanpa pengembalian",
     "unused": "Kembalikan sisa",
     "date": "Tanggal pengembalian"
+  },
+  "sort": {
+    "owed": "Belum dibayar",
+    "net": "Bersih per tahun"
   }
 }

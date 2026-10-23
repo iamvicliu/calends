@@ -31,7 +31,7 @@ import { useIconTint } from '../iconTint.ts';
 import { useOrig } from '../display.ts';
 import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
-import { Picker } from '../components/Picker.tsx';
+import { SortControl } from '../components/SortControl.tsx';
 import { usePref } from '../store.ts';
 import { scopeReport } from '../../../shared/scope-report.ts';
 import { ScopeReport } from '../components/ScopeReport.tsx';
@@ -228,30 +228,19 @@ export function List({
             ['gantt', t('list.view.gantt')],
           ]}
         />
-        <Picker
-          variant="btn"
+        <SortControl
           value={sort}
-          onChange={chooseSort}
-          ariaLabel={t('list.sort.label')}
-          options={
-            [
-              { value: 'next', label: t('list.sort.next') },
-              { value: 'cost', label: t('list.sort.cost') },
-              { value: 'name', label: t('list.sort.name') },
-              { value: 'category', label: t('list.sort.category') },
-              { value: 'start', label: t('list.sort.start') },
-            ] as Array<{ value: Sort; label: string }>
-          }
+          dir={dir}
+          onSort={chooseSort}
+          onDir={setDir}
+          options={[
+            { value: 'next', label: t('list.sort.next') },
+            { value: 'cost', label: t('list.sort.cost') },
+            { value: 'name', label: t('list.sort.name') },
+            { value: 'category', label: t('list.sort.category') },
+            { value: 'start', label: t('list.sort.start') },
+          ]}
         />
-        <IconButton
-          type="button"
-
-          onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')}
-          aria-label={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
-          title={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}
-        >
-          <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
-        </IconButton>
         {!state.readonly && (
           <IconButton className="accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />

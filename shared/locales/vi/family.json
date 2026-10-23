@@ -307,5 +307,9 @@
     "none": "Không hoàn",
     "unused": "Hoàn phần chưa dùng",
     "date": "Ngày hoàn tiền"
+  },
+  "sort": {
+    "owed": "Khoản chờ thu",
+    "net": "Ròng mỗi năm"
   }
 }

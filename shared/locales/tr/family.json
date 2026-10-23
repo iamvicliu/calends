@@ -317,5 +317,9 @@
     "none": "İade yok",
     "unused": "Kullanılmayanı iade et",
     "date": "İade tarihi"
+  },
+  "sort": {
+    "owed": "Alacak",
+    "net": "Yıllık net"
   }
 }

@@ -20,11 +20,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { carpoolSnapshot } from './carpool-snapshot.ts';
 import { createPortal } from 'react-dom';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } from '../../../shared/format.ts';
-import { t } from '../../../shared/i18n.ts';
+import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { chargeValue, convertOn } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
+import { SortControl } from '../components/SortControl.tsx';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
 import { applyCarRule, carRule, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
@@ -68,6 +69,11 @@ function parseIds(raw: string): Set<string> {
   }
 }
 
+type CarSort = 'owed' | 'net' | 'next' | 'name';
+const isCarSort = (v: string): v is CarSort => ['owed', 'net', 'next', 'name'].includes(v);
+/** 默认方向：待收多的在前、亏得多的在前、扣款近的在前、名称 A→Z */
+const CAR_SORT_DIR: Record<CarSort, 'asc' | 'desc'> = { owed: 'desc', net: 'asc', next: 'asc', name: 'asc' };
+
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const [colsRef, colsWidth] = useWidth();
@@ -87,12 +93,31 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
     settled: owned.filter((s) => !owes(s)),
     ended,
   };
-  // 有待收的在前，其余按下次扣款从近到远；已停止的排最后
-  const nextOf = (s: Subscription) => nextCharge(s, addDays(today, 1)) ?? '9999-12-31';
-  const shown = [...groups[filter]].sort(
-    (a, b) => Number(!live(a)) - Number(!live(b)) || Number(!owes(a)) - Number(!owes(b)) || nextOf(a).localeCompare(nextOf(b)),
-  );
   const books = new Map([...owned, ...ended].map((s) => [s.id, carLedger(state, s, today)]));
+  // 排序与方向存在服务端；已停止的车始终排在最后。默认待收多的在前
+  const [sort, setSort] = usePref<CarSort>('car-sort', 'owed', isCarSort);
+  const [dir, setDir] = usePref<'asc' | 'desc'>('car-dir', CAR_SORT_DIR[sort], (v): v is 'asc' | 'desc' => v === 'asc' || v === 'desc');
+  const chooseSort = (k: CarSort) => {
+    setSort(k);
+    setDir(CAR_SORT_DIR[k]);
+  };
+  const nextOf = (s: Subscription) => nextCharge(s, addDays(today, 1)) ?? '9999-12-31';
+  const owedOf = (s: Subscription) =>
+    memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state)
+      .filter((d) => d.periodsOwed > 0)
+      .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : 0), 0);
+  const netOf = (s: Subscription) => -books.get(s.id)!.yearNet;
+  const asc = (a: Subscription, b: Subscription) =>
+    sort === 'owed'
+      ? owedOf(a) - owedOf(b)
+      : sort === 'net'
+        ? netOf(a) - netOf(b)
+        : sort === 'name'
+          ? a.name.localeCompare(b.name, locale())
+          : nextOf(a).localeCompare(nextOf(b));
+  const shown = [...groups[filter]].sort(
+    (a, b) => Number(!live(a)) - Number(!live(b)) || (dir === 'asc' ? asc(a, b) : asc(b, a)) || nextOf(a).localeCompare(nextOf(b)),
+  );
   const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = [...owned, ...ended]
@@ -124,6 +149,18 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           value={filter}
           onChange={setFilter}
           options={CAR_FILTERS.map((f) => [f, `${t(`family.pool.filter.${f}`)} ${groups[f].length}`] as [CarFilter, string])}
+        />
+        <SortControl
+          value={sort}
+          dir={dir}
+          onSort={chooseSort}
+          onDir={setDir}
+          options={[
+            { value: 'owed', label: t('family.sort.owed') },
+            { value: 'net', label: t('family.sort.net') },
+            { value: 'next', label: t('list.sort.next') },
+            { value: 'name', label: t('list.sort.name') },
+          ]}
         />
         {!ro && <FamilyTabs tab="plans" />}
       </Toolbar>

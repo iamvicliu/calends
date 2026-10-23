@@ -317,5 +317,9 @@
     "none": "Keine Erstattung",
     "unused": "Ungenutztes erstatten",
     "date": "Erstattungsdatum"
+  },
+  "sort": {
+    "owed": "Offener Betrag",
+    "net": "Jährlicher Saldo"
   }
 }
