@@ -9834,16 +9834,33 @@ img.mm-flag {
   grid-template-rows: auto auto 1fr;
 }
 
-/* 日历月、年切换的视图过渡：月历与对应月份小卡之间缩放，其余内容淡入淡出 */
-::view-transition-group(cal-month),
-::view-transition-old(root),
-::view-transition-new(root) {
+/*
+ * 日历月、年切换的视图过渡：只有日历这个框在两个视图之间缩放移动（cal-month），
+ * 其余内容先淡出、再淡入，中间不叠影；总时长仍是 --duration
+ */
+::view-transition-group(cal-month) {
   animation-duration: var(--duration);
   animation-timing-function: var(--ease);
+}
+::view-transition-old(root) {
+  animation: vt-fade-out calc(var(--duration) * 0.4) var(--ease) both;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in calc(var(--duration) * 0.6) var(--ease) calc(var(--duration) * 0.4) both;
 }
 ::view-transition-old(cal-month),
 ::view-transition-new(cal-month) {
   height: 100%;
   object-fit: cover;
   object-position: top;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
 }
