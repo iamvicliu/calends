@@ -262,3 +262,16 @@ test('公开页没有认证 state 时，主题偏好快照立即更新且不发�
   await c.tick(1_000);
   assert.deepEqual(c.requests, []);
 });
+
+test('改界面偏好只换偏好，不换账本对象，依赖账本的派生计算不失效', async (t) => {
+  const c = await client(t);
+  const before = c.store.getState();
+  const snapshot = (c.store.usePref('list-view', 'grid'), c.prefSnapshots.at(-1)!);
+  c.store.writePref('list-view', 'table');
+  assert.equal(c.store.getState(), before, '账本对象引用不变');
+  assert.equal(snapshot.value, 'table', '偏好订阅者拿到新值');
+  assert.equal(c.store.getState().prefs?.['list-view'], 'table');
+  await c.tick(400);
+  assert.ok(c.requests.includes('prefs'), '偏好照常同步到服务端');
+  await c.store.logout();
+});

@@ -65,6 +65,17 @@ function replaceState(state: AppState) {
   set({ state });
 }
 
+/**
+ * 只换偏好，不换账本对象：视图、缩放这类界面偏好变化时，依赖 state 的账务派生（React Compiler 与 useMemo 以 state 为键）不必重算。
+ * 偏好的订阅者经 usePref 按值更新；服务端同步时 replaceSyncedState 仍整体替换。
+ */
+function replacePrefs(prefs: NonNullable<AppState['prefs']>) {
+  const st = store.state!;
+  st.prefs = prefs;
+  cache(st);
+  set({});
+}
+
 let knownRev: number | undefined;
 let ownRevisions: Array<{ from: number; rev: number }> = [];
 const prefEdits = new Map<string, number>();
@@ -708,7 +719,7 @@ export function writePref(key: PrefKey, value: string | null) {
   const prefs = { ...st.prefs };
   if (value == null) delete prefs[key];
   else prefs[key] = value;
-  replaceState({ ...st, prefs });
+  replacePrefs(prefs);
   if (!st.readonly) queuePrefs({ [key]: value });
 }
 
@@ -758,7 +769,7 @@ function migratePrefs() {
     }
   }
   if (!Object.keys(patch).length) return;
-  replaceState({ ...store.state!, prefs: { ...store.state!.prefs, ...patch } });
+  replacePrefs({ ...store.state!.prefs, ...patch });
   queuePrefs(patch);
 }
 
