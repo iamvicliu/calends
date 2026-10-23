@@ -77,7 +77,7 @@ const VERSION = (JSON.parse(readFileSync(new URL('../package.json', import.meta.
 
 export default defineConfig({
   root: APP,
-  cacheDir: join(ROOT, 'node_modules/.vite'),
+  cacheDir: process.env.VITE_CACHE_DIR || join(ROOT, 'node_modules/.vite'),
   base: `${BASE_PATH}/`,
   // 页脚等处显示的版本号
   define: { __APP_VERSION__: JSON.stringify(VERSION) },
@@ -91,7 +91,7 @@ export default defineConfig({
   },
   server: {
     // 本地开发：wrangler dev 跑在 8787；按前缀匹配，/cal/ 要带斜杠，否则 /calendar 页面也会被转发
-    proxy: Object.fromEntries(['/api/', '/cal/', '/mcp'].map((path) => [assetPath(path), 'http://127.0.0.1:8787'])),
+    proxy: Object.fromEntries(['/api/', '/cal/', '/mcp'].map((path) => [assetPath(path), process.env.VITE_WORKER_ORIGIN || 'http://127.0.0.1:8787'])),
   },
   build: { outDir: DIST, emptyOutDir: true, target: 'es2022', assetsInlineLimit: 0 },
 });

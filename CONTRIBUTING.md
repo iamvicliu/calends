@@ -38,6 +38,40 @@ that assistant confirmation-card proposals do not save until `/api/assistant/app
 Preview-only tasks are never confirmed. Tokens are held in memory; the assistant key exists only in the
 disposable local configuration and is cleared before cleanup. Do not paste credentials into shell history.
 
+## Detail layout stress captures
+
+Run `node scripts/detail-shots.mjs --out /tmp/calends-detail-shots` to generate a fictional,
+date-relative backup, restore it through the real Worker API, and capture every subscription detail
+with ego-browser. Use `--cases 4,15` to select case groups; variants in a group are included.
+`--keep` leaves the isolated services running at `http://127.0.0.1:5180/list` and writes process groups
+and the disposable data path to `keep.json`. Stop those process groups before deleting that path.
+The normal run closes its TaskSpace, stops its services and removes its temporary database.
+An interrupted run resumes completed captures in the same output directory only when the date,
+fictional backup and tracked UI/domain sources still match `run.json`; each resumed run gets a new
+temporary database. A completed output directory is captured afresh on the next invocation.
+Crossing midnight fails the run instead of accepting stale “today” fixtures.
+
+The script refuses occupied ports 8790/5180. It uses a generated Wrangler config and fresh
+`--persist-to` directory, never the local wrapper, `.dev.vars`, `CALENDS_LOCAL` or `.wrangler/state`.
+Vite's optional `VITE_WORKER_ORIGIN` and `VITE_CACHE_DIR` select the isolated API and optimizer cache;
+without them, the normal 8787 proxy and cache path are unchanged. Run from the dedicated fixture
+worktree without a personal `local/` directory. Only fictional currencies and historical FX are seeded.
+
+`index.html` links cropped Chinese desktop, 1440×900 first-screen and 390px-wide long captures,
+English desktop captures for groups 4/15/24/30, and extra expanded-history captures. Regular
+fixtures open through `/list`; the proxy fixture opens through the name link on `/behalf`. Long desktop
+captures stitch the real scroll container, keeping the sticky header once; narrow captures grow the
+viewport until the sheet fits. No detail CSS is overridden. `tiles/` retains the original PNG pieces.
+`measurements.json` and each case JSON include card geometry, candidate clipping/overflow,
+scroll containers, approximate metric text coverage and visible record counts. Desktop blank ratios
+use the full stitched dialog area; single-column layouts report zero. Overlay scrollbar visibility and
+clipping flags are candidates for visual review, not automatic failures. Inspect every image and write
+`problems.md` with case IDs and screenshot paths; that file is deliberately a human review artifact.
+
+The generator and its descriptions live in `scripts/detail-fixtures.ts`. Its regression tests also
+exercise leap day and month end. Group 4 has both the four-record roster with a departed member
+and a separate currently-full variant, because a departed member cannot occupy a live seat.
+
 ## Guidelines
 
 - **Domain logic lives in `shared/`** and must run in both the browser and the Worker (no DOM or Node APIs). Add unit tests in `shared/*.test.ts` for billing, phase or metric changes.
