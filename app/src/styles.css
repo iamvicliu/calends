@@ -9851,9 +9851,9 @@ img.mm-flag {
 ::view-transition-new(root) {
   animation: vt-fade-in calc(var(--duration) * 0.6) var(--ease) calc(var(--duration) * 0.4) both;
 }
-/* 放大进月视图：等日历框放大完成，右侧列表与报告再用更长的时间淡淡出现 */
+/* 放大进月视图：日历框先放大，在它最后 0.1 秒时右侧列表与底部报告才开始淡入 */
 .vt-zoom-in::view-transition-new(root) {
-  animation: vt-fade-in calc(var(--duration) * 1.6) var(--ease) var(--duration) both;
+  animation: vt-fade-in 300ms var(--ease) calc(var(--duration) - 100ms) both;
 }
 /* 侧栏与工具栏在月、年切换时单独成层：侧栏不变，工具栏只是标题换字，不随整页淡出淡入 */
 .vt-cal .sidebar {
