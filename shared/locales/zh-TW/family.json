@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "付出 {amount}",
-    "noReceiptsYet": "還沒收款",
     "receiptHint": "收到錢後，點成員旁的「收款」記一筆",
     "tabIn": "收款 {count}",
     "tabOut": "付款 {count}",
@@ -41,7 +40,8 @@
     "hiddenMember": "已隱藏成員",
     "addMember": "新增成員",
     "vacancyTrack": "暫時空缺",
-    "copyFailed": "複製圖片失敗"
+    "copyFailed": "複製圖片失敗",
+    "ownerFee": "車主"
   },
   "contact": {
     "via": {
@@ -180,8 +180,6 @@
     "me": "我",
     "exemptTitle": "{name}（不分攤）",
     "addMember": "新增成員",
-    "manageTitle": "開啟家庭群組管理頁",
-    "manage": "管理",
     "owedN": "{count} 人待收",
     "settled": "已結清",
     "noMembers": "還沒有成員",
@@ -226,20 +224,17 @@
     "ownerPh": "付給誰"
   },
   "facts": {
-    "paidAll": "累計付出",
-    "receivedAll": "累計收回",
-    "netGain": "累計賺",
-    "netLoss": "累計虧",
     "cost": "成本 / 年",
     "income": "收入 / 年",
     "loss": "未獲利 / 年",
     "profit": "利潤 / 年",
     "since": "{month}發起至今",
-    "sinceNone": "發起至今",
     "actual": "付出 {paid}\n收回 {received}\n{result}",
     "gain": "賺 {amount}",
     "lost": "虧 {amount}",
-    "noRecords": "還沒有收款記錄"
+    "noRecords": "還沒有收款記錄",
+    "yearCost": "每年成本",
+    "yearIncome": "每年收入"
   },
   "collect": {
     "title": "記收款\n{name}",

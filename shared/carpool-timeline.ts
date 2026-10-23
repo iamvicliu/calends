@@ -6,7 +6,9 @@ export function carpoolRoster(s: Subscription, today: string) {
   const members = s.share?.members ?? [];
   const active = members.filter((m) => !m.left || m.left > today);
   const departed = members.filter((m) => m.left && m.left <= today);
-  return { active, departed, vacancies: Math.max(0, (s.share?.seats ?? 0) - active.length) };
+  // 席位数包含车主自己（与 MCP 的 seats 约定一致）：我发起的车，我占一个座
+  const taken = active.length + (s.share?.role === 'owner' ? 1 : 0);
+  return { active, departed, taken, vacancies: Math.max(0, (s.share?.seats ?? 0) - taken) };
 }
 
 /** 时间范围覆盖全部加入历史，到在车成员第一段未来应收的期末再留两周。 */

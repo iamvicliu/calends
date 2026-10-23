@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Pagado {amount}",
-    "noReceiptsYet": "Aún sin cobros",
     "receiptHint": "Cuando alguien pague, toca «Cobrar» junto al miembro",
     "tabIn": "Recibido {count}",
     "tabOut": "Pagado {count}",
@@ -42,7 +41,8 @@
     "hiddenMember": "Miembro oculto",
     "addMember": "Añadir miembro",
     "vacancyTrack": "Vacante por ahora",
-    "copyFailed": "No se pudo copiar la imagen"
+    "copyFailed": "No se pudo copiar la imagen",
+    "ownerFee": "Organizador"
   },
   "contact": {
     "via": {
@@ -193,8 +193,6 @@
     "me": "Yo",
     "exemptTitle": "{name} (no paga)",
     "addMember": "Añadir miembro",
-    "manageTitle": "Abrir la página de gestión familiar",
-    "manage": "Gestionar",
     "owedN": {
       "one": "{count} por cobrar",
       "other": "{count} por cobrar"
@@ -251,20 +249,17 @@
     "ownerPh": "A quién pagas"
   },
   "facts": {
-    "paidAll": "Pagado en total",
-    "receivedAll": "Recibido en total",
-    "netGain": "Ganancia neta",
-    "netLoss": "Coste neto",
     "cost": "Coste / año",
     "income": "Ingresos / año",
     "loss": "Pérdida / año",
     "profit": "Ganancia / año",
     "since": "Desde {month}",
-    "sinceNone": "Desde el inicio",
     "actual": "Pagado {paid}\nRecibido {received}\n{result}",
     "gain": "+{amount}",
     "lost": "−{amount}",
-    "noRecords": "Aún no hay pagos"
+    "noRecords": "Aún no hay pagos",
+    "yearCost": "Costo anual",
+    "yearIncome": "Ingreso anual"
   },
   "collect": {
     "title": "Registrar cobro\n{name}",

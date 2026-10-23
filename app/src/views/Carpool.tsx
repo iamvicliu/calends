@@ -24,6 +24,7 @@ import { t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { chargeValue, convertOn } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
+import { base } from '../base.ts';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
 import { applyCarRule, carRule, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
@@ -210,11 +211,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     </div>
                     <div className="seats-row">
                       <ShareAvatars sub={s} state={state} today={today} onMember={ro ? undefined : (m) => setMember({ s, m })} />
-                      {s.manageUrl && (
-                        <a className="car-toggle" href={s.manageUrl} target="_blank" rel="noreferrer" title={t('family.pool.manageTitle')}>
-                          <Icon name="gear" size={14} /> {t('family.pool.manage')}
-                        </a>
-                      )}
                       <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
                         {(() => {
                           const n = dues.filter((d) => d.periodsOwed > 0).length;
@@ -566,6 +562,7 @@ function MemberTable({
         </tr>
       </thead>
       <tbody role="rowgroup">
+        {s.share?.role === 'owner' && <OwnerSeat state={state} table />}
         {[
           ...roster.active.filter((m) => !m.exempt),
           ...Array.from({ length: roster.vacancies }, () => null),
@@ -672,6 +669,32 @@ function DepartedToggle({ count, expanded, onToggle }: { count: number; expanded
       {t('family.sheet.departed', { count })}
       <Icon name="down" size={14} />
     </button>
+  );
+}
+
+/** 车主自己占的那一座：不收费、不可点，只表明席位 */
+function OwnerSeat({ state, table = false }: { state: AppState; table?: boolean }) {
+  const chip = (
+    <span className="car-member-chip owner">
+      <img className="owner-avatar" src={state.settings.avatar || base('/icons/avatar.png')} alt="" />
+      <span className="text-ellipsis">{t('family.pool.me')}</span>
+    </span>
+  );
+  return table ? (
+    <tr role="row" className="car-member-row owner-seat">
+      <td role="cell">{chip}</td>
+      <td role="cell" className="muted">
+        {t('family.sheet.ownerFee')}
+      </td>
+      <td role="cell" />
+      <td role="cell" />
+      <td role="cell" />
+    </tr>
+  ) : (
+    <div className="member owner-seat">
+      {chip}
+      <span className="muted">{t('family.sheet.ownerFee')}</span>
+    </div>
   );
 }
 
@@ -857,11 +880,12 @@ export function CarSheet({
                   [
                     `${money(s.price, s.currency)} ${cycleLabel(s.cycle)}`,
                     stopped ? '' : next ? t('family.pool.next', { date: cnDate(next) }) : '',
-                    t('family.sheet.seatsVal', { used: roster.active.length, total: sh.seats }),
+                    t('family.sheet.seatsVal', { used: roster.taken, total: sh.seats }),
                   ]
                     .filter(Boolean)
                     .join('\n'),
                 )}
+                {!stopped && roster.vacancies === 0 && <span className="car-seats full">{t('family.pool.seatsFull')}</span>}
               </div>
             </div>
             <div className="car-sheet-actions" data-snapshot-hide>
@@ -928,6 +952,7 @@ export function CarSheet({
             />
             <div className="car-member-cards">
               <TimelineAxis win={win} />
+              {s.share?.role === 'owner' && <OwnerSeat state={state} />}
               {memberGroups
                 .filter(([key]) => key !== 'exempt')
                 .map(([key, label, n]) => (
@@ -1183,30 +1208,22 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
 /** 车卡上的数字：这辆车从发起到现在一共付出、收回多少，赚还是亏；按年的在弹窗里看 */
 function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: string }) {
   const fmt = (v: number) => flow(v, base, { compact: true });
-  const actual = -book.net;
+  const net = book.yearIncome - book.yearCost;
+  // 卡片看这辆车现在每年的账：量级稳定、各车可比；累计历史放在详情页
   return (
     <div className="car-book">
-      <MetricCards>
+      <MetricCards inline>
         <div>
-          <small>{t('family.facts.paidAll')}</small>
-          <b>{fmt(-book.paid)}</b>
+          <small>{t('family.facts.yearCost')}</small>
+          <b>{fmt(-book.yearCost)}</b>
         </div>
         <div>
-          <small>{t('family.facts.receivedAll')}</small>
-          <b className={book.received > 0 ? 'green' : undefined}>{fmt(book.received)}</b>
+          <small>{t('family.facts.yearIncome')}</small>
+          <b className={book.yearIncome > 0 ? 'green' : undefined}>{fmt(book.yearIncome)}</b>
         </div>
         <div>
-          {book.hasRecords ? (
-            <>
-              <small>{actual >= 0 ? t('family.facts.netGain') : t('family.facts.netLoss')}</small>
-              <b className={actual >= 0 ? 'gain' : 'loss'}>{fmt(actual)}</b>
-            </>
-          ) : (
-            <>
-              <small>{t('family.facts.sinceNone')}</small>
-              <b className="warn">{t('family.sheet.noReceiptsYet')}</b>
-            </>
-          )}
+          <small>{t('family.strip.yearNet')}</small>
+          <b className={net > 0 ? 'gain' : net < 0 ? 'loss' : undefined}>{fmt(net)}</b>
         </div>
       </MetricCards>
     </div>

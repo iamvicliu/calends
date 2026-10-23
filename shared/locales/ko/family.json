@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "지출 {amount}",
-    "noReceiptsYet": "아직 받은 돈 없음",
     "receiptHint": "돈을 받으면 멤버 옆 「받기」로 기록하세요",
     "tabIn": "받음 {count}",
     "tabOut": "결제 {count}",
@@ -41,7 +40,8 @@
     "hiddenMember": "숨겨진 멤버",
     "addMember": "멤버 추가",
     "vacancyTrack": "현재 빈자리",
-    "copyFailed": "이미지 복사 실패"
+    "copyFailed": "이미지 복사 실패",
+    "ownerFee": "방장"
   },
   "contact": {
     "via": {
@@ -188,8 +188,6 @@
     "me": "나",
     "exemptTitle": "{name}(납부 면제)",
     "addMember": "멤버 추가",
-    "manageTitle": "가족 관리 페이지 열기",
-    "manage": "관리",
     "owedN": {
       "other": "{count}건 받을 예정"
     },
@@ -242,20 +240,17 @@
     "ownerPh": "돈을 보낼 사람"
   },
   "facts": {
-    "paidAll": "누적 지출",
-    "receivedAll": "누적 수입",
-    "netGain": "누적 이익",
-    "netLoss": "누적 손실",
     "cost": "비용 / 년",
     "income": "수입 / 년",
     "loss": "손실 / 년",
     "profit": "이익 / 년",
     "since": "{month}부터",
-    "sinceNone": "시작부터",
     "actual": "지출 {paid}\n받음 {received}\n{result}",
     "gain": "{amount} 이익",
     "lost": "{amount} 손해",
-    "noRecords": "아직 납부 없음"
+    "noRecords": "아직 납부 없음",
+    "yearCost": "연간 비용",
+    "yearIncome": "연간 수입"
   },
   "collect": {
     "title": "입금 기록\n{name}",

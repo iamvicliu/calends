@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Đã trả {amount}",
-    "noReceiptsYet": "Chưa thu được",
     "receiptHint": "Khi thành viên trả tiền, bấm «Thu» cạnh tên họ",
     "tabIn": "Đã nhận {count}",
     "tabOut": "Đã trả {count}",
@@ -41,7 +40,8 @@
     "hiddenMember": "Thành viên đã ẩn",
     "addMember": "Thêm thành viên",
     "vacancyTrack": "Tạm thời còn trống",
-    "copyFailed": "Không thể sao chép ảnh"
+    "copyFailed": "Không thể sao chép ảnh",
+    "ownerFee": "Chủ nhóm"
   },
   "contact": {
     "via": {
@@ -188,8 +188,6 @@
     "me": "Tôi",
     "exemptTitle": "{name} (không trả tiền)",
     "addMember": "Thêm thành viên",
-    "manageTitle": "Mở trang quản lý gia đình",
-    "manage": "Quản lý",
     "owedN": {
       "other": "{count} cần thu"
     },
@@ -242,20 +240,17 @@
     "ownerPh": "Người bạn trả tiền"
   },
   "facts": {
-    "paidAll": "Tổng đã trả",
-    "receivedAll": "Tổng đã thu",
-    "netGain": "Lãi ròng",
-    "netLoss": "Chi ròng",
     "cost": "Chi phí / năm",
     "income": "Thu nhập / năm",
     "loss": "Lỗ / năm",
     "profit": "Lãi / năm",
     "since": "Từ {month}",
-    "sinceNone": "Từ đầu",
     "actual": "Đã trả {paid}\nĐã nhận {received}\n{result}",
     "gain": "Lãi {amount}",
     "lost": "Lỗ {amount}",
-    "noRecords": "Chưa có khoản thanh toán"
+    "noRecords": "Chưa có khoản thanh toán",
+    "yearCost": "Chi phí mỗi năm",
+    "yearIncome": "Thu mỗi năm"
   },
   "collect": {
     "title": "Ghi khoản thu\n{name}",

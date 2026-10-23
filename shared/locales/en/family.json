@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Paid {amount}",
-    "noReceiptsYet": "Nothing received yet",
     "receiptHint": "When a member pays you, tap “Collect” next to them",
     "tabIn": "Received {count}",
     "tabOut": "Paid {count}",
@@ -42,7 +41,8 @@
     "hiddenMember": "Hidden member",
     "addMember": "Add member",
     "vacancyTrack": "Currently vacant",
-    "copyFailed": "Could not copy image"
+    "copyFailed": "Could not copy image",
+    "ownerFee": "Organizer"
   },
   "contact": {
     "via": {
@@ -193,8 +193,6 @@
     "me": "Me",
     "exemptTitle": "{name} (doesn't pay)",
     "addMember": "Add member",
-    "manageTitle": "Open family management page",
-    "manage": "Manage",
     "owedN": {
       "one": "{count} to collect",
       "other": "{count} to collect"
@@ -251,20 +249,17 @@
     "ownerPh": "Who you pay"
   },
   "facts": {
-    "paidAll": "Paid so far",
-    "receivedAll": "Received so far",
-    "netGain": "Net gain",
-    "netLoss": "Net cost",
     "cost": "Cost / yr",
     "income": "Income / yr",
     "loss": "Loss / yr",
     "profit": "Profit / yr",
     "since": "Since {month}",
-    "sinceNone": "Since start",
     "actual": "Paid {paid}\nReceived {received}\n{result}",
     "gain": "Up {amount}",
     "lost": "Down {amount}",
-    "noRecords": "No payments yet"
+    "noRecords": "No payments yet",
+    "yearCost": "Yearly cost",
+    "yearIncome": "Yearly income"
   },
   "collect": {
     "title": "Record payment\n{name}",

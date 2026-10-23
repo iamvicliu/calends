@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Bezahlt {amount}",
-    "noReceiptsYet": "Noch nichts erhalten",
     "receiptHint": "Wenn jemand zahlt, tippe neben dem Mitglied auf „Kassieren“",
     "tabIn": "Erhalten {count}",
     "tabOut": "Bezahlt {count}",
@@ -42,7 +41,8 @@
     "hiddenMember": "Verstecktes Mitglied",
     "addMember": "Mitglied hinzufügen",
     "vacancyTrack": "Derzeit frei",
-    "copyFailed": "Bild konnte nicht kopiert werden"
+    "copyFailed": "Bild konnte nicht kopiert werden",
+    "ownerFee": "Organisator"
   },
   "contact": {
     "via": {
@@ -193,8 +193,6 @@
     "me": "Ich",
     "exemptTitle": "{name} (zahlt nicht)",
     "addMember": "Mitglied hinzufügen",
-    "manageTitle": "Familienverwaltung öffnen",
-    "manage": "Verwalten",
     "owedN": {
       "one": "{count} einzufordern",
       "other": "{count} einzufordern"
@@ -251,20 +249,17 @@
     "ownerPh": "An wen du zahlst"
   },
   "facts": {
-    "paidAll": "Bisher bezahlt",
-    "receivedAll": "Bisher erhalten",
-    "netGain": "Gewinn",
-    "netLoss": "Kosten",
     "cost": "Kosten / Jahr",
     "income": "Einnahmen / Jahr",
     "loss": "Verlust / Jahr",
     "profit": "Gewinn / Jahr",
     "since": "Seit {month}",
-    "sinceNone": "Seit Beginn",
     "actual": "Gezahlt {paid}\nErhalten {received}\n{result}",
     "gain": "Plus {amount}",
     "lost": "Minus {amount}",
-    "noRecords": "Noch keine Zahlungen"
+    "noRecords": "Noch keine Zahlungen",
+    "yearCost": "Kosten pro Jahr",
+    "yearIncome": "Einnahmen pro Jahr"
   },
   "collect": {
     "title": "Zahlung erfassen\n{name}",

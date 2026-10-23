@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Ödenen {amount}",
-    "noReceiptsYet": "Henüz tahsilat yok",
     "receiptHint": "Biri ödediğinde üyenin yanındaki “Tahsil et”e dokunun",
     "tabIn": "Alınan {count}",
     "tabOut": "Ödenen {count}",
@@ -42,7 +41,8 @@
     "hiddenMember": "Gizli üye",
     "addMember": "Üye ekle",
     "vacancyTrack": "Şimdilik boş",
-    "copyFailed": "Görsel kopyalanamadı"
+    "copyFailed": "Görsel kopyalanamadı",
+    "ownerFee": "Düzenleyen"
   },
   "contact": {
     "via": {
@@ -193,8 +193,6 @@
     "me": "Ben",
     "exemptTitle": "{name} (ödemiyor)",
     "addMember": "Üye ekle",
-    "manageTitle": "Aile yönetimi sayfasını aç",
-    "manage": "Yönet",
     "owedN": {
       "one": "{count} tahsilat",
       "other": "{count} tahsilat"
@@ -251,20 +249,17 @@
     "ownerPh": "Kime ödüyorsunuz"
   },
   "facts": {
-    "paidAll": "Toplam ödenen",
-    "receivedAll": "Toplam alınan",
-    "netGain": "Net kazanç",
-    "netLoss": "Net maliyet",
     "cost": "Maliyet / yıl",
     "income": "Gelir / yıl",
     "loss": "Zarar / yıl",
     "profit": "Kâr / yıl",
     "since": "{month} itibarıyla",
-    "sinceNone": "Başlangıçtan beri",
     "actual": "Ödenen {paid}\nAlınan {received}\n{result}",
     "gain": "{amount} kârda",
     "lost": "{amount} zararda",
-    "noRecords": "Henüz ödeme yok"
+    "noRecords": "Henüz ödeme yok",
+    "yearCost": "Yıllık maliyet",
+    "yearIncome": "Yıllık gelir"
   },
   "collect": {
     "title": "Ödeme kaydet\n{name}",

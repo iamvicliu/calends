@@ -8329,8 +8329,23 @@ a.car-toggle {
   font-size: var(--fs-1);
   color: var(--label-2);
 }
+/* 满车是明确的状态：绿色胶囊，比「空 N 位」更醒目 */
 .car-seats.full {
-  color: var(--label-3);
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--green-3);
+  color: var(--green-11);
+  font-weight: 600;
+}
+.ph-meta .car-seats.full {
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.car-card .car-book {
+  margin-top: 8px;
 }
 .car-card .car-toggle {
   height: var(--ctl-h-md);
@@ -9408,8 +9423,11 @@ img.mm-flag {
   .car-member-row {
     cursor: pointer;
   }
-  .car-member-row:hover {
+  .car-member-row:hover:not(.owner-seat) {
     background: var(--fill-2);
+  }
+  .car-member-row.owner-seat {
+    cursor: default;
   }
   .car-member-row:focus-visible {
     outline: var(--hairline) solid var(--focus-ring);
@@ -9607,6 +9625,25 @@ img.mm-flag {
 }
 .car-member-cards > .mt-axis {
   margin-inline: 16px;
+}
+/* 车主自己的座位：头像 + 「我」，不可点 */
+.car-member-chip .owner-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  object-fit: cover;
+}
+.owner-seat {
+  cursor: default;
+}
+.car-member-cards .owner-seat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
 }
 .car-member-cards .car-vacancy {
   padding: 12px 16px;

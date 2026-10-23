@@ -240,6 +240,20 @@
   box-shadow: 0 0 0 var(--hairline) var(--gray-6);
   overflow-wrap: anywhere;
 }
+.metric-cards.inline .metric-grid {
+  gap: 0;
+}
+.metric-cards.inline .metric-grid > div {
+  padding: 0 16px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-left: var(--hairline) solid var(--sep);
+}
+.metric-cards.inline .metric-grid > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
 .metric-top {
   display: flex;
   align-items: center;
@@ -325,6 +339,53 @@
 @container (max-width: 300px) {
   .metric-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 窄栏里的事实：两行两列，无底色、无分割线；与上方大数字留出段落间距 */
+.metric-cards.plain {
+  margin-top: 20px;
+}
+.metric-cards.plain .metric-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+.metric-cards.plain .metric-grid > div {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+@container (max-width: 520px) {
+  .metric-cards.plain .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+  }
+  .metric-cards.plain .metric-grid > div {
+    padding: 0;
+  }
+}
+
+/* 卡片内的竖线分隔指标：窄屏也保持一行（四项时两行两列），分隔线跟着换行 */
+@container (max-width: 520px) {
+  .metric-cards.inline .metric-grid {
+    grid-template-columns: repeat(var(--metric-columns), minmax(0, 1fr));
+    row-gap: 12px;
+  }
+  .metric-cards.inline .metric-grid > div {
+    padding: 0 10px;
+  }
+  /* 灰卡在窄屏把落单的最后一项铺满整行；一行指标不需要 */
+  .metric-cards:is(.inline, .plain) .metric-grid > div:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+  .metric-cards.inline[data-count='4'] .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metric-cards.inline[data-count='4'] .metric-grid > div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
   }
 }
 

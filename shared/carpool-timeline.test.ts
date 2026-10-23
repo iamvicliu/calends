@@ -36,7 +36,10 @@ test('离开当天收起成员；不分摊与未来加入的成员仍占位，�
     roster.departed.map((m) => m.id),
     ['left'],
   );
-  assert.equal(roster.vacancies, 1);
+  // 四座车：三位在车成员（含不分摊、未来加入）+ 车主自己，正好坐满
+  assert.equal(roster.taken, 4);
+  assert.equal(roster.vacancies, 0);
+  assert.equal(carpoolRoster(sub(s.share!.members, 5), today).vacancies, 1);
   assert.equal(JSON.stringify(s), before);
   assert.equal(carpoolRoster(sub(roster.active, 1), today).vacancies, 0);
 });

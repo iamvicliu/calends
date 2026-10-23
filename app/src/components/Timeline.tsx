@@ -119,12 +119,14 @@ export function Timeline({
     pick();
   }, [today]);
 
-  // 滚轮：鼠标在时间线上时，竖向滚动一律换成左右移动；滚到两端就停住，不带动页面。
-  // 想滚页面，把鼠标移出时间线即可
+  // 滚轮：鼠标在时间线上时，竖向滚动换成左右移动；已经到最左（往上滚）或最右（往下滚）时不再拦截，交还给页面滚动
   useEffect(() => {
     const el = scroller.current!;
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return; // 触控板横滑，浏览器自己处理
+      const atStart = el.scrollLeft <= 0;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+      if ((e.deltaY < 0 && atStart) || (e.deltaY > 0 && atEnd)) return;
       e.preventDefault();
       cancelAnimationFrame(glide.current);
       el.scrollLeft += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;

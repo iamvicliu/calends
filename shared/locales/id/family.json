@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Dibayar {amount}",
-    "noReceiptsYet": "Belum ada yang diterima",
     "receiptHint": "Saat anggota membayar, ketuk “Terima” di sebelahnya",
     "tabIn": "Diterima {count}",
     "tabOut": "Dibayar {count}",
@@ -41,7 +40,8 @@
     "hiddenMember": "Anggota disembunyikan",
     "addMember": "Tambah anggota",
     "vacancyTrack": "Sementara kosong",
-    "copyFailed": "Gagal menyalin gambar"
+    "copyFailed": "Gagal menyalin gambar",
+    "ownerFee": "Pengelola"
   },
   "contact": {
     "via": {
@@ -188,8 +188,6 @@
     "me": "Saya",
     "exemptTitle": "{name} (tidak membayar)",
     "addMember": "Tambah anggota",
-    "manageTitle": "Buka halaman kelola keluarga",
-    "manage": "Kelola",
     "owedN": {
       "other": "{count} perlu ditagih"
     },
@@ -242,20 +240,17 @@
     "ownerPh": "Kepada siapa Anda membayar"
   },
   "facts": {
-    "paidAll": "Total dibayar",
-    "receivedAll": "Total diterima",
-    "netGain": "Untung bersih",
-    "netLoss": "Biaya bersih",
     "cost": "Biaya / thn",
     "income": "Pemasukan / thn",
     "loss": "Rugi / thn",
     "profit": "Untung / thn",
     "since": "Sejak {month}",
-    "sinceNone": "Sejak awal",
     "actual": "Dibayar {paid}\nDiterima {received}\n{result}",
     "gain": "Untung {amount}",
     "lost": "Rugi {amount}",
-    "noRecords": "Belum ada pembayaran"
+    "noRecords": "Belum ada pembayaran",
+    "yearCost": "Biaya per tahun",
+    "yearIncome": "Pemasukan per tahun"
   },
   "collect": {
     "title": "Catat pembayaran\n{name}",

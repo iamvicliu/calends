@@ -179,7 +179,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               {delta(block.change)}
               <span className="muted">{t('scope.previousEnd')}</span>
             </div>
-            <MetricCards>
+            <MetricCards inline>
               {fact(t('scope.annual'), expense(block.annual))}
               {fact(t('scope.active'), block.activeCount)}
               {fact(t('scope.yearPaid'), expense(block.paid))}
@@ -202,7 +202,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </span>
               )}
             </div>
-            <MetricCards>
+            <MetricCards inline>
               {fact(t('scope.paid'), expense(block.paid))}
               {fact(t('scope.pending'), expense(block.pending))}
               {fact(t('scope.count'), block.count)}
@@ -406,7 +406,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('losses')}
-            <MetricCards>
+            <MetricCards inline>
               {block.rows.length > 1 && fact(t('scope.loss'), expense(block.loss))}
               {block.refunds.length > 1 && fact(t('scope.refunded'), income(block.refunded))}
             </MetricCards>
@@ -446,7 +446,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <>
             {heading('sharing', 'sharingBasis')}
             {block.rows.length > 1 && (
-              <MetricCards>
+              <MetricCards inline>
                 {block.received !== 0 && fact(t('scope.received'), income(block.received))}
                 {block.owed > 0 && fact(t('scope.owed'), income(block.owed))}
               </MetricCards>

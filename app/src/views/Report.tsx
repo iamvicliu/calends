@@ -103,7 +103,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         <div className="hero-delta">
           {yearAgo != null && yearAgo > 0 && <span className="muted">{copyParts(t('report.hero.yearAgo', { amount: signed(-yearAgo) }))}</span>}
         </div>
-        <MetricCards>
+        <MetricCards plain>
           <Metric label={t('report.hero.annual')} value={signed(-now * 12)} />
           <Metric label={t('report.hero.perDay')} value={signed(-now / 30.4375, false)} />
           <Metric label={t('report.hero.active')} value={tot.activeCount} />
@@ -190,7 +190,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           </IconButton>
         </div>
       </div>
-      <MetricCards>
+      <MetricCards inline>
         {offset !== 0 && <Metric label={offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')} value={perMonth(flow(-mv.to, base, { compact: true }))} />}
         <Metric
           label={t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}
@@ -325,7 +325,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             </>
           )}
         />
-        <MetricCards>
+        <MetricCards inline>
           <Metric
             {...tipProps(() =>
               pv.items
@@ -377,7 +377,7 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
       <p className="stop-basis">{copyParts(t('report.stops.basis'))}</p>
-      <MetricCards>
+      <MetricCards inline>
         <Metric
           {...tipProps(() =>
             saved.items.map((i) => (

@@ -68,6 +68,7 @@ function compile(names, extra = {}) {
     DepartedToggle: noop,
     MemberTable: noop,
     MemberRows: noop,
+    OwnerSeat: noop,
     Sheet: passthrough,
     NameLink: passthrough,
     CardTitle: passthrough,
@@ -107,13 +108,14 @@ test('空位整行支持点击与键盘；只读空位不会打开编辑器', ()
 
 test('详情按分摊成员、空位、不分摊、已下车排序；满员没有添加入口', () => {
   const { MemberTable } = compile(['MemberTable', 'Vacancy']);
-  const s = sub([m('exempt', { exempt: true }), m('departed', { left: today }), m('paying')], 3);
+  // 四座：车主、分摊成员、不分摊成员各占一座，余一个空位
+  const s = sub([m('exempt', { exempt: true }), m('departed', { left: today }), m('paying')], 4);
   const props = { state, s, today, win: carpoolTimeline(s, today, 1), ro: false, expanded: true, masked: false, onMember() {}, onToggle() {} };
   const html = renderToStaticMarkup(React.createElement(MemberTable, props));
   assert.ok(html.indexOf('aria-label="paying"') < html.indexOf('class="car-vacancy'));
   assert.ok(html.indexOf('class="car-vacancy') < html.indexOf('aria-label="exempt"'));
   assert.ok(html.indexOf('aria-label="exempt"') < html.indexOf('aria-label="departed"'));
-  const full = { ...s, share: { ...s.share, seats: 2 } };
+  const full = { ...s, share: { ...s.share, seats: 3 } };
   assert.doesNotMatch(renderToStaticMarkup(React.createElement(MemberTable, { ...props, s: full })), /car-vacancy|Add member/);
 });
 

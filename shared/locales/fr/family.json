@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Payé {amount}",
-    "noReceiptsYet": "Rien reçu pour l’instant",
     "receiptHint": "Quand un membre paie, touchez « Encaisser » à côté de son nom",
     "tabIn": "Reçu {count}",
     "tabOut": "Payé {count}",
@@ -42,7 +41,8 @@
     "hiddenMember": "Membre masqué",
     "addMember": "Ajouter un membre",
     "vacancyTrack": "Place libre",
-    "copyFailed": "Impossible de copier l’image"
+    "copyFailed": "Impossible de copier l’image",
+    "ownerFee": "Organisateur"
   },
   "contact": {
     "via": {
@@ -193,8 +193,6 @@
     "me": "Moi",
     "exemptTitle": "{name} (ne paie pas)",
     "addMember": "Ajouter un membre",
-    "manageTitle": "Ouvrir la page de gestion familiale",
-    "manage": "Gérer",
     "owedN": {
       "one": "{count} à encaisser",
       "other": "{count} à encaisser"
@@ -251,20 +249,17 @@
     "ownerPh": "La personne que vous payez"
   },
   "facts": {
-    "paidAll": "Payé au total",
-    "receivedAll": "Reçu au total",
-    "netGain": "Gain net",
-    "netLoss": "Coût net",
     "cost": "Coût / an",
     "income": "Revenu / an",
     "loss": "Perte / an",
     "profit": "Bénéfice / an",
     "since": "Depuis {month}",
-    "sinceNone": "Depuis le début",
     "actual": "Payé {paid}\nReçu {received}\n{result}",
     "gain": "+{amount}",
     "lost": "−{amount}",
-    "noRecords": "Aucun paiement pour l’instant"
+    "noRecords": "Aucun paiement pour l’instant",
+    "yearCost": "Coût annuel",
+    "yearIncome": "Revenu annuel"
   },
   "collect": {
     "title": "Enregistrer un paiement\n{name}",

@@ -477,7 +477,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             </linearGradient>
           </defs>
         </svg>
-        <MetricCards>
+        <MetricCards plain>
           <Metric label={t('overview.stmt.annual')} value={flow(-tot.mrr * 12, base, { compact: true })} />
           <Metric
             label={t('overview.stmt.ytd', { year: today.slice(0, 4) })}

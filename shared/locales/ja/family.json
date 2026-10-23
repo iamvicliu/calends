@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "支払い {amount}",
-    "noReceiptsYet": "まだ受け取りなし",
     "receiptHint": "受け取ったらメンバー横の「受取」で記録",
     "tabIn": "受取 {count}",
     "tabOut": "支払い {count}",
@@ -41,7 +40,8 @@
     "hiddenMember": "非表示のメンバー",
     "addMember": "メンバーを追加",
     "vacancyTrack": "現在空席",
-    "copyFailed": "画像をコピーできませんでした"
+    "copyFailed": "画像をコピーできませんでした",
+    "ownerFee": "オーナー"
   },
   "contact": {
     "via": {
@@ -188,8 +188,6 @@
     "me": "自分",
     "exemptTitle": "{name}（支払いなし）",
     "addMember": "メンバーを追加",
-    "manageTitle": "ファミリー管理ページを開く",
-    "manage": "管理",
     "owedN": {
       "other": "未回収 {count}"
     },
@@ -242,20 +240,17 @@
     "ownerPh": "支払う相手"
   },
   "facts": {
-    "paidAll": "累計支払い",
-    "receivedAll": "累計受取",
-    "netGain": "累計プラス",
-    "netLoss": "累計マイナス",
     "cost": "コスト / 年",
     "income": "収入 / 年",
     "loss": "損失 / 年",
     "profit": "利益 / 年",
     "since": "{month}から",
-    "sinceNone": "開始時から",
     "actual": "支払い {paid}\n受け取り {received}\n{result}",
     "gain": "{amount}のプラス",
     "lost": "{amount}のマイナス",
-    "noRecords": "まだ支払いはありません"
+    "noRecords": "まだ支払いはありません",
+    "yearCost": "年間コスト",
+    "yearIncome": "年間収入"
   },
   "collect": {
     "title": "入金を記録\n{name}",

@@ -472,7 +472,7 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
       <div className="cal-stat-big">
         <b className={headline.total < 0 ? 'green' : undefined}>{flow(-headline.total, base)}</b>
       </div>
-      <MetricCards>
+      <MetricCards inline>
         <Metric label={t('scope.paid')} value={flow(-headline.paid, base)} />
         <Metric label={t('scope.pending')} value={flow(-headline.pending, base)} />
       </MetricCards>

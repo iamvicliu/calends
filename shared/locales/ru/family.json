@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Оплачено {amount}",
-    "noReceiptsYet": "Пока ничего не получено",
     "receiptHint": "Когда участник заплатит, нажмите «Получить» рядом с ним",
     "tabIn": "Получено {count}",
     "tabOut": "Оплачено {count}",
@@ -43,7 +42,8 @@
     "hiddenMember": "Скрытый участник",
     "addMember": "Добавить участника",
     "vacancyTrack": "Пока свободно",
-    "copyFailed": "Не удалось скопировать изображение"
+    "copyFailed": "Не удалось скопировать изображение",
+    "ownerFee": "Организатор"
   },
   "contact": {
     "via": {
@@ -202,8 +202,6 @@
     "me": "Я",
     "exemptTitle": "{name} (не платит)",
     "addMember": "Добавить участника",
-    "manageTitle": "Открыть страницу управления семейной группой",
-    "manage": "Управление",
     "owedN": {
       "one": "{count} к получению",
       "few": "{count} к получению",
@@ -268,20 +266,17 @@
     "ownerPh": "Кому вы платите"
   },
   "facts": {
-    "paidAll": "Всего оплачено",
-    "receivedAll": "Всего получено",
-    "netGain": "Итог: плюс",
-    "netLoss": "Итог: минус",
     "cost": "Расходы / год",
     "income": "Доход / год",
     "loss": "Убыток / год",
     "profit": "Прибыль / год",
     "since": "{month} — сейчас",
-    "sinceNone": "С начала",
     "actual": "Заплачено {paid}\nПолучено {received}\n{result}",
     "gain": "В плюсе на {amount}",
     "lost": "В минусе на {amount}",
-    "noRecords": "Платежей пока нет"
+    "noRecords": "Платежей пока нет",
+    "yearCost": "Расход в год",
+    "yearIncome": "Доход в год"
   },
   "collect": {
     "title": "Записать оплату\n{name}",

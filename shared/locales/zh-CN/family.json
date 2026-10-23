@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "付出 {amount}",
-    "noReceiptsYet": "还没收款",
     "receiptHint": "收到钱后，点成员旁的「收款」记一笔",
     "tabIn": "收款 {count}",
     "tabOut": "付款 {count}",
@@ -41,7 +40,8 @@
     "hiddenMember": "已隐藏成员",
     "addMember": "添加成员",
     "vacancyTrack": "暂时空缺",
-    "copyFailed": "复制图片失败"
+    "copyFailed": "复制图片失败",
+    "ownerFee": "车主"
   },
   "contact": {
     "via": {
@@ -180,8 +180,6 @@
     "me": "我",
     "exemptTitle": "{name}（不分摊）",
     "addMember": "添加成员",
-    "manageTitle": "打开家庭组管理页",
-    "manage": "管理",
     "owedN": "{count} 人待收",
     "settled": "已结清",
     "noMembers": "还没有成员",
@@ -226,20 +224,17 @@
     "ownerPh": "付给谁"
   },
   "facts": {
-    "paidAll": "累计付出",
-    "receivedAll": "累计收回",
-    "netGain": "累计赚",
-    "netLoss": "累计亏",
     "cost": "成本 / 年",
     "income": "收入 / 年",
     "loss": "没赚钱 / 年",
     "profit": "利润 / 年",
     "since": "{month}发起至今",
-    "sinceNone": "发起至今",
     "actual": "付出 {paid}\n收回 {received}\n{result}",
     "gain": "赚 {amount}",
     "lost": "亏 {amount}",
-    "noRecords": "还没有收款记录"
+    "noRecords": "还没有收款记录",
+    "yearCost": "每年成本",
+    "yearIncome": "每年收入"
   },
   "collect": {
     "title": "记收款\n{name}",

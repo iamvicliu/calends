@@ -2401,7 +2401,8 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   let nodes = r.render('MemberTable', props);
   assert.deepEqual(names(nodes), ['Active', 'Exempt']);
   const vacancies = nodes.filter((n) => typeof n.type === 'function' && n.type.name === 'Vacancy');
-  assert.equal(vacancies.length, 2);
+  // 车主自己占一座
+  assert.equal(vacancies.length, 1);
   vacancies[0].props.onAdd();
   assert.equal(opened, 1);
   nodes = r.render('MemberTable', { ...props, expanded: true });
@@ -2424,7 +2425,8 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   assert.equal(nodes.filter((n) => n.props.className === 'ld-row car-period').length, 1);
   const empty = { ...s, share: { ...s.share!, members: [] } };
   const emptyNodes = r.render('MemberTable', { ...props, s: empty });
-  assert.equal(emptyNodes.filter((n) => typeof n.type === 'function' && n.type.name === 'Vacancy').length, 4);
+  // 四座车没有成员时，除车主自己外还有三个空位
+  assert.equal(emptyNodes.filter((n) => typeof n.type === 'function' && n.type.name === 'Vacancy').length, 3);
   assert.equal(
     emptyNodes.some((n) => typeof n.type === 'function' && n.type.name === 'DepartedToggle'),
     false,

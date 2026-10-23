@@ -432,11 +432,19 @@ export function Seg<T extends string>({
 }
 
 /** 独立灰底指标卡；等宽排列并随容器换行，金额与颜色由调用处提供。 */
-export function MetricCards({ children }: { children: ComponentChildren }) {
+/**
+ * 一组并列指标。页面顶部与弹窗顶部用独立灰卡；放在另一张卡片里时传 inline，改为竖线分隔的一行，避免卡片套卡片；
+ * 窄栏里的四项（概览、报告的大数字下方）传 plain：两行两列，不加底色与分割线。
+ */
+export function MetricCards({ children, inline = false, plain = false }: { children: ComponentChildren; inline?: boolean; plain?: boolean }) {
   const count = Children.toArray(children).length;
   if (count === 0) return null;
   return (
-    <div className="metric-cards" style={{ '--metric-columns': Math.min(4, count) } as CSSProperties} data-count={count}>
+    <div
+      className={`metric-cards ${inline ? 'inline' : ''} ${plain ? 'plain' : ''}`}
+      style={{ '--metric-columns': Math.min(4, count) } as CSSProperties}
+      data-count={count}
+    >
       <div className="metric-grid">{children}</div>
     </div>
   );

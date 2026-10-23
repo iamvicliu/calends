@@ -200,7 +200,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
           </Group>
 
-          <MetricCards>
+          <MetricCards inline>
             <Metric label={t('proxy.paidPeriods', { count: list.length })} value={flow(-charged, base, { compact: true })} />
             <Metric label={t('proxy.received')} value={flow(received, base, { compact: true })} valueClassName="green" />
             <Metric

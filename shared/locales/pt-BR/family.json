@@ -1,7 +1,6 @@
 {
   "sheet": {
     "paidOut": "Pago {amount}",
-    "noReceiptsYet": "Nada recebido ainda",
     "receiptHint": "Quando alguém pagar, toque em “Receber” ao lado do membro",
     "tabIn": "Recebido {count}",
     "tabOut": "Pago {count}",
@@ -42,7 +41,8 @@
     "hiddenMember": "Membro oculto",
     "addMember": "Adicionar membro",
     "vacancyTrack": "Vaga disponível",
-    "copyFailed": "Não foi possível copiar a imagem"
+    "copyFailed": "Não foi possível copiar a imagem",
+    "ownerFee": "Organizador"
   },
   "contact": {
     "via": {
@@ -193,8 +193,6 @@
     "me": "Eu",
     "exemptTitle": "{name} (não paga)",
     "addMember": "Adicionar membro",
-    "manageTitle": "Abrir página de gerenciamento da família",
-    "manage": "Gerenciar",
     "owedN": {
       "one": "{count} a receber",
       "other": "{count} a receber"
@@ -251,20 +249,17 @@
     "ownerPh": "A quem você paga"
   },
   "facts": {
-    "paidAll": "Pago no total",
-    "receivedAll": "Recebido no total",
-    "netGain": "Ganho líquido",
-    "netLoss": "Custo líquido",
     "cost": "Custo / ano",
     "income": "Receita / ano",
     "loss": "Prejuízo / ano",
     "profit": "Lucro / ano",
     "since": "Desde {month}",
-    "sinceNone": "Desde o início",
     "actual": "Pago {paid}\nRecebido {received}\n{result}",
     "gain": "Ganho de {amount}",
     "lost": "Perda de {amount}",
-    "noRecords": "Nenhum pagamento ainda"
+    "noRecords": "Nenhum pagamento ainda",
+    "yearCost": "Custo anual",
+    "yearIncome": "Receita anual"
   },
   "collect": {
     "title": "Registrar recebimento\n{name}",
