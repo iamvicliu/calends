@@ -26,6 +26,9 @@
   --muted: var(--label-2);
   --border: var(--line);
   --separator: var(--sep);
+  /* Imported scroll containers follow the app-wide hidden, uncolored scrollbar rule. */
+  --scrollbar-width: none;
+  --scrollbar-color: auto;
   --default: var(--fill);
   --default-foreground: var(--label);
   --field-background: var(--card);

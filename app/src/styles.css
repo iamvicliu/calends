@@ -101,8 +101,6 @@ a {
   flex-direction: column;
   padding: 14px 10px 12px;
   background: var(--sidebar);
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
   border-right: var(--hairline) solid var(--sep);
 }
 .side-scroll {
@@ -1085,25 +1083,6 @@ a {
     transition: none;
   }
 }
-.paycard::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: radial-gradient(400px 200px at 110% -20%, color-mix(in srgb, var(--white-a12) 30%, transparent), transparent 60%);
-}
-.paycard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity var(--duration) var(--ease);
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--white-a12) 30%, transparent), transparent 60%);
-}
-.paycard:hover::after {
-  opacity: 1;
-}
 .pc-top {
   display: flex;
   justify-content: space-between;
@@ -1277,8 +1256,7 @@ a {
   top: 12px;
   right: 12px;
   z-index: 5;
-  background: color-mix(in srgb, var(--card) 70%, transparent);
-  backdrop-filter: blur(10px);
+  background: var(--card);
 }
 .sheet-head {
   position: sticky;
@@ -2342,7 +2320,7 @@ select.btn {
   border-radius: var(--radius-lg);
   padding: 22px 20px 16px;
   color: var(--white-a12);
-  background: radial-gradient(110% 70% at 100% 0%, color-mix(in srgb, var(--white-a12) 10%, transparent), transparent 60%), var(--gray-12);
+  background: var(--gray-12);
   box-shadow: none;
 }
 .rv-head {
@@ -3818,9 +3796,6 @@ button.h-price-row:focus-visible {
   background: linear-gradient(155deg, var(--white-a12) 0%, var(--cyan-2) 60%, var(--slate-3) 100%);
   box-shadow: inset 0 0 0 var(--hairline) var(--line);
 }
-.paycard.sim::before {
-  background: radial-gradient(260px 160px at 0% 100%, color-mix(in srgb, var(--amber-10) 12%, transparent), transparent 70%);
-}
 .paycard.sim:hover {
   box-shadow: inset 0 0 0 var(--hairline) var(--line);
 }
@@ -4333,13 +4308,6 @@ button.h-price-row:focus-visible {
 .paycard.apple:hover {
   box-shadow: inset 0 0 0 var(--hairline) var(--line);
 }
-/* 拉丝金属的一道斜向反光 */
-.paycard.apple::before {
-  background: linear-gradient(115deg, transparent 28%, color-mix(in srgb, var(--white-a12) 75%, transparent) 44%, transparent 60%);
-}
-.paycard.apple::after {
-  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--white-a12) 70%, transparent), transparent 60%);
-}
 .ac-logo {
   width: 34px;
   height: 34px;
@@ -4566,7 +4534,7 @@ button.h-price-row:focus-visible {
   color: var(--orange);
 }
 
-/* 钱包卡片拖动排序：拿起的卡片微微放大、阴影加深；拖动中不触发悬停光效；长按不弹系统菜单 */
+/* 钱包卡片拖动排序：长按不弹系统菜单 */
 .paycard {
   -webkit-touch-callout: none;
   user-select: none;
@@ -4578,13 +4546,11 @@ button.h-price-row:focus-visible {
   cursor: grabbing;
   box-shadow: none;
 }
-.wallet-grid.dragging .paycard::after {
-  opacity: 0 !important;
-}
 
 /* 全站隐藏滚动条（页面、侧边栏、弹窗、横向滚动区），保留滚动能力 */
 * {
   scrollbar-width: none;
+  scrollbar-color: auto;
   -ms-overflow-style: none;
 }
 *::-webkit-scrollbar {
@@ -5037,7 +5003,7 @@ button.h-price-row:focus-visible {
   width: 7px;
   height: 7px;
   border-radius: var(--radius-pill);
-  background: var(--green-9);
+  background: currentColor;
 }
 .ph-status.owe i {
   background: var(--orange-9);
@@ -6161,7 +6127,7 @@ a.car-toggle {
   letter-spacing: 0.08em;
 }
 
-/* 海报：深色底、三团分类色光晕、超大数字 */
+/* 海报：深色底、年度数字 */
 .ps {
   position: relative;
   overflow: hidden;
@@ -6169,10 +6135,7 @@ a.car-toggle {
   border-radius: var(--radius-lg);
   color: var(--white-a12);
   isolation: isolate;
-  background:
-    radial-gradient(60% 45% at 85% 12%, color-mix(in srgb, var(--g1) 75%, transparent), transparent 70%),
-    radial-gradient(55% 40% at 0% 55%, color-mix(in srgb, var(--g2) 55%, transparent), transparent 70%),
-    radial-gradient(60% 40% at 90% 100%, color-mix(in srgb, var(--g3) 55%, transparent), transparent 70%), var(--gray-12);
+  background: var(--gray-12);
 }
 .ps-year {
   font-size: var(--fs-4);
@@ -7032,7 +6995,7 @@ a.car-toggle {
   padding: 24px 22px 18px;
   border-radius: var(--radius-lg);
   color: var(--white-a12);
-  background: radial-gradient(120% 70% at 100% 0%, color-mix(in srgb, var(--white-a12) 12%, transparent), transparent 60%), var(--gray-12);
+  background: var(--gray-12);
 }
 .sc-head {
   display: flex;
@@ -7114,7 +7077,7 @@ a.car-toggle {
 .tlc {
   padding: 24px 22px 18px;
   border-radius: var(--radius-lg);
-  background: radial-gradient(90% 50% at 100% 0%, color-mix(in srgb, var(--tint) 22%, transparent), transparent 70%), var(--gray-1);
+  background: var(--gray-1);
   color: var(--label);
 }
 .tlc-head {
@@ -7209,9 +7172,7 @@ a.car-toggle {
   text-align: center;
   color: var(--white-a12);
   isolation: isolate;
-  background:
-    radial-gradient(70% 45% at 50% 18%, color-mix(in srgb, var(--tint) 70%, transparent), transparent 75%),
-    radial-gradient(80% 50% at 50% 110%, color-mix(in srgb, var(--tint) 35%, transparent), transparent 70%), var(--gray-12);
+  background: var(--gray-12);
 }
 .sp-icon {
   display: grid;
@@ -7567,7 +7528,7 @@ a.car-toggle {
   color: var(--label-2);
   font-size: var(--fs-2);
 }
-/* 开启状态：柔和的绿色徽标；关闭：中性灰 */
+/* 仅提示停用状态。 */
 .ai-badge {
   display: inline-flex;
   align-items: center;
@@ -7579,13 +7540,6 @@ a.car-toggle {
   color: var(--label-2);
   font-size: var(--fs-1);
   font-weight: 600;
-}
-.ai-badge.on {
-  background: var(--green-3);
-  color: var(--green);
-}
-.ai-badge .i {
-  stroke-width: 2.6;
 }
 .ai-endpoint {
   display: flex;
@@ -7754,11 +7708,7 @@ a.car-toggle {
   padding: 6px 8px 6px 14px;
   background: var(--slate-12);
   color: var(--label-2);
-  font:
-    500 var(--fs-1)/1 ui-monospace,
-    'SF Mono',
-    Menlo,
-    monospace;
+  font: 500 var(--fs-1)/1 var(--font);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -9763,11 +9713,4 @@ img.mm-flag {
 .gt-today,
 .gt-charge {
   margin-left: -0.25px;
-}
-
-/* Wallet cards stay at rest; brand watermarks do not need a pointer spotlight. */
-.paycard::before,
-.paycard::after,
-.paycard.apple::before {
-  display: none;
 }

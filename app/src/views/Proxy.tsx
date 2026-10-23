@@ -60,7 +60,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const st = effectiveStatus(s, today);
   const stopped = ['ended', 'terminated'].includes(st);
   // 状态胶囊只说进度：进行中 / 待收 / 已停止；是否结清看下面的「待收」格
-  const tone = stopped ? 'stop' : open.length ? 'owe' : 'ok';
+  const tone = stopped ? 'stop' : open.length ? 'owe' : st === 'active' || st === 'lifetime' ? 'ok' : 'notice';
   const label = open.length && !stopped ? t('proxy.owed') : stopped ? t('proxy.status.ended') : statusLabel(st);
 
   return (
@@ -167,7 +167,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               {copyParts(cardCcy ? t('proxy.cardCcy', { ccy: cardCcy }) : '')}
             </div>
           </div>
-          <StatusPill tone={stopped ? 'stop' : open.length ? 'owe' : 'ok'}>
+          <StatusPill tone={stopped ? 'stop' : open.length ? 'owe' : st === 'active' || st === 'lifetime' ? 'ok' : 'notice'}>
             {stopped ? t('proxy.status.ended') : open.length ? t('proxy.owed') : statusLabel(st)}
           </StatusPill>
         </div>

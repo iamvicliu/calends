@@ -272,7 +272,7 @@ function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () =>
       {...(attributes as unknown as Record<string, unknown>)}
       {...(listeners as Record<string, unknown>)}
       className={`paycard ${faceClass(m)} ${isDragging ? 'lifted' : ''}`}
-      // 拖动排序用独立的 translate 属性，不占用 transform / transition：悬停的浮起和倾斜才能平滑过渡
+      // 拖动排序使用独立的 translate 属性
       style={
         {
           '--card-bg': paletteColor(m.color, KIND_BG[m.kind]),
@@ -281,22 +281,6 @@ function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () =>
         } as Record<string, string>
       }
       onClick={onOpen}
-      onMouseMove={(e) => {
-        // 光泽跟着鼠标走，卡片朝鼠标方向轻微倾斜（最多 4°），像拿在手里转一下
-        const el = e.currentTarget as HTMLElement;
-        const b = el.getBoundingClientRect();
-        const px = (e.clientX - b.left) / b.width - 0.5;
-        const py = (e.clientY - b.top) / b.height - 0.5;
-        el.style.setProperty('--mx', `${e.clientX - b.left}px`);
-        el.style.setProperty('--my', `${e.clientY - b.top}px`);
-        el.style.setProperty('--ry', `${(px * 8).toFixed(2)}deg`);
-        el.style.setProperty('--rx', `${(-py * 8).toFixed(2)}deg`);
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.setProperty('--rx', '0deg');
-        el.style.setProperty('--ry', '0deg');
-      }}
     >
       {children}
     </button>

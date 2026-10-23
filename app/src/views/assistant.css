@@ -202,7 +202,6 @@
 }
 .as-md blockquote {
   padding: 2px 0 2px 12px;
-  border-left: var(--hairline) solid var(--sep);
   color: var(--label-2);
 }
 .as-md hr {
@@ -319,7 +318,6 @@
 .as-reason-b {
   margin: 6px 0 2px 7px;
   padding: 2px 0 2px 14px;
-  border-left: var(--hairline) solid var(--sep);
   color: var(--label-2);
   font-size: var(--fs-2);
   line-height: 1.6;

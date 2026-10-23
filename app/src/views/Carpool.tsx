@@ -663,8 +663,8 @@ export function CarSheet({
               {copyParts(next && !stopped ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
             </div>
           </div>
-          <StatusPill tone={stopped ? 'stop' : owe ? 'owe' : 'ok'}>
-            {stopped ? t('family.pool.filter.ended') : owe ? t('family.pool.owedN', { count: owe }) : t('family.pool.settled')}
+          <StatusPill tone={stopped ? 'stop' : owe ? 'owe' : st === 'active' || st === 'lifetime' ? 'ok' : 'notice'}>
+            {stopped ? t('family.pool.filter.ended') : owe ? t('family.pool.owedN', { count: owe }) : t(`list.status.${st}`)}
           </StatusPill>
         </div>
 

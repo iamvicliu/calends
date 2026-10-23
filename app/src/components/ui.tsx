@@ -606,8 +606,9 @@ export function FlagImg({ cc, className = '' }: { cc?: string; className?: strin
   return <img className={`flag-img ${className}`} src={base(`/flags/${k}.png`)} alt="" loading="lazy" />;
 }
 
-/** 右上角的状态胶囊：进行中绿点、待收橙点、已停止换成红色「禁止」图标，形状都一样 */
-export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop'; children: ComponentChildren }) {
+/** 只提示需注意的状态；正常计费与已结清不显示胶囊。 */
+export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop' | 'notice'; children: ComponentChildren }) {
+  if (tone === 'ok') return null;
   return (
     <span className={`ph-status ${tone}`}>
       {tone === 'stop' ? <Icon name="ban" size={13} /> : <i />}

@@ -271,14 +271,11 @@ export function Ai({ state }: { state: AppState }) {
       <div className="page fade-in ai-page">
         {/* 状态与地址 */}
         <div className={`ai-status ${enabled ? 'on' : ''}`}>
-          {/* 状态用标题旁的徽标表示（同 Vercel、Linear 设置页的做法），不再用前置圆点，标题与下方内容左对齐 */}
+          {/* 开关已表示正常启用状态，只额外提示停用。 */}
           <div className="ai-status-l">
             <b className="icon-text">
               {t('settings.open.ai')}
-              <span className={`ai-badge ${enabled ? 'on' : ''}`}>
-                {enabled && <Icon name="check" size={12} />}
-                {enabled ? t('settings.open.on') : t('settings.open.off')}
-              </span>
+              {!enabled && <span className="ai-badge">{t('settings.open.off')}</span>}
             </b>
             <small className="m-hide">{enabled ? t('ai.status.onHint') : t('ai.status.offHint')}</small>
           </div>
