@@ -420,13 +420,19 @@ function phaseIndexAt(phases: Phase[], date: string, sub?: Subscription, phase?:
  * 把推算出来的历史扣款固化成记录：一段一旦有了扣款记录，就完全以记录为准，
  * 所以第一次手动改之前，先把到今天为止推算出的扣款写进去，并记下原本的下次扣款日，未来照旧。
  */
-function materialize(p: Phase, sub: Subscription, today: string): Phase {
-  if (p.payments?.length || p.cycle.unit === 'lifetime') return p;
+function materialize(p: Phase, sub: Subscription, today: string, target?: string): Phase {
+  if (p.cycle.unit === 'lifetime') return p;
+  const recorded = p.payments ?? [];
+  // 已有记录且要改的那笔就在记录里：保持原样，不额外改写其他推算
+  if (recorded.length && (!target || recorded.some((r) => r.date === target))) return p;
   const v: Subscription = { ...sub, phases: undefined, ...p, end: p.end };
   const past = chargesBetween(v, p.start, today, today);
   const next = p.stop ? addDays(p.stop.paidThrough, 1) : chargesBetween(v, addDays(today, 1), addDays(today, 800), today).find((c) => !c.kind)?.date;
+  // 要改的是记录之后推算出的扣款（如结束日当天的一期）：把推算的过去扣款补成记录，这一行才能修改或删除
+  const inferred = past.filter((c) => !c.kind && !recorded.some((r) => r.date === c.date));
+  const payments = [...recorded, ...inferred.map((c) => ({ date: c.date, amount: c.amount }))].sort((a, b) => a.date.localeCompare(b.date));
   // 到期前不会再扣（比如并行中快到期的旧段）：下次扣款记为结束日，删掉最后一笔也不会被重新推算出来
-  return { ...p, payments: past.map((c) => ({ date: c.date, amount: c.amount })), nextDue: p.nextDue ?? next ?? p.end };
+  return { ...p, payments, nextDue: p.nextDue ?? next ?? p.end };
 }
 
 /** 新增或修改一笔扣款记录；old 为原记录的日期与序号（修改时） */
@@ -435,7 +441,7 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
   let originalPhase: number | undefined;
   if (old) {
     const oi = phaseIndexAt(phases, old.date, s, phase, true);
-    phases[oi] = materialize(phases[oi], s, today);
+    phases[oi] = materialize(phases[oi], s, today, old.date);
     originalPhase = oi;
     const list = (phases[oi].payments ?? []).filter((x) => x.date === old.date);
     const target = list[old.index];
@@ -463,11 +469,15 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
 export function deletePayment(s: Subscription, today: string, date: string, index: number, phase?: string): Subscription {
   const phases = phasesOf(s);
   const i = phaseIndexAt(phases, date, s, phase, true);
-  phases[i] = materialize(phases[i], s, today);
+  phases[i] = materialize(phases[i], s, today, date);
   const list = (phases[i].payments ?? []).filter((x) => x.date === date);
   const target = list[index];
   if (!target) throw new Error(t('mcp.error.invalidTarget'));
-  phases[i] = { ...phases[i], payments: (phases[i].payments ?? []).filter((x) => x !== target) };
+  const payments = (phases[i].payments ?? []).filter((x) => x !== target);
+  // 删掉已结束阶段的最后一笔：这笔本就不该有，下次扣款推到结束日之后，不再被推算回来
+  const end = phases[i].end;
+  const last = end && !payments.some((x) => x.date >= date);
+  phases[i] = { ...phases[i], payments, ...(last ? { nextDue: addDays(end, 1) } : {}) };
   return fromPhases(s, phases);
 }
 

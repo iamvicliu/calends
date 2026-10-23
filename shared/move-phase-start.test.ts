@@ -226,3 +226,37 @@ test('billing anchor survives JSON round trips and public masking without exposi
     assert.equal(subError(restored), undefined);
   }
 });
+
+test('记录之后推算出的扣款（结束日当天那一期）可以修改和删除，删除后不再被推算回来', () => {
+  const phase = {
+    start: '2026-07-20',
+    end: '2026-08-20',
+    price: 199,
+    currency: 'CNY',
+    cycle: { unit: 'month' as const, every: 1 },
+    payments: [{ date: '2026-07-20', amount: 199 }],
+  };
+  const s: Subscription = {
+    id: 'k',
+    name: 'K',
+    category: 'AI',
+    tags: [],
+    status: 'active',
+    start: '2026-07-20',
+    price: 199,
+    currency: 'CNY',
+    cycle: { unit: 'month', every: 1 },
+    end: '2026-08-20',
+    phases: [phase],
+  };
+  const today = '2026-10-23';
+  const dates = (x: Subscription) => chargesBetween(x, '2026-01-01', '2026-12-31', today).map((c) => c.date);
+  assert.deepEqual(dates(s), ['2026-07-20', '2026-08-20']);
+  const removed = deletePayment(s, today, '2026-08-20', 0);
+  assert.deepEqual(dates(removed), ['2026-07-20']);
+  const edited = savePayment(s, today, { date: '2026-08-20', amount: 99 }, { date: '2026-08-20', index: 0 });
+  assert.deepEqual(
+    chargesBetween(edited, '2026-08-20', '2026-08-20', today).map((c) => c.amount),
+    [99],
+  );
+});
