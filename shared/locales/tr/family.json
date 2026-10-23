@@ -33,7 +33,8 @@
     "period": "Geçerli dönem",
     "range": "{from} – {until}",
     "rangeFrom": "Başlangıç",
-    "rangeTo": "Bitiş"
+    "rangeTo": "Bitiş",
+    "showAllPeriods": "{count} dönemin tümünü göster"
   },
   "contact": {
     "via": {
@@ -291,5 +292,11 @@
     },
     "owe": "{amount} bekliyor\n{date} tarihinden beri",
     "settled": "Ödendi\nsonraki {date}"
+  },
+  "strip": {
+    "yearNet": "Yıllık net",
+    "costIncome": "Maliyet {cost}\nGelir {income}",
+    "noneOwed": "Borcu olan yok",
+    "since": "{date} itibarıyla"
   }
 }

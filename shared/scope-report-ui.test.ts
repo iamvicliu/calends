@@ -1792,9 +1792,12 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
     [true, false],
   );
   assert.equal(details(nodes).length, 2);
+  // 组标题只写覆盖区间；和区间重复的共有备注（周期等）不再单独显示
+  assert.ok(!nodes.some((n) => n.props.className === 'car-period-title' && all(n.children).some((c) => c.type === 'small')));
+  // 共有的「第5次收款」不再显示；各行不同的周期仍留在行内
+  assert.equal(nodes.filter((n) => n.children.includes('第5次收款')).length, 0);
   assert.ok(nodes.some((n) => n.children.includes('半年')));
   assert.ok(nodes.some((n) => n.children.includes('季度')));
-  assert.equal(nodes.filter((n) => n.children.includes('第5次收款')).length, 1);
   head(nodes).props.onClick();
   nodes = render();
   assert.equal(details(nodes).length, 3);
@@ -1845,7 +1848,7 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
   assert.equal(head(nodes).props['aria-expanded'], false);
 });
 
-test('合租分组以覆盖区间为主标题，共有信息为可选副标题，差异信息留在行内', () => {
+test('合租分组以覆盖区间为标题，不重复共有备注，差异信息留在行内', () => {
   const words = (n: any): string =>
     Array.isArray(n)
       ? n.map(words).join('')
@@ -1903,7 +1906,7 @@ test('合租分组以覆盖区间为主标题，共有信息为可选副标题�
       all(title.children)
         .filter((n) => n.type === 'small')
         .map((n) => words(n.children)),
-      common ? [common] : [],
+      [],
     );
     nodes.find((n) => n.props.className === 'ld-row car-period')!.props.onClick();
     nodes = r.render('CarSheet', props);

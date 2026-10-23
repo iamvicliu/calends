@@ -32,7 +32,8 @@
     "period": "Periode ini",
     "range": "{from} – {until}",
     "rangeFrom": "Dari",
-    "rangeTo": "Sampai"
+    "rangeTo": "Sampai",
+    "showAllPeriods": "Tampilkan semua {count} periode"
   },
   "contact": {
     "via": {
@@ -281,5 +282,11 @@
     },
     "owe": "Tagihan {amount}\nsejak {date}",
     "settled": "Lunas\nberikutnya {date}"
+  },
+  "strip": {
+    "yearNet": "Bersih per tahun",
+    "costIncome": "Biaya {cost}\nPendapatan {income}",
+    "noneOwed": "Tidak ada tunggakan",
+    "since": "Sejak {date}"
   }
 }

@@ -32,7 +32,8 @@
     "period": "今期",
     "range": "{from} – {until}",
     "rangeFrom": "開始",
-    "rangeTo": "終了"
+    "rangeTo": "終了",
+    "showAllPeriods": "全 {count} 期間を表示"
   },
   "contact": {
     "via": {
@@ -281,5 +282,11 @@
     },
     "owe": "未収 {amount}\n{date}から",
     "settled": "精算済み\n次回 {date}"
+  },
+  "strip": {
+    "yearNet": "年間の収支",
+    "costIncome": "費用 {cost}\n収入 {income}",
+    "noneOwed": "未払いなし",
+    "since": "{date}から"
   }
 }

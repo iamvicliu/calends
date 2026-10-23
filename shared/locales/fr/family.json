@@ -33,7 +33,8 @@
     "period": "Période en cours",
     "range": "{from} – {until}",
     "rangeFrom": "Du",
-    "rangeTo": "Au"
+    "rangeTo": "Au",
+    "showAllPeriods": "Afficher les {count} périodes"
   },
   "contact": {
     "via": {
@@ -291,5 +292,11 @@
     },
     "owe": "{amount} dû\ndepuis le {date}",
     "settled": "Réglé\nprochaine échéance {date}"
+  },
+  "strip": {
+    "yearNet": "Net par an",
+    "costIncome": "Coût {cost}\nRecettes {income}",
+    "noneOwed": "Personne ne doit rien",
+    "since": "Depuis le {date}"
   }
 }

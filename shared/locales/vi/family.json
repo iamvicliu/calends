@@ -32,7 +32,8 @@
     "period": "Kỳ hiện tại",
     "range": "{from} – {until}",
     "rangeFrom": "Từ",
-    "rangeTo": "Đến"
+    "rangeTo": "Đến",
+    "showAllPeriods": "Hiện tất cả {count} kỳ"
   },
   "contact": {
     "via": {
@@ -281,5 +282,11 @@
     },
     "owe": "Còn nợ {amount}\ntừ {date}",
     "settled": "Đã thanh toán\nlần tới {date}"
+  },
+  "strip": {
+    "yearNet": "Ròng mỗi năm",
+    "costIncome": "Chi phí {cost}\nThu {income}",
+    "noneOwed": "Không ai nợ",
+    "since": "Từ {date}"
   }
 }

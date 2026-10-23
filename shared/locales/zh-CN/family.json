@@ -32,7 +32,8 @@
     "period": "本期",
     "range": "{from} – {until}",
     "rangeFrom": "从",
-    "rangeTo": "至"
+    "rangeTo": "至",
+    "showAllPeriods": "显示全部 {count} 期"
   },
   "contact": {
     "via": {
@@ -263,5 +264,11 @@
     "late": "已逾期 {count} 天",
     "owe": "待收 {amount}\n应收 {date}",
     "settled": "已结清\n下次应收 {date}"
+  },
+  "strip": {
+    "yearNet": "每年净额",
+    "costIncome": "成本 {cost}\n收入 {income}",
+    "noneOwed": "无人欠款",
+    "since": "{date}起"
   }
 }

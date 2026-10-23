@@ -33,7 +33,8 @@
     "period": "Current period",
     "range": "{from} – {until}",
     "rangeFrom": "From",
-    "rangeTo": "To"
+    "rangeTo": "To",
+    "showAllPeriods": "Show all {count} periods"
   },
   "contact": {
     "via": {
@@ -291,5 +292,11 @@
     },
     "owe": "{amount} due\nsince {date}",
     "settled": "Settled\nnext due {date}"
+  },
+  "strip": {
+    "yearNet": "Net per year",
+    "costIncome": "Cost {cost}\nIncome {income}",
+    "noneOwed": "Nobody owes",
+    "since": "Since {date}"
   }
 }

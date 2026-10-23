@@ -582,10 +582,14 @@ export function CarSheet({
   const next = nextCharge(s, addDays(today, 1));
   const onboard = sh.members.filter((m) => memberAboard(m, today));
   const free = Math.max(0, sh.seats - 1 - onboard.length);
-  const owe = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0).length;
+  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);
+  const owe = dues.length;
+  const oweSum = dues.reduce((a, d) => a + toBaseAt(state, d.owed, d.currency), 0);
   const fmt = (v: number) => flow(v, base, { compact: true });
   const rule = carRule(state, s, today);
   const [editingRule, setEditingRule] = useState(false);
+  // 收款记录默认只列最近几期，期数多时再展开
+  const [allPeriods, setAllPeriods] = useState(false);
   const profit = -book.yearNet;
   const actual = -book.net;
   const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m, today)}`);
@@ -652,6 +656,7 @@ export function CarSheet({
   return (
     <Sheet title={t('family.sheet.title')} onClose={onClose}>
       <div className="stack">
+        {/* 页头：名称（点开订阅）+ 一行概况；右侧直接显示收款规则并可修改 */}
         <div className="ld-head">
           <SubIcon sub={s} size={52} />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -659,68 +664,43 @@ export function CarSheet({
               <NameLink onClick={onOpenSub}>{s.name}</NameLink>
             </div>
             <div className="muted ph-meta">
-              {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-              {copyParts(next && !stopped ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
-            </div>
-          </div>
-          <StatusPill tone={stopped ? 'stop' : owe ? 'owe' : st === 'active' || st === 'lifetime' ? 'ok' : 'notice'}>
-            {stopped ? t('family.pool.filter.ended') : owe ? t('family.pool.owedN', { count: owe }) : t(`list.status.${st}`)}
-          </StatusPill>
-        </div>
-
-        <div className="ld-top">
-          <Group>
-            <Cell label={t('family.sheet.seats')}>
-              {t('family.sheet.seatsVal', { used: onboard.length + 1, total: sh.seats })}
-              {copyParts(free ? `\n${t('family.pool.seatsFree', { count: free })}` : '')}
-            </Cell>
-            {/* 车的收款规则：跟随车的成员都按这个收；点开修改 */}
-            <Cell label={t('family.rule.title')} onClick={ro ? undefined : () => setEditingRule(true)}>
-              {/* 窄屏放不下时只在「·」处换行，不把日期拆开 */}
-              <span className="cell-wrap">
-                <span className="nowrap">{perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}</span>
-                {copyParts('\n')}
-                <span className="nowrap">
-                  {t('family.rule.anchor')} {cnDate(collectionAnchor(s))}
-                </span>
-              </span>
-            </Cell>
-            <Cell label={t('family.sheet.since')}>{book.since ? cnDateFull(book.since) : '—'}</Cell>
-            <Cell label={stopped ? t('proxy.stoppedAt') : t('proxy.nextCharge')}>
-              {stopped ? (s.end ? cnDateFull(s.end) : '—') : next ? cnDateFull(next) : '—'}
-            </Cell>
-            {/* 家庭组管理页入口在合租卡片的「管理」按钮，这里不重复 */}
-            <Cell label={t('proxy.subscription')} onClick={onOpenSub}>
-              {t('proxy.viewDetail')}
-            </Cell>
-          </Group>
-          <div className="proxy-facts four car-sheet-facts">
-            <div>
-              <small>{t('family.facts.cost')}</small>
-              <b>{fmt(-book.yearCost)}</b>
-            </div>
-            <div>
-              <small>{t('family.facts.income')}</small>
-              <b className="green">{fmt(book.yearIncome)}</b>
-            </div>
-            <div>
-              <small>{profit < 0 ? t('family.facts.loss') : t('family.facts.profit')}</small>
-              <b className={profit >= 0 ? 'done' : 'loss'}>{fmt(profit)}</b>
-            </div>
-            <div>
-              <small>{t('family.facts.sinceNone')}</small>
-              {/* 还没收过款：只说付出了多少，别显示成「亏」或「赚 ¥0」 */}
-              {book.received > 0 ? (
-                <b className={actual >= 0 ? 'done' : 'loss'}>
-                  {actual >= 0 ? t('family.facts.gain', { amount: fmt(actual) }) : t('family.facts.lost', { amount: fmt(actual) })}
-                </b>
-              ) : (
-                <>
-                  <b>{t('family.sheet.paidOut', { amount: fmt(-book.paid) })}</b>
-                  <em className="warn">{t('family.sheet.noReceiptsYet')}</em>
-                </>
+              {copyParts(
+                [
+                  `${money(s.price, s.currency)} ${cycleLabel(s.cycle)}`,
+                  stopped ? '' : next ? t('family.pool.next', { date: cnDate(next) }) : '',
+                  t('family.sheet.seatsVal', { used: onboard.length + 1, total: sh.seats }),
+                ]
+                  .filter(Boolean)
+                  .join('\n'),
               )}
             </div>
+          </div>
+          {stopped ? (
+            <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+          ) : (
+            <button className="btn car-rule-btn" disabled={ro} onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
+              {perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
+              {!ro && <Icon name="right" size={14} />}
+            </button>
+          )}
+        </div>
+
+        {/* 指标条：一张卡里三格，标签 / 数字 / 说明三层 */}
+        <div className="car-strip">
+          <div>
+            <small>{t('family.strip.yearNet')}</small>
+            <b className={profit >= 0 ? 'done' : 'loss'}>{fmt(profit)}</b>
+            <span>{copyParts(t('family.strip.costIncome', { cost: fmt(-book.yearCost), income: fmt(book.yearIncome) }))}</span>
+          </div>
+          <div>
+            <small>{t('family.pool.owed')}</small>
+            <b className={owe ? 'warn' : ''}>{money(oweSum, base, { compact: true })}</b>
+            <span>{owe ? t('family.pool.owedSub', { count: owe }) : t('family.strip.noneOwed')}</span>
+          </div>
+          <div>
+            <small>{t('family.facts.sinceNone')}</small>
+            {book.received > 0 ? <b className={actual >= 0 ? 'done' : 'loss'}>{fmt(actual)}</b> : <b>{fmt(-book.paid)}</b>}
+            <span>{book.received > 0 ? (book.since ? t('family.strip.since', { date: cnDateFull(book.since) }) : '') : t('family.sheet.noReceiptsYet')}</span>
           </div>
         </div>
 
@@ -757,7 +737,10 @@ export function CarSheet({
               ['out', t('family.sheet.tabOut', { count: outs.length })],
             ]}
           />
-          <span className={tab === 'in' ? 'green' : undefined}>{tab === 'in' ? fmt(total) : fmt(-outTotal)}</span>
+          <span className="car-total">
+            <small>{t(tab === 'in' ? 'family.facts.receivedAll' : 'family.facts.paidAll')}</small>
+            <b className={tab === 'in' ? 'green' : undefined}>{tab === 'in' ? fmt(total) : fmt(-outTotal)}</b>
+          </span>
         </div>
         {tab === 'out' ? (
           <div className="ld-table car-receipts car-receipts-out">
@@ -810,7 +793,7 @@ export function CarSheet({
               openIn,
               setOpenIn,
             )}
-            {periods.map((g) => (
+            {(allPeriods ? periods : periods.slice(0, RECENT_PERIODS)).map((g) => (
               <Fragment key={g.key}>
                 <button
                   type="button"
@@ -823,7 +806,6 @@ export function CarSheet({
                 >
                   <span className="car-period-title">
                     <b>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</b>
-                    {g.notes.common && <small>{copyParts(g.notes.common)}</small>}
                   </span>
                   <span className="green">{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) }))}</span>
                 </button>
@@ -844,6 +826,11 @@ export function CarSheet({
                   ))}
               </Fragment>
             ))}
+            {!allPeriods && periods.length > RECENT_PERIODS && (
+              <button type="button" className="ld-row car-more" onClick={() => setAllPeriods(true)}>
+                {t('family.sheet.showAllPeriods', { count: periods.length })}
+              </button>
+            )}
             {receipts.length === 0 && (
               <div className="car-empty">
                 <b>{t('family.facts.noRecords')}</b>
@@ -857,6 +844,8 @@ export function CarSheet({
     </Sheet>
   );
 }
+
+const RECENT_PERIODS = 4;
 
 /** 常见家庭方案的席位数（含自己） */
 function defaultSeats(name: string): number {

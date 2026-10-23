@@ -34,7 +34,8 @@
     "period": "Текущий период",
     "range": "{from} – {until}",
     "rangeFrom": "С",
-    "rangeTo": "По"
+    "rangeTo": "По",
+    "showAllPeriods": "Показать все периоды ({count})"
   },
   "contact": {
     "via": {
@@ -310,5 +311,11 @@
     },
     "owe": "Долг {amount}\nс {date}",
     "settled": "Оплачено\nследующий платёж {date}"
+  },
+  "strip": {
+    "yearNet": "Итог за год",
+    "costIncome": "Расходы {cost}\nДоходы {income}",
+    "noneOwed": "Долгов нет",
+    "since": "С {date}"
   }
 }

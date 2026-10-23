@@ -33,7 +33,8 @@
     "period": "Aktueller Zeitraum",
     "range": "{from} – {until}",
     "rangeFrom": "Von",
-    "rangeTo": "Bis"
+    "rangeTo": "Bis",
+    "showAllPeriods": "Alle {count} Zeiträume anzeigen"
   },
   "contact": {
     "via": {
@@ -291,5 +292,11 @@
     },
     "owe": "{amount} offen\nseit {date}",
     "settled": "Beglichen\nnächste Fälligkeit {date}"
+  },
+  "strip": {
+    "yearNet": "Netto pro Jahr",
+    "costIncome": "Kosten {cost}\nEinnahmen {income}",
+    "noneOwed": "Niemand im Rückstand",
+    "since": "Seit {date}"
   }
 }

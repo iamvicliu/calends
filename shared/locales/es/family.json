@@ -33,7 +33,8 @@
     "period": "Periodo actual",
     "range": "{from} – {until}",
     "rangeFrom": "Desde",
-    "rangeTo": "Hasta"
+    "rangeTo": "Hasta",
+    "showAllPeriods": "Mostrar los {count} periodos"
   },
   "contact": {
     "via": {
@@ -291,5 +292,11 @@
     },
     "owe": "{amount} pendiente\ndesde {date}",
     "settled": "Al día\npróximo cobro {date}"
+  },
+  "strip": {
+    "yearNet": "Neto al año",
+    "costIncome": "Coste {cost}\nIngresos {income}",
+    "noneOwed": "Nadie debe",
+    "since": "Desde {date}"
   }
 }
