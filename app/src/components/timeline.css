@@ -76,7 +76,7 @@
   top: 15px;
   left: 0;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: var(--fs-1);
   font-weight: 600;
   font-style: normal;
   color: var(--tl-fg);
@@ -89,7 +89,7 @@
   top: 4px;
   height: 137px;
   width: 0;
-  border-left: 1.5px solid var(--tl-fg);
+  border-left: var(--hairline) solid var(--tl-fg);
   opacity: 0.85;
 }
 .tl-today span {
@@ -98,10 +98,10 @@
   left: 0;
   transform: translateX(-50%);
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--tl-fg);
   color: var(--tl-card);
-  font-size: 11px;
+  font-size: var(--fs-1);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -114,9 +114,9 @@
   padding: 0;
   border: 0;
   background: none;
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: none;
   z-index: 1;
 }
 /* 细线把图标连到它那一天 */
@@ -132,7 +132,6 @@
   z-index: -1;
 }
 .tl-icon:hover {
-  transform: translateY(-2px);
   z-index: 3;
 }
 .tl-icon.past {
@@ -153,15 +152,15 @@
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--fs-1);
   line-height: 1.3;
   padding: 5px 8px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--tl-fg);
   color: var(--tl-card);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s;
+  transition: opacity var(--duration) var(--ease);
   z-index: 5;
 }
 .tl-icon:hover::after {
@@ -170,11 +169,11 @@
 .tl-more {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: var(--fs-1);
   font-weight: 600;
   color: var(--tl-mute);
   background: var(--tl-fill);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 1px 6px;
 }
 .tl-dot {
@@ -183,13 +182,13 @@
   width: 7px;
   height: 7px;
   margin-left: -3px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--tl-card);
-  box-shadow: inset 0 0 0 1.5px var(--tl-fg);
+  box-shadow: inset 0 0 0 var(--hairline) var(--tl-fg);
   z-index: 2;
 }
 .tl-dot.past {
-  box-shadow: inset 0 0 0 1.5px var(--tl-mute);
+  box-shadow: inset 0 0 0 var(--hairline) var(--tl-mute);
 }
 .tl-home {
   position: absolute;
@@ -199,10 +198,10 @@
   height: var(--ctl-h-md);
   padding: 0 9px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--tl-fill);
   color: var(--tl-mute);
-  font-size: 12px;
+  font-size: var(--fs-1);
   cursor: pointer;
 }
 .tl-home:hover {

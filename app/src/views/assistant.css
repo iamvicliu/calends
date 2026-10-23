@@ -31,18 +31,18 @@
 .as-orb {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
 }
 .as-welcome h2 {
   margin: 18px 0 6px;
-  font-size: 24px;
+  font-size: var(--fs-3);
   letter-spacing: -0.02em;
 }
 .as-welcome > p {
   margin: 0;
   max-width: 460px;
   color: var(--label-2);
-  font-size: 14.5px;
+  font-size: var(--fs-2);
   line-height: 1.6;
 }
 .as-setup-cta {
@@ -52,7 +52,7 @@
   margin-top: 20px;
   padding: 12px 18px;
   border: 0;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--ink);
   color: var(--on-ink);
   text-align: left;
@@ -63,10 +63,10 @@
   flex-direction: column;
 }
 .as-setup-cta b {
-  font-size: 14px;
+  font-size: var(--fs-2);
 }
 .as-setup-cta small {
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   opacity: 0.85;
 }
 /* 输入框上方的建议操作，保持与普通按钮一致的圆角 */
@@ -86,23 +86,18 @@
   height: var(--ctl-h-md);
   padding: 0 14px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
   color: var(--label);
   font: inherit;
-  font-size: 13.5px;
+  font-size: var(--fs-2);
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    background 0.15s,
-    transform 0.1s;
+  transition: background var(--duration) var(--ease);
 }
 .as-suggest button:hover {
   background: var(--fill-2);
-}
-.as-suggest button:active {
-  transform: scale(0.97);
 }
 
 /* 用户消息：靠右的气泡，图片在上 */
@@ -115,9 +110,9 @@
 .as-bubble {
   max-width: min(80%, 560px);
   padding: 11px 16px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--fill);
-  font-size: 15px;
+  font-size: var(--fs-2);
   line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -133,10 +128,10 @@
   width: 132px;
   height: 132px;
   object-fit: cover;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--fill-2);
   /* 图片多是白底截图：描一圈边，免得和页面混在一起 */
-  outline: 1px solid var(--line);
+  outline: var(--hairline) solid var(--focus-ring);
   outline-offset: -1px;
 }
 
@@ -152,7 +147,7 @@
   gap: 10px;
 }
 .as-md {
-  font-size: 15px;
+  font-size: var(--fs-2);
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
@@ -169,13 +164,13 @@
 .as-md h5,
 .as-md h6 {
   margin: 16px 0 8px;
-  font-size: 15.5px;
+  font-size: var(--fs-2);
   font-weight: 650;
   line-height: 1.4;
 }
 .as-md h1,
 .as-md h2 {
-  font-size: 17px;
+  font-size: var(--fs-3);
 }
 .as-md > :first-child {
   margin-top: 0;
@@ -207,32 +202,32 @@
 }
 .as-md blockquote {
   padding: 2px 0 2px 12px;
-  border-left: 3px solid var(--sep);
+  border-left: var(--hairline) solid var(--sep);
   color: var(--label-2);
 }
 .as-md hr {
   border: 0;
-  border-top: 1px solid var(--sep);
+  border-top: var(--hairline) solid var(--sep);
   margin: 14px 0;
 }
 .as-md code {
   padding: 1px 5px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   background: var(--fill);
-  font: 0.88em var(--mono);
+  font: var(--fs-1) var(--mono);
 }
 .as-md .as-pre {
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: var(--fill-2);
   overflow-x: auto;
-  font-size: 13px;
+  font-size: var(--fs-2);
   line-height: 1.55;
 }
 .as-md .as-pre code {
   padding: 0;
   background: none;
-  font-size: inherit;
+  font-size: var(--fs-2);
 }
 .as-md a {
   color: var(--accent);
@@ -241,20 +236,20 @@
 .as-table {
   max-width: 100%;
   overflow-x: auto;
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 1px var(--sep);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 var(--hairline) var(--sep);
 }
 .as-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: var(--fs-2);
   line-height: 1.45;
   font-variant-numeric: tabular-nums;
 }
 .as-table th,
 .as-table td {
   padding: 8px 12px;
-  border-bottom: 1px solid var(--sep);
+  border-bottom: var(--hairline) solid var(--sep);
   text-align: left;
   vertical-align: top;
   white-space: nowrap;
@@ -263,7 +258,7 @@
   background: var(--fill-2);
   font-weight: 600;
   color: var(--label-2);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
 }
 .as-table tr:last-child td {
   border-bottom: 0;
@@ -289,27 +284,15 @@
 .as-dots i {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--label-3);
-  animation: as-dot 1.2s infinite ease-in-out;
+  animation: none;
 }
 .as-dots i:nth-child(2) {
   animation-delay: 0.15s;
 }
 .as-dots i:nth-child(3) {
   animation-delay: 0.3s;
-}
-@keyframes as-dot {
-  0%,
-  80%,
-  100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-  40% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
 }
 
 /* 思考过程 */
@@ -322,12 +305,12 @@
   background: none;
   color: var(--label-2);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-2);
   cursor: pointer;
 }
 .as-reason-h .chev,
 .as-tool-h .chev {
-  transition: transform 0.2s;
+  transition: none;
 }
 .as-reason.open .chev,
 .as-tool:has(.as-tool-b) .chev {
@@ -336,9 +319,9 @@
 .as-reason-b {
   margin: 6px 0 2px 7px;
   padding: 2px 0 2px 14px;
-  border-left: 2px solid var(--sep);
+  border-left: var(--hairline) solid var(--sep);
   color: var(--label-2);
-  font-size: 13px;
+  font-size: var(--fs-2);
   line-height: 1.6;
   white-space: pre-wrap;
   max-height: 240px;
@@ -350,22 +333,14 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: as-shimmer 1.6s linear infinite;
-}
-@keyframes as-shimmer {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: -100% 0;
-  }
+  animation: none;
 }
 
 /* 工具调用 */
 .as-tool {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
   overflow: hidden;
 }
 .as-tool-h {
@@ -378,7 +353,7 @@
   background: none;
   color: var(--label);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-2);
   text-align: left;
   cursor: pointer;
 }
@@ -400,8 +375,8 @@
   align-items: center;
   gap: 5px;
   padding: 2px 9px 2px 7px;
-  border-radius: 999px;
-  font-size: 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-1);
   font-weight: 500;
   white-space: nowrap;
   background: var(--fill);
@@ -414,22 +389,18 @@
   color: var(--red);
 }
 .pulse {
-  animation: as-pulse 1.4s ease-in-out infinite;
+  animation: none;
 }
-@keyframes as-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
+
 .as-tool-b {
   padding: 2px 12px 12px;
-  border-top: 1px solid var(--sep);
+  border-top: var(--hairline) solid var(--sep);
 }
 .as-tool-b small {
   display: block;
   margin: 10px 0 4px;
   color: var(--label-3);
-  font-size: 11px;
+  font-size: var(--fs-1);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -439,9 +410,9 @@
   max-height: 220px;
   overflow: auto;
   padding: 10px 12px;
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   background: var(--fill-2);
-  font: 11.5px/1.55 var(--mono);
+  font: var(--fs-1)/1.55 var(--mono);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -449,12 +420,7 @@
   color: var(--red);
 }
 .spin {
-  animation: as-spin 0.9s linear infinite;
-}
-@keyframes as-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  animation: none;
 }
 
 /* 草稿卡片 */
@@ -462,11 +428,11 @@
   position: relative;
   max-width: 460px;
   padding: 14px 16px 14px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--card);
   box-shadow:
-    inset 0 0 0 1px var(--line),
-    0 8px 28px -14px rgba(0, 0, 0, 0.25);
+    inset 0 0 0 var(--hairline) var(--line),
+    0 8px 28px -14px color-mix(in srgb, var(--black-a12) 25%, transparent);
   overflow: hidden;
 }
 .as-card::before {
@@ -488,10 +454,10 @@
   align-items: center;
   gap: 5px;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--fill);
   color: var(--label-2);
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   font-weight: 600;
 }
 .as-card-head {
@@ -500,8 +466,8 @@
 }
 .as-card-head .ico {
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.12),
-    inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+    0 4px 12px color-mix(in srgb, var(--black-a12) 12%, transparent),
+    inset 0 0 0 var(--hairline) var(--line);
 }
 .as-card-id {
   flex: 1;
@@ -510,7 +476,7 @@
   min-width: 0;
 }
 .as-card-id b {
-  font-size: 17px;
+  font-size: var(--fs-3);
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -518,7 +484,7 @@
 }
 .as-card-id span {
   color: var(--label-2);
-  font-size: 13.5px;
+  font-size: var(--fs-2);
   font-variant-numeric: tabular-nums;
 }
 .as-card-rows {
@@ -527,8 +493,8 @@
   gap: 7px 14px;
   margin: 14px 0 0;
   padding-top: 12px;
-  border-top: 1px solid var(--sep);
-  font-size: 13.5px;
+  border-top: var(--hairline) solid var(--sep);
+  font-size: var(--fs-2);
 }
 .as-card-rows dt {
   color: var(--label-2);
@@ -547,19 +513,19 @@
 .as-card-next {
   margin-top: 12px;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--fill-2);
 }
 .as-card-next small {
   color: var(--label-3);
-  font-size: 11.5px;
+  font-size: var(--fs-1);
 }
 .as-card-next div {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
   margin-top: 3px;
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-variant-numeric: tabular-nums;
 }
 .as-card-err {
@@ -567,7 +533,7 @@
   gap: 6px;
   margin-top: 10px;
   color: var(--red);
-  font-size: 13px;
+  font-size: var(--fs-2);
 }
 .as-card-foot {
   display: flex;
@@ -589,13 +555,13 @@
   margin-right: auto;
   color: var(--green);
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-2);
 }
 .as-muted {
   display: inline-flex;
   gap: 5px;
   color: var(--label-3);
-  font-size: 13.5px;
+  font-size: var(--fs-2);
   margin-right: auto;
 }
 .as-card-note {
@@ -604,7 +570,7 @@
   gap: 3px;
   margin-top: 10px;
   color: var(--label-3);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
 }
 .as-card-note .warn {
   display: inline-flex;
@@ -621,9 +587,9 @@
   gap: 12px;
   max-width: 460px;
   padding: 10px 12px 10px 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--fill-2);
-  font-size: 13.5px;
+  font-size: var(--fs-2);
   color: var(--label-2);
 }
 .as-applyall .btn {
@@ -634,9 +600,9 @@
 .as-error {
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--red) 8%, var(--card));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 22%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--red-3);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--red) 22%, transparent);
   color: var(--red);
 }
 .as-error > svg {
@@ -649,11 +615,11 @@
   min-width: 0;
 }
 .as-error b {
-  font-size: 14px;
+  font-size: var(--fs-2);
 }
 .as-error small {
   color: var(--label-2);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   overflow-wrap: anywhere;
 }
 .as-error-acts {
@@ -663,7 +629,7 @@
 }
 .as-stopped {
   color: var(--label-3);
-  font-size: 13px;
+  font-size: var(--fs-2);
 }
 .as-actions {
   display: flex;
@@ -680,12 +646,12 @@
   place-items: center;
   margin-top: calc(-1 * var(--icon-button-size));
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--card);
   color: var(--label);
   box-shadow:
-    0 0 0 1px var(--line),
-    0 6px 18px rgba(0, 0, 0, 0.12);
+    0 0 0 var(--hairline) var(--line),
+    0 6px 18px color-mix(in srgb, var(--black-a12) 12%, transparent);
   cursor: pointer;
 }
 
@@ -702,16 +668,18 @@
   margin: 0 auto;
   border-radius: var(--r);
   background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
-  transition: box-shadow 0.15s;
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+  transition: none;
 }
 .as-input:focus-within {
-  box-shadow: inset 0 0 0 1.5px var(--accent);
+  box-shadow: none;
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .as-composer.drag .as-input {
   box-shadow:
-    inset 0 0 0 2px var(--accent),
-    0 0 0 6px var(--accent-soft);
+    inset 0 0 0 var(--hairline) var(--accent),
+    0 0 0 var(--hairline) var(--accent-soft);
 }
 .as-atts {
   display: flex;
@@ -727,8 +695,8 @@
   width: 64px;
   height: 64px;
   object-fit: cover;
-  border-radius: 12px;
-  outline: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  outline: var(--hairline) solid var(--focus-ring);
   outline-offset: -1px;
 }
 .as-att button {
@@ -737,7 +705,7 @@
   right: 0;
   display: grid;
   place-items: center;
-  border: 2px solid var(--card);
+  border: var(--hairline) solid var(--card);
   background: var(--label);
   color: var(--bg);
   cursor: pointer;
@@ -753,7 +721,7 @@
   background: none;
   color: var(--label);
   font: inherit;
-  font-size: 15px;
+  font-size: var(--fs-2);
   line-height: 1.5;
 }
 .as-input textarea::placeholder {
@@ -778,17 +746,17 @@
   border: 0;
   font: inherit;
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--fill-2);
   color: var(--label-2);
-  font-size: 12px;
+  font-size: var(--fs-1);
   white-space: nowrap;
 }
 .as-foot {
   max-width: var(--as-w);
   margin: 8px auto 0;
   color: var(--label-3);
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   text-align: center;
 }
 
@@ -803,7 +771,7 @@
 .as-setup-note {
   margin: 0;
   color: var(--label-2);
-  font-size: 13px;
+  font-size: var(--fs-2);
   line-height: 1.55;
 }
 .as-setup-intro a {
@@ -811,7 +779,7 @@
 }
 .as-setup-note {
   color: var(--label-3);
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 .as-field {
   display: flex;
@@ -819,26 +787,28 @@
   gap: 6px;
 }
 .as-field > span {
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-weight: 600;
 }
 .as-field input {
   height: 42px;
   padding: 0 14px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   outline: 0;
   background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
   color: var(--label);
-  font: 14px var(--mono);
+  font: var(--fs-2) var(--mono);
 }
 .as-field input:focus {
-  box-shadow: inset 0 0 0 1.5px var(--accent);
+  box-shadow: none;
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .as-field small {
   color: var(--label-3);
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 /* 模型：标题右侧是刷新；下方是列表选择或手动输入 */
 .as-model-head {
@@ -855,7 +825,7 @@
   background: none;
   color: var(--accent);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-1);
   font-weight: 500;
   cursor: pointer;
 }
@@ -870,7 +840,7 @@
   justify-content: space-between;
   width: 100%;
   height: 42px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .as-model-empty {
   display: flex;
@@ -878,10 +848,10 @@
   gap: 8px;
   min-height: 42px;
   padding: 10px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--card);
   color: var(--label-3);
-  font-size: 13px;
+  font-size: var(--fs-2);
   line-height: 1.5;
 }
 .as-model-foot {
@@ -900,23 +870,23 @@
   gap: 2px;
   padding: 10px 12px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--card);
-  box-shadow: inset 0 0 0 1px var(--line);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
   color: var(--label);
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
 .as-effort button.on {
-  box-shadow: inset 0 0 0 2px var(--accent);
+  box-shadow: inset 0 0 0 var(--hairline) var(--accent);
 }
 .as-effort b {
-  font-size: 13.5px;
+  font-size: var(--fs-2);
 }
 .as-effort small {
   color: var(--label-2);
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   line-height: 1.4;
 }
 
@@ -938,7 +908,7 @@
     padding-top: 3vh;
   }
   .as-welcome h2 {
-    font-size: 21px;
+    font-size: var(--fs-3);
   }
   .as-suggest {
     flex-wrap: wrap;
@@ -977,14 +947,14 @@
   align-items: center;
   gap: 12px;
   margin: 8px 0;
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-3);
 }
 .as-past-head::before,
 .as-past-head::after {
   content: '';
   flex: 1;
-  border-top: 1px dashed var(--sep);
+  border-top: var(--hairline) dashed var(--sep);
 }
 /* 当前对话：有历史时至少占满一屏（高度由脚本按顶栏与输入框算出）；空状态始终贴在上方，
    不随历史记录加载完成后改为居中，避免进入页面时跳动 */
@@ -1004,10 +974,10 @@
   gap: 5px;
   align-self: flex-end;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--fill-2);
   color: var(--label-3);
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 .as-clear-chats {
   display: flex;
@@ -1016,9 +986,9 @@
   gap: 12px;
   padding: 12px 14px;
   margin-bottom: 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--fill-2);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 .as-clear-chats .btn {

@@ -19,7 +19,7 @@ import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 're
 import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
-import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
+import { bankOf, BRANDS, brandOf, catColor, catIcon, faviconOf, isDomainCat, KIND_BG, paletteColor, methodLogo, methodRegion, NETWORKS } from '../derive.ts';
 import { CatGlyph } from './CatGlyph.tsx';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { Toaster, toast as notify } from 'sonner';
@@ -259,7 +259,7 @@ export function CatIcon({ cat, size = 14 }: { cat: string; size?: number }) {
 /** 分类胶囊：分类色 + 图标 + 名称 */
 export function CatChip({ cat }: { cat: string }) {
   return (
-    <span className="cat-chip" style={{ '--tint': catColor(cat) } as Record<string, string>}>
+    <span className="cat-chip" style={{ '--tint': catColor(cat), '--tint-text': catColor(cat, 11), '--tint-soft': catColor(cat, 3) } as Record<string, string>}>
       <CatIcon cat={cat} size={12} />
       {cat}
     </span>
@@ -315,8 +315,8 @@ export function MethodMark({ m, size = 36, proxied }: { m: PaymentMethod; size?:
 /** 标记底色：白色 logo 放在卡面色上，彩色 logo 放在白底上 */
 function markBg(m: PaymentMethod, logo: string | undefined, onColor: boolean | undefined): string {
   if (onColor) return KIND_BG[m.kind] ?? KIND_BG.other;
-  if (logo) return m.color && m.logo ? m.color : '#fff';
-  return m.color || KIND_BG[m.kind] || KIND_BG.other;
+  if (logo) return m.color && m.logo ? paletteColor(m.color) : 'var(--white-a12)';
+  return paletteColor(m.color, KIND_BG[m.kind] || KIND_BG.other);
 }
 
 /** 卡组织标：Visa、Mastercard、银联… */

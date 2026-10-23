@@ -164,7 +164,7 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
       <div className="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.count', { items: r.items.length, charges: r.charges })} r="" />
       {!hide && <Line l={t('review.receipt.total')} r={m(-r.total)} b />}
-      {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
+      {!hide && <div style={{ fontSize: 'var(--fs-1)' }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="rp-rule">{'-'.repeat(60)}</div>
       {byMethod.slice(0, 5).map((x) => (
@@ -189,11 +189,11 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
   // 第一名占 3×3，接下来四个占 2×2，其余 1×1；dense 排布让格子自动补齐
   const span = (i: number) => (i === 0 ? 3 : i < 5 ? 2 : 1);
   return (
-    <div className="ps" style={{ '--g1': glow[0] ?? '#6366f1', '--g2': glow[1] ?? '#ec4899', '--g3': glow[2] ?? '#f59e0b' } as Record<string, string>}>
+    <div className="ps" style={{ '--g1': glow[0] ?? 'var(--c1)', '--g2': glow[1] ?? 'var(--c7)', '--g3': glow[2] ?? 'var(--c10)' } as Record<string, string>}>
       <div className="ps-year">{year}</div>
       <div className="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
       <div className="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</div>
-      {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
+      {!hide && <div style={{ fontSize: 'var(--fs-1)' }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="ps-line">
         {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, {
@@ -327,7 +327,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
         <span>{t('review.stars.head', { year, whose }).trim()}</span>
         <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</b>
       </div>
-      {!hide && <div style={{ fontSize: 11 }}>{t('review.spendBasis')}</div>}
+      {!hide && <div style={{ fontSize: 'var(--fs-1)' }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="st-map" style={{ height: (bubbles[0]?.h ?? 1) * W }}>
         {bubbles.map((b) => {

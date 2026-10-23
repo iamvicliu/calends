@@ -112,7 +112,7 @@ export function SubShare({ sub, state, today, onClose }: { sub: Subscription; st
 function SCard({ sub, st, hide, m, today }: Ctx) {
   const start = st.vs[0].start;
   const span = Math.max(1, diffDays(start, today));
-  const colors = ['#7c9bf5', '#3dd68c', '#ff8b3e', '#bf7af0', '#2dd4bf', '#f472b6'];
+  const colors = ['var(--c1)', 'var(--c4)', 'var(--c5)', 'var(--c3)', 'var(--c6)', 'var(--c7)'];
   return (
     <div className="sc">
       <div className="sc-head">

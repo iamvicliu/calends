@@ -18,7 +18,7 @@
   margin: 0 0 10px;
   min-width: 0;
   color: var(--label-3);
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-weight: 500;
   text-align: center;
   overflow-wrap: anywhere;
@@ -37,23 +37,23 @@
 .scope-trigger::after {
   content: '';
   flex: 1;
-  border-top: 1px dashed currentColor;
+  border-top: var(--hairline) dashed currentColor;
 }
 .scope-trigger {
   border: 0;
   background: none;
   color: var(--label-3);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-2);
   cursor: pointer;
 }
 .scope-trigger:hover {
   color: var(--label-2);
 }
 .scope-trigger:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: var(--hairline) solid var(--focus-ring);
   outline-offset: 4px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .scope-grid {
   display: grid;
@@ -65,7 +65,7 @@
   line-height: 1.4;
 }
 .scope-block .hero-num {
-  font-size: clamp(28px, 4vw, 36px);
+  font-size: var(--fs-4);
   line-height: 1.15;
 }
 .scope-block .hero-facts {
@@ -117,7 +117,7 @@
 .scope-note {
   margin: 8px 0 12px;
   color: var(--label-2);
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 .scope-row {
   display: flex;
@@ -125,8 +125,8 @@
   align-items: center;
   gap: 12px;
   padding: 7px 0;
-  border-bottom: 0.5px solid var(--sep);
-  font-size: 13px;
+  border-bottom: var(--hairline) solid var(--sep);
+  font-size: var(--fs-2);
 }
 .scope-row:last-child {
   border-bottom: 0;
@@ -142,7 +142,7 @@
   display: block;
   margin-top: 3px;
   color: var(--label-2);
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 .scope-sub {
   display: flex;
@@ -171,7 +171,7 @@
 .scope-tap {
   width: 100%;
   border: 0;
-  border-bottom: 0.5px solid var(--sep);
+  border-bottom: var(--hairline) solid var(--sep);
   background: none;
   color: inherit;
   font-family: inherit;
@@ -183,14 +183,14 @@
   text-underline-offset: 3px;
 }
 .scope-tap:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: var(--hairline) solid var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .scope-composition h4 {
   margin: 10px 0 2px;
   color: var(--label-2);
-  font-size: 12px;
+  font-size: var(--fs-1);
   font-weight: 500;
 }
 .scope-share {
@@ -212,25 +212,16 @@
 }
 .scope-chart-data {
   margin-top: 12px;
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 .scope-chart-data summary {
   cursor: pointer;
 }
 .scope-animate .scope-block {
-  animation: scope-assemble 180ms ease-out both;
+  animation: none;
 }
-@keyframes scope-assemble {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+
 @media (max-width: 680px) {
   .scope-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -254,7 +245,7 @@
   justify-content: space-between;
   gap: 8px;
   min-height: 28px;
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 .cal-mini-head > span {
@@ -264,7 +255,7 @@
 }
 .cal-expand {
   opacity: 0;
-  transition: opacity 150ms;
+  transition: opacity var(--duration) var(--ease);
 }
 .cal-stat:hover .cal-expand,
 .cal-stat:focus-within .cal-expand {
@@ -281,7 +272,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 .cal-mini-chart {
@@ -298,7 +289,7 @@
   color: var(--accent);
 }
 .cal-mini-month small {
-  font-size: 10px;
+  font-size: var(--fs-1);
   white-space: nowrap;
 }
 .cal-mini-bars {
@@ -312,7 +303,7 @@
   display: flex;
   flex-direction: column-reverse;
   height: 50%;
-  border-bottom: 1px solid var(--sep);
+  border-bottom: var(--hairline) solid var(--sep);
 }
 .cal-mini-negative {
   flex-direction: column;
@@ -324,7 +315,7 @@
   flex-shrink: 0;
 }
 .cal-mini-bars .forecast {
-  border: 1px dashed currentColor;
+  border: var(--hairline) dashed currentColor;
   background: none;
 }
 .cal-dc-meta {
@@ -334,11 +325,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 .cal-dc-main > small {
-  font-size: 11px;
+  font-size: var(--fs-1);
   color: var(--label-2);
   overflow-wrap: anywhere;
 }

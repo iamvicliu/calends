@@ -22,14 +22,14 @@ export const KINDS = (): Record<
 > => ({
   email: {
     name: t('settings.channels.kind.email.name'),
-    color: '#ea4335',
+    color: 'var(--red-9)',
     logo: base('/channels/gmail.svg'),
     fields: [{ key: 'to', label: t('settings.channels.field.to'), placeholder: 'you@example.com' }],
     help: t('settings.channels.kind.email.help'),
   },
   telegram: {
     name: 'Telegram',
-    color: '#26a5e4',
+    color: 'var(--cyan-9)',
     logo: base('/channels/telegram.svg'),
     fields: [
       { key: 'token', label: 'Bot Token', placeholder: '123456:ABC…', secret: true },
@@ -39,7 +39,7 @@ export const KINDS = (): Record<
   },
   lark: {
     name: t('settings.channels.kind.lark.name'),
-    color: '#3370ff',
+    color: 'var(--blue-9)',
     logo: base('/channels/lark.svg'),
     fields: [
       { key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://open.feishu.cn/open-apis/bot/v2/hook/…' },
@@ -55,7 +55,7 @@ export const KINDS = (): Record<
   },
   dingtalk: {
     name: t('settings.channels.kind.dingtalk.name'),
-    color: '#1677ff',
+    color: 'var(--blue-9)',
     logo: base('/channels/dingtalk.svg'),
     fields: [
       { key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://oapi.dingtalk.com/robot/send?access_token=…' },
@@ -71,14 +71,14 @@ export const KINDS = (): Record<
   },
   wecom: {
     name: t('settings.channels.kind.wecom.name'),
-    color: '#07c160',
+    color: 'var(--green-9)',
     logo: base('/channels/wechat.svg'),
     fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=…' }],
     help: t('settings.channels.kind.wecom.help'),
   },
   bark: {
     name: 'Bark',
-    color: '#f04d4d',
+    color: 'var(--red-9)',
     logo: base('/channels/bark.png'),
     tile: true,
     fields: [
@@ -89,7 +89,7 @@ export const KINDS = (): Record<
   },
   ntfy: {
     name: 'ntfy',
-    color: '#317f6f',
+    color: 'var(--teal-9)',
     logo: base('/channels/ntfy.svg'),
     fields: [
       { key: 'topic', label: 'Topic', placeholder: t('settings.channels.kind.ntfy.topicPlaceholder') },
@@ -100,7 +100,7 @@ export const KINDS = (): Record<
   },
   serverchan: {
     name: t('settings.channels.kind.serverchan.name'),
-    color: '#1f4e79',
+    color: 'var(--blue-9)',
     logo: base('/channels/serverchan.png'),
     tile: true,
     fields: [{ key: 'key', label: 'SendKey', placeholder: t('settings.channels.kind.serverchan.keyPlaceholder'), secret: true }],
@@ -108,21 +108,21 @@ export const KINDS = (): Record<
   },
   discord: {
     name: 'Discord',
-    color: '#5865f2',
+    color: 'var(--iris-9)',
     logo: base('/channels/discord.svg'),
     fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://discord.com/api/webhooks/…' }],
     help: t('settings.channels.kind.discord.help'),
   },
   slack: {
     name: 'Slack',
-    color: '#4a154b',
+    color: 'var(--purple-9)',
     logo: base('/channels/slack.svg'),
     fields: [{ key: 'webhook', label: t('settings.channels.field.webhook'), placeholder: 'https://hooks.slack.com/services/…' }],
     help: 'Slack App → Incoming Webhooks',
   },
   webhook: {
     name: t('settings.channels.kind.webhook.name'),
-    color: '#3a3f47',
+    color: 'var(--slate-9)',
     logo: base('/channels/webhook.svg'),
     fields: [
       { key: 'url', label: 'URL', placeholder: 'https://…' },

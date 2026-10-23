@@ -31,7 +31,7 @@ export function RowActions({
     if (!armed) return setArmed(true);
     // 对勾弹一下再删，减少动效时立即删除
     setDone(true);
-    setTimeout(onRemove, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 320);
+    setTimeout(onRemove, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250);
   };
   return (
     <span className={`row-actions${onEdit ? ' pair' : ''}${armed ? ' armed' : ''}${done ? ' done' : ''}`}>

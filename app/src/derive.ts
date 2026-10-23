@@ -1,3 +1,4 @@
+import { indigo, red, purple, green, orange, teal, pink, iris, gray, gold, slate, blue } from '@radix-ui/colors';
 import { base } from './base.ts';
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, parseDay, type Charge } from '../../shared/billing.ts';
 import { chargeValue } from '../../shared/fx.ts';
@@ -22,7 +23,14 @@ export const categories = (): Category[] => REG;
 const catOf = (name: string): Category | undefined => findCategory(REG, name);
 /** 分类图标：Lucide 图标名或 emoji */
 export const catIcon = (name: string): string => catOf(name)?.icon ?? 'tag';
-export const catColor = (name: string): string => categoryColor(catOf(name), name);
+export const catColor = (name: string, step: 3 | 9 | 11 = 9): string => {
+  const color = paletteColor(categoryColor(catOf(name), name));
+  if (step === 9) return color;
+  const families = ['indigo', 'red', 'purple', 'green', 'orange', 'teal', 'pink', 'iris', 'gray', 'gold'];
+  const category = /^var\(--c(\d+)\)$/.exec(color);
+  const family = category ? families[Number(category[1]) - 1] : /var\(--([a-z]+)-9\)/.exec(color)?.[1];
+  return `var(--${family ?? 'gray'}-${step})`;
+};
 /** 「域名」分类：域名用注册商图标、可在公开页打码；改过名也认得 */
 export const isDomainCat = (name: string): boolean => isDomainCategory(REG, name);
 /** 某个内置分类现在的名称（用户可能改过名），新建订阅的默认分类、App Store 类别映射用它 */
@@ -70,19 +78,45 @@ export const KIND_LABEL: Record<MethodKind, string> = {
 
 // 卡面底色：中性石墨或品牌纯色，不用蓝紫渐变；App Store 卡另有钛金属卡面
 export const KIND_BG: Record<MethodKind, string> = {
-  debit: 'linear-gradient(135deg,#3a3f47,#1c1f24)',
-  credit: 'linear-gradient(135deg,#2c2c30,#111113)',
-  alipay: '#1677ff',
-  wechat: '#07c160',
-  paypal: '#003087',
-  appstore: 'linear-gradient(135deg,#fbfbfd,#e4e4e8)',
-  googleplay: '#ffffff',
-  giftcard: 'linear-gradient(135deg,#f08a4b,#d4532b)',
-  prepaid: 'linear-gradient(135deg,#3a3f47,#1c1f24)',
-  phone: 'linear-gradient(135deg,#2fbf71,#0f7d55)',
-  crypto: 'linear-gradient(135deg,#1f2933,#4a3b10)',
-  other: 'linear-gradient(135deg,#55626c,#262e34)',
+  debit: 'color-mix(in srgb, var(--slate-9) 75%, var(--black-a12))',
+  credit: 'color-mix(in srgb, var(--gray-9) 75%, var(--black-a12))',
+  alipay: 'color-mix(in srgb, var(--blue-9) 75%, var(--black-a12))',
+  wechat: 'color-mix(in srgb, var(--green-9) 75%, var(--black-a12))',
+  paypal: 'color-mix(in srgb, var(--indigo-9) 75%, var(--black-a12))',
+  appstore: 'var(--gray-2)',
+  googleplay: 'var(--gray-1)',
+  giftcard: 'color-mix(in srgb, var(--orange-9) 75%, var(--black-a12))',
+  prepaid: 'color-mix(in srgb, var(--slate-9) 75%, var(--black-a12))',
+  phone: 'color-mix(in srgb, var(--teal-9) 75%, var(--black-a12))',
+  crypto: 'color-mix(in srgb, var(--gold-9) 75%, var(--black-a12))',
+  other: 'color-mix(in srgb, var(--slate-9) 75%, var(--black-a12))',
 };
+
+/** Map legacy custom UI colors to the shared palette without rewriting stored preferences. */
+const swatches = { indigo, red, purple, green, orange, teal, pink, iris, gray, gold, slate, blue };
+const rgb = (hex: string) => {
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex;
+  return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+};
+export function paletteColor(value: string | undefined, fallback = 'var(--c9)'): string {
+  if (!value) return fallback;
+  // Category colors already refer to the shared c1–c10 aliases.
+  if (/^var\(--(?:c(?:10|[1-9])|[a-z]+-(?:[1-9]|1[0-2]))\)$/.test(value)) return value;
+  const map = (hex: string) => {
+    const source = rgb(hex);
+    const neutral = Math.max(...source) - Math.min(...source) < 20;
+    const nearest = Object.entries(neutral ? { slate, gray } : swatches).sort(([, a], [, b]) => {
+      const distance = (scale: object) => rgb(Object.values(scale)[8].slice(1)).reduce((sum, c, i) => sum + (c - source[i]) ** 2, 0);
+      return distance(a) - distance(b);
+    })[0][0];
+    return `color-mix(in srgb, var(--${nearest}-9) 75%, var(--black-a12))`;
+  };
+  if (/^#[\da-f]{3}(?:[\da-f]{3})?$/i.test(value)) return map(value.slice(1));
+  if (/^linear-gradient\(\d+deg,\s*#[\da-f]{3,6},\s*#[\da-f]{3,6}\)$/i.test(value)) {
+    return value.replace(/#([\da-f]{3,6})/gi, (_, hex: string) => map(hex));
+  }
+  return fallback;
+}
 
 /**
  * 平台品牌：这几类支付方式本身就是一个平台，选了类型就自动用它的 logo。

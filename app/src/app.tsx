@@ -156,7 +156,7 @@ function Login({ error }: { error?: string }) {
           />
         )}
         {(err || mismatch) && (
-          <div className="red" style={{ fontSize: 13 }}>
+          <div className="red" style={{ fontSize: 'var(--fs-2)' }}>
             {mismatch ? t('app.login.mismatch') : err}
           </div>
         )}

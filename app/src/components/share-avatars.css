@@ -10,33 +10,31 @@
   place-items: center;
   width: var(--avatar-size);
   height: var(--avatar-size);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
   position: relative;
-  font-size: calc(var(--avatar-size) * 0.4 + 2px);
+  font-size: var(--fs-1);
   font-weight: 600;
   color: var(--label-3);
-  box-shadow: 0 0 0 1.5px var(--card);
+  box-shadow: 0 0 0 var(--hairline) var(--card);
   background: color-mix(in srgb, var(--label) 6%, var(--card));
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
+  transition: none;
 }
 .share-avatars .seat + .seat {
   margin-left: calc(-1 * var(--avatar-overlap));
 }
 .share-avatars .seat.on {
-  color: #1f9d48;
-  background: color-mix(in srgb, #34c759 18%, var(--card));
+  color: var(--green-11);
+  background: color-mix(in srgb, var(--green-9) 18%, var(--card));
 }
 .share-avatars .seat.owe {
-  color: #c76a00;
-  background: color-mix(in srgb, #ff9500 18%, var(--card));
+  color: var(--orange-11);
+  background: color-mix(in srgb, var(--amber-10) 18%, var(--card));
 }
 .share-avatars .seat.free {
   box-shadow:
-    0 0 0 1.5px var(--card),
-    inset 0 0 0 1px var(--line);
+    0 0 0 var(--hairline) var(--card),
+    inset 0 0 0 var(--hairline) var(--line);
 }
 .share-avatars .seat.me {
   overflow: hidden;
@@ -53,10 +51,9 @@
   cursor: pointer;
 }
 .share-avatars button.seat:hover {
-  transform: translateY(-2px);
   box-shadow:
-    0 0 0 1.5px var(--card),
-    0 0 0 3px var(--label-3);
+    0 0 0 var(--hairline) var(--card),
+    0 0 0 var(--hairline) var(--label-3);
   z-index: 1;
 }
 .seats-row > .share-avatars {

@@ -30,7 +30,7 @@
 }
 .people-head {
   color: var(--label-2);
-  font-size: 12px;
+  font-size: var(--fs-1);
   background: var(--fill-2);
   border-radius: var(--r) var(--r) 0 0;
 }
@@ -53,16 +53,16 @@
 .people-head .lt-sort:focus-visible,
 .people-open:focus-visible,
 .people-mobile-sort button:focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: var(--hairline) solid var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 .people-row {
   /* 参考常见组件库中等密度表格（约 48px） */
   min-height: 48px;
-  border-top: 0.5px solid var(--sep);
+  border-top: var(--hairline) solid var(--sep);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--fs-2);
 }
 .people-row:last-child {
   border-radius: 0 0 var(--r) var(--r);
@@ -101,7 +101,7 @@
 }
 .people-person small,
 .people-owed small {
-  font-size: 11px;
+  font-size: var(--fs-1);
 }
 .people-plans {
   gap: 6px;
@@ -112,7 +112,7 @@
 }
 .people-more {
   color: var(--label-2);
-  font-size: 11px;
+  font-size: var(--fs-1);
   font-weight: 600;
 }
 .people-owed {
@@ -166,7 +166,7 @@
   }
   .people-last {
     grid-area: last;
-    font-size: 11px;
+    font-size: var(--fs-1);
   }
   .people-last-label {
     display: inline;
@@ -189,11 +189,11 @@
     padding: 12px 10px;
   }
   .people-stats .stat-value {
-    font-size: clamp(16px, 4.3vw, 24px);
+    font-size: var(--fs-3);
   }
   .people-stats .stat-sub {
     display: block;
-    font-size: 10px;
+    font-size: var(--fs-1);
     overflow-wrap: anywhere;
   }
 }

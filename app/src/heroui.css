@@ -33,6 +33,19 @@
   --danger: var(--red);
   --success: var(--green);
   --warning: var(--orange);
-  --radius: 0.75rem;
+  --radius: var(--radius-md);
   --font-sans: var(--font);
+}
+
+:root {
+  --text-xs: var(--fs-1);
+  --text-sm: var(--fs-2);
+  --text-base: var(--fs-2);
+  --text-lg: var(--fs-3);
+  --text-xl: var(--fs-3);
+  --text-2xl: var(--fs-4);
+  --text-3xl: var(--fs-4);
+  --text-4xl: var(--fs-4);
+  --default-transition-duration: var(--duration);
+  --default-transition-timing-function: var(--ease);
 }

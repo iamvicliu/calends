@@ -220,14 +220,14 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
           <div className="big">
             <Amount value={-selTotal} ccy={base} />
           </div>
-          <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+          <div className="muted" style={{ fontSize: 'var(--fs-1)', marginTop: 2 }}>
             {t('overview.n.subs', { count: items.length })} · {t('overview.n.charges', { count: selData?.cs.length ?? 0 })}
             {sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: flow(-selPaid, base, { compact: true }) }) : ''}
           </div>
         </div>
         <div className="sel-items">
           {items.length === 0 && (
-            <span className="muted" style={{ fontSize: 13 }}>
+            <span className="muted" style={{ fontSize: 'var(--fs-2)' }}>
               {t('overview.spending.empty')}
             </span>
           )}
@@ -352,7 +352,7 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
         );
       })}
       {cards.length > 0 && (
-        <div className="muted" style={{ fontSize: 12.5, marginTop: rows.length ? 12 : 0 }}>
+        <div className="muted" style={{ fontSize: 'var(--fs-1)', marginTop: rows.length ? 12 : 0 }}>
           {t('overview.wallet.others', { list: cards.map((m) => m.name).join(t('overview.listSep')) })}
         </div>
       )}

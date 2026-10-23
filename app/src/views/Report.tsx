@@ -21,7 +21,7 @@ import {
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
-import { allCharges, catColor, KIND_BG, sumBase, toBase } from '../derive.ts';
+import { allCharges, catColor, KIND_BG, paletteColor, sumBase, toBase } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
 export function perLabel(s: Subscription): string {
@@ -230,7 +230,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
       )}
       <div className="wf-items">
         {mv.items.length === 0 && (
-          <div className="muted" style={{ fontSize: 13, padding: '8px 0' }}>
+          <div className="muted" style={{ fontSize: 'var(--fs-2)', padding: '8px 0' }}>
             {Math.abs(mv.fx) >= 0.5 ? t('report.wf.fx') : t('report.wf.empty')}
           </div>
         )}
@@ -473,7 +473,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
     if (dim === 'cat') return catColor(k);
     if (dim === 'pay') {
       const m = state.methods.find((x) => x.name === k);
-      return m ? m.color || KIND_BG[m.kind] : 'var(--c9)';
+      return m ? paletteColor(m.color, KIND_BG[m.kind]) : 'var(--c9)';
     }
     return `var(--c${(i % 10) + 1})`;
   };
@@ -604,7 +604,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
           <MethodMark m={p.method} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600 }}>{p.method.name}</div>
-            <div className="muted" style={{ fontSize: 12.5 }}>
+            <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
               {t('report.topup.summary', {
                 balance: money(p.current, p.method.currency, { compact: true }),
                 monthly: flow(-p.monthly, p.method.currency, { compact: true }),
@@ -641,7 +641,7 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                 )}
               </>
             ) : (
-              <div className="green" style={{ fontSize: 13, marginTop: 6 }}>
+              <div className="green" style={{ fontSize: 'var(--fs-2)', marginTop: 6 }}>
                 {t(`report.topup.enough${months}`)}
               </div>
             )}
@@ -651,11 +651,11 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
               <div style={{ fontWeight: 700 }}>
                 <Amount plain value={p.need} ccy={p.method.currency} compact />
               </div>
-              <div className="muted" style={{ fontSize: 12 }}>
+              <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
                 ≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}
               </div>
               {p.deadline && (
-                <div className={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 12, fontWeight: 600 }}>
+                <div className={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 'var(--fs-1)', fontWeight: 600 }}>
                   {t('report.topup.by', { date: cnDate(p.deadline) })}
                 </div>
               )}
