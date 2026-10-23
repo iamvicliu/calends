@@ -16,19 +16,15 @@ import { CurrencyPicker } from './components/CurrencyPicker.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode, type ThemeMode } from './theme.tsx';
 import './heroui.css';
 import './styles.css';
-import { Calendar } from './views/Calendar.tsx';
 import { Carpool } from './views/Carpool.tsx';
 import { ProxyPage } from './views/Proxy.tsx';
 import { PeopleView } from './views/People.tsx';
-import { Ai } from './views/Ai.tsx';
 import { Detail } from './views/Detail.tsx';
 import { Editor, newSub } from './views/Editor.tsx';
 import { List } from './views/List.tsx';
 import { Overview } from './views/Overview.tsx';
 import { Report } from './views/Report.tsx';
-import { Review } from './views/Review.tsx';
 import { IcsSheet, Settings } from './views/Settings.tsx';
-import { Wallet } from './views/Wallet.tsx';
 import { currentRoute, go as navigate, href, initRouter, loginNext, onRoute, replaceRoute, sortNav } from './router.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
@@ -36,7 +32,22 @@ import { monthEnd } from '../../shared/metrics.ts';
 import { useTextSearch } from './use-search.ts';
 
 // AI 助手页带着 Markdown 渲染器（Streamdown），按需加载，不拖慢其他页面的首屏
-const Assistant = lazy(() => import('./views/Assistant.tsx').then((m) => ({ default: m.Assistant })));
+const loadAssistant = () => import('./views/Assistant.tsx');
+const Assistant = lazy(() => loadAssistant().then((m) => ({ default: m.Assistant })));
+// 日历、钱包、连接与年度回顾不在首屏：按需加载，首屏渲染后空闲时预取，切过去不用等
+const loadCalendar = () => import('./views/Calendar.tsx');
+const loadWallet = () => import('./views/Wallet.tsx');
+const loadAi = () => import('./views/Ai.tsx');
+const loadReview = () => import('./views/Review.tsx');
+const Calendar = lazy(() => loadCalendar().then((m) => ({ default: m.Calendar })));
+const Wallet = lazy(() => loadWallet().then((m) => ({ default: m.Wallet })));
+const Ai = lazy(() => loadAi().then((m) => ({ default: m.Ai })));
+const Review = lazy(() => loadReview().then((m) => ({ default: m.Review })));
+function prefetchViews() {
+  const run = () => [loadCalendar, loadWallet, loadAi, loadReview, loadAssistant].forEach((load) => void load().catch(() => {}));
+  if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 3000 });
+  else setTimeout(run, 1500);
+}
 
 /** label 是 app.nav.* 的键，取用时再翻译 */
 const NAV = [
@@ -449,6 +460,10 @@ function App() {
   const collapsed = collapsedPref === '1';
   const setCollapsed = (v: boolean) => setCollapsedPref(v ? '1' : '0');
   const [drawer, setDrawer] = useState(false);
+  const loaded = !!state;
+  useEffect(() => {
+    if (loaded) prefetchViews();
+  }, [loaded]);
   const [narrow, setNarrow] = useState(() => matchMedia('(max-width: 860px)').matches);
   useEffect(() => {
     const media = matchMedia('(max-width: 860px)');
@@ -578,11 +593,7 @@ function App() {
         view = <Ai state={state} />;
         break;
       case 'assistant':
-        view = ro ? null : (
-          <Suspense fallback={null}>
-            <Assistant state={state} today={d} onOpen={open} />
-          </Suspense>
-        );
+        view = ro ? null : <Assistant state={state} today={d} onOpen={open} />;
         break;
       case 'report':
         view = <Report state={state} today={d} onOpen={open} onReview={() => setReview(true)} />;
@@ -643,7 +654,7 @@ function App() {
             <Icon name="sidebar" />
           </IconButton>
         )}
-        {view}
+        <Suspense fallback={null}>{view}</Suspense>
       </div>
 
       {viewing && (
@@ -664,7 +675,11 @@ function App() {
           }}
         />
       )}
-      {review && <Review state={state} today={d} onClose={() => setReview(false)} />}
+      {review && (
+        <Suspense fallback={null}>
+          <Review state={state} today={d} onClose={() => setReview(false)} />
+        </Suspense>
+      )}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {palette && <Palette state={state} d={d} onClose={() => setPalette(false)} onOpen={open} onAdd={add} />}
       {keyboardHelp && <KeyboardHelp onClose={() => setKeyboardHelp(false)} />}
