@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
@@ -299,8 +300,7 @@ export function Ai({ state }: { state: AppState }) {
 
         <section className="ai-card">
           <header>
-            <CardTitle as="h2">{t('ai.tokens', { count: tokens?.length ?? 0 })}</CardTitle>
-            <p className="m-hide">{t('ai.tokensHint')}</p>
+            <CardTitle as="h2">{copyParts(t('ai.tokens', { count: tokens?.length ?? 0 }))}</CardTitle>
           </header>
           {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
           {!!tokens?.length && (
@@ -367,19 +367,18 @@ export function Ai({ state }: { state: AppState }) {
             <span className="row">
               {/* 读写数量紧跟在总数后面，不单独占一行 */}
               <span className="ai-tools-title">
-                <CardTitle as="h2">{t('ai.tools', { count: tools.length })}</CardTitle>
+                <CardTitle as="h2">{copyParts(t('ai.tools', { count: tools.length }))}</CardTitle>
                 <span className="ai-tools-legend">
                   <span>
-                    <Eye size={14} /> {t('ai.toolsRead')} · {readCount}
+                    <Eye size={14} /> {t('ai.toolsRead')} <span className="copy-gap" aria-hidden="true" /> {readCount}
                   </span>
                   <span className="write">
-                    <PencilLine size={14} /> {t('ai.toolsWrite')} · {tools.length - readCount}
+                    <PencilLine size={14} /> {t('ai.toolsWrite')} <span className="copy-gap" aria-hidden="true" /> {tools.length - readCount}
                   </span>
                 </span>
               </span>
               <Icon name="down" size={16} />
             </span>
-            <p className="m-hide">{t('ai.toolsHint')}</p>
           </button>
           {showTools && (
             <>

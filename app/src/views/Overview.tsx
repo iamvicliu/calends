@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../../shared/billing.ts';
@@ -36,11 +37,6 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
           <WalletBrief state={state} today={today} />
         </div>
         <Tips state={state} today={today} onOpen={onOpen} />
-        <p className="card-note" style={{ textAlign: 'center' }}>
-          <a href={appPath('/report')} style={{ textDecoration: 'underline' }}>
-            {t('overview.fullReport')}
-          </a>
-        </p>
       </div>
     </>
   );
@@ -67,7 +63,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
         g.items.push({
           key: `${c.sub.id}-${c.date}-${g.items.length}`,
           icon: <SubIcon sub={c.sub} size={30} />,
-          tip: `${c.sub.name} · ${flow(-c.amount, c.currency)}`,
+          tip: `${c.sub.name}\n${flow(-c.amount, c.currency)}`,
           onClick: () => onOpen(real),
         });
         map.set(c.date, g);
@@ -81,7 +77,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
       <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
         <CardTitle className="sec-title">{t('overview.timeline.title')}</CardTitle>
         <span className="sec-sub" style={{ marginTop: 0 }}>
-          {t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) })}
+          {copyParts(t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) }))}
         </span>
       </div>
       <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
@@ -215,14 +211,15 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         <div>
           <h4>
             {selLabel}
-            {isFuture ? t('overview.spending.projected') : sel === curKey ? t('overview.spending.inProgress') : ''}
+            {copyParts(isFuture ? t('overview.spending.projected') : sel === curKey ? t('overview.spending.inProgress') : '')}
           </h4>
           <div className="big">
             <Amount value={-selTotal} ccy={base} />
           </div>
           <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
-            {t('overview.n.subs', { count: items.length })} · {t('overview.n.charges', { count: selData?.cs.length ?? 0 })}
-            {sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: flow(-selPaid, base, { compact: true }) }) : ''}
+            {t('overview.n.subs', { count: items.length })} <span className="copy-gap" aria-hidden="true" />{' '}
+            {t('overview.n.charges', { count: selData?.cs.length ?? 0 })}
+            {copyParts(sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: flow(-selPaid, base, { compact: true }) }) : '')}
           </div>
         </div>
         <div className="sel-items">
@@ -268,7 +265,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
       <div className="card-h">
         <CardTitle>{t('overview.due.title')}</CardTitle>
         <span className="meta">
-          {t('overview.n.charges', { count: cs.length })} · {flow(-total, base, { compact: true })}
+          {t('overview.n.charges', { count: cs.length })} <span className="copy-gap" aria-hidden="true" /> {flow(-total, base, { compact: true })}
         </span>
       </div>
       {cs.length === 0 && <div className="empty">{t('overview.due.empty')}</div>}
@@ -288,7 +285,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
                     <span className="nm">
                       <b>{c.sub.name}</b>
                       <small>
-                        {m?.name ?? t('overview.due.noMethod')} · {cycleLabel(c.sub.cycle)}
+                        {m?.name ?? t('overview.due.noMethod')} <span className="copy-gap" aria-hidden="true" /> {cycleLabel(c.sub.cycle)}
                       </small>
                     </span>
                     <span className="am">
@@ -331,14 +328,16 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
               {r ? (
                 <>
                   <small>
-                    {t('overview.wallet.balance', {
-                      amount: money(r.current, m.currency, { compact: true }),
-                      status: r.shortfall
-                        ? r.coveredCharges
-                          ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) })
-                          : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })
-                        : t('overview.wallet.enough'),
-                    })}
+                    {copyParts(
+                      t('overview.wallet.balance', {
+                        amount: money(r.current, m.currency, { compact: true }),
+                        status: r.shortfall
+                          ? r.coveredCharges
+                            ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) })
+                            : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })
+                          : t('overview.wallet.enough'),
+                      }),
+                    )}
                   </small>
                   <div className="wal-bar">
                     <i className={days != null && days <= 7 ? 'out' : days != null && days <= 30 ? 'low' : ''} style={{ width: `${Math.max(3, pct)}%` }} />
@@ -450,7 +449,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
         </div>
         <div className="stmt-delta">
           <span className={delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}>
-            {delta > 0.5 ? '↑' : delta < -0.5 ? '↓' : '·'} {money(Math.abs(delta), base, { compact: true })}
+            {copyParts(delta > 0.5 ? '↑' : delta < -0.5 ? '↓' : '')} {money(Math.abs(delta), base, { compact: true })}
           </span>
           {t('overview.stmt.vsLastMonth')}
         </div>
@@ -494,10 +493,11 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
         <div className="stmt-cap m-hide">
           {hv ? (
             <>
-              <b>{hv.s.name}</b> · {t('overview.stmt.share', { amount: flow(-hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) })}
+              <b>{hv.s.name}</b> <span className="copy-gap" aria-hidden="true" />{' '}
+              {copyParts(t('overview.stmt.share', { amount: flow(-hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) }))}
             </>
           ) : (
-            <>{t('overview.stmt.caption')}</>
+            <>{copyParts(t('overview.stmt.caption'))}</>
           )}
         </div>
         <div className="stars" ref={box} style={{ aspectRatio: `${1 / h}` }}>

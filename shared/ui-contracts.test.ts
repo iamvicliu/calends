@@ -8,12 +8,15 @@ import { LOCALES } from './i18n.ts';
 import { buildIcs } from '../worker/ics.ts';
 
 const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
+const copySource = read('../app/src/components/copy.tsx')
+  .replace(/^import.*;\n/gm, '')
+  .replace(/export function /g, 'function ');
 const locale = (loc: string, ns: string) => JSON.parse(read(`./locales/${loc}/${ns}.json`));
 
 test('14. 真实 Ai 组件创建令牌后仅弹层可见，关闭和“已保存”都清空令牌', () => {
   // 在 Node 中执行真实组件的事件，不加载浏览器或其他页面；只替换 React 宿主与外部依赖。
   const source = read('../app/src/views/Ai.tsx').replace(/^import .*;\n/gm, '');
-  const result = transformSync('Ai.tsx', source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  const result = transformSync('Ai.tsx', source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   type Element = { type: string | { name: string }; props: Record<string, unknown>; children: Element[] };
   const values: unknown[] = [];
@@ -199,7 +202,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     const source = read(file)
       .replace(/^import [\s\S]*?;\n/gm, '')
       .replace(/export function /g, 'function ');
-    const result = transformSync(file, source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+    const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
     assert.equal(result.fatal, false);
     return new Function(...Object.keys(deps), `${result.code}; return { ${names.join(', ')} };`)(...Object.values(deps));
   };

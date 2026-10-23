@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useRef, useState } from 'react';
 import {
@@ -320,7 +321,7 @@ export function MemberSheet({
               <b>{s.name}</b>
               <small>
                 {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                {nextCharge(s, today) ? ` · ${t('family.pool.next', { date: cnDate(nextCharge(s, today)!) })}` : ''}
+                {copyParts(nextCharge(s, today) ? `\n${t('family.pool.next', { date: cnDate(nextCharge(s, today)!) })}` : '')}
               </small>
             </span>
             {onOpenSub && (
@@ -348,11 +349,11 @@ export function MemberSheet({
             </Cell>
             <Cell label={t('family.member.paidUntil')}>{f.paidUntil ? cnDateFull(f.paidUntil) : t('family.member.notSet')}</Cell>
             <Cell label={t('family.collect.lastPayment')}>
-              {payments[0] ? `${cnDateFull(payments[0].date)} · ${money(payments[0].amount, payments[0].currency)}` : t('family.pool.noPay')}
+              {copyParts(payments[0] ? `${cnDateFull(payments[0].date)}\n${money(payments[0].amount, payments[0].currency)}` : t('family.pool.noPay'))}
             </Cell>
           </Group>
           <Group
-            foot={`${t('family.collect.covers', { from: cnDateFull(pay.from ?? pay.date), until: cnDateFull(pay.until) })} · ${t('family.collect.next', { date: cnDateFull(addDays(pay.until, 1)) })}`}
+            foot={`${t('family.collect.covers', { from: cnDateFull(pay.from ?? pay.date), until: cnDateFull(pay.until) })}\n${t('family.collect.next', { date: cnDateFull(addDays(pay.until, 1)) })}`}
           >
             <Cell label={t('family.member.receivedOn')}>
               <DatePicker value={pay.date} onChange={(v) => setPay({ ...pay, date: v ?? today })} />
@@ -499,12 +500,14 @@ export function MemberSheet({
             <>
               <div className="cell">
                 <small className="muted">
-                  {t('family.member.firstSummary', {
-                    from: cnDate(first.from),
-                    until: cnDate(first.until),
-                    mode: t(`family.member.firstMode.${f.firstPeriod ?? 'prorate'}`),
-                    amount: money(first.amount, first.currency),
-                  })}
+                  {copyParts(
+                    t('family.member.firstSummary', {
+                      from: cnDate(first.from),
+                      until: cnDate(first.until),
+                      mode: t(`family.member.firstMode.${f.firstPeriod ?? 'prorate'}`),
+                      amount: money(first.amount, first.currency),
+                    }),
+                  )}
                 </small>
               </div>
               <Cell label={t('family.member.firstPeriod')}>
@@ -633,10 +636,12 @@ export function MemberSheet({
                 <span className="cell-l">
                   <span className="green">{flow(p.amount, p.currency)}</span>
                   <small>
-                    {p.from
-                      ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) })
-                      : t('family.member.payCoverTo', { date: cnDateFull(p.date), until: cnDate(p.until) })}
-                    {p.note ? ` · ${p.note}` : ''}
+                    {copyParts(
+                      p.from
+                        ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) })
+                        : t('family.member.payCoverTo', { date: cnDateFull(p.date), until: cnDate(p.until) }),
+                    )}
+                    {copyParts(p.note ? `\n${p.note}` : '')}
                   </small>
                 </span>
                 <span className="cell-r">
@@ -744,7 +749,7 @@ export function MemberSheet({
                 setAdding(true);
               }}
             >
-              <Icon name="plus" /> {t('family.member.recordNext', { amount: money(freshPay(f).amount, freshPay(f).currency) })}
+              <Icon name="plus" /> {copyParts(t('family.member.recordNext', { amount: money(freshPay(f).amount, freshPay(f).currency) }))}
             </button>
           )}
         </Group>
@@ -922,7 +927,7 @@ export function MemberBillingSheet({
               st.gone
                 ? undefined
                 : st.owe
-                  ? `${st.late > 0 ? `${t('family.quick.late', { count: st.late })} · ` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`
+                  ? `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`
                   : t('family.quick.settled', { date: cnDateFull(st.next.from) })
             }
           >

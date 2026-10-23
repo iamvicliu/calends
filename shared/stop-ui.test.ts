@@ -41,7 +41,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
   const source = readFileSync(new URL(file, import.meta.url), 'utf8')
     .replace(/^import[\s\S]*?;\n/gm, '')
     .replace(/^export \{.*\};\n/gm, '');
-  const result = transformSync(file, source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  const copySource = readFileSync(new URL('../app/src/components/copy.tsx', import.meta.url), 'utf8').replace(/^import.*;\n/gm, '');
+  const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   const values: unknown[] = [];
   let cursor = 0;
@@ -118,7 +119,7 @@ test('真实停止表单：三种模式、日期默认值、币种锁定、按�
   nodes = render();
   nodes.find((e) => e.type === 'Picker' && e.props.ariaLabel === t('editor.payment.kind.refund'))!.props.onChange('yes');
   nodes = render();
-  const amount = all(cell(`${t('core.stop.refundAmount')} · USD`)).find((e) => e.type === 'input')!;
+  const amount = all(cell(`${t('core.stop.refundAmount')}\nUSD`)).find((e) => e.type === 'input')!;
   assert.equal(amount.props.value, '16');
   // 唯一可选币种属于卡上实退，订阅退款币种没有选择器。
   assert.equal(nodes.filter((e) => e.type === 'CurrencySelect').length, 1);
@@ -127,7 +128,7 @@ test('真实停止表单：三种模式、日期默认值、币种锁定、按�
   nodes.find((e) => e.type === 'button' && e.children.includes(t('core.stop.title')))!.props.onClick();
   assert.equal(applied.length, 0);
   assert.equal(errors.at(-1), t('mcp.error.refundExceedsPaid'));
-  all(cell(`${t('core.stop.refundAmount')} · USD`))
+  all(cell(`${t('core.stop.refundAmount')}\nUSD`))
     .find((e) => e.type === 'input')!
     .props.onChange({ target: { value: '6' } });
   nodes = render();
@@ -513,7 +514,7 @@ test('编辑状态：立即停止及退款随完成保存，错误不关闭，�
   nodes.find((n) => n.type === 'Picker' && n.props.ariaLabel === t('editor.payment.kind.refund'))!.props.onChange('yes');
   nodes = r.render();
   const refundAmount = () =>
-    all(nodes.find((n) => n.type === 'Cell' && n.props.label === `${t('core.stop.refundAmount')} · USD`)).find((n) => n.type === 'input')!;
+    all(nodes.find((n) => n.type === 'Cell' && n.props.label === `${t('core.stop.refundAmount')}\nUSD`)).find((n) => n.type === 'input')!;
   refundAmount().props.onChange({ target: { value: '32' } });
   await button(r.render(), 'common.done').props.onClick();
   assert.equal(r.saved.length, 0);
@@ -583,7 +584,7 @@ test('编辑停止字段：延期到续费日仍提示扣款；已有退款金�
   nodes = refunded.render();
   nodes.find((n) => n.type === 'DatePicker' && n.props.value === today)!.props.onChange('2026-10-18');
   nodes = refunded.render();
-  const amount = all(nodes.find((n) => n.type === 'Cell' && n.props.label === `${t('core.stop.refundAmount')} · USD`)).find((n) => n.type === 'input')!;
+  const amount = all(nodes.find((n) => n.type === 'Cell' && n.props.label === `${t('core.stop.refundAmount')}\nUSD`)).find((n) => n.type === 'input')!;
   assert.equal(amount.props.value, '6');
 });
 

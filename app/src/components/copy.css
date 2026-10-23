@@ -1,0 +1,17 @@
+.copy-parts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.65em;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.copy-gap {
+  display: inline-block;
+  width: 0.65em;
+}
+
+.tl-icon.copy-tooltip::after {
+  white-space: pre-line;
+}

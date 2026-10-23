@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
@@ -158,7 +159,7 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
         <div className="sim-name">
           {m.name}
           <small>
-            <FlagImg cc={methodRegion(m)} /> {m.phone ? fmtPhone(m.phone) : `${KIND_LABEL[m.kind]} · ${m.currency}`}
+            <FlagImg cc={methodRegion(m)} /> {copyParts(m.phone ? fmtPhone(m.phone) : `${KIND_LABEL[m.kind]}\n${m.currency}`)}
           </small>
         </div>
         <div className="pc-foot">
@@ -218,9 +219,9 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
             <div className="pc-name text-ellipsis">{m.name}</div>
             <div className="pc-kind">
               {KIND_LABEL[m.kind]}
-              {m.network ? ` · ${m.currency}` : ''}
-              {m.region ? ` · ${m.region}` : ''}
-              {m.cashback ? ` · ${t('wallet.card.cashback', { pct: m.cashback })}` : ''}
+              {copyParts(m.network ? `\n${m.currency}` : '')}
+              {copyParts(m.region ? `\n${m.region}` : '')}
+              {copyParts(m.cashback ? `\n${t('wallet.card.cashback', { pct: m.cashback })}` : '')}
             </div>
           </div>
         </div>
@@ -321,7 +322,7 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
 
   return (
     <>
-      <Toolbar title={t('wallet.title')} sub={t(ro ? 'wallet.sub' : 'wallet.subDrag', { count: state.methods.length })}>
+      <Toolbar title={t('wallet.title')} sub={t('wallet.sub', { count: state.methods.length })}>
         {!ro && (
           <button className="btn primary" onClick={() => setEdit({ id: uid(), name: '', kind: 'appstore', currency: 'TRY' })}>
             <Icon name="plus" /> {t('wallet.add')}
@@ -521,7 +522,7 @@ function MethodSheet({
               }
               onClick={() => onOpen(s)}
             >
-              {money(s.price, s.currency)} · {cycleLabel(s.cycle)}
+              {money(s.price, s.currency)} <span className="copy-gap" aria-hidden="true" /> {cycleLabel(s.cycle)}
             </Cell>
           ))}
         </Group>
@@ -644,8 +645,10 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
                     <span className="green">{flow(tp.amount, m.currency)}</span>
                     <small>
                       {tp.date}
-                      {tp.cost != null ? ` · ${t('wallet.topup.spent', { amount: flow(-tp.cost, tp.costCurrency ?? state.settings.baseCurrency) })}` : ''}
-                      {tp.note ? ` · ${tp.note}` : ''}
+                      {copyParts(
+                        tp.cost != null ? `\n${t('wallet.topup.spent', { amount: flow(-tp.cost, tp.costCurrency ?? state.settings.baseCurrency) })}` : '',
+                      )}
+                      {copyParts(tp.note ? `\n${tp.note}` : '')}
                     </small>
                   </span>
                   <span className="cell-r">

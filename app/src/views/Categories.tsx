@@ -96,7 +96,7 @@ function CategoriesSheet({ state, onClose }: { state: AppState; onClose: () => v
         )
       }
     >
-      <Group foot={t('settings.cat.foot')}>
+      <Group>
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

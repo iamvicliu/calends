@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 import {
@@ -208,7 +209,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                             <span
                               key={c.sub.id}
                               style={{ '--i': i } as Record<string, number>}
-                              {...tipProps(() => `${c.sub.name} · ${flow(-c.amount, c.currency)}`)}
+                              {...tipProps(() => `${c.sub.name}\n${flow(-c.amount, c.currency)}`)}
                             >
                               <SubIcon sub={c.sub} size={24} />
                             </span>
@@ -223,7 +224,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               {sel && hasSelection ? (
                 <div className="stack cal-selection" ref={selection}>
                   <section className="cal-dayhead">
-                    <CardTitle as="h3" hint={t('report.cash.fullPaidHint')}>{`${cnDate(sel, true)} · ${relDays(diffDays(today, sel))}`}</CardTitle>
+                    <CardTitle as="h3" hint={t('report.cash.fullPaidHint')}>
+                      {copyParts(`${cnDate(sel, true)}\n${relDays(diffDays(today, sel))}`)}
+                    </CardTitle>
                   </section>
                   <div className="cal-daycards">
                     {selList.map((c, i) => {
@@ -252,7 +255,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                           <span className="cal-dc-info">
                             {c.sub.cycle.unit === 'lifetime' && c.kind !== 'refund' && (
                               <small>
-                                {t('editor.field.purchased')} · {cnDateAuto(c.sub.start, today)}
+                                {t('editor.field.purchased')} <span className="copy-gap" aria-hidden="true" /> {cnDateAuto(c.sub.start, today)}
                               </small>
                             )}
                             {period && (
@@ -263,7 +266,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                             {status === 'paused' ? (
                               cur.pausedAt && (
                                 <small>
-                                  {t('detail.ev.paused')} · {cnDateAuto(cur.pausedAt, today)}
+                                  {t('detail.ev.paused')} <span className="copy-gap" aria-hidden="true" /> {cnDateAuto(cur.pausedAt, today)}
                                 </small>
                               )
                             ) : ['ended', 'terminated'].includes(status) ? (
@@ -272,7 +275,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                               <small>{t('core.stop.paidThrough', { date: cnDateAuto(cur.end, today) })}</small>
                             ) : next && next !== c.date ? (
                               // 下次扣款就是选中的这一天时，标题已写明日期，不再重复
-                              <small>{t('calendar.nextCharge', { date: cnDateAuto(next, today) })}</small>
+                              <small>{copyParts(t('calendar.nextCharge', { date: cnDateAuto(next, today) }))}</small>
                             ) : null}
                             {stopped && (
                               <small title={stopDescription(cur, today)}>
@@ -285,7 +288,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                             {/* 已扣/预计与原币合成一行：「预计 · −₺499.99」 */}
                             {(amt.alt || c.kind !== 'refund') && (
                               <small>
-                                {[c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged')), amt.alt].filter(Boolean).join(' · ')}
+                                {copyParts(
+                                  [c.kind !== 'refund' && (c.projected ? t('calendar.projected') : t('calendar.charged')), amt.alt].filter(Boolean).join('\n'),
+                                )}
                               </small>
                             )}
                           </span>
@@ -316,7 +321,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
               {reportMode === 'mini' && report && <MiniReport report={report} base={base} today={today} onExpand={() => setReportMode('full')} />}
               <section className="card cal-charges">
                 <div className="card-h">
-                  <CardTitle>{t('calendar.monthAll', { month: monthLabel(month, { year: false }) })}</CardTitle>
+                  <CardTitle>{copyParts(t('calendar.monthAll', { month: monthLabel(month, { year: false }) }))}</CardTitle>
                 </div>
                 {monthCharges.length === 0 && <div className="cell muted">{t('calendar.noneMonth')}</div>}
                 <div className="cal-charge-list">
@@ -390,7 +395,7 @@ function YearHeat({
             <div className="heat-h">
               {monthLabel(m, { year: false })}
               <span>
-                {count ? t('calendar.heatCount', { count }) : ''}
+                {copyParts(count ? t('calendar.heatCount', { count }) : '')}
                 {flow(-total, base, { compact: true })}
               </span>
             </div>
@@ -417,7 +422,7 @@ function YearHeat({
                         <b>{cnDate(d, true)}</b>
                         {list.map((c) => (
                           <div key={c.sub.id}>
-                            {c.sub.name} · {flow(-c.amount, c.currency)}
+                            {c.sub.name} <span className="copy-gap" aria-hidden="true" /> {flow(-c.amount, c.currency)}
                           </div>
                         ))}
                       </>
@@ -484,10 +489,10 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
           <div
             key={r.month}
             role="img"
-            aria-label={`${monthLabel(r.month)} · ${flow(-r.total, base)}`}
+            aria-label={`${monthLabel(r.month)}\n${flow(-r.total, base)}`}
             className={`cal-mini-month ${r.month === headline.month ? 'current' : ''}`}
             {...tipProps(
-              () => `${monthLabel(r.month)} · ${flow(-r.total, base)}${r.month >= today.slice(0, 7) && r.pending !== 0 ? ` · ${t('scope.forecast')}` : ''}`,
+              () => `${monthLabel(r.month)}\n${flow(-r.total, base)}${r.month >= today.slice(0, 7) && r.pending !== 0 ? `\n${t('scope.forecast')}` : ''}`,
             )}
           >
             <div className={`cal-mini-bars ${report.months.some((m) => m.paid < 0 || m.pending < 0) ? 'signed' : ''}`}>

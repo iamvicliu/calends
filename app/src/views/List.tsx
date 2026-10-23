@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { StopBadge, StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
@@ -165,7 +166,7 @@ export function List({
     q.trim() && t('scope.search', { query: q.trim().replace(/\s+/g, ' ') }),
   ]
     .filter(Boolean)
-    .join(' · ');
+    .join('\n');
 
   return (
     <>
@@ -563,9 +564,9 @@ function ChangeNote({ cur, up, st, today, state }: { cur: Subscription; up: Subs
     <div className="change-note">
       <Icon name="right" size={12} />
       <span>
-        {up.planned ? t('list.change.planned') : ''}
+        {copyParts(up.planned ? t('list.change.planned') : '')}
         {t(st === 'upcoming' ? 'list.change.starts' : 'list.change.from', { when })}
-        {parts.length ? ` · ${parts.join(' · ')}` : ''}
+        {copyParts(parts.length ? `\n${parts.join('\n')}` : '')}
       </span>
     </div>
   );
@@ -580,14 +581,16 @@ function ParallelNote({ sub, cur, today }: { sub: Subscription; cur: Subscriptio
     <div className="change-note parallel">
       <Icon name="copy" size={12} />
       <span>
-        {vs
-          .map((v) =>
-            t('list.overlap.note', {
-              what: v.region && v.region !== cur.region ? v.region : `${money(v.price, v.currency)}/${perLabel(v)}`,
-              date: cnDate(v.end!),
-            }),
-          )
-          .join(' · ')}
+        {copyParts(
+          vs
+            .map((v) =>
+              t('list.overlap.note', {
+                what: v.region && v.region !== cur.region ? v.region : `${money(v.price, v.currency)}/${perLabel(v)}`,
+                date: cnDate(v.end!),
+              }),
+            )
+            .join('\n'),
+        )}
       </span>
     </div>
   );

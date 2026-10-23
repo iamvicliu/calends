@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
 import { localTime } from '../../../shared/format.ts';
@@ -58,12 +59,12 @@ function ago(iso: string | null): string {
 
 function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () => void }) {
   const { browser, os } = describeUA(d.userAgent);
-  const where = [d.location, d.ip].filter(Boolean).join(' · ');
+  const where = [d.location, d.ip].filter(Boolean).join('\n');
   return (
     <Cell
       label={
         <span>
-          {[browser, os].filter(Boolean).join(' · ')}
+          {copyParts([browser, os].filter(Boolean).join('\n'))}
           {d.current && (
             <span className="pill" style={{ marginLeft: 8, color: 'var(--green)' }}>
               {t('settings.security.thisDevice')}
@@ -78,7 +79,7 @@ function DeviceCell({ d, tz, onRevoke }: { d: Device; tz: string; onRevoke: () =
           d.current ? '' : ago(d.lastSeenAt),
         ]
           .filter(Boolean)
-          .join(' · '),
+          .join('\n'),
       ]
         .filter(Boolean)
         .join('\n')}

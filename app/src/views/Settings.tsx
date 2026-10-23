@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -275,7 +276,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           <Cell
             label={
               <CardTitle as="span" hint={t('settings.general.signedAmountsSub')}>
-                {t('settings.general.signedAmounts')}
+                {copyParts(t('settings.general.signedAmounts'))}
               </CardTitle>
             }
           >
@@ -307,7 +308,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           </Cell>
         </Group>
 
-        <Group title={t('settings.sidebar.title')} foot={t('settings.sidebar.dragFoot')}>
+        <Group title={t('settings.sidebar.title')}>
           {/* 模块顺序：拖动把手调整，侧边栏跟着变；能隐藏的右边有开关 */}
           <DndContext
             sensors={sensors}

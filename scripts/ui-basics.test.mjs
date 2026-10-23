@@ -84,6 +84,8 @@ test('title and icon primitives preserve heading semantics, accessible names and
   visit(ast, (node) => {
     if (node.type === 'FunctionDeclaration' && ['CardTitle', 'IconButton'].includes(node.id?.name)) functions.push(text(node, source));
   });
+  const [, copyAst, copySource] = sources.find(([file]) => file === 'components/copy.tsx');
+  functions.push(copySource.slice(...functionRange(copyAst, 'copyParts')));
   const result = transformSync('ui.tsx', functions.join('\n'), { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   const { CardTitle, IconButton } = new Function('React', 'Hint', `${result.code}; return { CardTitle, IconButton };`)(React, 'hint');
@@ -345,4 +347,40 @@ test('timeline loss amount uses its own line box so the digits stay vertically c
   assert.ok(rule);
   assert.match(rule[1], /display:\s*block/);
   assert.match(rule[1], /line-height:\s*18px/);
+});
+
+test('copy separates facts into elements and preserves punctuation in user names', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'components/copy.tsx');
+  const result = transformSync('copy.tsx', source.slice(...functionRange(ast, 'copyParts')), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  const copyParts = new Function('React', `${result.code}; return copyParts;`)(React);
+  const name = 'Orbit · Family';
+  assert.equal(copyParts(name), name);
+  const markup = renderToStaticMarkup(copyParts(`${name}\n$12/month\nNext charge Oct 28`));
+  assert.match(markup, /<span class="copy-parts"><span>Orbit · Family<\/span><span>\$12\/month<\/span><span>Next charge Oct 28<\/span><\/span>/);
+  assert.equal(copyParts(0), 0);
+  assert.equal(copyParts(null), null);
+  // Leading/trailing boundaries still need spacing when a conditional fact follows existing text.
+  assert.match(renderToStaticMarkup(copyParts('\nNext charge Oct 28')), /<span><\/span><span>Next charge Oct 28<\/span>/);
+});
+
+test('UI copy and locale templates never introduce middle-dot separators', async () => {
+  const failures = [];
+  for (const file of readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.tsx'))) {
+    const source = readFileSync(new URL(file, root), 'utf8');
+    const ast = await parsers.typescript.parse(source);
+    visit(ast, (node) => {
+      const value = node.type === 'JSXText' ? node.value : node.type === 'Literal' ? node.value : node.type === 'TemplateElement' ? node.value.raw : undefined;
+      if (typeof value === 'string' && value.includes('\u00b7')) failures.push(file);
+    });
+  }
+  const locales = new URL('../shared/locales/', import.meta.url);
+  for (const file of readdirSync(locales, { recursive: true }).filter((file) => file.endsWith('.json'))) {
+    if (readFileSync(new URL(file, locales), 'utf8').includes('\u00b7')) failures.push(`locales/${file}`);
+  }
+  assert.deepEqual(failures, []);
 });
