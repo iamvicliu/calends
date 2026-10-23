@@ -13,36 +13,57 @@ const copySource = read('../app/src/components/copy.tsx')
   .replace(/export function /g, 'function ');
 const locale = (loc: string, ns: string) => JSON.parse(read(`./locales/${loc}/${ns}.json`));
 
-test('14. 真实 Ai 组件创建令牌后仅弹层可见，关闭和“已保存”都清空令牌', () => {
-  // 在 Node 中执行真实组件的事件，不加载浏览器或其他页面；只替换 React 宿主与外部依赖。
+type AiElement = { type: string | { name: string }; props: Record<string, any>; children: AiElement[] };
+const aiNodes = (node: unknown): AiElement[] => {
+  if (Array.isArray(node)) return node.flatMap(aiNodes);
+  if (!node || typeof node !== 'object' || !('type' in node)) return [];
+  const e = node as AiElement;
+  return [e, ...aiNodes(e.children)];
+};
+const aiNamed = (e: AiElement, name: string) => (typeof e.type === 'object' || typeof e.type === 'function' ? e.type.name === name : e.type === name);
+function aiHarness() {
+  // 执行真实组件及事件，仅替换 React 宿主与外部 API；不访问本地账本。
   const source = read('../app/src/views/Ai.tsx').replace(/^import .*;\n/gm, '');
   const result = transformSync('Ai.tsx', source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
-  type Element = { type: string | { name: string }; props: Record<string, unknown>; children: Element[] };
-  const values: unknown[] = [];
+  const states = new Map<unknown, unknown[]>();
+  let values: unknown[] = [];
   let cursor = 0;
   const useState = (initial: unknown) => {
     const i = cursor++;
     if (!(i in values)) values[i] = typeof initial === 'function' ? initial() : initial;
+    const owner = values;
     return [
       values[i],
-      (next: unknown) => {
-        values[i] = typeof next === 'function' ? next(values[i]) : next;
+      (next: any) => {
+        owner[i] = typeof next === 'function' ? next(owner[i]) : next;
       },
     ];
   };
   const React = {
     Fragment: 'Fragment',
-    createElement(type: Element['type'], props: Element['props'], ...children: Element[]) {
+    createElement(type: AiElement['type'], props: AiElement['props'], ...children: AiElement[]) {
       return { type, props: props ?? {}, children };
     },
   };
+  const requests: Array<{ path: string; init?: RequestInit }> = [];
+  const fresh = { token: 'fictional-once-only-token', item: { id: 'new', name: 'Claude Code', scope: 'write' } };
+  const messages = locale('en', 'ai');
   const deps = {
     React,
     useState,
     useEffect() {},
     base: (s: string) => s,
-    t: (s: string) => s,
+    t: (key: string, args: Record<string, unknown> = {}) => {
+      const value = key.startsWith('ai.')
+        ? key
+            .slice(3)
+            .split('.')
+            .reduce((o, k) => o?.[k], messages)
+        : key;
+      const template = typeof value === 'object' ? value.other : (value ?? key);
+      return template.replace(/\{(\w+)\}/g, (_: string, k: string) => String(args[k] ?? `{${k}}`));
+    },
     Icon: 'Icon',
     IconButton: 'IconButton',
     ChartPie: 'ChartPie',
@@ -61,56 +82,112 @@ test('14. 真实 Ai 组件创建令牌后仅弹层可见，关闭和“已保存
     Sheet: 'Sheet',
     Toggle: 'Toggle',
     Toolbar: 'Toolbar',
-    api: async () => [],
-    run() {},
+    api: async (path: string, init?: RequestInit) => {
+      requests.push({ path, init });
+      return init?.method === 'POST' ? fresh : [];
+    },
+    run: (fn: () => unknown) => fn(),
     saveSettings() {},
     toast() {},
-    confirmDelete() {},
     localTime() {},
     location: { origin: 'https://example.test' },
   };
-  const Ai = new Function(...Object.keys(deps), `${result.code.replace('export function Ai', 'function Ai')}; return Ai;`)(...Object.values(deps));
-  const render = (): Element => {
+  const components = new Function(...Object.keys(deps), `${result.code.replace('export function Ai', 'function Ai')}; return { Ai, Connect, NewToken };`)(
+    ...Object.values(deps),
+  );
+  const render = (component = components.Ai, props = { state: { subscriptions: [], methods: [], fx: FALLBACK_FX, settings: DEFAULT_SETTINGS } }): AiElement => {
+    if (!states.has(component)) states.set(component, []);
+    values = states.get(component)!;
     cursor = 0;
-    return Ai({ state: { subscriptions: [], methods: [], fx: FALLBACK_FX, settings: DEFAULT_SETTINGS } });
+    return component(props);
   };
-  const all = (node: unknown): Element[] => {
-    if (Array.isArray(node)) return node.flatMap(all);
-    if (!node || typeof node !== 'object' || !('type' in node)) return [];
-    const e = node as Element;
-    return [e, ...all(e.children)];
-  };
-  const named = (e: Element, name: string) => (typeof e.type === 'object' || typeof e.type === 'function' ? e.type.name === name : e.type === name);
+  const renderElement = (element: AiElement) => render(element.type, element.props);
+  return { render, renderElement, requests, fresh, states };
+}
+
+test('连接卡片默认收起、可切换和收起，重新挂载不记住选择', () => {
+  const h = aiHarness();
+  const connection = () => aiNodes(h.render()).find((e) => aiNamed(e, 'Connect'))!;
+  const cards = () => aiNodes(h.renderElement(connection())).filter((e) => e.props.className?.startsWith('ai-client '));
+  const steps = () => aiNodes(h.renderElement(connection())).find((e) => e.type === 'ol');
+  assert.equal(steps(), undefined);
+  assert.equal(cards().length, 8);
+  for (const card of cards()) {
+    assert.equal(card.type, 'button');
+    assert.equal(card.props.type, 'button');
+    assert.equal(card.props.role, undefined); // 原生按钮保留 Enter / Space 行为
+    assert.equal(card.props['aria-expanded'], false);
+    assert.equal(card.props['aria-controls'], undefined);
+  }
+  cards()[0].props.onClick();
+  assert.equal(cards()[0].props['aria-expanded'], true);
+  assert.equal(cards()[0].props['aria-controls'], steps()!.props.id);
+  let block = aiNodes(h.renderElement(connection())).find((e) => aiNamed(e, 'CodeBlock'))!;
+  assert.ok(block.props.code.includes('claude mcp add'));
+  assert.ok(block.props.code.includes('<your-token>'));
+  cards()[7].props.onClick();
+  assert.equal(cards()[0].props['aria-expanded'], false);
+  assert.equal(cards()[7].props['aria-expanded'], true);
+  block = aiNodes(h.renderElement(connection())).find((e) => aiNamed(e, 'CodeBlock'))!;
+  assert.ok(block.props.code.includes('POST https://example.test/mcp'));
+  assert.equal(aiNodes(h.renderElement(connection())).filter((e) => e.type === 'ol').length, 1);
+  cards()[7].props.onClick();
+  assert.equal(steps(), undefined);
+  cards()[0].props.onClick();
+  h.states.clear(); // 等价于首次进入或刷新后的组件重新挂载
+  assert.equal(steps(), undefined);
+  assert.equal(
+    h.requests.some((r) => r.init?.method),
+    false,
+  );
+});
+
+test('14. 真实生成流程将令牌带入弹层提示词，关闭和已保存都清空，主页面始终使用占位符', async () => {
   for (const close of ['onClose', 'saved']) {
-    let nodes = all(render());
-    const createButton = nodes.find((e) => e.type === 'button' && e.props.className === 'btn primary')!;
-    (createButton.props.onClick as () => void)();
-    nodes = all(render());
-    const create = nodes.find((e) => named(e, 'NewToken'))!;
-    const secret = 'secret-token-never-persist';
-    (create.props.onCreated as (r: unknown) => void)({ token: secret, item: { id: 'new', name: 'New', scope: 'write' } });
-    nodes = all(render());
-    const connections = nodes.filter((e) => named(e, 'Connect'));
+    const h = aiHarness();
+    let nodes = aiNodes(h.render());
+    let main = nodes.find((e) => aiNamed(e, 'Connect'))!;
+    aiNodes(h.renderElement(main))
+      .find((e) => e.props.className === 'ai-client ')!
+      .props.onClick();
+    nodes = aiNodes(h.render());
+    nodes.find((e) => e.type === 'button' && e.props.className === 'btn primary')!.props.onClick();
+    const create = aiNodes(h.render()).find((e) => aiNamed(e, 'NewToken'))!;
+    const form = h.renderElement(create);
+    const generate = aiNodes(aiNodes(form).find((e) => e.type === 'Sheet')!.props.foot).find((e) => e.props.className === 'btn primary')!;
+    await generate.props.onClick();
+    assert.deepEqual(
+      h.requests.find((r) => r.init?.method === 'POST'),
+      {
+        path: '/api/mcp/tokens',
+        init: { method: 'POST', body: JSON.stringify({ name: 'Claude Code', scope: 'write' }) },
+      },
+    );
+    nodes = aiNodes(h.render());
+    const connections = nodes.filter((e) => aiNamed(e, 'Connect'));
     assert.equal(connections.length, 2);
-    assert.equal(connections[0].props.token, undefined); // 主页面始终使用占位符
-    assert.equal((connections[1].props.token as { token: string }).token, secret);
+    main = connections[0];
+    assert.equal(main.props.token, undefined);
+    const mainBlock = aiNodes(h.renderElement(main)).find((e) => aiNamed(e, 'CodeBlock'))!;
+    assert.ok(mainBlock.props.code.includes('<your-token>'));
+    assert.ok(!mainBlock.props.code.includes(h.fresh.token));
+    const freshBlock = aiNodes(h.renderElement(connections[1])).find((e) => aiNamed(e, 'CodeBlock'))!;
+    assert.ok(freshBlock.props.code.includes(h.fresh.token));
+    assert.equal(connections[1].props.token, h.fresh);
     const sheet = nodes.find((e) => e.type === 'Sheet')!;
-    if (close === 'onClose') (sheet.props.onClose as () => void)();
-    else {
-      const button = all(sheet.props.foot).find((e) => e.type === 'button')!;
-      (button.props.onClick as () => void)();
-    }
-    nodes = all(render());
+    if (close === 'onClose') sheet.props.onClose();
+    else
+      aiNodes(sheet.props.foot)
+        .find((e) => e.type === 'button')!
+        .props.onClick();
+    nodes = aiNodes(h.render());
     assert.equal(
       nodes.some((e) => e.type === 'Sheet'),
       false,
     );
-    assert.equal(
-      values.some((v) => typeof v === 'object' && v && 'token' in v),
-      false,
-    );
-    assert.equal(nodes.filter((e) => named(e, 'Connect')).length, 1);
-    assert.equal(nodes.find((e) => named(e, 'Connect'))!.props.token, undefined);
+    assert.equal([...h.states.values()].flat().includes(h.fresh), false);
+    assert.equal(nodes.filter((e) => aiNamed(e, 'Connect')).length, 1);
+    assert.equal(nodes.find((e) => aiNamed(e, 'Connect'))!.props.token, undefined);
   }
 });
 

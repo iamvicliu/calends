@@ -41,7 +41,6 @@
   "name": "Nom",
   "namePlaceholder": "Pour quelle IA ?",
   "pickClient": "Choisissez votre assistant IA",
-  "setupHint": "Choisissez l’assistant que vous utilisez, puis collez un extrait. Votre jeton est inséré automatiquement dès sa création.",
   "tokensHint": "Donnez à chaque assistant son propre jeton pour pouvoir le révoquer séparément.",
   "toolsHint": "Ce que les assistants peuvent faire avec votre registre. Les jetons en lecture seule ne voient que les outils de lecture.",
   "toolsRead": "Lecture",

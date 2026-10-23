@@ -39,7 +39,6 @@
   "name": "名稱",
   "namePlaceholder": "要給哪個 AI 使用",
   "pickClient": "選擇你的 AI 助手",
-  "setupHint": "選一個你在用的 AI 助手，把下面這段話傳給它，它會自己完成設定。剛生成令牌後，這段話裏會自動帶上令牌。",
   "tokensHint": "建議每個助手用一個獨立的令牌，有需要時可以單獨撤銷。",
   "toolsHint": "AI 助手能對帳簿做的事。唯讀令牌只能看到讀取類工具。",
   "toolsRead": "讀取",

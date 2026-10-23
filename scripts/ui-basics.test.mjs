@@ -814,3 +814,31 @@ test('wallet material styles retain neutral dark and fixed light faces, restrain
   assert.ok(reduced.some(([s, b]) => s.includes('.paycard:hover') && /transform: none/.test(b)));
   assert.ok(reduced.some(([s, b]) => s.includes('.paycard.lifted') && /scale: 1;/.test(b)));
 });
+
+test('connection terminals keep theme-independent dark surfaces and light text', () => {
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const rules = cssRules(css);
+  for (const selector of ['.ai-code', '.ai-code-bar', '.ai-copy', '.ai-copy:hover']) {
+    const body = rules.find(([sel]) => sel === selector)?.[1];
+    assert.ok(body, selector);
+    const colors = [...body.matchAll(/(?:^|;)\s*(?:background|color):\s*([^;]+);/g)].map((m) => m[1]);
+    assert.ok(colors.length, selector);
+    for (const color of colors) assert.match(color, /^var\(--(?:black|white)-a\d+\)$/, selector);
+    if (selector === '.ai-code') {
+      assert.match(body, /background:\s*var\(--black-a12\)/);
+      assert.match(body, /color:\s*var\(--white-a12\)/);
+    } else if (selector !== '.ai-copy:hover') assert.match(body, /color:\s*var\(--white-a(?:11|12)\)/);
+  }
+  const pre = rules.find(([sel]) => sel === '.ai-code pre')?.[1];
+  assert.doesNotMatch(pre, /(?:^|;)\s*(?:background|color):/); // 代码继承终端前景，避免主题文字色覆盖
+  for (const [selector, body] of rules) {
+    if (/\.ai-(?:code|copy)\b/.test(selector)) assert.doesNotMatch(body, /var\(--(?:gray|slate|label|ink)/, selector);
+  }
+});
+
+test('connection setup hint is removed in every locale', () => {
+  for (const entry of readdirSync(new URL('../shared/locales/', import.meta.url), { withFileTypes: true }).filter((e) => e.isDirectory())) {
+    const messages = JSON.parse(readFileSync(new URL(`../shared/locales/${entry.name}/ai.json`, import.meta.url), 'utf8'));
+    assert.equal(messages.setupHint, undefined, entry.name);
+  }
+});

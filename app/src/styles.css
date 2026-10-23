@@ -7765,8 +7765,8 @@ a.car-toggle {
 }
 .ai-code {
   border-radius: var(--radius-md);
-  background: var(--gray-12);
-  color: var(--label);
+  background: var(--black-a12);
+  color: var(--white-a12);
   overflow: hidden;
 }
 .ai-code-bar {
@@ -7774,8 +7774,8 @@ a.car-toggle {
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px 6px 14px;
-  background: var(--slate-12);
-  color: var(--label-2);
+  background: var(--white-a2);
+  color: var(--white-a11);
   font: 500 var(--fs-1)/1 var(--font);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -7788,15 +7788,15 @@ a.car-toggle {
   padding: 0 10px;
   border: 0;
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--white-a12) 8%, transparent);
-  color: var(--label);
+  background: var(--white-a3);
+  color: var(--white-a12);
   font-family: inherit;
   text-transform: none;
   letter-spacing: 0;
   cursor: pointer;
 }
 .ai-copy:hover {
-  background: color-mix(in srgb, var(--white-a12) 16%, transparent);
+  background: var(--white-a4);
 }
 .ai-code pre {
   margin: 0;

@@ -168,66 +168,69 @@ function Connect({
 }: {
   url: string;
   token?: { token: string; item: Token };
-  client: string;
-  setClient: (id: string) => void;
+  client: string | null;
+  setClient: (id: string | null) => void;
   onCreate?: (name: string) => void;
 }) {
-  const c = CLIENTS.find((x) => x.id === client) ?? CLIENTS[0];
-  const name = c.name || t('ai.clientOther');
-  const code = c.snippet(url, token?.token ?? t('ai.tokenPlaceholder'));
+  const c = CLIENTS.find((x) => x.id === client);
+  const stepsId = token ? 'ai-fresh-steps' : 'ai-steps';
+  const name = c?.name || t('ai.clientOther');
+  const code = c?.snippet(url, token?.token ?? t('ai.tokenPlaceholder')) ?? '';
   // 直接发给 AI 助手的一段话：说明要做什么、放在哪、具体配置，最后让它自己验证
-  const prompt = t('ai.agentPrompt', { name, where: c.where(), code, verify: 'get_overview' });
+  const prompt = t('ai.agentPrompt', { name, where: c?.where() ?? '', code, verify: 'get_overview' });
   return (
     <div className="ai-connect">
-      <div className="ai-clients" role="radiogroup" aria-label={t('ai.pickClient')}>
+      <div className="ai-clients" role="group" aria-label={t('ai.pickClient')}>
         {CLIENTS.map((x) => (
           <button
             key={x.id}
             type="button"
-            role="radio"
-            aria-checked={x.id === c.id}
-            className={`ai-client ${x.id === c.id ? 'on' : ''}`}
-            onClick={() => setClient(x.id)}
+            aria-expanded={x.id === c?.id}
+            aria-controls={x.id === c?.id ? stepsId : undefined}
+            className={`ai-client ${x.id === c?.id ? 'on' : ''}`}
+            onClick={() => setClient(client === x.id ? null : x.id)}
           >
             <ClientLogo c={x} />
             <span>{x.name || t('ai.clientOther')}</span>
           </button>
         ))}
       </div>
-      <ol className="ai-steps">
-        <li>
-          <b>{t('ai.step.token')}</b>
-          {token ? (
-            <span className="ai-step-ok">
-              <Icon name="check" size={14} /> {t('ai.step.tokenReady', { name: token.item.name })}
-            </span>
-          ) : onCreate ? (
-            <span>
-              {t('ai.step.tokenNeeded')}{' '}
-              <button type="button" className="btn plain" onClick={() => onCreate(name)}>
-                {t('ai.step.createFor', { name })}
+      {c && (
+        <ol id={stepsId} className="ai-steps">
+          <li>
+            <b>{t('ai.step.token')}</b>
+            {token ? (
+              <span className="ai-step-ok">
+                <Icon name="check" size={14} /> {t('ai.step.tokenReady', { name: token.item.name })}
+              </span>
+            ) : onCreate ? (
+              <span>
+                {t('ai.step.tokenNeeded')}{' '}
+                <button type="button" className="btn plain" onClick={() => onCreate(name)}>
+                  {t('ai.step.createFor', { name })}
+                </button>
+              </span>
+            ) : null}
+          </li>
+          <li className="ai-step-code">
+            <b>
+              {t('ai.step.send', { name })}
+              {c.experimental && <span className="badge">{t('ai.experimental')}</span>}
+            </b>
+            <CodeBlock code={prompt} lang={t('ai.promptLabel')} onCopy={() => copy(prompt, token ? t('ai.copiedWithToken') : t('ai.copied'))} />
+            <span className="ai-step-actions">
+              {token && c.install && (
+                <a className="btn primary ai-install" href={c.install(url, token.token)}>
+                  <ClientLogo c={c} size={18} /> {t('ai.installIn', { name })}
+                </a>
+              )}
+              <button type="button" className="btn plain" onClick={() => copy(code, t('ai.configCopied'))}>
+                <Icon name="copy" size={14} /> {t('ai.copyConfigOnly')}
               </button>
             </span>
-          ) : null}
-        </li>
-        <li className="ai-step-code">
-          <b>
-            {t('ai.step.send', { name })}
-            {c.experimental && <span className="badge">{t('ai.experimental')}</span>}
-          </b>
-          <CodeBlock code={prompt} lang={t('ai.promptLabel')} onCopy={() => copy(prompt, token ? t('ai.copiedWithToken') : t('ai.copied'))} />
-          <span className="ai-step-actions">
-            {token && c.install && (
-              <a className="btn primary ai-install" href={c.install(url, token.token)}>
-                <ClientLogo c={c} size={18} /> {t('ai.installIn', { name })}
-              </a>
-            )}
-            <button type="button" className="btn plain" onClick={() => copy(code, t('ai.configCopied'))}>
-              <Icon name="copy" size={14} /> {t('ai.copyConfigOnly')}
-            </button>
-          </span>
-        </li>
-      </ol>
+          </li>
+        </ol>
+      )}
     </div>
   );
 }
@@ -240,7 +243,7 @@ export function Ai({ state }: { state: AppState }) {
   const url = `${location.origin}${base('/mcp')}`;
   const [tokens, setTokens] = useState<Token[] | null>(null);
   const [tools, setTools] = useState<ToolMeta[]>([]);
-  const [client, setClient] = useState('claude-code');
+  const [client, setClient] = useState<string | null>(null);
   const [creating, setCreating] = useState<string | null>(null);
   // 原始令牌只存在于首次展示的弹层中，关闭即丢弃。
   const [fresh, setFresh] = useState<{ token: string; item: Token } | null>(null);
@@ -290,7 +293,6 @@ export function Ai({ state }: { state: AppState }) {
         <section className="ai-card">
           <header>
             <CardTitle as="h2">{t('ai.setup')}</CardTitle>
-            <p className="m-hide">{t('ai.setupHint')}</p>
           </header>
           <Connect url={url} client={client} setClient={setClient} onCreate={ro ? undefined : (name) => setCreating(name)} />
         </section>

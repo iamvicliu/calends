@@ -41,7 +41,6 @@
   "name": "Nombre",
   "namePlaceholder": "¿Para qué IA es?",
   "pickClient": "Elige tu asistente de IA",
-  "setupHint": "Elige el asistente que usas y pega un fragmento. Tu token se rellena automáticamente justo después de crearlo.",
   "tokensHint": "Conviene darle a cada asistente su propio token para poder revocarlo por separado.",
   "toolsHint": "Lo que los asistentes pueden hacer con tu registro. Los tokens de solo lectura solo ven las herramientas de lectura.",
   "toolsRead": "Lectura",

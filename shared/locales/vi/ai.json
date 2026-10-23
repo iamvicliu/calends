@@ -39,7 +39,6 @@
   "name": "Tên",
   "namePlaceholder": "Dành cho AI nào?",
   "pickClient": "Chọn trợ lý AI của bạn",
-  "setupHint": "Chọn trợ lý bạn đang dùng rồi dán một đoạn cấu hình. Token sẽ tự động được điền ngay sau khi tạo.",
   "tokensHint": "Nên cấp cho mỗi trợ lý một token riêng để có thể thu hồi riêng lẻ.",
   "toolsHint": "Những gì trợ lý có thể làm với sổ của bạn. Token chỉ đọc chỉ thấy các công cụ đọc.",
   "toolsRead": "Đọc",
