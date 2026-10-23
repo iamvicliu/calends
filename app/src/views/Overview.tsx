@@ -1,3 +1,4 @@
+import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -73,12 +74,15 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
     [state, today, onOpen],
   );
   return (
-    <section className="card">
-      <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6, paddingRight: 64 }}>
+    <section className="card copy-card" data-copy-card>
+      <div className="row tl-head" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
         <CardTitle className="sec-title">{t('overview.timeline.title')}</CardTitle>
-        <span className="sec-sub" style={{ marginTop: 0 }}>
-          {copyParts(t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) }))}
-        </span>
+        <div className="copy-tools">
+          <CopyImageButton hover />
+          <span className="sec-sub" style={{ marginTop: 0 }}>
+            {copyParts(t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) }))}
+          </span>
+        </div>
       </div>
       <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
     </section>
@@ -163,7 +167,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
   const isFuture = sel > curKey;
 
   return (
-    <div className="card" style={{ padding: '22px 24px 20px' }}>
+    <div className="card copy-card" data-copy-card style={{ padding: '22px 24px 20px' }}>
       <div className="ov-head">
         <div>
           <CardTitle as="h3" className="sec-title" hint={t('report.cash.fullPaidHint')}>
@@ -171,17 +175,20 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
           </CardTitle>
           <div className="sec-sub">{t('overview.spending.sub')}</div>
         </div>
-        <Seg
-          value={scale}
-          onChange={(v) => {
-            setScale(v);
-            setSelKey(undefined);
-          }}
-          options={[
-            ['month', t('overview.spending.month')],
-            ['year', t('overview.spending.yearly')],
-          ]}
-        />
+        <div className="copy-controls">
+          <CopyImageButton hover />
+          <Seg
+            value={scale}
+            onChange={(v) => {
+              setScale(v);
+              setSelKey(undefined);
+            }}
+            options={[
+              ['month', t('overview.spending.month')],
+              ['year', t('overview.spending.yearly')],
+            ]}
+          />{' '}
+        </div>
       </div>
 
       <Activity
@@ -453,7 +460,10 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   const hv = hover != null ? live[hover] : undefined;
 
   return (
-    <section className="stmt">
+    <section className="stmt copy-card" data-copy-card>
+      <div className="copy-corner">
+        <CopyImageButton hover />
+      </div>
       <div className="stmt-l">
         <CardTitle as="div" className="stmt-kicker" hint={t('scope.mrrBasis')}>
           {t('overview.stmt.kicker')}

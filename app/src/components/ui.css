@@ -405,3 +405,67 @@
 .sheet-actions > :is(.btn, .dt-act) {
   border-radius: var(--radius-pill);
 }
+
+/* Image actions share the normal icon hit area; only page cards fade them. */
+.copy-card {
+  position: relative;
+  container-type: inline-size;
+}
+.copy-tools,
+.copy-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.copy-controls .seg.sm {
+  height: var(--ctl-h-md);
+}
+.copy-corner {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 1;
+}
+.copy-card > .copy-corner + .stmt-l,
+.copy-card > .copy-corner + .card-h {
+  padding-right: calc(var(--ctl-h-md) + 8px);
+}
+.copy-card .stmt-cap {
+  padding-right: calc(var(--ctl-h-md) + 8px);
+}
+.copy-hover {
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+}
+.copy-card:hover .copy-hover,
+.copy-hover:focus-visible {
+  opacity: 0.65;
+}
+.copy-hover:hover,
+.copy-hover:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .copy-hover {
+    opacity: 0.4;
+  }
+}
+/* Keep existing controls reachable when a title row cannot fit another action. */
+@container (max-width: 360px) {
+  .copy-controls > .copy-hover {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .copy-hover {
+    transition: none;
+  }
+}
+
+@container (max-width: 440px) {
+  .hero-r .copy-controls > .copy-hover {
+    display: none;
+  }
+}

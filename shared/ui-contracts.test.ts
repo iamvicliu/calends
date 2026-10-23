@@ -80,6 +80,7 @@ function aiHarness() {
     Users: 'Users',
     Wallet: 'Wallet',
     CardTitle: 'h3',
+    CopyImageButton: 'CopyImageButton',
     Sheet: 'Sheet',
     Toggle: 'Toggle',
     Toolbar: 'Toolbar',
@@ -309,6 +310,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     SubIcon: 'SubIcon',
     Amount: 'Amount',
     CardTitle: 'h3',
+    CopyImageButton: 'CopyImageButton',
   };
   const { StopsCard } = load('../app/src/views/Report.tsx', ['StopsCard'], deps);
   const { Receipt, Poster, Card, Stars } = load('../app/src/views/Review.tsx', ['Receipt', 'Poster', 'Card', 'Stars'], {
