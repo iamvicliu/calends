@@ -1945,7 +1945,7 @@ select.btn {
   margin: -3px 0 0 -3px;
   border-radius: var(--radius-pill);
   background: var(--card);
-  box-shadow: 0 0 0 var(--hairline) var(--accent);
+  box-shadow: 0 0 0 1px var(--chart-ink);
   pointer-events: none;
 }
 .area-end {
@@ -3293,7 +3293,6 @@ select.btn {
   flex-direction: column-reverse;
   border-radius: var(--radius-sm) var(--radius-sm) var(--radius-sm) var(--radius-sm);
   overflow: hidden;
-  gap: 1.5px;
   min-height: 2px;
   transition:
     opacity var(--duration) var(--ease),
@@ -3358,16 +3357,11 @@ select.btn {
   gap: 7px;
   height: var(--ctl-h-sm);
   padding: 0 11px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-pill);
   border: 0;
   background: var(--fill-2);
   font-size: var(--fs-1);
   color: var(--label);
-}
-.lc i {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-sm);
 }
 .lc b {
   font-weight: 600;
@@ -3382,6 +3376,7 @@ select.btn {
   border-top: var(--hairline) solid var(--line);
   display: grid;
   grid-template-columns: 200px 1fr;
+  align-items: center;
   gap: 20px;
 }
 @media (max-width: 680px) {
@@ -6574,7 +6569,7 @@ a.car-toggle {
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--c) 75%, var(--black-a12)) var(--now),
-    color-mix(in srgb, var(--c) 60%, var(--black-a12)) var(--now)
+    color-mix(in srgb, color-mix(in srgb, var(--c) 75%, var(--black-a12)) 45%, transparent) var(--now)
   );
 }
 .gt-seg.open {
@@ -6602,6 +6597,8 @@ a.car-toggle {
   text-overflow: ellipsis;
   text-shadow: none;
 }
+/* 整段都在今天之后：底色变浅，文字改用正文色 */
+.gt-seg.ahead em,
 .gt-seg.planned em {
   color: var(--label);
   text-shadow: none;

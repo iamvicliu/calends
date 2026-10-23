@@ -24,7 +24,7 @@
   "hero": {
     "label": "Расходы на подписки в месяц",
     "vsLastMonth": "к концу прошлого месяца",
-    "yearAgo": "\n{amount} год назад",
+    "yearAgo": "{amount} год назад",
     "annual": "В год",
     "perDay": "В день",
     "active": "Активные",

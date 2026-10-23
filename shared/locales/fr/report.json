@@ -24,7 +24,7 @@
   "hero": {
     "label": "Dépenses mensuelles en abonnements",
     "vsLastMonth": "par rapport à fin du mois dernier",
-    "yearAgo": "\n{amount} il y a un an",
+    "yearAgo": "{amount} il y a un an",
     "annual": "Par an",
     "perDay": "Par jour",
     "active": "Actifs",

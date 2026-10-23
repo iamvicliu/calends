@@ -24,7 +24,7 @@
   "hero": {
     "label": "Gasto mensual en suscripciones",
     "vsLastMonth": "vs. final del mes pasado",
-    "yearAgo": "\n{amount} hace un año",
+    "yearAgo": "{amount} hace un año",
     "annual": "Al año",
     "perDay": "Al día",
     "active": "Activas",

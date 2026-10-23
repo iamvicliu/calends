@@ -24,7 +24,7 @@
   "hero": {
     "label": "Monatliche Abo-Ausgaben",
     "vsLastMonth": "ggü. Ende letzten Monats",
-    "yearAgo": "\nvor einem Jahr {amount}",
+    "yearAgo": "vor einem Jahr {amount}",
     "annual": "Pro Jahr",
     "perDay": "Pro Tag",
     "active": "Aktiv",

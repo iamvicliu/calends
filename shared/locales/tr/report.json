@@ -24,7 +24,7 @@
   "hero": {
     "label": "Aylık abonelik harcaması",
     "vsLastMonth": "geçen ay sonuna göre",
-    "yearAgo": "\nbir yıl önce {amount}",
+    "yearAgo": "bir yıl önce {amount}",
     "annual": "Yıllık",
     "perDay": "Günlük",
     "active": "Etkin",

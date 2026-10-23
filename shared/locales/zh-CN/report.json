@@ -24,7 +24,7 @@
   "hero": {
     "label": "每月订阅支出",
     "vsLastMonth": "较上月末",
-    "yearAgo": "\n一年前 {amount}",
+    "yearAgo": "一年前 {amount}",
     "annual": "年化",
     "perDay": "每天",
     "active": "计费中",

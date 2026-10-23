@@ -24,7 +24,7 @@
   "hero": {
     "label": "Chi tiêu gói đăng ký hằng tháng",
     "vsLastMonth": "so với cuối tháng trước",
-    "yearAgo": "\n{amount} một năm trước",
+    "yearAgo": "{amount} một năm trước",
     "annual": "Mỗi năm",
     "perDay": "Mỗi ngày",
     "active": "Đang hoạt động",

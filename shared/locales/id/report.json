@@ -24,7 +24,7 @@
   "hero": {
     "label": "Pengeluaran langganan bulanan",
     "vsLastMonth": "dibanding akhir bulan lalu",
-    "yearAgo": "\n{amount} setahun lalu",
+    "yearAgo": "{amount} setahun lalu",
     "annual": "Per tahun",
     "perDay": "Per hari",
     "active": "Aktif",

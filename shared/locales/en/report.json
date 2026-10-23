@@ -24,7 +24,7 @@
   "hero": {
     "label": "Monthly subscription spend",
     "vsLastMonth": "vs. end of last month",
-    "yearAgo": "\n{amount} a year ago",
+    "yearAgo": "{amount} a year ago",
     "annual": "Per year",
     "perDay": "Per day",
     "active": "Active",

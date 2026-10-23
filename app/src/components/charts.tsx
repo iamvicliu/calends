@@ -212,6 +212,18 @@ export interface Bucket {
 }
 
 /** 堆叠柱状图：有刻度、可选中，未来为斜纹 */
+/** 相邻同色的分段合成一段，单色柱子里不留发丝缝 */
+function mergeByColor(parts: Bucket['parts'], color: (k: string) => string) {
+  const out: Array<{ k: string; v: number; c: string }> = [];
+  for (const p of parts) {
+    const c = color(p.k);
+    const last = out[out.length - 1];
+    if (last?.c === c) last.v += p.v;
+    else out.push({ k: p.k, v: p.v, c });
+  }
+  return out;
+}
+
 export function Activity({
   buckets,
   color,
@@ -220,6 +232,7 @@ export function Activity({
   onSelect,
   height = 220,
   fmt,
+  tip,
 }: {
   buckets: Bucket[];
   color: (k: string) => string;
@@ -228,6 +241,8 @@ export function Activity({
   onSelect: (k: string) => void;
   height?: number;
   fmt: (v: number) => string;
+  /** 悬停柱子时的明细；柱子统一单色，构成靠这里读 */
+  tip?: (b: Bucket) => ComponentChildren;
 }) {
   const ticks = niceTicks(Math.max(1, ...buckets.map((b) => b.total)));
   const top = ticks[ticks.length - 1];
@@ -247,10 +262,11 @@ export function Activity({
             className={`act-col ${(buckets.length - 1 - i) % 2 ? 'odd' : ''} ${b.future ? 'future' : ''} ${b.current ? 'current' : ''} ${(selected ?? current) === b.key ? 'sel' : ''} ${selected && selected !== b.key ? 'dim' : ''}`}
             onClick={() => onSelect(b.key)}
             aria-label={`${b.label} ${fmt(b.total)}`}
+            {...(tip && b.total > 0 ? tipProps(() => tip(b)) : {})}
           >
             <div className="act-stack" style={{ height: `${(b.total / top) * 100}%` }}>
-              {b.parts.map((p) => (
-                <i key={p.k} style={{ flexGrow: p.v, background: color(p.k) }} />
+              {mergeByColor(b.parts, color).map((p) => (
+                <i key={p.k} style={{ flexGrow: p.v, background: p.c }} />
               ))}
             </div>
             <span className="act-label">{b.label}</span>

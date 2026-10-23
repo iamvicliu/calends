@@ -9,7 +9,7 @@ import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosse
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
-import { IconButton, Amount, CardTitle, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, Amount, CardTitle, CatIcon, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
@@ -186,11 +186,30 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
 
       <Activity
         buckets={buckets}
-        color={(k) => (k === PROJ ? 'color-mix(in srgb, var(--label-3) 45%, transparent)' : catColor(k))}
+        color={(k) => (k === PROJ ? 'var(--chart-ink-2)' : 'var(--chart-ink)')}
         selected={selKey ? sel : undefined}
         current={sel}
         onSelect={(k) => setSelKey(k === selKey ? undefined : k)}
         fmt={(v) => moneyTick(v, base)}
+        tip={(b) => (
+          <>
+            <b>
+              {b.label}
+              <span className="copy-gap" aria-hidden="true" />
+              {flow(-b.total, base, { compact: true })}
+            </b>
+            {b.parts
+              .filter((p) => p.k !== PROJ)
+              .slice(0, 5)
+              .map((p) => (
+                <div key={p.k}>
+                  {p.k}
+                  <span className="copy-gap" aria-hidden="true" />
+                  {flow(-p.v, base, { compact: true })}
+                </div>
+              ))}
+          </>
+        )}
       />
 
       <div className="legend-chips">
@@ -200,7 +219,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
             className={`lc ${hidden.includes(k) ? 'off' : ''}`}
             onClick={() => setHidden(hidden.includes(k) ? hidden.filter((x) => x !== k) : [...hidden, k])}
           >
-            <i style={{ background: catColor(k) }} />
+            <CatIcon cat={k} size={13} />
             {k}
             <b>{flow(-v, base, { compact: true })}</b>
           </button>
@@ -376,9 +395,14 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
           </span>
           <b>{i.title}</b>
           <p>{i.body}</p>
-          {i.subs && i.subs.length > 0 && (
+          {!!(i.subs?.length || i.methods?.length) && (
             <div className="ins-subs">
-              {i.subs.slice(0, 7).map((s) => (
+              {i.methods?.map((m) => (
+                <a className="icon-btn sub-shortcut" key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
+                  <MethodMark m={m} size={22} />
+                </a>
+              ))}
+              {(i.subs ?? []).slice(0, 7).map((s) => (
                 <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                   <SubIcon sub={s} size={22} />
                 </IconButton>
