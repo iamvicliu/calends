@@ -44,7 +44,9 @@
     "name": "Name ist erforderlich",
     "price": "Ungültiger Preis",
     "start": "Ungültiges Startdatum",
-    "cycle": "Ungültiger Abrechnungszeitraum"
+    "cycle": "Ungültiger Abrechnungszeitraum",
+    "refundAmount": "Positiven Erstattungsbetrag und gültige Währung eingeben",
+    "refundDate": "Austrittsdatum angeben; Erstattung nicht vor dem Beitritt"
   },
   "phase": {
     "switchTooEarly": "Das Gültigkeitsdatum muss nach dem Beginn der aktuellen Phase liegen",

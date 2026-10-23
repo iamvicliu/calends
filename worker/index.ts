@@ -1,3 +1,4 @@
+import { updateMemberLeave } from '../shared/carpool.ts';
 import { validateAvatar, validatePeopleAvatars } from '../shared/avatar.ts';
 import { statusChangeError } from '../shared/phases.ts';
 import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.ts';
@@ -194,6 +195,17 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       const previous = (await subsOf(env)).find((x) => x.id === sub.id);
       const today = todayIn((await getSettings(env)).timezone);
       sub = reconcileRenewalRules(previous, sub, today);
+      // Clearing an existing exit also clears its settlement. New orphan refunds fail validation.
+      if (sub.share)
+        sub = {
+          ...sub,
+          share: {
+            ...sub.share,
+            members: sub.share.members.map((m) =>
+              previous?.share?.members.some((old) => old.id === m.id && old.left) && !m.left ? updateMemberLeave(m, {}) : m,
+            ),
+          },
+        };
       const err = validSub(sub) ?? statusChangeError(previous, sub, today);
       if (err) return bad(err);
       sub.updatedAt = new Date().toISOString();

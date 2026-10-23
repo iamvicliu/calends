@@ -44,7 +44,9 @@
     "name": "Name is required",
     "price": "Invalid price",
     "start": "Invalid start date",
-    "cycle": "Invalid billing cycle"
+    "cycle": "Invalid billing cycle",
+    "refundAmount": "Enter a positive refund amount and a valid currency",
+    "refundDate": "Set a leave date; the refund date cannot precede joining"
   },
   "phase": {
     "switchTooEarly": "The effective date must be after the current phase starts",

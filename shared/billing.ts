@@ -112,6 +112,12 @@ export function subError(s: Subscription): string | undefined {
         ))
     )
       return t('core.subError.price');
+    if (m.leaveRefund != null) {
+      const r = m.leaveRefund;
+      if (!Number.isFinite(r.amount) || r.amount <= 0 || !/^[A-Z]{3}$/.test(r.currency)) return t('core.subError.refundAmount');
+      if (!m.left || !validDay(m.left) || !validDay(r.date) || r.date < (m.joined ?? s.share?.since ?? s.start)) return t('core.subError.refundDate');
+      if (r.note != null && typeof r.note !== 'string') return t('mcp.error.invalidInput', { field: 'leave_refund.note' });
+    }
     if (m.firstPeriod != null && !['prorate', 'full', 'free'].includes(m.firstPeriod)) return t('mcp.error.invalidFirstPeriod');
     if (m.firstAmount != null && (!Number.isFinite(m.firstAmount) || m.firstAmount < 0)) return t('core.subError.price');
   }

@@ -1,3 +1,4 @@
+import { memberCashFlows, memberFlowValue } from './carpool.ts';
 // 人：合租成员与代付对象的统一名册。
 // 成员、代付上存 personId 指向名册；原来的称呼、联系方式保留为镜像副本，老数据和只认副本的地方（提醒邮件、导出）照常工作。
 // 应收按人汇总时，直接复用合租（memberDues）与代付（proxyRows）各自的算法，只是换个维度加起来。
@@ -208,13 +209,14 @@ export interface PersonLedger {
 function shareItem(state: AppState, s: Subscription, m: ShareMember, today: string, dues: ReturnType<typeof memberDues>): PersonItem {
   const d = dues.find((x) => x.member.id === m.id);
   const pays = m.payments ?? [];
+  const flows = memberCashFlows(m);
   return {
     kind: 'share',
     sub: s,
     member: m,
     owed: d && !m.exempt ? (Number.isFinite(d.owed) ? toBaseAt(state, d.owed, d.currency) : NaN) : 0,
     periodsOwed: d && !m.exempt ? d.periodsOwed : 0,
-    received: pays.reduce((a, p) => a + toBaseAt(state, p.amount, p.currency, p.date), 0),
+    received: flows.reduce((a, p) => a + memberFlowValue(state, p), 0),
     lastPaid: pays.reduce<string | undefined>((a, p) => (!a || p.date > a ? p.date : a), undefined),
     paidUntil: m.paidUntil,
     active: !!d && memberAboard(m, today) && ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)),

@@ -29,7 +29,9 @@
     "name": "名称不能为空",
     "price": "价格无效",
     "start": "开始日期无效",
-    "cycle": "周期无效"
+    "cycle": "周期无效",
+    "refundAmount": "退款金额须为正数，币种须有效",
+    "refundDate": "请先设置退出日，退款日期不能早于加入日"
   },
   "phase": {
     "switchTooEarly": "生效日期要晚于当前阶段的开始日期",
