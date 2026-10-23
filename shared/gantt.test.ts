@@ -486,15 +486,15 @@ test('横滑与拖动在手势中只写位移变量，停下后才提交窗口�
   setLocale('en', [flatten('list', JSON.parse(read('./locales/en/list.json')))]);
   const host = mount('1y', 600);
   const find = () => host.render().find((el) => el.props.className?.split(' ').includes('gt-range'))!;
-  const before = find().children.join("");
+  const before = find().children.join('');
   for (let i = 0; i < 5; i++) host.listeners.wheel({ deltaX: 20, deltaY: 0, preventDefault() {} });
   host.render();
-  assert.equal(find().children.join(""), before, '手势中不重算窗口');
+  assert.equal(find().children.join(''), before, '手势中不重算窗口');
   assert.equal(host.shift.value, '-100px');
   assert.ok(host.shift.classes.has('panning'), '手势中关闭位置过渡');
   [...host.timers.values()].forEach((fn) => fn());
   const after = find();
-  assert.notEqual(after.children.join(""), before);
+  assert.notEqual(after.children.join(''), before);
   assert.ok(after.props.className.includes('moved'));
   assert.equal(host.shift.value, '0px', '对齐到月份后无残余位移');
   assert.ok(!host.shift.classes.has('panning'));
