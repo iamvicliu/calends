@@ -718,3 +718,24 @@ test('keyboard behavior stays in the shared Sheet and guards, with safe confirma
   const people = sources.find(([file]) => file === 'views/People.tsx')[2];
   assert.match(people, /data-submit=\{editingAccount === accountKey\(i\) \? '' : undefined\}/);
 });
+
+test('connection terminals keep theme-independent dark surfaces and light text', () => {
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const rules = cssRules(css);
+  for (const selector of ['.ai-code', '.ai-code-bar', '.ai-copy', '.ai-copy:hover']) {
+    const body = rules.find(([sel]) => sel === selector)?.[1];
+    assert.ok(body, selector);
+    const colors = [...body.matchAll(/(?:^|;)\s*(?:background|color):\s*([^;]+);/g)].map((m) => m[1]);
+    assert.ok(colors.length, selector);
+    for (const color of colors) assert.match(color, /^var\(--(?:black|white)-a\d+\)$/, selector);
+    if (selector === '.ai-code') {
+      assert.match(body, /background:\s*var\(--black-a12\)/);
+      assert.match(body, /color:\s*var\(--white-a12\)/);
+    } else if (selector !== '.ai-copy:hover') assert.match(body, /color:\s*var\(--white-a(?:11|12)\)/);
+  }
+  const pre = rules.find(([sel]) => sel === '.ai-code pre')?.[1];
+  assert.doesNotMatch(pre, /(?:^|;)\s*(?:background|color):/); // 代码继承终端前景，避免主题文字色覆盖
+  for (const [selector, body] of rules) {
+    if (/\.ai-(?:code|copy)\b/.test(selector)) assert.doesNotMatch(body, /var\(--(?:gray|slate|label|ink)/, selector);
+  }
+});
