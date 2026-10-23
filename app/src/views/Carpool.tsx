@@ -3,6 +3,7 @@ import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
   addDays,
+  addMonths,
   chargesBetween,
   collectionAnchor,
   cycleLabel,
@@ -17,16 +18,16 @@ import {
 } from '../../../shared/billing.ts';
 import { Fragment, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
-import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberStatus, perBill } from './Members.tsx';
+import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
 import { applyCarRule, carRule, followsCar } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { CardTitle, Amount, Cell, Group, Icon, NameLink, NumInput, Seg, Sheet, StatusPill, SubIcon, Toolbar, useWidth } from '../components/ui.tsx';
+import { CardTitle, Amount, Cell, Group, Icon, NameLink, NumInput, Seg, Sheet, StatusPill, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -321,6 +322,7 @@ function MemberRows({
   ro,
   onMember,
   only,
+  timeline,
 }: {
   state: AppState;
   s: Subscription;
@@ -329,6 +331,8 @@ function MemberRows({
   onMember: (m: ShareMember, collect?: boolean) => void;
   /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
   only?: (m: ShareMember) => boolean;
+  /** 合租详情里在每人下方画时间条（与宽屏表格一致） */
+  timeline?: boolean;
 }) {
   const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => !only || only(d.member));
   const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
@@ -381,6 +385,7 @@ function MemberRows({
                   )}
                 </span>
               </div>
+              {timeline && <MemberTimeline s={s} m={d.member} today={today} win={timelineWindow(today)} />}
             </button>
             <div className="member-amount num" style={{ textAlign: 'right', fontSize: 'var(--fs-2)' }}>
               {d.member.exempt ? (
@@ -423,6 +428,65 @@ function receiptNotes(notes: (string | undefined)[]) {
   };
 }
 
+/** 成员时间条的窗口：过去 6 个月到未来 9 个月，按半年收的也能看到前后两期 */
+function timelineWindow(today: string) {
+  return { start: addMonths(today, -6), end: addMonths(today, 9) };
+}
+const pct = (d: string, win: { start: string; end: string }) => (diffDays(win.start, d) / Math.max(1, diffDays(win.start, win.end))) * 100;
+
+/** 表头：季度刻度（1、4、7、10 月），1 月处只写年份，其余写月份，标签短、不会重叠 */
+function TimelineAxis({ today, win }: { today: string; win: { start: string; end: string } }) {
+  const marks: string[] = [];
+  for (let d = `${win.start.slice(0, 7)}-01`; d <= win.end; d = addMonths(d, 1))
+    if (d >= win.start && ['01', '04', '07', '10'].includes(d.slice(5, 7))) marks.push(d);
+  return (
+    <span className="mt-axis" aria-label={t('family.sheet.period')}>
+      {marks.map((d) => (
+        <span key={d} className={`mt-mark ${d.slice(5, 7) === '01' ? 'year' : ''}`} style={{ left: `${pct(d, win)}%` }}>
+          {d.slice(5, 7) === '01' ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false })}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * 成员时间条：按这个人自己的周期切出各期，已付实心、该收没收红色斜纹、下一期浅灰斜纹，
+ * 一条今天竖线贯穿所有行——周期长短、谁提前付了、谁拖了多久一眼可见。
+ */
+function MemberTimeline({ s, m, today, win, fee }: { s: Subscription; m: ShareMember; today: string; win: { start: string; end: string }; fee?: string }) {
+  const segs = memberSegments(s, m, today, win.start, win.end);
+  const label = { paid: t('family.timeline.paid'), due: t('family.timeline.due'), future: t('family.timeline.future') };
+  return (
+    <span className={`mt-track ${m.exempt ? 'exempt' : ''}`}>
+      {segs.map((g) => (
+        <i
+          key={`${g.from}-${g.kind}`}
+          className={`mt-seg ${g.kind}`}
+          style={{ left: `${pct(g.from, win)}%`, width: `${Math.max(0.6, pct(addDays(g.until, 1), win) - pct(g.from, win))}%` }}
+          {...tipProps(() => (
+            <>
+              <b>
+                {label[g.kind]}
+                {fee && (
+                  <>
+                    <span className="copy-gap" aria-hidden="true" />
+                    {fee}
+                  </>
+                )}
+              </b>
+              <div>
+                {cnDateFull(g.from)} – {cnDateFull(g.until)}
+              </div>
+            </>
+          ))}
+        />
+      ))}
+      <i className="mt-today" style={{ left: `${pct(today, win)}%` }} />
+    </span>
+  );
+}
+
 /** 宽屏成员表：每人的收费（周期、金额、跟随车与否）和收款状态；点一行改收费，点「收款」记一笔。 */
 function MemberTable({
   state,
@@ -437,6 +501,7 @@ function MemberTable({
   ro: boolean;
   onMember: (m: ShareMember, collect?: boolean) => void;
 }) {
+  const win = timelineWindow(today);
   return (
     <table role="table" className="car-member-table" aria-label={t('family.sheet.members')}>
       <thead role="rowgroup">
@@ -447,8 +512,8 @@ function MemberTable({
           <th role="columnheader" scope="col">
             {t('family.sheet.fee')}
           </th>
-          <th role="columnheader" scope="col">
-            {t('family.sheet.period')}
+          <th role="columnheader" scope="col" className="mt-head">
+            <TimelineAxis today={today} win={win} />
           </th>
           <th role="columnheader" scope="col">
             {t('family.sheet.status')}
@@ -479,45 +544,32 @@ function MemberTable({
               }}
             >
               <td role="cell">
-                <span className="car-member-name">
-                  <PersonAvatar p={personFor(state, m.personId, m.name)} size={28} />
-                  <span className="car-member-lines">
-                    <span className="text-ellipsis" title={m.name}>
-                      {m.name || t('family.pool.unnamed')}
-                    </span>
-                    {(left || (m.account && m.account !== m.name)) && (
-                      <small className="muted text-ellipsis" title={m.account}>
-                        {left ? t('family.pool.leftOn', { date: cnDateFull(m.left!) }) : m.account}
-                      </small>
-                    )}
-                  </span>
+                <span
+                  className={`car-member-chip ${left ? 'left' : ''}`}
+                  {...tipProps(() => (
+                    <>
+                      <b>{m.name || t('family.pool.unnamed')}</b>
+                      {m.account && m.account !== m.name && <div>{m.account}</div>}
+                      {left && <div>{t('family.pool.leftOn', { date: cnDateFull(m.left!) })}</div>}
+                      {!m.exempt && <div className="muted">{t(followsCar(state, s, m, today) ? 'family.rule.follow' : 'family.rule.custom')}</div>}
+                    </>
+                  ))}
+                >
+                  <PersonAvatar p={personFor(state, m.personId, m.name)} size={24} />
+                  <span className="text-ellipsis">{m.name || t('family.pool.unnamed')}</span>
                 </span>
               </td>
               <td role="cell">
                 {m.exempt ? (
                   <span className="muted">{t('family.pool.exempt')}</span>
                 ) : (
-                  <span className="car-member-lines">
-                    <span>{perBill('family.pool.perFee', memberBillMonths(s, m, today), { fee: money(rate.amount, rate.currency) })}</span>
-                    {followsCar(state, s, m, today) ? (
-                      <span className="badge">{t('family.rule.follow')}</span>
-                    ) : (
-                      <span className="badge custom">{t('family.rule.custom')}</span>
-                    )}
+                  <span className="car-member-fee">
+                    {perBill('family.pool.perFee', memberBillMonths(s, m, today), { fee: money(rate.amount, rate.currency) })}
                   </span>
                 )}
               </td>
               <td role="cell">
-                {m.exempt || st.gone ? (
-                  <span className="muted">—</span>
-                ) : (
-                  <span className="car-member-range">
-                    <small className="muted">{t('family.sheet.rangeFrom')}</small>
-                    <span>{cnDateFull(st.period.from)}</span>
-                    <small className="muted">{t('family.sheet.rangeTo')}</small>
-                    <span>{cnDateFull(st.period.until)}</span>
-                  </span>
-                )}
+                <MemberTimeline s={s} m={m} today={today} win={win} fee={money(rate.amount, rate.currency)} />
               </td>
               <td role="cell">
                 {m.exempt || st.gone ? (
@@ -720,7 +772,7 @@ export function CarSheet({
                 <div className="car-group-head">
                   {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
                 </div>
-                <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} />
+                <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} timeline />
               </div>
             ))}
           </div>

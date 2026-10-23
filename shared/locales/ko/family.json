@@ -288,5 +288,10 @@
     "costIncome": "비용 {cost}\n수입 {income}",
     "noneOwed": "미납 없음",
     "since": "{date}부터"
+  },
+  "timeline": {
+    "paid": "납부 완료",
+    "due": "미수",
+    "future": "다음 기간"
   }
 }

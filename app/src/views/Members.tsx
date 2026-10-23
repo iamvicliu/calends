@@ -786,6 +786,48 @@ export function memberStatus(state: AppState, s: Subscription, m: ShareMember, t
   };
 }
 
+/** 成员时间条上的一段：已付的一期、该收没收的一期（到今天为止）、还没到期的下一期 */
+export interface MemberSegment {
+  from: string;
+  until: string;
+  kind: 'paid' | 'due' | 'future';
+}
+
+/**
+ * 成员在时间窗口内的各期：按这个人自己的收费周期切分，已付到哪天、哪几期没收、下一期从哪天起。
+ * 已退出的截到退出前一天；不分摊的没有分段。
+ */
+export function memberSegments(s: Subscription, m: ShareMember, today: string, start: string, end: string): MemberSegment[] {
+  if (m.exempt) return [];
+  const joined = m.joined ?? s.share?.since ?? s.start;
+  const stop = m.left ? addDays(m.left, -1) : end;
+  const out: MemberSegment[] = [];
+  const push = (from: string, until: string, kind: MemberSegment['kind']) => {
+    const a = from < start ? start : from;
+    const b = until > stop ? stop : until > end ? end : until;
+    if (a <= b) out.push({ from: a, until: b, kind });
+  };
+  // 已付：从加入起按周期切，切到已付至
+  if (m.paidUntil) {
+    let from = joined;
+    for (let guard = 0; guard < 400 && from <= m.paidUntil && from <= end; guard++) {
+      const c = memberCollection(s, m, from);
+      push(c.from, c.until < m.paidUntil ? c.until : m.paidUntil, 'paid');
+      from = addDays(c.until, 1);
+    }
+  }
+  // 未付：从最早未付起，今天之前开始的算欠收，之后的只画下一期
+  let from = memberUnpaidFrom(s, m);
+  for (let guard = 0; guard < 400 && from <= end && from <= stop; guard++) {
+    const c = memberCollection(s, m, from);
+    const due = c.from <= today;
+    push(c.from, c.until, due ? 'due' : 'future');
+    if (!due) break;
+    from = addDays(c.until, 1);
+  }
+  return out;
+}
+
 /**
  * 合租表格里点成员打开的收费弹窗：只管跟随车 / 自定义 / 不分摊、收费周期和金额，以及已付到哪一期。
  * 已付期只选开始日，结束日按这个人的收费周期算出；称呼、联系方式、收款明细在「更多资料」里。

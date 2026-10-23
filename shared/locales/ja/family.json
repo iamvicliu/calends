@@ -288,5 +288,10 @@
     "costIncome": "費用 {cost}\n収入 {income}",
     "noneOwed": "未払いなし",
     "since": "{date}から"
+  },
+  "timeline": {
+    "paid": "支払済み",
+    "due": "未収",
+    "future": "次の期間"
   }
 }

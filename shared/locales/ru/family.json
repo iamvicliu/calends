@@ -317,5 +317,10 @@
     "costIncome": "Расходы {cost}\nДоходы {income}",
     "noneOwed": "Долгов нет",
     "since": "С {date}"
+  },
+  "timeline": {
+    "paid": "Оплачено",
+    "due": "К оплате",
+    "future": "Следующий период"
   }
 }

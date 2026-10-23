@@ -270,5 +270,10 @@
     "costIncome": "成本 {cost}\n收入 {income}",
     "noneOwed": "無人欠款",
     "since": "{date}起"
+  },
+  "timeline": {
+    "paid": "已付",
+    "due": "待收",
+    "future": "下一期"
   }
 }

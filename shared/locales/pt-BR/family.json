@@ -298,5 +298,10 @@
     "costIncome": "Custo {cost}\nReceita {income}",
     "noneOwed": "Ninguém deve",
     "since": "Desde {date}"
+  },
+  "timeline": {
+    "paid": "Pago",
+    "due": "Pendente",
+    "future": "Próximo período"
   }
 }

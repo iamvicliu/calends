@@ -288,5 +288,10 @@
     "costIncome": "Biaya {cost}\nPendapatan {income}",
     "noneOwed": "Tidak ada tunggakan",
     "since": "Sejak {date}"
+  },
+  "timeline": {
+    "paid": "Lunas",
+    "due": "Tertagih",
+    "future": "Periode berikutnya"
   }
 }

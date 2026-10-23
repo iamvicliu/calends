@@ -298,5 +298,10 @@
     "costIncome": "Maliyet {cost}\nGelir {income}",
     "noneOwed": "Borcu olan yok",
     "since": "{date} itibarıyla"
+  },
+  "timeline": {
+    "paid": "Ödendi",
+    "due": "Bekleyen",
+    "future": "Sonraki dönem"
   }
 }

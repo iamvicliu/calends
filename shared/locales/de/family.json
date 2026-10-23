@@ -298,5 +298,10 @@
     "costIncome": "Kosten {cost}\nEinnahmen {income}",
     "noneOwed": "Niemand im Rückstand",
     "since": "Seit {date}"
+  },
+  "timeline": {
+    "paid": "Bezahlt",
+    "due": "Offen",
+    "future": "Nächster Zeitraum"
   }
 }

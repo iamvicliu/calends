@@ -8914,6 +8914,68 @@ a.car-toggle {
 
 /* 合租弹窗的四格：标签在上、数字在下，格子被左边信息撑高时不留一截空白 */
 /* 合租详情指标条：一张卡里三格，竖向细线分隔；标签 / 数字 / 说明三层，数字用中等字重 */
+/* 成员时间条：已付实心、欠收红色斜纹、下一期浅灰斜纹，今天一条竖线 */
+.mt-head {
+  position: relative;
+}
+.mt-axis {
+  position: relative;
+  display: block;
+  height: 16px;
+}
+.mt-mark {
+  position: absolute;
+  top: 0;
+  padding-left: 4px;
+  border-left: var(--hairline) solid var(--sep);
+  color: var(--label-3);
+  font-size: var(--fs-1);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.member-info .mt-mark.year {
+  color: var(--label-2);
+  font-weight: 600;
+}
+.member-info .mt-track {
+  margin-top: 8px;
+}
+.mt-track {
+  position: relative;
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--fill-2);
+}
+.mt-track.exempt {
+  height: 0;
+  border-top: var(--hairline) dashed var(--label-3);
+  background: none;
+}
+.mt-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* 相邻两期之间留出细缝，周期长短一眼可见 */
+  box-shadow: inset -2px 0 0 var(--card);
+  border-radius: 3px;
+}
+.mt-seg.paid {
+  background: color-mix(in srgb, var(--green) 62%, transparent);
+}
+.mt-seg.due {
+  background: repeating-linear-gradient(135deg, var(--red) 0 2px, color-mix(in srgb, var(--red) 25%, transparent) 2px 5px);
+}
+.mt-seg.future {
+  background: repeating-linear-gradient(135deg, var(--gray-8) 0 2px, transparent 2px 5px);
+}
+.mt-today {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  width: 1px;
+  background: var(--red);
+}
 .car-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -9676,9 +9738,9 @@ img.mm-flag {
   }
   .car-member-table {
     display: grid;
-    /* 成员（账号） | 收费 + 跟随车/自定义 | 本期起止 | 收款状态 | 操作；最小宽度之和 + 间距不超过 720px，
-       各列统一两行：收费 + 标签、本期开始 + 结束、状态 + 待收 */
-    grid-template-columns: minmax(140px, 1.4fr) minmax(130px, 1.1fr) minmax(150px, 1.2fr) minmax(96px, 0.8fr) max-content;
+    /* 成员（账号） | 收费 + 跟随车/自定义 | 时间条 | 收款状态 | 操作；最小宽度之和 + 间距不超过 720px */
+    grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 0.9fr) minmax(200px, 2fr) minmax(90px, 0.8fr) max-content;
+    column-gap: 20px;
     column-gap: 28px;
     width: 100%;
     border-collapse: collapse;
@@ -9758,6 +9820,34 @@ img.mm-flag {
     padding: 0 12px;
     font-size: var(--fs-2);
   }
+}
+
+/* 成员表：头像与称呼合成一枚胶囊，账号、退出日期与收费规则悬停查看 */
+.car-member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  height: var(--ctl-h-md);
+  padding: 0 12px 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--fill-2);
+  font-size: var(--fs-2);
+  font-weight: 500;
+  min-width: 0;
+}
+.car-member-chip.left {
+  color: var(--label-3);
+}
+.car-member-row:hover .car-member-chip {
+  background: var(--gray-4);
+}
+.car-member-fee {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.mt-seg:hover {
+  filter: brightness(0.92);
 }
 
 /* 成员行的应收日期已到期时用橙色提醒 */

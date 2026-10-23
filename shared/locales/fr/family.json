@@ -298,5 +298,10 @@
     "costIncome": "Coût {cost}\nRecettes {income}",
     "noneOwed": "Personne ne doit rien",
     "since": "Depuis le {date}"
+  },
+  "timeline": {
+    "paid": "Payé",
+    "due": "Dû",
+    "future": "Période suivante"
   }
 }
