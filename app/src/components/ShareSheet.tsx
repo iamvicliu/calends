@@ -1,3 +1,4 @@
+import { CopyImageButton } from './CopyImageButton.tsx';
 import { toBlob } from 'html-to-image';
 import type { ReactNode as ComponentChildren } from 'react';
 import { useRef, useState } from 'react';
@@ -5,7 +6,7 @@ import { flow } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { toast, usePref } from '../store.ts';
 import type { PrefKey } from '../../../shared/prefs.ts';
-import { Icon, Seg, Sheet, Toggle } from './ui.tsx';
+import { Icon, IconButton, Seg, Sheet, Toggle } from './ui.tsx';
 
 /**
  * 分享图的通用弹窗：选样式 → 预览 → 复制图片 / 下载图片。年度回顾和单个订阅都用它。
@@ -43,18 +44,6 @@ export function ShareSheet<S extends string>({
 
   // 3 倍像素导出，发到聊天里也清楚
   const render3x = () => toBlob(node.current!, { pixelRatio: 3, skipFonts: true, cacheBust: false, includeQueryParams: true });
-  const copy = async () => {
-    setBusy(true);
-    try {
-      // Safari 要求在点击的同一个调用里拿到 ClipboardItem，所以传 Promise 进去
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': render3x().then((b) => b!) })]);
-      toast(t('share.sheet.copied'));
-    } catch {
-      toast(t('share.sheet.copyFailed'));
-    } finally {
-      setBusy(false);
-    }
-  };
   const download = async () => {
     setBusy(true);
     try {
@@ -75,14 +64,12 @@ export function ShareSheet<S extends string>({
       narrow
       title={title}
       onClose={onClose}
-      foot={
+      actions={
         <>
-          <button className="btn" disabled={busy} onClick={download}>
-            <Icon name="download" /> {t('share.sheet.download')}
-          </button>
-          <button className="btn primary" disabled={busy} onClick={copy}>
-            <Icon name="copy" /> {busy ? t('share.sheet.generating') : t('share.sheet.copy')}
-          </button>
+          <IconButton aria-label={t('share.sheet.download')} title={t('share.sheet.download')} disabled={busy} onClick={download}>
+            <Icon name="download" />
+          </IconButton>
+          <CopyImageButton render={render3x} disabled={busy} />
         </>
       }
     >

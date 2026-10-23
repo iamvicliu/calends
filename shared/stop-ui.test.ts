@@ -88,6 +88,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     Icon: 'Icon',
     IconButton: 'button',
     CardTitle: 'h3',
+    CopyImageButton: 'CopyImageButton',
     Hint: 'Hint',
     SubIcon: 'SubIcon',
     FlagImg: 'FlagImg',

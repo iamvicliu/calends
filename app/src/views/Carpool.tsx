@@ -1,3 +1,4 @@
+import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
@@ -51,7 +52,7 @@ import {
   useWidth,
 } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
-import { run, saveSub, toast, usePref } from '../store.ts';
+import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
 import { carpoolRoster, carpoolTimeline } from '../../../shared/carpool-timeline.ts';
 import { useTimelinePan } from './member-timeline-pan.ts';
@@ -801,26 +802,7 @@ export function CarSheet({
   onMember: (m?: ShareMember, collect?: boolean) => void;
 }) {
   const [masked, setMasked] = useState(false);
-  const [copying, setCopying] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
-  const copyImage = () => {
-    if (!summaryRef.current || copying) return;
-    if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
-      toast(t('family.sheet.copyFailed'), true);
-      return;
-    }
-    setCopying(true);
-    const blob = carpoolSnapshot(summaryRef.current);
-    void (async () => {
-      try {
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-        toast(t('detail.toast.imageCopied'));
-      } catch {
-        toast(t('family.sheet.copyFailed'), true);
-      }
-      setCopying(false);
-    })();
-  };
   const base = state.settings.baseCurrency;
   const sh = s.share!;
   const st = effectiveStatus(s, today);
@@ -902,7 +884,22 @@ export function CarSheet({
     }))
     .sort((a, b) => (b.from ?? b.until).localeCompare(a.from ?? a.until));
   return (
-    <Sheet title={t('family.sheet.title')} onClose={onClose}>
+    <Sheet
+      title={t('family.sheet.title')}
+      onClose={onClose}
+      actions={
+        <>
+          <IconButton
+            aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
+            aria-pressed={masked}
+            onClick={() => setMasked(!masked)}
+          >
+            {masked ? <EyeOff size={18} /> : <Eye size={18} />}
+          </IconButton>
+          <CopyImageButton render={() => carpoolSnapshot(summaryRef.current!)} />
+        </>
+      }
+    >
       <div className="stack">
         <div className="stack car-summary" ref={summaryRef}>
           {/* 页头：名称（点开订阅）+ 一行概况；右侧直接显示收款规则并可修改 */}
@@ -926,16 +923,6 @@ export function CarSheet({
               </div>
             </div>
             <div className="car-sheet-actions" data-snapshot-hide>
-              <IconButton
-                aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
-                aria-pressed={masked}
-                onClick={() => setMasked(!masked)}
-              >
-                {masked ? <EyeOff size={18} /> : <Eye size={18} />}
-              </IconButton>
-              <IconButton aria-label={t('detail.action.copyImage')} disabled={copying} onClick={copyImage}>
-                <Icon name="copy" />
-              </IconButton>
               {stopped ? (
                 <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
               ) : (

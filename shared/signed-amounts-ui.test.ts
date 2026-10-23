@@ -377,6 +377,8 @@ test('Detail keeps renewal context and places only short default histories in th
     Panel,
     Prop: ({ k, children, hint }: { k: string; children: React.ReactNode; hint?: string }) => React.createElement('div', null, k, children, hint),
     Act: empty,
+    CopyImageButton: empty,
+    Sheet: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
     IconButton: empty,
     regular: (h: { kind?: string; amount: number }[]) => h.filter((c) => !c.kind && c.amount > 0),
     SubIcon: empty,

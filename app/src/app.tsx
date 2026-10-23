@@ -8,7 +8,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/billing.ts';
 import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
-import { IconButton, AskLayer, Icon, Sheet, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
+import { IconButton, AskLayer, Icon, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -664,11 +664,7 @@ function App() {
         <Suspense fallback={null}>{view}</Suspense>
       </div>
 
-      {viewing && (
-        <Sheet bare label={viewing.name} onClose={() => setViewId(null)}>
-          <Detail sub={viewing} state={state} today={d} onEdit={editFromDetail} onClose={() => setViewId(null)} />
-        </Sheet>
-      )}
+      {viewing && <Detail sub={viewing} state={state} today={d} onEdit={editFromDetail} onClose={() => setViewId(null)} />}
       {editing && (
         <Editor
           key={editing.id}

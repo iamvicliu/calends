@@ -1521,19 +1521,12 @@ a {
   padding: 0;
 }
 
-.sheet-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 5;
-  background: var(--card);
-}
 .sheet-head {
   position: sticky;
   top: 0;
   z-index: 2;
   display: grid;
-  grid-template-columns: var(--icon-button-size) minmax(0, 1fr) var(--icon-button-size);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   padding: 16px 18px 12px;
@@ -1548,9 +1541,9 @@ a {
   flex: 1;
   text-align: center;
   min-width: 0;
-  grid-column: 2;
+  grid-column: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
 }
@@ -9049,8 +9042,16 @@ img.mm-flag {
   }
 }
 
-.sheet-head > .icon-btn {
-  grid-column: 3;
+.sheet-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.sheet-head.bare-head {
+  display: flex;
+  justify-content: flex-end;
+  background: var(--card);
 }
 .ins-subs {
   flex-wrap: wrap;

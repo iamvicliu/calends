@@ -1,3 +1,4 @@
+import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -92,7 +93,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   /** 带正负号的金额：支出为负、收入为正 */
   const signed = (v: number, compact = true) => flow(v, base, { compact });
   return (
-    <div className="card hero-card">
+    <div className="card hero-card copy-card" data-copy-card>
       <div className="hero-l">
         <CardTitle as="div" className="stat-label" hint={t('scope.mrrBasis')}>
           {t('report.hero.label')}
@@ -111,7 +112,8 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         </MetricCards>
       </div>
       <div className="hero-r">
-        <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+        <div className="row copy-controls" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+          <CopyImageButton hover />
           <Seg
             small
             value={hist ? 'h' : 'c'}
@@ -173,10 +175,11 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
   const pct = mv.from > 0 ? delta / mv.from : 0;
   const kindLabel = (k: 'added' | 'expansion' | 'contraction' | 'churned') => t(`report.wf.${k}`);
   return (
-    <div className="card">
+    <div className="card copy-card" data-copy-card>
       <div className="card-h">
         <CardTitle>{t('report.wf.title', { n: Number(month.slice(5)), month: monthLabel(month, { year: false, long: true }) })}</CardTitle>
-        <div className="row" style={{ gap: 4 }}>
+        <div className="row copy-controls" style={{ gap: 4 }}>
+          <CopyImageButton hover />
           <IconButton aria-label={t('report.wf.prev')} onClick={() => setOffset(offset - 1)}>
             <Icon name="left" />
           </IconButton>
@@ -242,10 +245,13 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
   const [all, setAll] = useState(false);
   const shown = all ? list : list.slice(0, 5);
   return (
-    <div className="card">
+    <div className="card copy-card" data-copy-card>
       <div className="card-h">
         <CardTitle>{t('report.checkup.title')}</CardTitle>
-        <span className="meta">{t('report.checkup.warn', { count: list.filter((i) => i.tone === 'warn').length })}</span>
+        <div className="copy-tools">
+          <CopyImageButton hover />
+          <span className="meta">{t('report.checkup.warn', { count: list.filter((i) => i.tone === 'warn').length })}</span>
+        </div>
       </div>
       <div className="insights">
         {shown.map((i) => (
@@ -294,20 +300,23 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   const next90 = sumBase(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
-    <div className="card">
+    <div className="card copy-card" data-copy-card>
       <div className="card-h">
         <CardTitle as="h3" hint={t('scope.cashBasis')}>
           {t('report.cash.title')}
         </CardTitle>
-        <div className="legend-inline">
-          <span>
-            <i style={{ background: 'var(--chart-ink-2)' }} />
-            {t('report.cash.legendCash')}
-          </span>
-          <span>
-            <i style={{ background: 'var(--chart-ink)', height: 3 }} />
-            {t('report.cash.legendAccrual')}
-          </span>
+        <div className="copy-tools">
+          <CopyImageButton hover />
+          <div className="legend-inline">
+            <span>
+              <i style={{ background: 'var(--chart-ink-2)' }} />
+              {t('report.cash.legendCash')}
+            </span>
+            <span>
+              <i style={{ background: 'var(--chart-ink)', height: 3 }} />
+              {t('report.cash.legendAccrual')}
+            </span>
+          </div>
         </div>
       </div>
       <div className="cash-grid">
@@ -372,7 +381,10 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
   const saved = useMemo(() => cancelSavings(state, today), [state, today]);
   const losses = useMemo(() => stopLosses(state, today), [state, today]);
   return (
-    <div className="card stop-report" id="report-stops">
+    <div className="card stop-report copy-card" data-copy-card id="report-stops">
+      <div className="copy-corner">
+        <CopyImageButton hover />
+      </div>
       <div className="card-h">
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
@@ -504,29 +516,32 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
       );
     });
   return (
-    <div className="card">
+    <div className="card copy-card" data-copy-card>
       <div className="card-h">
         <CardTitle>{copyParts(sel ? `${sel.k}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}</CardTitle>
-        {sel ? (
-          <button className="btn plain" onClick={() => setFocus(null)}>
-            {t('report.comp.back')}
-          </button>
-        ) : (
-          <Seg
-            small
-            value={dim}
-            onChange={(v) => {
-              setDim(v);
-              setFocus(null);
-            }}
-            options={[
-              ['cat', t('report.comp.cat')],
-              ['pay', t('report.comp.pay')],
-              ['ccy', t('report.comp.ccy')],
-              ['cycle', t('report.comp.cycle')],
-            ]}
-          />
-        )}
+        <div className="copy-controls">
+          <CopyImageButton hover />
+          {sel ? (
+            <button className="btn plain" onClick={() => setFocus(null)}>
+              {t('report.comp.back')}
+            </button>
+          ) : (
+            <Seg
+              small
+              value={dim}
+              onChange={(v) => {
+                setDim(v);
+                setFocus(null);
+              }}
+              options={[
+                ['cat', t('report.comp.cat')],
+                ['pay', t('report.comp.pay')],
+                ['ccy', t('report.comp.ccy')],
+                ['cycle', t('report.comp.cycle')],
+              ]}
+            />
+          )}
+        </div>
       </div>
       <div className="treemap" ref={box} style={{ height: H }}>
         {W > 0 &&
@@ -573,19 +588,22 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
   const span = t(`report.topup.span${months}`);
   const base = state.settings.baseCurrency;
   return (
-    <div className="card">
+    <div className="card copy-card" data-copy-card>
       <div className="card-h">
         <CardTitle>{t('report.topup.title')}</CardTitle>
-        <Seg
-          small
-          value={months}
-          onChange={setMonths}
-          options={[
-            ['3', t('report.topup.range3')],
-            ['6', t('report.topup.range6')],
-            ['12', t('report.topup.range12')],
-          ]}
-        />
+        <div className="copy-controls">
+          <CopyImageButton hover />
+          <Seg
+            small
+            value={months}
+            onChange={setMonths}
+            options={[
+              ['3', t('report.topup.range3')],
+              ['6', t('report.topup.range6')],
+              ['12', t('report.topup.range12')],
+            ]}
+          />{' '}
+        </div>
       </div>
       {plan.length === 0 && (
         <div className="empty">
@@ -730,10 +748,13 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
     };
   }, [list, extra]);
   return (
-    <div className={`card report-log ${extra > 0 ? 'expanded' : ''}`}>
+    <div className={`card report-log copy-card ${extra > 0 ? 'expanded' : ''}`} data-copy-card>
       <div className="card-h">
         <CardTitle>{t('report.log.title')}</CardTitle>
-        <span className="meta">{t('report.log.decisions', { count: list.length })}</span>
+        <div className="copy-tools">
+          <CopyImageButton hover />
+          <span className="meta">{t('report.log.decisions', { count: list.length })}</span>
+        </div>
       </div>
       <div className="log" ref={log}>
         {list.slice(0, n).map((e, i) => {

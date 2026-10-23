@@ -76,6 +76,7 @@ function compile(names, extra = {}) {
     SubIcon: noop,
     Icon: noop,
     IconButton: noop,
+    CopyImageButton: noop,
     MetricCards: ({ children }) => React.createElement('div', { className: 'metric-cards' }, children),
     Eye: noop,
     EyeOff: noop,
@@ -176,45 +177,25 @@ test('零盈亏保持中性，亏损为红色，缺失汇率不隐藏尚未确�
   assert.match(html, /—/);
 });
 
-test('复制按钮交付 PNG Promise，成功及剪贴板拒绝均通过本地化 toast 反馈', async () => {
+test('合租图片入口在头部，沿用当前 summary 和打码状态', async () => {
+  const sourceNode = {};
+  let captured;
+  const CopyImageButton = () => null;
+  const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy'], {
+    useRef: () => ({ current: sourceNode }),
+    useState: (value) => [value, () => {}],
+    CopyImageButton,
+    carpoolSnapshot: async (node) => {
+      captured = node;
+      return new Blob(['PNG']);
+    },
+  });
   const s = sub([]);
-  for (const reject of [false, true]) {
-    const image = new Blob(['fictional PNG'], { type: 'image/png' });
-    const source = {};
-    let written;
-    let notify;
-    const done = new Promise((resolve) => {
-      notify = resolve;
-    });
-    const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy'], {
-      useRef: () => ({ current: source }),
-      useState: (value) => [value, () => {}],
-      navigator: {
-        clipboard: {
-          write: async (items) => {
-            written = items;
-            if (reject) throw new Error('Clipboard denied');
-          },
-        },
-      },
-      ClipboardItem: function ClipboardItem(data) {
-        return { data };
-      },
-      carpoolSnapshot: async (el) => {
-        assert.equal(el, source);
-        return image;
-      },
-      toast: (text, error = false) => notify({ text, error }),
-    });
-    const tree = CarSheet({ state, s, today, ro: false, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {}, onMember() {} });
-    const find = (node) => {
-      if (!node || typeof node !== 'object') return undefined;
-      if (node.props?.['aria-label'] === t('detail.action.copyImage')) return node;
-      return React.Children.toArray(node.props?.children).map(find).find(Boolean);
-    };
-    find(tree).props.onClick();
-    const feedback = await done;
-    assert.equal(await written[0].data['image/png'], image);
-    assert.deepEqual(feedback, { text: t(reject ? 'family.sheet.copyFailed' : 'detail.toast.imageCopied'), error: reject });
-  }
+  const tree = CarSheet({ state, s, today, ro: false, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {}, onMember() {} });
+  const actions = React.Children.toArray(tree.props.actions.props.children);
+  const copy = actions.find((node) => node.type === CopyImageButton);
+  assert.ok(copy);
+  await copy.props.render();
+  assert.equal(captured, sourceNode);
+  assert.ok(actions.some((node) => node.props['aria-pressed'] === false));
 });

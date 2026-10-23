@@ -1174,3 +1174,26 @@ test('sheet and embedded form action rows use one right-aligned container with t
     }
   }
 });
+
+test('image clipboard construction has one owner and Sheet actions precede Close in every header mode', () => {
+  for (const file of readdirSync(root, { recursive: true }).filter((file) => /\.tsx?$/.test(file))) {
+    const source = readFileSync(new URL(file, root), 'utf8');
+    if (file === 'components/CopyImageButton.tsx') assert.match(source, /new ClipboardItem/);
+    else assert.doesNotMatch(source, /new ClipboardItem/, file);
+  }
+  const ui = sources.find(([file]) => file === 'components/ui.tsx')[2];
+  assert.match(ui, /actions\?: ComponentChildren/);
+  assert.match(ui, /sheet-head-actions[\s\S]*?\{props.actions\}[\s\S]*?onClick=\{props.onClose\}/);
+  for (const file of ['views/Carpool.tsx', 'views/Detail.tsx', 'components/ShareSheet.tsx']) {
+    const [, ast, source] = sources.find(([path]) => path === file);
+    let slotted = false;
+    visit(ast, (node) => {
+      if (node.type !== 'JSXElement' || node.openingElement.name.name !== 'Sheet') return;
+      const actions = attr(node.openingElement, 'actions');
+      if (actions && text(actions, source).includes('CopyImageButton')) slotted = true;
+    });
+    assert.ok(slotted, file);
+  }
+  const review = sources.find(([file]) => file === 'views/Review.tsx')[2];
+  assert.match(review, /<ShareSheet/);
+});

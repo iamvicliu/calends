@@ -1,3 +1,4 @@
+import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { renewalDates } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
@@ -5,7 +6,7 @@ import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
 import { Fragment, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowRight, Copy, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
 import {
   activePhases,
   addDays,
@@ -107,7 +108,6 @@ function Act({
   onClick,
   href,
   round,
-  desk,
   primary,
 }: {
   icon: ReactNode;
@@ -115,7 +115,6 @@ function Act({
   onClick?: () => void;
   href?: string;
   round?: boolean;
-  desk?: boolean;
   primary?: boolean;
 }) {
   const inner = (
@@ -124,13 +123,13 @@ function Act({
       <span className="dt-act-l">{label}</span>
     </>
   );
-  const cls = `${round ? 'icon-btn dt-round' : 'btn dt-act'} ${primary ? 'primary' : ''} ${desk ? 'desk' : ''}`;
+  const cls = `${round ? 'icon-btn dt-round' : 'btn dt-act'} ${primary ? 'primary' : ''}`;
   return href ? (
     <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
       {inner}
     </a>
   ) : round ? (
-    <IconButton className={`dt-round ${desk ? 'desk' : ''}`} onClick={onClick} title={label} aria-label={label}>
+    <IconButton className="dt-round" onClick={onClick} title={label} aria-label={label}>
       {inner}
     </IconButton>
   ) : (
@@ -141,14 +140,12 @@ function Act({
 }
 
 /** 把详情复制成图片：和弹窗一样的圆角，圆角外透明；去掉顶部按钮 */
-function copyImage(el: HTMLElement) {
+function detailImage(el: HTMLElement) {
   const sheet = el.closest<HTMLElement>('.sheet') ?? el;
-  const blob = snapshot(el, {
+  return snapshot(el, {
     radius: getComputedStyle(sheet).borderRadius,
-    filter: (n) => !(n instanceof Element && n.matches('.dt-actions, .dt-close, .dt-add')),
+    filter: (n) => !(n instanceof Element && n.matches('.dt-actions, .dt-add')),
   }).then((b) => b!);
-  // Safari 要求在点击的同一个调用里拿到 ClipboardItem，所以传 Promise 进去
-  void run(() => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]), t('detail.toast.imageCopied'));
 }
 
 function Panel({
@@ -257,116 +254,122 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       )}
       {!ro && st === 'terminated' && <Act icon={<Plus size={15} />} label={t('editor.change.resume')} onClick={onEdit} />}
       {sub.manageUrl && <Act icon={<Settings2 size={15} />} label={t('detail.action.manage')} href={sub.manageUrl} />}
-      {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
-      {typeof ClipboardItem !== 'undefined' && (
-        <Act icon={<Copy size={15} />} label={t('detail.action.copyImage')} onClick={() => copyImage(root.current!)} round desk />
-      )}
-      <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
       {!ro && <Act primary icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
     </>
   );
 
   return (
-    <div className={`dt ${compact ? 'compact' : ''}`} ref={root}>
-      <header className="dt-head">
-        <SubIcon sub={sub} size={48} proxied />
-        <div className="dt-id">
-          <h2>
-            <span className="dt-name">{sub.name}</span>
-            {st !== 'active' && st !== 'lifetime' && (
-              <span className={`dt-badge dot ${TONE[st]}`}>
-                <i />
-                {t(`list.status.${st}`)}
-              </span>
-            )}
-          </h2>
-          <div className="dt-meta">
-            <b>
-              {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
-            </b>
-            {big.alt && <span>{big.alt}</span>}
-            <RegionTag
-              cc={subRegion(
-                cur,
-                state.methods.find((x) => x.id === cur.methodId),
+    <Sheet
+      bare
+      label={sub.name}
+      onClose={onClose}
+      actions={
+        <>
+          {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
+          <CopyImageButton render={() => detailImage(root.current!)} />
+          <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
+        </>
+      }
+    >
+      <div className={`dt ${compact ? 'compact' : ''}`} ref={root}>
+        <header className="dt-head">
+          <SubIcon sub={sub} size={48} proxied />
+          <div className="dt-id">
+            <h2>
+              <span className="dt-name">{sub.name}</span>
+              {st !== 'active' && st !== 'lifetime' && (
+                <span className={`dt-badge dot ${TONE[st]}`}>
+                  <i />
+                  {t(`list.status.${st}`)}
+                </span>
               )}
-            />
-            <CatTag cat={sub.category} />
+            </h2>
+            <div className="dt-meta">
+              <b>
+                {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
+              </b>
+              {big.alt && <span>{big.alt}</span>}
+              <RegionTag
+                cc={subRegion(
+                  cur,
+                  state.methods.find((x) => x.id === cur.methodId),
+                )}
+              />
+              <CatTag cat={sub.category} />
+            </div>
+          </div>
+          <div className="sheet-actions dt-actions">{actions}</div>
+        </header>
+
+        {/* 无预测卡片且默认记录较少时，宽屏把扣款记录放到摘要下方；窄屏仍按数字、走势、扣款、摘要排列 */}
+        <div className="dt-body">
+          <div className="dt-main">
+            <Kpis sub={sub} state={state} today={today} history={history} />
+            {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
+            {!sidebarCharges && (
+              <div className={`dt-billing ${showForecast ? 'has-forecast' : ''}`}>
+                {!compact && showForecast && <Upcoming sub={sub} state={state} today={today} />}
+                {charges}
+              </div>
+            )}
+          </div>
+          <div className={`dt-side ${sidebarCharges ? 'has-charges' : ''}`}>
+            <Outcome sub={sub} state={state} today={today} />
+            <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} afterSummary={sidebarCharges ? charges : undefined} />
+            {!compact && <Events sub={sub} state={state} today={today} />}
           </div>
         </div>
-        <div className="sheet-actions dt-actions">{actions}</div>
-        <IconButton className="dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')}>
-          <X size={17} />
-        </IconButton>
-      </header>
 
-      {/* 无预测卡片且默认记录较少时，宽屏把扣款记录放到摘要下方；窄屏仍按数字、走势、扣款、摘要排列 */}
-      <div className="dt-body">
-        <div className="dt-main">
-          <Kpis sub={sub} state={state} today={today} history={history} />
-          {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
-          {!sidebarCharges && (
-            <div className={`dt-billing ${showForecast ? 'has-forecast' : ''}`}>
-              {!compact && showForecast && <Upcoming sub={sub} state={state} today={today} />}
-              {charges}
-            </div>
+        {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
+        {stopping &&
+          createPortal(
+            <Sheet title={t('core.stop.title')} narrow onClose={() => setStopping(false)}>
+              <StopPanel
+                sub={sub}
+                today={today}
+                onApply={(next) =>
+                  run(
+                    async () => {
+                      await saveSub(next);
+                      setStopping(false);
+                    },
+                    next.stop ? t('core.stop.stoppedDone') : next.end ? t('core.stop.nonrenewDone', { date: cnDateFull(next.end) }) : t('detail.toast.resumed'),
+                  )
+                }
+              />
+            </Sheet>,
+            document.body,
           )}
-        </div>
-        <div className={`dt-side ${sidebarCharges ? 'has-charges' : ''}`}>
-          <Outcome sub={sub} state={state} today={today} />
-          <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} afterSummary={sidebarCharges ? charges : undefined} />
-          {!compact && <Events sub={sub} state={state} today={today} />}
-        </div>
-      </div>
-
-      {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
-      {stopping &&
-        createPortal(
-          <Sheet title={t('core.stop.title')} narrow onClose={() => setStopping(false)}>
-            <StopPanel
+        {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
+        {car &&
+          sub.share?.role === 'owner' &&
+          createPortal(
+            <CarSheet
+              state={state}
+              s={sub}
+              today={today}
+              ro={ro}
+              book={carLedger(state, sub, today)}
+              onClose={() => setCar(false)}
+              onOpenSub={() => setCar(false)}
+              onMember={(m, collect) => setMember({ m, collect })}
+            />,
+            document.body,
+          )}
+        {member &&
+          createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
+        {pay &&
+          createPortal(
+            <PaymentSheet
               sub={sub}
               today={today}
-              onApply={(next) =>
-                run(
-                  async () => {
-                    await saveSub(next);
-                    setStopping(false);
-                  },
-                  next.stop ? t('core.stop.stoppedDone') : next.end ? t('core.stop.nonrenewDone', { date: cnDateFull(next.end) }) : t('detail.toast.resumed'),
-                )
-              }
-            />
-          </Sheet>,
-          document.body,
-        )}
-      {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
-      {car &&
-        sub.share?.role === 'owner' &&
-        createPortal(
-          <CarSheet
-            state={state}
-            s={sub}
-            today={today}
-            ro={ro}
-            book={carLedger(state, sub, today)}
-            onClose={() => setCar(false)}
-            onOpenSub={() => setCar(false)}
-            onMember={(m, collect) => setMember({ m, collect })}
-          />,
-          document.body,
-        )}
-      {member && createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
-      {pay &&
-        createPortal(
-          <PaymentSheet
-            sub={sub}
-            today={today}
-            edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined}
-            onClose={() => setPay(null)}
-          />,
-          document.body,
-        )}
-    </div>
+              edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined}
+              onClose={() => setPay(null)}
+            />,
+            document.body,
+          )}
+      </div>
+    </Sheet>
   );
 }
 
