@@ -1,6 +1,6 @@
 import { copyParts } from './copy.tsx';
 import { numberFormat } from '../../../shared/intl.ts';
-import { useId, useRef, useState, type ReactNode } from 'react';
+import { useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
 import { cnDateAuto, cnDateFull, flow, money, monthLabel } from '../../../shared/format.ts';
@@ -397,13 +397,22 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               : (() => {
                   const list = block.rows.map((r, n) => (
                     <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
-                      {wide && <span className="scope-rank num">{n + 1}</span>}
                       {name(r.sub)}
-                      <b className="num">{expense(r.amount)}</b>
+                      <span className="scope-rank-amount">
+                        {/* 只给前三名标名次：金、银、铜 */}
+                        {wide && n < 3 && <span className={`scope-medal m${n + 1}`}>No.{n + 1}</span>}
+                        <b className="num">{expense(r.amount)}</b>
+                      </span>
                     </button>
                   ));
-                  // 独占整行时分两列并标名次，不把五行拉成整页宽
-                  return wide ? <div className="scope-movements scope-ranks">{list}</div> : list;
+                  // 独占整行时分两列竖排：左列 1–5，右列 6–10
+                  return wide ? (
+                    <div className="scope-movements scope-ranks" style={{ '--rank-rows': Math.ceil(list.length / 2) } as CSSProperties}>
+                      {list}
+                    </div>
+                  ) : (
+                    list
+                  );
                 })()}
           </>
         );

@@ -246,7 +246,7 @@ function totalReport(scoped: AppState, today: string, yearStart: string): ScopeR
     composition(rows.map((r) => ({ key: r.original.sub.methodId ?? '', amount: r.amount }))),
     true,
   );
-  if (spent.length > 1) blocks.push({ type: 'top', mode: 'total', rows: spent.sort(byAmount).slice(0, 5) });
+  if (spent.length > 1) blocks.push({ type: 'top', mode: 'total', rows: spent.sort(byAmount).slice(0, 10) });
   blocks.push(...details(scoped, today, addMonths(today, -12), addDays(today, 30), undefined, yearStart, today));
   return { blocks };
 }

@@ -99,17 +99,39 @@
 .scope-movements {
   margin-top: 8px;
 }
-/* 排行独占整行时一行两个，按名次从左到右排（与本月变动一致），手机上回到单列 */
-.scope-rank + * {
-  flex: 1;
-  min-width: 0;
+/* 排行独占整行时两列竖排（左列在前），手机上回到单列 */
+.scope-ranks {
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--rank-rows, 3), auto);
 }
-.scope-rank {
-  align-self: center;
+.scope-rank-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
-  width: 18px;
-  color: var(--label-3);
+}
+/* 前三名胶囊：金、银、铜 */
+.scope-medal {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
   font-size: var(--fs-1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.scope-medal.m1 {
+  background: var(--amber-9);
+  color: var(--amber-12);
+}
+.scope-medal.m2 {
+  background: var(--gray-5);
+  color: var(--gray-12);
+}
+.scope-medal.m3 {
+  background: var(--bronze-5);
+  color: var(--bronze-12);
 }
 .scope-compositions > :only-child {
   grid-column: 1 / -1;
@@ -228,6 +250,10 @@
 @media (max-width: 680px) {
   .scope-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .scope-ranks {
+    grid-auto-flow: row;
+    grid-template-rows: none;
   }
   .scope-compositions,
   .scope-movements {

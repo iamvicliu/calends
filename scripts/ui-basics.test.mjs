@@ -531,7 +531,7 @@ test('app and public CSS use only the four shared type sizes, including font sho
 
 test('colors come from Radix with both themes and package-provided P3 support', () => {
   const tokens = readFileSync(new URL('design-tokens.css', root), 'utf8');
-  const families = ['gray', 'indigo', 'red', 'green', 'orange', 'purple', 'teal', 'pink', 'iris', 'gold'];
+  const families = ['gray', 'indigo', 'red', 'green', 'orange', 'purple', 'teal', 'pink', 'iris', 'gold', 'amber', 'bronze'];
   for (const family of families) {
     for (const suffix of ['', '-dark']) {
       assert.ok(tokens.includes(`@radix-ui/colors/${family}${suffix}.css`));
