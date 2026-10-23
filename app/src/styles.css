@@ -8549,6 +8549,16 @@ a.car-toggle {
 .car-receipts .ld-row > span {
   overflow-wrap: anywhere;
 }
+/* 层级靠高度与分隔线区分：表头 36px > 分组标题 > 内容行 32px；组内不画分隔线，组与组之间一条细线 */
+.car-receipts .ld-row:not(.car-period):not(.ld-th):not(.ld-tf) {
+  min-height: 32px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-top: 0;
+}
+.car-receipts .car-ledger-head + .car-period {
+  border-top: 0;
+}
 .car-receipts .ld-row > span:not(:first-child) {
   white-space: nowrap;
 }
@@ -8581,6 +8591,15 @@ a.car-toggle {
   font-size: var(--fs-1);
   font-weight: 600;
   color: var(--label-2);
+}
+/* 付款表的年份分组与数据行同样三列，卡上实扣与成本各自合计在对应列下 */
+.car-receipts-out .car-period {
+  grid-template-columns: minmax(0, 1fr) 130px 120px;
+  column-gap: 24px;
+}
+.car-receipts-out .car-period > span:not(:first-child) {
+  text-align: right;
+  align-items: flex-end;
 }
 .car-receipts .car-period > .car-period-title {
   white-space: normal;
@@ -8616,6 +8635,10 @@ a.car-toggle {
   .car-receipts .car-period {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px;
+  }
+  .car-receipts-out .car-period {
+    grid-template-columns: minmax(0, 1fr) 84px 98px;
+    column-gap: 10px;
   }
 }
 .car-group-head {

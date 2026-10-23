@@ -1996,7 +1996,8 @@ test('合租分组以覆盖区间为标题，不重复共有备注，差异信�
     nodes = r.render('CarSheet', props);
     const yearTitle = nodes.find((n) => n.props.className === 'car-period-title')!;
     assert.equal(all(yearTitle.children).filter((n) => n.type === 'b').length, 1);
-    assert.equal(all(yearTitle.children).filter((n) => n.type === 'small').length, 0);
+    // 年份旁只带笔数；卡上实扣与成本的合计放在对应列下
+    assert.equal(all(yearTitle.children).filter((n) => n.type === 'small').length, 1);
   }
 });
 

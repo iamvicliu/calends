@@ -1060,8 +1060,17 @@ export function CarSheet({
                 >
                   <span className="car-period-title">
                     <b>{t('calendar.yearTitle', { year: g.y })}</b>
+                    <small>{t('detail.stats.count', { count: g.list.length })}</small>
                   </span>
-                  <span>{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(-g.sum) }))}</span>
+                  {/* 与数据行同列合计：卡上实扣按原币种（混用币种时分别列出），成本按记账货币 */}
+                  <span>
+                    {copyParts(
+                      [...g.list.reduce((m, { c }) => m.set(c.currency, (m.get(c.currency) ?? 0) + c.amount), new Map<string, number>())]
+                        .map(([ccy, sum]) => flow(-sum, ccy))
+                        .join('\n'),
+                    )}
+                  </span>
+                  <span>{fmt(-g.sum)}</span>
                 </button>
                 {openOut.has(g.y) &&
                   g.list.map(({ c, base: v }, i) => (
