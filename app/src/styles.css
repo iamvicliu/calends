@@ -2116,34 +2116,12 @@ select.btn {
   font-size: var(--fs-1);
   line-height: 1.5;
 }
-.stop-totals {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.stop-totals > div {
-  min-width: 0;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: var(--fill-2);
-}
-.stop-totals > div > span,
-.stop-totals > div > small,
 .stop-info small,
 .stop-amount small {
   display: block;
   color: var(--label-2);
   font-size: var(--fs-1);
   line-height: 1.5;
-}
-.stop-totals > div > b {
-  display: block;
-  font-size: var(--fs-4);
-  margin: 4px 0;
-  overflow-wrap: anywhere;
-}
-.stop-totals .amt {
-  white-space: normal;
 }
 .stop-list-title {
   margin: 20px 0 6px;
@@ -2206,12 +2184,6 @@ select.btn {
   overflow-wrap: anywhere;
 }
 @media (max-width: 680px) {
-  .stop-totals {
-    gap: 8px;
-  }
-  .stop-totals > div {
-    padding: 10px;
-  }
   .stop-row {
     gap: 8px;
     grid-template-columns: 32px minmax(0, 1fr) minmax(0, auto);
@@ -8777,48 +8749,6 @@ img.mm-flag {
 }
 
 /* 报告 · 月度变动：一句结论 + 变化来源（横条只在各项之间比大小） */
-.mv-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  margin: 4px 0 14px;
-}
-.mv-head > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.mv-head small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
-.mv-head b {
-  font-size: var(--fs-4);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-.mv-delta {
-  align-items: flex-end;
-  text-align: right;
-}
-.mv-delta b {
-  font-size: var(--fs-3);
-}
-.mv-delta.up b {
-  color: var(--red);
-}
-.mv-delta.down b {
-  color: var(--green);
-}
-.mv-delta em {
-  margin-left: 6px;
-  font-style: normal;
-  font-size: var(--fs-1);
-  font-weight: 600;
-  opacity: 0.8;
-}
 .mv-rows {
   display: flex;
   flex-direction: column;
@@ -9101,10 +9031,6 @@ img.mm-flag {
   .mp-btn {
     min-height: var(--ctl-h-md);
   }
-}
-
-.stop-totals > :only-child {
-  grid-column: 1 / -1;
 }
 
 /* 表单单元格里的输入框是无边框行内样式，聚焦靠光标即可，不再套深色粗框；

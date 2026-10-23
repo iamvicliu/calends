@@ -190,21 +190,14 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           </IconButton>
         </div>
       </div>
-      <div className="mv-head">
-        {offset !== 0 && (
-          <div>
-            <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
-            {/* 和顶部一致：花出去为负 */}
-            <b className="num">{perMonth(flow(-mv.to, base, { compact: true }))}</b>
-          </div>
-        )}
-        <div className={`mv-delta ${Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'up' : 'down'}`}>
-          <small>{t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}</small>
-          <b className="num">
-            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : <SpendingDelta value={{ amount: delta, percent: mv.from > 0 ? pct : undefined }} base={base} />}
-          </b>
-        </div>
-      </div>
+      <MetricCards>
+        {offset !== 0 && <Metric label={offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')} value={perMonth(flow(-mv.to, base, { compact: true }))} />}
+        <Metric
+          label={t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}
+          value={Math.abs(delta) < 0.5 ? t('report.wf.flat') : <SpendingDelta value={{ amount: delta, percent: mv.from > 0 ? pct : undefined }} base={base} />}
+          valueClassName={Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'loss' : 'gain'}
+        />
+      </MetricCards>
       {drivers.length > 0 && !singleDriver && (
         <div className="mv-rows">
           {drivers.map((x) => (
@@ -384,31 +377,32 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
       <p className="stop-basis">{copyParts(t('report.stops.basis'))}</p>
-      <div className="stop-totals">
-        <div
+      <MetricCards>
+        <Metric
           {...tipProps(() =>
             saved.items.map((i) => (
               <div key={i.sub.id}>{copyParts(t('report.cash.savedItem', { name: i.sub.name, amount: money(i.saved, base), since: i.since }))}</div>
             )),
           )}
-        >
-          <span>{t('report.stops.saved')}</span>
-          <b className="green">
-            {saved.total > 0 ? '+' : ''}
-            <Amount plain value={saved.total} ccy={base} compact />
-          </b>
-          <small>{t('report.stops.savedHint')}</small>
-        </div>
+          label={t('report.stops.saved')}
+          value={
+            <>
+              {saved.total > 0 ? '+' : ''}
+              <Amount plain value={saved.total} ccy={base} compact />
+            </>
+          }
+          valueClassName="green"
+          note={t('report.stops.savedHint')}
+        />
         {losses.items.length !== 1 && (
-          <div>
-            <span>{t('report.stops.loss')}</span>
-            <b className="red">
-              <Amount value={-losses.total} ccy={base} compact />
-            </b>
-            <small>{t('report.stops.lossHint')}</small>
-          </div>
+          <Metric
+            label={t('report.stops.loss')}
+            value={<Amount value={-losses.total} ccy={base} compact />}
+            valueClassName="loss"
+            note={t('report.stops.lossHint')}
+          />
         )}
-      </div>
+      </MetricCards>
       {losses.incomplete && <p className="stop-basis red">{t('core.stop.fxMissing')}</p>}
       <h4 className="stop-list-title">{t('report.stops.details')}</h4>
       {losses.items.length === 0 ? (

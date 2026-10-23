@@ -946,19 +946,39 @@ test('connection setup hint is removed in every locale', () => {
 
 const nestedCssRules = (css) => cssRules(css).flatMap(([selector, body]) => (selector.startsWith('@') ? nestedCssRules(body) : [[selector, body]]));
 
+function layoutChildren(children) {
+  const elements = [];
+  const scan = (node) => {
+    if (!node || typeof node !== 'object') return;
+    if (node.type === 'JSXElement') {
+      elements.push(node);
+      return;
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (['loc', 'range', 'comments', 'tokens'].includes(key)) continue;
+      if (Array.isArray(value)) value.forEach(scan);
+      else scan(value);
+    }
+  };
+  children.forEach(scan);
+  return elements;
+}
+
 function parallelMetricViolations(ast, source) {
   const failures = [];
   visit(ast, (node) => {
     if (node.type !== 'JSXElement') return;
     const opening = node.openingElement;
     const classes = text(attr(opening, 'className')?.value, source);
-    if (/(?<![\w-])(?:stat|stat-value|stat-sub|[\w-]+-facts|[\w-]+-kpis|car-strip|people-stats)(?![\w-])/.test(classes)) failures.push(classes);
-    const cells = node.children.filter((child) => child.type === 'JSXElement' && child.openingElement.name.name === 'div');
+    if (/(?<![\w-])(?:stat|stat-value|stat-sub|[\w-]+-facts|[\w-]+-kpis|car-strip|stop-totals|mv-head|people-stats)(?![\w-])/.test(classes))
+      failures.push(classes);
+    const cells = layoutChildren(node.children).filter((child) => child.openingElement.name.name === 'div');
     const metricLike = cells.filter((cell) => {
-      const tags = cell.children.filter((c) => c.type === 'JSXElement').map((c) => c.openingElement.name.name);
+      const tags = layoutChildren(cell.children).map((c) => c.openingElement.name.name);
       return tags.includes('b') && (tags.includes('small') || tags.includes('span'));
     });
-    if (metricLike.length > 1 && opening.name.name !== 'MetricCards' && !classes.includes('metric-grid')) failures.push('unshared metric cells');
+    if (metricLike.length > 1 && opening.name.name !== 'MetricCards' && !classes.includes('metric-grid'))
+      failures.push(`unshared metric cells: ${classes || opening.name.name} at ${node.range[0]}`);
   });
   return failures;
 }
@@ -967,6 +987,8 @@ test('parallel metrics use the shared cards and slots, including previously inde
   for (const [file, ast, source] of sources) assert.deepEqual(parallelMetricViolations(ast, source), [], file);
   const legacy = '<div className="custom-summary"><div><small>Paid</small><b>−10</b></div><div><small>Received</small><b>+20</b></div></div>';
   assert.ok(parallelMetricViolations(await parsers.typescript.parse(legacy), legacy).length > 0);
+  const conditional = '<div><div><span>Saved</span><b>+10</b></div>{showLoss && <div><span>Loss</span><b>—</b></div>}</div>';
+  assert.ok(parallelMetricViolations(await parsers.typescript.parse(conditional), conditional).length > 0);
   const shared = '<MetricCards><Metric label="Paid" value="−10" /><Metric label="Received" value="+20" /></MetricCards>';
   assert.deepEqual(parallelMetricViolations(await parsers.typescript.parse(shared), shared), []);
   for (const [file, css] of styleSources) {
