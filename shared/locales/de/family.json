@@ -320,6 +320,8 @@
   },
   "sort": {
     "owed": "Offener Betrag",
-    "net": "Jährlicher Saldo"
+    "net": "Jährlicher Saldo",
+    "received": "Bisher erhalten",
+    "lastPaid": "Letzte Zahlung"
   }
 }

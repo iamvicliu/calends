@@ -310,6 +310,8 @@
   },
   "sort": {
     "owed": "Khoản chờ thu",
-    "net": "Ròng mỗi năm"
+    "net": "Ròng mỗi năm",
+    "received": "Tổng đã nhận",
+    "lastPaid": "Lần nhận gần nhất"
   }
 }

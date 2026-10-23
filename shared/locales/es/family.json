@@ -320,6 +320,8 @@
   },
   "sort": {
     "owed": "Pendiente de cobro",
-    "net": "Neto anual"
+    "net": "Neto anual",
+    "received": "Total recibido",
+    "lastPaid": "Último pago"
   }
 }

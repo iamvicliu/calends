@@ -6,6 +6,7 @@ import { compressAvatar } from '../handoff.ts';
 import { uid } from '../../../shared/billing.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
+import { SortControl } from '../components/SortControl.tsx';
 import { colorFor, peopleLedger, peopleListRows, refsFor, type PeopleSort, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
@@ -136,6 +137,20 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
             options={(['all', 'owe', 'settled'] as const).map((key) => [key, `${t(`family.pool.filter.${key}`)} ${counts[key]}`])}
           />
         )}
+        {book.length > 0 && (
+          <SortControl
+            value={sort}
+            dir={dir}
+            onSort={chooseSort}
+            onDir={setDir}
+            options={[
+              { value: 'owed', label: t('family.sort.owed') },
+              { value: 'received', label: t('family.sort.received') },
+              { value: 'lastPaid', label: t('family.sort.lastPaid') },
+              { value: 'name', label: t('list.sort.name') },
+            ]}
+          />
+        )}
         <FamilyTabs tab="people" />
       </Toolbar>
       <div className="page fade-in stack people-page">
@@ -160,20 +175,6 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
           </div>
         ) : (
           <>
-            <div className="people-controls">
-              <div className="people-mobile-sort">
-                <Picker
-                  variant="btn"
-                  value={sort}
-                  onChange={chooseSort}
-                  ariaLabel={t('list.sort.label')}
-                  options={columns.map(([value, label]) => ({ value, label }))}
-                />
-                <IconButton onClick={() => setDir(dir === 'asc' ? 'desc' : 'asc')} aria-label={dir === 'asc' ? t('list.sort.asc') : t('list.sort.desc')}>
-                  <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
-                </IconButton>
-              </div>
-            </div>
             <div className="card people-list" role="table" aria-label={t('people.tab.people')}>
               <div className="people-head" role="row">
                 {columns.flatMap(([key, label], index) => [

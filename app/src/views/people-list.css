@@ -2,20 +2,6 @@
 .people-page {
   container: people / inline-size;
 }
-.people-controls {
-  display: none;
-}
-.people-mobile-sort {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.people-mobile-sort {
-  justify-content: flex-end;
-}
-.people-mobile-sort {
-  display: none;
-}
 .people-list {
   padding: 0;
 }
@@ -51,8 +37,7 @@
   min-height: var(--ctl-h-md);
 }
 .people-head .lt-sort:focus-visible,
-.people-open:focus-visible,
-.people-mobile-sort button:focus-visible {
+.people-open:focus-visible {
   outline: var(--hairline) solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
@@ -147,10 +132,6 @@
   .people-head,
   .people-received {
     display: none;
-  }
-  .people-controls,
-  .people-mobile-sort {
-    display: flex;
   }
   .people-row {
     grid-template-columns: minmax(0, 1fr) max-content;

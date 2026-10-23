@@ -310,6 +310,8 @@
   },
   "sort": {
     "owed": "Belum dibayar",
-    "net": "Bersih per tahun"
+    "net": "Bersih per tahun",
+    "received": "Total diterima",
+    "lastPaid": "Pembayaran terakhir"
   }
 }

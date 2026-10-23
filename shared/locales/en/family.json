@@ -320,6 +320,8 @@
   },
   "sort": {
     "owed": "Amount owed",
-    "net": "Yearly net"
+    "net": "Yearly net",
+    "received": "Total received",
+    "lastPaid": "Last payment"
   }
 }

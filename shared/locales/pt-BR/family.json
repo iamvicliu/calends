@@ -320,6 +320,8 @@
   },
   "sort": {
     "owed": "Valor a receber",
-    "net": "Líquido anual"
+    "net": "Líquido anual",
+    "received": "Total recebido",
+    "lastPaid": "Último pagamento"
   }
 }

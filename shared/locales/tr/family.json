@@ -320,6 +320,8 @@
   },
   "sort": {
     "owed": "Alacak",
-    "net": "Yıllık net"
+    "net": "Yıllık net",
+    "received": "Toplam alınan",
+    "lastPaid": "Son ödeme"
   }
 }

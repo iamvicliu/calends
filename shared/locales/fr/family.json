@@ -320,6 +320,8 @@
   },
   "sort": {
     "owed": "Montant dû",
-    "net": "Net annuel"
+    "net": "Net annuel",
+    "received": "Total reçu",
+    "lastPaid": "Dernier paiement"
   }
 }
