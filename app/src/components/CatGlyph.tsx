@@ -5,7 +5,7 @@ import { CAT_ICONS } from './cat-icons.gen.ts';
 export function CatGlyph({ icon, size = 14, className: cls = 'i' }: { icon?: string; size?: number; className?: string }) {
   if (icon && !isIconName(icon)) {
     return (
-      <span className={`${cls} cat-emo`} style={{ width: size, height: size, fontSize: Math.round(size * 0.92) }} aria-hidden="true">
+      <span className={`${cls} cat-emo`} style={{ width: size, height: size, fontSize: 'var(--fs-1)' }} aria-hidden="true">
         {icon}
       </span>
     );

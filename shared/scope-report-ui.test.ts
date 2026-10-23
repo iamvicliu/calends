@@ -1500,6 +1500,7 @@ test('payment marks fall back for missing, legacy and failed logos and recover w
       methodRegion: () => undefined,
       BRANDS: [],
       KIND_BG: { credit: '#222', other: '#444' },
+      paletteColor: (value: string | undefined, fallback: string) => value ?? fallback,
     },
   );
   const render = (logo?: string, kind?: string) => r.render('MethodMark', { m: { id: 'm', name: 'Fictional Visa', currency: 'USD', kind, logo } });

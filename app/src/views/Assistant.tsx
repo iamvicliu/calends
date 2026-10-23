@@ -923,7 +923,7 @@ function Proposal(props: {
       {!create && part.preview.before !== undefined && (
         <details className="as-tool-detail">
           <summary>{t('assistant.card.changes')}</summary>
-          <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 260, overflow: 'auto', fontSize: 12 }}>
+          <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 260, overflow: 'auto', fontSize: 'var(--fs-1)' }}>
             {JSON.stringify({ before: part.preview.before, after: part.preview.after, references: part.preview.references }, null, 2)}
           </pre>
         </details>

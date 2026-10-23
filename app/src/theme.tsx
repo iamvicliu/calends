@@ -25,7 +25,9 @@ const isMode = (v: string): v is ThemeMode => v === 'light' || v === 'dark' || v
 
 /** 始终写入 data-theme，跟随系统时按系统当前外观取值 */
 function apply(m: ThemeMode) {
-  document.documentElement.dataset.theme = m === 'system' ? (mq().matches ? 'dark' : 'light') : m;
+  const resolved = m === 'system' ? (mq().matches ? 'dark' : 'light') : m;
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.classList.toggle('dark', resolved === 'dark');
 }
 
 /** 主题跟着账号走，多台设备一致；公开页没有登录数据时只用本机副本 */
@@ -47,8 +49,7 @@ export function useThemeMode(): [ThemeMode, () => void] {
 }
 
 /**
- * 三个图标叠在一起，当前的转正放大显示，其余旋转缩小淡出；
- * 切换时新图标带一点回弹转进来，旧图标反向转出。
+ * 三个图标叠在一起，只淡入当前图标。
  */
 export function ThemeIcon({ mode, size = 18 }: { mode: ThemeMode; size?: number }) {
   const layer = (m: ThemeMode, turn: number) =>
@@ -57,7 +58,7 @@ export function ThemeIcon({ mode, size = 18 }: { mode: ThemeMode; size?: number 
       transformOrigin: 'center',
       transform: mode === m ? 'rotate(0deg) scale(1)' : `rotate(${turn}deg) scale(0.3)`,
       opacity: mode === m ? 1 : 0,
-      transition: 'transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
+      transition: 'opacity var(--duration) var(--ease)',
     }) as React.CSSProperties;
   return (
     <svg

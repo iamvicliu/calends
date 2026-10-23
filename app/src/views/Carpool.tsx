@@ -358,7 +358,7 @@ function MemberRows({
           >
             {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
             <button className="member-info" disabled={ro} onClick={() => onMember(d.member)}>
-              <div className="icon-text" style={{ fontWeight: 600, fontSize: 14 }}>
+              <div className="icon-text" style={{ fontWeight: 600, fontSize: 'var(--fs-2)' }}>
                 <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
                 <span className="text-ellipsis member-label">{d.member.name || t('family.pool.unnamed')}</span>
                 {d.member.left && d.member.left <= today && <span className="badge">{t('family.pool.leftOn', { date: cnDate(d.member.left) })}</span>}
@@ -380,7 +380,7 @@ function MemberRows({
                 </span>
               </div>
             </button>
-            <div className="member-amount num" style={{ textAlign: 'right', fontSize: 13.5 }}>
+            <div className="member-amount num" style={{ textAlign: 'right', fontSize: 'var(--fs-2)' }}>
               {d.member.exempt ? (
                 <span className="muted" style={{ fontWeight: 600 }}>
                   {t('family.pool.exempt')}

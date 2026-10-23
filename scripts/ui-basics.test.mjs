@@ -344,5 +344,101 @@ test('timeline loss amount uses its own line box so the digits stay vertically c
   const rule = cssRules(allCss).find(([sel]) => sel === '.gt-unused-amount');
   assert.ok(rule);
   assert.match(rule[1], /display:\s*block/);
-  assert.match(rule[1], /line-height:\s*18px/);
+  assert.match(rule[1], /line-height:\s*22px/);
+  assert.match(rule[1], /font-size:\s*var\(--fs-1\)/);
+});
+
+const styleFiles = readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.css'));
+const styleSources = styleFiles.map((file) => [file, readFileSync(new URL(file, root), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')]);
+
+test('app and public CSS use only the four shared type sizes, including font shorthands', async () => {
+  const failures = [];
+  for (const [file, css] of styleSources) {
+    for (const [, value] of css.matchAll(/font-size:\s*([^;]+);/g)) {
+      if (!/^(?:var\(--fs-[1-4]\)|12px|14px|17px|28px)(?: !important)?$/.test(value)) failures.push(`${file}: ${value}`);
+    }
+    for (const [, value] of css.matchAll(/(?<![\w-])font:\s*([^;]+);/g)) {
+      if (value !== 'inherit' && !/var\(--fs-[1-4]\)/.test(value)) failures.push(`${file}: font ${value}`);
+    }
+  }
+  for (const file of readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.tsx'))) {
+    const source = readFileSync(new URL(file, root), 'utf8');
+    visit(await parsers.typescript.parse(source), (node) => {
+      if (node.type !== 'ObjectProperty' || node.key.name !== 'fontSize') return;
+      if (node.value.type !== 'StringLiteral' || !/^var\(--fs-[1-4]\)$/.test(node.value.value)) failures.push(`${file}: inline fontSize`);
+    });
+    if (/text-\[\d+(?:\.\d+)?(?:px|rem|em)\]/.test(source)) failures.push(`${file}: arbitrary text size`);
+  }
+  assert.deepEqual(failures, []);
+});
+
+test('colors come from Radix with both themes and package-provided P3 support', () => {
+  const tokens = readFileSync(new URL('design-tokens.css', root), 'utf8');
+  const families = ['gray', 'indigo', 'red', 'green', 'orange', 'purple', 'teal', 'pink', 'iris', 'gold'];
+  for (const family of families) {
+    for (const suffix of ['', '-dark']) {
+      assert.ok(tokens.includes(`@radix-ui/colors/${family}${suffix}.css`));
+      const palette = readFileSync(new URL(`../../node_modules/@radix-ui/colors/${family}${suffix}.css`, root), 'utf8');
+      assert.match(palette, /color\(display-p3/);
+    }
+  }
+  assert.match(readFileSync(new URL('theme.tsx', root), 'utf8'), /classList.toggle\('dark', resolved === 'dark'\)/);
+  for (const [file, css] of styleSources) assert.doesNotMatch(css, /#[\da-f]{3,8}\b|rgba?\(/i, file);
+  for (const entry of ['styles.css', 'public/index.css']) assert.match(readFileSync(new URL(entry, root), 'utf8'), /import ['"]\.\.?\/design-tokens.css/);
+});
+
+test('borders use hairlines and keyboard focus uses only the shared ring', () => {
+  const failures = [];
+  for (const [file, css] of styleSources) {
+    for (const [, value] of css.matchAll(/(?:border(?:-(?:top|right|bottom|left|inline|block|width))?|outline)(?:-width)?:\s*([^;]+);/g)) {
+      if (/\d+(?:\.\d+)?px/.test(value) && value !== '0.5px') failures.push(`${file}: ${value}`);
+    }
+    for (const [, value] of css.matchAll(/outline:\s*([^;]+);/g)) {
+      if (!['none', 'none !important', '0'].includes(value) && !value.includes('var(--focus-ring)')) failures.push(`${file}: focus ${value}`);
+    }
+  }
+  assert.deepEqual(failures, []);
+});
+
+test('remaining CSS transitions use 250ms ease-out and cards do not lift on hover', () => {
+  for (const [file, css] of styleSources) {
+    for (const [, value] of css.matchAll(/transition:\s*([^;]+);/g)) {
+      if (value.startsWith('none')) continue;
+      for (const part of value.split(',')) assert.match(part.trim(), /^[\w-]+ var\(--duration\) var\(--ease\)$/, `${file}: ${value}`);
+    }
+    assert.doesNotMatch(css, /:hover[^{}]*\{[^{}]*transform:\s*(?:translateY\(-|perspective)/, file);
+  }
+  const css = readFileSync(new URL('components/ui.css', root), 'utf8');
+  assert.match(css, /animation: rm-pop var\(--duration\) var\(--ease\)/);
+  assert.match(readFileSync(new URL('styles.css', root), 'utf8'), /\.sc-glow \{[^{}]*opacity: 0\.18/);
+  const assistant = readFileSync(new URL('views/assistant.css', root), 'utf8');
+  assert.match(assistant, /\.as-card \{[^{}]*box-shadow:/);
+  assert.match(assistant, /\.as-card::before \{[^{}]*linear-gradient/);
+});
+
+test('custom presentation colors map to Radix without changing stored color strings', async () => {
+  const colors = await import('@radix-ui/colors');
+  const source = readFileSync(new URL('derive.ts', root), 'utf8');
+  const ast = await parsers.typescript.parse(source);
+  let rgb;
+  visit(ast, (node) => {
+    if (node.type === 'VariableDeclaration' && node.declarations.some((d) => d.id.name === 'rgb')) rgb = text(node, source);
+  });
+  const range = functionRange(ast, 'paletteColor');
+  const transformed = transformSync('palette.ts', `${rgb}\n${source.slice(...range)}`, { lang: 'ts' });
+  assert.equal(transformed.fatal, false);
+  const swatches = Object.fromEntries(
+    ['indigo', 'red', 'purple', 'green', 'orange', 'teal', 'pink', 'iris', 'gray', 'gold', 'slate', 'blue'].map((name) => [name, colors[name]]),
+  );
+  const paletteColor = new Function('swatches', `const { slate, gray } = swatches; ${transformed.code}; return paletteColor;`)(swatches);
+  const value = '#e5484d';
+  assert.match(paletteColor(value), /var\(--red-9\)/);
+  assert.equal(value, '#e5484d');
+  assert.equal(paletteColor('var(--c4)'), 'var(--c4)');
+  assert.equal(paletteColor('var(--indigo-9)'), 'var(--indigo-9)');
+  assert.equal(paletteColor(undefined, 'var(--blue-9)'), 'var(--blue-9)');
+  assert.equal(paletteColor('invalid', 'var(--c1)'), 'var(--c1)');
+  assert.doesNotMatch(paletteColor('#abc'), /NaN|undefined/);
+  assert.match(paletteColor('linear-gradient(135deg,#c8102e,#7a0a1c)'), /linear-gradient.*var\(--red-9\)/);
+  assert.match(paletteColor('linear-gradient(135deg,#1c1c22,#0a0a0d)'), /var\(--(?:gray|slate)-9\)/);
 });

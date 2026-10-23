@@ -9,8 +9,8 @@ const failed = new Set<string>();
 /** 订阅图标：域名用注册商图标（默认 Cloudflare，其他注册商取 icon，与后台一致）；其余 emoji > App 图标 > 站点图标 > 首字母 */
 export function AppIcon({ sub, className, size, eager }: { sub: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'>; className?: string; size?: number; eager?: boolean }) {
   const [, force] = useState(0);
-  const box = cn('flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[9px] ring-1 ring-foreground/10', className);
-  const style = size ? { width: size, height: size, fontSize: size * 0.55 } : undefined;
+  const box = cn('flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md ring-[0.5px] ring-border', className);
+  const style = size ? { width: size, height: size, fontSize: 'var(--fs-1)'} : undefined;
   if (isDomainCat(sub.category)) {
     return (
       <span style={style} className={cn(box, 'bg-white')}>
@@ -19,7 +19,7 @@ export function AppIcon({ sub, className, size, eager }: { sub: Pick<Subscriptio
     );
   }
   const icon = sub.icon?.trim();
-  if (icon && !/^(https?:|\/)/.test(icon)) return <span style={style} className={cn(box, 'bg-muted text-[1.05em]')}>{icon}</span>;
+  if (icon && !/^(https?:|\/)/.test(icon)) return <span style={style} className={cn(box, 'bg-muted text-xs')}>{icon}</span>;
   const src = icon || faviconOf(sub.url);
   if (src && !failed.has(src)) {
     return (

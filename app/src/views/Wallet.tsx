@@ -25,7 +25,7 @@ import {
   Toggle,
   Toolbar,
 } from '../components/ui.tsx';
-import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
+import { bankOf, brandOf, domainOf, methodLogo, KIND_BG, paletteColor, KIND_LABEL, liveSubs, methodName, methodRegion, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
 import { go } from '../router.ts';
 import { BANKS } from '../banks.ts';
@@ -49,7 +49,7 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600 }}>{m.name}</div>
           {!detailsOnly && (
-            <div className="muted" style={{ fontSize: 12.5 }}>
+            <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
               {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
             </div>
           )}
@@ -58,7 +58,7 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
           <div style={{ textAlign: 'right' }}>
             <div className="rw-bal">{bal.main}</div>
             {bal.alt && (
-              <div className="soft" style={{ fontSize: 11.5 }}>
+              <div className="soft" style={{ fontSize: 'var(--fs-1)' }}>
                 {bal.alt}
               </div>
             )}
@@ -135,15 +135,15 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
           <path className="groove inner" d="M4.6 3.1H15.4L16.65 4.35V11.9H4.6Z" />
           <defs>
             <linearGradient id="simgold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#fbefc4" />
-              <stop offset="1" stopColor="#d6b46a" />
+              <stop offset="0" stopColor="var(--gold-3)" />
+              <stop offset="1" stopColor="var(--gold-9)" />
             </linearGradient>
           </defs>
-          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="rgba(120,90,20,0.45)" strokeWidth="0.12" />
+          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="var(--gold-8)" strokeWidth="0.12" />
           <path
             d="M10.6 4.6V10.6M6.6 6.6H9.4M6.6 8.6H9.4M11.8 6.6H14.6M11.8 8.6H14.6M9.4 5.6V9.6M11.8 5.6V9.6"
             fill="none"
-            stroke="rgba(120,90,20,0.45)"
+            stroke="var(--gold-8)"
             strokeWidth="0.12"
           />
         </svg>
@@ -274,7 +274,7 @@ function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () =>
       // 拖动排序用独立的 translate 属性，不占用 transform / transition：悬停的浮起和倾斜才能平滑过渡
       style={
         {
-          '--card-bg': m.color || KIND_BG[m.kind],
+          '--card-bg': paletteColor(m.color, KIND_BG[m.kind]),
           translate: transform ? `${transform.x}px ${transform.y}px` : undefined,
           '--sort-t': transition ? transition.replace('transform', 'translate') : 'translate 0s',
         } as Record<string, string>
@@ -527,7 +527,7 @@ function MethodSheet({
         </Group>
         {m.notes && (
           <Group title={t('wallet.sheet.notes')}>
-            <div className="cell" style={{ fontSize: 14 }}>
+            <div className="cell" style={{ fontSize: 'var(--fs-2)' }}>
               {m.notes}
             </div>
           </Group>
@@ -731,7 +731,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
       }
     >
       <div className="stack">
-        <div className={`paycard ${faceClass(f)}`} style={{ '--card-bg': f.color || KIND_BG[f.kind], cursor: 'default' } as Record<string, string>}>
+        <div className={`paycard ${faceClass(f)}`} style={{ '--card-bg': paletteColor(f.color, KIND_BG[f.kind]), cursor: 'default' } as Record<string, string>}>
           <CardFace
             m={{ ...f, name: f.name || t('wallet.editor.newName') }}
             label=""

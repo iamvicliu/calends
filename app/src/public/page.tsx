@@ -88,7 +88,7 @@ export function PublicPage() {
   }, []);
   return (
     <TooltipProvider delayDuration={80}>
-      <MotionConfig reducedMotion="user" transition={{ type: 'spring', bounce: 0, duration: 0.5 }}>
+      <MotionConfig reducedMotion="user" transition={{ type: 'tween', ease: 'easeOut', duration: 0.25 }}>
         {err ? (
           <Shell>
             <p className="py-24 text-center text-sm text-muted-foreground">{err}</p>
@@ -109,8 +109,8 @@ function Shell({ children, right, avatar }: { children: React.ReactNode; right?:
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pt-[max(env(safe-area-inset-top),1.25rem)] pb-12 sm:px-6 sm:pt-10">
       <header className="mb-5 flex items-center gap-3 sm:mb-6">
-        <img src={appPath(avatarOf({ avatar }))} alt="" className="size-9 rounded-[22%] object-cover" />
-        <h1 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title()}</h1>
+        <img src={appPath(avatarOf({ avatar }))} alt="" className="size-9 rounded-md object-cover" />
+        <h1 className="min-w-0 flex-1 truncate text-[length:var(--fs-2)] font-semibold">{title()}</h1>
         {right}
       </header>
       {children}
@@ -119,8 +119,8 @@ function Shell({ children, right, avatar }: { children: React.ReactNode; right?:
 }
 
 /** 卡片依次浮现 */
-const Reveal = ({ i, className, children }: { i: number; className?: string; children: React.ReactNode }) => (
-  <motion.div className={cn('min-w-0', className)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
+const Reveal = ({ className, children }: { i: number; className?: string; children: React.ReactNode }) => (
+  <motion.div className={cn('min-w-0', className)} initial={false} animate={{ opacity: 1 }}>
     {children}
   </motion.div>
 );
@@ -159,7 +159,7 @@ function Ledger({ state }: { state: AppState }) {
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const v = chargeValue(state, c) * k;
-        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-[8px] bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
+        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-md bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
         map.set(c.date, g);
       }
       return [...map.values()];
@@ -201,7 +201,7 @@ function Ledger({ state }: { state: AppState }) {
               <div>
                 <div className="text-sm text-muted-foreground">{t('public.hero.monthly')}</div>
                 <Num value={d.mrr * k} ccy={ccy} prefix={sym} className="mt-1 text-5xl font-semibold tracking-tight tnum sm:text-6xl" />
-                <div className="mt-2 text-[13px] text-muted-foreground tnum">
+                <div className="mt-2 text-[length:var(--fs-2)] text-muted-foreground tnum">
                   {Math.abs(diff) < 1 ? t('public.hero.flat') : t(diff > 0 ? 'public.hero.more' : 'public.hero.less', { amount: fmt(Math.abs(diff)) })}
                 </div>
               </div>
@@ -217,7 +217,7 @@ function Ledger({ state }: { state: AppState }) {
             <CardContent>
               <div className="mb-2 flex items-baseline justify-between gap-3 pr-16">
                 <h2 className="font-medium">{t('public.timeline.title')}</h2>
-                <span className="text-[13px] text-muted-foreground tnum">
+                <span className="text-[length:var(--fs-2)] text-muted-foreground tnum">
                   {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} ccy={ccy} prefix={sym} className="text-foreground" /> })}
                 </span>
               </div>
@@ -229,7 +229,7 @@ function Ledger({ state }: { state: AppState }) {
             <Tabs defaultValue="paid" className="gap-0">
               <CardHeader>
                 <CardTitle className="text-sm">{t('public.chart.title')}</CardTitle>
-                <CardDescription className="text-[13px]">{t('public.chart.desc')}</CardDescription>
+                <CardDescription className="text-[length:var(--fs-2)]">{t('public.chart.desc')}</CardDescription>
                 <CardAction>
                   <TabsList>
                     <TabsTrigger value="paid" className="px-2.5 text-xs">
@@ -278,11 +278,11 @@ function Ledger({ state }: { state: AppState }) {
                   <ul className="-my-1.5">
                     {d.ended.map((x) => (
                       <li key={x.sub.id} className="flex items-center gap-3 py-1.5">
-                        <AppIcon sub={x.sub} className="size-7 rounded-[8px] opacity-50 grayscale" />
+                        <AppIcon sub={x.sub} className="size-7 rounded-md opacity-50 grayscale" />
                         <span className="min-w-0 flex-1 truncate text-muted-foreground">{clean(x.sub.name)}{effectiveStatus(x.sub, today) === 'terminated' && <Badge variant="secondary" className="ml-2">{t('list.status.terminated')}</Badge>}</span>
                         <span className="text-right tnum">
-                          <span className="text-[13px] text-muted-foreground line-through decoration-muted-foreground/50">{t('public.perMonth', { amount: fmt(x.monthly * k) })}</span>
-                          <span className="ml-3 text-[13px] text-muted-foreground">{monthLabel(x.since.slice(0, 7))}</span>
+                          <span className="text-[length:var(--fs-2)] text-muted-foreground line-through decoration-muted-foreground/50">{t('public.perMonth', { amount: fmt(x.monthly * k) })}</span>
+                          <span className="ml-3 text-[length:var(--fs-2)] text-muted-foreground">{monthLabel(x.since.slice(0, 7))}</span>
                         </span>
                       </li>
                     ))}
@@ -302,9 +302,9 @@ function Ledger({ state }: { state: AppState }) {
                   <ul className="-my-1.5">
                     {d.lifetime.map((s) => (
                       <li key={s.id} className="flex items-center gap-3 py-1.5">
-                        <AppIcon sub={s} className="size-7 rounded-[8px]" />
+                        <AppIcon sub={s} className="size-7 rounded-md" />
                         <span className="min-w-0 flex-1 truncate">{clean(s.name)}</span>
-                        <span className="text-[13px] text-muted-foreground tnum">{s.start.slice(0, 4)}</span>
+                        <span className="text-[length:var(--fs-2)] text-muted-foreground tnum">{s.start.slice(0, 4)}</span>
                         <span className="w-20 text-right tnum">{money(s.price, s.currency)}</span>
                       </li>
                     ))}
@@ -317,9 +317,9 @@ function Ledger({ state }: { state: AppState }) {
       </div>
 
 
-      <footer className="mt-10 flex items-center justify-between border-t border-border/70 pt-5 text-[13px] text-muted-foreground">
+      <footer className="mt-10 flex items-center justify-between border-t-[0.5px] border-border/70 pt-5 text-[length:var(--fs-2)] text-muted-foreground">
         <a href={PROJECT_URL} className="flex items-center gap-2 transition hover:text-foreground">
-          <img src={appPath("/icons/logo.svg")} alt="" className="size-5 rounded-[22%]" />
+          <img src={appPath("/icons/logo.svg")} alt="" className="size-5 rounded-md" />
           <span className="font-medium text-foreground">{PROJECT_NAME}</span>
           <span>v{__APP_VERSION__}</span>
         </a>
@@ -430,7 +430,7 @@ const monthFull = (m: string) => monthLabel(m);
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="truncate text-[13px] text-muted-foreground">{label}</dt>
+      <dt className="truncate text-[length:var(--fs-2)] text-muted-foreground">{label}</dt>
       <dd className="mt-1 text-lg font-semibold tracking-tight tnum">{value}</dd>
     </div>
   );
@@ -438,11 +438,11 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 
 
 function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: number }>; cur: string; ccy: string; fmt: (v: number) => string }) {
-  const paidConfig = { v: { label: t('public.chart.charge'), color: 'var(--foreground)' } } satisfies ChartConfig;
+  const paidConfig = { v: { label: t('public.chart.charge'), color: 'var(--c1)' } } satisfies ChartConfig;
   return (
     <ChartContainer config={paidConfig} className="aspect-auto h-52 w-full">
       <BarChart data={months} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-        <CartesianGrid vertical={false} strokeDasharray="2 4" />
+        <CartesianGrid strokeWidth={0.5} vertical={false} strokeDasharray="2 4" />
         <XAxis dataKey="m" tickLine={false} axisLine={false} tickMargin={8} interval="preserveStartEnd" minTickGap={6} tickFormatter={(m: string) => monthTick(m, cur)} />
         <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip
@@ -453,8 +453,9 @@ function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: nu
           {months.map((x) => (
             <Cell
               key={x.m}
-              fill={x.m === cur ? 'var(--foreground)' : x.m > cur ? 'transparent' : 'color-mix(in oklab, var(--foreground) 16%, transparent)'}
-              stroke={x.m > cur ? 'color-mix(in oklab, var(--foreground) 35%, transparent)' : undefined}
+              fill={x.m === cur ? 'var(--color-v)' : x.m > cur ? 'transparent' : 'color-mix(in srgb, var(--color-v) 70%, var(--card))'}
+              stroke={x.m > cur ? 'var(--color-v)' : undefined}
+              strokeWidth={0.5}
               strokeDasharray={x.m > cur ? '3 3' : undefined}
             />
           ))}
@@ -466,7 +467,7 @@ function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: nu
 
 
 function MrrChart({ data, ccy, fmt }: { data: Array<{ month: string; mrr: number }>; ccy: string; fmt: (v: number) => string }) {
-  const mrrConfig = { mrr: { label: t('public.chart.mrr'), color: 'var(--foreground)' } } satisfies ChartConfig;
+  const mrrConfig = { mrr: { label: t('public.chart.mrr'), color: 'var(--c1)' } } satisfies ChartConfig;
   return (
     <ChartContainer config={mrrConfig} className="aspect-auto h-52 w-full">
       <AreaChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
@@ -476,11 +477,11 @@ function MrrChart({ data, ccy, fmt }: { data: Array<{ month: string; mrr: number
             <stop offset="100%" stopColor="var(--color-mrr)" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid vertical={false} strokeDasharray="2 4" />
+        <CartesianGrid strokeWidth={0.5} vertical={false} strokeDasharray="2 4" />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} minTickGap={28} tickFormatter={(m: string) => `${m.slice(2, 4)}/${Number(m.slice(5))}`} />
         <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip cursor={false} content={<ChartTooltipContent hideIndicator labelFormatter={(m) => monthFull(String(m))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />} />
-        <Area dataKey="mrr" type="stepAfter" stroke="var(--color-mrr)" strokeWidth={1.5} fill="url(#mrr-fill)" />
+        <Area dataKey="mrr" type="stepAfter" stroke="var(--color-mrr)" strokeWidth={0.5} fill="url(#mrr-fill)" />
       </AreaChart>
     </ChartContainer>
   );
@@ -504,22 +505,22 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
               key={x.name}
               className="block h-full min-w-1"
               style={{ background: shade(i), flexGrow: x.v, originX: 0 }}
-              initial={{ scaleX: 0 }}
+              initial={false}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 0.3 + i * 0.05 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             />
           ))}
         </div>
         <ul className="mt-5 space-y-2.5">
           {top.map((x, i) => (
             <li key={x.name} className="flex items-center gap-2.5">
-              <i className="size-2.5 rounded-[3px]" style={{ background: shade(i) }} />
+              <i className="size-2.5 rounded-md" style={{ background: shade(i) }} />
               <span className="flex flex-1 items-center gap-1.5">
                 {!x.other && <CatGlyph icon={catIcon(x.name)} size={14} className="size-3.5 text-muted-foreground" />}
-                {x.name} <span className="text-[13px] text-muted-foreground">{t('public.count', { count: x.n })}</span>
+                {x.name} <span className="text-[length:var(--fs-2)] text-muted-foreground">{t('public.count', { count: x.n })}</span>
               </span>
               <span className="tnum">{fmt(x.v * k)}</span>
-              <span className="w-10 text-right text-[13px] text-muted-foreground tnum">{Math.round((x.v / (total || 1)) * 100)}%</span>
+              <span className="w-10 text-right text-[length:var(--fs-2)] text-muted-foreground tnum">{Math.round((x.v / (total || 1)) * 100)}%</span>
             </li>
           ))}
         </ul>
@@ -530,7 +531,7 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
 
 /** 汇率：外币占比与一年变化 */
 /** 占比条的灰阶：第一名最深，依次变浅（构成与汇率两张卡共用） */
-const shade = (i: number) => `color-mix(in oklab, var(--foreground) ${[100, 62, 38, 22, 12][i] ?? 10}%, transparent)`;
+const shade = (i: number) => `var(--c${[1, 4, 5, 6, 7][i] ?? 9})`;
 
 function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) => string }) {
   const { rows, effect: eff } = d.fx[ccy];
@@ -554,9 +555,9 @@ function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) =>
               key={f.c}
               className="block h-full min-w-1"
               style={{ background: shade(i), flexGrow: f.share, originX: 0 }}
-              initial={{ scaleX: 0 }}
+              initial={false}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 0.3 + i * 0.05 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             />
           ))}
         </div>
@@ -564,14 +565,14 @@ function Currencies({ d, ccy, fmt }: { d: Derived; ccy: Ccy; fmt: (v: number) =>
           {rows.map(({ now, ...f }, i) => {
             return (
               <li key={f.c} className="flex items-center gap-2.5">
-                <i className="size-2.5 shrink-0 rounded-[3px]" style={{ background: shade(i) }} />
+                <i className="size-2.5 shrink-0 rounded-md" style={{ background: shade(i) }} />
                 <span className="w-12 shrink-0 text-xs font-medium">
                   {f.c}
                 </span>
-                <span className="flex-1 text-[13px] text-muted-foreground tnum">
+                <span className="flex-1 text-[length:var(--fs-2)] text-muted-foreground tnum">
                   1 {f.c} = {now < 0.1 ? now.toFixed(4) : now.toFixed(3)} {ccy}
                 </span>
-                <span className="text-[13px] text-muted-foreground tnum">{t('public.fx.share', { pct: Math.round(f.share * 100) })}</span>
+                <span className="text-[length:var(--fs-2)] text-muted-foreground tnum">{t('public.fx.share', { pct: Math.round(f.share * 100) })}</span>
                 <span className={cn('w-14 text-right tnum', Math.abs(f.chg) < 0.005 ? 'text-muted-foreground' : f.chg > 0 ? 'text-up' : 'text-down')}>
                   {f.chg > 0 ? '↑' : f.chg < 0 ? '↓' : ''}
                   {Math.abs(f.chg * 100).toFixed(1)}%
@@ -606,7 +607,7 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
                 aria-pressed={tab === c}
                 className={cn('public-filter-btn relative rounded-md px-3 text-xs font-medium transition-colors', tab === c ? 'text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}
               >
-                {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-md bg-primary" transition={{ type: 'spring', bounce: 0, duration: 0.35 }} />}
+                {tab === c && <motion.span layoutId="cat-pill" className="absolute inset-0 rounded-md bg-primary" transition={{ type: 'tween', ease: 'easeOut', duration: 0.25 }} />}
                 <span className="relative flex items-center gap-1">
                   {c && <CatGlyph icon={catIcon(c)} size={13} className="size-[13px]" />}
                   {c || t('public.list.all')} <span className="opacity-60 tnum">{n}</span>
@@ -618,7 +619,7 @@ function SubList({ d, today, ccy, k, fmt }: { d: Derived; today: string; ccy: Cc
         <ul className="grid gap-x-10 md:grid-cols-2">
           <AnimatePresence initial={false} mode="popLayout">
             {rows.map(({ s, v }) => (
-              <motion.li key={s.id} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="border-b border-border/60">
+              <motion.li key={s.id} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25, ease: 'easeOut' }} className="border-b-[0.5px] border-border/60">
                 <Row s={s} v={v} today={today} ccy={ccy} k={k} fmt={fmt} />
               </motion.li>
             ))}
@@ -640,25 +641,25 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
   const repeatsPrice = monthly && Math.abs(v * k - ph.price) < 0.005;
   return (
     <div className="flex items-center gap-3 py-3">
-      <AppIcon sub={s} className="size-9 rounded-[10px]" />
+      <AppIcon sub={s} className="size-9 rounded-md" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="truncate font-medium">{clean(s.name)}</span>
-          {['trial', 'paused', 'ending'].includes(status) && <Badge variant="secondary" className="text-[10px]">{t(`list.status.${status}`)}</Badge>}
+          {['trial', 'paused', 'ending'].includes(status) && <Badge variant="secondary" className="text-[length:var(--fs-1)]">{t(`list.status.${status}`)}</Badge>}
           {ph.region && (
-            <span className="shrink-0 text-[10px] text-muted-foreground">
+            <span className="shrink-0 text-[length:var(--fs-1)] text-muted-foreground">
               {ph.region}
             </span>
           )}
         </div>
-        <div className="truncate text-[13px] text-muted-foreground tnum">
+        <div className="truncate text-[length:var(--fs-2)] text-muted-foreground tnum">
           {cycleLabel(ph.cycle)}{!repeatsPrice && ` ${money(ph.price, ph.currency)}`}
           {ending && end ? <span>{t('public.row.ends', { date: cnDate(end) })}</span> : n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
         </div>
       </div>
       <div className="text-right tnum">
         <div className="font-medium">{fmt(v * k)}</div>
-        <div className="text-[13px] text-muted-foreground">{monthly ? t('public.row.monthly') : t('public.row.perMonthEq')}</div>
+        <div className="text-[length:var(--fs-2)] text-muted-foreground">{monthly ? t('public.row.monthly') : t('public.row.perMonthEq')}</div>
       </div>
     </div>
   );

@@ -167,10 +167,9 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
             { opacity: 0, transform: 'translateY(6px)' },
             { opacity: 1, transform: 'none' },
           ],
-          { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+          { duration: 250, easing: 'ease-out' },
         );
-      else if (before !== top)
-        row.animate([{ transform: `translateY(${before - top}px)` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+      else if (before !== top) row.animate([{ transform: `translateY(${before - top}px)` }, { transform: 'none' }], { duration: 250, easing: 'ease-out' });
     });
     prevTops.current = next;
   });

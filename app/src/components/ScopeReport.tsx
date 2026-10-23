@@ -55,7 +55,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         const image = await snapshot(el, {
           width: el.offsetWidth + 40,
           height: el.offsetHeight + 40,
-          style: { backgroundColor: getComputedStyle(el).getPropertyValue('--bg'), padding: '20px', borderRadius: '20px' },
+          style: { backgroundColor: getComputedStyle(el).getPropertyValue('--bg'), padding: '20px', borderRadius: 'var(--radius-lg)' },
           filter: (n) => !(n instanceof Element && n.matches('.scope-actions')),
         });
         if (!image) throw new Error(t('ui.error.requestFailed', { status: 'PNG' }));

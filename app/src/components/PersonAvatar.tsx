@@ -12,11 +12,7 @@ export function PersonAvatar({ p, size = 36 }: { p: Pick<Person, 'name' | 'color
   const [failed, setFailed] = useState<string>();
   const source = /^data:image\/(png|webp);base64,/.test(p.avatar ?? '') ? p.avatar : undefined;
   return (
-    <span
-      className={`pp-ava c-${p.color ?? colorFor(p.id || p.name)}`}
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }}
-      aria-hidden="true"
-    >
+    <span className={`pp-ava c-${p.color ?? colorFor(p.id || p.name)}`} style={{ width: size, height: size, fontSize: 'var(--fs-1)' }} aria-hidden="true">
       {source && failed !== source ? (
         <img src={source} alt="" referrerPolicy="no-referrer" onError={() => setFailed(source)} />
       ) : (

@@ -1,45 +1,25 @@
 /* ---------------- 订阅详情：停止卡片、指标、走势通栏，其余区块宽屏在两栏里按内容流动；窄屏单列 ---------------- */
 .dt {
-  --dt-bg: #f6f6f7;
+  --dt-bg: var(--gray-1);
   --dt-panel: var(--card);
-  --dt-ok: #1f9a5a;
-  --dt-ok-soft: rgba(31, 154, 90, 0.1);
-  --dt-bad: #d93f3f;
-  --dt-bad-soft: rgba(217, 63, 63, 0.09);
-  --dt-warn: #b5620a;
-  --dt-warn-soft: rgba(226, 133, 27, 0.1);
-  --dt-line: color-mix(in srgb, var(--label) 9%, transparent);
-  --dt-line-2: color-mix(in srgb, var(--label) 14%, transparent);
+  --dt-ok: var(--green);
+  --dt-ok-soft: var(--green-3);
+  --dt-bad: var(--red);
+  --dt-bad-soft: var(--red-3);
+  --dt-warn: var(--orange);
+  --dt-warn-soft: var(--orange-3);
+  --dt-line: var(--gray-6);
+  --dt-line-2: var(--gray-7);
   background: var(--dt-bg);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  font-size: 13px;
+  font-size: var(--fs-2);
   line-height: 20px;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .dt {
-    --dt-bg: #1b1b1b;
-    --dt-ok: #3dd68c;
-    --dt-ok-soft: rgba(61, 214, 140, 0.12);
-    --dt-bad: #ff6369;
-    --dt-bad-soft: rgba(255, 99, 105, 0.12);
-    --dt-warn: #ffa057;
-    --dt-warn-soft: rgba(255, 160, 87, 0.12);
-  }
-}
-:root[data-theme='dark'] .dt {
-  --dt-bg: #1b1b1b;
-  --dt-ok: #3dd68c;
-  --dt-ok-soft: rgba(61, 214, 140, 0.12);
-  --dt-bad: #ff6369;
-  --dt-bad-soft: rgba(255, 99, 105, 0.12);
-  --dt-warn: #ffa057;
-  --dt-warn-soft: rgba(255, 160, 87, 0.12);
-}
 .sheet.bare:has(.dt) {
-  background: var(--dt-bg, #f6f6f7);
+  background: var(--dt-bg, var(--gray-2));
 }
 /* 关闭按钮放进详情自己的按钮行，和其他按钮对齐 */
 .sheet.bare:has(.dt) .sheet-close {
@@ -61,43 +41,43 @@
   gap: 5px;
   height: 22px;
   padding: 0 8px;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-1);
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0;
   white-space: nowrap;
   background: var(--fill-2);
   color: var(--label-2);
-  box-shadow: inset 0 0 0 1px var(--dt-line);
+  box-shadow: inset 0 0 0 var(--hairline) var(--dt-line);
   font-variant-numeric: tabular-nums;
 }
 .dt-badge.dot i {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: currentColor;
   opacity: 0.85;
 }
 .dt-badge.ok {
   background: var(--dt-ok-soft);
   color: var(--dt-ok);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-ok) 25%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--dt-ok) 25%, transparent);
 }
 .dt-badge.bad {
   background: var(--dt-bad-soft);
   color: var(--dt-bad);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-bad) 25%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--dt-bad) 25%, transparent);
 }
 .dt-badge.warn {
   background: var(--dt-warn-soft);
   color: var(--dt-warn);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-warn) 25%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--dt-warn) 25%, transparent);
 }
 .dt-badge.acc {
   background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .dt-btn {
   display: inline-flex;
@@ -107,27 +87,20 @@
   height: var(--ctl-h-md);
   padding: 0 13px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--dt-panel);
   color: var(--label);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
-  box-shadow:
-    0 0 0 1px var(--dt-line-2),
-    0 1px 2px rgba(0, 0, 0, 0.05);
-  transition:
-    background 0.15s,
-    transform 0.1s;
+  box-shadow: 0 0 0 var(--hairline) var(--dt-line-2);
+  transition: background var(--duration) var(--ease);
 }
 .dt-btn:hover {
   background: color-mix(in srgb, var(--dt-panel) 92%, var(--label));
-}
-.dt-btn:active {
-  transform: scale(0.97);
 }
 .dt-close {
   flex-shrink: 0;
@@ -144,27 +117,20 @@
   height: var(--ctl-h-md);
   padding: 0 13px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--dt-panel);
   color: var(--label);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
-  box-shadow:
-    0 0 0 1px var(--dt-line-2),
-    0 1px 2px rgba(0, 0, 0, 0.05);
-  transition:
-    background 0.15s,
-    transform 0.1s;
+  box-shadow: 0 0 0 var(--hairline) var(--dt-line-2);
+  transition: background var(--duration) var(--ease);
 }
 .dt-act:hover {
   background: color-mix(in srgb, var(--dt-panel) 92%, var(--label));
-}
-.dt-act:active {
-  transform: scale(0.96);
 }
 .dt-act-i {
   display: grid;
@@ -177,14 +143,14 @@
 .dt-btn.sm {
   height: var(--ctl-h-md);
   padding: 0 12px;
-  font-size: 12.5px;
+  font-size: var(--fs-1);
 }
 /* 标题右侧的操作和同排图标、分段控件同高。 */
 .dt-btn.dt-add {
   height: var(--ctl-h-md);
   padding: 0 9px;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--fs-1);
 }
 .dt-btn.dt-add svg {
   width: 12px;
@@ -206,7 +172,7 @@
   border: 0;
   background: none;
   font: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   font-weight: 500;
   color: var(--accent);
   cursor: pointer;
@@ -220,7 +186,7 @@
   min-height: 48px;
 }
 .dt-head > .ico {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .dt-id {
   min-width: 0;
@@ -230,7 +196,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 20px;
+  font-size: var(--fs-3);
   line-height: 28px;
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -318,7 +284,7 @@
 .dt-outcome.bad,
 .dt-outcome.loss {
   background: color-mix(in srgb, var(--dt-bad) 5%, var(--dt-panel));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dt-bad) 22%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--dt-bad) 22%, transparent);
 }
 .dt-outcome.bad .dt-ph h3 {
   color: var(--dt-bad);
@@ -328,7 +294,7 @@
 }
 .dt-oc-loss b {
   display: block;
-  font-size: 26px;
+  font-size: var(--fs-4);
   line-height: 32px;
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -336,7 +302,7 @@
   font-variant-numeric: tabular-nums;
 }
 .dt-oc-loss small {
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 /* 收回来的钱：正号、绿色 */
@@ -345,10 +311,8 @@
 }
 .dt-panel {
   background: var(--dt-panel);
-  border-radius: 12px;
-  box-shadow:
-    0 0 0 1px var(--dt-line),
-    0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 var(--hairline) var(--dt-line);
   padding: 16px 20px 20px;
   min-width: 0;
 }
@@ -359,7 +323,7 @@
   flex-wrap: wrap;
 }
 .dt-ph h3 {
-  font-size: 13px;
+  font-size: var(--fs-2);
   font-weight: 600;
   letter-spacing: -0.005em;
 }
@@ -367,7 +331,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
 }
@@ -395,7 +359,7 @@
   min-height: 22px;
 }
 .dt-kpi-top small {
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-2);
   white-space: nowrap;
   overflow: hidden;
@@ -409,7 +373,7 @@
   margin-top: 6px;
 }
 .dt-kpi-val b {
-  font-size: 24px;
+  font-size: var(--fs-3);
   line-height: 30px;
   font-weight: 650;
   letter-spacing: -0.025em;
@@ -432,14 +396,14 @@
   margin-top: 4px;
 }
 .dt-headline b {
-  font-size: 28px;
+  font-size: var(--fs-4);
   line-height: 36px;
   font-weight: 650;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 .dt-headline > span:last-child {
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
 }
@@ -447,7 +411,7 @@
 .dt-empty {
   padding: 24px 0 8px;
   color: var(--label-3);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
 }
 .cc {
   position: relative;
@@ -461,44 +425,44 @@
 }
 .cc-grid {
   stroke: var(--sep);
-  stroke-width: 1;
+  stroke-width: 0.5;
 }
 .cc-tk {
   fill: var(--label-3);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--fs-1);
 }
 .cc-line {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: 0.5;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 .cc-list {
   fill: none;
   stroke: var(--label-3);
-  stroke-width: 1.4;
+  stroke-width: 0.5;
   stroke-dasharray: 4 4;
 }
 .cc-pt {
   fill: var(--dt-panel);
   stroke: var(--accent);
-  stroke-width: 1.5;
+  stroke-width: 0.5;
 }
 .cc-cross {
   stroke: var(--label-3);
-  stroke-width: 1;
+  stroke-width: 0.5;
   stroke-dasharray: 2 3;
 }
 .cc-hl {
   fill: var(--accent);
   stroke: var(--dt-panel);
-  stroke-width: 2.5;
+  stroke-width: 0.5;
 }
 .cc-hl.list {
   fill: var(--label-3);
-  stroke-width: 2;
+  stroke-width: 0.5;
 }
 
 .cc-lanes {
@@ -511,12 +475,12 @@
   align-items: center;
   gap: 8px;
   padding: 0 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   white-space: nowrap;
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   background: color-mix(in srgb, var(--tint) 12%, var(--dt-panel));
-  box-shadow: inset 3px 0 0 var(--tint);
+  box-shadow: none;
 }
 .cc-lane b {
   display: inline-flex;
@@ -536,7 +500,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  border-left: 1px dashed var(--label-3);
+  border-left: var(--hairline) dashed var(--label-3);
   pointer-events: none;
 }
 .cc-xt {
@@ -549,7 +513,7 @@
   top: 4px;
   transform: translateX(-50%);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--fs-1);
   color: var(--label-3);
   white-space: nowrap;
 }
@@ -559,15 +523,12 @@
   z-index: 3;
   width: 220px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--dt-panel) 94%, transparent);
   backdrop-filter: blur(8px);
-  box-shadow:
-    0 0 0 1px var(--dt-line-2),
-    0 12px 32px -8px rgba(0, 0, 0, 0.22),
-    0 2px 6px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 0 var(--hairline) var(--dt-line-2);
   pointer-events: none;
-  font-size: 12px;
+  font-size: var(--fs-1);
   line-height: 16px;
 }
 .cc-tip-h {
@@ -575,7 +536,7 @@
   justify-content: space-between;
   padding-bottom: 8px;
   margin-bottom: 6px;
-  border-bottom: 1px solid var(--sep);
+  border-bottom: var(--hairline) solid var(--sep);
   color: var(--label-2);
 }
 .cc-tip-h b {
@@ -591,16 +552,16 @@
 .cc-tip-r i {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   flex: none;
 }
 .cc-tip-r i.k-v {
-  background: var(--accent);
+  background: var(--indigo-9);
 }
 .cc-tip-r i.k-l {
   border-radius: 0;
   height: 0;
-  border-top: 1.5px dashed var(--label-3);
+  border-top: var(--hairline) dashed var(--label-3);
 }
 .cc-tip-r span {
   flex: 1;
@@ -616,9 +577,9 @@
 .cc-tip-f {
   margin-top: 6px;
   padding-top: 8px;
-  border-top: 1px solid var(--sep);
+  border-top: var(--hairline) solid var(--sep);
   color: var(--label-3);
-  font-size: 11px;
+  font-size: var(--fs-1);
   font-variant-numeric: tabular-nums;
 }
 
@@ -641,15 +602,15 @@
 .dt-up-bars i {
   width: 100%;
   max-width: 22px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   background: var(--fill);
 }
 .dt-up-bars .on i {
-  background: var(--accent);
+  background: var(--indigo-9);
   opacity: 0.85;
 }
 .dt-up-bars small {
-  font-size: 10.5px;
+  font-size: var(--fs-1);
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
 }
@@ -662,9 +623,9 @@
 }
 .dt-up-more {
   padding-top: 8px;
-  border-top: 1px solid var(--sep);
+  border-top: var(--hairline) solid var(--sep);
   color: var(--label-3);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
 }
 
 /* 合租座位 */
@@ -675,7 +636,7 @@
   display: block;
   margin-top: 8px;
   color: var(--label-2);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
 }
 
 /* 历程 */
@@ -706,14 +667,14 @@
   width: 9px;
   height: 9px;
   margin: 5px 0 0 3px;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   background: var(--label-3);
   box-shadow:
-    0 0 0 3px var(--dt-panel),
-    0 0 0 4px var(--dt-line-2);
+    0 0 0 var(--hairline) var(--dt-panel),
+    0 0 0 var(--hairline) var(--dt-line-2);
 }
 .dt-ev.acc > i {
-  background: var(--accent);
+  background: var(--indigo-9);
 }
 .dt-ev.ok > i {
   background: var(--dt-ok);
@@ -722,7 +683,7 @@
   background: var(--dt-bad);
 }
 .dt-ev.warn > i {
-  background: var(--orange);
+  background: var(--orange-9);
 }
 .dt-ev.ink > i {
   background: var(--label);
@@ -730,8 +691,8 @@
 .dt-ev.fut > i {
   background: var(--dt-panel);
   box-shadow:
-    0 0 0 3px var(--dt-panel),
-    inset 0 0 0 1.5px var(--label-3);
+    0 0 0 var(--hairline) var(--dt-panel),
+    inset 0 0 0 var(--hairline) var(--label-3);
 }
 .dt-ev b {
   display: block;
@@ -739,7 +700,7 @@
 }
 .dt-ev small {
   display: block;
-  font-size: 12px;
+  font-size: var(--fs-1);
   line-height: 16px;
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
@@ -747,7 +708,7 @@
 .dt-ev time {
   padding-top: 1px;
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   color: var(--label-3);
 }
 .dt-events .dt-link {
@@ -768,7 +729,7 @@
   gap: 12px;
   min-height: 38px;
   padding: 6px 0;
-  border-bottom: 1px solid var(--sep);
+  border-bottom: var(--hairline) solid var(--sep);
 }
 .dt-prop dt {
   color: var(--label-2);
@@ -784,7 +745,7 @@
   min-width: 0;
 }
 .dt-prop dd small {
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   line-height: 15px;
   font-weight: 400;
   color: var(--label-3);
@@ -801,9 +762,9 @@
 .dt-region img {
   width: 16px;
   height: 12px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 var(--hairline) var(--line);
 }
 .dt-inline {
   display: inline-flex;
@@ -814,7 +775,7 @@
   display: flex;
   gap: 8px;
   margin-top: 12px;
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   line-height: 20px;
   color: var(--label-2);
 }
@@ -876,7 +837,7 @@
   column-gap: 8px;
   min-height: 48px;
   padding: 7px 0;
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   line-height: 18px;
   font-variant-numeric: tabular-nums;
 }
@@ -889,7 +850,7 @@
   flex-direction: column;
 }
 .dt-tr small {
-  font-size: 11.5px;
+  font-size: var(--fs-1);
   line-height: 16px;
   color: var(--label-3);
 }
@@ -906,8 +867,8 @@
   z-index: 1;
   min-height: 30px;
   background: color-mix(in srgb, var(--label) 2.5%, var(--dt-panel));
-  box-shadow: inset 0 -1px 0 var(--sep);
-  font-size: 12px;
+  box-shadow: none;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 .dt-grp b {
@@ -916,7 +877,7 @@
   color: var(--label);
 }
 .dt-row {
-  border-bottom: 1px solid var(--sep);
+  border-bottom: var(--hairline) solid var(--sep);
 }
 .dt-row.edit {
   cursor: pointer;
@@ -926,7 +887,7 @@
 }
 .dt-row .d {
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   color: var(--label-2);
   white-space: nowrap;
 }
@@ -958,9 +919,9 @@
   align-items: center;
   height: 16px;
   padding: 0 5px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-style: normal;
-  font-size: 10px;
+  font-size: var(--fs-1);
   font-weight: 600;
   background: var(--accent-soft);
   color: var(--accent);
@@ -984,7 +945,7 @@
   justify-content: center;
   min-height: 46px;
   padding: 0 20px;
-  border-top: 1px solid var(--dt-line);
+  border-top: var(--hairline) solid var(--dt-line);
   flex: none;
 }
 
@@ -1010,7 +971,7 @@
   .dt-id h2 {
     flex-wrap: wrap;
     row-gap: 2px;
-    font-size: 19px;
+    font-size: var(--fs-3);
     line-height: 26px;
   }
   .dt-name {
@@ -1032,7 +993,7 @@
     gap: 6px;
     height: var(--ctl-h-md);
     padding: 0 8px;
-    font-size: 11.5px;
+    font-size: var(--fs-1);
     font-weight: 500;
     color: var(--label-2);
   }
@@ -1087,14 +1048,14 @@
     justify-self: start;
     height: 20px;
     padding: 0 6px;
-    font-size: 11px;
+    font-size: var(--fs-1);
   }
   .dt-kpi-val {
     grid-area: val;
     margin-top: 2px;
   }
   .dt-kpi-val b {
-    font-size: 18px;
+    font-size: var(--fs-3);
     line-height: 24px;
   }
   .dt-charges .dt-tbl {
@@ -1184,15 +1145,13 @@
 /* 可点的面板（合租区）：整块点开合租弹窗 */
 .dt-panel.dt-tap {
   cursor: pointer;
-  transition: box-shadow 0.15s;
+  transition: none;
 }
 .dt-panel.dt-tap:hover {
-  box-shadow:
-    0 0 0 1px var(--dt-line-2),
-    0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 0 var(--hairline) var(--dt-line-2);
 }
 .dt-more {
-  font-size: 12.5px;
+  font-size: var(--fs-1);
   color: var(--label-2);
 }
 
@@ -1238,7 +1197,7 @@
 .dt-stops .dt-props + .dt-props {
   margin-top: 16px !important;
   padding-top: 12px;
-  border-top: 1px solid var(--dt-line);
+  border-top: var(--hairline) solid var(--dt-line);
 }
 .dt-stop-loss {
   color: var(--dt-bad);

@@ -11,13 +11,13 @@
   border: 0;
   padding: 0;
   background: none;
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
 }
 .person-avatar-edit:focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: var(--hairline) solid var(--focus-ring);
   outline-offset: 3px;
 }
 .person-avatar-edit:disabled {
@@ -25,6 +25,6 @@
   opacity: 0.6;
 }
 .person-avatar-help {
-  font-size: 12px;
+  font-size: var(--fs-1);
   color: var(--label-3);
 }

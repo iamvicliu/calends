@@ -289,7 +289,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             </div>
           )}
           {list.length === 0 && (
-            <div className="muted" style={{ fontSize: 13, padding: '12px 0' }}>
+            <div className="muted" style={{ fontSize: 'var(--fs-2)', padding: '12px 0' }}>
               {t('proxy.table.none')}
             </div>
           )}

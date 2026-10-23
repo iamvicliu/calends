@@ -66,7 +66,7 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
   return (
     <Sheet narrow title={t('app.ics.title')} onClose={onClose}>
       <div className="stack">
-        <p className="muted" style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>
+        <p className="muted" style={{ margin: 0, fontSize: 'var(--fs-2)', lineHeight: 1.6 }}>
           {t('app.ics.intro')}
         </p>
         {url ? (
@@ -122,8 +122,8 @@ function ReminderPreview({ preview, timezone }: { preview: Preview | null; timez
             </Cell>
           ))}
           {todayLog.map((l) => (
-            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
-              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{localTime(l.sent_at, timezone).slice(11)}</span>
+            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 'var(--fs-2)' }}>{l.subject}</span>}>
+              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 'var(--fs-1)' }}>{localTime(l.sent_at, timezone).slice(11)}</span>
             </Cell>
           ))}
         </Group>
@@ -132,8 +132,8 @@ function ReminderPreview({ preview, timezone }: { preview: Preview | null; timez
       {recentLog.length > 0 && (
         <Group title={t('settings.today.recent')}>
           {recentLog.slice(0, 6).map((l) => (
-            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 13.5 }}>{l.subject}</span>}>
-              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 12.5 }}>{localTime(l.sent_at, timezone)}</span>
+            <Cell key={l.dedupe_key} label={<span style={{ fontSize: 'var(--fs-2)' }}>{l.subject}</span>}>
+              <span style={{ color: l.status === 'sent' ? undefined : 'var(--red)', fontSize: 'var(--fs-1)' }}>{localTime(l.sent_at, timezone)}</span>
             </Cell>
           ))}
         </Group>
