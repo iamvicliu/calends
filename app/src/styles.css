@@ -4128,7 +4128,9 @@ button.h-price-row:focus-visible {
   font-size: 12px;
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
-  margin-top: 2px;
+  /* 贴卡片底边：同一行有卡片因多一行说明被拉高时，各卡底部信息仍在同一高度 */
+  margin-top: auto;
+  padding-top: 2px;
 }
 .sc-foot .soon {
   color: var(--orange);
@@ -7289,7 +7291,8 @@ a.car-toggle {
   bottom: 0;
   border-radius: 999px;
 }
-.sc-foot {
+/* 分享卡片的页脚；限定在 .sc 内，不影响订阅卡片的 .sc-foot */
+.sc .sc-foot {
   display: flex;
   justify-content: space-between;
   margin-top: 12px;
