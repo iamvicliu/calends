@@ -34,6 +34,7 @@
     "next": "Próxima cobrança",
     "cost": "Custo mensal",
     "name": "Nome",
+    "category": "Categoria",
     "start": "Data de início",
     "asc": "Crescente",
     "desc": "Decrescente"

@@ -33,6 +33,7 @@
     "next": "Tagihan berikutnya",
     "cost": "Biaya bulanan",
     "name": "Nama",
+    "category": "Kategori",
     "start": "Tanggal mulai",
     "asc": "Naik",
     "desc": "Turun"

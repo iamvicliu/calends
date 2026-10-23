@@ -34,6 +34,7 @@
     "next": "Próximo cobro",
     "cost": "Coste mensual",
     "name": "Nombre",
+    "category": "Categoría",
     "start": "Fecha de inicio",
     "asc": "Ascendente",
     "desc": "Descendente"

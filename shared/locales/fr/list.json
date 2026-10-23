@@ -34,6 +34,7 @@
     "next": "Prochain prélèvement",
     "cost": "Coût mensuel",
     "name": "Nom",
+    "category": "Catégorie",
     "start": "Date de début",
     "asc": "Croissant",
     "desc": "Décroissant"

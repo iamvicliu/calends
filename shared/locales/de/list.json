@@ -34,6 +34,7 @@
     "next": "Nächste Abbuchung",
     "cost": "Monatliche Kosten",
     "name": "Name",
+    "category": "Kategorie",
     "start": "Startdatum",
     "asc": "Aufsteigend",
     "desc": "Absteigend"

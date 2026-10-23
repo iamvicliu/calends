@@ -38,12 +38,12 @@ import { ScopeReport } from '../components/ScopeReport.tsx';
 import { useTextSearch } from '../use-search.ts';
 
 type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'terminated' | 'lifetime' | 'all';
-type Sort = 'next' | 'cost' | 'name' | 'start';
+type Sort = 'next' | 'cost' | 'name' | 'category' | 'start';
 type Dir = 'asc' | 'desc';
-/** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、最新开始在前 */
-const DEFAULT_DIR: Record<Sort, Dir> = { next: 'asc', cost: 'desc', name: 'asc', start: 'desc' };
+/** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、分类按设置里的顺序、最新开始在前 */
+const DEFAULT_DIR: Record<Sort, Dir> = { next: 'asc', cost: 'desc', name: 'asc', category: 'asc', start: 'desc' };
 type View = 'grid' | 'list' | 'gantt';
-const isSort = (v: string): v is Sort => ['next', 'cost', 'name', 'start'].includes(v);
+const isSort = (v: string): v is Sort => ['next', 'cost', 'name', 'category', 'start'].includes(v);
 const isDir = (v: string): v is Dir => v === 'asc' || v === 'desc';
 const isView = (v: string): v is View => ['grid', 'list', 'gantt'].includes(v);
 
@@ -155,9 +155,16 @@ export function List({
     .filter((c) => mine.some((s) => s.category === c));
   const dirty = filter !== 'all' || cat !== (category ?? 'all') || pay !== 'all' || !!q;
   const mo = (s: Subscription) => monthlyMine(state, s, today);
+  const catOrder = categories().map((c) => c.name);
+  const catRank = (s: Subscription) => {
+    const i = catOrder.indexOf(s.category);
+    return i < 0 ? catOrder.length : i;
+  };
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
     if (sort === 'name') return a.name.localeCompare(b.name, locale());
+    // 分类按设置里的顺序，同类里最贵的在前
+    if (sort === 'category') return catRank(a) - catRank(b) || mo(b) - mo(a) || a.name.localeCompare(b.name, locale());
     if (sort === 'cost') return mo(a) - mo(b) || toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
     if (sort === 'start') return a.start.localeCompare(b.start);
     return (nextCharge(a, addDays(today, 1)) ?? '').localeCompare(nextCharge(b, addDays(today, 1)) ?? '');
@@ -231,6 +238,7 @@ export function List({
               { value: 'next', label: t('list.sort.next') },
               { value: 'cost', label: t('list.sort.cost') },
               { value: 'name', label: t('list.sort.name') },
+              { value: 'category', label: t('list.sort.category') },
               { value: 'start', label: t('list.sort.start') },
             ] as Array<{ value: Sort; label: string }>
           }

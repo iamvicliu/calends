@@ -34,6 +34,7 @@
     "next": "Next charge",
     "cost": "Monthly cost",
     "name": "Name",
+    "category": "Category",
     "start": "Start date",
     "asc": "Ascending",
     "desc": "Descending"

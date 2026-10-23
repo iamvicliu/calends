@@ -34,6 +34,7 @@
     "next": "Sonraki ödeme",
     "cost": "Aylık maliyet",
     "name": "Ad",
+    "category": "Kategori",
     "start": "Başlangıç tarihi",
     "asc": "Artan",
     "desc": "Azalan"
