@@ -4045,6 +4045,25 @@ button.h-price-row:focus-visible {
 .scard:active {
   transform: scale(0.985);
 }
+/* 用 App 图标本身晕染出卡片顶部的氛围色 */
+.sc-glow {
+  position: absolute;
+  z-index: -1;
+  left: -20%;
+  right: -20%;
+  top: -60%;
+  height: 120%;
+  filter: blur(36px);
+  /* 只留一点氛围色，不抢图标和文字 */
+  opacity: 0.18;
+  pointer-events: none;
+}
+.sc-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, var(--card) 75%);
+}
 .sc-top {
   display: flex;
   justify-content: space-between;
@@ -4124,6 +4143,10 @@ button.h-price-row:focus-visible {
 .scard.st-terminated .ico,
 .scard.st-terminated .sc-name {
   opacity: 0.5;
+}
+.scard.st-ended .sc-glow,
+.scard.st-terminated .sc-glow {
+  opacity: 0.09;
 }
 .scard.st-ended .sc-price .amt,
 .scard.st-terminated .sc-price .amt {

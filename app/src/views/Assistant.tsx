@@ -17,6 +17,7 @@ import {
   KeyRound,
   Loader2,
   Pencil,
+  ReceiptText,
   RotateCcw,
   Settings2,
   Square,
@@ -32,6 +33,7 @@ import { dropOldImages } from '../../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
+import { catColor } from '../derive.ts';
 import { api, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
@@ -891,8 +893,10 @@ function Proposal(props: {
       ]
     : summaryRows(part.tool, a, state, sub?.currency);
   return (
-    <div className={`as-card ${part.state}`}>
-      <div className="as-card-tag">{create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}</div>
+    <div className={`as-card ${part.state}`} style={{ '--tint': catColor(icon.category) } as Record<string, string>}>
+      <div className="as-card-tag">
+        <ReceiptText size={12} /> {create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}
+      </div>
       <div className="as-card-head row">
         <SubIcon sub={icon} size={44} />
         <div className="as-card-id">

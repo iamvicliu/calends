@@ -49,6 +49,7 @@ export const PRESETS: Preset[] = [
   { code: 'social', icon: 'user', legacy: ['社交'] },
   { code: 'shopping', icon: 'shopping-bag', color: 'c7', legacy: ['购物'] },
   { code: 'finance', icon: 'landmark', color: 'c4' },
+  { code: 'insurance', icon: 'umbrella', color: 'c6' },
   { code: 'health', icon: 'heart-pulse', color: 'c2' },
   { code: 'phone', icon: 'smartphone', color: 'c1' },
   { code: 'daily', icon: 'house', color: 'c5', legacy: ['日用'] },
