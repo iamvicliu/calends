@@ -75,9 +75,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
     if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
     // 放大进月视图时，右侧列表与报告要等日历框放大后再淡入：用根元素上的类区分方向
     const root = document.documentElement;
+    // vt-cal：侧栏与工具栏单独成层，过渡中不跟着整页淡出；vt-zoom-in：放大进月视图的节奏
+    root.classList.add('vt-cal');
     root.classList.toggle('vt-zoom-in', next === 'month');
     const transition = document.startViewTransition(apply);
-    void transition.finished.finally(() => root.classList.remove('vt-zoom-in'));
+    void transition.finished.finally(() => root.classList.remove('vt-cal', 'vt-zoom-in'));
   };
   const [sel, setSel] = useState<string | null>(today);
   const [reportMode, setReportMode] = usePref<'mini' | 'full'>('cal-report-mode', 'mini', (v): v is 'mini' | 'full' => v === 'mini' || v === 'full');

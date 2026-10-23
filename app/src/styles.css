@@ -9851,9 +9851,20 @@ img.mm-flag {
 ::view-transition-new(root) {
   animation: vt-fade-in calc(var(--duration) * 0.6) var(--ease) calc(var(--duration) * 0.4) both;
 }
-/* 放大进月视图：右侧列表与报告在日历框放大接近完成时才淡淡出现，比缩放滞后 */
+/* 放大进月视图：等日历框放大完成，右侧列表与报告再用更长的时间淡淡出现 */
 .vt-zoom-in::view-transition-new(root) {
-  animation: vt-fade-in calc(var(--duration) * 1.2) var(--ease) calc(var(--duration) * 0.7) both;
+  animation: vt-fade-in calc(var(--duration) * 1.6) var(--ease) var(--duration) both;
+}
+/* 侧栏与工具栏在月、年切换时单独成层：侧栏不变，工具栏只是标题换字，不随整页淡出淡入 */
+.vt-cal .sidebar {
+  view-transition-name: cal-side;
+}
+.vt-cal .toolbar {
+  view-transition-name: cal-toolbar;
+}
+::view-transition-group(cal-side),
+::view-transition-group(cal-toolbar) {
+  animation-duration: var(--duration);
 }
 ::view-transition-old(cal-month),
 ::view-transition-new(cal-month) {
