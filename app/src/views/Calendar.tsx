@@ -1,6 +1,7 @@
 import { canUseSingleKey } from '../keyboard.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Maximize2 } from 'lucide-react';
 import {
   addDays,
@@ -62,6 +63,18 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const DOW = dows(weekStart);
   const [month, setMonth] = useState(today.slice(0, 7));
   const [mode, setMode] = usePref<'month' | 'year'>('cal-mode', 'month', (v): v is 'month' | 'year' => v === 'month' || v === 'year');
+  // 月、年切换的「神奇移动」：当前月的月历与年视图里那一格共用 view-transition-name，浏览器在两者之间缩放过渡；
+  // 不支持视图过渡或开了「减少动态效果」时直接切换
+  const switchMode = (next: 'month' | 'year', pick?: string) => {
+    const apply = () =>
+      flushSync(() => {
+        if (pick) goMonth(pick);
+        setMode(next);
+      });
+    if (next === mode && !pick) return;
+    if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) return apply();
+    document.startViewTransition(apply);
+  };
   const [sel, setSel] = useState<string | null>(today);
   const [reportMode, setReportMode] = usePref<'mini' | 'full'>('cal-report-mode', 'mini', (v): v is 'mini' | 'full' => v === 'mini' || v === 'full');
   const report = useMemo(() => (mode === 'month' ? monthReport(state, month, today) : null), [state, month, today, mode]);
@@ -138,7 +151,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       >
         <Seg
           value={mode}
-          onChange={setMode}
+          onChange={(v) => switchMode(v)}
           options={[
             ['month', t('calendar.mode.month')],
             ['year', t('calendar.mode.year')],
@@ -174,16 +187,14 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             today={today}
             sumOf={sumOf}
             base={base}
-            onPick={(m) => {
-              goMonth(m);
-              setMode('month');
-            }}
+            focus={month}
+            onPick={(m) => switchMode('month', m)}
           />
         ) : (
           <div className="cal-wrap">
             {/* 左：日历与选中日明细或月报告；右：整月列表 */}
             <div className="stack">
-              <div className="card cal">
+              <div className="card cal" style={{ viewTransitionName: 'cal-month' }}>
                 <div className="cal-grid" ref={gridRef}>
                   {DOW.map((d, i) => (
                     <div key={i} className="cal-dow">
@@ -385,6 +396,7 @@ function YearHeat({
   base,
   onPick,
   weekStart,
+  focus,
 }: {
   year: string;
   byDay: Map<string, Charge[]>;
@@ -393,6 +405,8 @@ function YearHeat({
   base: string;
   onPick: (m: string) => void;
   weekStart: 0 | 1;
+  /** 月视图正在看的月份：它的小卡与月历共用过渡名，切换时一个缩放成另一个 */
+  focus: string;
 }) {
   const DOW = dows(weekStart);
   return (
@@ -405,7 +419,17 @@ function YearHeat({
         const total = days.reduce((a, d) => a + sumOf(byDay.get(d)), 0);
         const count = days.reduce((a, d) => a + (byDay.get(d)?.length ?? 0), 0);
         return (
-          <button key={m} className={`heat-m ${today.startsWith(m) ? 'cur' : ''} ${m < today.slice(0, 7) ? 'past' : ''}`} onClick={() => onPick(m)}>
+          <button
+            key={m}
+            className={`heat-m ${today.startsWith(m) ? 'cur' : ''} ${m < today.slice(0, 7) ? 'past' : ''}`}
+            style={m === focus ? { viewTransitionName: 'cal-month' } : undefined}
+            onClick={(e) => {
+              // 点哪个月就从哪一格放大：过渡开始前把过渡名挪到这一格
+              for (const el of e.currentTarget.parentElement?.children ?? []) (el as HTMLElement).style.viewTransitionName = '';
+              e.currentTarget.style.viewTransitionName = 'cal-month';
+              onPick(m);
+            }}
+          >
             <div className="heat-h">
               {monthLabel(m, { year: false })}
               <span>

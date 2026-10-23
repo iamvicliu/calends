@@ -9833,3 +9833,17 @@ img.mm-flag {
 .car-summary .car-strip > div {
   grid-template-rows: auto auto 1fr;
 }
+
+/* 日历月、年切换的视图过渡：月历与对应月份小卡之间缩放，其余内容淡入淡出 */
+::view-transition-group(cal-month),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration);
+  animation-timing-function: var(--ease);
+}
+::view-transition-old(cal-month),
+::view-transition-new(cal-month) {
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
