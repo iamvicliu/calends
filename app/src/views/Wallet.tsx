@@ -453,12 +453,7 @@ function MethodSheet({
     <Sheet narrow title={methodName(m)} onClose={onClose}>
       <div className="stack" style={{ gap: 18 }}>
         {!ro && (
-          <div className="row">
-            {(r || BALANCE_KINDS.includes(m.kind)) && (
-              <button className="btn primary" onClick={() => onTopup(r?.current ?? 0)}>
-                {r ? t('wallet.sheet.topup') : t('wallet.sheet.setBalance')}
-              </button>
-            )}
+          <div className="sheet-actions">
             <button className="btn" onClick={onEdit}>
               <Icon name="edit" /> {t('wallet.sheet.edit')}
             </button>
@@ -466,6 +461,11 @@ function MethodSheet({
               <a className="btn" href={m.url} target="_blank" rel="noreferrer">
                 <Icon name="link" /> {BALANCE_KINDS.includes(m.kind) ? t('wallet.sheet.goTopup') : t('wallet.sheet.site')}
               </a>
+            )}
+            {(r || BALANCE_KINDS.includes(m.kind)) && (
+              <button className="btn primary" onClick={() => onTopup(r?.current ?? 0)}>
+                {r ? t('wallet.sheet.topup') : t('wallet.sheet.setBalance')}
+              </button>
             )}
           </div>
         )}

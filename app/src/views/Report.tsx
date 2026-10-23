@@ -21,7 +21,7 @@ import {
 } from '../../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, paletteColor, sumBase, toBase } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
@@ -103,26 +103,12 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         <div className="hero-delta">
           {yearAgo != null && yearAgo > 0 && <span className="muted">{copyParts(t('report.hero.yearAgo', { amount: signed(-yearAgo) }))}</span>}
         </div>
-        <div className="hero-facts">
-          <div>
-            <b>{signed(-now * 12)}</b>
-            <span>{t('report.hero.annual')}</span>
-          </div>
-          <div>
-            <b>{signed(-now / 30.4375, false)}</b>
-            <span>{t('report.hero.perDay')}</span>
-          </div>
-          <div>
-            <b>{tot.activeCount}</b>
-            <span>{t('report.hero.active')}</span>
-          </div>
-          {tot.recoverMrr > 1 && (
-            <div>
-              <b className="gain">{signed(tot.recoverMrr)}</b>
-              <span>{t('report.hero.recover')}</span>
-            </div>
-          )}
-        </div>
+        <MetricCards>
+          <Metric label={t('report.hero.annual')} value={signed(-now * 12)} />
+          <Metric label={t('report.hero.perDay')} value={signed(-now / 30.4375, false)} />
+          <Metric label={t('report.hero.active')} value={tot.activeCount} />
+          {tot.recoverMrr > 1 && <Metric label={t('report.hero.recover')} value={signed(tot.recoverMrr)} valueClassName="gain" />}
+        </MetricCards>
       </div>
       <div className="hero-r">
         <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
@@ -204,21 +190,14 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           </IconButton>
         </div>
       </div>
-      <div className="mv-head">
-        {offset !== 0 && (
-          <div>
-            <small>{offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}</small>
-            {/* 和顶部一致：花出去为负 */}
-            <b className="num">{perMonth(flow(-mv.to, base, { compact: true }))}</b>
-          </div>
-        )}
-        <div className={`mv-delta ${Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'up' : 'down'}`}>
-          <small>{t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}</small>
-          <b className="num">
-            {Math.abs(delta) < 0.5 ? t('report.wf.flat') : <SpendingDelta value={{ amount: delta, percent: mv.from > 0 ? pct : undefined }} base={base} />}
-          </b>
-        </div>
-      </div>
+      <MetricCards>
+        {offset !== 0 && <Metric label={offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')} value={perMonth(flow(-mv.to, base, { compact: true }))} />}
+        <Metric
+          label={t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}
+          value={Math.abs(delta) < 0.5 ? t('report.wf.flat') : <SpendingDelta value={{ amount: delta, percent: mv.from > 0 ? pct : undefined }} base={base} />}
+          valueClassName={Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'loss' : 'gain'}
+        />
+      </MetricCards>
       {drivers.length > 0 && !singleDriver && (
         <div className="mv-rows">
           {drivers.map((x) => (
@@ -346,8 +325,8 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             </>
           )}
         />
-        <div className="cash-facts">
-          <div
+        <MetricCards>
+          <Metric
             {...tipProps(() =>
               pv.items
                 .slice(0, 6)
@@ -357,32 +336,31 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
                   </div>
                 )),
             )}
-          >
-            <span>{t('report.cash.prepaid')}</span>
-            <b>
-              <Amount plain value={pv.total} ccy={base} compact />
-            </b>
-            <small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>
-          </div>
-          <div>
-            <span>{t('report.cash.next90')}</span>
-            <b>
-              <Amount value={-next90} ccy={base} compact />
-            </b>
-            <small>{t('report.cash.fullPaidHint')}</small>
-            <small>
-              {copyParts(
-                peak
-                  ? t('report.cash.peak', {
-                      n: Number(peak.month.slice(5)),
-                      month: monthLabel(peak.month.slice(0, 7), { year: false }),
-                      amount: flow(-peak.cash, base, { compact: true }),
-                    })
-                  : '',
-              )}
-            </small>
-          </div>
-        </div>
+            label={t('report.cash.prepaid')}
+            value={<Amount plain value={pv.total} ccy={base} compact />}
+            note={<small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>}
+          />
+          <Metric
+            label={t('report.cash.next90')}
+            value={<Amount value={-next90} ccy={base} compact />}
+            note={
+              <>
+                <small>{t('report.cash.fullPaidHint')}</small>
+                <small>
+                  {copyParts(
+                    peak
+                      ? t('report.cash.peak', {
+                          n: Number(peak.month.slice(5)),
+                          month: monthLabel(peak.month.slice(0, 7), { year: false }),
+                          amount: flow(-peak.cash, base, { compact: true }),
+                        })
+                      : '',
+                  )}
+                </small>
+              </>
+            }
+          />
+        </MetricCards>
       </div>
     </div>
   );
@@ -399,31 +377,32 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
       <p className="stop-basis">{copyParts(t('report.stops.basis'))}</p>
-      <div className="stop-totals">
-        <div
+      <MetricCards>
+        <Metric
           {...tipProps(() =>
             saved.items.map((i) => (
               <div key={i.sub.id}>{copyParts(t('report.cash.savedItem', { name: i.sub.name, amount: money(i.saved, base), since: i.since }))}</div>
             )),
           )}
-        >
-          <span>{t('report.stops.saved')}</span>
-          <b className="green">
-            {saved.total > 0 ? '+' : ''}
-            <Amount plain value={saved.total} ccy={base} compact />
-          </b>
-          <small>{t('report.stops.savedHint')}</small>
-        </div>
+          label={t('report.stops.saved')}
+          value={
+            <>
+              {saved.total > 0 ? '+' : ''}
+              <Amount plain value={saved.total} ccy={base} compact />
+            </>
+          }
+          valueClassName="green"
+          note={t('report.stops.savedHint')}
+        />
         {losses.items.length !== 1 && (
-          <div>
-            <span>{t('report.stops.loss')}</span>
-            <b className="red">
-              <Amount value={-losses.total} ccy={base} compact />
-            </b>
-            <small>{t('report.stops.lossHint')}</small>
-          </div>
+          <Metric
+            label={t('report.stops.loss')}
+            value={<Amount value={-losses.total} ccy={base} compact />}
+            valueClassName="loss"
+            note={t('report.stops.lossHint')}
+          />
         )}
-      </div>
+      </MetricCards>
       {losses.incomplete && <p className="stop-basis red">{t('core.stop.fxMissing')}</p>}
       <h4 className="stop-list-title">{t('report.stops.details')}</h4>
       {losses.items.length === 0 ? (

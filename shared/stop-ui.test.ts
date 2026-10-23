@@ -1,3 +1,4 @@
+import { metricComponents } from '../scripts/ui-test-components.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
@@ -90,6 +91,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     Hint: 'Hint',
     SubIcon: 'SubIcon',
     FlagImg: 'FlagImg',
+    ...metricComponents(extra.React ?? React),
     ...extra,
   };
   const exports = new Function(...Object.keys(deps), `${result.code.replace(/export /g, '')}; return {${names}};`)(...Object.values(deps));
@@ -350,9 +352,10 @@ test('概览今年已付附注：只计今年停止的损失；零、全退和�
       ),
     ),
   );
-  const facts = withClass(tree, 'stmt-facts')[0];
-  assert.equal((facts.children.filter((n) => n && typeof n === 'object') as Element[]).length, 4);
-  const paid = (facts.children.filter((n) => n && typeof n === 'object') as Element[])[1];
+  const facts = withClass(tree, 'metric-cards')[0];
+  const cells = withClass(facts, 'metric');
+  assert.equal(cells.length, 4);
+  const paid = cells[1];
   assert.ok(text(paid).includes(t('overview.stmt.ytd', { year: '2026' })));
   assert.equal(withClass(paid, 'stmt-loss-note').length, 1);
   assert.equal(note.type, 'button');

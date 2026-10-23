@@ -6,7 +6,7 @@ import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
+import { MetricCards, Metric, Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
 import { contactText } from './Members.tsx';
 import { run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -97,28 +97,23 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
           <PayBadge m={method} />
         </div>
 
-        <div className="proxy-facts">
-          <div>
-            <small>{t('proxy.paidPeriods', { count: list.length })}</small>
-            <b>{flow(-charged, base, { compact: true })}</b>
-          </div>
-          <div>
-            <small>{t('proxy.received')}</small>
-            <b className="green">{flow(received, base, { compact: true })}</b>
-          </div>
-          <div>
-            <small>{open.length ? t('proxy.owedPeriods', { count: open.length }) : t('proxy.owed')}</small>
-            <b className={open.length ? 'warn' : 'done'}>
-              {open.length
+        <MetricCards>
+          <Metric label={t('proxy.paidPeriods', { count: list.length })} value={flow(-charged, base, { compact: true })} />
+          <Metric label={t('proxy.received')} value={flow(received, base, { compact: true })} valueClassName="green" />
+          <Metric
+            label={open.length ? t('proxy.owedPeriods', { count: open.length }) : t('proxy.owed')}
+            value={
+              open.length
                 ? `≈ ${money(
                     open.reduce((a, r) => a + r.chargedBase, 0),
                     base,
                     { compact: true },
                   )}`
-                : t('proxy.settled')}
-            </b>
-          </div>
-        </div>
+                : t('proxy.settled')
+            }
+            valueClassName={open.length ? 'warn' : 'done'}
+          />
+        </MetricCards>
       </div>
       {/* 弹窗放在卡片外面：卡片的定位与裁切不会影响弹层，也不会把同一行的卡片撑高 */}
       {ledger && <LedgerSheet state={state} s={s} onClose={() => setLedger(false)} onOpen={onOpen} />}
@@ -205,32 +200,28 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
           </Group>
 
-          <div className="proxy-facts four">
-            <div>
-              <small>{t('proxy.paidPeriods', { count: list.length })}</small>
-              <b>{flow(-charged, base, { compact: true })}</b>
-            </div>
-            <div>
-              <small>{t('proxy.received')}</small>
-              <b className="green">{flow(received, base, { compact: true })}</b>
-            </div>
-            <div>
-              <small>{t('proxy.owed')}</small>
-              <b className={open.length ? 'warn' : 'done'}>
-                {open.length
+          <MetricCards>
+            <Metric label={t('proxy.paidPeriods', { count: list.length })} value={flow(-charged, base, { compact: true })} />
+            <Metric label={t('proxy.received')} value={flow(received, base, { compact: true })} valueClassName="green" />
+            <Metric
+              label={t('proxy.owed')}
+              value={
+                open.length
                   ? `≈ ${money(
                       open.reduce((a, r) => a + r.chargedBase, 0),
                       base,
                       { compact: true },
                     )}`
-                  : t('proxy.settled')}
-              </b>
-            </div>
-            <div>
-              <small>{t('proxy.diffLabel')}</small>
-              <b className={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}>{flow(diff, base, { compact: true })}</b>
-            </div>
-          </div>
+                  : t('proxy.settled')
+              }
+              valueClassName={open.length ? 'warn' : 'done'}
+            />
+            <Metric
+              label={t('proxy.diffLabel')}
+              value={flow(diff, base, { compact: true })}
+              valueClassName={Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'done' : 'loss'}
+            />
+          </MetricCards>
         </div>
 
         <div className="ld-table">
@@ -449,29 +440,25 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
         )}
       </Toolbar>
       <div className="page fade-in stack">
-        <div className="grid g-3">
-          <div className="card stat">
-            <div className="stat-label">{t('proxy.owed')}</div>
-            <div className="stat-value" style={{ color: sum.owedCount ? 'var(--orange)' : undefined }}>
-              <Amount plain value={sum.owed} ccy={base} />
-            </div>
-            <div className="stat-sub">{sum.owedCount ? t('proxy.page.owedSub', { count: sum.owedCount }) : t('proxy.page.allBack')}</div>
-          </div>
-          <div className="card stat">
-            <div className="stat-label">{t('proxy.page.total')}</div>
-            <div className="stat-value">
-              <Amount value={-sum.charged} ccy={base} />
-            </div>
-            <div className="stat-sub">{copyParts(t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) }))}</div>
-          </div>
-          <div className="card stat">
-            <div className="stat-label">{t('proxy.diffLabel')}</div>
-            <div className="stat-value" style={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}>
-              <Amount value={sum.diff} ccy={base} />
-            </div>
-            <div className="stat-sub">{t('proxy.page.diffSub')}</div>
-          </div>
-        </div>
+        <MetricCards>
+          <Metric
+            label={t('proxy.owed')}
+            value={<Amount plain value={sum.owed} ccy={base} />}
+            valueStyle={{ color: sum.owedCount ? 'var(--orange)' : undefined }}
+            note={sum.owedCount ? t('proxy.page.owedSub', { count: sum.owedCount }) : t('proxy.page.allBack')}
+          />
+          <Metric
+            label={t('proxy.page.total')}
+            value={<Amount value={-sum.charged} ccy={base} />}
+            note={copyParts(t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) }))}
+          />
+          <Metric
+            label={t('proxy.diffLabel')}
+            value={<Amount value={sum.diff} ccy={base} />}
+            valueStyle={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
+            note={t('proxy.page.diffSub')}
+          />
+        </MetricCards>
         {sum.subs.length === 0 ? (
           <div className="card empty">
             <b>{t('proxy.page.emptyTitle')}</b>

@@ -694,7 +694,7 @@ export function MemberSheet({
                         </label>
                       );
                     })}
-                    <div className="copy-actions">
+                    <div className="sheet-actions">
                       <button className="btn" onClick={() => setCopying(null)}>
                         {t('family.member.cancel')}
                       </button>
@@ -750,7 +750,7 @@ export function MemberSheet({
               <Cell label={t('family.member.note')}>
                 <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onChange={(e) => setPay({ ...pay, note: val(e) || undefined })} />
               </Cell>
-              <div className="cell" style={{ justifyContent: 'flex-end', gap: 8 }}>
+              <div className="cell sheet-actions">
                 <button className="btn" onClick={() => setAdding(false)}>
                   {t('family.member.cancel')}
                 </button>

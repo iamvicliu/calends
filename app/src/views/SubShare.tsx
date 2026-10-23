@@ -8,7 +8,7 @@ const when = (d: string, today: string) => (d.slice(0, 4) === today.slice(0, 4) 
 import { chargeValue } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { ShareSheet } from '../components/ShareSheet.tsx';
-import { FlagImg, SubIcon } from '../components/ui.tsx';
+import { MetricCards, Metric, FlagImg, SubIcon } from '../components/ui.tsx';
 import { catColor } from '../derive.ts';
 
 type Style = 'card' | 'receipt' | 'timeline' | 'poster' | 'years';
@@ -127,24 +127,15 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
       </div>
       <small className="sc-k">{hide ? t('share.together') : t('share.totalSpent')}</small>
       <div className="sc-big">{hide ? st.duration : m(-st.total)}</div>
-      <div className="sc-grid">
-        <div>
-          <small>{hide ? t('share.charges') : t('share.subscribed')}</small>
-          <b>{hide ? t('share.times', { count: st.charges.length }) : st.duration}</b>
-        </div>
-        <div>
-          <small>{hide ? t('share.gaps') : t('share.realMonthly')}</small>
-          <b>{hide ? t('share.times', { count: st.gaps.length }) : m(-st.perMonth)}</b>
-        </div>
-        <div>
-          <small>{t('share.price')}</small>
-          <b>{changeText(st)}</b>
-        </div>
-        <div>
-          <small>{hide ? t('share.phases') : t('share.charges')}</small>
-          <b>{hide ? t('share.phaseCount', { count: st.vs.length }) : t('share.times', { count: st.charges.length })}</b>
-        </div>
-      </div>
+      <MetricCards>
+        <Metric label={hide ? t('share.charges') : t('share.subscribed')} value={hide ? t('share.times', { count: st.charges.length }) : st.duration} />
+        <Metric label={hide ? t('share.gaps') : t('share.realMonthly')} value={hide ? t('share.times', { count: st.gaps.length }) : m(-st.perMonth)} />
+        <Metric label={t('share.price')} value={changeText(st)} />
+        <Metric
+          label={hide ? t('share.phases') : t('share.charges')}
+          value={hide ? t('share.phaseCount', { count: st.vs.length }) : t('share.times', { count: st.charges.length })}
+        />
+      </MetricCards>
       <div className="sc-bar">
         {st.vs.map((v, i) => {
           const end = v.end && v.end < today ? v.end : today;

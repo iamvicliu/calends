@@ -179,21 +179,4 @@
   .people-plans .ico {
     --s: 18px !important;
   }
-
-  .people-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-  }
-  .people-stats .stat {
-    min-width: 0;
-    padding: 12px 10px;
-  }
-  .people-stats .stat-value {
-    font-size: var(--fs-3);
-  }
-  .people-stats .stat-sub {
-    display: block;
-    font-size: var(--fs-1);
-    overflow-wrap: anywhere;
-  }
 }

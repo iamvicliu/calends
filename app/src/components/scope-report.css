@@ -68,11 +68,6 @@
   font-size: var(--fs-4);
   line-height: 1.15;
 }
-.scope-block .hero-facts {
-  margin-top: 10px;
-  padding-top: 10px;
-  gap: 12px;
-}
 .scope-block .stat-label {
   display: flex;
   align-items: center;
@@ -197,11 +192,6 @@
   padding-bottom: 6px;
 }
 .scope-share .scope-row {
-  border: 0;
-}
-.scope-report .scope-facts {
-  margin-top: 0;
-  padding-top: 0;
   border: 0;
 }
 .scope-comparison {

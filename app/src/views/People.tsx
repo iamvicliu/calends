@@ -10,7 +10,7 @@ import { colorFor, peopleLedger, peopleListRows, refsFor, type PeopleSort, type 
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
-import { Amount, ask, Cell, Group, Icon, IconButton, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
+import { MetricCards, Metric, Amount, ask, Cell, Group, Icon, IconButton, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { go } from '../router.ts';
 import { deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
 import { ContactField, contactText, contactValue, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
@@ -139,31 +139,20 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
         <FamilyTabs tab="people" />
       </Toolbar>
       <div className="page fade-in stack people-page">
-        <div className="grid g-3 people-stats">
-          <div className="card stat">
-            <div className="stat-label">{t('people.stat.owed')}</div>
-            <div className="stat-value" style={{ color: owed > 0 ? 'var(--orange)' : undefined }}>
-              <Amount plain compact value={owed} ccy={base} />
-            </div>
-            <div className="stat-sub">
-              {owing.length ? t('people.stat.owedSub', { count: owing.length }) : Number.isFinite(owed) ? t('people.stat.allSettled') : '—'}
-            </div>
-          </div>
-          <div className="card stat">
-            <div className="stat-label">{t('people.stat.received')}</div>
-            <div className="stat-value">
-              <Amount compact value={received} ccy={base} />
-            </div>
-            <div className="stat-sub">{t('people.stat.receivedSub')}</div>
-          </div>
-          <div className="card stat">
-            <div className="stat-label">{t('people.stat.count')}</div>
-            <div className="stat-value">
-              <span className="amt">{book.length}</span>
-            </div>
-            <div className="stat-sub">{copyParts(t('people.stat.countSub', { share: inShare, proxy: inProxy }))}</div>
-          </div>
-        </div>
+        <MetricCards>
+          <Metric
+            label={t('people.stat.owed')}
+            value={<Amount plain compact value={owed} ccy={base} />}
+            valueStyle={{ color: owed > 0 ? 'var(--orange)' : undefined }}
+            note={owing.length ? t('people.stat.owedSub', { count: owing.length }) : Number.isFinite(owed) ? t('people.stat.allSettled') : '—'}
+          />
+          <Metric label={t('people.stat.received')} value={<Amount compact value={received} ccy={base} />} note={t('people.stat.receivedSub')} />
+          <Metric
+            label={t('people.stat.count')}
+            value={<span className="amt">{book.length}</span>}
+            note={copyParts(t('people.stat.countSub', { share: inShare, proxy: inProxy }))}
+          />
+        </MetricCards>
         {book.length === 0 ? (
           <div className="card empty">
             <b>{t('people.empty.title')}</b>
@@ -498,20 +487,15 @@ function PersonSheet({
             )}
           </div>
         )}
-        <div className="proxy-facts">
-          <div>
-            <small>{t('people.sheet.owed')}</small>
-            <b className={l.owed > 0.005 ? 'warn' : 'done'}>{l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}</b>
-          </div>
-          <div>
-            <small>{t('people.sheet.received')}</small>
-            <b className="green">{flow(l.received, base, { compact: true })}</b>
-          </div>
-          <div>
-            <small>{t('people.sheet.last')}</small>
-            <b>{l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'}</b>
-          </div>
-        </div>
+        <MetricCards>
+          <Metric
+            label={t('people.sheet.owed')}
+            value={l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}
+            valueClassName={l.owed > 0.005 ? 'warn' : 'done'}
+          />
+          <Metric label={t('people.sheet.received')} value={flow(l.received, base, { compact: true })} valueClassName="green" />
+          <Metric label={t('people.sheet.last')} value={l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'} />
+        </MetricCards>
 
         <Group title={t('people.sheet.in', { count: l.items.length })} foot={l.items.length ? undefined : t('people.sheet.inEmpty')}>
           {l.items.map((i) => (

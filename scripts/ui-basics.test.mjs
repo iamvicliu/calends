@@ -997,3 +997,180 @@ test('connection setup hint is removed in every locale', () => {
     assert.equal(messages.setupHint, undefined, entry.name);
   }
 });
+
+const nestedCssRules = (css) => cssRules(css).flatMap(([selector, body]) => (selector.startsWith('@') ? nestedCssRules(body) : [[selector, body]]));
+
+function layoutChildren(children) {
+  const elements = [];
+  const scan = (node) => {
+    if (!node || typeof node !== 'object') return;
+    if (node.type === 'JSXElement') {
+      elements.push(node);
+      return;
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (['loc', 'range', 'comments', 'tokens'].includes(key)) continue;
+      if (Array.isArray(value)) value.forEach(scan);
+      else scan(value);
+    }
+  };
+  children.forEach(scan);
+  return elements;
+}
+
+function parallelMetricViolations(ast, source) {
+  const failures = [];
+  visit(ast, (node) => {
+    if (node.type !== 'JSXElement') return;
+    const opening = node.openingElement;
+    const classes = text(attr(opening, 'className')?.value, source);
+    if (/(?<![\w-])(?:stat|stat-value|stat-sub|[\w-]+-facts|[\w-]+-kpis|car-strip|stop-totals|mv-head|people-stats)(?![\w-])/.test(classes))
+      failures.push(classes);
+    const cells = layoutChildren(node.children).filter((child) => child.openingElement.name.name === 'div');
+    const metricLike = cells.filter((cell) => {
+      const tags = layoutChildren(cell.children).map((c) => c.openingElement.name.name);
+      return tags.includes('b') && (tags.includes('small') || tags.includes('span'));
+    });
+    if (metricLike.length > 1 && opening.name.name !== 'MetricCards' && !classes.includes('metric-grid'))
+      failures.push(`unshared metric cells: ${classes || opening.name.name} at ${node.range[0]}`);
+  });
+  return failures;
+}
+
+test('parallel metrics use the shared cards and slots, including previously independent page and sheet summaries', async () => {
+  for (const [file, ast, source] of sources) assert.deepEqual(parallelMetricViolations(ast, source), [], file);
+  const legacy = '<div className="custom-summary"><div><small>Paid</small><b>−10</b></div><div><small>Received</small><b>+20</b></div></div>';
+  assert.ok(parallelMetricViolations(await parsers.typescript.parse(legacy), legacy).length > 0);
+  const conditional = '<div><div><span>Saved</span><b>+10</b></div>{showLoss && <div><span>Loss</span><b>—</b></div>}</div>';
+  assert.ok(parallelMetricViolations(await parsers.typescript.parse(conditional), conditional).length > 0);
+  const shared = '<MetricCards><Metric label="Paid" value="−10" /><Metric label="Received" value="+20" /></MetricCards>';
+  assert.deepEqual(parallelMetricViolations(await parsers.typescript.parse(shared), shared), []);
+  for (const [file, css] of styleSources) {
+    if (file.startsWith('public/')) continue;
+    for (const [selector, body] of nestedCssRules(css)) {
+      if (!selector.includes('.metric-') || !/font-|grid-template|padding|border-radius|background:/.test(body)) continue;
+      assert.equal(file, 'components/ui.css', `${file}: metric presentation must have one owner`);
+    }
+  }
+});
+
+test('metric slots retain negative, zero and unavailable amounts, notes and semantic colors without inventing data', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'components/ui.tsx');
+  const functions = ['MetricCards', 'Metric'].map((name) => source.slice(...functionRange(ast, name))).join('\n');
+  const result = transformSync('ui.tsx', functions, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  assert.equal(result.fatal, false);
+  const { Metric, MetricCards } = new Function('React', 'Children', `${result.code}; return { Metric, MetricCards };`)(React, React.Children);
+  assert.equal(renderToStaticMarkup(React.createElement(MetricCards, null, false, null)), '');
+  const html = renderToStaticMarkup(
+    React.createElement(
+      MetricCards,
+      null,
+      React.createElement(Metric, { label: 'Cost', value: '−¥10.00', valueClassName: 'loss', note: 'Original period', 'aria-label': 'Historical cost' }),
+      React.createElement(Metric, { label: 'Received', value: '+¥20.00', valueClassName: 'done' }),
+      React.createElement(Metric, { label: 'Due', value: '¥0.00', valueClassName: 'warn' }),
+      React.createElement(Metric, { label: 'Unavailable', value: '—', note: 'Missing FX' }),
+    ),
+  );
+  for (const value of ['−¥10.00', '+¥20.00', '¥0.00', '—', 'Original period', 'Missing FX']) assert.ok(html.includes(value));
+  assert.match(html, /aria-label="Historical cost"/);
+  assert.match(html, /class="metric-value loss"/);
+  assert.match(html, /class="metric-value done"/);
+  assert.match(html, /class="metric-value warn"/);
+  const css = readFileSync(new URL('components/ui.css', root), 'utf8');
+  assert.match(css, /\.metric-value,[\s\S]*?font-weight:\s*650/);
+  const rules = nestedCssRules(css);
+  const frame = rules.find(([selector]) => selector === '.metric-cards')[1];
+  const cell = rules.find(([selector]) => selector === '.metric-grid > div')[1];
+  assert.doesNotMatch(frame, /background:|box-shadow:|border:/);
+  assert.match(cell, /background:\s*var\(--card\)/);
+  assert.match(cell, /border-radius:\s*var\(--radius-md\)/);
+  assert.match(css, /repeat\(var\(--metric-columns\), minmax\(0, 1fr\)\)/);
+  assert.doesNotMatch(css, /margin-inline-start:|inset var\(--hairline\) 0/);
+  assert.match(css, /\.metric-grid > div > b:is\(\.done, \.gain, \.green\)\s*\{\s*color: var\(--green\)/);
+  for (const count of [1, 2, 3, 4, 5]) {
+    const cards = renderToStaticMarkup(
+      React.createElement(
+        MetricCards,
+        null,
+        false,
+        Array.from({ length: count }, (_, key) => React.createElement(Metric, { key, label: 'Due', value: '—' })),
+      ),
+    );
+    assert.ok(cards.includes(`--metric-columns:${Math.min(4, count)}`));
+  }
+  const accessory = renderToStaticMarkup(React.createElement(Metric, { label: 'Monthly', value: '−10', accessory: React.createElement('span', null, '−5%') }));
+  assert.match(accessory, /metric-top[\s\S]*?Monthly[\s\S]*?−5%[\s\S]*?metric-value[\s\S]*?−10/);
+
+  assert.match(css, /@container \(max-width: 520px\)[\s\S]*?repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css, /@container \(max-width: 300px\)[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\)/);
+});
+
+// Adjacent full-size action buttons differ from field controls, pickers, table rows
+// and disclosure buttons. Look through conditional JSX, but never through a new layout container.
+function sheetActionViolations(ast, source, sharedForm = false) {
+  const failures = [];
+  const scan = (node, inSheet = sharedForm) => {
+    if (!node || typeof node !== 'object') return;
+    if (node.type === 'JSXElement') {
+      inSheet ||= node.openingElement.name.name === 'Sheet';
+      if (inSheet && ['div', 'span'].includes(node.openingElement.name.name)) {
+        const buttons = [];
+        const direct = (child) => {
+          if (!child || typeof child !== 'object') return;
+          if (child.type === 'JSXElement') {
+            const o = child.openingElement;
+            if (['button', 'a'].includes(o.name.name) && /(?<![\w-])btn(?![\w-])/.test(text(attr(o, 'className')?.value, source))) buttons.push(child);
+            return;
+          }
+          for (const [key, value] of Object.entries(child)) {
+            if (['loc', 'range', 'comments', 'tokens'].includes(key)) continue;
+            if (Array.isArray(value)) value.forEach(direct);
+            else direct(value);
+          }
+        };
+        node.children.forEach(direct);
+        if (
+          buttons.filter((b) => !attr(b.openingElement, 'aria-pressed')).length > 1 &&
+          !/\bsheet-actions\b/.test(text(attr(node.openingElement, 'className')?.value, source))
+        )
+          failures.push('action row missing sheet-actions');
+        if (
+          /\bsheet-actions\b/.test(text(attr(node.openingElement, 'className')?.value, source)) &&
+          /justifyContent|flexDirection|flexWrap/.test(text(attr(node.openingElement, 'style'), source))
+        )
+          failures.push('local action alignment');
+      }
+    }
+    for (const [key, value] of Object.entries(node)) {
+      if (['loc', 'range', 'comments', 'tokens'].includes(key)) continue;
+      if (Array.isArray(value)) value.forEach((child) => scan(child, inSheet));
+      else scan(value, inSheet);
+    }
+  };
+  scan(ast);
+  return failures;
+}
+
+test('sheet and embedded form action rows use one right-aligned container with the primary action last', async () => {
+  for (const [file, ast, source] of sources) {
+    assert.deepEqual(sheetActionViolations(ast, source, ['components/ChangePanel.tsx', 'components/StopPanel.tsx'].includes(file)), [], file);
+  }
+  const bad = '<Sheet><div className="row"><button className="btn">Edit</button><button className="btn primary">Save</button></div></Sheet>';
+  assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(bad), bad), ['action row missing sheet-actions']);
+  const good = bad.replace('className="row"', 'className="sheet-actions"');
+  assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(good), good), []);
+  const ui = readFileSync(new URL('components/ui.tsx', root), 'utf8');
+  assert.match(ui, /className="sheet-foot sheet-actions"/);
+  const detail = readFileSync(new URL('views/Detail.tsx', root), 'utf8');
+  assert.match(detail, /className="sheet-actions dt-actions"/);
+  const css = readFileSync(new URL('components/ui.css', root), 'utf8');
+  assert.match(css, /\.sheet-actions\s*\{[^}]*justify-content:\s*flex-end/);
+  assert.match(css, /\.sheet-actions > :is\(\.primary, \.danger-solid\)\s*\{\s*order:\s*1/);
+  for (const [file, css] of styleSources) {
+    if (file.startsWith('public/')) continue;
+    for (const [selector, body] of nestedCssRules(css)) {
+      if (/\.(?:dt-actions|sheet-foot|copy-actions|change-actions|stop-actions|pubs-acts)(?![\w-])/.test(selector))
+        assert.doesNotMatch(body, /justify-content:\s*|flex-wrap:\s*|grid-template-columns:\s*/, `${file}: local action layout ${selector}`);
+    }
+  }
+});

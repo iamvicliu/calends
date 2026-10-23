@@ -461,16 +461,6 @@ a {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-
-/* 小组件式统计卡 */
-.stat {
-  padding: 14px 16px 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  position: relative;
-  overflow: hidden;
-}
 .stat-label {
   font-size: var(--fs-2);
   color: var(--label-2);
@@ -484,11 +474,6 @@ a {
   width: 14px;
   height: 14px;
 }
-.stat-value {
-  font-size: var(--fs-4);
-  line-height: 1.15;
-  margin-top: 8px;
-}
 .amt.car-plan-count {
   display: flex;
   flex-wrap: wrap;
@@ -498,29 +483,9 @@ a {
 .car-plan-count > span {
   white-space: nowrap;
 }
-.stat-sub {
-  font-size: var(--fs-1);
-  line-height: 1.35;
-  color: var(--label-2);
-  /* 长语言可以换行，不截断 */
-  overflow-wrap: anywhere;
-}
 @media (max-width: 680px) {
-  .stat {
-    padding: 11px 12px 12px;
-    border-radius: var(--radius-lg);
-  }
   .stat-label {
     font-size: var(--fs-1);
-  }
-  .stat-value {
-    font-size: var(--fs-3);
-    margin-top: 6px;
-  }
-  /* 窄屏空间有限：说明、提示类的小字只在宽屏显示（.m-hide 可用在任何这类文字上） */
-  .stat-sub,
-  .cash-facts small {
-    display: none;
   }
   /* 工具类：要压过各组件里写了 display 的选择器 */
   .m-hide {
@@ -1595,11 +1560,6 @@ a {
 .sheet-foot {
   position: sticky;
   bottom: 0;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  /* 按钮统一靠右；「删除」之类放在 .grow 左边 */
-  justify-content: flex-end;
   padding: 12px 18px calc(12px + var(--safe-b));
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(18px);
@@ -1928,29 +1888,6 @@ select.btn {
   background: color-mix(in srgb, var(--green-9) 14%, transparent);
   color: var(--green-11);
 }
-.hero-facts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 18px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: var(--hairline) solid var(--sep);
-}
-.hero-facts div {
-  display: flex;
-  flex-direction: column;
-}
-.hero-facts b {
-  font-family: var(--font-num);
-  font-size: var(--fs-3);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-.hero-facts span {
-  font-size: var(--fs-1);
-  color: var(--label-2);
-}
 .hero-r {
   min-width: 0;
   display: flex;
@@ -2201,45 +2138,6 @@ select.btn {
     grid-template-columns: 1fr;
   }
 }
-.cash-facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-@media (max-width: 900px) {
-  .cash-facts {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-}
-.cash-facts > div {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  background: var(--fill-2);
-}
-.cash-facts > div > span:first-child {
-  font-size: var(--fs-1);
-  color: var(--label-2);
-}
-.cash-facts b {
-  font-size: var(--fs-3);
-  margin: 2px 0;
-}
-.cash-facts small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
-@media (max-width: 680px) {
-  .cash-facts b {
-    font-size: var(--fs-3);
-  }
-  .cash-facts > div {
-    padding: 8px 9px;
-  }
-}
 /* 退订与停用 */
 .stop-basis {
   margin: -4px 0 16px;
@@ -2247,34 +2145,12 @@ select.btn {
   font-size: var(--fs-1);
   line-height: 1.5;
 }
-.stop-totals {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.stop-totals > div {
-  min-width: 0;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: var(--fill-2);
-}
-.stop-totals > div > span,
-.stop-totals > div > small,
 .stop-info small,
 .stop-amount small {
   display: block;
   color: var(--label-2);
   font-size: var(--fs-1);
   line-height: 1.5;
-}
-.stop-totals > div > b {
-  display: block;
-  font-size: var(--fs-4);
-  margin: 4px 0;
-  overflow-wrap: anywhere;
-}
-.stop-totals .amt {
-  white-space: normal;
 }
 .stop-list-title {
   margin: 20px 0 6px;
@@ -2337,12 +2213,6 @@ select.btn {
   overflow-wrap: anywhere;
 }
 @media (max-width: 680px) {
-  .stop-totals {
-    gap: 8px;
-  }
-  .stop-totals > div {
-    padding: 10px;
-  }
   .stop-row {
     gap: 8px;
     grid-template-columns: 32px minmax(0, 1fr) minmax(0, auto);
@@ -2718,35 +2588,6 @@ select.btn {
   height: 100%;
   border-radius: var(--radius-sm);
   background: var(--gray-2);
-}
-.rv-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
-.rv-grid > div {
-  background: color-mix(in srgb, var(--white-a12) 8%, transparent);
-  border-radius: var(--radius-lg);
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.rv-grid small {
-  font-size: var(--fs-1);
-  opacity: 0.7;
-}
-.rv-grid b {
-  font-size: var(--fs-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.rv-grid span {
-  font-size: var(--fs-1);
-  opacity: 0.8;
 }
 .rv-foot {
   text-align: center;
@@ -3864,12 +3705,6 @@ button.h-price-row:focus-visible {
   outline: var(--hairline) solid var(--focus-ring);
   outline-offset: 2px;
 }
-.change-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  grid-column: 1 / -1;
-}
 
 /* ================================================================
    日期选择器
@@ -4300,25 +4135,6 @@ button.h-price-row:focus-visible {
 .stmt-spark path:first-child {
   opacity: 0.5;
 }
-.stmt-facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 20px;
-  margin-top: auto;
-  padding-top: 18px;
-  border-top: var(--hairline) solid var(--line);
-}
-.stmt-facts b {
-  display: block;
-  font-size: var(--fs-3);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-.stmt-facts span {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
 /* 已付金额下的补充说明预留两行，零损失时其余格子仍保持对齐。 */
 .stmt-paid-note {
   min-height: 32px;
@@ -4707,35 +4523,6 @@ button.h-price-row:focus-visible {
 }
 
 /* 代付：三项小结 + 每期一行（日期 · 实扣 · 收回） */
-.proxy-facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.proxy-facts > div {
-  background: var(--fill-2);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.proxy-facts small {
-  font-size: var(--fs-1);
-  color: var(--label-2);
-}
-.proxy-facts b {
-  font-size: var(--fs-3);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.proxy-facts b.warn {
-  color: var(--orange);
-}
 
 /* 全站隐藏滚动条（页面、侧边栏、弹窗、横向滚动区），保留滚动能力 */
 * {
@@ -5139,9 +4926,6 @@ button.h-price-row:focus-visible {
   min-width: 0;
   flex-wrap: wrap;
 }
-.proxy-facts b.done {
-  color: var(--green);
-}
 /* 状态胶囊只说进度：绿点进行中、橙点待收、红色已停止 */
 .ph-status {
   display: inline-flex;
@@ -5185,13 +4969,13 @@ button.h-price-row:focus-visible {
 /* 已停止：整卡去色变淡，只有右上角的状态胶囊保留颜色 */
 .proxy-card.stopped .proxy-head,
 .proxy-card.stopped .ph-chips,
-.proxy-card.stopped .proxy-facts {
+.proxy-card.stopped .metric-cards {
   filter: grayscale(1);
   opacity: 0.5;
 }
 .proxy-card > .proxy-top,
 .proxy-card > .ph-chips,
-.proxy-card > .proxy-facts {
+.proxy-card > .metric-cards {
   position: relative;
   z-index: 1;
 }
@@ -5260,12 +5044,6 @@ button.h-price-row:focus-visible {
   opacity: 0.5;
   cursor: default;
 }
-.copy-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
 
 /* 联系方式：渠道 + 账号 */
 .contact-field {
@@ -5309,7 +5087,6 @@ button.h-price-row:focus-visible {
   flex-direction: column;
   gap: 8px;
 }
-.proxy-facts b.gain,
 .car-actual b.gain {
   color: var(--green);
 }
@@ -5575,17 +5352,6 @@ a.car-toggle {
   font-size: var(--fs-1);
   color: var(--label-3);
 }
-.proxy-facts.four {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.proxy-facts b.loss {
-  color: var(--red);
-}
-@media (max-width: 560px) {
-  .proxy-facts.four {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 .ld-table {
   border-radius: var(--radius-lg);
   background: var(--card);
@@ -5689,10 +5455,6 @@ a.car-toggle {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
     align-items: start;
-  }
-  .ld-top .proxy-facts.four {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    height: 100%;
   }
   .ld-row {
     grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 96px;
@@ -6132,18 +5894,6 @@ a.car-toggle {
 }
 .tl-head .sec-title {
   white-space: nowrap;
-}
-
-/* 手机上三格并排的统计：金额再收一号，免得顶到卡片边缘 */
-@media (max-width: 430px) {
-  .g-3 .stat {
-    padding: 10px 10px 11px;
-  }
-  .g-3 .stat-value {
-    font-size: var(--fs-3);
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-  }
 }
 
 /* ---------------- 分享年度回顾 ---------------- */
@@ -7196,31 +6946,6 @@ a.car-toggle {
   letter-spacing: -0.04em;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
-}
-.sc-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 18px;
-}
-.sc-grid > div {
-  padding: 10px 12px;
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--white-a12) 8%, transparent);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.sc-grid small {
-  font-size: var(--fs-1);
-  opacity: 0.65;
-}
-.sc-grid b {
-  font-size: var(--fs-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .sc-bar {
   position: relative;
@@ -8611,41 +8336,6 @@ a.car-toggle {
   height: var(--ctl-h-md);
   font-size: var(--fs-1);
 }
-.car-facts {
-  width: 100%;
-  border: 0;
-  border-top: var(--hairline) solid var(--sep);
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  padding: 12px 0 0;
-  font-variant-numeric: tabular-nums;
-}
-.car-facts > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.car-facts small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
-.car-facts b {
-  font-size: var(--fs-2);
-  font-weight: 600;
-}
-.car-facts b.gain {
-  color: var(--green);
-}
-.car-facts b.loss {
-  color: var(--red);
-}
 .car-card .car-actual {
   margin-top: 0;
 }
@@ -8658,8 +8348,7 @@ a.car-toggle {
 .car-card .ph-status {
   align-self: flex-start;
 }
-.car-card.stopped .car-facts b.gain,
-.car-card.stopped .car-facts b.loss {
+.car-card.stopped .metric-grid > div > b:is(.gain, .loss) {
   color: var(--label-2);
 }
 
@@ -8765,15 +8454,12 @@ a.car-toggle {
   color: var(--label-3);
   white-space: nowrap;
 }
-
-/* 日历右栏顶部的本月指标卡 */
 .cal-stat {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.cal-stat > small,
-.cal-stat-split small {
+.cal-stat > small {
   font-size: var(--fs-1);
   color: var(--label-3);
 }
@@ -8788,8 +8474,7 @@ a.car-toggle {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
-.cal-stat-big span,
-.cal-stat-split span {
+.cal-stat-big span {
   font-size: var(--fs-1);
   color: var(--label-3);
 }
@@ -8804,22 +8489,6 @@ a.car-toggle {
   height: 100%;
   border-radius: var(--radius-sm);
   background: var(--label);
-}
-.cal-stat-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 2px;
-  font-variant-numeric: tabular-nums;
-}
-.cal-stat-split > div {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.cal-stat-split b {
-  font-size: var(--fs-2);
-  font-weight: 600;
 }
 
 /* 合租弹窗：小节标题、成员、收款表 */
@@ -8960,12 +8629,7 @@ a.car-toggle {
 .car-head {
   cursor: inherit;
 }
-.car-facts {
-  cursor: inherit;
-}
 
-/* 合租弹窗的四格：标签在上、数字在下，格子被左边信息撑高时不留一截空白 */
-/* 合租详情指标条：一张卡里三格，竖向细线分隔；标签 / 数字 / 说明三层，数字用中等字重 */
 /* 成员时间条：已付实心、欠收红色斜纹、下一期浅灰斜纹，今天一条竖线 */
 .mt-head {
   position: relative;
@@ -9026,55 +8690,6 @@ a.car-toggle {
   width: 1px;
   background: var(--red);
 }
-.car-strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
-}
-.car-strip > div {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-  padding: 16px 20px;
-}
-.car-strip > div + div {
-  box-shadow: inset var(--hairline) 0 0 var(--sep);
-}
-.car-strip small {
-  color: var(--label-2);
-  font-size: var(--fs-1);
-}
-.car-strip b {
-  font-size: var(--fs-4);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-}
-.car-strip span {
-  color: var(--label-3);
-  font-size: var(--fs-1);
-}
-.car-strip b.done {
-  color: var(--green);
-}
-.car-strip b.loss {
-  color: var(--red);
-}
-.car-strip b.warn {
-  color: var(--orange);
-}
-@media (max-width: 680px) {
-  /* 窄屏仍三格并排，数字降一档，说明可换行 */
-  .car-strip > div {
-    padding: 12px;
-  }
-  .car-strip b {
-    font-size: var(--fs-3);
-  }
-}
 .car-total {
   display: inline-flex;
   align-items: baseline;
@@ -9127,10 +8742,6 @@ a.car-toggle {
   font-size: var(--fs-1);
   color: var(--label-3);
 }
-.car-facts b.warn {
-  color: var(--orange);
-  font-size: var(--fs-2);
-}
 
 /* 国旗图片（不用 emoji）：和文字基线对齐 */
 .flag-img {
@@ -9164,48 +8775,6 @@ img.mm-flag {
 }
 
 /* 报告 · 月度变动：一句结论 + 变化来源（横条只在各项之间比大小） */
-.mv-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  margin: 4px 0 14px;
-}
-.mv-head > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.mv-head small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
-.mv-head b {
-  font-size: var(--fs-4);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-.mv-delta {
-  align-items: flex-end;
-  text-align: right;
-}
-.mv-delta b {
-  font-size: var(--fs-3);
-}
-.mv-delta.up b {
-  color: var(--red);
-}
-.mv-delta.down b {
-  color: var(--green);
-}
-.mv-delta em {
-  margin-left: 6px;
-  font-style: normal;
-  font-size: var(--fs-1);
-  font-weight: 600;
-  opacity: 0.8;
-}
 .mv-rows {
   display: flex;
   flex-direction: column;
@@ -9281,9 +8850,6 @@ img.mm-flag {
 .dt-copy:hover {
   text-decoration-color: var(--label-3);
 }
-.hero-facts b.gain {
-  color: var(--green);
-}
 
 /* 设置 · 侧边栏模块：把手 + 名称 + 开关 */
 .nav-row {
@@ -9323,9 +8889,6 @@ img.mm-flag {
 }
 .stop-summary b {
   font-weight: 500;
-}
-.stop-actions {
-  justify-content: flex-end;
 }
 /* 停用 / 退款说明里的金额：损失红色、已退款绿色，与时间轴灰段金额同色 */
 .stop-money {
@@ -9494,10 +9057,6 @@ img.mm-flag {
   .mp-btn {
     min-height: var(--ctl-h-md);
   }
-}
-
-.stop-totals > :only-child {
-  grid-column: 1 / -1;
 }
 
 /* 表单单元格里的输入框是无边框行内样式，聚焦靠光标即可，不再套深色粗框；

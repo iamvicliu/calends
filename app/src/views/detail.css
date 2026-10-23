@@ -237,8 +237,6 @@
   color: var(--tint);
 }
 .dt-actions {
-  display: flex;
-  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -337,51 +335,6 @@
 }
 .dt-aside .seg {
   margin: 0;
-}
-
-/* 指标卡 */
-.dt-kpis {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.dt-kpi {
-  padding: 14px 16px 16px;
-  display: flex;
-  flex-direction: column;
-  background: var(--dt-panel);
-}
-.dt-kpi-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  min-height: 22px;
-}
-.dt-kpi-top small {
-  font-size: var(--fs-1);
-  color: var(--label-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dt-kpi-val {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 6px;
-}
-.dt-kpi-val b {
-  font-size: var(--fs-3);
-  line-height: 30px;
-  font-weight: 650;
-  letter-spacing: -0.025em;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
 }
 
 /* 走势 */
@@ -982,9 +935,6 @@
   }
   .dt-actions {
     grid-area: act;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
     margin-top: 4px;
   }
   .dt-act {
@@ -1014,48 +964,6 @@
   }
   .dt-panel {
     padding: 14px 14px 16px;
-  }
-  /* 三张指标卡并排，角标换到数字下面 */
-  .dt-kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-  }
-  .dt-kpi {
-    padding: 10px 12px 12px;
-  }
-  .dt-kpi-top {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .dt-kpi-top .dt-badge {
-    order: 2;
-    margin-top: 6px;
-  }
-  .dt-kpi {
-    display: grid;
-    grid-template-areas: 'label' 'val' 'badge';
-    align-content: start;
-  }
-  .dt-kpi-top {
-    display: contents;
-  }
-  .dt-kpi-top small {
-    grid-area: label;
-  }
-  .dt-kpi-top .dt-badge {
-    grid-area: badge;
-    justify-self: start;
-    height: 20px;
-    padding: 0 6px;
-    font-size: var(--fs-1);
-  }
-  .dt-kpi-val {
-    grid-area: val;
-    margin-top: 2px;
-  }
-  .dt-kpi-val b {
-    font-size: var(--fs-3);
-    line-height: 24px;
   }
   .dt-charges .dt-tbl {
     width: calc(100% - 28px);
@@ -1098,9 +1006,6 @@
     gap: 16px;
     align-items: start;
   }
-  .dt-kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 @media (min-width: 641px) and (max-width: 999px) {
   .sheet.bare:has(.dt) {
@@ -1129,15 +1034,11 @@
   .dt.compact .dt-actions {
     order: 3;
     flex-basis: 100%;
-    flex-wrap: wrap;
   }
   .dt.compact .dt-body {
     display: flex;
     /* 宽屏两栏的 align-items: start 会让单列里的卡片缩成内容宽度 */
     align-items: stretch;
-  }
-  .dt.compact .dt-kpis {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1165,18 +1066,12 @@
   .dt-actions {
     order: 2;
     width: 100%;
-    flex-wrap: wrap;
   }
 }
 @media (max-width: 640px) {
   /* 复制为图片只在桌面端提供 */
   .dt-actions .desk {
     display: none;
-  }
-  .dt-actions {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-    row-gap: 14px;
   }
   .dt-act-l {
     white-space: normal;

@@ -40,6 +40,8 @@ const state = {
   fx: { base: 'USD', rates: { CNY: 7, USD: 1 }, fetchedAt: today },
   methods: [],
 };
+// 合租详情的指标卡（MetricCards 里的每一格）
+const metricCells = (html) => (html.split('class="metric-cards"')[1] ?? '').split('car-sheet-sec')[0].split('<small>').length - 1;
 const passthrough = ({ children }) => React.createElement('span', null, children);
 const noop = () => null;
 function compile(names, extra = {}) {
@@ -73,6 +75,7 @@ function compile(names, extra = {}) {
     SubIcon: noop,
     Icon: noop,
     IconButton: noop,
+    MetricCards: ({ children }) => React.createElement('div', { className: 'metric-cards' }, children),
     Eye: noop,
     EyeOff: noop,
     Seg: noop,
@@ -148,7 +151,7 @@ test('详情复用累计实付、净收款与盈亏；待收为零时只呈现�
     ]);
     const book = carpool.carLedger(state, s, today);
     const html = renderToStaticMarkup(React.createElement(CarSheet, { state, s, today, ro: false, book, onClose() {}, onOpenSub() {}, onMember() {} }));
-    assert.match(html, new RegExp(`grid-template-columns:repeat\\(${settled ? 3 : 4},`));
+    assert.equal(metricCells(html), settled ? 3 : 4);
     assert.equal((html.match(/<small>Paid<\/small>/g) ?? []).length, 1);
     assert.equal((html.match(/<small>Received<\/small>/g) ?? []).length, 1);
     assert.match(html, new RegExp(format.flow(book.received, 'CNY', { compact: true }).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -167,7 +170,7 @@ test('零盈亏保持中性，亏损为红色，缺失汇率不隐藏尚未确�
   assert.doesNotMatch(render(state, { ...book, net: 0 }), /class="loss"|class="done"/);
   const unavailable = { ...state, settings: { ...state.settings, baseCurrency: 'USD' }, fx: { base: 'USD', rates: {}, fetchedAt: today } };
   const html = render(unavailable, carpool.carLedger(unavailable, s, today));
-  assert.match(html, /grid-template-columns:repeat\(4,/);
+  assert.equal(metricCells(html), 4);
   assert.match(html, /—/);
 });
 

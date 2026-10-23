@@ -5,7 +5,7 @@ import './ui.css';
 import { createPortal } from 'react-dom';
 import { tooltipPosition } from './tooltip-position.ts';
 import { base } from '../base.ts';
-import type { ReactNode as ComponentChildren, JSX } from 'react';
+import type { ReactNode as ComponentChildren, CSSProperties, HTMLAttributes, JSX } from 'react';
 import {
   Button as AriaButton,
   Tooltip,
@@ -18,7 +18,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from 'react-aria-components';
-import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
+import { Children, Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
 import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
@@ -431,6 +431,53 @@ export function Seg<T extends string>({
   );
 }
 
+/** 独立灰底指标卡；等宽排列并随容器换行，金额与颜色由调用处提供。 */
+export function MetricCards({ children }: { children: ComponentChildren }) {
+  const count = Children.toArray(children).length;
+  if (count === 0) return null;
+  return (
+    <div className="metric-cards" style={{ '--metric-columns': Math.min(4, count) } as CSSProperties} data-count={count}>
+      <div className="metric-grid">{children}</div>
+    </div>
+  );
+}
+
+export function Metric({
+  label,
+  value,
+  note,
+  accessory,
+  valueClassName = '',
+  valueStyle,
+  noteStyle,
+  ...props
+}: {
+  label: ComponentChildren;
+  value: ComponentChildren;
+  note?: ComponentChildren;
+  accessory?: ComponentChildren;
+  valueClassName?: string;
+  valueStyle?: CSSProperties;
+  noteStyle?: CSSProperties;
+} & Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'className'>) {
+  return (
+    <div {...props} className="metric">
+      <div className="metric-top">
+        <small>{label}</small>
+        {accessory}
+      </div>
+      <div className={`metric-value ${valueClassName}`} style={valueStyle}>
+        {value}
+      </div>
+      {note != null && (
+        <div className="metric-note" style={noteStyle}>
+          {note}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** 页面工具栏：桌面端为半透明窗口工具栏，手机端为大标题 */
 export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
   return (
@@ -505,7 +552,7 @@ export function Sheet(props: {
             </div>
           )}
           <div className="sheet-body">{props.children}</div>
-          {props.foot && <div className="sheet-foot">{copyParts(props.foot)}</div>}
+          {props.foot && <div className="sheet-foot sheet-actions">{copyParts(props.foot)}</div>}
         </Dialog>
       </Modal>
     </ModalOverlay>

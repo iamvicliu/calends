@@ -73,16 +73,16 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
         {url ? (
           <>
             <div className="codebox">{url}</div>
-            <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-              <a className="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
-                <Icon name="cal" /> {t('app.ics.subscribe')}
-              </a>
+            <div className="sheet-actions">
               <button className="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast(t('app.ics.copied')))}>
                 {t('app.ics.copy')}
               </button>
               <button className="btn ghost" onClick={() => run(rotateIcs, t('app.ics.resetDone'))}>
                 {t('app.ics.reset')}
               </button>
+              <a className="btn primary" href={url.replace(/^https?:/, 'webcal:')}>
+                <Icon name="cal" /> {t('app.ics.subscribe')}
+              </a>
             </div>
           </>
         ) : (

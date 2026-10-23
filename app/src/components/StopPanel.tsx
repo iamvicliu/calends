@@ -102,13 +102,13 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
   return (
     <div className="stop-panel">
       <StopFields sub={sub} today={today} value={form} onChange={setForm} />
-      <div className="cell stop-actions">
+      <div className="cell sheet-actions">
         {sub.end && (
           <button type="button" className="btn" onClick={() => onApply(reactivate(sub, today))}>
             {t('core.stop.restore')}
           </button>
         )}
-        <button type="button" className="btn" onClick={apply}>
+        <button type="button" className="btn primary" onClick={apply}>
           {t('core.stop.title')}
         </button>
       </div>

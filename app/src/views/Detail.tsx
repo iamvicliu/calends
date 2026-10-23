@@ -36,7 +36,7 @@ import type { AppState, Payment, ShareMember, Subscription } from '../../../shar
 import { CarSheet } from './Carpool.tsx';
 import { carLedger, MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { CardTitle, IconButton, CatIcon, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
+import { MetricCards, Metric, CardTitle, IconButton, CatIcon, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
 import { catColor, presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
@@ -108,6 +108,7 @@ function Act({
   href,
   round,
   desk,
+  primary,
 }: {
   icon: ReactNode;
   label: string;
@@ -115,6 +116,7 @@ function Act({
   href?: string;
   round?: boolean;
   desk?: boolean;
+  primary?: boolean;
 }) {
   const inner = (
     <>
@@ -122,7 +124,7 @@ function Act({
       <span className="dt-act-l">{label}</span>
     </>
   );
-  const cls = `${round ? 'icon-btn dt-round' : 'dt-act'} ${desk ? 'desk' : ''}`;
+  const cls = `${round ? 'icon-btn dt-round' : 'btn dt-act'} ${primary ? 'primary' : ''} ${desk ? 'desk' : ''}`;
   return href ? (
     <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
       {inner}
@@ -235,7 +237,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   );
   const actions = (
     <>
-      {!ro && <Act icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
       {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
         <Act
           icon={paused ? <Play size={15} /> : <Pause size={15} />}
@@ -261,6 +262,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         <Act icon={<Copy size={15} />} label={t('detail.action.copyImage')} onClick={() => copyImage(root.current!)} round desk />
       )}
       <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
+      {!ro && <Act primary icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
     </>
   );
 
@@ -292,7 +294,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             <CatTag cat={sub.category} />
           </div>
         </div>
-        <div className="dt-actions">{actions}</div>
+        <div className="sheet-actions dt-actions">{actions}</div>
         <IconButton className="dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')}>
           <X size={17} />
         </IconButton>
@@ -407,37 +409,19 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
           : t('detail.stats.days', { count: active });
 
   return (
-    <div className="dt-kpis" style={history.length === 1 ? { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } : undefined}>
-      {history.length !== 1 && (
-        <div className="dt-panel dt-kpi">
-          <div className="dt-kpi-top">
-            <small>{t('detail.stats.spent')}</small>
-          </div>
-          <div className="dt-kpi-val">
-            <b>{flow(-total, base, { compact: true })}</b>
-          </div>
-        </div>
-      )}
-      <div className="dt-panel dt-kpi">
-        <div className="dt-kpi-top">
-          <small>{lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}</small>
-          {gaps > 0 && <span className="dt-badge warn">{t('detail.stats.gaps', { count: gaps })}</span>}
-        </div>
-        <div className="dt-kpi-val">
-          <b>{duration}</b>
-        </div>
-      </div>
-      <div className="dt-panel dt-kpi">
-        <div className="dt-kpi-top">
-          <small>{lifetime ? t('detail.kpi.amortized') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}</small>
-          {!lifetime && <Trend pct={perTrend} />}
-        </div>
-        <div className="dt-kpi-val">
-          {/* 买断：花的钱摊到拥有的每个月，越用越便宜 */}
-          <b>{flow(-(lifetime ? total / Math.max(1, active / 30.44) : perMonth), base, { compact: true })}</b>
-        </div>
-      </div>
-    </div>
+    <MetricCards>
+      {history.length !== 1 && <Metric label={t('detail.stats.spent')} value={flow(-total, base, { compact: true })} />}
+      <Metric
+        label={lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
+        value={duration}
+        accessory={gaps > 0 ? <span className="dt-badge warn">{t('detail.stats.gaps', { count: gaps })}</span> : undefined}
+      />
+      <Metric
+        label={lifetime ? t('detail.kpi.amortized') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}
+        value={flow(-(lifetime ? total / Math.max(1, active / 30.44) : perMonth), base, { compact: true })}
+        accessory={!lifetime ? <Trend pct={perTrend} /> : undefined}
+      />
+    </MetricCards>
   );
 }
 
