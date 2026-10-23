@@ -111,14 +111,13 @@ function PileStage({
         Bodies.rectangle(left + W + 50, top + wallH / 2, 100, wallH, wall),
       ]);
 
-      // 从当前屏幕的顶端依次落下：先大后小，大的垫底更像真的堆起来
+      // 先在屏幕外解算静态排布，避免加载时装饰性掉落。
       const order = items.map((_, i) => i).sort((a, b) => sz[b] - sz[a]);
       const bodies: Array<Matter.Body | null> = items.map(() => null);
-      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       const drop = (i: number, n: number) => {
         const s = sz[i];
         const x = left + s / 2 + 8 + ((n * 0.6180339) % 1) * Math.max(1, W - s - 16);
-        const y = reduce ? floor - s * (1 + n * 0.5) : scrollY - s;
+        const y = floor - s * (1 + n * 0.5);
         const b = Bodies.rectangle(x, y, s, s, {
           chamfer: { radius: s * 0.22 },
           restitution: 0.2,
@@ -136,11 +135,8 @@ function PileStage({
           node.style.visibility = 'visible';
         }
       };
-      const timers: number[] = [];
-      if (reduce) {
-        order.forEach((i, n) => drop(i, n));
-        for (let n = 0; n < 900; n++) Engine.update(engine, 1000 / 60);
-      } else order.forEach((i, n) => timers.push(window.setTimeout(() => drop(i, n), n * 70)));
+      order.forEach((i, n) => drop(i, n));
+      for (let n = 0; n < 900; n++) Engine.update(engine, 1000 / 60);
 
       removeRef.current = (i: number) => {
         const b = bodies[i];
@@ -176,7 +172,6 @@ function PileStage({
       };
       raf = requestAnimationFrame(tick);
       cleanup = () => {
-        timers.forEach(clearTimeout);
         Composite.clear(engine.world, false);
         Engine.clear(engine);
       };
@@ -213,7 +208,7 @@ function PileStage({
             removeRef.current(i);
           }}
         >
-          <AppIcon sub={x.s} size={side[i]} eager className="size-full rounded-[22%] shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)]" />
+          <AppIcon sub={x.s} size={side[i]} eager className="size-full rounded-md " />
         </div>
       ))}
     </div>,

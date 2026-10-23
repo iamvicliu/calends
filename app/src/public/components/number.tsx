@@ -13,6 +13,7 @@ export function Num({ value, prefix, suffix, ccy, digits = ccy ? currencyDecimal
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    el.animated = false;
     el.locales = 'en-US';
     el.format = { maximumFractionDigits: ccy && currencyDecimals(ccy) === 0 ? 0 : digits, minimumFractionDigits: ccy && currencyDecimals(ccy) === 0 ? 0 : digits };
     el.numberPrefix = prefix;
