@@ -730,3 +730,73 @@ test('keyboard behavior stays in the shared Sheet and guards, with safe confirma
   const people = sources.find(([file]) => file === 'views/People.tsx')[2];
   assert.match(people, /data-submit=\{editingAccount === accountKey\(i\) \? '' : undefined\}/);
 });
+
+test('physical wallet cards keep bounded pointer tilt and reflection without taking over sort translation', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/Wallet.tsx');
+  const result = transformSync('SortableCard.tsx', source.slice(...functionRange(ast, 'SortableCard')), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  let dragging = false;
+  const useSortable = () => ({ attributes: {}, listeners: {}, transform: { x: 24, y: 16 }, transition: 'transform 200ms ease', isDragging: dragging });
+  const Card = new Function('React', 'useSortable', 'faceClass', 'paletteColor', 'KIND_BG', `${result.code}; return SortableCard;`)(
+    React,
+    useSortable,
+    () => '',
+    (_, fallback) => fallback,
+    { debit: 'neutral' },
+  );
+  const props = { m: { id: 'fictional-card', kind: 'debit' }, onOpen() {}, children: null };
+  const card = Card(props);
+  assert.equal(card.props.style.translate, '24px 16px');
+  assert.equal(card.props.style['--sort-t'], 'translate 200ms ease');
+  const values = {};
+  const currentTarget = {
+    getBoundingClientRect: () => ({ left: 20, top: 30, width: 300, height: 180 }),
+    style: {
+      setProperty: (k, v) => {
+        values[k] = v;
+      },
+    },
+  };
+  card.props.onMouseMove({ currentTarget, clientX: 320, clientY: 30 });
+  assert.deepEqual(values, { '--mx': '300px', '--my': '0px', '--ry': '4.00deg', '--rx': '4.00deg' });
+  card.props.onMouseMove({ currentTarget, clientX: -100, clientY: 900 });
+  assert.equal(values['--rx'], '-4.00deg');
+  assert.equal(values['--ry'], '-4.00deg');
+  card.props.onMouseLeave({ currentTarget });
+  assert.equal(values['--rx'], '0deg');
+  assert.equal(values['--ry'], '0deg');
+  dragging = true;
+  Card(props).props.onMouseMove({ currentTarget, clientX: 320, clientY: 30 });
+  assert.equal(values['--rx'], '0deg');
+});
+
+test('wallet material styles retain neutral dark and fixed light faces, restrained motion and drag-safe reflections', () => {
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const rules = leafRules(css);
+  const bodies = (sel) =>
+    rules
+      .filter(([s]) => s.split(',').some((x) => x.trim() === sel))
+      .map(([, b]) => b.replace(/\s+/g, ' '))
+      .join('\n');
+  assert.match(bodies('.paycard'), /background: var\(\s*--card-bg,\s*linear-gradient\(135deg,.*--slate-9/);
+  for (const [selector, body] of rules.filter(([s]) => physicalCardSelector(s))) assert.doesNotMatch(body, /--(?:iris|purple|indigo|blue)-\d+/, selector);
+  assert.match(bodies('.paycard:hover'), /perspective\(900px\).*rotateX\(var\(--rx, 0deg\)\).*rotateY\(var\(--ry, 0deg\)\).*translateY\(-3px\) scale\(1\.01\)/);
+  assert.match(bodies('.paycard::after'), /radial-gradient.*var\(--mx, 50%\) var\(--my, 50%\)/);
+  assert.match(bodies('.paycard:hover::after'), /opacity: 1/);
+  assert.match(bodies('.wallet-grid.dragging .paycard::after'), /opacity: 0/);
+  assert.match(bodies('.paycard.lifted'), /scale: 1\.02/);
+  for (const sel of ['.paycard.apple', '.paycard.light', '.paycard.sim']) {
+    assert.match(bodies(sel), /background: linear-gradient\([\s\S]*--white-a12/);
+    assert.match(bodies(sel), /color: var\(--pc-ink\)/);
+    assert.match(bodies(`${sel}:hover`), /box-shadow:/);
+  }
+  const reduced = cssRules(css)
+    .filter(([s]) => s === '@media (prefers-reduced-motion: reduce)')
+    .flatMap(([, b]) => cssRules(b));
+  assert.ok(reduced.some(([s, b]) => s.includes('.paycard:hover') && /transform: none/.test(b)));
+  assert.ok(reduced.some(([s, b]) => s.includes('.paycard.lifted') && /scale: 1;/.test(b)));
+});
