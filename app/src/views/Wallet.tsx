@@ -126,28 +126,16 @@ const faceClass = (m: PaymentMethod) => (isSim(m) ? 'sim' : brandOf(m) === 'apps
 function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; label: string; value: React.ReactNode; right: string; rightSub: string }) {
   const brand = brandOf(m);
   if (isSim(m)) {
-    // 标准 SIM 卡托：银行卡大小的卡片，右半边是可以掰下来的 SIM 卡压痕（缺角、内圈 Micro 压痕、金色触点）
+    // 卡托细槽分段留出连接桥；芯片与银行卡共用组件和尺寸，不随槽线 SVG 缩放。
     return (
       <>
-        {/* 标准 Mini SIM（25 × 15 mm）按真实比例画：外圈带缺角，里面依次是 Micro、Nano 的压痕，触点在正中 */}
-        <svg className="sim-punch" viewBox="0 0 25 15" aria-hidden="true">
-          <path className="groove" d="M1 0.15H22.2L24.85 2.8V14A0.85 0.85 0 0 1 24 14.85H1A0.85 0.85 0 0 1 0.15 14V1A0.85 0.85 0 0 1 1 0.15Z" />
-          <path className="groove inner" d="M3.5 1.5H16.4L18 3.1V13.5H3.5Z" />
-          <path className="groove inner" d="M4.6 3.1H15.4L16.65 4.35V11.9H4.6Z" />
-          <defs>
-            <linearGradient id="simgold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#fbefc4" />
-              <stop offset="1" stopColor="#d6b46a" />
-            </linearGradient>
-          </defs>
-          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="rgba(120,90,20,0.45)" strokeWidth="0.12" />
-          <path
-            d="M10.6 4.6V10.6M6.6 6.6H9.4M6.6 8.6H9.4M11.8 6.6H14.6M11.8 8.6H14.6M9.4 5.6V9.6M11.8 5.6V9.6"
-            fill="none"
-            stroke="rgba(120,90,20,0.45)"
-            strokeWidth="0.12"
-          />
-        </svg>
+        <div className="sim-punch" aria-hidden="true">
+          <svg className="sim-cutouts" viewBox="0 0 120 72">
+            <path className="sim-slot" d="M2 32V6Q2 2 6 2H48M53 2H100L118 20V45M118 50V66Q118 70 114 70H75M70 70H6Q2 70 2 66V37" />
+            <path className="sim-slot" d="M18 33V16Q18 12 22 12H49M54 12H84L102 30V44M102 49V56Q102 60 98 60H66M61 60H22Q18 60 18 56V38" />
+          </svg>
+          <CardChip />
+        </div>
         <div className="sim-top">
           {/* 只有认出是哪家运营商（如 SMART）才放它的 logo，否则写名字，不默认套某一家 */}
           {methodLogo(m) ? (

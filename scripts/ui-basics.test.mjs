@@ -33,6 +33,60 @@ const functionRange = (ast, name) => {
 };
 const inside = (node, range) => range && node.range[0] >= range[0] && node.range[1] <= range[1];
 
+test('SIM and bank faces render identical chips with independent gradient IDs', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/Wallet.tsx');
+  const compiled = transformSync('Wallet.tsx', ['CardFace', 'CardChip'].map((name) => source.slice(...functionRange(ast, name))).join('\n'), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(compiled.fatal, false);
+  const Face = new Function(
+    'React',
+    'useId',
+    'isSim',
+    'brandOf',
+    'bankOf',
+    'methodLogo',
+    'KIND_LABEL',
+    'CARD_KINDS',
+    'FlagImg',
+    'methodRegion',
+    'fmtPhone',
+    'copyParts',
+    `${compiled.code}; return CardFace;`,
+  )(
+    React,
+    React.useId,
+    (m) => m.kind === 'phone',
+    () => undefined,
+    () => undefined,
+    () => undefined,
+    { debit: 'Debit' },
+    ['debit', 'credit', 'crypto'],
+    () => null,
+    () => 'US',
+    (s) => s,
+    (s) => s,
+  );
+  const html = renderToStaticMarkup(
+    React.createElement(
+      React.Fragment,
+      null,
+      ...['phone', 'debit', 'phone'].map((kind, i) =>
+        React.createElement(Face, { key: i, m: { id: String(i), name: 'Example', kind, currency: 'USD' }, label: '', value: '0', right: '', rightSub: '' }),
+      ),
+    ),
+  );
+  const chips = html.match(/<svg class="pc-chip"[\s\S]*?<\/svg>/g) ?? [];
+  assert.equal(chips.length, 3, 'every SIM and bank face must display a chip');
+  const normalizeIds = (svg) => svg.replace(/id="[^"]+"/g, 'id="chip"').replace(/url\(#[^)]+\)/g, 'url(#chip)');
+  assert.equal(normalizeIds(chips[0]), normalizeIds(chips[1]));
+  assert.equal(normalizeIds(chips[2]), normalizeIds(chips[1]));
+  const ids = [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(new Set(ids).size, ids.length, 'chips must not reuse another card’s gradient IDs');
+});
+
 test('compiled search hook refreshes an unchanged query when the lazy dictionary arrives', async () => {
   const { loadSearch, searchIndex, matchText } = await import('../app/src/search.ts');
   const source = readFileSync(new URL('use-search.ts', root), 'utf8').replace(/^import .*;\n/gm, '');
