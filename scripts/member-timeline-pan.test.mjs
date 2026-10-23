@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { attachTimelinePan } from '../app/src/views/member-timeline-pan.ts';
+import { attachTimelinePan, fitTimelineLabels } from '../app/src/views/member-timeline-pan.ts';
 
 function harness(t, maxOffset = 600) {
   const frames = new Map();
@@ -11,7 +11,7 @@ function harness(t, maxOffset = 600) {
   });
   t.mock.method(globalThis, 'cancelAnimationFrame', (id) => frames.delete(id));
   const styles = new Map();
-  const root = Object.assign(new EventTarget(), { style: { setProperty: (key, value) => styles.set(key, value) }, dataset: {} });
+  const root = Object.assign(new EventTarget(), { style: { setProperty: (key, value) => styles.set(key, value) }, dataset: {}, querySelectorAll: () => [] });
   const captured = new Set();
   const viewport = {
     closest: () => viewport,
@@ -43,6 +43,12 @@ function harness(t, maxOffset = 600) {
     },
   };
 }
+
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  disconnect() {}
+};
+globalThis.document ??= { fonts: { ready: Promise.resolve() } };
 
 // Node has no browser frame scheduler.
 globalThis.requestAnimationFrame ??= () => 0;
@@ -100,4 +106,22 @@ test('短跨度不能滑动，清理时取消未完成帧', (t) => {
   assert.equal(h.frames.size, 0);
   h.send('wheel', { deltaX: 100 });
   assert.equal(h.frames.size, 0);
+});
+
+test('刻度完整落在视口内才可见，平移后重新显示', () => {
+  const marks = [
+    { style: {}, getBoundingClientRect: () => ({ left: 95, right: 125 }) },
+    { style: {}, getBoundingClientRect: () => ({ left: 100, right: 135 }) },
+    { style: {}, getBoundingClientRect: () => ({ left: 280, right: 305 }) },
+  ];
+  const axis = { getBoundingClientRect: () => ({ left: 100, right: 300 }), querySelectorAll: () => marks };
+  const root = { querySelectorAll: () => [axis] };
+  fitTimelineLabels(root);
+  assert.deepEqual(
+    marks.map((m) => m.style.visibility),
+    ['hidden', 'visible', 'hidden'],
+  );
+  marks[0].getBoundingClientRect = () => ({ left: 110, right: 140 });
+  fitTimelineLabels(root);
+  assert.equal(marks[0].style.visibility, 'visible');
 });
