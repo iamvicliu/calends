@@ -1,18 +1,18 @@
 {
-  "title": "年間まとめを共有",
+  "title": "年間レポートを共有",
   "fileName": "subscriptions-{year}-in-review-{style}.png",
   "style": {
     "poster": "ポスター",
     "receipt": "レシート",
     "card": "カード",
-    "stars": "星図"
+    "stars": "支出の内訳"
   },
   "unassigned": "未設定",
   "me": "自分",
   "whose": "{name}の",
-  "whoseSelf": "わたしの",
-  "topSpend": "最大の支出",
-  "ofYear": "年間の{pct}",
+  "whoseSelf": "私の",
+  "topSpend": "支出額が最大",
+  "ofYear": "年間支出の{pct}",
   "n": {
     "subs": {
       "other": "{count}件のサブスク"
@@ -22,37 +22,13 @@
     },
     "currencies": {
       "other": "{count}種類の通貨"
-    },
-    "currencyKinds": {
-      "other": "{count}種類の通貨"
     }
   },
-  "tip": {
-    "top": "{name}だけで年間の{pct}を占めました",
-    "longest": {
-      "other": "{name}とは{count}年以上の付き合いです"
-    },
-    "busiest": "財布にいちばん響いたのは{month}",
-    "newEnded": "今年は{added}件追加、{ended}件解約",
-    "currencies": {
-      "other": "今年は{count}種類の通貨で支払いました"
-    },
-    "soon": {
-      "other": "今後30日間に{count}件の請求があります。本当に全部必要？"
-    },
-    "milkTea": {
-      "other": "1日{amount}、タピオカミルクティー約{count}杯分"
-    },
-    "saved": "解約で今年はすでに{amount}節約しました",
-    "fallback": "まもなく更新されるサブスクリプションを確認しましょう。"
-  },
   "receipt": {
-    "shop": "{whose}サブスクストア",
-    "asOf": "年間明細 · {date}時点",
-    "fullYear": "年間明細 · {year}",
+    "shop": "{whose}サブスクリプション台帳",
+    "asOf": "年間明細\n{date}時点",
+    "fullYear": "{year}年の明細",
     "no": "No. {no}",
-    "register": "REG 01",
-    "cashier": "担当：{name}",
     "item": "品目",
     "share": "割合",
     "amount": "金額",
@@ -61,38 +37,38 @@
     "total": "合計"
   },
   "poster": {
-    "kicker": "{whose}サブスク年間レポート",
-    "ongoing": "今年これまで、{subs}・{charges}で",
-    "ongoingHidden": "今年これまで：{charges} · {currencies}",
-    "year": "{subs}・{charges}で支出",
-    "yearHidden": "今年：{charges} · {currencies}",
-    "newEnded": "新規 {added} · 解約 {ended}",
+    "kicker": "{whose}年間サブスクリプションレポート",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "新規 {added}\n終了 {ended}",
     "perDay": "1日平均 {amount}"
   },
   "card": {
     "head": "{whose}サブスク",
     "intro": {
-      "ongoing": "今年これまでのサブスク支出",
-      "ongoingHidden": "今年これまでに登録したサブスク",
-      "year": "今年のサブスク支出",
-      "yearHidden": "今年登録したサブスク"
+      "ongoing": "年初からの支出",
+      "ongoingHidden": "年初からの契約数",
+      "year": "年間支出",
+      "yearHidden": "年間の契約数"
     },
     "perDay": "1日平均 {amount}",
-    "longest": "最長の継続",
+    "longest": "契約期間が最長",
     "duration": "{y}年{m}か月",
-    "busiest": "最も高かった月",
+    "busiest": "支出が最も多い月",
     "month": "{month}",
-    "newEnded": "新規 / 解約",
+    "newEnded": "新規 / 終了",
     "saved": "{amount}節約",
-    "ended": "{count}件解約",
-    "noneEnded": "解約なし",
-    "currencies": "通貨",
+    "ended": "{count}件終了",
+    "noneEnded": "終了した契約なし",
+    "currencies": "使用通貨",
     "currencyCount": "{count}種類",
-    "nowMonthly": "現在 {amount}/月"
+    "nowMonthly": "現在の月額費用 {amount}"
   },
   "stars": {
-    "head": "{year} · {whose}サブスク星図",
-    "foot": "泡が大きいほど支出も大きい"
+    "head": "{year}年\n{whose}サブスクリプション支出",
+    "foot": "円の大きさは支出額を示します"
   },
   "spendBasis": "支払総額（メンバーへの立て替えを含む）",
   "stopLoss": "今年の未返金損失：{amount}"

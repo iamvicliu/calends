@@ -1,18 +1,18 @@
 {
-  "title": "Partager votre bilan annuel",
+  "title": "Partager le bilan annuel",
   "fileName": "abonnements-bilan-{year}-{style}.png",
   "style": {
     "poster": "Affiche",
     "receipt": "Ticket",
     "card": "Carte",
-    "stars": "Constellation"
+    "stars": "Répartition des dépenses"
   },
   "unassigned": "Non attribué",
   "me": "Moi",
   "whose": "de {name}",
-  "whoseSelf": "perso",
-  "topSpend": "Plus grosse dépense",
-  "ofYear": "{pct} de l’année",
+  "whoseSelf": "personnels",
+  "topSpend": "Dépense la plus élevée",
+  "ofYear": "{pct} des dépenses annuelles",
   "n": {
     "subs": {
       "one": "{count} abonnement",
@@ -25,42 +25,13 @@
     "currencies": {
       "one": "{count} devise",
       "other": "{count} devises"
-    },
-    "currencyKinds": {
-      "one": "{count} devise",
-      "other": "{count} devises"
     }
   },
-  "tip": {
-    "top": "{name} représente à lui seul {pct} de l’année",
-    "longest": {
-      "one": "{name} vous accompagne depuis plus d’un an",
-      "other": "{name} vous accompagne depuis plus de {count} ans"
-    },
-    "busiest": "{month} a le plus pesé sur votre portefeuille",
-    "newEnded": "Cette année : {added} arrivés, {ended} partis",
-    "currencies": {
-      "one": "Payé en {count} devise cette année",
-      "other": "Payé en {count} devises cette année, un vrai globe-trotteur"
-    },
-    "soon": {
-      "one": "{count} prélèvement tombe dans les 30 prochains jours : vous le gardez ?",
-      "other": "{count} prélèvements tombent dans les 30 prochains jours : vous les gardez tous ?"
-    },
-    "milkTea": {
-      "one": "{amount} par jour, environ un bubble tea",
-      "other": "{amount} par jour, environ {count} bubble teas"
-    },
-    "saved": "Les résiliations vous ont déjà fait économiser {amount} cette année",
-    "fallback": "Vérifiez les abonnements qui seront bientôt renouvelés."
-  },
   "receipt": {
-    "shop": "Boutique d’abonnements {whose}",
-    "asOf": "Relevé annuel · au {date}",
-    "fullYear": "Relevé annuel · {year}",
+    "shop": "Abonnements {whose}",
+    "asOf": "Bilan annuel\nAu {date}",
+    "fullYear": "Bilan annuel {year}",
     "no": "N° {no}",
-    "register": "CAISSE 01",
-    "cashier": "Caissier : {name}",
     "item": "Article",
     "share": "Part",
     "amount": "Montant",
@@ -69,38 +40,38 @@
     "total": "TOTAL"
   },
   "poster": {
-    "kicker": "L’année en abonnements {whose}",
-    "ongoing": "Cette année jusqu’ici, sur {subs} · {charges}",
-    "ongoingHidden": "Cette année jusqu’ici : {charges} · {currencies}",
-    "year": "Dépensé sur {subs} · {charges}",
-    "yearHidden": "Cette année : {charges} · {currencies}",
-    "newEnded": "{added} nouveaux · {ended} résiliés",
+    "kicker": "Abonnements {whose}",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "Ajoutés : {added}\nTerminés : {ended}",
     "perDay": "{amount}/jour en moyenne"
   },
   "card": {
     "head": "Abonnements {whose}",
     "intro": {
-      "ongoing": "Cette année jusqu’ici, les abonnements ont coûté",
-      "ongoingHidden": "Cette année jusqu’ici, vous vous êtes abonné à",
-      "year": "Cette année, les abonnements ont coûté",
-      "yearHidden": "Cette année, vous vous êtes abonné à"
+      "ongoing": "Dépenses depuis janvier",
+      "ongoingHidden": "Abonnements depuis janvier",
+      "year": "Dépenses annuelles",
+      "yearHidden": "Abonnements de l’année"
     },
     "perDay": "{amount}/jour en moyenne",
-    "longest": "Le plus ancien",
+    "longest": "Abonnement le plus ancien",
     "duration": "{y} an(s) {m} mois",
-    "busiest": "Mois le plus cher",
+    "busiest": "Mois le plus coûteux",
     "month": "{month}",
-    "newEnded": "Nouveaux / résiliés",
+    "newEnded": "Ajoutés / terminés",
     "saved": "{amount} économisés",
-    "ended": "{count} résiliés",
-    "noneEnded": "Aucune résiliation",
-    "currencies": "Devises",
+    "ended": "Terminés : {count}",
+    "noneEnded": "Aucun terminé",
+    "currencies": "Devises utilisées",
     "currencyCount": "{count}",
-    "nowMonthly": "{amount}/mois actuellement"
+    "nowMonthly": "Coût mensuel actuel : {amount}"
   },
   "stars": {
-    "head": "{year} · Constellation d’abonnements {whose}",
-    "foot": "Plus la bulle est grosse, plus la dépense est élevée"
+    "head": "{year}\nAbonnements {whose}",
+    "foot": "La taille des cercles représente les dépenses"
   },
   "spendBasis": "Montant total payé, avances pour les membres comprises",
   "stopLoss": "Perte non remboursée cette année : {amount}"

@@ -5,14 +5,14 @@
     "poster": "Áp phích",
     "receipt": "Hóa đơn",
     "card": "Thẻ",
-    "stars": "Bản đồ sao"
+    "stars": "Phân bố chi tiêu"
   },
   "unassigned": "Chưa gán",
   "me": "Tôi",
   "whose": "{name}",
   "whoseSelf": "tôi",
-  "topSpend": "Chi nhiều nhất",
-  "ofYear": "{pct} của cả năm",
+  "topSpend": "Chi tiêu cao nhất",
+  "ofYear": "{pct} chi tiêu cả năm",
   "n": {
     "subs": {
       "other": "{count} gói đăng ký"
@@ -22,37 +22,13 @@
     },
     "currencies": {
       "other": "{count} loại tiền tệ"
-    },
-    "currencyKinds": {
-      "other": "{count} loại tiền tệ"
     }
   },
-  "tip": {
-    "top": "Riêng {name} đã chiếm {pct} của cả năm",
-    "longest": {
-      "other": "{name} đã gắn bó với bạn hơn {count} năm"
-    },
-    "busiest": "{month} là tháng ví bạn “đau” nhất",
-    "newEnded": "Năm nay: thêm {added}, bỏ {ended}",
-    "currencies": {
-      "other": "Năm nay đã trả bằng {count} loại tiền tệ — đúng là dân xê dịch"
-    },
-    "soon": {
-      "other": "{count} khoản phí sẽ đến trong 30 ngày tới — vẫn muốn giữ hết chứ?"
-    },
-    "milkTea": {
-      "other": "{amount} mỗi ngày — khoảng {count} ly trà sữa"
-    },
-    "saved": "Năm nay việc hủy gói đã giúp bạn tiết kiệm {amount}",
-    "fallback": "Kiểm tra các gói đăng ký sắp gia hạn."
-  },
   "receipt": {
-    "shop": "Cửa hàng gói đăng ký của {whose}",
-    "asOf": "Sao kê năm · tính đến {date}",
-    "fullYear": "Sao kê năm · {year}",
+    "shop": "Sổ theo dõi gói đăng ký của {whose}",
+    "asOf": "Tổng kết năm\nĐến {date}",
+    "fullYear": "Tổng kết năm {year}",
     "no": "Số {no}",
-    "register": "QUẦY 01",
-    "cashier": "Thu ngân: {name}",
     "item": "Mục",
     "share": "Phần",
     "amount": "Số tiền",
@@ -61,38 +37,38 @@
     "total": "TỔNG"
   },
   "poster": {
-    "kicker": "Năm đăng ký của {whose}",
-    "ongoing": "Từ đầu năm đến nay, qua {subs} · {charges}",
-    "ongoingHidden": "Từ đầu năm đến nay: {charges} · {currencies}",
-    "year": "Đã chi cho {subs} · {charges}",
-    "yearHidden": "Năm nay: {charges} · {currencies}",
-    "newEnded": "{added} mới · {ended} đã hủy",
+    "kicker": "Tổng kết gói đăng ký của {whose}",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "Thêm {added}\nKết thúc {ended}",
     "perDay": "Trung bình {amount}/ngày"
   },
   "card": {
     "head": "Gói đăng ký của {whose}",
     "intro": {
-      "ongoing": "Từ đầu năm đến nay, gói đăng ký đã tốn",
-      "ongoingHidden": "Từ đầu năm đến nay, bạn đã đăng ký",
-      "year": "Năm nay, gói đăng ký đã tốn",
-      "yearHidden": "Năm nay, bạn đã đăng ký"
+      "ongoing": "Chi tiêu từ đầu năm",
+      "ongoingHidden": "Số gói đăng ký từ đầu năm",
+      "year": "Chi tiêu cả năm",
+      "yearHidden": "Số gói đăng ký trong năm"
     },
     "perDay": "Trung bình {amount}/ngày",
-    "longest": "Lâu nhất",
+    "longest": "Gói đăng ký lâu nhất",
     "duration": "{y} năm {m} tháng",
-    "busiest": "Tháng tốn nhất",
+    "busiest": "Tháng chi tiêu nhiều nhất",
     "month": "{month}",
-    "newEnded": "Mới / đã hủy",
+    "newEnded": "Thêm / kết thúc",
     "saved": "Tiết kiệm {amount}",
-    "ended": "{count} đã hủy",
-    "noneEnded": "Không hủy gói nào",
-    "currencies": "Tiền tệ",
+    "ended": "{count} đã kết thúc",
+    "noneEnded": "Chưa có đăng ký kết thúc",
+    "currencies": "Tiền tệ đã dùng",
     "currencyCount": "{count}",
-    "nowMonthly": "Hiện {amount}/tháng"
+    "nowMonthly": "Chi phí tháng hiện tại {amount}"
   },
   "stars": {
-    "head": "{year} · Chòm sao gói đăng ký của {whose}",
-    "foot": "Bong bóng càng lớn, chi càng nhiều"
+    "head": "{year}\nChi tiêu đăng ký của {whose}",
+    "foot": "Kích thước vòng tròn thể hiện chi tiêu"
   },
   "spendBasis": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên",
   "stopLoss": "Tổn thất chưa hoàn tiền năm nay: {amount}"

@@ -5,14 +5,14 @@
     "poster": "Poster",
     "receipt": "Kassenbon",
     "card": "Karte",
-    "stars": "Sternenhimmel"
+    "stars": "Ausgabenverteilung"
   },
   "unassigned": "Nicht zugeordnet",
   "me": "Ich",
   "whose": "{name}s",
-  "whoseSelf": "Mein",
-  "topSpend": "Größte Ausgabe",
-  "ofYear": "{pct} des Jahres",
+  "whoseSelf": "Meine",
+  "topSpend": "Höchste Ausgaben",
+  "ofYear": "{pct} der Jahresausgaben",
   "n": {
     "subs": {
       "one": "{count} Abo",
@@ -25,42 +25,13 @@
     "currencies": {
       "one": "{count} Währung",
       "other": "{count} Währungen"
-    },
-    "currencyKinds": {
-      "one": "{count} Währung",
-      "other": "{count} Währungen"
     }
   },
-  "tip": {
-    "top": "{name} allein machte {pct} des Jahres aus",
-    "longest": {
-      "one": "{name} begleitet dich seit über einem Jahr",
-      "other": "{name} begleitet dich seit über {count} Jahren"
-    },
-    "busiest": "Der {month} hat deinen Geldbeutel am meisten belastet",
-    "newEnded": "Dieses Jahr: {added} dazu, {ended} weg",
-    "currencies": {
-      "one": "Dieses Jahr in {count} Währung bezahlt",
-      "other": "Dieses Jahr in {count} Währungen bezahlt – ganz schön weltgewandt"
-    },
-    "soon": {
-      "one": "{count} Abbuchung kommt in den nächsten 30 Tagen – willst du sie noch?",
-      "other": "{count} Abbuchungen kommen in den nächsten 30 Tagen – willst du noch alle?"
-    },
-    "milkTea": {
-      "one": "{amount} pro Tag – etwa ein Bubble Tea",
-      "other": "{amount} pro Tag – etwa {count} Bubble Teas"
-    },
-    "saved": "Kündigungen haben dir dieses Jahr schon {amount} gespart",
-    "fallback": "Prüfe die Abos, die sich bald verlängern."
-  },
   "receipt": {
-    "shop": "{whose} Abo-Laden",
-    "asOf": "Jahresauszug · Stand {date}",
-    "fullYear": "Jahresauszug · {year}",
+    "shop": "{whose} Abonnements",
+    "asOf": "Jahresübersicht\nStand {date}",
+    "fullYear": "Jahresübersicht {year}",
     "no": "Nr. {no}",
-    "register": "KASSE 01",
-    "cashier": "Kassierer: {name}",
     "item": "Artikel",
     "share": "Anteil",
     "amount": "Betrag",
@@ -69,38 +40,38 @@
     "total": "SUMME"
   },
   "poster": {
-    "kicker": "{whose} Abo-Jahr",
-    "ongoing": "Bisher dieses Jahr, über {subs} · {charges}",
-    "ongoingHidden": "Bisher dieses Jahr: {charges} · {currencies}",
-    "year": "Ausgegeben für {subs} · {charges}",
-    "yearHidden": "Dieses Jahr: {charges} · {currencies}",
-    "newEnded": "{added} neu · {ended} gekündigt",
+    "kicker": "{whose} Abonnements im Jahresrückblick",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "{added} hinzugefügt\n{ended} beendet",
     "perDay": "Im Schnitt {amount}/Tag"
   },
   "card": {
-    "head": "{whose} Abo-Überblick",
+    "head": "{whose} Abonnements",
     "intro": {
-      "ongoing": "Bisher haben Abos dieses Jahr gekostet",
-      "ongoingHidden": "Bisher hast du dieses Jahr abonniert",
-      "year": "Dieses Jahr haben Abos gekostet",
-      "yearHidden": "Dieses Jahr hast du abonniert"
+      "ongoing": "Bisherige Jahresausgaben",
+      "ongoingHidden": "Bisherige Abos",
+      "year": "Jahresausgaben",
+      "yearHidden": "Abos im Jahr"
     },
     "perDay": "Im Schnitt {amount}/Tag",
-    "longest": "Am längsten dabei",
+    "longest": "Längstes Abo",
     "duration": "{y} J. {m} Mon.",
-    "busiest": "Teuerster Monat",
+    "busiest": "Monat mit den höchsten Ausgaben",
     "month": "{month}",
-    "newEnded": "Neu / gekündigt",
+    "newEnded": "Hinzugefügt / beendet",
     "saved": "{amount} gespart",
-    "ended": "{count} gekündigt",
-    "noneEnded": "Nichts gekündigt",
-    "currencies": "Währungen",
+    "ended": "{count} beendet",
+    "noneEnded": "Keine beendet",
+    "currencies": "Verwendete Währungen",
     "currencyCount": "{count}",
-    "nowMonthly": "Aktuell {amount}/Mon."
+    "nowMonthly": "Aktuelle Monatskosten {amount}"
   },
   "stars": {
-    "head": "{year} · {whose} Abo-Sternenhimmel",
-    "foot": "Größere Blase, höhere Ausgaben"
+    "head": "{year}\n{whose} Abo-Ausgaben",
+    "foot": "Kreisgröße entspricht den Ausgaben"
   },
   "spendBasis": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder",
   "stopLoss": "Nicht erstatteter Verlust dieses Jahr: {amount}"

@@ -5,38 +5,24 @@
     "poster": "海報",
     "receipt": "收據",
     "card": "卡片",
-    "stars": "星圖"
+    "stars": "支出分佈"
   },
   "unassigned": "未指定",
   "me": "我",
   "whose": "{name}",
   "whoseSelf": "我",
-  "topSpend": "花得最多",
-  "ofYear": "佔全年 {pct}",
+  "topSpend": "支出最多",
+  "ofYear": "佔年度支出 {pct}",
   "n": {
     "subs": "{count} 個訂閱",
     "charges": "{count} 次扣款",
-    "currencies": "{count} 種貨幣",
-    "currencyKinds": "{count} 種貨幣"
-  },
-  "tip": {
-    "top": "{name} 一個就佔了全年的 {pct}",
-    "longest": "{name} 已經陪了你 {count} 年多",
-    "busiest": "{n} 月是花得最多的一個月",
-    "newEnded": "這一年新開 {added} 個、退訂 {ended} 個",
-    "currencies": "這一年用 {count} 種貨幣付過訂閱",
-    "soon": "接下來 30 天還有 {count} 筆扣款，記得看看還要不要",
-    "milkTea": "平均每天 {amount}，差不多是 {count} 杯奶茶",
-    "saved": "今年的退訂已經幫你省下 {amount}",
-    "fallback": "核對即將續訂的訂閱。"
+    "currencies": "{count} 種貨幣"
   },
   "receipt": {
-    "shop": "{whose} 訂閱商店",
-    "asOf": "年度結算單 · 截至 {date}",
-    "fullYear": "年度結算單 · {year} 全年",
+    "shop": "{whose}的訂閱帳本",
+    "asOf": "年度帳單\n截至 {date}",
+    "fullYear": "{year} 年度帳單",
     "no": "單號 {no}",
-    "register": "機號 01",
-    "cashier": "收銀員 {name}",
     "item": "品名",
     "share": "佔比",
     "amount": "金額",
@@ -45,38 +31,38 @@
     "total": "合計"
   },
   "poster": {
-    "kicker": "{whose}的訂閱年度報告",
-    "ongoing": "今年到目前為止花在 {subs}上 · {charges}",
-    "ongoingHidden": "今年到目前為止一共 {charges} · {currencies}",
-    "year": "這一年花在 {subs}上 · {charges}",
-    "yearHidden": "這一年一共 {charges} · {currencies}",
-    "newEnded": "新開 {added} · 退訂 {ended}",
+    "kicker": "{whose}的訂閱年度回顧",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "新增 {added}\n結束 {ended}",
     "perDay": "日均 {amount}"
   },
   "card": {
     "head": "{whose} 的訂閱",
     "intro": {
-      "ongoing": "今年到目前為止，訂閱一共花了",
-      "ongoingHidden": "今年到目前為止，一共訂了",
-      "year": "這一年，訂閱一共花了",
-      "yearHidden": "這一年，一共訂了"
+      "ongoing": "本年累計支出",
+      "ongoingHidden": "本年訂閱數量",
+      "year": "全年訂閱支出",
+      "yearHidden": "全年訂閱數量"
     },
     "perDay": "平均每天 {amount}",
-    "longest": "陪伴最久",
+    "longest": "訂閱時間最長",
     "duration": "{y} 年 {m} 個月",
-    "busiest": "最貴的月份",
+    "busiest": "支出最多的月份",
     "month": "{n} 月",
-    "newEnded": "新開 / 退訂",
+    "newEnded": "新增 / 結束",
     "saved": "退訂已省 {amount}",
-    "ended": "退訂了 {count} 個",
-    "noneEnded": "沒有退訂",
-    "currencies": "用到的貨幣",
+    "ended": "已結束 {count} 個",
+    "noneEnded": "沒有已結束訂閱",
+    "currencies": "付款貨幣",
     "currencyCount": "{count} 種",
-    "nowMonthly": "現在每月 {amount}"
+    "nowMonthly": "目前每月成本 {amount}"
   },
   "stars": {
-    "head": "{year} · {whose}的訂閱星圖",
-    "foot": "圓越大，這一年花得越多"
+    "head": "{year}\n{whose}的訂閱支出",
+    "foot": "圓形大小表示支出金額"
   },
   "spendBasis": "全額實付，含替成員墊付",
   "stopLoss": "這一年未退款損失 {amount}"
