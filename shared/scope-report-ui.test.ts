@@ -10,6 +10,7 @@ import * as fx from './fx.ts';
 import * as reports from './scope-report.ts';
 import * as metrics from './metrics.ts';
 import * as carpool from './carpool.ts';
+import * as carpoolTimeline from './carpool-timeline.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 // Execute component event handlers in the existing JSX harness, retaining pure financial builders.
@@ -36,6 +37,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...fx,
     ...reports,
     ...metrics,
+    ...carpoolTimeline,
+    useTimelinePan: () => ({ current: null }),
     locale: () => 'en',
     useOrig: () => false,
     useTextSearch: (texts: string[]) => {
@@ -2148,4 +2151,92 @@ test('停用说明里的金额单独着色：未退款损失为红色，已退�
   assert.equal(gain!.props.className, 'stop-money gain');
   assert.equal(money(render({ date: '2026-10-01', refunded: 0, unusedValue: 0 })), undefined);
   assert.deepEqual(all(render({ date: '2099-01-01', refunded: 0, unusedValue: 1 })), []);
+});
+
+test('合租成员主表和手机卡片收起已下车成员；展开保留灰色成员与历史收款', () => {
+  const s: Subscription = {
+    id: 'car',
+    name: 'Fictional plan',
+    category: 'Tools',
+    tags: [],
+    start: '2025-01-01',
+    status: 'active',
+    price: 120,
+    currency: 'CNY',
+    cycle: { unit: 'year', every: 1 },
+    share: {
+      role: 'owner',
+      seats: 4,
+      members: [
+        { id: 'active', name: 'Active', share: 30, fee: 30, billEvery: 3 },
+        { id: 'exempt', name: 'Exempt', share: 0, exempt: true },
+        {
+          id: 'left',
+          name: 'Departed',
+          share: 30,
+          fee: 30,
+          billEvery: 3,
+          left: today,
+          payments: [{ date: '2026-01-01', amount: 30, currency: 'CNY', until: '2026-03-31' }],
+        },
+      ],
+    },
+  };
+  const state = { ...st, subscriptions: [s] };
+  const members = harness('../app/src/views/Members.tsx', 'memberStatus,memberSegments,perBill', {}, { ...carpool });
+  const r = harness(
+    '../app/src/views/Carpool.tsx',
+    'CarSheet,MemberTable,MemberRows,Vacancy',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      NameLink: 'NameLink',
+      StatusPill: 'StatusPill',
+      memberStatus: (...args: unknown[]) => members.call('memberStatus', ...args),
+      memberSegments: (...args: unknown[]) => members.call('memberSegments', ...args),
+      perBill: (...args: unknown[]) => members.call('perBill', ...args),
+    },
+  );
+  let opened = 0;
+  const props = { state, s, today, ro: false, onMember: () => opened++, win: carpoolTimeline.carpoolTimeline(s, today, 3), expanded: false, onToggle() {} };
+  const names = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'car-member-row').map((n) => n.props['aria-label']);
+  let nodes = r.render('MemberTable', props);
+  assert.deepEqual(names(nodes), ['Active', 'Exempt']);
+  const vacancies = nodes.filter((n) => typeof n.type === 'function' && n.type.name === 'Vacancy');
+  assert.equal(vacancies.length, 2);
+  vacancies[0].props.onAdd();
+  assert.equal(opened, 1);
+  nodes = r.render('MemberTable', { ...props, expanded: true });
+  assert.deepEqual(names(nodes), ['Active', 'Exempt', 'Departed']);
+  assert.ok(nodes.some((n) => n.props.className === 'car-member-chip left'));
+  const collapsedCards = r.render('MemberRows', props).filter((n) => n.type === 'button' && n.props.className === 'member-info');
+  assert.equal(collapsedCards.length, 2);
+  assert.equal(r.render('MemberRows', { ...props, includeLeft: true }).filter((n) => n.props.className === 'member departed').length, 1);
+  const cellNodes = r.render('Vacancy', { ro: false, onAdd: () => opened++, table: true });
+  assert.equal(cellNodes.filter((n) => n.type === 'td').length, 5);
+  assert.equal(cellNodes.filter((n) => n.type === 'td' && !all(n.children).length).length, 3);
+  cellNodes[0].props.onClick();
+  assert.equal(opened, 2);
+  const readonly = r.render('Vacancy', { ro: true, onAdd: () => opened++, table: false })[0];
+  readonly.props.onClick();
+  assert.equal(opened, 2);
+  assert.equal(readonly.props.tabIndex, undefined);
+  assert.equal(readonly.props.role, undefined);
+  nodes = r.render('CarSheet', { ...props, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {} });
+  assert.equal(nodes.filter((n) => n.props.className === 'ld-row car-period').length, 1);
+  const empty = { ...s, share: { ...s.share!, members: [] } };
+  const emptyNodes = r.render('MemberTable', { ...props, s: empty });
+  assert.equal(emptyNodes.filter((n) => typeof n.type === 'function' && n.type.name === 'Vacancy').length, 4);
+  assert.equal(
+    emptyNodes.some((n) => typeof n.type === 'function' && n.type.name === 'DepartedToggle'),
+    false,
+  );
+  const full = { ...s, share: { ...s.share!, seats: 1, members: s.share!.members.slice(0, 2) } };
+  assert.equal(
+    r.render('MemberTable', { ...props, s: full }).some((n) => typeof n.type === 'function' && n.type.name === 'Vacancy'),
+    false,
+  );
+  // 下车成员的那笔收款仍归入原有账本。
+  assert.ok(nodes.some((n) => n.type === 'Seg' && n.props.options[0][1] === 'family.sheet.tabIn'));
 });

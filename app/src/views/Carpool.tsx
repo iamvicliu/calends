@@ -10,7 +10,6 @@ import {
   diffDays,
   effectiveStatus,
   memberDues,
-  memberAboard,
   nextCharge,
   memberBillMonths,
   memberCollection,
@@ -31,6 +30,8 @@ import { CardTitle, Amount, Cell, Group, Icon, NameLink, NumInput, Seg, Sheet, S
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
+import { carpoolRoster, carpoolTimeline } from '../../../shared/carpool-timeline.ts';
+import { useTimelinePan } from './member-timeline-pan.ts';
 
 const CAR_FILTERS = ['all', 'live', 'owe', 'settled', 'ended'] as const;
 type CarFilter = (typeof CAR_FILTERS)[number];
@@ -156,8 +157,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 const sh = s.share!;
                 const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
                 // 已退出的成员不占座，只在展开的明细里保留
-                const onboard = sh.members.filter((m) => memberAboard(m, today));
-                const free = Math.max(0, sh.seats - 1 - onboard.length);
+                const free = carpoolRoster(s, today).vacancies;
                 const next = nextCharge(s, addDays(today, 1));
                 return (
                   // 整张卡片打开合租弹窗；里面的按钮、链接和订阅名各管各的
@@ -323,6 +323,8 @@ function MemberRows({
   onMember,
   only,
   timeline,
+  includeLeft = false,
+  win,
 }: {
   state: AppState;
   s: Subscription;
@@ -333,8 +335,12 @@ function MemberRows({
   only?: (m: ShareMember) => boolean;
   /** 合租详情里在每人下方画时间条（与宽屏表格一致） */
   timeline?: boolean;
+  includeLeft?: boolean;
+  win?: ReturnType<typeof carpoolTimeline>;
 }) {
-  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => !only || only(d.member));
+  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter(
+    (d) => (includeLeft || !d.member.left || d.member.left > today) && (!only || only(d.member)),
+  );
   const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
   return (
     <div>
@@ -343,7 +349,7 @@ function MemberRows({
         return (
           <div
             key={d.member.id}
-            className="member"
+            className={`member ${d.member.left && d.member.left <= today ? 'departed' : ''}`}
             role={ro ? undefined : 'button'}
             tabIndex={ro ? undefined : 0}
             onClick={(e) => {
@@ -385,7 +391,6 @@ function MemberRows({
                   )}
                 </span>
               </div>
-              {timeline && <MemberTimeline s={s} m={d.member} today={today} win={timelineWindow(today)} />}
             </button>
             <div className="member-amount num" style={{ textAlign: 'right', fontSize: 'var(--fs-2)' }}>
               {d.member.exempt ? (
@@ -398,6 +403,7 @@ function MemberRows({
                 <span className="muted">{t('family.pool.settled')}</span>
               )}
             </div>
+            {timeline && win && <MemberTimeline s={s} m={d.member} today={today} win={win} />}
             {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
             {!ro && !d.member.exempt && d.periodsOwed > 0 && (
               <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => onMember(d.member, true)}>
@@ -428,24 +434,22 @@ function receiptNotes(notes: (string | undefined)[]) {
   };
 }
 
-/** 成员时间条的窗口：过去 6 个月到未来 9 个月，按半年收的也能看到前后两期 */
-function timelineWindow(today: string) {
-  return { start: addMonths(today, -6), end: addMonths(today, 9) };
-}
 const pct = (d: string, win: { start: string; end: string }) => (diffDays(win.start, d) / Math.max(1, diffDays(win.start, win.end))) * 100;
 
 /** 表头：季度刻度（1、4、7、10 月），1 月处只写年份，其余写月份，标签短、不会重叠 */
-function TimelineAxis({ today, win }: { today: string; win: { start: string; end: string } }) {
+function TimelineAxis({ win }: { win: { start: string; end: string } }) {
   const marks: string[] = [];
   for (let d = `${win.start.slice(0, 7)}-01`; d <= win.end; d = addMonths(d, 1))
     if (d >= win.start && ['01', '04', '07', '10'].includes(d.slice(5, 7))) marks.push(d);
   return (
-    <span className="mt-axis" aria-label={t('family.sheet.period')}>
-      {marks.map((d) => (
-        <span key={d} className={`mt-mark ${d.slice(5, 7) === '01' ? 'year' : ''}`} style={{ left: `${pct(d, win)}%` }}>
-          {d.slice(5, 7) === '01' ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false })}
-        </span>
-      ))}
+    <span className="mt-viewport mt-axis" aria-label={t('family.sheet.period')}>
+      <span className="mt-inner">
+        {marks.map((d) => (
+          <span key={d} className={`mt-mark ${d.slice(5, 7) === '01' ? 'year' : ''}`} style={{ left: `${pct(d, win)}%` }}>
+            {d.slice(5, 7) === '01' ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false })}
+          </span>
+        ))}
+      </span>
     </span>
   );
 }
@@ -458,31 +462,33 @@ function MemberTimeline({ s, m, today, win, fee }: { s: Subscription; m: ShareMe
   const segs = memberSegments(s, m, today, win.start, win.end);
   const label = { paid: t('family.timeline.paid'), due: t('family.timeline.due'), future: t('family.timeline.future') };
   return (
-    <span className={`mt-track ${m.exempt ? 'exempt' : ''}`}>
-      {segs.map((g) => (
-        <i
-          key={`${g.from}-${g.kind}`}
-          className={`mt-seg ${g.kind}`}
-          style={{ left: `${pct(g.from, win)}%`, width: `${Math.max(0.6, pct(addDays(g.until, 1), win) - pct(g.from, win))}%` }}
-          {...tipProps(() => (
-            <>
-              <b>
-                {label[g.kind]}
-                {fee && (
-                  <>
-                    <span className="copy-gap" aria-hidden="true" />
-                    {fee}
-                  </>
-                )}
-              </b>
-              <div>
-                {cnDateFull(g.from)} – {cnDateFull(g.until)}
-              </div>
-            </>
-          ))}
-        />
-      ))}
-      <i className="mt-today" style={{ left: `${pct(today, win)}%` }} />
+    <span className={`mt-viewport mt-track ${m.exempt ? 'exempt' : ''}`}>
+      <span className="mt-inner">
+        {segs.map((g) => (
+          <i
+            key={`${g.from}-${g.kind}`}
+            className={`mt-seg ${g.kind}`}
+            style={{ left: `${pct(g.from, win)}%`, width: `${Math.max(0.6, pct(addDays(g.until, 1), win) - pct(g.from, win))}%` }}
+            {...tipProps(() => (
+              <>
+                <b>
+                  {label[g.kind]}
+                  {fee && (
+                    <>
+                      <span className="copy-gap" aria-hidden="true" />
+                      {fee}
+                    </>
+                  )}
+                </b>
+                <div>
+                  {cnDateFull(g.from)} – {cnDateFull(g.until)}
+                </div>
+              </>
+            ))}
+          />
+        ))}
+        <i className="mt-today" style={{ left: `${pct(today, win)}%` }} />
+      </span>
     </span>
   );
 }
@@ -494,14 +500,20 @@ function MemberTable({
   today,
   ro,
   onMember,
+  win,
+  expanded,
+  onToggle,
 }: {
   state: AppState;
   s: Subscription;
   today: string;
   ro: boolean;
-  onMember: (m: ShareMember, collect?: boolean) => void;
+  onMember: (m?: ShareMember, collect?: boolean) => void;
+  win: ReturnType<typeof carpoolTimeline>;
+  expanded: boolean;
+  onToggle: () => void;
 }) {
-  const win = timelineWindow(today);
+  const roster = carpoolRoster(s, today);
   return (
     <table role="table" className="car-member-table" aria-label={t('family.sheet.members')}>
       <thead role="rowgroup">
@@ -513,7 +525,7 @@ function MemberTable({
             {t('family.sheet.fee')}
           </th>
           <th role="columnheader" scope="col" className="mt-head">
-            <TimelineAxis today={today} win={win} />
+            <TimelineAxis win={win} />
           </th>
           <th role="columnheader" scope="col">
             {t('family.sheet.status')}
@@ -524,7 +536,8 @@ function MemberTable({
         </tr>
       </thead>
       <tbody role="rowgroup">
-        {(s.share?.members ?? []).map((m) => {
+        {[...roster.active, ...Array.from({ length: roster.vacancies }, () => null), ...(expanded ? roster.departed : [])].map((m, index) => {
+          if (!m) return <Vacancy key={`vacancy-${index}`} ro={ro} onAdd={() => onMember()} table />;
           const st = memberStatus(state, s, m, today);
           const rate = memberFee(state, s, m, today);
           const left = !!m.left && m.left <= today;
@@ -533,6 +546,7 @@ function MemberTable({
               role="row"
               key={m.id}
               className="car-member-row"
+              data-readonly={ro || undefined}
               tabIndex={ro ? undefined : 0}
               aria-label={m.name || t('family.pool.unnamed')}
               onClick={() => !ro && onMember(m)}
@@ -600,7 +614,62 @@ function MemberTable({
           );
         })}
       </tbody>
+      {roster.departed.length > 0 && (
+        <tfoot>
+          <tr>
+            <td colSpan={5}>
+              <DepartedToggle count={roster.departed.length} expanded={expanded} onToggle={onToggle} />
+            </td>
+          </tr>
+        </tfoot>
+      )}
     </table>
+  );
+}
+
+function DepartedToggle({ count, expanded, onToggle }: { count: number; expanded: boolean; onToggle: () => void }) {
+  return (
+    <button className="btn car-departed-toggle" aria-expanded={expanded} onClick={onToggle}>
+      {t('family.sheet.departed', { count })}
+      <Icon name="down" size={14} />
+    </button>
+  );
+}
+
+function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void; table?: boolean }) {
+  const props = {
+    className: `car-vacancy ${table ? 'car-member-row' : 'member'}`,
+    role: table ? 'row' : ro ? undefined : 'button',
+    'data-readonly': ro || undefined,
+    tabIndex: ro ? undefined : 0,
+    'aria-label': t('family.sheet.vacancy'),
+    onClick: () => !ro && onAdd(),
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        onAdd();
+      }
+    },
+  };
+  const chip = <span className="car-member-chip vacancy">{t('family.sheet.vacancy')}</span>;
+  const track = (
+    <span className="mt-viewport mt-track vacant">
+      <span className="mt-inner" />
+    </span>
+  );
+  return table ? (
+    <tr {...props}>
+      <td role="cell">{chip}</td>
+      <td role="cell" />
+      <td role="cell">{track}</td>
+      <td role="cell" />
+      <td role="cell" />
+    </tr>
+  ) : (
+    <div {...props}>
+      {chip}
+      {track}
+    </div>
   );
 }
 
@@ -632,22 +701,25 @@ export function CarSheet({
   const st = effectiveStatus(s, today);
   const stopped = ['ended', 'terminated'].includes(st);
   const next = nextCharge(s, addDays(today, 1));
-  const onboard = sh.members.filter((m) => memberAboard(m, today));
-  const free = Math.max(0, sh.seats - 1 - onboard.length);
+  const roster = carpoolRoster(s, today);
+  const free = roster.vacancies;
   const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
   const oweSum = dues.reduce((a, d) => a + toBaseAt(state, d.owed, d.currency), 0);
   const fmt = (v: number) => flow(v, base, { compact: true });
   const rule = carRule(state, s, today);
   const [editingRule, setEditingRule] = useState(false);
+  const [departedOpen, setDepartedOpen] = useState(false);
+  const win = carpoolTimeline(s, today, rule.billEvery);
+  const timelineRef = useTimelinePan(win);
   // 收款记录默认只列最近几期，期数多时再展开
   const [allPeriods, setAllPeriods] = useState(false);
   const profit = -book.yearNet;
   const actual = -book.net;
   const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m, today)}`);
-  const memberGroups = [...new Set(sh.members.map(groupOf))]
+  const memberGroups = [...new Set(roster.active.map(groupOf))]
     .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
-    .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), sh.members.filter((m) => groupOf(m) === k).length] as const);
+    .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), roster.active.filter((m) => groupOf(m) === k).length] as const);
   // 历来所有收款，按这笔钱覆盖的那一期分组（同一期的人排在一起），新的期在前；已退出的成员也保留
   const receipts = sh.members.flatMap((m) => (m.payments ?? []).map((p) => ({ m, p, base: toBaseAt(state, p.amount, p.currency, p.date) })));
   const total = receipts.reduce((a, r) => a + r.base, 0);
@@ -720,7 +792,7 @@ export function CarSheet({
                 [
                   `${money(s.price, s.currency)} ${cycleLabel(s.cycle)}`,
                   stopped ? '' : next ? t('family.pool.next', { date: cnDate(next) }) : '',
-                  t('family.sheet.seatsVal', { used: onboard.length + 1, total: sh.seats }),
+                  t('family.sheet.seatsVal', { used: roster.active.length, total: sh.seats }),
                 ]
                   .filter(Boolean)
                   .join('\n'),
@@ -764,17 +836,48 @@ export function CarSheet({
             </button>
           )}
         </div>
-        <div className="car-members">
-          <MemberTable state={state} s={s} today={today} ro={ro} onMember={onMember} />
+        <div className="car-members" ref={timelineRef}>
+          <MemberTable
+            state={state}
+            s={s}
+            today={today}
+            ro={ro}
+            onMember={onMember}
+            win={win}
+            expanded={departedOpen}
+            onToggle={() => setDepartedOpen(!departedOpen)}
+          />
           <div className="car-member-cards">
+            <TimelineAxis win={win} />
             {memberGroups.map(([key, label, n]) => (
               <div key={key} className="car-sheet-members">
                 <div className="car-group-head">
                   {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
                 </div>
-                <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} timeline />
+                <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} timeline win={win} />
               </div>
             ))}
+            {Array.from({ length: free }, (_, i) => (
+              <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
+            ))}
+            {departedOpen && (
+              <div className="car-sheet-members">
+                <MemberRows
+                  state={state}
+                  s={s}
+                  today={today}
+                  ro={ro}
+                  onMember={onMember}
+                  only={(m) => !!m.left && m.left <= today}
+                  includeLeft
+                  timeline
+                  win={win}
+                />
+              </div>
+            )}
+            {roster.departed.length > 0 && (
+              <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
+            )}
           </div>
         </div>
 
