@@ -15,7 +15,7 @@
     "since": "Lancé le",
     "members": "Membres",
     "receipts": "Paiements reçus",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Date",
     "member": "Membre",
     "covers": "Période",
@@ -23,8 +23,8 @@
     "expandAll": "Tout développer",
     "collapseAll": "Tout réduire",
     "groupSum": {
-      "one": "{count} paiement · {amount}",
-      "other": "{count} paiements · {amount}"
+      "one": "{count} paiement\n{amount}",
+      "other": "{count} paiements\n{amount}"
     },
     "fee": "Tarif",
     "nextCollection": "Prochain encaissement",
@@ -59,7 +59,7 @@
       "one": "Copié pour {count} membre",
       "other": "Copié pour {count} membres"
     },
-    "titleNew": "Ajouter un membre · {name}",
+    "titleNew": "Ajouter un membre\n{name}",
     "confirmDelete": "Supprimer définitivement « {name} » ? Son historique de paiements sera aussi supprimé, ce qui réduira vos revenus enregistrés.\nS’il a simplement quitté le partage, indiquez plutôt une date de départ.",
     "deleted": "Supprimé",
     "delete": "Supprimer",
@@ -101,12 +101,12 @@
     "other": "Autre",
     "source": "Provenance",
     "sourcePh": "Quel groupe / qui l’a recommandé",
-    "payments": "Paiements · {count}",
+    "payments": "Paiements\n{count}",
     "receivedTotal": "Environ {amount} reçus au total",
     "paidUntil": "Payé jusqu’au",
     "paidUntilPh": "Aucun paiement pour l’instant",
-    "payCover": "Reçu le {date} · couvre du {from} au {until}",
-    "payCoverTo": "Reçu le {date} · couvre jusqu’au {until}",
+    "payCover": "Reçu le {date}\ncouvre du {from} au {until}",
+    "payCoverTo": "Reçu le {date}\ncouvre jusqu’au {until}",
     "copyAria": "Copier pour les autres membres",
     "removePayAria": "Supprimer le paiement",
     "dup": "Déjà enregistré",
@@ -147,9 +147,9 @@
     },
     "collectionSchedule": "Dates de collecte : chaque année {dates}",
     "coverAligned": "Se termine à la fin de la période commune",
-    "recordNext": "Enregistrer un paiement · {amount}",
+    "recordNext": "Enregistrer un paiement\n{amount}",
     "collectionAnchor": "Début commun de collecte",
-    "firstSummary": "Première période {from}–{until} · {mode} {amount}",
+    "firstSummary": "Première période {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Compte non renseigné",
     "editAccount": "Modifier le compte du membre",
     "copyAccount": "Copier le compte"
@@ -175,9 +175,9 @@
       "other": "{count} membres n’ont pas payé"
     },
     "count": "Partages",
-    "countStarted": " organisés · ",
+    "countStarted": " organisés\n",
     "countJoined": " rejoints",
-    "countSub": "Organisés · Rejoints",
+    "countSub": "Organisés\nRejoints",
     "emptyTitle": "Aucun abonnement partagé",
     "emptyBody": "Dans l’éditeur d’un abonnement, choisissez « J’organise » dans « Qui l’utilise », puis ajoutez les membres et leurs parts.",
     "next": "prochain le {date}",
@@ -220,7 +220,7 @@
     },
     "collect": "Encaisser",
     "joinedGroup": "Partages rejoints",
-    "payTo": "Payé à {name} · {amount}",
+    "payTo": "Payé à {name}\n{amount}",
     "ownerDefault": "organisateur",
     "maybeGroup": "Peut-être partagé",
     "convert": "Rendre partagé",
@@ -252,13 +252,13 @@
     "profit": "Bénéfice / an",
     "since": "Depuis {month}",
     "sinceNone": "Depuis le début",
-    "actual": "Payé {paid} · Reçu {received} · {result}",
+    "actual": "Payé {paid}\nReçu {received}\n{result}",
     "gain": "+{amount}",
     "lost": "−{amount}",
     "noRecords": "Aucun paiement pour l’instant"
   },
   "collect": {
-    "title": "Enregistrer un paiement · {name}",
+    "title": "Enregistrer un paiement\n{name}",
     "next": "Prochain encaissement {date}",
     "editMember": "Modifier",
     "until": "Couvre jusqu’au",
@@ -289,7 +289,7 @@
       "one": "{count} jour de retard",
       "other": "{count} jours de retard"
     },
-    "owe": "{amount} dû · depuis le {date}",
-    "settled": "Réglé · prochaine échéance {date}"
+    "owe": "{amount} dû\ndepuis le {date}",
+    "settled": "Réglé\nprochaine échéance {date}"
   }
 }

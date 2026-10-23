@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
@@ -126,7 +127,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               <span className="amt car-plan-count">
                 <span>
                   {owned.length}
-                  <small>{t('family.pool.countStarted')}</small>
+                  <small>{copyParts(t('family.pool.countStarted'))}</small>
                 </span>
                 <span>
                   {joined.length}
@@ -134,7 +135,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 </span>
               </span>
             </div>
-            <div className="stat-sub">{t('family.pool.countSub')}</div>
           </div>
         </div>
 
@@ -177,7 +177,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         </div>
                         <div className="muted car-sub">
                           {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                          {next && live(s) ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
+                          {copyParts(next && live(s) ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
                         </div>
                       </div>
                       {/* 只提示满没满车；空位的「+」放到展开后的「添加成员」 */}
@@ -242,7 +242,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 sub={undefined}
                 onClick={() => onOpen(s)}
               >
-                {t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: flow(-s.price, s.currency) })}
+                {copyParts(t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: flow(-s.price, s.currency) }))}
               </Cell>
             ))}
           </Group>
@@ -365,18 +365,20 @@ function MemberRows({
               </div>
               <div className="muted member-dates">
                 <span className={`text-ellipsis ${d.periodsOwed > 0 && collection.from <= today ? 'owe' : ''}`}>
-                  {d.member.exempt
-                    ? (d.member.note ?? t('family.pool.exemptNote'))
-                    : d.member.left && collection.from >= d.member.left
-                      ? t('family.pool.leftOn', { date: cnDateAuto(d.member.left, today) })
-                      : d.periodsOwed > 0 && collection.from < today
-                        ? `${t('family.quick.late', { count: diffDays(collection.from, today) })} · ${t('family.pool.dueOn', { date: cnDateFull(collection.from) })}`
-                        : d.periodsOwed > 0
-                          ? t('family.pool.dueOn', { date: cnDateFull(collection.from) })
-                          : (() => {
-                              const p = memberStatus(state, s, d.member, today).period;
-                              return t('family.sheet.range', { from: cnDateFull(p.from), until: cnDateFull(p.until) });
-                            })()}
+                  {copyParts(
+                    d.member.exempt
+                      ? (d.member.note ?? t('family.pool.exemptNote'))
+                      : d.member.left && collection.from >= d.member.left
+                        ? t('family.pool.leftOn', { date: cnDateAuto(d.member.left, today) })
+                        : d.periodsOwed > 0 && collection.from < today
+                          ? `${t('family.quick.late', { count: diffDays(collection.from, today) })}\n${t('family.pool.dueOn', { date: cnDateFull(collection.from) })}`
+                          : d.periodsOwed > 0
+                            ? t('family.pool.dueOn', { date: cnDateFull(collection.from) })
+                            : (() => {
+                                const p = memberStatus(state, s, d.member, today).period;
+                                return t('family.sheet.range', { from: cnDateFull(p.from), until: cnDateFull(p.until) });
+                              })(),
+                  )}
                 </span>
               </div>
             </button>
@@ -410,14 +412,14 @@ function receiptNotes(notes: (string | undefined)[]) {
   // 历史收款的次数/周期存在备注中，不从今天的成员收费标准反推历史。
   const parts = raw.map((note) => /^(第\s*\d+\s*次收款|Collection\s*#?\d+)(?:\s*[（(]([^（）()]+)[）)])?\s*(?:[·，,:：；;]\s*)?([\s\S]*)$/i.exec(note));
   if (raw.every((note) => note === raw[0])) {
-    return { common: parts[0] ? parts[0].slice(1).filter(Boolean).join(' · ') : (raw[0] ?? ''), rows: raw.map(() => '') };
+    return { common: parts[0] ? parts[0].slice(1).filter(Boolean).join('\n') : (raw[0] ?? ''), rows: raw.map(() => '') };
   }
   const commonNo = parts[0]?.[1] && parts.every((p) => p?.[1] === parts[0]![1]) ? parts[0][1] : '';
   const commonCycle = parts[0]?.[2] && parts.every((p) => p?.[2] === parts[0]![2]) ? parts[0][2] : '';
   if (!commonNo && !commonCycle) return { common: '', rows: raw };
   return {
-    common: [commonNo, commonCycle].filter(Boolean).join(' · '),
-    rows: parts.map((p) => [commonNo ? '' : p?.[1], commonCycle ? '' : p?.[2], p?.[3]].filter(Boolean).join(' · ')),
+    common: [commonNo, commonCycle].filter(Boolean).join('\n'),
+    rows: parts.map((p) => [commonNo ? '' : p?.[1], commonCycle ? '' : p?.[2], p?.[3]].filter(Boolean).join('\n')),
   };
 }
 
@@ -613,7 +615,7 @@ export function CarSheet({
         type="button"
         className="ld-row ld-th car-ledger-head"
         aria-expanded={allOpen}
-        aria-label={`${columns.join(' · ')} · ${t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}`}
+        aria-label={`${columns.join('\n')}\n${t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}`}
         disabled={!keys.length}
         onClick={() => setOpen(new Set(allOpen ? [] : keys))}
       >
@@ -658,7 +660,7 @@ export function CarSheet({
             </div>
             <div className="muted ph-meta">
               {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-              {next && !stopped ? ` · ${t('family.pool.next', { date: cnDate(next) })}` : ''}
+              {copyParts(next && !stopped ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
             </div>
           </div>
           <StatusPill tone={stopped ? 'stop' : owe ? 'owe' : 'ok'}>
@@ -670,14 +672,14 @@ export function CarSheet({
           <Group>
             <Cell label={t('family.sheet.seats')}>
               {t('family.sheet.seatsVal', { used: onboard.length + 1, total: sh.seats })}
-              {free ? ` · ${t('family.pool.seatsFree', { count: free })}` : ''}
+              {copyParts(free ? `\n${t('family.pool.seatsFree', { count: free })}` : '')}
             </Cell>
             {/* 车的收款规则：跟随车的成员都按这个收；点开修改 */}
             <Cell label={t('family.rule.title')} onClick={ro ? undefined : () => setEditingRule(true)}>
               {/* 窄屏放不下时只在「·」处换行，不把日期拆开 */}
               <span className="cell-wrap">
                 <span className="nowrap">{perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}</span>
-                {' · '}
+                {copyParts('\n')}
                 <span className="nowrap">
                   {t('family.rule.anchor')} {cnDate(collectionAnchor(s))}
                 </span>
@@ -736,7 +738,7 @@ export function CarSheet({
             {memberGroups.map(([key, label, n]) => (
               <div key={key} className="car-sheet-members">
                 <div className="car-group-head">
-                  {label} · {t('family.sheet.people', { count: n })}
+                  {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
                 </div>
                 <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} />
               </div>
@@ -777,7 +779,7 @@ export function CarSheet({
                   <span className="car-period-title">
                     <b>{t('calendar.yearTitle', { year: g.y })}</b>
                   </span>
-                  <span>{t('family.sheet.groupSum', { count: g.list.length, amount: fmt(-g.sum) })}</span>
+                  <span>{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(-g.sum) }))}</span>
                 </button>
                 {openOut.has(g.y) &&
                   g.list.map(({ c, base: v }, i) => (
@@ -816,21 +818,21 @@ export function CarSheet({
                   aria-expanded={openIn.has(g.key)}
                   aria-label={[g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) }), g.notes.common]
                     .filter(Boolean)
-                    .join(' · ')}
+                    .join('\n')}
                   onClick={() => toggleGroup(g.key, openIn, setOpenIn)}
                 >
                   <span className="car-period-title">
                     <b>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</b>
-                    {g.notes.common && <small>{g.notes.common}</small>}
+                    {g.notes.common && <small>{copyParts(g.notes.common)}</small>}
                   </span>
-                  <span className="green">{t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) })}</span>
+                  <span className="green">{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) }))}</span>
                 </button>
                 {openIn.has(g.key) &&
                   g.list.map(({ m, p, base: v }, i) => (
                     <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => onMember(m)}>
                       <span>
                         <b>{m.name || t('family.pool.unnamed')}</b>
-                        {g.notes.rows[i] && <small>{g.notes.rows[i]}</small>}
+                        {g.notes.rows[i] && <small>{copyParts(g.notes.rows[i])}</small>}
                       </span>
                       {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
                       <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>

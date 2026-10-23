@@ -1,13 +1,13 @@
 {
   "title": "Ví",
   "sub": { "other": "{count} phương thức thanh toán" },
-  "subDrag": { "other": "{count} phương thức thanh toán · Kéo thẻ để sắp xếp" },
+  "subDrag": { "other": "{count} phương thức thanh toán\nKéo thẻ để sắp xếp" },
   "add": "Thêm",
   "orderSaved": "Đã lưu thứ tự",
   "runwayGroup": "Thời gian dùng của số dư",
   "family": "Gói chia sẻ",
   "familyCount": "{count}",
-  "unassigned": "Chưa có phương thức thanh toán · {count}",
+  "unassigned": "Chưa có phương thức thanh toán\n{count}",
   "runway": {
     "drain": "Khoảng {amount}/tháng",
     "scale": { "today": "Hôm nay", "m3": "3 tháng", "m6": "6 tháng", "m9": "9 tháng", "y1": "1 năm" },
@@ -36,7 +36,7 @@
     "goTopup": "Nạp tiền",
     "site": "Trang web",
     "projection": "Khoản phí sắp tới",
-    "linked": "Gói đăng ký liên kết · {count}",
+    "linked": "Gói đăng ký liên kết\n{count}",
     "none": "Không có",
     "notes": "Ghi chú"
   },
@@ -59,7 +59,7 @@
     "costPh": "Tùy chọn",
     "note": "Ghi chú",
     "notePh": "VD: Razer Gold, đại lý",
-    "history": "Lần nạp · {count}",
+    "history": "Lần nạp\n{count}",
     "spent": "đã trả {amount}",
     "premium": "Cao hơn {pct}%",
     "below": "Thấp hơn thị trường {pct}%",

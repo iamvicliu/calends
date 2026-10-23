@@ -24,7 +24,7 @@
   "hero": {
     "label": "Gasto mensual en suscripciones",
     "vsLastMonth": "vs. final del mes pasado",
-    "yearAgo": "· {amount} hace un año",
+    "yearAgo": "\n{amount} hace un año",
     "annual": "Al año",
     "perDay": "Al día",
     "active": "Activas",
@@ -66,16 +66,16 @@
     "title": "Caja vs. coste real",
     "legendCash": "Cobrado ese mes",
     "legendAccrual": "Coste repartido por mes",
-    "forecast": " · Previsión",
-    "tip": "Cobrado {cash} · Coste {cost}",
-    "prepaidItem": "{name} · {amount} · hasta {until}",
+    "forecast": "\nPrevisión",
+    "tip": "Cobrado {cash}\nCoste {cost}",
+    "prepaidItem": "{name}\n{amount}\nhasta {until}",
     "prepaid": "Valor prepagado",
     "prepaidSub": "{count} pagadas, aún sin consumir",
-    "savedItem": "{name} · {amount} · desde {since}",
+    "savedItem": "{name}\n{amount}\ndesde {since}",
     "saved": "Menos al mes por cancelar",
     "savedSub": "{count} canceladas",
     "next90": "Vence en los próximos 90 días",
-    "peak": "Pico en {month} · {amount}",
+    "peak": "Pico en {month}\n{amount}",
     "fullPaidHint": "Importe total pagado, incluidos los adelantos por los miembros"
   },
   "comp": {
@@ -90,8 +90,8 @@
     "quarterly": "Trimestral / semestral",
     "monthly": "Mensual",
     "groupTip": {
-      "one": "{name} · {count} elemento · {amount}/mes",
-      "other": "{name} · {count} elementos · {amount}/mes"
+      "one": "{name}\n{count} elemento\n{amount}/mes",
+      "other": "{name}\n{count} elementos\n{amount}/mes"
     }
   },
   "topup": {
@@ -104,7 +104,7 @@
     "span12": "Próximo año",
     "empty": "Aún no hay cuentas con saldo.",
     "emptyCta": "Añade saldos de App Store o de tu operador en Cartera",
-    "summary": "Saldo {balance} · unos {monthly}/mes",
+    "summary": "Saldo {balance}\nunos {monthly}/mes",
     "why": "{span}: vencen {due}, tienes {balance}, faltan {need}",
     "urgent": "; lo más urgente: añade al menos {min} antes del {date}",
     "cards": "Tarjetas regalo sugeridas",
@@ -138,7 +138,7 @@
     "loss": "Pérdida no reembolsada",
     "savedHint": "Estimación de renovaciones evitadas desde la cancelación hasta hoy",
     "lossHint": "Importe pagado por un servicio que terminó antes de tiempo y no se reembolsó",
-    "basis": "Todo el historial · Mi parte; ahorro al cambio actual y pérdida no reembolsada al cambio del día del cese.",
+    "basis": "Todo el historial\nMi parte; ahorro al cambio actual y pérdida no reembolsada al cambio del día del cese.",
     "details": "Detalle de pérdidas no reembolsadas",
     "empty": "No hay pérdidas no reembolsadas.",
     "cancel": "Cancelación anticipada voluntaria"

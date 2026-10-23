@@ -1,5 +1,5 @@
 {
-  "title": "{name} · Abonelikler",
+  "title": "{name}\nAbonelikler",
   "loadFailed": "Yüklenemedi",
   "theme": {
     "title": "Tema: {mode} (değiştirmek için tıklayın)",
@@ -18,8 +18,8 @@
   "timeline": {
     "title": "Zaman çizelgesi",
     "upcoming": {
-      "one": "Önümüzdeki 30 günde {count} ödeme · {amount}",
-      "other": "Önümüzdeki 30 günde {count} ödeme · {amount}"
+      "one": "Önümüzdeki 30 günde {count} ödeme\n{amount}",
+      "other": "Önümüzdeki 30 günde {count} ödeme\n{amount}"
     }
   },
   "chart": {
@@ -29,7 +29,7 @@
     "mrr": "Aylık maliyet",
     "charge": "Ödenen tutar",
     "thisMonth": "Bu ay",
-    "projected": "{month} · Tahmini"
+    "projected": "{month}\nTahmini"
   },
   "ended": {
     "title": "İptal edilenler",
@@ -56,14 +56,14 @@
   "list": {
     "title": "Abonelikler",
     "summary": {
-      "one": "{count} · {amount}/ay",
-      "other": "{count} · {amount}/ay"
+      "one": "{count}\n{amount}/ay",
+      "other": "{count}\n{amount}/ay"
     },
     "all": "Tümü"
   },
   "row": {
-    "ends": " · Bitiş {date}",
-    "renews": " · {date} yenilenir",
+    "ends": "\nBitiş {date}",
+    "renews": "\n{date} yenilenir",
     "monthly": "Aylık",
     "perMonthEq": "Aylık karşılığı"
   },

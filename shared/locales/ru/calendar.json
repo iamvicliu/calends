@@ -1,10 +1,10 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} списание · {amount}",
-    "few": "{count} списания · {amount}",
-    "many": "{count} списаний · {amount}",
-    "other": "{count} списания · {amount}"
+    "one": "{count} списание\n{amount}",
+    "few": "{count} списания\n{amount}",
+    "many": "{count} списаний\n{amount}",
+    "other": "{count} списания\n{amount}"
   },
   "mode": {
     "month": "Месяц",
@@ -24,12 +24,12 @@
   "noneMonth": "В этом месяце списаний нет",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} списание · ",
-    "few": "{count} списания · ",
-    "many": "{count} списаний · ",
-    "other": "{count} списания · "
+    "one": "{count} списание\n",
+    "few": "{count} списания\n",
+    "many": "{count} списаний\n",
+    "other": "{count} списания\n"
   },
   "pickDay": "Выберите дату для просмотра списаний",
-  "nextCharge": "Следующее списание · {date}",
+  "nextCharge": "Следующее списание\n{date}",
   "expandReport": "Открыть полный отчёт"
 }

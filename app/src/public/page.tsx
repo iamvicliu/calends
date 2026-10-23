@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
@@ -62,7 +63,7 @@ function rich(key: string, params: Params, parts: Record<string, React.ReactNode
     last = m.index! + m[0].length;
   }
   out.push(s.slice(last));
-  return out.map((node, i) => <Fragment key={i}>{node}</Fragment>);
+  return out.map((node, i) => <Fragment key={i}>{copyParts(node)}</Fragment>);
 }
 
 /** 卡片留白：手机 16px，桌面 24px */
@@ -159,7 +160,7 @@ function Ledger({ state }: { state: AppState }) {
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const v = chargeValue(state, c) * k;
-        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-md bg-card" size={30} />, tip: `${clean(c.sub.name)} · ${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
+        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-md bg-card" size={30} />, tip: `${clean(c.sub.name)}\n${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
         map.set(c.date, g);
       }
       return [...map.values()];
@@ -447,7 +448,7 @@ function PaidChart({ months, cur, ccy, fmt }: { months: Array<{ m: string; v: nu
         <YAxis tickLine={false} axisLine={false} width={44} tickCount={4} tickFormatter={(v: number) => moneyTick(v, ccy)} />
         <ChartTooltip
           cursor={false}
-          content={<ChartTooltipContent hideIndicator labelFormatter={(m) => (String(m) > cur ? t('public.chart.projected', { month: monthFull(String(m)) }) : monthFull(String(m)))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />}
+          content={<ChartTooltipContent hideIndicator labelFormatter={(m) => (String(m) > cur ? copyParts(t('public.chart.projected', { month: monthFull(String(m)) })) : monthFull(String(m)))} formatter={(v) => <span className="font-medium tnum">{fmt(Number(v))}</span>} />}
         />
         <Bar dataKey="v" radius={4} maxBarSize={26}>
           {months.map((x) => (
@@ -517,7 +518,7 @@ function Composition({ cats, total, k, fmt }: { cats: Derived['cats']; total: nu
               <i className="size-2.5 rounded-md" style={{ background: shade(i) }} />
               <span className="flex flex-1 items-center gap-1.5">
                 {!x.other && <CatGlyph icon={catIcon(x.name)} size={14} className="size-3.5 text-muted-foreground" />}
-                {x.name} <span className="text-[length:var(--fs-2)] text-muted-foreground">{t('public.count', { count: x.n })}</span>
+                {copyParts(x.name)} <span className="text-[length:var(--fs-2)] text-muted-foreground">{t('public.count', { count: x.n })}</span>
               </span>
               <span className="tnum">{fmt(x.v * k)}</span>
               <span className="w-10 text-right text-[length:var(--fs-2)] text-muted-foreground tnum">{Math.round((x.v / (total || 1)) * 100)}%</span>
@@ -654,7 +655,7 @@ function Row({ s, v, today, ccy, k, fmt }: { s: Subscription; v: number; today: 
         </div>
         <div className="truncate text-[length:var(--fs-2)] text-muted-foreground tnum">
           {cycleLabel(ph.cycle)}{!repeatsPrice && ` ${money(ph.price, ph.currency)}`}
-          {ending && end ? <span>{t('public.row.ends', { date: cnDate(end) })}</span> : n && <span className={cn(soon && 'text-foreground')}>{t('public.row.renews', { date: cnDate(n) })}</span>}
+          {ending && end ? <span>{copyParts(t('public.row.ends', { date: cnDate(end) }))}</span> : n && <span className={cn(soon && 'text-foreground')}>{copyParts(t('public.row.renews', { date: cnDate(n) }))}</span>}
         </div>
       </div>
       <div className="text-right tnum">

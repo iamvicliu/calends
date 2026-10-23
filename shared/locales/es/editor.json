@@ -179,7 +179,7 @@
   },
   "name": {
     "placeholder": "Nombre, o pega un enlace de App Store",
-    "catalog": "Servicios populares · completa logo, categoría y sitio web"
+    "catalog": "Servicios populares\ncompleta logo, categoría y sitio web"
   },
   "change": {
     "title": "Historial y cambios",

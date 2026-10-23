@@ -17,8 +17,8 @@
     "other": "{count} payments due"
   },
   "viewSub": "View subscription",
-  "stoppedOn": " · stopped {date}",
-  "nextOn": " · next {date}",
+  "stoppedOn": "\nstopped {date}",
+  "nextOn": "\nnext {date}",
   "payFor": "For {name}",
   "unset": "not set",
   "paidPeriods": {
@@ -29,7 +29,7 @@
   "owed": "Due",
   "settled": "Settled",
   "detailTitle": "Paid for others",
-  "cardCcy": " · card settles in {ccy}",
+  "cardCcy": "\ncard settles in {ccy}",
   "forWhom": "Paid for",
   "method": "Payment method",
   "subscription": "Subscription",
@@ -40,7 +40,7 @@
   "diffLabel": "Paid back − charged",
   "table": {
     "cost": "Cost then",
-    "total": "Total · {count}",
+    "total": "Total\n{count}",
     "receivedOn": "Received {date}",
     "date": "Charge date",
     "charged": "Charged",
@@ -78,8 +78,8 @@
     "allBack": "All paid back",
     "total": "Total paid",
     "totalSub": {
-      "one": "{count} charge · {subs}",
-      "other": "{count} charges · {subs}"
+      "one": "{count} charge\n{subs}",
+      "other": "{count} charges\n{subs}"
     },
     "subs": {
       "one": "{count} subscription",

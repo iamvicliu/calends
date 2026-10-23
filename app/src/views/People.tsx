@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { useRef, useState } from 'react';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
@@ -87,12 +88,12 @@ function ContactLink({ p }: { p: Person }) {
 /** 一笔关系的一行说明：合租已付至哪天 / 代付欠几期 */
 function itemLine(i: PersonItem, today: string): string {
   const kind = t(`people.kind.${i.kind}`);
-  if (i.member?.left && i.member.left <= today) return `${kind} · ${t('people.item.left')}`;
-  if (!i.active && i.kind === 'proxy') return `${kind} · ${t('people.item.ended')}`;
-  if (i.member?.exempt) return `${kind} · ${t('family.pool.exempt')}`;
-  if (i.periodsOwed > 0) return `${kind} · ${t('people.item.owedPeriods', { count: i.periodsOwed })}`;
-  if (i.kind === 'share') return `${kind} · ${i.paidUntil ? t('people.item.paidUntil', { date: cnDateAuto(i.paidUntil, today) }) : t('people.item.noPay')}`;
-  return `${kind} · ${t('family.pool.settled')}`;
+  if (i.member?.left && i.member.left <= today) return `${kind}\n${t('people.item.left')}`;
+  if (!i.active && i.kind === 'proxy') return `${kind}\n${t('people.item.ended')}`;
+  if (i.member?.exempt) return `${kind}\n${t('family.pool.exempt')}`;
+  if (i.periodsOwed > 0) return `${kind}\n${t('people.item.owedPeriods', { count: i.periodsOwed })}`;
+  if (i.kind === 'share') return `${kind}\n${i.paidUntil ? t('people.item.paidUntil', { date: cnDateAuto(i.paidUntil, today) }) : t('people.item.noPay')}`;
+  return `${kind}\n${t('family.pool.settled')}`;
 }
 
 /** 人：每个人在哪些合租、代付里，现在欠多少、至今收回多少、最近一次收款 */
@@ -159,7 +160,7 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
             <div className="stat-value">
               <span className="amt">{book.length}</span>
             </div>
-            <div className="stat-sub">{t('people.stat.countSub', { share: inShare, proxy: inProxy })}</div>
+            <div className="stat-sub">{copyParts(t('people.stat.countSub', { share: inShare, proxy: inProxy }))}</div>
           </div>
         </div>
         {book.length === 0 ? (
@@ -222,7 +223,7 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
   const planTitle = (id: string) =>
     l.items
       .filter((i) => i.sub.id === id)
-      .map((i) => [i.sub.name, i.member?.account].filter(Boolean).join(' · '))
+      .map((i) => [i.sub.name, i.member?.account].filter(Boolean).join('\n'))
       .join('\n');
   return (
     <div className="people-row" role="row" onClick={onClick}>
@@ -519,7 +520,7 @@ function PersonSheet({
                   <SubIcon sub={i.sub} size={30} />
                   <span>
                     {i.sub.name}
-                    <small>{itemLine(i, today)}</small>
+                    <small>{copyParts(itemLine(i, today))}</small>
                   </span>
                 </button>
                 {i.member && (
@@ -528,7 +529,7 @@ function PersonSheet({
                       <input
                         autoFocus
                         autoCapitalize="off"
-                        aria-label={`${i.sub.name} · ${t('family.member.account')}`}
+                        aria-label={`${i.sub.name}\n${t('family.member.account')}`}
                         placeholder={t('family.member.accountPh', { name: i.sub.name })}
                         value={accountValue(i)}
                         disabled={saving}
@@ -546,7 +547,7 @@ function PersonSheet({
                         type="button"
                         className="pp-account-value text-ellipsis"
                         disabled={ro || saving || !stored}
-                        aria-label={`${i.sub.name} · ${t('family.member.editAccount')}`}
+                        aria-label={`${i.sub.name}\n${t('family.member.editAccount')}`}
                         title={accountValue(i).trim() || t('family.member.accountEmpty')}
                         onClick={() => setEditingAccount(accountKey(i))}
                       >

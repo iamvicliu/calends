@@ -6,8 +6,8 @@
   "title": "Tüm abonelikler",
   "all": "Tümü",
   "summary": {
-    "one": "{count} öğe · {monthly}/ay · {yearly}/yıl",
-    "other": "{count} öğe · {monthly}/ay · {yearly}/yıl"
+    "one": "{count} öğe\n{monthly}/ay\n{yearly}/yıl",
+    "other": "{count} öğe\n{monthly}/ay\n{yearly}/yıl"
   },
   "status": {
     "upcoming": "Başlamadı",
@@ -21,7 +21,7 @@
     "lifetime": "Ömür boyu",
     "terminated": "Kapatıldı"
   },
-  "proxyExcluded": "Başkası için ödendi · sayılmaz",
+  "proxyExcluded": "Başkası için ödendi\nsayılmaz",
   "perMonthApprox": "≈ {amount}/ay",
   "originalPrice": "Normal fiyat {amount}",
   "view": {
@@ -68,21 +68,21 @@
   "endedOn": "{date} sona erdi",
   "change": {
     "noMethod": "Ödeme yöntemi belirsiz",
-    "planned": "Planlandı · ",
+    "planned": "Planlandı\n",
     "starts": "Başlangıç: {when}",
     "from": "Değişiklik: {when}"
   },
   "proxyBadge": {
     "owed": {
-      "one": "Başkası için · {count} borç",
-      "other": "Başkası için · {count} borç"
+      "one": "Başkası için\n{count} borç",
+      "other": "Başkası için\n{count} borç"
     },
     "owedFor": {
-      "one": "{name} için · {count} borç",
-      "other": "{name} için · {count} borç"
+      "one": "{name} için\n{count} borç",
+      "other": "{name} için\n{count} borç"
     },
-    "settled": "Başkası için · ödeşildi",
-    "settledFor": "{name} için · ödeşildi"
+    "settled": "Başkası için\nödeşildi",
+    "settledFor": "{name} için\nödeşildi"
   },
   "gantt": {
     "months": {
@@ -104,15 +104,15 @@
     "gapShort": "{span} ara",
     "lifetimeSuffix": " ömür boyu",
     "present": "şimdi",
-    "plannedSuffix": " · planlandı",
-    "introPrefix": "Tanıtım teklifi · ",
+    "plannedSuffix": "\nplanlandı",
+    "introPrefix": "Tanıtım teklifi\n",
     "introShort": "Tanıtım ",
     "planned": "Planlandı",
     "gap": "Ara",
     "earlier": "Önceki",
     "later": "Sonraki",
     "backToNow": "Bugüne dön",
-    "resize": "Ad sütununu boyutlandırmak için sürükleyin · sıfırlamak için çift tıklayın"
+    "resize": "Ad sütununu boyutlandırmak için sürükleyin\nsıfırlamak için çift tıklayın"
   },
   "kind": {
     "debit": "Banka kartı",

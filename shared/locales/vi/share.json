@@ -58,7 +58,7 @@
   "switches": "Đổi khu vực / gói",
   "stoppedOn": "Đã dừng vào {date}",
   "endsOn": "Kết thúc vào {date}",
-  "thanks": "Cảm ơn · Hẹn gặp lại kỳ sau",
+  "thanks": "Cảm ơn\nHẹn gặp lại kỳ sau",
   "n": {
     "charges": {
       "other": "{count} khoản phí"
@@ -70,7 +70,7 @@
   "present": "nay",
   "priceChanges": "Đổi giá: {list}",
   "withYou": "Đồng hành cùng bạn",
-  "totalPerDay": "Tổng {total} · trung bình {perDay}/ngày",
+  "totalPerDay": "Tổng {total}\ntrung bình {perDay}/ngày",
   "lapsed": {
     "other": "Gián đoạn {count} lần"
   },

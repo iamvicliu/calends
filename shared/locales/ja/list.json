@@ -6,7 +6,7 @@
   "title": "すべてのサブスク",
   "all": "すべて",
   "summary": {
-    "other": "{count}件 · {monthly}/月 · {yearly}/年"
+    "other": "{count}件\n{monthly}/月\n{yearly}/年"
   },
   "status": {
     "upcoming": "開始前",
@@ -20,7 +20,7 @@
     "lifetime": "買い切り",
     "terminated": "利用停止"
   },
-  "proxyExcluded": "立て替え · 集計対象外",
+  "proxyExcluded": "立て替え\n集計対象外",
   "perMonthApprox": "≈ {amount}/月",
   "originalPrice": "元の価格 {amount}",
   "view": {
@@ -67,19 +67,19 @@
   "endedOn": "{date}に終了",
   "change": {
     "noMethod": "支払い方法未定",
-    "planned": "予定 · ",
+    "planned": "予定\n",
     "starts": "{when}に開始",
     "from": "{when}に変更"
   },
   "proxyBadge": {
     "owed": {
-      "other": "立て替え · 未回収 {count}"
+      "other": "立て替え\n未回収 {count}"
     },
     "owedFor": {
-      "other": "{name}の立て替え · 未回収 {count}"
+      "other": "{name}の立て替え\n未回収 {count}"
     },
-    "settled": "立て替え · 精算済み",
-    "settledFor": "{name}の立て替え · 精算済み"
+    "settled": "立て替え\n精算済み",
+    "settledFor": "{name}の立て替え\n精算済み"
   },
   "gantt": {
     "months": {
@@ -99,15 +99,15 @@
     "gapShort": "{span}中断",
     "lifetimeSuffix": " 買い切り",
     "present": "現在",
-    "plannedSuffix": " · 予定",
-    "introPrefix": "初回特典 · ",
+    "plannedSuffix": "\n予定",
+    "introPrefix": "初回特典\n",
     "introShort": "特典 ",
     "planned": "予定",
     "gap": "中断",
     "earlier": "前へ",
     "later": "次へ",
     "backToNow": "現在に戻る",
-    "resize": "ドラッグで名前列の幅を調整 · ダブルクリックで元に戻す"
+    "resize": "ドラッグで名前列の幅を調整\nダブルクリックで元に戻す"
   },
   "kind": {
     "debit": "デビットカード",

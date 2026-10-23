@@ -9,8 +9,8 @@
   "neverUsed": "Nunca usado",
   "tokenPlaceholder": "<tu-token>",
   "tokens": {
-    "one": "Tokens · {count}",
-    "other": "Tokens · {count}"
+    "one": "Tokens\n{count}",
+    "other": "Tokens\n{count}"
   },
   "noTokens": "Aún no hay tokens. Crea uno y dáselo al asistente de IA que quieras conectar.",
   "lastUsed": "Último uso: {time}",
@@ -19,8 +19,8 @@
   "revoked": "Revocado",
   "setup": "Configuración",
   "tools": {
-    "one": "Herramientas disponibles · {count}",
-    "other": "Herramientas disponibles · {count}"
+    "one": "Herramientas disponibles\n{count}",
+    "other": "Herramientas disponibles\n{count}"
   },
   "clientOther": "Otro",
   "scope": {

@@ -1,3 +1,4 @@
+import { copyParts } from './copy.tsx';
 import './ui.css';
 import { createPortal } from 'react-dom';
 import { tooltipPosition } from './tooltip-position.ts';
@@ -398,8 +399,8 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
         <Icon name="menu" />
       </IconButton>
       <div className="tb-title">
-        <h1>{title}</h1>
-        {sub && <div className="tb-sub">{sub}</div>}
+        <h1>{copyParts(title)}</h1>
+        {sub && <div className="tb-sub">{copyParts(sub)}</div>}
       </div>
       <IconButton className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
         <Icon name="compose" />
@@ -451,7 +452,7 @@ export function Sheet(props: {
           ) : (
             <div className="sheet-head">
               <Heading slot="title" level={3} className="ui-title">
-                <span className="ui-title-text">{props.title}</span>
+                <span className="ui-title-text">{copyParts(props.title)}</span>
               </Heading>
               <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
                 <Icon name="x" />
@@ -459,7 +460,7 @@ export function Sheet(props: {
             </div>
           )}
           <div className="sheet-body">{props.children}</div>
-          {props.foot && <div className="sheet-foot">{props.foot}</div>}
+          {props.foot && <div className="sheet-foot">{copyParts(props.foot)}</div>}
         </Dialog>
       </Modal>
     </ModalOverlay>
@@ -693,7 +694,7 @@ export function TipLayer() {
     tip &&
     createPortal(
       <div ref={ref} className="tip" role="tooltip" style={position}>
-        {tip.html}
+        {copyParts(tip.html)}
       </div>,
       document.body,
     )
@@ -723,7 +724,7 @@ export function CardTitle({
 }) {
   return (
     <Tag className={`ui-title ${className}`}>
-      <span className="ui-title-text">{children}</span>
+      <span className="ui-title-text">{copyParts(children)}</span>
       {hint && <Hint text={hint} />}
     </Tag>
   );
@@ -749,7 +750,7 @@ export function Hint({ text }: { text: string }) {
         <Icon name="info" />
       </AriaButton>
       <Tooltip className="info-tip" placement="top" offset={8} containerPadding={8}>
-        {text}
+        {copyParts(text)}
       </Tooltip>
     </TooltipTrigger>
   );
@@ -767,9 +768,9 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 export function Group({ title, foot, children }: { title?: ComponentChildren; foot?: ComponentChildren; children: ComponentChildren }) {
   return (
     <section className="group">
-      {title && <div className="group-title">{title}</div>}
+      {title && <div className="group-title">{copyParts(title)}</div>}
       <div className="group-body">{children}</div>
-      {foot && <div className="group-foot">{foot}</div>}
+      {foot && <div className="group-foot">{copyParts(foot)}</div>}
     </section>
   );
 }
@@ -788,10 +789,10 @@ export function Cell({
   const inner = (
     <>
       <span className="cell-l">
-        {label}
-        {sub && <small>{sub}</small>}
+        {copyParts(label)}
+        {sub && <small>{copyParts(sub)}</small>}
       </span>
-      <span className="cell-r">{children}</span>
+      <span className="cell-r">{copyParts(children)}</span>
     </>
   );
   return onClick ? (

@@ -5,7 +5,7 @@
   "search": "搜索订阅",
   "title": "全部订阅",
   "all": "全部",
-  "summary": "{count} 项 · 每月 {monthly} · 每年 {yearly}",
+  "summary": "{count} 项\n每月 {monthly}\n每年 {yearly}",
   "status": {
     "upcoming": "未开始",
     "active": "计费中",
@@ -18,7 +18,7 @@
     "lifetime": "买断",
     "terminated": "已停用"
   },
-  "proxyExcluded": "代付 · 不计入支出",
+  "proxyExcluded": "代付\n不计入支出",
   "perMonthApprox": "≈ {amount}/月",
   "originalPrice": "原价 {amount}",
   "view": {
@@ -65,15 +65,15 @@
   "endedOn": "结束 {date}",
   "change": {
     "noMethod": "支付方式未定",
-    "planned": "计划 · ",
+    "planned": "计划\n",
     "starts": "{when}开始",
     "from": "{when}起"
   },
   "proxyBadge": {
-    "owed": "代付 · 待收 {count} 期",
-    "owedFor": "替{name}代付 · 待收 {count} 期",
-    "settled": "代付 · 已结清",
-    "settledFor": "替{name}代付 · 已结清"
+    "owed": "代付\n待收 {count} 期",
+    "owedFor": "替{name}代付\n待收 {count} 期",
+    "settled": "代付\n已结清",
+    "settledFor": "替{name}代付\n已结清"
   },
   "gantt": {
     "months": "{count} 个月",
@@ -89,15 +89,15 @@
     "gapShort": "断 {span}",
     "lifetimeSuffix": " 买断",
     "present": "至今",
-    "plannedSuffix": " · 计划中",
-    "introPrefix": "首期优惠 · ",
+    "plannedSuffix": "\n计划中",
+    "introPrefix": "首期优惠\n",
     "introShort": "首期 ",
     "planned": "计划中",
     "gap": "断订",
     "earlier": "往前",
     "later": "往后",
     "backToNow": "回到现在",
-    "resize": "拖动调整名称列宽度 · 双击恢复默认"
+    "resize": "拖动调整名称列宽度\n双击恢复默认"
   },
   "kind": {
     "debit": "银行卡",

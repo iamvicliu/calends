@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base, storageKey } from '../base.ts';
 import type { ReactNode } from 'react';
 import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
@@ -540,22 +541,15 @@ const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
   { key: 'hikes', send: true },
 ];
 
-/** 欢迎语共 20 套：每次出现空状态（进入助手页、开新对话）随机一套，停留期间不变 */
-const WELCOME_COUNT = 20;
-
 function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
-  const [n] = useState(() => Math.floor(Math.random() * WELCOME_COUNT) + 1);
   return (
     <div className="as-welcome">
       <img className="as-orb" src={base('/icons/logo.svg')} alt="" />
-      <h2>{t(`assistant.welcome.variants.v${n}.title`)}</h2>
-      <p>{t(`assistant.welcome.variants.v${n}.body`)}</p>
       {!ready && cfg && (
         <button className="as-setup-cta" onClick={onSetup}>
           <KeyRound size={16} />
           <span>
             <b>{t('assistant.setup.cta')}</b>
-            <small>{t('assistant.setup.ctaHint')}</small>
           </span>
         </button>
       )}
@@ -765,7 +759,7 @@ function summaryRows(tool: string, a: Record<string, unknown>, state: AppState, 
         a.exempt
           ? t('assistant.v.exempt')
           : a.fee != null
-            ? `${money(Number(a.fee), String(a.fee_currency ?? collect))} · ${billLabel(Number(a.bill_every ?? 1))}`
+            ? `${money(Number(a.fee), String(a.fee_currency ?? collect))}\n${billLabel(Number(a.bill_every ?? 1))}`
             : undefined,
       );
       add(t('assistant.f.paidUntil'), day(a.paid_until));
@@ -886,7 +880,7 @@ function Proposal(props: {
           ? [
               [
                 t('assistant.card.history'),
-                `${t('assistant.card.historyCount', { count: history.length })} · ${flow(-history.reduce((x, p) => x + p.amount, 0), String(a.currency))}`,
+                `${t('assistant.card.historyCount', { count: history.length })}\n${flow(-history.reduce((x, p) => x + p.amount, 0), String(a.currency))}`,
               ] as [string, ReactNode],
             ]
           : []),
@@ -904,10 +898,10 @@ function Proposal(props: {
           {create && cyc ? (
             <span>
               {money(Number(a.price), String(a.currency))} {cycleLabel({ unit: cyc.unit, every: Number(cyc.every ?? 1) })}
-              {a.category ? ` · ${String(a.category)}` : ''}
+              {copyParts(a.category ? `\n${String(a.category)}` : '')}
             </span>
           ) : (
-            sub && <span>{[sub.price != null && sub.currency ? money(sub.price, sub.currency) : '', sub.cycle].filter(Boolean).join(' · ')}</span>
+            sub && <span>{copyParts([sub.price != null && sub.currency ? money(sub.price, sub.currency) : '', sub.cycle].filter(Boolean).join('\n'))}</span>
           )}
         </div>
       </div>
@@ -915,7 +909,7 @@ function Proposal(props: {
         {rows.map(([k, v]) => (
           <Fragment key={k}>
             <dt>{k}</dt>
-            <dd>{v}</dd>
+            <dd>{copyParts(v)}</dd>
           </Fragment>
         ))}
       </dl>
@@ -934,7 +928,7 @@ function Proposal(props: {
           <div>
             {part.preview.next_charges.map((c) => (
               <span key={c.date}>
-                {c.date.slice(5).replace('-', '/')} · {flow(-c.amount, c.currency)}
+                {c.date.slice(5).replace('-', '/')} <span className="copy-gap" aria-hidden="true" /> {flow(-c.amount, c.currency)}
               </span>
             ))}
           </div>

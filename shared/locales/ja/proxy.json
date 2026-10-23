@@ -16,8 +16,8 @@
     "other": "未回収 {count}件"
   },
   "viewSub": "サブスクを見る",
-  "stoppedOn": " · {date}に停止",
-  "nextOn": " · 次回 {date}",
+  "stoppedOn": "\n{date}に停止",
+  "nextOn": "\n次回 {date}",
   "payFor": "{name}の分",
   "unset": "未設定",
   "paidPeriods": {
@@ -27,7 +27,7 @@
   "owed": "未回収",
   "settled": "精算済み",
   "detailTitle": "立て替え",
-  "cardCcy": " · カードは{ccy}で決済",
+  "cardCcy": "\nカードは{ccy}で決済",
   "forWhom": "立て替え先",
   "method": "支払い方法",
   "subscription": "サブスク",
@@ -75,7 +75,7 @@
     "allBack": "すべて返済済み",
     "total": "立て替え総額",
     "totalSub": {
-      "other": "{count}件の請求 · {subs}"
+      "other": "{count}件の請求\n{subs}"
     },
     "subs": {
       "other": "{count}件のサブスク"

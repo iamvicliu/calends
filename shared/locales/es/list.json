@@ -6,8 +6,8 @@
   "title": "Todas las suscripciones",
   "all": "Todas",
   "summary": {
-    "one": "{count} elemento · {monthly}/mes · {yearly}/año",
-    "other": "{count} elementos · {monthly}/mes · {yearly}/año"
+    "one": "{count} elemento\n{monthly}/mes\n{yearly}/año",
+    "other": "{count} elementos\n{monthly}/mes\n{yearly}/año"
   },
   "status": {
     "upcoming": "Sin empezar",
@@ -21,7 +21,7 @@
     "lifetime": "De por vida",
     "terminated": "Desactivado"
   },
-  "proxyExcluded": "Pago por otros · no se cuenta",
+  "proxyExcluded": "Pago por otros\nno se cuenta",
   "perMonthApprox": "≈ {amount}/mes",
   "originalPrice": "Original {amount}",
   "view": {
@@ -68,21 +68,21 @@
   "endedOn": "Finalizó {date}",
   "change": {
     "noMethod": "Método de pago por definir",
-    "planned": "Previsto · ",
+    "planned": "Previsto\n",
     "starts": "Empieza {when}",
     "from": "Cambia {when}"
   },
   "proxyBadge": {
     "owed": {
-      "one": "Pago por otros · {count} pendiente",
-      "other": "Pago por otros · {count} pendientes"
+      "one": "Pago por otros\n{count} pendiente",
+      "other": "Pago por otros\n{count} pendientes"
     },
     "owedFor": {
-      "one": "Pago por {name} · {count} pendiente",
-      "other": "Pago por {name} · {count} pendientes"
+      "one": "Pago por {name}\n{count} pendiente",
+      "other": "Pago por {name}\n{count} pendientes"
     },
-    "settled": "Pago por otros · al día",
-    "settledFor": "Pago por {name} · al día"
+    "settled": "Pago por otros\nal día",
+    "settledFor": "Pago por {name}\nal día"
   },
   "gantt": {
     "months": {
@@ -104,15 +104,15 @@
     "gapShort": "Interrumpida {span}",
     "lifetimeSuffix": " de por vida",
     "present": "ahora",
-    "plannedSuffix": " · previsto",
-    "introPrefix": "Oferta inicial · ",
+    "plannedSuffix": "\nprevisto",
+    "introPrefix": "Oferta inicial\n",
     "introShort": "Inicial ",
     "planned": "Previsto",
     "gap": "Interrupción",
     "earlier": "Antes",
     "later": "Después",
     "backToNow": "Volver a hoy",
-    "resize": "Arrastra para ajustar la columna de nombres · doble clic para restablecer"
+    "resize": "Arrastra para ajustar la columna de nombres\ndoble clic para restablecer"
   },
   "kind": {
     "debit": "Tarjeta bancaria",

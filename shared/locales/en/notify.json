@@ -20,7 +20,7 @@
       "one": "{count} day overdue",
       "other": "{count} days overdue"
     },
-    "sub": "{status} · next period: {bill}",
+    "sub": "{status}\nnext period: {bill}",
     "headline": "Time to collect from {member} for {name}"
   },
   "proxy": {

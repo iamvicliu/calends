@@ -1,18 +1,18 @@
 {
-  "title": "Share your year in review",
+  "title": "Share annual review",
   "fileName": "subscriptions-{year}-in-review-{style}.png",
   "style": {
     "poster": "Poster",
     "receipt": "Receipt",
     "card": "Card",
-    "stars": "Star map"
+    "stars": "Spending map"
   },
   "unassigned": "Unassigned",
   "me": "Me",
   "whose": "{name}'s",
   "whoseSelf": "My",
-  "topSpend": "Top spend",
-  "ofYear": "{pct} of the year",
+  "topSpend": "Highest spending",
+  "ofYear": "{pct} of annual spending",
   "n": {
     "subs": {
       "one": "{count} subscription",
@@ -25,42 +25,13 @@
     "currencies": {
       "one": "{count} currency",
       "other": "{count} currencies"
-    },
-    "currencyKinds": {
-      "one": "{count} currency",
-      "other": "{count} currencies"
     }
   },
-  "tip": {
-    "top": "{name} alone ate {pct} of the year",
-    "longest": {
-      "one": "{name} has stuck with you for over a year",
-      "other": "{name} has stuck with you for {count}+ years"
-    },
-    "busiest": "{month} hit your wallet hardest",
-    "newEnded": "This year: {added} in, {ended} out",
-    "currencies": {
-      "one": "Paid in {count} currency this year",
-      "other": "Paid in {count} currencies this year — very well traveled"
-    },
-    "soon": {
-      "one": "{count} charge lands in the next 30 days — still want it?",
-      "other": "{count} charges land in the next 30 days — still want them all?"
-    },
-    "milkTea": {
-      "one": "{amount} a day — about one bubble tea",
-      "other": "{amount} a day — about {count} bubble teas"
-    },
-    "saved": "Cancelling has already saved you {amount} this year",
-    "fallback": "Review subscriptions that renew soon."
-  },
   "receipt": {
-    "shop": "{whose} Subscription Store",
-    "asOf": "Annual statement · as of {date}",
-    "fullYear": "Annual statement · {year}",
+    "shop": "{whose} subscription ledger",
+    "asOf": "Annual statement\nAs of {date}",
+    "fullYear": "{year} annual statement",
     "no": "No. {no}",
-    "register": "REG 01",
-    "cashier": "Cashier: {name}",
     "item": "Item",
     "share": "Share",
     "amount": "Amount",
@@ -69,38 +40,38 @@
     "total": "TOTAL"
   },
   "poster": {
-    "kicker": "{whose} year in subscriptions",
-    "ongoing": "So far this year, across {subs} · {charges}",
-    "ongoingHidden": "So far this year: {charges} · {currencies}",
-    "year": "Spent across {subs} · {charges}",
-    "yearHidden": "This year: {charges} · {currencies}",
-    "newEnded": "{added} new · {ended} cancelled",
+    "kicker": "{whose} subscription review",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "{added} added\n{ended} ended",
     "perDay": "{amount}/day on average"
   },
   "card": {
     "head": "{whose} subscriptions",
     "intro": {
-      "ongoing": "So far this year, subscriptions cost",
-      "ongoingHidden": "So far this year, you subscribed to",
-      "year": "This year, subscriptions cost",
-      "yearHidden": "This year, you subscribed to"
+      "ongoing": "Spending to date",
+      "ongoingHidden": "Subscriptions to date",
+      "year": "Annual spending",
+      "yearHidden": "Subscriptions this year"
     },
     "perDay": "{amount}/day on average",
-    "longest": "Longest-running",
+    "longest": "Longest subscription",
     "duration": "{y} yr {m} mo",
-    "busiest": "Priciest month",
+    "busiest": "Highest-spending month",
     "month": "{month}",
-    "newEnded": "New / cancelled",
+    "newEnded": "Added / ended",
     "saved": "Saved {amount}",
-    "ended": "{count} cancelled",
-    "noneEnded": "Nothing cancelled",
-    "currencies": "Currencies",
+    "ended": "{count} ended",
+    "noneEnded": "None ended",
+    "currencies": "Currencies used",
     "currencyCount": "{count}",
-    "nowMonthly": "{amount}/mo now"
+    "nowMonthly": "Current monthly cost {amount}"
   },
   "stars": {
-    "head": "{year} · {whose} subscription stars",
-    "foot": "Bigger bubble, bigger spend"
+    "head": "{year}\n{whose} subscription spending",
+    "foot": "Circle size represents spending"
   },
   "spendBasis": "Full amount paid, including advances for members",
   "stopLoss": "Unrefunded loss this year: {amount}"

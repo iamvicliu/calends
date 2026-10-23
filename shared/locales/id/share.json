@@ -58,7 +58,7 @@
   "switches": "Ganti wilayah / paket",
   "stoppedOn": "Berhenti pada {date}",
   "endsOn": "Berakhir pada {date}",
-  "thanks": "Terima kasih · Sampai jumpa di siklus berikutnya",
+  "thanks": "Terima kasih\nSampai jumpa di siklus berikutnya",
   "n": {
     "charges": {
       "other": "{count} tagihan"
@@ -70,7 +70,7 @@
   "present": "sekarang",
   "priceChanges": "Perubahan harga: {list}",
   "withYou": "Menemani Anda selama",
-  "totalPerDay": "Total {total} · rata-rata {perDay}/hari",
+  "totalPerDay": "Total {total}\nrata-rata {perDay}/hari",
   "lapsed": {
     "other": "Terputus {count} kali"
   },

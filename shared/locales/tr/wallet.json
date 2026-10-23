@@ -1,13 +1,13 @@
 {
   "title": "Cüzdan",
   "sub": { "one": "{count} ödeme yöntemi", "other": "{count} ödeme yöntemi" },
-  "subDrag": { "one": "{count} ödeme yöntemi · Sıralamak için kartları sürükleyin", "other": "{count} ödeme yöntemi · Sıralamak için kartları sürükleyin" },
+  "subDrag": { "one": "{count} ödeme yöntemi\nSıralamak için kartları sürükleyin", "other": "{count} ödeme yöntemi\nSıralamak için kartları sürükleyin" },
   "add": "Ekle",
   "orderSaved": "Sıralama kaydedildi",
   "runwayGroup": "Bakiye ömrü",
   "family": "Ortak planlar",
   "familyCount": "{count}",
-  "unassigned": "Ödeme yöntemi yok · {count}",
+  "unassigned": "Ödeme yöntemi yok\n{count}",
   "runway": {
     "drain": "Ayda yaklaşık {amount}",
     "scale": { "today": "Bugün", "m3": "3 ay", "m6": "6 ay", "m9": "9 ay", "y1": "1 yıl" },
@@ -36,7 +36,7 @@
     "goTopup": "Bakiye yükle",
     "site": "Web sitesi",
     "projection": "Yaklaşan ödemeler",
-    "linked": "Bağlı abonelikler · {count}",
+    "linked": "Bağlı abonelikler\n{count}",
     "none": "Yok",
     "notes": "Notlar"
   },
@@ -59,7 +59,7 @@
     "costPh": "İsteğe bağlı",
     "note": "Not",
     "notePh": "ör. Razer Gold, bir satıcı",
-    "history": "Yüklemeler · {count}",
+    "history": "Yüklemeler\n{count}",
     "spent": "{amount} ödendi",
     "premium": "%{pct} fazla",
     "below": "Piyasanın %{pct} altında",

@@ -20,7 +20,7 @@
       "one": "{count} dia de atraso",
       "other": "{count} dias de atraso"
     },
-    "sub": "{status} · próximo período: {bill}",
+    "sub": "{status}\npróximo período: {bill}",
     "headline": "Hora de cobrar {member} por {name}"
   },
   "proxy": {

@@ -9,8 +9,8 @@
   "neverUsed": "Hiç kullanılmadı",
   "tokenPlaceholder": "<token'ınız>",
   "tokens": {
-    "one": "Token'lar · {count}",
-    "other": "Token'lar · {count}"
+    "one": "Token'lar\n{count}",
+    "other": "Token'lar\n{count}"
   },
   "noTokens": "Henüz token yok. Bir tane oluşturup bağlamak istediğiniz yapay zekâ asistanına verin.",
   "lastUsed": "Son kullanım: {time}",
@@ -19,8 +19,8 @@
   "revoked": "İptal edildi",
   "setup": "Kurulum",
   "tools": {
-    "one": "Kullanılabilir araçlar · {count}",
-    "other": "Kullanılabilir araçlar · {count}"
+    "one": "Kullanılabilir araçlar\n{count}",
+    "other": "Kullanılabilir araçlar\n{count}"
   },
   "clientOther": "Diğer",
   "scope": {

@@ -1,18 +1,18 @@
 {
-  "title": "Bagikan kilas balik tahunan",
+  "title": "Bagikan ringkasan tahunan",
   "fileName": "langganan-{year}-kilas-balik-{style}.png",
   "style": {
     "poster": "Poster",
     "receipt": "Struk",
     "card": "Kartu",
-    "stars": "Peta bintang"
+    "stars": "Sebaran pengeluaran"
   },
   "unassigned": "Belum ditentukan",
   "me": "Saya",
   "whose": "{name}",
   "whoseSelf": "saya",
-  "topSpend": "Pengeluaran teratas",
-  "ofYear": "{pct} dari setahun",
+  "topSpend": "Pengeluaran terbesar",
+  "ofYear": "{pct} dari pengeluaran tahunan",
   "n": {
     "subs": {
       "other": "{count} langganan"
@@ -22,37 +22,13 @@
     },
     "currencies": {
       "other": "{count} mata uang"
-    },
-    "currencyKinds": {
-      "other": "{count} mata uang"
     }
   },
-  "tip": {
-    "top": "{name} sendiri menghabiskan {pct} dari setahun",
-    "longest": {
-      "other": "{name} sudah menemani Anda lebih dari {count} tahun"
-    },
-    "busiest": "{month} paling menguras dompet",
-    "newEnded": "Tahun ini: {added} masuk, {ended} keluar",
-    "currencies": {
-      "other": "Tahun ini membayar dalam {count} mata uang — benar-benar pengelana"
-    },
-    "soon": {
-      "other": "{count} tagihan datang dalam 30 hari ke depan — masih mau semuanya?"
-    },
-    "milkTea": {
-      "other": "{amount} per hari — kira-kira {count} gelas boba"
-    },
-    "saved": "Membatalkan langganan sudah menghemat {amount} tahun ini",
-    "fallback": "Periksa langganan yang akan segera diperpanjang."
-  },
   "receipt": {
-    "shop": "Toko Langganan {whose}",
-    "asOf": "Laporan tahunan · per {date}",
-    "fullYear": "Laporan tahunan · {year}",
+    "shop": "Catatan langganan {whose}",
+    "asOf": "Ringkasan tahunan\nHingga {date}",
+    "fullYear": "Ringkasan tahun {year}",
     "no": "No. {no}",
-    "register": "KASIR 01",
-    "cashier": "Kasir: {name}",
     "item": "Item",
     "share": "Bagian",
     "amount": "Jumlah",
@@ -61,38 +37,38 @@
     "total": "TOTAL"
   },
   "poster": {
-    "kicker": "Tahun langganan {whose}",
-    "ongoing": "Sejauh ini tahun ini, dari {subs} · {charges}",
-    "ongoingHidden": "Sejauh ini tahun ini: {charges} · {currencies}",
-    "year": "Dibelanjakan untuk {subs} · {charges}",
-    "yearHidden": "Tahun ini: {charges} · {currencies}",
-    "newEnded": "{added} baru · {ended} dibatalkan",
+    "kicker": "Ringkasan langganan tahunan {whose}",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "{added} baru\n{ended} berakhir",
     "perDay": "Rata-rata {amount}/hari"
   },
   "card": {
     "head": "Langganan {whose}",
     "intro": {
-      "ongoing": "Sejauh ini tahun ini, biaya langganan",
-      "ongoingHidden": "Sejauh ini tahun ini, Anda berlangganan",
-      "year": "Tahun ini, biaya langganan",
-      "yearHidden": "Tahun ini, Anda berlangganan"
+      "ongoing": "Pengeluaran tahun berjalan",
+      "ongoingHidden": "Langganan tahun berjalan",
+      "year": "Pengeluaran tahunan",
+      "yearHidden": "Langganan tahun ini"
     },
     "perDay": "Rata-rata {amount}/hari",
-    "longest": "Paling lama",
+    "longest": "Langganan terlama",
     "duration": "{y} thn {m} bln",
-    "busiest": "Bulan termahal",
+    "busiest": "Bulan dengan pengeluaran tertinggi",
     "month": "{month}",
-    "newEnded": "Baru / dibatalkan",
+    "newEnded": "Baru / berakhir",
     "saved": "Hemat {amount}",
-    "ended": "{count} dibatalkan",
-    "noneEnded": "Tidak ada yang dibatalkan",
-    "currencies": "Mata uang",
+    "ended": "{count} berakhir",
+    "noneEnded": "Tidak ada yang berakhir",
+    "currencies": "Mata uang yang digunakan",
     "currencyCount": "{count}",
-    "nowMonthly": "Kini {amount}/bln"
+    "nowMonthly": "Biaya bulanan saat ini {amount}"
   },
   "stars": {
-    "head": "{year} · Bintang langganan {whose}",
-    "foot": "Gelembung makin besar, pengeluaran makin besar"
+    "head": "{year}\nPengeluaran langganan {whose}",
+    "foot": "Ukuran lingkaran menunjukkan pengeluaran"
   },
   "spendBasis": "Total pembayaran, termasuk talangan untuk anggota",
   "stopLoss": "Kerugian tanpa pengembalian dana tahun ini: {amount}"

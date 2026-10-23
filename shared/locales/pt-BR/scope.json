@@ -58,9 +58,9 @@
   "generate": "Gerar relatório",
   "search": "Busca por “{query}”",
   "selectionTitle": {
-    "one": "{scope} · {count} assinatura",
-    "other": "{scope} · {count} assinaturas",
-    "many": "{scope} · {count} assinaturas"
+    "one": "{scope}\n{count} assinatura",
+    "other": "{scope}\n{count} assinaturas",
+    "many": "{scope}\n{count} assinaturas"
   },
   "mrrBasis": "Custo mensal normalizado da minha parte das assinaturas em cobrança. Planos anuais são distribuídos por mês; não são os débitos deste mês.",
   "debitBasis": "Apenas cobranças positivas; reembolsos aparecem separadamente e não reduzem a composição nem a classificação.",

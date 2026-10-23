@@ -24,7 +24,7 @@
   "hero": {
     "label": "Aylık abonelik harcaması",
     "vsLastMonth": "geçen ay sonuna göre",
-    "yearAgo": "· bir yıl önce {amount}",
+    "yearAgo": "\nbir yıl önce {amount}",
     "annual": "Yıllık",
     "perDay": "Günlük",
     "active": "Etkin",
@@ -66,16 +66,16 @@
     "title": "Nakit ve gerçek maliyet",
     "legendCash": "O ay ödenen",
     "legendAccrual": "Aylara yayılan maliyet",
-    "forecast": " · Tahmin",
-    "tip": "Ödenen {cash} · Maliyet {cost}",
-    "prepaidItem": "{name} · {amount} · {until} tarihine kadar",
+    "forecast": "\nTahmin",
+    "tip": "Ödenen {cash}\nMaliyet {cost}",
+    "prepaidItem": "{name}\n{amount}\n{until} tarihine kadar",
     "prepaid": "Ön ödemeli değer",
     "prepaidSub": "{count} ödendi, henüz tüketilmedi",
-    "savedItem": "{name} · {amount} · {since} tarihinden beri",
+    "savedItem": "{name}\n{amount}\n{since} tarihinden beri",
     "saved": "İptallerle aylık tasarruf",
     "savedSub": "{count} iptal edildi",
     "next90": "Önümüzdeki 90 günde ödenecek",
-    "peak": "Zirve: {month} · {amount}",
+    "peak": "Zirve: {month}\n{amount}",
     "fullPaidHint": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar"
   },
   "comp": {
@@ -90,8 +90,8 @@
     "quarterly": "Üç / altı aylık",
     "monthly": "Aylık",
     "groupTip": {
-      "one": "{name} · {count} öğe · {amount}/ay",
-      "other": "{name} · {count} öğe · {amount}/ay"
+      "one": "{name}\n{count} öğe\n{amount}/ay",
+      "other": "{name}\n{count} öğe\n{amount}/ay"
     }
   },
   "topup": {
@@ -104,7 +104,7 @@
     "span12": "Önümüzdeki yıl",
     "empty": "Henüz bakiyeli hesap yok.",
     "emptyCta": "Cüzdan'a App Store veya operatör bakiyesi ekleyin",
-    "summary": "Bakiye {balance} · ayda yaklaşık {monthly}",
+    "summary": "Bakiye {balance}\nayda yaklaşık {monthly}",
     "why": "{span}: {due} ödenecek, {balance} mevcut, {need} eksik",
     "urgent": "; en acil: {date} tarihine kadar en az {min} yükleyin",
     "cards": "Önerilen hediye kartları",
@@ -138,7 +138,7 @@
     "loss": "İade edilmeyen kayıp",
     "savedHint": "İptalden bugüne kadar önlenen yenileme ücretlerinin tahmini",
     "lossHint": "Erken sona eren hizmet için ödenen ve iade edilmeyen tutar",
-    "basis": "Tüm geçmiş · Benim payım; tasarruf güncel kurla, iade edilmeyen kayıp sonlandırma tarihindeki kurla hesaplanır.",
+    "basis": "Tüm geçmiş\nBenim payım; tasarruf güncel kurla, iade edilmeyen kayıp sonlandırma tarihindeki kurla hesaplanır.",
     "details": "İade edilmeyen kayıp ayrıntıları",
     "empty": "İade edilmeyen kayıp yok.",
     "cancel": "İsteğe bağlı erken iptal"

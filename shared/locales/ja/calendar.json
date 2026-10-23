@@ -1,7 +1,7 @@
 {
   "yearTitle": "{year}年",
   "summary": {
-    "other": "{count}件の請求 · {amount}"
+    "other": "{count}件の請求\n{amount}"
   },
   "mode": {
     "month": "月",
@@ -21,9 +21,9 @@
   "noneMonth": "今月の請求はありません",
   "day": "{day}日",
   "heatCount": {
-    "other": "{count}件 · "
+    "other": "{count}件\n"
   },
   "pickDay": "日付を選んでその日の支払いを表示",
-  "nextCharge": "次回の支払い · {date}",
+  "nextCharge": "次回の支払い\n{date}",
   "expandReport": "完全なレポートを表示"
 }

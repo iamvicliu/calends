@@ -6,7 +6,7 @@
   "title": "Tất cả gói đăng ký",
   "all": "Tất cả",
   "summary": {
-    "other": "{count} mục · {monthly}/tháng · {yearly}/năm"
+    "other": "{count} mục\n{monthly}/tháng\n{yearly}/năm"
   },
   "status": {
     "upcoming": "Chưa bắt đầu",
@@ -20,7 +20,7 @@
     "lifetime": "Trọn đời",
     "terminated": "Đã vô hiệu hóa"
   },
-  "proxyExcluded": "Trả hộ · không tính",
+  "proxyExcluded": "Trả hộ\nkhông tính",
   "perMonthApprox": "≈ {amount}/tháng",
   "originalPrice": "Giá gốc {amount}",
   "view": {
@@ -67,19 +67,19 @@
   "endedOn": "Kết thúc {date}",
   "change": {
     "noMethod": "Chưa chọn phương thức thanh toán",
-    "planned": "Dự định · ",
+    "planned": "Dự định\n",
     "starts": "Bắt đầu {when}",
     "from": "Thay đổi {when}"
   },
   "proxyBadge": {
     "owed": {
-      "other": "Trả hộ · {count} chưa trả lại"
+      "other": "Trả hộ\n{count} chưa trả lại"
     },
     "owedFor": {
-      "other": "Trả hộ {name} · {count} chưa trả lại"
+      "other": "Trả hộ {name}\n{count} chưa trả lại"
     },
-    "settled": "Trả hộ · đã trả đủ",
-    "settledFor": "Trả hộ {name} · đã trả đủ"
+    "settled": "Trả hộ\nđã trả đủ",
+    "settledFor": "Trả hộ {name}\nđã trả đủ"
   },
   "gantt": {
     "months": {
@@ -99,15 +99,15 @@
     "gapShort": "Gián đoạn {span}",
     "lifetimeSuffix": " trọn đời",
     "present": "nay",
-    "plannedSuffix": " · dự định",
-    "introPrefix": "Ưu đãi mở đầu · ",
+    "plannedSuffix": "\ndự định",
+    "introPrefix": "Ưu đãi mở đầu\n",
     "introShort": "Ưu đãi ",
     "planned": "Dự định",
     "gap": "Gián đoạn",
     "earlier": "Trước",
     "later": "Sau",
     "backToNow": "Về hiện tại",
-    "resize": "Kéo để chỉnh độ rộng cột tên · nhấp đúp để đặt lại"
+    "resize": "Kéo để chỉnh độ rộng cột tên\nnhấp đúp để đặt lại"
   },
   "kind": {
     "debit": "Thẻ ngân hàng",

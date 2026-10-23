@@ -2,8 +2,8 @@
   "title": "Aperçu",
   "add": "Nouvel abonnement",
   "footer": {
-    "one": "{count} abonnement actif · {amount}/mois ·",
-    "other": "{count} abonnements actifs · {amount}/mois ·"
+    "one": "{count} abonnement actif\n{amount}/mois\n",
+    "other": "{count} abonnements actifs\n{amount}/mois\n"
   },
   "fullReport": "Voir le rapport complet",
   "listSep": ", ",
@@ -22,8 +22,8 @@
   },
   "timeline": {
     "title": "Frise",
-    "sub": "{past} prélevés ces 30 derniers jours · {next} à venir dans les 30 prochains",
-    "past": "30 derniers jours · {amount}"
+    "sub": "{past} prélevés ces 30 derniers jours\n{next} à venir dans les 30 prochains",
+    "past": "30 derniers jours\n{amount}"
   },
   "spending": {
     "title": "Dépenses mensuelles",
@@ -31,9 +31,9 @@
     "month": "Mensuel",
     "yearly": "Annuel",
     "year": "{year}",
-    "projected": " · Prévu",
-    "inProgress": " · En cours",
-    "paid": " · {amount} payés",
+    "projected": "\nPrévu",
+    "inProgress": "\nEn cours",
+    "paid": "\n{amount} payés",
     "empty": "Aucun prélèvement sur cette période"
   },
   "due": {
@@ -46,7 +46,7 @@
   "wallet": {
     "title": "Portefeuille",
     "manage": "Gérer",
-    "balance": "Solde {amount} · {status}",
+    "balance": "Solde {amount}\n{status}",
     "covered": {
       "one": "couvre encore {count} prélèvement, rechargez avant le {date}",
       "other": "couvre encore {count} prélèvements, rechargez avant le {date}"
@@ -68,8 +68,8 @@
     "ytd": "Payé en {year}",
     "perDay": "Par jour",
     "active": "Actifs",
-    "share": "{amount}/mois · {pct} %",
-    "caption": "Constellation d’abonnements · la taille des bulles indique le coût mensuel",
+    "share": "{amount}/mois\n{pct} %",
+    "caption": "Constellation d’abonnements\nla taille des bulles indique le coût mensuel",
     "aria": "{name}, {amount} par mois",
     "loss": "Dont perte non remboursée"
   }

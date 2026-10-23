@@ -1,7 +1,7 @@
 {
   "copy": "Kopyala",
   "copied": "Kopyalandı",
-  "overlap": { "title": "Birlikte devam eden", "previous": "Önceki plan", "until": "{date} tarihine kadar · {rel}" },
+  "overlap": { "title": "Birlikte devam eden", "previous": "Önceki plan", "until": "{date} tarihine kadar\n{rel}" },
   "action": {
     "edit": "Düzenle",
     "pause": "Duraklat",
@@ -28,7 +28,7 @@
     "region": "Bölge"
   },
   "up": {
-    "planned": "Planlanan değişiklik · onaylanmadı",
+    "planned": "Planlanan değişiklik\nonaylanmadı",
     "starting": "Yakında başlıyor",
     "changing": "Yaklaşan değişiklik",
     "effective": "Geçerlilik tarihi"
@@ -42,8 +42,8 @@
   "intro": { "title": "Tanıtım teklifi", "price": "Tanıtım fiyatı", "until": "Teklif bitişi", "then": "Sonra" },
   "share": {
     "open": "Planı aç",
-    "owner": "Ortak · yönetici benim ({count}/{seats})",
-    "member": "Ortak · katıldım",
+    "owner": "Ortak\nyönetici benim ({count}/{seats})",
+    "member": "Ortak\nkatıldım",
     "payTo": "Ödenecek kişi",
     "host": "Yönetici",
     "myShare": "Payım",
@@ -60,7 +60,7 @@
   "charges": {
     "recentN": "Yalnızca son {count}",
     "addShort": "Ekle",
-    "title": { "one": "Ödemeler · {count}", "other": "Ödemeler · {count}" },
+    "title": { "one": "Ödemeler\n{count}", "other": "Ödemeler\n{count}" },
     "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" },
     "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)",
     "all": "Tümünü göster ({count})"
@@ -77,10 +77,10 @@
     "gaps": { "one": "Bir kez ara verildi", "other": "{count} kez ara verildi" },
     "perMonth": "Gerçek aylık"
   },
-  "tab": { "charges": "Ödemeler · {count}", "details": "Ayrıntılar" },
+  "tab": { "charges": "Ödemeler\n{count}", "details": "Ayrıntılar" },
   "kpi": { "amortized": "Aylık maliyet", "noGaps": "Kesinti yok", "startedToday": "Bugün başladı", "expectedMonthly": "Tahmini aylık" },
   "chart": {
-    "title": "Ödeme başına · {ccy}",
+    "title": "Ödeme başına\n{ccy}",
     "orig": "Orijinal",
     "all": "Tümü",
     "y1": "1 yıl",
@@ -107,7 +107,7 @@
   },
   "upcoming": {
     "title": "Önümüzdeki 12 ay",
-    "total": { "one": "≈ {amount} · {count} ödeme", "other": "≈ {amount} · {count} ödeme" },
+    "total": { "one": "≈ {amount}\n{count} ödeme", "other": "≈ {amount}\n{count} ödeme" },
     "more": { "one": "{count} tane daha", "other": "{count} tane daha" },
     "none": "Önümüzdeki 12 ayda ödeme yok"
   },

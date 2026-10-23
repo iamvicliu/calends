@@ -1,3 +1,4 @@
+import { copyParts } from './copy.tsx';
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
@@ -30,8 +31,10 @@ export function SpendingDelta({ value, base }: { value: Comparison; base: string
   const direction = value.amount > 0.005 ? 'up' : value.amount < -0.005 ? 'down' : '';
   return (
     <span className={`chip-d ${direction}`}>
-      {direction === 'up' ? '↑' : direction === 'down' ? '↓' : '·'} {money(Math.abs(value.amount), base)}
-      {value.percent != null && ` · ${new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`}
+      {copyParts(direction === 'up' ? '↑' : direction === 'down' ? '↓' : '')} {money(Math.abs(value.amount), base)}
+      {copyParts(
+        value.percent != null && `\n${new Intl.NumberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`,
+      )}
     </span>
   );
 }
@@ -127,7 +130,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         {name(
           r.sub,
           <>
-            {cnDateAuto(r.date, today)} · {eventLabel(r)}
+            {cnDateAuto(r.date, today)} <span className="copy-gap" aria-hidden="true" /> {eventLabel(r)}
           </>,
         )}
         {r.delta !== 0 && delta({ amount: r.delta })}
@@ -224,8 +227,8 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 labels={block.rows.map((r) => monthLabel(r.month, { year: false }))}
                 tip={(i) => (
                   <>
-                    {monthLabel(block.rows[i].month)} · {expense(block.rows[i].cash)}
-                    {block.rows[i].projected && ` · ${t('scope.forecast')}`}
+                    {monthLabel(block.rows[i].month)} <span className="copy-gap" aria-hidden="true" /> {expense(block.rows[i].cash)}
+                    {copyParts(block.rows[i].projected && `\n${t('scope.forecast')}`)}
                   </>
                 )}
               />
@@ -235,7 +238,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                   <div className="scope-row" key={r.month}>
                     <span>
                       {monthLabel(r.month)}
-                      {r.projected && ` · ${t('scope.forecast')}`}
+                      {copyParts(r.projected && `\n${t('scope.forecast')}`)}
                     </span>
                     <b className="num">{expense(r.cash)}</b>
                   </div>
@@ -290,14 +293,16 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                             ((e.delta > 0 && r.kind === 'expansion') || (e.delta < 0 && r.kind === 'contraction')));
                         return redundant ? null : (
                           <span key={`${e.date}-${e.kind}-${i}`}>
-                            {' · '}
+                            {copyParts('\n')}
                             {eventLabel(e)}
                             {rows.length > 1 && ` (${cnDateAuto(e.date, today)})`}
                           </span>
                         );
                       })}
-                      {movementEvents(r).some((e) => e.kind === 'cancel' || e.kind === 'terminate') && r.sub.stop?.reason && ` · ${r.sub.stop.reason}`}
-                      {' · '}
+                      {copyParts(
+                        movementEvents(r).some((e) => e.kind === 'cancel' || e.kind === 'terminate') && r.sub.stop?.reason && `\n${r.sub.stop.reason}`,
+                      )}
+                      {copyParts('\n')}
                       <span className="num">
                         {money(r.from, base)} → {money(r.to, base)}
                       </span>
@@ -355,7 +360,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                                 </span>
                               </span>
                               <b className="num">
-                                {expense(r.amount)} · {percent(r.share)}
+                                {expense(r.amount)} <span className="copy-gap" aria-hidden="true" /> {percent(r.share)}
                               </b>
                             </div>
                             <div className="mv-bar">
@@ -418,7 +423,8 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                   r.sub,
                   events.some((e) => e.sub.id === r.sub.id && e.date === r.date && (e.kind === 'cancel' || e.kind === 'terminate')) ? undefined : (
                     <>
-                      {cnDateAuto(r.date, today)} · {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
+                      {cnDateAuto(r.date, today)} <span className="copy-gap" aria-hidden="true" />{' '}
+                      {t(`scope.event.${r.kind === 'terminate' ? 'terminate' : 'cancel'}`)}
                     </>
                   ),
                 )}
@@ -433,7 +439,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 {name(
                   r.sub,
                   <>
-                    {cnDateAuto(r.date, today)} · {t('scope.refunded')}
+                    {cnDateAuto(r.date, today)} <span className="copy-gap" aria-hidden="true" /> {t('scope.refunded')}
                   </>,
                 )}
                 <b className="num green">{income(-r.amount)}</b>
@@ -471,7 +477,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <span className="scope-title">{title}</span>
         ) : (
           <button type="button" className="scope-trigger" aria-expanded={false} aria-controls={id} onClick={onToggle}>
-            {t('scope.expand')} · {title}
+            {t('scope.expand')} <span className="copy-gap" aria-hidden="true" /> {title}
           </button>
         )}
       </h2>

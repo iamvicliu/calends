@@ -62,7 +62,7 @@
   "switches": "Trocas de região / plano",
   "stoppedOn": "Encerrado em {date}",
   "endsOn": "Termina em {date}",
-  "thanks": "Obrigado · Até o próximo ciclo",
+  "thanks": "Obrigado\nAté o próximo ciclo",
   "n": {
     "charges": {
       "one": "{count} cobrança",
@@ -75,7 +75,7 @@
   "present": "agora",
   "priceChanges": "Mudanças de preço: {list}",
   "withYou": "Com você há",
-  "totalPerDay": "{total} no total · {perDay}/dia em média",
+  "totalPerDay": "{total} no total\n{perDay}/dia em média",
   "lapsed": {
     "one": "Interrompida uma vez",
     "other": "Interrompida {count} vezes"

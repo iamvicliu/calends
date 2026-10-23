@@ -1,13 +1,13 @@
 {
   "title": "Wallet",
   "sub": { "one": "{count} payment method", "other": "{count} payment methods" },
-  "subDrag": { "one": "{count} payment method · Drag cards to reorder", "other": "{count} payment methods · Drag cards to reorder" },
+  "subDrag": { "one": "{count} payment method\nDrag cards to reorder", "other": "{count} payment methods\nDrag cards to reorder" },
   "add": "Add",
   "orderSaved": "Order saved",
   "runwayGroup": "Balance runway",
   "family": "Shared plans",
   "familyCount": "{count}",
-  "unassigned": "No payment method · {count}",
+  "unassigned": "No payment method\n{count}",
   "runway": {
     "drain": "About {amount}/mo",
     "scale": { "today": "Today", "m3": "3 mo", "m6": "6 mo", "m9": "9 mo", "y1": "1 yr" },
@@ -36,7 +36,7 @@
     "goTopup": "Top up",
     "site": "Website",
     "projection": "Upcoming charges",
-    "linked": "Linked subscriptions · {count}",
+    "linked": "Linked subscriptions\n{count}",
     "none": "None",
     "notes": "Notes"
   },
@@ -59,7 +59,7 @@
     "costPh": "Optional",
     "note": "Note",
     "notePh": "e.g. Razer Gold, a reseller",
-    "history": "Top-ups · {count}",
+    "history": "Top-ups\n{count}",
     "spent": "paid {amount}",
     "premium": "{pct}% premium",
     "below": "{pct}% below market",

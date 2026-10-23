@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -120,7 +121,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
         <div>
           <b>{sub.name}</b>
           <span>
-            {statusText(st)} · {t('share.since', { date: when(start, today) })}
+            {statusText(st)} <span className="copy-gap" aria-hidden="true" /> {t('share.since', { date: when(start, today) })}
           </span>
         </div>
       </div>
@@ -215,7 +216,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
       ))}
       {rest.length > 0 && (
         <div className="rc-row">
-          <span className="rc-d">··</span>
+          <span className="rc-d" />
           <span className="rc-n">{t('share.earlier', { count: rest.length })}</span>
           <span className="rc-v">{hide ? '' : m(-rest.reduce((a, x) => a + x.v, 0))}</span>
         </div>
@@ -264,7 +265,8 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
         <div>
           <b>{sub.name}</b>
           <span>
-            {st.duration} · {hide ? t('share.n.charges', { count: st.charges.length }) : t('share.sum', { amount: m(-st.total) })}
+            {st.duration} <span className="copy-gap" aria-hidden="true" />{' '}
+            {hide ? t('share.n.charges', { count: st.charges.length }) : t('share.sum', { amount: m(-st.total) })}
           </span>
         </div>
       </div>
@@ -285,7 +287,7 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
                 <b>
                   {it.v!.region ? (
                     <>
-                      <FlagImg cc={it.v!.region} /> {it.v!.region} ·{' '}
+                      <FlagImg cc={it.v!.region} /> {it.v!.region} <span className="copy-gap" aria-hidden="true" />{' '}
                     </>
                   ) : null}
                   {hide ? cycleLabel(it.v!.cycle) : `${money(it.v!.price, it.v!.currency, { compact: true })} ${cycleLabel(it.v!.cycle)}`}
@@ -317,9 +319,11 @@ function SPoster({ sub, st, hide, m }: Ctx) {
       <div className="sp-k">{t('share.withYou')}</div>
       <div className="sp-big">{st.duration}</div>
       <div className="sp-line">
-        {hide
-          ? `${t('share.n.charges', { count: st.charges.length })} · ${changeText(st)}`
-          : t('share.totalPerDay', { total: m(-st.total), perDay: m(-st.perDay) })}
+        {copyParts(
+          hide
+            ? `${t('share.n.charges', { count: st.charges.length })}\n${changeText(st)}`
+            : t('share.totalPerDay', { total: m(-st.total), perDay: m(-st.perDay) }),
+        )}
       </div>
       <div className="sp-chips">
         <span>{statusText(st)}</span>
@@ -356,7 +360,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
       </div>
       <div className="sy-foot">
         <span>
-          {t('share.n.charges', { count: st.charges.length })} · {changeText(st)}
+          {t('share.n.charges', { count: st.charges.length })} <span className="copy-gap" aria-hidden="true" /> {changeText(st)}
         </span>
         <span>{location.host}</span>
       </div>

@@ -6,7 +6,7 @@
   "title": "모든 구독",
   "all": "전체",
   "summary": {
-    "other": "{count}개 · {monthly}/월 · {yearly}/년"
+    "other": "{count}개\n{monthly}/월\n{yearly}/년"
   },
   "status": {
     "upcoming": "시작 전",
@@ -20,7 +20,7 @@
     "lifetime": "평생 이용",
     "terminated": "사용 중지됨"
   },
-  "proxyExcluded": "대신 결제 · 집계 제외",
+  "proxyExcluded": "대신 결제\n집계 제외",
   "perMonthApprox": "≈ {amount}/월",
   "originalPrice": "정가 {amount}",
   "view": {
@@ -67,19 +67,19 @@
   "endedOn": "{date} 종료",
   "change": {
     "noMethod": "결제 수단 미정",
-    "planned": "예정 · ",
+    "planned": "예정\n",
     "starts": "{when} 시작",
     "from": "{when} 변경"
   },
   "proxyBadge": {
     "owed": {
-      "other": "대신 결제 · {count}건 미수"
+      "other": "대신 결제\n{count}건 미수"
     },
     "owedFor": {
-      "other": "{name} 대신 결제 · {count}건 미수"
+      "other": "{name} 대신 결제\n{count}건 미수"
     },
-    "settled": "대신 결제 · 정산 완료",
-    "settledFor": "{name} 대신 결제 · 정산 완료"
+    "settled": "대신 결제\n정산 완료",
+    "settledFor": "{name} 대신 결제\n정산 완료"
   },
   "gantt": {
     "months": {
@@ -99,15 +99,15 @@
     "gapShort": "{span} 중단",
     "lifetimeSuffix": " 평생 이용",
     "present": "현재",
-    "plannedSuffix": " · 예정",
-    "introPrefix": "프로모션 · ",
+    "plannedSuffix": "\n예정",
+    "introPrefix": "프로모션\n",
     "introShort": "프로모션 ",
     "planned": "예정",
     "gap": "중단",
     "earlier": "이전",
     "later": "다음",
     "backToNow": "현재로",
-    "resize": "드래그해 이름 열 너비 조절 · 더블클릭하면 기본값"
+    "resize": "드래그해 이름 열 너비 조절\n더블클릭하면 기본값"
   },
   "kind": {
     "debit": "체크카드",

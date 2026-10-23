@@ -84,9 +84,9 @@
   },
   "open": {
     "publicSubs": "公開するサブスク",
-    "publicSubsHint": "公開ページには以下のサブスクだけが表示されます。立替分は公開されず、新しいサブスクは既定で表示されます。",
-    "publicShown": "表示中 · {count}",
-    "publicOff2": "非表示 · {count}",
+    "publicSubsHint": "立て替え払いの契約は非公開です。新規契約は初期設定で公開されます。",
+    "publicShown": "表示中\n{count}",
+    "publicOff2": "非表示\n{count}",
     "publicShowAll": "すべて表示",
     "publicHideAll": "すべて非表示",
     "publicHideOne": "{name} を非表示",
@@ -141,7 +141,7 @@
   },
   "channels": {
     "title": {
-      "other": "通知チャネル · {count}件オン"
+      "other": "通知チャネル\n{count}件オン"
     },
     "empty": "チャネルがありません。通知は送信されません。",
     "test": "テスト",
@@ -242,7 +242,7 @@
     "changePassword": "パスワードを変更",
     "devices": "ログイン中のデバイス",
     "devicesCount": {
-      "other": "ログイン中のデバイス · {count}"
+      "other": "ログイン中のデバイス\n{count}"
     },
     "devicesFoot": "上限に達すると、最も長く使われていないデバイスが自動的にログアウトされます。所在地は IP から推定しているため、正確でない場合があります。",
     "maxSessions": "ログインできるデバイスの上限",

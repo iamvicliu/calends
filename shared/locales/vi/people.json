@@ -10,7 +10,7 @@
     "received": "Đã thu đến nay",
     "receivedSub": "Gói chia sẻ và trả hộ",
     "count": "Số người",
-    "countSub": "Gói chia sẻ: {share} · Trả hộ: {proxy}"
+    "countSub": "Gói chia sẻ: {share}\nTrả hộ: {proxy}"
   },
   "empty": {
     "title": "Chưa có ai",

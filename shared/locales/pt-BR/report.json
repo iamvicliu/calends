@@ -24,7 +24,7 @@
   "hero": {
     "label": "Gasto mensal com assinaturas",
     "vsLastMonth": "vs. fim do mês passado",
-    "yearAgo": "· {amount} há um ano",
+    "yearAgo": "\n{amount} há um ano",
     "annual": "Por ano",
     "perDay": "Por dia",
     "active": "Ativas",
@@ -66,16 +66,16 @@
     "title": "Caixa vs. custo real",
     "legendCash": "Cobrado no mês",
     "legendAccrual": "Custo distribuído por mês",
-    "forecast": " · Previsão",
-    "tip": "Cobrado {cash} · Custo {cost}",
-    "prepaidItem": "{name} · {amount} · até {until}",
+    "forecast": "\nPrevisão",
+    "tip": "Cobrado {cash}\nCusto {cost}",
+    "prepaidItem": "{name}\n{amount}\naté {until}",
     "prepaid": "Valor pré-pago",
     "prepaidSub": "{count} pagas, ainda não consumidas",
-    "savedItem": "{name} · {amount} · desde {since}",
+    "savedItem": "{name}\n{amount}\ndesde {since}",
     "saved": "A menos por mês com cancelamentos",
     "savedSub": "{count} canceladas",
     "next90": "A vencer nos próximos 90 dias",
-    "peak": "Pico em {month} · {amount}",
+    "peak": "Pico em {month}\n{amount}",
     "fullPaidHint": "Valor total pago, incluindo adiantamentos para membros"
   },
   "comp": {
@@ -90,8 +90,8 @@
     "quarterly": "Trimestral / semestral",
     "monthly": "Mensal",
     "groupTip": {
-      "one": "{name} · {count} item · {amount}/mês",
-      "other": "{name} · {count} itens · {amount}/mês"
+      "one": "{name}\n{count} item\n{amount}/mês",
+      "other": "{name}\n{count} itens\n{amount}/mês"
     }
   },
   "topup": {
@@ -104,7 +104,7 @@
     "span12": "Próximo ano",
     "empty": "Nenhuma conta com saldo ainda.",
     "emptyCta": "Adicione saldos da App Store ou da operadora na Carteira",
-    "summary": "Saldo {balance} · cerca de {monthly}/mês",
+    "summary": "Saldo {balance}\ncerca de {monthly}/mês",
     "why": "{span}: {due} a vencer, {balance} disponível, faltam {need}",
     "urgent": "; mais urgente: adicione pelo menos {min} até {date}",
     "cards": "Cartões-presente sugeridos",
@@ -138,7 +138,7 @@
     "loss": "Perda não reembolsada",
     "savedHint": "Estimativa de renovações evitadas desde o cancelamento até hoje",
     "lossHint": "Valor pago por um serviço encerrado antes do prazo e não reembolsado",
-    "basis": "Todo o histórico · Minha parte; economia pelo câmbio atual e perda não reembolsada pelo câmbio do dia do encerramento.",
+    "basis": "Todo o histórico\nMinha parte; economia pelo câmbio atual e perda não reembolsada pelo câmbio do dia do encerramento.",
     "details": "Detalhes das perdas não reembolsadas",
     "empty": "Nenhuma perda não reembolsada.",
     "cancel": "Cancelamento antecipado voluntário"

@@ -461,7 +461,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                     const showUnusedAmount = !!unusedAmount;
                     if ((unused ? wastedUntil : to) < start || g.from > end) return null;
                     const lifetime = g.v.cycle.unit === 'lifetime';
-                    const tip = `${g.v.region ? `${g.v.region} · ` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`} · ${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
+                    const tip = `${g.v.region ? `${g.v.region}\n` : ''}${money(g.v.price, g.v.currency)}${lifetime ? t('list.gantt.lifetimeSuffix') : `/${perLabel(g.v)}`}\n${cnDate(g.from)} – ${g.open ? t('list.gantt.present') : cnDate(g.to)}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                     // 买断：一个圆点；有结束日（如含一年更新、之后改订阅）时，再拉一条细线到结束日，和后面的虚线、下一段接上
                     if (lifetime)
                       return (
@@ -504,7 +504,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           const run = `${price}|${intro ? 1 : 0}`;
                           const label = pw > 70 && labeled !== run;
                           if (label) labeled = run;
-                          const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)} · ${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? ` · ${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
+                          const ptip = `${intro ? t('list.gantt.introPrefix') : ''}${money(price, g.v.currency)}/${perLabel(g.v)}\n${cnDate(a)} – ${last && g.open ? t('list.gantt.present') : cnDate(b)}${g.v.region ? `\n${g.v.region}` : ''}${g.v.planned ? t('list.gantt.plannedSuffix') : ''}`;
                           return (
                             <span
                               key={a}
@@ -563,7 +563,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       key={k2}
                       className={`gt-charge ${c.amount < 0 ? 'refund' : ''} ${c.date > today ? 'future' : ''}`}
                       style={{ left: x(c.date) }}
-                      title={`${cnDate(c.date)} · ${c.kind === 'refund' ? t('editor.payment.kind.refund') : t('editor.payment.kind.charge')} · ${flow(-c.amount, c.currency)}`}
+                      title={`${cnDate(c.date)}\n${c.kind === 'refund' ? t('editor.payment.kind.refund') : t('editor.payment.kind.charge')}\n${flow(-c.amount, c.currency)}`}
                     />
                   ))}
                 </div>

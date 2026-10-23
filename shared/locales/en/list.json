@@ -6,8 +6,8 @@
   "title": "All subscriptions",
   "all": "All",
   "summary": {
-    "one": "{count} item · {monthly}/mo · {yearly}/yr",
-    "other": "{count} items · {monthly}/mo · {yearly}/yr"
+    "one": "{count} item\n{monthly}/mo\n{yearly}/yr",
+    "other": "{count} items\n{monthly}/mo\n{yearly}/yr"
   },
   "status": {
     "upcoming": "Not started",
@@ -21,7 +21,7 @@
     "lifetime": "Lifetime",
     "terminated": "Terminated"
   },
-  "proxyExcluded": "Paid for others · not counted",
+  "proxyExcluded": "Paid for others\nnot counted",
   "perMonthApprox": "≈ {amount}/mo",
   "originalPrice": "Original {amount}",
   "view": {
@@ -68,21 +68,21 @@
   "endedOn": "Ended {date}",
   "change": {
     "noMethod": "Payment method TBD",
-    "planned": "Planned · ",
+    "planned": "Planned\n",
     "starts": "Starts {when}",
     "from": "Changes {when}"
   },
   "proxyBadge": {
     "owed": {
-      "one": "Paid for others · {count} due",
-      "other": "Paid for others · {count} due"
+      "one": "Paid for others\n{count} due",
+      "other": "Paid for others\n{count} due"
     },
     "owedFor": {
-      "one": "Paid for {name} · {count} due",
-      "other": "Paid for {name} · {count} due"
+      "one": "Paid for {name}\n{count} due",
+      "other": "Paid for {name}\n{count} due"
     },
-    "settled": "Paid for others · settled",
-    "settledFor": "Paid for {name} · settled"
+    "settled": "Paid for others\nsettled",
+    "settledFor": "Paid for {name}\nsettled"
   },
   "gantt": {
     "months": {
@@ -104,15 +104,15 @@
     "gapShort": "Lapsed {span}",
     "lifetimeSuffix": " lifetime",
     "present": "now",
-    "plannedSuffix": " · planned",
-    "introPrefix": "Intro offer · ",
+    "plannedSuffix": "\nplanned",
+    "introPrefix": "Intro offer\n",
     "introShort": "Intro ",
     "planned": "Planned",
     "gap": "Lapsed",
     "earlier": "Earlier",
     "later": "Later",
     "backToNow": "Back to now",
-    "resize": "Drag to resize the name column · double-click to reset"
+    "resize": "Drag to resize the name column\ndouble-click to reset"
   },
   "kind": {
     "debit": "Bank card",

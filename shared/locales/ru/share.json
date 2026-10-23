@@ -70,7 +70,7 @@
   "switches": "Смены региона / тарифа",
   "stoppedOn": "Прекращено {date}",
   "endsOn": "Окончание {date}",
-  "thanks": "Спасибо · До следующего периода",
+  "thanks": "Спасибо\nДо следующего периода",
   "n": {
     "charges": {
       "one": "{count} списание",
@@ -85,7 +85,7 @@
   "present": "сейчас",
   "priceChanges": "Изменения цены: {list}",
   "withYou": "С вами уже",
-  "totalPerDay": "Всего {total} · в среднем {perDay} в день",
+  "totalPerDay": "Всего {total}\nв среднем {perDay} в день",
   "lapsed": {
     "one": "Перерывов: {count}",
     "few": "Перерывов: {count}",

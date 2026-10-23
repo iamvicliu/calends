@@ -17,8 +17,8 @@
     "other": "{count} Zahlungen offen"
   },
   "viewSub": "Abo ansehen",
-  "stoppedOn": " · beendet am {date}",
-  "nextOn": " · nächste am {date}",
+  "stoppedOn": "\nbeendet am {date}",
+  "nextOn": "\nnächste am {date}",
   "payFor": "Für {name}",
   "unset": "nicht festgelegt",
   "paidPeriods": {
@@ -29,7 +29,7 @@
   "owed": "Offen",
   "settled": "Beglichen",
   "detailTitle": "Für andere bezahlt",
-  "cardCcy": " · Karte rechnet in {ccy} ab",
+  "cardCcy": "\nKarte rechnet in {ccy} ab",
   "forWhom": "Bezahlt für",
   "method": "Zahlungsmethode",
   "subscription": "Abo",
@@ -40,7 +40,7 @@
   "diffLabel": "Zurückgezahlt − abgebucht",
   "table": {
     "cost": "Kosten damals",
-    "total": "Summe · {count}",
+    "total": "Summe\n{count}",
     "receivedOn": "Erhalten {date}",
     "date": "Abbuchungsdatum",
     "charged": "Abgebucht",
@@ -78,8 +78,8 @@
     "allBack": "Alles zurückgezahlt",
     "total": "Gesamt bezahlt",
     "totalSub": {
-      "one": "{count} Abbuchung · {subs}",
-      "other": "{count} Abbuchungen · {subs}"
+      "one": "{count} Abbuchung\n{subs}",
+      "other": "{count} Abbuchungen\n{subs}"
     },
     "subs": {
       "one": "{count} Abo",

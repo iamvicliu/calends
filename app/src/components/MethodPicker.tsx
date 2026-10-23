@@ -47,7 +47,7 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
                 <span className="mp-name">
                   {m.name}
                   <small>
-                    {KIND_LABEL[m.kind]} · {m.currency}
+                    {KIND_LABEL[m.kind]} <span className="copy-gap" aria-hidden="true" /> {m.currency}
                   </small>
                 </span>
                 {m.id === value && <Icon name="check" />}

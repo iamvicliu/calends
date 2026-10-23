@@ -1,3 +1,4 @@
+import { copyParts } from './copy.tsx';
 import { base } from '../base.ts';
 import type { ReactNode as ComponentChildren } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -105,7 +106,7 @@ export function Picker<T extends string | number>({
         {display ?? (
           <>
             {cur?.icon && <span className="pk-ico">{cur.icon}</span>}
-            <span>{cur?.label ?? t('picker.choose')}</span>
+            <span>{copyParts(cur?.label ?? t('picker.choose'))}</span>
           </>
         )}
         {/* 上下双箭头：一眼看出是下拉选择，不是链接 */}
@@ -134,7 +135,7 @@ export function Picker<T extends string | number>({
                     onClick={() => pick(o.value)}
                   >
                     {o.icon !== undefined && <span className="pk-ico">{o.icon}</span>}
-                    <span className="cp-name">{o.label}</span>
+                    <span className="cp-name">{copyParts(o.label)}</span>
                     {o.hint && <span className="cp-code">{o.hint}</span>}
                     {o.value === value && <Icon name="check" />}
                   </button>

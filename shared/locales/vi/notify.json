@@ -19,7 +19,7 @@
     "overdue": {
       "other": "Quá hạn {count} ngày"
     },
-    "sub": "{status} · kỳ tới: {bill}",
+    "sub": "{status}\nkỳ tới: {bill}",
     "headline": "Đến lúc thu tiền {name} từ {member}"
   },
   "proxy": {

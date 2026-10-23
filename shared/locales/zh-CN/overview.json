@@ -1,7 +1,7 @@
 {
   "title": "概览",
   "add": "新建订阅",
-  "footer": "{count} 个订阅计费中 · 每月 {amount} ·",
+  "footer": "{count} 个订阅计费中\n每月 {amount}\n",
   "fullReport": "看完整报告",
   "listSep": "、",
   "n": {
@@ -13,8 +13,8 @@
   },
   "timeline": {
     "title": "时间线",
-    "sub": "过去 30 天扣了 {past} · 接下来 30 天要扣 {next}",
-    "past": "过去 30 天 · {amount}"
+    "sub": "过去 30 天扣了 {past}\n接下来 30 天要扣 {next}",
+    "past": "过去 30 天\n{amount}"
   },
   "spending": {
     "title": "每月花了多少",
@@ -22,9 +22,9 @@
     "month": "按月",
     "yearly": "按年",
     "year": "{year}年",
-    "projected": " · 预计",
-    "inProgress": " · 进行中",
-    "paid": " · 已付 {amount}",
+    "projected": "\n预计",
+    "inProgress": "\n进行中",
+    "paid": "\n已付 {amount}",
     "empty": "这段时间没有扣款"
   },
   "due": {
@@ -37,7 +37,7 @@
   "wallet": {
     "title": "钱包",
     "manage": "管理",
-    "balance": "余额 {amount} · {status}",
+    "balance": "余额 {amount}\n{status}",
     "covered": "还能扣 {count} 期，{date} 前要充值",
     "mustTopUp": "{date} 前必须充值",
     "enough": "3 年内够用",
@@ -56,8 +56,8 @@
     "ytd": "{year} 已付",
     "perDay": "每天",
     "active": "计费中",
-    "share": "{amount}/月 · 占 {pct}%",
-    "caption": "订阅星图 · 圆的大小按每月金额比例",
+    "share": "{amount}/月\n占 {pct}%",
+    "caption": "订阅星图\n圆的大小按每月金额比例",
     "aria": "{name} 每月 {amount}",
     "loss": "含未退款损失"
   }

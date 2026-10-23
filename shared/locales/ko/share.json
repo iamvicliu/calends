@@ -58,7 +58,7 @@
   "switches": "지역 / 플랜 변경",
   "stoppedOn": "{date}에 종료됨",
   "endsOn": "{date}에 종료 예정",
-  "thanks": "감사합니다 · 다음 주기에 또 만나요",
+  "thanks": "감사합니다\n다음 주기에 또 만나요",
   "n": {
     "charges": {
       "other": "결제 {count}건"
@@ -70,7 +70,7 @@
   "present": "현재",
   "priceChanges": "가격 변경: {list}",
   "withYou": "함께한 기간",
-  "totalPerDay": "총 {total} · 하루 평균 {perDay}",
+  "totalPerDay": "총 {total}\n하루 평균 {perDay}",
   "lapsed": {
     "other": "{count}회 중단"
   },

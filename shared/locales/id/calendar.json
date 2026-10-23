@@ -1,7 +1,7 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "other": "{count} tagihan · {amount}"
+    "other": "{count} tagihan\n{amount}"
   },
   "mode": {
     "month": "Bulan",
@@ -21,9 +21,9 @@
   "noneMonth": "Tidak ada tagihan bulan ini",
   "day": "{day}",
   "heatCount": {
-    "other": "{count} tagihan · "
+    "other": "{count} tagihan\n"
   },
   "pickDay": "Pilih tanggal untuk melihat tagihan hari itu",
-  "nextCharge": "Tagihan berikutnya · {date}",
+  "nextCharge": "Tagihan berikutnya\n{date}",
   "expandReport": "Buka laporan lengkap"
 }

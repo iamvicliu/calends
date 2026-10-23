@@ -9,8 +9,8 @@
   "neverUsed": "Nunca usado",
   "tokenPlaceholder": "<seu-token>",
   "tokens": {
-    "one": "Tokens · {count}",
-    "other": "Tokens · {count}"
+    "one": "Tokens\n{count}",
+    "other": "Tokens\n{count}"
   },
   "noTokens": "Nenhum token ainda. Crie um e entregue ao assistente de IA que você quer conectar.",
   "lastUsed": "Último uso {time}",
@@ -19,8 +19,8 @@
   "revoked": "Revogado",
   "setup": "Configuração",
   "tools": {
-    "one": "Ferramentas disponíveis · {count}",
-    "other": "Ferramentas disponíveis · {count}"
+    "one": "Ferramentas disponíveis\n{count}",
+    "other": "Ferramentas disponíveis\n{count}"
   },
   "clientOther": "Outro",
   "scope": {

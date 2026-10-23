@@ -2,8 +2,8 @@
   "title": "Genel Bakış",
   "add": "Yeni abonelik",
   "footer": {
-    "one": "{count} etkin abonelik · {amount}/ay ·",
-    "other": "{count} etkin abonelik · {amount}/ay ·"
+    "one": "{count} etkin abonelik\n{amount}/ay\n",
+    "other": "{count} etkin abonelik\n{amount}/ay\n"
   },
   "fullReport": "Tam raporu gör",
   "listSep": ", ",
@@ -22,8 +22,8 @@
   },
   "timeline": {
     "title": "Zaman çizelgesi",
-    "sub": "Son 30 günde {past} ödendi · önümüzdeki 30 günde {next} ödenecek",
-    "past": "Son 30 gün · {amount}"
+    "sub": "Son 30 günde {past} ödendi\nönümüzdeki 30 günde {next} ödenecek",
+    "past": "Son 30 gün\n{amount}"
   },
   "spending": {
     "title": "Aylık harcama",
@@ -31,9 +31,9 @@
     "month": "Aylık",
     "yearly": "Yıllık",
     "year": "{year}",
-    "projected": " · Tahmini",
-    "inProgress": " · Devam ediyor",
-    "paid": " · {amount} ödendi",
+    "projected": "\nTahmini",
+    "inProgress": "\nDevam ediyor",
+    "paid": "\n{amount} ödendi",
     "empty": "Bu dönemde ödeme yok"
   },
   "due": {
@@ -46,7 +46,7 @@
   "wallet": {
     "title": "Cüzdan",
     "manage": "Yönet",
-    "balance": "Bakiye {amount} · {status}",
+    "balance": "Bakiye {amount}\n{status}",
     "covered": {
       "one": "{count} ödeme daha karşılar, {date} tarihine kadar yükleme yapın",
       "other": "{count} ödeme daha karşılar, {date} tarihine kadar yükleme yapın"
@@ -68,8 +68,8 @@
     "ytd": "{year} yılında ödenen",
     "perDay": "Günlük",
     "active": "Etkin",
-    "share": "{amount}/ay · %{pct}",
-    "caption": "Abonelik yıldızları · balon boyutu aylık maliyeti gösterir",
+    "share": "{amount}/ay\n%{pct}",
+    "caption": "Abonelik yıldızları\nbalon boyutu aylık maliyeti gösterir",
     "aria": "{name}, ayda {amount}",
     "loss": "İade edilmeyen kayıp dahil"
   }

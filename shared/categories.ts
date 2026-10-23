@@ -23,7 +23,7 @@ interface Preset {
   code: string;
   icon: string;
   color?: string;
-  /** 早期版本写进订阅里的中文原名 */
+  /** 旧版本写进订阅里的名称 */
   legacy?: string[];
 }
 
@@ -41,16 +41,16 @@ export const PRESETS: Preset[] = [
   { code: 'cloud', icon: 'server', legacy: ['服务器'] },
   { code: 'storage', icon: 'hard-drive', color: 'c6' },
   { code: 'domains', icon: 'globe', color: 'c10', legacy: ['域名'] },
-  { code: 'vpn', icon: 'shield-check', color: 'c4' },
+  { code: 'vpn', icon: 'shield-check', color: 'c4', legacy: ['VPN·네트워크'] },
   { code: 'developer', icon: 'code', color: 'c8' },
   { code: 'design', icon: 'palette', color: 'c7' },
   { code: 'education', icon: 'book', color: 'c6', legacy: ['教育'] },
-  { code: 'news', icon: 'newspaper', color: 'c5' },
+  { code: 'news', icon: 'newspaper', color: 'c5', legacy: ['뉴스·읽기'] },
   { code: 'social', icon: 'user', legacy: ['社交'] },
   { code: 'shopping', icon: 'shopping-bag', color: 'c7', legacy: ['购物'] },
   { code: 'finance', icon: 'landmark', color: 'c4' },
   { code: 'insurance', icon: 'umbrella', color: 'c6' },
-  { code: 'health', icon: 'heart-pulse', color: 'c2' },
+  { code: 'health', icon: 'heart-pulse', color: 'c2', legacy: ['건강·피트니스'] },
   { code: 'phone', icon: 'smartphone', color: 'c1' },
   { code: 'daily', icon: 'house', color: 'c5', legacy: ['日用'] },
 ];

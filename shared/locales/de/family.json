@@ -15,7 +15,7 @@
     "since": "Gestartet",
     "members": "Mitglieder",
     "receipts": "Erhaltene Zahlungen",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Datum",
     "member": "Mitglied",
     "covers": "Zeitraum",
@@ -23,8 +23,8 @@
     "expandAll": "Alle aufklappen",
     "collapseAll": "Alle zuklappen",
     "groupSum": {
-      "one": "{count} Zahlung · {amount}",
-      "other": "{count} Zahlungen · {amount}"
+      "one": "{count} Zahlung\n{amount}",
+      "other": "{count} Zahlungen\n{amount}"
     },
     "fee": "Gebühr",
     "nextCollection": "Nächster Einzug",
@@ -59,7 +59,7 @@
       "one": "Für {count} Mitglied kopiert",
       "other": "Für {count} Mitglieder kopiert"
     },
-    "titleNew": "Mitglied hinzufügen · {name}",
+    "titleNew": "Mitglied hinzufügen\n{name}",
     "confirmDelete": "„{name}“ endgültig löschen? Der Zahlungsverlauf wird ebenfalls gelöscht und deine erfassten Einnahmen sinken.\nFalls die Person nur ausgestiegen ist, trag stattdessen ein Austrittsdatum ein.",
     "deleted": "Gelöscht",
     "delete": "Löschen",
@@ -101,12 +101,12 @@
     "other": "Sonstiges",
     "source": "Herkunft",
     "sourcePh": "Welche Gruppe / wer hat vermittelt",
-    "payments": "Zahlungen · {count}",
+    "payments": "Zahlungen\n{count}",
     "receivedTotal": "Insgesamt etwa {amount} erhalten",
     "paidUntil": "Bezahlt bis",
     "paidUntilPh": "Noch keine Zahlungen",
-    "payCover": "Erhalten am {date} · deckt {from}–{until}",
-    "payCoverTo": "Erhalten am {date} · deckt bis {until}",
+    "payCover": "Erhalten am {date}\ndeckt {from}–{until}",
+    "payCoverTo": "Erhalten am {date}\ndeckt bis {until}",
     "copyAria": "Für andere Mitglieder kopieren",
     "removePayAria": "Zahlung löschen",
     "dup": "Bereits erfasst",
@@ -147,9 +147,9 @@
     },
     "collectionSchedule": "Einzugstermine: jährlich {dates}",
     "coverAligned": "Endet an der gemeinsamen Zeitraumgrenze",
-    "recordNext": "Zahlung erfassen · {amount}",
+    "recordNext": "Zahlung erfassen\n{amount}",
     "collectionAnchor": "Gemeinsamer Einzugsbeginn",
-    "firstSummary": "Erster Zeitraum {from}–{until} · {mode} {amount}",
+    "firstSummary": "Erster Zeitraum {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Kein Konto eingetragen",
     "editAccount": "Mitgliedskonto bearbeiten",
     "copyAccount": "Konto kopieren"
@@ -175,9 +175,9 @@
       "other": "{count} Mitglieder haben nicht bezahlt"
     },
     "count": "Abos",
-    "countStarted": " organisiert · ",
+    "countStarted": " organisiert\n",
     "countJoined": " beigetreten",
-    "countSub": "Organisiert · Beigetreten",
+    "countSub": "Organisiert\nBeigetreten",
     "emptyTitle": "Noch keine geteilten Abos",
     "emptyBody": "Wähle im Abo-Editor unter „Wer es nutzt“ die Option „Ich organisiere“ und füge Mitglieder und ihre Anteile hinzu.",
     "next": "nächste am {date}",
@@ -220,7 +220,7 @@
     },
     "collect": "Einfordern",
     "joinedGroup": "Abos, bei denen ich dabei bin",
-    "payTo": "An {name} gezahlt · {amount}",
+    "payTo": "An {name} gezahlt\n{amount}",
     "ownerDefault": "Organisator",
     "maybeGroup": "Evtl. geteilt",
     "convert": "Als geteilt markieren",
@@ -252,13 +252,13 @@
     "profit": "Gewinn / Jahr",
     "since": "Seit {month}",
     "sinceNone": "Seit Beginn",
-    "actual": "Gezahlt {paid} · Erhalten {received} · {result}",
+    "actual": "Gezahlt {paid}\nErhalten {received}\n{result}",
     "gain": "Plus {amount}",
     "lost": "Minus {amount}",
     "noRecords": "Noch keine Zahlungen"
   },
   "collect": {
-    "title": "Zahlung erfassen · {name}",
+    "title": "Zahlung erfassen\n{name}",
     "next": "Nächste Einnahme {date}",
     "editMember": "Bearbeiten",
     "until": "Gedeckt bis",
@@ -289,7 +289,7 @@
       "one": "{count} Tag überfällig",
       "other": "{count} Tage überfällig"
     },
-    "owe": "{amount} offen · seit {date}",
-    "settled": "Beglichen · nächste Fälligkeit {date}"
+    "owe": "{amount} offen\nseit {date}",
+    "settled": "Beglichen\nnächste Fälligkeit {date}"
   }
 }

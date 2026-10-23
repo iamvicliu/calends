@@ -13,7 +13,7 @@
     "received": "Cobrado hasta hoy",
     "receivedSub": "Planes compartidos y pagos por otros",
     "count": "Personas",
-    "countSub": "Planes: {share} · Pagos por otros: {proxy}"
+    "countSub": "Planes: {share}\nPagos por otros: {proxy}"
   },
   "empty": {
     "title": "Aún no hay personas",

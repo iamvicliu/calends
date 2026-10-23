@@ -6,8 +6,8 @@
   "title": "Alle Abos",
   "all": "Alle",
   "summary": {
-    "one": "{count} Eintrag · {monthly}/Mon. · {yearly}/Jahr",
-    "other": "{count} Einträge · {monthly}/Mon. · {yearly}/Jahr"
+    "one": "{count} Eintrag\n{monthly}/Mon.\n{yearly}/Jahr",
+    "other": "{count} Einträge\n{monthly}/Mon.\n{yearly}/Jahr"
   },
   "status": {
     "upcoming": "Noch nicht gestartet",
@@ -21,7 +21,7 @@
     "lifetime": "Lebenslang",
     "terminated": "Gesperrt"
   },
-  "proxyExcluded": "Für andere bezahlt · nicht mitgezählt",
+  "proxyExcluded": "Für andere bezahlt\nnicht mitgezählt",
   "perMonthApprox": "≈ {amount}/Mon.",
   "originalPrice": "Ursprünglich {amount}",
   "view": {
@@ -68,21 +68,21 @@
   "endedOn": "Beendet am {date}",
   "change": {
     "noMethod": "Zahlungsmethode offen",
-    "planned": "Geplant · ",
+    "planned": "Geplant\n",
     "starts": "Beginnt {when}",
     "from": "Ändert sich {when}"
   },
   "proxyBadge": {
     "owed": {
-      "one": "Für andere bezahlt · {count} offen",
-      "other": "Für andere bezahlt · {count} offen"
+      "one": "Für andere bezahlt\n{count} offen",
+      "other": "Für andere bezahlt\n{count} offen"
     },
     "owedFor": {
-      "one": "Für {name} bezahlt · {count} offen",
-      "other": "Für {name} bezahlt · {count} offen"
+      "one": "Für {name} bezahlt\n{count} offen",
+      "other": "Für {name} bezahlt\n{count} offen"
     },
-    "settled": "Für andere bezahlt · beglichen",
-    "settledFor": "Für {name} bezahlt · beglichen"
+    "settled": "Für andere bezahlt\nbeglichen",
+    "settledFor": "Für {name} bezahlt\nbeglichen"
   },
   "gantt": {
     "months": {
@@ -104,15 +104,15 @@
     "gapShort": "{span} unterbrochen",
     "lifetimeSuffix": " lebenslang",
     "present": "heute",
-    "plannedSuffix": " · geplant",
-    "introPrefix": "Einführungsangebot · ",
+    "plannedSuffix": "\ngeplant",
+    "introPrefix": "Einführungsangebot\n",
     "introShort": "Angebot ",
     "planned": "Geplant",
     "gap": "Unterbrochen",
     "earlier": "Früher",
     "later": "Später",
     "backToNow": "Zurück zu heute",
-    "resize": "Ziehen, um die Namensspalte anzupassen · Doppelklick zum Zurücksetzen"
+    "resize": "Ziehen, um die Namensspalte anzupassen\nDoppelklick zum Zurücksetzen"
   },
   "kind": {
     "debit": "Bankkarte",

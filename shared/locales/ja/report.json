@@ -24,7 +24,7 @@
   "hero": {
     "label": "毎月のサブスク支出",
     "vsLastMonth": "先月末比",
-    "yearAgo": "· 1年前は{amount}",
+    "yearAgo": "\n1年前は{amount}",
     "annual": "年額",
     "perDay": "1日あたり",
     "active": "利用中",
@@ -65,16 +65,16 @@
     "title": "支払額と実質コスト",
     "legendCash": "その月の請求額",
     "legendAccrual": "月割りのコスト",
-    "forecast": " · 予測",
-    "tip": "請求 {cash} · コスト {cost}",
-    "prepaidItem": "{name} · {amount} · {until}まで",
+    "forecast": "\n予測",
+    "tip": "請求 {cash}\nコスト {cost}",
+    "prepaidItem": "{name}\n{amount}\n{until}まで",
     "prepaid": "前払いの残存価値",
     "prepaidSub": "{count}件が支払い済み・未消化",
-    "savedItem": "{name} · {amount} · {since}から",
+    "savedItem": "{name}\n{amount}\n{since}から",
     "saved": "解約で毎月減った額",
     "savedSub": "{count}件を解約",
     "next90": "今後90日間の請求",
-    "peak": "ピークは{month} · {amount}",
+    "peak": "ピークは{month}\n{amount}",
     "fullPaidHint": "支払総額（メンバーへの立て替えを含む）"
   },
   "comp": {
@@ -89,7 +89,7 @@
     "quarterly": "3か月 / 半年払い",
     "monthly": "月払い",
     "groupTip": {
-      "other": "{name} · {count}件 · {amount}/月"
+      "other": "{name}\n{count}件\n{amount}/月"
     }
   },
   "topup": {
@@ -102,7 +102,7 @@
     "span12": "今後1年",
     "empty": "残高のあるアカウントはまだありません。",
     "emptyCta": "ウォレットで App Store や携帯キャリアの残高を追加",
-    "summary": "残高 {balance} · 月約{monthly}",
+    "summary": "残高 {balance}\n月約{monthly}",
     "why": "{span}：請求 {due}、手持ち {balance}、不足 {need}",
     "urgent": "。最優先：{date}までに{min}以上チャージ",
     "cards": "おすすめのギフトカード",
@@ -135,7 +135,7 @@
     "loss": "未返金損失",
     "savedHint": "解約後から今日までに回避できた更新料の推計",
     "lossHint": "サービスの早期終了により返金されなかった料金",
-    "basis": "全履歴 · 自分の負担分。節約額は現在の為替、未返金損失は停止日の為替で換算。",
+    "basis": "全履歴\n自分の負担分。節約額は現在の為替、未返金損失は停止日の為替で換算。",
     "details": "未返金損失の明細",
     "empty": "未返金損失はありません。",
     "cancel": "自分で早期解約"

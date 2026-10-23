@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
 import { useRef, useState } from 'react';
@@ -234,7 +235,6 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           </span>
           <span className="ed-ai-text">
             <b>{t('editor.ai.title')}</b>
-            <small>{t('editor.ai.hint')}</small>
           </span>
           <span className="ed-ai-go">{t('editor.ai.go')}</span>
         </button>
@@ -517,7 +517,7 @@ function Form({
             : share?.role === 'member'
               ? t('editor.share.memberHint')
               : share?.role === 'owner'
-                ? `${t('editor.share.perHead', { amount: money(perHead, f.currency) })} · ${t('editor.share.manageHint')}`
+                ? `${t('editor.share.perHead', { amount: money(perHead, f.currency) })}\n${t('editor.share.manageHint')}`
                 : undefined
         }
       >
@@ -600,10 +600,15 @@ function Form({
                       <b className="text-ellipsis">{m.name || t('editor.share.memberN', { n: i + 1 })}</b>
                       <small className="muted">
                         {m.exempt ? t('family.pool.exempt') : followsCar(state, stored!, m, today) ? t('editor.share.follows') : t('editor.share.custom')}
-                        {late > 0 && <span className="member-late"> · {t('editor.share.overdue', { count: late })}</span>}
+                        {late > 0 && (
+                          <span className="member-late">
+                            {' '}
+                            <span className="copy-gap" aria-hidden="true" /> {t('editor.share.overdue', { count: late })}
+                          </span>
+                        )}
                         {due && (
                           <>
-                            {' · '}
+                            {copyParts('\n')}
                             <span className="nowrap">{t(late > 0 ? 'editor.share.dueOn' : 'editor.share.nextDue', { date: cnDateFull(due) })}</span>
                           </>
                         )}
@@ -656,7 +661,7 @@ function Form({
       {/* 五、不常用的：折叠起来，标题上列出已设置的项 */}
       <button type="button" className={`ed-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more}>
         <span>{t('editor.more.title')}</span>
-        <small>{extras.length ? extras.join(' · ') : t(lt ? 'editor.more.summaryLt' : 'editor.more.summary')}</small>
+        <small>{copyParts(extras.length ? extras.join('\n') : t(lt ? 'editor.more.summaryLt' : 'editor.more.summary'))}</small>
         <Icon name="down" size={14} />
       </button>
       {more && (
@@ -927,10 +932,10 @@ function NameField({
         <div className="ed-suggest" role="listbox">
           {all.map((x, i) => (
             <div key={x.c ? `c-${x.c.name}` : `h-${x.h!.url}`}>
-              {i === 0 && x.c && <div className="ed-suggest-h">{t('editor.name.catalog')}</div>}
+              {i === 0 && x.c && <div className="ed-suggest-h">{copyParts(t('editor.name.catalog'))}</div>}
               {x.h && (i === 0 || all[i - 1].c) && (
                 <div className="ed-suggest-h">
-                  App Store · <img className="pk-flag" src={base(`/flags/${x.h.country}.png`)} alt="" />
+                  App Store <span className="copy-gap" aria-hidden="true" /> <img className="pk-flag" src={base(`/flags/${x.h.country}.png`)} alt="" />
                 </div>
               )}
               <button
@@ -949,7 +954,7 @@ function NameField({
                 )}
                 <span style={{ minWidth: 0 }}>
                   <b>{x.c ? x.c.name : x.h!.name}</b>
-                  <small>{x.c ? `${x.c.category} · ${x.c.url.replace(/^https?:\/\//, '')}` : `${x.h!.seller} · ${x.h!.genre}`}</small>
+                  <small>{copyParts(x.c ? `${x.c.category}\n${x.c.url.replace(/^https?:\/\//, '')}` : `${x.h!.seller}\n${x.h!.genre}`)}</small>
                 </span>
               </button>
             </div>

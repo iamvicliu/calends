@@ -4,14 +4,14 @@
     "other": "결제 수단 {count}개"
   },
   "subDrag": {
-    "other": "결제 수단 {count}개 · 카드를 드래그하여 순서 변경"
+    "other": "결제 수단 {count}개\n카드를 드래그하여 순서 변경"
   },
   "add": "추가",
   "orderSaved": "순서를 저장했습니다",
   "runwayGroup": "잔액 지속 기간",
   "family": "공유 플랜",
   "familyCount": "{count}개",
-  "unassigned": "결제 수단 없음 · {count}",
+  "unassigned": "결제 수단 없음\n{count}",
   "runway": {
     "drain": "월 약 {amount}",
     "scale": {
@@ -52,7 +52,7 @@
     "goTopup": "충전",
     "site": "웹사이트",
     "projection": "예정된 결제",
-    "linked": "연결된 구독 · {count}",
+    "linked": "연결된 구독\n{count}",
     "none": "없음",
     "notes": "메모"
   },
@@ -75,7 +75,7 @@
     "costPh": "선택 사항",
     "note": "메모",
     "notePh": "예: Razer Gold, 대행업체",
-    "history": "충전 기록 · {count}",
+    "history": "충전 기록\n{count}",
     "spent": "{amount} 결제",
     "premium": "{pct}% 웃돈",
     "below": "시세보다 {pct}% 저렴",
@@ -127,7 +127,7 @@
     "link": "이미지 URL",
     "favicon": "웹사이트 아이콘",
     "bank": "은행 아이콘",
-    "none": "설정 안 함 · 첫 글자 표시",
+    "none": "설정 안 함\n첫 글자 표시",
     "upload": "업로드",
     "linkBtn": "URL",
     "clear": "지우기",

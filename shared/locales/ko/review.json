@@ -5,14 +5,14 @@
     "poster": "포스터",
     "receipt": "영수증",
     "card": "카드",
-    "stars": "별자리"
+    "stars": "지출 분포"
   },
   "unassigned": "미지정",
   "me": "나",
   "whose": "{name}의",
   "whoseSelf": "나의",
-  "topSpend": "최대 지출",
-  "ofYear": "연간의 {pct}",
+  "topSpend": "가장 큰 지출",
+  "ofYear": "연간 지출의 {pct}",
   "n": {
     "subs": {
       "other": "구독 {count}개"
@@ -22,37 +22,13 @@
     },
     "currencies": {
       "other": "통화 {count}종"
-    },
-    "currencyKinds": {
-      "other": "통화 {count}종"
     }
   },
-  "tip": {
-    "top": "{name} 하나가 연간 지출의 {pct}를 차지했습니다",
-    "longest": {
-      "other": "{name}와(과) 함께한 지 {count}년이 넘었습니다"
-    },
-    "busiest": "지갑이 가장 아팠던 달은 {month}",
-    "newEnded": "올해 {added}개 추가, {ended}개 해지",
-    "currencies": {
-      "other": "올해 {count}가지 통화로 결제했습니다"
-    },
-    "soon": {
-      "other": "다음 30일 안에 결제 {count}건이 있습니다. 정말 모두 필요한가요?"
-    },
-    "milkTea": {
-      "other": "하루 {amount}, 버블티 약 {count}잔"
-    },
-    "saved": "해지 덕분에 올해 벌써 {amount}을(를) 절약했습니다",
-    "fallback": "곧 갱신되는 구독을 확인하세요."
-  },
   "receipt": {
-    "shop": "{whose} 구독 상점",
-    "asOf": "연간 명세서 · {date} 기준",
-    "fullYear": "연간 명세서 · {year}",
+    "shop": "{whose} 구독 장부",
+    "asOf": "연간 명세\n{date} 기준",
+    "fullYear": "{year}년 명세",
     "no": "No. {no}",
-    "register": "REG 01",
-    "cashier": "담당: {name}",
     "item": "항목",
     "share": "비중",
     "amount": "금액",
@@ -61,38 +37,38 @@
     "total": "합계"
   },
   "poster": {
-    "kicker": "{whose} 올해의 구독",
-    "ongoing": "올해 지금까지 {subs} · {charges}",
-    "ongoingHidden": "올해 지금까지: {charges} · {currencies}",
-    "year": "{subs} · {charges}에 지출",
-    "yearHidden": "올해: {charges} · {currencies}",
-    "newEnded": "신규 {added} · 해지 {ended}",
+    "kicker": "{whose} 연간 구독 결산",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "신규 {added}\n종료 {ended}",
     "perDay": "하루 평균 {amount}"
   },
   "card": {
     "head": "{whose} 구독",
     "intro": {
-      "ongoing": "올해 지금까지 구독에 쓴 돈",
-      "ongoingHidden": "올해 지금까지 구독한 서비스",
-      "year": "올해 구독에 쓴 돈",
-      "yearHidden": "올해 구독한 서비스"
+      "ongoing": "올해 누적 지출",
+      "ongoingHidden": "올해 구독 수",
+      "year": "연간 지출",
+      "yearHidden": "연간 구독 수"
     },
     "perDay": "하루 평균 {amount}",
     "longest": "가장 오래된 구독",
     "duration": "{y}년 {m}개월",
-    "busiest": "가장 비쌌던 달",
+    "busiest": "지출이 가장 많은 달",
     "month": "{month}",
-    "newEnded": "신규 / 해지",
+    "newEnded": "신규 / 종료",
     "saved": "{amount} 절약",
-    "ended": "{count}개 해지",
-    "noneEnded": "해지 없음",
-    "currencies": "통화",
+    "ended": "{count}개 종료",
+    "noneEnded": "종료된 구독 없음",
+    "currencies": "사용한 통화",
     "currencyCount": "{count}종",
-    "nowMonthly": "현재 {amount}/월"
+    "nowMonthly": "현재 월 비용 {amount}"
   },
   "stars": {
-    "head": "{year} · {whose} 구독 별자리",
-    "foot": "거품이 클수록 지출도 큽니다"
+    "head": "{year}년\n{whose} 구독 지출",
+    "foot": "원의 크기는 지출액을 나타냅니다"
   },
   "spendBasis": "멤버 대신 낸 금액을 포함한 전체 결제액",
   "stopLoss": "올해 미환불 손실: {amount}"

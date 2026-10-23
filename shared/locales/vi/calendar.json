@@ -1,7 +1,7 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "other": "{count} khoản phí · {amount}"
+    "other": "{count} khoản phí\n{amount}"
   },
   "mode": {
     "month": "Tháng",
@@ -21,9 +21,9 @@
   "noneMonth": "Không có khoản phí nào trong tháng này",
   "day": "{day}",
   "heatCount": {
-    "other": "{count} khoản phí · "
+    "other": "{count} khoản phí\n"
   },
   "pickDay": "Chọn ngày để xem các khoản thu trong ngày",
-  "nextCharge": "Lần thu tiếp theo · {date}",
+  "nextCharge": "Lần thu tiếp theo\n{date}",
   "expandReport": "Mở báo cáo đầy đủ"
 }

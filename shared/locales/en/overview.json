@@ -2,8 +2,8 @@
   "title": "Overview",
   "add": "New subscription",
   "footer": {
-    "one": "{count} active subscription · {amount}/mo ·",
-    "other": "{count} active subscriptions · {amount}/mo ·"
+    "one": "{count} active subscription\n{amount}/mo\n",
+    "other": "{count} active subscriptions\n{amount}/mo\n"
   },
   "fullReport": "See full report",
   "listSep": ", ",
@@ -22,8 +22,8 @@
   },
   "timeline": {
     "title": "Timeline",
-    "sub": "{past} charged in the last 30 days · {next} due in the next 30",
-    "past": "Past 30 days · {amount}"
+    "sub": "{past} charged in the last 30 days\n{next} due in the next 30",
+    "past": "Past 30 days\n{amount}"
   },
   "spending": {
     "title": "Monthly spending",
@@ -31,9 +31,9 @@
     "month": "Monthly",
     "yearly": "Yearly",
     "year": "{year}",
-    "projected": " · Projected",
-    "inProgress": " · In progress",
-    "paid": " · {amount} paid",
+    "projected": "\nProjected",
+    "inProgress": "\nIn progress",
+    "paid": "\n{amount} paid",
     "empty": "No charges in this period"
   },
   "due": {
@@ -46,7 +46,7 @@
   "wallet": {
     "title": "Wallet",
     "manage": "Manage",
-    "balance": "Balance {amount} · {status}",
+    "balance": "Balance {amount}\n{status}",
     "covered": {
       "one": "covers {count} more charge, top up by {date}",
       "other": "covers {count} more charges, top up by {date}"
@@ -68,8 +68,8 @@
     "ytd": "Paid in {year}",
     "perDay": "Per day",
     "active": "Active",
-    "share": "{amount}/mo · {pct}%",
-    "caption": "Subscription stars · bubble size shows monthly cost",
+    "share": "{amount}/mo\n{pct}%",
+    "caption": "Subscription stars\nbubble size shows monthly cost",
     "aria": "{name}, {amount} per month",
     "loss": "Includes unrefunded loss"
   }

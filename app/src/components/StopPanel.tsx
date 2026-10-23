@@ -56,7 +56,7 @@ export function stopDescription(sub: Subscription, today: string): string {
       : '',
   ]
     .filter(Boolean)
-    .join(' · ');
+    .join('\n');
 }
 
 export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: string; readonly?: boolean }) {
@@ -188,7 +188,7 @@ export function StopFields({ sub, today, value, onChange }: { sub: Subscription;
           </Cell>
           {refund && (
             <>
-              <Cell label={`${t('core.stop.refundAmount')} · ${cur.currency}`} sub={t('core.stop.currencyHint', { currency: cur.currency })}>
+              <Cell label={`${t('core.stop.refundAmount')}\n${cur.currency}`} sub={t('core.stop.currencyHint', { currency: cur.currency })}>
                 <input
                   className="num"
                   inputMode="decimal"

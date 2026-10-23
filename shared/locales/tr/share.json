@@ -62,7 +62,7 @@
   "switches": "Bölge / plan değişiklikleri",
   "stoppedOn": "{date} tarihinde durduruldu",
   "endsOn": "{date} tarihinde sona erer",
-  "thanks": "Teşekkürler · Bir sonraki dönemde görüşmek üzere",
+  "thanks": "Teşekkürler\nBir sonraki dönemde görüşmek üzere",
   "n": {
     "charges": {
       "one": "{count} ödeme",
@@ -75,7 +75,7 @@
   "present": "şimdi",
   "priceChanges": "Fiyat değişiklikleri: {list}",
   "withYou": "Sizinle geçen süre",
-  "totalPerDay": "Toplam {total} · günde ortalama {perDay}",
+  "totalPerDay": "Toplam {total}\ngünde ortalama {perDay}",
   "lapsed": {
     "one": "Bir kez ara verildi",
     "other": "{count} kez ara verildi"

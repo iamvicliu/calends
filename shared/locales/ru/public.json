@@ -1,5 +1,5 @@
 {
-  "title": "Подписки · {name}",
+  "title": "Подписки\n{name}",
   "loadFailed": "Не удалось загрузить",
   "theme": {
     "title": "Тема: {mode} (нажмите, чтобы сменить)",
@@ -18,10 +18,10 @@
   "timeline": {
     "title": "Шкала времени",
     "upcoming": {
-      "one": "{count} списание в ближайшие 30 дней · {amount}",
-      "few": "{count} списания в ближайшие 30 дней · {amount}",
-      "many": "{count} списаний в ближайшие 30 дней · {amount}",
-      "other": "{count} списания в ближайшие 30 дней · {amount}"
+      "one": "{count} списание в ближайшие 30 дней\n{amount}",
+      "few": "{count} списания в ближайшие 30 дней\n{amount}",
+      "many": "{count} списаний в ближайшие 30 дней\n{amount}",
+      "other": "{count} списания в ближайшие 30 дней\n{amount}"
     }
   },
   "chart": {
@@ -31,7 +31,7 @@
     "mrr": "Стоимость в месяц",
     "charge": "Списано",
     "thisMonth": "Этот месяц",
-    "projected": "{month} · Прогноз"
+    "projected": "{month}\nПрогноз"
   },
   "ended": {
     "title": "Отменённые",
@@ -58,16 +58,16 @@
   "list": {
     "title": "Подписки",
     "summary": {
-      "one": "{count} · {amount}/мес.",
-      "few": "{count} · {amount}/мес.",
-      "many": "{count} · {amount}/мес.",
-      "other": "{count} · {amount}/мес."
+      "one": "{count}\n{amount}/мес.",
+      "few": "{count}\n{amount}/мес.",
+      "many": "{count}\n{amount}/мес.",
+      "other": "{count}\n{amount}/мес."
     },
     "all": "Все"
   },
   "row": {
-    "ends": " · Окончание {date}",
-    "renews": " · Продление {date}",
+    "ends": "\nОкончание {date}",
+    "renews": "\nПродление {date}",
     "monthly": "В месяц",
     "perMonthEq": "В пересчёте на месяц"
   },

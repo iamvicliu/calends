@@ -9,7 +9,7 @@
   "neverUsed": "사용 기록 없음",
   "tokenPlaceholder": "<your-token>",
   "tokens": {
-    "other": "토큰 · {count}"
+    "other": "토큰\n{count}"
   },
   "noTokens": "아직 토큰이 없습니다. 토큰을 만들어 연결할 AI 어시스턴트에 전달하세요.",
   "lastUsed": "마지막 사용 {time}",
@@ -18,7 +18,7 @@
   "revoked": "폐기됨",
   "setup": "설정 방법",
   "tools": {
-    "other": "사용 가능한 도구 · {count}"
+    "other": "사용 가능한 도구\n{count}"
   },
   "clientOther": "기타",
   "scope": {

@@ -4,6 +4,7 @@ import { addDays, addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import './timeline.css';
+import './copy.css';
 
 export interface TimelineItem {
   key: string;
@@ -193,11 +194,11 @@ export function Timeline({
             <button
               key={it.key}
               type="button"
-              className={`tl-icon ${date < today ? 'past' : ''}`}
+              className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
               style={
                 { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<string, string | number>
               }
-              data-tip={`${md(date)} · ${it.tip}`}
+              data-tip={`${md(date)}\n${it.tip}`}
               onClick={() => it.onClick?.()}
             >
               {it.icon}

@@ -24,7 +24,7 @@
   "hero": {
     "label": "Monatliche Abo-Ausgaben",
     "vsLastMonth": "ggü. Ende letzten Monats",
-    "yearAgo": "· vor einem Jahr {amount}",
+    "yearAgo": "\nvor einem Jahr {amount}",
     "annual": "Pro Jahr",
     "perDay": "Pro Tag",
     "active": "Aktiv",
@@ -66,16 +66,16 @@
     "title": "Abbuchungen vs. echte Kosten",
     "legendCash": "Im Monat abgebucht",
     "legendAccrual": "Kosten pro Monat verteilt",
-    "forecast": " · Prognose",
-    "tip": "Abgebucht {cash} · Kosten {cost}",
-    "prepaidItem": "{name} · {amount} · bis {until}",
+    "forecast": "\nPrognose",
+    "tip": "Abgebucht {cash}\nKosten {cost}",
+    "prepaidItem": "{name}\n{amount}\nbis {until}",
     "prepaid": "Vorausbezahlter Wert",
     "prepaidSub": "{count} bezahlt, nicht aufgebraucht",
-    "savedItem": "{name} · {amount} · seit {since}",
+    "savedItem": "{name}\n{amount}\nseit {since}",
     "saved": "Monatlich weniger durch Kündigen",
     "savedSub": "{count} gekündigt",
     "next90": "Fällig in den nächsten 90 Tagen",
-    "peak": "Höchststand im {month} · {amount}",
+    "peak": "Höchststand im {month}\n{amount}",
     "fullPaidHint": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder"
   },
   "comp": {
@@ -90,8 +90,8 @@
     "quarterly": "Vierteljährlich / halbjährlich",
     "monthly": "Monatlich",
     "groupTip": {
-      "one": "{name} · {count} Eintrag · {amount}/Mon.",
-      "other": "{name} · {count} Einträge · {amount}/Mon."
+      "one": "{name}\n{count} Eintrag\n{amount}/Mon.",
+      "other": "{name}\n{count} Einträge\n{amount}/Mon."
     }
   },
   "topup": {
@@ -104,7 +104,7 @@
     "span12": "Nächstes Jahr",
     "empty": "Noch keine Konten mit Guthaben.",
     "emptyCta": "App Store- oder Mobilfunkguthaben im Wallet hinzufügen",
-    "summary": "Guthaben {balance} · etwa {monthly}/Mon.",
+    "summary": "Guthaben {balance}\netwa {monthly}/Mon.",
     "why": "{span}: {due} fällig, {balance} vorhanden, {need} fehlen",
     "urgent": "; am dringendsten: mind. {min} bis {date} aufladen",
     "cards": "Empfohlene Geschenkkarten",
@@ -138,7 +138,7 @@
     "loss": "Nicht erstatteter Verlust",
     "savedHint": "Geschätzte vermiedene Verlängerungskosten seit der Kündigung bis heute",
     "lossHint": "Bezahlte Gebühren für vorzeitig beendete Leistungen, die nicht erstattet wurden",
-    "basis": "Gesamter Verlauf · Mein Anteil; Ersparnis zum aktuellen Kurs, nicht erstatteter Verlust zum Kurs am Beendigungstag.",
+    "basis": "Gesamter Verlauf\nMein Anteil; Ersparnis zum aktuellen Kurs, nicht erstatteter Verlust zum Kurs am Beendigungstag.",
     "details": "Nicht erstattete Verluste im Detail",
     "empty": "Keine nicht erstatteten Verluste.",
     "cancel": "Freiwillig vorzeitig gekündigt"

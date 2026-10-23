@@ -2,8 +2,8 @@
   "title": "Resumen",
   "add": "Nueva suscripción",
   "footer": {
-    "one": "{count} suscripción activa · {amount}/mes ·",
-    "other": "{count} suscripciones activas · {amount}/mes ·"
+    "one": "{count} suscripción activa\n{amount}/mes\n",
+    "other": "{count} suscripciones activas\n{amount}/mes\n"
   },
   "fullReport": "Ver informe completo",
   "listSep": ", ",
@@ -22,8 +22,8 @@
   },
   "timeline": {
     "title": "Cronología",
-    "sub": "{past} cobrados en los últimos 30 días · {next} en los próximos 30",
-    "past": "Últimos 30 días · {amount}"
+    "sub": "{past} cobrados en los últimos 30 días\n{next} en los próximos 30",
+    "past": "Últimos 30 días\n{amount}"
   },
   "spending": {
     "title": "Gasto mensual",
@@ -31,9 +31,9 @@
     "month": "Mensual",
     "yearly": "Anual",
     "year": "{year}",
-    "projected": " · Previsto",
-    "inProgress": " · En curso",
-    "paid": " · {amount} pagado",
+    "projected": "\nPrevisto",
+    "inProgress": "\nEn curso",
+    "paid": "\n{amount} pagado",
     "empty": "No hay cobros en este periodo"
   },
   "due": {
@@ -46,7 +46,7 @@
   "wallet": {
     "title": "Cartera",
     "manage": "Gestionar",
-    "balance": "Saldo {amount} · {status}",
+    "balance": "Saldo {amount}\n{status}",
     "covered": {
       "one": "cubre {count} cobro más, recarga antes del {date}",
       "other": "cubre {count} cobros más, recarga antes del {date}"
@@ -68,8 +68,8 @@
     "ytd": "Pagado en {year}",
     "perDay": "Al día",
     "active": "Activas",
-    "share": "{amount}/mes · {pct}%",
-    "caption": "Constelación de suscripciones · el tamaño indica el coste mensual",
+    "share": "{amount}/mes\n{pct}%",
+    "caption": "Constelación de suscripciones\nel tamaño indica el coste mensual",
     "aria": "{name}, {amount} al mes",
     "loss": "Incluye pérdida no reembolsada"
   }

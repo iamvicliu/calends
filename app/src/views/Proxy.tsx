@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
 import { addDays, cycleLabel, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
@@ -81,7 +82,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
               </div>
               <div className="muted ph-meta">
                 {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                {stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : ''}
+                {copyParts(stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : '')}
               </div>
             </div>
           </div>
@@ -163,7 +164,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             </div>
             <div className="muted ph-meta">
               {money(live.price, live.currency)} {cycleLabel(live.cycle)}
-              {cardCcy ? t('proxy.cardCcy', { ccy: cardCcy }) : ''}
+              {copyParts(cardCcy ? t('proxy.cardCcy', { ccy: cardCcy }) : '')}
             </div>
           </div>
           <StatusPill tone={stopped ? 'stop' : open.length ? 'owe' : 'ok'}>
@@ -260,12 +261,14 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                       <b className="green">{flow(r.entry!.received!, rc)}</b>
                       {(r.entry?.receivedOn || rc !== base) && (
                         <small style={{ color: 'var(--green)' }}>
-                          {[
-                            r.entry?.receivedOn && t('proxy.table.receivedOn', { date: cnDate(r.entry.receivedOn) }),
-                            rc !== base && `≈ ${flow(r.receivedBase, base)}`,
-                          ]
-                            .filter(Boolean)
-                            .join(' · ')}
+                          {copyParts(
+                            [
+                              r.entry?.receivedOn && t('proxy.table.receivedOn', { date: cnDate(r.entry.receivedOn) }),
+                              rc !== base && `≈ ${flow(r.receivedBase, base)}`,
+                            ]
+                              .filter(Boolean)
+                              .join('\n'),
+                          )}
                         </small>
                       )}
                     </>
@@ -279,7 +282,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           })}
           {list.length > 1 && (
             <div className="ld-row ld-tf">
-              <span>{t('proxy.table.total', { count: list.length })}</span>
+              <span>{copyParts(t('proxy.table.total', { count: list.length }))}</span>
               <span>{new Set(list.map((r) => r.currency)).size === 1 ? flow(-list.reduce((a, r) => a + r.charged, 0), list[0].currency) : ''}</span>
               <span className="ld-cost">{flow(-charged, base)}</span>
               <span className="green">{flow(received, base)}</span>
@@ -459,7 +462,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
             <div className="stat-value">
               <Amount value={-sum.charged} ccy={base} />
             </div>
-            <div className="stat-sub">{t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) })}</div>
+            <div className="stat-sub">{copyParts(t('proxy.page.totalSub', { count: sum.count, subs: t('proxy.page.subs', { count: sum.subs.length }) }))}</div>
           </div>
           <div className="card stat">
             <div className="stat-label">{t('proxy.diffLabel')}</div>

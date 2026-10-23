@@ -1,7 +1,7 @@
 {
   "copy": "Salin",
   "copied": "Disalin",
-  "overlap": { "title": "Juga berjalan", "previous": "Paket sebelumnya", "until": "Sampai {date} · {rel}" },
+  "overlap": { "title": "Juga berjalan", "previous": "Paket sebelumnya", "until": "Sampai {date}\n{rel}" },
   "action": {
     "edit": "Edit",
     "pause": "Jeda",
@@ -27,7 +27,7 @@
     "trialEnd": "Uji coba berakhir",
     "region": "Wilayah"
   },
-  "up": { "planned": "Rencana perubahan · belum pasti", "starting": "Segera dimulai", "changing": "Perubahan mendatang", "effective": "Tanggal berlaku" },
+  "up": { "planned": "Rencana perubahan\nbelum pasti", "starting": "Segera dimulai", "changing": "Perubahan mendatang", "effective": "Tanggal berlaku" },
   "plan": {
     "drop": "Jangan beralih",
     "droppedToast": "Tidak beralih. Berakhir setelah {date}",
@@ -37,8 +37,8 @@
   "intro": { "title": "Promo awal", "price": "Harga promo", "until": "Promo berakhir", "then": "Setelahnya" },
   "share": {
     "open": "Lihat patungan",
-    "owner": "Bersama · saya pengelola ({count}/{seats})",
-    "member": "Bersama · saya bergabung",
+    "owner": "Bersama\nsaya pengelola ({count}/{seats})",
+    "member": "Bersama\nsaya bergabung",
     "payTo": "Bayar ke",
     "host": "Pengelola",
     "myShare": "Bagian saya",
@@ -55,7 +55,7 @@
   "charges": {
     "recentN": "Hanya {count} terakhir",
     "addShort": "Catat",
-    "title": { "other": "Tagihan · {count}" },
+    "title": { "other": "Tagihan\n{count}" },
     "kind": { "refund": "Refund", "adjust": "Penyesuaian", "failed": "Gagal" },
     "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)",
     "all": "Tampilkan semua {count}"
@@ -72,10 +72,10 @@
     "gaps": { "other": "Terputus {count} kali" },
     "perMonth": "Biaya bulanan riil"
   },
-  "tab": { "charges": "Tagihan · {count}", "details": "Detail" },
+  "tab": { "charges": "Tagihan\n{count}", "details": "Detail" },
   "kpi": { "amortized": "Per bulan dimiliki", "noGaps": "Tanpa jeda", "startedToday": "Mulai hari ini", "expectedMonthly": "Perkiraan per bulan" },
   "chart": {
-    "title": "Per tagihan · {ccy}",
+    "title": "Per tagihan\n{ccy}",
     "orig": "Asli",
     "all": "Semua",
     "y1": "1 thn",
@@ -102,7 +102,7 @@
   },
   "upcoming": {
     "title": "12 bulan ke depan",
-    "total": { "other": "≈ {amount} · {count} tagihan" },
+    "total": { "other": "≈ {amount}\n{count} tagihan" },
     "more": { "other": "{count} lagi" },
     "none": "Tidak ada tagihan dalam 12 bulan ke depan"
   },

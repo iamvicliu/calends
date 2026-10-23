@@ -24,7 +24,7 @@
   "hero": {
     "label": "Chi tiêu gói đăng ký hằng tháng",
     "vsLastMonth": "so với cuối tháng trước",
-    "yearAgo": "· {amount} một năm trước",
+    "yearAgo": "\n{amount} một năm trước",
     "annual": "Mỗi năm",
     "perDay": "Mỗi ngày",
     "active": "Đang hoạt động",
@@ -65,16 +65,16 @@
     "title": "Tiền mặt và chi phí thực",
     "legendCash": "Đã trừ trong tháng",
     "legendAccrual": "Chi phí phân bổ theo tháng",
-    "forecast": " · Dự báo",
-    "tip": "Đã trừ {cash} · Chi phí {cost}",
-    "prepaidItem": "{name} · {amount} · đến {until}",
+    "forecast": "\nDự báo",
+    "tip": "Đã trừ {cash}\nChi phí {cost}",
+    "prepaidItem": "{name}\n{amount}\nđến {until}",
     "prepaid": "Giá trị trả trước",
     "prepaidSub": "{count} đã trả, chưa dùng hết",
-    "savedItem": "{name} · {amount} · từ {since}",
+    "savedItem": "{name}\n{amount}\ntừ {since}",
     "saved": "Mỗi tháng bớt nhờ hủy",
     "savedSub": "{count} đã hủy",
     "next90": "Đến hạn trong 90 ngày tới",
-    "peak": "Cao nhất vào {month} · {amount}",
+    "peak": "Cao nhất vào {month}\n{amount}",
     "fullPaidHint": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên"
   },
   "comp": {
@@ -89,7 +89,7 @@
     "quarterly": "Hằng quý / nửa năm",
     "monthly": "Hằng tháng",
     "groupTip": {
-      "other": "{name} · {count} mục · {amount}/tháng"
+      "other": "{name}\n{count} mục\n{amount}/tháng"
     }
   },
   "topup": {
@@ -102,7 +102,7 @@
     "span12": "Năm tới",
     "empty": "Chưa có tài khoản nào có số dư.",
     "emptyCta": "Thêm số dư App Store hoặc nhà mạng trong Ví",
-    "summary": "Số dư {balance} · khoảng {monthly}/tháng",
+    "summary": "Số dư {balance}\nkhoảng {monthly}/tháng",
     "why": "{span}: cần trả {due}, đang có {balance}, thiếu {need}",
     "urgent": "; gấp nhất: nạp ít nhất {min} trước {date}",
     "cards": "Thẻ quà tặng gợi ý",
@@ -135,7 +135,7 @@
     "loss": "Tổn thất chưa hoàn tiền",
     "savedHint": "Ước tính phí gia hạn tránh được từ khi hủy đến hôm nay",
     "lossHint": "Khoản đã trả cho dịch vụ kết thúc sớm nhưng không được hoàn lại",
-    "basis": "Toàn bộ lịch sử · Phần của tôi; tiết kiệm theo tỷ giá hiện tại, tổn thất chưa hoàn tiền theo tỷ giá ngày dừng.",
+    "basis": "Toàn bộ lịch sử\nPhần của tôi; tiết kiệm theo tỷ giá hiện tại, tổn thất chưa hoàn tiền theo tỷ giá ngày dừng.",
     "details": "Chi tiết tổn thất chưa hoàn tiền",
     "empty": "Không có tổn thất chưa hoàn tiền.",
     "cancel": "Chủ động hủy sớm"

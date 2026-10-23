@@ -15,7 +15,7 @@
     "since": "Başlangıç",
     "members": "Üyeler",
     "receipts": "Alınan ödemeler",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Tarih",
     "member": "Üye",
     "covers": "Dönem",
@@ -23,8 +23,8 @@
     "expandAll": "Tümünü genişlet",
     "collapseAll": "Tümünü daralt",
     "groupSum": {
-      "one": "{count} ödeme · {amount}",
-      "other": "{count} ödeme · {amount}"
+      "one": "{count} ödeme\n{amount}",
+      "other": "{count} ödeme\n{amount}"
     },
     "fee": "Ücret",
     "nextCollection": "Sonraki tahsilat",
@@ -59,7 +59,7 @@
       "one": "{count} üyeye kopyalandı",
       "other": "{count} üyeye kopyalandı"
     },
-    "titleNew": "Üye ekle · {name}",
+    "titleNew": "Üye ekle\n{name}",
     "confirmDelete": "“{name}” kalıcı olarak silinsin mi? Ödeme geçmişi de silinir ve kayıtlı geliriniz azalır.\nYalnızca plandan ayrıldıysa bunun yerine ayrılış tarihi girin.",
     "deleted": "Silindi",
     "delete": "Sil",
@@ -101,12 +101,12 @@
     "other": "Diğer",
     "source": "Kaynak",
     "sourcePh": "Hangi gruptan / kim önerdi",
-    "payments": "Ödemeler · {count}",
+    "payments": "Ödemeler\n{count}",
     "receivedTotal": "Toplam yaklaşık {amount} alındı",
     "paidUntil": "Ödendiği tarih",
     "paidUntilPh": "Henüz ödeme yok",
-    "payCover": "{date} alındı · {from}–{until} dönemi",
-    "payCoverTo": "{date} alındı · {until} tarihine kadar",
+    "payCover": "{date} alındı\n{from}–{until} dönemi",
+    "payCoverTo": "{date} alındı\n{until} tarihine kadar",
     "copyAria": "Diğer üyelere kopyala",
     "removePayAria": "Ödemeyi sil",
     "dup": "Zaten kayıtlı",
@@ -147,9 +147,9 @@
     },
     "collectionSchedule": "Tahsilat tarihleri: her yıl {dates}",
     "coverAligned": "Ortak dönem sınırında sona erer",
-    "recordNext": "Ödeme kaydet · {amount}",
+    "recordNext": "Ödeme kaydet\n{amount}",
     "collectionAnchor": "Ortak tahsilat başlangıcı",
-    "firstSummary": "İlk dönem {from}–{until} · {mode} {amount}",
+    "firstSummary": "İlk dönem {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Hesap girilmedi",
     "editAccount": "Üye hesabını düzenle",
     "copyAccount": "Hesabı kopyala"
@@ -175,9 +175,9 @@
       "other": "{count} üye ödemedi"
     },
     "count": "Planlar",
-    "countStarted": " yönetilen · ",
+    "countStarted": " yönetilen\n",
     "countJoined": " katılınan",
-    "countSub": "Yönetilen · Katılınan",
+    "countSub": "Yönetilen\nKatılınan",
     "emptyTitle": "Henüz ortak plan yok",
     "emptyBody": "Abonelik düzenleyicisinde “Kim kullanıyor” altında “Yönetici benim” seçeneğini seçin, ardından üyeleri ve paylarını ekleyin.",
     "next": "sonraki {date}",
@@ -220,7 +220,7 @@
     },
     "collect": "Tahsil et",
     "joinedGroup": "Katıldığım planlar",
-    "payTo": "Ödenen: {name} · {amount}",
+    "payTo": "Ödenen: {name}\n{amount}",
     "ownerDefault": "yönetici",
     "maybeGroup": "Ortak olabilir",
     "convert": "Ortak yap",
@@ -252,13 +252,13 @@
     "profit": "Kâr / yıl",
     "since": "{month} itibarıyla",
     "sinceNone": "Başlangıçtan beri",
-    "actual": "Ödenen {paid} · Alınan {received} · {result}",
+    "actual": "Ödenen {paid}\nAlınan {received}\n{result}",
     "gain": "{amount} kârda",
     "lost": "{amount} zararda",
     "noRecords": "Henüz ödeme yok"
   },
   "collect": {
-    "title": "Ödeme kaydet · {name}",
+    "title": "Ödeme kaydet\n{name}",
     "next": "Sonraki tahsilat {date}",
     "editMember": "Düzenle",
     "until": "Kapsadığı son tarih",
@@ -289,7 +289,7 @@
       "one": "{count} gün gecikti",
       "other": "{count} gün gecikti"
     },
-    "owe": "{amount} bekliyor · {date} tarihinden beri",
-    "settled": "Ödendi · sonraki {date}"
+    "owe": "{amount} bekliyor\n{date} tarihinden beri",
+    "settled": "Ödendi\nsonraki {date}"
   }
 }

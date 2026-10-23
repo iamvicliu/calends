@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { renewalDates } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
@@ -174,7 +175,7 @@ function Panel({
       {title && (
         <div className="dt-ph row">
           <CardTitle>{title}</CardTitle>
-          {aside && <div className="dt-aside">{aside}</div>}
+          {aside && <div className="dt-aside">{copyParts(aside)}</div>}
         </div>
       )}
       {children}
@@ -281,19 +282,8 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             <b>
               {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
             </b>
-            {big.alt && (
-              <>
-                <s>·</s>
-                {big.alt}
-              </>
-            )}
-            {cur.region && (
-              <>
-                <s>·</s>
-                <Region cc={cur.region} />
-              </>
-            )}
-            <s>·</s>
+            {big.alt && <span>{big.alt}</span>}
+            {cur.region && <Region cc={cur.region} />}
             <CatTag cat={sub.category} />
           </div>
         </div>
@@ -614,7 +604,9 @@ function Trendline({ sub, state, today, history }: { sub: Subscription; state: A
                 )}
                 <div className="cc-tip-f">
                   {m?.name ?? t('ui.method.none')}
-                  {c.currency !== base && rate && rb && ` · 1 ${c.currency} = ${((1 / rate.rate) * rb.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} ${base}`}
+                  {copyParts(
+                    c.currency !== base && rate && rb && `\n1 ${c.currency} = ${((1 / rate.rate) * rb.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} ${base}`,
+                  )}
                 </div>
               </>
             );
@@ -644,7 +636,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
     return (
       <span className="dt-inline">
         {v.region && <Region cc={v.region} />}
-        {[`${money(pricePoints(v)[0].amount, v.currency)} ${cycleLabel(v.cycle)}`, m?.name].filter(Boolean).join(' · ')}
+        {copyParts([`${money(pricePoints(v)[0].amount, v.currency)} ${cycleLabel(v.cycle)}`, m?.name].filter(Boolean).join('\n'))}
       </span>
     );
   };
@@ -725,7 +717,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
     <Panel
       className="dt-events"
       title={t('detail.history')}
-      aside={`${t('detail.ev.phases', { count: vs.length })} · ${gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.kpi.noGaps')}`}
+      aside={`${t('detail.ev.phases', { count: vs.length })}\n${gaps ? t('detail.stats.gaps', { count: gaps }) : t('detail.kpi.noGaps')}`}
     >
       <ol className="dt-evs">
         {shown.map((e, i) => (
@@ -767,7 +759,7 @@ function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?:
       <dt>{k}</dt>
       <dd>
         {children}
-        {hint && <small>{hint}</small>}
+        {hint && <small>{copyParts(hint)}</small>}
       </dd>
     </div>
   );
@@ -794,15 +786,17 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
               <div className="dt-oc-loss">
                 <b>{flow(-(loss?.loss ?? sm.unusedValue), phase.currency)}</b>
                 <small>
-                  {[
-                    t('core.stop.lossTitle'),
-                    t('core.stop.lossDays', { count: sm.wastedDays }),
-                    phase.currency !== base
-                      ? `≈ ${flow(-(loss?.lossBase ?? convertOn(sm.unusedValue, phase.currency, base, sm.date, state.fxHistory, state.fx)), base)}`
-                      : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
+                  {copyParts(
+                    [
+                      t('core.stop.lossTitle'),
+                      t('core.stop.lossDays', { count: sm.wastedDays }),
+                      phase.currency !== base
+                        ? `≈ ${flow(-(loss?.lossBase ?? convertOn(sm.unusedValue, phase.currency, base, sm.date, state.fxHistory, state.fx)), base)}`
+                        : '',
+                    ]
+                      .filter(Boolean)
+                      .join('\n'),
+                  )}
                 </small>
               </div>
             )}
@@ -919,7 +913,7 @@ function Details({
                 }
                 hint={t('detail.overlap.until', { date: cnDateFull(v.end!), rel: relDays(diffDays(today, v.end!)) })}
               >
-                {money(v.price, v.currency)} · {cycleLabel(v.cycle)}
+                {money(v.price, v.currency)} <span className="copy-gap" aria-hidden="true" /> {cycleLabel(v.cycle)}
               </Prop>
             ))}
           </dl>
@@ -946,7 +940,7 @@ function Details({
             )}
             <Prop k={t('detail.field.amount')}>
               {st !== 'upcoming' && (up.price !== cur.price || up.currency !== cur.currency) ? `${money(cur.price, cur.currency)} → ` : ''}
-              {money(up.price, up.currency)} · {cycleLabel(up.cycle)}
+              {money(up.price, up.currency)} <span className="copy-gap" aria-hidden="true" /> {cycleLabel(up.cycle)}
             </Prop>
             <Prop k={t('detail.field.method')}>
               <PayBadge m={methodOf(state, up.methodId)} />

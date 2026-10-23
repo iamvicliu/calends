@@ -74,9 +74,9 @@
   },
   "open": {
     "publicSubs": "Gói hiển thị",
-    "publicSubsHint": "Trang công khai chỉ hiện các gói dưới đây. Gói trả hộ không bao giờ công khai; gói mới mặc định được hiển thị.",
-    "publicShown": "Đang hiện · {count}",
-    "publicOff2": "Đã ẩn · {count}",
+    "publicSubsHint": "Đăng ký trả hộ luôn được giữ riêng tư. Đăng ký mới được công khai theo mặc định.",
+    "publicShown": "Đang hiện\n{count}",
+    "publicOff2": "Đã ẩn\n{count}",
     "publicShowAll": "Hiện tất cả",
     "publicHideAll": "Ẩn tất cả",
     "publicHideOne": "Ẩn {name}",
@@ -126,7 +126,7 @@
     "sep": ", "
   },
   "channels": {
-    "title": { "other": "Kênh thông báo · {count} đang bật" },
+    "title": { "other": "Kênh thông báo\n{count} đang bật" },
     "empty": "Chưa có kênh nào — nhắc nhở sẽ không được gửi.",
     "test": "Thử",
     "testFailed": "Không gửi được",
@@ -219,7 +219,7 @@
     "alreadyBound": "Thiết bị này đã có passkey",
     "changePassword": "Đổi mật khẩu",
     "devices": "Thiết bị đã đăng nhập",
-    "devicesCount": { "other": "Thiết bị đã đăng nhập · {count}" },
+    "devicesCount": { "other": "Thiết bị đã đăng nhập\n{count}" },
     "devicesFoot": "Khi đạt giới hạn, thiết bị không hoạt động lâu nhất sẽ tự động bị đăng xuất. Vị trí được ước tính từ IP và có thể không chính xác.",
     "maxSessions": "Số thiết bị đăng nhập tối đa",
     "maxSessionsSaved": { "other": "Tối đa {count} thiết bị" },
@@ -265,7 +265,7 @@
       "created": "Đã thêm danh mục",
       "saved": "Đã lưu danh mục",
       "renamed": {
-        "other": "Đã lưu danh mục · cập nhật {count} gói đăng ký"
+        "other": "Đã lưu danh mục\ncập nhật {count} gói đăng ký"
       },
       "deleted": "Đã xóa danh mục",
       "order": "Đã lưu thứ tự"

@@ -13,11 +13,11 @@
     "less": "比去年同月少 {amount}",
     "yearly": "一年约",
     "live": "在付订阅",
-    "paid": "累计已付 · {year} 起"
+    "paid": "累计已付\n{year} 起"
   },
   "timeline": {
     "title": "时间线",
-    "upcoming": "接下来 30 天 {count} 笔 · {amount}"
+    "upcoming": "接下来 30 天 {count} 笔\n{amount}"
   },
   "chart": {
     "title": "每月扣款",
@@ -26,7 +26,7 @@
     "mrr": "月成本",
     "charge": "扣款",
     "thisMonth": "本月",
-    "projected": "{month} · 预计"
+    "projected": "{month}\n预计"
   },
   "ended": {
     "title": "已退订",
@@ -52,12 +52,12 @@
   },
   "list": {
     "title": "正在订阅",
-    "summary": "{count} 个 · 每月 {amount}",
+    "summary": "{count} 个\n每月 {amount}",
     "all": "全部"
   },
   "row": {
-    "ends": " · {date}结束",
-    "renews": " · {date}续费",
+    "ends": "\n{date}结束",
+    "renews": "\n{date}续费",
     "monthly": "每月",
     "perMonthEq": "折合每月"
   },

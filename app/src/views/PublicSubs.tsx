@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { Plus, X } from 'lucide-react';
 import { effectiveStatus } from '../../../shared/billing.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -27,7 +28,7 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
       <div className="pubs">
         <p className="pubs-hint">{t('settings.open.publicSubsHint')}</p>
         <div className="pubs-bar">
-          <span>{t('settings.open.publicShown', { count: shown.length })}</span>
+          <span>{copyParts(t('settings.open.publicShown', { count: shown.length }))}</span>
           <div className="pubs-acts">
             <button className="btn" disabled={!off.length} onClick={() => save([])}>
               {t('settings.open.publicShowAll')}
@@ -60,7 +61,7 @@ export function PublicSubsSheet({ state, today, onClose }: { state: AppState; to
         {off.length > 0 && (
           <>
             <div className="pubs-bar">
-              <span>{t('settings.open.publicOff2', { count: off.length })}</span>
+              <span>{copyParts(t('settings.open.publicOff2', { count: off.length }))}</span>
             </div>
             <div className="pubs-chips">
               {off.map((s) => (

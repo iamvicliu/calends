@@ -132,7 +132,7 @@
     "crypto": "Crypto card",
     "other": "Other"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "Email"
   },
@@ -178,7 +178,7 @@
     "currencyHint": "Refunds use {currency}, the subscription currency. Record a different card currency below.",
     "refunded": "Refunded {money}",
     "partial": "Partial refund {money}",
-    "unrefunded": "No refund · Loss {money}",
+    "unrefunded": "No refund\nLoss {money}",
     "unused": "Unrefunded loss: {money} ({days})",
     "unusedTitle": "Unrefunded",
     "terminated": "Terminated",

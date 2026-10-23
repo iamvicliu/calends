@@ -171,7 +171,7 @@
   },
   "name": {
     "placeholder": "이름 또는 App Store 링크 붙여넣기",
-    "catalog": "인기 서비스 · 로고, 카테고리, 웹사이트 자동 입력"
+    "catalog": "인기 서비스\n로고, 카테고리, 웹사이트 자동 입력"
   },
   "change": {
     "title": "기록 및 변경",

@@ -58,7 +58,7 @@
   "generate": "보고서 생성",
   "search": "“{query}” 검색",
   "selectionTitle": {
-    "other": "{scope} · 구독 {count}개"
+    "other": "{scope}\n구독 {count}개"
   },
   "mrrBasis": "현재 결제 중인 구독에서 내 부담분을 월 비용으로 환산합니다. 연간 요금은 월별로 나누며 이번 달 실제 결제액과는 다릅니다.",
   "debitBasis": "지출 결제만 집계합니다. 환불은 별도로 표시하며 내역과 순위에서 차감하지 않습니다.",

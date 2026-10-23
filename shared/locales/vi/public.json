@@ -18,7 +18,7 @@
   "timeline": {
     "title": "Dòng thời gian",
     "upcoming": {
-      "other": "{count} khoản phí trong 30 ngày tới · {amount}"
+      "other": "{count} khoản phí trong 30 ngày tới\n{amount}"
     }
   },
   "chart": {
@@ -28,7 +28,7 @@
     "mrr": "Chi phí hằng tháng",
     "charge": "Đã trừ tiền",
     "thisMonth": "Tháng này",
-    "projected": "{month} · Dự kiến"
+    "projected": "{month}\nDự kiến"
   },
   "ended": {
     "title": "Đã hủy",
@@ -55,13 +55,13 @@
   "list": {
     "title": "Gói đăng ký",
     "summary": {
-      "other": "{count} · {amount}/tháng"
+      "other": "{count}\n{amount}/tháng"
     },
     "all": "Tất cả"
   },
   "row": {
-    "ends": " · Kết thúc {date}",
-    "renews": " · Gia hạn {date}",
+    "ends": "\nKết thúc {date}",
+    "renews": "\nGia hạn {date}",
     "monthly": "Hằng tháng",
     "perMonthEq": "Mỗi tháng"
   },

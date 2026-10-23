@@ -1,18 +1,18 @@
 {
-  "title": "Compartilhar sua retrospectiva do ano",
+  "title": "Compartilhar resumo anual",
   "fileName": "assinaturas-retrospectiva-{year}-{style}.png",
   "style": {
     "poster": "Pôster",
     "receipt": "Recibo",
     "card": "Cartão",
-    "stars": "Constelação"
+    "stars": "Distribuição dos gastos"
   },
   "unassigned": "Sem atribuição",
   "me": "Eu",
   "whose": "de {name}",
-  "whoseSelf": "",
+  "whoseSelf": "pessoais",
   "topSpend": "Maior gasto",
-  "ofYear": "{pct} do ano",
+  "ofYear": "{pct} dos gastos anuais",
   "n": {
     "subs": {
       "one": "{count} assinatura",
@@ -25,42 +25,13 @@
     "currencies": {
       "one": "{count} moeda",
       "other": "{count} moedas"
-    },
-    "currencyKinds": {
-      "one": "{count} moeda",
-      "other": "{count} moedas"
     }
   },
-  "tip": {
-    "top": "Só {name} levou {pct} do ano",
-    "longest": {
-      "one": "{name} está com você há mais de um ano",
-      "other": "{name} está com você há mais de {count} anos"
-    },
-    "busiest": "{month} foi o mês que mais pesou no bolso",
-    "newEnded": "Este ano: {added} entraram, {ended} saíram",
-    "currencies": {
-      "one": "Pagou em {count} moeda este ano",
-      "other": "Pagou em {count} moedas este ano — que viajado!"
-    },
-    "soon": {
-      "one": "{count} cobrança chega nos próximos 30 dias — ainda vale a pena?",
-      "other": "{count} cobranças chegam nos próximos 30 dias — ainda quer todas?"
-    },
-    "milkTea": {
-      "one": "{amount} por dia — mais ou menos um cafezinho",
-      "other": "{amount} por dia — mais ou menos {count} cafezinhos"
-    },
-    "saved": "Os cancelamentos já economizaram {amount} este ano",
-    "fallback": "Revise as assinaturas que serão renovadas em breve."
-  },
   "receipt": {
-    "shop": "Loja de Assinaturas {whose}",
-    "asOf": "Extrato anual · até {date}",
-    "fullYear": "Extrato anual · {year}",
+    "shop": "Assinaturas {whose}",
+    "asOf": "Resumo anual\nAté {date}",
+    "fullYear": "Resumo anual de {year}",
     "no": "Nº {no}",
-    "register": "CAIXA 01",
-    "cashier": "Operador: {name}",
     "item": "Item",
     "share": "Parte",
     "amount": "Valor",
@@ -69,38 +40,38 @@
     "total": "TOTAL"
   },
   "poster": {
-    "kicker": "Retrospectiva de assinaturas {whose}",
-    "ongoing": "Até agora neste ano, em {subs} · {charges}",
-    "ongoingHidden": "Até agora neste ano: {charges} · {currencies}",
-    "year": "Gasto em {subs} · {charges}",
-    "yearHidden": "Este ano: {charges} · {currencies}",
-    "newEnded": "{added} novas · {ended} canceladas",
+    "kicker": "Resumo de assinaturas {whose}",
+    "ongoing": "{subs}\n{charges}",
+    "ongoingHidden": "{charges}\n{currencies}",
+    "year": "{subs}\n{charges}",
+    "yearHidden": "{charges}\n{currencies}",
+    "newEnded": "Novas: {added}\nEncerradas: {ended}",
     "perDay": "{amount}/dia em média"
   },
   "card": {
     "head": "Assinaturas {whose}",
     "intro": {
-      "ongoing": "Até agora neste ano, as assinaturas custaram",
-      "ongoingHidden": "Até agora neste ano, você assinou",
-      "year": "Este ano, as assinaturas custaram",
-      "yearHidden": "Este ano, você assinou"
+      "ongoing": "Gastos no ano até agora",
+      "ongoingHidden": "Assinaturas no ano até agora",
+      "year": "Gastos anuais",
+      "yearHidden": "Assinaturas do ano"
     },
     "perDay": "{amount}/dia em média",
-    "longest": "Mais duradoura",
+    "longest": "Assinatura mais antiga",
     "duration": "{y} a {m} m",
-    "busiest": "Mês mais caro",
+    "busiest": "Mês com maior gasto",
     "month": "{month}",
-    "newEnded": "Novas / canceladas",
+    "newEnded": "Novas / encerradas",
     "saved": "{amount} economizados",
-    "ended": "{count} canceladas",
-    "noneEnded": "Nada cancelado",
-    "currencies": "Moedas",
+    "ended": "Encerradas: {count}",
+    "noneEnded": "Nenhuma encerrada",
+    "currencies": "Moedas utilizadas",
     "currencyCount": "{count}",
-    "nowMonthly": "{amount}/mês agora"
+    "nowMonthly": "Custo mensal atual: {amount}"
   },
   "stars": {
-    "head": "{year} · Constelação de assinaturas {whose}",
-    "foot": "Bolha maior, gasto maior"
+    "head": "{year}\nGastos {whose} com assinaturas",
+    "foot": "O tamanho dos círculos representa os gastos"
   },
   "spendBasis": "Valor total pago, incluindo adiantamentos para membros",
   "stopLoss": "Perda não reembolsada neste ano: {amount}"

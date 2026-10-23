@@ -103,7 +103,7 @@ export function PaymentSheet({
                 }}
                 options={lanes.map((v) => ({
                   value: v.start,
-                  label: `${v.region ? `${v.region} · ` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`,
+                  label: `${v.region ? `${v.region}\n` : ''}${money(v.price, v.currency)} ${cycleLabel(v.cycle)}`,
                 }))}
                 ariaLabel={t('editor.overlap.payPhase')}
               />

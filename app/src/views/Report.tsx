@@ -1,3 +1,4 @@
+import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { addDays, addMonths, cycleDays, diffDays, totals } from '../../../shared/billing.ts';
@@ -95,7 +96,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           <Amount value={-now} ccy={base} />
         </div>
         <div className="hero-delta">
-          {yearAgo != null && yearAgo > 0 && <span className="muted">{t('report.hero.yearAgo', { amount: signed(-yearAgo) })}</span>}
+          {yearAgo != null && yearAgo > 0 && <span className="muted">{copyParts(t('report.hero.yearAgo', { amount: signed(-yearAgo) }))}</span>}
         </div>
         <div className="hero-facts">
           <div>
@@ -146,7 +147,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           markers={markers}
           tip={(i) => (
             <>
-              <b>{series[i].month}</b> · {perMonth(flow(-series[i].mrr, base, { compact: true }))}
+              <b>{series[i].month}</b> <span className="copy-gap" aria-hidden="true" /> {perMonth(flow(-series[i].mrr, base, { compact: true }))}
             </>
           )}
         />
@@ -329,9 +330,9 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           tip={(i) => (
             <>
               <b>{rows[i].month}</b>
-              {rows[i].projected ? t('report.cash.forecast') : ''}
+              {copyParts(rows[i].projected ? t('report.cash.forecast') : '')}
               <br />
-              {t('report.cash.tip', { cash: flow(-rows[i].cash, base, { compact: true }), cost: flow(-rows[i].accrual, base, { compact: true }) })}
+              {copyParts(t('report.cash.tip', { cash: flow(-rows[i].cash, base, { compact: true }), cost: flow(-rows[i].accrual, base, { compact: true }) }))}
             </>
           )}
         />
@@ -342,7 +343,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
                 .slice(0, 6)
                 .map((x) => (
                   <div key={x.sub.id}>
-                    {t('report.cash.prepaidItem', { name: x.sub.name, amount: money(x.value, base, { compact: true }), until: x.until })}
+                    {copyParts(t('report.cash.prepaidItem', { name: x.sub.name, amount: money(x.value, base, { compact: true }), until: x.until }))}
                   </div>
                 )),
             )}
@@ -360,13 +361,15 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             </b>
             <small>{t('report.cash.fullPaidHint')}</small>
             <small>
-              {peak
-                ? t('report.cash.peak', {
-                    n: Number(peak.month.slice(5)),
-                    month: monthLabel(peak.month.slice(0, 7), { year: false }),
-                    amount: flow(-peak.cash, base, { compact: true }),
-                  })
-                : ''}
+              {copyParts(
+                peak
+                  ? t('report.cash.peak', {
+                      n: Number(peak.month.slice(5)),
+                      month: monthLabel(peak.month.slice(0, 7), { year: false }),
+                      amount: flow(-peak.cash, base, { compact: true }),
+                    })
+                  : '',
+              )}
             </small>
           </div>
         </div>
@@ -385,11 +388,13 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
       <div className="card-h">
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
-      <p className="stop-basis">{t('report.stops.basis')}</p>
+      <p className="stop-basis">{copyParts(t('report.stops.basis'))}</p>
       <div className="stop-totals">
         <div
           {...tipProps(() =>
-            saved.items.map((i) => <div key={i.sub.id}>{t('report.cash.savedItem', { name: i.sub.name, amount: money(i.saved, base), since: i.since })}</div>),
+            saved.items.map((i) => (
+              <div key={i.sub.id}>{copyParts(t('report.cash.savedItem', { name: i.sub.name, amount: money(i.saved, base), since: i.since }))}</div>
+            )),
           )}
         >
           <span>{t('report.stops.saved')}</span>
@@ -421,8 +426,9 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
               <span className="stop-info">
                 <b>{i.sub.name}</b>
                 <small>
-                  {cnDate(i.date)} · {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
-                  {i.reason ? ` · ${i.reason}` : ''}
+                  {cnDate(i.date)} <span className="copy-gap" aria-hidden="true" />{' '}
+                  {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
+                  {copyParts(i.reason ? `\n${i.reason}` : '')}
                 </small>
                 <small style={i.refunded > 0 ? { color: 'var(--green)' } : undefined}>
                   {i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: flow(i.refunded, i.currency) })}
@@ -430,7 +436,9 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
               </span>
               <span className="stop-amount">
                 <b className="red">
-                  <span className="stop-days">{t('core.stop.lossDays', { count: i.wastedDays })} ·</span>
+                  <span className="stop-days">
+                    {t('core.stop.lossDays', { count: i.wastedDays })} <span className="copy-gap" aria-hidden="true" />{' '}
+                  </span>
                   <span>{flow(-i.lossBase, base)}</span>
                 </b>
                 {i.currency !== base && <small>{flow(-i.loss, i.currency)}</small>}
@@ -498,7 +506,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
           className={`tm-cell ${side > 200 ? 'lg' : ''}`}
           style={{ left: r.x, top: r.y, width: r.w, height: r.h, background: bg(x.s.category) }}
           onClick={() => (onPick ? onPick() : onOpen(x.s))}
-          {...tipProps(() => `${x.s.name} · ${perMonth(flow(-x.v, base))}`)}
+          {...tipProps(() => `${x.s.name}\n${perMonth(flow(-x.v, base))}`)}
         >
           {ico >= 12 && <SubIcon sub={x.s} size={ico} />}
           {label && <b>{x.s.name}</b>}
@@ -509,7 +517,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   return (
     <div className="card">
       <div className="card-h">
-        <CardTitle>{sel ? `${sel.k} · ${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title')}</CardTitle>
+        <CardTitle>{copyParts(sel ? `${sel.k}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}</CardTitle>
         {sel ? (
           <button className="btn plain" onClick={() => setFocus(null)}>
             {t('report.comp.back')}
@@ -555,7 +563,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                         </b>
                         {g.w > 150 && (
                           <span>
-                            {Math.round((e.v / total) * 100)}% · {flow(-e.v, base, { compact: true })}
+                            {Math.round((e.v / total) * 100)}% <span className="copy-gap" aria-hidden="true" /> {flow(-e.v, base, { compact: true })}
                           </span>
                         )}
                       </button>
@@ -605,10 +613,12 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 600 }}>{p.method.name}</div>
             <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
-              {t('report.topup.summary', {
-                balance: money(p.current, p.method.currency, { compact: true }),
-                monthly: flow(-p.monthly, p.method.currency, { compact: true }),
-              })}
+              {copyParts(
+                t('report.topup.summary', {
+                  balance: money(p.current, p.method.currency, { compact: true }),
+                  monthly: flow(-p.monthly, p.method.currency, { compact: true }),
+                }),
+              )}
             </div>
             {p.need > 0 ? (
               <>
@@ -760,9 +770,11 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
                   </small>
                 </span>
                 <b className={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
-                  {tone === 'buy'
-                    ? money(e.delta, base, { compact: true })
-                    : perMonth(`${e.delta > 0 ? '↑' : e.delta < 0 ? '↓' : '·'} ${money(Math.abs(e.delta), base, { compact: true })}`)}
+                  {copyParts(
+                    tone === 'buy'
+                      ? money(e.delta, base, { compact: true })
+                      : perMonth(`${e.delta > 0 ? '↑' : e.delta < 0 ? '↓' : ''} ${money(Math.abs(e.delta), base, { compact: true })}`),
+                  )}
                 </b>
               </button>
             </Fragment>

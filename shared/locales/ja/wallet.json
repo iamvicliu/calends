@@ -4,14 +4,14 @@
     "other": "{count}件の支払い方法"
   },
   "subDrag": {
-    "other": "{count}件の支払い方法 · ドラッグで並べ替え"
+    "other": "{count}件の支払い方法\nドラッグで並べ替え"
   },
   "add": "追加",
   "orderSaved": "並び順を保存しました",
   "runwayGroup": "残高の持ち",
   "family": "共有プラン",
   "familyCount": "{count}件",
-  "unassigned": "支払い方法なし · {count}",
+  "unassigned": "支払い方法なし\n{count}",
   "runway": {
     "drain": "月約{amount}",
     "scale": {
@@ -52,7 +52,7 @@
     "goTopup": "チャージ",
     "site": "Web サイト",
     "projection": "今後の請求",
-    "linked": "紐づいたサブスク · {count}",
+    "linked": "紐づいたサブスク\n{count}",
     "none": "なし",
     "notes": "メモ"
   },
@@ -75,7 +75,7 @@
     "costPh": "任意",
     "note": "メモ",
     "notePh": "例：Razer Gold、代行業者",
-    "history": "チャージ履歴 · {count}",
+    "history": "チャージ履歴\n{count}",
     "spent": "{amount}支払い",
     "premium": "{pct}%割高",
     "below": "相場より{pct}%安い",

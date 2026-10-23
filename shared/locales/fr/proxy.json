@@ -17,8 +17,8 @@
     "other": "{count} paiements dus"
   },
   "viewSub": "Voir l’abonnement",
-  "stoppedOn": " · arrêté le {date}",
-  "nextOn": " · prochain le {date}",
+  "stoppedOn": "\narrêté le {date}",
+  "nextOn": "\nprochain le {date}",
   "payFor": "Pour {name}",
   "unset": "non défini",
   "paidPeriods": {
@@ -29,7 +29,7 @@
   "owed": "Dû",
   "settled": "Réglé",
   "detailTitle": "Payé pour d’autres",
-  "cardCcy": " · carte débitée en {ccy}",
+  "cardCcy": "\ncarte débitée en {ccy}",
   "forWhom": "Payé pour",
   "method": "Moyen de paiement",
   "subscription": "Abonnement",
@@ -40,7 +40,7 @@
   "diffLabel": "Remboursé − prélevé",
   "table": {
     "cost": "Coût à l’époque",
-    "total": "Total · {count}",
+    "total": "Total\n{count}",
     "receivedOn": "Reçu le {date}",
     "date": "Date du prélèvement",
     "charged": "Prélevé",
@@ -78,8 +78,8 @@
     "allBack": "Tout est remboursé",
     "total": "Total payé",
     "totalSub": {
-      "one": "{count} prélèvement · {subs}",
-      "other": "{count} prélèvements · {subs}"
+      "one": "{count} prélèvement\n{subs}",
+      "other": "{count} prélèvements\n{subs}"
     },
     "subs": {
       "one": "{count} abonnement",

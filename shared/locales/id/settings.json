@@ -74,9 +74,9 @@
   },
   "open": {
     "publicSubs": "Langganan yang ditampilkan",
-    "publicSubsHint": "Hanya langganan ini yang muncul di halaman publik. Langganan yang dibayarkan untuk orang lain tidak pernah publik; langganan baru ditampilkan secara bawaan.",
-    "publicShown": "Ditampilkan · {count}",
-    "publicOff2": "Disembunyikan · {count}",
+    "publicSubsHint": "Langganan yang dibayarkan untuk orang lain tetap privat. Langganan baru ditampilkan secara publik secara default.",
+    "publicShown": "Ditampilkan\n{count}",
+    "publicOff2": "Disembunyikan\n{count}",
     "publicShowAll": "Tampilkan semua",
     "publicHideAll": "Sembunyikan semua",
     "publicHideOne": "Sembunyikan {name}",
@@ -126,7 +126,7 @@
     "sep": ", "
   },
   "channels": {
-    "title": { "other": "Saluran notifikasi · {count} aktif" },
+    "title": { "other": "Saluran notifikasi\n{count} aktif" },
     "empty": "Belum ada saluran — pengingat tidak akan dikirim.",
     "test": "Uji",
     "testFailed": "Gagal mengirim",
@@ -219,7 +219,7 @@
     "alreadyBound": "Perangkat ini sudah memiliki passkey",
     "changePassword": "Ubah kata sandi",
     "devices": "Perangkat yang masuk",
-    "devicesCount": { "other": "Perangkat yang masuk · {count}" },
+    "devicesCount": { "other": "Perangkat yang masuk\n{count}" },
     "devicesFoot": "Saat batas tercapai, perangkat yang paling lama tidak aktif akan dikeluarkan otomatis. Lokasi diperkirakan dari IP dan mungkin tidak akurat.",
     "maxSessions": "Maks. perangkat yang masuk",
     "maxSessionsSaved": { "other": "Hingga {count} perangkat" },
@@ -265,7 +265,7 @@
       "created": "Kategori ditambahkan",
       "saved": "Kategori disimpan",
       "renamed": {
-        "other": "Kategori disimpan · {count} langganan diperbarui"
+        "other": "Kategori disimpan\n{count} langganan diperbarui"
       },
       "deleted": "Kategori dihapus",
       "order": "Urutan disimpan"

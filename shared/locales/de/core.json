@@ -132,7 +132,7 @@
     "crypto": "Kryptokarte",
     "other": "Sonstiges"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "E-Mail"
   },
@@ -178,7 +178,7 @@
     "currencyHint": "Erstattungen erfolgen in der Abowährung {currency}. Eine andere Kartenwährung kann unten erfasst werden.",
     "refunded": "Erstattet {money}",
     "partial": "Teilerstattung {money}",
-    "unrefunded": "Keine Erstattung · Verlust {money}",
+    "unrefunded": "Keine Erstattung\nVerlust {money}",
     "unused": "Nicht erstatteter Verlust: {money} ({days})",
     "unusedTitle": "Nicht erstattet",
     "terminated": "Gesperrt",

@@ -1,6 +1,7 @@
+import { copyParts } from '../components/copy.tsx';
 import { useMemo, useState } from 'react';
-import { addDays, totals } from '../../../shared/billing.ts';
-import { flow, money, monthLabel } from '../../../shared/format.ts';
+import { totals } from '../../../shared/billing.ts';
+import { money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
 import { cancelSavings, yearReview, type YearReview } from '../../../shared/metrics.ts';
@@ -21,7 +22,6 @@ const STYLES = (): Array<[Style, string]> => [
 interface Ctx {
   r: YearReview;
   year: string;
-  name: string;
   /** 所有格：「张三」/「Alex's」；没填名字时是「我」/「My」 */
   whose: string;
   ongoing: boolean;
@@ -34,8 +34,6 @@ interface Ctx {
   saved: string;
   /** 这一年按支付方式分的花费 */
   byMethod: Array<{ name: string; sum: number }>;
-  /** 小票底部的一句话：从数据里随机挑 */
-  tip: string;
   today: string;
 }
 
@@ -62,26 +60,6 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     }
     return [...sums].map(([name, sum]) => ({ name, sum })).sort((a, b) => b.sum - a.sum);
   }, [state, today, year]);
-  // 底部一句话：都是从这一年的数据里算出来的，打开一次换一句
-  const [seed] = useState(() => Math.random());
-  const tipsFor = (hide: boolean) => {
-    const out: string[] = [];
-    const top = r.items[0];
-    if (top) out.push(t('review.tip.top', { name: top.sub.name, pct: pct(top.sum) }));
-    if (r.longest) out.push(t('review.tip.longest', { name: r.longest.sub.name, count: Math.max(1, Math.floor(r.longest.days / 365)) }));
-    if (r.busiestMonth)
-      out.push(
-        t('review.tip.busiest', { n: Number(r.busiestMonth.month.slice(5)), month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }) }),
-      );
-    if (r.newSubs.length || r.ended.length) out.push(t('review.tip.newEnded', { added: r.newSubs.length, ended: r.ended.length }));
-    if (r.currencies > 1) out.push(t('review.tip.currencies', { count: r.currencies }));
-    const soon = allCharges(state, today, addDays(today, 30), today).length;
-    if (soon) out.push(t('review.tip.soon', { count: soon }));
-    if (!hide && base === 'CNY' && r.perDay >= 1)
-      out.push(t('review.tip.milkTea', { amount: flow(-r.perDay, base), count: Math.max(1, Math.round(r.perDay / 15)) }));
-    if (!hide && saved > 1) out.push(t('review.tip.saved', { amount: money(saved, base, { compact: true }) }));
-    return out.length ? out[Math.floor(seed * out.length)] : t('review.tip.fallback');
-  };
   return (
     <ShareSheet
       title={t('review.title')}
@@ -96,7 +74,6 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
         const ctx: Ctx = {
           r,
           year,
-          name: dn || t('review.me'),
           whose: dn ? t('review.whose', { name: dn }) : t('review.whoseSelf'),
           ongoing: year === today.slice(0, 4),
           m,
@@ -105,7 +82,6 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
           mrr: tot.mrr,
           saved: saved ? money(saved, base, { compact: true }) : '',
           byMethod,
-          tip: tipsFor(hide),
           today,
         };
         return style === 'receipt' ? (
@@ -139,7 +115,7 @@ function Line({ l, r, b }: { l: string; r: string; b?: boolean }) {
 }
 
 /** 小票：热敏纸机打风格。店名、机号、流水，逐项明细、按支付方式合计，底部条码和一句从数据里挑的话 */
-function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, today }: Ctx) {
+function Receipt({ r, year, whose, ongoing, m, hide, pct, byMethod, today }: Ctx) {
   const items = r.items.slice(0, 12);
   const rest = r.items.slice(12);
   const restSum = rest.reduce((a, x) => a + x.sum, 0);
@@ -148,12 +124,9 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
   const no = `${year}${String(r.charges).padStart(4, '0')}`;
   return (
     <div className="rp">
-      <div className="rp-c rp-shop">{t('review.receipt.shop', { whose }).trim()}</div>
-      <div className="rp-c">SUBSCRIPTION STORE</div>
-      <div className="rp-c rp-small">{ongoing ? t('review.receipt.asOf', { date: today }) : t('review.receipt.fullYear', { year })}</div>
+      <div className="rp-c rp-shop">{copyParts(t('review.receipt.shop', { whose }).trim())}</div>
+      <div className="rp-c rp-small">{copyParts(ongoing ? t('review.receipt.asOf', { date: today }) : t('review.receipt.fullYear', { year }))}</div>
       <div className="rp-rule">{'='.repeat(60)}</div>
-      <Line l={t('review.receipt.no', { no })} r={t('review.receipt.register')} />
-      <Line l={t('review.receipt.cashier', { name })} r={ongoing ? today : `${year}-12-31`} />
       <div className="rp-rule">{'-'.repeat(60)}</div>
       <Line l={t('review.receipt.item')} r={hide ? t('review.receipt.share') : t('review.receipt.amount')} />
       <div className="rp-rule">{'-'.repeat(60)}</div>
@@ -177,7 +150,6 @@ function Receipt({ r, year, name, whose, ongoing, m, hide, pct, byMethod, tip, t
         ))}
       </div>
       <div className="rp-c rp-small">{no}</div>
-      <div className="rp-tip">* {tip} *</div>
       <div className="rp-c rp-small">{location.host}</div>
     </div>
   );
@@ -191,16 +163,18 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
   return (
     <div className="ps" style={{ '--g1': glow[0] ?? 'var(--c1)', '--g2': glow[1] ?? 'var(--c7)', '--g3': glow[2] ?? 'var(--c10)' } as Record<string, string>}>
       <div className="ps-year">{year}</div>
-      <div className="ps-kicker">{t('review.poster.kicker', { whose }).trim()}</div>
+      <div className="ps-kicker">{copyParts(t('review.poster.kicker', { whose }).trim())}</div>
       <div className="ps-total">{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</div>
       {!hide && <div style={{ fontSize: 'var(--fs-1)' }}>{t('review.spendBasis')}</div>}
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="ps-line">
-        {t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, {
-          charges: t('review.n.charges', { count: r.charges }),
-          currencies: t('review.n.currencies', { count: r.currencies }),
-          subs: t('review.n.subs', { count: r.items.length }),
-        })}
+        {copyParts(
+          t(`review.poster.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`, {
+            charges: t('review.n.charges', { count: r.charges }),
+            currencies: t('review.n.currencies', { count: r.currencies }),
+            subs: t('review.n.subs', { count: r.items.length }),
+          }),
+        )}
       </div>
       <div className="ps-wall">
         {r.items.map((x, i) => (
@@ -213,16 +187,20 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
         <small>{t('review.topSpend')}</small>
         <b>{r.items[0]?.sub.name ?? '—'}</b>
         <span>
-          {r.items[0]
-            ? hide
-              ? t('review.ofYear', { pct: pct(r.items[0].sum) })
-              : `${m(-r.items[0].sum)} · ${t('review.ofYear', { pct: pct(r.items[0].sum) })}`
-            : ''}
+          {copyParts(
+            r.items[0]
+              ? hide
+                ? t('review.ofYear', { pct: pct(r.items[0].sum) })
+                : `${m(-r.items[0].sum)}\n${t('review.ofYear', { pct: pct(r.items[0].sum) })}`
+              : '',
+          )}
         </span>
       </div>
       <div className="ps-foot">
         <span>
-          {hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(-r.perDay) })}
+          {copyParts(
+            hide ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length }) : t('review.poster.perDay', { amount: m(-r.perDay) }),
+          )}
         </span>
         <span>{location.host}</span>
       </div>
@@ -237,7 +215,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
     <div className="review">
       <div className="rv-head">
         <span>{year}</span>
-        <span>{t('review.card.head', { whose }).trim()}</span>
+        <span>{copyParts(t('review.card.head', { whose }).trim())}</span>
       </div>
       <div className="rv-big">
         <small>{t(`review.card.intro.${ongoing ? 'ongoing' : 'year'}${hide ? 'Hidden' : ''}`)}</small>
@@ -245,9 +223,11 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
         {!hide && <small>{t('review.spendBasis')}</small>}
         <ReviewLoss r={r} hide={hide} m={m} />
         <span>
-          {hide
-            ? `${t('review.n.charges', { count: r.charges })} · ${t('review.n.currencyKinds', { count: r.currencies })}`
-            : `${t('review.n.charges', { count: r.charges })} · ${t('review.card.perDay', { amount: m(-r.perDay) })}`}
+          {copyParts(
+            hide
+              ? `${t('review.n.charges', { count: r.charges })}\n${t('review.n.currencies', { count: r.currencies })}`
+              : `${t('review.n.charges', { count: r.charges })}\n${t('review.card.perDay', { amount: m(-r.perDay) })}`,
+          )}
         </span>
       </div>
       <div className="rv-sec">
@@ -324,7 +304,7 @@ function Stars({ r, year, whose, m, hide, pct }: Ctx) {
   return (
     <div className="st">
       <div className="st-head">
-        <span>{t('review.stars.head', { year, whose }).trim()}</span>
+        <span>{copyParts(t('review.stars.head', { year, whose }).trim())}</span>
         <b>{hide ? t('review.n.subs', { count: r.items.length }) : m(-r.total)}</b>
       </div>
       {!hide && <div style={{ fontSize: 'var(--fs-1)' }}>{t('review.spendBasis')}</div>}

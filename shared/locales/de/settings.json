@@ -89,9 +89,9 @@
   },
   "open": {
     "publicSubs": "Angezeigte Abos",
-    "publicSubsHint": "Nur diese Abos erscheinen auf der öffentlichen Seite. Für andere bezahlte Abos sind nie öffentlich; neue Abos werden standardmäßig angezeigt.",
-    "publicShown": "Angezeigt · {count}",
-    "publicOff2": "Ausgeblendet · {count}",
+    "publicSubsHint": "Für andere bezahlte Abos bleiben privat. Neue Abos sind standardmäßig öffentlich.",
+    "publicShown": "Angezeigt\n{count}",
+    "publicOff2": "Ausgeblendet\n{count}",
     "publicShowAll": "Alle anzeigen",
     "publicHideAll": "Alle ausblenden",
     "publicHideOne": "{name} ausblenden",
@@ -148,8 +148,8 @@
   },
   "channels": {
     "title": {
-      "one": "Benachrichtigungskanäle · {count} aktiv",
-      "other": "Benachrichtigungskanäle · {count} aktiv"
+      "one": "Benachrichtigungskanäle\n{count} aktiv",
+      "other": "Benachrichtigungskanäle\n{count} aktiv"
     },
     "empty": "Noch keine Kanäle – Erinnerungen werden nicht gesendet.",
     "test": "Testen",
@@ -253,8 +253,8 @@
     "changePassword": "Passwort ändern",
     "devices": "Angemeldete Geräte",
     "devicesCount": {
-      "one": "Angemeldetes Gerät · {count}",
-      "other": "Angemeldete Geräte · {count}"
+      "one": "Angemeldetes Gerät\n{count}",
+      "other": "Angemeldete Geräte\n{count}"
     },
     "devicesFoot": "Ist das Limit erreicht, wird das am längsten inaktive Gerät automatisch abgemeldet. Standorte werden anhand der IP geschätzt und können ungenau sein.",
     "maxSessions": "Max. angemeldete Geräte",
@@ -310,8 +310,8 @@
       "created": "Kategorie hinzugefügt",
       "saved": "Kategorie gespeichert",
       "renamed": {
-        "one": "Kategorie gespeichert · {count} Abo aktualisiert",
-        "other": "Kategorie gespeichert · {count} Abos aktualisiert"
+        "one": "Kategorie gespeichert\n{count} Abo aktualisiert",
+        "other": "Kategorie gespeichert\n{count} Abos aktualisiert"
       },
       "deleted": "Kategorie gelöscht",
       "order": "Reihenfolge gespeichert"

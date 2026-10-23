@@ -1,7 +1,7 @@
 {
   "yearTitle": "{year}년",
   "summary": {
-    "other": "결제 {count}건 · {amount}"
+    "other": "결제 {count}건\n{amount}"
   },
   "mode": {
     "month": "월",
@@ -21,9 +21,9 @@
   "noneMonth": "이번 달에는 결제가 없습니다",
   "day": "{day}일",
   "heatCount": {
-    "other": "결제 {count}건 · "
+    "other": "결제 {count}건\n"
   },
   "pickDay": "날짜를 선택하여 당일 결제 보기",
-  "nextCharge": "다음 결제 · {date}",
+  "nextCharge": "다음 결제\n{date}",
   "expandReport": "전체 보고서 펼치기"
 }

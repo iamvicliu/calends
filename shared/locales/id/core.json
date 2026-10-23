@@ -122,7 +122,7 @@
     "crypto": "Kartu kripto",
     "other": "Lainnya"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "Email"
   },
@@ -168,7 +168,7 @@
     "currencyHint": "Pengembalian memakai {currency}, mata uang langganan. Mata uang dan jumlah aktual di kartu dapat diisi di bawah.",
     "refunded": "Dikembalikan {money}",
     "partial": "Pengembalian sebagian {money}",
-    "unrefunded": "Tanpa pengembalian dana · Kerugian {money}",
+    "unrefunded": "Tanpa pengembalian dana\nKerugian {money}",
     "unused": "Kerugian tanpa pengembalian dana: {money} ({days})",
     "unusedTitle": "Tanpa pengembalian dana",
     "terminated": "Dinonaktifkan",

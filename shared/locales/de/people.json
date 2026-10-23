@@ -13,7 +13,7 @@
     "received": "Bisher erhalten",
     "receivedSub": "Geteilte Abos und Auslagen zusammen",
     "count": "Personen",
-    "countSub": "Geteilt: {share} · Ausgelegt: {proxy}"
+    "countSub": "Geteilt: {share}\nAusgelegt: {proxy}"
   },
   "empty": {
     "title": "Noch keine Personen",

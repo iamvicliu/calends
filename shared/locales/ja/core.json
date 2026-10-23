@@ -122,7 +122,7 @@
     "crypto": "暗号資産カード",
     "other": "その他"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "メール"
   },
@@ -168,7 +168,7 @@
     "currencyHint": "返金通貨は契約通貨の {currency} です。カードへの返金は別の通貨・金額を入力できます。",
     "refunded": "返金済み {money}",
     "partial": "一部返金 {money}",
-    "unrefunded": "未返金 · 損失 {money}",
+    "unrefunded": "未返金\n損失 {money}",
     "unused": "未返金損失: {money} ({days})",
     "unusedTitle": "未返金",
     "terminated": "利用停止",

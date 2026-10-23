@@ -9,7 +9,7 @@
   "neverUsed": "Chưa từng dùng",
   "tokenPlaceholder": "<token-của-bạn>",
   "tokens": {
-    "other": "Token · {count}"
+    "other": "Token\n{count}"
   },
   "noTokens": "Chưa có token. Hãy tạo một token và đưa cho trợ lý AI bạn muốn kết nối.",
   "lastUsed": "Dùng lần cuối {time}",
@@ -18,7 +18,7 @@
   "revoked": "Đã thu hồi",
   "setup": "Thiết lập",
   "tools": {
-    "other": "Công cụ khả dụng · {count}"
+    "other": "Công cụ khả dụng\n{count}"
   },
   "clientOther": "Khác",
   "scope": {

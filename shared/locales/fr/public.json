@@ -18,8 +18,8 @@
   "timeline": {
     "title": "Frise",
     "upcoming": {
-      "one": "{count} prélèvement dans les 30 prochains jours · {amount}",
-      "other": "{count} prélèvements dans les 30 prochains jours · {amount}"
+      "one": "{count} prélèvement dans les 30 prochains jours\n{amount}",
+      "other": "{count} prélèvements dans les 30 prochains jours\n{amount}"
     }
   },
   "chart": {
@@ -29,7 +29,7 @@
     "mrr": "Coût mensuel",
     "charge": "Prélevé",
     "thisMonth": "Ce mois-ci",
-    "projected": "{month} · Prévu"
+    "projected": "{month}\nPrévu"
   },
   "ended": {
     "title": "Résiliés",
@@ -56,14 +56,14 @@
   "list": {
     "title": "Abonnements",
     "summary": {
-      "one": "{count} · {amount}/mois",
-      "other": "{count} · {amount}/mois"
+      "one": "{count}\n{amount}/mois",
+      "other": "{count}\n{amount}/mois"
     },
     "all": "Tous"
   },
   "row": {
-    "ends": " · Se termine le {date}",
-    "renews": " · Renouvellement le {date}",
+    "ends": "\nSe termine le {date}",
+    "renews": "\nRenouvellement le {date}",
     "monthly": "Mensuel",
     "perMonthEq": "Par mois"
   },

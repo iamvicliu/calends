@@ -2,7 +2,7 @@
   "title": "概要",
   "add": "新規サブスク",
   "footer": {
-    "other": "利用中のサブスク {count}件 · {amount}/月 ·"
+    "other": "利用中のサブスク {count}件\n{amount}/月\n"
   },
   "fullReport": "レポート全体を見る",
   "listSep": "、",
@@ -19,8 +19,8 @@
   },
   "timeline": {
     "title": "タイムライン",
-    "sub": "過去30日間に{past}請求 · 今後30日間に{next}予定",
-    "past": "過去30日間 · {amount}"
+    "sub": "過去30日間に{past}請求\n今後30日間に{next}予定",
+    "past": "過去30日間\n{amount}"
   },
   "spending": {
     "title": "月間支出",
@@ -28,9 +28,9 @@
     "month": "月別",
     "yearly": "年別",
     "year": "{year}年",
-    "projected": " · 予測",
-    "inProgress": " · 進行中",
-    "paid": " · {amount}支払い済み",
+    "projected": "\n予測",
+    "inProgress": "\n進行中",
+    "paid": "\n{amount}支払い済み",
     "empty": "この期間の請求はありません"
   },
   "due": {
@@ -43,7 +43,7 @@
   "wallet": {
     "title": "ウォレット",
     "manage": "管理",
-    "balance": "残高 {amount} · {status}",
+    "balance": "残高 {amount}\n{status}",
     "covered": {
       "other": "あと{count}回分、{date}までにチャージ"
     },
@@ -64,8 +64,8 @@
     "ytd": "{year}年の支払い",
     "perDay": "1日あたり",
     "active": "利用中",
-    "share": "{amount}/月 · {pct}%",
-    "caption": "サブスクの星 · 泡の大きさは月額を表します",
+    "share": "{amount}/月\n{pct}%",
+    "caption": "サブスクの星\n泡の大きさは月額を表します",
     "aria": "{name}、月額{amount}",
     "loss": "未返金損失を含む"
   }

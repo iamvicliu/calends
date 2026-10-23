@@ -20,7 +20,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
   const source = readFileSync(new URL(file, import.meta.url), 'utf8')
     .replace(/^import[\s\S]*?;\n/gm, '')
     .replace(/^export \{.*\};\n/gm, '');
-  const result = transformSync(file, source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  const copySource = readFileSync(new URL('../app/src/components/copy.tsx', import.meta.url), 'utf8').replace(/^import.*;\n/gm, '');
+  const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   const values: unknown[] = [];
   let cursor = 0;
@@ -861,8 +862,8 @@ test('公开页时间线的支出和退款使用同一收支格式，关闭符�
       format.setSignedAmounts(on);
       assert.throws(() => r.render('Ledger', { state: st }), captured);
       const items = load!(today, today)[0].items;
-      assert.equal(items[0].tip, `Service · ${on ? '−' : ''}$10.00`);
-      assert.equal(items[1].tip, `Service · ${on ? '+' : ''}$3.00`);
+      assert.equal(items[0].tip, `Service\n${on ? '−' : ''}$10.00`);
+      assert.equal(items[1].tip, `Service\n${on ? '+' : ''}$3.00`);
     }
   } finally {
     format.setSignedAmounts(true);
@@ -1701,18 +1702,18 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
 test('合租备注仅上移共有次数/周期，保留不同次数、周期、自由备注和缺失备注', () => {
   const r = harness('../app/src/views/Carpool.tsx', 'receiptNotes');
   const split = (...notes: (string | undefined)[]) => r.call('receiptNotes', notes);
-  assert.deepEqual(split('第12次收款（半年）', '第12次收款（半年）'), { common: '第12次收款 · 半年', rows: ['', ''] });
+  assert.deepEqual(split('第12次收款（半年）', '第12次收款（半年）'), { common: '第12次收款\n半年', rows: ['', ''] });
   assert.deepEqual(split('第12次收款（半年）· 银行转账', '第12次收款（季度）· 现金'), {
     common: '第12次收款',
-    rows: ['半年 · 银行转账', '季度 · 现金'],
+    rows: ['半年\n银行转账', '季度\n现金'],
   });
   assert.deepEqual(split('第12次收款（半年）', '第3次收款（半年）'), { common: '半年', rows: ['第12次收款', '第3次收款'] });
   assert.deepEqual(split('第12次收款（半年）', undefined), { common: '', rows: ['第12次收款（半年）', ''] });
   // 备注用中文分号接在次数后面时，上移共有部分后不留前导分号
-  assert.deepEqual(split('第12次收款（半年）；实收待核对', '第12次收款（半年）'), { common: '第12次收款 · 半年', rows: ['实收待核对', ''] });
+  assert.deepEqual(split('第12次收款（半年）；实收待核对', '第12次收款（半年）'), { common: '第12次收款\n半年', rows: ['实收待核对', ''] });
   assert.deepEqual(split('第12次收款（半年）', '第3次收款（季度）'), { common: '', rows: ['第12次收款（半年）', '第3次收款（季度）'] });
   assert.deepEqual(split('Collection #12 (6 months): bank', 'Collection #12 (6 months): cash'), {
-    common: 'Collection #12 · 6 months',
+    common: 'Collection #12\n6 months',
     rows: ['bank', 'cash'],
   });
   assert.deepEqual(split('银行转账', '已抵扣优惠'), { common: '', rows: ['银行转账', '已抵扣优惠'] });
@@ -1771,7 +1772,7 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
   assert.equal(groups(nodes).length, 2);
   assert.ok(groups(nodes).every((g) => g.type === 'button' && g.props['aria-expanded'] === false));
   assert.equal(head(nodes).props['aria-expanded'], false);
-  assert.equal(head(nodes).props['aria-label'], 'family.sheet.member · family.sheet.date · family.sheet.amount · family.sheet.expandAll');
+  assert.equal(head(nodes).props['aria-label'], 'family.sheet.member\nfamily.sheet.date\nfamily.sheet.amount\nfamily.sheet.expandAll');
   assert.equal(all(head(nodes).children).filter((n) => n.type === 'small').length, 0);
   assert.equal(all(head(nodes).children).filter((n) => n.type === 'Icon').length, 0);
   assert.ok(groups(nodes).every((g) => g.props['aria-label'] && !all(g.children).some((n) => n.type === 'Icon')));
@@ -1841,9 +1842,19 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
 });
 
 test('合租分组以覆盖区间为主标题，共有信息为可选副标题，差异信息留在行内', () => {
+  const words = (n: any): string =>
+    Array.isArray(n)
+      ? n.map(words).join('')
+      : n && typeof n === 'object'
+        ? n.props?.className === 'copy-parts'
+          ? n.children.flat().map(words).join('\n')
+          : words(n.children)
+        : n == null
+          ? ''
+          : String(n);
   for (const { notes, common, rows } of [
-    { notes: ['第6次收款（半年）', '第6次收款（半年）'], common: '第6次收款 · 半年', rows: ['', ''] },
-    { notes: ['第6次收款（半年）', '第2次收款（半年）· 抵扣调整'], common: '半年', rows: ['第6次收款', '第2次收款 · 抵扣调整'] },
+    { notes: ['第6次收款（半年）', '第6次收款（半年）'], common: '第6次收款\n半年', rows: ['', ''] },
+    { notes: ['第6次收款（半年）', '第2次收款（半年）· 抵扣调整'], common: '半年', rows: ['第6次收款', '第2次收款\n抵扣调整'] },
     { notes: ['第6次收款（半年）', undefined], common: '', rows: ['第6次收款（半年）', ''] },
   ]) {
     const sub: Subscription = {
@@ -1881,13 +1892,13 @@ test('合租分组以覆盖区间为主标题，共有信息为可选副标题�
     assert.deepEqual(
       all(title.children)
         .filter((n) => n.type === 'b')
-        .map((n) => n.children.join('')),
+        .map((n) => words(n.children)),
       [`${format.cnDateFull('2026-07-17')} – ${format.cnDateFull('2027-01-16')}`],
     );
     assert.deepEqual(
       all(title.children)
         .filter((n) => n.type === 'small')
-        .map((n) => n.children.join('')),
+        .map((n) => words(n.children)),
       common ? [common] : [],
     );
     nodes.find((n) => n.props.className === 'ld-row car-period')!.props.onClick();
@@ -1898,7 +1909,7 @@ test('合租分组以覆盖区间为主标题，共有信息为可选副标题�
         .map((n) =>
           all(n.children[0])
             .filter((child) => child.type === 'small')
-            .map((child) => child.children.join(''))
+            .map((child) => words(child.children))
             .join(''),
         ),
       rows,
