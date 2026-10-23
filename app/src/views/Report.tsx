@@ -51,12 +51,13 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
       </Toolbar>
       <div className="page fade-in stack">
         <Hero state={state} today={today} />
+        {/* 先看钱的全貌（现金与真实成本、钱花在哪），再看本月变动与体检 */}
+        <CashCard state={state} today={today} />
+        <Composition state={state} today={today} onOpen={onOpen} />
         <div className="grid g-2">
           <Waterfall state={state} today={today} onOpen={onOpen} />
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
-        <CashCard state={state} today={today} />
-        <Composition state={state} today={today} onOpen={onOpen} />
         <StopsCard state={state} today={today} onOpen={onOpen} />
         <div className="grid g-2 report-bottom">
           <TopUps state={state} today={today} />
