@@ -48,6 +48,7 @@ export function Timeline({
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const box = useRef<HTMLDivElement>(null);
+  const glide = useRef(0);
   const drag = useRef<{ x: number; left: number; moved: boolean; v: number; t: number; id: number } | null>(null);
   // 左边留半屏的余量，最早那一笔也能滚到中间附近
   const from = addDays(start && start < today ? start : addDays(today, -30), -30);
@@ -119,7 +120,6 @@ export function Timeline({
   }, []);
 
   // 鼠标按住拖动：按在空白或图标上都拖整条时间线；松手后带惯性滑一段。拖过之后不触发点击
-  const glide = useRef(0);
   const onDown = (e: React.PointerEvent) => {
     if (e.pointerType !== 'mouse' || e.button !== 0) return;
     cancelAnimationFrame(glide.current);
