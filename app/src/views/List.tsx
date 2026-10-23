@@ -725,5 +725,5 @@ function CardGlow({ sub }: { sub: Subscription }) {
       ? sub.icon
       : subImage(sub);
   const tint = useIconTint(src);
-  return <div className="sc-glow" style={{ background: tint ?? catColor(sub.category) }} />;
+  return <div className="sc-glow" style={{ '--glow': tint ?? catColor(sub.category) } as Record<string, string>} />;
 }

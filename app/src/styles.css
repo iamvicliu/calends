@@ -4075,23 +4075,20 @@ button.h-price-row:focus-visible {
   box-shadow: 0 0 0 var(--hairline) var(--label-3);
 }
 /* 用 App 图标本身晕染出卡片顶部的氛围色 */
+/* 纯渐变而非 blur 滤镜：几十张卡片同屏滚动时，大半径模糊每帧都要重新合成 */
 .sc-glow {
   position: absolute;
   z-index: -1;
-  left: -20%;
-  right: -20%;
-  top: -60%;
-  height: 120%;
-  filter: blur(36px);
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--glow) 70%, transparent) 0%,
+    color-mix(in srgb, var(--glow) 30%, transparent) 22%,
+    transparent 48%
+  );
   /* 只留一点氛围色，不抢图标和文字 */
   opacity: 0.18;
   pointer-events: none;
-}
-.sc-glow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 30%, var(--card) 75%);
 }
 .sc-top {
   display: flex;
