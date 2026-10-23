@@ -39,7 +39,6 @@
   "name": "Nama",
   "namePlaceholder": "Untuk AI yang mana?",
   "pickClient": "Pilih asisten AI Anda",
-  "setupHint": "Pilih asisten yang Anda pakai, lalu tempel satu cuplikan. Token otomatis terisi begitu Anda membuatnya.",
   "tokensHint": "Sebaiknya tiap asisten punya token sendiri agar bisa dicabut secara terpisah.",
   "toolsHint": "Hal yang bisa dilakukan asisten pada catatan Anda. Token hanya baca hanya melihat alat baca.",
   "toolsRead": "Baca",

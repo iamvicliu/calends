@@ -41,7 +41,6 @@
   "name": "Name",
   "namePlaceholder": "Für welche KI ist das?",
   "pickClient": "Wähle deinen KI-Assistenten",
-  "setupHint": "Wähle deinen Assistenten und füge ein Snippet ein. Dein Token wird direkt nach dem Erstellen automatisch eingefügt.",
   "tokensHint": "Gib jedem Assistenten ein eigenes Token, damit du es einzeln widerrufen kannst.",
   "toolsHint": "Was Assistenten mit deinem Haushaltsbuch tun können. Nur-Lese-Tokens sehen nur die Lesewerkzeuge.",
   "toolsRead": "Lesen",

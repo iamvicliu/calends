@@ -739,3 +739,10 @@ test('connection terminals keep theme-independent dark surfaces and light text',
     if (/\.ai-(?:code|copy)\b/.test(selector)) assert.doesNotMatch(body, /var\(--(?:gray|slate|label|ink)/, selector);
   }
 });
+
+test('connection setup hint is removed in every locale', () => {
+  for (const entry of readdirSync(new URL('../shared/locales/', import.meta.url), { withFileTypes: true }).filter((e) => e.isDirectory())) {
+    const messages = JSON.parse(readFileSync(new URL(`../shared/locales/${entry.name}/ai.json`, import.meta.url), 'utf8'));
+    assert.equal(messages.setupHint, undefined, entry.name);
+  }
+});
