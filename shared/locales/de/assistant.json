@@ -11,20 +11,84 @@
   "welcome": {
     "variants": {
       "v1": {
-        "title": "Abonnemententwürfe erstellen",
-        "body": "Füge einen Beleg, eine Abbuchungsmitteilung oder einen Screenshot ein, um Betrag, Abrechnungszeitraum und Daten zur Prüfung zu erfassen."
+        "title": "Rechnungen und Screenshots einfach hier einfügen",
+        "body": "Füge einen Beleg aus dem App Store, eine Abbuchungs-SMS, einen Screenshot deiner Abos oder beliebigen Text ein. Ich erstelle Abo-Entwürfe, die du bestätigen kannst. Frag mich auch nach deinen Ausgaben."
       },
       "v2": {
-        "title": "Ausgaben abfragen",
-        "body": "Frage nach Abbuchungen in einem Zeitraum, anstehenden Zahlungen oder Ausgaben nach Kategorie und Zahlungsmethode."
+        "title": "Wohin geht diesen Monat dein Geld?",
+        "body": "Frag mich, was diesen Monat fällig ist, welche Abbuchungen am teuersten sind oder wie viel du dieses Jahr ausgegeben hast. Ich schaue in deinem Haushaltsbuch nach."
       },
       "v3": {
-        "title": "Abonnement ändern",
-        "body": "Gib einen neuen Preis mit Startdatum, eine Pause oder das Ende der Verlängerung an. Prüfe den Entwurf vor dem Speichern."
+        "title": "Abbuchungsmitteilungen? Her damit",
+        "body": "Füge eine Abbuchungsmitteilung deiner Bank, deines Bezahldienstes oder Mobilfunkanbieters ein. Ich erkenne das Abo und den Betrag und trage die Zahlung ein."
       },
       "v4": {
-        "title": "Geteilte Zahlungen verwalten",
-        "body": "Prüfe Mitglieder geteilter Abos, offene Beträge und Zahlungseingänge oder erstelle einen Entwurf für einen Zahlungseingang."
+        "title": "Ein Screenshot für eine ganze Seite Abos",
+        "body": "Schick einen Screenshot deiner Abos im App Store oder einer Mitgliedschaftsseite. Ich erstelle für jedes Abo einen eigenen Entwurf zum Bestätigen."
+      },
+      "v5": {
+        "title": "Preis erhöht? Sag mir, ab wann",
+        "body": "Sag „Netflix kostet ab nächsten Monat 17.99“. Ich ändere den Preis ab diesem Datum. Frühere Abbuchungen bleiben unverändert."
+      },
+      "v6": {
+        "title": "Du willst nicht verlängern? Sag Bescheid",
+        "body": "Nicht verlängern, sofort beenden oder vom Anbieter gesperrt: Ich kenne den Unterschied und kann auch gleich eine Erstattung eintragen."
+      },
+      "v7": {
+        "title": "Ich rechne geteilte Abos für dich ab",
+        "body": "Ihr teilt euch einen Familientarif? Sag mir, wie viel jeder zahlt und wer schon bezahlt hat. Ich erfasse Mitglieder und Zahlungen, damit du siehst, wer noch wie viel schuldet."
+      },
+      "v8": {
+        "title": "Eine Tabelle mit Rechnungen fürs ganze Jahr?",
+        "body": "Füge eine Tabelle mit monatlichen Rechnungen ein. Ich lege für jede Spalte ein Abo an und trage die tatsächlichen Monatsbeträge in den Verlauf ein."
+      },
+      "v9": {
+        "title": "Welche Abos können weg?",
+        "body": "Frag nach ungenutzten oder doppelten Abos oder den größten Preiserhöhungen. Ich suche sie in deinem Haushaltsbuch und stelle eine Liste möglicher Kündigungen zusammen."
+      },
+      "v10": {
+        "title": "Was wird nächste Woche abgebucht?",
+        "body": "Frag nach den Abbuchungen der nächsten Tage oder des restlichen Monats. Ich liste sie nach Datum auf, damit du vorausplanen kannst."
+      },
+      "v11": {
+        "title": "Auch Abos in Fremdwährungen im Blick",
+        "body": "Preise im türkischen oder nigerianischen Store bleiben in der Originalwährung. Ich rechne sie zum Tageskurs in deine Hauptwährung um und kann auch die tatsächliche Kartenbelastung erfassen."
+      },
+      "v12": {
+        "title": "Beleg per E-Mail? Kopiere einfach alles",
+        "body": "Bei Belegen von Apple, Google oder Spotify musst du keine Details heraussuchen. Füge die ganze E-Mail ein, ich finde Betrag, Abrechnungszeitraum und Datum."
+      },
+      "v13": {
+        "title": "Auch langjährige Abos nachtragen",
+        "body": "Sag „Seit 2021, anfangs 8, jetzt 18“. Ich ergänze den Preisverlauf, damit deine Gesamtausgaben stimmen."
+      },
+      "v14": {
+        "title": "Wie viel kosten deine Abos dieses Jahr?",
+        "body": "Frag nach den Abo-Ausgaben dieses Jahr, letztes Jahr oder in einem beliebigen Zeitraum. Ich schlüssle sie nach Kategorie oder Zahlungsmethode auf."
+      },
+      "v15": {
+        "title": "Vergiss nicht, das Probeabo zu kündigen",
+        "body": "Sag mir, wann die Testphase endet. Ich trage das Datum ein, damit du vor dem kostenpflichtigen Beginn eine Erinnerung bekommst."
+      },
+      "v16": {
+        "title": "Für andere bezahlen und den Überblick behalten",
+        "body": "Sag mir, wenn du ein Abo für jemand anderen bezahlst. Ich erfasse deine Auslagen und Rückzahlungen getrennt."
+      },
+      "v17": {
+        "title": "Region oder Tarif gewechselt?",
+        "body": "Vom US-Store in die Türkei gewechselt oder auf einen Familientarif umgestiegen? Sag mir, wann. Ich rechne mit dem neuen Tarif weiter und behalte den bisherigen Verlauf."
+      },
+      "v18": {
+        "title": "Frag einfach drauflos",
+        "body": "„Welches Abo habe ich am längsten?“ „Welche Karte wird am meisten belastet?“ Frag einfach, ich schaue im Haushaltsbuch nach."
+      },
+      "v19": {
+        "title": "Du bestätigst jede Änderung",
+        "body": "Ich erstelle nur Entwürfe. Neue Abos, Preisänderungen und Kündigungen erscheinen als Karten. Erst nach deiner Bestätigung wird etwas gespeichert."
+      },
+      "v20": {
+        "title": "Starte hier dein Haushaltsbuch",
+        "body": "Schick einen Beleg, einen Screenshot oder sag mir einfach, welche Abos du hast. Ich kümmere mich um den Rest."
       }
     }
   },

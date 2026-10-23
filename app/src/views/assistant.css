@@ -34,15 +34,16 @@
   border-radius: var(--radius-lg);
 }
 .as-welcome h2 {
-  margin: 18px 0 6px;
-  font-size: var(--fs-3);
-  letter-spacing: -0.02em;
+  margin: 14px 0 4px;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  color: var(--label-2);
 }
 .as-welcome > p {
   margin: 0;
-  max-width: 460px;
-  color: var(--label-2);
-  font-size: var(--fs-2);
+  max-width: 420px;
+  color: var(--label-3);
+  font-size: var(--fs-1);
   line-height: 1.6;
 }
 .as-setup-cta {
@@ -904,9 +905,6 @@
   }
   .as-welcome {
     padding-top: 3vh;
-  }
-  .as-welcome h2 {
-    font-size: var(--fs-3);
   }
   .as-suggest {
     flex-wrap: wrap;

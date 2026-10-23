@@ -11,20 +11,84 @@
   "welcome": {
     "variants": {
       "v1": {
-        "title": "Create subscription drafts",
-        "body": "Paste a receipt, charge notice or subscription screenshot to extract the amount, billing cycle and dates for review."
+        "title": "Drop your bills and screenshots here",
+        "body": "Paste an App Store receipt, a charge SMS, a subscription page screenshot or any text. I'll turn it into subscription drafts for you to confirm. You can also ask about your spending."
       },
       "v2": {
-        "title": "Look up spending",
-        "body": "Ask about charges in a date range, upcoming payments or spending by category and payment method."
+        "title": "Where did this month's money go?",
+        "body": "Ask what's due this month, which charges cost the most, or how much you've spent this year. I'll look it up in your ledger."
       },
       "v3": {
-        "title": "Update a subscription",
-        "body": "Specify a new price and its start date, pause a subscription or stop renewal. Review the draft before saving."
+        "title": "Charge alerts? Hand them over",
+        "body": "Paste a bank, wallet or carrier charge notice. I'll work out which subscription it is and how much was charged, and record it."
       },
       "v4": {
-        "title": "Track shared payments",
-        "body": "Check shared-plan members, amounts due and payments received, or prepare a receipt draft."
+        "title": "One screenshot, a whole page of subscriptions",
+        "body": "Send a screenshot of your App Store subscriptions or a membership page. I'll split it into drafts, one per subscription, for you to confirm."
+      },
+      "v5": {
+        "title": "Price went up? Tell me from when",
+        "body": "Say \"Netflix is 17.99 from next month\" and I'll change the price from that date. Earlier charges stay as they were."
+      },
+      "v6": {
+        "title": "Done with it? Just say so",
+        "body": "Not renewing, stopping now, or shut down by the provider: I know the difference, and can record a refund at the same time."
+      },
+      "v7": {
+        "title": "I'll keep the shared-plan math",
+        "body": "Splitting a family plan? Tell me each person's share and who has paid. I'll track members and payments so you can see who still owes what."
+      },
+      "v8": {
+        "title": "Found a year of bills?",
+        "body": "Paste a monthly bill table. I'll create one subscription per column and record each month's actual amount in its history."
+      },
+      "v9": {
+        "title": "Which subscriptions can go?",
+        "body": "Ask for ones you don't use, duplicates or the biggest price hikes. I'll pull them from your ledger as a list you could cancel."
+      },
+      "v10": {
+        "title": "What's charging next week?",
+        "body": "Ask about the next few days or the rest of the month. I'll list the charges by date so you can plan ahead."
+      },
+      "v11": {
+        "title": "Foreign-currency plans, sorted",
+        "body": "Turkish or Nigerian store prices stay in their own currency. I convert them at that day's rate, and can record what your card was actually charged."
+      },
+      "v12": {
+        "title": "Receipt emails: just copy everything",
+        "body": "No need to pick out the details from Apple, Google or Spotify receipts. Paste the whole email and I'll find the amount, cycle and date."
+      },
+      "v13": {
+        "title": "Add a subscription you've had for years",
+        "body": "Say \"since 2021, 8 at first, 18 now\" and I'll fill in the price history so your lifetime spending is accurate."
+      },
+      "v14": {
+        "title": "How much on subscriptions this year?",
+        "body": "Ask about this year, last year or any range. I'll break it down by category or payment method."
+      },
+      "v15": {
+        "title": "Don't forget to cancel that trial",
+        "body": "Tell me when the trial ends. I'll record it so you get a reminder before it converts."
+      },
+      "v16": {
+        "title": "Paying for someone else? Keep track",
+        "body": "Tell me a subscription is paid on someone's behalf and I'll track what you paid and what you got back, separately."
+      },
+      "v17": {
+        "title": "Switched region or plan?",
+        "body": "Moved from the US store to Turkey, or upgraded to Family? Tell me when, and I'll continue on the new plan and keep the old history."
+      },
+      "v18": {
+        "title": "Ask anything, casually",
+        "body": "\"Which subscription have I had longest?\" \"Which card is charged most?\" Just ask and I'll check the ledger."
+      },
+      "v19": {
+        "title": "You confirm every change",
+        "body": "I only draft. New subscriptions, price changes and cancellations appear as cards, and nothing is saved until you confirm."
+      },
+      "v20": {
+        "title": "Start your ledger here",
+        "body": "Send a receipt, a screenshot, or just tell me what you subscribe to. I'll handle the rest."
       }
     }
   },

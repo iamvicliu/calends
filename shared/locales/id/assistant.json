@@ -11,20 +11,84 @@
   "welcome": {
     "variants": {
       "v1": {
-        "title": "Buat draf langganan",
-        "body": "Tempel tanda terima, pemberitahuan tagihan, atau tangkapan layar langganan untuk mengekstrak jumlah, siklus tagihan, dan tanggal untuk ditinjau."
+        "title": "Kirim tagihan dan tangkapan layar di sini",
+        "body": "Tempel struk App Store, SMS tagihan, tangkapan layar langganan, atau teks apa pun. Saya akan membuat draf langganan untuk Anda konfirmasi. Anda juga bisa bertanya soal pengeluaran."
       },
       "v2": {
-        "title": "Lihat pengeluaran",
-        "body": "Tanyakan tagihan dalam rentang tanggal, pembayaran mendatang, atau pengeluaran menurut kategori dan metode pembayaran."
+        "title": "Ke mana uang Anda bulan ini?",
+        "body": "Tanyakan tagihan bulan ini, biaya yang paling besar, atau total pengeluaran tahun ini. Saya akan mencarinya di buku catatan Anda."
       },
       "v3": {
-        "title": "Ubah langganan",
-        "body": "Tentukan harga baru dan tanggal berlakunya, jeda, atau penghentian perpanjangan. Tinjau draf sebelum menyimpan."
+        "title": "Ada notifikasi tagihan? Kirim saja",
+        "body": "Tempel notifikasi tagihan dari bank, dompet digital, atau operator. Saya akan mengenali langganan dan jumlahnya, lalu mencatatnya."
       },
       "v4": {
-        "title": "Kelola pembayaran bersama",
-        "body": "Periksa anggota paket bersama, jumlah terutang, dan pembayaran diterima, atau siapkan draf penerimaan pembayaran."
+        "title": "Satu tangkapan layar untuk satu halaman langganan",
+        "body": "Kirim tangkapan layar daftar langganan App Store atau halaman keanggotaan. Saya akan membuat draf terpisah untuk setiap langganan agar bisa Anda konfirmasi."
+      },
+      "v5": {
+        "title": "Harga naik? Beri tahu mulai kapan",
+        "body": "Katakan “Netflix jadi 17.99 mulai bulan depan”. Saya akan mengubah harga sejak tanggal itu. Tagihan sebelumnya tetap seperti semula."
+      },
+      "v6": {
+        "title": "Tidak ingin lanjut? Tinggal bilang",
+        "body": "Tidak memperpanjang, berhenti sekarang, atau akun diblokir penyedia: saya bisa membedakannya dan sekaligus mencatat pengembalian dana."
+      },
+      "v7": {
+        "title": "Saya hitungkan biaya paket bersama",
+        "body": "Berbagi paket keluarga? Beri tahu bagian tiap orang dan siapa yang sudah membayar. Saya akan mencatat anggota dan pembayaran agar sisa tagihan tiap orang terlihat jelas."
+      },
+      "v8": {
+        "title": "Menemukan tabel tagihan setahun?",
+        "body": "Tempel tabel tagihan bulanan. Saya akan membuat satu langganan per kolom dan mencatat jumlah aktual setiap bulan dalam riwayatnya."
+      },
+      "v9": {
+        "title": "Langganan mana yang bisa dihentikan?",
+        "body": "Tanyakan langganan yang tidak dipakai, duplikat, atau paling banyak naik harga. Saya akan mencarinya di catatan Anda dan membuat daftar yang bisa dibatalkan."
+      },
+      "v10": {
+        "title": "Apa saja tagihan minggu depan?",
+        "body": "Tanyakan tagihan beberapa hari ke depan atau sisa bulan ini. Saya akan mengurutkannya berdasarkan tanggal agar Anda bisa menyiapkan dana."
+      },
+      "v11": {
+        "title": "Langganan mata uang asing juga beres",
+        "body": "Harga toko Turki atau Nigeria tetap dicatat dalam mata uang aslinya. Saya konversi ke mata uang utama dengan kurs hari itu, dan bisa mencatat jumlah yang benar-benar ditagih ke kartu Anda."
+      },
+      "v12": {
+        "title": "Struk lewat email? Salin semuanya",
+        "body": "Tak perlu memilah detail struk Apple, Google, atau Spotify. Tempel seluruh email dan saya akan menemukan jumlah, siklus, serta tanggalnya."
+      },
+      "v13": {
+        "title": "Tambahkan langganan yang sudah bertahun-tahun",
+        "body": "Katakan “Sejak 2021, awalnya 8, sekarang 18”. Saya akan melengkapi riwayat harga agar total pengeluaran Anda akurat."
+      },
+      "v14": {
+        "title": "Berapa biaya langganan tahun ini?",
+        "body": "Tanyakan pengeluaran langganan tahun ini, tahun lalu, atau periode apa pun. Saya akan merincinya menurut kategori atau metode pembayaran."
+      },
+      "v15": {
+        "title": "Jangan lupa batalkan masa uji coba",
+        "body": "Beri tahu kapan masa uji coba berakhir. Saya akan mencatatnya agar Anda mendapat pengingat sebelum mulai berbayar."
+      },
+      "v16": {
+        "title": "Membayari orang lain? Tetap tercatat",
+        "body": "Beri tahu jika Anda membayar langganan untuk orang lain. Saya akan mencatat uang yang Anda bayarkan dan yang sudah dikembalikan secara terpisah."
+      },
+      "v17": {
+        "title": "Ganti wilayah atau paket?",
+        "body": "Pindah dari toko AS ke Turki, atau beralih ke paket keluarga? Beri tahu kapan. Saya akan melanjutkan dengan paket baru sambil menyimpan riwayat lama."
+      },
+      "v18": {
+        "title": "Tanya saja dengan santai",
+        "body": "“Langganan mana yang paling lama saya pakai?” “Kartu mana yang paling banyak ditagih?” Tinggal tanya, saya akan memeriksa catatan Anda."
+      },
+      "v19": {
+        "title": "Setiap perubahan perlu konfirmasi Anda",
+        "body": "Saya hanya membuat draf. Langganan baru, perubahan harga, dan pembatalan muncul sebagai kartu. Tidak ada yang disimpan sebelum Anda mengonfirmasi."
+      },
+      "v20": {
+        "title": "Mulai catatan Anda di sini",
+        "body": "Kirim struk, tangkapan layar, atau cukup ceritakan langganan Anda. Sisanya saya yang urus."
       }
     }
   },

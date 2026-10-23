@@ -617,11 +617,16 @@ test('normal settlement is silent while attention status pills retain their labe
   }
 });
 
-test('assistant welcome resources contain only four concrete variants in every locale', () => {
+test('assistant welcome rotates every variant in every locale and renders a quiet title and body', () => {
+  const source = sources.find(([file]) => file === 'views/Assistant.tsx')[2];
+  const count = Number(/const WELCOME_COUNT = (\d+);/.exec(source)?.[1]);
+  assert.ok(count > 1);
+  assert.match(source, /<h2>\{t\(`assistant\.welcome\.variants\.v\$\{n\}\.title`\)\}<\/h2>/);
+  assert.match(source, /<p>\{t\(`assistant\.welcome\.variants\.v\$\{n\}\.body`\)\}<\/p>/);
   const locales = new URL('../shared/locales/', import.meta.url);
   for (const { name: lang } of readdirSync(locales, { withFileTypes: true }).filter((entry) => entry.isDirectory())) {
     const { welcome } = JSON.parse(readFileSync(new URL(`${lang}/assistant.json`, locales), 'utf8'));
-    assert.deepEqual(Object.keys(welcome.variants), ['v1', 'v2', 'v3', 'v4'], lang);
+    assert.equal(Object.keys(welcome.variants).length, count, lang);
     for (const { title, body } of Object.values(welcome.variants)) {
       assert.ok(title.trim() && body.trim(), lang);
     }

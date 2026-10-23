@@ -11,20 +11,84 @@
   "welcome": {
     "variants": {
       "v1": {
-        "title": "Tạo bản nháp đăng ký",
-        "body": "Dán biên lai, thông báo trừ tiền hoặc ảnh chụp đăng ký để trích xuất số tiền, chu kỳ thanh toán và ngày tháng cần kiểm tra."
+        "title": "Gửi hóa đơn và ảnh chụp màn hình vào đây",
+        "body": "Dán biên lai App Store, tin nhắn trừ tiền, ảnh chụp trang đăng ký hoặc bất kỳ đoạn văn bản nào. Tôi sẽ tạo bản nháp gói đăng ký để bạn xác nhận. Bạn cũng có thể hỏi về chi tiêu."
       },
       "v2": {
-        "title": "Tra cứu chi tiêu",
-        "body": "Tra cứu khoản thu trong một khoảng ngày, các khoản sắp thanh toán hoặc chi tiêu theo danh mục và phương thức thanh toán."
+        "title": "Tiền tháng này đi đâu hết rồi?",
+        "body": "Hỏi tôi tháng này cần trả bao nhiêu, khoản nào tốn nhất hoặc năm nay đã chi bao nhiêu. Tôi sẽ tra trong sổ của bạn."
       },
       "v3": {
-        "title": "Sửa đăng ký",
-        "body": "Chỉ định giá mới và ngày áp dụng, tạm dừng hoặc ngừng gia hạn. Kiểm tra bản nháp trước khi lưu."
+        "title": "Có thông báo trừ tiền? Cứ gửi tôi",
+        "body": "Dán thông báo trừ tiền từ ngân hàng, ví điện tử hoặc nhà mạng. Tôi sẽ xác định gói đăng ký, số tiền và ghi lại khoản thanh toán."
       },
       "v4": {
-        "title": "Quản lý thanh toán dùng chung",
-        "body": "Kiểm tra thành viên gói dùng chung, số tiền còn nợ và khoản đã thu, hoặc tạo bản nháp ghi nhận thu tiền."
+        "title": "Một ảnh chụp, cả trang gói đăng ký",
+        "body": "Gửi ảnh chụp danh sách đăng ký App Store hoặc trang thành viên. Tôi sẽ tách thành từng bản nháp cho mỗi gói để bạn xác nhận."
+      },
+      "v5": {
+        "title": "Tăng giá? Cho tôi biết từ khi nào",
+        "body": "Nói “Netflix từ tháng sau là 17.99”, tôi sẽ đổi giá từ ngày đó. Các khoản trừ tiền trước đây vẫn giữ nguyên."
+      },
+      "v6": {
+        "title": "Không muốn dùng tiếp? Chỉ cần nói",
+        "body": "Không gia hạn, dừng ngay hay bị nhà cung cấp khóa tài khoản: tôi phân biệt được và có thể ghi cả khoản hoàn tiền."
+      },
+      "v7": {
+        "title": "Tôi tính giúp phần tiền dùng chung",
+        "body": "Đang chia sẻ gói gia đình? Cho tôi biết phần của mỗi người và ai đã trả. Tôi sẽ theo dõi thành viên và tiền nhận được để bạn biết ai còn nợ bao nhiêu."
+      },
+      "v8": {
+        "title": "Tìm thấy bảng hóa đơn cả năm?",
+        "body": "Dán bảng hóa đơn theo tháng. Tôi sẽ tạo một gói đăng ký cho mỗi cột và ghi số tiền thực tế từng tháng vào lịch sử."
+      },
+      "v9": {
+        "title": "Có thể cắt bớt gói đăng ký nào?",
+        "body": "Hỏi tôi về các gói không dùng, trùng lặp hoặc tăng giá nhiều nhất. Tôi sẽ tìm trong sổ và lập danh sách các gói bạn có thể hủy."
+      },
+      "v10": {
+        "title": "Tuần sau có khoản nào bị trừ?",
+        "body": "Hỏi về các khoản sẽ trừ trong vài ngày tới hoặc phần còn lại của tháng. Tôi sẽ xếp theo ngày để bạn chuẩn bị trước."
+      },
+      "v11": {
+        "title": "Gói đăng ký bằng ngoại tệ cũng rõ ràng",
+        "body": "Giá tại cửa hàng Thổ Nhĩ Kỳ hay Nigeria vẫn được ghi bằng tiền gốc. Tôi quy đổi sang tiền tệ chính theo tỷ giá ngày đó và có thể ghi cả số tiền thực tế bị trừ trên thẻ."
+      },
+      "v12": {
+        "title": "Email biên lai: cứ sao chép toàn bộ",
+        "body": "Không cần chọn lọc chi tiết trong biên lai Apple, Google hay Spotify. Dán cả email, tôi sẽ tìm số tiền, chu kỳ và ngày thanh toán."
+      },
+      "v13": {
+        "title": "Thêm gói đăng ký đã dùng nhiều năm",
+        "body": "Nói “Dùng từ 2021, ban đầu 8, giờ 18”. Tôi sẽ bổ sung lịch sử giá để tổng chi tiêu của bạn được tính chính xác."
+      },
+      "v14": {
+        "title": "Năm nay tốn bao nhiêu cho các gói đăng ký?",
+        "body": "Hỏi về chi phí đăng ký năm nay, năm ngoái hoặc bất kỳ khoảng thời gian nào. Tôi sẽ chia theo danh mục hoặc phương thức thanh toán."
+      },
+      "v15": {
+        "title": "Đừng quên hủy trước khi hết dùng thử",
+        "body": "Cho tôi biết ngày kết thúc dùng thử. Tôi sẽ ghi lại để bạn nhận được nhắc nhở trước khi chuyển sang trả phí."
+      },
+      "v16": {
+        "title": "Trả hộ người khác? Ghi lại cho rõ",
+        "body": "Cho tôi biết nếu bạn trả tiền gói đăng ký hộ người khác. Tôi sẽ theo dõi riêng số tiền đã trả và số tiền đã nhận lại."
+      },
+      "v17": {
+        "title": "Đổi khu vực hay gói đăng ký?",
+        "body": "Chuyển từ cửa hàng Mỹ sang Thổ Nhĩ Kỳ, hay nâng cấp lên gói gia đình? Cho tôi biết ngày đổi. Tôi sẽ tính tiếp theo gói mới và giữ lại lịch sử cũ."
+      },
+      "v18": {
+        "title": "Cứ hỏi tự nhiên",
+        "body": "“Tôi dùng gói nào lâu nhất?” “Thẻ nào bị trừ nhiều tiền nhất?” Cứ hỏi, tôi sẽ tra sổ rồi trả lời."
+      },
+      "v19": {
+        "title": "Mỗi thay đổi đều do bạn xác nhận",
+        "body": "Tôi chỉ tạo bản nháp. Thêm gói, đổi giá hay ngừng dùng đều hiện thành thẻ để bạn xem. Chỉ khi bạn xác nhận mới lưu vào sổ."
+      },
+      "v20": {
+        "title": "Bắt đầu ghi sổ tại đây",
+        "body": "Gửi biên lai, ảnh chụp màn hình hoặc chỉ cần nói bạn đang đăng ký gì. Phần còn lại để tôi lo."
       }
     }
   },

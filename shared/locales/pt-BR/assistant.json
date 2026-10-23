@@ -11,20 +11,84 @@
   "welcome": {
     "variants": {
       "v1": {
-        "title": "Criar rascunhos de assinaturas",
-        "body": "Cole um recibo, aviso de cobrança ou captura de assinatura para extrair o valor, o ciclo de cobrança e as datas para revisão."
+        "title": "Mande suas faturas e prints por aqui",
+        "body": "Cole um recibo da App Store, um SMS de cobrança, um print das assinaturas ou qualquer texto. Eu preparo rascunhos para você confirmar. Você também pode perguntar sobre seus gastos."
       },
       "v2": {
-        "title": "Consultar despesas",
-        "body": "Consulte cobranças de um período, próximos pagamentos ou despesas por categoria e forma de pagamento."
+        "title": "Para onde foi o dinheiro deste mês?",
+        "body": "Pergunte o que vence neste mês, quais cobranças são mais caras ou quanto você gastou neste ano. Eu consulto seus registros."
       },
       "v3": {
-        "title": "Alterar uma assinatura",
-        "body": "Informe o novo preço e a data de início, uma pausa ou o fim da renovação. Revise o rascunho antes de salvar."
+        "title": "Avisos de cobrança? Pode mandar",
+        "body": "Cole um aviso de cobrança do banco, da carteira digital ou da operadora. Eu identifico a assinatura e o valor e registro o pagamento."
       },
       "v4": {
-        "title": "Gerenciar pagamentos compartilhados",
-        "body": "Consulte membros de planos compartilhados, valores pendentes e pagamentos recebidos, ou prepare um rascunho de recebimento."
+        "title": "Um print para uma página inteira de assinaturas",
+        "body": "Envie um print das assinaturas da App Store ou de uma página de membros. Eu separo tudo em rascunhos, um por assinatura, para você confirmar."
+      },
+      "v5": {
+        "title": "O preço subiu? Me diga a partir de quando",
+        "body": "Diga “Netflix passa a custar 17.99 no mês que vem” e eu mudo o preço a partir dessa data. As cobranças anteriores ficam como estavam."
+      },
+      "v6": {
+        "title": "Não quer continuar? É só dizer",
+        "body": "Não renovar, encerrar agora ou ter a conta bloqueada pelo provedor: eu sei a diferença e também posso registrar um reembolso."
+      },
+      "v7": {
+        "title": "Eu faço as contas do plano compartilhado",
+        "body": "Dividindo um plano família? Me diga a parte de cada pessoa e quem já pagou. Eu acompanho os membros e os pagamentos para você saber quem ainda deve quanto."
+      },
+      "v8": {
+        "title": "Achou as faturas de um ano inteiro?",
+        "body": "Cole uma tabela de faturas por mês. Eu crio uma assinatura por coluna e registro o valor real de cada mês no histórico."
+      },
+      "v9": {
+        "title": "Quais assinaturas dá para cortar?",
+        "body": "Pergunte pelas que você não usa, pelas duplicadas ou pelas que mais aumentaram de preço. Eu busco nos seus registros e preparo uma lista de possíveis cancelamentos."
+      },
+      "v10": {
+        "title": "O que será cobrado na semana que vem?",
+        "body": "Pergunte pelas cobranças dos próximos dias ou do restante do mês. Eu listo tudo por data para você se planejar."
+      },
+      "v11": {
+        "title": "Assinaturas em moeda estrangeira, em dia",
+        "body": "Os preços das lojas da Turquia ou da Nigéria ficam na moeda original. Eu converto para sua moeda principal pelo câmbio do dia e também posso registrar o valor realmente cobrado no cartão."
+      },
+      "v12": {
+        "title": "Recibo por e-mail? Copie tudo",
+        "body": "Não precisa separar os detalhes dos recibos da Apple, Google ou Spotify. Cole o e-mail inteiro e eu encontro o valor, o ciclo e a data."
+      },
+      "v13": {
+        "title": "Adicione uma assinatura que você tem há anos",
+        "body": "Diga “Desde 2021, no começo 8, agora 18” e eu completo o histórico de preços para calcular seus gastos acumulados corretamente."
+      },
+      "v14": {
+        "title": "Quanto você gastou em assinaturas neste ano?",
+        "body": "Pergunte sobre este ano, o ano passado ou qualquer período. Eu separo os gastos por categoria ou forma de pagamento."
+      },
+      "v15": {
+        "title": "Não esqueça de cancelar o teste grátis",
+        "body": "Me diga quando o teste termina. Eu registro a data para você receber um lembrete antes de começar a cobrança."
+      },
+      "v16": {
+        "title": "Pagando por outra pessoa? Registre também",
+        "body": "Me avise se você paga uma assinatura por alguém. Eu acompanho separadamente o que você pagou e o que recebeu de volta."
+      },
+      "v17": {
+        "title": "Mudou de região ou de plano?",
+        "body": "Saiu da loja dos EUA para a da Turquia ou mudou para o plano família? Me diga quando. Eu continuo com o novo plano e preservo o histórico anterior."
+      },
+      "v18": {
+        "title": "Pergunte à vontade",
+        "body": "“Qual assinatura eu tenho há mais tempo?” “Qual cartão recebe mais cobranças?” É só perguntar que eu consulto seus registros."
+      },
+      "v19": {
+        "title": "Você confirma cada alteração",
+        "body": "Eu só preparo rascunhos. Novas assinaturas, mudanças de preço e cancelamentos aparecem como cartões. Nada é salvo até você confirmar."
+      },
+      "v20": {
+        "title": "Comece seus registros por aqui",
+        "body": "Envie um recibo, um print ou apenas me conte quais assinaturas você tem. Eu cuido do resto."
       }
     }
   },

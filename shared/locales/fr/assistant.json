@@ -11,20 +11,84 @@
   "welcome": {
     "variants": {
       "v1": {
-        "title": "Créer des brouillons d’abonnement",
-        "body": "Collez un reçu, un avis de débit ou une capture d’abonnement pour en extraire le montant, le cycle de facturation et les dates à vérifier."
+        "title": "Déposez vos factures et captures ici",
+        "body": "Collez un reçu App Store, un SMS de prélèvement, une capture de vos abonnements ou tout autre texte. Je prépare des brouillons à confirmer. Vous pouvez aussi me poser des questions sur vos dépenses."
       },
       "v2": {
-        "title": "Consulter les dépenses",
-        "body": "Consultez les débits sur une période, les paiements à venir ou les dépenses par catégorie et moyen de paiement."
+        "title": "Où passe votre argent ce mois-ci ?",
+        "body": "Demandez-moi ce qui est à payer ce mois-ci, quels prélèvements coûtent le plus cher ou combien vous avez dépensé cette année. Je consulterai votre registre."
       },
       "v3": {
-        "title": "Modifier un abonnement",
-        "body": "Indiquez un nouveau prix et sa date d’effet, une pause ou un arrêt du renouvellement. Vérifiez le brouillon avant de l’enregistrer."
+        "title": "Des avis de prélèvement ? Confiez-les-moi",
+        "body": "Collez un avis de prélèvement de votre banque, portefeuille électronique ou opérateur. Je repère l’abonnement et le montant pour enregistrer le paiement."
       },
       "v4": {
-        "title": "Suivre les paiements partagés",
-        "body": "Consultez les membres d’un abonnement partagé, les montants dus et les paiements reçus, ou préparez un brouillon d’encaissement."
+        "title": "Une capture pour toute une page d’abonnements",
+        "body": "Envoyez une capture de vos abonnements App Store ou d’une page d’adhésion. Je prépare un brouillon par abonnement, à confirmer."
+      },
+      "v5": {
+        "title": "Le prix augmente ? Dites-moi à partir de quand",
+        "body": "Dites « Netflix passe à 17.99 le mois prochain » et je modifierai le prix à partir de cette date. Les anciens prélèvements resteront inchangés."
+      },
+      "v6": {
+        "title": "Vous arrêtez ? Il suffit de me le dire",
+        "body": "Non-renouvellement, arrêt immédiat ou blocage par le fournisseur : je distingue chaque cas et peux aussi enregistrer un remboursement."
+      },
+      "v7": {
+        "title": "Je fais les comptes des forfaits partagés",
+        "body": "Vous partagez un forfait familial ? Dites-moi la part de chacun et qui a payé. Je suis les membres et les paiements pour que vous sachiez qui doit encore combien."
+      },
+      "v8": {
+        "title": "Vous avez retrouvé un an de factures ?",
+        "body": "Collez un tableau de factures par mois. Je crée un abonnement par colonne et inscris le montant réel de chaque mois dans son historique."
+      },
+      "v9": {
+        "title": "Quels abonnements pouvez-vous supprimer ?",
+        "body": "Demandez-moi les abonnements inutilisés, les doublons ou les plus fortes hausses de prix. Je les cherche dans votre registre et vous propose une liste de résiliations possibles."
+      },
+      "v10": {
+        "title": "Quels prélèvements la semaine prochaine ?",
+        "body": "Demandez-moi les prélèvements des prochains jours ou du reste du mois. Je les classe par date pour vous aider à anticiper."
+      },
+      "v11": {
+        "title": "Les abonnements en devises aussi ont leur place",
+        "body": "Les prix des boutiques turque ou nigériane restent dans leur devise d’origine. Je les convertis dans votre devise principale au taux du jour et peux aussi noter le débit réel de votre carte."
+      },
+      "v12": {
+        "title": "Un reçu par e-mail ? Copiez tout",
+        "body": "Pas besoin de chercher les détails dans les reçus Apple, Google ou Spotify. Collez l’e-mail entier : je repère le montant, la périodicité et la date."
+      },
+      "v13": {
+        "title": "Ajoutez un abonnement de longue date",
+        "body": "Dites « Depuis 2021, 8 au début, 18 maintenant ». Je complète l’historique des prix pour que le total de vos dépenses soit juste."
+      },
+      "v14": {
+        "title": "Combien en abonnements cette année ?",
+        "body": "Demandez-moi vos dépenses de cette année, de l’an dernier ou de toute autre période. Je les détaille par catégorie ou moyen de paiement."
+      },
+      "v15": {
+        "title": "Pensez à annuler cet essai",
+        "body": "Dites-moi quand l’essai se termine. J’enregistre la date pour que vous receviez un rappel avant le passage au payant."
+      },
+      "v16": {
+        "title": "Vous payez pour quelqu’un ? Gardez une trace",
+        "body": "Dites-moi si vous payez un abonnement pour quelqu’un. Je suivrai séparément les sommes avancées et celles qui vous ont été remboursées."
+      },
+      "v17": {
+        "title": "Vous avez changé de région ou de forfait ?",
+        "body": "Passage de la boutique américaine à la turque, ou à un forfait familial ? Dites-moi quand. Je poursuis avec le nouveau forfait et conserve l’ancien historique."
+      },
+      "v18": {
+        "title": "Posez vos questions, tout simplement",
+        "body": "« Quel est mon abonnement le plus ancien ? » « Quelle carte est la plus débitée ? » Demandez, je consulterai votre registre."
+      },
+      "v19": {
+        "title": "Vous confirmez chaque modification",
+        "body": "Je ne prépare que des brouillons. Les ajouts, changements de prix et résiliations s’affichent sous forme de cartes. Rien n’est enregistré sans votre confirmation."
+      },
+      "v20": {
+        "title": "Commencez votre registre ici",
+        "body": "Envoyez un reçu, une capture ou dites-moi simplement à quoi vous êtes abonné. Je m’occupe du reste."
       }
     }
   },
