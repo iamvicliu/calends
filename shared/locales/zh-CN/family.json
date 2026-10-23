@@ -35,7 +35,13 @@
     "rangeTo": "至",
     "showAllPeriods": "显示全部 {count} 期",
     "vacancy": "空位",
-    "departed": "已下车 {count} 人"
+    "departed": "已下车 {count} 人",
+    "hidePersonal": "隐藏个人信息",
+    "showPersonal": "显示个人信息",
+    "hiddenMember": "已隐藏成员",
+    "addMember": "添加成员",
+    "vacancyTrack": "暂时空缺",
+    "copyFailed": "复制图片失败"
   },
   "contact": {
     "via": {
@@ -271,7 +277,11 @@
     "yearNet": "每年净额",
     "costIncome": "成本 {cost}\n收入 {income}",
     "noneOwed": "无人欠款",
-    "since": "{date}起"
+    "since": "{date}起",
+    "profit": "盈亏",
+    "annualApprox": "每年约 {amount}",
+    "paid": "付出",
+    "received": "收回"
   },
   "timeline": {
     "paid": "已付",

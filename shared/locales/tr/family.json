@@ -36,7 +36,13 @@
     "rangeTo": "Bitiş",
     "showAllPeriods": "{count} dönemin tümünü göster",
     "vacancy": "Boş yer",
-    "departed": "{count} kişi ayrıldı"
+    "departed": "{count} kişi ayrıldı",
+    "hidePersonal": "Kişisel bilgileri gizle",
+    "showPersonal": "Kişisel bilgileri göster",
+    "hiddenMember": "Gizli üye",
+    "addMember": "Üye ekle",
+    "vacancyTrack": "Şimdilik boş",
+    "copyFailed": "Görsel kopyalanamadı"
   },
   "contact": {
     "via": {
@@ -299,7 +305,11 @@
     "yearNet": "Yıllık net",
     "costIncome": "Maliyet {cost}\nGelir {income}",
     "noneOwed": "Borcu olan yok",
-    "since": "{date} itibarıyla"
+    "since": "{date} itibarıyla",
+    "profit": "Kâr / zarar",
+    "annualApprox": "Yılda yaklaşık {amount}",
+    "paid": "Ödenen",
+    "received": "Alınan"
   },
   "timeline": {
     "paid": "Ödendi",

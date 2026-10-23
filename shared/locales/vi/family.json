@@ -35,7 +35,13 @@
     "rangeTo": "Đến",
     "showAllPeriods": "Hiện tất cả {count} kỳ",
     "vacancy": "Chỗ trống",
-    "departed": "{count} người đã rời"
+    "departed": "{count} người đã rời",
+    "hidePersonal": "Ẩn thông tin cá nhân",
+    "showPersonal": "Hiện thông tin cá nhân",
+    "hiddenMember": "Thành viên đã ẩn",
+    "addMember": "Thêm thành viên",
+    "vacancyTrack": "Tạm thời còn trống",
+    "copyFailed": "Không thể sao chép ảnh"
   },
   "contact": {
     "via": {
@@ -289,7 +295,11 @@
     "yearNet": "Ròng mỗi năm",
     "costIncome": "Chi phí {cost}\nThu {income}",
     "noneOwed": "Không ai nợ",
-    "since": "Từ {date}"
+    "since": "Từ {date}",
+    "profit": "Lãi / lỗ",
+    "annualApprox": "Khoảng {amount} mỗi năm",
+    "paid": "Đã chi",
+    "received": "Đã thu"
   },
   "timeline": {
     "paid": "Đã trả",

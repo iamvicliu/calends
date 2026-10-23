@@ -37,7 +37,13 @@
     "rangeTo": "По",
     "showAllPeriods": "Показать все периоды ({count})",
     "vacancy": "Свободное место",
-    "departed": "Вышли: {count}"
+    "departed": "Вышли: {count}",
+    "hidePersonal": "Скрыть личные данные",
+    "showPersonal": "Показать личные данные",
+    "hiddenMember": "Скрытый участник",
+    "addMember": "Добавить участника",
+    "vacancyTrack": "Пока свободно",
+    "copyFailed": "Не удалось скопировать изображение"
   },
   "contact": {
     "via": {
@@ -318,7 +324,11 @@
     "yearNet": "Итог за год",
     "costIncome": "Расходы {cost}\nДоходы {income}",
     "noneOwed": "Долгов нет",
-    "since": "С {date}"
+    "since": "С {date}",
+    "profit": "Прибыль / убыток",
+    "annualApprox": "Около {amount} в год",
+    "paid": "Выплачено",
+    "received": "Получено"
   },
   "timeline": {
     "paid": "Оплачено",
