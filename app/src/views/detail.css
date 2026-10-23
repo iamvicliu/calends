@@ -21,10 +21,6 @@
 .sheet.bare:has(.dt) {
   background: var(--dt-bg, var(--gray-2));
 }
-/* 关闭按钮放进详情自己的按钮行，和其他按钮对齐 */
-.sheet.bare:has(.dt) .sheet-close {
-  display: none;
-}
 .dt h2,
 .dt h3,
 .dt p,
@@ -101,12 +97,6 @@
 }
 .dt-btn:hover {
   background: color-mix(in srgb, var(--dt-panel) 92%, var(--label));
-}
-.dt-close {
-  flex-shrink: 0;
-  margin-left: 4px;
-  background: var(--fill);
-  box-shadow: none;
 }
 /* 顶部操作：宽屏为胶囊（带文字）与正圆（只有图标），32px 高，与关闭按钮对齐 */
 .dt-act {
@@ -906,11 +896,11 @@
   .dt {
     padding: 24px 12px 24px;
   }
-  /* 第一行：图标 · 名称 · 关闭；第二行：同高操作，空间不足时整项换行 */
+  /* 第一行保留图标和名称；文字操作在第二行换行 */
   .dt-head {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: 'ico id close' 'act act act';
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'ico id' 'act act';
     align-items: start;
     gap: 12px;
   }
@@ -928,10 +918,6 @@
   }
   .dt-name {
     white-space: normal;
-  }
-  .dt-close {
-    grid-area: close;
-    margin: 0;
   }
   .dt-actions {
     grid-area: act;
@@ -983,8 +969,8 @@
   }
   /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */
   .sheet.bare:has(.dt) .sheet-body {
-    /* 和弹窗外壳的最大高度一致，否则底部的内边距会被外壳裁掉，滚到底时比左右边距窄 */
-    max-height: min(90dvh, 920px);
+    /* 为统一头部留出空间，底部内边距仍可完整滚入视口 */
+    max-height: calc(min(90dvh, 920px) - var(--ctl-h-md) - 28px);
     overflow: auto;
     overscroll-behavior: contain;
   }
@@ -1069,10 +1055,6 @@
   }
 }
 @media (max-width: 640px) {
-  /* 复制为图片只在桌面端提供 */
-  .dt-actions .desk {
-    display: none;
-  }
   .dt-act-l {
     white-space: normal;
     overflow-wrap: anywhere;

@@ -1,14 +1,14 @@
+import { CopyImageButton } from './CopyImageButton.tsx';
 import { copyParts } from './copy.tsx';
 import { numberFormat } from '../../../shared/intl.ts';
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { ChevronUp, Copy, Layers, Minimize2 } from 'lucide-react';
+import { ChevronUp, Layers, Minimize2 } from 'lucide-react';
 import { cnDateAuto, flow, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import type { Block, ChargeRow, Comparison, MovementRow, ReportEvent, ScopeReport as ReportData } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
-import { run } from '../store.ts';
 import { bankOf, brandOf, catColor, methodLogo } from '../derive.ts';
 import { BarLine } from './charts.tsx';
 import { MetricCards, Metric, IconButton, CatIcon, CardTitle, Icon, MethodMark, SubIcon } from './ui.tsx';
@@ -46,7 +46,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const copying = copyState === 'copying';
   const expanded = open || copying;
   const copyImage = () => {
-    if (!root.current || copying) return;
+    if (!root.current || copying) return Promise.reject(new Error('PNG'));
     const el = root.current;
     // 同步关闭动画并锁定操作，以便 Safari 在点击内创建 ClipboardItem。
     flushSync(() => setCopyState('copying'));
@@ -66,7 +66,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         setCopyState('done');
       }
     })();
-    void run(() => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]), t('detail.toast.imageCopied'));
+    return blob;
   };
   const base = state.settings.baseCurrency;
   const monthly = report.blocks.some((b) => b.type === 'headline' && b.mode === 'month');
@@ -141,18 +141,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         {t(label)}
       </CardTitle>
       <div className="scope-actions">
-        {typeof ClipboardItem !== 'undefined' && (
-          <IconButton
-            type="button"
-
-            title={t('detail.action.copyImage')}
-            aria-label={t('detail.action.copyImage')}
-            disabled={copying}
-            onClick={copyImage}
-          >
-            <Copy size={15} />
-          </IconButton>
-        )}
+        <CopyImageButton render={copyImage} disabled={copying} />
         <IconButton
           type="button"
 

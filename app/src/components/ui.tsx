@@ -522,6 +522,7 @@ export function Sheet(props: {
   foot?: ComponentChildren;
   narrow?: boolean;
   bare?: boolean;
+  actions?: ComponentChildren;
 }) {
   const dialog = useRef<HTMLDivElement>(null);
   // 兜底：焦点不在弹窗里（如落在 body 上）时 react-aria 收不到 Esc，这里替最上面那层关掉
@@ -545,20 +546,19 @@ export function Sheet(props: {
       <Modal className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`}>
         <Dialog ref={dialog} className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
           <div className="grabber" />
-          {props.bare ? (
-            <IconButton className="sheet-close" onClick={props.onClose} aria-label={t('ui.close')}>
-              <Icon name="x" />
-            </IconButton>
-          ) : (
-            <div className="sheet-head">
+          <div className={`sheet-head ${props.bare ? 'bare-head' : ''}`} data-snapshot-hide>
+            {!props.bare && (
               <Heading slot="title" level={3} className="ui-title">
                 <span className="ui-title-text">{copyParts(props.title)}</span>
               </Heading>
+            )}
+            <div className="sheet-head-actions">
+              {props.actions}
               <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
                 <Icon name="x" />
               </IconButton>
             </div>
-          )}
+          </div>
           <div className="sheet-body">{props.children}</div>
           {props.foot && <div className="sheet-foot sheet-actions">{copyParts(props.foot)}</div>}
         </Dialog>

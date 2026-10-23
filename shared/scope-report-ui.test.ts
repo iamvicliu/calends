@@ -93,6 +93,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Icon: 'Icon',
     IconButton: 'button',
     CardTitle: 'h3',
+    CopyImageButton: 'CopyImageButton',
     Hint: 'Hint',
     PayBadge: 'PayBadge',
     RegionTag: 'RegionTag',
