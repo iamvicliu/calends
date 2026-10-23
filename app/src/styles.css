@@ -4913,6 +4913,17 @@ button.h-price-row:focus-visible {
 .ph-meta {
   font-size: var(--fs-2);
 }
+/* 代付卡片头部与合租卡片同一套：40px 图标、正文字号名称、小号说明 */
+.proxy-card .ph-name {
+  font-size: var(--fs-2);
+  font-weight: 650;
+}
+.proxy-card .ph-meta {
+  font-size: var(--fs-1);
+}
+.proxy-card .metric-cards {
+  margin-top: 8px;
+}
 .ph-chips {
   display: flex;
   gap: 6px;

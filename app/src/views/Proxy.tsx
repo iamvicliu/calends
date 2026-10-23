@@ -75,7 +75,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
       >
         <div className="proxy-top">
           <div className="proxy-head">
-            <SubIcon sub={s} size={46} />
+            <SubIcon sub={s} size={40} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="ph-name text-ellipsis">
                 <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
@@ -97,7 +97,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
           <PayBadge m={method} />
         </div>
 
-        <MetricCards>
+        <MetricCards inline>
           <Metric label={t('proxy.paidPeriods', { count: list.length })} value={flow(-charged, base, { compact: true })} />
           <Metric label={t('proxy.received')} value={flow(received, base, { compact: true })} valueClassName="green" />
           <Metric
@@ -200,7 +200,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             {px.note && <Cell label={t('proxy.note')}>{px.note}</Cell>}
           </Group>
 
-          <MetricCards inline>
+          <MetricCards>
             <Metric label={t('proxy.paidPeriods', { count: list.length })} value={flow(-charged, base, { compact: true })} />
             <Metric label={t('proxy.received')} value={flow(received, base, { compact: true })} valueClassName="green" />
             <Metric
