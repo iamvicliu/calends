@@ -99,6 +99,18 @@
 .scope-movements {
   margin-top: 8px;
 }
+/* 排行独占整行时一行两个，按名次从左到右排（与本月变动一致），手机上回到单列 */
+.scope-rank + * {
+  flex: 1;
+  min-width: 0;
+}
+.scope-rank {
+  align-self: center;
+  flex-shrink: 0;
+  width: 18px;
+  color: var(--label-3);
+  font-size: var(--fs-1);
+}
 .scope-compositions > :only-child {
   grid-column: 1 / -1;
 }

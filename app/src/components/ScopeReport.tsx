@@ -168,7 +168,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       </div>
     </div>
   );
-  const render = (block: Block): ReactNode => {
+  const render = (block: Block, wide = false): ReactNode => {
     switch (block.type) {
       case 'headline':
         if (block.mode === 'total')
@@ -394,12 +394,17 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             )}
             {block.mode === 'month'
               ? chargeRows(visibleCharges(block.rows))
-              : block.rows.map((r) => (
-                  <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
-                    {name(r.sub)}
-                    <b className="num">{expense(r.amount)}</b>
-                  </button>
-                ))}
+              : (() => {
+                  const list = block.rows.map((r, n) => (
+                    <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
+                      {wide && <span className="scope-rank num">{n + 1}</span>}
+                      {name(r.sub)}
+                      <b className="num">{expense(r.amount)}</b>
+                    </button>
+                  ));
+                  // 独占整行时分两列并标名次，不把五行拉成整页宽
+                  return wide ? <div className="scope-movements scope-ranks">{list}</div> : list;
+                })()}
           </>
         );
       case 'upcoming':
@@ -506,7 +511,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               key={block.type}
               style={{ animationDelay: `${i * 65}ms` }}
             >
-              {render(block)}
+              {render(block, alone.has(i))}
             </div>
           ))}
         </div>
