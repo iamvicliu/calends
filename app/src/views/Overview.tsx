@@ -9,7 +9,7 @@ import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosse
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
-import { IconButton, Amount, CardTitle, CatIcon, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { IconButton, Amount, CardTitle, CatIcon, TipTable, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
@@ -192,23 +192,13 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         onSelect={(k) => setSelKey(k === selKey ? undefined : k)}
         fmt={(v) => moneyTick(v, base)}
         tip={(b) => (
-          <>
-            <b>
-              {b.label}
-              <span className="copy-gap" aria-hidden="true" />
-              {flow(-b.total, base, { compact: true })}
-            </b>
-            {b.parts
+          <TipTable
+            head={[b.label, flow(-b.total, base, { compact: true })]}
+            rows={b.parts
               .filter((p) => p.k !== PROJ)
               .slice(0, 5)
-              .map((p) => (
-                <div key={p.k}>
-                  {p.k}
-                  <span className="copy-gap" aria-hidden="true" />
-                  {flow(-p.v, base, { compact: true })}
-                </div>
-              ))}
-          </>
+              .map((p) => ({ key: p.k, label: p.k, value: flow(-p.v, base, { compact: true }) }))}
+          />
         )}
       />
 

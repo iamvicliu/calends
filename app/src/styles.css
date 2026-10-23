@@ -1696,6 +1696,23 @@ a {
 }
 
 /* ---------------- 提示 ---------------- */
+.tip-table {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
+  row-gap: 2px;
+}
+.tip-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tip-table b {
+  font-weight: 600;
+}
+.tip-table span:not(.num) {
+  color: var(--label-2);
+}
 .tip {
   position: fixed;
   z-index: 80;

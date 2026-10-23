@@ -17,7 +17,7 @@ import {
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, Amount, CardTitle, Icon, PayBadge, RegionTag, Seg, subRegion, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { IconButton, Amount, CardTitle, Icon, PayBadge, RegionTag, Seg, subRegion, SubIcon, TipTable, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -416,14 +416,10 @@ function YearHeat({
                     key={d}
                     className={cls}
                     {...tipProps(() => (
-                      <>
-                        <b>{cnDate(d, true)}</b>
-                        {list.map((c) => (
-                          <div key={c.sub.id}>
-                            {c.sub.name} <span className="copy-gap" aria-hidden="true" /> {flow(-c.amount, c.currency)}
-                          </div>
-                        ))}
-                      </>
+                      <TipTable
+                        head={[cnDate(d, true), list.length > 1 ? flow(-sumOf(list), base, { compact: true }) : '']}
+                        rows={list.map((c, i) => ({ key: `${c.sub.id}-${i}`, label: c.sub.name, value: flow(-c.amount, c.currency) }))}
+                      />
                     ))}
                   >
                     {/* 同一天多笔：只画第一个图标，右上角标出总笔数（格子太小，叠起来只剩一道边） */}

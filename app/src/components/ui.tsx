@@ -18,7 +18,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from 'react-aria-components';
-import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
 import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
@@ -744,6 +744,28 @@ export function TipLayer() {
       </div>,
       document.body,
     )
+  );
+}
+
+/** 悬浮提示里的明细表：名称左对齐、金额右对齐，标题行与明细同一套两列 */
+export function TipTable({
+  head,
+  rows,
+}: {
+  head: [ComponentChildren, ComponentChildren];
+  rows: Array<{ key: string; label: ComponentChildren; value: ComponentChildren }>;
+}) {
+  return (
+    <div className="tip-table">
+      <b>{head[0]}</b>
+      <b className="num">{head[1]}</b>
+      {rows.map((r) => (
+        <Fragment key={r.key}>
+          <span>{r.label}</span>
+          <span className="num">{r.value}</span>
+        </Fragment>
+      ))}
+    </div>
   );
 }
 
