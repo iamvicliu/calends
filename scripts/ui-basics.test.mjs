@@ -404,13 +404,22 @@ test('borders use hairlines and keyboard focus uses only the shared ring', () =>
   assert.deepEqual(failures, []);
 });
 
-test('remaining CSS transitions use 250ms ease-out and cards do not lift on hover', () => {
+// Only physical wallet-card surfaces may tilt, reflect light and cast material shadows.
+const physicalCardSelector = (selector) => selector.split(',').every((sel) => /^(?:\.wallet-grid\.dragging )?\.paycard(?=[.:\s]|$)/.test(sel.trim()));
+const leafRules = (css) => cssRules(css).flatMap(([selector, body]) => (selector.startsWith('@') ? leafRules(body) : [[selector, body]]));
+
+test('remaining CSS transitions use 250ms ease-out and only physical cards lift on hover', () => {
   for (const [file, css] of styleSources) {
-    for (const [, value] of css.matchAll(/transition:\s*([^;]+);/g)) {
-      if (value.startsWith('none')) continue;
-      for (const part of value.split(',')) assert.match(part.trim(), /^[\w-]+ var\(--duration\) var\(--ease\)$/, `${file}: ${value}`);
+    for (const [selector, body] of leafRules(css)) {
+      for (const [, value] of body.matchAll(/transition:\s*([^;]+);/g)) {
+        if (value.startsWith('none')) continue;
+        // dnd-kit owns only translate timing; card transform/shadow still use the shared transition.
+        const fixed = physicalCardSelector(selector) ? value.replace(/,\s*var\(--sort-t, translate 0s\)/, '') : value;
+        for (const part of fixed.split(',')) assert.match(part.trim(), /^[\w-]+ var\(--duration\) var\(--ease\)$/, `${file}: ${value}`);
+      }
+      if (selector.includes(':hover') && !physicalCardSelector(selector))
+        assert.doesNotMatch(body, /transform:\s*(?:translateY\(-|perspective)/, `${file}: ${selector}`);
     }
-    assert.doesNotMatch(css, /:hover[^{}]*\{[^{}]*transform:\s*(?:translateY\(-|perspective)/, file);
   }
   const css = readFileSync(new URL('components/ui.css', root), 'utf8');
   assert.match(css, /animation: rm-pop var\(--duration\) var\(--ease\)/);
@@ -563,9 +572,12 @@ test('glass is limited to sticky toolbars and sheet headers and footers', () => 
 
 test('decorative spotlights and left-edge callouts do not return', () => {
   for (const [file, css] of styleSources) {
-    assert.doesNotMatch(css, /--m[xy]\b/, file);
-    for (const [, body] of css.matchAll(/[^{}]+\{([^{}]*radial-gradient[^{}]*)\}/g)) {
-      // The remaining radial gradients cut the functional receipt-paper edges.
+    for (const [selector, body] of leafRules(css)) {
+      // Pointer reflections and material lighting are content on simulated physical cards only.
+      if (physicalCardSelector(selector)) continue;
+      assert.doesNotMatch(body, /--m[xy]\b/, `${file}: ${selector}`);
+      if (!body.includes('radial-gradient')) continue;
+      // The other remaining radial gradients cut functional receipt-paper edges.
       assert.match(body, /(?:-webkit-)?mask:\s*radial-gradient/, file);
       assert.doesNotMatch(body, /background(?:-image)?:[^;]*radial-gradient/, file);
     }
@@ -731,4 +743,74 @@ test('single-series charts share the monochrome chart ink and keep readable data
   assert.doesNotMatch(charts, /<path[^>]*strokeWidth="0\.5"/);
   const pub = readFileSync(new URL('public/index.css', root), 'utf8');
   for (const n of [1, 2, 3, 4, 5]) assert.match(pub, new RegExp(`--chart-${n}:\\s*var\\(--gray-\\d+\\)`));
+});
+
+test('physical wallet cards keep bounded pointer tilt and reflection without taking over sort translation', () => {
+  const [, ast, source] = sources.find(([file]) => file === 'views/Wallet.tsx');
+  const result = transformSync('SortableCard.tsx', source.slice(...functionRange(ast, 'SortableCard')), {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
+  assert.equal(result.fatal, false);
+  let dragging = false;
+  const useSortable = () => ({ attributes: {}, listeners: {}, transform: { x: 24, y: 16 }, transition: 'transform 200ms ease', isDragging: dragging });
+  const Card = new Function('React', 'useSortable', 'faceClass', 'paletteColor', 'KIND_BG', `${result.code}; return SortableCard;`)(
+    React,
+    useSortable,
+    () => '',
+    (_, fallback) => fallback,
+    { debit: 'neutral' },
+  );
+  const props = { m: { id: 'fictional-card', kind: 'debit' }, onOpen() {}, children: null };
+  const card = Card(props);
+  assert.equal(card.props.style.translate, '24px 16px');
+  assert.equal(card.props.style['--sort-t'], 'translate 200ms ease');
+  const values = {};
+  const currentTarget = {
+    getBoundingClientRect: () => ({ left: 20, top: 30, width: 300, height: 180 }),
+    style: {
+      setProperty: (k, v) => {
+        values[k] = v;
+      },
+    },
+  };
+  card.props.onMouseMove({ currentTarget, clientX: 320, clientY: 30 });
+  assert.deepEqual(values, { '--mx': '300px', '--my': '0px', '--ry': '4.00deg', '--rx': '4.00deg' });
+  card.props.onMouseMove({ currentTarget, clientX: -100, clientY: 900 });
+  assert.equal(values['--rx'], '-4.00deg');
+  assert.equal(values['--ry'], '-4.00deg');
+  card.props.onMouseLeave({ currentTarget });
+  assert.equal(values['--rx'], '0deg');
+  assert.equal(values['--ry'], '0deg');
+  dragging = true;
+  Card(props).props.onMouseMove({ currentTarget, clientX: 320, clientY: 30 });
+  assert.equal(values['--rx'], '0deg');
+});
+
+test('wallet material styles retain neutral dark and fixed light faces, restrained motion and drag-safe reflections', () => {
+  const css = readFileSync(new URL('styles.css', root), 'utf8');
+  const rules = leafRules(css);
+  const bodies = (sel) =>
+    rules
+      .filter(([s]) => s.split(',').some((x) => x.trim() === sel))
+      .map(([, b]) => b.replace(/\s+/g, ' '))
+      .join('\n');
+  assert.match(bodies('.paycard'), /background: var\(\s*--card-bg,\s*linear-gradient\(135deg,.*--slate-9/);
+  for (const [selector, body] of rules.filter(([s]) => physicalCardSelector(s))) assert.doesNotMatch(body, /--(?:iris|purple|indigo|blue)-\d+/, selector);
+  assert.match(bodies('.paycard:hover'), /perspective\(900px\).*rotateX\(var\(--rx, 0deg\)\).*rotateY\(var\(--ry, 0deg\)\).*translateY\(-3px\) scale\(1\.01\)/);
+  assert.match(bodies('.paycard::after'), /radial-gradient.*var\(--mx, 50%\) var\(--my, 50%\)/);
+  assert.match(bodies('.paycard:hover::after'), /opacity: 1/);
+  assert.match(bodies('.wallet-grid.dragging .paycard::after'), /opacity: 0/);
+  assert.match(bodies('.paycard.lifted'), /scale: 1\.02/);
+  for (const sel of ['.paycard.apple', '.paycard.light', '.paycard.sim']) {
+    assert.match(bodies(sel), /background: linear-gradient\([\s\S]*--white-a12/);
+    assert.match(bodies(sel), /color: var\(--pc-ink\)/);
+    assert.match(bodies(`${sel}:hover`), /box-shadow:/);
+  }
+  const reduced = cssRules(css)
+    .filter(([s]) => s === '@media (prefers-reduced-motion: reduce)')
+    .flatMap(([, b]) => cssRules(b));
+  assert.ok(reduced.some(([s, b]) => s.includes('.paycard:hover') && /transform: none/.test(b)));
+  assert.ok(reduced.some(([s, b]) => s.includes('.paycard.lifted') && /scale: 1;/.test(b)));
 });

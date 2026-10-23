@@ -136,15 +136,15 @@ function CardFace({ m, label, value, right, rightSub }: { m: PaymentMethod; labe
           <path className="groove inner" d="M4.6 3.1H15.4L16.65 4.35V11.9H4.6Z" />
           <defs>
             <linearGradient id="simgold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="var(--gold-3)" />
-              <stop offset="1" stopColor="var(--gold-9)" />
+              <stop offset="0" stopColor="var(--pc-gold)" />
+              <stop offset="1" stopColor="var(--pc-gold-edge)" />
             </linearGradient>
           </defs>
-          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="var(--gold-8)" strokeWidth="0.12" />
+          <rect x="6.6" y="4.6" width="8" height="6" rx="1" fill="url(#simgold)" stroke="var(--pc-gold-edge)" strokeWidth="0.12" />
           <path
             d="M10.6 4.6V10.6M6.6 6.6H9.4M6.6 8.6H9.4M11.8 6.6H14.6M11.8 8.6H14.6M9.4 5.6V9.6M11.8 5.6V9.6"
             fill="none"
-            stroke="var(--gold-8)"
+            stroke="var(--pc-gold-edge)"
             strokeWidth="0.12"
           />
         </svg>
@@ -281,6 +281,23 @@ function SortableCard({ m, onOpen, children }: { m: PaymentMethod; onOpen: () =>
         } as Record<string, string>
       }
       onClick={onOpen}
+      onMouseMove={(e) => {
+        // 光泽跟着鼠标走，卡片朝鼠标方向轻微倾斜（最多 4°），像拿在手里转一下
+        if (isDragging) return;
+        const el = e.currentTarget;
+        const b = el.getBoundingClientRect();
+        const px = Math.max(-0.5, Math.min(0.5, (e.clientX - b.left) / b.width - 0.5));
+        const py = Math.max(-0.5, Math.min(0.5, (e.clientY - b.top) / b.height - 0.5));
+        el.style.setProperty('--mx', `${e.clientX - b.left}px`);
+        el.style.setProperty('--my', `${e.clientY - b.top}px`);
+        el.style.setProperty('--ry', `${(px * 8).toFixed(2)}deg`);
+        el.style.setProperty('--rx', `${(-py * 8).toFixed(2)}deg`);
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget as HTMLElement;
+        el.style.setProperty('--rx', '0deg');
+        el.style.setProperty('--ry', '0deg');
+      }}
     >
       {children}
     </button>
