@@ -5813,7 +5813,8 @@ a.car-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 2px;
+  /* 日期与下方订阅之间多留一点距离 */
+  margin: 0 0 6px;
 }
 .cal-charge-day > span {
   display: grid;
@@ -5823,7 +5824,7 @@ a.car-toggle {
   flex-shrink: 0;
   border: var(--hairline) solid var(--line);
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--label-3) 22%, var(--card));
+  background: var(--fill-2);
   color: var(--label-2);
   font-size: var(--fs-1);
   font-weight: 600;
@@ -5836,8 +5837,8 @@ a.car-toggle {
 }
 .cal-charge-day > i {
   flex: 1;
-  height: 1px;
-  background: var(--line);
+  height: 0;
+  border-top: var(--hairline) dashed var(--line);
 }
 .cal-charge-row {
   align-items: center;
