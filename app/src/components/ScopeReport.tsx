@@ -479,6 +479,14 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         );
     }
   };
+  // 半宽卡片两两并排；落单的（如买断报告只有排行、没有即将扣款）铺满整行，不留右侧空缺
+  const FULL = new Set<Block['type']>(['headline', 'trend', 'events', 'losses', 'composition']);
+  const alone = new Set<number>();
+  for (let i = 0; i < blocks.length; i++) {
+    if (FULL.has(blocks[i].type)) continue;
+    if (i + 1 < blocks.length && !FULL.has(blocks[i + 1].type)) i++;
+    else alone.add(i);
+  }
   return (
     <section ref={root} className={`scope-report ${animate && copyState === 'idle' ? 'scope-animate' : ''}`} aria-labelledby={`${id}-title`}>
       <h2 id={`${id}-title`} className="scope-header">
@@ -493,7 +501,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       {expanded && (
         <div id={id} className="scope-grid">
           {blocks.map((block, i) => (
-            <div className={`card scope-block scope-${block.type}`} key={block.type} style={{ animationDelay: `${i * 65}ms` }}>
+            <div
+              className={`card scope-block scope-${block.type} ${alone.has(i) ? 'scope-alone' : ''}`}
+              key={block.type}
+              style={{ animationDelay: `${i * 65}ms` }}
+            >
               {render(block)}
             </div>
           ))}

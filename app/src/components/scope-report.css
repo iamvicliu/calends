@@ -86,7 +86,8 @@
 .scope-trend,
 .scope-events,
 .scope-losses,
-.scope-grid > .scope-composition {
+.scope-grid > .scope-composition,
+.scope-grid > .scope-alone {
   grid-column: 1 / -1;
 }
 .scope-compositions,
