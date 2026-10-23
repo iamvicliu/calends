@@ -4099,12 +4099,23 @@ button.h-price-row:focus-visible {
 .sc-name .i {
   color: var(--green);
 }
+.sc-region {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+}
+.sc-region .flag-img {
+  width: 18px;
+  height: 13px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 var(--hairline) var(--line);
+}
 .sc-meta {
   display: flex;
-  /* 分类、支付方式、地区三枚胶囊放不下时换行，不截断文字 */
-  flex-wrap: wrap;
+  /* 名字下只放分类与支付方式两枚胶囊，固定一行；放不下时支付方式截断 */
   align-items: center;
   gap: 6px;
+  overflow: hidden;
   font-size: var(--fs-1);
   font-weight: 500;
   min-width: 0;

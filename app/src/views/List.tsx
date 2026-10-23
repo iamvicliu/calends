@@ -6,7 +6,22 @@ import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthly
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, Amount, CatChip, CatIcon, Icon, MethodMark, PayBadge, RegionTag, Seg, subRegion, SubIcon, Toolbar } from '../components/ui.tsx';
+import {
+  IconButton,
+  Amount,
+  CatChip,
+  CatIcon,
+  Icon,
+  MethodMark,
+  PayBadge,
+  RegionTag,
+  FlagImg,
+  regionLabel,
+  Seg,
+  subRegion,
+  SubIcon,
+  Toolbar,
+} from '../components/ui.tsx';
 import { proxyOwed } from './Proxy.tsx';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
@@ -293,7 +308,23 @@ export function List({
                   <div className="sc-top">
                     <SubIcon sub={s} size={48} />
                     <span className="sc-flags">
-                      {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
+                      {/* 右上角放状态与标识：地区只显示国旗，待生效变更与并行只显示短标签，详情在提示里 */}
+                      {subRegion(cur, m) && (
+                        <span className="sc-region" title={regionLabel(subRegion(cur, m)!)}>
+                          <FlagImg cc={subRegion(cur, m)} />
+                        </span>
+                      )}
+                      {up && (
+                        <span className="badge blue" title={changeSummary(cur, up, st, today, state).full}>
+                          {changeSummary(cur, up, st, today, state).short}
+                        </span>
+                      )}
+                      {parallelSummary(s, cur, today) && (
+                        <span className="badge" title={parallelSummary(s, cur, today)}>
+                          {t('list.badge.parallel')}
+                        </span>
+                      )}
+                      {st === 'upcoming' && !up && <span className="badge blue">{t('list.status.upcoming')}</span>}
                       {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
                       {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
                       {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
@@ -312,14 +343,11 @@ export function List({
                   <div className="sc-meta">
                     <CatChip cat={s.category} />
                     <PayBadge m={m} />
-                    <RegionTag cc={subRegion(cur, m)} />
                   </div>
                   <div className="sc-price">
                     <Amount plain value={shown(s, n).value} ccy={shown(s, n).ccy} />
                     <span className="sc-per">/{perLabel(cur)}</span>
                   </div>
-                  {up && <ChangeNote cur={cur} up={up} st={st} today={today} state={state} />}
-                  <ParallelNote sub={s} cur={cur} today={today} />
                   <div className="sc-foot">
                     <span>{shown(s, n).sub ?? '\u00a0'}</span>
                     <span className={d != null && d <= 3 ? 'soon' : ''}>
@@ -551,6 +579,33 @@ function readReportPref(pref: string, key: string): { key: string; open: boolean
   } catch {
     // 未生成或旧偏好损坏时保留生成入口。
   }
+}
+
+/** 待生效变更的简短说明（卡片右上角标签）与完整说明（悬停提示），和 ChangeNote 同一口径 */
+function changeSummary(cur: Subscription, up: Subscription, st: string, today: string, state: AppState) {
+  const d = diffDays(today, up.start);
+  const when = d <= 14 ? relDays(d) : cnDate(up.start);
+  const m = state.methods.find((x) => x.id === up.methodId);
+  const short = t(st === 'upcoming' ? 'list.change.starts' : 'list.change.from', { when });
+  const parts = [
+    up.planned ? t('list.change.planned').trim() : '',
+    short,
+    up.region && up.region !== cur.region ? up.region : '',
+    st === 'upcoming' || up.price !== cur.price || up.currency !== cur.currency ? `${money(up.price, up.currency)}/${perLabel(up)}` : '',
+    up.methodId !== cur.methodId || st === 'upcoming' ? (m ? m.name : t('list.change.noMethod')) : '',
+  ].filter(Boolean);
+  return { short, full: parts.join('\n') };
+}
+
+/** 换区后旧的那段还在付：卡片右上角只标「并行」，详细放在提示里 */
+function parallelSummary(sub: Subscription, cur: Subscription, today: string): string {
+  if (!sub.phases?.length) return '';
+  return activePhases(sub, today)
+    .filter((v) => v.start !== cur.start)
+    .map((v) =>
+      t('list.overlap.note', { what: v.region && v.region !== cur.region ? v.region : `${money(v.price, v.currency)}/${perLabel(v)}`, date: cnDate(v.end!) }),
+    )
+    .join('\n');
 }
 
 /** 待生效变更的一行提示：「10月27日起 🇺🇸 $9.99/月 · 支付方式」，未来才开始的订阅写「10月27日开始」 */

@@ -54,7 +54,8 @@
     "joined": "Участвую",
     "proxy": "Оплата за других",
     "proxyFor": "Оплата за {name}",
-    "someone": "кого-то"
+    "someone": "кого-то",
+    "parallel": "Параллельно"
   },
   "saved": "Сэкономлено {amount}",
   "col": {

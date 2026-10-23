@@ -52,7 +52,8 @@
     "joined": "Katıldım",
     "proxy": "Başkası için",
     "proxyFor": "{name} için ödendi",
-    "someone": "birisi"
+    "someone": "birisi",
+    "parallel": "Paralel"
   },
   "saved": "{amount} tasarruf",
   "col": {

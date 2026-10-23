@@ -51,7 +51,8 @@
     "joined": "Tham gia",
     "proxy": "Trả hộ",
     "proxyFor": "Trả hộ {name}",
-    "someone": "ai đó"
+    "someone": "ai đó",
+    "parallel": "Song song"
   },
   "saved": "Tiết kiệm {amount}",
   "col": {

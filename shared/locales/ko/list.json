@@ -51,7 +51,8 @@
     "joined": "참여",
     "proxy": "대신 결제",
     "proxyFor": "{name} 대신 결제",
-    "someone": "누군가"
+    "someone": "누군가",
+    "parallel": "병행"
   },
   "saved": "{amount} 절약",
   "col": {

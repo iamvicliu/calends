@@ -51,7 +51,8 @@
     "joined": "参加",
     "proxy": "立て替え",
     "proxyFor": "{name}の立て替え",
-    "someone": "誰か"
+    "someone": "誰か",
+    "parallel": "並行"
   },
   "saved": "{amount}節約",
   "col": {

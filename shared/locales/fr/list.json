@@ -52,7 +52,8 @@
     "joined": "Rejoint",
     "proxy": "Payé pour d’autres",
     "proxyFor": "Payé pour {name}",
-    "someone": "quelqu’un"
+    "someone": "quelqu’un",
+    "parallel": "En parallèle"
   },
   "saved": "{amount} économisés",
   "col": {

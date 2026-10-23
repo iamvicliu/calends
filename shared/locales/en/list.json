@@ -52,7 +52,8 @@
     "joined": "Joined",
     "proxy": "Paid for others",
     "proxyFor": "Paid for {name}",
-    "someone": "someone"
+    "someone": "someone",
+    "parallel": "Overlap"
   },
   "saved": "Saved {amount}",
   "col": {

@@ -52,7 +52,8 @@
     "joined": "Unida",
     "proxy": "Pago por otros",
     "proxyFor": "Pago por {name}",
-    "someone": "alguien"
+    "someone": "alguien",
+    "parallel": "En paralelo"
   },
   "saved": "Ahorrado {amount}",
   "col": {

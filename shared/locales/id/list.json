@@ -51,7 +51,8 @@
     "joined": "Diikuti",
     "proxy": "Talangan",
     "proxyFor": "Ditalangi untuk {name}",
-    "someone": "seseorang"
+    "someone": "seseorang",
+    "parallel": "Paralel"
   },
   "saved": "Hemat {amount}",
   "col": {
