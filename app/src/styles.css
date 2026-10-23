@@ -9807,14 +9807,6 @@ img.mm-flag {
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
-  .car-member-name {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--fs-2);
-    font-weight: 600;
-    min-width: 0;
-  }
   .car-member-table .btn {
     height: var(--ctl-h-md);
     padding: 0 12px;
@@ -9861,10 +9853,6 @@ img.mm-flag {
 }
 .car-member-table .late {
   color: var(--red);
-}
-.car-member-lines .badge.custom {
-  background: var(--orange-3);
-  color: var(--orange);
 }
 .car-member-lines {
   display: grid;
