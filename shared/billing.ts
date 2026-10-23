@@ -1,4 +1,5 @@
 import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment, ShareMember, RenewalRule } from './types.ts';
+import { dateFormat } from './intl.ts';
 import { t } from './i18n.ts';
 import { chargeValue, convertOn } from './fx.ts';
 import { matchEntries } from './proxy.ts';
@@ -36,7 +37,7 @@ export function addMonths(s: string, n: number): string {
 
 export function todayIn(tz: string, now = Date.now()): string {
   try {
-    return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(now));
+    return dateFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(now));
   } catch {
     return fmtDay(now);
   }

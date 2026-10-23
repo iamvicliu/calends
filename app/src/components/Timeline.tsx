@@ -1,4 +1,5 @@
 import type { ReactNode as ComponentChildren } from 'react';
+import { dateFormat } from '../../../shared/intl.ts';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { addDays, addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
@@ -27,7 +28,7 @@ const AXIS = 140;
 /** 右端：今天往后一年（未来的扣款看一年就够） */
 const AHEAD_MONTHS = 12;
 
-const yearLabel = (d: string) => new Intl.DateTimeFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
+const yearLabel = (d: string) => dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
 
 /**
