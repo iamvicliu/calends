@@ -1,8 +1,8 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} cobro · {amount}",
-    "other": "{count} cobros · {amount}"
+    "one": "{count} cobro\n{amount}",
+    "other": "{count} cobros\n{amount}"
   },
   "mode": {
     "month": "Mes",
@@ -22,10 +22,10 @@
   "noneMonth": "No hay cobros este mes",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} cobro · ",
-    "other": "{count} cobros · "
+    "one": "{count} cobro\n",
+    "other": "{count} cobros\n"
   },
   "pickDay": "Selecciona una fecha para ver sus cargos",
-  "nextCharge": "Próximo cargo · {date}",
+  "nextCharge": "Próximo cargo\n{date}",
   "expandReport": "Ampliar informe completo"
 }

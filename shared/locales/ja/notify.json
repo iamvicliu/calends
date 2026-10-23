@@ -19,7 +19,7 @@
     "overdue": {
       "other": "{count}日超過"
     },
-    "sub": "{status} · 次の期間：{bill}",
+    "sub": "{status}\n次の期間：{bill}",
     "headline": "{name}の料金を{member}から回収する時期です"
   },
   "proxy": {

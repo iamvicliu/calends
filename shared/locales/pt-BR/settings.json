@@ -77,9 +77,9 @@
   },
   "open": {
     "publicSubs": "Assinaturas exibidas",
-    "publicSubsHint": "Só estas assinaturas aparecem na página pública. As pagas por outros nunca são públicas; novas assinaturas são exibidas por padrão.",
-    "publicShown": "Exibidas · {count}",
-    "publicOff2": "Ocultas · {count}",
+    "publicSubsHint": "Assinaturas pagas para outras pessoas ficam privadas. Novas assinaturas são públicas por padrão.",
+    "publicShown": "Exibidas\n{count}",
+    "publicOff2": "Ocultas\n{count}",
     "publicShowAll": "Exibir todas",
     "publicHideAll": "Ocultar todas",
     "publicHideOne": "Ocultar {name}",
@@ -129,7 +129,7 @@
     "sep": ", "
   },
   "channels": {
-    "title": { "one": "Canais de notificação · {count} ativo", "other": "Canais de notificação · {count} ativos" },
+    "title": { "one": "Canais de notificação\n{count} ativo", "other": "Canais de notificação\n{count} ativos" },
     "empty": "Nenhum canal ainda — os lembretes não serão enviados.",
     "test": "Testar",
     "testFailed": "Não foi possível enviar",
@@ -222,7 +222,7 @@
     "alreadyBound": "Este dispositivo já tem uma chave de acesso",
     "changePassword": "Alterar senha",
     "devices": "Dispositivos conectados",
-    "devicesCount": { "one": "Dispositivos conectados · {count}", "other": "Dispositivos conectados · {count}" },
+    "devicesCount": { "one": "Dispositivos conectados\n{count}", "other": "Dispositivos conectados\n{count}" },
     "devicesFoot": "Ao atingir o limite, o dispositivo inativo há mais tempo é desconectado automaticamente. As localizações são estimadas pelo IP e podem não ser precisas.",
     "maxSessions": "Máximo de dispositivos conectados",
     "maxSessionsSaved": { "one": "Até {count} dispositivo", "other": "Até {count} dispositivos" },
@@ -271,8 +271,8 @@
       "created": "Categoria adicionada",
       "saved": "Categoria salva",
       "renamed": {
-        "one": "Categoria salva · {count} assinatura atualizada",
-        "other": "Categoria salva · {count} assinaturas atualizadas"
+        "one": "Categoria salva\n{count} assinatura atualizada",
+        "other": "Categoria salva\n{count} assinaturas atualizadas"
       },
       "deleted": "Categoria excluída",
       "order": "Ordem salva"

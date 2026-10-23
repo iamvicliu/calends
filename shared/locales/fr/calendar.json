@@ -1,8 +1,8 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} prélèvement · {amount}",
-    "other": "{count} prélèvements · {amount}"
+    "one": "{count} prélèvement\n{amount}",
+    "other": "{count} prélèvements\n{amount}"
   },
   "mode": {
     "month": "Mois",
@@ -22,10 +22,10 @@
   "noneMonth": "Aucun prélèvement ce mois-ci",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} prélèvement · ",
-    "other": "{count} prélèvements · "
+    "one": "{count} prélèvement\n",
+    "other": "{count} prélèvements\n"
   },
   "pickDay": "Choisissez une date pour voir ses prélèvements",
-  "nextCharge": "Prochain prélèvement · {date}",
+  "nextCharge": "Prochain prélèvement\n{date}",
   "expandReport": "Afficher le rapport complet"
 }

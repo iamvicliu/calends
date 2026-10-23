@@ -9,8 +9,8 @@
   "neverUsed": "Never used",
   "tokenPlaceholder": "<your-token>",
   "tokens": {
-    "one": "Tokens · {count}",
-    "other": "Tokens · {count}"
+    "one": "Tokens\n{count}",
+    "other": "Tokens\n{count}"
   },
   "noTokens": "No tokens yet. Create one and give it to the AI assistant you want to connect.",
   "lastUsed": "Last used {time}",
@@ -19,8 +19,8 @@
   "revoked": "Revoked",
   "setup": "Setup",
   "tools": {
-    "one": "Available tools · {count}",
-    "other": "Available tools · {count}"
+    "one": "Available tools\n{count}",
+    "other": "Available tools\n{count}"
   },
   "clientOther": "Other",
   "scope": {

@@ -18,8 +18,8 @@
   "timeline": {
     "title": "Cronología",
     "upcoming": {
-      "one": "{count} cobro en los próximos 30 días · {amount}",
-      "other": "{count} cobros en los próximos 30 días · {amount}"
+      "one": "{count} cobro en los próximos 30 días\n{amount}",
+      "other": "{count} cobros en los próximos 30 días\n{amount}"
     }
   },
   "chart": {
@@ -29,7 +29,7 @@
     "mrr": "Coste mensual",
     "charge": "Cobrado",
     "thisMonth": "Este mes",
-    "projected": "{month} · Previsto"
+    "projected": "{month}\nPrevisto"
   },
   "ended": {
     "title": "Canceladas",
@@ -56,14 +56,14 @@
   "list": {
     "title": "Suscripciones",
     "summary": {
-      "one": "{count} · {amount}/mes",
-      "other": "{count} · {amount}/mes"
+      "one": "{count}\n{amount}/mes",
+      "other": "{count}\n{amount}/mes"
     },
     "all": "Todas"
   },
   "row": {
-    "ends": " · Termina el {date}",
-    "renews": " · Se renueva {date}",
+    "ends": "\nTermina el {date}",
+    "renews": "\nSe renueva {date}",
     "monthly": "Mensual",
     "perMonthEq": "Al mes"
   },

@@ -1,7 +1,7 @@
 {
   "copy": "Copiar",
   "copied": "Copiado",
-  "overlap": { "title": "Também ativo", "previous": "Plano anterior", "until": "Até {date} · {rel}" },
+  "overlap": { "title": "Também ativo", "previous": "Plano anterior", "until": "Até {date}\n{rel}" },
   "action": {
     "edit": "Editar",
     "pause": "Pausar",
@@ -27,13 +27,13 @@
     "trialEnd": "Fim do teste",
     "region": "Região"
   },
-  "up": { "planned": "Mudança planejada · não confirmada", "starting": "Começa em breve", "changing": "Mudança próxima", "effective": "Data de vigência" },
+  "up": { "planned": "Mudança planejada\nnão confirmada", "starting": "Começa em breve", "changing": "Mudança próxima", "effective": "Data de vigência" },
   "plan": { "drop": "Não trocar", "droppedToast": "Sem troca. Termina após {date}", "confirm": "Confirmar troca", "confirmedToast": "Troca confirmada" },
   "intro": { "title": "Oferta inicial", "price": "Preço promocional", "until": "Fim da oferta", "then": "Depois" },
   "share": {
     "open": "Ver plano",
-    "owner": "Compartilhado · Eu organizo ({count}/{seats})",
-    "member": "Compartilhado · Participo",
+    "owner": "Compartilhado\nEu organizo ({count}/{seats})",
+    "member": "Compartilhado\nParticipo",
     "payTo": "Pagar a",
     "host": "Organizador",
     "myShare": "Minha parte",
@@ -50,7 +50,7 @@
   "charges": {
     "recentN": { "one": "Só a última", "other": "Só as últimas {count}" },
     "addShort": "Registrar",
-    "title": { "one": "Cobranças · {count}", "other": "Cobranças · {count}" },
+    "title": { "one": "Cobranças\n{count}", "other": "Cobranças\n{count}" },
     "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Falhou" },
     "add": "Adicionar registro (reembolso, ajuste, cobrança com falha, valor no cartão…)",
     "all": "Mostrar todas as {count}"
@@ -67,10 +67,10 @@
     "gaps": { "one": "Interrompida uma vez", "other": "Interrompida {count} vezes" },
     "perMonth": "Custo mensal real"
   },
-  "tab": { "charges": "Cobranças · {count}", "details": "Detalhes" },
+  "tab": { "charges": "Cobranças\n{count}", "details": "Detalhes" },
   "kpi": { "amortized": "Por mês de uso", "noGaps": "Sem interrupções", "startedToday": "Começou hoje", "expectedMonthly": "Previsto por mês" },
   "chart": {
-    "title": "Por cobrança · {ccy}",
+    "title": "Por cobrança\n{ccy}",
     "orig": "Original",
     "all": "Tudo",
     "y1": "1 ano",
@@ -97,7 +97,7 @@
   },
   "upcoming": {
     "title": "Próximos 12 meses",
-    "total": { "one": "≈ {amount} · {count} cobrança", "other": "≈ {amount} · {count} cobranças" },
+    "total": { "one": "≈ {amount}\n{count} cobrança", "other": "≈ {amount}\n{count} cobranças" },
     "more": { "one": "mais {count}", "other": "mais {count}" },
     "none": "Nenhuma cobrança nos próximos 12 meses"
   },

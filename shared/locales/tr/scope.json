@@ -58,8 +58,8 @@
   "generate": "Rapor oluştur",
   "search": "“{query}” araması",
   "selectionTitle": {
-    "one": "{scope} · {count} abonelik",
-    "other": "{scope} · {count} abonelik"
+    "one": "{scope}\n{count} abonelik",
+    "other": "{scope}\n{count} abonelik"
   },
   "mrrBasis": "Faturalandırılan aboneliklerdeki payımın aylık maliyeti. Yıllık planlar aylara bölünür; bu ayki gerçek ödemeler değildir.",
   "debitBasis": "Yalnızca pozitif ödemeler; iadeler ayrı gösterilir ve dağılımı veya sıralamayı azaltmaz.",

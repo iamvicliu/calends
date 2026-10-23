@@ -18,7 +18,7 @@
   "timeline": {
     "title": "타임라인",
     "upcoming": {
-      "other": "다음 30일 결제 {count}건 · {amount}"
+      "other": "다음 30일 결제 {count}건\n{amount}"
     }
   },
   "chart": {
@@ -28,7 +28,7 @@
     "mrr": "월 비용",
     "charge": "결제 금액",
     "thisMonth": "이번 달",
-    "projected": "{month} · 예측"
+    "projected": "{month}\n예측"
   },
   "ended": {
     "title": "해지됨",
@@ -55,13 +55,13 @@
   "list": {
     "title": "구독",
     "summary": {
-      "other": "{count}개 · {amount}/월"
+      "other": "{count}개\n{amount}/월"
     },
     "all": "전체"
   },
   "row": {
-    "ends": " · {date} 종료",
-    "renews": " · {date} 갱신",
+    "ends": "\n{date} 종료",
+    "renews": "\n{date} 갱신",
     "monthly": "월",
     "perMonthEq": "월 환산"
   },

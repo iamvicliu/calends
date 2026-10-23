@@ -16,8 +16,8 @@
     "other": "미수 {count}건"
   },
   "viewSub": "구독 보기",
-  "stoppedOn": " · {date} 중지",
-  "nextOn": " · 다음 {date}",
+  "stoppedOn": "\n{date} 중지",
+  "nextOn": "\n다음 {date}",
   "payFor": "{name} 대신",
   "unset": "설정 안 함",
   "paidPeriods": {
@@ -27,7 +27,7 @@
   "owed": "미수",
   "settled": "정산 완료",
   "detailTitle": "대신 결제",
-  "cardCcy": " · 카드는 {ccy}(으)로 결제",
+  "cardCcy": "\n카드는 {ccy}(으)로 결제",
   "forWhom": "대신 결제 대상",
   "method": "결제 수단",
   "subscription": "구독",
@@ -75,7 +75,7 @@
     "allBack": "모두 돌려받음",
     "total": "총 대신 결제액",
     "totalSub": {
-      "other": "결제 {count}건 · {subs}"
+      "other": "결제 {count}건\n{subs}"
     },
     "subs": {
       "other": "구독 {count}개"

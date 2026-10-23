@@ -15,7 +15,7 @@
     "since": "Mulai",
     "members": "Anggota",
     "receipts": "Pembayaran diterima",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Tanggal",
     "member": "Anggota",
     "covers": "Periode",
@@ -23,7 +23,7 @@
     "expandAll": "Buka semua",
     "collapseAll": "Tutup semua",
     "groupSum": {
-      "other": "{count} pembayaran · {amount}"
+      "other": "{count} pembayaran\n{amount}"
     },
     "fee": "Biaya",
     "nextCollection": "Penagihan berikutnya",
@@ -57,7 +57,7 @@
     "copied": {
       "other": "Disalin ke {count} anggota"
     },
-    "titleNew": "Tambah anggota · {name}",
+    "titleNew": "Tambah anggota\n{name}",
     "confirmDelete": "Hapus “{name}” secara permanen? Riwayat pembayarannya juga akan dihapus, sehingga pemasukan tercatat Anda berkurang.\nJika mereka hanya keluar dari paket, atur tanggal keluar saja.",
     "deleted": "Dihapus",
     "delete": "Hapus",
@@ -98,12 +98,12 @@
     "other": "Lainnya",
     "source": "Sumber",
     "sourcePh": "Dari grup mana / siapa yang mengajak",
-    "payments": "Pembayaran · {count}",
+    "payments": "Pembayaran\n{count}",
     "receivedTotal": "Total diterima sekitar {amount}",
     "paidUntil": "Lunas hingga",
     "paidUntilPh": "Belum ada pembayaran",
-    "payCover": "Diterima {date} · untuk {from}–{until}",
-    "payCoverTo": "Diterima {date} · untuk hingga {until}",
+    "payCover": "Diterima {date}\nuntuk {from}–{until}",
+    "payCoverTo": "Diterima {date}\nuntuk hingga {until}",
     "copyAria": "Salin ke anggota lain",
     "removePayAria": "Hapus pembayaran",
     "dup": "Sudah tercatat",
@@ -143,9 +143,9 @@
     },
     "collectionSchedule": "Tanggal penagihan: setiap tahun {dates}",
     "coverAligned": "Berakhir pada batas periode bersama",
-    "recordNext": "Catat pembayaran · {amount}",
+    "recordNext": "Catat pembayaran\n{amount}",
     "collectionAnchor": "Awal penagihan bersama",
-    "firstSummary": "Periode pertama {from}–{until} · {mode} {amount}",
+    "firstSummary": "Periode pertama {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Akun belum diisi",
     "editAccount": "Edit akun anggota",
     "copyAccount": "Salin akun"
@@ -170,9 +170,9 @@
       "other": "{count} anggota belum bayar"
     },
     "count": "Paket",
-    "countStarted": " dikelola · ",
+    "countStarted": " dikelola\n",
     "countJoined": " diikuti",
-    "countSub": "Dikelola · Diikuti",
+    "countSub": "Dikelola\nDiikuti",
     "emptyTitle": "Belum ada paket bersama",
     "emptyBody": "Di editor langganan, pilih “Saya pengelola” pada “Siapa yang memakai”, lalu tambahkan anggota dan bagiannya.",
     "next": "berikutnya {date}",
@@ -211,7 +211,7 @@
     },
     "collect": "Tagih",
     "joinedGroup": "Paket yang saya ikuti",
-    "payTo": "Dibayar ke {name} · {amount}",
+    "payTo": "Dibayar ke {name}\n{amount}",
     "ownerDefault": "pengelola",
     "maybeGroup": "Mungkin dipakai bersama",
     "convert": "Jadikan bersama",
@@ -243,13 +243,13 @@
     "profit": "Untung / thn",
     "since": "Sejak {month}",
     "sinceNone": "Sejak awal",
-    "actual": "Dibayar {paid} · Diterima {received} · {result}",
+    "actual": "Dibayar {paid}\nDiterima {received}\n{result}",
     "gain": "Untung {amount}",
     "lost": "Rugi {amount}",
     "noRecords": "Belum ada pembayaran"
   },
   "collect": {
-    "title": "Catat pembayaran · {name}",
+    "title": "Catat pembayaran\n{name}",
     "next": "Penagihan berikutnya {date}",
     "editMember": "Edit",
     "until": "Berlaku sampai",
@@ -279,7 +279,7 @@
     "late": {
       "other": "Terlambat {count} hari"
     },
-    "owe": "Tagihan {amount} · sejak {date}",
-    "settled": "Lunas · berikutnya {date}"
+    "owe": "Tagihan {amount}\nsejak {date}",
+    "settled": "Lunas\nberikutnya {date}"
   }
 }

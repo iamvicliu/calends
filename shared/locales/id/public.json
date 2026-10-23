@@ -18,7 +18,7 @@
   "timeline": {
     "title": "Linimasa",
     "upcoming": {
-      "other": "{count} tagihan dalam 30 hari ke depan · {amount}"
+      "other": "{count} tagihan dalam 30 hari ke depan\n{amount}"
     }
   },
   "chart": {
@@ -28,7 +28,7 @@
     "mrr": "Biaya bulanan",
     "charge": "Ditagih",
     "thisMonth": "Bulan ini",
-    "projected": "{month} · Perkiraan"
+    "projected": "{month}\nPerkiraan"
   },
   "ended": {
     "title": "Dibatalkan",
@@ -55,13 +55,13 @@
   "list": {
     "title": "Langganan",
     "summary": {
-      "other": "{count} · {amount}/bln"
+      "other": "{count}\n{amount}/bln"
     },
     "all": "Semua"
   },
   "row": {
-    "ends": " · Berakhir {date}",
-    "renews": " · Diperpanjang {date}",
+    "ends": "\nBerakhir {date}",
+    "renews": "\nDiperpanjang {date}",
     "monthly": "Bulanan",
     "perMonthEq": "Per bulan"
   },

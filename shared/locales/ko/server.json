@@ -38,7 +38,7 @@
   },
   "invalidPerson": "이름을 입력하세요",
   "personNotFound": "사람을 찾을 수 없어요",
-  "personInUse": "아직 {count}건의 공유·대신 결제에 연결돼 있어요. 먼저 다른 사람에게 병합하세요",
+  "personInUse": "아직 {count}건의 공유\n대신 결제에 연결돼 있어요. 먼저 다른 사람에게 병합하세요",
   "category": {
     "invalid": "카테고리 목록이 올바르지 않습니다",
     "duplicate": "카테고리 이름이 중복됩니다: {name}"

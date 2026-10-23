@@ -18,7 +18,7 @@
   "timeline": {
     "title": "タイムライン",
     "upcoming": {
-      "other": "今後30日間に{count}件の請求 · {amount}"
+      "other": "今後30日間に{count}件の請求\n{amount}"
     }
   },
   "chart": {
@@ -28,7 +28,7 @@
     "mrr": "月額",
     "charge": "請求額",
     "thisMonth": "今月",
-    "projected": "{month} · 予測"
+    "projected": "{month}\n予測"
   },
   "ended": {
     "title": "解約済み",
@@ -55,13 +55,13 @@
   "list": {
     "title": "サブスク",
     "summary": {
-      "other": "{count}件 · {amount}/月"
+      "other": "{count}件\n{amount}/月"
     },
     "all": "すべて"
   },
   "row": {
-    "ends": " · {date}終了",
-    "renews": " · {date}に更新",
+    "ends": "\n{date}終了",
+    "renews": "\n{date}に更新",
     "monthly": "月額",
     "perMonthEq": "月あたり"
   },

@@ -5,15 +5,15 @@
     "other": "{count} Zahlungsmethoden"
   },
   "subDrag": {
-    "one": "{count} Zahlungsmethode · Karten zum Sortieren ziehen",
-    "other": "{count} Zahlungsmethoden · Karten zum Sortieren ziehen"
+    "one": "{count} Zahlungsmethode\nKarten zum Sortieren ziehen",
+    "other": "{count} Zahlungsmethoden\nKarten zum Sortieren ziehen"
   },
   "add": "Hinzufügen",
   "orderSaved": "Reihenfolge gesichert",
   "runwayGroup": "Reichweite des Guthabens",
   "family": "Geteilte Abos",
   "familyCount": "{count}",
-  "unassigned": "Ohne Zahlungsmethode · {count}",
+  "unassigned": "Ohne Zahlungsmethode\n{count}",
   "runway": {
     "drain": "Etwa {amount}/Mon.",
     "scale": {
@@ -57,7 +57,7 @@
     "goTopup": "Aufladen",
     "site": "Website",
     "projection": "Anstehende Abbuchungen",
-    "linked": "Verknüpfte Abos · {count}",
+    "linked": "Verknüpfte Abos\n{count}",
     "none": "Keine",
     "notes": "Notizen"
   },
@@ -80,7 +80,7 @@
     "costPh": "Optional",
     "note": "Notiz",
     "notePh": "z. B. Razer Gold, ein Händler",
-    "history": "Aufladungen · {count}",
+    "history": "Aufladungen\n{count}",
     "spent": "{amount} bezahlt",
     "premium": "{pct} % Aufpreis",
     "below": "{pct} % unter Marktpreis",

@@ -17,8 +17,8 @@
     "other": "{count} ödeme bekliyor"
   },
   "viewSub": "Aboneliği gör",
-  "stoppedOn": " · {date} durduruldu",
-  "nextOn": " · sonraki {date}",
+  "stoppedOn": "\n{date} durduruldu",
+  "nextOn": "\nsonraki {date}",
   "payFor": "{name} için",
   "unset": "belirtilmedi",
   "paidPeriods": {
@@ -29,7 +29,7 @@
   "owed": "Borç",
   "settled": "Ödeşildi",
   "detailTitle": "Başkaları için",
-  "cardCcy": " · kart {ccy} ile ödüyor",
+  "cardCcy": "\nkart {ccy} ile ödüyor",
   "forWhom": "Kimin için",
   "method": "Ödeme yöntemi",
   "subscription": "Abonelik",
@@ -40,7 +40,7 @@
   "diffLabel": "Geri ödenen − ödenen",
   "table": {
     "cost": "O anki maliyet",
-    "total": "Toplam · {count}",
+    "total": "Toplam\n{count}",
     "receivedOn": "{date} alındı",
     "date": "Ödeme tarihi",
     "charged": "Ödenen",
@@ -78,8 +78,8 @@
     "allBack": "Tamamı geri ödendi",
     "total": "Toplam ödenen",
     "totalSub": {
-      "one": "{count} ödeme · {subs}",
-      "other": "{count} ödeme · {subs}"
+      "one": "{count} ödeme\n{subs}",
+      "other": "{count} ödeme\n{subs}"
     },
     "subs": {
       "one": "{count} abonelik",

@@ -102,7 +102,7 @@
     "crypto": "加密卡",
     "other": "其他"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "電郵"
   },
@@ -148,7 +148,7 @@
     "currencyHint": "退款貨幣固定為訂閱貨幣 {currency}，卡上實退可另填貨幣和金額。",
     "refunded": "已退款 {money}",
     "partial": "部分退款 {money}",
-    "unrefunded": "未退款 · 損失 {money}",
+    "unrefunded": "未退款\n損失 {money}",
     "unused": "未退款損失：{money}（{days}）",
     "unusedTitle": "未退款",
     "terminated": "已停用",

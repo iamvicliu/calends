@@ -74,9 +74,9 @@
   },
   "open": {
     "publicSubs": "展示的訂閱",
-    "publicSubsHint": "公開頁只展示下面這些訂閱。代付的訂閱從不公開；新加的訂閱預設展示。",
-    "publicShown": "展示中 · {count}",
-    "publicOff2": "未展示 · {count}",
+    "publicSubsHint": "代付訂閱不公開；新增訂閱預設公開。",
+    "publicShown": "展示中\n{count}",
+    "publicOff2": "未展示\n{count}",
     "publicShowAll": "全部展示",
     "publicHideAll": "全部隱藏",
     "publicHideOne": "不展示 {name}",
@@ -126,7 +126,7 @@
     "sep": "、"
   },
   "channels": {
-    "title": { "other": "通知管道 · 已開啟 {count} 個" },
+    "title": { "other": "通知管道\n已開啟 {count} 個" },
     "empty": "還沒有通知管道，提醒不會送出。",
     "test": "測試",
     "testFailed": "傳送失敗",
@@ -219,7 +219,7 @@
     "alreadyBound": "這台裝置已經綁定過了",
     "changePassword": "修改密碼",
     "devices": "登入裝置",
-    "devicesCount": { "other": "登入裝置 · {count}" },
+    "devicesCount": { "other": "登入裝置\n{count}" },
     "devicesFoot": "超過上限時，最久沒有活動的裝置會被自動登出。位置依 IP 估算，僅供參考。",
     "maxSessions": "最多同時登入",
     "maxSessionsSaved": { "other": "最多 {count} 台裝置" },

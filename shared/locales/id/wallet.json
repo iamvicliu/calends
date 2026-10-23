@@ -1,13 +1,13 @@
 {
   "title": "Dompet",
   "sub": { "other": "{count} metode pembayaran" },
-  "subDrag": { "other": "{count} metode pembayaran · Seret kartu untuk mengurutkan" },
+  "subDrag": { "other": "{count} metode pembayaran\nSeret kartu untuk mengurutkan" },
   "add": "Tambah",
   "orderSaved": "Urutan disimpan",
   "runwayGroup": "Daya tahan saldo",
   "family": "Paket bersama",
   "familyCount": "{count}",
-  "unassigned": "Tanpa metode pembayaran · {count}",
+  "unassigned": "Tanpa metode pembayaran\n{count}",
   "runway": {
     "drain": "Sekitar {amount}/bln",
     "scale": { "today": "Hari ini", "m3": "3 bln", "m6": "6 bln", "m9": "9 bln", "y1": "1 thn" },
@@ -36,7 +36,7 @@
     "goTopup": "Top up",
     "site": "Situs web",
     "projection": "Tagihan mendatang",
-    "linked": "Langganan terhubung · {count}",
+    "linked": "Langganan terhubung\n{count}",
     "none": "Tidak ada",
     "notes": "Catatan"
   },
@@ -59,7 +59,7 @@
     "costPh": "Opsional",
     "note": "Catatan",
     "notePh": "mis. Razer Gold, reseller",
-    "history": "Top up · {count}",
+    "history": "Top up\n{count}",
     "spent": "dibayar {amount}",
     "premium": "Premi {pct}%",
     "below": "{pct}% di bawah pasar",

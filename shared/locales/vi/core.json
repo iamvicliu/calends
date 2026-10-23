@@ -122,7 +122,7 @@
     "crypto": "Thẻ tiền mã hóa",
     "other": "Khác"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "Email"
   },
@@ -168,7 +168,7 @@
     "currencyHint": "Hoàn tiền dùng {currency}, đơn vị tiền của gói. Có thể nhập đơn vị tiền và số tiền thực hoàn về thẻ bên dưới.",
     "refunded": "Đã hoàn {money}",
     "partial": "Hoàn một phần {money}",
-    "unrefunded": "Chưa hoàn tiền · Tổn thất {money}",
+    "unrefunded": "Chưa hoàn tiền\nTổn thất {money}",
     "unused": "Tổn thất chưa hoàn tiền: {money} ({days})",
     "unusedTitle": "Chưa hoàn tiền",
     "terminated": "Đã vô hiệu hóa",

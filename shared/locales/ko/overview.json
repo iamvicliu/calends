@@ -2,7 +2,7 @@
   "title": "개요",
   "add": "새 구독",
   "footer": {
-    "other": "이용 중인 구독 {count}개 · {amount}/월 ·"
+    "other": "이용 중인 구독 {count}개\n{amount}/월\n"
   },
   "fullReport": "전체 리포트 보기",
   "listSep": ", ",
@@ -19,8 +19,8 @@
   },
   "timeline": {
     "title": "타임라인",
-    "sub": "지난 30일 결제 {past} · 다음 30일 예정 {next}",
-    "past": "지난 30일 · {amount}"
+    "sub": "지난 30일 결제 {past}\n다음 30일 예정 {next}",
+    "past": "지난 30일\n{amount}"
   },
   "spending": {
     "title": "월별 지출",
@@ -28,9 +28,9 @@
     "month": "월별",
     "yearly": "연도별",
     "year": "{year}년",
-    "projected": " · 예측",
-    "inProgress": " · 진행 중",
-    "paid": " · {amount} 결제됨",
+    "projected": "\n예측",
+    "inProgress": "\n진행 중",
+    "paid": "\n{amount} 결제됨",
     "empty": "이 기간에는 결제가 없습니다"
   },
   "due": {
@@ -43,7 +43,7 @@
   "wallet": {
     "title": "지갑",
     "manage": "관리",
-    "balance": "잔액 {amount} · {status}",
+    "balance": "잔액 {amount}\n{status}",
     "covered": {
       "other": "결제 {count}회 더 가능, {date}까지 충전 필요"
     },
@@ -64,8 +64,8 @@
     "ytd": "{year}년 결제액",
     "perDay": "하루",
     "active": "이용 중",
-    "share": "{amount}/월 · {pct}%",
-    "caption": "구독 별자리 · 거품 크기는 월 비용을 나타냅니다",
+    "share": "{amount}/월\n{pct}%",
+    "caption": "구독 별자리\n거품 크기는 월 비용을 나타냅니다",
     "aria": "{name}, 월 {amount}",
     "loss": "미환불 손실 포함"
   }

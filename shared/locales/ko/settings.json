@@ -21,7 +21,7 @@
     "startPage": "시작 화면",
     "startPageAria": "시작 페이지",
     "baseCurrency": "기준 통화",
-    "signedAmounts": "수입·지출 부호",
+    "signedAmounts": "수입\n지출 부호",
     "signedAmountsSub": "지출은 −, 환불과 돌려받은 돈은 +로 표시",
     "timezone": "시간대",
     "weekStart": "한 주의 시작",
@@ -84,9 +84,9 @@
   },
   "open": {
     "publicSubs": "공개할 구독",
-    "publicSubsHint": "공개 페이지에는 아래 구독만 표시됩니다. 대리 결제는 공개되지 않으며, 새 구독은 기본으로 표시됩니다.",
-    "publicShown": "표시 중 · {count}",
-    "publicOff2": "숨김 · {count}",
+    "publicSubsHint": "다른 사람을 대신해 결제한 구독은 비공개입니다. 새 구독은 기본적으로 공개됩니다.",
+    "publicShown": "표시 중\n{count}",
+    "publicOff2": "숨김\n{count}",
     "publicShowAll": "모두 표시",
     "publicHideAll": "모두 숨기기",
     "publicHideOne": "{name} 숨기기",
@@ -141,7 +141,7 @@
   },
   "channels": {
     "title": {
-      "other": "알림 채널 · {count}개 켜짐"
+      "other": "알림 채널\n{count}개 켜짐"
     },
     "empty": "채널이 없습니다. 알림이 발송되지 않습니다.",
     "test": "테스트",
@@ -189,7 +189,7 @@
       },
       "bark": {
         "keyPlaceholder": "앱에서 복사한 키",
-        "help": "iPhone 푸시 알림 · App Store에서 Bark를 검색하세요"
+        "help": "iPhone 푸시 알림\nApp Store에서 Bark를 검색하세요"
       },
       "ntfy": {
         "topicPlaceholder": "추측하기 어려운 이름을 정하세요",
@@ -242,7 +242,7 @@
     "changePassword": "비밀번호 변경",
     "devices": "로그인한 기기",
     "devicesCount": {
-      "other": "로그인한 기기 · {count}"
+      "other": "로그인한 기기\n{count}"
     },
     "devicesFoot": "한도에 도달하면 가장 오래 사용하지 않은 기기가 자동으로 로그아웃됩니다. 위치는 IP로 추정하므로 정확하지 않을 수 있습니다.",
     "maxSessions": "최대 로그인 기기 수",
@@ -307,12 +307,12 @@
       "tech": "기술",
       "media": "엔터테인먼트",
       "work": "업무",
-      "money": "쇼핑·금융",
+      "money": "쇼핑\n금융",
       "life": "생활",
       "food": "음식",
-      "health": "건강·운동",
-      "travel": "이동·여행",
-      "people": "사람·학습"
+      "health": "건강\n운동",
+      "travel": "이동\n여행",
+      "people": "사람\n학습"
     }
   }
 }

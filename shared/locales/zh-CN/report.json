@@ -24,7 +24,7 @@
   "hero": {
     "label": "每月订阅支出",
     "vsLastMonth": "较上月末",
-    "yearAgo": "· 一年前 {amount}",
+    "yearAgo": "\n一年前 {amount}",
     "annual": "年化",
     "perDay": "每天",
     "active": "计费中",
@@ -63,16 +63,16 @@
     "title": "现金与真实成本",
     "legendCash": "当月扣款",
     "legendAccrual": "摊到每月的成本",
-    "forecast": " · 预测",
-    "tip": "扣款 {cash} · 成本 {cost}",
-    "prepaidItem": "{name} · {amount} · 至 {until}",
+    "forecast": "\n预测",
+    "tip": "扣款 {cash}\n成本 {cost}",
+    "prepaidItem": "{name}\n{amount}\n至 {until}",
     "prepaid": "预付余值",
     "prepaidSub": "{count} 项已付未用完",
-    "savedItem": "{name} · {amount} · 自 {since}",
+    "savedItem": "{name}\n{amount}\n自 {since}",
     "saved": "退订后每月少花",
     "savedSub": "{count} 个已退订",
     "next90": "未来 90 天要付",
-    "peak": "高峰在 {n} 月 · {amount}",
+    "peak": "高峰在 {n} 月\n{amount}",
     "fullPaidHint": "全额实付，含替成员垫付"
   },
   "comp": {
@@ -86,7 +86,7 @@
     "yearly": "年付",
     "quarterly": "季付 / 半年付",
     "monthly": "月付",
-    "groupTip": "{name} · {count} 项 · {amount}/月"
+    "groupTip": "{name}\n{count} 项\n{amount}/月"
   },
   "topup": {
     "title": "充值计划",
@@ -98,7 +98,7 @@
     "span12": "未来一年",
     "empty": "还没有设置余额的账户。",
     "emptyCta": "去钱包填写 App Store / 话费余额",
-    "summary": "余额 {balance} · 每月约 {monthly}",
+    "summary": "余额 {balance}\n每月约 {monthly}",
     "why": "{span}要扣 {due}，余额 {balance}，还差 {need}",
     "urgent": "；最急的是 {date} 前至少补 {min}",
     "cards": "礼品卡面额参考",
@@ -129,7 +129,7 @@
     "loss": "未退款损失",
     "savedHint": "退订后截至今天，估算免去的续费",
     "lossHint": "服务提前终止、没有退回的费用",
-    "basis": "全部历史 · 我的份额；省下按当前汇率，未退款损失按停止日汇率。",
+    "basis": "全部历史\n我的份额；省下按当前汇率，未退款损失按停止日汇率。",
     "details": "未退款损失明细",
     "empty": "暂无未退款损失。",
     "cancel": "主动提前退订"

@@ -1,6 +1,6 @@
 {
   "yearTitle": "{year}年",
-  "summary": "{count} 笔 · {amount}",
+  "summary": "{count} 笔\n{amount}",
   "mode": {
     "month": "月",
     "year": "年"
@@ -18,8 +18,8 @@
   "monthAll": "{month}全部扣款",
   "noneMonth": "本月没有扣款",
   "day": "{day}日",
-  "heatCount": "{count} 笔 · ",
+  "heatCount": "{count} 笔\n",
   "pickDay": "点日期查看当天扣款",
-  "nextCharge": "下次扣款 · {date}",
+  "nextCharge": "下次扣款\n{date}",
   "expandReport": "展开完整报告"
 }

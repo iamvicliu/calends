@@ -1,7 +1,7 @@
 {
   "copy": "复制",
   "copied": "已复制",
-  "overlap": { "title": "同时进行中", "previous": "原来的方案", "until": "用到 {date} · {rel}" },
+  "overlap": { "title": "同时进行中", "previous": "原来的方案", "until": "用到 {date}\n{rel}" },
   "action": { "edit": "编辑", "pause": "暂停", "resume": "恢复", "manage": "管理", "website": "官网", "share": "分享", "copyImage": "复制为图片" },
   "toast": { "resumed": "已恢复计费", "paused": "已暂停，不再推算后续扣款", "imageCopied": "已复制图片" },
   "history": "历程",
@@ -19,13 +19,13 @@
     "trialEnd": "试用截止",
     "region": "地区"
   },
-  "up": { "planned": "计划变更 · 还没确定", "starting": "即将开始", "changing": "即将变更", "effective": "生效日期" },
+  "up": { "planned": "计划变更\n还没确定", "starting": "即将开始", "changing": "即将变更", "effective": "生效日期" },
   "plan": { "drop": "不切换了", "droppedToast": "不切换了，{date} 到期后不再续", "confirm": "确认切换", "confirmedToast": "已确认切换" },
   "intro": { "title": "首期优惠", "price": "优惠价", "until": "优惠截止", "then": "之后恢复" },
   "share": {
     "open": "查看合租",
-    "owner": "合租 · 我发起（{count}/{seats}）",
-    "member": "合租 · 我加入",
+    "owner": "合租\n我发起（{count}/{seats}）",
+    "member": "合租\n我加入",
     "payTo": "付给",
     "host": "发起人",
     "myShare": "我的份额",
@@ -42,7 +42,7 @@
   "charges": {
     "recentN": "只看最近 {count} 笔",
     "addShort": "记一笔",
-    "title": "扣款记录 · {count} 笔",
+    "title": "扣款记录\n{count} 笔",
     "kind": { "refund": "退款", "adjust": "补差", "failed": "失败" },
     "add": "记一笔（退款、补差、扣款失败、卡上实扣…）",
     "all": "显示全部 {count} 笔"
@@ -59,10 +59,10 @@
     "gaps": "中间断过 {count} 次",
     "perMonth": "实际每月"
   },
-  "tab": { "charges": "扣款记录 · {count}", "details": "详情" },
+  "tab": { "charges": "扣款记录\n{count}", "details": "详情" },
   "kpi": { "amortized": "摊到每月", "noGaps": "无断档", "startedToday": "今天开始", "expectedMonthly": "预计每月" },
   "chart": {
-    "title": "每笔扣款 · {ccy}",
+    "title": "每笔扣款\n{ccy}",
     "orig": "原币",
     "all": "全部",
     "y1": "1 年",
@@ -87,6 +87,6 @@
     "more": "显示更早的 {count} 条",
     "shareStart": "开始合租"
   },
-  "upcoming": { "title": "未来 12 个月", "total": "约 {amount} · {count} 笔", "more": "还有 {count} 笔", "none": "未来 12 个月没有扣款" },
+  "upcoming": { "title": "未来 12 个月", "total": "约 {amount}\n{count} 笔", "more": "还有 {count} 笔", "none": "未来 12 个月没有扣款" },
   "stop": { "title": "停止与退款", "type": "停止类型", "paidThrough": "本期原本付到日", "loss": "−{money}（{days}）" }
 }

@@ -89,9 +89,9 @@
   },
   "open": {
     "publicSubs": "Abonnements affichés",
-    "publicSubsHint": "Seuls ces abonnements apparaissent sur la page publique. Ceux payés pour d’autres ne sont jamais publics ; les nouveaux sont affichés par défaut.",
-    "publicShown": "Affichés · {count}",
-    "publicOff2": "Masqués · {count}",
+    "publicSubsHint": "Les abonnements payés pour autrui restent privés. Les nouveaux sont publics par défaut.",
+    "publicShown": "Affichés\n{count}",
+    "publicOff2": "Masqués\n{count}",
     "publicShowAll": "Tout afficher",
     "publicHideAll": "Tout masquer",
     "publicHideOne": "Masquer {name}",
@@ -148,8 +148,8 @@
   },
   "channels": {
     "title": {
-      "one": "Canaux de notification · {count} activé",
-      "other": "Canaux de notification · {count} activés"
+      "one": "Canaux de notification\n{count} activé",
+      "other": "Canaux de notification\n{count} activés"
     },
     "empty": "Aucun canal : les rappels ne seront pas envoyés.",
     "test": "Tester",
@@ -253,8 +253,8 @@
     "changePassword": "Changer le mot de passe",
     "devices": "Appareils connectés",
     "devicesCount": {
-      "one": "Appareil connecté · {count}",
-      "other": "Appareils connectés · {count}"
+      "one": "Appareil connecté\n{count}",
+      "other": "Appareils connectés\n{count}"
     },
     "devicesFoot": "Une fois la limite atteinte, l’appareil inactif depuis le plus longtemps est déconnecté automatiquement. Les lieux sont estimés à partir de l’IP et peuvent être imprécis.",
     "maxSessions": "Appareils connectés max.",
@@ -310,8 +310,8 @@
       "created": "Catégorie ajoutée",
       "saved": "Catégorie enregistrée",
       "renamed": {
-        "one": "Catégorie enregistrée · {count} abonnement mis à jour",
-        "other": "Catégorie enregistrée · {count} abonnements mis à jour"
+        "one": "Catégorie enregistrée\n{count} abonnement mis à jour",
+        "other": "Catégorie enregistrée\n{count} abonnements mis à jour"
       },
       "deleted": "Catégorie supprimée",
       "order": "Ordre enregistré"

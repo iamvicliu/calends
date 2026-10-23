@@ -10,7 +10,7 @@
     "received": "至今收回",
     "receivedSub": "合租与代付合计",
     "count": "人数",
-    "countSub": "合租 {share} · 代付 {proxy}"
+    "countSub": "合租 {share}\n代付 {proxy}"
   },
   "empty": {
     "title": "还没有人",

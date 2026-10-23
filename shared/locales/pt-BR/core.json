@@ -132,7 +132,7 @@
     "crypto": "Cartão cripto",
     "other": "Outro"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "E-mail"
   },
@@ -178,7 +178,7 @@
     "currencyHint": "O reembolso usa {currency}, a moeda da assinatura. Outra moeda do cartão pode ser informada abaixo.",
     "refunded": "Reembolsado {money}",
     "partial": "Reembolso parcial {money}",
-    "unrefunded": "Sem reembolso · Perda {money}",
+    "unrefunded": "Sem reembolso\nPerda {money}",
     "unused": "Perda não reembolsada: {money} ({days})",
     "unusedTitle": "Sem reembolso",
     "terminated": "Desativado",

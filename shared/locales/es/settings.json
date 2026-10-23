@@ -77,9 +77,9 @@
   },
   "open": {
     "publicSubs": "Suscripciones visibles",
-    "publicSubsHint": "Solo estas suscripciones aparecen en la página pública. Las pagadas por otros nunca son públicas; las nuevas se muestran por defecto.",
-    "publicShown": "Visibles · {count}",
-    "publicOff2": "Ocultas · {count}",
+    "publicSubsHint": "Las suscripciones pagadas por otros no se publican. Las nuevas son públicas por defecto.",
+    "publicShown": "Visibles\n{count}",
+    "publicOff2": "Ocultas\n{count}",
     "publicShowAll": "Mostrar todas",
     "publicHideAll": "Ocultar todas",
     "publicHideOne": "Ocultar {name}",
@@ -129,7 +129,7 @@
     "sep": ", "
   },
   "channels": {
-    "title": { "one": "Canales de notificación · {count} activo", "other": "Canales de notificación · {count} activos" },
+    "title": { "one": "Canales de notificación\n{count} activo", "other": "Canales de notificación\n{count} activos" },
     "empty": "Aún no hay canales: no se enviarán recordatorios.",
     "test": "Probar",
     "testFailed": "No se pudo enviar",
@@ -222,7 +222,7 @@
     "alreadyBound": "Este dispositivo ya tiene una llave de acceso",
     "changePassword": "Cambiar contraseña",
     "devices": "Dispositivos con sesión iniciada",
-    "devicesCount": { "one": "Dispositivos con sesión iniciada · {count}", "other": "Dispositivos con sesión iniciada · {count}" },
+    "devicesCount": { "one": "Dispositivos con sesión iniciada\n{count}", "other": "Dispositivos con sesión iniciada\n{count}" },
     "devicesFoot": "Al alcanzar el límite, se cierra automáticamente la sesión del dispositivo inactivo durante más tiempo. Las ubicaciones se estiman a partir de la IP y pueden no ser exactas.",
     "maxSessions": "Máximo de dispositivos con sesión",
     "maxSessionsSaved": { "one": "Hasta {count} dispositivo", "other": "Hasta {count} dispositivos" },
@@ -271,8 +271,8 @@
       "created": "Categoría añadida",
       "saved": "Categoría guardada",
       "renamed": {
-        "one": "Categoría guardada · {count} suscripción actualizada",
-        "other": "Categoría guardada · {count} suscripciones actualizadas"
+        "one": "Categoría guardada\n{count} suscripción actualizada",
+        "other": "Categoría guardada\n{count} suscripciones actualizadas"
       },
       "deleted": "Categoría eliminada",
       "order": "Orden guardado"

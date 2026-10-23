@@ -179,7 +179,7 @@
   },
   "name": {
     "placeholder": "Name, or paste an App Store link",
-    "catalog": "Popular services · fills in logo, category and website"
+    "catalog": "Popular services\nfills in logo, category and website"
   },
   "change": {
     "title": "History & changes",

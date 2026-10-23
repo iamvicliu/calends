@@ -15,7 +15,7 @@
     "since": "Bắt đầu",
     "members": "Thành viên",
     "receipts": "Đã nhận",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Ngày",
     "member": "Thành viên",
     "covers": "Kỳ",
@@ -23,7 +23,7 @@
     "expandAll": "Mở rộng tất cả",
     "collapseAll": "Thu gọn tất cả",
     "groupSum": {
-      "other": "{count} khoản · {amount}"
+      "other": "{count} khoản\n{amount}"
     },
     "fee": "Phí",
     "nextCollection": "Lần thu tiếp theo",
@@ -57,7 +57,7 @@
     "copied": {
       "other": "Đã sao chép cho {count} thành viên"
     },
-    "titleNew": "Thêm thành viên · {name}",
+    "titleNew": "Thêm thành viên\n{name}",
     "confirmDelete": "Xóa vĩnh viễn “{name}”? Lịch sử thanh toán của họ cũng sẽ bị xóa, làm giảm khoản thu đã ghi nhận.\nNếu họ chỉ rời gói, hãy đặt ngày rời đi.",
     "deleted": "Đã xóa",
     "delete": "Xóa",
@@ -98,12 +98,12 @@
     "other": "Khác",
     "source": "Nguồn",
     "sourcePh": "Từ nhóm nào / ai giới thiệu",
-    "payments": "Khoản thanh toán · {count}",
+    "payments": "Khoản thanh toán\n{count}",
     "receivedTotal": "Đã nhận tổng cộng khoảng {amount}",
     "paidUntil": "Đã trả đến",
     "paidUntilPh": "Chưa có khoản thanh toán",
-    "payCover": "Nhận {date} · cho {from}–{until}",
-    "payCoverTo": "Nhận {date} · cho đến {until}",
+    "payCover": "Nhận {date}\ncho {from}–{until}",
+    "payCoverTo": "Nhận {date}\ncho đến {until}",
     "copyAria": "Sao chép cho thành viên khác",
     "removePayAria": "Xóa khoản thanh toán",
     "dup": "Đã ghi nhận",
@@ -143,9 +143,9 @@
     },
     "collectionSchedule": "Ngày thu chung: hằng năm {dates}",
     "coverAligned": "Kết thúc vào cuối kỳ thu chung",
-    "recordNext": "Ghi nhận thanh toán · {amount}",
+    "recordNext": "Ghi nhận thanh toán\n{amount}",
     "collectionAnchor": "Mốc bắt đầu thu chung",
-    "firstSummary": "Kỳ đầu {from}–{until} · {mode} {amount}",
+    "firstSummary": "Kỳ đầu {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Chưa điền tài khoản",
     "editAccount": "Sửa tài khoản thành viên",
     "copyAccount": "Sao chép tài khoản"
@@ -170,9 +170,9 @@
       "other": "{count} thành viên chưa trả"
     },
     "count": "Gói",
-    "countStarted": " làm chủ · ",
+    "countStarted": " làm chủ\n",
     "countJoined": " tham gia",
-    "countSub": "Làm chủ · Tham gia",
+    "countSub": "Làm chủ\nTham gia",
     "emptyTitle": "Chưa có gói chia sẻ",
     "emptyBody": "Trong trình sửa gói đăng ký, chọn “Tôi làm chủ nhóm” ở mục “Ai sử dụng”, rồi thêm thành viên và phần của họ.",
     "next": "kỳ tới {date}",
@@ -211,7 +211,7 @@
     },
     "collect": "Thu tiền",
     "joinedGroup": "Gói tôi tham gia",
-    "payTo": "Trả cho {name} · {amount}",
+    "payTo": "Trả cho {name}\n{amount}",
     "ownerDefault": "chủ nhóm",
     "maybeGroup": "Có thể đang chia sẻ",
     "convert": "Chuyển thành gói chia sẻ",
@@ -243,13 +243,13 @@
     "profit": "Lãi / năm",
     "since": "Từ {month}",
     "sinceNone": "Từ đầu",
-    "actual": "Đã trả {paid} · Đã nhận {received} · {result}",
+    "actual": "Đã trả {paid}\nĐã nhận {received}\n{result}",
     "gain": "Lãi {amount}",
     "lost": "Lỗ {amount}",
     "noRecords": "Chưa có khoản thanh toán"
   },
   "collect": {
-    "title": "Ghi khoản thu · {name}",
+    "title": "Ghi khoản thu\n{name}",
     "next": "Lần thu tiếp theo {date}",
     "editMember": "Sửa",
     "until": "Áp dụng đến",
@@ -279,7 +279,7 @@
     "late": {
       "other": "Quá hạn {count} ngày"
     },
-    "owe": "Còn nợ {amount} · từ {date}",
-    "settled": "Đã thanh toán · lần tới {date}"
+    "owe": "Còn nợ {amount}\ntừ {date}",
+    "settled": "Đã thanh toán\nlần tới {date}"
   }
 }

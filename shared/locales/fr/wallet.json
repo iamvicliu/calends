@@ -5,15 +5,15 @@
     "other": "{count} moyens de paiement"
   },
   "subDrag": {
-    "one": "{count} moyen de paiement · Faites glisser les cartes pour les réorganiser",
-    "other": "{count} moyens de paiement · Faites glisser les cartes pour les réorganiser"
+    "one": "{count} moyen de paiement\nFaites glisser les cartes pour les réorganiser",
+    "other": "{count} moyens de paiement\nFaites glisser les cartes pour les réorganiser"
   },
   "add": "Ajouter",
   "orderSaved": "Ordre enregistré",
   "runwayGroup": "Autonomie du solde",
   "family": "Abonnements partagés",
   "familyCount": "{count}",
-  "unassigned": "Sans moyen de paiement · {count}",
+  "unassigned": "Sans moyen de paiement\n{count}",
   "runway": {
     "drain": "Environ {amount}/mois",
     "scale": {
@@ -57,7 +57,7 @@
     "goTopup": "Recharger",
     "site": "Site web",
     "projection": "Prélèvements à venir",
-    "linked": "Abonnements associés · {count}",
+    "linked": "Abonnements associés\n{count}",
     "none": "Aucun",
     "notes": "Notes"
   },
@@ -80,7 +80,7 @@
     "costPh": "Facultatif",
     "note": "Note",
     "notePh": "ex. Razer Gold, un revendeur",
-    "history": "Recharges · {count}",
+    "history": "Recharges\n{count}",
     "spent": "payé {amount}",
     "premium": "{pct} % de surcoût",
     "below": "{pct} % sous le marché",

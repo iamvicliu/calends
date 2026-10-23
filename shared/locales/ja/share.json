@@ -58,7 +58,7 @@
   "switches": "地域 / プランの変更",
   "stoppedOn": "{date}に終了しました",
   "endsOn": "{date}に終了予定",
-  "thanks": "ありがとうございました · また次のサイクルで",
+  "thanks": "ありがとうございました\nまた次のサイクルで",
   "n": {
     "charges": {
       "other": "{count}回の請求"
@@ -70,7 +70,7 @@
   "present": "現在",
   "priceChanges": "価格変更：{list}",
   "withYou": "一緒に過ごした期間",
-  "totalPerDay": "合計 {total} · 1日平均 {perDay}",
+  "totalPerDay": "合計 {total}\n1日平均 {perDay}",
   "lapsed": {
     "other": "{count}回中断"
   },

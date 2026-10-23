@@ -2,8 +2,8 @@
   "title": "Visão geral",
   "add": "Nova assinatura",
   "footer": {
-    "one": "{count} assinatura ativa · {amount}/mês ·",
-    "other": "{count} assinaturas ativas · {amount}/mês ·"
+    "one": "{count} assinatura ativa\n{amount}/mês\n",
+    "other": "{count} assinaturas ativas\n{amount}/mês\n"
   },
   "fullReport": "Ver relatório completo",
   "listSep": ", ",
@@ -22,8 +22,8 @@
   },
   "timeline": {
     "title": "Linha do tempo",
-    "sub": "{past} cobrados nos últimos 30 dias · {next} a vencer nos próximos 30",
-    "past": "Últimos 30 dias · {amount}"
+    "sub": "{past} cobrados nos últimos 30 dias\n{next} a vencer nos próximos 30",
+    "past": "Últimos 30 dias\n{amount}"
   },
   "spending": {
     "title": "Gastos mensais",
@@ -31,9 +31,9 @@
     "month": "Mensal",
     "yearly": "Anual",
     "year": "{year}",
-    "projected": " · Previsto",
-    "inProgress": " · Em andamento",
-    "paid": " · {amount} pagos",
+    "projected": "\nPrevisto",
+    "inProgress": "\nEm andamento",
+    "paid": "\n{amount} pagos",
     "empty": "Nenhuma cobrança neste período"
   },
   "due": {
@@ -46,7 +46,7 @@
   "wallet": {
     "title": "Carteira",
     "manage": "Gerenciar",
-    "balance": "Saldo {amount} · {status}",
+    "balance": "Saldo {amount}\n{status}",
     "covered": {
       "one": "cobre mais {count} cobrança, recarregue até {date}",
       "other": "cobre mais {count} cobranças, recarregue até {date}"
@@ -68,8 +68,8 @@
     "ytd": "Pago em {year}",
     "perDay": "Por dia",
     "active": "Ativas",
-    "share": "{amount}/mês · {pct}%",
-    "caption": "Constelação de assinaturas · o tamanho da bolha mostra o custo mensal",
+    "share": "{amount}/mês\n{pct}%",
+    "caption": "Constelação de assinaturas\no tamanho da bolha mostra o custo mensal",
     "aria": "{name}, {amount} por mês",
     "loss": "Inclui perda não reembolsada"
   }

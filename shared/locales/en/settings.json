@@ -74,9 +74,9 @@
   },
   "open": {
     "publicSubs": "Shown subscriptions",
-    "publicSubsHint": "Only these subscriptions appear on the public page. Paid-on-behalf ones are never public; new subscriptions are shown by default.",
-    "publicShown": "Shown · {count}",
-    "publicOff2": "Hidden · {count}",
+    "publicSubsHint": "Payments made for others stay private. New subscriptions are public by default.",
+    "publicShown": "Shown\n{count}",
+    "publicOff2": "Hidden\n{count}",
     "publicShowAll": "Show all",
     "publicHideAll": "Hide all",
     "publicHideOne": "Hide {name}",
@@ -126,7 +126,7 @@
     "sep": ", "
   },
   "channels": {
-    "title": { "one": "Notification channels · {count} on", "other": "Notification channels · {count} on" },
+    "title": { "one": "Notification channels\n{count} on", "other": "Notification channels\n{count} on" },
     "empty": "No channels yet — reminders won't be sent.",
     "test": "Test",
     "testFailed": "Couldn't send",
@@ -219,7 +219,7 @@
     "alreadyBound": "This device already has a passkey",
     "changePassword": "Change password",
     "devices": "Signed-in devices",
-    "devicesCount": { "one": "Signed-in devices · {count}", "other": "Signed-in devices · {count}" },
+    "devicesCount": { "one": "Signed-in devices\n{count}", "other": "Signed-in devices\n{count}" },
     "devicesFoot": "When the limit is reached, the device inactive the longest is signed out automatically. Locations are estimated from IP and may be inaccurate.",
     "maxSessions": "Max signed-in devices",
     "maxSessionsSaved": { "one": "Up to {count} device", "other": "Up to {count} devices" },
@@ -268,8 +268,8 @@
       "created": "Category added",
       "saved": "Category saved",
       "renamed": {
-        "one": "Category saved · {count} subscription updated",
-        "other": "Category saved · {count} subscriptions updated"
+        "one": "Category saved\n{count} subscription updated",
+        "other": "Category saved\n{count} subscriptions updated"
       },
       "deleted": "Category deleted",
       "order": "Order saved"

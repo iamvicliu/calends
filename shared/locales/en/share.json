@@ -62,7 +62,7 @@
   "switches": "Region / plan changes",
   "stoppedOn": "Stopped on {date}",
   "endsOn": "Ends on {date}",
-  "thanks": "Thank you · See you next cycle",
+  "thanks": "Thank you\nSee you next cycle",
   "n": {
     "charges": {
       "one": "{count} charge",
@@ -75,7 +75,7 @@
   "present": "now",
   "priceChanges": "Price changes: {list}",
   "withYou": "With you for",
-  "totalPerDay": "{total} total · {perDay}/day on average",
+  "totalPerDay": "{total} total\n{perDay}/day on average",
   "lapsed": {
     "one": "Lapsed once",
     "other": "Lapsed {count} times"

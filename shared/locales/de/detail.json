@@ -1,7 +1,7 @@
 {
   "copy": "Kopieren",
   "copied": "Kopiert",
-  "overlap": { "title": "Läuft parallel", "previous": "Vorheriger Tarif", "until": "Bis {date} · {rel}" },
+  "overlap": { "title": "Läuft parallel", "previous": "Vorheriger Tarif", "until": "Bis {date}\n{rel}" },
   "action": {
     "edit": "Bearbeiten",
     "pause": "Pausieren",
@@ -27,7 +27,7 @@
     "trialEnd": "Testphase endet",
     "region": "Region"
   },
-  "up": { "planned": "Geplante Änderung · nicht bestätigt", "starting": "Beginnt bald", "changing": "Anstehende Änderung", "effective": "Gültig ab" },
+  "up": { "planned": "Geplante Änderung\nnicht bestätigt", "starting": "Beginnt bald", "changing": "Anstehende Änderung", "effective": "Gültig ab" },
   "plan": {
     "drop": "Nicht wechseln",
     "droppedToast": "Kein Wechsel. Endet nach dem {date}",
@@ -37,8 +37,8 @@
   "intro": { "title": "Einführungsangebot", "price": "Einführungspreis", "until": "Angebot endet", "then": "Danach" },
   "share": {
     "open": "Gruppe öffnen",
-    "owner": "Geteilt · ich organisiere ({count}/{seats})",
-    "member": "Geteilt · ich bin dabei",
+    "owner": "Geteilt\nich organisiere ({count}/{seats})",
+    "member": "Geteilt\nich bin dabei",
     "payTo": "Zahlen an",
     "host": "Organisator",
     "myShare": "Mein Anteil",
@@ -55,7 +55,7 @@
   "charges": {
     "recentN": { "one": "Nur die letzten {count}", "other": "Nur die letzten {count}" },
     "addShort": "Erfassen",
-    "title": { "one": "Abbuchung · {count}", "other": "Abbuchungen · {count}" },
+    "title": { "one": "Abbuchung\n{count}", "other": "Abbuchungen\n{count}" },
     "kind": { "refund": "Erstattung", "adjust": "Korrektur", "failed": "Fehlgeschlagen" },
     "add": "Eintrag hinzufügen (Erstattung, Korrektur, fehlgeschlagene Abbuchung, Kartenbetrag …)",
     "all": "Alle {count} zeigen"
@@ -72,10 +72,10 @@
     "gaps": { "one": "Einmal unterbrochen", "other": "{count}-mal unterbrochen" },
     "perMonth": "Tatsächlich pro Monat"
   },
-  "tab": { "charges": "Abbuchungen · {count}", "details": "Details" },
+  "tab": { "charges": "Abbuchungen\n{count}", "details": "Details" },
   "kpi": { "amortized": "Pro Monat Besitz", "noGaps": "Keine Unterbrechung", "startedToday": "Heute begonnen", "expectedMonthly": "Voraussichtlich pro Monat" },
   "chart": {
-    "title": "Pro Abbuchung · {ccy}",
+    "title": "Pro Abbuchung\n{ccy}",
     "orig": "Original",
     "all": "Alle",
     "y1": "1 J.",
@@ -102,7 +102,7 @@
   },
   "upcoming": {
     "title": "Nächste 12 Monate",
-    "total": { "one": "≈ {amount} · {count} Abbuchung", "other": "≈ {amount} · {count} Abbuchungen" },
+    "total": { "one": "≈ {amount}\n{count} Abbuchung", "other": "≈ {amount}\n{count} Abbuchungen" },
     "more": { "one": "{count} weitere", "other": "{count} weitere" },
     "none": "Keine Abbuchungen in den nächsten 12 Monaten"
   },

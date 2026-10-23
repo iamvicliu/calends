@@ -58,7 +58,7 @@
   "generate": "產生報告",
   "search": "搜尋「{query}」",
   "selectionTitle": {
-    "other": "{scope} · {count} 個訂閱"
+    "other": "{scope}\n{count} 個訂閱"
   },
   "mrrBasis": "目前計費訂閱按我的份額折算的月成本；年付等按月攤算，不代表本月實扣。",
   "debitBasis": "僅統計正向扣款；退款單列，不抵減構成與排名。",

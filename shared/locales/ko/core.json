@@ -122,7 +122,7 @@
     "crypto": "암호화폐 카드",
     "other": "기타"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "이메일"
   },
@@ -140,16 +140,16 @@
     "cloud": "클라우드",
     "storage": "저장공간",
     "domains": "도메인",
-    "vpn": "VPN·네트워크",
+    "vpn": "VPN 및 네트워크",
     "developer": "개발",
     "design": "디자인",
     "education": "교육",
-    "news": "뉴스·읽기",
+    "news": "뉴스 및 독서",
     "social": "소셜",
     "shopping": "쇼핑",
     "finance": "금융",
     "insurance": "보험",
-    "health": "건강·피트니스",
+    "health": "건강 및 운동",
     "phone": "통신",
     "daily": "라이프스타일"
   },
@@ -168,7 +168,7 @@
     "currencyHint": "환불 통화는 구독 통화인 {currency}로 고정됩니다. 카드 환불은 다른 통화와 금액을 입력할 수 있습니다.",
     "refunded": "환불됨 {money}",
     "partial": "부분 환불 {money}",
-    "unrefunded": "미환불 · 손실 {money}",
+    "unrefunded": "미환불\n손실 {money}",
     "unused": "미환불 손실: {money} ({days})",
     "unusedTitle": "미환불",
     "terminated": "사용 중지됨",

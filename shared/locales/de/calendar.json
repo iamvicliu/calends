@@ -1,8 +1,8 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} Abbuchung · {amount}",
-    "other": "{count} Abbuchungen · {amount}"
+    "one": "{count} Abbuchung\n{amount}",
+    "other": "{count} Abbuchungen\n{amount}"
   },
   "mode": {
     "month": "Monat",
@@ -22,10 +22,10 @@
   "noneMonth": "Keine Abbuchungen in diesem Monat",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} Abbuchung · ",
-    "other": "{count} Abbuchungen · "
+    "one": "{count} Abbuchung\n",
+    "other": "{count} Abbuchungen\n"
   },
   "pickDay": "Datum wählen, um Abbuchungen anzuzeigen",
-  "nextCharge": "Nächste Abbuchung · {date}",
+  "nextCharge": "Nächste Abbuchung\n{date}",
   "expandReport": "Vollständigen Bericht öffnen"
 }

@@ -1,7 +1,7 @@
 {
   "copy": "Copier",
   "copied": "Copié",
-  "overlap": { "title": "Aussi en cours", "previous": "Ancienne formule", "until": "Jusqu’au {date} · {rel}" },
+  "overlap": { "title": "Aussi en cours", "previous": "Ancienne formule", "until": "Jusqu’au {date}\n{rel}" },
   "action": {
     "edit": "Modifier",
     "pause": "Suspendre",
@@ -27,7 +27,7 @@
     "trialEnd": "Fin de l’essai",
     "region": "Région"
   },
-  "up": { "planned": "Changement prévu · non confirmé", "starting": "Commence bientôt", "changing": "Changement à venir", "effective": "Date d’effet" },
+  "up": { "planned": "Changement prévu\nnon confirmé", "starting": "Commence bientôt", "changing": "Changement à venir", "effective": "Date d’effet" },
   "plan": {
     "drop": "Ne pas changer",
     "droppedToast": "Pas de changement. Se termine après le {date}",
@@ -37,8 +37,8 @@
   "intro": { "title": "Offre de lancement", "price": "Prix de lancement", "until": "Fin de l’offre", "then": "Ensuite" },
   "share": {
     "open": "Voir le partage",
-    "owner": "Partagé · j’organise ({count}/{seats})",
-    "member": "Partagé · j’ai rejoint",
+    "owner": "Partagé\nj’organise ({count}/{seats})",
+    "member": "Partagé\nj’ai rejoint",
     "payTo": "Payer à",
     "host": "Organisateur",
     "myShare": "Ma part",
@@ -55,7 +55,7 @@
   "charges": {
     "recentN": { "one": "Seulement le dernier", "other": "Seulement les {count} derniers" },
     "addShort": "Ajouter",
-    "title": { "one": "Prélèvements · {count}", "other": "Prélèvements · {count}" },
+    "title": { "one": "Prélèvements\n{count}", "other": "Prélèvements\n{count}" },
     "kind": { "refund": "Remboursement", "adjust": "Ajustement", "failed": "Échec" },
     "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)",
     "all": "Tout afficher ({count})"
@@ -72,10 +72,10 @@
     "gaps": { "one": "Interrompu une fois", "other": "Interrompu {count} fois" },
     "perMonth": "Coût mensuel réel"
   },
-  "tab": { "charges": "Prélèvements · {count}", "details": "Détails" },
+  "tab": { "charges": "Prélèvements\n{count}", "details": "Détails" },
   "kpi": { "amortized": "Par mois de possession", "noGaps": "Sans interruption", "startedToday": "Commencé aujourd’hui", "expectedMonthly": "Prévu par mois" },
   "chart": {
-    "title": "Par prélèvement · {ccy}",
+    "title": "Par prélèvement\n{ccy}",
     "orig": "Devise d’origine",
     "all": "Tout",
     "y1": "1 an",
@@ -102,7 +102,7 @@
   },
   "upcoming": {
     "title": "12 prochains mois",
-    "total": { "one": "≈ {amount} · {count} prélèvement", "other": "≈ {amount} · {count} prélèvements" },
+    "total": { "one": "≈ {amount}\n{count} prélèvement", "other": "≈ {amount}\n{count} prélèvements" },
     "more": { "one": "{count} de plus", "other": "{count} de plus" },
     "none": "Aucun prélèvement dans les 12 prochains mois"
   },

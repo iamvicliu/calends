@@ -18,8 +18,8 @@
   "timeline": {
     "title": "Timeline",
     "upcoming": {
-      "one": "{count} charge in the next 30 days · {amount}",
-      "other": "{count} charges in the next 30 days · {amount}"
+      "one": "{count} charge in the next 30 days\n{amount}",
+      "other": "{count} charges in the next 30 days\n{amount}"
     }
   },
   "chart": {
@@ -29,7 +29,7 @@
     "mrr": "Monthly cost",
     "charge": "Charged",
     "thisMonth": "This month",
-    "projected": "{month} · Projected"
+    "projected": "{month}\nProjected"
   },
   "ended": {
     "title": "Cancelled",
@@ -56,14 +56,14 @@
   "list": {
     "title": "Subscriptions",
     "summary": {
-      "one": "{count} · {amount}/mo",
-      "other": "{count} · {amount}/mo"
+      "one": "{count}\n{amount}/mo",
+      "other": "{count}\n{amount}/mo"
     },
     "all": "All"
   },
   "row": {
-    "ends": " · Ends {date}",
-    "renews": " · Renews {date}",
+    "ends": "\nEnds {date}",
+    "renews": "\nRenews {date}",
     "monthly": "Monthly",
     "perMonthEq": "Per month"
   },

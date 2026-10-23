@@ -10,7 +10,7 @@
     "received": "Terkumpul sejauh ini",
     "receivedSub": "Paket bersama dan talangan",
     "count": "Orang",
-    "countSub": "Paket bersama: {share} · Talangan: {proxy}"
+    "countSub": "Paket bersama: {share}\nTalangan: {proxy}"
   },
   "empty": {
     "title": "Belum ada orang",

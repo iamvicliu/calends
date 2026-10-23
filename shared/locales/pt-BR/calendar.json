@@ -1,8 +1,8 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} cobrança · {amount}",
-    "other": "{count} cobranças · {amount}"
+    "one": "{count} cobrança\n{amount}",
+    "other": "{count} cobranças\n{amount}"
   },
   "mode": {
     "month": "Mês",
@@ -22,10 +22,10 @@
   "noneMonth": "Nenhuma cobrança neste mês",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} cobrança · ",
-    "other": "{count} cobranças · "
+    "one": "{count} cobrança\n",
+    "other": "{count} cobranças\n"
   },
   "pickDay": "Selecione uma data para ver as cobranças",
-  "nextCharge": "Próxima cobrança · {date}",
+  "nextCharge": "Próxima cobrança\n{date}",
   "expandReport": "Expandir relatório completo"
 }

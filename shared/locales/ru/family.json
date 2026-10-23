@@ -15,7 +15,7 @@
     "since": "Начало",
     "members": "Участники",
     "receipts": "Полученные платежи",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Дата",
     "member": "Участник",
     "covers": "Период",
@@ -23,9 +23,9 @@
     "expandAll": "Развернуть все",
     "collapseAll": "Свернуть все",
     "groupSum": {
-      "one": "{count} платёж · {amount}",
-      "other": "{count} платежей · {amount}",
-      "few": "{count} платежа · {amount}"
+      "one": "{count} платёж\n{amount}",
+      "other": "{count} платежей\n{amount}",
+      "few": "{count} платежа\n{amount}"
     },
     "fee": "Плата",
     "nextCollection": "Следующий сбор",
@@ -62,7 +62,7 @@
       "many": "Скопировано {count} участникам",
       "other": "Скопировано {count} участникам"
     },
-    "titleNew": "Новый участник · {name}",
+    "titleNew": "Новый участник\n{name}",
     "confirmDelete": "Удалить «{name}» навсегда? Вся история его платежей тоже удалится, и учтённый доход уменьшится.\nЕсли участник просто вышел из подписки, укажите дату выхода.",
     "deleted": "Удалено",
     "delete": "Удалить",
@@ -106,12 +106,12 @@
     "other": "Другое",
     "source": "Откуда",
     "sourcePh": "Из какой группы / кто привёл",
-    "payments": "Платежи · {count}",
+    "payments": "Платежи\n{count}",
     "receivedTotal": "Всего получено около {amount}",
     "paidUntil": "Оплачено до",
     "paidUntilPh": "Платежей пока нет",
-    "payCover": "Получено {date} · за {from}–{until}",
-    "payCoverTo": "Получено {date} · по {until}",
+    "payCover": "Получено {date}\nза {from}–{until}",
+    "payCoverTo": "Получено {date}\nпо {until}",
     "copyAria": "Скопировать другим участникам",
     "removePayAria": "Удалить платёж",
     "dup": "Уже записано",
@@ -154,9 +154,9 @@
     },
     "collectionSchedule": "Даты сбора: ежегодно {dates}",
     "coverAligned": "До конца общего расчётного периода",
-    "recordNext": "Записать платёж · {amount}",
+    "recordNext": "Записать платёж\n{amount}",
     "collectionAnchor": "Общая дата начала сбора",
-    "firstSummary": "Первый период {from}–{until} · {mode} {amount}",
+    "firstSummary": "Первый период {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Аккаунт не указан",
     "editAccount": "Изменить аккаунт участника",
     "copyAccount": "Копировать аккаунт"
@@ -184,9 +184,9 @@
       "other": "{count} участника не заплатили"
     },
     "count": "Подписки",
-    "countStarted": " организую · ",
+    "countStarted": " организую\n",
     "countJoined": " участвую",
-    "countSub": "Организую · Участвую",
+    "countSub": "Организую\nУчаствую",
     "emptyTitle": "Совместных подписок пока нет",
     "emptyBody": "В редакторе подписки выберите «Я организатор» в разделе «Кто пользуется», затем добавьте участников и их доли.",
     "next": "следующий {date}",
@@ -237,7 +237,7 @@
     },
     "collect": "Получить",
     "joinedGroup": "Подписки, в которых я участвую",
-    "payTo": "Плачу {name} · {amount}",
+    "payTo": "Плачу {name}\n{amount}",
     "ownerDefault": "организатор",
     "maybeGroup": "Возможно, совместные",
     "convert": "Сделать совместной",
@@ -269,13 +269,13 @@
     "profit": "Прибыль / год",
     "since": "{month} — сейчас",
     "sinceNone": "С начала",
-    "actual": "Заплачено {paid} · Получено {received} · {result}",
+    "actual": "Заплачено {paid}\nПолучено {received}\n{result}",
     "gain": "В плюсе на {amount}",
     "lost": "В минусе на {amount}",
     "noRecords": "Платежей пока нет"
   },
   "collect": {
-    "title": "Записать оплату · {name}",
+    "title": "Записать оплату\n{name}",
     "next": "Следующий сбор {date}",
     "editMember": "Изменить",
     "until": "Покрывает до",
@@ -308,7 +308,7 @@
       "many": "Просрочено на {count} дней",
       "other": "Просрочено на {count} дня"
     },
-    "owe": "Долг {amount} · с {date}",
-    "settled": "Оплачено · следующий платёж {date}"
+    "owe": "Долг {amount}\nс {date}",
+    "settled": "Оплачено\nследующий платёж {date}"
   }
 }

@@ -9,7 +9,7 @@
   "neverUsed": "未使用",
   "tokenPlaceholder": "<your-token>",
   "tokens": {
-    "other": "トークン · {count}"
+    "other": "トークン\n{count}"
   },
   "noTokens": "トークンはまだありません。作成して、接続したい AI アシスタントに渡してください。",
   "lastUsed": "最終使用 {time}",
@@ -18,7 +18,7 @@
   "revoked": "無効にしました",
   "setup": "設定方法",
   "tools": {
-    "other": "利用可能なツール · {count}"
+    "other": "利用可能なツール\n{count}"
   },
   "clientOther": "その他",
   "scope": {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { categoryColor, categoryList, cleanCategories, isDomainCategory, isIconName, PRESETS, presetCategory, renameInSubs } from './categories.ts';
+import { presetOf, categoryColor, categoryList, cleanCategories, isDomainCategory, isIconName, PRESETS, presetCategory, renameInSubs } from './categories.ts';
 import { FALLBACK_FX } from './billing.ts';
 import { maskForPublic } from './mask.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
@@ -139,4 +139,17 @@ test('内置分类在任何语言下的名字都认回同一个预设，公开�
     assert.ok(isDomainSub({ name: 'my site', category: name, tags: [] }), name);
   }
   assert.equal(presetOf('Spiele')?.code, 'games');
+});
+
+test('旧韩语分类名称保留识别与存储原名', () => {
+  for (const [name, code] of [
+    ['VPN·네트워크', 'vpn'],
+    ['뉴스·읽기', 'news'],
+    ['건강·피트니스', 'health'],
+  ]) {
+    assert.equal(presetOf(name, nameOf)?.code, code);
+    const category = categoryList({}, subs(name), nameOf).find((c) => c.name === name);
+    assert.equal(category?.preset, code);
+    assert.equal(category?.name, name);
+  }
 });

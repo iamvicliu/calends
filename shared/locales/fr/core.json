@@ -132,7 +132,7 @@
     "crypto": "Carte crypto",
     "other": "Autre"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "E-mail"
   },
@@ -178,7 +178,7 @@
     "currencyHint": "Le remboursement utilise {currency}, la devise de l’abonnement. Une autre devise de carte peut être saisie ci-dessous.",
     "refunded": "Remboursé {money}",
     "partial": "Remboursement partiel {money}",
-    "unrefunded": "Non remboursé · Perte {money}",
+    "unrefunded": "Non remboursé\nPerte {money}",
     "unused": "Perte non remboursée: {money} ({days})",
     "unusedTitle": "Non remboursé",
     "terminated": "Désactivé",

@@ -132,7 +132,7 @@
     "crypto": "Kripto kart",
     "other": "Diğer"
   },
-  "publicMethod": "{kind} · {region}",
+  "publicMethod": "{kind}\n{region}",
   "channel": {
     "email": "E-posta"
   },
@@ -178,7 +178,7 @@
     "currencyHint": "İadeler abonelik para birimi {currency} ile kaydedilir. Kart iadesi için aşağıya farklı para birimi girilebilir.",
     "refunded": "İade edildi {money}",
     "partial": "Kısmi iade {money}",
-    "unrefunded": "İade yok · Kayıp {money}",
+    "unrefunded": "İade yok\nKayıp {money}",
     "unused": "İade edilmeyen kayıp: {money} ({days})",
     "unusedTitle": "İade edilmedi",
     "terminated": "Kapatıldı",

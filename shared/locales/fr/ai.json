@@ -9,8 +9,8 @@
   "neverUsed": "Jamais utilisé",
   "tokenPlaceholder": "<votre-jeton>",
   "tokens": {
-    "one": "Jetons · {count}",
-    "other": "Jetons · {count}"
+    "one": "Jetons\n{count}",
+    "other": "Jetons\n{count}"
   },
   "noTokens": "Aucun jeton pour l’instant. Créez-en un et donnez-le à l’assistant IA que vous voulez connecter.",
   "lastUsed": "Dernière utilisation {time}",
@@ -19,8 +19,8 @@
   "revoked": "Révoqué",
   "setup": "Configuration",
   "tools": {
-    "one": "Outil disponible · {count}",
-    "other": "Outils disponibles · {count}"
+    "one": "Outil disponible\n{count}",
+    "other": "Outils disponibles\n{count}"
   },
   "clientOther": "Autre",
   "scope": {

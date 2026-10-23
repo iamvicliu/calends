@@ -16,8 +16,8 @@
     "other": "{count} khoản chưa trả lại"
   },
   "viewSub": "Xem gói đăng ký",
-  "stoppedOn": " · dừng {date}",
-  "nextOn": " · kỳ tới {date}",
+  "stoppedOn": "\ndừng {date}",
+  "nextOn": "\nkỳ tới {date}",
   "payFor": "Cho {name}",
   "unset": "chưa đặt",
   "paidPeriods": {
@@ -27,7 +27,7 @@
   "owed": "Chưa trả lại",
   "settled": "Đã trả đủ",
   "detailTitle": "Trả hộ",
-  "cardCcy": " · thẻ thanh toán bằng {ccy}",
+  "cardCcy": "\nthẻ thanh toán bằng {ccy}",
   "forWhom": "Trả hộ cho",
   "method": "Phương thức thanh toán",
   "subscription": "Gói đăng ký",
@@ -38,7 +38,7 @@
   "diffLabel": "Đã trả lại − đã trừ",
   "table": {
     "cost": "Chi phí lúc đó",
-    "total": "Tổng · {count}",
+    "total": "Tổng\n{count}",
     "receivedOn": "Nhận {date}",
     "date": "Ngày trừ tiền",
     "charged": "Đã trừ",
@@ -75,7 +75,7 @@
     "allBack": "Đã trả lại hết",
     "total": "Tổng đã trả hộ",
     "totalSub": {
-      "other": "{count} khoản phí · {subs}"
+      "other": "{count} khoản phí\n{subs}"
     },
     "subs": {
       "other": "{count} gói đăng ký"

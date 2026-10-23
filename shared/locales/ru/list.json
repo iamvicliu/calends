@@ -6,10 +6,10 @@
   "title": "Все подписки",
   "all": "Все",
   "summary": {
-    "one": "{count} подписка · {monthly}/мес. · {yearly}/год",
-    "few": "{count} подписки · {monthly}/мес. · {yearly}/год",
-    "many": "{count} подписок · {monthly}/мес. · {yearly}/год",
-    "other": "{count} подписки · {monthly}/мес. · {yearly}/год"
+    "one": "{count} подписка\n{monthly}/мес.\n{yearly}/год",
+    "few": "{count} подписки\n{monthly}/мес.\n{yearly}/год",
+    "many": "{count} подписок\n{monthly}/мес.\n{yearly}/год",
+    "other": "{count} подписки\n{monthly}/мес.\n{yearly}/год"
   },
   "status": {
     "upcoming": "Не началась",
@@ -23,7 +23,7 @@
     "lifetime": "Навсегда",
     "terminated": "Отключено"
   },
-  "proxyExcluded": "Оплата за других · не учитывается",
+  "proxyExcluded": "Оплата за других\nне учитывается",
   "perMonthApprox": "≈ {amount}/мес.",
   "originalPrice": "Было {amount}",
   "view": {
@@ -70,25 +70,25 @@
   "endedOn": "Завершена {date}",
   "change": {
     "noMethod": "Способ оплаты не выбран",
-    "planned": "В планах · ",
+    "planned": "В планах\n",
     "starts": "Начнётся {when}",
     "from": "Изменится {when}"
   },
   "proxyBadge": {
     "owed": {
-      "one": "Оплата за других · к оплате {count}",
-      "few": "Оплата за других · к оплате {count}",
-      "many": "Оплата за других · к оплате {count}",
-      "other": "Оплата за других · к оплате {count}"
+      "one": "Оплата за других\nк оплате {count}",
+      "few": "Оплата за других\nк оплате {count}",
+      "many": "Оплата за других\nк оплате {count}",
+      "other": "Оплата за других\nк оплате {count}"
     },
     "owedFor": {
-      "one": "Оплата за {name} · к оплате {count}",
-      "few": "Оплата за {name} · к оплате {count}",
-      "many": "Оплата за {name} · к оплате {count}",
-      "other": "Оплата за {name} · к оплате {count}"
+      "one": "Оплата за {name}\nк оплате {count}",
+      "few": "Оплата за {name}\nк оплате {count}",
+      "many": "Оплата за {name}\nк оплате {count}",
+      "other": "Оплата за {name}\nк оплате {count}"
     },
-    "settled": "Оплата за других · рассчитались",
-    "settledFor": "Оплата за {name} · рассчитались"
+    "settled": "Оплата за других\nрассчитались",
+    "settledFor": "Оплата за {name}\nрассчитались"
   },
   "gantt": {
     "months": {
@@ -114,15 +114,15 @@
     "gapShort": "Перерыв {span}",
     "lifetimeSuffix": " навсегда",
     "present": "сейчас",
-    "plannedSuffix": " · в планах",
-    "introPrefix": "Вводное предложение · ",
+    "plannedSuffix": "\nв планах",
+    "introPrefix": "Вводное предложение\n",
     "introShort": "Вводная ",
     "planned": "В планах",
     "gap": "Перерыв",
     "earlier": "Раньше",
     "later": "Позже",
     "backToNow": "Вернуться к сегодня",
-    "resize": "Перетащите, чтобы изменить ширину столбца названий · двойной щелчок — сброс"
+    "resize": "Перетащите, чтобы изменить ширину столбца названий\nдвойной щелчок — сброс"
   },
   "kind": {
     "debit": "Банковская карта",

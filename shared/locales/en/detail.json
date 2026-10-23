@@ -1,7 +1,7 @@
 {
   "copy": "Copy",
   "copied": "Copied",
-  "overlap": { "title": "Also running", "previous": "Previous plan", "until": "Runs until {date} · {rel}" },
+  "overlap": { "title": "Also running", "previous": "Previous plan", "until": "Runs until {date}\n{rel}" },
   "action": { "edit": "Edit", "pause": "Pause", "resume": "Resume", "manage": "Manage", "website": "Website", "share": "Share", "copyImage": "Copy as image" },
   "toast": { "resumed": "Billing resumed", "paused": "Paused. Future charges won't be projected", "imageCopied": "Image copied" },
   "history": "History",
@@ -19,13 +19,13 @@
     "trialEnd": "Trial ends",
     "region": "Region"
   },
-  "up": { "planned": "Planned change · not confirmed", "starting": "Starting soon", "changing": "Upcoming change", "effective": "Effective date" },
+  "up": { "planned": "Planned change\nnot confirmed", "starting": "Starting soon", "changing": "Upcoming change", "effective": "Effective date" },
   "plan": { "drop": "Don't switch", "droppedToast": "Won't switch. Ends after {date}", "confirm": "Confirm switch", "confirmedToast": "Switch confirmed" },
   "intro": { "title": "Intro offer", "price": "Intro price", "until": "Offer ends", "then": "Then" },
   "share": {
     "open": "Open plan",
-    "owner": "Shared · I host ({count}/{seats})",
-    "member": "Shared · I joined",
+    "owner": "Shared\nI host ({count}/{seats})",
+    "member": "Shared\nI joined",
     "payTo": "Pay to",
     "host": "Host",
     "myShare": "My share",
@@ -42,7 +42,7 @@
   "charges": {
     "recentN": { "one": "Latest {count} only", "other": "Latest {count} only" },
     "addShort": "Add",
-    "title": { "one": "Charges · {count}", "other": "Charges · {count}" },
+    "title": { "one": "Charges\n{count}", "other": "Charges\n{count}" },
     "kind": { "refund": "Refund", "adjust": "Adjustment", "failed": "Failed" },
     "add": "Add a record (refund, adjustment, failed charge, card amount…)",
     "all": "Show all {count}"
@@ -59,10 +59,10 @@
     "gaps": { "one": "Lapsed once", "other": "Lapsed {count} times" },
     "perMonth": "Actual monthly"
   },
-  "tab": { "charges": "Charges · {count}", "details": "Details" },
+  "tab": { "charges": "Charges\n{count}", "details": "Details" },
   "kpi": { "amortized": "Per month owned", "noGaps": "No lapses", "startedToday": "Started today", "expectedMonthly": "Expected monthly" },
   "chart": {
-    "title": "Per charge · {ccy}",
+    "title": "Per charge\n{ccy}",
     "orig": "Original",
     "all": "All",
     "y1": "1Y",
@@ -89,7 +89,7 @@
   },
   "upcoming": {
     "title": "Next 12 months",
-    "total": { "one": "≈ {amount} · {count} charge", "other": "≈ {amount} · {count} charges" },
+    "total": { "one": "≈ {amount}\n{count} charge", "other": "≈ {amount}\n{count} charges" },
     "more": { "one": "{count} more", "other": "{count} more" },
     "none": "No charges in the next 12 months"
   },

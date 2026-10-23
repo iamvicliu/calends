@@ -24,7 +24,7 @@
   "hero": {
     "label": "월 구독 지출",
     "vsLastMonth": "지난달 말 대비",
-    "yearAgo": "· 1년 전 {amount}",
+    "yearAgo": "\n1년 전 {amount}",
     "annual": "연간",
     "perDay": "하루",
     "active": "이용 중",
@@ -65,16 +65,16 @@
     "title": "현금 지출 vs. 실제 비용",
     "legendCash": "그달 결제 금액",
     "legendAccrual": "월별로 나눈 비용",
-    "forecast": " · 예측",
-    "tip": "결제 {cash} · 비용 {cost}",
-    "prepaidItem": "{name} · {amount} · {until}까지",
+    "forecast": "\n예측",
+    "tip": "결제 {cash}\n비용 {cost}",
+    "prepaidItem": "{name}\n{amount}\n{until}까지",
     "prepaid": "선결제 잔여 가치",
     "prepaidSub": "{count}개 결제 완료, 아직 사용 중",
-    "savedItem": "{name} · {amount} · {since}부터",
+    "savedItem": "{name}\n{amount}\n{since}부터",
     "saved": "해지 후 매달 절약",
     "savedSub": "{count}개 해지",
     "next90": "다음 90일 결제 예정",
-    "peak": "최고점 {month} · {amount}",
+    "peak": "최고점 {month}\n{amount}",
     "fullPaidHint": "멤버 대신 낸 금액을 포함한 전체 결제액"
   },
   "comp": {
@@ -89,7 +89,7 @@
     "quarterly": "분기 / 반기",
     "monthly": "월간",
     "groupTip": {
-      "other": "{name} · {count}개 · {amount}/월"
+      "other": "{name}\n{count}개\n{amount}/월"
     }
   },
   "topup": {
@@ -102,7 +102,7 @@
     "span12": "다음 1년",
     "empty": "아직 잔액이 있는 계정이 없습니다.",
     "emptyCta": "지갑에서 App Store 또는 통신사 잔액 추가",
-    "summary": "잔액 {balance} · 월 약 {monthly}",
+    "summary": "잔액 {balance}\n월 약 {monthly}",
     "why": "{span}: 결제 {due}, 보유 {balance}, 부족 {need}",
     "urgent": "; 가장 급함: {date}까지 최소 {min} 충전",
     "cards": "추천 기프트 카드",
@@ -135,7 +135,7 @@
     "loss": "미환불 손실",
     "savedHint": "해지 후 오늘까지 지불하지 않은 갱신 비용 추정액",
     "lossHint": "서비스가 조기 종료되어 환불받지 못한 요금",
-    "basis": "전체 내역 · 내 부담분. 절약액은 현재 환율, 미환불 손실은 종료일 환율 기준.",
+    "basis": "전체 내역\n내 부담분. 절약액은 현재 환율, 미환불 손실은 종료일 환율 기준.",
     "details": "미환불 손실 내역",
     "empty": "미환불 손실이 없습니다.",
     "cancel": "자발적 조기 해지"

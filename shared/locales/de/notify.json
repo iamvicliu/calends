@@ -20,7 +20,7 @@
       "one": "{count} Tag überfällig",
       "other": "{count} Tage überfällig"
     },
-    "sub": "{status} · nächster Zeitraum: {bill}",
+    "sub": "{status}\nnächster Zeitraum: {bill}",
     "headline": "Zeit, bei {member} für {name} einzusammeln"
   },
   "proxy": {

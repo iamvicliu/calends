@@ -1,8 +1,8 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} charge · {amount}",
-    "other": "{count} charges · {amount}"
+    "one": "{count} charge\n{amount}",
+    "other": "{count} charges\n{amount}"
   },
   "mode": {
     "month": "Month",
@@ -22,10 +22,10 @@
   "noneMonth": "No charges this month",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} charge · ",
-    "other": "{count} charges · "
+    "one": "{count} charge\n",
+    "other": "{count} charges\n"
   },
   "pickDay": "Click a date to view its charges",
-  "nextCharge": "Next charge · {date}",
+  "nextCharge": "Next charge\n{date}",
   "expandReport": "Expand full report"
 }

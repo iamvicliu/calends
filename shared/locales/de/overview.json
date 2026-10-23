@@ -2,8 +2,8 @@
   "title": "Übersicht",
   "add": "Neues Abo",
   "footer": {
-    "one": "{count} aktives Abo · {amount}/Mon. ·",
-    "other": "{count} aktive Abos · {amount}/Mon. ·"
+    "one": "{count} aktives Abo\n{amount}/Mon.\n",
+    "other": "{count} aktive Abos\n{amount}/Mon.\n"
   },
   "fullReport": "Ganzen Bericht ansehen",
   "listSep": ", ",
@@ -22,8 +22,8 @@
   },
   "timeline": {
     "title": "Zeitleiste",
-    "sub": "{past} in den letzten 30 Tagen abgebucht · {next} fällig in den nächsten 30",
-    "past": "Letzte 30 Tage · {amount}"
+    "sub": "{past} in den letzten 30 Tagen abgebucht\n{next} fällig in den nächsten 30",
+    "past": "Letzte 30 Tage\n{amount}"
   },
   "spending": {
     "title": "Monatliche Ausgaben",
@@ -31,9 +31,9 @@
     "month": "Monatlich",
     "yearly": "Jährlich",
     "year": "{year}",
-    "projected": " · Prognose",
-    "inProgress": " · Laufend",
-    "paid": " · {amount} bezahlt",
+    "projected": "\nPrognose",
+    "inProgress": "\nLaufend",
+    "paid": "\n{amount} bezahlt",
     "empty": "Keine Abbuchungen in diesem Zeitraum"
   },
   "due": {
@@ -46,7 +46,7 @@
   "wallet": {
     "title": "Wallet",
     "manage": "Verwalten",
-    "balance": "Guthaben {amount} · {status}",
+    "balance": "Guthaben {amount}\n{status}",
     "covered": {
       "one": "reicht für {count} weitere Abbuchung, bis {date} aufladen",
       "other": "reicht für {count} weitere Abbuchungen, bis {date} aufladen"
@@ -68,8 +68,8 @@
     "ytd": "Bezahlt {year}",
     "perDay": "Pro Tag",
     "active": "Aktiv",
-    "share": "{amount}/Mon. · {pct} %",
-    "caption": "Abo-Sternenhimmel · Blasengröße zeigt monatliche Kosten",
+    "share": "{amount}/Mon.\n{pct} %",
+    "caption": "Abo-Sternenhimmel\nBlasengröße zeigt monatliche Kosten",
     "aria": "{name}, {amount} pro Monat",
     "loss": "Davon nicht erstatteter Verlust"
   }

@@ -2,7 +2,7 @@
   "title": "Ringkasan",
   "add": "Langganan baru",
   "footer": {
-    "other": "{count} langganan aktif · {amount}/bln ·"
+    "other": "{count} langganan aktif\n{amount}/bln\n"
   },
   "fullReport": "Lihat laporan lengkap",
   "listSep": ", ",
@@ -19,8 +19,8 @@
   },
   "timeline": {
     "title": "Linimasa",
-    "sub": "{past} ditagih dalam 30 hari terakhir · {next} jatuh tempo dalam 30 hari ke depan",
-    "past": "30 hari terakhir · {amount}"
+    "sub": "{past} ditagih dalam 30 hari terakhir\n{next} jatuh tempo dalam 30 hari ke depan",
+    "past": "30 hari terakhir\n{amount}"
   },
   "spending": {
     "title": "Pengeluaran bulanan",
@@ -28,9 +28,9 @@
     "month": "Bulanan",
     "yearly": "Tahunan",
     "year": "{year}",
-    "projected": " · Perkiraan",
-    "inProgress": " · Berjalan",
-    "paid": " · {amount} dibayar",
+    "projected": "\nPerkiraan",
+    "inProgress": "\nBerjalan",
+    "paid": "\n{amount} dibayar",
     "empty": "Tidak ada tagihan dalam periode ini"
   },
   "due": {
@@ -43,7 +43,7 @@
   "wallet": {
     "title": "Dompet",
     "manage": "Kelola",
-    "balance": "Saldo {amount} · {status}",
+    "balance": "Saldo {amount}\n{status}",
     "covered": {
       "other": "cukup untuk {count} tagihan lagi, top up sebelum {date}"
     },
@@ -64,8 +64,8 @@
     "ytd": "Dibayar pada {year}",
     "perDay": "Per hari",
     "active": "Aktif",
-    "share": "{amount}/bln · {pct}%",
-    "caption": "Bintang langganan · ukuran gelembung menunjukkan biaya bulanan",
+    "share": "{amount}/bln\n{pct}%",
+    "caption": "Bintang langganan\nukuran gelembung menunjukkan biaya bulanan",
     "aria": "{name}, {amount} per bulan",
     "loss": "Termasuk kerugian tanpa pengembalian dana"
   }

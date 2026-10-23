@@ -19,7 +19,7 @@
     "overdue": {
       "other": "{count}일 연체"
     },
-    "sub": "{status} · 다음 주기: {bill}",
+    "sub": "{status}\n다음 주기: {bill}",
     "headline": "{member}에게서 {name} 요금을 받을 때입니다"
   },
   "proxy": {

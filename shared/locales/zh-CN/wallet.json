@@ -1,13 +1,13 @@
 {
   "title": "钱包",
   "sub": "{count} 种支付方式",
-  "subDrag": "{count} 种支付方式 · 拖动卡片调整顺序",
+  "subDrag": "{count} 种支付方式\n拖动卡片调整顺序",
   "add": "添加",
   "orderSaved": "顺序已保存",
   "runwayGroup": "余额续航",
   "family": "合租与分摊",
   "familyCount": "{count} 个",
-  "unassigned": "未指定支付方式 · {count}",
+  "unassigned": "未指定支付方式\n{count}",
   "runway": {
     "drain": "每月约扣 {amount}",
     "scale": { "today": "今天", "m3": "3 个月", "m6": "半年", "m9": "9 个月", "y1": "1 年" },
@@ -36,7 +36,7 @@
     "goTopup": "去充值",
     "site": "官网",
     "projection": "扣款推演",
-    "linked": "关联订阅 · {count}",
+    "linked": "关联订阅\n{count}",
     "none": "暂无",
     "notes": "备注"
   },
@@ -59,7 +59,7 @@
     "costPh": "不填",
     "note": "备注",
     "notePh": "如 Razer Gold、某宝店铺",
-    "history": "充值记录 · {count} 次",
+    "history": "充值记录\n{count} 次",
     "spent": "花了 {amount}",
     "premium": "溢价 {pct}%",
     "below": "比市价低 {pct}%",

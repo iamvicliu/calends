@@ -16,8 +16,8 @@
     "other": "{count} pembayaran tertunggak"
   },
   "viewSub": "Lihat langganan",
-  "stoppedOn": " · dihentikan {date}",
-  "nextOn": " · berikutnya {date}",
+  "stoppedOn": "\ndihentikan {date}",
+  "nextOn": "\nberikutnya {date}",
   "payFor": "Untuk {name}",
   "unset": "belum diatur",
   "paidPeriods": {
@@ -27,7 +27,7 @@
   "owed": "Tertunggak",
   "settled": "Lunas",
   "detailTitle": "Talangan",
-  "cardCcy": " · kartu ditagih dalam {ccy}",
+  "cardCcy": "\nkartu ditagih dalam {ccy}",
   "forWhom": "Ditalangi untuk",
   "method": "Metode pembayaran",
   "subscription": "Langganan",
@@ -38,7 +38,7 @@
   "diffLabel": "Diganti − ditagih",
   "table": {
     "cost": "Biaya saat itu",
-    "total": "Total · {count}",
+    "total": "Total\n{count}",
     "receivedOn": "Diterima {date}",
     "date": "Tanggal tagihan",
     "charged": "Ditagih",
@@ -75,7 +75,7 @@
     "allBack": "Semua sudah diganti",
     "total": "Total ditalangi",
     "totalSub": {
-      "other": "{count} tagihan · {subs}"
+      "other": "{count} tagihan\n{subs}"
     },
     "subs": {
       "other": "{count} langganan"

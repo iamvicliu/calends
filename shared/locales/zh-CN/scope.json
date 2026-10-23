@@ -58,7 +58,7 @@
   "generate": "生成报告",
   "search": "搜索“{query}”",
   "selectionTitle": {
-    "other": "{scope} · {count} 个订阅"
+    "other": "{scope}\n{count} 个订阅"
   },
   "mrrBasis": "当前计费订阅按我的份额折算的月成本；年付等按月摊算，不代表本月实扣。",
   "debitBasis": "仅统计正向扣款；退款单列，不抵减构成与排名。",

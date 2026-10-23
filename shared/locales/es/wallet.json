@@ -2,15 +2,15 @@
   "title": "Cartera",
   "sub": { "one": "{count} método de pago", "other": "{count} métodos de pago" },
   "subDrag": {
-    "one": "{count} método de pago · Arrastra las tarjetas para reordenarlas",
-    "other": "{count} métodos de pago · Arrastra las tarjetas para reordenarlas"
+    "one": "{count} método de pago\nArrastra las tarjetas para reordenarlas",
+    "other": "{count} métodos de pago\nArrastra las tarjetas para reordenarlas"
   },
   "add": "Añadir",
   "orderSaved": "Orden guardado",
   "runwayGroup": "Duración del saldo",
   "family": "Planes compartidos",
   "familyCount": "{count}",
-  "unassigned": "Sin método de pago · {count}",
+  "unassigned": "Sin método de pago\n{count}",
   "runway": {
     "drain": "Unos {amount}/mes",
     "scale": { "today": "Hoy", "m3": "3 meses", "m6": "6 meses", "m9": "9 meses", "y1": "1 año" },
@@ -39,7 +39,7 @@
     "goTopup": "Recargar",
     "site": "Sitio web",
     "projection": "Próximos cobros",
-    "linked": "Suscripciones vinculadas · {count}",
+    "linked": "Suscripciones vinculadas\n{count}",
     "none": "Ninguna",
     "notes": "Notas"
   },
@@ -62,7 +62,7 @@
     "costPh": "Opcional",
     "note": "Nota",
     "notePh": "p. ej. Razer Gold, un revendedor",
-    "history": "Recargas · {count}",
+    "history": "Recargas\n{count}",
     "spent": "pagado {amount}",
     "premium": "{pct}% de sobreprecio",
     "below": "{pct}% por debajo del mercado",

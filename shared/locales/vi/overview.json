@@ -2,7 +2,7 @@
   "title": "Tổng quan",
   "add": "Gói đăng ký mới",
   "footer": {
-    "other": "{count} gói đăng ký đang hoạt động · {amount}/tháng ·"
+    "other": "{count} gói đăng ký đang hoạt động\n{amount}/tháng\n"
   },
   "fullReport": "Xem báo cáo đầy đủ",
   "listSep": ", ",
@@ -19,8 +19,8 @@
   },
   "timeline": {
     "title": "Dòng thời gian",
-    "sub": "{past} đã trừ trong 30 ngày qua · {next} đến hạn trong 30 ngày tới",
-    "past": "30 ngày qua · {amount}"
+    "sub": "{past} đã trừ trong 30 ngày qua\n{next} đến hạn trong 30 ngày tới",
+    "past": "30 ngày qua\n{amount}"
   },
   "spending": {
     "title": "Chi tiêu hằng tháng",
@@ -28,9 +28,9 @@
     "month": "Theo tháng",
     "yearly": "Theo năm",
     "year": "{year}",
-    "projected": " · Dự kiến",
-    "inProgress": " · Đang diễn ra",
-    "paid": " · đã trả {amount}",
+    "projected": "\nDự kiến",
+    "inProgress": "\nĐang diễn ra",
+    "paid": "\nđã trả {amount}",
     "empty": "Không có khoản phí trong kỳ này"
   },
   "due": {
@@ -43,7 +43,7 @@
   "wallet": {
     "title": "Ví",
     "manage": "Quản lý",
-    "balance": "Số dư {amount} · {status}",
+    "balance": "Số dư {amount}\n{status}",
     "covered": {
       "other": "đủ cho {count} khoản phí nữa, nạp tiền trước {date}"
     },
@@ -64,8 +64,8 @@
     "ytd": "Đã trả trong {year}",
     "perDay": "Mỗi ngày",
     "active": "Đang hoạt động",
-    "share": "{amount}/tháng · {pct}%",
-    "caption": "Chòm sao gói đăng ký · kích thước bong bóng thể hiện chi phí hằng tháng",
+    "share": "{amount}/tháng\n{pct}%",
+    "caption": "Chòm sao gói đăng ký\nkích thước bong bóng thể hiện chi phí hằng tháng",
     "aria": "{name}, {amount} mỗi tháng",
     "loss": "Gồm tổn thất chưa hoàn tiền"
   }

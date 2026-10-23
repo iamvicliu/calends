@@ -20,7 +20,7 @@
       "one": "{count} día de retraso",
       "other": "{count} días de retraso"
     },
-    "sub": "{status} · próximo periodo: {bill}",
+    "sub": "{status}\npróximo periodo: {bill}",
     "headline": "Toca cobrar a {member} por {name}"
   },
   "proxy": {

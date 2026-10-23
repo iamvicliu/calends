@@ -19,8 +19,8 @@
     "other": "{count} платежа к оплате"
   },
   "viewSub": "Открыть подписку",
-  "stoppedOn": " · остановлена {date}",
-  "nextOn": " · следующее {date}",
+  "stoppedOn": "\nостановлена {date}",
+  "nextOn": "\nследующее {date}",
   "payFor": "За {name}",
   "unset": "не указано",
   "paidPeriods": {
@@ -33,7 +33,7 @@
   "owed": "К оплате",
   "settled": "Рассчитались",
   "detailTitle": "Оплата за других",
-  "cardCcy": " · карта списывает в {ccy}",
+  "cardCcy": "\nкарта списывает в {ccy}",
   "forWhom": "За кого",
   "method": "Способ оплаты",
   "subscription": "Подписка",
@@ -44,7 +44,7 @@
   "diffLabel": "Возвращено − списано",
   "table": {
     "cost": "Стоимость тогда",
-    "total": "Итого · {count}",
+    "total": "Итого\n{count}",
     "receivedOn": "Получено {date}",
     "date": "Дата списания",
     "charged": "Списано",
@@ -84,10 +84,10 @@
     "allBack": "Всё возвращено",
     "total": "Всего оплачено",
     "totalSub": {
-      "one": "{count} списание · {subs}",
-      "few": "{count} списания · {subs}",
-      "many": "{count} списаний · {subs}",
-      "other": "{count} списания · {subs}"
+      "one": "{count} списание\n{subs}",
+      "few": "{count} списания\n{subs}",
+      "many": "{count} списаний\n{subs}",
+      "other": "{count} списания\n{subs}"
     },
     "subs": {
       "one": "{count} подписка",

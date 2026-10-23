@@ -9,7 +9,7 @@
   "neverUsed": "从未使用",
   "tokenPlaceholder": "<你的令牌>",
   "tokens": {
-    "other": "令牌 · {count} 个"
+    "other": "令牌\n{count} 个"
   },
   "noTokens": "还没有令牌。新建一个，交给要接入的 AI 助手。",
   "lastUsed": "最近使用 {time}",
@@ -18,7 +18,7 @@
   "revoked": "已吊销",
   "setup": "接入方式",
   "tools": {
-    "other": "可用工具 · {count} 个"
+    "other": "可用工具\n{count} 个"
   },
   "clientOther": "其他",
   "scope": {

@@ -15,7 +15,7 @@
     "since": "開始日",
     "members": "メンバー",
     "receipts": "受け取り履歴",
-    "receiptsSum": "{count} 件 · {amount}",
+    "receiptsSum": "{count} 件\n{amount}",
     "date": "受取日",
     "member": "メンバー",
     "covers": "対象期間",
@@ -23,7 +23,7 @@
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
     "groupSum": {
-      "other": "{count} 件 · {amount}"
+      "other": "{count} 件\n{amount}"
     },
     "fee": "料金",
     "nextCollection": "次回集金",
@@ -57,7 +57,7 @@
     "copied": {
       "other": "{count}人のメンバーにコピーしました"
     },
-    "titleNew": "メンバーを追加 · {name}",
+    "titleNew": "メンバーを追加\n{name}",
     "confirmDelete": "「{name}」を完全に削除しますか？支払い履歴も削除され、記録上の収入が減ります。\nプランを抜けただけなら、脱退日を設定してください。",
     "deleted": "削除しました",
     "delete": "削除",
@@ -98,12 +98,12 @@
     "other": "その他",
     "source": "経路",
     "sourcePh": "どのグループ / 誰の紹介か",
-    "payments": "支払い · {count}",
+    "payments": "支払い\n{count}",
     "receivedTotal": "累計約{amount}を受け取り済み",
     "paidUntil": "支払い済み期限",
     "paidUntilPh": "まだ支払いはありません",
-    "payCover": "{date}受領 · {from}〜{until}分",
-    "payCoverTo": "{date}受領 · {until}まで",
+    "payCover": "{date}受領\n{from}〜{until}分",
+    "payCoverTo": "{date}受領\n{until}まで",
     "copyAria": "ほかのメンバーにコピー",
     "removePayAria": "支払いを削除",
     "dup": "記録済み",
@@ -143,9 +143,9 @@
     },
     "collectionSchedule": "共通の集金日：毎年 {dates}",
     "coverAligned": "共通の請求期間の終了日を自動設定",
-    "recordNext": "入金を記録 · {amount}",
+    "recordNext": "入金を記録\n{amount}",
     "collectionAnchor": "共通の集金起点",
-    "firstSummary": "初回 {from}–{until} · {mode} {amount}",
+    "firstSummary": "初回 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "アカウント未入力",
     "editAccount": "メンバーアカウントを編集",
     "copyAccount": "アカウントをコピー"
@@ -170,9 +170,9 @@
       "other": "{count}人が未払い"
     },
     "count": "プラン数",
-    "countStarted": " 主催 · ",
+    "countStarted": " 主催\n",
     "countJoined": " 参加",
-    "countSub": "主催 · 参加",
+    "countSub": "主催\n参加",
     "emptyTitle": "共有プランはまだありません",
     "emptyBody": "サブスクリプションの編集画面で「利用者」から「主催」を選び、メンバーと負担額を追加します。",
     "next": "次回 {date}",
@@ -211,7 +211,7 @@
     },
     "collect": "回収",
     "joinedGroup": "参加中のプラン",
-    "payTo": "{name}に支払い · {amount}",
+    "payTo": "{name}に支払い\n{amount}",
     "ownerDefault": "主催者",
     "maybeGroup": "共有の可能性あり",
     "convert": "共有にする",
@@ -243,13 +243,13 @@
     "profit": "利益 / 年",
     "since": "{month}から",
     "sinceNone": "開始時から",
-    "actual": "支払い {paid} · 受け取り {received} · {result}",
+    "actual": "支払い {paid}\n受け取り {received}\n{result}",
     "gain": "{amount}のプラス",
     "lost": "{amount}のマイナス",
     "noRecords": "まだ支払いはありません"
   },
   "collect": {
-    "title": "入金を記録 · {name}",
+    "title": "入金を記録\n{name}",
     "next": "次回の集金 {date}",
     "editMember": "編集",
     "until": "対象期間の終わり",
@@ -279,7 +279,7 @@
     "late": {
       "other": "{count}日超過"
     },
-    "owe": "未収 {amount} · {date}から",
-    "settled": "精算済み · 次回 {date}"
+    "owe": "未収 {amount}\n{date}から",
+    "settled": "精算済み\n次回 {date}"
   }
 }

@@ -74,9 +74,9 @@
   },
   "open": {
     "publicSubs": "Gösterilen abonelikler",
-    "publicSubsHint": "Herkese açık sayfada yalnızca bu abonelikler görünür. Başkası adına ödenenler asla gösterilmez; yeni abonelikler varsayılan olarak gösterilir.",
-    "publicShown": "Gösterilen · {count}",
-    "publicOff2": "Gizli · {count}",
+    "publicSubsHint": "Başkaları için ödenen abonelikler gizli kalır. Yeni abonelikler varsayılan olarak herkese açıktır.",
+    "publicShown": "Gösterilen\n{count}",
+    "publicOff2": "Gizli\n{count}",
     "publicShowAll": "Tümünü göster",
     "publicHideAll": "Tümünü gizle",
     "publicHideOne": "{name} gizle",
@@ -126,7 +126,7 @@
     "sep": ", "
   },
   "channels": {
-    "title": { "one": "Bildirim kanalları · {count} açık", "other": "Bildirim kanalları · {count} açık" },
+    "title": { "one": "Bildirim kanalları\n{count} açık", "other": "Bildirim kanalları\n{count} açık" },
     "empty": "Henüz kanal yok; hatırlatmalar gönderilmeyecek.",
     "test": "Test et",
     "testFailed": "Gönderilemedi",
@@ -219,7 +219,7 @@
     "alreadyBound": "Bu cihazda zaten bir geçiş anahtarı var",
     "changePassword": "Parolayı değiştir",
     "devices": "Giriş yapılmış cihazlar",
-    "devicesCount": { "one": "Giriş yapılmış cihazlar · {count}", "other": "Giriş yapılmış cihazlar · {count}" },
+    "devicesCount": { "one": "Giriş yapılmış cihazlar\n{count}", "other": "Giriş yapılmış cihazlar\n{count}" },
     "devicesFoot": "Sınıra ulaşıldığında en uzun süredir etkin olmayan cihazdan otomatik olarak çıkış yapılır. Konumlar IP'den tahmin edilir ve hatalı olabilir.",
     "maxSessions": "En fazla giriş yapılmış cihaz",
     "maxSessionsSaved": { "one": "En fazla {count} cihaz", "other": "En fazla {count} cihaz" },
@@ -268,8 +268,8 @@
       "created": "Kategori eklendi",
       "saved": "Kategori kaydedildi",
       "renamed": {
-        "one": "Kategori kaydedildi · {count} abonelik güncellendi",
-        "other": "Kategori kaydedildi · {count} abonelik güncellendi"
+        "one": "Kategori kaydedildi\n{count} abonelik güncellendi",
+        "other": "Kategori kaydedildi\n{count} abonelik güncellendi"
       },
       "deleted": "Kategori silindi",
       "order": "Sıralama kaydedildi"

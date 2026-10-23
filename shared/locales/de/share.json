@@ -62,7 +62,7 @@
   "switches": "Region- / Tarifwechsel",
   "stoppedOn": "Beendet am {date}",
   "endsOn": "Endet am {date}",
-  "thanks": "Danke · Bis zum nächsten Zeitraum",
+  "thanks": "Danke\nBis zum nächsten Zeitraum",
   "n": {
     "charges": {
       "one": "{count} Abbuchung",
@@ -75,7 +75,7 @@
   "present": "heute",
   "priceChanges": "Preisänderungen: {list}",
   "withYou": "Dabei seit",
-  "totalPerDay": "{total} gesamt · im Schnitt {perDay}/Tag",
+  "totalPerDay": "{total} gesamt\nim Schnitt {perDay}/Tag",
   "lapsed": {
     "one": "Einmal unterbrochen",
     "other": "{count}-mal unterbrochen"

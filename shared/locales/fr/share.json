@@ -62,7 +62,7 @@
   "switches": "Changements de région / formule",
   "stoppedOn": "Arrêté le {date}",
   "endsOn": "Se termine le {date}",
-  "thanks": "Merci · À la prochaine échéance",
+  "thanks": "Merci\nÀ la prochaine échéance",
   "n": {
     "charges": {
       "one": "{count} prélèvement",
@@ -75,7 +75,7 @@
   "present": "aujourd’hui",
   "priceChanges": "Changements de prix : {list}",
   "withYou": "Avec vous depuis",
-  "totalPerDay": "{total} au total · {perDay}/jour en moyenne",
+  "totalPerDay": "{total} au total\n{perDay}/jour en moyenne",
   "lapsed": {
     "one": "Interrompu une fois",
     "other": "Interrompu {count} fois"

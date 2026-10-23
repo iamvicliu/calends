@@ -1,8 +1,8 @@
 {
   "yearTitle": "{year}",
   "summary": {
-    "one": "{count} ödeme · {amount}",
-    "other": "{count} ödeme · {amount}"
+    "one": "{count} ödeme\n{amount}",
+    "other": "{count} ödeme\n{amount}"
   },
   "mode": {
     "month": "Ay",
@@ -18,14 +18,14 @@
   "monthTotal": "{month} ödemeleri",
   "count": "{count} ödeme",
   "pending": "Bekleyen",
-  "monthAll": "Tüm ödemeler · {month}",
+  "monthAll": "Tüm ödemeler\n{month}",
   "noneMonth": "Bu ay ödeme yok",
   "day": "{day}",
   "heatCount": {
-    "one": "{count} ödeme · ",
-    "other": "{count} ödeme · "
+    "one": "{count} ödeme\n",
+    "other": "{count} ödeme\n"
   },
   "pickDay": "Ödemeleri görmek için bir tarih seçin",
-  "nextCharge": "Sonraki ödeme · {date}",
+  "nextCharge": "Sonraki ödeme\n{date}",
   "expandReport": "Tam raporu aç"
 }

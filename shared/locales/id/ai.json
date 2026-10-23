@@ -9,7 +9,7 @@
   "neverUsed": "Belum pernah dipakai",
   "tokenPlaceholder": "<token-anda>",
   "tokens": {
-    "other": "Token · {count}"
+    "other": "Token\n{count}"
   },
   "noTokens": "Belum ada token. Buat satu, lalu berikan ke asisten AI yang ingin Anda hubungkan.",
   "lastUsed": "Terakhir dipakai {time}",
@@ -18,7 +18,7 @@
   "revoked": "Dicabut",
   "setup": "Penyiapan",
   "tools": {
-    "other": "Alat tersedia · {count}"
+    "other": "Alat tersedia\n{count}"
   },
   "clientOther": "Lainnya",
   "scope": {

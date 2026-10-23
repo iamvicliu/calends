@@ -1,7 +1,7 @@
 {
   "copy": "복사",
   "copied": "복사됨",
-  "overlap": { "title": "함께 진행 중", "previous": "기존 플랜", "until": "{date}까지 · {rel}" },
+  "overlap": { "title": "함께 진행 중", "previous": "기존 플랜", "until": "{date}까지\n{rel}" },
   "action": { "edit": "편집", "pause": "일시 정지", "resume": "재개", "manage": "관리", "website": "웹사이트", "share": "공유", "copyImage": "이미지로 복사" },
   "toast": {
     "resumed": "결제를 재개했습니다",
@@ -23,7 +23,7 @@
     "trialEnd": "체험 종료",
     "region": "지역"
   },
-  "up": { "planned": "변경 예정 · 미확정", "starting": "곧 시작", "changing": "예정된 변경", "effective": "적용일" },
+  "up": { "planned": "변경 예정\n미확정", "starting": "곧 시작", "changing": "예정된 변경", "effective": "적용일" },
   "plan": {
     "drop": "전환하지 않음",
     "droppedToast": "전환하지 않습니다. {date} 이후 종료됩니다",
@@ -33,8 +33,8 @@
   "intro": { "title": "프로모션", "price": "프로모션 가격", "until": "프로모션 종료", "then": "이후" },
   "share": {
     "open": "공유 보기",
-    "owner": "공유 · 내가 주최({count}/{seats})",
-    "member": "공유 · 참여 중",
+    "owner": "공유\n내가 주최({count}/{seats})",
+    "member": "공유\n참여 중",
     "payTo": "보낼 사람",
     "host": "주최자",
     "myShare": "내 분담금",
@@ -51,7 +51,7 @@
   "charges": {
     "recentN": "최근 {count}건만",
     "addShort": "기록",
-    "title": { "other": "결제 · {count}" },
+    "title": { "other": "결제\n{count}" },
     "kind": { "refund": "환불", "adjust": "조정", "failed": "실패" },
     "add": "기록 추가(환불, 조정, 결제 실패, 카드 금액 등)",
     "all": "{count}건 모두 보기"
@@ -68,10 +68,10 @@
     "gaps": { "other": "{count}회 중단" },
     "perMonth": "실제 월평균"
   },
-  "tab": { "charges": "결제 내역 · {count}", "details": "상세" },
+  "tab": { "charges": "결제 내역\n{count}", "details": "상세" },
   "kpi": { "amortized": "월 환산", "noGaps": "중단 없음", "startedToday": "오늘 시작", "expectedMonthly": "예상 월 비용" },
   "chart": {
-    "title": "회당 결제 · {ccy}",
+    "title": "회당 결제\n{ccy}",
     "orig": "원래 통화",
     "all": "전체",
     "y1": "1년",
@@ -98,7 +98,7 @@
   },
   "upcoming": {
     "title": "앞으로 12개월",
-    "total": { "other": "약 {amount} · {count}건" },
+    "total": { "other": "약 {amount}\n{count}건" },
     "more": { "other": "{count}건 더" },
     "none": "앞으로 12개월 동안 결제가 없어요"
   },

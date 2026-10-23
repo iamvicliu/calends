@@ -74,9 +74,9 @@
   },
   "open": {
     "publicSubs": "展示的订阅",
-    "publicSubsHint": "公开页只展示下面这些订阅。代付的订阅从不公开；新加的订阅默认展示。",
-    "publicShown": "展示中 · {count}",
-    "publicOff2": "未展示 · {count}",
+    "publicSubsHint": "代付订阅不公开；新增订阅默认公开。",
+    "publicShown": "展示中\n{count}",
+    "publicOff2": "未展示\n{count}",
     "publicShowAll": "全部展示",
     "publicHideAll": "全部隐藏",
     "publicHideOne": "不展示 {name}",
@@ -126,7 +126,7 @@
     "sep": "、"
   },
   "channels": {
-    "title": { "other": "通知渠道 · {count} 个开启" },
+    "title": { "other": "通知渠道\n{count} 个开启" },
     "empty": "还没有渠道，提醒不会发出。",
     "test": "测试",
     "testFailed": "发送失败",
@@ -219,7 +219,7 @@
     "alreadyBound": "这台设备已经绑定过了",
     "changePassword": "修改密码",
     "devices": "登录设备",
-    "devicesCount": { "other": "登录设备 · {count}" },
+    "devicesCount": { "other": "登录设备\n{count}" },
     "devicesFoot": "超过上限时，最久没有活动的设备会被自动退出。位置按 IP 估算，仅供参考。",
     "maxSessions": "最多同时登录",
     "maxSessionsSaved": { "other": "最多 {count} 台设备" },

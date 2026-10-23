@@ -19,7 +19,7 @@
     "overdue": {
       "other": "Terlambat {count} hari"
     },
-    "sub": "{status} · periode berikutnya: {bill}",
+    "sub": "{status}\nperiode berikutnya: {bill}",
     "headline": "Saatnya menagih {member} untuk {name}"
   },
   "proxy": {

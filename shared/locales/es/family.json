@@ -15,7 +15,7 @@
     "since": "Inicio",
     "members": "Miembros",
     "receipts": "Pagos recibidos",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Fecha",
     "member": "Miembro",
     "covers": "Periodo",
@@ -23,8 +23,8 @@
     "expandAll": "Expandir todo",
     "collapseAll": "Contraer todo",
     "groupSum": {
-      "one": "{count} pago · {amount}",
-      "other": "{count} pagos · {amount}"
+      "one": "{count} pago\n{amount}",
+      "other": "{count} pagos\n{amount}"
     },
     "fee": "Tarifa",
     "nextCollection": "Próximo cobro",
@@ -59,7 +59,7 @@
       "one": "Copiado a {count} miembro",
       "other": "Copiado a {count} miembros"
     },
-    "titleNew": "Añadir miembro · {name}",
+    "titleNew": "Añadir miembro\n{name}",
     "confirmDelete": "¿Eliminar a «{name}» para siempre? También se eliminará su historial de pagos, lo que reducirá tus ingresos registrados.\nSi solo dejó el plan, indica una fecha de salida.",
     "deleted": "Eliminado",
     "delete": "Eliminar",
@@ -101,12 +101,12 @@
     "other": "Otro",
     "source": "Origen",
     "sourcePh": "De qué grupo / quién lo recomendó",
-    "payments": "Pagos · {count}",
+    "payments": "Pagos\n{count}",
     "receivedTotal": "Unos {amount} recibidos en total",
     "paidUntil": "Pagado hasta",
     "paidUntilPh": "Aún no hay pagos",
-    "payCover": "Recibido {date} · cubre {from}–{until}",
-    "payCoverTo": "Recibido {date} · cubre hasta {until}",
+    "payCover": "Recibido {date}\ncubre {from}–{until}",
+    "payCoverTo": "Recibido {date}\ncubre hasta {until}",
     "copyAria": "Copiar a otros miembros",
     "removePayAria": "Eliminar pago",
     "dup": "Ya registrado",
@@ -147,9 +147,9 @@
     },
     "collectionSchedule": "Fechas de cobro: cada año {dates}",
     "coverAligned": "Termina en el límite del período común",
-    "recordNext": "Registrar pago · {amount}",
+    "recordNext": "Registrar pago\n{amount}",
     "collectionAnchor": "Inicio común de cobro",
-    "firstSummary": "Primer período {from}–{until} · {mode} {amount}",
+    "firstSummary": "Primer período {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Sin cuenta",
     "editAccount": "Editar cuenta del miembro",
     "copyAccount": "Copiar cuenta"
@@ -175,9 +175,9 @@
       "other": "{count} miembros sin pagar"
     },
     "count": "Planes",
-    "countStarted": " organizados · ",
+    "countStarted": " organizados\n",
     "countJoined": " unidos",
-    "countSub": "Organizados · Unidos",
+    "countSub": "Organizados\nUnidos",
     "emptyTitle": "Aún no hay planes compartidos",
     "emptyBody": "En el editor de una suscripción, elige «Lo organizo» en «Quién la usa» y añade los miembros y sus partes.",
     "next": "próximo: {date}",
@@ -220,7 +220,7 @@
     },
     "collect": "Cobrar",
     "joinedGroup": "Planes a los que me uní",
-    "payTo": "Pagado a {name} · {amount}",
+    "payTo": "Pagado a {name}\n{amount}",
     "ownerDefault": "organizador",
     "maybeGroup": "Posiblemente compartidos",
     "convert": "Hacer compartido",
@@ -252,13 +252,13 @@
     "profit": "Ganancia / año",
     "since": "Desde {month}",
     "sinceNone": "Desde el inicio",
-    "actual": "Pagado {paid} · Recibido {received} · {result}",
+    "actual": "Pagado {paid}\nRecibido {received}\n{result}",
     "gain": "+{amount}",
     "lost": "−{amount}",
     "noRecords": "Aún no hay pagos"
   },
   "collect": {
-    "title": "Registrar cobro · {name}",
+    "title": "Registrar cobro\n{name}",
     "next": "Próximo cobro {date}",
     "editMember": "Editar",
     "until": "Cubre hasta",
@@ -289,7 +289,7 @@
       "one": "{count} día de retraso",
       "other": "{count} días de retraso"
     },
-    "owe": "{amount} pendiente · desde {date}",
-    "settled": "Al día · próximo cobro {date}"
+    "owe": "{amount} pendiente\ndesde {date}",
+    "settled": "Al día\npróximo cobro {date}"
   }
 }

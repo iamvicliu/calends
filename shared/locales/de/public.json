@@ -18,8 +18,8 @@
   "timeline": {
     "title": "Zeitleiste",
     "upcoming": {
-      "one": "{count} Abbuchung in den nächsten 30 Tagen · {amount}",
-      "other": "{count} Abbuchungen in den nächsten 30 Tagen · {amount}"
+      "one": "{count} Abbuchung in den nächsten 30 Tagen\n{amount}",
+      "other": "{count} Abbuchungen in den nächsten 30 Tagen\n{amount}"
     }
   },
   "chart": {
@@ -29,7 +29,7 @@
     "mrr": "Monatliche Kosten",
     "charge": "Abgebucht",
     "thisMonth": "Dieser Monat",
-    "projected": "{month} · Prognose"
+    "projected": "{month}\nPrognose"
   },
   "ended": {
     "title": "Gekündigt",
@@ -56,14 +56,14 @@
   "list": {
     "title": "Abos",
     "summary": {
-      "one": "{count} · {amount}/Mon.",
-      "other": "{count} · {amount}/Mon."
+      "one": "{count}\n{amount}/Mon.",
+      "other": "{count}\n{amount}/Mon."
     },
     "all": "Alle"
   },
   "row": {
-    "ends": " · Endet am {date}",
-    "renews": " · Verlängert sich am {date}",
+    "ends": "\nEndet am {date}",
+    "renews": "\nVerlängert sich am {date}",
     "monthly": "Monatlich",
     "perMonthEq": "Pro Monat"
   },

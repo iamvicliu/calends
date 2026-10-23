@@ -17,8 +17,8 @@
     "other": "{count} pagos pendientes"
   },
   "viewSub": "Ver suscripción",
-  "stoppedOn": " · detenido {date}",
-  "nextOn": " · próximo {date}",
+  "stoppedOn": "\ndetenido {date}",
+  "nextOn": "\npróximo {date}",
   "payFor": "Para {name}",
   "unset": "sin definir",
   "paidPeriods": {
@@ -29,7 +29,7 @@
   "owed": "Pendiente",
   "settled": "Al día",
   "detailTitle": "Pago por otros",
-  "cardCcy": " · la tarjeta liquida en {ccy}",
+  "cardCcy": "\nla tarjeta liquida en {ccy}",
   "forWhom": "Para quién",
   "method": "Método de pago",
   "subscription": "Suscripción",
@@ -40,7 +40,7 @@
   "diffLabel": "Devuelto − cobrado",
   "table": {
     "cost": "Coste entonces",
-    "total": "Total · {count}",
+    "total": "Total\n{count}",
     "receivedOn": "Recibido {date}",
     "date": "Fecha de cobro",
     "charged": "Cobrado",
@@ -78,8 +78,8 @@
     "allBack": "Todo devuelto",
     "total": "Total pagado",
     "totalSub": {
-      "one": "{count} cobro · {subs}",
-      "other": "{count} cobros · {subs}"
+      "one": "{count} cobro\n{subs}",
+      "other": "{count} cobros\n{subs}"
     },
     "subs": {
       "one": "{count} suscripción",

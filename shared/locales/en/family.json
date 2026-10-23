@@ -15,7 +15,7 @@
     "since": "Started",
     "members": "Members",
     "receipts": "Payments received",
-    "receiptsSum": "{count} · {amount}",
+    "receiptsSum": "{count}\n{amount}",
     "date": "Date",
     "member": "Member",
     "covers": "Covers",
@@ -23,8 +23,8 @@
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",
     "groupSum": {
-      "one": "{count} payment · {amount}",
-      "other": "{count} payments · {amount}"
+      "one": "{count} payment\n{amount}",
+      "other": "{count} payments\n{amount}"
     },
     "fee": "Fee",
     "nextCollection": "Next due",
@@ -59,7 +59,7 @@
       "one": "Copied to {count} member",
       "other": "Copied to {count} members"
     },
-    "titleNew": "Add member · {name}",
+    "titleNew": "Add member\n{name}",
     "confirmDelete": "Permanently delete “{name}”? Their payment history will be deleted too, lowering your recorded income.\nIf they just left the plan, set a leave date instead.",
     "deleted": "Deleted",
     "delete": "Delete",
@@ -101,12 +101,12 @@
     "other": "Other",
     "source": "Source",
     "sourcePh": "Which group / who referred them",
-    "payments": "Payments · {count}",
+    "payments": "Payments\n{count}",
     "receivedTotal": "About {amount} received in total",
     "paidUntil": "Paid through",
     "paidUntilPh": "No payments yet",
-    "payCover": "Received {date} · covers {from}–{until}",
-    "payCoverTo": "Received {date} · covers through {until}",
+    "payCover": "Received {date}\ncovers {from}–{until}",
+    "payCoverTo": "Received {date}\ncovers through {until}",
     "copyAria": "Copy to other members",
     "removePayAria": "Delete payment",
     "dup": "Already recorded",
@@ -147,9 +147,9 @@
     },
     "collectionSchedule": "Collection dates: every year {dates}",
     "coverAligned": "Ends at the aligned period boundary",
-    "recordNext": "Record payment · {amount}",
+    "recordNext": "Record payment\n{amount}",
     "collectionAnchor": "Collection anchor",
-    "firstSummary": "First period {from}–{until} · {mode} {amount}",
+    "firstSummary": "First period {from}–{until}\n{mode} {amount}",
     "accountEmpty": "No account added",
     "editAccount": "Edit member account",
     "copyAccount": "Copy account"
@@ -175,9 +175,9 @@
       "other": "{count} members unpaid"
     },
     "count": "Plans",
-    "countStarted": " organized · ",
+    "countStarted": " organized\n",
     "countJoined": " joined",
-    "countSub": "Organized · Joined",
+    "countSub": "Organized\nJoined",
     "emptyTitle": "No shared plans yet",
     "emptyBody": "In a subscription’s editor, choose “I host” under “Who uses it”, then add members and their shares.",
     "next": "next {date}",
@@ -220,7 +220,7 @@
     },
     "collect": "Collect",
     "joinedGroup": "Plans I've joined",
-    "payTo": "Paid to {name} · {amount}",
+    "payTo": "Paid to {name}\n{amount}",
     "ownerDefault": "organizer",
     "maybeGroup": "Possibly shared",
     "convert": "Make shared",
@@ -252,13 +252,13 @@
     "profit": "Profit / yr",
     "since": "Since {month}",
     "sinceNone": "Since start",
-    "actual": "Paid {paid} · Received {received} · {result}",
+    "actual": "Paid {paid}\nReceived {received}\n{result}",
     "gain": "Up {amount}",
     "lost": "Down {amount}",
     "noRecords": "No payments yet"
   },
   "collect": {
-    "title": "Record payment · {name}",
+    "title": "Record payment\n{name}",
     "next": "Next collection {date}",
     "editMember": "Edit member",
     "until": "Covers through",
@@ -289,7 +289,7 @@
       "one": "{count} day overdue",
       "other": "{count} days overdue"
     },
-    "owe": "{amount} due · since {date}",
-    "settled": "Settled · next due {date}"
+    "owe": "{amount} due\nsince {date}",
+    "settled": "Settled\nnext due {date}"
   }
 }

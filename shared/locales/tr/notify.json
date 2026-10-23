@@ -20,7 +20,7 @@
       "one": "{count} gün gecikti",
       "other": "{count} gün gecikti"
     },
-    "sub": "{status} · sonraki dönem: {bill}",
+    "sub": "{status}\nsonraki dönem: {bill}",
     "headline": "{name} için {member} kişisinden tahsilat zamanı"
   },
   "proxy": {

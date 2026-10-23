@@ -6,7 +6,7 @@
   "title": "Semua langganan",
   "all": "Semua",
   "summary": {
-    "other": "{count} item · {monthly}/bln · {yearly}/thn"
+    "other": "{count} item\n{monthly}/bln\n{yearly}/thn"
   },
   "status": {
     "upcoming": "Belum dimulai",
@@ -20,7 +20,7 @@
     "lifetime": "Seumur hidup",
     "terminated": "Dinonaktifkan"
   },
-  "proxyExcluded": "Talangan · tidak dihitung",
+  "proxyExcluded": "Talangan\ntidak dihitung",
   "perMonthApprox": "≈ {amount}/bln",
   "originalPrice": "Harga asli {amount}",
   "view": {
@@ -67,19 +67,19 @@
   "endedOn": "Berakhir {date}",
   "change": {
     "noMethod": "Metode pembayaran belum ditentukan",
-    "planned": "Rencana · ",
+    "planned": "Rencana\n",
     "starts": "Mulai {when}",
     "from": "Berubah {when}"
   },
   "proxyBadge": {
     "owed": {
-      "other": "Talangan · {count} tertunggak"
+      "other": "Talangan\n{count} tertunggak"
     },
     "owedFor": {
-      "other": "Ditalangi untuk {name} · {count} tertunggak"
+      "other": "Ditalangi untuk {name}\n{count} tertunggak"
     },
-    "settled": "Talangan · lunas",
-    "settledFor": "Ditalangi untuk {name} · lunas"
+    "settled": "Talangan\nlunas",
+    "settledFor": "Ditalangi untuk {name}\nlunas"
   },
   "gantt": {
     "months": {
@@ -99,15 +99,15 @@
     "gapShort": "Terputus {span}",
     "lifetimeSuffix": " seumur hidup",
     "present": "sekarang",
-    "plannedSuffix": " · rencana",
-    "introPrefix": "Promo awal · ",
+    "plannedSuffix": "\nrencana",
+    "introPrefix": "Promo awal\n",
     "introShort": "Promo ",
     "planned": "Rencana",
     "gap": "Terputus",
     "earlier": "Sebelumnya",
     "later": "Berikutnya",
     "backToNow": "Kembali ke sekarang",
-    "resize": "Seret untuk mengubah lebar kolom nama · klik dua kali untuk mengatur ulang"
+    "resize": "Seret untuk mengubah lebar kolom nama\nklik dua kali untuk mengatur ulang"
   },
   "kind": {
     "debit": "Kartu debit",

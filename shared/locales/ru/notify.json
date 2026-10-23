@@ -22,7 +22,7 @@
       "many": "Просрочено на {count} дней",
       "other": "Просрочено на {count} дня"
     },
-    "sub": "{status} · следующий период: {bill}",
+    "sub": "{status}\nследующий период: {bill}",
     "headline": "Пора получить оплату от {member} за {name}"
   },
   "proxy": {
