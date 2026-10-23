@@ -1389,7 +1389,7 @@ a {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-/* SIM 卡面：卡托右侧按真实比例的 Mini SIM 压痕，垂直居中 */
+/* SIM 卡面：右侧两层可掰卡槽，芯片独立于轮廓缩放 */
 .sim-punch {
   position: absolute;
   z-index: -1;
@@ -1400,15 +1400,27 @@ a {
   transform: translateY(-58%);
   overflow: visible;
 }
-.sim-punch .groove {
+.sim-cutouts {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.sim-slot {
   fill: none;
-  stroke: rgba(27, 36, 48, 0.18);
+  stroke: rgba(65, 76, 88, 0.24);
   stroke-width: 1.2;
   vector-effect: non-scaling-stroke;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0.8px 0 rgba(255, 255, 255, 0.95));
 }
-.sim-punch .groove.inner {
-  stroke: rgba(27, 36, 48, 0.1);
-  stroke-dasharray: 3 3;
+.sim-punch .pc-chip {
+  position: absolute;
+  left: 22%;
+  top: 50%;
+  margin-top: 0;
+  transform: translateY(-50%);
 }
 .sim-carrier {
   font-size: 18px;
