@@ -508,6 +508,8 @@ export interface Insight {
   title: string;
   body: string;
   subs?: Subscription[];
+  /** 与这条提醒直接相关的支付方式（如余额不足的卡），界面上和订阅图标并排 */
+  methods?: PaymentMethod[];
   href?: string;
 }
 
@@ -619,6 +621,8 @@ export function insights(state: AppState, today: string): Insight[] {
           need: money(r.shortfall.amount, r.shortfall.currency),
           current: money(r.current, m.currency),
         }),
+        methods: [m],
+        subs: [r.shortfall.sub],
         href: '/wallet',
       });
     }

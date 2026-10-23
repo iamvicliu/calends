@@ -270,9 +270,14 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="ins-t">{i.title}</div>
               <div className="ins-b">{i.body}</div>
-              {i.subs && i.subs.length > 0 && (
+              {!!(i.subs?.length || i.methods?.length) && (
                 <div className="ins-subs">
-                  {i.subs.slice(0, 6).map((s) => (
+                  {i.methods?.map((m) => (
+                    <a className="icon-btn sub-shortcut" key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
+                      <MethodMark m={m} size={22} />
+                    </a>
+                  ))}
+                  {(i.subs ?? []).slice(0, 6).map((s) => (
                     <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                       <SubIcon sub={s} size={22} />
                     </IconButton>
