@@ -57,6 +57,10 @@
   color: var(--on-ink);
   box-shadow: none;
 }
+/* 侧栏折叠/展开是唯一不带描边的圆形按钮：贴着侧栏边缘，描边会显得多余 */
+.icon-btn.sb-toggle {
+  box-shadow: none;
+}
 /* 删除类操作：与同排圆形按钮同样的灰色描边、无底色，只把图标换成红色；悬停时浅红底 */
 .icon-btn.danger {
   color: var(--red);

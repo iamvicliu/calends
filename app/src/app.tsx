@@ -228,7 +228,7 @@ function Sidebar({
           <img src={base(avatarOf(state.settings))} alt="" />
           {t('app.name')}
         </a>
-        <IconButton className="sb-btn" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
+        <IconButton className="sb-btn sb-toggle" onClick={onCollapse} title={t('app.sidebar.collapse')} aria-label={t('app.sidebar.collapse')}>
           <Icon name="sidebar" />
         </IconButton>
       </div>
@@ -509,9 +509,11 @@ function App() {
         setPalette(true);
         return;
       }
-      if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+      // ⌘B 折叠或展开侧栏（旧的 ⌘\ 保留）；窄屏时开关抽屉
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && (e.key.toLowerCase() === 'b' || e.key === '\\')) {
         e.preventDefault();
-        setCollapsed(!collapsed);
+        if (narrow) setDrawer(!drawer);
+        else setCollapsed(!collapsed);
         return;
       }
       const detail = viewId ? document.querySelector<HTMLElement>('.sheet-dlg:has(.dt)') : null;
@@ -548,7 +550,7 @@ function App() {
       window.removeEventListener('ledger:drawer', onDrawer);
       window.removeEventListener('ledger:add', onAdd);
     };
-  }, [state, collapsed, editing, viewId, review, ics, palette]);
+  }, [state, collapsed, narrow, drawer, editing, viewId, review, ics, palette]);
 
   if (phase === 'loading' || (phase === 'login' && route !== 'login')) return <div className="login" />;
   if (phase === 'login' || !state) return <Login error={phase === 'offline' ? t('app.offlineError', { error: error ?? '' }) : undefined} />;
@@ -650,7 +652,12 @@ function App() {
           </div>
         )}
         {collapsed && (
-          <IconButton className="sb-btn reopen" onClick={() => setCollapsed(false)} title={t('app.sidebar.expand')} aria-label={t('app.sidebar.expand')}>
+          <IconButton
+            className="sb-btn sb-toggle reopen"
+            onClick={() => setCollapsed(false)}
+            title={t('app.sidebar.expand')}
+            aria-label={t('app.sidebar.expand')}
+          >
             <Icon name="sidebar" />
           </IconButton>
         )}

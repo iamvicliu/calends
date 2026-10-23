@@ -10,7 +10,7 @@ export function KeyboardHelp({ onClose }: { onClose: () => void }) {
       'global',
       [
         [`${cmd} K`, 'search'],
-        [`${cmd} \\`, 'sidebar'],
+        [`${cmd} B`, 'sidebar'],
         ['N', 'new'],
         ['1–9', 'navigate'],
         ['?', 'help'],
