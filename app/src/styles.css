@@ -5438,16 +5438,10 @@ a.car-toggle {
   cursor: default;
   padding-top: 9px;
   padding-bottom: 9px;
-  background: var(--fill-2);
-  font-size: var(--fs-1);
-  color: var(--label-3);
 }
-.ld-th > span {
-  font-weight: 400;
-}
+/* 合计行：与数据行同底，只靠字重区分 */
 .ld-tf {
   cursor: default;
-  background: var(--fill-2);
   font-weight: 600;
 }
 .ld-tf > span:first-child {
@@ -5532,16 +5526,12 @@ a.car-toggle {
   background: var(--fill);
 }
 .lt-head {
-  min-height: 36px;
   border-top: 0;
   cursor: default;
-  font-size: var(--fs-1);
-  color: var(--label-3);
-  background: color-mix(in srgb, var(--fill-2) 50%, transparent);
 }
 .lt-head:hover,
 .lt-head:active {
-  background: color-mix(in srgb, var(--fill-2) 50%, transparent);
+  background: none;
 }
 .lt-head > :nth-child(n + 4),
 .lt-row > :nth-child(n + 4) {
@@ -8577,9 +8567,7 @@ a.car-toggle {
 .car-receipts .car-period:hover:not(:disabled) {
   background: var(--hover);
 }
-.car-receipts .car-ledger-head {
-  min-height: 46px;
-}
+
 .car-receipts .car-ledger-head > span {
   white-space: nowrap;
 }
@@ -8587,9 +8575,9 @@ a.car-toggle {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   /* 分组条比表头矮：表头是整张表的层级，分组条是表内的层级 */
-  padding: 6px 14px;
+  /* 左右边距与表头、数据行一致，标题首字对齐 */
+  padding: 12px 18px 4px;
   min-height: 36px;
-  background: var(--fill-2);
   font-size: var(--fs-1);
   font-weight: 600;
   color: var(--label-2);
@@ -8614,9 +8602,6 @@ a.car-toggle {
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: 6px;
-}
-.car-receipts .car-period-title small::before {
-  content: '· ';
 }
 .car-receipts .ld-row:not(.car-period) > span:first-child small {
   font-size: var(--fs-1);
@@ -9420,15 +9405,13 @@ img.mm-flag {
     text-align: left;
   }
   .car-member-table thead th {
-    padding: 12px 0;
+    padding: 0;
+    align-self: center;
   }
   .car-member-row {
     min-height: 48px;
   }
-  .car-member-table th {
-    color: var(--label-3);
-    font-weight: 600;
-  }
+
   .car-member-table td > .text-ellipsis {
     display: block;
   }
@@ -9440,7 +9423,6 @@ img.mm-flag {
     grid-column: 1 / -1;
     padding: 8px 0;
   }
-  .car-member-table thead tr,
   .car-member-group {
     border-bottom: var(--hairline) solid var(--sep);
   }

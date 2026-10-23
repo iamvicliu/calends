@@ -581,7 +581,7 @@ function MemberTable({
   return (
     <table role="table" className="car-member-table" aria-label={t('family.sheet.members')}>
       <thead role="rowgroup">
-        <tr role="row">
+        <tr role="row" className="table-head">
           <th role="columnheader" scope="col">
             {t('family.sheet.member')}
           </th>
@@ -848,7 +848,7 @@ export function CarSheet({
     return (
       <button
         type="button"
-        className="ld-row ld-th car-ledger-head"
+        className="ld-row ld-th car-ledger-head table-head"
         aria-expanded={allOpen}
         aria-label={`${columns.join('\n')}\n${t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}`}
         disabled={!keys.length}

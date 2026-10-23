@@ -57,6 +57,30 @@
   color: var(--on-ink);
   box-shadow: none;
 }
+/*
+ * 全站表头：无底色、12px 常规字重浅灰标签、至少 36px 高、底部 0.5px 分隔线。
+ * 列宽与左右边距由各表自己的行布局决定，表头只管这一层视觉。
+ */
+/* 重复类名提高优先级：盖过各表行样式里的字号、字重（如最后一列加粗） */
+.table-head.table-head {
+  height: 36px;
+  min-height: 36px;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: none;
+  font-size: var(--fs-1);
+  font-weight: 400;
+  color: var(--label-3);
+  border-bottom: var(--hairline) solid var(--sep);
+}
+.table-head.table-head > *,
+.table-head.table-head > :last-child,
+.table-head.table-head th {
+  font-size: var(--fs-1);
+  font-weight: 400;
+  color: var(--label-3);
+}
+
 /* 侧栏折叠/展开是唯一不带描边的圆形按钮：贴着侧栏边缘，描边会显得多余 */
 .icon-btn.sb-toggle {
   box-shadow: none;

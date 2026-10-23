@@ -376,7 +376,7 @@ export function List({
         ) : (
           <div className="ltable-wrap">
             <div className="ltable" role="table">
-              <div className="lt-row lt-head" role="row">
+              <div className="lt-row lt-head table-head" role="row">
                 {(
                   [
                     ['name', t('list.col.name')],

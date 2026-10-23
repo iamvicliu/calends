@@ -225,7 +225,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
         </div>
 
         <div className="ld-table">
-          <div className="ld-row ld-th">
+          <div className="ld-row ld-th table-head">
             <span>{t('proxy.table.date')}</span>
             <span>{t('proxy.table.charged')}</span>
             <span className="ld-cost">{t('proxy.table.cost')}</span>

@@ -1841,7 +1841,7 @@ test('合租收付款默认折叠，分组独立切换，表头在部分展开�
   const props = { state, s: sub, today, ro: false, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
   const render = () => r.render('CarSheet', props);
   const groups = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row car-period');
-  const head = (nodes: Node[]) => nodes.find((n) => n.props.className === 'ld-row ld-th car-ledger-head')!;
+  const head = (nodes: Node[]) => nodes.find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')!;
   const details = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row');
   let nodes = render();
   assert.equal(groups(nodes).length, 2);
@@ -2334,7 +2334,7 @@ test('退款行显示负现金流和退款标签，全额退款后仍保留累�
   );
   const render = () => r.render('CarSheet', { state: st, s, today, book: carpool.carLedger(st, s, today), onClose() {}, onMember() {}, onOpenSub() {} });
   render()
-    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head')!
+    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')!
     .props.onClick();
   const refund = render().find((n) => n.props.className === 'ld-row' && all(n.children).some((x) => x.children.includes('family.sheet.refund')))!;
   assert.ok(refund);

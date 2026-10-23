@@ -15,9 +15,6 @@
   padding: 8px 20px;
 }
 .people-head {
-  color: var(--label-2);
-  font-size: var(--fs-1);
-  background: var(--fill-2);
   border-radius: var(--r) var(--r) 0 0;
 }
 .people-head > :nth-child(n + 3),

@@ -1197,3 +1197,21 @@ test('image clipboard construction has one owner and Sheet actions precede Close
   const review = sources.find(([file]) => file === 'views/Review.tsx')[2];
   assert.match(review, /<ShareSheet/);
 });
+
+test('table headers share one light header style without filled bands', () => {
+  const tsx = sources.map(([file, , text]) => [file, text]);
+  const failures = [];
+  for (const [file, text] of tsx) {
+    for (const m of text.matchAll(/className="([^"]*\b(?:ld-th|people-head|lt-head)\b[^"]*)"/g))
+      if (!m[1].split(' ').includes('table-head')) failures.push(`${file}: ${m[1]}`);
+    if (/<thead[\s>]/.test(text) && !/<thead[^>]*>\s*<tr[^>]*className="table-head"/.test(text)) failures.push(`${file}: thead row without table-head`);
+  }
+  for (const [file, css] of styleSources) {
+    for (const m of css.matchAll(/([^{}]*(?:\.ld-th|\.lt-head|\.people-head)[^{}]*)\{([^}]*)\}/g)) {
+      const selector = m[1].replace(/:not\([^)]*\)/g, '');
+      if (/\.ld-th|\.lt-head|\.people-head/.test(selector) && /background\s*:(?!\s*none)/.test(m[2]))
+        failures.push(`${file}: ${m[1].trim()} has a filled background`);
+    }
+  }
+  assert.deepEqual(failures, []);
+});

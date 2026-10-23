@@ -176,7 +176,7 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
         ) : (
           <>
             <div className="card people-list" role="table" aria-label={t('people.tab.people')}>
-              <div className="people-head" role="row">
+              <div className="people-head table-head" role="row">
                 {columns.flatMap(([key, label], index) => [
                   <div key={key} role="columnheader" aria-sort={sort === key ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
                     <button className={`lt-sort ${sort === key ? 'on' : ''}`} onClick={() => toggleSort(key)}>
