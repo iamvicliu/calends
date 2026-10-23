@@ -4,6 +4,7 @@ import { KIND_LABEL } from '../derive.ts';
 import { t } from '../../../shared/i18n.ts';
 import { Icon, MethodMark } from './ui.tsx';
 import { Pop } from './Pop.tsx';
+import { useTextSearch } from '../use-search.ts';
 
 /**
  * 支付方式选择器：系统下拉框放不了图片，这里自己画一个，每项带产品 logo 与国旗角标。
@@ -11,12 +12,22 @@ import { Pop } from './Pop.tsx';
  */
 export function MethodPicker({ methods, value, onChange }: { methods: PaymentMethod[]; value?: string; onChange: (id: string | undefined) => void }) {
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
   const btn = useRef<HTMLButtonElement>(null);
   const cur = methods.find((m) => m.id === value);
+  const searchText = (m: PaymentMethod) => `${m.name} ${KIND_LABEL[m.kind]} ${m.currency}`;
+  const none = t('picker.method.none');
+  const matches = useTextSearch([none, ...methods.map(searchText)], open);
+  const shown = methods.filter((m) => matches(q, searchText(m)));
+  const showNone = matches(q, none);
+  const close = () => {
+    setOpen(false);
+    setQ('');
+  };
 
   const pick = (id: string | undefined) => {
     onChange(id);
-    setOpen(false);
+    close();
   };
 
   return (
@@ -27,14 +38,20 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
         <Icon name="updown" />
       </button>
       {open && (
-        <Pop triggerRef={btn} onClose={() => setOpen(false)} label={t('picker.method.label')} className="mp-pop">
+        <Pop triggerRef={btn} onClose={close} label={t('picker.method.label')} className="mp-pop">
+          <label className="cp-search">
+            <Icon name="search" />
+            <input autoFocus value={q} placeholder={t('common.search')} onChange={(e) => setQ(e.target.value)} />
+          </label>
           <div role="listbox" aria-label={t('picker.method.label')}>
-            <button type="button" role="option" aria-selected={!cur} className={`mp-opt ${cur ? '' : 'sel'}`} onClick={() => pick(undefined)}>
-              <span className="mp-none" />
-              <span className="mp-name">{t('picker.method.none')}</span>
-              {!cur && <Icon name="check" />}
-            </button>
-            {methods.map((m) => (
+            {showNone && (
+              <button type="button" role="option" aria-selected={!cur} className={`mp-opt ${cur ? '' : 'sel'}`} onClick={() => pick(undefined)}>
+                <span className="mp-none" />
+                <span className="mp-name">{t('picker.method.none')}</span>
+                {!cur && <Icon name="check" />}
+              </button>
+            )}
+            {shown.map((m) => (
               <button
                 type="button"
                 role="option"
@@ -53,6 +70,7 @@ export function MethodPicker({ methods, value, onChange }: { methods: PaymentMet
                 {m.id === value && <Icon name="check" />}
               </button>
             ))}
+            {!showNone && !shown.length && <div className="cp-empty">{t('picker.noMatch')}</div>}
           </div>
         </Pop>
       )}

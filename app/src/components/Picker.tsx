@@ -7,6 +7,7 @@ import { locale, t } from '../../../shared/i18n.ts';
 import { ccyFlag, ccyName, FLAGS } from '../display.ts';
 import { Icon } from './ui.tsx';
 import { Pop } from './Pop.tsx';
+import { useTextSearch } from '../use-search.ts';
 
 export interface PickOption<T> {
   value: T;
@@ -52,10 +53,12 @@ export function Picker<T extends string | number>({
   const cur = options.find((o) => o.value === value);
   const H = Math.min(400, (searchable ? 48 : 8) + options.length * 36 + new Set(options.map((o) => o.group).filter(Boolean)).size * 26);
 
+  const searchText = (o: PickOption<T>) => `${o.label} ${o.hint ?? ''} ${o.value}`;
+  const matches = useTextSearch(options.map(searchText), open && searchable);
   const shown = useMemo(() => {
     const k = q.trim().toLowerCase();
-    return k ? options.filter((o) => `${o.label} ${o.hint ?? ''} ${o.value}`.toLowerCase().includes(k)) : options;
-  }, [q, options]);
+    return k ? options.filter((o) => matches(k, searchText(o))) : options;
+  }, [q, options, matches]);
 
   useEffect(() => {
     if (!open) return;

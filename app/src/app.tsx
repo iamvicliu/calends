@@ -33,6 +33,7 @@ import { currentRoute, go as navigate, href, initRouter, loginNext, onRoute, rep
 import { locale, t } from '../../shared/i18n.ts';
 import { initialLocale, loadLocale, preferredLocale } from './i18n.ts';
 import { monthEnd } from '../../shared/metrics.ts';
+import { useTextSearch } from './use-search.ts';
 
 // AI 助手页带着 Markdown 渲染器（Streamdown），按需加载，不拖慢其他页面的首屏
 const Assistant = lazy(() => import('./views/Assistant.tsx').then((m) => ({ default: m.Assistant })));
@@ -326,19 +327,19 @@ function Palette({
   const [q, setQ] = useState('');
   const [i, setI] = useState(0);
   const lower = q.trim().toLowerCase();
+  const haystack = (s: Subscription) => {
+    const m = state.methods.find((x) => x.id === s.methodId)?.name ?? '';
+    return `${s.name} ${s.category} ${s.tags.join(' ')} ${m} ${s.region ?? ''} ${s.notes ?? ''} ${s.proxy?.forName ?? ''}`;
+  };
+  const nav = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }];
+  const addKeywords = t('app.palette.addKeywords');
+  const matches = useTextSearch([...state.subscriptions.map(haystack), ...nav.map((n) => n.label), addKeywords]);
   const subs = state.subscriptions
-    .filter((s) => {
-      if (!lower) return true;
-      // 名称、分类、标签、支付方式、地区、备注、代付对象都能搜；多个词需同时命中
-      const m = state.methods.find((x) => x.id === s.methodId)?.name ?? '';
-      const hay = `${s.name} ${s.category} ${s.tags.join(' ')} ${m} ${s.region ?? ''} ${s.notes ?? ''} ${s.proxy?.forName ?? ''}`.toLowerCase();
-      return lower.split(/\s+/).every((w) => hay.includes(w));
-    })
+    // Multiple words must all match, as before.
+    .filter((s) => !lower || lower.split(/\s+/).every((w) => matches(w, haystack(s))))
     .sort((a, b) => (['ended', 'terminated'].includes(effectiveStatus(a, d)) ? 1 : 0) - (['ended', 'terminated'].includes(effectiveStatus(b, d)) ? 1 : 0))
     .slice(0, 8);
-  const pages = [...navOf(state.settings), { path: 'settings', label: t('app.nav.settings'), icon: 'gear' }].filter(
-    (n) => !lower || n.label.toLowerCase().includes(lower),
-  );
+  const pages = nav.filter((n) => matches(lower, n.label));
   const items: Array<{ key: string; run: () => void; el: React.JSX.Element }> = [
     ...subs.map((s) => ({
       key: s.id,
@@ -362,7 +363,7 @@ function Palette({
         </>
       ),
     })),
-    ...(!state.readonly && (!lower || t('app.palette.addKeywords').toLowerCase().includes(lower))
+    ...(!state.readonly && matches(lower, addKeywords)
       ? [
           {
             key: 'add',

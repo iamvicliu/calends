@@ -1,4 +1,5 @@
 import { canUseSingleKey } from '../app/src/keyboard.ts';
+import { loadSearch, matchText, searchIndex } from '../app/src/search.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -37,6 +38,10 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...metrics,
     locale: () => 'en',
     useOrig: () => false,
+    useTextSearch: (texts: string[]) => {
+      const indexes = new Map(texts.map((text) => [text, searchIndex(text, 'en')]));
+      return (query: string, text: string) => matchText(query, indexes.get(text) ?? text, 'en');
+    },
     categories: () => [],
     Picker: 'Picker',
     PersonAvatar: 'PersonAvatar',
@@ -548,6 +553,49 @@ test('订阅筛选默认全部时无清空按钮，任一条件变化后清空�
       assert.equal(nodes.find((n) => n.props.label === 'list.facet.pay')!.props.value, 'all');
       assert.equal(nodes.find((n) => n.type === 'input')!.props.value, '');
     }
+  }
+});
+
+test('subscription list pinyin filtering keeps multi-word intersection and facet counts aligned', async () => {
+  await loadSearch('zh-CN');
+  const sample = (id: string, name: string, category: string): Subscription => ({
+    id,
+    name,
+    category,
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    status: 'active',
+    tags: [],
+  });
+  const state = { ...st, subscriptions: [sample('music', '网易云音乐', '娱乐'), sample('study', '学习工具', '学习')] };
+  const r = harness(
+    '../app/src/views/List.tsx',
+    'List',
+    { 'list-view': 'gantt' },
+    {
+      Gantt: 'Gantt',
+      categories: () => [{ name: '娱乐' }, { name: '学习' }],
+      useTextSearch: (texts: string[]) => {
+        const indexes = new Map(texts.map((text) => [text, searchIndex(text, 'zh-CN')]));
+        return (query: string, text: string) => matchText(query, indexes.get(text) ?? text, 'zh-CN');
+      },
+    },
+  );
+  const render = () => r.render('List', { state, today, onOpen() {}, onAdd() {} });
+  for (const [query, ids] of [
+    ['wyyyy yl', ['music']],
+    ['xuexi', ['study']],
+    ['wyyyy xx', []],
+  ] as const) {
+    render()
+      .find((n) => n.type === 'input')!
+      .props.onChange({ target: { value: query } });
+    const nodes = render();
+    assert.deepEqual(nodes.find((n) => n.type === 'Gantt')?.props.rows.map((s: Subscription) => s.id) ?? [], ids);
+    const facet = nodes.find((n) => n.props.label === 'list.facet.category')!;
+    assert.equal(facet.props.options.find((o: { key: string }) => o.key === 'all').n, ids.length);
   }
 });
 
