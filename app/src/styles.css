@@ -9853,7 +9853,12 @@ img.mm-flag {
 }
 /* 放大进月视图：日历框先放大，在它最后 0.1 秒时右侧列表与底部报告才开始淡入 */
 .vt-zoom-in::view-transition-new(root) {
-  animation: vt-fade-in 300ms var(--ease) calc(var(--duration) - 100ms) both;
+  animation: vt-fade-in 150ms var(--ease) calc(var(--duration) - 100ms) both;
+}
+/* 组件库基础样式把 :root 的过渡名设成了 none，页面其余部分就不参与过渡、会直接跳出来；
+   只在日历月年切换期间恢复，右侧列表与报告才能按上面的节奏淡出淡入 */
+:root.vt-cal {
+  view-transition-name: root;
 }
 /* 侧栏与工具栏在月、年切换时单独成层：侧栏不变，工具栏只是标题换字，不随整页淡出淡入 */
 .vt-cal .sidebar {
