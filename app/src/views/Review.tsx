@@ -8,7 +8,7 @@ import { cancelSavings, yearReview, type YearReview } from '../../../shared/metr
 import type { AppState } from '../../../shared/types.ts';
 import { packCircles } from '../components/charts.tsx';
 import { ShareSheet } from '../components/ShareSheet.tsx';
-import { Seg, SubIcon } from '../components/ui.tsx';
+import { MetricCards, Metric, Seg, SubIcon } from '../components/ui.tsx';
 import { allCharges, catColor } from '../derive.ts';
 
 type Style = 'receipt' | 'poster' | 'card' | 'stars';
@@ -248,45 +248,45 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
           </div>
         ))}
       </div>
-      <div className="rv-grid">
+      <MetricCards>
         {r.longest && (
-          <div>
-            <small>{t('review.card.longest')}</small>
-            <b>{r.longest.sub.name}</b>
-            <span>{t('review.card.duration', { y: Math.floor(r.longest.days / 365), m: Math.floor((r.longest.days % 365) / 30) })}</span>
-          </div>
+          <Metric
+            label={t('review.card.longest')}
+            value={r.longest.sub.name}
+            note={t('review.card.duration', { y: Math.floor(r.longest.days / 365), m: Math.floor((r.longest.days % 365) / 30) })}
+          />
         )}
         {r.busiestMonth && (
-          <div>
-            <small>{t('review.card.busiest')}</small>
-            <b>
-              {t('review.card.month', {
-                n: Number(r.busiestMonth.month.slice(5)),
-                month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }),
-              })}
-            </b>
-            <span>{hide ? t('review.ofYear', { pct: pct(r.busiestMonth.sum) }) : m(-r.busiestMonth.sum)}</span>
-          </div>
+          <Metric
+            label={t('review.card.busiest')}
+            value={t('review.card.month', {
+              n: Number(r.busiestMonth.month.slice(5)),
+              month: monthLabel(r.busiestMonth.month.slice(0, 7), { year: false, long: true }),
+            })}
+            note={hide ? t('review.ofYear', { pct: pct(r.busiestMonth.sum) }) : m(-r.busiestMonth.sum)}
+          />
         )}
-        <div>
-          <small>{t('review.card.newEnded')}</small>
-          <b>
-            {r.newSubs.length} / {r.ended.length}
-          </b>
-          <span>
-            {saved && !hide
+        <Metric
+          label={t('review.card.newEnded')}
+          value={
+            <>
+              {r.newSubs.length} / {r.ended.length}
+            </>
+          }
+          note={
+            saved && !hide
               ? t('review.card.saved', { amount: saved })
               : r.ended.length
                 ? t('review.card.ended', { count: r.ended.length })
-                : t('review.card.noneEnded')}
-          </span>
-        </div>
-        <div>
-          <small>{t('review.card.currencies')}</small>
-          <b>{t('review.card.currencyCount', { count: r.currencies })}</b>
-          <span>{hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(-mrr) })}</span>
-        </div>
-      </div>
+                : t('review.card.noneEnded')
+          }
+        />
+        <Metric
+          label={t('review.card.currencies')}
+          value={t('review.card.currencyCount', { count: r.currencies })}
+          note={hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(-mrr) })}
+        />
+      </MetricCards>
       <div className="rv-foot">{location.host}</div>
     </div>
   );

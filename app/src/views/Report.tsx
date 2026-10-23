@@ -21,7 +21,7 @@ import {
 } from '../../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
 import { allCharges, catColor, KIND_BG, paletteColor, sumBase, toBase } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
@@ -103,26 +103,12 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         <div className="hero-delta">
           {yearAgo != null && yearAgo > 0 && <span className="muted">{copyParts(t('report.hero.yearAgo', { amount: signed(-yearAgo) }))}</span>}
         </div>
-        <div className="hero-facts">
-          <div>
-            <b>{signed(-now * 12)}</b>
-            <span>{t('report.hero.annual')}</span>
-          </div>
-          <div>
-            <b>{signed(-now / 30.4375, false)}</b>
-            <span>{t('report.hero.perDay')}</span>
-          </div>
-          <div>
-            <b>{tot.activeCount}</b>
-            <span>{t('report.hero.active')}</span>
-          </div>
-          {tot.recoverMrr > 1 && (
-            <div>
-              <b className="gain">{signed(tot.recoverMrr)}</b>
-              <span>{t('report.hero.recover')}</span>
-            </div>
-          )}
-        </div>
+        <MetricCards>
+          <Metric label={t('report.hero.annual')} value={signed(-now * 12)} />
+          <Metric label={t('report.hero.perDay')} value={signed(-now / 30.4375, false)} />
+          <Metric label={t('report.hero.active')} value={tot.activeCount} />
+          {tot.recoverMrr > 1 && <Metric label={t('report.hero.recover')} value={signed(tot.recoverMrr)} valueClassName="gain" />}
+        </MetricCards>
       </div>
       <div className="hero-r">
         <div className="row" style={{ justifyContent: 'space-between', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
@@ -346,8 +332,8 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
             </>
           )}
         />
-        <div className="cash-facts">
-          <div
+        <MetricCards>
+          <Metric
             {...tipProps(() =>
               pv.items
                 .slice(0, 6)
@@ -357,32 +343,31 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
                   </div>
                 )),
             )}
-          >
-            <span>{t('report.cash.prepaid')}</span>
-            <b>
-              <Amount plain value={pv.total} ccy={base} compact />
-            </b>
-            <small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>
-          </div>
-          <div>
-            <span>{t('report.cash.next90')}</span>
-            <b>
-              <Amount value={-next90} ccy={base} compact />
-            </b>
-            <small>{t('report.cash.fullPaidHint')}</small>
-            <small>
-              {copyParts(
-                peak
-                  ? t('report.cash.peak', {
-                      n: Number(peak.month.slice(5)),
-                      month: monthLabel(peak.month.slice(0, 7), { year: false }),
-                      amount: flow(-peak.cash, base, { compact: true }),
-                    })
-                  : '',
-              )}
-            </small>
-          </div>
-        </div>
+            label={t('report.cash.prepaid')}
+            value={<Amount plain value={pv.total} ccy={base} compact />}
+            note={<small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>}
+          />
+          <Metric
+            label={t('report.cash.next90')}
+            value={<Amount value={-next90} ccy={base} compact />}
+            note={
+              <>
+                <small>{t('report.cash.fullPaidHint')}</small>
+                <small>
+                  {copyParts(
+                    peak
+                      ? t('report.cash.peak', {
+                          n: Number(peak.month.slice(5)),
+                          month: monthLabel(peak.month.slice(0, 7), { year: false }),
+                          amount: flow(-peak.cash, base, { compact: true }),
+                        })
+                      : '',
+                  )}
+                </small>
+              </>
+            }
+          />
+        </MetricCards>
       </div>
     </div>
   );

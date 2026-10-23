@@ -9,7 +9,7 @@ import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosse
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
-import { IconButton, Amount, CardTitle, CatIcon, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { MetricCards, Metric, IconButton, Amount, CardTitle, CatIcon, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
@@ -487,31 +487,24 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             </linearGradient>
           </defs>
         </svg>
-        <div className="stmt-facts">
-          <div>
-            <b>{flow(-tot.mrr * 12, base, { compact: true })}</b>
-            <span>{t('overview.stmt.annual')}</span>
-          </div>
-          <div>
-            <b>{flow(-ytd, base, { compact: true })}</b>
-            <span>{t('overview.stmt.ytd', { year: today.slice(0, 4) })}</span>
-            <div className="stmt-paid-note">
-              {!state.readonly && loss !== 0 && (
-                <button type="button" className="stmt-loss-note" onClick={openLosses} title={!Number.isFinite(loss) ? t('core.stop.fxMissing') : undefined}>
-                  {t('overview.stmt.loss')} <strong>{flow(-loss, base, { compact: true })}</strong>
-                </button>
-              )}
-            </div>
-          </div>
-          <div>
-            <b>{flow(-tot.mrr / 30.4375, base)}</b>
-            <span>{t('overview.stmt.perDay')}</span>
-          </div>
-          <div>
-            <b>{tot.activeCount}</b>
-            <span>{t('overview.stmt.active')}</span>
-          </div>
-        </div>
+        <MetricCards>
+          <Metric label={t('overview.stmt.annual')} value={flow(-tot.mrr * 12, base, { compact: true })} />
+          <Metric
+            label={t('overview.stmt.ytd', { year: today.slice(0, 4) })}
+            value={flow(-ytd, base, { compact: true })}
+            note={
+              <div className="stmt-paid-note">
+                {!state.readonly && loss !== 0 && (
+                  <button type="button" className="stmt-loss-note" onClick={openLosses} title={!Number.isFinite(loss) ? t('core.stop.fxMissing') : undefined}>
+                    {t('overview.stmt.loss')} <strong>{flow(-loss, base, { compact: true })}</strong>
+                  </button>
+                )}
+              </div>
+            }
+          />
+          <Metric label={t('overview.stmt.perDay')} value={flow(-tot.mrr / 30.4375, base)} />
+          <Metric label={t('overview.stmt.active')} value={tot.activeCount} />
+        </MetricCards>
       </div>
       <div className="stmt-r">
         <div className="stmt-cap m-hide">

@@ -1,3 +1,4 @@
+import { metricComponents } from '../scripts/ui-test-components.ts';
 import { canUseSingleKey } from '../app/src/keyboard.ts';
 import { numberFormat } from './intl.ts';
 import { loadSearch, matchText, searchIndex } from '../app/src/search.ts';
@@ -31,7 +32,11 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
   let cursor = 0;
   const keys: Record<string, (e: any) => void> = {};
   const deps = {
-    React: { Fragment: 'Fragment', createElement: (type: string, props: Node['props'], ...children: unknown[]) => ({ type, props: props ?? {}, children }) },
+    React: {
+      Fragment: 'Fragment',
+      createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
+        typeof type === 'function' && ['MetricCards', 'Metric'].includes(type.name) ? type({ ...props, children }) : { type, props: props ?? {}, children },
+    },
     canUseSingleKey,
     ...billing,
     ...format,
@@ -114,7 +119,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     SpendingDelta: 'SpendingDelta',
     ...extra,
   };
-  const exports = new Function(...Object.keys(deps), `${result.code.replace(/export /g, '')}; return {${names}};`)(...Object.values(deps));
+  const components = { ...deps, ...metricComponents(deps.React) };
+  const exports = new Function(...Object.keys(components), `${result.code.replace(/export /g, '')}; return {${names}};`)(...Object.values(components));
   return {
     prefs,
     keys,
@@ -374,7 +380,7 @@ test('scope presentation gives single refunds/receipts one numeric owner and avo
   const root = subscription;
   nodes = render({ blocks: [{ type: 'sharing', rows: [{ sub: root, received: 10, owed: 0 }], received: 10, owed: 0 }] });
   assert.equal(
-    nodes.some((n) => n.props.className === 'hero-facts scope-facts'),
+    nodes.some((n) => n.props.className === 'metric-cards'),
     false,
   );
   const upcoming = {
@@ -522,7 +528,7 @@ test('a single charge owns its amount instead of repeating an identical cumulati
     nodes.some((n) => n.children.includes('detail.stats.spent')),
     false,
   );
-  assert.equal(nodes.filter((n) => n.props.className === 'dt-panel dt-kpi').length, 2);
+  assert.equal(nodes.filter((n) => n.props.className === 'metric').length, 2);
 });
 
 test('same-currency cash pairs retain a distinct actual settlement and never hide fees behind the list price', () => {

@@ -26,7 +26,24 @@ import { applyCarRule, carRule, followsCar, memberCashFlows, memberFlowValue } f
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { CardTitle, Amount, Cell, Group, Icon, NameLink, NumInput, Seg, Sheet, StatusPill, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import {
+  MetricCards,
+  Metric,
+  CardTitle,
+  Amount,
+  Cell,
+  Group,
+  Icon,
+  NameLink,
+  NumInput,
+  Seg,
+  Sheet,
+  StatusPill,
+  SubIcon,
+  tipProps,
+  Toolbar,
+  useWidth,
+} from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
@@ -106,26 +123,23 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         {!ro && <FamilyTabs tab="plans" />}
       </Toolbar>
       <div className="page fade-in stack">
-        <div className="grid g-3">
-          <div className="card stat">
-            <div className="stat-label">{yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}</div>
-            <div className="stat-value" style={{ color: yearNet < 0 ? 'var(--green)' : undefined }}>
-              <Amount value={-yearNet} ccy={base} />
-            </div>
-            <div className="stat-sub" style={{ color: 'var(--green)' }}>
-              {t('family.pool.yearIncome', { amount: flow(yearIncome, base, { compact: true }) })}
-            </div>
-          </div>
-          <div className="card stat">
-            <div className="stat-label">{t('family.pool.owed')}</div>
-            <div className="stat-value" style={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}>
-              <Amount plain value={owedSum} ccy={base} />
-            </div>
-            <div className="stat-sub">{t('family.pool.owedSub', { count: owedAll.length })}</div>
-          </div>
-          <div className="card stat">
-            <div className="stat-label">{t('family.pool.count')}</div>
-            <div className="stat-value">
+        <MetricCards>
+          <Metric
+            label={yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}
+            value={<Amount value={-yearNet} ccy={base} />}
+            valueStyle={{ color: yearNet < 0 ? 'var(--green)' : undefined }}
+            note={t('family.pool.yearIncome', { amount: flow(yearIncome, base, { compact: true }) })}
+            noteStyle={{ color: 'var(--green)' }}
+          />
+          <Metric
+            label={t('family.pool.owed')}
+            value={<Amount plain value={owedSum} ccy={base} />}
+            valueStyle={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}
+            note={t('family.pool.owedSub', { count: owedAll.length })}
+          />
+          <Metric
+            label={t('family.pool.count')}
+            value={
               <span className="amt car-plan-count">
                 <span>
                   {owned.length}
@@ -136,9 +150,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                   <small>{t('family.pool.countJoined')}</small>
                 </span>
               </span>
-            </div>
-          </div>
-        </div>
+            }
+          />
+        </MetricCards>
 
         {owned.length + ended.length === 0 ? (
           <div className="card empty">
@@ -809,8 +823,8 @@ export function CarSheet({
           )}
         </div>
 
-        {/* 指标条：一张卡里三格，标签 / 数字 / 说明三层 */}
-        <div className="car-strip">
+        {/* 独立指标卡：保留标签 / 数字 / 说明三层 */}
+        <MetricCards>
           <div>
             <small>{t('family.strip.yearNet')}</small>
             <b className={profit >= 0 ? 'done' : 'loss'}>{fmt(profit)}</b>
@@ -826,7 +840,7 @@ export function CarSheet({
             {book.hasRecords ? <b className={actual >= 0 ? 'done' : 'loss'}>{fmt(actual)}</b> : <b>{fmt(-book.paid)}</b>}
             <span>{book.hasRecords ? (book.since ? t('family.strip.since', { date: cnDateFull(book.since) }) : '') : t('family.sheet.noReceiptsYet')}</span>
           </div>
-        </div>
+        </MetricCards>
 
         <div className="car-sheet-sec row">
           <CardTitle>{t('family.sheet.members')}</CardTitle>
@@ -1089,7 +1103,7 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
   const actual = -book.net;
   return (
     <div className="car-book">
-      <div className="car-facts">
+      <MetricCards>
         <div>
           <small>{t('family.facts.paidAll')}</small>
           <b>{fmt(-book.paid)}</b>
@@ -1111,7 +1125,7 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
             </>
           )}
         </div>
-      </div>
+      </MetricCards>
     </div>
   );
 }

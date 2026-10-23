@@ -17,7 +17,22 @@ import {
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, Amount, CardTitle, Icon, PayBadge, RegionTag, Seg, subRegion, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import {
+  IconButton,
+  Amount,
+  MetricCards,
+  Metric,
+  CardTitle,
+  Icon,
+  PayBadge,
+  RegionTag,
+  Seg,
+  subRegion,
+  SubIcon,
+  tipProps,
+  Toolbar,
+  useWidth,
+} from '../components/ui.tsx';
 import { chargeValue } from '../../../shared/fx.ts';
 import { allCharges, sumBase } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -460,16 +475,10 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
       <div className="cal-stat-big">
         <b className={headline.total < 0 ? 'green' : undefined}>{flow(-headline.total, base)}</b>
       </div>
-      <div className="cal-stat-split">
-        <div>
-          <small>{t('scope.paid')}</small>
-          <b>{flow(-headline.paid, base)}</b>
-        </div>
-        <div>
-          <small>{t('scope.pending')}</small>
-          <b>{flow(-headline.pending, base)}</b>
-        </div>
-      </div>
+      <MetricCards>
+        <Metric label={t('scope.paid')} value={flow(-headline.paid, base)} />
+        <Metric label={t('scope.pending')} value={flow(-headline.pending, base)} />
+      </MetricCards>
       <div className="cal-comparisons">
         <div>
           <span>{t('scope.previousMonth')}</span>

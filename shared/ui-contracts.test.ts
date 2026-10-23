@@ -1,3 +1,4 @@
+import { metricComponents } from '../scripts/ui-test-components.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -281,7 +282,8 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
       .replace(/export function /g, 'function ');
     const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
     assert.equal(result.fatal, false);
-    return new Function(...Object.keys(deps), `${result.code}; return { ${names.join(', ')} };`)(...Object.values(deps));
+    const components = { ...deps, ...metricComponents(deps.React) };
+    return new Function(...Object.keys(components), `${result.code}; return { ${names.join(', ')} };`)(...Object.values(components));
   };
   const all = (node: unknown): Element[] => {
     if (Array.isArray(node)) return node.flatMap(all);

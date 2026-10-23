@@ -11,7 +11,7 @@ import { snapshot } from '../snapshot.ts';
 import { run } from '../store.ts';
 import { bankOf, brandOf, catColor, methodLogo } from '../derive.ts';
 import { BarLine } from './charts.tsx';
-import { IconButton, CatIcon, CardTitle, Icon, MethodMark, SubIcon } from './ui.tsx';
+import { MetricCards, Metric, IconButton, CatIcon, CardTitle, Icon, MethodMark, SubIcon } from './ui.tsx';
 import './scope-report.css';
 
 interface Props {
@@ -100,12 +100,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const income = (v: number) => flow(v, base);
   const percent = (v: number) => numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v));
   const delta = (value: Comparison) => <SpendingDelta value={value} base={base} />;
-  const fact = (label: string, value: ReactNode) => (
-    <div>
-      <b className="num">{value}</b>
-      <span>{label}</span>
-    </div>
-  );
+  const fact = (label: string, value: ReactNode) => <Metric label={label} value={value} />;
   const name = (sub: Subscription, meta?: ReactNode) => (
     <span className="scope-sub">
       <SubIcon sub={sub} size={24} proxied />
@@ -184,12 +179,12 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               {delta(block.change)}
               <span className="muted">{t('scope.previousEnd')}</span>
             </div>
-            <div className="hero-facts">
+            <MetricCards>
               {fact(t('scope.annual'), expense(block.annual))}
               {fact(t('scope.active'), block.activeCount)}
               {fact(t('scope.yearPaid'), expense(block.paid))}
               {(block.loss > 0 || !Number.isFinite(block.loss)) && block.loss !== losses?.loss && fact(t('scope.includedLoss'), expense(block.loss))}
-            </div>
+            </MetricCards>
           </>
         ) : (
           <>
@@ -207,11 +202,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </span>
               )}
             </div>
-            <div className="hero-facts">
+            <MetricCards>
               {fact(t('scope.paid'), expense(block.paid))}
               {fact(t('scope.pending'), expense(block.pending))}
               {fact(t('scope.count'), block.count)}
-            </div>
+            </MetricCards>
           </>
         );
       case 'trend': {
@@ -411,10 +406,10 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('losses')}
-            <div className="hero-facts scope-facts">
+            <MetricCards>
               {block.rows.length > 1 && fact(t('scope.loss'), expense(block.loss))}
               {block.refunds.length > 1 && fact(t('scope.refunded'), income(block.refunded))}
-            </div>
+            </MetricCards>
             {block.incomplete && <p className="scope-note red">{t('scope.incomplete')}</p>}
             {block.rows.map((r) => (
               <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
@@ -451,10 +446,10 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <>
             {heading('sharing', 'sharingBasis')}
             {block.rows.length > 1 && (
-              <div className="hero-facts scope-facts">
+              <MetricCards>
                 {block.received !== 0 && fact(t('scope.received'), income(block.received))}
                 {block.owed > 0 && fact(t('scope.owed'), income(block.owed))}
-              </div>
+              </MetricCards>
             )}
             {block.rows.map((r) => (
               <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
