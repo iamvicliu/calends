@@ -1,4 +1,4 @@
-import { addDays, addMonths, chargesBetween, renewalRuleAt, todayIn } from '../shared/billing.ts';
+import { addDays, addMonths, chargesBetween, renewalRuleAt, todayIn, chargeMethodId } from '../shared/billing.ts';
 import { money } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
 import type { AppState } from '../shared/types.ts';
@@ -52,7 +52,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
       // 同一天可能有两笔（如补扣），UID 要各不相同
       const n = (seen.get(d) ?? 0) + 1;
       seen.set(d, n);
-      const method = state.methods.find((m) => m.id === c.sub.methodId);
+      const method = state.methods.find((m) => m.id === chargeMethodId(c));
       lines.push(
         'BEGIN:VEVENT',
         `UID:${s.id}-${d}${n > 1 ? `-${n}` : ''}@${new URL(siteUrl).host}`,

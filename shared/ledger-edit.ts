@@ -2,7 +2,7 @@ import { validatePeopleAvatars } from './avatar.ts';
 // Ledger references and non-secret settings. Pure functions; no storage or platform APIs.
 import { categoryList, cleanCategories, renameInSubs, type Category } from './categories.ts';
 import { mergePeople, refsFor, syncPerson } from './people.ts';
-import { channelsOf, DEFAULT_SETTINGS, type AppState, type PaymentMethod, type Person, type Settings, type Subscription } from './types.ts';
+import { channelsOf, DEFAULT_SETTINGS, type AppState, type Payment, type PaymentMethod, type Person, type Settings, type Subscription } from './types.ts';
 import { PREF_KEYS, mergePrefs } from './prefs.ts';
 import { isLocale, t } from './i18n.ts';
 import { collectionAnchor, validDay } from './billing.ts';
@@ -76,6 +76,10 @@ export function methodReferences(st: AppState, id: string) {
       ...(s.phases ?? [])
         .filter((p) => p.methodId === id)
         .map((p) => ({ subscription: s.id, name: s.name, kind: 'phase', start: p.start, payments: p.payments?.length ?? 0 })),
+      // 单笔扣款单独记的支付方式也算引用：删卡时一起迁移，不留下指向已删卡的记录
+      ...[s, ...(s.phases ?? [])].flatMap((p) =>
+        (p.payments ?? []).filter((x) => x.methodId === id).map((x) => ({ subscription: s.id, name: s.name, kind: 'payment', date: x.date })),
+      ),
     ]),
     ...(st.settings.defaultMethodId === id ? [{ kind: 'default_method' }] : []),
   ];
@@ -84,12 +88,15 @@ export function deleteMethodData(st: AppState, id: string, into?: string) {
   const references = methodReferences(st, id);
   if (into === id || (into && !st.methods.some((m) => m.id === into))) throw new Error(t('mcp.error.invalidTarget'));
   requireMigration(references, into);
+  const uses = (pays?: Payment[]) => pays?.some((x) => x.methodId === id);
+  const move = (pays?: Payment[]) => pays?.map((x) => (x.methodId === id ? { ...x, methodId: into } : x));
   const subscriptions = st.subscriptions
-    .filter((s) => s.methodId === id || s.phases?.some((p) => p.methodId === id))
+    .filter((s) => s.methodId === id || uses(s.payments) || s.phases?.some((p) => p.methodId === id || uses(p.payments)))
     .map((s) => ({
       ...s,
       methodId: s.methodId === id ? into : s.methodId,
-      phases: s.phases?.map((p) => (p.methodId === id ? { ...p, methodId: into } : p)),
+      payments: move(s.payments),
+      phases: s.phases?.map((p) => ({ ...p, methodId: p.methodId === id ? into : p.methodId, payments: move(p.payments) })),
     }));
   return { references, subscriptions, settings: st.settings.defaultMethodId === id ? { ...st.settings, defaultMethodId: into } : st.settings };
 }

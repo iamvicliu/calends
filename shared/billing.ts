@@ -329,7 +329,12 @@ export interface Charge {
   note?: string;
   /** 本笔续费购买的服务起点，与现金日期分开。 */
   serviceDate?: string;
+  /** 这一笔单独记的支付方式；缺省用所属阶段的，读取用 chargeMethodId() */
+  methodId?: string;
 }
+
+/** 一笔扣款实际用的支付方式：这一笔单独记的优先，否则是所属阶段的 */
+export const chargeMethodId = (c: Pick<Charge, 'methodId' | 'sub'>) => c.methodId ?? c.sub.methodId;
 
 /** 规则修改只影响尚未发生的扣款；已扣过的服务边界不重复收费。 */
 function renewalDate(s: Subscription, boundary: string, initial = false): string {
@@ -447,6 +452,7 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
         kind: p.kind,
         settled: p.kind === 'failed' ? undefined : p.settled,
         note: p.note,
+        ...(p.methodId ? { methodId: p.methodId } : {}),
       }));
     if (s.cycle.unit === 'lifetime') return out;
     const last = renewals.at(-1)?.date ?? s.billingStart ?? s.start;

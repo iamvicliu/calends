@@ -1,5 +1,5 @@
 import { memberCashFlows, memberFlowValue } from './carpool.ts';
-import { addDays, addMonths, chargesBetween, memberDues, myShareFactor, phaseSubs, totals, type Charge } from './billing.ts';
+import { addDays, addMonths, chargesBetween, memberDues, myShareFactor, phaseSubs, totals, type Charge, chargeMethodId } from './billing.ts';
 import { chargeValue, toBaseAt } from './fx.ts';
 import {
   cashVsAccrual,
@@ -243,7 +243,7 @@ function totalReport(scoped: AppState, today: string, yearStart: string): ScopeR
   addComposition(
     blocks,
     composition(spent.map((r) => ({ key: r.sub.category, amount: r.amount }))),
-    composition(rows.map((r) => ({ key: r.original.sub.methodId ?? '', amount: r.amount }))),
+    composition(rows.map((r) => ({ key: chargeMethodId(r.original) ?? '', amount: r.amount }))),
     true,
   );
   if (spent.length > 1) blocks.push({ type: 'top', mode: 'total', rows: spent.sort(byAmount).slice(0, 10) });
@@ -298,7 +298,7 @@ export function monthReport(state: AppState, month: string, today: string): Scop
   addComposition(
     blocks,
     composition(debits.map((r) => ({ key: r.sub.category, amount: r.amount }))),
-    composition(debits.map((r) => ({ key: r.original.sub.methodId ?? '', amount: r.amount }))),
+    composition(debits.map((r) => ({ key: chargeMethodId(r.original) ?? '', amount: r.amount }))),
     false,
   );
   if (debits.length) blocks.push({ type: 'top', mode: 'month', rows: [...debits].sort(byAmount).slice(0, 5) });

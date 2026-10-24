@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { activePhases, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
+import { activePhases, chargesBetween, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { deletePayment, savePayment } from '../../../shared/phases.ts';
+import { deletePayment, savePayment, setPhaseMethod } from '../../../shared/phases.ts';
 import type { Payment, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
-import { MoneyInput, Cell, Group, Sheet } from '../components/ui.tsx';
-import { run, saveSub } from '../store.ts';
+import { MethodPicker } from '../components/MethodPicker.tsx';
+import { MoneyInput, Cell, Group, Seg, Sheet } from '../components/ui.tsx';
+import { getState, run, saveSub } from '../store.ts';
 
 type Kind = 'charge' | NonNullable<Payment['kind']>;
 const KINDS: Kind[] = ['charge', 'refund', 'adjust', 'failed'];
@@ -40,6 +41,11 @@ export function PaymentSheet({
   const [settledCcy, setSettledCcy] = useState(edit?.pay.settled?.currency ?? 'USD');
   const [note, setNote] = useState(edit?.pay.note ?? '');
   const sign = kind === 'refund' ? -1 : 1;
+  // 支付方式：缺省为这一笔单独记的，否则是所属这一段的；换了卡时选只改这一笔，还是整段一起改
+  const [method, setMethod] = useState(edit?.pay.methodId ?? phase.methodId);
+  const changed = method !== (edit?.pay.methodId ?? phase.methodId);
+  const [scope, setScope] = useState<'one' | 'phase'>(phase.methodId ? 'one' : 'phase');
+  const phaseCount = chargesBetween(phase, phase.start, today, today).length;
 
   const save = () => {
     const n = Number(amount);
@@ -51,10 +57,13 @@ export function PaymentSheet({
       kind: kind === 'charge' ? undefined : kind,
       settled: settled !== '' && Number(settled) >= 0 ? { amount: sign * Number(settled), currency: settledCcy } : undefined,
       note: note.trim() || undefined,
+      methodId: changed ? (scope === 'one' && method !== phase.methodId ? method : undefined) : edit?.pay.methodId,
     };
     run(
       async () => {
-        await saveSub(savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick));
+        let next = savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick);
+        if (changed && scope === 'phase') next = setPhaseMethod(next, phase.start, method);
+        await saveSub(next);
         onClose();
       },
       t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'),
@@ -117,6 +126,27 @@ export function PaymentSheet({
               ariaLabel={t('editor.payment.kind.label')}
             />
           </Cell>
+        </Group>
+        <Group>
+          <Cell label={t('editor.payment.method')}>
+            <MethodPicker methods={getState().methods} value={method} onChange={setMethod} />
+          </Cell>
+          {changed && phaseCount > 1 && (
+            <Cell label={t('editor.payment.scope')}>
+              <Seg
+                small
+                value={scope}
+                onChange={setScope}
+                options={[
+                  ['one', t('editor.payment.scopeOne')],
+                  ['phase', t('editor.payment.scopePhase', { count: phaseCount })],
+                ]}
+              />
+            </Cell>
+          )}
+        </Group>
+        {/* 金额按这一段的币种（写在标签里，跟方案走）；卡上用别的币种扣时先选实扣币种再填金额 */}
+        <Group>
           <Cell label={t('editor.payment.amount', { currency: ccy })} sub={kind === 'refund' ? t('core.stop.currencyHint', { currency: ccy }) : undefined}>
             <MoneyInput ccy={ccy} className="num" value={amount} onChange={(e) => setAmount((e.target as HTMLInputElement).value)} />
           </Cell>

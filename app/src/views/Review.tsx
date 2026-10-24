@@ -1,6 +1,6 @@
 import { copyParts } from '../components/copy.tsx';
 import { useMemo, useState } from 'react';
-import { totals } from '../../../shared/billing.ts';
+import { totals, chargeMethodId } from '../../../shared/billing.ts';
 import { money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
@@ -55,7 +55,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     const to = `${year}-12-31` < today ? `${year}-12-31` : today;
     const sums = new Map<string, number>();
     for (const c of allCharges(state, from, to, today)) {
-      const name = state.methods.find((x) => x.id === c.sub.methodId)?.name ?? t('review.unassigned');
+      const name = state.methods.find((x) => x.id === chargeMethodId(c))?.name ?? t('review.unassigned');
       sums.set(name, (sums.get(name) ?? 0) + chargeValue(state, c));
     }
     return [...sums].map(([name, sum]) => ({ name, sum })).sort((a, b) => b.sum - a.sum);

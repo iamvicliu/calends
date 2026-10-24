@@ -1287,3 +1287,29 @@ test('助手下车退款必须确认，确认参数固定预览日期币种并�
   await apply(f.env, proposal);
   assert.deepEqual((await f.snapshot()).subscriptions[0].share!.members[0].leaveRefund, proposal.args.leave_refund);
 });
+
+test('record_payment：单笔支付方式可指定、改写时保留、null 清除，读工具按单笔方式汇总', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), start: '2026-01-05', share: undefined, proxy: undefined, payments: [{ date: '2026-01-05', amount: 10 }] };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const pays = async () => (await f.snapshot()).subscriptions.find((x) => x.id === 's')!.payments!;
+  // 指定这一笔用另一张卡
+  let r = await f.call('record_payment', { subscription: 's', replace: { date: '2026-01-05', index: 0 }, date: '2026-01-05', amount: 10, method: 'target' });
+  assert.ok(!r.isError, JSON.stringify(r));
+  assert.equal((await pays())[0].methodId, 'target');
+  // 只改金额：沿用这一笔原来的支付方式，不被悄悄丢掉
+  r = await f.call('record_payment', { subscription: 's', replace: { date: '2026-01-05', index: 0 }, date: '2026-01-05', amount: 11 });
+  assert.ok(!r.isError, JSON.stringify(r));
+  assert.equal((await pays())[0].amount, 11);
+  assert.equal((await pays())[0].methodId, 'target');
+  // 扣款明细的支付方式按单笔记录
+  const list = JSON.stringify(
+    await f.call('list_charges', { subscription: 's', period: 'custom', from: '2026-01-01', to: '2026-01-31', include_projected: false }),
+  );
+  assert.match(list, /Target wallet/);
+  // null 清除，回到所属方案的支付方式
+  r = await f.call('record_payment', { subscription: 's', replace: { date: '2026-01-05', index: 0 }, date: '2026-01-05', amount: 11, method: null });
+  assert.ok(!r.isError, JSON.stringify(r));
+  assert.equal((await pays())[0].methodId, undefined);
+});

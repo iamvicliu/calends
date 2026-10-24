@@ -14,6 +14,7 @@ import {
   effectiveStatus,
   nextCharge,
   type Charge,
+  chargeMethodId,
 } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -267,11 +268,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                           <span className="cal-dc-main">
                             <b>{sub.name}</b>
                             <span className="cal-dc-meta">
-                              <PayBadge m={state.methods.find((m) => m.id === c.sub.methodId)} />
+                              <PayBadge m={state.methods.find((m) => m.id === chargeMethodId(c))} />
                               <RegionTag
                                 cc={subRegion(
                                   c.sub,
-                                  state.methods.find((m) => m.id === c.sub.methodId),
+                                  state.methods.find((m) => m.id === chargeMethodId(c)),
                                 )}
                               />
                               <span>{cycleLabel(c.sub.cycle)}</span>
