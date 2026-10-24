@@ -34,7 +34,7 @@ const functionRange = (ast, name) => {
 const inside = (node, range) => range && node.range[0] >= range[0] && node.range[1] <= range[1];
 
 test('SIM and bank faces render identical chips with independent gradient IDs', () => {
-  const [, ast, source] = sources.find(([file]) => file === 'views/Wallet.tsx');
+  const [, ast, source] = sources.find(([file]) => file === 'components/PayCardFace.tsx');
   const compiled = transformSync('Wallet.tsx', ['CardFace', 'CardChip'].map((name) => source.slice(...functionRange(ast, name))).join('\n'), {
     lang: 'tsx',
     jsx: { runtime: 'classic' },
@@ -765,6 +765,7 @@ test('normal settlement is silent while attention status pills retain their labe
     ['owe', 'Pending'],
     ['stop', 'Stopped'],
     ['notice', 'Paused'],
+    ['done', 'Settled'],
   ]) {
     assert.match(renderToStaticMarkup(React.createElement(StatusPill, { tone }, label)), new RegExp(label));
   }
@@ -788,12 +789,14 @@ test('assistant welcome rotates every variant in every locale and renders a quie
 
 test('subscription headings omit normal status badges and retain exceptional states', () => {
   const [, ast, source] = sources.find(([file]) => file === 'views/Detail.tsx');
-  let header;
+  // 标题与角标交给共用的 DetailHead；这里取 badge 的表达式与名称一起渲染
+  let badge;
   visit(ast, (node) => {
-    if (node.type === 'JSXElement' && node.openingElement.name.name === 'h2' && text(node, source).includes('dt-name')) header = text(node, source);
+    if (node.type === 'JSXElement' && node.openingElement.name.name === 'DetailHead')
+      badge = node.openingElement.attributes.find((a) => a.name?.name === 'badge')?.value.expression;
   });
-  assert.ok(header);
-  const result = transformSync('DetailHeader.tsx', `function Header() { return (${header}); }`, {
+  assert.ok(badge);
+  const result = transformSync('DetailHeader.tsx', `function Header() { return (<h2>{sub.name}{${text(badge, source)}}</h2>); }`, {
     lang: 'tsx',
     jsx: { runtime: 'classic' },
     reactCompiler: false,
@@ -892,9 +895,12 @@ test('keyboard behavior stays in the shared Sheet and guards, with safe confirma
 test('single-series charts share the monochrome chart ink and keep readable data-line widths', () => {
   const detail = readFileSync(new URL('views/detail.css', root), 'utf8');
   const charts = readFileSync(new URL('components/charts.tsx', root), 'utf8');
-  for (const sel of ['.cc-line', '.cc-pt', '.cc-hl']) {
+  // 扣款时间轴：实际扣款的柱用单色图表墨色，「今天」线不细到看不见
+  const bar = cssRules(detail).find(([s]) => s === '.cc-bar')?.[1] ?? '';
+  assert.match(bar, /var\(--chart-ink\)/);
+  for (const sel of ['.cc-bar.future', '.cc-today']) {
     const body = cssRules(detail).find(([s]) => s === sel)?.[1] ?? '';
-    assert.match(body, /var\(--chart-ink\)/, sel);
+    assert.doesNotMatch(body, /var\(--(accent|orange|indigo-\d+)\)/, sel);
     assert.doesNotMatch(body, /stroke-width:\s*0\.5\b/, sel);
   }
   assert.doesNotMatch(charts, /var\(--(accent|orange|indigo-\d+)\)/);
@@ -965,9 +971,11 @@ test('wallet cards keep the main-branch physical-card design with pointer tilt a
   assert.match(wallet, /'--card-bg': m\.color \|\| KIND_BG\[m\.kind\]/);
   assert.match(wallet, /setProperty\('--rx'/);
   assert.match(wallet, /setProperty\('--mx'/);
-  // 银行卡芯片画出触点分区，而不是纯色块
-  assert.match(wallet, /function CardChip\(\)/);
-  assert.match(wallet, /<rect x="12" y="8" width="12" height="11"/);
+  // 银行卡芯片画出触点分区，而不是纯色块；卡面与芯片在钱包和订阅详情共用
+  const face = sources.find(([file]) => file === 'components/PayCardFace.tsx')[2];
+  assert.match(face, /function CardChip\(\)/);
+  assert.match(face, /<rect x="12" y="8" width="12" height="11"/);
+  assert.match(wallet, /from '\.\.\/components\/PayCardFace\.tsx'/);
 });
 
 test('connection terminals keep theme-independent dark surfaces and light text', () => {
@@ -1052,6 +1060,14 @@ test('parallel metrics use the shared cards and slots, including previously inde
       assert.equal(file, 'components/ui.css', `${file}: metric presentation must have one owner`);
     }
   }
+});
+
+test('metric cards stay block containers even though their variant class matches the Tailwind inline utility', () => {
+  const [, css] = styleSources.find(([file]) => file === 'components/ui.css');
+  const body = cssRules(css).find(([selector]) => selector === '.metric-cards')?.[1] ?? '';
+  // 行内元素不能作容器查询的容器：窄卡片里的两列与换行规则会全部失效
+  assert.match(body, /display:\s*block/);
+  assert.match(body, /container-type:\s*inline-size/);
 });
 
 test('metric slots retain negative, zero and unavailable amounts, notes and semantic colors without inventing data', () => {
@@ -1161,8 +1177,8 @@ test('sheet and embedded form action rows use one right-aligned container with t
   assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(good), good), []);
   const ui = readFileSync(new URL('components/ui.tsx', root), 'utf8');
   assert.match(ui, /className="sheet-foot sheet-actions"/);
-  const detail = readFileSync(new URL('views/Detail.tsx', root), 'utf8');
-  assert.match(detail, /className="sheet-actions dt-actions"/);
+  const kit = readFileSync(new URL('components/DetailKit.tsx', root), 'utf8');
+  assert.match(kit, /className="sheet-actions dt-actions"/);
   const css = readFileSync(new URL('components/ui.css', root), 'utf8');
   assert.match(css, /\.sheet-actions\s*\{[^}]*justify-content:\s*flex-end/);
   assert.match(css, /\.sheet-actions > :is\(\.primary, \.danger-solid\)\s*\{\s*order:\s*1/);
@@ -1184,16 +1200,24 @@ test('image clipboard construction has one owner and Sheet actions precede Close
   const ui = sources.find(([file]) => file === 'components/ui.tsx')[2];
   assert.match(ui, /actions\?: ComponentChildren/);
   assert.match(ui, /sheet-head-actions[\s\S]*?\{props.actions\}[\s\S]*?onClick=\{props.onClose\}/);
-  for (const file of ['views/Carpool.tsx', 'views/Detail.tsx', 'components/ShareSheet.tsx']) {
+  for (const file of ['views/Carpool.tsx', 'components/ShareSheet.tsx']) {
     const [, ast, source] = sources.find(([path]) => path === file);
     let slotted = false;
     visit(ast, (node) => {
-      if (node.type !== 'JSXElement' || node.openingElement.name.name !== 'Sheet') return;
+      // 合租详情用共用的 DetailHead，操作同样排在关闭按钮之前
+      if (node.type !== 'JSXElement' || !['Sheet', 'DetailHead'].includes(node.openingElement.name.name)) return;
       const actions = attr(node.openingElement, 'actions');
       if (actions && text(actions, source).includes('CopyImageButton')) slotted = true;
     });
     assert.ok(slotted, file);
   }
+  // 详情类弹窗共用一个吸顶头部，自带关闭按钮，排在操作之后
+  const kit = sources.find(([file]) => file === 'components/DetailKit.tsx')[2];
+  assert.match(kit, /<Sheet[^>]*header=\{null\}/);
+  assert.match(kit, /\{actions && <div className="sheet-actions dt-actions">[\s\S]*?className="dt-close"[\s\S]*?onClick=\{onClose\}/);
+  const detail = sources.find(([file]) => file === 'views/Detail.tsx')[2];
+  assert.match(detail, /<DetailSheet/);
+  assert.match(detail, /<CopyImageButton/);
   const review = sources.find(([file]) => file === 'views/Review.tsx')[2];
   assert.match(review, /<ShareSheet/);
 });

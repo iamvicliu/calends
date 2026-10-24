@@ -90,7 +90,13 @@ export function List({
     setSort(k);
     setDir(DEFAULT_DIR[k]);
   };
-  const toggleSort = (k: Sort) => (k === sort ? setDir(dir === 'asc' ? 'desc' : 'asc') : chooseSort(k));
+  // 表头三态：该列默认方向、反向、回到默认（按下次扣款）；默认排序不标箭头，与合租、代付、人员表一致
+  const toggleSort = (k: Sort) => {
+    if (k !== sort) return chooseSort(k);
+    if (dir === DEFAULT_DIR[k]) return setDir(dir === 'asc' ? 'desc' : 'asc');
+    chooseSort('next');
+  };
+  const marked = (k: Sort) => sort === k && !(k === 'next' && dir === DEFAULT_DIR.next);
   const [view, setView] = usePref<View>('list-view', 'grid', isView);
   // 金额显示：原币，或折算成侧边栏选的货币（大字为折算后，小字为原币）
   const orig = useOrig();
@@ -218,6 +224,28 @@ export function List({
             </IconButton>
           )}
         </label>
+        {/* 列表视图在表头排序，右上角的排序只给卡片与时间轴用 */}
+        {view !== 'list' && (
+          <SortControl
+            value={sort}
+            dir={dir}
+            onSort={chooseSort}
+            onDir={setDir}
+            options={[
+              { value: 'next', label: t('list.sort.next') },
+              { value: 'cost', label: t('list.sort.cost') },
+              { value: 'name', label: t('list.sort.name') },
+              { value: 'category', label: t('list.sort.category') },
+              { value: 'start', label: t('list.sort.start') },
+            ]}
+          />
+        )}
+        {!state.readonly && (
+          <IconButton className="accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
+            <Icon name="plus" />
+          </IconButton>
+        )}
+        {/* 视图切换固定在右上角最后一个，各页一致 */}
         <Seg
           small
           value={view}
@@ -228,24 +256,6 @@ export function List({
             ['gantt', t('list.view.gantt')],
           ]}
         />
-        <SortControl
-          value={sort}
-          dir={dir}
-          onSort={chooseSort}
-          onDir={setDir}
-          options={[
-            { value: 'next', label: t('list.sort.next') },
-            { value: 'cost', label: t('list.sort.cost') },
-            { value: 'name', label: t('list.sort.name') },
-            { value: 'category', label: t('list.sort.category') },
-            { value: 'start', label: t('list.sort.start') },
-          ]}
-        />
-        {!state.readonly && (
-          <IconButton className="accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
-            <Icon name="plus" />
-          </IconButton>
-        )}
       </Toolbar>
       <div className="page fade-in">
         <div className="facets">
@@ -391,12 +401,12 @@ export function List({
                   k ? (
                     <button
                       key={l}
-                      className={`lt-sort ${sort === k ? 'on' : ''}`}
+                      className={`lt-sort ${marked(k) ? 'on' : ''}`}
                       onClick={() => toggleSort(k)}
                       aria-sort={sort === k ? (dir === 'asc' ? 'ascending' : 'descending') : undefined}
                     >
                       {l}
-                      {sort === k && <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} size={12} />}
+                      {marked(k) && <Icon name={dir === 'asc' ? 'arrow-up' : 'arrow-down'} size={12} />}
                     </button>
                   ) : (
                     <span key={l}>{l}</span>

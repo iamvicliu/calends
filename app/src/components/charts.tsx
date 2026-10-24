@@ -265,9 +265,14 @@ export function Activity({
             {...(tip && b.total > 0 ? tipProps(() => tip(b)) : {})}
           >
             <div className="act-stack" style={{ height: `${(b.total / top) * 100}%` }}>
-              {mergeByColor(b.parts, color).map((p) => (
-                <i key={p.k} style={{ flexGrow: p.v, background: p.c }} />
-              ))}
+              {/* 颜色传 pending 的一段是还没扣的（本月待扣）：与全站「未扣」同一种虚框样式 */}
+              {mergeByColor(b.parts, color).map((p) =>
+                p.c === 'pending' ? (
+                  <i key={p.k} className="act-pending" style={{ flexGrow: p.v }} />
+                ) : (
+                  <i key={p.k} style={{ flexGrow: p.v, background: p.c }} />
+                ),
+              )}
             </div>
             <span className="act-label">{b.label}</span>
           </button>

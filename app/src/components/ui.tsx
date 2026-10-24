@@ -114,6 +114,9 @@ const P: Record<string, JSX.Element> = {
   left: <path d="m15 18-6-6 6-6" />,
   'sort-asc': <path d="m3 8 4-4 4 4M7 4v16M11 12h4M11 16h7M11 20h10" />,
   'sort-desc': <path d="m3 16 4 4 4-4M7 20V4M11 4h10M11 8h7M11 12h4" />,
+  // 表格表头的排序方向：只用一支箭头，比工具栏里带横线的排序图标轻
+  'arrow-up': <path d="M12 19V5M6 11l6-6 6 6" />,
+  'arrow-down': <path d="M12 5v14M6 13l6 6 6-6" />,
   right: <path d="m9 18 6-6-6-6" />,
   down: <path d="m6 9 6 6 6-6" />,
   updown: <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />,
@@ -524,6 +527,8 @@ export function Sheet(props: {
   foot?: ComponentChildren;
   narrow?: boolean;
   bare?: boolean;
+  /** 自带完整表头的内容可传 null，仍复用弹窗的焦点、关闭和键盘行为。 */
+  header?: ComponentChildren;
   actions?: ComponentChildren;
 }) {
   const dialog = useRef<HTMLDivElement>(null);
@@ -548,19 +553,23 @@ export function Sheet(props: {
       <Modal className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`}>
         <Dialog ref={dialog} className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
           <div className="grabber" />
-          <div className={`sheet-head ${props.bare ? 'bare-head' : ''}`} data-snapshot-hide>
-            {!props.bare && (
-              <Heading slot="title" level={3} className="ui-title">
-                <span className="ui-title-text">{copyParts(props.title)}</span>
-              </Heading>
-            )}
-            <div className="sheet-head-actions">
-              {props.actions}
-              <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
-                <Icon name="x" />
-              </IconButton>
+          {props.header !== undefined ? (
+            props.header
+          ) : (
+            <div className={`sheet-head ${props.bare ? 'bare-head' : ''}`} data-snapshot-hide>
+              {!props.bare && (
+                <Heading slot="title" level={3} className="ui-title">
+                  <span className="ui-title-text">{copyParts(props.title)}</span>
+                </Heading>
+              )}
+              <div className="sheet-head-actions">
+                {props.actions}
+                <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
+                  <Icon name="x" />
+                </IconButton>
+              </div>
             </div>
-          </div>
+          )}
           <div className="sheet-body">{props.children}</div>
           {props.foot && <div className="sheet-foot sheet-actions">{copyParts(props.foot)}</div>}
         </Dialog>
@@ -709,7 +718,7 @@ export function FlagImg({ cc, className = '' }: { cc?: string; className?: strin
 }
 
 /** 只提示需注意的状态；正常计费与已结清不显示胶囊。 */
-export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop' | 'notice'; children: ComponentChildren }) {
+export function StatusPill({ tone, children }: { tone: 'ok' | 'owe' | 'stop' | 'notice' | 'done'; children: ComponentChildren }) {
   if (tone === 'ok') return null;
   return (
     <span className={`ph-status ${tone}`}>
@@ -892,18 +901,26 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 /** iOS 分组列表 */
 export function Group({
   title,
+  action,
   foot,
   children,
   submit,
 }: {
   title?: ComponentChildren;
+  /** 标题右侧的操作，如「记一笔收款」 */
+  action?: ComponentChildren;
   foot?: ComponentChildren;
   children: ComponentChildren;
   submit?: string;
 }) {
   return (
     <section className="group" data-submit={submit}>
-      {title && <div className="group-title">{copyParts(title)}</div>}
+      {(title || action) && (
+        <div className={`group-title ${action ? 'with-action' : ''}`}>
+          <span>{copyParts(title)}</span>
+          {action}
+        </div>
+      )}
       <div className="group-body">{children}</div>
       {foot && <div className="group-foot">{copyParts(foot)}</div>}
     </section>

@@ -625,6 +625,18 @@ a {
   padding: 0 16px;
   font-weight: 500;
 }
+/* 标题右侧带操作时：标题靠左、操作靠右，同一行 */
+.group-title.with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.group-title.with-action > .btn.plain {
+  height: auto;
+  padding: 0;
+  font-size: var(--fs-1);
+}
 .group-body {
   background: var(--card);
   border-radius: var(--radius-lg);
@@ -2242,13 +2254,8 @@ select.btn {
   background: var(--chart-ink-2);
   min-height: 1px;
 }
-.bl-col.future i {
-  background: repeating-linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--label) 22%, transparent) 0 3px,
-    color-mix(in srgb, var(--label) 8%, transparent) 3px 6px
-  );
-}
+/* 报告「现金与真实成本」里未来几个月的应付：同一种「未扣」虚框样式，见下方 .bl-col.future i */
+
 .bl-col:hover i {
   background: var(--gray-9);
 }
@@ -2787,14 +2794,7 @@ select.btn {
   box-shadow: none;
   background: none;
 }
-.btn.plain {
-  color: var(--label-2);
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 3px;
-}
 .btn.plain:hover {
-  color: var(--label);
   background: none;
 }
 
@@ -3182,8 +3182,37 @@ select.btn {
   display: block;
   min-height: 2px;
 }
-.act-col.future .act-stack {
-  opacity: 0.35;
+/*
+ * 还没扣的钱（本月待扣的那一截、未来各月）：全站同一种样子，浅底 + 虚线框（--unpaid-dash 遮罩画的虚线，见 design-tokens.css）
+ */
+.act-stack i.act-pending,
+.act-col.future .act-stack i,
+.bl-col.future i,
+.unpaid-box {
+  position: relative;
+  background: var(--unpaid-fill) !important;
+  border-radius: var(--radius-sm);
+}
+:is(.act-stack i.act-pending, .act-col.future .act-stack i, .bl-col.future i, .unpaid-box)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--unpaid-line);
+  -webkit-mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
+  mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
+}
+/* 待扣在已扣上面：只圆上面两角；虚线框向下多伸一点，底边藏在下面的实色段后面 */
+.act-stack i.act-pending:not(:only-child) {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.act-stack i.act-pending:not(:only-child)::after {
+  bottom: -4px;
+}
+.act-stack i:not(.act-pending) {
+  position: relative;
+  z-index: 1;
 }
 .act-col.dim .act-stack {
   opacity: 0.35;
@@ -4978,6 +5007,14 @@ button.h-price-row:focus-visible {
   color: var(--red);
   background: var(--red-3);
 }
+/* 已结清：绿色，只在代付各期都收回后出现 */
+.ph-status.done {
+  color: var(--green);
+  background: var(--green-3);
+}
+.ph-status.done i {
+  background: var(--green-9);
+}
 .ph-status.stop i {
   background: var(--red-9);
 }
@@ -5214,18 +5251,19 @@ a.car-toggle {
 }
 
 /* 代付对象：谁 + 联系方式 */
+/* 与旁边的支付方式胶囊同一套尺寸：16px 头像距左右上下都是 3px，与胶囊半圆同心 */
 .who-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   height: 22px;
-  padding: 0 9px 0 7px;
+  padding: 0 9px 0 3px;
   border-radius: var(--radius-pill);
   background: var(--fill-2);
   box-shadow: inset 0 0 0 var(--hairline) var(--line);
   color: var(--label-2);
   font-size: var(--fs-1);
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
   max-width: 100%;
   overflow: hidden;
@@ -5374,26 +5412,17 @@ a.car-toggle {
   }
 }
 
-/* 代付详情弹窗：基本信息 + 四格汇总 + 逐期表格 */
+/* 代付详情弹窗的逐期表格；头部、指标与信息卡见 DetailKit */
 .ld-head {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.ld-who {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  color: var(--label);
-}
-.ld-who small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
 .ld-table {
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+  /* 与详情面板同样的底色、圆角和描边 */
+  border-radius: var(--radius-md);
+  background: var(--dt-panel, var(--card));
+  box-shadow: 0 0 0 var(--hairline) var(--dt-line, var(--line));
   overflow: hidden;
 }
 .ld-row {
@@ -5469,25 +5498,11 @@ a.car-toggle {
   color: var(--label-2);
   font-weight: 400;
 }
-.ld-top {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.ld-top > * {
-  margin: 0;
-}
-/* 宽屏：基本信息与四格汇总并排，表格多一列「当时成本」 */
+/* 宽屏：表格多一列「当时成本」 */
 .ld-cost {
   display: none !important;
 }
 @media (min-width: 720px) {
-  .ld-top {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-  }
   .ld-row {
     grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 96px;
     padding: 12px 18px;
@@ -5656,8 +5671,8 @@ a.car-toggle {
   }
   .lt-cat,
   .lt-start,
-  .lt-head > :nth-child(2),
-  .lt-head > :nth-child(6) {
+  .ltable:not(.lt-x) .lt-head > :nth-child(2),
+  .ltable:not(.lt-x) .lt-head > :nth-child(6) {
     display: none;
   }
 }
@@ -5667,13 +5682,117 @@ a.car-toggle {
   }
   .lt-pay,
   .lt-mo,
-  .lt-head > :nth-child(3),
-  .lt-head > :nth-child(5) {
+  .ltable:not(.lt-x) .lt-head > :nth-child(3),
+  .ltable:not(.lt-x) .lt-head > :nth-child(5) {
     display: none;
   }
   .lt-row {
     padding: 8px 12px;
     gap: 10px;
+  }
+}
+
+/*
+ * 合租、代付的列表视图（桌面）：沿用订阅列表的表格。除名称列稍宽外，各列按比例平分余下宽度，不把空白都留给名称列；
+ * 按表格宽度分两档收列：先收 data-p=2，再收 data-p=3。手机上不出表格，改用卡片
+ */
+.lt-x {
+  --cols: minmax(210px, 2fr) repeat(var(--n), minmax(max-content, 1fr));
+  --n: 8;
+}
+.car-lt {
+  --n: 7;
+}
+.lt-x .lt-row {
+  column-gap: 14px;
+}
+.lt-x .lt-row > *,
+.lt-x .lt-head > * {
+  justify-self: stretch;
+  text-align: left;
+}
+.lt-x .lt-head > .lt-r {
+  justify-self: end;
+  text-align: right;
+}
+.lt-x .lt-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.lt-x .lt-title .lt-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lt-x .lt-title .nm .ph-status {
+  flex-shrink: 0;
+}
+.lt-members,
+.lt-who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.lt-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  white-space: nowrap;
+}
+.lt-x .lt-who .who-chip {
+  min-width: 0;
+}
+.lt-text {
+  color: var(--label-2);
+  white-space: nowrap;
+}
+.lt-num {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lt-num b {
+  font-weight: 600;
+}
+.lt-x .warn {
+  color: var(--orange);
+}
+.lt-x .green,
+.lt-x .gain {
+  color: var(--green);
+}
+.lt-x .loss {
+  color: var(--red);
+}
+@container (max-width: 1100px) {
+  .lt-x {
+    --cols: minmax(200px, 2fr) repeat(var(--n), minmax(max-content, 1fr));
+    --n: 7;
+  }
+  .car-lt {
+    --n: 6;
+  }
+  .lt-x [data-p='2'] {
+    display: none;
+  }
+}
+@container (max-width: 940px) {
+  .lt-x {
+    --cols: minmax(190px, 2fr) repeat(var(--n), minmax(max-content, 1fr));
+    --n: 4;
+  }
+  .car-lt {
+    --n: 5;
+  }
+  .lt-x [data-p='3'] {
+    display: none;
   }
 }
 
@@ -5753,13 +5872,14 @@ a.car-toggle {
   flex-shrink: 0;
   color: var(--accent);
 }
+/* 国旗图是 4:3：框也按 4:3，圆角只用 2px，不把旗面四角裁掉 */
 .cp-flag {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 22px;
-  height: 16px;
-  border-radius: var(--radius-sm);
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
   overflow: hidden;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }
@@ -8537,6 +8657,15 @@ a.car-toggle {
 }
 
 /* 合租弹窗：小节标题、成员、收款表 */
+/* 收款 / 付款切换与下面的表格：同一组，间距固定，不靠负边距 */
+.car-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.car-ledger > .car-sheet-sec {
+  margin: 0;
+}
 .car-sheet-sec {
   justify-content: space-between;
   gap: 8px;
@@ -8745,6 +8874,10 @@ a.car-toggle {
 .mt-seg.paid {
   background: color-mix(in srgb, var(--green) 62%, transparent);
 }
+/* 车主自己付给服务方的每一期：中性深灰，与成员已收的绿色区分 */
+.mt-seg.owner {
+  background: var(--gray-9);
+}
 .mt-seg.unused {
   background: var(--gray-8);
 }
@@ -8819,7 +8952,7 @@ a.car-toggle {
   display: inline-block;
   width: 16px;
   height: 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 2px;
   object-fit: cover;
 
   box-shadow: 0 0 0 var(--hairline) var(--line);
@@ -9395,10 +9528,6 @@ img.mm-flag {
   grid-column: 2;
   grid-row: 1;
 }
-.car-member-cards .member > .btn {
-  grid-column: 2;
-  grid-row: 2;
-}
 .car-member-cards .member-label {
   flex: none;
   max-width: 45%;
@@ -9426,8 +9555,8 @@ img.mm-flag {
   }
   .car-member-table {
     display: grid;
-    /* 成员（账号） | 收费 + 跟随车/自定义 | 时间条 | 收款状态 | 操作；最小宽度之和 + 间距不超过 720px */
-    grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 0.9fr) minmax(200px, 2fr) minmax(90px, 0.8fr) max-content;
+    /* 成员（账号） | 收费 + 跟随车/自定义 | 时间条 | 收款状态；收款在点开成员后的弹窗里，不另设操作列 */
+    grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 0.9fr) minmax(200px, 2fr) minmax(110px, 0.8fr);
     column-gap: 20px;
     column-gap: 28px;
     width: 100%;
@@ -9494,11 +9623,6 @@ img.mm-flag {
     outline: var(--hairline) solid var(--focus-ring);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
-  }
-  .car-member-table .btn {
-    height: var(--ctl-h-md);
-    padding: 0 12px;
-    font-size: var(--fs-2);
   }
 }
 
@@ -9669,11 +9793,17 @@ img.mm-flag {
   background: var(--fill-2);
   box-shadow: inset 0 0 0 var(--hairline) var(--sep);
 }
+/* 空位：与成员胶囊同尺寸、同内距，头像位是虚线空圈，文字浅色 */
 .car-member-chip.vacancy {
-  padding: 0 12px;
-  border: var(--hairline) dashed var(--label-3);
-  background: none;
   color: var(--label-3);
+}
+.vacancy-ava {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  border: var(--hairline) dashed var(--label-3);
 }
 .car-member-cards .member > .mt-track,
 .car-member-cards .car-vacancy > .mt-track {
@@ -9697,10 +9827,15 @@ img.mm-flag {
 .owner-seat {
   cursor: default;
 }
+.car-member-cards .owner-seat > .car-member-chip {
+  justify-self: start;
+}
+/* 与成员卡片同一套网格：头像与「车主」一行，时间线在下面占满一行 */
 .car-member-cards .owner-seat {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
+  column-gap: 10px;
   padding: 12px 16px;
   border-radius: var(--radius-lg);
   background: var(--card);
@@ -9752,13 +9887,6 @@ img.mm-flag {
   }
 }
 
-.car-sheet-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 8px;
-}
 .car-private {
   display: inline-block;
   color: transparent !important;
@@ -9775,14 +9903,16 @@ img.mm-flag {
   border-radius: var(--radius-pill);
   background: var(--gray-6);
 }
+/* 空位的时间线：与成员同高的一条空轨道，不再是一大块写着「暂时空缺」的胶囊（左边已写空位） */
 .car-vacancy .mt-track.vacant {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--ctl-h-md);
-  color: var(--label-3);
-  font-size: var(--fs-1);
   cursor: inherit;
+}
+.car-vacancy .mt-track.vacant > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 .vacancy-add {
   display: none;
@@ -9804,17 +9934,9 @@ img.mm-flag {
   left: -10000px;
   top: 0;
   width: 1000px;
-  padding: 28px;
+  padding: 0 28px 28px;
   background: var(--bg);
   border-radius: var(--radius-lg);
-}
-@media (max-width: 680px) {
-  .car-summary > .ld-head {
-    flex-wrap: wrap;
-  }
-  .car-summary .car-sheet-actions {
-    flex: 1 0 100%;
-  }
 }
 
 .car-snapshot .car-strip > div {
@@ -9886,4 +10008,46 @@ img.mm-flag {
   from {
     opacity: 0;
   }
+}
+
+/* 报告页右上：复制整份报告的按钮平时隐藏，鼠标移到分享一组上或键盘聚焦时出现在分享左边；触屏没有悬停，一直显示 */
+.report-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (hover: hover) {
+  .report-share > .copy-image {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration) var(--ease);
+  }
+  .report-share:is(:hover, :focus-within) > .copy-image,
+  .report-share > .copy-image:disabled {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/*
+ * 纯文字的可点链接，全局一种样子：平时灰色、不带下划线，悬停或键盘聚焦时变黑并出现下划线（与卡片里订阅名的悬停一致）。
+ * 不用蓝色；危险操作（红字）各自保留颜色，只加下划线
+ */
+.btn.plain,
+.dt-link,
+.as-link,
+.as-md a,
+.as-setup-intro a {
+  color: var(--label-2);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition:
+    color var(--duration) var(--ease),
+    text-decoration-color var(--duration) var(--ease);
+}
+:is(.btn.plain, .dt-link, .as-link, .as-md a, .as-setup-intro a):is(:hover, :focus-visible) {
+  color: var(--label);
+  text-decoration-color: currentColor;
 }

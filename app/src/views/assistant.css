@@ -229,9 +229,6 @@
   background: none;
   font-size: var(--fs-2);
 }
-.as-md a {
-  color: var(--accent);
-}
 /* 表格：外框圆角、可横向滑动，表头浅底，数字等宽 */
 .as-table {
   max-width: 100%;
@@ -773,9 +770,6 @@
   font-size: var(--fs-2);
   line-height: 1.55;
 }
-.as-setup-intro a {
-  color: var(--accent);
-}
 .as-setup-note {
   color: var(--label-3);
   font-size: var(--fs-1);
@@ -822,7 +816,6 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--accent);
   font: inherit;
   font-size: var(--fs-1);
   font-weight: 500;

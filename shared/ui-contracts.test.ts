@@ -362,12 +362,13 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     terminated.props.onClick();
     assert.equal(opened, stopped);
     const empty = StopsCard({ state: { ...st, subscriptions: [] }, today, onOpen() {} });
-    assert.ok(text(empty).includes(t('report.stops.empty')));
+    // 没有未退款损失：不放明细标题和空提示
+    assert.ok(!text(empty).includes(t('report.stops.details')));
     assert.equal(all(empty).filter((e) => e.props.className === 'stop-row').length, 0);
     const unknown = stopSubscription({ ...original, currency: 'XYZ' }, today, 'terminate');
     const unknownTree = StopsCard({ state: { ...st, subscriptions: [unknown] }, today, onOpen() {} });
     assert.ok(text(unknownTree).includes(t('core.stop.fxMissing')));
-    assert.ok(!text(unknownTree).includes(t('report.stops.empty')));
+    assert.ok(text(unknownTree).includes(t('report.stops.details')));
     const r = yearReview(st, today);
     const ctx = {
       r,

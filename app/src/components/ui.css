@@ -73,6 +73,10 @@
   color: var(--label-3);
   border-bottom: var(--hairline) solid var(--sep);
 }
+/* 表头的底线就是第一行的分隔线：第一行自己的顶线去掉，否则两条细线叠在一起显得更粗更深 */
+.table-head.table-head + * {
+  border-top-color: transparent;
+}
 .table-head.table-head > *,
 .table-head.table-head > :last-child,
 .table-head.table-head th {
@@ -248,6 +252,8 @@
 
 /* Independent cards follow subscription-detail KPIs; direct slots keep carpool content intact. */
 .metric-cards {
+  /* 变体类名 inline 会命中 Tailwind 的 .inline 工具类（display: inline），行内元素不能作容器查询的容器 */
+  display: block;
   container-type: inline-size;
   min-width: 0;
   width: 100%;
