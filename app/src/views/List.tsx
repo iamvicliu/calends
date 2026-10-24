@@ -160,6 +160,13 @@ export function List({
     const i = catOrder.indexOf(s.category);
     return i < 0 ? catOrder.length : i;
   };
+  // 金额列显示的是「当前阶段、下次扣款日的价格」折算后的值，排序也用同一个数
+  const amountOf = (s: Subscription) => {
+    const cur = currentPhase(s, today);
+    const n = nextCharge(s, addDays(today, 1));
+    const price = n && !(cur.end && n >= cur.end) ? priceAt(cur, n) : cur.price;
+    return toBase(state, price, cur.currency);
+  };
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
     if (sort === 'name') return a.name.localeCompare(b.name, locale());
@@ -174,8 +181,8 @@ export function List({
       };
       return rank(a) - rank(b) || a.name.localeCompare(b.name, locale());
     }
-    // 金额按当前计费周期的原价折算成本位币，跨币种才比得准
-    if (sort === 'amount') return toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
+    // 金额按列里显示的那个数（当前阶段、下次扣款日的价格）折算成本位币，跨币种才比得准
+    if (sort === 'amount') return amountOf(a) - amountOf(b);
     if (sort === 'start') return a.start.localeCompare(b.start);
     return (nextCharge(a, addDays(today, 1)) ?? '').localeCompare(nextCharge(b, addDays(today, 1)) ?? '');
   };
