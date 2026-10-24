@@ -326,11 +326,7 @@
   },
   "sort": {
     "owed": "Montant dû",
-    "net": "Par résultat de l’année",
     "received": "Total reçu",
-    "lastPaid": "Dernier paiement",
-    "price": "Par prix du forfait",
-    "paid": "Par payé à ce jour",
-    "profit": "Par résultat cumulé"
+    "lastPaid": "Dernier paiement"
   }
 }

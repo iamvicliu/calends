@@ -326,11 +326,7 @@
   },
   "sort": {
     "owed": "Amount owed",
-    "net": "This year P/L",
     "received": "Total received",
-    "lastPaid": "Last payment",
-    "price": "Plan price",
-    "paid": "Paid to date",
-    "profit": "Total P/L"
+    "lastPaid": "Last payment"
   }
 }

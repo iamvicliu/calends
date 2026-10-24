@@ -317,11 +317,7 @@
   },
   "sort": {
     "owed": "미수금",
-    "net": "올해 손익순",
     "received": "누적 수령액",
-    "lastPaid": "최근 수령",
-    "price": "요금제 가격순",
-    "paid": "낸 금액순",
-    "profit": "누적 손익순"
+    "lastPaid": "최근 수령"
   }
 }

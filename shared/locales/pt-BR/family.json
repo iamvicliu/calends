@@ -326,11 +326,7 @@
   },
   "sort": {
     "owed": "Valor a receber",
-    "net": "Por resultado do ano",
     "received": "Total recebido",
-    "lastPaid": "Último pagamento",
-    "price": "Por preço do plano",
-    "paid": "Por pago até hoje",
-    "profit": "Por resultado acumulado"
+    "lastPaid": "Último pagamento"
   }
 }

@@ -326,11 +326,7 @@
   },
   "sort": {
     "owed": "Offener Betrag",
-    "net": "Nach Jahresergebnis",
     "received": "Bisher erhalten",
-    "lastPaid": "Letzte Zahlung",
-    "price": "Nach Tarifpreis",
-    "paid": "Nach bisher gezahlt",
-    "profit": "Nach Gesamtergebnis"
+    "lastPaid": "Letzte Zahlung"
   }
 }

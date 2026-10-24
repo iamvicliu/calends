@@ -299,11 +299,7 @@
   },
   "sort": {
     "owed": "按待收",
-    "net": "按当年盈亏",
     "received": "按至今收回",
-    "lastPaid": "按最近收款",
-    "price": "按套餐价格",
-    "paid": "按至今付出",
-    "profit": "按累计盈亏"
+    "lastPaid": "按最近收款"
   }
 }

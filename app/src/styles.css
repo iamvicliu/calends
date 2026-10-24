@@ -5151,6 +5151,9 @@ button.h-price-row:focus-visible {
 }
 .ph-chips {
   display: flex;
+  align-items: center;
+  /* 与合租卡的成员行同高（32px），两种卡片等高 */
+  min-height: var(--ctl-h-md);
   gap: 6px;
   min-width: 0;
   flex-wrap: wrap;

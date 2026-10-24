@@ -164,6 +164,19 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
           />
         )}
         <FamilyTabs tab="people" />
+        {/* 与合租页一样右上角最后是卡片 / 列表切换；人员只有列表，卡片不可选 */}
+        {!phone && (
+          <Seg
+            small
+            value="list"
+            onChange={() => {}}
+            disabledKeys={['grid']}
+            options={[
+              ['grid', t('list.view.grid')],
+              ['list', t('list.view.list')],
+            ]}
+          />
+        )}
       </Toolbar>
       <div className="page fade-in stack people-page">
         <MetricCards>

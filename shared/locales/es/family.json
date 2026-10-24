@@ -326,11 +326,7 @@
   },
   "sort": {
     "owed": "Pendiente de cobro",
-    "net": "Por resultado del año",
     "received": "Total recibido",
-    "lastPaid": "Último pago",
-    "price": "Por precio del plan",
-    "paid": "Por pagado hasta hoy",
-    "profit": "Por resultado acumulado"
+    "lastPaid": "Último pago"
   }
 }

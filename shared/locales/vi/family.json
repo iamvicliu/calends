@@ -317,11 +317,7 @@
   },
   "sort": {
     "owed": "Khoản chờ thu",
-    "net": "Theo lãi lỗ năm nay",
     "received": "Tổng đã nhận",
-    "lastPaid": "Lần nhận gần nhất",
-    "price": "Theo giá gói",
-    "paid": "Theo đã trả",
-    "profit": "Theo lãi lỗ lũy kế"
+    "lastPaid": "Lần nhận gần nhất"
   }
 }

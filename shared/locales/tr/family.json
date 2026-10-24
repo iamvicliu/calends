@@ -326,11 +326,7 @@
   },
   "sort": {
     "owed": "Alacak",
-    "net": "Bu yılın sonucuna göre",
     "received": "Toplam alınan",
-    "lastPaid": "Son ödeme",
-    "price": "Plan fiyatına göre",
-    "paid": "Ödenene göre",
-    "profit": "Toplam sonuca göre"
+    "lastPaid": "Son ödeme"
   }
 }

@@ -448,9 +448,11 @@ const PROXY_SORT_DIR: Record<ProxySort, 'asc' | 'desc'> = {
  * 代付的列表视图（桌面）：一行一个代付，比卡片多出支付方式、每期本币金额、下次扣款与最近一次收款；点一行打开代付详情。
  * 各列按比例分宽度；表格变窄时先收起 data-p=2 的列，再收起 data-p=3。手机上不出表格，仍用卡片
  */
-function ProxyTable({ state, today, subs, onOpen }: { state: AppState; today: string; subs: Subscription[]; onOpen: (s: Subscription) => void }) {
-  const base = state.settings.baseCurrency;
-  // 表头排序存在服务端；默认按状态（待收多的在前、已结清其次，已停止始终最后），表头不为默认排序标箭头。
+/**
+ * 代付的排序：卡片与列表共用一份，在列表表头切换，对两种视图都生效。
+ * 排序存在服务端；默认按状态（待收多的在前、已结清其次，已停止始终最后），表头不为默认排序标箭头
+ */
+function useProxySort(state: AppState, today: string, subs: Subscription[]) {
   // 三态：该列默认方向、反向、回到默认
   const [sort, setSort] = usePref<ProxySort>('proxy-sort', 'status', isProxySort);
   const [dir, setDir] = usePref<'asc' | 'desc'>('proxy-dir', PROXY_SORT_DIR[sort], (v): v is 'asc' | 'desc' => v === 'asc' || v === 'desc');
@@ -487,6 +489,28 @@ function ProxyTable({ state, today, subs, onOpen }: { state: AppState; today: st
           ? (a.next ?? a.s.end ?? '9999').localeCompare(b.next ?? b.s.end ?? '9999')
           : num(amountOf(a)[sort]) - num(amountOf(b)[sort]);
   const sorted = [...items].sort((a, b) => Number(a.stopped) - Number(b.stopped) || (dir === 'asc' ? asc(a, b) : asc(b, a)));
+  return { sorted, sort, dir, onSort };
+}
+
+type ProxyItem = ReturnType<typeof useProxySort>['sorted'][number];
+
+function ProxyTable({
+  state,
+  sorted,
+  sort,
+  dir,
+  onSort,
+  onOpen,
+}: {
+  state: AppState;
+  sorted: ProxyItem[];
+  sort: ProxySort;
+  dir: 'asc' | 'desc';
+  onSort: (k: ProxySort) => void;
+  onOpen: (s: Subscription) => void;
+}) {
+  const base = state.settings.baseCurrency;
+  const today = todayIn(state.settings.timezone);
   const [ledger, setLedger] = useState<string | null>(null);
   const ledgerSub = ledger ? state.subscriptions.find((x) => x.id === ledger) : undefined;
   const fmt = (v: number) => flow(v, base, { compact: true });
@@ -596,6 +620,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
     ended: sum.subs.filter(stopped),
   };
   const shown = groups[filter];
+  const order = useProxySort(state, today, shown);
   const [savedView, setView] = usePref<ProxyView>('proxy-view', 'grid', (v): v is ProxyView => v === 'grid' || v === 'list');
   const phone = usePhone();
   const view = phone ? 'grid' : savedView;
@@ -662,10 +687,11 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
           <>
             {shown.length === 0 && <div className="card empty">{t('proxy.filter.none')}</div>}
             {view === 'list' ? (
-              shown.length > 0 && <ProxyTable state={state} today={today} subs={shown} onOpen={onOpen} />
+              shown.length > 0 && <ProxyTable state={state} {...order} onOpen={onOpen} />
             ) : (
               <div className="grid g-2">
-                {shown.map((s) => (
+                {/* 卡片与列表同一个排序（在列表表头切换） */}
+                {order.sorted.map(({ s }) => (
                   <ProxyCard key={s.id} state={state} s={s} onOpen={onOpen} />
                 ))}
               </div>

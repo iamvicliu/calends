@@ -317,11 +317,7 @@
   },
   "sort": {
     "owed": "Belum dibayar",
-    "net": "Menurut untung rugi tahun ini",
     "received": "Total diterima",
-    "lastPaid": "Pembayaran terakhir",
-    "price": "Menurut harga paket",
-    "paid": "Menurut dibayar",
-    "profit": "Menurut untung rugi total"
+    "lastPaid": "Pembayaran terakhir"
   }
 }

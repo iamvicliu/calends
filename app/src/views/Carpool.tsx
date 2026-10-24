@@ -31,7 +31,6 @@ import { tx } from '../i18n.ts';
 import { chargeValue, convertOn } from '../../../shared/fx.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
-import { SortControl } from '../components/SortControl.tsx';
 import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
 import { applyCarRule, carRule, carYear, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
@@ -122,10 +121,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   // 默认按状态：待收多的在前，已结清、已停止在后；表头不为默认排序标箭头
   const [sort, setSort] = usePref<CarSort>('car-sort', 'owed', isCarSort);
   const [dir, setDir] = usePref<'asc' | 'desc'>('car-dir', CAR_SORT_DIR[sort], (v): v is 'asc' | 'desc' => v === 'asc' || v === 'desc');
-  const chooseSort = (k: CarSort) => {
-    setSort(k);
-    setDir(CAR_SORT_DIR[k]);
-  };
   // 表头三态：该列默认方向、反向、回到默认（按状态）
   const headSort = (k: CarSort) => {
     const [ns, nd] = nextSort(k, sort, dir, CAR_SORT_DIR, 'owed');
@@ -196,25 +191,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           onChange={setFilter}
           options={CAR_FILTERS.map((f) => [f, `${t(`family.pool.filter.${f}`)} ${groups[f].length}`] as [CarFilter, string])}
         />
-        {/* 列表视图在表头排序，顶部的排序只给卡片用 */}
-        {view === 'grid' && (
-          <SortControl
-            value={sort}
-            dir={dir}
-            onSort={chooseSort}
-            onDir={setDir}
-            options={[
-              { value: 'owed', label: t('family.sort.owed') },
-              { value: 'net', label: t('family.sort.net') },
-              { value: 'next', label: t('list.sort.next') },
-              { value: 'name', label: t('list.sort.name') },
-              { value: 'price', label: t('family.sort.price') },
-              { value: 'paid', label: t('family.sort.paid') },
-              { value: 'received', label: t('family.sort.received') },
-              { value: 'profit', label: t('family.sort.profit') },
-            ]}
-          />
-        )}
+        {!ro && <FamilyTabs tab="plans" />}
+        {/* 卡片 / 列表切换固定在右上角最后一个；排序只在列表表头切换，对卡片同样生效 */}
         {!phone && (
           <Seg
             small
@@ -226,8 +204,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             ]}
           />
         )}
-        {/* 合租 / 人员切换固定在最右：人员页没有卡片与列表切换，放在最后两页切换时位置不跳 */}
-        {!ro && <FamilyTabs tab="plans" />}
       </Toolbar>
       <div className="page fade-in stack">
         <MetricCards>

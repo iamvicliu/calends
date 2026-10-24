@@ -359,7 +359,8 @@
     grid-area: accessory;
     justify-self: start;
   }
-  .metric-value {
+  .metric-value,
+  .metric-grid > div > b {
     grid-area: value;
     line-height: 24px;
   }
