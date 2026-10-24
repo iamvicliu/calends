@@ -1,4 +1,5 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
+import { snapshotCard } from '../snapshot.ts';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -42,14 +43,19 @@ const perMonth = (amount: string) => t('report.perMonth', { amount });
 export function Report({ state, today, onOpen, onReview }: { state: AppState; today: string; onOpen: (s: Subscription) => void; onReview: () => void }) {
   const base = state.settings.baseCurrency;
   const y = Number(today.slice(0, 4));
+  const pageRef = useRef<HTMLDivElement>(null);
   return (
     <>
       <Toolbar title={t('report.title')}>
-        <button className="btn" onClick={onReview}>
-          <Icon name="share" /> {t('report.shareReview', { year: y })}
-        </button>
+        {/* 鼠标移到分享上才出现：复制整份报告为一张图（卡片上的复制只取那一张）；「分享年度回顾」是另做的个性化回顾 */}
+        <span className="report-share">
+          <CopyImageButton render={() => snapshotCard(pageRef.current!)} />
+          <button className="btn" onClick={onReview}>
+            <Icon name="share" /> {t('report.shareReview', { year: y })}
+          </button>
+        </span>
       </Toolbar>
-      <div className="page fade-in stack">
+      <div className="page fade-in stack" ref={pageRef}>
         <Hero state={state} today={today} />
         {/* 先看钱的全貌（现金与真实成本、钱花在哪），再看本月变动与体检 */}
         <CashCard state={state} today={today} />
@@ -411,43 +417,45 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
           <Metric
             label={t('report.stops.loss')}
             value={<Amount value={-losses.total} ccy={base} compact />}
-            valueClassName="loss"
+            // 没有损失时 ¥0 不标红
+            valueClassName={losses.total > 0 || !Number.isFinite(losses.total) ? 'loss' : ''}
             note={t('report.stops.lossHint')}
           />
         )}
       </MetricCards>
       {losses.incomplete && <p className="stop-basis red">{t('core.stop.fxMissing')}</p>}
-      <h4 className="stop-list-title">{t('report.stops.details')}</h4>
-      {losses.items.length === 0 ? (
-        <div className="empty">{t('report.stops.empty')}</div>
-      ) : (
-        <div className="stop-list">
-          {losses.items.map((i) => (
-            <button key={`${i.sub.id}-${i.phaseIndex}`} className="stop-row" onClick={() => onOpen(i.sub)}>
-              <SubIcon sub={i.sub} size={32} />
-              <span className="stop-info">
-                <b>{i.sub.name}</b>
-                <small>
-                  {cnDate(i.date)} <span className="copy-gap" aria-hidden="true" />{' '}
-                  {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
-                  {copyParts(i.reason ? `\n${i.reason}` : '')}
-                </small>
-                <small style={i.refunded > 0 ? { color: 'var(--green)' } : undefined}>
-                  {i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: flow(i.refunded, i.currency) })}
-                </small>
-              </span>
-              <span className="stop-amount">
-                <b className="red">
-                  <span className="stop-days">
-                    {t('core.stop.lossDays', { count: i.wastedDays })} <span className="copy-gap" aria-hidden="true" />{' '}
-                  </span>
-                  <span>{flow(-i.lossBase, base)}</span>
-                </b>
-                {i.currency !== base && <small>{flow(-i.loss, i.currency)}</small>}
-              </span>
-            </button>
-          ))}
-        </div>
+      {/* 没有未退款损失时，上面的指标已写 ¥0，不再放一个空的明细区块 */}
+      {losses.items.length > 0 && (
+        <>
+          <h4 className="stop-list-title">{t('report.stops.details')}</h4>
+          <div className="stop-list">
+            {losses.items.map((i) => (
+              <button key={`${i.sub.id}-${i.phaseIndex}`} className="stop-row" onClick={() => onOpen(i.sub)}>
+                <SubIcon sub={i.sub} size={32} />
+                <span className="stop-info">
+                  <b>{i.sub.name}</b>
+                  <small>
+                    {cnDate(i.date)} <span className="copy-gap" aria-hidden="true" />{' '}
+                    {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
+                    {copyParts(i.reason ? `\n${i.reason}` : '')}
+                  </small>
+                  <small style={i.refunded > 0 ? { color: 'var(--green)' } : undefined}>
+                    {i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: flow(i.refunded, i.currency) })}
+                  </small>
+                </span>
+                <span className="stop-amount">
+                  <b className="red">
+                    <span className="stop-days">
+                      {t('core.stop.lossDays', { count: i.wastedDays })} <span className="copy-gap" aria-hidden="true" />{' '}
+                    </span>
+                    <span>{flow(-i.lossBase, base)}</span>
+                  </b>
+                  {i.currency !== base && <small>{flow(-i.loss, i.currency)}</small>}
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

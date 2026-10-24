@@ -234,7 +234,11 @@
     "settledCcy": "Tiền tệ của thẻ",
     "settledAmount": "Số tiền trên thẻ",
     "blank": "Để trống",
-    "freezeHint": "Các khoản phí trong giai đoạn này hiện được ước tính theo chu kỳ thanh toán. Khi lưu, {amount} khoản phí ước tính tính đến hôm nay sẽ được chuyển thành bản ghi; từ đó trở đi, bản ghi là căn cứ chính. Các khoản phí sắp tới không thay đổi."
+    "freezeHint": "Các khoản phí trong giai đoạn này hiện được ước tính theo chu kỳ thanh toán. Khi lưu, {amount} khoản phí ước tính tính đến hôm nay sẽ được chuyển thành bản ghi; từ đó trở đi, bản ghi là căn cứ chính. Các khoản phí sắp tới không thay đổi.",
+    "method": "Phương thức thanh toán",
+    "scopeOne": "Chỉ lần này",
+    "scopePhase": "Gói này ({count})",
+    "scope": "Áp dụng cho"
   },
   "timeline": {
     "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)"

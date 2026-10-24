@@ -7,7 +7,8 @@
     "custom": {
       "one": "Every {count} month",
       "other": "Every {count} months"
-    }
+    },
+    "once": "One-time"
   },
   "cycle": {
     "lifetime": "Lifetime",

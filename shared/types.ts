@@ -30,6 +30,8 @@ export interface Payment {
   /** 缺省为正常扣款；refund 退款、adjust 补差（升级补差价等）、failed 扣款失败（不计入支出） */
   kind?: 'refund' | 'adjust' | 'failed';
   settled?: { amount: number; currency: string };
+  /** 这一笔单独用的支付方式；缺省为所属阶段的支付方式（偶尔换卡扣了一次时填） */
+  methodId?: string;
 }
 
 export interface PricePoint {

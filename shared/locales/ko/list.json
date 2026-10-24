@@ -65,7 +65,9 @@
     "amount": "금액",
     "monthly": "월",
     "start": "시작",
-    "next": "다음 결제"
+    "next": "다음 결제",
+    "planPrice": "요금제 가격",
+    "inBase": "{ccy} 환산"
   },
   "notCounted": "집계 제외",
   "endedOn": "{date} 종료",

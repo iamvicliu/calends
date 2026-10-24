@@ -140,7 +140,6 @@
     "lossHint": "Paid for service that ended early and was not refunded",
     "basis": "All history\nMy share; savings at current FX, unrefunded loss at stop-date FX.",
     "details": "Unrefunded loss details",
-    "empty": "No unrefunded loss.",
     "cancel": "Voluntary early cancellation"
   }
 }

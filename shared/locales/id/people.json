@@ -57,7 +57,8 @@
   },
   "field": {
     "person": "Orang",
-    "syncFoot": "Juga ada di {count} tempat lain — perubahan nama dan kontak ikut berlaku."
+    "editProfile": "Edit orang",
+    "noContact": "Tanpa kontak"
   },
   "avatar": {
     "change": "Ganti avatar",

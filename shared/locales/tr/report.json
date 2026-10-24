@@ -140,7 +140,6 @@
     "lossHint": "Erken sona eren hizmet için ödenen ve iade edilmeyen tutar",
     "basis": "Tüm geçmiş\nBenim payım; tasarruf güncel kurla, iade edilmeyen kayıp sonlandırma tarihindeki kurla hesaplanır.",
     "details": "İade edilmeyen kayıp ayrıntıları",
-    "empty": "İade edilmeyen kayıp yok.",
     "cancel": "İsteğe bağlı erken iptal"
   }
 }

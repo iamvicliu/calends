@@ -1,7 +1,7 @@
 import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { StopFields } from '../components/StopPanel.tsx';
 import { Minus, Plus, ReceiptText } from 'lucide-react';
@@ -20,9 +20,9 @@ import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-for
 import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField, MemberSheet } from './Members.tsx';
+import { ContactField, contactText, MemberSheet } from './Members.tsx';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
-import { linkPerson, PersonPicker } from './People.tsx';
+import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { searchCatalog, type CatalogItem } from '../catalog.ts';
 import type { AppStorePlan } from '../../../shared/appstore-plans.ts';
@@ -249,13 +249,19 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
         }}
       >
-        <Form isNew={isNew} f={f} setF={setF} up={up} state={state} today={today} stop={stop} setStop={setStop} />
+        <Form
+          key={historyReset}
+          isNew={isNew}
+          f={f}
+          setF={setF}
+          up={up}
+          state={state}
+          today={today}
+          stop={stop}
+          setStop={setStop}
+          history={!isNew && <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />}
+        />
       </div>
-      {!isNew && (
-        <div style={{ marginTop: 18 }}>
-          <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />
-        </div>
-      )}
     </Sheet>
   );
 }
@@ -269,6 +275,7 @@ function Form({
   up,
   state,
   today,
+  history,
 }: {
   isNew: boolean;
   stop?: StopForm;
@@ -278,7 +285,11 @@ function Form({
   up: (p: Partial<Subscription>) => void;
   state: AppState;
   today: string;
+  history?: ReactNode;
 }) {
+  // 代付对象已关联名册里的人：称呼、联系方式只读，改资料去人员详情
+  const proxyLinked = !!f.proxy?.personId && !!state.people?.some((p) => p.id === f.proxy!.personId);
+  const [proxyProfile, setProxyProfile] = useState(false);
   const phoneCat = f.category === presetCat('phone');
   const preset = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0];
   // 选了「自定义」就一直停在自定义，填到恰好等于某个预设（如每 1 个月）时也不跳回去
@@ -314,15 +325,16 @@ function Form({
   // 买断是一次性的：没有续费、状态、到期、提醒、优惠期这些概念，表单里不显示
   const lt = f.cycle.unit === 'lifetime';
   const extras = [
-    f.intro && t('editor.more.intro'),
-    f.bonus && t('editor.more.bonus'),
-    f.remindDays != null && t('editor.more.remind'),
-    (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
-    (f.url || f.manageUrl) && t('editor.more.links'),
+    !lt && f.intro && t('editor.more.intro'),
+    !lt && f.bonus && t('editor.more.bonus'),
+    !lt && f.remindDays != null && t('editor.more.remind'),
+    !lt && (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
+    (f.url?.trim() || f.manageUrl?.trim() || f.icon?.trim() || (isDomainCat(f.category) && f.showOnPublic)) && t('editor.more.links'),
     f.tags.length > 0 && t('editor.more.tags'),
-    f.notes && t('editor.more.notes'),
+    f.notes?.trim() && t('editor.more.notes'),
   ].filter(Boolean) as string[];
-  const [more, setMore] = useState(extras.length > 0);
+  // 不保存展开偏好；每次打开（包括恢复/清空表单）都按实际内容决定。
+  const [more, setMore] = useState(() => extras.length > 0);
   // 分类表的顺序；表单里的分类万一不在表里（刚被删掉），也留着它
   const catOptions = [...new Set([...categories().map((c) => c.name), f.category].filter(Boolean))];
   const [newCat, setNewCat] = useState(false);
@@ -583,26 +595,55 @@ function Form({
               <Cell label={t('people.field.person')}>
                 <PersonPicker
                   state={state}
-                  value={f.proxy.personId}
+                  value={proxyLinked ? f.proxy.personId : undefined}
                   onPick={(p) =>
                     p
                       ? up({ proxy: { ...f.proxy!, personId: p.id, forName: p.name, contactVia: p.contactVia, contact: p.contact } })
-                      : f.proxy!.personId && up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contact: undefined } })
+                      : up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contactVia: undefined, contact: undefined } })
                   }
                 />
               </Cell>
             )}
-            <Cell label={t('editor.proxy.for')}>
-              <input value={f.proxy.forName} placeholder={t('editor.proxy.forPlaceholder')} onChange={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })} />
-            </Cell>
-            <Cell label={t('editor.proxy.contact')}>
-              <ContactField
-                via={f.proxy.contactVia ?? 'Telegram'}
-                value={f.proxy.contact}
-                onVia={(v) => up({ proxy: { ...f.proxy!, contactVia: v } })}
-                onChange={(c) => up({ proxy: { ...f.proxy!, contactVia: f.proxy!.contactVia ?? 'Telegram', contact: c || undefined } })}
+            {/* 与合租成员一致：这里只选替谁付；称呼、联系方式属于人员，到人员详情里改。新建人员时才在这里填 */}
+            {proxyLinked ? (
+              <Cell label={t('editor.proxy.contact')}>
+                <span className={contactText(f.proxy) ? undefined : 'muted'}>{contactText(f.proxy) || t('people.field.noContact')}</span>
+                <button type="button" className="btn plain" onClick={() => setProxyProfile(true)}>
+                  {t('people.field.editProfile')}
+                </button>
+              </Cell>
+            ) : (
+              <>
+                <Cell label={t('editor.proxy.for')}>
+                  <input
+                    value={f.proxy.forName}
+                    placeholder={t('editor.proxy.forPlaceholder')}
+                    onChange={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })}
+                  />
+                </Cell>
+                <Cell label={t('editor.proxy.contact')}>
+                  <ContactField
+                    via={f.proxy.contactVia ?? 'Telegram'}
+                    value={f.proxy.contact}
+                    onVia={(v) => up({ proxy: { ...f.proxy!, contactVia: v } })}
+                    onChange={(c) => up({ proxy: { ...f.proxy!, contactVia: f.proxy!.contactVia ?? 'Telegram', contact: c || undefined } })}
+                  />
+                </Cell>
+              </>
+            )}
+            {proxyProfile && f.proxy.personId && (
+              <PersonProfileSheet
+                state={state}
+                today={today}
+                personId={f.proxy.personId}
+                onOpen={() => setProxyProfile(false)}
+                onClose={() => {
+                  setProxyProfile(false);
+                  const p = getState().people?.find((x) => x.id === f.proxy?.personId);
+                  if (p && f.proxy) up({ proxy: { ...f.proxy, forName: p.name, contactVia: p.contactVia, contact: p.contact } });
+                }}
               />
-            </Cell>
+            )}
             <Cell label={t('editor.field.notes')}>
               <input
                 value={f.proxy.note ?? ''}
@@ -698,7 +739,9 @@ function Form({
         )}
       </Group>
 
-      {/* 五、不常用的：折叠起来，标题上列出已设置的项 */}
+      {history}
+
+      {/* 最后放不常用的选项，标题上列出已设置的项 */}
       <button type="button" className={`ed-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more}>
         <span>{t('editor.more.title')}</span>
         <small>{copyParts(extras.length ? extras.join('\n') : t(lt ? 'editor.more.summaryLt' : 'editor.more.summary'))}</small>

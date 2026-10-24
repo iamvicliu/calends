@@ -13,6 +13,7 @@ import * as reports from './scope-report.ts';
 import * as metrics from './metrics.ts';
 import * as carpool from './carpool.ts';
 import * as carpoolTimeline from './carpool-timeline.ts';
+import { detailForecast } from '../app/src/views/detail-data.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 // Execute component event handlers in the existing JSX harness, retaining pure financial builders.
@@ -26,7 +27,21 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     .replace(/^import[\s\S]*?;\n/gm, '')
     .replace(/^export \{.*\};\n/gm, '');
   const copySource = readFileSync(new URL('../app/src/components/copy.tsx', import.meta.url), 'utf8').replace(/^import.*;\n/gm, '');
-  const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  // 详情类视图共用的头部、面板与事实项在 DetailKit，与被测文件一起编译
+  const kitSource = /DetailKit\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    ? readFileSync(new URL('../app/src/components/DetailKit.tsx', import.meta.url), 'utf8').replace(/^import[\s\S]*?;\n/gm, '')
+    : '';
+  // 合租、订阅详情的收付款表共用 YearLedger：一起编译并在渲染时展开
+  const ledgerSource = /YearLedger\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    ? readFileSync(new URL('../app/src/components/YearLedger.tsx', import.meta.url), 'utf8')
+        .replace(/^import[\s\S]*?;\n/gm, '')
+        .replace(/export function /g, 'function ')
+    : '';
+  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource, {
+    lang: 'tsx',
+    jsx: { runtime: 'classic' },
+    reactCompiler: false,
+  });
   assert.equal(result.fatal, false);
   const values: unknown[] = [];
   let cursor = 0;
@@ -35,7 +50,9 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     React: {
       Fragment: 'Fragment',
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
-        typeof type === 'function' && ['MetricCards', 'Metric'].includes(type.name) ? type({ ...props, children }) : { type, props: props ?? {}, children },
+        typeof type === 'function' && ['MetricCards', 'Metric', 'YearLedger'].includes(type.name)
+          ? type({ ...props, children })
+          : { type, props: props ?? {}, children },
     },
     canUseSingleKey,
     ...billing,
@@ -514,7 +531,7 @@ test('public rows keep the amount once for an ordinary monthly plan and distingu
 });
 
 test('a single charge owns its amount instead of repeating an identical cumulative-spend KPI', () => {
-  const r = harness('../app/src/views/Detail.tsx', 'Kpis', {}, { toBase: (s: AppState, n: number, ccy: string) => fx.toBaseAt(s, n, ccy) });
+  const r = harness('../app/src/views/Detail.tsx', 'Kpis', {}, { toBase: (s: AppState, n: number, ccy: string) => fx.toBaseAt(s, n, ccy), detailForecast });
   const sub = {
     id: 'service',
     name: 'Service',
@@ -533,7 +550,9 @@ test('a single charge owns its amount instead of repeating an identical cumulati
     nodes.some((n) => n.children.includes('detail.stats.spent')),
     false,
   );
-  assert.equal(nodes.filter((n) => n.props.className === 'metric').length, 2);
+  // 三格：下次扣款、本期进度、预计每月；下次扣款只在第一格
+  assert.equal(nodes.filter((n) => n.props.className === 'metric').length, 3);
+  assert.equal(nodes.filter((n) => n.children.includes('detail.ev.next')).length, 1);
 });
 
 test('same-currency cash pairs retain a distinct actual settlement and never hide fees behind the list price', () => {
@@ -1774,233 +1793,6 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
   }
 });
 
-test('合租备注仅上移共有次数/周期，保留不同次数、周期、自由备注和缺失备注', () => {
-  const r = harness('../app/src/views/Carpool.tsx', 'receiptNotes');
-  const split = (...notes: (string | undefined)[]) => r.call('receiptNotes', notes);
-  assert.deepEqual(split('第12次收款（半年）', '第12次收款（半年）'), { common: '第12次收款\n半年', rows: ['', ''] });
-  assert.deepEqual(split('第12次收款（半年）· 银行转账', '第12次收款（季度）· 现金'), {
-    common: '第12次收款',
-    rows: ['半年\n银行转账', '季度\n现金'],
-  });
-  assert.deepEqual(split('第12次收款（半年）', '第3次收款（半年）'), { common: '半年', rows: ['第12次收款', '第3次收款'] });
-  assert.deepEqual(split('第12次收款（半年）', undefined), { common: '', rows: ['第12次收款（半年）', ''] });
-  // 备注用中文分号接在次数后面时，上移共有部分后不留前导分号
-  assert.deepEqual(split('第12次收款（半年）；实收待核对', '第12次收款（半年）'), { common: '第12次收款\n半年', rows: ['实收待核对', ''] });
-  assert.deepEqual(split('第12次收款（半年）', '第3次收款（季度）'), { common: '', rows: ['第12次收款（半年）', '第3次收款（季度）'] });
-  assert.deepEqual(split('Collection #12 (6 months): bank', 'Collection #12 (6 months): cash'), {
-    common: 'Collection #12\n6 months',
-    rows: ['bank', 'cash'],
-  });
-  assert.deepEqual(split('银行转账', '已抵扣优惠'), { common: '', rows: ['银行转账', '已抵扣优惠'] });
-});
-
-test('合租收付款默认折叠，分组独立切换，表头在部分展开时全部展开并可全部收起', () => {
-  const sub: Subscription = {
-    id: 'car',
-    name: 'Fictional six-seat plan',
-    category: 'Tools',
-    tags: [],
-    start: '2024-01-17',
-    status: 'active',
-    price: 240,
-    currency: 'CNY',
-    cycle: { unit: 'month', every: 6 },
-    share: {
-      role: 'owner',
-      seats: 6,
-      since: '2024-01-17',
-      members: [
-        {
-          id: 'a',
-          name: 'A',
-          share: 40,
-          billEvery: 6,
-          payments: [
-            { date: '2026-01-17', from: '2026-01-17', until: '2026-07-16', amount: 40, currency: 'CNY', note: '第5次收款（半年）' },
-            { date: '2025-07-17', from: '2025-07-17', until: '2026-01-16', amount: 0, currency: 'CNY', note: '第4次收款（半年）' },
-          ],
-        },
-        {
-          id: 'b',
-          name: 'B',
-          share: 40,
-          billEvery: 3,
-          joined: '2025-03-01',
-          payments: [{ date: '2026-01-18', from: '2026-01-17', until: '2026-07-16', amount: -5, currency: 'USD', note: '第5次收款（季度）' }],
-        },
-      ],
-    },
-  };
-  const state = { ...st, subscriptions: [sub] };
-  const r = harness(
-    '../app/src/views/Carpool.tsx',
-    'CarSheet',
-    {},
-    { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill', perBill: () => '', createPortal: () => null },
-  );
-  const props = { state, s: sub, today, ro: false, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
-  const render = () => r.render('CarSheet', props);
-  const groups = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row car-period');
-  const head = (nodes: Node[]) => nodes.find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')!;
-  const details = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'ld-row');
-  let nodes = render();
-  assert.equal(groups(nodes).length, 2);
-  assert.ok(groups(nodes).every((g) => g.type === 'button' && g.props['aria-expanded'] === false));
-  assert.equal(head(nodes).props['aria-expanded'], false);
-  assert.equal(head(nodes).props['aria-label'], 'family.sheet.member\nfamily.sheet.date\nfamily.sheet.amount\nfamily.sheet.expandAll');
-  assert.equal(all(head(nodes).children).filter((n) => n.type === 'small').length, 0);
-  assert.equal(all(head(nodes).children).filter((n) => n.type === 'Icon').length, 0);
-  assert.ok(groups(nodes).every((g) => g.props['aria-label'] && !all(g.children).some((n) => n.type === 'Icon')));
-  assert.deepEqual(
-    head(nodes).children.map((n: Node) => n.children.join('')),
-    ['family.sheet.member', 'family.sheet.date', 'family.sheet.amount'],
-  );
-  assert.equal(details(nodes).length, 0);
-  groups(nodes)[0].props.onClick();
-  nodes = render();
-  assert.deepEqual(
-    groups(nodes).map((g) => g.props['aria-expanded']),
-    [true, false],
-  );
-  assert.equal(details(nodes).length, 2);
-  // 组标题只写覆盖区间；和区间重复的共有备注（周期等）不再单独显示
-  assert.ok(!nodes.some((n) => n.props.className === 'car-period-title' && all(n.children).some((c) => c.type === 'small')));
-  // 共有的「第5次收款」不再显示；各行不同的周期仍留在行内
-  assert.equal(nodes.filter((n) => n.children.includes('第5次收款')).length, 0);
-  assert.ok(nodes.some((n) => n.children.includes('半年')));
-  assert.ok(nodes.some((n) => n.children.includes('季度')));
-  head(nodes).props.onClick();
-  nodes = render();
-  assert.equal(details(nodes).length, 3);
-  assert.equal(head(nodes).props['aria-expanded'], true);
-  assert.ok(head(nodes).props['aria-label'].endsWith('family.sheet.collapseAll'));
-  assert.equal(all(head(nodes).children).filter((n) => n.type === 'Icon').length, 0);
-  head(nodes).props.onClick();
-  nodes = render();
-  assert.equal(details(nodes).length, 0);
-  nodes.find((n) => n.type === 'Seg')!.props.onChange('out');
-  nodes = render();
-  assert.equal(groups(nodes).length, 3);
-  assert.ok(groups(nodes).every((g) => g.props['aria-label'] && !all(g.children).some((n) => n.type === 'Icon')));
-  assert.deepEqual(
-    head(nodes).children.map((n: Node) => n.children.join('')),
-    ['family.sheet.chargeDate', 'proxy.table.charged', 'proxy.table.cost'],
-  );
-  assert.equal(details(nodes).length, 0);
-  groups(nodes)[1].props.onClick();
-  nodes = render();
-  assert.deepEqual(
-    groups(nodes).map((g) => g.props['aria-expanded']),
-    [false, true, false],
-  );
-  head(nodes).props.onClick();
-  nodes = render();
-  assert.equal(details(nodes).length, 6);
-  assert.equal(head(nodes).props['aria-expanded'], true);
-  head(nodes).props.onClick();
-  assert.equal(details(render()).length, 0);
-  // 单组也折叠；只读状态不阻止查看历史，空记录不提供无效的全部展开操作。
-  const single = {
-    ...sub,
-    start: '2026-01-17',
-    share: { ...sub.share!, members: [{ ...sub.share!.members[0], payments: [sub.share!.members[0].payments![0]] }] },
-  };
-  const fresh = harness(
-    '../app/src/views/Carpool.tsx',
-    'CarSheet',
-    {},
-    { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill', perBill: () => '', createPortal: () => null },
-  );
-  nodes = fresh.render('CarSheet', { ...props, s: single, ro: true });
-  assert.equal(groups(nodes).length, 1);
-  assert.ok(groups(nodes).every((g) => g.props['aria-expanded'] === false && !g.props.disabled));
-  nodes = fresh.render('CarSheet', { ...props, s: { ...single, share: { ...single.share!, members: [] } } });
-  assert.equal(head(nodes).props.disabled, true);
-  assert.equal(head(nodes).props['aria-expanded'], false);
-});
-
-test('合租分组以覆盖区间为标题，不重复共有备注，差异信息留在行内', () => {
-  const words = (n: any): string =>
-    Array.isArray(n)
-      ? n.map(words).join('')
-      : n && typeof n === 'object'
-        ? n.props?.className === 'copy-parts'
-          ? n.children.flat().map(words).join('\n')
-          : words(n.children)
-        : n == null
-          ? ''
-          : String(n);
-  for (const { notes, common, rows } of [
-    { notes: ['第6次收款（半年）', '第6次收款（半年）'], common: '第6次收款\n半年', rows: ['', ''] },
-    { notes: ['第6次收款（半年）', '第2次收款（半年）· 抵扣调整'], common: '半年', rows: ['第6次收款', '第2次收款\n抵扣调整'] },
-    { notes: ['第6次收款（半年）', undefined], common: '', rows: ['第6次收款（半年）', ''] },
-  ]) {
-    const sub: Subscription = {
-      id: 'car',
-      name: 'Fictional plan',
-      category: 'Tools',
-      tags: [],
-      start: '2026-01-17',
-      status: 'active',
-      price: 240,
-      currency: 'CNY',
-      cycle: { unit: 'month', every: 6 },
-      share: {
-        role: 'owner',
-        seats: 3,
-        members: notes.map((note, i) => ({
-          id: String(i),
-          name: `Member ${i}`,
-          share: 40,
-          billEvery: 6,
-          payments: [{ date: '2026-07-17', from: '2026-07-17', until: '2027-01-16', amount: 40, currency: 'CNY', note }],
-        })),
-      },
-    };
-    const state = { ...st, subscriptions: [sub] };
-    const r = harness(
-      '../app/src/views/Carpool.tsx',
-      'CarSheet',
-      {},
-      { ...carpool, Sheet: 'Sheet', NameLink: 'NameLink', StatusPill: 'StatusPill', perBill: () => '', createPortal: () => null },
-    );
-    const props = { state, s: sub, today, ro: true, book: carpool.carLedger(state, sub, today), onClose() {}, onOpenSub() {}, onMember() {} };
-    let nodes = r.render('CarSheet', props);
-    const title = nodes.find((n) => n.props.className === 'car-period-title')!;
-    assert.deepEqual(
-      all(title.children)
-        .filter((n) => n.type === 'b')
-        .map((n) => words(n.children)),
-      [`${format.cnDateFull('2026-07-17')} – ${format.cnDateFull('2027-01-16')}`],
-    );
-    assert.deepEqual(
-      all(title.children)
-        .filter((n) => n.type === 'small')
-        .map((n) => words(n.children)),
-      [],
-    );
-    nodes.find((n) => n.props.className === 'ld-row car-period')!.props.onClick();
-    nodes = r.render('CarSheet', props);
-    assert.deepEqual(
-      nodes
-        .filter((n) => n.props.className === 'ld-row')
-        .map((n) =>
-          all(n.children[0])
-            .filter((child) => child.type === 'small')
-            .map((child) => words(child.children))
-            .join(''),
-        ),
-      rows,
-    );
-    nodes.find((n) => n.type === 'Seg')!.props.onChange('out');
-    nodes = r.render('CarSheet', props);
-    const yearTitle = nodes.find((n) => n.props.className === 'car-period-title')!;
-    assert.equal(all(yearTitle.children).filter((n) => n.type === 'b').length, 1);
-    // 年份旁只带笔数；卡上实扣与成本的合计放在对应列下
-    assert.equal(all(yearTitle.children).filter((n) => n.type === 'small').length, 1);
-  }
-});
-
 test('person avatar drafts remain unsaved until Save; server field order does not leave Save enabled', async () => {
   const people = await import('./people.ts');
   const state = { ...st, people: [{ id: 'person', name: 'Fictional person', color: 'blue' as const }] };
@@ -2055,6 +1847,12 @@ test('person avatar drafts remain unsaved until Save; server field order does no
   assert.equal(save().props.disabled, true);
 });
 
+/** 成员弹窗：有欠款时默认是记收款，点底部「调整收费与退出」切到设置；已结清的本来就是设置 */
+function toSettings(render: () => Node[]) {
+  const adjust = all(render().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.quick.adjust'));
+  adjust?.props.onClick();
+}
+
 test('合租表格的收费弹窗：已付期按开始日自动算结束日；改自定义收费从生效日起记调价', async () => {
   const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2026-07-16' };
   const sub: Subscription = {
@@ -2091,6 +1889,8 @@ test('合租表格的收费弹窗：已付期按开始日自动算结束日；�
     },
   );
   const render = () => r.render('MemberBillingSheet', { state: st, s: sub, member, onClose() {}, onMore() {} });
+  // 欠款的成员先打开的是记收款；切到收费设置再测
+  toSettings(render);
   const save = async () =>
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
       .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
@@ -2282,6 +2082,7 @@ test('收费弹窗设置下车退款保留原始已付至，金额无效不能�
     },
   );
   const render = () => r.render('MemberBillingSheet', { state: st, s, member: m, onClose() {}, onMore() {} });
+  toSettings(render);
   const leaveFields = () => render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields')!;
   const save = () => all(render().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.member.save'))!;
   leaveFields().props.onChange({ left: '2026-01-16', leaveRefund: { date: '2026-01-20', amount: 12, currency: 'USD' } });
@@ -2334,10 +2135,10 @@ test('退款行显示负现金流和退款标签，全额退款后仍保留累�
     { Sheet: 'Sheet', NameLink: 'NameLink', perBill: () => '', createPortal: () => null },
   );
   const render = () => r.render('CarSheet', { state: st, s, today, book: carpool.carLedger(st, s, today), onClose() {}, onMember() {}, onOpenSub() {} });
-  render()
-    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')!
-    .props.onClick();
-  const refund = render().find((n) => n.props.className === 'ld-row' && all(n.children).some((x) => x.children.includes('family.sheet.refund')))!;
+  // 只有一年的记录平铺，不用先展开；行与订阅详情的扣款记录同一套（ld-row dt-row）
+  const refund = render().find(
+    (n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('family.sheet.refund')),
+  )!;
   assert.ok(refund);
   assert.ok(all(refund.children).some((n) => n.children.includes(format.flow(-31, 'USD'))));
   const facts = r.render('CarFacts', { book: carpool.carLedger(st, s, today), base: 'USD' });
@@ -2415,8 +2216,8 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   assert.equal(collapsedCards.length, 2);
   assert.equal(r.render('MemberRows', { ...props, includeLeft: true }).filter((n) => n.props.className === 'member departed').length, 1);
   const cellNodes = r.render('Vacancy', { ro: false, onAdd: () => opened++, table: true });
-  assert.equal(cellNodes.filter((n) => n.type === 'td').length, 5);
-  assert.equal(cellNodes.filter((n) => n.type === 'td' && !all(n.children).length).length, 3);
+  assert.equal(cellNodes.filter((n) => n.type === 'td').length, 4);
+  assert.equal(cellNodes.filter((n) => n.type === 'td' && !all(n.children).length).length, 2);
   cellNodes[0].props.onClick();
   assert.equal(opened, 2);
   const readonly = r.render('Vacancy', { ro: true, onAdd: () => opened++, table: false })[0];
@@ -2425,7 +2226,8 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   assert.equal(readonly.props.tabIndex, undefined);
   assert.equal(readonly.props.role, undefined);
   nodes = r.render('CarSheet', { ...props, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {} });
-  assert.equal(nodes.filter((n) => n.props.className === 'ld-row car-period').length, 1);
+  // 已下车成员的历史收款仍留在收款表里（与订阅详情同一套按年表格，只有一年时平铺）
+  assert.ok(nodes.some((n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('Departed'))));
   const empty = { ...s, share: { ...s.share!, members: [] } };
   const emptyNodes = r.render('MemberTable', { ...props, s: empty });
   // 四座车没有成员时，除车主自己外还有三个空位
@@ -2475,12 +2277,88 @@ test('收款表点某一笔直接进入这笔收款的编辑，而不是成员�
     onMember: () => calls.push(['member']),
     onPayment: (m: unknown, p: unknown) => calls.push(['payment', m, p]),
   };
+  // 跨年时先点表头全部展开；只有一年的记录本来就平铺
   r.render('CarSheet', props)
-    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')!
-    .props.onClick();
-  const row = r.render('CarSheet', props).find((n) => n.type === 'button' && n.props.className === 'ld-row')!;
+    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')
+    ?.props.onClick();
+  const row = r.render('CarSheet', props).find((n) => n.type === 'button' && String(n.props.className ?? '').startsWith('ld-row dt-row'))!;
   row.props.onClick();
   assert.equal(calls.length, 1);
   assert.equal(calls[0][0], 'payment');
   assert.equal((calls[0][2] as typeof payment).amount, 40);
+});
+
+test('代付结清后第三格显示盈亏而不是「已结清」，未结清时仍是待收', () => {
+  const r = harness('../app/src/views/Proxy.tsx', 'OwedOrNet', {}, { proxyRows: () => [] });
+  const text = (nodes: Node[]) => JSON.stringify(nodes.map((n) => n.children));
+  // 虚构的三期代付：全部收回，比实扣多收 ¥15
+  const settled = [
+    { chargedBase: 100, receivedBase: 105 },
+    { chargedBase: 100, receivedBase: 105 },
+    { chargedBase: 100, receivedBase: 105 },
+  ];
+  const done = r.render('OwedOrNet', { list: settled, base: 'CNY' });
+  assert.match(text(done), /family\.strip\.profit/);
+  assert.doesNotMatch(text(done), /proxy\.settled/);
+  assert.ok(done.some((n) => n.props.className?.includes('done')));
+  // 少收：亏损用红色
+  const loss = r.render('OwedOrNet', { list: settled.map((x) => ({ ...x, receivedBase: 90 })), base: 'CNY' });
+  assert.ok(loss.some((n) => n.props.className?.includes('loss')));
+  // 收回与实扣相差不到 0.5 视为持平，不着色
+  const even = r.render('OwedOrNet', { list: [{ chargedBase: 100, receivedBase: 100.2 }], base: 'CNY' });
+  assert.match(text(even), /proxy\.table\.even/);
+  // 还有待收：照旧显示待收期数
+  const owed = r.render('OwedOrNet', { list: [...settled, { chargedBase: 100 }], base: 'CNY' });
+  assert.match(text(owed), /proxy\.owedPeriods/);
+  assert.doesNotMatch(text(owed), /family\.strip\.profit/);
+});
+
+test('点欠款成员只开一个弹窗：先是预填好的记收款，记下这笔推进已付至', async () => {
+  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2025-07-16' };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 15,
+    currency: 'USD',
+    start: '2025-01-17',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2025-01-17', members: [member] },
+  };
+  let saved: Subscription | undefined;
+  let closed = false;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberBillingSheet',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      PersonAvatar: 'PersonAvatar',
+      personFor: () => undefined,
+      todayIn: () => today,
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (s: Subscription) => {
+        saved = s;
+      },
+    },
+  );
+  const nodes = r.render('MemberBillingSheet', { state: st, s: sub, member, onClose: () => (closed = true), onMore() {} });
+  const foot = all(nodes.find((n) => n.type === 'Sheet')!.props.foot);
+  // 没有单独的收款按钮入口：同一个弹窗底部就是「记下这笔」
+  const record = foot.find((n) => n.type === 'button' && n.children.includes('family.member.record'))!;
+  assert.ok(nodes.some((n) => n.type === 'NumInput' && n.props.value === 44));
+  await record.props.onClick();
+  const m = saved!.share!.members[0];
+  assert.equal(m.payments!.length, 1);
+  assert.equal(m.payments![0].from, '2025-07-17');
+  assert.equal(m.paidUntil, m.payments![0].until);
+  assert.ok(m.paidUntil! > member.paidUntil);
+  assert.equal(closed, true);
 });

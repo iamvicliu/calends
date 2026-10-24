@@ -1,6 +1,6 @@
 import { personSummary } from '../../shared/avatar.ts';
 import { parseAppStorePlans } from '../../shared/appstore-plans.ts';
-import { reconcileRenewalRules, preserveRenewalHistory, renewalDates } from '../../shared/billing.ts';
+import { reconcileRenewalRules, preserveRenewalHistory, renewalDates, chargeMethodId } from '../../shared/billing.ts';
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
 import {
   activePhases,
@@ -367,7 +367,7 @@ function chargeRow(st: AppState, c: Charge, out?: string) {
     my_amount: round(v * myShareFactor(c.sub, c.date)),
     projected: c.projected,
     kind: c.kind ?? 'charge',
-    method: st.methods.find((m) => m.id === c.sub.methodId)?.name ?? null,
+    method: st.methods.find((m) => m.id === chargeMethodId(c))?.name ?? null,
     ...(c.settled ? { settled: c.settled } : {}),
     ...(c.note ? { note: c.note } : {}),
   };
@@ -759,7 +759,7 @@ const CATALOGUE: Tool[] = [
       const method = a.method ? methodRef(st, a.method) : undefined;
       const scope = str(a.scope) ?? 'mine';
       const items = (sub ? chargesBetween(sub, from, to, today) : chargesIn(st, from, to, today, scope))
-        .filter((c) => !method || c.sub.methodId === method)
+        .filter((c) => !method || chargeMethodId(c) === method)
         .filter((c) => a.include_projected !== false || !c.projected)
         .map((c) => chargeRow(st, c, out));
       const sum = (k: 'converted' | 'my') => round(items.reduce((t, i) => t + (k === 'my' ? i.my_amount : i.amount.converted), 0));
@@ -792,7 +792,7 @@ const CATALOGUE: Tool[] = [
         if (a.include_projected === false && c.projected) continue;
         const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
         const v = chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
-        const m = st.methods.find((x) => x.id === c.sub.methodId);
+        const m = st.methods.find((x) => x.id === chargeMethodId(c));
         const [key, label] = groupOf(by, c, sub, m);
         const g = groups.get(key) ?? { key, label, total: 0, count: 0 };
         g.total += v;
@@ -1472,7 +1472,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'record_payment',
     description:
-      'Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for refunds. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). Rejects same-day same-amount duplicates unless allow_duplicate.',
+      'Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for refunds. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. Rejects same-day same-amount duplicates unless allow_duplicate.',
     write: true,
     inputSchema: obj(
       {
@@ -1486,6 +1486,7 @@ const CATALOGUE: Tool[] = [
         },
         kind: { type: 'string', enum: ['charge', 'refund', 'adjust', 'failed'], default: 'charge' },
         settled: obj({ amount: { type: 'number' }, currency: { type: 'string' } }, ['amount', 'currency']),
+        method: { type: ['string', 'null'], description: 'Payment method id or name for this single charge; null clears it.' },
         note: { type: 'string' },
         allow_duplicate: { type: 'boolean', default: false },
         phase: {
@@ -1517,6 +1518,8 @@ const CATALOGUE: Tool[] = [
         kind: kind === 'charge' ? undefined : (kind as Payment['kind']),
         settled: st2 ? { amount: sign * Math.abs(num(st2.amount, 'settled.amount')), currency: String(st2.currency).toUpperCase() } : undefined,
         note: str(a.note),
+        // 只有显式给了 method（含 null）才带这个键；不给时改写沿用原来那一笔的支付方式
+        ...(a.method !== undefined ? { methodId: a.method === null ? undefined : methodRef(st, a.method) } : {}),
       };
       return commit(
         ctx,

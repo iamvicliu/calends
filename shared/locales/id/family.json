@@ -26,7 +26,6 @@
     },
     "fee": "Biaya",
     "nextCollection": "Penagihan berikutnya",
-    "actions": "Tindakan",
     "status": "Status pembayaran",
     "period": "Periode ini",
     "range": "{from} – {until}",
@@ -100,7 +99,8 @@
       "m12": "Per tahun",
       "custom": {
         "other": "Per {count} bulan"
-      }
+      },
+      "once": "Sekali bayar"
     },
     "feeCcyAria": "Mata uang",
     "exempt": "Tidak membayar",
@@ -216,7 +216,8 @@
       "m12": "{fee}/thn",
       "custom": {
         "other": "{fee} per {count} bulan"
-      }
+      },
+      "once": "{fee} sekali bayar"
     },
     "collect": "Tagih",
     "joinedGroup": "Paket yang saya ikuti",
@@ -225,7 +226,13 @@
     "maybeGroup": "Mungkin dipakai bersama",
     "convert": "Jadikan bersama",
     "dueOn": "Jatuh tempo {date}",
-    "nextDueOn": "Berikutnya {date}"
+    "nextDueOn": "Berikutnya {date}",
+    "members": "Anggota",
+    "incomeShort": "Pemasukan {amount}",
+    "status": "Status",
+    "countNote": "Anggota {members}, kursi kosong {free}",
+    "yearPnl": "Untung rugi tahun ini",
+    "totalPnl": "Untung rugi total"
   },
   "convert": {
     "title": "Jadikan “{name}” paket bersama",
@@ -287,7 +294,9 @@
       "other": "Terlambat {count} hari"
     },
     "owe": "Tagihan {amount}\nsejak {date}",
-    "settled": "Lunas\nberikutnya {date}"
+    "settled": "Lunas\nberikutnya {date}",
+    "adjust": "Biaya & keluar",
+    "backCollect": "Catat pembayaran"
   },
   "strip": {
     "yearNet": "Bersih per tahun",
@@ -295,9 +304,9 @@
     "noneOwed": "Tidak ada tunggakan",
     "since": "Sejak {date}",
     "profit": "Laba / rugi",
-    "annualApprox": "Sekitar {amount} per tahun",
     "paid": "Dibayar",
-    "received": "Diterima"
+    "received": "Diterima",
+    "thisYear": "Tahun ini {amount}"
   },
   "timeline": {
     "paid": "Lunas",
@@ -313,8 +322,11 @@
   },
   "sort": {
     "owed": "Belum dibayar",
-    "net": "Bersih per tahun",
+    "net": "Menurut untung rugi tahun ini",
     "received": "Total diterima",
-    "lastPaid": "Pembayaran terakhir"
+    "lastPaid": "Pembayaran terakhir",
+    "price": "Menurut harga paket",
+    "paid": "Menurut dibayar",
+    "profit": "Menurut untung rugi total"
   }
 }

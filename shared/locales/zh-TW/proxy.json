@@ -31,7 +31,6 @@
   "stoppedAt": "停止於",
   "nextCharge": "下次扣款",
   "note": "備註",
-  "diffLabel": "收回 − 實扣",
   "table": {
     "cost": "當時成本",
     "total": "合計 {count} 期",
@@ -66,12 +65,18 @@
   },
   "page": {
     "owedSub": "{count} 期未收，依扣款當天匯率",
-    "allBack": "全部已收回",
-    "total": "累計代付",
-    "totalSub": "{count} 期\n{subs}",
     "subs": "{count} 個訂閱",
     "diffSub": "已收的期數中，匯率與手續費造成的差額",
     "emptyTitle": "還沒有代付",
-    "emptyBody": "新增或編輯訂閱，在「誰在用」中選「代付」並填寫替誰付。"
-  }
+    "emptyBody": "新增或編輯訂閱，在「誰在用」中選「代付」並填寫替誰付。",
+    "liveNext": "進行中 {count} 個，下次 {date} 扣款",
+    "lastIn": "最近一筆 {date} 收到",
+    "noneIn": "還沒有收回",
+    "diffAvg": "已收 {count} 期，平均每期 {amount}",
+    "perPeriod": "平均每期 {amount}",
+    "owedRate": "按扣款當天匯率"
+  },
+  "paid": "已代付",
+  "periods": "{count} 期",
+  "lastIn": "最近 {date}"
 }

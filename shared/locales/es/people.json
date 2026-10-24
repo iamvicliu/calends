@@ -72,10 +72,8 @@
   },
   "field": {
     "person": "Persona",
-    "syncFoot": {
-      "one": "También aparece en {count} lugar más: los cambios de nombre y contacto se aplican ahí también.",
-      "other": "También aparece en {count} lugares más: los cambios de nombre y contacto se aplican ahí también."
-    }
+    "editProfile": "Editar persona",
+    "noContact": "Sin contacto"
   },
   "avatar": {
     "change": "Cambiar avatar",

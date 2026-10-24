@@ -1,6 +1,6 @@
 import { afterEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { currencyDecimals, moneyTick, symbol, flow, flowSign, money, setSignedAmounts } from './format.ts';
+import { currencyDecimals, moneyTick, symbol, flow, flowSign, money, relDays, setSignedAmounts } from './format.ts';
 import { setLocale } from './i18n.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 
@@ -120,4 +120,14 @@ test('Intl formatters are reused per locale and options without changing output'
   const n = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
   assert.equal(numberFormat('fr', n).format(1234.5), (1234.5).toLocaleString('fr', n));
   assert.throws(() => dateFormat('en', { timeZone: 'Not/AZone' }));
+});
+
+test('relative dates use days, then months, then years for long cycles', () => {
+  setLocale('en', []);
+  assert.equal(relDays(5), 'in 5 days');
+  assert.equal(relDays(-90), '3 months ago');
+  assert.equal(relDays(365), 'in 12 months');
+  // 两年付的下次扣款说「2 年后」，不说「24 个月后」
+  assert.equal(relDays(730), 'in 2 years');
+  assert.equal(relDays(-1461), '4 years ago');
 });

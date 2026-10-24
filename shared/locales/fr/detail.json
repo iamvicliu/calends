@@ -1,7 +1,18 @@
 {
   "copy": "Copier",
   "copied": "Copié",
-  "overlap": { "title": "Aussi en cours", "previous": "Ancienne formule", "until": "Jusqu’au {date}\n{rel}" },
+  "note": {
+    "more": "Tout afficher"
+  },
+  "renewal": {
+    "afterTrial": "Premier prélèvement après l’essai",
+    "elapsed": "{pct} % de la période écoulée"
+  },
+  "overlap": {
+    "title": "Aussi en cours",
+    "previous": "Ancienne formule",
+    "until": "Jusqu’au {date}\n{rel}"
+  },
   "action": {
     "edit": "Modifier",
     "pause": "Suspendre",
@@ -11,7 +22,11 @@
     "share": "Partager",
     "copyImage": "Copier en image"
   },
-  "toast": { "resumed": "Facturation reprise", "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus", "imageCopied": "Image copiée" },
+  "toast": {
+    "resumed": "Facturation reprise",
+    "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus",
+    "imageCopied": "Image copiée"
+  },
   "history": "Historique",
   "summary": "Résumé",
   "field": {
@@ -25,16 +40,29 @@
     "expiresHint": "Le renouvellement automatique prélève avant cette date",
     "endedOn": "Terminé le",
     "trialEnd": "Fin de l’essai",
-    "region": "Région"
+    "region": "Région",
+    "period": "Période",
+    "present": "aujourd’hui",
+    "progress": "Période en cours"
   },
-  "up": { "planned": "Changement prévu\nnon confirmé", "starting": "Commence bientôt", "changing": "Changement à venir", "effective": "Date d’effet" },
+  "up": {
+    "planned": "Changement prévu\nnon confirmé",
+    "starting": "Commence bientôt",
+    "changing": "Changement à venir",
+    "effective": "Date d’effet"
+  },
   "plan": {
     "drop": "Ne pas changer",
     "droppedToast": "Pas de changement. Se termine après le {date}",
     "confirm": "Confirmer le changement",
     "confirmedToast": "Changement confirmé"
   },
-  "intro": { "title": "Offre de lancement", "price": "Prix de lancement", "until": "Fin de l’offre", "then": "Ensuite" },
+  "intro": {
+    "title": "Offre de lancement",
+    "price": "Prix de lancement",
+    "until": "Fin de l’offre",
+    "then": "Ensuite"
+  },
   "share": {
     "open": "Voir le partage",
     "owner": "Partagé\nj’organise ({count}/{seats})",
@@ -48,32 +76,70 @@
     "owed": "{amount} dû",
     "settled": "Réglé",
     "me": "Moi",
-    "seatsLeft": { "one": "{seats} places, {count} libre", "other": "{seats} places, {count} libres" },
+    "seatsLeft": {
+      "one": "{seats} places, {count} libre",
+      "other": "{seats} places, {count} libres"
+    },
     "seatsFull": "Les {seats} places sont prises",
     "surplus": "Rien à payer, {amount} en plus"
   },
   "charges": {
-    "recentN": { "one": "Seulement le dernier", "other": "Seulement les {count} derniers" },
+    "recentN": {
+      "one": "Seulement le dernier",
+      "other": "Seulement les {count} derniers"
+    },
     "addShort": "Ajouter",
-    "title": { "one": "Prélèvements\n{count}", "other": "Prélèvements\n{count}" },
-    "kind": { "refund": "Remboursement", "adjust": "Ajustement", "failed": "Échec" },
+    "title": {
+      "one": "Prélèvements\n{count}",
+      "other": "Prélèvements\n{count}"
+    },
+    "kind": {
+      "refund": "Remboursement",
+      "adjust": "Ajustement",
+      "failed": "Échec"
+    },
     "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)",
     "all": "Tout afficher ({count})"
   },
   "stats": {
     "spent": "Total dépensé",
-    "count": { "one": "{count} prélèvement", "other": "{count} prélèvements" },
+    "count": {
+      "one": "{count} prélèvement",
+      "other": "{count} prélèvements"
+    },
     "owned": "Possédé depuis",
     "subscribed": "Abonné depuis",
     "yearsMonths": "{years} an(s) {months} mois",
-    "years": { "one": "{count} an", "other": "{count} ans" },
-    "months": { "one": "{count} mois", "other": "{count} mois" },
-    "days": { "one": "{count} jour", "other": "{count} jours" },
-    "gaps": { "one": "Interrompu une fois", "other": "Interrompu {count} fois" },
+    "years": {
+      "one": "{count} an",
+      "other": "{count} ans"
+    },
+    "months": {
+      "one": "{count} mois",
+      "other": "{count} mois"
+    },
+    "days": {
+      "one": "{count} jour",
+      "other": "{count} jours"
+    },
+    "gaps": {
+      "one": "Interrompu une fois",
+      "other": "Interrompu {count} fois"
+    },
     "perMonth": "Coût mensuel réel"
   },
-  "tab": { "charges": "Prélèvements\n{count}", "details": "Détails" },
-  "kpi": { "amortized": "Par mois de possession", "noGaps": "Sans interruption", "startedToday": "Commencé aujourd’hui", "expectedMonthly": "Prévu par mois" },
+  "tab": {
+    "charges": "Prélèvements\n{count}",
+    "details": "Détails"
+  },
+  "kpi": {
+    "noGaps": "Sans interruption",
+    "startedToday": "Commencé aujourd’hui",
+    "expectedMonthly": "Prévu par mois",
+    "amortizedCost": "Coût lissé",
+    "perMonthValue": "{amount}/mois",
+    "perDay": "{amount} par jour"
+  },
   "chart": {
     "title": "Par prélèvement\n{ccy}",
     "orig": "Devise d’origine",
@@ -84,7 +150,14 @@
     "list": "Prix catalogue au premier taux",
     "listOrig": "Prix catalogue",
     "origAmount": "Montant d’origine",
-    "few": "Il faut au moins deux prélèvements pour tracer une tendance"
+    "few": "Il faut au moins deux prélèvements pour tracer une tendance",
+    "bucket": {
+      "m1": "Chaque barre est un total mensuel",
+      "m3": "Chaque barre est un total trimestriel",
+      "m12": "Chaque barre est un total annuel"
+    },
+    "regular": "Prix normal",
+    "saved": "Remise de lancement"
   },
   "ev": {
     "next": "Prochain prélèvement",
@@ -96,15 +169,42 @@
     "paused": "En pause",
     "ended": "Terminé",
     "ending": "Se termine",
-    "phases": { "one": "{count} phase", "other": "{count} phases" },
-    "more": { "one": "Afficher {count} plus ancien", "other": "Afficher {count} plus anciens" },
+    "phases": {
+      "one": "{count} phase",
+      "other": "{count} phases"
+    },
+    "more": {
+      "one": "Afficher {count} plus ancien",
+      "other": "Afficher {count} plus anciens"
+    },
     "shareStart": "Partage commencé"
   },
   "upcoming": {
     "title": "12 prochains mois",
-    "total": { "one": "≈ {amount}\n{count} prélèvement", "other": "≈ {amount}\n{count} prélèvements" },
-    "more": { "one": "{count} de plus", "other": "{count} de plus" },
+    "total": {
+      "one": "≈ {amount}\n{count} prélèvement",
+      "other": "≈ {amount}\n{count} prélèvements"
+    },
+    "more": {
+      "one": "{count} de plus",
+      "other": "{count} de plus"
+    },
     "none": "Aucun prélèvement dans les 12 prochains mois"
   },
-  "stop": { "title": "Arrêt et remboursement", "type": "Type d’arrêt", "paidThrough": "Payé initialement jusqu’au", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Arrêt et remboursement",
+    "type": "Type d’arrêt",
+    "paidThrough": "Payé initialement jusqu’au",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Débité",
+    "planned": "Prévu"
+  },
+  "period": {
+    "paid": "Période en cours",
+    "trial": "Essai",
+    "bonus": "Période offerte",
+    "since": "Depuis le {date}"
+  }
 }

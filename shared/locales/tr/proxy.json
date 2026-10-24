@@ -37,7 +37,6 @@
   "stoppedAt": "Durdurulma tarihi",
   "nextCharge": "Sonraki ödeme",
   "note": "Not",
-  "diffLabel": "Geri ödenen − ödenen",
   "table": {
     "cost": "O anki maliyet",
     "total": "Toplam\n{count}",
@@ -75,18 +74,21 @@
       "one": "{count} ödenmemiş, ödeme tarihindeki kurlarla",
       "other": "{count} ödenmemiş, ödeme tarihindeki kurlarla"
     },
-    "allBack": "Tamamı geri ödendi",
-    "total": "Toplam ödenen",
-    "totalSub": {
-      "one": "{count} ödeme\n{subs}",
-      "other": "{count} ödeme\n{subs}"
-    },
     "subs": {
       "one": "{count} abonelik",
       "other": "{count} abonelik"
     },
     "diffSub": "Geri ödenen ödemelerde kur ve ücretlerden kaynaklanan fark",
     "emptyTitle": "Henüz başkası için ödeme yok",
-    "emptyBody": "Bir abonelik oluşturun veya düzenleyin, “Kim kullanıyor” altında “Başkası için ödüyorum” seçeneğini seçip kimin için olduğunu girin."
-  }
+    "emptyBody": "Bir abonelik oluşturun veya düzenleyin, “Kim kullanıyor” altında “Başkası için ödüyorum” seçeneğini seçip kimin için olduğunu girin.",
+    "liveNext": "Aktif: {count}, sonraki ödeme {date}",
+    "lastIn": "Son alınan {date}",
+    "noneIn": "Henüz alınan yok",
+    "diffAvg": "{count} geri ödendi, dönem başına ort. {amount}",
+    "perPeriod": "Dönem başına ort. {amount}",
+    "owedRate": "Ödeme günü kuruyla"
+  },
+  "paid": "Ödenen",
+  "periods": "{count} dönem",
+  "lastIn": "Son {date}"
 }

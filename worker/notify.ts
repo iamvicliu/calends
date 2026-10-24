@@ -15,6 +15,7 @@ import {
   runwayFor,
   todayIn,
   totals,
+  chargeMethodId,
 } from '../shared/billing.ts';
 import { toBaseAt } from '../shared/fx.ts';
 import { billLabel, cnDate, money, monthLabel, relDays } from '../shared/format.ts';
@@ -301,7 +302,7 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
       {
         heading: t('notify.section.month'),
         rows: charges.map((c) => {
-          const method = state.methods.find((x) => x.id === c.sub.methodId);
+          const method = state.methods.find((x) => x.id === chargeMethodId(c));
           return {
             title: c.sub.name,
             sub: cnDate(c.date, true),

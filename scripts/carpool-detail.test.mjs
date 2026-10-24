@@ -43,6 +43,8 @@ const state = {
 // 合租详情的指标卡（MetricCards 里的每一格）
 const metricCells = (html) => (html.split('class="metric-cards"')[1] ?? '').split('car-sheet-sec')[0].split('<small>').length - 1;
 const passthrough = ({ children }) => React.createElement('span', null, children);
+const DetailHead = ({ title, badge, meta, actions }) => React.createElement('header', null, title, badge, meta, actions);
+const Panel = ({ title, children }) => React.createElement('section', null, title, children);
 const noop = () => null;
 function compile(names, extra = {}) {
   const dependencies = {
@@ -70,6 +72,10 @@ function compile(names, extra = {}) {
     MemberRows: noop,
     OwnerSeat: noop,
     Sheet: passthrough,
+    DetailSheet: passthrough,
+    CarMembers: noop,
+    DetailHead,
+    Panel,
     NameLink: passthrough,
     CardTitle: passthrough,
     StatusPill: passthrough,
@@ -81,6 +87,9 @@ function compile(names, extra = {}) {
     Eye: noop,
     EyeOff: noop,
     Seg: noop,
+    YearLedger: noop,
+    YearMethods: noop,
+    PayBadge: noop,
     useTimelinePan: noop,
     tipProps: () => ({}),
     ...extra,
@@ -88,7 +97,7 @@ function compile(names, extra = {}) {
   const functions = names.map((name) => source.slice(...nodes.find((n) => n.type === 'FunctionDeclaration' && n.id.name === name).range)).join('\n');
   const compiled = transformSync('Carpool.tsx', functions, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(compiled.fatal, false);
-  return new Function(...Object.keys(dependencies), `const RECENT_PERIODS=4; ${compiled.code}; return {${names.join(',')}};`)(...Object.values(dependencies));
+  return new Function(...Object.keys(dependencies), `${compiled.code}; return {${names.join(',')}};`)(...Object.values(dependencies));
 }
 
 test('空位整行支持点击与键盘；只读空位不会打开编辑器', () => {
@@ -107,15 +116,16 @@ test('空位整行支持点击与键盘；只读空位不会打开编辑器', ()
   assert.equal(opened, 4);
 });
 
-test('详情按分摊成员、空位、不分摊、已下车排序；满员没有添加入口', () => {
+test('详情按分摊成员、不分摊、已下车排序，空位永远在最后；满员没有添加入口', () => {
   const { MemberTable } = compile(['MemberTable', 'Vacancy']);
   // 四座：车主、分摊成员、不分摊成员各占一座，余一个空位
   const s = sub([m('exempt', { exempt: true }), m('departed', { left: today }), m('paying')], 4);
   const props = { state, s, today, win: carpoolTimeline(s, today, 1), ro: false, expanded: true, masked: false, onMember() {}, onToggle() {} };
   const html = renderToStaticMarkup(React.createElement(MemberTable, props));
-  assert.ok(html.indexOf('aria-label="paying"') < html.indexOf('class="car-vacancy'));
-  assert.ok(html.indexOf('class="car-vacancy') < html.indexOf('aria-label="exempt"'));
+  // 空位永远最后：分摊、不分摊、已退出，然后才是空位
+  assert.ok(html.indexOf('aria-label="paying"') < html.indexOf('aria-label="exempt"'));
   assert.ok(html.indexOf('aria-label="exempt"') < html.indexOf('aria-label="departed"'));
+  assert.ok(html.indexOf('aria-label="departed"') < html.indexOf('class="car-vacancy'));
   const full = { ...s, share: { ...s.share, seats: 3 } };
   assert.doesNotMatch(renderToStaticMarkup(React.createElement(MemberTable, { ...props, s: full })), /car-vacancy|Add member/);
 });
@@ -143,7 +153,7 @@ test('打码移除真实头像、个人悬停提示和读屏称呼；手机自�
 });
 
 test('详情复用累计实付、净收款与盈亏；待收为零时只呈现三格且不重复累计总额', () => {
-  const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy']);
+  const { CarSheet } = compile(['CarSheet', 'Vacancy']);
   for (const settled of [false, true]) {
     const s = sub([
       m('payer', {
@@ -164,7 +174,7 @@ test('详情复用累计实付、净收款与盈亏；待收为零时只呈现�
 });
 
 test('零盈亏保持中性，亏损为红色，缺失汇率不隐藏尚未确认的待收', () => {
-  const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy']);
+  const { CarSheet } = compile(['CarSheet', 'Vacancy']);
   const s = sub([m('payer')]);
   const render = (st, book) =>
     renderToStaticMarkup(React.createElement(CarSheet, { state: st, s, today, ro: false, book, onClose() {}, onOpenSub() {}, onMember() {} }));
@@ -181,7 +191,7 @@ test('合租图片入口在头部，沿用当前 summary 和打码状态', async
   const sourceNode = {};
   let captured;
   const CopyImageButton = () => null;
-  const { CarSheet } = compile(['CarSheet', 'receiptNotes', 'Vacancy'], {
+  const { CarSheet } = compile(['CarSheet', 'Vacancy'], {
     useRef: () => ({ current: sourceNode }),
     useState: (value) => [value, () => {}],
     CopyImageButton,
@@ -192,7 +202,9 @@ test('合租图片入口在头部，沿用当前 summary 和打码状态', async
   });
   const s = sub([]);
   const tree = CarSheet({ state, s, today, ro: false, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {}, onMember() {} });
-  const actions = React.Children.toArray(tree.props.actions.props.children);
+  const [root] = React.Children.toArray(tree.props.children);
+  const head = React.Children.toArray(root.props.children).find((node) => node.type === DetailHead);
+  const actions = React.Children.toArray(head.props.actions.props.children);
   const copy = actions.find((node) => node.type === CopyImageButton);
   assert.ok(copy);
   await copy.props.render();

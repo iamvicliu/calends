@@ -244,7 +244,11 @@
     "settledCcy": "Card currency",
     "settledAmount": "Card amount",
     "blank": "Leave blank",
-    "freezeHint": "Charges in this phase are currently estimated from the billing cycle. Saving will first turn the estimated {amount} charges up to today into records; from then on, records are the source of truth. Future charges are unchanged."
+    "freezeHint": "Charges in this phase are currently estimated from the billing cycle. Saving will first turn the estimated {amount} charges up to today into records; from then on, records are the source of truth. Future charges are unchanged.",
+    "method": "Payment method",
+    "scopeOne": "This charge only",
+    "scopePhase": "This plan ({count})",
+    "scope": "Apply to"
   },
   "timeline": {
     "home": "Back to today (or double-click the timeline)"

@@ -1,10 +1,13 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
+import { DetailHead, DetailSheet, Panel } from '../components/DetailKit.tsx';
+import { YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
   addDays,
   addMonths,
+  chargeMethodId,
   chargesBetween,
   collectionAnchor,
   cycleLabel,
@@ -16,26 +19,27 @@ import {
   memberCollection,
   memberUnpaidFrom,
 } from '../../../shared/billing.ts';
-import { Fragment, useRef, useState } from 'react';
+import { toBaseAt } from '../../../shared/fx.ts';
+import { useRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { carpoolSnapshot } from './carpool-snapshot.ts';
 import { createPortal } from 'react-dom';
-import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel } from '../../../shared/format.ts';
+import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { chargeValue, convertOn } from '../../../shared/fx.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { SortControl } from '../components/SortControl.tsx';
+import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
-import { applyCarRule, carRule, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
+import { applyCarRule, carRule, carYear, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
 import {
   MetricCards,
   Metric,
-  CardTitle,
   Amount,
   Cell,
   Group,
@@ -43,6 +47,7 @@ import {
   IconButton,
   NameLink,
   NumInput,
+  PayBadge,
   Seg,
   Sheet,
   StatusPill,
@@ -70,16 +75,28 @@ function parseIds(raw: string): Set<string> {
   }
 }
 
-type CarSort = 'owed' | 'net' | 'next' | 'name';
-const isCarSort = (v: string): v is CarSort => ['owed', 'net', 'next', 'name'].includes(v);
-/** 默认方向：待收多的在前、亏得多的在前、扣款近的在前、名称 A→Z */
-const CAR_SORT_DIR: Record<CarSort, 'asc' | 'desc'> = { owed: 'desc', net: 'asc', next: 'asc', name: 'asc' };
+type CarSort = 'owed' | 'net' | 'next' | 'name' | 'price' | 'paid' | 'received' | 'profit';
+type CarView = 'grid' | 'list';
+const isCarView = (v: string): v is CarView => v === 'grid' || v === 'list';
+const isCarSort = (v: string): v is CarSort => ['owed', 'net', 'next', 'name', 'price', 'paid', 'received', 'profit'].includes(v);
+/** 默认方向：待收多的在前、亏得多的在前、扣款近的在前、名称 A→Z；金额类大的在前，盈亏亏得多的在前 */
+const CAR_SORT_DIR: Record<CarSort, 'asc' | 'desc'> = {
+  owed: 'desc',
+  net: 'asc',
+  next: 'asc',
+  name: 'asc',
+  price: 'desc',
+  paid: 'desc',
+  received: 'desc',
+  profit: 'asc',
+};
 
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const [colsRef, colsWidth] = useWidth();
   const colCount = Math.max(1, Math.min(4, Math.floor((colsWidth + 16) / 356)));
-  const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused'].includes(effectiveStatus(s, today));
+  // 买断的车没有到期，一直算进行中
+  const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused', 'lifetime'].includes(effectiveStatus(s, today));
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));
   const joined = state.subscriptions.filter((s) => s.share?.role === 'member' && live(s));
   // 卡片按状态筛选；顶部的统计始终按进行中的合租算
@@ -96,30 +113,48 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   };
   const books = new Map([...owned, ...ended].map((s) => [s.id, carLedger(state, s, today)]));
   // 排序与方向存在服务端；已停止的车始终排在最后。默认待收多的在前
+  // 默认按状态：待收多的在前，已结清、已停止在后；表头不为默认排序标箭头
   const [sort, setSort] = usePref<CarSort>('car-sort', 'owed', isCarSort);
   const [dir, setDir] = usePref<'asc' | 'desc'>('car-dir', CAR_SORT_DIR[sort], (v): v is 'asc' | 'desc' => v === 'asc' || v === 'desc');
   const chooseSort = (k: CarSort) => {
     setSort(k);
     setDir(CAR_SORT_DIR[k]);
   };
+  // 表头三态：该列默认方向、反向、回到默认（按状态）
+  const headSort = (k: CarSort) => {
+    const [ns, nd] = nextSort(k, sort, dir, CAR_SORT_DIR, 'owed');
+    setSort(ns);
+    setDir(nd);
+  };
+  const [savedView, setView] = usePref<CarView>('car-view', 'grid', isCarView);
+  const phone = usePhone();
+  const view = phone ? 'grid' : savedView;
   const nextOf = (s: Subscription) => nextCharge(s, addDays(today, 1)) ?? '9999-12-31';
   const owedOf = (s: Subscription) =>
     memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state)
       .filter((d) => d.periodsOwed > 0)
       .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : 0), 0);
-  const netOf = (s: Subscription) => -books.get(s.id)!.yearNet;
+  // 当年盈亏：今年成本（已扣 + 预计）对比成员今年的收入（已收 + 今年还该收）
+  const years = new Map([...owned, ...ended].map((s) => [s.id, carYear(state, s, today)]));
+  const netOf = (s: Subscription) => years.get(s.id)!.net;
+  const num = (v: number) => (Number.isFinite(v) ? v : 0);
+  const value: Record<Exclude<CarSort, 'name' | 'next'>, (s: Subscription) => number> = {
+    owed: owedOf,
+    net: netOf,
+    price: (s) => num(toBaseAt(state, s.price, s.currency)),
+    paid: (s) => books.get(s.id)!.paid,
+    received: (s) => books.get(s.id)!.received,
+    profit: (s) => -books.get(s.id)!.net,
+  };
   const asc = (a: Subscription, b: Subscription) =>
-    sort === 'owed'
-      ? owedOf(a) - owedOf(b)
-      : sort === 'net'
-        ? netOf(a) - netOf(b)
-        : sort === 'name'
-          ? a.name.localeCompare(b.name, locale())
-          : nextOf(a).localeCompare(nextOf(b));
+    sort === 'name' ? a.name.localeCompare(b.name, locale()) : sort === 'next' ? nextOf(a).localeCompare(nextOf(b)) : value[sort](a) - value[sort](b);
   const shown = [...groups[filter]].sort(
     (a, b) => Number(!live(a)) - Number(!live(b)) || (dir === 'asc' ? asc(a, b) : asc(b, a)) || nextOf(a).localeCompare(nextOf(b)),
   );
   const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
+  // 第三格的小字：进行中的车上一共坐了几位成员、还空几个位置
+  const seated = owned.reduce((a, s) => a + carpoolRoster(s, today).active.length, 0);
+  const openSeats = owned.reduce((a, s) => a + carpoolRoster(s, today).vacancies, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = [...owned, ...ended]
     .flatMap((s) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state))
@@ -151,18 +186,37 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           onChange={setFilter}
           options={CAR_FILTERS.map((f) => [f, `${t(`family.pool.filter.${f}`)} ${groups[f].length}`] as [CarFilter, string])}
         />
-        <SortControl
-          value={sort}
-          dir={dir}
-          onSort={chooseSort}
-          onDir={setDir}
-          options={[
-            { value: 'owed', label: t('family.sort.owed') },
-            { value: 'net', label: t('family.sort.net') },
-            { value: 'next', label: t('list.sort.next') },
-            { value: 'name', label: t('list.sort.name') },
-          ]}
-        />
+        {/* 列表视图在表头排序，顶部的排序只给卡片用 */}
+        {view === 'grid' && (
+          <SortControl
+            value={sort}
+            dir={dir}
+            onSort={chooseSort}
+            onDir={setDir}
+            options={[
+              { value: 'owed', label: t('family.sort.owed') },
+              { value: 'net', label: t('family.sort.net') },
+              { value: 'next', label: t('list.sort.next') },
+              { value: 'name', label: t('list.sort.name') },
+              { value: 'price', label: t('family.sort.price') },
+              { value: 'paid', label: t('family.sort.paid') },
+              { value: 'received', label: t('family.sort.received') },
+              { value: 'profit', label: t('family.sort.profit') },
+            ]}
+          />
+        )}
+        {!phone && (
+          <Seg
+            small
+            value={view}
+            onChange={setView}
+            options={[
+              ['grid', t('list.view.grid')],
+              ['list', t('list.view.list')],
+            ]}
+          />
+        )}
+        {/* 合租 / 人员切换固定在最右：人员页没有卡片与列表切换，放在最后两页切换时位置不跳 */}
         {!ro && <FamilyTabs tab="plans" />}
       </Toolbar>
       <div className="page fade-in stack">
@@ -182,6 +236,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           />
           <Metric
             label={t('family.pool.count')}
+            note={t('family.pool.countNote', { members: seated, free: openSeats })}
             value={
               <span className="amt car-plan-count">
                 <span>
@@ -205,81 +260,97 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         ) : (
           shown.length === 0 && <div className="card empty">{t('family.pool.filter.none')}</div>
         )}
+        {view === 'list' && shown.length > 0 && (
+          <CarTable
+            state={state}
+            today={today}
+            rows={shown}
+            books={books}
+            live={live}
+            owedOf={owedOf}
+            sort={sort}
+            dir={dir}
+            onSort={headSort}
+            onOpen={setSheet}
+          />
+        )}
         {/* 列数随宽度变化（每列至少约 340px）；各列独立：展开一张卡只撑高它所在的那一列 */}
-        <div className="car-cols" ref={colsRef} style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
-          {Array.from({ length: colCount }, (_, col) => (
-            <div className="car-col" key={col}>
-              {shown.map((s, idx) => {
-                if (idx % colCount !== col) return null;
-                const sh = s.share!;
-                const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
-                // 已退出的成员不占座，只在展开的明细里保留
-                const free = carpoolRoster(s, today).vacancies;
-                const next = nextCharge(s, addDays(today, 1));
-                return (
-                  // 整张卡片打开合租弹窗；里面的按钮、链接和订阅名各管各的
-                  <div
-                    key={s.id}
-                    className={`card stack car-card ${live(s) ? '' : 'stopped'}`}
-                    style={{ order: idx }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={(e) => !(e.target as HTMLElement).closest('button, a, [role=link]') && setSheet(s.id)}
-                    onKeyDown={(e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setSheet(s.id))}
-                  >
-                    <div className="car-head">
-                      <SubIcon sub={s} size={40} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="car-name">
-                          <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
+        {view === 'grid' && (
+          <div className="car-cols" ref={colsRef} style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+            {Array.from({ length: colCount }, (_, col) => (
+              <div className="car-col" key={col}>
+                {shown.map((s, idx) => {
+                  if (idx % colCount !== col) return null;
+                  const sh = s.share!;
+                  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
+                  // 已退出的成员不占座，只在展开的明细里保留
+                  const free = carpoolRoster(s, today).vacancies;
+                  const next = nextCharge(s, addDays(today, 1));
+                  return (
+                    // 整张卡片打开合租弹窗；里面的按钮、链接和订阅名各管各的
+                    <div
+                      key={s.id}
+                      className={`card stack car-card ${live(s) ? '' : 'stopped'}`}
+                      style={{ order: idx }}
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => !(e.target as HTMLElement).closest('button, a, [role=link]') && setSheet(s.id)}
+                      onKeyDown={(e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setSheet(s.id))}
+                    >
+                      <div className="car-head">
+                        <SubIcon sub={s} size={40} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="car-name">
+                            <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
+                          </div>
+                          <div className="muted car-sub">
+                            {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                            {copyParts(next && live(s) ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
+                          </div>
                         </div>
-                        <div className="muted car-sub">
-                          {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-                          {copyParts(next && live(s) ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
-                        </div>
+                        {/* 只提示满没满车；空位的「+」放到展开后的「添加成员」 */}
+                        {live(s) ? (
+                          <span className={`car-seats ${free ? '' : 'full'}`}>
+                            {free ? t('family.pool.seatsFree', { count: free }) : t('family.pool.seatsFull')}
+                          </span>
+                        ) : (
+                          <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+                        )}
                       </div>
-                      {/* 只提示满没满车；空位的「+」放到展开后的「添加成员」 */}
-                      {live(s) ? (
-                        <span className={`car-seats ${free ? '' : 'full'}`}>
-                          {free ? t('family.pool.seatsFree', { count: free }) : t('family.pool.seatsFull')}
-                        </span>
-                      ) : (
-                        <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+                      <div className="seats-row">
+                        <ShareAvatars sub={s} state={state} today={today} onMember={ro ? undefined : (m) => setMember({ s, m })} />
+                        <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
+                          {(() => {
+                            const n = dues.filter((d) => d.periodsOwed > 0).length;
+                            return n ? (
+                              <span className="owe">{t('family.pool.owedN', { count: n })}</span>
+                            ) : sh.members.length ? (
+                              t('family.pool.settled')
+                            ) : (
+                              t('family.pool.noMembers')
+                            );
+                          })()}
+                          <Icon name="down" size={14} />
+                        </button>
+                      </div>
+                      <CarFacts book={books.get(s.id)!} base={base} />
+                      {expanded.has(s.id) && (
+                        <>
+                          {!ro && free > 0 && live(s) && (
+                            <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
+                              <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
+                            </button>
+                          )}
+                          <MemberRows state={state} s={s} today={today} ro={ro} onMember={(m, c) => setMember({ s, m, collect: c })} />
+                        </>
                       )}
                     </div>
-                    <div className="seats-row">
-                      <ShareAvatars sub={s} state={state} today={today} onMember={ro ? undefined : (m) => setMember({ s, m })} />
-                      <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
-                        {(() => {
-                          const n = dues.filter((d) => d.periodsOwed > 0).length;
-                          return n ? (
-                            <span className="owe">{t('family.pool.owedN', { count: n })}</span>
-                          ) : sh.members.length ? (
-                            t('family.pool.settled')
-                          ) : (
-                            t('family.pool.noMembers')
-                          );
-                        })()}
-                        <Icon name="down" size={14} />
-                      </button>
-                    </div>
-                    <CarFacts book={books.get(s.id)!} base={base} />
-                    {expanded.has(s.id) && (
-                      <>
-                        {!ro && free > 0 && live(s) && (
-                          <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
-                            <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
-                          </button>
-                        )}
-                        <MemberRows state={state} s={s} today={today} ro={ro} onMember={(m, c) => setMember({ s, m, collect: c })} />
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
 
         {joined.length > 0 && (
           <Group title={t('family.pool.joinedGroup')}>
@@ -365,6 +436,131 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         )}
       </div>
     </>
+  );
+}
+
+/**
+ * 合租的列表视图（桌面）：一行一辆车，比卡片多出套餐价格、收费标准、下次扣款与累计净额；点一行打开合租弹窗。
+ * 各列按比例分宽度；表格变窄时先收起 data-p=2 的列，再收起 data-p=3。手机上不出表格，仍用卡片
+ */
+function CarTable({
+  state,
+  today,
+  rows,
+  books,
+  live,
+  owedOf,
+  sort,
+  dir,
+  onSort,
+  onOpen,
+}: {
+  state: AppState;
+  today: string;
+  rows: Subscription[];
+  books: Map<string, ReturnType<typeof carLedger>>;
+  live: (s: Subscription) => boolean;
+  owedOf: (s: Subscription) => number;
+  sort: CarSort;
+  dir: 'asc' | 'desc';
+  onSort: (k: CarSort) => void;
+  onOpen: (id: string) => void;
+}) {
+  const base = state.settings.baseCurrency;
+  const fmt = (v: number) => flow(v, base, { compact: true });
+  return (
+    <div className="ltable-wrap">
+      <div className="ltable lt-x car-lt" role="table">
+        <LtHead<CarSort>
+          initial={['owed', CAR_SORT_DIR.owed]}
+          sort={sort}
+          dir={dir}
+          onSort={onSort}
+          cols={[
+            { label: t('list.col.name'), sort: 'name' },
+            { label: t('family.pool.members') },
+            { label: t('family.pool.status'), sort: 'owed' },
+            { label: t('list.col.planPrice'), sort: 'price', p: 3, num: true },
+            { label: t('family.rule.title'), p: 2, num: true },
+            { label: t('list.col.next'), sort: 'next', num: true },
+            { label: t('family.pool.yearPnl'), sort: 'net', num: true },
+            { label: t('family.pool.totalPnl'), sort: 'profit', num: true },
+          ]}
+        />
+        {rows.map((s) => {
+          const book = books.get(s.id)!;
+          const on = live(s);
+          const free = carpoolRoster(s, today).vacancies;
+          const next = on ? nextCharge(s, addDays(today, 1)) : undefined;
+          const dues = memberDues(s, today, state.settings.collectCurrency ?? base, state).filter((d) => d.periodsOwed > 0);
+          const owed = owedOf(s);
+          const year = carYear(state, s, today);
+          const rule = carRule(state, s, today);
+          return (
+            <button key={s.id} className={`lt-row ${on ? '' : 'st-ended'}`} role="row" onClick={() => onOpen(s.id)}>
+              <span className="lt-name">
+                <SubIcon sub={s} size={32} />
+                <span className="lt-title">
+                  <span className="nm">
+                    <b>{s.name}</b>
+                  </span>
+                  {book.since && <small className="lt-sub">{t('family.strip.since', { date: cnDateFull(book.since) })}</small>}
+                </span>
+              </span>
+              <span className="lt-members">
+                {/* 家庭组一般最多 6 人：连同自己最多排 6 个头像；坐满不写，只标出空位 */}
+                <ShareAvatars sub={s} state={state} today={today} size={22} max={6} />
+                {on && free > 0 && <small>{t('family.pool.seatsFree', { count: free })}</small>}
+              </span>
+              {/* 状态胶囊：已停止 > 待收多少 > 已结清；还没有成员的写提示。放在左侧文字区，右边都是数字 */}
+              <span className="lt-status">
+                {!on ? (
+                  <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+                ) : dues.length ? (
+                  <StatusPill tone="owe">
+                    {Number.isFinite(owed) ? t('family.pool.owedAmount', { amount: money(owed, base, { compact: true }) }) : t('family.pool.owed')}
+                  </StatusPill>
+                ) : s.share!.members.length ? (
+                  <StatusPill tone="done">{t('family.pool.settled')}</StatusPill>
+                ) : (
+                  <StatusPill tone="notice">{t('family.pool.noMembers')}</StatusPill>
+                )}
+              </span>
+              <PlanPrice state={state} s={s} today={today} />
+              {/* 已停止的车：收费、下次扣款、每年净额都不再有意义，留空 */}
+              <span className="lt-num" data-p={2}>
+                {!on ? null : s.share!.members.length ? (
+                  <>
+                    {money(rule.fee, rule.currency)}/{perMonths(rule.billEvery)}
+                  </>
+                ) : (
+                  <small>—</small>
+                )}
+              </span>
+              <span className="lt-num">
+                {!on ? null : next ? (
+                  <>
+                    {cnDate(next)}
+                    <small>{relDays(diffDays(today, next))}</small>
+                  </>
+                ) : (
+                  <small>—</small>
+                )}
+              </span>
+              {/* 当年盈亏：今年的成本对比成员今年的收入，小字是收入；停止与买断的车同样有今年的账 */}
+              <span className="lt-num">
+                <span className={Math.abs(year.net) < 0.5 ? undefined : year.net > 0 ? 'gain' : 'loss'}>{fmt(year.net)}</span>
+                <small>{t('family.pool.incomeShort', { amount: fmt(year.income) })}</small>
+              </span>
+              {/* 累计盈亏：发起至今收回减付出，与代付的盈亏同一口径；与左边的当年盈亏成对 */}
+              <span className={`lt-num ${Math.abs(book.net) < 0.5 ? '' : book.net < 0 ? 'gain' : 'loss'}`}>
+                {Math.abs(book.net) < 0.5 ? t('proxy.table.even') : fmt(-book.net)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -468,34 +664,11 @@ function MemberRows({
               )}
             </div>
             {timeline && win && <MemberTimeline s={s} m={d.member} today={today} win={win} />}
-            {/* 本期已收过的不再显示「收款」；要补记点这一行打开成员资料 */}
-            {!ro && !d.member.exempt && d.periodsOwed > 0 && (
-              <button className={`btn ${d.periodsOwed > 0 ? 'primary' : ''}`} onClick={() => onMember(d.member, true)}>
-                <Icon name="check" /> {t('family.pool.collect')}
-              </button>
-            )}
           </div>
         );
       })}
     </div>
   );
-}
-
-/** 只上移所有行共有的备注信息；无法识别的自由备注原样保留。 */
-function receiptNotes(notes: (string | undefined)[]) {
-  const raw = notes.map((note) => note ?? '');
-  // 历史收款的次数/周期存在备注中，不从今天的成员收费标准反推历史。
-  const parts = raw.map((note) => /^(第\s*\d+\s*次收款|Collection\s*#?\d+)(?:\s*[（(]([^（）()]+)[）)])?\s*(?:[·，,:：；;]\s*)?([\s\S]*)$/i.exec(note));
-  if (raw.every((note) => note === raw[0])) {
-    return { common: parts[0] ? parts[0].slice(1).filter(Boolean).join('\n') : (raw[0] ?? ''), rows: raw.map(() => '') };
-  }
-  const commonNo = parts[0]?.[1] && parts.every((p) => p?.[1] === parts[0]![1]) ? parts[0][1] : '';
-  const commonCycle = parts[0]?.[2] && parts.every((p) => p?.[2] === parts[0]![2]) ? parts[0][2] : '';
-  if (!commonNo && !commonCycle) return { common: '', rows: raw };
-  return {
-    common: [commonNo, commonCycle].filter(Boolean).join('\n'),
-    rows: parts.map((p) => [commonNo ? '' : p?.[1], commonCycle ? '' : p?.[2], p?.[3]].filter(Boolean).join('\n')),
-  };
 }
 
 const pct = (d: string, win: { start: string; end: string }) => (diffDays(win.start, d) / Math.max(1, diffDays(win.start, win.end))) * 100;
@@ -596,18 +769,16 @@ function MemberTable({
           <th role="columnheader" scope="col">
             {t('family.sheet.status')}
           </th>
-          <th role="columnheader" scope="col">
-            {t('family.sheet.actions')}
-          </th>
         </tr>
       </thead>
       <tbody role="rowgroup">
-        {s.share?.role === 'owner' && <OwnerSeat state={state} table />}
+        {s.share?.role === 'owner' && <OwnerSeat state={state} s={s} today={today} win={win} table />}
         {[
+          // 空位永远在最后：车主、分摊成员、不分摊成员、（展开时）已退出成员之后
           ...roster.active.filter((m) => !m.exempt),
-          ...Array.from({ length: roster.vacancies }, () => null),
           ...roster.active.filter((m) => m.exempt),
           ...(expanded ? roster.departed : []),
+          ...Array.from({ length: roster.vacancies }, () => null),
         ].map((m, index) => {
           if (!m) return <Vacancy key={`vacancy-${index}`} ro={ro} onAdd={() => onMember()} table />;
           const st = memberStatus(state, s, m, today);
@@ -673,19 +844,6 @@ function MemberTable({
                   <span className="muted">{t('family.pool.settled')}</span>
                 )}
               </td>
-              <td role="cell">
-                {!ro && !m.exempt && st.owe && (
-                  <button
-                    className="btn primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMember(m, true);
-                    }}
-                  >
-                    {t('family.pool.collect')}
-                  </button>
-                )}
-              </td>
             </tr>
           );
         })}
@@ -693,7 +851,7 @@ function MemberTable({
       {roster.departed.length > 0 && (
         <tfoot>
           <tr>
-            <td colSpan={5}>
+            <td colSpan={4}>
               <DepartedToggle count={roster.departed.length} expanded={expanded} onToggle={onToggle} />
             </td>
           </tr>
@@ -713,27 +871,82 @@ function DepartedToggle({ count, expanded, onToggle }: { count: number; expanded
 }
 
 /** 车主自己占的那一座：不收费、不可点，只表明席位 */
-function OwnerSeat({ state, table = false }: { state: AppState; table?: boolean }) {
+/**
+ * 车主自己的迷你时间线：订阅本身的每一期（车主实际付给服务方的扣款），
+ * 已扣的为实色，下一期预测为虚框；与成员的收款时间线共用同一条时间轴
+ */
+function OwnerTimeline({ state, s, today, win }: { state: AppState; s: Subscription; today: string; win: { start: string; end: string } }) {
+  const charges = chargesBetween(s, addMonths(win.start, -24), win.end, today).filter((c) => !c.kind);
+  const segs = charges
+    .map((c, i) => {
+      const until = addDays(charges[i + 1]?.date ?? nextCharge(s, addDays(c.date, 1)) ?? win.end, -1);
+      return { c, from: c.date, until, kind: c.date <= today ? 'owner' : 'future' };
+    })
+    .filter((g) => g.until >= win.start && g.from <= win.end)
+    // 预测只画下一期
+    .filter((g, i, all) => g.kind === 'owner' || all.findIndex((x) => x.kind === 'future') === i);
+  return (
+    <span className="mt-viewport mt-track">
+      <span className="mt-inner">
+        {segs.map((g) => {
+          const from = g.from < win.start ? win.start : g.from;
+          const until = g.until > win.end ? win.end : g.until;
+          return (
+            <i
+              key={g.from}
+              className={`mt-seg ${g.kind}`}
+              style={{ left: `${pct(from, win)}%`, width: `${Math.max(0.6, pct(addDays(until, 1), win) - pct(from, win))}%` }}
+              {...tipProps(() => (
+                <>
+                  <b>{g.kind === 'owner' ? flow(-chargeValue(state, g.c), state.settings.baseCurrency) : t('family.timeline.future')}</b>
+                  <div>
+                    {cnDateFull(g.from)} – {cnDateFull(g.until)}
+                  </div>
+                </>
+              ))}
+            />
+          );
+        })}
+        <i className="mt-today" style={{ left: `${pct(today, win)}%` }} />
+      </span>
+    </span>
+  );
+}
+
+function OwnerSeat({
+  state,
+  s,
+  today,
+  win,
+  table = false,
+}: {
+  state: AppState;
+  s: Subscription;
+  today: string;
+  win: { start: string; end: string };
+  table?: boolean;
+}) {
   const chip = (
     <span className="car-member-chip owner">
       <img className="owner-avatar" src={state.settings.avatar || base('/icons/avatar.png')} alt="" />
       <span className="text-ellipsis">{t('family.pool.me')}</span>
     </span>
   );
+  const line = <OwnerTimeline state={state} s={s} today={today} win={win} />;
   return table ? (
     <tr role="row" className="car-member-row owner-seat">
       <td role="cell">{chip}</td>
       <td role="cell" className="muted">
         {t('family.sheet.ownerFee')}
       </td>
-      <td role="cell" />
-      <td role="cell" />
+      <td role="cell">{line}</td>
       <td role="cell" />
     </tr>
   ) : (
     <div className="member owner-seat">
       {chip}
       <span className="muted">{t('family.sheet.ownerFee')}</span>
+      {line}
     </div>
   );
 }
@@ -755,6 +968,8 @@ function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void;
   };
   const chip = (
     <span className="car-member-chip vacancy">
+      {/* 和成员胶囊同一个样子：左边头像位（虚线空圈），右边文字 */}
+      <span className="vacancy-ava" aria-hidden="true" />
       <span className="vacancy-label">{t('family.sheet.vacancy')}</span>
       <span className="vacancy-add">{t('family.sheet.addMember')}</span>
     </span>
@@ -770,12 +985,100 @@ function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void;
       <td role="cell" />
       <td role="cell">{track}</td>
       <td role="cell" />
-      <td role="cell" />
     </tr>
   ) : (
     <div {...props}>
       {chip}
       {track}
+    </div>
+  );
+}
+
+/**
+ * 合租成员：宽时成员表（收费、迷你时间线、收款状态），窄时按收费周期分组的卡片；
+ * 合租详情与订阅详情共用，保证两处成员的样子一致
+ */
+export function CarMembers({
+  state,
+  s,
+  today,
+  ro,
+  onMember,
+  masked = false,
+  billEvery,
+}: {
+  state: AppState;
+  s: Subscription;
+  today: string;
+  ro: boolean;
+  onMember: (m?: ShareMember, collect?: boolean) => void;
+  masked?: boolean;
+  billEvery: number;
+}) {
+  const [departedOpen, setDepartedOpen] = useState(false);
+  const win = carpoolTimeline(s, today, billEvery);
+  const timelineRef = useTimelinePan(win);
+  const roster = carpoolRoster(s, today);
+  const free = roster.vacancies;
+  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m, today)}`);
+  const memberGroups = [...new Set(roster.active.map(groupOf))]
+    .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
+    .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), roster.active.filter((m) => groupOf(m) === k).length] as const);
+  return (
+    <div className="car-members" ref={timelineRef}>
+      <MemberTable
+        state={state}
+        s={s}
+        today={today}
+        ro={ro}
+        onMember={onMember}
+        win={win}
+        masked={masked}
+        expanded={departedOpen}
+        onToggle={() => setDepartedOpen(!departedOpen)}
+      />
+      <div className="car-member-cards">
+        <TimelineAxis win={win} />
+        {s.share?.role === 'owner' && <OwnerSeat state={state} s={s} today={today} win={win} />}
+        {memberGroups
+          .filter(([key]) => key !== 'exempt')
+          .map(([key, label, n]) => (
+            <div key={key} className="car-sheet-members">
+              <div className="car-group-head">
+                {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
+              </div>
+              <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} masked={masked} timeline win={win} />
+            </div>
+          ))}
+        {roster.active.some((m) => m.exempt) && (
+          <div className="car-sheet-members">
+            <div className="car-group-head">{t('family.pool.exempt')}</div>
+            <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
+          </div>
+        )}
+        {departedOpen && (
+          <div className="car-sheet-members">
+            <MemberRows
+              state={state}
+              s={s}
+              today={today}
+              ro={ro}
+              onMember={onMember}
+              only={(m) => !!m.left && m.left <= today}
+              includeLeft
+              masked={masked}
+              timeline
+              win={win}
+            />
+          </div>
+        )}
+        {Array.from({ length: free }, (_, i) => (
+          <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
+        ))}
+        {roster.departed.length > 0 && (
+          <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
+        )}
+      </div>
     </div>
   );
 }
@@ -814,7 +1117,6 @@ export function CarSheet({
   const stopped = ['ended', 'terminated'].includes(st);
   const next = nextCharge(s, addDays(today, 1));
   const roster = carpoolRoster(s, today);
-  const free = roster.vacancies;
   const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
   const oweSum = dues.reduce((a, d) => a + convertOn(d.owed, d.currency, base, today, undefined, state.fx), 0);
@@ -822,123 +1124,59 @@ export function CarSheet({
   const fmt = (v: number) => flow(v, base, { compact: true });
   const rule = carRule(state, s, today);
   const [editingRule, setEditingRule] = useState(false);
-  const [departedOpen, setDepartedOpen] = useState(false);
-  const win = carpoolTimeline(s, today, rule.billEvery);
-  const timelineRef = useTimelinePan(win);
-  // 收款记录默认只列最近几期，期数多时再展开
-  const [allPeriods, setAllPeriods] = useState(false);
-  const profit = -book.yearNet;
   const actual = -book.net;
-  const groupOf = (m: ShareMember) => (m.exempt ? 'exempt' : `m${memberBillMonths(s, m, today)}`);
-  const memberGroups = [...new Set(roster.active.map(groupOf))]
-    .sort((a, b) => (a === 'exempt' ? 1 : b === 'exempt' ? -1 : Number(a.slice(1)) - Number(b.slice(1))))
-    .map((k) => [k, k === 'exempt' ? t('family.pool.exempt') : billLabel(Number(k.slice(1))), roster.active.filter((m) => groupOf(m) === k).length] as const);
-  // 历来所有收款，按这笔钱覆盖的那一期分组（同一期的人排在一起），新的期在前；已退出的成员也保留
+  // 历来所有收款，已退出的成员也保留
   const receipts = sh.members.flatMap((m) => memberCashFlows(m).map((p) => ({ m, p, base: memberFlowValue(state, p) })));
-  /** 期间：两端都在今年只写月日；只要有一端不在今年，两端都带年份，免得看成倒序 */
-  // 分组条的区间一律带年份，跨年与不跨年的组格式一致
-  const range = (a: string, b: string) => `${cnDateFull(a)} – ${cnDateFull(b)}`;
-  // 我付出去的：发起合租以来这个订阅的每次扣款（没记发起日期就从订阅开始算），按年分组
+  // 收款、付款切换：两张表都按年分组，与订阅详情的扣款记录同一套
   const [tab, setTab] = useState<'in' | 'out'>('in');
-  const [openIn, setOpenIn] = useState<Set<string>>(() => new Set());
-  const [openOut, setOpenOut] = useState<Set<string>>(() => new Set());
-  const toggleGroup = (key: string, open: Set<string>, setOpen: (next: Set<string>) => void) => {
-    const next = new Set(open);
-    if (next.has(key)) next.delete(key);
-    else next.add(key);
-    setOpen(next);
-  };
-  const tableHead = (columns: string[], keys: string[], open: Set<string>, setOpen: (next: Set<string>) => void) => {
-    const allOpen = keys.length > 0 && keys.every((key) => open.has(key));
-    return (
-      <button
-        type="button"
-        className="ld-row ld-th car-ledger-head table-head"
-        aria-expanded={allOpen}
-        aria-label={`${columns.join('\n')}\n${t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}`}
-        disabled={!keys.length}
-        onClick={() => setOpen(new Set(allOpen ? [] : keys))}
-      >
-        <span>{columns[0]}</span>
-        <span>{columns[1]}</span>
-        <span>{columns[2]}</span>
-      </button>
-    );
-  };
   const outs = chargesBetween(s, book.since ?? s.start, today, today)
     .filter((c) => c.kind !== 'failed')
     .map((c) => ({ c, base: chargeValue(state, c) }))
     .reverse();
-  const outYears = [...new Set(outs.map((r) => r.c.date.slice(0, 4)))].map((y) => {
-    const list = outs.filter((r) => r.c.date.startsWith(y));
-    return { y, list, sum: list.reduce((a, r) => a + r.base, 0) };
-  });
-  const byPeriod = new Map<string, typeof receipts>();
-  for (const r of receipts) {
-    const k = `${r.p.from ?? ''}|${r.p.until}`;
-    byPeriod.set(k, [...(byPeriod.get(k) ?? []), r]);
-  }
-  const periods = [...byPeriod.entries()]
-    .map(([key, list]) => ({
-      key,
-      from: list[0].p.from,
-      until: list[0].p.until,
-      list: list.sort((a, b) => a.p.date.localeCompare(b.p.date)),
-      sum: list.reduce((a, r) => a + r.base, 0),
-      notes: receiptNotes(list.map((r) => r.p.note)),
-    }))
-    .sort((a, b) => (b.from ?? b.until).localeCompare(a.from ?? a.until));
   return (
-    <Sheet
-      title={t('family.sheet.title')}
-      onClose={onClose}
-      actions={
-        <>
-          <IconButton
-            aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
-            aria-pressed={masked}
-            onClick={() => setMasked(!masked)}
-          >
-            {masked ? <EyeOff size={18} /> : <Eye size={18} />}
-          </IconButton>
-          <CopyImageButton render={() => carpoolSnapshot(summaryRef.current!)} />
-        </>
-      }
-    >
-      <div className="stack">
-        <div className="stack car-summary" ref={summaryRef}>
-          {/* 页头：名称（点开订阅）+ 一行概况；右侧直接显示收款规则并可修改 */}
-          <div className="ld-head">
-            <SubIcon sub={s} size={52} proxied />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="ph-name text-ellipsis">
-                <NameLink onClick={onOpenSub}>{s.name}</NameLink>
-              </div>
-              <div className="muted ph-meta">
-                {copyParts(
-                  [
-                    `${money(s.price, s.currency)} ${cycleLabel(s.cycle)}`,
-                    stopped ? '' : next ? t('family.pool.next', { date: cnDate(next) }) : '',
-                    t('family.sheet.seatsVal', { used: roster.taken, total: sh.seats }),
-                  ]
-                    .filter(Boolean)
-                    .join('\n'),
-                )}
-                {!stopped && roster.vacancies === 0 && <span className="car-seats full">{t('family.pool.seatsFull')}</span>}
-              </div>
-            </div>
-            <div className="car-sheet-actions" data-snapshot-hide>
-              {stopped ? (
-                <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
-              ) : (
+    <DetailSheet label={t('family.sheet.title')} onClose={onClose}>
+      {/* 复制为图片取整张弹窗，收款表与按钮带 data-snapshot-hide 不入图 */}
+      <div className="dt car-summary" ref={summaryRef}>
+        <DetailHead
+          icon={<SubIcon sub={s} size={48} proxied />}
+          title={<NameLink onClick={onOpenSub}>{s.name}</NameLink>}
+          badge={
+            stopped ? (
+              <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
+            ) : (
+              roster.vacancies === 0 && <span className="car-seats full">{t('family.pool.seatsFull')}</span>
+            )
+          }
+          meta={
+            <>
+              <b>
+                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+              </b>
+              {!stopped && next && <span>{t('family.pool.next', { date: cnDate(next) })}</span>}
+              <span>{t('family.sheet.seatsVal', { used: roster.taken, total: sh.seats })}</span>
+            </>
+          }
+          actions={
+            <span className="dt-header-tools" data-snapshot-hide>
+              {!stopped && (
                 <button className="btn car-rule-btn" disabled={ro} onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
                   {perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
                   {!ro && <Icon name="right" size={14} />}
                 </button>
               )}
-            </div>
-          </div>
-
+              <IconButton
+                aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
+                aria-pressed={masked}
+                onClick={() => setMasked(!masked)}
+              >
+                {masked ? <EyeOff size={17} /> : <Eye size={17} />}
+              </IconButton>
+              <CopyImageButton render={() => carpoolSnapshot(summaryRef.current!)} />
+            </span>
+          }
+          onClose={onClose}
+        />
+        <div className="dt-body">
           <MetricCards>
             <div>
               <small>{t('family.strip.paid')}</small>
@@ -953,7 +1191,8 @@ export function CarSheet({
             <div>
               <small>{t('family.strip.profit')}</small>
               <b className={actual > 0 ? 'done' : actual < 0 ? 'loss' : undefined}>{fmt(actual)}</b>
-              <span>{tx('family.strip.annualApprox', { amount: <span className="nowrap">{fmt(profit)}</span> })}</span>
+              {/* 小字是当年盈亏，与列表的「当年盈亏」同一口径；买断的车也有今年的账 */}
+              <span>{tx('family.strip.thisYear', { amount: <span className="nowrap">{fmt(carYear(state, s, today).net)}</span> })}</span>
             </div>
             {hasPending && (
               <div>
@@ -964,204 +1203,138 @@ export function CarSheet({
             )}
           </MetricCards>
 
-          <div className="car-sheet-sec row">
-            <CardTitle>{t('family.sheet.members')}</CardTitle>
-          </div>
-          <div className="car-members" ref={timelineRef}>
-            <MemberTable
-              state={state}
-              s={s}
-              today={today}
-              ro={ro}
-              onMember={onMember}
-              win={win}
-              masked={masked}
-              expanded={departedOpen}
-              onToggle={() => setDepartedOpen(!departedOpen)}
-            />
-            <div className="car-member-cards">
-              <TimelineAxis win={win} />
-              {s.share?.role === 'owner' && <OwnerSeat state={state} />}
-              {memberGroups
-                .filter(([key]) => key !== 'exempt')
-                .map(([key, label, n]) => (
-                  <div key={key} className="car-sheet-members">
-                    <div className="car-group-head">
-                      {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
-                    </div>
-                    <MemberRows
-                      state={state}
-                      s={s}
-                      today={today}
-                      ro={ro}
-                      onMember={onMember}
-                      only={(m) => groupOf(m) === key}
-                      masked={masked}
-                      timeline
-                      win={win}
-                    />
-                  </div>
-                ))}
-              {Array.from({ length: free }, (_, i) => (
-                <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
-              ))}
-              {roster.active.some((m) => m.exempt) && (
-                <div className="car-sheet-members">
-                  <div className="car-group-head">{t('family.pool.exempt')}</div>
-                  <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
-                </div>
-              )}
-              {departedOpen && (
-                <div className="car-sheet-members">
-                  <MemberRows
-                    state={state}
-                    s={s}
-                    today={today}
-                    ro={ro}
-                    onMember={onMember}
-                    only={(m) => !!m.left && m.left <= today}
-                    includeLeft
-                    masked={masked}
-                    timeline
-                    win={win}
+          {/* 与订阅详情一样：成员表、收付款表各在一张卡片里，标题在卡片内 */}
+          {/* 成员卡片不加标题：表头第一列已经是「成员」 */}
+          <Panel className="dt-share car-members-panel">
+            <CarMembers state={state} s={s} today={today} ro={ro} onMember={onMember} masked={masked} billEvery={rule.billEvery} />
+          </Panel>
+
+          {/* 收进来的和我付出去的切换着看；表格与订阅详情的扣款记录同一套（YearLedger） */}
+          <Panel className="dt-charges car-ledger">
+            {/* 切换放在卡片头部右侧，与其他卡片的操作位置一致 */}
+            <div className="dt-ph row car-ledger-ph" data-snapshot-hide>
+              <Seg
+                small
+                value={tab}
+                onChange={setTab}
+                options={[
+                  ['in', t('family.sheet.tabIn', { count: receipts.length })],
+                  ['out', t('family.sheet.tabOut', { count: outs.length })],
+                ]}
+              />
+            </div>
+            <div data-snapshot-hide>
+              {tab === 'out' ? (
+                outs.length ? (
+                  <YearLedger
+                    key="out"
+                    items={outs}
+                    dateOf={(r) => r.c.date}
+                    head={[t('family.sheet.chargeDate'), t('detail.field.method'), t('proxy.table.charged'), t('proxy.table.cost')]}
+                    yearCells={(ys) => {
+                      const total = ys.reduce((a, r) => a + r.base, 0);
+                      return {
+                        second: <YearMethods ids={[...new Set(ys.map((r) => chargeMethodId(r.c) ?? ''))]} state={state} />,
+                        orig: copyParts(
+                          [...ys.reduce((m, { c }) => m.set(c.currency, (m.get(c.currency) ?? 0) + c.amount), new Map<string, number>())]
+                            .map(([ccy, sum]) => flow(-sum, ccy))
+                            .join('\n'),
+                        ),
+                        base: Number.isFinite(total) ? flow(-total, base) : '—',
+                      };
+                    }}
+                    row={({ c, base: v }) => ({
+                      date: <time dateTime={c.date}>{cnDateFull(c.date)}</time>,
+                      second: <PayBadge m={state.methods.find((x) => x.id === chargeMethodId(c))} />,
+                      orig: (
+                        <>
+                          {flow(-c.amount, c.currency)}
+                          {c.kind === 'refund' && <em className="dt-kind refund">{t('family.sheet.refund')}</em>}
+                        </>
+                      ),
+                      base: Number.isFinite(v) ? flow(-v, base) : '—',
+                    })}
+                    rowKey={({ c }, i) => `${c.date}-${i}`}
                   />
+                ) : (
+                  <div className="car-empty">
+                    <b>{t('family.sheet.noCharges')}</b>
+                  </div>
+                )
+              ) : receipts.length ? (
+                <YearLedger
+                  key="in"
+                  keepSecond
+                  items={[...receipts].sort((x, y) => y.p.date.localeCompare(x.p.date))}
+                  dateOf={(r) => r.p.date}
+                  head={[t('family.sheet.date'), t('family.sheet.member'), t('family.sheet.amount'), t('list.col.inBase', { ccy: base })]}
+                  yearCells={(ys) => ({
+                    // 这一年交过钱的人：与付款表的支付方式一样，一个人写胶囊，几个人把头像叠在一起，悬停看名单
+                    second: (() => {
+                      const who = [...new Map(ys.map((r) => [r.m.id, r.m])).values()];
+                      if (who.length === 1)
+                        return (
+                          <span className="who-chip">
+                            <PersonAvatar p={personFor(state, who[0].personId, who[0].name || '?')} size={16} />
+                            <span className={masked ? 'car-private' : undefined}>{who[0].name || t('family.pool.unnamed')}</span>
+                          </span>
+                        );
+                      return (
+                        <span className="dt-ava-stack" title={masked ? undefined : who.map((m) => m.name || t('family.pool.unnamed')).join('\n')}>
+                          {who.slice(0, 6).map((m) => (
+                            <PersonAvatar key={m.id} p={personFor(state, m.personId, m.name || '?')} size={20} />
+                          ))}
+                          {who.length > 6 && <small>+{who.length - 6}</small>}
+                        </span>
+                      );
+                    })(),
+                    orig: copyParts(
+                      [...ys.reduce((m, { p }) => m.set(p.currency, (m.get(p.currency) ?? 0) + p.amount), new Map<string, number>())]
+                        .map(([ccy, sum]) => flow(sum, ccy))
+                        .join('\n'),
+                    ),
+                    base: flow(
+                      ys.reduce((a, r) => a + r.base, 0),
+                      base,
+                    ),
+                  })}
+                  row={({ m, p, base: v }) => ({
+                    date: <time dateTime={p.date}>{cnDateFull(p.date)}</time>,
+                    // 人员一律用胶囊
+                    second: (
+                      <span className="who-chip">
+                        <PersonAvatar p={personFor(state, m.personId, m.name || '?')} size={16} />
+                        <span className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
+                          {m.name || t('family.pool.unnamed')}
+                        </span>
+                      </span>
+                    ),
+                    orig: (
+                      <>
+                        {flow(p.amount, p.currency)}
+                        {p.kind === 'refund' && <em className="dt-kind refund">{t('family.sheet.refund')}</em>}
+                      </>
+                    ),
+                    base: flow(v, base),
+                  })}
+                  rowKey={({ m, p }, i) => `${m.id}-${p.date}-${i}`}
+                  rowTitle={({ p }) => (masked ? undefined : p.note)}
+                  onRow={ro ? undefined : ({ m, p }) => (onPayment ? onPayment(m, p) : onMember(m))}
+                />
+              ) : (
+                <div className="car-empty">
+                  <b>{t('family.facts.noRecords')}</b>
+                  <span>{t('family.sheet.receiptHint')}</span>
                 </div>
-              )}
-              {roster.departed.length > 0 && (
-                <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
               )}
             </div>
-          </div>
+          </Panel>
         </div>
-
-        {/* 收进来的和我付出去的左右切换，两边对照看这辆车的钱 */}
-        <div className="car-sheet-sec row">
-          <Seg
-            small
-            value={tab}
-            onChange={setTab}
-            options={[
-              ['in', t('family.sheet.tabIn', { count: receipts.length })],
-              ['out', t('family.sheet.tabOut', { count: outs.length })],
-            ]}
-          />
-        </div>
-        {tab === 'out' ? (
-          <div className="ld-table car-receipts car-receipts-out">
-            {tableHead(
-              [t('family.sheet.chargeDate'), t('proxy.table.charged'), t('proxy.table.cost')],
-              outYears.map((g) => g.y),
-              openOut,
-              setOpenOut,
-            )}
-            {outYears.map((g) => (
-              <Fragment key={g.y}>
-                <button
-                  type="button"
-                  className="ld-row car-period"
-                  aria-expanded={openOut.has(g.y)}
-                  aria-label={t('calendar.yearTitle', { year: g.y })}
-                  onClick={() => toggleGroup(g.y, openOut, setOpenOut)}
-                >
-                  <span className="car-period-title">
-                    <b>{t('calendar.yearTitle', { year: g.y })}</b>
-                    <small>{t('detail.stats.count', { count: g.list.length })}</small>
-                  </span>
-                  {/* 与数据行同列合计：卡上实扣按原币种（混用币种时分别列出），成本按记账货币 */}
-                  <span>
-                    {copyParts(
-                      [...g.list.reduce((m, { c }) => m.set(c.currency, (m.get(c.currency) ?? 0) + c.amount), new Map<string, number>())]
-                        .map(([ccy, sum]) => flow(-sum, ccy))
-                        .join('\n'),
-                    )}
-                  </span>
-                  <span>{fmt(-g.sum)}</span>
-                </button>
-                {openOut.has(g.y) &&
-                  g.list.map(({ c, base: v }, i) => (
-                    <div key={`${c.date}-${i}`} className="ld-row">
-                      <span className="ld-date">{cnDate(c.date)}</span>
-                      <span>
-                        <b className={c.amount < 0 ? 'green' : undefined}>{flow(-c.amount, c.currency)}</b>
-                        {c.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
-                      </span>
-                      <span>
-                        <b className={v < 0 ? 'green' : undefined}>{flow(-v, base)}</b>
-                      </span>
-                    </div>
-                  ))}
-              </Fragment>
-            ))}
-            {outs.length === 0 && (
-              <div className="car-empty">
-                <b>{t('family.sheet.noCharges')}</b>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="ld-table car-receipts">
-            {tableHead(
-              [t('family.sheet.member'), t('family.sheet.date'), t('family.sheet.amount')],
-              periods.map((g) => g.key),
-              openIn,
-              setOpenIn,
-            )}
-            {(allPeriods ? periods : periods.slice(0, RECENT_PERIODS)).map((g) => (
-              <Fragment key={g.key}>
-                <button
-                  type="button"
-                  className="ld-row car-period"
-                  aria-expanded={openIn.has(g.key)}
-                  aria-label={[g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) }), masked ? '' : g.notes.common]
-                    .filter(Boolean)
-                    .join('\n')}
-                  onClick={() => toggleGroup(g.key, openIn, setOpenIn)}
-                >
-                  <span className="car-period-title">
-                    <b>{g.from ? range(g.from, g.until) : t('family.pool.paidUntil', { date: cnDateAuto(g.until, today) })}</b>
-                  </span>
-                  <span className={g.sum > 0 ? 'green' : undefined}>{copyParts(t('family.sheet.groupSum', { count: g.list.length, amount: fmt(g.sum) }))}</span>
-                </button>
-                {openIn.has(g.key) &&
-                  g.list.map(({ m, p, base: v }, i) => (
-                    <button key={`${m.id}-${p.date}-${i}`} className="ld-row" disabled={ro} onClick={() => (onPayment ? onPayment(m, p) : onMember(m))}>
-                      <span>
-                        <b className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
-                          {m.name || t('family.pool.unnamed')}
-                        </b>
-                        {p.kind === 'refund' && <small>{t('family.sheet.refund')}</small>}
-                        {!masked && g.notes.rows[i] && <small>{copyParts(g.notes.rows[i])}</small>}
-                      </span>
-                      {/* 组标题已写年份，组内只写月日；和这一期不在同一年时才带年份 */}
-                      <span className="ld-date">{p.date.slice(0, 4) === (g.from ?? g.until).slice(0, 4) ? cnDate(p.date) : cnDateFull(p.date)}</span>
-                      <span>
-                        <b className={p.amount >= 0 ? 'green' : undefined}>{flow(p.amount, p.currency)}</b>
-                        {p.currency !== base && <small className={v >= 0 ? 'green' : undefined}>≈ {flow(v, base)}</small>}
-                      </span>
-                    </button>
-                  ))}
-              </Fragment>
-            ))}
-            {!allPeriods && periods.length > RECENT_PERIODS && (
-              <button type="button" className="ld-row car-more" onClick={() => setAllPeriods(true)}>
-                {t('family.sheet.showAllPeriods', { count: periods.length })}
-              </button>
-            )}
-            {receipts.length === 0 && (
-              <div className="car-empty">
-                <b>{t('family.facts.noRecords')}</b>
-                <span>{t('family.sheet.receiptHint')}</span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
       {editingRule && createPortal(<CarRuleSheet state={state} s={s} today={today} rule={rule} onClose={() => setEditingRule(false)} />, document.body)}
-    </Sheet>
+    </DetailSheet>
   );
 }
-
-const RECENT_PERIODS = 4;
 
 /** 常见家庭方案的席位数（含自己） */
 function defaultSeats(name: string): number {

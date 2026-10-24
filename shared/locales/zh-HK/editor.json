@@ -216,7 +216,11 @@
     "settledCcy": "實扣貨幣",
     "settledAmount": "實扣金額",
     "blank": "不填",
-    "freezeHint": "這一段目前依週期推算扣款；儲存後會先把到今天為止推算出的 {amount} 各期固化成記錄，以後完全以記錄為準，未來的扣款照舊。"
+    "freezeHint": "這一段目前依週期推算扣款；儲存後會先把到今天為止推算出的 {amount} 各期固化成記錄，以後完全以記錄為準，未來的扣款照舊。",
+    "method": "付款方式",
+    "scopeOne": "只改這一筆",
+    "scopePhase": "這一段 {count} 筆",
+    "scope": "改哪些"
   },
   "timeline": {
     "home": "回到今天（也可以在時間軸上按兩下）"

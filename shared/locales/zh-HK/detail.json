@@ -1,9 +1,32 @@
 {
   "copy": "複製",
   "copied": "已複製",
-  "overlap": { "title": "同時進行中", "previous": "原本的方案", "until": "用到 {date}\n{rel}" },
-  "action": { "edit": "編輯", "pause": "暫停", "resume": "恢復", "manage": "管理", "website": "官網", "share": "分享", "copyImage": "複製為圖片" },
-  "toast": { "resumed": "已恢復計費", "paused": "已暫停，不再推算之後的扣款", "imageCopied": "已複製圖片" },
+  "note": {
+    "more": "展開全文"
+  },
+  "renewal": {
+    "afterTrial": "試用結束後首次扣款",
+    "elapsed": "本期已過 {pct}%"
+  },
+  "overlap": {
+    "title": "同時進行中",
+    "previous": "原本的方案",
+    "until": "用到 {date}\n{rel}"
+  },
+  "action": {
+    "edit": "編輯",
+    "pause": "暫停",
+    "resume": "恢復",
+    "manage": "管理",
+    "website": "官網",
+    "share": "分享",
+    "copyImage": "複製為圖片"
+  },
+  "toast": {
+    "resumed": "已恢復計費",
+    "paused": "已暫停，不再推算之後的扣款",
+    "imageCopied": "已複製圖片"
+  },
   "history": "歷程",
   "summary": "摘要",
   "field": {
@@ -17,11 +40,29 @@
     "expiresHint": "自動續訂會在到期前扣款",
     "endedOn": "結束於",
     "trialEnd": "試用截止",
-    "region": "地區"
+    "region": "地區",
+    "period": "訂閱期間",
+    "present": "至今",
+    "progress": "本期進度"
   },
-  "up": { "planned": "計劃變更\n尚未確定", "starting": "即將開始", "changing": "即將變更", "effective": "生效日期" },
-  "plan": { "drop": "不切換了", "droppedToast": "不切換了，{date} 到期後不再續", "confirm": "確認切換", "confirmedToast": "已確認切換" },
-  "intro": { "title": "首期優惠", "price": "優惠價", "until": "優惠截止", "then": "之後恢復" },
+  "up": {
+    "planned": "計劃變更\n尚未確定",
+    "starting": "即將開始",
+    "changing": "即將變更",
+    "effective": "生效日期"
+  },
+  "plan": {
+    "drop": "不切換了",
+    "droppedToast": "不切換了，{date} 到期後不再續",
+    "confirm": "確認切換",
+    "confirmedToast": "已確認切換"
+  },
+  "intro": {
+    "title": "首期優惠",
+    "price": "優惠價",
+    "until": "優惠截止",
+    "then": "之後恢復"
+  },
   "share": {
     "open": "查看合租",
     "owner": "共享\n我發起（{count}/{seats}）",
@@ -43,7 +84,11 @@
     "recentN": "只看最近 {count} 筆",
     "addShort": "記一筆",
     "title": "扣款記錄\n{count} 筆",
-    "kind": { "refund": "退款", "adjust": "補差", "failed": "失敗" },
+    "kind": {
+      "refund": "退款",
+      "adjust": "補差",
+      "failed": "失敗"
+    },
     "add": "記一筆（退款、補差、扣款失敗、卡上實扣…）",
     "all": "顯示全部 {count} 筆"
   },
@@ -59,8 +104,18 @@
     "gaps": "中間斷過 {count} 次",
     "perMonth": "實際每月"
   },
-  "tab": { "charges": "扣款紀錄\n{count}", "details": "詳情" },
-  "kpi": { "amortized": "攤到每月", "noGaps": "無中斷", "startedToday": "今日開始", "expectedMonthly": "預計每月" },
+  "tab": {
+    "charges": "扣款紀錄\n{count}",
+    "details": "詳情"
+  },
+  "kpi": {
+    "noGaps": "無中斷",
+    "startedToday": "今日開始",
+    "expectedMonthly": "預計每月",
+    "amortizedCost": "攤分成本",
+    "perMonthValue": "{amount}/月",
+    "perDay": "每天 {amount}"
+  },
   "chart": {
     "title": "每筆扣款\n{ccy}",
     "orig": "原幣",
@@ -71,7 +126,14 @@
     "list": "標價（按首筆匯率）",
     "listOrig": "標價",
     "origAmount": "原幣金額",
-    "few": "扣款少於兩筆，未能畫出走勢"
+    "few": "扣款少於兩筆，未能畫出走勢",
+    "bucket": {
+      "m1": "每根柱為一個月合計",
+      "m3": "每根柱為一季合計",
+      "m12": "每根柱為一年合計"
+    },
+    "regular": "原價",
+    "saved": "首期優惠省下"
   },
   "ev": {
     "next": "下次扣款",
@@ -87,6 +149,26 @@
     "more": "顯示更早的 {count} 項",
     "shareStart": "開始合租"
   },
-  "upcoming": { "title": "未來 12 個月", "total": "約 {amount}\n{count} 筆", "more": "仲有 {count} 筆", "none": "未來 12 個月冇扣款" },
-  "stop": { "title": "停止與退款", "type": "停止類型", "paidThrough": "本期原本付到日", "loss": "−{money}（{days}）" }
+  "upcoming": {
+    "title": "未來 12 個月",
+    "total": "約 {amount}\n{count} 筆",
+    "more": "仲有 {count} 筆",
+    "none": "未來 12 個月冇扣款"
+  },
+  "stop": {
+    "title": "停止與退款",
+    "type": "停止類型",
+    "paidThrough": "本期原本付到日",
+    "loss": "−{money}（{days}）"
+  },
+  "timeline": {
+    "paid": "已扣款",
+    "planned": "預計"
+  },
+  "period": {
+    "paid": "本期",
+    "trial": "試用期",
+    "bonus": "贈送期",
+    "since": "{date}起"
+  }
 }

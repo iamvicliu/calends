@@ -31,7 +31,6 @@
   "stoppedAt": "停止于",
   "nextCharge": "下次扣款",
   "note": "备注",
-  "diffLabel": "收回 − 实扣",
   "table": {
     "cost": "当时成本",
     "total": "合计 {count} 期",
@@ -66,12 +65,18 @@
   },
   "page": {
     "owedSub": "{count} 期未收，按扣款当天汇率",
-    "allBack": "全部已收回",
-    "total": "累计代付",
-    "totalSub": "{count} 期\n{subs}",
     "subs": "{count} 个订阅",
     "diffSub": "已收的期数里，汇率和手续费带来的差额",
     "emptyTitle": "还没有代付",
-    "emptyBody": "新建或编辑订阅，在「谁在用」里选「代付」并填上替谁付。"
-  }
+    "emptyBody": "新建或编辑订阅，在「谁在用」里选「代付」并填上替谁付。",
+    "liveNext": "进行中 {count} 个，下次 {date} 扣款",
+    "lastIn": "最近一笔 {date} 收到",
+    "noneIn": "还没有收回",
+    "diffAvg": "已收 {count} 期，平均每期 {amount}",
+    "perPeriod": "平均每期 {amount}",
+    "owedRate": "按扣款当天汇率"
+  },
+  "paid": "已代付",
+  "periods": "{count} 期",
+  "lastIn": "最近 {date}"
 }

@@ -7,6 +7,7 @@ import { uid } from '../../../shared/billing.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { SortControl } from '../components/SortControl.tsx';
+import { usePhone } from '../components/LtHead.tsx';
 import { colorFor, peopleLedger, peopleListRows, refsFor, type PeopleSort, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
@@ -106,11 +107,19 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   const [filter, setFilter] = useState<'all' | 'owe' | 'settled'>('all');
   const [sort, setSort] = useState<PeopleSort>('owed');
   const [dir, setDir] = useState<'asc' | 'desc'>('desc');
+  const phone = usePhone();
   const chooseSort = (key: PeopleSort) => {
     setSort(key);
     setDir(key === 'name' ? 'asc' : 'desc');
   };
-  const toggleSort = (key: PeopleSort) => (key === sort ? setDir(dir === 'asc' ? 'desc' : 'asc') : chooseSort(key));
+  // 表头三态：该列默认方向、反向、回到默认（待收多的在前）；默认排序不标箭头，与合租、代付表一致
+  const defDir = (key: PeopleSort): 'asc' | 'desc' => (key === 'name' ? 'asc' : 'desc');
+  const toggleSort = (key: PeopleSort) => {
+    if (key !== sort) return chooseSort(key);
+    if (dir === defDir(key)) return setDir(dir === 'asc' ? 'desc' : 'asc');
+    chooseSort('owed');
+  };
+  const marked = (key: PeopleSort) => sort === key && !(key === 'owed' && dir === 'desc');
   const rows = peopleListRows(book, { filter, sort, dir, locale: locale() });
   const owing = peopleListRows(book, { filter: 'owe' });
   const counts = { all: book.length, owe: owing.length, settled: peopleListRows(book, { filter: 'settled' }).length };
@@ -137,7 +146,8 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
             options={(['all', 'owe', 'settled'] as const).map((key) => [key, `${t(`family.pool.filter.${key}`)} ${counts[key]}`])}
           />
         )}
-        {book.length > 0 && (
+        {/* 桌面在表头排序，右上角不再重复；手机上表头收起，排序按钮只在手机出现 */}
+        {phone && book.length > 0 && (
           <SortControl
             value={sort}
             dir={dir}
@@ -179,9 +189,9 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
               <div className="people-head table-head" role="row">
                 {columns.flatMap(([key, label], index) => [
                   <div key={key} role="columnheader" aria-sort={sort === key ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
-                    <button className={`lt-sort ${sort === key ? 'on' : ''}`} onClick={() => toggleSort(key)}>
+                    <button className={`lt-sort ${marked(key) ? 'on' : ''}`} onClick={() => toggleSort(key)}>
                       {label}
-                      {sort === key && <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} size={12} />}
+                      {marked(key) && <Icon name={dir === 'asc' ? 'arrow-up' : 'arrow-down'} size={12} />}
                     </button>
                   </div>,
                   ...(index === 0
@@ -219,17 +229,18 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
   return (
     <div className="people-row" role="row" onClick={onClick}>
       <div className="people-identity" role="cell">
-        <PersonAvatar p={l.person} size={28} />
         <span className="people-person">
+          {/* 人员一律用胶囊（头像 + 称呼），与合租成员、代付对象一致 */}
           <button
-            className="people-open"
+            className="people-open car-member-chip"
             title={l.person.name}
             onClick={(e) => {
               e.stopPropagation();
               onClick();
             }}
           >
-            {l.person.name}
+            <PersonAvatar p={l.person} size={24} />
+            <span className="text-ellipsis">{l.person.name}</span>
           </button>
           {contact && (
             <small className="muted text-ellipsis" title={contact}>
@@ -285,6 +296,24 @@ function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: string;
 }
 
 /** 一个人的详情：资料（改了处处生效）、每个合租 / 代付的明细与快捷记收款、合并与删除 */
+/** 从合租成员、代付对象那里打开某个人员的详情：在这里改称呼、联系方式、头像，所有引用他的地方一起变 */
+export function PersonProfileSheet({
+  state,
+  today,
+  personId,
+  onOpen,
+  onClose,
+}: {
+  state: AppState;
+  today: string;
+  personId: string;
+  onOpen: (s: Subscription) => void;
+  onClose: () => void;
+}) {
+  const l = peopleLedger(state, today).find((x) => x.person.id === personId);
+  return l ? <PersonSheet state={state} today={today} l={l} onOpen={onOpen} onClose={onClose} /> : null;
+}
+
 function PersonSheet({
   state,
   today,

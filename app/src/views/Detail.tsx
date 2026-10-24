@@ -1,24 +1,26 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
-import { renewalDates } from '../../../shared/billing.ts';
+import { YearLedger, YearMethods } from '../components/YearLedger.tsx';
+import { renewalDates, chargeMethodId } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
-import { Fragment, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, StickyNote, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, TrendingDown, TrendingUp } from 'lucide-react';
 import {
   activePhases,
   addDays,
   addMonths,
+  billingPeriod,
   chargesBetween,
   coveredUntil,
   currentPhase,
+  cycleDays,
   cycleLabel,
   diffDays,
   effectiveStatus,
   isGap,
-  memberDues,
   monthlyGross,
   memberAboard,
   nextCharge,
@@ -30,15 +32,16 @@ import {
   upcomingPhase,
   type Charge,
 } from '../../../shared/billing.ts';
-import { flow, cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
+import { flow, cnDate, cnDateAuto, cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
 import { stopLosses } from '../../../shared/metrics.ts';
 import { chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
-import { CarSheet } from './Carpool.tsx';
+import { CarMembers, CarSheet } from './Carpool.tsx';
+import { carRule } from '../../../shared/carpool.ts';
 import { carLedger, MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { MetricCards, Metric, CardTitle, IconButton, CatIcon, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
-import { catColor, presetCat, toBase } from '../derive.ts';
+import { MetricCards, Metric, CardTitle, IconButton, CatChip, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
+import { presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
 import { run, saveSub, toast } from '../store.ts';
 import { snapshot } from '../snapshot.ts';
@@ -46,10 +49,9 @@ import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan, pricePoints, reactivate } from '../../../shared/phases.ts';
 import { t } from '../../../shared/i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
-import { ChargeChart, type ChartLane } from './DetailChart.tsx';
-import { detailChargeHistory, detailForecast } from './detail-data.ts';
-import { ShareAvatars } from '../components/ShareAvatars.tsx';
-import './detail.css';
+import { ChargeBars, type ChartLane } from './DetailChart.tsx';
+import { detailForecast } from './detail-data.ts';
+import { DetailHead, DetailSheet, Note, Panel, Prop } from '../components/DetailKit.tsx';
 
 /** 状态角标的色调；文案见 list.status.* */
 const TONE: Record<string, string> = {
@@ -82,16 +84,6 @@ function Region({ cc }: { cc: string }) {
     <span className="dt-region">
       {FLAGS.has(k) && <img src={base(`/flags/${k}.png`)} alt="" />}
       {cc.toUpperCase()}
-    </span>
-  );
-}
-
-/** 分类：分类色 + 图标 + 名称 */
-function CatTag({ cat }: { cat: string }) {
-  return (
-    <span className="dt-cat" style={{ '--tint': catColor(cat) } as Record<string, string>}>
-      <CatIcon cat={cat} size={12} />
-      {cat}
     </span>
   );
 }
@@ -148,38 +140,6 @@ function detailImage(el: HTMLElement) {
   }).then((b) => b!);
 }
 
-function Panel({
-  title,
-  aside,
-  children,
-  className = '',
-  onClick,
-}: {
-  title?: ReactNode;
-  aside?: ReactNode;
-  children: ReactNode;
-  className?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <section
-      className={`dt-panel ${className} ${onClick ? 'dt-tap' : ''}`}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
-      onKeyDown={onClick ? (e) => e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick()) : undefined}
-    >
-      {title && (
-        <div className="dt-ph row">
-          <CardTitle>{title}</CardTitle>
-          {aside && <div className="dt-aside">{copyParts(aside)}</div>}
-        </div>
-      )}
-      {children}
-    </section>
-  );
-}
-
 export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscription; state: AppState; today: string; onEdit: () => void; onClose: () => void }) {
   const pair = useMoneyPair(state);
   const st = effectiveStatus(sub, today);
@@ -218,9 +178,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   // 买断，或刚开始的长周期订阅（一段、不合租，不到两笔扣款画不出走势，也没有未来扣款图）：
   // 主栏只剩指标卡，换成窄的单列，不留半屏空白
   const compact = phaseSubs(sub).length === 1 && !sub.share && (sub.cycle.unit === 'lifetime' || (!showForecast && regular(history).length < 2));
-  // 最多五行（含可见年份头）才进侧栏：短记录填补摘要下方，返佣等密集记录留在走势下方，避免侧栏过长。
-  // 以默认年份计数；展开全部历史时保持位置，避免交互后卡片跳栏。
-  const sidebarCharges = !compact && !showForecast && detailChargeHistory(history, today).defaultRowCount <= 5;
   const charges = (
     <Charges
       sub={sub}
@@ -232,6 +189,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
     />
   );
+  const events = !compact ? <Events sub={sub} state={state} today={today} /> : null;
   const actions = (
     <>
       {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
@@ -257,119 +215,121 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       {!ro && <Act primary icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
     </>
   );
+  const utilityActions = (
+    <>
+      {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
+      <CopyImageButton render={() => detailImage(root.current!)} />
+      <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
+    </>
+  );
 
-  return (
-    <Sheet
-      bare
-      label={sub.name}
-      onClose={onClose}
-      actions={
-        <>
-          {sub.url && <Act icon={<ExternalLink size={15} />} label={t('detail.action.website')} href={sub.url} round />}
-          <CopyImageButton render={() => detailImage(root.current!)} />
-          <Act icon={<Share size={15} />} label={t('detail.action.share')} onClick={() => setShare(true)} round />
-        </>
-      }
-    >
-      <div className={`dt ${compact ? 'compact' : ''}`} ref={root}>
-        <header className="dt-head">
-          <SubIcon sub={sub} size={48} proxied />
-          <div className="dt-id">
-            <h2>
-              <span className="dt-name">{sub.name}</span>
-              {st !== 'active' && st !== 'lifetime' && (
-                <span className={`dt-badge dot ${TONE[st]}`}>
-                  <i />
-                  {t(`list.status.${st}`)}
-                </span>
+  const content = (
+    <div className={`dt ${compact ? 'compact' : ''}`} ref={root}>
+      <DetailHead
+        icon={<SubIcon sub={sub} size={48} proxied />}
+        title={sub.name}
+        badge={
+          st !== 'active' &&
+          st !== 'lifetime' && (
+            <span className={`dt-badge dot ${TONE[st]}`}>
+              <i />
+              {t(`list.status.${st}`)}
+            </span>
+          )
+        }
+        meta={
+          <>
+            <b>
+              {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
+            </b>
+            {big.alt && <span>{big.alt}</span>}
+            <RegionTag
+              cc={subRegion(
+                cur,
+                state.methods.find((x) => x.id === cur.methodId),
               )}
-            </h2>
-            <div className="dt-meta">
-              <b>
-                {big.main} {st !== 'lifetime' && cycleLabel(cur.cycle)}
-              </b>
-              {big.alt && <span>{big.alt}</span>}
-              <RegionTag
-                cc={subRegion(
-                  cur,
-                  state.methods.find((x) => x.id === cur.methodId),
-                )}
-              />
-              <CatTag cat={sub.category} />
-            </div>
-          </div>
-          <div className="sheet-actions dt-actions">{actions}</div>
-        </header>
+            />
+            {sub.category && <CatChip cat={sub.category} />}
+          </>
+        }
+        actions={
+          <>
+            {actions}
+            <span className="dt-header-tools">{utilityActions}</span>
+          </>
+        }
+        onClose={onClose}
+      />
 
-        {/* 无预测卡片且默认记录较少时，宽屏把扣款记录放到摘要下方；窄屏仍按数字、走势、扣款、摘要排列 */}
-        <div className="dt-body">
-          <div className="dt-main">
-            <Kpis sub={sub} state={state} today={today} history={history} />
-            {!compact && <Trendline sub={sub} state={state} today={today} history={history} />}
-            {!sidebarCharges && (
-              <div className={`dt-billing ${showForecast ? 'has-forecast' : ''}`}>
-                {!compact && showForecast && <Upcoming sub={sub} state={state} today={today} />}
-                {charges}
-              </div>
-            )}
-          </div>
-          <div className={`dt-side ${sidebarCharges ? 'has-charges' : ''}`}>
-            <Outcome sub={sub} state={state} today={today} />
-            <Details sub={sub} state={state} today={today} onCar={() => setCar(true)} afterSummary={sidebarCharges ? charges : undefined} />
-            {!compact && <Events sub={sub} state={state} today={today} />}
-          </div>
-        </div>
+      {/*
+          顶部四格随状态变：下次扣款、本期进度、累计、每月；下面单列分节，
+          提醒仍是卡片，其余（走势、记录、合租、详情、历程）用分隔线隔开
+        */}
+      <div className="dt-body dt-flow">
+        <Kpis sub={sub} state={state} today={today} history={history} />
+        {/* 指标下面：本期进度与属性（不加标题），然后是扣款走势、提醒和记录 */}
+        <Summary sub={sub} state={state} today={today} />
+        {!compact && <Timeline sub={sub} state={state} today={today} history={history} />}
+        <Notices sub={sub} state={state} today={today} />
+        {/* 合租比扣款记录重要，放在前面 */}
+        <ShareCard sub={sub} state={state} today={today} onCar={() => setCar(true)} onMember={(m, collect) => setMember({ m, collect })} />
+        {charges}
+        {events}
+      </div>
 
-        {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
-        {stopping &&
-          createPortal(
-            <Sheet title={t('core.stop.title')} narrow onClose={() => setStopping(false)}>
-              <StopPanel
-                sub={sub}
-                today={today}
-                onApply={(next) =>
-                  run(
-                    async () => {
-                      await saveSub(next);
-                      setStopping(false);
-                    },
-                    next.stop ? t('core.stop.stoppedDone') : next.end ? t('core.stop.nonrenewDone', { date: cnDateFull(next.end) }) : t('detail.toast.resumed'),
-                  )
-                }
-              />
-            </Sheet>,
-            document.body,
-          )}
-        {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
-        {car &&
-          sub.share?.role === 'owner' &&
-          createPortal(
-            <CarSheet
-              state={state}
-              s={sub}
-              today={today}
-              ro={ro}
-              book={carLedger(state, sub, today)}
-              onClose={() => setCar(false)}
-              onOpenSub={() => setCar(false)}
-              onMember={(m, collect) => setMember({ m, collect })}
-            />,
-            document.body,
-          )}
-        {member &&
-          createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
-        {pay &&
-          createPortal(
-            <PaymentSheet
+      {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}
+      {stopping &&
+        createPortal(
+          <Sheet title={t('core.stop.title')} narrow onClose={() => setStopping(false)}>
+            <StopPanel
               sub={sub}
               today={today}
-              edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined}
-              onClose={() => setPay(null)}
-            />,
-            document.body,
-          )}
-      </div>
-    </Sheet>
+              onApply={(next) =>
+                run(
+                  async () => {
+                    await saveSub(next);
+                    setStopping(false);
+                  },
+                  next.stop ? t('core.stop.stoppedDone') : next.end ? t('core.stop.nonrenewDone', { date: cnDateFull(next.end) }) : t('detail.toast.resumed'),
+                )
+              }
+            />
+          </Sheet>,
+          document.body,
+        )}
+      {share && createPortal(<SubShare sub={sub} state={state} today={today} onClose={() => setShare(false)} />, document.body)}
+      {car &&
+        sub.share?.role === 'owner' &&
+        createPortal(
+          <CarSheet
+            state={state}
+            s={sub}
+            today={today}
+            ro={ro}
+            book={carLedger(state, sub, today)}
+            onClose={() => setCar(false)}
+            onOpenSub={() => setCar(false)}
+            onMember={(m, collect) => setMember({ m, collect })}
+          />,
+          document.body,
+        )}
+      {member && createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
+      {pay &&
+        createPortal(
+          <PaymentSheet
+            sub={sub}
+            today={today}
+            edit={pay.pay ? { pay: pay.pay, index: pay.index ?? 0, phase: pay.phase } : undefined}
+            onClose={() => setPay(null)}
+          />,
+          document.body,
+        )}
+    </div>
+  );
+  return (
+    <DetailSheet label={sub.name} onClose={onClose}>
+      {content}
+    </DetailSheet>
   );
 }
 
@@ -377,13 +337,17 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
 const regular = (h: Charge[]) => h.filter((c) => !c.kind && c.amount > 0);
 
 /**
- * 指标卡：累计花了多少、订了多久（扣掉断档）、按实际算每月多少。
+ * 顶部四格，内容跟着状态走：
+ * 计费中、试用中是 下次扣款 · 订了多久 · 累计 · 每月；已结束是 结束于 · 订了多久 · 累计 · 每月；
+ * 买断、暂停没有下一笔，是 订了多久 · 累计 · 每月。
  * 累计按每笔扣款当天的汇率；合租发起人这里是付出去的全额，成员分摊在「合租」页看。
  */
 function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
   const base = state.settings.baseCurrency;
+  const st = effectiveStatus(sub, today);
   const vals = history.map((c) => chargeValue(state, c, base));
-  const total = vals.reduce((a, v) => a + (Number.isFinite(v) ? v : 0), 0);
+  // 有一笔缺汇率就不能求和：显示「—」，不能把缺的那笔当 0
+  const total = vals.reduce((a, v) => a + v, 0);
   const per = regular(history)
     .map((c) => chargeValue(state, c, base))
     .filter(Number.isFinite);
@@ -391,8 +355,10 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const served = servedTime(sub, today);
   const active = served.days;
   const gaps = served.gaps.length;
-  const years = Math.floor(active / 365);
-  const months = Math.floor((active % 365) / 30.44);
+  // 按平均月长取整：11-24 到次年 10-24 是 11 个月，不能因为差几天算成 10 个月
+  const span = active < 30 ? 0 : Math.round(active / 30.4375);
+  const years = Math.floor(span / 12);
+  const months = span % 12;
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   // 订了不到一个月（或只有一笔）时，「实际每月」没有意义：改用标价折算的预计每月
   const young = active < 30 || per.length < 2;
@@ -410,203 +376,308 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
         : months
           ? t('detail.stats.months', { count: months })
           : t('detail.stats.days', { count: active });
+  const amount = (v: number) => (Number.isFinite(v) ? flow(-v, base, { compact: true }) : '—');
+  // 每月：买断按订了多久平摊，其余按实际（或刚开始时按标价预计）
+  const monthly = lifetime ? total / Math.max(1, active / 30.44) : perMonth;
+
+  const next = ['ended', 'terminated', 'lifetime', 'paused'].includes(st) ? undefined : detailForecast(sub, today).charges[0];
+  const nextValue = next ? chargeValue(state, next, base) : NaN;
+  // 停止的订阅由下方停止卡片写停止日，这里不再重复
+  const ended = ['ended', 'terminated'].includes(st) && sub.end && !phaseSubs(sub).some((p) => p.stop);
+  const durationCell = (
+    <Metric
+      label={lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
+      value={duration}
+      note={gaps > 0 ? t('detail.stats.gaps', { count: gaps }) : t('detail.period.since', { date: cnDateFull(sub.start) })}
+    />
+  );
 
   return (
     <MetricCards>
-      {history.length !== 1 && <Metric label={t('detail.stats.spent')} value={flow(-total, base, { compact: true })} />}
+      {next ? (
+        <Metric
+          label={st === 'trial' ? t('detail.renewal.afterTrial') : t('detail.ev.next')}
+          value={cnDateAuto(next.date, today)}
+          note={copyParts([Number.isFinite(nextValue) ? flow(-nextValue, base) : '—', relDays(diffDays(today, next.date))].join('\n'))}
+        />
+      ) : ended ? (
+        <Metric label={t('detail.field.endedOn')} value={cnDateAuto(sub.end!, today)} note={relDays(diffDays(today, sub.end!))} />
+      ) : (
+        durationCell
+      )}
+      {(next || ended) && durationCell}
+      {/* 只有一笔时累计就是那一笔，扣款记录里已有，不再占一格 */}
+      {history.length !== 1 && <Metric label={t('detail.stats.spent')} value={amount(total)} note={t('detail.stats.count', { count: history.length })} />}
       <Metric
-        label={lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
-        value={duration}
-        accessory={gaps > 0 ? <span className="dt-badge warn">{t('detail.stats.gaps', { count: gaps })}</span> : undefined}
-      />
-      <Metric
-        label={lifetime ? t('detail.kpi.amortized') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}
-        value={flow(-(lifetime ? total / Math.max(1, active / 30.44) : perMonth), base, { compact: true })}
+        label={lifetime ? t('detail.kpi.amortizedCost') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}
+        value={lifetime ? t('detail.kpi.perMonthValue', { amount: amount(monthly) }) : amount(monthly)}
+        // 与其他格一样三行：折到每天多少；算不出来就不写这一行
+        note={Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined}
         accessory={!lifetime ? <Trend pct={perTrend} /> : undefined}
       />
     </MetricCards>
   );
 }
 
-/** 月付/季付保留节奏图；稀疏扣款由摘要展示下次日期。 */
-function Upcoming({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
-  const base = state.settings.baseCurrency;
-  const { sparse, charges: cs } = detailForecast(sub, today);
-  if (sparse || !cs.length) return null;
-  const labels = Array.from({ length: 13 }, (_, i) => addMonths(`${today.slice(0, 7)}-01`, i).slice(0, 7));
-  const vals = cs.map((c) => ({ c, v: chargeValue(state, c, base) }));
-  const bars = labels.map((m) => vals.filter((x) => x.c.date.startsWith(m)).reduce((a, x) => a + x.v, 0));
-  const total = vals.reduce((a, x) => a + x.v, 0);
-  const max = Math.max(...bars, 1);
-  const show = vals.slice(0, 5);
-  return (
-    <Panel
-      className="dt-upcoming"
-      title={t('detail.upcoming.title')}
-      aside={Number.isFinite(total) ? t('detail.upcoming.total', { amount: flow(-total, base), count: cs.length }) : undefined}
-    >
-      <div className="dt-up-bars" aria-hidden="true">
-        {bars.map((v, i) => (
-          <div key={labels[i]} className={v ? 'on' : ''}>
-            <i style={{ height: `${v ? Math.max(14, (v / max) * 100) : 6}%` }} />
-            <small>{Number(labels[i].slice(5))}</small>
-          </div>
-        ))}
-      </div>
-      <div className="dt-tbl">
-        {show.map(({ c, v }, i) => (
-          <div className="dt-tr dt-row" key={`${c.date}-${c.sub.start}-${i}`}>
-            <span className="d">
-              <time>{c.date}</time>
-              <small>{relDays(diffDays(today, c.date))}</small>
-            </span>
-            <span className={`o ${c.amount < 0 ? 'dt-in' : ''}`}>{c.currency !== base ? flow(-c.amount, c.currency) : ''}</span>
-            <span className={`c ${v < 0 ? 'dt-in' : ''}`}>
-              {c.currency !== base ? '≈ ' : ''}
-              {Number.isFinite(v) ? flow(-v, base) : '—'}
-            </span>
-          </div>
-        ))}
-      </div>
-      {cs.length > show.length && <div className="dt-up-more">{t('detail.upcoming.more', { count: cs.length - show.length })}</div>}
-    </Panel>
-  );
-}
-
-type Unit = 'base' | 'usd' | 'orig';
 type Range = 'all' | '1y' | '6m';
 
-/** 每笔扣款折算后的走势，和标价（按首笔汇率）对比，看出是涨价还是汇率在动 */
-function Trendline({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
+/**
+ * 扣款时间轴：今天之前是每笔实际扣款，之后是预测，中间一条「今天」虚线。
+ * 预测长度按周期：月付及更短看半年，更长的看一个周期（至少半年、至多两年）。
+ * 下次扣款的日期与金额在顶部四格；买断、已结束、暂停没有预测，只画过去。
+ */
+function Timeline({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
   const base = state.settings.baseCurrency;
-  const [unit, setUnit] = useState<Unit>('base');
-  const [range, setRange] = useState<Range>('all');
+  const st = effectiveStatus(sub, today);
+  const cur = currentPhase(sub, today);
   const reg = regular(history);
-  const ccys = [...new Set(reg.map((c) => c.currency))];
-  const single = ccys.length === 1;
-  const u: Unit = unit === 'orig' && !single ? 'base' : unit;
-  const ccy = u === 'base' ? base : u === 'usd' ? 'USD' : ccys[0];
-  const lastDay = reg[reg.length - 1]?.date ?? today;
-  const since = range === 'all' ? '' : addMonths(lastDay, range === '1y' ? -12 : -6);
-  // 每段首笔的日期：标价按那天的汇率折算
+  const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(st);
+  const next = live ? detailForecast(sub, today).charges[0] : undefined;
+  const days = cycleDays(cur.cycle);
+  // 暂停、已结束、买断没有预测：时间轴只画到今天
+  let until = live ? addDays(today, days <= 31 ? 183 : Math.min(731, Math.max(183, Math.ceil(days) + 1))) : today;
+  if (next && next.date > until) until = next.date;
+  const future = live ? chargesBetween(sub, addDays(today, 1), until, today).filter((c) => !c.kind) : [];
+
+  // 只有范围内至少三笔、且比全部少时才给这个范围：两年付、年付这类稀疏记录不显示无意义的「1 年 / 6 个月」
+  const within = (months: number) => reg.filter((c) => c.date >= addMonths(today, -months)).length;
+  const ranges: Array<[Range, string]> = [
+    ['all', t('detail.chart.all')],
+    ...(
+      [
+        ['1y', t('detail.chart.y1'), 12],
+        ['6m', t('detail.chart.m6'), 6],
+      ] as const
+    )
+      .filter(([, , m]) => within(m) >= 3 && within(m) < reg.length)
+      .map(([k, l]) => [k, l] as [Range, string]),
+  ];
+  // 月付及更短默认看最近一年，柱子不至于挤成一片；更长的周期默认看全部
+  const [range, setRange] = useState<Range>(() => (days <= 31 && ranges.some(([k]) => k === '1y') ? '1y' : 'all'));
+  const since = range === 'all' ? '' : addMonths(today, range === '1y' ? -12 : -6);
+  const past = reg.filter((c) => c.date >= since);
+  // 单位：记账货币，或（所有扣款同一种外币时）原币；原币下卡上另币种结算的那笔没有原币实扣，按标价画
+  const ccys = [...new Set([...reg, ...future].map((c) => c.currency))];
+  const origCcy = ccys.length === 1 && ccys[0] !== base ? ccys[0] : undefined;
+  const [unit, setUnit] = useState<'base' | 'orig'>('base');
+  // 图表在柱子太密时按月、季、年汇总，图例里写明一根柱代表多久的合计
+  const [bucket, setBucket] = useState(0);
+  const ccy = unit === 'orig' && origCcy ? origCcy : base;
+  // 标价参照：每一段按它首笔扣款那天的汇率折算，柱子高出或低于这条线就是汇率带来的涨跌
   const firstOf = new Map<string, string>();
   for (const c of reg) if (!firstOf.has(c.sub.start)) firstOf.set(c.sub.start, c.date);
-  const rows = reg
-    .filter((c) => c.date >= since)
-    .map((c) => {
-      const v = u === 'orig' ? (c.settled ? NaN : c.amount) : chargeValue(state, c, ccy);
-      const price = priceAt(c.sub, c.date);
-      const list = u === 'orig' ? price : convertOn(price, c.currency, ccy, firstOf.get(c.sub.start)!, state.fxHistory, state.fx);
-      return { c, date: c.date, v: Number.isFinite(v) ? v : c.amount, list: Number.isFinite(list) ? list : undefined };
-    });
-  if (reg.length < 2) return null;
+  const each = [...past.map((c) => ({ c, future: false })), ...future.map((c) => ({ c, future: true }))].map((r) => {
+    const price = priceAt(r.c.sub, r.c.date);
+    const list = ccy === base ? convertOn(price, r.c.currency, base, firstOf.get(r.c.sub.start) ?? r.c.date, state.fxHistory, state.fx) : price;
+    const v = ccy === base ? chargeValue(state, r.c, base) : r.c.amount;
+    // 首期优惠：这一笔按优惠价扣，原价减去的部分在柱顶画成虚框（按这一笔同样的折算比例）
+    const regularPrice = r.c.sub.intro && r.c.date < r.c.sub.intro.until && !r.c.kind ? priceAt({ ...r.c.sub, intro: undefined }, r.c.date) : undefined;
+    const full = regularPrice && r.c.amount > 0 && regularPrice > r.c.amount ? (v * regularPrice) / r.c.amount : undefined;
+    return {
+      ...r,
+      date: r.c.date,
+      phase: r.c.sub.start,
+      v,
+      list: Number.isFinite(list) ? list : undefined,
+      full: full != null && Number.isFinite(full) ? full : undefined,
+    };
+  });
+  // 标价与实际几乎一样（同币种、未调价）时不画参照线，免得压在柱顶上重复
+  const showList = each.some((r) => r.list != null && Number.isFinite(r.v) && Math.abs(r.list - r.v) > Math.abs(r.v) * 0.005);
+  // 柱子太密时由图表按宽度自动按月、季、年汇总，这里给出每一笔
+  const rows = showList ? each : each.map((r) => ({ ...r, list: undefined }));
+  if (rows.length < 2) return null;
 
-  // 坐标轴是刻度，不是收支，不带正负号
+  // 横轴从第一根柱到最后一根柱（或今天），两端留同样的边距，左右对称；不按预测窗口的末端留白
+  const first = rows[0].date < today ? rows[0].date : today;
+  const lastBar = rows[rows.length - 1].date > today ? rows[rows.length - 1].date : today;
+  const pad = Math.max(4, Math.round(diffDays(first, lastBar) * 0.03));
+  const from = addDays(first, -pad);
+  const to = addDays(lastBar, pad);
   const fmt = (v: number) => money(v, ccy, { compact: true });
-  const first = rows[0];
-  const last = rows[rows.length - 1];
-  const vsFirst = rows.length > 1 && first.v > 0 ? last.v / first.v - 1 : undefined;
   const lanesSrc = phaseSubs(sub);
   const laneIdx = phaseLanes(lanesSrc);
   const methodIds = [...new Set(lanesSrc.map((v) => v.methodId ?? ''))];
-  const lanes: ChartLane[] = lanesSrc.map((v, i) => {
-    const m = methodOf(state, v.methodId);
-    return {
-      key: v.start,
-      from: v.start,
-      to: v.end && v.end < today ? v.end : today,
-      lane: laneIdx[i],
-      color: LANE_COLORS[methodIds.indexOf(v.methodId ?? '') % LANE_COLORS.length],
-      label: (
-        <>
-          {v.region && <Region cc={v.region} />}
-          {money(v.price, v.currency)} {cycleLabel(v.cycle)}
-        </>
-      ),
-      aside: m?.name,
-    };
-  });
-  const unitOpts: Array<[Unit, string]> = [
-    ['base', base],
-    ...(single && ccys[0] !== base && ccys[0] !== 'USD' ? [['orig', t('detail.chart.orig')] as [Unit, string]] : []),
-  ];
-  const spanDays = diffDays(reg[0].date, lastDay);
+  const lanes: ChartLane[] = lanesSrc.map((v, i) => ({
+    key: v.start,
+    from: v.start,
+    // 方案色带：计费中的延伸到预测末端；暂停、已结束的画到今天（或那一段的结束日）为止
+    to: [v.end ?? to, live ? to : today].sort()[0],
+    lane: laneIdx[i],
+    color: LANE_COLORS[methodIds.indexOf(v.methodId ?? '') % LANE_COLORS.length],
+    label: (
+      <>
+        {v.region && <Region cc={v.region} />}
+        {money(v.price, v.currency)} {cycleLabel(v.cycle)}
+      </>
+    ),
+    short: (
+      <>
+        {v.region && <Region cc={v.region} />}
+        {money(v.price, v.currency)}
+      </>
+    ),
+    aside: methodOf(state, v.methodId)?.name,
+  }));
+  const planned = each.filter((r) => r.future).reduce((a, r) => a + r.v, 0);
 
   return (
     <Panel
       className="dt-chart"
-      title={t('detail.chart.title', { ccy: u === 'orig' ? t('detail.chart.orig') : ccy })}
+      title={t('detail.chart.title', { ccy })}
       aside={
         <>
-          {unitOpts.length > 1 && <Seg small value={u} onChange={setUnit} options={unitOpts} />}
-          {spanDays > 240 && (
+          {origCcy && (
             <Seg
               small
-              value={range}
-              onChange={setRange}
+              value={unit}
+              onChange={setUnit}
               options={[
-                ['all', t('detail.chart.all')],
-                ['1y', t('detail.chart.y1')],
-                ...(spanDays > 400 ? [['6m', t('detail.chart.m6')] as [Range, string]] : []),
+                ['base', base],
+                ['orig', origCcy],
               ]}
             />
           )}
+          {ranges.length > 1 && <Seg small value={range} onChange={setRange} options={ranges} />}
         </>
       }
     >
-      <div className="dt-headline">
-        <b>{flow(-last.v, ccy)}</b>
-        <Trend pct={vsFirst} />
-      </div>
-      {rows.length > 1 ? (
-        <ChargeChart
-          points={rows}
-          fmt={fmt}
-          lanes={lanes}
-          tip={(i) => {
-            const r = rows[i];
-            const c = r.c;
-            const m = methodOf(state, c.sub.methodId);
-            const rate = rateOn(state.fxHistory, c.currency, c.date);
-            const rb = rateOn(state.fxHistory, base, c.date);
+      <ChargeBars
+        bars={rows}
+        from={from}
+        to={to}
+        today={today}
+        todayLabel={t('calendar.today')}
+        fmt={fmt}
+        lanes={lanes}
+        onBucket={setBucket}
+        tip={(idx, summed) => {
+          // 汇总柱（太密时按月、季、年合计）：写起止日期、笔数与合计
+          if (summed && idx.length > 1) {
+            const sum = idx.reduce((a, i) => a + rows[i].v, 0);
             return (
               <>
                 <div className="cc-tip-h">
-                  <b>{cnDateFull(c.date)}</b>
-                  <span>{weekdayOf(c.date)}</span>
+                  <b>
+                    {cnDateFull(rows[idx[0]].c.date)} – {cnDateFull(rows[idx[idx.length - 1]].c.date)}
+                  </b>
                 </div>
                 <div className="cc-tip-r">
-                  <i className="k-v" />
-                  <span>{t('detail.chart.perCharge')}</span>
-                  <b>{flow(-r.v, ccy)}</b>
-                </div>
-                {r.list != null && (
-                  <div className="cc-tip-r">
-                    <i className="k-l" />
-                    <span>{u === 'orig' ? t('detail.chart.listOrig') : t('detail.chart.list')}</span>
-                    <b className="m">{money(r.list, ccy)}</b>
-                  </div>
-                )}
-                {c.currency !== ccy && (
-                  <div className="cc-tip-r">
-                    <i />
-                    <span>{t('detail.chart.origAmount')}</span>
-                    <b className="m">{flow(-c.amount, c.currency)}</b>
-                  </div>
-                )}
-                <div className="cc-tip-f">
-                  {m?.name ?? t('ui.method.none')}
-                  {copyParts(
-                    c.currency !== base && rate && rb && `\n1 ${c.currency} = ${((1 / rate.rate) * rb.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} ${base}`,
-                  )}
+                  <i className={rows[idx[0]].future ? 'k-f' : 'k-v'} />
+                  <span>{t('detail.stats.count', { count: idx.length })}</span>
+                  <b>{Number.isFinite(sum) ? flow(-sum, ccy) : '—'}</b>
                 </div>
               </>
             );
-          }}
-        />
-      ) : (
-        <div className="dt-empty">{t('detail.chart.few')}</div>
-      )}
+          }
+          // 挨在一起的几笔（换方案、换卡、并行方案）：逐笔列出
+          if (idx.length > 1) {
+            const sum = idx.reduce((a, i) => a + rows[i].v, 0);
+            return (
+              <>
+                <div className="cc-tip-h">
+                  <b>{cnDateFull(rows[idx[0]].c.date)}</b>
+                  <span>{t('detail.stats.count', { count: idx.length })}</span>
+                </div>
+                {idx.map((i) => {
+                  const r = rows[i];
+                  return (
+                    <div className="cc-tip-r" key={i}>
+                      <i className={r.future ? 'k-f' : 'k-v'} />
+                      <span>
+                        {copyParts(
+                          [cnDate(r.c.date), methodOf(state, chargeMethodId(r.c))?.name ?? t('ui.method.none'), r.c.sub.region ?? '']
+                            .filter(Boolean)
+                            .join('\n'),
+                        )}
+                      </span>
+                      <b>{Number.isFinite(r.v) ? flow(-r.v, ccy) : '—'}</b>
+                    </div>
+                  );
+                })}
+                <div className="cc-tip-f">{Number.isFinite(sum) ? flow(-sum, ccy) : '—'}</div>
+              </>
+            );
+          }
+          const r = rows[idx[0]];
+          const c = r.c;
+          const m = methodOf(state, chargeMethodId(c));
+          const rate = rateOn(state.fxHistory, c.currency, c.date);
+          const rb = rateOn(state.fxHistory, base, c.date);
+          return (
+            <>
+              <div className="cc-tip-h">
+                <b>{cnDateFull(c.date)}</b>
+                <span>{weekdayOf(c.date)}</span>
+              </div>
+              <div className="cc-tip-r">
+                <i className={r.future ? 'k-f' : 'k-v'} />
+                <span>{r.future ? t('detail.timeline.planned') : t('detail.chart.perCharge')}</span>
+                <b>{Number.isFinite(r.v) ? flow(-r.v, ccy) : '—'}</b>
+              </div>
+              {r.full != null && (
+                <div className="cc-tip-r">
+                  <i className="k-f" />
+                  <span>{t('detail.chart.regular')}</span>
+                  <b className="m">{money(r.full, ccy)}</b>
+                </div>
+              )}
+              {r.list != null && (
+                <div className="cc-tip-r">
+                  <i className="k-l" />
+                  <span>{ccy === base ? t('detail.chart.list') : t('detail.chart.listOrig')}</span>
+                  <b className="m">{money(r.list, ccy)}</b>
+                </div>
+              )}
+              {c.currency !== ccy && (
+                <div className="cc-tip-r">
+                  <i />
+                  <span>{t('detail.chart.origAmount')}</span>
+                  <b className="m">{flow(-c.amount, c.currency)}</b>
+                </div>
+              )}
+              <div className="cc-tip-f">
+                {m?.name ?? t('ui.method.none')}
+                {copyParts(
+                  !r.future &&
+                    ccy === base &&
+                    c.currency !== base &&
+                    rate &&
+                    rb &&
+                    `\n1 ${c.currency} = ${((1 / rate.rate) * rb.rate).toFixed(c.currency === 'NGN' ? 5 : 4)} ${base}`,
+                )}
+              </div>
+            </>
+          );
+        }}
+      />
+      {/* 图例：实色是已扣，虚框是预测；预测合计按今天的汇率 */}
+      <div className="dt-legend">
+        <span>
+          <i className="k-v" />
+          {t('detail.timeline.paid')}
+        </span>
+        {bucket > 0 && <span>{t(`detail.chart.bucket.m${bucket}`)}</span>}
+        {each.some((r) => r.full != null) && (
+          <span>
+            <i className="k-f" />
+            {t('detail.chart.saved')}
+          </span>
+        )}
+        {showList && (
+          <span>
+            <i className="k-l" />
+            {ccy === base ? t('detail.chart.list') : t('detail.chart.listOrig')}
+          </span>
+        )}
+        {future.length > 0 && (
+          <span>
+            <i className="k-f" />
+            {t('detail.timeline.planned')}
+            {copyParts(t('detail.upcoming.total', { count: future.length, amount: Number.isFinite(planned) ? flow(-planned, ccy) : '—' }))}
+          </span>
+        )}
+      </div>
     </Panel>
   );
 }
@@ -673,7 +744,10 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
     evs.push({
       date: sub.share.since,
       title: t('detail.ev.shareStart'),
-      sub: sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member'),
+      sub:
+        sub.share.role === 'owner'
+          ? t('detail.share.owner', { count: sub.share.members.filter((m) => memberAboard(m, today)).length + 1, seats: sub.share.seats })
+          : t('detail.share.member'),
       tone: 'ok',
     });
   const up = upcomingPhase(sub, today);
@@ -701,8 +775,8 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
   // 一条时间线，新的在上
   evs.sort((a, b) => b.date.localeCompare(a.date));
 
-  // 只有「开始订阅」一条时，没什么可看的
-  if (evs.length < 2) return null;
+  // 只有开始订阅、开始合租这类一两条时，开始日已在摘要、方案在走势下方，不单独成卡
+  if (evs.length < 3) return null;
   const shown = all || evs.length <= 6 ? evs : evs.slice(0, 6);
   const gaps = servedTime(sub, today).gaps.length;
   return (
@@ -715,11 +789,12 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
         {shown.map((e, i) => (
           <li key={`${e.date}-${i}`} className={`dt-ev ${e.future ? 'fut' : ''} ${e.tone ?? ''}`}>
             <i />
+            {/* 日期在前、事件与说明紧跟在同一行，不再把日期推到最右边 */}
+            <time dateTime={e.date}>{cnDateFull(e.date)}</time>
             <div>
               <b>{e.title}</b>
               {e.sub && <small style={e.tone === 'ok' ? { color: 'var(--dt-ok)' } : undefined}>{e.sub}</small>}
             </div>
-            <time>{e.date}</time>
           </li>
         ))}
       </ol>
@@ -729,31 +804,6 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
         </button>
       )}
     </Panel>
-  );
-}
-
-/** 合租卡片共用的头像组；详情只放大尺寸、减小重叠，空位用文字提示。 */
-function Seats({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
-  const share = sub.share!;
-  const live = share.members.filter((m) => memberAboard(m, today));
-  const free = Math.max(0, share.seats - live.length - 1);
-  return (
-    <div className="dt-seats">
-      <ShareAvatars sub={sub} state={state} today={today} size={36} overlap={2} />
-      <small>{free ? t('detail.share.seatsLeft', { count: free, seats: share.seats }) : t('detail.share.seatsFull', { seats: share.seats })}</small>
-    </div>
-  );
-}
-
-function Prop({ k, children, hint }: { k: ReactNode; children: ReactNode; hint?: ReactNode }) {
-  return (
-    <div className="dt-prop">
-      <dt>{k}</dt>
-      <dd>
-        {children}
-        {hint && <small>{copyParts(hint)}</small>}
-      </dd>
-    </div>
   );
 }
 
@@ -772,7 +822,6 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
           <section key={phase.start} className={`dt-panel dt-outcome ${sm.kind === 'terminate' ? 'bad' : ''} ${sm.unusedValue > 0 ? 'loss' : ''}`}>
             <div className="dt-ph row">
               <CardTitle>{t(sm.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}</CardTitle>
-              {sm.kind === 'terminate' && sm.reason && <div className="dt-aside">{sm.reason}</div>}
             </div>
             {sm.unusedValue > 0 && (
               <div className="dt-oc-loss">
@@ -792,6 +841,8 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
                 </small>
               </div>
             )}
+            {/* 停用原因是一句话，跟在金额下面，不挤到标题行最右边 */}
+            {sm.kind === 'terminate' && sm.reason && <p className="dt-oc-reason">{sm.reason}</p>}
             <dl className="dt-props">
               <Prop k={t('core.stop.date')}>{cnDateFull(sm.date)}</Prop>
               <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(sm.paidThrough)}</Prop>
@@ -814,83 +865,115 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
   );
 }
 
-/** 详情：金额、周期、分类、支付方式、日期等，以及并行、计划变更、优惠、合租、提醒和备注 */
-function Details({
-  sub,
-  state,
-  today,
-  onCar,
-  afterSummary,
-}: {
-  sub: Subscription;
-  state: AppState;
-  today: string;
-  onCar: () => void;
-  afterSummary?: ReactNode;
-}) {
+/**
+ * 本期：只画当前这一期，不画历史各期。左端本期开始，右端到期，填充到今天；
+ * 刻度标最晚取消日，提前扣款时另标扣款日；试用期、赠送期换颜色和名称。
+ * 刻度的日期写在下面一行图例里，不在条上叠标签
+ */
+function PeriodBar({ sub, today }: { sub: Subscription; today: string }) {
+  const st = effectiveStatus(sub, today);
+  const next = detailForecast(sub, today).charges[0];
+  if (!next) return null;
+  const renewal = renewalDates(sub, addDays(today, 1));
+  const bonus = sub.bonus && sub.bonus.from <= today && today <= sub.bonus.until ? sub.bonus : undefined;
+  const bp = billingPeriod(sub, today);
+  const kind: 'trial' | 'bonus' | 'paid' = st === 'trial' ? 'trial' : bonus ? 'bonus' : 'paid';
+  const from = bonus ? bonus.from : bp.from > today ? today : bp.from;
+  const end = bonus ? addDays(bonus.until, 1) : renewal.serviceExpires && renewal.serviceExpires > next.date ? renewal.serviceExpires : next.date;
+  const span = Math.max(1, diffDays(from, end));
+  const at = (d: string) => `${Math.min(100, Math.max(0, (diffDays(from, d) / span) * 100))}%`;
+  const pct = Math.round(Math.min(1, Math.max(0, diffDays(from, today) / span)) * 100);
+  const cancelBy = renewal.cancelBy && renewal.cancelBy >= today && renewal.cancelBy < end ? renewal.cancelBy : undefined;
+  const charge = next.date > today && next.date < end ? next.date : undefined;
+  return (
+    <div className={`dt-period ${kind}`}>
+      <p className="dt-period-h">
+        <b>{t(`detail.period.${kind}`)}</b>
+        <span>{t('detail.renewal.elapsed', { pct })}</span>
+      </p>
+      <div className="dt-period-bar" role="img" aria-label={t('detail.renewal.elapsed', { pct })}>
+        <i style={{ width: `${pct}%` }} />
+        {cancelBy && <b className="cb" style={{ left: at(cancelBy) }} />}
+        {charge && <b className="ch" style={{ left: at(charge) }} />}
+      </div>
+      <p className="dt-period-ends">
+        <span>{cnDateAuto(from, today)}</span>
+        <span>{cnDateAuto(addDays(end, -1), today)}</span>
+      </p>
+      {(cancelBy || charge) && (
+        <p className="dt-period-keys">
+          {cancelBy && (
+            <span className="cb">
+              <i />
+              {t('core.renewal.cancelBy')} {cnDateAuto(cancelBy, today)}
+            </span>
+          )}
+          {charge && (
+            <span className="ch">
+              <i />
+              {t('detail.ev.next')} {cnDateAuto(charge, today)}
+            </span>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** 详情：支付方式、订阅期间、账号、试用截止、付给谁与备注；金额、周期、分类、地区在标题，下次扣款在顶部四格 */
+function Summary({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+  const st = effectiveStatus(sub, today);
+  const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
+  const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(st);
+  return (
+    <Panel className="dt-about">
+      {live && <PeriodBar sub={sub} today={today} />}
+      <dl className="dt-about-grid">
+        {/* 计费中只画当前这一期；买断、已结束、暂停写订阅期间（买断的开始日就是那一笔扣款，不再重复） */}
+        {!lifetime && !live && (
+          <Prop className="dt-period-text" k={t('detail.field.period')}>
+            {cnDateFull(sub.start)} – {sub.end ? cnDateFull(sub.end) : t('detail.field.present')}
+          </Prop>
+        )}
+        {sub.account && (
+          <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
+            {/* 点一下复制，登录时直接粘贴 */}
+            <button
+              type="button"
+              className="dt-copy"
+              title={t('detail.copy')}
+              onClick={() => void navigator.clipboard?.writeText(sub.account!).then(() => toast(t('detail.copied')))}
+            >
+              {sub.account}
+            </button>
+          </Prop>
+        )}
+        {/* 试用中顶部已写试用结束后的首次扣款，这里不再单列试用截止 */}
+        {sub.trialEnd && st !== 'trial' && <Prop k={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Prop>}
+        {/* 加入别人的合租只有「付给谁」一项，放在详情里，不单独成卡 */}
+        {sub.share?.role === 'member' && <Prop k={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Prop>}
+      </dl>
+      {/* 备注单独带一个标题，与上面的属性同一种「标签在上」写法，一眼看出这是备注 */}
+      {sub.notes && (
+        <div className="dt-note-block">
+          <span className="dt-note-k">{t('editor.field.notes')}</span>
+          <Note text={sub.notes} />
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/** 提醒：停止结果、并行方案、即将变更或计划变更、首期优惠；有结论或待操作，放在指标下方通栏 */
+function Notices({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
   const st = effectiveStatus(sub, today);
   const cur = currentPhase(sub, today);
   const up = upcomingPhase(sub, today);
   const ro = !!state.readonly;
-
-  const nextBill = detailForecast(sub, today).charges[0];
-  const renewal = renewalDates(sub, addDays(today, 1));
-  const method = methodOf(state, cur.methodId);
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
-  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
   return (
-    <>
-      <Panel title={t('detail.summary')}>
-        <dl className="dt-props">
-          {/* 金额、周期、分类、地区已在标题下方，这里不再重复 */}
-          <Prop k={t('detail.field.method')}>
-            <PayBadge m={method} />
-          </Prop>
-          {sub.account && (
-            <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
-              {/* 点一下复制，登录时直接粘贴 */}
-              <button
-                type="button"
-                className="dt-copy"
-                title={t('detail.copy')}
-                onClick={() => void navigator.clipboard?.writeText(sub.account!).then(() => toast(t('detail.copied')))}
-              >
-                {sub.account}
-              </button>
-            </Prop>
-          )}
-          {/* 买断的开始日就是扣款记录里那一笔，不再重复 */}
-          {!(sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1) && <Prop k={t('detail.field.start')}>{cnDateFull(sub.start)}</Prop>}
-          {nextBill && (
-            <Prop k={t('detail.ev.next')} hint={relDays(diffDays(today, nextBill.date))}>
-              {cnDateFull(nextBill.date)}
-            </Prop>
-          )}
-          {/* 没有提前扣款时，服务到期就是下次扣款那天，不重复显示 */}
-          {renewal.serviceExpires && !sub.end && renewal.serviceExpires !== nextBill?.date && (
-            <Prop k={t('detail.field.expires')} hint={relDays(diffDays(today, renewal.serviceExpires))}>
-              {cnDateFull(renewal.serviceExpires)}
-            </Prop>
-          )}
-          {renewal.cancelBy && (
-            <Prop k={t('core.renewal.cancelBy')} hint={relDays(diffDays(today, renewal.cancelBy))}>
-              {cnDateFull(renewal.cancelBy)}
-            </Prop>
-          )}
-          {sub.end && !sub.stop && (
-            <Prop k={['ended', 'terminated'].includes(st) ? t('detail.field.endedOn') : t('list.status.ending')}>{cnDateFull(sub.end)}</Prop>
-          )}
-          {sub.trialEnd && <Prop k={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Prop>}
-        </dl>
-        {sub.notes && (
-          <div className="dt-note">
-            <StickyNote size={14} />
-            <p>{sub.notes}</p>
-          </div>
-        )}
-      </Panel>
-
-      {afterSummary}
+    <div className="dt-notices">
+      <Outcome sub={sub} state={state} today={today} />
       {parallel.length > 0 && (
         <Panel title={t('detail.overlap.title')}>
           <dl className="dt-props one">
@@ -913,7 +996,25 @@ function Details({
       )}
 
       {up && (
-        <Panel title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}>
+        <Panel
+          title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}
+          // 待确认的计划：取舍按钮放在标题右侧，结论和操作同一眼看到
+          aside={
+            up.planned && !ro ? (
+              <div className="dt-plan">
+                <button
+                  className="dt-btn"
+                  onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}
+                >
+                  {t('detail.plan.drop')}
+                </button>
+                <button className="dt-btn dark" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
+                  {t('detail.plan.confirm')}
+                </button>
+              </div>
+            ) : undefined
+          }
+        >
           <dl className="dt-props one">
             <Prop k={t('detail.up.effective')} hint={relDays(diffDays(today, up.start))}>
               {cnDateFull(up.start)}
@@ -938,76 +1039,54 @@ function Details({
               <PayBadge m={methodOf(state, up.methodId)} />
             </Prop>
           </dl>
-          {up.planned && !ro && (
-            <div className="dt-plan">
-              <button
-                className="dt-btn"
-                onClick={() => run(() => saveSub(dropPlan(sub, up.start)), t('detail.plan.droppedToast', { date: cnDateFull(up.start) }))}
-              >
-                {t('detail.plan.drop')}
-              </button>
-              <button className="dt-btn dark" onClick={() => run(() => saveSub(confirmPlan(sub, up.start)), t('detail.plan.confirmedToast'))}>
-                {t('detail.plan.confirm')}
-              </button>
-            </div>
-          )}
         </Panel>
       )}
 
-      {sub.intro && (
+      {/* 首期优惠还没结束才提醒；结束后写在历程里，图表里也画了省下的部分 */}
+      {sub.intro && sub.intro.until > today && (
         <Panel title={t('detail.intro.title')}>
           <dl className="dt-props one">
             <Prop k={t('detail.intro.price')}>{money(sub.intro.price, sub.currency)}</Prop>
             <Prop k={t('detail.intro.until')}>{cnDateFull(sub.intro.until)}</Prop>
-            <Prop k={t('detail.intro.then')}>{money(sub.price, sub.currency)}</Prop>
+            <Prop k={t('detail.intro.then')}>{money(priceAt({ ...sub, intro: undefined }, sub.intro.until), sub.currency)}</Prop>
           </dl>
         </Panel>
       )}
+    </div>
+  );
+}
 
-      {sub.share && (
-        <Panel
-          title={
-            sub.share.role === 'owner' ? t('detail.share.owner', { count: sub.share.members.length + 1, seats: sub.share.seats }) : t('detail.share.member')
-          }
-          // 我发起的合租：整块点开合租弹窗，看收付明细
-          onClick={sub.share.role === 'owner' ? onCar : undefined}
-          aside={sub.share.role === 'owner' ? <span className="dt-more">{t('detail.share.open')} ›</span> : undefined}
-        >
-          {sub.share.role === 'owner' && <Seats sub={sub} state={state} today={today} />}
-          <dl className="dt-props one">
-            {sub.share.role === 'member' && <Prop k={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Prop>}
-            {sub.share.role === 'owner' && (
-              <>
-                {(() => {
-                  // 成员交的比总价还多时，不显示负的份额，直接说多收了多少
-                  const mine = sub.price - sub.share.members.reduce((a, m) => a + (m.exempt || !memberAboard(m, today) ? 0 : m.share), 0);
-                  return mine >= 0 ? (
-                    <Prop k={t('detail.share.myShare')}>{money(mine, sub.currency)}</Prop>
-                  ) : (
-                    <Prop k={t('detail.share.myShare')}>
-                      <span className="dt-in">{t('detail.share.surplus', { amount: flow(-mine, sub.currency) })}</span>
-                    </Prop>
-                  );
-                })()}
-                {dues.map((d) => (
-                  <Prop
-                    key={d.member.id}
-                    k={d.member.name || t('detail.share.unnamed')}
-                    hint={d.member.paidUntil ? t('detail.share.paidUntil', { date: d.member.paidUntil }) : t('detail.share.unpaid')}
-                  >
-                    {d.periodsOwed > 0 ? (
-                      <span className="dt-owed">{t('detail.share.owed', { amount: money(d.owed, d.currency) })}</span>
-                    ) : (
-                      <span className="dt-settled">{t('detail.share.settled')}</span>
-                    )}
-                  </Prop>
-                ))}
-              </>
-            )}
-          </dl>
-        </Panel>
-      )}
-    </>
+/**
+ * 合租：和合租详情用同一张成员表（收费、迷你时间线、收款状态），点一行看成员、记收款；
+ * 标题右边进合租详情看收付款明细。只有我发起的合租才有这一块
+ */
+function ShareCard({
+  sub,
+  state,
+  today,
+  onCar,
+  onMember,
+}: {
+  sub: Subscription;
+  state: AppState;
+  today: string;
+  onCar: () => void;
+  onMember: (m?: ShareMember, collect?: boolean) => void;
+}) {
+  const share = sub.share;
+  if (share?.role !== 'owner') return null;
+  return (
+    <Panel
+      title={t('detail.share.owner', { count: share.members.filter((m) => memberAboard(m, today)).length + 1, seats: share.seats })}
+      className="dt-share"
+      aside={
+        <button type="button" className="dt-link" onClick={onCar}>
+          {t('detail.share.open')} ›
+        </button>
+      }
+    >
+      <CarMembers state={state} s={sub} today={today} ro={!!state.readonly} onMember={onMember} billEvery={carRule(state, sub, today).billEvery} />
+    </Panel>
   );
 }
 
@@ -1028,15 +1107,14 @@ function Charges({
   onAdd?: () => void;
 }) {
   const base = state.settings.baseCurrency;
-  const [all, setAll] = useState(false);
   const multi = phaseSubs(sub).length > 1;
   const rows = history.map((c) => ({ c, b: chargeValue(state, c, base) })).reverse();
-  const thisYear = today.slice(0, 4);
-  const { defaultYear, grouped } = detailChargeHistory(history, today);
-  const shown = all ? rows : rows.filter((r) => r.c.date.startsWith(defaultYear));
-  const years = [...new Set(shown.map((r) => r.c.date.slice(0, 4)))];
+  // 卡上实扣的原币：这张表里某个币种的金额都是整数（如奈拉、日元整价扣款）就不写 .00，省出宽度
+  const whole = new Set([...new Set(rows.map((r) => r.c.currency))].filter((ccy) => rows.every((r) => r.c.currency !== ccy || Number.isInteger(r.c.amount))));
+  const orig = (v: number, ccy: string) => flow(v, ccy, whole.has(ccy) ? { decimals: 0 } : {});
   return (
     <Panel
+      // 还没有记录时只是一条带「记一笔」的细条，不进列表网格被拉高
       className="dt-charges"
       title={t('detail.charges.title', { count: history.length })}
       // 记一笔放在标题右侧，不额外占一行
@@ -1048,55 +1126,45 @@ function Charges({
         )
       }
     >
+      {/* 与合租的收款、付款表同一套表格（YearLedger）：表头、按年分组带小计、日期写全 */}
       {history.length > 0 && (
-        <div className="dt-tbl">
-          {years.map((y) => {
-            const ys = rows.filter((r) => r.c.date.startsWith(y));
+        <YearLedger
+          items={rows}
+          dateOf={(r) => r.c.date}
+          head={[t('proxy.table.date'), t('detail.field.method'), t('proxy.table.charged'), t('proxy.table.cost')]}
+          yearCells={(ys) => {
             const total = ys.reduce((a, r) => a + r.b, 0);
-            return (
-              <Fragment key={y}>
-                {grouped && (
-                  <div className="dt-grp">
-                    <span>
-                      <b>{y}</b>
-                      {t('detail.stats.count', { count: ys.length })}
-                    </span>
-                    <span className={total < 0 ? 'dt-in' : undefined}>{Number.isFinite(total) ? flow(-total, base) : '—'}</span>
-                  </div>
-                )}
-                {shown
-                  .filter((r) => r.c.date.startsWith(y))
-                  .map(({ c, b }, i) => (
-                    <div
-                      key={`${c.date}-${c.sub.start}-${i}`}
-                      className={`dt-tr dt-row ${onRow ? 'edit' : ''} ${c.kind ?? ''}`}
-                      onClick={() => onRow?.(c)}
-                      title={c.note}
-                    >
-                      {/* 分年时组头已有年份；不分组且不是今年的（如多年前的买断）要带上年份 */}
-                      <span className="d">
-                        <time dateTime={c.date}>{grouped || c.date.startsWith(thisYear) ? c.date.slice(5) : c.date}</time>
-                        <small>{relDays(diffDays(today, c.date))}</small>
-                      </span>
-                      <span className="o">
-                        {c.currency !== base || c.settled ? flow(-c.amount, c.currency) : ''}
-                        {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
-                        {multi && c.sub.region && !c.kind && <em className="dt-kind">{c.sub.region}</em>}
-                      </span>
-                      <span className="c">{Number.isFinite(b) ? flow(-b, base) : '—'}</span>
-                    </div>
-                  ))}
-              </Fragment>
-            );
+            return {
+              // 这一年用过的支付方式：一种时与下面的行一样写胶囊，几种时把卡的图标叠在一起
+              second: <YearMethods ids={[...new Set(ys.map((r) => chargeMethodId(r.c) ?? ''))]} state={state} />,
+              // 卡上实扣按原币合计；一年里有几种币种时逐个列出，不留空
+              orig: copyParts(
+                [...ys.reduce((m, r) => m.set(r.c.currency, (m.get(r.c.currency) ?? 0) + r.c.amount), new Map<string, number>())]
+                  .map(([ccy, sum]) => orig(-sum, ccy))
+                  .join('\n'),
+              ),
+              base: Number.isFinite(total) ? flow(-total, base) : '—',
+              baseClass: total < 0 ? 'dt-in' : undefined,
+            };
+          }}
+          row={({ c, b }) => ({
+            // 日期写全，不再加「几天前」
+            date: <time dateTime={c.date}>{cnDateFull(c.date)}</time>,
+            second: <PayBadge m={methodOf(state, chargeMethodId(c))} />,
+            orig: (
+              <>
+                {orig(-c.amount, c.currency)}
+                {c.kind && <em className={`dt-kind ${c.kind}`}>{t(`detail.charges.kind.${c.kind}`)}</em>}
+                {multi && c.sub.region && !c.kind && <em className="dt-kind">{c.sub.region}</em>}
+              </>
+            ),
+            base: Number.isFinite(b) ? flow(-b, base) : '—',
           })}
-        </div>
-      )}
-      {grouped && (
-        <div className="dt-tfoot">
-          <button className="dt-link" onClick={() => setAll(!all)} aria-expanded={all}>
-            {all ? t('report.checkup.less') : t('detail.charges.all', { count: history.length })}
-          </button>
-        </div>
+          rowKey={({ c }, i) => `${c.date}-${c.sub.start}-${i}`}
+          rowClass={({ c }) => c.kind ?? ''}
+          rowTitle={({ c }) => c.note}
+          onRow={onRow && (({ c }) => onRow(c))}
+        />
       )}
     </Panel>
   );

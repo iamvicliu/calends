@@ -26,7 +26,6 @@
     },
     "fee": "Phí",
     "nextCollection": "Lần thu tiếp theo",
-    "actions": "Thao tác",
     "status": "Tình trạng thanh toán",
     "period": "Kỳ hiện tại",
     "range": "{from} – {until}",
@@ -100,7 +99,8 @@
       "m12": "Mỗi năm",
       "custom": {
         "other": "Mỗi {count} tháng"
-      }
+      },
+      "once": "Thu một lần"
     },
     "feeCcyAria": "Tiền tệ",
     "exempt": "Không trả tiền",
@@ -216,7 +216,8 @@
       "m12": "{fee}/năm",
       "custom": {
         "other": "{fee} mỗi {count} tháng"
-      }
+      },
+      "once": "Thu một lần {fee}"
     },
     "collect": "Thu tiền",
     "joinedGroup": "Gói tôi tham gia",
@@ -225,7 +226,13 @@
     "maybeGroup": "Có thể đang chia sẻ",
     "convert": "Chuyển thành gói chia sẻ",
     "dueOn": "Đến hạn {date}",
-    "nextDueOn": "Lần tới {date}"
+    "nextDueOn": "Lần tới {date}",
+    "members": "Thành viên",
+    "incomeShort": "Thu {amount}",
+    "status": "Trạng thái",
+    "countNote": "{members} thành viên, còn trống {free} chỗ",
+    "yearPnl": "Lãi lỗ năm nay",
+    "totalPnl": "Lãi lỗ lũy kế"
   },
   "convert": {
     "title": "Chuyển “{name}” thành gói chia sẻ",
@@ -287,7 +294,9 @@
       "other": "Quá hạn {count} ngày"
     },
     "owe": "Còn nợ {amount}\ntừ {date}",
-    "settled": "Đã thanh toán\nlần tới {date}"
+    "settled": "Đã thanh toán\nlần tới {date}",
+    "adjust": "Phí và rời nhóm",
+    "backCollect": "Ghi khoản thu"
   },
   "strip": {
     "yearNet": "Ròng mỗi năm",
@@ -295,9 +304,9 @@
     "noneOwed": "Không ai nợ",
     "since": "Từ {date}",
     "profit": "Lãi / lỗ",
-    "annualApprox": "Khoảng {amount} mỗi năm",
     "paid": "Đã chi",
-    "received": "Đã thu"
+    "received": "Đã thu",
+    "thisYear": "Năm nay {amount}"
   },
   "timeline": {
     "paid": "Đã trả",
@@ -313,8 +322,11 @@
   },
   "sort": {
     "owed": "Khoản chờ thu",
-    "net": "Ròng mỗi năm",
+    "net": "Theo lãi lỗ năm nay",
     "received": "Tổng đã nhận",
-    "lastPaid": "Lần nhận gần nhất"
+    "lastPaid": "Lần nhận gần nhất",
+    "price": "Theo giá gói",
+    "paid": "Theo đã trả",
+    "profit": "Theo lãi lỗ lũy kế"
   }
 }

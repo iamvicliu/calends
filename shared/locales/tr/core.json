@@ -7,7 +7,8 @@
     "custom": {
       "one": "{count} ayda bir",
       "other": "{count} ayda bir"
-    }
+    },
+    "once": "Tek seferlik"
   },
   "cycle": {
     "lifetime": "Ömür boyu",

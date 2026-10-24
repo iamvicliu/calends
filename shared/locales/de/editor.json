@@ -244,7 +244,11 @@
     "settledCcy": "Kartenwährung",
     "settledAmount": "Kartenbetrag",
     "blank": "Leer lassen",
-    "freezeHint": "Abbuchungen in dieser Phase werden derzeit aus dem Abrechnungszeitraum geschätzt. Beim Sichern werden die geschätzten Abbuchungen von {amount} bis heute zuerst in Einträge umgewandelt; danach sind die Einträge maßgeblich. Künftige Abbuchungen bleiben unverändert."
+    "freezeHint": "Abbuchungen in dieser Phase werden derzeit aus dem Abrechnungszeitraum geschätzt. Beim Sichern werden die geschätzten Abbuchungen von {amount} bis heute zuerst in Einträge umgewandelt; danach sind die Einträge maßgeblich. Künftige Abbuchungen bleiben unverändert.",
+    "method": "Zahlungsmethode",
+    "scopeOne": "Nur diese Abbuchung",
+    "scopePhase": "Dieser Tarif ({count})",
+    "scope": "Gilt für"
   },
   "timeline": {
     "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"

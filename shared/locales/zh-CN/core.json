@@ -4,7 +4,8 @@
     "m3": "按季",
     "m6": "按半年",
     "m12": "按年",
-    "custom": "按 {count} 个月"
+    "custom": "按 {count} 个月",
+    "once": "一次性"
   },
   "cycle": {
     "lifetime": "买断",

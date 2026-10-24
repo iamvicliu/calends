@@ -1,7 +1,18 @@
 {
   "copy": "Kopyala",
   "copied": "Kopyalandı",
-  "overlap": { "title": "Birlikte devam eden", "previous": "Önceki plan", "until": "{date} tarihine kadar\n{rel}" },
+  "note": {
+    "more": "Tümünü göster"
+  },
+  "renewal": {
+    "afterTrial": "Denemeden sonraki ilk ödeme",
+    "elapsed": "Bu dönemin %{pct} kadarı geçti"
+  },
+  "overlap": {
+    "title": "Birlikte devam eden",
+    "previous": "Önceki plan",
+    "until": "{date} tarihine kadar\n{rel}"
+  },
   "action": {
     "edit": "Düzenle",
     "pause": "Duraklat",
@@ -11,7 +22,11 @@
     "share": "Paylaş",
     "copyImage": "Görsel olarak kopyala"
   },
-  "toast": { "resumed": "Ödemeler devam ediyor", "paused": "Duraklatıldı. Gelecek ödemeler tahmin edilmeyecek", "imageCopied": "Görsel kopyalandı" },
+  "toast": {
+    "resumed": "Ödemeler devam ediyor",
+    "paused": "Duraklatıldı. Gelecek ödemeler tahmin edilmeyecek",
+    "imageCopied": "Görsel kopyalandı"
+  },
   "history": "Geçmiş",
   "summary": "Özet",
   "field": {
@@ -25,7 +40,10 @@
     "expiresHint": "Otomatik yenileme bu tarihten önce ücretlendirir",
     "endedOn": "Bitiş tarihi",
     "trialEnd": "Deneme bitişi",
-    "region": "Bölge"
+    "region": "Bölge",
+    "period": "Dönem",
+    "present": "bugün",
+    "progress": "Bu dönem"
   },
   "up": {
     "planned": "Planlanan değişiklik\nonaylanmadı",
@@ -39,7 +57,12 @@
     "confirm": "Geçişi onayla",
     "confirmedToast": "Geçiş onaylandı"
   },
-  "intro": { "title": "Tanıtım teklifi", "price": "Tanıtım fiyatı", "until": "Teklif bitişi", "then": "Sonra" },
+  "intro": {
+    "title": "Tanıtım teklifi",
+    "price": "Tanıtım fiyatı",
+    "until": "Teklif bitişi",
+    "then": "Sonra"
+  },
   "share": {
     "open": "Planı aç",
     "owner": "Ortak\nyönetici benim ({count}/{seats})",
@@ -53,32 +76,67 @@
     "owed": "{amount} borç",
     "settled": "Ödeşildi",
     "me": "Ben",
-    "seatsLeft": { "one": "{seats} koltuk, {count} boş", "other": "{seats} koltuk, {count} boş" },
+    "seatsLeft": {
+      "one": "{seats} koltuk, {count} boş",
+      "other": "{seats} koltuk, {count} boş"
+    },
     "seatsFull": "{seats} koltuğun hepsi dolu",
     "surplus": "Ücretsiz, {amount} fazla"
   },
   "charges": {
     "recentN": "Yalnızca son {count}",
     "addShort": "Ekle",
-    "title": { "one": "Ödemeler\n{count}", "other": "Ödemeler\n{count}" },
-    "kind": { "refund": "İade", "adjust": "Düzeltme", "failed": "Başarısız" },
+    "title": {
+      "one": "Ödemeler\n{count}",
+      "other": "Ödemeler\n{count}"
+    },
+    "kind": {
+      "refund": "İade",
+      "adjust": "Düzeltme",
+      "failed": "Başarısız"
+    },
     "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)",
     "all": "Tümünü göster ({count})"
   },
   "stats": {
     "spent": "Toplam harcama",
-    "count": { "one": "{count} ödeme", "other": "{count} ödeme" },
+    "count": {
+      "one": "{count} ödeme",
+      "other": "{count} ödeme"
+    },
     "owned": "Sahiplik süresi",
     "subscribed": "Abonelik süresi",
     "yearsMonths": "{years} yıl {months} ay",
-    "years": { "one": "{count} yıl", "other": "{count} yıl" },
-    "months": { "one": "{count} ay", "other": "{count} ay" },
-    "days": { "one": "{count} gün", "other": "{count} gün" },
-    "gaps": { "one": "Bir kez ara verildi", "other": "{count} kez ara verildi" },
+    "years": {
+      "one": "{count} yıl",
+      "other": "{count} yıl"
+    },
+    "months": {
+      "one": "{count} ay",
+      "other": "{count} ay"
+    },
+    "days": {
+      "one": "{count} gün",
+      "other": "{count} gün"
+    },
+    "gaps": {
+      "one": "Bir kez ara verildi",
+      "other": "{count} kez ara verildi"
+    },
     "perMonth": "Gerçek aylık"
   },
-  "tab": { "charges": "Ödemeler\n{count}", "details": "Ayrıntılar" },
-  "kpi": { "amortized": "Aylık maliyet", "noGaps": "Kesinti yok", "startedToday": "Bugün başladı", "expectedMonthly": "Tahmini aylık" },
+  "tab": {
+    "charges": "Ödemeler\n{count}",
+    "details": "Ayrıntılar"
+  },
+  "kpi": {
+    "noGaps": "Kesinti yok",
+    "startedToday": "Bugün başladı",
+    "expectedMonthly": "Tahmini aylık",
+    "amortizedCost": "Dağıtılmış maliyet",
+    "perMonthValue": "{amount}/ay",
+    "perDay": "Günde {amount}"
+  },
   "chart": {
     "title": "Ödeme başına\n{ccy}",
     "orig": "Orijinal",
@@ -89,7 +147,14 @@
     "list": "İlk kurla liste fiyatı",
     "listOrig": "Liste fiyatı",
     "origAmount": "Orijinal tutar",
-    "few": "Eğilim için en az iki ödeme gerekir"
+    "few": "Eğilim için en az iki ödeme gerekir",
+    "bucket": {
+      "m1": "Her çubuk aylık toplamdır",
+      "m3": "Her çubuk üç aylık toplamdır",
+      "m12": "Her çubuk yıllık toplamdır"
+    },
+    "regular": "Normal fiyat",
+    "saved": "Başlangıç indirimi"
   },
   "ev": {
     "next": "Sonraki ödeme",
@@ -107,9 +172,30 @@
   },
   "upcoming": {
     "title": "Önümüzdeki 12 ay",
-    "total": { "one": "≈ {amount}\n{count} ödeme", "other": "≈ {amount}\n{count} ödeme" },
-    "more": { "one": "{count} tane daha", "other": "{count} tane daha" },
+    "total": {
+      "one": "≈ {amount}\n{count} ödeme",
+      "other": "≈ {amount}\n{count} ödeme"
+    },
+    "more": {
+      "one": "{count} tane daha",
+      "other": "{count} tane daha"
+    },
     "none": "Önümüzdeki 12 ayda ödeme yok"
   },
-  "stop": { "title": "Sonlandırma ve iade", "type": "Sonlandırma türü", "paidThrough": "Başlangıçta ödenen son gün", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Sonlandırma ve iade",
+    "type": "Sonlandırma türü",
+    "paidThrough": "Başlangıçta ödenen son gün",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Ödendi",
+    "planned": "Beklenen"
+  },
+  "period": {
+    "paid": "Bu dönem",
+    "trial": "Deneme",
+    "bonus": "Hediye dönemi",
+    "since": "{date} tarihinden beri"
+  }
 }

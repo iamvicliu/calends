@@ -27,7 +27,6 @@
     },
     "fee": "Tarif",
     "nextCollection": "Prochain encaissement",
-    "actions": "Actions",
     "status": "État du paiement",
     "period": "Période en cours",
     "range": "{from} – {until}",
@@ -103,7 +102,8 @@
       "custom": {
         "one": "Tous les {count} mois",
         "other": "Tous les {count} mois"
-      }
+      },
+      "once": "En une fois"
     },
     "feeCcyAria": "Devise",
     "exempt": "Ne paie pas",
@@ -225,7 +225,8 @@
       "custom": {
         "one": "{fee} tous les {count} mois",
         "other": "{fee} tous les {count} mois"
-      }
+      },
+      "once": "{fee} en une fois"
     },
     "collect": "Encaisser",
     "joinedGroup": "Partages rejoints",
@@ -234,7 +235,13 @@
     "maybeGroup": "Peut-être partagé",
     "convert": "Rendre partagé",
     "dueOn": "À percevoir le {date}",
-    "nextDueOn": "Prochain le {date}"
+    "nextDueOn": "Prochain le {date}",
+    "members": "Membres",
+    "incomeShort": "Revenus {amount}",
+    "status": "Statut",
+    "countNote": "Membres {members}, places libres {free}",
+    "yearPnl": "Résultat de l’année",
+    "totalPnl": "Résultat cumulé"
   },
   "convert": {
     "title": "Partager « {name} »",
@@ -297,7 +304,9 @@
       "other": "{count} jours de retard"
     },
     "owe": "{amount} dû\ndepuis le {date}",
-    "settled": "Réglé\nprochaine échéance {date}"
+    "settled": "Réglé\nprochaine échéance {date}",
+    "adjust": "Tarif et départ",
+    "backCollect": "Enregistrer un paiement"
   },
   "strip": {
     "yearNet": "Net par an",
@@ -305,9 +314,9 @@
     "noneOwed": "Personne ne doit rien",
     "since": "Depuis le {date}",
     "profit": "Bénéfice / perte",
-    "annualApprox": "Environ {amount} par an",
     "paid": "Payé",
-    "received": "Reçu"
+    "received": "Reçu",
+    "thisYear": "Cette année {amount}"
   },
   "timeline": {
     "paid": "Payé",
@@ -323,8 +332,11 @@
   },
   "sort": {
     "owed": "Montant dû",
-    "net": "Net annuel",
+    "net": "Par résultat de l’année",
     "received": "Total reçu",
-    "lastPaid": "Dernier paiement"
+    "lastPaid": "Dernier paiement",
+    "price": "Par prix du forfait",
+    "paid": "Par payé à ce jour",
+    "profit": "Par résultat cumulé"
   }
 }

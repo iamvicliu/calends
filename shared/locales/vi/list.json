@@ -65,7 +65,9 @@
     "amount": "Số tiền",
     "monthly": "Hằng tháng",
     "start": "Bắt đầu",
-    "next": "Lần trừ tiền tới"
+    "next": "Lần trừ tiền tới",
+    "planPrice": "Giá gói",
+    "inBase": "Quy đổi {ccy}"
   },
   "notCounted": "Không tính",
   "endedOn": "Kết thúc {date}",

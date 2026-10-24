@@ -311,7 +311,7 @@ export function setPhaseEnd(s: Subscription, start: string, end: string | undefi
 
 /**
  * 改阶段标识（开始日），不移动实际发生的付款、停止、优惠、赠送和合租覆盖日期。
- * billingStart 固定原计费锚点，避免改服务开始日连带重算历史扣款；买断固化原购买记录。
+ * billingStart 固定原计费锚点，提前开始日时向前补周期，之后的扣款日不变；买断固化原购买记录。
  * priceHistory 中的初始价随标识迁移；跨过调价点时保留原历史并补新起点的有效价。
  */
 export function movePhaseStart(s: Subscription, start: string, nextStart: string): Subscription {
@@ -438,6 +438,7 @@ function materialize(p: Phase, sub: Subscription, today: string, target?: string
 /** 新增或修改一笔扣款记录；old 为原记录的日期与序号（修改时） */
 export function savePayment(s: Subscription, today: string, pay: Payment, old?: { date: string; index: number }, phase?: string): Subscription {
   const phases = phasesOf(s);
+  // 改写一笔时没有带 methodId 这个键（如 MCP 只改金额），沿用原来那一笔单独记的支付方式；明确传 undefined 才清除
   let originalPhase: number | undefined;
   if (old) {
     const oi = phaseIndexAt(phases, old.date, s, phase, true);
@@ -446,6 +447,7 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
     const list = (phases[oi].payments ?? []).filter((x) => x.date === old.date);
     const target = list[old.index];
     if (!target) throw new Error(t('mcp.error.invalidTarget'));
+    if (!('methodId' in pay) && target.methodId) pay = { ...pay, methodId: target.methodId };
     phases[oi] = { ...phases[oi], payments: (phases[oi].payments ?? []).filter((x) => x !== target) };
   }
   // 原日期不变的编辑始终留在原阶段（修正开始日后可能在服务期外）；改日期或新记录仍按覆盖范围归段
@@ -460,6 +462,20 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
   if (i !== originalPhase) phases[i] = materialize(phases[i], s, today);
   phases[i] = { ...phases[i], payments: [...(phases[i].payments ?? []), pay].sort((a, b) => a.date.localeCompare(b.date)) };
   const next = fromPhases(s, phases);
+  const error = subError(next);
+  if (error) throw new Error(error);
+  return next;
+}
+
+/**
+ * 改一段方案的支付方式：这一段的扣款都跟着换；这一段里单独记成同一张卡的扣款去掉单独记录，
+ * 单独记成别的卡的保持不变。没有分段的订阅就是改订阅本身
+ */
+export function setPhaseMethod(s: Subscription, phaseStart: string, methodId: string | undefined): Subscription {
+  const clear = (pays?: Payment[]) => pays?.map((x) => (x.methodId === methodId ? { ...x, methodId: undefined } : x));
+  if (!s.phases?.length) return { ...s, methodId, payments: clear(s.payments) };
+  const phases = phasesOf(s).map((p) => (p.start === phaseStart ? { ...p, methodId, payments: clear(p.payments) } : p));
+  const next = mirror(s, phases);
   const error = subError(next);
   if (error) throw new Error(error);
   return next;

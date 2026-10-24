@@ -329,7 +329,12 @@ export interface Charge {
   note?: string;
   /** 本笔续费购买的服务起点，与现金日期分开。 */
   serviceDate?: string;
+  /** 这一笔单独记的支付方式；缺省用所属阶段的，读取用 chargeMethodId() */
+  methodId?: string;
 }
+
+/** 一笔扣款实际用的支付方式：这一笔单独记的优先，否则是所属阶段的 */
+export const chargeMethodId = (c: Pick<Charge, 'methodId' | 'sub'>) => c.methodId ?? c.sub.methodId;
 
 /** 规则修改只影响尚未发生的扣款；已扣过的服务边界不重复收费。 */
 function renewalDate(s: Subscription, boundary: string, initial = false): string {
@@ -356,12 +361,18 @@ export function renewalRuleAt(s: Subscription, day: string): RenewalRule {
   );
 }
 
+/** 开始日前移后，允许沿原计费锚点向前查找新增的周期。 */
+function firstCycle(s: Subscription, anchor: string): number {
+  return anchor === s.billingStart && s.start < anchor ? Math.floor(diffDays(anchor, s.start) / cycleDays(s.cycle)) - 2 : 0;
+}
+
 /** 将实付/nextDue 的现金日期恢复为原服务锚点，保留月底日号。 */
 export function renewalAnchor(s: Subscription, anchor: string): string {
   const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
-  const guess = Math.max(0, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
+  const first = firstCycle(s, original);
+  const guess = Math.max(first, Math.round(diffDays(original, anchor) / cycleDays(s.cycle)));
   for (
-    let k = Math.max(0, guess - 2);
+    let k = Math.max(first, guess - 2);
     k <= guess + Math.ceil(Math.max(s.chargeLeadDays ?? 0, ...(s.renewalHistory ?? []).map((r) => r.chargeLeadDays)) / cycleDays(s.cycle)) + 2;
     k++
   ) {
@@ -378,7 +389,9 @@ function schedule(s: Subscription, anchor: string, from: string, to: string, tod
   const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
   if (cashAnchor) anchor = renewalAnchor(s, anchor);
   const pausedFrom = s.status === 'paused' ? (s.pausedAt ?? today) : undefined;
-  let k = Math.max(0, Math.floor(diffDays(anchor, addDays(from, -(s.renewalOffsetDays ?? 0))) / cycleDays(s.cycle)) - 2);
+  // 开始日提前时，沿原计费锚点向前补周期；保留月底日号及之后的续费日期。
+  const first = firstCycle(s, anchor);
+  let k = Math.max(first, Math.floor(diffDays(anchor, addDays(from, -(s.renewalOffsetDays ?? 0))) / cycleDays(s.cycle)) - 2);
   const maxLead = Math.max(s.chargeLeadDays ?? 0, ...(s.renewalHistory ?? []).map((r) => r.chargeLeadDays));
   for (let guard = 0; guard < 10000; guard++, k++) {
     const boundary = nthCharge(anchor, s.cycle, k);
@@ -402,6 +415,7 @@ function schedule(s: Subscription, anchor: string, from: string, to: string, tod
 /**
  * [from, to] 区间内的扣款（含两端）。暂停中的订阅不产生未来扣款；试用期内的不计费。
  * 有实际扣款记录（payments）时以记录为准，之后从 nextDue（缺省为最后一笔 + 一个周期）开始推算；
+ * 开始日提前到原 billingStart 之前的新增服务期按原规则补算，同日实付优先。
  * 只有 nextDue 时，此前按开始日推算，此后从 nextDue 推算（用于扣款日漂移、提前续费等）。
  */
 export function chargesBetween(s: Subscription, from: string, to: string, today: string): Charge[] {
@@ -438,10 +452,17 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
         kind: p.kind,
         settled: p.kind === 'failed' ? undefined : p.settled,
         note: p.note,
+        ...(p.methodId ? { methodId: p.methodId } : {}),
       }));
     if (s.cycle.unit === 'lifetime') return out;
     const last = renewals.at(-1)?.date ?? s.billingStart ?? s.start;
-    return out.concat(schedule(s, s.nextDue ?? last, from, to, today, last, true));
+    const future = schedule(s, s.nextDue ?? last, from, to, today, last, true);
+    const covered = new Set([...pays, ...future].map((p) => p.date));
+    const earlier =
+      s.billingStart && s.start < s.billingStart
+        ? schedule(s, s.billingStart, from, to < s.billingStart ? to : addDays(s.billingStart, -1), today).filter((c) => !covered.has(c.date))
+        : [];
+    return earlier.concat(out, future).sort((a, b) => a.date.localeCompare(b.date));
   }
   if (s.cycle.unit === 'lifetime') {
     return s.start >= from && s.start <= to ? [{ sub: s, date: s.start, amount: priceAt(s, s.start), currency: s.currency, projected: s.start > today }] : [];
@@ -518,11 +539,12 @@ export function nonrenewalDate(s: Subscription, today: string): string {
 export function chargeServicePeriod(s: Subscription, cashDate: string, serviceDate?: string): { from: string; until: string } {
   const offset = s.renewalOffsetDays ?? 0;
   const anchor = renewalAnchor(s, cashDate);
-  const guess = Math.max(0, Math.round(diffDays(anchor, cashDate) / cycleDays(s.cycle)));
+  const first = firstCycle(s, anchor);
+  const guess = Math.max(first, Math.round(diffDays(anchor, cashDate) / cycleDays(s.cycle)));
   const maxLead = Math.max(s.chargeLeadDays ?? 0, ...(s.renewalHistory ?? []).map((r) => r.chargeLeadDays));
   const original = s.status === 'trial' && s.trialEnd ? s.trialEnd : (s.billingStart ?? s.start);
   const extend = (until: string) => (s.bonus && until >= s.bonus.from && until < s.bonus.until ? s.bonus.until : until);
-  for (let k = Math.max(0, guess - 2); k <= guess + Math.ceil(maxLead / cycleDays(s.cycle)) + 2; k++) {
+  for (let k = Math.max(first, guess - 2); k <= guess + Math.ceil(maxLead / cycleDays(s.cycle)) + 2; k++) {
     const boundary = nthCharge(anchor, s.cycle, k);
     if (renewalDate(s, boundary, boundary === original) === cashDate)
       return {
@@ -880,9 +902,13 @@ export interface MemberDue {
   periodsOwed: number;
 }
 
+/** 买断的合租只收一次：收费周期按 100 年算，避免无限长的周期让日期计算失效 */
+export const LIFETIME_BILL_MONTHS = 1200;
+
 /** 旧成员未设置周期时沿用订阅周期。 */
 export function memberBillMonths(s: Subscription, m: ShareMember, day?: string): number {
-  return Math.max(1, Math.round(memberFeePoint(m, day)?.billEvery ?? m.billEvery ?? cycleDays(s.cycle) / 30.4375));
+  const months = Math.round(memberFeePoint(m, day)?.billEvery ?? m.billEvery ?? cycleDays(s.cycle) / 30.4375);
+  return Math.min(LIFETIME_BILL_MONTHS, Math.max(1, Number.isFinite(months) ? months : LIFETIME_BILL_MONTHS));
 }
 
 /** 无历史的旧成员继续读原字段；历史按生效日读取，不依赖系统时间。 */

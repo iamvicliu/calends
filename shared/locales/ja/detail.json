@@ -1,7 +1,18 @@
 {
   "copy": "コピー",
   "copied": "コピーしました",
-  "overlap": { "title": "並行中", "previous": "以前のプラン", "until": "{date}まで\n{rel}" },
+  "note": {
+    "more": "すべて表示"
+  },
+  "renewal": {
+    "afterTrial": "トライアル終了後の初回請求",
+    "elapsed": "今期 {pct}% 経過"
+  },
+  "overlap": {
+    "title": "並行中",
+    "previous": "以前のプラン",
+    "until": "{date}まで\n{rel}"
+  },
   "action": {
     "edit": "編集",
     "pause": "一時停止",
@@ -11,7 +22,11 @@
     "share": "共有",
     "copyImage": "画像としてコピー"
   },
-  "toast": { "resumed": "請求を再開しました", "paused": "一時停止しました。今後の請求は予測に含まれません", "imageCopied": "画像をコピーしました" },
+  "toast": {
+    "resumed": "請求を再開しました",
+    "paused": "一時停止しました。今後の請求は予測に含まれません",
+    "imageCopied": "画像をコピーしました"
+  },
   "history": "履歴",
   "summary": "概要",
   "field": {
@@ -25,16 +40,29 @@
     "expiresHint": "この日より前に自動更新で請求されます",
     "endedOn": "終了日",
     "trialEnd": "トライアル終了",
-    "region": "地域"
+    "region": "地域",
+    "period": "契約期間",
+    "present": "現在",
+    "progress": "今期の経過"
   },
-  "up": { "planned": "変更予定\n未確定", "starting": "まもなく開始", "changing": "今後の変更", "effective": "適用日" },
+  "up": {
+    "planned": "変更予定\n未確定",
+    "starting": "まもなく開始",
+    "changing": "今後の変更",
+    "effective": "適用日"
+  },
   "plan": {
     "drop": "切り替えない",
     "droppedToast": "切り替えません。{date}以降に終了します",
     "confirm": "切り替えを確定",
     "confirmedToast": "切り替えを確定しました"
   },
-  "intro": { "title": "初回特典", "price": "特典価格", "until": "特典終了", "then": "その後" },
+  "intro": {
+    "title": "初回特典",
+    "price": "特典価格",
+    "until": "特典終了",
+    "then": "その後"
+  },
   "share": {
     "open": "シェアを見る",
     "owner": "共有\n主催（{count}/{seats}）",
@@ -48,32 +76,60 @@
     "owed": "未払い {amount}",
     "settled": "精算済み",
     "me": "自分",
-    "seatsLeft": { "other": "{seats} 席中、空き {count} 席" },
+    "seatsLeft": {
+      "other": "{seats} 席中、空き {count} 席"
+    },
     "seatsFull": "{seats} 席すべて埋まっています",
     "surplus": "自己負担なし、{amount} 多く回収"
   },
   "charges": {
     "recentN": "最新 {count} 件のみ",
     "addShort": "記録",
-    "title": { "other": "請求\n{count}" },
-    "kind": { "refund": "返金", "adjust": "調整", "failed": "失敗" },
+    "title": {
+      "other": "請求\n{count}"
+    },
+    "kind": {
+      "refund": "返金",
+      "adjust": "調整",
+      "failed": "失敗"
+    },
     "add": "記録を追加（返金、調整、請求失敗、カード上の金額など）",
     "all": "すべて表示（{count}件）"
   },
   "stats": {
     "spent": "累計支出",
-    "count": { "other": "{count}件の請求" },
+    "count": {
+      "other": "{count}件の請求"
+    },
     "owned": "購入から",
     "subscribed": "登録期間",
     "yearsMonths": "{years}年{months}か月",
-    "years": { "other": "{count}年" },
-    "months": { "other": "{count}か月" },
-    "days": { "other": "{count}日" },
-    "gaps": { "other": "{count}回中断" },
+    "years": {
+      "other": "{count}年"
+    },
+    "months": {
+      "other": "{count}か月"
+    },
+    "days": {
+      "other": "{count}日"
+    },
+    "gaps": {
+      "other": "{count}回中断"
+    },
     "perMonth": "実質月額"
   },
-  "tab": { "charges": "請求履歴\n{count}", "details": "詳細" },
-  "kpi": { "amortized": "月あたり", "noGaps": "中断なし", "startedToday": "今日から", "expectedMonthly": "月あたりの見込み" },
+  "tab": {
+    "charges": "請求履歴\n{count}",
+    "details": "詳細"
+  },
+  "kpi": {
+    "noGaps": "中断なし",
+    "startedToday": "今日から",
+    "expectedMonthly": "月あたりの見込み",
+    "amortizedCost": "按分コスト",
+    "perMonthValue": "{amount}/月",
+    "perDay": "1日 {amount}"
+  },
   "chart": {
     "title": "1 回の請求\n{ccy}",
     "orig": "原通貨",
@@ -84,7 +140,14 @@
     "list": "定価（初回レート）",
     "listOrig": "定価",
     "origAmount": "原通貨の金額",
-    "few": "請求が 2 回以上になると推移を表示します"
+    "few": "請求が 2 回以上になると推移を表示します",
+    "bucket": {
+      "m1": "各棒は1か月の合計",
+      "m3": "各棒は四半期の合計",
+      "m12": "各棒は1年の合計"
+    },
+    "regular": "通常価格",
+    "saved": "初回割引"
   },
   "ev": {
     "next": "次回の引き落とし",
@@ -102,9 +165,28 @@
   },
   "upcoming": {
     "title": "今後 12 か月",
-    "total": { "other": "約 {amount}\n{count} 件" },
-    "more": { "other": "ほか {count} 件" },
+    "total": {
+      "other": "約 {amount}\n{count} 件"
+    },
+    "more": {
+      "other": "ほか {count} 件"
+    },
     "none": "今後 12 か月は請求がありません"
   },
-  "stop": { "title": "停止と返金", "type": "停止の種類", "paidThrough": "当初の支払済み期間の終了日", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "停止と返金",
+    "type": "停止の種類",
+    "paidThrough": "当初の支払済み期間の終了日",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "請求済み",
+    "planned": "予定"
+  },
+  "period": {
+    "paid": "今期",
+    "trial": "トライアル",
+    "bonus": "特典期間",
+    "since": "{date}から"
+  }
 }

@@ -27,7 +27,6 @@
     },
     "fee": "Ücret",
     "nextCollection": "Sonraki tahsilat",
-    "actions": "İşlemler",
     "status": "Ödeme durumu",
     "period": "Geçerli dönem",
     "range": "{from} – {until}",
@@ -103,7 +102,8 @@
       "custom": {
         "one": "{count} ayda bir",
         "other": "{count} ayda bir"
-      }
+      },
+      "once": "Tek seferde"
     },
     "feeCcyAria": "Para birimi",
     "exempt": "Ödemiyor",
@@ -225,7 +225,8 @@
       "custom": {
         "one": "{count} ayda bir {fee}",
         "other": "{count} ayda bir {fee}"
-      }
+      },
+      "once": "Tek seferde {fee}"
     },
     "collect": "Tahsil et",
     "joinedGroup": "Katıldığım planlar",
@@ -234,7 +235,13 @@
     "maybeGroup": "Ortak olabilir",
     "convert": "Ortak yap",
     "dueOn": "Vade {date}",
-    "nextDueOn": "Sonraki {date}"
+    "nextDueOn": "Sonraki {date}",
+    "members": "Üyeler",
+    "incomeShort": "Gelir {amount}",
+    "status": "Durum",
+    "countNote": "Üye {members}, boş yer {free}",
+    "yearPnl": "Bu yıl kâr/zarar",
+    "totalPnl": "Toplam kâr/zarar"
   },
   "convert": {
     "title": "“{name}” ortak yapılsın",
@@ -297,7 +304,9 @@
       "other": "{count} gün gecikti"
     },
     "owe": "{amount} bekliyor\n{date} tarihinden beri",
-    "settled": "Ödendi\nsonraki {date}"
+    "settled": "Ödendi\nsonraki {date}",
+    "adjust": "Ücret ve ayrılma",
+    "backCollect": "Ödeme kaydet"
   },
   "strip": {
     "yearNet": "Yıllık net",
@@ -305,9 +314,9 @@
     "noneOwed": "Borcu olan yok",
     "since": "{date} itibarıyla",
     "profit": "Kâr / zarar",
-    "annualApprox": "Yılda yaklaşık {amount}",
     "paid": "Ödenen",
-    "received": "Alınan"
+    "received": "Alınan",
+    "thisYear": "Bu yıl {amount}"
   },
   "timeline": {
     "paid": "Ödendi",
@@ -323,8 +332,11 @@
   },
   "sort": {
     "owed": "Alacak",
-    "net": "Yıllık net",
+    "net": "Bu yılın sonucuna göre",
     "received": "Toplam alınan",
-    "lastPaid": "Son ödeme"
+    "lastPaid": "Son ödeme",
+    "price": "Plan fiyatına göre",
+    "paid": "Ödenene göre",
+    "profit": "Toplam sonuca göre"
   }
 }

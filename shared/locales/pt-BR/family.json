@@ -27,7 +27,6 @@
     },
     "fee": "Tarifa",
     "nextCollection": "Próxima cobrança",
-    "actions": "Ações",
     "status": "Situação do pagamento",
     "period": "Período atual",
     "range": "{from} – {until}",
@@ -103,7 +102,8 @@
       "custom": {
         "one": "A cada {count} mês",
         "other": "A cada {count} meses"
-      }
+      },
+      "once": "Uma única vez"
     },
     "feeCcyAria": "Moeda",
     "exempt": "Não paga",
@@ -225,7 +225,8 @@
       "custom": {
         "one": "{fee} a cada {count} mês",
         "other": "{fee} a cada {count} meses"
-      }
+      },
+      "once": "{fee} uma única vez"
     },
     "collect": "Cobrar",
     "joinedGroup": "Planos de que participo",
@@ -234,7 +235,13 @@
     "maybeGroup": "Talvez compartilhadas",
     "convert": "Tornar compartilhado",
     "dueOn": "Vence {date}",
-    "nextDueOn": "Próxima cobrança {date}"
+    "nextDueOn": "Próxima cobrança {date}",
+    "members": "Membros",
+    "incomeShort": "Receita {amount}",
+    "status": "Status",
+    "countNote": "Membros {members}, vagas livres {free}",
+    "yearPnl": "Resultado do ano",
+    "totalPnl": "Resultado acumulado"
   },
   "convert": {
     "title": "Tornar “{name}” compartilhado",
@@ -297,7 +304,9 @@
       "other": "{count} dias de atraso"
     },
     "owe": "{amount} pendente\ndesde {date}",
-    "settled": "Em dia\npróxima cobrança {date}"
+    "settled": "Em dia\npróxima cobrança {date}",
+    "adjust": "Taxa e saída",
+    "backCollect": "Registrar pagamento"
   },
   "strip": {
     "yearNet": "Líquido por ano",
@@ -305,9 +314,9 @@
     "noneOwed": "Ninguém deve",
     "since": "Desde {date}",
     "profit": "Lucro / prejuízo",
-    "annualApprox": "Cerca de {amount} por ano",
     "paid": "Pago",
-    "received": "Recebido"
+    "received": "Recebido",
+    "thisYear": "Este ano {amount}"
   },
   "timeline": {
     "paid": "Pago",
@@ -323,8 +332,11 @@
   },
   "sort": {
     "owed": "Valor a receber",
-    "net": "Líquido anual",
+    "net": "Por resultado do ano",
     "received": "Total recebido",
-    "lastPaid": "Último pagamento"
+    "lastPaid": "Último pagamento",
+    "price": "Por preço do plano",
+    "paid": "Por pago até hoje",
+    "profit": "Por resultado acumulado"
   }
 }

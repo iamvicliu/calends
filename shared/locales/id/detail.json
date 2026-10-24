@@ -1,7 +1,18 @@
 {
   "copy": "Salin",
   "copied": "Disalin",
-  "overlap": { "title": "Juga berjalan", "previous": "Paket sebelumnya", "until": "Sampai {date}\n{rel}" },
+  "note": {
+    "more": "Tampilkan semua"
+  },
+  "renewal": {
+    "afterTrial": "Tagihan pertama setelah uji coba",
+    "elapsed": "{pct}% periode ini berlalu"
+  },
+  "overlap": {
+    "title": "Juga berjalan",
+    "previous": "Paket sebelumnya",
+    "until": "Sampai {date}\n{rel}"
+  },
   "action": {
     "edit": "Edit",
     "pause": "Jeda",
@@ -11,7 +22,11 @@
     "share": "Bagikan",
     "copyImage": "Salin sebagai gambar"
   },
-  "toast": { "resumed": "Tagihan dilanjutkan", "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan", "imageCopied": "Gambar disalin" },
+  "toast": {
+    "resumed": "Tagihan dilanjutkan",
+    "paused": "Dijeda. Tagihan mendatang tidak lagi diperkirakan",
+    "imageCopied": "Gambar disalin"
+  },
   "history": "Riwayat",
   "summary": "Ringkasan",
   "field": {
@@ -25,16 +40,29 @@
     "expiresHint": "Perpanjangan otomatis ditagih sebelum tanggal ini",
     "endedOn": "Berakhir pada",
     "trialEnd": "Uji coba berakhir",
-    "region": "Wilayah"
+    "region": "Wilayah",
+    "period": "Periode",
+    "present": "sekarang",
+    "progress": "Periode ini"
   },
-  "up": { "planned": "Rencana perubahan\nbelum pasti", "starting": "Segera dimulai", "changing": "Perubahan mendatang", "effective": "Tanggal berlaku" },
+  "up": {
+    "planned": "Rencana perubahan\nbelum pasti",
+    "starting": "Segera dimulai",
+    "changing": "Perubahan mendatang",
+    "effective": "Tanggal berlaku"
+  },
   "plan": {
     "drop": "Jangan beralih",
     "droppedToast": "Tidak beralih. Berakhir setelah {date}",
     "confirm": "Konfirmasi peralihan",
     "confirmedToast": "Peralihan dikonfirmasi"
   },
-  "intro": { "title": "Promo awal", "price": "Harga promo", "until": "Promo berakhir", "then": "Setelahnya" },
+  "intro": {
+    "title": "Promo awal",
+    "price": "Harga promo",
+    "until": "Promo berakhir",
+    "then": "Setelahnya"
+  },
   "share": {
     "open": "Lihat patungan",
     "owner": "Bersama\nsaya pengelola ({count}/{seats})",
@@ -48,32 +76,60 @@
     "owed": "Tertunggak {amount}",
     "settled": "Lunas",
     "me": "Saya",
-    "seatsLeft": { "other": "{seats} kursi, {count} kosong" },
+    "seatsLeft": {
+      "other": "{seats} kursi, {count} kosong"
+    },
     "seatsFull": "Semua {seats} kursi terisi",
     "surplus": "Gratis, lebih {amount}"
   },
   "charges": {
     "recentN": "Hanya {count} terakhir",
     "addShort": "Catat",
-    "title": { "other": "Tagihan\n{count}" },
-    "kind": { "refund": "Refund", "adjust": "Penyesuaian", "failed": "Gagal" },
+    "title": {
+      "other": "Tagihan\n{count}"
+    },
+    "kind": {
+      "refund": "Refund",
+      "adjust": "Penyesuaian",
+      "failed": "Gagal"
+    },
     "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)",
     "all": "Tampilkan semua {count}"
   },
   "stats": {
     "spent": "Total pengeluaran",
-    "count": { "other": "{count} tagihan" },
+    "count": {
+      "other": "{count} tagihan"
+    },
     "owned": "Dimiliki selama",
     "subscribed": "Berlangganan selama",
     "yearsMonths": "{years} thn {months} bln",
-    "years": { "other": "{count} tahun" },
-    "months": { "other": "{count} bulan" },
-    "days": { "other": "{count} hari" },
-    "gaps": { "other": "Terputus {count} kali" },
+    "years": {
+      "other": "{count} tahun"
+    },
+    "months": {
+      "other": "{count} bulan"
+    },
+    "days": {
+      "other": "{count} hari"
+    },
+    "gaps": {
+      "other": "Terputus {count} kali"
+    },
     "perMonth": "Biaya bulanan riil"
   },
-  "tab": { "charges": "Tagihan\n{count}", "details": "Detail" },
-  "kpi": { "amortized": "Per bulan dimiliki", "noGaps": "Tanpa jeda", "startedToday": "Mulai hari ini", "expectedMonthly": "Perkiraan per bulan" },
+  "tab": {
+    "charges": "Tagihan\n{count}",
+    "details": "Detail"
+  },
+  "kpi": {
+    "noGaps": "Tanpa jeda",
+    "startedToday": "Mulai hari ini",
+    "expectedMonthly": "Perkiraan per bulan",
+    "amortizedCost": "Biaya rata-rata",
+    "perMonthValue": "{amount}/bln",
+    "perDay": "{amount} per hari"
+  },
   "chart": {
     "title": "Per tagihan\n{ccy}",
     "orig": "Asli",
@@ -84,7 +140,14 @@
     "list": "Harga daftar pada kurs pertama",
     "listOrig": "Harga daftar",
     "origAmount": "Jumlah asli",
-    "few": "Perlu minimal dua tagihan untuk melihat tren"
+    "few": "Perlu minimal dua tagihan untuk melihat tren",
+    "bucket": {
+      "m1": "Setiap batang adalah total bulanan",
+      "m3": "Setiap batang adalah total kuartalan",
+      "m12": "Setiap batang adalah total tahunan"
+    },
+    "regular": "Harga normal",
+    "saved": "Diskon awal"
   },
   "ev": {
     "next": "Tagihan berikutnya",
@@ -102,9 +165,28 @@
   },
   "upcoming": {
     "title": "12 bulan ke depan",
-    "total": { "other": "≈ {amount}\n{count} tagihan" },
-    "more": { "other": "{count} lagi" },
+    "total": {
+      "other": "≈ {amount}\n{count} tagihan"
+    },
+    "more": {
+      "other": "{count} lagi"
+    },
     "none": "Tidak ada tagihan dalam 12 bulan ke depan"
   },
-  "stop": { "title": "Penghentian dan pengembalian dana", "type": "Jenis penghentian", "paidThrough": "Awalnya dibayar sampai", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Penghentian dan pengembalian dana",
+    "type": "Jenis penghentian",
+    "paidThrough": "Awalnya dibayar sampai",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Ditagih",
+    "planned": "Perkiraan"
+  },
+  "period": {
+    "paid": "Periode ini",
+    "trial": "Uji coba",
+    "bonus": "Periode bonus",
+    "since": "Sejak {date}"
+  }
 }

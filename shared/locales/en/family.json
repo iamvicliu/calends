@@ -27,7 +27,6 @@
     },
     "fee": "Fee",
     "nextCollection": "Next due",
-    "actions": "Actions",
     "status": "Payment status",
     "period": "Current period",
     "range": "{from} – {until}",
@@ -103,7 +102,8 @@
       "custom": {
         "one": "Every {count} month",
         "other": "Every {count} months"
-      }
+      },
+      "once": "One-time"
     },
     "feeCcyAria": "Currency",
     "exempt": "Doesn't pay",
@@ -225,7 +225,8 @@
       "custom": {
         "one": "{fee} every {count} month",
         "other": "{fee} every {count} months"
-      }
+      },
+      "once": "{fee} one-time"
     },
     "collect": "Collect",
     "joinedGroup": "Plans I've joined",
@@ -234,7 +235,13 @@
     "maybeGroup": "Possibly shared",
     "convert": "Make shared",
     "dueOn": "Due {date}",
-    "nextDueOn": "Next due {date}"
+    "nextDueOn": "Next due {date}",
+    "members": "Members",
+    "incomeShort": "Income {amount}",
+    "status": "Status",
+    "countNote": "Members {members}, open seats {free}",
+    "yearPnl": "This year P/L",
+    "totalPnl": "Total P/L"
   },
   "convert": {
     "title": "Make “{name}” shared",
@@ -297,7 +304,9 @@
       "other": "{count} days overdue"
     },
     "owe": "{amount} due\nsince {date}",
-    "settled": "Settled\nnext due {date}"
+    "settled": "Settled\nnext due {date}",
+    "adjust": "Fee & leaving",
+    "backCollect": "Record payment"
   },
   "strip": {
     "yearNet": "Net per year",
@@ -305,9 +314,9 @@
     "noneOwed": "Nobody owes",
     "since": "Since {date}",
     "profit": "Profit / loss",
-    "annualApprox": "About {amount} per year",
     "paid": "Paid",
-    "received": "Received"
+    "received": "Received",
+    "thisYear": "This year {amount}"
   },
   "timeline": {
     "paid": "Paid",
@@ -323,8 +332,11 @@
   },
   "sort": {
     "owed": "Amount owed",
-    "net": "Yearly net",
+    "net": "This year P/L",
     "received": "Total received",
-    "lastPaid": "Last payment"
+    "lastPaid": "Last payment",
+    "price": "Plan price",
+    "paid": "Paid to date",
+    "profit": "Total P/L"
   }
 }

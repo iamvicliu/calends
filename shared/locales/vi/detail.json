@@ -1,7 +1,18 @@
 {
   "copy": "Sao chép",
   "copied": "Đã sao chép",
-  "overlap": { "title": "Đang chạy song song", "previous": "Gói trước", "until": "Đến {date}\n{rel}" },
+  "note": {
+    "more": "Xem toàn bộ"
+  },
+  "renewal": {
+    "afterTrial": "Lần trừ tiền đầu sau dùng thử",
+    "elapsed": "Đã qua {pct}% kỳ này"
+  },
+  "overlap": {
+    "title": "Đang chạy song song",
+    "previous": "Gói trước",
+    "until": "Đến {date}\n{rel}"
+  },
   "action": {
     "edit": "Sửa",
     "pause": "Tạm dừng",
@@ -11,7 +22,11 @@
     "share": "Chia sẻ",
     "copyImage": "Sao chép thành ảnh"
   },
-  "toast": { "resumed": "Đã tiếp tục thanh toán", "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến", "imageCopied": "Đã sao chép ảnh" },
+  "toast": {
+    "resumed": "Đã tiếp tục thanh toán",
+    "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến",
+    "imageCopied": "Đã sao chép ảnh"
+  },
   "history": "Lịch sử",
   "summary": "Tóm tắt",
   "field": {
@@ -25,16 +40,29 @@
     "expiresHint": "Tự động gia hạn sẽ trừ tiền trước ngày này",
     "endedOn": "Kết thúc ngày",
     "trialEnd": "Hết dùng thử",
-    "region": "Khu vực"
+    "region": "Khu vực",
+    "period": "Thời gian",
+    "present": "nay",
+    "progress": "Kỳ hiện tại"
   },
-  "up": { "planned": "Dự định thay đổi\nchưa xác nhận", "starting": "Sắp bắt đầu", "changing": "Thay đổi sắp tới", "effective": "Ngày hiệu lực" },
+  "up": {
+    "planned": "Dự định thay đổi\nchưa xác nhận",
+    "starting": "Sắp bắt đầu",
+    "changing": "Thay đổi sắp tới",
+    "effective": "Ngày hiệu lực"
+  },
   "plan": {
     "drop": "Không chuyển",
     "droppedToast": "Sẽ không chuyển. Kết thúc sau {date}",
     "confirm": "Xác nhận chuyển",
     "confirmedToast": "Đã xác nhận chuyển"
   },
-  "intro": { "title": "Ưu đãi mở đầu", "price": "Giá ưu đãi", "until": "Ưu đãi kết thúc", "then": "Sau đó" },
+  "intro": {
+    "title": "Ưu đãi mở đầu",
+    "price": "Giá ưu đãi",
+    "until": "Ưu đãi kết thúc",
+    "then": "Sau đó"
+  },
   "share": {
     "open": "Xem nhóm",
     "owner": "Chia sẻ\ntôi làm chủ nhóm ({count}/{seats})",
@@ -48,32 +76,60 @@
     "owed": "Còn nợ {amount}",
     "settled": "Đã thanh toán đủ",
     "me": "Tôi",
-    "seatsLeft": { "other": "{seats} chỗ, còn trống {count}" },
+    "seatsLeft": {
+      "other": "{seats} chỗ, còn trống {count}"
+    },
     "seatsFull": "Đã kín cả {seats} chỗ",
     "surplus": "Không mất tiền, dư {amount}"
   },
   "charges": {
     "recentN": "Chỉ {count} lần gần nhất",
     "addShort": "Ghi",
-    "title": { "other": "Khoản phí\n{count}" },
-    "kind": { "refund": "Hoàn tiền", "adjust": "Điều chỉnh", "failed": "Thất bại" },
+    "title": {
+      "other": "Khoản phí\n{count}"
+    },
+    "kind": {
+      "refund": "Hoàn tiền",
+      "adjust": "Điều chỉnh",
+      "failed": "Thất bại"
+    },
     "add": "Thêm bản ghi (hoàn tiền, điều chỉnh, trừ tiền thất bại, số tiền trên thẻ…)",
     "all": "Hiện tất cả {count}"
   },
   "stats": {
     "spent": "Tổng chi",
-    "count": { "other": "{count} khoản phí" },
+    "count": {
+      "other": "{count} khoản phí"
+    },
     "owned": "Đã sở hữu",
     "subscribed": "Đã đăng ký",
     "yearsMonths": "{years} năm {months} tháng",
-    "years": { "other": "{count} năm" },
-    "months": { "other": "{count} tháng" },
-    "days": { "other": "{count} ngày" },
-    "gaps": { "other": "Gián đoạn {count} lần" },
+    "years": {
+      "other": "{count} năm"
+    },
+    "months": {
+      "other": "{count} tháng"
+    },
+    "days": {
+      "other": "{count} ngày"
+    },
+    "gaps": {
+      "other": "Gián đoạn {count} lần"
+    },
     "perMonth": "Thực chi mỗi tháng"
   },
-  "tab": { "charges": "Lần trừ tiền\n{count}", "details": "Chi tiết" },
-  "kpi": { "amortized": "Chia theo tháng", "noGaps": "Không gián đoạn", "startedToday": "Bắt đầu hôm nay", "expectedMonthly": "Dự kiến mỗi tháng" },
+  "tab": {
+    "charges": "Lần trừ tiền\n{count}",
+    "details": "Chi tiết"
+  },
+  "kpi": {
+    "noGaps": "Không gián đoạn",
+    "startedToday": "Bắt đầu hôm nay",
+    "expectedMonthly": "Dự kiến mỗi tháng",
+    "amortizedCost": "Chi phí phân bổ",
+    "perMonthValue": "{amount}/tháng",
+    "perDay": "{amount} mỗi ngày"
+  },
   "chart": {
     "title": "Mỗi lần trừ\n{ccy}",
     "orig": "Gốc",
@@ -84,7 +140,14 @@
     "list": "Giá niêm yết theo tỷ giá đầu",
     "listOrig": "Giá niêm yết",
     "origAmount": "Số tiền gốc",
-    "few": "Cần ít nhất hai lần trừ tiền để vẽ xu hướng"
+    "few": "Cần ít nhất hai lần trừ tiền để vẽ xu hướng",
+    "bucket": {
+      "m1": "Mỗi cột là tổng một tháng",
+      "m3": "Mỗi cột là tổng một quý",
+      "m12": "Mỗi cột là tổng một năm"
+    },
+    "regular": "Giá gốc",
+    "saved": "Ưu đãi kỳ đầu"
   },
   "ev": {
     "next": "Lần trừ tiếp theo",
@@ -102,9 +165,28 @@
   },
   "upcoming": {
     "title": "12 tháng tới",
-    "total": { "other": "≈ {amount}\n{count} lần" },
-    "more": { "other": "Thêm {count} lần" },
+    "total": {
+      "other": "≈ {amount}\n{count} lần"
+    },
+    "more": {
+      "other": "Thêm {count} lần"
+    },
     "none": "Không có khoản trừ nào trong 12 tháng tới"
   },
-  "stop": { "title": "Dừng dịch vụ và hoàn tiền", "type": "Loại dừng dịch vụ", "paidThrough": "Ngày cuối đã trả ban đầu", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Dừng dịch vụ và hoàn tiền",
+    "type": "Loại dừng dịch vụ",
+    "paidThrough": "Ngày cuối đã trả ban đầu",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Đã trừ",
+    "planned": "Dự kiến"
+  },
+  "period": {
+    "paid": "Kỳ hiện tại",
+    "trial": "Dùng thử",
+    "bonus": "Thời gian tặng",
+    "since": "Từ {date}"
+  }
 }

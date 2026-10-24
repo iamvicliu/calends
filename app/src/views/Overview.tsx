@@ -2,7 +2,7 @@ import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { type CSSProperties, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge } from '../../../shared/billing.ts';
+import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge, chargeMethodId } from '../../../shared/billing.ts';
 import { moneyTick, flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
@@ -170,10 +170,10 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
     <div className="card copy-card" data-copy-card style={{ padding: '22px 24px 20px' }}>
       <div className="ov-head">
         <div>
-          <CardTitle as="h3" className="sec-title" hint={t('report.cash.fullPaidHint')}>
+          {/* 「浅色为预计」并入说明，标题下不再单列一行 */}
+          <CardTitle as="h3" className="sec-title" hint={`${t('report.cash.fullPaidHint')}\n${t('overview.spending.sub')}`}>
             {t('overview.spending.title')}
           </CardTitle>
-          <div className="sec-sub">{t('overview.spending.sub')}</div>
         </div>
         <div className="copy-controls">
           <CopyImageButton hover />
@@ -193,7 +193,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
 
       <Activity
         buckets={buckets}
-        color={(k) => (k === PROJ ? 'var(--chart-ink-2)' : 'var(--chart-ink)')}
+        color={(k) => (k === PROJ ? 'pending' : 'var(--chart-ink)')}
         selected={selKey ? sel : undefined}
         current={sel}
         onSelect={(k) => setSelKey(k === selKey ? undefined : k)}
@@ -293,7 +293,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
               <div className="due-g">{t(`overview.due.${g}`)}</div>
               {list.slice(0, g === 'thisWeek' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
-                const m = state.methods.find((x) => x.id === c.sub.methodId);
+                const m = state.methods.find((x) => x.id === chargeMethodId(c));
                 const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
                 return (
                   <button key={c.sub.id + c.date + i} className="due-row" onClick={() => onOpen(c.sub)}>

@@ -12,7 +12,8 @@
   grid-template-columns: minmax(200px, 1fr) 132px 168px 120px 128px;
   align-items: center;
   gap: 24px;
-  padding: 8px 20px;
+  /* 与合租、代付的列表视图同一套：左右 16px */
+  padding: 8px 16px;
 }
 .people-head {
   border-radius: var(--r) var(--r) 0 0;
@@ -40,8 +41,8 @@
   border-radius: var(--radius-sm);
 }
 .people-row {
-  /* 参考常见组件库中等密度表格（约 48px） */
-  min-height: 48px;
+  /* 与合租、代付的列表视图同一行高（56px），三张表切换时不跳 */
+  min-height: 56px;
   border-top: var(--hairline) solid var(--sep);
   cursor: pointer;
   font-size: var(--fs-2);
@@ -61,25 +62,23 @@
   min-width: 0;
 }
 .people-person {
-  /* 称呼与联系方式同一行，行高减半 */
+  /* 称呼胶囊与联系方式同一行 */
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   min-width: 0;
 }
-.people-open {
-  display: block;
-  padding: 0;
+.people-open.car-member-chip {
+  flex-shrink: 0;
+  max-width: 100%;
   border: 0;
-  background: none;
   color: var(--label);
-  font: inherit;
-  font-weight: 600;
+  font-family: inherit;
   text-align: left;
   cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+.people-row:hover .people-open.car-member-chip {
+  background: var(--gray-4);
 }
 .people-person small,
 .people-owed small {

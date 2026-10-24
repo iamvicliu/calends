@@ -90,7 +90,13 @@ export function List({
     setSort(k);
     setDir(DEFAULT_DIR[k]);
   };
-  const toggleSort = (k: Sort) => (k === sort ? setDir(dir === 'asc' ? 'desc' : 'asc') : chooseSort(k));
+  // 表头三态：该列默认方向、反向、回到默认（按下次扣款）；默认排序不标箭头，与合租、代付、人员表一致
+  const toggleSort = (k: Sort) => {
+    if (k !== sort) return chooseSort(k);
+    if (dir === DEFAULT_DIR[k]) return setDir(dir === 'asc' ? 'desc' : 'asc');
+    chooseSort('next');
+  };
+  const marked = (k: Sort) => sort === k && !(k === 'next' && dir === DEFAULT_DIR.next);
   const [view, setView] = usePref<View>('list-view', 'grid', isView);
   // 金额显示：原币，或折算成侧边栏选的货币（大字为折算后，小字为原币）
   const orig = useOrig();
@@ -235,16 +241,7 @@ export function List({
             </IconButton>
           )}
         </label>
-        <Seg
-          small
-          value={view}
-          onChange={setView}
-          options={[
-            ['grid', t('list.view.grid')],
-            ['list', t('list.view.list')],
-            ['gantt', t('list.view.gantt')],
-          ]}
-        />
+        {/* 列表视图在表头排序，右上角的排序只给卡片与时间轴用 */}
         {view !== 'list' && (
           <SortControl
             value={sort}
@@ -267,6 +264,17 @@ export function List({
             <Icon name="plus" />
           </IconButton>
         )}
+        {/* 视图切换固定在右上角最后一个，各页一致 */}
+        <Seg
+          small
+          value={view}
+          onChange={setView}
+          options={[
+            ['grid', t('list.view.grid')],
+            ['list', t('list.view.list')],
+            ['gantt', t('list.view.gantt')],
+          ]}
+        />
       </Toolbar>
       <div className="page fade-in">
         <div className="facets">
@@ -409,15 +417,16 @@ export function List({
                     ['next', t('list.col.next')],
                   ] as Array<[Sort, string]>
                 ).map(([k, l]) => (
+                  // 每列都可排序；只有正在排序（且不是默认的按下次扣款）的那一列带单支箭头
                   <button
                     key={k}
-                    className={`lt-sort ${sort === k ? 'on' : ''}`}
+                    className={`lt-sort ${marked(k) ? 'on' : ''}`}
                     onClick={() => toggleSort(k)}
                     aria-sort={sort === k ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
                     title={t(`list.sort.${k}`)}
                   >
                     {l}
-                    <Icon name={sort === k ? (dir === 'asc' ? 'sort-asc' : 'sort-desc') : 'updown'} size={12} />
+                    {marked(k) && <Icon name={dir === 'asc' ? 'arrow-up' : 'arrow-down'} size={12} />}
                   </button>
                 ))}
               </div>

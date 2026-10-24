@@ -1,14 +1,21 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
 import { useWidth } from '../components/ui.tsx';
 
-export interface ChartPoint {
+export interface ChartBar {
   date: string;
+  /** 折合记账货币的金额；缺汇率时为 NaN，画成占位的短柱 */
   v: number;
-  /** 标价按这一段首笔的汇率折算，画成虚线：和实线的差就是汇率带来的涨跌 */
+  /** 今天之后的预测扣款 */
+  future?: boolean;
+  /** 标价参照（按那一段首笔的汇率折算），画成虚线台阶；高出或低于它就是汇率带来的涨跌 */
   list?: number;
+  /** 属于哪一段方案：只有不同方案的扣款挨在一起时才并排，同一方案的相邻扣款各自一根 */
+  phase?: string;
+  /** 首期优惠期间这一笔的原价（同单位）：实际扣的是实色，原价比实际多出的部分画成柱顶的虚框 */
+  full?: number;
 }
 
 export interface ChartLane {
@@ -18,15 +25,17 @@ export interface ChartLane {
   lane: number;
   color: string;
   label: ReactNode;
+  /** 色带窄时只写价格，不写周期 */
+  short?: ReactNode;
   aside?: ReactNode;
 }
 
 const PAD_L = 44;
 const PAD_R = 14;
 const LANE = 24;
-/** 曲线区高度与顶部留白 */
+/** 柱区高度与顶部留白（留给「今天」标签） */
 const H = 150;
-const T = 10;
+const T = 18;
 
 /** 刻度取 1、2、2.5、5 × 10ⁿ，让 4 格左右正好盖住最大值 */
 function niceStep(max: number) {
@@ -35,81 +44,95 @@ function niceStep(max: number) {
   return ([1, 2, 2.5, 5, 10].find((m) => m * p >= raw) ?? 10) * p;
 }
 
-/** 单调三次插值（Fritsch–Carlson）：曲线平滑，但不会冲出相邻两点的范围 */
-function smooth(pts: Array<[number, number]>) {
-  if (pts.length < 3) return pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x},${y}`).join('');
-  const n = pts.length;
-  const d = pts.slice(1).map(([x, y], i) => (y - pts[i][1]) / (x - pts[i][0] || 1));
-  const m = pts.map((_, i) => {
-    if (i === 0) return d[0];
-    if (i === n - 1) return d[n - 2];
-    return d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
-  });
-  for (let i = 0; i < n - 1; i++) {
-    if (d[i] === 0) {
-      m[i] = m[i + 1] = 0;
-      continue;
-    }
-    const a = m[i] / d[i];
-    const b = m[i + 1] / d[i];
-    const s = a * a + b * b;
-    if (s > 9) {
-      const k = 3 / Math.sqrt(s);
-      m[i] = k * a * d[i];
-      m[i + 1] = k * b * d[i];
-    }
-  }
-  let out = `M${pts[0][0]},${pts[0][1]}`;
-  for (let i = 0; i < n - 1; i++) {
-    const [x0, y0] = pts[i];
-    const [x1, y1] = pts[i + 1];
-    const h = (x1 - x0) / 3;
-    out += `C${x0 + h},${y0 + m[i] * h} ${x1 - h},${y1 - m[i + 1] * h} ${x1},${y1}`;
-  }
-  return out;
-}
-
 /**
- * 每笔扣款折算后的走势：实线是每笔实际折合，虚线是标价按首笔汇率折合，下面是各段方案的轨道。
- * 悬停（或手指按住拖动）时出现十字线和明细卡片。
+ * 扣款时间轴：横轴是真实日期，每笔扣款一根柱。今天之前是实际扣款，之后是预测，中间一条「今天」虚线；
+ * 下面是各段方案的轨道。悬停（或手指按住拖动）时高亮最近的一根并出现明细卡片。
  */
-export function ChargeChart({
-  points,
+export function ChargeBars({
+  bars,
+  from,
+  to,
+  today,
+  todayLabel,
   fmt,
   lanes,
   tip,
+  onBucket,
 }: {
-  points: ChartPoint[];
+  bars: ChartBar[];
+  from: string;
+  to: string;
+  today: string;
+  todayLabel: string;
   fmt: (v: number) => string;
   lanes: ChartLane[];
-  tip: (i: number) => ReactNode;
+  tip: (indices: number[], summed: boolean) => ReactNode;
+  /** 柱子太密改为按月（1）、季（3）、年（12）汇总时，告诉调用方写一句说明 */
+  onBucket?: (months: number) => void;
 }) {
   const [box, w] = useWidth();
   const [hover, setHover] = useState<number | null>(null);
 
-  const from = points[0].date;
-  const to = points[points.length - 1].date;
   const span = Math.max(1, diffDays(from, to));
   const iw = Math.max(1, w - PAD_L - PAD_R);
   const x = (d: string) => PAD_L + (Math.min(span, Math.max(0, diffDays(from, d))) / span) * iw;
-  const max = Math.max(...points.map((p) => Math.max(p.v, p.list ?? 0))) || 1;
+  type Group = { x: number; idx: number[]; future: boolean; stack: boolean };
+  // 1) 换方案、换卡、并行方案时，不同方案的两笔相隔 10 天以内：并排放在同一位置，悬停时逐笔列出
+  const near: Group[] = [];
+  bars.forEach((b, i) => {
+    const last = near[near.length - 1];
+    const prev = last && bars[last.idx[last.idx.length - 1]];
+    if (last && prev && !!b.future === last.future && prev.phase !== b.phase && diffDays(prev.date, b.date) <= 10) last.idx.push(i);
+    else near.push({ x: 0, idx: [i], future: !!b.future, stack: true });
+  });
+  // 2) 太密时（柱距不到 7px）按月、季、年汇总成一根实心柱，柱子代表那段时间的合计，不再分段
+  const fit = Math.max(4, Math.floor(iw / 7));
+  const bucketOf = (d: string, by: number) => {
+    const m = Number(d.slice(5, 7)) - 1;
+    return `${d.slice(0, 4)}-${by === 12 ? 0 : Math.floor(m / by)}`;
+  };
+  let groups: Group[] = near;
+  let bucket = 0;
+  for (const by of [1, 3, 12]) {
+    if (groups.length <= fit) break;
+    bucket = by;
+    const merged: Group[] = [];
+    for (const g of near) {
+      const k = bucketOf(bars[g.idx[0]].date, by) + (g.future ? '+' : '');
+      const last = merged[merged.length - 1];
+      const lk = last && bucketOf(bars[last.idx[0]].date, by) + (last.future ? '+' : '');
+      if (last && lk === k) last.idx.push(...g.idx);
+      else merged.push({ x: 0, idx: [...g.idx], future: g.future, stack: false });
+    }
+    groups = merged;
+  }
+  useEffect(() => onBucket?.(bucket), [bucket, onBucket]);
+  // 柱子放在组内各笔日期的平均位置
+  for (const g of groups) g.x = g.idx.reduce((a, i) => a + x(bars[i].date), 0) / g.idx.length;
+  // 柱宽随密度变：密时 3px，稀疏的年付最宽 16px
+  const bw = Math.max(3, Math.min(16, (iw / Math.max(1, groups.length)) * 0.55));
+  const val = (i: number) => (Number.isFinite(bars[i].v) ? Math.max(0, bars[i].v) : 0);
+  const listOf = (g: Group) =>
+    g.idx.every((i) => bars[i].list != null)
+      ? g.stack
+        ? Math.max(...g.idx.map((i) => bars[i].list!))
+        : g.idx.reduce((a, i) => a + bars[i].list!, 0)
+      : undefined;
+  const max =
+    Math.max(
+      0,
+      ...groups.map((g) =>
+        Math.max(
+          g.idx.reduce((a, i) => a + val(i), 0),
+          listOf(g) ?? 0,
+        ),
+      ),
+    ) || 1;
   const step = niceStep(max * 1.08);
   const top = Math.ceil((max * 1.08) / step) * step;
   const y = (v: number) => T + (1 - v / top) * (H - T - 6);
   const ticks = Array.from({ length: Math.round(top / step) + 1 }, (_, i) => i * step);
-
-  const pts = points.map((p) => [x(p.date), y(p.v)] as [number, number]);
-  const line = smooth(pts);
-  const area = `${line}L${pts[pts.length - 1][0]},${H}L${pts[0][0]},${H}Z`;
-  // 标价：阶梯线，价格或汇率基准变了才跳
-  let list = '';
-  points.forEach((p, i) => {
-    if (p.list == null) return;
-    const px = x(p.date);
-    const py = y(p.list);
-    const prev = points[i - 1]?.list;
-    list += !list || prev == null ? `M${px},${py}` : `L${px},${y(prev)}L${px},${py}`;
-  });
+  const cx = groups.map((g) => g.x);
 
   // 月份刻度：间隔按宽度挑，最多约每 90px 一个
   const months = Math.max(1, Math.round(span / 30.44));
@@ -122,27 +145,21 @@ export function ChargeChart({
   }
 
   const nLanes = lanes.reduce((m, l) => Math.max(m, l.lane + 1), 0);
-  const last = points.length - 1;
   const onMove = (e: React.PointerEvent) => {
-    const r = box.current!.getBoundingClientRect();
-    const px = e.clientX - r.left;
+    if (!bars.length) return;
+    const px = e.clientX - box.current!.getBoundingClientRect().left;
     let best = 0;
-    for (let i = 1; i < pts.length; i++) if (Math.abs(pts[i][0] - px) < Math.abs(pts[best][0] - px)) best = i;
+    for (let i = 1; i < cx.length; i++) if (Math.abs(cx[i] - px) < Math.abs(cx[best] - px)) best = i;
     setHover(best);
   };
-  const hx = hover != null ? pts[hover][0] : 0;
+  const hx = hover != null ? cx[hover] : 0;
+  const tx = x(today);
 
   return (
     <div className="cc" ref={box} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
       {w > 0 && (
         <>
           <svg className="cc-plot" width={w} height={H}>
-            <defs>
-              <linearGradient id="cc-fill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0" stopColor="var(--chart-ink)" stopOpacity="0.16" />
-                <stop offset="1" stopColor="var(--chart-ink)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
             {ticks.map((v) => (
               <g key={v}>
                 <line className="cc-grid" x1={PAD_L} x2={w - PAD_R} y1={y(v)} y2={y(v)} />
@@ -151,17 +168,72 @@ export function ChargeChart({
                 </text>
               </g>
             ))}
-            <path d={area} fill="url(#cc-fill)" />
-            {list && <path className="cc-list" d={list} />}
-            <path className="cc-line" d={line} />
-            {points.length <= 40 && pts.map(([px, py], i) => <circle key={i} className="cc-pt" cx={px} cy={py} r={i === last ? 4 : 2.2} />)}
-            {hover != null && (
-              <>
-                <line className="cc-cross" x1={hx} x2={hx} y1={T} y2={H} />
-                {points[hover].list != null && <circle className="cc-hl list" cx={hx} cy={y(points[hover].list!)} r={3.5} />}
-                <circle className="cc-hl" cx={hx} cy={pts[hover][1]} r={5} />
-              </>
-            )}
+            {groups.map((g, gi) => {
+              const on = hover === gi ? 'on' : '';
+              // 汇总柱：一根实心柱，高度是这段时间的合计；有一笔缺汇率就画成浅色短块
+              if (!g.stack || g.idx.length === 1) {
+                const ok = g.idx.every((i) => Number.isFinite(bars[i].v));
+                const sum = g.idx.reduce((a, i) => a + val(i), 0);
+                const by = ok ? Math.min(y(sum), y(0) - 2) : y(0) - 4;
+                const full = g.idx.length === 1 ? bars[g.idx[0]].full : undefined;
+                return (
+                  <g key={gi}>
+                    {/* 首期优惠：先画一整根原价高度的未扣柱（与预测同一种虚框样式），实际扣的实色柱从底部涨到它的金额为止 */}
+                    {ok && full != null && full > sum && (
+                      <rect className={`cc-bar future ${on}`} x={g.x - bw / 2} y={y(full)} width={bw} height={y(0) - y(full)} rx={Math.min(3, bw / 2)} />
+                    )}
+                    <rect
+                      className={`cc-bar ${g.future ? 'future' : ''} ${ok ? '' : 'unknown'} ${on}`}
+                      x={g.x - bw / 2}
+                      y={by}
+                      width={bw}
+                      height={y(0) - by}
+                      rx={Math.min(3, bw / 2)}
+                    />
+                  </g>
+                );
+              }
+              // 挨在一起的几笔（不同方案）：同一位置左右并排，每笔一根窄柱，中间留 1px 缝
+              const n = g.idx.length;
+              const w1 = Math.max(2, (bw - (n - 1)) / n);
+              return g.idx.map((i, k) => {
+                const ok = Number.isFinite(bars[i].v);
+                const by = ok ? Math.min(y(val(i)), y(0) - 2) : y(0) - 4;
+                return (
+                  <rect
+                    key={i}
+                    className={`cc-bar ${g.future ? 'future' : ''} ${ok ? '' : 'unknown'} ${on}`}
+                    x={g.x - bw / 2 + k * (w1 + 1)}
+                    y={by}
+                    width={w1}
+                    height={y(0) - by}
+                    rx={Math.min(2, w1 / 2)}
+                  />
+                );
+              });
+            })}
+            {/* 标价参照：每根柱上一段虚线，相邻相同时连成台阶；汇总柱用组内合计 */}
+            {(() => {
+              let d = '';
+              let prev: number | undefined;
+              groups.forEach((g) => {
+                const lv = listOf(g);
+                if (lv == null) {
+                  prev = undefined;
+                  return;
+                }
+                const ly = y(lv);
+                const x0 = g.x - bw / 2 - 2;
+                const x1 = g.x + bw / 2 + 2;
+                d += prev == null ? `M${x0},${ly}H${x1}` : `L${x0},${prev}L${x0},${ly}H${x1}`;
+                prev = ly;
+              });
+              return d && <path className="cc-list" d={d} />;
+            })()}
+            <line className="cc-today" x1={tx} x2={tx} y1={T - 4} y2={H} />
+            <text className="cc-today-l" x={tx} y={T - 8} textAnchor={tx > w - PAD_R - 24 ? 'end' : tx < PAD_L + 24 ? 'start' : 'middle'}>
+              {todayLabel}
+            </text>
           </svg>
           {nLanes > 0 && (
             <div className="cc-lanes" style={{ height: nLanes * LANE + 4, marginLeft: PAD_L, marginRight: PAD_R }}>
@@ -174,12 +246,12 @@ export function ChargeChart({
                     className="cc-lane"
                     style={{ left: a - PAD_L, width: Math.max(6, b - a), top: l.lane * LANE + 4, '--tint': l.color } as Record<string, string | number>}
                   >
-                    {b - a > 56 && <b>{l.label}</b>}
+                    {b - a > 56 && <b>{b - a > 120 ? l.label : (l.short ?? l.label)}</b>}
                     {l.aside && b - a > 260 && <span>{l.aside}</span>}
                   </div>
                 );
               })}
-              {hover != null && <i className="cc-cross-l" style={{ left: hx - PAD_L }} />}
+              <i className="cc-today-lane" style={{ left: tx - PAD_L }} />
             </div>
           )}
           <div className="cc-xt" style={{ marginLeft: PAD_L, marginRight: PAD_R }}>
@@ -191,7 +263,7 @@ export function ChargeChart({
           </div>
           {hover != null && (
             <div className="cc-tip" style={hx > w / 2 ? { right: w - hx + 14 } : { left: hx + 14 }}>
-              {tip(hover)}
+              {tip(groups[hover].idx, !groups[hover].stack)}
             </div>
           )}
         </>

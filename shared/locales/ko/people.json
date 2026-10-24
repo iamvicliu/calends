@@ -57,7 +57,8 @@
   },
   "field": {
     "person": "사람",
-    "syncFoot": "이 사람은 다른 {count}곳에도 있어요. 이름이나 연락처를 바꾸면 함께 바뀌어요."
+    "editProfile": "인물 정보 편집",
+    "noContact": "연락처 없음"
   },
   "avatar": {
     "change": "아바타 변경",

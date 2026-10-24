@@ -234,7 +234,11 @@
     "settledCcy": "Mata uang kartu",
     "settledAmount": "Jumlah di kartu",
     "blank": "Kosongkan",
-    "freezeHint": "Tagihan di fase ini saat ini diperkirakan dari siklus tagihan. Saat disimpan, {amount} tagihan perkiraan hingga hari ini akan diubah menjadi catatan; sejak itu, catatanlah yang menjadi acuan. Tagihan mendatang tidak berubah."
+    "freezeHint": "Tagihan di fase ini saat ini diperkirakan dari siklus tagihan. Saat disimpan, {amount} tagihan perkiraan hingga hari ini akan diubah menjadi catatan; sejak itu, catatanlah yang menjadi acuan. Tagihan mendatang tidak berubah.",
+    "method": "Metode pembayaran",
+    "scopeOne": "Hanya tagihan ini",
+    "scopePhase": "Paket ini ({count})",
+    "scope": "Terapkan ke"
   },
   "timeline": {
     "home": "Kembali ke hari ini (atau klik dua kali linimasa)"

@@ -63,7 +63,9 @@
     "amount": "金额",
     "monthly": "月均",
     "start": "开始",
-    "next": "下次扣款"
+    "next": "下次扣款",
+    "planPrice": "套餐价格",
+    "inBase": "折合 {ccy}"
   },
   "notCounted": "不计入",
   "endedOn": "结束 {date}",
