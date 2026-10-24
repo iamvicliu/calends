@@ -132,7 +132,13 @@ function keyOf(q: string): string {
 }
 
 function decodeEntities(s: string): string {
+  // &quot; 必须解：Bing 把结果 JSON 整个 HTML 转义后放进 m 属性，
+  // 不解开就 JSON.parse 不了（属性名带着 &quot; 会被当成非法字符）
   return s
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&amp;/g, '&')
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
@@ -400,59 +406,84 @@ async function searchOfficialSite(q: string): Promise<LogoHit[]> {
  * 比 DuckDuckGo 稳：DDG 的 i.js 会返回反爬挑战，纯 fetch 拿不到结果。
  * 页面改版就失效，失败一律返回空数组。
  */
-async function searchWebImages(q: string): Promise<LogoHit[]> {
-  try {
-    const url = `https://www.bing.com/images/search?q=${encodeURIComponent(`${q} logo`)}&form=HDRSC2&first=1`;
-    const res = await fetch(url, { headers: { 'user-agent': UA, 'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8' } });
-    if (!res.ok) return [];
-    const html = await res.text();
+/**
+ * 图片搜索的候选：Bing 一条结果全在 <a class="iusc"> 里 —— m 属性是 JSON
+ * （原图 murl、缩略图 turl、标题 t），href 里带原图尺寸 expw/exph。
+ */
+function parseBingImages(html: string, q: string): LogoHit[] {
+  const hits: Array<LogoHit & { rank: number }> = [];
+  const seen = new Set<string>();
+  // 按 <a 切块再判断，不用标签正则：m 属性里的 JSON 含 >，宽松正则会吞掉别的元素
+  for (const chunk of html.split(/<a\s/).slice(1)) {
+    const tag = chunk.slice(0, 3000);
+    if (!/class="iusc"/.test(tag)) continue;
+    const meta = tag.match(/\sm="([^"]+)"/)?.[1];
+    const href = tag.match(/href="([^"]+)"/)?.[1];
+    if (!meta || !href) continue;
 
-    // 从每条结果的详情链接里取 mediaurl / expw / exph：三个字段同在一个 URL 里，
-    // 比按 murl 分段去猜相邻关系可靠。尺寸用来挡掉超大图和超小图——
-    // 图标是并排显示的小图，几 MB 的壁纸既拖慢加载也没有意义。
-    const hits: Array<LogoHit & { rank: number }> = [];
-    const seen = new Set<string>();
-    const DETAIL = /href="(\/images\/search\?view=detailV2[^"]+)"/g;
-    for (const m of html.matchAll(DETAIL)) {
-      const link = decodeEntities(m[1]);
-      const media = link.match(/mediaurl=([^&]+)/)?.[1];
-      if (!media) continue;
-      let image: string;
-      try {
-        image = decodeURIComponent(media);
-      } catch {
-        continue;
-      }
-      if (!image.startsWith('https://') || seen.has(image)) continue;
-      // 只要图片文件：Bing 偶尔把网页地址混进 mediaurl
-      if (!IMAGE_EXT.test(image)) continue;
-      const w = Number(link.match(/expw=(\d+)/)?.[1] ?? 0);
-      const h = Number(link.match(/exph=(\d+)/)?.[1] ?? 0);
-      // 没有尺寸信息的保留，有就按尺寸筛
-      if (w && h) {
-        const max = Math.max(w, h);
-        const min = Math.min(w, h);
-        if (max < 64 || max > 1024) continue; // 太小放大就糊；太大不是图标
-        if (max / min > 3) continue; // 太扁，是横幅
-      }
-      seen.add(image);
-      // 文件名或标题里带 logo/icon 的更像图标，排前面；带活动、价格、尺寸后缀的排后面
-      const file = image.split('/').pop() ?? '';
-      let rank = 0;
-      if (/logo|icon/i.test(file)) rank += 10;
-      if (/活动|优惠|折|元|套餐|推荐|\d+x\d+/.test(file)) rank -= 10;
-      if (/\.svg$/i.test(image)) rank += 5;
-      // 越方越像图标
-      if (w && h && Math.abs(w - h) / Math.max(w, h) < 0.15) rank += 5;
-      hits.push({ url: image, thumb: image, source: 'web', name: q, rank, ...(w && h ? { width: w, height: h } : {}) });
+    let data: { murl?: string; turl?: string; t?: string };
+    try {
+      data = JSON.parse(decodeEntities(meta));
+    } catch {
+      continue;
     }
-    return hits
-      .sort((a, b) => b.rank - a.rank)
-      .slice(0, MAX_RESULTS)
-      .map(({ rank: _rank, ...hit }) => hit);
-  } catch {
-    return [];
+    const image = data.murl ?? '';
+    const turl = data.turl ?? '';
+    const title = data.t ?? '';
+    if (!image.startsWith('https://') || seen.has(image)) continue;
+    if (!IMAGE_EXT.test(image)) continue;
+    // 测评、教程、下载站上的图不是图标本身
+    if (/测评|教程|优惠码|购买|怎么样|官网入口|攻略|百科|下载站/i.test(title)) continue;
+
+    const link = decodeEntities(href);
+    const w = Number(link.match(/expw=(\d+)/)?.[1] ?? 0);
+    const h = Number(link.match(/exph=(\d+)/)?.[1] ?? 0);
+    if (w && h) {
+      const max = Math.max(w, h);
+      const min = Math.min(w, h);
+      // 太小放大就糊；太大的多是海报和整屏截图。图标并排显示，1024 已经够用
+      if (max < 64 || max > 1024) continue;
+      if (max / min > 3) continue; // 太扁，是横幅
+    }
+    seen.add(image);
+
+    const file = image.split('/').pop() ?? '';
+    let rank = 0;
+    if (/logo|icon/i.test(file)) rank += 10;
+    if (/\.svg$/i.test(image)) rank += 5;
+    // 越接近方形越像图标
+    if (w && h && Math.abs(w - h) / Math.max(w, h) < 0.15) rank += 5;
+
+    // 缩略图交给 Bing 自己的缩放服务（同一张图可按需出任意尺寸），
+    // 面板只拉小图：原图上千像素，还可能超过 /api/img 的 1MB 上限
+    const thumb = turl ? `${turl}&w=256&h=256&c=7` : image;
+    hits.push({ url: image, thumb, source: 'web', name: title.slice(0, 60) || q, rank, ...(w && h ? { width: w, height: h } : {}) });
   }
+  return hits.sort((a, b) => b.rank - a.rank);
+}
+
+/**
+ * 图片搜索：先要透明背景的（最像图标），结果不够再退回全部。
+ * 透明滤镜会顺带把一大批结果标成非图片文件，光用它反而让候选变得很少。
+ */
+async function searchWebImages(q: string): Promise<LogoHit[]> {
+  const fetchPage = async (transparent: boolean): Promise<LogoHit[]> => {
+    try {
+      const qft = transparent ? `&qft=${encodeURIComponent('+filterui:photo-transparent')}` : '';
+      const url = `https://www.bing.com/images/search?q=${encodeURIComponent(`${q} logo`)}&form=HDRSC2&first=1${qft}`;
+      const res = await fetch(url, { headers: { 'user-agent': UA, 'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8' } });
+      if (!res.ok) return [];
+      return parseBingImages(await res.text(), q);
+    } catch {
+      return [];
+    }
+  };
+  const transparent = await fetchPage(true);
+  if (transparent.length >= 6) return transparent.slice(0, MAX_RESULTS);
+  const all = await fetchPage(false);
+  // 透明背景的排前面，其余按相关度接在后面
+  const seen = new Set(transparent.map((h) => h.url));
+  return [...transparent, ...all.filter((h) => !seen.has(h.url))].slice(0, MAX_RESULTS);
 }
 
 /** 四路并行查询，任一来源失败不影响其他来源；官网结果排在最前，最可能是本人想要的那张 */
