@@ -10195,7 +10195,7 @@ img.mm-flag {
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: 8px;
 }
-/* 格子复用 IconButton（为了 tip），要盖掉 .icon-btn 的固定宽高、圆形和描边 */
+/* 格子复用 IconButton（带悬停提示），要盖掉 .icon-btn 的固定宽高、圆形和描边 */
 .icon-btn.logo-cell {
   display: grid;
   place-items: center;

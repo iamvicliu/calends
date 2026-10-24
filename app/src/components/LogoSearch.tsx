@@ -61,7 +61,7 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
       <IconButton
         className="ed-logo-btn"
         aria-label={t('editor.logoSearch.search')}
-        tip={t('editor.logoSearch.search')}
+        title={t('editor.logoSearch.search')}
         onClick={() => {
           setQ(value.trim());
           setOpen(!open);
@@ -92,7 +92,7 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
                 autoFocus
               />
             </div>
-            <IconButton className="logo-close" aria-label={t('ui.close')} tip={t('ui.close')} onClick={() => setOpen(false)}>
+            <IconButton className="logo-close" aria-label={t('ui.close')} title={t('ui.close')} onClick={() => setOpen(false)}>
               <Icon name="x" size={15} />
             </IconButton>
           </div>
@@ -112,7 +112,7 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
                         key={h.url}
                         className="logo-cell"
                         aria-label={h.name}
-                        tip={h.name}
+                        title={h.name}
                         onClick={() => {
                           // 外链图片经同源代理，画进分享图时不会污染 canvas
                           onPick(/^https?:/.test(h.url) ? `/api/img?u=${encodeURIComponent(h.url)}` : h.url);
