@@ -3187,13 +3187,12 @@ select.btn {
  */
 .act-stack i.act-pending,
 .act-col.future .act-stack i,
-.bl-col.future i,
-.unpaid-box {
+.bl-col.future i {
   position: relative;
   background: var(--unpaid-fill) !important;
   border-radius: var(--radius-sm);
 }
-:is(.act-stack i.act-pending, .act-col.future .act-stack i, .bl-col.future i, .unpaid-box)::after {
+:is(.act-stack i.act-pending, .act-col.future .act-stack i, .bl-col.future i)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -5939,10 +5938,6 @@ a.car-toggle {
 }
 .lt-x .lt-who .who-chip {
   min-width: 0;
-}
-.lt-text {
-  color: var(--label-2);
-  white-space: nowrap;
 }
 .lt-num {
   display: flex;
@@ -8856,25 +8851,6 @@ a.car-toggle {
   flex-direction: column;
   gap: 10px;
 }
-.car-ledger > .car-sheet-sec {
-  margin: 0;
-}
-.car-sheet-sec {
-  justify-content: space-between;
-  gap: 8px;
-  margin: 6px 4px -6px;
-}
-.car-sheet-sec h3 {
-  font-size: var(--fs-2);
-  font-weight: 600;
-  color: var(--label-2);
-}
-.car-sheet-sec > span {
-  font-size: var(--fs-2);
-  font-weight: 600;
-  color: var(--label-2);
-  font-variant-numeric: tabular-nums;
-}
 .car-sheet-members {
   padding: 2px 16px;
   border-radius: var(--radius-lg);
@@ -9094,11 +9070,6 @@ a.car-toggle {
 }
 .car-total small {
   color: var(--label-3);
-  font-size: var(--fs-1);
-}
-.car-more {
-  justify-content: center;
-  color: var(--label-2);
   font-size: var(--fs-1);
 }
 .car-rule-btn {

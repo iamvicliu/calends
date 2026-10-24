@@ -1048,22 +1048,6 @@
   -webkit-mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
   mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
 }
-.dt-rn-bar {
-  flex: 1;
-  min-width: 48px;
-}
-.dt-rn-bar {
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--fill);
-  overflow: hidden;
-}
-.dt-rn-bar i {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--chart-ink);
-}
 
 /* 单列：各区块都是卡片（与上方指标卡一致）；扣款表、合租成员表自带描边，放在卡片里时去掉外框 */
 .dt-flow > .dt-charges .dt-ph {
@@ -1136,11 +1120,6 @@
 .dt-about .dt-note {
   margin-top: 14px;
 }
-/* 四格里的本期进度：细条在数字下面，下一行是最晚取消日或本期起止 */
-.dt-cell-bar {
-  display: block;
-  margin: 2px 0 6px;
-}
 .dt-warn {
   color: var(--dt-warn);
 }
@@ -1159,10 +1138,6 @@
 .dt-ledger .car-period > span:nth-child(3) {
   text-align: right;
   align-items: flex-end;
-}
-.dt-ledger .car-more {
-  display: flex;
-  justify-content: center;
 }
 /* 支付方式一列：表头、年份行、数据行一律靠左；要压过合租「付款」表把第二列靠右的规则 */
 .ld-table.dt-ledger.car-receipts-out .ld-row > span:nth-child(2) {
@@ -1350,8 +1325,7 @@
 .ld-table.car-receipts.dt-ledger .car-period {
   border-top: var(--hairline) solid var(--sep);
 }
-.ld-table.car-receipts.dt-ledger .ld-row.dt-row:not(.car-period):not(.ld-th),
-.ld-table.car-receipts.dt-ledger .ld-row.car-more:not(.car-period):not(.ld-th) {
+.ld-table.car-receipts.dt-ledger .ld-row.dt-row:not(.car-period):not(.ld-th) {
   border-top: var(--hairline) solid color-mix(in srgb, var(--sep) 55%, transparent);
 }
 .ld-table.car-receipts.dt-ledger .ld-th + .ld-row.ld-row,

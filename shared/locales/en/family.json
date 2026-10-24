@@ -21,10 +21,6 @@
     "amount": "Amount",
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",
-    "groupSum": {
-      "one": "{count} payment\n{amount}",
-      "other": "{count} payments\n{amount}"
-    },
     "fee": "Fee",
     "nextCollection": "Next due",
     "status": "Payment status",
@@ -32,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "From",
     "rangeTo": "To",
-    "showAllPeriods": "Show all {count} periods",
     "vacancy": "Vacant",
     "departed": "{count} departed",
     "hidePersonal": "Hide personal details",
@@ -208,7 +203,6 @@
     "unnamed": "Unnamed",
     "leftOn": "Left {date}",
     "exemptNote": "Holds a seat, doesn't pay",
-    "paidUntil": "Paid through {date}",
     "noPay": "No payments yet",
     "paymentsN": {
       "one": "{count} payment",

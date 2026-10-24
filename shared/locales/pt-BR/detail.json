@@ -28,22 +28,18 @@
     "imageCopied": "Imagem copiada"
   },
   "history": "Histórico",
-  "summary": "Resumo",
   "field": {
     "amount": "Valor",
     "cycle": "Ciclo de cobrança",
     "category": "Categoria",
     "method": "Forma de pagamento",
-    "start": "Data de início",
     "next": "Próxima cobrança",
-    "expires": "Fim do serviço",
     "expiresHint": "A renovação automática cobra antes desta data",
     "endedOn": "Encerrada em",
     "trialEnd": "Fim do teste",
     "region": "Região",
     "period": "Período",
-    "present": "hoje",
-    "progress": "Período atual"
+    "present": "hoje"
   },
   "up": {
     "planned": "Mudança planejada\nnão confirmada",
@@ -69,19 +65,8 @@
     "member": "Compartilhado\nParticipo",
     "payTo": "Pagar a",
     "host": "Organizador",
-    "myShare": "Minha parte",
     "unnamed": "Sem nome",
-    "paidUntil": "Pago até {date}",
-    "unpaid": "Ainda não pago",
-    "owed": "{amount} pendente",
-    "settled": "Quitado",
-    "me": "Eu",
-    "seatsLeft": {
-      "one": "{seats} vagas, {count} livre",
-      "other": "{seats} vagas, {count} livres"
-    },
-    "seatsFull": "Todas as {seats} vagas ocupadas",
-    "surplus": "Sem custo, {amount} a mais"
+    "me": "Eu"
   },
   "charges": {
     "recentN": {
@@ -98,8 +83,7 @@
       "adjust": "Ajuste",
       "failed": "Falhou"
     },
-    "add": "Adicionar registro (reembolso, ajuste, cobrança com falha, valor no cartão…)",
-    "all": "Mostrar todas as {count}"
+    "add": "Adicionar registro (reembolso, ajuste, cobrança com falha, valor no cartão…)"
   },
   "stats": {
     "spent": "Total gasto",
@@ -142,7 +126,6 @@
   },
   "chart": {
     "title": "Por cobrança\n{ccy}",
-    "orig": "Original",
     "all": "Tudo",
     "y1": "1 ano",
     "m6": "6 meses",
@@ -150,7 +133,6 @@
     "list": "Preço de tabela no primeiro câmbio",
     "listOrig": "Preço de tabela",
     "origAmount": "Valor original",
-    "few": "São necessárias ao menos duas cobranças para ver a tendência",
     "bucket": {
       "m1": "Cada barra é o total do mês",
       "m3": "Cada barra é o total do trimestre",
@@ -180,14 +162,9 @@
     "shareStart": "Compartilhamento iniciado"
   },
   "upcoming": {
-    "title": "Próximos 12 meses",
     "total": {
       "one": "≈ {amount}\n{count} cobrança",
       "other": "≈ {amount}\n{count} cobranças"
-    },
-    "more": {
-      "one": "mais {count}",
-      "other": "mais {count}"
     },
     "none": "Nenhuma cobrança nos próximos 12 meses"
   },

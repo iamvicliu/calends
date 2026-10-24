@@ -28,22 +28,18 @@
     "imageCopied": "Bild kopiert"
   },
   "history": "Verlauf",
-  "summary": "Übersicht",
   "field": {
     "amount": "Betrag",
     "cycle": "Abrechnungszeitraum",
     "category": "Kategorie",
     "method": "Zahlungsmethode",
-    "start": "Startdatum",
     "next": "Nächste Fälligkeit",
-    "expires": "Leistung endet",
     "expiresHint": "Die automatische Verlängerung bucht vor diesem Datum ab",
     "endedOn": "Beendet am",
     "trialEnd": "Testphase endet",
     "region": "Region",
     "period": "Zeitraum",
-    "present": "heute",
-    "progress": "Laufende Periode"
+    "present": "heute"
   },
   "up": {
     "planned": "Geplante Änderung\nnicht bestätigt",
@@ -69,19 +65,8 @@
     "member": "Geteilt\nich bin dabei",
     "payTo": "Zahlen an",
     "host": "Organisator",
-    "myShare": "Mein Anteil",
     "unnamed": "Ohne Namen",
-    "paidUntil": "Bezahlt bis {date}",
-    "unpaid": "Noch nicht bezahlt",
-    "owed": "{amount} offen",
-    "settled": "Beglichen",
-    "me": "Ich",
-    "seatsLeft": {
-      "one": "{seats} Plätze, {count} frei",
-      "other": "{seats} Plätze, {count} frei"
-    },
-    "seatsFull": "Alle {seats} Plätze belegt",
-    "surplus": "Kostenlos, {amount} mehr eingenommen"
+    "me": "Ich"
   },
   "charges": {
     "recentN": {
@@ -98,8 +83,7 @@
       "adjust": "Korrektur",
       "failed": "Fehlgeschlagen"
     },
-    "add": "Eintrag hinzufügen (Erstattung, Korrektur, fehlgeschlagene Abbuchung, Kartenbetrag …)",
-    "all": "Alle {count} zeigen"
+    "add": "Eintrag hinzufügen (Erstattung, Korrektur, fehlgeschlagene Abbuchung, Kartenbetrag …)"
   },
   "stats": {
     "spent": "Gesamtausgaben",
@@ -142,7 +126,6 @@
   },
   "chart": {
     "title": "Pro Abbuchung\n{ccy}",
-    "orig": "Original",
     "all": "Alle",
     "y1": "1 J.",
     "m6": "6 M.",
@@ -150,7 +133,6 @@
     "list": "Listenpreis zum ersten Kurs",
     "listOrig": "Listenpreis",
     "origAmount": "Originalbetrag",
-    "few": "Für einen Verlauf braucht es mindestens zwei Abbuchungen",
     "bucket": {
       "m1": "Jeder Balken ist eine Monatssumme",
       "m3": "Jeder Balken ist eine Quartalssumme",
@@ -180,14 +162,9 @@
     "shareStart": "Teilen begonnen"
   },
   "upcoming": {
-    "title": "Nächste 12 Monate",
     "total": {
       "one": "≈ {amount}\n{count} Abbuchung",
       "other": "≈ {amount}\n{count} Abbuchungen"
-    },
-    "more": {
-      "one": "{count} weitere",
-      "other": "{count} weitere"
     },
     "none": "Keine Abbuchungen in den nächsten 12 Monaten"
   },

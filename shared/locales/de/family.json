@@ -21,10 +21,6 @@
     "amount": "Betrag",
     "expandAll": "Alle aufklappen",
     "collapseAll": "Alle zuklappen",
-    "groupSum": {
-      "one": "{count} Zahlung\n{amount}",
-      "other": "{count} Zahlungen\n{amount}"
-    },
     "fee": "Gebühr",
     "nextCollection": "Nächster Einzug",
     "status": "Zahlungsstatus",
@@ -32,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "Von",
     "rangeTo": "Bis",
-    "showAllPeriods": "Alle {count} Zeiträume anzeigen",
     "vacancy": "Freier Platz",
     "departed": "{count} ausgeschieden",
     "hidePersonal": "Persönliche Daten ausblenden",
@@ -208,7 +203,6 @@
     "unnamed": "Ohne Namen",
     "leftOn": "Ausgetreten am {date}",
     "exemptNote": "Belegt einen Platz, zahlt nicht",
-    "paidUntil": "Bezahlt bis {date}",
     "noPay": "Noch keine Zahlungen",
     "paymentsN": {
       "one": "{count} Zahlung",

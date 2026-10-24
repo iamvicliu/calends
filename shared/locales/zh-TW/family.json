@@ -21,9 +21,6 @@
     "amount": "金額",
     "expandAll": "全部展開",
     "collapseAll": "全部收起",
-    "groupSum": {
-      "other": "{count} 筆\n{amount}"
-    },
     "fee": "收費",
     "nextCollection": "下次應收",
     "status": "收款狀態",
@@ -31,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "從",
     "rangeTo": "至",
-    "showAllPeriods": "顯示全部 {count} 期",
     "vacancy": "空位",
     "departed": "已下車 {count} 人",
     "hidePersonal": "隱藏個人資訊",
@@ -189,7 +185,6 @@
     "unnamed": "未命名",
     "leftOn": "{date} 已退出",
     "exemptNote": "佔位但不付費",
-    "paidUntil": "已付至 {date}",
     "noPay": "尚未收款",
     "paymentsN": "{count} 筆收款",
     "from": "來自 {source}",

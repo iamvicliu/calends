@@ -21,10 +21,6 @@
     "amount": "Montant",
     "expandAll": "Tout développer",
     "collapseAll": "Tout réduire",
-    "groupSum": {
-      "one": "{count} paiement\n{amount}",
-      "other": "{count} paiements\n{amount}"
-    },
     "fee": "Tarif",
     "nextCollection": "Prochain encaissement",
     "status": "État du paiement",
@@ -32,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "Du",
     "rangeTo": "Au",
-    "showAllPeriods": "Afficher les {count} périodes",
     "vacancy": "Place libre",
     "departed": "Départs : {count}",
     "hidePersonal": "Masquer les données personnelles",
@@ -208,7 +203,6 @@
     "unnamed": "Sans nom",
     "leftOn": "Parti le {date}",
     "exemptNote": "Occupe une place, ne paie pas",
-    "paidUntil": "Payé jusqu’au {date}",
     "noPay": "Aucun paiement pour l’instant",
     "paymentsN": {
       "one": "{count} paiement",

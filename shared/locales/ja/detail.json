@@ -28,22 +28,18 @@
     "imageCopied": "画像をコピーしました"
   },
   "history": "履歴",
-  "summary": "概要",
   "field": {
     "amount": "金額",
     "cycle": "請求サイクル",
     "category": "カテゴリ",
     "method": "支払い方法",
-    "start": "開始日",
     "next": "次回請求",
-    "expires": "サービス終了",
     "expiresHint": "この日より前に自動更新で請求されます",
     "endedOn": "終了日",
     "trialEnd": "トライアル終了",
     "region": "地域",
     "period": "契約期間",
-    "present": "現在",
-    "progress": "今期の経過"
+    "present": "現在"
   },
   "up": {
     "planned": "変更予定\n未確定",
@@ -69,18 +65,8 @@
     "member": "共有\n参加中",
     "payTo": "支払い先",
     "host": "主催者",
-    "myShare": "自分の負担分",
     "unnamed": "名前なし",
-    "paidUntil": "{date}まで支払い済み",
-    "unpaid": "未払い",
-    "owed": "未払い {amount}",
-    "settled": "精算済み",
-    "me": "自分",
-    "seatsLeft": {
-      "other": "{seats} 席中、空き {count} 席"
-    },
-    "seatsFull": "{seats} 席すべて埋まっています",
-    "surplus": "自己負担なし、{amount} 多く回収"
+    "me": "自分"
   },
   "charges": {
     "recentN": "最新 {count} 件のみ",
@@ -93,8 +79,7 @@
       "adjust": "調整",
       "failed": "失敗"
     },
-    "add": "記録を追加（返金、調整、請求失敗、カード上の金額など）",
-    "all": "すべて表示（{count}件）"
+    "add": "記録を追加（返金、調整、請求失敗、カード上の金額など）"
   },
   "stats": {
     "spent": "累計支出",
@@ -132,7 +117,6 @@
   },
   "chart": {
     "title": "1 回の請求\n{ccy}",
-    "orig": "原通貨",
     "all": "すべて",
     "y1": "1 年",
     "m6": "6 か月",
@@ -140,7 +124,6 @@
     "list": "定価（初回レート）",
     "listOrig": "定価",
     "origAmount": "原通貨の金額",
-    "few": "請求が 2 回以上になると推移を表示します",
     "bucket": {
       "m1": "各棒は1か月の合計",
       "m3": "各棒は四半期の合計",
@@ -164,12 +147,8 @@
     "shareStart": "シェア開始"
   },
   "upcoming": {
-    "title": "今後 12 か月",
     "total": {
       "other": "約 {amount}\n{count} 件"
-    },
-    "more": {
-      "other": "ほか {count} 件"
     },
     "none": "今後 12 か月は請求がありません"
   },

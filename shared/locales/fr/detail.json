@@ -28,22 +28,18 @@
     "imageCopied": "Image copiée"
   },
   "history": "Historique",
-  "summary": "Résumé",
   "field": {
     "amount": "Montant",
     "cycle": "Cycle de facturation",
     "category": "Catégorie",
     "method": "Moyen de paiement",
-    "start": "Date de début",
     "next": "Prochaine échéance",
-    "expires": "Fin du service",
     "expiresHint": "Le renouvellement automatique prélève avant cette date",
     "endedOn": "Terminé le",
     "trialEnd": "Fin de l’essai",
     "region": "Région",
     "period": "Période",
-    "present": "aujourd’hui",
-    "progress": "Période en cours"
+    "present": "aujourd’hui"
   },
   "up": {
     "planned": "Changement prévu\nnon confirmé",
@@ -69,19 +65,8 @@
     "member": "Partagé\nj’ai rejoint",
     "payTo": "Payer à",
     "host": "Organisateur",
-    "myShare": "Ma part",
     "unnamed": "Sans nom",
-    "paidUntil": "Payé jusqu’au {date}",
-    "unpaid": "Pas encore payé",
-    "owed": "{amount} dû",
-    "settled": "Réglé",
-    "me": "Moi",
-    "seatsLeft": {
-      "one": "{seats} places, {count} libre",
-      "other": "{seats} places, {count} libres"
-    },
-    "seatsFull": "Les {seats} places sont prises",
-    "surplus": "Rien à payer, {amount} en plus"
+    "me": "Moi"
   },
   "charges": {
     "recentN": {
@@ -98,8 +83,7 @@
       "adjust": "Ajustement",
       "failed": "Échec"
     },
-    "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)",
-    "all": "Tout afficher ({count})"
+    "add": "Ajouter une opération (remboursement, ajustement, échec, montant carte…)"
   },
   "stats": {
     "spent": "Total dépensé",
@@ -142,7 +126,6 @@
   },
   "chart": {
     "title": "Par prélèvement\n{ccy}",
-    "orig": "Devise d’origine",
     "all": "Tout",
     "y1": "1 an",
     "m6": "6 mois",
@@ -150,7 +133,6 @@
     "list": "Prix catalogue au premier taux",
     "listOrig": "Prix catalogue",
     "origAmount": "Montant d’origine",
-    "few": "Il faut au moins deux prélèvements pour tracer une tendance",
     "bucket": {
       "m1": "Chaque barre est un total mensuel",
       "m3": "Chaque barre est un total trimestriel",
@@ -180,14 +162,9 @@
     "shareStart": "Partage commencé"
   },
   "upcoming": {
-    "title": "12 prochains mois",
     "total": {
       "one": "≈ {amount}\n{count} prélèvement",
       "other": "≈ {amount}\n{count} prélèvements"
-    },
-    "more": {
-      "one": "{count} de plus",
-      "other": "{count} de plus"
     },
     "none": "Aucun prélèvement dans les 12 prochains mois"
   },

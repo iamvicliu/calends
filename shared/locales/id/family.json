@@ -21,9 +21,6 @@
     "amount": "Jumlah",
     "expandAll": "Buka semua",
     "collapseAll": "Tutup semua",
-    "groupSum": {
-      "other": "{count} pembayaran\n{amount}"
-    },
     "fee": "Biaya",
     "nextCollection": "Penagihan berikutnya",
     "status": "Status pembayaran",
@@ -31,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "Dari",
     "rangeTo": "Sampai",
-    "showAllPeriods": "Tampilkan semua {count} periode",
     "vacancy": "Kursi kosong",
     "departed": "{count} keluar",
     "hidePersonal": "Sembunyikan data pribadi",
@@ -201,7 +197,6 @@
     "unnamed": "Tanpa nama",
     "leftOn": "Keluar {date}",
     "exemptNote": "Mengisi kursi, tidak membayar",
-    "paidUntil": "Lunas hingga {date}",
     "noPay": "Belum ada pembayaran",
     "paymentsN": {
       "other": "{count} pembayaran"

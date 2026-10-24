@@ -28,22 +28,18 @@
     "imageCopied": "已複製圖片"
   },
   "history": "歷程",
-  "summary": "摘要",
   "field": {
     "amount": "金額",
     "cycle": "計費週期",
     "category": "分類",
     "method": "付款方式",
-    "start": "開始日期",
     "next": "下次到期",
-    "expires": "服務到期",
     "expiresHint": "自動續訂會在到期前扣款",
     "endedOn": "結束於",
     "trialEnd": "試用截止",
     "region": "地區",
     "period": "訂閱期間",
-    "present": "至今",
-    "progress": "本期進度"
+    "present": "至今"
   },
   "up": {
     "planned": "計畫變更\n尚未確定",
@@ -69,16 +65,8 @@
     "member": "共享\n我加入",
     "payTo": "付給",
     "host": "發起人",
-    "myShare": "我的份額",
     "unnamed": "未命名",
-    "paidUntil": "已付至 {date}",
-    "unpaid": "尚未收款",
-    "owed": "待收 {amount}",
-    "settled": "已結清",
-    "me": "我",
-    "seatsLeft": "{seats} 個位置，還剩 {count} 個空位",
-    "seatsFull": "{seats} 個位置已坐滿",
-    "surplus": "不用出錢，多收 {amount}"
+    "me": "我"
   },
   "charges": {
     "recentN": "只看最近 {count} 筆",
@@ -89,8 +77,7 @@
       "adjust": "補差",
       "failed": "失敗"
     },
-    "add": "記一筆（退款、補差、扣款失敗、卡上實扣…）",
-    "all": "顯示全部 {count} 筆"
+    "add": "記一筆（退款、補差、扣款失敗、卡上實扣…）"
   },
   "stats": {
     "spent": "累計花了",
@@ -118,7 +105,6 @@
   },
   "chart": {
     "title": "每筆扣款\n{ccy}",
-    "orig": "原幣",
     "all": "全部",
     "y1": "1 年",
     "m6": "6 個月",
@@ -126,7 +112,6 @@
     "list": "標價（按首筆匯率）",
     "listOrig": "標價",
     "origAmount": "原幣金額",
-    "few": "扣款少於兩筆，還畫不出走勢",
     "bucket": {
       "m1": "每根柱為一個月合計",
       "m3": "每根柱為一季合計",
@@ -150,9 +135,7 @@
     "shareStart": "開始合租"
   },
   "upcoming": {
-    "title": "未來 12 個月",
     "total": "約 {amount}\n{count} 筆",
-    "more": "還有 {count} 筆",
     "none": "未來 12 個月沒有扣款"
   },
   "stop": {

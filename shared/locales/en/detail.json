@@ -28,22 +28,18 @@
     "imageCopied": "Image copied"
   },
   "history": "History",
-  "summary": "Summary",
   "field": {
     "amount": "Amount",
     "cycle": "Billing cycle",
     "category": "Category",
     "method": "Payment method",
-    "start": "Start date",
     "next": "Next due",
-    "expires": "Service ends",
     "expiresHint": "Auto-renew charges before this date",
     "endedOn": "Ended on",
     "trialEnd": "Trial ends",
     "region": "Region",
     "period": "Subscribed",
-    "present": "present",
-    "progress": "This period"
+    "present": "present"
   },
   "up": {
     "planned": "Planned change\nnot confirmed",
@@ -69,19 +65,8 @@
     "member": "Shared\nI joined",
     "payTo": "Pay to",
     "host": "Host",
-    "myShare": "My share",
     "unnamed": "Unnamed",
-    "paidUntil": "Paid through {date}",
-    "unpaid": "Not paid yet",
-    "owed": "{amount} due",
-    "settled": "Settled",
-    "me": "Me",
-    "seatsLeft": {
-      "one": "{seats} seats, {count} free",
-      "other": "{seats} seats, {count} free"
-    },
-    "seatsFull": "All {seats} seats taken",
-    "surplus": "Covered, {amount} extra"
+    "me": "Me"
   },
   "charges": {
     "recentN": {
@@ -98,8 +83,7 @@
       "adjust": "Adjustment",
       "failed": "Failed"
     },
-    "add": "Add a record (refund, adjustment, failed charge, card amount…)",
-    "all": "Show all {count}"
+    "add": "Add a record (refund, adjustment, failed charge, card amount…)"
   },
   "stats": {
     "spent": "Total spent",
@@ -142,7 +126,6 @@
   },
   "chart": {
     "title": "Per charge\n{ccy}",
-    "orig": "Original",
     "all": "All",
     "y1": "1Y",
     "m6": "6M",
@@ -150,7 +133,6 @@
     "list": "List price at first rate",
     "listOrig": "List price",
     "origAmount": "Original amount",
-    "few": "Need at least two charges to draw a trend",
     "bucket": {
       "m1": "Each bar is a monthly total",
       "m3": "Each bar is a quarterly total",
@@ -180,14 +162,9 @@
     "shareStart": "Sharing started"
   },
   "upcoming": {
-    "title": "Next 12 months",
     "total": {
       "one": "≈ {amount}\n{count} charge",
       "other": "≈ {amount}\n{count} charges"
-    },
-    "more": {
-      "one": "{count} more",
-      "other": "{count} more"
     },
     "none": "No charges in the next 12 months"
   },

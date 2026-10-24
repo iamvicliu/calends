@@ -21,10 +21,6 @@
     "amount": "Tutar",
     "expandAll": "Tümünü genişlet",
     "collapseAll": "Tümünü daralt",
-    "groupSum": {
-      "one": "{count} ödeme\n{amount}",
-      "other": "{count} ödeme\n{amount}"
-    },
     "fee": "Ücret",
     "nextCollection": "Sonraki tahsilat",
     "status": "Ödeme durumu",
@@ -32,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "Başlangıç",
     "rangeTo": "Bitiş",
-    "showAllPeriods": "{count} dönemin tümünü göster",
     "vacancy": "Boş yer",
     "departed": "{count} kişi ayrıldı",
     "hidePersonal": "Kişisel bilgileri gizle",
@@ -208,7 +203,6 @@
     "unnamed": "Adsız",
     "leftOn": "{date} ayrıldı",
     "exemptNote": "Yer tutuyor, ödemiyor",
-    "paidUntil": "{date} tarihine kadar ödendi",
     "noPay": "Henüz ödeme yok",
     "paymentsN": {
       "one": "{count} ödeme",

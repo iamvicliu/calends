@@ -32,8 +32,6 @@
   "cardCcy": "\ncarte débitée en {ccy}",
   "forWhom": "Payé pour",
   "method": "Moyen de paiement",
-  "subscription": "Abonnement",
-  "viewDetail": "Voir les détails de l’abonnement",
   "stoppedAt": "Arrêté le",
   "nextCharge": "Prochain prélèvement",
   "note": "Note",

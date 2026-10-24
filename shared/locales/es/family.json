@@ -21,10 +21,6 @@
     "amount": "Importe",
     "expandAll": "Expandir todo",
     "collapseAll": "Contraer todo",
-    "groupSum": {
-      "one": "{count} pago\n{amount}",
-      "other": "{count} pagos\n{amount}"
-    },
     "fee": "Tarifa",
     "nextCollection": "Próximo cobro",
     "status": "Estado de pago",
@@ -32,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "Desde",
     "rangeTo": "Hasta",
-    "showAllPeriods": "Mostrar los {count} periodos",
     "vacancy": "Plaza libre",
     "departed": "Salidas: {count}",
     "hidePersonal": "Ocultar datos personales",
@@ -208,7 +203,6 @@
     "unnamed": "Sin nombre",
     "leftOn": "Salió {date}",
     "exemptNote": "Ocupa una plaza, no paga",
-    "paidUntil": "Pagado hasta {date}",
     "noPay": "Aún no hay pagos",
     "paymentsN": {
       "one": "{count} pago",

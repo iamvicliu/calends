@@ -32,8 +32,6 @@
   "cardCcy": "\nla tarjeta liquida en {ccy}",
   "forWhom": "Para quién",
   "method": "Método de pago",
-  "subscription": "Suscripción",
-  "viewDetail": "Ver detalles de la suscripción",
   "stoppedAt": "Detenido el",
   "nextCharge": "Próximo cobro",
   "note": "Nota",

@@ -30,8 +30,6 @@
   "cardCcy": "\n카드는 {ccy}(으)로 결제",
   "forWhom": "대신 결제 대상",
   "method": "결제 수단",
-  "subscription": "구독",
-  "viewDetail": "구독 상세 보기",
   "stoppedAt": "중지일",
   "nextCharge": "다음 결제",
   "note": "메모",

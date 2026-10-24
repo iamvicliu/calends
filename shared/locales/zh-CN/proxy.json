@@ -26,8 +26,6 @@
   "cardCcy": "\n卡上按 {ccy} 结算",
   "forWhom": "替谁付",
   "method": "支付方式",
-  "subscription": "订阅",
-  "viewDetail": "查看订阅详情",
   "stoppedAt": "停止于",
   "nextCharge": "下次扣款",
   "note": "备注",

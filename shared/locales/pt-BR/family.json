@@ -21,10 +21,6 @@
     "amount": "Valor",
     "expandAll": "Expandir tudo",
     "collapseAll": "Recolher tudo",
-    "groupSum": {
-      "one": "{count} pagamento\n{amount}",
-      "other": "{count} pagamentos\n{amount}"
-    },
     "fee": "Tarifa",
     "nextCollection": "Próxima cobrança",
     "status": "Situação do pagamento",
@@ -32,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "De",
     "rangeTo": "Até",
-    "showAllPeriods": "Mostrar todos os {count} períodos",
     "vacancy": "Vaga",
     "departed": "Saídas: {count}",
     "hidePersonal": "Ocultar dados pessoais",
@@ -208,7 +203,6 @@
     "unnamed": "Sem nome",
     "leftOn": "Saiu em {date}",
     "exemptNote": "Ocupa uma vaga, não paga",
-    "paidUntil": "Pago até {date}",
     "noPay": "Nenhum pagamento ainda",
     "paymentsN": {
       "one": "{count} pagamento",

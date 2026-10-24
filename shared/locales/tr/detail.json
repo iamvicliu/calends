@@ -28,22 +28,18 @@
     "imageCopied": "Görsel kopyalandı"
   },
   "history": "Geçmiş",
-  "summary": "Özet",
   "field": {
     "amount": "Tutar",
     "cycle": "Ödeme dönemi",
     "category": "Kategori",
     "method": "Ödeme yöntemi",
-    "start": "Başlangıç tarihi",
     "next": "Sonraki ödeme",
-    "expires": "Hizmet bitişi",
     "expiresHint": "Otomatik yenileme bu tarihten önce ücretlendirir",
     "endedOn": "Bitiş tarihi",
     "trialEnd": "Deneme bitişi",
     "region": "Bölge",
     "period": "Dönem",
-    "present": "bugün",
-    "progress": "Bu dönem"
+    "present": "bugün"
   },
   "up": {
     "planned": "Planlanan değişiklik\nonaylanmadı",
@@ -69,19 +65,8 @@
     "member": "Ortak\nkatıldım",
     "payTo": "Ödenecek kişi",
     "host": "Yönetici",
-    "myShare": "Payım",
     "unnamed": "Adsız",
-    "paidUntil": "{date} tarihine kadar ödendi",
-    "unpaid": "Henüz ödenmedi",
-    "owed": "{amount} borç",
-    "settled": "Ödeşildi",
-    "me": "Ben",
-    "seatsLeft": {
-      "one": "{seats} koltuk, {count} boş",
-      "other": "{seats} koltuk, {count} boş"
-    },
-    "seatsFull": "{seats} koltuğun hepsi dolu",
-    "surplus": "Ücretsiz, {amount} fazla"
+    "me": "Ben"
   },
   "charges": {
     "recentN": "Yalnızca son {count}",
@@ -95,8 +80,7 @@
       "adjust": "Düzeltme",
       "failed": "Başarısız"
     },
-    "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)",
-    "all": "Tümünü göster ({count})"
+    "add": "Kayıt ekle (iade, düzeltme, başarısız ödeme, kart tutarı…)"
   },
   "stats": {
     "spent": "Toplam harcama",
@@ -139,7 +123,6 @@
   },
   "chart": {
     "title": "Ödeme başına\n{ccy}",
-    "orig": "Orijinal",
     "all": "Tümü",
     "y1": "1 yıl",
     "m6": "6 ay",
@@ -147,7 +130,6 @@
     "list": "İlk kurla liste fiyatı",
     "listOrig": "Liste fiyatı",
     "origAmount": "Orijinal tutar",
-    "few": "Eğilim için en az iki ödeme gerekir",
     "bucket": {
       "m1": "Her çubuk aylık toplamdır",
       "m3": "Her çubuk üç aylık toplamdır",
@@ -171,14 +153,9 @@
     "shareStart": "Paylaşım başladı"
   },
   "upcoming": {
-    "title": "Önümüzdeki 12 ay",
     "total": {
       "one": "≈ {amount}\n{count} ödeme",
       "other": "≈ {amount}\n{count} ödeme"
-    },
-    "more": {
-      "one": "{count} tane daha",
-      "other": "{count} tane daha"
     },
     "none": "Önümüzdeki 12 ayda ödeme yok"
   },

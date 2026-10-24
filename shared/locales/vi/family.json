@@ -21,9 +21,6 @@
     "amount": "Số tiền",
     "expandAll": "Mở rộng tất cả",
     "collapseAll": "Thu gọn tất cả",
-    "groupSum": {
-      "other": "{count} khoản\n{amount}"
-    },
     "fee": "Phí",
     "nextCollection": "Lần thu tiếp theo",
     "status": "Tình trạng thanh toán",
@@ -31,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "Từ",
     "rangeTo": "Đến",
-    "showAllPeriods": "Hiện tất cả {count} kỳ",
     "vacancy": "Chỗ trống",
     "departed": "{count} người đã rời",
     "hidePersonal": "Ẩn thông tin cá nhân",
@@ -201,7 +197,6 @@
     "unnamed": "Chưa đặt tên",
     "leftOn": "Rời ngày {date}",
     "exemptNote": "Giữ một suất, không trả tiền",
-    "paidUntil": "Đã trả đến {date}",
     "noPay": "Chưa có khoản thanh toán",
     "paymentsN": {
       "other": "{count} khoản thanh toán"

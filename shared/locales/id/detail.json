@@ -28,22 +28,18 @@
     "imageCopied": "Gambar disalin"
   },
   "history": "Riwayat",
-  "summary": "Ringkasan",
   "field": {
     "amount": "Jumlah",
     "cycle": "Siklus tagihan",
     "category": "Kategori",
     "method": "Metode pembayaran",
-    "start": "Tanggal mulai",
     "next": "Jatuh tempo berikutnya",
-    "expires": "Layanan berakhir",
     "expiresHint": "Perpanjangan otomatis ditagih sebelum tanggal ini",
     "endedOn": "Berakhir pada",
     "trialEnd": "Uji coba berakhir",
     "region": "Wilayah",
     "period": "Periode",
-    "present": "sekarang",
-    "progress": "Periode ini"
+    "present": "sekarang"
   },
   "up": {
     "planned": "Rencana perubahan\nbelum pasti",
@@ -69,18 +65,8 @@
     "member": "Bersama\nsaya bergabung",
     "payTo": "Bayar ke",
     "host": "Pengelola",
-    "myShare": "Bagian saya",
     "unnamed": "Tanpa nama",
-    "paidUntil": "Lunas hingga {date}",
-    "unpaid": "Belum bayar",
-    "owed": "Tertunggak {amount}",
-    "settled": "Lunas",
-    "me": "Saya",
-    "seatsLeft": {
-      "other": "{seats} kursi, {count} kosong"
-    },
-    "seatsFull": "Semua {seats} kursi terisi",
-    "surplus": "Gratis, lebih {amount}"
+    "me": "Saya"
   },
   "charges": {
     "recentN": "Hanya {count} terakhir",
@@ -93,8 +79,7 @@
       "adjust": "Penyesuaian",
       "failed": "Gagal"
     },
-    "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)",
-    "all": "Tampilkan semua {count}"
+    "add": "Tambah catatan (refund, penyesuaian, tagihan gagal, jumlah di kartu…)"
   },
   "stats": {
     "spent": "Total pengeluaran",
@@ -132,7 +117,6 @@
   },
   "chart": {
     "title": "Per tagihan\n{ccy}",
-    "orig": "Asli",
     "all": "Semua",
     "y1": "1 thn",
     "m6": "6 bln",
@@ -140,7 +124,6 @@
     "list": "Harga daftar pada kurs pertama",
     "listOrig": "Harga daftar",
     "origAmount": "Jumlah asli",
-    "few": "Perlu minimal dua tagihan untuk melihat tren",
     "bucket": {
       "m1": "Setiap batang adalah total bulanan",
       "m3": "Setiap batang adalah total kuartalan",
@@ -164,12 +147,8 @@
     "shareStart": "Mulai patungan"
   },
   "upcoming": {
-    "title": "12 bulan ke depan",
     "total": {
       "other": "≈ {amount}\n{count} tagihan"
-    },
-    "more": {
-      "other": "{count} lagi"
     },
     "none": "Tidak ada tagihan dalam 12 bulan ke depan"
   },

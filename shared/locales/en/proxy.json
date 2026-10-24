@@ -32,8 +32,6 @@
   "cardCcy": "\ncard settles in {ccy}",
   "forWhom": "Paid for",
   "method": "Payment method",
-  "subscription": "Subscription",
-  "viewDetail": "View subscription details",
   "stoppedAt": "Stopped on",
   "nextCharge": "Next charge",
   "note": "Note",

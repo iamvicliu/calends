@@ -28,22 +28,18 @@
     "imageCopied": "이미지를 복사했습니다"
   },
   "history": "기록",
-  "summary": "요약",
   "field": {
     "amount": "금액",
     "cycle": "결제 주기",
     "category": "카테고리",
     "method": "결제 수단",
-    "start": "시작일",
     "next": "다음 결제",
-    "expires": "서비스 종료",
     "expiresHint": "이 날짜 전에 자동 갱신 결제가 이루어집니다",
     "endedOn": "종료일",
     "trialEnd": "체험 종료",
     "region": "지역",
     "period": "구독 기간",
-    "present": "현재",
-    "progress": "이번 주기"
+    "present": "현재"
   },
   "up": {
     "planned": "변경 예정\n미확정",
@@ -69,18 +65,8 @@
     "member": "공유\n참여 중",
     "payTo": "보낼 사람",
     "host": "주최자",
-    "myShare": "내 분담금",
     "unnamed": "이름 없음",
-    "paidUntil": "{date}까지 납부 완료",
-    "unpaid": "미납",
-    "owed": "{amount} 미납",
-    "settled": "정산 완료",
-    "me": "나",
-    "seatsLeft": {
-      "other": "{seats}자리 중 {count}자리 남음"
-    },
-    "seatsFull": "{seats}자리가 모두 찼어요",
-    "surplus": "부담 없음, {amount} 더 받음"
+    "me": "나"
   },
   "charges": {
     "recentN": "최근 {count}건만",
@@ -93,8 +79,7 @@
       "adjust": "조정",
       "failed": "실패"
     },
-    "add": "기록 추가(환불, 조정, 결제 실패, 카드 금액 등)",
-    "all": "{count}건 모두 보기"
+    "add": "기록 추가(환불, 조정, 결제 실패, 카드 금액 등)"
   },
   "stats": {
     "spent": "총 지출",
@@ -132,7 +117,6 @@
   },
   "chart": {
     "title": "회당 결제\n{ccy}",
-    "orig": "원래 통화",
     "all": "전체",
     "y1": "1년",
     "m6": "6개월",
@@ -140,7 +124,6 @@
     "list": "정가(첫 결제 환율)",
     "listOrig": "정가",
     "origAmount": "원래 통화 금액",
-    "few": "결제가 2회 이상이어야 추이를 볼 수 있어요",
     "bucket": {
       "m1": "막대 하나가 한 달 합계",
       "m3": "막대 하나가 분기 합계",
@@ -164,12 +147,8 @@
     "shareStart": "공유 시작"
   },
   "upcoming": {
-    "title": "앞으로 12개월",
     "total": {
       "other": "약 {amount}\n{count}건"
-    },
-    "more": {
-      "other": "{count}건 더"
     },
     "none": "앞으로 12개월 동안 결제가 없어요"
   },

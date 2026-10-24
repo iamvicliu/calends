@@ -28,22 +28,18 @@
     "imageCopied": "Đã sao chép ảnh"
   },
   "history": "Lịch sử",
-  "summary": "Tóm tắt",
   "field": {
     "amount": "Số tiền",
     "cycle": "Chu kỳ thanh toán",
     "category": "Danh mục",
     "method": "Phương thức thanh toán",
-    "start": "Ngày bắt đầu",
     "next": "Kỳ thanh toán tới",
-    "expires": "Dịch vụ kết thúc",
     "expiresHint": "Tự động gia hạn sẽ trừ tiền trước ngày này",
     "endedOn": "Kết thúc ngày",
     "trialEnd": "Hết dùng thử",
     "region": "Khu vực",
     "period": "Thời gian",
-    "present": "nay",
-    "progress": "Kỳ hiện tại"
+    "present": "nay"
   },
   "up": {
     "planned": "Dự định thay đổi\nchưa xác nhận",
@@ -69,18 +65,8 @@
     "member": "Chia sẻ\ntôi tham gia",
     "payTo": "Trả cho",
     "host": "Chủ nhóm",
-    "myShare": "Phần của tôi",
     "unnamed": "Chưa đặt tên",
-    "paidUntil": "Đã trả đến {date}",
-    "unpaid": "Chưa trả",
-    "owed": "Còn nợ {amount}",
-    "settled": "Đã thanh toán đủ",
-    "me": "Tôi",
-    "seatsLeft": {
-      "other": "{seats} chỗ, còn trống {count}"
-    },
-    "seatsFull": "Đã kín cả {seats} chỗ",
-    "surplus": "Không mất tiền, dư {amount}"
+    "me": "Tôi"
   },
   "charges": {
     "recentN": "Chỉ {count} lần gần nhất",
@@ -93,8 +79,7 @@
       "adjust": "Điều chỉnh",
       "failed": "Thất bại"
     },
-    "add": "Thêm bản ghi (hoàn tiền, điều chỉnh, trừ tiền thất bại, số tiền trên thẻ…)",
-    "all": "Hiện tất cả {count}"
+    "add": "Thêm bản ghi (hoàn tiền, điều chỉnh, trừ tiền thất bại, số tiền trên thẻ…)"
   },
   "stats": {
     "spent": "Tổng chi",
@@ -132,7 +117,6 @@
   },
   "chart": {
     "title": "Mỗi lần trừ\n{ccy}",
-    "orig": "Gốc",
     "all": "Tất cả",
     "y1": "1 năm",
     "m6": "6 tháng",
@@ -140,7 +124,6 @@
     "list": "Giá niêm yết theo tỷ giá đầu",
     "listOrig": "Giá niêm yết",
     "origAmount": "Số tiền gốc",
-    "few": "Cần ít nhất hai lần trừ tiền để vẽ xu hướng",
     "bucket": {
       "m1": "Mỗi cột là tổng một tháng",
       "m3": "Mỗi cột là tổng một quý",
@@ -164,12 +147,8 @@
     "shareStart": "Bắt đầu dùng chung"
   },
   "upcoming": {
-    "title": "12 tháng tới",
     "total": {
       "other": "≈ {amount}\n{count} lần"
-    },
-    "more": {
-      "other": "Thêm {count} lần"
     },
     "none": "Không có khoản trừ nào trong 12 tháng tới"
   },

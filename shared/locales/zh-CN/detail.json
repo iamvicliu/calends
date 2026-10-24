@@ -28,22 +28,18 @@
     "imageCopied": "已复制图片"
   },
   "history": "历程",
-  "summary": "摘要",
   "field": {
     "amount": "金额",
     "cycle": "计费周期",
     "category": "分类",
     "method": "支付方式",
-    "start": "开始日期",
     "next": "下次到期",
-    "expires": "服务到期",
     "expiresHint": "自动续费会在到期前扣款",
     "endedOn": "结束于",
     "trialEnd": "试用截止",
     "region": "地区",
     "period": "订阅期间",
-    "present": "至今",
-    "progress": "本期进度"
+    "present": "至今"
   },
   "up": {
     "planned": "计划变更\n还没确定",
@@ -69,16 +65,8 @@
     "member": "合租\n我加入",
     "payTo": "付给",
     "host": "发起人",
-    "myShare": "我的份额",
     "unnamed": "未命名",
-    "paidUntil": "已付至 {date}",
-    "unpaid": "尚未收款",
-    "owed": "待收 {amount}",
-    "settled": "已结清",
-    "me": "我",
-    "seatsLeft": "{seats} 个位置，还剩 {count} 个空位",
-    "seatsFull": "{seats} 个位置已坐满",
-    "surplus": "不用出钱，多收 {amount}"
+    "me": "我"
   },
   "charges": {
     "recentN": "只看最近 {count} 笔",
@@ -89,8 +77,7 @@
       "adjust": "补差",
       "failed": "失败"
     },
-    "add": "记一笔（退款、补差、扣款失败、卡上实扣…）",
-    "all": "显示全部 {count} 笔"
+    "add": "记一笔（退款、补差、扣款失败、卡上实扣…）"
   },
   "stats": {
     "spent": "累计花了",
@@ -118,7 +105,6 @@
   },
   "chart": {
     "title": "每笔扣款\n{ccy}",
-    "orig": "原币",
     "all": "全部",
     "y1": "1 年",
     "m6": "6 个月",
@@ -126,7 +112,6 @@
     "list": "标价（按首笔汇率）",
     "listOrig": "标价",
     "origAmount": "原币金额",
-    "few": "扣款少于两笔，还画不出走势",
     "bucket": {
       "m1": "每根柱为一个月合计",
       "m3": "每根柱为一季合计",
@@ -150,9 +135,7 @@
     "shareStart": "开始合租"
   },
   "upcoming": {
-    "title": "未来 12 个月",
     "total": "约 {amount}\n{count} 笔",
-    "more": "还有 {count} 笔",
     "none": "未来 12 个月没有扣款"
   },
   "stop": {

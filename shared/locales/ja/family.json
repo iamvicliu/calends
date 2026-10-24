@@ -21,9 +21,6 @@
     "amount": "金額",
     "expandAll": "すべて展開",
     "collapseAll": "すべて折りたたむ",
-    "groupSum": {
-      "other": "{count} 件\n{amount}"
-    },
     "fee": "料金",
     "nextCollection": "次回集金",
     "status": "支払い状況",
@@ -31,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "開始",
     "rangeTo": "終了",
-    "showAllPeriods": "全 {count} 期間を表示",
     "vacancy": "空席",
     "departed": "退席 {count} 人",
     "hidePersonal": "個人情報を隠す",
@@ -201,7 +197,6 @@
     "unnamed": "名前なし",
     "leftOn": "{date}に脱退",
     "exemptNote": "枠を使用、支払いなし",
-    "paidUntil": "{date}まで支払い済み",
     "noPay": "まだ支払いはありません",
     "paymentsN": {
       "other": "{count}件の支払い"

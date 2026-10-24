@@ -21,9 +21,6 @@
     "amount": "금액",
     "expandAll": "모두 펼치기",
     "collapseAll": "모두 접기",
-    "groupSum": {
-      "other": "{count}건\n{amount}"
-    },
     "fee": "요금",
     "nextCollection": "다음 수금",
     "status": "납부 상태",
@@ -31,7 +28,6 @@
     "range": "{from} – {until}",
     "rangeFrom": "시작",
     "rangeTo": "종료",
-    "showAllPeriods": "전체 {count}개 기간 보기",
     "vacancy": "빈자리",
     "departed": "탈퇴 {count}명",
     "hidePersonal": "개인정보 숨기기",
@@ -201,7 +197,6 @@
     "unnamed": "이름 없음",
     "leftOn": "{date} 탈퇴",
     "exemptNote": "자리만 차지, 납부 없음",
-    "paidUntil": "{date}까지 납부 완료",
     "noPay": "아직 납부 없음",
     "paymentsN": {
       "other": "납부 {count}건"

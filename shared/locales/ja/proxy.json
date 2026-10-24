@@ -30,8 +30,6 @@
   "cardCcy": "\nカードは{ccy}で決済",
   "forWhom": "立て替え先",
   "method": "支払い方法",
-  "subscription": "サブスク",
-  "viewDetail": "サブスクの詳細を見る",
   "stoppedAt": "停止日",
   "nextCharge": "次回請求",
   "note": "メモ",
