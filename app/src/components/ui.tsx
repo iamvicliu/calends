@@ -116,6 +116,7 @@ const P: Record<string, JSX.Element> = {
   'sort-asc': <path d="m3 8 4-4 4 4M7 4v16M11 12h4M11 16h7M11 20h10" />,
   'sort-desc': <path d="m3 16 4 4 4-4M7 20V4M11 4h10M11 8h7M11 12h4" />,
   // 表格表头的排序方向：只用一支箭头，比工具栏里带横线的排序图标轻
+  updown: <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />,
   'arrow-up': <path d="M12 19V5M6 11l6-6 6 6" />,
   'arrow-down': <path d="M12 5v14M6 13l6 6 6-6" />,
   right: <path d="m9 18 6-6-6-6" />,
