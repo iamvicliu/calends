@@ -1,7 +1,7 @@
 import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { StopFields } from '../components/StopPanel.tsx';
 import { Minus, Plus, ReceiptText } from 'lucide-react';
@@ -248,13 +248,19 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           void Promise.all(files.slice(0, 8).map(compressImage)).then(toAssistant, () => toAssistant());
         }}
       >
-        <Form isNew={isNew} f={f} setF={setF} up={up} state={state} today={today} stop={stop} setStop={setStop} />
+        <Form
+          key={historyReset}
+          isNew={isNew}
+          f={f}
+          setF={setF}
+          up={up}
+          state={state}
+          today={today}
+          stop={stop}
+          setStop={setStop}
+          history={!isNew && <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />}
+        />
       </div>
-      {!isNew && (
-        <div style={{ marginTop: 18 }}>
-          <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />
-        </div>
-      )}
     </Sheet>
   );
 }
@@ -268,6 +274,7 @@ function Form({
   up,
   state,
   today,
+  history,
 }: {
   isNew: boolean;
   stop?: StopForm;
@@ -277,6 +284,7 @@ function Form({
   up: (p: Partial<Subscription>) => void;
   state: AppState;
   today: string;
+  history?: ReactNode;
 }) {
   const phoneCat = f.category === presetCat('phone');
   const preset = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0];
@@ -313,15 +321,16 @@ function Form({
   // 买断是一次性的：没有续费、状态、到期、提醒、优惠期这些概念，表单里不显示
   const lt = f.cycle.unit === 'lifetime';
   const extras = [
-    f.intro && t('editor.more.intro'),
-    f.bonus && t('editor.more.bonus'),
-    f.remindDays != null && t('editor.more.remind'),
-    (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
-    (f.url || f.manageUrl) && t('editor.more.links'),
+    !lt && f.intro && t('editor.more.intro'),
+    !lt && f.bonus && t('editor.more.bonus'),
+    !lt && f.remindDays != null && t('editor.more.remind'),
+    !lt && (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
+    (f.url?.trim() || f.manageUrl?.trim() || f.icon?.trim() || (isDomainCat(f.category) && f.showOnPublic)) && t('editor.more.links'),
     f.tags.length > 0 && t('editor.more.tags'),
-    f.notes && t('editor.more.notes'),
+    f.notes?.trim() && t('editor.more.notes'),
   ].filter(Boolean) as string[];
-  const [more, setMore] = useState(extras.length > 0);
+  // 不保存展开偏好；每次打开（包括恢复/清空表单）都按实际内容决定。
+  const [more, setMore] = useState(() => extras.length > 0);
   // 分类表的顺序；表单里的分类万一不在表里（刚被删掉），也留着它
   const catOptions = [...new Set([...categories().map((c) => c.name), f.category].filter(Boolean))];
   const [newCat, setNewCat] = useState(false);
@@ -658,7 +667,9 @@ function Form({
         )}
       </Group>
 
-      {/* 五、不常用的：折叠起来，标题上列出已设置的项 */}
+      {history}
+
+      {/* 最后放不常用的选项，标题上列出已设置的项 */}
       <button type="button" className={`ed-more ${more ? 'open' : ''}`} onClick={() => setMore(!more)} aria-expanded={more}>
         <span>{t('editor.more.title')}</span>
         <small>{copyParts(extras.length ? extras.join('\n') : t(lt ? 'editor.more.summaryLt' : 'editor.more.summary'))}</small>
