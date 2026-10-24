@@ -726,3 +726,14 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
     perDay: total / Math.max(1, diffDays(from, to) + 1),
   };
 }
+
+/**
+ * 一个订阅今年（自然年）的总成本，折成本位币：今年已扣的按实扣，剩下的按预计，算到 12 月 31 日；失败的扣款不算。
+ * 合租、代付列表的套餐价格小字与合租的当年盈亏共用这一个数
+ */
+export function yearCost(state: AppState, s: Subscription, today: string): number {
+  const y = today.slice(0, 4);
+  return chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today)
+    .filter((c) => c.kind !== 'failed')
+    .reduce((a, c) => a + chargeValue(state, c), 0);
+}

@@ -13,6 +13,7 @@ import * as reports from './scope-report.ts';
 import * as metrics from './metrics.ts';
 import * as carpool from './carpool.ts';
 import * as carpoolTimeline from './carpool-timeline.ts';
+import * as proxy from './proxy.ts';
 import { detailForecast } from '../app/src/views/detail-data.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
@@ -62,6 +63,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...carpool,
     ...metrics,
     ...carpoolTimeline,
+    ...proxy,
     useTimelinePan: () => ({ current: null }),
     locale: () => 'en',
     useOrig: () => false,

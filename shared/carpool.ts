@@ -17,6 +17,7 @@ import {
   memberCollection,
 } from './billing.ts';
 import { chargeValue, convertOn, toBaseAt } from './fx.ts';
+import { yearCost } from './metrics.ts';
 import { currencyDecimals } from './format.ts';
 import type { AppState, CarRule, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
 
@@ -122,9 +123,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
 export function carYear(state: AppState, s: Subscription, today: string) {
   const y = today.slice(0, 4);
   const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
-  const cost = chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today)
-    .filter((c) => c.kind !== 'failed')
-    .reduce((a, c) => a + chargeValue(state, c), 0);
+  const cost = yearCost(state, s, today);
   const members = s.share?.members ?? [];
   const received = members
     .flatMap(memberCashFlows)

@@ -1,3 +1,4 @@
+import { LIFETIME_BILL_MONTHS } from './types.ts';
 import { intlLocale, t } from './i18n.ts';
 import { dateFormat, numberFormat, relativeFormat } from './intl.ts';
 
@@ -162,8 +163,8 @@ export function relDays(n: number): string {
 /** 合租收费周期的文字：按月、按季……不在常用选项里的写成「按 N 个月」 */
 export function billLabel(months?: number): string {
   const m = months ?? 1;
-  // 买断的合租只收一次（收费周期按 100 年记）
-  if (m >= 1200) return t('core.bill.once');
+  // 买断的合租只收一次（收费周期按 LIFETIME_BILL_MONTHS 记）
+  if (m >= LIFETIME_BILL_MONTHS) return t('core.bill.once');
   return [1, 3, 6, 12].includes(m) ? t(`core.bill.m${m}`) : t('core.bill.custom', { count: m });
 }
 

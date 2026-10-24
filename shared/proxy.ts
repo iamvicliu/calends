@@ -67,3 +67,21 @@ export function proxyRows(state: AppState, s: Subscription, today: string): Prox
     })
     .reverse();
 }
+
+/**
+ * 一组代付期的合计（都折成本位币）：已收与待收两组、已代付、已收回、待收、盈亏（只算已收的期：收回 − 实扣）、最近一次收款日。
+ * 代付页、卡片、详情与列表共用，口径只在这里一处
+ */
+export function proxyTotals(rows: ProxyRow[]) {
+  const done = rows.filter((r) => r.receivedBase != null);
+  const open = rows.filter((r) => r.receivedBase == null);
+  return {
+    done,
+    open,
+    charged: rows.reduce((a, r) => a + r.chargedBase, 0),
+    received: done.reduce((a, r) => a + r.receivedBase!, 0),
+    owed: open.reduce((a, r) => a + r.chargedBase, 0),
+    diff: done.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0),
+    lastIn: done.map((r) => r.entry?.receivedOn ?? r.date).reduce<string | undefined>((a, d) => (!a || d > a ? d : a), undefined),
+  };
+}

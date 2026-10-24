@@ -12,7 +12,7 @@ import { contactText } from './Members.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { proxyRows, type ProxyRow } from '../../../shared/proxy.ts';
+import { proxyRows, proxyTotals, type ProxyRow } from '../../../shared/proxy.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 
 /** 代付的状态文案：进行中、到期停付、已停止是代付自己的说法，其余沿用订阅状态 */
@@ -33,21 +33,20 @@ function proxySummary(state: AppState, today: string) {
     .filter((s) => s.proxy)
     .sort((a, b) => Number(['ended', 'terminated'].includes(effectiveStatus(a, today))) - Number(['ended', 'terminated'].includes(effectiveStatus(b, today))));
   const all = subs.flatMap((s) => rows(state, s, today));
-  const open = all.filter((r) => r.receivedBase == null);
-  const closed = all.filter((r) => r.receivedBase != null);
+  const { done, open, charged, owed, received, diff, lastIn } = proxyTotals(all);
   const live = subs.filter((s) => !['ended', 'terminated'].includes(effectiveStatus(s, today)));
   return {
     subs,
     live: live.length,
     next: live.map((s) => nextCharge(s, addDays(today, 1))).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined),
-    lastIn: closed.map((r) => r.entry?.receivedOn ?? r.date).reduce<string | undefined>((a, d) => (!a || d > a ? d : a), undefined),
-    closedCount: closed.length,
+    lastIn,
+    closedCount: done.length,
     count: all.length,
-    charged: all.reduce((a, r) => a + r.chargedBase, 0),
-    owed: open.reduce((a, r) => a + r.chargedBase, 0),
+    charged,
+    owed,
     owedCount: open.length,
-    received: closed.reduce((a, r) => a + r.receivedBase!, 0),
-    diff: closed.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0),
+    received,
+    diff,
   };
 }
 
@@ -66,21 +65,17 @@ function proxyStatus(st: string, list: Row[]): ['stop' | 'owe' | 'done' | 'ok' |
  * 第三格：还有没收的期就是待收；全部结清后不再写「已结清」，改为这笔代付最终赚了还是亏了（收回 − 实扣）
  */
 function OwedOrNet({ list, base, exact = false }: { list: Row[]; base: string; exact?: boolean }) {
-  const open = list.filter((r) => r.receivedBase == null);
+  const { open, owed, diff: net } = proxyTotals(list);
   if (open.length)
     return (
       <Metric
         label={t('proxy.owedPeriods', { count: open.length })}
-        value={`≈ ${money(
-          open.reduce((a, r) => a + r.chargedBase, 0),
-          base,
-          { compact: !exact },
-        )}`}
+        value={`≈ ${money(owed, base, { compact: !exact })}`}
         note={exact ? t('proxy.page.owedRate') : undefined}
         valueClassName="warn"
       />
     );
-  const net = list.reduce((a, r) => a + (r.receivedBase ?? 0) - r.chargedBase, 0);
+  // 走到这里各期都已收回，盈亏就是全部期的收回 − 实扣
   const even = Math.abs(net) < 0.5;
   return (
     <Metric
@@ -103,8 +98,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const [ledger, setLedger] = useState(false);
   const next = nextCharge(s, addDays(today, 1));
   const method = state.methods.find((m) => m.id === s.methodId);
-  const charged = list.reduce((a, r) => a + r.chargedBase, 0);
-  const received = list.reduce((a, r) => a + (r.receivedBase ?? 0), 0);
+  const { charged, received } = proxyTotals(list);
   const st = effectiveStatus(s, today);
   const stopped = ['ended', 'terminated'].includes(st);
   const [tone, label] = proxyStatus(st, list);
@@ -168,13 +162,8 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const stopped = ['ended', 'terminated'].includes(st);
   const next = nextCharge(live, addDays(today, 1));
   const method = state.methods.find((m) => m.id === live.methodId);
-  const charged = list.reduce((a, r) => a + r.chargedBase, 0);
-  const done = list.filter((r) => r.receivedBase != null);
-  const received = done.reduce((a, r) => a + r.receivedBase!, 0);
-  const open = list.filter((r) => r.receivedBase == null);
-  const diff = done.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0);
+  const { charged, done, received, open, diff, lastIn } = proxyTotals(list);
   const cardCcy = list.find((r) => r.currency !== r.listCurrency)?.currency;
-  const lastIn = done.map((r) => r.entry?.receivedOn ?? r.date).reduce<string | undefined>((a, d) => (!a || d > a ? d : a), undefined);
 
   return (
     <DetailSheet label={t('proxy.detailTitle')} onClose={onClose}>
@@ -474,20 +463,13 @@ function ProxyTable({ state, today, subs, onOpen }: { state: AppState; today: st
     const list = rows(state, s, today);
     const st = effectiveStatus(s, today);
     const stopped = ['ended', 'terminated'].includes(st);
-    const done = list.filter((r) => r.receivedBase != null);
-    const open = list.filter((r) => r.receivedBase == null);
     return {
       s,
       list,
       st,
       stopped,
-      done,
-      open,
+      ...proxyTotals(list),
       next: stopped ? undefined : nextCharge(s, addDays(today, 1)),
-      charged: list.reduce((a, r) => a + r.chargedBase, 0),
-      received: done.reduce((a, r) => a + r.receivedBase!, 0),
-      owed: open.reduce((a, r) => a + r.chargedBase, 0),
-      diff: done.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0),
       priceBase: toBaseAt(state, s.price, s.currency),
     };
   });
@@ -528,9 +510,8 @@ function ProxyTable({ state, today, subs, onOpen }: { state: AppState; today: st
             { label: t('family.strip.profit'), sort: 'profit', num: true },
           ]}
         />
-        {sorted.map(({ s, list, st, stopped, next, charged, done, open, received, owed, diff, priceBase }) => {
+        {sorted.map(({ s, list, st, stopped, next, charged, done, open, received, owed, diff, lastIn, priceBase }) => {
           const [tone, label] = proxyStatus(st, list);
-          const lastIn = done.map((r) => r.entry?.receivedOn ?? r.date).reduce<string | undefined>((a, d) => (!a || d > a ? d : a), undefined);
           const px = s.proxy!;
           return (
             <button key={s.id} className={`lt-row ${stopped ? 'st-ended' : ''}`} role="row" onClick={() => setLedger(s.id)}>

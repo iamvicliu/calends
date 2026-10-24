@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { chargesBetween, currentPhase, LIFETIME_BILL_MONTHS } from '../../../shared/billing.ts';
+import { currentPhase, LIFETIME_BILL_MONTHS } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
-import { chargeValue } from '../../../shared/fx.ts';
+import { yearCost } from '../../../shared/metrics.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { perLabel } from '../views/Report.tsx';
@@ -22,13 +22,11 @@ export function perMonths(n: number): string {
  * 套餐价格一格：上面是原币价格和周期（$71.88/年），下面是今年的总成本折成本币：
  * 今年已扣的按实扣，剩下的按预计，一起算到 12 月 31 日；单位统一是「/年」
  */
-export function PlanPrice({ state, s, today }: { state: AppState; s: Subscription; today: string }) {
+export function PlanPrice({ state, s, today, cost }: { state: AppState; s: Subscription; today: string; cost?: number }) {
   const cur = currentPhase(s, today);
   const base = state.settings.baseCurrency;
-  const y = today.slice(0, 4);
-  const year = chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today)
-    .filter((c) => c.kind !== 'failed')
-    .reduce((a, c) => a + chargeValue(state, c), 0);
+  // 调用方已算过今年成本（合租表的当年盈亏）就直接用，不再重算一遍
+  const year = cost ?? yearCost(state, s, today);
   return (
     <span className="lt-num" data-p={3}>
       <span>
@@ -68,6 +66,11 @@ export function nextSort<K extends string>(k: K, cur: K, dir: 'asc' | 'desc', de
   return [initial, defDir[initial]];
 }
 
+/** 这一列要不要标方向箭头：正在按它排序，且不是页面的默认排序（initial 那一列的默认方向） */
+export function isMarked<K extends string>(k: K | undefined, sort: K | undefined, dir: 'asc' | 'desc' | undefined, initial?: [K, 'asc' | 'desc']): boolean {
+  return sort === k && !(initial && initial[0] === sort && initial[1] === dir);
+}
+
 /**
  * 列表视图（.ltable）的表头：可排序的列是按钮，再点一次反向；p 是收窄时的隐藏优先级，与行内单元格的 data-p 一致；num 的列靠右，与数字对齐
  */
@@ -85,7 +88,7 @@ export function LtHead<K extends string>({
   initial?: [K, 'asc' | 'desc'];
   onSort?: (k: K) => void;
 }) {
-  const marked = (k?: K) => sort === k && !(initial && initial[0] === sort && initial[1] === dir);
+  const marked = (k?: K) => isMarked(k, sort, dir, initial);
   return (
     <div className="lt-row lt-head table-head" role="row">
       {cols.map((c) =>

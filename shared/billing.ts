@@ -1,4 +1,14 @@
-import type { AppState, Cycle, FxTable, PaymentMethod, Subscription, Payment, ShareMember, RenewalRule } from './types.ts';
+import {
+  LIFETIME_BILL_MONTHS,
+  type AppState,
+  type Cycle,
+  type FxTable,
+  type PaymentMethod,
+  type Subscription,
+  type Payment,
+  type ShareMember,
+  type RenewalRule,
+} from './types.ts';
 import { dateFormat } from './intl.ts';
 import { t } from './i18n.ts';
 import { chargeValue, convertOn } from './fx.ts';
@@ -907,8 +917,7 @@ export interface MemberDue {
   periodsOwed: number;
 }
 
-/** 买断的合租只收一次：收费周期按 100 年算，避免无限长的周期让日期计算失效 */
-export const LIFETIME_BILL_MONTHS = 1200;
+export { LIFETIME_BILL_MONTHS };
 
 /** 旧成员未设置周期时沿用订阅周期。 */
 export function memberBillMonths(s: Subscription, m: ShareMember, day?: string): number {
