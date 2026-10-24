@@ -1,0 +1,4 @@
+appstore.svg, icloud.svg, appledev.svg: Simple Icons 13.21.0 (CC0 1.0), https://simpleicons.org, filled with brand color
+microsoft365.svg: Wikimedia Commons, File:Microsoft_365_(2022).svg (public domain)
+setapp.png: setapp.com apple-touch-icon, resized to 96px
+Logos are trademarks of their owners.
