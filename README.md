@@ -35,6 +35,7 @@ Track what you pay, when it renews, and who owes you. Calends brings subscriptio
 - **Search** — find Chinese names by full pinyin, initials or mixed syllables in the subscription list, command palette and pickers.
 - **Renewal reminders** — email, Telegram, Lark/Feishu, DingTalk, WeCom, Slack, Discord, Bark, ntfy, ServerChan and custom webhooks.
 - **AI access** — query and update your ledger from an MCP-compatible assistant, with scoped tokens and previews for write operations.
+- **Import external ledgers** — preview and import CSV files, ZIP backups and databases from Wallos and other services in your browser.
 - **Storage and access** — password and passkey sign-in, remote device sign-out, optional public sharing with server-side masking, JSON backup/restore and CSV import/export. Available in 14 languages.
 
 <details>
@@ -77,7 +78,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.8.0` instead of `latest`.
+Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.9.0` instead of `latest`.
 
 Alternatively, build from source with Compose. From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
 
