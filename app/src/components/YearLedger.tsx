@@ -1,0 +1,139 @@
+import { Fragment, useState, type ReactNode } from 'react';
+import { t } from '../../../shared/i18n.ts';
+import type { AppState } from '../../../shared/types.ts';
+import { PayBadge } from './ui.tsx';
+import '../views/detail.css';
+
+/**
+ * 按年分组的收付款表：订阅详情的扣款记录、合租的收款与付款共用这一套。
+ * 四列（日期 · 第二列 · 原币金额 · 折合本位币）；只有一年的记录就平铺，跨年时按年分组且默认全部折叠。
+ * 年份行是小计：点一下展开或折叠这一年；表头点一下全部展开或全部收起。
+ * 第二列默认是支付方式，窄时收起（keepSecond 时保留，如合租收款的成员）
+ */
+export function YearLedger<T>({
+  items,
+  dateOf,
+  head,
+  yearCells,
+  row,
+  rowKey,
+  onRow,
+  rowClass,
+  rowTitle,
+  keepSecond = false,
+}: {
+  /** 新的在前 */
+  items: T[];
+  dateOf: (x: T) => string;
+  head: [string, string, string, string];
+  /** 年份行的后三格：第二列、原币合计、本位币合计（baseClass 给本位币合计那一格） */
+  yearCells: (list: T[]) => { second: ReactNode; orig: ReactNode; base: ReactNode; baseClass?: string };
+  /** 数据行的四格 */
+  row: (x: T) => { date: ReactNode; second: ReactNode; orig: ReactNode; base: ReactNode };
+  rowKey: (x: T, i: number) => string;
+  onRow?: (x: T) => void;
+  rowClass?: (x: T) => string;
+  rowTitle?: (x: T) => string | undefined;
+  keepSecond?: boolean;
+}) {
+  const yearsOf = [...new Set(items.map((x) => dateOf(x).slice(0, 4)))];
+  const grouped = yearsOf.length > 1;
+  const years = grouped ? yearsOf : [''];
+  const [open, setOpen] = useState<Set<string>>(() => new Set());
+  const inYear = (y: string) => items.filter((x) => dateOf(x).startsWith(y));
+  const second = keepSecond ? 'dt-ledger-keep' : 'dt-ledger-pay';
+  const cells = (
+    <>
+      <span>{head[0]}</span>
+      <span className={second}>{head[1]}</span>
+      <span>{head[2]}</span>
+      <span>{head[3]}</span>
+    </>
+  );
+  const allOpen = years.every((y) => open.has(y));
+  return (
+    <div className="ld-table car-receipts car-receipts-out dt-ledger">
+      {grouped ? (
+        <button
+          type="button"
+          className="ld-row ld-th car-ledger-head table-head"
+          aria-expanded={allOpen}
+          aria-label={t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}
+          onClick={() => setOpen(new Set(allOpen ? [] : years))}
+        >
+          {cells}
+        </button>
+      ) : (
+        <div className="ld-row ld-th table-head">{cells}</div>
+      )}
+      {years.map((y) => {
+        const list = inYear(y);
+        const sum = yearCells(list);
+        return (
+          <Fragment key={y || 'all'}>
+            {grouped && (
+              <button
+                type="button"
+                className="ld-row car-period"
+                aria-expanded={open.has(y)}
+                onClick={() => {
+                  const next = new Set(open);
+                  if (next.has(y)) next.delete(y);
+                  else next.add(y);
+                  setOpen(next);
+                }}
+              >
+                <span className="car-period-title">
+                  <b>{t('calendar.yearTitle', { year: y })}</b>
+                  <small>{t('detail.stats.count', { count: list.length })}</small>
+                </span>
+                <span className={second}>{sum.second}</span>
+                <span>{sum.orig}</span>
+                <span className={sum.baseClass}>{sum.base}</span>
+              </button>
+            )}
+            {(!grouped || open.has(y)) &&
+              list.map((x, i) => {
+                const r = row(x);
+                const cells = (
+                  <>
+                    <span className="ld-date">{r.date}</span>
+                    <span className={second}>{r.second}</span>
+                    <span className="o">{r.orig}</span>
+                    <span className="c">{r.base}</span>
+                  </>
+                );
+                const key = rowKey(x, i);
+                const props = { className: `ld-row dt-row ${rowClass?.(x) ?? ''}`, title: rowTitle?.(x) };
+                // 不能点的行用普通元素：禁用按钮会被画成灰色，看起来像另一种字号和颜色
+                return onRow ? (
+                  <button key={key} type="button" {...props} onClick={() => onRow(x)}>
+                    {cells}
+                  </button>
+                ) : (
+                  <div key={key} {...props}>
+                    {cells}
+                  </div>
+                );
+              })}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+/** 年份行的支付方式：和明细行一样用胶囊；两种以内并排，更多时写前两种再加「+N」，悬停看全部 */
+export function YearMethods({ ids, state }: { ids: string[]; state: AppState }) {
+  const methods = ids.map((id) => state.methods.find((m) => m.id === id));
+  const shown = methods.slice(0, 2);
+  const more = methods.length - shown.length;
+  return (
+    <span className="dt-pay-list" title={methods.length > 1 ? methods.map((m) => m?.name ?? t('ui.method.none')).join('\n') : undefined}>
+      {shown.map((m, i) => (
+        <PayBadge key={m?.id ?? `none-${i}`} m={m} />
+      ))}
+      {more > 0 && <span className="dt-pay-more">+{more}</span>}
+    </span>
+  );
+}

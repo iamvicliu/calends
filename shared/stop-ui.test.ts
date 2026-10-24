@@ -43,7 +43,11 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     .replace(/^import[\s\S]*?;\n/gm, '')
     .replace(/^export \{.*\};\n/gm, '');
   const copySource = readFileSync(new URL('../app/src/components/copy.tsx', import.meta.url), 'utf8').replace(/^import.*;\n/gm, '');
-  const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
+  // 详情类视图共用的头部、面板与事实项在 DetailKit，与被测文件一起编译
+  const kitSource = /DetailKit\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    ? readFileSync(new URL('../app/src/components/DetailKit.tsx', import.meta.url), 'utf8').replace(/^import[\s\S]*?;\n/gm, '')
+    : '';
+  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(result.fatal, false);
   const values: unknown[] = [];
   let cursor = 0;

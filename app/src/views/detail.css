@@ -11,7 +11,8 @@
   --dt-line: var(--gray-6);
   --dt-line-2: var(--gray-7);
   background: var(--dt-bg);
-  padding: 20px;
+  --dt-pad: 20px;
+  padding: 0 var(--dt-pad) 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -20,6 +21,7 @@
 }
 .sheet.bare:has(.dt) {
   background: var(--dt-bg, var(--gray-2));
+  container: subscription-detail / inline-size;
 }
 .dt h2,
 .dt h3,
@@ -164,21 +166,30 @@
   font: inherit;
   font-size: var(--fs-1);
   font-weight: 500;
-  color: var(--accent);
   cursor: pointer;
 }
 
 /* 头部：图标、名称、状态，一行价格与支付信息，右侧操作 */
 .dt-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: 'ico id act close';
   align-items: center;
   gap: 14px;
   min-height: 48px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 calc(-1 * var(--dt-pad));
+  padding: 16px var(--dt-pad);
+  background: var(--dt-bg);
 }
 .dt-head > .ico {
+  grid-area: ico;
   border-radius: var(--radius-md);
 }
 .dt-id {
+  grid-area: id;
   min-width: 0;
   flex: 1;
 }
@@ -194,9 +205,9 @@
 }
 .dt-name {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  /* 和按钮同行时名称可能折行，两行尽量等长，不留单字 */
+  text-wrap: balance;
 }
 .dt-meta {
   display: flex;
@@ -215,57 +226,88 @@
   text-decoration: none;
   color: var(--label-3);
 }
-.dt-cat {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--label);
+.dt-meta > * {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
-.dt-cat .i,
-.dt-cat .cat-emo,
-.dt-cat svg {
-  color: var(--tint);
+.dt-meta .cat-chip {
+  overflow: hidden;
 }
-.dt-actions {
-  flex-shrink: 0;
+.dt-head > .dt-actions {
+  grid-area: act;
+}
+.dt-header-tools {
+  display: contents;
+}
+.dt-close {
+  grid-area: close;
 }
 
-/* 两栏 */
-.dt-body,
-.dt-main,
-.dt-side {
+/* 按弹窗实际宽度收紧按钮，买断等窄弹窗同样适用。 */
+@container subscription-detail (max-width: 959px) {
+  .dt-head .dt-act-l {
+    display: none;
+  }
+  .dt-head .dt-act {
+    width: var(--ctl-h-md);
+    min-width: var(--ctl-h-md);
+    height: var(--ctl-h-md);
+    padding: 0;
+    gap: 0;
+    border-radius: var(--radius-pill);
+  }
+}
+@container subscription-detail (min-width: 560px) and (max-width: 959px) {
+  .dt-head {
+    grid-template-areas: 'ico id act close' 'ico meta meta meta';
+    row-gap: 2px;
+  }
+  .dt-id {
+    display: contents;
+  }
+  .dt-id h2 {
+    grid-area: id;
+  }
+  .dt-meta {
+    grid-area: meta;
+  }
+}
+@container subscription-detail (max-width: 559px) {
+  .dt-head {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'ico id close' 'act act act';
+    gap: 12px;
+  }
+  .dt-close {
+    align-self: start;
+  }
+  .dt-head > .dt-actions {
+    justify-self: center;
+    max-width: 100%;
+    gap: clamp(2px, calc((100cqw - 304px) / 6), 8px);
+  }
+  .dt-id h2 {
+    font-size: var(--fs-3);
+    line-height: 26px;
+  }
+}
+
+/* 内容区：单列分节，见 .dt-flow */
+.dt-body {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  container: detail-body / inline-size;
 }
-.dt-body,
-.dt-main {
-  container: detail-main / inline-size;
-}
-.dt-billing {
+/* 提醒：一张占满，两张以上平分一行 */
+.dt-notices {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 16px;
 }
-@container detail-main (min-width: 720px) {
-  .dt-billing.has-forecast {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-/* 窄屏单列：保留主栏顺序，让预测与扣款记录相邻 */
-@media (max-width: 999px) {
-  .dt-main,
-  .dt-side {
-    display: contents;
-  }
-  .dt-side.has-charges > .dt-panel:not(.dt-charges):not(.dt-outcome) {
-    order: 1;
-  }
-  .dt-outcome {
-    order: -1;
-  }
+.dt-notices:empty {
+  display: none;
 }
 
 /* 停止卡片：侧栏第一块，损失金额最醒目，下面是停止日、原本付到和退款 */
@@ -331,25 +373,6 @@
 .dt-chart {
   padding-bottom: 16px;
 }
-.dt-headline {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-top: 4px;
-}
-.dt-headline b {
-  font-size: var(--fs-4);
-  line-height: 36px;
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.dt-headline > span:last-child {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-  font-variant-numeric: tabular-nums;
-}
 
 .dt-empty {
   padding: 24px 0 8px;
@@ -375,37 +398,40 @@
   font-family: var(--mono);
   font-size: var(--fs-1);
 }
-.cc-line {
-  fill: none;
-  stroke: var(--chart-ink);
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
+/* 柱：实际扣款实色，预测只描边；缺汇率的画成浅色短柱，不当成 0 */
+.cc-bar {
+  fill: var(--chart-ink);
 }
+/* 与 HTML 柱的 --unpaid-dash 同一规格：1.5px 线、3px 段 2px 空 */
+.cc-bar.future {
+  fill: var(--unpaid-fill);
+  stroke: var(--unpaid-line);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+}
+.cc-bar.unknown {
+  fill: var(--gray-6);
+  stroke: none;
+}
+/* 悬停的那根加深一档，不换颜色 */
+.cc-bar.on {
+  opacity: 0.7;
+}
+/* 标价参照：细虚线台阶，压在柱子上方也看得清 */
 .cc-list {
   fill: none;
-  stroke: var(--label-3);
-  stroke-width: 1.4;
-  stroke-dasharray: 4 4;
-}
-.cc-pt {
-  fill: var(--dt-panel);
-  stroke: var(--chart-ink);
+  stroke: var(--dt-warn);
   stroke-width: 1.5;
+  stroke-dasharray: 4 3;
 }
-.cc-cross {
-  stroke: var(--label-3);
-  stroke-width: 0.5;
-  stroke-dasharray: 2 3;
+.cc-today {
+  stroke: var(--label-2);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
 }
-.cc-hl {
-  fill: var(--chart-ink);
-  stroke: var(--dt-panel);
-  stroke-width: 2.5;
-}
-.cc-hl.list {
-  fill: var(--label-3);
-  stroke-width: 2;
+.cc-today-l {
+  fill: var(--label-2);
+  font-size: var(--fs-1);
 }
 
 .cc-lanes {
@@ -439,11 +465,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.cc-cross-l {
+.cc-today-lane {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-left: var(--hairline) dashed var(--label-3);
+  border-left: var(--hairline) dashed var(--label-2);
   pointer-events: none;
 }
 .cc-xt {
@@ -464,7 +490,10 @@
   position: absolute;
   top: 0;
   z-index: 3;
-  width: 220px;
+  /* 按内容定宽：几笔并列时日期、卡名、金额各占一段，不在卡名中间折行 */
+  width: max-content;
+  min-width: 200px;
+  max-width: 300px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
   background: var(--dt-panel);
@@ -498,16 +527,35 @@
   flex: none;
 }
 .cc-tip-r i.k-v {
-  background: var(--indigo-9);
+  background: var(--chart-ink);
 }
-.cc-tip-r i.k-l {
+.cc-tip-r i.k-l,
+.dt-legend i.k-l {
+  width: 12px;
+  height: 2px;
   border-radius: 0;
-  height: 0;
-  border-top: var(--hairline) dashed var(--label-3);
+  background: repeating-linear-gradient(90deg, var(--dt-warn) 0 4px, transparent 4px 7px);
+}
+.cc-tip-r i.k-f {
+  position: relative;
+  background: var(--unpaid-fill);
+}
+.cc-tip-r i.k-f::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--unpaid-line);
+  -webkit-mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
+  mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
 }
 .cc-tip-r span {
   flex: 1;
+  min-width: 0;
   color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cc-tip-r b {
   font-weight: 600;
@@ -523,51 +571,6 @@
   color: var(--label-3);
   font-size: var(--fs-1);
   font-variant-numeric: tabular-nums;
-}
-
-/* 未来 12 个月 */
-.dt-up-bars {
-  display: grid;
-  grid-template-columns: repeat(13, minmax(0, 1fr));
-  gap: 5px;
-  height: 84px;
-  margin: 12px 0 4px;
-}
-.dt-up-bars div {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-.dt-up-bars i {
-  width: 100%;
-  max-width: 22px;
-  border-radius: var(--radius-sm);
-  background: var(--fill);
-}
-.dt-up-bars .on i {
-  background: var(--chart-ink);
-  opacity: 0.85;
-}
-.dt-up-bars small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-  font-variant-numeric: tabular-nums;
-}
-.dt-upcoming .dt-tbl {
-  margin-top: 10px;
-}
-.dt-charges .dt-tbl {
-  width: calc(100% - 40px);
-  margin-inline: 20px;
-}
-.dt-up-more {
-  padding-top: 8px;
-  border-top: var(--hairline) solid var(--sep);
-  color: var(--label-3);
-  font-size: var(--fs-1);
 }
 
 /* 合租座位 */
@@ -591,9 +594,18 @@
 .dt-ev {
   position: relative;
   display: grid;
-  grid-template-columns: 16px minmax(0, 1fr) auto;
+  grid-template-columns: 16px 120px minmax(0, 1fr);
   column-gap: 8px;
+  align-items: baseline;
   padding: 6px 0;
+}
+/* 事件名与说明同一行，放不下才折行 */
+.dt-ev > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
+  min-width: 0;
 }
 .dt-ev:not(:last-child)::before {
   content: '';
@@ -605,6 +617,8 @@
   background: var(--dt-line-2);
 }
 .dt-ev > i {
+  align-self: start;
+  grid-row: 1 / span 2;
   position: relative;
   width: 9px;
   height: 9px;
@@ -637,21 +651,30 @@
     inset 0 0 0 var(--hairline) var(--label-3);
 }
 .dt-ev b {
-  display: block;
   font-weight: 500;
 }
 .dt-ev small {
-  display: block;
   font-size: var(--fs-1);
   line-height: 16px;
   color: var(--label-3);
   font-variant-numeric: tabular-nums;
 }
 .dt-ev time {
-  padding-top: 1px;
-  font-family: var(--mono);
-  font-size: var(--fs-1);
-  color: var(--label-3);
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@container detail-body (max-width: 520px) {
+  .dt-ev {
+    grid-template-columns: 16px minmax(0, 1fr);
+  }
+  .dt-ev > time {
+    grid-column: 2;
+    font-size: var(--fs-1);
+  }
+  .dt-ev > div {
+    grid-column: 2;
+  }
 }
 .dt-events .dt-link {
   margin-top: 8px;
@@ -678,6 +701,7 @@
   white-space: nowrap;
 }
 .dt-prop dd {
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -726,10 +750,23 @@
   margin-top: 3px;
   color: var(--label-3);
 }
+.dt-note > div {
+  min-width: 0;
+}
 .dt-note p {
   white-space: pre-wrap;
-  min-width: 0;
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+.dt-note.open p {
+  display: block;
+}
+.dt-note .dt-link {
+  margin-top: 4px;
 }
 .dt-plan {
   display: flex;
@@ -755,68 +792,6 @@
 }
 .dt-charges .dt-ph {
   padding: 14px 20px 10px;
-}
-.dt-tbl {
-  --cols: minmax(82px, 1fr) minmax(0, 1.15fr) minmax(0, 1.3fr);
-  width: 100%;
-}
-/* 卡片撑满主栏；宽卡按时间逐行先左后右，共享网格行高与分隔线。 */
-@container detail-charges (min-width: 640px) {
-  .dt-charges .dt-tbl {
-    --cols: 82px 80px 104px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 24px;
-  }
-  .dt-charges .dt-grp {
-    grid-column: 1 / -1;
-  }
-}
-.dt-tr {
-  display: grid;
-  grid-template-columns: var(--cols);
-  align-items: center;
-  column-gap: 8px;
-  min-height: 48px;
-  padding: 7px 0;
-  font-size: var(--fs-1);
-  line-height: 18px;
-  font-variant-numeric: tabular-nums;
-}
-.dt-tr > :nth-child(n + 2) {
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-.dt-tr .d {
-  display: flex;
-  flex-direction: column;
-}
-.dt-tr small {
-  font-size: var(--fs-1);
-  line-height: 16px;
-  color: var(--label-3);
-}
-
-.dt-grp {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 0;
-  font-variant-numeric: tabular-nums;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  min-height: 30px;
-  background: color-mix(in srgb, var(--label) 2.5%, var(--dt-panel));
-  box-shadow: none;
-  font-size: var(--fs-1);
-  color: var(--label-2);
-}
-.dt-grp b {
-  margin-right: 6px;
-  font-weight: 600;
-  color: var(--label);
 }
 .dt-row {
   border-bottom: var(--hairline) solid var(--sep);
@@ -881,150 +856,25 @@
   background: var(--dt-warn-soft);
   color: var(--dt-warn);
 }
-.dt-tfoot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 0 20px;
-  border-top: var(--hairline) solid var(--dt-line);
-  flex: none;
-}
 
-/* 窄屏：文字与图标操作同高，表格去掉星期 */
+/* 窄屏：内距收窄 */
 @media (max-width: 640px) {
   .dt {
-    padding: 24px 12px 24px;
-  }
-  /* 第一行保留图标和名称；文字操作在第二行换行 */
-  .dt-head {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas: 'ico id' 'act act';
-    align-items: start;
-    gap: 12px;
-  }
-  .dt-head > .ico {
-    grid-area: ico;
-  }
-  .dt-id {
-    grid-area: id;
-  }
-  .dt-id h2 {
-    flex-wrap: wrap;
-    row-gap: 2px;
-    font-size: var(--fs-3);
-    line-height: 26px;
-  }
-  .dt-name {
-    white-space: normal;
-  }
-  .dt-actions {
-    grid-area: act;
-    margin-top: 4px;
-  }
-  .dt-act {
-    flex-direction: row;
-    gap: 6px;
-    height: var(--ctl-h-md);
-    padding: 0 8px;
-    font-size: var(--fs-1);
-    font-weight: 500;
-    color: var(--label-2);
-  }
-  .dt-act:hover {
-    background: none;
-  }
-  .dt-act .dt-act-i {
-    color: var(--label);
-  }
-  .dt-act .dt-act-i svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .dt-act-l {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    --dt-pad: 12px;
+    padding-bottom: 24px;
   }
   .dt-panel {
     padding: 14px 14px 16px;
-  }
-  .dt-charges .dt-tbl {
-    width: calc(100% - 28px);
-    margin-inline: 14px;
   }
   .dt-charges .dt-ph {
     padding: 12px 14px 8px;
   }
 }
 
-/* 宽屏：弹层撑大，两栏各自滚动 */
-@media (min-width: 1000px) {
-  .sheet.bare:has(.dt) {
-    /* 左右各留至少 80px 遮罩，方便点空白处关闭 */
-    width: min(1120px, calc(100vw - 160px));
-    overflow: hidden;
-  }
-  /* 整个弹窗一起滚动（左右两栏不再各滚各的），顶部名称与按钮固定 */
-  .sheet.bare:has(.dt) .sheet-body {
-    /* 为统一头部留出空间，底部内边距仍可完整滚入视口 */
-    max-height: calc(min(90dvh, 920px) - var(--ctl-h-md) - 28px);
-    overflow: auto;
-    overscroll-behavior: contain;
-  }
-  .dt {
-    padding: 0 24px 24px;
-    gap: 20px;
-  }
-  .dt-head {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    margin: 0 -24px;
-    padding: 24px 24px 12px;
-    background: var(--dt-bg);
-  }
-  .dt-body {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 16px;
-    align-items: start;
-  }
-}
-@media (min-width: 641px) and (max-width: 999px) {
+/* 订阅、代付、合租详情弹窗统一宽度，与其他弹窗一致 */
+@media (min-width: 641px) {
   .sheet.bare:has(.dt) {
     width: min(760px, calc(100vw - 96px));
-  }
-}
-
-/* 买断等内容少的：窄弹窗、单列、高度随内容 */
-@media (min-width: 641px) {
-  .sheet.bare:has(.dt.compact) {
-    width: min(620px, calc(100vw - 32px));
-  }
-  .sheet.bare:has(.dt.compact) .sheet-body {
-    height: auto;
-    max-height: 92vh;
-    overflow: auto;
-  }
-  .dt.compact {
-    height: auto;
-  }
-  /* 窄弹窗放不下名称和一整排按钮：按钮另起一行，名称不被挤成省略号 */
-  .dt.compact .dt-head {
-    flex-wrap: wrap;
-    row-gap: 12px;
-  }
-  .dt.compact .dt-actions {
-    order: 3;
-    flex-basis: 100%;
-  }
-  .dt.compact .dt-body {
-    display: flex;
-    /* 宽屏两栏的 align-items: start 会让单列里的卡片缩成内容宽度 */
-    align-items: stretch;
   }
 }
 
@@ -1045,23 +895,6 @@
 .dt-id h2 {
   flex-wrap: wrap;
 }
-@media (min-width: 641px) and (max-width: 1000px) {
-  .dt-head {
-    flex-wrap: wrap;
-  }
-  .dt-actions {
-    order: 2;
-    width: 100%;
-  }
-}
-@media (max-width: 640px) {
-  .dt-act-l {
-    white-space: normal;
-    overflow-wrap: anywhere;
-    text-align: center;
-  }
-}
-
 /* 停止与退款复用摘要的属性行，长翻译与停用原因在各自列内换行。 */
 .dt-stops .dt-prop dt {
   white-space: normal;
@@ -1082,4 +915,525 @@
 .dt-actions > .dt-round {
   justify-self: center;
   align-self: center;
+}
+
+/* 指标与摘要：一张卡，上层是竖线分隔的指标，下层是一行事实（支付方式、账号、日期）与备注 */
+/*
+ * 信息卡与上方指标卡竖向对齐：列数等于指标卡数；内距同卡片内距 16，
+ * 列距 = 卡片间距 12 + 两侧内距 32，每列文字正好落在对应卡片文字的起点
+ */
+.dt-panel.dt-glance {
+  padding: 16px;
+}
+.dt-summary {
+  --m: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--m), minmax(0, 1fr));
+  /* 账号占两列时，后面的短项回填前面的空格 */
+  grid-auto-flow: row dense;
+  gap: 14px 44px;
+}
+/* 没有卡面时（如代付）信息卡独占一行，列数等于指标卡数；在卡面右边时少一列 */
+.dt-body:has(> .metric-cards[data-count='2']) .dt-summary {
+  --m: 2;
+}
+.dt-body:has(> .metric-cards[data-count='4']) .dt-summary {
+  --m: 4;
+}
+.dt-summary .dt-prop {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 0;
+  padding: 0 !important;
+  border: 0;
+}
+.dt-summary .dt-prop dt {
+  font-size: var(--fs-1);
+}
+/* 账号多是长邮箱，占两列，不在字母中间断行 */
+.dt-summary .dt-prop:has(.dt-copy) {
+  grid-column: span 2;
+}
+/* 窄时指标卡两列、间距 8、内距 12，信息卡同样换算：列距 8 + 24 */
+@container detail-body (max-width: 520px) {
+  .dt-panel.dt-glance {
+    padding: 12px;
+  }
+  .dt-summary {
+    --m: 2 !important;
+    column-gap: 32px;
+  }
+}
+.dt-glance .dt-note p {
+  max-width: 72ch;
+}
+.dt-summary .dt-prop dd {
+  align-items: flex-start;
+  text-align: left;
+}
+.dt-summary .dt-copy {
+  text-align: left;
+}
+.dt-glance .dt-note {
+  margin-top: 14px;
+}
+
+/* 提醒放在通栏时，属性按列排开，不在整行宽度上左右相隔老远 */
+.dt-notices .dt-props {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+}
+.dt-notices .dt-plan {
+  margin-top: 0;
+}
+/* 通栏的提醒：每项标签在上、数值在下，像一行事实，不把数值推到格子最右边 */
+.dt-notices .dt-props {
+  row-gap: 14px;
+  margin-top: 12px !important;
+}
+.dt-notices .dt-prop {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
+}
+.dt-notices .dt-prop dd {
+  align-items: flex-start;
+  text-align: left;
+}
+.dt-notices .dt-prop dt {
+  font-size: var(--fs-1);
+}
+
+.dt-copy {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* 续费卡：下次扣款的日期与金额同一行，下面按周期给节奏柱或本期进度 */
+.dt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 4px;
+  color: var(--label-2);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+}
+.dt-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dt-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--chart-ink);
+}
+.dt-legend i.k-f {
+  position: relative;
+  background: var(--unpaid-fill);
+}
+.dt-legend i.k-f::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--unpaid-line);
+  -webkit-mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
+  mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
+}
+.dt-rn-bar {
+  flex: 1;
+  min-width: 48px;
+}
+.dt-rn-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--fill);
+  overflow: hidden;
+}
+.dt-rn-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--chart-ink);
+}
+
+/* 单列：各区块都是卡片（与上方指标卡一致）；扣款表、合租成员表自带描边，放在卡片里时去掉外框 */
+.dt-flow > .dt-charges .dt-ph {
+  padding: 14px 20px 10px;
+}
+.dt-flow > .dt-charges .ld-table,
+.dt-share .car-member-table {
+  margin: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+/*
+ * 合租成员表：卡片左右不留内距，让成员区与合租详情一样宽（≥720px 时是同一张成员表，而不是退回窄屏卡片）；
+ * 表格自己的左右内距与卡片标题对齐。窄屏的成员卡片在这张卡里不再各自成卡，改用分隔线，避免卡片套卡片
+ */
+.dt-panel.dt-share {
+  padding: 16px 0 8px;
+}
+.dt-share > .dt-ph {
+  padding: 0 20px;
+}
+.dt-share .car-member-table {
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+.dt-share .car-member-cards {
+  gap: 0;
+  padding: 0 20px;
+}
+.dt-share .car-member-cards :is(.owner-seat, .car-vacancy, .car-sheet-members) {
+  padding-inline: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-top: var(--hairline) solid var(--sep);
+}
+/* 详情：标签在上、数值在下，宽时四列，窄时两列；账号占两列 */
+.dt-about-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+@container detail-body (max-width: 560px) {
+  .dt-about-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.dt-about-grid .dt-prop {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
+.dt-about-grid .dt-prop dt {
+  font-size: var(--fs-1);
+  color: var(--label-2);
+}
+.dt-about-grid .dt-prop dd,
+.dt-about-grid .dt-copy {
+  align-items: flex-start;
+  text-align: left;
+}
+.dt-about-grid .dt-prop:has(.dt-copy) {
+  grid-column: span 2;
+}
+.dt-about .dt-note {
+  margin-top: 14px;
+}
+/* 四格里的本期进度：细条在数字下面，下一行是最晚取消日或本期起止 */
+.dt-cell-bar {
+  display: block;
+  margin: 2px 0 6px;
+}
+.dt-warn {
+  color: var(--dt-warn);
+}
+.dt-oc-reason {
+  margin: 0 0 4px !important;
+  color: var(--label-2);
+}
+
+/*
+ * 扣款记录与代付、合租的收付款表同一套（.ld-table / .car-receipts）：
+ * 扣款日 · 支付方式 · 卡上实扣 · 当时成本，四列均分；窄时去掉支付方式一列
+ */
+.dt-ledger .ld-row:not(.car-more) {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+.dt-ledger .car-period > span:nth-child(3) {
+  text-align: right;
+  align-items: flex-end;
+}
+.dt-ledger .car-more {
+  display: flex;
+  justify-content: center;
+}
+/* 支付方式一列：表头、年份行、数据行一律靠左；要压过合租「付款」表把第二列靠右的规则 */
+.ld-table.dt-ledger.car-receipts-out .ld-row > span:nth-child(2) {
+  text-align: left;
+  align-items: flex-start;
+}
+.dt-ledger .ld-row:not(.car-period) > span:nth-child(3) {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+.dt-ledger .ld-row:not(.car-period) > span:first-child small {
+  color: var(--label-3);
+}
+@container detail-charges (max-width: 480px) {
+  .dt-ledger .ld-row:not(.car-more) {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .dt-ledger-pay {
+    display: none !important;
+  }
+}
+/* 本期与属性都没有时（如没有账号的买断）不留空白 */
+.dt-about-grid:empty {
+  display: none;
+}
+.dt-flow > .dt-about:not(:has(.dt-period, .dt-prop, .dt-note)) {
+  display: none;
+}
+
+/* 本期：详情开头一条进度，试用期绿色、赠送期青色；刻度为最晚取消（橙）与扣款日（墨） */
+.dt-period {
+  --fill-c: var(--chart-ink);
+  margin-bottom: 18px;
+}
+.dt-period.trial {
+  --fill-c: var(--green-9);
+}
+.dt-period.bonus {
+  --fill-c: var(--teal-9);
+}
+.dt-period-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px !important;
+}
+.dt-period-h b {
+  font-weight: 600;
+}
+.dt-period-h span {
+  color: var(--label-2);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+}
+.dt-period-bar {
+  position: relative;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--fill);
+}
+.dt-period-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fill-c);
+}
+.dt-period-bar b {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 16px;
+  margin-left: -1px;
+  border-radius: 1px;
+}
+.dt-period-bar b.cb,
+.dt-period-keys .cb i {
+  background: var(--dt-warn);
+}
+.dt-period-bar b.ch,
+.dt-period-keys .ch i {
+  background: var(--label);
+}
+.dt-period-ends,
+.dt-period-keys {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px !important;
+  color: var(--label-3);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+}
+.dt-period-keys {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 4px !important;
+  color: var(--label-2);
+}
+.dt-period-keys span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dt-period-keys i {
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+}
+.dt-period-keys .cb {
+  color: var(--dt-warn);
+}
+
+/* 年份行里的几种支付方式：整颗胶囊在一行内叠放，后一颗盖住前一颗，前一颗只露出最左边的图标 */
+.dt-pay-list {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+}
+.dt-pay-list > .pay {
+  position: relative;
+  flex: none;
+  box-shadow:
+    0 0 0 1.5px var(--dt-panel),
+    inset 0 0 0 var(--hairline) var(--line);
+}
+/* 前面的胶囊只露出左端的图标（固定宽度，不随卡名长短变），右半段压在后一颗下面 */
+.dt-pay-list > .pay:not(:last-of-type) {
+  width: 34px;
+  margin-right: -10px;
+}
+.dt-pay-list > .pay:last-of-type {
+  z-index: 1;
+}
+.dt-pay-more {
+  position: relative;
+  z-index: 2;
+  margin-left: 6px;
+  color: var(--label-3);
+  font-size: var(--fs-1);
+}
+
+/* 停止卡片只有停止日、原本付到、退款三项：宽时一行放下，窄了再折行 */
+.dt-notices .dt-outcome .dt-props {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+/* 订阅期间是两个完整日期，占两列，不在年份中间折行 */
+.dt-about-grid .dt-prop.dt-period-text {
+  grid-column: span 2;
+}
+
+/* 主次：年份行是小计，金额深色加粗；明细行常规字重，不比小计更醒目 */
+.dt-ledger .car-period {
+  font-size: var(--fs-2);
+}
+.dt-ledger .car-period > span:nth-child(n + 3) {
+  color: var(--label);
+  font-weight: 600;
+}
+.dt-ledger .dt-row > span:nth-child(n + 3),
+.dt-ledger .dt-row b {
+  font-weight: 400;
+}
+/* 几种币种的合计排在同一行，放不下才折行 */
+.dt-ledger .car-period > span:nth-child(3) {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  column-gap: 8px;
+}
+
+/*
+ * 扣款表的分隔线只用一种画法：表头画下边线，其余每行只画上边线，避免相邻两行的线叠成一条粗线。
+ * 层级：表头、年份行用标准分隔色；年份展开后，组内各笔之间更浅一档；紧跟表头或年份行的那一行不画。
+ * 选择器带上 .ld-table.car-receipts，压过合租收付款表的同名规则
+ */
+.ld-table.car-receipts.dt-ledger .ld-row:not(.ld-th) {
+  border-bottom: 0;
+}
+.ld-table.car-receipts.dt-ledger .car-period {
+  border-top: var(--hairline) solid var(--sep);
+}
+.ld-table.car-receipts.dt-ledger .ld-row.dt-row:not(.car-period):not(.ld-th),
+.ld-table.car-receipts.dt-ledger .ld-row.car-more:not(.car-period):not(.ld-th) {
+  border-top: var(--hairline) solid color-mix(in srgb, var(--sep) 55%, transparent);
+}
+.ld-table.car-receipts.dt-ledger .ld-th + .ld-row.ld-row,
+.ld-table.car-receipts.dt-ledger .car-period + .ld-row.dt-row:not(.car-period):not(.ld-th) {
+  border-top: 0;
+}
+
+/* 订阅详情里的合租成员表更紧凑：行高 40px、上下内距 4px、收款按钮用 28px；合租详情保持原行高 */
+@container (min-width: 720px) {
+  .dt-share .car-member-row {
+    min-height: 40px;
+  }
+  /* 卡片左右各留 20px 后只剩约 680px，列间距收窄到 16px */
+  .dt-share .car-member-table {
+    column-gap: 16px;
+  }
+  .dt-share .car-member-table td {
+    padding-block: 4px;
+  }
+
+  /* 行矮了，成员胶囊与头像同步缩小：胶囊 28px、头像 20px，头像距胶囊边仍是 4px */
+  .dt-share .car-member-chip {
+    height: var(--ctl-h-sm);
+    gap: 6px;
+    padding: 0 10px 0 4px;
+  }
+  .dt-share .car-member-chip :is(.pp-ava, .owner-avatar, .car-private-avatar, .vacancy-ava) {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+/* 详情里的备注：标签在上（与属性一致），正文在下；有属性时与上面隔一点距离 */
+.dt-note-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dt-about-grid:not(:empty) + .dt-note-block,
+.dt-period + .dt-note-block {
+  margin-top: 14px;
+}
+.dt-note-k {
+  color: var(--label-2);
+  font-size: var(--fs-1);
+}
+.dt-note-block .dt-note {
+  margin-top: 0;
+}
+
+/* 备注已有标题，不再加便签图标 */
+.dt-note-block .dt-note > svg {
+  display: none;
+}
+
+/* 合租弹窗：成员卡片没有标题，表格顶到卡片上沿；收付款卡片头部只有右侧的切换 */
+.dt-panel.dt-share.car-members-panel {
+  padding-top: 4px;
+}
+.car-ledger-ph {
+  justify-content: flex-end;
+}
+/* 年份行的成员头像叠在一起：后一个压住前一个的一部分，白色描边分开 */
+.dt-ava-stack {
+  display: inline-flex;
+  align-items: center;
+}
+.dt-ava-stack > .pp-ava {
+  box-shadow: 0 0 0 1.5px var(--card);
+}
+.dt-ava-stack > .pp-ava + .pp-ava {
+  margin-left: -6px;
+}
+.dt-ava-stack small {
+  margin-left: 4px;
+  color: var(--label-3);
+}
+/* 年份行高度固定：第二列不论是支付方式胶囊还是成员头像，三张表（扣款、收款、付款）一样高 */
+.dt-ledger .car-period {
+  min-height: 38px;
+}
+.dt-ledger .dt-ava-stack > .pp-ava {
+  width: 22px !important;
+  height: 22px !important;
 }

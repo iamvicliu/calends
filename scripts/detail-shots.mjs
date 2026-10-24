@@ -20,7 +20,10 @@ for (let i = 0; i < args.length; i++) {
   else throw new Error(`Unknown argument: ${args[i]}`);
 }
 assert.ok(out, 'Usage: node scripts/detail-shots.mjs --out <directory> [--cases 4,15] [--keep]');
-assert.ok(!selected || (selected.length && selected.every((n) => Number.isInteger(n) && n >= 1 && n <= 30)), 'Cases must be 1–30');
+assert.ok(
+  !selected || (selected.length && selected.every((n) => Number.isInteger(n) && n >= 1 && n <= 40)),
+  'Cases must be 1–40 (38 selects both amount variants)',
+);
 out = resolve(out);
 await mkdir(out, { recursive: true });
 // Refuse collisions; never reuse or kill an existing listener (including 5173/8787).
@@ -280,7 +283,7 @@ function overview(results, fixture) {
   <table><thead><tr><th>用例 / 说明 / 测量摘要</th><th>截图（点击原图）</th></tr></thead><tbody>${results
     .map((r) => {
       const m = summary(r);
-      return `<tr id="${esc(r.id)}"><td><b>${r.case} · ${esc(r.name)}</b><p>${esc(r.description)}</p><p>高度差 ${m.heightDifference}px · 空白 ${(m.blankRatio * 100).toFixed(1)}%<br>横向溢出 ${m.horizontalOverflow.length} · 截断候选 ${m.truncated.length} · 滚动容器 ${m.scrollContainers.length}<br>${r.id === 'detail-18-missing' && m.text.includes('¥0') ? '<b>异常：缺失汇率显示为零</b><br>' : ''}全历史 ${r.verified.records}/${r.expected.records} · 阶段 ${r.expected.phases} · 成员 ${r.expected.members}</p><a href="${esc(r.id)}.json">此例JSON（各截图测量、文本与卡片）</a></td><td><div class="shots">${r.shots.map((s) => `<figure><a href="${esc(s.file)}"><img loading="lazy" src="${esc(s.file)}" alt="${esc(s.kind)}"></a><figcaption>${esc(s.kind)}</figcaption></figure>`).join('')}</div></td></tr>`;
+      return `<tr id="${esc(r.id)}"><td><b>${r.case} · ${esc(r.name)}</b><p>${esc(r.description)}</p><p>高度差 ${m.heightDifference}px · 空白 ${(m.blankRatio * 100).toFixed(1)}%<br>横向溢出 ${m.horizontalOverflow.length} · 截断候选 ${m.truncated.length} · 滚动容器 ${m.scrollContainers.length}<br>${r.case === 11 && m.text.includes('¥0') ? '<b>异常：缺失汇率显示为零</b><br>' : ''}全历史 ${r.verified.records}/${r.expected.records} · 阶段 ${r.expected.phases} · 成员 ${r.expected.members}</p><a href="${esc(r.id)}.json">此例JSON（各截图测量、文本与卡片）</a></td><td><div class="shots">${r.shots.map((s) => `<figure><a href="${esc(s.file)}"><img loading="lazy" src="${esc(s.file)}" alt="${esc(s.kind)}"></a><figcaption>${esc(s.kind)}</figcaption></figure>`).join('')}</div></td></tr>`;
     })
     .join('')}</tbody></table><h2>构造限制</h2><ul>${fixture.limitations.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></html>`;
 }
@@ -337,7 +340,10 @@ async function browserRun(input) {
     if (openedCase === c.id && openedLanguage === language) {
       await page.evaluate(() => {
         document.querySelector('.sheet').scrollTop = 0;
-        document.querySelector('.sheet-body').scrollTop = 0;
+        ((s) => {
+          const b = s.querySelector('.sheet-body');
+          return b && b.scrollHeight > b.clientHeight + 1 ? b : s;
+        })(document.querySelector('.sheet:has(.dt)') ?? document.querySelector('.sheet')).scrollTop = 0;
       });
       await settle();
       return;
@@ -348,7 +354,7 @@ async function browserRun(input) {
       body: JSON.stringify({ language }),
     });
     if (!r.ok) throw new Error('Temporary locale change failed');
-    const proxy = c.case === 26;
+    const proxy = c.case === 37;
     await page.goto(`http://127.0.0.1:5180/${proxy ? 'behalf' : 'list'}`);
     await page.waitForFunction(
       ({ language, proxy }) =>
@@ -372,13 +378,16 @@ async function browserRun(input) {
     openedCase = c.id;
     openedLanguage = language;
     await page.evaluate(() => {
-      document.querySelector('.sheet-body').scrollTop = 0;
+      ((s) => {
+        const b = s.querySelector('.sheet-body');
+        return b && b.scrollHeight > b.clientHeight + 1 ? b : s;
+      })(document.querySelector('.sheet:has(.dt)') ?? document.querySelector('.sheet')).scrollTop = 0;
     });
   }
   async function measure() {
     return page.evaluate(() => {
       const sheet = document.querySelector('.sheet:has(.dt)');
-      const body = sheet.querySelector('.sheet-body');
+      const body = ((b) => (b && b.scrollHeight > b.clientHeight + 1 ? b : sheet))(sheet.querySelector('.sheet-body'));
       const rect = (e) => {
         const r = e.getBoundingClientRect();
         return { x: r.x, y: r.y, width: r.width, height: r.height };
@@ -390,19 +399,43 @@ async function browserRun(input) {
       };
       const columns = {};
       const cards = [];
-      for (const name of ['main', 'side']) {
-        const col = sheet.querySelector(`.dt-${name}`);
-        const kids = [...col.children].filter(visible);
-        const bounds = kids.map(rect);
-        const contentHeight = bounds.length ? Math.max(...bounds.map((b) => b.y + b.height)) - Math.min(...bounds.map((b) => b.y)) : 0;
-        columns[name] = { ...rect(col), contentHeight: Math.round(contentHeight), display: getComputedStyle(col).display };
-        for (const e of kids)
-          cards.push({
-            column: name,
-            title: e.querySelector('.card-title,.dt-ph,h3')?.textContent?.trim() || (e.classList.contains('metric-cards') ? '指标卡' : label(e)),
-            ...rect(e),
-            nestedCards: [...e.querySelectorAll('.dt-panel')].map((p) => ({ title: p.querySelector('.dt-ph')?.textContent?.trim(), ...rect(p) })),
-          });
+      // 旧版两栏：主栏与侧栏各自堆叠，较短一栏下方整列留白
+      const legacy = sheet.querySelector('.dt-main') && sheet.querySelector('.dt-side');
+      const gaps = [];
+      if (legacy) {
+        for (const name of ['main', 'side']) {
+          const col = sheet.querySelector(`.dt-${name}`);
+          const kids = [...col.children].filter(visible);
+          const bounds = kids.map(rect);
+          const contentHeight = bounds.length ? Math.max(...bounds.map((b) => b.y + b.height)) - Math.min(...bounds.map((b) => b.y)) : 0;
+          columns[name] = { ...rect(col), contentHeight: Math.round(contentHeight), display: getComputedStyle(col).display };
+          for (const e of kids) cards.push({ column: name, title: e.querySelector('.card-title,.dt-ph,h3')?.textContent?.trim() || label(e), ...rect(e) });
+        }
+        if (getComputedStyle(sheet.querySelector('.dt-body')).display === 'grid') {
+          const [m, sd] = [columns.main, columns.side];
+          const short = m.contentHeight < sd.contentHeight ? m : sd;
+          gaps.push({ row: 'columns', difference: Math.abs(m.contentHeight - sd.contentHeight), width: short.width });
+        }
+      } else {
+        // 网格里同一视觉行（顶边相同）的卡片按各自自然高度比较，差值就是行内留白（拉伸后表现为卡片内部空白）
+        for (const grid of sheet.querySelectorAll('.dt-grid')) {
+          const kids = [...grid.children].filter(visible);
+          for (const e of kids) cards.push({ column: 'grid', title: e.querySelector('.card-title,.dt-ph,h3')?.textContent?.trim() || label(e), ...rect(e) });
+          const rows = new Map();
+          for (const e of kids) {
+            const top = Math.round(e.getBoundingClientRect().top);
+            rows.set(top, [...(rows.get(top) ?? []), e]);
+          }
+          for (const [top, row] of rows) {
+            if (row.length < 2) continue;
+            const prev = row.map((e) => e.style.alignSelf);
+            row.forEach((e) => (e.style.alignSelf = 'start'));
+            const hs = row.map((e) => ({ h: e.getBoundingClientRect().height, w: e.getBoundingClientRect().width }));
+            row.forEach((e, i) => (e.style.alignSelf = prev[i]));
+            const hi = Math.max(...hs.map((x) => x.h));
+            gaps.push({ row: `grid@${top}`, difference: hi - Math.min(...hs.map((x) => x.h)), width: 0, area: hs.reduce((a, x) => a + (hi - x.h) * x.w, 0) });
+          }
+        }
       }
       const horizontalOverflow = [];
       const scrollContainers = [];
@@ -459,9 +492,9 @@ async function browserRun(input) {
         const r = rect(e);
         return { text: e.textContent.trim(), ...r, textAreaRatio: Math.min(1, area / (r.width * r.height)) };
       });
-      const twoColumns = getComputedStyle(sheet.querySelector('.dt-body')).display === 'grid';
-      const difference = Math.abs(columns.main.contentHeight - columns.side.contentHeight);
-      const short = columns.main.contentHeight < columns.side.contentHeight ? columns.main : columns.side;
+      const twoColumns = gaps.length > 0;
+      const difference = Math.max(0, ...gaps.map((g) => g.difference));
+      const blankArea = gaps.reduce((a, g) => a + (g.area ?? g.difference * g.width), 0);
       const dialog = rect(sheet);
       const fullHeight = dialog.height + body.scrollHeight - body.clientHeight;
       return {
@@ -470,8 +503,9 @@ async function browserRun(input) {
         columns,
         twoColumns,
         heightDifference: Math.round(difference),
-        blankRatio: twoColumns ? (difference * short.width) / (dialog.width * fullHeight) : 0,
-        blankArea: twoColumns ? difference * short.width : 0,
+        blankRatio: blankArea / (dialog.width * fullHeight),
+        blankArea,
+        rowGaps: gaps,
         blankRatioDenominator: 'dialog.width × full stitched dialog height',
         horizontalOverflow,
         scrollContainers,
@@ -493,28 +527,38 @@ async function browserRun(input) {
     });
   }
   async function screenshot(path, clip) {
-    // CDP clips use device-independent pixels before browser zoom; normalize to CSS pixels.
+    // CDP clip 的单位随浏览器缩放与设备像素比变化：先截一张整屏，按截图宽度与视口宽度之比换算
+    const probe = await page.cdp('Page.captureScreenshot', { format: 'png' }, { timeout: 60000 });
+    const ratio = Buffer.from(probe.data, 'base64').readUInt32BE(16) / (await page.evaluate(() => innerWidth));
     const result = await page.cdp(
       'Page.captureScreenshot',
       {
         format: 'png',
         captureBeyondViewport: true,
-        clip: { x: clip.x * zoom, y: clip.y * zoom, width: clip.width * zoom, height: clip.height * zoom, scale: 1 },
+        clip: { x: clip.x * ratio, y: clip.y * ratio, width: clip.width * ratio, height: clip.height * ratio, scale: 1 / ratio },
       },
       { timeout: 60000 },
     );
     await fs.writeFile(path, Buffer.from(result.data, 'base64'));
   }
   async function capture(file, full) {
-    // Narrow sheets scroll at the sheet itself. Grow the viewport until their natural
-    // content fits, preserving the real 390px layout rather than changing overflow CSS.
+    // Sheets scroll at the sheet itself. Grow the viewport until their natural content fits,
+    // preserving the real layout rather than changing overflow CSS or stitching scrolled tiles.
     if (full) {
+      // 桌面弹窗高度上限是 920px：完整长图临时去掉上限，首屏图仍是真实高度
+      await page.evaluate(() => {
+        if (innerWidth < 641 || document.getElementById('detail-shot-full')) return;
+        const st = document.createElement('style');
+        st.id = 'detail-shot-full';
+        st.textContent = '.sheet:has(.dt){max-height:none!important}';
+        document.head.append(st);
+      });
       for (let i = 0; i < 8; i++) {
         const size = await page.evaluate(() => {
           const sheet = document.querySelector('.sheet:has(.dt)');
           return { width: innerWidth, height: innerHeight, excess: sheet.scrollHeight - sheet.clientHeight };
         });
-        if (size.width >= 641 || size.excess <= 1) break;
+        if (size.excess <= 1) break;
         zoom = await resize(size.width, Math.ceil(size.height + size.excess + 100));
         await settle();
         if (i === 7) throw new Error('Narrow dialog still scrolls after growing viewport');
@@ -522,13 +566,16 @@ async function browserRun(input) {
     }
     const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
     await page.evaluate(() => {
-      document.querySelector('.sheet-body').scrollTop = 0;
+      ((s) => {
+        const b = s.querySelector('.sheet-body');
+        return b && b.scrollHeight > b.clientHeight + 1 ? b : s;
+      })(document.querySelector('.sheet:has(.dt)') ?? document.querySelector('.sheet')).scrollTop = 0;
     });
     await settle();
     const geometry = () =>
       page.evaluate(() => {
         const sheet = document.querySelector('.sheet:has(.dt)');
-        const body = sheet.querySelector('.sheet-body');
+        const body = ((b) => (b && b.scrollHeight > b.clientHeight + 1 ? b : sheet))(sheet.querySelector('.sheet-body'));
         const head = sheet.querySelector('.dt-head');
         const r = sheet.getBoundingClientRect();
         const b = body.getBoundingClientRect();
@@ -550,6 +597,7 @@ async function browserRun(input) {
       const tile = `tiles/${file.replace('.png', '')}-0.png`;
       await screenshot(`${input.out}/${tile}`, { x: g.x, y: g.y, width: g.width, height: g.height });
       imageSpecs.push({ file, width: g.width, height: g.height, tiles: [{ path: tile, top: 0, height: g.height }] });
+      await page.evaluate(() => document.getElementById('detail-shot-full')?.remove());
       return { viewport, measurement, stitching: { tiles: 1 } };
     }
     const pieces = [];
@@ -569,7 +617,10 @@ async function browserRun(input) {
       previous = g.scroll;
       await page.evaluate(
         (step) => {
-          document.querySelector('.sheet-body').scrollTop += step;
+          ((s) => {
+            const b = s.querySelector('.sheet-body');
+            return b && b.scrollHeight > b.clientHeight + 1 ? b : s;
+          })(document.querySelector('.sheet:has(.dt)') ?? document.querySelector('.sheet')).scrollTop += step;
         },
         Math.max(1, g.bodyBottom - g.bodyTop - g.sticky - 4),
       );
@@ -588,7 +639,10 @@ async function browserRun(input) {
     }
     imageSpecs.push({ file, width: g.width, height: total, tiles: pieces });
     await page.evaluate(() => {
-      document.querySelector('.sheet-body').scrollTop = 0;
+      ((s) => {
+        const b = s.querySelector('.sheet-body');
+        return b && b.scrollHeight > b.clientHeight + 1 ? b : s;
+      })(document.querySelector('.sheet:has(.dt)') ?? document.querySelector('.sheet')).scrollTop = 0;
     });
     return {
       viewport,
@@ -610,7 +664,7 @@ async function browserRun(input) {
           ['zh-desktop', 'zh-CN', 1440, 1800, true],
           ['zh-first', 'zh-CN', 1440, 900, false],
           ['zh-narrow', 'zh-CN', 390, 1800, true],
-          ...([4, 15, 24, 30].includes(c.case) ? [['en-desktop', 'en', 1440, 1800, true]] : []),
+          ...([23, 34, 35, 39].includes(c.case) ? [['en-desktop', 'en', 1440, 1800, true]] : []),
         ]) {
           await openCase(c, language, width, height);
           const file = `${c.id}-${kind}.png`;
@@ -630,7 +684,9 @@ async function browserRun(input) {
         }
         const expanded = await measure();
         r.verified = { records: expanded.historyRows, eventRows: expanded.eventRows, phaseLabel: expanded.phaseLabel, text: expanded.text };
-        if (c.expected.phases > 1 && Number(expanded.phaseLabel?.match(/\d+/)?.[0]) !== c.expected.phases) throw new Error(`${c.id}: phase label mismatch`);
+        // 历程不足三条时详情不单独成卡，此时没有段数标签可核对
+        if (c.expected.phases > 1 && expanded.phaseLabel && Number(expanded.phaseLabel?.match(/\d+/)?.[0]) !== c.expected.phases)
+          throw new Error(`${c.id}: phase label mismatch`);
         if (expanded.historyRows !== c.expected.records)
           throw new Error(`${c.id}: visible expanded records ${expanded.historyRows} != expected ${c.expected.records}`);
         if (moreHistory || moreEvents) {

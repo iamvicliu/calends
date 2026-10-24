@@ -153,7 +153,10 @@ export function weekdayShort(i: number, narrow = false): string {
 /** 今天、明天、3 天后、2 个月后 */
 export function relDays(n: number): string {
   const rtf = relativeFormat(intlLocale(), { numeric: 'auto' });
-  return Math.abs(n) < 60 ? rtf.format(n, 'day') : rtf.format(Math.round(n / 30), 'month');
+  // 两个月内按天，两年内按月，再远按年：两年付的下次扣款说「2 年后」，不说「24 个月后」
+  if (Math.abs(n) < 60) return rtf.format(n, 'day');
+  if (Math.abs(n) < 700) return rtf.format(Math.round(n / 30), 'month');
+  return rtf.format(Math.round(n / 365.25), 'year');
 }
 
 /** 合租收费周期的文字：按月、按季……不在常用选项里的写成「按 N 个月」 */

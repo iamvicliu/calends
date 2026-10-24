@@ -5,14 +5,14 @@ import { afterEach, test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { currencyDecimals, moneyDecimals, flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateFull } from './format.ts';
+import { currencyDecimals, moneyDecimals, flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateAuto, cnDateFull } from './format.ts';
 import { intlLocale, locale, setLocale } from './i18n.ts';
 import { chargeValue } from './fx.ts';
-import { FALLBACK_FX, phaseSubs, diffDays } from './billing.ts';
+import { FALLBACK_FX, addMonths, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
 import { colorFor } from './people.ts';
-import { detailChargeHistory, detailForecast } from '../app/src/views/detail-data.ts';
+import { detailForecast } from '../app/src/views/detail-data.ts';
 import type { AppState, Subscription } from './types.ts';
 
 const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
@@ -26,6 +26,12 @@ function load(file: string, name: string, source: string, deps: Record<string, u
   return new Function(...Object.keys(deps), `${result.code}; return ${name};`)(...Object.values(deps));
 }
 const text = (html: string) => html.replace(/<[^>]*>/g, '');
+/** 订阅详情、合租共用的按年收付款表：按调用方注入的 useState 与 t 编译真实组件 */
+const yearLedger = (deps: Record<string, unknown>) => {
+  const file = '../app/src/components/YearLedger.tsx';
+  const src = read(file).split('export function YearLedger')[1].split('/** 年份行的支付方式')[0];
+  return load(file, 'YearLedger', `function YearLedger${src}`, { React, Fragment: React.Fragment, ...deps });
+};
 afterEach(() => {
   setSignedAmounts(true);
   setLocale('en', []);
@@ -158,15 +164,26 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
   const Charges = load(file, 'Charges', `function Charges(${source}`, {
     React,
     Fragment: React.Fragment,
-    useState: () => [true, () => {}],
+    // 两个状态：「显示全部」为真，展开的年份为全部年份，年度小计都能看到
+    useState: (initial: unknown) => (typeof initial === 'function' ? [new Set(['2025', '2026']), () => {}] : [true, () => {}]),
+    YearLedger: yearLedger({
+      useState: (initial: unknown) => (typeof initial === 'function' ? [new Set(['2025', '2026']), () => {}] : [true, () => {}]),
+      t: (key: string) => key,
+    }),
     phaseSubs,
-    detailChargeHistory,
     chargeValue,
     diffDays,
     relDays,
     flow,
     t: (key: string) => key,
     Panel: ({ children }: { children: React.ReactNode }) => React.createElement('section', null, children),
+    PayBadge: () => null,
+    methodOf: () => undefined,
+    cnDateFull,
+    chargeMethodId: billing.chargeMethodId,
+    YearMethods: () => null,
+    copyParts: (v: unknown) => v,
+    addMonths,
   });
   const sub = {
     id: 'fictional',
@@ -181,7 +198,8 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
   };
   const state = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
   const history = [
-    { sub, date: '2025-01-01', amount: 20, currency: 'USD' },
+    // 年份行只在超过 12 笔且跨年时出现：2025 年 12 笔，加上 2026 年两笔，才有年度小计
+    ...Array.from({ length: 12 }, (_, i) => ({ sub, date: `2025-${String(i + 1).padStart(2, '0')}-01`, amount: 20, currency: 'USD' })),
     { sub, date: '2026-01-01', amount: 10, currency: 'USD' },
     { sub, date: '2026-01-02', amount: -15, currency: 'USD', kind: 'refund' },
   ];
@@ -199,27 +217,34 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
   }
 });
 
-test('Detail defaults to the current charge year, falls back to the latest populated year and toggles the full history', () => {
+test('Detail charge history lists a year flat, and folds longer histories by year with a click on the year row', () => {
   const file = '../app/src/views/Detail.tsx';
   const source = read(file).split('function Charges(')[1];
-  let all = false;
+  // 组件里有两个状态（显示全部、展开的年份）：按调用顺序存，重新渲染时沿用
+  let values: unknown[] = [];
+  let cursor = 0;
+  const hook = (initial: unknown) => {
+    const i = cursor++;
+    if (!(i in values)) values[i] = typeof initial === 'function' ? (initial as () => unknown)() : initial;
+    return [values[i], (v: unknown) => (values[i] = v)];
+  };
   const Charges = load(file, 'Charges', `function Charges(${source}`, {
     React,
     Fragment: React.Fragment,
-    useState: () => [
-      all,
-      (value: boolean) => {
-        all = value;
-      },
-    ],
+    useState: hook,
+    YearLedger: yearLedger({ useState: hook, t: (key: string, args?: { count?: number; year?: string }) => `${key}:${args?.count ?? args?.year ?? ''}` }),
     phaseSubs,
-    detailChargeHistory,
     chargeValue,
-    diffDays,
-    relDays,
+    addMonths,
     flow,
-    t: (key: string, args?: { count: number }) => `${key}:${args?.count ?? ''}`,
+    t: (key: string, args?: { count?: number; year?: string }) => `${key}:${args?.count ?? args?.year ?? ''}`,
     Panel: ({ children, title }: { children: React.ReactNode; title: string }) => React.createElement('section', null, title, children),
+    PayBadge: () => React.createElement('i', { 'data-pay': '' }),
+    methodOf: () => undefined,
+    cnDateFull,
+    chargeMethodId: billing.chargeMethodId,
+    YearMethods: () => null,
+    copyParts: (v: unknown) => v,
   });
   const sub = {
     id: 'fictional-history',
@@ -233,51 +258,89 @@ test('Detail defaults to the current charge year, falls back to the latest popul
     category: 'tools',
   };
   const state = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
-  const history = Array.from({ length: 82 }, (_, i) => ({
-    sub,
-    date: `${2020 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}-15`,
-    amount: 12,
-    currency: 'USD',
-  }));
-  const render = (rows = history, today = '2026-10-22') => renderToStaticMarkup(React.createElement(Charges, { sub, state, today, history: rows }));
-  const count = (html: string) => (html.match(/class="dt-tr dt-row/g) ?? []).length;
-  let html = render();
-  assert.equal(count(html), 10);
-  assert.ok(text(html).includes('detail.charges.title:82'));
-  assert.ok(text(html).includes('2026'));
-  assert.ok(!text(html).includes('2025'));
-  assert.ok(html.includes('aria-expanded="false"'));
-  // Exercise the actual disclosure handler, then render its resulting state.
-  const findToggle = (node: React.ReactNode): React.ReactElement<{ onClick: () => void }> | undefined => {
+  const monthly = (n: number, from = 2020) =>
+    Array.from({ length: n }, (_, i) => ({
+      sub,
+      date: `${from + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, '0')}-15`,
+      amount: 12,
+      currency: 'USD',
+    }));
+  const today = '2026-10-22';
+  const tree = (history: unknown[]) => {
+    cursor = 0;
+    return Charges({ sub, state, today, history });
+  };
+  const html = (history: unknown[]) => {
+    cursor = 0;
+    return renderToStaticMarkup(React.createElement(Charges, { sub, state, today, history }));
+  };
+  const count = (h: string) => (h.match(/class="ld-row dt-row/g) ?? []).length;
+  const years = (h: string) => (h.match(/class="ld-row car-period"/g) ?? []).length;
+  const find = (node: React.ReactNode, test: (p: Record<string, unknown>) => boolean): Record<string, unknown> | undefined => {
     if (!React.isValidElement(node)) return;
-    const props = node.props as { children?: React.ReactNode; 'aria-expanded'?: boolean };
-    if (props['aria-expanded'] !== undefined) return node as React.ReactElement<{ onClick: () => void }>;
+    // 表格本体是 YearLedger 组件：展开它渲染出的元素再找
+    if (typeof node.type === 'function') return find((node.type as (p: unknown) => React.ReactNode)(node.props), test);
+    const props = node.props as Record<string, unknown> & { children?: React.ReactNode };
+    if (test(props)) return props;
     for (const child of React.Children.toArray(props.children)) {
-      const found = findToggle(child);
+      const found = find(child, test);
       if (found) return found;
     }
   };
-  const toggle = () => findToggle(Charges({ sub, state, today: '2026-10-22', history }))!.props.onClick();
-  toggle();
-  html = render();
-  assert.equal(count(html), 82);
-  assert.ok(text(html).includes('2020'));
-  assert.ok(html.includes('aria-expanded="true"'));
-  toggle();
-  assert.equal(count(render()), 10);
-  const old = history.filter((c) => c.date < '2025');
-  html = render(old);
-  assert.equal(count(html), 12);
-  assert.ok(text(html).includes('2024'));
-  assert.ok(!text(html).includes('2023'));
-  // A single year is complete even with more than 24 entries; no disclosure.
-  const daily = Array.from({ length: 30 }, (_, i) => ({ ...history[0], date: `2024-06-${String(i + 1).padStart(2, '0')}` }));
-  html = render(daily);
-  assert.equal(count(html), 30);
-  assert.ok(!html.includes('aria-expanded'));
-  assert.ok(text(html).includes('2024-06-30'));
-  assert.equal(count(render([])), 0);
-  assert.ok(!render([]).includes('aria-expanded'));
+
+  // 一年以内：不分年，全部列出，没有「显示全部」
+  const recent = monthly(10, 2026);
+  values = [];
+  let h = html(recent);
+  assert.equal(years(h), 0);
+  assert.equal(count(h), 10);
+  // 每一行都写支付方式
+  assert.equal((h.match(/data-pay/g) ?? []).length, 10);
+  assert.doesNotMatch(h, /detail\.charges\.all/);
+  // 日期写全，不再写「几天前」
+  assert.match(h, /date[tT]ime="2026-10-15"/);
+  assert.doesNotMatch(text(h), /detail\.ev|relDays|ago|天前|个月前/);
+
+  // 82 笔跨七年：按年分组，打开时全部折叠，只看年份小计
+  const long = monthly(82);
+  values = [];
+  h = html(long);
+  assert.equal(years(h), 7);
+  assert.equal(count(h), 0);
+  assert.match(text(h), /detail\.charges\.title:82/);
+  const textOf = (node: React.ReactNode): string =>
+    typeof node === 'string' || typeof node === 'number'
+      ? String(node)
+      : React.isValidElement(node)
+        ? React.Children.toArray((node.props as { children?: React.ReactNode }).children)
+            .map(textOf)
+            .join('')
+        : Array.isArray(node)
+          ? node.map(textOf).join('')
+          : '';
+  const yearRow = (y: string, expanded: boolean) =>
+    find(tree(long), (p) => p['aria-expanded'] === expanded && textOf(p.children as React.ReactNode).includes(`calendar.yearTitle:${y}`))!;
+  // 点 2025 年展开这一年的 12 笔，再点收起
+  (yearRow('2025', false).onClick as () => void)();
+  assert.equal(count(html(long)), 12);
+  (yearRow('2025', true).onClick as () => void)();
+  assert.equal(count(html(long)), 0);
+  // 点表头：全部展开，再点全部收起
+  const head = () => find(tree(long), (p) => typeof p.onClick === 'function' && String(p.className ?? '').includes('car-ledger-head'))!;
+  (head().onClick as () => void)();
+  assert.equal(count(html(long)), 82);
+  (head().onClick as () => void)();
+  assert.equal(count(html(long)), 0);
+  // 只跨一次年、只有两笔也按年折叠
+  values = [];
+  h = html([...monthly(1, 2025).map((c) => ({ ...c, date: '2025-12-15' })), ...monthly(1, 2026)]);
+  assert.equal(years(h), 2);
+  assert.equal(count(h), 0);
+
+  // 没有记录：没有表格，也没有展开按钮
+  values = [];
+  assert.equal(count(html([])), 0);
+  assert.ok(!html([]).includes('aria-expanded'));
 });
 
 test('shared-plan avatars retain owner images, initials, dues colors and overflow in both sizes', async () => {
@@ -350,7 +413,7 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
   assert.ok(!remoteHtml.includes('tracking.invalid'));
 });
 
-test('Detail keeps renewal context and places only short default histories in the sidebar', () => {
+test('Detail leads with state-aware cells, puts the next charge first, and lays out one column', () => {
   const file = '../app/src/views/Detail.tsx';
   const source = read(file);
   const empty = () => null;
@@ -361,14 +424,13 @@ test('Detail keeps renewal context and places only short default histories in th
     Fragment: React.Fragment,
     ...billing,
     detailForecast,
-    detailChargeHistory,
     money,
     cnDateFull,
     relDays,
     flow,
     chargeValue,
     t: (key: string) => key,
-    useState: (initial: unknown) => [initial, empty],
+    useState: (initial: unknown) => [typeof initial === 'function' ? initial() : initial, empty],
     useRef: () => ({ current: null }),
     useMoneyPair: () => (amount: number, currency: string) => ({ main: money(amount, currency), alt: '≈ ¥766.18' }),
     TONE: {},
@@ -382,7 +444,7 @@ test('Detail keeps renewal context and places only short default histories in th
     IconButton: empty,
     regular: (h: { kind?: string; amount: number }[]) => h.filter((c) => !c.kind && c.amount > 0),
     SubIcon: empty,
-    CatTag: empty,
+    CatChip: empty,
     Region: empty,
     X: empty,
     Pencil: empty,
@@ -390,24 +452,48 @@ test('Detail keeps renewal context and places only short default histories in th
     Play: empty,
     Plus: empty,
     Share: empty,
-    Kpis: empty,
-    Trendline: empty,
+    Timeline: empty,
+    PeriodBar: empty,
     Charges: empty,
     Outcome: empty,
-    Details: empty,
+    Notices: empty,
+    ShareCard: empty,
+    Note: empty,
     Events: empty,
     PayBadge: empty,
     RegionTag: empty,
     subRegion: (s: { region?: string }) => s.region,
   };
-  const Upcoming = load(file, 'Upcoming', `function Upcoming(${source.split('function Upcoming(')[1].split('type Unit =')[0]}`, deps);
-  const Details = load(file, 'Details', `function Details(${source.split('function Details(')[1].split('/** 扣款记录')[0]}`, deps);
-  const Charges = load(file, 'Charges', `function Charges(${source.split('function Charges(')[1]}`, deps);
+  const Kpis = load(file, 'Kpis', `function Kpis(${source.split('function Kpis(')[1].split('type Range =')[0]}`, {
+    ...deps,
+    cnDateAuto,
+    copyParts: (v: unknown) => v,
+    MetricCards: ({ children }: { children: React.ReactNode }) => React.createElement('div', null, children),
+    Metric: ({ label, value, note }: { label: string; value: React.ReactNode; note?: React.ReactNode }) => React.createElement('div', null, label, value, note),
+    Trend: empty,
+    toBase: (_s: AppState, n: number) => n,
+  });
+  const Summary = load(file, 'Summary', `function Summary(${source.split('function Summary(')[1].split('\n}\n')[0]}\n}`, { ...deps, cnDateAuto, Note: empty });
+  const Charges = load(file, 'Charges', `function Charges(${source.split('function Charges(')[1]}`, {
+    ...deps,
+    Seg: empty,
+    copyParts: (v: unknown) => v,
+    YearMethods: empty,
+    YearLedger: yearLedger({ useState: React.useState, t: deps.t }),
+  });
   const Detail = load(file, 'Detail', `function Detail(${source.split('export function Detail(')[1].split('/** 正常扣款')[0]}`, {
     ...deps,
-    Upcoming,
-    Details,
+    Summary,
+    Kpis,
     Charges,
+    Maximize2: empty,
+    DetailHead: load('../app/src/components/DetailKit.tsx', 'DetailHead', read('../app/src/components/DetailKit.tsx').replace(/^import[\s\S]*?;\n/gm, ''), {
+      React,
+      t: (key: string) => key,
+      IconButton: empty,
+      X: empty,
+    }),
+    DetailSheet: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
   });
   for (const [unit, end] of [['year'], ['month'], ['lifetime'], ['month', '2026-07-01']] as const) {
     const sub: Subscription = {
@@ -428,25 +514,24 @@ test('Detail keeps renewal context and places only short default histories in th
     const header = html.split('class="dt-meta"')[1].split('</header>')[0];
     assert.ok(text(header).includes('€99.00'));
     assert.ok(text(header).includes('≈ ¥766.18'));
-    const summary = text(renderToStaticMarkup(React.createElement(Details, props)));
+    // 下次扣款在指标里，摘要只放支付方式、日期等，不重复
+    const summary = text(renderToStaticMarkup(React.createElement(Summary, props)));
+    assert.ok(!summary.includes('detail.ev.next'));
+    assert.ok(!summary.includes('€99.00'));
+    // 下次扣款的日期、金额与倒计时在顶部第一格；买断与已结束的没有下一笔
+    const history = billing.chargesBetween(sub, sub.start, props.today, props.today);
+    const cells = text(renderToStaticMarkup(React.createElement(Kpis, { ...props, history })));
     if (unit === 'lifetime' || end) {
-      assert.ok(!summary.includes('detail.ev.next'));
+      assert.ok(!cells.includes('detail.ev.next'));
     } else {
-      const next = detailForecast(sub, props.today).charges[0].date;
-      assert.ok(summary.includes('detail.ev.next'));
-      assert.ok(summary.includes(cnDateFull(next)));
-      assert.ok(summary.includes(relDays(diffDays(props.today, next))));
-      assert.ok(!summary.includes('€99.00'));
+      const charge = detailForecast(sub, props.today).charges[0];
+      assert.ok(cells.includes('detail.ev.next'));
+      assert.ok(cells.includes(cnDateAuto(charge.date, props.today)));
+      assert.ok(cells.includes(relDays(diffDays(props.today, charge.date))));
     }
-    assert.equal(html.includes('dt-upcoming'), unit === 'month' && !end);
-    assert.ok(!html.includes('dt-renewal'));
-    assert.equal((html.match(/class="dt-charges"/g) ?? []).length, 1);
-    const [main, side] = html.split('class="dt-side');
-    // 只扣过一笔的年付和买断一样内容少，改用窄单列，扣款记录留在主栏
-    const inSidebar = false;
-    assert.equal(main.includes('class="dt-charges"'), !inSidebar);
-    assert.equal(side.includes('class="dt-charges"'), inSidebar);
-    if (inSidebar) assert.ok(side.indexOf('detail.summary') < side.indexOf('class="dt-charges"'));
+    // 一份扣款记录；单列，没有侧栏
+    assert.equal((html.match(/class="dt-charges[ "]/g) ?? []).length, 1);
+    assert.ok(!html.includes('dt-side'));
     assert.equal(html.includes('dt compact'), unit === 'lifetime' || unit === 'year');
   }
   // Fictional annual plans: ordinary renewals plus commissions recorded as negative charges.
@@ -461,14 +546,14 @@ test('Detail keeps renewal context and places only short default histories in th
     category: 'tools',
     tags: [],
   };
-  for (const [count, start, today, inSidebar] of [
-    [3, '2020-01-15', '2026-10-22', true], // Four charges + year heading = five rows.
-    [4, '2020-01-15', '2026-10-22', false], // Five charges + year heading = six rows.
-    [8, '2020-01-15', '2026-10-22', false], // Reported case: nine charges, mostly commissions.
-    [4, '2026-01-15', '2026-10-22', false], // Only one renewal: no trend line, compact single column keeps charges in the main flow.
-    [5, '2026-01-15', '2026-10-22', false],
-    [3, '2020-01-15', '2027-01-01', true], // Latest populated year is the default after ending.
-    [4, '2020-01-15', '2027-01-01', false],
+  for (const [count, start, today] of [
+    [3, '2020-01-15', '2026-10-22'], // Four charges + year heading = five rows.
+    [4, '2020-01-15', '2026-10-22'], // Five charges + year heading = six rows.
+    [8, '2020-01-15', '2026-10-22'], // Reported case: nine charges, mostly commissions.
+    [4, '2026-01-15', '2026-10-22'], // Only one renewal: no trend line, compact single column keeps charges in the main flow.
+    [5, '2026-01-15', '2026-10-22'],
+    [3, '2020-01-15', '2027-01-01'], // Latest populated year is the default after ending.
+    [4, '2020-01-15', '2027-01-01'],
   ] as const) {
     const sub: Subscription = {
       ...annual,
@@ -481,11 +566,13 @@ test('Detail keeps renewal context and places only short default histories in th
     };
     const state: AppState = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
     const html = renderToStaticMarkup(React.createElement(Detail, { sub, state, today, onEdit: empty, onClose: empty }));
-    const [main, side] = html.split('class="dt-side');
-    assert.equal(main.includes('class="dt-charges"'), !inSidebar, `${count} credits from ${start} at ${today}`);
-    assert.equal(side.includes('class="dt-charges"'), inSidebar);
-    assert.equal((html.match(/class="dt-tr dt-row/g) ?? []).length, count + 1);
-    assert.ok(text(html).includes('+$5.00') || text(html).includes('+€5.00'));
-    assert.equal(html.includes('dt-upcoming'), false);
+    assert.equal((html.match(/class="dt-charges[ "]/g) ?? []).length, 1, `${count} credits from ${start} at ${today}`);
+    // 跨年就按年分组并全部折叠（只见年份小计）；只有一年的全部平铺
+    const charges = billing.chargesBetween(sub, sub.start, today, today);
+    const grouped = new Set(charges.map((c) => c.date.slice(0, 4))).size > 1;
+    assert.equal((html.match(/class="ld-row dt-row/g) ?? []).length, grouped ? 0 : charges.length);
+    // 这张表里欧元金额都是整数，原币不写 .00（平铺时看单笔返佣，分组时看年份小计）
+    if (!grouped) assert.ok(/\+[$€]5(\.00)?(?!\d)/.test(text(html)));
+    else assert.ok(!/[$€]\d[\d,]*\.00/.test(text(html.split('class="ld-table')[1] ?? '')));
   }
 });
