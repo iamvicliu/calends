@@ -6,7 +6,14 @@
   "date": {
     "placeholder": "날짜 선택",
     "prev": "이전",
-    "next": "다음"
+    "next": "다음",
+    "open": "캘린더 열기",
+    "year": "연도",
+    "month": "월",
+    "invalid": "유효한 날짜를 입력하세요",
+    "range": "날짜가 허용 범위를 벗어났습니다",
+    "type": "날짜 입력",
+    "confirm": "확인"
   },
   "method": {
     "label": "결제 수단",

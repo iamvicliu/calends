@@ -3,9 +3,28 @@
   "noMatch": "No matches",
   "common": "Frequently used",
   "currency": "Currency",
-  "date": { "placeholder": "Choose a date", "prev": "Previous", "next": "Next" },
-  "method": { "label": "Payment method", "none": "None" },
-  "region": { "label": "Region", "any": "Any", "none": "Any region", "all": "All regions" },
+  "date": {
+    "placeholder": "YYYY-MM-DD",
+    "prev": "Previous month",
+    "next": "Next month",
+    "open": "Open calendar",
+    "year": "Year",
+    "month": "Month",
+    "invalid": "Enter a valid date",
+    "range": "Date is outside the allowed range",
+    "type": "Type the date",
+    "confirm": "Confirm"
+  },
+  "method": {
+    "label": "Payment method",
+    "none": "None"
+  },
+  "region": {
+    "label": "Region",
+    "any": "Any",
+    "none": "Any region",
+    "all": "All regions"
+  },
   "ccy": {
     "label": "Currency",
     "switch": "Change the display currency",

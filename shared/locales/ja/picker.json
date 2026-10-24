@@ -6,7 +6,14 @@
   "date": {
     "placeholder": "日付を選択",
     "prev": "前へ",
-    "next": "次へ"
+    "next": "次へ",
+    "open": "カレンダーを開く",
+    "year": "年",
+    "month": "月",
+    "invalid": "有効な日付を入力してください",
+    "range": "日付が許可された範囲外です",
+    "type": "日付を入力",
+    "confirm": "確定"
   },
   "method": {
     "label": "支払い方法",

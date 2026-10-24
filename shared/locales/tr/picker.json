@@ -3,9 +3,28 @@
   "noMatch": "Eşleşme yok",
   "common": "Sık kullanılanlar",
   "currency": "Para birimi",
-  "date": { "placeholder": "Tarih seçin", "prev": "Önceki", "next": "Sonraki" },
-  "method": { "label": "Ödeme yöntemi", "none": "Yok" },
-  "region": { "label": "Bölge", "any": "Tümü", "none": "Tüm bölgeler", "all": "Tüm bölgeler" },
+  "date": {
+    "placeholder": "Tarih seçin",
+    "prev": "Önceki",
+    "next": "Sonraki",
+    "open": "Takvimi aç",
+    "year": "Yıl",
+    "month": "Ay",
+    "invalid": "Geçerli bir tarih girin",
+    "range": "Tarih izin verilen aralığın dışında",
+    "type": "Tarihi yaz",
+    "confirm": "Onayla"
+  },
+  "method": {
+    "label": "Ödeme yöntemi",
+    "none": "Yok"
+  },
+  "region": {
+    "label": "Bölge",
+    "any": "Tümü",
+    "none": "Tüm bölgeler",
+    "all": "Tüm bölgeler"
+  },
   "ccy": {
     "label": "Para birimi",
     "switch": "Görüntüleme para birimini değiştir",
