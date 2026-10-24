@@ -29,9 +29,9 @@ const entries: CatalogEntry[] = [
     icon: '/catalog/icloud.svg',
   },
   {
-    name: 'Apple 开发者',
+    name: 'Apple Developer Program',
     file: 'appledev',
-    aka: ['apple developer', '开发者证书', '苹果开发者'],
+    aka: ['apple developer', 'Apple 开发者', '开发者证书', '苹果开发者'],
     cat: 'developer',
     url: 'https://developer.apple.com/',
     icon: '/catalog/appledev.svg',
