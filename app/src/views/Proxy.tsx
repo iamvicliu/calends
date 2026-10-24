@@ -81,7 +81,8 @@ function OwedOrNet({ list, base, exact = false }: { list: Row[]; base: string; e
     <Metric
       label={t('family.strip.profit')}
       value={even ? t('proxy.table.even') : flow(net, base, { compact: !exact })}
-      note={exact && list.length ? t('proxy.page.perPeriod', { amount: flow(net / list.length, base) }) : undefined}
+      // 持平时不写平均每期（会显示成 −¥0.00）
+      note={exact && list.length && !even ? t('proxy.page.perPeriod', { amount: flow(net / list.length, base) }) : undefined}
       valueClassName={even ? '' : net > 0 ? 'done' : 'loss'}
     />
   );
@@ -666,7 +667,10 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
             value={Math.abs(sum.diff) < 0.5 ? t('proxy.table.even') : <Amount value={sum.diff} ccy={base} />}
             valueStyle={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
             note={
-              sum.closedCount ? t('proxy.page.diffAvg', { count: sum.closedCount, amount: flow(sum.diff / sum.closedCount, base) }) : t('proxy.page.diffSub')
+              // 持平时平均每期是 ±0，改写口径说明，不出现 −¥0.00
+              sum.closedCount && Math.abs(sum.diff) >= 0.5
+                ? t('proxy.page.diffAvg', { count: sum.closedCount, amount: flow(sum.diff / sum.closedCount, base) })
+                : t('proxy.page.diffSub')
             }
           />
           {sum.owedCount > 0 && (
