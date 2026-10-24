@@ -99,12 +99,14 @@ export function Gantt({
   today,
   onOpen,
   compact = false,
+  onEdit,
 }: {
   rows: Subscription[];
   state: AppState;
   today: string;
   onOpen: (s: Subscription) => void;
   compact?: boolean;
+  onEdit?: (s: Subscription) => void;
 }) {
   const captureRef = useRef<HTMLDivElement>(null);
   useSnapshotRender(captureRef, () => (compact ? <Gantt rows={subs} state={state} today={today} onOpen={onOpen} compact /> : null));
@@ -550,6 +552,19 @@ export function Gantt({
                     <SubIcon sub={r.s} size={20} proxied={compact} />
                   </span>
                   {!iconOnly && <TailName className="gt-name" name={r.s.name} />}
+                  {onEdit && !state.readonly && (
+                    <IconButton
+                      className="gt-edit"
+                      aria-label={t('list.edit')}
+                      title={t('list.edit')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(r.s);
+                      }}
+                    >
+                      <Icon name="edit" size={13} />
+                    </IconButton>
+                  )}
                 </div>
                 <div className="gt-track">
                   <div className="gt-pan">

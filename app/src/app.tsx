@@ -597,6 +597,14 @@ function App() {
     setDrawer(false);
     setViewId(s.id);
   };
+  // 卡片/列表/时间轴上的铅笔：直接进入编辑，不经过详情，关掉后回到列表
+  const edit = (s: Subscription) => {
+    if (state?.readonly) return;
+    setDrawer(false);
+    setViewId(null);
+    setBackTo(s.id);
+    setEditing(s);
+  };
   const add = () => {
     setDrawer(false);
     setEditing(newSub(d, state?.settings.defaultMethodId, state?.settings.baseCurrency));
@@ -604,14 +612,14 @@ function App() {
   const viewing = state.subscriptions.find((s) => s.id === viewId);
 
   let view;
-  if (route.startsWith('cat/')) view = <List key={route} state={state} today={d} onOpen={open} onAdd={add} category={route.slice(4)} />;
+  if (route.startsWith('cat/')) view = <List key={route} state={state} today={d} onOpen={open} onEdit={edit} onAdd={add} category={route.slice(4)} />;
   else
     switch (route) {
       case 'calendar':
         view = <Calendar state={state} today={d} onOpen={open} onIcs={() => setIcs(true)} />;
         break;
       case 'list':
-        view = <List key="all" state={state} today={d} onOpen={open} onAdd={add} />;
+        view = <List key="all" state={state} today={d} onOpen={open} onEdit={edit} onAdd={add} />;
         break;
       case 'wallet':
         view = <Wallet state={state} today={d} onOpen={open} />;

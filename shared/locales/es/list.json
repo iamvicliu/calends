@@ -136,5 +136,6 @@
   "network": {
     "unionpay": "UnionPay"
   },
-  "monthlySame": "Igual al precio"
+  "monthlySame": "Igual al precio",
+  "edit": "Editar"
 }

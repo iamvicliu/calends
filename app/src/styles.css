@@ -240,7 +240,8 @@ a {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  flex-wrap: wrap;
+  /* 不换行：排序方式与升降序按钮必须待在同一行，宽度不够时让搜索框先收缩 */
+  flex-wrap: nowrap;
   margin-left: auto;
 }
 .page {
@@ -10083,4 +10084,49 @@ img.mm-flag {
 .car-card-identity {
   flex: 1;
   min-width: 0;
+}
+
+/* 卡片、列表、时间轴：悬停（或键盘聚焦）时在名称旁露出铅笔，直接进入编辑 */
+.sc-edit,
+.lt-edit,
+.gt-edit {
+  opacity: 0;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--label-3);
+  transition:
+    opacity var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+.sc-edit {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}
+.scard:hover .sc-edit,
+.scard:focus-within .sc-edit,
+.lt-row:hover .lt-edit,
+.lt-row:focus-within .lt-edit,
+.gt-row:hover .gt-edit,
+.gt-row:focus-within .gt-edit,
+.sc-edit:focus-visible,
+.lt-edit:focus-visible,
+.gt-edit:focus-visible {
+  opacity: 1;
+}
+.sc-edit:hover,
+.lt-edit:hover,
+.gt-edit:hover {
+  color: var(--label);
+  background: var(--fill-2);
+}
+/* 触屏没有悬停：直接常显，避免够不着 */
+@media (hover: none) {
+  .sc-edit,
+  .lt-edit,
+  .gt-edit {
+    opacity: 1;
+  }
 }
