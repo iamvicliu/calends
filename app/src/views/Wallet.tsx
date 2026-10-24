@@ -325,7 +325,9 @@ function MethodSheet({
   onOpen: (s: Subscription) => void;
 }) {
   const r = runwayFor(m, state, today);
-  const subs = state.subscriptions.filter((s) => s.methodId === m.id);
+  // 关联订阅：还在用的（含买断）在前，已退订、被停用的排到后面；同组内保持原有顺序
+  const stopped = (s: Subscription) => ['ended', 'terminated'].includes(effectiveStatus(s, today));
+  const subs = state.subscriptions.filter((s) => s.methodId === m.id).sort((a, b) => Number(stopped(a)) - Number(stopped(b)));
   const ro = !!state.readonly;
   return (
     <Sheet
@@ -393,7 +395,7 @@ function MethodSheet({
             <Cell
               key={s.id}
               label={
-                <span className="row" style={{ opacity: ['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 0.45 : 1 }}>
+                <span className="row" style={{ opacity: stopped(s) ? 0.45 : 1 }}>
                   <SubIcon sub={s} size={28} />
                   {s.name}
                 </span>
