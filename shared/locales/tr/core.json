@@ -209,5 +209,22 @@
     "tooLate": "İptal süresi geçti. Sonraki dönem yine tahsil edilecek.",
     "cancelReminder": "Sonraki ödemeyi önlemek için {date} tarihine kadar iptal edin.",
     "none": "Yok"
+  },
+  "import": {
+    "invalid": "Bu dosya abonelik verisi olarak okunamadı.",
+    "tooLarge": "En fazla 32 MB boyutunda bir dosya seçin.",
+    "pending": "Bu yedekte bekleyen değişiklikler var. Önce tutarlı bir veritabanı yedeği oluşturun.",
+    "currency": "Para birimini seçin; kaynak simgesi belirsiz veya desteklenmiyor.",
+    "cycle": "Geçerli bir faturalama dönemi seçin.",
+    "price": "Geçerli, negatif olmayan bir tutar girin.",
+    "date": "Geçerli bir tarih girin.",
+    "selectUser": "Bu yedekten bir hesap seçin.",
+    "payers": "Ödeyen",
+    "unknownStart": "İlk başlangıç tarihi bilinmiyor; kayıt seçilen tarihten başlar.",
+    "manual": "Kaynakta elle yenileme; duraklatılmış olarak içe aktarılır.",
+    "reviewRequired": "Alanları incelemek için dosyayı Veri içe aktar üzerinden açın.",
+    "badDate": "Orijinal {field} \"{value}\" tanınmadı, içe aktarılmadı",
+    "nextDue": "sonraki ödeme tarihi",
+    "end": "bitiş tarihi"
   }
 }

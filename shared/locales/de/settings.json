@@ -113,7 +113,7 @@
   },
   "data": {
     "title": "Daten",
-    "importCsv": "CSV importieren",
+    "importCsv": "Daten importieren",
     "restore": "Aus Backup wiederherstellen",
     "exportCsv": "CSV exportieren",
     "backup": "Vollständiges Backup exportieren"
@@ -144,7 +144,17 @@
     "mergeDone": "Importiert (zusammengeführt)",
     "merge": "Zu Vorhandenem hinzufügen",
     "newMethods": "Neue Zahlungsmethoden werden angelegt: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Zahlungen werden erst ab dem Importdatum geschätzt. Frühere Zahlungen werden nicht rekonstruiert.",
+    "owner": "Konto im Backup",
+    "choose": "Auswählen…",
+    "independent": "Gleichnamige Abos bleiben getrennt.",
+    "include": "Importieren",
+    "every": "Alle",
+    "next": "Nächste Zahlung",
+    "paused": "Als pausiert importiert; vor dem Fortsetzen prüfen.",
+    "reading": "Datei wird gelesen…",
+    "formats": "CSV, ZIP-Backup oder SQLite-Datenbank"
   },
   "channels": {
     "title": {

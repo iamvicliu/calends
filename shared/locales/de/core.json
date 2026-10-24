@@ -209,5 +209,22 @@
     "tooLate": "Die Kündigungsfrist ist abgelaufen. Der nächste Zeitraum wird noch berechnet.",
     "cancelReminder": "Bis {date} kündigen, um die nächste Abbuchung zu vermeiden.",
     "none": "Keine"
+  },
+  "import": {
+    "invalid": "Diese Datei konnte nicht als Abonnementdaten gelesen werden.",
+    "tooLarge": "Wähle eine Datei mit höchstens 32 MB.",
+    "pending": "Dieses Backup enthält ausstehende Änderungen. Erstelle zuerst ein konsistentes Datenbank-Backup.",
+    "currency": "Wähle die Währung; das Quellsymbol ist mehrdeutig oder nicht unterstützt.",
+    "cycle": "Wähle einen gültigen Abrechnungszyklus.",
+    "price": "Gib einen gültigen Betrag ab null ein.",
+    "date": "Gib ein gültiges Datum ein.",
+    "selectUser": "Wähle ein Konto aus diesem Backup.",
+    "payers": "Bezahlt von",
+    "unknownStart": "Das ursprüngliche Startdatum ist unbekannt; die Erfassung beginnt am gewählten Datum.",
+    "manual": "Manuelle Verlängerung in der Quelle; als pausiert importiert.",
+    "reviewRequired": "Öffne diese Datei über Daten importieren und prüfe die Felder.",
+    "badDate": "Ursprüngliches {field} „{value}“ nicht erkannt, nicht importiert",
+    "nextDue": "nächstes Zahlungsdatum",
+    "end": "Enddatum"
   }
 }

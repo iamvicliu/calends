@@ -1,3 +1,4 @@
+import { isDataIcon } from '../shared/icon.ts';
 import {
   addDays,
   addMonths,
@@ -68,7 +69,8 @@ export interface Digest {
 /** 订阅图标：自己填的 emoji / 图片，没有就用官网的站点图标 */
 function iconOf(s: Pick<Subscription, 'icon' | 'url'>): string | undefined {
   const icon = s.icon?.trim();
-  if (icon) return icon;
+  // 内嵌图片不交给通知渠道（它们只认网址或 emoji），退回官网图标
+  if (icon && !isDataIcon(icon)) return icon;
   try {
     return s.url ? `https://www.google.com/s2/favicons?domain=${new URL(s.url).hostname}&sz=128` : undefined;
   } catch {

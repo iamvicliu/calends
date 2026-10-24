@@ -3,11 +3,13 @@ import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useEffect, useRef, useState } from 'react';
-import { cycleShort } from '../../../shared/billing.ts';
-import { importSubscriptionsCsv, toCsv } from '../../../shared/csv.ts';
-import { avatarOf, type AppState, type PaymentMethod, type Subscription } from '../../../shared/types.ts';
-import { IconButton, ask, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
-import { api, importData, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
+import { toCsv } from '../../../shared/csv.ts';
+import type { ImportSource } from '../../../shared/import-ledger.ts';
+import { readImportFile } from '../import-file.ts';
+import { ImportSheet } from './ImportSheet.tsx';
+import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
+import { IconButton, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { api, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
@@ -159,7 +161,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [pubTitle, setPubTitle] = useState(s.publicTitle ?? '');
   const [ics, setIcs] = useState(false);
   const [pubSubs, setPubSubs] = useState(false);
-  const [importing, setImporting] = useState<{ subs: Subscription[]; methods: PaymentMethod[]; created: PaymentMethod[] } | null>(null);
+  const [importing, setImporting] = useState<ImportSource | null>(null);
+  const [reading, setReading] = useState(false);
 
   const loadPreview = () =>
     api<Preview>('/api/notify/preview')
@@ -183,10 +186,25 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
     input.click();
   };
 
-  const onCsv = (text: string) => {
-    const r = importSubscriptionsCsv(text, state.methods, today);
-    if (!r.subscriptions.length) return toast(t('settings.toast.csvEmpty'), true);
-    setImporting({ subs: r.subscriptions, methods: r.methods, created: r.created });
+  const pickImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.zip,.db,.sqlite,text/csv,application/zip';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      setReading(true);
+      try {
+        const source = await readImportFile(file, state.methods, today);
+        if (!source.rows.length) toast(t('settings.toast.csvEmpty'), true);
+        else setImporting(source);
+      } catch (e) {
+        toast(e instanceof Error ? e.message : t('core.import.invalid'), true);
+      } finally {
+        setReading(false);
+      }
+    };
+    input.click();
   };
   // 备份恢复：整份交给服务端，订阅、支付方式、设置、汇率一起原样还原
   const [restoring, setRestoring] = useState<{ raw: unknown; subs: number; methods: number; exportedAt?: string; version: number } | null>(null);
@@ -517,7 +535,11 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
         {!state.readonly && <SecurityGroup state={state} />}
 
         <Group title={t('settings.data.title')}>
-          <Cell label={t('settings.data.importCsv')} onClick={() => pickFile('.csv,text/csv', onCsv)} />
+          <Cell
+            label={t('settings.data.importCsv')}
+            sub={reading ? t('settings.import.reading') : t('settings.import.formats')}
+            onClick={reading ? undefined : pickImport}
+          />
           <Cell label={t('settings.data.restore')} onClick={() => pickFile('.json,application/json', onJson)} />
           <Cell label={t('settings.data.exportCsv')} onClick={exportCsv} />
           <Cell label={t('settings.data.backup')} onClick={() => (location.href = base('/api/backup'))} />
@@ -570,54 +592,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       )}
       {ics && <IcsSheet state={state} onClose={() => setIcs(false)} />}
       {pubSubs && <PublicSubsSheet state={state} today={today} onClose={() => setPubSubs(false)} />}
-      {importing && (
-        <Sheet
-          title={t('settings.import.title', { count: importing.subs.length })}
-          onClose={() => setImporting(null)}
-          foot={
-            <>
-              <button
-                className="btn danger"
-                onClick={async () =>
-                  (await ask(t('settings.import.confirmReplace'))) &&
-                  run(async () => {
-                    await importData({ subscriptions: importing.subs, methods: importing.methods, mode: 'replace' });
-                    setImporting(null);
-                  }, t('settings.import.replaceDone'))
-                }
-              >
-                {t('settings.import.replaceAll')}
-              </button>
-              <span className="grow" />
-              <button
-                className="btn primary"
-                onClick={() =>
-                  run(async () => {
-                    await importData({ subscriptions: importing.subs, methods: importing.methods, mode: 'merge' });
-                    setImporting(null);
-                  }, t('settings.import.mergeDone'))
-                }
-              >
-                {t('settings.import.merge')}
-              </button>
-            </>
-          }
-        >
-          <Group
-            title={
-              importing.created.length
-                ? t('settings.import.newMethods', { names: importing.created.map((m) => m.name).join(t('settings.import.sep')) })
-                : undefined
-            }
-          >
-            {importing.subs.map((x) => (
-              <Cell key={x.id} label={x.name}>
-                {x.currency} {x.price} / {cycleShort(x.cycle)}
-              </Cell>
-            ))}
-          </Group>
-        </Sheet>
-      )}
+      {importing && <ImportSheet source={importing} state={state} today={today} onClose={() => setImporting(null)} />}
     </>
   );
 }

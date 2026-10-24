@@ -209,5 +209,22 @@
     "tooLate": "Le délai d’annulation est dépassé. La prochaine période sera facturée.",
     "cancelReminder": "Annulez avant le {date} pour éviter le prochain prélèvement.",
     "none": "Aucun"
+  },
+  "import": {
+    "invalid": "Ce fichier ne peut pas être lu comme des données d’abonnements.",
+    "tooLarge": "Choisissez un fichier de 32 Mo maximum.",
+    "pending": "Cette sauvegarde contient des modifications en attente. Créez d’abord une sauvegarde cohérente de la base.",
+    "currency": "Choisissez la devise ; le symbole est ambigu ou non pris en charge.",
+    "cycle": "Choisissez un cycle de facturation valide.",
+    "price": "Saisissez un montant valide positif ou nul.",
+    "date": "Saisissez une date valide.",
+    "selectUser": "Choisissez un compte dans cette sauvegarde.",
+    "payers": "Payé par",
+    "unknownStart": "La date de début originale est inconnue ; le suivi commence à la date choisie.",
+    "manual": "Renouvellement manuel à l’origine ; importé en pause.",
+    "reviewRequired": "Ouvrez ce fichier via Importer des données pour vérifier les champs.",
+    "badDate": "{field} d’origine « {value} » non reconnu, non importé",
+    "nextDue": "date du prochain paiement",
+    "end": "date de fin"
   }
 }

@@ -113,7 +113,7 @@
   },
   "data": {
     "title": "Données",
-    "importCsv": "Importer un CSV",
+    "importCsv": "Importer des données",
     "restore": "Restaurer une sauvegarde",
     "exportCsv": "Exporter en CSV",
     "backup": "Exporter une sauvegarde complète"
@@ -144,7 +144,17 @@
     "mergeDone": "Importé (fusionné)",
     "merge": "Ajouter à l’existant",
     "newMethods": "De nouveaux moyens de paiement seront créés : {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Les paiements sont estimés à partir de l’import. L’historique antérieur n’est pas reconstitué.",
+    "owner": "Compte dans la sauvegarde",
+    "choose": "Choisir…",
+    "independent": "Les abonnements homonymes restent séparés.",
+    "include": "Inclure",
+    "every": "Tous les",
+    "next": "Prochain paiement",
+    "paused": "Importé en pause ; vérifiez avant de reprendre.",
+    "reading": "Lecture du fichier…",
+    "formats": "CSV, sauvegarde ZIP ou base SQLite"
   },
   "channels": {
     "title": {

@@ -209,5 +209,22 @@
     "tooLate": "El plazo de cancelación ha vencido. Se cobrará el siguiente período.",
     "cancelReminder": "Cancela antes del {date} para evitar el próximo cobro.",
     "none": "Ninguno"
+  },
+  "import": {
+    "invalid": "No se pudo leer este archivo como datos de suscripciones.",
+    "tooLarge": "Elige un archivo de hasta 32 MB.",
+    "pending": "Esta copia tiene cambios pendientes. Crea primero una copia coherente de la base de datos.",
+    "currency": "Elige la moneda; el símbolo es ambiguo o no compatible.",
+    "cycle": "Elige un ciclo de facturación válido.",
+    "price": "Introduce un importe válido no negativo.",
+    "date": "Introduce una fecha válida.",
+    "selectUser": "Elige una cuenta de esta copia.",
+    "payers": "Pagado por",
+    "unknownStart": "Se desconoce la fecha original; el registro empieza en la fecha seleccionada.",
+    "manual": "Renovación manual en el origen; se importa en pausa.",
+    "reviewRequired": "Abre el archivo mediante Importar datos para revisar los campos.",
+    "badDate": "{field} original «{value}» no reconocido; no se importó",
+    "nextDue": "fecha del próximo pago",
+    "end": "fecha de fin"
   }
 }

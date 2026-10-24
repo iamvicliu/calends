@@ -98,7 +98,7 @@
   },
   "data": {
     "title": "Veriler",
-    "importCsv": "CSV içe aktar",
+    "importCsv": "Veri içe aktar",
     "restore": "Yedekten geri yükle",
     "exportCsv": "CSV dışa aktar",
     "backup": "Tam yedeği dışa aktar"
@@ -116,14 +116,27 @@
     "legacy": "Eski yedek: yalnızca abonelikler ve ödeme yöntemleri"
   },
   "import": {
-    "title": { "one": "{count} abonelik içe aktar", "other": "{count} abonelik içe aktar" },
+    "title": {
+      "one": "{count} abonelik içe aktar",
+      "other": "{count} abonelik içe aktar"
+    },
     "confirmReplace": "Değiştirmek mevcut tüm abonelikleri ve ödeme yöntemlerini siler. Devam edilsin mi?",
     "replaceDone": "İçe aktarıldı (değiştirildi)",
     "replaceAll": "Tümünü değiştir",
     "mergeDone": "İçe aktarıldı (birleştirildi)",
     "merge": "Mevcutlara ekle",
     "newMethods": "Yeni ödeme yöntemleri oluşturulacak: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Ödemeler yalnızca içe aktarma tarihinden itibaren tahmin edilir. Önceki geçmiş yeniden oluşturulmaz.",
+    "owner": "Yedekteki hesap",
+    "choose": "Seçin…",
+    "independent": "Aynı adlı abonelikler ayrı kalır.",
+    "include": "Dahil et",
+    "every": "Her",
+    "next": "Sonraki ödeme",
+    "paused": "Duraklatılmış olarak içe aktarılır; sürdürmeden önce inceleyin.",
+    "reading": "Dosya okunuyor…",
+    "formats": "CSV, ZIP yedeği veya SQLite veritabanı"
   },
   "channels": {
     "title": { "one": "Bildirim kanalları\n{count} açık", "other": "Bildirim kanalları\n{count} açık" },

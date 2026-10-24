@@ -68,6 +68,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     cycle: s.cycle,
     start: s.start,
     billingStart: s.billingStart,
+    estimateFrom: s.estimateFrom,
     chargeLeadDays: s.chargeLeadDays,
     cancelLeadDays: s.cancelLeadDays,
     renewalHistory: s.renewalHistory,

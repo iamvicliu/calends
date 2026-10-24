@@ -1,3 +1,4 @@
+import { isImageIcon } from '../shared/icon.ts';
 import { addDays, addMonths, chargesBetween, renewalRuleAt, todayIn, chargeMethodId } from '../shared/billing.ts';
 import { money } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
@@ -59,7 +60,7 @@ export function buildIcs(state: AppState, siteUrl: string): string {
         `DTSTAMP:${stamp}`,
         `DTSTART;VALUE=DATE:${d}`,
         `DTEND;VALUE=DATE:${addDays(c.date, 1).replace(/-/g, '')}`,
-        fold(`SUMMARY:${icsText(`${s.icon && !s.icon.startsWith('http') ? s.icon + ' ' : ''}${s.name} ${money(c.amount, c.currency)}`)}`),
+        fold(`SUMMARY:${icsText(`${s.icon && !isImageIcon(s.icon) ? s.icon + ' ' : ''}${s.name} ${money(c.amount, c.currency)}`)}`),
         fold(`DESCRIPTION:${icsText([method ? t('server.ics.method', { name: method.name }) : '', s.category, `${siteUrl}/`].filter(Boolean).join('\n'))}`),
         'TRANSP:TRANSPARENT',
       );

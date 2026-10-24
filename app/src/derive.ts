@@ -1,3 +1,4 @@
+import { isDataIcon } from '../../shared/icon.ts';
 import { indigo, red, purple, green, orange, teal, pink, iris, gray, gold, slate, blue } from '@radix-ui/colors';
 import { base } from './base.ts';
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, parseDay, type Charge } from '../../shared/billing.ts';
@@ -263,7 +264,7 @@ export function faviconOf(url?: string): string | undefined {
 /** 订阅的图片图标，用作卡片和详情的背景光晕：图片链接 > 官网图标；域名类不用 */
 export function subImage(s: Pick<Subscription, 'category' | 'icon' | 'url'>): string | undefined {
   if (isDomainCat(s.category)) return undefined;
-  if (s.icon?.startsWith('http')) return s.icon;
+  if (s.icon?.startsWith('http') || isDataIcon(s.icon)) return s.icon;
   return faviconOf(s.url);
 }
 

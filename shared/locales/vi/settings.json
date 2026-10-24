@@ -98,7 +98,7 @@
   },
   "data": {
     "title": "Dữ liệu",
-    "importCsv": "Nhập CSV",
+    "importCsv": "Nhập dữ liệu",
     "restore": "Khôi phục từ bản sao lưu",
     "exportCsv": "Xuất CSV",
     "backup": "Xuất bản sao lưu đầy đủ"
@@ -116,14 +116,26 @@
     "legacy": "Bản sao lưu cũ: chỉ có gói đăng ký và phương thức thanh toán"
   },
   "import": {
-    "title": { "other": "Nhập {count} gói đăng ký" },
+    "title": {
+      "other": "Nhập {count} gói đăng ký"
+    },
     "confirmReplace": "Thay thế sẽ xóa toàn bộ gói đăng ký và phương thức thanh toán hiện có. Tiếp tục?",
     "replaceDone": "Đã nhập (thay thế)",
     "replaceAll": "Thay thế tất cả",
     "mergeDone": "Đã nhập (gộp)",
     "merge": "Thêm vào dữ liệu hiện có",
     "newMethods": "Sẽ tạo phương thức thanh toán mới: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Chỉ ước tính khoản thu từ ngày nhập. Không tạo lại lịch sử thanh toán trước đó.",
+    "owner": "Tài khoản trong bản sao lưu",
+    "choose": "Chọn…",
+    "independent": "Các đăng ký cùng tên vẫn tách biệt.",
+    "include": "Bao gồm",
+    "every": "Mỗi",
+    "next": "Lần thanh toán tiếp",
+    "paused": "Nhập ở trạng thái tạm dừng; kiểm tra trước khi tiếp tục.",
+    "reading": "Đang đọc tệp…",
+    "formats": "CSV, bản sao lưu ZIP hoặc cơ sở dữ liệu SQLite"
   },
   "channels": {
     "title": { "other": "Kênh thông báo\n{count} đang bật" },

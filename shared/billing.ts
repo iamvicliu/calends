@@ -125,6 +125,7 @@ export function subError(s: Subscription): string | undefined {
   if (!s.cycle || !['day', 'week', 'month', 'year', 'lifetime'].includes(s.cycle.unit) || !Number.isInteger(s.cycle.every) || !(s.cycle.every >= 1))
     return t('core.subError.cycle');
   for (const v of phaseSubs(s)) {
+    if (v.estimateFrom && !validDay(v.estimateFrom)) return t('core.subError.start');
     if (v.billingStart && !validDay(v.billingStart)) return t('core.subError.start');
     if ([v.chargeLeadDays, v.cancelLeadDays, v.renewalOffsetDays].some((n) => n != null && (!Number.isInteger(n) || n < 0 || n > 3660)))
       return t('core.renewal.invalid');
@@ -425,7 +426,9 @@ export function chargesBetween(s: Subscription, from: string, to: string, today:
       .flatMap((v) => chargesBetween(v, from, to, today))
       .sort((a, b) => a.date.localeCompare(b.date));
   }
-  const raw = rawCharges(s, from, to, today);
+  const recorded = new Set((s.payments ?? []).map((p) => p.date));
+  const known = (c: Charge) => !s.estimateFrom || c.date >= s.estimateFrom || recorded.has(c.date);
+  const raw = rawCharges(s, from, to, today).filter(known);
   const b = s.bonus;
   if (!b || s.cycle.unit === 'lifetime') return raw;
   // 赠送期：期间的预测扣款去掉，之后从赠送结束日重新按周期起算；实际扣款记录照旧保留
@@ -433,7 +436,7 @@ export function chargesBetween(s: Subscription, from: string, to: string, today:
   const lastPaid = (s.payments ?? []).filter((p) => !p.kind).reduce((m, p) => (p.date > m ? p.date : m), '');
   const keep = raw.filter((c) => paid.has(c.date) || (c.serviceDate ?? c.date) < b.from);
   const after = schedule(s, b.until, from, to, today, lastPaid > renewalDate(s, b.until) ? lastPaid : addDays(renewalDate(s, b.until), -1));
-  return keep.concat(after.filter((c) => !paid.has(c.date))).sort((x, y) => x.date.localeCompare(y.date));
+  return keep.concat(after.filter((c) => !paid.has(c.date) && known(c))).sort((x, y) => x.date.localeCompare(y.date));
 }
 
 function rawCharges(s: Subscription, from: string, to: string, today: string): Charge[] {
@@ -593,7 +596,9 @@ export function billingPeriod(s: Subscription, at: string): { from: string; paid
   const paidFrom = [s.start, s.billingStart, s.nextDue, ...(s.payments ?? []).filter((p) => !p.kind).map((p) => p.date)]
     .filter((d): d is string => !!d)
     .sort()[0];
-  const paidOpen = { ...open, start: paidFrom };
+  // 账期按完整计费规则推算：导入边界（estimateFrom）只决定统计里算不算边界前的推算扣款，
+  // 不能让当前账期的那一笔消失，否则已付金额为 0、退款上限和浪费天数全错
+  const paidOpen = { ...open, start: paidFrom, estimateFrom: undefined };
   const past = chargesBetween(paidOpen, paidFrom, at, at).filter((c) => !c.kind);
   const last = past.at(-1);
   const from = last?.date ?? s.start;

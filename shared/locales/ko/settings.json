@@ -108,7 +108,7 @@
   },
   "data": {
     "title": "데이터",
-    "importCsv": "CSV 가져오기",
+    "importCsv": "데이터 가져오기",
     "restore": "백업에서 복원",
     "exportCsv": "CSV 내보내기",
     "backup": "전체 백업 내보내기"
@@ -137,7 +137,17 @@
     "mergeDone": "가져왔습니다(병합)",
     "merge": "기존에 추가",
     "newMethods": "새 결제 수단이 만들어집니다: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "가져온 날짜 이후만 결제를 추정합니다. 이전 결제 내역은 재구성하지 않습니다.",
+    "owner": "백업의 계정",
+    "choose": "선택…",
+    "independent": "동일한 이름의 구독은 별도로 유지됩니다.",
+    "include": "가져오기",
+    "every": "간격",
+    "next": "다음 결제",
+    "paused": "일시 중지로 가져옵니다. 재개 전에 확인하세요.",
+    "reading": "파일 읽는 중…",
+    "formats": "CSV, ZIP 백업 또는 SQLite 데이터베이스"
   },
   "channels": {
     "title": {

@@ -209,5 +209,22 @@
     "tooLate": "The cancellation deadline has passed. The next period will still be charged.",
     "cancelReminder": "Cancel by {date} to avoid the next charge.",
     "none": "None"
+  },
+  "import": {
+    "invalid": "This file could not be read as subscription data.",
+    "tooLarge": "Choose a file no larger than 32 MB.",
+    "pending": "This backup has pending database changes. Create a consistent database backup first.",
+    "currency": "Choose the currency; the source symbol is ambiguous or unsupported.",
+    "cycle": "Choose a valid billing cycle.",
+    "price": "Enter a valid non-negative amount.",
+    "date": "Enter a valid date.",
+    "selectUser": "Choose one account from this backup.",
+    "payers": "Paid by",
+    "unknownStart": "Original start date is unknown; recording starts on the selected date.",
+    "manual": "Manual renewal in the source; imported as paused.",
+    "reviewRequired": "Open this file through Import data to review its fields.",
+    "badDate": "Original {field} \"{value}\" was not recognized and was not imported",
+    "nextDue": "next payment date",
+    "end": "end date"
   }
 }

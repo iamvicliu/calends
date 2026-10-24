@@ -98,7 +98,7 @@
   },
   "data": {
     "title": "Data",
-    "importCsv": "Impor CSV",
+    "importCsv": "Impor data",
     "restore": "Pulihkan dari cadangan",
     "exportCsv": "Ekspor CSV",
     "backup": "Ekspor cadangan lengkap"
@@ -116,14 +116,26 @@
     "legacy": "Cadangan lama: hanya langganan dan metode pembayaran"
   },
   "import": {
-    "title": { "other": "Impor {count} langganan" },
+    "title": {
+      "other": "Impor {count} langganan"
+    },
     "confirmReplace": "Mengganti akan menghapus semua langganan dan metode pembayaran yang ada. Lanjutkan?",
     "replaceDone": "Diimpor (diganti)",
     "replaceAll": "Ganti semua",
     "mergeDone": "Diimpor (digabung)",
     "merge": "Tambahkan ke yang ada",
     "newMethods": "Metode pembayaran baru akan dibuat: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Tagihan hanya diperkirakan sejak tanggal impor. Riwayat sebelumnya tidak dibuat ulang.",
+    "owner": "Akun dalam cadangan",
+    "choose": "Pilih…",
+    "independent": "Langganan bernama sama tetap terpisah.",
+    "include": "Sertakan",
+    "every": "Setiap",
+    "next": "Pembayaran berikutnya",
+    "paused": "Diimpor sebagai dijeda; periksa sebelum melanjutkan.",
+    "reading": "Membaca file…",
+    "formats": "CSV, cadangan ZIP, atau basis data SQLite"
   },
   "channels": {
     "title": { "other": "Saluran notifikasi\n{count} aktif" },

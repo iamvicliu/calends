@@ -1,3 +1,4 @@
+import { isImageIcon } from '../../../../shared/icon.ts';
 import { base } from '../../base.ts';
 import { useState } from 'react';
 import type { Subscription } from '../../../../shared/types.ts';
@@ -19,7 +20,7 @@ export function AppIcon({ sub, className, size, eager }: { sub: Pick<Subscriptio
     );
   }
   const icon = sub.icon?.trim();
-  if (icon && !/^(https?:|\/)/.test(icon)) return <span style={style} className={cn(box, 'bg-muted text-xs')}>{icon}</span>;
+  if (icon && !isImageIcon(icon)) return <span style={style} className={cn(box, 'bg-muted text-xs')}>{icon}</span>;
   const src = icon || faviconOf(sub.url);
   if (src && !failed.has(src)) {
     return (

@@ -198,5 +198,22 @@
     "tooLate": "Batas pembatalan telah lewat. Periode berikutnya tetap akan ditagih.",
     "cancelReminder": "Batalkan sebelum {date} untuk menghindari tagihan berikutnya.",
     "none": "Tidak ada"
+  },
+  "import": {
+    "invalid": "File ini tidak dapat dibaca sebagai data langganan.",
+    "tooLarge": "Pilih file maksimal 32 MB.",
+    "pending": "Cadangan berisi perubahan tertunda. Buat cadangan basis data yang konsisten terlebih dahulu.",
+    "currency": "Pilih mata uang; simbol sumber ambigu atau tidak didukung.",
+    "cycle": "Pilih siklus penagihan yang valid.",
+    "price": "Masukkan jumlah valid yang tidak negatif.",
+    "date": "Masukkan tanggal yang valid.",
+    "selectUser": "Pilih satu akun dari cadangan ini.",
+    "payers": "Dibayar oleh",
+    "unknownStart": "Tanggal mulai asli tidak diketahui; pencatatan dimulai dari tanggal yang dipilih.",
+    "manual": "Pembaruan manual pada sumber; diimpor sebagai dijeda.",
+    "reviewRequired": "Buka file melalui Impor data untuk meninjau kolomnya.",
+    "badDate": "{field} asli \"{value}\" tidak dikenali, tidak diimpor",
+    "nextDue": "tanggal pembayaran berikutnya",
+    "end": "tanggal berakhir"
   }
 }

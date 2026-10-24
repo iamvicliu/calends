@@ -198,5 +198,22 @@
     "tooLate": "Đã quá hạn hủy. Kỳ tiếp theo vẫn bị tính phí.",
     "cancelReminder": "Hủy trước {date} để tránh khoản thu tiếp theo.",
     "none": "Không"
+  },
+  "import": {
+    "invalid": "Không thể đọc tệp này thành dữ liệu đăng ký.",
+    "tooLarge": "Chọn tệp không quá 32 MB.",
+    "pending": "Bản sao lưu có thay đổi chưa ghi. Hãy tạo bản sao lưu cơ sở dữ liệu nhất quán trước.",
+    "currency": "Chọn loại tiền; ký hiệu nguồn không rõ hoặc không được hỗ trợ.",
+    "cycle": "Chọn chu kỳ thanh toán hợp lệ.",
+    "price": "Nhập số tiền không âm hợp lệ.",
+    "date": "Nhập ngày hợp lệ.",
+    "selectUser": "Chọn một tài khoản trong bản sao lưu.",
+    "payers": "Người thanh toán",
+    "unknownStart": "Không rõ ngày bắt đầu gốc; ghi nhận từ ngày đã chọn.",
+    "manual": "Nguồn gia hạn thủ công; nhập ở trạng thái tạm dừng.",
+    "reviewRequired": "Mở tệp qua Nhập dữ liệu để kiểm tra các trường.",
+    "badDate": "{field} gốc \"{value}\" không nhận dạng được, chưa nhập",
+    "nextDue": "ngày thanh toán tiếp theo",
+    "end": "ngày kết thúc"
   }
 }

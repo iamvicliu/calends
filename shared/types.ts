@@ -233,6 +233,8 @@ export interface Subscription extends RenewalRules {
   currency: string;
   cycle: Cycle;
   start: string;
+  /** Import boundary: do not infer older charges without actual payment records. */
+  estimateFrom?: string;
   /** 修正服务开始日时保留的原计费起点；缺省使用 start */
   billingStart?: string;
   /** 最后服务日（含当天）：次日结束，不再产生预测扣款 */

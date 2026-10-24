@@ -101,7 +101,8 @@
     "tagsPlaceholder": "Mit Leerzeichen trennen",
     "notesPlaceholder": "Notizen (optional)",
     "pausedAt": "Pausiert ab",
-    "plan": "Tarif"
+    "plan": "Tarif",
+    "iconImported": "Importiertes Bild; URL oder Emoji ersetzt es"
   },
   "share": {
     "none": "Nur ich",

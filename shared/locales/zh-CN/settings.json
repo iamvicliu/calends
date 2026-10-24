@@ -98,7 +98,7 @@
   },
   "data": {
     "title": "数据",
-    "importCsv": "导入 CSV",
+    "importCsv": "导入数据",
     "restore": "从备份恢复",
     "exportCsv": "导出 CSV",
     "backup": "导出完整备份"
@@ -116,14 +116,26 @@
     "legacy": "旧版备份：只含订阅与支付方式"
   },
   "import": {
-    "title": { "other": "导入 {count} 项订阅" },
+    "title": {
+      "other": "导入 {count} 项订阅"
+    },
     "confirmReplace": "替换会清空现有订阅与支付方式，确定？",
     "replaceDone": "已替换导入",
     "replaceAll": "替换全部",
     "mergeDone": "已合并导入",
     "merge": "追加导入",
     "newMethods": "将新建支付方式：{names}",
-    "sep": "、"
+    "sep": "、",
+    "history": "仅从导入日起推算扣款，不补造之前的付款历史。",
+    "owner": "备份中的账号",
+    "choose": "请选择…",
+    "independent": "同名订阅保持独立。",
+    "include": "导入此项",
+    "every": "每隔",
+    "next": "下次付款",
+    "paused": "按暂停状态导入，恢复前请核对。",
+    "reading": "正在读取文件…",
+    "formats": "CSV、ZIP 备份或 SQLite 数据库"
   },
   "channels": {
     "title": { "other": "通知渠道\n{count} 个开启" },

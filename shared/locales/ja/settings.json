@@ -108,7 +108,7 @@
   },
   "data": {
     "title": "データ",
-    "importCsv": "CSV をインポート",
+    "importCsv": "データを取り込む",
     "restore": "バックアップから復元",
     "exportCsv": "CSV をエクスポート",
     "backup": "完全バックアップをエクスポート"
@@ -137,7 +137,17 @@
     "mergeDone": "インポートしました（統合）",
     "merge": "既存に追加",
     "newMethods": "新しい支払い方法が作成されます：{names}",
-    "sep": "、"
+    "sep": "、",
+    "history": "取込日以降のみ支払いを推定します。それ以前の支払い履歴は再構成しません。",
+    "owner": "バックアップ内のアカウント",
+    "choose": "選択…",
+    "independent": "同名の購読は別々に保持します。",
+    "include": "取り込む",
+    "every": "間隔",
+    "next": "次回支払い",
+    "paused": "一時停止として取り込みます。再開前に確認してください。",
+    "reading": "ファイルを読込中…",
+    "formats": "CSV、ZIP バックアップ、SQLite データベース"
   },
   "channels": {
     "title": {

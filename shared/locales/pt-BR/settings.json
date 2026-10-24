@@ -101,7 +101,7 @@
   },
   "data": {
     "title": "Dados",
-    "importCsv": "Importar CSV",
+    "importCsv": "Importar dados",
     "restore": "Restaurar backup",
     "exportCsv": "Exportar CSV",
     "backup": "Exportar backup completo"
@@ -119,14 +119,27 @@
     "legacy": "Backup antigo: só assinaturas e formas de pagamento"
   },
   "import": {
-    "title": { "one": "Importar {count} assinatura", "other": "Importar {count} assinaturas" },
+    "title": {
+      "one": "Importar {count} assinatura",
+      "other": "Importar {count} assinaturas"
+    },
     "confirmReplace": "Substituir vai apagar todas as assinaturas e formas de pagamento existentes. Continuar?",
     "replaceDone": "Importado (substituído)",
     "replaceAll": "Substituir tudo",
     "mergeDone": "Importado (mesclado)",
     "merge": "Adicionar aos existentes",
     "newMethods": "Novas formas de pagamento serão criadas: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Só são estimadas cobranças a partir da importação. O histórico anterior não é reconstruído.",
+    "owner": "Conta no backup",
+    "choose": "Escolher…",
+    "independent": "Assinaturas com o mesmo nome ficam separadas.",
+    "include": "Incluir",
+    "every": "A cada",
+    "next": "Próximo pagamento",
+    "paused": "Importada como pausada; confira antes de retomar.",
+    "reading": "Lendo arquivo…",
+    "formats": "CSV, backup ZIP ou banco SQLite"
   },
   "channels": {
     "title": { "one": "Canais de notificação\n{count} ativo", "other": "Canais de notificação\n{count} ativos" },

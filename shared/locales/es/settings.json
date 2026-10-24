@@ -101,7 +101,7 @@
   },
   "data": {
     "title": "Datos",
-    "importCsv": "Importar CSV",
+    "importCsv": "Importar datos",
     "restore": "Restaurar desde copia de seguridad",
     "exportCsv": "Exportar CSV",
     "backup": "Exportar copia de seguridad completa"
@@ -119,14 +119,27 @@
     "legacy": "Copia antigua: solo suscripciones y métodos de pago"
   },
   "import": {
-    "title": { "one": "Importar {count} suscripción", "other": "Importar {count} suscripciones" },
+    "title": {
+      "one": "Importar {count} suscripción",
+      "other": "Importar {count} suscripciones"
+    },
     "confirmReplace": "Al reemplazar se borrarán todas las suscripciones y métodos de pago existentes. ¿Continuar?",
     "replaceDone": "Importado (reemplazado)",
     "replaceAll": "Reemplazar todo",
     "mergeDone": "Importado (combinado)",
     "merge": "Añadir a lo existente",
     "newMethods": "Se crearán nuevos métodos de pago: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Solo se estiman cobros desde la importación. No se reconstruye el historial anterior.",
+    "owner": "Cuenta en la copia",
+    "choose": "Elegir…",
+    "independent": "Las suscripciones con el mismo nombre se mantienen separadas.",
+    "include": "Incluir",
+    "every": "Cada",
+    "next": "Próximo pago",
+    "paused": "Se importa en pausa; revisa antes de reanudar.",
+    "reading": "Leyendo archivo…",
+    "formats": "CSV, copia ZIP o base SQLite"
   },
   "channels": {
     "title": { "one": "Canales de notificación\n{count} activo", "other": "Canales de notificación\n{count} activos" },

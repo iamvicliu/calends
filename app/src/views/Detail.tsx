@@ -361,7 +361,8 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const months = span % 12;
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   // 订了不到一个月（或只有一笔）时，「实际每月」没有意义：改用标价折算的预计每月
-  const young = active < 30 || per.length < 2;
+  // An incomplete imported history cannot establish an average over the original service lifetime.
+  const young = !!sub.estimateFrom || active < 30 || per.length < 2;
   const perMonth = young
     ? toBase(state, monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency)
     : total / Math.max(1, active / 30.44);
@@ -407,10 +408,17 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
       )}
       {(next || ended) && durationCell}
       {/* 只有一笔时累计就是那一笔，扣款记录里已有，不再占一格 */}
-      {history.length !== 1 && <Metric label={t('detail.stats.spent')} value={amount(total)} note={t('detail.stats.count', { count: history.length })} />}
+      {/* 导入边界之前的历史没有记录：没有一笔时写「—」，小字说明只算导入之后 */}
+      {history.length !== 1 && (
+        <Metric
+          label={t('detail.stats.spent')}
+          value={sub.estimateFrom && !history.length ? '—' : amount(total)}
+          note={sub.estimateFrom ? t('settings.import.history') : t('detail.stats.count', { count: history.length })}
+        />
+      )}
       <Metric
         label={lifetime ? t('detail.kpi.amortizedCost') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}
-        value={lifetime ? t('detail.kpi.perMonthValue', { amount: amount(monthly) }) : amount(monthly)}
+        value={sub.estimateFrom && lifetime && !history.length ? '—' : lifetime ? t('detail.kpi.perMonthValue', { amount: amount(monthly) }) : amount(monthly)}
         // 与其他格一样三行：折到每天多少；算不出来就不写这一行
         note={Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined}
         accessory={!lifetime ? <Trend pct={perTrend} /> : undefined}
@@ -1126,6 +1134,7 @@ function Charges({
         )
       }
     >
+      {sub.estimateFrom && <p className="muted dt-import-note">{t('settings.import.history')}</p>}
       {/* 与合租的收款、付款表同一套表格（YearLedger）：表头、按年分组带小计、日期写全 */}
       {history.length > 0 && (
         <YearLedger

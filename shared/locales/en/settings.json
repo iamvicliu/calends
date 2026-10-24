@@ -98,7 +98,7 @@
   },
   "data": {
     "title": "Data",
-    "importCsv": "Import CSV",
+    "importCsv": "Import data",
     "restore": "Restore from backup",
     "exportCsv": "Export CSV",
     "backup": "Export full backup"
@@ -116,14 +116,27 @@
     "legacy": "Legacy backup: subscriptions and payment methods only"
   },
   "import": {
-    "title": { "one": "Import {count} subscription", "other": "Import {count} subscriptions" },
+    "title": {
+      "one": "Import {count} subscription",
+      "other": "Import {count} subscriptions"
+    },
     "confirmReplace": "Replacing will erase all existing subscriptions and payment methods. Continue?",
     "replaceDone": "Imported (replaced)",
     "replaceAll": "Replace all",
     "mergeDone": "Imported (merged)",
     "merge": "Add to existing",
     "newMethods": "New payment methods will be created: {names}",
-    "sep": ", "
+    "sep": ", ",
+    "history": "Only charges from the import date onward are estimated. Earlier payment history is not reconstructed.",
+    "owner": "Account in backup",
+    "choose": "Choose…",
+    "independent": "Same-name subscriptions stay separate.",
+    "include": "Include",
+    "every": "Every",
+    "next": "Next payment",
+    "paused": "Imported as paused; review before resuming.",
+    "reading": "Reading file…",
+    "formats": "CSV, ZIP backup or SQLite database"
   },
   "channels": {
     "title": { "one": "Notification channels\n{count} on", "other": "Notification channels\n{count} on" },

@@ -96,7 +96,8 @@
     "tagsPlaceholder": "スペースで区切る",
     "notesPlaceholder": "メモ（任意）",
     "pausedAt": "一時停止日",
-    "plan": "プラン"
+    "plan": "プラン",
+    "iconImported": "インポートした画像（URL か絵文字で置き換え）"
   },
   "share": {
     "none": "自分だけ",

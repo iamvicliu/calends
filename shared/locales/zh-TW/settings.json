@@ -98,7 +98,7 @@
   },
   "data": {
     "title": "資料",
-    "importCsv": "匯入 CSV",
+    "importCsv": "匯入資料",
     "restore": "從備份恢復",
     "exportCsv": "匯出 CSV",
     "backup": "匯出完整備份"
@@ -116,14 +116,26 @@
     "legacy": "舊版備份：只含訂閱與付款方式"
   },
   "import": {
-    "title": { "other": "匯入 {count} 項訂閱" },
+    "title": {
+      "other": "匯入 {count} 項訂閱"
+    },
     "confirmReplace": "取代會清除現有的訂閱與付款方式，確定嗎？",
     "replaceDone": "已取代匯入",
     "replaceAll": "全部取代",
     "mergeDone": "已合併匯入",
     "merge": "追加匯入",
     "newMethods": "將新增付款方式：{names}",
-    "sep": "、"
+    "sep": "、",
+    "history": "僅從匯入日起推算扣款，不重建之前的付款歷史。",
+    "owner": "備份中的帳號",
+    "choose": "請選擇…",
+    "independent": "同名訂閱保持獨立。",
+    "include": "匯入此項",
+    "every": "每隔",
+    "next": "下次付款",
+    "paused": "以暫停狀態匯入，恢復前請核對。",
+    "reading": "正在讀取檔案…",
+    "formats": "CSV、ZIP 備份或 SQLite 資料庫"
   },
   "channels": {
     "title": { "other": "通知管道\n已開啟 {count} 個" },

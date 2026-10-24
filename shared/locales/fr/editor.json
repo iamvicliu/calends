@@ -101,7 +101,8 @@
     "tagsPlaceholder": "Séparés par des espaces",
     "notesPlaceholder": "Notes (facultatif)",
     "pausedAt": "Date de pause",
-    "plan": "Formule"
+    "plan": "Formule",
+    "iconImported": "Image importée ; saisissez une URL ou un emoji pour la remplacer"
   },
   "share": {
     "none": "Moi seul",

@@ -209,5 +209,22 @@
     "tooLate": "O prazo de cancelamento passou. O próximo período ainda será cobrado.",
     "cancelReminder": "Cancele até {date} para evitar a próxima cobrança.",
     "none": "Nenhum"
+  },
+  "import": {
+    "invalid": "Não foi possível ler este arquivo como dados de assinaturas.",
+    "tooLarge": "Escolha um arquivo de até 32 MB.",
+    "pending": "Este backup tem alterações pendentes. Crie primeiro um backup consistente do banco.",
+    "currency": "Escolha a moeda; o símbolo é ambíguo ou não compatível.",
+    "cycle": "Escolha um ciclo de cobrança válido.",
+    "price": "Informe um valor válido maior ou igual a zero.",
+    "date": "Informe uma data válida.",
+    "selectUser": "Escolha uma conta deste backup.",
+    "payers": "Pago por",
+    "unknownStart": "A data inicial original é desconhecida; o registro começa na data escolhida.",
+    "manual": "Renovação manual na origem; importada como pausada.",
+    "reviewRequired": "Abra o arquivo em Importar dados para conferir os campos.",
+    "badDate": "{field} original \"{value}\" não reconhecido; não importado",
+    "nextDue": "data do próximo pagamento",
+    "end": "data de término"
   }
 }

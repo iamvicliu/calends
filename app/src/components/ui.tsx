@@ -1,3 +1,4 @@
+import { isDataIcon, isImageIcon } from '../../../shared/icon.ts';
 import { submitSheet } from '../keyboard.ts';
 import { numberFormat } from '../../../shared/intl.ts';
 import { copyParts } from './copy.tsx';
@@ -200,8 +201,8 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
     );
   }
   const icon = sub.icon?.trim();
-  // 不是链接也不是站内图片路径（/ai/claude.svg）的，当 emoji 显示
-  if (icon && !/^(https?:|\/)/.test(icon)) {
+  // 不是链接、站内图片路径（/ai/claude.svg）或内嵌图片的，当 emoji 显示
+  if (icon && !isImageIcon(icon)) {
     return (
       <span className="ico emoji" style={style}>
         {icon}
@@ -209,7 +210,7 @@ export function SubIcon({ sub, size = 40, proxied }: { sub: Pick<Subscription, '
     );
   }
   // 依次尝试：填写的图标 → 官网图标；都加载失败才用首字母
-  const viaProxy = (u: string) => (proxied && /^https?:/.test(u) ? base(`/api/img?u=${encodeURIComponent(u)}`) : base(u));
+  const viaProxy = (u: string) => (isDataIcon(u) ? u : proxied && /^https?:/.test(u) ? base(`/api/img?u=${encodeURIComponent(u)}`) : base(u));
   const raw = [icon, faviconOf(sub.url)].find((u): u is string => tried >= 0 && !!u && !failed.has(viaProxy(u)));
   const src = raw && viaProxy(raw);
   if (src) {

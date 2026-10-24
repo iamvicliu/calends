@@ -2,7 +2,7 @@ import type { Cycle, MethodKind, PaymentMethod, Subscription } from './types.ts'
 import { uid } from './billing.ts';
 import { t } from './i18n.ts';
 
-function parseCsv(text: string): string[][] {
+export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = '';
@@ -101,6 +101,7 @@ export interface ImportResult {
 export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], today: string): ImportResult {
   const rows = parseCsv(text);
   const head = rows.shift()?.map((h) => h.trim().toLowerCase()) ?? [];
+  if (head.includes('payment cycle')) throw new Error(t('core.import.reviewRequired'));
   const col = (r: string[], ...names: string[]) => {
     for (const n of names) {
       const i = head.indexOf(n);

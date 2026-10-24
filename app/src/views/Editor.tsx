@@ -1,3 +1,4 @@
+import { isDataIcon } from '../../../shared/icon.ts';
 import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
@@ -868,7 +869,12 @@ function Form({
               <input value={f.manageUrl ?? ''} placeholder={t('editor.field.optional')} onChange={(e) => up({ manageUrl: val(e) || undefined })} />
             </Cell>
             <Cell label={t('editor.field.icon')}>
-              <input value={f.icon ?? ''} placeholder={t('editor.field.auto')} onChange={(e) => up({ icon: val(e) || undefined })} />
+              {/* 导入的内嵌图片不把整串 base64 塞进输入框：留空并提示，输入网址或 emoji 即替换 */}
+              <input
+                value={isDataIcon(f.icon) ? '' : (f.icon ?? '')}
+                placeholder={isDataIcon(f.icon) ? t('editor.field.iconImported') : t('editor.field.auto')}
+                onChange={(e) => up({ icon: val(e) || undefined })}
+              />
             </Cell>
             {isDomainCat(f.category) && (
               <Cell label={t('editor.field.showDomain')} sub={t(f.showOnPublic ? 'editor.field.showDomainOn' : 'editor.field.showDomainOff')}>

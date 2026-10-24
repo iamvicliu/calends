@@ -96,7 +96,8 @@
     "tagsPlaceholder": "Phân tách bằng dấu cách",
     "notesPlaceholder": "Ghi chú (tùy chọn)",
     "pausedAt": "Ngày tạm dừng",
-    "plan": "Gói"
+    "plan": "Gói",
+    "iconImported": "Ảnh đã nhập; nhập URL hoặc emoji để thay"
   },
   "share": {
     "none": "Chỉ mình tôi",

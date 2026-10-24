@@ -96,7 +96,8 @@
     "tagsPlaceholder": "Pisahkan dengan spasi",
     "notesPlaceholder": "Catatan (opsional)",
     "pausedAt": "Tanggal jeda",
-    "plan": "Paket"
+    "plan": "Paket",
+    "iconImported": "Gambar impor; ketik URL atau emoji untuk mengganti"
   },
   "share": {
     "none": "Hanya saya",
