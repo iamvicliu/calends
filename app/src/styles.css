@@ -3911,10 +3911,10 @@ button.h-price-row:focus-visible {
 .dp-month-select > .dp-select {
   width: 96px;
 }
-/* 头部改用全站统一 Picker 后，年月两个按钮等宽 */
+/* 头部改用全站统一 Picker 后，年月两个按钮等宽；年份在中文等语言下带「年」字，按内容撑开而不是写死宽度 */
 .dp-step > .pk-btn {
-  width: 88px;
-  min-width: 0;
+  min-width: 88px;
+  width: auto;
   justify-content: space-between;
   padding: 0 8px;
   height: var(--ctl-h-md);

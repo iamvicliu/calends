@@ -60,7 +60,7 @@ const CATALOG: Entry[] = [
     aka: ['百度云', 'baidupan', 'baidu pan'],
     cat: 'storage',
     url: 'https://pan.baidu.com/',
-    icon: 'https://nd-static.bdstatic.com/m-static/wp-brand/favicon.ico',
+    icon: '/brands/baidupan.webp',
   },
   {
     name: '115',
@@ -68,7 +68,7 @@ const CATALOG: Entry[] = [
     aka: ['115网盘', '115云盘', '115 pan'],
     cat: 'storage',
     url: 'https://115.com/',
-    icon: 'https://115.com/favicon.ico',
+    icon: '/brands/115.webp',
   },
   {
     name: '阿里云盘',
@@ -76,7 +76,7 @@ const CATALOG: Entry[] = [
     aka: ['alipan', '阿里网盘', 'aliyun drive'],
     cat: 'storage',
     url: 'https://www.alipan.com/',
-    icon: 'https://www.alipan.com/favicon.ico',
+    icon: '/brands/alipan.webp',
   },
   {
     name: '夸克网盘',
@@ -84,7 +84,7 @@ const CATALOG: Entry[] = [
     aka: ['quark', '夸克云盘', 'quark drive'],
     cat: 'storage',
     url: 'https://pan.quark.cn/',
-    icon: 'https://pan.quark.cn/favicon.ico',
+    icon: '/brands/quark.webp',
   },
   {
     name: '腾讯视频',
@@ -92,7 +92,7 @@ const CATALOG: Entry[] = [
     aka: ['v.qq.com', '腾讯影音'],
     cat: 'media',
     url: 'https://v.qq.com/',
-    icon: 'https://v.qq.com/favicon.ico',
+    icon: '/brands/tencentvideo.webp',
   },
   {
     name: '爱奇艺',
@@ -100,7 +100,7 @@ const CATALOG: Entry[] = [
     aka: ['iqiyi', '奇艺'],
     cat: 'media',
     url: 'https://www.iqiyi.com/',
-    icon: 'https://www.iqiyi.com/favicon.ico',
+    icon: '/brands/iqiyi.webp',
   },
   {
     name: '优酷',
@@ -108,7 +108,7 @@ const CATALOG: Entry[] = [
     aka: ['youku', '土豆'],
     cat: 'media',
     url: 'https://www.youku.com/',
-    icon: 'https://www.youku.com/favicon.ico',
+    icon: '/brands/youku.webp',
   },
   {
     name: '芒果 TV',
@@ -116,7 +116,7 @@ const CATALOG: Entry[] = [
     aka: ['mgtv', '芒果tv', '芒果'],
     cat: 'media',
     url: 'https://www.mgtv.com/',
-    icon: 'https://www.mgtv.com/favicon.ico',
+    icon: '/brands/mgtv.webp',
   },
   {
     name: 'Bilibili 大会员',
@@ -124,7 +124,7 @@ const CATALOG: Entry[] = [
     aka: ['bilibili', 'b站', '哔哩哔哩'],
     cat: 'media',
     url: 'https://www.bilibili.com/',
-    icon: 'https://www.bilibili.com/favicon.ico',
+    icon: '/brands/bilibili.webp',
   },
   {
     name: 'Netflix',
@@ -132,7 +132,7 @@ const CATALOG: Entry[] = [
     aka: ['奈飞'],
     cat: 'media',
     url: 'https://www.netflix.com/',
-    icon: 'https://www.netflix.com/favicon.ico',
+    icon: '/brands/netflix.webp',
   },
   {
     name: 'Spotify',
@@ -140,7 +140,7 @@ const CATALOG: Entry[] = [
     aka: ['声田'],
     cat: 'music',
     url: 'https://www.spotify.com/',
-    icon: 'https://www.spotify.com/favicon.ico',
+    icon: '/brands/spotify.webp',
   },
   {
     name: 'Apple Music',
@@ -148,7 +148,7 @@ const CATALOG: Entry[] = [
     aka: ['apple music'],
     cat: 'music',
     url: 'https://www.apple.com/apple-music/',
-    icon: 'https://www.apple.com/favicon.ico',
+    icon: '/brands/applemusic.webp',
   },
   {
     name: 'QQ 音乐',
@@ -156,7 +156,7 @@ const CATALOG: Entry[] = [
     aka: ['qq音乐', 'qqmusic'],
     cat: 'music',
     url: 'https://y.qq.com/',
-    icon: 'https://y.qq.com/favicon.ico',
+    icon: '/brands/qqmusic.webp',
   },
   {
     name: '网易云音乐',
@@ -164,7 +164,7 @@ const CATALOG: Entry[] = [
     aka: ['netease', '网易云'],
     cat: 'music',
     url: 'https://music.163.com/',
-    icon: 'https://music.163.com/favicon.ico',
+    icon: '/brands/netease.webp',
   },
   {
     name: '京东 Plus',
@@ -172,7 +172,7 @@ const CATALOG: Entry[] = [
     aka: ['jd', '京东', '京东plus'],
     cat: 'shopping',
     url: 'https://www.jd.com/',
-    icon: 'https://www.jd.com/favicon.ico',
+    icon: '/brands/jd.webp',
   },
   {
     name: '淘宝 88VIP',
@@ -180,7 +180,23 @@ const CATALOG: Entry[] = [
     aka: ['taobao', '淘宝', '88vip', '天猫'],
     cat: 'shopping',
     url: 'https://www.taobao.com/',
-    icon: 'https://www.taobao.com/favicon.ico',
+    icon: '/brands/taobao.webp',
+  },
+  {
+    name: '1号会员店',
+    file: 'yhd',
+    aka: ['一号会员店', '1号店', 'yhd'],
+    cat: 'shopping',
+    url: 'https://www.yhd.com/',
+    icon: '/brands/yhd.webp',
+  },
+  {
+    name: '云闪付会员',
+    file: 'unionpay',
+    aka: ['云闪付', 'unionpay', 'quickpass', '银联'],
+    cat: 'shopping',
+    url: 'https://cn.unionpay.com/upowhtml/cn/templates/quickPass/quickPass.html',
+    icon: '/brands/unionpay.webp',
   },
   {
     name: 'WPS 会员',
@@ -188,7 +204,7 @@ const CATALOG: Entry[] = [
     aka: ['wps', '金山办公'],
     cat: 'productivity',
     url: 'https://www.wps.cn/',
-    icon: 'https://www.wps.cn/favicon.ico',
+    icon: '/brands/wps.webp',
   },
   {
     name: '百度文库',
@@ -196,7 +212,7 @@ const CATALOG: Entry[] = [
     aka: ['wenku', '百度文库'],
     cat: 'education',
     url: 'https://wenku.baidu.com/',
-    icon: 'https://wenku.baidu.com/favicon.ico',
+    icon: '/brands/wenku.webp',
   },
   {
     name: '得到',
@@ -204,7 +220,7 @@ const CATALOG: Entry[] = [
     aka: ['dedao', '得到app'],
     cat: 'education',
     url: 'https://www.dedao.cn/',
-    icon: 'https://www.dedao.cn/favicon.ico',
+    icon: '/brands/dedao.webp',
   },
   {
     name: '知乎盐选',
@@ -212,7 +228,7 @@ const CATALOG: Entry[] = [
     aka: ['zhihu', '知乎', '知乎会员'],
     cat: 'news',
     url: 'https://www.zhihu.com/',
-    icon: 'https://www.zhihu.com/favicon.ico',
+    icon: '/brands/zhihu.webp',
   },
   {
     name: '微信读书',
@@ -220,7 +236,7 @@ const CATALOG: Entry[] = [
     aka: ['weread', '微信读书'],
     cat: 'news',
     url: 'https://weread.qq.com/',
-    icon: 'https://weread.qq.com/favicon.ico',
+    icon: '/brands/weread.webp',
   },
   {
     name: 'QQ 会员',
@@ -228,7 +244,7 @@ const CATALOG: Entry[] = [
     aka: ['qq会员', 'qqvip', '腾讯会员'],
     cat: 'social',
     url: 'https://vip.qq.com/',
-    icon: 'https://vip.qq.com/favicon.ico',
+    icon: '/brands/qqvip.webp',
   },
   {
     name: '腾讯动漫',
@@ -236,7 +252,7 @@ const CATALOG: Entry[] = [
     aka: ['腾讯动漫', 'ac.qq.com'],
     cat: 'media',
     url: 'https://ac.qq.com/',
-    icon: 'https://ac.qq.com/favicon.ico',
+    icon: '/brands/tencentcomic.webp',
   },
   {
     name: '起点读书',
@@ -244,7 +260,7 @@ const CATALOG: Entry[] = [
     aka: ['qidian', '起点', '阅文'],
     cat: 'news',
     url: 'https://www.qidian.com/',
-    icon: 'https://www.qidian.com/favicon.ico',
+    icon: '/brands/qidian.webp',
   },
   {
     name: 'YouTube Premium',
@@ -252,7 +268,7 @@ const CATALOG: Entry[] = [
     aka: ['youtube', '油管', 'yt premium'],
     cat: 'media',
     url: 'https://www.youtube.com/premium',
-    icon: 'https://www.youtube.com/favicon.ico',
+    icon: '/brands/youtube.webp',
   },
   {
     name: '多邻国',
@@ -260,7 +276,7 @@ const CATALOG: Entry[] = [
     aka: ['duolingo', '多邻国'],
     cat: 'education',
     url: 'https://www.duolingo.com/',
-    icon: 'https://www.duolingo.com/favicon.ico',
+    icon: '/brands/duolingo.webp',
   },
   {
     name: '幕布',
@@ -268,7 +284,7 @@ const CATALOG: Entry[] = [
     aka: ['mubu', '幕布文档'],
     cat: 'productivity',
     url: 'https://mubu.com/',
-    icon: 'https://mubu.com/favicon.ico',
+    icon: '/brands/mubu.webp',
   },
   {
     name: '石墨文档',
@@ -276,7 +292,7 @@ const CATALOG: Entry[] = [
     aka: ['shimo', '石墨'],
     cat: 'productivity',
     url: 'https://shimo.im/',
-    icon: 'https://shimo.im/favicon.ico',
+    icon: '/brands/shimo.webp',
   },
   {
     name: 'ProcessOn',
@@ -284,7 +300,7 @@ const CATALOG: Entry[] = [
     aka: ['processon', '流程图'],
     cat: 'productivity',
     url: 'https://www.processon.com/',
-    icon: 'https://www.processon.com/favicon.ico',
+    icon: '/brands/processon.webp',
   },
   {
     name: 'Setapp',
@@ -292,7 +308,7 @@ const CATALOG: Entry[] = [
     aka: ['setapp', 'mac 软件订阅'],
     cat: 'tools',
     url: 'https://setapp.com/',
-    icon: 'https://setapp.com/favicon.ico',
+    icon: '/brands/setapp.webp',
   },
   {
     name: 'Termius',
@@ -300,7 +316,7 @@ const CATALOG: Entry[] = [
     aka: ['termius', 'ssh 客户端'],
     cat: 'tools',
     url: 'https://termius.com/',
-    icon: 'https://termius.com/favicon.ico',
+    icon: '/brands/termius.webp',
   },
   {
     name: 'Microsoft 365',
@@ -308,7 +324,7 @@ const CATALOG: Entry[] = [
     aka: ['microsoft 365', 'office 365', 'ms365'],
     cat: 'productivity',
     url: 'https://www.microsoft.com/microsoft-365',
-    icon: 'https://www.microsoft.com/favicon.ico',
+    icon: '/brands/microsoft365.webp',
   },
   {
     name: 'iCloud+',
@@ -316,7 +332,7 @@ const CATALOG: Entry[] = [
     aka: ['icloud', '苹果云', 'apple icloud'],
     cat: 'storage',
     url: 'https://www.icloud.com/',
-    icon: 'https://www.icloud.com/favicon.ico',
+    icon: '/brands/icloud.webp',
   },
   {
     name: '微云',
@@ -324,7 +340,7 @@ const CATALOG: Entry[] = [
     aka: ['weiyun', '腾讯微云'],
     cat: 'storage',
     url: 'https://www.weiyun.com/',
-    icon: 'https://www.weiyun.com/favicon.ico',
+    icon: '/brands/weiyun.webp',
   },
   {
     name: '小米云服务',
@@ -332,7 +348,7 @@ const CATALOG: Entry[] = [
     aka: ['小米云', 'micloud', 'xiaomi cloud'],
     cat: 'storage',
     url: 'https://i.mi.com/',
-    icon: 'https://i.mi.com/favicon.ico',
+    icon: '/brands/micloud.webp',
   },
   {
     name: 'Apple 开发者',
@@ -340,7 +356,7 @@ const CATALOG: Entry[] = [
     aka: ['apple developer', '开发者证书', '苹果开发者'],
     cat: 'developer',
     url: 'https://developer.apple.com/',
-    icon: 'https://developer.apple.com/favicon.ico',
+    icon: '/brands/appledev.webp',
   },
   {
     name: '雷神加速器',
@@ -348,7 +364,15 @@ const CATALOG: Entry[] = [
     aka: ['leigod', '雷神'],
     cat: 'tools',
     url: 'https://www.leigod.com/',
-    icon: 'https://www.leigod.com/favicon.ico',
+    icon: '/brands/leigod.webp',
+  },
+  {
+    name: 'OpenCode',
+    file: 'opencode',
+    aka: ['opencode zen', 'opencode go', 'sst'],
+    cat: 'tools',
+    url: 'https://opencode.ai/',
+    icon: '/brands/opencode.svg',
   },
   ai('ChatGPT', 'openai', 'https://chatgpt.com', ['openai', 'gpt', 'chatgpt plus', 'chatgpt pro']),
   ai('Claude', 'claude', 'https://claude.ai', ['anthropic', 'claude pro', 'claude max']),
