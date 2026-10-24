@@ -16,7 +16,7 @@ export interface CatalogItem {
   cancelLeadDays?: number;
 }
 
-export type CatalogCat = 'ai' | 'tools' | 'productivity' | 'domains' | 'storage' | 'media' | 'music' | 'shopping' | 'education' | 'news' | 'social' | 'developer';
+export type CatalogCat = 'ai' | 'tools' | 'productivity' | 'domains' | 'storage' | 'developer';
 /** 目录里只存分类代码；localized 的条目在 catalog.name.<file> 里有译名，按当前语言显示，原名仍参与搜索 */
 export type CatalogEntry = {
   name: string;
