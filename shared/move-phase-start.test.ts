@@ -1,6 +1,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { billingPeriod, chargesBetween, FALLBACK_FX, collectionAnchor, phaseLanes, phaseSubs, priceAt, stopSummary, subError } from './billing.ts';
+import {
+  billingPeriod,
+  chargeServicePeriod,
+  chargesBetween,
+  FALLBACK_FX,
+  collectionAnchor,
+  phaseLanes,
+  phaseSubs,
+  priceAt,
+  stopSummary,
+  subError,
+} from './billing.ts';
 import { deletePayment, movePhaseStart, paymentsOutsideMovedPhase, savePayment, setPhaseEnd, stopSubscription, switchPlan } from './phases.ts';
 import { maskForPublic } from './mask.ts';
 import { DEFAULT_SETTINGS, type Subscription } from './types.ts';
@@ -27,6 +38,97 @@ const charges = (s: Subscription) =>
     phase: sub.start,
   }));
 const values = (s: Subscription) => charges(s).map(({ phase: _phase, ...c }) => c);
+
+test('提前开始日补算原计费起点之前的费用，已有实付与后续扣款不变', () => {
+  for (const payments of [
+    undefined,
+    [
+      { date: '2024-10-01', amount: 29 },
+      { date: '2026-09-01', amount: 20 },
+    ],
+  ]) {
+    const s = base({ start: '2024-10-01', cycle: { unit: 'month', every: 1 }, price: 19, currency: 'CNY', payments });
+    const n = JSON.parse(JSON.stringify(movePhaseStart(s, s.start, '2018-01-01'))) as Subscription;
+    const earlier = chargesBetween(n, n.start, '2024-09-30', '2026-10-23');
+    assert.equal(earlier.length, 81);
+    assert.equal(
+      earlier.reduce((sum, c) => sum + c.amount, 0),
+      1539,
+    );
+    assert.equal(earlier[0].date, '2018-01-01');
+    assert.equal(earlier.at(-1)!.date, '2024-09-01');
+    assert.deepEqual(n.payments, s.payments);
+    assert.deepEqual(
+      values(n).filter((c) => c.date >= s.start),
+      values(s),
+    );
+  }
+});
+
+test('向前补算沿用原月末锚点，实付、零金额及退款覆盖同日估算', () => {
+  const s = base({
+    start: '2024-03-31',
+    cycle: { unit: 'month', every: 1 },
+    price: 19,
+    payments: [{ date: '2024-03-31', amount: 25 }],
+  });
+  const n = movePhaseStart(s, s.start, '2024-01-15');
+  assert.deepEqual(chargeServicePeriod(n, '2024-02-29'), { from: '2024-02-29', until: '2024-03-31' });
+  n.payments!.push({ date: '2024-01-31', amount: 0 }, { date: '2024-02-10', amount: -5, kind: 'refund' });
+  assert.deepEqual(
+    chargesBetween(n, n.start, '2024-04-30', '2024-05-01').map((c) => [c.date, c.amount]),
+    [
+      ['2024-01-31', 0],
+      ['2024-02-10', -5],
+      ['2024-02-29', 19],
+      ['2024-03-31', 25],
+      ['2024-04-30', 19],
+    ],
+  );
+});
+
+test('补算不填实付记录之间的空档，不改变预付续费日，并尊重试用和赠送期', () => {
+  const s = base({
+    start: '2024-03-01',
+    cycle: { unit: 'month', every: 1 },
+    payments: [
+      { date: '2024-03-01', amount: 100 },
+      { date: '2024-06-01', amount: 120 },
+    ],
+    nextDue: '2025-01-01',
+  });
+  const n = movePhaseStart(s, s.start, '2024-01-01');
+  assert.deepEqual(
+    chargesBetween(n, n.start, '2024-12-31', '2024-12-31').map((c) => c.date),
+    ['2024-01-01', '2024-02-01', '2024-03-01', '2024-06-01'],
+  );
+  const bonus = { ...n, bonus: { from: '2024-02-01', until: '2024-03-01' } };
+  assert.deepEqual(
+    chargesBetween(bonus, n.start, '2024-02-29', '2024-12-31').map((c) => c.date),
+    ['2024-01-01'],
+  );
+  const trial = movePhaseStart({ ...s, status: 'trial', trialEnd: s.start, bonus: undefined }, s.start, '2024-01-01');
+  assert.equal(chargesBetween(trial, trial.start, '2024-02-29', '2024-12-31').length, 0);
+});
+
+test('实付仅在提前的服务期内时，前补与后推不重复同一期', () => {
+  const s = base({
+    start: '2024-01-01',
+    billingStart: '2024-04-01',
+    cycle: { unit: 'month', every: 1 },
+    payments: [{ date: '2024-02-01', amount: 99 }],
+  });
+  assert.deepEqual(
+    chargesBetween(s, s.start, '2024-05-01', '2024-06-01').map((c) => [c.date, c.amount]),
+    [
+      ['2024-01-01', 120],
+      ['2024-02-01', 99],
+      ['2024-03-01', 120],
+      ['2024-04-01', 120],
+      ['2024-05-01', 120],
+    ],
+  );
+});
 
 for (const cycle of [
   { unit: 'month' as const, every: 1 },

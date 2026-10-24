@@ -311,7 +311,7 @@ export function setPhaseEnd(s: Subscription, start: string, end: string | undefi
 
 /**
  * 改阶段标识（开始日），不移动实际发生的付款、停止、优惠、赠送和合租覆盖日期。
- * billingStart 固定原计费锚点，避免改服务开始日连带重算历史扣款；买断固化原购买记录。
+ * billingStart 固定原计费锚点，提前开始日时向前补周期，之后的扣款日不变；买断固化原购买记录。
  * priceHistory 中的初始价随标识迁移；跨过调价点时保留原历史并补新起点的有效价。
  */
 export function movePhaseStart(s: Subscription, start: string, nextStart: string): Subscription {
