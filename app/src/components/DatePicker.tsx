@@ -241,6 +241,8 @@ export function DatePicker({
                 value={y}
                 ariaLabel={t('picker.date.year')}
                 onChange={(v) => setMonth(`${v}-${month.slice(5)}`)}
+                // 按钮上只放数字：中文等语言格式化后是「2025年」，加号字和箭头会挤不下
+                display={<span>{y}</span>}
                 options={years.map((year) => ({
                   value: year,
                   label: dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, 0, 1))),
