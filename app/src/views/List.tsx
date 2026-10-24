@@ -1,3 +1,4 @@
+import { isMarked, nextSort } from '../components/LtHead.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { StopBadge, StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
@@ -92,11 +93,11 @@ export function List({
   };
   // 表头三态：该列默认方向、反向、回到默认（按下次扣款）；默认排序不标箭头，与合租、代付、人员表一致
   const toggleSort = (k: Sort) => {
-    if (k !== sort) return chooseSort(k);
-    if (dir === DEFAULT_DIR[k]) return setDir(dir === 'asc' ? 'desc' : 'asc');
-    chooseSort('next');
+    const [ns, nd] = nextSort(k, sort, dir, DEFAULT_DIR, 'next');
+    setSort(ns);
+    setDir(nd);
   };
-  const marked = (k: Sort) => sort === k && !(k === 'next' && dir === DEFAULT_DIR.next);
+  const marked = (k: Sort) => isMarked(k, sort, dir, ['next', DEFAULT_DIR.next]);
   const [view, setView] = usePref<View>('list-view', 'grid', isView);
   // 金额显示：原币，或折算成侧边栏选的货币（大字为折算后，小字为原币）
   const orig = useOrig();

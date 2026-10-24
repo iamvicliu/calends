@@ -7,7 +7,7 @@ import { uid } from '../../../shared/billing.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { SortControl } from '../components/SortControl.tsx';
-import { usePhone } from '../components/LtHead.tsx';
+import { isMarked, nextSort, usePhone } from '../components/LtHead.tsx';
 import { colorFor, peopleLedger, peopleListRows, refsFor, type PeopleSort, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
@@ -20,6 +20,9 @@ import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 import './people-list.css';
 
 /** 选人：已有的人（可搜索）或「新的人」；选中已有的人时把称呼、联系方式带过去 */
+/** 人员表各列的默认方向：称呼 A→Z，金额与日期大的、近的在前 */
+const PEOPLE_DIR: Record<PeopleSort, 'asc' | 'desc'> = { owed: 'desc', received: 'desc', lastPaid: 'desc', name: 'asc' };
+
 export function PersonPicker({ state, value, onPick }: { state: AppState; value?: string; onPick: (p: Person | undefined) => void }) {
   const people = [...(state.people ?? [])].sort((a, b) => a.name.localeCompare(b.name));
   return (
@@ -110,16 +113,15 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   const phone = usePhone();
   const chooseSort = (key: PeopleSort) => {
     setSort(key);
-    setDir(key === 'name' ? 'asc' : 'desc');
+    setDir(PEOPLE_DIR[key]);
   };
   // 表头三态：该列默认方向、反向、回到默认（待收多的在前）；默认排序不标箭头，与合租、代付表一致
-  const defDir = (key: PeopleSort): 'asc' | 'desc' => (key === 'name' ? 'asc' : 'desc');
   const toggleSort = (key: PeopleSort) => {
-    if (key !== sort) return chooseSort(key);
-    if (dir === defDir(key)) return setDir(dir === 'asc' ? 'desc' : 'asc');
-    chooseSort('owed');
+    const [ns, nd] = nextSort(key, sort, dir, PEOPLE_DIR, 'owed');
+    setSort(ns);
+    setDir(nd);
   };
-  const marked = (key: PeopleSort) => sort === key && !(key === 'owed' && dir === 'desc');
+  const marked = (key: PeopleSort) => isMarked(key, sort, dir, ['owed', PEOPLE_DIR.owed]);
   const rows = peopleListRows(book, { filter, sort, dir, locale: locale() });
   const owing = peopleListRows(book, { filter: 'owe' });
   const counts = { all: book.length, owe: owing.length, settled: peopleListRows(book, { filter: 'settled' }).length };
