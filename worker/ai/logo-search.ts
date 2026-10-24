@@ -113,7 +113,8 @@ const NOT_OFFICIAL =
  * 页面里方向不对的图：合作方 logo 墙、轮播、头像、二维码、国旗。
  * 客户 logo 常见于 swiper/carousel 轮播里，和自家页头 logo 的 class 有明显区别。
  */
-const NOT_A_LOGO = /(client|customer|partner|press|sponsor|avatar|qrcode|qr-code|banner|screenshot|bg-|background|swiper|carousel|slide|marquee|flagcdn|flag|hero|shape|spinner|clippy|overlay|bubble|sprite|placeholder|loading|arrow|close|search|rank|selected|addlist|badge|icon-account|icon-\d)/i;
+const NOT_A_LOGO =
+  /(client|customer|partner|press|sponsor|avatar|qrcode|qr-code|banner|screenshot|bg-|background|swiper|carousel|slide|marquee|flagcdn|flag|hero|shape|spinner|clippy|overlay|bubble|sprite|placeholder|loading|arrow|close|search|rank|selected|addlist|badge|icon-account|icon-\d)/i;
 
 /** 各家的页头 logo 习惯用这些 class，命中就大幅加分 */
 const REAL_LOGO_CLASS = /(custom-logo|site-logo|navbar-brand|header-logo|brand-logo|main-logo|logo-img)/i;
@@ -282,7 +283,7 @@ function iconsFromHtml(html: string, base: string, q: string): Candidate[] {
   }
 
   // 3) favicon.ico：页头用的纯文字品牌（如 WHMCS 模板）没有 logo 图，只有站点小图标
-  if (out.length === 0 || out.every((c) => c.rank < 60)) {
+  if (out.every((c) => c.rank < 60)) {
     for (const rel of ['/favicon.ico', '/favicon.png']) {
       const url = abs(rel);
       if (url) out.push({ url, rank: 60, name: q });
@@ -297,9 +298,7 @@ function iconsFromHtml(html: string, base: string, q: string): Candidate[] {
   }
 
   const seen = new Set<string>();
-  return out
-    .filter((c) => (seen.has(c.url) ? false : seen.add(c.url)))
-    .sort((a, b) => b.rank - a.rank);
+  return out.filter((c) => (seen.has(c.url) ? false : seen.add(c.url))).sort((a, b) => b.rank - a.rank);
 }
 
 /**
