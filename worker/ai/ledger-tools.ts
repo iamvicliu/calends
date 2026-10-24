@@ -22,7 +22,7 @@ import {
   validateMethod,
 } from '../../shared/ledger-edit.ts';
 import { saveLedgerEdit } from '../store.ts';
-import { state, findSub, findPerson, methodRef, commit, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { state, findSub, findPerson, methodRef, commit, connectionInfo, type Tool, type ToolCtx } from './mcp-tools.ts';
 
 const action = (values: string[]) => ({ type: 'string', enum: values });
 const body = (value: unknown) => (value ?? {}) as Record<string, unknown>;
@@ -236,10 +236,11 @@ export const ledgerTools: Tool[] = [
   },
   {
     name: 'get_settings',
-    description: `Read all non-security business settings, existing notification channel metadata/enabled switches and saved UI preferences. ${excludedAccess}`,
+    description: `Read connection identity, today's ledger date, timezone, base currency, actual caller permissions and available tool names; also non-security business settings, existing notification channel metadata/enabled switches and saved UI preferences. ${excludedAccess}`,
     inputSchema: obj({}),
     async run(_a, ctx) {
-      return safeSettings((await state(ctx)).st);
+      const { st, today } = await state(ctx);
+      return { ...safeSettings(st), connection: connectionInfo(ctx, st, today) };
     },
   },
   {

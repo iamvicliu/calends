@@ -132,6 +132,7 @@ export async function appStorePlans(id: string, country = 'us') {
 
 export interface ToolCtx {
   env: Env;
+  access?: { client: 'mcp' | 'assistant'; scope: 'read' | 'write' };
   /**
    * 草稿叠加层（AI 助手用）：同一轮里先出的草稿（dry_run）叠在真实数据上，后面的工具能看到它们，
    * 于是「新建订阅 → 设为合租 → 加成员」可以一口气出完草稿。null 表示这一轮里删除了。
@@ -174,6 +175,32 @@ export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
 /** 候选列表：「名称（id）、名称（id）」 */
 const candidates = (xs: Array<{ name: string; id: string }>) => xs.map((x) => t('mcp.item', { name: x.name, id: x.id })).join(t('mcp.sep'));
 
+/** Connection metadata is private, credential-free and reflects the actual caller's permissions. */
+export function connectionInfo(ctx: ToolCtx, st: AppState, today: string) {
+  const scope = ctx.access?.scope ?? 'read';
+  let site: string | null = null;
+  try {
+    const url = new URL(ctx.env.SITE_URL || st.settings.siteUrl || '');
+    site = url.origin + url.pathname;
+  } catch {
+    /* Unconfigured deployment. */
+  }
+  return {
+    ledger: st.settings.displayName || 'Calends',
+    site_url: site,
+    timezone: st.settings.timezone,
+    today,
+    base_currency: st.settings.baseCurrency,
+    client: ctx.access?.client ?? 'unknown',
+    scope,
+    writes_require_confirmation: ctx.access?.client === 'assistant',
+    tools: TOOLS.filter((x) => scope === 'write' || !x.write).map((x) => ({ name: x.name, read_only: !x.write, preview: !!x.write })),
+  };
+}
+
+const subCandidates = (st: AppState, xs: Subscription[]) =>
+  candidates(xs.map((s) => ({ id: s.id, name: [s.name, s.account, s.region, st.methods.find((m) => m.id === s.methodId)?.name].filter(Boolean).join(' · ') })));
+
 /** 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选 */
 export function findSub(st: AppState, ref: unknown): Subscription {
   const q = String(ref ?? '').trim();
@@ -186,7 +213,7 @@ export function findSub(st: AppState, ref: unknown): Subscription {
   const fuzzy = exact.length ? exact : st.subscriptions.filter((s) => s.name.toLowerCase().includes(k));
   if (fuzzy.length === 1) return fuzzy[0];
   if (!fuzzy.length) throw new Error(t('mcp.error.subNotFound', { q }));
-  throw new Error(t('mcp.error.subAmbiguous', { q, count: fuzzy.length, list: candidates(fuzzy) }));
+  throw new Error(t('mcp.error.subAmbiguous', { q, count: fuzzy.length, list: subCandidates(st, fuzzy) }));
 }
 
 /** 按 id 或称呼找人；称呼模糊匹配到多个时报错并列出候选 */
@@ -321,6 +348,7 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
   return {
     id: s.id,
     name: s.name,
+    account: s.account ?? null,
     category: s.category,
     tags: s.tags,
     status: effectiveStatus(s, today),
@@ -337,6 +365,7 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
     method_id: cur.methodId ?? null,
     region: cur.region ?? null,
     start: s.start,
+    estimate_from: s.estimateFrom ?? null,
     end: s.end ?? null,
     stop: stopSummary(cur, today) ?? null,
     has_planned_change: !!s.phases?.some((p) => p.planned),
@@ -614,7 +643,11 @@ const CATALOGUE: Tool[] = [
     description:
       'List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner = shared plan I organize / share_member = shared plan I joined / proxy = paid on behalf of someone), category, method or region. Stop summaries distinguish non-renewal (end only), voluntary immediate cancellation and provider termination; stop includes kind, date, paidThrough, reason, refunded, refundStatus (none / partial / full; a pro-rata refund of the remaining days counts as full), unusedDays (stop date to paidThrough), unusedValue and wastedDays (days not covered by the refund). Use query to find a subscription id.',
     inputSchema: obj({
-      query: { type: 'string', description: 'Fuzzy match on name, tags, notes, category.' },
+      query: {
+        type: 'string',
+        description:
+          'Search name, login account, tags, notes, category, region and payment method. Same-name subscriptions may belong to different accounts; inspect candidates instead of assuming duplicates.',
+      },
       status: {
         type: 'string',
         enum: ['active', 'trial', 'paused', 'ending', 'ended', 'terminated', 'upcoming', 'lifetime', 'live', 'all'],
@@ -636,7 +669,15 @@ const CATALOGUE: Tool[] = [
       const status = str(a.status) ?? 'live';
       const method = a.method ? methodRef(st, a.method) : undefined;
       let rows = st.subscriptions
-        .filter((s) => !q || `${s.name} ${s.tags.join(' ')} ${s.notes ?? ''} ${s.category}`.toLowerCase().includes(q))
+        .filter(
+          (s) =>
+            !q ||
+            [s.name, s.account, ...s.tags, s.notes, s.category, s.region, st.methods.find((m) => m.id === s.methodId)?.name]
+              .filter(Boolean)
+              .join(' ')
+              .toLowerCase()
+              .includes(q),
+        )
         .map((s) => row(st, s, today, out))
         .filter((r) => status === 'all' || (status === 'live' ? ['active', 'trial', 'ending', 'paused'].includes(r.status) : r.status === status))
         .filter((r) => !a.kind || a.kind === 'all' || r.kind === a.kind)
@@ -689,7 +730,13 @@ const CATALOGUE: Tool[] = [
         intro: s.intro ?? null,
         bonus: s.bonus ?? null,
         expires: renewalDates(s, today).serviceExpires ?? null,
-        spent_total: { amount: round(spent), currency: out ?? st.settings.baseCurrency, charges: all.length },
+        spent_total: {
+          amount: round(spent),
+          currency: out ?? st.settings.baseCurrency,
+          charges: all.length,
+          from: s.estimateFrom ?? s.start,
+          history_complete: !s.estimateFrom,
+        },
         phases: phaseSubs(s).map((v) => ({
           start: v.start,
           end: v.end ?? null,
@@ -1079,7 +1126,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'create_subscription',
     description:
-      'Create a subscription. price is per cycle in the given currency. Rejects a duplicate (same name and start date) unless force=true. Use dry_run=true to preview first. Call list_categories first and reuse an existing code/name. Unknown categories fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
+      'Create a subscription. price is per cycle in the given currency. Same name and start date with explicitly different login accounts are independent subscriptions. Otherwise a possible duplicate requires force=true. Use dry_run=true to preview first. Call list_categories first and reuse an existing code/name. Unknown categories fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
     write: true,
     inputSchema: obj(
       {
@@ -1134,7 +1181,16 @@ const CATALOGUE: Tool[] = [
         })
         .sort((x, y) => x.date.localeCompare(y.date));
       if (!st.fx.rates[currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: currency }));
-      if (!a.force && st.subscriptions.some((s) => s.name.toLowerCase() === name.toLowerCase() && s.start === start))
+      const account = str(a.account)?.trim();
+      if (
+        !a.force &&
+        st.subscriptions.some(
+          (s) =>
+            s.name.toLowerCase() === name.toLowerCase() &&
+            s.start === start &&
+            !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
+        )
+      )
         throw new Error(t('mcp.error.duplicateSub', { name }));
       const category =
         a.category === undefined
@@ -1159,7 +1215,7 @@ const CATALOGUE: Tool[] = [
         url: str(a.url),
         icon: str(a.icon)?.startsWith('https://') ? str(a.icon) : undefined,
         notes: str(a.notes),
-        account: str(a.account),
+        account,
         trialEnd: a.trial_end ? date(a.trial_end, 'trial_end') : undefined,
         end: a.end ? date(a.end, 'end') : undefined,
         intro: a.intro

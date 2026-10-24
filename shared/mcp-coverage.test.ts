@@ -1313,3 +1313,78 @@ test('record_payment：单笔支付方式可指定、改写时保留、null 清�
   assert.ok(!r.isError, JSON.stringify(r));
   assert.equal((await pays())[0].methodId, undefined);
 });
+
+// Same service names are not a business identity: these are two intentional accounts.
+test('MCP account identity: search, contextual candidates, independent creation and unchanged read permissions', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const original = { ...sub(), id: 'personal', name: 'ChatGPT', account: 'personal@example.test', region: 'US', share: undefined, proxy: undefined };
+  await upsert(f.env, 'subscriptions', original.id, original);
+  const args = { name: 'ChatGPT', start: original.start, account: 'work@example.test', price: 20, currency: 'USD', cycle: { unit: 'month' }, category: 'Test' };
+  const before = await f.snapshot();
+  const preview = await f.call('create_subscription', { ...args, dry_run: true });
+  assert.equal(preview.isError, undefined);
+  assert.equal(preview.structuredContent.after.account, args.account);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('create_subscription', args, f.read)).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  const saved = await f.call('create_subscription', args);
+  assert.equal(saved.isError, undefined);
+  const listed = await f.call('list_subscriptions', { query: 'work@example.test' }, f.read);
+  assert.equal(listed.structuredContent.items.length, 1);
+  assert.equal(listed.structuredContent.items[0].account, args.account);
+  const ambiguity = await f.call('get_subscription', { subscription: 'ChatGPT' });
+  assert.equal(ambiguity.isError, true);
+  assert.match(ambiguity.content[0].text, /personal@example.test/);
+  assert.match(ambiguity.content[0].text, /work@example.test/);
+  assert.match(ambiguity.content[0].text, /Fictional wallet/);
+  const duplicate = await f.call('create_subscription', { ...args, account: ' WORK@example.test ' });
+  assert.equal(duplicate.isError, true);
+  assert.equal((await f.snapshot()).subscriptions.filter((s) => s.name === 'ChatGPT').length, 2);
+  const fromId = await f.call('update_subscription', { subscription: saved.structuredContent.after.id, set: { notes: 'Work account only' } });
+  assert.equal(fromId.isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 'personal')?.notes, original.notes);
+});
+
+test('MCP initialization and get_settings expose connection scope without credentials or extra tools', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const count = TOOLS.length;
+  for (const [token, scope] of [
+    [f.read, 'read'],
+    [f.write, 'write'],
+  ] as const) {
+    const before = await f.snapshot();
+    const initialized = await f.rpc('initialize', { protocolVersion: '2025-06-18' }, token);
+    const context = JSON.parse(initialized.instructions.split('\n').at(-1));
+    assert.equal(context.scope, scope);
+    assert.equal(context.client, 'mcp');
+    const settings = await f.call('get_settings', {}, token);
+    assert.deepEqual(settings.structuredContent.connection, context);
+    assert.ok(context.timezone && context.today && context.base_currency);
+    const tools = await f.rpc('tools/list', {}, token);
+    assert.deepEqual(
+      context.tools.map((x) => x.name),
+      tools.tools.map((x) => x.name),
+    );
+    if (scope === 'read') assert.ok(context.tools.every((x) => x.read_only));
+    assert.equal(context.writes_require_confirmation, false);
+    assert.ok(!JSON.stringify(settings).includes('SECRET'));
+    assert.ok(!JSON.stringify(settings).includes(token));
+    assert.deepEqual(await f.snapshot(), before);
+  }
+  assert.equal(TOOLS.length, count);
+});
+
+test('MCP 读取导入订阅：标出导入边界，累计支出只从边界算起并注明历史不完整', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), start: '2024-03-01', cycle: { unit: 'year', every: 1 }, estimateFrom: '2026-10-24', share: undefined, proxy: undefined };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const r = await f.call('get_subscription', { subscription: 's' }, f.read);
+  assert.ok(!r.isError, JSON.stringify(r));
+  const text = JSON.stringify(r.structuredContent);
+  assert.match(text, /"estimate_from":"2026-10-24"/);
+  assert.match(text, /"history_complete":false/);
+  assert.match(text, /"from":"2026-10-24"/);
+});

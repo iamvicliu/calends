@@ -4,7 +4,7 @@
 import { randomToken, sha256 } from '../auth.ts';
 import type { Env } from '../env.ts';
 import { getKv, getSettings, putKv } from '../store.ts';
-import { TOOLS, toolTitle, type ToolCtx } from './mcp-tools.ts';
+import { TOOLS, toolTitle, state, connectionInfo, type ToolCtx } from './mcp-tools.ts';
 import { t } from '../../shared/i18n.ts';
 
 export interface McpToken {
@@ -78,11 +78,13 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
   switch (msg.method) {
     case 'initialize': {
       const asked = String(msg.params?.protocolVersion ?? PROTOCOL);
+      const ctx: ToolCtx = { env, access: { client: 'mcp', scope: token.scope } };
+      const { st, today } = await state(ctx);
       return ok(msg.id, {
         protocolVersion: SUPPORTED.includes(asked) ? asked : PROTOCOL,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'calends', title: t('mcp.serverTitle'), version: '1.0.0' },
-        instructions: t('mcp.instructions'),
+        instructions: `${t('mcp.instructions')}\n${JSON.stringify(connectionInfo(ctx, st, today))}`,
       });
     }
     case 'ping':
@@ -102,7 +104,7 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
       const tool = TOOLS.find((x) => x.name === name);
       if (!tool) return fail(msg.id, -32602, t('mcp.error.noTool', { name }));
       if (tool.write && token.scope !== 'write') return ok(msg.id, { isError: true, content: [{ type: 'text', text: t('mcp.error.readOnly') }] });
-      const ctx: ToolCtx = { env };
+      const ctx: ToolCtx = { env, access: { client: 'mcp', scope: token.scope } };
       try {
         const out = await tool.run((msg.params?.arguments ?? {}) as Record<string, unknown>, ctx);
         return ok(msg.id, { content: [{ type: 'text', text: JSON.stringify(out, null, 1) }], structuredContent: out });
