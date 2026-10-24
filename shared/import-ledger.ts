@@ -3,6 +3,9 @@ import { parseCsv, importSubscriptionsCsv } from './csv.ts';
 import type { Cycle, PaymentMethod, Subscription } from './types.ts';
 import { t } from './i18n.ts';
 
+/** 导入文件（CSV、ZIP、数据库）大小与解压总量的上限 */
+export const IMPORT_LIMIT = 32 * 1024 * 1024;
+
 export interface ImportRow {
   key: string;
   user?: string;

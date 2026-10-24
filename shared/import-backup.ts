@@ -1,9 +1,9 @@
 import { ICON_DATA_LIMIT } from './icon.ts';
 import { unzipSync } from 'fflate';
-import { readImportTables, type ImportSource } from './import-ledger.ts';
+import { IMPORT_LIMIT, readImportTables, type ImportSource } from './import-ledger.ts';
 import { t } from './i18n.ts';
 
-export const IMPORT_LIMIT = 32 * 1024 * 1024;
+export { IMPORT_LIMIT };
 const MAX_ROWS = 5000;
 interface DatabaseReader {
   exec(sql: string): Array<{ columns: string[]; values: unknown[][] }>;
@@ -51,12 +51,14 @@ export function readImportBackup(bytes: Uint8Array, open: (bytes: Uint8Array) =>
     let total = 0;
     files = unzipSync(bytes, {
       filter: (file) => {
-        const wanted = /(^|\/)wallos\.db(?:-wal)?$/.test(file.name) || /(^|\/)logos\/[^/]+\.(png|jpe?g|webp)$/i.test(file.name);
+        const db = /(^|\/)wallos\.db(?:-wal)?$/.test(file.name);
+        const wanted = db || /(^|\/)logos\/[^/]+\.(png|jpe?g|webp)$/i.test(file.name);
         if (!wanted) return false;
         if (file.name.startsWith('/') || file.name.split('/').includes('..')) throw new Error(t('core.import.invalid'));
         total += file.originalSize;
         if (file.originalSize > IMPORT_LIMIT || total > IMPORT_LIMIT) throw new Error(t('core.import.tooLarge'));
-        return (!file.name.includes('/logos/') && !file.name.startsWith('logos/')) || file.originalSize <= 64 * 1024;
+        // 超过上限的 logo 不解压
+        return db || file.originalSize <= ICON_DATA_LIMIT;
       },
     });
     const names = Object.keys(files).filter((name) => /(^|\/)wallos\.db$/.test(name));
