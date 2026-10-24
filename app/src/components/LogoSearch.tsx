@@ -70,7 +70,8 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
         <Icon name="search" size={16} />
       </IconButton>
       {open && (
-        <div className="logo-panel">
+        <div className="logo-panel" data-submit="">
+          {/* data-submit="" 告诉弹窗的捕获阶段回车监听：这里的回车自己处理，别去点主按钮（添加） */}
           <div className="logo-head">
             {/* 用 div 而不是 form：编辑器整个是一个表单，HTML 不允许 form 嵌套，
                 内层 form 会被浏览器忽略，回车就变成提交外层表单（保存）而不是搜索 */}
@@ -80,7 +81,7 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key !== 'Enter') return;
+                  if (e.key !== 'Enter' || e.nativeEvent.isComposing) return;
                   // 拦住冒泡，避免触发编辑器的提交
                   e.preventDefault();
                   e.stopPropagation();
