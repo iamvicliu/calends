@@ -1,0 +1,105 @@
+name: Sync upstream release
+
+# 每天把上游（imetn/calends）最新的 release tag 合并进本 fork 的 main，测试通过后构建镜像，
+# arm 上的 watchtower 在 02:00 自动更新容器。遇到下面几种情况会停下来让 workflow 失败，GitHub 会发邮件提醒：
+# 合并冲突、测试不过、上游改了 workflow 文件（GITHUB_TOKEN 推不了）、带新的数据库迁移（推到 sync/<tag> 分支等人工审核）。
+on:
+  schedule:
+    - cron: '0 17 * * *' # 北京时间 01:00
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '指定上游 tag，例如 v1.8.0；留空取最新'
+        required: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency: sync-upstream
+
+jobs:
+  sync:
+    if: github.repository == 'iamvicliu/calends'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: 找到要同步的上游 tag
+        id: tag
+        run: |
+          git remote add upstream https://github.com/imetn/calends.git
+          git fetch --no-tags upstream 'refs/tags/v*:refs/tags/upstream/v*'
+          tag="${{ inputs.tag }}"
+          [ -n "$tag" ] || tag=$(git tag -l 'upstream/v*' --sort=-v:refname | head -1 | sed 's#^upstream/##')
+          ref="upstream/$tag"
+          git rev-parse -q --verify "refs/tags/$ref" >/dev/null || { echo "::error::上游没有 tag $tag"; exit 1; }
+          if git merge-base --is-ancestor "$ref" HEAD; then
+            echo "已包含 $tag，无需同步" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only HEAD..."$ref")
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          if echo "$changed" | grep -q '^\.github/workflows/'; then
+            echo "::error::上游 $tag 修改了 .github/workflows/，GITHUB_TOKEN 无权推送，请在本地手动合并"
+            exit 1
+          fi
+          if echo "$changed" | grep -q '^worker/migrations/'; then
+            echo "migrations=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 合并
+        if: steps.tag.outputs.skip != 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898283+github-actions[bot]@users.noreply.github.com'
+          if ! git merge --no-edit -m "🔀 merge: 同步上游 ${{ steps.tag.outputs.tag }}" "${{ steps.tag.outputs.ref }}"; then
+            git diff --name-only --diff-filter=U | sed 's/^/冲突：/' | tee -a "$GITHUB_STEP_SUMMARY"
+            git merge --abort
+            echo "::error::合并上游 ${{ steps.tag.outputs.tag }} 有冲突，请在本地处理"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.tag.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 检查（与 CI 一致）
+        if: steps.tag.outputs.skip != 'true'
+        run: |
+          npm ci
+          npm run lint
+          npm run format:check
+          npm run i18n:check
+          npm test
+          npm run build
+
+      - name: 带数据库迁移，推到审核分支
+        if: steps.tag.outputs.skip != 'true' && steps.tag.outputs.migrations == 'true'
+        run: |
+          branch="sync/${{ steps.tag.outputs.tag }}"
+          git push -f origin "HEAD:refs/heads/$branch"
+          {
+            echo "上游 ${{ steps.tag.outputs.tag }} 带新的数据库迁移，未自动上线。"
+            echo "审核：https://github.com/${{ github.repository }}/compare/main...$branch"
+            echo "确认后先在 arm 手动备份，再把 $branch 合进 main（push 会自动构建镜像）。"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "::error::上游 ${{ steps.tag.outputs.tag }} 带数据库迁移，等待人工审核"
+          exit 1
+
+      - name: 推送并构建镜像
+        if: steps.tag.outputs.skip != 'true' && steps.tag.outputs.migrations != 'true'
+        run: |
+          git push origin HEAD:main
+          # GITHUB_TOKEN 的 push 不会触发其他 workflow，这里显式触发
+          gh workflow run docker.yml --ref main
+          echo "已同步上游 ${{ steps.tag.outputs.tag }}，镜像构建已触发" | tee -a "$GITHUB_STEP_SUMMARY"
