@@ -32,8 +32,10 @@
     "label": "並べ替え",
     "next": "次回請求",
     "cost": "月額",
+    "amount": "金額",
     "name": "名前",
     "category": "カテゴリ",
+    "method": "支払い方法",
     "start": "開始日",
     "asc": "昇順",
     "desc": "降順"

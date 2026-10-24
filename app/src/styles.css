@@ -5751,9 +5751,21 @@ a.car-toggle {
   font: inherit;
   cursor: pointer;
 }
+/* 可排序的列都带上下箭头：未选中时很淡，悬停或选中后变亮，用户一眼能看出哪列能点 */
+.lt-sort svg {
+  opacity: 0.35;
+  transition: opacity var(--duration) var(--ease);
+}
 .lt-sort:hover,
 .lt-sort.on {
   color: var(--label);
+}
+.lt-sort:hover svg,
+.lt-sort.on svg {
+  opacity: 1;
+}
+.lt-head > .lt-sort:nth-child(n + 4) {
+  flex-direction: row-reverse;
 }
 .lt-name {
   display: flex;

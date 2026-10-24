@@ -33,8 +33,10 @@
     "label": "Ordenar",
     "next": "Próxima cobrança",
     "cost": "Custo mensal",
+    "amount": "Valor",
     "name": "Nome",
     "category": "Categoria",
+    "method": "Forma de pagamento",
     "start": "Data de início",
     "asc": "Crescente",
     "desc": "Decrescente"

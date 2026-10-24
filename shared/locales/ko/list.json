@@ -32,8 +32,10 @@
     "label": "정렬",
     "next": "다음 결제",
     "cost": "월 비용",
+    "amount": "금액",
     "name": "이름",
     "category": "카테고리",
+    "method": "결제 수단",
     "start": "시작일",
     "asc": "오름차순",
     "desc": "내림차순"

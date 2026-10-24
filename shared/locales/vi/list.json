@@ -32,8 +32,10 @@
     "label": "Sắp xếp",
     "next": "Lần trừ tiền tới",
     "cost": "Chi phí hằng tháng",
+    "amount": "Số tiền",
     "name": "Tên",
     "category": "Danh mục",
+    "method": "Phương thức thanh toán",
     "start": "Ngày bắt đầu",
     "asc": "Tăng dần",
     "desc": "Giảm dần"

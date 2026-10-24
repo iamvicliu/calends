@@ -32,8 +32,10 @@
     "label": "Urutkan",
     "next": "Tagihan berikutnya",
     "cost": "Biaya bulanan",
+    "amount": "Jumlah",
     "name": "Nama",
     "category": "Kategori",
+    "method": "Metode pembayaran",
     "start": "Tanggal mulai",
     "asc": "Naik",
     "desc": "Turun"

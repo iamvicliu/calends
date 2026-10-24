@@ -33,8 +33,10 @@
     "label": "Ordenar",
     "next": "Próximo cobro",
     "cost": "Coste mensual",
+    "amount": "Importe",
     "name": "Nombre",
     "category": "Categoría",
+    "method": "Método de pago",
     "start": "Fecha de inicio",
     "asc": "Ascendente",
     "desc": "Descendente"

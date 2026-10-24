@@ -33,8 +33,10 @@
     "label": "Sortieren",
     "next": "Nächste Abbuchung",
     "cost": "Monatliche Kosten",
+    "amount": "Betrag",
     "name": "Name",
     "category": "Kategorie",
+    "method": "Zahlungsmethode",
     "start": "Startdatum",
     "asc": "Aufsteigend",
     "desc": "Absteigend"

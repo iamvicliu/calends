@@ -33,8 +33,10 @@
     "label": "Trier",
     "next": "Prochain prélèvement",
     "cost": "Coût mensuel",
+    "amount": "Montant",
     "name": "Nom",
     "category": "Catégorie",
+    "method": "Moyen de paiement",
     "start": "Date de début",
     "asc": "Croissant",
     "desc": "Décroissant"
