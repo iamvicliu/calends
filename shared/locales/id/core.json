@@ -6,7 +6,8 @@
     "m12": "Tahunan",
     "custom": {
       "other": "Per {count} bulan"
-    }
+    },
+    "once": "Sekali"
   },
   "cycle": {
     "lifetime": "Seumur hidup",

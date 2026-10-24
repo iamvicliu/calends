@@ -26,7 +26,6 @@
     },
     "fee": "料金",
     "nextCollection": "次回集金",
-    "actions": "操作",
     "status": "支払い状況",
     "period": "今期",
     "range": "{from} – {until}",
@@ -100,7 +99,8 @@
       "m12": "年額",
       "custom": {
         "other": "{count}か月ごと"
-      }
+      },
+      "once": "一括"
     },
     "feeCcyAria": "通貨",
     "exempt": "支払いなし",
@@ -216,7 +216,8 @@
       "m12": "{fee}/年",
       "custom": {
         "other": "{count}か月ごとに{fee}"
-      }
+      },
+      "once": "一括 {fee}"
     },
     "collect": "回収",
     "joinedGroup": "参加中のプラン",
@@ -225,7 +226,13 @@
     "maybeGroup": "共有の可能性あり",
     "convert": "共有にする",
     "dueOn": "{date} 集金予定",
-    "nextDueOn": "次回 {date}"
+    "nextDueOn": "次回 {date}",
+    "members": "メンバー",
+    "incomeShort": "収入 {amount}",
+    "status": "ステータス",
+    "countNote": "メンバー {members} 人、空き {free} 席",
+    "yearPnl": "今年の損益",
+    "totalPnl": "累計損益"
   },
   "convert": {
     "title": "「{name}」を共有にする",
@@ -287,7 +294,9 @@
       "other": "{count}日超過"
     },
     "owe": "未収 {amount}\n{date}から",
-    "settled": "精算済み\n次回 {date}"
+    "settled": "精算済み\n次回 {date}",
+    "adjust": "料金と脱退",
+    "backCollect": "入金を記録"
   },
   "strip": {
     "yearNet": "年間の収支",
@@ -295,9 +304,9 @@
     "noneOwed": "未払いなし",
     "since": "{date}から",
     "profit": "損益",
-    "annualApprox": "年間約 {amount}",
     "paid": "支出",
-    "received": "回収"
+    "received": "回収",
+    "thisYear": "今年 {amount}"
   },
   "timeline": {
     "paid": "支払済み",
@@ -313,8 +322,11 @@
   },
   "sort": {
     "owed": "未回収額",
-    "net": "年間純額",
+    "net": "今年の損益順",
     "received": "受取累計",
-    "lastPaid": "最新の受取"
+    "lastPaid": "最新の受取",
+    "price": "プラン価格順",
+    "paid": "支払い累計順",
+    "profit": "累計損益順"
   }
 }

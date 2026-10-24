@@ -20,9 +20,9 @@ import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-for
 import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField, MemberSheet } from './Members.tsx';
+import { ContactField, contactText, MemberSheet } from './Members.tsx';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
-import { linkPerson, PersonPicker } from './People.tsx';
+import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { searchCatalog, type CatalogItem } from '../catalog.ts';
 
@@ -286,6 +286,9 @@ function Form({
   today: string;
   history?: ReactNode;
 }) {
+  // 代付对象已关联名册里的人：称呼、联系方式只读，改资料去人员详情
+  const proxyLinked = !!f.proxy?.personId && !!state.people?.some((p) => p.id === f.proxy!.personId);
+  const [proxyProfile, setProxyProfile] = useState(false);
   const phoneCat = f.category === presetCat('phone');
   const preset = CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0];
   // 选了「自定义」就一直停在自定义，填到恰好等于某个预设（如每 1 个月）时也不跳回去
@@ -552,26 +555,55 @@ function Form({
               <Cell label={t('people.field.person')}>
                 <PersonPicker
                   state={state}
-                  value={f.proxy.personId}
+                  value={proxyLinked ? f.proxy.personId : undefined}
                   onPick={(p) =>
                     p
                       ? up({ proxy: { ...f.proxy!, personId: p.id, forName: p.name, contactVia: p.contactVia, contact: p.contact } })
-                      : f.proxy!.personId && up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contact: undefined } })
+                      : up({ proxy: { ...f.proxy!, personId: undefined, forName: '', contactVia: undefined, contact: undefined } })
                   }
                 />
               </Cell>
             )}
-            <Cell label={t('editor.proxy.for')}>
-              <input value={f.proxy.forName} placeholder={t('editor.proxy.forPlaceholder')} onChange={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })} />
-            </Cell>
-            <Cell label={t('editor.proxy.contact')}>
-              <ContactField
-                via={f.proxy.contactVia ?? 'Telegram'}
-                value={f.proxy.contact}
-                onVia={(v) => up({ proxy: { ...f.proxy!, contactVia: v } })}
-                onChange={(c) => up({ proxy: { ...f.proxy!, contactVia: f.proxy!.contactVia ?? 'Telegram', contact: c || undefined } })}
+            {/* 与合租成员一致：这里只选替谁付；称呼、联系方式属于人员，到人员详情里改。新建人员时才在这里填 */}
+            {proxyLinked ? (
+              <Cell label={t('editor.proxy.contact')}>
+                <span className={contactText(f.proxy) ? undefined : 'muted'}>{contactText(f.proxy) || t('people.field.noContact')}</span>
+                <button type="button" className="btn plain" onClick={() => setProxyProfile(true)}>
+                  {t('people.field.editProfile')}
+                </button>
+              </Cell>
+            ) : (
+              <>
+                <Cell label={t('editor.proxy.for')}>
+                  <input
+                    value={f.proxy.forName}
+                    placeholder={t('editor.proxy.forPlaceholder')}
+                    onChange={(e) => up({ proxy: { ...f.proxy!, forName: val(e) } })}
+                  />
+                </Cell>
+                <Cell label={t('editor.proxy.contact')}>
+                  <ContactField
+                    via={f.proxy.contactVia ?? 'Telegram'}
+                    value={f.proxy.contact}
+                    onVia={(v) => up({ proxy: { ...f.proxy!, contactVia: v } })}
+                    onChange={(c) => up({ proxy: { ...f.proxy!, contactVia: f.proxy!.contactVia ?? 'Telegram', contact: c || undefined } })}
+                  />
+                </Cell>
+              </>
+            )}
+            {proxyProfile && f.proxy.personId && (
+              <PersonProfileSheet
+                state={state}
+                today={today}
+                personId={f.proxy.personId}
+                onOpen={() => setProxyProfile(false)}
+                onClose={() => {
+                  setProxyProfile(false);
+                  const p = getState().people?.find((x) => x.id === f.proxy?.personId);
+                  if (p && f.proxy) up({ proxy: { ...f.proxy, forName: p.name, contactVia: p.contactVia, contact: p.contact } });
+                }}
               />
-            </Cell>
+            )}
             <Cell label={t('editor.field.notes')}>
               <input
                 value={f.proxy.note ?? ''}

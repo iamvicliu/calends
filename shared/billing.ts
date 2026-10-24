@@ -902,9 +902,13 @@ export interface MemberDue {
   periodsOwed: number;
 }
 
+/** 买断的合租只收一次：收费周期按 100 年算，避免无限长的周期让日期计算失效 */
+export const LIFETIME_BILL_MONTHS = 1200;
+
 /** 旧成员未设置周期时沿用订阅周期。 */
 export function memberBillMonths(s: Subscription, m: ShareMember, day?: string): number {
-  return Math.max(1, Math.round(memberFeePoint(m, day)?.billEvery ?? m.billEvery ?? cycleDays(s.cycle) / 30.4375));
+  const months = Math.round(memberFeePoint(m, day)?.billEvery ?? m.billEvery ?? cycleDays(s.cycle) / 30.4375);
+  return Math.min(LIFETIME_BILL_MONTHS, Math.max(1, Number.isFinite(months) ? months : LIFETIME_BILL_MONTHS));
 }
 
 /** 无历史的旧成员继续读原字段；历史按生效日读取，不依赖系统时间。 */

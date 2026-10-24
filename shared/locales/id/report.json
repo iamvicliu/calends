@@ -137,7 +137,6 @@
     "lossHint": "Biaya yang dibayar untuk layanan yang berakhir lebih awal dan tidak dikembalikan",
     "basis": "Seluruh riwayat\nBagian saya; penghematan memakai kurs saat ini, kerugian tanpa pengembalian dana memakai kurs tanggal penghentian.",
     "details": "Rincian kerugian tanpa pengembalian dana",
-    "empty": "Tidak ada kerugian tanpa pengembalian dana.",
     "cancel": "Pembatalan dini sukarela"
   }
 }

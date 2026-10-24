@@ -8,10 +8,13 @@ import {
   memberAboard,
   effectiveStatus,
   memberBillMonths,
+  LIFETIME_BILL_MONTHS,
   memberRate,
   addDays,
   addMonths,
+  collectionDates,
   diffDays,
+  memberCollection,
 } from './billing.ts';
 import { chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { currencyDecimals } from './format.ts';
@@ -85,8 +88,9 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
     const r = m.leaveRefund;
     return sum + (r && r.date.slice(0, 4) === today.slice(0, 4) && r.date <= today ? memberFlowValue(state, r) : 0);
   }, 0);
+  // 买断的车只收一次，没有每年的收入；一次性收款算在发起至今的收回里
   const yearIncome =
-    (['ended', 'terminated'].includes(effectiveStatus(s, today))
+    (['ended', 'terminated'].includes(effectiveStatus(s, today)) || cur.cycle.unit === 'lifetime'
       ? 0
       : members.reduce((a, m) => {
           const rate = memberFee(state, s, m, today);
@@ -111,8 +115,38 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   };
 }
 
+/**
+ * 一辆车今年（自然年）的盈亏：成本是今年已扣加剩下预计要扣的；收入是成员今年已经交的，
+ * 加上今年里还该收的各期（含已逾期没收的）。都折成本币，买断与停止的车同样适用
+ */
+export function carYear(state: AppState, s: Subscription, today: string) {
+  const y = today.slice(0, 4);
+  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const cost = chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today)
+    .filter((c) => c.kind !== 'failed')
+    .reduce((a, c) => a + chargeValue(state, c), 0);
+  const members = s.share?.members ?? [];
+  const received = members
+    .flatMap(memberCashFlows)
+    .filter((p) => p.date.slice(0, 4) === y && p.date <= today)
+    .reduce((a, p) => a + memberFlowValue(state, p), 0);
+  const expected = members
+    .filter((m) => !m.exempt)
+    .flatMap((m) =>
+      collectionDates(s, m, y).map((d) => {
+        const c = memberCollection(s, m, d, ccy);
+        return toBaseAt(state, c.amount, c.currency, d);
+      }),
+    )
+    .reduce((a, v) => a + v, 0);
+  const income = received + expected;
+  return { cost, income, net: income - cost };
+}
+
 /** 订阅一期大约几个月，用来把「每期份额」换算成按月 / 季 / 年收的金额 */
 export function cycleMonths(s: Subscription): number {
+  // 买断没有周期：按收一次（与成员的买断收费周期一致）算，份额就是一次性的那份
+  if (s.cycle.unit === 'lifetime') return LIFETIME_BILL_MONTHS;
   return Math.max(0.25, cycleDays(s.cycle) / 30.4375);
 }
 

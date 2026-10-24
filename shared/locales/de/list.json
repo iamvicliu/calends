@@ -64,7 +64,9 @@
     "amount": "Betrag",
     "monthly": "Monatlich",
     "start": "Start",
-    "next": "Nächste Abbuchung"
+    "next": "Nächste Abbuchung",
+    "planPrice": "Tarifpreis",
+    "inBase": "In {ccy}"
   },
   "notCounted": "Nicht mitgezählt",
   "endedOn": "Beendet am {date}",

@@ -11,10 +11,11 @@ import {
   resyncShares,
   suggestedLeaveRefund,
   carLedger,
+  carYear,
   memberCashFlows,
   updateMemberLeave,
 } from './carpool.ts';
-import { memberRate } from './billing.ts';
+import { memberDues, memberRate } from './billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const sub = (o: Partial<Subscription> = {}): Subscription => ({
@@ -222,4 +223,69 @@ test('账本和现金流按退款日汇率扣实际退款，年度净额包含�
   assert.equal(cleared.leaveRefund, undefined);
   assert.deepEqual(cleared.payments, m.payments);
   assert.equal(cleared.paidUntil, m.paidUntil);
+});
+
+test('买断的合租：成员只收一次，算待收不抛错，也没有每年收入', () => {
+  const s = sub({
+    price: 99.99,
+    currency: 'USD',
+    cycle: { unit: 'lifetime', every: 1 },
+    start: '2026-03-10',
+    share: {
+      role: 'owner',
+      seats: 4,
+      since: '2026-03-10',
+      members: [
+        {
+          id: 'paid',
+          name: '甲',
+          share: 1,
+          fee: 129,
+          feeCurrency: 'CNY',
+          joined: '2026-03-10',
+          // 买断只收一期：这一期一直覆盖到 100 年后
+          paidUntil: '2126-03-09',
+          payments: [{ date: '2026-03-12', amount: 129, currency: 'CNY', from: '2026-03-10', until: '2126-03-09' }],
+        },
+        { id: 'owe', name: '乙', share: 1, fee: 129, feeCurrency: 'CNY', joined: '2026-03-10' },
+      ],
+    },
+  });
+  const dues = memberDues(s, '2026-10-25', 'CNY', state);
+  assert.equal(dues.find((d) => d.member.id === 'paid')!.periodsOwed, 0);
+  const owe = dues.find((d) => d.member.id === 'owe')!;
+  assert.equal(owe.periodsOwed, 1);
+  assert.equal(owe.owed, 129);
+  assert.equal(carLedger(state, s, '2026-10-25').yearIncome, 0);
+});
+
+test('当年盈亏：今年成本含预计扣款，收入含已收与今年还该收的各期（含逾期）', () => {
+  const s = sub({
+    price: 30,
+    currency: 'CNY',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    share: {
+      role: 'owner',
+      seats: 2,
+      since: '2026-01-01',
+      members: [
+        {
+          id: 'a',
+          name: 'A',
+          share: 10,
+          fee: 10,
+          feeCurrency: 'CNY',
+          billEvery: 1,
+          joined: '2026-01-01',
+          paidUntil: '2026-06-30',
+          payments: [{ date: '2026-01-05', amount: 60, currency: 'CNY', from: '2026-01-01', until: '2026-06-30' }],
+        },
+      ],
+    },
+  });
+  const y = carYear(state, s, '2026-10-25');
+  assert.equal(y.cost, 360);
+  assert.equal(y.income, 120);
+  assert.equal(y.net, -240);
 });

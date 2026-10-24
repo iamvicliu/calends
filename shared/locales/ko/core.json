@@ -6,7 +6,8 @@
     "m12": "매년",
     "custom": {
       "other": "{count}개월마다"
-    }
+    },
+    "once": "일회성"
   },
   "cycle": {
     "lifetime": "평생 이용",

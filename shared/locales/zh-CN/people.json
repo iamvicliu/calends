@@ -52,12 +52,13 @@
     "accountMissing": "这条成员关系已不存在，请重新打开人员详情。"
   },
   "pick": {
-    "new": "新的人",
-    "aria": "选择人"
+    "new": "新建人员",
+    "aria": "选择人员"
   },
   "field": {
-    "person": "人",
-    "syncFoot": "这个人还在另外 {count} 处出现，改称呼或联系方式会一起改。"
+    "person": "人员",
+    "editProfile": "编辑人员资料",
+    "noContact": "未填联系方式"
   },
   "avatar": {
     "change": "更换头像",

@@ -37,7 +37,6 @@
   "stoppedAt": "Encerrado em",
   "nextCharge": "Próxima cobrança",
   "note": "Nota",
-  "diffLabel": "Reembolsado − cobrado",
   "table": {
     "cost": "Custo na época",
     "total": "Total\n{count}",
@@ -75,18 +74,24 @@
       "one": "{count} pendente, pelo câmbio da data da cobrança",
       "other": "{count} pendentes, pelo câmbio da data da cobrança"
     },
-    "allBack": "Tudo reembolsado",
-    "total": "Total pago",
-    "totalSub": {
-      "one": "{count} cobrança\n{subs}",
-      "other": "{count} cobranças\n{subs}"
-    },
     "subs": {
       "one": "{count} assinatura",
       "other": "{count} assinaturas"
     },
     "diffSub": "Diferença por câmbio e tarifas nas cobranças reembolsadas",
     "emptyTitle": "Nenhum pagamento para outros ainda",
-    "emptyBody": "Crie ou edite uma assinatura, escolha “Pago para outra pessoa” em “Quem usa” e informe para quem é."
-  }
+    "emptyBody": "Crie ou edite uma assinatura, escolha “Pago para outra pessoa” em “Quem usa” e informe para quem é.",
+    "liveNext": "Ativos: {count}, próxima cobrança {date}",
+    "lastIn": "Último recebido {date}",
+    "noneIn": "Nada recebido ainda",
+    "diffAvg": "{count} devolvidos, média de {amount} por período",
+    "perPeriod": "Média de {amount} por período",
+    "owedRate": "Pela cotação do dia da cobrança"
+  },
+  "paid": "Adiantado",
+  "periods": {
+    "one": "{count} período",
+    "other": "{count} períodos"
+  },
+  "lastIn": "Último {date}"
 }

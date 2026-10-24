@@ -1,7 +1,18 @@
 {
   "copy": "Copiar",
   "copied": "Copiado",
-  "overlap": { "title": "También activo", "previous": "Plan anterior", "until": "Hasta el {date}\n{rel}" },
+  "note": {
+    "more": "Ver todo"
+  },
+  "renewal": {
+    "afterTrial": "Primer cargo tras la prueba",
+    "elapsed": "{pct} % del periodo transcurrido"
+  },
+  "overlap": {
+    "title": "También activo",
+    "previous": "Plan anterior",
+    "until": "Hasta el {date}\n{rel}"
+  },
   "action": {
     "edit": "Editar",
     "pause": "Pausar",
@@ -11,7 +22,11 @@
     "share": "Compartir",
     "copyImage": "Copiar como imagen"
   },
-  "toast": { "resumed": "Facturación reanudada", "paused": "En pausa. No se prevén cobros futuros", "imageCopied": "Imagen copiada" },
+  "toast": {
+    "resumed": "Facturación reanudada",
+    "paused": "En pausa. No se prevén cobros futuros",
+    "imageCopied": "Imagen copiada"
+  },
   "history": "Historial",
   "summary": "Resumen",
   "field": {
@@ -25,16 +40,29 @@
     "expiresHint": "La renovación automática cobra antes de esta fecha",
     "endedOn": "Finalizó el",
     "trialEnd": "Fin de la prueba",
-    "region": "Región"
+    "region": "Región",
+    "period": "Periodo",
+    "present": "actualidad",
+    "progress": "Periodo actual"
   },
-  "up": { "planned": "Cambio previsto\nsin confirmar", "starting": "Empieza pronto", "changing": "Próximo cambio", "effective": "Fecha de entrada en vigor" },
+  "up": {
+    "planned": "Cambio previsto\nsin confirmar",
+    "starting": "Empieza pronto",
+    "changing": "Próximo cambio",
+    "effective": "Fecha de entrada en vigor"
+  },
   "plan": {
     "drop": "No cambiar",
     "droppedToast": "No se cambiará. Termina después del {date}",
     "confirm": "Confirmar cambio",
     "confirmedToast": "Cambio confirmado"
   },
-  "intro": { "title": "Oferta inicial", "price": "Precio inicial", "until": "Fin de la oferta", "then": "Después" },
+  "intro": {
+    "title": "Oferta inicial",
+    "price": "Precio inicial",
+    "until": "Fin de la oferta",
+    "then": "Después"
+  },
   "share": {
     "open": "Ver plan",
     "owner": "Compartido\nlo organizo yo ({count}/{seats})",
@@ -48,32 +76,70 @@
     "owed": "{amount} pendiente",
     "settled": "Al día",
     "me": "Yo",
-    "seatsLeft": { "one": "{seats} plazas, {count} libre", "other": "{seats} plazas, {count} libres" },
+    "seatsLeft": {
+      "one": "{seats} plazas, {count} libre",
+      "other": "{seats} plazas, {count} libres"
+    },
     "seatsFull": "Las {seats} plazas están ocupadas",
     "surplus": "Sin coste, {amount} de más"
   },
   "charges": {
-    "recentN": { "one": "Solo el último", "other": "Solo los últimos {count}" },
+    "recentN": {
+      "one": "Solo el último",
+      "other": "Solo los últimos {count}"
+    },
     "addShort": "Añadir",
-    "title": { "one": "Cobros\n{count}", "other": "Cobros\n{count}" },
-    "kind": { "refund": "Reembolso", "adjust": "Ajuste", "failed": "Fallido" },
+    "title": {
+      "one": "Cobros\n{count}",
+      "other": "Cobros\n{count}"
+    },
+    "kind": {
+      "refund": "Reembolso",
+      "adjust": "Ajuste",
+      "failed": "Fallido"
+    },
     "add": "Añadir un registro (reembolso, ajuste, cobro fallido, importe en tarjeta…)",
     "all": "Mostrar los {count}"
   },
   "stats": {
     "spent": "Gasto total",
-    "count": { "one": "{count} cobro", "other": "{count} cobros" },
+    "count": {
+      "one": "{count} cobro",
+      "other": "{count} cobros"
+    },
     "owned": "Lo tienes desde hace",
     "subscribed": "Suscrito durante",
     "yearsMonths": "{years}a {months}m",
-    "years": { "one": "{count} año", "other": "{count} años" },
-    "months": { "one": "{count} mes", "other": "{count} meses" },
-    "days": { "one": "{count} día", "other": "{count} días" },
-    "gaps": { "one": "Interrumpida una vez", "other": "Interrumpida {count} veces" },
+    "years": {
+      "one": "{count} año",
+      "other": "{count} años"
+    },
+    "months": {
+      "one": "{count} mes",
+      "other": "{count} meses"
+    },
+    "days": {
+      "one": "{count} día",
+      "other": "{count} días"
+    },
+    "gaps": {
+      "one": "Interrumpida una vez",
+      "other": "Interrumpida {count} veces"
+    },
     "perMonth": "Coste mensual real"
   },
-  "tab": { "charges": "Cargos\n{count}", "details": "Detalles" },
-  "kpi": { "amortized": "Por mes de uso", "noGaps": "Sin interrupciones", "startedToday": "Empezó hoy", "expectedMonthly": "Previsto al mes" },
+  "tab": {
+    "charges": "Cargos\n{count}",
+    "details": "Detalles"
+  },
+  "kpi": {
+    "noGaps": "Sin interrupciones",
+    "startedToday": "Empezó hoy",
+    "expectedMonthly": "Previsto al mes",
+    "amortizedCost": "Coste prorrateado",
+    "perMonthValue": "{amount}/mes",
+    "perDay": "{amount} al día"
+  },
   "chart": {
     "title": "Por cargo\n{ccy}",
     "orig": "Original",
@@ -84,7 +150,14 @@
     "list": "Precio de lista al primer tipo",
     "listOrig": "Precio de lista",
     "origAmount": "Importe original",
-    "few": "Se necesitan al menos dos cargos para ver la tendencia"
+    "few": "Se necesitan al menos dos cargos para ver la tendencia",
+    "bucket": {
+      "m1": "Cada barra es el total de un mes",
+      "m3": "Cada barra es el total de un trimestre",
+      "m12": "Cada barra es el total de un año"
+    },
+    "regular": "Precio normal",
+    "saved": "Descuento inicial"
   },
   "ev": {
     "next": "Próximo cargo",
@@ -96,15 +169,42 @@
     "paused": "En pausa",
     "ended": "Terminada",
     "ending": "Termina",
-    "phases": { "one": "{count} fase", "other": "{count} fases" },
-    "more": { "one": "Ver {count} anterior", "other": "Ver {count} anteriores" },
+    "phases": {
+      "one": "{count} fase",
+      "other": "{count} fases"
+    },
+    "more": {
+      "one": "Ver {count} anterior",
+      "other": "Ver {count} anteriores"
+    },
     "shareStart": "Empezó a compartirse"
   },
   "upcoming": {
     "title": "Próximos 12 meses",
-    "total": { "one": "≈ {amount}\n{count} cargo", "other": "≈ {amount}\n{count} cargos" },
-    "more": { "one": "{count} más", "other": "{count} más" },
+    "total": {
+      "one": "≈ {amount}\n{count} cargo",
+      "other": "≈ {amount}\n{count} cargos"
+    },
+    "more": {
+      "one": "{count} más",
+      "other": "{count} más"
+    },
     "none": "Sin cargos en los próximos 12 meses"
   },
-  "stop": { "title": "Cese y reembolso", "type": "Tipo de cese", "paidThrough": "Pagado originalmente hasta", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Cese y reembolso",
+    "type": "Tipo de cese",
+    "paidThrough": "Pagado originalmente hasta",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Cobrado",
+    "planned": "Previsto"
+  },
+  "period": {
+    "paid": "Periodo actual",
+    "trial": "Prueba",
+    "bonus": "Periodo de regalo",
+    "since": "Desde {date}"
+  }
 }

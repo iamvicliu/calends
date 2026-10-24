@@ -1,9 +1,32 @@
 {
   "copy": "Copy",
   "copied": "Copied",
-  "overlap": { "title": "Also running", "previous": "Previous plan", "until": "Runs until {date}\n{rel}" },
-  "action": { "edit": "Edit", "pause": "Pause", "resume": "Resume", "manage": "Manage", "website": "Website", "share": "Share", "copyImage": "Copy as image" },
-  "toast": { "resumed": "Billing resumed", "paused": "Paused. Future charges won't be projected", "imageCopied": "Image copied" },
+  "note": {
+    "more": "Show all"
+  },
+  "renewal": {
+    "afterTrial": "First charge after trial",
+    "elapsed": "{pct}% of this period used"
+  },
+  "overlap": {
+    "title": "Also running",
+    "previous": "Previous plan",
+    "until": "Runs until {date}\n{rel}"
+  },
+  "action": {
+    "edit": "Edit",
+    "pause": "Pause",
+    "resume": "Resume",
+    "manage": "Manage",
+    "website": "Website",
+    "share": "Share",
+    "copyImage": "Copy as image"
+  },
+  "toast": {
+    "resumed": "Billing resumed",
+    "paused": "Paused. Future charges won't be projected",
+    "imageCopied": "Image copied"
+  },
   "history": "History",
   "summary": "Summary",
   "field": {
@@ -17,11 +40,29 @@
     "expiresHint": "Auto-renew charges before this date",
     "endedOn": "Ended on",
     "trialEnd": "Trial ends",
-    "region": "Region"
+    "region": "Region",
+    "period": "Subscribed",
+    "present": "present",
+    "progress": "This period"
   },
-  "up": { "planned": "Planned change\nnot confirmed", "starting": "Starting soon", "changing": "Upcoming change", "effective": "Effective date" },
-  "plan": { "drop": "Don't switch", "droppedToast": "Won't switch. Ends after {date}", "confirm": "Confirm switch", "confirmedToast": "Switch confirmed" },
-  "intro": { "title": "Intro offer", "price": "Intro price", "until": "Offer ends", "then": "Then" },
+  "up": {
+    "planned": "Planned change\nnot confirmed",
+    "starting": "Starting soon",
+    "changing": "Upcoming change",
+    "effective": "Effective date"
+  },
+  "plan": {
+    "drop": "Don't switch",
+    "droppedToast": "Won't switch. Ends after {date}",
+    "confirm": "Confirm switch",
+    "confirmedToast": "Switch confirmed"
+  },
+  "intro": {
+    "title": "Intro offer",
+    "price": "Intro price",
+    "until": "Offer ends",
+    "then": "Then"
+  },
   "share": {
     "open": "Open plan",
     "owner": "Shared\nI host ({count}/{seats})",
@@ -35,32 +76,70 @@
     "owed": "{amount} due",
     "settled": "Settled",
     "me": "Me",
-    "seatsLeft": { "one": "{seats} seats, {count} free", "other": "{seats} seats, {count} free" },
+    "seatsLeft": {
+      "one": "{seats} seats, {count} free",
+      "other": "{seats} seats, {count} free"
+    },
     "seatsFull": "All {seats} seats taken",
     "surplus": "Covered, {amount} extra"
   },
   "charges": {
-    "recentN": { "one": "Latest {count} only", "other": "Latest {count} only" },
+    "recentN": {
+      "one": "Latest {count} only",
+      "other": "Latest {count} only"
+    },
     "addShort": "Add",
-    "title": { "one": "Charges\n{count}", "other": "Charges\n{count}" },
-    "kind": { "refund": "Refund", "adjust": "Adjustment", "failed": "Failed" },
+    "title": {
+      "one": "Charges\n{count}",
+      "other": "Charges\n{count}"
+    },
+    "kind": {
+      "refund": "Refund",
+      "adjust": "Adjustment",
+      "failed": "Failed"
+    },
     "add": "Add a record (refund, adjustment, failed charge, card amount…)",
     "all": "Show all {count}"
   },
   "stats": {
     "spent": "Total spent",
-    "count": { "one": "{count} charge", "other": "{count} charges" },
+    "count": {
+      "one": "{count} charge",
+      "other": "{count} charges"
+    },
     "owned": "Owned for",
     "subscribed": "Subscribed for",
     "yearsMonths": "{years} yr {months} mo",
-    "years": { "one": "{count} year", "other": "{count} years" },
-    "months": { "one": "{count} month", "other": "{count} months" },
-    "days": { "one": "{count} day", "other": "{count} days" },
-    "gaps": { "one": "Lapsed once", "other": "Lapsed {count} times" },
+    "years": {
+      "one": "{count} year",
+      "other": "{count} years"
+    },
+    "months": {
+      "one": "{count} month",
+      "other": "{count} months"
+    },
+    "days": {
+      "one": "{count} day",
+      "other": "{count} days"
+    },
+    "gaps": {
+      "one": "Lapsed once",
+      "other": "Lapsed {count} times"
+    },
     "perMonth": "Actual monthly"
   },
-  "tab": { "charges": "Charges\n{count}", "details": "Details" },
-  "kpi": { "amortized": "Per month owned", "noGaps": "No lapses", "startedToday": "Started today", "expectedMonthly": "Expected monthly" },
+  "tab": {
+    "charges": "Charges\n{count}",
+    "details": "Details"
+  },
+  "kpi": {
+    "noGaps": "No lapses",
+    "startedToday": "Started today",
+    "expectedMonthly": "Expected monthly",
+    "amortizedCost": "Amortized cost",
+    "perMonthValue": "{amount}/mo",
+    "perDay": "{amount} a day"
+  },
   "chart": {
     "title": "Per charge\n{ccy}",
     "orig": "Original",
@@ -71,7 +150,14 @@
     "list": "List price at first rate",
     "listOrig": "List price",
     "origAmount": "Original amount",
-    "few": "Need at least two charges to draw a trend"
+    "few": "Need at least two charges to draw a trend",
+    "bucket": {
+      "m1": "Each bar is a monthly total",
+      "m3": "Each bar is a quarterly total",
+      "m12": "Each bar is a yearly total"
+    },
+    "regular": "Regular price",
+    "saved": "Intro discount"
   },
   "ev": {
     "next": "Next charge",
@@ -83,15 +169,42 @@
     "paused": "Paused",
     "ended": "Ended",
     "ending": "Ends",
-    "phases": { "one": "{count} phase", "other": "{count} phases" },
-    "more": { "one": "Show {count} earlier", "other": "Show {count} earlier" },
+    "phases": {
+      "one": "{count} phase",
+      "other": "{count} phases"
+    },
+    "more": {
+      "one": "Show {count} earlier",
+      "other": "Show {count} earlier"
+    },
     "shareStart": "Sharing started"
   },
   "upcoming": {
     "title": "Next 12 months",
-    "total": { "one": "≈ {amount}\n{count} charge", "other": "≈ {amount}\n{count} charges" },
-    "more": { "one": "{count} more", "other": "{count} more" },
+    "total": {
+      "one": "≈ {amount}\n{count} charge",
+      "other": "≈ {amount}\n{count} charges"
+    },
+    "more": {
+      "one": "{count} more",
+      "other": "{count} more"
+    },
     "none": "No charges in the next 12 months"
   },
-  "stop": { "title": "Stop & refund", "type": "Stop type", "paidThrough": "Originally paid through", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Stop & refund",
+    "type": "Stop type",
+    "paidThrough": "Originally paid through",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Charged",
+    "planned": "Expected"
+  },
+  "period": {
+    "paid": "This period",
+    "trial": "Trial",
+    "bonus": "Bonus period",
+    "since": "Since {date}"
+  }
 }

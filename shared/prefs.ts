@@ -27,6 +27,10 @@ export const PREF_KEYS = [
   'cal-mode',
   'cal-report-open',
   'cal-report-mode',
+  'car-view',
+  'proxy-view',
+  'proxy-sort',
+  'proxy-dir',
 ] as const;
 export type PrefKey = (typeof PREF_KEYS)[number];
 

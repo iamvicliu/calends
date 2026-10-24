@@ -140,7 +140,6 @@
     "lossHint": "Frais payés pour un service arrêté avant terme et non remboursés",
     "basis": "Tout l’historique\nMa part ; économies au taux actuel, perte non remboursée au taux du jour de l’arrêt.",
     "details": "Détail des pertes non remboursées",
-    "empty": "Aucune perte non remboursée.",
     "cancel": "Résiliation anticipée volontaire"
   }
 }

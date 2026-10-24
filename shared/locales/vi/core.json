@@ -6,7 +6,8 @@
     "m12": "Hằng năm",
     "custom": {
       "other": "Mỗi {count} tháng"
-    }
+    },
+    "once": "Một lần"
   },
   "cycle": {
     "lifetime": "Trọn đời",

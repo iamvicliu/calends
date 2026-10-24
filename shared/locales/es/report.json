@@ -140,7 +140,6 @@
     "lossHint": "Importe pagado por un servicio que terminó antes de tiempo y no se reembolsó",
     "basis": "Todo el historial\nMi parte; ahorro al cambio actual y pérdida no reembolsada al cambio del día del cese.",
     "details": "Detalle de pérdidas no reembolsadas",
-    "empty": "No hay pérdidas no reembolsadas.",
     "cancel": "Cancelación anticipada voluntaria"
   }
 }

@@ -72,10 +72,8 @@
   },
   "field": {
     "person": "Person",
-    "syncFoot": {
-      "one": "Also in {count} other place — name and contact changes apply there too.",
-      "other": "Also in {count} other places — name and contact changes apply there too."
-    }
+    "editProfile": "Edit person",
+    "noContact": "No contact"
   },
   "avatar": {
     "change": "Change avatar",

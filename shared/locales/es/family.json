@@ -27,7 +27,6 @@
     },
     "fee": "Tarifa",
     "nextCollection": "Próximo cobro",
-    "actions": "Acciones",
     "status": "Estado de pago",
     "period": "Periodo actual",
     "range": "{from} – {until}",
@@ -103,7 +102,8 @@
       "custom": {
         "one": "Cada {count} mes",
         "other": "Cada {count} meses"
-      }
+      },
+      "once": "Una sola vez"
     },
     "feeCcyAria": "Moneda",
     "exempt": "No paga",
@@ -225,7 +225,8 @@
       "custom": {
         "one": "{fee} cada {count} mes",
         "other": "{fee} cada {count} meses"
-      }
+      },
+      "once": "{fee} una sola vez"
     },
     "collect": "Cobrar",
     "joinedGroup": "Planes a los que me uní",
@@ -234,7 +235,13 @@
     "maybeGroup": "Posiblemente compartidos",
     "convert": "Hacer compartido",
     "dueOn": "Vence {date}",
-    "nextDueOn": "Próximo cobro {date}"
+    "nextDueOn": "Próximo cobro {date}",
+    "members": "Miembros",
+    "incomeShort": "Ingresos {amount}",
+    "status": "Estado",
+    "countNote": "Miembros {members}, plazas libres {free}",
+    "yearPnl": "Resultado del año",
+    "totalPnl": "Resultado acumulado"
   },
   "convert": {
     "title": "Hacer compartido «{name}»",
@@ -297,7 +304,9 @@
       "other": "{count} días de retraso"
     },
     "owe": "{amount} pendiente\ndesde {date}",
-    "settled": "Al día\npróximo cobro {date}"
+    "settled": "Al día\npróximo cobro {date}",
+    "adjust": "Cuota y salida",
+    "backCollect": "Registrar pago"
   },
   "strip": {
     "yearNet": "Neto al año",
@@ -305,9 +314,9 @@
     "noneOwed": "Nadie debe",
     "since": "Desde {date}",
     "profit": "Ganancia / pérdida",
-    "annualApprox": "Unos {amount} al año",
     "paid": "Pagado",
-    "received": "Recuperado"
+    "received": "Recuperado",
+    "thisYear": "Este año {amount}"
   },
   "timeline": {
     "paid": "Pagado",
@@ -323,8 +332,11 @@
   },
   "sort": {
     "owed": "Pendiente de cobro",
-    "net": "Neto anual",
+    "net": "Por resultado del año",
     "received": "Total recibido",
-    "lastPaid": "Último pago"
+    "lastPaid": "Último pago",
+    "price": "Por precio del plan",
+    "paid": "Por pagado hasta hoy",
+    "profit": "Por resultado acumulado"
   }
 }

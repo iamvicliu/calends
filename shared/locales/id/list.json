@@ -63,7 +63,9 @@
     "amount": "Jumlah",
     "monthly": "Bulanan",
     "start": "Mulai",
-    "next": "Tagihan berikutnya"
+    "next": "Tagihan berikutnya",
+    "planPrice": "Harga paket",
+    "inBase": "Dalam {ccy}"
   },
   "notCounted": "Tidak dihitung",
   "endedOn": "Berakhir {date}",

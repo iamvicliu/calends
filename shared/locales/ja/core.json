@@ -6,7 +6,8 @@
     "m12": "毎年",
     "custom": {
       "other": "{count}か月ごと"
-    }
+    },
+    "once": "一括"
   },
   "cycle": {
     "lifetime": "買い切り",

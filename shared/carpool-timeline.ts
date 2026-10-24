@@ -31,7 +31,11 @@ export function carpoolTimeline(s: Subscription, today: string, ruleMonths: numb
       }
       return period.until;
     });
-  const end = [addDays(ends.sort().at(-1) ?? addMonths(today, ruleMonths), 14), addMonths(today, 1)].sort().at(-1)!;
+  // 右端最多到今天之后十年（长期预付仍可拖动看到）；买断的车只有一期、覆盖百年，拉长没有信息，只看到今天之后三个月
+  const end = [
+    [addDays(ends.sort().at(-1) ?? addMonths(today, ruleMonths), 14), addMonths(today, 1)].sort().at(-1)!,
+    addMonths(today, s.cycle.unit === 'lifetime' ? 3 : 120),
+  ].sort()[0];
   const desiredStart = [addMonths(end, -15), addMonths(today, -3)].sort()[0];
   const viewStart = [start, desiredStart].sort().at(-1)!;
   const totalDays = Math.max(1, diffDays(start, end));

@@ -37,7 +37,6 @@
   "stoppedAt": "Stopped on",
   "nextCharge": "Next charge",
   "note": "Note",
-  "diffLabel": "Paid back − charged",
   "table": {
     "cost": "Cost then",
     "total": "Total\n{count}",
@@ -75,18 +74,24 @@
       "one": "{count} unpaid, at charge-date rates",
       "other": "{count} unpaid, at charge-date rates"
     },
-    "allBack": "All paid back",
-    "total": "Total paid",
-    "totalSub": {
-      "one": "{count} charge\n{subs}",
-      "other": "{count} charges\n{subs}"
-    },
     "subs": {
       "one": "{count} subscription",
       "other": "{count} subscriptions"
     },
     "diffSub": "Difference from exchange rates and fees on paid-back charges",
     "emptyTitle": "Nothing paid for others yet",
-    "emptyBody": "Create or edit a subscription, choose “Paying for” under “Who uses it”, and enter who it’s for."
-  }
+    "emptyBody": "Create or edit a subscription, choose “Paying for” under “Who uses it”, and enter who it’s for.",
+    "liveNext": "Active: {count}, next charge {date}",
+    "lastIn": "Last received {date}",
+    "noneIn": "Nothing received yet",
+    "diffAvg": "Over {count} paid back: {amount} each on average",
+    "perPeriod": "{amount} per period on average",
+    "owedRate": "At charge-date rates"
+  },
+  "paid": "Paid on behalf",
+  "periods": {
+    "one": "{count} period",
+    "other": "{count} periods"
+  },
+  "lastIn": "Last {date}"
 }

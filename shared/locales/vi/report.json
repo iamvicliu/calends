@@ -137,7 +137,6 @@
     "lossHint": "Khoản đã trả cho dịch vụ kết thúc sớm nhưng không được hoàn lại",
     "basis": "Toàn bộ lịch sử\nPhần của tôi; tiết kiệm theo tỷ giá hiện tại, tổn thất chưa hoàn tiền theo tỷ giá ngày dừng.",
     "details": "Chi tiết tổn thất chưa hoàn tiền",
-    "empty": "Không có tổn thất chưa hoàn tiền.",
     "cancel": "Chủ động hủy sớm"
   }
 }

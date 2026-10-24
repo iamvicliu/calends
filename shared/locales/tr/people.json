@@ -72,10 +72,8 @@
   },
   "field": {
     "person": "Kişi",
-    "syncFoot": {
-      "one": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır.",
-      "other": "{count} yerde daha var; ad ve iletişim değişiklikleri oraya da uygulanır."
-    }
+    "editProfile": "Kişiyi düzenle",
+    "noContact": "İletişim yok"
   },
   "avatar": {
     "change": "Avatarı değiştir",

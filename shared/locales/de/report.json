@@ -140,7 +140,6 @@
     "lossHint": "Bezahlte Gebühren für vorzeitig beendete Leistungen, die nicht erstattet wurden",
     "basis": "Gesamter Verlauf\nMein Anteil; Ersparnis zum aktuellen Kurs, nicht erstatteter Verlust zum Kurs am Beendigungstag.",
     "details": "Nicht erstattete Verluste im Detail",
-    "empty": "Keine nicht erstatteten Verluste.",
     "cancel": "Freiwillig vorzeitig gekündigt"
   }
 }

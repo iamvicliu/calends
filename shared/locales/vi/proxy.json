@@ -35,7 +35,6 @@
   "stoppedAt": "Dừng ngày",
   "nextCharge": "Lần trừ tiền tới",
   "note": "Ghi chú",
-  "diffLabel": "Đã trả lại − đã trừ",
   "table": {
     "cost": "Chi phí lúc đó",
     "total": "Tổng\n{count}",
@@ -72,16 +71,20 @@
     "owedSub": {
       "other": "{count} khoản chưa trả lại, theo tỷ giá ngày trừ tiền"
     },
-    "allBack": "Đã trả lại hết",
-    "total": "Tổng đã trả hộ",
-    "totalSub": {
-      "other": "{count} khoản phí\n{subs}"
-    },
     "subs": {
       "other": "{count} gói đăng ký"
     },
     "diffSub": "Chênh lệch do tỷ giá và phí trên các khoản đã được trả lại",
     "emptyTitle": "Chưa có khoản trả hộ nào",
-    "emptyBody": "Tạo hoặc sửa gói đăng ký, chọn “Trả hộ” ở mục “Ai sử dụng”, rồi nhập người được trả hộ."
-  }
+    "emptyBody": "Tạo hoặc sửa gói đăng ký, chọn “Trả hộ” ở mục “Ai sử dụng”, rồi nhập người được trả hộ.",
+    "liveNext": "Đang chạy {count}, lần trừ tiếp theo {date}",
+    "lastIn": "Nhận gần nhất {date}",
+    "noneIn": "Chưa nhận lại",
+    "diffAvg": "Đã thu {count} kỳ, trung bình {amount} mỗi kỳ",
+    "perPeriod": "Trung bình {amount} mỗi kỳ",
+    "owedRate": "Theo tỷ giá ngày trừ tiền"
+  },
+  "paid": "Đã trả hộ",
+  "periods": "{count} kỳ",
+  "lastIn": "Gần nhất {date}"
 }

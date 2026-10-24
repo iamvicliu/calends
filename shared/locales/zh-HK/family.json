@@ -26,7 +26,6 @@
     },
     "fee": "收費",
     "nextCollection": "下次應收",
-    "actions": "操作",
     "status": "收款狀態",
     "period": "本期",
     "range": "{from} – {until}",
@@ -96,7 +95,8 @@
       "m3": "每季收",
       "m6": "每半年收",
       "m12": "每年收",
-      "custom": "每 {count} 個月收"
+      "custom": "每 {count} 個月收",
+      "once": "一次收"
     },
     "feeCcyAria": "收款貨幣",
     "exempt": "不分攤",
@@ -200,7 +200,8 @@
       "m3": "每季收 {fee}",
       "m6": "每半年收 {fee}",
       "m12": "每年收 {fee}",
-      "custom": "每 {count} 個月收 {fee}"
+      "custom": "每 {count} 個月收 {fee}",
+      "once": "一次收 {fee}"
     },
     "collect": "收款",
     "joinedGroup": "我加入的共享方案",
@@ -209,7 +210,13 @@
     "maybeGroup": "可能是共享方案",
     "convert": "轉為共享方案",
     "dueOn": "應收 {date}",
-    "nextDueOn": "下次應收 {date}"
+    "nextDueOn": "下次應收 {date}",
+    "members": "成員",
+    "incomeShort": "收入 {amount}",
+    "status": "狀態",
+    "countNote": "{members} 位成員，空 {free} 位",
+    "yearPnl": "當年盈虧",
+    "totalPnl": "累計盈虧"
   },
   "convert": {
     "title": "將「{name}」轉為共享方案",
@@ -269,7 +276,9 @@
     "paidTo": "這一期結束",
     "late": "已逾期 {count} 天",
     "owe": "待收 {amount}\n應收 {date}",
-    "settled": "已結清\n下次應收 {date}"
+    "settled": "已結清\n下次應收 {date}",
+    "adjust": "調整收費與退出",
+    "backCollect": "記一筆收款"
   },
   "strip": {
     "yearNet": "每年淨額",
@@ -277,9 +286,9 @@
     "noneOwed": "無人欠款",
     "since": "{date}起",
     "profit": "盈虧",
-    "annualApprox": "每年約 {amount}",
     "paid": "付出",
-    "received": "收回"
+    "received": "收回",
+    "thisYear": "當年 {amount}"
   },
   "timeline": {
     "paid": "已付",
@@ -295,8 +304,11 @@
   },
   "sort": {
     "owed": "依待收",
-    "net": "依每年淨額",
+    "net": "按當年盈虧",
     "received": "依至今收回",
-    "lastPaid": "依最近收款"
+    "lastPaid": "依最近收款",
+    "price": "按方案價格",
+    "paid": "按至今付出",
+    "profit": "按累計盈虧"
   }
 }

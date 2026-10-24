@@ -63,7 +63,9 @@
     "amount": "金額",
     "monthly": "月額",
     "start": "開始",
-    "next": "次回請求"
+    "next": "次回請求",
+    "planPrice": "プラン価格",
+    "inBase": "{ccy} 換算"
   },
   "notCounted": "集計対象外",
   "endedOn": "{date}に終了",

@@ -64,7 +64,9 @@
     "amount": "Valor",
     "monthly": "Mensal",
     "start": "Início",
-    "next": "Próxima cobrança"
+    "next": "Próxima cobrança",
+    "planPrice": "Preço do plano",
+    "inBase": "Em {ccy}"
   },
   "notCounted": "Não contabilizada",
   "endedOn": "Encerrada em {date}",

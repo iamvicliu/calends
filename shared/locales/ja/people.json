@@ -57,7 +57,8 @@
   },
   "field": {
     "person": "相手",
-    "syncFoot": "この人はほかに {count} か所あり、呼び名や連絡先の変更はそちらにも反映されます。"
+    "editProfile": "人物情報を編集",
+    "noContact": "連絡先なし"
   },
   "avatar": {
     "change": "アバターを変更",

@@ -7,7 +7,8 @@
     "custom": {
       "one": "A cada {count} mês",
       "other": "A cada {count} meses"
-    }
+    },
+    "once": "Único"
   },
   "cycle": {
     "lifetime": "Vitalício",

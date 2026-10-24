@@ -35,7 +35,6 @@
   "stoppedAt": "Dihentikan pada",
   "nextCharge": "Tagihan berikutnya",
   "note": "Catatan",
-  "diffLabel": "Diganti − ditagih",
   "table": {
     "cost": "Biaya saat itu",
     "total": "Total\n{count}",
@@ -72,16 +71,20 @@
     "owedSub": {
       "other": "{count} belum dibayar, dengan kurs tanggal tagihan"
     },
-    "allBack": "Semua sudah diganti",
-    "total": "Total ditalangi",
-    "totalSub": {
-      "other": "{count} tagihan\n{subs}"
-    },
     "subs": {
       "other": "{count} langganan"
     },
     "diffSub": "Selisih dari kurs dan biaya pada tagihan yang sudah diganti",
     "emptyTitle": "Belum ada talangan",
-    "emptyBody": "Buat atau edit langganan, pilih “Talangan” pada “Siapa yang memakai”, lalu masukkan untuk siapa."
-  }
+    "emptyBody": "Buat atau edit langganan, pilih “Talangan” pada “Siapa yang memakai”, lalu masukkan untuk siapa.",
+    "liveNext": "Aktif: {count}, tagihan berikutnya {date}",
+    "lastIn": "Terakhir diterima {date}",
+    "noneIn": "Belum ada yang diterima",
+    "diffAvg": "{count} dikembalikan, rata-rata {amount} per periode",
+    "perPeriod": "Rata-rata {amount} per periode",
+    "owedRate": "Kurs pada hari tagihan"
+  },
+  "paid": "Sudah ditalangi",
+  "periods": "{count} periode",
+  "lastIn": "Terakhir {date}"
 }

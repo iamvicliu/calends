@@ -109,3 +109,10 @@ test('短收费周期右侧也至少留出一个月，不丢今天线', () => {
   assert.ok(win.end >= '2026-11-01');
   assert.ok(addDays(win.end, -win.viewDays) <= '2026-07-01');
 });
+
+test('买断的车一期覆盖百年，时间轴只看到今天之后三个月', () => {
+  const lifetime = member({ id: 'once', paidUntil: '2126-03-09', billEvery: 1200 });
+  const win = carpoolTimeline({ ...sub([lifetime]), cycle: { unit: 'lifetime', every: 1 } }, today, 1200);
+  assert.ok(win.end <= addMonths(today, 3));
+  assert.ok(today < win.end);
+});

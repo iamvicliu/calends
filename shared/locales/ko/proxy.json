@@ -35,7 +35,6 @@
   "stoppedAt": "중지일",
   "nextCharge": "다음 결제",
   "note": "메모",
-  "diffLabel": "돌려받은 금액 − 결제 금액",
   "table": {
     "cost": "당시 비용",
     "total": "합계 {count}회",
@@ -72,16 +71,20 @@
     "owedSub": {
       "other": "미수 {count}건, 결제일 환율 기준"
     },
-    "allBack": "모두 돌려받음",
-    "total": "총 대신 결제액",
-    "totalSub": {
-      "other": "결제 {count}건\n{subs}"
-    },
     "subs": {
       "other": "구독 {count}개"
     },
     "diffSub": "돌려받은 결제의 환율 및 수수료 차이",
     "emptyTitle": "아직 대신 결제한 내역이 없습니다",
-    "emptyBody": "구독을 만들거나 편집하고 “사용자”에서 “대신 결제”를 선택한 다음 누구를 위한 결제인지 입력하세요."
-  }
+    "emptyBody": "구독을 만들거나 편집하고 “사용자”에서 “대신 결제”를 선택한 다음 누구를 위한 결제인지 입력하세요.",
+    "liveNext": "진행 중 {count}개, 다음 결제 {date}",
+    "lastIn": "최근 받은 날 {date}",
+    "noneIn": "아직 받은 금액 없음",
+    "diffAvg": "회수 {count}회, 회당 평균 {amount}",
+    "perPeriod": "회당 평균 {amount}",
+    "owedRate": "결제일 환율 기준"
+  },
+  "paid": "대신 낸 금액",
+  "periods": "{count}회",
+  "lastIn": "최근 {date}"
 }

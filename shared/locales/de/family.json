@@ -27,7 +27,6 @@
     },
     "fee": "Gebühr",
     "nextCollection": "Nächster Einzug",
-    "actions": "Aktionen",
     "status": "Zahlungsstatus",
     "period": "Aktueller Zeitraum",
     "range": "{from} – {until}",
@@ -103,7 +102,8 @@
       "custom": {
         "one": "Jeden Monat",
         "other": "Alle {count} Monate"
-      }
+      },
+      "once": "Einmalig"
     },
     "feeCcyAria": "Währung",
     "exempt": "Zahlt nicht",
@@ -225,7 +225,8 @@
       "custom": {
         "one": "{fee} jeden {count}. Monat",
         "other": "{fee} alle {count} Monate"
-      }
+      },
+      "once": "{fee} einmalig"
     },
     "collect": "Einfordern",
     "joinedGroup": "Abos, bei denen ich dabei bin",
@@ -234,7 +235,13 @@
     "maybeGroup": "Evtl. geteilt",
     "convert": "Als geteilt markieren",
     "dueOn": "Fällig {date}",
-    "nextDueOn": "Nächste Fälligkeit {date}"
+    "nextDueOn": "Nächste Fälligkeit {date}",
+    "members": "Mitglieder",
+    "incomeShort": "Einnahmen {amount}",
+    "status": "Status",
+    "countNote": "Mitglieder {members}, freie Plätze {free}",
+    "yearPnl": "Gewinn/Verlust dieses Jahr",
+    "totalPnl": "Gewinn/Verlust gesamt"
   },
   "convert": {
     "title": "„{name}“ teilen",
@@ -297,7 +304,9 @@
       "other": "{count} Tage überfällig"
     },
     "owe": "{amount} offen\nseit {date}",
-    "settled": "Beglichen\nnächste Fälligkeit {date}"
+    "settled": "Beglichen\nnächste Fälligkeit {date}",
+    "adjust": "Gebühr & Austritt",
+    "backCollect": "Zahlung erfassen"
   },
   "strip": {
     "yearNet": "Netto pro Jahr",
@@ -305,9 +314,9 @@
     "noneOwed": "Niemand im Rückstand",
     "since": "Seit {date}",
     "profit": "Gewinn / Verlust",
-    "annualApprox": "Etwa {amount} pro Jahr",
     "paid": "Gezahlt",
-    "received": "Erhalten"
+    "received": "Erhalten",
+    "thisYear": "Dieses Jahr {amount}"
   },
   "timeline": {
     "paid": "Bezahlt",
@@ -323,8 +332,11 @@
   },
   "sort": {
     "owed": "Offener Betrag",
-    "net": "Jährlicher Saldo",
+    "net": "Nach Jahresergebnis",
     "received": "Bisher erhalten",
-    "lastPaid": "Letzte Zahlung"
+    "lastPaid": "Letzte Zahlung",
+    "price": "Nach Tarifpreis",
+    "paid": "Nach bisher gezahlt",
+    "profit": "Nach Gesamtergebnis"
   }
 }

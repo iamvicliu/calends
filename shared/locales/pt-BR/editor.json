@@ -243,7 +243,11 @@
     "settledCcy": "Moeda do cartão",
     "settledAmount": "Valor no cartão",
     "blank": "Deixe em branco",
-    "freezeHint": "As cobranças desta fase hoje são estimadas pelo ciclo de cobrança. Ao salvar, as {amount} cobranças estimadas até hoje viram registros; a partir daí, os registros valem. As cobranças futuras não mudam."
+    "freezeHint": "As cobranças desta fase hoje são estimadas pelo ciclo de cobrança. Ao salvar, as {amount} cobranças estimadas até hoje viram registros; a partir daí, os registros valem. As cobranças futuras não mudam.",
+    "method": "Forma de pagamento",
+    "scopeOne": "Só esta cobrança",
+    "scopePhase": "Este plano ({count})",
+    "scope": "Aplicar a"
   },
   "timeline": {
     "home": "Voltar para hoje (ou clique duas vezes na linha do tempo)"

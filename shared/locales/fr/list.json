@@ -64,7 +64,9 @@
     "amount": "Montant",
     "monthly": "Mensuel",
     "start": "Début",
-    "next": "Prochain prélèvement"
+    "next": "Prochain prélèvement",
+    "planPrice": "Prix du forfait",
+    "inBase": "En {ccy}"
   },
   "notCounted": "Non compté",
   "endedOn": "Terminé le {date}",

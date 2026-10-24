@@ -64,7 +64,9 @@
     "amount": "Tutar",
     "monthly": "Aylık",
     "start": "Başlangıç",
-    "next": "Sonraki ödeme"
+    "next": "Sonraki ödeme",
+    "planPrice": "Plan fiyatı",
+    "inBase": "{ccy} karşılığı"
   },
   "notCounted": "Sayılmaz",
   "endedOn": "{date} sona erdi",

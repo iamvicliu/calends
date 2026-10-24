@@ -37,7 +37,6 @@
   "stoppedAt": "Beendet am",
   "nextCharge": "Nächste Abbuchung",
   "note": "Notiz",
-  "diffLabel": "Zurückgezahlt − abgebucht",
   "table": {
     "cost": "Kosten damals",
     "total": "Summe\n{count}",
@@ -75,18 +74,24 @@
       "one": "{count} offen, zu Kursen am Abbuchungstag",
       "other": "{count} offen, zu Kursen am Abbuchungstag"
     },
-    "allBack": "Alles zurückgezahlt",
-    "total": "Gesamt bezahlt",
-    "totalSub": {
-      "one": "{count} Abbuchung\n{subs}",
-      "other": "{count} Abbuchungen\n{subs}"
-    },
     "subs": {
       "one": "{count} Abo",
       "other": "{count} Abos"
     },
     "diffSub": "Differenz durch Wechselkurse und Gebühren bei zurückgezahlten Abbuchungen",
     "emptyTitle": "Noch nichts für andere bezahlt",
-    "emptyBody": "Erstelle oder bearbeite ein Abo, wähle unter „Wer es nutzt“ die Option „Ich zahle für“ und gib an, für wen."
-  }
+    "emptyBody": "Erstelle oder bearbeite ein Abo, wähle unter „Wer es nutzt“ die Option „Ich zahle für“ und gib an, für wen.",
+    "liveNext": "Aktiv: {count}, nächste Abbuchung {date}",
+    "lastIn": "Zuletzt erhalten {date}",
+    "noneIn": "Noch nichts erhalten",
+    "diffAvg": "{count} zurückgezahlt, im Schnitt {amount} je Zeitraum",
+    "perPeriod": "Im Schnitt {amount} je Zeitraum",
+    "owedRate": "Zum Kurs am Abbuchungstag"
+  },
+  "paid": "Ausgelegt",
+  "periods": {
+    "one": "{count} Zeitraum",
+    "other": "{count} Zeiträume"
+  },
+  "lastIn": "Zuletzt {date}"
 }

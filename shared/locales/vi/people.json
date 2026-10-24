@@ -57,7 +57,8 @@
   },
   "field": {
     "person": "Người",
-    "syncFoot": "Người này còn ở {count} chỗ khác — đổi tên hoặc liên hệ sẽ áp dụng luôn."
+    "editProfile": "Sửa thông tin người",
+    "noContact": "Chưa có liên hệ"
   },
   "avatar": {
     "change": "Đổi ảnh đại diện",

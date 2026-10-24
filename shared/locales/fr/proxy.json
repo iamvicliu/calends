@@ -37,7 +37,6 @@
   "stoppedAt": "Arrêté le",
   "nextCharge": "Prochain prélèvement",
   "note": "Note",
-  "diffLabel": "Remboursé − prélevé",
   "table": {
     "cost": "Coût à l’époque",
     "total": "Total\n{count}",
@@ -75,18 +74,24 @@
       "one": "{count} impayé, aux taux du jour du prélèvement",
       "other": "{count} impayés, aux taux du jour du prélèvement"
     },
-    "allBack": "Tout est remboursé",
-    "total": "Total payé",
-    "totalSub": {
-      "one": "{count} prélèvement\n{subs}",
-      "other": "{count} prélèvements\n{subs}"
-    },
     "subs": {
       "one": "{count} abonnement",
       "other": "{count} abonnements"
     },
     "diffSub": "Écart dû aux taux de change et aux frais sur les prélèvements remboursés",
     "emptyTitle": "Aucun paiement pour d’autres",
-    "emptyBody": "Créez ou modifiez un abonnement, choisissez « Je paie pour » dans « Qui l’utilise » et indiquez pour qui."
-  }
+    "emptyBody": "Créez ou modifiez un abonnement, choisissez « Je paie pour » dans « Qui l’utilise » et indiquez pour qui.",
+    "liveNext": "Actifs : {count}, prochain prélèvement {date}",
+    "lastIn": "Dernier reçu le {date}",
+    "noneIn": "Rien reçu pour l’instant",
+    "diffAvg": "{count} remboursés, {amount} en moyenne par période",
+    "perPeriod": "{amount} en moyenne par période",
+    "owedRate": "Au taux du jour du prélèvement"
+  },
+  "paid": "Avancé",
+  "periods": {
+    "one": "{count} période",
+    "other": "{count} périodes"
+  },
+  "lastIn": "Dernier {date}"
 }

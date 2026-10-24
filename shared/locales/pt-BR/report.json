@@ -140,7 +140,6 @@
     "lossHint": "Valor pago por um serviço encerrado antes do prazo e não reembolsado",
     "basis": "Todo o histórico\nMinha parte; economia pelo câmbio atual e perda não reembolsada pelo câmbio do dia do encerramento.",
     "details": "Detalhes das perdas não reembolsadas",
-    "empty": "Nenhuma perda não reembolsada.",
     "cancel": "Cancelamento antecipado voluntário"
   }
 }

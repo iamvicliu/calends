@@ -1,7 +1,18 @@
 {
   "copy": "Копировать",
   "copied": "Скопировано",
-  "overlap": { "title": "Действует параллельно", "previous": "Прежний план", "until": "До {date}\n{rel}" },
+  "note": {
+    "more": "Показать всё"
+  },
+  "renewal": {
+    "afterTrial": "Первое списание после пробного периода",
+    "elapsed": "Прошло {pct}% периода"
+  },
+  "overlap": {
+    "title": "Действует параллельно",
+    "previous": "Прежний план",
+    "until": "До {date}\n{rel}"
+  },
   "action": {
     "edit": "Изменить",
     "pause": "Приостановить",
@@ -11,7 +22,11 @@
     "share": "Поделиться",
     "copyImage": "Копировать как изображение"
   },
-  "toast": { "resumed": "Оплата возобновлена", "paused": "Приостановлено. Будущие списания не прогнозируются", "imageCopied": "Изображение скопировано" },
+  "toast": {
+    "resumed": "Оплата возобновлена",
+    "paused": "Приостановлено. Будущие списания не прогнозируются",
+    "imageCopied": "Изображение скопировано"
+  },
   "history": "История",
   "summary": "Сводка",
   "field": {
@@ -25,7 +40,10 @@
     "expiresHint": "Автопродление спишет оплату до этой даты",
     "endedOn": "Завершена",
     "trialEnd": "Пробный период до",
-    "region": "Регион"
+    "region": "Регион",
+    "period": "Период",
+    "present": "сейчас",
+    "progress": "Текущий период"
   },
   "up": {
     "planned": "Запланированное изменение\nне подтверждено",
@@ -39,7 +57,12 @@
     "confirm": "Подтвердить переход",
     "confirmedToast": "Переход подтверждён"
   },
-  "intro": { "title": "Вводное предложение", "price": "Вводная цена", "until": "Действует до", "then": "Затем" },
+  "intro": {
+    "title": "Вводное предложение",
+    "price": "Вводная цена",
+    "until": "Действует до",
+    "then": "Затем"
+  },
   "share": {
     "open": "Открыть складчину",
     "owner": "Совместная\nя организатор ({count}/{seats})",
@@ -65,25 +88,69 @@
   "charges": {
     "recentN": "Только последние {count}",
     "addShort": "Добавить",
-    "title": { "one": "Списания\n{count}", "few": "Списания\n{count}", "many": "Списания\n{count}", "other": "Списания\n{count}" },
-    "kind": { "refund": "Возврат", "adjust": "Корректировка", "failed": "Не прошло" },
+    "title": {
+      "one": "Списания\n{count}",
+      "few": "Списания\n{count}",
+      "many": "Списания\n{count}",
+      "other": "Списания\n{count}"
+    },
+    "kind": {
+      "refund": "Возврат",
+      "adjust": "Корректировка",
+      "failed": "Не прошло"
+    },
     "add": "Добавить запись (возврат, корректировка, неудачное списание, сумма по карте…)",
     "all": "Показать все ({count})"
   },
   "stats": {
     "spent": "Всего потрачено",
-    "count": { "one": "{count} списание", "few": "{count} списания", "many": "{count} списаний", "other": "{count} списания" },
+    "count": {
+      "one": "{count} списание",
+      "few": "{count} списания",
+      "many": "{count} списаний",
+      "other": "{count} списания"
+    },
     "owned": "Во владении",
     "subscribed": "Подписка",
     "yearsMonths": "{years} г. {months} мес.",
-    "years": { "one": "{count} год", "few": "{count} года", "many": "{count} лет", "other": "{count} года" },
-    "months": { "one": "{count} месяц", "few": "{count} месяца", "many": "{count} месяцев", "other": "{count} месяца" },
-    "days": { "one": "{count} день", "few": "{count} дня", "many": "{count} дней", "other": "{count} дня" },
-    "gaps": { "one": "Перерывов: {count}", "few": "Перерывов: {count}", "many": "Перерывов: {count}", "other": "Перерывов: {count}" },
+    "years": {
+      "one": "{count} год",
+      "few": "{count} года",
+      "many": "{count} лет",
+      "other": "{count} года"
+    },
+    "months": {
+      "one": "{count} месяц",
+      "few": "{count} месяца",
+      "many": "{count} месяцев",
+      "other": "{count} месяца"
+    },
+    "days": {
+      "one": "{count} день",
+      "few": "{count} дня",
+      "many": "{count} дней",
+      "other": "{count} дня"
+    },
+    "gaps": {
+      "one": "Перерывов: {count}",
+      "few": "Перерывов: {count}",
+      "many": "Перерывов: {count}",
+      "other": "Перерывов: {count}"
+    },
     "perMonth": "Фактически в месяц"
   },
-  "tab": { "charges": "Списания\n{count}", "details": "Подробности" },
-  "kpi": { "amortized": "В месяц владения", "noGaps": "Без перерывов", "startedToday": "С сегодняшнего дня", "expectedMonthly": "Ожидается в месяц" },
+  "tab": {
+    "charges": "Списания\n{count}",
+    "details": "Подробности"
+  },
+  "kpi": {
+    "noGaps": "Без перерывов",
+    "startedToday": "С сегодняшнего дня",
+    "expectedMonthly": "Ожидается в месяц",
+    "amortizedCost": "Распределённая стоимость",
+    "perMonthValue": "{amount}/мес.",
+    "perDay": "{amount} в день"
+  },
   "chart": {
     "title": "За списание\n{ccy}",
     "orig": "Исходная",
@@ -94,7 +161,14 @@
     "list": "Цена по первому курсу",
     "listOrig": "Цена",
     "origAmount": "Исходная сумма",
-    "few": "Для графика нужно хотя бы два списания"
+    "few": "Для графика нужно хотя бы два списания",
+    "bucket": {
+      "m1": "Каждый столбец — сумма за месяц",
+      "m3": "Каждый столбец — сумма за квартал",
+      "m12": "Каждый столбец — сумма за год"
+    },
+    "regular": "Обычная цена",
+    "saved": "Вводная скидка"
   },
   "ev": {
     "next": "Следующее списание",
@@ -118,8 +192,28 @@
       "many": "≈ {amount}\n{count} списаний",
       "other": "≈ {amount}\n{count} списания"
     },
-    "more": { "one": "ещё {count}", "few": "ещё {count}", "many": "ещё {count}", "other": "ещё {count}" },
+    "more": {
+      "one": "ещё {count}",
+      "few": "ещё {count}",
+      "many": "ещё {count}",
+      "other": "ещё {count}"
+    },
     "none": "В ближайшие 12 месяцев списаний нет"
   },
-  "stop": { "title": "Прекращение и возврат", "type": "Тип прекращения", "paidThrough": "Изначально оплачено до", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "Прекращение и возврат",
+    "type": "Тип прекращения",
+    "paidThrough": "Изначально оплачено до",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "Списано",
+    "planned": "Ожидается"
+  },
+  "period": {
+    "paid": "Текущий период",
+    "trial": "Пробный период",
+    "bonus": "Бонусный период",
+    "since": "С {date}"
+  }
 }

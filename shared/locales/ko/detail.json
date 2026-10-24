@@ -1,8 +1,27 @@
 {
   "copy": "복사",
   "copied": "복사됨",
-  "overlap": { "title": "함께 진행 중", "previous": "기존 플랜", "until": "{date}까지\n{rel}" },
-  "action": { "edit": "편집", "pause": "일시 정지", "resume": "재개", "manage": "관리", "website": "웹사이트", "share": "공유", "copyImage": "이미지로 복사" },
+  "note": {
+    "more": "전체 보기"
+  },
+  "renewal": {
+    "afterTrial": "체험 종료 후 첫 결제",
+    "elapsed": "이번 기간 {pct}% 경과"
+  },
+  "overlap": {
+    "title": "함께 진행 중",
+    "previous": "기존 플랜",
+    "until": "{date}까지\n{rel}"
+  },
+  "action": {
+    "edit": "편집",
+    "pause": "일시 정지",
+    "resume": "재개",
+    "manage": "관리",
+    "website": "웹사이트",
+    "share": "공유",
+    "copyImage": "이미지로 복사"
+  },
   "toast": {
     "resumed": "결제를 재개했습니다",
     "paused": "일시 정지했습니다. 앞으로의 결제는 예측에 포함되지 않습니다",
@@ -21,16 +40,29 @@
     "expiresHint": "이 날짜 전에 자동 갱신 결제가 이루어집니다",
     "endedOn": "종료일",
     "trialEnd": "체험 종료",
-    "region": "지역"
+    "region": "지역",
+    "period": "구독 기간",
+    "present": "현재",
+    "progress": "이번 주기"
   },
-  "up": { "planned": "변경 예정\n미확정", "starting": "곧 시작", "changing": "예정된 변경", "effective": "적용일" },
+  "up": {
+    "planned": "변경 예정\n미확정",
+    "starting": "곧 시작",
+    "changing": "예정된 변경",
+    "effective": "적용일"
+  },
   "plan": {
     "drop": "전환하지 않음",
     "droppedToast": "전환하지 않습니다. {date} 이후 종료됩니다",
     "confirm": "전환 확정",
     "confirmedToast": "전환을 확정했습니다"
   },
-  "intro": { "title": "프로모션", "price": "프로모션 가격", "until": "프로모션 종료", "then": "이후" },
+  "intro": {
+    "title": "프로모션",
+    "price": "프로모션 가격",
+    "until": "프로모션 종료",
+    "then": "이후"
+  },
   "share": {
     "open": "공유 보기",
     "owner": "공유\n내가 주최({count}/{seats})",
@@ -44,32 +76,60 @@
     "owed": "{amount} 미납",
     "settled": "정산 완료",
     "me": "나",
-    "seatsLeft": { "other": "{seats}자리 중 {count}자리 남음" },
+    "seatsLeft": {
+      "other": "{seats}자리 중 {count}자리 남음"
+    },
     "seatsFull": "{seats}자리가 모두 찼어요",
     "surplus": "부담 없음, {amount} 더 받음"
   },
   "charges": {
     "recentN": "최근 {count}건만",
     "addShort": "기록",
-    "title": { "other": "결제\n{count}" },
-    "kind": { "refund": "환불", "adjust": "조정", "failed": "실패" },
+    "title": {
+      "other": "결제\n{count}"
+    },
+    "kind": {
+      "refund": "환불",
+      "adjust": "조정",
+      "failed": "실패"
+    },
     "add": "기록 추가(환불, 조정, 결제 실패, 카드 금액 등)",
     "all": "{count}건 모두 보기"
   },
   "stats": {
     "spent": "총 지출",
-    "count": { "other": "결제 {count}건" },
+    "count": {
+      "other": "결제 {count}건"
+    },
     "owned": "보유 기간",
     "subscribed": "구독 기간",
     "yearsMonths": "{years}년 {months}개월",
-    "years": { "other": "{count}년" },
-    "months": { "other": "{count}개월" },
-    "days": { "other": "{count}일" },
-    "gaps": { "other": "{count}회 중단" },
+    "years": {
+      "other": "{count}년"
+    },
+    "months": {
+      "other": "{count}개월"
+    },
+    "days": {
+      "other": "{count}일"
+    },
+    "gaps": {
+      "other": "{count}회 중단"
+    },
     "perMonth": "실제 월평균"
   },
-  "tab": { "charges": "결제 내역\n{count}", "details": "상세" },
-  "kpi": { "amortized": "월 환산", "noGaps": "중단 없음", "startedToday": "오늘 시작", "expectedMonthly": "예상 월 비용" },
+  "tab": {
+    "charges": "결제 내역\n{count}",
+    "details": "상세"
+  },
+  "kpi": {
+    "noGaps": "중단 없음",
+    "startedToday": "오늘 시작",
+    "expectedMonthly": "예상 월 비용",
+    "amortizedCost": "분할 비용",
+    "perMonthValue": "{amount}/월",
+    "perDay": "하루 {amount}"
+  },
   "chart": {
     "title": "회당 결제\n{ccy}",
     "orig": "원래 통화",
@@ -80,7 +140,14 @@
     "list": "정가(첫 결제 환율)",
     "listOrig": "정가",
     "origAmount": "원래 통화 금액",
-    "few": "결제가 2회 이상이어야 추이를 볼 수 있어요"
+    "few": "결제가 2회 이상이어야 추이를 볼 수 있어요",
+    "bucket": {
+      "m1": "막대 하나가 한 달 합계",
+      "m3": "막대 하나가 분기 합계",
+      "m12": "막대 하나가 1년 합계"
+    },
+    "regular": "정가",
+    "saved": "첫 기간 할인"
   },
   "ev": {
     "next": "다음 결제",
@@ -98,9 +165,28 @@
   },
   "upcoming": {
     "title": "앞으로 12개월",
-    "total": { "other": "약 {amount}\n{count}건" },
-    "more": { "other": "{count}건 더" },
+    "total": {
+      "other": "약 {amount}\n{count}건"
+    },
+    "more": {
+      "other": "{count}건 더"
+    },
     "none": "앞으로 12개월 동안 결제가 없어요"
   },
-  "stop": { "title": "종료 및 환불", "type": "종료 유형", "paidThrough": "원래 결제된 이용 종료일", "loss": "−{money} ({days})" }
+  "stop": {
+    "title": "종료 및 환불",
+    "type": "종료 유형",
+    "paidThrough": "원래 결제된 이용 종료일",
+    "loss": "−{money} ({days})"
+  },
+  "timeline": {
+    "paid": "결제됨",
+    "planned": "예정"
+  },
+  "period": {
+    "paid": "이번 주기",
+    "trial": "체험 기간",
+    "bonus": "보너스 기간",
+    "since": "{date}부터"
+  }
 }
