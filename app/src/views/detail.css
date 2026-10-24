@@ -728,7 +728,7 @@
 .dt-region img {
   width: 16px;
   height: 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   object-fit: cover;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }

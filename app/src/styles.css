@@ -551,7 +551,7 @@ a {
 .region-tag .flag-img {
   width: 14px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }
 .pay {
@@ -4194,7 +4194,7 @@ button.h-price-row:focus-visible {
 .sc-region .flag-img {
   width: 18px;
   height: 13px;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }
 .sc-meta {
@@ -6060,14 +6060,14 @@ a.car-toggle {
   flex-shrink: 0;
   color: var(--accent);
 }
-/* 国旗图是 4:3：框也按 4:3，圆角只用 2px，不把旗面四角裁掉 */
+/* 国旗图是 4:3：框也按 4:3；全站国旗一律直角，不加圆角裁掉旗面四角 */
 .cp-flag {
   display: grid;
   place-items: center;
   flex-shrink: 0;
   width: 20px;
   height: 15px;
-  border-radius: 2px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }
@@ -6935,7 +6935,7 @@ a.car-toggle {
 .pk-flag {
   width: 20px;
   height: 15px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   object-fit: cover;
   box-shadow: 0 0 0 var(--hairline) var(--line);
 }
@@ -9116,7 +9116,7 @@ a.car-toggle {
   display: inline-block;
   width: 16px;
   height: 12px;
-  border-radius: 2px;
+  border-radius: 0;
   object-fit: cover;
 
   box-shadow: 0 0 0 var(--hairline) var(--line);
@@ -9124,14 +9124,14 @@ a.car-toggle {
 .ac-flag .flag-img {
   width: 26px;
   height: 19px;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
 }
 img.mm-flag {
   width: max(11px, calc(var(--s) * 0.42));
   height: auto;
-  border-radius: 2px;
+  border-radius: 0;
   filter: none;
-  /* 白色描边把角标和图标分开，小国旗只用 2px 圆角，不被裁掉 */
+  /* 白色描边把角标和图标分开；国旗一律直角，不被裁掉 */
   box-shadow: 0 0 0 1.5px var(--white-a12);
 }
 .pay img.mm-flag {
