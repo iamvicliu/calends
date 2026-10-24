@@ -38,12 +38,12 @@ import { ScopeReport } from '../components/ScopeReport.tsx';
 import { useTextSearch } from '../use-search.ts';
 
 type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'terminated' | 'lifetime' | 'all';
-type Sort = 'next' | 'cost' | 'name' | 'category' | 'start';
+type Sort = 'next' | 'cost' | 'name' | 'category' | 'method' | 'amount' | 'start';
 type Dir = 'asc' | 'desc';
 /** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、分类按设置里的顺序、最新开始在前 */
-const DEFAULT_DIR: Record<Sort, Dir> = { next: 'asc', cost: 'desc', name: 'asc', category: 'asc', start: 'desc' };
+const DEFAULT_DIR: Record<Sort, Dir> = { next: 'asc', cost: 'desc', name: 'asc', category: 'asc', method: 'asc', amount: 'desc', start: 'desc' };
 type View = 'grid' | 'list' | 'gantt';
-const isSort = (v: string): v is Sort => ['next', 'cost', 'name', 'category', 'start'].includes(v);
+const isSort = (v: string): v is Sort => ['next', 'cost', 'name', 'category', 'method', 'amount', 'start'].includes(v);
 const isDir = (v: string): v is Dir => v === 'asc' || v === 'desc';
 const isView = (v: string): v is View => ['grid', 'list', 'gantt'].includes(v);
 
@@ -160,12 +160,29 @@ export function List({
     const i = catOrder.indexOf(s.category);
     return i < 0 ? catOrder.length : i;
   };
+  // 金额列显示的是「当前阶段、下次扣款日的价格」折算后的值，排序也用同一个数
+  const amountOf = (s: Subscription) => {
+    const cur = currentPhase(s, today);
+    const n = nextCharge(s, addDays(today, 1));
+    const price = n && !(cur.end && n >= cur.end) ? priceAt(cur, n) : cur.price;
+    return toBase(state, price, cur.currency);
+  };
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
     if (sort === 'name') return a.name.localeCompare(b.name, locale());
     // 分类按设置里的顺序，同类里最贵的在前
     if (sort === 'category') return catRank(a) - catRank(b) || mo(b) - mo(a) || a.name.localeCompare(b.name, locale());
     if (sort === 'cost') return mo(a) - mo(b) || toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
+    // 支付方式按设置里的顺序，未指定的排最后
+    if (sort === 'method') {
+      const rank = (s: Subscription) => {
+        const i = state.methods.findIndex((m) => m.id === payOf(s));
+        return i < 0 ? state.methods.length : i;
+      };
+      return rank(a) - rank(b) || a.name.localeCompare(b.name, locale());
+    }
+    // 金额按列里显示的那个数（当前阶段、下次扣款日的价格）折算成本位币，跨币种才比得准
+    if (sort === 'amount') return amountOf(a) - amountOf(b);
     if (sort === 'start') return a.start.localeCompare(b.start);
     return (nextCharge(a, addDays(today, 1)) ?? '').localeCompare(nextCharge(b, addDays(today, 1)) ?? '');
   };
@@ -228,19 +245,23 @@ export function List({
             ['gantt', t('list.view.gantt')],
           ]}
         />
-        <SortControl
-          value={sort}
-          dir={dir}
-          onSort={chooseSort}
-          onDir={setDir}
-          options={[
-            { value: 'next', label: t('list.sort.next') },
-            { value: 'cost', label: t('list.sort.cost') },
-            { value: 'name', label: t('list.sort.name') },
-            { value: 'category', label: t('list.sort.category') },
-            { value: 'start', label: t('list.sort.start') },
-          ]}
-        />
+        {view !== 'list' && (
+          <SortControl
+            value={sort}
+            dir={dir}
+            onSort={chooseSort}
+            onDir={setDir}
+            options={[
+              { value: 'next', label: t('list.sort.next') },
+              { value: 'cost', label: t('list.sort.cost') },
+              { value: 'amount', label: t('list.sort.amount') },
+              { value: 'name', label: t('list.sort.name') },
+              { value: 'category', label: t('list.sort.category') },
+              { value: 'method', label: t('list.sort.method') },
+              { value: 'start', label: t('list.sort.start') },
+            ]}
+          />
+        )}
         {!state.readonly && (
           <IconButton className="accent d-only page-add" onClick={onAdd} aria-label={t('list.add')}>
             <Icon name="plus" />
@@ -380,28 +401,25 @@ export function List({
                 {(
                   [
                     ['name', t('list.col.name')],
-                    [null, t('list.col.category')],
-                    [null, t('list.col.method')],
-                    [null, t('list.col.amount')],
+                    ['category', t('list.col.category')],
+                    ['method', t('list.col.method')],
+                    ['amount', t('list.col.amount')],
                     ['cost', t('list.col.monthly')],
                     ['start', t('list.col.start')],
                     ['next', t('list.col.next')],
-                  ] as Array<[Sort | null, string]>
-                ).map(([k, l]) =>
-                  k ? (
-                    <button
-                      key={l}
-                      className={`lt-sort ${sort === k ? 'on' : ''}`}
-                      onClick={() => toggleSort(k)}
-                      aria-sort={sort === k ? (dir === 'asc' ? 'ascending' : 'descending') : undefined}
-                    >
-                      {l}
-                      {sort === k && <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} size={12} />}
-                    </button>
-                  ) : (
-                    <span key={l}>{l}</span>
-                  ),
-                )}
+                  ] as Array<[Sort, string]>
+                ).map(([k, l]) => (
+                  <button
+                    key={k}
+                    className={`lt-sort ${sort === k ? 'on' : ''}`}
+                    onClick={() => toggleSort(k)}
+                    aria-sort={sort === k ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    title={t(`list.sort.${k}`)}
+                  >
+                    {l}
+                    <Icon name={sort === k ? (dir === 'asc' ? 'sort-asc' : 'sort-desc') : 'updown'} size={12} />
+                  </button>
+                ))}
               </div>
               {rows.map((s) => {
                 const st = effectiveStatus(s, today);

@@ -33,8 +33,10 @@
     "label": "Sort",
     "next": "Next charge",
     "cost": "Monthly cost",
+    "amount": "Amount",
     "name": "Name",
     "category": "Category",
+    "method": "Payment method",
     "start": "Start date",
     "asc": "Ascending",
     "desc": "Descending"

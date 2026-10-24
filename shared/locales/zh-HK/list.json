@@ -30,8 +30,10 @@
     "label": "排序",
     "next": "依下次扣款",
     "cost": "依月成本",
+    "amount": "按金額",
     "name": "依名稱",
     "category": "依分類",
+    "method": "按支付方式",
     "start": "依開始時間",
     "asc": "遞增",
     "desc": "遞減"

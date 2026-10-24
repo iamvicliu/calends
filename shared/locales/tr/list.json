@@ -33,8 +33,10 @@
     "label": "Sırala",
     "next": "Sonraki ödeme",
     "cost": "Aylık maliyet",
+    "amount": "Tutar",
     "name": "Ad",
     "category": "Kategori",
+    "method": "Ödeme yöntemi",
     "start": "Başlangıç tarihi",
     "asc": "Artan",
     "desc": "Azalan"
