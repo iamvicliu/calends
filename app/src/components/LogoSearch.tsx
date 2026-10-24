@@ -72,22 +72,25 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
       {open && (
         <div className="logo-panel">
           <div className="logo-head">
-            <form
-              className="logo-q"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (q.trim().length >= 2) run(q);
-              }}
-            >
+            {/* 用 div 而不是 form：编辑器整个是一个表单，HTML 不允许 form 嵌套，
+                内层 form 会被浏览器忽略，回车就变成提交外层表单（保存）而不是搜索 */}
+            <div className="logo-q">
               <Icon name="search" size={15} />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  // 拦住冒泡，避免触发编辑器的提交
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (q.trim().length >= 2) run(q);
+                }}
                 placeholder={t('editor.logoSearch.placeholder')}
                 aria-label={t('editor.logoSearch.placeholder')}
                 autoFocus
               />
-            </form>
+            </div>
             <IconButton className="logo-close" aria-label={t('ui.close')} title={t('ui.close')} onClick={() => setOpen(false)}>
               <Icon name="x" size={15} />
             </IconButton>

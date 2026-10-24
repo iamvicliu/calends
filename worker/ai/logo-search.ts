@@ -407,26 +407,44 @@ async function searchWebImages(q: string): Promise<LogoHit[]> {
     if (!res.ok) return [];
     const html = await res.text();
 
-    // 每条结果的 JSON 里：murl 原图、turl 缩略图、t 标题。按段拆开逐个读，避免三个字段错位配对。
+    // 从每条结果的详情链接里取 mediaurl / expw / exph：三个字段同在一个 URL 里，
+    // 比按 murl 分段去猜相邻关系可靠。尺寸用来挡掉超大图和超小图——
+    // 图标是并排显示的小图，几 MB 的壁纸既拖慢加载也没有意义。
     const hits: Array<LogoHit & { rank: number }> = [];
     const seen = new Set<string>();
-    for (const block of html.split('murl').slice(1)) {
-      const image = block.match(/(?:&quot;|\\)?\s*:\s*(?:&quot;)?(https?:\/\/[^"&\\]+)/)?.[1];
-      const thumb = block.match(/turl(?:&quot;|\\)?\s*:\s*(?:&quot;)?(https?:\/\/[^"&\\]+)/)?.[1];
-      const title = block.match(/&quot;t&quot;:&quot;([^&]{0,80})/)?.[1] ?? '';
-      if (!image || !image.startsWith('https://') || seen.has(image)) continue;
-      // 只要图片文件：Bing 偶尔把网页地址混进 murl
+    const DETAIL = /href="(\/images\/search\?view=detailV2[^"]+)"/g;
+    for (const m of html.matchAll(DETAIL)) {
+      const link = decodeEntities(m[1]);
+      const media = link.match(/mediaurl=([^&]+)/)?.[1];
+      if (!media) continue;
+      let image: string;
+      try {
+        image = decodeURIComponent(media);
+      } catch {
+        continue;
+      }
+      if (!image.startsWith('https://') || seen.has(image)) continue;
+      // 只要图片文件：Bing 偶尔把网页地址混进 mediaurl
       if (!IMAGE_EXT.test(image)) continue;
-      // 标题里带「测评 / 教程 / 优惠码」这类的是文章配图，不是图标
-      if (/测评|教程|优惠码|购买|怎么样|官网入口|攻略|百科/i.test(title)) continue;
+      const w = Number(link.match(/expw=(\d+)/)?.[1] ?? 0);
+      const h = Number(link.match(/exph=(\d+)/)?.[1] ?? 0);
+      // 没有尺寸信息的保留，有就按尺寸筛
+      if (w && h) {
+        const max = Math.max(w, h);
+        const min = Math.min(w, h);
+        if (max < 64 || max > 1024) continue; // 太小放大就糊；太大不是图标
+        if (max / min > 3) continue; // 太扁，是横幅
+      }
       seen.add(image);
       // 文件名或标题里带 logo/icon 的更像图标，排前面；带活动、价格、尺寸后缀的排后面
       const file = image.split('/').pop() ?? '';
       let rank = 0;
-      if (/logo|icon/i.test(file) || /logo|图标/i.test(title)) rank += 10;
-      if (/活动|优惠|折|元|套餐|推荐|\d+x\d+/.test(title + file)) rank -= 10;
+      if (/logo|icon/i.test(file)) rank += 10;
+      if (/活动|优惠|折|元|套餐|推荐|\d+x\d+/.test(file)) rank -= 10;
       if (/\.svg$/i.test(image)) rank += 5;
-      hits.push({ url: image, thumb: thumb ?? image, source: 'web', name: title || q, rank });
+      // 越方越像图标
+      if (w && h && Math.abs(w - h) / Math.max(w, h) < 0.15) rank += 5;
+      hits.push({ url: image, thumb: image, source: 'web', name: q, rank, ...(w && h ? { width: w, height: h } : {}) });
     }
     return hits
       .sort((a, b) => b.rank - a.rank)
