@@ -4,7 +4,8 @@
 import { randomToken, sha256 } from '../auth.ts';
 import type { Env } from '../env.ts';
 import { getKv, getSettings, putKv } from '../store.ts';
-import { TOOLS, toolTitle, state, connectionInfo, type ToolCtx } from './mcp-tools.ts';
+import { TOOLS, toolTitle, connectionInfo, type ToolCtx } from './mcp-tools.ts';
+import { todayIn } from '../../shared/billing.ts';
 import { t } from '../../shared/i18n.ts';
 
 export interface McpToken {
@@ -79,12 +80,12 @@ async function handle(msg: Rpc, env: Env, token: McpToken): Promise<unknown | un
     case 'initialize': {
       const asked = String(msg.params?.protocolVersion ?? PROTOCOL);
       const ctx: ToolCtx = { env, access: { client: 'mcp', scope: token.scope } };
-      const { st, today } = await state(ctx);
+      const settings = await getSettings(env);
       return ok(msg.id, {
         protocolVersion: SUPPORTED.includes(asked) ? asked : PROTOCOL,
         capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'calends', title: t('mcp.serverTitle'), version: '1.0.0' },
-        instructions: `${t('mcp.instructions')}\n${JSON.stringify(connectionInfo(ctx, st, today))}`,
+        instructions: `${t('mcp.instructions')}\n${JSON.stringify(connectionInfo(ctx, settings, todayIn(settings.timezone)))}`,
       });
     }
     case 'ping':

@@ -240,7 +240,7 @@ export const ledgerTools: Tool[] = [
     inputSchema: obj({}),
     async run(_a, ctx) {
       const { st, today } = await state(ctx);
-      return { ...safeSettings(st), connection: connectionInfo(ctx, st, today) };
+      return { ...safeSettings(st), connection: connectionInfo(ctx, st.settings, today) };
     },
   },
   {

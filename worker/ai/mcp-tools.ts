@@ -176,21 +176,22 @@ export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
 const candidates = (xs: Array<{ name: string; id: string }>) => xs.map((x) => t('mcp.item', { name: x.name, id: x.id })).join(t('mcp.sep'));
 
 /** Connection metadata is private, credential-free and reflects the actual caller's permissions. */
-export function connectionInfo(ctx: ToolCtx, st: AppState, today: string) {
+/** 连接信息只用到设置：握手时不必读整份账本 */
+export function connectionInfo(ctx: ToolCtx, settings: AppState['settings'], today: string) {
   const scope = ctx.access?.scope ?? 'read';
   let site: string | null = null;
   try {
-    const url = new URL(ctx.env.SITE_URL || st.settings.siteUrl || '');
+    const url = new URL(ctx.env.SITE_URL || settings.siteUrl || '');
     site = url.origin + url.pathname;
   } catch {
     /* Unconfigured deployment. */
   }
   return {
-    ledger: st.settings.displayName || 'Calends',
+    ledger: settings.displayName || 'Calends',
     site_url: site,
-    timezone: st.settings.timezone,
+    timezone: settings.timezone,
     today,
-    base_currency: st.settings.baseCurrency,
+    base_currency: settings.baseCurrency,
     client: ctx.access?.client ?? 'unknown',
     scope,
     writes_require_confirmation: ctx.access?.client === 'assistant',
