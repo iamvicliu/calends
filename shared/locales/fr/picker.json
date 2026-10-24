@@ -6,7 +6,14 @@
   "date": {
     "placeholder": "Choisir une date",
     "prev": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "open": "Ouvrir le calendrier",
+    "year": "Année",
+    "month": "Mois",
+    "invalid": "Saisissez une date valide",
+    "range": "La date est hors de la plage autorisée",
+    "type": "Saisir la date",
+    "confirm": "Confirmer"
   },
   "method": {
     "label": "Moyen de paiement",

@@ -3718,6 +3718,11 @@ button.h-price-row:focus-visible {
 /* ================================================================
    日期选择器
    ================================================================ */
+.dp {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+}
 .dp-btn {
   display: inline-flex;
   align-items: center;
@@ -3733,10 +3738,99 @@ button.h-price-row:focus-visible {
   white-space: nowrap;
   transition: background var(--duration) var(--ease);
 }
+.dp-btn:focus-within {
+  background: var(--card);
+  box-shadow: inset 0 0 0 var(--hairline) var(--focus-ring);
+}
 .dp-btn .i {
   width: 15px;
   height: 15px;
   color: var(--label-2);
+  flex-shrink: 0;
+}
+.dp .dp-btn {
+  cursor: pointer;
+}
+.dp .dp-btn.editing {
+  cursor: text;
+  gap: 4px;
+  padding: 0 4px 0 10px;
+  width: 153px;
+}
+.dp .dp-btn.editing input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+}
+.dp .dp-val {
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+.dp .dp-btn {
+  max-width: 100%;
+}
+.dp .dp-edit,
+.dp .dp-commit {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  box-shadow: none;
+  color: var(--label-2);
+}
+.dp .dp-edit .i,
+.dp .dp-commit .i {
+  width: 13px;
+  height: 13px;
+}
+.dp .dp-edit:hover,
+.dp .dp-commit:hover {
+  background: var(--fill);
+  color: var(--label);
+}
+.dp .dp-btn input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+  cursor: text;
+  font-variant-numeric: tabular-nums;
+}
+.dp-btn input::placeholder {
+  color: var(--label-3);
+}
+.dp-open {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  box-shadow: none;
+}
+.dp-open .i {
+  width: 13px;
+  height: 13px;
+}
+.dp-btn.invalid {
+  box-shadow: inset 0 0 0 var(--hairline) var(--red);
+}
+.dp-error {
+  max-width: 220px;
+  padding: 3px 2px 0;
+  color: var(--red);
+  font-size: var(--fs-1);
+  line-height: 1.35;
 }
 .dp-btn:hover {
   background: var(--fill);
@@ -3797,8 +3891,95 @@ button.h-price-row:focus-visible {
 .dp-head {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   margin-bottom: 8px;
+}
+.dp-step {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  flex: 1 1 0;
+}
+.dp-step > .dp-select {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.dp-step:first-child > .dp-select {
+  width: 74px;
+}
+.dp-month-select > .dp-select {
+  width: 96px;
+}
+/* 头部改用全站统一 Picker 后，年月两个按钮等宽 */
+.dp-step > .pk-btn {
+  width: 88px;
+  min-width: 0;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: var(--ctl-h-md);
+  font-size: var(--fs-2);
+  font-weight: 600;
+}
+.dp-step > .pk-btn .pk-ico {
+  display: none;
+}
+.dp-select {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+.dp-select:first-child {
+  flex: 1;
+}
+.dp-select select {
+  width: 100%;
+  height: var(--ctl-h-md);
+  padding: 0 20px 0 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--fill-2);
+  color: var(--label);
+  font: inherit;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding-left: 8px;
+  outline: 0;
+  appearance: none;
+  cursor: pointer;
+}
+.dp-select::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-right: var(--hairline) solid var(--label-2);
+  border-bottom: var(--hairline) solid var(--label-2);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.dp-select select:focus-visible {
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.dp-month-select {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.dp-nav-sm {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+}
+.dp-nav-sm .i {
+  width: 12px;
+  height: 12px;
 }
 .dp-title {
   height: var(--ctl-h-md);

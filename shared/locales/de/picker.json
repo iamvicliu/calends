@@ -6,7 +6,14 @@
   "date": {
     "placeholder": "Datum wählen",
     "prev": "Zurück",
-    "next": "Weiter"
+    "next": "Weiter",
+    "open": "Kalender öffnen",
+    "year": "Jahr",
+    "month": "Monat",
+    "invalid": "Bitte ein gültiges Datum eingeben",
+    "range": "Datum liegt außerhalb des erlaubten Bereichs",
+    "type": "Datum eingeben",
+    "confirm": "Bestätigen"
   },
   "method": {
     "label": "Zahlungsmethode",

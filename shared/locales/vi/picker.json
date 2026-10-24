@@ -3,9 +3,28 @@
   "noMatch": "Không có kết quả phù hợp",
   "common": "Thường dùng",
   "currency": "Tiền tệ",
-  "date": { "placeholder": "Chọn ngày", "prev": "Trước", "next": "Sau" },
-  "method": { "label": "Phương thức thanh toán", "none": "Không có" },
-  "region": { "label": "Khu vực", "any": "Bất kỳ", "none": "Mọi khu vực", "all": "Tất cả khu vực" },
+  "date": {
+    "placeholder": "Chọn ngày",
+    "prev": "Trước",
+    "next": "Sau",
+    "open": "Mở lịch",
+    "year": "Năm",
+    "month": "Tháng",
+    "invalid": "Nhập ngày hợp lệ",
+    "range": "Ngày nằm ngoài phạm vi cho phép",
+    "type": "Nhập ngày",
+    "confirm": "Xác nhận"
+  },
+  "method": {
+    "label": "Phương thức thanh toán",
+    "none": "Không có"
+  },
+  "region": {
+    "label": "Khu vực",
+    "any": "Bất kỳ",
+    "none": "Mọi khu vực",
+    "all": "Tất cả khu vực"
+  },
   "ccy": {
     "label": "Tiền tệ",
     "switch": "Đổi tiền tệ hiển thị",

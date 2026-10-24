@@ -3,9 +3,28 @@
   "noMatch": "Tidak ada yang cocok",
   "common": "Sering dipakai",
   "currency": "Mata uang",
-  "date": { "placeholder": "Pilih tanggal", "prev": "Sebelumnya", "next": "Berikutnya" },
-  "method": { "label": "Metode pembayaran", "none": "Tidak ada" },
-  "region": { "label": "Wilayah", "any": "Semua", "none": "Semua wilayah", "all": "Semua wilayah" },
+  "date": {
+    "placeholder": "Pilih tanggal",
+    "prev": "Sebelumnya",
+    "next": "Berikutnya",
+    "open": "Buka kalender",
+    "year": "Tahun",
+    "month": "Bulan",
+    "invalid": "Masukkan tanggal yang valid",
+    "range": "Tanggal di luar rentang yang diizinkan",
+    "type": "Ketik tanggal",
+    "confirm": "Konfirmasi"
+  },
+  "method": {
+    "label": "Metode pembayaran",
+    "none": "Tidak ada"
+  },
+  "region": {
+    "label": "Wilayah",
+    "any": "Semua",
+    "none": "Semua wilayah",
+    "all": "Semua wilayah"
+  },
   "ccy": {
     "label": "Mata uang",
     "switch": "Ganti mata uang tampilan",

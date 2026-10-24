@@ -3,9 +3,28 @@
   "noMatch": "Sin coincidencias",
   "common": "Más usados",
   "currency": "Moneda",
-  "date": { "placeholder": "Elige una fecha", "prev": "Anterior", "next": "Siguiente" },
-  "method": { "label": "Método de pago", "none": "Ninguno" },
-  "region": { "label": "Región", "any": "Cualquiera", "none": "Cualquier región", "all": "Todas las regiones" },
+  "date": {
+    "placeholder": "Elige una fecha",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "open": "Abrir calendario",
+    "year": "Año",
+    "month": "Mes",
+    "invalid": "Introduce una fecha válida",
+    "range": "La fecha está fuera del rango permitido",
+    "type": "Escribir la fecha",
+    "confirm": "Confirmar"
+  },
+  "method": {
+    "label": "Método de pago",
+    "none": "Ninguno"
+  },
+  "region": {
+    "label": "Región",
+    "any": "Cualquiera",
+    "none": "Cualquier región",
+    "all": "Todas las regiones"
+  },
   "ccy": {
     "label": "Moneda",
     "switch": "Cambiar la moneda de visualización",
