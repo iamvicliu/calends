@@ -14,6 +14,7 @@ import {
   diffDays,
   effectiveStatus,
   memberDues,
+  type MemberDue,
   nextCharge,
   memberBillMonths,
   memberCollection,
@@ -103,15 +104,20 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   // 筛选记在服务端：切到别的页面再回来、换台设备都还是上次选的
   const [filter, setFilter] = usePref<CarFilter>('car-filter', 'live', (v): v is CarFilter => (CAR_FILTERS as readonly string[]).includes(v));
   const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
-  const owes = (s: Subscription) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).some((d) => d.periodsOwed > 0);
+  const all = [...owned, ...ended];
+  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  // 每辆车的成员待收、账、下次扣款只算一次：筛选、排序、统计、卡片与表格共用
+  const duesBy = new Map(all.map((s) => [s.id, memberDues(s, today, collect, state)]));
+  const duesOf = (s: Subscription) => duesBy.get(s.id) ?? memberDues(s, today, collect, state);
+  const owes = (s: Subscription) => duesOf(s).some((d) => d.periodsOwed > 0);
   const groups: Record<CarFilter, Subscription[]> = {
-    all: [...owned, ...ended],
+    all,
     live: owned,
-    owe: [...owned, ...ended].filter(owes),
+    owe: all.filter(owes),
     settled: owned.filter((s) => !owes(s)),
     ended,
   };
-  const books = new Map([...owned, ...ended].map((s) => [s.id, carLedger(state, s, today)]));
+  const books = new Map(all.map((s) => [s.id, carLedger(state, s, today)]));
   // 排序与方向存在服务端；已停止的车始终排在最后。默认待收多的在前
   // 默认按状态：待收多的在前，已结清、已停止在后；表头不为默认排序标箭头
   const [sort, setSort] = usePref<CarSort>('car-sort', 'owed', isCarSort);
@@ -129,13 +135,19 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const [savedView, setView] = usePref<CarView>('car-view', 'grid', isCarView);
   const phone = usePhone();
   const view = phone ? 'grid' : savedView;
-  const nextOf = (s: Subscription) => nextCharge(s, addDays(today, 1)) ?? '9999-12-31';
-  const owedOf = (s: Subscription) =>
-    memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state)
-      .filter((d) => d.periodsOwed > 0)
-      .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : 0), 0);
+  const nextBy = new Map(all.map((s) => [s.id, nextCharge(s, addDays(today, 1)) ?? '9999-12-31']));
+  const nextOf = (s: Subscription) => nextBy.get(s.id)!;
+  const owedBy = new Map(
+    all.map((s) => [
+      s.id,
+      duesOf(s)
+        .filter((d) => d.periodsOwed > 0)
+        .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : 0), 0),
+    ]),
+  );
+  const owedOf = (s: Subscription) => owedBy.get(s.id)!;
   // 当年盈亏：今年成本（已扣 + 预计）对比成员今年的收入（已收 + 今年还该收）
-  const years = new Map([...owned, ...ended].map((s) => [s.id, carYear(state, s, today)]));
+  const years = new Map(all.map((s) => [s.id, carYear(state, s, today)]));
   const netOf = (s: Subscription) => years.get(s.id)!.net;
   const num = (v: number) => (Number.isFinite(v) ? v : 0);
   const value: Record<Exclude<CarSort, 'name' | 'next'>, (s: Subscription) => number> = {
@@ -156,9 +168,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const seated = owned.reduce((a, s) => a + carpoolRoster(s, today).active.length, 0);
   const openSeats = owned.reduce((a, s) => a + carpoolRoster(s, today).vacancies, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
-  const owedAll = [...owned, ...ended]
-    .flatMap((s) => memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state))
-    .filter((d) => d.periodsOwed > 0);
+  const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
   const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
@@ -266,7 +276,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             today={today}
             rows={shown}
             books={books}
+            years={years}
             live={live}
+            duesOf={duesOf}
             owedOf={owedOf}
             sort={sort}
             dir={dir}
@@ -282,7 +294,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 {shown.map((s, idx) => {
                   if (idx % colCount !== col) return null;
                   const sh = s.share!;
-                  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
+                  const dues = duesOf(s);
                   // 已退出的成员不占座，只在展开的明细里保留
                   const free = carpoolRoster(s, today).vacancies;
                   const next = nextCharge(s, addDays(today, 1));
@@ -448,7 +460,9 @@ function CarTable({
   today,
   rows,
   books,
+  years,
   live,
+  duesOf,
   owedOf,
   sort,
   dir,
@@ -459,7 +473,9 @@ function CarTable({
   today: string;
   rows: Subscription[];
   books: Map<string, ReturnType<typeof carLedger>>;
+  years: Map<string, ReturnType<typeof carYear>>;
   live: (s: Subscription) => boolean;
+  duesOf: (s: Subscription) => MemberDue[];
   owedOf: (s: Subscription) => number;
   sort: CarSort;
   dir: 'asc' | 'desc';
@@ -492,9 +508,9 @@ function CarTable({
           const on = live(s);
           const free = carpoolRoster(s, today).vacancies;
           const next = on ? nextCharge(s, addDays(today, 1)) : undefined;
-          const dues = memberDues(s, today, state.settings.collectCurrency ?? base, state).filter((d) => d.periodsOwed > 0);
+          const dues = duesOf(s).filter((d) => d.periodsOwed > 0);
           const owed = owedOf(s);
-          const year = carYear(state, s, today);
+          const year = years.get(s.id) ?? carYear(state, s, today);
           const rule = carRule(state, s, today);
           return (
             <button key={s.id} className={`lt-row ${on ? '' : 'st-ended'}`} role="row" onClick={() => onOpen(s.id)}>
@@ -526,7 +542,7 @@ function CarTable({
                   <StatusPill tone="notice">{t('family.pool.noMembers')}</StatusPill>
                 )}
               </span>
-              <PlanPrice state={state} s={s} today={today} />
+              <PlanPrice state={state} s={s} today={today} cost={year.cost} />
               {/* 已停止的车：收费、下次扣款、每年净额都不再有意义，留空 */}
               <span className="lt-num" data-p={2}>
                 {!on ? null : s.share!.members.length ? (
