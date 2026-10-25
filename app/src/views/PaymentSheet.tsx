@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { activePhases, chargesBetween, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
-import { cnDateFull, money } from '../../../shared/format.ts';
+import { cnDateFull, currencyDecimals, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { deletePayment, savePayment, setPhaseMethod } from '../../../shared/phases.ts';
 import type { Payment, Subscription } from '../../../shared/types.ts';
@@ -51,14 +51,17 @@ export function PaymentSheet({
     edit?.pay.funding?.length ? edit.pay.funding.map((f) => ({ methodId: f.methodId, amount: String(Math.abs(f.amount)) })) : null,
   );
   const splitSum = (split ?? []).reduce((a, x) => a + (Number(x.amount) || 0), 0);
-  const left = Math.round((Number(amount) - splitSum) * 100) / 100;
+  // 差额按这一段币种的小数位取整（日元等没有小数）
+  const unit = 10 ** currencyDecimals(ccy);
+  const left = Math.round((Number(amount) - splitSum) * unit) / unit;
+  const amountValid = amount.trim() !== '' && Number(amount) >= 0;
   const blanks = (split ?? []).filter((x) => x.amount === '').length;
   const setPart = (i: number, patch: Partial<{ methodId?: string; amount: string }>) => setSplit((xs) => xs!.map((x, k) => (k === i ? { ...x, ...patch } : x)));
 
   const [busy, submit] = useSubmit();
   const save = () => {
     const n = Number(amount);
-    if (!(n >= 0) || amount === '') return;
+    if (!amountValid) return;
     const pay: Payment = {
       date,
       amount: sign * n,
@@ -109,7 +112,7 @@ export function PaymentSheet({
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={busy} onClick={save}>
+          <button className="btn primary" disabled={busy || !amountValid} onClick={save}>
             {t('common.save')}
           </button>
         </>
@@ -168,7 +171,7 @@ export function PaymentSheet({
           }
           foot={
             split
-              ? Math.abs(left) < 0.005 || (blanks === 1 && left > 0)
+              ? Math.abs(left) < 0.5 / unit || (blanks === 1 && left > 0)
                 ? t('editor.payment.splitOk', { amount: money(Number(amount) || 0, ccy) })
                 : t('editor.payment.splitLeft', { amount: money(left, ccy) })
               : undefined
