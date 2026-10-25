@@ -675,15 +675,32 @@ export function useSubmit(): [boolean, (fn: () => unknown) => Promise<void>] {
  */
 type AskReq = { message: ComponentChildren; ok?: string; resolve: (v: boolean) => void };
 let askSet: ((r: AskReq | null) => void) | null = null;
+/** 正在等回答的那一问：新的一问顶替它时，旧的按「否」结束，不会永远挂起 */
+let asking: AskReq | null = null;
 export function ask(message: ComponentChildren, opts: { ok?: string } = {}): Promise<boolean> {
-  return new Promise((resolve) => (askSet ? askSet({ message, ...opts, resolve }) : resolve(false)));
+  return new Promise((resolve) => {
+    if (!askSet) return resolve(false);
+    asking?.resolve(false);
+    asking = { message, ...opts, resolve };
+    askSet(asking);
+  });
 }
 
 export function AskLayer() {
   const [req, setReq] = useState<AskReq | null>(null);
   askSet = setReq;
+  // 整棵树重新挂载（换语言）或卸载时：未回答的一问按「否」结束，旧的 setter 不再接收新问题
+  useEffect(
+    () => () => {
+      if (askSet === setReq) askSet = null;
+      asking?.resolve(false);
+      asking = null;
+    },
+    [],
+  );
   if (!req) return null;
   const done = (v: boolean) => {
+    if (asking === req) asking = null;
     setReq(null);
     req.resolve(v);
   };
