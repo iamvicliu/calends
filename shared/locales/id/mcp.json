@@ -11,7 +11,8 @@
     "createCategory": "Kategori akan dibuat: {name}",
     "createdCategory": "Kategori dibuat: {name}",
     "createPerson": "Akan ditambahkan ke daftar orang: {name}",
-    "createdPerson": "Ditambahkan ke daftar orang: {name}"
+    "createdPerson": "Ditambahkan ke daftar orang: {name}",
+    "transfer": "Pengalihan"
   },
   "error": {
     "shareFull": "“{name}” sudah penuh ({seats} kursi)",
@@ -75,7 +76,8 @@
     "transferNotFound": "Tidak ada pengalihan pada {date}",
     "notStopped": "Langganan ini belum dihentikan, jadi tidak ada penghentian yang bisa diubah. Untuk menghentikannya, gunakan set_status cancel / terminate tanpa edit.",
     "editStopDate": "Untuk mengubah penghentian, isi tanggal sebenarnya di at (hilangkan at untuk mempertahankan tanggal tercatat). Penghentian tanpa tanggal memerlukan tanggal sebenarnya.",
-    "invalidIcon": "Ikon “{value}” tidak valid: gunakan URL gambar http(s), jalur situs seperti /ai/claude.svg, atau satu emoji / simbol pendek."
+    "invalidIcon": "Ikon “{value}” tidak valid: gunakan URL gambar http(s), jalur situs seperti /ai/claude.svg, atau satu emoji / simbol pendek.",
+    "badMonth": "Bulan harus berformat YYYY-MM: {month}"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",

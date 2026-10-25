@@ -11,7 +11,8 @@
     "createCategory": "Kategori oluşturulacak: {name}",
     "createdCategory": "Kategori oluşturuldu: {name}",
     "createPerson": "Kişilere eklenecek: {name}",
-    "createdPerson": "Kişilere eklendi: {name}"
+    "createdPerson": "Kişilere eklendi: {name}",
+    "transfer": "Devir"
   },
   "error": {
     "shareFull": "“{name}” dolu ({seats} koltuk)",
@@ -75,7 +76,8 @@
     "transferNotFound": "{date} tarihinde devir bulunamadı",
     "notStopped": "Bu abonelik durdurulmamış, düzenlenecek bir durdurma bilgisi yok. Durdurmak için edit olmadan set_status cancel / terminate kullanın.",
     "editStopDate": "Durdurmayı düzenlerken gerçek tarihi at ile verin (at verilmezse kayıtlı tarih korunur). Tarihi bilinmeyen bir durdurmanın gerçek tarihi gerekir.",
-    "invalidIcon": "Geçersiz simge “{value}”: http(s) görsel URL’si, /ai/claude.svg gibi bir site yolu ya da tek bir emoji / kısa sembol kullanın."
+    "invalidIcon": "Geçersiz simge “{value}”: http(s) görsel URL’si, /ai/claude.svg gibi bir site yolu ya da tek bir emoji / kısa sembol kullanın.",
+    "badMonth": "Ay YYYY-MM biçiminde olmalı: {month}"
   },
   "tool": {
     "get_overview": "Defter özeti",

@@ -11,7 +11,8 @@
     "createCategory": "Kategorie wird erstellt: {name}",
     "createdCategory": "Kategorie erstellt: {name}",
     "createPerson": "Wird als Person angelegt: {name}",
-    "createdPerson": "Person angelegt: {name}"
+    "createdPerson": "Person angelegt: {name}",
+    "transfer": "Übertragung"
   },
   "error": {
     "shareFull": "„{name}“ ist voll ({seats} Plätze)",
@@ -78,7 +79,8 @@
     "transferNotFound": "Keine Übertragung am {date} gefunden",
     "notStopped": "Dieses Abo ist nicht beendet, daher gibt es keine Beendigung zum Bearbeiten. Zum Beenden set_status cancel / terminate ohne edit verwenden.",
     "editStopDate": "Zum Bearbeiten einer Beendigung das tatsächliche Datum in at angeben (ohne at bleibt ein erfasstes Datum erhalten). Eine Beendigung mit unbekanntem Datum braucht ihr echtes Datum.",
-    "invalidIcon": "Ungültiges Symbol „{value}“: Verwende eine http(s)-Bild-URL, einen Seitenpfad wie /ai/claude.svg oder ein Emoji bzw. kurzes Zeichen."
+    "invalidIcon": "Ungültiges Symbol „{value}“: Verwende eine http(s)-Bild-URL, einen Seitenpfad wie /ai/claude.svg oder ein Emoji bzw. kurzes Zeichen.",
+    "badMonth": "Der Monat muss YYYY-MM sein: {month}"
   },
   "tool": {
     "get_overview": "Kontoübersicht",

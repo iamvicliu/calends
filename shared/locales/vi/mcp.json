@@ -11,7 +11,8 @@
     "createCategory": "Sẽ tạo danh mục: {name}",
     "createdCategory": "Đã tạo danh mục: {name}",
     "createPerson": "Sẽ thêm vào danh sách người: {name}",
-    "createdPerson": "Đã thêm vào danh sách người: {name}"
+    "createdPerson": "Đã thêm vào danh sách người: {name}",
+    "transfer": "Chuyển nhượng"
   },
   "error": {
     "shareFull": "“{name}” đã đủ chỗ ({seats} chỗ)",
@@ -75,7 +76,8 @@
     "transferNotFound": "Không tìm thấy chuyển nhượng ngày {date}",
     "notStopped": "Gói đăng ký này chưa dừng nên không có thông tin dừng để sửa. Để dừng, hãy dùng set_status cancel / terminate không kèm edit.",
     "editStopDate": "Khi sửa thông tin dừng, hãy nhập ngày thực tế vào at (bỏ at để giữ ngày đã ghi). Lần dừng không rõ ngày cần có ngày thực tế.",
-    "invalidIcon": "Biểu tượng “{value}” không hợp lệ: hãy dùng URL ảnh http(s), đường dẫn trong trang như /ai/claude.svg, hoặc một emoji / ký hiệu ngắn."
+    "invalidIcon": "Biểu tượng “{value}” không hợp lệ: hãy dùng URL ảnh http(s), đường dẫn trong trang như /ai/claude.svg, hoặc một emoji / ký hiệu ngắn.",
+    "badMonth": "Tháng phải có dạng YYYY-MM: {month}"
   },
   "tool": {
     "get_overview": "Tổng quan sổ",

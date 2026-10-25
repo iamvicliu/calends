@@ -11,7 +11,8 @@
     "createCategory": "Será criada a categoria: {name}",
     "createdCategory": "Categoria criada: {name}",
     "createPerson": "Será adicionado às pessoas: {name}",
-    "createdPerson": "Adicionado às pessoas: {name}"
+    "createdPerson": "Adicionado às pessoas: {name}",
+    "transfer": "Transferência"
   },
   "error": {
     "shareFull": "“{name}” está cheio ({seats} vagas)",
@@ -78,7 +79,8 @@
     "transferNotFound": "Nenhuma transferência em {date}",
     "notStopped": "Esta assinatura não está encerrada, então não há encerramento para editar. Para encerrá-la, use set_status cancel / terminate sem edit.",
     "editStopDate": "Para editar um encerramento, informe a data real em at (omita at para manter a data registrada). Um encerramento com data desconhecida precisa da data real.",
-    "invalidIcon": "Ícone “{value}” inválido: use uma URL de imagem http(s), um caminho do site como /ai/claude.svg ou um emoji ou símbolo curto."
+    "invalidIcon": "Ícone “{value}” inválido: use uma URL de imagem http(s), um caminho do site como /ai/claude.svg ou um emoji ou símbolo curto.",
+    "badMonth": "O mês deve estar no formato YYYY-MM: {month}"
   },
   "tool": {
     "get_overview": "Visão geral",

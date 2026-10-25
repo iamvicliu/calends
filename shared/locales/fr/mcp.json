@@ -11,7 +11,8 @@
     "createCategory": "Catégorie à créer : {name}",
     "createdCategory": "Catégorie créée : {name}",
     "createPerson": "Sera ajouté aux personnes : {name}",
-    "createdPerson": "Ajouté aux personnes : {name}"
+    "createdPerson": "Ajouté aux personnes : {name}",
+    "transfer": "Cession"
   },
   "error": {
     "shareFull": "« {name} » est complet ({seats} places)",
@@ -78,7 +79,8 @@
     "transferNotFound": "Aucune cession trouvée le {date}",
     "notStopped": "Cet abonnement n’est pas arrêté : il n’y a pas d’arrêt à modifier. Pour l’arrêter, utilisez set_status cancel / terminate sans edit.",
     "editStopDate": "Pour modifier un arrêt, indiquez sa date réelle dans at (omettez at pour garder la date enregistrée). Un arrêt à date inconnue nécessite sa date réelle.",
-    "invalidIcon": "Icône « {value} » invalide : utilisez une URL d’image http(s), un chemin du site comme /ai/claude.svg, ou un emoji ou symbole court."
+    "invalidIcon": "Icône « {value} » invalide : utilisez une URL d’image http(s), un chemin du site comme /ai/claude.svg, ou un emoji ou symbole court.",
+    "badMonth": "Le mois doit être au format YYYY-MM : {month}"
   },
   "tool": {
     "get_overview": "Aperçu du registre",
