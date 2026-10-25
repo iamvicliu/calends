@@ -6,7 +6,7 @@ import { linkPeople } from '../shared/people.ts';
 import { migrateReceivables } from '../shared/receivables-legacy.ts';
 import type { Prefs } from '../shared/prefs.ts';
 import type { Env } from './env.ts';
-import { keepSet, slimFxHistory } from './fx.ts';
+import { keepSet, putFxDayStmt, slimFxHistory } from './fx.ts';
 
 const revSql = "SELECT CAST(value AS INTEGER) AS rev FROM kv WHERE key = 'rev'";
 
@@ -62,17 +62,14 @@ const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
     "INSERT INTO kv (key, value, updated_at) VALUES ('people', ?1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
   ).bind(JSON.stringify(people));
 
-/** 把名册和改动过的订阅一起写入（分批，D1 一次 batch 的语句数有限） */
+/**
+ * 把名册和改动过的订阅一起写入：一个 batch 即一个事务，不会只写进一半。
+ * D1 不限制一次 batch 的语句数（整个 batch 只算一次查询），单条语句、单行各有 100 KB / 2 MB 的上限。
+ */
 export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<Revision | undefined> {
   if (people) validatePeopleAvatars(people);
   const stmts = [...(people ? [putPeopleStmt(env, people)] : []), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))];
-  let revision: Revision | undefined;
-  for (let i = 0; i < stmts.length; i += 50) {
-    const next = await mutate(env, stmts.slice(i, i + 50));
-    // Only acknowledge a contiguous series; interleaved remote writes require a reload.
-    revision = { from: revision && revision.rev === next.from ? revision.from : next.from, rev: next.rev };
-  }
-  return revision;
+  return stmts.length ? mutate(env, stmts) : undefined;
 }
 
 /**
@@ -166,6 +163,34 @@ export async function loadSubs(env: Env): Promise<Subscription[]> {
   return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) =>
     migrateRenewalRules(JSON.parse(r.data) as Subscription),
   );
+}
+
+/**
+ * 备份恢复：订阅、支付方式整体替换，名册、设置、当前汇率替换，历史汇率按日期合并——全部在同一个事务里。
+ * 任何一条失败（如备份里的历史汇率缺字段）都整体回滚，原账本保持不变。
+ */
+export async function restoreLedger(
+  env: Env,
+  b: {
+    subscriptions: Subscription[];
+    methods: PaymentMethod[];
+    people: Person[];
+    settings?: Settings;
+    fx?: FxTable;
+    fxDaily: Array<{ date: string; rates: Record<string, number>; source: string }>;
+  },
+): Promise<Revision> {
+  validatePeopleAvatars(b.people);
+  return mutate(env, [
+    env.DB.prepare('DELETE FROM subscriptions'),
+    env.DB.prepare('DELETE FROM methods'),
+    ...b.methods.map((m) => upsertStmt(env, 'methods', m.id, m)),
+    ...b.subscriptions.map((s) => upsertStmt(env, 'subscriptions', s.id, s)),
+    putKvStmt(env, 'people', b.people),
+    ...(b.settings ? [putKvStmt(env, 'settings', b.settings)] : []),
+    ...(b.fx ? [putKvStmt(env, 'fx', b.fx)] : []),
+    ...b.fxDaily.map((d) => putFxDayStmt(env, d.date, d.rates, d.source)),
+  ]);
 }
 
 /** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */

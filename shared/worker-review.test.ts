@@ -217,3 +217,29 @@ test('W-5 破坏性工具只认 id 或完整名称；成员查找重名时报错
   assert.equal((await f.call('remove_share_member', { subscription: 'c1', member: 'Alexa', dry_run: true })).isError, true);
   assert.equal((await f.call('save_share_member', { subscription: 'c1', member: 'alex', note: 'x', dry_run: true })).isError, true);
 });
+
+test('W-6 备份恢复在一个事务里：中途失败时原账本保持不变', async () => {
+  const f = fixture();
+  await putKv(f.env, 'settings', { ...DEFAULT_SETTINGS, displayName: 'Original ledger' });
+  await upsert(f.env, 'subscriptions', 'keep', sub('keep', 'Fictional keep'));
+  const r = await f.request('/api/backup', {
+    method: 'POST',
+    body: JSON.stringify({
+      format: 'calends-backup',
+      version: 3,
+      subscriptions: [sub('new', 'Fictional replacement')],
+      methods: [],
+      people: [],
+      settings: { ...DEFAULT_SETTINGS, displayName: 'Replaced' },
+      // 缺 source：写入这一行会失败
+      fxDaily: [{ date: '2026-01-01', rates: { USD: 1 } }],
+    }),
+  });
+  assert.equal(r.status, 500);
+  const st = await loadState(f.env, false);
+  assert.deepEqual(
+    st.subscriptions.map((s) => s.id),
+    ['keep'],
+  );
+  assert.equal(st.settings.displayName, 'Original ledger');
+});
