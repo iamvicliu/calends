@@ -139,21 +139,6 @@ a {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.side-item .i {
-  width: 17px;
-  height: 17px;
-  color: var(--accent);
-}
-.side-item:hover {
-  background: var(--fill-2);
-}
-.side-item.active {
-  background: var(--indigo-9);
-  color: var(--white-a12);
-}
-.side-item.active .i {
-  color: var(--white-a12);
-}
 .side-item .n {
   margin-left: auto;
   font-size: var(--fs-1);
@@ -162,17 +147,6 @@ a {
 }
 .side-item.active .n {
   color: color-mix(in srgb, var(--white-a12) 75%, transparent);
-}
-.side-label {
-  font-size: var(--fs-1);
-  font-weight: 600;
-  color: var(--label-3);
-  padding: 16px 10px 4px;
-}
-.side-foot {
-  border-top: var(--hairline) solid var(--sep);
-  padding-top: 8px;
-  margin-top: 6px;
 }
 
 .main {
@@ -209,11 +183,6 @@ a {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.tb-sub {
-  font-size: var(--fs-1);
-  color: var(--label-2);
-  margin-top: 1px;
 }
 /* 工具栏里的搜索框：胶囊形，高度与分段控件一致 */
 .tb-search {
@@ -323,31 +292,15 @@ a {
   white-space: nowrap;
   transition: background var(--duration) var(--ease);
 }
-.btn:hover {
-  background: color-mix(in srgb, var(--fill) 160%, transparent);
-}
 .btn .i {
   width: 15px;
   height: 15px;
-}
-.btn.primary {
-  background: var(--indigo-9);
-  color: var(--white-a12);
-}
-.btn.primary:hover {
-  background: var(--indigo-10);
-}
-.btn.tinted {
-  background: var(--accent-soft);
-  color: var(--accent);
 }
 .btn.danger {
   background: none;
   color: var(--red);
 }
 .btn.plain {
-  background: none;
-  color: var(--accent);
   padding: 0 6px;
 }
 .btn.lg {
@@ -445,21 +398,12 @@ a {
   display: grid;
   gap: 14px;
 }
-.g-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 .g-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 @media (max-width: 680px) {
   .g-2 {
     grid-template-columns: 1fr;
-  }
-  .g-3 {
-    gap: 8px;
-  }
-  .g-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 .stat-label {
@@ -597,21 +541,9 @@ a {
   width: 11px;
   height: 11px;
 }
-.badge.green {
-  background: color-mix(in srgb, var(--green-9) 14%, transparent);
-  color: var(--green-11);
-}
-.badge.orange {
-  background: color-mix(in srgb, var(--amber-10) 14%, transparent);
-  color: var(--orange-11);
-}
 .badge.red {
   background: var(--red-3);
   color: var(--red);
-}
-.badge.blue {
-  background: var(--accent-soft);
-  color: var(--accent);
 }
 
 /* ---------------- iOS 分组列表 ---------------- */
@@ -663,8 +595,7 @@ a {
   position: relative;
   font-size: var(--fs-2);
 }
-.cell + .cell::before,
-.cell + .member-edit::before {
+.cell + .cell::before {
   content: '';
   position: absolute;
   top: 0;
@@ -784,9 +715,6 @@ a {
   background: var(--white-a12);
   box-shadow: none;
   transition: none;
-}
-.toggle[data-selected] i {
-  background: var(--green-9);
 }
 .toggle[data-selected] i::after {
   transform: translateX(var(--toggle-travel));
@@ -1273,13 +1201,6 @@ a {
 .paycard.sim .pc-bal .amt {
   color: #0d2f80;
 }
-.paycard.sim .pc-foot .o {
-  color: #5b6676;
-  opacity: 1;
-}
-.paycard.sim .pc-bal .amt {
-  color: #0d2f80;
-}
 /* ================================================================
    App Store 卡：参照 Apple Card 的白色钛金属卡面，标志做激光蚀刻效果
    ================================================================ */
@@ -1611,37 +1532,7 @@ a {
 .fade-in {
   animation: none;
 }
-
-.member-edit {
-  display: grid;
-  /* 叉号按钮 32px 宽，日期列按内容留够空间，避免互相压住 */
-  grid-template-columns: minmax(0, 1fr) 80px 150px var(--ctl-h-md);
-  gap: 6px;
-  align-items: center;
-  padding: 8px 12px 8px 16px;
-  position: relative;
-}
-.member-edit .wide > * {
-  width: 100%;
-  justify-content: flex-start;
-}
-.member-edit input {
-  border: 0;
-  background: var(--fill-2);
-  border-radius: var(--radius-sm);
-  padding: 6px 8px;
-  font-size: var(--fs-2);
-  outline: 0;
-  min-width: 0;
-  width: 100%;
-}
 @media (max-width: 680px) {
-  .member-edit {
-    grid-template-columns: minmax(0, 1fr) 80px var(--ctl-h-md);
-  }
-  .member-edit .wide {
-    grid-column: 1 / 3;
-  }
 }
 .hit {
   display: flex;
@@ -1893,10 +1784,6 @@ select.btn {
   background: color-mix(in srgb, var(--red-10) 12%, transparent);
   color: var(--red);
 }
-.chip-d.down {
-  background: color-mix(in srgb, var(--green-9) 14%, transparent);
-  color: var(--green-11);
-}
 .hero-r {
   min-width: 0;
   display: flex;
@@ -1980,69 +1867,10 @@ select.btn {
   height: 168px;
   align-items: stretch;
 }
-.wf-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-.wf-track {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  max-width: 46px;
-}
-.wf-track i {
-  position: absolute;
-  left: 0;
-  right: 0;
-  border-radius: var(--radius-sm);
-  background: var(--fill);
-}
-.wf-col.total .wf-track i {
-  background: var(--indigo-9);
-}
-.wf-col.up .wf-track i {
-  background: var(--red-9);
-  opacity: 0.85;
-}
-.wf-col.down .wf-track i {
-  background: var(--green-9);
-}
-.wf-col b {
-  font-size: var(--fs-2);
-  font-weight: 700;
-}
-.wf-col.up b {
-  color: var(--red);
-}
-.wf-col.down b {
-  color: var(--green-11);
-}
-.wf-col span {
-  max-width: 100%;
-  font-size: var(--fs-1);
-  line-height: 1.2;
-  color: var(--label-2);
-  text-align: center;
-  overflow-wrap: anywhere;
-  /* 长语言最多换成两行，不截断 */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 /* 窄屏：柱子下的标签缩小 */
 @media (max-width: 560px) {
   .wf {
     gap: 4px;
-  }
-  .wf-col span {
-    font-size: var(--fs-1);
-  }
-  .wf-col b {
-    font-size: var(--fs-1);
   }
 }
 .wf-items {
@@ -2507,9 +2335,6 @@ select.btn {
 .log-item b.red {
   color: var(--red);
 }
-.log-item b.green {
-  color: var(--green-11);
-}
 
 /* 年度回顾 */
 .review {
@@ -2884,7 +2709,6 @@ select.btn {
   background: var(--green-3);
   color: var(--green);
 }
-.wf-col.down b,
 .log-item b.green,
 .wf-item em.down {
   color: var(--green);
@@ -3056,7 +2880,6 @@ select.btn {
     /* 状态筛选项多时横向滑动，不挤压文字 */
     max-width: 100%;
     overflow-x: auto;
-    scrollbar-width: none;
   }
   .tb-actions .seg button {
     flex-shrink: 0;
@@ -3840,17 +3663,6 @@ button.h-price-row:focus-visible {
 .dp-btn input::placeholder {
   color: var(--label-3);
 }
-.dp-open {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
-  box-shadow: none;
-}
-.dp-open .i {
-  width: 13px;
-  height: 13px;
-}
 .dp-btn.invalid {
   box-shadow: inset 0 0 0 var(--hairline) var(--red);
 }
@@ -3985,26 +3797,6 @@ button.h-price-row:focus-visible {
 .dp-day:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-}
-.dp-months {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  padding: 4px 0;
-}
-.dp-month {
-  height: var(--ctl-h-lg);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: var(--fill-2);
-  font-size: var(--fs-2);
-}
-.dp-month:hover {
-  background: var(--fill);
-}
-.dp-month.sel {
-  background: var(--ink);
-  color: var(--on-ink);
 }
 .dp-foot {
   display: flex;
@@ -5251,27 +5043,6 @@ button.h-price-row:focus-visible {
   flex-direction: column;
   gap: 8px;
 }
-.car-actual b.gain {
-  color: var(--green);
-}
-.car-actual {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-  font-size: var(--fs-1);
-  color: var(--label-2);
-  font-variant-numeric: tabular-nums;
-}
-.car-actual b {
-  color: var(--label);
-  font-weight: 600;
-}
-.car-actual b {
-  font-weight: 600;
-  color: var(--label);
-}
 
 /* 车卡：收起时只有头部、座位与一个展开按钮 */
 .seats-row {
@@ -6389,10 +6160,6 @@ a.car-toggle {
   margin-top: 14px;
   font-size: var(--fs-1);
   color: var(--label-2);
-}
-
-.car-actual b.loss {
-  color: var(--red);
 }
 
 .change-plan {
@@ -7567,12 +7334,6 @@ a.car-toggle {
   display: block;
   background: var(--gray-12);
 }
-.rp-tip {
-  margin: 12px 0 8px;
-  text-align: center;
-  font-weight: 600;
-  line-height: 1.5;
-}
 .ps-foot span {
   white-space: nowrap;
 }
@@ -8302,63 +8063,6 @@ a.car-toggle {
 :root[data-theme='dark'] .c-purple {
   --pc: var(--purple-8);
 }
-.pp-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  cursor: pointer;
-  transition: none;
-}
-.pp-card:hover {
-  box-shadow: 0 0 0 var(--hairline) var(--line);
-}
-.pp-card:focus-visible {
-  outline: var(--hairline) solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.pp-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.pp-id {
-  flex: 1;
-  min-width: 0;
-}
-.pp-id .ph-meta {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pp-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 24px;
-  padding: 0 9px 0 4px;
-  border-radius: var(--radius-pill);
-  background: var(--fill-2);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
-  color: var(--label-2);
-  font-size: var(--fs-1);
-  font-weight: 600;
-  white-space: nowrap;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pp-chip.off {
-  opacity: 0.55;
-}
-.pp-chip .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--orange-9);
-}
-.pp-foot {
-  font-size: var(--fs-1);
-}
 .pp-item {
   flex-direction: column;
   align-items: stretch;
@@ -8436,17 +8140,6 @@ a.car-toggle {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pp-amt {
-  flex: none;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: var(--fs-2);
-}
-.pp-amt small {
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
 .pp-collect {
   height: var(--ctl-h-md);
   padding: 0 11px;
@@ -8489,9 +8182,6 @@ a.car-toggle {
   .pp-item .cell-r {
     width: 100%;
     justify-content: space-between;
-  }
-  .pp-amt {
-    align-items: flex-start;
   }
 }
 
@@ -8628,9 +8318,6 @@ a.car-toggle {
 .car-card .car-toggle {
   height: var(--ctl-h-md);
   font-size: var(--fs-1);
-}
-.car-card .car-actual {
-  margin-top: 0;
 }
 .car-card.stopped .car-head > :not(.ph-status),
 .car-card.stopped .seats-row,
@@ -8771,18 +8458,6 @@ a.car-toggle {
   font-size: var(--fs-1);
   color: var(--label-3);
 }
-.cal-stat-bar {
-  height: 4px;
-  border-radius: var(--radius-sm);
-  background: var(--fill-2);
-  overflow: hidden;
-}
-.cal-stat-bar i {
-  display: block;
-  height: 100%;
-  border-radius: var(--radius-sm);
-  background: var(--label);
-}
 
 /* 合租弹窗：小节标题、成员、收款表 */
 /* 收款 / 付款切换在卡片头部，表格贴着卡片边：间距与订阅详情的扣款记录一致 */
@@ -8799,48 +8474,48 @@ a.car-toggle {
 .car-sheet-members .member:last-child {
   border-bottom: 0;
 }
-.car-receipts .ld-row {
+.ld-receipts .ld-row {
   /* 日期与金额靠在一起，不把三列拉到两端 */
   grid-template-columns: minmax(0, 1fr) 96px 104px;
   column-gap: 16px;
   min-height: var(--table-row-h);
 }
-.car-receipts .ld-row > span {
+.ld-receipts .ld-row > span {
   overflow-wrap: anywhere;
 }
 /* 按年分组时，组内的行是从属的明细：矮一些（32px）、不画分隔线；表头与分组行是标准行高。只有一年时平铺，行高同表头 */
-.car-receipts.ld-grouped .ld-row:not(.car-period):not(.ld-th):not(.ld-tf) {
+.ld-receipts.ld-grouped .ld-row:not(.ld-year):not(.ld-th):not(.ld-tf) {
   min-height: 32px;
   padding-top: 4px;
   padding-bottom: 4px;
   border-top: 0;
 }
-.car-receipts .car-ledger-head + .car-period {
+.ld-receipts .ld-toggle + .ld-year {
   border-top: 0;
 }
-.car-receipts .ld-row > span:not(:first-child) {
+.ld-receipts .ld-row > span:not(:first-child) {
   white-space: nowrap;
 }
-.car-receipts-out .ld-row:not(.car-period) > span:nth-child(2) {
+.ld-out .ld-row:not(.ld-year) > span:nth-child(2) {
   text-align: right;
   align-items: flex-end;
 }
-:root:not([data-input='pointer']) .car-receipts button:focus-visible {
+:root:not([data-input='pointer']) .ld-receipts button:focus-visible {
   outline: var(--hairline) solid var(--focus-ring);
   outline-offset: -2px;
 }
-.car-receipts .car-ledger-head:not(:disabled) {
+.ld-receipts .ld-toggle:not(:disabled) {
   cursor: pointer;
 }
-.car-receipts .car-ledger-head:hover:not(:disabled),
-.car-receipts .car-period:hover:not(:disabled) {
+.ld-receipts .ld-toggle:hover:not(:disabled),
+.ld-receipts .ld-year:hover:not(:disabled) {
   background: var(--hover);
 }
 
-.car-receipts .car-ledger-head > span {
+.ld-receipts .ld-toggle > span {
   white-space: nowrap;
 }
-.car-receipts .car-period {
+.ld-receipts .ld-year {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   /* 与表头同高；左右边距与表头、数据行一致，标题首字对齐 */
@@ -8851,57 +8526,57 @@ a.car-toggle {
   color: var(--label-2);
 }
 /* 付款表的年份分组与数据行同样三列，卡上实扣与成本各自合计在对应列下 */
-.car-receipts-out .car-period {
+.ld-out .ld-year {
   grid-template-columns: minmax(0, 1fr) 96px 104px;
   column-gap: 16px;
 }
-.car-receipts-out .car-period > span:not(:first-child) {
+.ld-out .ld-year > span:not(:first-child) {
   text-align: right;
   align-items: flex-end;
 }
-.car-receipts .car-period > .car-period-title {
+.ld-receipts .ld-year > .ld-year-title {
   white-space: normal;
   line-height: 1.35;
 }
-.car-receipts .car-period > span:last-child {
+.ld-receipts .ld-year > span:last-child {
   white-space: nowrap;
 }
-.car-receipts .car-period-title small {
+.ld-receipts .ld-year-title small {
   color: var(--label-3);
   font-weight: 400;
 }
 /* 共有信息跟在区间后面同一行，分组条保持单行、比表头矮 */
-.car-receipts .car-period > .car-period-title {
+.ld-receipts .ld-year > .ld-year-title {
   flex-direction: row;
 }
-.car-receipts .car-period-title {
+.ld-receipts .ld-year-title {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: 6px;
 }
-.car-receipts .ld-row:not(.car-period) > span:first-child small {
+.ld-receipts .ld-row:not(.ld-year) > span:first-child small {
   font-size: var(--fs-1);
 }
 /* 备注（如「实收待核对」、退款）跟在名字后面同一行，横向空间足够 */
-.car-receipts .ld-row:not(.car-period):not(.ld-th) > span:first-child {
+.ld-receipts .ld-row:not(.ld-year):not(.ld-th) > span:first-child {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: 8px;
 }
 @media (max-width: 560px) {
-  .car-receipts .ld-row {
+  .ld-receipts .ld-row {
     grid-template-columns: minmax(0, 1fr) 84px 98px;
     column-gap: 10px;
     padding-inline: 12px;
     font-size: var(--fs-1);
   }
-  .car-receipts .car-period {
+  .ld-receipts .ld-year {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 6px;
   }
-  .car-receipts-out .car-period {
+  .ld-out .ld-year {
     grid-template-columns: minmax(0, 1fr) 84px 98px;
     column-gap: 10px;
   }
@@ -9005,35 +8680,9 @@ a.car-toggle {
   width: 1px;
   background: var(--red);
 }
-.car-total {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-}
-.car-total small {
-  color: var(--label-3);
-  font-size: var(--fs-1);
-}
 .car-rule-btn {
   flex-shrink: 0;
   gap: 4px;
-}
-.car-sheet-facts > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 8px;
-}
-.car-sheet-facts b {
-  font-size: var(--fs-3);
-}
-.car-sheet-facts em {
-  font-style: normal;
-  font-size: var(--fs-1);
-  color: var(--label-3);
-}
-.car-sheet-facts em.warn {
-  color: var(--orange);
 }
 .car-empty {
   display: flex;
@@ -9309,8 +8958,7 @@ img.mm-flag {
   display: block;
 }
 
-.pk-btn > span:not(.pk-ico),
-.pk-opt > span:not(.pk-ico) {
+.pk-btn > span:not(.pk-ico) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -9526,10 +9174,6 @@ img.mm-flag {
   max-width: 60%;
 }
 
-.member-fee-section {
-  scroll-margin-top: 84px;
-}
-
 /* 记收款弹窗顶部：订阅卡片一行（图标、名称与价格、查看详情） */
 .collect-sub {
   display: flex;
@@ -9579,10 +9223,6 @@ img.mm-flag {
 }
 
 /* 人员账号是关系草稿，随人员弹窗底部保存。 */
-.pp-item-main {
-  flex: 1;
-  min-width: 0;
-}
 .pp-account {
   display: flex;
   align-items: center;
@@ -9627,16 +9267,6 @@ img.mm-flag {
   min-height: 24px;
   padding: 0;
   box-shadow: none;
-}
-.collect-person-id {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.collect-person-id small {
-  font-size: var(--fs-1);
 }
 
 /* 成员区按实际内容宽度切换，收付款记录区保持原布局。 */
@@ -9748,13 +9378,6 @@ img.mm-flag {
     text-align: right;
     white-space: nowrap;
   }
-  .car-member-group th {
-    grid-column: 1 / -1;
-    padding: 8px 0;
-  }
-  .car-member-group {
-    border-bottom: var(--hairline) solid var(--sep);
-  }
   .car-member-row + .car-member-row {
     border-top: var(--hairline) solid var(--sep);
   }
@@ -9820,18 +9443,6 @@ img.mm-flag {
   min-width: 0;
 }
 /* 本期：「从 / 至」一列，日期一列左对齐、等宽数字 */
-.car-member-range {
-  display: grid;
-  grid-template-columns: auto auto;
-  justify-content: start;
-  align-items: baseline;
-  gap: 2px 8px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.car-member-range small {
-  font-size: var(--fs-1);
-}
 .car-member-lines > span:first-child {
   white-space: nowrap;
 }
@@ -9846,45 +9457,13 @@ img.mm-flag {
 }
 
 /* 编辑页「谁在用」：已保存成员只显示摘要（称呼 + 收费方式 · 下次应收） */
-.member-edit.member-summary {
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-}
-.member-summary-name {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.member-late {
-  color: var(--red);
-}
-.member-summary-name b {
-  font-size: var(--fs-2);
-  font-weight: 500;
-}
-.member-summary-name small {
-  font-size: var(--fs-1);
-}
 .nowrap {
   white-space: nowrap;
 }
 /* 单元格右侧的值允许换行（整体右对齐），配合 .nowrap 控制断行位置 */
-.cell-wrap {
-  min-width: 0;
-  white-space: normal;
-  text-align: right;
-}
 
 .scard:hover,
 .proxy-card:hover,
-.pp-card:hover,
 .cal-daycard:hover,
 .heat-m:hover {
   background-color: var(--gray-3);
@@ -10100,24 +9679,11 @@ img.mm-flag {
   border-radius: var(--radius-lg);
 }
 
-.car-snapshot .car-strip > div {
-  padding: 16px 20px;
-}
-.car-snapshot .car-strip b {
-  font-size: var(--fs-4);
-}
-
 .car-member-chip.vacancy {
   white-space: nowrap;
 }
 .car-snapshot .car-member-table {
   grid-template-columns: minmax(130px, 1.1fr) minmax(120px, 0.9fr) minmax(200px, 2fr) minmax(90px, 0.8fr);
-}
-.car-summary .car-strip b {
-  white-space: nowrap;
-}
-.car-summary .car-strip > div {
-  grid-template-rows: auto auto 1fr;
 }
 
 /*
@@ -10353,4 +9919,47 @@ img.mm-flag {
 }
 .rv-cell:hover {
   filter: brightness(0.92);
+}
+
+/* Shared-plan member presentation; dynamic dimensions remain explicit custom properties. */
+.car-member-name {
+  font-weight: 600;
+  font-size: var(--fs-2);
+}
+.car-member-amount {
+  text-align: right;
+  font-size: var(--fs-2);
+}
+.car-member-exempt {
+  font-weight: 600;
+}
+.car-member-due {
+  color: var(--orange);
+}
+.car-private-avatar {
+  width: var(--car-avatar-size);
+  height: var(--car-avatar-size);
+}
+.mt-mark,
+.mt-today {
+  left: var(--mt-left);
+}
+.mt-seg {
+  left: var(--mt-left);
+  width: var(--mt-width);
+}
+
+.car-add-member {
+  align-self: flex-start;
+}
+
+.car-cols {
+  grid-template-columns: repeat(var(--car-columns), minmax(0, 1fr));
+}
+.car-card {
+  order: var(--car-order);
+}
+.car-card-identity {
+  flex: 1;
+  min-width: 0;
 }

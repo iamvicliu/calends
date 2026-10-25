@@ -81,7 +81,7 @@ export function MemberRows({
           >
             {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
             <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} onClick={() => onMember(d.member)}>
-              <div className="icon-text" style={{ fontWeight: 600, fontSize: 'var(--fs-2)' }}>
+              <div className="icon-text car-member-name">
                 <MemberAvatar state={state} m={d.member} size={28} masked={masked} />
                 <span className={`text-ellipsis member-label ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
                   {d.member.name || t('family.pool.unnamed')}
@@ -109,13 +109,11 @@ export function MemberRows({
                 </span>
               </div>
             </button>
-            <div className="member-amount num" style={{ textAlign: 'right', fontSize: 'var(--fs-2)' }}>
+            <div className="member-amount num car-member-amount">
               {d.member.exempt ? (
-                <span className="muted" style={{ fontWeight: 600 }}>
-                  {t('family.pool.exempt')}
-                </span>
+                <span className="muted car-member-exempt">{t('family.pool.exempt')}</span>
               ) : d.periodsOwed > 0 ? (
-                <b style={{ color: 'var(--orange)' }}>{money(collection.amount, collection.currency)}</b>
+                <b className="car-member-due">{money(collection.amount, collection.currency)}</b>
               ) : (
                 <span className="muted">{t('family.pool.settled')}</span>
               )}
@@ -131,7 +129,7 @@ export function MemberRows({
 /** 成员头像：隐藏个人信息时换成同尺寸的灰色占位，合租详情里所有成员头像都走这里，不会漏 */
 export function MemberAvatar({ state, m, size, masked }: { state: AppState; m: ShareMember; size: number; masked?: boolean }) {
   return masked ? (
-    <span className="pp-ava car-private-avatar" style={{ width: size, height: size }} aria-hidden="true" />
+    <span className="pp-ava car-private-avatar" style={{ '--car-avatar-size': `${size}px` } as React.CSSProperties} aria-hidden="true" />
   ) : (
     <PersonAvatar p={personFor(state, m.personId, m.name || '?')} size={size} />
   );
@@ -148,7 +146,7 @@ export function TimelineAxis({ win }: { win: { start: string; end: string } }) {
     <span className="mt-viewport mt-axis" aria-label={t('family.sheet.period')}>
       <span className="mt-inner">
         {marks.map((d) => (
-          <span key={d} className={`mt-mark ${d.slice(5, 7) === '01' ? 'year' : ''}`} style={{ left: `${pct(d, win)}%` }}>
+          <span key={d} className={`mt-mark ${d.slice(5, 7) === '01' ? 'year' : ''}`} style={{ '--mt-left': `${pct(d, win)}%` } as React.CSSProperties}>
             {d.slice(5, 7) === '01' ? d.slice(0, 4) : monthLabel(d.slice(0, 7), { year: false })}
           </span>
         ))}
@@ -189,7 +187,12 @@ export function MemberTimeline({
           <i
             key={`${g.from}-${g.kind}`}
             className={`mt-seg ${g.kind}`}
-            style={{ left: `${pct(g.from, win)}%`, width: `${Math.max(0.6, pct(addDays(g.until, 1), win) - pct(g.from, win))}%` }}
+            style={
+              {
+                '--mt-left': `${pct(g.from, win)}%`,
+                '--mt-width': `${Math.max(0.6, pct(addDays(g.until, 1), win) - pct(g.from, win))}%`,
+              } as React.CSSProperties
+            }
             {...tipProps(() => (
               <>
                 <b>
@@ -208,7 +211,7 @@ export function MemberTimeline({
             ))}
           />
         ))}
-        <i className="mt-today" style={{ left: `${pct(today, win)}%` }} />
+        <i className="mt-today" style={{ '--mt-left': `${pct(today, win)}%` } as React.CSSProperties} />
       </span>
     </span>
   );
@@ -376,7 +379,9 @@ export function OwnerTimeline({ state, s, today, win }: { state: AppState; s: Su
             <i
               key={g.from}
               className={`mt-seg ${g.kind}`}
-              style={{ left: `${pct(from, win)}%`, width: `${Math.max(0.6, pct(addDays(until, 1), win) - pct(from, win))}%` }}
+              style={
+                { '--mt-left': `${pct(from, win)}%`, '--mt-width': `${Math.max(0.6, pct(addDays(until, 1), win) - pct(from, win))}%` } as React.CSSProperties
+              }
               {...tipProps(() => (
                 <>
                   <b>{g.kind === 'owner' ? flow(-chargeBaseOrNaN(state, g.c), state.settings.baseCurrency) : t('family.timeline.future')}</b>
@@ -388,7 +393,7 @@ export function OwnerTimeline({ state, s, today, win }: { state: AppState; s: Su
             />
           );
         })}
-        <i className="mt-today" style={{ left: `${pct(today, win)}%` }} />
+        <i className="mt-today" style={{ '--mt-left': `${pct(today, win)}%` } as React.CSSProperties} />
       </span>
     </span>
   );

@@ -59,11 +59,11 @@ export function YearLedger<T>({
   );
   const allOpen = years.every((y) => open.has(y));
   return (
-    <div className={`ld-table car-receipts car-receipts-out dt-ledger ${grouped ? 'ld-grouped' : ''} ${extraHead ? 'dt-ledger-5' : ''}`}>
+    <div className={`ld-table ld-receipts ld-out dt-ledger ${grouped ? 'ld-grouped' : ''} ${extraHead ? 'dt-ledger-5' : ''}`}>
       {grouped ? (
         <button
           type="button"
-          className="ld-row ld-th car-ledger-head table-head"
+          className="ld-row ld-th ld-toggle table-head"
           aria-expanded={allOpen}
           aria-label={t(allOpen ? 'family.sheet.collapseAll' : 'family.sheet.expandAll')}
           onClick={() => setOpen(new Set(allOpen ? [] : years))}
@@ -81,7 +81,7 @@ export function YearLedger<T>({
             {grouped && (
               <button
                 type="button"
-                className="ld-row car-period"
+                className="ld-row ld-year"
                 aria-expanded={open.has(y)}
                 onClick={() => {
                   const next = new Set(open);
@@ -90,7 +90,7 @@ export function YearLedger<T>({
                   setOpen(next);
                 }}
               >
-                <span className="car-period-title">
+                <span className="ld-year-title">
                   <b>{t('calendar.yearTitle', { year: y })}</b>
                   <small>{t('detail.stats.count', { count: list.length })}</small>
                 </span>

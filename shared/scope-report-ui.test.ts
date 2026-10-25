@@ -2408,7 +2408,7 @@ test('收款表点某一笔直接进入这笔收款的编辑，而不是成员�
   };
   // 跨年时先点表头全部展开；只有一年的记录本来就平铺
   r.render('CarSheet', props)
-    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')
+    .find((n) => n.props.className === 'ld-row ld-th ld-toggle table-head')
     ?.props.onClick();
   const row = r.render('CarSheet', props).find((n) => n.type === 'button' && String(n.props.className ?? '').startsWith('ld-row dt-row'))!;
   row.props.onClick();

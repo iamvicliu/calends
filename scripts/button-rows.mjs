@@ -245,8 +245,8 @@ export async function auditButtonRows(
               await capture('family-detail', width, locale, theme);
             }
             if (route === 'family/people') {
-              await page.focus('.pp-card >> nth=0');
-              await page.press('.pp-card >> nth=0', 'Enter');
+              await page.focus('.people-open >> nth=0');
+              await page.press('.people-open >> nth=0', 'Enter');
               await page.waitForSelector('.sheet');
               await capture('person-detail', width, locale, theme);
             }

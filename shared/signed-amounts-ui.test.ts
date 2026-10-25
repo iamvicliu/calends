@@ -298,7 +298,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     return renderToStaticMarkup(React.createElement(Charges, { sub, state, today, history }));
   };
   const count = (h: string) => (h.match(/class="ld-row dt-row/g) ?? []).length;
-  const years = (h: string) => (h.match(/class="ld-row car-period"/g) ?? []).length;
+  const years = (h: string) => (h.match(/class="ld-row ld-year"/g) ?? []).length;
   const find = (node: React.ReactNode, test: (p: Record<string, unknown>) => boolean): Record<string, unknown> | undefined => {
     if (!React.isValidElement(node)) return;
     // 表格本体是 YearLedger 组件：展开它渲染出的元素再找
@@ -349,7 +349,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
   (yearRow('2025', true).onClick as () => void)();
   assert.equal(count(html(long)), 0);
   // 点表头：全部展开，再点全部收起
-  const head = () => find(tree(long), (p) => typeof p.onClick === 'function' && String(p.className ?? '').includes('car-ledger-head'))!;
+  const head = () => find(tree(long), (p) => typeof p.onClick === 'function' && String(p.className ?? '').includes('ld-toggle'))!;
   (head().onClick as () => void)();
   assert.equal(count(html(long)), 82);
   (head().onClick as () => void)();

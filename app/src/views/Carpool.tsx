@@ -203,7 +203,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         )}
         {/* 列数随宽度变化（每列至少约 340px）；各列独立：展开一张卡只撑高它所在的那一列 */}
         {view === 'grid' && (
-          <div className="car-cols" ref={colsRef} style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
+          <div className="car-cols" ref={colsRef} style={{ '--car-columns': colCount } as React.CSSProperties}>
             {Array.from({ length: colCount }, (_, col) => (
               <div className="car-col" key={col}>
                 {shown.map((s, idx) => {
@@ -218,7 +218,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     <div
                       key={s.id}
                       className={`card stack car-card ${live(s) ? '' : 'stopped'}`}
-                      style={{ order: idx }}
+                      style={{ '--car-order': idx } as React.CSSProperties}
                       role="button"
                       tabIndex={0}
                       onClick={(e) => !(e.target as HTMLElement).closest('button, a, [role=link]') && setSheet(s.id)}
@@ -226,7 +226,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                     >
                       <div className="car-head">
                         <SubIcon sub={s} size={40} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="car-card-identity">
                           <div className="car-name">
                             <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
                           </div>
@@ -264,7 +264,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                       {expanded.has(s.id) && (
                         <>
                           {free > 0 && live(s) && (
-                            <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
+                            <button className="btn tinted car-add-member" onClick={() => setMember({ s })}>
                               <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
                             </button>
                           )}
