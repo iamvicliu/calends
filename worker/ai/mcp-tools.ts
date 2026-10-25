@@ -74,7 +74,7 @@ import {
 import { normName, peopleLedger, personLink, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
-import { loadState, saveLedgerEdit, upsert } from '../store.ts';
+import { loadState, saveLedgerEdit } from '../store.ts';
 import {
   applyCarRule,
   suggestedLeaveRefund,
@@ -604,22 +604,46 @@ async function persist(
       .map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })),
     ...extra,
   };
-  const people = personCreation ? [...(st.people ?? []), personCreation] : undefined;
+  // 新建的分类、人与订阅同一个事务写入
+  return writeLedger(
+    ctx,
+    st,
+    {
+      subscriptions: [after],
+      ...(categoryCreation ? { settings: { ...st.settings, categories: categoryCreation.categories } } : {}),
+      ...(personCreation ? { people: [...(st.people ?? []), personCreation] } : {}),
+    },
+    preview,
+    dry,
+  );
+}
+
+/** 一次写入涉及的实体：订阅、支付方式、设置、名册、界面配置，以及要删除的支付方式与订阅 */
+export interface LedgerWrite extends Pick<Partial<AppState>, 'subscriptions' | 'methods' | 'settings' | 'people' | 'prefs'> {
+  deletedMethods?: string[];
+  deletedSubscriptions?: string[];
+}
+
+/**
+ * 所有写工具唯一的写入出口。dry_run 时只叠进草稿层（订阅进 overlay，删除记为 null；其余进 draftState），
+ * 同一轮后面的工具能看到；否则在一个事务里写入（saveLedgerEdit）。preview 原样带回。
+ */
+export async function writeLedger(ctx: ToolCtx, st: AppState, w: LedgerWrite, preview: object, dry: unknown) {
+  const { subscriptions, methods, deletedMethods = [], deletedSubscriptions = [], ...rest } = w;
   if (dry) {
-    if (categoryCreation) ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, categories: categoryCreation.categories } };
-    if (people) ctx.draftState = { ...ctx.draftState, people };
-    ctx.overlay?.set(after.id, after);
+    ctx.draftState = {
+      ...ctx.draftState,
+      ...rest,
+      ...(methods || deletedMethods.length
+        ? { methods: [...st.methods.filter((m) => !deletedMethods.includes(m.id) && !methods?.some((n) => n.id === m.id)), ...(methods ?? [])] }
+        : {}),
+    };
+    for (const s of subscriptions ?? []) ctx.overlay?.set(s.id, s);
+    for (const id of deletedSubscriptions) ctx.overlay?.set(id, null);
     return { dry_run: true, ...preview };
   }
-  const saved = { ...after };
-  // 新建的分类、人与订阅同一个事务写入
-  if (categoryCreation || people)
-    await saveLedgerEdit(ctx.env, {
-      subscriptions: [saved],
-      ...(categoryCreation ? { settings: { ...st.settings, categories: categoryCreation.categories } } : {}),
-      ...(people ? { people } : {}),
-    });
-  else await upsert(ctx.env, 'subscriptions', saved.id, saved);
+  // 存储层会给订阅记 updatedAt：写副本，预览里的对象保持原样
+  await saveLedgerEdit(ctx.env, { ...rest, subscriptions: subscriptions?.map((s) => ({ ...s })), methods }, deletedMethods, deletedSubscriptions);
   return { ok: true, ...preview };
 }
 
@@ -2175,13 +2199,7 @@ const CATALOGUE: Tool[] = [
           default_public_hidden: st.settings.publicHidden?.includes(s.id) ?? false,
         },
       };
-      if (a.dry_run) {
-        ctx.overlay?.set(s.id, null);
-        ctx.draftState = { ...ctx.draftState, settings: deleteSubscriptionSettings(st.settings, s.id) };
-        return { dry_run: true, ...preview };
-      }
-      await saveLedgerEdit(ctx.env, { settings: deleteSubscriptionSettings(st.settings, s.id) }, [], [s.id]);
-      return { ok: true, ...preview };
+      return writeLedger(ctx, st, { settings: deleteSubscriptionSettings(st.settings, s.id), deletedSubscriptions: [s.id] }, preview, a.dry_run);
     },
   },
   {
