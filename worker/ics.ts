@@ -5,7 +5,12 @@ import { t } from '../shared/i18n.ts';
 import type { AppState } from '../shared/types.ts';
 
 function icsText(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  // 换行（含单独的 CR）一律写成 \n：裸 CR 会被日历客户端当成行结束，把后面的文字解析成新的属性
+  return s
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r\n|\r|\n/g, '\\n');
 }
 
 /** RFC 5545 要求每行不超过 75 字节，超出折行 */

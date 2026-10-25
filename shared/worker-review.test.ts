@@ -380,3 +380,21 @@ test('W-13 日历订阅令牌定长比对，猜错的请求不读整本账也不
   assert.match(await ok.text(), /BEGIN:VCALENDAR/);
   assert.deepEqual(f.writes, []);
 });
+
+test('W-13 日历文本里的单独 CR 也被转义，不能注入新属性', async () => {
+  const { buildIcs } = await import('../worker/ics.ts');
+  const { FALLBACK_FX } = await import('./billing.ts');
+  const ics = buildIcs(
+    {
+      subscriptions: [sub('i', 'Fictional\rX-INJECTED:1', { category: 'Cat\r\nX-OTHER:2' })],
+      methods: [],
+      settings: { ...DEFAULT_SETTINGS, timezone: 'UTC' },
+      fx: FALLBACK_FX,
+    },
+    'https://example.test',
+  );
+  const lines = ics.split('\r\n');
+  assert.ok(lines.every((l) => !l.includes('\r') && !l.includes('\n')));
+  assert.ok(!lines.some((l) => /^(X-INJECTED|X-OTHER)/.test(l)));
+  assert.ok(lines.some((l) => l.includes('Fictional\\nX-INJECTED')));
+});
