@@ -36,7 +36,8 @@
     "addMember": "Ajouter un membre",
     "vacancyTrack": "Place libre",
     "copyFailed": "Impossible de copier l’image",
-    "ownerFee": "Organisateur"
+    "ownerFee": "Organisateur",
+    "ledgerTitle": "Encaissements et paiements"
   },
   "contact": {
     "via": {

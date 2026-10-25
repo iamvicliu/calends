@@ -36,7 +36,8 @@
     "addMember": "添加成员",
     "vacancyTrack": "暂时空缺",
     "copyFailed": "复制图片失败",
-    "ownerFee": "车主"
+    "ownerFee": "车主",
+    "ledgerTitle": "收付记录"
   },
   "contact": {
     "via": {

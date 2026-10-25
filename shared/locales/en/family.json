@@ -36,7 +36,8 @@
     "addMember": "Add member",
     "vacancyTrack": "Currently vacant",
     "copyFailed": "Could not copy image",
-    "ownerFee": "Organizer"
+    "ownerFee": "Organizer",
+    "ledgerTitle": "Money in and out"
   },
   "contact": {
     "via": {

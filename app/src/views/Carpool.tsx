@@ -1203,19 +1203,24 @@ export function CarSheet({
           </Panel>
 
           {/* 收进来的和我付出去的切换着看；表格与订阅详情的扣款记录同一套（YearLedger） */}
-          <Panel className="dt-charges car-ledger">
-            {/* 切换放在卡片头部右侧，与其他卡片的操作位置一致 */}
-            <div className="dt-ph row car-ledger-ph" data-snapshot-hide>
-              <Seg
-                small
-                value={tab}
-                onChange={setTab}
-                options={[
-                  ['in', t('family.sheet.tabIn', { count: receipts.length })],
-                  ['out', t('family.sheet.tabOut', { count: outs.length })],
-                ]}
-              />
-            </div>
+          {/* 与代付的逐期明细同一种卡片：标题在左，收款 / 付款切换在右 */}
+          <Panel
+            className="dt-charges car-ledger"
+            title={t('family.sheet.ledgerTitle')}
+            aside={
+              <span data-snapshot-hide>
+                <Seg
+                  small
+                  value={tab}
+                  onChange={setTab}
+                  options={[
+                    ['in', t('family.sheet.tabIn', { count: receipts.length })],
+                    ['out', t('family.sheet.tabOut', { count: outs.length })],
+                  ]}
+                />
+              </span>
+            }
+          >
             <div data-snapshot-hide>
               {tab === 'out' ? (
                 outs.length ? (

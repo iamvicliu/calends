@@ -8,23 +8,7 @@ import type { AppState, Receipt, Subscription, Waiver } from '../../../shared/ty
 import { recordProxyCharge } from '../../../shared/receivable-edit.ts';
 import { ReceivableSheet } from './Receivable.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../components/DetailKit.tsx';
-import {
-  MetricCards,
-  Metric,
-  Amount,
-  MoneyInput,
-  Cell,
-  Group,
-  NameLink,
-  PayBadge,
-  Seg,
-  Sheet,
-  StatusPill,
-  SubIcon,
-  Toolbar,
-  CardTitle,
-  Icon,
-} from '../components/ui.tsx';
+import { MetricCards, Metric, Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar, Icon } from '../components/ui.tsx';
 import { Plus } from 'lucide-react';
 import { contactText } from './Members.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
@@ -275,15 +259,17 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
           </Facts>
 
           {/* 与订阅详情、合租详情一样：标题和操作在卡片里，表格贴着卡片边 */}
-          <Panel className="dt-charges">
-            <div className="dt-ph row">
-              <CardTitle>{t('proxy.table.title')}</CardTitle>
-              {!ro && (
-                <button className="dt-btn sm dt-add" onClick={() => setAdding(true)}>
+          <Panel
+            className="dt-charges"
+            title={t('proxy.table.title')}
+            aside={
+              !ro && (
+                <button className="dt-btn dt-add" onClick={() => setAdding(true)}>
                   <Plus size={14} /> {t('proxy.receipt.add')}
                 </button>
-              )}
-            </div>
+              )
+            }
+          >
             <div className="ld-table">
               <div className="ld-row ld-th table-head">
                 <span>{t('proxy.table.date')}</span>
@@ -304,7 +290,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     {r.currency !== base && <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>}
                   </span>
                   <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
-                  <ReceivedCell r={r} base={base} />
+                  <ReceivedCell r={r} base={base} brief />
                   <span className="muted">—</span>
                 </button>
               ))}
@@ -324,7 +310,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                         <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
                       </span>
                     ) : (
-                      <ReceivedCell r={r} base={base} />
+                      <ReceivedCell r={r} base={base} brief />
                     )}
                     <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
                       {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base)}
@@ -359,10 +345,17 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
 }
 
 /** 收回一列：这一期分到的钱；收款日与扣款日不同、外币折合、一笔分几期时在下面补一行。免收、期初结清写明 */
-function ReceivedCell({ r, base }: { r: Row; base: string }) {
+function ReceivedCell({ r, base, brief }: { r: Row; base: string; brief?: boolean }) {
   if (r.status === 'waived') return <span className="muted">{t('receivable.waived')}</span>;
   const e = r.receipt!;
   if (r.share == null) return <span className="green">{t('receivable.opening')}</span>;
+  // 表格里只写收回多少，每行一样高；收款日、外币折合、一笔分几期点开这一期再看
+  if (brief)
+    return (
+      <span>
+        <b className="green">{flow(r.share, e.currency)}</b>
+      </span>
+    );
   const lines = [
     // 当天就收回的不再写收款日，和左边的扣款日重复
     e.date !== r.date && t('proxy.table.receivedOn', { date: cnDate(e.date) }),

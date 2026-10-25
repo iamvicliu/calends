@@ -36,7 +36,8 @@
     "addMember": "멤버 추가",
     "vacancyTrack": "현재 빈자리",
     "copyFailed": "이미지 복사 실패",
-    "ownerFee": "방장"
+    "ownerFee": "방장",
+    "ledgerTitle": "입출금 기록"
   },
   "contact": {
     "via": {

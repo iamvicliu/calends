@@ -36,7 +36,8 @@
     "addMember": "Añadir miembro",
     "vacancyTrack": "Vacante por ahora",
     "copyFailed": "No se pudo copiar la imagen",
-    "ownerFee": "Organizador"
+    "ownerFee": "Organizador",
+    "ledgerTitle": "Cobros y pagos"
   },
   "contact": {
     "via": {

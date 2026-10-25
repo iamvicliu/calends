@@ -36,7 +36,8 @@
     "addMember": "メンバーを追加",
     "vacancyTrack": "現在空席",
     "copyFailed": "画像をコピーできませんでした",
-    "ownerFee": "オーナー"
+    "ownerFee": "オーナー",
+    "ledgerTitle": "入出金の記録"
   },
   "contact": {
     "via": {
