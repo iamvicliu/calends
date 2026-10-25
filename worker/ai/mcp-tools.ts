@@ -59,6 +59,7 @@ import {
   stopUndated,
   movePhaseStart,
 } from '../../shared/phases.ts';
+import { editStop } from '../../shared/stop-form.ts';
 import { proxyLedger } from '../../shared/proxy.ts';
 import { paidThrough, setOpening, type LedgerPeriod } from '../../shared/receivables.ts';
 import {
@@ -1729,7 +1730,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'set_status',
     description:
-      'Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).',
+      'Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. To correct an existing stop (date, non-renewal vs immediate cancel, reason, refund) pass edit=true with action=cancel|terminate; omitted fields keep the recorded values and a provider termination stays terminate. An undated stop needs its real date in at. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).',
     write: true,
     inputSchema: obj(
       {
@@ -1744,15 +1745,25 @@ const CATALOGUE: Tool[] = [
         trial_end: { ...DATE, type: ['string', 'null'], description: 'trial only: first paid charge date; null clears, omitted preserves the existing value.' },
         immediate: { type: 'boolean', default: false, description: 'cancel only: stop using the service immediately instead of non-renewal.' },
         reason: { type: 'string', description: 'Optional provider termination reason; terminate only.' },
-        refund: obj(
-          {
-            amount: { type: 'number', minimum: 0 },
-            date: DATE,
-            currency: { type: 'string', description: 'Must equal the subscription currency; usually omit.' },
-            settled: obj({ amount: { type: 'number', minimum: 0 }, currency: { type: 'string' } }, ['amount', 'currency']),
-          },
-          ['amount'],
-        ),
+        refund: {
+          ...obj(
+            {
+              amount: { type: 'number', minimum: 0 },
+              date: DATE,
+              currency: { type: 'string', description: 'Must equal the subscription currency; usually omit.' },
+              settled: obj({ amount: { type: 'number', minimum: 0 }, currency: { type: 'string' } }, ['amount', 'currency']),
+            },
+            ['amount'],
+          ),
+          type: ['object', 'null'],
+          description: 'Immediate cancel / terminate only. With edit=true it replaces the latest stop refund; null removes it; omitted keeps it.',
+        },
+        edit: {
+          type: 'boolean',
+          default: false,
+          description:
+            'Correct an already stopped subscription with action=cancel|terminate: change the stop date (at; omitted keeps it), non-renewal vs immediate cancel, reason or refund. Provider termination cannot become cancel.',
+        },
         dry_run: DRY,
       },
       ['subscription', 'action'],
@@ -1762,6 +1773,35 @@ const CATALOGUE: Tool[] = [
       const s = findSub(st, a.subscription);
       const act = String(a.action);
       const stopping = act === 'cancel' || act === 'terminate';
+      // 修改已有停用：与网页停用表单同一套（先重开再停用），省略的字段保留原值
+      if (a.edit === true) {
+        if (!stopping) throw new Error(t('mcp.error.invalidStop'));
+        if (a.at === null) throw new Error(t('mcp.error.editStopDate'));
+        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | null | undefined;
+        const next = editStop(
+          s,
+          {
+            mode: act === 'terminate' ? 'terminate' : a.immediate === true ? 'cancel' : 'nonrenew',
+            date: a.at === undefined ? undefined : date(a.at, 'at'),
+            reason: 'reason' in a ? (str(a.reason) ?? null) : undefined,
+            refund:
+              r === null
+                ? null
+                : r
+                  ? {
+                      amount: num(r.amount, 'refund.amount'),
+                      date: r.date == null ? undefined : date(r.date, 'refund.date'),
+                      currency: str(r.currency)?.toUpperCase(),
+                      settled: r.settled
+                        ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() }
+                        : undefined,
+                    }
+                  : undefined,
+          },
+          today,
+        );
+        return commit(ctx, st, today, next, a.dry_run, [act, 'edit_stop']);
+      }
       // 停用不默认今天：已经开始或付过钱的订阅，今天未必是真实的停用日，需显式给出（或 null 表示日期未知）
       if (stopping && a.at === undefined) {
         const paid = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some((p) => p.date < today);

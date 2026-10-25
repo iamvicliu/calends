@@ -73,7 +73,9 @@
     "stopDateRequired": "Cet abonnement a commencé ou a été prélevé avant aujourd’hui : la date d’arrêt ne peut pas être aujourd’hui par défaut. Indiquez la date réelle dans at, ou at=null si elle est inconnue.",
     "unknownStopDetails": "Un arrêt à date inconnue ne peut pas comporter de remboursement ni de motif ; indiquez la date dans at pour les enregistrer.",
     "transferProxy": "Les abonnements payés pour autrui ne prennent pas de cessions",
-    "transferNotFound": "Aucune cession trouvée le {date}"
+    "transferNotFound": "Aucune cession trouvée le {date}",
+    "notStopped": "Cet abonnement n’est pas arrêté : il n’y a pas d’arrêt à modifier. Pour l’arrêter, utilisez set_status cancel / terminate sans edit.",
+    "editStopDate": "Pour modifier un arrêt, indiquez sa date réelle dans at (omettez at pour garder la date enregistrée). Un arrêt à date inconnue nécessite sa date réelle."
   },
   "tool": {
     "get_overview": "Aperçu du registre",

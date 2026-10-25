@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
-import { applyStopForm, stopForm } from './stop-form.ts';
+import { applyStopForm, editStop, stopForm } from './stop-form.ts';
 import { cancelAtEnd, savePayment, statusChangeError, stopSubscription, switchPlan } from './phases.ts';
 import { currentPhase, subError } from './billing.ts';
 import { flatten, setLocale, t } from './i18n.ts';
@@ -102,4 +102,22 @@ test('stop fields show the exact stored nonrenewal date, including prepaid futur
   const legacy = { ...sub, status: 'cancelled' as const };
   assert.equal(stopForm(legacy, today).date, today);
   assert.equal(applyStopForm(legacy, stopForm(legacy, today), today).end, today);
+});
+
+test('editStop keeps omitted stop fields, moves a stop-day refund with the date and never turns termination into cancel', () => {
+  const stopped = stopSubscription(sub, today, 'cancel', '2026-10-10', undefined, { amount: 6 });
+  const moved = editStop(stopped, { mode: 'cancel', date: '2026-10-12' }, today);
+  assert.equal(moved.stop?.date, '2026-10-12');
+  assert.deepEqual(
+    moved.payments?.filter((p) => p.kind === 'refund').map((p) => [p.date, p.amount]),
+    [['2026-10-12', -6]],
+  );
+  const nonrenew = editStop(moved, { mode: 'nonrenew' }, today);
+  assert.equal(nonrenew.stop, undefined);
+  assert.equal(nonrenew.end, '2026-10-12');
+  assert.throws(() => editStop(sub, { mode: 'cancel', date: '2026-10-12' }, today), /not stopped/);
+  const terminated = stopSubscription(sub, today, 'terminate', '2026-10-10', 'Policy');
+  assert.equal(editStop(terminated, { mode: 'terminate', reason: 'Revised' }, today).stop?.reason, 'Revised');
+  assert.throws(() => editStop(terminated, { mode: 'cancel' }, today), /cannot reactivate/);
+  assert.throws(() => editStop(stopped, { mode: 'cancel', reason: 'x' }, today));
 });

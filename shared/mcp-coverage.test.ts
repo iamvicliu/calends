@@ -1752,3 +1752,68 @@ test('MCP 改开始日与网页 movePhaseStart 一致：默认保留扣款锚点
   assert.equal(stored.billingStart, '2026-01-15');
   assert.equal((await f.call('get_subscription', { subscription: 's' })).structuredContent.next_charge.slice(8), '15');
 });
+
+test('set_status edit=true 修改已有停用：日期、不续费/立即停用、原因、退款，被服务商停用不能改成取消', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const today = todayIn('UTC');
+  const past = addDays(today, -40);
+  const stopAt = addDays(past, 20);
+  await upsert(f.env, 'subscriptions', 's', { ...sub(), start: past, share: undefined, proxy: undefined, payments: [{ date: past, amount: 10 }] });
+  const stored = async () => (await f.snapshot()).subscriptions.find((x) => x.id === 's')!;
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: stopAt, edit: true })).isError, true, 'not stopped yet');
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: stopAt, refund: { amount: 2 } })).isError, undefined);
+  // 未带 edit 仍然拒绝重复停用
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: addDays(stopAt, 1) })).isError, true);
+  const before = await f.snapshot();
+  const moved = addDays(stopAt, 2);
+  const preview = await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: moved, edit: true, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.after.stop.date, moved);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: moved, edit: true }, f.read)).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  // 只改日期：退款保留
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: moved, edit: true })).isError, undefined);
+  let s = await stored();
+  assert.equal(s.stop?.date, moved);
+  assert.deepEqual(
+    s.payments?.filter((p) => p.kind === 'refund').map((p) => p.amount),
+    [-2],
+  );
+  // 改退款金额，再清除
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true, refund: { amount: 3 } })).isError, undefined);
+  s = await stored();
+  assert.equal(s.stop?.date, moved);
+  assert.deepEqual(
+    s.payments?.filter((p) => p.kind === 'refund').map((p) => p.amount),
+    [-3],
+  );
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true, refund: null })).isError, undefined);
+  assert.equal((await stored()).payments?.some((p) => p.kind === 'refund'), false);
+  // 立即停用 → 到期不续
+  const r = await f.call('set_status', { subscription: 's', action: 'cancel', edit: true });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  s = await stored();
+  assert.equal(s.stop, undefined);
+  assert.equal(s.status, 'cancelled');
+  assert.equal(s.end, moved);
+  // 改为被服务商停用并写原因，之后可改原因，但不能改成取消
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'terminate', at: moved, reason: 'Fictional policy', edit: true })).isError, undefined);
+  assert.equal((await stored()).stop?.kind, 'terminate');
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'terminate', reason: 'Revised policy', edit: true })).isError, undefined);
+  assert.equal((await stored()).stop?.reason, 'Revised policy');
+  const blocked = await f.snapshot();
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true })).isError, true);
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', edit: true })).isError, true);
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'pause', edit: true })).isError, true);
+  assert.deepEqual(await f.snapshot(), blocked);
+  // 日期不详的停用：必须补上日期
+  await upsert(f.env, 'subscriptions', 'u', { ...sub(), id: 'u', start: past, share: undefined, proxy: undefined, payments: [{ date: past, amount: 10 }] });
+  assert.equal((await f.call('set_status', { subscription: 'u', action: 'cancel', at: null })).isError, undefined);
+  assert.equal((await f.call('set_status', { subscription: 'u', action: 'cancel', immediate: true, edit: true })).isError, true);
+  assert.equal((await f.call('set_status', { subscription: 'u', action: 'cancel', at: null, edit: true })).isError, true);
+  const dated = await f.call('set_status', { subscription: 'u', action: 'cancel', immediate: true, at: stopAt, edit: true });
+  assert.equal(dated.isError, undefined, JSON.stringify(dated));
+  assert.equal((await f.snapshot()).subscriptions.find((x) => x.id === 'u')?.stop?.date, stopAt);
+});
