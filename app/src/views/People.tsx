@@ -13,7 +13,7 @@ import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subsc
 import { Picker } from '../components/Picker.tsx';
 import { MetricCards, Metric, Amount, ask, Cell, Group, Icon, IconButton, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { go } from '../router.ts';
-import { copyText, deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
+import { copyText, toast, deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
 import { ContactField, contactText, contactValue, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 import './people-list.css';
@@ -351,7 +351,7 @@ function PersonSheet({
       const avatar = await compressAvatar(file);
       setF((current) => ({ ...current, avatar }));
     } catch (error) {
-      await ask(error instanceof Error ? error.message : t('server.avatarInvalid'));
+      toast(error instanceof Error ? error.message : t('server.avatarInvalid'), true);
     } finally {
       busyRef.current = false;
       setAvatarBusy(false);
