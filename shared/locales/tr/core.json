@@ -44,6 +44,7 @@
   "subError": {
     "name": "Ad gerekli",
     "price": "Geçersiz fiyat",
+    "paymentCurrency": "Ödeme para birimi planın para birimiyle aynı olmalı",
     "start": "Geçersiz başlangıç tarihi",
     "cycle": "Geçersiz ödeme dönemi",
     "refundAmount": "Pozitif bir tutar ve geçerli para birimi girin",

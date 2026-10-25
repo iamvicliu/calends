@@ -187,7 +187,7 @@ export function subError(s: Subscription): string | undefined {
 }
 
 /**
- * 订阅与各阶段的字段格式问题：开始日、价格、币种、周期、结束日、下次扣款日、试用结束、暂停日、首期优惠、赠送期与标签。
+ * 订阅与各阶段的字段格式问题：开始日、价格、币种、周期、结束日、下次扣款日、试用结束、暂停日、首期优惠、赠送期、标签与扣款币种。
  * 每项带上「字段 + 取值」作键，newShapeError 据此只拦本次新写入的问题。
  */
 function shapeIssues(s: Subscription): Array<[key: string, error: string]> {
@@ -224,6 +224,10 @@ function shapeIssues(s: Subscription): Array<[key: string, error: string]> {
       day('bonus.from', p.bonus.from ?? null);
       day('bonus.until', p.bonus.until ?? null);
     }
+    // 扣款金额始终按所属方案的币种计；另写的币种会被忽略，卡上实扣的币种用 settled
+    for (const pay of Array.isArray(p.payments) ? p.payments : [])
+      if (pay?.currency != null && pay.currency !== p.currency)
+        add('payment.currency', [pay.date, pay.currency, p.currency], t('core.subError.paymentCurrency'));
   }
   return out;
 }

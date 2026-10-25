@@ -22,7 +22,7 @@ export interface Stop {
 }
 
 export interface Payment {
-  /** 缺省同所属阶段币种；退款不得使用其他币种，卡上实退使用 settled */
+  /** 缺省同所属阶段币种；写了也必须等于阶段币种（新写入校验），卡上实扣、实退的其他币种使用 settled */
   currency?: string;
   date: string;
   amount: number;

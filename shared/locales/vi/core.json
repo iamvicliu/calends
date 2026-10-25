@@ -39,6 +39,7 @@
   "subError": {
     "name": "Cần nhập tên",
     "price": "Giá không hợp lệ",
+    "paymentCurrency": "Tiền tệ thanh toán phải trùng với tiền tệ của gói",
     "start": "Ngày bắt đầu không hợp lệ",
     "cycle": "Chu kỳ thanh toán không hợp lệ",
     "refundAmount": "Nhập số tiền dương và loại tiền hợp lệ",

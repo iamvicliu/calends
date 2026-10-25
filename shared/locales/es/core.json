@@ -44,6 +44,7 @@
   "subError": {
     "name": "El nombre es obligatorio",
     "price": "Precio no válido",
+    "paymentCurrency": "La moneda del pago debe coincidir con la del plan",
     "start": "Fecha de inicio no válida",
     "cycle": "Ciclo de facturación no válido",
     "refundAmount": "Introduce un importe positivo y una moneda válida",

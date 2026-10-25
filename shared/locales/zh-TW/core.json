@@ -29,6 +29,7 @@
   "subError": {
     "name": "名稱不能為空",
     "price": "價格無效",
+    "paymentCurrency": "扣款幣別必須與所屬方案的幣別一致",
     "start": "開始日期無效",
     "cycle": "週期無效",
     "refundAmount": "退款金額須為正數，幣別須有效",

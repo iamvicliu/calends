@@ -44,6 +44,7 @@
   "subError": {
     "name": "Name ist erforderlich",
     "price": "Ungültiger Preis",
+    "paymentCurrency": "Die Zahlungswährung muss der Währung des Tarifs entsprechen",
     "start": "Ungültiges Startdatum",
     "cycle": "Ungültiger Abrechnungszeitraum",
     "refundAmount": "Positiven Erstattungsbetrag und gültige Währung eingeben",

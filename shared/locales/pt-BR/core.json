@@ -44,6 +44,7 @@
   "subError": {
     "name": "O nome é obrigatório",
     "price": "Preço inválido",
+    "paymentCurrency": "A moeda do pagamento deve ser a mesma do plano",
     "start": "Data de início inválida",
     "cycle": "Ciclo de cobrança inválido",
     "refundAmount": "Insira um valor positivo e uma moeda válida",

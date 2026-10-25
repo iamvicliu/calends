@@ -44,6 +44,7 @@
   "subError": {
     "name": "Name is required",
     "price": "Invalid price",
+    "paymentCurrency": "Payment currency must match the plan currency",
     "start": "Invalid start date",
     "cycle": "Invalid billing cycle",
     "refundAmount": "Enter a positive refund amount and a valid currency",

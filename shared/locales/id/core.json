@@ -39,6 +39,7 @@
   "subError": {
     "name": "Nama wajib diisi",
     "price": "Harga tidak valid",
+    "paymentCurrency": "Mata uang pembayaran harus sama dengan mata uang paket",
     "start": "Tanggal mulai tidak valid",
     "cycle": "Siklus tagihan tidak valid",
     "refundAmount": "Masukkan jumlah positif dan mata uang yang valid",

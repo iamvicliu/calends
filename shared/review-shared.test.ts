@@ -59,3 +59,13 @@ test('S-1 标签缺省补为空数组；库里原有的同一格式问题放行�
   // MCP 窄工具走 commit → subRefsError，同一套校验
   assert.ok(subRefsError(state(), undefined, phased({ cycle: { unit: 'week', every: 1.5 } })));
 });
+
+test('S-2 普通扣款写了与方案不同的币种时拒绝新写入，原有记录放行', () => {
+  const pays = (currency?: string) => sub({ payments: [{ date: '2026-01-01', amount: 10, ...(currency ? { currency } : {}) }] });
+  assert.equal(writeError(pays()), undefined);
+  assert.equal(writeError(pays('USD')), undefined);
+  assert.ok(writeError(pays('EUR')));
+  assert.ok(writeError(phased({ payments: [{ date: '2026-06-01', amount: 12, kind: 'adjust', currency: 'EUR' }] })));
+  const legacy = pays('EUR');
+  assert.equal(writeError({ ...legacy, notes: 'edited' }, legacy), undefined);
+});
