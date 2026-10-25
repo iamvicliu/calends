@@ -8,6 +8,7 @@ import { chargeBaseOrNaN, chargeFxMissing, chargeValue, toBaseAt, toBaseOrNaN } 
 import { yearCost } from './metrics.ts';
 import { netCost } from './transfers.ts';
 import { dropPlan, switchPlan } from './phases.ts';
+import { maskForPublic } from './mask.ts';
 import { prepareImport, readImportCsv } from './import-ledger.ts';
 import { subRefsError } from './ledger-edit.ts';
 import { prepareSubWrite } from './sub-write.ts';
@@ -156,4 +157,21 @@ test('S-6 合租收款币种统一取 collectCurrencyOf：范围报告的待收�
   const sharing = scopeReport(st, [car], '2026-03-15').blocks.find((b) => b.type === 'sharing') as { owed: number } | undefined;
   assert.ok(sharing);
   assert.ok(Math.abs(sharing.owed - dues.owed) < 0.01, `${sharing.owed} ≈ ${dues.owed}`);
+});
+
+test('S-7 公开页阶段与扣款按白名单下发，未知字段与备注不外泄', () => {
+  const leaky = { secret: 'private-text', note: 'private-note' };
+  const s = sub({
+    price: 12,
+    phases: [
+      { ...phase({ end: '2026-05-31', payments: [{ date: '2026-01-01', amount: 10, note: 'n', ...leaky } as never] }), ...leaky },
+      phase({ start: '2026-06-01', price: 12, payments: [{ date: '2026-06-01', amount: 12, settled: { amount: 90, currency: 'CNY', ...leaky } as never }] }),
+    ],
+    payments: [{ date: '2026-01-01', amount: 10, ...leaky } as never],
+  });
+  const json = JSON.stringify(maskForPublic(state([s])).subscriptions);
+  assert.ok(!json.includes('private'), json);
+  const out = maskForPublic(state([s])).subscriptions[0];
+  assert.equal(out.phases![1].payments![0].settled!.amount, 90);
+  assert.equal(out.phases![0].end, '2026-05-31');
 });
