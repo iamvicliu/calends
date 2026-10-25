@@ -18,7 +18,7 @@ import {
   totals,
   chargeMethodId,
 } from '../shared/billing.ts';
-import { toBaseAt } from '../shared/fx.ts';
+import { toBaseOrNaN } from '../shared/fx.ts';
 import { billLabel, cnDate, money, monthLabel, relDays } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
 import { channelsOf, type AppState, type Subscription } from '../shared/types.ts';
@@ -172,7 +172,8 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
       const every = memberBillMonths(s, m, due);
       const period = memberCollection(s, m, due, collect);
-      const fee = money(toBaseAt(state, period.amount, period.currency, undefined, collect), collect);
+      // 缺汇率时显示「—」，不显示成 0
+      const fee = money(toBaseOrNaN(state, period.amount, period.currency, undefined, collect), collect);
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
       carpool.push({
         title: `${m.name} · ${s.name}`,
@@ -200,7 +201,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
         title: `${name} · ${s.name}`,
         sub: `${t('notify.proxy.sub', { status: d === 0 ? t('notify.proxy.chargedToday') : t('notify.proxy.chargedAgo', { date: cnDate(c.from), count: d }) })}${contact}`,
         amount: money(charged, ccy),
-        amountSub: `≈ ${money(toBaseAt(state, charged, ccy, c.from, collect), collect)}`,
+        amountSub: `≈ ${money(toBaseOrNaN(state, charged, ccy, c.from, collect), collect)}`,
         tone: d > 0 ? 'warn' : undefined,
         icon: iconOf(s),
       });
@@ -267,7 +268,8 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
     .filter((s) => !s.proxy)
     .flatMap((s) => chargesBetween(s, today, end, today).filter((c) => c.date < end))
     .sort((a, b) => a.date.localeCompare(b.date));
-  const sum = charges.reduce((acc, c) => acc + (convert(c.amount, c.currency, base, state.fx) || 0), 0);
+  // 有一笔折算不了，本月合计就显示「—」，不把它当 0 少算
+  const sum = charges.reduce((acc, c) => acc + convert(c.amount, c.currency, base, state.fx), 0);
   const tot = totals(state, today);
   const [y, m] = today.split('-').map(Number);
   const ym = today.slice(0, 7);

@@ -436,3 +436,36 @@ test('W-15 订阅 updatedAt 由存储层统一写入：网页保存、MCP 账本
   assert.equal(put.status, 200);
   assert.notEqual(await stampOf(), '2000-01-01T00:00:00.000Z');
 });
+
+test('W-19 MCP 读工具与提醒遇到缺汇率给 null + incomplete，不当成 0', async () => {
+  const f = await ledger();
+  const past = `${Number(today.slice(0, 4)) - 1}-01-15`;
+  // XYZ 没有任何汇率：既不在当前汇率表，也没有历史汇率
+  f.db
+    .prepare('INSERT INTO subscriptions (id, data) VALUES (?, ?)')
+    .run('x1', JSON.stringify(sub('x1', 'Fictional exotic', { currency: 'XYZ', price: 100, start: past, payments: [{ date: past, amount: 100 }] })));
+  await upsert(f.env, 'subscriptions', 'u1', sub('u1', 'Fictional usd', { start: past }));
+  const json = (r: { content: Array<{ text: string }> }) => JSON.parse(r.content[0].text);
+  const detail = json(await f.call('get_subscription', { subscription: 'x1' }));
+  assert.equal(detail.spent_total.amount, null);
+  assert.equal(detail.spent_total.incomplete, true);
+  assert.deepEqual(detail.spent_total.fx_missing, ['XYZ']);
+  assert.ok(detail.charges.every((c: { amount: { converted: unknown } }) => c.amount.converted === null));
+  const charges = json(await f.call('list_charges', { period: 'custom', from: past, to: today }));
+  assert.equal(charges.total, null);
+  assert.equal(charges.incomplete, true);
+  assert.deepEqual(charges.fx_missing, ['XYZ']);
+  const usdOnly = json(await f.call('list_charges', { period: 'custom', from: past, to: today, subscription: 'u1' }));
+  assert.equal(usdOnly.incomplete, false);
+  assert.ok(usdOnly.total > 0);
+  const preview = json(await f.call('save_subscription', { subscription: { ...detail.record, notes: 'x' }, dry_run: true }));
+  assert.equal(preview.computed.after.spent_total.amount, null);
+  assert.equal(preview.computed.after.spent_total.incomplete, true);
+
+  const { buildMonthly } = await import('../worker/notify.ts');
+  const st = await loadState(f.env, false);
+  const first = `${today.slice(0, 7)}-01`;
+  const d = buildMonthly({ ...st, settings: { ...st.settings, monthlyDigest: true } }, first);
+  assert.ok(d);
+  assert.equal(d.stats?.[0].value, '—');
+});
