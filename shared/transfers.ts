@@ -1,7 +1,7 @@
 // 转让收付：二手转入时付给原主的钱、转出时收到的钱。都是实际现金，不推算剩余服务价值。
 // 不是服务商扣款：不进 MRR、续费预测、余额消耗、退款与扣款笔数；只进生命周期净成本和年度、月度现金流。
 import { chargesBetween, diffDays, servedTime, validDay } from './billing.ts';
-import { chargeValue, convertOn } from './fx.ts';
+import { chargeBaseOrNaN, convertOn } from './fx.ts';
 import { t } from './i18n.ts';
 import type { AppState, Subscription, Transfer } from './types.ts';
 
@@ -44,7 +44,7 @@ export function holdingPeriod(s: Subscription, today: string): { from: string; u
 
 export interface NetCost {
   currency: string;
-  /** 服务商扣款（实扣、退款为负），同详情「累计」口径 */
+  /** 服务商扣款（实扣、退款为负），同详情「累计」口径；有扣款缺汇率时为 NaN */
   service: number;
   charges: number;
   /** 转入付出的钱、转出收回的钱（正数）；缺汇率时为 NaN */
@@ -56,14 +56,14 @@ export interface NetCost {
   days: number;
   perMonth: number;
   perDay: number;
-  /** 有转让缺少可用汇率：本位币合计不可用 */
+  /** 有服务扣款或转让缺少可用汇率：本位币合计不可用 */
   incomplete: boolean;
 }
 
 /** 生命周期净成本 = 服务付款 + 转入 − 转出；月均、日均按持有期摊（今天之后的转让不计） */
 export function netCost(state: AppState, s: Subscription, today: string, to = state.settings.baseCurrency): NetCost {
   const history = chargesBetween(s, s.start, today, today);
-  const service = history.reduce((a, c) => a + chargeValue(state, c, to), 0);
+  const service = history.reduce((a, c) => a + chargeBaseOrNaN(state, c, to), 0);
   let bought = 0;
   let sold = 0;
   for (const tr of transfersOf(s)) {
@@ -85,7 +85,7 @@ export function netCost(state: AppState, s: Subscription, today: string, to = st
     ...held,
     perMonth,
     perDay: perMonth / MONTH,
-    incomplete: !Number.isFinite(bought) || !Number.isFinite(sold),
+    incomplete: !Number.isFinite(service) || !Number.isFinite(bought) || !Number.isFinite(sold),
   };
 }
 

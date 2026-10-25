@@ -83,30 +83,33 @@ export function parseFrankfurter(body: unknown, keep: Set<string>): Record<strin
   return out;
 }
 
-/** 换算到本位币：date 在未来或缺省时用当前汇率 */
+/** 换算到 to（缺省本位币）：date 在未来或缺省时用当前汇率；折算不了（缺汇率）为 NaN，不当成 0 */
+export function toBaseOrNaN(state: AppState, amount: number, ccy: string, date?: string, to = state.settings.baseCurrency): number {
+  return date ? convertOn(amount, ccy, to, date, state.fxHistory, state.fx) : convertOn(amount, ccy, to, '9999-12-31', undefined, state.fx);
+}
+
+type ChargeLike = { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } };
+
+/** 一笔扣款的本位币金额：已发生的按扣款当天汇率（记了卡上实扣时按实扣），预测的按当前汇率；缺汇率为 NaN */
+export function chargeBaseOrNaN(state: AppState, c: ChargeLike, to = state.settings.baseCurrency): number {
+  // 记了卡上实际扣款时按它算：汇差、手续费都算进真实成本
+  if (c.settled && !c.projected) return toBaseOrNaN(state, c.settled.amount, c.settled.currency, c.date, to);
+  return toBaseOrNaN(state, c.amount, c.currency, c.projected ? undefined : c.date, to);
+}
+
+/** 旧口径：同 toBaseOrNaN，但缺汇率时返回 0。新代码用 toBaseOrNaN 并标记不完整 */
 export function toBaseAt(state: AppState, amount: number, ccy: string, date?: string, to = state.settings.baseCurrency): number {
-  const v = date ? convertOn(amount, ccy, to, date, state.fxHistory, state.fx) : convertOn(amount, ccy, to, '9999-12-31', undefined, state.fx);
+  const v = toBaseOrNaN(state, amount, ccy, date, to);
   return Number.isFinite(v) ? v : 0;
 }
 
 /** chargeValue() 折算不了（缺汇率）时为 true：那时它返回 0，调用方需要标记不完整而不是当成 0 */
-export function chargeFxMissing(
-  state: AppState,
-  c: { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } },
-  to = state.settings.baseCurrency,
-): boolean {
-  const [ccy, date] = c.settled && !c.projected ? [c.settled.currency, c.date] : [c.currency, c.projected ? undefined : c.date];
-  const v = date ? convertOn(1, ccy, to, date, state.fxHistory, state.fx) : convertOn(1, ccy, to, '9999-12-31', undefined, state.fx);
-  return !Number.isFinite(v);
+export function chargeFxMissing(state: AppState, c: ChargeLike, to = state.settings.baseCurrency): boolean {
+  return !Number.isFinite(chargeBaseOrNaN(state, c, to));
 }
 
-/** 一笔扣款的本位币金额：已发生的按扣款当天汇率，预测的按当前汇率 */
-export function chargeValue(
-  state: AppState,
-  c: { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } },
-  to = state.settings.baseCurrency,
-): number {
-  // 记了卡上实际扣款时按它算：汇差、手续费都算进真实成本
-  if (c.settled && !c.projected) return toBaseAt(state, c.settled.amount, c.settled.currency, c.date, to);
-  return toBaseAt(state, c.amount, c.currency, c.projected ? undefined : c.date, to);
+/** 旧口径：同 chargeBaseOrNaN，但缺汇率时返回 0。新代码用 chargeBaseOrNaN 并标记不完整 */
+export function chargeValue(state: AppState, c: ChargeLike, to = state.settings.baseCurrency): number {
+  const v = chargeBaseOrNaN(state, c, to);
+  return Number.isFinite(v) ? v : 0;
 }

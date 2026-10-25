@@ -21,7 +21,7 @@ import {
   runwayFor,
   type Charge,
 } from './billing.ts';
-import { chargeValue, convertOn, toBaseAt } from './fx.ts';
+import { chargeBaseOrNaN, chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
@@ -744,7 +744,8 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
  */
 export function yearCost(state: AppState, s: Subscription, today: string): number {
   const y = today.slice(0, 4);
+  // 缺汇率的扣款让合计为 NaN（显示为不可用），不当成 0
   return chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today)
     .filter((c) => c.kind !== 'failed')
-    .reduce((a, c) => a + chargeValue(state, c), 0);
+    .reduce((a, c) => a + chargeBaseOrNaN(state, c), 0);
 }

@@ -13,7 +13,7 @@ import {
 } from './types.ts';
 import { dateFormat } from './intl.ts';
 import { t } from './i18n.ts';
-import { chargeValue, convertOn } from './fx.ts';
+import { chargeBaseOrNaN, convertOn } from './fx.ts';
 import { isSettled, settle, type Period } from './receivables.ts';
 import { transferError } from './transfers.ts';
 
@@ -884,7 +884,8 @@ export function monthlyGross(s: Subscription, day?: string, fx: FxTable = FALLBA
     if (!day) return monthlyGross(phaseSubs(s).pop()!);
     const cur = currentPhase(s, day);
     const others = activePhases(s, day).filter((v) => v.start !== cur.start);
-    return others.reduce((a, v) => a + (convert(monthlyGross(v, day), v.currency, cur.currency, fx) || 0), monthlyGross(cur, day));
+    // 并行段折算不了（缺汇率）时整体为 NaN，不把那一段当成 0
+    return others.reduce((a, v) => a + convert(monthlyGross(v, day), v.currency, cur.currency, fx), monthlyGross(cur, day));
   }
   if (s.cycle.unit === 'lifetime') return 0;
   const p = day ? priceAt(s, day) : s.price;
@@ -960,6 +961,8 @@ export interface Runway {
   runsOutOn?: string;
   /** 撑满未来 12 个月还需充值多少（账户币种） */
   topUp12m: number;
+  /** 有扣款或月消耗缺汇率：从那一笔起余额、充值额为 NaN，不跳过 */
+  incomplete: boolean;
   /** 完整推演，供充值计划使用；明细单独截断 */
   forecast: Array<Charge & { balanceAfter: number; amountInMethod: number }>;
   upcoming: Runway['forecast'];
@@ -988,11 +991,13 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   let shortfall: Charge | undefined;
   let covered = 0;
   let current = bal;
+  let incomplete = false;
   for (const { c, share } of charges) {
     const entry = proxyCharges.get(c.sub.id)?.get(c.date);
     const settled = c.kind === 'failed' ? undefined : entry?.amount != null ? { amount: entry.amount, currency: entry.currency ?? c.currency } : c.settled;
-    const amt = chargeValue(state, { ...c, settled }, method.currency) * share;
-    if (!Number.isFinite(amt)) continue;
+    const amt = chargeBaseOrNaN(state, { ...c, settled }, method.currency) * share;
+    // 缺汇率的扣款照样扣：余额从这里起不可知（NaN），而不是假装没扣
+    if (!Number.isFinite(amt)) incomplete = true;
     if (c.date <= today) {
       bal -= amt;
       current = bal;
@@ -1000,7 +1005,7 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
     }
     if (!shortfall && bal - amt < -1e-9) shortfall = c;
     bal -= amt;
-    if (!shortfall) covered++;
+    if (!shortfall && Number.isFinite(bal)) covered++;
     forecast.push({ ...c, balanceAfter: bal, amountInMethod: amt });
   }
   const yearOut = addMonths(today, 12);
@@ -1008,12 +1013,14 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   let monthlyDrain = 0;
   for (const s of subs) {
     const st = effectiveStatus(s, today);
-    if (st === 'active' || st === 'ending') monthlyDrain += convert(monthlyGross(s, today), s.currency, method.currency, state.fx) || 0;
+    if (st === 'active' || st === 'ending') monthlyDrain += convert(monthlyGross(s, today), s.currency, method.currency, state.fx);
   }
+  if (!Number.isFinite(monthlyDrain)) incomplete = true;
   return {
     method,
     current,
     monthlyDrain,
+    incomplete,
     shortfall,
     coveredCharges: covered,
     runsOutOn: shortfall?.date,

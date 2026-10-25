@@ -15,7 +15,7 @@ import {
   memberLedger,
   diffDays,
 } from './billing.ts';
-import { chargeValue, convertOn, toBaseAt } from './fx.ts';
+import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
 import { currencyDecimals } from './format.ts';
 import { isSettled, type Period } from './receivables.ts';
@@ -67,7 +67,8 @@ export function suggestedLeaveRefund(state: AppState, s: Subscription, m: ShareM
 export function carLedger(state: AppState, s: Subscription, today: string) {
   const cur = currentPhase(s, today);
   const members = s.share?.members ?? [];
-  const yearCost = toBaseAt(state, monthlyGross(cur, today) * 12, cur.currency);
+  // 缺汇率的部分为 NaN（与收回、退款的 memberFlowValue 同一口径），不当成 0
+  const yearCost = toBaseOrNaN(state, monthlyGross(cur, today) * 12, cur.currency);
   // 预计收入只算还在车上的；实际收回保留所有人（包括已退出的）的历史收款
   const yearRefunded = members.reduce((sum, m) => {
     const r = m.leaveRefund;
@@ -79,7 +80,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
       ? 0
       : members.reduce((a, m) => {
           const rate = memberFee(state, s, m, today);
-          return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
+          return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseOrNaN(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
         }, 0)) - yearRefunded;
   const firstPay = members
     .flatMap(memberCashFlows)
@@ -88,7 +89,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
   const since = s.share?.since ?? firstPay ?? firstJoin ?? s.start;
-  const paid = since ? chargesBetween(s, since, today, today).reduce((a, c) => a + chargeValue(state, c), 0) : 0;
+  const paid = since ? chargesBetween(s, since, today, today).reduce((a, c) => a + chargeBaseOrNaN(state, c), 0) : 0;
   const received = members.flatMap(memberCashFlows).reduce((a, p) => a + memberFlowValue(state, p), 0);
   return {
     hasRecords: members.some((m) => memberCashFlows(m).length > 0),
@@ -121,7 +122,7 @@ export function carYear(state: AppState, s: Subscription, today: string) {
     .flatMap((m) =>
       memberLedger(s, m, today, ccy, `${y}-12-31`)
         .periods.filter((p) => !isSettled(p) && p.from.slice(0, 4) === y)
-        .map((p) => toBaseAt(state, p.due, p.currency, p.from)),
+        .map((p) => toBaseOrNaN(state, p.due, p.currency, p.from)),
     )
     .reduce((a, v) => a + v, 0);
   const income = received + expected;

@@ -1,7 +1,11 @@
 // 2026-10-25 审查 S 组（shared 领域层）的回归用例
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { FALLBACK_FX } from './billing.ts';
+import { FALLBACK_FX, monthlyGross, runwayFor } from './billing.ts';
+import { carLedger, carYear } from './carpool.ts';
+import { chargeBaseOrNaN, chargeFxMissing, chargeValue, toBaseAt, toBaseOrNaN } from './fx.ts';
+import { yearCost } from './metrics.ts';
+import { netCost } from './transfers.ts';
 import { dropPlan, switchPlan } from './phases.ts';
 import { prepareImport, readImportCsv } from './import-ledger.ts';
 import { subRefsError } from './ledger-edit.ts';
@@ -104,4 +108,34 @@ test('S-4 撤销计划阶段退回单阶段时保留赠送期', () => {
   const back = dropPlan(planned, '2026-12-01');
   assert.equal(back.phases, undefined);
   assert.deepEqual(back.bonus, bonus);
+});
+
+test('S-5 缺汇率口径：NaN 版本与旧 0 版本并存，净成本、余额续航、并行月成本、合租账标记不完整', () => {
+  const st = state();
+  const charge = { amount: 10, currency: 'XYZ', date: '2026-02-01', projected: false };
+  assert.ok(Number.isNaN(chargeBaseOrNaN(st, charge, 'USD')));
+  assert.equal(chargeValue(st, charge), 0);
+  assert.ok(chargeFxMissing(st, charge));
+  assert.ok(Number.isNaN(toBaseOrNaN(st, 10, 'XYZ', '2026-02-01')));
+  assert.equal(toBaseAt(st, 10, 'XYZ'), 0);
+  assert.equal(toBaseOrNaN(st, 10, 'USD'), 10);
+
+  const foreign = sub({ currency: 'XYZ', price: 10, methodId: 'm' });
+  const cost = netCost(state([foreign]), foreign, '2026-03-15');
+  assert.equal(cost.incomplete, true);
+  assert.ok(Number.isNaN(cost.service));
+
+  const method = { id: 'm', name: 'Fictional Wallet', kind: 'prepaid' as const, currency: 'USD', balance: 100, balanceAsOf: '2026-01-01' };
+  const runway = runwayFor(method, state([foreign], { methods: [method] }), '2026-03-15')!;
+  assert.equal(runway.incomplete, true);
+  assert.ok(Number.isNaN(runway.current), '已发生但折算不了的扣款不再被跳过');
+
+  const parallel = sub({ phases: [phase({ currency: 'XYZ', end: '2026-12-31' }), phase({ start: '2026-03-01', price: 12 })], price: 12 });
+  assert.ok(Number.isNaN(monthlyGross(parallel, '2026-04-01', FALLBACK_FX)));
+
+  const car = sub({ currency: 'XYZ', share: { role: 'owner', seats: 2, members: [], since: '2026-01-01' } });
+  const ledger = carLedger(state([car]), car, '2026-03-15');
+  assert.ok(Number.isNaN(ledger.paid) && Number.isNaN(ledger.yearCost));
+  assert.ok(Number.isNaN(carYear(state([car]), car, '2026-03-15').cost));
+  assert.ok(Number.isNaN(yearCost(state([car]), car, '2026-03-15')));
 });
