@@ -1933,7 +1933,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'record_payment',
     description:
-      'Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for refunds. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. funding = one order paid from several sources (amounts in the subscription currency summing to amount, e.g. 178.80 = PayPal 168.05 + Balance 10.75); wallet balances are reduced by each part. funding and method are exclusive; null clears a split; omitted keeps a replaced charge’s split. Rejects same-day same-amount duplicates unless allow_duplicate.',
+      'Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for every kind (charge, refund, adjust, failed); a different card currency belongs in settled. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. funding = one order paid from several sources (amounts in the subscription currency summing to amount, e.g. 178.80 = PayPal 168.05 + Balance 10.75); wallet balances are reduced by each part. funding and method are exclusive; null clears a split; omitted keeps a replaced charge’s split. Rejects same-day same-amount duplicates unless allow_duplicate.',
     write: true,
     inputSchema: obj(
       {
@@ -1943,7 +1943,7 @@ const CATALOGUE: Tool[] = [
         amount: { type: 'number', minimum: 0 },
         currency: {
           type: 'string',
-          description: 'Refund currency must equal the subscription / selected phase currency. Use settled for a different card currency.',
+          description: 'Must equal the subscription / selected phase currency for every kind; usually omit. Use settled for a different card currency.',
         },
         kind: { type: 'string', enum: ['charge', 'refund', 'adjust', 'failed'], default: 'charge' },
         settled: obj({ amount: { type: 'number' }, currency: { type: 'string' } }, ['amount', 'currency']),
