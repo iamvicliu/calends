@@ -1,5 +1,5 @@
 import { personSummary } from '../../shared/avatar.ts';
-import { reconcileRenewalRules, preserveRenewalHistory, renewalDates, chargeMethodId, chargeSources } from '../../shared/billing.ts';
+import { preserveRenewalHistory, renewalDates, chargeMethodId, chargeSources } from '../../shared/billing.ts';
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
 import {
   activePhases,
@@ -53,7 +53,6 @@ import {
   toEditForm,
   stopSubscription,
   reactivate,
-  statusChangeError,
   cancelAtEnd,
   stopUndated,
   movePhaseStart,
@@ -96,7 +95,7 @@ import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './rep
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
-import { validateCurrency, categoryEdit, deleteSubscriptionSettings, subRefsError } from '../../shared/ledger-edit.ts';
+import { validateCurrency, categoryEdit, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
 import { cleanTransfers, netCost, transferRows, transferredStop, transferSign, transfersOf, transferValue } from '../../shared/transfers.ts';
@@ -536,11 +535,7 @@ export async function commit(
   categoryCreation?: CategoryCreation,
   personCreation?: Person,
 ) {
-  after = reconcileRenewalRules(
-    st.subscriptions.find((s) => s.id === after.id),
-    after,
-    today,
-  );
+  // 续费规则历史、清退出日连带清退款、完整校验、引用校验与状态迁移都交给与网页整条保存同一个 prepareSubWrite
   after = resyncShares(
     st,
     st.subscriptions.find((s) => s.id === after.id),
@@ -552,21 +547,14 @@ export async function commit(
     if (error) throw new Error(error);
   }
   // 与网页整条保存同一套引用校验：新写入的支付方式要存在、币种要可用；记录里原有的值放行
-  const refs = subRefsError(
-    st,
-    st.subscriptions.find((x) => x.id === after.id),
-    after,
-  );
-  if (refs) throw new Error(refs);
-  const invalid = subError(after);
-  if (invalid) throw new Error(invalid);
-  const errs = statusChangeError(
+  const prepared = prepareSubWrite(
     st.subscriptions.find((x) => x.id === after.id),
     after,
     today,
+    st,
   );
-  if (errs) throw new Error(errs);
-  return persist(ctx, st, today, after, dry, changed, categoryCreation, undefined, personCreation);
+  if (prepared.error !== undefined) throw new Error(prepared.error);
+  return persist(ctx, st, today, prepared.sub, dry, changed, categoryCreation, undefined, personCreation);
 }
 
 /** 已校验的订阅：生成预览；dry_run 只叠进草稿层，否则保存 */
