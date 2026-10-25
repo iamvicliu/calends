@@ -149,3 +149,27 @@ test('W-2 MCP 鉴权只单独记最后使用时间，不重写令牌列表（吊
     [other.item.id],
   );
 });
+
+test('W-4 MCP 批量请求按顺序执行：后一个写入能看到前一个的结果', async () => {
+  const f = await ledger();
+  const out = (await f.rpc([
+    {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'tools/call',
+      params: {
+        name: 'create_subscription',
+        arguments: { id: 'batch1', name: 'Fictional batch', category: 'Test', price: 5, currency: 'USD', cycle: { unit: 'month' } },
+      },
+    },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'update_subscription', arguments: { subscription: 'batch1', set: { notes: 'second' } } } },
+  ])) as Array<{ id: number; result: { isError?: boolean; content: Array<{ text: string }> } }>;
+  assert.deepEqual(
+    out.map((x) => [x.id, !!x.result.isError]),
+    [
+      [1, false],
+      [2, false],
+    ],
+  );
+  assert.equal((await loadState(f.env, false)).subscriptions.find((s) => s.id === 'batch1')?.notes, 'second');
+});

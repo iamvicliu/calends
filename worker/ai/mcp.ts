@@ -149,7 +149,12 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
     return Response.json(fail(null, -32700, t('mcp.error.parse')), { status: 400, headers: cors });
   }
   const list = Array.isArray(body) ? body : [body];
-  const out = (await Promise.all(list.map((m) => handle(m, env, token)))).filter((x) => x !== undefined);
+  // 批量请求逐条执行：后面的写入要看到前面的结果，两个写入也不会同时读同一份旧账本
+  const out: unknown[] = [];
+  for (const m of list) {
+    const r = await handle(m, env, token);
+    if (r !== undefined) out.push(r);
+  }
   if (!out.length) return new Response(null, { status: 202, headers: cors });
   return Response.json(Array.isArray(body) ? out : out[0], { headers: { ...cors, 'cache-control': 'no-store' } });
 }
