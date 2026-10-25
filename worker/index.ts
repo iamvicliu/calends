@@ -14,7 +14,7 @@ import {
   type Subscription,
 } from '../shared/types.ts';
 import { mergePeople, refsFor, syncPerson } from '../shared/people.ts';
-import { checkSettings, deleteMethodData, deleteSubscriptionSettings, methodReferences, pruneSettingsRefs } from '../shared/ledger-edit.ts';
+import { checkSettings, deleteMethodData, deleteSubscriptionSettings, methodReferences, pruneSettingsRefs, validateMethod } from '../shared/ledger-edit.ts';
 import {
   DEFAULT_MAX_SESSIONS,
   authStatus,
@@ -122,6 +122,20 @@ const subsOf = async (env: Env) =>
   (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
 const methodsOf = async (env: Env) =>
   (await env.DB.prepare('SELECT data FROM methods').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as PaymentMethod);
+
+/**
+ * 写入一张支付方式前的校验：与 MCP update_payment_method 同一个 validateMethod（名称、币种要有汇率）。
+ * 只拦本次新引入的币种：已存记录的原币种即使汇率表里没有了也放行，免得旧卡改个备注都存不了。
+ */
+function methodError(fx: FxTable, previous: PaymentMethod | undefined, pm: PaymentMethod): string | undefined {
+  if (!pm || typeof pm !== 'object' || typeof pm.id !== 'string' || !pm.id) return t('server.invalidMethod');
+  try {
+    validateMethod({ fx: previous && previous.currency === pm.currency ? { ...fx, rates: { ...fx.rates, [pm.currency]: 1 } } : fx }, pm);
+  } catch (e) {
+    return e instanceof Error ? e.message : t('server.invalidMethod');
+  }
+  return undefined;
+}
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
@@ -257,7 +271,13 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (m) {
     if (method === 'PUT') {
       const pm = (await readJson(req)) as PaymentMethod;
-      if (pm.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
+      if (pm?.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
+      const error = methodError(
+        await getFx(env),
+        (await methodsOf(env)).find((x) => x.id === pm.id),
+        pm,
+      );
+      if (error) return bad(error);
       const rev = await upsert(env, 'methods', pm.id, pm);
       return json(pm, 200, rev);
     }
@@ -350,20 +370,25 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json({ restored, state }, 200, state.rev);
   }
   if (path === '/api/import' && method === 'POST') {
-    const body = (await readJson(req)) as {
-      subscriptions?: Subscription[];
-      methods?: PaymentMethod[];
-      settings?: Partial<Settings>;
-      mode?: 'merge' | 'replace';
-    };
+    // 只导入订阅与支付方式；设置走 PUT /api/settings 的校验，这里不再接受
+    const body = (await readJson(req)) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; mode?: 'merge' | 'replace' };
     const subs = body.subscriptions ?? [];
     const err = invalidIn(subs);
     if (err) return bad(err);
-    await replaceAll(env, subs, body.methods ?? [], body.mode === 'replace' ? 'replace' : 'merge');
-    if (body.settings) {
-      const cur = await getSettings(env);
-      await putKv(env, 'settings', { ...cur, ...body.settings, icsToken: cur.icsToken });
+    const methods = body.methods ?? [];
+    const mode = body.mode === 'replace' ? 'replace' : 'merge';
+    // 与网页钱包、MCP 同一套支付方式校验；合并导入时已存的同 id 记录原币种放行
+    const existing = mode === 'merge' ? await methodsOf(env) : [];
+    const fx = await getFx(env);
+    for (const pm of methods) {
+      const error = methodError(
+        fx,
+        existing.find((x) => x.id === pm?.id),
+        pm,
+      );
+      if (error) return bad(t('server.invalidItem', { name: pm?.name ?? '?', error }));
     }
+    await replaceAll(env, subs, methods, mode);
     const state = await loadState(env);
     return json(state, 200, state.rev);
   }

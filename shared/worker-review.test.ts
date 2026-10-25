@@ -257,6 +257,31 @@ test('W-7 对话按 UTF-8 字节限长；超长工具结果截断后仍是合法
   assert.equal(toolContent('{"a":1}'), '{"a":1}');
 });
 
+test('W-8 导入不再接受 settings；支付方式与网页、MCP 同一套校验', async () => {
+  const f = fixture();
+  await putKv(f.env, 'settings', { ...DEFAULT_SETTINGS, displayName: 'Before import' });
+  const r = await f.request('/api/import', {
+    method: 'POST',
+    body: JSON.stringify({ subscriptions: [], methods: [], settings: { displayName: 'Injected', baseCurrency: 'ZZZ' }, mode: 'merge' }),
+  });
+  assert.equal(r.status, 200);
+  assert.equal((await loadState(f.env, false)).settings.displayName, 'Before import');
+  const bad = await f.request('/api/import', {
+    method: 'POST',
+    body: JSON.stringify({ subscriptions: [], methods: [{ id: 'w', name: 'Fictional wallet', kind: 'credit', currency: 'ZZZ' }], mode: 'merge' }),
+  });
+  assert.equal(bad.status, 400);
+  const put = await f.request('/api/methods/w2', { method: 'PUT', body: JSON.stringify({ id: 'w2', name: 'Fictional', kind: 'credit', currency: 'ZZZ' }) });
+  assert.equal(put.status, 400);
+  // 已存的旧币种（汇率表里已经没有）改名照样能存
+  await upsert(f.env, 'methods', 'old', { id: 'old', name: 'Old', kind: 'credit', currency: 'XYZ' });
+  const keep = await f.request('/api/methods/old', {
+    method: 'PUT',
+    body: JSON.stringify({ id: 'old', name: 'Old renamed', kind: 'credit', currency: 'XYZ' }),
+  });
+  assert.equal(keep.status, 200);
+});
+
 test('W-9 非法 JSON 请求体返回 400 而不是 500', async () => {
   const f = fixture();
   for (const [path, method] of [
