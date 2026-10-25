@@ -237,7 +237,12 @@
     "currency": "Tiền tệ",
     "cycle": "Chu kỳ thanh toán",
     "note": "Ghi chú",
-    "planned": "Dự kiến"
+    "planned": "Dự kiến",
+    "phases": "Giai đoạn",
+    "payments": "Khoản đã ghi",
+    "spent": "Đã chi đến nay",
+    "changes": "Trường thay đổi",
+    "funding": "Nguồn thanh toán"
   },
   "v": {
     "exempt": "Không trả tiền",
@@ -248,6 +253,8 @@
     "cancel": "Hủy đăng ký",
     "reactivate": "Tiếp tục",
     "charge": "Trừ tiền",
-    "deleteAll": "Xóa gói đăng ký và toàn bộ lần trừ tiền. Không thể hoàn tác."
+    "deleteAll": "Xóa gói đăng ký và toàn bộ lần trừ tiền. Không thể hoàn tác.",
+    "dateUnknown": "Không rõ ngày",
+    "terminate": "Bị nhà cung cấp dừng"
   }
 }

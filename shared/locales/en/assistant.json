@@ -242,7 +242,12 @@
     "currency": "Currency",
     "cycle": "Cycle",
     "note": "Note",
-    "planned": "Planned"
+    "planned": "Planned",
+    "phases": "Phases",
+    "payments": "Recorded charges",
+    "spent": "Spent to date",
+    "changes": "Changed fields",
+    "funding": "Paid with"
   },
   "v": {
     "exempt": "Doesn’t pay",
@@ -253,6 +258,8 @@
     "cancel": "Cancel",
     "reactivate": "Resume",
     "charge": "Charge",
-    "deleteAll": "Deletes the subscription and all its charges. This can’t be undone."
+    "deleteAll": "Deletes the subscription and all its charges. This can’t be undone.",
+    "dateUnknown": "Date unknown",
+    "terminate": "Terminated"
   }
 }

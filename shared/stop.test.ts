@@ -382,6 +382,8 @@ function fixture(sub = base({ start: addDays(todayIn('UTC'), -14) })) {
   const run = async (name: string, args: Record<string, unknown> = {}) => {
     const tool = TOOLS.find((tool) => tool.name === name)!;
     const hasSubscription = Object.hasOwn(tool.inputSchema.properties as object, 'subscription');
+    // 停用不再默认今天：这些用例检验的是「今天停用」时的账期规则，显式传今天
+    if (name === 'set_status' && ['cancel', 'terminate'].includes(String(args.action)) && !('at' in args)) args = { ...args, at: todayIn('UTC') };
     return tool.run({ ...(hasSubscription ? { subscription: sub.id } : {}), ...args }, ctx) as Promise<Record<string, any>>;
   };
   const saved = () => JSON.parse((db.prepare('SELECT data FROM subscriptions WHERE id = ?').get(sub.id) as { data: string }).data) as Subscription;

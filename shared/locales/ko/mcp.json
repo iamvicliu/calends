@@ -66,7 +66,9 @@
     "noPeriods": "회차를 하나 이상 선택하세요(같은 회차는 한 번만)",
     "periodUnknown": "{period}은(는) 이 채권의 회차가 아닙니다",
     "periodTaken": "{period} 회차에는 이미 입금 또는 면제 기록이 있습니다",
-    "periodsShort": "미정산 회차가 {count}회만 남아 이 입금이 적용할 회차보다 적습니다"
+    "periodsShort": "미정산 회차가 {count}회만 남아 이 입금이 적용할 회차보다 적습니다",
+    "stopDateRequired": "이 구독은 오늘 이전에 시작되었거나 결제되어 중지일을 오늘로 둘 수 없습니다. at에 실제 날짜를 지정하거나, 모르면 at=null을 전달하세요.",
+    "unknownStopDetails": "날짜를 모르는 중지에는 환불이나 사유를 붙일 수 없습니다. 기록하려면 at에 날짜를 지정하세요."
   },
   "tool": {
     "get_overview": "장부 개요",
@@ -100,6 +102,7 @@
     "save_person": "사람 관리",
     "get_settings": "장부 설정 및 환경설정",
     "update_settings": "장부 설정 및 환경설정 변경",
-    "set_proxy": "대납 관계 관리"
+    "set_proxy": "대납 관계 관리",
+    "save_subscription": "구독 전체 저장"
   }
 }

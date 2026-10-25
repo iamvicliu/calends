@@ -69,7 +69,9 @@
     "periodsShort": {
       "one": "Only {count} unsettled period left, fewer than this payment covers",
       "other": "Only {count} unsettled periods left, fewer than this payment covers"
-    }
+    },
+    "stopDateRequired": "This subscription started or was charged before today, so the stop date cannot default to today. Pass the actual date in at, or at=null if the date is unknown.",
+    "unknownStopDetails": "A stop with an unknown date cannot carry a refund or reason; give the date in at to record them."
   },
   "tool": {
     "get_overview": "Ledger overview",
@@ -103,6 +105,7 @@
     "save_person": "Manage person",
     "get_settings": "Ledger settings & preferences",
     "update_settings": "Update ledger settings & preferences",
-    "set_proxy": "Manage proxy relationship"
+    "set_proxy": "Manage proxy relationship",
+    "save_subscription": "Save full subscription"
   }
 }

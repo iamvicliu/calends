@@ -66,7 +66,9 @@
     "noPeriods": "En az bir dönem seçin, her biri yalnızca bir kez",
     "periodUnknown": "{period} bu alacağın bir dönemi değil",
     "periodTaken": "{period} dönemi için zaten ödeme veya bağış kaydı var",
-    "periodsShort": "Kapanmamış yalnızca {count} dönem kaldı; bu ödemenin kapsadığından az"
+    "periodsShort": "Kapanmamış yalnızca {count} dönem kaldı; bu ödemenin kapsadığından az",
+    "stopDateRequired": "Bu abonelik bugünden önce başladı veya ücretlendirildi; durdurma tarihi varsayılan olarak bugün olamaz. Gerçek tarihi at ile verin ya da bilinmiyorsa at=null kullanın.",
+    "unknownStopDetails": "Tarihi bilinmeyen bir durdurma iade veya neden içeremez; kaydetmek için tarihi at ile verin."
   },
   "tool": {
     "get_overview": "Defter özeti",
@@ -100,6 +102,7 @@
     "save_person": "Kişi yönetimi",
     "get_settings": "Defter ve arayüz ayarları",
     "update_settings": "Defter ve arayüz ayarlarını güncelle",
-    "set_proxy": "Başkası adına ödemeleri yönet"
+    "set_proxy": "Başkası adına ödemeleri yönet",
+    "save_subscription": "Aboneliği tamamen kaydet"
   }
 }

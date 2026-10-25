@@ -237,7 +237,12 @@
     "currency": "통화",
     "cycle": "결제 주기",
     "note": "메모",
-    "planned": "계획"
+    "planned": "계획",
+    "phases": "단계",
+    "payments": "결제 기록",
+    "spent": "누적 지출",
+    "changes": "변경 항목",
+    "funding": "결제 출처"
   },
   "v": {
     "exempt": "납부 면제",
@@ -248,6 +253,8 @@
     "cancel": "해지",
     "reactivate": "재개",
     "charge": "결제",
-    "deleteAll": "구독과 모든 결제 기록을 삭제합니다. 되돌릴 수 없습니다"
+    "deleteAll": "구독과 모든 결제 기록을 삭제합니다. 되돌릴 수 없습니다",
+    "dateUnknown": "날짜 모름",
+    "terminate": "제공자 중지"
   }
 }

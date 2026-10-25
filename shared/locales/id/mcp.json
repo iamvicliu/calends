@@ -66,7 +66,9 @@
     "noPeriods": "Pilih setidaknya satu periode, masing-masing hanya sekali",
     "periodUnknown": "{period} bukan periode dari piutang ini",
     "periodTaken": "Periode {period} sudah punya pembayaran atau pembebasan",
-    "periodsShort": "Hanya tersisa {count} periode yang belum lunas, kurang dari cakupan pembayaran ini"
+    "periodsShort": "Hanya tersisa {count} periode yang belum lunas, kurang dari cakupan pembayaran ini",
+    "stopDateRequired": "Langganan ini dimulai atau ditagih sebelum hari ini, jadi tanggal berhenti tidak bisa default hari ini. Berikan tanggal sebenarnya di at, atau at=null jika tidak diketahui.",
+    "unknownStopDetails": "Penghentian dengan tanggal tidak diketahui tidak bisa memuat pengembalian dana atau alasan; berikan tanggal di at untuk mencatatnya."
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
@@ -100,6 +102,7 @@
     "save_person": "Kelola orang",
     "get_settings": "Pengaturan & preferensi buku catatan",
     "update_settings": "Ubah pengaturan & preferensi buku catatan",
-    "set_proxy": "Kelola pembayaran titipan"
+    "set_proxy": "Kelola pembayaran titipan",
+    "save_subscription": "Simpan langganan lengkap"
   }
 }
