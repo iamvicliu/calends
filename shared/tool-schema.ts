@@ -8,7 +8,7 @@ export type Schema = {
   required?: string[];
   additionalProperties?: boolean;
   items?: Schema;
-  enum?: unknown[];
+  enum?: readonly unknown[];
   minimum?: number;
   maximum?: number;
   format?: string;

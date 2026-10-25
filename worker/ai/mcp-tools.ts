@@ -92,7 +92,7 @@ import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { searchAppStore } from '../appstore.ts';
 import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
-import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
+import { objectSchema as obj, validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
 import { validateCurrency, categoryEdit, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
@@ -304,7 +304,7 @@ function periodsOut(periods: LedgerPeriod[]) {
 /** 收款摘要：日期是最早没结清的一期（可能已逾期），金额由 shared 计算。 */
 function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: MemberDue | undefined, today: string) {
   const rule = s.share?.role === 'owner' ? carRule(st, s, today) : undefined;
-  const currency = st.settings.collectCurrency ?? st.settings.baseCurrency;
+  const currency = collectCcy(st);
   const first = memberCollection(s, m, m.joined ?? s.share?.since ?? s.start, currency);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), currency);
   return {
@@ -471,6 +471,9 @@ function groupOf(by: string, c: Charge, sub: Subscription, m: PaymentMethod | un
   }
 }
 
+/** 合租收款币种：设置里的收款币种，没设时用本位币 */
+const collectCcy = (st: AppState) => st.settings.collectCurrency ?? st.settings.baseCurrency;
+
 /** 当前汇率表里没有（或不为正）的币种 */
 const missingRates = (st: AppState, ccys: string[]) => [...new Set(ccys.filter((c) => c !== 'USD' && !(st.fx.rates[c] > 0)))].sort();
 
@@ -510,7 +513,6 @@ const CATEGORY_CREATE = {
   category_icon: { type: ['string', 'null'], description: 'New category only: Lucide icon name or emoji; same validation as save_category set.icon.' },
   category_color: { type: ['string', 'null'], description: 'New category only: palette code or #rrggbb; same validation as save_category set.color.' },
 };
-const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required, additionalProperties: false });
 const FUNDING = {
   type: ['array', 'null'],
   description:
@@ -646,6 +648,34 @@ const date = (v: unknown, what: string, fallback?: string) => {
   if (!d || !validDay(d)) throw new Error(t('mcp.error.notDate', { what }));
   return d;
 };
+/** 订阅里记下的全部付款：顶层与各阶段 */
+const allPayments = (s: Subscription): Payment[] => [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])];
+
+/** 停用退款参数；date 省略时用 fallback（编辑停用时省略即保留原日期） */
+function refundInput(raw: unknown, fallback?: string) {
+  const r = raw as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } };
+  return {
+    amount: num(r.amount, 'refund.amount'),
+    date: r.date == null ? fallback : date(r.date, 'refund.date'),
+    currency: str(r.currency)?.toUpperCase(),
+    settled: r.settled ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() } : undefined,
+  };
+}
+
+/** 新建时的同名去重：同名同开始日视为可能重复，除非双方都写了账号且不同 */
+function assertNotDuplicate(st: AppState, name: string, start: string, account: string | undefined) {
+  const dup = st.subscriptions.some(
+    (s) =>
+      s.name.toLowerCase() === name.toLowerCase() &&
+      s.start === start &&
+      !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
+  );
+  if (dup) throw new Error(t('mcp.error.duplicateSub', { name }));
+}
+
+/** 没指定分类时的默认分类：现有的「工具」预设；被删掉时报错，让调用方指定 */
+const defaultCategory = (st: AppState) => categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))!;
+
 export const methodRef = (st: AppState, v: unknown) => {
   const q = str(v);
   if (!q) return undefined;
@@ -881,7 +911,7 @@ const CATALOGUE: Tool[] = [
       const from = addMonths(today, -Number(a.months_back ?? 12));
       const to = addMonths(today, Number(a.months_forward ?? 6));
       const px = s.proxy;
-      const collect = st.settings.collectCurrency ?? st.settings.baseCurrency;
+      const collect = collectCcy(st);
       return {
         ...row(st, s, today, out),
         record: s, // Complete editable history, stable receipt indices and original currencies.
@@ -960,7 +990,7 @@ const CATALOGUE: Tool[] = [
                 leave_refund: m.leaveRefund ?? null,
                 exempt: !!m.exempt,
               })),
-              dues: memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
+              dues: memberDues(s, today, collectCcy(st), st)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({ member: d.member.name, periods_owed: d.periodsOwed, owed: money(st, d.owed, d.currency, undefined, out) })),
             }
@@ -1207,7 +1237,7 @@ const CATALOGUE: Tool[] = [
         kind === 'proxy'
           ? []
           : st.subscriptions.flatMap((s) =>
-              memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
+              memberDues(s, today, collectCcy(st), st)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({
                   subscription_id: s.id,
@@ -1468,20 +1498,8 @@ const CATALOGUE: Tool[] = [
         .sort((x, y) => x.date.localeCompare(y.date));
       if (!st.fx.rates[currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: currency }));
       const account = str(a.account)?.trim();
-      if (
-        !a.force &&
-        st.subscriptions.some(
-          (s) =>
-            s.name.toLowerCase() === name.toLowerCase() &&
-            s.start === start &&
-            !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
-        )
-      )
-        throw new Error(t('mcp.error.duplicateSub', { name }));
-      const category =
-        a.category === undefined
-          ? { name: categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))! }
-          : subscriptionCategory(st, a.category, a);
+      if (!a.force) assertNotDuplicate(st, name, start, account);
+      const category = a.category === undefined ? { name: defaultCategory(st) } : subscriptionCategory(st, a.category, a);
       const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       let sub: Subscription = {
         // 确认草稿时沿用草稿里生成的 id，后续基于它的草稿（合租、成员）才能对上
@@ -1547,22 +1565,13 @@ const CATALOGUE: Tool[] = [
       const start = String(raw.start ?? '');
       if (!['active', 'trial', 'paused', 'cancelled', 'terminated'].includes(String(raw.status)))
         throw new Error(t('mcp.error.invalidInput', { field: 'subscription.status' }));
-      if (!previous && !a.force) {
-        const account = str(raw.account)?.trim();
-        const dup = st.subscriptions.some(
-          (s) =>
-            s.name.toLowerCase() === name.toLowerCase() &&
-            s.start === start &&
-            !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
-        );
-        if (dup) throw new Error(t('mcp.error.duplicateSub', { name }));
-      }
+      if (!previous && !a.force) assertNotDuplicate(st, name, start, str(raw.account)?.trim());
       // 原分类不变时照旧（包括历史名称）；改了或新建时按分类规则解析
       const category =
         raw.category == null
           ? previous
             ? { name: previous.category }
-            : { name: categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))! }
+            : { name: defaultCategory(st) }
           : previous && raw.category === previous.category
             ? { name: previous.category }
             : subscriptionCategory(st, raw.category, a);
@@ -1879,26 +1888,13 @@ const CATALOGUE: Tool[] = [
       if (a.edit === true) {
         if (!stopping) throw new Error(t('mcp.error.invalidStop'));
         if (a.at === null) throw new Error(t('mcp.error.editStopDate'));
-        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | null | undefined;
         const next = editStop(
           s,
           {
             mode: act === 'terminate' ? 'terminate' : a.immediate === true ? 'cancel' : 'nonrenew',
             date: a.at === undefined ? undefined : date(a.at, 'at'),
             reason: 'reason' in a ? (str(a.reason) ?? null) : undefined,
-            refund:
-              r === null
-                ? null
-                : r
-                  ? {
-                      amount: num(r.amount, 'refund.amount'),
-                      date: r.date == null ? undefined : date(r.date, 'refund.date'),
-                      currency: str(r.currency)?.toUpperCase(),
-                      settled: r.settled
-                        ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() }
-                        : undefined,
-                    }
-                  : undefined,
+            refund: a.refund === null ? null : a.refund ? refundInput(a.refund) : undefined,
           },
           today,
         );
@@ -1906,7 +1902,7 @@ const CATALOGUE: Tool[] = [
       }
       // 停用不默认今天：已经开始或付过钱的订阅，今天未必是真实的停用日，需显式给出（或 null 表示日期未知）
       if (stopping && a.at === undefined) {
-        const paid = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some((p) => p.date < today);
+        const paid = allPayments(s).some((p) => p.date < today);
         if (paid || s.start < today) throw new Error(t('mcp.error.stopDateRequired'));
       }
       if (stopping && a.at === null) {
@@ -1917,22 +1913,7 @@ const CATALOGUE: Tool[] = [
       let next: Subscription;
       if (act === 'reactivate') next = reactivate(s, today);
       else if (act === 'terminate' || (act === 'cancel' && a.immediate === true)) {
-        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | undefined;
-        next = stopSubscription(
-          s,
-          today,
-          act === 'terminate' ? 'terminate' : 'cancel',
-          at,
-          str(a.reason),
-          r
-            ? {
-                amount: num(r.amount, 'refund.amount'),
-                date: date(r.date, 'refund.date', at),
-                currency: str(r.currency)?.toUpperCase(),
-                settled: r.settled ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() } : undefined,
-              }
-            : undefined,
-        );
+        next = stopSubscription(s, today, act === 'terminate' ? 'terminate' : 'cancel', at, str(a.reason), a.refund ? refundInput(a.refund, at) : undefined);
       } else {
         if (['ended', 'terminated'].includes(effectiveStatus(s, today)) || s.stop) throw new Error(t('mcp.error.subscriptionEnded'));
         if (act === 'trial')
@@ -1989,9 +1970,7 @@ const CATALOGUE: Tool[] = [
       const sign = kind === 'refund' ? -1 : 1;
       const amount = sign * Math.abs(num(a.amount, 'amount'));
       const existing = chargesBetween(s, d, d, today).filter((c) => !c.projected && Math.abs(c.amount - amount) < 0.005);
-      const isRecorded = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some(
-        (p) => p.date === d && Math.abs(p.amount - amount) < 0.005,
-      );
+      const isRecorded = allPayments(s).some((p) => p.date === d && Math.abs(p.amount - amount) < 0.005);
       if (isRecorded && existing.length && !a.allow_duplicate && !a.replace) throw new Error(t('mcp.error.duplicatePayment', { date: d, amount }));
       const st2 = a.settled as { amount: unknown; currency: unknown } | undefined;
       if (a.funding != null && a.method != null) throw new Error(t('core.subError.funding'));
@@ -2113,7 +2092,7 @@ const CATALOGUE: Tool[] = [
           .map((s) => {
             const sh = s.share!;
             const live = sh.members.filter((m) => memberAboard(m, today));
-            const dues = new Map(memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).map((d) => [d.member.id, d]));
+            const dues = new Map(memberDues(s, today, collectCcy(st), st).map((d) => [d.member.id, d]));
             const book = carLedger(st, s, today);
             return {
               id: s.id,
@@ -2327,7 +2306,7 @@ const CATALOGUE: Tool[] = [
       const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const feeArgs = a.follow_rule === true ? {} : a;
-      const ccy = (str(feeArgs.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
+      const ccy = (str(feeArgs.fee_currency) ?? old?.feeCurrency ?? collectCcy(st)).toUpperCase();
       validateCurrency(st, ccy);
       // 新成员没给收费标准时按车的收款规则
       const rule = carRule(st, s, today);
@@ -2427,7 +2406,7 @@ const CATALOGUE: Tool[] = [
       // 期初已付至：这天及之前的期算开始记账前就收清了
       if ('paid_until' in a) {
         const until = a.paid_until == null ? undefined : date(a.paid_until, 'paid_until');
-        m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, st.settings.collectCurrency ?? st.settings.baseCurrency), until) };
+        m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, collectCcy(st)), until) };
       }
       // 与网页成员表单同一套建档规则：没关联到人的按称呼（+ 联系方式）认已有的人，认不到就新建；person=null 明确不关联
       const link = !m.personId && a.person !== null ? personLink(st.people ?? [], { name: m.name, contactVia: m.contactVia, contact: m.contact }) : undefined;
@@ -2448,7 +2427,7 @@ const CATALOGUE: Tool[] = [
             st,
             after,
             m,
-            memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+            memberDues(after, today, collectCcy(st), st).find((d) => d.member.id === m.id),
             today,
           ),
         },
@@ -2582,7 +2561,7 @@ const CATALOGUE: Tool[] = [
                   st,
                   after,
                   m,
-                  memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+                  memberDues(after, today, collectCcy(st), st).find((d) => d.member.id === m.id),
                   today,
                 ),
               },
