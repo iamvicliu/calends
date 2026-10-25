@@ -485,3 +485,56 @@ test('W-16 刷新汇率：上游非 2xx 时报汇率接口错误（502），当�
   }
   assert.deepEqual(await getKv(f.env, 'fx'), fx);
 });
+
+test('W-17 写入管线重构前的行为基线：清退出日连带清退款，删除与账本工具的草稿叠加', async () => {
+  const f = await ledger();
+  const past = `${Number(today.slice(0, 4)) - 1}-01-01`;
+  await upsert(
+    f.env,
+    'subscriptions',
+    'car',
+    sub('car', 'Fictional Car', {
+      start: past,
+      share: {
+        role: 'owner',
+        seats: 4,
+        members: [
+          {
+            id: 'm1',
+            name: 'Fictional member',
+            share: 2,
+            fee: 2,
+            feeCurrency: 'USD',
+            joined: past,
+            left: today,
+            leaveRefund: { date: today, amount: 1, currency: 'USD' },
+          },
+        ],
+      },
+    }),
+  );
+  const cleared = await f.call('save_share_member', { subscription: 'car', member: 'm1', left: null });
+  assert.ok(!cleared.isError, JSON.stringify(cleared));
+  const m = (await loadState(f.env, false)).subscriptions.find((s) => s.id === 'car')!.share!.members[0];
+  assert.equal(m.left, undefined);
+  assert.equal(m.leaveRefund, undefined);
+
+  // 助手的草稿叠加：同一轮里先删订阅、再建分类、再建订阅，后面的工具看得到前面的草稿，且都不写库
+  const { TOOLS } = await import('../worker/ai/mcp-tools.ts');
+  const run = (name: string, args: object, ctx: object) => TOOLS.find((x) => x.name === name)!.run({ ...args, dry_run: true }, ctx as never);
+  const ctx = { env: f.env, overlay: new Map(), access: { client: 'assistant', scope: 'write' } };
+  const rev = (await loadState(f.env, false)).rev;
+  await run('delete_subscription', { subscription: 'car' }, ctx);
+  await run('save_category', { action: 'create', set: { name: 'Draft category' } }, ctx);
+  await run('update_payment_method', { action: 'create', id: 'draftw', set: { name: 'Draft wallet', kind: 'credit', currency: 'USD' } }, ctx);
+  const created = (await run(
+    'create_subscription',
+    { name: 'Draft sub', price: 1, currency: 'USD', cycle: { unit: 'month' }, category: 'Draft category', method: 'draftw' },
+    ctx,
+  )) as { subscription: { id: string; method_id: string; category: string } };
+  assert.equal(created.subscription.category, 'Draft category');
+  assert.equal(created.subscription.method_id, 'draftw');
+  const list = (await TOOLS.find((x) => x.name === 'list_subscriptions')!.run({ status: 'all' }, ctx as never)) as { items: Array<{ id: string }> };
+  assert.deepEqual(list.items.map((x) => x.id).sort(), [created.subscription.id].sort());
+  assert.equal((await loadState(f.env, false)).rev, rev);
+});
