@@ -111,7 +111,8 @@ a {
 }
 /* 鼠标操作后不显示聚焦框（含弹层关闭时焦点回到触发按钮），键盘操作照常显示 */
 /* 全站聚焦描边统一用浅主题色（不用黑色）；鼠标/触摸操作后一律不显示，只有键盘操作才显示 */
-[data-input='pointer'] :focus-visible {
+[data-input='pointer'] :focus-visible,
+[data-input='pointer'] [data-focus-visible] {
   outline: none !important;
 }
 .side-item:focus-visible {
