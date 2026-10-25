@@ -3,7 +3,7 @@ import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
 import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
-import { toBaseAt } from '../../../shared/fx.ts';
+import { toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../shared/types.ts';
 import { recordProxyCharge } from '../../../shared/receivable-edit.ts';
 import { ReceivableSheet } from './Receivable.tsx';
@@ -440,7 +440,8 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const [chargedCcy, setChargedCcy] = useState(row.charge?.currency ?? row.listCurrency);
   const [receipt, setReceipt] = useState(false);
   const chargedN = charged === '' ? row.list : Number(charged);
-  const chargedBase = toBaseAt(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
+  // 缺汇率时为 NaN：差额显示「—」，不按 0 算出假的盈亏
+  const chargedBase = toBaseOrNaN(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
   const rec = row.receipt ?? row.waiver;
   const diff = row.receivedBase == null ? undefined : row.receivedBase - chargedBase;
   const dirty =

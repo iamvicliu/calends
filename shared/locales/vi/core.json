@@ -218,5 +218,6 @@
     "badDate": "{field} gốc \"{value}\" không nhận dạng được, chưa nhập",
     "nextDue": "ngày thanh toán tiếp theo",
     "end": "ngày kết thúc"
-  }
+  },
+  "fxIncomplete": "Thiếu tỷ giá nên không quy đổi được một số khoản; kết quả này chưa đầy đủ."
 }

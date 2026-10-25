@@ -60,7 +60,7 @@ import {
 import { flow, cnDate, cnDateAuto, cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
 import { stopLosses } from '../../../shared/metrics.ts';
 import { netCost, transferredStop, transfersOf, transferSign, transferValue } from '../../../shared/transfers.ts';
-import { chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN, chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { CarMembers, CarSheet } from './Carpool.tsx';
 import { carRule } from '../../../shared/carpool.ts';
@@ -472,8 +472,9 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   // 停用日不详时时长与均价算不准；转出日已知则持有期到转出为止，照常计算
   const undated = end.unknown && !transfersOf(sub).some((tr) => tr.kind === 'sell' && tr.date <= today);
   const total = cost.net;
+  // 缺汇率的那笔不参与均价与走势（不能当 0 拉低平均）
   const per = regular(history)
-    .map((c) => chargeValue(state, c, base))
+    .map((c) => chargeBaseOrNaN(state, c, base))
     .filter(Number.isFinite);
   // 实际在订的天数：各段到今天（或结束日）为止，不算断档，并行的不重复计
   const served = servedTime(sub, today);
@@ -507,7 +508,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const monthly = lifetime ? total / Math.max(1, active / 30.44) : perMonth;
 
   const next = ['ended', 'terminated', 'lifetime', 'paused'].includes(st) ? undefined : detailForecast(sub, today).charges[0];
-  const nextValue = next ? chargeValue(state, next, base) : NaN;
+  const nextValue = next ? chargeBaseOrNaN(state, next, base) : NaN;
   // 停止的订阅由下方停止卡片写停止日，这里不再重复
   const ended = ['ended', 'terminated'].includes(st) && sub.end && !phaseSubs(sub).some((p) => p.stop);
   const durationCell = (
@@ -1279,7 +1280,8 @@ function Charges({
 }) {
   const base = state.settings.baseCurrency;
   const multi = phaseSubs(sub).length > 1;
-  const rows = history.map((c) => ({ c, b: chargeValue(state, c, base) })).reverse();
+  // 缺汇率的一笔本位币金额为 NaN：行内与年小计显示「—」，不按 0 合计
+  const rows = history.map((c) => ({ c, b: chargeBaseOrNaN(state, c, base) })).reverse();
   // 卡上实扣的原币：这张表里某个币种的金额都是整数（如奈拉、日元整价扣款）就不写 .00，省出宽度
   const whole = new Set([...new Set(rows.map((r) => r.c.currency))].filter((ccy) => rows.every((r) => r.c.currency !== ccy || Number.isInteger(r.c.amount))));
   const orig = (v: number, ccy: string) => flow(v, ccy, whole.has(ccy) ? { decimals: 0 } : {});

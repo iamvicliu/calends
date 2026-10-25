@@ -2,7 +2,7 @@ import { isDataIcon } from '../../shared/icon.ts';
 import { indigo, red, purple, green, orange, teal, pink, iris, gray, gold, slate, blue } from '@radix-ui/colors';
 import { base } from './base.ts';
 import { addDays, addMonths, chargesBetween, convert, effectiveStatus, parseDay, type Charge } from '../../shared/billing.ts';
-import { chargeValue } from '../../shared/fx.ts';
+import { chargeBaseOrNaN, chargeValue } from '../../shared/fx.ts';
 import type { AppState, CardNetwork, MethodKind, PaymentMethod, Subscription } from '../../shared/types.ts';
 import { BANKS } from './banks.ts';
 import { locale, t } from '../../shared/i18n.ts';
@@ -242,10 +242,13 @@ export function liveSubs(state: AppState, today: string): Subscription[] {
   });
 }
 
+/** 按当前汇率换算到本位币；缺汇率为 NaN（金额显示「—」），不当作 0 */
 export function toBase(state: AppState, amount: number, ccy: string): number {
-  const v = convert(amount, ccy, state.settings.baseCurrency, state.fx);
-  return Number.isFinite(v) ? v : 0;
+  return convert(amount, ccy, state.settings.baseCurrency, state.fx);
 }
+
+/** 排序用：缺汇率（NaN）的排在最后，其余按数值；正常数据与直接相减相同 */
+export const sortValue = (v: number) => (Number.isFinite(v) ? v : -Infinity);
 
 /** 区间内的扣款。默认不含代付（那是替别人付的，不算我的支出）；日历等需要看卡上实际扣款时传 withProxy */
 export function allCharges(state: AppState, from: string, to: string, today: string, withProxy = false): Charge[] {
@@ -298,7 +301,12 @@ export function periodRange(p: Period, today: string, offset = 0): [string, stri
   return [`${y}-01-01`, `${y}-12-31`];
 }
 
-/** 一组扣款折算后的合计；to 缺省为本位币 */
+/** 一组扣款折算后的合计；to 缺省为本位币。缺汇率的按 0 计：只用于图表几何（柱高、坐标），显示的合计用 sumBaseOrNaN */
 export function sumBase(state: AppState, charges: Charge[], to?: string): number {
   return charges.reduce((a, c) => a + chargeValue(state, c, to), 0);
+}
+
+/** 显示用的合计：任一笔缺汇率则为 NaN，金额显示「—」，不把不完整的数当成合计 */
+export function sumBaseOrNaN(state: AppState, charges: Charge[], to?: string): number {
+  return charges.reduce((a, c) => a + chargeBaseOrNaN(state, c, to), 0);
 }

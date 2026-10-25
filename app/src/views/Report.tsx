@@ -24,7 +24,7 @@ import {
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
-import { allCharges, catColor, KIND_BG, paletteColor, sumBase, toBase } from '../derive.ts';
+import { allCharges, catColor, KIND_BG, paletteColor, sumBaseOrNaN, toBase } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
 export function perLabel(s: Subscription): string {
@@ -304,7 +304,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const rows = useMemo(() => cashVsAccrual(state, today, 23, 12), [state, today]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
-  const next90 = sumBase(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
+  const next90 = sumBaseOrNaN(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
     <div className="card copy-card" data-copy-card>
@@ -666,6 +666,9 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                   <div className="topup-why soft">{t('report.topup.anyAmount')}</div>
                 )}
               </>
+            ) : !Number.isFinite(p.need) ? (
+              // 缺汇率算不出要充多少：不能说「够用」
+              <div className="topup-why soft">{t('core.fxIncomplete')}</div>
             ) : (
               <div className="green" style={{ fontSize: 'var(--fs-2)', marginTop: 6 }}>
                 {t(`report.topup.enough${months}`)}

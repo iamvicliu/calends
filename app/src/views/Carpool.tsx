@@ -27,7 +27,7 @@ import { createPortal } from 'react-dom';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
-import { chargeValue, convertOn } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN, convertOn } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
@@ -54,7 +54,7 @@ import {
   useSubmit,
   useWidth,
 } from '../components/ui.tsx';
-import { toBase } from '../derive.ts';
+import { sortValue, toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
 import { carpoolRoster, carpoolTimeline } from '../../../shared/carpool-timeline.ts';
@@ -135,7 +135,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
       s.id,
       duesOf(s)
         .filter((d) => d.periodsOwed > 0)
-        .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : 0), 0),
+        // 算不出（缺汇率或缺金额）的一笔让合计为 NaN：状态胶囊只写「待收」，不写成少收的金额
+        .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0),
     ]),
   );
   const owedOf = (s: Subscription) => owedBy.get(s.id)!;
@@ -152,7 +153,11 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
     profit: (s) => -books.get(s.id)!.net,
   };
   const asc = (a: Subscription, b: Subscription) =>
-    sort === 'name' ? a.name.localeCompare(b.name, locale()) : sort === 'next' ? nextOf(a).localeCompare(nextOf(b)) : value[sort](a) - value[sort](b);
+    sort === 'name'
+      ? a.name.localeCompare(b.name, locale())
+      : sort === 'next'
+        ? nextOf(a).localeCompare(nextOf(b))
+        : sortValue(value[sort](a)) - sortValue(value[sort](b));
   const shown = [...groups[filter]].sort(
     (a, b) => Number(!live(a)) - Number(!live(b)) || (dir === 'asc' ? asc(a, b) : asc(b, a)) || nextOf(a).localeCompare(nextOf(b)),
   );
@@ -891,7 +896,7 @@ function OwnerTimeline({ state, s, today, win }: { state: AppState; s: Subscript
               style={{ left: `${pct(from, win)}%`, width: `${Math.max(0.6, pct(addDays(until, 1), win) - pct(from, win))}%` }}
               {...tipProps(() => (
                 <>
-                  <b>{g.kind === 'owner' ? flow(-chargeValue(state, g.c), state.settings.baseCurrency) : t('family.timeline.future')}</b>
+                  <b>{g.kind === 'owner' ? flow(-chargeBaseOrNaN(state, g.c), state.settings.baseCurrency) : t('family.timeline.future')}</b>
                   <div>
                     {cnDateFull(g.from)} – {cnDateFull(g.until)}
                   </div>
@@ -1124,7 +1129,8 @@ export function CarSheet({
   const [tab, setTab] = useState<'in' | 'out'>('in');
   const outs = chargesBetween(s, book.since ?? s.start, today, today)
     .filter((c) => c.kind !== 'failed')
-    .map((c) => ({ c, base: chargeValue(state, c) }))
+    // 缺汇率的一笔为 NaN：行与年小计显示「—」
+    .map((c) => ({ c, base: chargeBaseOrNaN(state, c) }))
     .reverse();
   return (
     <DetailSheet label={t('family.sheet.title')} onClose={onClose}>

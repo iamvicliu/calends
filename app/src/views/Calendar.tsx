@@ -36,8 +36,8 @@ import {
   Toolbar,
   useWidth,
 } from '../components/ui.tsx';
-import { chargeValue } from '../../../shared/fx.ts';
-import { allCharges, sumBase } from '../derive.ts';
+import { chargeBaseOrNaN } from '../../../shared/fx.ts';
+import { allCharges, sumBaseOrNaN } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { usePref } from '../store.ts';
 import { monthReport } from '../../../shared/scope-report.ts';
@@ -106,7 +106,8 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const fits = (n: number) => icon * n + 3 * (n - 1) <= inner;
   const byDay = new Map<string, Charge[]>();
   for (const c of charges) byDay.set(c.date, [...(byDay.get(c.date) ?? []), c]);
-  const sumOf = (list: Charge[] = []) => sumBase(state, list);
+  // 显示用合计：有一笔缺汇率就显示「—」，不按 0 算
+  const sumOf = (list: Charge[] = []) => sumBaseOrNaN(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
   // 翻月清空选择；今天按钮和 T 明确选中今天。
@@ -254,7 +255,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                   </section>
                   <div className="cal-daycards">
                     {selList.map((c, i) => {
-                      const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                      const amt = pair(-c.amount, c.currency, { value: -chargeBaseOrNaN(state, c) });
                       const sub = state.subscriptions.find((s) => s.id === c.sub.id) ?? c.sub;
                       const cur = currentPhase(sub, today);
                       const status = effectiveStatus(sub, today);
@@ -365,7 +366,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                           <i aria-hidden="true" />
                         </h4>
                         {items.map((c, i) => {
-                          const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                          const amt = pair(-c.amount, c.currency, { value: -chargeBaseOrNaN(state, c) });
                           return (
                             <button
                               type="button"

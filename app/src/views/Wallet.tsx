@@ -78,7 +78,10 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
         <span>{t('wallet.runway.scale.y1')}</span>
       </div>
       <div className="rw-note">
-        {r.monthlyDrain <= 0 ? (
+        {/* 缺汇率时月消耗、余额推演算不出：说明不完整，不说「够用」 */}
+        {!Number.isFinite(r.monthlyDrain) || !Number.isFinite(r.topUp12m) ? (
+          t('core.fxIncomplete')
+        ) : r.monthlyDrain <= 0 ? (
           t('wallet.runway.noSubs')
         ) : r.shortfall && r.coveredCharges === 0 ? (
           <>
@@ -122,6 +125,7 @@ function projFoot(r: Runway, m: PaymentMethod): string | undefined {
 /** 卡面右下角的小字：设了余额的说还够扣几期，没设的显示卡号尾号 */
 function cardHint(m: PaymentMethod, r: Runway | undefined): string {
   if (r) {
+    if (!Number.isFinite(r.monthlyDrain) || !Number.isFinite(r.topUp12m)) return '—';
     if (r.monthlyDrain <= 0) return t('wallet.card.noCharges');
     if (!r.shortfall) return t('wallet.card.enough');
     return r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low');
@@ -241,11 +245,14 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
         </DndContext>
 
         {/* 只列有关联计费订阅的余额；空着的账户（比如还没用上的美国区）不占位置 */}
-        {state.methods.some((m) => (runwayFor(m, state, today)?.monthlyDrain ?? 0) > 0) && (
+        {state.methods.some((m) => {
+          const drain = runwayFor(m, state, today)?.monthlyDrain ?? 0;
+          return drain > 0 || !Number.isFinite(drain);
+        }) && (
           <Group title={t('wallet.runwayGroup')}>
             {state.methods
               .map((m) => runwayFor(m, state, today))
-              .filter((r): r is NonNullable<typeof r> => r != null && r.monthlyDrain > 0)
+              .filter((r): r is NonNullable<typeof r> => r != null && (r.monthlyDrain > 0 || !Number.isFinite(r.monthlyDrain)))
               .map((r) => (
                 <div key={r.method.id} className="cell" style={{ display: 'block', padding: '14px 16px' }}>
                   <RunwayCard r={r} today={today} state={state} flat detailsOnly />

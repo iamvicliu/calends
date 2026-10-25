@@ -5,7 +5,7 @@ import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
-import { toBaseAt } from '../../../shared/fx.ts';
+import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import {
   IconButton,
@@ -118,7 +118,7 @@ export function List({
             : undefined,
       }; // 外币或不是按月付的，都折成每月多少
     }
-    return { value: toBaseAt(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
+    return { value: toBaseOrNaN(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
   };
   const base = state.settings.baseCurrency;
 
@@ -166,12 +166,14 @@ export function List({
     const price = n && !(cur.end && n >= cur.end) ? priceAt(cur, n) : cur.price;
     return toBase(state, price, cur.currency);
   };
+  // 排序时缺汇率（NaN）按 0 比较，与显示无关，保持原有顺序
+  const n0 = (v: number) => (Number.isFinite(v) ? v : 0);
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
     if (sort === 'name') return a.name.localeCompare(b.name, locale());
     // 分类按设置里的顺序，同类里最贵的在前
-    if (sort === 'category') return catRank(a) - catRank(b) || mo(b) - mo(a) || a.name.localeCompare(b.name, locale());
-    if (sort === 'cost') return mo(a) - mo(b) || toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
+    if (sort === 'category') return catRank(a) - catRank(b) || n0(mo(b)) - n0(mo(a)) || a.name.localeCompare(b.name, locale());
+    if (sort === 'cost') return n0(mo(a)) - n0(mo(b)) || n0(toBase(state, a.price, a.currency)) - n0(toBase(state, b.price, b.currency));
     // 支付方式按设置里的顺序，未指定的排最后
     if (sort === 'method') {
       const rank = (s: Subscription) => {
@@ -181,7 +183,7 @@ export function List({
       return rank(a) - rank(b) || a.name.localeCompare(b.name, locale());
     }
     // 金额按列里显示的那个数（当前阶段、下次扣款日的价格）折算成本位币，跨币种才比得准
-    if (sort === 'amount') return amountOf(a) - amountOf(b);
+    if (sort === 'amount') return n0(amountOf(a)) - n0(amountOf(b));
     if (sort === 'start') return a.start.localeCompare(b.start);
     return (nextCharge(a, addDays(today, 1)) ?? '').localeCompare(nextCharge(b, addDays(today, 1)) ?? '');
   };

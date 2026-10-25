@@ -64,3 +64,43 @@ test('备份导入的已知问题带类型，不靠比对翻译文案识别', as
     (e) => e instanceof ImportError,
   );
 });
+
+test('视图合计：缺汇率不按 0 计，显示用合计为 NaN（金额显示「—」）', async (t) => {
+  const { registerHooks } = await import('node:module');
+  const hook = registerHooks({
+    load(url, ctx, next) {
+      if (url.endsWith('/app/src/base.ts'))
+        return {
+          format: 'module-typescript',
+          shortCircuit: true,
+          source: readFileSync(new URL('../app/src/base.ts', import.meta.url), 'utf8').replace('import.meta.env.BASE_URL', "'/'"),
+        };
+      return next(url, ctx);
+    },
+  });
+  t.after(() => hook.deregister());
+  const { DEFAULT_SETTINGS } = await import('./types.ts');
+  const { FALLBACK_FX, chargesBetween } = await import('./billing.ts');
+  const { toBase, sumBase, sumBaseOrNaN, sortValue } = await import('../app/src/derive.ts');
+  const sub = (id: string, currency: string) => ({
+    id,
+    name: id,
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency,
+    cycle: { unit: 'month' as const, every: 1 },
+    start: '2026-01-01',
+    status: 'active' as const,
+    payments: [{ date: '2026-01-01', amount: 10 }],
+  });
+  const state = { subscriptions: [sub('a', 'USD'), sub('b', 'XCD')], methods: [], settings: { ...DEFAULT_SETTINGS, baseCurrency: 'USD' }, fx: FALLBACK_FX };
+  assert.equal(Number.isNaN(toBase(state, 10, 'XCD')), true);
+  assert.equal(toBase(state, 10, 'USD'), 10);
+  const charges = state.subscriptions.flatMap((s) => chargesBetween(s, '2026-01-01', '2026-01-01', '2026-01-02'));
+  assert.equal(charges.length, 2);
+  assert.equal(sumBase(state, charges), 10, '图表几何仍按 0 计');
+  assert.equal(Number.isNaN(sumBaseOrNaN(state, charges)), true);
+  assert.equal(sumBaseOrNaN(state, charges.slice(0, 1)), 10);
+  assert.deepEqual([3, NaN, 5].sort((a, b) => sortValue(b) - sortValue(a)).map(String), ['5', '3', 'NaN']);
+});
