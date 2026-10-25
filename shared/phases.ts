@@ -447,9 +447,12 @@ export function savePayment(s: Subscription, today: string, pay: Payment, old?: 
     const list = (phases[oi].payments ?? []).filter((x) => x.date === old.date);
     const target = list[old.index];
     if (!target) throw new Error(t('mcp.error.invalidTarget'));
-    if (!('methodId' in pay) && target.methodId) pay = { ...pay, methodId: target.methodId };
+    // 资金拆分同理：两个键都没带时沿用原来的拆分；带了拆分就不再沿用单独的支付方式
+    if (!('methodId' in pay) && !('funding' in pay) && target.funding?.length) pay = { ...pay, funding: target.funding };
+    else if (!('methodId' in pay) && !pay.funding?.length && target.methodId) pay = { ...pay, methodId: target.methodId };
     phases[oi] = { ...phases[oi], payments: (phases[oi].payments ?? []).filter((x) => x !== target) };
   }
+  if (pay.funding && !pay.funding.length) pay = { ...pay, funding: undefined };
   // 原日期不变的编辑始终留在原阶段（修正开始日后可能在服务期外）；改日期或新记录仍按覆盖范围归段
   const keep = phase
     ? phases.findIndex(

@@ -1,6 +1,6 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
-import { YearLedger, YearMethods } from '../components/YearLedger.tsx';
+import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { renewalDates, chargeMethodId } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
@@ -168,7 +168,16 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
     // 同一天可能有多笔（如重复扣款），用当天在同一段里的序号定位；并行的两段各算各的
     const index = history.filter((x) => x.date === c.date && x.sub.start === c.sub.start).indexOf(c);
     setPay({
-      pay: { date: c.date, amount: c.kind === 'failed' ? c.sub.price : c.amount, kind: c.kind, settled: c.settled, note: c.note },
+      // 单笔支付方式与资金拆分一起带进编辑表单，改金额时不会丢
+      pay: {
+        date: c.date,
+        amount: c.kind === 'failed' ? c.sub.price : c.amount,
+        kind: c.kind,
+        settled: c.settled,
+        note: c.note,
+        methodId: c.methodId,
+        funding: c.funding,
+      },
       index,
       phase: sub.phases?.length ? c.sub.start : undefined,
     });
@@ -1145,7 +1154,7 @@ function Charges({
             const total = ys.reduce((a, r) => a + r.b, 0);
             return {
               // 这一年用过的支付方式：一种时与下面的行一样写胶囊，几种时把卡的图标叠在一起
-              second: <YearMethods ids={[...new Set(ys.map((r) => chargeMethodId(r.c) ?? ''))]} state={state} />,
+              second: <YearMethods ids={chargeMethodIds(ys.map((r) => r.c))} state={state} />,
               // 卡上实扣按原币合计；一年里有几种币种时逐个列出，不留空
               orig: copyParts(
                 [...ys.reduce((m, r) => m.set(r.c.currency, (m.get(r.c.currency) ?? 0) + r.c.amount), new Map<string, number>())]
@@ -1159,7 +1168,7 @@ function Charges({
           row={({ c, b }) => ({
             // 日期写全，不再加「几天前」
             date: <time dateTime={c.date}>{cnDateFull(c.date)}</time>,
-            second: <PayBadge m={methodOf(state, chargeMethodId(c))} />,
+            second: <ChargeMethods c={c} state={state} />,
             orig: (
               <>
                 {orig(-c.amount, c.currency)}

@@ -236,7 +236,13 @@
     "method": "Moyen de paiement",
     "scopeOne": "Ce débit uniquement",
     "scopePhase": "Cette formule ({count})",
-    "scope": "Appliquer à"
+    "scope": "Appliquer à",
+    "split": "Répartir le paiement",
+    "unsplit": "Un seul moyen",
+    "sources": "Payé avec",
+    "addSource": "Ajouter une source",
+    "splitOk": "Total {amount}",
+    "splitLeft": "Reste à répartir : {amount}"
   },
   "timeline": {
     "home": "Revenir à aujourd’hui (ou double-cliquez sur la frise)"

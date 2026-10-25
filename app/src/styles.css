@@ -9392,6 +9392,43 @@ img.mm-flag {
   flex-shrink: 0;
 }
 
+/* 付款资金拆分：一行一个来源（支付方式 + 金额），金额右对齐；末行是添加来源 */
+.cell.pay-split {
+  justify-content: space-between;
+}
+.cell.pay-split .mp-btn {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.cell.pay-split input {
+  flex: 1 1 72px;
+  min-width: 72px;
+  box-sizing: border-box;
+  height: var(--ctl-h-md);
+  padding: 4px 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--label);
+  font-size: var(--fs-2);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cell.pay-split input::placeholder {
+  color: var(--label-3);
+}
+.cell.pay-split input:focus-visible {
+  outline: none;
+}
+.cell.pay-split-add {
+  gap: 6px;
+  color: var(--accent);
+  cursor: pointer;
+}
+.cell.pay-split-add > .i {
+  color: currentColor;
+}
+
 /* Form/action rows share the same outer box as their neighboring pickers. */
 .cell-r input:not([type='checkbox']),
 .cell-r select {

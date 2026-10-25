@@ -1,5 +1,5 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
-import { DEFAULT_SETTINGS, type AppState, type PaymentMethod, type Subscription } from './types.ts';
+import { DEFAULT_SETTINGS, type AppState, type Payment, type PaymentMethod, type Subscription } from './types.ts';
 import { migrateRenewalRules } from './billing.ts';
 import { t } from './i18n.ts';
 import { categoryList, isDomainCategory, presetOf, type Category } from './categories.ts';
@@ -50,6 +50,11 @@ function originOf(url?: string): string | undefined {
   }
 }
 
+/** 公开页的一笔扣款：去掉备注；拆分付款只留来源 id 与金额（与 methodId 同口径，来源本身由 publicMethod 脱敏） */
+function publicPayment({ note: _n, funding, ...pay }: Payment): Payment {
+  return funding?.length ? { ...pay, funding: funding.map(({ methodId, amount }) => ({ methodId, amount })) } : pay;
+}
+
 function publicSub(s: Subscription, cats: Category[]): Subscription {
   s = migrateRenewalRules(s);
   const domain = isDomainSub(s, cats);
@@ -88,9 +93,9 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     phases: s.phases?.map(({ note: _n, stop, ...p }) => ({
       ...p,
       stop: stop && { kind: stop.kind, date: stop.date, paidThrough: stop.paidThrough },
-      payments: p.payments?.filter((pay) => pay.kind !== 'refund').map(({ note: _x, ...pay }) => pay),
+      payments: p.payments?.filter((pay) => pay.kind !== 'refund').map(publicPayment),
     })),
-    payments: s.payments?.filter((pay) => pay.kind !== 'refund').map(({ note: _n, ...p }) => p),
+    payments: s.payments?.filter((pay) => pay.kind !== 'refund').map(publicPayment),
     nextDue: s.nextDue,
     share: s.share && {
       role: s.share.role,

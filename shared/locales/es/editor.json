@@ -236,7 +236,13 @@
     "method": "Método de pago",
     "scopeOne": "Solo este cargo",
     "scopePhase": "Este plan ({count})",
-    "scope": "Aplicar a"
+    "scope": "Aplicar a",
+    "split": "Dividir pago",
+    "unsplit": "Un solo método",
+    "sources": "Pagado con",
+    "addSource": "Añadir origen",
+    "splitOk": "Suma {amount}",
+    "splitLeft": "Falta asignar: {amount}"
   },
   "timeline": {
     "home": "Volver a hoy (o haz doble clic en la línea de tiempo)"

@@ -236,7 +236,13 @@
     "method": "Ödeme yöntemi",
     "scopeOne": "Yalnızca bu ödeme",
     "scopePhase": "Bu plan ({count})",
-    "scope": "Uygula"
+    "scope": "Uygula",
+    "split": "Ödemeyi böl",
+    "unsplit": "Tek yöntem",
+    "sources": "Ödeme kaynakları",
+    "addSource": "Kaynak ekle",
+    "splitOk": "Toplam {amount}",
+    "splitLeft": "Dağıtılacak kalan: {amount}"
   },
   "timeline": {
     "home": "Bugüne dön (veya zaman çizelgesine çift tıklayın)"

@@ -42,7 +42,9 @@
     "start": "Ngày bắt đầu không hợp lệ",
     "cycle": "Chu kỳ thanh toán không hợp lệ",
     "refundAmount": "Nhập số tiền dương và loại tiền hợp lệ",
-    "refundDate": "Đặt ngày rời nhóm; ngày hoàn tiền không được trước ngày tham gia"
+    "refundDate": "Đặt ngày rời nhóm; ngày hoàn tiền không được trước ngày tham gia",
+    "funding": "Chia thanh toán không hợp lệ: dùng ít nhất hai phương thức khác nhau với số tiền khác 0 và không gán thêm một phương thức riêng cho cùng khoản thanh toán",
+    "fundingSum": "Tổng các phần chia phải bằng số tiền của khoản thanh toán"
   },
   "phase": {
     "switchTooEarly": "Ngày hiệu lực phải sau ngày bắt đầu giai đoạn hiện tại",

@@ -182,6 +182,8 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     cnDateFull,
     chargeMethodId: billing.chargeMethodId,
     YearMethods: () => null,
+    ChargeMethods: () => null,
+    chargeMethodIds: () => [],
     copyParts: (v: unknown) => v,
     addMonths,
   });
@@ -244,6 +246,8 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     cnDateFull,
     chargeMethodId: billing.chargeMethodId,
     YearMethods: () => null,
+    ChargeMethods: () => React.createElement('i', { 'data-pay': '' }),
+    chargeMethodIds: () => [],
     copyParts: (v: unknown) => v,
   });
   const sub = {
@@ -492,6 +496,8 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Seg: empty,
     copyParts: (v: unknown) => v,
     YearMethods: empty,
+    ChargeMethods: empty,
+    chargeMethodIds: () => [],
     YearLedger: yearLedger({ useState: React.useState, t: deps.t }),
   });
   const Detail = load(file, 'Detail', `function Detail(${source.split('export function Detail(')[1].split('/** 正常扣款')[0]}`, {

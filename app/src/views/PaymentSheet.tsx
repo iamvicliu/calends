@@ -7,7 +7,7 @@ import type { Payment, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { MoneyInput, Cell, Group, Seg, Sheet } from '../components/ui.tsx';
+import { MoneyInput, Cell, Group, Icon, IconButton, Seg, Sheet } from '../components/ui.tsx';
 import { getState, run, saveSub } from '../store.ts';
 
 type Kind = 'charge' | NonNullable<Payment['kind']>;
@@ -46,6 +46,14 @@ export function PaymentSheet({
   const changed = method !== (edit?.pay.methodId ?? phase.methodId);
   const [scope, setScope] = useState<'one' | 'phase'>(phase.methodId ? 'one' : 'phase');
   const phaseCount = chargesBetween(phase, phase.start, today, today).length;
+  // 资金拆分：一笔订单由几个来源合付；金额按订阅币种，合计等于本笔
+  const [split, setSplit] = useState<Array<{ methodId?: string; amount: string }> | null>(
+    edit?.pay.funding?.length ? edit.pay.funding.map((f) => ({ methodId: f.methodId, amount: String(Math.abs(f.amount)) })) : null,
+  );
+  const splitSum = (split ?? []).reduce((a, x) => a + (Number(x.amount) || 0), 0);
+  const left = Math.round((Number(amount) - splitSum) * 100) / 100;
+  const blanks = (split ?? []).filter((x) => x.amount === '').length;
+  const setPart = (i: number, patch: Partial<{ methodId?: string; amount: string }>) => setSplit((xs) => xs!.map((x, k) => (k === i ? { ...x, ...patch } : x)));
 
   const save = () => {
     const n = Number(amount);
@@ -57,12 +65,17 @@ export function PaymentSheet({
       kind: kind === 'charge' ? undefined : kind,
       settled: settled !== '' && Number(settled) >= 0 ? { amount: sign * Number(settled), currency: settledCcy } : undefined,
       note: note.trim() || undefined,
-      methodId: changed ? (scope === 'one' && method !== phase.methodId ? method : undefined) : edit?.pay.methodId,
+      methodId: split ? undefined : changed ? (scope === 'one' && method !== phase.methodId ? method : undefined) : edit?.pay.methodId,
+      // 只剩一个来源没填金额时，它补上差额；其余校验（来源不同、合计相等）由 savePayment 统一做
+      // 没选来源也没填金额的空行直接忽略
+      funding: split
+        ?.filter((x) => x.methodId || x.amount !== '')
+        .map((x) => ({ methodId: x.methodId ?? '', amount: sign * (x.amount === '' && blanks === 1 ? left : Number(x.amount)) })),
     };
     run(
       async () => {
         let next = savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick);
-        if (changed && scope === 'phase') next = setPhaseMethod(next, phase.start, method);
+        if (!split && changed && scope === 'phase') next = setPhaseMethod(next, phase.start, method);
         await saveSub(next);
         onClose();
       },
@@ -127,11 +140,56 @@ export function PaymentSheet({
             />
           </Cell>
         </Group>
-        <Group>
-          <Cell label={t('editor.payment.method')}>
-            <MethodPicker methods={getState().methods} value={method} onChange={setMethod} />
-          </Cell>
-          {changed && phaseCount > 1 && (
+        <Group
+          title={split ? t('editor.payment.sources') : undefined}
+          action={
+            <button
+              type="button"
+              className="btn plain"
+              onClick={() => setSplit(split ? null : [{ methodId: method, amount }, { methodId: undefined, amount: '' }])}
+            >
+              {t(split ? 'editor.payment.unsplit' : 'editor.payment.split')}
+            </button>
+          }
+          foot={
+            split
+              ? Math.abs(left) < 0.005 || (blanks === 1 && left > 0)
+                ? t('editor.payment.splitOk', { amount: money(Number(amount) || 0, ccy) })
+                : t('editor.payment.splitLeft', { amount: money(left, ccy) })
+              : undefined
+          }
+        >
+          {split ? (
+            <>
+              {split.map((x, i) => (
+                <div className="cell pay-split" key={i}>
+                  <MethodPicker methods={getState().methods} value={x.methodId} onChange={(v) => setPart(i, { methodId: v })} />
+                  <MoneyInput
+                    ccy={ccy}
+                    className="num"
+                    aria-label={t('editor.payment.amount', { currency: ccy })}
+                    placeholder={x.amount === '' && blanks === 1 && left > 0 ? String(left) : '0'}
+                    value={x.amount}
+                    onChange={(e) => setPart(i, { amount: (e.target as HTMLInputElement).value })}
+                  />
+                  {split.length > 2 && (
+                    <IconButton aria-label={t('common.delete')} onClick={() => setSplit(split.filter((_, k) => k !== i))}>
+                      <Icon name="x" />
+                    </IconButton>
+                  )}
+                </div>
+              ))}
+              <button type="button" className="cell tap pay-split-add" onClick={() => setSplit([...split, { methodId: undefined, amount: '' }])}>
+                <Icon name="plus" />
+                {t('editor.payment.addSource')}
+              </button>
+            </>
+          ) : (
+            <Cell label={t('editor.payment.method')}>
+              <MethodPicker methods={getState().methods} value={method} onChange={setMethod} />
+            </Cell>
+          )}
+          {!split && changed && phaseCount > 1 && (
             <Cell label={t('editor.payment.scope')}>
               <Seg
                 small

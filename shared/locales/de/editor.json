@@ -236,7 +236,13 @@
     "method": "Zahlungsmethode",
     "scopeOne": "Nur diese Abbuchung",
     "scopePhase": "Dieser Tarif ({count})",
-    "scope": "Gilt für"
+    "scope": "Gilt für",
+    "split": "Zahlung aufteilen",
+    "unsplit": "Eine Methode",
+    "sources": "Bezahlt mit",
+    "addSource": "Quelle hinzufügen",
+    "splitOk": "Ergibt {amount}",
+    "splitLeft": "Noch zuzuordnen: {amount}"
   },
   "timeline": {
     "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"

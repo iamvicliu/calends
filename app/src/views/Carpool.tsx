@@ -1,13 +1,12 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../components/DetailKit.tsx';
-import { YearLedger, YearMethods } from '../components/YearLedger.tsx';
+import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import {
   addDays,
   addMonths,
-  chargeMethodId,
   chargesBetween,
   cycleLabel,
   diffDays,
@@ -44,7 +43,6 @@ import {
   Icon,
   IconButton,
   NameLink,
-  PayBadge,
   Seg,
   Sheet,
   Stepper,
@@ -1232,7 +1230,7 @@ export function CarSheet({
                     yearCells={(ys) => {
                       const total = ys.reduce((a, r) => a + r.base, 0);
                       return {
-                        second: <YearMethods ids={[...new Set(ys.map((r) => chargeMethodId(r.c) ?? ''))]} state={state} />,
+                        second: <YearMethods ids={chargeMethodIds(ys.map((r) => r.c))} state={state} />,
                         orig: copyParts(
                           [...ys.reduce((m, { c }) => m.set(c.currency, (m.get(c.currency) ?? 0) + c.amount), new Map<string, number>())]
                             .map(([ccy, sum]) => flow(-sum, ccy))
@@ -1243,7 +1241,7 @@ export function CarSheet({
                     }}
                     row={({ c, base: v }) => ({
                       date: <time dateTime={c.date}>{cnDateFull(c.date)}</time>,
-                      second: <PayBadge m={state.methods.find((x) => x.id === chargeMethodId(c))} />,
+                      second: <ChargeMethods c={c} state={state} />,
                       orig: (
                         <>
                           {flow(-c.amount, c.currency)}

@@ -47,7 +47,9 @@
     "start": "Invalid start date",
     "cycle": "Invalid billing cycle",
     "refundAmount": "Enter a positive refund amount and a valid currency",
-    "refundDate": "Set a leave date; the refund date cannot precede joining"
+    "refundDate": "Set a leave date; the refund date cannot precede joining",
+    "funding": "Invalid split payment: use at least two different payment methods with non-zero amounts, and no single payment method on the same charge",
+    "fundingSum": "The split amounts must add up to the payment amount"
   },
   "phase": {
     "switchTooEarly": "The effective date must be after the current phase starts",
