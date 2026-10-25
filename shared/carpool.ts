@@ -81,7 +81,10 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
           const rate = memberFee(state, s, m, today);
           return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
         }, 0)) - yearRefunded;
-  const firstPay = members.flatMap(memberCashFlows).filter((p) => p.kind === 'receipt').reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
+  const firstPay = members
+    .flatMap(memberCashFlows)
+    .filter((p) => p.kind === 'receipt')
+    .reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
   const since = s.share?.since ?? firstPay ?? firstJoin ?? s.start;

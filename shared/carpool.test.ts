@@ -190,7 +190,10 @@ test('旧收款无覆盖起点时转成它覆盖的那一期，退出当日也�
   ];
   const s = migrateReceivables(raw, 'CNY');
   const m = s.share!.members[0];
-  assert.deepEqual(m.receipts!.map((r) => r.periods), [['2026-01-10']]);
+  assert.deepEqual(
+    m.receipts!.map((r) => r.periods),
+    [['2026-01-10']],
+  );
   // 01-10 至 02-09 这一期，退出日 01-31 起 10 天没用：100 × 10 / 31
   assert.equal(suggestedLeaveRefund(state, s, m).amount, 32);
   assert.equal(suggestedLeaveRefund(state, s, m).unusedDays, 10);

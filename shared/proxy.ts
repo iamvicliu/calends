@@ -104,6 +104,8 @@ export function proxyTotals(rows: ProxyRow[]) {
     received: done.reduce((a, r) => a + r.receivedBase!, 0),
     owed: open.reduce((a, r) => a + r.chargedBase, 0),
     diff: done.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0),
-    lastIn: done.flatMap((r) => (r.receipt && !r.receipt.opening ? [r.receipt.date] : [])).reduce<string | undefined>((a, d) => (!a || d > a ? d : a), undefined),
+    lastIn: done
+      .flatMap((r) => (r.receipt && !r.receipt.opening ? [r.receipt.date] : []))
+      .reduce<string | undefined>((a, d) => (!a || d > a ? d : a), undefined),
   };
 }

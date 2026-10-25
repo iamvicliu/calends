@@ -241,7 +241,8 @@ const mutations: Array<[string, object, (st: AppState) => unknown]> = [
   [
     'record_receivable',
     { action: 'update', subscription: 's', kind: 'share', member: 'member', id: 'r1', amount: 0 },
-    (st) => st.subscriptions[0].share?.members[0].receipts?.[0].amount === 0 && st.subscriptions[0].share?.members[0].receipts?.[0].periods[0] === todayIn('UTC'),
+    (st) =>
+      st.subscriptions[0].share?.members[0].receipts?.[0].amount === 0 && st.subscriptions[0].share?.members[0].receipts?.[0].periods[0] === todayIn('UTC'),
   ],
   [
     'record_receivable',
@@ -253,11 +254,7 @@ const mutations: Array<[string, object, (st: AppState) => unknown]> = [
     { action: 'charged', subscription: 's', kind: 'proxy', charge: todayIn('UTC'), charged_amount: 12, charged_currency: 'USD' },
     (st) => st.subscriptions[0].proxy?.charged?.[0].amount === 12 && st.subscriptions[0].proxy?.charged?.[0].currency === 'USD',
   ],
-  [
-    'record_receivable',
-    { action: 'delete', subscription: 's', kind: 'proxy', id: 'p1' },
-    (st) => st.subscriptions[0].proxy?.receipts?.length === 0,
-  ],
+  ['record_receivable', { action: 'delete', subscription: 's', kind: 'proxy', id: 'p1' }, (st) => st.subscriptions[0].proxy?.receipts?.length === 0],
   [
     'record_receivable',
     // 免收下一期

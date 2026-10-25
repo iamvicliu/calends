@@ -64,7 +64,8 @@ export function recordReceipt(st: AppState, s: Subscription, target: ReceivableT
   const total = periodsTotal(st, picked);
   const currency = (input.currency ?? total.currency).toUpperCase();
   const amount =
-    input.amount ?? (currency === total.currency ? total.amount : Math.round(convertOn(total.amount, total.currency, currency, input.date, st.fxHistory, st.fx) * 100) / 100);
+    input.amount ??
+    (currency === total.currency ? total.amount : Math.round(convertOn(total.amount, total.currency, currency, input.date, st.fxHistory, st.fx) * 100) / 100);
   if (!Number.isFinite(amount) || amount < 0) throw new Error(t('mcp.error.invalidTarget'));
   const old = r.record.receipts?.find((x) => x.id === input.id);
   const receipt: Receipt = { id: input.id, date: input.date, amount, currency, periods: input.periods, ...(input.note ? { note: input.note } : {}) };

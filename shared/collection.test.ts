@@ -154,10 +154,7 @@ test('收款可以不连续：收了第 1、3 期，第 2 期仍欠；欠款从�
   const due = memberDues(s, '2026-10-22')[1];
   assert.deepEqual([due.owed, due.periodsOwed, due.dueFor], [44, 1, '2026-04-14']);
   // 第 3 期提前收了，到第 4 期开始时欠第 2、4 两期
-  assert.deepEqual(
-    [memberDues(s, '2027-04-14')[1].owed, memberDues(s, '2027-04-14')[1].periodsOwed],
-    [88, 2],
-  );
+  assert.deepEqual([memberDues(s, '2027-04-14')[1].owed, memberDues(s, '2027-04-14')[1].periodsOwed], [88, 2]);
   const { periods } = memberLedger(s, m, '2026-10-22');
   assert.deepEqual(
     periods.map((p) => p.status),

@@ -87,7 +87,28 @@ function sampleState(loc: Locale): AppState {
       start: '2025-02-20',
       methodId: 'visa',
       icon: favicon('youtube.com'),
-      share: { role: 'owner', seats: 5, since: '2025-02-20', members: [{ id: 'w', name: zh ? '小王' : 'Sam', share: 4.6, receipts: [{ id: 'r', date: '2025-02-20', amount: 0, currency: 'USD', periods: Array.from({ length: 21 }, (_, k) => addMonths('2025-02-20', k)), opening: true }] }] },
+      share: {
+        role: 'owner',
+        seats: 5,
+        since: '2025-02-20',
+        members: [
+          {
+            id: 'w',
+            name: zh ? '小王' : 'Sam',
+            share: 4.6,
+            receipts: [
+              {
+                id: 'r',
+                date: '2025-02-20',
+                amount: 0,
+                currency: 'USD',
+                periods: Array.from({ length: 21 }, (_, k) => addMonths('2025-02-20', k)),
+                opening: true,
+              },
+            ],
+          },
+        ],
+      },
     }),
     sub({ id: 'icloud', name: 'iCloud+ 200GB', price: 21, currency: 'CNY', start: '2024-01-15', methodId: 'alipay', icon: '☁️' }),
     sub({ id: '1password', name: '1Password', price: 35.88, currency: 'USD', start: '2023-11-18', cycle: { unit: 'year', every: 1 }, methodId: 'visa' }),

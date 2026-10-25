@@ -274,7 +274,10 @@ test('10. 公开数据保留计费字段，成本与后台相等且不泄露成�
   const st = state([s]);
   const out = maskForPublic(st);
   assert.ok(!JSON.stringify(out).includes('private-'));
-  assert.deepEqual(Object.keys(out.subscriptions[0].share!.members[0]).sort(), ['id', 'name', 'share', 'restarts', 'receipts', 'waivers', 'exempt', 'joined', 'left'].sort());
+  assert.deepEqual(
+    Object.keys(out.subscriptions[0].share!.members[0]).sort(),
+    ['id', 'name', 'share', 'restarts', 'receipts', 'waivers', 'exempt', 'joined', 'left'].sort(),
+  );
   for (const day of ['2026-01-31', '2026-02-01', '2026-02-15', '2026-03-01']) {
     near(totals(out, day).mrr, totals(st, day).mrr);
     near(contributionOn(out, out.subscriptions[0], day), contributionOn(st, s, day));

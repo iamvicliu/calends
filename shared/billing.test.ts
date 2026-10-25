@@ -54,28 +54,34 @@ test('余额续航', () => {
 
 test('合租', () => {
   // 旧数据只有已付至：转成期初结清后照常算
-  const s = migrateReceivables(base({
-    price: 60,
-    start: '2026-01-10',
-    share: {
-      role: 'owner',
-      seats: 6,
-      members: [
-        { id: 'a', name: 'A', share: 10, paidUntil: '2026-11-09' },
-        { id: 'b', name: 'B', share: 10 },
-      ],
-    },
-  }), 'CNY');
+  const s = migrateReceivables(
+    base({
+      price: 60,
+      start: '2026-01-10',
+      share: {
+        role: 'owner',
+        seats: 6,
+        members: [
+          { id: 'a', name: 'A', share: 10, paidUntil: '2026-11-09' },
+          { id: 'b', name: 'B', share: 10 },
+        ],
+      },
+    }),
+    'CNY',
+  );
   const d = memberDues(s, '2026-10-19');
   // 已付至 11 月 9 日：还没到期，不欠
   assert.equal(d[0].periodsOwed, 0);
   assert.equal(d[1].owed, 100);
   // 按半年收、已付至 7 月 16 日：10 月 20 日欠一期（7 月 17 日那期），金额 = 每期份额 × 6
-  const half = migrateReceivables(base({
-    price: 60,
-    start: '2021-04-14',
-    share: { role: 'owner', seats: 6, members: [{ id: 'c', name: 'C', share: 10, billEvery: 6, paidUntil: '2026-07-16' }] },
-  }), 'CNY');
+  const half = migrateReceivables(
+    base({
+      price: 60,
+      start: '2021-04-14',
+      share: { role: 'owner', seats: 6, members: [{ id: 'c', name: 'C', share: 10, billEvery: 6, paidUntil: '2026-07-16' }] },
+    }),
+    'CNY',
+  );
   const h = memberDues(half, '2026-10-20');
   assert.equal(h[0].periodsOwed, 1);
   assert.equal(Math.round(h[0].owed), 60);

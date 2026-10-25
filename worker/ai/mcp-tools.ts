@@ -59,7 +59,15 @@ import {
 } from '../../shared/phases.ts';
 import { proxyLedger } from '../../shared/proxy.ts';
 import { paidThrough, setOpening, type LedgerPeriod } from '../../shared/receivables.ts';
-import { deleteRecord, openPeriods, receivableOf, recordProxyCharge, recordReceipt, recordWaiver, type ReceivableTarget } from '../../shared/receivable-edit.ts';
+import {
+  deleteRecord,
+  openPeriods,
+  receivableOf,
+  recordProxyCharge,
+  recordReceipt,
+  recordWaiver,
+  type ReceivableTarget,
+} from '../../shared/receivable-edit.ts';
 import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
@@ -2043,12 +2051,16 @@ const CATALOGUE: Tool[] = [
         if (kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
         const currency = str(a.charged_currency)?.toUpperCase();
         if (currency) validateCurrency(st, currency);
-        const r = recordProxyCharge(s, {
-          charge: date(a.charge, 'charge'),
-          ...(a.charged_amount != null ? { amount: num(a.charged_amount, 'charged_amount') } : {}),
-          ...(currency ? { currency } : {}),
-          ...(str(a.note) ? { note: str(a.note) } : {}),
-        }, today);
+        const r = recordProxyCharge(
+          s,
+          {
+            charge: date(a.charge, 'charge'),
+            ...(a.charged_amount != null ? { amount: num(a.charged_amount, 'charged_amount') } : {}),
+            ...(currency ? { currency } : {}),
+            ...(str(a.note) ? { note: str(a.note) } : {}),
+          },
+          today,
+        );
         return { ...(await commit(ctx, st, today, r.after, a.dry_run, [`proxy_charged:${a.charge}`])), before: r.before, after: r.record };
       }
       let target: ReceivableTarget = { kind: 'proxy' };

@@ -8,8 +8,7 @@ import type { ShareMember, Subscription } from './types.ts';
 const today = '2026-10-23';
 const member = (o: Partial<ShareMember> = {}): ShareMember => ({ id: 'a', name: 'A', share: 10, fee: 10, billEvery: 1, joined: '2024-01-01', ...o });
 // 用例里成员按旧写法（已付至、按覆盖期的收款）给出，先转成按期记账
-const sub = (members: ShareMember[], seats = 4): Subscription =>
-  migrateReceivables(raw(members, seats), 'CNY');
+const sub = (members: ShareMember[], seats = 4): Subscription => migrateReceivables(raw(members, seats), 'CNY');
 const raw = (members: ShareMember[], seats: number): Subscription => ({
   id: 's',
   name: 'Shared test',

@@ -154,7 +154,10 @@ export function subError(s: Subscription): string | undefined {
     if (
       s.proxy.charged != null &&
       (!Array.isArray(s.proxy.charged) ||
-        s.proxy.charged.some((c) => !validDay(c.charge) || (c.amount != null && (!Number.isFinite(c.amount) || c.amount < 0)) || (c.currency != null && !/^[A-Z]{3}$/.test(c.currency))))
+        s.proxy.charged.some(
+          (c) =>
+            !validDay(c.charge) || (c.amount != null && (!Number.isFinite(c.amount) || c.amount < 0)) || (c.currency != null && !/^[A-Z]{3}$/.test(c.currency)),
+        ))
     )
       return t('mcp.error.invalidInput', { field: 'charged' });
   }
@@ -881,14 +884,15 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   let bal = method.balance;
   const forecast: Runway['forecast'] = [];
   // 代付各期记过的卡上实扣
-  const proxyCharges = new Map(state.subscriptions.filter((s) => s.proxy?.charged?.length).map((s) => [s.id, new Map(s.proxy!.charged!.map((c) => [c.charge, c]))]));
+  const proxyCharges = new Map(
+    state.subscriptions.filter((s) => s.proxy?.charged?.length).map((s) => [s.id, new Map(s.proxy!.charged!.map((c) => [c.charge, c]))]),
+  );
   let shortfall: Charge | undefined;
   let covered = 0;
   let current = bal;
   for (const c of charges) {
     const entry = proxyCharges.get(c.sub.id)?.get(c.date);
-    const settled =
-      c.kind === 'failed' ? undefined : entry?.amount != null ? { amount: entry.amount, currency: entry.currency ?? c.currency } : c.settled;
+    const settled = c.kind === 'failed' ? undefined : entry?.amount != null ? { amount: entry.amount, currency: entry.currency ?? c.currency } : c.settled;
     const amt = chargeValue(state, { ...c, settled }, method.currency);
     if (!Number.isFinite(amt)) continue;
     if (c.date <= today) {

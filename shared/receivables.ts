@@ -107,9 +107,7 @@ export function paidThrough(periods: LedgerPeriod[]): string | undefined {
 
 /** 已经被收款或免收占用的期（对到现在各期后）：写入新收款时不能重复抵扣 */
 export function takenPeriods(r: Receivable, periods: Period[], except?: string): Set<string> {
-  return new Set(
-    [...(r.receipts ?? []), ...(r.waivers ?? [])].filter((x) => x.id !== except).flatMap((x) => resolvedPeriods(periods, x)),
-  );
+  return new Set([...(r.receipts ?? []), ...(r.waivers ?? [])].filter((x) => x.id !== except).flatMap((x) => resolvedPeriods(periods, x)));
 }
 
 /**
@@ -148,6 +146,8 @@ export function setOpening(r: Receivable, periods: Period[], until: string | und
   const receipts = (r.receipts ?? []).filter((x) => !x.opening);
   const taken = takenPeriods({ receipts, waivers: r.waivers }, periods);
   const keys = until ? periods.filter((p) => p.from <= until && p.due > 0 && !taken.has(p.key)).map((p) => p.key) : [];
-  const opening = keys.length ? [{ id: 'opening', date: periods.find((p) => p.key === keys[0])!.from, amount: 0, currency: periods[0].currency, periods: keys, opening: true }] : [];
+  const opening = keys.length
+    ? [{ id: 'opening', date: periods.find((p) => p.key === keys[0])!.from, amount: 0, currency: periods[0].currency, periods: keys, opening: true }]
+    : [];
   return { receipts: [...opening, ...receipts], waivers: r.waivers ?? [] };
 }

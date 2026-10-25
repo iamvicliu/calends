@@ -192,7 +192,15 @@ test('详情复用累计实付、净收款与盈亏；待收为零时只呈现�
     const s = sub([
       m('payer', {
         // 结清时这笔收了 10 至 12 月三期；没结清时只抵了 11、12 月，10 月这期还欠着
-        receipts: [{ id: 'r', date: '2026-10-01', amount: 100, currency: 'CNY', periods: settled ? ['2026-10-01', '2026-11-01', '2026-12-01'] : ['2026-11-01', '2026-12-01'] }],
+        receipts: [
+          {
+            id: 'r',
+            date: '2026-10-01',
+            amount: 100,
+            currency: 'CNY',
+            periods: settled ? ['2026-10-01', '2026-11-01', '2026-12-01'] : ['2026-11-01', '2026-12-01'],
+          },
+        ],
         leaveRefund: { date: today, amount: 20, currency: 'CNY' },
       }),
     ]);

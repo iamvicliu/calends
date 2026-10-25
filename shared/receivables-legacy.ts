@@ -76,9 +76,7 @@ function memberFrom(s: Subscription, m: LegacyMember): ShareMember {
   const receipts: Receipt[] = [];
   // 老收款没有起始日时，接着上一笔的终点，再不行按一个收费周期往前推
   let previous: string | undefined;
-  for (const [i, p] of payments
-    .map((p, i) => [i, p] as const)
-    .sort((a, b) => a[1].until.localeCompare(b[1].until) || a[1].date.localeCompare(b[1].date))) {
+  for (const [i, p] of payments.map((p, i) => [i, p] as const).sort((a, b) => a[1].until.localeCompare(b[1].until) || a[1].date.localeCompare(b[1].date))) {
     const inferred = previous ? addDays(previous, 1) : addMonths(addDays(p.until, 1), -memberBillMonths(s, rest, p.until));
     const from = p.from ?? (inferred < joined ? joined : inferred);
     previous = previous && previous > p.until ? previous : p.until;

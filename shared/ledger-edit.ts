@@ -201,4 +201,3 @@ export function editRecord<T>(records: T[], index: number, replacement: T | unde
   if (expected !== undefined && JSON.stringify(expected) !== JSON.stringify(records[index])) throw new Error(t('mcp.error.staleRecord'));
   return records.flatMap((x, i) => (i === index ? (replacement === undefined ? [] : [replacement]) : [x]));
 }
-

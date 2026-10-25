@@ -1855,7 +1855,11 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
   assert.deepEqual(left(), ['o']);
   // 点开那一笔在收款表单里删，结果一样
   saved = undefined;
-  await all(make().render('ReceiptForm', { state: st, s: sub, member, editId: 'r1', onDone() {} }).find((n) => n.type === 'Sheet')!.props.foot)
+  await all(
+    make()
+      .render('ReceiptForm', { state: st, s: sub, member, editId: 'r1', onDone() {} })
+      .find((n) => n.type === 'Sheet')!.props.foot,
+  )
     .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
     .props.onClick();
   assert.deepEqual(left(), ['o']);
