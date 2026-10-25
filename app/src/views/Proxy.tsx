@@ -7,7 +7,7 @@ import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../shared/types.ts';
 import { recordProxyCharge } from '../../../shared/receivable-edit.ts';
 import { ReceivableSheet } from './Receivable.tsx';
-import { DetailHead, DetailSheet, Facts, Note, Prop } from '../components/DetailKit.tsx';
+import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../components/DetailKit.tsx';
 import {
   MetricCards,
   Metric,
@@ -274,79 +274,82 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             {px.note && <Note text={px.note} />}
           </Facts>
 
-          {!ro && (
+          {/* 与订阅详情、合租详情一样：标题和操作在卡片里，表格贴着卡片边 */}
+          <Panel className="dt-charges">
             <div className="dt-ph row">
               <CardTitle>{t('proxy.table.title')}</CardTitle>
-              <button className="dt-btn sm dt-add" onClick={() => setAdding(true)}>
-                <Plus size={14} /> {t('proxy.receipt.add')}
-              </button>
+              {!ro && (
+                <button className="dt-btn sm dt-add" onClick={() => setAdding(true)}>
+                  <Plus size={14} /> {t('proxy.receipt.add')}
+                </button>
+              )}
             </div>
-          )}
-          <div className="ld-table">
-            <div className="ld-row ld-th table-head">
-              <span>{t('proxy.table.date')}</span>
-              <span>{t('proxy.table.charged')}</span>
-              <span className="ld-cost">{t('proxy.table.cost')}</span>
-              <span>{t('proxy.table.received')}</span>
-              <span>{t('proxy.table.diff')}</span>
-            </div>
-            {/* 已预收、还没到扣款日的期排在最上面：实扣是预计金额，盈亏等扣款后再算 */}
-            {ahead.map((r) => (
-              <button key={r.date} className="ld-row ld-ahead" disabled={ro} onClick={() => setEdit(r)}>
-                <span className="ld-date">
-                  {cnDate(r.date)}
-                  <small>{t('proxy.table.notCharged')}</small>
-                </span>
-                <span>
-                  {flow(-r.charged, r.currency)}
-                  {r.currency !== base && <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>}
-                </span>
-                <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
-                <ReceivedCell r={r} base={base} />
-                <span className="muted">—</span>
-              </button>
-            ))}
-            {list.map((r) => {
-              const d = r.receivedBase == null ? undefined : r.receivedBase - r.chargedBase;
-              return (
-                <button key={r.date} className="ld-row" disabled={ro} onClick={() => setEdit(r)}>
-                  <span className="ld-date">{cnDate(r.date)}</span>
+            <div className="ld-table">
+              <div className="ld-row ld-th table-head">
+                <span>{t('proxy.table.date')}</span>
+                <span>{t('proxy.table.charged')}</span>
+                <span className="ld-cost">{t('proxy.table.cost')}</span>
+                <span>{t('proxy.table.received')}</span>
+                <span>{t('proxy.table.diff')}</span>
+              </div>
+              {/* 已预收、还没到扣款日的期排在最上面：实扣是预计金额，盈亏等扣款后再算 */}
+              {ahead.map((r) => (
+                <button key={r.date} className="ld-row ld-ahead" disabled={ro} onClick={() => setEdit(r)}>
+                  <span className="ld-date">
+                    {cnDate(r.date)}
+                    <small>{t('proxy.table.notCharged')}</small>
+                  </span>
                   <span>
-                    <b>{flow(-r.charged, r.currency)}</b>
-                    {/* 窄屏没有「当时成本」一列，外币时折合写在实扣下面 */}
+                    {flow(-r.charged, r.currency)}
                     {r.currency !== base && <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>}
                   </span>
                   <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
-                  {r.receivedBase == null ? (
-                    <span>
-                      <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
-                    </span>
-                  ) : (
-                    <ReceivedCell r={r} base={base} />
-                  )}
-                  <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
-                    {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base)}
-                  </span>
+                  <ReceivedCell r={r} base={base} />
+                  <span className="muted">—</span>
                 </button>
-              );
-            })}
-            {list.length > 1 && (
-              <div className="ld-row ld-tf">
-                <span>{copyParts(t('proxy.table.total', { count: list.length }))}</span>
-                <span>{new Set(list.map((r) => r.currency)).size === 1 ? flow(-list.reduce((a, r) => a + r.charged, 0), list[0].currency) : ''}</span>
-                <span className="ld-cost">{flow(-charged, base)}</span>
-                <span className="green">{flow(received, base)}</span>
-                <span className={Math.abs(diff) < 0.5 ? 'muted' : diff > 0 ? 'gain' : 'loss'}>
-                  {Math.abs(diff) < 0.5 ? t('proxy.table.even') : flow(diff, base)}
-                </span>
-              </div>
-            )}
-            {list.length === 0 && (
-              <div className="muted" style={{ fontSize: 'var(--fs-2)', padding: '12px 0' }}>
-                {t('proxy.table.none')}
-              </div>
-            )}
-          </div>
+              ))}
+              {list.map((r) => {
+                const d = r.receivedBase == null ? undefined : r.receivedBase - r.chargedBase;
+                return (
+                  <button key={r.date} className="ld-row" disabled={ro} onClick={() => setEdit(r)}>
+                    <span className="ld-date">{cnDate(r.date)}</span>
+                    <span>
+                      <b>{flow(-r.charged, r.currency)}</b>
+                      {/* 窄屏没有「当时成本」一列，外币时折合写在实扣下面 */}
+                      {r.currency !== base && <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>}
+                    </span>
+                    <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
+                    {r.receivedBase == null ? (
+                      <span>
+                        <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
+                      </span>
+                    ) : (
+                      <ReceivedCell r={r} base={base} />
+                    )}
+                    <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
+                      {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base)}
+                    </span>
+                  </button>
+                );
+              })}
+              {list.length > 1 && (
+                <div className="ld-row ld-tf">
+                  <span>{copyParts(t('proxy.table.total', { count: list.length }))}</span>
+                  <span>{new Set(list.map((r) => r.currency)).size === 1 ? flow(-list.reduce((a, r) => a + r.charged, 0), list[0].currency) : ''}</span>
+                  <span className="ld-cost">{flow(-charged, base)}</span>
+                  <span className="green">{flow(received, base)}</span>
+                  <span className={Math.abs(diff) < 0.5 ? 'muted' : diff > 0 ? 'gain' : 'loss'}>
+                    {Math.abs(diff) < 0.5 ? t('proxy.table.even') : flow(diff, base)}
+                  </span>
+                </div>
+              )}
+              {list.length === 0 && (
+                <div className="muted" style={{ fontSize: 'var(--fs-2)', padding: '12px 0' }}>
+                  {t('proxy.table.none')}
+                </div>
+              )}
+            </div>
+          </Panel>
         </div>
       </div>
       {edit && <EntrySheet state={state} s={live} row={edit} onClose={() => setEdit(null)} />}

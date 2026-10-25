@@ -5516,11 +5516,13 @@ a.car-toggle {
 }
 .ld-row {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1.3fr) minmax(0, 1fr) 84px;
-  gap: 10px;
+  /* 窄屏四列：日期、实扣、收回、差额；金额两列等宽，放得下「+¥1,157.44」这样的整数 */
+  grid-template-columns: 64px minmax(0, 1.2fr) minmax(0, 1.2fr) 72px;
+  gap: 8px;
   align-items: center;
   width: 100%;
-  padding: 10px 14px;
+  min-height: var(--table-row-h);
+  padding: 8px 14px;
   border: 0;
   border-top: var(--hairline) solid var(--sep);
   background: none;
@@ -5548,6 +5550,8 @@ a.car-toggle {
 }
 .ld-row b {
   font-weight: 600;
+  /* 金额不在正负号后面断开 */
+  white-space: nowrap;
 }
 .ld-row small {
   font-size: var(--fs-1);
@@ -5603,7 +5607,8 @@ a.car-toggle {
 @media (min-width: 720px) {
   .ld-row {
     grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 96px;
-    padding: 12px 18px;
+    gap: 10px;
+    padding: 10px 18px;
   }
   .ld-cost {
     display: flex !important;
@@ -8801,11 +8806,10 @@ a.car-toggle {
 }
 
 /* 合租弹窗：小节标题、成员、收款表 */
-/* 收款 / 付款切换与下面的表格：同一组，间距固定，不靠负边距 */
+/* 收款 / 付款切换在卡片头部，表格贴着卡片边：间距与订阅详情的扣款记录一致 */
 .car-ledger {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 .car-sheet-members {
   padding: 2px 16px;
@@ -8820,13 +8824,13 @@ a.car-toggle {
   /* 日期与金额靠在一起，不把三列拉到两端 */
   grid-template-columns: minmax(0, 1fr) 96px 104px;
   column-gap: 16px;
-  min-height: var(--ctl-h-md);
+  min-height: var(--table-row-h);
 }
 .car-receipts .ld-row > span {
   overflow-wrap: anywhere;
 }
-/* 层级靠高度与分隔线区分：表头 36px > 分组标题 > 内容行 32px；组内不画分隔线，组与组之间一条细线 */
-.car-receipts .ld-row:not(.car-period):not(.ld-th):not(.ld-tf) {
+/* 按年分组时，组内的行是从属的明细：矮一些（32px）、不画分隔线；表头与分组行是标准行高。只有一年时平铺，行高同表头 */
+.car-receipts.ld-grouped .ld-row:not(.car-period):not(.ld-th):not(.ld-tf) {
   min-height: 32px;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -8860,10 +8864,9 @@ a.car-toggle {
 .car-receipts .car-period {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
-  /* 分组条比表头矮：表头是整张表的层级，分组条是表内的层级 */
-  /* 左右边距与表头、数据行一致，标题首字对齐 */
-  padding: 12px 18px 4px;
-  min-height: 36px;
+  /* 与表头同高；左右边距与表头、数据行一致，标题首字对齐 */
+  padding: 8px 18px;
+  min-height: var(--table-row-h);
   font-size: var(--fs-1);
   font-weight: 600;
   color: var(--label-2);
@@ -9707,7 +9710,7 @@ img.mm-flag {
     grid-column: 1 / -1;
     align-items: center;
   }
-  /* 表头略高于分组行，成员行 48px（按钮 32px 上下各留 8px） */
+  /* 表头与成员行同高（--table-row-h） */
   .car-member-table th,
   .car-member-table td {
     min-width: 0;
@@ -9719,7 +9722,7 @@ img.mm-flag {
     align-self: center;
   }
   .car-member-row {
-    min-height: 48px;
+    min-height: var(--table-row-h);
   }
 
   .car-member-table td > .text-ellipsis {

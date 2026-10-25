@@ -1049,11 +1049,11 @@
   mask: var(--unpaid-dash) 0 0 / 100% 100% no-repeat;
 }
 
-/* 单列：各区块都是卡片（与上方指标卡一致）；扣款表、合租成员表自带描边，放在卡片里时去掉外框 */
+/* 单列：各区块都是卡片（与上方指标卡一致）；扣款表、收付款表、合租成员表自带描边，放在卡片里时去掉外框，只留卡片一圈 */
 .dt-flow > .dt-charges .dt-ph {
   padding: 14px 20px 10px;
 }
-.dt-flow > .dt-charges .ld-table,
+.dt-panel.dt-charges .ld-table,
 .dt-share .car-member-table {
   margin: 0;
   border-radius: 0;
@@ -1333,10 +1333,10 @@
   border-top: 0;
 }
 
-/* 订阅详情里的合租成员表更紧凑：行高 40px、上下内距 4px、收款按钮用 28px；合租详情保持原行高 */
+/* 订阅详情里的合租成员表：行高同表头（--table-row-h）、上下内距 4px、收款按钮用 28px */
 @container (min-width: 720px) {
   .dt-share .car-member-row {
-    min-height: 40px;
+    min-height: var(--table-row-h);
   }
   /* 卡片左右各留 20px 后只剩约 680px，列间距收窄到 16px */
   .dt-share .car-member-table {
@@ -1403,9 +1403,9 @@
   margin-left: 4px;
   color: var(--label-3);
 }
-/* 年份行高度固定：第二列不论是支付方式胶囊还是成员头像，三张表（扣款、收款、付款）一样高 */
+/* 年份行高度固定（同表头）：第二列不论是支付方式胶囊还是成员头像，三张表（扣款、收款、付款）一样高 */
 .dt-ledger .car-period {
-  min-height: 38px;
+  min-height: var(--table-row-h);
 }
 .dt-ledger .dt-ava-stack > .pp-ava {
   width: 22px !important;

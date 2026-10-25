@@ -52,7 +52,7 @@ export function YearLedger<T>({
   );
   const allOpen = years.every((y) => open.has(y));
   return (
-    <div className="ld-table car-receipts car-receipts-out dt-ledger">
+    <div className={`ld-table car-receipts car-receipts-out dt-ledger ${grouped ? 'ld-grouped' : ''}`}>
       {grouped ? (
         <button
           type="button"
