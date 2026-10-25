@@ -175,7 +175,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   // 显示今天生效的那一段（换区前仍是旧区的价格与支付方式），未来的变更单独列出
   const cur = currentPhase(sub, today);
   const history = chargesBetween(sub, sub.start, today, today);
-  const ro = !!state.readonly;
   const [pay, setPay] = useState<{ pay?: Payment; index?: number; phase?: string } | null>(null);
   const [stopping, setStopping] = useState(false);
   const [share, setShare] = useState(false);
@@ -193,7 +192,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const big = pair(nowPrice, cur.currency, { compact: false, plain: true, date: once ? history[0]?.date : undefined });
 
   const editPay = (c: Charge) => {
-    if (ro) return;
     // 同一天可能有多笔（如重复扣款），用当天在同一段里的序号定位；并行的两段各算各的
     const index = history.filter((x) => x.date === c.date && x.sub.start === c.sub.start).indexOf(c);
     setPay({
@@ -222,15 +220,15 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       state={state}
       today={today}
       history={history}
-      onRow={ro ? undefined : editPay}
+      onRow={editPay}
       // 买断已有那一笔就不再提示记一笔，行仍可点开修改
-      onAdd={ro || (once && history.length) ? undefined : () => setPay({})}
+      onAdd={once && history.length ? undefined : () => setPay({})}
     />
   );
   const events = !compact ? <Events sub={sub} state={state} today={today} /> : null;
   const actions = (
     <>
-      {!ro && sub.cycle.unit !== 'lifetime' && !isStopped(st) && (
+      {sub.cycle.unit !== 'lifetime' && !isStopped(st) && (
         <Act
           icon={paused ? <Play size={15} /> : <Pause size={15} />}
           label={paused ? t('detail.action.resume') : t('detail.action.pause')}
@@ -242,13 +240,13 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           }
         />
       )}
-      {!ro && sub.cycle.unit !== 'lifetime' && !isStopped(st) && <Act icon={<X size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />}
-      {!ro && sub.stop?.kind === 'cancel' && (
+      {sub.cycle.unit !== 'lifetime' && !isStopped(st) && <Act icon={<X size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />}
+      {sub.stop?.kind === 'cancel' && (
         <Act icon={<Play size={15} />} label={t('core.stop.restore')} onClick={() => run(() => saveSub(reactivate(sub, today)), t('detail.toast.resumed'))} />
       )}
-      {!ro && st === 'terminated' && <Act icon={<Plus size={15} />} label={t('editor.change.resume')} onClick={onEdit} />}
+      {st === 'terminated' && <Act icon={<Plus size={15} />} label={t('editor.change.resume')} onClick={onEdit} />}
       {sub.manageUrl && <Act icon={<Settings2 size={15} />} label={t('detail.action.manage')} href={sub.manageUrl} />}
-      {!ro && <Act primary icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />}
+      <Act primary icon={<Pencil size={15} />} label={t('detail.action.edit')} onClick={onEdit} />
     </>
   );
   const utilityActions = (
@@ -310,7 +308,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         {/* 合租比扣款记录重要，放在前面 */}
         <ShareCard sub={sub} state={state} today={today} onCar={() => setCar(true)} onMember={(m, collect) => setMember({ m, collect })} />
         {charges}
-        <Transfers sub={sub} state={state} onRow={ro ? undefined : (index) => setTransfer({ index })} onAdd={ro ? undefined : () => setTransfer({})} />
+        <Transfers sub={sub} state={state} onRow={(index) => setTransfer({ index })} onAdd={() => setTransfer({})} />
         {events}
       </div>
 
@@ -342,7 +340,6 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             state={state}
             s={sub}
             today={today}
-            ro={ro}
             book={carLedger(state, sub, today)}
             onClose={() => setCar(false)}
             onOpenSub={() => setCar(false)}
@@ -916,19 +913,18 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
         date: v.stop.date,
         icon: v.stop.kind === 'terminate' ? Ban : CircleStop,
         title: t(v.stop.kind === 'terminate' ? 'core.stop.terminate' : 'core.stop.cancel'),
-        sub: !state.readonly && v.stop.kind === 'terminate' ? v.stop.reason : undefined,
+        sub: v.stop.kind === 'terminate' ? v.stop.reason : undefined,
         tone: v.stop.kind === 'terminate' ? 'bad' : 'ink',
       });
-    if (!state.readonly)
-      for (const p of v.payments ?? [])
-        if (p.kind === 'refund')
-          evs.push({
-            date: p.date,
-            icon: Undo2,
-            title: t('editor.payment.kind.refund'),
-            tone: 'ok',
-            future: p.date > today,
-          });
+    for (const p of v.payments ?? [])
+      if (p.kind === 'refund')
+        evs.push({
+          date: p.date,
+          icon: Undo2,
+          title: t('editor.payment.kind.refund'),
+          tone: 'ok',
+          future: p.date > today,
+        });
   }
   // 转让只记发生了什么，金额在转让卡片里
   for (const tr of transfersOf(sub))
@@ -936,7 +932,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       date: tr.date,
       icon: tr.kind === 'sell' ? ArrowUpFromLine : ArrowDownToLine,
       title: t(`detail.transfer.kind.${tr.kind}`),
-      sub: state.readonly ? undefined : tr.note,
+      sub: tr.note,
       tone: tr.kind === 'sell' ? 'ok' : 'acc',
       future: tr.date > today,
     });
@@ -982,7 +978,7 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
   const stopped = phaseSubs(sub).filter((phase) => phase.stop);
   const losses = stopLosses({ ...state, subscriptions: [sub] }, today).items;
   const base = state.settings.baseCurrency;
-  if (state.readonly || !stopped.length) return null;
+  if (!stopped.length) return null;
   return (
     <>
       {stopped.map((phase) => {
@@ -1139,7 +1135,6 @@ function Notices({ sub, state, today }: { sub: Subscription; state: AppState; to
   const st = effectiveStatus(sub, today);
   const cur = currentPhase(sub, today);
   const up = upcomingPhase(sub, today);
-  const ro = !!state.readonly;
   const parallel = sub.phases?.length ? activePhases(sub, today).filter((v) => v.start !== cur.start) : [];
   return (
     <div className="dt-notices">
@@ -1170,7 +1165,7 @@ function Notices({ sub, state, today }: { sub: Subscription; state: AppState; to
           title={up.planned ? t('detail.up.planned') : st === 'upcoming' ? t('detail.up.starting') : t('detail.up.changing')}
           // 待确认的计划：取舍按钮放在标题右侧，结论和操作同一眼看到
           aside={
-            up.planned && !ro ? (
+            up.planned ? (
               <div className="dt-plan">
                 <button
                   className="dt-btn"
@@ -1255,7 +1250,7 @@ function ShareCard({
         </button>
       }
     >
-      <CarMembers state={state} s={sub} today={today} ro={!!state.readonly} onMember={onMember} billEvery={carRule(state, sub, today).billEvery} />
+      <CarMembers state={state} s={sub} today={today} onMember={onMember} billEvery={carRule(state, sub, today).billEvery} />
     </Panel>
   );
 }

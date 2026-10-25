@@ -168,7 +168,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
   const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
-  const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
@@ -194,7 +193,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           onChange={setFilter}
           options={CAR_FILTERS.map((f) => [f, `${t(`family.pool.filter.${f}`)} ${groups[f].length}`] as [CarFilter, string])}
         />
-        {!ro && <FamilyTabs tab="plans" />}
+        <FamilyTabs tab="plans" />
         {/* 卡片 / 列表切换固定在右上角最后一个；排序只在列表表头切换，对卡片同样生效 */}
         {!phone && (
           <Seg
@@ -309,7 +308,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         )}
                       </div>
                       <div className="seats-row">
-                        <ShareAvatars sub={s} state={state} today={today} onMember={ro ? undefined : (m) => setMember({ s, m })} />
+                        <ShareAvatars sub={s} state={state} today={today} onMember={(m) => setMember({ s, m })} />
                         <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
                           {(() => {
                             const n = dues.filter((d) => d.periodsOwed > 0).length;
@@ -327,12 +326,12 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                       <CarFacts book={books.get(s.id)!} base={base} />
                       {expanded.has(s.id) && (
                         <>
-                          {!ro && free > 0 && live(s) && (
+                          {free > 0 && live(s) && (
                             <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
                               <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
                             </button>
                           )}
-                          <MemberRows state={state} s={s} today={today} ro={ro} onMember={(m, c) => setMember({ s, m, collect: c })} />
+                          <MemberRows state={state} s={s} today={today} onMember={(m, c) => setMember({ s, m, collect: c })} />
                         </>
                       )}
                     </div>
@@ -363,7 +362,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           </Group>
         )}
 
-        {candidates.length > 0 && !ro && (
+        {candidates.length > 0 && (
           <Group title={t('family.pool.maybeGroup')}>
             {candidates.map((s) => (
               <div key={s.id} className="cell">
@@ -389,7 +388,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             state={state}
             s={sheetSub}
             today={today}
-            ro={ro}
+
             book={books.get(sheetSub.id) ?? carLedger(state, sheetSub, today)}
             onClose={() => setSheet(null)}
             onOpenSub={() => {
@@ -556,7 +555,6 @@ function MemberRows({
   state,
   s,
   today,
-  ro,
   onMember,
   only,
   timeline,
@@ -567,7 +565,6 @@ function MemberRows({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   onMember: (m: ShareMember, collect?: boolean) => void;
   /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
   only?: (m: ShareMember) => boolean;
@@ -589,16 +586,16 @@ function MemberRows({
           <div
             key={d.member.id}
             className={`member ${d.member.left && d.member.left <= today ? 'departed' : ''}`}
-            role={ro ? undefined : 'button'}
-            tabIndex={ro ? undefined : 0}
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
-              if (!ro && !(e.target as HTMLElement).closest('button')) {
+              if (!(e.target as HTMLElement).closest('button')) {
                 e.stopPropagation();
                 onMember(d.member);
               }
             }}
             onKeyDown={(e) => {
-              if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+              if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                 e.preventDefault();
                 e.stopPropagation();
                 onMember(d.member);
@@ -606,7 +603,7 @@ function MemberRows({
             }}
           >
             {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
-            <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} disabled={ro} onClick={() => onMember(d.member)}>
+            <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 'var(--fs-2)' }}>
                 <MemberAvatar state={state} m={d.member} size={28} masked={masked} />
                 <span className={`text-ellipsis member-label ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
@@ -733,7 +730,6 @@ function MemberTable({
   state,
   s,
   today,
-  ro,
   onMember,
   win,
   expanded,
@@ -743,7 +739,6 @@ function MemberTable({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   onMember: (m?: ShareMember, collect?: boolean) => void;
   win: ReturnType<typeof carpoolTimeline>;
   expanded: boolean;
@@ -778,7 +773,7 @@ function MemberTable({
           ...(expanded ? roster.departed : []),
           ...Array.from({ length: roster.vacancies }, () => null),
         ].map((m, index) => {
-          if (!m) return <Vacancy key={`vacancy-${index}`} ro={ro} onAdd={() => onMember()} table />;
+          if (!m) return <Vacancy key={`vacancy-${index}`} onAdd={() => onMember()} table />;
           const st = memberStatus(state, s, m, today);
           const rate = memberFee(state, s, m, today);
           const left = !!m.left && m.left <= today;
@@ -787,12 +782,11 @@ function MemberTable({
               role="row"
               key={m.id}
               className="car-member-row"
-              data-readonly={ro || undefined}
-              tabIndex={ro ? undefined : 0}
+              tabIndex={0}
               aria-label={masked ? t('family.sheet.hiddenMember') : m.name || t('family.pool.unnamed')}
-              onClick={() => !ro && onMember(m)}
+              onClick={() => onMember(m)}
               onKeyDown={(e) => {
-                if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                   e.preventDefault();
                   onMember(m);
                 }
@@ -949,16 +943,15 @@ function OwnerSeat({
   );
 }
 
-function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void; table?: boolean }) {
+function Vacancy({ onAdd, table = false }: { onAdd: () => void; table?: boolean }) {
   const props = {
     className: `car-vacancy ${table ? 'car-member-row' : 'member'}`,
-    role: table ? 'row' : ro ? undefined : 'button',
-    'data-readonly': ro || undefined,
-    tabIndex: ro ? undefined : 0,
-    'aria-label': t(ro ? 'family.sheet.vacancy' : 'family.sheet.addMember'),
-    onClick: () => !ro && onAdd(),
+    role: table ? 'row' : 'button',
+    tabIndex: 0,
+    'aria-label': t('family.sheet.addMember'),
+    onClick: () => onAdd(),
     onKeyDown: (e: React.KeyboardEvent) => {
-      if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+      if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         onAdd();
       }
@@ -1000,7 +993,6 @@ export function CarMembers({
   state,
   s,
   today,
-  ro,
   onMember,
   masked = false,
   billEvery,
@@ -1008,7 +1000,6 @@ export function CarMembers({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   onMember: (m?: ShareMember, collect?: boolean) => void;
   masked?: boolean;
   billEvery: number;
@@ -1028,7 +1019,7 @@ export function CarMembers({
         state={state}
         s={s}
         today={today}
-        ro={ro}
+
         onMember={onMember}
         win={win}
         masked={masked}
@@ -1045,13 +1036,13 @@ export function CarMembers({
               <div className="car-group-head">
                 {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
               </div>
-              <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} masked={masked} timeline win={win} />
+              <MemberRows state={state} s={s} today={today} onMember={onMember} only={(m) => groupOf(m) === key} masked={masked} timeline win={win} />
             </div>
           ))}
         {roster.active.some((m) => m.exempt) && (
           <div className="car-sheet-members">
             <div className="car-group-head">{t('family.pool.exempt')}</div>
-            <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
+            <MemberRows state={state} s={s} today={today} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
           </div>
         )}
         {departedOpen && (
@@ -1060,7 +1051,7 @@ export function CarMembers({
               state={state}
               s={s}
               today={today}
-              ro={ro}
+
               onMember={onMember}
               only={(m) => !!m.left && m.left <= today}
               includeLeft
@@ -1071,7 +1062,7 @@ export function CarMembers({
           </div>
         )}
         {Array.from({ length: free }, (_, i) => (
-          <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
+          <Vacancy key={i} onAdd={() => onMember()} />
         ))}
         {roster.departed.length > 0 && (
           <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
@@ -1089,7 +1080,6 @@ export function CarSheet({
   state,
   s,
   today,
-  ro,
   book,
   onClose,
   onOpenSub,
@@ -1099,7 +1089,6 @@ export function CarSheet({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   book: ReturnType<typeof carLedger>;
   onClose: () => void;
   onOpenSub: () => void;
@@ -1158,9 +1147,9 @@ export function CarSheet({
           actions={
             <span className="dt-header-tools" data-snapshot-hide>
               {!stopped && (
-                <button className="btn car-rule-btn" disabled={ro} onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
+                <button className="btn car-rule-btn" onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
                   {perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
-                  {!ro && <Icon name="right" size={14} />}
+                  <Icon name="right" size={14} />
                 </button>
               )}
               <IconButton
@@ -1205,7 +1194,7 @@ export function CarSheet({
           {/* 与订阅详情一样：成员表、收付款表各在一张卡片里，标题在卡片内 */}
           {/* 成员卡片不加标题：表头第一列已经是「成员」 */}
           <Panel className="dt-share car-members-panel">
-            <CarMembers state={state} s={s} today={today} ro={ro} onMember={onMember} masked={masked} billEvery={rule.billEvery} />
+            <CarMembers state={state} s={s} today={today} onMember={onMember} masked={masked} billEvery={rule.billEvery} />
           </Panel>
 
           {/* 收进来的和我付出去的切换着看；表格与订阅详情的扣款记录同一套（YearLedger） */}
@@ -1325,7 +1314,7 @@ export function CarSheet({
                   })}
                   rowKey={({ m, p }, i) => `${m.id}-${p.date}-${i}`}
                   rowTitle={({ p }) => (masked ? undefined : p.note)}
-                  onRow={ro ? undefined : ({ m, p }) => (onPayment && p.kind === 'receipt' ? onPayment(m, p.id) : onMember(m))}
+                  onRow={({ m, p }) => (onPayment && p.kind === 'receipt' ? onPayment(m, p.id) : onMember(m))}
                 />
               ) : (
                 <div className="car-empty">

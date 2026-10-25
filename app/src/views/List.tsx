@@ -364,7 +364,7 @@ export function List({
                       {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
                       {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
                       {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
-                      <StopBadge sub={s} today={today} readonly={state.readonly} />
+                      <StopBadge sub={s} today={today} />
                       {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
                       {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                       {s.proxy && <ProxyBadge state={state} s={s} today={today} />}

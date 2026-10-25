@@ -605,7 +605,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
         <Group
           title={t('family.member.group')}
           action={
-            linked && !state.readonly ? (
+            linked ? (
               <button type="button" className="btn plain" onClick={() => setProfile(true)}>
                 {t('people.field.editProfile')}
               </button>

@@ -180,7 +180,6 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const ahead = proxyAhead(state, live, today);
   const [edit, setEdit] = useState<Row | null>(null);
   const [adding, setAdding] = useState(false);
-  const ro = !!state.readonly;
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
   const stopped = isStopped(st);
@@ -282,11 +281,9 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             className="dt-charges"
             title={t('proxy.table.title')}
             aside={
-              !ro && (
-                <button className="dt-btn dt-add" onClick={() => setAdding(true)}>
-                  <Plus size={14} /> {t('proxy.receipt.add')}
-                </button>
-              )
+              <button className="dt-btn dt-add" onClick={() => setAdding(true)}>
+                <Plus size={14} /> {t('proxy.receipt.add')}
+              </button>
             }
           >
             {/* 与订阅详情、合租详情同一套表格（YearLedger）：只有一年就平铺，跨年按年分组带小计；没有合计行，总数在上方指标卡 */}
@@ -330,19 +327,14 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     ),
                     second: flow(-r.charged, r.currency),
                     extra: flow(-r.chargedBase, base),
-                    orig:
-                      r.receivedBase == null ? (
-                        <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
-                      ) : (
-                        <ReceivedCell r={r} base={base} brief />
-                      ),
+                    orig: r.receivedBase == null ? <em className="todo">{t('proxy.table.record')}</em> : <ReceivedCell r={r} base={base} brief />,
                     base: d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base),
                     baseClass: d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
                   };
                 }}
                 rowKey={(r) => r.date}
                 rowClass={(r) => (r.date > today ? 'ld-ahead' : '')}
-                onRow={ro ? undefined : setEdit}
+                onRow={setEdit}
               />
             ) : (
               <div className="muted dt-import-note">{t('proxy.table.none')}</div>
@@ -525,7 +517,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           }
         >
           {rec ? (
-            <button type="button" className="cell tap" disabled={!!state.readonly || !!row.receipt?.opening} onClick={() => setReceipt(true)}>
+            <button type="button" className="cell tap" disabled={!!row.receipt?.opening} onClick={() => setReceipt(true)}>
               <span className="cell-l">
                 <ReceivedCell r={row} base={base} />
                 <small className="muted">
@@ -538,11 +530,9 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
               </span>
             </button>
           ) : (
-            !state.readonly && (
-              <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt(true)}>
-                <Icon name="plus" /> {t('proxy.receipt.add')}
-              </button>
-            )
+            <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt(true)}>
+              <Icon name="plus" /> {t('proxy.receipt.add')}
+            </button>
           )}
         </Group>
       </div>

@@ -59,9 +59,9 @@ export function stopDescription(sub: Subscription, today: string): string {
     .join('\n');
 }
 
-export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: string; readonly?: boolean }) {
+export function StopBadge({ sub, today }: { sub: Subscription; today: string }) {
   const cur = currentPhase(sub, today);
-  const label = readonly ? undefined : stopLabel(cur, today);
+  const label = stopLabel(cur, today);
   return label ? (
     <span className="badge stop-badge" title={stopDescription(cur, today)}>
       <StopText sub={cur} today={today} />
