@@ -53,7 +53,7 @@
     "paid": "Bezahlt",
     "waived": "Erlassen",
     "free": "Kostenlos",
-    "due": "Offen",
+    "due": "Unbezahlt",
     "upcoming": "Noch nicht fällig",
     "this": "Diese Zahlung"
   }

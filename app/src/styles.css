@@ -9997,11 +9997,24 @@ img.mm-flag {
 .car-member-row[data-readonly] {
   cursor: default;
 }
+/* 已下车成员的折叠：最后一行居中的灰字，没有胶囊底 */
 .car-departed-toggle {
-  justify-self: start;
+  justify-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
   height: var(--ctl-h-md);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--label-3);
-  border-radius: var(--radius-pill);
+  font-size: var(--fs-1);
+  cursor: pointer;
+}
+.car-departed-toggle:hover {
+  color: var(--label-2);
 }
 .car-departed-toggle[aria-expanded='true'] svg {
   transform: rotate(180deg);

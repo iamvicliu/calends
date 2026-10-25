@@ -41,7 +41,7 @@
     "paid": "Ödendi",
     "waived": "Bağışlandı",
     "free": "Ücretsiz",
-    "due": "Borçlu",
+    "due": "Ödenmedi",
     "upcoming": "Vadesi gelmedi",
     "this": "Bu ödeme"
   }

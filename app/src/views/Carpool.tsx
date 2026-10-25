@@ -856,7 +856,7 @@ function MemberTable({
 
 function DepartedToggle({ count, expanded, onToggle }: { count: number; expanded: boolean; onToggle: () => void }) {
   return (
-    <button className="btn car-departed-toggle" aria-expanded={expanded} onClick={onToggle}>
+    <button type="button" className="car-departed-toggle" aria-expanded={expanded} onClick={onToggle}>
       {t('family.sheet.departed', { count })}
       <Icon name="down" size={14} />
     </button>

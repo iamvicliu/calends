@@ -53,7 +53,7 @@
     "paid": "Paid",
     "waived": "Waived",
     "free": "Free",
-    "due": "Owed",
+    "due": "Unpaid",
     "upcoming": "Not due",
     "this": "This payment"
   }
