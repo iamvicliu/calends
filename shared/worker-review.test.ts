@@ -43,14 +43,14 @@ function fixture(extra: Partial<Env> = {}) {
         return stmt;
       },
       async first() {
-        if (!/^\s*SELECT/i.test(sql)) writes.push(sql);
+        if (!/^\s*(SELECT|CREATE TABLE IF NOT EXISTS d1_migrations)/i.test(sql)) writes.push(sql);
         return db.prepare(sql).get(...args) ?? null;
       },
       async all() {
         return { results: db.prepare(sql).all(...args) };
       },
       async run() {
-        if (!/^\s*SELECT/i.test(sql)) writes.push(sql);
+        if (!/^\s*(SELECT|CREATE TABLE IF NOT EXISTS d1_migrations)/i.test(sql)) writes.push(sql);
         const query = db.prepare(sql);
         if (query.columns().length) return { results: query.all(...args) };
         return { results: [], meta: { changes: Number(query.run(...args).changes) } };
@@ -361,4 +361,22 @@ test('W-13 一次性登录挑战被并发请求取用时只有一个能拿到', 
   const got = await Promise.all([takeChallenge(f.env, 'c1', 'login'), takeChallenge(f.env, 'c1', 'login')]);
   assert.deepEqual(got.filter(Boolean), ['fictional-challenge']);
   assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM auth_challenges').get()!.n, 0);
+});
+
+test('W-13 日历订阅令牌定长比对，猜错的请求不读整本账也不写库', async () => {
+  const f = fixture({ DEV_BYPASS_AUTH: undefined });
+  const token = 'a'.repeat(32);
+  await putKv(f.env, 'settings', { ...DEFAULT_SETTINGS, icsToken: token });
+  await upsert(
+    f.env,
+    'subscriptions',
+    'legacy',
+    sub('legacy', 'Fictional legacy', { share: { role: 'owner', seats: 3, members: [{ id: 'm', name: 'Fictional member', share: 3 }] } }),
+  );
+  f.writes.length = 0;
+  assert.equal((await f.request(`/cal/${'b'.repeat(32)}.ics`)).status, 404);
+  const ok = await f.request(`/cal/${token}.ics`);
+  assert.equal(ok.status, 200);
+  assert.match(await ok.text(), /BEGIN:VCALENDAR/);
+  assert.deepEqual(f.writes, []);
 });

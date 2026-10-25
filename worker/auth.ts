@@ -53,7 +53,7 @@ async function pbkdf2(password: string, salt: string, iterations: number): Promi
 }
 
 /** 定长比较，避免按字节泄露 */
-function constantEqual(a: string, b: string): boolean {
+export function constantEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);

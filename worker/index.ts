@@ -19,6 +19,7 @@ import {
   DEFAULT_MAX_SESSIONS,
   authStatus,
   changePassword,
+  constantEqual,
   deletePasskey,
   isAuthed,
   listPasskeys,
@@ -528,9 +529,10 @@ async function handleFetch(req: Request, env: Env): Promise<Response> {
     }
     const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
     if (cal) {
-      const state = await loadState(env);
-      if (!state.settings.icsToken || state.settings.icsToken !== cal[1]) return new Response('not found', { status: 404 });
-      return new Response(buildIcs(state, env.SITE_URL ?? ''), {
+      // 先定长比对令牌，对上了才只读加载账本：猜令牌的请求既得不到计时线索，也不会触发写库
+      const token = (await getSettings(env)).icsToken;
+      if (!token || !constantEqual(token, cal[1])) return new Response('not found', { status: 404 });
+      return new Response(buildIcs(await loadState(env, false), env.SITE_URL ?? ''), {
         headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
       });
     }
