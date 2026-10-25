@@ -1,4 +1,4 @@
-// AI 产品与 AI 开发工具：图标来自 lobe-icons（MIT），放在 public/ai
+// AI 产品与 AI 开发工具：图标来源见 public/ai/SOURCE.txt 与 public/brands/SOURCE.txt
 import type { CatalogEntry, CatalogCat } from '../catalog.ts';
 
 /** 有译名的条目：名称在 catalog.name.<file> 里按当前语言显示 */
@@ -10,7 +10,7 @@ const ai = (name: string, file: string, url: string, aka: string[] = [], cat: Ca
   aka,
   cat,
   url,
-  icon: `/ai/${file}.svg`,
+  icon: ['kimi', 'qwen', 'doubao', 'zhipu', 'devin', 'coze', 'ideogram', 'kling', 'suno'].includes(file) ? `/brands/${file}.webp` : `/ai/${file}.svg`,
   localized: LOCALIZED.has(file),
 });
 
