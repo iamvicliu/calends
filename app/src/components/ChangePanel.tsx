@@ -1,7 +1,7 @@
 import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { useId, useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { addDays, addMonths, nextCharge, phaseSubs } from '../../../shared/billing.ts';
+import { addDays, addMonths, cycleLabel, nextCharge, phaseSubs } from '../../../shared/billing.ts';
 import {
   changePrice,
   editPricePoint,
@@ -91,7 +91,10 @@ export function ChangePanel({
   const [date, setDate] = useState(today);
   const [price, setPrice] = useState('');
   const [currency, setCurrency] = useState(f.currency);
-  const [cycle, setCycle] = useState(CYCLES.find(([, c]) => c.unit === f.cycle.unit && c.every === f.cycle.every)?.[0] ?? 'm1');
+  // 现有周期不在常用列表里（如每 30 天、每 2 个月）：作为额外一项保留，不悄悄改成每月
+  const same = (c: Cycle) => c.unit === f.cycle.unit && c.every === f.cycle.every;
+  const [options] = useState<Array<[string, Cycle]>>(() => (CYCLES.some(([, c]) => same(c)) ? CYCLES : [['current', f.cycle], ...CYCLES]));
+  const [cycle, setCycle] = useState(() => options.find(([, c]) => same(c))![0]);
   const [methodId, setMethodId] = useState(f.methodId ?? '');
   const [region, setRegion] = useState(f.region ?? '');
   const [planned, setPlanned] = useState(false);
@@ -152,7 +155,7 @@ export function ChangePanel({
       const plan = {
         price: n,
         currency,
-        cycle: CYCLES.find(([k]) => k === cycle)![1],
+        cycle: options.find(([k]) => k === cycle)![1],
         methodId: methodId || undefined,
         region: region.trim().toUpperCase() || undefined,
         planned: mode === 'switch' && planned ? true : undefined,
@@ -288,7 +291,7 @@ export function ChangePanel({
                 <Picker
                   value={cycle}
                   onChange={setCycle}
-                  options={CYCLES.map(([k]) => ({ value: k, label: cycleName(k) }))}
+                  options={options.map(([k, c]) => ({ value: k, label: k === 'current' ? cycleLabel(c) : cycleName(k) }))}
                   ariaLabel={t('editor.field.cycle')}
                 />
               </label>
