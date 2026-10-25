@@ -6915,8 +6915,9 @@ a.car-toggle {
   padding: 12px 12px 12px 14px;
   border: 0;
   border-radius: var(--radius-lg);
-  background: var(--indigo-3);
-  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--accent) 28%, transparent);
+  /* 跟随系统的墨色主题：浅底、细描边，操作按钮用墨色 */
+  background: var(--fill-2);
+  box-shadow: inset 0 0 0 var(--hairline) var(--sep);
   color: var(--label);
   font: inherit;
   text-align: left;
@@ -6924,7 +6925,7 @@ a.car-toggle {
   transition: background var(--duration) var(--ease);
 }
 .ed-ai:hover {
-  background: var(--indigo-3);
+  background: var(--fill);
 }
 .ed-ai-ico {
   display: grid;
@@ -6933,8 +6934,9 @@ a.car-toggle {
   width: 38px;
   height: 38px;
   border-radius: var(--radius-md);
-  background: var(--indigo-9);
-  color: var(--white-a12);
+  background: var(--card);
+  box-shadow: 0 0 0 var(--hairline) var(--sep);
+  color: var(--label);
 }
 .ed-ai-text {
   display: flex;
@@ -6954,8 +6956,8 @@ a.car-toggle {
   flex-shrink: 0;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background: var(--indigo-9);
-  color: var(--white-a12);
+  background: var(--ink);
+  color: var(--on-ink);
   font-size: var(--fs-2);
   font-weight: 600;
 }
@@ -6973,18 +6975,11 @@ a.car-toggle {
   gap: 12px;
   padding: 4px 4px 0;
 }
-.ed-id-ph {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--fill-2);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
-  color: var(--label-2);
-  font-size: var(--fs-3);
-  font-weight: 600;
+/* 还没填名称：和最终图标同形同大，淡淡铺上分类色，预告将来的样子 */
+.ed-id-ghost {
+  background: color-mix(in srgb, var(--tint) 16%, transparent);
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--tint) 30%, transparent);
+  transition: background var(--duration) var(--ease);
 }
 .ed-id > .ico {
   flex-shrink: 0;
@@ -8369,7 +8364,49 @@ a.car-toggle {
   font-size: var(--fs-1);
 }
 .pp-item {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+/* 参与的每一项：头部订阅与状态；中间带标签的小表（与订阅名左对齐）；右下收款 */
+.pp-row {
+  display: flex;
+  align-items: center;
   gap: 10px;
+  min-width: 0;
+}
+.pp-state {
+  flex: none;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  color: var(--label-2);
+}
+.pp-kv {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 14px;
+  align-items: center;
+  margin: 2px 0 0;
+  padding-left: 40px;
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+}
+.pp-kv dt {
+  color: var(--label-3);
+}
+.pp-kv dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--label);
+}
+.pp-kv dd.green {
+  color: var(--green);
+}
+.pp-kv dd.muted {
+  color: var(--label-3);
+}
+.pp-actions {
+  justify-content: flex-end;
 }
 .pp-item.off .pp-item-l {
   opacity: 0.6;
@@ -8403,10 +8440,8 @@ a.car-toggle {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.pp-item .cell-r {
-  flex: 0 0 auto;
-}
 .pp-amt {
+  flex: none;
   display: inline-flex;
   flex-direction: column;
   align-items: flex-end;
@@ -8958,6 +8993,10 @@ a.car-toggle {
 }
 .mt-seg.unused {
   background: var(--gray-8);
+}
+/* 放弃不收的期：浅灰斜纹，和已付的绿色、欠款的红色斜纹都区分开 */
+.mt-seg.waived {
+  background: repeating-linear-gradient(135deg, var(--gray-7) 0 2px, transparent 2px 5px);
 }
 .mt-seg.due {
   background: repeating-linear-gradient(135deg, var(--red) 0 2px, color-mix(in srgb, var(--red) 25%, transparent) 2px 5px);
@@ -9517,17 +9556,16 @@ img.mm-flag {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding-left: 40px;
   min-width: 0;
 }
 .pp-account-value {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   border: 0;
   padding: 0;
-  height: var(--ctl-h-md);
+  height: auto;
   background: none;
-  color: var(--label-3);
+  color: var(--label);
   font: inherit;
   font-size: var(--fs-1);
   text-align: left;
@@ -9552,6 +9590,12 @@ img.mm-flag {
 }
 .pp-account .icon-btn {
   flex: none;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  box-shadow: none;
 }
 .collect-person-id {
   display: flex;
@@ -10123,4 +10167,75 @@ img.mm-flag {
 :is(.btn.plain, .dt-link, .as-link, .as-md a, .as-setup-intro a):is(:hover, :focus-visible) {
   color: var(--label);
   text-decoration-color: currentColor;
+}
+
+/* 成员表单的本期进度：复用订阅详情的 dt-period，欠款时填充为橙色；收款记录最下面的「记一笔收款」 */
+.member-period {
+  display: block;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.member-period .dt-period {
+  margin-bottom: 0;
+}
+.dt-period.due {
+  --fill-c: var(--orange);
+}
+.member-pay-add {
+  justify-content: flex-start;
+  gap: 6px;
+  color: var(--accent);
+}
+
+/* 成员称呼：输入框下面联想已有的人（与订阅名称的联想同一个样式），已关联时是带 × 的胶囊 */
+/* 分组默认裁掉超出圆角的内容；有联想框的这一组放开，联想框才能完整盖在下面的行上 */
+.group-body:has(.pn-suggest) {
+  overflow: visible;
+}
+.pn-field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.pn-field input {
+  width: 100%;
+}
+.pn-suggest {
+  left: auto;
+  right: -8px;
+  width: min(300px, 80vw);
+  text-align: left;
+}
+.pn-suggest .hit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.pn-suggest .hit span {
+  display: flex;
+  flex-direction: column;
+}
+.pn-suggest .hit small {
+  color: var(--label-3);
+  font-size: var(--fs-1);
+}
+.pn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  min-width: 0;
+  padding-left: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--fill-2);
+}
+.pn-chip .icon-btn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  box-shadow: none;
+  background: none;
 }

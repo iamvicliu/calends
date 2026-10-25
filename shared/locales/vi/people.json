@@ -26,12 +26,10 @@
     "proxy": "Trả hộ"
   },
   "item": {
-    "paidUntil": "Đã trả đến {date}",
     "noPay": "Chưa thu lần nào",
     "owedPeriods": "Nợ {count} kỳ",
     "left": "Đã rời",
-    "ended": "Đã dừng",
-    "received": "Đã thu {amount}"
+    "ended": "Đã dừng"
   },
   "sheet": {
     "owed": "Còn nợ",

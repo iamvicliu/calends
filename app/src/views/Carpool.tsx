@@ -9,7 +9,6 @@ import {
   addMonths,
   chargeMethodId,
   chargesBetween,
-  collectionAnchor,
   cycleLabel,
   diffDays,
   effectiveStatus,
@@ -32,11 +31,10 @@ import { chargeValue, convertOn } from '../../../shared/fx.ts';
 import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
-import { carLedger, MemberBillingSheet, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
-import { applyCarRule, carRule, carYear, followsCar, memberCashFlows, memberFlowValue } from '../../../shared/carpool.ts';
+import { carLedger, FeeRuleFields, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
+import { applyCarRule, carRule, carYear, followsCar, memberCashFlows, memberFlowValue, nextCollectionDay } from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { CurrencySelect } from '../components/Picker.tsx';
 import {
   MetricCards,
   Metric,
@@ -46,10 +44,10 @@ import {
   Icon,
   IconButton,
   NameLink,
-  NumInput,
   PayBadge,
   Seg,
   Sheet,
+  Stepper,
   StatusPill,
   SubIcon,
   tipProps,
@@ -167,7 +165,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
-  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; full?: boolean; pay?: MemberPayment } | null>(null);
+  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; pay?: MemberPayment } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
   const [sheet, setSheet] = useState<string | null>(null);
   const sheetSub = sheet ? state.subscriptions.find((x) => x.id === sheet) : undefined;
@@ -380,7 +378,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             ))}
           </Group>
         )}
-        {convert && <ConvertSheet s={convert} today={today} onClose={() => setConvert(null)} />}
+        {convert && <ConvertSheet state={state} s={convert} today={today} onClose={() => setConvert(null)} />}
         {sheetSub?.share && (
           <CarSheet
             state={state}
@@ -397,16 +395,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             onPayment={(m, pay) => setMember({ s: sheetSub, m, pay })}
           />
         )}
-        {member?.m && !member.collect && !member.full && !member.pay && (
-          <MemberBillingSheet
-            state={state}
-            s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
-            member={member.m}
-            onClose={() => setMember(null)}
-            onMore={() => setMember({ ...member, full: true })}
-          />
-        )}
-        {member && (!member.m || member.collect || member.full || member.pay) && (
+        {/* 点成员、点收款、点某一笔收款都打开同一个成员入口：欠款先记收款，其余是成员表单 */}
+        {member && (
           <MemberSheet
             state={state}
             s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
@@ -694,7 +684,13 @@ function TimelineAxis({ win }: { win: { start: string; end: string } }) {
  */
 function MemberTimeline({ s, m, today, win, fee }: { s: Subscription; m: ShareMember; today: string; win: { start: string; end: string }; fee?: string }) {
   const segs = memberSegments(s, m, today, win.start, win.end);
-  const label = { paid: t('family.timeline.paid'), due: t('family.timeline.due'), future: t('family.timeline.future'), unused: t('family.timeline.unused') };
+  const label = {
+    paid: t('family.timeline.paid'),
+    due: t('family.timeline.due'),
+    future: t('family.timeline.future'),
+    unused: t('family.timeline.unused'),
+    waived: t('family.timeline.waived'),
+  };
   return (
     <span className={`mt-viewport mt-track ${m.exempt ? 'exempt' : ''}`}>
       <span className="mt-inner">
@@ -1343,11 +1339,14 @@ function defaultSeats(name: string): number {
 }
 
 /** 一步转为合租：选身份与席位，保存后在上面补成员 */
-function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; onClose: () => void }) {
+function ConvertSheet({ state, s, today, onClose }: { state: AppState; s: Subscription; today: string; onClose: () => void }) {
   const [role, setRole] = useState<'owner' | 'member'>('owner');
   const [seats, setSeats] = useState(defaultSeats(s.name));
   const [ownerName, setOwnerName] = useState('');
   const perHead = seats > 0 ? s.price / seats : s.price;
+  // 我发起时一起定收费标准：默认按价格和席位推算，改了就用改的（之后在合租详情的收费规则里也是这一份）
+  const [rule, setRule] = useState<CarRule | null>(null);
+  const shown = rule ?? carRule(state, { ...s, share: { role: 'owner', seats, members: [] } }, today);
   return (
     <Sheet
       narrow
@@ -1368,7 +1367,7 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
                     ...s,
                     share:
                       role === 'owner'
-                        ? { role, seats, members: [], since: today }
+                        ? { role, seats, members: [], since: today, rule: shown }
                         : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today },
                   });
                   onClose();
@@ -1393,13 +1392,16 @@ function ConvertSheet({ s, today, onClose }: { s: Subscription; today: string; o
         />
         <Group foot={role === 'owner' ? t('family.convert.footOwner', { count: seats, amount: money(perHead, s.currency) }) : t('family.convert.footMember')}>
           <Cell label={t('family.convert.seats')}>
-            <input
-              className="num"
-              inputMode="numeric"
+            <Stepper
+              label={t('family.convert.seats')}
               value={seats}
-              onChange={(e) => setSeats(Math.max(1, Number((e.target as HTMLInputElement).value) || 1))}
+              min={1}
+              max={50}
+              unit={(n) => t('family.convert.seatUnit', { count: n })}
+              onChange={setSeats}
             />
           </Cell>
+          {role === 'owner' && <FeeRuleFields value={shown} onChange={setRule} />}
           {role === 'member' && (
             <Cell label={t('family.convert.owner')}>
               <input value={ownerName} placeholder={t('family.convert.ownerPh')} onChange={(e) => setOwnerName((e.target as HTMLInputElement).value)} />
@@ -1443,13 +1445,13 @@ function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: st
 /** 修改车的收款规则：周期、每次收多少、统一收款日；跟随车的成员从生效日起改用新标准 */
 function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: Subscription; today: string; rule: CarRule; onClose: () => void }) {
   const [draft, setDraft] = useState<CarRule>(rule);
-  const [from, setFrom] = useState(today);
-  const [anchor, setAnchor] = useState(collectionAnchor(s));
+  // 下期收款日：新标准从这天起执行，也是全车往后的收款节奏；默认按现在的节奏算出的下一次
+  const [next, setNext] = useState(nextCollectionDay(s, rule.billEvery, today));
   const followers = (s.share?.members ?? []).filter((m) => followsCar(state, s, m, today) && (!m.left || m.left > today)).length;
   const save = () =>
     run(async () => {
-      const next = applyCarRule(state, s, draft, from, today);
-      await saveSub({ ...next, share: { ...next.share!, collectFrom: anchor } });
+      const applied = applyCarRule(state, s, draft, next, today);
+      await saveSub({ ...applied, share: { ...applied.share!, collectFrom: next } });
       onClose();
     }, t('family.member.saved'));
   return (
@@ -1471,29 +1473,9 @@ function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: 
     >
       <div className="stack">
         <Group foot={t('family.rule.applyNote', { count: followers })}>
-          <div className="cell">
-            <Seg
-              value={String(draft.billEvery)}
-              onChange={(v) => setDraft({ ...draft, billEvery: Number(v) })}
-              options={[
-                ['1', t('family.member.seg.m1')],
-                ['3', t('family.member.seg.m3')],
-                ['6', t('family.member.seg.m6')],
-                ['12', t('family.member.seg.m12')],
-              ]}
-            />
-          </div>
-          <Cell label={perBill('family.member.feeLabel', draft.billEvery)}>
-            <span className="contact-field">
-              <CurrencySelect value={draft.currency} onChange={(c) => setDraft({ ...draft, currency: c })} ariaLabel={t('family.member.feeCcyAria')} />
-              <NumInput ccy={draft.currency} className="num" value={draft.fee} placeholder="0" onValue={(n) => setDraft({ ...draft, fee: n ?? 0 })} />
-            </span>
-          </Cell>
-          <Cell label={t('family.rule.from')}>
-            <DatePicker value={from} onChange={(v) => v && setFrom(v)} />
-          </Cell>
-          <Cell label={t('family.rule.anchor')}>
-            <DatePicker value={anchor} onChange={(v) => v && setAnchor(v)} />
+          <FeeRuleFields value={draft} onChange={setDraft} />
+          <Cell label={t('family.rule.nextDay')}>
+            <DatePicker value={next} onChange={(v) => v && setNext(v)} />
           </Cell>
         </Group>
       </div>

@@ -32,15 +32,13 @@
     "proxy": "Ausgelegt"
   },
   "item": {
-    "paidUntil": "Bezahlt bis {date}",
     "noPay": "Noch keine Zahlung",
     "owedPeriods": {
       "one": "{count} Zeitraum offen",
       "other": "{count} Zeiträume offen"
     },
     "left": "Ausgestiegen",
-    "ended": "Beendet",
-    "received": "Erhalten {amount}"
+    "ended": "Beendet"
   },
   "sheet": {
     "owed": "Offen",

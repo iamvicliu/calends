@@ -101,19 +101,9 @@
     "ownerName": "發起人",
     "ownerPlaceholder": "付給誰",
     "seats": "總席位（含自己）",
-    "memberN": "成員 {n}",
     "perPeriod": "每期份額",
     "paidUntil": "已付至",
-    "remove": "移除",
-    "addMember": "新增成員",
-    "manageHint": "點成員可單獨設定跟隨車或自訂收費、週期",
-    "follows": "跟隨車",
-    "custom": "自訂",
-    "nextDue": "下次應收 {date}",
-    "editMember": "編輯",
-    "overdue": "已逾期 {count} 天",
-    "dueOn": "應收 {date}",
-    "confirmRemove": "確認"
+    "manageHint": "儲存後在「共享」裡開啟這台車，新增成員、記收款。"
   },
   "proxy": {
     "for": "替誰付",

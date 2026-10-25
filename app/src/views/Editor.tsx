@@ -2,26 +2,24 @@ import { isDataIcon } from '../../../shared/icon.ts';
 import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
 import { base } from '../base.ts';
-import { useRef, useState, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { StopFields } from '../components/StopPanel.tsx';
-import { Minus, Plus, ReceiptText } from 'lucide-react';
+import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
-import { addDays, addMonths, diffDays, memberCollection, memberUnpaidFrom, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
-import { carRule, followsCar, shareFromFee } from '../../../shared/carpool.ts';
+import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
 import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import type { AppState, Cycle, ShareMember, SubStatus, Subscription } from '../../../shared/types.ts';
+import type { AppState, Cycle, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { RowActions } from '../components/RowActions.tsx';
-import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, SubIcon, Toggle } from '../components/ui.tsx';
-import { categories, isDomainCat, presetCat } from '../derive.ts';
+import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle } from '../components/ui.tsx';
+import { catColor, categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-form.ts';
 import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField, contactText, MemberSheet } from './Members.tsx';
+import { ContactField, contactText, FeeRuleFields } from './Members.tsx';
+import { applyCarRule, carRule, followsCar, nextCollectionDay, sameRule } from '../../../shared/carpool.ts';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
@@ -94,6 +92,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
   const [priceValid, setPriceValid] = useState(true);
   const [historyReset, setHistoryReset] = useState(0);
   const [f, setFRaw] = useState<Subscription>(() => draft?.form ?? initialForm);
+  // 收费标准改了、车上已有跟随车的成员时，从哪天起按新标准收
+  const [ruleFrom, setRuleFrom] = useState<string>();
   const [stop, setStop] = useState<StopForm | undefined>(
     () => draft?.stop ?? (f.stop || f.end || ['cancelled', 'terminated'].includes(f.status) ? stopForm(f, today) : undefined),
   );
@@ -165,15 +165,21 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           ? await linkPerson(state, px.personId, px.forName, px.contact ? (px.contactVia ?? 'Telegram') : undefined, px.contact)
           : {};
         if (px) out = { ...out, proxy: { ...px, forName: px.forName.trim(), personId: link.id } };
-        await saveSub(
-          isNew
-            ? out
-            : mergeEdits(
-                sub,
-                out,
-                getState().subscriptions.find((x) => x.id === sub.id),
-              ),
-        );
+        const latest = getState().subscriptions.find((x) => x.id === sub.id);
+        let final = isNew ? out : mergeEdits(sub, out, latest);
+        // 合租：编辑器只管身份、席位、付给谁和收费标准；成员与收款以账本里最新的为准，收费标准改了按合租详情同一套规则同步给跟随车的成员
+        if (!isNew && out.share && latest?.share && JSON.stringify(sub.share) !== JSON.stringify(out.share)) {
+          const { members: _m, ...own } = out.share;
+          final = { ...final, share: { ...latest.share, ...own, members: latest.share.members } };
+          const rule = out.share.role === 'owner' ? out.share.rule : undefined;
+          if (rule && !sameRule(rule, carRule(state, latest, today))) {
+            // 新标准从下期收款日起执行；没改日期时按现在的节奏算
+            const next = ruleFrom ?? nextCollectionDay(latest, rule.billEvery, today);
+            const applied = applyCarRule(state, { ...final, share: { ...final.share!, rule: latest.share.rule } }, rule, next, today);
+            final = { ...applied, share: { ...applied.share!, collectFrom: next } };
+          }
+        }
+        await saveSub(final);
         if (link.after) await savePerson(link.after);
         writeDraft(key, undefined);
         onClose();
@@ -260,6 +266,8 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           today={today}
           stop={stop}
           setStop={setStop}
+          ruleFrom={ruleFrom}
+          setRuleFrom={setRuleFrom}
           history={!isNew && <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />}
         />
       </div>
@@ -271,6 +279,8 @@ function Form({
   isNew,
   stop,
   setStop,
+  ruleFrom,
+  setRuleFrom,
   f,
   setF,
   up,
@@ -281,6 +291,8 @@ function Form({
   isNew: boolean;
   stop?: StopForm;
   setStop: (value: StopForm | undefined) => void;
+  ruleFrom?: string;
+  setRuleFrom: (d: string) => void;
   f: Subscription;
   setF: (s: Subscription) => void;
   up: (p: Partial<Subscription>) => void;
@@ -299,27 +311,15 @@ function Form({
   const share = f.share;
   const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) =>
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
-  const setMember = (i: number, p: Partial<ShareMember>) => setShare({ members: share!.members.map((m, j) => (j === i ? { ...m, ...p } : m)) });
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
-  // 已保存过的成员只显示摘要；刚在这里加的成员可以先填称呼
+  // 收费标准：存过的就用存的，否则按价格和席位推算（随价格、席位变）
   const stored = state.subscriptions.find((x) => x.id === f.id);
-  const savedMembers = new Map((stored?.share?.members ?? []).map((m) => [m.id, m]));
-  // 单个成员的收费方式、周期、收款在成员弹窗里编辑，弹窗直接保存到账本
-  const [editMember, setEditMember] = useState<ShareMember>();
-  // 打开成员弹窗时表单里的合租设置是否已和账本不同；没改过就不动表单，保存时整体沿用账本里的新数据
-  const shareEdited = useRef(false);
-  const openMember = (m: ShareMember) => {
-    shareEdited.current = JSON.stringify(share) !== JSON.stringify(stored?.share);
-    setEditMember(m);
-  };
-  const closeMember = () => {
-    setEditMember(undefined);
-    // 这里改过合租设置时，表单里的成员换成刚保存的版本，免得点「完成」把弹窗里的修改覆盖回去
-    const latest = getState()?.subscriptions.find((x) => x.id === f.id)?.share?.members;
-    if (!latest || !share || !shareEdited.current) return;
-    const byId = new Map(latest.map((m) => [m.id, m]));
-    setShare({ members: share.members.filter((m) => !savedMembers.has(m.id) || byId.has(m.id)).map((m) => byId.get(m.id) ?? m) });
-  };
+  const rule = carRule(state, f, today);
+  // 改了收费标准、车上有跟随车的成员时才问生效日
+  const ruleFollowers =
+    stored?.share && f.share?.rule && !sameRule(f.share.rule, carRule(state, stored, today))
+      ? stored.share.members.filter((m) => followsCar(state, stored, m, today) && (!m.left || m.left > today)).length
+      : 0;
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const method = state.methods.find((m) => m.id === f.methodId);
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
@@ -360,13 +360,14 @@ function Form({
     <div className="ed">
       {/* 一、是什么：图标 + 名称（输入时联想 App Store）+ 分类 */}
       <div className="ed-id">
-        {/* 有图标或网址时显示真实图标；否则是灰色占位（填了名称就显示首字母） */}
-        {f.icon || f.url ? (
+        {/*
+          填了名称、图标或网址：直接显示它最终的样子（真实图标，或分类色方块加首字母）；
+          还没填名称：同样大小的方块淡淡铺上分类色，预告将来的样子，换分类颜色跟着变
+        */}
+        {f.icon || f.url || f.name.trim() ? (
           <SubIcon sub={f} size={36} />
         ) : (
-          <span className="ed-id-ph" aria-hidden="true">
-            {[...f.name.trim()][0]?.toUpperCase()}
-          </span>
+          <span className="ico ed-id-ghost" style={{ '--s': '36px', '--tint': catColor(f.category) } as CSSProperties} aria-hidden="true" />
         )}
         <div className="ed-id-main">
           <NameField
@@ -445,12 +446,13 @@ function Form({
         </Cell>
         {cycleKey === 'custom' && (
           <Cell label={t('editor.unit.every')}>
-            <NumInput
-              className="num"
-              style={{ width: 60 }}
-              inputMode="numeric"
+            <Stepper
+              label={t('editor.unit.every')}
               value={f.cycle.every}
-              onValue={(n) => up({ cycle: { unit: f.cycle.unit === 'lifetime' ? 'month' : f.cycle.unit, every: Math.max(1, Math.round(n ?? 1)) } })}
+              min={1}
+              max={999}
+              unit={() => ''}
+              onChange={(n) => up({ cycle: { unit: f.cycle.unit === 'lifetime' ? 'month' : f.cycle.unit, every: n } })}
             />
             <Picker
               value={f.cycle.unit}
@@ -663,79 +665,26 @@ function Form({
             />
           </Cell>
         )}
+        {/* 这里只定身份与席位；成员、收费规则、收款都在合租详情里管 */}
         {share?.role === 'owner' && (
           <>
             <Cell label={t('editor.share.seats')}>
-              <input className="num" inputMode="numeric" value={share.seats} onChange={(e) => setShare({ seats: Math.max(1, Number(val(e)) || 1) })} />
+              <Stepper
+                label={t('editor.share.seats')}
+                value={share.seats}
+                min={1}
+                max={50}
+                unit={(n) => t('family.convert.seatUnit', { count: n })}
+                onChange={(n) => setShare({ seats: n })}
+              />
             </Cell>
-            {/* 这里只管名单：已有成员只显示摘要，收费方式、成员账号、收款在合租详情里维护 */}
-            {share.members.map((m0, i) => {
-              // 摘要按账本里最新保存的成员与订阅算，成员弹窗保存后立即更新
-              const m = savedMembers.get(m0.id) ?? m0;
-              const saved = savedMembers.has(m0.id);
-              const due = saved && stored && !m.exempt ? memberCollection(stored, m, memberUnpaidFrom(stored, m)).from : undefined;
-              const late = due && due < today ? diffDays(due, today) : 0;
-              return (
-                <div key={m.id} className="member-edit member-summary">
-                  {saved ? (
-                    <button type="button" className="member-summary-name tap" onClick={() => openMember(m)}>
-                      <b className="text-ellipsis">{m.name || t('editor.share.memberN', { n: i + 1 })}</b>
-                      <small className="muted">
-                        {m.exempt ? t('family.pool.exempt') : followsCar(state, stored!, m, today) ? t('editor.share.follows') : t('editor.share.custom')}
-                        {late > 0 && (
-                          <span className="member-late">
-                            {' '}
-                            <span className="copy-gap" aria-hidden="true" /> {t('editor.share.overdue', { count: late })}
-                          </span>
-                        )}
-                        {due && (
-                          <>
-                            {copyParts('\n')}
-                            <span className="nowrap">{t(late > 0 ? 'editor.share.dueOn' : 'editor.share.nextDue', { date: cnDateFull(due) })}</span>
-                          </>
-                        )}
-                      </small>
-                    </button>
-                  ) : (
-                    <input value={m.name} placeholder={t('editor.share.memberN', { n: i + 1 })} onChange={(e) => setMember(i, { name: val(e) })} />
-                  )}
-                  <RowActions
-                    onEdit={saved ? () => openMember(m) : undefined}
-                    editLabel={t('editor.share.editMember')}
-                    removeLabel={t('editor.share.remove')}
-                    confirmLabel={t('editor.share.confirmRemove')}
-                    onRemove={() => setShare({ members: share.members.filter((x) => x.id !== m0.id) })}
-                  />
-                </div>
-              );
-            })}
-            {share.members.length < share.seats - 1 && (
-              <button
-                className="cell tap"
-                style={{ color: 'var(--accent)' }}
-                onClick={() => {
-                  // 新成员按车的收款规则收费
-                  const r = carRule(state, f, today);
-                  setShare({
-                    members: [
-                      ...share.members,
-                      {
-                        id: uid(),
-                        name: '',
-                        share: shareFromFee(state, f, r.fee, r.currency, r.billEvery),
-                        fee: r.fee,
-                        feeCurrency: r.currency,
-                        billEvery: r.billEvery,
-                        joined: today,
-                      },
-                    ],
-                  });
-                }}
-              >
-                <Icon name="plus" /> {t('editor.share.addMember')}
-              </button>
+            {/* 收费标准就是合租详情里的「收费规则」，同一份数据；新成员默认按它收 */}
+            <FeeRuleFields value={rule} onChange={(r) => setShare({ rule: r })} />
+            {ruleFollowers > 0 && stored && (
+              <Cell label={t('family.rule.nextDay')}>
+                <DatePicker value={ruleFrom ?? nextCollectionDay(stored, rule.billEvery, today)} onChange={(v) => v && setRuleFrom(v)} />
+              </Cell>
             )}
-            {editMember && stored && createPortal(<MemberSheet state={state} s={stored} member={editMember} onClose={closeMember} />, document.body)}
           </>
         )}
       </Group>
@@ -834,7 +783,12 @@ function Form({
               <Group title={t('core.renewal.title')} foot={t('core.renewal.hint')}>
                 {(['chargeLeadDays', 'cancelLeadDays'] as const).map((field) => (
                   <Cell key={field} label={t(`core.renewal.${field}`)}>
-                    <DaysStepper label={t(`core.renewal.${field}`)} value={f[field] ?? 0} onChange={(n) => up({ [field]: n })} />
+                    <Stepper
+                      label={t(`core.renewal.${field}`)}
+                      value={f[field] ?? 0}
+                      unit={(n) => t('editor.unit.day', { count: n })}
+                      onChange={(n) => up({ [field]: n })}
+                    />
                   </Cell>
                 ))}
               </Group>
@@ -1057,41 +1011,3 @@ function NameField({
 }
 
 /** 天数步进器：0–3660 的整数，可直接输入，也可用两侧按钮加减；0 显示为「不需要」以外的数字 0 */
-function DaysStepper({ value, onChange, label }: { value: number; onChange: (n: number) => void; label: string }) {
-  const [draft, setDraft] = useState<string | null>(null);
-  const clamp = (n: number) => Math.min(3660, Math.max(0, Math.round(n)));
-  const commit = (raw: string) => {
-    setDraft(null);
-    const n = Number(raw);
-    if (raw.trim() !== '' && Number.isFinite(n)) onChange(clamp(n));
-  };
-  return (
-    <span className="days-stepper" role="group" aria-label={label}>
-      <button type="button" aria-label="−1" disabled={value <= 0} onClick={() => onChange(clamp(value - 1))}>
-        <Minus size={14} />
-      </button>
-      <input
-        inputMode="numeric"
-        aria-label={label}
-        value={draft ?? String(value)}
-        onChange={(e) => {
-          const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
-          setDraft(raw);
-          if (raw) onChange(clamp(Number(raw)));
-        }}
-        onBlur={(e) => commit(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            e.preventDefault();
-            onChange(clamp(value + (e.key === 'ArrowUp' ? 1 : -1)));
-            setDraft(null);
-          }
-        }}
-      />
-      <span className="days-unit">{t('editor.unit.day', { count: value })}</span>
-      <button type="button" aria-label="+1" disabled={value >= 3660} onClick={() => onChange(clamp(value + 1))}>
-        <Plus size={14} />
-      </button>
-    </span>
-  );
-}

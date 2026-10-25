@@ -69,6 +69,7 @@ const P: Record<string, JSX.Element> = {
     </>
   ),
   plus: <path d="M12 5v14M5 12h14" />,
+  minus: <path d="M5 12h14" />,
   menu: <path d="M4 7h16M4 12h10M4 17h16" />,
   compose: <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M18.4 3.6a2 2 0 0 1 2.8 2.8L12 15.6l-3.6.8.8-3.6z" />,
   home: <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" />,
@@ -896,6 +897,63 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
     <AriaSwitch className="toggle" isSelected={checked} onChange={onChange} aria-label={label}>
       <i />
     </AriaSwitch>
+  );
+}
+
+/**
+ * 加减器：两端减一、加一，中间可以直接输入数字，后面带单位（如「3 天」「2 期」）。
+ * 提醒提前天数、收款期数共用
+ */
+export function Stepper({
+  value,
+  onChange,
+  label,
+  unit,
+  min = 0,
+  max = 3660,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  label: string;
+  unit: (n: number) => string;
+  min?: number;
+  max?: number;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const clamp = (n: number) => Math.min(max, Math.max(min, Math.round(n)));
+  const commit = (raw: string) => {
+    setDraft(null);
+    const n = Number(raw);
+    if (raw.trim() !== '' && Number.isFinite(n)) onChange(clamp(n));
+  };
+  return (
+    <span className="days-stepper" role="group" aria-label={label}>
+      <button type="button" aria-label="−1" disabled={value <= min} onClick={() => onChange(clamp(value - 1))}>
+        <Icon name="minus" size={14} />
+      </button>
+      <input
+        inputMode="numeric"
+        aria-label={label}
+        value={draft ?? String(value)}
+        onChange={(e) => {
+          const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+          setDraft(raw);
+          if (raw) onChange(clamp(Number(raw)));
+        }}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            onChange(clamp(value + (e.key === 'ArrowUp' ? 1 : -1)));
+            setDraft(null);
+          }
+        }}
+      />
+      {unit(value) && <span className="days-unit">{unit(value)}</span>}
+      <button type="button" aria-label="+1" disabled={value >= max} onClick={() => onChange(clamp(value + 1))}>
+        <Icon name="plus" size={14} />
+      </button>
+    </span>
   );
 }
 

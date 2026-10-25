@@ -114,22 +114,9 @@
     "ownerName": "Host",
     "ownerPlaceholder": "Who you pay",
     "seats": "Total seats (incl. you)",
-    "memberN": "Member {n}",
     "perPeriod": "Share per period",
     "paidUntil": "Paid until",
-    "remove": "Remove",
-    "addMember": "Add member",
-    "manageHint": "Tap a member to follow the plan rule or set a custom fee and cycle",
-    "follows": "Follows plan",
-    "custom": "Custom",
-    "nextDue": "Next due {date}",
-    "editMember": "Edit",
-    "overdue": {
-      "one": "{count} day overdue",
-      "other": "{count} days overdue"
-    },
-    "dueOn": "Due {date}",
-    "confirmRemove": "Confirm"
+    "manageHint": "After saving, open this plan under Shared plans to add members and record payments."
   },
   "proxy": {
     "for": "Paying for",

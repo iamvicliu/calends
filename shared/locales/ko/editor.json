@@ -109,21 +109,9 @@
     "ownerName": "주최자",
     "ownerPlaceholder": "돈을 보낼 사람",
     "seats": "총 인원(본인 포함)",
-    "memberN": "멤버 {n}",
     "perPeriod": "주기당 분담금",
     "paidUntil": "납부 완료 기한",
-    "remove": "삭제",
-    "addMember": "멤버 추가",
-    "manageHint": "멤버를 눌러 플랜 규칙을 따르거나 개별 요금과 주기를 설정",
-    "follows": "요금제 따름",
-    "custom": "개별",
-    "nextDue": "다음 {date}",
-    "editMember": "편집",
-    "overdue": {
-      "other": "{count}일 연체"
-    },
-    "dueOn": "{date} 수금 예정",
-    "confirmRemove": "확인"
+    "manageHint": "저장한 뒤 「공유 플랜」에서 이 플랜을 열어 멤버를 추가하고 입금을 기록하세요."
   },
   "proxy": {
     "for": "대신 결제 대상",

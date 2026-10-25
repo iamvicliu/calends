@@ -32,15 +32,13 @@
     "proxy": "Başkası için"
   },
   "item": {
-    "paidUntil": "{date} tarihine kadar ödendi",
     "noPay": "Henüz ödeme yok",
     "owedPeriods": {
       "one": "{count} dönem borç",
       "other": "{count} dönem borç"
     },
     "left": "Ayrıldı",
-    "ended": "Durduruldu",
-    "received": "Alınan {amount}"
+    "ended": "Durduruldu"
   },
   "sheet": {
     "owed": "Alacak",

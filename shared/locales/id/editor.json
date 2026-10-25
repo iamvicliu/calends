@@ -109,21 +109,9 @@
     "ownerName": "Pengelola",
     "ownerPlaceholder": "Kepada siapa Anda membayar",
     "seats": "Total kursi (termasuk Anda)",
-    "memberN": "Anggota {n}",
     "perPeriod": "Bagian per periode",
     "paidUntil": "Lunas hingga",
-    "remove": "Hapus",
-    "addMember": "Tambah anggota",
-    "manageHint": "Ketuk anggota untuk mengikuti aturan paket atau atur biaya dan siklus sendiri",
-    "follows": "Ikuti paket",
-    "custom": "Kustom",
-    "nextDue": "Berikutnya {date}",
-    "editMember": "Ubah",
-    "overdue": {
-      "other": "Terlambat {count} hari"
-    },
-    "dueOn": "Jatuh tempo {date}",
-    "confirmRemove": "Hapus"
+    "manageHint": "Setelah disimpan, buka paket ini di Paket bersama untuk menambah anggota dan mencatat pembayaran."
   },
   "proxy": {
     "for": "Ditalangi untuk",

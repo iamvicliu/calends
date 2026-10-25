@@ -96,13 +96,11 @@
     },
     "feeCcyAria": "收款币种",
     "exempt": "不分摊",
-    "other": "其他",
     "source": "来源",
     "sourcePh": "哪个群 / 谁介绍的",
     "payments": "收款记录\n{count} 笔",
     "receivedTotal": "累计收到约 {amount}",
     "paidUntil": "已付至",
-    "paidUntilPh": "还没收过",
     "payCover": "{date} 收\n覆盖 {from}–{until}",
     "payCoverTo": "{date} 收\n覆盖 至 {until}",
     "copyAria": "复制给其他成员",
@@ -142,14 +140,20 @@
     },
     "collectionSchedule": "统一收款日：每年 {dates}",
     "coverAligned": "按统一收款期自动算出",
-    "recordNext": "记一笔收款\n{amount}",
     "collectionAnchor": "收款对齐起点",
-    "firstSummary": "首期 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "未填账号",
     "editAccount": "编辑成员账号",
     "copyAccount": "复制账号",
     "toastPayEdited": "已更新收款",
-    "editPayAria": "修改这笔收款"
+    "editPayAria": "修改这笔收款",
+    "seatGroup": "座位",
+    "firstPay": "首笔收款",
+    "firstPayToggle": "已收到首笔款",
+    "pickPerson": "从人员中选",
+    "accountHere": "账号",
+    "accountPhShort": "邮箱 / 手机号 / 用户名",
+    "unlinkPerson": "解除关联",
+    "namePickPh": "输入称呼，或选已有的人"
   },
   "pool": {
     "seatsFree": "空 {count} 位",
@@ -225,7 +229,8 @@
     "footMember": "加入后，订阅金额记你每期付给发起人的那一份。",
     "seats": "总席位（含自己）",
     "owner": "发起人",
-    "ownerPh": "付给谁"
+    "ownerPh": "付给谁",
+    "seatUnit": "位"
   },
   "facts": {
     "cost": "成本 / 年",
@@ -241,18 +246,23 @@
     "yearIncome": "每年收入"
   },
   "collect": {
-    "title": "记收款\n{name}",
     "next": "下次收款 {date}",
     "editMember": "编辑资料",
     "until": "覆盖到",
-    "covers": "这笔覆盖 {from} – {until}",
-    "changeFee": "改收费",
-    "lastPayment": "上次收款",
-    "adjustFee": "调整收费（从某日起）",
     "feeFrom": "生效日期",
     "feeHelp": "整期按覆盖起点的收费计算，已记收款不变。",
     "viewSub": "查看详情",
-    "editTitle": "修改收款\n{name}"
+    "period": "本期",
+    "due": "本期应收",
+    "actual": "实际收款",
+    "nextPeriod": "下一期",
+    "adjustPaid": "调整",
+    "periodPaid": "已付清",
+    "periods": "期数",
+    "periodUnit": "期",
+    "owedTotal": "共欠",
+    "owedTotalValue": "{count} 期，共 {amount}",
+    "firstOwed": "最早欠的一期"
   },
   "rule": {
     "title": "收费",
@@ -260,19 +270,13 @@
     "custom": "自定义",
     "followValue": "{rule}（跟随车）",
     "sheetTitle": "收费",
-    "from": "生效日",
-    "anchor": "统一收款日",
-    "applyNote": "{count} 位跟随车的成员从生效日起改用新标准；自定义收费的成员不受影响，历史收款不变。"
+    "applyNote": "{count} 位跟随车的成员从下期收款日起按新标准收；自定义收费的成员不受影响，已记的收款不变。",
+    "nextDay": "下期收款日"
   },
   "quick": {
-    "more": "更多资料",
-    "paid": "已付到",
-    "paidFrom": "这一期开始",
-    "paidTo": "这一期结束",
     "late": "已逾期 {count} 天",
     "owe": "待收 {amount}\n应收 {date}",
     "settled": "已结清\n下次应收 {date}",
-    "adjust": "调整收费与退出",
     "backCollect": "记一笔收款"
   },
   "strip": {
@@ -289,7 +293,8 @@
     "paid": "已付",
     "due": "待收",
     "future": "下一期",
-    "unused": "已付未用"
+    "unused": "已付未用",
+    "waived": "未收（已放弃）"
   },
   "refund": {
     "title": "下车退款",

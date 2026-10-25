@@ -100,13 +100,11 @@
     },
     "feeCcyAria": "Mata uang",
     "exempt": "Tidak membayar",
-    "other": "Lainnya",
     "source": "Sumber",
     "sourcePh": "Dari grup mana / siapa yang mengajak",
     "payments": "Pembayaran\n{count}",
     "receivedTotal": "Total diterima sekitar {amount}",
     "paidUntil": "Lunas hingga",
-    "paidUntilPh": "Belum ada pembayaran",
     "payCover": "Diterima {date}\nuntuk {from}–{until}",
     "payCoverTo": "Diterima {date}\nuntuk hingga {until}",
     "copyAria": "Salin ke anggota lain",
@@ -148,14 +146,20 @@
     },
     "collectionSchedule": "Tanggal penagihan: setiap tahun {dates}",
     "coverAligned": "Berakhir pada batas periode bersama",
-    "recordNext": "Catat pembayaran\n{amount}",
     "collectionAnchor": "Awal penagihan bersama",
-    "firstSummary": "Periode pertama {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Akun belum diisi",
     "editAccount": "Edit akun anggota",
     "copyAccount": "Salin akun",
     "toastPayEdited": "Pembayaran diperbarui",
-    "editPayAria": "Ubah pembayaran ini"
+    "editPayAria": "Ubah pembayaran ini",
+    "seatGroup": "Kursi",
+    "firstPay": "Pembayaran pertama",
+    "firstPayToggle": "Pembayaran pertama sudah diterima",
+    "pickPerson": "Pilih dari daftar orang",
+    "accountHere": "Akun",
+    "accountPhShort": "Email / nomor telepon / nama pengguna",
+    "unlinkPerson": "Lepas tautan",
+    "namePickPh": "Ketik nama atau pilih orang"
   },
   "pool": {
     "seatsFree": "{count} kosong",
@@ -241,7 +245,8 @@
     "footMember": "Setelah bergabung, harga adalah jumlah yang Anda bayarkan ke pengelola tiap periode.",
     "seats": "Total kursi (termasuk Anda)",
     "owner": "Pengelola",
-    "ownerPh": "Kepada siapa Anda membayar"
+    "ownerPh": "Kepada siapa Anda membayar",
+    "seatUnit": "kursi"
   },
   "facts": {
     "cost": "Biaya / thn",
@@ -257,18 +262,23 @@
     "yearIncome": "Pemasukan per tahun"
   },
   "collect": {
-    "title": "Catat pembayaran\n{name}",
     "next": "Penagihan berikutnya {date}",
     "editMember": "Edit",
     "until": "Berlaku sampai",
-    "covers": "Pembayaran mencakup {from} – {until}",
-    "changeFee": "Ubah biaya",
-    "lastPayment": "Pembayaran terakhir",
-    "adjustFee": "Sesuaikan biaya",
     "feeFrom": "Berlaku mulai",
     "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",
     "viewSub": "Lihat detail",
-    "editTitle": "Ubah pembayaran\n{name}"
+    "period": "Periode",
+    "due": "Tagihan periode ini",
+    "actual": "Pembayaran diterima",
+    "nextPeriod": "Periode berikutnya",
+    "adjustPaid": "Sesuaikan",
+    "periodPaid": "Lunas",
+    "periods": "Jumlah periode",
+    "periodUnit": "periode",
+    "owedTotal": "Total tertunggak",
+    "owedTotalValue": "{count} periode, total {amount}",
+    "firstOwed": "Periode tertunggak paling awal"
   },
   "rule": {
     "title": "Biaya",
@@ -276,21 +286,15 @@
     "custom": "Kustom",
     "followValue": "{rule} (aturan paket)",
     "sheetTitle": "Biaya",
-    "from": "Berlaku mulai",
-    "anchor": "Tanggal tagih bersama",
-    "applyNote": "{count} anggota yang mengikuti paket beralih mulai tanggal berlaku; anggota kustom dan pembayaran lama tidak berubah."
+    "applyNote": "{count} anggota yang mengikuti paket membayar tarif baru mulai penagihan berikutnya; tarif khusus dan pembayaran tercatat tidak berubah.",
+    "nextDay": "Penagihan berikutnya"
   },
   "quick": {
-    "more": "Detail lainnya",
-    "paid": "Dibayar sampai",
-    "paidFrom": "Awal periode",
-    "paidTo": "Akhir periode",
     "late": {
       "other": "Terlambat {count} hari"
     },
     "owe": "Tagihan {amount}\nsejak {date}",
     "settled": "Lunas\nberikutnya {date}",
-    "adjust": "Biaya & keluar",
     "backCollect": "Catat pembayaran"
   },
   "strip": {
@@ -307,7 +311,8 @@
     "paid": "Lunas",
     "due": "Tertagih",
     "future": "Periode berikutnya",
-    "unused": "Dibayar, belum dipakai"
+    "unused": "Dibayar, belum dipakai",
+    "waived": "Dibebaskan"
   },
   "refund": {
     "title": "Pengembalian saat keluar",

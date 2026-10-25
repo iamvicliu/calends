@@ -26,12 +26,10 @@
     "proxy": "立て替え"
   },
   "item": {
-    "paidUntil": "{date} まで支払い済み",
     "noPay": "未入金",
     "owedPeriods": "{count} 期分未払い",
     "left": "退出済み",
-    "ended": "停止済み",
-    "received": "回収 {amount}"
+    "ended": "停止済み"
   },
   "sheet": {
     "owed": "未回収",

@@ -51,7 +51,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     React: {
       Fragment: 'Fragment',
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
-        typeof type === 'function' && ['MetricCards', 'Metric', 'YearLedger'].includes(type.name)
+        typeof type === 'function' && ['MetricCards', 'Metric', 'YearLedger', 'FeeRuleFields'].includes(type.name)
           ? type({ ...props, children })
           : { type, props: props ?? {}, children },
     },
@@ -119,6 +119,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     RegionTag: 'RegionTag',
     subRegion: (s: { region?: string }) => s.region,
     Seg: 'Seg',
+    Stepper: 'Stepper',
     SubIcon: 'SubIcon',
     CatIcon: 'CatIcon',
     BarLine: 'BarLine',
@@ -437,34 +438,52 @@ test('member with a receipt and no paid-through date never claims no receipts an
     feeCurrency: 'USD',
     payments: [{ date: today, amount: 10, currency: 'USD', until: '2026-10-31' }],
   };
-  const sub = {
-    id: 'owner',
-    name: 'Owner',
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
     category: 'Tools',
     tags: [],
-    price: 30,
+    price: 15,
     currency: 'USD',
     start: '2026-01-01',
-    cycle: { unit: 'month' as const, every: 1 },
-    status: 'active' as const,
-    share: { role: 'owner' as const, seats: 3, members: [member] },
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2026-01-01', members: [member] },
   };
+  let saved: Subscription | undefined;
   const r = harness(
     '../app/src/views/Members.tsx',
-    'MemberSheet',
+    'MemberForm',
     {},
-    { ...carpool, Sheet: 'Sheet', DatePicker: 'DatePicker', Toggle: 'Toggle', CurrencySelect: 'CurrencySelect', NumInput: 'NumInput', Picker: 'Picker' },
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      Picker: 'Picker',
+      todayIn: () => today,
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      linkPerson: async () => ({}),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (next: Subscription) => {
+        saved = next;
+      },
+    },
   );
-  const nodes = r.render('MemberSheet', { state: { ...st, subscriptions: [sub] }, s: sub, member, onClose() {} });
-  const date = nodes.find((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.member.notSet');
+  const render = () => r.render('MemberForm', { state: { ...st, subscriptions: [sub] }, s: sub, member, onClose() {} });
+  // 已付到默认只读，点「调整」才出现这一期开始
+  render()
+    .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
+    .props.onClick();
+  const nodes = render();
+  const date = nodes.find((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.pool.noPay');
   assert.ok(date);
   assert.equal(date.props.value, undefined, 'display correction does not invent a paid-through date');
   const receipts = nodes.find((n) => n.type === 'Group' && String(n.props.title).startsWith('family.member.payments'))!;
-  assert.equal(receipts.props.foot, undefined);
-  assert.equal(
-    nodes.some((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.member.paidUntilPh'),
-    false,
-  );
+  assert.equal(String(receipts.props.foot).includes('family.member.receivedTotal'), false);
+  assert.equal(saved, undefined);
 });
 
 test('public rows keep the amount once for an ordinary monthly plan and distinguish trials and sharing', () => {
@@ -834,7 +853,7 @@ test('钱包续航列表不重复卡面余额和月扣；单年度分享用时�
   }
 });
 
-test('收款只显示实收表单；编辑成员后切周期仍保留实际草稿，默认覆盖按成员周期顺延', () => {
+test('收款表单按应收预填：上面只读的收费与本期，下面实际收到的日期、金额、币种、备注都按改过的记', async () => {
   for (const edit of ['none', 'amount', 'zero', 'currency']) {
     const member = { id: 'm', name: 'Member', share: 7.5, fee: 150, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-14' };
     const sub: Subscription = {
@@ -847,56 +866,55 @@ test('收款只显示实收表单；编辑成员后切周期仍保留实际草�
       start: '2026-01-14',
       cycle: { unit: 'month', every: 1 },
       status: 'active',
-      share: { role: 'owner', seats: 2, since: '2026-01-14', members: [member] },
+      share: { role: 'owner', seats: 6, collectFrom: '2026-01-14', members: [member] },
     };
+    let saved: Subscription | undefined;
     const r = harness(
       '../app/src/views/Members.tsx',
-      'MemberSheet',
+      'ReceiptForm',
       {},
-      { ...carpool, Sheet: 'Sheet', DatePicker: 'DatePicker', Toggle: 'Toggle', CurrencySelect: 'CurrencySelect', NumInput: 'NumInput', Picker: 'Picker' },
+      {
+        ...carpool,
+        Sheet: 'Sheet',
+        DatePicker: 'DatePicker',
+        Toggle: 'Toggle',
+        CurrencySelect: 'CurrencySelect',
+        NumInput: 'NumInput',
+        Picker: 'Picker',
+        todayIn: () => today,
+        getState: () => ({ ...st, subscriptions: [sub] }),
+        linkPerson: async () => ({}),
+        run: (fn: () => Promise<unknown>) => fn(),
+        saveSub: async (next: Subscription) => {
+          saved = next;
+        },
+      },
     );
-    const render = () => r.render('MemberSheet', { state: st, s: sub, member, collect: true, onClose() {} });
+    const render = () => r.render('ReceiptForm', { state: st, s: sub, member, onDone() {} });
     const cell = (label: string) => render().find((n) => n.type === 'Cell' && n.props.label === label)!;
     const input = (label: string, type: string) => all(cell(label)).find((n) => n.type === type)!;
+    const due = billing.memberCollection(sub, member, billing.memberUnpaidFrom(sub, member), 'USD');
+    // 应收只读：收费标准与这一期，不是输入框
+    assert.ok(cell('family.member.feeGroup'));
+    assert.equal(
+      all(cell('family.collect.period')).some((n) => n.type === 'DatePicker'),
+      false,
+    );
+    assert.equal(input('family.member.amount', 'NumInput').props.value, due.amount);
     input('family.member.note', 'input').props.onChange({ target: { value: '审查草稿' } });
     input('family.member.receivedOn', 'DatePicker').props.onChange('2026-10-21');
     if (edit === 'amount' || edit === 'zero') input('family.member.amount', 'NumInput').props.onValue(edit === 'zero' ? 0 : 12.34);
-    if (edit === 'currency') input('family.member.currency', 'CurrencySelect').props.onChange('EUR');
-    assert.equal(
-      render().some((n) => n.type === 'Seg'),
-      false,
-    );
-    assert.equal(
-      render().some((n) => n.type === 'Cell' && n.props.label === 'family.member.name'),
-      false,
-    );
-    render()
-      .find((n) => n.type === 'button' && n.children.includes('family.collect.editMember'))!
+    if (edit === 'currency') input('family.member.amount', 'CurrencySelect').props.onChange('EUR');
+    await all(render().find((n) => n.type === 'Sheet')!.props.foot)
+      .find((n) => n.type === 'button' && n.children.includes('family.member.record'))!
       .props.onClick();
-    const before = input('family.member.amount', 'NumInput').props.value;
-    input('family.collect.feeFrom', 'DatePicker').props.onChange('2026-10-14');
-    // 成员默认跟随车的规则；要单独改周期先切到自定义
-    render()
-      .find((n) => n.type === 'Seg' && n.props.value === 'follow')
-      ?.props.onChange('custom');
-    for (const months of [1, 3, 6]) {
-      render()
-        .find((n) => n.type === 'Seg' && n.props.value !== 'custom')!
-        .props.onChange(String(months));
-      assert.equal(input('family.member.note', 'input').props.value, '审查草稿');
-      assert.equal(input('family.member.receivedOn', 'DatePicker').props.value, '2026-10-21');
-      const dates = render()
-        .filter((n) => n.type === 'DatePicker')
-        .map((n) => n.props.value);
-      assert.ok(dates.includes(billing.memberCollection(sub, { ...member, billEvery: months }, '2026-10-14', 'USD').until));
-      if (edit !== 'none') assert.equal(input('family.member.amount', 'NumInput').props.value, before);
-      else
-        assert.equal(
-          input('family.member.amount', 'NumInput').props.value,
-          billing.memberCollection(sub, { ...member, billEvery: months }, '2026-10-14', 'USD').amount,
-        );
-      assert.equal(input('family.member.currency', 'CurrencySelect').props.value, edit === 'currency' ? 'EUR' : 'CNY');
-    }
+    const p = saved!.share!.members[0].payments![0];
+    assert.equal(p.note, '审查草稿');
+    assert.equal(p.date, '2026-10-21');
+    assert.equal(p.from, due.from);
+    assert.equal(p.until, due.until);
+    assert.equal(p.amount, edit === 'amount' ? 12.34 : edit === 'zero' ? 0 : due.amount);
+    assert.equal(p.currency, edit === 'currency' ? 'EUR' : due.currency);
   }
 });
 
@@ -1633,13 +1651,12 @@ test('收款保存失败保留草稿且不关闭；重试成功只增加一条�
   let saved: Subscription | undefined;
   const r = harness(
     '../app/src/views/Members.tsx',
-    'MemberSheet',
+    'ReceiptForm',
     {},
     {
       ...carpool,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
-      Toggle: 'Toggle',
       CurrencySelect: 'CurrencySelect',
       NumInput: 'NumInput',
       getState: () => ({ ...st, subscriptions: [sub] }),
@@ -1657,12 +1674,11 @@ test('收款保存失败保留草稿且不关闭；重试成功只增加一条�
     },
   );
   const render = () =>
-    r.render('MemberSheet', {
+    r.render('ReceiptForm', {
       state: st,
       s: sub,
       member,
-      collect: true,
-      onClose() {
+      onDone() {
         closed++;
       },
     });
@@ -1701,7 +1717,7 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
   let saved: Subscription | undefined;
   const r = harness(
     '../app/src/views/Members.tsx',
-    'MemberSheet',
+    'MemberForm',
     {},
     {
       ...carpool,
@@ -1710,18 +1726,25 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
       Toggle: 'Toggle',
       CurrencySelect: 'CurrencySelect',
       NumInput: 'NumInput',
+      Picker: 'Picker',
+      todayIn: () => today,
       getState: () => ({ ...st, subscriptions: [sub] }),
-      linkPerson: async () => ({ id: 'p' }),
+      linkPerson: async () => ({}),
       run: (fn: () => Promise<unknown>) => fn(),
-      saveSub: async (s: Subscription) => {
-        saved = s;
+      saveSub: async (next: Subscription) => {
+        saved = next;
       },
     },
   );
-  const render = () => r.render('MemberSheet', { state: st, s: sub, member, onClose() {} });
+  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   render()
-    .find((n) => n.type === 'Seg' && n.props.value === 'follow')
-    ?.props.onChange('custom');
+    .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
+    .props.onChange('custom');
+  // 没改金额前不问生效日
+  assert.equal(
+    render().some((n) => n.type === 'Cell' && n.props.label === 'family.collect.feeFrom'),
+    true,
+  );
   render()
     .find((n) => n.type === 'NumInput' && n.props.value === 40)!
     .props.onValue(44);
@@ -1770,7 +1793,7 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
     let saved: Subscription | undefined;
     const r = harness(
       '../app/src/views/Members.tsx',
-      'MemberSheet',
+      'MemberForm,ReceiptForm',
       {},
       {
         ...carpool,
@@ -1779,17 +1802,45 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
         Toggle: 'Toggle',
         CurrencySelect: 'CurrencySelect',
         NumInput: 'NumInput',
+        Picker: 'Picker',
+        todayIn: () => today,
         getState: () => ({ ...st, subscriptions: [sub] }),
+        linkPerson: async () => ({}),
         run: (fn: () => Promise<unknown>) => fn(),
-        saveSub: async (s: Subscription) => {
-          saved = s;
+        saveSub: async (next: Subscription) => {
+          saved = next;
         },
       },
     );
-    r.render('MemberSheet', { state: st, s: sub, member, onClose() {} })
+    // 成员表单的收款列表直接删
+    await r
+      .render('MemberForm', { state: st, s: sub, member, onClose() {} })
       .find((n) => n.type === 'button' && n.props['aria-label'] === 'family.member.removePayAria')!
       .props.onClick();
-    await Promise.resolve();
+    assert.equal(saved!.share!.members[0].payments!.length, 0);
+    assert.equal(saved!.share!.members[0].paidUntil, paidUntil === '2026-11-10' ? paidUntil : undefined);
+    // 点开那一笔在收款表单里删，结果一样
+    saved = undefined;
+    const receipt = harness(
+      '../app/src/views/Members.tsx',
+      'ReceiptForm',
+      {},
+      {
+        ...carpool,
+        Sheet: 'Sheet',
+        DatePicker: 'DatePicker',
+        CurrencySelect: 'CurrencySelect',
+        NumInput: 'NumInput',
+        getState: () => ({ ...st, subscriptions: [sub] }),
+        run: (fn: () => Promise<unknown>) => fn(),
+        saveSub: async (next: Subscription) => {
+          saved = next;
+        },
+      },
+    );
+    await all(receipt.render('ReceiptForm', { state: st, s: sub, member, index: 0, onDone() {} }).find((n) => n.type === 'Sheet')!.props.foot)
+      .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
+      .props.onClick();
     assert.equal(saved!.share!.members[0].payments!.length, 0);
     assert.equal(saved!.share!.members[0].paidUntil, paidUntil === '2026-11-10' ? paidUntil : undefined);
   }
@@ -1850,12 +1901,7 @@ test('person avatar drafts remain unsaved until Save; server field order does no
 });
 
 /** 成员弹窗：有欠款时默认是记收款，点底部「调整收费与退出」切到设置；已结清的本来就是设置 */
-function toSettings(render: () => Node[]) {
-  const adjust = all(render().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.quick.adjust'));
-  adjust?.props.onClick();
-}
-
-test('合租表格的收费弹窗：已付期按开始日自动算结束日；改自定义收费从生效日起记调价', async () => {
+test('成员表单：已付至点「调整」直接改日期；改自定义收费从生效日起记调价', async () => {
   const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2026-07-16' };
   const sub: Subscription = {
     id: 's',
@@ -1872,39 +1918,38 @@ test('合租表格的收费弹窗：已付期按开始日自动算结束日；�
   let saved: Subscription | undefined;
   const r = harness(
     '../app/src/views/Members.tsx',
-    'MemberBillingSheet',
+    'MemberForm',
     {},
     {
       ...carpool,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
       CurrencySelect: 'CurrencySelect',
       NumInput: 'NumInput',
-      PersonAvatar: 'PersonAvatar',
-      personFor: () => undefined,
+      Picker: 'Picker',
       todayIn: () => today,
       getState: () => ({ ...st, subscriptions: [sub] }),
+      linkPerson: async () => ({}),
       run: (fn: () => Promise<unknown>) => fn(),
-      saveSub: async (s: Subscription) => {
-        saved = s;
+      saveSub: async (next: Subscription) => {
+        saved = next;
       },
     },
   );
-  const render = () => r.render('MemberBillingSheet', { state: st, s: sub, member, onClose() {}, onMore() {} });
-  // 欠款的成员先打开的是记收款；切到收费设置再测
-  toSettings(render);
+  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   const save = async () =>
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
       .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
       .props.onClick();
-  // 跟随车，已付期从已付至倒推：2026-01-17 起
-  assert.equal(render().find((n) => n.type === 'DatePicker' && n.props.value === '2026-01-17') != null, true);
+  // 已付至默认是文字，点「调整」原地变成日期选择，直接改这个日期
   render()
-    .find((n) => n.type === 'DatePicker' && n.props.value === '2026-01-17')!
-    .props.onChange('2026-07-17');
-  assert.ok(
-    all(render().find((n) => n.type === 'Cell' && n.props.label === 'family.quick.paidTo')!).some((n) => n.children.includes(format.cnDateFull('2027-01-16'))),
-  );
+    .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
+    .props.onClick();
+  render()
+    .find((n) => n.type === 'DatePicker' && n.props.value === member.paidUntil)!
+    .props.onChange('2027-01-16');
+  assert.equal(render().find((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil') != null, true);
   await save();
   assert.equal(saved!.share!.members[0].paidUntil, '2027-01-16');
 
@@ -2040,8 +2085,8 @@ test('下车控件默认建议金额，可编辑实际退款，清退出清退�
   assert.ok(!render().some((n) => n.type === 'Seg'));
 });
 
-test('收费弹窗设置下车退款保留原始已付至，金额无效不能保存，新成员隐藏下车退款', async () => {
-  const m = {
+test('成员表单设置下车退款保留原始已付至，金额无效不能保存，新成员隐藏下车退款', async () => {
+  const member = {
     id: 'm',
     name: 'M',
     share: 31,
@@ -2052,58 +2097,56 @@ test('收费弹窗设置下车退款保留原始已付至，金额无效不能�
     paidUntil: '2026-01-31',
     payments: [{ from: '2026-01-01', until: '2026-01-31', date: '2026-01-01', amount: 31, currency: 'USD' }],
   };
-  const s: Subscription = {
+  const sub: Subscription = {
     id: 's',
     name: 'Plan',
     category: 'Tools',
     tags: [],
     price: 40,
     currency: 'USD',
+    start: '2026-01-01',
     cycle: { unit: 'month', every: 1 },
     status: 'active',
-    start: '2026-01-01',
-    share: { role: 'owner', seats: 4, collectFrom: '2026-01-01', members: [m] },
+    share: { role: 'owner', seats: 4, collectFrom: '2026-01-01', members: [member] },
   };
   let saved: Subscription | undefined;
   const r = harness(
     '../app/src/views/Members.tsx',
-    'MemberBillingSheet,MemberSheet',
+    'MemberForm',
     {},
     {
+      ...carpool,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
       CurrencySelect: 'CurrencySelect',
       NumInput: 'NumInput',
-      Toggle: 'Toggle',
+      Picker: 'Picker',
       todayIn: () => today,
-      getState: () => ({ ...st, subscriptions: [s] }),
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      linkPerson: async () => ({}),
       run: (fn: () => Promise<unknown>) => fn(),
-      saveSub: async (s: Subscription) => {
-        saved = s;
+      saveSub: async (next: Subscription) => {
+        saved = next;
       },
     },
   );
-  const render = () => r.render('MemberBillingSheet', { state: st, s, member: m, onClose() {}, onMore() {} });
-  toSettings(render);
+  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   const leaveFields = () => render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields')!;
   const save = () => all(render().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.member.save'))!;
   leaveFields().props.onChange({ left: '2026-01-16', leaveRefund: { date: '2026-01-20', amount: 12, currency: 'USD' } });
   assert.ok(
-    all(render().find((n) => n.type === 'Cell' && n.props.label === 'family.quick.paidTo')).some((n) => n.children.includes(format.cnDateFull(m.paidUntil))),
+    all(render().find((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil')).some((n) =>
+      n.children.includes(format.cnDateFull(member.paidUntil)),
+    ),
   );
   await save().props.onClick();
-  assert.equal(saved!.share!.members[0].paidUntil, m.paidUntil);
-  assert.deepEqual(saved!.share!.members[0].payments, m.payments);
+  assert.equal(saved!.share!.members[0].paidUntil, member.paidUntil);
+  assert.deepEqual(saved!.share!.members[0].payments, member.payments);
   leaveFields().props.onChange({ leaveRefund: { date: '2026-01-20', amount: 0, currency: 'USD' } });
   assert.equal(save().props.disabled, true);
-  const fresh = harness(
-    '../app/src/views/Members.tsx',
-    'MemberSheet',
-    {},
-    { Sheet: 'Sheet', DatePicker: 'DatePicker', NumInput: 'NumInput', Toggle: 'Toggle' },
-  );
   assert.ok(
-    !fresh.render('MemberSheet', { state: st, s, onClose() {} }).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'),
+    !r.render('MemberForm', { state: st, s: sub, onClose() {} }).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'),
   );
 });
 
@@ -2315,7 +2358,7 @@ test('代付结清后第三格显示盈亏而不是「已结清」，未结清�
   assert.doesNotMatch(text(owed), /family\.strip\.profit/);
 });
 
-test('点欠款成员只开一个弹窗：先是预填好的记收款，记下这笔推进已付至', async () => {
+test('所有入口打开同一个成员入口：欠款先到收款表单，其余是成员表单；记下这笔推进已付至', async () => {
   const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2025-07-16' };
   const sub: Subscription = {
     id: 's',
@@ -2333,28 +2376,43 @@ test('点欠款成员只开一个弹窗：先是预填好的记收款，记下�
   let closed = false;
   const r = harness(
     '../app/src/views/Members.tsx',
-    'MemberBillingSheet',
+    'MemberSheet,ReceiptForm',
     {},
     {
       ...carpool,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
       CurrencySelect: 'CurrencySelect',
       NumInput: 'NumInput',
-      PersonAvatar: 'PersonAvatar',
-      personFor: () => undefined,
+      Picker: 'Picker',
       todayIn: () => today,
       getState: () => ({ ...st, subscriptions: [sub] }),
+      linkPerson: async () => ({}),
       run: (fn: () => Promise<unknown>) => fn(),
-      saveSub: async (s: Subscription) => {
-        saved = s;
+      saveSub: async (next: Subscription) => {
+        saved = next;
       },
     },
   );
-  const nodes = r.render('MemberBillingSheet', { state: st, s: sub, member, onClose: () => (closed = true), onMore() {} });
-  const foot = all(nodes.find((n) => n.type === 'Sheet')!.props.foot);
-  // 没有单独的收款按钮入口：同一个弹窗底部就是「记下这笔」
-  const record = foot.find((n) => n.type === 'button' && n.children.includes('family.member.record'))!;
+  // 每次换一个新的渲染器：入口只在打开时决定一次
+  const route = (props: { member?: typeof member; collect?: boolean }) => {
+    const plan = props.member ? { ...sub, share: { ...sub.share!, members: [props.member] } } : sub;
+    const [node] = harness('../app/src/views/Members.tsx', 'MemberSheet', {}, { ...carpool, todayIn: () => today }).render('MemberSheet', {
+      state: st,
+      s: plan,
+      onClose() {},
+      ...props,
+    });
+    return (node.type as Function).name;
+  };
+
+  assert.equal(route({ member }), 'ReceiptForm');
+  assert.equal(route({ member: { ...member, paidUntil: '2099-01-01' } }), 'MemberForm');
+  assert.equal(route({ member: { ...member, paidUntil: '2099-01-01' }, collect: true }), 'ReceiptForm');
+  assert.equal(route({}), 'MemberForm');
+  const nodes = r.render('ReceiptForm', { state: st, s: sub, member, onDone: () => (closed = true) });
+  const record = all(nodes.find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.member.record'))!;
   assert.ok(nodes.some((n) => n.type === 'NumInput' && n.props.value === 44));
   await record.props.onClick();
   const m = saved!.share!.members[0];
@@ -2363,4 +2421,62 @@ test('点欠款成员只开一个弹窗：先是预填好的记收款，记下�
   assert.equal(m.paidUntil, m.payments![0].until);
   assert.ok(m.paidUntil! > member.paidUntil);
   assert.equal(closed, true);
+});
+
+test('欠了好几期：默认从最早一期收，期数填 3 就补前三期，其余照样待收；没被收款覆盖的期画成已放弃', async () => {
+  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17' };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 15,
+    currency: 'USD',
+    start: '2025-01-17',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2025-01-17', members: [member] },
+  };
+  let saved: Subscription | undefined;
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'ReceiptForm,memberSegments',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      todayIn: () => today,
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (next: Subscription) => {
+        saved = next;
+      },
+    },
+  );
+  const render = () => r.render('ReceiptForm', { state: st, s: sub, member, onDone() {} });
+  // 2025-01-17 起半年一期，今天 2026-10-22 在第 4 期：共欠 4 期
+  assert.ok(render().some((n) => n.type === 'Cell' && n.props.label === 'family.collect.owedTotal'));
+  render()
+    .find((n) => n.type === 'Stepper')!
+    .props.onChange(3);
+  await all(render().find((n) => n.type === 'Sheet')!.props.foot)
+    .find((n) => n.type === 'button' && n.children.includes('family.member.record'))!
+    .props.onClick();
+  const m = saved!.share!.members[0];
+  assert.equal(m.payments![0].from, '2025-01-17');
+  assert.equal(m.paidUntil, '2026-07-16');
+  assert.equal(m.payments![0].amount, 132);
+  const segs = r.call('memberSegments', saved!, m, today, '2025-01-01', '2027-06-30') as { kind: string; from: string }[];
+  assert.deepEqual(
+    segs.filter((g) => g.from < '2026-07-17').map((g) => g.kind),
+    ['paid', 'paid', 'paid'],
+  );
+  assert.equal(segs.find((g) => g.from === '2026-07-17')!.kind, 'due');
+  // 用「调整已付至」免掉旧账：只有一笔从本期开始的收款，之前的期画成已放弃，不冒充已付
+  const waived = { ...member, paidUntil: '2027-01-16', payments: [{ date: today, amount: 44, currency: 'CNY', from: '2026-07-17', until: '2027-01-16' }] };
+  const kinds = (r.call('memberSegments', sub, waived, today, '2025-01-01', '2027-06-30') as { kind: string; from: string }[]).map((g) => g.kind);
+  assert.deepEqual(kinds.slice(0, 4), ['waived', 'waived', 'waived', 'paid']);
 });

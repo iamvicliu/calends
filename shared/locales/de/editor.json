@@ -114,22 +114,9 @@
     "ownerName": "Organisator",
     "ownerPlaceholder": "An wen du zahlst",
     "seats": "Plätze gesamt (inkl. dir)",
-    "memberN": "Mitglied {n}",
     "perPeriod": "Anteil pro Zeitraum",
     "paidUntil": "Bezahlt bis",
-    "remove": "Entfernen",
-    "addMember": "Mitglied hinzufügen",
-    "manageHint": "Tippe auf ein Mitglied, um der Abo-Regel zu folgen oder Betrag und Zyklus individuell festzulegen",
-    "follows": "Wie Abo",
-    "custom": "Eigen",
-    "nextDue": "Nächste {date}",
-    "editMember": "Bearbeiten",
-    "overdue": {
-      "one": "{count} Tag überfällig",
-      "other": "{count} Tage überfällig"
-    },
-    "dueOn": "Fällig {date}",
-    "confirmRemove": "Löschen"
+    "manageHint": "Nach dem Speichern den Plan unter „Geteilte Abos“ öffnen, um Mitglieder hinzuzufügen und Zahlungen zu erfassen."
   },
   "proxy": {
     "for": "Ich zahle für",

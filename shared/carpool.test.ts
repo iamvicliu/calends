@@ -12,6 +12,8 @@ import {
   suggestedLeaveRefund,
   carLedger,
   carYear,
+  collectionSpan,
+  nextCollectionDay,
   memberCashFlows,
   updateMemberLeave,
 } from './carpool.ts';
@@ -288,4 +290,33 @@ test('当年盈亏：今年成本含预计扣款，收入含已收与今年还�
   assert.equal(y.cost, 360);
   assert.equal(y.income, 120);
   assert.equal(y.net, -240);
+});
+
+test('按期数收：一笔覆盖几期就加几期应收、覆盖到第 N 期末；退出日之后不再计', () => {
+  const plan = sub({
+    price: 60,
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    share: {
+      role: 'owner',
+      seats: 6,
+      since: '2026-01-01',
+      collectFrom: '2026-01-01',
+      members: [{ id: 'm', name: 'M', joined: '2026-01-01', share: 10, fee: 60, feeCurrency: 'CNY', billEvery: 6 }],
+    },
+  });
+  const m = plan.share!.members[0];
+  assert.deepEqual(collectionSpan(state, plan, m, '2026-01-01', 1, 'CNY'), { amount: 60, currency: 'CNY', until: '2026-06-30', periods: 1 });
+  assert.deepEqual(collectionSpan(state, plan, m, '2026-01-01', 3, 'CNY'), { amount: 180, currency: 'CNY', until: '2027-06-30', periods: 3 });
+  // 2026-09-01 下车：第二期从 07-01 开始还在车上，第三期起不再计
+  const left = { ...m, left: '2026-09-01' };
+  assert.equal(collectionSpan(state, plan, left, '2026-01-01', 5, 'CNY').periods, 2);
+});
+
+test('下期收款日：按车的收款节奏取今天之后的下一次；当天正好是收款日时算下一期', () => {
+  const plan = sub({ share: { role: 'owner', seats: 6, collectFrom: '2025-11-01', members: [] } });
+  assert.equal(nextCollectionDay(plan, 6, '2026-10-25'), '2026-11-01');
+  assert.equal(nextCollectionDay(plan, 6, '2026-11-01'), '2027-05-01');
+  assert.equal(nextCollectionDay(plan, 1, '2026-10-25'), '2026-11-01');
+  assert.equal(nextCollectionDay(plan, 12, '2025-10-01'), '2025-11-01');
 });

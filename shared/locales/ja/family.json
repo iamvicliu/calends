@@ -100,13 +100,11 @@
     },
     "feeCcyAria": "通貨",
     "exempt": "支払いなし",
-    "other": "その他",
     "source": "経路",
     "sourcePh": "どのグループ / 誰の紹介か",
     "payments": "支払い\n{count}",
     "receivedTotal": "累計約{amount}を受け取り済み",
     "paidUntil": "支払い済み期限",
-    "paidUntilPh": "まだ支払いはありません",
     "payCover": "{date}受領\n{from}〜{until}分",
     "payCoverTo": "{date}受領\n{until}まで",
     "copyAria": "ほかのメンバーにコピー",
@@ -148,14 +146,20 @@
     },
     "collectionSchedule": "共通の集金日：毎年 {dates}",
     "coverAligned": "共通の請求期間の終了日を自動設定",
-    "recordNext": "入金を記録\n{amount}",
     "collectionAnchor": "共通の集金起点",
-    "firstSummary": "初回 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "アカウント未入力",
     "editAccount": "メンバーアカウントを編集",
     "copyAccount": "アカウントをコピー",
     "toastPayEdited": "受取を更新しました",
-    "editPayAria": "この受取を編集"
+    "editPayAria": "この受取を編集",
+    "seatGroup": "席",
+    "firstPay": "初回の入金",
+    "firstPayToggle": "初回分を受け取り済み",
+    "pickPerson": "人物から選ぶ",
+    "accountHere": "アカウント",
+    "accountPhShort": "メール / 電話番号 / ユーザー名",
+    "unlinkPerson": "関連付けを解除",
+    "namePickPh": "名前を入力、または既存の人を選択"
   },
   "pool": {
     "seatsFree": "空き {count}",
@@ -241,7 +245,8 @@
     "footMember": "参加後の価格は、各期間に主催者へ支払う金額です。",
     "seats": "総人数（自分を含む）",
     "owner": "主催者",
-    "ownerPh": "支払う相手"
+    "ownerPh": "支払う相手",
+    "seatUnit": "席"
   },
   "facts": {
     "cost": "コスト / 年",
@@ -257,18 +262,23 @@
     "yearIncome": "年間収入"
   },
   "collect": {
-    "title": "入金を記録\n{name}",
     "next": "次回の集金 {date}",
     "editMember": "編集",
     "until": "対象期間の終わり",
-    "covers": "この入金の対象 {from} – {until}",
-    "changeFee": "料金を変更",
-    "lastPayment": "前回の入金",
-    "adjustFee": "料金を調整",
     "feeFrom": "適用開始日",
     "feeHelp": "対象期間の開始日の料金を期間全体に適用します。記録済みの入金は変更されません。",
     "viewSub": "詳細を見る",
-    "editTitle": "受取を編集\n{name}"
+    "period": "今期",
+    "due": "今期の請求額",
+    "actual": "実際の受取",
+    "nextPeriod": "次の期間",
+    "adjustPaid": "調整",
+    "periodPaid": "支払い済み",
+    "periods": "期間数",
+    "periodUnit": "期",
+    "owedTotal": "未回収の合計",
+    "owedTotalValue": "{count} 期、計 {amount}",
+    "firstOwed": "最も古い未回収の期"
   },
   "rule": {
     "title": "料金",
@@ -276,21 +286,15 @@
     "custom": "個別",
     "followValue": "{rule}（プラン共通）",
     "sheetTitle": "料金",
-    "from": "適用開始日",
-    "anchor": "共通集金日",
-    "applyNote": "プランに合わせる {count} 人は適用開始日から新ルールになります。個別設定と過去の入金は変わりません。"
+    "applyNote": "プランに従う {count} 人は次回の集金日から新しい料金になります。個別料金のメンバーと記録済みの入金は変わりません。",
+    "nextDay": "次回の集金日"
   },
   "quick": {
-    "more": "詳細",
-    "paid": "支払済みの期間",
-    "paidFrom": "期間の開始",
-    "paidTo": "期間の終了",
     "late": {
       "other": "{count}日超過"
     },
     "owe": "未収 {amount}\n{date}から",
     "settled": "精算済み\n次回 {date}",
-    "adjust": "料金と脱退",
     "backCollect": "入金を記録"
   },
   "strip": {
@@ -307,7 +311,8 @@
     "paid": "支払済み",
     "due": "未収",
     "future": "次の期間",
-    "unused": "支払済み・未使用"
+    "unused": "支払済み・未使用",
+    "waived": "回収しない"
   },
   "refund": {
     "title": "退出時の返金",

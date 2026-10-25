@@ -102,13 +102,11 @@
     },
     "feeCcyAria": "Moeda",
     "exempt": "Não paga",
-    "other": "Outro",
     "source": "Origem",
     "sourcePh": "De qual grupo / quem indicou",
     "payments": "Pagamentos\n{count}",
     "receivedTotal": "Cerca de {amount} recebidos no total",
     "paidUntil": "Pago até",
-    "paidUntilPh": "Nenhum pagamento ainda",
     "payCover": "Recebido em {date}\ncobre {from}–{until}",
     "payCoverTo": "Recebido em {date}\ncobre até {until}",
     "copyAria": "Copiar para outros membros",
@@ -151,14 +149,20 @@
     },
     "collectionSchedule": "Datas de cobrança: todo ano {dates}",
     "coverAligned": "Termina no limite do período comum",
-    "recordNext": "Registrar pagamento\n{amount}",
     "collectionAnchor": "Início comum de cobrança",
-    "firstSummary": "Primeiro período {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Conta não informada",
     "editAccount": "Editar conta do membro",
     "copyAccount": "Copiar conta",
     "toastPayEdited": "Pagamento atualizado",
-    "editPayAria": "Editar este pagamento"
+    "editPayAria": "Editar este pagamento",
+    "seatGroup": "Vaga",
+    "firstPay": "Primeiro pagamento",
+    "firstPayToggle": "Já recebi o primeiro pagamento",
+    "pickPerson": "Escolher das pessoas",
+    "accountHere": "Conta",
+    "accountPhShort": "E-mail / telefone / usuário",
+    "unlinkPerson": "Desvincular",
+    "namePickPh": "Digite um nome ou escolha alguém"
   },
   "pool": {
     "seatsFree": "{count} livres",
@@ -249,7 +253,11 @@
     "footMember": "Como participante, o preço é o que você paga ao organizador a cada período.",
     "seats": "Total de vagas (incluindo você)",
     "owner": "Organizador",
-    "ownerPh": "A quem você paga"
+    "ownerPh": "A quem você paga",
+    "seatUnit": {
+      "one": "vaga",
+      "other": "vagas"
+    }
   },
   "facts": {
     "cost": "Custo / ano",
@@ -265,18 +273,26 @@
     "yearIncome": "Receita anual"
   },
   "collect": {
-    "title": "Registrar recebimento\n{name}",
     "next": "Próxima cobrança {date}",
     "editMember": "Editar",
     "until": "Cobre até",
-    "covers": "O pagamento cobre {from} – {until}",
-    "changeFee": "Alterar valor",
-    "lastPayment": "Último pagamento",
-    "adjustFee": "Ajustar valor",
     "feeFrom": "Vigente a partir de",
     "feeHelp": "O início da cobertura define a tarifa de todo o período. Os pagamentos registrados permanecem inalterados.",
     "viewSub": "Ver detalhes",
-    "editTitle": "Editar pagamento\n{name}"
+    "period": "Período",
+    "due": "A receber neste período",
+    "actual": "Pagamento recebido",
+    "nextPeriod": "Próximo período",
+    "adjustPaid": "Ajustar",
+    "periodPaid": "Pago",
+    "periods": "Períodos",
+    "periodUnit": {
+      "one": "período",
+      "other": "períodos"
+    },
+    "owedTotal": "Total devido",
+    "owedTotalValue": "{count} períodos, {amount}",
+    "firstOwed": "Período devido mais antigo"
   },
   "rule": {
     "title": "Tarifa",
@@ -284,22 +300,19 @@
     "custom": "Personalizado",
     "followValue": "{rule} (regra do plano)",
     "sheetTitle": "Tarifa",
-    "from": "A partir de",
-    "anchor": "Data comum de cobrança",
-    "applyNote": "{count} membros que seguem o plano mudam a partir da data; personalizados e cobranças anteriores não mudam."
+    "applyNote": {
+      "one": "{count} membro que segue o plano paga o novo valor a partir da próxima cobrança; valores personalizados e recebimentos registrados não mudam.",
+      "other": "{count} membros que seguem o plano pagam o novo valor a partir da próxima cobrança; valores personalizados e recebimentos registrados não mudam."
+    },
+    "nextDay": "Próxima cobrança"
   },
   "quick": {
-    "more": "Mais dados",
-    "paid": "Pago até",
-    "paidFrom": "Início do período",
-    "paidTo": "Fim do período",
     "late": {
       "one": "{count} dia de atraso",
       "other": "{count} dias de atraso"
     },
     "owe": "{amount} pendente\ndesde {date}",
     "settled": "Em dia\npróxima cobrança {date}",
-    "adjust": "Taxa e saída",
     "backCollect": "Registrar pagamento"
   },
   "strip": {
@@ -316,7 +329,8 @@
     "paid": "Pago",
     "due": "Pendente",
     "future": "Próximo período",
-    "unused": "Pago, não usado"
+    "unused": "Pago, não usado",
+    "waived": "Perdoado"
   },
   "refund": {
     "title": "Reembolso na saída",

@@ -102,13 +102,11 @@
     },
     "feeCcyAria": "Währung",
     "exempt": "Zahlt nicht",
-    "other": "Sonstiges",
     "source": "Herkunft",
     "sourcePh": "Welche Gruppe / wer hat vermittelt",
     "payments": "Zahlungen\n{count}",
     "receivedTotal": "Insgesamt etwa {amount} erhalten",
     "paidUntil": "Bezahlt bis",
-    "paidUntilPh": "Noch keine Zahlungen",
     "payCover": "Erhalten am {date}\ndeckt {from}–{until}",
     "payCoverTo": "Erhalten am {date}\ndeckt bis {until}",
     "copyAria": "Für andere Mitglieder kopieren",
@@ -151,14 +149,20 @@
     },
     "collectionSchedule": "Einzugstermine: jährlich {dates}",
     "coverAligned": "Endet an der gemeinsamen Zeitraumgrenze",
-    "recordNext": "Zahlung erfassen\n{amount}",
     "collectionAnchor": "Gemeinsamer Einzugsbeginn",
-    "firstSummary": "Erster Zeitraum {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Kein Konto eingetragen",
     "editAccount": "Mitgliedskonto bearbeiten",
     "copyAccount": "Konto kopieren",
     "toastPayEdited": "Zahlung aktualisiert",
-    "editPayAria": "Diese Zahlung bearbeiten"
+    "editPayAria": "Diese Zahlung bearbeiten",
+    "seatGroup": "Platz",
+    "firstPay": "Erste Zahlung",
+    "firstPayToggle": "Erste Zahlung bereits erhalten",
+    "pickPerson": "Aus Personen wählen",
+    "accountHere": "Konto",
+    "accountPhShort": "E-Mail / Telefon / Benutzername",
+    "unlinkPerson": "Verknüpfung lösen",
+    "namePickPh": "Namen eingeben oder Person wählen"
   },
   "pool": {
     "seatsFree": "{count} frei",
@@ -249,7 +253,11 @@
     "footMember": "Als Mitglied ist der Preis das, was du dem Organisator pro Zeitraum zahlst.",
     "seats": "Plätze gesamt (inkl. dir)",
     "owner": "Organisator",
-    "ownerPh": "An wen du zahlst"
+    "ownerPh": "An wen du zahlst",
+    "seatUnit": {
+      "one": "Platz",
+      "other": "Plätze"
+    }
   },
   "facts": {
     "cost": "Kosten / Jahr",
@@ -265,18 +273,26 @@
     "yearIncome": "Einnahmen pro Jahr"
   },
   "collect": {
-    "title": "Zahlung erfassen\n{name}",
     "next": "Nächste Einnahme {date}",
     "editMember": "Bearbeiten",
     "until": "Gedeckt bis",
-    "covers": "Zahlung deckt {from} – {until}",
-    "changeFee": "Gebühr ändern",
-    "lastPayment": "Letzte Zahlung",
-    "adjustFee": "Gebühr anpassen",
     "feeFrom": "Gültig ab",
     "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert.",
     "viewSub": "Details ansehen",
-    "editTitle": "Zahlung bearbeiten\n{name}"
+    "period": "Zeitraum",
+    "due": "Fällig in diesem Zeitraum",
+    "actual": "Erhaltene Zahlung",
+    "nextPeriod": "Nächster Zeitraum",
+    "adjustPaid": "Anpassen",
+    "periodPaid": "Bezahlt",
+    "periods": "Zeiträume",
+    "periodUnit": {
+      "one": "Zeitraum",
+      "other": "Zeiträume"
+    },
+    "owedTotal": "Insgesamt offen",
+    "owedTotalValue": "{count} Zeiträume, {amount}",
+    "firstOwed": "Frühester offener Zeitraum"
   },
   "rule": {
     "title": "Gebühr",
@@ -284,22 +300,19 @@
     "custom": "Eigen",
     "followValue": "{rule} (Abo-Regel)",
     "sheetTitle": "Gebühr",
-    "from": "Gültig ab",
-    "anchor": "Einzugsstichtag",
-    "applyNote": "{count} Mitglieder mit Abo-Regel wechseln ab dem Stichtag; eigene Regeln und frühere Zahlungen bleiben unverändert."
+    "applyNote": {
+      "one": "{count} Mitglied, das dem Abo folgt, zahlt ab der nächsten Zahlung den neuen Betrag; individuelle Beiträge und erfasste Zahlungen bleiben unverändert.",
+      "other": "{count} Mitglieder, die dem Abo folgen, zahlen ab der nächsten Zahlung den neuen Betrag; individuelle Beiträge und erfasste Zahlungen bleiben unverändert."
+    },
+    "nextDay": "Nächste Zahlung"
   },
   "quick": {
-    "more": "Weitere Angaben",
-    "paid": "Bezahlt bis",
-    "paidFrom": "Zeitraum ab",
-    "paidTo": "Zeitraum bis",
     "late": {
       "one": "{count} Tag überfällig",
       "other": "{count} Tage überfällig"
     },
     "owe": "{amount} offen\nseit {date}",
     "settled": "Beglichen\nnächste Fälligkeit {date}",
-    "adjust": "Gebühr & Austritt",
     "backCollect": "Zahlung erfassen"
   },
   "strip": {
@@ -316,7 +329,8 @@
     "paid": "Bezahlt",
     "due": "Offen",
     "future": "Nächster Zeitraum",
-    "unused": "Bezahlt, ungenutzt"
+    "unused": "Bezahlt, ungenutzt",
+    "waived": "Erlassen"
   },
   "refund": {
     "title": "Erstattung beim Austritt",

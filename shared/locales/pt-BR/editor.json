@@ -114,22 +114,9 @@
     "ownerName": "Organizador",
     "ownerPlaceholder": "A quem você paga",
     "seats": "Total de vagas (incluindo você)",
-    "memberN": "Membro {n}",
     "perPeriod": "Parte por período",
     "paidUntil": "Pago até",
-    "remove": "Remover",
-    "addMember": "Adicionar membro",
-    "manageHint": "Toque em um membro para seguir a regra do plano ou definir valor e ciclo próprios",
-    "follows": "Segue o plano",
-    "custom": "Personalizado",
-    "nextDue": "Próximo {date}",
-    "editMember": "Editar",
-    "overdue": {
-      "one": "{count} dia de atraso",
-      "other": "{count} dias de atraso"
-    },
-    "dueOn": "Vence {date}",
-    "confirmRemove": "Confirmar"
+    "manageHint": "Depois de salvar, abra este plano em Planos compartilhados para adicionar membros e registrar recebimentos."
   },
   "proxy": {
     "for": "Pago para",

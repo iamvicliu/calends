@@ -32,15 +32,13 @@
     "proxy": "Pago por mim"
   },
   "item": {
-    "paidUntil": "Pago até {date}",
     "noPay": "Nenhum pagamento",
     "owedPeriods": {
       "one": "{count} período em aberto",
       "other": "{count} períodos em aberto"
     },
     "left": "Saiu",
-    "ended": "Encerrado",
-    "received": "Pago {amount}"
+    "ended": "Encerrado"
   },
   "sheet": {
     "owed": "A receber",

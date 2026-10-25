@@ -100,13 +100,11 @@
     },
     "feeCcyAria": "Tiền tệ",
     "exempt": "Không trả tiền",
-    "other": "Khác",
     "source": "Nguồn",
     "sourcePh": "Từ nhóm nào / ai giới thiệu",
     "payments": "Khoản thanh toán\n{count}",
     "receivedTotal": "Đã nhận tổng cộng khoảng {amount}",
     "paidUntil": "Đã trả đến",
-    "paidUntilPh": "Chưa có khoản thanh toán",
     "payCover": "Nhận {date}\ncho {from}–{until}",
     "payCoverTo": "Nhận {date}\ncho đến {until}",
     "copyAria": "Sao chép cho thành viên khác",
@@ -148,14 +146,20 @@
     },
     "collectionSchedule": "Ngày thu chung: hằng năm {dates}",
     "coverAligned": "Kết thúc vào cuối kỳ thu chung",
-    "recordNext": "Ghi nhận thanh toán\n{amount}",
     "collectionAnchor": "Mốc bắt đầu thu chung",
-    "firstSummary": "Kỳ đầu {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Chưa điền tài khoản",
     "editAccount": "Sửa tài khoản thành viên",
     "copyAccount": "Sao chép tài khoản",
     "toastPayEdited": "Đã cập nhật khoản thu",
-    "editPayAria": "Sửa khoản thu này"
+    "editPayAria": "Sửa khoản thu này",
+    "seatGroup": "Chỗ",
+    "firstPay": "Khoản đầu tiên",
+    "firstPayToggle": "Đã nhận khoản đầu tiên",
+    "pickPerson": "Chọn từ danh sách người",
+    "accountHere": "Tài khoản",
+    "accountPhShort": "Email / số điện thoại / tên người dùng",
+    "unlinkPerson": "Bỏ liên kết",
+    "namePickPh": "Nhập tên hoặc chọn người có sẵn"
   },
   "pool": {
     "seatsFree": "Trống {count}",
@@ -241,7 +245,8 @@
     "footMember": "Khi đã tham gia, giá là số tiền bạn trả cho chủ nhóm mỗi kỳ.",
     "seats": "Tổng số suất (gồm cả bạn)",
     "owner": "Chủ nhóm",
-    "ownerPh": "Người bạn trả tiền"
+    "ownerPh": "Người bạn trả tiền",
+    "seatUnit": "chỗ"
   },
   "facts": {
     "cost": "Chi phí / năm",
@@ -257,18 +262,23 @@
     "yearIncome": "Thu mỗi năm"
   },
   "collect": {
-    "title": "Ghi khoản thu\n{name}",
     "next": "Lần thu tiếp theo {date}",
     "editMember": "Sửa",
     "until": "Áp dụng đến",
-    "covers": "Khoản này áp dụng {from} – {until}",
-    "changeFee": "Đổi mức phí",
-    "lastPayment": "Lần thu gần nhất",
-    "adjustFee": "Điều chỉnh phí",
     "feeFrom": "Có hiệu lực từ",
     "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",
     "viewSub": "Xem chi tiết",
-    "editTitle": "Sửa khoản thu\n{name}"
+    "period": "Kỳ này",
+    "due": "Phải thu kỳ này",
+    "actual": "Khoản đã nhận",
+    "nextPeriod": "Kỳ tiếp theo",
+    "adjustPaid": "Điều chỉnh",
+    "periodPaid": "Đã trả",
+    "periods": "Số kỳ",
+    "periodUnit": "kỳ",
+    "owedTotal": "Tổng nợ",
+    "owedTotalValue": "{count} kỳ, tổng {amount}",
+    "firstOwed": "Kỳ nợ sớm nhất"
   },
   "rule": {
     "title": "Phí",
@@ -276,21 +286,15 @@
     "custom": "Tùy chỉnh",
     "followValue": "{rule} (quy tắc gói)",
     "sheetTitle": "Phí",
-    "from": "Áp dụng từ",
-    "anchor": "Ngày thu chung",
-    "applyNote": "{count} thành viên theo gói chuyển sang quy tắc mới từ ngày áp dụng; thành viên tùy chỉnh và khoản thu cũ không đổi."
+    "applyNote": "{count} thành viên theo gói trả mức mới từ lần thu tiếp theo; phí riêng và các khoản đã ghi không đổi.",
+    "nextDay": "Lần thu tiếp theo"
   },
   "quick": {
-    "more": "Thêm thông tin",
-    "paid": "Đã trả đến",
-    "paidFrom": "Đầu kỳ",
-    "paidTo": "Cuối kỳ",
     "late": {
       "other": "Quá hạn {count} ngày"
     },
     "owe": "Còn nợ {amount}\ntừ {date}",
     "settled": "Đã thanh toán\nlần tới {date}",
-    "adjust": "Phí và rời nhóm",
     "backCollect": "Ghi khoản thu"
   },
   "strip": {
@@ -307,7 +311,8 @@
     "paid": "Đã trả",
     "due": "Còn nợ",
     "future": "Kỳ tiếp theo",
-    "unused": "Đã trả, chưa dùng"
+    "unused": "Đã trả, chưa dùng",
+    "waived": "Đã miễn"
   },
   "refund": {
     "title": "Hoàn tiền khi rời nhóm",

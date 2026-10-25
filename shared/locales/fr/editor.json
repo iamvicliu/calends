@@ -114,22 +114,9 @@
     "ownerName": "Organisateur",
     "ownerPlaceholder": "La personne que vous payez",
     "seats": "Places au total (vous compris)",
-    "memberN": "Membre {n}",
     "perPeriod": "Part par période",
     "paidUntil": "Payé jusqu’au",
-    "remove": "Retirer",
-    "addMember": "Ajouter un membre",
-    "manageHint": "Touchez un membre pour suivre la règle du forfait ou définir un montant et un cycle personnalisés",
-    "follows": "Suit le forfait",
-    "custom": "Personnalisé",
-    "nextDue": "Prochain {date}",
-    "editMember": "Modifier",
-    "overdue": {
-      "one": "{count} jour de retard",
-      "other": "{count} jours de retard"
-    },
-    "dueOn": "À percevoir le {date}",
-    "confirmRemove": "Confirmer"
+    "manageHint": "Après l’enregistrement, ouvrez ce plan dans Abonnements partagés pour ajouter des membres et enregistrer les paiements."
   },
   "proxy": {
     "for": "Je paie pour",

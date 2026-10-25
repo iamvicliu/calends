@@ -26,12 +26,10 @@
     "proxy": "Talangan"
   },
   "item": {
-    "paidUntil": "Dibayar s.d. {date}",
     "noPay": "Belum ada pembayaran",
     "owedPeriods": "Utang {count} periode",
     "left": "Keluar",
-    "ended": "Dihentikan",
-    "received": "Diterima {amount}"
+    "ended": "Dihentikan"
   },
   "sheet": {
     "owed": "Piutang",

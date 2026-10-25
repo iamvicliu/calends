@@ -32,15 +32,13 @@
     "proxy": "Payé pour"
   },
   "item": {
-    "paidUntil": "Payé jusqu’au {date}",
     "noPay": "Aucun paiement",
     "owedPeriods": {
       "one": "{count} période due",
       "other": "{count} périodes dues"
     },
     "left": "Parti",
-    "ended": "Arrêté",
-    "received": "Payé {amount}"
+    "ended": "Arrêté"
   },
   "sheet": {
     "owed": "Dû",

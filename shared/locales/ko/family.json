@@ -100,13 +100,11 @@
     },
     "feeCcyAria": "통화",
     "exempt": "납부 면제",
-    "other": "기타",
     "source": "경로",
     "sourcePh": "어느 그룹 / 누구의 소개인지",
     "payments": "납부\n{count}",
     "receivedTotal": "총 약 {amount} 받음",
     "paidUntil": "납부 완료 기한",
-    "paidUntilPh": "아직 납부 없음",
     "payCover": "{date} 받음\n{from}–{until}분",
     "payCoverTo": "{date} 받음\n{until}까지",
     "copyAria": "다른 멤버에게 복사",
@@ -148,14 +146,20 @@
     },
     "collectionSchedule": "공통 수금일: 매년 {dates}",
     "coverAligned": "공통 청구 기간 종료일로 자동 설정",
-    "recordNext": "수금 기록\n{amount}",
     "collectionAnchor": "공통 수금 시작일",
-    "firstSummary": "첫 기간 {from}–{until}\n{mode} {amount}",
     "accountEmpty": "계정 미입력",
     "editAccount": "멤버 계정 편집",
     "copyAccount": "계정 복사",
     "toastPayEdited": "수령 내역을 수정했습니다",
-    "editPayAria": "이 수령 수정"
+    "editPayAria": "이 수령 수정",
+    "seatGroup": "자리",
+    "firstPay": "첫 입금",
+    "firstPayToggle": "첫 입금을 이미 받음",
+    "pickPerson": "사람 목록에서 선택",
+    "accountHere": "계정",
+    "accountPhShort": "이메일 / 전화번호 / 사용자 이름",
+    "unlinkPerson": "연결 해제",
+    "namePickPh": "이름을 입력하거나 기존 사람을 선택"
   },
   "pool": {
     "seatsFree": "빈자리 {count}",
@@ -241,7 +245,8 @@
     "footMember": "참여 후 가격은 매 주기 주최자에게 보내는 금액입니다.",
     "seats": "총 인원(본인 포함)",
     "owner": "주최자",
-    "ownerPh": "돈을 보낼 사람"
+    "ownerPh": "돈을 보낼 사람",
+    "seatUnit": "자리"
   },
   "facts": {
     "cost": "비용 / 년",
@@ -257,18 +262,23 @@
     "yearIncome": "연간 수입"
   },
   "collect": {
-    "title": "입금 기록\n{name}",
     "next": "다음 수금 {date}",
     "editMember": "편집",
     "until": "적용 종료일",
-    "covers": "이번 입금 적용 {from} – {until}",
-    "changeFee": "요금 변경",
-    "lastPayment": "최근 수금",
-    "adjustFee": "요금 조정",
     "feeFrom": "적용 시작일",
     "feeHelp": "적용 기간 시작일의 요금이 전체 기간에 적용됩니다. 저장된 수금 내역은 변경되지 않습니다.",
     "viewSub": "상세 보기",
-    "editTitle": "수령 수정\n{name}"
+    "period": "이번 기간",
+    "due": "이번 기간 받을 금액",
+    "actual": "실제 받은 금액",
+    "nextPeriod": "다음 기간",
+    "adjustPaid": "조정",
+    "periodPaid": "결제 완료",
+    "periods": "기간 수",
+    "periodUnit": "기간",
+    "owedTotal": "총 미수",
+    "owedTotalValue": "{count}기간, 총 {amount}",
+    "firstOwed": "가장 오래된 미수 기간"
   },
   "rule": {
     "title": "요금",
@@ -276,21 +286,15 @@
     "custom": "개별",
     "followValue": "{rule} (요금제 규칙)",
     "sheetTitle": "요금",
-    "from": "적용일",
-    "anchor": "공통 수금일",
-    "applyNote": "요금제를 따르는 {count}명은 적용일부터 새 규칙을 사용합니다. 개별 설정과 지난 수금은 바뀌지 않습니다."
+    "applyNote": "플랜을 따르는 {count}명은 다음 수금일부터 새 요금을 냅니다. 개별 요금 멤버와 기록된 입금은 바뀌지 않습니다.",
+    "nextDay": "다음 수금일"
   },
   "quick": {
-    "more": "자세히",
-    "paid": "납부한 기간",
-    "paidFrom": "기간 시작",
-    "paidTo": "기간 종료",
     "late": {
       "other": "{count}일 연체"
     },
     "owe": "미수 {amount}\n{date}부터",
     "settled": "정산 완료\n다음 {date}",
-    "adjust": "요금 및 탈퇴 조정",
     "backCollect": "결제 기록"
   },
   "strip": {
@@ -307,7 +311,8 @@
     "paid": "납부 완료",
     "due": "미수",
     "future": "다음 기간",
-    "unused": "결제 완료, 미사용"
+    "unused": "결제 완료, 미사용",
+    "waived": "받지 않음"
   },
   "refund": {
     "title": "탈퇴 환불",

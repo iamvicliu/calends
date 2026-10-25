@@ -10,6 +10,7 @@ import * as format from './format.ts';
 import * as gantt from './gantt.ts';
 import * as metrics from './metrics.ts';
 import * as fx from './fx.ts';
+import * as carpool from './carpool.ts';
 import { flatten, intlLocale, setLocale, t } from './i18n.ts';
 import { DEFAULT_SETTINGS, type Subscription } from './types.ts';
 
@@ -80,6 +81,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     ...gantt,
     ...metrics,
     ...fx,
+    ...carpool,
+    perBill: (key: string) => key,
     toBase: fx.toBaseAt,
     t,
     intlLocale,
@@ -89,6 +92,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     DatePicker: 'DatePicker',
     Fragment: 'Fragment',
     Seg: 'Seg',
+    Stepper: 'Stepper',
+    NumInput: 'NumInput',
     Icon: 'Icon',
     IconButton: 'button',
     CardTitle: 'h3',

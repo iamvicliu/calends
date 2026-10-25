@@ -36,7 +36,6 @@
     "proxy": "Оплата за"
   },
   "item": {
-    "paidUntil": "Оплачено до {date}",
     "noPay": "Платежей нет",
     "owedPeriods": {
       "one": "Долг за {count} период",
@@ -45,8 +44,7 @@
       "other": "Долг за {count} периода"
     },
     "left": "Вышел",
-    "ended": "Остановлено",
-    "received": "Получено {amount}"
+    "ended": "Остановлено"
   },
   "sheet": {
     "owed": "Должен",

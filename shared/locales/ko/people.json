@@ -26,12 +26,10 @@
     "proxy": "대신 결제"
   },
   "item": {
-    "paidUntil": "{date}까지 납부",
     "noPay": "아직 받은 적 없음",
     "owedPeriods": "{count}회분 미납",
     "left": "나감",
-    "ended": "중단됨",
-    "received": "받음 {amount}"
+    "ended": "중단됨"
   },
   "sheet": {
     "owed": "받을 돈",

@@ -26,12 +26,10 @@
     "proxy": "代付"
   },
   "item": {
-    "paidUntil": "已付至 {date}",
     "noPay": "還沒收過款",
     "owedPeriods": "欠 {count} 期",
     "left": "已退出",
-    "ended": "已停止",
-    "received": "已收 {amount}"
+    "ended": "已停止"
   },
   "sheet": {
     "owed": "待收",

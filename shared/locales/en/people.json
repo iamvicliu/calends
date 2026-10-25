@@ -32,15 +32,13 @@
     "proxy": "Paid for"
   },
   "item": {
-    "paidUntil": "Paid through {date}",
     "noPay": "No payments yet",
     "owedPeriods": {
       "one": "{count} period owed",
       "other": "{count} periods owed"
     },
     "left": "Left",
-    "ended": "Stopped",
-    "received": "Paid {amount}"
+    "ended": "Stopped"
   },
   "sheet": {
     "owed": "Owed",

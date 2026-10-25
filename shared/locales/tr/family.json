@@ -102,13 +102,11 @@
     },
     "feeCcyAria": "Para birimi",
     "exempt": "Ödemiyor",
-    "other": "Diğer",
     "source": "Kaynak",
     "sourcePh": "Hangi gruptan / kim önerdi",
     "payments": "Ödemeler\n{count}",
     "receivedTotal": "Toplam yaklaşık {amount} alındı",
     "paidUntil": "Ödendiği tarih",
-    "paidUntilPh": "Henüz ödeme yok",
     "payCover": "{date} alındı\n{from}–{until} dönemi",
     "payCoverTo": "{date} alındı\n{until} tarihine kadar",
     "copyAria": "Diğer üyelere kopyala",
@@ -151,14 +149,20 @@
     },
     "collectionSchedule": "Tahsilat tarihleri: her yıl {dates}",
     "coverAligned": "Ortak dönem sınırında sona erer",
-    "recordNext": "Ödeme kaydet\n{amount}",
     "collectionAnchor": "Ortak tahsilat başlangıcı",
-    "firstSummary": "İlk dönem {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Hesap girilmedi",
     "editAccount": "Üye hesabını düzenle",
     "copyAccount": "Hesabı kopyala",
     "toastPayEdited": "Ödeme güncellendi",
-    "editPayAria": "Bu ödemeyi düzenle"
+    "editPayAria": "Bu ödemeyi düzenle",
+    "seatGroup": "Koltuk",
+    "firstPay": "İlk ödeme",
+    "firstPayToggle": "İlk ödeme zaten alındı",
+    "pickPerson": "Kişilerden seç",
+    "accountHere": "Hesap",
+    "accountPhShort": "E-posta / telefon / kullanıcı adı",
+    "unlinkPerson": "Bağlantıyı kaldır",
+    "namePickPh": "Ad yazın veya birini seçin"
   },
   "pool": {
     "seatsFree": "{count} boş",
@@ -249,7 +253,8 @@
     "footMember": "Katıldıktan sonra fiyat, her dönem yöneticiye ödediğiniz tutardır.",
     "seats": "Toplam kişi (siz dahil)",
     "owner": "Yönetici",
-    "ownerPh": "Kime ödüyorsunuz"
+    "ownerPh": "Kime ödüyorsunuz",
+    "seatUnit": "koltuk"
   },
   "facts": {
     "cost": "Maliyet / yıl",
@@ -265,18 +270,23 @@
     "yearIncome": "Yıllık gelir"
   },
   "collect": {
-    "title": "Ödeme kaydet\n{name}",
     "next": "Sonraki tahsilat {date}",
     "editMember": "Düzenle",
     "until": "Kapsadığı son tarih",
-    "covers": "Ödeme {from} – {until} dönemini kapsar",
-    "changeFee": "Ücreti değiştir",
-    "lastPayment": "Son ödeme",
-    "adjustFee": "Ücreti ayarla",
     "feeFrom": "Geçerlilik tarihi",
     "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez.",
     "viewSub": "Ayrıntıları gör",
-    "editTitle": "Ödemeyi düzenle\n{name}"
+    "period": "Dönem",
+    "due": "Bu dönem alınacak",
+    "actual": "Alınan ödeme",
+    "nextPeriod": "Sonraki dönem",
+    "adjustPaid": "Düzenle",
+    "periodPaid": "Ödendi",
+    "periods": "Dönem sayısı",
+    "periodUnit": "dönem",
+    "owedTotal": "Toplam borç",
+    "owedTotalValue": "{count} dönem, toplam {amount}",
+    "firstOwed": "En eski borçlu dönem"
   },
   "rule": {
     "title": "Ücret",
@@ -284,22 +294,16 @@
     "custom": "Özel",
     "followValue": "{rule} (plan kuralı)",
     "sheetTitle": "Ücret",
-    "from": "Geçerlilik",
-    "anchor": "Ortak tahsilat günü",
-    "applyNote": "Planı izleyen {count} üye bu tarihten itibaren yeni kurala geçer; özel üyeler ve geçmiş tahsilatlar değişmez."
+    "applyNote": "Plana uyan {count} üye sonraki tahsilattan itibaren yeni ücreti öder; özel ücretler ve kayıtlı ödemeler değişmez.",
+    "nextDay": "Sonraki tahsilat"
   },
   "quick": {
-    "more": "Diğer bilgiler",
-    "paid": "Ödendiği tarih",
-    "paidFrom": "Dönem başlangıcı",
-    "paidTo": "Dönem sonu",
     "late": {
       "one": "{count} gün gecikti",
       "other": "{count} gün gecikti"
     },
     "owe": "{amount} bekliyor\n{date} tarihinden beri",
     "settled": "Ödendi\nsonraki {date}",
-    "adjust": "Ücret ve ayrılma",
     "backCollect": "Ödeme kaydet"
   },
   "strip": {
@@ -316,7 +320,8 @@
     "paid": "Ödendi",
     "due": "Bekleyen",
     "future": "Sonraki dönem",
-    "unused": "Ödendi, kullanılmadı"
+    "unused": "Ödendi, kullanılmadı",
+    "waived": "Affedildi"
   },
   "refund": {
     "title": "Ayrılma iadesi",

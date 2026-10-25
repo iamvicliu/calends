@@ -102,13 +102,11 @@
     },
     "feeCcyAria": "Currency",
     "exempt": "Doesn't pay",
-    "other": "Other",
     "source": "Source",
     "sourcePh": "Which group / who referred them",
     "payments": "Payments\n{count}",
     "receivedTotal": "About {amount} received in total",
     "paidUntil": "Paid through",
-    "paidUntilPh": "No payments yet",
     "payCover": "Received {date}\ncovers {from}–{until}",
     "payCoverTo": "Received {date}\ncovers through {until}",
     "copyAria": "Copy to other members",
@@ -151,14 +149,20 @@
     },
     "collectionSchedule": "Collection dates: every year {dates}",
     "coverAligned": "Ends at the aligned period boundary",
-    "recordNext": "Record payment\n{amount}",
     "collectionAnchor": "Collection anchor",
-    "firstSummary": "First period {from}–{until}\n{mode} {amount}",
     "accountEmpty": "No account added",
     "editAccount": "Edit member account",
     "copyAccount": "Copy account",
     "toastPayEdited": "Payment updated",
-    "editPayAria": "Edit this payment"
+    "editPayAria": "Edit this payment",
+    "seatGroup": "Seat",
+    "firstPay": "First payment",
+    "firstPayToggle": "Already received the first payment",
+    "pickPerson": "Pick from people",
+    "accountHere": "Account",
+    "accountPhShort": "Email / phone / username",
+    "unlinkPerson": "Unlink person",
+    "namePickPh": "Type a name, or pick someone"
   },
   "pool": {
     "seatsFree": "{count} open",
@@ -249,7 +253,11 @@
     "footMember": "Once joined, the price is what you pay the organizer each period.",
     "seats": "Total seats (incl. you)",
     "owner": "Organizer",
-    "ownerPh": "Who you pay"
+    "ownerPh": "Who you pay",
+    "seatUnit": {
+      "one": "seat",
+      "other": "seats"
+    }
   },
   "facts": {
     "cost": "Cost / yr",
@@ -265,18 +273,29 @@
     "yearIncome": "Yearly income"
   },
   "collect": {
-    "title": "Record payment\n{name}",
     "next": "Next collection {date}",
     "editMember": "Edit member",
     "until": "Covers through",
-    "covers": "Payment covers {from} – {until}",
-    "changeFee": "Change fee",
-    "lastPayment": "Last payment",
-    "adjustFee": "Adjust fee",
     "feeFrom": "Effective from",
     "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",
     "viewSub": "View details",
-    "editTitle": "Edit payment\n{name}"
+    "period": "Period",
+    "due": "Due this period",
+    "actual": "Payment received",
+    "nextPeriod": "Next period",
+    "adjustPaid": "Adjust",
+    "periodPaid": "Paid",
+    "periods": "Periods",
+    "periodUnit": {
+      "one": "period",
+      "other": "periods"
+    },
+    "owedTotal": "Owed in total",
+    "owedTotalValue": {
+      "one": "{count} period, {amount}",
+      "other": "{count} periods, {amount}"
+    },
+    "firstOwed": "Earliest unpaid"
   },
   "rule": {
     "title": "Fee",
@@ -284,22 +303,19 @@
     "custom": "Custom",
     "followValue": "{rule} (plan rule)",
     "sheetTitle": "Fee",
-    "from": "Effective from",
-    "anchor": "Collection anchor",
-    "applyNote": "{count} members following the plan switch to the new rule from the effective date. Custom members and past receipts are unchanged."
+    "applyNote": {
+      "one": "{count} member following the plan pays the new rate from the next collection; custom-fee members and recorded payments stay unchanged.",
+      "other": "{count} members following the plan pay the new rate from the next collection; custom-fee members and recorded payments stay unchanged."
+    },
+    "nextDay": "Next collection"
   },
   "quick": {
-    "more": "More details",
-    "paid": "Paid through",
-    "paidFrom": "Period starts",
-    "paidTo": "Period ends",
     "late": {
       "one": "{count} day overdue",
       "other": "{count} days overdue"
     },
     "owe": "{amount} due\nsince {date}",
     "settled": "Settled\nnext due {date}",
-    "adjust": "Fee & leaving",
     "backCollect": "Record payment"
   },
   "strip": {
@@ -316,7 +332,8 @@
     "paid": "Paid",
     "due": "Due",
     "future": "Next period",
-    "unused": "Paid, unused"
+    "unused": "Paid, unused",
+    "waived": "Waived"
   },
   "refund": {
     "title": "Leave refund",

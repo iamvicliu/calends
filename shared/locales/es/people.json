@@ -32,15 +32,13 @@
     "proxy": "Pago por otro"
   },
   "item": {
-    "paidUntil": "Pagado hasta {date}",
     "noPay": "Sin pagos aún",
     "owedPeriods": {
       "one": "Debe {count} periodo",
       "other": "Debe {count} periodos"
     },
     "left": "Salió",
-    "ended": "Detenido",
-    "received": "Pagado {amount}"
+    "ended": "Detenido"
   },
   "sheet": {
     "owed": "Pendiente",

@@ -109,21 +109,9 @@
     "ownerName": "Chủ nhóm",
     "ownerPlaceholder": "Người bạn trả tiền",
     "seats": "Tổng số suất (gồm cả bạn)",
-    "memberN": "Thành viên {n}",
     "perPeriod": "Phần mỗi kỳ",
     "paidUntil": "Đã trả đến",
-    "remove": "Xóa",
-    "addMember": "Thêm thành viên",
-    "manageHint": "Chạm vào thành viên để theo quy tắc của nhóm hoặc đặt phí và chu kỳ riêng",
-    "follows": "Theo gói",
-    "custom": "Tùy chỉnh",
-    "nextDue": "Lần tới {date}",
-    "editMember": "Sửa",
-    "overdue": {
-      "other": "Quá hạn {count} ngày"
-    },
-    "dueOn": "Đến hạn {date}",
-    "confirmRemove": "Xác nhận"
+    "manageHint": "Sau khi lưu, mở gói này trong Gói chia sẻ để thêm thành viên và ghi khoản nhận."
   },
   "proxy": {
     "for": "Trả hộ cho",

@@ -102,13 +102,11 @@
     },
     "feeCcyAria": "Devise",
     "exempt": "Ne paie pas",
-    "other": "Autre",
     "source": "Provenance",
     "sourcePh": "Quel groupe / qui l’a recommandé",
     "payments": "Paiements\n{count}",
     "receivedTotal": "Environ {amount} reçus au total",
     "paidUntil": "Payé jusqu’au",
-    "paidUntilPh": "Aucun paiement pour l’instant",
     "payCover": "Reçu le {date}\ncouvre du {from} au {until}",
     "payCoverTo": "Reçu le {date}\ncouvre jusqu’au {until}",
     "copyAria": "Copier pour les autres membres",
@@ -151,14 +149,20 @@
     },
     "collectionSchedule": "Dates de collecte : chaque année {dates}",
     "coverAligned": "Se termine à la fin de la période commune",
-    "recordNext": "Enregistrer un paiement\n{amount}",
     "collectionAnchor": "Début commun de collecte",
-    "firstSummary": "Première période {from}–{until}\n{mode} {amount}",
     "accountEmpty": "Compte non renseigné",
     "editAccount": "Modifier le compte du membre",
     "copyAccount": "Copier le compte",
     "toastPayEdited": "Paiement mis à jour",
-    "editPayAria": "Modifier ce paiement"
+    "editPayAria": "Modifier ce paiement",
+    "seatGroup": "Place",
+    "firstPay": "Premier paiement",
+    "firstPayToggle": "Premier paiement déjà reçu",
+    "pickPerson": "Choisir parmi les personnes",
+    "accountHere": "Compte",
+    "accountPhShort": "E-mail / téléphone / identifiant",
+    "unlinkPerson": "Dissocier",
+    "namePickPh": "Saisissez un nom ou choisissez une personne"
   },
   "pool": {
     "seatsFree": "{count} libre(s)",
@@ -249,7 +253,11 @@
     "footMember": "Une fois rejoint, le prix correspond à ce que vous payez à l’organisateur à chaque période.",
     "seats": "Places au total (vous compris)",
     "owner": "Organisateur",
-    "ownerPh": "La personne que vous payez"
+    "ownerPh": "La personne que vous payez",
+    "seatUnit": {
+      "one": "place",
+      "other": "places"
+    }
   },
   "facts": {
     "cost": "Coût / an",
@@ -265,18 +273,26 @@
     "yearIncome": "Revenu annuel"
   },
   "collect": {
-    "title": "Enregistrer un paiement\n{name}",
     "next": "Prochain encaissement {date}",
     "editMember": "Modifier",
     "until": "Couvre jusqu’au",
-    "covers": "Ce paiement couvre {from} – {until}",
-    "changeFee": "Modifier le tarif",
-    "lastPayment": "Dernier paiement",
-    "adjustFee": "Ajuster le tarif",
     "feeFrom": "À partir du",
     "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés.",
     "viewSub": "Voir les détails",
-    "editTitle": "Modifier le paiement\n{name}"
+    "period": "Période",
+    "due": "Dû pour cette période",
+    "actual": "Paiement reçu",
+    "nextPeriod": "Période suivante",
+    "adjustPaid": "Ajuster",
+    "periodPaid": "Payé",
+    "periods": "Périodes",
+    "periodUnit": {
+      "one": "période",
+      "other": "périodes"
+    },
+    "owedTotal": "Total dû",
+    "owedTotalValue": "{count} périodes, {amount}",
+    "firstOwed": "Plus ancienne période due"
   },
   "rule": {
     "title": "Tarif",
@@ -284,22 +300,19 @@
     "custom": "Personnalisé",
     "followValue": "{rule} (règle du forfait)",
     "sheetTitle": "Tarif",
-    "from": "À partir du",
-    "anchor": "Date de collecte commune",
-    "applyNote": "{count} membres qui suivent le forfait passent à la nouvelle règle ; les membres personnalisés et les paiements passés ne changent pas."
+    "applyNote": {
+      "one": "{count} membre qui suit l’abonnement paie le nouveau tarif dès le prochain encaissement ; les tarifs personnalisés et les paiements enregistrés ne changent pas.",
+      "other": "{count} membres qui suivent l’abonnement paient le nouveau tarif dès le prochain encaissement ; les tarifs personnalisés et les paiements enregistrés ne changent pas."
+    },
+    "nextDay": "Prochain encaissement"
   },
   "quick": {
-    "more": "Plus de détails",
-    "paid": "Payé jusqu’au",
-    "paidFrom": "Début de la période",
-    "paidTo": "Fin de la période",
     "late": {
       "one": "{count} jour de retard",
       "other": "{count} jours de retard"
     },
     "owe": "{amount} dû\ndepuis le {date}",
     "settled": "Réglé\nprochaine échéance {date}",
-    "adjust": "Tarif et départ",
     "backCollect": "Enregistrer un paiement"
   },
   "strip": {
@@ -316,7 +329,8 @@
     "paid": "Payé",
     "due": "Dû",
     "future": "Période suivante",
-    "unused": "Payé, inutilisé"
+    "unused": "Payé, inutilisé",
+    "waived": "Abandonné"
   },
   "refund": {
     "title": "Remboursement au départ",

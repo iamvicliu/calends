@@ -12,6 +12,7 @@ import {
   memberRate,
   addDays,
   addMonths,
+  collectionAnchor,
   collectionDates,
   diffDays,
   memberCollection,
@@ -286,4 +287,39 @@ export function followCarRule(state: AppState, s: Subscription, m: ShareMember, 
   return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)
     ? next
     : changeMemberFee(state, s, next, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
+}
+
+/**
+ * 一笔收款从 from 起覆盖 periods 期：逐期按收费规则算应收，金额折成第一期的币种相加，返回覆盖到哪天。
+ * 遇到退出日或订阅结束就停，periods 返回实际能覆盖的期数。收款表单的「期数」与提前收款共用
+ */
+export function collectionSpan(state: AppState, s: Subscription, m: ShareMember, from: string, periods: number, currency: string) {
+  let start = from;
+  let amount = 0;
+  let until = from;
+  let count = 0;
+  let ccy = currency;
+  for (; count < periods; count++) {
+    if ((m.left && start >= m.left) || (s.end && start > s.end)) break;
+    const c = memberCollection(s, m, start, currency);
+    if (!count) ccy = c.currency;
+    amount += c.currency === ccy ? c.amount : convertOn(c.amount, c.currency, ccy, c.from, state.fxHistory, state.fx);
+    until = c.until;
+    start = addDays(c.until, 1);
+  }
+  const d = 10 ** currencyDecimals(ccy);
+  return { amount: Math.round(amount * d) / d, currency: ccy, until, periods: count };
+}
+
+/**
+ * 按车的收款节奏（基准日每隔 billEvery 个月一次），今天之后的下一次收款日。
+ * 收费规则里的「下期收款日」：新标准从这天起执行，改这个日期就是把全车的收款节奏挪到这天
+ */
+export function nextCollectionDay(s: Subscription, billEvery: number, today: string): string {
+  const anchor = collectionAnchor(s);
+  const every = Math.max(1, billEvery);
+  let k = Math.ceil(((Number(today.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(today.slice(5, 7)) - Number(anchor.slice(5, 7))) / every) - 1;
+  while (addMonths(anchor, k * every) > today) k--;
+  while (addMonths(anchor, k * every) <= today) k++;
+  return addMonths(anchor, k * every);
 }

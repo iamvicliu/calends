@@ -114,22 +114,9 @@
     "ownerName": "Yönetici",
     "ownerPlaceholder": "Kime ödüyorsunuz",
     "seats": "Toplam kişi (siz dahil)",
-    "memberN": "Üye {n}",
     "perPeriod": "Dönem başına pay",
     "paidUntil": "Ödendiği tarih",
-    "remove": "Kaldır",
-    "addMember": "Üye ekle",
-    "manageHint": "Plan kuralını izlemek ya da özel ücret ve dönem belirlemek için üyeye dokunun",
-    "follows": "Planı izler",
-    "custom": "Özel",
-    "nextDue": "Sonraki {date}",
-    "editMember": "Düzenle",
-    "overdue": {
-      "one": "{count} gün gecikti",
-      "other": "{count} gün gecikti"
-    },
-    "dueOn": "Vade {date}",
-    "confirmRemove": "Onayla"
+    "manageHint": "Kaydettikten sonra bu planı Ortak planlar bölümünde açıp üye ekleyin ve ödemeleri kaydedin."
   },
   "proxy": {
     "for": "Kimin için",

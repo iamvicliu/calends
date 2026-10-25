@@ -109,21 +109,9 @@
     "ownerName": "主催者",
     "ownerPlaceholder": "支払う相手",
     "seats": "総人数（自分を含む）",
-    "memberN": "メンバー {n}",
     "perPeriod": "1期間あたりの負担額",
     "paidUntil": "支払い済み期限",
-    "remove": "削除",
-    "addMember": "メンバーを追加",
-    "manageHint": "メンバーをタップして、プランのルールに従うか独自の料金と周期を設定",
-    "follows": "プラン共通",
-    "custom": "個別",
-    "nextDue": "次回 {date}",
-    "editMember": "編集",
-    "overdue": {
-      "other": "{count}日超過"
-    },
-    "dueOn": "{date} 集金予定",
-    "confirmRemove": "確認"
+    "manageHint": "保存後、「共有プラン」でこのプランを開き、メンバーの追加と入金記録を行います。"
   },
   "proxy": {
     "for": "立て替え先",
