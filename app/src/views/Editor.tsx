@@ -7,7 +7,7 @@ import { StopFields } from '../components/StopPanel.tsx';
 import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
-import { cnDateFull, flow, money } from '../../../shared/format.ts';
+import { cnDateFull, currencyDecimals, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -321,7 +321,8 @@ function Form({
   const share = f.share;
   const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) =>
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
-  const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
+  const unit = 10 ** currencyDecimals(f.currency);
+  const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * unit) / unit : 0;
   // 收费标准：存过的就用存的，否则按价格和席位推算（随价格、席位变）
   const stored = state.subscriptions.find((x) => x.id === f.id);
   const rule = carRule(state, f, today);
