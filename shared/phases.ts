@@ -630,9 +630,9 @@ export function editPhase(s: Subscription, start: string, patch: Partial<Phase>)
   phases[index] = p as unknown as Phase;
   phases.sort((a, b) => a.start.localeCompare(b.start));
   if (new Set(phases.map((p) => p.start)).size !== phases.length) throw new Error(t('mcp.error.invalidTarget'));
+  // 其余字段格式由写入入口统一校验（subRefsError → newShapeError）；开始日先查，后面的定位依赖它
   for (const phase of phases) {
-    const error = subError({ ...s, ...phase, phases: undefined });
-    if (error) throw new Error(error);
+    if (!validDay(phase.start)) throw new Error(t('core.subError.start'));
     if (phase.end && phase.end < phase.start) throw new Error(t('core.phase.endTooEarly'));
   }
   let next = mirror({ ...s, start: phases[0].start }, phases);

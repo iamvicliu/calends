@@ -541,10 +541,6 @@ export async function commit(
     after,
   );
   for (const member of after.share?.members ?? []) if (!Number.isFinite(member.share)) throw new Error(t('mcp.error.notNumber', { what: 'member.share' }));
-  for (const v of phaseSubs(after)) {
-    const error = subError(v);
-    if (error) throw new Error(error);
-  }
   // 与网页整条保存同一套引用校验：新写入的支付方式要存在、币种要可用；记录里原有的值放行
   const refs = subRefsError(
     st,

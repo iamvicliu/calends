@@ -186,6 +186,57 @@ export function subError(s: Subscription): string | undefined {
   return undefined;
 }
 
+/**
+ * 订阅与各阶段的字段格式问题：开始日、价格、币种、周期、结束日、下次扣款日、试用结束、暂停日、首期优惠、赠送期与标签。
+ * 每项带上「字段 + 取值」作键，newShapeError 据此只拦本次新写入的问题。
+ */
+function shapeIssues(s: Subscription): Array<[key: string, error: string]> {
+  const out: Array<[string, string]> = [];
+  const add = (field: string, value: unknown, error: string) => out.push([`${field}:${JSON.stringify(value) ?? 'undefined'}`, error]);
+  const isDay = (v: unknown): v is string => typeof v === 'string' && validDay(v);
+  const day = (field: string, v: unknown) => {
+    if (v != null && !isDay(v)) add(field, v, t('mcp.error.notDate', { what: field }));
+  };
+  day('trialEnd', s.trialEnd);
+  day('pausedAt', s.pausedAt);
+  if (!Array.isArray(s.tags) || s.tags.some((x) => typeof x !== 'string')) add('tags', s.tags, t('mcp.error.invalidInput', { field: 'tags' }));
+  for (const p of [s, ...(Array.isArray(s.phases) ? s.phases : [])]) {
+    if (!p || typeof p !== 'object') {
+      add('phase', p, t('mcp.error.invalidInput', { field: 'phases' }));
+      continue;
+    }
+    if (!isDay(p.start)) add('start', p.start, t('core.subError.start'));
+    if (typeof p.price !== 'number' || !Number.isFinite(p.price) || p.price < 0) add('price', p.price, t('core.subError.price'));
+    if (typeof p.currency !== 'string' || !/^[A-Z]{3}$/.test(p.currency))
+      add('currency', p.currency, t('mcp.error.unsupportedCurrency', { code: String(p.currency) }));
+    const c = p.cycle;
+    if (!c || !['day', 'week', 'month', 'year', 'lifetime'].includes(c.unit) || !Number.isInteger(c.every) || !(c.every >= 1))
+      add('cycle', c, t('core.subError.cycle'));
+    day('end', p.end);
+    if (isDay(p.end) && isDay(p.start) && p.end < p.start) add('end', [p.start, p.end], t('core.phase.endTooEarly'));
+    day('nextDue', p.nextDue);
+    if (p.intro != null) {
+      day('intro.until', p.intro.until ?? null);
+      if (typeof p.intro.price !== 'number' || !Number.isFinite(p.intro.price) || p.intro.price < 0)
+        add('intro.price', p.intro.price, t('core.subError.price'));
+    }
+    if (p.bonus != null) {
+      day('bonus.from', p.bonus.from ?? null);
+      day('bonus.until', p.bonus.until ?? null);
+    }
+  }
+  return out;
+}
+
+/**
+ * 整条写入的格式校验：只拦本次新引入的问题，previous 里原有的同一问题放行（与 subRefsError 的引用校验同一做法），
+ * 已存的旧记录仍可编辑保存。导入、恢复备份不经过这里。
+ */
+export function newShapeError(previous: Subscription | undefined, next: Subscription): string | undefined {
+  const known = new Set(previous ? shapeIssues(previous).map(([key]) => key) : []);
+  return shapeIssues(next).find(([key]) => !known.has(key))?.[1];
+}
+
 // ---------- 阶段（换区 / 换套餐 / 断更续订） ----------
 
 /**

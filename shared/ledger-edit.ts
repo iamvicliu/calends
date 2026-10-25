@@ -1,4 +1,5 @@
 import { validatePeopleAvatars } from './avatar.ts';
+import { newShapeError } from './billing.ts';
 // Ledger references and non-secret settings. Pure functions; no storage or platform APIs.
 import { categoryList, cleanCategories, renameInSubs, type Category } from './categories.ts';
 import { mergePeople, refsFor, syncPerson } from './people.ts';
@@ -269,9 +270,11 @@ const currenciesOf = (s: Subscription | undefined) => (s ? [s.currency, ...(s.ph
 /**
  * 整条订阅写入的引用校验（网页 PUT /api/subscriptions、MCP save_subscription 与其余订阅写工具共用）：
  * 新写入的支付方式必须存在，新写入的币种必须有汇率。previous 里本来就有的值放行（删卡遗留、汇率表变化），
- * 这样未改动的历史记录仍能保存，只拒绝本次新引入的非法值。
+ * 这样未改动的历史记录仍能保存，只拒绝本次新引入的非法值。字段格式（各阶段的日期、价格、币种、周期等）同样按此放行旧值，见 newShapeError。
  */
 export function subRefsError(st: Pick<AppState, 'fx' | 'methods'>, previous: Subscription | undefined, next: Subscription): string | undefined {
+  const shape = newShapeError(previous, next);
+  if (shape) return shape;
   const knownMethods = new Set(methodIdsOf(previous));
   for (const id of methodIdsOf(next))
     if (!knownMethods.has(id) && !st.methods.some((m) => m.id === id))
