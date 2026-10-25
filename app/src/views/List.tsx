@@ -3,7 +3,18 @@ import { copyParts } from '../components/copy.tsx';
 import { StopBadge, StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
-import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
+import {
+  activePhases,
+  addDays,
+  currentPhase,
+  diffDays,
+  effectiveStatus,
+  monthlyMine,
+  nextCharge,
+  priceAt,
+  upcomingPhase,
+  isStopped,
+} from '../../../shared/billing.ts';
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
@@ -195,7 +206,7 @@ export function List({
     }
     return dir === 'asc' ? asc(a, b) : asc(b, a);
   });
-  const sum = rows.reduce((a, s) => a + (['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
+  const sum = rows.reduce((a, s) => a + (isStopped(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
   // 只按筛选范围识别报告，排序、视图及时间轴窗口不影响报告。
   const reportKey = JSON.stringify([category ?? null, filter, cat, pay, words.join(' ')]);
@@ -376,7 +387,7 @@ export function List({
                     <span className={d != null && d <= 3 ? 'soon' : ''}>
                       {st === 'lifetime' ? (
                         s.start.slice(0, 7)
-                      ) : ['ended', 'terminated'].includes(st) ? (
+                      ) : isStopped(st) ? (
                         saved.get(s.id) ? (
                           <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (
@@ -505,7 +516,7 @@ export function List({
                     <span className={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
                       {st === 'lifetime' ? (
                         t('list.status.lifetime')
-                      ) : ['ended', 'terminated'].includes(st) ? (
+                      ) : isStopped(st) ? (
                         saved.get(s.id) ? (
                           <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (

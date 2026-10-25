@@ -3,7 +3,7 @@ import { base as appPath, readStored, storageKey } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
-import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn, isStopped } from '../../../shared/billing.ts';
 import { cnDate, flow, moneyTick, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
 import { t, type Params } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
@@ -411,7 +411,7 @@ function derive(state: AppState, today: string) {
     upcoming,
     fx: { [base]: fxFor(base), USD: fxFor('USD') } as Record<Ccy, ReturnType<typeof fxFor>>,
     // 退订：按退订时间新的在前；只给「原来每月多少」这种不随时间膨胀的数，不算「退订至今省了多少」
-    ended: state.subscriptions.filter((s) => ['ended', 'terminated'].includes(effectiveStatus(s, today))).map((sub) => ({ sub, since: sub.stop?.date ?? sub.end ?? sub.start, monthly: savings.items.find((x) => x.sub.id === sub.id)?.monthly ?? toBaseOrNaN(state, monthlyGross(currentPhase(sub, sub.end ?? today), sub.end ?? today), sub.currency) * myShareFactor(sub, sub.end ?? today) })).sort((a, b) => b.since.localeCompare(a.since)),
+    ended: state.subscriptions.filter((s) => isStopped(effectiveStatus(s, today))).map((sub) => ({ sub, since: sub.stop?.date ?? sub.end ?? sub.start, monthly: savings.items.find((x) => x.sub.id === sub.id)?.monthly ?? toBaseOrNaN(state, monthlyGross(currentPhase(sub, sub.end ?? today), sub.end ?? today), sub.currency) * myShareFactor(sub, sub.end ?? today) })).sort((a, b) => b.since.localeCompare(a.since)),
     endedMonthly: savings.items.reduce((a, x) => a + x.monthly, 0),
     lifetime: state.subscriptions.filter((s) => s.cycle.unit === 'lifetime'),
   };

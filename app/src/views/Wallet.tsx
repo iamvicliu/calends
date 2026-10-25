@@ -4,7 +4,18 @@ import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { useRef, useState } from 'react';
-import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../../shared/billing.ts';
+import {
+  activePhases,
+  currentPhase,
+  cycleLabel,
+  diffDays,
+  effectiveStatus,
+  monthlyMine,
+  runwayFor,
+  uid,
+  type Runway,
+  isStopped,
+} from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
@@ -334,7 +345,7 @@ function MethodSheet({
 }) {
   const r = runwayFor(m, state, today);
   // 关联订阅：还在用的（含买断）在前，已退订、被停用的排到后面；同组内保持原有顺序
-  const stopped = (s: Subscription) => ['ended', 'terminated'].includes(effectiveStatus(s, today));
+  const stopped = (s: Subscription) => isStopped(effectiveStatus(s, today));
   const subs = state.subscriptions.filter((s) => s.methodId === m.id).sort((a, b) => Number(stopped(a)) - Number(stopped(b)));
   const ro = !!state.readonly;
   return (

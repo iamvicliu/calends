@@ -1,4 +1,14 @@
-import { addDays, addMonths, chargeServicePeriod, chargesBetween, currentPhase, cycleDays, effectiveStatus, phaseSubs } from '../../../shared/billing.ts';
+import {
+  addDays,
+  addMonths,
+  chargeServicePeriod,
+  chargesBetween,
+  currentPhase,
+  cycleDays,
+  effectiveStatus,
+  phaseSubs,
+  isStopped,
+} from '../../../shared/billing.ts';
 import type { Subscription } from '../../../shared/types.ts';
 
 /** Display boundary only: an undated stop never becomes a persisted service end. */
@@ -35,7 +45,7 @@ export function detailHistoryEnd(sub: Subscription, today: string): { date: stri
 export function detailForecast(sub: Subscription, today: string) {
   if (sub.cycle.unit === 'lifetime') return { sparse: true, charges: [] };
   const from = addDays(today, 1);
-  const ended = ['ended', 'terminated'].includes(effectiveStatus(sub, today));
+  const ended = isStopped(effectiveStatus(sub, today));
   const cur = currentPhase(sub, today);
   const charges = ended ? [] : chargesBetween(sub, from, addMonths(today, 12), today).filter((c) => !c.kind);
   const sparse = cycleDays(cur.cycle) >= 365 || charges.length <= 2;

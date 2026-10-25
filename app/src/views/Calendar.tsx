@@ -15,6 +15,7 @@ import {
   nextCharge,
   type Charge,
   chargeMethodId,
+  isStopped,
 } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -300,7 +301,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                                   {t('detail.ev.paused')} <span className="copy-gap" aria-hidden="true" /> {cnDateAuto(cur.pausedAt, today)}
                                 </small>
                               )
-                            ) : ['ended', 'terminated'].includes(status) ? (
+                            ) : isStopped(status) ? (
                               endedOn && <small>{t('list.endedOn', { date: cnDateAuto(endedOn, today) })}</small>
                             ) : status === 'ending' && cur.end ? (
                               <small>{t('core.stop.paidThrough', { date: cnDateAuto(cur.end, today) })}</small>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { nonrenewalDate, renewalDates, chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary } from '../../../shared/billing.ts';
+import { nonrenewalDate, renewalDates, chargesBetween, currentPhase, effectiveStatus, phaseSubs, stopSummary, isStopped } from '../../../shared/billing.ts';
 import { flow, cnDateFull } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { reactivate } from '../../../shared/phases.ts';
@@ -72,7 +72,7 @@ export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: 
 /** Standalone detail action: fields plus an explicit confirmation. */
 export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: string; onApply: (s: Subscription) => unknown }) {
   const [form, setForm] = useState(() => stopForm(sub, today));
-  const ended = ['ended', 'terminated'].includes(effectiveStatus(sub, today));
+  const ended = isStopped(effectiveStatus(sub, today));
   const stops = phaseSubs(sub).filter((p) => p.stop);
   const [busy, submit] = useSubmit();
   const apply = () =>

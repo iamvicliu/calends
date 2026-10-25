@@ -1,5 +1,5 @@
 import { copyParts } from '../components/copy.tsx';
-import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime } from '../../../shared/billing.ts';
+import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime, isStopped } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 
@@ -166,7 +166,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
 /** 小票：逐笔列出扣款，最后合计；隐藏金额时列出每期的地区和日期 */
 function SReceipt({ sub, st, hide, m, today }: Ctx) {
   const end = st.cur.stop?.date ?? st.cur.end ?? sub.end;
-  const farewell = ['ended', 'terminated'].includes(st.status)
+  const farewell = isStopped(st.status)
     ? end
       ? t('share.stoppedOn', { date: cnDateFull(end) })
       : statusText(st)

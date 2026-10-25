@@ -1112,7 +1112,7 @@ export function CarSheet({
   const base = state.settings.baseCurrency;
   const sh = s.share!;
   const st = effectiveStatus(s, today);
-  const stopped = ['ended', 'terminated'].includes(st);
+  const stopped = isStopped(st);
   const next = nextCharge(s, addDays(today, 1));
   const roster = carpoolRoster(s, today);
   const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);

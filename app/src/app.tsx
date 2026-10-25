@@ -5,7 +5,7 @@ import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
 import { FocusScope } from 'react-aria';
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
-import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/billing.ts';
+import { addDays, diffDays, effectiveStatus, nextCharge, isStopped } from '../../shared/billing.ts';
 import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
 import { IconButton, AskLayer, Icon, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
@@ -378,7 +378,7 @@ function Palette({
   const subs = state.subscriptions
     // Multiple words must all match, as before.
     .filter((s) => !lower || lower.split(/\s+/).every((w) => matches(w, haystack(s))))
-    .sort((a, b) => (['ended', 'terminated'].includes(effectiveStatus(a, d)) ? 1 : 0) - (['ended', 'terminated'].includes(effectiveStatus(b, d)) ? 1 : 0))
+    .sort((a, b) => (isStopped(effectiveStatus(a, d)) ? 1 : 0) - (isStopped(effectiveStatus(b, d)) ? 1 : 0))
     .slice(0, 8);
   const pages = nav.filter((n) => matches(lower, n.label));
   const items: Array<{ key: string; run: () => void; el: React.JSX.Element }> = [

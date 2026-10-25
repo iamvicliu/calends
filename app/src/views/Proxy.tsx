@@ -1,7 +1,7 @@
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
-import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn, isStopped } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../shared/types.ts';
@@ -50,10 +50,10 @@ function proxySummary(state: AppState, today: string) {
   // 进行中的在前，已停止的排到最后
   const subs = state.subscriptions
     .filter((s) => s.proxy)
-    .sort((a, b) => Number(['ended', 'terminated'].includes(effectiveStatus(a, today))) - Number(['ended', 'terminated'].includes(effectiveStatus(b, today))));
+    .sort((a, b) => Number(isStopped(effectiveStatus(a, today))) - Number(isStopped(effectiveStatus(b, today))));
   const all = subs.flatMap((s) => rows(state, s, today));
   const { done, open, charged, owed, received, diff, lastIn } = proxyTotals(all);
-  const live = subs.filter((s) => !['ended', 'terminated'].includes(effectiveStatus(s, today)));
+  const live = subs.filter((s) => !isStopped(effectiveStatus(s, today)));
   return {
     subs,
     live: live.length,
@@ -74,7 +74,7 @@ function proxySummary(state: AppState, today: string) {
  * 结清后第三格改为盈亏，「已结清」只在这里说一次
  */
 function proxyStatus(st: string, list: Row[], ahead: Row[]): ['stop' | 'owe' | 'done' | 'ok' | 'notice', string] {
-  if (['ended', 'terminated'].includes(st)) return ['stop', t('proxy.status.ended')];
+  if (isStopped(st)) return ['stop', t('proxy.status.ended')];
   if (list.some((r) => r.receivedBase == null)) return ['owe', t('proxy.owed')];
   if (ahead.length) return ['done', t('proxy.prepaidTo', { date: cnDate(ahead[0].date) })];
   if (list.length) return ['done', t('proxy.settled')];
@@ -122,7 +122,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const method = state.methods.find((m) => m.id === s.methodId);
   const { charged, received } = proxyTotals(list);
   const st = effectiveStatus(s, today);
-  const stopped = ['ended', 'terminated'].includes(st);
+  const stopped = isStopped(st);
   const [tone, label] = proxyStatus(st, list, ahead);
 
   return (
@@ -183,7 +183,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const ro = !!state.readonly;
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
-  const stopped = ['ended', 'terminated'].includes(st);
+  const stopped = isStopped(st);
   const next = nextCharge(live, addDays(today, 1));
   const method = state.methods.find((m) => m.id === live.methodId);
   const { charged, done, received, open, diff, lastIn } = proxyTotals(list);
@@ -588,7 +588,7 @@ function useProxySort(state: AppState, today: string, subs: Subscription[]) {
   const items = subs.map((s) => {
     const list = rows(state, s, today);
     const st = effectiveStatus(s, today);
-    const stopped = ['ended', 'terminated'].includes(st);
+    const stopped = isStopped(st);
     return {
       s,
       list,
@@ -737,7 +737,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
   const base = state.settings.baseCurrency;
   const sum = proxySummary(state, today);
   const [filter, setFilter] = usePref<ProxyFilter>('proxy-filter', 'all', (v): v is ProxyFilter => (PROXY_FILTERS as readonly string[]).includes(v));
-  const stopped = (s: Subscription) => ['ended', 'terminated'].includes(effectiveStatus(s, today));
+  const stopped = (s: Subscription) => isStopped(effectiveStatus(s, today));
   const groups: Record<ProxyFilter, Subscription[]> = {
     all: sum.subs,
     live: sum.subs.filter((s) => !stopped(s)),

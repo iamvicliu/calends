@@ -1,7 +1,7 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
-import { renewalDates, chargeMethodId } from '../../../shared/billing.ts';
+import { renewalDates, chargeMethodId, isStopped } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
@@ -230,7 +230,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const events = !compact ? <Events sub={sub} state={state} today={today} /> : null;
   const actions = (
     <>
-      {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
+      {!ro && sub.cycle.unit !== 'lifetime' && !isStopped(st) && (
         <Act
           icon={paused ? <Play size={15} /> : <Pause size={15} />}
           label={paused ? t('detail.action.resume') : t('detail.action.pause')}
@@ -242,9 +242,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           }
         />
       )}
-      {!ro && sub.cycle.unit !== 'lifetime' && !['ended', 'terminated'].includes(st) && (
-        <Act icon={<X size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />
-      )}
+      {!ro && sub.cycle.unit !== 'lifetime' && !isStopped(st) && <Act icon={<X size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />}
       {!ro && sub.stop?.kind === 'cancel' && (
         <Act icon={<Play size={15} />} label={t('core.stop.restore')} onClick={() => run(() => saveSub(reactivate(sub, today)), t('detail.toast.resumed'))} />
       )}
@@ -510,7 +508,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const next = ['ended', 'terminated', 'lifetime', 'paused'].includes(st) ? undefined : detailForecast(sub, today).charges[0];
   const nextValue = next ? chargeBaseOrNaN(state, next, base) : NaN;
   // 停止的订阅由下方停止卡片写停止日，这里不再重复
-  const ended = ['ended', 'terminated'].includes(st) && sub.end && !phaseSubs(sub).some((p) => p.stop);
+  const ended = isStopped(st) && sub.end && !phaseSubs(sub).some((p) => p.stop);
   const durationCell = (
     <Metric
       label={transferred ? t('detail.transfer.held') : lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
