@@ -27,7 +27,7 @@ import {
   X,
 } from 'lucide-react';
 import { cycleLabel } from '../../../shared/billing.ts';
-import { flow, billLabel, cnDate, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, billLabel, cnDate, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
@@ -37,6 +37,7 @@ import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
 import { api, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
+import { isDateField, proposalDay } from './assistant-fields.ts';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
 import './assistant.css';
 import { Streamdown, type Components } from 'streamdown';
@@ -746,7 +747,7 @@ function summaryRows(
   const add = (label: string, v: ReactNode | undefined | null | false) => {
     if (v !== undefined && v !== null && v !== false && v !== '') rows.push([label, v]);
   };
-  const day = (v: unknown) => (v ? cnDateFull(String(v)) : undefined);
+  const day = proposalDay;
   const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
   const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
   switch (tool) {
@@ -889,7 +890,7 @@ function summaryRows(
         const val =
           k === 'method'
             ? (method(v)?.name ?? String(v))
-            : /date|end|due|until|from|at|expires/.test(k)
+            : isDateField(k)
               ? day(v)
               : Array.isArray(v)
                 ? v.join('、')
@@ -954,9 +955,9 @@ function Proposal(props: {
   const gone = part.state === 'dismissed';
   const rows: Array<[string, ReactNode]> = create
     ? [
-        [t('assistant.card.start'), a.start ? cnDateFull(String(a.start)) : t('assistant.card.today')],
+        [t('assistant.card.start'), proposalDay(a.start) ?? t('assistant.card.today')],
         ...(a.region ? [[t('detail.field.region'), String(a.region).toUpperCase()] as [string, ReactNode]] : []),
-        ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), cnDateFull(String(a.trial_end))] as [string, ReactNode]] : []),
+        ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), proposalDay(a.trial_end)] as [string, ReactNode]] : []),
         [t('detail.field.method'), <PayBadge key="m" m={method} />],
         ...(history.length
           ? [
