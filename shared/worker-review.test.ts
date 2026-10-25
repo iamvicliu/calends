@@ -243,3 +243,16 @@ test('W-6 备份恢复在一个事务里：中途失败时原账本保持不变'
   );
   assert.equal(st.settings.displayName, 'Original ledger');
 });
+
+test('W-7 对话按 UTF-8 字节限长；超长工具结果截断后仍是合法 JSON', async () => {
+  const f = fixture();
+  // 70 万个汉字约 2.1 MB，超出 D1 单行上限
+  await assert.rejects(saveChat(f.env, 'c1', { turns: [], history: [{ role: 'user', content: '汉'.repeat(700_000) }] }), /too large/);
+  await saveChat(f.env, 'c2', { turns: [], history: [{ role: 'user', content: 'a'.repeat(1000) }] });
+  const big = JSON.stringify({ items: Array.from({ length: 5000 }, (_, i) => ({ i, name: `Fictional ${i}` })) });
+  const out = toolContent(big);
+  const parsed = JSON.parse(out);
+  assert.equal(parsed.truncated, true);
+  assert.equal(parsed.original_chars, big.length);
+  assert.equal(toolContent('{"a":1}'), '{"a":1}');
+});
