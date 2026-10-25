@@ -211,7 +211,13 @@
     "method": "支付方式",
     "scopeOne": "只改这一笔",
     "scopePhase": "这一段 {count} 笔",
-    "scope": "改哪些"
+    "scope": "改哪些",
+    "split": "拆分付款",
+    "unsplit": "单一来源",
+    "sources": "付款来源",
+    "addSource": "添加来源",
+    "splitOk": "合计 {amount}，与金额一致",
+    "splitLeft": "还差 {amount} 未分配"
   },
   "timeline": {
     "home": "回到今天（也可以在时间线上双击）"

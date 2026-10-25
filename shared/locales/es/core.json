@@ -47,7 +47,9 @@
     "start": "Fecha de inicio no válida",
     "cycle": "Ciclo de facturación no válido",
     "refundAmount": "Introduce un importe positivo y una moneda válida",
-    "refundDate": "Indica la salida; el reembolso no puede ser anterior al ingreso"
+    "refundDate": "Indica la salida; el reembolso no puede ser anterior al ingreso",
+    "funding": "División de pago no válida: usa al menos dos métodos de pago distintos con importes distintos de cero y no asignes un único método al mismo cargo",
+    "fundingSum": "Los importes divididos deben sumar el importe del pago"
   },
   "phase": {
     "switchTooEarly": "La fecha de entrada en vigor debe ser posterior al inicio de la fase actual",

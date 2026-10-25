@@ -242,7 +242,12 @@
     "currency": "Währung",
     "cycle": "Abrechnungszeitraum",
     "note": "Notiz",
-    "planned": "Geplant"
+    "planned": "Geplant",
+    "phases": "Phasen",
+    "payments": "Erfasste Zahlungen",
+    "spent": "Bisher ausgegeben",
+    "changes": "Geänderte Felder",
+    "funding": "Bezahlt mit"
   },
   "v": {
     "exempt": "Zahlt nicht",
@@ -253,6 +258,8 @@
     "cancel": "Kündigen",
     "reactivate": "Fortsetzen",
     "charge": "Abbuchung",
-    "deleteAll": "Löscht das Abo und alle Abbuchungen. Dies kann nicht rückgängig gemacht werden."
+    "deleteAll": "Löscht das Abo und alle Abbuchungen. Dies kann nicht rückgängig gemacht werden.",
+    "dateUnknown": "Datum unbekannt",
+    "terminate": "Gesperrt"
   }
 }

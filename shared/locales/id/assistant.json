@@ -237,7 +237,12 @@
     "currency": "Mata uang",
     "cycle": "Siklus tagihan",
     "note": "Catatan",
-    "planned": "Rencana"
+    "planned": "Rencana",
+    "phases": "Fase",
+    "payments": "Tagihan tercatat",
+    "spent": "Total pengeluaran",
+    "changes": "Kolom berubah",
+    "funding": "Dibayar dengan"
   },
   "v": {
     "exempt": "Tidak membayar",
@@ -248,6 +253,8 @@
     "cancel": "Batalkan langganan",
     "reactivate": "Lanjutkan",
     "charge": "Tagihan",
-    "deleteAll": "Menghapus langganan beserta semua tagihannya. Tidak dapat dibatalkan."
+    "deleteAll": "Menghapus langganan beserta semua tagihannya. Tidak dapat dibatalkan.",
+    "dateUnknown": "Tanggal tidak diketahui",
+    "terminate": "Dihentikan penyedia"
   }
 }

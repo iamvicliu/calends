@@ -77,7 +77,9 @@ export function methodReferences(st: AppState, id: string) {
         .map((p) => ({ subscription: s.id, name: s.name, kind: 'phase', start: p.start, payments: p.payments?.length ?? 0 })),
       // 单笔扣款单独记的支付方式也算引用：删卡时一起迁移，不留下指向已删卡的记录
       ...[s, ...(s.phases ?? [])].flatMap((p) =>
-        (p.payments ?? []).filter((x) => x.methodId === id).map((x) => ({ subscription: s.id, name: s.name, kind: 'payment', date: x.date })),
+        (p.payments ?? [])
+          .filter((x) => x.methodId === id || x.funding?.some((f) => f.methodId === id))
+          .map((x) => ({ subscription: s.id, name: s.name, kind: 'payment', date: x.date })),
       ),
     ]),
     ...(st.settings.defaultMethodId === id ? [{ kind: 'default_method' }] : []),
@@ -87,8 +89,26 @@ export function deleteMethodData(st: AppState, id: string, into?: string) {
   const references = methodReferences(st, id);
   if (into === id || (into && !st.methods.some((m) => m.id === into))) throw new Error(t('mcp.error.invalidTarget'));
   requireMigration(references, into);
-  const uses = (pays?: Payment[]) => pays?.some((x) => x.methodId === id);
-  const move = (pays?: Payment[]) => pays?.map((x) => (x.methodId === id ? { ...x, methodId: into } : x));
+  const uses = (pays?: Payment[]) => pays?.some((x) => x.methodId === id || x.funding?.some((f) => f.methodId === id));
+  // 拆分付款里的来源一起迁移；迁到同一笔里已有的来源时合并成一份
+  const moveFunding = (parts: NonNullable<Payment['funding']>) => {
+    const merged = new Map<string, number>();
+    for (const f of parts) {
+      const key = f.methodId === id ? into! : f.methodId;
+      merged.set(key, (merged.get(key) ?? 0) + f.amount);
+    }
+    return [...merged].map(([methodId, amount]) => ({ methodId, amount: Math.round(amount * 100) / 100 }));
+  };
+  const move = (pays?: Payment[]) =>
+    pays?.map((x) => {
+      let next = x.methodId === id ? { ...x, methodId: into } : x;
+      if (x.funding?.some((f) => f.methodId === id)) {
+        const funding = moveFunding(x.funding);
+        // 合并后只剩一个来源：不再算拆分，记成这一笔单独的支付方式
+        next = funding.length > 1 ? { ...next, funding } : { ...next, funding: undefined, methodId: funding[0].methodId };
+      }
+      return next;
+    });
   const subscriptions = st.subscriptions
     .filter((s) => s.methodId === id || uses(s.payments) || s.phases?.some((p) => p.methodId === id || uses(p.payments)))
     .map((s) => ({

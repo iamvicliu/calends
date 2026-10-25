@@ -237,7 +237,12 @@
     "currency": "幣別",
     "cycle": "週期",
     "note": "備註",
-    "planned": "計畫中"
+    "planned": "計畫中",
+    "phases": "階段",
+    "payments": "扣款紀錄",
+    "spent": "累計支出",
+    "changes": "變更欄位",
+    "funding": "付款來源"
   },
   "v": {
     "exempt": "不分攤",
@@ -248,6 +253,8 @@
     "cancel": "退訂",
     "reactivate": "恢復",
     "charge": "扣款",
-    "deleteAll": "刪除訂閱及全部扣款紀錄，無法復原"
+    "deleteAll": "刪除訂閱及全部扣款紀錄，無法復原",
+    "dateUnknown": "日期不詳",
+    "terminate": "被停用"
   }
 }

@@ -47,7 +47,9 @@
     "start": "Ungültiges Startdatum",
     "cycle": "Ungültiger Abrechnungszeitraum",
     "refundAmount": "Positiven Erstattungsbetrag und gültige Währung eingeben",
-    "refundDate": "Austrittsdatum angeben; Erstattung nicht vor dem Beitritt"
+    "refundDate": "Austrittsdatum angeben; Erstattung nicht vor dem Beitritt",
+    "funding": "Ungültige Aufteilung: Mindestens zwei verschiedene Zahlungsmethoden mit Beträgen ungleich null angeben und keine einzelne Zahlungsmethode für dieselbe Zahlung setzen",
+    "fundingSum": "Die aufgeteilten Beträge müssen den Zahlungsbetrag ergeben"
   },
   "phase": {
     "switchTooEarly": "Das Gültigkeitsdatum muss nach dem Beginn der aktuellen Phase liegen",

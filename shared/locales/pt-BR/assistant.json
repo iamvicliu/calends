@@ -242,7 +242,12 @@
     "currency": "Moeda",
     "cycle": "Ciclo de cobrança",
     "note": "Nota",
-    "planned": "Planejado"
+    "planned": "Planejado",
+    "phases": "Fases",
+    "payments": "Cobranças registradas",
+    "spent": "Gasto até hoje",
+    "changes": "Campos alterados",
+    "funding": "Pago com"
   },
   "v": {
     "exempt": "Não paga",
@@ -253,6 +258,8 @@
     "cancel": "Cancelar",
     "reactivate": "Retomar",
     "charge": "Cobrança",
-    "deleteAll": "Exclui a assinatura e todas as cobranças. Não é possível desfazer."
+    "deleteAll": "Exclui a assinatura e todas as cobranças. Não é possível desfazer.",
+    "dateUnknown": "Data desconhecida",
+    "terminate": "Encerrada pelo provedor"
   }
 }

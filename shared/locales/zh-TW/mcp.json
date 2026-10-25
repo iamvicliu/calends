@@ -66,7 +66,9 @@
     "noPeriods": "請至少選一期，且同一期只能寫一次",
     "periodUnknown": "{period} 不是這筆帳裡的一期",
     "periodTaken": "{period} 這一期已經記過收款或免收",
-    "periodsShort": "只剩 {count} 期沒結清，不夠這筆要抵扣的期數"
+    "periodsShort": "只剩 {count} 期沒結清，不夠這筆要抵扣的期數",
+    "stopDateRequired": "這個訂閱在今天之前已經開始或扣過款，停用日不能預設今天。請用 at 提供實際日期；日期不詳時傳 at=null。",
+    "unknownStopDetails": "日期不詳的停用不能附帶退款或原因；要記錄請用 at 提供日期。"
   },
   "tool": {
     "get_overview": "帳本概況",
@@ -100,6 +102,7 @@
     "save_person": "管理人員",
     "get_settings": "帳本設定與偏好",
     "update_settings": "修改帳本設定與偏好",
-    "set_proxy": "管理代付關係"
+    "set_proxy": "管理代付關係",
+    "save_subscription": "完整儲存訂閱"
   }
 }

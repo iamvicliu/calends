@@ -227,7 +227,13 @@
     "method": "支払い方法",
     "scopeOne": "この請求のみ",
     "scopePhase": "このプラン {count} 件",
-    "scope": "変更する範囲"
+    "scope": "変更する範囲",
+    "split": "分割払い",
+    "unsplit": "1 つの支払い方法",
+    "sources": "支払い元",
+    "addSource": "支払い元を追加",
+    "splitOk": "合計 {amount}（金額と一致）",
+    "splitLeft": "未割り当て：{amount}"
   },
   "timeline": {
     "home": "今日に戻る（またはタイムラインをダブルクリック）"

@@ -47,7 +47,9 @@
     "start": "Date de début non valide",
     "cycle": "Cycle de facturation non valide",
     "refundAmount": "Saisissez un montant positif et une devise valide",
-    "refundDate": "Indiquez le départ ; le remboursement ne peut précéder l’arrivée"
+    "refundDate": "Indiquez le départ ; le remboursement ne peut précéder l’arrivée",
+    "funding": "Répartition invalide : utilisez au moins deux moyens de paiement différents avec des montants non nuls, sans moyen de paiement unique sur le même paiement",
+    "fundingSum": "La somme des montants répartis doit égaler le montant du paiement"
   },
   "phase": {
     "switchTooEarly": "La date d’effet doit être postérieure au début de la phase actuelle",

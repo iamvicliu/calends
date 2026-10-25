@@ -233,7 +233,12 @@
     "currency": "币种",
     "cycle": "周期",
     "note": "备注",
-    "planned": "计划中"
+    "planned": "计划中",
+    "phases": "阶段",
+    "payments": "扣款记录",
+    "spent": "累计支出",
+    "changes": "改动字段",
+    "funding": "付款来源"
   },
   "v": {
     "exempt": "不分摊",
@@ -244,6 +249,8 @@
     "cancel": "退订",
     "reactivate": "恢复",
     "charge": "扣款",
-    "deleteAll": "删除订阅及全部扣款记录，无法恢复"
+    "deleteAll": "删除订阅及全部扣款记录，无法恢复",
+    "dateUnknown": "日期不详",
+    "terminate": "被停用"
   }
 }

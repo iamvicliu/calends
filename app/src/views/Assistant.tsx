@@ -819,8 +819,21 @@ function summaryRows(
       break;
     case 'set_status':
       add(t('assistant.f.action'), t(`assistant.v.${String(a.action)}`));
-      add(t('assistant.f.date'), day(a.at));
+      add(t('assistant.f.date'), a.at === null ? t('assistant.v.dateUnknown') : day(a.at));
       break;
+    case 'save_subscription': {
+      const rec = (a.subscription ?? {}) as Partial<Subscription>;
+      const computed = (preview?.computed as { after?: { next_charge?: string | null; spent_total?: { amount: number | null; currency: string } } } | undefined)?.after;
+      const pays = [...(rec.payments ?? []), ...(rec.phases ?? []).flatMap((p) => p.payments ?? [])];
+      if (rec.status === 'cancelled' || rec.status === 'terminated')
+        add(t(`assistant.v.${rec.status === 'terminated' ? 'terminate' : 'cancel'}`), day(rec.stop?.date ?? rec.end) ?? t('assistant.v.dateUnknown'));
+      add(t('assistant.f.phases'), rec.phases?.length ? String(rec.phases.length) : undefined);
+      add(t('assistant.f.payments'), pays.length ? String(pays.length) : undefined);
+      add(t('assistant.f.spent'), computed?.spent_total?.amount != null ? money(computed.spent_total.amount, computed.spent_total.currency) : undefined);
+      add(t('assistant.f.next_due'), day(computed?.next_charge));
+      add(t('assistant.f.changes'), Array.isArray(preview?.changes) ? String(preview.changes.length) : undefined);
+      break;
+    }
     case 'record_payment':
       add(t('assistant.f.kind'), a.kind && a.kind !== 'charge' ? t(`detail.charges.kind.${String(a.kind)}`) : t('assistant.v.charge'));
       add(
@@ -832,6 +845,13 @@ function summaryRows(
         ) : undefined,
       );
       add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
+      if (Array.isArray(a.funding))
+        add(
+          t('assistant.f.funding'),
+          (a.funding as Array<{ method: string; amount: number }>)
+            .map((f) => `${method(f.method)?.name ?? f.method} ${money(Number(f.amount), subCcy ?? state.settings.baseCurrency)}`)
+            .join('\n'),
+        );
       break;
     case 'delete_subscription':
       add(t('assistant.f.effect'), t('assistant.v.deleteAll'));
@@ -887,9 +907,10 @@ function Proposal(props: {
   };
   const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number } | undefined;
   const history = create && Array.isArray(a.payments) ? (a.payments as Array<{ amount: number }>) : [];
+  // method=null 明确不绑定支付方式，卡片上不显示默认卡
   const method =
     state.methods.find((m) => m.id === a.method || m.name === a.method) ??
-    (create ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
+    (create && a.method !== null ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
   const done = part.state === 'applied';
   const destructive =
     part.tool === 'delete_subscription' ||
@@ -901,7 +922,7 @@ function Proposal(props: {
     (part.tool === 'set_share' && a.role === 'none');
   // 没识别出来、用了默认值的字段：提醒用户核对
   const missing = create
-    ? [!a.start && t('assistant.card.start'), !a.method && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
+    ? [!a.start && t('assistant.card.start'), a.method === undefined && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
     : [];
   const gone = part.state === 'dismissed';
   const rows: Array<[string, ReactNode]> = create

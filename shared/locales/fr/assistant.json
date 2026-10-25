@@ -242,7 +242,12 @@
     "currency": "Devise",
     "cycle": "Cycle de facturation",
     "note": "Note",
-    "planned": "Prévu"
+    "planned": "Prévu",
+    "phases": "Phases",
+    "payments": "Paiements enregistrés",
+    "spent": "Dépensé à ce jour",
+    "changes": "Champs modifiés",
+    "funding": "Payé avec"
   },
   "v": {
     "exempt": "Ne paie pas",
@@ -253,6 +258,8 @@
     "cancel": "Résilier",
     "reactivate": "Reprendre",
     "charge": "Prélèvement",
-    "deleteAll": "Supprime l’abonnement et tous ses prélèvements. Action irréversible."
+    "deleteAll": "Supprime l’abonnement et tous ses prélèvements. Action irréversible.",
+    "dateUnknown": "Date inconnue",
+    "terminate": "Résilié par le fournisseur"
   }
 }

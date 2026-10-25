@@ -1,8 +1,7 @@
-import { updateMemberLeave } from '../shared/carpool.ts';
+import { prepareSubWrite, validSub } from '../shared/sub-write.ts';
 import { validateAvatar, validatePeopleAvatars } from '../shared/avatar.ts';
-import { statusChangeError } from '../shared/phases.ts';
 import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.ts';
-import { addDays, reconcileRenewalRules, subError, todayIn } from '../shared/billing.ts';
+import { addDays, todayIn } from '../shared/billing.ts';
 import {
   DEFAULT_SETTINGS,
   PERSON_COLORS,
@@ -87,11 +86,6 @@ async function refreshFx(env: Env): Promise<FxTable> {
   await putKv(env, 'fx', fx);
   await recordToday(env, fx, (await getSettings(env)).timezone);
   return fx;
-}
-
-function validSub(s: Subscription): string | undefined {
-  if (!s || typeof s.id !== 'string' || !s.id) return t('server.missingId');
-  return subError(s);
 }
 
 /** 批量导入时第一条不合格的订阅 */
@@ -195,20 +189,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
       const previous = (await subsOf(env)).find((x) => x.id === sub.id);
       const today = todayIn((await getSettings(env)).timezone);
-      sub = reconcileRenewalRules(previous, sub, today);
-      // Clearing an existing exit also clears its settlement. New orphan refunds fail validation.
-      if (sub.share)
-        sub = {
-          ...sub,
-          share: {
-            ...sub.share,
-            members: sub.share.members.map((m) =>
-              previous?.share?.members.some((old) => old.id === m.id && old.left) && !m.left ? updateMemberLeave(m, {}) : m,
-            ),
-          },
-        };
-      const err = validSub(sub) ?? statusChangeError(previous, sub, today);
-      if (err) return bad(err);
+      const prepared = prepareSubWrite(previous, sub, today);
+      if (prepared.error !== undefined) return bad(prepared.error);
+      sub = prepared.sub;
       sub.updatedAt = new Date().toISOString();
       const rev = await upsert(env, 'subscriptions', sub.id, sub);
       return json(sub, 200, rev);

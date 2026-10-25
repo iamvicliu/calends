@@ -239,7 +239,12 @@
     "currency": "Para birimi",
     "cycle": "Ödeme dönemi",
     "note": "Not",
-    "planned": "Planlanan"
+    "planned": "Planlanan",
+    "phases": "Dönemler",
+    "payments": "Kayıtlı ödemeler",
+    "spent": "Bugüne kadar harcanan",
+    "changes": "Değişen alanlar",
+    "funding": "Ödeme kaynakları"
   },
   "v": {
     "exempt": "Ödemiyor",
@@ -250,6 +255,8 @@
     "cancel": "İptal et",
     "reactivate": "Devam ettir",
     "charge": "Ödeme",
-    "deleteAll": "Abonelik ve tüm ödeme kayıtları silinir. Bu işlem geri alınamaz."
+    "deleteAll": "Abonelik ve tüm ödeme kayıtları silinir. Bu işlem geri alınamaz.",
+    "dateUnknown": "Tarih bilinmiyor",
+    "terminate": "Sağlayıcı sonlandırdı"
   }
 }

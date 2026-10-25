@@ -371,10 +371,37 @@ export interface Charge {
   serviceDate?: string;
   /** 这一笔单独记的支付方式；缺省用所属阶段的，读取用 chargeMethodId() */
   methodId?: string;
+  /** 这一笔由几个来源合付；读取用 chargeSources() */
+  funding?: Payment['funding'];
 }
 
-/** 一笔扣款实际用的支付方式：这一笔单独记的优先，否则是所属阶段的 */
-export const chargeMethodId = (c: Pick<Charge, 'methodId' | 'sub'>) => c.methodId ?? c.sub.methodId;
+/** 一笔扣款实际用的支付方式：拆分付款取金额最大的来源，否则这一笔单独记的优先，再否则是所属阶段的 */
+export const chargeMethodId = (c: Pick<Charge, 'methodId' | 'sub' | 'funding'>) =>
+  c.funding?.length ? c.funding.reduce((a, b) => (Math.abs(b.amount) > Math.abs(a.amount) ? b : a)).methodId : (c.methodId ?? c.sub.methodId);
+
+/** 一笔扣款各来源及所占比例（合计为 1）；未拆分时只有 chargeMethodId() 一个来源 */
+export function chargeSources(c: Pick<Charge, 'methodId' | 'sub' | 'funding' | 'amount'>): Array<{ methodId: string | undefined; share: number }> {
+  if (!c.funding?.length) return [{ methodId: chargeMethodId(c), share: 1 }];
+  const total = c.funding.reduce((a, f) => a + f.amount, 0);
+  return c.funding.map((f) => ({ methodId: f.methodId, share: total ? f.amount / total : 1 / c.funding!.length }));
+}
+
+/** 资金拆分：至少两个不同来源，与本笔同号且不为零，合计等于本笔金额；失败的扣款和单独记的 methodId 不能同时拆分 */
+export function fundingError(p: Payment): string | undefined {
+  if (p.funding == null) return undefined;
+  const parts = p.funding;
+  if (
+    !Array.isArray(parts) ||
+    parts.length < 2 ||
+    p.kind === 'failed' ||
+    p.methodId != null ||
+    parts.some((f) => !f || typeof f.methodId !== 'string' || !f.methodId || !Number.isFinite(f.amount) || f.amount === 0 || Math.sign(f.amount) !== Math.sign(p.amount)) ||
+    new Set(parts.map((f) => f.methodId)).size !== parts.length
+  )
+    return t('core.subError.funding');
+  if (Math.abs(parts.reduce((a, f) => a + f.amount, 0) - p.amount) > 0.005) return t('core.subError.fundingSum');
+  return undefined;
+}
 
 /** 规则修改只影响尚未发生的扣款；已扣过的服务边界不重复收费。 */
 function renewalDate(s: Subscription, boundary: string, initial = false): string {
@@ -495,6 +522,7 @@ function rawCharges(s: Subscription, from: string, to: string, today: string): C
         settled: p.kind === 'failed' ? undefined : p.settled,
         note: p.note,
         ...(p.methodId ? { methodId: p.methodId } : {}),
+        ...(p.funding?.length ? { funding: p.funding } : {}),
       }));
     if (s.cycle.unit === 'lifetime') return out;
     const last = renewals.at(-1)?.date ?? s.billingStart ?? s.start;
@@ -696,7 +724,8 @@ export function validDay(day: string): boolean {
 
 export function stopError(s: Subscription): string | undefined {
   const stop = s.stop;
-  if (!stop) return s.status === 'terminated' ? t('mcp.error.needStop') : undefined;
+  // 被停用但日期不详：没有 stop 也没有 end；有结束日却没有 stop 信息仍不合格
+  if (!stop) return s.status === 'terminated' && s.end ? t('mcp.error.needStop') : undefined;
   if (!['cancel', 'terminate'].includes(stop.kind) || !validDay(stop.date) || !validDay(stop.paidThrough)) return t('mcp.error.notDate', { what: 'stop' });
   if (stop.date < s.start) return t('mcp.error.stopBeforeStart');
   if (stop.date > stop.paidThrough) return t('mcp.error.stopAfterPaidThrough');
@@ -710,6 +739,8 @@ export function paymentError(s: Subscription): string | undefined {
   for (const p of s.payments ?? []) {
     if (!validDay(p.date)) return t('mcp.error.notDate', { what: 'payment.date' });
     if (!Number.isFinite(p.amount) || (p.settled && (!Number.isFinite(p.settled.amount) || !p.settled.currency))) return t('core.subError.price');
+    const funding = fundingError(p);
+    if (funding) return funding;
     if (p.kind !== 'refund') continue;
     if (p.currency && p.currency !== s.currency) return t('mcp.error.refundCurrency');
     if (p.amount > 0 || (p.settled && p.settled.amount > 0)) return t('mcp.error.invalidRefund');
@@ -876,11 +907,18 @@ export interface Runway {
 
 export function runwayFor(method: PaymentMethod, state: AppState, today: string, horizonMonths = 36): Runway | undefined {
   if (method.balance == null) return undefined;
-  // 按阶段展开：换区前后可能用不同的支付方式
-  const subs = state.subscriptions.flatMap(phaseSubs).filter((s) => s.methodId === method.id);
+  // 按阶段展开：换区前后可能用不同的支付方式。月消耗仍按阶段的支付方式
+  const phases = state.subscriptions.flatMap(phaseSubs);
+  const subs = phases.filter((s) => s.methodId === method.id);
   const asOf = method.balanceAsOf ?? today;
   const horizon = addMonths(today, Math.max(12, horizonMonths));
-  const charges = subs.flatMap((s) => chargesBetween(s, addDays(asOf, 1), horizon, today)).sort((a, b) => a.date.localeCompare(b.date));
+  // 余额按每笔实际的来源扣：单笔记的支付方式优先，拆分付款按份额；预测的扣款没有单笔记录，仍归阶段的支付方式
+  const share = (c: Charge) => chargeSources(c).reduce((a, x) => a + (x.methodId === method.id ? x.share : 0), 0);
+  const charges = phases
+    .flatMap((s) => chargesBetween(s, addDays(asOf, 1), horizon, today))
+    .map((c) => ({ c, share: share(c) }))
+    .filter((x) => x.share > 0)
+    .sort((a, b) => a.c.date.localeCompare(b.c.date));
   let bal = method.balance;
   const forecast: Runway['forecast'] = [];
   // 代付各期记过的卡上实扣
@@ -890,10 +928,10 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   let shortfall: Charge | undefined;
   let covered = 0;
   let current = bal;
-  for (const c of charges) {
+  for (const { c, share } of charges) {
     const entry = proxyCharges.get(c.sub.id)?.get(c.date);
     const settled = c.kind === 'failed' ? undefined : entry?.amount != null ? { amount: entry.amount, currency: entry.currency ?? c.currency } : c.settled;
-    const amt = chargeValue(state, { ...c, settled }, method.currency);
+    const amt = chargeValue(state, { ...c, settled }, method.currency) * share;
     if (!Number.isFinite(amt)) continue;
     if (c.date <= today) {
       bal -= amt;

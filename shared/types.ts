@@ -32,6 +32,13 @@ export interface Payment {
   settled?: { amount: number; currency: string };
   /** 这一笔单独用的支付方式；缺省为所属阶段的支付方式（偶尔换卡扣了一次时填） */
   methodId?: string;
+  /** 资金拆分：一笔订单由多个来源合付（PayPal 168.05 + 余额 10.75）；金额为订阅币种，合计等于 amount；有它时不填 methodId */
+  funding?: FundingPart[];
+}
+
+export interface FundingPart {
+  methodId: string;
+  amount: number;
 }
 
 export interface PricePoint {

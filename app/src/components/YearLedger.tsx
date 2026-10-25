@@ -1,6 +1,8 @@
 import { Fragment, useState, type ReactNode } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState } from '../../../shared/types.ts';
+import { chargeMethodId, chargeSources, type Charge } from '../../../shared/billing.ts';
+import { money } from '../../../shared/format.ts';
 import { PayBadge } from './ui.tsx';
 import '../views/detail.css';
 
@@ -131,16 +133,30 @@ export function YearLedger<T>({
 }
 
 /** 年份行的支付方式：和明细行一样用胶囊；两种以内并排，更多时写前两种再加「+N」，悬停看全部 */
-export function YearMethods({ ids, state }: { ids: string[]; state: AppState }) {
+export function YearMethods({ ids, state, title }: { ids: string[]; state: AppState; title?: string }) {
   const methods = ids.map((id) => state.methods.find((m) => m.id === id));
   const shown = methods.slice(0, 2);
   const more = methods.length - shown.length;
   return (
-    <span className="dt-pay-list" title={methods.length > 1 ? methods.map((m) => m?.name ?? t('ui.method.none')).join('\n') : undefined}>
+    <span className="dt-pay-list" title={title ?? (methods.length > 1 ? methods.map((m) => m?.name ?? t('ui.method.none')).join('\n') : undefined)}>
       {shown.map((m, i) => (
         <PayBadge key={m?.id ?? `none-${i}`} m={m} />
       ))}
       {more > 0 && <span className="dt-pay-more">+{more}</span>}
     </span>
   );
+}
+
+/** 一组扣款用到的支付方式（拆分付款的各来源都算），供年份行的 YearMethods */
+export const chargeMethodIds = (cs: Charge[]) => [...new Set(cs.flatMap((c) => chargeSources(c).map((x) => x.methodId ?? '')))];
+
+/** 明细行的支付方式：一个来源是胶囊；拆分付款叠放各来源，悬停看每个来源付了多少 */
+export function ChargeMethods({ c, state }: { c: Charge; state: AppState }) {
+  if (!c.funding?.length) return <PayBadge m={state.methods.find((m) => m.id === chargeMethodId(c))} />;
+  const title = c.funding
+    .map((f) => `${state.methods.find((m) => m.id === f.methodId)?.name ?? t('ui.method.none')} ${money(Math.abs(f.amount), c.currency)}`)
+    .join('\n');
+  // 金额最大的来源排在最后，露出完整的名字
+  const ids = [...c.funding].sort((a, b) => Math.abs(a.amount) - Math.abs(b.amount)).map((f) => f.methodId);
+  return <YearMethods ids={ids} state={state} title={`${t('editor.payment.split')}\n${title}`} />;
 }

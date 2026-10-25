@@ -69,7 +69,9 @@
     "periodsShort": {
       "one": "Resta só {count} pagamento em aberto, menos do que este recebimento cobre",
       "other": "Restam só {count} pagamentos em aberto, menos do que este recebimento cobre"
-    }
+    },
+    "stopDateRequired": "Esta assinatura começou ou foi cobrada antes de hoje, então a data de encerramento não pode ser hoje por padrão. Informe a data real em at, ou at=null se for desconhecida.",
+    "unknownStopDetails": "Um encerramento com data desconhecida não pode ter reembolso nem motivo; informe a data em at para registrá-los."
   },
   "tool": {
     "get_overview": "Visão geral",
@@ -103,6 +105,7 @@
     "save_person": "Gerenciar pessoa",
     "get_settings": "Configurações e preferências do registro",
     "update_settings": "Atualizar configurações e preferências do registro",
-    "set_proxy": "Gerenciar adiantamentos"
+    "set_proxy": "Gerenciar adiantamentos",
+    "save_subscription": "Salvar assinatura completa"
   }
 }
