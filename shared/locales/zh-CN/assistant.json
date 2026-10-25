@@ -157,7 +157,8 @@
     "applyAll": "全部确认",
     "history": "历史扣款",
     "historyCount": "{count} 笔",
-    "changes": "预览改动与引用"
+    "changes": "预览改动与引用",
+    "unverified": "请核对结果"
   },
   "error": {
     "auth": "API Key 无效",
@@ -252,5 +253,13 @@
     "deleteAll": "删除订阅及全部扣款记录，无法恢复",
     "dateUnknown": "日期不详",
     "terminate": "被停用"
+  },
+  "saveUnknown": "未能确认是否保存成功。请先核对账本，不要重复提交。",
+  "savedUnverified": "已保存，但回读未能核对结果。请先检查账本再继续。",
+  "savedRefreshFailed": "修改已保存，但页面刷新失败。请刷新后再确认其他草稿。",
+  "outcome": {
+    "partial": "部分步骤尚未完成",
+    "limit": "已达到工具调用上限",
+    "review": "草稿尚未保存。请检查已准备的草稿和未完成步骤，再决定如何继续。"
   }
 }

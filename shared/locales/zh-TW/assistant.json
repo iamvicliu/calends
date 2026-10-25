@@ -161,7 +161,8 @@
     "applyAll": "全部確認",
     "history": "歷史扣款",
     "historyCount": "{count} 筆",
-    "changes": "預覽變更與引用"
+    "changes": "預覽變更與引用",
+    "unverified": "請核對結果"
   },
   "error": {
     "auth": "API Key 無效",
@@ -256,5 +257,13 @@
     "deleteAll": "刪除訂閱及全部扣款紀錄，無法復原",
     "dateUnknown": "日期不詳",
     "terminate": "被停用"
+  },
+  "saveUnknown": "無法確認是否儲存成功。請先核對帳本，勿重複提交。",
+  "savedUnverified": "已儲存，但回讀未能核對結果。請先檢查帳本再繼續。",
+  "savedRefreshFailed": "變更已儲存，但頁面重新整理失敗。請重新整理後再確認其他草稿。",
+  "outcome": {
+    "partial": "部分步驟尚未完成",
+    "limit": "已達工具呼叫上限",
+    "review": "草稿尚未儲存。請檢查已準備的草稿和未完成步驟，再決定如何繼續。"
   }
 }

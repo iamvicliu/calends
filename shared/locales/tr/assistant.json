@@ -163,7 +163,8 @@
     "applyAll": "Tümünü onayla",
     "history": "Geçmiş ödemeler",
     "historyCount": "{count} ödeme",
-    "changes": "Değişiklikleri ve referansları göster"
+    "changes": "Değişiklikleri ve referansları göster",
+    "unverified": "Sonucu kontrol et"
   },
   "error": {
     "auth": "Geçersiz API Key",
@@ -258,5 +259,13 @@
     "deleteAll": "Abonelik ve tüm ödeme kayıtları silinir. Bu işlem geri alınamaz.",
     "dateUnknown": "Tarih bilinmiyor",
     "terminate": "Sağlayıcı sonlandırdı"
+  },
+  "saveUnknown": "Kaydedilip kaydedilmediği doğrulanamadı. Yeniden denemeden önce defteri kontrol edin.",
+  "savedUnverified": "Kaydedildi ancak sonuç doğrulanamadı. Devam etmeden önce defteri kontrol edin.",
+  "savedRefreshFailed": "Değişiklik kaydedildi ancak sayfa yenilenemedi. Diğer taslakları onaylamadan önce sayfayı yenileyin.",
+  "outcome": {
+    "partial": "Bazı adımlar tamamlanmadı",
+    "limit": "Araç çağrısı sınırına ulaşıldı",
+    "review": "Taslaklar henüz kaydedilmedi. Devam etmeden önce hazır taslakları ve tamamlanmamış adımları inceleyin."
   }
 }

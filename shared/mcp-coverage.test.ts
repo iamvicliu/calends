@@ -11,6 +11,8 @@ import { createToken } from '../worker/ai/mcp.ts';
 import { ASSISTANT_TOOLS, apply, chat, enrichDraft } from '../worker/ai/assistant.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 import { addDays, memberRate, runwayFor, todayIn } from './billing.ts';
+import { SUBSCRIPTION_SCHEMA } from './subscription-schema.ts';
+import { validateToolInput } from './tool-schema.ts';
 const hook = registerHooks({
   load(url, ctx, next) {
     if (url.endsWith('.json')) return { format: 'module', source: `export default ${readFileSync(new URL(url), 'utf8')}`, shortCircuit: true };
@@ -1877,4 +1879,190 @@ test('save_share_member / set_proxy 给新名字建档或复用同名人：预�
   st = await f.snapshot();
   assert.equal(st.subscriptions.find((s) => s.id === 'p')?.proxy?.personId, undefined);
   assert.equal(st.people?.length, 3);
+});
+
+test('full-record MCP schema explains and saves gift, early renewal and stopped service without losing payment ownership', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const sample = structuredClone((SUBSCRIPTION_SCHEMA.examples as Array<Record<string, unknown>>)[0]);
+  sample.id = 'gift-history';
+  sample.category = 'Test';
+  validateToolInput(SUBSCRIPTION_SCHEMA, sample);
+  const before = await f.snapshot();
+  const preview = await f.call('save_subscription', { subscription: sample, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.deepEqual(await f.snapshot(), before);
+  const r = await apply(f.env, { tool: 'save_subscription', args: { subscription: sample } });
+  assert.equal(r.verification.status, 'verified');
+  const saved = (await f.snapshot()).subscriptions.find((s) => s.id === 'gift-history')!;
+  assert.equal(saved.phases?.[1].start, '2026-02-19');
+  assert.equal(saved.phases?.[1].payments?.[0].date, '2026-02-06');
+  assert.equal(saved.phases?.[1].nextDue, '2027-02-19');
+  assert.equal(saved.end, '2026-07-17');
+  assert.equal(saved.payments, undefined);
+  const bad = { ...sample, stop: { date: '2026-07-17', immediate: true } };
+  assert.throws(() => validateToolInput(SUBSCRIPTION_SCHEMA, bad, 'arguments.subscription'), /subscription.stop.kind/);
+  const wrongDate = structuredClone(sample) as unknown as Subscription;
+  wrongDate.phases![1].payments![0].date = 'not-a-date';
+  assert.throws(() => validateToolInput(SUBSCRIPTION_SCHEMA, wrongDate, 'arguments.subscription'), /subscription.phases\[1\].payments\[0\].date/);
+});
+
+const modelReply = (delta: object) =>
+  new Response(`data: ${JSON.stringify({ choices: [{ delta, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`, {
+    headers: { 'content-type': 'text/event-stream' },
+  });
+const eventsOf = (stream: string) =>
+  stream
+    .split('\n')
+    .filter((l) => l.startsWith('data: '))
+    .map((l) => JSON.parse(l.slice(6)));
+const functionCall = (id: string, name: string, args: object) => ({
+  tool_calls: [{ index: 0, id, type: 'function', function: { name, arguments: JSON.stringify(args) } }],
+});
+
+test('assistant done reports unresolved failures even when the model claims full completion', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+  const before = await f.snapshot();
+  let n = 0;
+  t.mock.method(globalThis, 'fetch', async () =>
+    modelReply(
+      n++ === 0
+        ? functionCall('bad', 'update_subscription', { subscription: 's', set: { start: 'bad-date' } })
+        : { content: 'Everything was saved successfully.' },
+    ),
+  );
+  const es = eventsOf(await chat(f.env, { text: 'Fix date' }, new AbortController().signal).text());
+  const done = es.find((e) => e.type === 'done');
+  assert.equal(done.outcome.status, 'partial');
+  assert.equal(done.outcome.failures.length, 1);
+  assert.equal(done.outcome.drafts, 0);
+  assert.match(done.messages.at(-1).content, /not.*fully completed/);
+  assert.deepEqual(await f.snapshot(), before);
+});
+
+test('failed drafts can retry after their missing dependency is drafted, and only successful operations count', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+  const before = await f.snapshot();
+  let n = 0;
+  const target = { subscription: 's', set: { method: 'new-wallet' } };
+  t.mock.method(globalThis, 'fetch', async () =>
+    modelReply(
+      [
+        functionCall('first', 'update_subscription', target),
+        functionCall('wallet', 'update_payment_method', {
+          action: 'create',
+          id: 'new-wallet',
+          set: { name: 'Fictional new wallet', kind: 'credit', currency: 'USD' },
+        }),
+        functionCall('retry', 'update_subscription', target),
+        { content: 'Two drafts ready for confirmation.' },
+      ][n++],
+    ),
+  );
+  const es = eventsOf(await chat(f.env, { text: 'Change wallet' }, new AbortController().signal).text());
+  assert.equal(es.find((e) => e.type === 'done').outcome.status, 'complete');
+  const proposals = es.filter((e) => e.type === 'proposal');
+  assert.equal(proposals.length, 2);
+  assert.deepEqual(await f.snapshot(), before);
+  for (const p of proposals) assert.equal((await apply(f.env, p)).verification.status, 'verified');
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 's')?.methodId, 'new-wallet');
+});
+
+for (const summaryFails of [false, true])
+  test(`assistant budget ends with a limit outcome and a tool-free closing attempt (provider closing failure=${summaryFails})`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+    const before = await f.snapshot();
+    let n = 0;
+    t.mock.method(globalThis, 'fetch', async (_url, init) => {
+      const request = JSON.parse(String(init?.body));
+      n++;
+      if (request.tools) return modelReply(functionCall('read-' + n, 'get_settings', {}));
+      return summaryFails ? new Response('{}', { status: 503 }) : modelReply({ content: 'The tool limit was reached; no changes were saved.' });
+    });
+    const es = eventsOf(await chat(f.env, { text: 'Read settings' }, new AbortController().signal).text());
+    assert.equal(n, 13);
+    assert.equal(es.find((e) => e.type === 'done').outcome.status, 'limit');
+    assert.equal(
+      es.some((e) => e.type === 'error'),
+      false,
+    );
+    assert.deepEqual(await f.snapshot(), before);
+  });
+
+test('confirmation reports a committed but unverified write when read-back is unavailable', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const driver = f.env.DB as unknown as { prepare(sql: string): { run: () => Promise<unknown> } };
+  const prepare = driver.prepare.bind(driver);
+  let committed = false;
+  t.mock.method(driver, 'prepare', (sql: string) => {
+    if (committed && /^SELECT/i.test(sql)) throw new Error('Fictional read-back unavailable');
+    const stmt = prepare(sql);
+    if (/^INSERT INTO subscriptions\b/i.test(sql)) {
+      const run = stmt.run.bind(stmt);
+      stmt.run = async () => {
+        const out = await run();
+        committed = true;
+        return out;
+      };
+    }
+    return stmt;
+  });
+  const response = await f.request('assistant/apply', 'POST', { tool: 'update_subscription', args: { subscription: 's', set: { notes: 'Committed once' } } });
+  assert.equal(response.status, 200);
+  const r = await response.json();
+  assert.equal(committed, true);
+  assert.equal(r.verification.status, 'unverified');
+  const row = f.db.prepare("SELECT data FROM subscriptions WHERE id='s'").get() as { data: string };
+  assert.equal(JSON.parse(row.data).notes, 'Committed once');
+});
+
+for (const [name, args] of mutations)
+  test(`assistant confirmation read-back: ${name} ${JSON.stringify(args)}`, async (t) => {
+    const f = await setup();
+    t.after(() => f.db.close());
+    const result = await apply(f.env, { tool: name, args: structuredClone(args) });
+    assert.equal(result.verification.status, 'verified', JSON.stringify(result.verification));
+  });
+
+test('startup route accepts real navigation paths, rejects labels, and preserves unchanged legacy values', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const before = await f.snapshot();
+  const bad = await f.call('update_settings', { set: { startPage: 'subscriptions' } });
+  assert.equal(bad.isError, true);
+  assert.match(JSON.stringify(bad), /startPage/);
+  const web = await f.request('settings', 'PUT', { startPage: 'subscriptions' });
+  assert.equal(web.status, 400);
+  assert.deepEqual(await f.snapshot(), before);
+  const saved = await apply(f.env, { tool: 'update_settings', args: { set: { startPage: 'list' } } });
+  assert.equal(saved.verification.status, 'verified');
+  assert.equal((await f.snapshot()).settings.startPage, 'list');
+  await putKv(f.env, 'settings', { ...(await f.snapshot()).settings, startPage: 'legacy-unknown' });
+  const unchanged = await f.call('update_settings', { set: { remindDays: 8 } });
+  assert.equal(unchanged.isError, undefined, JSON.stringify(unchanged));
+  assert.equal((await f.snapshot()).settings.startPage, 'legacy-unknown');
+});
+
+test('assistant clears malformed-argument failure after the same tool successfully retries', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+  const before = await f.snapshot();
+  let n = 0;
+  const bad = functionCall('bad-json', 'update_settings', {});
+  bad.tool_calls[0].function.arguments = '{broken JSON';
+  t.mock.method(globalThis, 'fetch', async () =>
+    modelReply([bad, functionCall('fixed-json', 'update_settings', { set: { remindDays: 6 } }), { content: 'Draft ready.' }][n++]),
+  );
+  const es = eventsOf(await chat(f.env, { text: 'Set reminders' }, new AbortController().signal).text());
+  assert.equal(es.filter((e) => e.type === 'proposal').length, 1);
+  assert.deepEqual(es.find((e) => e.type === 'done').outcome, { status: 'complete', drafts: 1, failures: [] });
+  assert.deepEqual(await f.snapshot(), before);
 });

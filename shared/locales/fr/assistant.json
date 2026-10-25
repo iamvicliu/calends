@@ -166,7 +166,8 @@
       "one": "{count} prélèvement",
       "other": "{count} prélèvements"
     },
-    "changes": "Voir les modifications et références"
+    "changes": "Voir les modifications et références",
+    "unverified": "Vérifier le résultat"
   },
   "error": {
     "auth": "Clé API invalide",
@@ -261,5 +262,13 @@
     "deleteAll": "Supprime l’abonnement et tous ses prélèvements. Action irréversible.",
     "dateUnknown": "Date inconnue",
     "terminate": "Résilié par le fournisseur"
+  },
+  "saveUnknown": "Impossible de confirmer l’enregistrement. Vérifiez le registre avant de réessayer.",
+  "savedUnverified": "Enregistré, mais le résultat n’a pas pu être vérifié. Vérifiez le registre avant de continuer.",
+  "savedRefreshFailed": "La modification est enregistrée, mais la page n’a pas pu être actualisée. Actualisez-la avant de confirmer d’autres brouillons.",
+  "outcome": {
+    "partial": "Certaines étapes sont inachevées",
+    "limit": "La limite d’appels aux outils est atteinte",
+    "review": "Les brouillons ne sont pas encore enregistrés. Vérifiez les brouillons prêts et les étapes inachevées avant de continuer."
   }
 }

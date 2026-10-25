@@ -96,6 +96,7 @@ import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './rep
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
+import { SUBSCRIPTION_SCHEMA } from '../../shared/subscription-schema.ts';
 import { validateCurrency, categoryEdit, deleteSubscriptionSettings, subRefsError } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
@@ -1478,11 +1479,7 @@ const CATALOGUE: Tool[] = [
     destructive: true,
     inputSchema: obj(
       {
-        subscription: {
-          type: 'object',
-          description:
-            'Complete Subscription JSON: id?, name, price, currency, cycle, start, status, category?, tags?, methodId?, phases?, payments?, stop?, end?, share?, proxy?, … Dates YYYY-MM-DD; payment amounts in the subscription / phase currency (refunds negative).',
-        },
+        subscription: SUBSCRIPTION_SCHEMA,
         force: { type: 'boolean', default: false },
         ...CATEGORY_CREATE,
         dry_run: DRY,
@@ -1782,7 +1779,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'set_status',
     description:
-      'Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. To correct an existing stop (date, non-renewal vs immediate cancel, reason, refund) pass edit=true with action=cancel|terminate; omitted fields keep the recorded values and a provider termination stays terminate. An undated stop needs its real date in at. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).',
+      'Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). Omit refund when no refund information was supplied; never invent one. The tool derives paidThrough from the existing billing history, so the user need not confirm automatically inferred charges before you stop it. Inferred charges in a stopped gap disappear when the status and resumed phase dates change; do not delete or ask to confirm those estimates as if they were recorded payments. When the user supplies both the termination date and the later restart date/price/cycle, terminate at the supplied date, then change_plan action=resume; no optional refund clarification is required to make those known changes. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. To correct an existing stop (date, non-renewal vs immediate cancel, reason, refund) pass edit=true with action=cancel|terminate; omitted fields keep the recorded values and a provider termination stays terminate. An undated stop needs its real date in at. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).',
     write: true,
     inputSchema: obj(
       {
@@ -2451,7 +2448,10 @@ const CATALOGUE: Tool[] = [
         member: { type: 'string', description: 'share: member id or name.' },
         periods: { type: 'array', items: DATE, maxItems: 240, description: 'Period keys (share: period start; proxy: charge date).' },
         count: { type: 'integer', minimum: 1, maximum: 240, description: 'Without periods: cover the N earliest unsettled periods.' },
-        id: { type: 'string', description: 'update/delete: receipt or waiver id.' },
+        id: {
+          type: 'string',
+          description: 'update/delete: receipt or waiver id. For record/waive: optional stable new record id, pinned when confirming a draft.',
+        },
         amount: { type: 'number', minimum: 0, description: 'Actual amount received; defaults to the total due of the covered periods.' },
         currency: { type: 'string', description: 'Receipt currency; defaults to the currency of the covered periods.' },
         date: { ...DATE, description: 'When the money arrived (or the waiver was agreed); defaults to today.' },
@@ -2513,7 +2513,7 @@ const CATALOGUE: Tool[] = [
           : existing && a.count == null
             ? existing.periods
             : openPeriods(ledger.periods, Number(a.count ?? 1)).map((p) => p.key);
-        const id = existing?.id ?? uid();
+        const id = existing?.id ?? str(a.id) ?? uid();
         const note = 'note' in a ? str(a.note) : existing?.note;
         const on = date(a.date, 'date', existing?.date ?? today);
         const isWaiver = action === 'waive' || (action === 'update' && !!existing && !('amount' in existing));

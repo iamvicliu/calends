@@ -166,7 +166,8 @@
       "one": "{count} Abbuchung",
       "other": "{count} Abbuchungen"
     },
-    "changes": "Änderungen und Verweise ansehen"
+    "changes": "Änderungen und Verweise ansehen",
+    "unverified": "Ergebnis prüfen"
   },
   "error": {
     "auth": "Ungültiger API-Key",
@@ -261,5 +262,13 @@
     "deleteAll": "Löscht das Abo und alle Abbuchungen. Dies kann nicht rückgängig gemacht werden.",
     "dateUnknown": "Datum unbekannt",
     "terminate": "Gesperrt"
+  },
+  "saveUnknown": "Das Speichern konnte nicht bestätigt werden. Prüfe das Buch, bevor du es erneut versuchst.",
+  "savedUnverified": "Gespeichert, aber das Ergebnis konnte nicht geprüft werden. Prüfe das Buch, bevor du fortfährst.",
+  "savedRefreshFailed": "Die Änderung wurde gespeichert, aber die Seite konnte nicht aktualisiert werden. Lade sie neu, bevor du weitere Entwürfe bestätigst.",
+  "outcome": {
+    "partial": "Einige Schritte sind noch offen",
+    "limit": "Das Limit für Werkzeugaufrufe wurde erreicht",
+    "review": "Die Entwürfe wurden noch nicht gespeichert. Prüfe die fertigen Entwürfe und die offenen Schritte, bevor du fortfährst."
   }
 }

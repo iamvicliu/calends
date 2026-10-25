@@ -151,10 +151,10 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       }
       await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
       set({ phase: 'login', state: undefined });
-      throw new Error(t('ui.error.loginRequired'));
+      throw Object.assign(new Error(t('ui.error.loginRequired')), { status: res.status });
     }
     const body = (await res.json().catch(() => ({}))) as T & { error?: string; code?: string };
-    if (!res.ok) throw Object.assign(new Error(body.error ?? t('ui.error.requestFailed', { status: res.status })), { code: body.code });
+    if (!res.ok) throw Object.assign(new Error(body.error ?? t('ui.error.requestFailed', { status: res.status })), { code: body.code, status: res.status });
     if (writing) acknowledgeWrite(res);
     return body;
   } finally {

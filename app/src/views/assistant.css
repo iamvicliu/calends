@@ -627,6 +627,18 @@
   color: var(--label-3);
   font-size: var(--fs-2);
 }
+.as-incomplete {
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--orange-3);
+  color: var(--label);
+  font-size: var(--fs-2);
+  overflow-wrap: anywhere;
+}
+.as-incomplete p {
+  margin: 4px 0;
+  color: var(--label-2);
+}
 .as-actions {
   display: flex;
   gap: 2px;

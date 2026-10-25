@@ -161,7 +161,8 @@
     "applyAll": "Xác nhận tất cả",
     "history": "Lịch sử thanh toán",
     "historyCount": "{count} lần",
-    "changes": "Xem thay đổi và tham chiếu"
+    "changes": "Xem thay đổi và tham chiếu",
+    "unverified": "Kiểm tra kết quả"
   },
   "error": {
     "auth": "API Key không hợp lệ",
@@ -256,5 +257,13 @@
     "deleteAll": "Xóa gói đăng ký và toàn bộ lần trừ tiền. Không thể hoàn tác.",
     "dateUnknown": "Không rõ ngày",
     "terminate": "Bị nhà cung cấp dừng"
+  },
+  "saveUnknown": "Không thể xác nhận thay đổi đã được lưu. Hãy kiểm tra sổ trước khi thử lại.",
+  "savedUnverified": "Đã lưu nhưng chưa thể xác minh kết quả. Hãy kiểm tra sổ trước khi tiếp tục.",
+  "savedRefreshFailed": "Thay đổi đã được lưu nhưng không thể làm mới trang. Hãy tải lại trước khi xác nhận bản nháp khác.",
+  "outcome": {
+    "partial": "Một số bước chưa hoàn tất",
+    "limit": "Đã đạt giới hạn gọi công cụ",
+    "review": "Các bản nháp chưa được lưu. Hãy xem lại bản nháp đã chuẩn bị và các bước chưa hoàn tất trước khi tiếp tục."
   }
 }
