@@ -60,6 +60,7 @@ import {
   movePhaseStart,
 } from '../../shared/phases.ts';
 import { editStop } from '../../shared/stop-form.ts';
+import { iconInput } from '../../shared/icon.ts';
 import { proxyLedger } from '../../shared/proxy.ts';
 import { paidThrough, setOpening, type LedgerPeriod } from '../../shared/receivables.ts';
 import {
@@ -488,6 +489,8 @@ const CYCLE = {
   required: ['unit'],
   description: 'Billing cycle, e.g. {"unit":"month","every":1}; lifetime = one-time purchase.',
 };
+const ICON_DESCRIPTION =
+  'Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected.';
 const SHIFT_BILLING = {
   type: 'boolean',
   default: false,
@@ -1289,7 +1292,7 @@ const CATALOGUE: Tool[] = [
         },
         region: { type: 'string', description: 'ISO country code for region-priced stores (App Store TR, NG…).' },
         url: { type: 'string' },
-        icon: { type: 'string', description: 'Icon image URL (https), e.g. artwork from search_app_store.' },
+        icon: { type: 'string', description: ICON_DESCRIPTION },
         notes: { type: 'string' },
         account: { type: 'string', description: 'Login account: email, phone number (for carriers) or username shown on the receipt.' },
         status: {
@@ -1397,7 +1400,7 @@ const CATALOGUE: Tool[] = [
         methodId: a.method === null ? undefined : (methodRef(st, a.method) ?? st.settings.defaultMethodId),
         region: str(a.region)?.toUpperCase(),
         url: str(a.url),
-        icon: str(a.icon)?.startsWith('https://') ? str(a.icon) : undefined,
+        icon: iconInput(a.icon),
         notes: str(a.notes),
         account,
         trialEnd: a.trial_end ? date(a.trial_end, 'trial_end') : undefined,
@@ -1496,7 +1499,7 @@ const CATALOGUE: Tool[] = [
       {
         subscription: SUBREF,
         set: obj({
-          icon: { type: ['string', 'null'] },
+          icon: { type: ['string', 'null'], description: `${ICON_DESCRIPTION} null clears it.` },
           show_on_public: { type: 'boolean' },
           start: { ...DATE, description: 'Service start (single-phase only). Keeps the billing anchor unless shift_billing=true.' },
           intro: {
@@ -1548,7 +1551,7 @@ const CATALOGUE: Tool[] = [
       };
       if ('chargeLeadDays' in set) put('chargeLeadDays', Number(set.chargeLeadDays));
       if ('cancelLeadDays' in set) put('cancelLeadDays', Number(set.cancelLeadDays));
-      if ('icon' in set) put('icon', str(set.icon));
+      if ('icon' in set) put('icon', iconInput(set.icon));
       if ('show_on_public' in set) put('showOnPublic', set.show_on_public as boolean);
       if ('start' in set) changed.push('start');
       if ('intro' in set) put('intro', set.intro == null ? undefined : (set.intro as Subscription['intro']));

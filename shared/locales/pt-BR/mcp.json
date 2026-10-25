@@ -75,7 +75,8 @@
     "transferProxy": "Assinaturas pagas para outros não aceitam transferências",
     "transferNotFound": "Nenhuma transferência em {date}",
     "notStopped": "Esta assinatura não está encerrada, então não há encerramento para editar. Para encerrá-la, use set_status cancel / terminate sem edit.",
-    "editStopDate": "Para editar um encerramento, informe a data real em at (omita at para manter a data registrada). Um encerramento com data desconhecida precisa da data real."
+    "editStopDate": "Para editar um encerramento, informe a data real em at (omita at para manter a data registrada). Um encerramento com data desconhecida precisa da data real.",
+    "invalidIcon": "Ícone “{value}” inválido: use uma URL de imagem http(s), um caminho do site como /ai/claude.svg ou um emoji ou símbolo curto."
   },
   "tool": {
     "get_overview": "Visão geral",

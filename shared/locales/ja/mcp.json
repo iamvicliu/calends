@@ -72,7 +72,8 @@
     "transferProxy": "代理払いのサブスクには譲渡を記録できません",
     "transferNotFound": "{date} の譲渡が見つかりません",
     "notStopped": "このサブスクリプションは停止されていないため、修正できる停止情報がありません。停止するには edit なしで set_status cancel / terminate を使ってください。",
-    "editStopDate": "停止を修正するときは at に実際の日付を指定してください（at を省略すると記録済みの日付を維持します）。日付不明の停止には実際の日付が必要です。"
+    "editStopDate": "停止を修正するときは at に実際の日付を指定してください（at を省略すると記録済みの日付を維持します）。日付不明の停止には実際の日付が必要です。",
+    "invalidIcon": "アイコン「{value}」は無効です。http(s) の画像 URL、サイト内パス（例：/ai/claude.svg）、または絵文字・短い記号 1 つを指定してください。"
   },
   "tool": {
     "get_overview": "台帳の概要",

@@ -75,7 +75,8 @@
     "transferProxy": "Les abonnements payés pour autrui ne prennent pas de cessions",
     "transferNotFound": "Aucune cession trouvée le {date}",
     "notStopped": "Cet abonnement n’est pas arrêté : il n’y a pas d’arrêt à modifier. Pour l’arrêter, utilisez set_status cancel / terminate sans edit.",
-    "editStopDate": "Pour modifier un arrêt, indiquez sa date réelle dans at (omettez at pour garder la date enregistrée). Un arrêt à date inconnue nécessite sa date réelle."
+    "editStopDate": "Pour modifier un arrêt, indiquez sa date réelle dans at (omettez at pour garder la date enregistrée). Un arrêt à date inconnue nécessite sa date réelle.",
+    "invalidIcon": "Icône « {value} » invalide : utilisez une URL d’image http(s), un chemin du site comme /ai/claude.svg, ou un emoji ou symbole court."
   },
   "tool": {
     "get_overview": "Aperçu du registre",

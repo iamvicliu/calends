@@ -72,7 +72,8 @@
     "transferProxy": "Başkası adına ödenen aboneliklerde devir kaydedilemez",
     "transferNotFound": "{date} tarihinde devir bulunamadı",
     "notStopped": "Bu abonelik durdurulmamış, düzenlenecek bir durdurma bilgisi yok. Durdurmak için edit olmadan set_status cancel / terminate kullanın.",
-    "editStopDate": "Durdurmayı düzenlerken gerçek tarihi at ile verin (at verilmezse kayıtlı tarih korunur). Tarihi bilinmeyen bir durdurmanın gerçek tarihi gerekir."
+    "editStopDate": "Durdurmayı düzenlerken gerçek tarihi at ile verin (at verilmezse kayıtlı tarih korunur). Tarihi bilinmeyen bir durdurmanın gerçek tarihi gerekir.",
+    "invalidIcon": "Geçersiz simge “{value}”: http(s) görsel URL’si, /ai/claude.svg gibi bir site yolu ya da tek bir emoji / kısa sembol kullanın."
   },
   "tool": {
     "get_overview": "Defter özeti",

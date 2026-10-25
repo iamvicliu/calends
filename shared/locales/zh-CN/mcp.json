@@ -72,7 +72,8 @@
     "transferProxy": "代付订阅不能记转让",
     "transferNotFound": "找不到 {date} 的这笔转让",
     "notStopped": "这个订阅还没有停用，没有可修改的停用信息。要停用请不带 edit 调用 set_status cancel / terminate。",
-    "editStopDate": "修改停用时请用 at 给出实际日期（省略 at 即沿用已记录的日期）；原本日期不详的停用需要补上真实日期。"
+    "editStopDate": "修改停用时请用 at 给出实际日期（省略 at 即沿用已记录的日期）；原本日期不详的停用需要补上真实日期。",
+    "invalidIcon": "图标“{value}”无效：请使用 http(s) 图片网址、站内路径（如 /ai/claude.svg），或一个 emoji / 简短符号。"
   },
   "tool": {
     "get_overview": "账本概况",

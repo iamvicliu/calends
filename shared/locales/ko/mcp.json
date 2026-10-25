@@ -72,7 +72,8 @@
     "transferProxy": "대리 결제 구독에는 양도를 기록할 수 없습니다",
     "transferNotFound": "{date}의 양도를 찾을 수 없습니다",
     "notStopped": "이 구독은 중지되지 않아 수정할 중지 정보가 없습니다. 중지하려면 edit 없이 set_status cancel / terminate를 사용하세요.",
-    "editStopDate": "중지를 수정할 때는 at에 실제 날짜를 지정하세요(at을 생략하면 기록된 날짜를 유지합니다). 날짜를 모르는 중지에는 실제 날짜가 필요합니다."
+    "editStopDate": "중지를 수정할 때는 at에 실제 날짜를 지정하세요(at을 생략하면 기록된 날짜를 유지합니다). 날짜를 모르는 중지에는 실제 날짜가 필요합니다.",
+    "invalidIcon": "아이콘 “{value}”이(가) 올바르지 않습니다. http(s) 이미지 URL, 사이트 경로(예: /ai/claude.svg) 또는 이모지 또는 짧은 기호 하나를 사용하세요."
   },
   "tool": {
     "get_overview": "장부 개요",

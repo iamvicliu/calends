@@ -1817,3 +1817,26 @@ test('set_status edit=true 修改已有停用：日期、不续费/立即停用�
   assert.equal(dated.isError, undefined, JSON.stringify(dated));
   assert.equal((await f.snapshot()).subscriptions.find((x) => x.id === 'u')?.stop?.date, stopAt);
 });
+
+test('create_subscription 与 update_subscription 图标同一套校验：emoji、网址、站内路径都保存，非法值报错不静默丢弃', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const base = { price: 10, currency: 'USD', cycle: { unit: 'month', every: 1 }, start: todayIn('UTC'), category: 'Test', method: null };
+  for (const [i, icon] of ['🎬', '👨‍👩‍👧', 'http://example.test/a.png', 'https://example.test/a.png', '/ai/claude.svg'].entries()) {
+    const r = await f.call('create_subscription', { ...base, name: `Fictional icon ${i}`, icon });
+    assert.equal(r.isError, undefined, JSON.stringify(r));
+    assert.equal((await f.snapshot()).subscriptions.find((s) => s.name === `Fictional icon ${i}`)?.icon, icon);
+  }
+  const before = await f.snapshot();
+  for (const icon of ['javascript:alert(1)', 'ftp://example.test/a.png', 'not an icon at all', '//evil.test/a.png', 'data:image/svg+xml;base64,PHN2Zz4=']) {
+    const created = await f.call('create_subscription', { ...base, name: 'Fictional bad icon', icon });
+    assert.equal(created.isError, true, icon);
+    const updated = await f.call('update_subscription', { subscription: 's', set: { icon } });
+    assert.equal(updated.isError, true, icon);
+  }
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('update_subscription', { subscription: 's', set: { icon: '🌱' } })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 's')?.icon, '🌱');
+  assert.equal((await f.call('update_subscription', { subscription: 's', set: { icon: null } })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 's')?.icon, undefined);
+});
