@@ -62,13 +62,14 @@ export function History({
         {editable ? (
           <div className="h-range h-edit">
             {onStart ? (
-              <DatePicker value={v.start} ariaLabel={t('editor.field.start')} onChange={(d) => d && onStart(v.start, d)} />
+              <DatePicker compact value={v.start} ariaLabel={t('editor.field.start')} onChange={(d) => d && onStart(v.start, d)} />
             ) : (
               <span>{cnDateFull(v.start)}</span>
             )}
             <span aria-hidden="true">→</span>
             {!v.stop && onEnd ? (
               <DatePicker
+                compact
                 ariaLabel={t('editor.field.end')}
                 value={raw?.end ?? (!sub.phases?.length ? sub.end : undefined)}
                 clearable

@@ -3920,117 +3920,22 @@ button.h-price-row:focus-visible {
 .dp-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 4px;
   margin-bottom: 8px;
 }
-.dp-step {
+/* 年、月两个下拉居中成组，中间留出间距 */
+.dp-ym {
   display: flex;
   align-items: center;
-  gap: 1px;
-  min-width: 0;
-  flex: 1 1 0;
-}
-.dp-step > .dp-select {
-  flex: 0 0 auto;
+  justify-content: center;
+  gap: 6px;
   min-width: 0;
 }
-.dp-step:first-child > .dp-select {
-  width: 74px;
-}
-.dp-month-select > .dp-select {
-  width: 96px;
-}
-/* 头部改用全站统一 Picker 后，年月两个按钮等宽；年份在中文等语言下带「年」字，按内容撑开而不是写死宽度 */
-.dp-step > .pk-btn {
-  min-width: 88px;
-  width: auto;
-  justify-content: space-between;
-  padding: 0 8px;
-  height: var(--ctl-h-md);
-  font-size: var(--fs-2);
-  font-weight: 600;
-}
-.dp-step > .pk-btn .pk-ico {
-  display: none;
-}
-.dp-select {
-  position: relative;
-  display: block;
-  min-width: 0;
-}
-.dp-select:first-child {
-  flex: 1;
-}
-.dp-select select {
-  width: 100%;
-  height: var(--ctl-h-md);
-  padding: 0 20px 0 6px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: var(--fill-2);
-  color: var(--label);
-  font: inherit;
-  font-size: var(--fs-2);
-  font-weight: 600;
-  text-overflow: ellipsis;
-  text-align: left;
-  padding-left: 8px;
-  outline: 0;
-  appearance: none;
-  cursor: pointer;
-}
-.dp-select::after {
-  content: '';
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  border-right: var(--hairline) solid var(--label-2);
-  border-bottom: var(--hairline) solid var(--label-2);
-  transform: translateY(-70%) rotate(45deg);
-  pointer-events: none;
-}
-.dp-select select:focus-visible {
-  outline: var(--hairline) solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.dp-month-select {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-.dp-nav-sm {
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  min-height: 22px;
-  padding: 0;
-}
-.dp-nav-sm .i {
-  width: 12px;
-  height: 12px;
-}
-.dp-title {
-  height: var(--ctl-h-md);
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
+.dp-ym > .pk-btn {
+  justify-content: center;
   gap: 4px;
-  border: 0;
-  background: none;
-  font-size: var(--fs-2);
   font-weight: 600;
-  padding: 0 6px;
-  border-radius: var(--radius-sm);
-  text-align: left;
-}
-.dp-title:hover {
-  background: var(--hover);
-}
-.dp-title .i {
-  width: 14px;
-  height: 14px;
-  color: var(--label-2);
 }
 
 .dp-nav .i {

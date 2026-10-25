@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { dateFormat } from '../../../shared/intl.ts';
 import { addDays, addMonths, parseDay } from '../../../shared/billing.ts';
-import { monthLabel, weekdayShort } from '../../../shared/format.ts';
+import { cnDateFull, monthLabel, weekdayShort } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { parseDateInput } from '../../../shared/date-input.ts';
 import { getState, today as todayOf } from '../store.ts';
@@ -19,6 +19,21 @@ function grid(month: string): string[] {
   const dow = (new Date(parseDay(first)).getUTCDay() - weekStart() + 7) % 7;
   const start = addDays(first, -dow);
   return Array.from({ length: 42 }, (_, i) => addDays(start, i));
+}
+
+/** 数字短日期，顺序与分隔符跟随语言：2026/10/25、10/25/2026、25.10.2026 */
+const numericDate = (d: string) =>
+  dateFormat(intlLocale(), { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }).format(new Date(parseDay(d)));
+
+/** 「2026年」「2026」：年份按当前语言写 */
+const yearLabel = (year: number) => dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, 0, 1)));
+
+/** 当前语言里年、月谁在前：中日韩「2026年10月」，英文等「Oct 2026」 */
+function ymOrder(): Array<'year' | 'month'> {
+  const parts = dateFormat(intlLocale(), { year: 'numeric', month: 'short', timeZone: 'UTC' }).formatToParts(new Date(Date.UTC(2026, 9, 1)));
+  const year = parts.findIndex((p) => p.type === 'year');
+  const month = parts.findIndex((p) => p.type === 'month');
+  return year < month ? ['year', 'month'] : ['month', 'year'];
 }
 
 /** 年份下拉覆盖 1970 到今年后 20 年，并纳入已有值/输入值的年份；输入框本身不受窗口限制。 */
@@ -43,6 +58,7 @@ export function DatePicker({
   min,
   max,
   ariaLabel,
+  compact,
 }: {
   value?: string;
   onChange: (v: string | undefined) => void;
@@ -51,6 +67,8 @@ export function DatePicker({
   min?: string;
   max?: string;
   ariaLabel?: string;
+  /** 窄位置（如两个日期并排）用数字短格式：中文 2026/10/25，英文 10/25/2026 */
+  compact?: boolean;
 }) {
   const today = todayOf();
   const [open, setOpen] = useState(false);
@@ -211,7 +229,8 @@ export function DatePicker({
           }}
         >
           <Icon name="cal" />
-          <span className="dp-val">{draft || placeholder}</span>
+          {/* 显示按当前语言写日期（中文「2026年10月25日」）；手动输入时仍可填 2026-10-25 等格式 */}
+          <span className="dp-val">{draft ? (ISO.test(draft) ? (compact ? numericDate(draft) : cnDateFull(draft)) : draft) : placeholder}</span>
           <IconButton
             className="dp-edit"
             aria-label={t('picker.date.type')}
@@ -232,43 +251,38 @@ export function DatePicker({
       )}
       {open && (
         <Pop triggerRef={trigger} onClose={() => setOpen(false)} label={t('picker.date.placeholder')}>
+          {/* 两端箭头只切月份（跨年自动进位）；年、月下拉居中，顺序跟随语言习惯（中文年在前，英文月在前） */}
           <div className="dp-head">
-            <span className="dp-step">
-              <IconButton className="dp-nav dp-nav-sm" aria-label={t('picker.date.prev')} onClick={() => setMonth(addMonths(month + '-01', -12).slice(0, 7))}>
-                <Icon name="left" />
-              </IconButton>
-              <Picker
-                value={y}
-                ariaLabel={t('picker.date.year')}
-                onChange={(v) => setMonth(`${v}-${month.slice(5)}`)}
-                // 按钮上只放数字：中文等语言格式化后是「2025年」，加号字和箭头会挤不下
-                display={<span>{y}</span>}
-                options={years.map((year) => ({
-                  value: year,
-                  label: dateFormat(intlLocale(), { year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, 0, 1))),
-                }))}
-              />
-              <IconButton className="dp-nav dp-nav-sm" aria-label={t('picker.date.next')} onClick={() => setMonth(addMonths(month + '-01', 12).slice(0, 7))}>
-                <Icon name="right" />
-              </IconButton>
+            <IconButton className="dp-nav" aria-label={t('picker.date.prev')} onClick={() => setMonth(addMonths(month + '-01', -1).slice(0, 7))}>
+              <Icon name="left" />
+            </IconButton>
+            <span className="dp-ym">
+              {ymOrder().map((part) =>
+                part === 'year' ? (
+                  <Picker
+                    key="year"
+                    value={y}
+                    ariaLabel={t('picker.date.year')}
+                    onChange={(v) => setMonth(`${v}-${month.slice(5)}`)}
+                    options={years.map((year) => ({ value: year, label: yearLabel(year) }))}
+                  />
+                ) : (
+                  <Picker
+                    key="month"
+                    value={m}
+                    ariaLabel={t('picker.date.month')}
+                    onChange={(v) => setMonth(`${month.slice(0, 4)}-${String(v).padStart(2, '0')}`)}
+                    options={Array.from({ length: 12 }, (_, i) => {
+                      const ym = `${month.slice(0, 4)}-${String(i + 1).padStart(2, '0')}`;
+                      return { value: i + 1, label: monthLabel(ym, { year: false }) };
+                    })}
+                  />
+                ),
+              )}
             </span>
-            <span className="dp-step dp-month-select">
-              <IconButton className="dp-nav dp-nav-sm" aria-label={t('picker.date.prev')} onClick={() => setMonth(addMonths(month + '-01', -1).slice(0, 7))}>
-                <Icon name="left" />
-              </IconButton>
-              <Picker
-                value={m}
-                ariaLabel={t('picker.date.month')}
-                onChange={(v) => setMonth(`${month.slice(0, 4)}-${String(v).padStart(2, '0')}`)}
-                options={Array.from({ length: 12 }, (_, i) => {
-                  const ym = `${month.slice(0, 4)}-${String(i + 1).padStart(2, '0')}`;
-                  return { value: i + 1, label: monthLabel(ym, { year: false }) };
-                })}
-              />
-              <IconButton className="dp-nav dp-nav-sm" aria-label={t('picker.date.next')} onClick={() => setMonth(addMonths(month + '-01', 1).slice(0, 7))}>
-                <Icon name="right" />
-              </IconButton>
-            </span>
+            <IconButton className="dp-nav" aria-label={t('picker.date.next')} onClick={() => setMonth(addMonths(month + '-01', 1).slice(0, 7))}>
+              <Icon name="right" />
+            </IconButton>
           </div>
           <div className="dp-grid">
             {dows().map((d) => (
