@@ -26,6 +26,7 @@
     "needSub": "subscription est obligatoire (id ou nom de l’abonnement)",
     "subNotFound": "Aucun abonnement ne correspond à « {q} ». Essayez d’abord de chercher avec list_subscriptions.",
     "subAmbiguous": "« {q} » correspond à {count} abonnements. Précisez-en un par id : {list}",
+    "subNotExact": "« {q} » n’est ni un id ni le nom complet d’un abonnement ; cette action supprime des données, les noms partiels ne sont pas acceptés. Candidats : {list}",
     "customRange": "period=custom nécessite from et to (AAAA-MM-JJ)",
     "unknownPeriod": "Période inconnue : {period}",
     "unsupportedCurrency": "Devise non prise en charge : {code}",

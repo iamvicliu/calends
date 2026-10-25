@@ -26,6 +26,7 @@
     "needSub": "subscription es obligatorio (id o nombre de la suscripción)",
     "subNotFound": "Ninguna suscripción coincide con «{q}». Prueba a buscar primero con list_subscriptions.",
     "subAmbiguous": "«{q}» coincide con {count} suscripciones. Indica una por id: {list}",
+    "subNotExact": "«{q}» no es un id ni el nombre completo de una suscripción; esta acción borra datos, así que no se aceptan nombres parciales. Candidatas: {list}",
     "customRange": "period=custom requiere from y to (YYYY-MM-DD)",
     "unknownPeriod": "Periodo desconocido: {period}",
     "unsupportedCurrency": "Moneda no admitida: {code}",

@@ -1,10 +1,13 @@
-// 容器入口：迁移数据库 → 准备初始化令牌 → 启动 Worker → 每小时触发一次定时任务（提醒、汇率）。
+// 容器入口：迁移数据库 → 准备初始化令牌 → 启动 Worker（只听容器内回环）与对外的前置转发 → 每 15 分钟触发一次定时任务（提醒；整点另做汇率维护）。
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { createFront } from './front.mjs';
 
 const PORT = process.env.PORT || '8787';
+// wrangler 自己的端口只在容器内回环可达；对外端口由 front.mjs 转发并拦掉 /cdn-cgi/
+const INTERNAL_PORT = process.env.INTERNAL_PORT || String(Number(PORT) + 1);
 const DATA = process.env.DATA_DIR || '/data';
 const wrangler = join('node_modules', '.bin', 'wrangler');
 mkdirSync(DATA, { recursive: true });
@@ -30,9 +33,9 @@ const args = [
   'dev',
   '--local',
   '--ip',
-  '0.0.0.0',
+  '127.0.0.1',
   '--port',
-  PORT,
+  INTERNAL_PORT,
   '--persist-to',
   DATA,
   '--show-interactive-dev-session=false',
@@ -41,12 +44,13 @@ const args = [
 ];
 for (const [k, v] of Object.entries(vars)) args.push('--var', `${k}:${v}`);
 
-const worker = spawn(wrangler, args, { stdio: 'inherit' });
+// 关闭 Miniflare 的本地数据浏览器与追踪收集：自托管实例不需要，且它们挂在 /cdn-cgi/ 下
+const worker = spawn(wrangler, args, { stdio: 'inherit', env: { ...process.env, X_LOCAL_EXPLORER: 'false', X_LOCAL_OBSERVABILITY: 'false' } });
 worker.on('exit', (code) => process.exit(code ?? 1));
 for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => worker.kill(sig));
 
 // 4. 等 Worker 就绪后打印访问方式；还没设密码时把初始化令牌打在日志里
-const base = `http://127.0.0.1:${PORT}`;
+const base = `http://127.0.0.1:${INTERNAL_PORT}`;
 async function ready() {
   for (let i = 0; i < 120; i++) {
     try {
@@ -58,6 +62,7 @@ async function ready() {
   throw new Error('worker did not start');
 }
 const status = await ready();
+createFront({ targetPort: Number(INTERNAL_PORT), trustProxy: process.env.TRUST_PROXY === '1' }).listen(Number(PORT), '0.0.0.0');
 log(`listening on port ${PORT} — open ${process.env.BASE_PATH || ''}/ in your browser`);
 if (status.needsSetup) {
   log(`first run: create your password at ${process.env.BASE_PATH || ''}/ with this setup token:`);

@@ -26,6 +26,7 @@
     "needSub": "subscription wajib diisi (id atau nama langganan)",
     "subNotFound": "Tidak ada langganan yang cocok dengan “{q}”. Coba cari dulu dengan list_subscriptions.",
     "subAmbiguous": "“{q}” cocok dengan {count} langganan. Tentukan salah satu dengan id: {list}",
+    "subNotExact": "“{q}” bukan id atau nama lengkap langganan; tindakan ini menghapus data, jadi nama sebagian tidak diterima. Kandidat: {list}",
     "customRange": "period=custom memerlukan from dan to (YYYY-MM-DD)",
     "unknownPeriod": "Periode tidak dikenal: {period}",
     "unsupportedCurrency": "Mata uang tidak didukung: {code}",

@@ -26,6 +26,7 @@
     "needSub": "subscription gerekli (abonelik id'si veya adı)",
     "subNotFound": "“{q}” ile eşleşen abonelik yok. Önce list_subscriptions ile aramayı deneyin.",
     "subAmbiguous": "“{q}” {count} abonelikle eşleşiyor. id ile birini belirtin: {list}",
+    "subNotExact": "“{q}” bir abonelik kimliği veya tam adı değil; bu işlem veri sildiği için kısmi adlar kabul edilmez. Adaylar: {list}",
     "customRange": "period=custom için from ve to gerekli (YYYY-MM-DD)",
     "unknownPeriod": "Bilinmeyen dönem: {period}",
     "unsupportedCurrency": "Desteklenmeyen para birimi: {code}",

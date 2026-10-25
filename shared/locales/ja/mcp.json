@@ -26,6 +26,7 @@
     "needSub": "subscription が必要です（サブスクの id または名前）",
     "subNotFound": "「{q}」に一致するサブスクはありません。まず list_subscriptions で検索してください。",
     "subAmbiguous": "「{q}」は{count}件のサブスクに一致します。id で指定してください：{list}",
+    "subNotExact": "「{q}」はサブスクリプションの id または完全な名前ではありません。この操作はデータを削除するため、部分的な名前は使えません。候補：{list}",
     "customRange": "period=custom には from と to（YYYY-MM-DD）が必要です",
     "unknownPeriod": "不明な期間：{period}",
     "unsupportedCurrency": "サポートされていない通貨：{code}",

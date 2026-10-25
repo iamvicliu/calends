@@ -3,6 +3,8 @@ import { CURRENCIES } from '../shared/format.ts';
 import { FX_SOURCES, parseCurrencyApi, parseFrankfurter } from '../shared/fx.ts';
 import type { AppState, FxHistory, FxTable } from '../shared/types.ts';
 import type { Env } from './env.ts';
+import { t } from '../shared/i18n.ts';
+import { getSettings, putKv } from './store.ts';
 
 /** 需要保存的币种：常用列表 + 订阅和账户实际用到的 */
 export function keepSet(state: Pick<AppState, 'subscriptions' | 'methods' | 'settings'>): Set<string> {
@@ -121,4 +123,17 @@ export async function recordToday(env: Env, fx: FxTable, tz: string): Promise<vo
   await env.DB.prepare('INSERT INTO fx_daily (date, rates, source) VALUES (?1, ?2, ?3) ON CONFLICT(date) DO NOTHING')
     .bind(todayIn(tz), JSON.stringify(fx.rates), 'er-api')
     .run();
+}
+
+/** 刷新当前汇率表，并把当天的汇率记进历史；接口出错时抛错，原表不变 */
+export async function refreshFx(env: Env): Promise<FxTable> {
+  const res = await fetch('https://open.er-api.com/v6/latest/USD', { cf: { cacheTtl: 3600 } });
+  // 非 2xx（限流、上游故障页）不去解析正文，直接按汇率接口出错处理，当前汇率表保持不变
+  if (!res.ok) throw new Error(t('server.fxApiError'));
+  const body = (await res.json().catch(() => ({}))) as { result?: string; rates?: Record<string, number> };
+  if (body.result !== 'success' || !body.rates) throw new Error(t('server.fxApiError'));
+  const fx: FxTable = { base: 'USD', rates: body.rates, fetchedAt: new Date().toISOString() };
+  await putKv(env, 'fx', fx);
+  await recordToday(env, fx, (await getSettings(env)).timezone);
+  return fx;
 }

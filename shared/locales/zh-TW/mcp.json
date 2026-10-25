@@ -26,6 +26,7 @@
     "needSub": "需要 subscription（訂閱 id 或名稱）",
     "subNotFound": "沒有找到「{q}」。可以先用 list_subscriptions 搜尋。",
     "subAmbiguous": "「{q}」符合到 {count} 個訂閱，請用 id 指定：{list}",
+    "subNotExact": "「{q}」不是訂閱 id 或完整名稱；此操作會刪除資料，不接受部分名稱。候選：{list}",
     "customRange": "period=custom 時需要 from、to（YYYY-MM-DD）",
     "unknownPeriod": "不認識的 period：{period}",
     "unsupportedCurrency": "不支援的幣別：{code}",

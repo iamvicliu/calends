@@ -4,6 +4,7 @@
   "invalidItem": "{name}：{error}",
   "notPublic": "这个账本没有公开",
   "idMismatch": "id 不一致",
+  "invalidJson": "请求内容不是有效的 JSON。",
   "invalidMethod": "支付方式无效",
   "invalidBackup": "备份文件无效",
   "refreshFailed": "刷新失败",

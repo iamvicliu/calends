@@ -15,21 +15,51 @@ function privateV4(a: number, b: number): boolean {
   return a >= 224; // 组播与保留段
 }
 
+/** IPv6 字面量展开成 8 组 16 位数；末尾写成点分 IPv4 的也认；不是合法写法时返回 undefined */
+function expandV6(h: string): number[] | undefined {
+  let s = h;
+  const v4 = s.match(/(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (v4) {
+    const b = v4.slice(1).map(Number);
+    if (b.some((x) => x > 255)) return undefined;
+    s = s.slice(0, -v4[0].length) + `${((b[0] << 8) | b[1]).toString(16)}:${((b[2] << 8) | b[3]).toString(16)}`;
+  }
+  const halves = s.split('::');
+  if (halves.length > 2) return undefined;
+  const part = (x: string) => (x ? x.split(':') : []);
+  const head = part(halves[0]);
+  const tail = halves.length === 2 ? part(halves[1]) : [];
+  const fill = 8 - head.length - tail.length;
+  if (halves.length === 1 ? fill !== 0 : fill < 1) return undefined;
+  const words = [...head, ...Array(halves.length === 2 ? fill : 0).fill('0'), ...tail];
+  if (words.some((w) => !/^[0-9a-f]{1,4}$/.test(w))) return undefined;
+  return words.map((w) => parseInt(w, 16));
+}
+
+/** 嵌在 IPv6 里的 IPv4（高 16 位、低 16 位）是否私有 */
+const embeddedPrivate = (hi: number, lo: number) => privateV4(hi >> 8, hi & 255) || (hi === 0 && lo === 0);
+
 /**
  * 主机名是否是私有地址的字面量。URL 解析时已经把 0x7f.1、2130706433 这类写法规范成点分十进制，
- * 把 [::ffff:127.0.0.1] 规范成 [::ffff:7f00:1]，这里按规范后的形式判断
+ * 把 [::ffff:127.0.0.1] 规范成 [::ffff:7f00:1]，这里按规范后的形式判断。
+ * IPv6 里带着 IPv4 的几种写法都按那个 IPv4 再判一次：IPv4 映射（::ffff:0:0/96）、IPv4 兼容（::/96，如 ::7f00:1）、
+ * NAT64（64:ff9b::/96 与本地 64:ff9b:1::/48）和 6to4（2002::/16）。
  */
 function privateIp(host: string): boolean {
   const h = host.replace(/^\[|\]$/g, '').toLowerCase();
   if (h.includes(':')) {
-    if (h === '::1' || h === '::') return true;
-    if (/^f[cd][0-9a-f]{2}:/.test(h)) return true; // fc00::/7 唯一本地
-    if (/^fe[89ab][0-9a-f]:/.test(h)) return true; // fe80::/10 链路本地
-    // IPv4 映射地址：::ffff:7f00:1 或 ::ffff:127.0.0.1，按 IPv4 再判一次
-    const hex = h.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
-    if (hex) return privateV4(parseInt(hex[1], 16) >> 8, parseInt(hex[1], 16) & 255);
-    const dotted = h.match(/^::ffff:(\d+)\.(\d+)\.\d+\.\d+$/);
-    if (dotted) return privateV4(Number(dotted[1]), Number(dotted[2]));
+    const w = expandV6(h);
+    // 认不出的写法不放行
+    if (!w) return true;
+    const zeros = (from: number, to: number) => w.slice(from, to).every((x) => x === 0);
+    if (zeros(0, 7) && (w[7] === 0 || w[7] === 1)) return true; // :: 与 ::1
+    if ((w[0] & 0xfe00) === 0xfc00) return true; // fc00::/7 唯一本地
+    if ((w[0] & 0xffc0) === 0xfe80) return true; // fe80::/10 链路本地
+    if ((w[0] & 0xff00) === 0xff00) return true; // ff00::/8 组播
+    if (zeros(0, 5) && w[5] === 0xffff) return privateV4(w[6] >> 8, w[6] & 255); // IPv4 映射
+    if (zeros(0, 6)) return embeddedPrivate(w[6], w[7]); // IPv4 兼容
+    if (w[0] === 0x64 && w[1] === 0xff9b && (zeros(2, 6) || w[2] === 1)) return embeddedPrivate(w[6], w[7]); // NAT64
+    if (w[0] === 0x2002) return embeddedPrivate(w[1], w[2]); // 6to4
     return false;
   }
   const m = h.match(/^(\d{1,3})\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/);

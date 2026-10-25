@@ -4,6 +4,7 @@
   "invalidItem": "{name}：{error}",
   "notPublic": "この台帳は公開されていません",
   "idMismatch": "ID が一致しません",
+  "invalidJson": "リクエスト本文が有効な JSON ではありません。",
   "invalidMethod": "支払い方法が正しくありません",
   "invalidBackup": "バックアップファイルが正しくありません",
   "refreshFailed": "更新に失敗しました",

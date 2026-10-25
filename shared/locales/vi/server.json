@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Sổ này không công khai",
   "idMismatch": "ID không khớp",
+  "invalidJson": "Nội dung yêu cầu không phải JSON hợp lệ.",
   "invalidMethod": "Phương thức thanh toán không hợp lệ",
   "invalidBackup": "Tệp sao lưu không hợp lệ",
   "refreshFailed": "Làm mới thất bại",

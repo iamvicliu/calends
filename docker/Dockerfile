@@ -29,7 +29,7 @@ COPY --from=build /app/worker ./worker
 COPY --from=build /app/shared ./shared
 COPY --from=build /app/tsconfig.json ./
 COPY docker/wrangler.docker.jsonc ./wrangler.jsonc
-COPY docker/entrypoint.mjs ./docker/entrypoint.mjs
+COPY docker/entrypoint.mjs docker/front.mjs ./docker/
 VOLUME ["/data"]
 EXPOSE 8787
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8787)+'/api/auth/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

@@ -21,28 +21,14 @@ import {
   validateCurrency,
   validateMethod,
 } from '../../shared/ledger-edit.ts';
-import { saveLedgerEdit } from '../store.ts';
 import { personLink } from '../../shared/people.ts';
-import { state, findSub, findPerson, methodRef, commit, connectionInfo, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { state, findSub, findPerson, methodRef, commit, connectionInfo, writeLedger, type Tool, type ToolCtx } from './mcp-tools.ts';
 
 const action = (values: string[]) => ({ type: 'string', enum: values });
 const body = (value: unknown) => (value ?? {}) as Record<string, unknown>;
-async function save(ctx: ToolCtx, st: AppState, patch: Partial<AppState>, deletes: string[], preview: object, dryRun: unknown) {
-  if (dryRun) {
-    const { subscriptions: _subs, ...rest } = patch;
-    ctx.draftState = {
-      ...ctx.draftState,
-      ...rest,
-      ...(patch.methods
-        ? { methods: [...st.methods.filter((m) => !deletes.includes(m.id) && !patch.methods!.some((n) => n.id === m.id)), ...patch.methods] }
-        : {}),
-    };
-    for (const s of patch.subscriptions ?? []) ctx.overlay?.set(s.id, s);
-    return { dry_run: true, ...preview };
-  }
-  await saveLedgerEdit(ctx.env, patch, deletes);
-  return { ok: true, ...preview };
-}
+/** 账本工具的写入：交给 mcp-tools 的唯一写入出口 writeLedger */
+const save = (ctx: ToolCtx, st: AppState, patch: Partial<AppState>, deletes: string[], preview: object, dryRun: unknown) =>
+  writeLedger(ctx, st, { ...patch, deletedMethods: deletes }, preview, dryRun);
 
 export const paymentMethodTool: Tool = {
   name: 'update_payment_method',
@@ -271,7 +257,7 @@ export const ledgerTools: Tool[] = [
     write: true,
     destructive: true,
     description:
-      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
+      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain; remove needs the subscription id or exact full name). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
     inputSchema: obj(
       {
         subscription: text,
@@ -287,7 +273,7 @@ export const ledgerTools: Tool[] = [
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: a.action === 'remove' });
       let proxy: Proxy | undefined;
       let link: ReturnType<typeof personLink> | undefined;
       if (a.action !== 'remove') {
