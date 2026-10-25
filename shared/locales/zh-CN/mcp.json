@@ -9,7 +9,9 @@
     "anyRegion": "不区分地区",
     "total": "合计",
     "createCategory": "将新建分类：{name}",
-    "createdCategory": "已新建分类：{name}"
+    "createdCategory": "已新建分类：{name}",
+    "createPerson": "将新建人员：{name}",
+    "createdPerson": "已新建人员：{name}"
   },
   "error": {
     "shareFull": "「{name}」已经坐满了（{seats} 个位置）",
@@ -70,7 +72,10 @@
     "stopDateRequired": "这个订阅在今天之前已经开始或扣过款，停用日不能默认今天。请用 at 给出实际日期；日期不详时传 at=null。",
     "unknownStopDetails": "日期不详的停用不能带退款或原因；要记录它们请用 at 给出日期。",
     "transferProxy": "代付订阅不能记转让",
-    "transferNotFound": "找不到 {date} 的这笔转让"
+    "transferNotFound": "找不到 {date} 的这笔转让",
+    "notStopped": "这个订阅还没有停用，没有可修改的停用信息。要停用请不带 edit 调用 set_status cancel / terminate。",
+    "editStopDate": "修改停用时请用 at 给出实际日期（省略 at 即沿用已记录的日期）；原本日期不详的停用需要补上真实日期。",
+    "invalidIcon": "图标“{value}”无效：请使用 http(s) 图片网址、站内路径（如 /ai/claude.svg），或一个 emoji / 简短符号。"
   },
   "tool": {
     "get_overview": "账本概况",

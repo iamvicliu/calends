@@ -9,7 +9,9 @@
     "anyRegion": "Qualquer região",
     "total": "Total",
     "createCategory": "Será criada a categoria: {name}",
-    "createdCategory": "Categoria criada: {name}"
+    "createdCategory": "Categoria criada: {name}",
+    "createPerson": "Será adicionado às pessoas: {name}",
+    "createdPerson": "Adicionado às pessoas: {name}"
   },
   "error": {
     "shareFull": "“{name}” está cheio ({seats} vagas)",
@@ -73,7 +75,10 @@
     "stopDateRequired": "Esta assinatura começou ou foi cobrada antes de hoje, então a data de encerramento não pode ser hoje por padrão. Informe a data real em at, ou at=null se for desconhecida.",
     "unknownStopDetails": "Um encerramento com data desconhecida não pode ter reembolso nem motivo; informe a data em at para registrá-los.",
     "transferProxy": "Assinaturas pagas para outros não aceitam transferências",
-    "transferNotFound": "Nenhuma transferência em {date}"
+    "transferNotFound": "Nenhuma transferência em {date}",
+    "notStopped": "Esta assinatura não está encerrada, então não há encerramento para editar. Para encerrá-la, use set_status cancel / terminate sem edit.",
+    "editStopDate": "Para editar um encerramento, informe a data real em at (omita at para manter a data registrada). Um encerramento com data desconhecida precisa da data real.",
+    "invalidIcon": "Ícone “{value}” inválido: use uma URL de imagem http(s), um caminho do site como /ai/claude.svg ou um emoji ou símbolo curto."
   },
   "tool": {
     "get_overview": "Visão geral",

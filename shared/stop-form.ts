@@ -1,5 +1,5 @@
 // Transient stop fields owned by the editor or the standalone stop dialog.
-import { nonrenewalDate, billingPeriod, currentPhase, stopSummary, subError } from './billing.ts';
+import { nonrenewalDate, billingPeriod, currentPhase, effectiveStatus, stopSummary, subError } from './billing.ts';
 import { cancelAtEnd, reactivate, statusChangeError, stopSubscription } from './phases.ts';
 import { t } from './i18n.ts';
 import type { Subscription } from './types.ts';
@@ -98,4 +98,46 @@ export function applyStopForm(sub: Subscription, form: StopForm, today: string):
   const error = subError(next) ?? statusChangeError(sub, next, today);
   if (error) throw new Error(error);
   return next;
+}
+
+/** Changes to an existing stop; omitted fields keep the recorded values. */
+export interface StopEdit {
+  mode: StopMode;
+  date?: string;
+  reason?: string | null;
+  refund?: { amount: number; date?: string; currency?: string; settled?: { amount: number; currency: string } } | null;
+}
+
+/**
+ * Edit an already stopped subscription through the same reopen-then-stop path as the web stop fields.
+ * Provider termination stays termination; an undated stop needs an explicit date.
+ */
+export function editStop(sub: Subscription, edit: StopEdit, today: string): Subscription {
+  const stopped = !!sub.stop || sub.status === 'cancelled' || sub.status === 'terminated' || effectiveStatus(sub, today) === 'ended';
+  if (!stopped) throw new Error(t('mcp.error.notStopped'));
+  if (edit.date === undefined && !sub.stop && !sub.end) throw new Error(t('mcp.error.editStopDate'));
+  if (edit.mode === 'nonrenew' && edit.refund) throw new Error(t('mcp.error.invalidStop'));
+  if (edit.mode !== 'terminate' && edit.reason) throw new Error(t('mcp.error.invalidStop'));
+  const form = stopForm(sub, today);
+  const next: StopForm = {
+    ...form,
+    mode: edit.mode,
+    date: edit.date ?? form.date,
+    reason: edit.mode !== 'terminate' ? '' : edit.reason === undefined ? form.reason : (edit.reason ?? ''),
+  };
+  // A kept refund dated on the stop day moves with the stop date; other refund dates stay as recorded.
+  if (edit.refund === undefined && form.refund && form.refundDate === form.date) next.refundDate = next.date;
+  if (edit.refund === null) Object.assign(next, { refund: false, amount: undefined, refundDate: undefined, settled: '' });
+  else if (edit.refund) {
+    const r = edit.refund;
+    if (r.currency && r.currency !== currentPhase(sub, sub.stop?.date ?? next.date).currency) throw new Error(t('mcp.error.refundCurrency'));
+    Object.assign(next, {
+      refund: true,
+      amount: String(r.amount),
+      refundDate: r.date ?? next.date,
+      settled: r.settled ? String(r.settled.amount) : '',
+      settledCurrency: r.settled?.currency ?? form.settledCurrency,
+    });
+  }
+  return applyStopForm(sub, next, today);
 }

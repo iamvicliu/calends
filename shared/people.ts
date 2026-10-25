@@ -148,6 +148,43 @@ export function linkPeople(people: Person[], subs: Subscription[]): { people: Pe
   return { people: created.length ? [...people, ...created] : people, created, subs: changed };
 }
 
+/**
+ * 保存一位成员或代付对象时决定关联到哪个人（网页表单与 MCP 共用）：
+ * - personId 指向名册里的人：沿用；称呼或联系方式改了时返回 after，由调用方在保存订阅后同步；
+ * - personId 给了但名册里没有：用这个 id 新建；
+ * - 没有 personId：按 linkPeople 的规则认人——称呼 + 联系方式都一样的是同一个人；没填联系方式时，同名的只有一个就归他，
+ *   有好几个时取其中没留联系方式的那位，都不符合就新建（id 由称呼 + 联系方式算出，预览与确认得到同一个 id）。
+ * 没有称呼时不建档。只返回计划，不写入。
+ */
+export function personLink(
+  people: Person[],
+  ref: { personId?: string; name: string; contactVia?: string; contact?: string },
+): { id?: string; created?: Person; after?: Person } {
+  const name = ref.name.trim();
+  if (!name) return { id: ref.personId };
+  const contact = ref.contact?.trim() || undefined;
+  const contactVia = contact ? ref.contactVia : undefined;
+  const cur = ref.personId ? people.find((p) => p.id === ref.personId) : undefined;
+  if (cur) {
+    const changed = cur.name !== name || cur.contact !== contact || (!!contact && cur.contactVia !== contactVia);
+    return { id: cur.id, after: changed ? { ...cur, name, contactVia, contact } : undefined };
+  }
+  const create = (id: string): { id: string; created: Person } => ({ id, created: { id, name, contactVia, contact, color: colorFor(id) } });
+  if (ref.personId) return create(ref.personId);
+  const key = personKey(name, contactVia, contact);
+  const same = people.filter((p) => normName(p.name) === normName(name));
+  const match = normContact(contactVia, contact)
+    ? people.find((p) => personKey(p.name, p.contactVia, p.contact) === key)
+    : same.length === 1
+      ? same[0]
+      : same.find((p) => !normContact(p.contactVia, p.contact));
+  if (match) return { id: match.id };
+  const ids = new Set(people.map((p) => p.id));
+  let id = `p${hash(key).toString(36)}`;
+  for (let i = 2; ids.has(id); i++) id = `p${hash(`${key}#${i}`).toString(36)}`;
+  return create(id);
+}
+
 // ---------- 改一个人：处处生效 ----------
 
 /** 把这个人的称呼、联系方式同步到所有引用他的成员、代付上，返回改动过的订阅 */

@@ -22,6 +22,7 @@ import {
   validateMethod,
 } from '../../shared/ledger-edit.ts';
 import { saveLedgerEdit } from '../store.ts';
+import { personLink } from '../../shared/people.ts';
 import { state, findSub, findPerson, methodRef, commit, connectionInfo, type Tool, type ToolCtx } from './mcp-tools.ts';
 
 const action = (values: string[]) => ({ type: 'string', enum: values });
@@ -270,7 +271,7 @@ export const ledgerTools: Tool[] = [
     write: true,
     destructive: true,
     description:
-      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain). Prefer person id/name from list_people; for_name permits a legacy display name. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
+      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
     inputSchema: obj(
       {
         subscription: text,
@@ -288,6 +289,7 @@ export const ledgerTools: Tool[] = [
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
       let proxy: Proxy | undefined;
+      let link: ReturnType<typeof personLink> | undefined;
       if (a.action !== 'remove') {
         const p = a.person ? findPerson(st, a.person) : undefined;
         proxy = {
@@ -306,9 +308,14 @@ export const ledgerTools: Tool[] = [
         ] as const)
           if (input in a) proxy = applyFields(proxy, { [key]: a[input] });
         if (!proxy.forName.trim()) throw new Error(t('mcp.error.needMemberName'));
+        // 与网页代付表单同一套建档规则；person=null 明确不关联
+        if (!proxy.personId && a.person !== null) {
+          link = personLink(st.people ?? [], { name: proxy.forName, contactVia: proxy.contactVia, contact: proxy.contact });
+          proxy = { ...proxy, personId: link.id };
+        }
       }
       return {
-        ...(await commit(ctx, st, today, { ...s, proxy }, a.dry_run, ['proxy'])),
+        ...(await commit(ctx, st, today, { ...s, proxy }, a.dry_run, ['proxy'], undefined, link?.created)),
         before: s.proxy ?? null,
         after: proxy ?? null,
         references: { subscription: s.id, removed_receipts: proxy ? [] : (s.proxy?.receipts ?? []), removed_waivers: proxy ? [] : (s.proxy?.waivers ?? []) },

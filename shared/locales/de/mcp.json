@@ -9,7 +9,9 @@
     "anyRegion": "Jede Region",
     "total": "Gesamt",
     "createCategory": "Kategorie wird erstellt: {name}",
-    "createdCategory": "Kategorie erstellt: {name}"
+    "createdCategory": "Kategorie erstellt: {name}",
+    "createPerson": "Wird als Person angelegt: {name}",
+    "createdPerson": "Person angelegt: {name}"
   },
   "error": {
     "shareFull": "„{name}“ ist voll ({seats} Plätze)",
@@ -73,7 +75,10 @@
     "stopDateRequired": "Dieses Abo begann oder wurde vor heute belastet, daher kann das Enddatum nicht heute sein. Gib das tatsächliche Datum in at an oder at=null, wenn es unbekannt ist.",
     "unknownStopDetails": "Ein Stopp ohne Datum kann keine Erstattung oder keinen Grund enthalten; gib das Datum in at an, um sie zu erfassen.",
     "transferProxy": "Für Abonnements, die du für andere zahlst, gibt es keine Übertragungen",
-    "transferNotFound": "Keine Übertragung am {date} gefunden"
+    "transferNotFound": "Keine Übertragung am {date} gefunden",
+    "notStopped": "Dieses Abo ist nicht beendet, daher gibt es keine Beendigung zum Bearbeiten. Zum Beenden set_status cancel / terminate ohne edit verwenden.",
+    "editStopDate": "Zum Bearbeiten einer Beendigung das tatsächliche Datum in at angeben (ohne at bleibt ein erfasstes Datum erhalten). Eine Beendigung mit unbekanntem Datum braucht ihr echtes Datum.",
+    "invalidIcon": "Ungültiges Symbol „{value}“: Verwende eine http(s)-Bild-URL, einen Seitenpfad wie /ai/claude.svg oder ein Emoji bzw. kurzes Zeichen."
   },
   "tool": {
     "get_overview": "Kontoübersicht",

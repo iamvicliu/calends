@@ -362,3 +362,14 @@ test('记录之后推算出的扣款（结束日当天那一期）可以修改�
     [99],
   );
 });
+
+test('shiftBilling moves the billing anchor with the start; the default keeps it', () => {
+  const s = base({ start: '2026-01-15', cycle: { unit: 'month', every: 1 }, price: 10 });
+  const days = (x: Subscription) => new Set(chargesBetween(x, '2026-03-01', '2026-06-30', '2026-02-01').map((c) => c.date.slice(8)));
+  assert.deepEqual(days(movePhaseStart(s, '2026-01-15', '2026-01-10')), new Set(['15']));
+  const shifted = movePhaseStart(s, '2026-01-15', '2026-01-10', { shiftBilling: true });
+  assert.equal(shifted.billingStart, undefined);
+  assert.deepEqual(days(shifted), new Set(['10']));
+  const lifetime = base({ start: '2026-01-15', cycle: { unit: 'lifetime', every: 1 } });
+  assert.equal(movePhaseStart(lifetime, '2026-01-15', '2026-01-10', { shiftBilling: true }).payments, undefined);
+});

@@ -9,7 +9,9 @@
     "anyRegion": "Any region",
     "total": "Total",
     "createCategory": "Will create category: {name}",
-    "createdCategory": "Created category: {name}"
+    "createdCategory": "Created category: {name}",
+    "createPerson": "Will create person: {name}",
+    "createdPerson": "Created person: {name}"
   },
   "error": {
     "shareFull": "“{name}” is full ({seats} seats)",
@@ -73,7 +75,10 @@
     "stopDateRequired": "This subscription started or was charged before today, so the stop date cannot default to today. Pass the actual date in at, or at=null if the date is unknown.",
     "unknownStopDetails": "A stop with an unknown date cannot carry a refund or reason; give the date in at to record them.",
     "transferProxy": "Proxy subscriptions cannot record transfers",
-    "transferNotFound": "No transfer found on {date}"
+    "transferNotFound": "No transfer found on {date}",
+    "notStopped": "This subscription is not stopped, so there is no stop to edit. Use set_status cancel / terminate without edit to stop it.",
+    "editStopDate": "To edit a stop, give its actual date in at (omit at to keep a recorded date). A stop with an unknown date needs its real date.",
+    "invalidIcon": "Invalid icon “{value}”: use an http(s) image URL, a site path such as /ai/claude.svg, or one emoji / short symbol."
   },
   "tool": {
     "get_overview": "Ledger overview",
