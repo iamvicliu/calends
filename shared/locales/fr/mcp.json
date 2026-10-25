@@ -71,7 +71,9 @@
       "other": "Il ne reste que {count} paiements non réglés, moins que ce que couvre ce règlement"
     },
     "stopDateRequired": "Cet abonnement a commencé ou a été prélevé avant aujourd’hui : la date d’arrêt ne peut pas être aujourd’hui par défaut. Indiquez la date réelle dans at, ou at=null si elle est inconnue.",
-    "unknownStopDetails": "Un arrêt à date inconnue ne peut pas comporter de remboursement ni de motif ; indiquez la date dans at pour les enregistrer."
+    "unknownStopDetails": "Un arrêt à date inconnue ne peut pas comporter de remboursement ni de motif ; indiquez la date dans at pour les enregistrer.",
+    "transferProxy": "Les abonnements payés pour autrui ne prennent pas de cessions",
+    "transferNotFound": "Aucune cession trouvée le {date}"
   },
   "tool": {
     "get_overview": "Aperçu du registre",
@@ -106,6 +108,7 @@
     "get_settings": "Paramètres et préférences du registre",
     "update_settings": "Modifier les paramètres et préférences du registre",
     "set_proxy": "Gérer les avances",
-    "save_subscription": "Enregistrer l’abonnement complet"
+    "save_subscription": "Enregistrer l’abonnement complet",
+    "record_transfer": "Enregistrer ou modifier des cessions"
   }
 }

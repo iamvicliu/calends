@@ -169,5 +169,35 @@
     "trial": "Dùng thử",
     "bonus": "Thời gian tặng",
     "since": "Từ {date}"
+  },
+  "transfer": {
+    "title": "Chuyển nhượng",
+    "held": "Nắm giữ",
+    "net": "Chi phí ròng",
+    "included": "Gồm chuyển nhượng",
+    "kind": {
+      "label": "Loại",
+      "buy": "Nhận chuyển nhượng",
+      "sell": "Chuyển nhượng đi"
+    },
+    "hint": {
+      "buy": "Tiền trả cho chủ cũ khi nhận lại (gồm phần chênh). Nhập số tiền thực trả.",
+      "sell": "Tiền nhận được khi chuyển cho người khác. Nhập số tiền thực nhận; thời gian còn lại không còn tính là đã trả mà chưa dùng."
+    },
+    "paid": "Số tiền đã trả",
+    "received": "Số tiền đã nhận",
+    "addTitle": "Ghi chuyển nhượng",
+    "editTitle": "Sửa chuyển nhượng",
+    "saved": "Đã lưu chuyển nhượng",
+    "deleted": "Xóa chuyển nhượng này",
+    "foot": "Tiền thực trả hoặc nhận khi nhận lại hay chuyển đi một dịch vụ đã qua sử dụng. Tính vào chi phí ròng và dòng tiền, không tính vào chi phí hằng tháng, dự báo gia hạn hay số lần trừ tiền.",
+    "add": "Ghi",
+    "none": "Chưa có chuyển nhượng",
+    "netGain": "Thu ròng",
+    "head": {
+      "date": "Ngày",
+      "amount": "Số tiền",
+      "base": "Quy đổi {ccy}"
+    }
   }
 }

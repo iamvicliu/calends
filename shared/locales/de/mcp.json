@@ -71,7 +71,9 @@
       "other": "Nur noch {count} offene Zahlungen, weniger als diese Zahlung abdeckt"
     },
     "stopDateRequired": "Dieses Abo begann oder wurde vor heute belastet, daher kann das Enddatum nicht heute sein. Gib das tatsächliche Datum in at an oder at=null, wenn es unbekannt ist.",
-    "unknownStopDetails": "Ein Stopp ohne Datum kann keine Erstattung oder keinen Grund enthalten; gib das Datum in at an, um sie zu erfassen."
+    "unknownStopDetails": "Ein Stopp ohne Datum kann keine Erstattung oder keinen Grund enthalten; gib das Datum in at an, um sie zu erfassen.",
+    "transferProxy": "Für Abonnements, die du für andere zahlst, gibt es keine Übertragungen",
+    "transferNotFound": "Keine Übertragung am {date} gefunden"
   },
   "tool": {
     "get_overview": "Kontoübersicht",
@@ -106,6 +108,7 @@
     "get_settings": "Buch- & Anzeigeeinstellungen",
     "update_settings": "Buch- & Anzeigeeinstellungen ändern",
     "set_proxy": "Auslagen verwalten",
-    "save_subscription": "Abo vollständig speichern"
+    "save_subscription": "Abo vollständig speichern",
+    "record_transfer": "Übertragungen erfassen oder bearbeiten"
   }
 }

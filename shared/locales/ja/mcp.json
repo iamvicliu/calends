@@ -68,7 +68,9 @@
     "periodTaken": "{period} の期にはすでに受取または免除があります",
     "periodsShort": "未精算の期が {count} 期しか残っておらず、この受取の対象期数に足りません",
     "stopDateRequired": "このサブスクは今日より前に開始または請求済みのため、停止日を今日にできません。at に実際の日付を指定するか、不明な場合は at=null を指定してください。",
-    "unknownStopDetails": "日付不明の停止には返金や理由を付けられません。記録するには at に日付を指定してください。"
+    "unknownStopDetails": "日付不明の停止には返金や理由を付けられません。記録するには at に日付を指定してください。",
+    "transferProxy": "代理払いのサブスクには譲渡を記録できません",
+    "transferNotFound": "{date} の譲渡が見つかりません"
   },
   "tool": {
     "get_overview": "台帳の概要",
@@ -103,6 +105,7 @@
     "get_settings": "台帳設定と表示設定",
     "update_settings": "台帳設定と表示設定を更新",
     "set_proxy": "立替関係を管理",
-    "save_subscription": "サブスクを丸ごと保存"
+    "save_subscription": "サブスクを丸ごと保存",
+    "record_transfer": "譲渡を記録・編集"
   }
 }

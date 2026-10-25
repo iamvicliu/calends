@@ -15,6 +15,7 @@ import { dateFormat } from './intl.ts';
 import { t } from './i18n.ts';
 import { chargeValue, convertOn } from './fx.ts';
 import { isSettled, settle, type Period } from './receivables.ts';
+import { transferError } from './transfers.ts';
 
 // ---------- 日期：全部按 UTC 日计算 ----------
 
@@ -118,6 +119,8 @@ export function subError(s: Subscription): string | undefined {
   if (!s.name?.trim()) return t('core.subError.name');
   if (!Number.isFinite(s.price) || s.price < 0) return t('core.subError.price');
   if (!validDay(s.start) || (s.share?.collectFrom && !validDay(s.share.collectFrom))) return t('core.subError.start');
+  const transfer = transferError(s);
+  if (transfer) return transfer;
   for (const m of s.share?.members ?? []) {
     if (
       m.feeHistory != null &&
@@ -395,7 +398,9 @@ export function fundingError(p: Payment): string | undefined {
     parts.length < 2 ||
     p.kind === 'failed' ||
     p.methodId != null ||
-    parts.some((f) => !f || typeof f.methodId !== 'string' || !f.methodId || !Number.isFinite(f.amount) || f.amount === 0 || Math.sign(f.amount) !== Math.sign(p.amount)) ||
+    parts.some(
+      (f) => !f || typeof f.methodId !== 'string' || !f.methodId || !Number.isFinite(f.amount) || f.amount === 0 || Math.sign(f.amount) !== Math.sign(p.amount),
+    ) ||
     new Set(parts.map((f) => f.methodId)).size !== parts.length
   )
     return t('core.subError.funding');

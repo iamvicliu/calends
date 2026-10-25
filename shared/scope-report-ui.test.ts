@@ -1,4 +1,5 @@
 import { metricComponents } from '../scripts/ui-test-components.ts';
+import * as transfers from './transfers.ts';
 import { canUseSingleKey } from '../app/src/keyboard.ts';
 import { numberFormat } from './intl.ts';
 import { loadSearch, matchText, searchIndex } from '../app/src/search.ts';
@@ -64,6 +65,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     },
     canUseSingleKey,
     ...billing,
+    ...transfers,
     ...format,
     ...fx,
     ...reports,

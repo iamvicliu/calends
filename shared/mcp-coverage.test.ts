@@ -311,7 +311,7 @@ test('every new read tool and connection catalogue: read token visibility, title
   const before = await f.snapshot();
   const listed = await f.rpc('tools/list', {}, f.read);
   assert.equal(listed.tools.length, TOOLS.filter((x) => !x.write).length);
-  assert.equal(TOOLS.length, 33);
+  assert.equal(TOOLS.length, 34);
   assert.deepEqual(
     ASSISTANT_TOOLS.map((x) => x.name),
     TOOLS.map((x) => x.name),
@@ -1411,7 +1411,19 @@ test('save_subscription runs the same full-record pipeline as PUT: validation, r
   const base: Subscription = { ...sub(), start: past, proxy: undefined, payments: [{ date: past, amount: 10 }] };
   await upsert(f.env, 'subscriptions', 's', base);
   // 同一份不合格记录：两条路径给出同一个错误，都不写入
-  const bad = { ...base, payments: [{ date: past, amount: 10, funding: [{ methodId: 'wallet', amount: 6 }, { methodId: 'target', amount: 3 }] }] };
+  const bad = {
+    ...base,
+    payments: [
+      {
+        date: past,
+        amount: 10,
+        funding: [
+          { methodId: 'wallet', amount: 6 },
+          { methodId: 'target', amount: 3 },
+        ],
+      },
+    ],
+  };
   const before = await f.snapshot();
   const put = await f.request('subscriptions/s', 'PUT', bad);
   assert.equal(put.status, 400);
@@ -1458,7 +1470,16 @@ test('save_subscription: dry_run diff and computed preview, unknown stop date, e
         currency: 'USD',
         cycle: { unit: 'month', every: 1 },
         methodId: 'target',
-        payments: [{ date: p2, amount: 9, funding: [{ methodId: 'wallet', amount: 4 }, { methodId: 'target', amount: 5 }] }],
+        payments: [
+          {
+            date: p2,
+            amount: 9,
+            funding: [
+              { methodId: 'wallet', amount: 4 },
+              { methodId: 'target', amount: 5 },
+            ],
+          },
+        ],
       },
     ],
   };
@@ -1537,7 +1558,14 @@ test('create_subscription: stopped statuses, method=null without default, per-pa
     status: 'cancelled',
     payments: [
       { date: d1, amount: 10, method: 'target', settled: { amount: 11, currency: 'USD' } },
-      { date: d2, amount: 10, funding: [{ method: 'wallet', amount: 6 }, { method: 'Target wallet', amount: 4 }] },
+      {
+        date: d2,
+        amount: 10,
+        funding: [
+          { method: 'wallet', amount: 6 },
+          { method: 'Target wallet', amount: 4 },
+        ],
+      },
       { date: d2, amount: 2, kind: 'refund' },
     ],
   });
@@ -1555,7 +1583,14 @@ test('create_subscription: stopped statuses, method=null without default, per-pa
   assert.equal(s.payments![2].amount, -2);
   assert.equal(s.payments![2].kind, 'refund');
   // 省略 method 仍套默认
-  const dflt = await f.call('create_subscription', { name: 'Fictional default', price: 1, currency: 'USD', cycle: { unit: 'month' }, category: 'Test', dry_run: true });
+  const dflt = await f.call('create_subscription', {
+    name: 'Fictional default',
+    price: 1,
+    currency: 'USD',
+    cycle: { unit: 'month' },
+    category: 'Test',
+    dry_run: true,
+  });
   assert.equal(dflt.structuredContent.after.methodId, 'wallet');
   const ended = await f.call('create_subscription', {
     name: 'Fictional ended',
@@ -1577,23 +1612,114 @@ test('record_payment funding: split saved, reduces each wallet balance, rejects 
   t.after(() => f.db.close());
   const today = todayIn('UTC');
   await upsert(f.env, 'subscriptions', 's', { ...sub(), share: undefined, proxy: undefined, methodId: 'target' });
-  await upsert(f.env, 'methods', 'wallet', { id: 'wallet', name: 'Fictional wallet', kind: 'prepaid', currency: 'USD', balance: 100, balanceAsOf: addDays(today, -1) });
-  const mismatch = await f.call('record_payment', { subscription: 's', amount: 10, funding: [{ method: 'wallet', amount: 3 }, { method: 'target', amount: 3 }] });
+  await upsert(f.env, 'methods', 'wallet', {
+    id: 'wallet',
+    name: 'Fictional wallet',
+    kind: 'prepaid',
+    currency: 'USD',
+    balance: 100,
+    balanceAsOf: addDays(today, -1),
+  });
+  const mismatch = await f.call('record_payment', {
+    subscription: 's',
+    amount: 10,
+    funding: [
+      { method: 'wallet', amount: 3 },
+      { method: 'target', amount: 3 },
+    ],
+  });
   assert.equal(mismatch.isError, true);
-  const both = await f.call('record_payment', { subscription: 's', amount: 10, method: 'wallet', funding: [{ method: 'wallet', amount: 5 }, { method: 'target', amount: 5 }] });
+  const both = await f.call('record_payment', {
+    subscription: 's',
+    amount: 10,
+    method: 'wallet',
+    funding: [
+      { method: 'wallet', amount: 5 },
+      { method: 'target', amount: 5 },
+    ],
+  });
   assert.equal(both.isError, true);
   const ok = await f.call('record_payment', {
     subscription: 's',
     date: today,
     amount: 10,
     replace: { date: today, index: 0 },
-    funding: [{ method: 'wallet', amount: 4 }, { method: 'target', amount: 6 }],
+    funding: [
+      { method: 'wallet', amount: 4 },
+      { method: 'target', amount: 6 },
+    ],
   });
   assert.equal(ok.isError, undefined, JSON.stringify(ok));
   const st = await f.snapshot();
   assert.equal(st.subscriptions[0].payments![0].funding?.length, 2);
   // 钱包按拆分里自己的那一份扣：100 − 4
-  assert.equal(runwayFor(st.methods.find((m) => m.id === 'wallet')!, st, today)?.current, 96);
+  assert.equal(
+    runwayFor(
+      st.methods.find((m) => m.id === 'wallet')!,
+      st,
+      today,
+    )?.current,
+    96,
+  );
   const charges = JSON.stringify(await f.call('list_charges', { subscription: 's', period: 'today', include_projected: false }));
   assert.match(charges, /"funding"/);
+});
+
+test('record_transfer：dry_run 不写入、读令牌拒绝、记录/改写/删除，get_subscription 给出转让与净成本', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), start: '2026-01-05', share: undefined, proxy: undefined, payments: [{ date: '2026-01-05', amount: 10 }] };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const transfers = async () => (await f.snapshot()).subscriptions.find((x) => x.id === 's')!.transfers;
+  const args = { subscription: 's', kind: 'buy', date: '2026-01-05', amount: 100, currency: 'USD', note: 'Fictional premium' };
+  const before = await f.snapshot();
+  const preview = await f.call('record_transfer', { ...args, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.dry_run, true);
+  assert.deepEqual(preview.structuredContent.after.transfers, [{ kind: 'buy', date: '2026-01-05', amount: 100, currency: 'USD', note: 'Fictional premium' }]);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('record_transfer', args, f.read)).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('record_transfer', { ...args, amount: 0 })).isError, true);
+  assert.equal((await f.call('record_transfer', { ...args, kind: 'gift' })).isError, true);
+  assert.equal((await f.call('record_transfer', args)).isError, undefined);
+  let r = await f.call('record_transfer', { subscription: 's', kind: 'sell', date: '2026-02-01', amount: 30 });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  assert.equal((await transfers())?.length, 2);
+  // 改写：按日期与同日序号定位，缺省币种取订阅币种
+  r = await f.call('record_transfer', { subscription: 's', replace: { date: '2026-02-01', index: 0 }, kind: 'sell', date: '2026-02-01', amount: 40 });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  assert.deepEqual((await transfers())?.[1], { kind: 'sell', date: '2026-02-01', amount: 40, currency: 'USD' });
+  const detail = (await f.call('get_subscription', { subscription: 's' }, f.read)).structuredContent;
+  assert.equal(detail.transfers.length, 2);
+  assert.equal(detail.net_cost.bought, 100);
+  assert.equal(detail.net_cost.sold, 40);
+  assert.equal(detail.net_cost.net, Math.round((detail.net_cost.service + 100 - 40) * 100) / 100);
+  assert.equal(detail.net_cost.holding_until, '2026-02-01');
+  assert.equal((await f.call('record_transfer', { subscription: 's', delete: { date: '2026-03-01', index: 0 } })).isError, true);
+  r = await f.call('record_transfer', { subscription: 's', delete: { date: '2026-01-05', index: 0 }, dry_run: true });
+  assert.equal((await transfers())?.length, 2);
+  r = await f.call('record_transfer', { subscription: 's', delete: { date: '2026-01-05', index: 0 } });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  assert.deepEqual(
+    (await transfers())?.map((x) => x.kind),
+    ['sell'],
+  );
+  // 代付是别人的订阅：不能记转让
+  await upsert(f.env, 'subscriptions', 'p', { ...sub(), id: 'p', share: undefined });
+  assert.equal((await f.call('record_transfer', { ...args, subscription: 'p' })).isError, true);
+});
+
+test('PUT /api/subscriptions 校验转让并原样保存；备份导出带上转让', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), share: undefined, proxy: undefined };
+  const bad = await f.request('subscriptions/s', 'PUT', { ...s, transfers: [{ kind: 'buy', date: s.start, amount: -1, currency: 'USD' }] });
+  assert.equal(bad.status, 400);
+  const transfers = [{ kind: 'sell' as const, date: s.start, amount: 25, currency: 'EUR', note: 'Fictional buyer' }];
+  const ok = await f.request('subscriptions/s', 'PUT', { ...s, transfers });
+  assert.equal(ok.status, 200);
+  assert.deepEqual((await f.snapshot()).subscriptions.find((x) => x.id === 's')?.transfers, transfers);
+  const backup = await (await f.request('backup')).json();
+  assert.deepEqual(backup.subscriptions.find((x: Subscription) => x.id === 's').transfers, transfers);
 });

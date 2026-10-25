@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import * as transfers from './transfers.ts';
 import { numberFormat } from './intl.ts';
 import { readFileSync } from 'node:fs';
 import { afterEach, test } from 'node:test';
@@ -440,6 +441,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     React,
     Fragment: React.Fragment,
     ...billing,
+    ...transfers,
     detailForecast,
     detailHistoryEnd,
     money,

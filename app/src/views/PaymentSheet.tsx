@@ -146,7 +146,16 @@ export function PaymentSheet({
             <button
               type="button"
               className="btn plain"
-              onClick={() => setSplit(split ? null : [{ methodId: method, amount }, { methodId: undefined, amount: '' }])}
+              onClick={() =>
+                setSplit(
+                  split
+                    ? null
+                    : [
+                        { methodId: method, amount },
+                        { methodId: undefined, amount: '' },
+                      ],
+                )
+              }
             >
               {t(split ? 'editor.payment.unsplit' : 'editor.payment.split')}
             </button>

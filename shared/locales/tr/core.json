@@ -49,7 +49,8 @@
     "refundAmount": "Pozitif bir tutar ve geçerli para birimi girin",
     "refundDate": "Ayrılma tarihini belirleyin; iade katılma tarihinden önce olamaz",
     "funding": "Geçersiz bölünmüş ödeme: sıfır olmayan tutarlarla en az iki farklı ödeme yöntemi kullanın ve aynı ödemeye tek bir yöntem atamayın",
-    "fundingSum": "Bölünmüş tutarların toplamı ödeme tutarına eşit olmalıdır"
+    "fundingSum": "Bölünmüş tutarların toplamı ödeme tutarına eşit olmalıdır",
+    "transfer": "Geçersiz devir: tür, tarih, pozitif tutar ve para birimi gerekli"
   },
   "phase": {
     "switchTooEarly": "Geçerlilik tarihi mevcut dönemin başlangıcından sonra olmalı",

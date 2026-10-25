@@ -185,5 +185,35 @@
     "trial": "Prueba",
     "bonus": "Periodo de regalo",
     "since": "Desde {date}"
+  },
+  "transfer": {
+    "title": "Traspasos",
+    "held": "En posesión",
+    "net": "Coste neto",
+    "included": "Incl. traspasos",
+    "kind": {
+      "label": "Tipo",
+      "buy": "Adquirido",
+      "sell": "Vendido"
+    },
+    "hint": {
+      "buy": "Dinero pagado al anterior titular al hacerte cargo (prima incluida). Introduce el importe real pagado.",
+      "sell": "Dinero recibido al traspasarlo. Introduce el importe real recibido; el servicio restante deja de contar como pagado sin usar."
+    },
+    "paid": "Importe pagado",
+    "received": "Importe recibido",
+    "addTitle": "Registrar traspaso",
+    "editTitle": "Editar traspaso",
+    "saved": "Traspaso guardado",
+    "deleted": "Eliminar este traspaso",
+    "foot": "Dinero real pagado o recibido al adquirir o traspasar un servicio de segunda mano. Cuenta en el coste neto y el flujo de caja, no en el coste mensual, las previsiones de renovación ni el número de cargos.",
+    "add": "Registrar",
+    "none": "Aún no hay traspasos",
+    "netGain": "Ganancia neta",
+    "head": {
+      "date": "Fecha",
+      "amount": "Importe",
+      "base": "En {ccy}"
+    }
   }
 }

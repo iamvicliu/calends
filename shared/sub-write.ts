@@ -14,7 +14,11 @@ export function validSub(s: Subscription): string | undefined {
  * 以 previous（库里现有记录，新建时为空）为基准准备一条完整替换的订阅：
  * 续费规则改动按生效日记入历史；成员的退出日被清掉时一并清掉退款；最后做完整校验和状态迁移约束。
  */
-export function prepareSubWrite(previous: Subscription | undefined, next: Subscription, today: string): { sub: Subscription; error?: undefined } | { error: string } {
+export function prepareSubWrite(
+  previous: Subscription | undefined,
+  next: Subscription,
+  today: string,
+): { sub: Subscription; error?: undefined } | { error: string } {
   let sub = reconcileRenewalRules(previous, next, today);
   // Clearing an existing exit also clears its settlement. New orphan refunds fail validation.
   if (sub.share)

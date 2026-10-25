@@ -71,7 +71,9 @@
       "other": "Only {count} unsettled periods left, fewer than this payment covers"
     },
     "stopDateRequired": "This subscription started or was charged before today, so the stop date cannot default to today. Pass the actual date in at, or at=null if the date is unknown.",
-    "unknownStopDetails": "A stop with an unknown date cannot carry a refund or reason; give the date in at to record them."
+    "unknownStopDetails": "A stop with an unknown date cannot carry a refund or reason; give the date in at to record them.",
+    "transferProxy": "Proxy subscriptions cannot record transfers",
+    "transferNotFound": "No transfer found on {date}"
   },
   "tool": {
     "get_overview": "Ledger overview",
@@ -106,6 +108,7 @@
     "get_settings": "Ledger settings & preferences",
     "update_settings": "Update ledger settings & preferences",
     "set_proxy": "Manage proxy relationship",
-    "save_subscription": "Save full subscription"
+    "save_subscription": "Save full subscription",
+    "record_transfer": "Record or edit transfers"
   }
 }

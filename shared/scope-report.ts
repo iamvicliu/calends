@@ -16,6 +16,7 @@ import {
   type StopLoss,
 } from './metrics.ts';
 import type { AppState, Subscription } from './types.ts';
+import { transferRows } from './transfers.ts';
 
 export interface Comparison {
   amount: number;
@@ -81,7 +82,7 @@ const compare = (amount: number, previous: number): Comparison => ({
 const byAmount = (a: { sub: Subscription; amount: number }, b: { sub: Subscription; amount: number }) =>
   b.amount - a.amount || a.sub.id.localeCompare(b.sub.id);
 
-function cashMonth(rows: ChargeRow[], month: string, today: string): MonthCash {
+function cashMonth(rows: Array<{ date: string; amount: number }>, month: string, today: string): MonthCash {
   return { month, total: sum(rows), paid: sum(rows.filter((r) => r.date <= today)), pending: sum(rows.filter((r) => r.date > today)) };
 }
 
@@ -257,19 +258,23 @@ export function monthReport(state: AppState, month: string, today: string): Scop
   const from = `${month}-01`;
   const to = monthEnd(month);
   const rows = charges(scoped, from, to, today);
+  // 转让收付只进现金合计与月度走势，不进笔数、构成、排行和即将扣款
+  const cashOf = (m: string, list = charges(scoped, `${m}-01`, monthEnd(m), today)) => [...list, ...transferRows(scoped, `${m}-01`, monthEnd(m), today)];
+  const cash = cashOf(month, rows);
   const previousMonth = addMonths(from, -1).slice(0, 7);
-  const previous = charges(scoped, `${previousMonth}-01`, monthEnd(previousMonth), today);
+  const previous = cashOf(previousMonth);
   const lastYear = addMonths(from, -12).slice(0, 7);
-  const yearly = charges(scoped, `${lastYear}-01`, monthEnd(lastYear), today);
+  const yearlyCharges = charges(scoped, `${lastYear}-01`, monthEnd(lastYear), today);
+  const yearly = cashOf(lastYear, yearlyCharges);
   const debits = rows.filter((r) => r.original.kind !== 'refund' && r.amount > 0);
   const blocks: Block[] = [
     {
       type: 'headline',
       mode: 'month',
-      ...cashMonth(rows, month, today),
+      ...cashMonth(cash, month, today),
       count: rows.filter((r) => r.original.kind !== 'refund').length,
-      previous: compare(sum(rows), sum(previous)),
-      yearly: yearly.some((r) => r.original.kind !== 'refund') ? compare(sum(rows), sum(yearly)) : undefined,
+      previous: compare(sum(cash), sum(previous)),
+      yearly: yearlyCharges.some((r) => r.original.kind !== 'refund') ? compare(sum(cash), sum(yearly)) : undefined,
     },
   ];
   if (from <= today) {
@@ -307,7 +312,7 @@ export function monthReport(state: AppState, month: string, today: string): Scop
   blocks.push(...details(scoped, today, from, to, { from, to }, from, to < today ? to : from > today ? to : today));
   const months = Array.from({ length: 6 }, (_, i) => {
     const m = addMonths(from, i - 5).slice(0, 7);
-    return cashMonth(m === month ? rows : charges(scoped, `${m}-01`, monthEnd(m), today), m, today);
+    return cashMonth(m === month ? cash : cashOf(m), m, today);
   });
   return { blocks, months };
 }

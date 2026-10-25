@@ -71,7 +71,9 @@
       "other": "Solo quedan {count} pagos sin saldar, menos de los que cubre este cobro"
     },
     "stopDateRequired": "Esta suscripción empezó o se cobró antes de hoy, así que la fecha de baja no puede ser hoy por defecto. Indica la fecha real en at, o at=null si se desconoce.",
-    "unknownStopDetails": "Una baja con fecha desconocida no puede llevar reembolso ni motivo; indica la fecha en at para registrarlos."
+    "unknownStopDetails": "Una baja con fecha desconocida no puede llevar reembolso ni motivo; indica la fecha en at para registrarlos.",
+    "transferProxy": "Las suscripciones pagadas por otros no admiten traspasos",
+    "transferNotFound": "No hay ningún traspaso el {date}"
   },
   "tool": {
     "get_overview": "Resumen del registro",
@@ -106,6 +108,7 @@
     "get_settings": "Ajustes y preferencias del registro",
     "update_settings": "Actualizar ajustes y preferencias del registro",
     "set_proxy": "Gestionar pagos por terceros",
-    "save_subscription": "Guardar suscripción completa"
+    "save_subscription": "Guardar suscripción completa",
+    "record_transfer": "Registrar o editar traspasos"
   }
 }

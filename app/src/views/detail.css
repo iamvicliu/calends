@@ -851,7 +851,8 @@
   color: var(--accent);
   text-decoration: none;
 }
-.dt-kind.refund {
+.dt-kind.refund,
+.dt-kind.sell {
   background: var(--dt-ok-soft);
   color: var(--dt-ok);
 }

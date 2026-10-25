@@ -1,3 +1,4 @@
+import { transferredStop } from '../../../shared/transfers.ts';
 import { stopDescription } from '../components/StopPanel.tsx';
 import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
@@ -172,7 +173,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           segs.map((g) => ({
             start: g.from,
             end:
-              !state.readonly && g.v.stop && (stopSummary(g.v, today)?.wastedDays ?? 0) > 0
+              !state.readonly && g.v.stop && !transferredStop(g.v) && (stopSummary(g.v, today)?.wastedDays ?? 0) > 0
                 ? addDays(g.v.stop.date, stopSummary(g.v, today)!.wastedDays)
                 : g.open
                   ? undefined
@@ -529,7 +530,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       const top = 8 + r.lanes[gi] * LANE;
 
                       const stopped = stopSummary(g.v, today);
-                      const unused = !state.readonly && !!stopped && stopped.wastedDays > 0;
+                      // 转出时剩余服务随转让收回，不画已付未用
+                      const unused = !state.readonly && !!stopped && stopped.wastedDays > 0 && !transferredStop(g.v);
                       const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
                       const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
                       const unusedSeen = unused ? visible(x(stopped!.date), unusedWidth) : { l: 0, r: 0 };

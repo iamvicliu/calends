@@ -49,7 +49,8 @@
     "refundAmount": "Insira um valor positivo e uma moeda válida",
     "refundDate": "Defina a saída; o reembolso não pode ser anterior à entrada",
     "funding": "Divisão de pagamento inválida: use pelo menos dois métodos de pagamento diferentes com valores diferentes de zero e não defina um método único na mesma cobrança",
-    "fundingSum": "Os valores divididos devem somar o valor do pagamento"
+    "fundingSum": "Os valores divididos devem somar o valor do pagamento",
+    "transfer": "Transferência inválida: tipo, data, valor positivo e moeda são obrigatórios"
   },
   "phase": {
     "switchTooEarly": "A data de vigência deve ser posterior ao início da fase atual",

@@ -823,7 +823,8 @@ function summaryRows(
       break;
     case 'save_subscription': {
       const rec = (a.subscription ?? {}) as Partial<Subscription>;
-      const computed = (preview?.computed as { after?: { next_charge?: string | null; spent_total?: { amount: number | null; currency: string } } } | undefined)?.after;
+      const computed = (preview?.computed as { after?: { next_charge?: string | null; spent_total?: { amount: number | null; currency: string } } } | undefined)
+        ?.after;
       const pays = [...(rec.payments ?? []), ...(rec.phases ?? []).flatMap((p) => p.payments ?? [])];
       if (rec.status === 'cancelled' || rec.status === 'terminated')
         add(t(`assistant.v.${rec.status === 'terminated' ? 'terminate' : 'cancel'}`), day(rec.stop?.date ?? rec.end) ?? t('assistant.v.dateUnknown'));
@@ -853,6 +854,28 @@ function summaryRows(
             .join('\n'),
         );
       break;
+    case 'record_transfer': {
+      const del = a.delete as { date?: string } | undefined;
+      if (del) {
+        add(t('assistant.f.effect'), t('detail.transfer.deleted'));
+        add(t('assistant.f.date'), day(del.date));
+        break;
+      }
+      add(t('assistant.f.kind'), a.kind === 'sell' ? t('detail.transfer.kind.sell') : t('detail.transfer.kind.buy'));
+      add(
+        t('assistant.f.amount'),
+        a.amount != null ? (
+          <span className={a.kind === 'sell' ? 'green' : undefined}>
+            {flow(
+              a.kind === 'sell' ? Math.abs(Number(a.amount)) : -Math.abs(Number(a.amount)),
+              String(a.currency ?? subCcy ?? state.settings.baseCurrency).toUpperCase(),
+            )}
+          </span>
+        ) : undefined,
+      );
+      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
+      break;
+    }
     case 'delete_subscription':
       add(t('assistant.f.effect'), t('assistant.v.deleteAll'));
       break;
@@ -915,6 +938,7 @@ function Proposal(props: {
   const destructive =
     part.tool === 'delete_subscription' ||
     part.tool === 'delete_payment' ||
+    (part.tool === 'record_transfer' && !!a.delete) ||
     part.tool === 'remove_share_member' ||
     a.action === 'delete' ||
     a.action === 'remove' ||
@@ -922,7 +946,9 @@ function Proposal(props: {
     (part.tool === 'set_share' && a.role === 'none');
   // 没识别出来、用了默认值的字段：提醒用户核对
   const missing = create
-    ? [!a.start && t('assistant.card.start'), a.method === undefined && t('detail.field.method'), !a.category && t('detail.field.category')].filter((x): x is string => !!x)
+    ? [!a.start && t('assistant.card.start'), a.method === undefined && t('detail.field.method'), !a.category && t('detail.field.category')].filter(
+        (x): x is string => !!x,
+      )
     : [];
   const gone = part.state === 'dismissed';
   const rows: Array<[string, ReactNode]> = create

@@ -68,7 +68,9 @@
     "periodTaken": "Kỳ {period} đã có khoản thu hoặc miễn thu",
     "periodsShort": "Chỉ còn {count} kỳ chưa tất toán, ít hơn số kỳ khoản thu này áp dụng",
     "stopDateRequired": "Gói này đã bắt đầu hoặc bị trừ tiền trước hôm nay nên ngày dừng không thể mặc định là hôm nay. Hãy truyền ngày thực tế trong at, hoặc at=null nếu không rõ ngày.",
-    "unknownStopDetails": "Lần dừng không rõ ngày không thể kèm hoàn tiền hay lý do; hãy truyền ngày trong at để ghi lại."
+    "unknownStopDetails": "Lần dừng không rõ ngày không thể kèm hoàn tiền hay lý do; hãy truyền ngày trong at để ghi lại.",
+    "transferProxy": "Gói trả hộ không ghi được chuyển nhượng",
+    "transferNotFound": "Không tìm thấy chuyển nhượng ngày {date}"
   },
   "tool": {
     "get_overview": "Tổng quan sổ",
@@ -103,6 +105,7 @@
     "get_settings": "Cài đặt sổ & tùy chọn",
     "update_settings": "Cập nhật cài đặt sổ & tùy chọn",
     "set_proxy": "Quản lý trả hộ",
-    "save_subscription": "Lưu toàn bộ gói đăng ký"
+    "save_subscription": "Lưu toàn bộ gói đăng ký",
+    "record_transfer": "Ghi hoặc sửa chuyển nhượng"
   }
 }

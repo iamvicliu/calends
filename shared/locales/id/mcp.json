@@ -68,7 +68,9 @@
     "periodTaken": "Periode {period} sudah punya pembayaran atau pembebasan",
     "periodsShort": "Hanya tersisa {count} periode yang belum lunas, kurang dari cakupan pembayaran ini",
     "stopDateRequired": "Langganan ini dimulai atau ditagih sebelum hari ini, jadi tanggal berhenti tidak bisa default hari ini. Berikan tanggal sebenarnya di at, atau at=null jika tidak diketahui.",
-    "unknownStopDetails": "Penghentian dengan tanggal tidak diketahui tidak bisa memuat pengembalian dana atau alasan; berikan tanggal di at untuk mencatatnya."
+    "unknownStopDetails": "Penghentian dengan tanggal tidak diketahui tidak bisa memuat pengembalian dana atau alasan; berikan tanggal di at untuk mencatatnya.",
+    "transferProxy": "Langganan yang dibayarkan untuk orang lain tidak bisa mencatat pengalihan",
+    "transferNotFound": "Tidak ada pengalihan pada {date}"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
@@ -103,6 +105,7 @@
     "get_settings": "Pengaturan & preferensi buku catatan",
     "update_settings": "Ubah pengaturan & preferensi buku catatan",
     "set_proxy": "Kelola pembayaran titipan",
-    "save_subscription": "Simpan langganan lengkap"
+    "save_subscription": "Simpan langganan lengkap",
+    "record_transfer": "Catat atau edit pengalihan"
   }
 }

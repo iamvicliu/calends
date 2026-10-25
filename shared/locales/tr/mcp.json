@@ -68,7 +68,9 @@
     "periodTaken": "{period} dönemi için zaten ödeme veya bağış kaydı var",
     "periodsShort": "Kapanmamış yalnızca {count} dönem kaldı; bu ödemenin kapsadığından az",
     "stopDateRequired": "Bu abonelik bugünden önce başladı veya ücretlendirildi; durdurma tarihi varsayılan olarak bugün olamaz. Gerçek tarihi at ile verin ya da bilinmiyorsa at=null kullanın.",
-    "unknownStopDetails": "Tarihi bilinmeyen bir durdurma iade veya neden içeremez; kaydetmek için tarihi at ile verin."
+    "unknownStopDetails": "Tarihi bilinmeyen bir durdurma iade veya neden içeremez; kaydetmek için tarihi at ile verin.",
+    "transferProxy": "Başkası adına ödenen aboneliklerde devir kaydedilemez",
+    "transferNotFound": "{date} tarihinde devir bulunamadı"
   },
   "tool": {
     "get_overview": "Defter özeti",
@@ -103,6 +105,7 @@
     "get_settings": "Defter ve arayüz ayarları",
     "update_settings": "Defter ve arayüz ayarlarını güncelle",
     "set_proxy": "Başkası adına ödemeleri yönet",
-    "save_subscription": "Aboneliği tamamen kaydet"
+    "save_subscription": "Aboneliği tamamen kaydet",
+    "record_transfer": "Devir kaydet veya düzenle"
   }
 }

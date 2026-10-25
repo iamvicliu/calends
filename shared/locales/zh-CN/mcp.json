@@ -68,7 +68,9 @@
     "periodTaken": "{period} 这一期已经记过收款或免收",
     "periodsShort": "只剩 {count} 期没结清，不够这笔要抵扣的期数",
     "stopDateRequired": "这个订阅在今天之前已经开始或扣过款，停用日不能默认今天。请用 at 给出实际日期；日期不详时传 at=null。",
-    "unknownStopDetails": "日期不详的停用不能带退款或原因；要记录它们请用 at 给出日期。"
+    "unknownStopDetails": "日期不详的停用不能带退款或原因；要记录它们请用 at 给出日期。",
+    "transferProxy": "代付订阅不能记转让",
+    "transferNotFound": "找不到 {date} 的这笔转让"
   },
   "tool": {
     "get_overview": "账本概况",
@@ -103,6 +105,7 @@
     "get_settings": "账本设置与偏好",
     "update_settings": "修改账本设置与偏好",
     "set_proxy": "管理代付关系",
-    "save_subscription": "完整保存订阅"
+    "save_subscription": "完整保存订阅",
+    "record_transfer": "记录或修改转让收付"
   }
 }

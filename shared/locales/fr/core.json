@@ -49,7 +49,8 @@
     "refundAmount": "Saisissez un montant positif et une devise valide",
     "refundDate": "Indiquez le départ ; le remboursement ne peut précéder l’arrivée",
     "funding": "Répartition invalide : utilisez au moins deux moyens de paiement différents avec des montants non nuls, sans moyen de paiement unique sur le même paiement",
-    "fundingSum": "La somme des montants répartis doit égaler le montant du paiement"
+    "fundingSum": "La somme des montants répartis doit égaler le montant du paiement",
+    "transfer": "Cession invalide : type, date, montant positif et devise sont requis"
   },
   "phase": {
     "switchTooEarly": "La date d’effet doit être postérieure au début de la phase actuelle",

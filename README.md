@@ -96,7 +96,7 @@ See the [self-hosting guide](docs/self-hosting.md) for custom domains, configura
 
 ## AI & MCP
 
-Ask “What renews next week?”, “How much did I spend this year?” or “Netflix went up to $17.99 from today.” Calends provides 32 tools over a stateless [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` using Streamable HTTP.
+Ask “What renews next week?”, “How much did I spend this year?” or “Netflix went up to $17.99 from today.” Calends provides 34 tools over a stateless [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` using Streamable HTTP.
 
 On the **AI access** page (`/connect`), create a read-only or read/write token, then connect your client. Opening `/mcp` in a browser takes you to this page; MCP clients use the `/mcp` endpoint:
 
