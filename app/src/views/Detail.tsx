@@ -394,8 +394,11 @@ function Transfers({ sub, state, onRow, onAdd }: { sub: Subscription; state: App
         ]}
         yearCells={(ys) => {
           const total = ys.reduce((a, r) => a + r.v, 0);
+          // 一年里都是同一种（通常只有一笔）时照样标出转入 / 转出
+          const kinds = new Set(ys.map((r) => r.tr.kind));
+          const kind = kinds.size === 1 ? ys[0].tr.kind : undefined;
           return {
-            second: null,
+            second: kind ? <span className={`dt-kind transfer ${kind}`}>{t(`detail.transfer.kind.${kind}`)}</span> : null,
             orig: copyParts(
               [...ys.reduce((m, r) => m.set(r.tr.currency, (m.get(r.tr.currency) ?? 0) - transferSign(r.tr) * r.tr.amount), new Map<string, number>())]
                 .map(([ccy, sum]) => flow(sum, ccy))
@@ -532,7 +535,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
         }
         // 与其他格一样三行：折到每天多少；算不出来就不写这一行
         note={!undated && Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined}
-        accessory={!lifetime && !undated ? <Trend pct={perTrend} /> : undefined}
+        accessory={!lifetime && !undated && !transferred ? <Trend pct={perTrend} /> : undefined}
       />
     </MetricCards>
   );
