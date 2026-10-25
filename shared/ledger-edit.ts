@@ -8,6 +8,8 @@ import { PREF_KEYS, mergePrefs } from './prefs.ts';
 import { isLocale, t } from './i18n.ts';
 import { objectSchema, textSchema, daySchema, nullable } from './tool-schema.ts';
 
+const START_PAGE_PATHS = ['overview', 'list', 'calendar', 'report', 'wallet', 'family', 'behalf', 'assistant', 'connect'];
+
 export const METHOD_FIELDS = objectSchema({
   name: textSchema,
   kind: {
@@ -49,7 +51,12 @@ export const SETTINGS_FIELDS = objectSchema({
   upcomingDays: { type: 'integer', minimum: 0 },
   hiddenNav: nullable({ type: 'array', items: textSchema }),
   navOrder: nullable({ type: 'array', items: textSchema }),
-  startPage: nullable(textSchema),
+  startPage: {
+    type: ['string', 'null'],
+    enum: [...START_PAGE_PATHS, '', null],
+    description:
+      'Startup route: use list for Subscriptions, report for Reports, family for Shared plans, behalf for Paid for others. Empty/null resets to Overview.',
+  },
   weekStart: { type: 'integer', enum: [0, 1] },
   language: nullable(textSchema),
 });
@@ -231,6 +238,8 @@ export function checkSettings(st: Pick<AppState, 'fx' | 'methods' | 'subscriptio
       throw new Error(t('mcp.error.invalidInput', { field: 'timezone' }));
     }
   if (next.language && changed('language') && !isLocale(next.language)) throw new Error(t('mcp.error.invalidInput', { field: 'language' }));
+  if (next.startPage && changed('startPage') && !START_PAGE_PATHS.includes(next.startPage))
+    throw new Error(t('mcp.error.invalidInput', { field: 'startPage' }));
   const added = next.publicHidden?.filter((id) => !prev.publicHidden?.includes(id)) ?? [];
   if (added.some((id) => !st.subscriptions.some((s) => s.id === id))) throw new Error(t('mcp.error.invalidTarget'));
   if (next.avatar && changed('avatar') && (!/^(https?:\/\/|data:image\/(png|jpeg|webp|gif|svg\+xml);base64,)/.test(next.avatar) || next.avatar.length > 300000))

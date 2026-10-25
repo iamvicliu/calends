@@ -101,7 +101,7 @@ For Cloudflare, set variables and bindings in your Wrangler configuration and us
 | `BASE_PATH`                            | Variable                    | Build argument and environment variable  | Optional subpath without a trailing slash, e.g. `/calends`. Use the same value at build time and runtime; see [subpath deployment](#subpath-deployment). |
 | `DATA_DIR`                             | —                           | Environment variable                     | SQLite data directory; default `/data`. Persist this directory in a volume.                                                                              |
 | `PORT`                                 | —                           | Environment variable                     | Listening port; default `8787`.                                                                                                                          |
-| `INTERNAL_PORT` | — | Environment variable | Container-loopback port of the Worker runtime behind the entrypoint's front listener; default `PORT + 1`. Change it only if that port is taken. |
+| `INTERNAL_PORT`                        | —                           | Environment variable                     | Container-loopback port of the Worker runtime behind the entrypoint's front listener; default `PORT + 1`. Change it only if that port is taken.          |
 
 ### Personal Cloudflare configuration
 

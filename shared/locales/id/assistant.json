@@ -161,7 +161,8 @@
     "applyAll": "Konfirmasi semua",
     "history": "Riwayat tagihan",
     "historyCount": "{count} tagihan",
-    "changes": "Pratinjau perubahan dan referensi"
+    "changes": "Pratinjau perubahan dan referensi",
+    "unverified": "Periksa hasil"
   },
   "error": {
     "auth": "API Key tidak valid",
@@ -257,5 +258,13 @@
     "dateUnknown": "Tanggal tidak diketahui",
     "terminate": "Dihentikan penyedia"
   },
-  "interrupted": "Balasan terputus sebelum selesai."
+  "interrupted": "Balasan terputus sebelum selesai.",
+  "saveUnknown": "Tidak dapat memastikan apakah perubahan tersimpan. Periksa buku sebelum mencoba lagi.",
+  "savedUnverified": "Tersimpan, tetapi hasilnya tidak dapat diverifikasi. Periksa buku sebelum melanjutkan.",
+  "savedRefreshFailed": "Perubahan tersimpan, tetapi halaman gagal dimuat ulang. Muat ulang sebelum mengonfirmasi draf lain.",
+  "outcome": {
+    "partial": "Beberapa langkah belum selesai",
+    "limit": "Batas panggilan alat tercapai",
+    "review": "Draf belum disimpan. Tinjau draf yang siap dan langkah yang belum selesai sebelum melanjutkan."
+  }
 }

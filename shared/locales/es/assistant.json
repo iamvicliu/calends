@@ -166,7 +166,8 @@
       "one": "{count} cargo",
       "other": "{count} cargos"
     },
-    "changes": "Ver cambios y referencias"
+    "changes": "Ver cambios y referencias",
+    "unverified": "Revisar resultado"
   },
   "error": {
     "auth": "API Key no válida",
@@ -262,5 +263,13 @@
     "dateUnknown": "Fecha desconocida",
     "terminate": "Cancelada por el proveedor"
   },
-  "interrupted": "La respuesta se interrumpió antes de terminar."
+  "interrupted": "La respuesta se interrumpió antes de terminar.",
+  "saveUnknown": "No se pudo confirmar si se guardó. Revisa el registro antes de volver a intentarlo.",
+  "savedUnverified": "Guardado, pero no se pudo verificar el resultado. Revisa el registro antes de continuar.",
+  "savedRefreshFailed": "El cambio se guardó, pero la página no pudo actualizarse. Recárgala antes de confirmar otros borradores.",
+  "outcome": {
+    "partial": "Quedan pasos sin completar",
+    "limit": "Se alcanzó el límite de llamadas a herramientas",
+    "review": "Los borradores aún no se han guardado. Revisa los borradores preparados y los pasos pendientes antes de continuar."
+  }
 }

@@ -31,6 +31,7 @@ import { flow, billLabel, cnDate, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
+import { confirmInOrder, type AssistantOutcome, type WriteVerification } from '../../../shared/assistant-result.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
@@ -45,7 +46,7 @@ import { Streamdown, type Components } from 'streamdown';
 // ---------- 会话数据 ----------
 
 type ToolStatus = 'running' | 'done' | 'error';
-type ProposalState = 'pending' | 'applying' | 'applied' | 'dismissed' | 'error';
+type ProposalState = 'pending' | 'applying' | 'applied' | 'dismissed' | 'error' | 'unverified';
 
 type Part =
   | { kind: 'reasoning'; text: string; start: number; ms?: number }
@@ -82,7 +83,14 @@ type ChatTurn =
       /** 发送时历史的长度：重试、重新生成时截回这里 */ at: number;
       /** 存到服务端时图片不保存，只记张数 */ imgs?: number;
     }
-  | { id: string; role: 'assistant'; parts: Part[]; status: 'streaming' | 'done' | 'error' | 'stopped'; error?: { kind: ErrorKind; message: string } };
+  | {
+      id: string;
+      role: 'assistant';
+      parts: Part[];
+      status: 'streaming' | 'done' | 'error' | 'stopped';
+      outcome?: AssistantOutcome;
+      error?: { kind: ErrorKind; message: string };
+    };
 
 interface Saved {
   /** 对话 id：服务端按它存；「新对话」换一个新的 */
@@ -153,7 +161,7 @@ type ServerEvent =
   | { type: 'proposal'; id: string; tool: string; args: Record<string, unknown>; preview: Preview; filled?: string[] }
   | { type: 'usage' }
   | { type: 'error'; kind: ErrorKind; message: string }
-  | { type: 'done'; messages: ApiMessage[]; aborted?: boolean };
+  | { type: 'done'; messages: ApiMessage[]; aborted?: boolean; outcome?: AssistantOutcome };
 
 async function stream(body: unknown, signal: AbortSignal, on: (e: ServerEvent) => void) {
   // 带上界面语言：服务端按它给出分类名称和回复语言
@@ -222,7 +230,7 @@ function reduce(turn: Extract<ChatTurn, { role: 'assistant' }>, e: ServerEvent):
       return { ...turn, parts, status: 'error', error: { kind: e.kind, message: e.message } };
     case 'done':
       closeReasoning();
-      return { ...turn, parts, status: e.aborted ? 'stopped' : 'done' };
+      return { ...turn, parts, outcome: e.outcome, status: e.aborted ? 'stopped' : 'done' };
   }
   return { ...turn, parts };
 }
@@ -238,6 +246,8 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   // 历史记录加载完才显示欢迎语：加载前后滚动位置不同，提前显示会先出现在一处再跳到另一处
   const [pastLoaded, setPastLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const confirmingRef = useRef(false);
   const abort = useRef<AbortController | null>(null);
   const [atBottom, setAtBottom] = useState(true);
   const composer = useRef<ComposerHandle>(null);
@@ -369,36 +379,58 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
 
   /** 确认草稿：同一个 MCP 工具真正执行；结果作为备注写进历史，模型下一轮就知道已经加上了 */
   const applyProposal = async (turnId: string, p: Extract<Part, { kind: 'proposal' }>) => {
+    if (confirmingRef.current) return false;
+    confirmingRef.current = true;
+    setConfirming(true);
     const retrying = p.state === 'error';
     setPart(turnId, p.id, { state: 'applying', error: undefined });
     try {
-      // 上次失败可能只是没收到响应、其实已经写入：重试前先同步账本核对，新建过的订阅不再建一次。
-      // 其他工具没有可核对的标识，仍按原参数重试（服务端幂等另行处理）
+      // Legacy failed creates may already have committed. Read first and require review, never create them twice.
       if (retrying) {
         await refresh();
         const id = p.tool === 'create_subscription' && typeof p.args.id === 'string' ? p.args.id : undefined;
         const existing = id ? getState().subscriptions.find((s) => s.id === id) : undefined;
         if (existing) {
-          setPart(turnId, p.id, { state: 'applied', subId: existing.id });
-          return;
+          setPart(turnId, p.id, { state: 'unverified', subId: existing.id, error: t('assistant.savedUnverified') });
+          return false;
         }
       }
-      const r = await api<{ subscription?: { id: string; name: string } }>('/api/assistant/apply', {
+      const r = await api<{ subscription?: { id: string; name: string }; verification?: WriteVerification }>('/api/assistant/apply', {
         method: 'POST',
         body: JSON.stringify({ tool: p.tool, args: p.args }),
       });
-      await refresh();
-      setPart(turnId, p.id, { state: 'applied', subId: r.subscription?.id });
+      const verified = r.verification?.status === 'verified';
+      setPart(turnId, p.id, {
+        state: verified ? 'applied' : 'unverified',
+        subId: r.subscription?.id,
+        error: verified ? undefined : t('assistant.savedUnverified'),
+      });
       setChat((c) => ({
         ...c,
         history: [
           ...c.history,
-          { role: 'user', content: `[note] The user confirmed ${p.tool} for "${String(p.args.name ?? r.subscription?.name ?? '')}". It is saved now.` },
+          {
+            role: 'user',
+            content: `[note] The user confirmed ${p.tool} for "${String(p.args.name ?? r.subscription?.name ?? '')}". Saved; read-back ${verified ? 'verified' : 'not verified; check the ledger before retrying'}.`,
+          },
         ],
       }));
-      toast(t('assistant.applied'));
+      try {
+        await refresh();
+      } catch {
+        toast(t('assistant.savedRefreshFailed'));
+        return false;
+      }
+      if (verified) toast(t('assistant.applied'));
+      return verified;
     } catch (e) {
-      setPart(turnId, p.id, { state: 'error', error: (e as Error).message });
+      const status = (e as { status?: number }).status;
+      const uncertain = status == null || status >= 500;
+      setPart(turnId, p.id, { state: uncertain ? 'unverified' : 'error', error: uncertain ? t('assistant.saveUnknown') : (e as Error).message });
+      return false;
+    } finally {
+      confirmingRef.current = false;
+      setConfirming(false);
     }
   };
 
@@ -406,7 +438,12 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
   const applyAll = async (turnId: string) => {
     const turn = chat.turns.find((x) => x.id === turnId);
     if (turn?.role !== 'assistant') return;
-    for (const p of turn.parts) if (p.kind === 'proposal' && (p.state === 'pending' || p.state === 'error')) await applyProposal(turnId, p);
+    if (turn.outcome && turn.outcome.status !== 'complete') return;
+    if (turn.parts.some((p) => p.kind === 'proposal' && p.state === 'unverified')) return;
+    await confirmInOrder(
+      turn.parts.filter((p): p is Extract<Part, { kind: 'proposal' }> => p.kind === 'proposal' && (p.state === 'pending' || p.state === 'error')),
+      (p) => applyProposal(turnId, p),
+    );
   };
 
   /** 编辑后再添加：用草稿填好新建表单 */
@@ -477,6 +514,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
                       turn={turn.status === 'streaming' ? { ...turn, status: 'stopped' } : turn}
                       state={state}
                       last={false}
+                      confirming={confirming}
                       onRetry={noop}
                       onSetup={() => setSetup(true)}
                       onApply={noop}
@@ -505,6 +543,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
                         turn={turn}
                         state={state}
                         last={i === chat.turns.length - 1}
+                        confirming={confirming}
                         onRetry={retry}
                         onSetup={() => setSetup(true)}
                         onApply={(p) => void applyProposal(turn.id, p)}
@@ -624,6 +663,7 @@ function BotMessage(props: {
   turn: Extract<ChatTurn, { role: 'assistant' }>;
   state: AppState;
   last: boolean;
+  confirming: boolean;
   onRetry: () => void;
   onSetup: () => void;
   onApply: (p: Extract<Part, { kind: 'proposal' }>) => void;
@@ -634,7 +674,10 @@ function BotMessage(props: {
 }) {
   const { turn } = props;
   const pending = turn.parts.filter((p) => p.kind === 'proposal' && (p.state === 'pending' || p.state === 'error')).length;
-  const text = turn.parts.flatMap((p) => (p.kind === 'text' ? [p.text] : [])).join('\n\n');
+  const incomplete = turn.outcome && turn.outcome.status !== 'complete';
+  const lastText = turn.parts.findLastIndex((p) => p.kind === 'text');
+  const text = turn.parts.flatMap((p, i) => (p.kind === 'text' && (!incomplete || i !== lastText) ? [p.text] : [])).join('\n\n');
+  const unverified = turn.parts.some((p) => p.kind === 'proposal' && p.state === 'unverified');
   const waiting = turn.status === 'streaming' && !turn.parts.length;
   return (
     <div className="as-bot">
@@ -642,7 +685,7 @@ function BotMessage(props: {
         {waiting && <Dots />}
         {turn.parts.map((p, i) => {
           if (p.kind === 'reasoning') return <Reasoning key={i} part={p} live={turn.status === 'streaming' && p.ms == null} />;
-          if (p.kind === 'text') return <Markdown key={i} text={p.text} streaming={turn.status === 'streaming'} />;
+          if (p.kind === 'text') return incomplete && i === lastText ? null : <Markdown key={i} text={p.text} streaming={turn.status === 'streaming'} />;
           if (p.kind === 'tool') return <ToolCard key={`tool:${p.id}`} part={p} />;
           return (
             <Proposal
@@ -650,6 +693,7 @@ function BotMessage(props: {
               part={p}
               siblings={turn.parts.flatMap((x) => (x.kind === 'proposal' ? [{ tool: x.tool, args: x.args }] : []))}
               state={props.state}
+              disabled={props.confirming || turn.parts.slice(0, i).some((x) => x.kind === 'proposal' && (x.state === 'error' || x.state === 'unverified'))}
               onApply={() => props.onApply(p)}
               onEdit={() => props.onEdit(p)}
               onDismiss={() => props.onDismiss(p)}
@@ -657,10 +701,21 @@ function BotMessage(props: {
             />
           );
         })}
+        {incomplete && (
+          <div className="as-incomplete" role="status">
+            <b>{t(turn.outcome?.status === 'limit' ? 'assistant.outcome.limit' : 'assistant.outcome.partial')}</b>
+            <p>{t('assistant.outcome.review')}</p>
+            {turn.outcome?.failures.map((f) => (
+              <div key={f.id}>
+                {t(`mcp.tool.${f.name}`) === `mcp.tool.${f.name}` ? f.name : t(`mcp.tool.${f.name}`)}: {f.error}
+              </div>
+            ))}
+          </div>
+        )}
         {pending > 1 && turn.status !== 'streaming' && (
           <div className="as-applyall">
             <span>{t('assistant.card.pendingCount', { count: pending })}</span>
-            <button className="btn primary" onClick={props.onApplyAll}>
+            <button className="btn primary" onClick={props.onApplyAll} disabled={props.confirming || !!incomplete || unverified}>
               <Check size={14} /> {t('assistant.card.applyAll')}
             </button>
           </div>
@@ -924,6 +979,7 @@ function summaryRows(
 }
 
 function Proposal(props: {
+  disabled: boolean;
   siblings: Array<{ tool: string; args: Record<string, unknown> }>;
   part: Extract<Part, { kind: 'proposal' }>;
   state: AppState;
@@ -1046,16 +1102,17 @@ function Proposal(props: {
           {part.filled?.length ? <span>{t('assistant.card.filled')}</span> : null}
         </div>
       ) : null}
-      {part.state === 'error' && part.error && (
+      {(part.state === 'error' || part.state === 'unverified') && part.error && (
         <div className="as-card-err icon-text">
           <CircleAlert size={14} /> {part.error}
         </div>
       )}
       <div className="as-card-foot">
-        {done ? (
+        {done || part.state === 'unverified' ? (
           <>
-            <span className="as-ok icon-text">
-              <Check size={15} /> {create ? t('assistant.card.added') : t('assistant.card.done')}
+            <span className={`${done ? 'as-ok' : 'as-muted'} icon-text`}>
+              {done ? <Check size={15} /> : <CircleAlert size={15} />}{' '}
+              {done ? (create ? t('assistant.card.added') : t('assistant.card.done')) : t('assistant.card.unverified')}
             </span>
             {part.subId && (
               <button className="btn" onClick={() => props.onOpen(part.subId!)}>
@@ -1069,15 +1126,19 @@ function Proposal(props: {
           </span>
         ) : (
           <>
-            <button className="btn plain" onClick={props.onDismiss} disabled={part.state === 'applying'}>
+            <button className="btn plain" onClick={props.onDismiss} disabled={props.disabled || part.state === 'applying'}>
               {t('assistant.card.dismiss')}
             </button>
             {create && (
-              <button className="btn" onClick={props.onEdit} disabled={part.state === 'applying'}>
+              <button className="btn" onClick={props.onEdit} disabled={props.disabled || part.state === 'applying'}>
                 <Pencil size={14} /> {t('assistant.card.edit')}
               </button>
             )}
-            <button className={`btn ${destructive ? 'danger-solid' : 'primary'}`} onClick={props.onApply} disabled={part.state === 'applying'}>
+            <button
+              className={`btn ${destructive ? 'danger-solid' : 'primary'}`}
+              onClick={props.onApply}
+              disabled={props.disabled || part.state === 'applying'}
+            >
               {part.state === 'applying' ? <Loader2 size={14} className="spin" /> : <Check size={14} />}
               {create ? t('assistant.card.add') : t('assistant.card.confirm')}
             </button>

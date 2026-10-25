@@ -416,7 +416,8 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/assistant/apply' && method === 'POST') {
     try {
       const result = await apply(env, (await readJson(req)) as Parameters<typeof apply>[1]);
-      return json(result, 200, await getRev(env));
+      // A missing revision after commit must not turn a saved change into a retryable error.
+      return json(result, 200, await getRev(env).catch(() => undefined));
     } catch (e) {
       return bad(e instanceof Error ? e.message : String(e));
     }

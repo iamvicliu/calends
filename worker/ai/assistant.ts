@@ -19,14 +19,22 @@ import {
   type Turn,
 } from '../../shared/deepseek.ts';
 import { locale, t } from '../../shared/i18n.ts';
+import {
+  draftSignature,
+  remainingFailures,
+  writeMismatches,
+  type AssistantOutcome,
+  type ToolFailure,
+  type WriteVerification,
+} from '../../shared/assistant-result.ts';
 import type { Env } from '../env.ts';
-import { decodeEntities, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { decodeEntities, state, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
 import { searchAppStore } from '../appstore.ts';
 import { getKv, loadState, putKv } from '../store.ts';
 
 const KEY = 'assistant';
 /** 一次提问里最多跟模型来回几轮（每轮可能调用多个工具） */
-const MAX_ROUNDS = 8;
+const MAX_ROUNDS = 12;
 
 /** Every ledger tool is available; writes are always drafted and only the apply endpoint saves. */
 export const ASSISTANT_TOOLS: Tool[] = TOOLS;
@@ -105,6 +113,7 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Drafts in the same turn build on each other: later tools already see earlier drafts (a new subscription’s id from create_subscription, a member just added). So do multi-step requests in ONE turn — e.g. create_subscription, then set_share on the returned id, then save_share_member for each member, then record_receivable. Never stop to ask the user to confirm an earlier card first; the user confirms all cards together, in order.',
     '- Spending questions: for one calendar month ("how much in March", "this month vs last month") use get_insights section=month_report with month=YYYY-MM so numbers match the calendar (net cash incl. second-hand transfers). For a subset (a category, status, payment method, tag, region, search words or named subscriptions) use get_insights section=scope_report with filter. Use spending_stats for other periods or groupings (pass the same filter; include_transfers=true to count transfer cash). If a result has incomplete=true, say which currencies lack FX rates instead of treating the null amounts as zero.',
     '- After the tool calls, reply with one or two sentences summarizing what you drafted. For questions about spending, use the read tools and answer with concrete numbers.',
+    '- Verify drafts with get_subscription before declaring a complex history complete: check actual payment dates/count, service-phase boundaries, renewal anchor, and known end/stop date against the user’s request. With phases, payments belong inside the owning phase, never at the top level. Prefer one save_subscription for a complete multi-phase history; its schema includes a gift/early-renewal example. A free gift has price 0; an early payment date is not the paid phase start. Do not report unresolved steps as complete. No draft is saved until user confirmation.',
   ].join('\n');
 }
 
@@ -160,7 +169,7 @@ export async function enrichDraft(args: Record<string, unknown>): Promise<{ args
 }
 
 /** 调一次 DeepSeek（流式），边收边把思考和正文推给前端 */
-async function complete(cfg: AssistantConfig, messages: ApiMessage[], emit: Emit, signal: AbortSignal): Promise<Turn> {
+async function complete(cfg: AssistantConfig, messages: ApiMessage[], emit: Emit, signal: AbortSignal, tools = true): Promise<Turn> {
   const effort = cfg.effort ?? 'low';
   const res = await fetch(`${normBaseUrl(cfg.baseUrl)}/chat/completions`, {
     method: 'POST',
@@ -169,7 +178,9 @@ async function complete(cfg: AssistantConfig, messages: ApiMessage[], emit: Emit
     body: JSON.stringify({
       model: cfg.model || 'deepseek-flash',
       messages,
-      tools: ASSISTANT_TOOLS.map((x) => ({ type: 'function', function: { name: x.name, description: x.description, parameters: x.inputSchema } })),
+      ...(tools
+        ? { tools: ASSISTANT_TOOLS.map((x) => ({ type: 'function', function: { name: x.name, description: x.description, parameters: x.inputSchema } })) }
+        : {}),
       stream: true,
       stream_options: { include_usage: true },
       thinking: { type: effort === 'none' ? 'disabled' : 'enabled' },
@@ -223,19 +234,24 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
       // 这一问里的草稿叠在一起，后面的工具能看到前面的草稿
       const ctx = { env, overlay: new Map(), access: { client: 'assistant', scope: 'write' } } satisfies ToolCtx;
       const drafted = new Set<string>();
+      let failures: ToolFailure[] = [];
+      let exhausted = true;
       for (let round = 0; round < MAX_ROUNDS; round++) {
         const messages: ApiMessage[] = [{ role: 'system', content: await systemPrompt(env) }, ...history, ...added];
         const turn = await complete(cfg, messages, emit, signal);
         added.push(assistantMessage(turn));
         if (turn.usage) emit({ type: 'usage', ...turn.usage });
         const calls = turn.toolCalls.filter(Boolean);
-        if (!calls.length) break;
+        if (!calls.length) {
+          exhausted = false;
+          break;
+        }
         emit({ type: 'step' });
         for (const call of calls) {
           const tool = ASSISTANT_TOOLS.find((x) => x.name === call.function.name);
           const { args, error: parseError } = parseArgs(call.function.arguments);
           // 同一问里重复出同一个写操作草稿：不再执行、不显示，直接告诉模型已经有了
-          const sig = `${call.function.name}:${JSON.stringify({ ...args, dry_run: undefined })}`;
+          const sig = draftSignature(call.function.name, args);
           if (tool?.write && drafted.has(sig)) {
             added.push({
               role: 'tool',
@@ -244,7 +260,6 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
             });
             continue;
           }
-          if (tool?.write) drafted.add(sig);
           emit({ type: 'tool', id: call.id, name: call.function.name, args, status: 'running' });
           let content: string;
           try {
@@ -255,26 +270,9 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
                 tool.name === 'create_subscription' || tool.name === 'update_subscription' ? await enrichDraft(args) : { args, filled: [] as string[] };
               const draft = { ...full, dry_run: true };
               const preview = await tool.run(draft, ctx);
-              const { dry_run: _d, ...clean } = draft as Record<string, unknown>;
-              const pv = preview as {
-                created?: { id: string };
-                member?: { id: string; leave_refund?: { amount: number; currency: string; date: string; note?: string } | null };
-                subscription?: { id?: string; members?: Array<{ id: string; name: string }> };
-                after?: { periods?: string[]; amount?: number; currency?: string; date?: string } | null;
-              };
-              // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览选中的期。
-              if (tool.name === 'record_receivable' && pv.after?.periods) {
-                const { periods, amount, currency, date } = pv.after;
-                Object.assign(clean, { periods, date }, amount != null ? { amount, currency } : {});
-                delete clean.count;
-              }
-              if (tool.name === 'save_share_member' && clean.leave_refund && pv.member?.leave_refund) clean.leave_refund = pv.member.leave_refund;
-              if (pv.created) clean.id = pv.created.id;
-              if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;
-              // 整条保存新建时也固定预览生成的 id，确认后与同一轮后续草稿对得上
-              if (tool.name === 'save_subscription' && pv.subscription?.id && clean.subscription && typeof clean.subscription === 'object')
-                clean.subscription = { ...(clean.subscription as object), id: pv.subscription.id };
-              if (tool.name === 'save_share_member' && !clean.member && pv.member) clean.id = pv.member.id;
+              const clean = confirmationArgs(tool.name, draft, preview);
+              drafted.add(sig);
+              failures = remainingFailures(failures, tool.name, args, preview);
               emit({ type: 'tool', id: call.id, name: tool.name, args: clean, status: 'done' });
               emit({ type: 'proposal', id: call.id, tool: tool.name, args: clean, preview, filled });
               content = JSON.stringify({
@@ -285,11 +283,14 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
               });
             } else {
               const result = await tool.run(args, ctx);
+              failures = remainingFailures(failures, tool.name, args, result);
               emit({ type: 'tool', id: call.id, name: tool.name, args, status: 'done', result });
               content = JSON.stringify(result);
             }
           } catch (e) {
             const message = e instanceof Error ? e.message : String(e);
+            failures = failures.filter((f) => f.id !== call.id);
+            failures.push({ id: call.id, name: call.function.name, args, error: message });
             emit({ type: 'tool', id: call.id, name: call.function.name, args, status: 'error', error: message });
             const deletedNow = [...ctx.overlay.values()].some((v) => v === null);
             content = JSON.stringify({
@@ -300,7 +301,41 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
           added.push({ role: 'tool', tool_call_id: call.id, content: toolContent(content) });
         }
       }
-      emit({ type: 'done', messages: added });
+      if (exhausted) {
+        try {
+          const closing = await complete(
+            cfg,
+            [
+              { role: 'system', content: await systemPrompt(env) },
+              ...history,
+              ...added,
+              {
+                role: 'user',
+                content: `[Execution limit] No tool calls remain. Summarize only successfully prepared drafts and list unfinished steps. Nothing has been saved. Unresolved errors: ${JSON.stringify(failures.map(({ name, error }) => ({ name, error })))}`,
+              },
+            ],
+            emit,
+            signal,
+            false,
+          );
+          added.push(assistantMessage(closing));
+          if (closing.usage) emit({ type: 'usage', ...closing.usage });
+        } catch {
+          // Even if the provider cannot summarize, finish with an authoritative limit outcome.
+          if (signal.aborted) throw new Error('aborted');
+        }
+      }
+      const outcome: AssistantOutcome = {
+        status: exhausted ? 'limit' : failures.length ? 'partial' : 'complete',
+        drafts: drafted.size,
+        failures: failures.map(({ id, name, error }) => ({ id, name, error })),
+      };
+      if (outcome.status !== 'complete')
+        added.push({
+          role: 'user',
+          content: `[Execution status] ${JSON.stringify(outcome)}. Drafts are not saved. Do not treat this request as fully completed.`,
+        });
+      emit({ type: 'done', messages: added, outcome });
     } catch (e) {
       const err = e as Error & { kind?: ErrorKind; status?: number };
       if (signal.aborted) emit({ type: 'done', messages: added, aborted: true });
@@ -319,7 +354,44 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
 export async function apply(env: Env, b: { tool?: string; args?: Record<string, unknown> }) {
   const tool = ASSISTANT_TOOLS.find((x) => x.name === b.tool && x.write);
   if (!tool) throw new Error(t('server.assistant.badTool'));
-  return tool.run({ ...b.args, dry_run: false }, { env });
+  const before = await loadState(env, false);
+  const ctx: ToolCtx = { env, overlay: new Map(), access: { client: 'assistant', scope: 'write' } };
+  const preview = await tool.run({ ...b.args, dry_run: true }, ctx);
+  const args = confirmationArgs(tool.name, b.args ?? {}, preview);
+  const expected = (await state(ctx)).st;
+  const result = (await tool.run({ ...args, dry_run: false }, { env })) as Record<string, unknown>;
+  // The write has committed: a failed read-back must never invite blind retries.
+  let verification: WriteVerification;
+  try {
+    const fields = writeMismatches(before, expected, await loadState(env, false));
+    verification = { status: fields.length ? 'unverified' : 'verified', fields };
+  } catch {
+    verification = { status: 'unverified', fields: [] };
+  }
+  return { ...result, verification };
+}
+
+/** Freeze generated ids/defaults so preview, confirmation and read-back describe the same mutation. */
+function confirmationArgs(name: string, args: Record<string, unknown>, preview: unknown): Record<string, unknown> {
+  const { dry_run: _dry, ...clean } = args;
+  const p = preview as {
+    created?: { id: string };
+    subscription?: { id: string };
+    member?: { id: string; leave_refund?: unknown };
+    after?: { id?: string; periods?: string[]; amount?: number; currency?: string; date?: string };
+  };
+  if (p.created?.id) clean.id = p.created.id;
+  if (name === 'create_subscription' && p.subscription?.id) clean.id = p.subscription.id;
+  if (name === 'save_subscription' && p.subscription?.id && clean.subscription && typeof clean.subscription === 'object')
+    clean.subscription = { ...clean.subscription, id: p.subscription.id };
+  if (name === 'save_share_member' && !clean.member && p.member) clean.id = p.member.id;
+  if (name === 'save_share_member' && clean.leave_refund && p.member?.leave_refund) clean.leave_refund = p.member.leave_refund;
+  if (name === 'record_receivable' && p.after?.periods) {
+    const { id, periods, amount, currency, date } = p.after;
+    Object.assign(clean, { id, periods, date }, amount != null ? { amount, currency } : {});
+    delete clean.count;
+  }
+  return clean;
 }
 
 // ---------- 聊天记录：存在服务端，多台设备共用；「新对话」只是开新的一段，清空要在设置里明确操作 ----------

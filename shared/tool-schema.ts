@@ -33,8 +33,8 @@ export const nullable = (s: Schema): Schema => {
 export const drySchema: Schema = { type: 'boolean', description: 'Preview before/after and references without saving.' };
 
 export function validateToolInput(schema: Schema, value: unknown, path = 'arguments'): void {
-  const fail = () => {
-    throw new Error(t('mcp.error.invalidInput', { field: path }));
+  const fail = (field = path) => {
+    throw new Error(t('mcp.error.invalidInput', { field }));
   };
   const types = Array.isArray(schema.type) ? schema.type : [schema.type];
   if (
@@ -70,12 +70,12 @@ export function validateToolInput(schema: Schema, value: unknown, path = 'argume
   if (Array.isArray(value) && schema.items) value.forEach((v, i) => validateToolInput(schema.items!, v, `${path}[${i}]`));
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const record = value as Record<string, unknown>;
-    for (const key of schema.required ?? []) if (!Object.hasOwn(record, key)) fail();
+    for (const key of schema.required ?? []) if (!Object.hasOwn(record, key)) fail(`${path}.${key}`);
     for (const [key, v] of Object.entries(record)) {
       if (v === undefined && !(schema.required ?? []).includes(key)) continue;
       const child = schema.properties && Object.hasOwn(schema.properties, key) ? schema.properties[key] : undefined;
       if (child) validateToolInput(child, v, `${path}.${key}`);
-      else if (schema.additionalProperties === false) fail();
+      else if (schema.additionalProperties === false) fail(`${path}.${key}`);
     }
   }
 }

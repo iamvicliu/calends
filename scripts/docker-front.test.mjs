@@ -55,7 +55,13 @@ test('Docker 前置转发：伪造 Host 也进不了 /cdn-cgi/，访客 IP 不�
     path: '/api/login',
     method: 'POST',
     body: '{"password":"x"}',
-    headers: { host: 'calends.example.test', 'content-type': 'application/json', 'cf-connecting-ip': '203.0.113.9', 'mf-cf-blob': '{}', 'x-forwarded-for': '198.51.100.7' },
+    headers: {
+      host: 'calends.example.test',
+      'content-type': 'application/json',
+      'cf-connecting-ip': '203.0.113.9',
+      'mf-cf-blob': '{}',
+      'x-forwarded-for': '198.51.100.7',
+    },
   });
   assert.equal(r.status, 201);
   assert.equal(r.body, 'ok');

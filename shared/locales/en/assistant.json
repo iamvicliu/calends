@@ -166,7 +166,8 @@
       "one": "{count} charge",
       "other": "{count} charges"
     },
-    "changes": "Preview changes and references"
+    "changes": "Preview changes and references",
+    "unverified": "Check result"
   },
   "error": {
     "auth": "Invalid API key",
@@ -262,5 +263,13 @@
     "dateUnknown": "Date unknown",
     "terminate": "Terminated"
   },
-  "interrupted": "The reply was cut off before it finished."
+  "interrupted": "The reply was cut off before it finished.",
+  "saveUnknown": "Could not confirm whether this change was saved. Check the ledger before trying again.",
+  "savedUnverified": "Saved, but the result could not be verified. Check the ledger before continuing.",
+  "savedRefreshFailed": "The change was saved, but the page could not refresh. Refresh before confirming more drafts.",
+  "outcome": {
+    "partial": "Some steps are unfinished",
+    "limit": "The tool-call limit was reached",
+    "review": "Prepared drafts have not been saved. Review the successful drafts and unfinished steps before continuing."
+  }
 }
