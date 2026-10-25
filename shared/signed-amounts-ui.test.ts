@@ -354,7 +354,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
 });
 
 test('shared-plan avatars retain owner images, initials, dues colors and overflow in both sizes', async () => {
-  const { memberAboard, memberDues } = await import('./billing.ts');
+  const { collectCurrencyOf, memberAboard, memberDues } = await import('./billing.ts');
   const file = '../app/src/components/ShareAvatars.tsx';
   const source = read(file).split('export function ShareAvatars(')[1];
   const PersonAvatar = load(
@@ -367,6 +367,7 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
     React,
     memberAboard,
     memberDues,
+    collectCurrencyOf,
     PersonAvatar,
     personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     base: (path: string) => path,

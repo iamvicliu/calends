@@ -26,7 +26,7 @@ import {
   Wrench,
   X,
 } from 'lucide-react';
-import { cycleLabel } from '../../../shared/billing.ts';
+import { cycleLabel, collectCurrencyOf } from '../../../shared/billing.ts';
 import { flow, billLabel, cnDate, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
@@ -766,7 +766,7 @@ function summaryRows(
     if (v !== undefined && v !== null && v !== false && v !== '') rows.push([label, v]);
   };
   const day = proposalDay;
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
   switch (tool) {
     case 'record_receivable': {

@@ -16,6 +16,7 @@ import {
   collectionAnchor,
   diffDays,
   LIFETIME_BILL_MONTHS,
+  collectCurrencyOf,
 } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, CarRule, Person, Receipt, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -306,7 +307,7 @@ async function saveReceivable(s: Subscription, memberId: string, r: Receivable) 
 
 /** 成员的各期：算到十年后，可以提前收 */
 const memberLedgerAhead = (state: AppState, s: Subscription, m: ShareMember, today: string) =>
-  memberLedger(s, m, today, state.settings.collectCurrency ?? state.settings.baseCurrency, addMonths(today, 120));
+  memberLedger(s, m, today, collectCurrencyOf(state.settings), addMonths(today, 120));
 
 /**
  * 收款表单（全站唯一）：上面是这辆车和收费标准（只读），下面勾选这笔钱抵扣哪几期、实际收了多少。
@@ -333,7 +334,7 @@ function ReceiptForm({
 }) {
   const today = todayIn(state.settings.timezone);
   const cur = memberFee(state, s, m, today);
-  const collectCcy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collectCcy = collectCurrencyOf(state.settings);
   const edit = [...(m.receipts ?? []), ...(m.waivers ?? [])].find((x) => x.id === editId);
   const name = m.name || t('family.member.defaultName');
   return (
@@ -399,7 +400,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
   const isNew = !member;
   const once = s.cycle.unit === 'lifetime';
   // 收款默认币种：设置里的「合租收款币种」，缺省同本位币
-  const collectCcy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collectCcy = collectCurrencyOf(state.settings);
   const [f, setF] = useState<ShareMember>(() => {
     // 早期单独记的 Telegram 并入通用的联系方式
     const init =
@@ -971,7 +972,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
 
 /** 成员一行的收款状态：逾期几天 / 待收 / 已结清，合租表格和收费弹窗共用 */
 export function memberStatus(state: AppState, s: Subscription, m: ShareMember, today: string) {
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   const d = memberDues(s, today, collect, state).find((x) => x.member.id === m.id);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
   const owe = !!d && d.periodsOwed > 0;

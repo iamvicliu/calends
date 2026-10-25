@@ -1,3 +1,4 @@
+import { collectCurrencyOf } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
@@ -464,7 +465,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           )}
           <Cell label={t('settings.books.collectCurrency')}>
             <CurrencySelect
-              value={s.collectCurrency ?? s.baseCurrency}
+              value={collectCurrencyOf(s)}
               onChange={(c) => run(() => saveSettings({ collectCurrency: c }))}
               ariaLabel={t('settings.books.collectCurrency')}
             />

@@ -18,6 +18,7 @@ import {
   memberCollection,
   memberUnpaidFrom,
   isStopped,
+  collectCurrencyOf,
 } from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { useRef, useState } from 'react';
@@ -112,7 +113,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const [filter, setFilter] = usePref<CarFilter>('car-filter', 'live', (v): v is CarFilter => (CAR_FILTERS as readonly string[]).includes(v));
   const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
   const all = [...owned, ...ended];
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   // 每辆车的成员待收、账、下次扣款只算一次：筛选、排序、统计、卡片与表格共用
   const duesBy = new Map(all.map((s) => [s.id, memberDues(s, today, collect, state)]));
   const duesOf = (s: Subscription) => duesBy.get(s.id) ?? memberDues(s, today, collect, state);
@@ -584,10 +585,10 @@ function MemberRows({
   masked?: boolean;
   win?: ReturnType<typeof carpoolTimeline>;
 }) {
-  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter(
+  const dues = memberDues(s, today, collectCurrencyOf(state.settings), state).filter(
     (d) => (includeLeft || !d.member.left || d.member.left > today) && (!only || only(d.member)),
   );
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   return (
     <div>
       {dues.map((d) => {
@@ -1114,7 +1115,7 @@ export function CarSheet({
   const stopped = isStopped(st);
   const next = nextCharge(s, addDays(today, 1));
   const roster = carpoolRoster(s, today);
-  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);
+  const dues = memberDues(s, today, collectCurrencyOf(state.settings), state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
   const oweSum = dues.reduce((a, d) => a + convertOn(d.owed, d.currency, base, today, undefined, state.fx), 0);
   const hasPending = oweSum > 0 || !Number.isFinite(oweSum);
