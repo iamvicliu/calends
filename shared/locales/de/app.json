@@ -82,5 +82,7 @@
     "months": "Voriger / nächster Monat (Jahr in Jahresansicht)",
     "today": "Zu heute wechseln",
     "hint": "Globale Einzeltasten sind beim Tippen und bei geöffneten Overlays ausgesetzt. Formulare lassen sich erst nach Schließen der Auswahl absenden. In Textbereichen fügt Enter einen Zeilenumbruch ein."
-  }
+  },
+  "crashed": "Auf dieser Seite ist ein Fehler aufgetreten. Zum Fortfahren neu laden.",
+  "reload": "Neu laden"
 }

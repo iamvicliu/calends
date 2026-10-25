@@ -81,5 +81,7 @@
     "months": "Tháng trước / sau (năm trong chế độ xem năm)",
     "today": "Về hôm nay",
     "hint": "Phím tắt đơn toàn cục tạm dừng khi nhập hoặc khi lớp phủ mở. Đóng bộ chọn trước khi gửi. Trong ô nhiều dòng, Enter xuống dòng."
-  }
+  },
+  "crashed": "Trang gặp lỗi. Hãy tải lại để tiếp tục.",
+  "reload": "Tải lại"
 }

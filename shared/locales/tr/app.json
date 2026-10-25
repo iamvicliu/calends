@@ -82,5 +82,7 @@
     "months": "Önceki / sonraki ay (yıl görünümünde yıl)",
     "today": "Bugüne git",
     "hint": "Yazarken veya bir katman açıkken genel tek tuşlu kısayollar duraklar. Göndermeden önce seçicileri kapatın. Çok satırlı alanda Enter yeni satır ekler."
-  }
+  },
+  "crashed": "Bu sayfada bir sorun oluştu. Devam etmek için yeniden yükleyin.",
+  "reload": "Yeniden yükle"
 }

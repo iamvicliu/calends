@@ -82,5 +82,7 @@
     "months": "Mes anterior / siguiente (año en vista anual)",
     "today": "Ir a hoy",
     "hint": "Los atajos globales de una tecla se pausan al escribir o con una capa abierta. Cierra los selectores antes de enviar. En áreas de texto, Intro inserta una línea nueva."
-  }
+  },
+  "crashed": "Algo salió mal en esta página. Recarga para continuar.",
+  "reload": "Recargar"
 }
