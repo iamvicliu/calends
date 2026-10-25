@@ -60,6 +60,7 @@ import type { Revision } from './store.ts';
 import { mergePrefs, type Prefs } from '../shared/prefs.ts';
 import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './ai/mcp.ts';
+import { fetchPublic } from './url-guard.ts';
 import { appStorePlans, searchAppStore, TOOLS, toolTitle } from './ai/mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
 import { apply, chat, clearChats, listChats, saveChat, saveConfig, testConfig, viewConfig } from './ai/assistant.ts';
@@ -150,9 +151,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
 
   // 图片中转：分享图要把订阅图标画进 canvas，跨域图片会污染画布，所以经同源转一道。只转 https 的图片，限 1MB
   if (path === '/api/img' && method === 'GET') {
-    const u = new URL(req.url).searchParams.get('u') ?? '';
-    if (!u.startsWith('https://')) return bad('bad url', 400);
-    const res = await fetch(u, { cf: { cacheTtl: 86400, cacheEverything: true } });
+    // 只转公网地址，跳转的每一跳也检查：不能被拿来探测服务器所在的内网
+    const res = await fetchPublic(new URL(req.url).searchParams.get('u') ?? '', { cf: { cacheTtl: 86400, cacheEverything: true } });
+    if (!res) return bad('bad url', 400);
     const type = res.headers.get('content-type') ?? '';
     if (!res.ok || !type.startsWith('image/')) return bad('not an image', 502);
     const body = await res.arrayBuffer();
