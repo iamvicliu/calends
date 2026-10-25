@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { uid } from '../../../shared/billing.ts';
+import { addDays, addMonths, diffDays, uid } from '../../../shared/billing.ts';
 import { periodsTotal } from '../../../shared/carpool.ts';
 import { convertOn } from '../../../shared/fx.ts';
 import { cnDate, cnDateFull, currencyDecimals, flow, money } from '../../../shared/format.ts';
@@ -33,7 +33,7 @@ export function ReceivableSheet({
   state,
   title,
   head,
-  periods,
+  ledger,
   record,
   edit,
   preset,
@@ -47,8 +47,8 @@ export function ReceivableSheet({
   title: ReactNode;
   /** 表单顶部：是谁、哪辆车、收费标准 */
   head?: ReactNode;
-  /** 这笔账的各期（含未来的期） */
-  periods: LedgerPeriod[];
+  /** 这笔账的各期，至少算到 through；往后要提前收时传更晚的日子再算 */
+  ledger: (through: string) => LedgerPeriod[];
   record: Receivable;
   edit?: Receipt | Waiver;
   /** 新记一笔时默认勾选的期；缺省为最早没结清的一期 */
@@ -60,12 +60,19 @@ export function ReceivableSheet({
   /** 收款默认币种；缺省同应收 */
   defaultCurrency?: string;
 }) {
+  // 往后算到哪天：先算两年，点「更多」时按需往后延，没有尽头
+  const [horizon, setHorizon] = useState(() => addMonths(today, 24));
+  const periods = ledger(horizon);
   const [mode, setMode] = useState<'receipt' | 'waiver'>(edit && !isReceipt(edit) ? 'waiver' : 'receipt');
   // 修改旧记录时，期按现在的切法对上；对不上的单独列出
   const [keys, setKeys] = useState<string[]>(() =>
     edit
       ? [...resolvedPeriods(periods, edit), ...edit.periods.filter((k) => !resolveKey(periods, k))]
-      : (preset ?? periods.filter((p) => !isSettled(p)).slice(0, 1).map((p) => p.key)),
+      : (preset ??
+        periods
+          .filter((p) => !isSettled(p))
+          .slice(0, 1)
+          .map((p) => p.key)),
   );
   const picked = keys.map((k) => periods.find((p) => p.key === k)).filter((p): p is LedgerPeriod => !!p);
   const total = periodsTotal(state, picked);
@@ -83,7 +90,16 @@ export function ReceivableSheet({
   const [ahead, setAhead] = useState(() => Math.max(1, open.filter((p) => p.from > today && keys.includes(p.key)).length));
   const upcoming = open.filter((p) => p.from > today);
   const shown = open.filter((p) => p.from <= today || keys.includes(p.key) || upcoming.indexOf(p) < ahead);
-  const more = open.length > shown.length;
+  // 每点一次「更多」多列大约一年的期：年付两期、月付十二期，周付也最多十二期
+  const sample = upcoming[0] ?? periods.at(-1);
+  const step = sample ? Math.min(12, Math.max(2, Math.round(365 / (diffDays(sample.from, sample.until) + 1)))) : 2;
+  // 订阅结束或成员退出后没有新的期；否则可以一直往后
+  const last = periods.at(-1);
+  const more = upcoming.length > ahead || (!!last && last.until >= horizon);
+  const showMore = () => {
+    setAhead((n) => n + step);
+    if (upcoming.length < ahead + step && last) setHorizon(addDays(last.until, Math.max(366, (diffDays(last.from, last.until) + 1) * step)));
+  };
   // 指向已不存在的期（改过加入日、收费周期）的旧记录：列出来，取消勾选后才能保存
   const lost = keys.filter((k) => !periods.some((p) => p.key === k));
   const [saving, setSaving] = useState(false);
@@ -121,7 +137,12 @@ export function ReceivableSheet({
       foot={
         <>
           {edit ? (
-            <button className="btn plain" style={{ color: 'var(--red)' }} disabled={saving} onClick={() => write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))}>
+            <button
+              className="btn plain"
+              style={{ color: 'var(--red)' }}
+              disabled={saving}
+              onClick={() => write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))}
+            >
               {t('common.delete')}
             </button>
           ) : (
@@ -149,10 +170,7 @@ export function ReceivableSheet({
             ]}
           />
         </div>
-        <Group
-          title={t('receivable.periods')}
-          foot={mode === 'waiver' ? t('receivable.waiverFoot') : keys.length > 1 ? t('receivable.splitFoot') : undefined}
-        >
+        <Group title={t('receivable.periods')} foot={mode === 'waiver' ? t('receivable.waiverFoot') : keys.length > 1 ? t('receivable.splitFoot') : undefined}>
           {open.length === 0 && !lost.length && <div className="cell muted">{t('receivable.allSettled')}</div>}
           {lost.map((k) => (
             <label key={k} className="cell rv-period lost">
@@ -168,7 +186,7 @@ export function ReceivableSheet({
               <input type="checkbox" checked={keys.includes(p.key)} onChange={() => toggle(p.key)} />
               <span className="rv-period-l">
                 <span>{periodRange(p)}</span>
-                <small className={p.status === "due" ? "due" : undefined}>
+                <small className={p.status === 'due' ? 'due' : undefined}>
                   {t(own.has(p.key) && isSettled(p) ? 'receivable.status.this' : `receivable.status.${p.status}`)}
                 </small>
               </span>
@@ -176,7 +194,7 @@ export function ReceivableSheet({
             </label>
           ))}
           {more && (
-            <button type="button" className="cell tap rv-more" onClick={() => setAhead((n) => n + 6)}>
+            <button type="button" className="cell tap rv-more" onClick={showMore}>
               {t('receivable.more')}
             </button>
           )}
@@ -213,17 +231,7 @@ export function ReceivableSheet({
  * 各期一览：最近的若干期一格一期，已收、已免、欠着、未到期颜色不同，一眼看出哪几期没收（可以不连续）。
  * 点欠着或未到期的格子去记收款，点已收的格子打开那一笔
  */
-export function PeriodStrip({
-  periods,
-  today,
-  onPick,
-  max = 12,
-}: {
-  periods: LedgerPeriod[];
-  today: string;
-  onPick: (p: LedgerPeriod) => void;
-  max?: number;
-}) {
+export function PeriodStrip({ periods, today, onPick, max = 12 }: { periods: LedgerPeriod[]; today: string; onPick: (p: LedgerPeriod) => void; max?: number }) {
   // 到今天为止的期，加上提前收了的期，再加下一期
   const past = periods.filter((p) => p.from <= today || p.status === 'paid' || p.status === 'waived');
   const next = periods.find((p) => p.from > today && !past.includes(p));

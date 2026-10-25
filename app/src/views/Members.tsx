@@ -335,7 +335,7 @@ function ReceiptForm({
 }) {
   const today = todayIn(state.settings.timezone);
   const cur = memberFee(state, s, m, today);
-  const { periods } = memberLedgerAhead(state, s, m, today);
+  const collectCcy = state.settings.collectCurrency ?? state.settings.baseCurrency;
   const edit = [...(m.receipts ?? []), ...(m.waivers ?? [])].find((x) => x.id === editId);
   const name = m.name || t('family.member.defaultName');
   return (
@@ -374,7 +374,7 @@ function ReceiptForm({
           )}
         </>
       }
-      periods={periods}
+      ledger={(through) => memberLedger(s, m, today, collectCcy, through).periods}
       record={m}
       edit={edit}
       preset={preset}
@@ -514,10 +514,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
     );
   };
   const removeRecordById = (id: string) =>
-    run(
-      () => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)),
-      t('receivable.toastRemoved'),
-    );
+    run(() => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)), t('receivable.toastRemoved'));
 
   const save = () =>
     run(
@@ -530,7 +527,8 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
         const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
         // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加这里调整的期初结清和首笔收款
         const latest = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
-        const opened = openingEdit === null ? latest : { ...latest, ...setOpening(latest, memberPeriods(current, latest, openingEdit ?? today, collectCcy), openingEdit) };
+        const opened =
+          openingEdit === null ? latest : { ...latest, ...setOpening(latest, memberPeriods(current, latest, openingEdit ?? today, collectCcy), openingEdit) };
         const out: ShareMember =
           isNew && firstPay
             ? {
@@ -866,7 +864,11 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                       onClick={() => setReceipt({ edit: r.id })}
                       aria-label={t('family.member.editPayAria')}
                     >
-                      {isReceipt(r) && !opening ? <span className="green">{flow(r.amount, r.currency)}</span> : <span>{t(opening ? 'receivable.opening' : 'receivable.waived')}</span>}
+                      {isReceipt(r) && !opening ? (
+                        <span className="green">{flow(r.amount, r.currency)}</span>
+                      ) : (
+                        <span>{t(opening ? 'receivable.opening' : 'receivable.waived')}</span>
+                      )}
                       <small>
                         {copyParts(opening ? recordPeriods(r, ledger.periods) : `${cnDateFull(r.date)}\n${recordPeriods(r, ledger.periods)}`)}
                         {copyParts(r.note ? `\n${r.note}` : '')}
@@ -939,7 +941,9 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
         )}
       </div>
       {/* 记一笔、改某一笔：叠在成员表单上，存完回到这里，成员表单里没保存的修改不丢 */}
-      {receipt !== null && member && <ReceiptForm state={state} s={s} member={member} editId={receipt.edit} preset={receipt.preset} onDone={() => setReceipt(null)} />}
+      {receipt !== null && member && (
+        <ReceiptForm state={state} s={s} member={member} editId={receipt.edit} preset={receipt.preset} onDone={() => setReceipt(null)} />
+      )}
       {profile && f.personId && (
         <PersonProfileSheet
           state={state}
@@ -1009,7 +1013,10 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
     push(p.from, p.until, p.status === 'paid' ? 'paid' : p.status === 'due' ? 'due' : p.status === 'upcoming' ? 'future' : 'waived');
   }
   // 退出时已付到退出日之后、又没退钱：退出后到已付至的那段画成没用完
-  const paid = m.left && !m.leaveRefund ? memberLedger(s, { ...m, left: undefined }, today, s.currency, m.left).periods.filter((p) => p.status === 'paid' && p.until >= m.left!) : [];
+  const paid =
+    m.left && !m.leaveRefund
+      ? memberLedger(s, { ...m, left: undefined }, today, s.currency, m.left).periods.filter((p) => p.status === 'paid' && p.until >= m.left!)
+      : [];
   if (paid.length) {
     const from = [m.left!, start].sort().at(-1)!;
     const last = paid.at(-1)!.until;

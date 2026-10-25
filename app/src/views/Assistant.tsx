@@ -757,11 +757,17 @@ function summaryRows(
       add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
       if (action === 'charged') {
         add(t('proxy.table.date'), day(a.charge));
-        add(t('proxy.table.charged'), a.charged_amount != null ? money(Number(a.charged_amount), String(a.charged_currency ?? subCcy ?? collect)) : t('receivable.chargedClear'));
+        add(
+          t('proxy.table.charged'),
+          a.charged_amount != null ? money(Number(a.charged_amount), String(a.charged_currency ?? subCcy ?? collect)) : t('receivable.chargedClear'),
+        );
         break;
       }
       const keys = r?.periods ?? (Array.isArray(a.periods) ? (a.periods as string[]) : undefined);
-      add(t('receivable.periods'), keys ? keys.map((k) => cnDate(k)).join('\n') : a.count ? t('receivable.periodsCount', { count: Number(a.count) }) : undefined);
+      add(
+        t('receivable.periods'),
+        keys ? keys.map((k) => cnDate(k)).join('\n') : a.count ? t('receivable.periodsCount', { count: Number(a.count) }) : undefined,
+      );
       if (action !== 'delete' && action !== 'waive') {
         const amount = r?.amount ?? (a.amount != null ? Number(a.amount) : undefined);
         add(t('assistant.f.amount'), amount != null ? <span className="green">{flow(amount, String(r?.currency ?? a.currency ?? collect))}</span> : undefined);

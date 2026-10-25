@@ -1,7 +1,7 @@
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
-import { addDays, addMonths, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../shared/types.ts';
@@ -379,9 +379,6 @@ function ReceivedCell({ r, base }: { r: Row; base: string }) {
   );
 }
 
-/** 代付的各期：算到十年后，可以提前收 */
-const proxyLedgerAhead = (s: Subscription, today: string) => proxyLedger(s, today, addMonths(today, 120));
-
 /**
  * 记一笔收款或免收（与合租同一个表单）：勾选抵扣哪几期，可以跳过前面没收的期，也可以勾还没扣款的期（预收）；
  * 金额按各期实扣的比例分摊。传 edit 时修改那一笔
@@ -411,7 +408,7 @@ function ReceiptSheet({
           {px.forName || t('proxy.unset')}
         </span>
       }
-      periods={proxyLedgerAhead(s, today).periods}
+      ledger={(through) => proxyLedger(s, today, through).periods}
       record={px}
       edit={edit}
       preset={preset}
@@ -438,17 +435,22 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const chargedBase = toBaseAt(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
   const rec = row.receipt ?? row.waiver;
   const diff = row.receivedBase == null ? undefined : row.receivedBase - chargedBase;
-  const dirty = charged !== (row.charge?.amount != null ? String(row.charge.amount) : '') || (charged !== '' && chargedCcy !== (row.charge?.currency ?? row.listCurrency));
+  const dirty =
+    charged !== (row.charge?.amount != null ? String(row.charge.amount) : '') || (charged !== '' && chargedCcy !== (row.charge?.currency ?? row.listCurrency));
 
   const save = () =>
     run(async () => {
       const amount = charged === '' ? undefined : Number(charged);
-      const { after } = recordProxyCharge(live, {
-        charge: row.date,
-        ...(amount != null ? { amount } : {}),
-        ...(amount != null && chargedCcy !== row.listCurrency ? { currency: chargedCcy } : {}),
-        ...(row.charge?.note ? { note: row.charge.note } : {}),
-      }, today);
+      const { after } = recordProxyCharge(
+        live,
+        {
+          charge: row.date,
+          ...(amount != null ? { amount } : {}),
+          ...(amount != null && chargedCcy !== row.listCurrency ? { currency: chargedCcy } : {}),
+          ...(row.charge?.note ? { note: row.charge.note } : {}),
+        },
+        today,
+      );
       await saveSub(after);
       onClose();
     }, t('proxy.entry.saved'));
@@ -484,7 +486,13 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
           >
             <Cell label={t('proxy.entry.amount')}>
-              <MoneyInput ccy={chargedCcy} className="num" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged((ev.target as HTMLInputElement).value)} />
+              <MoneyInput
+                ccy={chargedCcy}
+                className="num"
+                value={charged}
+                placeholder={String(row.list)}
+                onChange={(ev) => setCharged((ev.target as HTMLInputElement).value)}
+              />
             </Cell>
             <Cell label={t('proxy.entry.currency')}>
               <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
@@ -506,7 +514,13 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             <button type="button" className="cell tap" disabled={!!state.readonly || !!row.receipt?.opening} onClick={() => setReceipt(true)}>
               <span className="cell-l">
                 <ReceivedCell r={row} base={base} />
-                <small className="muted">{copyParts([cnDateFull(rec.date), rec.periods.length > 1 && t('receivable.periodsCount', { count: rec.periods.length }), rec.note].filter(Boolean).join('\n'))}</small>
+                <small className="muted">
+                  {copyParts(
+                    [cnDateFull(rec.date), rec.periods.length > 1 && t('receivable.periodsCount', { count: rec.periods.length }), rec.note]
+                      .filter(Boolean)
+                      .join('\n'),
+                  )}
+                </small>
               </span>
             </button>
           ) : (
