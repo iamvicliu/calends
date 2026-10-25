@@ -42,7 +42,20 @@ export function detailHistoryEnd(sub: Subscription, today: string): { date: stri
 }
 
 /** 短周期保留一年节奏；稀疏扣款只展示下一笔，查询范围覆盖多年周期。 */
+/**
+ * 详情里头部、指标、进度条各取一次预测：按订阅对象与日期记住结果，同一次渲染不重复推算。
+ * 订阅改动后是新对象（store 不原地修改），缓存自然失效。
+ */
+const forecastCache = new WeakMap<Subscription, Map<string, ReturnType<typeof computeForecast>>>();
 export function detailForecast(sub: Subscription, today: string) {
+  let byDay = forecastCache.get(sub);
+  if (!byDay) forecastCache.set(sub, (byDay = new Map()));
+  let hit = byDay.get(today);
+  if (!hit) byDay.set(today, (hit = computeForecast(sub, today)));
+  return hit;
+}
+
+function computeForecast(sub: Subscription, today: string) {
   if (sub.cycle.unit === 'lifetime') return { sparse: true, charges: [] };
   const from = addDays(today, 1);
   const ended = isStopped(effectiveStatus(sub, today));
