@@ -63,11 +63,14 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Категория не найдена или неоднозначна: {q}. Варианты: {list}",
-    "proxyPeriodsShort": {
-      "one": "С {from} осталось только {count} списание — меньше, чем покрывает платёж",
-      "few": "С {from} осталось только {count} списания — меньше, чем покрывает платёж",
-      "many": "С {from} осталось только {count} списаний — меньше, чем покрывает платёж",
-      "other": "С {from} осталось только {count} списания — меньше, чем покрывает платёж"
+    "noPeriods": "Выберите хотя бы один период, каждый только раз",
+    "periodUnknown": "{period} — не период этого долга",
+    "periodTaken": "За период {period} уже есть платёж или прощение",
+    "periodsShort": {
+      "one": "Остался только {count} неоплаченный период — меньше, чем покрывает платёж",
+      "few": "Осталось только {count} неоплаченных периода — меньше, чем покрывает платёж",
+      "many": "Осталось только {count} неоплаченных периодов — меньше, чем покрывает платёж",
+      "other": "Осталось только {count} неоплаченного периода — меньше, чем покрывает платёж"
     }
   },
   "tool": {

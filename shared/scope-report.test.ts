@@ -52,9 +52,10 @@ const owner = () =>
           feeCurrency: 'USD',
           joined: '2026-01-01',
           billEvery: 1,
-          payments: [
-            { date: '2026-09-01', amount: 4, currency: 'USD', until: '2026-09-30' },
-            { date: '2026-10-03', amount: 4, currency: 'USD', until: '2026-10-31' },
+          // 9 月初收 8 月那期、10 月初收 9 月那期；10 月那期还没收
+          receipts: [
+            { id: 'r1', date: '2026-09-01', amount: 4, currency: 'USD', periods: ['2026-08-01'] },
+            { id: 'r2', date: '2026-10-03', amount: 4, currency: 'USD', periods: ['2026-09-01'] },
           ],
         },
       ],
@@ -390,7 +391,7 @@ test('top is limited to five, refunds are not charges, and ties are stable', () 
 
 test('proxy subscriptions never enter any block', () => {
   const own = sub('Own');
-  const proxy = sub('Proxy', { ...stopped(), id: 'Proxy', proxy: { forName: 'Other', entries: [] }, share: owner().share });
+  const proxy = sub('Proxy', { ...stopped(), id: 'Proxy', proxy: { forName: 'Other' }, share: owner().share });
   const st = state([own, proxy]);
   assert.deepEqual(scopeReport(st, [own, proxy], today), scopeReport(st, [own], today));
   assert.deepEqual(monthReport(st, '2026-10', today), monthReport(state([own]), '2026-10', today));
@@ -404,7 +405,7 @@ test('mini calendar series uses six consecutive selected months and the exact fu
     { date: '2026-10-22', amount: -30, kind: 'refund' },
     { date: '2026-10-23', amount: 999, kind: 'failed' },
   ];
-  const st = state([s, sub('Proxy', { price: 999, proxy: { forName: 'Other', entries: [] } })]);
+  const st = state([s, sub('Proxy', { price: 999, proxy: { forName: 'Other' } })]);
   for (const month of ['2026-01', '2026-10', '2026-12']) {
     const report = monthReport(st, month, today);
     assert.equal(report.months.length, 6);

@@ -63,7 +63,10 @@
     "references": "此项仍被引用。请指定 migrate_to 或先移除这些引用：{references}",
     "staleRecord": "记录在预览后已变化，请重新读取并预览。",
     "noCategory": "分類不存在或有歧義：{q}。可選分類：{list}",
-    "proxyPeriodsShort": "由 {from} 起只剩 {count} 期，不夠這筆要涵蓋的期數"
+    "noPeriods": "請至少選一期，且同一期只能寫一次",
+    "periodUnknown": "{period} 不是這筆賬裡的一期",
+    "periodTaken": "{period} 這一期已經記過收款或免收",
+    "periodsShort": "只剩 {count} 期沒結清，不夠這筆要抵扣的期數"
   },
   "tool": {
     "get_overview": "帳本概況",

@@ -1,0 +1,60 @@
+{
+  "periods": "Paiements couverts",
+  "periodsSpan": {
+    "one": "{count} paiement, {from} – {until}",
+    "other": "{count} paiements, {from} – {until}"
+  },
+  "periodsCount": {
+    "one": "{count} paiement",
+    "other": "{count} paiements"
+  },
+  "unmatched": "Paiement à partir du {date} (absent de l’échéancier)",
+  "unmatchedHint": "La date d’entrée ou le cycle de facturation a changé. Décochez-le et choisissez les paiements actuels.",
+  "unmatchedNote": {
+    "one": "{count} enregistrement ne correspond plus à l’échéancier. Ouvrez-le pour choisir les paiements.",
+    "other": "{count} enregistrements ne correspondent plus à l’échéancier. Ouvrez-les pour choisir les paiements."
+  },
+  "modeReceipt": "Paiement",
+  "modeWaiver": "Remise",
+  "record": "Enregistrer un paiement",
+  "waive": "Remettre des paiements",
+  "actual": "Reçu",
+  "waiverGroup": "Remise",
+  "receivedOn": "Reçu le",
+  "waivedOn": "Convenu le",
+  "amount": "Montant",
+  "currency": "Devise",
+  "note": "Note",
+  "notePh": "Facultatif, p. ex. mode de virement",
+  "splitFoot": "Un paiement couvrant plusieurs échéances est réparti au prorata de ce que chacune doit.",
+  "waiverFoot": "Les échéances remises ne sont ni dues ni comptées comme argent reçu.",
+  "dueFoot": "Ces échéances totalisent {amount}. Le montant réel est enregistré.",
+  "allSettled": "Tout est réglé",
+  "more": "Afficher plus d’échéances à venir",
+  "opening": "Réglé avant le suivi",
+  "openingHint": "Les échéances jusqu’à cette date sans paiement enregistré sont considérées comme réglées avant le début du suivi (non comptées comme argent reçu).",
+  "waived": "Remis",
+  "toastReceived": "Paiement de {amount} enregistré",
+  "toastWaived": {
+    "one": "{count} paiement remis",
+    "other": "{count} paiements remis"
+  },
+  "toastRemoved": "Supprimé. Ces échéances redeviennent impayées",
+  "chargedClear": "Prix de l’abonnement",
+  "action": "Action",
+  "actions": {
+    "record": "Enregistrer un paiement",
+    "waive": "Remettre",
+    "update": "Modifier",
+    "delete": "Supprimer",
+    "charged": "Corriger le débit"
+  },
+  "status": {
+    "paid": "Payé",
+    "waived": "Remis",
+    "free": "Gratuit",
+    "due": "Dû",
+    "upcoming": "Pas encore dû",
+    "this": "Ce paiement"
+  }
+}

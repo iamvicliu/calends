@@ -2,6 +2,7 @@ import { validatePeopleAvatars } from '../shared/avatar.ts';
 import { FALLBACK_FX, migrateRenewalRules } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
 import { linkPeople } from '../shared/people.ts';
+import { migrateReceivables } from '../shared/receivables-legacy.ts';
 import type { Prefs } from '../shared/prefs.ts';
 import type { Env } from './env.ts';
 import { keepSet, slimFxHistory } from './fx.ts';
@@ -85,6 +86,22 @@ async function ensurePeople(env: Env, state: AppState): Promise<boolean> {
   return true;
 }
 
+/**
+ * 旧版应收（已付至、按覆盖期记的收款、代付逐期记录）一次性转成按期记账（可重复执行，转过的原样返回）。
+ * 内存里总是转好再用；write 时写回库里，导入、恢复了旧备份后也会再转一次
+ */
+async function ensureReceivables(env: Env, state: AppState, write: boolean): Promise<boolean> {
+  const changed: Subscription[] = [];
+  state.subscriptions = state.subscriptions.map((s) => {
+    const next = migrateReceivables(s, state.settings.baseCurrency);
+    if (next !== s) changed.push(next);
+    return next;
+  });
+  if (!changed.length || !write) return false;
+  await writePeople(env, undefined, changed);
+  return true;
+}
+
 export async function loadState(env: Env, migratePeople = true): Promise<AppState> {
   // D1 batch reads one transactional snapshot: never pair stale data with a newer rev.
   const rows = await env.DB.batch([
@@ -111,7 +128,7 @@ export async function loadState(env: Env, migratePeople = true): Promise<AppStat
     fx: kv.fx ?? FALLBACK_FX,
     prefs: (kv.prefs as Prefs | undefined) ?? {},
   };
-  if (migratePeople && (await ensurePeople(env, state))) return loadState(env);
+  if ((await ensureReceivables(env, state, migratePeople)) || (migratePeople && (await ensurePeople(env, state)))) return loadState(env);
   state.fxHistory = slimFxHistory((rows[3] as D1Result<{ date: string; rates: string }>).results, keepSet(state));
   return state;
 }

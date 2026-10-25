@@ -1,0 +1,60 @@
+{
+  "periods": "Periods covered",
+  "periodsSpan": {
+    "one": "{count} period, {from} – {until}",
+    "other": "{count} periods, {from} – {until}"
+  },
+  "periodsCount": {
+    "one": "{count} period",
+    "other": "{count} periods"
+  },
+  "unmatched": "Period from {date} (no longer in the schedule)",
+  "unmatchedHint": "The join date or billing cycle changed. Untick it and pick current periods.",
+  "unmatchedNote": {
+    "one": "{count} record no longer matches the schedule. Open it to pick periods.",
+    "other": "{count} records no longer match the schedule. Open them to pick periods."
+  },
+  "modeReceipt": "Payment",
+  "modeWaiver": "Waive",
+  "record": "Record payment",
+  "waive": "Waive periods",
+  "actual": "Received",
+  "waiverGroup": "Waiver",
+  "receivedOn": "Received on",
+  "waivedOn": "Agreed on",
+  "amount": "Amount",
+  "currency": "Currency",
+  "note": "Note",
+  "notePh": "Optional, e.g. transfer method",
+  "splitFoot": "A payment covering several periods is split in proportion to what each period is due.",
+  "waiverFoot": "Waived periods are neither owed nor counted as money received.",
+  "dueFoot": "These periods are due {amount}. The actual amount is recorded.",
+  "allSettled": "All periods are settled",
+  "more": "Show more upcoming periods",
+  "opening": "Settled before tracking",
+  "openingHint": "Periods on or before this date without a recorded payment count as settled before tracking began (not counted as money received).",
+  "waived": "Waived",
+  "toastReceived": "Payment of {amount} recorded",
+  "toastWaived": {
+    "one": "{count} period waived",
+    "other": "{count} periods waived"
+  },
+  "toastRemoved": "Deleted. These periods are unpaid again",
+  "chargedClear": "Plan price",
+  "action": "Action",
+  "actions": {
+    "record": "Record payment",
+    "waive": "Waive",
+    "update": "Edit record",
+    "delete": "Delete record",
+    "charged": "Correct charge"
+  },
+  "status": {
+    "paid": "Paid",
+    "waived": "Waived",
+    "free": "Free",
+    "due": "Owed",
+    "upcoming": "Not due",
+    "this": "This payment"
+  }
+}

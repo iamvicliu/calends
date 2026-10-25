@@ -1,0 +1,60 @@
+{
+  "periods": "Pagamentos cobertos",
+  "periodsSpan": {
+    "one": "{count} pagamento, {from} – {until}",
+    "other": "{count} pagamentos, {from} – {until}"
+  },
+  "periodsCount": {
+    "one": "{count} pagamento",
+    "other": "{count} pagamentos"
+  },
+  "unmatched": "Pagamento a partir de {date} (não está mais no calendário)",
+  "unmatchedHint": "A data de entrada ou o ciclo de cobrança mudou. Desmarque e escolha os pagamentos atuais.",
+  "unmatchedNote": {
+    "one": "{count} registro não corresponde mais ao calendário. Abra para escolher pagamentos.",
+    "other": "{count} registros não correspondem mais ao calendário. Abra para escolher pagamentos."
+  },
+  "modeReceipt": "Recebimento",
+  "modeWaiver": "Dispensar",
+  "record": "Registrar recebimento",
+  "waive": "Dispensar pagamentos",
+  "actual": "Recebido",
+  "waiverGroup": "Dispensa",
+  "receivedOn": "Recebido em",
+  "waivedOn": "Combinado em",
+  "amount": "Valor",
+  "currency": "Moeda",
+  "note": "Observação",
+  "notePh": "Opcional, ex.: forma de transferência",
+  "splitFoot": "Um recebimento que cobre vários pagamentos é dividido proporcionalmente ao valor devido em cada um.",
+  "waiverFoot": "Pagamentos dispensados não são devidos nem contam como dinheiro recebido.",
+  "dueFoot": "Estes pagamentos somam {amount}. O valor real é registrado.",
+  "allSettled": "Tudo quitado",
+  "more": "Mostrar mais pagamentos futuros",
+  "opening": "Quitado antes do registro",
+  "openingHint": "Pagamentos até esta data sem recebimento registrado contam como quitados antes de o registro começar (não contam como dinheiro recebido).",
+  "waived": "Dispensado",
+  "toastReceived": "Recebimento de {amount} registrado",
+  "toastWaived": {
+    "one": "{count} pagamento dispensado",
+    "other": "{count} pagamentos dispensados"
+  },
+  "toastRemoved": "Excluído. Estes pagamentos voltam a ficar pendentes",
+  "chargedClear": "Preço do plano",
+  "action": "Ação",
+  "actions": {
+    "record": "Registrar recebimento",
+    "waive": "Dispensar",
+    "update": "Editar registro",
+    "delete": "Excluir registro",
+    "charged": "Corrigir cobrança"
+  },
+  "status": {
+    "paid": "Pago",
+    "waived": "Dispensado",
+    "free": "Grátis",
+    "due": "Devendo",
+    "upcoming": "A vencer",
+    "this": "Este recebimento"
+  }
+}

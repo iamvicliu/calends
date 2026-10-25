@@ -156,10 +156,10 @@ test('6. 订阅结束、暂停或成员退出后欠款保留且停止累计，�
       assert.equal(peopleLedger(state([s]), day)[0].owed, 30);
     }
     assert.equal(memberUnpaidFrom(s, s.share!.members[0]), '2026-01-01');
-    s.share!.members[0].paidUntil = '2026-01-31';
+    s.share!.members[0].receipts = [{ id: 'r1', date: '2026-01-05', amount: 10, currency: 'USD', periods: ['2026-01-01'] }];
     assert.equal(memberUnpaidFrom(s, s.share!.members[0]), '2026-02-01');
     assert.equal(memberDues(s, '2027-04-01')[0].owed, 20);
-    s.share!.members[0].paidUntil = '2026-03-31';
+    s.share!.members[0].receipts.push({ id: 'r2', date: '2026-04-05', amount: 20, currency: 'USD', periods: ['2026-02-01', '2026-03-01'] });
     assert.equal(memberDues(s, '2027-04-01')[0].owed, 0);
   }
   const s = sub({ share: { role: 'owner', seats: 2, members: [{ id: 'm', name: 'M', share: 10, joined: '2026-01-01', left: '2026-03-01' }] } });
@@ -202,7 +202,7 @@ test('8. 钱包按 settled、代付 chargedCurrency 实扣，失败不扣、退�
         end: '2026-01-05',
         start: '2026-01-05',
         currency: 'JPY',
-        proxy: { forName: 'P', entries: [{ charge: '2026-01-05', charged: 3, chargedCurrency: 'USD' }] },
+        proxy: { forName: 'P', charged: [{ charge: '2026-01-05', amount: 3, currency: 'USD' }] },
       }),
     ],
     {
@@ -216,7 +216,7 @@ test('8. 钱包按 settled、代付 chargedCurrency 实扣，失败不扣、退�
     [
       sub({
         end: '2026-01-10',
-        proxy: { forName: 'P', entries: [{ charge: '2026-01-01', charged: 8, chargedCurrency: 'USD' }] },
+        proxy: { forName: 'P', charged: [{ charge: '2026-01-01', amount: 8, currency: 'USD' }] },
         phases: [
           { start: '2026-01-01', end: '2026-01-09', price: 60, currency: 'USD', cycle: { unit: 'month', every: 1 }, methodId: 'old' },
           { start: '2026-01-10', price: 60, currency: 'USD', cycle: { unit: 'month', every: 1 }, methodId: 'new' },
@@ -225,7 +225,7 @@ test('8. 钱包按 settled、代付 chargedCurrency 实扣，失败不扣、退�
     ],
     { methods: [{ id: 'new', name: 'New card', kind: 'debit', currency: 'USD', balance: 100, balanceAsOf: '2026-01-01' }] },
   );
-  // 换卡前的实扣不能被模糊匹配到新卡的下一期。
+  // 换卡前那期记的实扣只属于那一期，不会算到新卡的下一期。
   assert.equal(runwayFor(switched.methods[0], switched, '2026-01-11')!.current, 40);
 });
 
@@ -274,7 +274,7 @@ test('10. 公开数据保留计费字段，成本与后台相等且不泄露成�
   const st = state([s]);
   const out = maskForPublic(st);
   assert.ok(!JSON.stringify(out).includes('private-'));
-  assert.deepEqual(Object.keys(out.subscriptions[0].share!.members[0]).sort(), ['id', 'name', 'share', 'paidUntil', 'exempt', 'joined', 'left'].sort());
+  assert.deepEqual(Object.keys(out.subscriptions[0].share!.members[0]).sort(), ['id', 'name', 'share', 'restarts', 'receipts', 'waivers', 'exempt', 'joined', 'left'].sort());
   for (const day of ['2026-01-31', '2026-02-01', '2026-02-15', '2026-03-01']) {
     near(totals(out, day).mrr, totals(st, day).mrr);
     near(contributionOn(out, out.subscriptions[0], day), contributionOn(st, s, day));

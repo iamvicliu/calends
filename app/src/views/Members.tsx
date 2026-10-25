@@ -11,19 +11,23 @@ import {
   memberBillMonths,
   memberCollection,
   memberDues,
+  memberLedger,
+  memberPeriods,
   collectionAnchor,
   diffDays,
   LIFETIME_BILL_MONTHS,
 } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
-import type { AppState, CarRule, MemberPayment, Person, ShareMember, Subscription } from '../../../shared/types.ts';
+import type { AppState, CarRule, Person, Receipt, ShareMember, Subscription } from '../../../shared/types.ts';
+import { isSettled, paidThrough, putRecord, removeRecord, resolveKey, setOpening, type Receivable } from '../../../shared/receivables.ts';
+import { isReceipt, PeriodStrip, ReceivableSheet, recordPeriods } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonProfileSheet } from './People.tsx';
 import {
   carLedger,
-  collectionSpan,
+  periodsTotal,
   carRule,
   followCarRule,
   followsCar,
@@ -157,7 +161,7 @@ export function MemberSheet({
   s,
   member,
   collect,
-  editPay,
+  editId,
   onClose,
   onOpenSub,
 }: {
@@ -166,8 +170,8 @@ export function MemberSheet({
   member?: ShareMember;
   /** 从「收款」进来：直接记一笔 */
   collect?: boolean;
-  /** 从收款表点某一笔进来：直接打开这笔收款的编辑 */
-  editPay?: MemberPayment;
+  /** 从收款表点某一笔进来：直接打开这笔收款（或免收）的编辑 */
+  editId?: string;
   onClose: () => void;
   /** 收款表单顶部「查看详情」：打开这条订阅的详情 */
   onOpenSub?: () => void;
@@ -176,25 +180,14 @@ export function MemberSheet({
   // 保存后表单读账本里的最新数据：收款列表、已付至都以它为准
   const live = state.subscriptions.find((x) => x.id === s.id) ?? s;
   const m = member && (live.share?.members.find((x) => x.id === member.id) ?? member);
-  const [view, setView] = useState<'member' | 'receipt' | number>(() => {
+  const [view, setView] = useState<'member' | 'receipt'>(() => {
     if (!m) return 'member';
-    const i = editPay ? (m.payments ?? []).findIndex((p) => p.date === editPay.date && p.until === editPay.until && p.amount === editPay.amount) : -1;
-    if (i >= 0) return i;
+    if (editId) return 'receipt';
     const st = memberStatus(state, live, m, today);
     return collect || (!m.exempt && !st.gone && st.owe) ? 'receipt' : 'member';
   });
   if (m && view !== 'member')
-    return (
-      <ReceiptForm
-        state={state}
-        s={live}
-        member={m}
-        index={typeof view === 'number' ? view : undefined}
-        onDone={onClose}
-        onMember={() => setView('member')}
-        onOpenSub={onOpenSub}
-      />
-    );
+    return <ReceiptForm state={state} s={live} member={m} editId={editId} onDone={onClose} onMember={() => setView('member')} onOpenSub={onOpenSub} />;
   return <MemberForm state={state} s={live} member={m} onClose={onClose} />;
 }
 
@@ -305,34 +298,28 @@ function PersonNameField({
   );
 }
 
-/** 收款后的已付至：取所有收款覆盖到的最晚一天；单独记过更晚的已付至（无对应收款）继续保留 */
-function paidThrough(old: ShareMember, payments: MemberPayment[]): string | undefined {
-  const recordedUntil = (old.payments ?? []).reduce((a, p) => (p.until > a ? p.until : a), '');
-  const knownUntil = old.paidUntil && old.paidUntil > recordedUntil ? old.paidUntil : '';
-  return payments.reduce((a, p) => (p.until > a ? p.until : a), knownUntil) || undefined;
-}
-
-/** 把一个成员的收款写回账本：以账本里最新的成员为底，只换收款与已付至 */
-async function saveReceipts(s: Subscription, memberId: string, change: (m: ShareMember) => MemberPayment[]) {
+/** 把一个成员的收款、免收写回账本：以账本里最新的成员为底，只换这两项 */
+async function saveReceivable(s: Subscription, memberId: string, r: Receivable) {
   const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
   const sh = current.share!;
-  const members = sh.members.map((x) => {
-    if (x.id !== memberId) return x;
-    const payments = change(x).sort((a, b) => a.date.localeCompare(b.date));
-    return { ...x, payments, paidUntil: paidThrough(x, payments) };
-  });
+  const members = sh.members.map((x) => (x.id === memberId ? { ...x, receipts: r.receipts, waivers: r.waivers } : x));
   await saveSub({ ...current, share: { ...sh, collectFrom: collectionAnchor(current), members } });
 }
 
+/** 成员的各期：算到十年后，可以提前收 */
+const memberLedgerAhead = (state: AppState, s: Subscription, m: ShareMember, today: string) =>
+  memberLedger(s, m, today, state.settings.collectCurrency ?? state.settings.baseCurrency, addMonths(today, 120));
+
 /**
- * 收款表单（全站唯一）：上面是应收（收费标准与这一期，只读），下面是实际收到的这一笔（按应收预填，可改）。
- * 传 index 时是修改已记的那一笔：只有实际收款，可删除。
+ * 收款表单（全站唯一）：上面是这辆车和收费标准（只读），下面勾选这笔钱抵扣哪几期、实际收了多少。
+ * 传 editId 时是修改已记的那一笔（收款或免收），可删除。
  */
 function ReceiptForm({
   state,
   s,
   member: m,
-  index,
+  editId,
+  preset,
   onDone,
   onMember,
   onOpenSub,
@@ -340,229 +327,67 @@ function ReceiptForm({
   state: AppState;
   s: Subscription;
   member: ShareMember;
-  index?: number;
+  editId?: string;
+  preset?: string[];
   onDone: () => void;
   onMember?: () => void;
   onOpenSub?: () => void;
 }) {
   const today = todayIn(state.settings.timezone);
-  // 买断只收一次：覆盖期一直到百年后，覆盖到、下次收款这些日期都不写
-  const once = s.cycle.unit === 'lifetime';
-  const collectCcy = state.settings.collectCurrency ?? state.settings.baseCurrency;
-  const editing = index != null;
-  const now = memberStatus(state, s, m, today);
   const cur = memberFee(state, s, m, today);
-  // 应收：最早没收的一期，收款按记账惯例先抵最早欠的期
-  const [due] = useState(() => {
-    const from = memberUnpaidFrom(s, m);
-    const period = memberCollection(s, m, from, collectCcy);
-    return { from, until: period.until, amount: period.amount, currency: period.currency };
-  });
-  // 一共欠几期（到今天所在的那一期为止）、多少钱：欠了不止一期时写在应收里，想一次补齐就把期数加到这么多
-  const [owing] = useState(() => {
-    let n = 0;
-    for (let from = due.from; n < 600;) {
-      const c = memberCollection(s, m, from, collectCcy);
-      if (c.from > today || (m.left && c.from >= m.left)) break;
-      n++;
-      from = addDays(c.until, 1);
-    }
-    return n > 1 ? collectionSpan(state, s, m, due.from, n, collectCcy) : null;
-  });
-  const [pay, setPay] = useState<MemberPayment>(() =>
-    editing ? { ...m.payments![index] } : { date: today, amount: due.amount, currency: due.currency, from: due.from, until: due.until },
-  );
-  // 按期数收：加减期数时覆盖到哪天、金额（没手动改过时）一起算出；提前收几期也是这样记
-  const [periods, setPeriods] = useState(1);
-  const [moneyEdited, setMoneyEdited] = useState(false);
-  const maxPeriods = Math.max(1, collectionSpan(state, s, m, due.from, 24, collectCcy).periods);
-  const changePeriods = (n: number) => {
-    const span = collectionSpan(state, s, m, due.from, n, collectCcy);
-    setPeriods(span.periods);
-    setPay((p) => ({ ...p, until: span.until, ...(moneyEdited ? {} : { amount: span.amount, currency: span.currency }) }));
-  };
-  const [saving, setSaving] = useState(false);
-  const invalid =
-    saving ||
-    !Number.isFinite(pay.amount) ||
-    pay.amount < 0 ||
-    !pay.from ||
-    pay.until < pay.from ||
-    (!!m.left && pay.from >= m.left) ||
-    (!!s.end && pay.from > s.end);
+  const { periods } = memberLedgerAhead(state, s, m, today);
+  const edit = [...(m.receipts ?? []), ...(m.waivers ?? [])].find((x) => x.id === editId);
   const name = m.name || t('family.member.defaultName');
-  const write = async (change: (x: ShareMember) => MemberPayment[], msg: string) => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      // 失败时 run 提示错误，表单与草稿保留，可直接重试
-      await run(async () => {
-        await saveReceipts(s, m.id, change);
-        onDone();
-      }, msg);
-    } finally {
-      setSaving(false);
-    }
-  };
-  const record = () => !invalid && write((x) => [...(x.payments ?? []), pay], t('family.member.toastPaid', { name, amount: flow(pay.amount, pay.currency) }));
-  const update = () => !invalid && write((x) => (x.payments ?? []).map((p, k) => (k === index ? pay : p)), t('family.member.toastPayEdited'));
-  const remove = () => write((x) => (x.payments ?? []).filter((_, k) => k !== index), t('family.member.paymentRemoved'));
-
-  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
-  const amount = (
-    <Cell label={t('family.member.amount')}>
-      <span className="contact-field">
-        <NumInput
-          className="num"
-          ccy={pay.currency}
-          value={pay.amount}
-          onValue={(n) => {
-            setMoneyEdited(true);
-            setPay({ ...pay, amount: n ?? 0 });
-          }}
-        />
-        <CurrencySelect
-          value={pay.currency}
-          onChange={(c) => {
-            setMoneyEdited(true);
-            setPay({ ...pay, currency: c });
-          }}
-          ariaLabel={t('family.member.currency')}
-        />
-      </span>
-    </Cell>
-  );
-  const note = (
-    <Cell label={t('family.member.note')}>
-      <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onChange={(e) => setPay({ ...pay, note: val(e) || undefined })} />
-    </Cell>
-  );
   return (
-    <Sheet
-      narrow
+    <ReceivableSheet
+      state={state}
+      today={today}
       title={
         <span className="icon-text">
           <PersonAvatar p={personFor(state, m.personId, m.name)} size={24} />
           {name}
         </span>
       }
-      onClose={onDone}
-      foot={
+      head={
         <>
-          {editing ? (
-            <button className="btn plain" style={{ color: 'var(--red)' }} disabled={saving} onClick={remove}>
-              {t('common.delete')}
-            </button>
-          ) : (
-            onMember && (
-              <button className="btn plain" onClick={onMember}>
-                {t('family.collect.editMember')}
+          {/* 从合租页进来时标明是哪辆车：同一个人可能在好几辆车上 */}
+          {onOpenSub && (
+            <div className="collect-sub">
+              <SubIcon sub={s} size={32} />
+              <span className="collect-sub-id">
+                <b>{s.name}</b>
+                <small>
+                  {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                </small>
+              </span>
+              <button type="button" className="collect-sub-link" onClick={onOpenSub}>
+                {t('family.collect.viewSub')}
               </button>
-            )
+            </div>
           )}
-          <span className="grow" />
-          <button className="btn" onClick={onDone}>
-            {t('family.member.cancel')}
-          </button>
-          <button className="btn primary" disabled={invalid} onClick={editing ? update : record}>
-            {editing ? t('common.save') : t('family.member.record')}
-          </button>
+          {!m.exempt && (
+            <Group>
+              <Cell label={t('family.member.feeGroup')}>
+                <span className="muted">{perBill('family.pool.perFee', memberBillMonths(s, m, today), { fee: money(cur.amount, cur.currency) })}</span>
+              </Cell>
+            </Group>
+          )}
         </>
       }
-    >
-      <div className="stack">
-        {/* 从合租页进来时标明是哪辆车：同一个人可能在好几辆车上 */}
-        {onOpenSub && (
-          <div className="collect-sub">
-            <SubIcon sub={s} size={32} />
-            <span className="collect-sub-id">
-              <b>{s.name}</b>
-              <small>
-                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
-              </small>
-            </span>
-            <button type="button" className="collect-sub-link" onClick={onOpenSub}>
-              {t('family.collect.viewSub')}
-            </button>
-          </div>
-        )}
-        {editing ? (
-          <Group title={t('family.collect.actual')}>
-            <Cell label={t('family.member.receivedOn')}>
-              <DatePicker value={pay.date} onChange={(v) => setPay({ ...pay, date: v ?? pay.date })} />
-            </Cell>
-            {amount}
-            {!once && (
-              <>
-                <Cell label={t('family.member.coverFrom')}>
-                  <DatePicker value={pay.from} onChange={(v) => v && setPay({ ...pay, from: v })} />
-                </Cell>
-                <Cell label={t('family.member.coverTo')}>
-                  <DatePicker value={pay.until} min={pay.from} onChange={(v) => setPay({ ...pay, until: v ?? pay.until })} />
-                </Cell>
-              </>
-            )}
-            {note}
-          </Group>
-        ) : (
-          <>
-            {/* 应收：收费标准与这一期，只读；标准在成员表单或车的收费规则里改 */}
-            <Group title={now.late > 0 ? t('family.quick.late', { count: now.late }) : now.owe ? t('family.pool.owed') : t('family.collect.nextPeriod')}>
-              <Cell label={t('family.member.feeGroup')}>
-                <span className="muted">{perBill('family.pool.perFee', memberBillMonths(s, m, due.from), { fee: money(cur.amount, cur.currency) })}</span>
-              </Cell>
-              {!once && (
-                // 欠了不止一期时，这一期是最早欠的那期，不是今天所在的期
-                <Cell label={t(owing ? 'family.collect.firstOwed' : 'family.collect.period')}>
-                  <span className="muted">
-                    {cnDateFull(due.from)} – {cnDateFull(due.until)}
-                  </span>
-                </Cell>
-              )}
-              {/* 首期按天折算或换成收款币种时，这一期应收与收费标准不同，单独写出 */}
-              {(due.amount !== cur.amount || due.currency !== cur.currency) && (
-                <Cell label={t('family.collect.due')}>
-                  <span className="muted">{money(due.amount, due.currency)}</span>
-                </Cell>
-              )}
-              {owing && (
-                <Cell label={t('family.collect.owedTotal')}>
-                  <span className="muted">{t('family.collect.owedTotalValue', { count: owing.periods, amount: money(owing.amount, owing.currency) })}</span>
-                </Cell>
-              )}
-            </Group>
-            <Group
-              title={t('family.collect.actual')}
-              // 覆盖到哪天在上面一行，页脚只说下次收款
-              foot={once ? undefined : t('family.collect.next', { date: cnDateFull(addDays(pay.until, 1)) })}
-            >
-              <Cell label={t('family.member.receivedOn')}>
-                <DatePicker value={pay.date} onChange={(v) => setPay({ ...pay, date: v ?? today })} />
-              </Cell>
-              {amount}
-              {!once && (
-                <>
-                  <Cell label={t('family.collect.periods')}>
-                    <Stepper
-                      label={t('family.collect.periods')}
-                      value={periods}
-                      min={1}
-                      max={maxPeriods}
-                      unit={(n) => t('family.collect.periodUnit', { count: n })}
-                      onChange={changePeriods}
-                    />
-                  </Cell>
-                  <Cell label={t('family.collect.until')}>
-                    <span>{cnDateFull(pay.until)}</span>
-                  </Cell>
-                </>
-              )}
-              {note}
-            </Group>
-          </>
-        )}
-      </div>
-    </Sheet>
+      periods={periods}
+      record={m}
+      edit={edit}
+      preset={preset}
+      save={(r) => saveReceivable(s, m.id, r)}
+      onDone={onDone}
+      extraFoot={
+        onMember && (
+          <button className="btn plain" onClick={onMember}>
+            {t('family.collect.editMember')}
+          </button>
+        )
+      }
+    />
   );
 }
 
@@ -625,73 +450,74 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
   };
   const rateChanged = !isNew && mode !== 'exempt' && (mode === 'follow' ? initialMode !== 'follow' : initialMode !== 'custom' || feeEdited);
 
-  // 已付至：默认只看；点「调整」直接改这个日期（null 表示没改过，undefined 表示清空）
-  const [paidEdit, setPaidEdit] = useState<string | undefined | null>(null);
+  // 期初已付至：默认只看已付至；点「调整」改这个日期，这天及之前没记收款的期算开始记账前已收清（null 表示没改过，undefined 表示清空）
+  const [openingEdit, setOpeningEdit] = useState<string | undefined | null>(null);
   const draft = (): ShareMember => {
     const m = withFee(f);
-    // 收款与已付至以账本为准：收款表单另行保存，这里只在改了已付至时覆盖
-    return { ...m, payments: member?.payments, paidUntil: paidEdit === null ? member?.paidUntil : paidEdit };
+    // 收款、免收以账本为准：收款表单另行保存，这里只在调整了已付至时改期初结清
+    const r = { ...m, receipts: member?.receipts, waivers: member?.waivers };
+    return openingEdit === null ? r : { ...r, ...setOpening(r, memberPeriods(s, r, openingEdit ?? today, collectCcy), openingEdit) };
   };
   const next = draft();
+  const ledger = memberLedgerAhead(state, s, next, today);
 
-  // 新成员可以顺手记首笔收款：按首期应收预填，金额、币种、日期都能改
+  // 新成员可以顺手记首笔收款：从首期起按期数预填，金额、币种、日期都能改
   const [firstPay, setFirstPay] = useState(false);
   const [firstPeriods, setFirstPeriods] = useState(1);
-  const suggested = (() => {
-    const from = memberUnpaidFrom(s, next);
-    const c = collectionSpan(state, s, next, from, firstPeriods, collectCcy);
-    return { date: today, amount: c.amount, currency: c.currency, from, until: c.until };
-  })();
-  const [payEdit, setPayEdit] = useState<Partial<MemberPayment>>({});
-  const pay: MemberPayment = { ...suggested, ...payEdit };
-  const payInvalid = !Number.isFinite(pay.amount) || pay.amount < 0 || pay.until < pay.from!;
+  const firstOpen = ledger.periods.filter((p) => !isSettled(p));
+  const firstKeys = firstOpen.slice(0, firstPeriods).map((p) => p.key);
+  const suggested = { date: today, ...periodsTotal(state, firstOpen.slice(0, firstPeriods)) };
+  const [payEdit, setPayEdit] = useState<{ date?: string; amount?: number; currency?: string; note?: string }>({});
+  const pay = { ...suggested, ...payEdit };
+  const payInvalid = !Number.isFinite(pay.amount) || pay.amount < 0 || !firstKeys.length;
+  const firstUntil = firstOpen[Math.min(firstPeriods, firstOpen.length) - 1]?.until;
 
   const first = memberCollection(s, f, f.joined ?? s.share?.since ?? s.start, collectCcy);
   // 同一个人还出现在别的合租、代付里：已关联名册里的人，称呼、联系方式只读，改人员资料去人员详情
   const linked = !!f.personId && !!state.people?.some((p) => p.id === f.personId);
   const [profile, setProfile] = useState(false);
-  const payments = (member?.payments ?? []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  // 收款与免收记录，新的在前；期初结清单独一行，不能当收款编辑
+  const records = [...(member?.receipts ?? []), ...(member?.waivers ?? [])].sort((a, b) => b.date.localeCompare(a.date));
   const received = member ? memberCashFlows(member).reduce((a, p) => a + memberFlowValue(state, p, collectCcy), 0) : 0;
   const st = memberStatus(state, { ...s, share: { ...s.share!, members: s.share!.members.map((x) => (x.id === next.id ? next : x)) } }, next, today);
-  const [receipt, setReceipt] = useState<number | 'new' | null>(null);
+  const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(null);
   const [adjustPaid, setAdjustPaid] = useState(false);
-  // 本期取今天所在的那一期：预付了好几期时，memberStatus 给的是已付的最后一期，要往前倒推到今天
-  const currentPeriod = (() => {
-    let p = st.period;
-    const joined = next.joined ?? s.share?.since ?? s.start;
-    for (let guard = 0; p.from > today && guard < 120; guard++) {
-      const from = addMonths(p.from, -memberBillMonths(s, next, addDays(p.from, -1)));
-      p = { from: from < joined ? joined : from, until: addDays(p.from, -1), paid: true };
-    }
-    return p;
-  })();
+  // 已付至按没退出算：退出后还有已付的天数时照样显示到那期期末，算退款要看
+  const paidUntil = next.left ? paidThrough(memberLedgerAhead(state, s, { ...next, left: undefined }, today).periods) : paidThrough(ledger.periods);
+  // 本期：今天所在的那一期
+  const currentPeriod = ledger.periods.find((p) => p.from <= today && p.until >= today);
 
-  // 同一笔收款复制给其他成员：大家每期交的一样，不用一个个重填
+  // 同一笔收款复制给其他成员：大家每期交的一样，不用一个个重填。对方这几期都还空着才能复制
   const others = (s.share?.members ?? []).filter((x) => x.id !== f.id);
-  const [copying, setCopying] = useState<number | null>(null);
+  const [copying, setCopying] = useState<string | null>(null);
   const [targets, setTargets] = useState<string[]>([]);
-  const startCopy = (i: number) => {
-    const p = member!.payments![i];
-    setTargets(others.filter((o) => !o.payments?.some((x) => x.date === p.date && x.until === p.until && x.amount === p.amount)).map((o) => o.id));
-    setCopying(i);
+  const copyable = (o: ShareMember, r: Receipt) => {
+    const l = memberLedgerAhead(state, s, o, today);
+    return r.periods.every((k) => l.periods.some((p) => p.key === resolveKey(l.periods, k) && !isSettled(p)));
   };
-  const copyTo = (p: MemberPayment) => {
+  const startCopy = (r: Receipt) => {
+    setTargets(others.filter((o) => copyable(o, r)).map((o) => o.id));
+    setCopying(r.id);
+  };
+  const copyTo = (r: Receipt) => {
     const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
     const sh = current.share!;
-    const members = sh.members.map((m) => {
-      if (!targets.includes(m.id)) return m;
-      const list = [...(m.payments ?? []), { ...p }].sort((a, b) => a.date.localeCompare(b.date));
-      return { ...m, payments: list, paidUntil: !m.paidUntil || p.until > m.paidUntil ? p.until : m.paidUntil };
-    });
     run(
       async () => {
+        const members = sh.members.map((o) =>
+          targets.includes(o.id) ? { ...o, ...putRecord(o, 'receipt', { ...r, id: uid() }, memberLedgerAhead(state, current, o, today).periods) } : o,
+        );
         await saveSub({ ...current, share: { ...sh, collectFrom: collectionAnchor(current), members } });
         setCopying(null);
       },
       t('family.member.copied', { count: targets.length }),
     );
   };
-  const removePayment = (i: number) => run(() => saveReceipts(s, f.id, (x) => (x.payments ?? []).filter((_, k) => k !== i)), t('family.member.paymentRemoved'));
+  const removeRecordById = (id: string) =>
+    run(
+      () => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)),
+      t('receivable.toastRemoved'),
+    );
 
   const save = () =>
     run(
@@ -701,15 +527,22 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
         const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
         const sh = current.share!;
         const stored = sh.members.find((x) => x.id === next.id);
-        const payments = isNew && firstPay ? [pay] : stored?.payments;
-        const out: ShareMember = {
-          ...next,
-          name: f.name.trim(),
-          account: f.account?.trim() || undefined,
-          personId: link.id,
-          payments,
-          paidUntil: isNew && firstPay ? pay.until : paidEdit === null ? stored?.paidUntil : paidEdit,
-        };
+        const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
+        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加这里调整的期初结清和首笔收款
+        const latest = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
+        const opened = openingEdit === null ? latest : { ...latest, ...setOpening(latest, memberPeriods(current, latest, openingEdit ?? today, collectCcy), openingEdit) };
+        const out: ShareMember =
+          isNew && firstPay
+            ? {
+                ...opened,
+                ...putRecord(
+                  opened,
+                  'receipt',
+                  { id: uid(), date: pay.date, amount: pay.amount, currency: pay.currency, periods: firstKeys, ...(pay.note ? { note: pay.note } : {}) },
+                  memberLedgerAhead(state, current, opened, today).periods,
+                ),
+              }
+            : opened;
         await saveSub({
           ...current,
           share: {
@@ -832,7 +665,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
               onChange={(v) => up({ joined: v })}
             />
           </Cell>
-          {first.partial && mode !== 'exempt' && !member?.payments?.some((p) => p.from === first.from && p.until >= first.until) && (
+          {first.partial && mode !== 'exempt' && !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
             <>
               {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
               <Cell label={t('family.member.firstPeriod')} sub={`${cnDate(first.from)} – ${cnDate(first.until)}`}>
@@ -905,7 +738,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
           mode !== 'exempt' && (
             <Group
               title={t('family.member.firstPay')}
-              foot={firstPay && !once ? t('family.collect.next', { date: cnDateFull(addDays(pay.until, 1)) }) : undefined}
+              foot={firstPay && !once && firstUntil ? t('family.collect.next', { date: cnDateFull(addDays(firstUntil, 1)) }) : undefined}
             >
               <Cell label={t('family.member.firstPayToggle')}>
                 <Toggle checked={firstPay} onChange={setFirstPay} />
@@ -928,14 +761,16 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                           label={t('family.collect.periods')}
                           value={firstPeriods}
                           min={1}
-                          max={24}
+                          max={Math.max(1, Math.min(24, firstOpen.length))}
                           unit={(n) => t('family.collect.periodUnit', { count: n })}
                           onChange={setFirstPeriods}
                         />
                       </Cell>
-                      <Cell label={t('family.collect.until')}>
-                        <span>{cnDateFull(pay.until)}</span>
-                      </Cell>
+                      {firstUntil && (
+                        <Cell label={t('family.collect.until')}>
+                          <span>{cnDateFull(firstUntil)}</span>
+                        </Cell>
+                      )}
                     </>
                   )}
                   <Cell label={t('family.member.note')}>
@@ -951,34 +786,59 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
           )
         ) : (
           <>
-            {/* 本期：和订阅详情同一条进度（开始、结束、已过多少），已付实色、欠款橙色；已付到默认只看，点「调整」才改 */}
+            {/* 本期：和订阅详情同一条进度（开始、结束、已过多少），已付实色、欠款橙色；下面一格一期，哪几期没收一眼可见 */}
             {/* 已退出的成员不再有本期，只留已付到（算退款要看） */}
             {mode !== 'exempt' && (
               <Group
                 title={st.gone ? undefined : t('detail.period.paid')}
                 foot={
-                  st.gone
-                    ? undefined
-                    : st.owe
-                      ? `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`
-                      : once
-                        ? t('family.pool.settled')
-                        : t('family.quick.settled', { date: cnDateFull(st.next.from) })
+                  adjustPaid
+                    ? t('receivable.openingHint')
+                    : st.gone
+                      ? undefined
+                      : st.owe
+                        ? `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`
+                        : once
+                          ? t('family.pool.settled')
+                          : t('family.quick.settled', { date: cnDateFull(st.next.from) })
                 }
               >
-                {!st.gone && (
+                {!st.gone && currentPeriod && (
                   <div className="cell member-period">
-                    <MemberPeriod {...currentPeriod} today={today} />
+                    <MemberPeriod from={currentPeriod.from} until={currentPeriod.until} paid={isSettled(currentPeriod)} today={today} />
                   </div>
                 )}
-                {/* 已付至只有一个日期：平时是文字，点「调整」原地变成日期选择 */}
+                {!once && (
+                  <div className="cell">
+                    <PeriodStrip
+                      periods={ledger.periods}
+                      today={today}
+                      onPick={(p) =>
+                        p.receipt && !p.receipt.opening
+                          ? setReceipt({ edit: p.receipt.id })
+                          : p.waiver
+                            ? setReceipt({ edit: p.waiver.id })
+                            : !isSettled(p) && setReceipt({ preset: [p.key] })
+                      }
+                    />
+                  </div>
+                )}
+                {/* 已付至：从第一期起连续结清到哪天；点「调整」改期初已付至 */}
                 <Cell label={t('family.member.paidUntil')}>
                   {adjustPaid ? (
-                    <DatePicker value={next.paidUntil} clearable placeholder={t('family.pool.noPay')} onChange={setPaidEdit} />
+                    <DatePicker value={openingEdit ?? undefined} clearable placeholder={t('family.pool.noPay')} onChange={setOpeningEdit} />
                   ) : (
                     <>
-                      <span className={next.paidUntil ? '' : 'muted'}>{next.paidUntil ? cnDateFull(next.paidUntil) : t('family.pool.noPay')}</span>
-                      <button type="button" className="btn plain" onClick={() => setAdjustPaid(true)}>
+                      <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
+                      <button
+                        type="button"
+                        className="btn plain"
+                        onClick={() => {
+                          const last = member?.receipts?.find((r) => r.opening)?.periods.at(-1);
+                          setOpeningEdit(ledger.periods.find((p) => p.key === last)?.until);
+                          setAdjustPaid(true);
+                        }}
+                      >
                         {t('family.collect.adjustPaid')}
                       </button>
                     </>
@@ -988,46 +848,50 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
             )}
             {/* 收款记录只放记录；记一笔放在最下面 */}
             <Group
-              title={t('family.member.payments', { count: payments.length })}
+              title={t('family.member.payments', { count: records.length })}
               foot={
-                (payments.length > 1 || !!member!.leaveRefund || (payments[0] && payments[0].currency !== collectCcy)) &&
+                (records.length > 1 || !!member!.leaveRefund || (isReceipt(records[0]) && records[0].currency !== collectCcy)) &&
                 t('family.member.receivedTotal', { amount: flow(received, collectCcy) })
               }
             >
-              {payments.map((p) => {
-                const i = (member!.payments ?? []).indexOf(p);
+              {ledger.unmatched.length > 0 && <div className="cell muted">{t('receivable.unmatchedNote', { count: ledger.unmatched.length })}</div>}
+              {records.map((r) => {
+                const opening = isReceipt(r) && r.opening;
                 return (
-                  <div key={`${p.date}-${i}`} className="cell member-pay">
-                    <button type="button" className="cell-l member-pay-edit" onClick={() => setReceipt(i)} aria-label={t('family.member.editPayAria')}>
-                      <span className="green">{flow(p.amount, p.currency)}</span>
+                  <div key={r.id} className="cell member-pay">
+                    <button
+                      type="button"
+                      className="cell-l member-pay-edit"
+                      disabled={opening}
+                      onClick={() => setReceipt({ edit: r.id })}
+                      aria-label={t('family.member.editPayAria')}
+                    >
+                      {isReceipt(r) && !opening ? <span className="green">{flow(r.amount, r.currency)}</span> : <span>{t(opening ? 'receivable.opening' : 'receivable.waived')}</span>}
                       <small>
-                        {copyParts(
-                          p.from
-                            ? t('family.member.payCover', { date: cnDateFull(p.date), from: cnDate(p.from), until: cnDate(p.until) })
-                            : t('family.member.payCoverTo', { date: cnDateFull(p.date), until: cnDate(p.until) }),
-                        )}
-                        {copyParts(p.note ? `\n${p.note}` : '')}
+                        {copyParts(opening ? recordPeriods(r, ledger.periods) : `${cnDateFull(r.date)}\n${recordPeriods(r, ledger.periods)}`)}
+                        {copyParts(r.note ? `\n${r.note}` : '')}
                       </small>
                     </button>
                     <span className="cell-r">
-                      {others.length > 0 && (
+                      {isReceipt(r) && !opening && others.length > 0 && (
                         <IconButton
-                          className={`${copying === i ? 'on' : ''}`}
+                          className={`${copying === r.id ? 'on' : ''}`}
                           aria-label={t('family.member.copyAria')}
                           title={t('family.member.copyAria')}
-                          onClick={() => (copying === i ? setCopying(null) : startCopy(i))}
+                          onClick={() => (copying === r.id ? setCopying(null) : startCopy(r))}
                         >
                           <Icon name="copy" />
                         </IconButton>
                       )}
-                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removePayment(i)}>
+                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removeRecordById(r.id)}>
                         <Icon name="x" />
                       </IconButton>
                     </span>
-                    {copying === i && (
+                    {copying === r.id && isReceipt(r) && (
                       <div className="copy-pay" data-submit=".btn.primary">
                         {others.map((o) => {
-                          const dup = o.payments?.some((x) => x.date === p.date && x.until === p.until && x.amount === p.amount);
+                          const dup = !copyable(o, r);
+                          const until = paidThrough(memberLedgerAhead(state, s, o, today).periods);
                           return (
                             <label key={o.id} className={`copy-target ${dup ? 'dup' : ''}`}>
                               <input
@@ -1038,11 +902,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                               />
                               <span>{o.name || t('family.member.unnamed')}</span>
                               <small>
-                                {dup
-                                  ? t('family.member.dup')
-                                  : o.paidUntil
-                                    ? t('family.member.paidUntilDate', { date: cnDate(o.paidUntil) })
-                                    : t('family.member.noPay')}
+                                {dup ? t('family.member.dup') : until ? t('family.member.paidUntilDate', { date: cnDate(until) }) : t('family.member.noPay')}
                               </small>
                             </label>
                           );
@@ -1051,7 +911,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                           <button className="btn" onClick={() => setCopying(null)}>
                             {t('family.member.cancel')}
                           </button>
-                          <button className="btn primary" disabled={!targets.length} onClick={() => copyTo(p)}>
+                          <button className="btn primary" disabled={!targets.length} onClick={() => copyTo(r)}>
                             {t('family.member.copyN', { count: targets.length })}
                           </button>
                         </div>
@@ -1070,7 +930,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                 </Cell>
               )}
               {mode !== 'exempt' && (
-                <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt('new')}>
+                <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt({})}>
                   <Icon name="plus" /> {t('family.quick.backCollect')}
                 </button>
               )}
@@ -1079,9 +939,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
         )}
       </div>
       {/* 记一笔、改某一笔：叠在成员表单上，存完回到这里，成员表单里没保存的修改不丢 */}
-      {receipt !== null && member && (
-        <ReceiptForm state={state} s={s} member={member} index={receipt === 'new' ? undefined : receipt} onDone={() => setReceipt(null)} />
-      )}
+      {receipt !== null && member && <ReceiptForm state={state} s={s} member={member} editId={receipt.edit} preset={receipt.preset} onDone={() => setReceipt(null)} />}
       {profile && f.personId && (
         <PersonProfileSheet
           state={state}
@@ -1106,17 +964,9 @@ export function memberStatus(state: AppState, s: Subscription, m: ShareMember, t
   const d = memberDues(s, today, collect, state).find((x) => x.member.id === m.id);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
   const owe = !!d && d.periodsOwed > 0;
-  // 本期：今天所在的这个人自己的收费期。欠款时从最早未付往后数到今天；已付到将来时是已付的最后一期
-  let period = { from: next.from, until: next.until, paid: false };
-  if (next.from > today) {
-    const joined = m.joined ?? s.share?.since ?? s.start;
-    const from = addMonths(next.from, -memberBillMonths(s, m, addDays(next.from, -1)));
-    period = { from: from < joined ? joined : from, until: addDays(next.from, -1), paid: true };
-  } else
-    for (let guard = 0; period.until < today && guard < 600; guard++) {
-      const c = memberCollection(s, m, addDays(period.until, 1), collect);
-      period = { from: c.from, until: c.until, paid: false };
-    }
+  // 本期：今天所在的这个人自己的收费期；还没加入或已经退出时取最早没结清的一期
+  const now = memberLedger(s, m, today, collect).periods.find((p) => p.from <= today && p.until >= today);
+  const period = now ? { from: now.from, until: now.until, paid: isSettled(now) } : { from: next.from, until: next.until, paid: false };
   return {
     owe,
     period,
@@ -1127,7 +977,7 @@ export function memberStatus(state: AppState, s: Subscription, m: ShareMember, t
   };
 }
 
-/** 成员时间条上的一段：已付的一期、该收没收的一期（到今天为止）、还没到期的下一期 */
+/** 成员时间条上的一段：已收、免收（含免费）、该收没收（到今天为止）、还没到期的下一期，以及退出后没用完的已付天数 */
 export interface MemberSegment {
   from: string;
   until: string;
@@ -1135,12 +985,11 @@ export interface MemberSegment {
 }
 
 /**
- * 成员在时间窗口内的各期：按这个人自己的收费周期切分，已付到哪天、哪几期没收、下一期从哪天起。
+ * 成员在时间窗口内的各期：按这个人自己的收费周期切分，每期按收款、免收推算状态，可以不连续。
  * 已退出的截到退出前一天；不分摊的没有分段。
  */
 export function memberSegments(s: Subscription, m: ShareMember, today: string, start: string, end: string): MemberSegment[] {
   if (m.exempt) return [];
-  const joined = m.joined ?? s.share?.since ?? s.start;
   const stop = m.left ? addDays(m.left, -1) : end;
   const out: MemberSegment[] = [];
   const push = (from: string, until: string, kind: MemberSegment['kind']) => {
@@ -1148,31 +997,23 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
     const b = [until, stop, end].sort()[0];
     if (a <= b) out.push({ from: a, until: b, kind });
   };
-  // 已付：从加入起按周期切，切到已付至。每笔收款都记了覆盖起点时，没被任何一笔覆盖到的期是放弃不收的，单独画出来
-  if (m.paidUntil) {
-    const pays = m.payments ?? [];
-    const exact = pays.length > 0 && pays.every((p) => p.from);
-    let from = joined;
-    for (let guard = 0; guard < 400 && from <= m.paidUntil && from <= end; guard++) {
-      const c = memberCollection(s, { ...m, left: undefined }, from);
-      const until = c.until < m.paidUntil ? c.until : m.paidUntil;
-      const covered = !exact || pays.some((p) => p.from! <= until && p.until >= c.from);
-      push(c.from, until, covered ? 'paid' : 'waived');
-      from = addDays(c.until, 1);
+  const { periods } = memberLedger(s, m, today, s.currency, end);
+  let future = false;
+  for (const p of periods) {
+    if (p.until < start || p.from > end) continue;
+    if (p.status === 'upcoming') {
+      // 还没到期的只画下一期
+      if (future) continue;
+      future = true;
     }
+    push(p.from, p.until, p.status === 'paid' ? 'paid' : p.status === 'due' ? 'due' : p.status === 'upcoming' ? 'future' : 'waived');
   }
-  // 未付：从最早未付起，今天之前开始的算欠收，之后的只画下一期
-  let from = memberUnpaidFrom(s, m);
-  for (let guard = 0; guard < 400 && from <= end && from <= stop; guard++) {
-    const c = memberCollection(s, m, from);
-    const due = c.from <= today;
-    push(c.from, c.until, due ? 'due' : 'future');
-    if (!due) break;
-    from = addDays(c.until, 1);
-  }
-  if (m.left && m.paidUntil && !m.leaveRefund) {
-    const from = [m.left, joined, start].sort().at(-1)!;
-    const until = m.paidUntil < end ? m.paidUntil : end;
+  // 退出时已付到退出日之后、又没退钱：退出后到已付至的那段画成没用完
+  const paid = m.left && !m.leaveRefund ? memberLedger(s, { ...m, left: undefined }, today, s.currency, m.left).periods.filter((p) => p.status === 'paid' && p.until >= m.left!) : [];
+  if (paid.length) {
+    const from = [m.left!, start].sort().at(-1)!;
+    const last = paid.at(-1)!.until;
+    const until = last < end ? last : end;
     if (from <= until) out.push({ from, until, kind: 'unused' });
   }
   return out;

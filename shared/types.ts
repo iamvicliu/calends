@@ -56,8 +56,6 @@ export interface ShareMember {
   name: string;
   /** 每期应付金额，币种同订阅 */
   share: number;
-  /** 已付至（含）该日；为空表示从未收款 */
-  paidUntil?: string;
   /** 联系方式：渠道（Telegram、微信、邮箱…）+ 账号 / ID */
   contactVia?: string;
   contact?: string;
@@ -82,8 +80,12 @@ export interface ShareMember {
   firstPeriod?: 'prorate' | 'full' | 'free';
   /** 首期应收自定义金额（收费币种）；缺省按 firstPeriod 计算 */
   firstAmount?: number;
-  /** 收款记录 */
-  payments?: MemberPayment[];
+  /** 收款节奏重新起算的日子：这天起新的一期，之前那期截到前一天（按天折算） */
+  restarts?: string[];
+  /** 收款：每笔写明抵扣哪几期（各期起始日），期可以不连续 */
+  receipts?: Receipt[];
+  /** 免收：这几期不再收 */
+  waivers?: Waiver[];
   note?: string;
   /** 加入日；缺省为开始合租那天 */
   joined?: string;
@@ -100,15 +102,27 @@ export interface LeaveRefund {
   note?: string;
 }
 
-/** 合租成员的一笔收款：收了多少、覆盖到哪天 */
-export interface MemberPayment {
+/**
+ * 一笔收款：收到多少钱、抵扣哪几期。合租的期用起始日标识，代付的期用扣款日标识。
+ * 期可以不连续（收了第 1、3、5 期），也可以是还没到期的期（提前收）；金额按各期应收的比例分摊
+ */
+export interface Receipt {
+  id: string;
+  /** 收到的日期，按当天汇率折算 */
   date: string;
   amount: number;
   currency: string;
-  /** 这笔钱覆盖的起始日 */
-  from?: string;
-  /** 这笔钱付到（含）哪一天 */
-  until: string;
+  periods: string[];
+  note?: string;
+  /** 期初结清：开始记账之前就已收清，金额不详；这几期算结清，但不计入收到的钱 */
+  opening?: boolean;
+}
+
+/** 免收：这几期不再收，既不算欠款，也不算收到钱 */
+export interface Waiver {
+  id: string;
+  date: string;
+  periods: string[];
   note?: string;
 }
 
@@ -134,29 +148,13 @@ export interface Share {
   rule?: CarRule;
 }
 
-/** 代付的一期：卡上实扣多少（订阅币种），对方还了多少（币种可以不同，比如扣日元、收人民币） */
-export interface ProxyEntry {
-  /** 对应哪一期扣款（扣款日） */
+/** 代付某一期卡上的实际扣款：卡按自己的币种结算时与订阅价不同（订阅 JPY、Bybit 卡扣 USD）；没记的按订阅价 */
+export interface ProxyCharge {
+  /** 扣款日，即这一期的标识 */
   charge: string;
-  /** 卡上实际扣款金额，缺省按订阅价格 */
-  charged?: number;
-  /** 实扣币种：卡按自己的币种结算时与订阅币种不同（订阅 JPY、Bybit 卡扣 USD）；缺省同订阅 */
-  chargedCurrency?: string;
-  /** 收回的金额；为空表示还没收 */
-  received?: number;
-  receivedCurrency?: string;
-  /** 实际收到的日期，用于按当天汇率折算 */
-  receivedOn?: string;
+  amount?: number;
+  currency?: string;
   note?: string;
-  /** 按笔记的收款，覆盖一期或多期（可早于扣款日预收）：每期各记一条，received 是均摊后的一份 */
-  batch?: ProxyBatch;
-}
-
-/** 一笔收款：收了多少（received 同币种）、分摊到几期；同一笔的各期共用 id */
-export interface ProxyBatch {
-  id: string;
-  amount: number;
-  periods: number;
 }
 
 /** 代付：替别人付的订阅。钱从我的卡上扣，但不算我的支出，每期向对方收回 */
@@ -170,7 +168,12 @@ export interface Proxy {
   contact?: string;
   /** 一句话备注，如「同事，月底转账」 */
   note?: string;
-  entries: ProxyEntry[];
+  /** 收回的钱：每笔写明抵扣哪几期（扣款日） */
+  receipts?: Receipt[];
+  /** 免收：这几期不再向对方收 */
+  waivers?: Waiver[];
+  /** 各期卡上的实际扣款 */
+  charged?: ProxyCharge[];
 }
 
 /** 头像底色：只存色名，显示时按主题取色 */

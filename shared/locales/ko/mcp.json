@@ -63,7 +63,10 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "카테고리가 없거나 모호합니다: {q}. 선택 가능: {list}",
-    "proxyPeriodsShort": "{from}부터 {count}회만 남아 이 입금이 적용할 회차보다 적습니다"
+    "noPeriods": "회차를 하나 이상 선택하세요(같은 회차는 한 번만)",
+    "periodUnknown": "{period}은(는) 이 채권의 회차가 아닙니다",
+    "periodTaken": "{period} 회차에는 이미 입금 또는 면제 기록이 있습니다",
+    "periodsShort": "미정산 회차가 {count}회만 남아 이 입금이 적용할 회차보다 적습니다"
   },
   "tool": {
     "get_overview": "장부 개요",

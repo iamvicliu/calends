@@ -581,7 +581,7 @@ function Form({
             value={f.proxy ? 'proxy' : share ? share.role : 'none'}
             onChange={(v) =>
               v === 'proxy'
-                ? up({ share: undefined, proxy: { forName: f.proxy?.forName ?? '', entries: f.proxy?.entries ?? [] } })
+                ? up({ share: undefined, proxy: { ...f.proxy, forName: f.proxy?.forName ?? '' } })
                 : up({ proxy: undefined, share: v === 'none' ? undefined : { seats: 6, members: [], ...share, role: v as 'owner' | 'member' } })
             }
             options={[

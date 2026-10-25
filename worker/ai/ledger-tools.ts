@@ -270,7 +270,7 @@ export const ledgerTools: Tool[] = [
     write: true,
     destructive: true,
     description:
-      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain). Prefer person id/name from list_people; for_name permits a legacy display name. Updates preserve entries and only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
+      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain). Prefer person id/name from list_people; for_name permits a legacy display name. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
     inputSchema: obj(
       {
         subscription: text,
@@ -291,7 +291,7 @@ export const ledgerTools: Tool[] = [
       if (a.action !== 'remove') {
         const p = a.person ? findPerson(st, a.person) : undefined;
         proxy = {
-          ...(s.proxy ?? { forName: '', entries: [] }),
+          ...(s.proxy ?? { forName: '' }),
           ...(p ? { personId: p.id, forName: p.name, contactVia: p.contactVia, contact: p.contact } : {}),
         };
         if (a.person === null) proxy.personId = undefined;
@@ -311,7 +311,7 @@ export const ledgerTools: Tool[] = [
         ...(await commit(ctx, st, today, { ...s, proxy }, a.dry_run, ['proxy'])),
         before: s.proxy ?? null,
         after: proxy ?? null,
-        references: { subscription: s.id, removed_entries: proxy ? [] : (s.proxy?.entries ?? []) },
+        references: { subscription: s.id, removed_receipts: proxy ? [] : (s.proxy?.receipts ?? []), removed_waivers: proxy ? [] : (s.proxy?.waivers ?? []) },
       };
     },
   },

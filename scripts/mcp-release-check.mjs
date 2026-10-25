@@ -8,7 +8,7 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { memberCollection, memberDues, memberRate, memberUnpaidFrom, todayIn, diffDays } from '../shared/billing.ts';
+import { addMonths, memberCollection, memberDues, memberRate, memberUnpaidFrom, todayIn, diffDays } from '../shared/billing.ts';
 import { DEEPSEEK_MODEL, DEEPSEEK_BASE_URL } from '../shared/deepseek.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -40,9 +40,9 @@ function fixtures() {
       member('Exempt', { exempt: true, share: 0 }),
       member('Departed', { left: `${today.slice(0, 7)}-01` }),
       member('Partial', { joined: `${today.slice(0, 7)}-15` }),
+      // 一笔收到明年年底：从去年 1 月起 36 期
       member('Prepaid', {
-        paidUntil: `${Number(today.slice(0, 4)) + 1}-12-31`,
-        payments: [{ date: past, from: past, until: `${Number(today.slice(0, 4)) + 1}-12-31`, amount: 360, currency: 'CNY' }],
+        receipts: [{ id: 'prepaid', date: past, amount: 360, currency: 'CNY', periods: Array.from({ length: 36 }, (_, k) => addMonths(past, k)) }],
       }),
     ]),
     car('youtube', 'YouTube', 3, [member('Quarterly', { billEvery: 3, fee: 30 })], { fee: 30, currency: 'CNY', billEvery: 3 }),
@@ -97,7 +97,7 @@ async function run(base) {
   };
   const subs = async () => (await api('state')).subscriptions;
   const spotify = async () => (await subs()).find((s) => s.id === 'spotify');
-  const history = (s) => s.share.members.map((m) => ({ id: m.id, payments: m.payments, paidUntil: m.paidUntil }));
+  const history = (s) => s.share.members.map((m) => ({ id: m.id, receipts: m.receipts, waivers: m.waivers }));
   const init = await rpc('initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'release-check', version: '1' } });
   assert.equal(init.protocolVersion, '2025-06-18');
   const catalogue = (await rpc('tools/list', {})).tools;
@@ -154,7 +154,7 @@ async function run(base) {
     );
   await ok('set_share', { subscription: 'spotify', role: 'owner', seats: 17 });
   assert.deepEqual((await spotify()).share.rule, s.share.rule);
-  // Existing receipt bytes and paidUntil survive past changes, cycle changes and currency changes.
+  // Existing receipts and waivers survive past changes, cycle changes and currency changes.
   await ok('set_share', { ...edit, rule: { fee: 12, fee_currency: 'USD', bill_every: 6 }, rule_from: `${today.slice(0, 7)}-01` });
   s = await spotify();
   assert.deepEqual(history(s), history(original));
@@ -189,14 +189,14 @@ async function run(base) {
     stable,
   );
   const receipt = await ok('record_receivable', { subscription: 'spotify', kind: 'share', member: 'Bob', amount: 10 });
-  assert.ok(receipt.receipt.until);
+  assert.equal(receipt.after.periods.length, 1);
   s = await spotify();
-  assert.equal(s.share.members.find((m) => m.id === 'Bob').payments.length, 1);
+  assert.equal(s.share.members.find((m) => m.id === 'Bob').receipts.length, 1);
   const receiptBefore = await subs();
-  await ok('record_receivable', { subscription: 'spotify', kind: 'share', member: 'Bob', action: 'delete', index: 0, dry_run: true });
+  await ok('record_receivable', { subscription: 'spotify', kind: 'share', member: 'Bob', action: 'delete', id: receipt.after.id, dry_run: true });
   assert.deepEqual(await subs(), receiptBefore);
-  await ok('record_receivable', { subscription: 'spotify', kind: 'share', member: 'Bob', action: 'delete', index: 0 });
-  assert.equal((await spotify()).share.members.find((m) => m.id === 'Bob').paidUntil, undefined);
+  await ok('record_receivable', { subscription: 'spotify', kind: 'share', member: 'Bob', action: 'delete', id: receipt.after.id });
+  assert.deepEqual((await spotify()).share.members.find((m) => m.id === 'Bob').receipts, []);
   const removal = { subscription: 'spotify', member: carol.member.id };
   const b = await subs();
   await ok('remove_share_member', { ...removal, dry_run: true });
@@ -393,8 +393,8 @@ async function liveModels({ base, api, seed, subs, spotify, rpc, catalogue }) {
           const oldMembers = before.find((s) => s.id === 'spotify').share.members;
           for (const old of oldMembers) {
             const m = s.share.members.find((m) => m.id === old.id);
-            assert.deepEqual(m.payments, old.payments);
-            assert.equal(m.paidUntil, old.paidUntil);
+            assert.deepEqual(m.receipts, old.receipts);
+            assert.deepEqual(m.waivers, old.waivers);
           }
         }
         console.log(`PASS model ${path} task ${i + 1}: tool arguments, stored values and history`);

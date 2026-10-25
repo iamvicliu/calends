@@ -5,7 +5,6 @@ import { mergePeople, refsFor, syncPerson } from './people.ts';
 import { channelsOf, DEFAULT_SETTINGS, type AppState, type Payment, type PaymentMethod, type Person, type Settings, type Subscription } from './types.ts';
 import { PREF_KEYS, mergePrefs } from './prefs.ts';
 import { isLocale, t } from './i18n.ts';
-import { collectionAnchor, validDay } from './billing.ts';
 import { objectSchema, textSchema, daySchema, nullable } from './tool-schema.ts';
 
 export const METHOD_FIELDS = objectSchema({
@@ -203,51 +202,3 @@ export function editRecord<T>(records: T[], index: number, replacement: T | unde
   return records.flatMap((x, i) => (i === index ? (replacement === undefined ? [] : [replacement]) : [x]));
 }
 
-/** Revise or remove one actual share receipt or proxy entry. No inferred fallback on a failed lookup. */
-export function reviseReceivable(st: AppState, s: AppState['subscriptions'][number], a: Record<string, unknown>) {
-  if (a.kind === 'proxy') {
-    if (!s.proxy) throw new Error(t('mcp.error.notProxy', { name: s.name }));
-    const index = s.proxy.entries.findIndex((e) => e.charge === a.charge);
-    const old = s.proxy.entries[index];
-    const next = a.action === 'delete' ? undefined : applyFields(old ?? {}, (a.entry ?? {}) as Record<string, unknown>);
-    const entries =
-      a.action === 'record' && index < 0 && next
-        ? [...s.proxy.entries, { ...next, charge: String(next.charge ?? a.charge) } as typeof old]
-        : editRecord(s.proxy.entries, index, next as typeof old | undefined);
-    if (entries.some((e) => !validDay(e.charge))) throw new Error(t('mcp.error.invalidTarget'));
-    if (next) {
-      if (entries.filter((e) => e.charge === (next.charge ?? a.charge)).length > 1) throw new Error(t('mcp.error.invalidTarget'));
-      for (const key of ['chargedCurrency', 'receivedCurrency'] as const) if (next[key]) validateCurrency(st, String(next[key]));
-    }
-    return { after: { ...s, proxy: { ...s.proxy, entries } }, before: old, record: next ?? null };
-  }
-  const members = s.share?.members ?? [];
-  const matches = members.filter((m) => m.id === a.member || m.name === a.member);
-  if (matches.length !== 1) throw new Error(t('mcp.error.invalidTarget'));
-  const m = matches[0];
-  const index = Number(a.index);
-  const old = m.payments?.[index];
-  const next = a.action === 'delete' ? undefined : (applyFields(old ?? {}, (a.receipt ?? {}) as Record<string, unknown>) as typeof old);
-  const payments = editRecord(m.payments ?? [], index, next);
-  if (next) {
-    validateCurrency(st, next.currency);
-    if (next.from && next.from > next.until) throw new Error(t('mcp.error.invalidTarget'));
-  }
-  // Explicit paid_until can preserve manually known coverage; otherwise removing a receipt retracts its coverage.
-  const paidUntil =
-    'paid_until' in a
-      ? (a.paid_until as string | undefined)
-      : payments.reduce<string | undefined>((end, p) => (!end || p.until > end ? p.until : end), undefined);
-  return {
-    after: {
-      ...s,
-      share: {
-        ...s.share!,
-        collectFrom: collectionAnchor(s),
-        members: members.map((x) => (x.id === m.id ? { ...m, payments, paidUntil: paidUntil ?? undefined } : x)),
-      },
-    },
-    before: old,
-    record: next ?? null,
-  };
-}

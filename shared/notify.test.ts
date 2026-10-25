@@ -276,7 +276,7 @@ test('合租提醒与首期应收一致，免费首期跳至统一收款日', ()
   assert.ok(!JSON.stringify(buildDaily(st, '2026-10-20') ?? null).includes('Test JJ'));
   assert.ok(JSON.stringify(buildDaily(st, '2027-01-17')).includes('40.67'));
   m.firstPeriod = 'prorate';
-  m.paidUntil = '2027-01-16';
+  m.receipts = [{ id: 'r1', date: '2026-10-20', amount: 19.67, currency: 'CNY', periods: ['2026-10-20'] }];
   assert.ok(JSON.stringify(buildDaily(st, '2027-01-14')).includes('Test JJ'));
   assert.ok(!JSON.stringify(buildDaily(st, '2027-01-20') ?? null).includes('Test JJ'));
 });

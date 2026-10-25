@@ -10,33 +10,22 @@ import {
   memberBillMonths,
   LIFETIME_BILL_MONTHS,
   memberRate,
-  addDays,
   addMonths,
   collectionAnchor,
-  collectionDates,
+  memberLedger,
   diffDays,
-  memberCollection,
 } from './billing.ts';
 import { chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { yearCost } from './metrics.ts';
 import { currencyDecimals } from './format.ts';
-import type { AppState, CarRule, MemberFeePoint, MemberPayment, ShareMember, Subscription } from './types.ts';
+import { isSettled, type Period } from './receivables.ts';
+import type { AppState, CarRule, MemberFeePoint, ShareMember, Subscription } from './types.ts';
 
-/** 保留收款原件；退款在现金流中作为支出，不改变覆盖期。 */
+/** 成员实际交来、退回的钱：期初结清没有金额，不算；退款作为负数。不改变各期是否结清 */
 export function memberCashFlows(m: ShareMember) {
   return [
-    ...(m.payments ?? []).map((p) => ({ ...p, kind: 'receipt' as const })),
-    ...(m.leaveRefund
-      ? [
-          {
-            ...m.leaveRefund,
-            amount: -m.leaveRefund.amount,
-            from: m.left,
-            until: m.paidUntil && m.left && m.paidUntil >= m.left ? m.paidUntil : (m.left ?? m.leaveRefund.date),
-            kind: 'refund' as const,
-          },
-        ]
-      : []),
+    ...(m.receipts ?? []).filter((r) => !r.opening).map((r) => ({ ...r, kind: 'receipt' as const })),
+    ...(m.leaveRefund ? [{ ...m.leaveRefund, amount: -m.leaveRefund.amount, kind: 'refund' as const }] : []),
   ];
 }
 
@@ -52,25 +41,19 @@ export function updateMemberLeave(m: ShareMember, patch: Partial<ShareMember>): 
 }
 
 /**
- * 按每笔实收的覆盖期日单价折算，退出当日已不在车上，计入未用天数。
- * 老收款无 from 时按前笔覆盖终点、收费周期和加入日推断；仅有 paidUntil 不虚构收款。
- * 默认使用最早一笔未用收款的币种，跨币种按退出日汇总，parts 保留原币种明细；缺汇率返回 NaN。
+ * 退出时建议退多少：收过钱的期里，退出日（当天已不在车上）之后没用的天数，按那一期分到的钱按天折算。
+ * 期初结清的期金额不详，不计入。默认用最早一笔未用收款的币种，跨币种按退出日汇总，parts 保留原币种明细；缺汇率返回 NaN
  */
 export function suggestedLeaveRefund(state: AppState, s: Subscription, m: ShareMember, currency?: string) {
-  const joined = m.joined ?? s.share?.since ?? s.start;
-  let previous: string | undefined;
-  const parts = (m.payments ?? [])
-    .slice()
-    .sort((a, b) => a.until.localeCompare(b.until))
-    .flatMap((p) => {
-      const inferred = previous ? addDays(previous, 1) : addMonths(addDays(p.until, 1), -memberBillMonths(s, m, p.until));
-      const from = p.from ?? (inferred < joined ? joined : inferred);
-      previous = previous && previous > p.until ? previous : p.until;
-      if (!m.left || p.until < m.left || p.until < from) return [];
-      const unusedFrom = from > m.left ? from : m.left;
-      const unusedDays = diffDays(unusedFrom, p.until) + 1;
-      return [{ from, until: p.until, unusedDays, amount: (p.amount * unusedDays) / (diffDays(from, p.until) + 1), currency: p.currency }];
-    });
+  // 按没退出算各期，才能对上退出日之后提前收了的期
+  const parts = !m.left
+    ? []
+    : memberLedger(s, { ...m, left: undefined }, m.left, s.currency, m.left).periods.flatMap((p) => {
+        if (p.status !== 'paid' || p.share == null || p.until < m.left!) return [];
+        const unusedFrom = p.from > m.left! ? p.from : m.left!;
+        const unusedDays = diffDays(unusedFrom, p.until) + 1;
+        return [{ from: p.from, until: p.until, unusedDays, amount: (p.share * unusedDays) / (diffDays(p.from, p.until) + 1), currency: p.receipt!.currency }];
+      });
   const ccy = currency ?? parts[0]?.currency ?? m.feeCurrency ?? state.settings.collectCurrency ?? state.settings.baseCurrency;
   const amount = parts.reduce((sum, p) => sum + convertOn(p.amount, p.currency, ccy, m.left!, state.fxHistory, state.fx), 0);
   const factor = 10 ** currencyDecimals(ccy);
@@ -98,7 +81,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
           const rate = memberFee(state, s, m, today);
           return a + (m.exempt || !memberAboard(m, today) ? 0 : toBaseAt(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency));
         }, 0)) - yearRefunded;
-  const firstPay = members.flatMap((m) => m.payments ?? []).reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
+  const firstPay = members.flatMap(memberCashFlows).filter((p) => p.kind === 'receipt').reduce<string | undefined>((a, p) => (!a || p.date < a ? p.date : a), undefined);
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
   const since = s.share?.since ?? firstPay ?? firstJoin ?? s.start;
@@ -133,10 +116,9 @@ export function carYear(state: AppState, s: Subscription, today: string) {
   const expected = members
     .filter((m) => !m.exempt)
     .flatMap((m) =>
-      collectionDates(s, m, y).map((d) => {
-        const c = memberCollection(s, m, d, ccy);
-        return toBaseAt(state, c.amount, c.currency, d);
-      }),
+      memberLedger(s, m, today, ccy, `${y}-12-31`)
+        .periods.filter((p) => !isSettled(p) && p.from.slice(0, 4) === y)
+        .map((p) => toBaseAt(state, p.due, p.currency, p.from)),
     )
     .reduce((a, v) => a + v, 0);
   const income = received + expected;
@@ -219,16 +201,6 @@ export function resyncShares(state: AppState, prev: Subscription | undefined, ne
   };
 }
 
-/** 更新应收和覆盖期时保留实际收款草稿；金额或币种手改后，两者都不再跟随默认值。 */
-export function refreshReceiptDraft(draft: MemberPayment, next: MemberPayment, moneyEdited: boolean): MemberPayment {
-  return {
-    ...draft,
-    from: next.from,
-    until: next.until,
-    ...(!moneyEdited ? { amount: next.amount, currency: next.currency } : {}),
-  };
-}
-
 /** 两条收费标准是否相同（金额容差一分钱） */
 export const sameRule = (a: CarRule, b: CarRule) => a.billEvery === b.billEvery && a.currency === b.currency && Math.abs(a.fee - b.fee) < 0.005;
 
@@ -289,26 +261,12 @@ export function followCarRule(state: AppState, s: Subscription, m: ShareMember, 
     : changeMemberFee(state, s, next, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
 }
 
-/**
- * 一笔收款从 from 起覆盖 periods 期：逐期按收费规则算应收，金额折成第一期的币种相加，返回覆盖到哪天。
- * 遇到退出日或订阅结束就停，periods 返回实际能覆盖的期数。收款表单的「期数」与提前收款共用
- */
-export function collectionSpan(state: AppState, s: Subscription, m: ShareMember, from: string, periods: number, currency: string) {
-  let start = from;
-  let amount = 0;
-  let until = from;
-  let count = 0;
-  let ccy = currency;
-  for (; count < periods; count++) {
-    if ((m.left && start >= m.left) || (s.end && start > s.end)) break;
-    const c = memberCollection(s, m, start, currency);
-    if (!count) ccy = c.currency;
-    amount += c.currency === ccy ? c.amount : convertOn(c.amount, c.currency, ccy, c.from, state.fxHistory, state.fx);
-    until = c.until;
-    start = addDays(c.until, 1);
-  }
+/** 几期应收的合计：金额折成第一期的币种相加（收款表单按选中的期预填金额） */
+export function periodsTotal(state: AppState, periods: Period[]) {
+  const ccy = periods[0]?.currency ?? state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const amount = periods.reduce((a, p) => a + (p.currency === ccy ? p.due : convertOn(p.due, p.currency, ccy, p.from, state.fxHistory, state.fx)), 0);
   const d = 10 ** currencyDecimals(ccy);
-  return { amount: Math.round(amount * d) / d, currency: ccy, until, periods: count };
+  return { amount: Math.round(amount * d) / d, currency: ccy };
 }
 
 /**

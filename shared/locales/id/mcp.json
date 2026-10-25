@@ -63,7 +63,10 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Kategori tidak ditemukan atau ambigu: {q}. Pilihan: {list}",
-    "proxyPeriodsShort": "Mulai {from} hanya tersisa {count} tagihan, kurang dari cakupan penerimaan ini"
+    "noPeriods": "Pilih setidaknya satu periode, masing-masing hanya sekali",
+    "periodUnknown": "{period} bukan periode dari piutang ini",
+    "periodTaken": "Periode {period} sudah punya pembayaran atau pembebasan",
+    "periodsShort": "Hanya tersisa {count} periode yang belum lunas, kurang dari cakupan pembayaran ini"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",

@@ -104,12 +104,16 @@ const sub = (): Subscription => ({
         share: 3,
         fee: 3,
         feeCurrency: 'USD',
-        payments: [{ date: todayIn('UTC'), from: todayIn('UTC'), until: '2026-12-31', amount: 3, currency: 'USD' }],
-        paidUntil: '2026-12-31',
+        receipts: [{ id: 'r1', date: todayIn('UTC'), amount: 3, currency: 'USD', periods: [todayIn('UTC')] }],
       },
     ],
   },
-  proxy: { personId: 'person', forName: 'Fictional person', entries: [{ charge: todayIn('UTC'), charged: 10, received: 9, receivedCurrency: 'USD' }] },
+  proxy: {
+    personId: 'person',
+    forName: 'Fictional person',
+    receipts: [{ id: 'p1', date: todayIn('UTC'), amount: 9, currency: 'USD', periods: [todayIn('UTC')] }],
+    charged: [{ charge: todayIn('UTC'), amount: 10 }],
+  },
 });
 async function setup() {
   const f = fixture();
@@ -236,42 +240,37 @@ const mutations: Array<[string, object, (st: AppState) => unknown]> = [
   ],
   [
     'record_receivable',
-    { action: 'update', subscription: 's', kind: 'share', member: 'member', index: 0, receipt: { amount: 0, until: '2026-11-30' } },
-    (st) => st.subscriptions[0].share?.members[0].paidUntil === '2026-11-30',
+    { action: 'update', subscription: 's', kind: 'share', member: 'member', id: 'r1', amount: 0 },
+    (st) => st.subscriptions[0].share?.members[0].receipts?.[0].amount === 0 && st.subscriptions[0].share?.members[0].receipts?.[0].periods[0] === todayIn('UTC'),
   ],
   [
     'record_receivable',
-    { action: 'delete', subscription: 's', kind: 'share', member: 'member', index: 0 },
-    (st) => !st.subscriptions[0].share?.members[0].paidUntil && st.subscriptions[0].share?.members[0].payments?.length === 0,
+    { action: 'delete', subscription: 's', kind: 'share', member: 'member', id: 'r1' },
+    (st) => st.subscriptions[0].share?.members[0].receipts?.length === 0,
   ],
   [
     'record_receivable',
-    {
-      action: 'update',
-      subscription: 's',
-      kind: 'proxy',
-      charge: todayIn('UTC'),
-      entry: { charged: 12, chargedCurrency: 'USD', received: null, receivedCurrency: null },
-    },
-    (st) => st.subscriptions[0].proxy?.entries[0].charged === 12 && st.subscriptions[0].proxy?.entries[0].received === undefined,
+    { action: 'charged', subscription: 's', kind: 'proxy', charge: todayIn('UTC'), charged_amount: 12, charged_currency: 'USD' },
+    (st) => st.subscriptions[0].proxy?.charged?.[0].amount === 12 && st.subscriptions[0].proxy?.charged?.[0].currency === 'USD',
   ],
   [
     'record_receivable',
-    { action: 'delete', subscription: 's', kind: 'proxy', charge: todayIn('UTC') },
-    (st) => st.subscriptions[0].proxy?.entries.length === 0,
+    { action: 'delete', subscription: 's', kind: 'proxy', id: 'p1' },
+    (st) => st.subscriptions[0].proxy?.receipts?.length === 0,
   ],
   [
     'record_receivable',
-    { subscription: 's', kind: 'proxy', charge: '2026-01-01', entry: { charged: 5, chargedCurrency: 'USD' } },
-    (st) => st.subscriptions[0].proxy?.entries.some((e) => e.charge === '2026-01-01' && e.charged === 5),
+    // 免收下一期
+    { action: 'waive', subscription: 's', kind: 'proxy' },
+    (st) => st.subscriptions[0].proxy?.waivers?.length === 1 && st.subscriptions[0].proxy.waivers[0].periods[0] > todayIn('UTC'),
   ],
   [
     'record_receivable',
     // 预收：一笔覆盖接下来 3 期（今天这期已收，跳过），按期均摊
-    { subscription: 's', kind: 'proxy', amount: 30, currency: 'USD', periods: 3 },
+    { subscription: 's', kind: 'proxy', amount: 30, currency: 'USD', count: 3 },
     (st) => {
-      const prepaid = st.subscriptions[0].proxy?.entries.filter((e) => e.batch?.periods === 3) ?? [];
-      return prepaid.length === 3 && prepaid.every((e) => e.received === 10 && e.charge > todayIn('UTC'));
+      const r = st.subscriptions[0].proxy?.receipts?.find((x) => x.amount === 30);
+      return !!r && r.periods.length === 3 && r.periods.every((k) => k > todayIn('UTC'));
     },
   ],
   [
@@ -708,7 +707,7 @@ test('assistant pins member id when adding by person without a name; later recei
   for (const p of proposals) await apply(f.env, p);
   const member = (await f.snapshot()).subscriptions[0].share!.members.find((m) => m.id === memberId)!;
   assert.equal(member.personId, 'target');
-  assert.equal(member.payments?.[0].amount, 2);
+  assert.equal(member.receipts?.[0].amount, 2);
 });
 
 test('价格历史 MCP：编辑、删除、起始价保护、预览及只读权限', async (t) => {
@@ -1014,7 +1013,7 @@ test('carpool collection rule: MCP reads, sets, follows and customizes member fe
     assert.equal((await member('member')).fee, 4);
     assert.equal((await member('Newcomer')).fee, 4);
     // 收款记录不受改规则影响
-    assert.equal((await member('member')).payments?.length, 1);
+    assert.equal((await member('member')).receipts?.length, 1);
 
     // 单独改收费 → 自定义，之后改车的规则不再影响他
     const custom = await f.call('save_share_member', { subscription: 's', member: 'member', fee: 5 });
@@ -1077,8 +1076,7 @@ test('follow_rule ignores explicit fee fields without losing the old fee baselin
   const m = saved.share!.members[0];
   assert.deepEqual(memberRate(saved, m, addDays(today, -1)), { amount: 3, currency: 'USD', billEvery: 1 });
   assert.deepEqual(memberRate(saved, m, today), { amount: 6, currency: 'USD', billEvery: 3 });
-  assert.deepEqual(m.payments, s.share.members[0].payments);
-  assert.equal(m.paidUntil, s.share.members[0].paidUntil);
+  assert.deepEqual(m.receipts, s.share.members[0].receipts);
 });
 
 test('MCP overdue days match the UI for exempt and departed members with no unpaid periods', async (t) => {
@@ -1088,7 +1086,15 @@ test('MCP overdue days match the UI for exempt and departed members with no unpa
   s.start = '2025-01-01';
   s.share!.members = [
     { id: 'exempt', name: 'Exempt', share: 0, fee: 0, exempt: true, joined: '2025-01-01' },
-    { id: 'left', name: 'Departed settled', share: 3, fee: 3, left: '2025-06-01', paidUntil: '2025-05-31', joined: '2025-01-01' },
+    {
+      id: 'left',
+      name: 'Departed settled',
+      share: 3,
+      fee: 3,
+      left: '2025-06-01',
+      joined: '2025-01-01',
+      receipts: [{ id: 'r', date: '2025-01-01', amount: 15, currency: 'USD', periods: ['2025-01-01', '2025-02-01', '2025-03-01', '2025-04-01', '2025-05-01'] }],
+    },
     { id: 'arrears', name: 'Departed owing', share: 3, fee: 3, left: '2025-06-01', joined: '2025-01-01' },
   ];
   await upsert(f.env, 'subscriptions', 's', s);
@@ -1147,8 +1153,7 @@ test('assistant car-rule and member drafts compose without saving; confirmation 
   assert.deepEqual(memberRate(s, m, today), { amount: 100, currency: 'USD', billEvery: 12 });
   assert.deepEqual(memberRate(s, m, from), { amount: 100, currency: 'USD', billEvery: 12 });
   assert.equal(m.custom, true);
-  assert.deepEqual(m.payments, before.subscriptions[0].share!.members[0].payments);
-  assert.equal(m.paidUntil, before.subscriptions[0].share!.members[0].paidUntil);
+  assert.deepEqual(m.receipts, before.subscriptions[0].share!.members[0].receipts);
   const carol = s.share!.members.find((m) => m.name === 'Carol')!;
   assert.equal(carol.id, proposals[3].args.id);
   assert.deepEqual(memberRate(s, carol, today), { amount: 6, currency: 'USD', billEvery: 3 });
@@ -1163,8 +1168,7 @@ test('下车退款 MCP：预览无写入、读令牌拒绝写、实际退款保�
     const m = s.share!.members[0];
     Object.assign(m, {
       joined: '2026-01-01',
-      paidUntil: '2026-01-31',
-      payments: [{ date: '2026-01-01', from: '2026-01-01', until: '2026-01-31', amount: 31, currency: 'USD' }],
+      receipts: [{ id: 'r1', date: '2026-01-01', amount: 31, currency: 'USD', periods: ['2026-01-01'] }],
     });
     await upsert(f.env, 'subscriptions', s.id, s);
     const args = { subscription: 's', member: 'member', left: '2026-01-16', leave_refund: { amount: 12.34, note: 'Private actual settlement' } };
@@ -1180,8 +1184,7 @@ test('下车退款 MCP：预览无写入、读令牌拒绝写、实际退款保�
     assert.equal((await f.call('save_share_member', args, f.read)).isError, true);
     assert.equal((await f.call('save_share_member', args)).isError, undefined);
     const saved = (await f.snapshot()).subscriptions[0];
-    assert.deepEqual(saved.share!.members[0].payments, m.payments);
-    assert.equal(saved.share!.members[0].paidUntil, m.paidUntil);
+    assert.deepEqual(saved.share!.members[0].receipts, m.receipts);
     const car = (await f.call('get_carpool', { subscription: 's' }, f.read)).structuredContent.plans[0];
     assert.equal(car.to_date.received, 18.66);
     assert.equal(car.members[0].leave_refund.amount, 12.34);
@@ -1203,7 +1206,7 @@ test('下车退款 MCP：预览无写入、读令牌拒绝写、实际退款保�
     const cleared = (await f.snapshot()).subscriptions[0].share!.members[0];
     assert.equal(cleared.left, undefined);
     assert.equal(cleared.leaveRefund, undefined);
-    assert.deepEqual(cleared.payments, m.payments);
+    assert.deepEqual(cleared.receipts, m.receipts);
     // HTTP save clears an existing leave settlement as well.
     assert.equal((await f.call('save_share_member', args)).isError, undefined);
     const http = (await f.snapshot()).subscriptions[0];

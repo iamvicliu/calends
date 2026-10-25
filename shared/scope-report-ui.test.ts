@@ -14,6 +14,7 @@ import * as metrics from './metrics.ts';
 import * as carpool from './carpool.ts';
 import * as carpoolTimeline from './carpool-timeline.ts';
 import * as proxy from './proxy.ts';
+import * as receivables from './receivables.ts';
 import { detailForecast } from '../app/src/views/detail-data.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
@@ -38,7 +39,13 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
         .replace(/^import[\s\S]*?;\n/gm, '')
         .replace(/export function /g, 'function ')
     : '';
-  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource, {
+  // 合租与代付共用的按期收款表单：一起编译并在渲染时展开
+  const receivableSource = /Receivable\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    ? readFileSync(new URL('../app/src/views/Receivable.tsx', import.meta.url), 'utf8')
+        .replace(/^import[\s\S]*?;\n/gm, '')
+        .replace(/export (function|const) /g, '$1 ')
+    : '';
+  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource + '\n' + receivableSource, {
     lang: 'tsx',
     jsx: { runtime: 'classic' },
     reactCompiler: false,
@@ -51,7 +58,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     React: {
       Fragment: 'Fragment',
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
-        typeof type === 'function' && ['MetricCards', 'Metric', 'YearLedger', 'FeeRuleFields'].includes(type.name)
+        typeof type === 'function' && ['MetricCards', 'Metric', 'YearLedger', 'FeeRuleFields', 'ReceivableSheet', 'PeriodStrip'].includes(type.name)
           ? type({ ...props, children })
           : { type, props: props ?? {}, children },
     },
@@ -64,6 +71,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...metrics,
     ...carpoolTimeline,
     ...proxy,
+    ...receivables,
     useTimelinePan: () => ({ current: null }),
     locale: () => 'en',
     useOrig: () => false,
@@ -853,7 +861,7 @@ test('钱包续航列表不重复卡面余额和月扣；单年度分享用时�
   }
 });
 
-test('收款表单按应收预填：上面只读的收费与本期，下面实际收到的日期、金额、币种、备注都按改过的记', async () => {
+test('收款表单按应收预填：上面只读的收费，默认勾最早没收的一期，实际收到的日期、金额、币种、备注都按改过的记', async () => {
   for (const edit of ['none', 'amount', 'zero', 'currency']) {
     const member = { id: 'm', name: 'Member', share: 7.5, fee: 150, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-14' };
     const sub: Subscription = {
@@ -894,26 +902,30 @@ test('收款表单按应收预填：上面只读的收费与本期，下面实�
     const cell = (label: string) => render().find((n) => n.type === 'Cell' && n.props.label === label)!;
     const input = (label: string, type: string) => all(cell(label)).find((n) => n.type === type)!;
     const due = billing.memberCollection(sub, member, billing.memberUnpaidFrom(sub, member), 'USD');
-    // 应收只读：收费标准与这一期，不是输入框
+    // 收费标准只读，不是输入框
     assert.ok(cell('family.member.feeGroup'));
     assert.equal(
-      all(cell('family.collect.period')).some((n) => n.type === 'DatePicker'),
+      all(cell('family.member.feeGroup')).some((n) => n.type === 'NumInput'),
       false,
     );
-    assert.equal(input('family.member.amount', 'NumInput').props.value, due.amount);
-    input('family.member.note', 'input').props.onChange({ target: { value: '审查草稿' } });
-    input('family.member.receivedOn', 'DatePicker').props.onChange('2026-10-21');
-    if (edit === 'amount' || edit === 'zero') input('family.member.amount', 'NumInput').props.onValue(edit === 'zero' ? 0 : 12.34);
-    if (edit === 'currency') input('family.member.amount', 'CurrencySelect').props.onChange('EUR');
+    // 默认勾选最早没收的那一期
+    const checked = render().filter((n) => n.type === 'input' && n.props.type === 'checkbox' && n.props.checked);
+    assert.equal(checked.length, 1);
+    assert.equal(input('receivable.amount', 'NumInput').props.value, due.amount);
+    input('receivable.note', 'input').props.onChange({ target: { value: '审查草稿' } });
+    input('receivable.receivedOn', 'DatePicker').props.onChange('2026-10-21');
+    if (edit === 'amount' || edit === 'zero') input('receivable.amount', 'NumInput').props.onValue(edit === 'zero' ? 0 : 12.34);
+    if (edit === 'currency') input('receivable.amount', 'CurrencySelect').props.onChange('EUR');
     await all(render().find((n) => n.type === 'Sheet')!.props.foot)
-      .find((n) => n.type === 'button' && n.children.includes('family.member.record'))!
+      .find((n) => n.type === 'button' && n.children.includes('receivable.record'))!
       .props.onClick();
-    const p = saved!.share!.members[0].payments![0];
+    const p = saved!.share!.members[0].receipts![0];
     assert.equal(p.note, '审查草稿');
     assert.equal(p.date, '2026-10-21');
-    assert.equal(p.from, due.from);
-    assert.equal(p.until, due.until);
-    assert.equal(p.amount, edit === 'amount' ? 12.34 : edit === 'zero' ? 0 : due.amount);
+    assert.deepEqual(p.periods, [due.from]);
+    // 只换币种时，按应收在收款日的汇率折算
+    const converted = Math.round(fx.convertOn(due.amount, due.currency, 'EUR', '2026-10-21', st.fxHistory, st.fx) * 100) / 100;
+    assert.equal(p.amount, edit === 'amount' ? 12.34 : edit === 'zero' ? 0 : edit === 'currency' ? converted : due.amount);
     assert.equal(p.currency, edit === 'currency' ? 'EUR' : due.currency);
   }
 });
@@ -1633,7 +1645,16 @@ test('payment marks fall back for missing, legacy and failed logos and recover w
 });
 
 test('收款保存失败保留草稿且不关闭；重试成功只增加一条并关闭', async () => {
-  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-10-14', paidUntil: '2026-07-16' };
+  const member = {
+    id: 'm',
+    name: 'Member',
+    share: 7,
+    fee: 44,
+    feeCurrency: 'CNY',
+    billEvery: 6,
+    joined: '2025-10-14',
+    receipts: [{ id: 'o', date: '2025-10-14', amount: 0, currency: 'CNY', periods: ['2025-10-14', '2026-04-14'], opening: true }],
+  };
   const sub: Subscription = {
     id: 's',
     name: 'Plan',
@@ -1682,26 +1703,35 @@ test('收款保存失败保留草稿且不关闭；重试成功只增加一条�
         closed++;
       },
     });
-  render()
-    .find((n) => n.type === 'input' && n.props.placeholder === 'family.member.notePh')!
-    .props.onChange({ target: { value: 'keep draft' } });
+  const note = () => render().find((n) => n.type === 'input' && n.props.placeholder === 'receivable.notePh')!;
+  note().props.onChange({ target: { value: 'keep draft' } });
   const record = () =>
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
-      .find((n) => n.type === 'button' && n.children.includes('family.member.record'))!
+      .find((n) => n.type === 'button' && n.children.includes('receivable.record'))!
       .props.onClick();
   await record();
   assert.equal(closed, 0);
   assert.equal(saved, undefined);
-  assert.equal(render().find((n) => n.type === 'input')!.props.value, 'keep draft');
+  assert.equal(note().props.value, 'keep draft');
   fail = false;
   await record();
   assert.equal(closed, 1);
-  assert.equal(saved!.share!.members[0].payments!.length, 1);
-  assert.equal(saved!.share!.members[0].paidUntil, '2027-01-16');
+  const receipts = saved!.share!.members[0].receipts!;
+  assert.equal(receipts.length, 2);
+  assert.deepEqual(receipts.at(-1)!.periods, ['2026-10-14']);
 });
 
 test('成员先改收费再改生效日只留下一个调整，今天标准与旧收款保持', async () => {
-  const member = { id: 'm', name: 'Member', share: 6.67, fee: 40, feeCurrency: 'CNY', billEvery: 6, joined: '2025-10-14', paidUntil: '2026-07-16' };
+  const member = {
+    id: 'm',
+    name: 'Member',
+    share: 6.67,
+    fee: 40,
+    feeCurrency: 'CNY',
+    billEvery: 6,
+    joined: '2025-10-14',
+    receipts: [{ id: 'o', date: '2025-10-14', amount: 0, currency: 'CNY', periods: ['2025-10-14', '2026-04-14'], opening: true }],
+  };
   const sub: Subscription = {
     id: 's',
     name: 'Plan',
@@ -1765,33 +1795,36 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
   );
 });
 
-test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继续保留', async () => {
-  for (const paidUntil of ['2026-08-02', '2026-11-10']) {
-    const member = {
-      id: 'm',
-      name: 'Member',
-      share: 7,
-      fee: 44,
-      feeCurrency: 'CNY',
-      billEvery: 6,
-      joined: '2025-10-14',
-      paidUntil,
-      payments: [{ date: '2026-02-03', amount: 44, currency: 'CNY', from: '2026-02-03', until: '2026-08-02' }],
-    };
-    const sub: Subscription = {
-      id: 's',
-      name: 'Plan',
-      category: 'Tools',
-      tags: [],
-      price: 15,
-      currency: 'USD',
-      start: '2025-10-14',
-      cycle: { unit: 'month', every: 1 },
-      status: 'active',
-      share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [member] },
-    };
-    let saved: Subscription | undefined;
-    const r = harness(
+test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受影响；成员表单和收款表单里删结果一样', async () => {
+  const member = {
+    id: 'm',
+    name: 'Member',
+    share: 7,
+    fee: 44,
+    feeCurrency: 'CNY',
+    billEvery: 6,
+    joined: '2025-10-14',
+    receipts: [
+      { id: 'o', date: '2025-10-14', amount: 0, currency: 'CNY', periods: ['2025-10-14'], opening: true },
+      { id: 'r1', date: '2026-04-20', amount: 44, currency: 'CNY', periods: ['2026-04-14'] },
+    ],
+  };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Plan',
+    category: 'Tools',
+    tags: [],
+    price: 15,
+    currency: 'USD',
+    start: '2025-10-14',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [member] },
+  };
+  let saved: Subscription | undefined;
+  // 每个表单各用一份 harness：状态按调用顺序存放，不能混用
+  const make = () =>
+    harness(
       '../app/src/views/Members.tsx',
       'MemberForm,ReceiptForm',
       {},
@@ -1812,38 +1845,22 @@ test('删除最后一笔收款清除对应覆盖；更晚的独立已付至继�
         },
       },
     );
-    // 成员表单的收款列表直接删
-    await r
-      .render('MemberForm', { state: st, s: sub, member, onClose() {} })
-      .find((n) => n.type === 'button' && n.props['aria-label'] === 'family.member.removePayAria')!
-      .props.onClick();
-    assert.equal(saved!.share!.members[0].payments!.length, 0);
-    assert.equal(saved!.share!.members[0].paidUntil, paidUntil === '2026-11-10' ? paidUntil : undefined);
-    // 点开那一笔在收款表单里删，结果一样
-    saved = undefined;
-    const receipt = harness(
-      '../app/src/views/Members.tsx',
-      'ReceiptForm',
-      {},
-      {
-        ...carpool,
-        Sheet: 'Sheet',
-        DatePicker: 'DatePicker',
-        CurrencySelect: 'CurrencySelect',
-        NumInput: 'NumInput',
-        getState: () => ({ ...st, subscriptions: [sub] }),
-        run: (fn: () => Promise<unknown>) => fn(),
-        saveSub: async (next: Subscription) => {
-          saved = next;
-        },
-      },
-    );
-    await all(receipt.render('ReceiptForm', { state: st, s: sub, member, index: 0, onDone() {} }).find((n) => n.type === 'Sheet')!.props.foot)
-      .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
-      .props.onClick();
-    assert.equal(saved!.share!.members[0].payments!.length, 0);
-    assert.equal(saved!.share!.members[0].paidUntil, paidUntil === '2026-11-10' ? paidUntil : undefined);
-  }
+  const r = make();
+  const left = () => saved!.share!.members[0].receipts!.map((x) => x.id);
+  // 成员表单的收款列表直接删（列表新的在前：第一行是 r1）
+  await r
+    .render('MemberForm', { state: st, s: sub, member, onClose() {} })
+    .find((n) => n.type === 'button' && n.props['aria-label'] === 'family.member.removePayAria')!
+    .props.onClick();
+  assert.deepEqual(left(), ['o']);
+  // 点开那一笔在收款表单里删，结果一样
+  saved = undefined;
+  await all(make().render('ReceiptForm', { state: st, s: sub, member, editId: 'r1', onDone() {} }).find((n) => n.type === 'Sheet')!.props.foot)
+    .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
+    .props.onClick();
+  assert.deepEqual(left(), ['o']);
+  const after = { ...sub, share: { ...sub.share!, members: saved!.share!.members } };
+  assert.equal(billing.memberUnpaidFrom(after, after.share.members[0]), '2026-04-14');
 });
 
 test('person avatar drafts remain unsaved until Save; server field order does not leave Save enabled', async () => {
@@ -1902,7 +1919,16 @@ test('person avatar drafts remain unsaved until Save; server field order does no
 
 /** 成员弹窗：有欠款时默认是记收款，点底部「调整收费与退出」切到设置；已结清的本来就是设置 */
 test('成员表单：已付至点「调整」直接改日期；改自定义收费从生效日起记调价', async () => {
-  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2026-07-16' };
+  const member = {
+    id: 'm',
+    name: 'Member',
+    share: 7,
+    fee: 44,
+    feeCurrency: 'CNY',
+    billEvery: 6,
+    joined: '2025-01-17',
+    receipts: [{ id: 'o', date: '2025-01-17', amount: 0, currency: 'CNY', periods: ['2025-01-17', '2025-07-17', '2026-01-17'], opening: true }],
+  };
   const sub: Subscription = {
     id: 's',
     name: 'Plan',
@@ -1942,16 +1968,16 @@ test('成员表单：已付至点「调整」直接改日期；改自定义收�
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
       .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
       .props.onClick();
-  // 已付至默认是文字，点「调整」原地变成日期选择，直接改这个日期
+  // 已付至默认是文字，点「调整」原地变成日期选择：改的是期初已付至，这天及之前没记收款的期算已收清
   render()
     .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
     .props.onClick();
   render()
-    .find((n) => n.type === 'DatePicker' && n.props.value === member.paidUntil)!
+    .find((n) => n.type === 'DatePicker' && n.props.value === '2026-07-16')!
     .props.onChange('2027-01-16');
   assert.equal(render().find((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil') != null, true);
   await save();
-  assert.equal(saved!.share!.members[0].paidUntil, '2027-01-16');
+  assert.deepEqual(saved!.share!.members[0].receipts![0].periods, ['2025-01-17', '2025-07-17', '2026-01-17', '2026-07-17']);
 
   render()
     .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
@@ -2023,7 +2049,17 @@ test('停用说明里的金额单独着色：未退款损失为红色，已退�
 
 test('下车时间条：不退保留已付未用灰段，退款截在退出前一天，窗口边界不溢出', () => {
   const r = harness('../app/src/views/Members.tsx', 'memberSegments');
-  const m = { id: 'm', name: 'M', share: 31, fee: 31, billEvery: 1, joined: '2026-01-01', left: '2026-01-16', paidUntil: '2026-02-28' };
+  // 提前收了 1、2 月两期，1 月 16 日退出
+  const m = {
+    id: 'm',
+    name: 'M',
+    share: 31,
+    fee: 31,
+    billEvery: 1,
+    joined: '2026-01-01',
+    left: '2026-01-16',
+    receipts: [{ id: 'r', date: '2026-01-01', amount: 62, currency: 'USD', periods: ['2026-01-01', '2026-02-01'] }],
+  };
   const s = {
     ...st.subscriptions[0],
     start: '2026-01-01',
@@ -2047,9 +2083,9 @@ test('下车控件默认建议金额，可编辑实际退款，清退出清退�
     share: 31,
     joined: '2026-01-01',
     left: '2026-01-16',
-    payments: [{ from: '2026-01-01', until: '2026-01-31', date: '2026-01-01', amount: 31, currency: 'USD' }],
+    receipts: [{ id: 'r', date: '2026-01-01', amount: 31, currency: 'USD', periods: ['2026-01-01'] }],
   };
-  const s = { start: '2026-01-01', cycle: { unit: 'month', every: 1 }, currency: 'USD', share: { members: [m] } };
+  const s = { start: '2026-01-01', cycle: { unit: 'month', every: 1 }, currency: 'USD', share: { collectFrom: '2026-01-01', members: [m] } };
   let member: any = m;
   const r = harness(
     '../app/src/views/Members.tsx',
@@ -2094,8 +2130,7 @@ test('成员表单设置下车退款保留原始已付至，金额无效不能�
     feeCurrency: 'USD',
     billEvery: 1,
     joined: '2026-01-01',
-    paidUntil: '2026-01-31',
-    payments: [{ from: '2026-01-01', until: '2026-01-31', date: '2026-01-01', amount: 31, currency: 'USD' }],
+    receipts: [{ id: 'r', date: '2026-01-01', amount: 31, currency: 'USD', periods: ['2026-01-01'] }],
   };
   const sub: Subscription = {
     id: 's',
@@ -2137,12 +2172,11 @@ test('成员表单设置下车退款保留原始已付至，金额无效不能�
   leaveFields().props.onChange({ left: '2026-01-16', leaveRefund: { date: '2026-01-20', amount: 12, currency: 'USD' } });
   assert.ok(
     all(render().find((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil')).some((n) =>
-      n.children.includes(format.cnDateFull(member.paidUntil)),
+      n.children.includes(format.cnDateFull('2026-01-31')),
     ),
   );
   await save().props.onClick();
-  assert.equal(saved!.share!.members[0].paidUntil, member.paidUntil);
-  assert.deepEqual(saved!.share!.members[0].payments, member.payments);
+  assert.deepEqual(saved!.share!.members[0].receipts, member.receipts);
   leaveFields().props.onChange({ leaveRefund: { date: '2026-01-20', amount: 0, currency: 'USD' } });
   assert.equal(save().props.disabled, true);
   assert.ok(
@@ -2157,8 +2191,7 @@ test('退款行显示负现金流和退款标签，全额退款后仍保留累�
     share: 3,
     joined: '2026-01-01',
     left: '2026-10-01',
-    paidUntil: '2026-12-31',
-    payments: [{ date: '2026-01-01', from: '2026-01-01', until: '2026-12-31', amount: 31, currency: 'USD' }],
+    receipts: [{ id: 'r', date: '2026-01-01', amount: 31, currency: 'USD', periods: ['2026-01-01'] }],
     leaveRefund: { date: '2026-10-02', amount: 31, currency: 'USD' },
   };
   const s: Subscription = {
@@ -2223,7 +2256,7 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
           fee: 30,
           billEvery: 3,
           left: today,
-          payments: [{ date: '2026-01-01', amount: 30, currency: 'CNY', until: '2026-03-31' }],
+          receipts: [{ id: 'r', date: '2026-01-01', amount: 30, currency: 'CNY', periods: ['2026-01-01'] }],
         },
       ],
     },
@@ -2291,8 +2324,8 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
 });
 
 test('收款表点某一笔直接进入这笔收款的编辑，而不是成员资料', () => {
-  const payment = { date: '2026-01-01', from: '2026-01-01', until: '2026-06-30', amount: 40, currency: 'USD', note: '实收待核对' };
-  const member = { id: 'm', name: 'M', share: 44, joined: '2026-01-01', paidUntil: '2026-06-30', payments: [payment] };
+  const receipt = { id: 'r1', date: '2026-01-01', periods: ['2026-01-01'], amount: 40, currency: 'USD', note: '实收待核对' };
+  const member = { id: 'm', name: 'M', share: 44, joined: '2026-01-01', receipts: [receipt] };
   const s: Subscription = {
     id: 's',
     name: 'Plan',
@@ -2330,7 +2363,7 @@ test('收款表点某一笔直接进入这笔收款的编辑，而不是成员�
   row.props.onClick();
   assert.equal(calls.length, 1);
   assert.equal(calls[0][0], 'payment');
-  assert.equal((calls[0][2] as typeof payment).amount, 40);
+  assert.equal(calls[0][2], 'r1');
 });
 
 test('代付结清后第三格显示盈亏而不是「已结清」，未结清时仍是待收', () => {
@@ -2359,7 +2392,10 @@ test('代付结清后第三格显示盈亏而不是「已结清」，未结清�
 });
 
 test('所有入口打开同一个成员入口：欠款先到收款表单，其余是成员表单；记下这笔推进已付至', async () => {
-  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', paidUntil: '2025-07-16' };
+  const opening = (...periods: string[]) => [{ id: 'o', date: '2025-01-17', amount: 0, currency: 'CNY', periods, opening: true }];
+  // 收了第一期，之后都欠着
+  const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', receipts: opening('2025-01-17') };
+  const settled = { ...member, receipts: opening('2025-01-17', '2025-07-17', '2026-01-17', '2026-07-17') };
   const sub: Subscription = {
     id: 's',
     name: 'Plan',
@@ -2408,22 +2444,20 @@ test('所有入口打开同一个成员入口：欠款先到收款表单，其�
   };
 
   assert.equal(route({ member }), 'ReceiptForm');
-  assert.equal(route({ member: { ...member, paidUntil: '2099-01-01' } }), 'MemberForm');
-  assert.equal(route({ member: { ...member, paidUntil: '2099-01-01' }, collect: true }), 'ReceiptForm');
+  assert.equal(route({ member: settled }), 'MemberForm');
+  assert.equal(route({ member: settled, collect: true }), 'ReceiptForm');
   assert.equal(route({}), 'MemberForm');
   const nodes = r.render('ReceiptForm', { state: st, s: sub, member, onDone: () => (closed = true) });
-  const record = all(nodes.find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.member.record'))!;
+  const record = all(nodes.find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('receivable.record'))!;
   assert.ok(nodes.some((n) => n.type === 'NumInput' && n.props.value === 44));
   await record.props.onClick();
   const m = saved!.share!.members[0];
-  assert.equal(m.payments!.length, 1);
-  assert.equal(m.payments![0].from, '2025-07-17');
-  assert.equal(m.paidUntil, m.payments![0].until);
-  assert.ok(m.paidUntil! > member.paidUntil);
+  assert.equal(m.receipts!.length, 2);
+  assert.deepEqual(m.receipts!.at(-1)!.periods, ['2025-07-17']);
   assert.equal(closed, true);
 });
 
-test('欠了好几期：默认从最早一期收，期数填 3 就补前三期，其余照样待收；没被收款覆盖的期画成已放弃', async () => {
+test('欠了好几期：默认勾最早一期，再勾两期就补前三期，其余照样待收；免收的期画成已放弃', async () => {
   const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17' };
   const sub: Subscription = {
     id: 's',
@@ -2457,26 +2491,29 @@ test('欠了好几期：默认从最早一期收，期数填 3 就补前三期�
     },
   );
   const render = () => r.render('ReceiptForm', { state: st, s: sub, member, onDone() {} });
-  // 2025-01-17 起半年一期，今天 2026-10-22 在第 4 期：共欠 4 期
-  assert.ok(render().some((n) => n.type === 'Cell' && n.props.label === 'family.collect.owedTotal'));
-  render()
-    .find((n) => n.type === 'Stepper')!
-    .props.onChange(3);
+  // 2025-01-17 起半年一期，今天 2026-10-22 在第 4 期：共欠 4 期，都列出来
+  const boxes = () => render().filter((n) => n.type === 'input' && n.props.type === 'checkbox');
+  assert.equal(boxes().filter((n) => n.props.checked).length, 1);
+  boxes()[1].props.onChange();
+  boxes()[2].props.onChange();
   await all(render().find((n) => n.type === 'Sheet')!.props.foot)
-    .find((n) => n.type === 'button' && n.children.includes('family.member.record'))!
+    .find((n) => n.type === 'button' && n.children.includes('receivable.record'))!
     .props.onClick();
   const m = saved!.share!.members[0];
-  assert.equal(m.payments![0].from, '2025-01-17');
-  assert.equal(m.paidUntil, '2026-07-16');
-  assert.equal(m.payments![0].amount, 132);
+  assert.deepEqual(m.receipts![0].periods, ['2025-01-17', '2025-07-17', '2026-01-17']);
+  assert.equal(m.receipts![0].amount, 132);
   const segs = r.call('memberSegments', saved!, m, today, '2025-01-01', '2027-06-30') as { kind: string; from: string }[];
   assert.deepEqual(
     segs.filter((g) => g.from < '2026-07-17').map((g) => g.kind),
     ['paid', 'paid', 'paid'],
   );
   assert.equal(segs.find((g) => g.from === '2026-07-17')!.kind, 'due');
-  // 用「调整已付至」免掉旧账：只有一笔从本期开始的收款，之前的期画成已放弃，不冒充已付
-  const waived = { ...member, paidUntil: '2027-01-16', payments: [{ date: today, amount: 44, currency: 'CNY', from: '2026-07-17', until: '2027-01-16' }] };
+  // 免掉旧账、只收本期：免收的期画成已放弃，不冒充已付
+  const waived = {
+    ...member,
+    waivers: [{ id: 'w', date: today, periods: ['2025-01-17', '2025-07-17', '2026-01-17'] }],
+    receipts: [{ id: 'r', date: today, amount: 44, currency: 'CNY', periods: ['2026-07-17'] }],
+  };
   const kinds = (r.call('memberSegments', sub, waived, today, '2025-01-01', '2027-06-30') as { kind: string; from: string }[]).map((g) => g.kind);
   assert.deepEqual(kinds.slice(0, 4), ['waived', 'waived', 'waived', 'paid']);
 });

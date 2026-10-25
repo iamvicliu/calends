@@ -63,9 +63,12 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Catégorie introuvable ou ambiguë : {q}. Options : {list}",
-    "proxyPeriodsShort": {
-      "one": "À partir du {from}, il ne reste que {count} paiement, moins que couvert",
-      "other": "À partir du {from}, il ne reste que {count} paiements, moins que couvert"
+    "noPeriods": "Choisissez au moins un paiement, chacun une seule fois",
+    "periodUnknown": "{period} n’est pas une échéance de cette créance",
+    "periodTaken": "L’échéance {period} a déjà un paiement ou une remise",
+    "periodsShort": {
+      "one": "Il ne reste que {count} paiement non réglé, moins que ce que couvre ce règlement",
+      "other": "Il ne reste que {count} paiements non réglés, moins que ce que couvre ce règlement"
     }
   },
   "tool": {

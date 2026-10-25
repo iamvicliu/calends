@@ -77,7 +77,7 @@ async function systemPrompt(env: Env): Promise<string> {
     `Categories (reuse these exact names): ${cats.join(', ')}.`,
     `Payment methods (pass the id as "method"): ${methods.join('; ') || 'none'}. Default method id: ${st.settings.defaultMethodId ?? 'none'}.`,
     '',
-    'You can maintain every non-security ledger entity: wallets (update_payment_method action=create/update/delete), categories (save_category), people (save_person), proxy relationships (set_proxy), receivables (record_receivable action=record/update/delete) and settings/preferences (get_settings/update_settings). Never access authentication, credentials, sessions/tokens, backups, resets, migrations or whole-ledger deletion.',
+    'You can maintain every non-security ledger entity: wallets (update_payment_method action=create/update/delete), categories (save_category), people (save_person), proxy relationships (set_proxy), receivables (record_receivable action=record/waive/update/delete/charged) and settings/preferences (get_settings/update_settings). Never access authentication, credentials, sessions/tokens, backups, resets, migrations or whole-ledger deletion.',
     'Main job: the user pastes receipts, App Store / Google Play emails, bank or SMS notices, subscription pages, invoices or screenshots. Extract every subscription in it and call create_subscription once per subscription.',
     '- Every write tool call is only a draft: the app shows it as a card and the user confirms it. Never ask the user to confirm in text, never repeat a call you already made, and do not claim anything was saved.',
     '- Read amounts exactly as shown, with the currency of the store or receipt (App Store Turkey → TRY and region TR). Price is per billing cycle; cycle unit day/week/month/year with every N.',
@@ -95,7 +95,7 @@ async function systemPrompt(env: Env): Promise<string> {
     '- Other changes use the matching tool: update_subscription (details), change_price (price change from a date), change_plan (switch plan/region), set_status (pause/cancel/terminate/reactivate), delete_subscription (remove completely), record_payment (a charge happened / refund).',
     '- Shared plans (合租/拼车): set_share to start or change sharing (seats include me) and to change the plan collection rule (rule: fee, bill_every; applies to members who follow it), save_share_member to add or edit a member (new members follow the rule by default; follow_rule=true/false switches between the rule and a custom fee per billing cycle, bill_every months), remove_share_member, record_receivable when a member paid me. get_carpool answers questions about a carpool: seats free, yearly cost vs. income, profit, who owes what.',
     '- Member fee dates: fee_from defaults to today when no date is requested. Each call changes one dated point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with that rate in the same turn. Never move the requested/default start to a future date to avoid a scheduled change. A follow_rule switch without a requested date also starts today, using the stored rule.',
-    '- Carpool collection: mid-period members align to the shared collection anchor; first_period defaults to prorate by actual days. For record_receivable, omit coverage and amount to use the member’s next unpaid collection; pass the actual amount when stated, even if different. Answer when to collect next and how much is pending from get_carpool results, never mental arithmetic.',
+    '- Carpool collection: mid-period members align to the shared collection anchor; first_period defaults to prorate by actual days. Receivables are per period: for record_receivable, omit periods and amount to cover the member’s earliest unsettled period; pass periods (period start dates from get_subscription) when the user names specific periods, count for several, and the actual amount when stated, even if different. Earlier unpaid periods may stay unpaid; use action=waive when the user forgives periods. Answer when to collect next and how much is pending from get_carpool results, never mental arithmetic.',
     '- For collection-rule previews, describe only returned fees, cycles, dates and member changes. Do not calculate annual income, savings or percentage changes unless a tool returns those metrics. Never label a larger after-value as a decrease.',
     '- Carpool details: if I use more than one seat myself, add one exempt member per extra seat (name e.g. "自己 · 第 2 台"). Money members already paid in the past → record_receivable for each payment with its date and amount, not just a note. If it is unclear whether an amount is per person or the total, take the reading that fits the other numbers and say which you chose.',
     '- History missing BEFORE an existing subscription’s start (e.g. it was a one-time purchase before it became a subscription) → change_plan action=earlier on that subscription; never create a separate subscription for it.',
@@ -239,10 +239,14 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
                 created?: { id: string };
                 member?: { id: string; leave_refund?: { amount: number; currency: string; date: string; note?: string } | null };
                 subscription?: { id?: string; members?: Array<{ id: string; name: string }> };
-                receipt?: { amount: number; currency: string; date: string; from: string; until: string };
+                after?: { periods?: string[]; amount?: number; currency?: string; date?: string } | null;
               };
-              // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览的覆盖区间。
-              if (tool.name === 'record_receivable' && pv.receipt) Object.assign(clean, pv.receipt);
+              // 把默认收款展开到确认参数：卡片显示实际金额，确认时沿用预览选中的期。
+              if (tool.name === 'record_receivable' && pv.after?.periods) {
+                const { periods, amount, currency, date } = pv.after;
+                Object.assign(clean, { periods, date }, amount != null ? { amount, currency } : {});
+                delete clean.count;
+              }
               if (tool.name === 'save_share_member' && clean.leave_refund && pv.member?.leave_refund) clean.leave_refund = pv.member.leave_refund;
               if (pv.created) clean.id = pv.created.id;
               if (tool.name === 'create_subscription' && pv.subscription?.id) clean.id = pv.subscription.id;

@@ -18,8 +18,8 @@ const original: ShareMember = {
   feeCurrency: 'CNY',
   billEvery: 6,
   joined: '2025-10-14',
-  paidUntil: '2026-07-16',
-  payments: [{ date: '2026-01-17', amount: 40, currency: 'CNY', from: '2026-01-17', until: '2026-07-16' }],
+  // 已收前两期（2025-10-14、2026-04-14 起）
+  receipts: [{ id: 'r1', date: '2026-01-17', amount: 80, currency: 'CNY', periods: ['2025-10-14', '2026-04-14'] }],
 };
 const sub: Subscription = {
   id: 's',
@@ -41,8 +41,7 @@ test('40调44：日期前后各取整期标准，跨生效日不拆期，历史�
   assert.equal(memberCollection(sub, m, '2026-07-01').amount, 44);
   assert.equal(memberCollection(sub, m, '2026-07-17').amount, 44);
   assert.equal(memberCollection(sub, m, '2026-06-17').until, '2026-12-16');
-  assert.deepEqual(m.payments, original.payments);
-  assert.equal(m.paidUntil, original.paidUntil);
+  assert.deepEqual(m.receipts, original.receipts);
   assert.deepEqual(JSON.parse(JSON.stringify(m)), m);
   assert.equal(original.feeHistory, undefined);
   assert.equal(memberFee(state, sub, m, '2026-06-30').amount, 40);
@@ -67,7 +66,7 @@ test('未来调价不覆盖今天或先前标准；相同生效日替换，周�
 });
 
 test('调价与免费首期：加入期仍对齐且跳过免费期，下一期取新标准；退出不新增应收', () => {
-  const m = adjust({ ...original, joined: '2026-10-20', paidUntil: undefined, payments: [], firstPeriod: 'free' }, '2027-01-01');
+  const m = adjust({ ...original, joined: '2026-10-20', receipts: [], firstPeriod: 'free' }, '2027-01-01');
   assert.equal(memberCollection(sub, m, '2026-10-20').amount, 0);
   assert.equal(memberUnpaidFrom(sub, m), '2027-04-14');
   assert.equal(memberCollection(sub, m, memberUnpaidFrom(sub, m)).amount, 44);
@@ -80,21 +79,21 @@ test('收费币种变更的多期欠款按币种换算，外币实收仍原样�
   const m = changeMemberFee(state, sub, original, { from: '2027-01-01', fee: 6, currency: 'USD', billEvery: 6 }, '2026-10-22');
   const s = { ...sub, share: { ...sub.share!, members: [m] } };
   assert.equal(memberCollection(s, m, '2027-01-17').currency, 'USD');
-  assert.equal(memberDues(s, '2027-01-17', 'CNY', state)[0].owed, 88); // 40 CNY + 6 USD
+  assert.equal(memberDues(s, '2027-04-14', 'CNY', state)[0].owed, 88); // 2026-10-14 那期 40 CNY + 2027-04-14 那期 6 USD
   assert.equal(memberDues(s, '2026-10-22', 'CNY', state)[0].owed, 40);
   const missing = { ...state, fx: { ...state.fx, rates: { USD: 1 } } };
-  assert.ok(Number.isNaN(memberDues(s, '2027-01-17', 'CNY', missing)[0].owed));
+  assert.ok(Number.isNaN(memberDues(s, '2027-04-14', 'CNY', missing)[0].owed));
   const zero = changeMemberFee(state, sub, original, { from: '2026-07-01', fee: 0, currency: 'EUR', billEvery: 6 }, '2026-10-22');
   assert.equal(memberCollection(sub, zero, '2026-07-17').amount, 0);
   const futureFree = changeMemberFee(state, sub, original, { from: '2027-01-01', fee: 0, currency: 'EUR', billEvery: 6 }, '2026-10-22');
   assert.equal(
-    memberDues({ ...sub, share: { ...sub.share!, members: [futureFree] } }, '2027-01-17', 'CNY', {
+    memberDues({ ...sub, share: { ...sub.share!, members: [futureFree] } }, '2027-04-14', 'CNY', {
       ...state,
       fx: { ...state.fx, rates: { USD: 1, CNY: 8 } },
     })[0].owed,
     40,
   );
-  assert.deepEqual(m.payments, original.payments);
+  assert.deepEqual(m.receipts, original.receipts);
   assert.equal(
     subError({ ...s, share: { ...s.share, members: [{ ...m, feeHistory: [{ from: '2026-02-30', fee: -1, currency: 'usd', billEvery: 0 }] }] } }),
     subError({ ...sub, price: -1 }),
@@ -107,7 +106,8 @@ test('公开脱敏仅保留收费历史的计算字段，成员身份与额外�
   Object.assign(m.feeHistory![0], { note: 'private extra', contact: 'private@example.test' });
   const masked = maskForPublic({ ...state, subscriptions: [{ ...sub, share: { ...sub.share!, members: [m] } }] }).subscriptions[0].share!.members[0];
   assert.equal(masked.name, '');
-  assert.equal(masked.payments, undefined);
+  // 只留哪几期结清了，金额、日期都去掉
+  assert.deepEqual(masked.receipts, [{ id: 'r0', date: '', amount: 0, currency: '', periods: ['2025-10-14', '2026-04-14'], opening: true }]);
   assert.deepEqual(Object.keys(masked.feeHistory![0]).sort(), ['billEvery', 'currency', 'fee', 'from', 'share']);
   assert.equal(myShareFactor({ ...sub, share: { ...sub.share!, members: [masked] } }, '2026-06-30'), myShareFactor(sub, '2026-06-30'));
 });

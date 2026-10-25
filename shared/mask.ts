@@ -100,7 +100,10 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
         name: '',
         share: m.share,
         ...(m.feeHistory ? { feeHistory: m.feeHistory.map(({ from, fee, currency, billEvery, share }) => ({ from, fee, currency, billEvery, share })) } : {}),
-        paidUntil: m.paidUntil,
+        restarts: m.restarts,
+        // 只留哪几期结清了，金额、日期、备注都去掉
+        receipts: m.receipts?.map((r, j) => ({ id: `r${j}`, date: '', amount: 0, currency: '', periods: r.periods, opening: true })),
+        waivers: m.waivers?.map((w, j) => ({ id: `w${j}`, date: '', periods: w.periods })),
         exempt: m.exempt,
         joined: m.joined,
         left: m.left,

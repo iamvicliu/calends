@@ -2,11 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { addDays, addMonths, diffDays, memberCollection, memberUnpaidFrom } from './billing.ts';
 import { carpoolRoster, carpoolTimeline } from './carpool-timeline.ts';
+import { migrateReceivables } from './receivables-legacy.ts';
 import type { ShareMember, Subscription } from './types.ts';
 
 const today = '2026-10-23';
 const member = (o: Partial<ShareMember> = {}): ShareMember => ({ id: 'a', name: 'A', share: 10, fee: 10, billEvery: 1, joined: '2024-01-01', ...o });
-const sub = (members: ShareMember[], seats = 4): Subscription => ({
+// 用例里成员按旧写法（已付至、按覆盖期的收款）给出，先转成按期记账
+const sub = (members: ShareMember[], seats = 4): Subscription =>
+  migrateReceivables(raw(members, seats), 'CNY');
+const raw = (members: ShareMember[], seats: number): Subscription => ({
   id: 's',
   name: 'Shared test',
   category: '',
@@ -57,7 +61,9 @@ test('右界取所有在车成员下一期的最晚期末，跳过欠费且保�
   const annual = member({ id: 'annual', paidUntil: '2027-01-31', billEvery: 12 });
   const s = sub([member(), annual, member({ id: 'gone', left: today, paidUntil: '2030-01-31' })]);
   const win = carpoolTimeline(s, today, 1);
-  assert.equal(win.end, addDays(memberCollection(s, annual, memberUnpaidFrom(s, annual)).until, 14));
+  const migrated = s.share!.members[1];
+  assert.equal(win.end, addDays(memberCollection(s, migrated, memberUnpaidFrom(s, migrated)).until, 14));
+  // 旧的已付至 2027-01-31 不在期界上：转换时记成节奏从 2027-02-01 重新起算，下一期与旧版一致
   assert.equal(win.end, '2028-02-14');
 });
 

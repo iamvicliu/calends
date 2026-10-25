@@ -18,6 +18,8 @@ import {
   memberBillMonths,
   memberCollection,
   memberUnpaidFrom,
+  memberLedger,
+  memberPeriods,
   monthlyGross,
   myShareFactor,
   memberAboard,
@@ -32,7 +34,7 @@ import {
   type Charge,
   validDay,
 } from '../../shared/billing.ts';
-import { chargeValue, convertOn, toBaseAt } from '../../shared/fx.ts';
+import { chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, stopLosses, topUpPlan, yearReview } from '../../shared/metrics.ts';
 import {
   editPhase,
@@ -55,9 +57,11 @@ import {
   statusChangeError,
   cancelAtEnd,
 } from '../../shared/phases.ts';
-import { matchEntries, proxyAhead, recordProxyReceipt } from '../../shared/proxy.ts';
+import { proxyLedger } from '../../shared/proxy.ts';
+import { paidThrough, setOpening, type LedgerPeriod } from '../../shared/receivables.ts';
+import { deleteRecord, openPeriods, receivableOf, recordProxyCharge, recordReceipt, recordWaiver, type ReceivableTarget } from '../../shared/receivable-edit.ts';
 import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
-import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../../shared/types.ts';
+import type { AppState, Payment, PaymentMethod, Person, Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
 import { loadState, saveLedgerEdit, upsert } from '../store.ts';
 import {
@@ -78,7 +82,7 @@ import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
-import { validateCurrency, reviseReceivable, categoryEdit } from '../../shared/ledger-edit.ts';
+import { validateCurrency, categoryEdit } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
 
@@ -272,7 +276,21 @@ function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
   };
 }
 
-/** 收款摘要：日期是最早未付的覆盖起点（可能已逾期），金额由 shared 计算。 */
+/** 各期应收与状态（period 是这一期的标识，记收款、免收时用它指定期）；收款、免收的 id 用于改删 */
+function periodsOut(periods: LedgerPeriod[]) {
+  return periods.map((p) => ({
+    period: p.key,
+    from: p.from,
+    until: p.until,
+    due: p.due,
+    currency: p.currency,
+    status: p.status,
+    receipt_id: p.receipt?.id ?? null,
+    waiver_id: p.waiver?.id ?? null,
+  }));
+}
+
+/** 收款摘要：日期是最早没结清的一期（可能已逾期），金额由 shared 计算。 */
 function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: MemberDue | undefined, today: string) {
   const rule = s.share?.role === 'owner' ? carRule(st, s, today) : undefined;
   const currency = st.settings.collectCurrency ?? st.settings.baseCurrency;
@@ -281,7 +299,7 @@ function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: M
   return {
     follows_rule: rule ? followsCar(st, s, m, today) : false,
     collect_from: collectionAnchor(s),
-    paid_until: m.paidUntil ?? null,
+    paid_until: paidThrough(memberLedger(s, m, today, currency).periods) ?? null,
     leave_refund: m.leaveRefund ?? null,
     first_collection: first,
     next_collection: next,
@@ -716,12 +734,7 @@ const CATALOGUE: Tool[] = [
       const from = addMonths(today, -Number(a.months_back ?? 12));
       const to = addMonths(today, Number(a.months_forward ?? 6));
       const px = s.proxy;
-      const matched = px
-        ? matchEntries(
-            px.entries,
-            all.map((c) => c.date),
-          )
-        : undefined;
+      const collect = st.settings.collectCurrency ?? st.settings.baseCurrency;
       return {
         ...row(st, s, today, out),
         record: s, // Complete editable history, stable receipt indices and original currencies.
@@ -759,7 +772,10 @@ const CATALOGUE: Tool[] = [
               members: s.share.members.map((m) => ({
                 id: m.id,
                 name: m.name,
-                paid_until: m.paidUntil ?? null,
+                ...(() => {
+                  const l = memberLedger(s, m, today, collect);
+                  return { paid_until: paidThrough(l.periods) ?? null, periods: periodsOut(l.periods), unmatched_records: l.unmatched };
+                })(),
                 joined: m.joined ?? null,
                 first_period: m.firstPeriod ?? 'prorate',
                 first_amount: m.firstAmount ?? null,
@@ -775,17 +791,11 @@ const CATALOGUE: Tool[] = [
         proxy: px
           ? {
               for: px.forName,
-              entries: all.map((c) => ({
-                charge: c.date,
-                received: matched!.get(c.date)?.received ?? null,
-                received_currency: matched!.get(c.date)?.receivedCurrency ?? null,
-              })),
-              // 已预收、还没到扣款日的期
-              prepaid: proxyAhead(st, s, today).map((r) => ({
-                charge: r.date,
-                received: r.entry!.received,
-                received_currency: r.entry!.receivedCurrency ?? null,
-              })),
+              // 各期（含已预收、还没到扣款日的期）；period 即扣款日
+              ...(() => {
+                const l = proxyLedger(s, today);
+                return { periods: periodsOut(l.periods), unmatched_records: l.unmatched };
+              })(),
             }
           : null,
       };
@@ -978,7 +988,7 @@ const CATALOGUE: Tool[] = [
                   member: d.member.name,
                   contact: d.member.contact ?? null,
                   periods_owed: d.periodsOwed,
-                  paid_until: d.member.paidUntil ?? null,
+                  first_unpaid: d.dueFor,
                   owed: money(st, d.owed, d.currency, undefined, out),
                 })),
             );
@@ -987,28 +997,18 @@ const CATALOGUE: Tool[] = [
           ? []
           : st.subscriptions
               .filter((s) => s.proxy)
-              .flatMap((s) => {
-                const cs = chargesBetween(s, s.start, today, today);
-                const m = matchEntries(
-                  s.proxy!.entries,
-                  cs.map((c) => c.date),
-                );
-                return cs
-                  .filter((c) => m.get(c.date)?.received == null)
-                  .map((c) => {
-                    const e = m.get(c.date);
-                    const charged = e?.charged ?? c.amount;
-                    const ccy = e?.chargedCurrency ?? c.currency;
-                    return {
-                      subscription_id: s.id,
-                      name: s.name,
-                      person_id: s.proxy!.personId ?? null,
-                      for: s.proxy!.forName,
-                      charge: c.date,
-                      charged: money(st, charged, ccy, c.date, out),
-                    };
-                  });
-              });
+              .flatMap((s) =>
+                proxyLedger(s, today)
+                  .periods.filter((p) => p.status === 'due')
+                  .map((p) => ({
+                    subscription_id: s.id,
+                    name: s.name,
+                    person_id: s.proxy!.personId ?? null,
+                    for: s.proxy!.forName,
+                    charge: p.key,
+                    charged: money(st, p.due, p.currency, p.from, out),
+                  })),
+              );
       const total = share.reduce((t, x) => t + x.owed.converted, 0) + proxy.reduce((t, x) => t + x.charged.converted, 0);
       // 按人汇总：只列现在欠钱的人，金额与下面的明细同源（memberDues / 代付逐期对账）
       const by_person = peopleLedger(st, today)
@@ -1679,7 +1679,7 @@ const CATALOGUE: Tool[] = [
                   first_period: m.firstPeriod ?? 'prorate',
                   first_amount: m.firstAmount ?? null,
                   owed: d && d.periodsOwed > 0 ? money(st, d.owed, d.currency) : null,
-                  payments: (m.payments ?? []).length,
+                  receipts: (m.receipts ?? []).length,
                 };
               }),
             };
@@ -1789,7 +1789,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'save_share_member',
     description:
-      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = already paid through this date. Only the joining period aligns to the shared anchor; later collections advance from individual paid-through. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Set left to retain all join/receipt history. Optional leave_refund stores the actual positive refund, with date defaulting to left and currency to the suggested refund currency; null means no refund. left=null also clears the refund. Preview returns suggested_refund (including original-currency parts) and unused_days; never save the suggestion as an actual refund without user confirmation. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
+      'Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = settled before record-keeping through this date (periods starting on/before it become an opening settlement with no amount; null removes it); record real money with record_receivable. Only the joining period aligns to the shared anchor; later periods follow the member’s own billing cycle. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Set left to retain all join/receipt history. Optional leave_refund stores the actual positive refund, with date defaulting to left and currency to the suggested refund currency; null means no refund. left=null also clears the refund. Preview returns suggested_refund (including original-currency parts) and unused_days; never save the suggestion as an actual refund without user confirmation. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.',
     write: true,
     inputSchema: obj(
       {
@@ -1880,7 +1880,6 @@ const CATALOGUE: Tool[] = [
           : {}),
         ...('first_amount' in a ? { firstAmount: a.first_amount == null ? undefined : num(a.first_amount, 'first_amount') } : {}),
         ...(a.exempt != null ? { exempt: !!a.exempt } : {}),
-        ...(a.paid_until ? { paidUntil: date(a.paid_until, 'paid_until') } : {}),
         ...(a.joined ? { joined: date(a.joined, 'joined') } : !old ? { joined: today } : {}),
         ...(a.left ? { left: date(a.left, 'left') } : {}),
         ...(a.contact_via ? { contactVia: String(a.contact_via) } : {}),
@@ -1895,7 +1894,6 @@ const CATALOGUE: Tool[] = [
         Object.assign(m, { personId: p.id, name: p.name, contactVia: p.contactVia, contact: p.contact });
       }
       for (const [input, field] of [
-        ['paid_until', 'paidUntil'],
         ['left', 'left'],
         ['joined', 'joined'],
       ] as const)
@@ -1952,6 +1950,11 @@ const CATALOGUE: Tool[] = [
       }
       // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
       m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;
+      // 期初已付至：这天及之前的期算开始记账前就收清了
+      if ('paid_until' in a) {
+        const until = a.paid_until == null ? undefined : date(a.paid_until, 'paid_until');
+        m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, st.settings.collectCurrency ?? st.settings.baseCurrency), until) };
+      }
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
       const after = { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } };
       const suggestion = suggestedLeaveRefund(st, after, m);
@@ -2002,109 +2005,54 @@ const CATALOGUE: Tool[] = [
     name: 'record_receivable',
     destructive: true,
     description:
-      'Record, update or delete actual receivables. Use action=update|delete with kind=share, member and index to revise/remove a receipt (receipt patch); with kind=proxy and exact charge to revise/remove a proxy entry (entry patch includes charged/received fields; action=record with entry can create a charged-only record; null clears). Read full records/indices with get_subscription. Removing proxy entries restores inferred unpaid charges. Record money received from others: a shared-plan member paid their share (kind=share; omitted coverage and amount default to their next unpaid collection, including a prorated first period; free partial first periods are skipped. Explicit amount is the actual receipt even if different from the suggested fee, and covers the selected period without leaving a balance. Returns receipt plus member paid_until and next_collection_date after recording), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). For proxy prepayment or one payment covering several charges, pass periods (and optionally charge as the earliest covered date, which may be in the future): the amount is split evenly over that many consecutive unpaid charges, skipping ones already repaid, and fails if the subscription has fewer charges left. Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
+      'Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again. action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).',
     write: true,
     inputSchema: obj(
       {
-        action: {
-          type: 'string',
-          enum: ['record', 'update', 'delete'],
-          description: 'Default record. Update/delete require exact kind and existing share member/index or proxy charge; no implicit target selection.',
-        },
-        index: { type: 'integer', minimum: 0, description: 'Share receipt zero-based index in get_subscription.record.share.members[].payments.' },
-        receipt: {
-          type: 'object',
-          properties: {
-            date: { type: 'string', format: 'date' },
-            amount: { type: 'number', minimum: 0 },
-            currency: { type: 'string' },
-            from: { type: ['string', 'null'], format: 'date' },
-            until: { type: 'string', format: 'date' },
-            note: { type: ['string', 'null'] },
-          },
-          additionalProperties: false,
-        },
-        entry: {
-          type: 'object',
-          properties: {
-            charge: { type: 'string', format: 'date' },
-            charged: { type: ['number', 'null'], minimum: 0 },
-            chargedCurrency: { type: ['string', 'null'] },
-            received: { type: ['number', 'null'], minimum: 0 },
-            receivedCurrency: { type: ['string', 'null'] },
-            receivedOn: { type: ['string', 'null'], format: 'date' },
-            note: { type: ['string', 'null'] },
-          },
-          additionalProperties: false,
-        },
-        paid_until: {
-          type: ['string', 'null'],
-          format: 'date',
-          description: 'Update/delete share receipt: explicit known coverage, otherwise recompute from remaining receipts (none clears).',
-        },
+        action: { type: 'string', enum: ['record', 'waive', 'update', 'delete', 'charged'] },
         subscription: {
           ...SUBREF,
           description: 'Subscription id or name. Optional when person is given and only one of their plans / proxy payments matches.',
         },
         person: { type: 'string', description: 'Person id or name (see list_people). Picks the matching member or proxy payment automatically.' },
-        kind: { type: 'string', enum: ['share', 'proxy'], description: 'Inferred when person is given.' },
+        kind: { type: 'string', enum: ['share', 'proxy'], description: 'Inferred when person or member is given; defaults to proxy for a proxy subscription.' },
         member: { type: 'string', description: 'share: member id or name.' },
-        charge: {
-          ...DATE,
-          description: 'proxy: which charge date is being repaid (defaults to the oldest unpaid). With periods: earliest covered charge, may be future.',
-        },
-        periods: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 120,
-          description: 'proxy only: number of unpaid charges this one payment covers (prepayment allowed); amount is split evenly per charge.',
-        },
-        amount: {
-          type: 'number',
-          minimum: 0,
-          description:
-            'Actual amount received; share only: omit to use the next unpaid collection amount. An explicit zero or different amount is recorded as-is. Required for proxy.',
-        },
-        currency: {
-          type: 'string',
-          description:
-            'With an explicit amount, defaults to the collection currency setting (legacy behavior). With a default share amount, defaults to that fee currency; an explicit currency converts the suggested amount using receipt-date FX.',
-        },
-        date: { ...DATE, description: 'When the money arrived; defaults to today.' },
-        from: { ...DATE, description: 'share: coverage start, inclusive; defaults to the next unpaid collection start, independently of receipt date.' },
-        until: {
-          ...DATE,
-          description:
-            'share: coverage end, inclusive; defaults to one member billing period from coverage start (only the joining period aligns to the shared anchor). Overrides automatic advance; paid_until never moves backward.',
-        },
-        note: { type: 'string' },
+        periods: { type: 'array', items: DATE, maxItems: 240, description: 'Period keys (share: period start; proxy: charge date).' },
+        count: { type: 'integer', minimum: 1, maximum: 240, description: 'Without periods: cover the N earliest unsettled periods.' },
+        id: { type: 'string', description: 'update/delete: receipt or waiver id.' },
+        amount: { type: 'number', minimum: 0, description: 'Actual amount received; defaults to the total due of the covered periods.' },
+        currency: { type: 'string', description: 'Receipt currency; defaults to the currency of the covered periods.' },
+        date: { ...DATE, description: 'When the money arrived (or the waiver was agreed); defaults to today.' },
+        note: { type: ['string', 'null'] },
+        charge: { ...DATE, description: 'charged: which proxy charge date.' },
+        charged_amount: { type: ['number', 'null'], minimum: 0 },
+        charged_currency: { type: ['string', 'null'] },
         dry_run: DRY,
       },
       [],
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      if (a.action === 'update' || a.action === 'delete' || (a.kind === 'proxy' && a.entry)) {
-        if (!['share', 'proxy'].includes(String(a.kind))) throw new Error(t('mcp.error.needKind'));
-        const s = findSub(st, a.subscription);
-        const result = reviseReceivable(st, s, { ...a, action: a.action ?? 'record' });
-        return {
-          ...(await commit(ctx, st, today, result.after, a.dry_run, [`receivable_${a.action}`])),
-          before: result.before,
-          after: result.record,
-          references: { subscription: s.id, kind: a.kind, member: a.member ?? null, charge: a.charge ?? null, index: a.index ?? null },
-        };
-      }
       if (a.person != null && String(a.person).trim()) a = { ...a, ...personTarget(st, a, today) };
       if (!a.subscription) throw new Error(t('mcp.error.needSubOrPerson'));
-      // 没写 kind：给了成员就是合租收款，给了扣款日就是代付还款
-      if (a.kind !== 'share' && a.kind !== 'proxy') a = { ...a, kind: a.member ? 'share' : a.charge ? 'proxy' : a.kind };
-      if (a.kind !== 'share' && a.kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
       const s = findSub(st, a.subscription);
-      const on = date(a.date, 'date', today);
-      const ccy = (str(a.currency) ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
-      validateCurrency(st, ccy);
-      if (a.kind === 'share') {
+      const kind = a.kind ?? (a.member ? 'share' : s.proxy ? 'proxy' : a.kind);
+      if (kind !== 'share' && kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
+      const action = String(a.action ?? 'record');
+      if (action === 'charged') {
+        if (kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
+        const currency = str(a.charged_currency)?.toUpperCase();
+        if (currency) validateCurrency(st, currency);
+        const r = recordProxyCharge(s, {
+          charge: date(a.charge, 'charge'),
+          ...(a.charged_amount != null ? { amount: num(a.charged_amount, 'charged_amount') } : {}),
+          ...(currency ? { currency } : {}),
+          ...(str(a.note) ? { note: str(a.note) } : {}),
+        }, today);
+        return { ...(await commit(ctx, st, today, r.after, a.dry_run, [`proxy_charged:${a.charge}`])), before: r.before, after: r.record };
+      }
+      let target: ReceivableTarget = { kind: 'proxy' };
+      if (kind === 'share') {
         if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
         const q = String(a.member ?? '')
           .trim()
@@ -2116,71 +2064,59 @@ const CATALOGUE: Tool[] = [
               ? t('mcp.error.memberAmbiguous', { q: String(a.member), list: candidates(ms) })
               : t('mcp.error.noMember', { list: candidates(s.share.members) }),
           );
-        const m = ms[0];
-        const from = a.from ? date(a.from, 'from') : memberUnpaidFrom(s, m);
-        const collection = memberCollection(s, m, from, st.settings.collectCurrency ?? st.settings.baseCurrency);
-        const until = a.until ? date(a.until, 'until') : collection.until;
-        const currency = a.amount == null ? (str(a.currency)?.toUpperCase() ?? collection.currency) : ccy;
-        validateCurrency(st, currency);
-        const amount =
-          a.amount == null
-            ? round(num(convertOn(collection.amount, collection.currency, currency, on, st.fxHistory, st.fx), 'amount'))
-            : num(a.amount, 'amount');
-        const receipt = { date: on, amount, currency, from, until, note: str(a.note) };
-        const members = s.share.members.map((x) =>
-          x.id === m.id
-            ? {
-                ...x,
-                paidUntil: !x.paidUntil || until > x.paidUntil ? until : x.paidUntil,
-                payments: [...(x.payments ?? []), receipt],
-              }
-            : x,
-        );
-        const after = { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } };
-        const updated = members.find((x) => x.id === m.id)!;
-        return {
-          ...(await commit(ctx, st, today, after, a.dry_run, [`share_payment:${m.name}`])),
-          receipt,
-          member: {
-            id: m.id,
-            name: m.name,
-            ...collectionSummary(
-              st,
-              after,
-              updated,
-              memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
-              today,
-            ),
-          },
-        };
+        target = { kind: 'share', member: ms[0] };
       }
-      const amount = num(a.amount, 'amount');
-      if (!s.proxy) throw new Error(t('mcp.error.notProxy', { name: s.name }));
-      // 按笔记：预收（扣款日在今天之后）或一笔覆盖多期，均摊到连续几期还没收的扣款
-      if (a.periods != null || (a.charge && date(a.charge, 'charge') > today)) {
-        const from = a.charge ? date(a.charge, 'charge') : s.start;
-        const { entries, covered } = recordProxyReceipt(
-          s,
-          { id: uid(), date: on, amount, currency: ccy, from, periods: Number(a.periods ?? 1), note: str(a.note) },
-          today,
-        );
-        return {
-          ...(await commit(ctx, st, today, { ...s, proxy: { ...s.proxy, entries } }, a.dry_run, [`proxy_received:${covered.join(',')}`])),
-          covered,
-          per_period: { amount: round(amount / covered.length), currency: ccy },
-        };
+      const ledger = receivableOf(st, s, target, today);
+      const existing = a.id ? [...(ledger.record.receipts ?? []), ...(ledger.record.waivers ?? [])].find((x) => x.id === a.id) : undefined;
+      if ((action === 'update' || action === 'delete') && !existing) throw new Error(t('mcp.error.invalidTarget'));
+      let result;
+      if (action === 'delete') result = deleteRecord(st, s, target, existing!.id, today);
+      else {
+        const periods = Array.isArray(a.periods)
+          ? (a.periods as unknown[]).map((d) => date(d, 'periods'))
+          : existing && a.count == null
+            ? existing.periods
+            : openPeriods(ledger.periods, Number(a.count ?? 1)).map((p) => p.key);
+        const id = existing?.id ?? uid();
+        const note = 'note' in a ? str(a.note) : existing?.note;
+        const on = date(a.date, 'date', existing?.date ?? today);
+        const isWaiver = action === 'waive' || (action === 'update' && !!existing && !('amount' in existing));
+        if (isWaiver) result = recordWaiver(st, s, target, { id, date: on, periods, note }, today);
+        else {
+          const old = existing && 'amount' in existing ? (existing as Receipt) : undefined;
+          const currency = str(a.currency)?.toUpperCase() ?? old?.currency;
+          if (currency) validateCurrency(st, currency);
+          result = recordReceipt(
+            st,
+            s,
+            target,
+            { id, date: on, amount: a.amount != null ? num(a.amount, 'amount') : old?.amount, currency, periods, note },
+            today,
+          );
+        }
       }
-      const cs = chargesBetween(s, s.start, today, today);
-      const matched = matchEntries(
-        s.proxy.entries,
-        cs.map((c) => c.date),
-      );
-      const charge = a.charge ? date(a.charge, 'charge') : cs.find((c) => matched.get(c.date)?.received == null)?.date;
-      if (!charge) throw new Error(t('mcp.error.noPendingProxy'));
-      const old = matched.get(charge);
-      const entry = { ...(old ?? { charge }), charge, received: amount, receivedCurrency: ccy, receivedOn: on, note: str(a.note) ?? old?.note };
-      const entries = [...s.proxy.entries.filter((e) => e !== old), entry].sort((x, y) => x.charge.localeCompare(y.charge));
-      return commit(ctx, st, today, { ...s, proxy: { ...s.proxy, entries } }, a.dry_run, [`proxy_received:${charge}`]);
+      const after = result.after;
+      const m = target.kind === 'share' ? after.share!.members.find((x) => x.id === (target as { member: ShareMember }).member.id)! : undefined;
+      return {
+        ...(await commit(ctx, st, today, after, a.dry_run, [`receivable_${action}:${m?.name ?? s.proxy?.forName ?? s.name}`])),
+        before: result.before,
+        after: result.record,
+        ...(m
+          ? {
+              member: {
+                id: m.id,
+                name: m.name,
+                ...collectionSummary(
+                  st,
+                  after,
+                  m,
+                  memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+                  today,
+                ),
+              },
+            }
+          : {}),
+      };
     },
   },
   paymentMethodTool,

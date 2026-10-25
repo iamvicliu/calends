@@ -63,7 +63,10 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Không tìm thấy danh mục hoặc danh mục không rõ ràng: {q}. Lựa chọn: {list}",
-    "proxyPeriodsShort": "Từ {from} chỉ còn {count} kỳ, ít hơn số kỳ khoản này áp dụng"
+    "noPeriods": "Chọn ít nhất một kỳ, mỗi kỳ chỉ một lần",
+    "periodUnknown": "{period} không phải một kỳ của khoản phải thu này",
+    "periodTaken": "Kỳ {period} đã có khoản thu hoặc miễn thu",
+    "periodsShort": "Chỉ còn {count} kỳ chưa tất toán, ít hơn số kỳ khoản thu này áp dụng"
   },
   "tool": {
     "get_overview": "Tổng quan sổ",

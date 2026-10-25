@@ -63,9 +63,12 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Categoría no encontrada o ambigua: {q}. Opciones: {list}",
-    "proxyPeriodsShort": {
-      "one": "Desde {from} solo queda {count} pago, menos de los que cubre",
-      "other": "Desde {from} solo quedan {count} pagos, menos de los que cubre"
+    "noPeriods": "Elige al menos un pago, cada uno una sola vez",
+    "periodUnknown": "{period} no es un pago de esta deuda",
+    "periodTaken": "El pago {period} ya tiene un cobro o una condonación",
+    "periodsShort": {
+      "one": "Solo queda {count} pago sin saldar, menos de los que cubre este cobro",
+      "other": "Solo quedan {count} pagos sin saldar, menos de los que cubre este cobro"
     }
   },
   "tool": {

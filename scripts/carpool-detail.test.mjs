@@ -170,8 +170,8 @@ test('打码时收款表的年度胶囊、头像叠放与每行胶囊都不出�
     if (node.type === YearLedger) return node.props;
     return find(node.props?.children);
   };
-  const payment = { date: '2026-10-05', amount: 10, currency: 'CNY', from: '2026-10-01', until: '2026-10-31' };
-  for (const members of [[m('Solo', { payments: [payment] })], [m('Alpha', { payments: [payment] }), m('Beta', { payments: [payment] })]]) {
+  const receipts = [{ id: 'r', date: '2026-10-05', amount: 10, currency: 'CNY', periods: ['2026-10-01'] }];
+  for (const members of [[m('Solo', { receipts })], [m('Alpha', { receipts }), m('Beta', { receipts })]]) {
     const s = sub(members);
     call = 0;
     const ledger = find(CarSheet({ state, s, today, ro: false, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {}, onMember() {} }));
@@ -191,8 +191,8 @@ test('详情复用累计实付、净收款与盈亏；待收为零时只呈现�
   for (const settled of [false, true]) {
     const s = sub([
       m('payer', {
-        paidUntil: settled ? '2026-12-31' : undefined,
-        payments: [{ date: '2026-10-01', until: '2026-12-31', amount: 100, currency: 'CNY' }],
+        // 结清时这笔收了 10 至 12 月三期；没结清时只抵了 11、12 月，10 月这期还欠着
+        receipts: [{ id: 'r', date: '2026-10-01', amount: 100, currency: 'CNY', periods: settled ? ['2026-10-01', '2026-11-01', '2026-12-01'] : ['2026-11-01', '2026-12-01'] }],
         leaveRefund: { date: today, amount: 20, currency: 'CNY' },
       }),
     ]);

@@ -63,9 +63,12 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Kategorie nicht gefunden oder mehrdeutig: {q}. Optionen: {list}",
-    "proxyPeriodsShort": {
-      "one": "Ab {from} bleibt nur {count} Zahlung, weniger als abgedeckt",
-      "other": "Ab {from} bleiben nur {count} Zahlungen, weniger als abgedeckt"
+    "noPeriods": "Wähle mindestens eine Zahlung, jede nur einmal",
+    "periodUnknown": "{period} gehört nicht zu dieser Forderung",
+    "periodTaken": "Für {period} gibt es schon eine Zahlung oder einen Erlass",
+    "periodsShort": {
+      "one": "Nur noch {count} offene Zahlung, weniger als diese Zahlung abdeckt",
+      "other": "Nur noch {count} offene Zahlungen, weniger als diese Zahlung abdeckt"
     }
   },
   "tool": {

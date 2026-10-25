@@ -381,7 +381,11 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
         name: i === 0 ? '' : `Name ${i}`,
         share: 1,
         exempt: i === 2,
-        paidUntil: i === 1 ? '2027-12-31' : undefined,
+        // 第 2 位提前付到了 2027 年底
+        receipts:
+          i === 1
+            ? [{ id: 'o', date: '2026-01-01', amount: 0, currency: 'USD', periods: Array.from({ length: 24 }, (_, k) => addMonths('2026-01-01', k)), opening: true }]
+            : undefined,
         left: i === 8 ? '2026-02-01' : undefined,
       })),
     },

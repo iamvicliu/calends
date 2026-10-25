@@ -63,7 +63,10 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "カテゴリが見つからないか、曖昧です：{q}。候補：{list}",
-    "proxyPeriodsShort": "{from} 以降は {count} 回分しかなく、対象回数に足りません"
+    "noPeriods": "期を1つ以上選んでください（同じ期は1回のみ）",
+    "periodUnknown": "{period} はこの債権の期ではありません",
+    "periodTaken": "{period} の期にはすでに受取または免除があります",
+    "periodsShort": "未精算の期が {count} 期しか残っておらず、この受取の対象期数に足りません"
   },
   "tool": {
     "get_overview": "台帳の概要",

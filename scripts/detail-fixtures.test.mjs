@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { detailFixtures } from './detail-fixtures.ts';
+import { paidThrough } from '../shared/receivables.ts';
 import {
   activePhases,
   addDays,
@@ -9,6 +10,7 @@ import {
   effectiveStatus,
   memberAboard,
   memberDues,
+  memberLedger,
   nextCharge,
   phaseSubs,
   renewalDates,
@@ -118,13 +120,13 @@ for (const today of ['2026-10-24', '2028-02-29', '2027-03-31', '2026-01-31', '20
         if (p.planned) assert.equal(p.payments?.length ?? 0, 0, 'planned phase has no actual payment');
       }
       for (const m of s.share?.members ?? []) {
-        for (const r of m.payments ?? []) assert.ok(r.date <= today && r.date >= m.joined, 'member receipt date');
+        for (const r of m.receipts ?? []) assert.ok(r.date <= today && r.date >= m.joined, 'member receipt date');
         if (m.leaveRefund) assert.ok(m.left <= today && m.leaveRefund.date <= today && m.leaveRefund.amount > 0);
       }
-      for (const e of s.proxy?.entries ?? []) {
-        assert.ok(e.charge <= today && e.receivedOn <= today);
+      for (const e of s.proxy?.receipts ?? []) {
+        assert.ok(e.periods.every((k) => k <= today) && e.date <= today);
         assert.ok(
-          rows.some((r) => r.date === e.charge && !r.kind),
+          e.periods.every((k) => rows.some((r) => r.date === k && !r.kind)),
           'proxy references an actual subscription payment',
         );
       }
@@ -143,7 +145,7 @@ for (const today of ['2026-10-24', '2028-02-29', '2027-03-31', '2026-01-31', '20
     assert.equal(seats(5), 3);
     assert.equal(sub(5).share.seats, 4);
     assert.ok(memberDues(sub(5), today)[0].dueFor < today);
-    assert.ok(sub(5).share.members[1].paidUntil > today);
+    assert.ok(paidThrough(memberLedger(sub(5), sub(5).share.members[1], today).periods) > today);
     assert.equal(sub(6).share.role, 'member');
     for (const [n, status] of [
       [7, 'trial'],

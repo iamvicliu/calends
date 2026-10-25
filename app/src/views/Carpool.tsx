@@ -28,7 +28,7 @@ import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel, rel
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { chargeValue, convertOn } from '../../../shared/fx.ts';
-import type { AppState, MemberPayment, ShareMember, Subscription } from '../../../shared/types.ts';
+import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { carLedger, FeeRuleFields, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
@@ -165,7 +165,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
   const ro = !!state.readonly;
   const [convert, setConvert] = useState<Subscription | null>(null);
-  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; pay?: MemberPayment } | null>(null);
+  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
   const [sheet, setSheet] = useState<string | null>(null);
   const sheetSub = sheet ? state.subscriptions.find((x) => x.id === sheet) : undefined;
@@ -392,7 +392,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               onOpen(sheetSub);
             }}
             onMember={(m, c) => setMember({ s: sheetSub, m, collect: c })}
-            onPayment={(m, pay) => setMember({ s: sheetSub, m, pay })}
+            onPayment={(m, editId) => setMember({ s: sheetSub, m, editId })}
           />
         )}
         {/* 点成员、点收款、点某一笔收款都打开同一个成员入口：欠款先记收款，其余是成员表单 */}
@@ -402,7 +402,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
             member={member.m}
             collect={member.collect}
-            editPay={member.pay}
+            editId={member.editId}
             onClose={() => setMember(null)}
             onOpenSub={() => {
               const sub = state.subscriptions.find((x) => x.id === member.s.id) ?? member.s;
@@ -1100,7 +1100,7 @@ export function CarSheet({
   onOpenSub: () => void;
   onMember: (m?: ShareMember, collect?: boolean) => void;
   /** 收款表点某一笔：直接编辑这笔收款 */
-  onPayment?: (m: ShareMember, pay: MemberPayment) => void;
+  onPayment?: (m: ShareMember, receiptId: string) => void;
 }) {
   const [masked, setMasked] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -1314,7 +1314,7 @@ export function CarSheet({
                   })}
                   rowKey={({ m, p }, i) => `${m.id}-${p.date}-${i}`}
                   rowTitle={({ p }) => (masked ? undefined : p.note)}
-                  onRow={ro ? undefined : ({ m, p }) => (onPayment ? onPayment(m, p) : onMember(m))}
+                  onRow={ro ? undefined : ({ m, p }) => (onPayment && p.kind === 'receipt' ? onPayment(m, p.id) : onMember(m))}
                 />
               ) : (
                 <div className="car-empty">

@@ -1,0 +1,60 @@
+{
+  "periods": "Abgedeckte Zahlungen",
+  "periodsSpan": {
+    "one": "{count} Zahlung, {from} – {until}",
+    "other": "{count} Zahlungen, {from} – {until}"
+  },
+  "periodsCount": {
+    "one": "{count} Zahlung",
+    "other": "{count} Zahlungen"
+  },
+  "unmatched": "Zahlung ab {date} (nicht mehr im Plan)",
+  "unmatchedHint": "Beitrittsdatum oder Abrechnungszyklus wurde geändert. Haken entfernen und aktuelle Zahlungen wählen.",
+  "unmatchedNote": {
+    "one": "{count} Eintrag passt nicht mehr zum Plan. Öffnen, um Zahlungen zu wählen.",
+    "other": "{count} Einträge passen nicht mehr zum Plan. Öffnen, um Zahlungen zu wählen."
+  },
+  "modeReceipt": "Zahlung",
+  "modeWaiver": "Erlassen",
+  "record": "Zahlung erfassen",
+  "waive": "Zahlungen erlassen",
+  "actual": "Erhalten",
+  "waiverGroup": "Erlass",
+  "receivedOn": "Erhalten am",
+  "waivedOn": "Vereinbart am",
+  "amount": "Betrag",
+  "currency": "Währung",
+  "note": "Notiz",
+  "notePh": "Optional, z. B. Überweisungsart",
+  "splitFoot": "Deckt eine Zahlung mehrere Zahlungen ab, wird sie im Verhältnis zum jeweils fälligen Betrag aufgeteilt.",
+  "waiverFoot": "Erlassene Zahlungen gelten weder als offen noch als erhaltenes Geld.",
+  "dueFoot": "Fällig sind hier {amount}. Erfasst wird der tatsächliche Betrag.",
+  "allSettled": "Alles beglichen",
+  "more": "Weitere kommende Zahlungen anzeigen",
+  "opening": "Vor Erfassung beglichen",
+  "openingHint": "Zahlungen bis zu diesem Datum ohne erfasste Zahlung gelten als vor Beginn der Erfassung beglichen (nicht als erhaltenes Geld).",
+  "waived": "Erlassen",
+  "toastReceived": "Zahlung von {amount} erfasst",
+  "toastWaived": {
+    "one": "{count} Zahlung erlassen",
+    "other": "{count} Zahlungen erlassen"
+  },
+  "toastRemoved": "Gelöscht. Diese Zahlungen sind wieder offen",
+  "chargedClear": "Tarifpreis",
+  "action": "Aktion",
+  "actions": {
+    "record": "Zahlung erfassen",
+    "waive": "Erlassen",
+    "update": "Eintrag bearbeiten",
+    "delete": "Eintrag löschen",
+    "charged": "Abbuchung korrigieren"
+  },
+  "status": {
+    "paid": "Bezahlt",
+    "waived": "Erlassen",
+    "free": "Kostenlos",
+    "due": "Offen",
+    "upcoming": "Noch nicht fällig",
+    "this": "Diese Zahlung"
+  }
+}

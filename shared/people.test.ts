@@ -47,7 +47,14 @@ const yt = sub({
     seats: 6,
     since: '2026-01-10',
     members: [
-      { id: 'a2', name: ' alice ', share: 10, contactVia: 'Telegram', contact: 'Alice', paidUntil: '2026-12-09' },
+      {
+        id: 'a2',
+        name: ' alice ',
+        share: 10,
+        contactVia: 'Telegram',
+        contact: 'Alice',
+        receipts: [{ id: 'o', date: '2026-01-10', amount: 0, currency: 'CNY', periods: ['2026-01-10', '2026-02-10', '2026-03-10', '2026-04-10', '2026-05-10', '2026-06-10', '2026-07-10', '2026-08-10', '2026-09-10', '2026-10-10', '2026-11-10'], opening: true }],
+      },
       { id: 'c', name: 'Carol', share: 10 },
     ],
   },
@@ -57,7 +64,7 @@ const proxy = sub({
   name: 'ChatGPT',
   price: 20,
   start: '2026-08-01',
-  proxy: { forName: 'Bob', entries: [{ charge: '2026-08-01', received: 20, receivedCurrency: 'USD', receivedOn: '2026-08-03' }] },
+  proxy: { forName: 'Bob', receipts: [{ id: 'r1', date: '2026-08-03', amount: 20, currency: 'USD', periods: ['2026-08-01'] }] },
 });
 
 test('联系方式归一化', () => {

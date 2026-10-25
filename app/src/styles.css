@@ -10251,3 +10251,74 @@ img.mm-flag {
   box-shadow: none;
   background: none;
 }
+
+/* 按期收款：一行一期，勾选抵扣哪几期；欠着的期标橙色 */
+.rv-period {
+  gap: 10px;
+  cursor: pointer;
+}
+.rv-period input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  accent-color: var(--label);
+}
+.rv-period-l {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  font-size: var(--fs-2);
+}
+.rv-period-l small {
+  font-size: var(--fs-1);
+  color: var(--label-3);
+}
+.rv-period-l small.due {
+  color: var(--orange);
+}
+.rv-period-r {
+  font-size: var(--fs-2);
+  color: var(--label-2);
+}
+.rv-period.lost .rv-period-l > span {
+  color: var(--orange);
+}
+.rv-more {
+  justify-content: center;
+  color: var(--accent);
+  font-size: var(--fs-2);
+}
+
+/* 各期一览：一格一期，颜色与合租时间条一致（已收绿、免收浅灰斜纹、欠着红斜纹、未到期灰斜纹） */
+.rv-strip {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+}
+.rv-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 14px;
+  border-radius: 3px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: var(--fill-2);
+}
+.rv-cell.paid {
+  background: color-mix(in srgb, var(--green) 62%, transparent);
+}
+.rv-cell.waived,
+.rv-cell.free {
+  background: repeating-linear-gradient(135deg, var(--gray-7) 0 2px, transparent 2px 5px);
+}
+.rv-cell.due {
+  background: repeating-linear-gradient(135deg, var(--red) 0 2px, color-mix(in srgb, var(--red) 25%, transparent) 2px 5px);
+}
+.rv-cell.upcoming {
+  background: repeating-linear-gradient(135deg, var(--gray-8) 0 2px, transparent 2px 5px);
+}
+.rv-cell:hover {
+  filter: brightness(0.92);
+}

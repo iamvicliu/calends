@@ -63,9 +63,12 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Categoria não encontrada ou ambígua: {q}. Opções: {list}",
-    "proxyPeriodsShort": {
-      "one": "A partir de {from} resta só {count} pagamento, menos do que o coberto",
-      "other": "A partir de {from} restam só {count} pagamentos, menos do que o coberto"
+    "noPeriods": "Escolha pelo menos um pagamento, cada um só uma vez",
+    "periodUnknown": "{period} não é um pagamento desta cobrança",
+    "periodTaken": "O pagamento {period} já tem um recebimento ou uma dispensa",
+    "periodsShort": {
+      "one": "Resta só {count} pagamento em aberto, menos do que este recebimento cobre",
+      "other": "Restam só {count} pagamentos em aberto, menos do que este recebimento cobre"
     }
   },
   "tool": {

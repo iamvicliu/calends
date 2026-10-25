@@ -27,7 +27,7 @@ import {
   X,
 } from 'lucide-react';
 import { cycleLabel } from '../../../shared/billing.ts';
-import { flow, billLabel, cnDateFull, money } from '../../../shared/format.ts';
+import { flow, billLabel, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
@@ -749,21 +749,27 @@ function summaryRows(
   const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
   const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
   switch (tool) {
-    case 'record_receivable':
-      if (a.action === 'update' || a.action === 'delete' || a.entry) {
-        for (const [key, value] of Object.entries(a))
-          if (!['subscription', 'dry_run'].includes(key))
-            add(
-              t(`assistant.f.${key}`) === `assistant.f.${key}` ? key : t(`assistant.f.${key}`),
-              typeof value === 'object' ? JSON.stringify(value) : String(value),
-            );
+    case 'record_receivable': {
+      // 预览里带着写入后的那一笔：抵扣哪几期、金额（没写金额时按应收算出来的）
+      const r = preview?.after as { periods?: string[]; amount?: number; currency?: string; date?: string } | null | undefined;
+      const action = String(a.action ?? 'record');
+      add(t('receivable.action'), t(`receivable.actions.${action}`));
+      add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
+      if (action === 'charged') {
+        add(t('proxy.table.date'), day(a.charge));
+        add(t('proxy.table.charged'), a.charged_amount != null ? money(Number(a.charged_amount), String(a.charged_currency ?? subCcy ?? collect)) : t('receivable.chargedClear'));
         break;
       }
-      add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
-      add(t('assistant.f.amount'), a.amount != null ? <span className="green">{flow(Number(a.amount), String(a.currency ?? collect))}</span> : undefined);
-      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
-      add(t('assistant.f.paidUntil'), day(a.until));
+      const keys = r?.periods ?? (Array.isArray(a.periods) ? (a.periods as string[]) : undefined);
+      add(t('receivable.periods'), keys ? keys.map((k) => cnDate(k)).join('\n') : a.count ? t('receivable.periodsCount', { count: Number(a.count) }) : undefined);
+      if (action !== 'delete' && action !== 'waive') {
+        const amount = r?.amount ?? (a.amount != null ? Number(a.amount) : undefined);
+        add(t('assistant.f.amount'), amount != null ? <span className="green">{flow(amount, String(r?.currency ?? a.currency ?? collect))}</span> : undefined);
+      }
+      if (action !== 'delete') add(t('assistant.f.date'), day(r?.date ?? a.date) ?? t('assistant.card.today'));
+      add(t('receivable.note'), a.note ? String(a.note) : undefined);
       break;
+    }
     case 'save_share_member':
       add(t('assistant.f.member'), String(a.name ?? a.member ?? ''));
       add(

@@ -728,15 +728,18 @@ test('MCP 合租：首期字段预览不写入、保存/备份保留、收款默
     await assert.rejects(f.run('save_share_member', { member: 'jj', first_amount: -1 }));
     await assert.rejects(f.run('save_share_member', { member: 'jj', first_period: 'invalid' }));
     await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 21.5, date: '2026-10-22', dry_run: true });
-    assert.equal(f.saved().share!.members[0].paidUntil, undefined);
-    assert.equal(f.ctx.overlay.get(s.id)!.share!.members[0].payments![0].until, '2027-01-16');
+    assert.equal(f.saved().share!.members[0].receipts, undefined);
+    assert.deepEqual(f.ctx.overlay.get(s.id)!.share!.members[0].receipts![0].periods, ['2026-10-20']);
     f.ctx.overlay.clear();
     await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 21.5, date: '2026-10-22' });
-    assert.deepEqual(f.saved().share!.members[0].payments![0], { date: '2026-10-22', amount: 21.5, currency: 'CNY', from: '2026-10-20', until: '2027-01-16' });
-    await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 60, date: '2027-01-17' });
-    assert.equal(f.saved().share!.members[0].paidUntil, '2027-07-16');
-    await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 0, date: '2027-01-17', until: '2026-12-01' });
-    assert.equal(f.saved().share!.members[0].paidUntil, '2027-07-16');
+    const { id: _id, ...first } = f.saved().share!.members[0].receipts![0];
+    assert.deepEqual(first, { date: '2026-10-22', amount: 21.5, currency: 'CNY', periods: ['2026-10-20'] });
+    const second = await f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 60, date: '2027-01-17' });
+    assert.deepEqual(second.after.periods, ['2027-01-17']);
+    assert.equal(second.member.paid_until, '2027-07-16');
+    // 同一期不能再记一次
+    await assert.rejects(f.run('record_receivable', { kind: 'share', member: 'jj', currency: 'CNY', amount: 0, periods: ['2026-10-20'] }));
+    assert.equal(f.saved().share!.members[0].receipts!.length, 2);
     await f.run('set_share', { role: 'owner', collect_from: '2026-01-31', dry_run: true });
     assert.equal(f.saved().share!.collectFrom, '2026-01-17');
     assert.equal(f.ctx.overlay.get(s.id)!.share!.collectFrom, '2026-01-31');
@@ -841,21 +844,15 @@ describe('MCP 合租统一收款与首期', () => {
       await f.run('get_carpool');
       const before = f.saved();
       const preview = await f.run('record_receivable', { member: 'jj', dry_run: true });
-      assert.deepEqual(preview.receipt, {
-        date: '2026-10-22',
-        from: '2026-10-20',
-        until: '2027-01-16',
-        amount: 29.02,
-        currency: 'CNY',
-        note: undefined,
-      });
+      const { id: _id, ...receipt } = preview.after;
+      assert.deepEqual(receipt, { date: '2026-10-22', periods: ['2026-10-20'], amount: 29.02, currency: 'CNY' });
       assert.equal(preview.member.paid_until, '2027-01-16');
       assert.equal(preview.member.next_collection_date, '2027-01-17');
       assert.equal(preview.member.is_first_period, false);
       assert.deepEqual(f.saved(), before);
       const saved = await f.run('record_receivable', { member: 'jj' });
-      assert.deepEqual(saved.receipt, preview.receipt);
-      assert.equal(f.saved().share!.members[0].payments![0].amount, 29.02);
+      assert.deepEqual({ ...saved.after, id: undefined }, { ...preview.after, id: undefined });
+      assert.equal(f.saved().share!.members[0].receipts![0].amount, 29.02);
       const member = (await f.run('get_carpool')).plans[0].members[0];
       assert.equal(member.paid_until, '2027-01-16');
       assert.equal(member.next_collection_date, '2027-01-17');
@@ -864,9 +861,8 @@ describe('MCP 合租统一收款与首期', () => {
       assert.equal(member.pending_amount.currency, 'CNY');
       assert.equal(member.owed, null); // 兼容旧返回字段。
       const second = await f.run('record_receivable', { member: 'jj', date: '2027-01-18' });
-      assert.equal(second.receipt.from, '2027-01-17');
-      assert.equal(second.receipt.until, '2027-07-16');
-      assert.equal(second.receipt.amount, 60);
+      assert.deepEqual(second.after.periods, ['2027-01-17']);
+      assert.equal(second.after.amount, 60);
       assert.equal(second.member.next_collection_date, '2027-07-17');
     } finally {
       f.db.close();
@@ -883,8 +879,8 @@ describe('MCP 合租统一收款与首期', () => {
       assert.equal(member.next_collection_date, '2026-10-20');
       assert.equal(member.is_first_period, true);
       const receipt = await f.run('record_receivable', { member: 'jj' });
-      assert.equal(receipt.receipt.amount, 29.02);
-      assert.equal(receipt.receipt.from, '2026-10-20');
+      assert.equal(receipt.after.amount, 29.02);
+      assert.deepEqual(receipt.after.periods, ['2026-10-20']);
       member = (await f.run('get_carpool')).plans[0].members[0];
       assert.equal(member.pending_amount.amount, 60);
       assert.equal(member.next_collection_date, '2027-01-17');
@@ -893,22 +889,31 @@ describe('MCP 合租统一收款与首期', () => {
     }
   });
 
-  test('实际金额可不同或为零；旧式显式金额默认收款币种，覆盖区间可指定且已付至不回退', async () => {
+  test('实际金额可不同或为零，币种缺省同应收；可以跳过中间的期先收后面的期，已付至只算连续结清的部分', async () => {
     const f = fixture(owned());
     try {
       await f.run('save_share_member', args);
       const first = await f.run('record_receivable', { member: 'jj', amount: 12.34 });
-      assert.equal(first.receipt.amount, 12.34);
-      assert.equal(first.receipt.currency, DEFAULT_SETTINGS.collectCurrency ?? DEFAULT_SETTINGS.baseCurrency);
-      assert.equal(first.receipt.until, '2027-01-16');
+      assert.equal(first.after.amount, 12.34);
+      assert.equal(first.after.currency, 'CNY');
+      assert.deepEqual(first.after.periods, ['2026-10-20']);
       const second = await f.run('record_receivable', { member: 'jj', amount: 0, currency: 'CNY' });
-      assert.equal(second.receipt.amount, 0);
+      assert.equal(second.after.amount, 0);
       assert.equal(second.member.paid_until, '2027-07-16');
-      await f.run('record_receivable', { member: 'jj', amount: 5, from: '2026-10-20', until: '2026-11-01' });
-      const m = f.saved().share!.members[0];
-      assert.equal(m.paidUntil, '2027-07-16');
-      assert.equal(m.payments!.at(-1)!.from, '2026-10-20');
-      assert.equal(m.payments!.at(-1)!.until, '2026-11-01');
+      // 跳过 2027-07-17 那期，先收 2028-01-17 那期：已付至不变，下一次收款仍是没收的那期
+      const skip = await f.run('record_receivable', { member: 'jj', amount: 60, periods: ['2028-01-17'] });
+      assert.equal(skip.member.paid_until, '2027-07-16');
+      assert.equal(skip.member.next_collection_date, '2027-07-17');
+      // 免收那期之后，已付至接上
+      const waived = await f.run('record_receivable', { member: 'jj', action: 'waive', periods: ['2027-07-17'] });
+      assert.equal(waived.member.paid_until, '2028-07-16');
+      // 删掉免收，那期恢复为没收
+      const undone = await f.run('record_receivable', { member: 'jj', action: 'delete', id: waived.after.id });
+      assert.equal(undone.member.paid_until, '2027-07-16');
+      // 改一笔收款：金额改了，抵扣的期不变
+      const edited = await f.run('record_receivable', { member: 'jj', action: 'update', id: skip.after.id, amount: 55 });
+      assert.deepEqual([edited.after.amount, edited.after.periods], [55, ['2028-01-17']]);
+      assert.equal(f.saved().share!.members[0].receipts!.length, 3);
     } finally {
       f.db.close();
     }
@@ -919,19 +924,18 @@ describe('MCP 合租统一收款与首期', () => {
     try {
       await f.run('save_share_member', { ...args, first_period: 'free' });
       const preview = await f.run('record_receivable', { member: 'jj', dry_run: true, currency: 'USD' });
-      assert.equal(preview.receipt.from, '2027-01-17');
-      assert.equal(preview.receipt.until, '2027-07-16');
-      assert.equal(preview.receipt.amount, 8.43);
-      assert.equal(preview.receipt.currency, 'USD');
+      assert.deepEqual(preview.after.periods, ['2027-01-17']);
+      assert.equal(preview.after.amount, 8.43);
+      assert.equal(preview.after.currency, 'USD');
       await assert.rejects(f.run('record_receivable', { member: 'jj', currency: 'XYZ' }));
-      assert.equal(f.saved().share!.members[0].payments, undefined);
-      assert.equal((await f.run('record_receivable', { member: 'jj' })).receipt.amount, 60);
+      assert.equal(f.saved().share!.members[0].receipts, undefined);
+      assert.equal((await f.run('record_receivable', { member: 'jj' })).after.amount, 60);
     } finally {
       f.db.close();
     }
   });
 
-  test('旧数据没有新字段时按历史覆盖推断，查询不补写；旧调用与删除仍可用', async () => {
+  test('旧数据（已付至 + 按覆盖期的收款）读出时转成按期：基准日按旧规则写死、收款对上那一期，查询不补写', async () => {
     const s = owned([
       {
         id: 'old',
@@ -957,15 +961,26 @@ describe('MCP 合租统一收款与首期', () => {
       const preview = await f.run('set_share', { role: 'owner', dry_run: true });
       assert.equal(preview.collect_from, '2026-09-17');
       assert.equal(f.saved().share!.collectFrom, undefined);
+      // 读出来已经是按期记账：期初结清 1 至 8 月、9 月那期对上旧收款
+      const legacy = plan.members[0];
+      assert.equal(legacy.receipts, 2);
       const set = await f.run('set_share', { role: 'owner', collect_from: '2026-01-31', dry_run: true });
       assert.equal(set.collect_from, '2026-01-31');
       assert.deepEqual(f.saved(), before);
       await f.run('set_share', { role: 'owner', collect_from: '2026-01-31' });
       assert.equal((await f.run('get_carpool')).plans[0].collect_from, '2026-01-31');
-      const received = await f.run('record_receivable', { kind: 'share', member: 'old', amount: 9, currency: 'USD', until: '2026-11-15' });
-      assert.equal(received.member.paid_until, '2026-11-15');
-      const history = f.saved().share!.members[0].payments!;
-      assert.deepEqual(history[0], s.share!.members[0].payments![0]);
+      // 改了基准日，期重新切过；旧收款按落在哪一期对上，不会变成欠款
+      const received = await f.run('record_receivable', { kind: 'share', member: 'old', amount: 9, currency: 'USD' });
+      assert.equal(received.member.paid_until, '2026-10-27');
+      const history = f.saved().share!.members[0].receipts!;
+      assert.deepEqual(
+        history.map((r) => [r.amount, r.opening ?? false]),
+        [
+          [0, true],
+          [10, false],
+          [9, false],
+        ],
+      );
       await f.run('remove_share_member', { member: 'old', dry_run: true });
       assert.equal(f.saved().share!.members.length, 1);
       await f.run('remove_share_member', { member: 'old' });
@@ -985,10 +1000,9 @@ describe('MCP 合租统一收款与首期', () => {
       assert.equal(plan.collect_from, '2026-09-17');
       assert.equal(plan.members[0].pending_amount.amount, 10);
       const saved = await f.run('record_receivable', { member: 'old' });
-      assert.equal(saved.receipt.from, '2026-10-17');
-      assert.equal(saved.receipt.until, '2026-11-16');
-      assert.equal(saved.receipt.amount, 10);
-      assert.equal(saved.receipt.currency, 'USD');
+      assert.deepEqual(saved.after.periods, ['2026-10-17']);
+      assert.equal(saved.after.amount, 10);
+      assert.equal(saved.after.currency, 'USD');
       assert.equal(saved.member.next_collection_date, '2026-11-17');
       assert.equal(f.saved().share!.collectFrom, '2026-09-17');
     } finally {
@@ -1043,11 +1057,11 @@ describe('MCP 合租统一收款与首期', () => {
       assert.equal(readback.body.result.structuredContent.plans[0].members[0].pending_amount.amount, 29.02);
       const paymentArgs = { subscription: f.sub.id, member: 'jj' };
       const receiptPreview = await rpc(write, 'tools/call', { name: 'record_receivable', arguments: { ...paymentArgs, dry_run: true } });
-      assert.equal(receiptPreview.body.result.structuredContent.receipt.amount, 29.02);
-      assert.equal(f.saved().share!.members[0].paidUntil, undefined);
+      assert.equal(receiptPreview.body.result.structuredContent.after.amount, 29.02);
+      assert.equal(f.saved().share!.members[0].receipts, undefined);
       const receipt = await rpc(write, 'tools/call', { name: 'record_receivable', arguments: paymentArgs });
       assert.equal(receipt.body.result.structuredContent.member.next_collection_date, '2027-01-17');
-      assert.equal(f.saved().share!.members[0].payments![0].amount, 29.02);
+      assert.equal(f.saved().share!.members[0].receipts![0].amount, 29.02);
       const tools = (await rpc(write, 'tools/list')).body.result.tools;
       const schema = tools.find((x: { name: string }) => x.name === 'record_receivable').inputSchema;
       assert.ok(!schema.required.includes('amount'));
@@ -1083,7 +1097,7 @@ describe('MCP 合租统一收款与首期', () => {
         return new Response(`data: ${JSON.stringify({ choices: [{ delta: { tool_calls } }] })}\n\ndata: [DONE]\n\n`);
       }
       const results = request.messages.filter((m: { role: string }) => m.role === 'tool').map((m: { content: string }) => JSON.parse(m.content));
-      assert.equal(results[1].preview.receipt.amount, 29.02);
+      assert.equal(results[1].preview.after.amount, 29.02);
       assert.equal(results[2].plans[0].members[0].next_collection_date, '2027-01-17');
       return new Response(`data: ${JSON.stringify({ choices: [{ delta: { content: 'Drafts ready.' } }] })}\n\ndata: [DONE]\n\n`);
     });
@@ -1099,12 +1113,11 @@ describe('MCP 合租统一收款与首期', () => {
       assert.equal(proposals.length, 2);
       assert.equal(proposals[1].args.amount, 29.02);
       assert.equal(proposals[1].args.currency, 'CNY');
-      assert.equal(proposals[1].args.from, '2026-10-20');
-      assert.equal(proposals[1].args.until, '2027-01-16');
+      assert.deepEqual(proposals[1].args.periods, ['2026-10-20']);
       assert.equal(f.saved().share!.members.length, 0);
       for (const proposal of proposals) await apply(f.ctx.env, { tool: proposal.tool, args: proposal.args });
-      assert.equal(f.saved().share!.members[0].paidUntil, '2027-01-16');
-      assert.equal(f.saved().share!.members[0].payments![0].amount, 29.02);
+      assert.deepEqual(f.saved().share!.members[0].receipts![0].periods, ['2026-10-20']);
+      assert.equal(f.saved().share!.members[0].receipts![0].amount, 29.02);
     } finally {
       f.db.close();
     }
@@ -1137,8 +1150,8 @@ test('MCP 成员生效日调价：预览、保存、备份、默认收款和独�
     feeCurrency: 'CNY',
     billEvery: 6,
     joined: '2025-10-14',
-    paidUntil: '2026-07-16',
-    payments: [{ date: '2026-01-17', amount: 40, currency: 'CNY', from: '2026-01-17', until: '2026-07-16' }],
+    // 已收前两期（2025-10-14、2026-04-14 起）
+    receipts: [{ id: 'r1', date: '2026-01-17', amount: 80, currency: 'CNY', periods: ['2025-10-14', '2026-04-14'] }],
   };
   const f = fixture(base({ start: '2025-10-14', share: { role: 'owner', seats: 6, collectFrom: '2025-10-14', members: [old] } }));
   f.ctx.overlay = new Map();
@@ -1146,26 +1159,26 @@ test('MCP 成员生效日调价：预览、保存、备份、默认收款和独�
     const patch = { member: 'm', fee: 44, fee_from: '2026-07-01' };
     const preview = await f.run('save_share_member', { ...patch, dry_run: true });
     assert.equal(preview.member.next_collection.amount, 44);
-    assert.equal(preview.member.next_collection.until, '2027-01-16');
+    assert.equal(preview.member.next_collection.until, '2027-04-13');
     assert.equal(f.saved().share!.members[0].fee, 40);
     f.ctx.overlay.clear();
     await f.run('save_share_member', patch);
     const member = f.saved().share!.members[0];
     assert.equal(member.feeHistory!.length, 2);
-    assert.deepEqual(member.payments, old.payments);
+    assert.deepEqual(member.receipts, old.receipts);
     const draft = await f.run('record_receivable', { member: 'm', dry_run: true });
-    assert.deepEqual([draft.receipt.amount, draft.receipt.currency, draft.receipt.from, draft.receipt.until], [44, 'CNY', '2026-07-17', '2027-01-16']);
-    assert.equal(f.saved().share!.members[0].payments!.length, 1);
+    assert.deepEqual([draft.after.amount, draft.after.currency, draft.after.periods], [44, 'CNY', ['2026-10-14']]);
+    assert.equal(f.saved().share!.members[0].receipts!.length, 1);
     f.ctx.overlay.clear();
-    const saved = await f.run('record_receivable', { member: 'm', until: '2027-02-03' });
-    assert.equal(saved.member.next_collection_date, '2027-02-04');
+    const saved = await f.run('record_receivable', { member: 'm' });
+    assert.equal(saved.member.next_collection_date, '2027-04-14');
     const backup = parseBackup(JSON.parse(JSON.stringify(await exportAll(f.ctx.env))));
     assert.deepEqual(backup.subscriptions[0].share, f.saved().share);
     await f.run('save_share_member', { member: 'm', fee: 48 }); // no effective date means today
     assert.equal(f.saved().share!.members[0].feeHistory!.at(-1)!.from, '2026-10-22');
     const next = await f.run('record_receivable', { member: 'm', currency: 'USD', dry_run: true });
-    near(next.receipt.amount, 48 / FALLBACK_FX.rates.CNY);
-    assert.equal(next.receipt.until, '2027-08-03');
+    near(next.after.amount, 48 / FALLBACK_FX.rates.CNY);
+    assert.deepEqual(next.after.periods, ['2027-04-14']);
     await assert.rejects(f.run('save_share_member', { member: 'm', fee: 20, fee_from: '2026-02-30' }));
   } finally {
     f.db.close();

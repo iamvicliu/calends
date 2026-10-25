@@ -7,17 +7,17 @@ import {
   carRule,
   followCarRule,
   followsCar,
-  refreshReceiptDraft,
   resyncShares,
   suggestedLeaveRefund,
   carLedger,
   carYear,
-  collectionSpan,
+  periodsTotal,
   nextCollectionDay,
   memberCashFlows,
   updateMemberLeave,
 } from './carpool.ts';
-import { memberDues, memberRate } from './billing.ts';
+import { memberDues, memberPeriods, memberRate } from './billing.ts';
+import { migrateReceivables } from './receivables-legacy.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const sub = (o: Partial<Subscription> = {}): Subscription => ({
@@ -67,20 +67,6 @@ test('年付改成月付：每期份额变成一个月的', () => {
   assert.equal(next.share!.members[0].share, 5);
 });
 
-test('收费周期变化只更新覆盖期，保留手改金额、币种、备注和收款日', () => {
-  const draft = { amount: 12.34, currency: 'USD', note: '审查草稿', date: '2026-10-21', from: '2026-10-14', until: '2027-04-13' };
-  const next = { amount: 37.39, currency: 'CNY', date: '2026-10-22', from: '2026-10-14', until: '2027-01-13' };
-  assert.deepEqual(refreshReceiptDraft(draft, next, true), { ...draft, until: next.until });
-  assert.deepEqual(refreshReceiptDraft(draft, next, false), { ...draft, amount: 37.39, currency: 'CNY', until: next.until });
-  // 手填 0 或恰好等于默认金额仍是明确的用户输入。
-  for (const amount of [0, next.amount]) {
-    assert.equal(refreshReceiptDraft({ ...draft, amount }, { ...next, amount: 75 }, true).amount, amount);
-  }
-  const refreshed = refreshReceiptDraft(draft, next, true);
-  assert.equal(refreshReceiptDraft(refreshed, { ...next, until: '2026-11-13' }, true).note, draft.note);
-  assert.deepEqual(draft, { amount: 12.34, currency: 'USD', note: '审查草稿', date: '2026-10-21', from: '2026-10-14', until: '2027-04-13' });
-});
-
 const ruleCar = (): Subscription => ({
   ...sub({ price: 279, currency: 'CNY', cycle: { unit: 'month', every: 1 }, start: '2021-04-14' }),
   share: {
@@ -95,8 +81,7 @@ const ruleCar = (): Subscription => ({
         fee: 44,
         feeCurrency: 'CNY',
         billEvery: 6,
-        paidUntil: '2026-07-16',
-        payments: [{ date: '2026-01-17', amount: 44, currency: 'CNY', from: '2026-01-17', until: '2026-07-16' }],
+        receipts: [{ id: 'r1', date: '2026-01-17', amount: 44, currency: 'CNY', periods: ['2026-01-17'] }],
       },
       { id: 'b', name: 'B', share: 7.33, fee: 44, feeCurrency: 'CNY', billEvery: 6 },
       { id: 'c', name: 'C', share: 10, fee: 120, feeCurrency: 'CNY', billEvery: 12, custom: true },
@@ -123,7 +108,7 @@ test('改车的规则：跟随车的成员从生效日起调价，历史收款�
   assert.equal(memberRate(next, a, '2026-12-01', 'CNY').amount, 44);
   assert.equal(memberRate(next, a, '2027-02-01', 'CNY').amount, 80);
   assert.equal(memberRate(next, b, '2027-02-01', 'CNY').billEvery, 12);
-  assert.deepEqual(a.payments, s.share!.members[0].payments);
+  assert.deepEqual(a.receipts, s.share!.members[0].receipts);
   assert.equal(c, s.share!.members[2]);
   assert.equal(d, s.share!.members[3]);
 });
@@ -156,15 +141,17 @@ test('已退出成员在首次存规则和追溯调价时保持原样', () => {
   }
 });
 
-test('下车建议逐笔按实际实收日单价折算，跨两笔、跨币种并保留原币明细', () => {
+test('下车建议按收过钱的各期分到的钱按天折算，跨两笔、跨币种并保留原币明细', () => {
   const s = ruleCar();
+  s.share!.collectFrom = '2026-01-01';
   const m = {
     ...s.share!.members[0],
+    billEvery: 1,
     joined: '2026-01-01',
     left: '2026-01-16',
-    payments: [
-      { date: '2026-01-01', from: '2026-01-01', until: '2026-01-31', amount: 31, currency: 'USD' },
-      { date: '2026-01-15', from: '2026-02-01', until: '2026-02-28', amount: 56, currency: 'CNY' },
+    receipts: [
+      { id: 'r1', date: '2026-01-01', periods: ['2026-01-01'], amount: 31, currency: 'USD' },
+      { id: 'r2', date: '2026-01-15', periods: ['2026-02-01'], amount: 56, currency: 'CNY' },
     ],
   };
   const fx = { ...state, fxHistory: { '2026-01-16': { USD: 1, CNY: 7 } } };
@@ -184,22 +171,29 @@ test('下车建议逐笔按实际实收日单价折算，跨两笔、跨币种�
   assert.equal(suggestedLeaveRefund(fx, s, m, 'CNY').amount, 168);
   assert.equal(suggestedLeaveRefund(fx, s, { ...m, left: '2026-03-01' }).amount, 0);
   assert.equal(suggestedLeaveRefund(fx, s, { ...m, left: undefined }).amount, 0);
-  assert.equal(suggestedLeaveRefund(fx, s, { ...m, payments: [] }).amount, 0);
+  assert.equal(suggestedLeaveRefund(fx, s, { ...m, receipts: [] }).amount, 0);
   const missing = { ...fx, fxHistory: undefined, fx: { ...fx.fx, rates: { USD: 1 } } };
   assert.ok(Number.isNaN(suggestedLeaveRefund(missing, s, m).amount));
 });
 
-test('旧收款无覆盖起点按周期和加入日推断，退出当日也属未用，零位币种建议不带小数', () => {
-  const s = ruleCar();
-  const m = {
-    ...s.share!.members[0],
-    billEvery: 1,
-    joined: '2026-01-10',
-    left: '2026-01-31',
-    payments: [{ date: '2026-01-10', until: '2026-01-31', amount: 100, currency: 'JPY' }],
-  };
-  assert.equal(suggestedLeaveRefund(state, s, m).amount, 5);
-  assert.equal(suggestedLeaveRefund(state, s, m).unusedDays, 1);
+test('旧收款无覆盖起点时转成它覆盖的那一期，退出当日也属未用，零位币种建议不带小数', () => {
+  const raw = ruleCar();
+  raw.share!.collectFrom = '2026-01-10';
+  raw.share!.members = [
+    {
+      ...raw.share!.members[1],
+      billEvery: 1,
+      joined: '2026-01-10',
+      left: '2026-01-31',
+      payments: [{ date: '2026-01-10', until: '2026-01-31', amount: 100, currency: 'JPY' }],
+    } as never,
+  ];
+  const s = migrateReceivables(raw, 'CNY');
+  const m = s.share!.members[0];
+  assert.deepEqual(m.receipts!.map((r) => r.periods), [['2026-01-10']]);
+  // 01-10 至 02-09 这一期，退出日 01-31 起 10 天没用：100 × 10 / 31
+  assert.equal(suggestedLeaveRefund(state, s, m).amount, 32);
+  assert.equal(suggestedLeaveRefund(state, s, m).unusedDays, 10);
 });
 
 test('账本和现金流按退款日汇率扣实际退款，年度净额包含本年已退，历史完整保留', () => {
@@ -223,8 +217,7 @@ test('账本和现金流按退款日汇率扣实际退款，年度净额包含�
   );
   const cleared = updateMemberLeave(m, { left: undefined });
   assert.equal(cleared.leaveRefund, undefined);
-  assert.deepEqual(cleared.payments, m.payments);
-  assert.equal(cleared.paidUntil, m.paidUntil);
+  assert.deepEqual(cleared.receipts, m.receipts);
 });
 
 test('买断的合租：成员只收一次，算待收不抛错，也没有每年收入', () => {
@@ -246,8 +239,7 @@ test('买断的合租：成员只收一次，算待收不抛错，也没有每�
           feeCurrency: 'CNY',
           joined: '2026-03-10',
           // 买断只收一期：这一期一直覆盖到 100 年后
-          paidUntil: '2126-03-09',
-          payments: [{ date: '2026-03-12', amount: 129, currency: 'CNY', from: '2026-03-10', until: '2126-03-09' }],
+          receipts: [{ id: 'r1', date: '2026-03-12', amount: 129, currency: 'CNY', periods: ['2026-03-10'] }],
         },
         { id: 'owe', name: '乙', share: 1, fee: 129, feeCurrency: 'CNY', joined: '2026-03-10' },
       ],
@@ -280,8 +272,16 @@ test('当年盈亏：今年成本含预计扣款，收入含已收与今年还�
           feeCurrency: 'CNY',
           billEvery: 1,
           joined: '2026-01-01',
-          paidUntil: '2026-06-30',
-          payments: [{ date: '2026-01-05', amount: 60, currency: 'CNY', from: '2026-01-01', until: '2026-06-30' }],
+          // 一笔收了前 6 期
+          receipts: [
+            {
+              id: 'r1',
+              date: '2026-01-05',
+              amount: 60,
+              currency: 'CNY',
+              periods: ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01', '2026-06-01'],
+            },
+          ],
         },
       ],
     },
@@ -292,7 +292,7 @@ test('当年盈亏：今年成本含预计扣款，收入含已收与今年还�
   assert.equal(y.net, -240);
 });
 
-test('按期数收：一笔覆盖几期就加几期应收、覆盖到第 N 期末；退出日之后不再计', () => {
+test('几期应收的合计：一笔覆盖几期就加几期应收；退出日之后不再有期', () => {
   const plan = sub({
     price: 60,
     cycle: { unit: 'month', every: 1 },
@@ -306,11 +306,12 @@ test('按期数收：一笔覆盖几期就加几期应收、覆盖到第 N 期�
     },
   });
   const m = plan.share!.members[0];
-  assert.deepEqual(collectionSpan(state, plan, m, '2026-01-01', 1, 'CNY'), { amount: 60, currency: 'CNY', until: '2026-06-30', periods: 1 });
-  assert.deepEqual(collectionSpan(state, plan, m, '2026-01-01', 3, 'CNY'), { amount: 180, currency: 'CNY', until: '2027-06-30', periods: 3 });
-  // 2026-09-01 下车：第二期从 07-01 开始还在车上，第三期起不再计
-  const left = { ...m, left: '2026-09-01' };
-  assert.equal(collectionSpan(state, plan, left, '2026-01-01', 5, 'CNY').periods, 2);
+  const periods = memberPeriods(plan, m, '2027-01-01', 'CNY');
+  assert.deepEqual(periodsTotal(state, periods.slice(0, 1)), { amount: 60, currency: 'CNY' });
+  assert.deepEqual(periodsTotal(state, periods.slice(0, 3)), { amount: 180, currency: 'CNY' });
+  assert.equal(periods[2].until, '2027-06-30');
+  // 2026-09-01 下车：第二期从 07-01 开始还在车上，第三期起不再有
+  assert.equal(memberPeriods(plan, { ...m, left: '2026-09-01' }, '2030-01-01', 'CNY').length, 2);
 });
 
 test('下期收款日：按车的收款节奏取今天之后的下一次；当天正好是收款日时算下一期', () => {

@@ -63,7 +63,10 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Kategori bulunamadı veya belirsiz: {q}. Seçenekler: {list}",
-    "proxyPeriodsShort": "{from} tarihinden itibaren yalnızca {count} ödeme kaldı; kapsanandan az"
+    "noPeriods": "En az bir dönem seçin, her biri yalnızca bir kez",
+    "periodUnknown": "{period} bu alacağın bir dönemi değil",
+    "periodTaken": "{period} dönemi için zaten ödeme veya bağış kaydı var",
+    "periodsShort": "Kapanmamış yalnızca {count} dönem kaldı; bu ödemenin kapsadığından az"
   },
   "tool": {
     "get_overview": "Defter özeti",

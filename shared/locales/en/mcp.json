@@ -63,9 +63,12 @@
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
     "noCategory": "Category not found or ambiguous: {q}. Options: {list}",
-    "proxyPeriodsShort": {
-      "one": "Only {count} payment left from {from}, fewer than this payment covers",
-      "other": "Only {count} payments left from {from}, fewer than this payment covers"
+    "noPeriods": "Pick at least one period, each only once",
+    "periodUnknown": "{period} is not a period of this receivable",
+    "periodTaken": "The period {period} already has a payment or waiver",
+    "periodsShort": {
+      "one": "Only {count} unsettled period left, fewer than this payment covers",
+      "other": "Only {count} unsettled periods left, fewer than this payment covers"
     }
   },
   "tool": {

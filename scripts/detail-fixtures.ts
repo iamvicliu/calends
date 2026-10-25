@@ -107,16 +107,17 @@ export function detailFixtures(today = todayIn('Asia/Shanghai')) {
   });
   const owner = (s: Subscription, full = false, billEvery = 1): Subscription => {
     const joined = s.start;
-    const receipt = (until: string, amount: number) => [{ date: joined, from: joined, until, amount, currency: 'CNY' }];
+    // 一笔收款从加入起覆盖 months 个月：按成员的周期切成各期
+    const receipt = (months: number, amount: number) => [
+      { id: id(), date: joined, amount, currency: 'CNY', periods: Array.from({ length: months / billEvery }, (_, k) => addMonths(joined, k * billEvery)) },
+    ];
     const elapsedMonths = (Number(today.slice(0, 4)) - Number(joined.slice(0, 4))) * 12 + Number(today.slice(5, 7)) - Number(joined.slice(5, 7));
     const overdueMonths = Math.floor((elapsedMonths - 3) / billEvery) * billEvery;
     const prepaidMonths = Math.ceil((elapsedMonths + 12) / billEvery) * billEvery;
-    const overdue = addDays(addMonths(joined, overdueMonths), -1);
-    const prepaid = addDays(addMonths(joined, prepaidMonths), -1);
     const share = 10 * s.cycle.every * (s.cycle.unit === 'year' ? 12 : 1);
     const members = [
-      member('虚构甲', joined, { share, fee: 10 * billEvery, billEvery, paidUntil: overdue, payments: receipt(overdue, overdueMonths * 10) }),
-      member('虚构乙', joined, { share, fee: 10 * billEvery, billEvery, paidUntil: prepaid, payments: receipt(prepaid, prepaidMonths * 10) }),
+      member('虚构甲', joined, { share, fee: 10 * billEvery, billEvery, receipts: receipt(overdueMonths, overdueMonths * 10) }),
+      member('虚构乙', joined, { share, fee: 10 * billEvery, billEvery, receipts: receipt(prepaidMonths, prepaidMonths * 10) }),
     ];
     if (full)
       members.push(
@@ -124,8 +125,7 @@ export function detailFixtures(today = todayIn('Asia/Shanghai')) {
         member('虚构丁', joined, {
           share,
           left: addDays(today, -20),
-          paidUntil: prepaid,
-          payments: receipt(prepaid, prepaidMonths * 10),
+          receipts: receipt(prepaidMonths, prepaidMonths * 10),
           leaveRefund: { date: addDays(today, -20), amount: 30, currency: 'CNY' },
         }),
         member('虚构戊', addDays(today, -19), { share }),
@@ -292,7 +292,8 @@ export function detailFixtures(today = todayIn('Asia/Shanghai')) {
   s = paid(base('特殊 · 代付进行中'));
   s.proxy = {
     forName: '虚构代付对象',
-    entries: [{ charge: s.payments!.at(-1)!.date, charged: 36, received: 36, receivedCurrency: 'CNY', receivedOn: today }],
+    receipts: [{ id: id(), date: today, amount: 36, currency: 'CNY', periods: [s.payments!.at(-1)!.date] }],
+    charged: [{ charge: s.payments!.at(-1)!.date, amount: 36 }],
     note: '虚构代付，月末结清',
   };
   add(37, s, '进行中的 proxy，保留支出及收回款，从代付列表打开详情。');

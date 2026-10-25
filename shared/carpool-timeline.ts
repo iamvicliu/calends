@@ -1,4 +1,5 @@
-import { addDays, addMonths, diffDays, memberCollection, memberUnpaidFrom } from './billing.ts';
+import { addDays, addMonths, diffDays, memberLedger } from './billing.ts';
+import { isSettled } from './receivables.ts';
 import type { Subscription } from './types.ts';
 
 /** 详情的成员展示不改变收款账本；不分摊成员同样占一个位置。 */
@@ -21,15 +22,10 @@ export function carpoolTimeline(s: Subscription, today: string, ruleMonths: numb
   ].sort()[0];
   const ends = active
     .filter((m) => !m.exempt)
-    .map((m) => {
-      let period = memberCollection(s, m, memberUnpaidFrom(s, m));
-      // 每次推进真实收费期，保留首期对齐、已付至和未来调价后的周期。
-      while (period.from <= today) {
-        const next = memberCollection(s, m, period.next);
-        if (next.from <= period.from) break;
-        period = next;
-      }
-      return period.until;
+    .flatMap((m) => {
+      // 今天之后第一期还没收的（提前收了的期跳过），按真实收费期算，保留首期对齐与未来调价后的周期
+      const next = memberLedger(s, m, today, s.currency, addMonths(today, 120)).periods.find((p) => p.from > today && !isSettled(p));
+      return next ? [next.until] : [];
     });
   // 右端最多到今天之后十年（长期预付仍可拖动看到）；买断的车只有一期、覆盖百年，拉长没有信息，只看到今天之后三个月
   const end = [

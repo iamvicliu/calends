@@ -23,7 +23,7 @@ import { billLabel, cnDate, money, monthLabel, relDays } from '../shared/format.
 import { t } from '../shared/i18n.ts';
 import { channelsOf, type AppState, type Subscription } from '../shared/types.ts';
 import type { Env } from './env.ts';
-import { matchEntries } from '../shared/proxy.ts';
+import { proxyLedger } from '../shared/proxy.ts';
 import { sendTo } from './channels.ts';
 
 export interface Row {
@@ -190,24 +190,17 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
     if (!s.proxy) continue;
     const name = s.proxy.forName || t('notify.proxy.someone');
     const contact = s.proxy.contact ? ` · ${s.proxy.contactVia ? `${s.proxy.contactVia} ` : ''}${s.proxy.contact}` : '';
-    // 与代付页同样的对账规则（扣款日前后 15 天内的收款也算），改过开始日期也不会重复提醒
-    const charges = chargesBetween(s, s.start, today, today);
-    const matched = matchEntries(
-      s.proxy.entries,
-      charges.map((c) => c.date),
-    );
-    for (const c of charges.filter((x) => x.date >= addDays(today, -45))) {
-      const entry = matched.get(c.date);
-      if (entry?.received != null) continue;
-      const d = diffDays(c.date, today);
+    // 与代付页同一本账：已收、已免的期不提醒
+    for (const c of proxyLedger(s, today).periods.filter((p) => p.status === 'due' && p.from >= addDays(today, -45))) {
+      const d = diffDays(c.from, today);
       if (![0, 3, 7, 14, 30].includes(d)) continue;
-      const charged = entry?.charged ?? c.amount;
-      const ccy = entry?.chargedCurrency ?? c.currency;
+      const charged = c.due;
+      const ccy = c.currency;
       proxy.push({
         title: `${name} · ${s.name}`,
-        sub: `${t('notify.proxy.sub', { status: d === 0 ? t('notify.proxy.chargedToday') : t('notify.proxy.chargedAgo', { date: cnDate(c.date), count: d }) })}${contact}`,
+        sub: `${t('notify.proxy.sub', { status: d === 0 ? t('notify.proxy.chargedToday') : t('notify.proxy.chargedAgo', { date: cnDate(c.from), count: d }) })}${contact}`,
         amount: money(charged, ccy),
-        amountSub: `≈ ${money(toBaseAt(state, charged, ccy, c.date, collect), collect)}`,
+        amountSub: `≈ ${money(toBaseAt(state, charged, ccy, c.from, collect), collect)}`,
         tone: d > 0 ? 'warn' : undefined,
         icon: iconOf(s),
       });
