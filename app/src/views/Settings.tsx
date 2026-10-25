@@ -9,7 +9,7 @@ import { readImportFile } from '../import-file.ts';
 import { ImportSheet } from './ImportSheet.tsx';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
 import { IconButton, Cell, Group, CardTitle, Icon, LoadFailed, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
-import { api, copyText, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
+import { adoptRestored, api, copyText, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
@@ -591,8 +591,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                       method: 'POST',
                       body: JSON.stringify(restoring.raw),
                     });
+                    adoptRestored(r.state);
                     setRestoring(null);
-                    location.reload();
                     return r;
                   }, t('settings.restore.done'))
                 }

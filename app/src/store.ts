@@ -696,6 +696,18 @@ export async function importData(body: { subscriptions: Subscription[]; methods:
   replaceSyncedState(state);
 }
 
+/**
+ * 恢复备份后换上服务端返回的新账本：不整页刷新，结果提示才看得到。
+ * 恢复会重建数据，版本号可能比本地记的小，先忘掉旧版本号再按新库同步。
+ */
+export function adoptRestored(state: unknown) {
+  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
+  knownRev = undefined;
+  ownRevisions = [];
+  replaceSyncedState(state);
+  void syncFx();
+}
+
 export async function refreshFx() {
   const fx = await api<AppState['fx']>('/api/fx/refresh', { method: 'POST' });
   patchState((s) => ({ ...s, fx }));
