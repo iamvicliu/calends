@@ -133,6 +133,16 @@ export function YearLedger<T>({
 }
 
 /** 年份行的支付方式：和明细行一样用胶囊；两种以内并排，更多时写前两种再加「+N」，悬停看全部 */
+/** 年小计的原币列：按币种合计（按首次出现的顺序），每种一行 */
+export function currencyTotals<T>(rows: T[], amountOf: (r: T) => { currency: string; amount: number }, fmt: (sum: number, ccy: string) => string): string {
+  const sums = new Map<string, number>();
+  for (const r of rows) {
+    const { currency, amount } = amountOf(r);
+    sums.set(currency, (sums.get(currency) ?? 0) + amount);
+  }
+  return [...sums].map(([ccy, sum]) => fmt(sum, ccy)).join('\n');
+}
+
 export function YearMethods({ ids, state, title }: { ids: string[]; state: AppState; title?: string }) {
   const methods = ids.map((id) => state.methods.find((m) => m.id === id));
   const shown = methods.slice(0, 2);

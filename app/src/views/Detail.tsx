@@ -1,6 +1,6 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
-import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
+import { ChargeMethods, chargeMethodIds, currencyTotals, YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { renewalDates, chargeMethodId, isStopped } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
 import { createPortal } from 'react-dom';
@@ -421,11 +421,7 @@ function Transfers({ sub, state, onRow, onAdd }: { sub: Subscription; state: App
           const kind = kinds.size === 1 ? ys[0].tr.kind : undefined;
           return {
             second: kind ? <span className={`dt-kind transfer ${kind}`}>{t(`detail.transfer.kind.${kind}`)}</span> : null,
-            orig: copyParts(
-              [...ys.reduce((m, r) => m.set(r.tr.currency, (m.get(r.tr.currency) ?? 0) - transferSign(r.tr) * r.tr.amount), new Map<string, number>())]
-                .map(([ccy, sum]) => flow(sum, ccy))
-                .join('\n'),
-            ),
+            orig: copyParts(currencyTotals(ys, (r) => ({ currency: r.tr.currency, amount: -transferSign(r.tr) * r.tr.amount }), flow)),
             base: Number.isFinite(total) ? flow(total, base) : '—',
             baseClass: total > 0 ? 'dt-in' : undefined,
           };
@@ -1303,9 +1299,11 @@ function Charges({
               second: <YearMethods ids={chargeMethodIds(ys.map((r) => r.c))} state={state} />,
               // 卡上实扣按原币合计；一年里有几种币种时逐个列出，不留空
               orig: copyParts(
-                [...ys.reduce((m, r) => m.set(r.c.currency, (m.get(r.c.currency) ?? 0) + r.c.amount), new Map<string, number>())]
-                  .map(([ccy, sum]) => orig(-sum, ccy))
-                  .join('\n'),
+                currencyTotals(
+                  ys,
+                  (r) => r.c,
+                  (sum, ccy) => orig(-sum, ccy),
+                ),
               ),
               base: Number.isFinite(total) ? flow(-total, base) : '—',
               baseClass: total < 0 ? 'dt-in' : undefined,

@@ -38,6 +38,16 @@ afterEach(() => {
   setLocale('en', []);
 });
 
+// YearLedger.tsx 的 currencyTotals（带样式导入，不能直接加载）：同一实现
+const currencyTotals = (rows: any[], amountOf: (r: any) => { currency: string; amount: number }, fmt: (sum: number, ccy: string) => string) => {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    const { currency, amount } = amountOf(r);
+    m.set(currency, (m.get(currency) ?? 0) + amount);
+  }
+  return [...m].map(([c, n]) => fmt(n, c)).join('\n');
+};
+
 test('Amount renders directed flows, zero, unavailable values and neutral prices/balances with both settings', () => {
   const file = '../app/src/components/ui.tsx';
   const source = read(file).split('export function Amount(')[1].split('/** 分段控件')[0];
@@ -187,6 +197,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     cnDateFull,
     chargeMethodId: billing.chargeMethodId,
     YearMethods: () => null,
+    currencyTotals,
     ChargeMethods: () => null,
     chargeMethodIds: () => [],
     copyParts: (v: unknown) => v,
@@ -252,6 +263,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     cnDateFull,
     chargeMethodId: billing.chargeMethodId,
     YearMethods: () => null,
+    currencyTotals,
     ChargeMethods: () => React.createElement('i', { 'data-pay': '' }),
     chargeMethodIds: () => [],
     copyParts: (v: unknown) => v,
@@ -506,6 +518,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Seg: empty,
     copyParts: (v: unknown) => v,
     YearMethods: empty,
+    currencyTotals,
     ChargeMethods: empty,
     chargeMethodIds: () => [],
     YearLedger: yearLedger({ useState: React.useState, t: deps.t }),

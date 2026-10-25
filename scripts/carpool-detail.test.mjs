@@ -89,6 +89,14 @@ function compile(names, extra = {}) {
     Seg: noop,
     YearLedger: noop,
     YearMethods: noop,
+    currencyTotals: (rows, amountOf, fmt) => {
+      const m = new Map();
+      for (const r of rows) {
+        const { currency, amount } = amountOf(r);
+        m.set(currency, (m.get(currency) ?? 0) + amount);
+      }
+      return [...m].map(([c, n]) => fmt(n, c)).join('\n');
+    },
     PayBadge: noop,
     useTimelinePan: noop,
     tipProps: () => ({}),

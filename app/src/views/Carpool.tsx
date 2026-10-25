@@ -1,6 +1,6 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../components/DetailKit.tsx';
-import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
+import { ChargeMethods, chargeMethodIds, currencyTotals, YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
@@ -1240,9 +1240,11 @@ export function CarSheet({
                       return {
                         second: <YearMethods ids={chargeMethodIds(ys.map((r) => r.c))} state={state} />,
                         orig: copyParts(
-                          [...ys.reduce((m, { c }) => m.set(c.currency, (m.get(c.currency) ?? 0) + c.amount), new Map<string, number>())]
-                            .map(([ccy, sum]) => flow(-sum, ccy))
-                            .join('\n'),
+                          currencyTotals(
+                            ys,
+                            (r) => r.c,
+                            (sum, ccy) => flow(-sum, ccy),
+                          ),
                         ),
                         base: Number.isFinite(total) ? flow(-total, base) : '—',
                       };
@@ -1294,11 +1296,7 @@ export function CarSheet({
                         </span>
                       );
                     })(),
-                    orig: copyParts(
-                      [...ys.reduce((m, { p }) => m.set(p.currency, (m.get(p.currency) ?? 0) + p.amount), new Map<string, number>())]
-                        .map(([ccy, sum]) => flow(sum, ccy))
-                        .join('\n'),
-                    ),
+                    orig: copyParts(currencyTotals(ys, (r) => r.p, flow)),
                     base: flow(
                       ys.reduce((a, r) => a + r.base, 0),
                       base,
