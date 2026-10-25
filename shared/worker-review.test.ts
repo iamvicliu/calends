@@ -173,3 +173,47 @@ test('W-4 MCP 批量请求按顺序执行：后一个写入能看到前一个的
   );
   assert.equal((await loadState(f.env, false)).subscriptions.find((s) => s.id === 'batch1')?.notes, 'second');
 });
+
+test('W-5 破坏性工具只认 id 或完整名称；成员查找重名时报错而不是挑第一个', async () => {
+  const f = await ledger();
+  await upsert(f.env, 'subscriptions', 'n1', sub('n1', 'Fictional Netflix Premium'));
+  await upsert(
+    f.env,
+    'subscriptions',
+    'c1',
+    sub('c1', 'Fictional Car', {
+      share: {
+        role: 'owner',
+        seats: 5,
+        members: [
+          { id: 'm1', name: 'Alex', share: 2, fee: 2, feeCurrency: 'USD' },
+          { id: 'm2', name: 'alex', share: 2, fee: 2, feeCurrency: 'USD' },
+          { id: 'm3', name: 'Alexandra', share: 2, fee: 2, feeCurrency: 'USD' },
+        ],
+      },
+    }),
+  );
+  // 子串唯一命中：读工具照常可用，删除被拒绝
+  assert.ok(!(await f.call('get_subscription', { subscription: 'netflix' })).isError);
+  const del = await f.call('delete_subscription', { subscription: 'netflix' });
+  assert.equal(del.isError, true);
+  assert.match(del.content[0].text, /netflix/);
+  assert.ok((await loadState(f.env, false)).subscriptions.some((s) => s.id === 'n1'));
+  for (const [name, args] of [
+    ['set_share', { subscription: 'Car', role: 'none', dry_run: true }],
+    ['change_plan', { subscription: 'netflix', action: 'remove', at: today, dry_run: true }],
+    ['delete_payment', { subscription: 'netflix', date: today, dry_run: true }],
+    ['set_proxy', { subscription: 'netflix', action: 'remove', dry_run: true }],
+  ] as const) {
+    const r = await f.call(name, args);
+    assert.equal(r.isError, true, `${name}: ${JSON.stringify(r).slice(0, 300)}`);
+  }
+  // 完整名称（不分大小写）可以
+  assert.ok(!(await f.call('delete_subscription', { subscription: 'fictional netflix premium', dry_run: true })).isError);
+  // 成员：完整名称重名 → 报错；id → 精确
+  const amb = await f.call('remove_share_member', { subscription: 'c1', member: 'ALEX', dry_run: true });
+  assert.equal(amb.isError, true);
+  assert.ok(!(await f.call('remove_share_member', { subscription: 'c1', member: 'm2', dry_run: true })).isError);
+  assert.equal((await f.call('remove_share_member', { subscription: 'c1', member: 'Alexa', dry_run: true })).isError, true);
+  assert.equal((await f.call('save_share_member', { subscription: 'c1', member: 'alex', note: 'x', dry_run: true })).isError, true);
+});

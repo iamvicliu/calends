@@ -271,7 +271,7 @@ export const ledgerTools: Tool[] = [
     write: true,
     destructive: true,
     description:
-      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
+      'Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain; remove needs the subscription id or exact full name). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.',
     inputSchema: obj(
       {
         subscription: text,
@@ -287,7 +287,7 @@ export const ledgerTools: Tool[] = [
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: a.action === 'remove' });
       let proxy: Proxy | undefined;
       let link: ReturnType<typeof personLink> | undefined;
       if (a.action !== 'remove') {

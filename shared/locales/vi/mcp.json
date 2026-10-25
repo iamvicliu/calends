@@ -26,6 +26,7 @@
     "needSub": "Cần có subscription (id hoặc tên gói đăng ký)",
     "subNotFound": "Không có gói đăng ký nào khớp với “{q}”. Hãy thử tìm bằng list_subscriptions trước.",
     "subAmbiguous": "“{q}” khớp với {count} gói đăng ký. Hãy chỉ định một gói bằng id: {list}",
+    "subNotExact": "“{q}” không phải id hay tên đầy đủ của gói đăng ký; thao tác này xóa dữ liệu nên không chấp nhận tên một phần. Ứng viên: {list}",
     "customRange": "period=custom cần from và to (YYYY-MM-DD)",
     "unknownPeriod": "Khoảng thời gian không xác định: {period}",
     "unsupportedCurrency": "Tiền tệ không được hỗ trợ: {code}",

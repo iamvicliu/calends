@@ -221,8 +221,11 @@ export function connectionInfo(ctx: ToolCtx, settings: AppState['settings'], tod
 const subCandidates = (st: AppState, xs: Subscription[]) =>
   candidates(xs.map((s) => ({ id: s.id, name: [s.name, s.account, s.region, st.methods.find((m) => m.id === s.methodId)?.name].filter(Boolean).join(' · ') })));
 
-/** 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选 */
-export function findSub(st: AppState, ref: unknown): Subscription {
+/**
+ * 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选。
+ * exact：删除、移除这类破坏性操作只认 id 或完整名称（不分大小写），子串唯一命中也不算。
+ */
+export function findSub(st: AppState, ref: unknown, opts: { exact?: boolean } = {}): Subscription {
   const q = String(ref ?? '').trim();
   if (!q) throw new Error(t('mcp.error.needSub'));
   const byId = st.subscriptions.find((s) => s.id === q);
@@ -231,9 +234,30 @@ export function findSub(st: AppState, ref: unknown): Subscription {
   const exact = st.subscriptions.filter((s) => s.name.toLowerCase() === k);
   if (exact.length === 1) return exact[0];
   const fuzzy = exact.length ? exact : st.subscriptions.filter((s) => s.name.toLowerCase().includes(k));
+  if (opts.exact && !exact.length) {
+    if (fuzzy.length) throw new Error(t('mcp.error.subNotExact', { q, list: subCandidates(st, fuzzy) }));
+    throw new Error(t('mcp.error.subNotFound', { q }));
+  }
   if (fuzzy.length === 1) return fuzzy[0];
   if (!fuzzy.length) throw new Error(t('mcp.error.subNotFound', { q }));
   throw new Error(t('mcp.error.subAmbiguous', { q, count: fuzzy.length, list: subCandidates(st, fuzzy) }));
+}
+
+/**
+ * 合租成员：id，或称呼（不分大小写）完全相同的唯一一位；fuzzy 时再接受唯一的子串命中。
+ * 重名、找不到都报错并列出候选，不会默默挑第一个。
+ */
+export function findMember(s: Subscription, ref: unknown, opts: { fuzzy?: boolean } = {}): ShareMember {
+  const members = s.share?.members ?? [];
+  const raw = String(ref ?? '').trim();
+  const byId = members.find((m) => m.id === raw);
+  if (byId) return byId;
+  const q = raw.toLowerCase();
+  const exact = q ? members.filter((m) => m.name.toLowerCase() === q) : [];
+  const hits = exact.length || !opts.fuzzy ? exact : q ? members.filter((m) => m.name.toLowerCase().includes(q)) : [];
+  if (hits.length === 1) return hits[0];
+  if (hits.length) throw new Error(t('mcp.error.memberAmbiguous', { q: raw, list: candidates(hits) }));
+  throw new Error(t('mcp.error.noMember', { list: candidates(members) }));
 }
 
 /** 按 id 或称呼找人；称呼模糊匹配到多个时报错并列出候选 */
@@ -482,6 +506,11 @@ const outCcy = (st: AppState, a: Record<string, unknown>) => {
 
 const DATE = { format: 'date', type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' };
 const SUBREF = { type: 'string', description: 'Subscription id, or its name (fuzzy match; ambiguous names return candidates).' };
+/** 破坏性操作的订阅引用：只认 id 或完整名称 */
+const SUBREF_EXACT = {
+  type: 'string',
+  description: 'Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action.',
+};
 const CURRENCY_OUT = { type: 'string', description: 'Convert amounts into this currency (ISO code). Defaults to the ledger base currency.' };
 const PERIOD = { type: 'string', enum: PERIODS, description: 'Time window. custom requires from/to.' };
 const CYCLE = {
@@ -1666,7 +1695,7 @@ const CATALOGUE: Tool[] = [
     name: 'change_plan',
     destructive: true,
     description:
-      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
+      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases; remove and drop accept only the subscription id or exact full name. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
@@ -1722,9 +1751,9 @@ const CATALOGUE: Tool[] = [
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
-      const at = date(a.at, 'at');
       const act = String(a.action);
+      const s = findSub(st, a.subscription, { exact: act === 'remove' || act === 'drop' });
+      const at = date(a.at, 'at');
       if (act === 'edit' || act === 'remove') {
         const phases = s.phases?.length ? s.phases : [{ ...s, phases: undefined }];
         const index = phases.findIndex((p) => p.start === at);
@@ -1975,7 +2004,7 @@ const CATALOGUE: Tool[] = [
     destructive: true,
     inputSchema: obj(
       {
-        subscription: SUBREF,
+        subscription: SUBREF_EXACT,
         date: DATE,
         index: { type: 'integer', default: 0 },
         phase: { ...DATE, description: 'Start date of the phase holding the payment, when two phases overlap.' },
@@ -1985,7 +2014,7 @@ const CATALOGUE: Tool[] = [
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: true });
       return commit(
         ctx,
         st,
@@ -2117,10 +2146,10 @@ const CATALOGUE: Tool[] = [
     description: 'Delete a subscription and its whole history. Irreversible: always preview with dry_run first; the user confirms.',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF, dry_run: DRY }, ['subscription']),
+    inputSchema: obj({ subscription: SUBREF_EXACT, dry_run: DRY }, ['subscription']),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: true });
       const preview = {
         before: s,
         after: null,
@@ -2147,7 +2176,7 @@ const CATALOGUE: Tool[] = [
     name: 'set_share',
     destructive: true,
     description:
-      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing. rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.',
+      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing (subscription must then be its id or exact full name). rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.',
     write: true,
     inputSchema: obj(
       {
@@ -2179,7 +2208,7 @@ const CATALOGUE: Tool[] = [
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: a.role === 'none' });
       if (a.role === 'none') return commit(ctx, st, today, { ...s, share: undefined }, a.dry_run, ['share_removed']);
       const role = a.role === 'member' ? 'member' : 'owner';
       const cur = s.share;
@@ -2276,9 +2305,7 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
       if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
-      const q = str(a.member)?.toLowerCase();
-      const old = q ? s.share.members.find((m) => m.id === q || m.name.toLowerCase() === q) : undefined;
-      if (q && !old) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
+      const old = str(a.member) ? findMember(s, a.member) : undefined;
       const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const feeArgs = a.follow_rule === true ? {} : a;
@@ -2415,14 +2442,15 @@ const CATALOGUE: Tool[] = [
     description: 'Remove a member from a shared plan entirely (their payment history goes too). To keep history, use save_share_member with left instead.',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF, member: { type: 'string' }, dry_run: DRY }, ['subscription', 'member']),
+    inputSchema: obj({ subscription: SUBREF_EXACT, member: { type: 'string', description: 'Member id or exact name (case-insensitive).' }, dry_run: DRY }, [
+      'subscription',
+      'member',
+    ]),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: true });
       if (!s.share) throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
-      const q = String(a.member).trim().toLowerCase();
-      const m = s.share.members.find((x) => x.id === q || x.name.toLowerCase() === q);
-      if (!m) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
+      const m = findMember(s, a.member);
       return commit(
         ctx,
         st,
@@ -2437,7 +2465,7 @@ const CATALOGUE: Tool[] = [
     name: 'record_receivable',
     destructive: true,
     description:
-      'Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again. action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).',
+      'Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again (subscription and member must be ids or exact names). action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).',
     write: true,
     inputSchema: obj(
       {
@@ -2467,10 +2495,10 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       if (a.person != null && String(a.person).trim()) a = { ...a, ...personTarget(st, a, today) };
       if (!a.subscription) throw new Error(t('mcp.error.needSubOrPerson'));
-      const s = findSub(st, a.subscription);
+      const action = String(a.action ?? 'record');
+      const s = findSub(st, a.subscription, { exact: action === 'delete' });
       const kind = a.kind ?? (a.member ? 'share' : s.proxy ? 'proxy' : a.kind);
       if (kind !== 'share' && kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
-      const action = String(a.action ?? 'record');
       if (action === 'charged') {
         if (kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
         const currency = str(a.charged_currency)?.toUpperCase();
@@ -2490,17 +2518,7 @@ const CATALOGUE: Tool[] = [
       let target: ReceivableTarget = { kind: 'proxy' };
       if (kind === 'share') {
         if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
-        const q = String(a.member ?? '')
-          .trim()
-          .toLowerCase();
-        const ms = s.share.members.filter((m) => m.id === q || m.name.toLowerCase() === q || (q && m.name.toLowerCase().includes(q)));
-        if (ms.length !== 1)
-          throw new Error(
-            ms.length
-              ? t('mcp.error.memberAmbiguous', { q: String(a.member), list: candidates(ms) })
-              : t('mcp.error.noMember', { list: candidates(s.share.members) }),
-          );
-        target = { kind: 'share', member: ms[0] };
+        target = { kind: 'share', member: findMember(s, a.member, { fuzzy: action !== 'delete' }) };
       }
       const ledger = receivableOf(st, s, target, today);
       const existing = a.id ? [...(ledger.record.receipts ?? []), ...(ledger.record.waivers ?? [])].find((x) => x.id === a.id) : undefined;

@@ -26,6 +26,7 @@
     "needSub": "Нужен параметр subscription (id или название подписки)",
     "subNotFound": "Нет подписки, соответствующей «{q}». Сначала попробуйте поиск через list_subscriptions.",
     "subAmbiguous": "«{q}» соответствует подпискам: {count}. Укажите одну по id: {list}",
+    "subNotExact": "«{q}» — не id и не полное название подписки; это действие удаляет данные, поэтому частичные названия не принимаются. Варианты: {list}",
     "customRange": "Для period=custom нужны from и to (YYYY-MM-DD)",
     "unknownPeriod": "Неизвестный период: {period}",
     "unsupportedCurrency": "Неподдерживаемая валюта: {code}",
