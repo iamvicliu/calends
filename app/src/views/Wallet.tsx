@@ -28,6 +28,7 @@ import {
 } from '../components/ui.tsx';
 import { bankOf, brandOf, domainOf, KIND_BG, KIND_LABEL, liveSubs, methodName, NETWORKS } from '../derive.ts';
 import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
+import { methodReferences } from '../../../shared/ledger-edit.ts';
 import { go } from '../router.ts';
 import { BANKS } from '../banks.ts';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
@@ -558,8 +559,67 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
   );
 }
 
+/** 删除一张仍被引用的卡：引用迁到另一张卡，或清空（与 MCP 删卡同一套处理，见 deleteMethodData） */
+function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod; state: AppState; onClose: () => void; onDeleted: () => void }) {
+  const others = state.methods.filter((x) => x.id !== m.id);
+  const refs = methodReferences(state, m.id);
+  const subs = new Set(refs.flatMap((r) => ('subscription' in r ? [r.subscription] : []))).size;
+  const isDefault = refs.some((r) => r.kind === 'default_method');
+  // 空字符串表示清空引用
+  const [target, setTarget] = useState(others[0]?.id ?? '');
+  const usage = [subs ? t('wallet.delete.usedBy', { count: subs }) : '', isDefault ? t('wallet.delete.isDefault') : ''].filter(Boolean).join('\n');
+  return (
+    <Sheet
+      narrow
+      title={t('wallet.delete.title', { name: m.name })}
+      onClose={onClose}
+      foot={
+        <>
+          <button className="btn" onClick={onClose}>
+            {t('wallet.editor.cancel')}
+          </button>
+          <button
+            className="btn danger-solid"
+            onClick={() =>
+              run(async () => {
+                await deleteMethod(m.id, target || null);
+                onDeleted();
+              }, t('wallet.editor.deleted'))
+            }
+          >
+            {t('wallet.editor.delete')}
+          </button>
+        </>
+      }
+    >
+      <div className="stack">
+        <p className="ask-msg">{copyParts(usage)}</p>
+        <Group foot={target ? undefined : t('wallet.delete.clearHint')}>
+          <Cell label={t('wallet.delete.moveTo')}>
+            <Picker
+              value={target}
+              onChange={setTarget}
+              ariaLabel={t('wallet.delete.moveTo')}
+              options={[
+                ...others.map((x) => ({
+                  value: x.id,
+                  label: x.name,
+                  hint: x.last4 ? `•••• ${x.last4}` : x.currency,
+                  icon: <MethodMark m={x} size={20} flag={false} />,
+                })),
+                { value: '', label: t('wallet.delete.clear') },
+              ]}
+            />
+          </Cell>
+        </Group>
+      </div>
+    </Sheet>
+  );
+}
+
 function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState; onClose: () => void }) {
   const [f, setF] = useState<PaymentMethod>(m);
+  const [deleting, setDeleting] = useState(false);
   const isNew = !state.methods.some((x) => x.id === m.id);
   const up = (p: Partial<PaymentMethod>) => setF({ ...f, ...p });
   const balanceKind = BALANCE_KINDS.includes(f.kind);
@@ -574,13 +634,15 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
           {!isNew && (
             <button
               className="btn danger"
-              onClick={async () =>
-                (await ask(t('wallet.editor.confirmDelete', { name: m.name }))) &&
-                run(async () => {
-                  await deleteMethod(m.id);
-                  onClose();
-                }, t('wallet.editor.deleted'))
-              }
+              onClick={async () => {
+                // 仍有订阅、扣款或默认设置用着这张卡：先选迁到哪张卡或清空
+                if (methodReferences(getState(), m.id).length) return setDeleting(true);
+                if (await ask(t('wallet.editor.confirmDelete', { name: m.name })))
+                  run(async () => {
+                    await deleteMethod(m.id);
+                    onClose();
+                  }, t('wallet.editor.deleted'));
+              }}
             >
               {t('wallet.editor.delete')}
             </button>
@@ -749,6 +811,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
           </div>
         </Group>
       </div>
+      {deleting && <MethodDeleteSheet m={m} state={getState()} onClose={() => setDeleting(false)} onDeleted={onClose} />}
     </Sheet>
   );
 }

@@ -68,7 +68,7 @@
   "editor": {
     "titleNew": "Add payment method",
     "titleEdit": "Edit payment method",
-    "confirmDelete": "Delete “{name}”? Linked subscriptions will no longer have a payment method.",
+    "confirmDelete": "Delete “{name}”?",
     "deleted": "Deleted",
     "delete": "Delete",
     "cancel": "Cancel",
@@ -114,5 +114,13 @@
     "linkBtn": "URL",
     "clear": "Clear",
     "wide": "Wide wordmark"
+  },
+  "delete": {
+    "title": "Delete “{name}”",
+    "usedBy": { "one": "{count} subscription uses this payment method.", "other": "{count} subscriptions use this payment method." },
+    "isDefault": "It is the default payment method for new subscriptions.",
+    "moveTo": "Move references to",
+    "clear": "Clear (no payment method)",
+    "clearHint": "Plans using it will have no payment method; charges recorded on it follow their plan. Split charges that include it are no longer split."
   }
 }

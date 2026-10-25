@@ -89,7 +89,7 @@
   "editor": {
     "titleNew": "Ajouter un moyen de paiement",
     "titleEdit": "Modifier le moyen de paiement",
-    "confirmDelete": "Supprimer « {name} » ? Les abonnements associés n’auront plus de moyen de paiement.",
+    "confirmDelete": "Supprimer « {name} » ?",
     "deleted": "Supprimé",
     "delete": "Supprimer",
     "cancel": "Annuler",
@@ -138,5 +138,13 @@
     "linkBtn": "URL",
     "clear": "Effacer",
     "wide": "Logo horizontal"
+  },
+  "delete": {
+    "title": "Supprimer « {name} »",
+    "usedBy": { "one": "{count} abonnement utilise ce moyen de paiement.", "other": "{count} abonnements utilisent ce moyen de paiement." },
+    "isDefault": "C’est le moyen de paiement par défaut des nouveaux abonnements.",
+    "moveTo": "Déplacer les références vers",
+    "clear": "Vider (aucun moyen de paiement)",
+    "clearHint": "Les formules qui l’utilisent n’auront plus de moyen de paiement ; les prélèvements enregistrés dessus suivront leur formule. Les paiements répartis qui l’incluent ne seront plus répartis."
   }
 }

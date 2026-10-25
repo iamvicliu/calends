@@ -68,7 +68,7 @@
   "editor": {
     "titleNew": "Ödeme yöntemi ekle",
     "titleEdit": "Ödeme yöntemini düzenle",
-    "confirmDelete": "“{name}” silinsin mi? Bağlı aboneliklerin artık ödeme yöntemi olmayacak.",
+    "confirmDelete": "“{name}” silinsin mi?",
     "deleted": "Silindi",
     "delete": "Sil",
     "cancel": "Vazgeç",
@@ -114,5 +114,13 @@
     "linkBtn": "URL",
     "clear": "Temizle",
     "wide": "Geniş logo"
+  },
+  "delete": {
+    "title": "“{name}” sil",
+    "usedBy": { "one": "{count} abonelik bu ödeme yöntemini kullanıyor.", "other": "{count} abonelik bu ödeme yöntemini kullanıyor." },
+    "isDefault": "Yeni abonelikler için varsayılan ödeme yöntemidir.",
+    "moveTo": "Referansları taşı",
+    "clear": "Temizle (ödeme yöntemi yok)",
+    "clearHint": "Bunu kullanan planların ödeme yöntemi olmaz; buna kaydedilen ödemeler planlarını izler. Bunu içeren bölünmüş ödemeler artık bölünmez."
   }
 }

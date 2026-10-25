@@ -68,7 +68,7 @@
   "editor": {
     "titleNew": "Thêm phương thức thanh toán",
     "titleEdit": "Sửa phương thức thanh toán",
-    "confirmDelete": "Xóa “{name}”? Các gói đăng ký liên kết sẽ không còn phương thức thanh toán.",
+    "confirmDelete": "Xóa “{name}”?",
     "deleted": "Đã xóa",
     "delete": "Xóa",
     "cancel": "Hủy",
@@ -114,5 +114,13 @@
     "linkBtn": "URL",
     "clear": "Xóa",
     "wide": "Logo chữ ngang"
+  },
+  "delete": {
+    "title": "Xóa “{name}”",
+    "usedBy": "{count} gói đăng ký dùng phương thức thanh toán này.",
+    "isDefault": "Đây là phương thức thanh toán mặc định cho gói đăng ký mới.",
+    "moveTo": "Chuyển tham chiếu sang",
+    "clear": "Xóa trống (không có phương thức thanh toán)",
+    "clearHint": "Các gói dùng nó sẽ không còn phương thức thanh toán; các khoản phí ghi trên nó theo gói của chúng. Các khoản thanh toán chia nhỏ có nó sẽ không còn chia nhỏ."
   }
 }

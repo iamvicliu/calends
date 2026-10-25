@@ -84,7 +84,7 @@
   "editor": {
     "titleNew": "결제 수단 추가",
     "titleEdit": "결제 수단 편집",
-    "confirmDelete": "‘{name}’을(를) 삭제할까요? 연결된 구독은 결제 수단이 없어집니다.",
+    "confirmDelete": "‘{name}’을(를) 삭제할까요?",
     "deleted": "삭제했습니다",
     "delete": "삭제",
     "cancel": "취소",
@@ -132,5 +132,13 @@
     "linkBtn": "URL",
     "clear": "지우기",
     "wide": "가로형 워드마크"
+  },
+  "delete": {
+    "title": "‘{name}’ 삭제",
+    "usedBy": "구독 {count}개가 이 결제 수단을 사용합니다.",
+    "isDefault": "새 구독의 기본 결제 수단입니다.",
+    "moveTo": "참조 이동 대상",
+    "clear": "비우기(결제 수단 없음)",
+    "clearHint": "이를 쓰는 플랜은 결제 수단이 없어지고, 여기에 기록된 결제는 해당 플랜을 따릅니다. 이를 포함한 분할 결제는 더 이상 분할되지 않습니다."
   }
 }

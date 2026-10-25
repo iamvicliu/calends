@@ -68,7 +68,7 @@
   "editor": {
     "titleNew": "Tambah metode pembayaran",
     "titleEdit": "Edit metode pembayaran",
-    "confirmDelete": "Hapus “{name}”? Langganan yang terhubung tidak akan lagi memiliki metode pembayaran.",
+    "confirmDelete": "Hapus “{name}”?",
     "deleted": "Dihapus",
     "delete": "Hapus",
     "cancel": "Batal",
@@ -114,5 +114,13 @@
     "linkBtn": "URL",
     "clear": "Hapus",
     "wide": "Logo teks lebar"
+  },
+  "delete": {
+    "title": "Hapus “{name}”",
+    "usedBy": "{count} langganan memakai metode pembayaran ini.",
+    "isDefault": "Ini metode pembayaran default untuk langganan baru.",
+    "moveTo": "Pindahkan referensi ke",
+    "clear": "Kosongkan (tanpa metode pembayaran)",
+    "clearHint": "Paket yang memakainya tidak lagi punya metode pembayaran; tagihan yang dicatat padanya mengikuti paketnya. Pembayaran terpisah yang menyertakannya tidak lagi dipisah."
   }
 }

@@ -20,7 +20,7 @@ import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/Ch
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ContactField, contactText, FeeRuleFields } from './Members.tsx';
 import { applyCarRule, carRule, followsCar, nextCollectionDay, sameRule } from '../../../shared/carpool.ts';
-import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSub } from '../store.ts';
+import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSettings, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { searchCatalog, type CatalogItem } from '../catalog.ts';
@@ -200,8 +200,15 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           {!isNew && (
             <button
               className="btn danger"
-              onClick={async () =>
-                (await ask(t('editor.confirmDelete', { name: sub.name }))) &&
+              onClick={async () => {
+                if (!(await ask(t('editor.confirmDelete', { name: sub.name })))) return;
+                // 删除会把它移出公开页隐藏列表；撤销时一并放回
+                const hidden = getState().settings.publicHidden?.includes(sub.id);
+                const restore = async () => {
+                  await saveSub(sub);
+                  const list = getState().settings.publicHidden ?? [];
+                  if (hidden && !list.includes(sub.id)) await saveSettings({ publicHidden: [...list, sub.id] });
+                };
                 run(
                   async () => {
                     await deleteSub(sub.id);
@@ -209,9 +216,9 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
                     onClose();
                   },
                   // 删了还能撤销：把删掉的订阅原样存回去
-                  { text: t('editor.toast.deleted'), action: { label: t('ui.undo'), onClick: () => void run(() => saveSub(sub), t('ui.restored')) } },
-                )
-              }
+                  { text: t('editor.toast.deleted'), action: { label: t('ui.undo'), onClick: () => void run(restore, t('ui.restored')) } },
+                );
+              }}
             >
               {t('common.delete')}
             </button>

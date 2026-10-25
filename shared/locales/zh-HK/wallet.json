@@ -68,7 +68,7 @@
   "editor": {
     "titleNew": "新增付款方式",
     "titleEdit": "編輯付款方式",
-    "confirmDelete": "刪除「{name}」？關聯訂閱會變為未指定。",
+    "confirmDelete": "刪除「{name}」？",
     "deleted": "已刪除",
     "delete": "刪除",
     "cancel": "取消",
@@ -114,5 +114,13 @@
     "linkBtn": "連結",
     "clear": "清除",
     "wide": "橫向字標"
+  },
+  "delete": {
+    "title": "刪除「{name}」",
+    "usedBy": "有 {count} 個訂閱用到這個支付方式。",
+    "isDefault": "它是新訂閱的預設支付方式。",
+    "moveTo": "引用遷移到",
+    "clear": "清空（不指定支付方式）",
+    "clearHint": "用它的方案將不指定支付方式；單獨記在它上的扣款改隨所在方案；含它的拆分付款不再拆分。"
   }
 }
