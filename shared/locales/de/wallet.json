@@ -89,7 +89,7 @@
   "editor": {
     "titleNew": "Zahlungsmethode hinzufügen",
     "titleEdit": "Zahlungsmethode bearbeiten",
-    "confirmDelete": "„{name}“ löschen? Verknüpfte Abos haben dann keine Zahlungsmethode mehr.",
+    "confirmDelete": "„{name}“ löschen?",
     "deleted": "Gelöscht",
     "delete": "Löschen",
     "cancel": "Abbrechen",
@@ -138,5 +138,13 @@
     "linkBtn": "URL",
     "clear": "Entfernen",
     "wide": "Breites Logo"
+  },
+  "delete": {
+    "title": "„{name}“ löschen",
+    "usedBy": { "one": "{count} Abo nutzt diese Zahlungsmethode.", "other": "{count} Abos nutzen diese Zahlungsmethode." },
+    "isDefault": "Sie ist die Standard-Zahlungsmethode für neue Abos.",
+    "moveTo": "Verweise verschieben nach",
+    "clear": "Leeren (keine Zahlungsmethode)",
+    "clearHint": "Tarife damit haben keine Zahlungsmethode mehr; darauf erfasste Abbuchungen folgen ihrem Tarif. Aufgeteilte Zahlungen damit sind nicht mehr aufgeteilt."
   }
 }

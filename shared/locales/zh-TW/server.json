@@ -45,5 +45,6 @@
   },
   "invalidAvatar": "圖片無效",
   "avatarInvalid": "頭像須為不含中繼資料的正方形 PNG/WebP，最大 128×128、64 KB。上傳支援 PNG/JPEG/WebP，最大 8 MB、4000 萬像素。",
-  "avatarRosterFull": "人員名冊空間已滿，請先移除一個頭像。"
+  "avatarRosterFull": "人員名冊空間已滿，請先移除一個頭像。",
+  "methodInUse": "這個支付方式仍在使用。請先把引用遷到其他支付方式，或選擇清空。"
 }

@@ -54,5 +54,6 @@
   },
   "invalidAvatar": "Ungültiges Bild",
   "avatarInvalid": "Quadratisches PNG/WebP ohne Metadaten, bis 128×128 und 64 KB. Uploads: PNG/JPEG/WebP bis 8 MB und 40 Megapixel.",
-  "avatarRosterFull": "Die Personenliste ist voll. Entferne zuerst ein Profilbild."
+  "avatarRosterFull": "Die Personenliste ist voll. Entferne zuerst ein Profilbild.",
+  "methodInUse": "Diese Zahlungsmethode wird noch verwendet. Verschiebe ihre Verweise zuerst auf eine andere Methode oder leere sie."
 }

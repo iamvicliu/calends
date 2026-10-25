@@ -68,7 +68,7 @@
   "editor": {
     "titleNew": "添加支付方式",
     "titleEdit": "编辑支付方式",
-    "confirmDelete": "删除「{name}」？关联订阅会变为未指定。",
+    "confirmDelete": "删除「{name}」？",
     "deleted": "已删除",
     "delete": "删除",
     "cancel": "取消",
@@ -114,5 +114,13 @@
     "linkBtn": "链接",
     "clear": "清除",
     "wide": "横向字标"
+  },
+  "delete": {
+    "title": "删除「{name}」",
+    "usedBy": "有 {count} 个订阅用到这个支付方式。",
+    "isDefault": "它是新订阅的默认支付方式。",
+    "moveTo": "引用迁移到",
+    "clear": "清空（不指定支付方式）",
+    "clearHint": "用它的方案将不指定支付方式；单独记在它上的扣款改随所在方案；含它的拆分付款不再拆分。"
   }
 }

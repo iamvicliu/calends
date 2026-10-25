@@ -34,7 +34,7 @@ import {
   type Charge,
   validDay,
 } from '../../shared/billing.ts';
-import { chargeValue, toBaseAt } from '../../shared/fx.ts';
+import { chargeFxMissing, chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, stopLosses, topUpPlan, yearReview } from '../../shared/metrics.ts';
 import {
   editPhase,
@@ -57,7 +57,10 @@ import {
   statusChangeError,
   cancelAtEnd,
   stopUndated,
+  movePhaseStart,
 } from '../../shared/phases.ts';
+import { editStop } from '../../shared/stop-form.ts';
+import { iconInput } from '../../shared/icon.ts';
 import { proxyLedger } from '../../shared/proxy.ts';
 import { paidThrough, setOpening, type LedgerPeriod } from '../../shared/receivables.ts';
 import {
@@ -69,7 +72,7 @@ import {
   recordWaiver,
   type ReceivableTarget,
 } from '../../shared/receivable-edit.ts';
-import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
+import { normName, peopleLedger, personLink, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
 import { loadState, saveLedgerEdit, upsert } from '../store.ts';
@@ -89,13 +92,14 @@ import {
 } from '../../shared/carpool.ts';
 import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
+import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
-import { validateCurrency, categoryEdit } from '../../shared/ledger-edit.ts';
+import { validateCurrency, categoryEdit, deleteSubscriptionSettings, subRefsError } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
-import { cleanTransfers, netCost, transferredStop, transfersOf, transferValue } from '../../shared/transfers.ts';
+import { cleanTransfers, netCost, transferRows, transferredStop, transferSign, transfersOf, transferValue } from '../../shared/transfers.ts';
 
 /** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
 const storeCountry = (country: string) =>
@@ -486,6 +490,14 @@ const CYCLE = {
   required: ['unit'],
   description: 'Billing cycle, e.g. {"unit":"month","every":1}; lifetime = one-time purchase.',
 };
+const ICON_DESCRIPTION =
+  'Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected.';
+const SHIFT_BILLING = {
+  type: 'boolean',
+  default: false,
+  description:
+    'Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge.',
+};
 const DRY = { type: 'boolean', default: false, description: 'Preview the result without saving.' };
 const CATEGORY = { type: 'string', description: 'Existing category code or name from list_categories; localized names are case-insensitive.' };
 const CATEGORY_CREATE = {
@@ -516,6 +528,7 @@ export async function commit(
   dry: unknown,
   changed: string[],
   categoryCreation?: CategoryCreation,
+  personCreation?: Person,
 ) {
   after = reconcileRenewalRules(
     st.subscriptions.find((s) => s.id === after.id),
@@ -531,8 +544,14 @@ export async function commit(
   for (const v of phaseSubs(after)) {
     const error = subError(v);
     if (error) throw new Error(error);
-    validateCurrency(st, v.currency);
   }
+  // 与网页整条保存同一套引用校验：新写入的支付方式要存在、币种要可用；记录里原有的值放行
+  const refs = subRefsError(
+    st,
+    st.subscriptions.find((x) => x.id === after.id),
+    after,
+  );
+  if (refs) throw new Error(refs);
   const invalid = subError(after);
   if (invalid) throw new Error(invalid);
   const errs = statusChangeError(
@@ -541,7 +560,7 @@ export async function commit(
     today,
   );
   if (errs) throw new Error(errs);
-  return persist(ctx, st, today, after, dry, changed, categoryCreation);
+  return persist(ctx, st, today, after, dry, changed, categoryCreation, undefined, personCreation);
 }
 
 /** 已校验的订阅：生成预览；dry_run 只叠进草稿层，否则保存 */
@@ -554,6 +573,7 @@ async function persist(
   changed: string[],
   categoryCreation?: CategoryCreation,
   extra: Record<string, unknown> = {},
+  personCreation?: Person,
 ) {
   const preview = {
     subscription: row(st, after, today),
@@ -567,18 +587,32 @@ async function persist(
           category_notice: t(dry ? 'mcp.label.createCategory' : 'mcp.label.createdCategory', { name: categoryCreation.category.name }),
         }
       : {}),
+    ...(personCreation
+      ? {
+          created_person: personSummary(personCreation),
+          person_notice: t(dry ? 'mcp.label.createPerson' : 'mcp.label.createdPerson', { name: personCreation.name }),
+        }
+      : {}),
     next_charges: chargesBetween(after, today, addMonths(today, 13), today)
       .slice(0, 3)
       .map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })),
     ...extra,
   };
+  const people = personCreation ? [...(st.people ?? []), personCreation] : undefined;
   if (dry) {
     if (categoryCreation) ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, categories: categoryCreation.categories } };
+    if (people) ctx.draftState = { ...ctx.draftState, people };
     ctx.overlay?.set(after.id, after);
     return { dry_run: true, ...preview };
   }
   const saved = { ...after, updatedAt: new Date().toISOString() };
-  if (categoryCreation) await saveLedgerEdit(ctx.env, { subscriptions: [saved], settings: { ...st.settings, categories: categoryCreation.categories } });
+  // 新建的分类、人与订阅同一个事务写入
+  if (categoryCreation || people)
+    await saveLedgerEdit(ctx.env, {
+      subscriptions: [saved],
+      ...(categoryCreation ? { settings: { ...st.settings, categories: categoryCreation.categories } } : {}),
+      ...(people ? { people } : {}),
+    });
   else await upsert(ctx.env, 'subscriptions', saved.id, saved);
   return { ok: true, ...preview };
 }
@@ -656,19 +690,6 @@ function dropNulls(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(dropNulls);
   if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).flatMap(([k, x]) => (x === null || x === undefined ? [] : [[k, dropNulls(x)]])));
   return v;
-}
-
-/** 一条订阅里引用到的所有支付方式：顶层、各阶段、单笔与拆分来源 */
-function methodIdsOf(s: Subscription): string[] {
-  const ids = new Set<string>();
-  for (const p of [s, ...(s.phases ?? [])]) {
-    if (p.methodId) ids.add(p.methodId);
-    for (const pay of p.payments ?? []) {
-      if (pay.methodId) ids.add(pay.methodId);
-      for (const f of pay.funding ?? []) if (f?.methodId) ids.add(f.methodId);
-    }
-  }
-  return [...ids];
 }
 
 /** 字段级差异：对象逐键、数组逐项展开到叶子；只列出变化的路径 */
@@ -960,7 +981,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'spending_stats',
     description:
-      'Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans.',
+      'Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans. Provider charges only by default; include_transfers=true adds second-hand transfers dated up to today (buy = cost, sell = negative; grouped under their subscription, transfer currency and month, method = "transfer"), which matches the calendar month report total for a calendar month — for that whole report prefer get_insights section=month_report. filter narrows to a subset with the same rules as the web list filter and get_insights section=scope_report (proxy payments then never match). Charges without a usable FX rate make their group and the total null with incomplete=true and fx_missing currencies.',
     inputSchema: obj({
       period: { ...PERIOD, default: 'this_year' },
       from: DATE,
@@ -968,6 +989,8 @@ const CATALOGUE: Tool[] = [
       group_by: { type: 'string', enum: ['month', 'year', 'category', 'method', 'currency', 'region', 'subscription', 'none'], default: 'category' },
       scope: { type: 'string', enum: ['mine', 'gross', 'proxy'], default: 'mine' },
       include_projected: { type: 'boolean', default: true, description: 'Include projected (future) charges inside the period.' },
+      include_transfers: { type: 'boolean', default: false, description: 'Add second-hand buy/sell cash (not with scope=proxy).' },
+      filter: LIST_FILTER,
       top: { type: 'integer', default: 30 },
       currency_out: CURRENCY_OUT,
     }),
@@ -977,33 +1000,63 @@ const CATALOGUE: Tool[] = [
       const [from, to] = rangeOf(a.period ?? 'this_year', today, a.from, a.to);
       const scope = str(a.scope) ?? 'mine';
       const by = str(a.group_by) ?? 'category';
-      const groups = new Map<string, { key: string; label: string; total: number; count: number }>();
+      const ids = a.filter ? new Set(filteredSubs(st, today, a.filter as Record<string, unknown>).map((s) => s.id)) : undefined;
+      const groups = new Map<string, { key: string; label: string; total: number; count: number; missing: boolean }>();
+      const fxMissing = new Set<string>();
       let total = 0;
+      const add = (key: string, label: string, v: number, ccy: string) => {
+        const g = groups.get(key) ?? { key, label, total: 0, count: 0, missing: false };
+        if (Number.isFinite(v)) g.total += v;
+        else {
+          g.missing = true;
+          fxMissing.add(ccy);
+        }
+        g.count++;
+        groups.set(key, g);
+      };
       for (const c of chargesIn(st, from, to, today, scope)) {
         if (a.include_projected === false && c.projected) continue;
+        if (ids && !ids.has(c.sub.id)) continue;
         const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-        const v = chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
+        // 缺汇率时 chargeValue 给 0：标为不完整而不是算进 0
+        const v = chargeFxMissing(st, c, out) ? NaN : chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
+        const ccy = c.settled && !c.projected ? c.settled.currency : c.currency;
         // 按支付方式分组时，拆分付款按份额分到各来源
         for (const x of by === 'method' ? chargeSources(c) : [{ methodId: chargeMethodId(c), share: 1 }]) {
           const m = st.methods.find((y) => y.id === x.methodId);
           const [key, label] = groupOf(by, c, sub, m);
-          const g = groups.get(key) ?? { key, label, total: 0, count: 0 };
-          g.total += v * x.share;
-          g.count++;
-          groups.set(key, g);
+          add(key, label, v * x.share, ccy);
         }
         total += v;
       }
+      let transferTotal = 0;
+      if (a.include_transfers === true && scope !== 'proxy') {
+        const subs = st.subscriptions.filter((s) => !s.proxy && (!ids || ids.has(s.id)));
+        for (const r of transferRows({ ...st, subscriptions: subs }, from, to, today)) {
+          const v = transferSign(r.transfer) * transferValue(st, r.transfer, out);
+          const as = { date: r.date, currency: r.transfer.currency, sub: r.sub } as Charge;
+          const [key, label] = by === 'method' ? ['transfer', t('mcp.label.transfer')] : groupOf(by, as, r.sub, undefined);
+          add(key, label, v, r.transfer.currency);
+          total += v;
+          transferTotal += v;
+        }
+      }
       const list = [...groups.values()].sort((x, y) => (by === 'month' || by === 'year' ? x.key.localeCompare(y.key) : y.total - x.total));
+      const ok = Number.isFinite(total);
       return {
         from,
         to,
         currency: out,
         scope,
-        total: round(total),
-        groups: list
-          .slice(0, Number(a.top ?? 30))
-          .map((g) => ({ ...g, total: round(g.total), share_pct: total > 0 ? Math.round((g.total / total) * 1000) / 10 : 0 })),
+        total: ok ? round(total) : null,
+        ...(a.include_transfers === true ? { transfer_total: Number.isFinite(transferTotal) ? round(transferTotal) : null } : {}),
+        incomplete: !ok,
+        fx_missing: [...fxMissing].sort(),
+        groups: list.slice(0, Number(a.top ?? 30)).map(({ missing, ...g }) => ({
+          ...g,
+          total: missing ? null : round(g.total),
+          share_pct: missing || !ok ? null : total > 0 ? Math.round((g.total / total) * 1000) / 10 : 0,
+        })),
       };
     },
   },
@@ -1153,15 +1206,23 @@ const CATALOGUE: Tool[] = [
   {
     name: 'get_insights',
     description:
-      'Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type). Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.',
+      'Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type), month_report (the calendar month report for month=YYYY-MM: net cash total/paid/pending incl. second-hand transfers, vs previous month and last year, MRR movement, composition, top, upcoming, events, losses, sharing, six-month cash series), scope_report (the web list selection report for filter: MRR, annual, paid this year, 12+3 month cash vs accrual, composition, top, upcoming, events, losses, sharing). Use month_report for "how much did I spend in <month>" so answers match the calendar, scope_report for questions about a subset (category, status, payment method, tag, region, search or named subscriptions). Report amounts are base currency at my share; charge rows also carry the original bill. Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.',
     inputSchema: obj({
-      section: { type: 'string', enum: ['insights', 'year_review', 'prepaid', 'cancel_savings', 'stop_losses'], default: 'insights' },
+      section: {
+        type: 'string',
+        enum: ['insights', 'year_review', 'prepaid', 'cancel_savings', 'stop_losses', 'month_report', 'scope_report'],
+        default: 'insights',
+      },
       year: { type: 'string', description: 'year_review only, e.g. 2025.' },
+      month: { type: 'string', description: 'month_report only: YYYY-MM, default this month.' },
+      filter: { ...LIST_FILTER, description: `scope_report only. ${LIST_FILTER.description}` },
     }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
       const sec = str(a.section) ?? 'insights';
       const base = st.settings.baseCurrency;
+      if (sec === 'month_report') return monthReportOut(st, str(a.month) ?? today.slice(0, 7), today);
+      if (sec === 'scope_report') return scopeReportOut(st, today, a.filter as Record<string, unknown> | undefined);
       if (sec === 'insights')
         return { items: insights(st, today).map((i) => ({ tone: i.tone, title: i.title, body: i.body, subscriptions: i.subs?.map((s) => s.name) ?? [] })) };
       if (sec === 'year_review') {
@@ -1281,7 +1342,7 @@ const CATALOGUE: Tool[] = [
         },
         region: { type: 'string', description: 'ISO country code for region-priced stores (App Store TR, NG…).' },
         url: { type: 'string' },
-        icon: { type: 'string', description: 'Icon image URL (https), e.g. artwork from search_app_store.' },
+        icon: { type: 'string', description: ICON_DESCRIPTION },
         notes: { type: 'string' },
         account: { type: 'string', description: 'Login account: email, phone number (for carriers) or username shown on the receipt.' },
         status: {
@@ -1389,7 +1450,7 @@ const CATALOGUE: Tool[] = [
         methodId: a.method === null ? undefined : (methodRef(st, a.method) ?? st.settings.defaultMethodId),
         region: str(a.region)?.toUpperCase(),
         url: str(a.url),
-        icon: str(a.icon)?.startsWith('https://') ? str(a.icon) : undefined,
+        icon: iconInput(a.icon),
         notes: str(a.notes),
         account,
         trialEnd: a.trial_end ? date(a.trial_end, 'trial_end') : undefined,
@@ -1464,11 +1525,8 @@ const CATALOGUE: Tool[] = [
         tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
         createdAt: previous?.createdAt ?? str(raw.createdAt) ?? today,
       } as Subscription;
-      for (const id of methodIdsOf(next))
-        if (!st.methods.some((m) => m.id === id)) throw new Error(t('mcp.error.noMethod', { q: id, list: candidates(st.methods) }));
-      const prepared = prepareSubWrite(previous, next, today);
+      const prepared = prepareSubWrite(previous, next, today, st);
       if (prepared.error !== undefined) throw new Error(prepared.error);
-      for (const v of [prepared.sub, ...phaseSubs(prepared.sub)]) validateCurrency(st, v.currency);
       const after = prepared.sub;
       const { updatedAt: _b, ...stored } = previous ?? ({} as Subscription);
       const changes = fieldChanges(previous ? stored : {}, after);
@@ -1482,15 +1540,15 @@ const CATALOGUE: Tool[] = [
   {
     name: 'update_subscription',
     description:
-      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, payment method, region, reminder days, end date (no renewal after it), next due date, trial end). Only provided keys change. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
+      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, icon, payment method, region, reminder days, start, end date (no renewal after it), next due date, trial end). Only provided keys change. A start correction keeps the original billing anchor and future charge dates (preview next_charges) unless shift_billing=true. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
     write: true,
     inputSchema: obj(
       {
         subscription: SUBREF,
         set: obj({
-          icon: { type: ['string', 'null'] },
+          icon: { type: ['string', 'null'], description: `${ICON_DESCRIPTION} null clears it.` },
           show_on_public: { type: 'boolean' },
-          start: DATE,
+          start: { ...DATE, description: 'Service start (single-phase only). Keeps the billing anchor unless shift_billing=true.' },
           intro: {
             type: ['object', 'null'],
             properties: { price: { type: 'number', minimum: 0 }, until: DATE },
@@ -1516,6 +1574,7 @@ const CATALOGUE: Tool[] = [
           cancelLeadDays: { type: 'integer', minimum: 0, maximum: 3660 },
         }),
         ...CATEGORY_CREATE,
+        shift_billing: SHIFT_BILLING,
         dry_run: DRY,
       },
       ['subscription', 'set'],
@@ -1524,8 +1583,14 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
       const set = (a.set ?? {}) as Record<string, unknown>;
+      // 改开始日与网页同一套：默认保留原扣款锚点（之后的扣款日不变），shift_billing=true 才整体平移
+      let base = s;
+      if ('start' in set) {
+        if (s.phases?.length) throw new Error(t('mcp.error.invalidInput', { field: 'start: use change_plan edit for phased subscriptions' }));
+        base = movePhaseStart(s, s.start, date(set.start, 'start'), { shiftBilling: a.shift_billing === true });
+      } else if (a.shift_billing != null) throw new Error(t('mcp.error.invalidInput', { field: 'shift_billing requires set.start' }));
       // 多段订阅：顶层字段先换成今天所在的那段，改完再同步回去
-      const next: Subscription = toEditForm({ ...s }, today);
+      const next: Subscription = toEditForm({ ...base }, today);
       const changed: string[] = [];
       const put = <K extends keyof Subscription>(k: K, v: Subscription[K], label = String(k)) => {
         next[k] = v;
@@ -1533,12 +1598,9 @@ const CATALOGUE: Tool[] = [
       };
       if ('chargeLeadDays' in set) put('chargeLeadDays', Number(set.chargeLeadDays));
       if ('cancelLeadDays' in set) put('cancelLeadDays', Number(set.cancelLeadDays));
-      if ('icon' in set) put('icon', str(set.icon));
+      if ('icon' in set) put('icon', iconInput(set.icon));
       if ('show_on_public' in set) put('showOnPublic', set.show_on_public as boolean);
-      if ('start' in set) {
-        if (s.phases?.length) throw new Error(t('mcp.error.invalidInput', { field: 'start: use change_plan edit for phased subscriptions' }));
-        put('start', date(set.start, 'start'));
-      }
+      if ('start' in set) changed.push('start');
       if ('intro' in set) put('intro', set.intro == null ? undefined : (set.intro as Subscription['intro']));
       if ('bonus' in set) put('bonus', set.bonus == null ? undefined : (set.bonus as Subscription['bonus']));
       if ('name' in set) put('name', String(set.name).trim());
@@ -1561,7 +1623,7 @@ const CATALOGUE: Tool[] = [
         if (k in set) put(f, set[k] == null ? undefined : date(set[k], k), k);
       }
       if (!changed.length) throw new Error(t('mcp.error.noFields'));
-      return commit(ctx, st, today, syncPhase(preserveRenewalHistory(s, next, today), today), a.dry_run, changed, category?.creation);
+      return commit(ctx, st, today, syncPhase(preserveRenewalHistory(base, next, today), today), a.dry_run, changed, category?.creation);
     },
   },
   {
@@ -1604,7 +1666,7 @@ const CATALOGUE: Tool[] = [
     name: 'change_plan',
     destructive: true,
     description:
-      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. action=remove deletes that phase and its payments, requires at least two phases. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
+      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
@@ -1612,7 +1674,7 @@ const CATALOGUE: Tool[] = [
         action: { type: 'string', enum: ['switch', 'resume', 'earlier', 'confirm', 'drop', 'edit', 'remove'] },
         at: DATE,
         set: obj({
-          start: DATE,
+          start: { ...DATE, description: 'New phase start; keeps the billing anchor unless shift_billing=true.' },
           end: { type: ['string', 'null'], format: 'date' },
           price: { type: 'number', minimum: 0 },
           currency: { type: 'string' },
@@ -1653,6 +1715,7 @@ const CATALOGUE: Tool[] = [
           description: 'action=switch only: the previous phase keeps running until this date (after `at`), overlapping the new one.',
         },
         earlier_until: { ...DATE, description: 'action=earlier only: the earlier phase ended on this date (a gap before the next one).' },
+        shift_billing: SHIFT_BILLING,
         dry_run: DRY,
       },
       ['subscription', 'action', 'at'],
@@ -1672,12 +1735,17 @@ const CATALOGUE: Tool[] = [
           delete patch.method;
         }
         if (patch.currency) validateCurrency(st, String(patch.currency));
-        const after = act === 'remove' ? removePhase(s, index) : editPhase(s, at, patch);
+        if (a.shift_billing != null && (act !== 'edit' || patch.start == null)) throw new Error(t('mcp.error.invalidInput', { field: 'shift_billing requires set.start' }));
+        // 改开始日走网页同一个 movePhaseStart（保留扣款锚点）；其余字段再按新开始日修改
+        const { start: moveTo, ...rest } = patch;
+        const moved = act === 'edit' && moveTo != null && moveTo !== at ? movePhaseStart(s, at, date(moveTo, 'set.start'), { shiftBilling: a.shift_billing === true }) : s;
+        const target = act === 'edit' && moveTo != null ? String(moveTo) : at;
+        const after = act === 'remove' ? removePhase(s, index) : Object.keys(rest).length ? editPhase(moved, target, rest) : moved;
         return {
           ...(await commit(ctx, st, today, after, a.dry_run, [act])),
           affected_estimated_charges: affectedPriceCharges(s, after, today),
           before: phases[index],
-          after: act === 'remove' ? null : after.phases?.find((p) => p.start === (patch.start ?? at)),
+          after: act === 'remove' ? null : (after.phases?.find((p) => p.start === target) ?? phaseSubs(after).find((p) => p.start === target)),
           references: { subscription: s.id, phase: at, removed_payments: act === 'remove' ? (phases[index].payments ?? []) : [] },
         };
       }
@@ -1712,7 +1780,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'set_status',
     description:
-      'Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).',
+      'Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. To correct an existing stop (date, non-renewal vs immediate cancel, reason, refund) pass edit=true with action=cancel|terminate; omitted fields keep the recorded values and a provider termination stays terminate. An undated stop needs its real date in at. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).',
     write: true,
     inputSchema: obj(
       {
@@ -1727,15 +1795,25 @@ const CATALOGUE: Tool[] = [
         trial_end: { ...DATE, type: ['string', 'null'], description: 'trial only: first paid charge date; null clears, omitted preserves the existing value.' },
         immediate: { type: 'boolean', default: false, description: 'cancel only: stop using the service immediately instead of non-renewal.' },
         reason: { type: 'string', description: 'Optional provider termination reason; terminate only.' },
-        refund: obj(
-          {
-            amount: { type: 'number', minimum: 0 },
-            date: DATE,
-            currency: { type: 'string', description: 'Must equal the subscription currency; usually omit.' },
-            settled: obj({ amount: { type: 'number', minimum: 0 }, currency: { type: 'string' } }, ['amount', 'currency']),
-          },
-          ['amount'],
-        ),
+        refund: {
+          ...obj(
+            {
+              amount: { type: 'number', minimum: 0 },
+              date: DATE,
+              currency: { type: 'string', description: 'Must equal the subscription currency; usually omit.' },
+              settled: obj({ amount: { type: 'number', minimum: 0 }, currency: { type: 'string' } }, ['amount', 'currency']),
+            },
+            ['amount'],
+          ),
+          type: ['object', 'null'],
+          description: 'Immediate cancel / terminate only. With edit=true it replaces the latest stop refund; null removes it; omitted keeps it.',
+        },
+        edit: {
+          type: 'boolean',
+          default: false,
+          description:
+            'Correct an already stopped subscription with action=cancel|terminate: change the stop date (at; omitted keeps it), non-renewal vs immediate cancel, reason or refund. Provider termination cannot become cancel.',
+        },
         dry_run: DRY,
       },
       ['subscription', 'action'],
@@ -1745,6 +1823,35 @@ const CATALOGUE: Tool[] = [
       const s = findSub(st, a.subscription);
       const act = String(a.action);
       const stopping = act === 'cancel' || act === 'terminate';
+      // 修改已有停用：与网页停用表单同一套（先重开再停用），省略的字段保留原值
+      if (a.edit === true) {
+        if (!stopping) throw new Error(t('mcp.error.invalidStop'));
+        if (a.at === null) throw new Error(t('mcp.error.editStopDate'));
+        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | null | undefined;
+        const next = editStop(
+          s,
+          {
+            mode: act === 'terminate' ? 'terminate' : a.immediate === true ? 'cancel' : 'nonrenew',
+            date: a.at === undefined ? undefined : date(a.at, 'at'),
+            reason: 'reason' in a ? (str(a.reason) ?? null) : undefined,
+            refund:
+              r === null
+                ? null
+                : r
+                  ? {
+                      amount: num(r.amount, 'refund.amount'),
+                      date: r.date == null ? undefined : date(r.date, 'refund.date'),
+                      currency: str(r.currency)?.toUpperCase(),
+                      settled: r.settled
+                        ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() }
+                        : undefined,
+                    }
+                  : undefined,
+          },
+          today,
+        );
+        return commit(ctx, st, today, next, a.dry_run, [act, 'edit_stop']);
+      }
       // 停用不默认今天：已经开始或付过钱的订阅，今天未必是真实的停用日，需显式给出（或 null 表示日期未知）
       if (stopping && a.at === undefined) {
         const paid = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some((p) => p.date < today);
@@ -2027,10 +2134,10 @@ const CATALOGUE: Tool[] = [
       };
       if (a.dry_run) {
         ctx.overlay?.set(s.id, null);
-        ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, publicHidden: st.settings.publicHidden?.filter((id) => id !== s.id) } };
+        ctx.draftState = { ...ctx.draftState, settings: deleteSubscriptionSettings(st.settings, s.id) };
         return { dry_run: true, ...preview };
       }
-      await saveLedgerEdit(ctx.env, { settings: { ...st.settings, publicHidden: st.settings.publicHidden?.filter((id) => id !== s.id) } }, [], [s.id]);
+      await saveLedgerEdit(ctx.env, { settings: deleteSubscriptionSettings(st.settings, s.id) }, [], [s.id]);
       return { ok: true, ...preview };
     },
   },
@@ -2110,7 +2217,11 @@ const CATALOGUE: Tool[] = [
     inputSchema: obj(
       {
         subscription: SUBREF,
-        person: { type: ['string', 'null'], description: 'Link an existing roster person by id/name; copies their name/contact.' },
+        person: {
+          type: ['string', 'null'],
+          description:
+            'Link an existing roster person by id/name; copies their name/contact. Omitted: an unlinked member is matched by name (+ contact) like the web form, else a roster person is created (preview created_person). null keeps the member unlinked.',
+        },
         member: { type: 'string', description: 'Existing member id or name to update; omit to add a new member.' },
         id: { type: 'string', description: 'Internal: id for a new member (used when confirming an earlier draft).' },
         name: { type: 'string' },
@@ -2271,11 +2382,14 @@ const CATALOGUE: Tool[] = [
         const until = a.paid_until == null ? undefined : date(a.paid_until, 'paid_until');
         m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, st.settings.collectCurrency ?? st.settings.baseCurrency), until) };
       }
+      // 与网页成员表单同一套建档规则：没关联到人的按称呼（+ 联系方式）认已有的人，认不到就新建；person=null 明确不关联
+      const link = !m.personId && a.person !== null ? personLink(st.people ?? [], { name: m.name, contactVia: m.contactVia, contact: m.contact }) : undefined;
+      if (link) m = { ...m, personId: link.id };
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
       const after = { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } };
       const suggestion = suggestedLeaveRefund(st, after, m);
       return {
-        ...(await commit(ctx, st, today, after, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`])),
+        ...(await commit(ctx, st, today, after, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`], undefined, link?.created)),
         suggested_refund: suggestion,
         unused_days: suggestion.unusedDays,
         member: {

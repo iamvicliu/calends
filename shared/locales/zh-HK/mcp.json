@@ -9,7 +9,10 @@
     "anyRegion": "不區分地區",
     "total": "合計",
     "createCategory": "將新增分類：{name}",
-    "createdCategory": "已新增分類：{name}"
+    "createdCategory": "已新增分類：{name}",
+    "createPerson": "將新增人員：{name}",
+    "createdPerson": "已新增人員：{name}",
+    "transfer": "轉讓"
   },
   "error": {
     "shareFull": "「{name}」已經坐滿了（{seats} 個位置）",
@@ -70,7 +73,11 @@
     "stopDateRequired": "這個訂閱在今天之前已經開始或扣過款，停用日不能預設今天。請用 at 提供實際日期；日期不詳時傳 at=null。",
     "unknownStopDetails": "日期不詳的停用不能附帶退款或原因；要記錄請用 at 提供日期。",
     "transferProxy": "代付訂閱不能記轉讓",
-    "transferNotFound": "找不到 {date} 的這筆轉讓"
+    "transferNotFound": "找不到 {date} 的這筆轉讓",
+    "notStopped": "這個訂閱尚未停用，沒有可修改的停用資料。要停用請不帶 edit 調用 set_status cancel / terminate。",
+    "editStopDate": "修改停用時請用 at 提供實際日期（省略 at 即沿用已記錄的日期）；原本日期不詳的停用需要補回真實日期。",
+    "invalidIcon": "圖示「{value}」無效：請使用 http(s) 圖片網址、站內路徑（如 /ai/claude.svg），或一個 emoji／簡短符號。",
+    "badMonth": "月份格式應為 YYYY-MM：{month}"
   },
   "tool": {
     "get_overview": "帳本概況",

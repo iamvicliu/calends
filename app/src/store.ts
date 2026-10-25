@@ -8,6 +8,7 @@ import { mergePeople, syncPerson } from '../../shared/people.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import { renameInSubs, type Category } from '../../shared/categories.ts';
 import { resyncShares } from '../../shared/carpool.ts';
+import { deleteMethodData, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
 import { PREF_KEYS, type PrefKey } from '../../shared/prefs.ts';
 import { toast as sonner } from 'sonner';
 import { advanceRevision, canApplySnapshot, CHECK_THROTTLE, shouldCheck, shouldPoll, syncedPrefs, SYNC_INTERVAL } from '../../shared/live-sync.ts';
@@ -526,8 +527,9 @@ export function saveSub(next: Subscription) {
 }
 
 export function deleteSub(id: string) {
+  // 服务端在同一事务里把它从公开页隐藏列表去掉（与 MCP delete_subscription 相同），本地同步
   return optimistic(
-    (s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id) }),
+    (s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id), settings: deleteSubscriptionSettings(s.settings, id) }),
     () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }),
   );
 }
@@ -550,19 +552,20 @@ export function saveMethod(m: PaymentMethod) {
   );
 }
 
-export async function deleteMethod(id: string) {
-  // 订阅本身和它的各个阶段都可能引用这张卡，一并清掉
-  const linked = store.state!.subscriptions.filter((s) => s.methodId === id || s.phases?.some((p) => p.methodId === id));
-  await optimistic(
-    (s) => ({ ...s, methods: s.methods.filter((x) => x.id !== id) }),
-    () => api(`/api/methods/${id}`, { method: 'DELETE' }),
+/**
+ * 删除支付方式：订阅、阶段、单笔扣款、拆分来源与默认支付方式里的引用由服务端在同一事务里处理（与 MCP 删卡同一套 deleteMethodData）。
+ * into 为另一张卡的 id 时迁过去，null 清空引用；有引用时必须二选一，否则服务端拒绝。
+ */
+export async function deleteMethod(id: string, into?: string | null) {
+  const query = into ? `?into=${encodeURIComponent(into)}` : into === null ? '?clear=1' : '';
+  const r = await optimistic(
+    (s) => {
+      const d = deleteMethodData(s, id, into);
+      return withSubs({ ...s, methods: s.methods.filter((x) => x.id !== id), settings: d.settings }, d.subscriptions);
+    },
+    () => api<{ subscriptions: Subscription[] }>(`/api/methods/${id}${query}`, { method: 'DELETE' }),
   );
-  for (const s of linked)
-    await saveSub({
-      ...s,
-      methodId: s.methodId === id ? undefined : s.methodId,
-      phases: s.phases?.map((p) => (p.methodId === id ? { ...p, methodId: undefined } : p)),
-    });
+  patchState((s) => withSubs(s, r.subscriptions));
 }
 
 /** 换上服务端改过的订阅（同步人的资料、合并时一次改好几条） */

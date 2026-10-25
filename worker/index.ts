@@ -5,6 +5,7 @@ import { addDays, todayIn } from '../shared/billing.ts';
 import {
   DEFAULT_SETTINGS,
   PERSON_COLORS,
+  type AppState,
   type Channel,
   type FxTable,
   type PaymentMethod,
@@ -13,6 +14,7 @@ import {
   type Subscription,
 } from '../shared/types.ts';
 import { mergePeople, refsFor, syncPerson } from '../shared/people.ts';
+import { checkSettings, deleteMethodData, deleteSubscriptionSettings, methodReferences, pruneSettingsRefs } from '../shared/ledger-edit.ts';
 import {
   DEFAULT_MAX_SESSIONS,
   authStatus,
@@ -49,8 +51,8 @@ import {
   loadState,
   loadSubs,
   putKv,
-  remove,
   replaceAll,
+  saveLedgerEdit,
   saveSettingsWithSubs,
   upsert,
   writePeople,
@@ -117,6 +119,8 @@ function cleanPerson(raw: Partial<Person>, id: string): Person | undefined {
 
 const subsOf = async (env: Env) =>
   (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
+const methodsOf = async (env: Env) =>
+  (await env.DB.prepare('SELECT data FROM methods').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as PaymentMethod);
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
@@ -189,7 +193,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
       const previous = (await subsOf(env)).find((x) => x.id === sub.id);
       const today = todayIn((await getSettings(env)).timezone);
-      const prepared = prepareSubWrite(previous, sub, today);
+      const prepared = prepareSubWrite(previous, sub, today, { methods: await methodsOf(env), fx: await getFx(env) });
       if (prepared.error !== undefined) return bad(prepared.error);
       sub = prepared.sub;
       sub.updatedAt = new Date().toISOString();
@@ -197,8 +201,10 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       return json(sub, 200, rev);
     }
     if (method === 'DELETE') {
-      const rev = await remove(env, 'subscriptions', m[1]);
-      return json({ ok: true }, 200, rev);
+      // 与 MCP delete_subscription 相同：同一事务里把它从公开页隐藏列表去掉，不留悬空 id
+      const settings = deleteSubscriptionSettings(await getSettings(env), m[1]);
+      const rev = await saveLedgerEdit(env, { settings }, [], [m[1]]);
+      return json({ ok: true, settings }, 200, rev);
     }
   }
   // 人：保存时把称呼、联系方式同步到所有引用他的成员、代付上，返回改动过的订阅
@@ -254,9 +260,23 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       const rev = await upsert(env, 'methods', pm.id, pm);
       return json(pm, 200, rev);
     }
+    // 删卡：与 MCP update_payment_method action=delete 同一套引用处理（订阅、阶段、单笔、拆分来源、默认支付方式）。
+    // ?into=<id> 迁到另一张卡，?clear=1 清空引用；有引用又没选时 409，返回引用数。
     if (method === 'DELETE') {
-      const rev = await remove(env, 'methods', m[1]);
-      return json({ ok: true }, 200, rev);
+      const q = new URL(req.url).searchParams;
+      const into = q.get('into') || (q.get('clear') === '1' ? null : undefined);
+      const st = { subscriptions: await loadSubs(env), methods: await methodsOf(env), settings: await getSettings(env) } as AppState;
+      if (into === undefined && methodReferences(st, m[1]).length) return json({ error: t('server.methodInUse'), code: 'in_use' }, 409);
+      let r: ReturnType<typeof deleteMethodData>;
+      try {
+        r = deleteMethodData(st, m[1], into);
+      } catch {
+        return bad(t('server.invalidMethod'));
+      }
+      const now = new Date().toISOString();
+      const subscriptions = r.subscriptions.map((x) => ({ ...x, updatedAt: now }));
+      const rev = await saveLedgerEdit(env, { settings: r.settings, subscriptions }, [m[1]]);
+      return json({ ok: true, settings: r.settings, subscriptions }, 200, rev);
     }
   }
   // 界面配置：按项合并，两台设备改不同的项互不覆盖
@@ -272,15 +292,18 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     // null 表示清空这个设置
     for (const k of Object.keys(next) as Array<keyof Settings>) if (next[k] === null) delete next[k];
     next.notifyHour = Math.min(23, Math.max(0, Math.round(next.notifyHour)));
-    if (
-      (next.avatar && !(/^https?:\/\//.test(next.avatar) || /^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,/.test(next.avatar))) ||
-      (next.avatar?.length ?? 0) > 300_000
-    )
-      return bad(t('server.invalidAvatar'));
     if (next.maxSessions !== undefined) next.maxSessions = Math.min(50, Math.max(1, Math.round(next.maxSessions)));
-    const rev = await putKv(env, 'settings', next);
+    // 与 MCP update_settings 同一套校验：只校验改动过的字段，再剔除早已失效的引用
+    const refs = { subscriptions: await subsOf(env), methods: await methodsOf(env), fx: await getFx(env) };
+    try {
+      checkSettings(refs, { ...DEFAULT_SETTINGS, ...cur }, next);
+    } catch (e) {
+      return bad(e instanceof Error ? e.message : t('server.invalidAvatar'));
+    }
+    const pruned = pruneSettingsRefs(next, refs.subscriptions, refs.methods);
+    const rev = await putKv(env, 'settings', pruned);
     if (next.maxSessions !== cur.maxSessions) await pruneSessions(req, env, next.maxSessions ?? DEFAULT_MAX_SESSIONS);
-    return json(next, 200, rev);
+    return json(pruned, 200, rev);
   }
   // 分类表：整表保存；renames（旧名 → 新名）把相关订阅一起改掉，改名、删除时移走订阅都靠它
   if (path === '/api/categories' && method === 'PUT') {

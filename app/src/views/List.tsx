@@ -37,8 +37,9 @@ import { usePref } from '../store.ts';
 import { scopeReport } from '../../../shared/scope-report.ts';
 import { ScopeReport } from '../components/ScopeReport.tsx';
 import { useTextSearch } from '../use-search.ts';
+import { inListScope, listHaystack, listMethod, listStatus, listWords, type ListFacet, type ListStatus } from '../../../shared/list-scope.ts';
 
-type Filter = 'live' | 'upcoming' | 'trial' | 'paused' | 'ended' | 'terminated' | 'lifetime' | 'all';
+type Filter = ListStatus;
 type Sort = 'next' | 'cost' | 'name' | 'category' | 'method' | 'amount' | 'start';
 type Dir = 'asc' | 'desc';
 /** 各排序的默认方向：最近扣款在前、最贵在前、名称 A→Z、分类按设置里的顺序、最新开始在前 */
@@ -58,9 +59,6 @@ const FILTERS = (): Array<[Filter, string]> => [
   ['ended', t('list.status.ended')],
   ['terminated', t('list.status.terminated')],
 ];
-
-/** 「订阅中」只算正在计费的（含到期不续）；试用、暂停各自单独一类，和概览、公开页的计数一致 */
-const statusOf = (st: string): Filter => (st === 'active' || st === 'ending' ? 'live' : (st as Filter));
 
 export function List({
   state,
@@ -127,22 +125,16 @@ export function List({
   // 多维筛选：状态、分类、支付方式；每个选项的数字按「其他维度已选条件」计算
   // 代付是替别人付的，不进「全部订阅」，在「代付」页单独管
   const mine = state.subscriptions.filter((s) => !s.proxy);
-  const payOf = (s: Subscription) => currentPhase(s, today).methodId ?? 'none';
+  const payOf = (s: Subscription) => listMethod(s, today);
   // 搜索也是一个筛选条件：名称、分类、标签、备注、地区、支付方式、网址都能搜，各维度的计数随之变化
-  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const words = listWords(q);
   const methodName = new Map(state.methods.map((m) => [m.id, m.name]));
-  const haystack = (s: Subscription) =>
-    [s.name, s.category, ...s.tags, s.notes, s.region, s.url, methodName.get(payOf(s))].filter(Boolean).join(' ').toLowerCase();
-  const matches = useTextSearch(mine.map(haystack));
-  const hit = (s: Subscription, skip?: 'status' | 'cat' | 'pay') => {
-    if (words.length && !words.every((w) => matches(w, haystack(s)))) return false;
-    if (skip !== 'status' && filter !== 'all' && statusOf(effectiveStatus(s, today)) !== filter) return false;
-    if (skip !== 'cat' && cat !== 'all' && s.category !== cat) return false;
-    if (skip !== 'pay' && pay !== 'all' && payOf(s) !== pay) return false;
-    return true;
-  };
+  const matches = useTextSearch(mine.map((s) => listHaystack(state, s, today)));
+  // 与 MCP scope_report 共用 shared/list-scope.ts 的判定；网页额外支持拼音
+  const scope = { status: filter, category: cat === 'all' ? undefined : cat, method: pay === 'all' ? undefined : pay, words };
+  const hit = (s: Subscription, skip?: ListFacet) => inListScope(state, s, today, scope, skip, matches);
   const match = (s: Subscription) => hit(s);
-  const facet = <K extends string>(skip: 'status' | 'cat' | 'pay', key: (s: Subscription) => K) => {
+  const facet = <K extends string>(skip: ListFacet, key: (s: Subscription) => K) => {
     const n = new Map<string, number>();
     let all = 0;
     for (const s of mine) {
@@ -153,7 +145,7 @@ export function List({
     n.set('all', all);
     return n;
   };
-  const statusN = facet('status', (s) => statusOf(effectiveStatus(s, today)));
+  const statusN = facet('status', (s) => listStatus(s, today));
   const catN = facet('cat', (s) => s.category);
   const payN = facet('pay', payOf);
   // 按分类表的顺序（设置里可拖动调整）

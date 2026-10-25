@@ -1,6 +1,7 @@
 import { validatePeopleAvatars } from '../shared/avatar.ts';
 import { FALLBACK_FX, migrateRenewalRules } from '../shared/billing.ts';
 import { DEFAULT_SETTINGS, type AppState, type FxTable, type PaymentMethod, type Person, type Settings, type Subscription } from '../shared/types.ts';
+import { pruneSettingsRefs } from '../shared/ledger-edit.ts';
 import { linkPeople } from '../shared/people.ts';
 import { migrateReceivables } from '../shared/receivables-legacy.ts';
 import type { Prefs } from '../shared/prefs.ts';
@@ -128,6 +129,8 @@ export async function loadState(env: Env, migratePeople = true): Promise<AppStat
     fx: kv.fx ?? FALLBACK_FX,
     prefs: (kv.prefs as Prefs | undefined) ?? {},
   };
+  // 旧版删除留下的悬空引用（公开页隐藏、默认支付方式）只在内存里剔除，不改库
+  state.settings = pruneSettingsRefs(state.settings, state.subscriptions, state.methods);
   if ((await ensureReceivables(env, state, migratePeople)) || (migratePeople && (await ensurePeople(env, state)))) return loadState(env);
   state.fxHistory = slimFxHistory((rows[3] as D1Result<{ date: string; rates: string }>).results, keepSet(state));
   return state;

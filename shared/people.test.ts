@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FALLBACK_FX, memberDues } from './billing.ts';
 import { maskForPublic } from './mask.ts';
-import { linkPeople, mergePeople, normContact, peopleLedger, peopleListRows, personKey, refsFor, syncPerson } from './people.ts';
+import { linkPeople, mergePeople, normContact, peopleLedger, peopleListRows, personKey, personLink, refsFor, syncPerson } from './people.ts';
 import { proxyRows } from './proxy.ts';
 import { DEFAULT_SETTINGS, type AppState, type Person, type Subscription } from './types.ts';
 
@@ -273,4 +273,27 @@ test('人员列表金额同值时最近收款优先，表头切换方向，缺�
     ['C', 'B'],
   );
   assert.deepEqual(peopleListRows([], { filter: 'owe' }), []);
+});
+
+test('personLink：已关联沿用并报告改动，同名唯一复用，联系方式不同或无称呼不复用，新建 id 稳定', () => {
+  const people: Person[] = [
+    { id: 'a', name: 'Fictional Ann', color: 'blue' },
+    { id: 'b', name: 'Fictional Bo', contactVia: 'Telegram', contact: '@bo', color: 'green' },
+    { id: 'c1', name: 'Twin', color: 'red' },
+    { id: 'c2', name: 'Twin', contactVia: 'Email', contact: 'twin@example.test', color: 'red' },
+  ];
+  assert.deepEqual(personLink(people, { personId: 'a', name: 'Fictional Ann' }), { id: 'a', after: undefined });
+  assert.equal(personLink(people, { personId: 'a', name: 'Ann B.' }).after?.name, 'Ann B.');
+  assert.deepEqual(personLink(people, { name: ' fictional  ann ' }), { id: 'a' });
+  assert.deepEqual(personLink(people, { name: 'Fictional Bo', contactVia: 'Telegram', contact: 'bo' }), { id: 'b' });
+  assert.deepEqual(personLink(people, { name: 'Twin' }), { id: 'c1' });
+  const other = personLink(people, { name: 'Fictional Bo', contactVia: 'Telegram', contact: '@someone' });
+  assert.equal(other.created?.name, 'Fictional Bo');
+  assert.equal(other.created?.contact, '@someone');
+  assert.equal(other.id, other.created?.id);
+  const fresh = personLink(people, { name: 'Fictional New' });
+  assert.deepEqual(personLink(people, { name: 'Fictional New' }), fresh);
+  assert.ok(!people.some((p) => p.id === fresh.id));
+  assert.deepEqual(personLink(people, { name: '  ' }), { id: undefined });
+  assert.equal(personLink(people, { personId: 'kept', name: 'Fictional New' }).created?.id, 'kept');
 });

@@ -71,7 +71,7 @@
   "editor": {
     "titleNew": "Adicionar forma de pagamento",
     "titleEdit": "Editar forma de pagamento",
-    "confirmDelete": "Apagar “{name}”? As assinaturas vinculadas ficarão sem forma de pagamento.",
+    "confirmDelete": "Apagar “{name}”?",
     "deleted": "Apagada",
     "delete": "Apagar",
     "cancel": "Cancelar",
@@ -117,5 +117,13 @@
     "linkBtn": "URL",
     "clear": "Limpar",
     "wide": "Logotipo horizontal"
+  },
+  "delete": {
+    "title": "Apagar “{name}”",
+    "usedBy": { "one": "{count} assinatura usa esta forma de pagamento.", "other": "{count} assinaturas usam esta forma de pagamento." },
+    "isDefault": "É a forma de pagamento padrão para novas assinaturas.",
+    "moveTo": "Mover referências para",
+    "clear": "Limpar (sem forma de pagamento)",
+    "clearHint": "Os planos que a usam ficarão sem forma de pagamento; cobranças registradas nela seguem o plano. Pagamentos divididos que a incluem deixam de ser divididos."
   }
 }

@@ -49,5 +49,6 @@
   },
   "invalidAvatar": "Gambar tidak valid",
   "avatarInvalid": "Gunakan PNG/WebP persegi tanpa metadata, maksimal 128×128 dan 64 KB. Unggahan: PNG/JPEG/WebP hingga 8 MB dan 40 megapiksel.",
-  "avatarRosterFull": "Daftar orang penuh. Hapus avatar sebelum menambahkan yang baru."
+  "avatarRosterFull": "Daftar orang penuh. Hapus avatar sebelum menambahkan yang baru.",
+  "methodInUse": "Metode pembayaran ini masih dipakai. Pindahkan referensinya ke metode lain atau kosongkan terlebih dahulu."
 }

@@ -71,7 +71,7 @@
   "editor": {
     "titleNew": "Añadir método de pago",
     "titleEdit": "Editar método de pago",
-    "confirmDelete": "¿Eliminar «{name}»? Las suscripciones vinculadas se quedarán sin método de pago.",
+    "confirmDelete": "¿Eliminar «{name}»?",
     "deleted": "Eliminado",
     "delete": "Eliminar",
     "cancel": "Cancelar",
@@ -117,5 +117,13 @@
     "linkBtn": "URL",
     "clear": "Borrar",
     "wide": "Logotipo horizontal"
+  },
+  "delete": {
+    "title": "Eliminar «{name}»",
+    "usedBy": { "one": "{count} suscripción usa este método de pago.", "other": "{count} suscripciones usan este método de pago." },
+    "isDefault": "Es el método de pago predeterminado para nuevas suscripciones.",
+    "moveTo": "Mover referencias a",
+    "clear": "Vaciar (sin método de pago)",
+    "clearHint": "Los planes que lo usan quedarán sin método de pago; los cargos registrados en él seguirán a su plan. Los pagos divididos que lo incluyen dejarán de estar divididos."
   }
 }

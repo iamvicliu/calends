@@ -9,7 +9,10 @@
     "anyRegion": "すべての地域",
     "total": "合計",
     "createCategory": "カテゴリを新規作成します：{name}",
-    "createdCategory": "カテゴリを作成しました：{name}"
+    "createdCategory": "カテゴリを作成しました：{name}",
+    "createPerson": "相手を新規登録します：{name}",
+    "createdPerson": "相手を登録しました：{name}",
+    "transfer": "譲渡"
   },
   "error": {
     "shareFull": "「{name}」は満席です（{seats} 席）",
@@ -70,7 +73,11 @@
     "stopDateRequired": "このサブスクは今日より前に開始または請求済みのため、停止日を今日にできません。at に実際の日付を指定するか、不明な場合は at=null を指定してください。",
     "unknownStopDetails": "日付不明の停止には返金や理由を付けられません。記録するには at に日付を指定してください。",
     "transferProxy": "代理払いのサブスクには譲渡を記録できません",
-    "transferNotFound": "{date} の譲渡が見つかりません"
+    "transferNotFound": "{date} の譲渡が見つかりません",
+    "notStopped": "このサブスクリプションは停止されていないため、修正できる停止情報がありません。停止するには edit なしで set_status cancel / terminate を使ってください。",
+    "editStopDate": "停止を修正するときは at に実際の日付を指定してください（at を省略すると記録済みの日付を維持します）。日付不明の停止には実際の日付が必要です。",
+    "invalidIcon": "アイコン「{value}」は無効です。http(s) の画像 URL、サイト内パス（例：/ai/claude.svg）、または絵文字・短い記号 1 つを指定してください。",
+    "badMonth": "月は YYYY-MM 形式で指定してください：{month}"
   },
   "tool": {
     "get_overview": "台帳の概要",

@@ -54,5 +54,6 @@
   },
   "invalidAvatar": "Imagem inválida",
   "avatarInvalid": "Use PNG/WebP quadrado sem metadados, até 128×128 e 64 KB. Envios: PNG/JPEG/WebP até 8 MB e 40 megapixels.",
-  "avatarRosterFull": "A lista de pessoas está cheia. Remova um avatar antes de adicionar outro."
+  "avatarRosterFull": "A lista de pessoas está cheia. Remova um avatar antes de adicionar outro.",
+  "methodInUse": "Esta forma de pagamento ainda está em uso. Mova as referências para outra forma ou limpe-as primeiro."
 }

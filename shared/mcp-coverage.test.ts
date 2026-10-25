@@ -1723,3 +1723,155 @@ test('PUT /api/subscriptions 校验转让并原样保存；备份导出带上转
   const backup = await (await f.request('backup')).json();
   assert.deepEqual(backup.subscriptions.find((x: Subscription) => x.id === 's').transfers, transfers);
 });
+
+test('MCP 改开始日与网页 movePhaseStart 一致：默认保留扣款锚点，shift_billing 才平移', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), start: '2026-01-15', share: undefined, proxy: undefined };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const days = (r: { structuredContent: { next_charges: Array<{ date: string }> } }) => r.structuredContent.next_charges.map((c) => c.date.slice(8));
+  const before = await f.snapshot();
+  for (const [tool, args] of [
+    ['update_subscription', { subscription: 's', set: { start: '2026-01-10' } }],
+    ['change_plan', { subscription: 's', action: 'edit', at: '2026-01-15', set: { start: '2026-01-10' } }],
+  ] as const) {
+    const kept = await f.call(tool, { ...args, dry_run: true });
+    assert.equal(kept.isError, undefined, JSON.stringify(kept));
+    assert.deepEqual(new Set(days(kept)), new Set(['15']), tool);
+    assert.equal(kept.structuredContent.after.start, '2026-01-10');
+    const shifted = await f.call(tool, { ...args, shift_billing: true, dry_run: true });
+    assert.equal(shifted.isError, undefined, JSON.stringify(shifted));
+    assert.deepEqual(new Set(days(shifted)), new Set(['10']), tool);
+  }
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('update_subscription', { subscription: 's', set: { notes: 'x' }, shift_billing: true, dry_run: true })).isError, true);
+  const saved = await f.call('update_subscription', { subscription: 's', set: { start: '2026-01-10' } });
+  assert.equal(saved.isError, undefined, JSON.stringify(saved));
+  const stored = (await f.snapshot()).subscriptions.find((x) => x.id === 's')!;
+  assert.equal(stored.start, '2026-01-10');
+  assert.equal(stored.billingStart, '2026-01-15');
+  assert.equal((await f.call('get_subscription', { subscription: 's' })).structuredContent.next_charge.slice(8), '15');
+});
+
+test('set_status edit=true 修改已有停用：日期、不续费/立即停用、原因、退款，被服务商停用不能改成取消', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const today = todayIn('UTC');
+  const past = addDays(today, -40);
+  const stopAt = addDays(past, 20);
+  await upsert(f.env, 'subscriptions', 's', { ...sub(), start: past, share: undefined, proxy: undefined, payments: [{ date: past, amount: 10 }] });
+  const stored = async () => (await f.snapshot()).subscriptions.find((x) => x.id === 's')!;
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: stopAt, edit: true })).isError, true, 'not stopped yet');
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: stopAt, refund: { amount: 2 } })).isError, undefined);
+  // 未带 edit 仍然拒绝重复停用
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: addDays(stopAt, 1) })).isError, true);
+  const before = await f.snapshot();
+  const moved = addDays(stopAt, 2);
+  const preview = await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: moved, edit: true, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.after.stop.date, moved);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: moved, edit: true }, f.read)).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  // 只改日期：退款保留
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, at: moved, edit: true })).isError, undefined);
+  let s = await stored();
+  assert.equal(s.stop?.date, moved);
+  assert.deepEqual(
+    s.payments?.filter((p) => p.kind === 'refund').map((p) => p.amount),
+    [-2],
+  );
+  // 改退款金额，再清除
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true, refund: { amount: 3 } })).isError, undefined);
+  s = await stored();
+  assert.equal(s.stop?.date, moved);
+  assert.deepEqual(
+    s.payments?.filter((p) => p.kind === 'refund').map((p) => p.amount),
+    [-3],
+  );
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true, refund: null })).isError, undefined);
+  assert.equal((await stored()).payments?.some((p) => p.kind === 'refund'), false);
+  // 立即停用 → 到期不续
+  const r = await f.call('set_status', { subscription: 's', action: 'cancel', edit: true });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  s = await stored();
+  assert.equal(s.stop, undefined);
+  assert.equal(s.status, 'cancelled');
+  assert.equal(s.end, moved);
+  // 改为被服务商停用并写原因，之后可改原因，但不能改成取消
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'terminate', at: moved, reason: 'Fictional policy', edit: true })).isError, undefined);
+  assert.equal((await stored()).stop?.kind, 'terminate');
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'terminate', reason: 'Revised policy', edit: true })).isError, undefined);
+  assert.equal((await stored()).stop?.reason, 'Revised policy');
+  const blocked = await f.snapshot();
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true })).isError, true);
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', edit: true })).isError, true);
+  assert.equal((await f.call('set_status', { subscription: 's', action: 'pause', edit: true })).isError, true);
+  assert.deepEqual(await f.snapshot(), blocked);
+  // 日期不详的停用：必须补上日期
+  await upsert(f.env, 'subscriptions', 'u', { ...sub(), id: 'u', start: past, share: undefined, proxy: undefined, payments: [{ date: past, amount: 10 }] });
+  assert.equal((await f.call('set_status', { subscription: 'u', action: 'cancel', at: null })).isError, undefined);
+  assert.equal((await f.call('set_status', { subscription: 'u', action: 'cancel', immediate: true, edit: true })).isError, true);
+  assert.equal((await f.call('set_status', { subscription: 'u', action: 'cancel', at: null, edit: true })).isError, true);
+  const dated = await f.call('set_status', { subscription: 'u', action: 'cancel', immediate: true, at: stopAt, edit: true });
+  assert.equal(dated.isError, undefined, JSON.stringify(dated));
+  assert.equal((await f.snapshot()).subscriptions.find((x) => x.id === 'u')?.stop?.date, stopAt);
+});
+
+test('create_subscription 与 update_subscription 图标同一套校验：emoji、网址、站内路径都保存，非法值报错不静默丢弃', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const base = { price: 10, currency: 'USD', cycle: { unit: 'month', every: 1 }, start: todayIn('UTC'), category: 'Test', method: null };
+  for (const [i, icon] of ['🎬', '👨‍👩‍👧', 'http://example.test/a.png', 'https://example.test/a.png', '/ai/claude.svg'].entries()) {
+    const r = await f.call('create_subscription', { ...base, name: `Fictional icon ${i}`, icon });
+    assert.equal(r.isError, undefined, JSON.stringify(r));
+    assert.equal((await f.snapshot()).subscriptions.find((s) => s.name === `Fictional icon ${i}`)?.icon, icon);
+  }
+  const before = await f.snapshot();
+  for (const icon of ['javascript:alert(1)', 'ftp://example.test/a.png', 'not an icon at all', '//evil.test/a.png', 'data:image/svg+xml;base64,PHN2Zz4=']) {
+    const created = await f.call('create_subscription', { ...base, name: 'Fictional bad icon', icon });
+    assert.equal(created.isError, true, icon);
+    const updated = await f.call('update_subscription', { subscription: 's', set: { icon } });
+    assert.equal(updated.isError, true, icon);
+  }
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('update_subscription', { subscription: 's', set: { icon: '🌱' } })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 's')?.icon, '🌱');
+  assert.equal((await f.call('update_subscription', { subscription: 's', set: { icon: null } })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 's')?.icon, undefined);
+});
+
+test('save_share_member / set_proxy 给新名字建档或复用同名人：预览说明将新建谁，确认后同一个 id，person=null 不关联', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const before = await f.snapshot();
+  const preview = await f.call('save_share_member', { subscription: 's', name: 'Fictional newcomer', fee: 3, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.created_person.name, 'Fictional newcomer');
+  assert.match(preview.structuredContent.person_notice, /Fictional newcomer/);
+  assert.deepEqual(await f.snapshot(), before);
+  const saved = await f.call('save_share_member', { subscription: 's', name: 'Fictional newcomer', fee: 3, id: preview.structuredContent.member.id });
+  assert.equal(saved.isError, undefined, JSON.stringify(saved));
+  let st = await f.snapshot();
+  const person = st.people?.find((p) => p.name === 'Fictional newcomer');
+  assert.equal(person?.id, preview.structuredContent.created_person.id);
+  assert.equal(st.subscriptions[0].share?.members.find((m) => m.name === 'Fictional newcomer')?.personId, person?.id);
+  // 同名（不分大小写）的人只有一个：直接关联，不重复建档
+  const same = await f.call('save_share_member', { subscription: 's', name: 'target PERSON', fee: 3 });
+  assert.equal(same.isError, undefined, JSON.stringify(same));
+  assert.equal(same.structuredContent.created_person, undefined);
+  st = await f.snapshot();
+  assert.equal(st.subscriptions[0].share?.members.find((m) => m.name === 'target PERSON')?.personId, 'target');
+  assert.equal(st.people?.length, 3);
+  // 代付：新名字建档，同名关联，person=null 保持不关联
+  await upsert(f.env, 'subscriptions', 'p', { ...sub(), id: 'p', share: undefined, proxy: undefined });
+  const proxyPreview = await f.call('set_proxy', { subscription: 'p', for_name: 'Fictional recipient', dry_run: true });
+  assert.equal(proxyPreview.structuredContent.created_person.name, 'Fictional recipient');
+  assert.equal(proxyPreview.structuredContent.after.personId, proxyPreview.structuredContent.created_person.id);
+  assert.equal((await f.call('set_proxy', { subscription: 'p', for_name: 'Target person' })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 'p')?.proxy?.personId, 'target');
+  assert.equal((await f.call('set_proxy', { subscription: 'p', for_name: 'Unlinked recipient', person: null })).isError, undefined);
+  st = await f.snapshot();
+  assert.equal(st.subscriptions.find((s) => s.id === 'p')?.proxy?.personId, undefined);
+  assert.equal(st.people?.length, 3);
+});
