@@ -313,6 +313,9 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
   };
 }
 
+/** 发送占位的租约：超过这么久仍是 sending，视为上次发送中途崩溃 */
+export const SEND_LEASE_MS = 10 * 60_000;
+
 /**
  * 把一份提醒发到所有开着的渠道（或只发 only 指定的那一个）。
  * 任一渠道成功即完成，不重复补发；全部失败持久化原提醒，在之后的整点最多补发 3 次。
@@ -328,13 +331,14 @@ export async function sendDigest(
   const now = opts.now ?? Date.now();
   if (!opts.force) {
     // 原子占位：新提醒或到期的失败重试只有一个任务能取得发送权。
+    // 占位带租约（retry_at = 现在 + SEND_LEASE_MS）：发送中途崩溃留下的 sending 过了租约可再被取走，不会永远卡住。
     const claim = await env.DB.prepare(
-      `INSERT INTO notify_log (dedupe_key, kind, subject, status, digest, attempts)
-       VALUES (?1, ?2, ?3, 'sending', ?4, 1)
-       ON CONFLICT(dedupe_key) DO UPDATE SET status = 'sending', attempts = notify_log.attempts + 1, retry_at = NULL
-       WHERE notify_log.status = 'failed' AND notify_log.attempts < 4 AND notify_log.retry_at <= ?5`,
+      `INSERT INTO notify_log (dedupe_key, kind, subject, status, digest, attempts, retry_at)
+       VALUES (?1, ?2, ?3, 'sending', ?4, 1, ?6)
+       ON CONFLICT(dedupe_key) DO UPDATE SET status = 'sending', attempts = notify_log.attempts + 1, retry_at = ?6
+       WHERE notify_log.status IN ('failed', 'sending') AND notify_log.attempts < 4 AND notify_log.retry_at <= ?5`,
     )
-      .bind(d.key, d.kind, d.subject, JSON.stringify(d), now)
+      .bind(d.key, d.kind, d.subject, JSON.stringify(d), now, now + SEND_LEASE_MS)
       .run();
     if (!claim.meta.changes) return { sent: false, reason: t('notify.send.alreadySent') };
   }
@@ -384,7 +388,8 @@ function localHour(tz: string, now = Date.now()): number {
 export async function runScheduled(env: Env, state: AppState, now = Date.now()): Promise<string[]> {
   const log: string[] = [];
   // 重试使用原提醒快照，跨日后也保留原日期与去重键。
-  const pending = await env.DB.prepare("SELECT digest FROM notify_log WHERE status = 'failed' AND attempts < 4 AND retry_at <= ?1")
+  // 含租约已过的 sending（上次发送中途崩溃）；旧版留下的 sending 没有 retry_at，不会被取到
+  const pending = await env.DB.prepare("SELECT digest FROM notify_log WHERE status IN ('failed', 'sending') AND attempts < 4 AND retry_at <= ?1")
     .bind(now)
     .all<{ digest: string }>();
   for (const row of pending.results) {
