@@ -360,7 +360,12 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             index={transfer.index}
             currency={cur.currency}
             today={today}
-            onSave={(next: Transfer[]) => void run(() => saveSub({ ...sub, transfers: next.length ? next : undefined }), t('detail.transfer.saved'))}
+            onSave={(next: Transfer[]) =>
+              run(async () => {
+                await saveSub({ ...sub, transfers: next.length ? next : undefined });
+                setTransfer(null);
+              }, t('detail.transfer.saved'))
+            }
             onClose={() => setTransfer(null)}
           />,
           document.body,

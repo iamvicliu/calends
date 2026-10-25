@@ -904,7 +904,10 @@ function Form({
           index={transfer.index}
           currency={f.currency}
           today={today}
-          onSave={(next) => up({ transfers: next.length ? next : undefined })}
+          onSave={(next) => {
+            up({ transfers: next.length ? next : undefined });
+            setTransfer(null);
+          }}
           onClose={() => setTransfer(null)}
         />
       )}

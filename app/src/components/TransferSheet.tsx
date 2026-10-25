@@ -3,11 +3,12 @@ import { t } from '../../../shared/i18n.ts';
 import type { Transfer } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect } from './Picker.tsx';
-import { Cell, Group, MoneyInput, Seg, Sheet } from './ui.tsx';
+import { Cell, Group, MoneyInput, Seg, Sheet, useSubmit } from './ui.tsx';
 
 /**
  * 记一笔 / 修改一笔转让收付：二手转入付给原主的钱，或转出时收到的钱。金额是实际现金，不推算剩余价值。
- * 只把改好的整组记录交给调用方：编辑器写进表单（完成时一起保存），详情页直接保存
+ * 只把改好的整组记录交给调用方：编辑器写进表单（完成时一起保存），详情页直接保存。
+ * 由调用方在成功后关闭：保存失败时表单保留，可以直接重试
  */
 export function TransferSheet({
   list,
@@ -22,7 +23,7 @@ export function TransferSheet({
   index?: number;
   currency: string;
   today: string;
-  onSave: (next: Transfer[]) => void;
+  onSave: (next: Transfer[]) => unknown;
   onClose: () => void;
 }) {
   const edit = index != null ? list[index] : undefined;
@@ -34,11 +35,11 @@ export function TransferSheet({
   const n = Number(amount);
   const valid = amount.trim() !== '' && Number.isFinite(n) && n > 0;
 
+  const [busy, submit] = useSubmit();
   const save = () => {
     if (!valid) return;
     const item: Transfer = { kind, date, amount: n, currency: ccy, ...(note.trim() ? { note: note.trim() } : {}) };
-    onSave(index != null ? list.map((x, i) => (i === index ? item : x)) : [...list, item]);
-    onClose();
+    return submit(() => onSave(index != null ? list.map((x, i) => (i === index ? item : x)) : [...list, item]));
   };
 
   return (
@@ -52,10 +53,8 @@ export function TransferSheet({
             <button
               className="btn danger"
               style={{ marginRight: 'auto' }}
-              onClick={() => {
-                onSave(list.filter((_, i) => i !== index));
-                onClose();
-              }}
+              disabled={busy}
+              onClick={() => submit(() => onSave(list.filter((_, i) => i !== index)))}
             >
               {t('common.delete')}
             </button>
@@ -63,7 +62,7 @@ export function TransferSheet({
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={!valid} onClick={save}>
+          <button className="btn primary" disabled={busy || !valid} onClick={save}>
             {t('common.save')}
           </button>
         </>
