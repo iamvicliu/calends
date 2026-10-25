@@ -11,7 +11,7 @@ import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { MetricCards, Metric, IconButton, Amount, CardTitle, CatIcon, TipTable, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
-import { allCharges, catColor, sortValue, sumBase, sumBaseOrNaN, firstStart } from '../derive.ts';
+import { allCharges, catColor, sortValue, sumBaseOrNaN, firstStart } from '../derive.ts';
 import { go } from '../router.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 
