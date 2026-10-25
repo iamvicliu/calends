@@ -9,7 +9,9 @@
     "anyRegion": "모든 지역",
     "total": "합계",
     "createCategory": "새 카테고리 생성 예정: {name}",
-    "createdCategory": "카테고리 생성 완료: {name}"
+    "createdCategory": "카테고리 생성 완료: {name}",
+    "createPerson": "사람을 새로 등록합니다: {name}",
+    "createdPerson": "사람을 등록했습니다: {name}"
   },
   "error": {
     "shareFull": "「{name}」은(는) 자리가 다 찼어요({seats}석)",

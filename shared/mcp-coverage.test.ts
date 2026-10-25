@@ -1840,3 +1840,38 @@ test('create_subscription 与 update_subscription 图标同一套校验：emoji�
   assert.equal((await f.call('update_subscription', { subscription: 's', set: { icon: null } })).isError, undefined);
   assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 's')?.icon, undefined);
 });
+
+test('save_share_member / set_proxy 给新名字建档或复用同名人：预览说明将新建谁，确认后同一个 id，person=null 不关联', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const before = await f.snapshot();
+  const preview = await f.call('save_share_member', { subscription: 's', name: 'Fictional newcomer', fee: 3, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.created_person.name, 'Fictional newcomer');
+  assert.match(preview.structuredContent.person_notice, /Fictional newcomer/);
+  assert.deepEqual(await f.snapshot(), before);
+  const saved = await f.call('save_share_member', { subscription: 's', name: 'Fictional newcomer', fee: 3, id: preview.structuredContent.member.id });
+  assert.equal(saved.isError, undefined, JSON.stringify(saved));
+  let st = await f.snapshot();
+  const person = st.people?.find((p) => p.name === 'Fictional newcomer');
+  assert.equal(person?.id, preview.structuredContent.created_person.id);
+  assert.equal(st.subscriptions[0].share?.members.find((m) => m.name === 'Fictional newcomer')?.personId, person?.id);
+  // 同名（不分大小写）的人只有一个：直接关联，不重复建档
+  const same = await f.call('save_share_member', { subscription: 's', name: 'target PERSON', fee: 3 });
+  assert.equal(same.isError, undefined, JSON.stringify(same));
+  assert.equal(same.structuredContent.created_person, undefined);
+  st = await f.snapshot();
+  assert.equal(st.subscriptions[0].share?.members.find((m) => m.name === 'target PERSON')?.personId, 'target');
+  assert.equal(st.people?.length, 3);
+  // 代付：新名字建档，同名关联，person=null 保持不关联
+  await upsert(f.env, 'subscriptions', 'p', { ...sub(), id: 'p', share: undefined, proxy: undefined });
+  const proxyPreview = await f.call('set_proxy', { subscription: 'p', for_name: 'Fictional recipient', dry_run: true });
+  assert.equal(proxyPreview.structuredContent.created_person.name, 'Fictional recipient');
+  assert.equal(proxyPreview.structuredContent.after.personId, proxyPreview.structuredContent.created_person.id);
+  assert.equal((await f.call('set_proxy', { subscription: 'p', for_name: 'Target person' })).isError, undefined);
+  assert.equal((await f.snapshot()).subscriptions.find((s) => s.id === 'p')?.proxy?.personId, 'target');
+  assert.equal((await f.call('set_proxy', { subscription: 'p', for_name: 'Unlinked recipient', person: null })).isError, undefined);
+  st = await f.snapshot();
+  assert.equal(st.subscriptions.find((s) => s.id === 'p')?.proxy?.personId, undefined);
+  assert.equal(st.people?.length, 3);
+});

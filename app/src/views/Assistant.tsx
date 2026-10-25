@@ -67,6 +67,7 @@ interface Preview {
   after?: unknown;
   references?: unknown;
   created_category?: { name: string };
+  created_person?: { name: string };
   subscription?: { id: string; name: string; category?: string; price?: number; currency?: string; cycle?: string; next_charge?: string | null };
   next_charges?: Array<{ date: string; amount: number; currency: string }>;
 }
@@ -995,6 +996,7 @@ function Proposal(props: {
         ))}
       </dl>
       {part.preview.created_category && <div className="as-card-next">{t('mcp.label.createCategory', { name: part.preview.created_category.name })}</div>}
+      {part.preview.created_person && <div className="as-card-next">{t('mcp.label.createPerson', { name: part.preview.created_person.name })}</div>}
       {!create && part.preview.before !== undefined && (
         <details className="as-tool-detail">
           <summary>{t('assistant.card.changes')}</summary>

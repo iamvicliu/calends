@@ -9,7 +9,9 @@
     "anyRegion": "Qualquer região",
     "total": "Total",
     "createCategory": "Será criada a categoria: {name}",
-    "createdCategory": "Categoria criada: {name}"
+    "createdCategory": "Categoria criada: {name}",
+    "createPerson": "Será adicionado às pessoas: {name}",
+    "createdPerson": "Adicionado às pessoas: {name}"
   },
   "error": {
     "shareFull": "“{name}” está cheio ({seats} vagas)",

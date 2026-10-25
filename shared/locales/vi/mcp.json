@@ -9,7 +9,9 @@
     "anyRegion": "Mọi khu vực",
     "total": "Tổng",
     "createCategory": "Sẽ tạo danh mục: {name}",
-    "createdCategory": "Đã tạo danh mục: {name}"
+    "createdCategory": "Đã tạo danh mục: {name}",
+    "createPerson": "Sẽ thêm vào danh sách người: {name}",
+    "createdPerson": "Đã thêm vào danh sách người: {name}"
   },
   "error": {
     "shareFull": "“{name}” đã đủ chỗ ({seats} chỗ)",

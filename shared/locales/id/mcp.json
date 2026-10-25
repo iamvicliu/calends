@@ -9,7 +9,9 @@
     "anyRegion": "Semua wilayah",
     "total": "Total",
     "createCategory": "Kategori akan dibuat: {name}",
-    "createdCategory": "Kategori dibuat: {name}"
+    "createdCategory": "Kategori dibuat: {name}",
+    "createPerson": "Akan ditambahkan ke daftar orang: {name}",
+    "createdPerson": "Ditambahkan ke daftar orang: {name}"
   },
   "error": {
     "shareFull": "“{name}” sudah penuh ({seats} kursi)",

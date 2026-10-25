@@ -9,7 +9,9 @@
     "anyRegion": "不区分地区",
     "total": "合计",
     "createCategory": "将新建分类：{name}",
-    "createdCategory": "已新建分类：{name}"
+    "createdCategory": "已新建分类：{name}",
+    "createPerson": "将新建人员：{name}",
+    "createdPerson": "已新建人员：{name}"
   },
   "error": {
     "shareFull": "「{name}」已经坐满了（{seats} 个位置）",

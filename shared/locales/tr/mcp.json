@@ -9,7 +9,9 @@
     "anyRegion": "Tüm bölgeler",
     "total": "Toplam",
     "createCategory": "Kategori oluşturulacak: {name}",
-    "createdCategory": "Kategori oluşturuldu: {name}"
+    "createdCategory": "Kategori oluşturuldu: {name}",
+    "createPerson": "Kişilere eklenecek: {name}",
+    "createdPerson": "Kişilere eklendi: {name}"
   },
   "error": {
     "shareFull": "“{name}” dolu ({seats} koltuk)",

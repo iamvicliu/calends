@@ -3,12 +3,11 @@ import { copyParts } from '../components/copy.tsx';
 import { useRef, useState } from 'react';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
-import { uid } from '../../../shared/billing.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { SortControl } from '../components/SortControl.tsx';
 import { isMarked, nextSort, usePhone } from '../components/LtHead.tsx';
-import { colorFor, peopleLedger, peopleListRows, refsFor, type PeopleSort, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
+import { colorFor, peopleLedger, peopleListRows, personLink, refsFor, type PeopleSort, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
@@ -40,7 +39,7 @@ export function PersonPicker({ state, value, onPick }: { state: AppState; value?
 }
 
 /**
- * 保存成员 / 代付之前调用：还没建档的人先建档，返回 personId；
+ * 保存成员 / 代付之前调用：按 personLink 的规则关联已有的人（含同名复用），还没建档的先建档，返回 personId；
  * 已有的人改了称呼或联系方式时返回 after，等订阅保存后再 savePerson，把改动同步到其他地方。
  */
 export async function linkPerson(
@@ -50,18 +49,9 @@ export async function linkPerson(
   contactVia: string | undefined,
   contact: string | undefined,
 ): Promise<{ id?: string; after?: Person }> {
-  const n = name.trim();
-  if (!n) return { id: personId };
-  const c = contact?.trim() || undefined;
-  const v = c ? contactVia : undefined;
-  const cur = personId ? state.people?.find((p) => p.id === personId) : undefined;
-  if (!cur) {
-    const id = personId ?? uid();
-    await savePerson({ id, name: n, contactVia: v, contact: c, color: colorFor(id) });
-    return { id };
-  }
-  const changed = cur.name !== n || cur.contact !== c || (!!c && cur.contactVia !== v);
-  return { id: cur.id, after: changed ? { ...cur, name: n, contactVia: v, contact: c } : undefined };
+  const link = personLink(state.people ?? [], { personId, name, contactVia, contact });
+  if (link.created) await savePerson(link.created);
+  return { id: link.id, after: link.after };
 }
 
 /** 合租页顶部的分段：合租 / 人 */

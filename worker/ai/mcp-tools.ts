@@ -72,7 +72,7 @@ import {
   recordWaiver,
   type ReceivableTarget,
 } from '../../shared/receivable-edit.ts';
-import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
+import { normName, peopleLedger, personLink, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
 import { loadState, saveLedgerEdit, upsert } from '../store.ts';
@@ -527,6 +527,7 @@ export async function commit(
   dry: unknown,
   changed: string[],
   categoryCreation?: CategoryCreation,
+  personCreation?: Person,
 ) {
   after = reconcileRenewalRules(
     st.subscriptions.find((s) => s.id === after.id),
@@ -552,7 +553,7 @@ export async function commit(
     today,
   );
   if (errs) throw new Error(errs);
-  return persist(ctx, st, today, after, dry, changed, categoryCreation);
+  return persist(ctx, st, today, after, dry, changed, categoryCreation, undefined, personCreation);
 }
 
 /** 已校验的订阅：生成预览；dry_run 只叠进草稿层，否则保存 */
@@ -565,6 +566,7 @@ async function persist(
   changed: string[],
   categoryCreation?: CategoryCreation,
   extra: Record<string, unknown> = {},
+  personCreation?: Person,
 ) {
   const preview = {
     subscription: row(st, after, today),
@@ -578,18 +580,32 @@ async function persist(
           category_notice: t(dry ? 'mcp.label.createCategory' : 'mcp.label.createdCategory', { name: categoryCreation.category.name }),
         }
       : {}),
+    ...(personCreation
+      ? {
+          created_person: personSummary(personCreation),
+          person_notice: t(dry ? 'mcp.label.createPerson' : 'mcp.label.createdPerson', { name: personCreation.name }),
+        }
+      : {}),
     next_charges: chargesBetween(after, today, addMonths(today, 13), today)
       .slice(0, 3)
       .map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })),
     ...extra,
   };
+  const people = personCreation ? [...(st.people ?? []), personCreation] : undefined;
   if (dry) {
     if (categoryCreation) ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, categories: categoryCreation.categories } };
+    if (people) ctx.draftState = { ...ctx.draftState, people };
     ctx.overlay?.set(after.id, after);
     return { dry_run: true, ...preview };
   }
   const saved = { ...after, updatedAt: new Date().toISOString() };
-  if (categoryCreation) await saveLedgerEdit(ctx.env, { subscriptions: [saved], settings: { ...st.settings, categories: categoryCreation.categories } });
+  // 新建的分类、人与订阅同一个事务写入
+  if (categoryCreation || people)
+    await saveLedgerEdit(ctx.env, {
+      subscriptions: [saved],
+      ...(categoryCreation ? { settings: { ...st.settings, categories: categoryCreation.categories } } : {}),
+      ...(people ? { people } : {}),
+    });
   else await upsert(ctx.env, 'subscriptions', saved.id, saved);
   return { ok: true, ...preview };
 }
@@ -2170,7 +2186,11 @@ const CATALOGUE: Tool[] = [
     inputSchema: obj(
       {
         subscription: SUBREF,
-        person: { type: ['string', 'null'], description: 'Link an existing roster person by id/name; copies their name/contact.' },
+        person: {
+          type: ['string', 'null'],
+          description:
+            'Link an existing roster person by id/name; copies their name/contact. Omitted: an unlinked member is matched by name (+ contact) like the web form, else a roster person is created (preview created_person). null keeps the member unlinked.',
+        },
         member: { type: 'string', description: 'Existing member id or name to update; omit to add a new member.' },
         id: { type: 'string', description: 'Internal: id for a new member (used when confirming an earlier draft).' },
         name: { type: 'string' },
@@ -2331,11 +2351,14 @@ const CATALOGUE: Tool[] = [
         const until = a.paid_until == null ? undefined : date(a.paid_until, 'paid_until');
         m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, st.settings.collectCurrency ?? st.settings.baseCurrency), until) };
       }
+      // 与网页成员表单同一套建档规则：没关联到人的按称呼（+ 联系方式）认已有的人，认不到就新建；person=null 明确不关联
+      const link = !m.personId && a.person !== null ? personLink(st.people ?? [], { name: m.name, contactVia: m.contactVia, contact: m.contact }) : undefined;
+      if (link) m = { ...m, personId: link.id };
       const members = old ? s.share.members.map((x) => (x.id === old.id ? m : x)) : [...s.share.members, m];
       const after = { ...s, share: { ...s.share, collectFrom: collectionAnchor(s), members } };
       const suggestion = suggestedLeaveRefund(st, after, m);
       return {
-        ...(await commit(ctx, st, today, after, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`])),
+        ...(await commit(ctx, st, today, after, a.dry_run, [old ? `member_updated:${m.name}` : `member_added:${m.name}`], undefined, link?.created)),
         suggested_refund: suggestion,
         unused_days: suggestion.unusedDays,
         member: {

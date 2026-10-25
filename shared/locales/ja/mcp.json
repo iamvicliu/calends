@@ -9,7 +9,9 @@
     "anyRegion": "すべての地域",
     "total": "合計",
     "createCategory": "カテゴリを新規作成します：{name}",
-    "createdCategory": "カテゴリを作成しました：{name}"
+    "createdCategory": "カテゴリを作成しました：{name}",
+    "createPerson": "相手を新規登録します：{name}",
+    "createdPerson": "相手を登録しました：{name}"
   },
   "error": {
     "shareFull": "「{name}」は満席です（{seats} 席）",

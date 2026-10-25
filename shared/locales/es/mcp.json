@@ -9,7 +9,9 @@
     "anyRegion": "Cualquier región",
     "total": "Total",
     "createCategory": "Se creará la categoría: {name}",
-    "createdCategory": "Categoría creada: {name}"
+    "createdCategory": "Categoría creada: {name}",
+    "createPerson": "Se añadirá a personas: {name}",
+    "createdPerson": "Añadido a personas: {name}"
   },
   "error": {
     "shareFull": "«{name}» está completo ({seats} plazas)",

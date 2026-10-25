@@ -9,7 +9,9 @@
     "anyRegion": "Любой регион",
     "total": "Итого",
     "createCategory": "Будет создана категория: {name}",
-    "createdCategory": "Создана категория: {name}"
+    "createdCategory": "Создана категория: {name}",
+    "createPerson": "Будет добавлен в список людей: {name}",
+    "createdPerson": "Добавлен в список людей: {name}"
   },
   "error": {
     "shareFull": "«{name}» заполнена (мест: {seats})",
