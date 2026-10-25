@@ -549,6 +549,24 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
   }
 }
 
+/**
+ * 写入模板：先在本地改（local），请求成功后用服务端返回的权威结果再改一次（apply，可选），失败按 optimistic 回滚。
+ * apply 在写入计数内执行，期间拉回的旧快照不会覆盖它。
+ */
+function write<T>(local: (s: AppState) => AppState, req: () => Promise<T>, apply?: (s: AppState, r: T) => AppState): Promise<T> {
+  return optimistic(local, async () => {
+    const r = await req();
+    if (apply && store.state) patchState((s) => apply(s, r));
+    return r;
+  });
+}
+
+/** 换上服务端改过的订阅（同步人的资料、合并、改分类名时一次改好几条）；没出现的保持不变 */
+const withSubs = (s: AppState, subs: Subscription[]): AppState => {
+  const by = new Map(subs.map((x) => [x.id, x]));
+  return { ...s, subscriptions: s.subscriptions.map((x) => by.get(x.id) ?? x) };
+};
+
 export function saveSub(next: Subscription) {
   // 改了开始日期或周期后，新的扣款日需要补汇率
   setTimeout(() => void syncFx(), 500);
@@ -558,22 +576,18 @@ export function saveSub(next: Subscription) {
     st.subscriptions.find((x) => x.id === next.id),
     next,
   );
-  return optimistic(
+  return write(
     (s) => ({ ...s, subscriptions: upsertById(s.subscriptions, sub) }),
-    async () => {
-      // 服务端会规范化（补字段、时间戳）：本地换成它返回的那条，和下次同步拿到的一致；
-      // 期间本地又改过这一条（更晚的写入）就不覆盖
-      const saved = await api<Subscription>(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) });
-      if (saved?.id === sub.id && store.state?.subscriptions.find((x) => x.id === sub.id) === sub)
-        patchState((s) => ({ ...s, subscriptions: upsertById(s.subscriptions, saved) }));
-      return saved;
-    },
+    () => api<Subscription>(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
+    // 服务端会规范化（补字段、时间戳）：本地换成它返回的那条，和下次同步拿到的一致；期间本地又改过这一条（更晚的写入）就不覆盖
+    (s, saved) =>
+      saved?.id === sub.id && s.subscriptions.find((x) => x.id === sub.id) === sub ? { ...s, subscriptions: upsertById(s.subscriptions, saved) } : s,
   );
 }
 
 export function deleteSub(id: string) {
   // 服务端在同一事务里把它从公开页隐藏列表去掉（与 MCP delete_subscription 相同），本地同步
-  return optimistic(
+  return write(
     (s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id), settings: deleteSubscriptionSettings(s.settings, id) }),
     () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }),
   );
@@ -583,21 +597,18 @@ export function deleteSub(id: string) {
 export function reorderMethods(ids: string[]) {
   const prev = store.state!.methods;
   const next = ids.map((id, i) => ({ ...prev.find((m) => m.id === id)!, order: i }));
-  // 全部重写，避免本地数据过期时出现重复的序号
-  return optimistic(
+  // 全部重写，避免本地数据过期时出现重复的序号；部分失败时整体回滚并强制同步，以服务端为准
+  return write(
     (s) => ({ ...s, methods: next }),
     () => Promise.all(next.map((m) => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }))),
   );
 }
 
 export function saveMethod(m: PaymentMethod) {
-  return optimistic(
+  return write(
     (s) => ({ ...s, methods: upsertById(s.methods, m) }),
-    async () => {
-      const saved = await api<PaymentMethod>(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) });
-      if (saved?.id === m.id && store.state?.methods.find((x) => x.id === m.id) === m) patchState((s) => ({ ...s, methods: upsertById(s.methods, saved) }));
-      return saved;
-    },
+    () => api<PaymentMethod>(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }),
+    (s, saved) => (saved?.id === m.id && s.methods.find((x) => x.id === m.id) === m ? { ...s, methods: upsertById(s.methods, saved) } : s),
   );
 }
 
@@ -607,32 +618,29 @@ export function saveMethod(m: PaymentMethod) {
  */
 export async function deleteMethod(id: string, into?: string | null) {
   const query = into ? `?into=${encodeURIComponent(into)}` : into === null ? '?clear=1' : '';
-  const r = await optimistic(
+  await write(
     (s) => {
       const d = deleteMethodData(s, id, into);
       return withSubs({ ...s, methods: s.methods.filter((x) => x.id !== id), settings: d.settings }, d.subscriptions);
     },
     () => api<{ subscriptions: Subscription[] }>(`/api/methods/${id}${query}`, { method: 'DELETE' }),
+    (s, r) => withSubs(s, r.subscriptions),
   );
-  patchState((s) => withSubs(s, r.subscriptions));
 }
-
-/** 换上服务端改过的订阅（同步人的资料、合并时一次改好几条） */
-const withSubs = (s: AppState, subs: Subscription[]): AppState => ({ ...s, subscriptions: s.subscriptions.map((x) => subs.find((y) => y.id === x.id) ?? x) });
 
 /** 保存一个人：称呼、联系方式同步到所有引用他的成员、代付上（本地先同步，服务端再同步一遍并返回结果） */
 export async function savePerson(p: Person) {
-  const r = await optimistic(
+  const r = await write(
     (s) => withSubs({ ...s, people: upsertById(s.people ?? [], p) }, syncPerson(s.subscriptions, p)),
     () => api<{ person: Person; subscriptions: Subscription[] }>(`/api/people/${p.id}`, { method: 'PUT', body: JSON.stringify(p) }),
+    (s, r) => withSubs({ ...s, people: upsertById(s.people ?? [], r.person) }, r.subscriptions),
   );
-  patchState((s) => withSubs({ ...s, people: upsertById(s.people ?? [], r.person) }, r.subscriptions));
   return r.person;
 }
 
 /** 删除一个人：只能删没有被任何合租、代付引用的（服务端会再检查一次） */
 export function deletePerson(id: string) {
-  return optimistic(
+  return write(
     (s) => ({ ...s, people: (s.people ?? []).filter((x) => x.id !== id) }),
     () => api(`/api/people/${id}`, { method: 'DELETE' }),
   );
@@ -640,26 +648,26 @@ export function deletePerson(id: string) {
 
 /** 把 from 合并到 into：引用全部改指向 into，from 从名册里去掉 */
 export async function mergePerson(from: string, into: string) {
-  const r = await optimistic(
+  await write(
     (s) => {
       const m = mergePeople(s.people ?? [], s.subscriptions, from, into);
       return withSubs({ ...s, people: m.people }, m.subs);
     },
     () => api<{ people: Person[]; subscriptions: Subscription[] }>(`/api/people/${from}/merge`, { method: 'POST', body: JSON.stringify({ into }) }),
+    (s, r) => withSubs({ ...s, people: r.people }, r.subscriptions),
   );
-  patchState((s) => withSubs({ ...s, people: r.people }, r.subscriptions));
 }
 
 export function saveSettings(patch: Partial<Settings>) {
-  return optimistic(
+  return write(
     (s) => ({ ...s, settings: { ...s.settings, ...patch } }),
-    async () => {
-      // 清空的字段（undefined）以 null 传给服务端，否则 JSON 会丢掉这个键，旧值留在库里
-      const body = JSON.stringify(Object.fromEntries(Object.entries({ ...store.state!.settings, ...patch }).map(([k, v]) => [k, v === undefined ? null : v])));
-      const settings = await api<Settings>('/api/settings', { method: 'PUT', body });
-      patchState((s) => ({ ...s, settings }));
-      return settings;
-    },
+    // 清空的字段（undefined）以 null 传给服务端，否则 JSON 会丢掉这个键，旧值留在库里
+    () =>
+      api<Settings>('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify(Object.fromEntries(Object.entries({ ...store.state!.settings, ...patch }).map(([k, v]) => [k, v === undefined ? null : v]))),
+      }),
+    (s, settings) => ({ ...s, settings }),
   );
 }
 
@@ -667,22 +675,13 @@ export function saveSettings(patch: Partial<Settings>) {
  * 保存分类表（顺序即显示顺序）。renames 是旧名 → 新名：改名、删除分类时把订阅移过去，服务端一次改写所有相关订阅。
  * 返回改动了几个订阅。
  */
-export function saveCategories(categories: Category[], renames: Record<string, string> = {}) {
-  const swap = (subs: Subscription[], changed: Subscription[]) => {
-    const by = new Map(changed.map((x) => [x.id, x]));
-    return subs.map((x) => by.get(x.id) ?? x);
-  };
-  return optimistic(
-    (s) => ({ ...s, settings: { ...s.settings, categories }, subscriptions: swap(s.subscriptions, renameInSubs(s.subscriptions, renames)) }),
-    async () => {
-      const r = await api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', {
-        method: 'PUT',
-        body: JSON.stringify({ categories, renames }),
-      });
-      patchState((s) => ({ ...s, settings: r.settings, subscriptions: swap(s.subscriptions, r.subscriptions) }));
-      return r.subscriptions.length;
-    },
+export async function saveCategories(categories: Category[], renames: Record<string, string> = {}) {
+  const r = await write(
+    (s) => withSubs({ ...s, settings: { ...s.settings, categories } }, renameInSubs(s.subscriptions, renames)),
+    () => api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', { method: 'PUT', body: JSON.stringify({ categories, renames }) }),
+    (s, r) => withSubs({ ...s, settings: r.settings }, r.subscriptions),
   );
+  return r.subscriptions.length;
 }
 
 export async function rotateIcs() {
