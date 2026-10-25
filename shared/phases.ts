@@ -38,6 +38,32 @@ function fromTop(s: Subscription, start: string): Phase {
   };
 }
 
+/** 只剩一个阶段时退回普通订阅：阶段的字段写回顶层（fromTop 的逆操作） */
+function phaseToTop(s: Subscription, p: Phase): Subscription {
+  return {
+    ...s,
+    phases: undefined,
+    start: p.start,
+    billingStart: p.billingStart,
+    chargeLeadDays: p.chargeLeadDays,
+    cancelLeadDays: p.cancelLeadDays,
+    renewalHistory: p.renewalHistory,
+    renewalOffsetDays: p.renewalOffsetDays,
+    end: p.end,
+    stop: p.stop,
+    price: p.price,
+    currency: p.currency,
+    cycle: p.cycle,
+    methodId: p.methodId,
+    region: p.region,
+    priceHistory: p.priceHistory,
+    intro: p.intro,
+    bonus: p.bonus,
+    payments: p.payments,
+    nextDue: p.nextDue,
+  };
+}
+
 function phasesOf(s: Subscription): Phase[] {
   return s.phases?.length ? s.phases.map((p) => ({ ...p })).sort((a, b) => a.start.localeCompare(b.start)) : [fromTop(s, s.start)];
 }
@@ -118,30 +144,7 @@ export function dropPlan(s: Subscription, start: string): Subscription {
   const phases = phasesOf(s).filter((p) => p.start !== start);
   const last = phases[phases.length - 1];
   if (!last.end || last.end < start) last.end = addDays(start, -1);
-  if (phases.length === 1) {
-    const p = phases[0];
-    return {
-      ...s,
-      phases: undefined,
-      start: p.start,
-      billingStart: p.billingStart,
-      chargeLeadDays: p.chargeLeadDays,
-      cancelLeadDays: p.cancelLeadDays,
-      renewalHistory: p.renewalHistory,
-      renewalOffsetDays: p.renewalOffsetDays,
-      end: p.end,
-      stop: p.stop,
-      price: p.price,
-      currency: p.currency,
-      cycle: p.cycle,
-      methodId: p.methodId,
-      region: p.region,
-      priceHistory: p.priceHistory,
-      intro: p.intro,
-      payments: p.payments,
-      nextDue: p.nextDue,
-    };
-  }
+  if (phases.length === 1) return phaseToTop(s, phases[0]);
   return mirror({ ...s, start: phases[0].start }, phases);
 }
 
@@ -367,31 +370,7 @@ export function removePhase(s: Subscription, index: number): Subscription {
   // 撤回最后一次换区：上一阶段只是因为换区才结束（或换区时选了继续跑到某天）的，恢复为进行中
   const prev = phases[phases.length - 1];
   if (index === phases.length && !prev.stop && prev.end && prev.end >= addDays(removed.start, -1)) prev.end = undefined;
-  if (phases.length === 1) {
-    const p = phases[0];
-    return {
-      ...s,
-      phases: undefined,
-      start: p.start,
-      billingStart: p.billingStart,
-      chargeLeadDays: p.chargeLeadDays,
-      cancelLeadDays: p.cancelLeadDays,
-      renewalHistory: p.renewalHistory,
-      renewalOffsetDays: p.renewalOffsetDays,
-      end: p.end,
-      stop: p.stop,
-      price: p.price,
-      currency: p.currency,
-      cycle: p.cycle,
-      methodId: p.methodId,
-      region: p.region,
-      priceHistory: p.priceHistory,
-      intro: p.intro,
-      bonus: p.bonus,
-      payments: p.payments,
-      nextDue: p.nextDue,
-    };
-  }
+  if (phases.length === 1) return phaseToTop(s, phases[0]);
   return mirror({ ...s, start: phases[0].start }, phases);
 }
 

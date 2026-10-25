@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { FALLBACK_FX } from './billing.ts';
+import { dropPlan, switchPlan } from './phases.ts';
 import { prepareImport, readImportCsv } from './import-ledger.ts';
 import { subRefsError } from './ledger-edit.ts';
 import { prepareSubWrite } from './sub-write.ts';
@@ -93,4 +94,14 @@ test('S-3 旧格式 CSV：认不出的金额、周期、币种、开始日都在
   assert.equal(byName.get('Good')!.start, '2026-01-15');
   assert.deepEqual(byName.get('No Start')!.cycle, { unit: 'month', every: 2 });
   assert.equal(byName.get('No Start')!.start, today);
+});
+
+test('S-4 撤销计划阶段退回单阶段时保留赠送期', () => {
+  const bonus = { from: '2026-02-01', until: '2026-03-01' };
+  const base = sub({ bonus });
+  const planned = switchPlan(base, '2026-12-01', { price: 100, currency: 'USD', cycle: { unit: 'year', every: 1 }, planned: true });
+  assert.deepEqual(planned.phases![0].bonus, bonus);
+  const back = dropPlan(planned, '2026-12-01');
+  assert.equal(back.phases, undefined);
+  assert.deepEqual(back.bonus, bonus);
 });
