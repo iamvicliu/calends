@@ -110,3 +110,20 @@ export function chargeValue(
   if (c.settled && !c.projected) return toBaseAt(state, c.settled.amount, c.settled.currency, c.date, to);
   return toBaseAt(state, c.amount, c.currency, c.projected ? undefined : c.date, to);
 }
+
+// —— 以下为前端修复先用到的最小实现，签名与 fix/review-shared 一致；合并时以 shared 分支为准 ——
+
+/** 换算到本位币（或 to）：date 在未来或缺省时用当前汇率；缺汇率为 NaN，调用方显示「—」或标记不完整 */
+export function toBaseOrNaN(state: AppState, amount: number, ccy: string, date?: string, to = state.settings.baseCurrency): number {
+  return date ? convertOn(amount, ccy, to, date, state.fxHistory, state.fx) : convertOn(amount, ccy, to, '9999-12-31', undefined, state.fx);
+}
+
+/** 一笔扣款的本位币金额：已发生的按扣款当天汇率（记了卡上实扣时按实扣），预测的按当前汇率；缺汇率为 NaN */
+export function chargeBaseOrNaN(
+  state: AppState,
+  c: { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } },
+  to = state.settings.baseCurrency,
+): number {
+  if (c.settled && !c.projected) return toBaseOrNaN(state, c.settled.amount, c.settled.currency, c.date, to);
+  return toBaseOrNaN(state, c.amount, c.currency, c.projected ? undefined : c.date, to);
+}

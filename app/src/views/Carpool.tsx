@@ -17,6 +17,7 @@ import {
   memberBillMonths,
   memberCollection,
   memberUnpaidFrom,
+  isStopped,
 } from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { useRef, useState } from 'react';
@@ -92,8 +93,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const base = state.settings.baseCurrency;
   const [colsRef, colsWidth] = useWidth();
   const colCount = Math.max(1, Math.min(4, Math.floor((colsWidth + 16) / 356)));
-  // 买断的车没有到期，一直算进行中
-  const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused', 'lifetime'].includes(effectiveStatus(s, today));
+  // 没有停止的车都算进行中：包括买断（没有到期）和还没开始的
+  const live = (s: Subscription) => !isStopped(effectiveStatus(s, today));
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));
   const joined = state.subscriptions.filter((s) => s.share?.role === 'member' && live(s));
   // 卡片按状态筛选；顶部的统计始终按进行中的合租算

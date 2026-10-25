@@ -1130,3 +1130,15 @@ export function memberDues(
 export function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 }
+
+// —— 以下为前端修复先用到的最小实现，签名与 fix/review-shared 一致；合并时以 shared 分支为准 ——
+
+/** 已停止（到期不续或被服务方停用）：effectiveStatus 的 ended / terminated */
+export function isStopped(status: string): boolean {
+  return status === 'ended' || status === 'terminated';
+}
+
+/** 代收币种：没单独设置时为本位币 */
+export function collectCurrencyOf(settings: Pick<AppState['settings'], 'collectCurrency' | 'baseCurrency'>): string {
+  return settings.collectCurrency ?? settings.baseCurrency;
+}
