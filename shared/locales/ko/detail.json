@@ -39,7 +39,8 @@
     "trialEnd": "체험 종료",
     "region": "지역",
     "period": "구독 기간",
-    "present": "현재"
+    "present": "현재",
+    "endedUnknown": "종료됨, 종료일 미상"
   },
   "up": {
     "planned": "변경 예정\n미확정",
@@ -130,7 +131,8 @@
       "m12": "막대 하나가 1년 합계"
     },
     "regular": "정가",
-    "saved": "첫 기간 할인"
+    "saved": "첫 기간 할인",
+    "unknownEnd": "종료일을 알 수 없어 확인된 결제 기간만 표시합니다"
   },
   "ev": {
     "next": "다음 결제",

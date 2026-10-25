@@ -39,7 +39,8 @@
     "trialEnd": "Uji coba berakhir",
     "region": "Wilayah",
     "period": "Periode",
-    "present": "sekarang"
+    "present": "sekarang",
+    "endedUnknown": "Berakhir; tanggal tidak diketahui"
   },
   "up": {
     "planned": "Rencana perubahan\nbelum pasti",
@@ -130,7 +131,8 @@
       "m12": "Setiap batang adalah total tahunan"
     },
     "regular": "Harga normal",
-    "saved": "Diskon awal"
+    "saved": "Diskon awal",
+    "unknownEnd": "Tanggal berakhir tidak diketahui; grafik dibatasi pada cakupan pembayaran yang diketahui"
   },
   "ev": {
     "next": "Tagihan berikutnya",

@@ -39,7 +39,8 @@
     "trialEnd": "试用截止",
     "region": "地区",
     "period": "订阅期间",
-    "present": "至今"
+    "present": "至今",
+    "endedUnknown": "已停用，日期未知"
   },
   "up": {
     "planned": "计划变更\n还没确定",
@@ -118,7 +119,8 @@
       "m12": "每根柱为一年合计"
     },
     "regular": "原价",
-    "saved": "首期优惠省下"
+    "saved": "首期优惠省下",
+    "unknownEnd": "停用日期未知，图表仅显示已知付款覆盖范围"
   },
   "ev": {
     "next": "下次扣款",

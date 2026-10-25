@@ -39,7 +39,8 @@
     "trialEnd": "Hết dùng thử",
     "region": "Khu vực",
     "period": "Thời gian",
-    "present": "nay"
+    "present": "nay",
+    "endedUnknown": "Đã kết thúc; chưa rõ ngày"
   },
   "up": {
     "planned": "Dự định thay đổi\nchưa xác nhận",
@@ -130,7 +131,8 @@
       "m12": "Mỗi cột là tổng một năm"
     },
     "regular": "Giá gốc",
-    "saved": "Ưu đãi kỳ đầu"
+    "saved": "Ưu đãi kỳ đầu",
+    "unknownEnd": "Chưa rõ ngày kết thúc; biểu đồ chỉ hiển thị phạm vi thanh toán đã biết"
   },
   "ev": {
     "next": "Lần trừ tiếp theo",

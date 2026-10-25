@@ -154,6 +154,7 @@ export function ChargeBars({
   };
   const hx = hover != null ? cx[hover] : 0;
   const tx = x(today);
+  const showToday = today >= from && today <= to;
 
   return (
     <div className="cc" ref={box} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
@@ -230,10 +231,12 @@ export function ChargeBars({
               });
               return d && <path className="cc-list" d={d} />;
             })()}
-            <line className="cc-today" x1={tx} x2={tx} y1={T - 4} y2={H} />
-            <text className="cc-today-l" x={tx} y={T - 8} textAnchor={tx > w - PAD_R - 24 ? 'end' : tx < PAD_L + 24 ? 'start' : 'middle'}>
-              {todayLabel}
-            </text>
+            {showToday && <line className="cc-today" x1={tx} x2={tx} y1={T - 4} y2={H} />}
+            {showToday && (
+              <text className="cc-today-l" x={tx} y={T - 8} textAnchor={tx > w - PAD_R - 24 ? 'end' : tx < PAD_L + 24 ? 'start' : 'middle'}>
+                {todayLabel}
+              </text>
+            )}
           </svg>
           {nLanes > 0 && (
             <div className="cc-lanes" style={{ height: nLanes * LANE + 4, marginLeft: PAD_L, marginRight: PAD_R }}>
@@ -251,7 +254,7 @@ export function ChargeBars({
                   </div>
                 );
               })}
-              <i className="cc-today-lane" style={{ left: tx - PAD_L }} />
+              {showToday && <i className="cc-today-lane" style={{ left: tx - PAD_L }} />}
             </div>
           )}
           <div className="cc-xt" style={{ marginLeft: PAD_L, marginRight: PAD_R }}>

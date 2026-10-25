@@ -39,7 +39,8 @@
     "trialEnd": "Testphase endet",
     "region": "Region",
     "period": "Zeitraum",
-    "present": "heute"
+    "present": "heute",
+    "endedUnknown": "Beendet; Datum unbekannt"
   },
   "up": {
     "planned": "Geplante Änderung\nnicht bestätigt",
@@ -139,7 +140,8 @@
       "m12": "Jeder Balken ist eine Jahressumme"
     },
     "regular": "Regulärer Preis",
-    "saved": "Einführungsrabatt"
+    "saved": "Einführungsrabatt",
+    "unknownEnd": "Enddatum unbekannt; Diagramm auf bekannte Zahlungszeiträume begrenzt"
   },
   "ev": {
     "next": "Nächste Abbuchung",

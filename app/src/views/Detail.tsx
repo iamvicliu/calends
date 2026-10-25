@@ -50,7 +50,7 @@ import { confirmPlan, dropPlan, pricePoints, reactivate } from '../../../shared/
 import { t } from '../../../shared/i18n.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { ChargeBars, type ChartLane } from './DetailChart.tsx';
-import { detailForecast } from './detail-data.ts';
+import { detailForecast, detailHistoryEnd } from './detail-data.ts';
 import { DetailHead, DetailSheet, Note, Panel, Prop } from '../components/DetailKit.tsx';
 
 /** 状态角标的色调；文案见 list.status.* */
@@ -345,6 +345,7 @@ const regular = (h: Charge[]) => h.filter((c) => !c.kind && c.amount > 0);
 function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
   const base = state.settings.baseCurrency;
   const st = effectiveStatus(sub, today);
+  const end = detailHistoryEnd(sub, today);
   const vals = history.map((c) => chargeValue(state, c, base));
   // 有一笔缺汇率就不能求和：显示「—」，不能把缺的那笔当 0
   const total = vals.reduce((a, v) => a + v, 0);
@@ -388,8 +389,14 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const durationCell = (
     <Metric
       label={lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
-      value={duration}
-      note={gaps > 0 ? t('detail.stats.gaps', { count: gaps }) : t('detail.period.since', { date: cnDateFull(sub.start) })}
+      value={end.unknown ? '—' : duration}
+      note={
+        end.unknown
+          ? t('detail.field.endedUnknown')
+          : gaps > 0
+            ? t('detail.stats.gaps', { count: gaps })
+            : t('detail.period.since', { date: cnDateFull(sub.start) })
+      }
     />
   );
 
@@ -418,10 +425,18 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
       )}
       <Metric
         label={lifetime ? t('detail.kpi.amortizedCost') : young ? t('detail.kpi.expectedMonthly') : t('detail.stats.perMonth')}
-        value={sub.estimateFrom && lifetime && !history.length ? '—' : lifetime ? t('detail.kpi.perMonthValue', { amount: amount(monthly) }) : amount(monthly)}
+        value={
+          end.unknown || (sub.estimateFrom && lifetime && !history.length)
+            ? '—'
+            : lifetime
+              ? t('detail.kpi.perMonthValue', { amount: amount(monthly) })
+              : amount(monthly)
+        }
         // 与其他格一样三行：折到每天多少；算不出来就不写这一行
-        note={Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined}
-        accessory={!lifetime ? <Trend pct={perTrend} /> : undefined}
+        note={
+          !end.unknown && Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined
+        }
+        accessory={!lifetime && !end.unknown ? <Trend pct={perTrend} /> : undefined}
       />
     </MetricCards>
   );
@@ -432,7 +447,7 @@ type Range = 'all' | '1y' | '6m';
 /**
  * 扣款时间轴：今天之前是每笔实际扣款，之后是预测，中间一条「今天」虚线。
  * 预测长度按周期：月付及更短看半年，更长的看一个周期（至少半年、至多两年）。
- * 下次扣款的日期与金额在顶部四格；买断、已结束、暂停没有预测，只画过去。
+ * 下次扣款的日期与金额在顶部四格；已结束、暂停按实际边界截断，未知结束日仅显示已知付款范围。
  */
 function Timeline({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
   const base = state.settings.baseCurrency;
@@ -440,15 +455,16 @@ function Timeline({ sub, state, today, history }: { sub: Subscription; state: Ap
   const cur = currentPhase(sub, today);
   const reg = regular(history);
   const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(st);
+  const end = detailHistoryEnd(sub, today);
+  const anchor = end.date ?? today;
   const next = live ? detailForecast(sub, today).charges[0] : undefined;
   const days = cycleDays(cur.cycle);
-  // 暂停、已结束、买断没有预测：时间轴只画到今天
-  let until = live ? addDays(today, days <= 31 ? 183 : Math.min(731, Math.max(183, Math.ceil(days) + 1))) : today;
+  let until = live ? addDays(today, days <= 31 ? 183 : Math.min(731, Math.max(183, Math.ceil(days) + 1))) : anchor;
   if (next && next.date > until) until = next.date;
   const future = live ? chargesBetween(sub, addDays(today, 1), until, today).filter((c) => !c.kind) : [];
 
   // 只有范围内至少三笔、且比全部少时才给这个范围：两年付、年付这类稀疏记录不显示无意义的「1 年 / 6 个月」
-  const within = (months: number) => reg.filter((c) => c.date >= addMonths(today, -months)).length;
+  const within = (months: number) => reg.filter((c) => c.date >= addMonths(anchor, -months)).length;
   const ranges: Array<[Range, string]> = [
     ['all', t('detail.chart.all')],
     ...(
@@ -462,7 +478,7 @@ function Timeline({ sub, state, today, history }: { sub: Subscription; state: Ap
   ];
   // 月付及更短默认看最近一年，柱子不至于挤成一片；更长的周期默认看全部
   const [range, setRange] = useState<Range>(() => (days <= 31 && ranges.some(([k]) => k === '1y') ? '1y' : 'all'));
-  const since = range === 'all' ? '' : addMonths(today, range === '1y' ? -12 : -6);
+  const since = range === 'all' ? '' : addMonths(anchor, range === '1y' ? -12 : -6);
   const past = reg.filter((c) => c.date >= since);
   // 单位：记账货币，或（所有扣款同一种外币时）原币；原币下卡上另币种结算的那笔没有原币实扣，按标价画
   const ccys = [...new Set([...reg, ...future].map((c) => c.currency))];
@@ -496,9 +512,9 @@ function Timeline({ sub, state, today, history }: { sub: Subscription; state: Ap
   const rows = showList ? each : each.map((r) => ({ ...r, list: undefined }));
   if (rows.length < 2) return null;
 
-  // 横轴从第一根柱到最后一根柱（或今天），两端留同样的边距，左右对称；不按预测窗口的末端留白
-  const first = rows[0].date < today ? rows[0].date : today;
-  const lastBar = rows[rows.length - 1].date > today ? rows[rows.length - 1].date : today;
+  // Preserve late payments after a known service end without extending the service lane.
+  const first = rows[0].date < anchor ? rows[0].date : anchor;
+  const lastBar = rows[rows.length - 1].date > anchor ? rows[rows.length - 1].date : anchor;
   const pad = Math.max(4, Math.round(diffDays(first, lastBar) * 0.03));
   const from = addDays(first, -pad);
   const to = addDays(lastBar, pad);
@@ -509,8 +525,7 @@ function Timeline({ sub, state, today, history }: { sub: Subscription; state: Ap
   const lanes: ChartLane[] = lanesSrc.map((v, i) => ({
     key: v.start,
     from: v.start,
-    // 方案色带：计费中的延伸到预测末端；暂停、已结束的画到今天（或那一段的结束日）为止
-    to: [v.end ?? to, live ? to : today].sort()[0],
+    to: [detailHistoryEnd(v, today).date ?? v.end ?? to, live ? to : anchor].sort()[0],
     lane: laneIdx[i],
     color: LANE_COLORS[methodIds.indexOf(v.methodId ?? '') % LANE_COLORS.length],
     label: (
@@ -661,6 +676,7 @@ function Timeline({ sub, state, today, history }: { sub: Subscription; state: Ap
       />
       {/* 图例：实色是已扣，虚框是预测；预测合计按今天的汇率 */}
       <div className="dt-legend">
+        {end.unknown && <span>{t('detail.chart.unknownEnd')}</span>}
         <span>
           <i className="k-v" />
           {t('detail.timeline.paid')}
@@ -933,6 +949,7 @@ function Summary({ sub, state, today }: { sub: Subscription; state: AppState; to
   const st = effectiveStatus(sub, today);
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(st);
+  const end = detailHistoryEnd(sub, today);
   return (
     <Panel className="dt-about">
       {live && <PeriodBar sub={sub} today={today} />}
@@ -940,7 +957,7 @@ function Summary({ sub, state, today }: { sub: Subscription; state: AppState; to
         {/* 计费中只画当前这一期；买断、已结束、暂停写订阅期间（买断的开始日就是那一笔扣款，不再重复） */}
         {!lifetime && !live && (
           <Prop className="dt-period-text" k={t('detail.field.period')}>
-            {cnDateFull(sub.start)} – {sub.end ? cnDateFull(sub.end) : t('detail.field.present')}
+            {cnDateFull(sub.start)} – {end.unknown ? t('detail.field.endedUnknown') : end.date ? cnDateFull(end.date) : t('detail.field.present')}
           </Prop>
         )}
         {sub.account && (

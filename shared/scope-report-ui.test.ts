@@ -15,7 +15,7 @@ import * as carpool from './carpool.ts';
 import * as carpoolTimeline from './carpool-timeline.ts';
 import * as proxy from './proxy.ts';
 import * as receivables from './receivables.ts';
-import { detailForecast } from '../app/src/views/detail-data.ts';
+import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 // Execute component event handlers in the existing JSX harness, retaining pure financial builders.
@@ -560,7 +560,12 @@ test('public rows keep the amount once for an ordinary monthly plan and distingu
 });
 
 test('a single charge owns its amount instead of repeating an identical cumulative-spend KPI', () => {
-  const r = harness('../app/src/views/Detail.tsx', 'Kpis', {}, { toBase: (s: AppState, n: number, ccy: string) => fx.toBaseAt(s, n, ccy), detailForecast });
+  const r = harness(
+    '../app/src/views/Detail.tsx',
+    'Kpis',
+    {},
+    { toBase: (s: AppState, n: number, ccy: string) => fx.toBaseAt(s, n, ccy), detailForecast, detailHistoryEnd },
+  );
   const sub = {
     id: 'service',
     name: 'Service',

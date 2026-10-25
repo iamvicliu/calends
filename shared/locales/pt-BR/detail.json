@@ -39,7 +39,8 @@
     "trialEnd": "Fim do teste",
     "region": "Região",
     "period": "Período",
-    "present": "hoje"
+    "present": "hoje",
+    "endedUnknown": "Encerrado; data desconhecida"
   },
   "up": {
     "planned": "Mudança planejada\nnão confirmada",
@@ -139,7 +140,8 @@
       "m12": "Cada barra é o total do ano"
     },
     "regular": "Preço normal",
-    "saved": "Desconto inicial"
+    "saved": "Desconto inicial",
+    "unknownEnd": "Data de término desconhecida; gráfico limitado aos períodos de pagamento conhecidos"
   },
   "ev": {
     "next": "Próxima cobrança",

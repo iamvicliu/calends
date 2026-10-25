@@ -12,7 +12,7 @@ import { FALLBACK_FX, addMonths, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
 import { colorFor } from './people.ts';
-import { detailForecast } from '../app/src/views/detail-data.ts';
+import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import type { AppState, Subscription } from './types.ts';
 
 const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
@@ -437,6 +437,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Fragment: React.Fragment,
     ...billing,
     detailForecast,
+    detailHistoryEnd,
     money,
     cnDateFull,
     relDays,
@@ -547,6 +548,37 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     assert.ok(!html.includes('dt-side'));
     assert.equal(html.includes('dt compact'), unit === 'lifetime' || unit === 'year');
   }
+  const undated: Subscription = {
+    id: 'fictional-undated-stop',
+    name: 'Fictional stopped plan',
+    price: 20,
+    currency: 'EUR',
+    cycle: { unit: 'month', every: 3 },
+    start: '2021-10-30',
+    status: 'cancelled',
+    category: 'tools',
+    tags: [],
+    payments: [
+      { date: '2021-10-30', amount: 20 },
+      { date: '2023-07-30', amount: 20 },
+    ],
+  };
+  const undatedState = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [undated] };
+  const undatedProps = { sub: undated, state: undatedState, today: '2026-10-22' };
+  const undatedSummary = text(renderToStaticMarkup(React.createElement(Summary, undatedProps)));
+  assert.ok(undatedSummary.includes('detail.field.endedUnknown'));
+  assert.ok(!undatedSummary.includes('detail.field.present'));
+  const undatedCells = text(
+    renderToStaticMarkup(
+      React.createElement(Kpis, {
+        ...undatedProps,
+        history: billing.chargesBetween(undated, undated.start, undatedProps.today, undatedProps.today),
+      }),
+    ),
+  );
+  assert.ok(undatedCells.includes('detail.field.endedUnknown'));
+  assert.ok(!undatedCells.includes('detail.period.since'));
+  assert.ok(!undatedCells.includes('detail.kpi.perDay'));
   // Fictional annual plans: ordinary renewals plus commissions recorded as negative charges.
   const annual: Subscription = {
     id: 'fictional-annual-commissions',

@@ -39,7 +39,8 @@
     "trialEnd": "Deneme bitişi",
     "region": "Bölge",
     "period": "Dönem",
-    "present": "bugün"
+    "present": "bugün",
+    "endedUnknown": "Sona erdi; tarih bilinmiyor"
   },
   "up": {
     "planned": "Planlanan değişiklik\nonaylanmadı",
@@ -136,7 +137,8 @@
       "m12": "Her çubuk yıllık toplamdır"
     },
     "regular": "Normal fiyat",
-    "saved": "Başlangıç indirimi"
+    "saved": "Başlangıç indirimi",
+    "unknownEnd": "Bitiş tarihi bilinmiyor; grafik bilinen ödeme dönemleriyle sınırlı"
   },
   "ev": {
     "next": "Sonraki ödeme",

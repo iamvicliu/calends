@@ -39,7 +39,8 @@
     "trialEnd": "Trial ends",
     "region": "Region",
     "period": "Subscribed",
-    "present": "present"
+    "present": "present",
+    "endedUnknown": "Ended; date unknown"
   },
   "up": {
     "planned": "Planned change\nnot confirmed",
@@ -139,7 +140,8 @@
       "m12": "Each bar is a yearly total"
     },
     "regular": "Regular price",
-    "saved": "Intro discount"
+    "saved": "Intro discount",
+    "unknownEnd": "End date unknown; chart limited to known payment coverage"
   },
   "ev": {
     "next": "Next charge",

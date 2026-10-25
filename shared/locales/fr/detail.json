@@ -39,7 +39,8 @@
     "trialEnd": "Fin de l’essai",
     "region": "Région",
     "period": "Période",
-    "present": "aujourd’hui"
+    "present": "aujourd’hui",
+    "endedUnknown": "Terminé ; date inconnue"
   },
   "up": {
     "planned": "Changement prévu\nnon confirmé",
@@ -139,7 +140,8 @@
       "m12": "Chaque barre est un total annuel"
     },
     "regular": "Prix normal",
-    "saved": "Remise de lancement"
+    "saved": "Remise de lancement",
+    "unknownEnd": "Date de fin inconnue ; graphique limité aux périodes de paiement connues"
   },
   "ev": {
     "next": "Prochain prélèvement",

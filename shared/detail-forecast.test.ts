@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { detailForecast } from '../app/src/views/detail-data.ts';
+import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import type { Cycle, Subscription } from './types.ts';
 
 const today = '2026-10-22';
@@ -77,4 +77,64 @@ test('lifetime, paused and ended subscriptions have no renewal forecast; zero-pr
   }
   const free = detailForecast(subscription({ unit: 'year', every: 1 }, { price: 0 }), today);
   assert.equal(free.charges[0].amount, 0);
+});
+
+test('stopped detail histories end at their actual stop, not today or the unused prepaid expiry', () => {
+  const stopped = subscription(
+    { unit: 'year', every: 1 },
+    {
+      status: 'cancelled',
+      end: '2026-07-17',
+      stop: { kind: 'cancel', date: '2026-07-17', paidThrough: '2027-02-05' },
+      payments: [{ date: '2026-02-06', amount: 120 }],
+    },
+  );
+  assert.deepEqual(detailHistoryEnd(stopped, today), { date: '2026-07-17', unknown: false });
+  assert.deepEqual(detailHistoryEnd(subscription({ unit: 'month', every: 1 }, { status: 'paused', pausedAt: '2025-08-15' }), today), {
+    date: '2025-08-14',
+    unknown: false,
+  });
+});
+
+test('unknown stop dates bound the chart to the last recorded paid period without inventing an end date', () => {
+  const stopped = subscription(
+    { unit: 'month', every: 3 },
+    {
+      status: 'cancelled',
+      start: '2021-10-30',
+      payments: [
+        { date: '2021-10-30', amount: 120 },
+        { date: '2023-07-30', amount: 120 },
+        { date: '2024-01-01', amount: -20, kind: 'refund' },
+      ],
+    },
+  );
+  const original = JSON.stringify(stopped);
+  assert.deepEqual(detailHistoryEnd(stopped, today), { date: '2023-10-29', unknown: true });
+  assert.deepEqual(detailHistoryEnd(stopped, '2028-10-22'), { date: '2023-10-29', unknown: true });
+  assert.equal(JSON.stringify(stopped), original);
+});
+
+test('unknown early stops never extend paid coverage into today or future ownership', () => {
+  const stopped = subscription({ unit: 'year', every: 1 }, { status: 'cancelled', payments: [{ date: '2026-02-06', amount: 120 }] });
+  assert.deepEqual(detailHistoryEnd(stopped, today), { date: '2026-02-06', unknown: true });
+  const zero = subscription({ unit: 'month', every: 1 }, { status: 'cancelled', start: '2024-01-31', payments: [{ date: '2024-01-31', amount: 0 }] });
+  assert.deepEqual(detailHistoryEnd(zero, today), { date: '2024-02-28', unknown: true });
+});
+
+test('phase history keeps overlaps and known ends while identifying an undated final stop', () => {
+  const sub = subscription(
+    { unit: 'month', every: 1 },
+    {
+      status: 'cancelled',
+      phases: [
+        { start: '2020-12-15', end: '2024-06-30', price: 120, currency: 'EUR', cycle: { unit: 'year', every: 1 } },
+        { start: '2024-03-01', price: 10, currency: 'EUR', cycle: { unit: 'month', every: 1 }, payments: [{ date: '2024-04-01', amount: 10 }] },
+      ],
+    },
+  );
+  assert.deepEqual(detailHistoryEnd(sub, today), { date: '2024-06-30', unknown: true });
+  for (const live of [subscription({ unit: 'month', every: 1 }), subscription({ unit: 'lifetime', every: 1 })]) {
+    assert.deepEqual(detailHistoryEnd(live, today), { date: undefined, unknown: false });
+  }
 });
