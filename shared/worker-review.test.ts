@@ -469,3 +469,19 @@ test('W-19 MCP 读工具与提醒遇到缺汇率给 null + incomplete，不当�
   assert.ok(d);
   assert.equal(d.stats?.[0].value, '—');
 });
+
+test('W-16 刷新汇率：上游非 2xx 时报汇率接口错误（502），当前汇率表不变', async () => {
+  const f = fixture();
+  const fx = { base: 'USD', rates: { USD: 1, CNY: 7 }, fetchedAt: '2026-01-01T00:00:00.000Z' };
+  await putKv(f.env, 'fx', fx);
+  const saved = globalThis.fetch;
+  globalThis.fetch = (async () => new Response('<html>rate limited</html>', { status: 429 })) as typeof fetch;
+  try {
+    const r = await f.request('/api/fx/refresh', { method: 'POST' });
+    assert.equal(r.status, 502);
+    assert.doesNotMatch(((await r.json()) as { error: string }).error, /Unexpected token|JSON/);
+  } finally {
+    globalThis.fetch = saved;
+  }
+  assert.deepEqual(await getKv(f.env, 'fx'), fx);
+});

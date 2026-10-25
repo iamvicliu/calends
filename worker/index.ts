@@ -84,7 +84,9 @@ const bad = (msg: string, status = 400) => json({ error: msg }, status);
 
 async function refreshFx(env: Env): Promise<FxTable> {
   const res = await fetch('https://open.er-api.com/v6/latest/USD', { cf: { cacheTtl: 3600 } });
-  const body = (await res.json()) as { result?: string; rates?: Record<string, number> };
+  // 非 2xx（限流、上游故障页）不去解析正文，直接按汇率接口出错处理，当前汇率表保持不变
+  if (!res.ok) throw new Error(t('server.fxApiError'));
+  const body = (await res.json().catch(() => ({}))) as { result?: string; rates?: Record<string, number> };
   if (body.result !== 'success' || !body.rates) throw new Error(t('server.fxApiError'));
   const fx: FxTable = { base: 'USD', rates: body.rates, fetchedAt: new Date().toISOString() };
   await putKv(env, 'fx', fx);
