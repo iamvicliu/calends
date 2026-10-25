@@ -31,8 +31,18 @@ import { chargeBaseOrNaN, convertOn } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
-import { carLedger, FeeRuleFields, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
-import { applyCarRule, carRule, carYear, followsCar, memberCashFlows, memberFlowValue, nextCollectionDay } from '../../../shared/carpool.ts';
+import { FeeRuleFields, MemberSheet, memberSegments, memberStatus, perBill } from './Members.tsx';
+import {
+  applyCarRule,
+  carLedger,
+  carRule,
+  carYear,
+  followsCar,
+  memberCashFlows,
+  memberFee,
+  memberFlowValue,
+  nextCollectionDay,
+} from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import {
@@ -1333,9 +1343,7 @@ export function CarSheet({
 
 /** 常见家庭方案的席位数（含自己） */
 function defaultSeats(name: string): number {
-  if (/1password/i.test(name)) return 5;
-  if (/spotify|youtube|apple one|icloud|netflix/i.test(name)) return 6;
-  return 6;
+  return /1password/i.test(name) ? 5 : 6;
 }
 
 /** 一步转为合租：选身份与席位，保存后在上面补成员 */

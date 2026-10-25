@@ -114,12 +114,8 @@ function Shell({ children, right, avatar }: { children: React.ReactNode; right?:
   );
 }
 
-/** 卡片依次浮现 */
-const Reveal = ({ className, children }: { i: number; className?: string; children: React.ReactNode }) => (
-  <motion.div className={cn('min-w-0', className)} initial={false} animate={{ opacity: 1 }}>
-    {children}
-  </motion.div>
-);
+/** 卡片外层：允许内容收缩（min-w-0） */
+const Reveal = ({ className, children }: { className?: string; children: React.ReactNode }) => <div className={cn('min-w-0', className)}>{children}</div>;
 
 function ThemeButton() {
   const [mode, cycle] = useThemeMode();
@@ -191,7 +187,7 @@ function Ledger({ state }: { state: AppState }) {
     >
       <div className="grid grid-cols-1 gap-4">
         {/* 主卡：月支出、未来 30 天、每月扣款 */}
-        <Reveal i={0}>
+        <Reveal>
           <Card className={cn(roomy, 'h-full')}>
             <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
@@ -248,21 +244,21 @@ function Ledger({ state }: { state: AppState }) {
         </Reveal>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Reveal i={1} className="h-full">
+          <Reveal className="h-full">
             <Composition cats={d.cats} total={d.mrr} k={k} fmt={fmt} />
           </Reveal>
-          <Reveal i={2} className="h-full">
+          <Reveal className="h-full">
             <Currencies d={d} ccy={ccy} fmt={fmt} />
           </Reveal>
         </div>
 
-        <Reveal i={3}>
+        <Reveal>
           <SubList d={d} today={today} ccy={ccy} k={k} fmt={fmt} />
         </Reveal>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {d.ended.length > 0 && (
-            <Reveal i={4} className="h-full">
+            <Reveal className="h-full">
               <Card className={cn(roomy, 'h-full')}>
                 <CardHeader>
                   <CardTitle>{t('public.ended.title')}</CardTitle>
@@ -288,7 +284,7 @@ function Ledger({ state }: { state: AppState }) {
             </Reveal>
           )}
           {d.lifetime.length > 0 && (
-            <Reveal i={5} className="h-full">
+            <Reveal className="h-full">
               <Card className={cn(roomy, 'h-full')}>
                 <CardHeader>
                   <CardTitle>{t('public.lifetime.title')}</CardTitle>

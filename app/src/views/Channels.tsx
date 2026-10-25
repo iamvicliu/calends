@@ -4,7 +4,7 @@ import { uid } from '../../../shared/billing.ts';
 import { channelsOf, type AppState, type Channel, type ChannelKind } from '../../../shared/types.ts';
 import { ask, Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
-import { api, run, saveSettings, toast } from '../store.ts';
+import { api, run, saveSettings } from '../store.ts';
 import { t } from '../../../shared/i18n.ts';
 
 interface Field {
@@ -240,11 +240,7 @@ function ChannelSheet({
             </button>
           )}
           <span className="grow" />
-          <button
-            className="btn"
-            disabled={missing.length > 0}
-            onClick={() => (missing.length ? toast(t('settings.channels.fillField', { field: missing[0].label }), true) : test(f))}
-          >
+          <button className="btn" disabled={missing.length > 0} onClick={() => test(f)}>
             {t('settings.channels.test')}
           </button>
           <button className="btn primary" disabled={missing.length > 0} onClick={() => onSave(f)}>

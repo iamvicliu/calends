@@ -3,7 +3,6 @@ import { copyParts } from '../components/copy.tsx';
 import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { renewalDates, chargeMethodId, isStopped } from '../../../shared/billing.ts';
 import { StopPanel } from '../components/StopPanel.tsx';
-import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -63,12 +62,11 @@ import { netCost, transferredStop, transfersOf, transferSign, transferValue } fr
 import { chargeBaseOrNaN, chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { CarMembers, CarSheet } from './Carpool.tsx';
-import { carRule } from '../../../shared/carpool.ts';
-import { carLedger, MemberSheet } from './Members.tsx';
+import { carLedger, carRule } from '../../../shared/carpool.ts';
+import { MemberSheet } from './Members.tsx';
 import { PaymentSheet } from './PaymentSheet.tsx';
-import { MetricCards, Metric, CardTitle, IconButton, CatChip, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
+import { MetricCards, Metric, CardTitle, IconButton, CatChip, FlagImg, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
 import { presetCat, toBase } from '../derive.ts';
-import { FLAGS } from '../display.ts';
 import { copyText, run, saveSub } from '../store.ts';
 import { snapshot } from '../snapshot.ts';
 import { SubShare } from './SubShare.tsx';
@@ -107,10 +105,9 @@ function Trend({ pct }: { pct: number | undefined }) {
 
 /** 地区：国旗小图 + 代码（emoji 国旗在部分系统上显示成字母） */
 function Region({ cc }: { cc: string }) {
-  const k = cc.toLowerCase();
   return (
     <span className="dt-region">
-      {FLAGS.has(k) && <img src={base(`/flags/${k}.png`)} alt="" />}
+      <FlagImg cc={cc} />
       {cc.toUpperCase()}
     </span>
   );

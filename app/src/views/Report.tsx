@@ -194,7 +194,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             aria-label={t('report.wf.next')}
             disabled={offset >= 0}
 
-            onClick={() => setOffset(Math.min(0, offset + 1))}
+            onClick={() => setOffset(offset + 1)}
           >
             <Icon name="right" />
           </IconButton>

@@ -26,7 +26,6 @@ import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubI
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonProfileSheet } from './People.tsx';
 import {
-  carLedger,
   periodsTotal,
   carRule,
   followCarRule,
@@ -40,7 +39,6 @@ import {
   memberFlowValue,
 } from '../../../shared/carpool.ts';
 
-export { carLedger, memberFee };
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { t, type Params } from '../../../shared/i18n.ts';
 
@@ -894,7 +892,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                           <Icon name="copy" />
                         </IconButton>
                       )}
-                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => void removeRecordById(r.id, r.date)}>
+                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removeRecordById(r.id, r.date)}>
                         <Icon name="x" />
                       </IconButton>
                     </span>

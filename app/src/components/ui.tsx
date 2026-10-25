@@ -438,9 +438,8 @@ export function Seg<T extends string>({
   );
 }
 
-/** 独立灰底指标卡；等宽排列并随容器换行，金额与颜色由调用处提供。 */
 /**
- * 一组并列指标。页面顶部与弹窗顶部用独立灰卡；放在另一张卡片里时传 inline，改为竖线分隔的一行，避免卡片套卡片；
+ * 一组并列指标（金额与颜色由调用处提供）。页面顶部与弹窗顶部用独立灰卡；放在另一张卡片里时传 inline，改为竖线分隔的一行，避免卡片套卡片；
  * 窄栏里的四项（概览、报告的大数字下方）传 plain：两行两列，不加底色与分割线。
  */
 export function MetricCards({ children, inline = false, plain = false }: { children: ComponentChildren; inline?: boolean; plain?: boolean }) {
@@ -747,7 +746,6 @@ export function Toasts() {
   );
 }
 
-/** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
 /**
  * 国旗：用图片，不用 emoji（Windows 不显示国旗 emoji，只会变成两个字母）；没有对应图片时不显示
  */
@@ -793,6 +791,7 @@ export function NameLink({ children, onClick }: { children: ComponentChildren; o
   );
 }
 
+/** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
 export function useWidth<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const [w, setW] = useState(0);

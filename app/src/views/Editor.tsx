@@ -510,7 +510,7 @@ function Form({
             }
           />
         </Cell>
-        {!state.subscriptions.some((s) => s.id === f.id) && (
+        {isNew && (
           <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
             <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
           </Cell>
@@ -1065,5 +1065,3 @@ function NameField({
     </div>
   );
 }
-
-/** 天数步进器：0–3660 的整数，可直接输入，也可用两侧按钮加减；0 显示为「不需要」以外的数字 0 */
