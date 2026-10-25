@@ -183,5 +183,35 @@
     "trial": "Trial",
     "bonus": "Bonus period",
     "since": "Since {date}"
+  },
+  "transfer": {
+    "title": "Transfers",
+    "held": "Held",
+    "net": "Net cost",
+    "included": "Incl. transfers",
+    "kind": {
+      "label": "Type",
+      "buy": "Bought",
+      "sell": "Sold"
+    },
+    "hint": {
+      "buy": "Cash paid to the previous owner when taking it over (premium included). Enter the actual amount paid.",
+      "sell": "Cash received when handing it on. Enter the actual amount received; the remaining service no longer counts as paid but unused."
+    },
+    "paid": "Amount paid",
+    "received": "Amount received",
+    "addTitle": "Record transfer",
+    "editTitle": "Edit transfer",
+    "saved": "Transfer saved",
+    "deleted": "Delete this transfer",
+    "foot": "Actual cash paid or received when taking over or handing on a second-hand service. Counts in net cost and cash flow, not in monthly cost, renewal forecasts or charge counts.",
+    "add": "Record",
+    "none": "No transfers yet",
+    "netGain": "Net gain",
+    "head": {
+      "date": "Date",
+      "amount": "Amount",
+      "base": "In {ccy}"
+    }
   }
 }

@@ -174,5 +174,35 @@
     "trial": "Deneme",
     "bonus": "Hediye dönemi",
     "since": "{date} tarihinden beri"
+  },
+  "transfer": {
+    "title": "Devirler",
+    "held": "Elde",
+    "net": "Net maliyet",
+    "included": "Devirler dahil",
+    "kind": {
+      "label": "Tür",
+      "buy": "Devralındı",
+      "sell": "Devredildi"
+    },
+    "hint": {
+      "buy": "Devralırken önceki sahibine ödenen para (prim dahil). Gerçekte ödenen tutarı girin.",
+      "sell": "Devrederken alınan para. Gerçekte alınan tutarı girin; kalan hizmet artık ödenmiş ama kullanılmamış sayılmaz."
+    },
+    "paid": "Ödenen tutar",
+    "received": "Alınan tutar",
+    "addTitle": "Devir kaydet",
+    "editTitle": "Devri düzenle",
+    "saved": "Devir kaydedildi",
+    "deleted": "Bu devri sil",
+    "foot": "İkinci el bir hizmeti devralırken veya devrederken gerçekten ödenen ya da alınan para. Net maliyete ve nakit akışına dahildir; aylık maliyete, yenileme tahminlerine ve tahsilat sayısına dahil değildir.",
+    "add": "Kaydet",
+    "none": "Henüz devir yok",
+    "netGain": "Net kazanç",
+    "head": {
+      "date": "Tarih",
+      "amount": "Tutar",
+      "base": "{ccy} karşılığı"
+    }
   }
 }

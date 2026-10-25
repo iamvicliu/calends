@@ -66,7 +66,9 @@
     "noPeriods": "請至少選一期，且同一期只能寫一次",
     "periodUnknown": "{period} 不是這筆賬裡的一期",
     "periodTaken": "{period} 這一期已經記過收款或免收",
-    "periodsShort": "只剩 {count} 期沒結清，不夠這筆要抵扣的期數"
+    "periodsShort": "只剩 {count} 期沒結清，不夠這筆要抵扣的期數",
+    "transferProxy": "代付訂閱不能記轉讓",
+    "transferNotFound": "找不到 {date} 的這筆轉讓"
   },
   "tool": {
     "get_overview": "帳本概況",
@@ -100,6 +102,7 @@
     "save_person": "管理人員",
     "get_settings": "帳本設定與偏好",
     "update_settings": "修改帳本設定與偏好",
-    "set_proxy": "管理代付關係"
+    "set_proxy": "管理代付關係",
+    "record_transfer": "記錄或修改轉讓收付"
   }
 }

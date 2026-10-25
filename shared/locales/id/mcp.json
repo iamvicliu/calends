@@ -66,7 +66,9 @@
     "noPeriods": "Pilih setidaknya satu periode, masing-masing hanya sekali",
     "periodUnknown": "{period} bukan periode dari piutang ini",
     "periodTaken": "Periode {period} sudah punya pembayaran atau pembebasan",
-    "periodsShort": "Hanya tersisa {count} periode yang belum lunas, kurang dari cakupan pembayaran ini"
+    "periodsShort": "Hanya tersisa {count} periode yang belum lunas, kurang dari cakupan pembayaran ini",
+    "transferProxy": "Langganan yang dibayarkan untuk orang lain tidak bisa mencatat pengalihan",
+    "transferNotFound": "Tidak ada pengalihan pada {date}"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",
@@ -100,6 +102,7 @@
     "save_person": "Kelola orang",
     "get_settings": "Pengaturan & preferensi buku catatan",
     "update_settings": "Ubah pengaturan & preferensi buku catatan",
-    "set_proxy": "Kelola pembayaran titipan"
+    "set_proxy": "Kelola pembayaran titipan",
+    "record_transfer": "Catat atau edit pengalihan"
   }
 }

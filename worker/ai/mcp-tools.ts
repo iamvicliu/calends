@@ -93,6 +93,7 @@ import { subError } from '../../shared/billing.ts';
 import { validateCurrency, categoryEdit } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
+import { cleanTransfers, netCost, transferredStop, transfersOf, transferValue } from '../../shared/transfers.ts';
 
 /** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
 const storeCountry = (country: string) =>
@@ -759,10 +760,39 @@ const CATALOGUE: Tool[] = [
           from: s.estimateFrom ?? s.start,
           history_complete: !s.estimateFrom,
         },
+        // 转让收付（二手转入付给原主、转出收到的实际现金）；index 为同一天内的序号，供 record_transfer replace/delete
+        transfers: transfersOf(s).map((tr) => ({
+          kind: tr.kind,
+          date: tr.date,
+          index: (s.transfers ?? []).filter((x) => x.date === tr.date).indexOf(tr),
+          amount: tr.amount,
+          currency: tr.currency,
+          base_amount: round(transferValue(st, tr, out ?? st.settings.baseCurrency)),
+          note: tr.note ?? null,
+        })),
+        // 生命周期净成本 = 服务付款 + 转入 − 转出；持有期从最早转入（早于开始时）到最后一次转出
+        net_cost: (() => {
+          const c = netCost(st, s, today, out ?? st.settings.baseCurrency);
+          return {
+            currency: c.currency,
+            service: round(c.service),
+            bought: round(c.bought),
+            sold: round(c.sold),
+            net: round(c.net),
+            holding_from: c.from,
+            holding_until: c.until,
+            holding_days: c.days,
+            per_month: round(c.perMonth),
+            per_day: round(c.perDay),
+            complete: !c.incomplete && !s.estimateFrom,
+          };
+        })(),
         phases: phaseSubs(s).map((v) => ({
           start: v.start,
           end: v.end ?? null,
           stop: stopSummary(v, today) ?? null,
+          // 转出时剩余服务随转让收回：该阶段不计已付未用损失
+          transferred_on: transferredStop(v)?.date ?? null,
           price: v.price,
           currency: v.currency,
           cycle: cycleLabel(v.cycle),
@@ -1631,6 +1661,57 @@ const CATALOGUE: Tool[] = [
     },
   },
   {
+    name: 'record_transfer',
+    description:
+      'Record, replace or delete a transfer of a subscription between owners (e.g. a second-hand VPS): kind=buy is the cash paid to the previous owner when taking it over, kind=sell is the cash received when handing it on. amount is the actual cash (positive), in any currency (converted at the transfer date); do not estimate residual value. Transfers count in lifetime net cost (service charges + buy − sell, averaged over the holding period) and yearly/monthly cash flow, not in MRR, forecasts, wallet runway, refunds or charge counts; a sale inside a stopped phase’s paid period removes its paid-but-unused loss. replace={date,index} edits one (index = zero-based among that date’s transfers, as listed by get_subscription.transfers); delete={date,index} removes one.',
+    write: true,
+    inputSchema: obj(
+      {
+        subscription: SUBREF,
+        kind: { type: 'string', enum: ['buy', 'sell'] },
+        date: { ...DATE, description: 'Defaults to today.' },
+        amount: { type: 'number', minimum: 0 },
+        currency: { type: 'string', description: 'ISO code; defaults to the subscription’s current currency.' },
+        note: { type: 'string' },
+        replace: obj({ date: DATE, index: { type: 'integer', minimum: 0 } }, ['date', 'index']),
+        delete: obj({ date: DATE, index: { type: 'integer', minimum: 0 } }, ['date', 'index']),
+        dry_run: DRY,
+      },
+      ['subscription'],
+    ),
+    async run(a, ctx) {
+      const { st, today } = await state(ctx);
+      const s = findSub(st, a.subscription);
+      if (s.proxy) throw new Error(t('mcp.error.transferProxy'));
+      const list = s.transfers ?? [];
+      const locate = (ref: unknown, field: string) => {
+        const r = ref as { date: unknown; index: unknown };
+        const d = date(r.date, `${field}.date`);
+        const at = list.map((x, i) => [x, i] as const).filter(([x]) => x.date === d)[Number(r.index ?? 0)]?.[1];
+        if (at == null) throw new Error(t('mcp.error.transferNotFound', { date: d }));
+        return at;
+      };
+      let next: typeof list;
+      if (a.delete) {
+        const at = locate(a.delete, 'delete');
+        next = list.filter((_, i) => i !== at);
+      } else {
+        const kind = str(a.kind);
+        if (kind !== 'buy' && kind !== 'sell') throw new Error(t('mcp.error.invalidInput', { field: 'kind' }));
+        const amount = num(a.amount, 'amount');
+        if (!(amount > 0)) throw new Error(t('core.subError.transfer'));
+        const currency = (str(a.currency) ?? currentPhase(s, today).currency).toUpperCase();
+        validateCurrency(st, currency);
+        const item = { kind, date: date(a.date, 'date', today), amount, currency, ...(str(a.note) ? { note: str(a.note)!.trim() } : {}) } as const;
+        if (a.replace) {
+          const at = locate(a.replace, 'replace');
+          next = list.map((x, i) => (i === at ? item : x));
+        } else next = [...list, item];
+      }
+      return commit(ctx, st, today, { ...s, transfers: cleanTransfers(next) }, a.dry_run, [a.delete ? 'delete_transfer' : 'transfer']);
+    },
+  },
+  {
     name: 'get_carpool',
     description:
       'Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from), the plan collection rule (rule: fee, currency, every_months; stored=false means inferred from the most common member rate); members with their actual leave_refund (null when not refunded), fee and billing months, follows_rule (true = fee follows the plan rule, false = custom fee or exempt), overdue_days (days the next unpaid collection is past due, 0 if not), alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.',
@@ -1834,7 +1915,7 @@ const CATALOGUE: Tool[] = [
           type: ['object', 'null'],
           description: 'Actual refund on leaving, positive amount. Requires left; null clears it. Omit to preserve. Date cannot precede joining.',
           properties: {
-            amount: { type: 'number', exclusiveMinimum: 0 },
+            amount: { type: 'number', minimum: 0 },
             date: DATE,
             currency: { type: 'string' },
             note: { type: 'string' },

@@ -183,5 +183,35 @@
     "trial": "Teste",
     "bonus": "Período bônus",
     "since": "Desde {date}"
+  },
+  "transfer": {
+    "title": "Transferências",
+    "held": "Em posse",
+    "net": "Custo líquido",
+    "included": "Incl. transferências",
+    "kind": {
+      "label": "Tipo",
+      "buy": "Comprado",
+      "sell": "Vendido"
+    },
+    "hint": {
+      "buy": "Valor pago ao dono anterior ao assumir (ágio incluído). Informe o valor realmente pago.",
+      "sell": "Valor recebido ao repassar. Informe o valor realmente recebido; o serviço restante deixa de contar como pago e não usado."
+    },
+    "paid": "Valor pago",
+    "received": "Valor recebido",
+    "addTitle": "Registrar transferência",
+    "editTitle": "Editar transferência",
+    "saved": "Transferência salva",
+    "deleted": "Excluir esta transferência",
+    "foot": "Dinheiro realmente pago ou recebido ao assumir ou repassar um serviço de segunda mão. Entra no custo líquido e no fluxo de caixa, não no custo mensal, nas previsões de renovação nem na contagem de cobranças.",
+    "add": "Registrar",
+    "none": "Nenhuma transferência ainda",
+    "netGain": "Ganho líquido",
+    "head": {
+      "date": "Data",
+      "amount": "Valor",
+      "base": "Em {ccy}"
+    }
   }
 }

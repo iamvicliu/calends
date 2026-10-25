@@ -47,7 +47,8 @@
     "start": "Geçersiz başlangıç tarihi",
     "cycle": "Geçersiz ödeme dönemi",
     "refundAmount": "Pozitif bir tutar ve geçerli para birimi girin",
-    "refundDate": "Ayrılma tarihini belirleyin; iade katılma tarihinden önce olamaz"
+    "refundDate": "Ayrılma tarihini belirleyin; iade katılma tarihinden önce olamaz",
+    "transfer": "Geçersiz devir: tür, tarih, pozitif tutar ve para birimi gerekli"
   },
   "phase": {
     "switchTooEarly": "Geçerlilik tarihi mevcut dönemin başlangıcından sonra olmalı",

@@ -69,7 +69,9 @@
     "periodsShort": {
       "one": "Resta só {count} pagamento em aberto, menos do que este recebimento cobre",
       "other": "Restam só {count} pagamentos em aberto, menos do que este recebimento cobre"
-    }
+    },
+    "transferProxy": "Assinaturas pagas para outros não aceitam transferências",
+    "transferNotFound": "Nenhuma transferência em {date}"
   },
   "tool": {
     "get_overview": "Visão geral",
@@ -103,6 +105,7 @@
     "save_person": "Gerenciar pessoa",
     "get_settings": "Configurações e preferências do registro",
     "update_settings": "Atualizar configurações e preferências do registro",
-    "set_proxy": "Gerenciar adiantamentos"
+    "set_proxy": "Gerenciar adiantamentos",
+    "record_transfer": "Registrar ou editar transferências"
   }
 }

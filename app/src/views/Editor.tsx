@@ -7,7 +7,7 @@ import { StopFields } from '../components/StopPanel.tsx';
 import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
-import { cnDateFull, money } from '../../../shared/format.ts';
+import { cnDateFull, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -25,6 +25,8 @@ import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
 import { CurrencySelect, Picker, RegionSelect } from '../components/Picker.tsx';
 import { searchCatalog, type CatalogItem } from '../catalog.ts';
 import type { AppStorePlan } from '../../../shared/appstore-plans.ts';
+import { TransferSheet } from '../components/TransferSheet.tsx';
+import { transfersOf } from '../../../shared/transfers.ts';
 
 const CYCLES: Array<[string, Cycle]> = [...RENEW_CYCLES, ['lt', { unit: 'lifetime', every: 1 }]];
 
@@ -333,7 +335,9 @@ function Form({
     (f.url?.trim() || f.manageUrl?.trim() || f.icon?.trim() || (isDomainCat(f.category) && f.showOnPublic)) && t('editor.more.links'),
     f.tags.length > 0 && t('editor.more.tags'),
     f.notes?.trim() && t('editor.more.notes'),
+    !f.proxy && !!f.transfers?.length && t('detail.transfer.title'),
   ].filter(Boolean) as string[];
+  const [transfer, setTransfer] = useState<{ index?: number } | null>(null);
   // 不保存展开偏好；每次打开（包括恢复/清空表单）都按实际内容决定。
   const [more, setMore] = useState(() => extras.length > 0);
   // 分类表的顺序；表单里的分类万一不在表里（刚被删掉），也留着它
@@ -815,6 +819,36 @@ function Form({
               </Group>
             </>
           )}
+          {/* 转让收付：二手转入、转出的实际现金；完成时随整张表单保存。代付是别人的订阅，没有转让 */}
+          {!f.proxy && (
+            <Group
+              title={t('detail.transfer.title')}
+              foot={t('detail.transfer.foot')}
+              action={
+                <button type="button" className="btn plain" onClick={() => setTransfer({})}>
+                  {t('detail.transfer.add')}
+                </button>
+              }
+            >
+              {f.transfers?.length ? (
+                transfersOf(f).map((tr) => {
+                  const index = f.transfers!.indexOf(tr);
+                  return (
+                    <Cell
+                      key={index}
+                      label={`${t(`detail.transfer.kind.${tr.kind}`)}\n${cnDateFull(tr.date)}`}
+                      sub={tr.note}
+                      onClick={() => setTransfer({ index })}
+                    >
+                      <span className={`num ${tr.kind === 'sell' ? 'green' : ''}`}>{flow(tr.kind === 'buy' ? -tr.amount : tr.amount, tr.currency)}</span>
+                    </Cell>
+                  );
+                })
+              ) : (
+                <Cell label={<span className="muted">{t('detail.transfer.none')}</span>} />
+              )}
+            </Group>
+          )}
           <Group title={t('editor.group.links')}>
             <Cell label={t('editor.field.url')}>
               <input value={f.url ?? ''} placeholder="https://" onChange={(e) => up({ url: val(e) || undefined })} />
@@ -855,6 +889,16 @@ function Form({
             </div>
           </Group>
         </>
+      )}
+      {transfer && (
+        <TransferSheet
+          list={f.transfers ?? []}
+          index={transfer.index}
+          currency={f.currency}
+          today={today}
+          onSave={(next) => up({ transfers: next.length ? next : undefined })}
+          onClose={() => setTransfer(null)}
+        />
       )}
       {newCat && <CategorySheet state={state} onClose={() => setNewCat(false)} onSaved={(name) => up({ category: name })} />}
     </div>

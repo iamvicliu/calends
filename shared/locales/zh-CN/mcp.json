@@ -66,7 +66,9 @@
     "noPeriods": "请至少选一期，且同一期只能写一次",
     "periodUnknown": "{period} 不是这笔账里的一期",
     "periodTaken": "{period} 这一期已经记过收款或免收",
-    "periodsShort": "只剩 {count} 期没结清，不够这笔要抵扣的期数"
+    "periodsShort": "只剩 {count} 期没结清，不够这笔要抵扣的期数",
+    "transferProxy": "代付订阅不能记转让",
+    "transferNotFound": "找不到 {date} 的这笔转让"
   },
   "tool": {
     "get_overview": "账本概况",
@@ -100,6 +102,7 @@
     "save_person": "管理人员",
     "get_settings": "账本设置与偏好",
     "update_settings": "修改账本设置与偏好",
-    "set_proxy": "管理代付关系"
+    "set_proxy": "管理代付关系",
+    "record_transfer": "记录或修改转让收付"
   }
 }

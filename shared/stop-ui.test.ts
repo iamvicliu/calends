@@ -1,4 +1,5 @@
 import { metricComponents } from '../scripts/ui-test-components.ts';
+import * as transfers from './transfers.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
@@ -75,6 +76,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     useSyncExternalStore: (_subscribe: unknown, _get: unknown, server: () => unknown) => server(),
     useEffectEvent: (fn: unknown) => fn,
     ...billing,
+    ...transfers,
     ...phases,
     ...stopForm,
     ...format,

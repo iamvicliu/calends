@@ -833,6 +833,25 @@ function summaryRows(
       );
       add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
       break;
+    case 'record_transfer': {
+      const del = a.delete as { date?: string } | undefined;
+      if (del) {
+        add(t('assistant.f.effect'), t('detail.transfer.deleted'));
+        add(t('assistant.f.date'), day(del.date));
+        break;
+      }
+      add(t('assistant.f.kind'), a.kind === 'sell' ? t('detail.transfer.kind.sell') : t('detail.transfer.kind.buy'));
+      add(
+        t('assistant.f.amount'),
+        a.amount != null ? (
+          <span className={a.kind === 'sell' ? 'green' : undefined}>
+            {flow(a.kind === 'sell' ? Math.abs(Number(a.amount)) : -Math.abs(Number(a.amount)), String(a.currency ?? subCcy ?? state.settings.baseCurrency).toUpperCase())}
+          </span>
+        ) : undefined,
+      );
+      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
+      break;
+    }
     case 'delete_subscription':
       add(t('assistant.f.effect'), t('assistant.v.deleteAll'));
       break;
@@ -894,6 +913,7 @@ function Proposal(props: {
   const destructive =
     part.tool === 'delete_subscription' ||
     part.tool === 'delete_payment' ||
+    (part.tool === 'record_transfer' && !!a.delete) ||
     part.tool === 'remove_share_member' ||
     a.action === 'delete' ||
     a.action === 'remove' ||

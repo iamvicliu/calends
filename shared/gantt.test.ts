@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import * as transfers from './transfers.ts';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
@@ -153,6 +154,7 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
   const useRef = (current: unknown) => useState({ current })[0];
   const deps = {
     ...billing,
+    ...transfers,
     ...format,
     ...gantt,
     t,

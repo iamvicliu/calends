@@ -47,7 +47,8 @@
     "start": "Ungültiges Startdatum",
     "cycle": "Ungültiger Abrechnungszeitraum",
     "refundAmount": "Positiven Erstattungsbetrag und gültige Währung eingeben",
-    "refundDate": "Austrittsdatum angeben; Erstattung nicht vor dem Beitritt"
+    "refundDate": "Austrittsdatum angeben; Erstattung nicht vor dem Beitritt",
+    "transfer": "Ungültige Übertragung: Art, Datum, positiver Betrag und Währung sind erforderlich"
   },
   "phase": {
     "switchTooEarly": "Das Gültigkeitsdatum muss nach dem Beginn der aktuellen Phase liegen",

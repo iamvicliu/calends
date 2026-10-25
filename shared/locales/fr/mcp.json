@@ -69,7 +69,9 @@
     "periodsShort": {
       "one": "Il ne reste que {count} paiement non réglé, moins que ce que couvre ce règlement",
       "other": "Il ne reste que {count} paiements non réglés, moins que ce que couvre ce règlement"
-    }
+    },
+    "transferProxy": "Les abonnements payés pour autrui ne prennent pas de cessions",
+    "transferNotFound": "Aucune cession trouvée le {date}"
   },
   "tool": {
     "get_overview": "Aperçu du registre",
@@ -103,6 +105,7 @@
     "save_person": "Gérer une personne",
     "get_settings": "Paramètres et préférences du registre",
     "update_settings": "Modifier les paramètres et préférences du registre",
-    "set_proxy": "Gérer les avances"
+    "set_proxy": "Gérer les avances",
+    "record_transfer": "Enregistrer ou modifier des cessions"
   }
 }

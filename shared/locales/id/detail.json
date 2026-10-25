@@ -167,5 +167,35 @@
     "trial": "Uji coba",
     "bonus": "Periode bonus",
     "since": "Sejak {date}"
+  },
+  "transfer": {
+    "title": "Pengalihan",
+    "held": "Dimiliki",
+    "net": "Biaya bersih",
+    "included": "Termasuk pengalihan",
+    "kind": {
+      "label": "Jenis",
+      "buy": "Diambil alih",
+      "sell": "Dialihkan"
+    },
+    "hint": {
+      "buy": "Uang yang dibayar ke pemilik sebelumnya saat mengambil alih (termasuk premi). Masukkan jumlah yang benar-benar dibayar.",
+      "sell": "Uang yang diterima saat mengalihkan. Masukkan jumlah yang benar-benar diterima; sisa layanan tidak lagi dihitung sebagai dibayar tapi tak terpakai."
+    },
+    "paid": "Jumlah dibayar",
+    "received": "Jumlah diterima",
+    "addTitle": "Catat pengalihan",
+    "editTitle": "Edit pengalihan",
+    "saved": "Pengalihan disimpan",
+    "deleted": "Hapus pengalihan ini",
+    "foot": "Uang yang benar-benar dibayar atau diterima saat mengambil alih atau mengalihkan layanan bekas. Masuk ke biaya bersih dan arus kas, bukan biaya bulanan, perkiraan perpanjangan, atau jumlah tagihan.",
+    "add": "Catat",
+    "none": "Belum ada pengalihan",
+    "netGain": "Hasil bersih",
+    "head": {
+      "date": "Tanggal",
+      "amount": "Jumlah",
+      "base": "Dalam {ccy}"
+    }
   }
 }

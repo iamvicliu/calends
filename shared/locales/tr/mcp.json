@@ -66,7 +66,9 @@
     "noPeriods": "En az bir dönem seçin, her biri yalnızca bir kez",
     "periodUnknown": "{period} bu alacağın bir dönemi değil",
     "periodTaken": "{period} dönemi için zaten ödeme veya bağış kaydı var",
-    "periodsShort": "Kapanmamış yalnızca {count} dönem kaldı; bu ödemenin kapsadığından az"
+    "periodsShort": "Kapanmamış yalnızca {count} dönem kaldı; bu ödemenin kapsadığından az",
+    "transferProxy": "Başkası adına ödenen aboneliklerde devir kaydedilemez",
+    "transferNotFound": "{date} tarihinde devir bulunamadı"
   },
   "tool": {
     "get_overview": "Defter özeti",
@@ -100,6 +102,7 @@
     "save_person": "Kişi yönetimi",
     "get_settings": "Defter ve arayüz ayarları",
     "update_settings": "Defter ve arayüz ayarlarını güncelle",
-    "set_proxy": "Başkası adına ödemeleri yönet"
+    "set_proxy": "Başkası adına ödemeleri yönet",
+    "record_transfer": "Devir kaydet veya düzenle"
   }
 }

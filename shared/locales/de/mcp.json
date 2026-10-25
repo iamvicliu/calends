@@ -69,7 +69,9 @@
     "periodsShort": {
       "one": "Nur noch {count} offene Zahlung, weniger als diese Zahlung abdeckt",
       "other": "Nur noch {count} offene Zahlungen, weniger als diese Zahlung abdeckt"
-    }
+    },
+    "transferProxy": "Für Abonnements, die du für andere zahlst, gibt es keine Übertragungen",
+    "transferNotFound": "Keine Übertragung am {date} gefunden"
   },
   "tool": {
     "get_overview": "Kontoübersicht",
@@ -103,6 +105,7 @@
     "save_person": "Person verwalten",
     "get_settings": "Buch- & Anzeigeeinstellungen",
     "update_settings": "Buch- & Anzeigeeinstellungen ändern",
-    "set_proxy": "Auslagen verwalten"
+    "set_proxy": "Auslagen verwalten",
+    "record_transfer": "Übertragungen erfassen oder bearbeiten"
   }
 }

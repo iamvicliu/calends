@@ -47,7 +47,8 @@
     "start": "Date de début non valide",
     "cycle": "Cycle de facturation non valide",
     "refundAmount": "Saisissez un montant positif et une devise valide",
-    "refundDate": "Indiquez le départ ; le remboursement ne peut précéder l’arrivée"
+    "refundDate": "Indiquez le départ ; le remboursement ne peut précéder l’arrivée",
+    "transfer": "Cession invalide : type, date, montant positif et devise sont requis"
   },
   "phase": {
     "switchTooEarly": "La date d’effet doit être postérieure au début de la phase actuelle",

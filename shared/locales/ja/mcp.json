@@ -66,7 +66,9 @@
     "noPeriods": "期を1つ以上選んでください（同じ期は1回のみ）",
     "periodUnknown": "{period} はこの債権の期ではありません",
     "periodTaken": "{period} の期にはすでに受取または免除があります",
-    "periodsShort": "未精算の期が {count} 期しか残っておらず、この受取の対象期数に足りません"
+    "periodsShort": "未精算の期が {count} 期しか残っておらず、この受取の対象期数に足りません",
+    "transferProxy": "代理払いのサブスクには譲渡を記録できません",
+    "transferNotFound": "{date} の譲渡が見つかりません"
   },
   "tool": {
     "get_overview": "台帳の概要",
@@ -100,6 +102,7 @@
     "save_person": "相手を管理",
     "get_settings": "台帳設定と表示設定",
     "update_settings": "台帳設定と表示設定を更新",
-    "set_proxy": "立替関係を管理"
+    "set_proxy": "立替関係を管理",
+    "record_transfer": "譲渡を記録・編集"
   }
 }

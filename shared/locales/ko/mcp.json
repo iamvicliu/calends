@@ -66,7 +66,9 @@
     "noPeriods": "회차를 하나 이상 선택하세요(같은 회차는 한 번만)",
     "periodUnknown": "{period}은(는) 이 채권의 회차가 아닙니다",
     "periodTaken": "{period} 회차에는 이미 입금 또는 면제 기록이 있습니다",
-    "periodsShort": "미정산 회차가 {count}회만 남아 이 입금이 적용할 회차보다 적습니다"
+    "periodsShort": "미정산 회차가 {count}회만 남아 이 입금이 적용할 회차보다 적습니다",
+    "transferProxy": "대리 결제 구독에는 양도를 기록할 수 없습니다",
+    "transferNotFound": "{date}의 양도를 찾을 수 없습니다"
   },
   "tool": {
     "get_overview": "장부 개요",
@@ -100,6 +102,7 @@
     "save_person": "사람 관리",
     "get_settings": "장부 설정 및 환경설정",
     "update_settings": "장부 설정 및 환경설정 변경",
-    "set_proxy": "대납 관계 관리"
+    "set_proxy": "대납 관계 관리",
+    "record_transfer": "양도 기록 또는 수정"
   }
 }

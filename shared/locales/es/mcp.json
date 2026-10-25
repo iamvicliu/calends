@@ -69,7 +69,9 @@
     "periodsShort": {
       "one": "Solo queda {count} pago sin saldar, menos de los que cubre este cobro",
       "other": "Solo quedan {count} pagos sin saldar, menos de los que cubre este cobro"
-    }
+    },
+    "transferProxy": "Las suscripciones pagadas por otros no admiten traspasos",
+    "transferNotFound": "No hay ningún traspaso el {date}"
   },
   "tool": {
     "get_overview": "Resumen del registro",
@@ -103,6 +105,7 @@
     "save_person": "Gestionar persona",
     "get_settings": "Ajustes y preferencias del registro",
     "update_settings": "Actualizar ajustes y preferencias del registro",
-    "set_proxy": "Gestionar pagos por terceros"
+    "set_proxy": "Gestionar pagos por terceros",
+    "record_transfer": "Registrar o editar traspasos"
   }
 }

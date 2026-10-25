@@ -306,7 +306,7 @@ test('every new read tool and connection catalogue: read token visibility, title
   const before = await f.snapshot();
   const listed = await f.rpc('tools/list', {}, f.read);
   assert.equal(listed.tools.length, TOOLS.filter((x) => !x.write).length);
-  assert.equal(TOOLS.length, 32);
+  assert.equal(TOOLS.length, 33);
   assert.deepEqual(
     ASSISTANT_TOOLS.map((x) => x.name),
     TOOLS.map((x) => x.name),
@@ -1396,4 +1396,60 @@ test('MCP 读取导入订阅：标出导入边界，累计支出只从边界算�
   assert.match(text, /"estimate_from":"2026-10-24"/);
   assert.match(text, /"history_complete":false/);
   assert.match(text, /"from":"2026-10-24"/);
+});
+
+test('record_transfer：dry_run 不写入、读令牌拒绝、记录/改写/删除，get_subscription 给出转让与净成本', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), start: '2026-01-05', share: undefined, proxy: undefined, payments: [{ date: '2026-01-05', amount: 10 }] };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const transfers = async () => (await f.snapshot()).subscriptions.find((x) => x.id === 's')!.transfers;
+  const args = { subscription: 's', kind: 'buy', date: '2026-01-05', amount: 100, currency: 'USD', note: 'Fictional premium' };
+  const before = await f.snapshot();
+  const preview = await f.call('record_transfer', { ...args, dry_run: true });
+  assert.equal(preview.isError, undefined, JSON.stringify(preview));
+  assert.equal(preview.structuredContent.dry_run, true);
+  assert.deepEqual(preview.structuredContent.after.transfers, [{ kind: 'buy', date: '2026-01-05', amount: 100, currency: 'USD', note: 'Fictional premium' }]);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('record_transfer', args, f.read)).isError, true);
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('record_transfer', { ...args, amount: 0 })).isError, true);
+  assert.equal((await f.call('record_transfer', { ...args, kind: 'gift' })).isError, true);
+  assert.equal((await f.call('record_transfer', args)).isError, undefined);
+  let r = await f.call('record_transfer', { subscription: 's', kind: 'sell', date: '2026-02-01', amount: 30 });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  assert.equal((await transfers())?.length, 2);
+  // 改写：按日期与同日序号定位，缺省币种取订阅币种
+  r = await f.call('record_transfer', { subscription: 's', replace: { date: '2026-02-01', index: 0 }, kind: 'sell', date: '2026-02-01', amount: 40 });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  assert.deepEqual((await transfers())?.[1], { kind: 'sell', date: '2026-02-01', amount: 40, currency: 'USD' });
+  const detail = (await f.call('get_subscription', { subscription: 's' }, f.read)).structuredContent;
+  assert.equal(detail.transfers.length, 2);
+  assert.equal(detail.net_cost.bought, 100);
+  assert.equal(detail.net_cost.sold, 40);
+  assert.equal(detail.net_cost.net, Math.round((detail.net_cost.service + 100 - 40) * 100) / 100);
+  assert.equal(detail.net_cost.holding_until, '2026-02-01');
+  assert.equal((await f.call('record_transfer', { subscription: 's', delete: { date: '2026-03-01', index: 0 } })).isError, true);
+  r = await f.call('record_transfer', { subscription: 's', delete: { date: '2026-01-05', index: 0 }, dry_run: true });
+  assert.equal((await transfers())?.length, 2);
+  r = await f.call('record_transfer', { subscription: 's', delete: { date: '2026-01-05', index: 0 } });
+  assert.equal(r.isError, undefined, JSON.stringify(r));
+  assert.deepEqual((await transfers())?.map((x) => x.kind), ['sell']);
+  // 代付是别人的订阅：不能记转让
+  await upsert(f.env, 'subscriptions', 'p', { ...sub(), id: 'p', share: undefined });
+  assert.equal((await f.call('record_transfer', { ...args, subscription: 'p' })).isError, true);
+});
+
+test('PUT /api/subscriptions 校验转让并原样保存；备份导出带上转让', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), share: undefined, proxy: undefined };
+  const bad = await f.request('subscriptions/s', 'PUT', { ...s, transfers: [{ kind: 'buy', date: s.start, amount: -1, currency: 'USD' }] });
+  assert.equal(bad.status, 400);
+  const transfers = [{ kind: 'sell' as const, date: s.start, amount: 25, currency: 'EUR', note: 'Fictional buyer' }];
+  const ok = await f.request('subscriptions/s', 'PUT', { ...s, transfers });
+  assert.equal(ok.status, 200);
+  assert.deepEqual((await f.snapshot()).subscriptions.find((x) => x.id === 's')?.transfers, transfers);
+  const backup = await (await f.request('backup')).json();
+  assert.deepEqual(backup.subscriptions.find((x: Subscription) => x.id === 's').transfers, transfers);
 });

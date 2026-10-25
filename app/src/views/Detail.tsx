@@ -34,6 +34,7 @@ import {
 } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateAuto, cnDateFull, money, relDays, weekdayOf } from '../../../shared/format.ts';
 import { stopLosses } from '../../../shared/metrics.ts';
+import { netCost, transferredStop, transfersOf, transferSign, transferValue } from '../../../shared/transfers.ts';
 import { chargeValue, convertOn, rateOn } from '../../../shared/fx.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
 import { CarMembers, CarSheet } from './Carpool.tsx';
@@ -52,6 +53,8 @@ import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { ChargeBars, type ChartLane } from './DetailChart.tsx';
 import { detailForecast } from './detail-data.ts';
 import { DetailHead, DetailSheet, Note, Panel, Prop } from '../components/DetailKit.tsx';
+import { TransferSheet } from '../components/TransferSheet.tsx';
+import type { Transfer } from '../../../shared/types.ts';
 
 /** 状态角标的色调；文案见 list.status.* */
 const TONE: Record<string, string> = {
@@ -154,6 +157,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   // 合租弹窗：从详情的合租区点进去，看收了多少、付了多少；成员资料再叠一层
   const [car, setCar] = useState(false);
   const [member, setMember] = useState<{ m?: ShareMember; collect?: boolean } | null>(null);
+  const [transfer, setTransfer] = useState<{ index?: number } | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
   const nowPrice = next && (!cur.end || next < cur.end) ? priceAt(sub, next) : cur.price;
@@ -274,6 +278,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         {/* 合租比扣款记录重要，放在前面 */}
         <ShareCard sub={sub} state={state} today={today} onCar={() => setCar(true)} onMember={(m, collect) => setMember({ m, collect })} />
         {charges}
+        <Transfers sub={sub} state={state} onRow={ro ? undefined : (index) => setTransfer({ index })} onAdd={ro ? undefined : () => setTransfer({})} />
         {events}
       </div>
 
@@ -314,6 +319,18 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           document.body,
         )}
       {member && createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
+      {transfer &&
+        createPortal(
+          <TransferSheet
+            list={sub.transfers ?? []}
+            index={transfer.index}
+            currency={cur.currency}
+            today={today}
+            onSave={(next: Transfer[]) => void run(() => saveSub({ ...sub, transfers: next.length ? next : undefined }), t('detail.transfer.saved'))}
+            onClose={() => setTransfer(null)}
+          />,
+          document.body,
+        )}
       {pay &&
         createPortal(
           <PaymentSheet
@@ -333,6 +350,62 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   );
 }
 
+/**
+ * 转让收付：二手转入付给原主的钱、转出收到的钱，与扣款记录同一张表（日期 · 类型 · 原币 · 折合）；
+ * 金额只在这里出现，顶部「净花费」只写合计。转入是支出（负），转出是收入（正）
+ */
+function Transfers({ sub, state, onRow, onAdd }: { sub: Subscription; state: AppState; onRow?: (index: number) => void; onAdd?: () => void }) {
+  const base = state.settings.baseCurrency;
+  const list = sub.transfers ?? [];
+  if (!list.length) return null;
+  const rows = transfersOf(sub)
+    .map((tr) => ({ tr, index: list.indexOf(tr), v: -transferSign(tr) * transferValue(state, tr, base) }))
+    .reverse();
+  return (
+    <Panel
+      className="dt-charges dt-transfers"
+      title={t('detail.transfer.title')}
+      aside={
+        onAdd && (
+          <button className="dt-btn sm dt-add" onClick={onAdd} title={t('detail.transfer.addTitle')}>
+            <Plus size={14} /> {t('detail.charges.addShort')}
+          </button>
+        )
+      }
+    >
+      <YearLedger
+        items={rows}
+        dateOf={(r) => r.tr.date}
+        keepSecond
+        head={[t('detail.transfer.head.date'), t('detail.transfer.kind.label'), t('detail.transfer.head.amount'), t('detail.transfer.head.base', { ccy: base })]}
+        yearCells={(ys) => {
+          const total = ys.reduce((a, r) => a + r.v, 0);
+          return {
+            second: null,
+            orig: copyParts(
+              [...ys.reduce((m, r) => m.set(r.tr.currency, (m.get(r.tr.currency) ?? 0) - transferSign(r.tr) * r.tr.amount), new Map<string, number>())]
+                .map(([ccy, sum]) => flow(sum, ccy))
+                .join('\n'),
+            ),
+            base: Number.isFinite(total) ? flow(total, base) : '—',
+            baseClass: total > 0 ? 'dt-in' : undefined,
+          };
+        }}
+        row={({ tr, v }) => ({
+          date: <time dateTime={tr.date}>{cnDateFull(tr.date)}</time>,
+          second: <span className={`dt-kind transfer ${tr.kind}`}>{t(`detail.transfer.kind.${tr.kind}`)}</span>,
+          orig: flow(-transferSign(tr) * tr.amount, tr.currency, Number.isInteger(tr.amount) ? { decimals: 0 } : {}),
+          base: Number.isFinite(v) ? flow(v, base) : '—',
+          baseClass: v > 0 ? 'dt-in' : undefined,
+        })}
+        rowKey={({ index }) => `t${index}`}
+        rowTitle={({ tr }) => tr.note}
+        onRow={onRow && (({ index }) => onRow(index))}
+      />
+    </Panel>
+  );
+}
+
 /** 正常扣款（不含退款、补差、失败，也不含记成负数的返佣、抵扣）：走势和「每笔」都只看这些 */
 const regular = (h: Charge[]) => h.filter((c) => !c.kind && c.amount > 0);
 
@@ -345,15 +418,17 @@ const regular = (h: Charge[]) => h.filter((c) => !c.kind && c.amount > 0);
 function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
   const base = state.settings.baseCurrency;
   const st = effectiveStatus(sub, today);
-  const vals = history.map((c) => chargeValue(state, c, base));
-  // 有一笔缺汇率就不能求和：显示「—」，不能把缺的那笔当 0
-  const total = vals.reduce((a, v) => a + v, 0);
+  // 累计 = 服务付款 + 转入 − 转出；有一笔转让缺汇率就不能求和：显示「—」，不能把缺的那笔当 0
+  const cost = netCost(state, sub, today, base);
+  const transferred = transfersOf(sub).some((tr) => tr.date <= today);
+  const total = cost.net;
   const per = regular(history)
     .map((c) => chargeValue(state, c, base))
     .filter(Number.isFinite);
   // 实际在订的天数：各段到今天（或结束日）为止，不算断档，并行的不重复计
   const served = servedTime(sub, today);
-  const active = served.days;
+  // 有转让时按持有期：最早转入起，转出那天止
+  const active = transferred ? cost.days : served.days;
   const gaps = served.gaps.length;
   // 按平均月长取整：11-24 到次年 10-24 是 11 个月，不能因为差几天算成 10 个月
   const span = active < 30 ? 0 : Math.round(active / 30.4375);
@@ -362,7 +437,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   // 订了不到一个月（或只有一笔）时，「实际每月」没有意义：改用标价折算的预计每月
   // An incomplete imported history cannot establish an average over the original service lifetime.
-  const young = !!sub.estimateFrom || active < 30 || per.length < 2;
+  const young = !!sub.estimateFrom || active < 30 || (per.length < 2 && !transferred);
   const perMonth = young
     ? toBase(state, monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency)
     : total / Math.max(1, active / 30.44);
@@ -387,9 +462,9 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
   const ended = ['ended', 'terminated'].includes(st) && sub.end && !phaseSubs(sub).some((p) => p.stop);
   const durationCell = (
     <Metric
-      label={lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
+      label={transferred ? t('detail.transfer.held') : lifetime ? t('detail.stats.owned') : t('detail.stats.subscribed')}
       value={duration}
-      note={gaps > 0 ? t('detail.stats.gaps', { count: gaps }) : t('detail.period.since', { date: cnDateFull(sub.start) })}
+      note={gaps > 0 ? t('detail.stats.gaps', { count: gaps }) : t('detail.period.since', { date: cnDateFull(transferred ? cost.from : sub.start) })}
     />
   );
 
@@ -409,11 +484,18 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
       {(next || ended) && durationCell}
       {/* 只有一笔时累计就是那一笔，扣款记录里已有，不再占一格 */}
       {/* 导入边界之前的历史没有记录：没有一笔时写「—」，小字说明只算导入之后 */}
-      {history.length !== 1 && (
+      {/* 有转让时是净花费：转入、转出各自的金额在下方转让卡片，这里只写合计 */}
+      {(history.length !== 1 || transferred) && (
         <Metric
-          label={t('detail.stats.spent')}
-          value={sub.estimateFrom && !history.length ? '—' : amount(total)}
-          note={sub.estimateFrom ? t('settings.import.history') : t('detail.stats.count', { count: history.length })}
+          label={transferred ? t(total < 0 ? 'detail.transfer.netGain' : 'detail.transfer.net') : t('detail.stats.spent')}
+          value={sub.estimateFrom && !history.length && !transferred ? '—' : amount(total)}
+          note={
+            sub.estimateFrom
+              ? t('settings.import.history')
+              : transferred
+                ? copyParts([t('detail.stats.count', { count: history.length }), t('detail.transfer.included')].join('\n'))
+                : t('detail.stats.count', { count: history.length })
+          }
         />
       )}
       <Metric
@@ -778,6 +860,9 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
             future: p.date > today,
           });
   }
+  // 转让只记发生了什么，金额在转让卡片里
+  for (const tr of transfersOf(sub))
+    evs.push({ date: tr.date, title: t(`detail.transfer.kind.${tr.kind}`), sub: state.readonly ? undefined : tr.note, tone: tr.kind === 'sell' ? 'ok' : 'acc', future: tr.date > today });
   if (sub.end && !sub.stop)
     evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
   // 一条时间线，新的在上
@@ -826,6 +911,9 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
       {stopped.map((phase) => {
         const sm = stopSummary(phase, today)!;
         const loss = losses.find((item) => item.phase.start === phase.start);
+        // 转出时剩余服务随转让收回：不写已付未用损失，改写转出日
+        const sold = transferredStop(phase);
+        if (sold) sm.unusedValue = 0;
         return (
           <section key={phase.start} className={`dt-panel dt-outcome ${sm.kind === 'terminate' ? 'bad' : ''} ${sm.unusedValue > 0 ? 'loss' : ''}`}>
             <div className="dt-ph row">
@@ -854,6 +942,7 @@ function Outcome({ sub, state, today }: { sub: Subscription; state: AppState; to
             <dl className="dt-props">
               <Prop k={t('core.stop.date')}>{cnDateFull(sm.date)}</Prop>
               <Prop k={t('detail.stop.paidThrough')}>{cnDateFull(sm.paidThrough)}</Prop>
+              {sold && <Prop k={t('detail.transfer.kind.sell')}>{cnDateFull(sold.date)}</Prop>}
               <Prop k={t('editor.payment.kind.refund')}>
                 {sm.refunded > 0 ? (
                   <span className="dt-in">

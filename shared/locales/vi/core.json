@@ -42,7 +42,8 @@
     "start": "Ngày bắt đầu không hợp lệ",
     "cycle": "Chu kỳ thanh toán không hợp lệ",
     "refundAmount": "Nhập số tiền dương và loại tiền hợp lệ",
-    "refundDate": "Đặt ngày rời nhóm; ngày hoàn tiền không được trước ngày tham gia"
+    "refundDate": "Đặt ngày rời nhóm; ngày hoàn tiền không được trước ngày tham gia",
+    "transfer": "Chuyển nhượng không hợp lệ: cần loại, ngày, số tiền dương và tiền tệ"
   },
   "phase": {
     "switchTooEarly": "Ngày hiệu lực phải sau ngày bắt đầu giai đoạn hiện tại",

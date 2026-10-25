@@ -25,6 +25,7 @@ import { chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
+import { transferRows, transferredStop } from './transfers.ts';
 
 const MONTH = 30.4375;
 
@@ -328,6 +329,8 @@ export function stopLosses(state: AppState, today: string, range?: { from?: stri
     if (sub.proxy) continue;
     phaseSubs(sub).forEach((phase, phaseIndex) => {
       if (!phase.stop || phase.stop.date > today || (range?.from && phase.stop.date < range.from) || (range?.to && phase.stop.date > range.to)) return;
+      // 转出时剩余服务已随转让收回，不算已付未用
+      if (transferredStop(phase)) return;
       const summary = stopSummary(phase, today)!;
       const factor = myShareFactor(phase, summary.date);
       const loss = summary.unusedValue * factor;
@@ -707,6 +710,14 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
     r.sum += v;
     bySub.set(c.sub.id, r);
     byMonth.set(c.date.slice(0, 7), (byMonth.get(c.date.slice(0, 7)) ?? 0) + v);
+  }
+  // 转让是现金流：转入加、转出减，计入总额与各月，但不算扣款笔数和币种
+  for (const r of transferRows(state, from, to, today)) {
+    total += r.amount;
+    const e = bySub.get(r.sub.id) ?? { sub: r.sub, sum: 0 };
+    e.sum += r.amount;
+    bySub.set(r.sub.id, e);
+    byMonth.set(r.date.slice(0, 7), (byMonth.get(r.date.slice(0, 7)) ?? 0) + r.amount);
   }
   const live = state.subscriptions.filter((s) => s.cycle.unit !== 'lifetime' && ['active', 'ending', 'paused'].includes(effectiveStatus(s, today)));
   const longest = live.map((s) => ({ sub: s, days: diffDays(s.start, today) })).sort((a, b) => b.days - a.days)[0];

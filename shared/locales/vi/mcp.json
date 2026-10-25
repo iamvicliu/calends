@@ -66,7 +66,9 @@
     "noPeriods": "Chọn ít nhất một kỳ, mỗi kỳ chỉ một lần",
     "periodUnknown": "{period} không phải một kỳ của khoản phải thu này",
     "periodTaken": "Kỳ {period} đã có khoản thu hoặc miễn thu",
-    "periodsShort": "Chỉ còn {count} kỳ chưa tất toán, ít hơn số kỳ khoản thu này áp dụng"
+    "periodsShort": "Chỉ còn {count} kỳ chưa tất toán, ít hơn số kỳ khoản thu này áp dụng",
+    "transferProxy": "Gói trả hộ không ghi được chuyển nhượng",
+    "transferNotFound": "Không tìm thấy chuyển nhượng ngày {date}"
   },
   "tool": {
     "get_overview": "Tổng quan sổ",
@@ -100,6 +102,7 @@
     "save_person": "Quản lý người",
     "get_settings": "Cài đặt sổ & tùy chọn",
     "update_settings": "Cập nhật cài đặt sổ & tùy chọn",
-    "set_proxy": "Quản lý trả hộ"
+    "set_proxy": "Quản lý trả hộ",
+    "record_transfer": "Ghi hoặc sửa chuyển nhượng"
   }
 }

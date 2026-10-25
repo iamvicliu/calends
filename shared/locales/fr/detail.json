@@ -183,5 +183,35 @@
     "trial": "Essai",
     "bonus": "Période offerte",
     "since": "Depuis le {date}"
+  },
+  "transfer": {
+    "title": "Cessions",
+    "held": "Détenu",
+    "net": "Coût net",
+    "included": "Cessions incluses",
+    "kind": {
+      "label": "Type",
+      "buy": "Repris",
+      "sell": "Cédé"
+    },
+    "hint": {
+      "buy": "Somme versée à l’ancien titulaire lors de la reprise (prime comprise). Saisissez le montant réellement payé.",
+      "sell": "Somme reçue lors de la cession. Saisissez le montant réellement reçu ; le service restant n’est plus compté comme payé non utilisé."
+    },
+    "paid": "Montant payé",
+    "received": "Montant reçu",
+    "addTitle": "Enregistrer une cession",
+    "editTitle": "Modifier la cession",
+    "saved": "Cession enregistrée",
+    "deleted": "Supprimer cette cession",
+    "foot": "Argent réellement payé ou reçu lors de la reprise ou de la cession d’un service d’occasion. Compté dans le coût net et la trésorerie, pas dans le coût mensuel, les prévisions de renouvellement ni le nombre de prélèvements.",
+    "add": "Enregistrer",
+    "none": "Aucune cession pour l’instant",
+    "netGain": "Gain net",
+    "head": {
+      "date": "Date",
+      "amount": "Montant",
+      "base": "En {ccy}"
+    }
   }
 }

@@ -42,7 +42,8 @@
     "start": "Tanggal mulai tidak valid",
     "cycle": "Siklus tagihan tidak valid",
     "refundAmount": "Masukkan jumlah positif dan mata uang yang valid",
-    "refundDate": "Tetapkan tanggal keluar; pengembalian tidak boleh sebelum bergabung"
+    "refundDate": "Tetapkan tanggal keluar; pengembalian tidak boleh sebelum bergabung",
+    "transfer": "Pengalihan tidak valid: jenis, tanggal, jumlah positif, dan mata uang wajib diisi"
   },
   "phase": {
     "switchTooEarly": "Tanggal berlaku harus setelah fase saat ini dimulai",
