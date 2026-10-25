@@ -205,6 +205,7 @@
       "date": "Tarih",
       "amount": "Tutar",
       "base": "{ccy} karşılığı"
-    }
+    },
+    "confirmDelete": "{date} tarihli devir silinsin mi?"
   }
 }

@@ -56,5 +56,6 @@
     "due": "Unpaid",
     "upcoming": "Not due",
     "this": "This payment"
-  }
+  },
+  "confirmDelete": "Delete the record on {date}?"
 }

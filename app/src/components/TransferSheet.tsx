@@ -3,7 +3,8 @@ import { t } from '../../../shared/i18n.ts';
 import type { Transfer } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect } from './Picker.tsx';
-import { Cell, Group, MoneyInput, Seg, Sheet, useSubmit } from './ui.tsx';
+import { ask, Cell, Group, MoneyInput, Seg, Sheet, useSubmit } from './ui.tsx';
+import { cnDateFull } from '../../../shared/format.ts';
 
 /**
  * 记一笔 / 修改一笔转让收付：二手转入付给原主的钱，或转出时收到的钱。金额是实际现金，不推算剩余价值。
@@ -54,7 +55,9 @@ export function TransferSheet({
               className="btn danger"
               style={{ marginRight: 'auto' }}
               disabled={busy}
-              onClick={() => submit(() => onSave(list.filter((_, i) => i !== index)))}
+              onClick={async () =>
+                (await ask(t('detail.transfer.confirmDelete', { date: cnDateFull(edit.date) }))) && submit(() => onSave(list.filter((_, i) => i !== index)))
+              }
             >
               {t('common.delete')}
             </button>

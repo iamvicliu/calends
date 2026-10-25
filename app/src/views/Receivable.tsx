@@ -8,7 +8,7 @@ import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type L
 import type { AppState, Receipt, Waiver } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { Cell, Group, NumInput, Seg, Sheet, useSubmit } from '../components/ui.tsx';
+import { ask, Cell, Group, NumInput, Seg, Sheet, useSubmit } from '../components/ui.tsx';
 import { run } from '../store.ts';
 
 /** 一期的起止：起始日带年份，同一年内的结束日不重复年份 */
@@ -136,7 +136,10 @@ export function ReceivableSheet({
               className="btn plain"
               style={{ color: 'var(--red)' }}
               disabled={saving}
-              onClick={() => write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))}
+              onClick={async () =>
+                (await ask(t('receivable.confirmDelete', { date: cnDateFull(edit.date) }))) &&
+                write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))
+              }
             >
               {t('common.delete')}
             </button>

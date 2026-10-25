@@ -198,6 +198,7 @@
       "date": "Tanggal",
       "amount": "Jumlah",
       "base": "Dalam {ccy}"
-    }
+    },
+    "confirmDelete": "Hapus pengalihan tanggal {date}?"
   }
 }

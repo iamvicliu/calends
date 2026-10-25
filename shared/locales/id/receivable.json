@@ -44,5 +44,6 @@
     "due": "Belum dibayar",
     "upcoming": "Belum jatuh tempo",
     "this": "Pembayaran ini"
-  }
+  },
+  "confirmDelete": "Hapus catatan tanggal {date}?"
 }

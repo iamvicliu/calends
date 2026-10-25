@@ -513,7 +513,8 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
       t('family.member.copied', { count: targets.length }),
     );
   };
-  const removeRecordById = (id: string) =>
+  const removeRecordById = async (id: string, date: string) =>
+    (await ask(t('receivable.confirmDelete', { date: cnDateFull(date) }))) &&
     run(() => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)), t('receivable.toastRemoved'));
 
   const [busy, submit] = useSubmit();
@@ -893,7 +894,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                           <Icon name="copy" />
                         </IconButton>
                       )}
-                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removeRecordById(r.id)}>
+                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => void removeRecordById(r.id, r.date)}>
                         <Icon name="x" />
                       </IconButton>
                     </span>

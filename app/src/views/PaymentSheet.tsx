@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { activePhases, chargesBetween, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
-import { money } from '../../../shared/format.ts';
+import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { deletePayment, savePayment, setPhaseMethod } from '../../../shared/phases.ts';
 import type { Payment, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { MoneyInput, Cell, Group, Icon, IconButton, Seg, Sheet, useSubmit } from '../components/ui.tsx';
+import { ask, MoneyInput, Cell, Group, Icon, IconButton, Seg, Sheet, useSubmit } from '../components/ui.tsx';
 import { getState, run, saveSub } from '../store.ts';
 
 type Kind = 'charge' | NonNullable<Payment['kind']>;
@@ -85,7 +85,8 @@ export function PaymentSheet({
       ),
     );
   };
-  const remove = () =>
+  const remove = async () =>
+    (await ask(t('editor.payment.confirmDelete', { date: cnDateFull(edit!.pay.date) }))) &&
     submit(() =>
       run(async () => {
         await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index, edit!.phase));

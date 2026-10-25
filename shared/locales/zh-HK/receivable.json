@@ -44,5 +44,6 @@
     "due": "未付款",
     "upcoming": "未到期",
     "this": "本筆"
-  }
+  },
+  "confirmDelete": "刪除 {date} 的這條記錄？"
 }

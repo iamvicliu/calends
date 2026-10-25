@@ -56,5 +56,6 @@
     "due": "Não pago",
     "upcoming": "A vencer",
     "this": "Este recebimento"
-  }
+  },
+  "confirmDelete": "Excluir o registro de {date}?"
 }
