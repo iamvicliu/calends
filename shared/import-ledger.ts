@@ -1,5 +1,7 @@
 import { addDays, subError, uid, validDay } from './billing.ts';
-import { parseCsv, importSubscriptionsCsv } from './csv.ts';
+import { importCycle, parseCsv, importSubscriptionsCsv } from './csv.ts';
+
+export { importCycle };
 import type { Cycle, PaymentMethod, Subscription } from './types.ts';
 import { t } from './i18n.ts';
 
@@ -61,22 +63,6 @@ const webUrl = (x: unknown) => {
     return undefined;
   }
 };
-
-export function importCycle(raw: unknown): Cycle | undefined {
-  const value = text(raw).toLowerCase();
-  if (/^(one[- ]time|lifetime|once)$/.test(value)) return { unit: 'lifetime', every: 1 };
-  const common: Record<string, Cycle> = {
-    daily: { unit: 'day', every: 1 },
-    weekly: { unit: 'week', every: 1 },
-    monthly: { unit: 'month', every: 1 },
-    quarterly: { unit: 'month', every: 3 },
-    yearly: { unit: 'year', every: 1 },
-    annually: { unit: 'year', every: 1 },
-  };
-  if (common[value]) return common[value];
-  const match = value.match(/^every\s+(\d+)\s+(day|week|month|year)s?$/);
-  return match && Number(match[1]) > 0 ? { unit: match[2] as Cycle['unit'], every: Number(match[1]) } : undefined;
-}
 
 /** Exported symbols such as $ and ¥ are deliberately not resolved to a currency code. */
 function currencyOf(code: string, price: string): string | undefined {
@@ -244,7 +230,9 @@ export function prepareImport(
     let method =
       pool.find((m) => m.name === r.method && (r.paymentMethod != null || m.currency === currency)) ?? pool.find((m) => !!r.method && m.name === r.method);
     if (r.method && !method) {
-      method = r.paymentMethod ? { ...r.paymentMethod, id: uid() } : { id: uid(), name: r.method, kind: 'other', currency };
+      method = r.paymentMethod
+        ? { ...r.paymentMethod, id: uid(), currency: r.paymentMethod.currency || currency }
+        : { id: uid(), name: r.method, kind: 'other', currency };
       created.push(method);
     }
     if (method && !methods.some((m) => m.id === method!.id)) methods.push(method);

@@ -42,10 +42,12 @@ export function toCsv(rows: unknown[][]): string {
   return '﻿' + rows.map((r) => r.map(toCsvCell).join(',')).join('\n');
 }
 
-function parseCycle(s: string): Cycle {
-  const t = s.trim().toLowerCase();
-  if (t === 'lifetime' || t === 'one time' || t === 'once') return { unit: 'lifetime', every: 1 };
-  const map: Record<string, Cycle> = {
+export function importCycle(raw: unknown): Cycle | undefined {
+  const value = String(raw ?? '')
+    .trim()
+    .toLowerCase();
+  if (/^(one[- ]time|lifetime|once)$/.test(value)) return { unit: 'lifetime', every: 1 };
+  const common: Record<string, Cycle> = {
     daily: { unit: 'day', every: 1 },
     weekly: { unit: 'week', every: 1 },
     monthly: { unit: 'month', every: 1 },
@@ -53,10 +55,9 @@ function parseCycle(s: string): Cycle {
     yearly: { unit: 'year', every: 1 },
     annually: { unit: 'year', every: 1 },
   };
-  if (map[t]) return map[t];
-  const m = t.match(/every\s+(\d+)\s+(day|week|month|year)s?/);
-  if (m) return { unit: m[2] as Cycle['unit'], every: Number(m[1]) };
-  return { unit: 'month', every: 1 };
+  if (common[value]) return common[value];
+  const match = value.match(/^every\s+(\d+)\s+(day|week|month|year)s?$/);
+  return match && Number(match[1]) > 0 ? { unit: match[2] as Cycle['unit'], every: Number(match[1]) } : undefined;
 }
 
 function mdy(s: string): string | undefined {
@@ -66,9 +67,10 @@ function mdy(s: string): string | undefined {
   return undefined;
 }
 
+/** 认不出的金额（含逗号小数、千分位等有歧义的写法）为 NaN，交给 prepareImport 在预览里拦下 */
 function amount(s: string): number {
-  const n = Number(s.replace(/[^\d.-]/g, ''));
-  return Number.isFinite(n) ? n : 0;
+  const numeric = s.replace(/[^\d.,+-]/g, '');
+  return /^[-+]?\d+(?:\.\d+)?$/.test(numeric) ? Number(numeric) : NaN;
 }
 
 /** 依据账户名称推断类型 */
@@ -85,8 +87,11 @@ function guessKind(name: string): MethodKind {
 
 const REGION_BY_CCY: Record<string, string> = { TRY: 'TR', NGN: 'NG', PHP: 'PH', INR: 'IN', PKR: 'PK', EGP: 'EG', CNY: 'CN', USD: 'US' };
 
+/** 币种、周期、开始日可能缺失或认不出：原样交给 prepareImport 报问题，不替用户猜 */
+export type ImportedSubscription = Omit<Subscription, 'currency' | 'cycle' | 'start'> & { currency?: string; cycle?: Cycle; start?: string };
+
 export interface ImportResult {
-  subscriptions: Subscription[];
+  subscriptions: ImportedSubscription[];
   /** 要写入的支付方式：新建的加上被引用到的已有的 */
   methods: PaymentMethod[];
   /** 其中新建的 */
@@ -135,26 +140,29 @@ export function importSubscriptionsCsv(text: string, existing: PaymentMethod[], 
     return m.id;
   };
   // 没有名称的行（空行、合计行等）直接跳过，不让整批导入失败
-  const subscriptions: Subscription[] = rows
+  const subscriptions: ImportedSubscription[] = rows
     .filter((r) => col(r, 'name'))
     .map((r) => {
-      const ccy = col(r, 'currency').toUpperCase() || 'CNY';
-      const start = mdy(col(r, 'starts', 'start')) ?? today;
-      const end = mdy(col(r, 'ends', 'end'));
-      const cycle = parseCycle(col(r, 'cycle'));
+      const ccy = col(r, 'currency').toUpperCase();
+      // 空开始日交给 prepareImport 按今天并在备注说明；认不出的保留原文，预览里拦下待修正
+      const rawStart = col(r, 'starts', 'start');
+      const start = mdy(rawStart) ?? (rawStart || undefined);
+      const rawEnd = col(r, 'ends', 'end');
+      const end = mdy(rawEnd);
+      const cycle = importCycle(col(r, 'cycle'));
       const tags = col(r, 'tags')
         .split(/[\s,，]+/)
         .filter(Boolean);
-      const sub: Subscription = {
+      const sub: ImportedSubscription = {
         id: uid(),
         name: col(r, 'name'),
         category: col(r, 'category') || t('core.csv.otherCategory'),
         tags,
         price: amount(col(r, 'price')),
-        currency: ccy,
+        currency: ccy || undefined,
         cycle,
         start,
-        end,
+        end: end ?? (rawEnd || undefined),
         status: end && end < today ? 'cancelled' : 'active',
         methodId: methodFor(col(r, 'payment account', 'payment method'), ccy),
         url: col(r, 'url') || undefined,
