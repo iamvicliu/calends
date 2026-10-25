@@ -333,6 +333,7 @@ export function List({
               const st = effectiveStatus(s, today);
               const n = nextCharge(s, addDays(today, 1));
               const d = n ? diffDays(today, n) : undefined;
+              const v = shown(s, n);
               const cur = currentPhase(s, today);
               const up = upcomingPhase(s, today);
               const m = state.methods.find((x) => x.id === cur.methodId);
@@ -375,11 +376,11 @@ export function List({
                     <PayBadge m={m} />
                   </div>
                   <div className="sc-price">
-                    <Amount plain value={shown(s, n).value} ccy={shown(s, n).ccy} />
+                    <Amount plain value={v.value} ccy={v.ccy} />
                     <span className="sc-per">/{perLabel(cur)}</span>
                   </div>
                   <div className="sc-foot">
-                    <span>{shown(s, n).sub ?? '\u00a0'}</span>
+                    <span>{v.sub ?? '\u00a0'}</span>
                     <span className={d != null && d <= 3 ? 'soon' : ''}>
                       {st === 'lifetime' ? (
                         s.start.slice(0, 7)
