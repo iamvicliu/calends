@@ -350,3 +350,15 @@ test('W-12 取不到访客 IP 时连续输错不会把站长锁在门外；有 I
   assert.equal((await login('correct-horse', '203.0.113.5')).status, 429);
   assert.equal((await login('correct-horse', '203.0.113.6')).status, 200);
 });
+
+test('W-13 一次性登录挑战被并发请求取用时只有一个能拿到', async () => {
+  const f = fixture();
+  const { takeChallenge } = (await import('../worker/auth.ts')) as { takeChallenge?: (env: Env, id: string, kind: string) => Promise<string | undefined> };
+  assert.ok(takeChallenge);
+  f.db
+    .prepare('INSERT INTO auth_challenges (id, challenge, kind, expires_at) VALUES (?, ?, ?, ?)')
+    .run('c1', 'fictional-challenge', 'login', Date.now() + 60_000);
+  const got = await Promise.all([takeChallenge(f.env, 'c1', 'login'), takeChallenge(f.env, 'c1', 'login')]);
+  assert.deepEqual(got.filter(Boolean), ['fictional-challenge']);
+  assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM auth_challenges').get()!.n, 0);
+});

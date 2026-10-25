@@ -329,12 +329,11 @@ async function saveChallenge(env: Env, kind: string, challenge: string): Promise
   return id;
 }
 
-/** 取出并作废一次性挑战 */
-async function takeChallenge(env: Env, id: string, kind: string): Promise<string | undefined> {
-  const row = await env.DB.prepare('SELECT challenge, kind, expires_at FROM auth_challenges WHERE id = ?1')
+/** 取出并作废一次性挑战：单条 DELETE … RETURNING，两个并发请求只有一个能拿到它 */
+export async function takeChallenge(env: Env, id: string, kind: string): Promise<string | undefined> {
+  const row = await env.DB.prepare('DELETE FROM auth_challenges WHERE id = ?1 RETURNING challenge, kind, expires_at')
     .bind(id)
     .first<{ challenge: string; kind: string; expires_at: number }>();
-  await env.DB.prepare('DELETE FROM auth_challenges WHERE id = ?1').bind(id).run();
   return row && row.kind === kind && row.expires_at > Date.now() ? row.challenge : undefined;
 }
 
