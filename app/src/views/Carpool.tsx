@@ -613,11 +613,7 @@ function MemberRows({
             {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
             <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} disabled={ro} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 'var(--fs-2)' }}>
-                {masked ? (
-                  <span className="car-private-avatar" style={{ width: 28, height: 28 }} />
-                ) : (
-                  <PersonAvatar p={personFor(state, d.member.personId, d.member.name)} size={28} />
-                )}
+                <MemberAvatar state={state} m={d.member} size={28} masked={masked} />
                 <span className={`text-ellipsis member-label ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
                   {d.member.name || t('family.pool.unnamed')}
                 </span>
@@ -660,6 +656,15 @@ function MemberRows({
         );
       })}
     </div>
+  );
+}
+
+/** 成员头像：隐藏个人信息时换成同尺寸的灰色占位，合租详情里所有成员头像都走这里，不会漏 */
+function MemberAvatar({ state, m, size, masked }: { state: AppState; m: ShareMember; size: number; masked?: boolean }) {
+  return masked ? (
+    <span className="pp-ava car-private-avatar" style={{ width: size, height: size }} aria-hidden="true" />
+  ) : (
+    <PersonAvatar p={personFor(state, m.personId, m.name || '?')} size={size} />
   );
 }
 
@@ -806,7 +811,7 @@ function MemberTable({
                         </>
                       )))}
                 >
-                  {masked ? <span className="car-private-avatar" /> : <PersonAvatar p={personFor(state, m.personId, m.name)} size={24} />}
+                  <MemberAvatar state={state} m={m} size={24} masked={masked} />
                   <span className={`text-ellipsis ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
                     {m.name || t('family.pool.unnamed')}
                   </span>
@@ -1267,14 +1272,16 @@ export function CarSheet({
                       if (who.length === 1)
                         return (
                           <span className="who-chip">
-                            <PersonAvatar p={personFor(state, who[0].personId, who[0].name || '?')} size={16} />
-                            <span className={masked ? 'car-private' : undefined}>{who[0].name || t('family.pool.unnamed')}</span>
+                            <MemberAvatar state={state} m={who[0]} size={16} masked={masked} />
+                            <span className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
+                              {who[0].name || t('family.pool.unnamed')}
+                            </span>
                           </span>
                         );
                       return (
                         <span className="dt-ava-stack" title={masked ? undefined : who.map((m) => m.name || t('family.pool.unnamed')).join('\n')}>
                           {who.slice(0, 6).map((m) => (
-                            <PersonAvatar key={m.id} p={personFor(state, m.personId, m.name || '?')} size={20} />
+                            <MemberAvatar key={m.id} state={state} m={m} size={20} masked={masked} />
                           ))}
                           {who.length > 6 && <small>+{who.length - 6}</small>}
                         </span>
@@ -1295,7 +1302,7 @@ export function CarSheet({
                     // 人员一律用胶囊
                     second: (
                       <span className="who-chip">
-                        <PersonAvatar p={personFor(state, m.personId, m.name || '?')} size={16} />
+                        <MemberAvatar state={state} m={m} size={16} masked={masked} />
                         <span className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
                           {m.name || t('family.pool.unnamed')}
                         </span>

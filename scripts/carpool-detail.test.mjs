@@ -94,7 +94,10 @@ function compile(names, extra = {}) {
     tipProps: () => ({}),
     ...extra,
   };
-  const functions = names.map((name) => source.slice(...nodes.find((n) => n.type === 'FunctionDeclaration' && n.id.name === name).range)).join('\n');
+  // 成员头像统一经过 MemberAvatar（打码在那里处理），每个组件都要带上它
+  const functions = [...names, 'MemberAvatar']
+    .map((name) => source.slice(...nodes.find((n) => n.type === 'FunctionDeclaration' && n.id.name === name).range))
+    .join('\n');
   const compiled = transformSync('Carpool.tsx', functions, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
   assert.equal(compiled.fatal, false);
   return new Function(...Object.keys(dependencies), `${compiled.code}; return {${names.join(',')}};`)(...Object.values(dependencies));
@@ -150,6 +153,37 @@ test('打码移除真实头像、个人悬停提示和读屏称呼；手机自�
   assert.match(masked, /car-private.*?aria-hidden="true"/);
   const mobile = renderToStaticMarkup(React.createElement(MemberRows, { ...props, masked: true }));
   assert.doesNotMatch(mobile, /Private Note|data-avatar/);
+});
+
+test('打码时收款表的年度胶囊、头像叠放与每行胶囊都不出现真实头像', () => {
+  let call = 0;
+  const YearLedger = () => null;
+  const { CarSheet } = compile(['CarSheet', 'Vacancy'], {
+    // 第一个状态是打码开关：直接打开
+    useState: (value) => [call++ === 0 ? true : value, () => {}],
+    useRef: () => ({ current: null }),
+    YearLedger,
+  });
+  const find = (node) => {
+    if (!node || typeof node !== 'object') return undefined;
+    if (Array.isArray(node)) return node.map(find).find(Boolean);
+    if (node.type === YearLedger) return node.props;
+    return find(node.props?.children);
+  };
+  const payment = { date: '2026-10-05', amount: 10, currency: 'CNY', from: '2026-10-01', until: '2026-10-31' };
+  for (const members of [[m('Solo', { payments: [payment] })], [m('Alpha', { payments: [payment] }), m('Beta', { payments: [payment] })]]) {
+    const s = sub(members);
+    call = 0;
+    const ledger = find(CarSheet({ state, s, today, ro: false, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {}, onMember() {} }));
+    assert.ok(ledger?.keepSecond);
+    const html = renderToStaticMarkup(
+      React.createElement(React.Fragment, null, ledger.yearCells(ledger.items).second, ...ledger.items.map((r) => ledger.row(r).second)),
+    );
+    assert.doesNotMatch(html, /data-avatar/);
+    assert.match(html, /car-private-avatar/);
+  }
+  // 合租视图里真实头像只在 MemberAvatar 一处渲染
+  assert.equal(source.match(/<PersonAvatar\b/g).length, 1);
 });
 
 test('详情复用累计实付、净收款与盈亏；待收为零时只呈现三格且不重复累计总额', () => {
