@@ -1,4 +1,4 @@
-import { addDays, subError, uid, validDay } from './billing.ts';
+import { addDays, CURRENCY_CODE, subError, uid, validDay } from './billing.ts';
 import { importCycle, parseCsv, importSubscriptionsCsv } from './csv.ts';
 
 export { importCycle };
@@ -66,7 +66,7 @@ const webUrl = (x: unknown) => {
 
 /** Exported symbols such as $ and ¥ are deliberately not resolved to a currency code. */
 function currencyOf(code: string, price: string): string | undefined {
-  if (/^[A-Z]{3}$/.test(code.toUpperCase())) return code.toUpperCase();
+  if (CURRENCY_CODE.test(code.toUpperCase())) return code.toUpperCase();
   const explicit = price.match(/\b([A-Z]{3})\b/);
   if (explicit) return explicit[1];
   return Object.entries({ '€': 'EUR', '£': 'GBP', '₺': 'TRY', '₹': 'INR', '₩': 'KRW', '₱': 'PHP', '₫': 'VND', '₽': 'RUB' }).find(([symbol]) =>
@@ -206,7 +206,7 @@ export function prepareImport(
     }
     const currency = fix.currency || r.currency;
     const cycle = fix.cycle ?? r.cycle;
-    if (!currency || !/^[A-Z]{3}$/.test(currency) || (allowedCurrencies && !allowedCurrencies.includes(currency))) {
+    if (!currency || !CURRENCY_CODE.test(currency) || (allowedCurrencies && !allowedCurrencies.includes(currency))) {
       issues.push({ key: r.key, name: r.name, message: t('core.import.currency') });
       continue;
     }

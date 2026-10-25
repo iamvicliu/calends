@@ -20,6 +20,7 @@ import {
   priceAt,
   runwayFor,
   type Charge,
+  DAYS_PER_MONTH,
 } from './billing.ts';
 import { chargeBaseOrNaN, chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
@@ -27,7 +28,7 @@ import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
 import { transferRows, transferredStop } from './transfers.ts';
 
-const MONTH = 30.4375;
+const MONTH = DAYS_PER_MONTH;
 
 /** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
 export function contributionOn(state: AppState, s: Subscription, day: string, fxDate?: string): number {

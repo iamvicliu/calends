@@ -1,6 +1,6 @@
 // 转让收付：二手转入时付给原主的钱、转出时收到的钱。都是实际现金，不推算剩余服务价值。
 // 不是服务商扣款：不进 MRR、续费预测、余额消耗、退款与扣款笔数；只进生命周期净成本和年度、月度现金流。
-import { chargesBetween, diffDays, servedTime, validDay } from './billing.ts';
+import { chargesBetween, CURRENCY_CODE, diffDays, servedTime, validDay } from './billing.ts';
 import { chargeBaseOrNaN, convertOn } from './fx.ts';
 import { t } from './i18n.ts';
 import type { AppState, Subscription, Transfer } from './types.ts';
@@ -133,7 +133,7 @@ export function transferError(s: Pick<Subscription, 'transfers'>): string | unde
       !Number.isFinite(tr.amount) ||
       tr.amount <= 0 ||
       typeof tr.currency !== 'string' ||
-      !/^[A-Z]{3}$/.test(tr.currency) ||
+      !CURRENCY_CODE.test(tr.currency) ||
       (tr.note != null && typeof tr.note !== 'string')
     )
       return t('core.subError.transfer');

@@ -1,7 +1,7 @@
 // 旧版应收数据一次性转成按期记账（receivables.ts）。读账本、导入备份后都会经过这里，转过的数据原样返回。
 // 旧合租成员：paidUntil（已付至）+ payments（每笔收款写覆盖起止日）；旧代付：entries（每期一条，收款、实扣混在一起）。
 // 收到的钱一笔不丢：对不上任何一期的收款保留原来覆盖的起始日，界面上作为对不上的记录单独列出
-import { addDays, addMonths, chargesBetween, diffDays, memberBillMonths, memberPeriods } from './billing.ts';
+import { addDays, addMonths, chargesBetween, diffDays, memberBillMonths, memberPeriods, memberSince } from './billing.ts';
 import type { Period } from './receivables.ts';
 import type { ProxyCharge, Receipt, ShareMember, Subscription } from './types.ts';
 
@@ -60,7 +60,7 @@ function legacyAnchor(s: Subscription): string {
 
 function memberFrom(s: Subscription, m: LegacyMember): ShareMember {
   const { paidUntil, payments = [], ...plain } = m;
-  const joined = m.joined ?? s.share?.since ?? s.start;
+  const joined = memberSince(s, m);
   const last = [joined, paidUntil ?? joined, ...payments.map((p) => p.until)].sort().at(-1)!;
   // 旧版的期跟着收款走：收款写明的起始日、已付至的次日如果不在按条款切出的期界上，说明节奏在那天改过（断过再续、手动调过），
   // 记成节奏重新起算，转换后下一次收款日与旧版一致

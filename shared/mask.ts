@@ -1,6 +1,6 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
 import { DEFAULT_SETTINGS, type AppState, type Payment, type PaymentMethod, type Phase, type Stop, type Subscription } from './types.ts';
-import { migrateRenewalRules } from './billing.ts';
+import { fnv1a, migrateRenewalRules } from './billing.ts';
 import { t } from './i18n.ts';
 import { categoryList, isDomainCategory, presetOf, type Category } from './categories.ts';
 
@@ -34,11 +34,7 @@ function publicMethod(m: PaymentMethod): PaymentMethod {
 }
 
 /** FNV-1a 短哈希：公开数据里不暴露可能含域名的 id */
-function shortHash(text: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
-  return (h >>> 0).toString(36);
-}
+const shortHash = (text: string) => fnv1a(text).toString(36);
 
 /** 只保留网址的协议与域名；写得不像网址的不下发（避免整个公开页报错） */
 function originOf(url?: string): string | undefined {

@@ -1,5 +1,5 @@
 import { validatePeopleAvatars } from './avatar.ts';
-import { newShapeError } from './billing.ts';
+import { CURRENCY_CODE, newShapeError } from './billing.ts';
 // Ledger references and non-secret settings. Pure functions; no storage or platform APIs.
 import { categoryList, cleanCategories, renameInSubs, type Category } from './categories.ts';
 import { mergePeople, refsFor, syncPerson } from './people.ts';
@@ -195,7 +195,7 @@ export function personEdit(st: AppState, person: Person, deleting: boolean, into
   return { people, subscriptions: syncPerson(st.subscriptions, person), references };
 }
 export function validateCurrency(st: Pick<AppState, 'fx'>, code: string): void {
-  if (!/^[A-Z]{3}$/.test(code) || !(st.fx.rates[code] > 0)) throw new Error(t('mcp.error.unsupportedCurrency', { code }));
+  if (!CURRENCY_CODE.test(code) || !(st.fx.rates[code] > 0)) throw new Error(t('mcp.error.unsupportedCurrency', { code }));
 }
 export function validateMethod(st: Pick<AppState, 'fx'>, m: PaymentMethod): void {
   if (!m.name?.trim()) throw new Error(t('mcp.error.invalidInput', { field: 'name' }));

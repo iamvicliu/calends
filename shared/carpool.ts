@@ -15,6 +15,8 @@ import {
   memberLedger,
   diffDays,
   collectCurrencyOf,
+  DAYS_PER_MONTH,
+  memberSince,
 } from './billing.ts';
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
@@ -134,23 +136,23 @@ export function carYear(state: AppState, s: Subscription, today: string) {
 export function cycleMonths(s: Subscription): number {
   // 买断没有周期：按收一次（与成员的买断收费周期一致）算，份额就是一次性的那份
   if (s.cycle.unit === 'lifetime') return LIFETIME_BILL_MONTHS;
-  return Math.max(0.25, cycleDays(s.cycle) / 30.4375);
+  return Math.max(0.25, cycleDays(s.cycle) / DAYS_PER_MONTH);
 }
 
 /** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算（订阅币种） */
-export function memberFee(state: AppState, s: Subscription, m: ShareMember, day = m.joined ?? s.share?.since ?? s.start): { amount: number; currency: string } {
+export function memberFee(state: AppState, s: Subscription, m: ShareMember, day = memberSince(s, m)): { amount: number; currency: string } {
   const ccy = collectCurrencyOf(state.settings);
   return memberRate(s, m, day, ccy);
 }
 
 /** 首次调价固定旧基线；只插入收费标准，绝不改写历史收款。 */
 export function changeMemberFee(state: AppState, s: Subscription, m: ShareMember, point: MemberFeePoint, today: string): ShareMember {
-  const baseline = memberRate(s, m, m.joined ?? s.share?.since ?? s.start, collectCurrencyOf(state.settings));
+  const baseline = memberRate(s, m, memberSince(s, m), collectCurrencyOf(state.settings));
   const history = m.feeHistory?.length
     ? m.feeHistory
     : [
         {
-          from: [m.joined ?? s.share?.since ?? s.start, point.from].sort()[0],
+          from: [memberSince(s, m), point.from].sort()[0],
           fee: baseline.amount,
           currency: baseline.currency,
           billEvery: baseline.billEvery,
