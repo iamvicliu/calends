@@ -2,13 +2,18 @@
 
 Everything that lets an AI read or change the ledger lives here. The MCP server and the built-in assistant share one set of tools, so a capability added once works in Claude Code, Codex, Cursor and the in-app assistant alike.
 
-| File              | Role                                                                                                                                                                                                                                               |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp.ts`          | MCP server at `/mcp`: Streamable HTTP in stateless mode (each POST is one JSON-RPC request, plain JSON response, no SSE or sessions). Bearer tokens are created on the AI access page, stored as SHA-256 only, and scoped read-only or read-write. |
-| `mcp-tools.ts`    | The tool catalogue: names, English descriptions, JSON schemas, permissions and handlers.                                                                                                                                                           |
-| `report-tools.ts` | JSON output for the month and list selection reports, and the shared list filter argument.                                                                                                                                                         |
-| `ledger-tools.ts` | Wallet, category, people, proxy and sanitized business-settings handlers; pure rules live in `shared/ledger-edit.ts`.                                                                                                                              |
-| `assistant.ts`    | Built-in assistant: streams a DeepSeek-compatible chat, calls the same tools, and turns every write into a draft the user confirms first. Request/response helpers shared with the browser are in `shared/deepseek.ts`.                            |
+| File                    | Role                                                                                                                                                                                                                                               |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp.ts`                | MCP server at `/mcp`: Streamable HTTP in stateless mode (each POST is one JSON-RPC request, plain JSON response, no SSE or sessions). Bearer tokens are created on the AI access page, stored as SHA-256 only, and scoped read-only or read-write. |
+| `mcp-tools.ts`          | Catalogue entry: preserves tool order, applies schema validation, and exposes connection information.                                                                                                                                              |
+| `tool-kit.ts`           | Shared types, argument/reference resolution, schema fragments and the single ledger-write pipeline.                                                                                                                                                |
+| `tool-views.ts`         | Shared output rows, amounts, collection summaries and previews.                                                                                                                                                                                    |
+| `read-tools.ts`         | Read handlers and their schemas.                                                                                                                                                                                                                   |
+| `subscription-tools.ts` | Subscription, phase, status, payment and transfer write handlers.                                                                                                                                                                                  |
+| `share-tools.ts`        | Shared-plan and receivable handlers.                                                                                                                                                                                                               |
+| `report-tools.ts`       | JSON output for the month and list selection reports, and the shared list filter argument.                                                                                                                                                         |
+| `ledger-tools.ts`       | Wallet, category, people, proxy and sanitized business-settings handlers; pure rules live in `shared/ledger-edit.ts`.                                                                                                                              |
+| `assistant.ts`          | Built-in assistant: streams a DeepSeek-compatible chat, calls the same tools, and turns every write into a draft the user confirms first. Request/response helpers shared with the browser are in `shared/deepseek.ts`.                            |
 
 ## Tools
 
@@ -35,7 +40,7 @@ The assistant uses the entire same catalogue. Every chat write is forced to `dry
 
 ## Adding or changing a tool
 
-1. Define it in `mcp-tools.ts`: a clear English description (it is the model's only documentation), a strict schema, `write`/`destructive`/`idempotent` flags, and a `dry_run` preview for writes.
+1. Define it in the owning `read-tools.ts`, `subscription-tools.ts`, `share-tools.ts` or `ledger-tools.ts` module, then place it in the original order in `mcp-tools.ts`: a clear English description (it is the model's only documentation), a strict schema, `write`/`destructive`/`idempotent` flags, and a `dry_run` preview for writes.
 2. Validate inputs with the shared helpers and throw errors with `t('mcp.error.*')`. Add new error keys to all 14 locales in `shared/locales/<lang>/mcp.json`.
 3. Reuse domain logic from `shared/` (billing, phases, carpool, metrics) instead of re-implementing it, so the app, the MCP server and the assistant agree.
 4. Add tests under `shared/*.test.ts`, run `npm run i18n:check` and `npm test`, and keep this catalogue summary and the architecture boundary current. The connection page reads `/api/mcp/tools` dynamically; add localized `mcp.tool.<name>` titles rather than maintaining a duplicate list.

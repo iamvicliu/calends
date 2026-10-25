@@ -6,7 +6,8 @@ import { monthEnd } from '../../shared/metrics.ts';
 import { monthReport, scopeReport, type Block, type ChargeRow, type Comparison, type CompositionRow } from '../../shared/scope-report.ts';
 import { transferRows, transfersOf, transferValue } from '../../shared/transfers.ts';
 import type { AppState, Subscription } from '../../shared/types.ts';
-import { categoryRef, findSub, methodRef, round } from './mcp-tools.ts';
+import { categoryRef, findSub, methodRef } from './tool-kit.ts';
+import { round } from './tool-views.ts';
 
 /** Shared by get_insights scope_report and spending_stats: the web list's filter, plus MCP-only narrowing. */
 export const LIST_FILTER = {

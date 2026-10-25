@@ -4,7 +4,8 @@
 import { randomToken, sha256 } from '../auth.ts';
 import type { Env } from '../env.ts';
 import { getKv, getSettings, putKv } from '../store.ts';
-import { TOOLS, toolTitle, connectionInfo, type ToolCtx } from './mcp-tools.ts';
+import { TOOLS, toolTitle, connectionInfo } from './mcp-tools.ts';
+import type { ToolCtx } from './tool-kit.ts';
 import { todayIn } from '../../shared/billing.ts';
 import { t } from '../../shared/i18n.ts';
 

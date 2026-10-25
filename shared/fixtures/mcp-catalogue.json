@@ -1,0 +1,2780 @@
+{
+  "catalogue": [
+    [
+      "save_category",
+      true,
+      true,
+      null,
+      "Create, update/rename, delete or reorder categories. category is the exact existing name. set contains name/icon/color; order is the complete ordered name list. Renames update every subscription atomically. Delete with references requires migrate_to (another existing category); preview and result list affected subscriptions. Never deletes subscriptions.",
+      "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"create\",\"update\",\"delete\",\"reorder\"]},\"category\":{\"type\":\"string\"},\"set\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"icon\":{\"type\":[\"string\",\"null\"]},\"color\":{\"type\":[\"string\",\"null\"]}},\"required\":[],\"additionalProperties\":false},\"migrate_to\":{\"type\":\"string\"},\"order\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"action\"],\"additionalProperties\":false}"
+    ],
+    [
+      "save_person",
+      true,
+      true,
+      null,
+      "Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. Avatar upload: avatar_base64 plus mime (image/png or image/webp), square <=128px and <=64KiB, no metadata. avatar=null removes it. Remote URLs are unsupported; upload a prepared thumbnail. All linked names and contacts update together. Accounts belong to person × shared-plan memberships; use save_share_member.account, never save_person. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.",
+      "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"create\",\"update\",\"delete\"]},\"id\":{\"type\":\"string\"},\"person\":{\"type\":\"string\"},\"avatar\":{\"type\":\"null\"},\"avatar_base64\":{\"type\":\"string\"},\"mime\":{\"type\":\"string\",\"enum\":[\"image/png\",\"image/webp\"]},\"migrate_to\":{\"type\":\"string\"},\"set\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"contactVia\":{\"type\":[\"string\",\"null\"]},\"contact\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]},\"color\":{\"type\":[\"string\",\"null\"],\"enum\":[\"blue\",\"green\",\"orange\",\"pink\",\"purple\",\"teal\",\"indigo\",\"red\"]}},\"required\":[],\"additionalProperties\":false},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"action\"],\"additionalProperties\":false}"
+    ],
+    [
+      "get_settings",
+      null,
+      null,
+      null,
+      "Read connection identity, today's ledger date, timezone, base currency, actual caller permissions and available tool names; also non-security business settings, existing notification channel metadata/enabled switches and saved UI preferences. Never exposes or changes authentication, passwords, Passkeys, sessions, MCP tokens, backup/restore/reset/migration, whole-ledger deletion, or outbound notification credentials. Channel access is limited to existing channel enable switches; no config/address/secret fields.",
+      "{\"type\":\"object\",\"properties\":{},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "update_settings",
+      true,
+      null,
+      true,
+      "Patch whitelisted business settings (camelCase keys), channel_enabled [{id,enabled}], and prefs (known UI preference keys, string values; null clears). Only supplied fields change; unknown/security fields are rejected. Null resets optional fields. Returns sanitized before/after, never credentials. Never exposes or changes authentication, passwords, Passkeys, sessions, MCP tokens, backup/restore/reset/migration, whole-ledger deletion, or outbound notification credentials. Channel access is limited to existing channel enable switches; no config/address/secret fields.",
+      "{\"type\":\"object\",\"properties\":{\"set\":{\"type\":\"object\",\"properties\":{\"baseCurrency\":{\"type\":\"string\"},\"collectCurrency\":{\"type\":[\"string\",\"null\"]},\"defaultMethodId\":{\"type\":[\"string\",\"null\"]},\"signedAmounts\":{\"type\":\"boolean\"},\"remindDays\":{\"type\":\"integer\",\"minimum\":-1,\"maximum\":365},\"notifyHour\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":23},\"timezone\":{\"type\":\"string\"},\"publicView\":{\"type\":\"boolean\"},\"publicHidden\":{\"type\":[\"array\",\"null\"],\"items\":{\"type\":\"string\"}},\"monthlyDigest\":{\"type\":\"boolean\"},\"displayName\":{\"type\":\"string\"},\"avatar\":{\"type\":[\"string\",\"null\"]},\"publicTitle\":{\"type\":[\"string\",\"null\"]},\"sidebarUpcoming\":{\"type\":\"boolean\"},\"upcomingDays\":{\"type\":\"integer\",\"minimum\":0},\"hiddenNav\":{\"type\":[\"array\",\"null\"],\"items\":{\"type\":\"string\"}},\"navOrder\":{\"type\":[\"array\",\"null\"],\"items\":{\"type\":\"string\"}},\"startPage\":{\"type\":[\"string\",\"null\"]},\"weekStart\":{\"type\":\"integer\",\"enum\":[0,1]},\"language\":{\"type\":[\"string\",\"null\"]}},\"required\":[],\"additionalProperties\":false},\"channel_enabled\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\"},\"enabled\":{\"type\":\"boolean\"}},\"required\":[\"id\",\"enabled\"],\"additionalProperties\":false}},\"prefs\":{\"type\":\"object\",\"properties\":{\"list-view\":{\"type\":[\"string\",\"null\"]},\"list-sort\":{\"type\":[\"string\",\"null\"]},\"list-dir\":{\"type\":[\"string\",\"null\"]},\"list-ccy\":{\"type\":[\"string\",\"null\"]},\"gantt-zoom\":{\"type\":[\"string\",\"null\"]},\"gantt-color\":{\"type\":[\"string\",\"null\"]},\"gantt-label-w\":{\"type\":[\"string\",\"null\"]},\"gantt-label-w-m\":{\"type\":[\"string\",\"null\"]},\"theme\":{\"type\":[\"string\",\"null\"]},\"sidebar-collapsed\":{\"type\":[\"string\",\"null\"]},\"car-open\":{\"type\":[\"string\",\"null\"]},\"share-style\":{\"type\":[\"string\",\"null\"]},\"sub-share-style\":{\"type\":[\"string\",\"null\"]},\"list-status\":{\"type\":[\"string\",\"null\"]},\"list-report\":{\"type\":[\"string\",\"null\"]},\"car-filter\":{\"type\":[\"string\",\"null\"]},\"car-sort\":{\"type\":[\"string\",\"null\"]},\"car-dir\":{\"type\":[\"string\",\"null\"]},\"proxy-filter\":{\"type\":[\"string\",\"null\"]},\"cal-mode\":{\"type\":[\"string\",\"null\"]},\"cal-report-mode\":{\"type\":[\"string\",\"null\"]},\"car-view\":{\"type\":[\"string\",\"null\"]},\"proxy-view\":{\"type\":[\"string\",\"null\"]},\"proxy-sort\":{\"type\":[\"string\",\"null\"]},\"proxy-dir\":{\"type\":[\"string\",\"null\"]}},\"required\":[],\"additionalProperties\":false},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "set_proxy",
+      true,
+      true,
+      null,
+      "Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain; remove needs the subscription id or exact full name). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\"},\"action\":{\"type\":\"string\",\"enum\":[\"save\",\"remove\"]},\"person\":{\"type\":[\"string\",\"null\"]},\"for_name\":{\"type\":\"string\"},\"contact_via\":{\"type\":[\"string\",\"null\"]},\"contact\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "get_overview",
+      null,
+      null,
+      null,
+      "Snapshot of the subscription ledger: today, base currency, my monthly recurring spend (MRR — excludes proxy payments made on behalf of others, counts only my share of shared plans), active count, payment methods (ids), categories and regions in use, top insights. Call this first to learn ids and categories.",
+      "{\"type\":\"object\",\"properties\":{\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "list_categories",
+      null,
+      null,
+      null,
+      "List the user’s categories in display order: name, icon (a Lucide icon name or an emoji), color, built-in code if any, and how many subscriptions use it (total / live). Call this before assigning categories. Use an existing code/name in create_subscription and update_subscription; unknown names fail unless create_category=true. For a missing category use save_category action=create or explicitly set create_category=true.",
+      "{\"type\":\"object\",\"properties\":{},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "list_subscriptions",
+      null,
+      null,
+      null,
+      "List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner = shared plan I organize / share_member = shared plan I joined / proxy = paid on behalf of someone), category, method or region. Stop summaries distinguish non-renewal (end only), voluntary immediate cancellation and provider termination; stop includes kind, date, paidThrough, reason, refunded, refundStatus (none / partial / full; a pro-rata refund of the remaining days counts as full), unusedDays (stop date to paidThrough), unusedValue and wastedDays (days not covered by the refund). Use query to find a subscription id.",
+      "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"Search name, login account, tags, notes, category, region and payment method. Same-name subscriptions may belong to different accounts; inspect candidates instead of assuming duplicates.\"},\"status\":{\"type\":\"string\",\"enum\":[\"active\",\"trial\",\"paused\",\"ending\",\"ended\",\"terminated\",\"upcoming\",\"lifetime\",\"live\",\"all\"],\"default\":\"live\",\"description\":\"live = active+trial+ending+paused.\"},\"kind\":{\"type\":\"string\",\"enum\":[\"mine\",\"share_owner\",\"share_member\",\"proxy\",\"all\"],\"default\":\"all\"},\"category\":{\"type\":\"string\"},\"method\":{\"type\":\"string\",\"description\":\"Payment method id or name.\"},\"region\":{\"type\":\"string\",\"description\":\"ISO country code, e.g. TR.\"},\"sort\":{\"type\":\"string\",\"enum\":[\"next_charge\",\"monthly_cost\",\"name\",\"start\"],\"default\":\"next_charge\"},\"limit\":{\"type\":\"integer\",\"default\":100},\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "get_subscription",
+      null,
+      null,
+      null,
+      "Full detail of one subscription: every phase (region or plan switches, gaps = lapses), price history, intro/bonus periods, recent and upcoming charges, shared-plan member dues, proxy repayments, and totals spent so far. Stop summaries include provider termination reasons, refunds and paid-but-unused days/value for each phase.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"months_back\":{\"type\":\"integer\",\"default\":12},\"months_forward\":{\"type\":\"integer\",\"default\":6},\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "list_charges",
+      null,
+      null,
+      null,
+      "Charges (actual and projected) in a period: today, next 3 days, next 7/30 days, this or next month, last 30 days, this year, or custom from/to. scope=mine excludes proxy payments and reports my_amount as my share for shared plans; gross = full card charges incl. proxy payments; proxy = only proxy payments.",
+      "{\"type\":\"object\",\"properties\":{\"period\":{\"type\":\"string\",\"enum\":[\"today\",\"next_3_days\",\"next_7_days\",\"next_30_days\",\"this_month\",\"next_month\",\"last_30_days\",\"this_year\",\"custom\"],\"description\":\"Time window. custom requires from/to.\",\"default\":\"next_30_days\"},\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"to\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"scope\":{\"type\":\"string\",\"enum\":[\"mine\",\"gross\",\"proxy\"],\"default\":\"mine\"},\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"method\":{\"type\":\"string\",\"description\":\"Payment method id or name.\"},\"include_projected\":{\"type\":\"boolean\",\"default\":true},\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "spending_stats",
+      null,
+      null,
+      null,
+      "Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans. Provider charges only by default; include_transfers=true adds second-hand transfers dated up to today (buy = cost, sell = negative; grouped under their subscription, transfer currency and month, method = \"transfer\"), which matches the calendar month report total for a calendar month — for that whole report prefer get_insights section=month_report. filter narrows to a subset with the same rules as the web list filter and get_insights section=scope_report (proxy payments then never match). Charges without a usable FX rate make their group and the total null with incomplete=true and fx_missing currencies.",
+      "{\"type\":\"object\",\"properties\":{\"period\":{\"type\":\"string\",\"enum\":[\"today\",\"next_3_days\",\"next_7_days\",\"next_30_days\",\"this_month\",\"next_month\",\"last_30_days\",\"this_year\",\"custom\"],\"description\":\"Time window. custom requires from/to.\",\"default\":\"this_year\"},\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"to\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"group_by\":{\"type\":\"string\",\"enum\":[\"month\",\"year\",\"category\",\"method\",\"currency\",\"region\",\"subscription\",\"none\"],\"default\":\"category\"},\"scope\":{\"type\":\"string\",\"enum\":[\"mine\",\"gross\",\"proxy\"],\"default\":\"mine\"},\"include_projected\":{\"type\":\"boolean\",\"default\":true,\"description\":\"Include projected (future) charges inside the period.\"},\"include_transfers\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Add second-hand buy/sell cash (not with scope=proxy).\"},\"filter\":{\"type\":\"object\",\"additionalProperties\":false,\"description\":\"Subset of my subscriptions, using the same rules as the web subscription list filter (proxy payments are never included). All given fields must match.\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"all\",\"live\",\"upcoming\",\"trial\",\"paused\",\"lifetime\",\"ended\",\"terminated\"],\"default\":\"all\",\"description\":\"List status facet: live = active + ending (trial and paused are separate), as in the web list.\"},\"category\":{\"type\":\"string\",\"description\":\"Existing category code or name from list_categories.\"},\"method\":{\"type\":\"string\",\"description\":\"Current payment method id or name; \\\"none\\\" = unassigned.\"},\"query\":{\"type\":\"string\",\"description\":\"Web list search: every whitespace-separated word must appear in name, category, tags, notes, region, URL or current payment method name (literal, case-insensitive; the web UI additionally matches pinyin).\"},\"tag\":{\"type\":\"string\",\"description\":\"MCP only: exact tag (case-insensitive).\"},\"region\":{\"type\":\"string\",\"description\":\"MCP only: ISO region of the current phase, e.g. TR.\"},\"subscriptions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"MCP only: explicit subscription ids or names.\"}}},\"top\":{\"type\":\"integer\",\"default\":30},\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "get_trends",
+      null,
+      null,
+      null,
+      "Time series: monthly MRR history, cash-vs-accrual by month (cash = what was charged; accrual = cost spread over the period it covers), or MRR movement between two dates (added / expansion / contraction / churn / FX effect).",
+      "{\"type\":\"object\",\"properties\":{\"metric\":{\"type\":\"string\",\"enum\":[\"mrr\",\"cash_vs_accrual\",\"movement\"],\"default\":\"mrr\"},\"months_back\":{\"type\":\"integer\",\"default\":12},\"months_forward\":{\"type\":\"integer\",\"default\":3,\"description\":\"cash_vs_accrual only.\"},\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"movement only: start date (default: one month ago).\"},\"to\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"movement only: end date (default: today).\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "list_payment_methods",
+      null,
+      null,
+      null,
+      "Payment methods (bank cards, App Store region balances, crypto cards, prepaid balances…) with current estimated balance, monthly drain, runway (how long the balance lasts, first shortfall) and a top-up suggestion.",
+      "{\"type\":\"object\",\"properties\":{\"topup_months\":{\"type\":\"integer\",\"default\":6}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "list_people",
+      null,
+      null,
+      null,
+      "People in the ledger (shared-plan members and people I pay on behalf of, each listed once): contact, which shared plans / proxy payments they are in and the separate account on each shared plan, how much they owe me now, how much they have paid so far and when they last paid. Use query to find someone by name.",
+      "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\",\"description\":\"Fuzzy name filter.\"},\"owing_only\":{\"type\":\"boolean\",\"default\":false},\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "get_receivables",
+      null,
+      null,
+      null,
+      "Money others owe me: by_person totals each person across all their shared plans and proxy payments; share lists shared-plan members whose payment is due/overdue; proxy lists charges paid on behalf of someone not yet repaid.",
+      "{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\",\"enum\":[\"share\",\"proxy\",\"all\"],\"default\":\"all\"},\"currency_out\":{\"type\":\"string\",\"description\":\"Convert amounts into this currency (ISO code). Defaults to the ledger base currency.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "get_insights",
+      null,
+      null,
+      null,
+      "Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type), month_report (the calendar month report for month=YYYY-MM: net cash total/paid/pending incl. second-hand transfers, vs previous month and last year, MRR movement, composition, top, upcoming, events, losses, sharing, six-month cash series), scope_report (the web list selection report for filter: MRR, annual, paid this year, 12+3 month cash vs accrual, composition, top, upcoming, events, losses, sharing). Use month_report for \"how much did I spend in <month>\" so answers match the calendar, scope_report for questions about a subset (category, status, payment method, tag, region, search or named subscriptions). Report amounts are base currency at my share; charge rows also carry the original bill. Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.",
+      "{\"type\":\"object\",\"properties\":{\"section\":{\"type\":\"string\",\"enum\":[\"insights\",\"year_review\",\"prepaid\",\"cancel_savings\",\"stop_losses\",\"month_report\",\"scope_report\"],\"default\":\"insights\"},\"year\":{\"type\":\"string\",\"description\":\"year_review only, e.g. 2025.\"},\"month\":{\"type\":\"string\",\"description\":\"month_report only: YYYY-MM, default this month.\"},\"filter\":{\"type\":\"object\",\"additionalProperties\":false,\"description\":\"scope_report only. Subset of my subscriptions, using the same rules as the web subscription list filter (proxy payments are never included). All given fields must match.\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"all\",\"live\",\"upcoming\",\"trial\",\"paused\",\"lifetime\",\"ended\",\"terminated\"],\"default\":\"all\",\"description\":\"List status facet: live = active + ending (trial and paused are separate), as in the web list.\"},\"category\":{\"type\":\"string\",\"description\":\"Existing category code or name from list_categories.\"},\"method\":{\"type\":\"string\",\"description\":\"Current payment method id or name; \\\"none\\\" = unassigned.\"},\"query\":{\"type\":\"string\",\"description\":\"Web list search: every whitespace-separated word must appear in name, category, tags, notes, region, URL or current payment method name (literal, case-insensitive; the web UI additionally matches pinyin).\"},\"tag\":{\"type\":\"string\",\"description\":\"MCP only: exact tag (case-insensitive).\"},\"region\":{\"type\":\"string\",\"description\":\"MCP only: ISO region of the current phase, e.g. TR.\"},\"subscriptions\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"MCP only: explicit subscription ids or names.\"}}}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "list_events",
+      null,
+      null,
+      null,
+      "Changelog of spending decisions: subscriptions started, ended, paused, resumed, price changes and plan/region switches, each with its effect on monthly spend (base currency).",
+      "{\"type\":\"object\",\"properties\":{\"since\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"limit\":{\"type\":\"integer\",\"default\":50}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "search_app_store",
+      null,
+      null,
+      null,
+      "Look up an app on the App Store by name or App Store link: returns name, icon URL, store URL, seller and genre. Use it to fill icon and url when creating a subscription for an app.",
+      "{\"type\":\"object\",\"properties\":{\"query\":{\"type\":\"string\"},\"country\":{\"type\":\"string\",\"description\":\"Two-letter store region, e.g. us, tr, cn. Defaults to us.\"}},\"required\":[\"query\"],\"additionalProperties\":false}"
+    ],
+    [
+      "create_subscription",
+      true,
+      null,
+      null,
+      "Create a subscription. price is per cycle in the given currency. Same name and start date with explicitly different login accounts are independent subscriptions. Otherwise a possible duplicate requires force=true. Use dry_run=true to preview first. Call list_categories first and reuse an existing code/name. Unknown categories fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one. Past records can be created already stopped: status=cancelled with end = last service day, or status=cancelled / terminated without end when the stop date is unknown. method=null creates it without a payment method (no default). For a complete record with phases or stop details use save_subscription.",
+      "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\",\"minimum\":0},\"currency\":{\"type\":\"string\",\"description\":\"ISO code, e.g. USD, CNY, TRY.\"},\"cycle\":{\"type\":\"object\",\"properties\":{\"unit\":{\"type\":\"string\",\"enum\":[\"day\",\"week\",\"month\",\"year\",\"lifetime\"]},\"every\":{\"type\":\"integer\",\"minimum\":1,\"default\":1}},\"required\":[\"unit\"],\"description\":\"Billing cycle, e.g. {\\\"unit\\\":\\\"month\\\",\\\"every\\\":1}; lifetime = one-time purchase.\"},\"start\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"First charge / purchase date. Defaults to today.\"},\"category\":{\"type\":\"string\",\"description\":\"Existing category code or name from list_categories; localized names are case-insensitive. Defaults to the existing Tools category; if absent, specify an existing category.\"},\"create_category\":{\"type\":\"boolean\",\"default\":false,\"description\":\"If category is unknown, explicitly create it. Ambiguous references always fail.\"},\"category_icon\":{\"type\":[\"string\",\"null\"],\"description\":\"New category only: Lucide icon name or emoji; same validation as save_category set.icon.\"},\"category_color\":{\"type\":[\"string\",\"null\"],\"description\":\"New category only: palette code or #rrggbb; same validation as save_category set.color.\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"method\":{\"type\":[\"string\",\"null\"],\"description\":\"Payment method id or name. Omitted uses the default payment method; null means no payment method.\"},\"region\":{\"type\":\"string\",\"description\":\"ISO country code for region-priced stores (App Store TR, NG…).\"},\"url\":{\"type\":\"string\"},\"icon\":{\"type\":\"string\",\"description\":\"Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected.\"},\"notes\":{\"type\":\"string\"},\"account\":{\"type\":\"string\",\"description\":\"Login account: email, phone number (for carriers) or username shown on the receipt.\"},\"status\":{\"type\":\"string\",\"enum\":[\"active\",\"trial\",\"cancelled\",\"terminated\"],\"default\":\"active\",\"description\":\"cancelled / terminated: already stopped. cancelled + end: did not renew after end (last service day). terminated + end: the provider disabled it on end. Without end the stop date is unknown.\"},\"trial_end\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"chargeLeadDays\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":3660},\"cancelLeadDays\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":3660},\"end\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Will not renew after this date.\"},\"intro\":{\"type\":\"object\",\"properties\":{\"price\":{\"type\":\"number\"},\"until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"}},\"required\":[\"price\",\"until\"],\"description\":\"Intro price until a date.\"},\"payments\":{\"type\":\"array\",\"description\":\"Actual past charges with their real amounts (e.g. a monthly bill history). When given they become the whole charge history, so include EVERY period, including ones equal to price; future charges continue at price from the last one. Dates on or after start and not after today.\",\"items\":{\"type\":\"object\",\"properties\":{\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"amount\":{\"type\":\"number\",\"minimum\":0,\"description\":\"Positive; refunds are stored negative.\"},\"kind\":{\"type\":\"string\",\"enum\":[\"charge\",\"refund\",\"adjust\",\"failed\"],\"default\":\"charge\"},\"method\":{\"type\":[\"string\",\"null\"],\"description\":\"Payment method id or name used for this one charge; omitted or null uses the subscription method.\"},\"settled\":{\"type\":\"object\",\"properties\":{\"amount\":{\"type\":\"number\",\"minimum\":0},\"currency\":{\"type\":\"string\"}},\"required\":[\"amount\",\"currency\"],\"additionalProperties\":false},\"funding\":{\"type\":[\"array\",\"null\"],\"description\":\"Split one order across several sources, e.g. [{\\\"method\\\":\\\"PayPal\\\",\\\"amount\\\":168.05},{\\\"method\\\":\\\"Balance\\\",\\\"amount\\\":10.75}] for 178.80. Amounts in the subscription currency, positive, at least two different methods, summing to amount. Replaces method for this charge.\",\"items\":{\"type\":\"object\",\"properties\":{\"method\":{\"type\":\"string\",\"description\":\"Payment method id or name.\"},\"amount\":{\"type\":\"number\",\"minimum\":0}},\"required\":[\"method\",\"amount\"],\"additionalProperties\":false}},\"note\":{\"type\":\"string\"}},\"required\":[\"date\",\"amount\"],\"additionalProperties\":false}},\"force\":{\"type\":\"boolean\",\"default\":false},\"id\":{\"type\":\"string\",\"description\":\"Internal: keep this id (used when confirming an earlier draft).\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"name\",\"price\",\"currency\",\"cycle\"],\"additionalProperties\":false}"
+    ],
+    [
+      "save_subscription",
+      true,
+      true,
+      null,
+      "Create or fully replace one subscription from a complete Subscription record (same shape as get_subscription.record): phases, payments with per-charge methodId / settled / kind (refund, adjust, failed) / funding (split across sources), status (active, trial, paused, cancelled, terminated), stop and end. Use it to enter a whole history at once (several phases, region or plan switches, every past charge) or to record an already-stopped subscription; for single edits prefer the narrower tools. The record is the entire new state, stored as given like the web editor’s save (keep top-level price/currency/cycle/methodId equal to the last phase): omitted fields are removed and null values are dropped; methodId absent or null means no payment method (no default is applied). cancelled / terminated without end or stop means stopped on an unknown date. Runs the same normalization and validation as saving in the web editor (renewal-rule history, clearing a member exit clears its refund, full-record and status-transition checks); referenced payment methods must exist. Without id, or with an id that does not exist, it creates a subscription; a same-name same-start duplicate then requires force=true. Preview returns changes (field-level before/after against the stored record) and computed before/after: status, next charge, last charge, total spent to date and charge count.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"object\",\"description\":\"Complete Subscription JSON: id?, name, price, currency, cycle, start, status, category?, tags?, methodId?, phases?, payments?, stop?, end?, share?, proxy?, … Dates YYYY-MM-DD; payment amounts in the subscription / phase currency (refunds negative).\"},\"force\":{\"type\":\"boolean\",\"default\":false},\"create_category\":{\"type\":\"boolean\",\"default\":false,\"description\":\"If category is unknown, explicitly create it. Ambiguous references always fail.\"},\"category_icon\":{\"type\":[\"string\",\"null\"],\"description\":\"New category only: Lucide icon name or emoji; same validation as save_category set.icon.\"},\"category_color\":{\"type\":[\"string\",\"null\"],\"description\":\"New category only: palette code or #rrggbb; same validation as save_category set.color.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "update_subscription",
+      true,
+      null,
+      null,
+      "Change descriptive fields and settings of a subscription (name, category, tags, url, notes, icon, payment method, region, reminder days, start, end date (no renewal after it), next due date, trial end). Only provided keys change. A start correction keeps the original billing anchor and future charge dates (preview next_charges) unless shift_billing=true. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"set\":{\"type\":\"object\",\"properties\":{\"icon\":{\"type\":[\"string\",\"null\"],\"description\":\"Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected. null clears it.\"},\"show_on_public\":{\"type\":\"boolean\"},\"start\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Service start (single-phase only). Keeps the billing anchor unless shift_billing=true.\"},\"intro\":{\"type\":[\"object\",\"null\"],\"properties\":{\"price\":{\"type\":\"number\",\"minimum\":0},\"until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"}},\"required\":[\"price\",\"until\"],\"additionalProperties\":false},\"bonus\":{\"type\":[\"object\",\"null\"],\"properties\":{\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"}},\"required\":[\"from\",\"until\"],\"additionalProperties\":false},\"name\":{\"type\":\"string\"},\"category\":{\"type\":\"string\",\"description\":\"Existing category code or name from list_categories; localized names are case-insensitive.\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"url\":{\"type\":\"string\"},\"manage_url\":{\"type\":\"string\"},\"notes\":{\"type\":\"string\"},\"account\":{\"type\":\"string\",\"description\":\"Login account (email / phone / username).\"},\"method\":{\"type\":[\"string\",\"null\"],\"description\":\"Payment method id or name.\"},\"region\":{\"type\":\"string\"},\"remind_days\":{\"type\":[\"integer\",\"null\"],\"minimum\":-1,\"description\":\"-1 disables; null restores the global setting.\"},\"end\":{\"type\":[\"string\",\"null\"],\"description\":\"YYYY-MM-DD, or null to clear (will renew again).\"},\"next_due\":{\"type\":[\"string\",\"null\"]},\"trial_end\":{\"type\":[\"string\",\"null\"]},\"expires\":{\"type\":[\"string\",\"null\"]},\"chargeLeadDays\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":3660},\"cancelLeadDays\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":3660}},\"required\":[],\"additionalProperties\":false},\"create_category\":{\"type\":\"boolean\",\"default\":false,\"description\":\"If category is unknown, explicitly create it. Ambiguous references always fail.\"},\"category_icon\":{\"type\":[\"string\",\"null\"],\"description\":\"New category only: Lucide icon name or emoji; same validation as save_category set.icon.\"},\"category_color\":{\"type\":[\"string\",\"null\"],\"description\":\"New category only: palette code or #rrggbb; same validation as save_category set.color.\"},\"shift_billing\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"set\"],\"additionalProperties\":false}"
+    ],
+    [
+      "change_price",
+      true,
+      null,
+      null,
+      "Add (default), edit or remove a dated price point in an existing plan. edit/remove require phase and original_from. The initial price can be edited but not removed. Dates must be within the phase and unique. Past estimated charges are recalculated; recorded payments stay unchanged. Preview reports affected_estimated_charges.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"action\":{\"type\":\"string\",\"enum\":[\"add\",\"edit\",\"remove\"],\"description\":\"Default add (upsert by date). edit/remove target an existing point using phase and original_from. The initial point cannot be removed.\"},\"phase\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Exact phase start; required for edit/remove, including single-phase subscriptions.\"},\"original_from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Original effective date; required for edit/remove.\"},\"amount\":{\"type\":\"number\",\"minimum\":0},\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Effective date; defaults to today for add, original_from for edit.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "change_plan",
+      true,
+      true,
+      null,
+      "Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases; remove and drop accept only the subscription id or exact full name. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"action\":{\"type\":\"string\",\"enum\":[\"switch\",\"resume\",\"earlier\",\"confirm\",\"drop\",\"edit\",\"remove\"]},\"at\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"set\":{\"type\":\"object\",\"properties\":{\"start\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"New phase start; keeps the billing anchor unless shift_billing=true.\"},\"end\":{\"type\":[\"string\",\"null\"],\"format\":\"date\"},\"price\":{\"type\":\"number\",\"minimum\":0},\"currency\":{\"type\":\"string\"},\"cycle\":{\"type\":\"object\",\"properties\":{\"unit\":{\"type\":\"string\",\"enum\":[\"day\",\"week\",\"month\",\"year\",\"lifetime\"]},\"every\":{\"type\":\"integer\",\"minimum\":1,\"default\":1}},\"required\":[\"unit\"],\"description\":\"Billing cycle, e.g. {\\\"unit\\\":\\\"month\\\",\\\"every\\\":1}; lifetime = one-time purchase.\"},\"method\":{\"type\":[\"string\",\"null\"]},\"region\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]},\"nextDue\":{\"type\":[\"string\",\"null\"],\"format\":\"date\"},\"planned\":{\"type\":\"boolean\"},\"priceHistory\":{\"type\":[\"array\",\"null\"],\"description\":\"Full replacement, retaining the initial effective date; use change_price action=edit to move that initial date. Latest amount becomes phase price.\",\"items\":{\"type\":\"object\",\"properties\":{\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"amount\":{\"type\":\"number\",\"minimum\":0}},\"required\":[\"from\",\"amount\"],\"additionalProperties\":false}},\"intro\":{\"type\":[\"object\",\"null\"],\"properties\":{\"price\":{\"type\":\"number\",\"minimum\":0},\"until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"}},\"required\":[\"price\",\"until\"],\"additionalProperties\":false},\"bonus\":{\"type\":[\"object\",\"null\"],\"properties\":{\"from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"}},\"required\":[\"from\",\"until\"],\"additionalProperties\":false}},\"required\":[],\"additionalProperties\":false},\"plan\":{\"type\":\"object\",\"properties\":{\"price\":{\"type\":\"number\"},\"currency\":{\"type\":\"string\"},\"cycle\":{\"type\":\"object\",\"properties\":{\"unit\":{\"type\":\"string\",\"enum\":[\"day\",\"week\",\"month\",\"year\",\"lifetime\"]},\"every\":{\"type\":\"integer\",\"minimum\":1,\"default\":1}},\"required\":[\"unit\"],\"description\":\"Billing cycle, e.g. {\\\"unit\\\":\\\"month\\\",\\\"every\\\":1}; lifetime = one-time purchase.\"},\"method\":{\"type\":[\"string\",\"null\"]},\"region\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"},\"planned\":{\"type\":\"boolean\"}},\"required\":[\"price\",\"currency\",\"cycle\"],\"additionalProperties\":false},\"keep_previous_until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"action=switch only: the previous phase keeps running until this date (after `at`), overlapping the new one.\"},\"earlier_until\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"action=earlier only: the earlier phase ended on this date (a gap before the next one).\"},\"shift_billing\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"action\",\"at\"],\"additionalProperties\":false}"
+    ],
+    [
+      "set_status",
+      true,
+      null,
+      null,
+      "Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. To correct an existing stop (date, non-renewal vs immediate cancel, reason, refund) pass edit=true with action=cancel|terminate; omitted fields keep the recorded values and a provider termination stays terminate. An undated stop needs its real date in at. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"action\":{\"type\":\"string\",\"enum\":[\"pause\",\"cancel\",\"terminate\",\"reactivate\",\"trial\"]},\"at\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Non-immediate cancel: last service day. Immediate cancel / terminate: actual stop day. Required for cancel / terminate when the subscription started or has charges before today; null = stopped on an unknown date. pause / trial default to today.\"},\"trial_end\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"trial only: first paid charge date; null clears, omitted preserves the existing value.\"},\"immediate\":{\"type\":\"boolean\",\"default\":false,\"description\":\"cancel only: stop using the service immediately instead of non-renewal.\"},\"reason\":{\"type\":\"string\",\"description\":\"Optional provider termination reason; terminate only.\"},\"refund\":{\"type\":[\"object\",\"null\"],\"properties\":{\"amount\":{\"type\":\"number\",\"minimum\":0},\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"currency\":{\"type\":\"string\",\"description\":\"Must equal the subscription currency; usually omit.\"},\"settled\":{\"type\":\"object\",\"properties\":{\"amount\":{\"type\":\"number\",\"minimum\":0},\"currency\":{\"type\":\"string\"}},\"required\":[\"amount\",\"currency\"],\"additionalProperties\":false}},\"required\":[\"amount\"],\"additionalProperties\":false,\"description\":\"Immediate cancel / terminate only. With edit=true it replaces the latest stop refund; null removes it; omitted keeps it.\"},\"edit\":{\"type\":\"boolean\",\"default\":false,\"description\":\"Correct an already stopped subscription with action=cancel|terminate: change the stop date (at; omitted keeps it), non-renewal vs immediate cancel, reason or refund. Provider termination cannot become cancel.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"action\"],\"additionalProperties\":false}"
+    ],
+    [
+      "record_payment",
+      true,
+      null,
+      null,
+      "Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for every kind (charge, refund, adjust, failed); a different card currency belongs in settled. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. funding = one order paid from several sources (amounts in the subscription currency summing to amount, e.g. 178.80 = PayPal 168.05 + Balance 10.75); wallet balances are reduced by each part. funding and method are exclusive; null clears a split; omitted keeps a replaced charge’s split. Rejects same-day same-amount duplicates unless allow_duplicate.",
+      "{\"type\":\"object\",\"properties\":{\"replace\":{\"type\":\"object\",\"properties\":{\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"date\",\"index\"],\"additionalProperties\":false},\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Defaults to today.\"},\"amount\":{\"type\":\"number\",\"minimum\":0},\"currency\":{\"type\":\"string\",\"description\":\"Must equal the subscription / selected phase currency for every kind; usually omit. Use settled for a different card currency.\"},\"kind\":{\"type\":\"string\",\"enum\":[\"charge\",\"refund\",\"adjust\",\"failed\"],\"default\":\"charge\"},\"settled\":{\"type\":\"object\",\"properties\":{\"amount\":{\"type\":\"number\"},\"currency\":{\"type\":\"string\"}},\"required\":[\"amount\",\"currency\"],\"additionalProperties\":false},\"method\":{\"type\":[\"string\",\"null\"],\"description\":\"Payment method id or name for this single charge; null clears it.\"},\"funding\":{\"type\":[\"array\",\"null\"],\"description\":\"Split one order across several sources, e.g. [{\\\"method\\\":\\\"PayPal\\\",\\\"amount\\\":168.05},{\\\"method\\\":\\\"Balance\\\",\\\"amount\\\":10.75}] for 178.80. Amounts in the subscription currency, positive, at least two different methods, summing to amount. Replaces method for this charge.\",\"items\":{\"type\":\"object\",\"properties\":{\"method\":{\"type\":\"string\",\"description\":\"Payment method id or name.\"},\"amount\":{\"type\":\"number\",\"minimum\":0}},\"required\":[\"method\",\"amount\"],\"additionalProperties\":false}},\"note\":{\"type\":\"string\"},\"allow_duplicate\":{\"type\":\"boolean\",\"default\":false},\"phase\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Start date of the phase this payment belongs to; only needed when two phases overlap on that date (defaults to the latest-started one).\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"amount\"],\"additionalProperties\":false}"
+    ],
+    [
+      "delete_payment",
+      true,
+      true,
+      null,
+      "Delete one recorded payment of a subscription by date (index picks among several on the same day, 0-based).",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action.\"},\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"index\":{\"type\":\"integer\",\"default\":0},\"phase\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Start date of the phase holding the payment, when two phases overlap.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"date\"],\"additionalProperties\":false}"
+    ],
+    [
+      "record_transfer",
+      true,
+      null,
+      null,
+      "Record, replace or delete a transfer of a subscription between owners (e.g. a second-hand VPS): kind=buy is the cash paid to the previous owner when taking it over, kind=sell is the cash received when handing it on. amount is the actual cash (positive), in any currency (converted at the transfer date); do not estimate residual value. Transfers count in lifetime net cost (service charges + buy − sell, averaged over the holding period) and yearly/monthly cash flow, not in MRR, forecasts, wallet runway, refunds or charge counts; a sale inside a stopped phase’s paid period removes its paid-but-unused loss. replace={date,index} edits one (index = zero-based among that date’s transfers, as listed by get_subscription.transfers); delete={date,index} removes one.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"kind\":{\"type\":\"string\",\"enum\":[\"buy\",\"sell\"]},\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Defaults to today.\"},\"amount\":{\"type\":\"number\",\"minimum\":0},\"currency\":{\"type\":\"string\",\"description\":\"ISO code; defaults to the subscription’s current currency.\"},\"note\":{\"type\":\"string\"},\"replace\":{\"type\":\"object\",\"properties\":{\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"date\",\"index\"],\"additionalProperties\":false},\"delete\":{\"type\":\"object\",\"properties\":{\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"index\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"date\",\"index\"],\"additionalProperties\":false},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "get_carpool",
+      null,
+      null,
+      null,
+      "Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from), the plan collection rule (rule: fee, currency, every_months; stored=false means inferred from the most common member rate); members with their actual leave_refund (null when not refunded), fee and billing months, follows_rule (true = fee follows the plan rule, false = custom fee or exempt), overdue_days (days the next unpaid collection is past due, 0 if not), alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Optional: only this plan.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "delete_subscription",
+      true,
+      true,
+      null,
+      "Delete a subscription and its whole history. Irreversible: always preview with dry_run first; the user confirms.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "set_share",
+      true,
+      true,
+      null,
+      "Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing (subscription must then be its id or exact full name). rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"role\":{\"type\":\"string\",\"enum\":[\"owner\",\"member\",\"none\"]},\"seats\":{\"type\":\"integer\",\"minimum\":1,\"description\":\"Total seats including me.\"},\"owner_name\":{\"type\":[\"string\",\"null\"]},\"since\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"collect_from\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Optional shared collection anchor. Members align to this date + k × bill_every months, preserving month-end alignment. Omit to preserve the existing anchor or infer from since, recorded coverage / paid-until, then subscription start.\"},\"rule\":{\"type\":\"object\",\"description\":\"Owner only: the plan collection rule followed by non-custom members.\",\"properties\":{\"fee\":{\"type\":\"number\",\"minimum\":0,\"description\":\"Amount collected from each member per bill.\"},\"fee_currency\":{\"type\":\"string\",\"description\":\"Defaults to the current rule currency, else the collection currency.\"},\"bill_every\":{\"type\":\"integer\",\"enum\":[1,3,6,12]}},\"additionalProperties\":false},\"rule_from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Effective date for the rule change; defaults to today. Whole periods starting on/after it use the new fee.\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"role\"],\"additionalProperties\":false}"
+    ],
+    [
+      "save_share_member",
+      true,
+      null,
+      null,
+      "Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = settled before record-keeping through this date (periods starting on/before it become an opening settlement with no amount; null removes it); record real money with record_receivable. Only the joining period aligns to the shared anchor; later periods follow the member’s own billing cycle. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Set left to retain all join/receipt history. Optional leave_refund stores the actual positive refund, with date defaulting to left and currency to the suggested refund currency; null means no refund. left=null also clears the refund. Preview returns suggested_refund (including original-currency parts) and unused_days; never save the suggestion as an actual refund without user confirmation. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its name (fuzzy match; ambiguous names return candidates).\"},\"person\":{\"type\":[\"string\",\"null\"],\"description\":\"Link an existing roster person by id/name; copies their name/contact. Omitted: an unlinked member is matched by name (+ contact) like the web form, else a roster person is created (preview created_person). null keeps the member unlinked.\"},\"member\":{\"type\":\"string\",\"description\":\"Existing member id or name to update; omit to add a new member.\"},\"id\":{\"type\":\"string\",\"description\":\"Internal: id for a new member (used when confirming an earlier draft).\"},\"name\":{\"type\":\"string\"},\"fee\":{\"type\":\"number\",\"minimum\":0},\"fee_currency\":{\"type\":\"string\"},\"fee_from\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Effective date for a fee/currency/billing-cycle change; omit when the user gave no date (today), including follow_rule switches. Do not align it to a future plan-rule date. Period start selects the whole-period rate; no split at price changes.\"},\"bill_every\":{\"type\":\"integer\",\"enum\":[1,3,6,12]},\"follow_rule\":{\"type\":\"boolean\",\"description\":\"true = follow the plan collection rule (ignores fee/fee_currency/bill_every); false = custom fee.\"},\"first_period\":{\"type\":\"string\",\"enum\":[\"prorate\",\"full\",\"free\"],\"description\":\"Partial first period only: prorate (default, actual inclusive days / full aligned period days, rounded to cents), full (regular fee), or free (zero; skipped for the next collection). Later periods charge the regular fee.\"},\"first_amount\":{\"type\":[\"number\",\"null\"],\"minimum\":0,\"description\":\"Custom first-period fee; null resets to calculated amount.\"},\"exempt\":{\"type\":\"boolean\"},\"paid_until\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"joined\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Join date, inclusive; defaults to today for a new member. A mid-period join covers this day through the shared aligned period end.\"},\"left\":{\"format\":\"date\",\"type\":[\"string\",\"null\"],\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"Left the plan on this date (keeps history). null also clears leave_refund.\"},\"leave_refund\":{\"type\":[\"object\",\"null\"],\"description\":\"Actual refund on leaving, positive amount. Requires left; null clears it. Omit to preserve. Date cannot precede joining.\",\"properties\":{\"amount\":{\"type\":\"number\",\"minimum\":0},\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"currency\":{\"type\":\"string\"},\"note\":{\"type\":\"string\"}},\"required\":[\"amount\"],\"additionalProperties\":false},\"source\":{\"type\":\"string\"},\"contact_via\":{\"type\":\"string\",\"description\":\"e.g. 微信, Telegram, 邮箱\"},\"contact\":{\"type\":\"string\"},\"account\":{\"type\":\"string\",\"description\":\"This person’s account on this shared plan (arbitrary text: email, phone number, username or ID).\"},\"note\":{\"type\":\"string\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\"],\"additionalProperties\":false}"
+    ],
+    [
+      "remove_share_member",
+      true,
+      true,
+      null,
+      "Remove a member from a shared plan entirely (their payment history goes too). To keep history, use save_share_member with left instead.",
+      "{\"type\":\"object\",\"properties\":{\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action.\"},\"member\":{\"type\":\"string\",\"description\":\"Member id or exact name (case-insensitive).\"},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"subscription\",\"member\"],\"additionalProperties\":false}"
+    ],
+    [
+      "record_receivable",
+      true,
+      true,
+      null,
+      "Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again (subscription and member must be ids or exact names). action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).",
+      "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"record\",\"waive\",\"update\",\"delete\",\"charged\"]},\"subscription\":{\"type\":\"string\",\"description\":\"Subscription id or name. Optional when person is given and only one of their plans / proxy payments matches.\"},\"person\":{\"type\":\"string\",\"description\":\"Person id or name (see list_people). Picks the matching member or proxy payment automatically.\"},\"kind\":{\"type\":\"string\",\"enum\":[\"share\",\"proxy\"],\"description\":\"Inferred when person or member is given; defaults to proxy for a proxy subscription.\"},\"member\":{\"type\":\"string\",\"description\":\"share: member id or name.\"},\"periods\":{\"type\":\"array\",\"items\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"YYYY-MM-DD\"},\"maxItems\":240,\"description\":\"Period keys (share: period start; proxy: charge date).\"},\"count\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":240,\"description\":\"Without periods: cover the N earliest unsettled periods.\"},\"id\":{\"type\":\"string\",\"description\":\"update/delete: receipt or waiver id.\"},\"amount\":{\"type\":\"number\",\"minimum\":0,\"description\":\"Actual amount received; defaults to the total due of the covered periods.\"},\"currency\":{\"type\":\"string\",\"description\":\"Receipt currency; defaults to the currency of the covered periods.\"},\"date\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"When the money arrived (or the waiver was agreed); defaults to today.\"},\"note\":{\"type\":[\"string\",\"null\"]},\"charge\":{\"format\":\"date\",\"type\":\"string\",\"pattern\":\"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\",\"description\":\"charged: which proxy charge date.\"},\"charged_amount\":{\"type\":[\"number\",\"null\"],\"minimum\":0},\"charged_currency\":{\"type\":[\"string\",\"null\"]},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[],\"additionalProperties\":false}"
+    ],
+    [
+      "update_payment_method",
+      true,
+      true,
+      null,
+      "Create (action=create), update (default), or delete (action=delete) a payment method/wallet. set uses PaymentMethod fields: name, kind, currency, balance/balanceAsOf, logo, notes, card details, order, etc. Create requires name/kind/currency in set. Delete blocks ALL subscription/phase/default-method references unless migrate_to names an existing target; returns references and lost top-up history. top_up appends and recalibrates current balance; top_up_action=update|delete with zero-based top_up_index edits stored history only, preserving the calibrated balance unless balance/set.balance is explicitly supplied. Read stored records and indices with list_payment_methods. Currency edits relabel the wallet, never convert historical amounts. Preview first.",
+      "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"create\",\"update\",\"delete\"]},\"id\":{\"type\":\"string\",\"description\":\"Stable new id when confirming a create draft.\"},\"method\":{\"type\":\"string\"},\"migrate_to\":{\"type\":\"string\"},\"set\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"kind\":{\"type\":\"string\",\"enum\":[\"debit\",\"credit\",\"alipay\",\"wechat\",\"paypal\",\"appstore\",\"googleplay\",\"giftcard\",\"prepaid\",\"phone\",\"crypto\",\"other\"]},\"currency\":{\"type\":\"string\"},\"balance\":{\"type\":[\"number\",\"null\"]},\"balanceAsOf\":{\"type\":[\"string\",\"null\"],\"format\":\"date\"},\"last4\":{\"type\":[\"string\",\"null\"]},\"color\":{\"type\":[\"string\",\"null\"]},\"region\":{\"type\":[\"string\",\"null\"]},\"notes\":{\"type\":[\"string\",\"null\"]},\"brand\":{\"type\":[\"string\",\"null\"]},\"logo\":{\"type\":[\"string\",\"null\"]},\"bank\":{\"type\":[\"string\",\"null\"]},\"phone\":{\"type\":[\"string\",\"null\"]},\"url\":{\"type\":[\"string\",\"null\"]},\"network\":{\"type\":[\"string\",\"null\"],\"enum\":[\"visa\",\"mastercard\",\"unionpay\",\"jcb\",\"american-express\",\"discover\",\"diners\",\"maestro\"]},\"logoWide\":{\"type\":\"boolean\"},\"order\":{\"type\":\"integer\",\"minimum\":0},\"lowRunwayDays\":{\"type\":[\"number\",\"null\"],\"minimum\":0},\"cashback\":{\"type\":[\"number\",\"null\"],\"minimum\":0}},\"required\":[],\"additionalProperties\":false},\"balance\":{\"type\":\"number\"},\"name\":{\"type\":\"string\"},\"region\":{\"type\":\"string\"},\"top_up\":{\"type\":\"object\",\"properties\":{\"date\":{\"type\":\"string\",\"format\":\"date\"},\"amount\":{\"type\":\"number\",\"minimum\":0},\"cost\":{\"type\":[\"number\",\"null\"],\"minimum\":0},\"costCurrency\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]},\"cost_currency\":{\"type\":[\"string\",\"null\"]}},\"required\":[],\"additionalProperties\":false,\"description\":\"Append: amount required, date defaults to today. Update: only supplied fields change.\"},\"top_up_action\":{\"type\":\"string\",\"enum\":[\"add\",\"update\",\"delete\"]},\"top_up_index\":{\"type\":\"integer\",\"minimum\":0},\"expected_top_up\":{\"type\":\"object\",\"properties\":{\"date\":{\"type\":\"string\",\"format\":\"date\"},\"amount\":{\"type\":\"number\",\"minimum\":0},\"cost\":{\"type\":[\"number\",\"null\"],\"minimum\":0},\"costCurrency\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]}},\"required\":[],\"additionalProperties\":false},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[],\"additionalProperties\":false}"
+    ]
+  ],
+  "list": [
+    {
+      "name": "save_category",
+      "title": "Manage category",
+      "description": "Create, update/rename, delete or reorder categories. category is the exact existing name. set contains name/icon/color; order is the complete ordered name list. Renames update every subscription atomically. Delete with references requires migrate_to (another existing category); preview and result list affected subscriptions. Never deletes subscriptions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["create", "update", "delete", "reorder"]
+          },
+          "category": {
+            "type": "string"
+          },
+          "set": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "icon": {
+                "type": ["string", "null"]
+              },
+              "color": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "migrate_to": {
+            "type": "string"
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["action"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "save_person",
+      "title": "Manage person",
+      "description": "Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. Avatar upload: avatar_base64 plus mime (image/png or image/webp), square <=128px and <=64KiB, no metadata. avatar=null removes it. Remote URLs are unsupported; upload a prepared thumbnail. All linked names and contacts update together. Accounts belong to person × shared-plan memberships; use save_share_member.account, never save_person. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["create", "update", "delete"]
+          },
+          "id": {
+            "type": "string"
+          },
+          "person": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "null"
+          },
+          "avatar_base64": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string",
+            "enum": ["image/png", "image/webp"]
+          },
+          "migrate_to": {
+            "type": "string"
+          },
+          "set": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "contactVia": {
+                "type": ["string", "null"]
+              },
+              "contact": {
+                "type": ["string", "null"]
+              },
+              "note": {
+                "type": ["string", "null"]
+              },
+              "color": {
+                "type": ["string", "null"],
+                "enum": ["blue", "green", "orange", "pink", "purple", "teal", "indigo", "red"]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["action"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_settings",
+      "title": "Ledger settings & preferences",
+      "description": "Read connection identity, today's ledger date, timezone, base currency, actual caller permissions and available tool names; also non-security business settings, existing notification channel metadata/enabled switches and saved UI preferences. Never exposes or changes authentication, passwords, Passkeys, sessions, MCP tokens, backup/restore/reset/migration, whole-ledger deletion, or outbound notification credentials. Channel access is limited to existing channel enable switches; no config/address/secret fields.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_settings",
+      "title": "Update ledger settings & preferences",
+      "description": "Patch whitelisted business settings (camelCase keys), channel_enabled [{id,enabled}], and prefs (known UI preference keys, string values; null clears). Only supplied fields change; unknown/security fields are rejected. Null resets optional fields. Returns sanitized before/after, never credentials. Never exposes or changes authentication, passwords, Passkeys, sessions, MCP tokens, backup/restore/reset/migration, whole-ledger deletion, or outbound notification credentials. Channel access is limited to existing channel enable switches; no config/address/secret fields.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "set": {
+            "type": "object",
+            "properties": {
+              "baseCurrency": {
+                "type": "string"
+              },
+              "collectCurrency": {
+                "type": ["string", "null"]
+              },
+              "defaultMethodId": {
+                "type": ["string", "null"]
+              },
+              "signedAmounts": {
+                "type": "boolean"
+              },
+              "remindDays": {
+                "type": "integer",
+                "minimum": -1,
+                "maximum": 365
+              },
+              "notifyHour": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 23
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "publicView": {
+                "type": "boolean"
+              },
+              "publicHidden": {
+                "type": ["array", "null"],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "monthlyDigest": {
+                "type": "boolean"
+              },
+              "displayName": {
+                "type": "string"
+              },
+              "avatar": {
+                "type": ["string", "null"]
+              },
+              "publicTitle": {
+                "type": ["string", "null"]
+              },
+              "sidebarUpcoming": {
+                "type": "boolean"
+              },
+              "upcomingDays": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "hiddenNav": {
+                "type": ["array", "null"],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "navOrder": {
+                "type": ["array", "null"],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "startPage": {
+                "type": ["string", "null"]
+              },
+              "weekStart": {
+                "type": "integer",
+                "enum": [0, 1]
+              },
+              "language": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "channel_enabled": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["id", "enabled"],
+              "additionalProperties": false
+            }
+          },
+          "prefs": {
+            "type": "object",
+            "properties": {
+              "list-view": {
+                "type": ["string", "null"]
+              },
+              "list-sort": {
+                "type": ["string", "null"]
+              },
+              "list-dir": {
+                "type": ["string", "null"]
+              },
+              "list-ccy": {
+                "type": ["string", "null"]
+              },
+              "gantt-zoom": {
+                "type": ["string", "null"]
+              },
+              "gantt-color": {
+                "type": ["string", "null"]
+              },
+              "gantt-label-w": {
+                "type": ["string", "null"]
+              },
+              "gantt-label-w-m": {
+                "type": ["string", "null"]
+              },
+              "theme": {
+                "type": ["string", "null"]
+              },
+              "sidebar-collapsed": {
+                "type": ["string", "null"]
+              },
+              "car-open": {
+                "type": ["string", "null"]
+              },
+              "share-style": {
+                "type": ["string", "null"]
+              },
+              "sub-share-style": {
+                "type": ["string", "null"]
+              },
+              "list-status": {
+                "type": ["string", "null"]
+              },
+              "list-report": {
+                "type": ["string", "null"]
+              },
+              "car-filter": {
+                "type": ["string", "null"]
+              },
+              "car-sort": {
+                "type": ["string", "null"]
+              },
+              "car-dir": {
+                "type": ["string", "null"]
+              },
+              "proxy-filter": {
+                "type": ["string", "null"]
+              },
+              "cal-mode": {
+                "type": ["string", "null"]
+              },
+              "cal-report-mode": {
+                "type": ["string", "null"]
+              },
+              "car-view": {
+                "type": ["string", "null"]
+              },
+              "proxy-view": {
+                "type": ["string", "null"]
+              },
+              "proxy-sort": {
+                "type": ["string", "null"]
+              },
+              "proxy-dir": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "set_proxy",
+      "title": "Manage proxy relationship",
+      "description": "Set up/edit paying on behalf of a person, or action=remove to remove the proxy relationship and its repayment records (subscription/provider charges remain; remove needs the subscription id or exact full name). Prefer person id/name from list_people; for_name without person links a same-name roster person (matching contact when given) like the web editor, or creates one (preview created_person); person=null keeps it unlinked. Updates preserve receipts, waivers and charged overrides; only supplied fields change. Receipts and charged overrides are edited/deleted via record_receivable kind=proxy. Returns removed-record/reference summary.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": ["save", "remove"]
+          },
+          "person": {
+            "type": ["string", "null"]
+          },
+          "for_name": {
+            "type": "string"
+          },
+          "contact_via": {
+            "type": ["string", "null"]
+          },
+          "contact": {
+            "type": ["string", "null"]
+          },
+          "note": {
+            "type": ["string", "null"]
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_overview",
+      "title": "Ledger overview",
+      "description": "Snapshot of the subscription ledger: today, base currency, my monthly recurring spend (MRR — excludes proxy payments made on behalf of others, counts only my share of shared plans), active count, payment methods (ids), categories and regions in use, top insights. Call this first to learn ids and categories.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_categories",
+      "title": "Categories",
+      "description": "List the user’s categories in display order: name, icon (a Lucide icon name or an emoji), color, built-in code if any, and how many subscriptions use it (total / live). Call this before assigning categories. Use an existing code/name in create_subscription and update_subscription; unknown names fail unless create_category=true. For a missing category use save_category action=create or explicitly set create_category=true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_subscriptions",
+      "title": "List subscriptions",
+      "description": "List subscriptions with status, current price, monthly cost, next/last charge, payment method and region. Filter by fuzzy name query, status, kind (mine / share_owner = shared plan I organize / share_member = shared plan I joined / proxy = paid on behalf of someone), category, method or region. Stop summaries distinguish non-renewal (end only), voluntary immediate cancellation and provider termination; stop includes kind, date, paidThrough, reason, refunded, refundStatus (none / partial / full; a pro-rata refund of the remaining days counts as full), unusedDays (stop date to paidThrough), unusedValue and wastedDays (days not covered by the refund). Use query to find a subscription id.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search name, login account, tags, notes, category, region and payment method. Same-name subscriptions may belong to different accounts; inspect candidates instead of assuming duplicates."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "trial", "paused", "ending", "ended", "terminated", "upcoming", "lifetime", "live", "all"],
+            "default": "live",
+            "description": "live = active+trial+ending+paused."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["mine", "share_owner", "share_member", "proxy", "all"],
+            "default": "all"
+          },
+          "category": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "description": "Payment method id or name."
+          },
+          "region": {
+            "type": "string",
+            "description": "ISO country code, e.g. TR."
+          },
+          "sort": {
+            "type": "string",
+            "enum": ["next_charge", "monthly_cost", "name", "start"],
+            "default": "next_charge"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 100
+          },
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_subscription",
+      "title": "Subscription details",
+      "description": "Full detail of one subscription: every phase (region or plan switches, gaps = lapses), price history, intro/bonus periods, recent and upcoming charges, shared-plan member dues, proxy repayments, and totals spent so far. Stop summaries include provider termination reasons, refunds and paid-but-unused days/value for each phase.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "months_back": {
+            "type": "integer",
+            "default": 12
+          },
+          "months_forward": {
+            "type": "integer",
+            "default": 6
+          },
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_charges",
+      "title": "Charges",
+      "description": "Charges (actual and projected) in a period: today, next 3 days, next 7/30 days, this or next month, last 30 days, this year, or custom from/to. scope=mine excludes proxy payments and reports my_amount as my share for shared plans; gross = full card charges incl. proxy payments; proxy = only proxy payments.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": ["today", "next_3_days", "next_7_days", "next_30_days", "this_month", "next_month", "last_30_days", "this_year", "custom"],
+            "description": "Time window. custom requires from/to.",
+            "default": "next_30_days"
+          },
+          "from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "to": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["mine", "gross", "proxy"],
+            "default": "mine"
+          },
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "method": {
+            "type": "string",
+            "description": "Payment method id or name."
+          },
+          "include_projected": {
+            "type": "boolean",
+            "default": true
+          },
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "spending_stats",
+      "title": "Spending stats",
+      "description": "Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans. Provider charges only by default; include_transfers=true adds second-hand transfers dated up to today (buy = cost, sell = negative; grouped under their subscription, transfer currency and month, method = \"transfer\"), which matches the calendar month report total for a calendar month — for that whole report prefer get_insights section=month_report. filter narrows to a subset with the same rules as the web list filter and get_insights section=scope_report (proxy payments then never match). Charges without a usable FX rate make their group and the total null with incomplete=true and fx_missing currencies.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": ["today", "next_3_days", "next_7_days", "next_30_days", "this_month", "next_month", "last_30_days", "this_year", "custom"],
+            "description": "Time window. custom requires from/to.",
+            "default": "this_year"
+          },
+          "from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "to": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "group_by": {
+            "type": "string",
+            "enum": ["month", "year", "category", "method", "currency", "region", "subscription", "none"],
+            "default": "category"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["mine", "gross", "proxy"],
+            "default": "mine"
+          },
+          "include_projected": {
+            "type": "boolean",
+            "default": true,
+            "description": "Include projected (future) charges inside the period."
+          },
+          "include_transfers": {
+            "type": "boolean",
+            "default": false,
+            "description": "Add second-hand buy/sell cash (not with scope=proxy)."
+          },
+          "filter": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Subset of my subscriptions, using the same rules as the web subscription list filter (proxy payments are never included). All given fields must match.",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["all", "live", "upcoming", "trial", "paused", "lifetime", "ended", "terminated"],
+                "default": "all",
+                "description": "List status facet: live = active + ending (trial and paused are separate), as in the web list."
+              },
+              "category": {
+                "type": "string",
+                "description": "Existing category code or name from list_categories."
+              },
+              "method": {
+                "type": "string",
+                "description": "Current payment method id or name; \"none\" = unassigned."
+              },
+              "query": {
+                "type": "string",
+                "description": "Web list search: every whitespace-separated word must appear in name, category, tags, notes, region, URL or current payment method name (literal, case-insensitive; the web UI additionally matches pinyin)."
+              },
+              "tag": {
+                "type": "string",
+                "description": "MCP only: exact tag (case-insensitive)."
+              },
+              "region": {
+                "type": "string",
+                "description": "MCP only: ISO region of the current phase, e.g. TR."
+              },
+              "subscriptions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "MCP only: explicit subscription ids or names."
+              }
+            }
+          },
+          "top": {
+            "type": "integer",
+            "default": 30
+          },
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_trends",
+      "title": "Trends",
+      "description": "Time series: monthly MRR history, cash-vs-accrual by month (cash = what was charged; accrual = cost spread over the period it covers), or MRR movement between two dates (added / expansion / contraction / churn / FX effect).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "enum": ["mrr", "cash_vs_accrual", "movement"],
+            "default": "mrr"
+          },
+          "months_back": {
+            "type": "integer",
+            "default": 12
+          },
+          "months_forward": {
+            "type": "integer",
+            "default": 3,
+            "description": "cash_vs_accrual only."
+          },
+          "from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "movement only: start date (default: one month ago)."
+          },
+          "to": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "movement only: end date (default: today)."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_payment_methods",
+      "title": "Payment methods & balances",
+      "description": "Payment methods (bank cards, App Store region balances, crypto cards, prepaid balances…) with current estimated balance, monthly drain, runway (how long the balance lasts, first shortfall) and a top-up suggestion.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "topup_months": {
+            "type": "integer",
+            "default": 6
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_people",
+      "title": "People & receivables",
+      "description": "People in the ledger (shared-plan members and people I pay on behalf of, each listed once): contact, which shared plans / proxy payments they are in and the separate account on each shared plan, how much they owe me now, how much they have paid so far and when they last paid. Use query to find someone by name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fuzzy name filter."
+          },
+          "owing_only": {
+            "type": "boolean",
+            "default": false
+          },
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_receivables",
+      "title": "Receivables",
+      "description": "Money others owe me: by_person totals each person across all their shared plans and proxy payments; share lists shared-plan members whose payment is due/overdue; proxy lists charges paid on behalf of someone not yet repaid.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["share", "proxy", "all"],
+            "default": "all"
+          },
+          "currency_out": {
+            "type": "string",
+            "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_insights",
+      "title": "Insights & reports",
+      "description": "Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type), month_report (the calendar month report for month=YYYY-MM: net cash total/paid/pending incl. second-hand transfers, vs previous month and last year, MRR movement, composition, top, upcoming, events, losses, sharing, six-month cash series), scope_report (the web list selection report for filter: MRR, annual, paid this year, 12+3 month cash vs accrual, composition, top, upcoming, events, losses, sharing). Use month_report for \"how much did I spend in <month>\" so answers match the calendar, scope_report for questions about a subset (category, status, payment method, tag, region, search or named subscriptions). Report amounts are base currency at my share; charge rows also carry the original bill. Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": ["insights", "year_review", "prepaid", "cancel_savings", "stop_losses", "month_report", "scope_report"],
+            "default": "insights"
+          },
+          "year": {
+            "type": "string",
+            "description": "year_review only, e.g. 2025."
+          },
+          "month": {
+            "type": "string",
+            "description": "month_report only: YYYY-MM, default this month."
+          },
+          "filter": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "scope_report only. Subset of my subscriptions, using the same rules as the web subscription list filter (proxy payments are never included). All given fields must match.",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["all", "live", "upcoming", "trial", "paused", "lifetime", "ended", "terminated"],
+                "default": "all",
+                "description": "List status facet: live = active + ending (trial and paused are separate), as in the web list."
+              },
+              "category": {
+                "type": "string",
+                "description": "Existing category code or name from list_categories."
+              },
+              "method": {
+                "type": "string",
+                "description": "Current payment method id or name; \"none\" = unassigned."
+              },
+              "query": {
+                "type": "string",
+                "description": "Web list search: every whitespace-separated word must appear in name, category, tags, notes, region, URL or current payment method name (literal, case-insensitive; the web UI additionally matches pinyin)."
+              },
+              "tag": {
+                "type": "string",
+                "description": "MCP only: exact tag (case-insensitive)."
+              },
+              "region": {
+                "type": "string",
+                "description": "MCP only: ISO region of the current phase, e.g. TR."
+              },
+              "subscriptions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "MCP only: explicit subscription ids or names."
+              }
+            }
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_events",
+      "title": "Change log",
+      "description": "Changelog of spending decisions: subscriptions started, ended, paused, resumed, price changes and plan/region switches, each with its effect on monthly spend (base currency).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "since": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "until": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "limit": {
+            "type": "integer",
+            "default": 50
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "search_app_store",
+      "title": "Find app",
+      "description": "Look up an app on the App Store by name or App Store link: returns name, icon URL, store URL, seller and genre. Use it to fill icon and url when creating a subscription for an app.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "description": "Two-letter store region, e.g. us, tr, cn. Defaults to us."
+          }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_subscription",
+      "title": "Add subscription",
+      "description": "Create a subscription. price is per cycle in the given currency. Same name and start date with explicitly different login accounts are independent subscriptions. Otherwise a possible duplicate requires force=true. Use dry_run=true to preview first. Call list_categories first and reuse an existing code/name. Unknown categories fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one. Past records can be created already stopped: status=cancelled with end = last service day, or status=cancelled / terminated without end when the stop date is unknown. method=null creates it without a payment method (no default). For a complete record with phases or stop details use save_subscription.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO code, e.g. USD, CNY, TRY."
+          },
+          "cycle": {
+            "type": "object",
+            "properties": {
+              "unit": {
+                "type": "string",
+                "enum": ["day", "week", "month", "year", "lifetime"]
+              },
+              "every": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1
+              }
+            },
+            "required": ["unit"],
+            "description": "Billing cycle, e.g. {\"unit\":\"month\",\"every\":1}; lifetime = one-time purchase."
+          },
+          "start": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "First charge / purchase date. Defaults to today."
+          },
+          "category": {
+            "type": "string",
+            "description": "Existing category code or name from list_categories; localized names are case-insensitive. Defaults to the existing Tools category; if absent, specify an existing category."
+          },
+          "create_category": {
+            "type": "boolean",
+            "default": false,
+            "description": "If category is unknown, explicitly create it. Ambiguous references always fail."
+          },
+          "category_icon": {
+            "type": ["string", "null"],
+            "description": "New category only: Lucide icon name or emoji; same validation as save_category set.icon."
+          },
+          "category_color": {
+            "type": ["string", "null"],
+            "description": "New category only: palette code or #rrggbb; same validation as save_category set.color."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "method": {
+            "type": ["string", "null"],
+            "description": "Payment method id or name. Omitted uses the default payment method; null means no payment method."
+          },
+          "region": {
+            "type": "string",
+            "description": "ISO country code for region-priced stores (App Store TR, NG…)."
+          },
+          "url": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected."
+          },
+          "notes": {
+            "type": "string"
+          },
+          "account": {
+            "type": "string",
+            "description": "Login account: email, phone number (for carriers) or username shown on the receipt."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "trial", "cancelled", "terminated"],
+            "default": "active",
+            "description": "cancelled / terminated: already stopped. cancelled + end: did not renew after end (last service day). terminated + end: the provider disabled it on end. Without end the stop date is unknown."
+          },
+          "trial_end": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "chargeLeadDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3660
+          },
+          "cancelLeadDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3660
+          },
+          "end": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Will not renew after this date."
+          },
+          "intro": {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "number"
+              },
+              "until": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "YYYY-MM-DD"
+              }
+            },
+            "required": ["price", "until"],
+            "description": "Intro price until a date."
+          },
+          "payments": {
+            "type": "array",
+            "description": "Actual past charges with their real amounts (e.g. a monthly bill history). When given they become the whole charge history, so include EVERY period, including ones equal to price; future charges continue at price from the last one. Dates on or after start and not after today.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "format": "date",
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "description": "YYYY-MM-DD"
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Positive; refunds are stored negative."
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": ["charge", "refund", "adjust", "failed"],
+                  "default": "charge"
+                },
+                "method": {
+                  "type": ["string", "null"],
+                  "description": "Payment method id or name used for this one charge; omitted or null uses the subscription method."
+                },
+                "settled": {
+                  "type": "object",
+                  "properties": {
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "currency": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["amount", "currency"],
+                  "additionalProperties": false
+                },
+                "funding": {
+                  "type": ["array", "null"],
+                  "description": "Split one order across several sources, e.g. [{\"method\":\"PayPal\",\"amount\":168.05},{\"method\":\"Balance\",\"amount\":10.75}] for 178.80. Amounts in the subscription currency, positive, at least two different methods, summing to amount. Replaces method for this charge.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "method": {
+                        "type": "string",
+                        "description": "Payment method id or name."
+                      },
+                      "amount": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    },
+                    "required": ["method", "amount"],
+                    "additionalProperties": false
+                  }
+                },
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": ["date", "amount"],
+              "additionalProperties": false
+            }
+          },
+          "force": {
+            "type": "boolean",
+            "default": false
+          },
+          "id": {
+            "type": "string",
+            "description": "Internal: keep this id (used when confirming an earlier draft)."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["name", "price", "currency", "cycle"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "save_subscription",
+      "title": "Save full subscription",
+      "description": "Create or fully replace one subscription from a complete Subscription record (same shape as get_subscription.record): phases, payments with per-charge methodId / settled / kind (refund, adjust, failed) / funding (split across sources), status (active, trial, paused, cancelled, terminated), stop and end. Use it to enter a whole history at once (several phases, region or plan switches, every past charge) or to record an already-stopped subscription; for single edits prefer the narrower tools. The record is the entire new state, stored as given like the web editor’s save (keep top-level price/currency/cycle/methodId equal to the last phase): omitted fields are removed and null values are dropped; methodId absent or null means no payment method (no default is applied). cancelled / terminated without end or stop means stopped on an unknown date. Runs the same normalization and validation as saving in the web editor (renewal-rule history, clearing a member exit clears its refund, full-record and status-transition checks); referenced payment methods must exist. Without id, or with an id that does not exist, it creates a subscription; a same-name same-start duplicate then requires force=true. Preview returns changes (field-level before/after against the stored record) and computed before/after: status, next charge, last charge, total spent to date and charge count.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "object",
+            "description": "Complete Subscription JSON: id?, name, price, currency, cycle, start, status, category?, tags?, methodId?, phases?, payments?, stop?, end?, share?, proxy?, … Dates YYYY-MM-DD; payment amounts in the subscription / phase currency (refunds negative)."
+          },
+          "force": {
+            "type": "boolean",
+            "default": false
+          },
+          "create_category": {
+            "type": "boolean",
+            "default": false,
+            "description": "If category is unknown, explicitly create it. Ambiguous references always fail."
+          },
+          "category_icon": {
+            "type": ["string", "null"],
+            "description": "New category only: Lucide icon name or emoji; same validation as save_category set.icon."
+          },
+          "category_color": {
+            "type": ["string", "null"],
+            "description": "New category only: palette code or #rrggbb; same validation as save_category set.color."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_subscription",
+      "title": "Edit subscription",
+      "description": "Change descriptive fields and settings of a subscription (name, category, tags, url, notes, icon, payment method, region, reminder days, start, end date (no renewal after it), next due date, trial end). Only provided keys change. A start correction keeps the original billing anchor and future charge dates (preview next_charges) unless shift_billing=true. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "set": {
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": ["string", "null"],
+                "description": "Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected. null clears it."
+              },
+              "show_on_public": {
+                "type": "boolean"
+              },
+              "start": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "Service start (single-phase only). Keeps the billing anchor unless shift_billing=true."
+              },
+              "intro": {
+                "type": ["object", "null"],
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "until": {
+                    "format": "date",
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "description": "YYYY-MM-DD"
+                  }
+                },
+                "required": ["price", "until"],
+                "additionalProperties": false
+              },
+              "bonus": {
+                "type": ["object", "null"],
+                "properties": {
+                  "from": {
+                    "format": "date",
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "description": "YYYY-MM-DD"
+                  },
+                  "until": {
+                    "format": "date",
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "description": "YYYY-MM-DD"
+                  }
+                },
+                "required": ["from", "until"],
+                "additionalProperties": false
+              },
+              "name": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string",
+                "description": "Existing category code or name from list_categories; localized names are case-insensitive."
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "url": {
+                "type": "string"
+              },
+              "manage_url": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "account": {
+                "type": "string",
+                "description": "Login account (email / phone / username)."
+              },
+              "method": {
+                "type": ["string", "null"],
+                "description": "Payment method id or name."
+              },
+              "region": {
+                "type": "string"
+              },
+              "remind_days": {
+                "type": ["integer", "null"],
+                "minimum": -1,
+                "description": "-1 disables; null restores the global setting."
+              },
+              "end": {
+                "type": ["string", "null"],
+                "description": "YYYY-MM-DD, or null to clear (will renew again)."
+              },
+              "next_due": {
+                "type": ["string", "null"]
+              },
+              "trial_end": {
+                "type": ["string", "null"]
+              },
+              "expires": {
+                "type": ["string", "null"]
+              },
+              "chargeLeadDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3660
+              },
+              "cancelLeadDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3660
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "create_category": {
+            "type": "boolean",
+            "default": false,
+            "description": "If category is unknown, explicitly create it. Ambiguous references always fail."
+          },
+          "category_icon": {
+            "type": ["string", "null"],
+            "description": "New category only: Lucide icon name or emoji; same validation as save_category set.icon."
+          },
+          "category_color": {
+            "type": ["string", "null"],
+            "description": "New category only: palette code or #rrggbb; same validation as save_category set.color."
+          },
+          "shift_billing": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "set"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "change_price",
+      "title": "Record price change",
+      "description": "Add (default), edit or remove a dated price point in an existing plan. edit/remove require phase and original_from. The initial price can be edited but not removed. Dates must be within the phase and unique. Past estimated charges are recalculated; recorded payments stay unchanged. Preview reports affected_estimated_charges.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "action": {
+            "type": "string",
+            "enum": ["add", "edit", "remove"],
+            "description": "Default add (upsert by date). edit/remove target an existing point using phase and original_from. The initial point cannot be removed."
+          },
+          "phase": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Exact phase start; required for edit/remove, including single-phase subscriptions."
+          },
+          "original_from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Original effective date; required for edit/remove."
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Effective date; defaults to today for add, original_from for edit."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "change_plan",
+      "title": "Manage plans & history",
+      "description": "Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases; remove and drop accept only the subscription id or exact full name. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "action": {
+            "type": "string",
+            "enum": ["switch", "resume", "earlier", "confirm", "drop", "edit", "remove"]
+          },
+          "at": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "set": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "New phase start; keeps the billing anchor unless shift_billing=true."
+              },
+              "end": {
+                "type": ["string", "null"],
+                "format": "date"
+              },
+              "price": {
+                "type": "number",
+                "minimum": 0
+              },
+              "currency": {
+                "type": "string"
+              },
+              "cycle": {
+                "type": "object",
+                "properties": {
+                  "unit": {
+                    "type": "string",
+                    "enum": ["day", "week", "month", "year", "lifetime"]
+                  },
+                  "every": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                  }
+                },
+                "required": ["unit"],
+                "description": "Billing cycle, e.g. {\"unit\":\"month\",\"every\":1}; lifetime = one-time purchase."
+              },
+              "method": {
+                "type": ["string", "null"]
+              },
+              "region": {
+                "type": ["string", "null"]
+              },
+              "note": {
+                "type": ["string", "null"]
+              },
+              "nextDue": {
+                "type": ["string", "null"],
+                "format": "date"
+              },
+              "planned": {
+                "type": "boolean"
+              },
+              "priceHistory": {
+                "type": ["array", "null"],
+                "description": "Full replacement, retaining the initial effective date; use change_price action=edit to move that initial date. Latest amount becomes phase price.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "format": "date",
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                      "description": "YYYY-MM-DD"
+                    },
+                    "amount": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": ["from", "amount"],
+                  "additionalProperties": false
+                }
+              },
+              "intro": {
+                "type": ["object", "null"],
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "until": {
+                    "format": "date",
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "description": "YYYY-MM-DD"
+                  }
+                },
+                "required": ["price", "until"],
+                "additionalProperties": false
+              },
+              "bonus": {
+                "type": ["object", "null"],
+                "properties": {
+                  "from": {
+                    "format": "date",
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "description": "YYYY-MM-DD"
+                  },
+                  "until": {
+                    "format": "date",
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                    "description": "YYYY-MM-DD"
+                  }
+                },
+                "required": ["from", "until"],
+                "additionalProperties": false
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "plan": {
+            "type": "object",
+            "properties": {
+              "price": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "cycle": {
+                "type": "object",
+                "properties": {
+                  "unit": {
+                    "type": "string",
+                    "enum": ["day", "week", "month", "year", "lifetime"]
+                  },
+                  "every": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                  }
+                },
+                "required": ["unit"],
+                "description": "Billing cycle, e.g. {\"unit\":\"month\",\"every\":1}; lifetime = one-time purchase."
+              },
+              "method": {
+                "type": ["string", "null"]
+              },
+              "region": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              },
+              "planned": {
+                "type": "boolean"
+              }
+            },
+            "required": ["price", "currency", "cycle"],
+            "additionalProperties": false
+          },
+          "keep_previous_until": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "action=switch only: the previous phase keeps running until this date (after `at`), overlapping the new one."
+          },
+          "earlier_until": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "action=earlier only: the earlier phase ended on this date (a gap before the next one)."
+          },
+          "shift_billing": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "action", "at"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "set_status",
+      "title": "Update subscription status",
+      "description": "Mark as trial (action=trial, trial_end is the first paid charge date; null clears; stopped subscriptions must resume a new phase first); pause (recoverable); cancel with immediate=false (default): do not renew after at, the last service day; cancel with immediate=true: voluntarily stop using it on at; terminate: provider disabled access on at, with optional reason. Immediate cancel and terminate compute the original paidThrough and accept an optional refund (positive amount, stored negative in the subscription currency; settled is the actual card refund). No refund means unrefunded. Preview includes paidThrough, suggestedRefund, unusedDays, unusedValue and wastedDays. Terminated subscriptions cannot reactivate; use change_plan action=resume to resubscribe with a new phase. Reactivate clears pause, stop and end for other subscriptions. To correct an existing stop (date, non-renewal vs immediate cancel, reason, refund) pass edit=true with action=cancel|terminate; omitted fields keep the recorded values and a provider termination stays terminate. An undated stop needs its real date in at. cancel / terminate never assume today for a subscription that started or was charged before today: pass the actual date in at, or at=null when the user only knows it has stopped (stored as cancelled / terminated with no end or stop date; no refund or reason then).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "action": {
+            "type": "string",
+            "enum": ["pause", "cancel", "terminate", "reactivate", "trial"]
+          },
+          "at": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Non-immediate cancel: last service day. Immediate cancel / terminate: actual stop day. Required for cancel / terminate when the subscription started or has charges before today; null = stopped on an unknown date. pause / trial default to today."
+          },
+          "trial_end": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "trial only: first paid charge date; null clears, omitted preserves the existing value."
+          },
+          "immediate": {
+            "type": "boolean",
+            "default": false,
+            "description": "cancel only: stop using the service immediately instead of non-renewal."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional provider termination reason; terminate only."
+          },
+          "refund": {
+            "type": ["object", "null"],
+            "properties": {
+              "amount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "date": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "YYYY-MM-DD"
+              },
+              "currency": {
+                "type": "string",
+                "description": "Must equal the subscription currency; usually omit."
+              },
+              "settled": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "currency": {
+                    "type": "string"
+                  }
+                },
+                "required": ["amount", "currency"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["amount"],
+            "additionalProperties": false,
+            "description": "Immediate cancel / terminate only. With edit=true it replaces the latest stop refund; null removes it; omitted keeps it."
+          },
+          "edit": {
+            "type": "boolean",
+            "default": false,
+            "description": "Correct an already stopped subscription with action=cancel|terminate: change the stop date (at; omitted keeps it), non-renewal vs immediate cancel, reason or refund. Provider termination cannot become cancel."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "action"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "record_payment",
+      "title": "Record or edit payments",
+      "description": "Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for every kind (charge, refund, adjust, failed); a different card currency belongs in settled. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. funding = one order paid from several sources (amounts in the subscription currency summing to amount, e.g. 178.80 = PayPal 168.05 + Balance 10.75); wallet balances are reduced by each part. funding and method are exclusive; null clears a split; omitted keeps a replaced charge’s split. Rejects same-day same-amount duplicates unless allow_duplicate.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "replace": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "YYYY-MM-DD"
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["date", "index"],
+            "additionalProperties": false
+          },
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "date": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Defaults to today."
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "description": "Must equal the subscription / selected phase currency for every kind; usually omit. Use settled for a different card currency."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["charge", "refund", "adjust", "failed"],
+            "default": "charge"
+          },
+          "settled": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "type": "number"
+              },
+              "currency": {
+                "type": "string"
+              }
+            },
+            "required": ["amount", "currency"],
+            "additionalProperties": false
+          },
+          "method": {
+            "type": ["string", "null"],
+            "description": "Payment method id or name for this single charge; null clears it."
+          },
+          "funding": {
+            "type": ["array", "null"],
+            "description": "Split one order across several sources, e.g. [{\"method\":\"PayPal\",\"amount\":168.05},{\"method\":\"Balance\",\"amount\":10.75}] for 178.80. Amounts in the subscription currency, positive, at least two different methods, summing to amount. Replaces method for this charge.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "description": "Payment method id or name."
+                },
+                "amount": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": ["method", "amount"],
+              "additionalProperties": false
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "allow_duplicate": {
+            "type": "boolean",
+            "default": false
+          },
+          "phase": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Start date of the phase this payment belongs to; only needed when two phases overlap on that date (defaults to the latest-started one)."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "amount"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "delete_payment",
+      "title": "Delete payment record",
+      "description": "Delete one recorded payment of a subscription by date (index picks among several on the same day, 0-based).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action."
+          },
+          "date": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "index": {
+            "type": "integer",
+            "default": 0
+          },
+          "phase": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Start date of the phase holding the payment, when two phases overlap."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "date"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "record_transfer",
+      "title": "Record or edit transfers",
+      "description": "Record, replace or delete a transfer of a subscription between owners (e.g. a second-hand VPS): kind=buy is the cash paid to the previous owner when taking it over, kind=sell is the cash received when handing it on. amount is the actual cash (positive), in any currency (converted at the transfer date); do not estimate residual value. Transfers count in lifetime net cost (service charges + buy − sell, averaged over the holding period) and yearly/monthly cash flow, not in MRR, forecasts, wallet runway, refunds or charge counts; a sale inside a stopped phase’s paid period removes its paid-but-unused loss. replace={date,index} edits one (index = zero-based among that date’s transfers, as listed by get_subscription.transfers); delete={date,index} removes one.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["buy", "sell"]
+          },
+          "date": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Defaults to today."
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO code; defaults to the subscription’s current currency."
+          },
+          "note": {
+            "type": "string"
+          },
+          "replace": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "YYYY-MM-DD"
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["date", "index"],
+            "additionalProperties": false
+          },
+          "delete": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "YYYY-MM-DD"
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["date", "index"],
+            "additionalProperties": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_carpool",
+      "title": "Shared plans",
+      "description": "Shared plans (carpools): for each plan I organize (role owner) or joined (role member): seats taken / total and free seats, the shared collection anchor (collect_from), the plan collection rule (rule: fee, currency, every_months; stored=false means inferred from the most common member rate); members with their actual leave_refund (null when not refunded), fee and billing months, follows_rule (true = fee follows the plan rule, false = custom fee or exempt), overdue_days (days the next unpaid collection is past due, 0 if not), alignment anchor, paid_until, first_collection (join date through aligned end, inclusive, and first fee), next_collection and next_collection_date (earliest unpaid coverage start, possibly overdue; free partial first periods are skipped), is_first_period (whether that next unpaid period is the first), and pending_amount (total currently owed, zero when nothing is due); per year: cost, expected income from members, and i_pay (what I still pay myself) or i_earn (profit when members pay more than the cost); since the carpool started: paid, received, and i_pay / i_earn to date. Amounts in the base currency unless noted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Optional: only this plan."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "delete_subscription",
+      "title": "Delete subscription",
+      "description": "Delete a subscription and its whole history. Irreversible: always preview with dry_run first; the user confirms.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "set_share",
+      "title": "Manage sharing",
+      "description": "Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing (subscription must then be its id or exact full name). rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "role": {
+            "type": "string",
+            "enum": ["owner", "member", "none"]
+          },
+          "seats": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Total seats including me."
+          },
+          "owner_name": {
+            "type": ["string", "null"]
+          },
+          "since": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "collect_from": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Optional shared collection anchor. Members align to this date + k × bill_every months, preserving month-end alignment. Omit to preserve the existing anchor or infer from since, recorded coverage / paid-until, then subscription start."
+          },
+          "rule": {
+            "type": "object",
+            "description": "Owner only: the plan collection rule followed by non-custom members.",
+            "properties": {
+              "fee": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Amount collected from each member per bill."
+              },
+              "fee_currency": {
+                "type": "string",
+                "description": "Defaults to the current rule currency, else the collection currency."
+              },
+              "bill_every": {
+                "type": "integer",
+                "enum": [1, 3, 6, 12]
+              }
+            },
+            "additionalProperties": false
+          },
+          "rule_from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Effective date for the rule change; defaults to today. Whole periods starting on/after it use the new fee."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "role"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "save_share_member",
+      "title": "Add or edit member",
+      "description": "Add a member to a shared plan I organize, or update one (pass member = id or name to update). fee = how much they pay each time, in fee_currency (defaults to the collection currency), every bill_every months (1 monthly, 3 quarterly, 6 half-yearly, 12 yearly). exempt = takes a seat but pays nothing. paid_until = settled before record-keeping through this date (periods starting on/before it become an opening settlement with no amount; null removes it); record real money with record_receivable. Only the joining period aligns to the shared anchor; later periods follow the member’s own billing cycle. Fee changes use fee_from (default today), preserve the old rate and receipts, and apply to whole periods starting on/after that date. A mid-period join covers joined through the aligned period end inclusive: first_period prorate (default, actual days / full period days, rounded to cents), full, or free. first_amount optionally overrides the first amount in fee_currency; free always charges zero. Later periods use the regular fee. Use save_person for name/contact changes of a linked roster person; person=null detaches the link. New members default to the plan collection rule (see get_carpool rule) when fee and bill_every are omitted. follow_rule=true makes the member follow the plan rule from fee_from (default today); follow_rule=false keeps their own fee. Changing fee, fee_currency or bill_every without follow_rule marks the member custom unless the result at fee_from equals the rule. Each call inserts/replaces one dated fee point; later fee_history points remain. For an ongoing custom rate, also replace conflicting later points with the same fee and cycle. Do not postpone fee_from to avoid them; omit it to start today. Set left to retain all join/receipt history. Optional leave_refund stores the actual positive refund, with date defaulting to left and currency to the suggested refund currency; null means no refund. left=null also clears the refund. Preview returns suggested_refund (including original-currency parts) and unused_days; never save the suggestion as an actual refund without user confirmation. Preview and save return member.first_collection (inclusive coverage and amount), follows_rule, collect_from, paid_until, next_collection_date and overdue_days.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
+          },
+          "person": {
+            "type": ["string", "null"],
+            "description": "Link an existing roster person by id/name; copies their name/contact. Omitted: an unlinked member is matched by name (+ contact) like the web form, else a roster person is created (preview created_person). null keeps the member unlinked."
+          },
+          "member": {
+            "type": "string",
+            "description": "Existing member id or name to update; omit to add a new member."
+          },
+          "id": {
+            "type": "string",
+            "description": "Internal: id for a new member (used when confirming an earlier draft)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "fee": {
+            "type": "number",
+            "minimum": 0
+          },
+          "fee_currency": {
+            "type": "string"
+          },
+          "fee_from": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Effective date for a fee/currency/billing-cycle change; omit when the user gave no date (today), including follow_rule switches. Do not align it to a future plan-rule date. Period start selects the whole-period rate; no split at price changes."
+          },
+          "bill_every": {
+            "type": "integer",
+            "enum": [1, 3, 6, 12]
+          },
+          "follow_rule": {
+            "type": "boolean",
+            "description": "true = follow the plan collection rule (ignores fee/fee_currency/bill_every); false = custom fee."
+          },
+          "first_period": {
+            "type": "string",
+            "enum": ["prorate", "full", "free"],
+            "description": "Partial first period only: prorate (default, actual inclusive days / full aligned period days, rounded to cents), full (regular fee), or free (zero; skipped for the next collection). Later periods charge the regular fee."
+          },
+          "first_amount": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "description": "Custom first-period fee; null resets to calculated amount."
+          },
+          "exempt": {
+            "type": "boolean"
+          },
+          "paid_until": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "YYYY-MM-DD"
+          },
+          "joined": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Join date, inclusive; defaults to today for a new member. A mid-period join covers this day through the shared aligned period end."
+          },
+          "left": {
+            "format": "date",
+            "type": ["string", "null"],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Left the plan on this date (keeps history). null also clears leave_refund."
+          },
+          "leave_refund": {
+            "type": ["object", "null"],
+            "description": "Actual refund on leaving, positive amount. Requires left; null clears it. Omit to preserve. Date cannot precede joining.",
+            "properties": {
+              "amount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "date": {
+                "format": "date",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                "description": "YYYY-MM-DD"
+              },
+              "currency": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": ["amount"],
+            "additionalProperties": false
+          },
+          "source": {
+            "type": "string"
+          },
+          "contact_via": {
+            "type": "string",
+            "description": "e.g. 微信, Telegram, 邮箱"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "account": {
+            "type": "string",
+            "description": "This person’s account on this shared plan (arbitrary text: email, phone number, username or ID)."
+          },
+          "note": {
+            "type": "string"
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "remove_share_member",
+      "title": "Remove member",
+      "description": "Remove a member from a shared plan entirely (their payment history goes too). To keep history, use save_share_member with left instead.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action."
+          },
+          "member": {
+            "type": "string",
+            "description": "Member id or exact name (case-insensitive)."
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": ["subscription", "member"],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "record_receivable",
+      "title": "Manage receivable records",
+      "description": "Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again (subscription and member must be ids or exact names). action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["record", "waive", "update", "delete", "charged"]
+          },
+          "subscription": {
+            "type": "string",
+            "description": "Subscription id or name. Optional when person is given and only one of their plans / proxy payments matches."
+          },
+          "person": {
+            "type": "string",
+            "description": "Person id or name (see list_people). Picks the matching member or proxy payment automatically."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["share", "proxy"],
+            "description": "Inferred when person or member is given; defaults to proxy for a proxy subscription."
+          },
+          "member": {
+            "type": "string",
+            "description": "share: member id or name."
+          },
+          "periods": {
+            "type": "array",
+            "items": {
+              "format": "date",
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "description": "YYYY-MM-DD"
+            },
+            "maxItems": 240,
+            "description": "Period keys (share: period start; proxy: charge date)."
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 240,
+            "description": "Without periods: cover the N earliest unsettled periods."
+          },
+          "id": {
+            "type": "string",
+            "description": "update/delete: receipt or waiver id."
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Actual amount received; defaults to the total due of the covered periods."
+          },
+          "currency": {
+            "type": "string",
+            "description": "Receipt currency; defaults to the currency of the covered periods."
+          },
+          "date": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "When the money arrived (or the waiver was agreed); defaults to today."
+          },
+          "note": {
+            "type": ["string", "null"]
+          },
+          "charge": {
+            "format": "date",
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "charged: which proxy charge date."
+          },
+          "charged_amount": {
+            "type": ["number", "null"],
+            "minimum": 0
+          },
+          "charged_currency": {
+            "type": ["string", "null"]
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_payment_method",
+      "title": "Manage payment methods & wallets",
+      "description": "Create (action=create), update (default), or delete (action=delete) a payment method/wallet. set uses PaymentMethod fields: name, kind, currency, balance/balanceAsOf, logo, notes, card details, order, etc. Create requires name/kind/currency in set. Delete blocks ALL subscription/phase/default-method references unless migrate_to names an existing target; returns references and lost top-up history. top_up appends and recalibrates current balance; top_up_action=update|delete with zero-based top_up_index edits stored history only, preserving the calibrated balance unless balance/set.balance is explicitly supplied. Read stored records and indices with list_payment_methods. Currency edits relabel the wallet, never convert historical amounts. Preview first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["create", "update", "delete"]
+          },
+          "id": {
+            "type": "string",
+            "description": "Stable new id when confirming a create draft."
+          },
+          "method": {
+            "type": "string"
+          },
+          "migrate_to": {
+            "type": "string"
+          },
+          "set": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["debit", "credit", "alipay", "wechat", "paypal", "appstore", "googleplay", "giftcard", "prepaid", "phone", "crypto", "other"]
+              },
+              "currency": {
+                "type": "string"
+              },
+              "balance": {
+                "type": ["number", "null"]
+              },
+              "balanceAsOf": {
+                "type": ["string", "null"],
+                "format": "date"
+              },
+              "last4": {
+                "type": ["string", "null"]
+              },
+              "color": {
+                "type": ["string", "null"]
+              },
+              "region": {
+                "type": ["string", "null"]
+              },
+              "notes": {
+                "type": ["string", "null"]
+              },
+              "brand": {
+                "type": ["string", "null"]
+              },
+              "logo": {
+                "type": ["string", "null"]
+              },
+              "bank": {
+                "type": ["string", "null"]
+              },
+              "phone": {
+                "type": ["string", "null"]
+              },
+              "url": {
+                "type": ["string", "null"]
+              },
+              "network": {
+                "type": ["string", "null"],
+                "enum": ["visa", "mastercard", "unionpay", "jcb", "american-express", "discover", "diners", "maestro"]
+              },
+              "logoWide": {
+                "type": "boolean"
+              },
+              "order": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "lowRunwayDays": {
+                "type": ["number", "null"],
+                "minimum": 0
+              },
+              "cashback": {
+                "type": ["number", "null"],
+                "minimum": 0
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "balance": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "top_up": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cost": {
+                "type": ["number", "null"],
+                "minimum": 0
+              },
+              "costCurrency": {
+                "type": ["string", "null"]
+              },
+              "note": {
+                "type": ["string", "null"]
+              },
+              "cost_currency": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": [],
+            "additionalProperties": false,
+            "description": "Append: amount required, date defaults to today. Update: only supplied fields change."
+          },
+          "top_up_action": {
+            "type": "string",
+            "enum": ["add", "update", "delete"]
+          },
+          "top_up_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expected_top_up": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cost": {
+                "type": ["number", "null"],
+                "minimum": 0
+              },
+              "costCurrency": {
+                "type": ["string", "null"]
+              },
+              "note": {
+                "type": ["string", "null"]
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "description": "Preview before/after and references without saving."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

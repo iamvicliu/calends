@@ -22,7 +22,7 @@ import {
   validateMethod,
 } from '../../shared/ledger-edit.ts';
 import { personLink } from '../../shared/people.ts';
-import { state, findSub, findPerson, methodRef, commit, connectionInfo, writeLedger, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { state, findSub, findPerson, methodRef, commit, writeLedger, type Tool, type ToolCtx } from './tool-kit.ts';
 
 const action = (values: string[]) => ({ type: 'string', enum: values });
 const body = (value: unknown) => (value ?? {}) as Record<string, unknown>;
@@ -127,7 +127,7 @@ export const paymentMethodTool: Tool = {
   },
 };
 
-export const ledgerTools: Tool[] = [
+export const ledgerTools = (connectionInfo: (ctx: ToolCtx, settings: AppState['settings'], today: string) => object): Tool[] => [
   {
     name: 'save_category',
     write: true,
