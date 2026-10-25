@@ -17,6 +17,7 @@ import * as carpool from './carpool.ts';
 import * as carpoolTimeline from './carpool-timeline.ts';
 import * as proxy from './proxy.ts';
 import * as receivables from './receivables.ts';
+import * as assistantFields from '../app/src/views/assistant-fields.ts';
 import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
@@ -47,7 +48,13 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
         .replace(/^import[\s\S]*?;\n/gm, '')
         .replace(/export (function|const) /g, '$1 ')
     : '';
-  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource + '\n' + receivableSource, {
+  // 联系方式工具在 components/Contact.tsx：一起编译
+  const contactSource = /Contact\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    ? readFileSync(new URL('../app/src/components/Contact.tsx', import.meta.url), 'utf8')
+        .replace(/^import[\s\S]*?;\n/gm, '')
+        .replace(/export (function|const) /g, '$1 ')
+    : '';
+  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource + '\n' + receivableSource + '\n' + contactSource, {
     lang: 'tsx',
     jsx: { runtime: 'classic' },
     reactCompiler: false,
@@ -113,6 +120,13 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     useWidth: () => [null, 700],
     allCharges: () => [],
     sumBase: () => 0,
+    // 显示用合计与排序（app/src/derive.ts）：缺汇率为 NaN
+    sumBaseOrNaN: (s: AppState, rows: billing.Charge[]) => rows.reduce((n, c) => n + fx.chargeBaseOrNaN(s, c), 0),
+    sortValue: (v: number) => (Number.isFinite(v) ? v : -Infinity),
+    firstStart: (state: AppState, at: string) => state.subscriptions.reduce((m, x) => (x.start < m ? x.start : m), at),
+    // 防重复提交（ui.tsx useSubmit）：测试里直接执行
+    useSubmit: () => [false, async (fn: () => unknown) => void (await fn())],
+    LoadFailed: 'LoadFailed',
     document: {
       addEventListener: (name: string, fn: (e: any) => void) => {
         keys[name] = fn;
@@ -862,7 +876,7 @@ test('钱包续航列表不重复卡面余额和月扣；单年度分享用时�
   ] as Array<Array<[string, number]>>) {
     const nodes = share.render('SYears', {
       sub,
-      st: { years, total: 10, duration: '20 days', charges: [], vs: [sub], change: 0 },
+      st: { years, yearMissing: new Set<string>(), total: 10, duration: '20 days', charges: [], vs: [sub], change: 0 },
       hide: false,
       m: (n: number) => format.flow(n, 'USD'),
     });
@@ -1846,6 +1860,8 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
         NumInput: 'NumInput',
         Picker: 'Picker',
         todayIn: () => today,
+        // 删除前要确认：这里确认
+        ask: async () => true,
         getState: () => ({ ...st, subscriptions: [sub] }),
         linkPerson: async () => ({}),
         run: (fn: () => Promise<unknown>) => fn(),
@@ -2234,7 +2250,7 @@ test('退款行显示负现金流和退款标签，全额退款后仍保留累�
   assert.ok(all(refund.children).some((n) => n.children.includes(format.flow(-31, 'USD'))));
   const facts = r.render('CarFacts', { book: carpool.carLedger(st, s, today), base: 'USD' });
   assert.ok(!facts.some((n) => n.children.includes('family.sheet.noReceiptsYet')));
-  const assistant = harness('../app/src/views/Assistant.tsx', 'summaryRows', {}, { storageKey: (s: string) => s });
+  const assistant = harness('../app/src/views/Assistant.tsx', 'summaryRows', {}, { storageKey: (s: string) => s, ...assistantFields });
   const rows = assistant.call('summaryRows', 'save_share_member', { member: 'm', leave_refund: { amount: 12 } }, st, 'USD', {
     member: { leave_refund: { date: '2026-10-02', currency: 'CNY' } },
   });
@@ -2291,7 +2307,7 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
     },
   );
   let opened = 0;
-  const props = { state, s, today, ro: false, onMember: () => opened++, win: carpoolTimeline.carpoolTimeline(s, today, 3), expanded: false, onToggle() {} };
+  const props = { state, s, today, onMember: () => opened++, win: carpoolTimeline.carpoolTimeline(s, today, 3), expanded: false, onToggle() {} };
   const names = (nodes: Node[]) => nodes.filter((n) => n.props.className === 'car-member-row').map((n) => n.props['aria-label']);
   let nodes = r.render('MemberTable', props);
   assert.deepEqual(names(nodes), ['Active', 'Exempt']);
@@ -2306,16 +2322,11 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   const collapsedCards = r.render('MemberRows', props).filter((n) => n.type === 'button' && n.props.className === 'member-info');
   assert.equal(collapsedCards.length, 2);
   assert.equal(r.render('MemberRows', { ...props, includeLeft: true }).filter((n) => n.props.className === 'member departed').length, 1);
-  const cellNodes = r.render('Vacancy', { ro: false, onAdd: () => opened++, table: true });
+  const cellNodes = r.render('Vacancy', { onAdd: () => opened++, table: true });
   assert.equal(cellNodes.filter((n) => n.type === 'td').length, 4);
   assert.equal(cellNodes.filter((n) => n.type === 'td' && !all(n.children).length).length, 2);
   cellNodes[0].props.onClick();
   assert.equal(opened, 2);
-  const readonly = r.render('Vacancy', { ro: true, onAdd: () => opened++, table: false })[0];
-  readonly.props.onClick();
-  assert.equal(opened, 2);
-  assert.equal(readonly.props.tabIndex, undefined);
-  assert.equal(readonly.props.role, undefined);
   nodes = r.render('CarSheet', { ...props, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {} });
   // 已下车成员的历史收款仍留在收款表里（与订阅详情同一套按年表格，只有一年时平铺）
   assert.ok(nodes.some((n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('Departed'))));

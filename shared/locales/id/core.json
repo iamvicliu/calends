@@ -219,5 +219,6 @@
     "badDate": "{field} asli \"{value}\" tidak dikenali, tidak diimpor",
     "nextDue": "tanggal pembayaran berikutnya",
     "end": "tanggal berakhir"
-  }
+  },
+  "fxIncomplete": "Beberapa jumlah tidak dapat dikonversi karena kurs tidak tersedia, jadi hasil ini tidak lengkap."
 }

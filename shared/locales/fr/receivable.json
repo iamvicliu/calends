@@ -56,5 +56,6 @@
     "due": "Impayé",
     "upcoming": "Pas encore dû",
     "this": "Ce paiement"
-  }
+  },
+  "confirmDelete": "Supprimer l’enregistrement du {date} ?"
 }

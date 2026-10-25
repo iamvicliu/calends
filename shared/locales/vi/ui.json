@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Vui lòng đăng nhập trước",
     "requestFailed": "Yêu cầu thất bại ({status})",
-    "wholeCurrency": "Số tiền {currency} phải là số nguyên"
+    "wholeCurrency": "Số tiền {currency} phải là số nguyên",
+    "deletedElsewhere": "Mục này đã bị xóa ở nơi khác nên thay đổi chưa được lưu."
   },
   "theme": {
     "light": "Sáng",
@@ -23,5 +24,7 @@
   },
   "working": "Đang xử lý…",
   "undo": "Hoàn tác",
-  "restored": "Đã khôi phục"
+  "restored": "Đã khôi phục",
+  "loadFailed": "Không tải được",
+  "retry": "Thử lại"
 }

@@ -1,15 +1,15 @@
 import { copyParts } from '../components/copy.tsx';
-import { base as appPath } from '../base.ts';
+import { base as appPath, readStored, storageKey } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
-import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn, isStopped } from '../../../shared/billing.ts';
 import { cnDate, flow, moneyTick, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
 import { t, type Params } from '../../../shared/i18n.ts';
-import { chargeValue, toBaseAt } from '../../../shared/fx.ts';
+import { chargeValue, toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../../shared/metrics.ts';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
-import { allCharges, catIcon, periodRange, sumBase, syncCategories } from '../derive.ts';
+import { allCharges, catIcon, periodRange, sumBase, syncCategories, firstStart } from '../derive.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode } from '../theme.tsx';
 import { AppIcon } from '@/public/components/app-icon';
@@ -29,13 +29,6 @@ import { IconPile } from './components/icon-pile.tsx';
 /** 公开页可切换的币种：本位币，和（本位币不是美元时）美元 */
 type Ccy = string;
 
-const pref = (key: string): string | null => {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-};
 const save = (key: string, v: string) => {
   try {
     localStorage.setItem(key, v);
@@ -77,8 +70,10 @@ export function PublicPage() {
     document.title = title();
     fetch(appPath('/api/public'))
       .then(async (r) => {
-        const body = (await r.json()) as AppState & { error?: string };
-        if (!r.ok) throw new Error(body.error ?? t('public.loadFailed'));
+        // 不是 JSON（代理错误页、静态页顶替）或不是账本：统一显示加载失败，不露出解析异常
+        const body = (await r.json().catch(() => null)) as (AppState & { error?: string }) | null;
+        if (!r.ok) throw new Error(body?.error ?? t('public.loadFailed'));
+        if (!Array.isArray(body?.subscriptions) || !body.settings) throw new Error(t('public.loadFailed'));
         owner = body.settings.displayName ?? '';
         custom = body.settings.publicTitle ?? '';
         document.title = title();
@@ -119,12 +114,8 @@ function Shell({ children, right, avatar }: { children: React.ReactNode; right?:
   );
 }
 
-/** 卡片依次浮现 */
-const Reveal = ({ className, children }: { i: number; className?: string; children: React.ReactNode }) => (
-  <motion.div className={cn('min-w-0', className)} initial={false} animate={{ opacity: 1 }}>
-    {children}
-  </motion.div>
-);
+/** 卡片外层：允许内容收缩（min-w-0） */
+const Reveal = ({ className, children }: { className?: string; children: React.ReactNode }) => <div className={cn('min-w-0', className)}>{children}</div>;
 
 function ThemeButton() {
   const [mode, cycle] = useThemeMode();
@@ -143,7 +134,7 @@ function ThemeButton() {
 
 function Ledger({ state }: { state: AppState }) {
   const base = state.settings.baseCurrency;
-  const [ccy, setCcy] = useState<Ccy>(() => (base !== 'USD' && pref('ledger:public-ccy') === 'USD' ? 'USD' : base));
+  const [ccy, setCcy] = useState<Ccy>(() => (base !== 'USD' && readStored('ledger:public-ccy') === 'USD' ? 'USD' : base));
   const today = todayIn(state.settings.timezone);
   const d = useMemo(() => derive(state, today), [state, today]);
 
@@ -178,7 +169,7 @@ function Ledger({ state }: { state: AppState }) {
               value={ccy}
               onValueChange={(v: string) => {
                 setCcy(v);
-                save('ledger:public-ccy', v);
+                save(storageKey('ledger:public-ccy'), v);
               }}
             >
               <TabsList aria-label={t('public.currency')}>
@@ -196,7 +187,7 @@ function Ledger({ state }: { state: AppState }) {
     >
       <div className="grid grid-cols-1 gap-4">
         {/* 主卡：月支出、未来 30 天、每月扣款 */}
-        <Reveal i={0}>
+        <Reveal>
           <Card className={cn(roomy, 'h-full')}>
             <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
@@ -222,7 +213,7 @@ function Ledger({ state }: { state: AppState }) {
                   {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} ccy={ccy} prefix={sym} className="text-foreground" /> })}
                 </span>
               </div>
-              <Timeline today={today} load={loadTimeline} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
+              <Timeline today={today} load={loadTimeline} start={firstStart(state, today)} />
             </CardContent>
 
             <Separator />
@@ -253,21 +244,21 @@ function Ledger({ state }: { state: AppState }) {
         </Reveal>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Reveal i={1} className="h-full">
+          <Reveal className="h-full">
             <Composition cats={d.cats} total={d.mrr} k={k} fmt={fmt} />
           </Reveal>
-          <Reveal i={2} className="h-full">
+          <Reveal className="h-full">
             <Currencies d={d} ccy={ccy} fmt={fmt} />
           </Reveal>
         </div>
 
-        <Reveal i={3}>
+        <Reveal>
           <SubList d={d} today={today} ccy={ccy} k={k} fmt={fmt} />
         </Reveal>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {d.ended.length > 0 && (
-            <Reveal i={4} className="h-full">
+            <Reveal className="h-full">
               <Card className={cn(roomy, 'h-full')}>
                 <CardHeader>
                   <CardTitle>{t('public.ended.title')}</CardTitle>
@@ -293,7 +284,7 @@ function Ledger({ state }: { state: AppState }) {
             </Reveal>
           )}
           {d.lifetime.length > 0 && (
-            <Reveal i={5} className="h-full">
+            <Reveal className="h-full">
               <Card className={cn(roomy, 'h-full')}>
                 <CardHeader>
                   <CardTitle>{t('public.lifetime.title')}</CardTitle>
@@ -344,7 +335,7 @@ type Derived = ReturnType<typeof derive>;
 function derive(state: AppState, today: string) {
   syncCategories(state);
   const base = state.settings.baseCurrency;
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const first = firstStart(state, today);
   const past = allCharges(state, first, today, today);
   const yearAgo = `${Number(today.slice(0, 4)) - 1}${today.slice(4)}`;
 
@@ -416,7 +407,7 @@ function derive(state: AppState, today: string) {
     upcoming,
     fx: { [base]: fxFor(base), USD: fxFor('USD') } as Record<Ccy, ReturnType<typeof fxFor>>,
     // 退订：按退订时间新的在前；只给「原来每月多少」这种不随时间膨胀的数，不算「退订至今省了多少」
-    ended: state.subscriptions.filter((s) => ['ended', 'terminated'].includes(effectiveStatus(s, today))).map((sub) => ({ sub, since: sub.stop?.date ?? sub.end ?? sub.start, monthly: savings.items.find((x) => x.sub.id === sub.id)?.monthly ?? toBaseAt(state, monthlyGross(currentPhase(sub, sub.end ?? today), sub.end ?? today), sub.currency) * myShareFactor(sub, sub.end ?? today) })).sort((a, b) => b.since.localeCompare(a.since)),
+    ended: state.subscriptions.filter((s) => isStopped(effectiveStatus(s, today))).map((sub) => ({ sub, since: sub.stop?.date ?? sub.end ?? sub.start, monthly: savings.items.find((x) => x.sub.id === sub.id)?.monthly ?? toBaseOrNaN(state, monthlyGross(currentPhase(sub, sub.end ?? today), sub.end ?? today), sub.currency) * myShareFactor(sub, sub.end ?? today) })).sort((a, b) => b.since.localeCompare(a.since)),
     endedMonthly: savings.items.reduce((a, x) => a + x.monthly, 0),
     lifetime: state.subscriptions.filter((s) => s.cycle.unit === 'lifetime'),
   };

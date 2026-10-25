@@ -74,6 +74,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     useEffect() {},
     useLayoutEffect() {},
     useSyncExternalStore: (_subscribe: unknown, _get: unknown, server: () => unknown) => server(),
+    useMedia: () => false,
     useEffectEvent: (fn: unknown) => fn,
     ...billing,
     ...transfers,
@@ -86,6 +87,10 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     ...carpool,
     perBill: (key: string) => key,
     toBase: fx.toBaseAt,
+    // app/src/derive.ts 的显示合计与排序；ui.tsx 的防重复提交（测试里同步执行）
+    sumBaseOrNaN: (st: AppState, rows: billing.Charge[]) => rows.reduce((n, c) => n + fx.chargeBaseOrNaN(st, c), 0),
+    sortValue: (v: number) => (Number.isFinite(v) ? v : -Infinity),
+    useSubmit: () => [false, (fn: () => unknown) => Promise.resolve(fn())],
     t,
     intlLocale,
     Cell: 'Cell',
@@ -234,7 +239,7 @@ const withClass = (node: unknown, cls: string) =>
   );
 
 // 使用真实 Outcome / Statement，执行组件树；仅替换宿主、Hooks 和不相关的可视化。
-test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色金额；全额退款、零损失和公开视图隐藏损失', () => {
+test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色金额；全额退款、零损失隐藏损失', () => {
   const r = runtime(
     '../app/src/views/Detail.tsx',
     {
@@ -247,11 +252,11 @@ test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色�
     },
     'Outcome',
   );
-  const render = (s: Subscription, readonly = false) =>
+  const render = (s: Subscription) =>
     r.render('Outcome', {
       sub: s,
       today,
-      state: { subscriptions: [s], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX, readonly },
+      state: { subscriptions: [s], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX },
     });
   for (const s of [sub, { ...sub, status: 'cancelled' as const, end: today }]) {
     assert.equal(withClass(render(s), 'dt-outcome').length, 0);
@@ -288,7 +293,6 @@ test('详情停止卡片：无 stop 完全不渲染；仅正损失显示红色�
         assert.ok(text(section).includes(t(summary.refundStatus === 'full' ? 'core.stop.fullyRefunded' : 'core.stop.partial', { money: '' }).trim()));
         assert.ok(!text(section).includes(format.flow(amount, 'USD')), 'a single refund amount is owned by the charge record');
       }
-      assert.equal(withClass(render(s, true), 'dt-outcome').length, 0);
     }
   }
   const free = phases.stopSubscription({ ...sub, price: 0 }, today, 'cancel');

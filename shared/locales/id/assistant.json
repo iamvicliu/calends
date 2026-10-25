@@ -256,5 +256,6 @@
     "deleteAll": "Menghapus langganan beserta semua tagihannya. Tidak dapat dibatalkan.",
     "dateUnknown": "Tanggal tidak diketahui",
     "terminate": "Dihentikan penyedia"
-  }
+  },
+  "interrupted": "Balasan terputus sebelum selesai."
 }

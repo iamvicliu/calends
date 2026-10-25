@@ -2,7 +2,7 @@ import { copyParts } from '../components/copy.tsx';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
 import { localTime } from '../../../shared/format.ts';
-import { ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
+import { ask, Cell, Group, Icon, LoadFailed, Sheet } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { api, registerPasskey, run, saveSettings } from '../store.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -108,7 +108,15 @@ function deviceName(): string {
 export function SecurityGroup({ state }: { state: AppState }) {
   const [sec, setSec] = useState<Security>();
   const [pwSheet, setPwSheet] = useState(false);
-  const load = () => api<Security>('/api/auth/security').then(setSec, () => {});
+  const [failed, setFailed] = useState(false);
+  const load = () =>
+    api<Security>('/api/auth/security').then(
+      (v) => {
+        setSec(v);
+        setFailed(false);
+      },
+      () => setFailed(true),
+    );
   useEffect(() => void load(), []);
   const supported = typeof window.PublicKeyCredential === 'function';
   const max = state.settings.maxSessions ?? DEFAULT_MAX;
@@ -116,6 +124,7 @@ export function SecurityGroup({ state }: { state: AppState }) {
   return (
     <>
       <Group title={t('settings.security.title')} foot={supported ? t('settings.security.passkeyFoot') : t('settings.security.passkeyUnsupported')}>
+        {failed && !sec && <LoadFailed onRetry={() => void load()} />}
         {sec?.passkeys.map((p) => (
           <Cell
             key={p.id}

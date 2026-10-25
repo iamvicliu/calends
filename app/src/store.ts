@@ -1,7 +1,7 @@
 import { browserSupportsWebAuthnAutofill, startAuthentication, WebAuthnAbortService } from '@simplewebauthn/browser';
 import { beginPasskeyAutofill } from './passkey-autofill.ts';
 import { BASE_PATH, base, storageKey } from './base.ts';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { todayIn } from '../../shared/billing.ts';
 import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../../shared/types.ts';
 import { mergePeople, syncPerson } from '../../shared/people.ts';
@@ -14,6 +14,11 @@ import { toast as sonner } from 'sonner';
 import { advanceRevision, canApplySnapshot, CHECK_THROTTLE, shouldCheck, shouldPoll, syncedPrefs, SYNC_INTERVAL } from '../../shared/live-sync.ts';
 
 const CACHE_KEY = storageKey('ledger:state:v1');
+/** 助手会话（本机副本）与新建表单交给助手的内容：都属于登录后的私有数据 */
+export const ASSISTANT_KEY = storageKey('calends.assistant');
+export const HANDOFF_KEY = storageKey('calends.assistant.handoff');
+/** 编辑草稿的键 ledger:draft:<new|id>（经 storageKey）；只认本安装的 */
+const isDraftKey = (k: string) => k.startsWith('ledger:draft:') && (BASE_PATH ? k.endsWith(`:${BASE_PATH}`) : !k.includes(':/'));
 
 type Phase = 'loading' | 'login' | 'ready' | 'offline';
 
@@ -32,16 +37,16 @@ function set(patch: Partial<Store>) {
   updatePolling();
 }
 
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** 组件里读整个 store：每次 set() 换新对象，订阅者随之重渲染 */
 export function useStore(): Store {
-  const [, force] = useState(0);
-  useEffect(() => {
-    const l = () => force((n) => n + 1);
-    listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
-  }, []);
-  return store;
+  return useSyncExternalStore(subscribe, () => store);
 }
 
 export function getState(): AppState {
@@ -142,18 +147,10 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       headers: { 'content-type': 'application/json', 'x-locale': locale(), ...init.headers },
     });
     if (res.status === 401 && path !== '/api/login' && !path.startsWith('/api/auth/')) {
-      knownRev = undefined;
-      ownRevisions = [];
-      try {
-        localStorage.removeItem(CACHE_KEY);
-      } catch {
-        /* ignore */
-      }
-      await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
-      set({ phase: 'login', state: undefined });
+      await clearLocalSession();
       throw new Error(t('ui.error.loginRequired'));
     }
-    const body = (await res.json().catch(() => ({}))) as T & { error?: string; code?: string };
+    const body = (await readBody(res)) as T & { error?: string; code?: string };
     if (!res.ok) throw Object.assign(new Error(body.error ?? t('ui.error.requestFailed', { status: res.status })), { code: body.code });
     if (writing) acknowledgeWrite(res);
     return body;
@@ -166,21 +163,48 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 }
 
+/**
+ * 响应正文：空正文（含 204）当作 {}；成功响应却不是 JSON（被代理、登录页、静态页顶替）算请求失败，
+ * 不能当作空结果交给调用方。失败响应的正文不是 JSON 时仍按状态码报错。
+ */
+async function readBody(res: Response): Promise<unknown> {
+  const text = res.status === 204 ? '' : await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (res.ok) throw new Error(t('ui.error.requestFailed', { status: res.status }));
+    return {};
+  }
+}
+
+/** 至少是一本账：读缓存、读接口时都先确认，坏数据不能显示成空账本 */
+export function isLedger(x: unknown): x is AppState {
+  const s = x as Partial<AppState> | null;
+  return !!s && typeof s === 'object' && Array.isArray(s.subscriptions) && Array.isArray(s.methods) && !!s.settings && typeof s.settings === 'object';
+}
+
+async function loadState(init?: RequestInit): Promise<AppState> {
+  const state = await api<unknown>('/api/state', init);
+  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
+  return state;
+}
+
 export async function boot(): Promise<void> {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-      const state = JSON.parse(raw) as AppState;
+    const state: unknown = raw ? JSON.parse(raw) : undefined;
+    if (isLedger(state)) {
       knownRev = state.rev;
       set({ phase: 'ready', state });
-    }
+    } else if (raw) localStorage.removeItem(CACHE_KEY);
   } catch {
     /* ignore */
   }
   try {
     const seq = writeSeq;
     const startWrites = writes;
-    const state = await api<AppState>('/api/state');
+    const state = await loadState();
     if (!state.readonly && !canApplySnapshot(startWrites, writes, seq, writeSeq, state.rev, knownRev)) {
       checkAgain = true;
       resumeSync();
@@ -196,16 +220,8 @@ export async function boot(): Promise<void> {
       mirrorPrefs();
     }
   } catch (e) {
-    if (store.phase === 'login') {
-      // 401 时丢弃旧缓存，避免他人设备残留数据
-      try {
-        localStorage.removeItem(CACHE_KEY);
-      } catch {
-        /* ignore */
-      }
-      set({ state: undefined });
-      return;
-    }
+    // 401 时 api() 已清掉本机私有数据（含旧缓存），避免他人设备残留
+    if (store.phase === 'login') return;
     if (store.state) set({ phase: 'offline' });
     else set({ phase: 'offline', error: e instanceof Error ? e.message : String(e) });
   }
@@ -216,7 +232,8 @@ export async function boot(): Promise<void> {
  * 打开表单期间别处（另一个标签页、同步脚本）改过的其他字段不会被旧数据覆盖。
  */
 export function mergeEdits<T extends { id: string }>(original: T, edited: T, latest: T | undefined): T {
-  if (!latest) return edited;
+  // 打开表单期间在别处被删掉了：不按旧表单把它写回来
+  if (!latest) throw new Error(t('ui.error.deletedElsewhere'));
   const out: Record<string, unknown> = { ...latest };
   const keys = new Set([...Object.keys(original), ...Object.keys(edited)]);
   for (const k of keys) {
@@ -236,7 +253,7 @@ let writeSeq = 0;
 async function freshState(): Promise<AppState | undefined> {
   const seq = writeSeq;
   const startWrites = writes;
-  const state = await api<AppState>('/api/state', { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+  const state = await loadState({ cache: 'no-store', signal: AbortSignal.timeout(15_000) });
   return canApplySnapshot(startWrites, writes, seq, writeSeq, state.rev, knownRev) ? state : undefined;
 }
 
@@ -473,14 +490,28 @@ export async function registerPasskey(name: string): Promise<void> {
 
 export async function logout(): Promise<void> {
   await api('/api/logout', { method: 'POST' }).catch(() => {});
-  await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
-  try {
-    localStorage.removeItem(CACHE_KEY);
-  } catch {
-    /* ignore */
-  }
+  await clearLocalSession();
+}
+
+/**
+ * 退出登录或登录失效（401）：清掉本机的私有数据——账本缓存、离线缓存、助手会话、编辑草稿、交给助手的内容，
+ * 回到登录页。界面偏好与语言不属于账本内容，保留。
+ */
+async function clearLocalSession() {
   knownRev = undefined;
   ownRevisions = [];
+  try {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(ASSISTANT_KEY);
+    for (let i = (localStorage.length ?? 0) - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && isDraftKey(k)) localStorage.removeItem(k);
+    }
+    sessionStorage.removeItem(HANDOFF_KEY);
+  } catch {
+    /* 隐私模式等 */
+  }
+  await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
   set({ phase: 'login', state: undefined });
 }
 
@@ -493,7 +524,10 @@ function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
   return list.some((x) => x.id === item.id) ? list.map((x) => (x.id === item.id ? item : x)) : [...list, item];
 }
 
-/** 乐观更新：先改本地，失败回滚 */
+/**
+ * 乐观更新：先改本地，失败回滚。回滚用的是发起时的快照，可能抹掉期间另一笔写入的本地结果，
+ * 所以回滚后强制下一次同步拉取服务端的完整快照（等所有写入结束后），以服务端为准。
+ */
 async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T>): Promise<T> {
   const prev = store.state!;
   patchState(fn);
@@ -502,7 +536,11 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
   try {
     return await req();
   } catch (e) {
-    if (store.phase !== 'login') patchState(() => ({ ...prev, rev: knownRev }));
+    if (store.phase !== 'login') {
+      patchState(() => ({ ...prev, rev: knownRev }));
+      forceSnapshot = true;
+      checkAgain = true;
+    }
     throw e;
   } finally {
     writes--;
@@ -510,6 +548,24 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
     resumeSync();
   }
 }
+
+/**
+ * 写入模板：先在本地改（local），请求成功后用服务端返回的权威结果再改一次（apply，可选），失败按 optimistic 回滚。
+ * apply 在写入计数内执行，期间拉回的旧快照不会覆盖它。
+ */
+function write<T>(local: (s: AppState) => AppState, req: () => Promise<T>, apply?: (s: AppState, r: T) => AppState): Promise<T> {
+  return optimistic(local, async () => {
+    const r = await req();
+    if (apply && store.state) patchState((s) => apply(s, r));
+    return r;
+  });
+}
+
+/** 换上服务端改过的订阅（同步人的资料、合并、改分类名时一次改好几条）；没出现的保持不变 */
+const withSubs = (s: AppState, subs: Subscription[]): AppState => {
+  const by = new Map(subs.map((x) => [x.id, x]));
+  return { ...s, subscriptions: s.subscriptions.map((x) => by.get(x.id) ?? x) };
+};
 
 export function saveSub(next: Subscription) {
   // 改了开始日期或周期后，新的扣款日需要补汇率
@@ -520,15 +576,18 @@ export function saveSub(next: Subscription) {
     st.subscriptions.find((x) => x.id === next.id),
     next,
   );
-  return optimistic(
+  return write(
     (s) => ({ ...s, subscriptions: upsertById(s.subscriptions, sub) }),
-    () => api(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
+    () => api<Subscription>(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
+    // 服务端会规范化（补字段、时间戳）：本地换成它返回的那条，和下次同步拿到的一致；期间本地又改过这一条（更晚的写入）就不覆盖
+    (s, saved) =>
+      saved?.id === sub.id && s.subscriptions.find((x) => x.id === sub.id) === sub ? { ...s, subscriptions: upsertById(s.subscriptions, saved) } : s,
   );
 }
 
 export function deleteSub(id: string) {
   // 服务端在同一事务里把它从公开页隐藏列表去掉（与 MCP delete_subscription 相同），本地同步
-  return optimistic(
+  return write(
     (s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id), settings: deleteSubscriptionSettings(s.settings, id) }),
     () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }),
   );
@@ -538,17 +597,18 @@ export function deleteSub(id: string) {
 export function reorderMethods(ids: string[]) {
   const prev = store.state!.methods;
   const next = ids.map((id, i) => ({ ...prev.find((m) => m.id === id)!, order: i }));
-  // 全部重写，避免本地数据过期时出现重复的序号
-  return optimistic(
+  // 全部重写，避免本地数据过期时出现重复的序号；部分失败时整体回滚并强制同步，以服务端为准
+  return write(
     (s) => ({ ...s, methods: next }),
     () => Promise.all(next.map((m) => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }))),
   );
 }
 
 export function saveMethod(m: PaymentMethod) {
-  return optimistic(
+  return write(
     (s) => ({ ...s, methods: upsertById(s.methods, m) }),
-    () => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }),
+    () => api<PaymentMethod>(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }),
+    (s, saved) => (saved?.id === m.id && s.methods.find((x) => x.id === m.id) === m ? { ...s, methods: upsertById(s.methods, saved) } : s),
   );
 }
 
@@ -558,32 +618,29 @@ export function saveMethod(m: PaymentMethod) {
  */
 export async function deleteMethod(id: string, into?: string | null) {
   const query = into ? `?into=${encodeURIComponent(into)}` : into === null ? '?clear=1' : '';
-  const r = await optimistic(
+  await write(
     (s) => {
       const d = deleteMethodData(s, id, into);
       return withSubs({ ...s, methods: s.methods.filter((x) => x.id !== id), settings: d.settings }, d.subscriptions);
     },
     () => api<{ subscriptions: Subscription[] }>(`/api/methods/${id}${query}`, { method: 'DELETE' }),
+    (s, r) => withSubs(s, r.subscriptions),
   );
-  patchState((s) => withSubs(s, r.subscriptions));
 }
-
-/** 换上服务端改过的订阅（同步人的资料、合并时一次改好几条） */
-const withSubs = (s: AppState, subs: Subscription[]): AppState => ({ ...s, subscriptions: s.subscriptions.map((x) => subs.find((y) => y.id === x.id) ?? x) });
 
 /** 保存一个人：称呼、联系方式同步到所有引用他的成员、代付上（本地先同步，服务端再同步一遍并返回结果） */
 export async function savePerson(p: Person) {
-  const r = await optimistic(
+  const r = await write(
     (s) => withSubs({ ...s, people: upsertById(s.people ?? [], p) }, syncPerson(s.subscriptions, p)),
     () => api<{ person: Person; subscriptions: Subscription[] }>(`/api/people/${p.id}`, { method: 'PUT', body: JSON.stringify(p) }),
+    (s, r) => withSubs({ ...s, people: upsertById(s.people ?? [], r.person) }, r.subscriptions),
   );
-  patchState((s) => withSubs({ ...s, people: upsertById(s.people ?? [], r.person) }, r.subscriptions));
   return r.person;
 }
 
 /** 删除一个人：只能删没有被任何合租、代付引用的（服务端会再检查一次） */
 export function deletePerson(id: string) {
-  return optimistic(
+  return write(
     (s) => ({ ...s, people: (s.people ?? []).filter((x) => x.id !== id) }),
     () => api(`/api/people/${id}`, { method: 'DELETE' }),
   );
@@ -591,26 +648,26 @@ export function deletePerson(id: string) {
 
 /** 把 from 合并到 into：引用全部改指向 into，from 从名册里去掉 */
 export async function mergePerson(from: string, into: string) {
-  const r = await optimistic(
+  await write(
     (s) => {
       const m = mergePeople(s.people ?? [], s.subscriptions, from, into);
       return withSubs({ ...s, people: m.people }, m.subs);
     },
     () => api<{ people: Person[]; subscriptions: Subscription[] }>(`/api/people/${from}/merge`, { method: 'POST', body: JSON.stringify({ into }) }),
+    (s, r) => withSubs({ ...s, people: r.people }, r.subscriptions),
   );
-  patchState((s) => withSubs({ ...s, people: r.people }, r.subscriptions));
 }
 
 export function saveSettings(patch: Partial<Settings>) {
-  return optimistic(
+  return write(
     (s) => ({ ...s, settings: { ...s.settings, ...patch } }),
-    async () => {
-      // 清空的字段（undefined）以 null 传给服务端，否则 JSON 会丢掉这个键，旧值留在库里
-      const body = JSON.stringify(Object.fromEntries(Object.entries({ ...store.state!.settings, ...patch }).map(([k, v]) => [k, v === undefined ? null : v])));
-      const settings = await api<Settings>('/api/settings', { method: 'PUT', body });
-      patchState((s) => ({ ...s, settings }));
-      return settings;
-    },
+    // 清空的字段（undefined）以 null 传给服务端，否则 JSON 会丢掉这个键，旧值留在库里
+    () =>
+      api<Settings>('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify(Object.fromEntries(Object.entries({ ...store.state!.settings, ...patch }).map(([k, v]) => [k, v === undefined ? null : v]))),
+      }),
+    (s, settings) => ({ ...s, settings }),
   );
 }
 
@@ -618,22 +675,13 @@ export function saveSettings(patch: Partial<Settings>) {
  * 保存分类表（顺序即显示顺序）。renames 是旧名 → 新名：改名、删除分类时把订阅移过去，服务端一次改写所有相关订阅。
  * 返回改动了几个订阅。
  */
-export function saveCategories(categories: Category[], renames: Record<string, string> = {}) {
-  const swap = (subs: Subscription[], changed: Subscription[]) => {
-    const by = new Map(changed.map((x) => [x.id, x]));
-    return subs.map((x) => by.get(x.id) ?? x);
-  };
-  return optimistic(
-    (s) => ({ ...s, settings: { ...s.settings, categories }, subscriptions: swap(s.subscriptions, renameInSubs(s.subscriptions, renames)) }),
-    async () => {
-      const r = await api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', {
-        method: 'PUT',
-        body: JSON.stringify({ categories, renames }),
-      });
-      patchState((s) => ({ ...s, settings: r.settings, subscriptions: swap(s.subscriptions, r.subscriptions) }));
-      return r.subscriptions.length;
-    },
+export async function saveCategories(categories: Category[], renames: Record<string, string> = {}) {
+  const r = await write(
+    (s) => withSubs({ ...s, settings: { ...s.settings, categories } }, renameInSubs(s.subscriptions, renames)),
+    () => api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', { method: 'PUT', body: JSON.stringify({ categories, renames }) }),
+    (s, r) => withSubs({ ...s, settings: r.settings }, r.subscriptions),
   );
+  return r.subscriptions.length;
 }
 
 export async function rotateIcs() {
@@ -642,7 +690,21 @@ export async function rotateIcs() {
 }
 
 export async function importData(body: { subscriptions: Subscription[]; methods: PaymentMethod[]; mode: 'merge' | 'replace' }) {
-  replaceSyncedState(await api<AppState>('/api/import', { method: 'POST', body: JSON.stringify(body) }));
+  const state = await api<unknown>('/api/import', { method: 'POST', body: JSON.stringify(body) });
+  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
+  replaceSyncedState(state);
+}
+
+/**
+ * 恢复备份后换上服务端返回的新账本：不整页刷新，结果提示才看得到。
+ * 恢复会重建数据，版本号可能比本地记的小，先忘掉旧版本号再按新库同步。
+ */
+export function adoptRestored(state: unknown) {
+  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
+  knownRev = undefined;
+  ownRevisions = [];
+  replaceSyncedState(state);
+  void syncFx();
 }
 
 export async function refreshFx() {
@@ -664,9 +726,24 @@ export interface ToastOptions {
   id?: string | number;
 }
 
-export function toast(text: string, err = false, opts: ToastOptions = {}): string | number {
-  const kind = err ? 'error' : (opts.kind ?? 'success');
+/** 提示条：第二个参数是种类（缺省成功），或带撤销按钮、替换已有提示等选项 */
+export function toast(text: string, how: ToastKind | ToastOptions = {}): string | number {
+  const opts = typeof how === 'string' ? { kind: how } : how;
+  const kind = opts.kind ?? 'success';
   return sonner[kind](text, { id: opts.id, description: opts.description, action: opts.action, duration: kind === 'error' ? 5000 : 2800 });
+}
+
+/** 复制文字：浏览器不支持剪贴板（非 HTTPS、旧浏览器）或被拒绝时提示失败，不静默 */
+export async function copyText(text: string, ok: string): Promise<boolean> {
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+    await navigator.clipboard.writeText(text);
+    toast(ok);
+    return true;
+  } catch {
+    toast(t('ai.copyFailed'), 'error');
+    return false;
+  }
 }
 
 /**
@@ -681,11 +758,11 @@ export async function run(fn: () => Promise<unknown>, ok?: string | (ToastOption
     clearTimeout(timer);
     if (ok) {
       const o = typeof ok === 'string' ? { text: ok } : ok;
-      toast(o.text, false, { ...o, id: pending });
+      toast(o.text, { ...o, id: pending });
     } else if (pending !== undefined) sonner.dismiss(pending);
   } catch (e) {
     clearTimeout(timer);
-    toast(e instanceof Error ? e.message : String(e), true, { id: pending });
+    toast(e instanceof Error ? e.message : String(e), { kind: 'error', id: pending });
   }
 }
 
@@ -789,15 +866,7 @@ function migratePrefs() {
 /** 组件里用：值变了（本机改、别的设备改后刷新）会重新渲染 */
 export function usePref<T extends string>(key: PrefKey, fallback: T, valid?: (v: string) => v is T): [T, (v: T | null) => void] {
   // 订阅实际偏好值；公开页没有 state 时，本机值变化也必须提供新的快照。
-  const raw = useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    () => (store.state ? (store.state.prefs?.[key] ?? null) : localPref(key)),
-  );
+  const raw = useSyncExternalStore(subscribe, () => (store.state ? (store.state.prefs?.[key] ?? null) : localPref(key)));
   const value = raw != null && (!valid || valid(raw)) ? (raw as T) : fallback;
   return [value, (v) => writePref(key, v)];
 }

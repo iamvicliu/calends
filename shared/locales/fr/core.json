@@ -230,5 +230,6 @@
     "badDate": "{field} d’origine « {value} » non reconnu, non importé",
     "nextDue": "date du prochain paiement",
     "end": "date de fin"
-  }
+  },
+  "fxIncomplete": "Certains montants ne peuvent pas être convertis faute de taux de change ; ce résultat est incomplet."
 }

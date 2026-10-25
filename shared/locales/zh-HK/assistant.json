@@ -256,5 +256,6 @@
     "deleteAll": "刪除訂閱及全部扣款記錄，無法復原",
     "dateUnknown": "日期不詳",
     "terminate": "被停用"
-  }
+  },
+  "interrupted": "回覆中途中斷，沒有完整收到。"
 }

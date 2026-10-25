@@ -44,5 +44,6 @@
     "due": "未払い",
     "upcoming": "期日前",
     "this": "この受取"
-  }
+  },
+  "confirmDelete": "{date} の記録を削除しますか？"
 }

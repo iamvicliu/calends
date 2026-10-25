@@ -214,6 +214,7 @@
       "date": "Data",
       "amount": "Valor",
       "base": "Em {ccy}"
-    }
+    },
+    "confirmDelete": "Excluir a transferência de {date}?"
   }
 }

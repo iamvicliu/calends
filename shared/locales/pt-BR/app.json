@@ -82,5 +82,7 @@
     "months": "Mês anterior / seguinte (ano na visão anual)",
     "today": "Ir para hoje",
     "hint": "Atalhos globais de uma tecla pausam durante a digitação ou com uma camada aberta. Feche os seletores antes de enviar. Em áreas de texto, Enter insere uma nova linha."
-  }
+  },
+  "crashed": "Algo deu errado nesta página. Recarregue para continuar.",
+  "reload": "Recarregar"
 }

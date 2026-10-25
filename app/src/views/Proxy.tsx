@@ -1,17 +1,33 @@
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
-import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn, isStopped } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
-import { toBaseAt } from '../../../shared/fx.ts';
+import { toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../shared/types.ts';
 import { recordProxyCharge } from '../../../shared/receivable-edit.ts';
 import { ReceivableSheet } from './Receivable.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../components/DetailKit.tsx';
 import { YearLedger } from '../components/YearLedger.tsx';
-import { MetricCards, Metric, Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar, Icon } from '../components/ui.tsx';
+import {
+  MetricCards,
+  Metric,
+  Amount,
+  MoneyInput,
+  Cell,
+  Group,
+  NameLink,
+  PayBadge,
+  Seg,
+  Sheet,
+  StatusPill,
+  SubIcon,
+  Toolbar,
+  Icon,
+  useSubmit,
+} from '../components/ui.tsx';
 import { Plus } from 'lucide-react';
-import { contactText } from './Members.tsx';
+import { contactText } from '../components/Contact.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { getState, run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';
@@ -34,10 +50,10 @@ function proxySummary(state: AppState, today: string) {
   // 进行中的在前，已停止的排到最后
   const subs = state.subscriptions
     .filter((s) => s.proxy)
-    .sort((a, b) => Number(['ended', 'terminated'].includes(effectiveStatus(a, today))) - Number(['ended', 'terminated'].includes(effectiveStatus(b, today))));
+    .sort((a, b) => Number(isStopped(effectiveStatus(a, today))) - Number(isStopped(effectiveStatus(b, today))));
   const all = subs.flatMap((s) => rows(state, s, today));
   const { done, open, charged, owed, received, diff, lastIn } = proxyTotals(all);
-  const live = subs.filter((s) => !['ended', 'terminated'].includes(effectiveStatus(s, today)));
+  const live = subs.filter((s) => !isStopped(effectiveStatus(s, today)));
   return {
     subs,
     live: live.length,
@@ -58,7 +74,7 @@ function proxySummary(state: AppState, today: string) {
  * 结清后第三格改为盈亏，「已结清」只在这里说一次
  */
 function proxyStatus(st: string, list: Row[], ahead: Row[]): ['stop' | 'owe' | 'done' | 'ok' | 'notice', string] {
-  if (['ended', 'terminated'].includes(st)) return ['stop', t('proxy.status.ended')];
+  if (isStopped(st)) return ['stop', t('proxy.status.ended')];
   if (list.some((r) => r.receivedBase == null)) return ['owe', t('proxy.owed')];
   if (ahead.length) return ['done', t('proxy.prepaidTo', { date: cnDate(ahead[0].date) })];
   if (list.length) return ['done', t('proxy.settled')];
@@ -106,7 +122,7 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const method = state.methods.find((m) => m.id === s.methodId);
   const { charged, received } = proxyTotals(list);
   const st = effectiveStatus(s, today);
-  const stopped = ['ended', 'terminated'].includes(st);
+  const stopped = isStopped(st);
   const [tone, label] = proxyStatus(st, list, ahead);
 
   return (
@@ -164,10 +180,9 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const ahead = proxyAhead(state, live, today);
   const [edit, setEdit] = useState<Row | null>(null);
   const [adding, setAdding] = useState(false);
-  const ro = !!state.readonly;
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
-  const stopped = ['ended', 'terminated'].includes(st);
+  const stopped = isStopped(st);
   const next = nextCharge(live, addDays(today, 1));
   const method = state.methods.find((m) => m.id === live.methodId);
   const { charged, done, received, open, diff, lastIn } = proxyTotals(list);
@@ -266,11 +281,9 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             className="dt-charges"
             title={t('proxy.table.title')}
             aside={
-              !ro && (
-                <button className="dt-btn dt-add" onClick={() => setAdding(true)}>
-                  <Plus size={14} /> {t('proxy.receipt.add')}
-                </button>
-              )
+              <button className="dt-btn dt-add" onClick={() => setAdding(true)}>
+                <Plus size={14} /> {t('proxy.receipt.add')}
+              </button>
             }
           >
             {/* 与订阅详情、合租详情同一套表格（YearLedger）：只有一年就平铺，跨年按年分组带小计；没有合计行，总数在上方指标卡 */}
@@ -314,19 +327,14 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     ),
                     second: flow(-r.charged, r.currency),
                     extra: flow(-r.chargedBase, base),
-                    orig:
-                      r.receivedBase == null ? (
-                        <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
-                      ) : (
-                        <ReceivedCell r={r} base={base} brief />
-                      ),
+                    orig: r.receivedBase == null ? <em className="todo">{t('proxy.table.record')}</em> : <ReceivedCell r={r} base={base} brief />,
                     base: d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base),
                     baseClass: d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
                   };
                 }}
                 rowKey={(r) => r.date}
                 rowClass={(r) => (r.date > today ? 'ld-ahead' : '')}
-                onRow={ro ? undefined : setEdit}
+                onRow={setEdit}
               />
             ) : (
               <div className="muted dt-import-note">{t('proxy.table.none')}</div>
@@ -424,12 +432,14 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const [chargedCcy, setChargedCcy] = useState(row.charge?.currency ?? row.listCurrency);
   const [receipt, setReceipt] = useState(false);
   const chargedN = charged === '' ? row.list : Number(charged);
-  const chargedBase = toBaseAt(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
+  // 缺汇率时为 NaN：差额显示「—」，不按 0 算出假的盈亏
+  const chargedBase = toBaseOrNaN(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
   const rec = row.receipt ?? row.waiver;
   const diff = row.receivedBase == null ? undefined : row.receivedBase - chargedBase;
   const dirty =
     charged !== (row.charge?.amount != null ? String(row.charge.amount) : '') || (charged !== '' && chargedCcy !== (row.charge?.currency ?? row.listCurrency));
 
+  const [busy, submit] = useSubmit();
   const save = () =>
     run(async () => {
       const amount = charged === '' ? undefined : Number(charged);
@@ -459,7 +469,11 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             {t('proxy.entry.cancel')}
           </button>
           {!future && (
-            <button className="btn primary" disabled={!dirty || (charged !== '' && !Number.isFinite(Number(charged)))} onClick={save}>
+            <button
+              className="btn primary"
+              disabled={busy || !dirty || (charged !== '' && !Number.isFinite(Number(charged)))}
+              onClick={() => void submit(save)}
+            >
               {t('proxy.entry.save')}
             </button>
           )}
@@ -503,7 +517,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           }
         >
           {rec ? (
-            <button type="button" className="cell tap" disabled={!!state.readonly || !!row.receipt?.opening} onClick={() => setReceipt(true)}>
+            <button type="button" className="cell tap" disabled={!!row.receipt?.opening} onClick={() => setReceipt(true)}>
               <span className="cell-l">
                 <ReceivedCell r={row} base={base} />
                 <small className="muted">
@@ -516,11 +530,9 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
               </span>
             </button>
           ) : (
-            !state.readonly && (
-              <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt(true)}>
-                <Icon name="plus" /> {t('proxy.receipt.add')}
-              </button>
-            )
+            <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt(true)}>
+              <Icon name="plus" /> {t('proxy.receipt.add')}
+            </button>
           )}
         </Group>
       </div>
@@ -566,7 +578,7 @@ function useProxySort(state: AppState, today: string, subs: Subscription[]) {
   const items = subs.map((s) => {
     const list = rows(state, s, today);
     const st = effectiveStatus(s, today);
-    const stopped = ['ended', 'terminated'].includes(st);
+    const stopped = isStopped(st);
     return {
       s,
       list,
@@ -715,7 +727,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
   const base = state.settings.baseCurrency;
   const sum = proxySummary(state, today);
   const [filter, setFilter] = usePref<ProxyFilter>('proxy-filter', 'all', (v): v is ProxyFilter => (PROXY_FILTERS as readonly string[]).includes(v));
-  const stopped = (s: Subscription) => ['ended', 'terminated'].includes(effectiveStatus(s, today));
+  const stopped = (s: Subscription) => isStopped(effectiveStatus(s, today));
   const groups: Record<ProxyFilter, Subscription[]> = {
     all: sum.subs,
     live: sum.subs.filter((s) => !stopped(s)),

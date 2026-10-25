@@ -258,5 +258,6 @@
     "deleteAll": "Abonelik ve tüm ödeme kayıtları silinir. Bu işlem geri alınamaz.",
     "dateUnknown": "Tarih bilinmiyor",
     "terminate": "Sağlayıcı sonlandırdı"
-  }
+  },
+  "interrupted": "Yanıt tamamlanmadan kesildi."
 }

@@ -56,5 +56,6 @@
     "due": "Sin pagar",
     "upcoming": "Aún no vence",
     "this": "Este cobro"
-  }
+  },
+  "confirmDelete": "¿Eliminar el registro del {date}?"
 }

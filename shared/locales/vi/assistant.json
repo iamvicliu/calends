@@ -256,5 +256,6 @@
     "deleteAll": "Xóa gói đăng ký và toàn bộ lần trừ tiền. Không thể hoàn tác.",
     "dateUnknown": "Không rõ ngày",
     "terminate": "Bị nhà cung cấp dừng"
-  }
+  },
+  "interrupted": "Câu trả lời bị ngắt giữa chừng."
 }

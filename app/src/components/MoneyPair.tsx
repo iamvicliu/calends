@@ -5,7 +5,7 @@
 import type { ReactNode as ComponentChildren } from 'react';
 import { flow, money } from '../../../shared/format.ts';
 import { convert } from '../../../shared/billing.ts';
-import { toBaseAt } from '../../../shared/fx.ts';
+import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState } from '../../../shared/types.ts';
 import { useOrig } from '../display.ts';
 import { Amount } from './ui.tsx';
@@ -26,7 +26,8 @@ export function useMoneyPair(state: AppState) {
   const base = state.settings.baseCurrency;
   return (amount: number, ccy: string, opts: { date?: string; value?: number; compact?: boolean; plain?: boolean } = {}): Pair => {
     const fmt = opts.plain ? money : flow;
-    const inBase = opts.value ?? (opts.date ? toBaseAt(state, amount, ccy, opts.date) : convert(amount, ccy, base, state.fx));
+    // 缺汇率为 NaN：折算的那一侧显示「—」，不显示 0
+    const inBase = opts.value ?? (opts.date ? toBaseOrNaN(state, amount, ccy, opts.date) : convert(amount, ccy, base, state.fx));
     if (ccy === base && fmt(inBase, base) === fmt(amount, ccy)) return { main: <Amount value={amount} ccy={ccy} plain={opts.plain} /> };
     return orig
       ? { main: <Amount value={amount} ccy={ccy} plain={opts.plain} />, alt: `≈ ${fmt(inBase, base, { compact: opts.compact ?? true })}` }

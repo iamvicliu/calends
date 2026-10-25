@@ -1,24 +1,25 @@
 import { isDataIcon } from '../../../shared/icon.ts';
 import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
-import { base } from '../base.ts';
+import { base, readStored, storageKey } from '../base.ts';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { StopFields } from '../components/StopPanel.tsx';
 import { ReceiptText } from 'lucide-react';
 import { compressImage, handoff } from '../handoff.ts';
 import { addDays, addMonths, nextCharge, nthCharge, uid } from '../../../shared/billing.ts';
-import { cnDateFull, flow, money } from '../../../shared/format.ts';
+import { cnDateFull, currencyDecimals, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle } from '../components/ui.tsx';
+import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle, useSubmit } from '../components/ui.tsx';
 import { catColor, categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-form.ts';
 import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField, contactText, FeeRuleFields } from './Members.tsx';
+import { FeeRuleFields } from './Members.tsx';
+import { ContactField, contactText } from '../components/Contact.tsx';
 import { applyCarRule, carRule, followsCar, nextCollectionDay, sameRule } from '../../../shared/carpool.ts';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSettings, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
@@ -65,9 +66,9 @@ const draftKey = (isNew: boolean, id: string) => `ledger:draft:${isNew ? 'new' :
 const sig = (x: Subscription) => JSON.stringify({ ...x, id: '' });
 function readDraft(key: string, base: string): Draft | undefined {
   try {
-    const d = JSON.parse(localStorage.getItem(key) ?? 'null') as Draft | null;
+    const d = JSON.parse(readStored(key) ?? 'null') as Draft | null;
     if (d && d.base === base) return d;
-    localStorage.removeItem(key);
+    localStorage.removeItem(storageKey(key));
   } catch {
     /* 隐私模式或坏数据 */
   }
@@ -75,8 +76,8 @@ function readDraft(key: string, base: string): Draft | undefined {
 }
 function writeDraft(key: string, d: Draft | undefined) {
   try {
-    if (d) localStorage.setItem(key, JSON.stringify(d));
-    else localStorage.removeItem(key);
+    if (d) localStorage.setItem(storageKey(key), JSON.stringify(d));
+    else localStorage.removeItem(storageKey(key));
   } catch {
     /* ignore */
   }
@@ -139,6 +140,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     handoff(f.name.trim() ? `${f.name.trim()}\n` : '', images);
   };
 
+  const [busy, submit] = useSubmit();
   const save = async () => {
     if (!priceValid) return;
     let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
@@ -238,7 +240,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           >
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={!f.name.trim() || !priceValid} onClick={save}>
+          <button className="btn primary" disabled={busy || !f.name.trim() || !priceValid} onClick={() => void submit(save)}>
             {isNew ? t('common.add') : t('common.done')}
           </button>
         </>
@@ -320,7 +322,8 @@ function Form({
   const share = f.share;
   const setShare = (p: Partial<NonNullable<Subscription['share']>> | null) =>
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
-  const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * 100) / 100 : 0;
+  const unit = 10 ** currencyDecimals(f.currency);
+  const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * unit) / unit : 0;
   // 收费标准：存过的就用存的，否则按价格和席位推算（随价格、席位变）
   const stored = state.subscriptions.find((x) => x.id === f.id);
   const rule = carRule(state, f, today);
@@ -508,7 +511,7 @@ function Form({
             }
           />
         </Cell>
-        {!state.subscriptions.some((s) => s.id === f.id) && (
+        {isNew && (
           <Cell label={t(f.cycle.unit === 'lifetime' ? 'editor.field.purchased' : 'editor.field.start')}>
             <DatePicker value={f.start} onChange={(v) => up({ start: v ?? today })} />
           </Cell>
@@ -903,7 +906,10 @@ function Form({
           index={transfer.index}
           currency={f.currency}
           today={today}
-          onSave={(next) => up({ transfers: next.length ? next : undefined })}
+          onSave={(next) => {
+            up({ transfers: next.length ? next : undefined });
+            setTransfer(null);
+          }}
           onClose={() => setTransfer(null)}
         />
       )}
@@ -1060,5 +1066,3 @@ function NameField({
     </div>
   );
 }
-
-/** 天数步进器：0–3660 的整数，可直接输入，也可用两侧按钮加减；0 显示为「不需要」以外的数字 0 */

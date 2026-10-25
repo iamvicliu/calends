@@ -261,5 +261,6 @@
     "deleteAll": "Löscht das Abo und alle Abbuchungen. Dies kann nicht rückgängig gemacht werden.",
     "dateUnknown": "Datum unbekannt",
     "terminate": "Gesperrt"
-  }
+  },
+  "interrupted": "Die Antwort wurde unterbrochen, bevor sie fertig war."
 }

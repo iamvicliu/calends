@@ -44,5 +44,6 @@
     "due": "Ödenmedi",
     "upcoming": "Vadesi gelmedi",
     "this": "Bu ödeme"
-  }
+  },
+  "confirmDelete": "{date} tarihli kayıt silinsin mi?"
 }

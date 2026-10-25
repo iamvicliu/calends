@@ -242,7 +242,8 @@
     "sources": "Payé avec",
     "addSource": "Ajouter une source",
     "splitOk": "Total {amount}",
-    "splitLeft": "Reste à répartir : {amount}"
+    "splitLeft": "Reste à répartir : {amount}",
+    "confirmDelete": "Supprimer l’enregistrement du {date} ?"
   },
   "timeline": {
     "home": "Revenir à aujourd’hui (ou double-cliquez sur la frise)"

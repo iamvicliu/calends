@@ -19,7 +19,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from 'react-aria-components';
-import { Children, Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
+import { Children, Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
@@ -438,9 +438,8 @@ export function Seg<T extends string>({
   );
 }
 
-/** 独立灰底指标卡；等宽排列并随容器换行，金额与颜色由调用处提供。 */
 /**
- * 一组并列指标。页面顶部与弹窗顶部用独立灰卡；放在另一张卡片里时传 inline，改为竖线分隔的一行，避免卡片套卡片；
+ * 一组并列指标（金额与颜色由调用处提供）。页面顶部与弹窗顶部用独立灰卡；放在另一张卡片里时传 inline，改为竖线分隔的一行，避免卡片套卡片；
  * 窄栏里的四项（概览、报告的大数字下方）传 plain：两行两列，不加底色与分割线。
  */
 export function MetricCards({ children, inline = false, plain = false }: { children: ComponentChildren; inline?: boolean; plain?: boolean }) {
@@ -649,20 +648,58 @@ export function MoneyInput({ ccy, onChange, ...props }: { ccy: string } & JSX.In
 }
 
 /**
+ * 防重复提交：保存进行中再点（双击、回车连按）不会再执行一次。返回 [进行中, 提交]；
+ * 进行中时调用方把提交按钮设为 disabled（沿用按钮自身的禁用样式）。
+ */
+export function useSubmit(): [boolean, (fn: () => unknown) => Promise<void>] {
+  const running = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const submit = async (fn: () => unknown) => {
+    if (running.current) return;
+    running.current = true;
+    setBusy(true);
+    try {
+      await fn();
+    } finally {
+      running.current = false;
+      setBusy(false);
+    }
+  };
+  return [busy, submit];
+}
+
+/**
  * 确认弹窗：替代浏览器原生 confirm（全局禁止 alert / confirm / prompt）。
  * const ok = await ask('删除？')；取消、Esc、点遮罩都算否。由 AskLayer 统一渲染
  */
 type AskReq = { message: ComponentChildren; ok?: string; resolve: (v: boolean) => void };
 let askSet: ((r: AskReq | null) => void) | null = null;
+/** 正在等回答的那一问：新的一问顶替它时，旧的按「否」结束，不会永远挂起 */
+let asking: AskReq | null = null;
 export function ask(message: ComponentChildren, opts: { ok?: string } = {}): Promise<boolean> {
-  return new Promise((resolve) => (askSet ? askSet({ message, ...opts, resolve }) : resolve(false)));
+  return new Promise((resolve) => {
+    if (!askSet) return resolve(false);
+    asking?.resolve(false);
+    asking = { message, ...opts, resolve };
+    askSet(asking);
+  });
 }
 
 export function AskLayer() {
   const [req, setReq] = useState<AskReq | null>(null);
   askSet = setReq;
+  // 整棵树重新挂载（换语言）或卸载时：未回答的一问按「否」结束，旧的 setter 不再接收新问题
+  useEffect(
+    () => () => {
+      if (askSet === setReq) askSet = null;
+      asking?.resolve(false);
+      asking = null;
+    },
+    [],
+  );
   if (!req) return null;
   const done = (v: boolean) => {
+    if (asking === req) asking = null;
     setReq(null);
     req.resolve(v);
   };
@@ -709,7 +746,6 @@ export function Toasts() {
   );
 }
 
-/** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
 /**
  * 国旗：用图片，不用 emoji（Windows 不显示国旗 emoji，只会变成两个字母）；没有对应图片时不显示
  */
@@ -755,6 +791,27 @@ export function NameLink({ children, onClick }: { children: ComponentChildren; o
   );
 }
 
+/** 媒体查询订阅按查询串缓存：同一查询在每次渲染里是同一个函数，React 不必反复退订再订阅 */
+const mediaSubscribers = new Map<string, (cb: () => void) => () => void>();
+/** 订阅一个媒体查询（断点由调用处给出，各自保持原值）；服务端渲染时为 false */
+export function useMedia(query: string): boolean {
+  let subscribe = mediaSubscribers.get(query);
+  if (!subscribe) {
+    subscribe = (cb) => {
+      const mq = matchMedia(query);
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    };
+    mediaSubscribers.set(query, subscribe);
+  }
+  return useSyncExternalStore(
+    subscribe,
+    () => matchMedia(query).matches,
+    () => false,
+  );
+}
+
+/** 跟踪元素的实际宽度（ResizeObserver）：图表按它布局，未测量前为 0 */
 export function useWidth<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
   const [w, setW] = useState(0);
@@ -1013,5 +1070,14 @@ export function Cell({
     </button>
   ) : (
     <div className="cell">{inner}</div>
+  );
+}
+
+/** 读取失败：一行提示加重试（沿用 Cell 的可点行），不把失败显示成空列表 */
+export function LoadFailed({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Cell label={t('ui.loadFailed')} onClick={onRetry}>
+      {t('ui.retry')}
+    </Cell>
   );
 }

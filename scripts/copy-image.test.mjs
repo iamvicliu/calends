@@ -77,7 +77,7 @@ test('denied clipboard, synchronous write errors and failed/null rendering use t
             },
     });
     await h.copyImage(() => (mode === 'render' ? Promise.reject(new Error('render')) : Promise.resolve(mode === 'null' ? null : new Blob(['PNG']))));
-    assert.deepEqual(h.feedback, [['family.sheet.copyFailed', true]], mode);
+    assert.deepEqual(h.feedback, [['family.sheet.copyFailed', 'error']], mode);
   }
 });
 

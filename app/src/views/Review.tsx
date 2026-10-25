@@ -3,13 +3,13 @@ import { useMemo, useState } from 'react';
 import { totals, chargeSources } from '../../../shared/billing.ts';
 import { money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { chargeValue } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN } from '../../../shared/fx.ts';
 import { cancelSavings, yearReview, type YearReview } from '../../../shared/metrics.ts';
 import type { AppState } from '../../../shared/types.ts';
 import { packCircles } from '../components/charts.tsx';
 import { ShareSheet } from '../components/ShareSheet.tsx';
 import { MetricCards, Metric, Seg, SubIcon } from '../components/ui.tsx';
-import { allCharges, catColor } from '../derive.ts';
+import { allCharges, catColor, sortValue, firstStart } from '../derive.ts';
 
 type Style = 'receipt' | 'poster' | 'card' | 'stars';
 const STYLES = (): Array<[Style, string]> => [
@@ -40,7 +40,7 @@ interface Ctx {
 /** 年度回顾分享：选一种样式，生成图片后复制或下载 */
 export function Review({ state, today, onClose }: { state: AppState; today: string; onClose: () => void }) {
   const years: string[] = [];
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today).slice(0, 4);
+  const first = firstStart(state, today).slice(0, 4);
   for (let y = Number(today.slice(0, 4)); y >= Number(first) && years.length < 4; y--) years.push(String(y));
   const [year, setYear] = useState(years[0]);
   const r = useMemo(() => yearReview(state, today, year), [state, today, year]);
@@ -48,7 +48,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
   const saved = cancelSavings(state, today)
     .items.filter((x) => x.since.startsWith(year))
     .reduce((a, x) => a + x.saved, 0);
-  const pct = (v: number) => `${r.total > 0 ? Math.round((v / r.total) * 100) : 0}%`;
+  const pct = (v: number) => (Number.isFinite(v) ? `${r.total > 0 ? Math.round((v / r.total) * 100) : 0}%` : '—');
   const base = state.settings.baseCurrency;
   const byMethod = useMemo(() => {
     const from = `${year}-01-01`;
@@ -57,10 +57,11 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     for (const c of allCharges(state, from, to, today)) {
       for (const x of chargeSources(c)) {
         const name = state.methods.find((m) => m.id === x.methodId)?.name ?? t('review.unassigned');
-        sums.set(name, (sums.get(name) ?? 0) + chargeValue(state, c) * x.share);
+        sums.set(name, (sums.get(name) ?? 0) + chargeBaseOrNaN(state, c) * x.share);
       }
     }
-    return [...sums].map(([name, sum]) => ({ name, sum })).sort((a, b) => b.sum - a.sum);
+    // 缺汇率的支付方式合计为 NaN，显示「—」并排在最后
+    return [...sums].map(([name, sum]) => ({ name, sum })).sort((a, b) => sortValue(b.sum) - sortValue(a.sum));
   }, [state, today, year]);
   return (
     <ShareSheet

@@ -2,8 +2,9 @@ import { AVATAR_INPUT_MAX_BYTES, avatarCrop, prepareAvatarThumbnail } from '../.
 import { t } from '../../shared/i18n.ts';
 // 从别的页面（新建订阅表单）把文字、图片交给 AI 助手：先存进 sessionStorage，助手页打开时取走
 import { go } from './router.ts';
+import { HANDOFF_KEY } from './store.ts';
 
-const KEY = 'calends.assistant.handoff';
+const KEY = HANDOFF_KEY;
 
 /** 压缩成长边不超过 1600px 的 JPEG（data URL）：截图够清晰，请求体也不大 */
 export async function compressImage(file: Blob): Promise<string> {

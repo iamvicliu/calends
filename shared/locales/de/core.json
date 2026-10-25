@@ -230,5 +230,6 @@
     "badDate": "Ursprüngliches {field} „{value}“ nicht erkannt, nicht importiert",
     "nextDue": "nächstes Zahlungsdatum",
     "end": "Enddatum"
-  }
+  },
+  "fxIncomplete": "Einige Beträge lassen sich mangels Wechselkurs nicht umrechnen; das Ergebnis ist unvollständig."
 }

@@ -1,5 +1,5 @@
 import { copyParts } from '../components/copy.tsx';
-import { base, storageKey } from '../base.ts';
+import { base } from '../base.ts';
 import type { ReactNode } from 'react';
 import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import {
@@ -26,8 +26,8 @@ import {
   Wrench,
   X,
 } from 'lucide-react';
-import { cycleLabel } from '../../../shared/billing.ts';
-import { flow, billLabel, cnDate, cnDateFull, money } from '../../../shared/format.ts';
+import { cycleLabel, collectCurrencyOf } from '../../../shared/billing.ts';
+import { flow, billLabel, cnDate, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
 import { dropOldImages } from '../../../shared/deepseek.ts';
@@ -35,8 +35,9 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
-import { api, refresh, toast } from '../store.ts';
+import { api, ASSISTANT_KEY, copyText, getState, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
+import { interrupted, isDateField, proposalDay, settleTurns } from './assistant-fields.ts';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
 import './assistant.css';
 import { Streamdown, type Components } from 'streamdown';
@@ -91,7 +92,6 @@ interface Saved {
   history: ApiMessage[];
 }
 
-const STORE = storageKey('calends.assistant');
 const rid = () => Math.random().toString(36).slice(2, 10);
 const newChat = (): Saved => ({ id: rid(), createdAt: new Date().toISOString(), turns: [], history: [] });
 
@@ -107,10 +107,10 @@ function forServer(s: Saved) {
 /** 会话存在本机浏览器里（只是方便，不是账本数据）：较早的图片不存，免得撑爆存储 */
 function load(): Saved {
   try {
-    const raw = localStorage.getItem(STORE);
+    const raw = localStorage.getItem(ASSISTANT_KEY);
     // 老版本没有 id：补上，之后照常存到服务端
     if (raw) {
-      const saved = { ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved;
+      const saved = settleInterrupted({ ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved);
       // 还没说过话的对话：分割线上的时间按这次打开算
       return saved.turns.length ? saved : { ...saved, createdAt: new Date().toISOString() };
     }
@@ -119,6 +119,9 @@ function load(): Saved {
   }
   return newChat();
 }
+/** 上次关页时还在流式输出的回复不会再继续：记为中断，显示重试入口 */
+const settleInterrupted = (s: Saved): Saved => ({ ...s, turns: settleTurns(s.turns ?? []) });
+
 function persist(s: Saved) {
   try {
     let users = 0;
@@ -127,7 +130,7 @@ function persist(s: Saved) {
       .reverse()
       .map((x) => (x.role === 'user' && x.images.length && ++users > 2 ? { ...x, images: [] } : x))
       .reverse();
-    localStorage.setItem(STORE, JSON.stringify({ id: s.id, createdAt: s.createdAt, turns, history: dropOldImages(s.history, 0, '[image]') }));
+    localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ id: s.id, createdAt: s.createdAt, turns, history: dropOldImages(s.history, 0, '[image]') }));
   } catch {
     /* 存不下就算了 */
   }
@@ -243,6 +246,8 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     void api<AssistantConfigView>('/api/assistant/config').then(setCfg, () => setCfg(null));
   }, []);
   useEffect(() => persist(chat), [chat]);
+  // 离开助手页时中止进行中的回复，不在后台继续消耗
+  useEffect(() => () => abort.current?.abort(), []);
   useEffect(() => {
     void api<Saved[]>('/api/assistant/chats')
       .then(
@@ -334,7 +339,11 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       // 成功（或中途停止）才把这轮写进历史；出错的这轮不进历史，重试时原样再发
       const done = added as ApiMessage[] | null;
       if (done) setChat((c) => ({ ...c, history: [...history, ...done] }));
-      if (bot.status === 'streaming') setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? { ...bot, status: 'done' } : x)) }));
+      // 连接结束却没收到 done（服务端或网络中途断开）：记为中断，可以重试，不当作已完成
+      if (bot.status === 'streaming') {
+        const cut = interrupted(bot);
+        setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? cut : x)) }));
+      }
       setBusy(false);
       abort.current = null;
     }
@@ -360,8 +369,20 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
 
   /** 确认草稿：同一个 MCP 工具真正执行；结果作为备注写进历史，模型下一轮就知道已经加上了 */
   const applyProposal = async (turnId: string, p: Extract<Part, { kind: 'proposal' }>) => {
+    const retrying = p.state === 'error';
     setPart(turnId, p.id, { state: 'applying', error: undefined });
     try {
+      // 上次失败可能只是没收到响应、其实已经写入：重试前先同步账本核对，新建过的订阅不再建一次。
+      // 其他工具没有可核对的标识，仍按原参数重试（服务端幂等另行处理）
+      if (retrying) {
+        await refresh();
+        const id = p.tool === 'create_subscription' && typeof p.args.id === 'string' ? p.args.id : undefined;
+        const existing = id ? getState().subscriptions.find((s) => s.id === id) : undefined;
+        if (existing) {
+          setPart(turnId, p.id, { state: 'applied', subId: existing.id });
+          return;
+        }
+      }
       const r = await api<{ subscription?: { id: string; name: string } }>('/api/assistant/apply', {
         method: 'POST',
         body: JSON.stringify({ tool: p.tool, args: p.args }),
@@ -649,11 +670,7 @@ function BotMessage(props: {
         {props.last && turn.status !== 'streaming' && turn.status !== 'error' && (
           <div className="as-actions">
             {text && (
-              <IconButton
-                onClick={() => void navigator.clipboard.writeText(text).then(() => toast(t('assistant.copied')))}
-                title={t('assistant.copy')}
-                aria-label={t('assistant.copy')}
-              >
+              <IconButton onClick={() => void copyText(text, t('assistant.copied'))} title={t('assistant.copy')} aria-label={t('assistant.copy')}>
                 <Copy size={14} />
               </IconButton>
             )}
@@ -701,7 +718,9 @@ function Reasoning({ part, live }: { part: Extract<Part, { kind: 'reasoning' }>;
 /** 工具调用：名称、状态，点开看参数与结果 */
 function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
   const [open, setOpen] = useState(false);
-  const title = t(`mcp.tool.${part.name}`) || part.name;
+  // 没有本地化名称的工具（t 原样返回键名）显示工具名本身，不显示 mcp.tool.xxx
+  const key = `mcp.tool.${part.name}`;
+  const title = t(key) === key ? part.name : t(key);
   const json = (v: unknown) => {
     const s = JSON.stringify(v, null, 2);
     return s.length > 4000 ? `${s.slice(0, 4000)}\n…` : s;
@@ -746,8 +765,8 @@ function summaryRows(
   const add = (label: string, v: ReactNode | undefined | null | false) => {
     if (v !== undefined && v !== null && v !== false && v !== '') rows.push([label, v]);
   };
-  const day = (v: unknown) => (v ? cnDateFull(String(v)) : undefined);
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const day = proposalDay;
+  const collect = collectCurrencyOf(state.settings);
   const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
   switch (tool) {
     case 'record_receivable': {
@@ -889,7 +908,7 @@ function summaryRows(
         const val =
           k === 'method'
             ? (method(v)?.name ?? String(v))
-            : /date|end|due|until|from|at|expires/.test(k)
+            : isDateField(k)
               ? day(v)
               : Array.isArray(v)
                 ? v.join('、')
@@ -954,9 +973,9 @@ function Proposal(props: {
   const gone = part.state === 'dismissed';
   const rows: Array<[string, ReactNode]> = create
     ? [
-        [t('assistant.card.start'), a.start ? cnDateFull(String(a.start)) : t('assistant.card.today')],
+        [t('assistant.card.start'), proposalDay(a.start) ?? t('assistant.card.today')],
         ...(a.region ? [[t('detail.field.region'), String(a.region).toUpperCase()] as [string, ReactNode]] : []),
-        ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), cnDateFull(String(a.trial_end))] as [string, ReactNode]] : []),
+        ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), proposalDay(a.trial_end)] as [string, ReactNode]] : []),
         [t('detail.field.method'), <PayBadge key="m" m={method} />],
         ...(history.length
           ? [
@@ -1189,7 +1208,7 @@ function Composer({
       const urls = await Promise.all(list.map(compress));
       setImages((x) => [...x, ...urls].slice(0, 8));
     } catch {
-      toast(t('assistant.imageFailed'), true);
+      toast(t('assistant.imageFailed'), 'error');
     }
   };
   const submit = () => {
@@ -1358,7 +1377,7 @@ function SetupSheet({
       toast(t('assistant.setup.saved'));
       onClose();
     } catch (e) {
-      toast((e as Error).message, true);
+      toast((e as Error).message, 'error');
     } finally {
       setSaving(false);
     }
@@ -1401,7 +1420,7 @@ function SetupSheet({
               (await ask(t('assistant.clearChatsConfirm'))) &&
               void api('/api/assistant/chats', { method: 'DELETE' }).then(() => {
                 try {
-                  localStorage.removeItem(STORE);
+                  localStorage.removeItem(ASSISTANT_KEY);
                 } catch {
                   /* ignore */
                 }

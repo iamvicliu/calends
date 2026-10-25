@@ -188,8 +188,8 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
 
   const save = () => {
     const v = name.trim();
-    if (!v) return toast(t('settings.cat.error.empty'), true);
-    if (others.some((c) => c.name === v)) return toast(t('settings.cat.error.duplicate', { name: v }), true);
+    if (!v) return toast(t('settings.cat.error.empty'), 'error');
+    if (others.some((c) => c.name === v)) return toast(t('settings.cat.error.duplicate', { name: v }), 'error');
     const next: Category = { ...cat, name: v, icon, color };
     const renamed = !!cat && cat.name !== v;
     void run(async () => {

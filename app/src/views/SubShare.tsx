@@ -1,11 +1,11 @@
 import { copyParts } from '../components/copy.tsx';
-import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime } from '../../../shared/billing.ts';
+import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime, isStopped } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 
 /** 不是今年的日期带上年份 */
 const when = (d: string, today: string) => (d.slice(0, 4) === today.slice(0, 4) ? cnDate(d) : cnDateFull(d));
-import { chargeValue } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN, chargeValue } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { ShareSheet } from '../components/ShareSheet.tsx';
 import { MetricCards, Metric, FlagImg, SubIcon } from '../components/ui.tsx';
@@ -24,13 +24,15 @@ const STYLES = (): Array<[Style, string]> => [
 function story(state: AppState, sub: Subscription, today: string) {
   const base = state.settings.baseCurrency;
   const charges = chargesBetween(sub, sub.start, today, today).filter((c) => c.kind !== 'failed');
+  // 图形（柱高）用缺汇率按 0 的值；显示的合计与年度金额缺汇率时为 NaN，显示「—」
   const values = charges.map((c) => chargeValue(state, c));
-  const total = values.reduce((a, v) => a + v, 0);
+  const total = charges.reduce((a, c) => a + chargeBaseOrNaN(state, c), 0);
   const vs = phaseSubs(sub);
   // 并行的阶段不重复计天数；断档只算前面各段都已结束的空档
   const { days: active, gaps } = servedTime(sub, today);
   const years = new Map<string, number>();
   charges.forEach((c, i) => years.set(c.date.slice(0, 4), (years.get(c.date.slice(0, 4)) ?? 0) + values[i]));
+  const yearMissing = new Set(charges.filter((c) => !Number.isFinite(chargeBaseOrNaN(state, c))).map((c) => c.date.slice(0, 4)));
   const first = vs[0];
   const cur = currentPhase(sub, today);
   const p0 = priceAt(first, first.start);
@@ -48,6 +50,7 @@ function story(state: AppState, sub: Subscription, today: string) {
     active,
     gaps,
     years: [...years].sort((a, b) => a[0].localeCompare(b[0])),
+    yearMissing,
     duration: y
       ? mo
         ? t('share.dur.ym', { y, m: mo })
@@ -163,7 +166,7 @@ function SCard({ sub, st, hide, m, today }: Ctx) {
 /** 小票：逐笔列出扣款，最后合计；隐藏金额时列出每期的地区和日期 */
 function SReceipt({ sub, st, hide, m, today }: Ctx) {
   const end = st.cur.stop?.date ?? st.cur.end ?? sub.end;
-  const farewell = ['ended', 'terminated'].includes(st.status)
+  const farewell = isStopped(st.status)
     ? end
       ? t('share.stoppedOn', { date: cnDateFull(end) })
       : statusText(st)
@@ -175,7 +178,7 @@ function SReceipt({ sub, st, hide, m, today }: Ctx) {
   const rows = st.charges.map((c, i) => ({ c, v: st.values[i] })).reverse();
   const shown = rows.slice(0, 14);
   const rest = rows.slice(14);
-  const bars = Array.from({ length: 46 }, (_, i) => 1 + ((Math.round(st.total) * 7 + st.charges.length * 13 + i * 31) % 4));
+  const bars = Array.from({ length: 46 }, (_, i) => 1 + (((Math.round(st.total) || 0) * 7 + st.charges.length * 13 + i * 31) % 4));
   return (
     <div className="rc">
       <div className="rc-shop">{sub.name}</div>
@@ -343,7 +346,7 @@ function SYears({ sub, st, hide, m }: Ctx) {
       <div className="sy-bars">
         {st.years.map(([y, v]) => (
           <div key={y} className="sy-col">
-            <span className="sy-v">{hide ? `${st.total > 0 ? Math.round((v / st.total) * 100) : 0}%` : m(-v)}</span>
+            <span className="sy-v">{st.yearMissing.has(y) ? '—' : hide ? `${st.total > 0 ? Math.round((v / st.total) * 100) : 0}%` : m(-v)}</span>
             <i style={{ height: `${Math.max(4, (v / max) * 100)}%` }} />
             <span className="sy-y">{y}</span>
           </div>

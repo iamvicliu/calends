@@ -217,7 +217,8 @@
     "sources": "付款來源",
     "addSource": "新增來源",
     "splitOk": "合計 {amount}，與金額一致",
-    "splitLeft": "還差 {amount} 未分配"
+    "splitLeft": "還差 {amount} 未分配",
+    "confirmDelete": "刪除 {date} 的這筆記錄？"
   },
   "timeline": {
     "home": "回到今天（也可以在時間軸上按兩下）"

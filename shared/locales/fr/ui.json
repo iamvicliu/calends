@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Veuillez d’abord vous connecter",
     "requestFailed": "Échec de la requête ({status})",
-    "wholeCurrency": "Les montants en {currency} doivent être entiers"
+    "wholeCurrency": "Les montants en {currency} doivent être entiers",
+    "deletedElsewhere": "Cet élément a été supprimé ailleurs ; vos modifications n’ont pas été enregistrées."
   },
   "theme": {
     "light": "Clair",
@@ -23,5 +24,7 @@
   },
   "working": "En cours…",
   "undo": "Annuler",
-  "restored": "Restauré"
+  "restored": "Restauré",
+  "loadFailed": "Chargement impossible",
+  "retry": "Réessayer"
 }

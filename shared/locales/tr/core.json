@@ -230,5 +230,6 @@
     "badDate": "Orijinal {field} \"{value}\" tanınmadı, içe aktarılmadı",
     "nextDue": "sonraki ödeme tarihi",
     "end": "bitiş tarihi"
-  }
+  },
+  "fxIncomplete": "Döviz kuru eksik olduğu için bazı tutarlar çevrilemiyor; sonuç eksik."
 }

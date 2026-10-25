@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Сначала войдите",
     "requestFailed": "Ошибка запроса ({status})",
-    "wholeCurrency": "Суммы в {currency} должны быть целыми числами"
+    "wholeCurrency": "Суммы в {currency} должны быть целыми числами",
+    "deletedElsewhere": "Этот элемент удалён в другом месте, изменения не сохранены."
   },
   "theme": {
     "light": "Светлая",
@@ -23,5 +24,7 @@
   },
   "working": "Выполняется…",
   "undo": "Отменить",
-  "restored": "Восстановлено"
+  "restored": "Восстановлено",
+  "loadFailed": "Не удалось загрузить",
+  "retry": "Повторить"
 }

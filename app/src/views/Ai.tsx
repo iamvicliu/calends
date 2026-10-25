@@ -2,10 +2,10 @@ import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { CardTitle, ask, Icon, IconButton, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { CardTitle, ask, Icon, IconButton, LoadFailed, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Trash2, Users, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { api, run, saveSettings, toast } from '../store.ts';
+import { api, copyText, run, saveSettings } from '../store.ts';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 
@@ -126,11 +126,7 @@ const CLIENTS: Client[] = [
   },
 ];
 
-const copy = (text: string, what = t('ai.copied')) =>
-  navigator.clipboard.writeText(text).then(
-    () => toast(what),
-    () => toast(t('ai.copyFailed'), true),
-  );
+const copy = (text: string, what = t('ai.copied')) => copyText(text, what);
 
 function ClientLogo({ c, size = 28 }: { c: Client; size?: number }) {
   return (
@@ -250,10 +246,26 @@ export function Ai({ state }: { state: AppState }) {
   const [showTools, setShowTools] = useState(false);
   const ro = !!state.readonly;
   const enabled = state.settings.aiEnabled !== false;
-  const load = () => api<Token[]>('/api/mcp/tokens').then(setTokens, () => setTokens([]));
+  const [failed, setFailed] = useState({ tokens: false, tools: false });
+  const load = () =>
+    api<Token[]>('/api/mcp/tokens').then(
+      (list) => {
+        setTokens(list);
+        setFailed((f) => ({ ...f, tokens: false }));
+      },
+      () => setFailed((f) => ({ ...f, tokens: true })),
+    );
+  const loadTools = () =>
+    api<ToolMeta[]>('/api/mcp/tools').then(
+      (list) => {
+        setTools(list);
+        setFailed((f) => ({ ...f, tools: false }));
+      },
+      () => setFailed((f) => ({ ...f, tools: true })),
+    );
   useEffect(() => {
-    load();
-    api<ToolMeta[]>('/api/mcp/tools').then(setTools, () => setTools([]));
+    void load();
+    void loadTools();
   }, []);
   const when = (iso?: string) => (iso ? localTime(iso, state.settings.timezone) : t('ai.neverUsed'));
   // 按领域分组，组内先读后写；读写用图标区分（参考 GitHub 细粒度令牌的权限列表）
@@ -301,6 +313,7 @@ export function Ai({ state }: { state: AppState }) {
           <header>
             <CardTitle as="h2">{copyParts(t('ai.tokens', { count: tokens?.length ?? 0 }))}</CardTitle>
           </header>
+          {failed.tokens && !tokens && <LoadFailed onRetry={() => void load()} />}
           {tokens?.length === 0 && <div className="ai-empty">{t('ai.noTokens')}</div>}
           {!!tokens?.length && (
             // 密钥列表参考 Stripe、OpenAI、Vercel 的 API Keys：名称与权限、遮蔽后的密钥、创建和最近使用分列对齐，操作收进行尾图标
@@ -379,6 +392,7 @@ export function Ai({ state }: { state: AppState }) {
               <Icon name="down" size={16} />
             </span>
           </button>
+          {failed.tools && !tools.length && <LoadFailed onRetry={() => void loadTools()} />}
           {showTools && (
             <>
               <div className="ai-tools">

@@ -242,7 +242,8 @@
     "sources": "Bezahlt mit",
     "addSource": "Quelle hinzufügen",
     "splitOk": "Ergibt {amount}",
-    "splitLeft": "Noch zuzuordnen: {amount}"
+    "splitLeft": "Noch zuzuordnen: {amount}",
+    "confirmDelete": "Eintrag vom {date} löschen?"
   },
   "timeline": {
     "home": "Zurück zu heute (oder Zeitleiste doppelklicken)"

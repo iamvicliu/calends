@@ -261,5 +261,6 @@
     "deleteAll": "Supprime l’abonnement et tous ses prélèvements. Action irréversible.",
     "dateUnknown": "Date inconnue",
     "terminate": "Résilié par le fournisseur"
-  }
+  },
+  "interrupted": "La réponse a été interrompue avant la fin."
 }

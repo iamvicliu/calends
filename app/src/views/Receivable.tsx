@@ -8,7 +8,7 @@ import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type L
 import type { AppState, Receipt, Waiver } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { Cell, Group, NumInput, Seg, Sheet } from '../components/ui.tsx';
+import { ask, Cell, Group, NumInput, Seg, Sheet, useSubmit } from '../components/ui.tsx';
 import { run } from '../store.ts';
 
 /** 一期的起止：起始日带年份，同一年内的结束日不重复年份 */
@@ -102,23 +102,18 @@ export function ReceivableSheet({
   };
   // 指向已不存在的期（改过加入日、收费周期）的旧记录：列出来，取消勾选后才能保存
   const lost = keys.filter((k) => !periods.some((p) => p.key === k));
-  const [saving, setSaving] = useState(false);
+  const [saving, guard] = useSubmit();
   const invalid = saving || !keys.length || lost.length > 0 || !date || (mode === 'receipt' && (!Number.isFinite(amount) || amount < 0));
   const toggle = (k: string) => setKeys((ks) => (ks.includes(k) ? ks.filter((x) => x !== k) : [...ks, k].sort()));
 
-  const write = async (next: () => Receivable, msg: string) => {
-    if (saving) return;
-    setSaving(true);
-    try {
-      // 失败时 run 提示错误，表单保留，可直接重试
-      await run(async () => {
+  // 失败时 run 提示错误，表单保留，可直接重试
+  const write = (next: () => Receivable, msg: string) =>
+    guard(() =>
+      run(async () => {
         await save(next());
         onDone();
-      }, msg);
-    } finally {
-      setSaving(false);
-    }
-  };
+      }, msg),
+    );
   const submit = () => {
     if (invalid) return;
     const id = edit?.id ?? uid();
@@ -141,7 +136,10 @@ export function ReceivableSheet({
               className="btn plain"
               style={{ color: 'var(--red)' }}
               disabled={saving}
-              onClick={() => write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))}
+              onClick={async () =>
+                (await ask(t('receivable.confirmDelete', { date: cnDateFull(edit.date) }))) &&
+                write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))
+              }
             >
               {t('common.delete')}
             </button>

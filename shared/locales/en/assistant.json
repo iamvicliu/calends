@@ -261,5 +261,6 @@
     "deleteAll": "Deletes the subscription and all its charges. This can’t be undone.",
     "dateUnknown": "Date unknown",
     "terminate": "Terminated"
-  }
+  },
+  "interrupted": "The reply was cut off before it finished."
 }

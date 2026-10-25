@@ -4,11 +4,11 @@ import { isPasskeyCancellation } from './passkey-autofill.ts';
 import { base } from './base.ts';
 import { createRoot } from 'react-dom/client';
 import { FocusScope } from 'react-aria';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { addDays, diffDays, effectiveStatus, nextCharge } from '../../shared/billing.ts';
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { addDays, diffDays, effectiveStatus, nextCharge, isStopped } from '../../shared/billing.ts';
 import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
-import { IconButton, AskLayer, Icon, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
+import { IconButton, AskLayer, Icon, SubIcon, TipLayer, Toasts, useMedia } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -85,12 +85,42 @@ function useRoute() {
   return r;
 }
 
-function Login({ error }: { error?: string }) {
+/** 整页提示（连不上且没有缓存、页面出错）：沿用登录页的卡片，只给重试，不出现密码框 */
+function Notice({ text, onRetry }: { text: string; onRetry: () => void }) {
+  return (
+    <div className="login">
+      <div className="login-card fade-in">
+        <img src={base('/icons/icon-192.png')} alt="" />
+        <h1>{t('app.name')}</h1>
+        <p>{text}</p>
+        <button type="button" className="btn primary lg" onClick={onRetry}>
+          {t('app.reload')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** 渲染出错时不留白屏：整页提示并可重新加载；正常渲染时不包任何元素 */
+class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error(error);
+  }
+  render() {
+    return this.state.failed ? <Notice text={t('app.crashed')} onRetry={() => location.reload()} /> : this.props.children;
+  }
+}
+
+function Login() {
   const [status, setStatus] = useState<{ needsSetup: boolean; passkeys: number }>();
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
   const [token, setToken] = useState('');
-  const [err, setErr] = useState(error);
+  const [err, setErr] = useState<string>();
   const [busy, setBusy] = useState(false);
   const autofill = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
@@ -348,7 +378,7 @@ function Palette({
   const subs = state.subscriptions
     // Multiple words must all match, as before.
     .filter((s) => !lower || lower.split(/\s+/).every((w) => matches(w, haystack(s))))
-    .sort((a, b) => (['ended', 'terminated'].includes(effectiveStatus(a, d)) ? 1 : 0) - (['ended', 'terminated'].includes(effectiveStatus(b, d)) ? 1 : 0))
+    .sort((a, b) => (isStopped(effectiveStatus(a, d)) ? 1 : 0) - (isStopped(effectiveStatus(b, d)) ? 1 : 0))
     .slice(0, 8);
   const pages = nav.filter((n) => matches(lower, n.label));
   const items: Array<{ key: string; run: () => void; el: React.JSX.Element }> = [
@@ -464,16 +494,11 @@ function App() {
   useEffect(() => {
     if (loaded) prefetchViews();
   }, [loaded]);
-  const [narrow, setNarrow] = useState(() => matchMedia('(max-width: 860px)').matches);
+  const narrow = useMedia('(max-width: 860px)');
+  // 变宽后抽屉不再适用：关掉
   useEffect(() => {
-    const media = matchMedia('(max-width: 860px)');
-    const change = () => {
-      setNarrow(media.matches);
-      if (!media.matches) setDrawer(false);
-    };
-    media.addEventListener('change', change);
-    return () => media.removeEventListener('change', change);
-  }, []);
+    if (!narrow) setDrawer(false);
+  }, [narrow]);
   useEffect(() => {
     if (!drawer) return;
     const close = (e: KeyboardEvent) => {
@@ -553,7 +578,9 @@ function App() {
   }, [state, collapsed, narrow, drawer, editing, viewId, review, ics, palette]);
 
   if (phase === 'loading' || (phase === 'login' && route !== 'login')) return <div className="login" />;
-  if (phase === 'login' || !state) return <Login error={phase === 'offline' ? t('app.offlineError', { error: error ?? '' }) : undefined} />;
+  // 连不上又没有缓存：只提示离线并可重试，不显示登录表单（此时输入密码也无法验证）
+  if (phase === 'offline' && !state) return <Notice text={t('app.offlineError', { error: error ?? '' })} onRetry={() => void boot()} />;
+  if (phase === 'login' || !state) return <Login />;
   // 分类表（图标、颜色、顺序）先于各页面同步，页面里按分类名直接查
   syncCategories(state);
 
@@ -714,7 +741,11 @@ function Root() {
     )
       void saveSettings({ siteUrl: `${location.origin}${base('/').replace(/\/$/, '')}` }).catch(() => {});
   }, [want, loc]);
-  return <App key={`${loc}:${signed}`} />;
+  return (
+    <ErrorBoundary>
+      <App key={`${loc}:${signed}`} />
+    </ErrorBoundary>
+  );
 }
 
 initRouter();

@@ -16,7 +16,7 @@ export async function copyImage(render: () => Promise<Blob | null>): Promise<voi
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
     toast(t('detail.toast.imageCopied'));
   } catch {
-    toast(t('family.sheet.copyFailed'), true);
+    toast(t('family.sheet.copyFailed'), 'error');
   }
 }
 

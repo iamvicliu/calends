@@ -82,5 +82,7 @@
     "months": "Previous / next month (year in year view)",
     "today": "Go to today",
     "hint": "Global single-key shortcuts pause while typing or an overlay is open. Form shortcuts wait until pickers close; textareas keep Enter for new lines."
-  }
+  },
+  "crashed": "Something went wrong on this page. Reload to continue.",
+  "reload": "Reload"
 }
