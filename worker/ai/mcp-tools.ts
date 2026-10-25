@@ -93,7 +93,6 @@ import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { searchAppStore } from '../appstore.ts';
 import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
 import { drySchema, objectSchema as obj, validateToolInput, type Schema } from '../../shared/tool-schema.ts';
-import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
 import { validateCurrency, categoryEdit, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
