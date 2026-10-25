@@ -24,6 +24,7 @@ export function carpoolTimeline(s: Subscription, today: string, ruleMonths: numb
     .filter((m) => !m.exempt)
     .flatMap((m) => {
       // 今天之后第一期还没收的（提前收了的期跳过），按真实收费期算，保留首期对齐与未来调价后的周期
+      // 只取期的起止日，收费币种不影响，这里不需要设置
       const next = memberLedger(s, m, today, s.currency, addMonths(today, 120)).periods.find((p) => p.from > today && !isSettled(p));
       return next ? [next.until] : [];
     });

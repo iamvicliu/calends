@@ -14,6 +14,7 @@ import {
   collectionAnchor,
   memberLedger,
   diffDays,
+  collectCurrencyOf,
 } from './billing.ts';
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
@@ -48,13 +49,13 @@ export function suggestedLeaveRefund(state: AppState, s: Subscription, m: ShareM
   // 按没退出算各期，才能对上退出日之后提前收了的期
   const parts = !m.left
     ? []
-    : memberLedger(s, { ...m, left: undefined }, m.left, s.currency, m.left).periods.flatMap((p) => {
+    : memberLedger(s, { ...m, left: undefined }, m.left, collectCurrencyOf(state.settings), m.left).periods.flatMap((p) => {
         if (p.status !== 'paid' || p.share == null || p.until < m.left!) return [];
         const unusedFrom = p.from > m.left! ? p.from : m.left!;
         const unusedDays = diffDays(unusedFrom, p.until) + 1;
         return [{ from: p.from, until: p.until, unusedDays, amount: (p.share * unusedDays) / (diffDays(p.from, p.until) + 1), currency: p.receipt!.currency }];
       });
-  const ccy = currency ?? parts[0]?.currency ?? m.feeCurrency ?? state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const ccy = currency ?? parts[0]?.currency ?? m.feeCurrency ?? collectCurrencyOf(state.settings);
   const amount = parts.reduce((sum, p) => sum + convertOn(p.amount, p.currency, ccy, m.left!, state.fxHistory, state.fx), 0);
   const factor = 10 ** currencyDecimals(ccy);
   return { amount: Math.round(amount * factor) / factor, currency: ccy, unusedDays: parts.reduce((sum, p) => sum + p.unusedDays, 0), parts };
@@ -110,7 +111,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
  */
 export function carYear(state: AppState, s: Subscription, today: string) {
   const y = today.slice(0, 4);
-  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const ccy = collectCurrencyOf(state.settings);
   const cost = yearCost(state, s, today);
   const members = s.share?.members ?? [];
   const received = members
@@ -143,13 +144,13 @@ export function billAmount(s: Subscription, m: ShareMember): number {
 
 /** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算（订阅币种） */
 export function memberFee(state: AppState, s: Subscription, m: ShareMember, day = m.joined ?? s.share?.since ?? s.start): { amount: number; currency: string } {
-  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const ccy = collectCurrencyOf(state.settings);
   return memberRate(s, m, day, ccy);
 }
 
 /** 首次调价固定旧基线；只插入收费标准，绝不改写历史收款。 */
 export function changeMemberFee(state: AppState, s: Subscription, m: ShareMember, point: MemberFeePoint, today: string): ShareMember {
-  const baseline = memberRate(s, m, m.joined ?? s.share?.since ?? s.start, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const baseline = memberRate(s, m, m.joined ?? s.share?.since ?? s.start, collectCurrencyOf(state.settings));
   const history = m.feeHistory?.length
     ? m.feeHistory
     : [
@@ -166,7 +167,7 @@ export function changeMemberFee(state: AppState, s: Subscription, m: ShareMember
     { ...point, share: shareFromFee(state, s, point.fee, point.currency, point.billEvery) },
   ].sort((a, b) => a.from.localeCompare(b.from));
   const next = { ...m, feeHistory };
-  const current = memberRate(s, next, today);
+  const current = memberRate(s, next, today, collectCurrencyOf(state.settings));
   return {
     ...next,
     fee: current.amount,
@@ -187,7 +188,7 @@ export function shareFromFee(state: AppState, s: Subscription, fee: number, ccy:
  */
 export function resyncShares(state: AppState, prev: Subscription | undefined, next: Subscription): Subscription {
   if (!next.share || !prev || (prev.currency === next.currency && cycleMonths(prev) === cycleMonths(next))) return next;
-  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const ccy = collectCurrencyOf(state.settings);
   return {
     ...next,
     share: {
@@ -214,7 +215,7 @@ export const sameRule = (a: CarRule, b: CarRule) => a.billEvery === b.billEvery 
  */
 export function carRule(state: AppState, s: Subscription, today: string): CarRule {
   if (s.share?.rule) return s.share.rule;
-  const ccy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const ccy = collectCurrencyOf(state.settings);
   const counts = new Map<string, { rule: CarRule; n: number }>();
   for (const m of s.share?.members ?? []) {
     if (m.exempt || (m.left && m.left <= today)) continue;
@@ -234,7 +235,7 @@ export function carRule(state: AppState, s: Subscription, today: string): CarRul
 export function followsCar(state: AppState, s: Subscription, m: ShareMember, today: string): boolean {
   if (m.custom || m.exempt) return false;
   if (s.share?.rule) return true;
-  const r = memberRate(s, m, today, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const r = memberRate(s, m, today, collectCurrencyOf(state.settings));
   return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, carRule(state, s, today));
 }
 
@@ -248,7 +249,7 @@ export function applyCarRule(state: AppState, s: Subscription, rule: CarRule, fr
     if (m.left && (m.left <= today || m.left <= from)) return m;
     // 规则第一次存下时，原本就与车不一致的成员明确标为自定义，之后不会被当成跟随车
     if (!followsCar(state, s, m, today)) return m.exempt || m.custom ? m : { ...m, custom: true };
-    const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
+    const r = memberRate(s, m, from, collectCurrencyOf(state.settings));
     if (sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)) return m;
     return changeMemberFee(state, s, m, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
   });
@@ -258,7 +259,7 @@ export function applyCarRule(state: AppState, s: Subscription, rule: CarRule, fr
 /** 成员改回跟随车：从生效日起套用车的规则 */
 export function followCarRule(state: AppState, s: Subscription, m: ShareMember, from: string, today: string): ShareMember {
   const rule = carRule(state, s, today);
-  const r = memberRate(s, m, from, state.settings.collectCurrency ?? state.settings.baseCurrency);
+  const r = memberRate(s, m, from, collectCurrencyOf(state.settings));
   const next = { ...m, custom: undefined };
   return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)
     ? next
@@ -267,7 +268,7 @@ export function followCarRule(state: AppState, s: Subscription, m: ShareMember, 
 
 /** 几期应收的合计：金额折成第一期的币种相加（收款表单按选中的期预填金额） */
 export function periodsTotal(state: AppState, periods: Period[]) {
-  const ccy = periods[0]?.currency ?? state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const ccy = periods[0]?.currency ?? collectCurrencyOf(state.settings);
   const amount = periods.reduce((a, p) => a + (p.currency === ccy ? p.due : convertOn(p.due, p.currency, ccy, p.from, state.fxHistory, state.fx)), 0);
   const d = 10 ** currencyDecimals(ccy);
   return { amount: Math.round(amount * d) / d, currency: ccy };

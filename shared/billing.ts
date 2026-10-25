@@ -10,6 +10,7 @@ import {
   type RenewalRule,
   type Receipt,
   type Waiver,
+  type Settings,
 } from './types.ts';
 import { dateFormat } from './intl.ts';
 import { t } from './i18n.ts';
@@ -1056,7 +1057,13 @@ export function memberFeePoint(m: ShareMember, day?: string) {
   return history.filter((p) => !day || p.from <= day).at(-1) ?? history[0];
 }
 
-export function memberRate(s: Subscription, m: ShareMember, day: string, collectCurrency = s.currency) {
+/** 合租收款币种：设置里选过的，否则本位币。memberRate 等收费计算一律传它，不再各自缺省 */
+export function collectCurrencyOf(settings: Pick<Settings, 'collectCurrency' | 'baseCurrency'>): string {
+  return settings.collectCurrency ?? settings.baseCurrency;
+}
+
+/** collectCurrency：旧成员只填了 fee、没填 feeCurrency 时的收费币种，传 collectCurrencyOf(settings) */
+export function memberRate(s: Subscription, m: ShareMember, day: string, collectCurrency: string) {
   const point = memberFeePoint(m, day);
   const billEvery = memberBillMonths(s, m, day);
   const amount = point?.fee ?? m.fee ?? ((m.share || 0) * billEvery) / (cycleDays(s.cycle) / 30.4375);
@@ -1089,7 +1096,7 @@ export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
  * 成员的应收期：从加入日起按条款切——首期对齐车的收款节奏，之后按成员自己的周期接着切；
  * 与收没收钱无关，所以可以单独收第 3 期、留着第 2 期。到退出日、订阅结束或 last 为止
  */
-export function memberPeriods(s: Subscription, m: ShareMember, last: string, collectCurrency = s.currency): Period[] {
+export function memberPeriods(s: Subscription, m: ShareMember, last: string, collectCurrency: string): Period[] {
   const out: Period[] = [];
   for (let from = m.joined ?? s.share?.since ?? s.start, guard = 0; from <= last && guard < 1200; guard++) {
     if ((m.left && from >= m.left) || (s.end && from > s.end)) break;
@@ -1105,14 +1112,14 @@ export function memberPeriods(s: Subscription, m: ShareMember, last: string, col
  * 成员的应收账：各期加上收款、免收推算出的状态。至少算到 through（缺省今天），
  * 收款、免收抵扣到更晚的期（提前收）时一直算到那一期
  */
-export function memberLedger(s: Subscription, m: ShareMember, today: string, collectCurrency = s.currency, through = today) {
+export function memberLedger(s: Subscription, m: ShareMember, today: string, collectCurrency: string, through = today) {
   const keys = [...(m.receipts ?? []), ...(m.waivers ?? [])].flatMap((x) => x.periods);
   const last = keys.reduce((a, k) => (k > a ? k : a), through);
   return settle(memberPeriods(s, m, last, collectCurrency), m, today);
 }
 
 /** 只有首次未收款的加入期对齐统一日；之后按成员自己的覆盖起点收完整一期。 */
-export function memberCollection(s: Subscription, m: ShareMember, from: string, collectCurrency = s.currency) {
+export function memberCollection(s: Subscription, m: ShareMember, from: string, collectCurrency: string) {
   const joined = m.joined ?? s.share?.since ?? s.start;
   const first = collectionPeriod(s, m, joined);
   const isFirst = from === joined;
@@ -1144,6 +1151,7 @@ export function memberUnpaidFrom(s: Subscription, m: ShareMember): string {
   const joined = m.joined ?? s.share?.since ?? s.start;
   if (m.exempt) return joined;
   for (let years = 2; years <= 128; years *= 2) {
+    // 收费币种只影响各期的币种标签，不影响结清状态，这里不需要设置
     const { periods } = memberLedger(s, m, joined, s.currency, addMonths(joined, 12 * years));
     const open = periods.find((p) => !isSettled(p));
     if (open) return open.from;
@@ -1153,12 +1161,7 @@ export function memberUnpaidFrom(s: Subscription, m: ShareMember): string {
   return joined;
 }
 
-export function memberDues(
-  s: Subscription,
-  today: string,
-  collectCurrency = s.currency,
-  fxState?: Pick<AppState, 'fx' | 'fxHistory' | 'settings'>,
-): MemberDue[] {
+export function memberDues(s: Subscription, today: string, collectCurrency: string, fxState?: Pick<AppState, 'fx' | 'fxHistory' | 'settings'>): MemberDue[] {
   if (!s.share || s.share.role !== 'owner') return [];
   const stop = [
     s.end,

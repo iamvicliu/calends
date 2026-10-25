@@ -68,10 +68,11 @@ function memberFrom(s: Subscription, m: LegacyMember): ShareMember {
   const marks = [...payments.flatMap((p) => (p.from ? [p.from] : [])), ...(paidUntil ? [addDays(paidUntil, 1)] : [])].filter((d) => d > joined).sort();
   for (const d of new Set(marks)) {
     // 只在落在某一期中间时才算改了节奏；正好在期界上、或已在退出与订阅结束之后的不用记
-    if ((m.left && d >= m.left) || !memberPeriods(s, rest, d).some((p) => p.from < d && d <= p.until)) continue;
+    if ((m.left && d >= m.left) || !memberPeriods(s, rest, d, s.currency).some((p) => p.from < d && d <= p.until)) continue;
     rest = { ...rest, restarts: [...(rest.restarts ?? []), d] };
   }
-  const periods = memberPeriods(s, rest, last);
+  // 迁移按旧版口径（订阅币种）切期，转换结果不随设置变化
+  const periods = memberPeriods(s, rest, last, s.currency);
   const taken = new Set<string>();
   const receipts: Receipt[] = [];
   // 老收款没有起始日时，接着上一笔的终点，再不行按一个收费周期往前推

@@ -1,6 +1,6 @@
 // 记收款、免收、改删收款、记代付实扣：合租成员与代付共用。界面与 MCP / AI 助手都走这里，校验只在一处。
 // 纯函数，不碰存储；返回改好的订阅，由调用方写入。
-import { addMonths, collectionAnchor, memberLedger, validDay } from './billing.ts';
+import { addMonths, collectCurrencyOf, collectionAnchor, memberLedger, validDay } from './billing.ts';
 import { periodsTotal } from './carpool.ts';
 import { convertOn } from './fx.ts';
 import { t } from './i18n.ts';
@@ -16,7 +16,7 @@ export type ReceivableTarget = { kind: 'share'; member: ShareMember } | { kind: 
 
 /** 这笔账的各期（含 through 之前的未来期）、现有收款与免收，以及把新的记录写回订阅的方法 */
 export function receivableOf(st: AppState, s: Subscription, target: ReceivableTarget, today: string, through = addMonths(today, 12 * AHEAD_YEARS)) {
-  const ccy = st.settings.collectCurrency ?? st.settings.baseCurrency;
+  const ccy = collectCurrencyOf(st.settings);
   if (target.kind === 'proxy') {
     if (!s.proxy) throw new Error(t('mcp.error.notProxy', { name: s.name }));
     const proxy = s.proxy;

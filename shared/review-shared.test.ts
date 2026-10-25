@@ -1,7 +1,8 @@
 // 2026-10-25 审查 S 组（shared 领域层）的回归用例
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { FALLBACK_FX, monthlyGross, runwayFor } from './billing.ts';
+import { FALLBACK_FX, collectCurrencyOf, memberDues, monthlyGross, runwayFor } from './billing.ts';
+import { scopeReport } from './scope-report.ts';
 import { carLedger, carYear } from './carpool.ts';
 import { chargeBaseOrNaN, chargeFxMissing, chargeValue, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
@@ -138,4 +139,21 @@ test('S-5 缺汇率口径：NaN 版本与旧 0 版本并存，净成本、余额
   assert.ok(Number.isNaN(ledger.paid) && Number.isNaN(ledger.yearCost));
   assert.ok(Number.isNaN(carYear(state([car]), car, '2026-03-15').cost));
   assert.ok(Number.isNaN(yearCost(state([car]), car, '2026-03-15')));
+});
+
+test('S-6 合租收款币种统一取 collectCurrencyOf：范围报告的待收与合租页同一币种', () => {
+  const settings = { ...DEFAULT_SETTINGS, baseCurrency: 'CNY', collectCurrency: undefined };
+  assert.equal(collectCurrencyOf(settings), 'CNY');
+  assert.equal(collectCurrencyOf({ ...settings, collectCurrency: 'HKD' }), 'HKD');
+  // 旧成员只填了 fee、没填 feeCurrency：按收款币种（这里缺省为本位币 CNY）收 30
+  const car = sub({
+    price: 20,
+    share: { role: 'owner', seats: 2, since: '2026-01-01', members: [{ id: 'a', name: 'Member A', share: 10, fee: 30, billEvery: 1, joined: '2026-01-01' }] },
+  });
+  const st = state([car], { settings });
+  const dues = memberDues(car, '2026-03-15', collectCurrencyOf(settings), st)[0];
+  assert.equal(dues.currency, 'CNY');
+  const sharing = scopeReport(st, [car], '2026-03-15').blocks.find((b) => b.type === 'sharing') as { owed: number } | undefined;
+  assert.ok(sharing);
+  assert.ok(Math.abs(sharing.owed - dues.owed) < 0.01, `${sharing.owed} ≈ ${dues.owed}`);
 });
