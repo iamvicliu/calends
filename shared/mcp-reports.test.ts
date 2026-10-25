@@ -12,8 +12,7 @@ import { MIGRATIONS } from '../worker/migrations.gen.ts';
 import type { Env } from '../worker/env.ts';
 
 const messages = {};
-for (const ns of ['core', 'common', 'mcp'])
-  flatten(ns, JSON.parse(readFileSync(new URL(`./locales/en/${ns}.json`, import.meta.url), 'utf8')), messages);
+for (const ns of ['core', 'common', 'mcp']) flatten(ns, JSON.parse(readFileSync(new URL(`./locales/en/${ns}.json`, import.meta.url), 'utf8')), messages);
 setLocale('en', [messages]);
 
 const today = todayIn('UTC');

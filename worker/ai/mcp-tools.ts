@@ -1735,10 +1735,12 @@ const CATALOGUE: Tool[] = [
           delete patch.method;
         }
         if (patch.currency) validateCurrency(st, String(patch.currency));
-        if (a.shift_billing != null && (act !== 'edit' || patch.start == null)) throw new Error(t('mcp.error.invalidInput', { field: 'shift_billing requires set.start' }));
+        if (a.shift_billing != null && (act !== 'edit' || patch.start == null))
+          throw new Error(t('mcp.error.invalidInput', { field: 'shift_billing requires set.start' }));
         // 改开始日走网页同一个 movePhaseStart（保留扣款锚点）；其余字段再按新开始日修改
         const { start: moveTo, ...rest } = patch;
-        const moved = act === 'edit' && moveTo != null && moveTo !== at ? movePhaseStart(s, at, date(moveTo, 'set.start'), { shiftBilling: a.shift_billing === true }) : s;
+        const moved =
+          act === 'edit' && moveTo != null && moveTo !== at ? movePhaseStart(s, at, date(moveTo, 'set.start'), { shiftBilling: a.shift_billing === true }) : s;
         const target = act === 'edit' && moveTo != null ? String(moveTo) : at;
         const after = act === 'remove' ? removePhase(s, index) : Object.keys(rest).length ? editPhase(moved, target, rest) : moved;
         return {

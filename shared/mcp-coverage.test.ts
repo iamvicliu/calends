@@ -1790,7 +1790,10 @@ test('set_status edit=true 修改已有停用：日期、不续费/立即停用�
     [-3],
   );
   assert.equal((await f.call('set_status', { subscription: 's', action: 'cancel', immediate: true, edit: true, refund: null })).isError, undefined);
-  assert.equal((await stored()).payments?.some((p) => p.kind === 'refund'), false);
+  assert.equal(
+    (await stored()).payments?.some((p) => p.kind === 'refund'),
+    false,
+  );
   // 立即停用 → 到期不续
   const r = await f.call('set_status', { subscription: 's', action: 'cancel', edit: true });
   assert.equal(r.isError, undefined, JSON.stringify(r));

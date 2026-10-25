@@ -198,7 +198,11 @@ function blockOut(st: AppState, b: Block, m: Missing): Record<string, unknown> {
         };
       }
     case 'composition':
-      return { type: 'composition', categories: compOut(st, b.categories, 'category', m.composition), methods: compOut(st, b.methods, 'method', m.composition) };
+      return {
+        type: 'composition',
+        categories: compOut(st, b.categories, 'category', m.composition),
+        methods: compOut(st, b.methods, 'method', m.composition),
+      };
     case 'top':
       if (b.mode === 'month') return { type: 'top', mode: 'month', rows: b.rows.map((r) => chargeOut(st, r)) };
       return { type: 'top', mode: b.mode, rows: b.rows.map((r) => ({ ...ref(r.sub), amount: sub(r.sub, r.amount) })) };

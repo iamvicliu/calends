@@ -21,6 +21,15 @@ test('iconInput：接受网址、站内路径、内嵌图片和 emoji，空值�
   assert.equal(iconInput('data:image/png;base64,iVBORw0KGgo='), 'data:image/png;base64,iVBORw0KGgo=');
   assert.equal(iconInput(''), undefined);
   assert.equal(iconInput(null), undefined);
-  for (const bad of ['javascript:alert(1)', 'mailto:a@example.test', 'https://', '//evil.test/x', 'two words', 'abcdefgh', 'data:image/svg+xml;base64,PHN2Zz4=', `data:image/png;base64,${'A'.repeat(90000)}`])
+  for (const bad of [
+    'javascript:alert(1)',
+    'mailto:a@example.test',
+    'https://',
+    '//evil.test/x',
+    'two words',
+    'abcdefgh',
+    'data:image/svg+xml;base64,PHN2Zz4=',
+    `data:image/png;base64,${'A'.repeat(90000)}`,
+  ])
     assert.throws(() => iconInput(bad), undefined, bad);
 });
