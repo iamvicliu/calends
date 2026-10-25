@@ -720,6 +720,19 @@ export function toast(text: string, err = false, opts: ToastOptions = {}): strin
   return sonner[kind](text, { id: opts.id, description: opts.description, action: opts.action, duration: kind === 'error' ? 5000 : 2800 });
 }
 
+/** 复制文字：浏览器不支持剪贴板（非 HTTPS、旧浏览器）或被拒绝时提示失败，不静默 */
+export async function copyText(text: string, ok: string): Promise<boolean> {
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+    await navigator.clipboard.writeText(text);
+    toast(ok);
+    return true;
+  } catch {
+    toast(t('ai.copyFailed'), true);
+    return false;
+  }
+}
+
 /**
  * 执行一个操作并给出反馈：超过 400ms 还没完成就先显示「处理中」，完成后原地换成成功或失败。
  * ok 也可以是 ToastOptions（带撤销按钮等）。

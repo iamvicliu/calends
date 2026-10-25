@@ -35,7 +35,7 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
-import { api, ASSISTANT_KEY, getState, refresh, toast } from '../store.ts';
+import { api, ASSISTANT_KEY, copyText, getState, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
 import { interrupted, isDateField, proposalDay, settleTurns } from './assistant-fields.ts';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
@@ -671,11 +671,7 @@ function BotMessage(props: {
         {props.last && turn.status !== 'streaming' && turn.status !== 'error' && (
           <div className="as-actions">
             {text && (
-              <IconButton
-                onClick={() => void navigator.clipboard.writeText(text).then(() => toast(t('assistant.copied')))}
-                title={t('assistant.copy')}
-                aria-label={t('assistant.copy')}
-              >
+              <IconButton onClick={() => void copyText(text, t('assistant.copied'))} title={t('assistant.copy')} aria-label={t('assistant.copy')}>
                 <Copy size={14} />
               </IconButton>
             )}

@@ -69,7 +69,7 @@ import { PaymentSheet } from './PaymentSheet.tsx';
 import { MetricCards, Metric, CardTitle, IconButton, CatChip, PayBadge, RegionTag, Seg, Sheet, subRegion, SubIcon } from '../components/ui.tsx';
 import { presetCat, toBase } from '../derive.ts';
 import { FLAGS } from '../display.ts';
-import { run, saveSub, toast } from '../store.ts';
+import { copyText, run, saveSub } from '../store.ts';
 import { snapshot } from '../snapshot.ts';
 import { SubShare } from './SubShare.tsx';
 import { confirmPlan, dropPlan, pricePoints, reactivate } from '../../../shared/phases.ts';
@@ -1114,12 +1114,7 @@ function Summary({ sub, state, today }: { sub: Subscription; state: AppState; to
         {sub.account && (
           <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
             {/* 点一下复制，登录时直接粘贴 */}
-            <button
-              type="button"
-              className="dt-copy"
-              title={t('detail.copy')}
-              onClick={() => void navigator.clipboard?.writeText(sub.account!).then(() => toast(t('detail.copied')))}
-            >
+            <button type="button" className="dt-copy" title={t('detail.copy')} onClick={() => void copyText(sub.account!, t('detail.copied'))}>
               {sub.account}
             </button>
           </Prop>

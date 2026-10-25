@@ -9,7 +9,7 @@ import { readImportFile } from '../import-file.ts';
 import { ImportSheet } from './ImportSheet.tsx';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
 import { IconButton, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
-import { api, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
+import { api, copyText, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
@@ -76,7 +76,7 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
           <>
             <div className="codebox">{url}</div>
             <div className="sheet-actions">
-              <button className="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast(t('app.ics.copied')))}>
+              <button className="btn" onClick={() => void copyText(url, t('app.ics.copied'))}>
                 {t('app.ics.copy')}
               </button>
               <button className="btn ghost" onClick={() => run(rotateIcs, t('app.ics.resetDone'))}>

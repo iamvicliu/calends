@@ -5,7 +5,7 @@ import type { AppState } from '../../../shared/types.ts';
 import { CardTitle, ask, Icon, IconButton, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Trash2, Users, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { api, run, saveSettings, toast } from '../store.ts';
+import { api, copyText, run, saveSettings } from '../store.ts';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 
@@ -126,11 +126,7 @@ const CLIENTS: Client[] = [
   },
 ];
 
-const copy = (text: string, what = t('ai.copied')) =>
-  navigator.clipboard.writeText(text).then(
-    () => toast(what),
-    () => toast(t('ai.copyFailed'), true),
-  );
+const copy = (text: string, what = t('ai.copied')) => copyText(text, what);
 
 function ClientLogo({ c, size = 28 }: { c: Client; size?: number }) {
   return (
