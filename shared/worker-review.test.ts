@@ -314,3 +314,22 @@ test('W-10 未登录访问 /api/public 不写库（未公开时直接 404）', a
     assert.deepEqual(f.writes, []);
   }
 });
+
+test('W-11 并发请求各用各的语言，不会被另一个请求切换的语言串掉', async () => {
+  const f = fixture();
+  const put = (locale: string) =>
+    f.request('/api/subscriptions/a', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json', 'x-locale': locale },
+      body: JSON.stringify({ id: 'b' }),
+    });
+  const [zh, en, ja] = await Promise.all([put('zh-CN'), put('en'), put('ja')]);
+  const msg = async (r: Response) => ((await r.json()) as { error: string }).error;
+  const zhMsg = await msg(zh);
+  const enMsg = await msg(en);
+  const jaMsg = await msg(ja);
+  assert.match(zhMsg, /[一-鿿]/);
+  assert.match(enMsg, /^[\x20-\x7e]+$/);
+  assert.match(jaMsg, /[぀-ヿ一-鿿]/);
+  assert.notEqual(zhMsg, jaMsg);
+});

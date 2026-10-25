@@ -1,5 +1,17 @@
 // Worker 端的语言：接口按请求头 x-locale（后台当前语言）返回文案；提醒邮件、MCP 等没有浏览器的场景按设置
-import { fallbackChain, flatten, isLocale, matchLocale, setLocale, type Locale, type Messages } from '../shared/i18n.ts';
+import { AsyncLocalStorage } from 'node:async_hooks';
+import {
+  fallbackChain,
+  flatten,
+  freshLocaleState,
+  isLocale,
+  matchLocale,
+  setLocale,
+  setLocaleScope,
+  type Locale,
+  type LocaleState,
+  type Messages,
+} from '../shared/i18n.ts';
 import { SERVER_MESSAGES } from '../shared/locales/server.gen.ts';
 import type { Settings } from '../shared/types.ts';
 
@@ -12,6 +24,15 @@ function pack(loc: Locale): Messages {
     cache.set(loc, m);
   }
   return m;
+}
+
+// 每个请求、定时任务一份语言状态：Cloudflare（nodejs_compat）与 Docker 的 workerd 都提供 AsyncLocalStorage
+const scope = new AsyncLocalStorage<LocaleState>();
+setLocaleScope(() => scope.getStore());
+
+/** 在独立的语言作用域里执行 fn；里面的 applyLocale 只影响这一次请求或任务 */
+export function withLocaleScope<T>(fn: () => T): T {
+  return scope.run(freshLocaleState(), fn);
 }
 
 export function applyLocale(loc: Locale): void {

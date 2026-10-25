@@ -19,6 +19,9 @@ const hook = registerHooks({
   },
 });
 const { default: worker } = await import('../worker/index.ts');
+// 纯函数直接调用时没有请求作用域，用全局语言
+const { applyLocale } = await import('../worker/i18n.ts');
+applyLocale('en');
 hook.deregister();
 
 function memoryEnv() {

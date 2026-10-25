@@ -18,6 +18,9 @@ const hook = registerHooks({
   },
 });
 const { default: worker } = await import('../worker/index.ts');
+// 直接调用工具（不经请求）时没有请求作用域，用全局语言
+const { applyLocale } = await import('../worker/i18n.ts');
+applyLocale('en');
 hook.deregister();
 function fixture() {
   const db = new DatabaseSync(':memory:');

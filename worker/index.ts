@@ -65,7 +65,7 @@ import { fetchPublic } from './url-guard.ts';
 import { appStorePlans, searchAppStore, TOOLS, toolTitle } from './ai/mcp-tools.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
 import { apply, chat, clearChats, listChats, saveChat, saveConfig, testConfig, viewConfig } from './ai/assistant.ts';
-import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
+import { requestLocale, settingsLocale, applyLocale, withLocaleScope } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 import { ensureMigrated } from './migrate.ts';
 import { HttpError, readJson } from './http.ts';
@@ -491,71 +491,79 @@ async function scheduledNotifications(env: Env, now: number): Promise<void> {
 }
 
 export default {
-  async fetch(req: Request, env: Env): Promise<Response> {
-    const url = new URL(req.url);
-    const prefix = normalizeBasePath(env.BASE_PATH);
-    url.pathname = stripBase(url.pathname, prefix);
-    // 旧域名：页面跳到新域名，接口、MCP、日历订阅继续在旧域名上可用
-    if (env.OLD_HOSTS && env.SITE_URL && env.OLD_HOSTS.split(',').some((h) => h.trim() === url.hostname)) {
-      const keep = url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/');
-      if (!keep) return Response.redirect(`${siteUrl(env.SITE_URL, prefix)}${url.pathname}${url.search}`, 301);
-    }
-    // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
-    env = { ...env, SITE_URL: siteUrl(env.SITE_URL || url.origin, prefix) };
-    try {
-      if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
-      // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
-      if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
-        if (url.pathname !== '/api/rev') {
-          const s = await getSettings(env);
-          applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
-        }
-      }
-      if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
-      if (url.pathname === '/mcp') {
-        // 在浏览器里打开 MCP 地址时，带去连接页查看令牌和配置
-        if (req.method === 'GET' && req.headers.get('accept')?.includes('text/html')) return Response.redirect(`${env.SITE_URL}/connect`, 302);
-        return await mcp(req, env);
-      }
-      const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
-      if (cal) {
-        const state = await loadState(env);
-        if (!state.settings.icsToken || state.settings.icsToken !== cal[1]) return new Response('not found', { status: 404 });
-        return new Response(buildIcs(state, env.SITE_URL ?? ''), {
-          headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
-        });
-      }
-      const asset = await env.ASSETS.fetch(new Request(url, req));
-      // Assets 对 index.html 等的规范化重定向也必须留在当前安装前缀下。
-      const location = asset.headers.get('location');
-      if (prefix && asset.status >= 300 && asset.status < 400 && location) {
-        const target = new URL(location, url);
-        if (target.origin === url.origin) {
-          target.pathname = withBase(target.pathname, prefix);
-          const headers = new Headers(asset.headers);
-          headers.set('location', target.href);
-          return new Response(asset.body, { status: asset.status, headers });
-        }
-      }
-      return asset;
-    } catch (e) {
-      if (e instanceof HttpError) return bad(e.message, e.status);
-      console.error(e);
-      return bad('server error', 500);
-    }
+  fetch(req: Request, env: Env): Promise<Response> {
+    return withLocaleScope(() => handleFetch(req, env));
   },
 
-  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    await ensureMigrated(env);
-    // 通知每刻钟检查；原有的每日维护仍只在 UTC 整点执行。
-    if (new Date(controller.scheduledTime).getUTCMinutes() >= 15) {
-      await scheduledNotifications(env, controller.scheduledTime);
-      return;
-    }
-    const fx = await getFx(env);
-    if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
-      ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
-    }
-    await scheduledNotifications(env, controller.scheduledTime);
+  scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    return withLocaleScope(() => handleScheduled(controller, env, ctx));
   },
 } satisfies ExportedHandler<Env>;
+
+async function handleFetch(req: Request, env: Env): Promise<Response> {
+  const url = new URL(req.url);
+  const prefix = normalizeBasePath(env.BASE_PATH);
+  url.pathname = stripBase(url.pathname, prefix);
+  // 旧域名：页面跳到新域名，接口、MCP、日历订阅继续在旧域名上可用
+  if (env.OLD_HOSTS && env.SITE_URL && env.OLD_HOSTS.split(',').some((h) => h.trim() === url.hostname)) {
+    const keep = url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/');
+    if (!keep) return Response.redirect(`${siteUrl(env.SITE_URL, prefix)}${url.pathname}${url.search}`, 301);
+  }
+  // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
+  env = { ...env, SITE_URL: siteUrl(env.SITE_URL || url.origin, prefix) };
+  try {
+    if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
+    // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
+    if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
+      if (url.pathname !== '/api/rev') {
+        const s = await getSettings(env);
+        applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+      }
+    }
+    if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
+    if (url.pathname === '/mcp') {
+      // 在浏览器里打开 MCP 地址时，带去连接页查看令牌和配置
+      if (req.method === 'GET' && req.headers.get('accept')?.includes('text/html')) return Response.redirect(`${env.SITE_URL}/connect`, 302);
+      return await mcp(req, env);
+    }
+    const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
+    if (cal) {
+      const state = await loadState(env);
+      if (!state.settings.icsToken || state.settings.icsToken !== cal[1]) return new Response('not found', { status: 404 });
+      return new Response(buildIcs(state, env.SITE_URL ?? ''), {
+        headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
+      });
+    }
+    const asset = await env.ASSETS.fetch(new Request(url, req));
+    // Assets 对 index.html 等的规范化重定向也必须留在当前安装前缀下。
+    const location = asset.headers.get('location');
+    if (prefix && asset.status >= 300 && asset.status < 400 && location) {
+      const target = new URL(location, url);
+      if (target.origin === url.origin) {
+        target.pathname = withBase(target.pathname, prefix);
+        const headers = new Headers(asset.headers);
+        headers.set('location', target.href);
+        return new Response(asset.body, { status: asset.status, headers });
+      }
+    }
+    return asset;
+  } catch (e) {
+    if (e instanceof HttpError) return bad(e.message, e.status);
+    console.error(e);
+    return bad('server error', 500);
+  }
+}
+
+async function handleScheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  await ensureMigrated(env);
+  // 通知每刻钟检查；原有的每日维护仍只在 UTC 整点执行。
+  if (new Date(controller.scheduledTime).getUTCMinutes() >= 15) {
+    await scheduledNotifications(env, controller.scheduledTime);
+    return;
+  }
+  const fx = await getFx(env);
+  if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
+    ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
+  }
+  await scheduledNotifications(env, controller.scheduledTime);
+}
