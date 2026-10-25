@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { chargeMethodId, chargeSources, chargesBetween, FALLBACK_FX, runwayFor, subError } from './billing.ts';
+import { chargeMethodId, chargeSources, chargesBetween, effectiveStatus, FALLBACK_FX, lastCharge, nextCharge, runwayFor, subError } from './billing.ts';
 import { maskForPublic } from './mask.ts';
-import { savePayment } from './phases.ts';
+import { savePayment, stopUndated } from './phases.ts';
 import { deleteMethodData } from './ledger-edit.ts';
+import { cancelSavings, insights, stopLosses, yearReview } from './metrics.ts';
 import { t } from './i18n.ts';
 import { DEFAULT_SETTINGS, type AppState, type Payment, type Subscription } from './types.ts';
 
@@ -177,4 +178,50 @@ test('deleting a funding source migrates it and collapses a split onto one remai
     { methodId: 'pp', amount: 40 },
     { methodId: 'card', amount: 5.9 },
   ]);
+});
+
+test('stopped on an unknown date: no end or stop is invented, no future charges, history and metrics stay intact', () => {
+  const s = stopUndated(
+    base([
+      { date: '2026-08-10', amount: 45.9 },
+      { date: '2026-09-10', amount: 45.9 },
+    ]),
+    'cancel',
+    today,
+  );
+  assert.equal(s.status, 'cancelled');
+  assert.equal(s.end, undefined);
+  assert.equal(s.stop, undefined);
+  assert.equal(subError(s), undefined);
+  assert.equal(effectiveStatus(s, today), 'ended');
+  assert.equal(nextCharge(s, today), undefined);
+  assert.equal(lastCharge(s, today), '2026-09-10');
+  assert.equal(chargesBetween(s, today, '2027-12-31', today).length, 0);
+  const past = chargesBetween(s, '2026-01-01', today, today);
+  assert.equal(past.length, 2);
+  const st = ledger(s);
+  // 指标不崩，也不把未知日期当成今天或 0 元损失
+  assert.doesNotThrow(() => insights(st, today));
+  assert.doesNotThrow(() => yearReview(st, today));
+  assert.equal(stopLosses(st, today).items.length, 0);
+  assert.equal(cancelSavings(st, today).items.length, 0);
+  const terminated = stopUndated(base(), 'terminate', today);
+  assert.equal(effectiveStatus(terminated, today), 'terminated');
+  assert.throws(() => stopUndated(terminated, 'cancel', today));
+});
+
+test('stopped on an unknown date drops only future planned phases without dating the earlier one', () => {
+  const s: Subscription = {
+    ...base(),
+    phases: [
+      { start: '2026-08-10', price: 45.9, currency: 'USD', cycle: { unit: 'month', every: 1 }, methodId: 'card' },
+      { start: '2026-12-01', price: 9.9, currency: 'USD', cycle: { unit: 'month', every: 1 }, methodId: 'card', planned: true },
+    ],
+  };
+  const next = stopUndated(s, 'cancel', today);
+  assert.equal(next.phases?.length, 1);
+  assert.equal(next.phases![0].end, undefined);
+  assert.equal(next.end, undefined);
+  assert.equal(effectiveStatus(next, today), 'ended');
+  assert.equal(nextCharge(next, today), undefined);
 });

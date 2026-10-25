@@ -590,6 +590,18 @@ export function statusChangeError(previous: Subscription | undefined, next: Subs
   return undefined;
 }
 
+/**
+ * 已停用、日期未知：只记 cancelled / terminated 状态，不填 end 与 stop，也不把今天当停用日；
+ * 撤销今天之后才开始的计划阶段。已记录的扣款原样保留，之后不再预测扣款。
+ */
+export function stopUndated(s: Subscription, kind: Stop['kind'], today: string): Subscription {
+  if (s.stop || ['ended', 'terminated'].includes(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
+  // 直接去掉未来阶段，不用 dropPlan：它会给前一段补一个结束日，那就成了编造的停用日期
+  const kept = s.phases?.length ? phasesOf(s).filter((p) => p.start <= today) : [];
+  const c = kept.length && kept.length < s.phases!.length ? mirror(s, kept) : s;
+  return { ...c, status: kind === 'terminate' ? 'terminated' : 'cancelled', pausedAt: undefined, end: undefined, stop: undefined };
+}
+
 /** 到期不续：只有 end，没有 stop；撤销结束日之后的阶段。 */
 export function cancelAtEnd(s: Subscription, at: string, today: string): Subscription {
   if (s.stop || ['ended', 'terminated'].includes(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));

@@ -724,7 +724,8 @@ export function validDay(day: string): boolean {
 
 export function stopError(s: Subscription): string | undefined {
   const stop = s.stop;
-  if (!stop) return s.status === 'terminated' ? t('mcp.error.needStop') : undefined;
+  // 被停用但日期不详：没有 stop 也没有 end；有结束日却没有 stop 信息仍不合格
+  if (!stop) return s.status === 'terminated' && s.end ? t('mcp.error.needStop') : undefined;
   if (!['cancel', 'terminate'].includes(stop.kind) || !validDay(stop.date) || !validDay(stop.paidThrough)) return t('mcp.error.notDate', { what: 'stop' });
   if (stop.date < s.start) return t('mcp.error.stopBeforeStart');
   if (stop.date > stop.paidThrough) return t('mcp.error.stopAfterPaidThrough');
