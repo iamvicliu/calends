@@ -77,10 +77,10 @@ export function ReceivableSheet({
   const due = currency === total.currency ? total.amount : convertOn(total.amount, total.currency, currency, date, state.fxHistory, state.fx);
   const amount = typed ?? Math.round(due * 10 ** currencyDecimals(currency)) / 10 ** currencyDecimals(currency);
   const [note, setNote] = useState(edit?.note ?? '');
-  // 可选的期：没结清的，加上这一笔自己抵扣的；还没到期的先列几期，不够再展开
+  // 可选的期：没结清的，加上这一笔自己抵扣的；还没到期的默认只列下一期，提前收多期时再展开
   const own = new Set(edit ? resolvedPeriods(periods, edit) : []);
   const open = periods.filter((p) => !isSettled(p) || own.has(p.key));
-  const [ahead, setAhead] = useState(() => Math.max(3, open.filter((p) => p.from > today && keys.includes(p.key)).length));
+  const [ahead, setAhead] = useState(() => Math.max(1, open.filter((p) => p.from > today && keys.includes(p.key)).length));
   const upcoming = open.filter((p) => p.from > today);
   const shown = open.filter((p) => p.from <= today || keys.includes(p.key) || upcoming.indexOf(p) < ahead);
   const more = open.length > shown.length;
