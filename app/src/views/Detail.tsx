@@ -957,11 +957,9 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
             <i aria-hidden>
               <e.icon size={12} strokeWidth={2.2} />
             </i>
-            {/* 事件名与说明同一行、日期靠右；放不下时说明才折到下一行 */}
-            <div>
-              <b>{e.title}</b>
-              {e.sub && <small>{e.sub}</small>}
-            </div>
+            {/* 事件名一列对齐，说明从同一位置起排，日期靠右 */}
+            <b>{e.title}</b>
+            {e.sub && <small>{e.sub}</small>}
             <time dateTime={e.date}>{cnDateFull(e.date)}</time>
           </li>
         ))}

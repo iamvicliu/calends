@@ -592,18 +592,20 @@
 }
 
 /* 历程 */
+/* 图标 | 事件名 | 说明 …… 日期：各行共用列宽（subgrid），事件名后的说明对齐成一列。一条竖线串起各节点，新的在上 */
 .dt-evs {
   list-style: none;
   padding: 0;
   margin-top: 10px !important;
-}
-/* 图标节点 | 事件名 + 说明 …… 日期，放不下时说明折行。一条竖线串起各节点，新的在上 */
-.dt-ev {
-  --ev: var(--label-2);
-  position: relative;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: 22px max-content minmax(0, 1fr) auto;
   column-gap: 12px;
+}
+.dt-ev {
+  position: relative;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
   align-items: baseline;
   padding: 5px 0;
 }
@@ -616,7 +618,10 @@
   width: 1px;
   background: var(--dt-line-2);
 }
+/* 节点统一中性色，类别靠图标区分 */
 .dt-ev > i {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   align-self: start;
   display: grid;
   place-items: center;
@@ -624,57 +629,57 @@
   width: 22px;
   height: 22px;
   border-radius: var(--radius-pill);
-  color: var(--ev);
-  background: color-mix(in srgb, var(--ev) 12%, var(--dt-panel));
-  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--ev) 22%, transparent);
-}
-.dt-ev.acc {
-  --ev: var(--indigo-9);
-}
-.dt-ev.ok {
-  --ev: var(--dt-ok);
-}
-.dt-ev.bad {
-  --ev: var(--dt-bad);
-}
-.dt-ev.warn {
-  --ev: var(--orange-9);
-}
-.dt-ev.ink {
-  --ev: var(--label);
-}
-/* 还没发生：虚线空心节点，文字也淡一档 */
-.dt-ev.fut > i {
+  color: var(--label-2);
   background: var(--dt-panel);
+  box-shadow: inset 0 0 0 var(--hairline) var(--dt-line-2);
+}
+/* 还没发生：虚线节点，文字淡一档 */
+.dt-ev.fut > i {
   box-shadow: none;
-  border: var(--hairline) dashed color-mix(in srgb, var(--ev) 55%, transparent);
+  border: var(--hairline) dashed var(--label-3);
+  color: var(--label-3);
 }
-.dt-ev > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: 10px;
-  min-width: 0;
-}
-.dt-ev b {
+.dt-ev > b {
+  grid-column: 2;
   font-weight: 500;
   line-height: 22px;
+  white-space: nowrap;
 }
-.dt-ev small {
+.dt-ev.fut > b {
+  color: var(--label-2);
+}
+.dt-ev > small {
+  grid-column: 3;
+  min-width: 0;
   font-size: var(--fs-1);
   line-height: 18px;
   color: var(--label-2);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
-.dt-ev.fut b {
-  color: var(--label-2);
-}
 .dt-ev > time {
+  grid-column: 4;
+  grid-row: 1;
   color: var(--label-3);
   font-size: var(--fs-1);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+/* 窄屏：说明放到事件名下一行，与事件名左对齐 */
+@container detail-body (max-width: 520px) {
+  .dt-evs {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+  }
+  .dt-ev > b {
+    white-space: normal;
+  }
+  .dt-ev > small {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+  .dt-ev > time {
+    grid-column: 3;
+  }
 }
 .dt-events .dt-link {
   margin-top: 8px;
