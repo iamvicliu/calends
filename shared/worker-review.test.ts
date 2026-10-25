@@ -398,3 +398,24 @@ test('W-13 日历文本里的单独 CR 也被转义，不能注入新属性', as
   assert.ok(!lines.some((l) => /^(X-INJECTED|X-OTHER)/.test(l)));
   assert.ok(lines.some((l) => l.includes('Fictional\\nX-INJECTED')));
 });
+
+test('W-14 工具入参运行时校验 pattern、maxItems，nullable 处理数组类型', async () => {
+  const { nullable, validateToolInput } = await import('./tool-schema.ts');
+  const { applyLocale } = await import('../worker/i18n.ts');
+  applyLocale('en');
+  assert.deepEqual(nullable({ type: ['string', 'number'] }).type, ['string', 'number', 'null']);
+  assert.deepEqual(nullable({ type: 'string' }).type, ['string', 'null']);
+  const s = nullable({ type: ['string', 'number'] });
+  validateToolInput(s, 'x');
+  validateToolInput(s, 1);
+  validateToolInput(s, null);
+  assert.throws(() => validateToolInput({ type: 'string', pattern: '^[A-Z]{3}$' }, 'usd'));
+  validateToolInput({ type: 'string', pattern: '^[A-Z]{3}$' }, 'USD');
+  assert.throws(() => validateToolInput({ type: 'array', items: { type: 'string' }, maxItems: 2 }, ['a', 'b', 'c']));
+  assert.throws(() => validateToolInput({ type: 'array', minItems: 1 }, []));
+  // 实际目录：record_receivable.periods 最多 240 项
+  const f = await ledger();
+  const r = await f.call('record_receivable', { subscription: 'x', periods: Array.from({ length: 241 }, () => '2026-01-01'), dry_run: true });
+  assert.equal(r.isError, true);
+  assert.match(r.content[0].text, /periods/);
+});
