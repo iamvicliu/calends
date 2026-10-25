@@ -1172,15 +1172,30 @@
 .dt-ledger .ld-row:not(.car-period) > span:first-child small {
   color: var(--label-3);
 }
+/* 五列（代付：扣款日 · 卡上实扣 · 当时成本 · 收回 · 差额）：多出的一列窄时收起 */
+.ld-table.dt-ledger.dt-ledger-5 .ld-row:not(.car-more) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr);
+}
+.ld-table.dt-ledger.dt-ledger-5 .ld-row > span:nth-child(n + 3) {
+  text-align: right;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
 @container detail-charges (max-width: 480px) {
   .dt-ledger .ld-row:not(.car-more) {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .ld-table.dt-ledger.dt-ledger-5 .ld-row:not(.car-more) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+  .dt-ledger-extra {
+    display: none !important;
   }
   .dt-ledger-pay {
     display: none !important;
   }
   /* 合租收款表窄时保留成员一列，改为收起最后的「折合」一列，仍是三列不折行 */
-  .dt-ledger .ld-row:has(> .dt-ledger-keep) > span:nth-child(4) {
+  .dt-ledger:not(.dt-ledger-5) .ld-row:has(> .dt-ledger-keep) > span:nth-child(4) {
     display: none;
   }
 }

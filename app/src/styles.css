@@ -5516,7 +5516,6 @@ a.car-toggle {
 }
 .ld-row {
   display: grid;
-  /* 窄屏四列：日期、实扣、收回、差额；金额两列等宽，放得下「+¥1,157.44」这样的整数 */
   grid-template-columns: 64px minmax(0, 1.2fr) minmax(0, 1.2fr) 72px;
   gap: 8px;
   align-items: center;
@@ -5582,7 +5581,7 @@ a.car-toggle {
 /* 已预收、还没扣款的期：日期与预计实扣淡一级 */
 .ld-ahead .ld-date,
 .ld-ahead > span:nth-child(2),
-.ld-ahead > .ld-cost {
+.ld-ahead > .dt-ledger-extra {
   color: var(--label-3);
 }
 .ld-th {
@@ -5591,30 +5590,10 @@ a.car-toggle {
   padding-top: 9px;
   padding-bottom: 9px;
 }
-/* 合计行：与数据行同底，只靠字重区分 */
-.ld-tf {
-  cursor: default;
-  font-weight: 600;
-}
-.ld-tf > span:first-child {
-  color: var(--label-2);
-  font-weight: 400;
-}
-/* 宽屏：表格多一列「当时成本」 */
-.ld-cost {
-  display: none !important;
-}
 @media (min-width: 720px) {
   .ld-row {
-    grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr) 96px;
     gap: 10px;
     padding: 10px 18px;
-  }
-  .ld-cost {
-    display: flex !important;
-  }
-  .ld-cost-inline {
-    display: none;
   }
   .ld-batch {
     display: block;

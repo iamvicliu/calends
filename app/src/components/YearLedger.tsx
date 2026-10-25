@@ -6,7 +6,8 @@ import '../views/detail.css';
 
 /**
  * 按年分组的收付款表：订阅详情的扣款记录、合租的收款与付款共用这一套。
- * 四列（日期 · 第二列 · 原币金额 · 折合本位币）；只有一年的记录就平铺，跨年时按年分组且默认全部折叠。
+ * 四列（日期 · 第二列 · 原币金额 · 折合本位币）；给了 extraHead 时在第二列后多一列（如代付的「当时成本」，窄时收起）。
+ * 只有一年的记录就平铺，跨年时按年分组且默认全部折叠；没有合计行，总数在上方的指标卡里。
  * 年份行是小计：点一下展开或折叠这一年；表头点一下全部展开或全部收起。
  * 第二列默认是支付方式，窄时收起（keepSecond 时保留，如合租收款的成员）
  */
@@ -21,20 +22,23 @@ export function YearLedger<T>({
   rowClass,
   rowTitle,
   keepSecond = false,
+  extraHead,
 }: {
   /** 新的在前 */
   items: T[];
   dateOf: (x: T) => string;
   head: [string, string, string, string];
-  /** 年份行的后三格：第二列、原币合计、本位币合计（baseClass 给本位币合计那一格） */
-  yearCells: (list: T[]) => { second: ReactNode; orig: ReactNode; base: ReactNode; baseClass?: string };
-  /** 数据行的四格 */
-  row: (x: T) => { date: ReactNode; second: ReactNode; orig: ReactNode; base: ReactNode };
+  /** 年份行的后几格：第二列、（多出的一列）、原币合计、本位币合计（baseClass 给本位币合计那一格） */
+  yearCells: (list: T[]) => { second: ReactNode; extra?: ReactNode; orig: ReactNode; base: ReactNode; baseClass?: string };
+  /** 数据行的各格 */
+  row: (x: T) => { date: ReactNode; second: ReactNode; extra?: ReactNode; orig: ReactNode; base: ReactNode; baseClass?: string };
   rowKey: (x: T, i: number) => string;
   onRow?: (x: T) => void;
   rowClass?: (x: T) => string;
   rowTitle?: (x: T) => string | undefined;
   keepSecond?: boolean;
+  /** 第二列后多出的一列的表头；窄时收起 */
+  extraHead?: string;
 }) {
   const yearsOf = [...new Set(items.map((x) => dateOf(x).slice(0, 4)))];
   const grouped = yearsOf.length > 1;
@@ -46,13 +50,14 @@ export function YearLedger<T>({
     <>
       <span>{head[0]}</span>
       <span className={second}>{head[1]}</span>
+      {extraHead && <span className="dt-ledger-extra">{extraHead}</span>}
       <span>{head[2]}</span>
       <span>{head[3]}</span>
     </>
   );
   const allOpen = years.every((y) => open.has(y));
   return (
-    <div className={`ld-table car-receipts car-receipts-out dt-ledger ${grouped ? 'ld-grouped' : ''}`}>
+    <div className={`ld-table car-receipts car-receipts-out dt-ledger ${grouped ? 'ld-grouped' : ''} ${extraHead ? 'dt-ledger-5' : ''}`}>
       {grouped ? (
         <button
           type="button"
@@ -88,6 +93,7 @@ export function YearLedger<T>({
                   <small>{t('detail.stats.count', { count: list.length })}</small>
                 </span>
                 <span className={second}>{sum.second}</span>
+                {extraHead && <span className="dt-ledger-extra">{sum.extra}</span>}
                 <span>{sum.orig}</span>
                 <span className={sum.baseClass}>{sum.base}</span>
               </button>
@@ -99,8 +105,9 @@ export function YearLedger<T>({
                   <>
                     <span className="ld-date">{r.date}</span>
                     <span className={second}>{r.second}</span>
+                    {extraHead && <span className="dt-ledger-extra">{r.extra}</span>}
                     <span className="o">{r.orig}</span>
-                    <span className="c">{r.base}</span>
+                    <span className={`c ${r.baseClass ?? ''}`}>{r.base}</span>
                   </>
                 );
                 const key = rowKey(x, i);
