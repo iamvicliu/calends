@@ -92,7 +92,7 @@ import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { searchAppStore } from '../appstore.ts';
 import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
-import { objectSchema as obj, validateToolInput, type Schema } from '../../shared/tool-schema.ts';
+import { drySchema, objectSchema as obj, validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
 import { validateCurrency, categoryEdit, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
@@ -506,7 +506,6 @@ const SHIFT_BILLING = {
   description:
     'Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge.',
 };
-const DRY = { type: 'boolean', default: false, description: 'Preview the result without saving.' };
 const CATEGORY = { type: 'string', description: 'Existing category code or name from list_categories; localized names are case-insensitive.' };
 const CATEGORY_CREATE = {
   create_category: { type: 'boolean', default: false, description: 'If category is unknown, explicitly create it. Ambiguous references always fail.' },
@@ -1464,7 +1463,7 @@ const CATALOGUE: Tool[] = [
         },
         force: { type: 'boolean', default: false },
         id: { type: 'string', description: 'Internal: keep this id (used when confirming an earlier draft).' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['name', 'price', 'currency', 'cycle'],
     ),
@@ -1553,7 +1552,7 @@ const CATALOGUE: Tool[] = [
         },
         force: { type: 'boolean', default: false },
         ...CATEGORY_CREATE,
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -1634,7 +1633,7 @@ const CATALOGUE: Tool[] = [
         }),
         ...CATEGORY_CREATE,
         shift_billing: SHIFT_BILLING,
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'set'],
     ),
@@ -1702,7 +1701,7 @@ const CATALOGUE: Tool[] = [
         original_from: { ...DATE, description: 'Original effective date; required for edit/remove.' },
         amount: { type: 'number', minimum: 0 },
         from: { ...DATE, description: 'Effective date; defaults to today for add, original_from for edit.' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -1775,7 +1774,7 @@ const CATALOGUE: Tool[] = [
         },
         earlier_until: { ...DATE, description: 'action=earlier only: the earlier phase ended on this date (a gap before the next one).' },
         shift_billing: SHIFT_BILLING,
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'action', 'at'],
     ),
@@ -1875,7 +1874,7 @@ const CATALOGUE: Tool[] = [
           description:
             'Correct an already stopped subscription with action=cancel|terminate: change the stop date (at; omitted keeps it), non-renewal vs immediate cancel, reason or refund. Provider termination cannot become cancel.',
         },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'action'],
     ),
@@ -1958,7 +1957,7 @@ const CATALOGUE: Tool[] = [
           description:
             'Start date of the phase this payment belongs to; only needed when two phases overlap on that date (defaults to the latest-started one).',
         },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'amount'],
     ),
@@ -2008,7 +2007,7 @@ const CATALOGUE: Tool[] = [
         date: DATE,
         index: { type: 'integer', default: 0 },
         phase: { ...DATE, description: 'Start date of the phase holding the payment, when two phases overlap.' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'date'],
     ),
@@ -2040,7 +2039,7 @@ const CATALOGUE: Tool[] = [
         note: { type: 'string' },
         replace: obj({ date: DATE, index: { type: 'integer', minimum: 0 } }, ['date', 'index']),
         delete: obj({ date: DATE, index: { type: 'integer', minimum: 0 } }, ['date', 'index']),
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -2149,7 +2148,7 @@ const CATALOGUE: Tool[] = [
     description: 'Delete a subscription and its whole history. Irreversible: always preview with dry_run first; the user confirms.',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF_EXACT, dry_run: DRY }, ['subscription']),
+    inputSchema: obj({ subscription: SUBREF_EXACT, dry_run: drySchema }, ['subscription']),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription, { exact: true });
@@ -2199,7 +2198,7 @@ const CATALOGUE: Tool[] = [
           additionalProperties: false,
         },
         rule_from: { ...DATE, description: 'Effective date for the rule change; defaults to today. Whole periods starting on/after it use the new fee.' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'role'],
     ),
@@ -2294,7 +2293,7 @@ const CATALOGUE: Tool[] = [
         contact: { type: 'string' },
         account: { type: 'string', description: 'This person’s account on this shared plan (arbitrary text: email, phone number, username or ID).' },
         note: { type: 'string' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -2439,7 +2438,7 @@ const CATALOGUE: Tool[] = [
     description: 'Remove a member from a shared plan entirely (their payment history goes too). To keep history, use save_share_member with left instead.',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF_EXACT, member: { type: 'string', description: 'Member id or exact name (case-insensitive).' }, dry_run: DRY }, [
+    inputSchema: obj({ subscription: SUBREF_EXACT, member: { type: 'string', description: 'Member id or exact name (case-insensitive).' }, dry_run: drySchema }, [
       'subscription',
       'member',
     ]),
@@ -2484,7 +2483,7 @@ const CATALOGUE: Tool[] = [
         charge: { ...DATE, description: 'charged: which proxy charge date.' },
         charged_amount: { type: ['number', 'null'], minimum: 0 },
         charged_currency: { type: ['string', 'null'] },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       [],
     ),
